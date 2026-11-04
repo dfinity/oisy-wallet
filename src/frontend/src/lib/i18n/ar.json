@@ -811,6 +811,7 @@
 			"explorers_description": "",
 			"explorers_velora_description": "",
 			"explorers_near_intents_description": "",
+			"explorers_lifi_description": "",
 			"explorers_onesec_description": "",
 			"explorers_chain_eth": "",
 			"explorers_chain_sol": "",
@@ -1211,7 +1212,10 @@
 			"unknown": "",
 			"unknown_fresh": "",
 			"sent_to_canister": "",
-			"sent_to_canister_top_up": ""
+			"sent_to_canister_top_up": "",
+			"choice_send": "",
+			"choice_send_description": "",
+			"choice_top_up_description": ""
 		},
 		"error": {
 			"invalid_canister_id": "",
@@ -1363,6 +1367,8 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "جاري تحديث واجهة المستخدم",
 			"swap_provider": "مزود التبديل",
+			"smart_swap": "",
+			"finding_best_rate": "",
 			"swap_provider_website": "الموقع الإلكتروني",
 			"swap_route": "مسار التبديل",
 			"included_network_fees": "رسوم الشبكة المضمنة",
@@ -1381,6 +1387,8 @@
 			"gasless": "",
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
+			"two_swaps_info": "",
+			"two_swaps_first_button": "",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
@@ -1416,6 +1424,7 @@
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
 			"swap_replaced_or_dropped": "",
+			"swap_expired": "",
 			"near_intents_quote_unverified": "",
 			"near_intents_quote_expired": "",
 			"near_intents_deposit_expired": "",
@@ -1426,7 +1435,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
@@ -1807,6 +1817,7 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "بيانات HEX",
+			"base64_data": "",
 			"tab_operations": "",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
@@ -1815,6 +1826,8 @@
 			"unread_programs_acknowledge": "",
 			"cannot_be_shown": "",
 			"close_pays_others": "",
+			"fee_paid_by_others": "",
+			"approval_without_simulation": "",
 			"simulated_instructions": "",
 			"multiple_operations": "",
 			"simulated_review": "",
@@ -1850,6 +1863,7 @@
 			"allowance_increase": "",
 			"allowance_decrease": "",
 			"unverifiable_erc20_request": "",
+			"unlisted_erc20_request": "",
 			"token_call_with_value": "",
 			"unverifiable_approval_for_all_request": "",
 			"approval_for_all_grant": "",
@@ -1929,6 +1943,7 @@
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
 			"btc_psbt_input_ambiguous": "",
+			"btc_psbt_input_unverified": "",
 			"from_address_not_wallet": "عنوان المرسل المطلوب للمعاملة ليس عنوان هذه المحفظة.",
 			"unknown_destination": "عنوان الوجهة غير معروف.",
 			"cketh_deposit_refused": "",
@@ -1936,6 +1951,8 @@
 			"token_call_with_value": "",
 			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
 			"close_pays_others": "",
+			"fee_paid_by_others": "",
+			"approval_without_simulation": "",
 			"unreviewed_without_simulation": "",
 			"unreviewed_not_described_by_simulation": "",
 			"unread_programs_unconfirmed": "",
@@ -2475,6 +2492,7 @@
 			"create": "فشل إنشاء جهة الاتصال",
 			"update": "فشل تحديث جهة الاتصال",
 			"delete": "فشل حذف جهة الاتصال",
+			"load": "",
 			"name_too_long": "يرجى أن يكون الاسم مكونًا من $maxCharacters حرفًا أو أقل."
 		}
 	},

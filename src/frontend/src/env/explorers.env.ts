@@ -57,12 +57,14 @@ export const {
 const PROVIDER_EXPLORER_URLS = {
 	VELORA: 'https://explorer.velora.xyz',
 	NEAR_INTENTS: 'https://explorer.near-intents.org',
+	LIFI: 'https://scan.li.fi',
 	ONESEC: 'https://1sec.to'
 };
 
 export const {
 	VELORA: VELORA_EXPLORER_URL,
 	NEAR_INTENTS: NEAR_INTENTS_EXPLORER_URL,
+	LIFI: LIFI_EXPLORER_URL,
 	ONESEC: ONESEC_EXPLORER_URL
 } = PROVIDER_EXPLORER_URLS;
 

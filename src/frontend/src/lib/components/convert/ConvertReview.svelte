@@ -12,6 +12,7 @@
 	interface Props {
 		sendAmount: OptionAmount;
 		receiveAmount?: number;
+		disabled?: boolean;
 		onConvert: () => void;
 		destination?: Snippet;
 		fee: Snippet;
@@ -19,8 +20,16 @@
 		cancel: Snippet;
 	}
 
-	let { sendAmount, receiveAmount, onConvert, destination, fee, infoMessage, cancel }: Props =
-		$props();
+	let {
+		sendAmount,
+		receiveAmount,
+		disabled = false,
+		onConvert,
+		destination,
+		fee,
+		infoMessage,
+		cancel
+	}: Props = $props();
 
 	const { sourceToken, destinationToken, sourceTokenExchangeRate, destinationTokenExchangeRate } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
@@ -48,7 +57,7 @@
 		<ButtonGroup>
 			{@render cancel()}
 
-			<Button onclick={onConvert} testId="convert-review-button-next">
+			<Button {disabled} onclick={onConvert} testId="convert-review-button-next">
 				{$i18n.convert.text.convert_button}
 			</Button>
 		</ButtonGroup>

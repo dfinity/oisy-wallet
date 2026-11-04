@@ -39,6 +39,19 @@ export class InfuraErc20Provider implements Erc20Provider {
 		};
 	};
 
+	// `decimals` and `symbol` on their own, for a contract OISY does not list: the standard makes all
+	// three getters optional, and a token that leaves out `name` is still one whose amounts can be
+	// read.
+	decimals = async ({ address }: Pick<Erc20ContractAddress, 'address'>): Promise<number> => {
+		const erc20Contract = new Contract(address, ERC20_ABI, this.provider);
+		return Number(await erc20Contract.decimals());
+	};
+
+	symbol = ({ address }: Pick<Erc20ContractAddress, 'address'>): Promise<string> => {
+		const erc20Contract = new Contract(address, ERC20_ABI, this.provider);
+		return erc20Contract.symbol();
+	};
+
 	balance = ({
 		contract: { address: contractAddress },
 		address

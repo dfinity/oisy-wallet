@@ -23,6 +23,7 @@ import {
 	toLifiExternalRefs,
 	toLifiExternalRefsMap,
 	toLifiLearnedRefs,
+	toLifiSimulationSlot,
 	toLifiStatusUpdate,
 	type LifiStatusAnswer
 } from '$lib/utils/lifi-active-tx.utils';
@@ -123,8 +124,37 @@ describe('lifi-active-tx.utils', () => {
 			});
 		});
 
+		it('should fail a Solana source whose blockhash expired before it landed', () => {
+			expect(lifiSourceOutcomeToUpdate('expired')).toEqual({
+				status: { Failed: null },
+				error: en.swap.error.swap_expired
+			});
+		});
+
 		it.each(['succeeded', 'unknown'] as const)('should settle nothing on %s', (outcome) => {
 			expect(lifiSourceOutcomeToUpdate(outcome)).toBeUndefined();
+		});
+	});
+
+	describe('toLifiSimulationSlot', () => {
+		it('should read a slot', () => {
+			expect(toLifiSimulationSlot('461778178')).toBe(461778178n);
+			expect(toLifiSimulationSlot('18446744073709551615')).toBe(18446744073709551615n);
+		});
+
+		it.each([
+			undefined,
+			'',
+			'-1',
+			'+1',
+			'1.5',
+			'0x10',
+			' 1',
+			'18446744073709551616',
+			'99999999999999999999',
+			'123456789012345678901'
+		])('should read no slot from %s', (value) => {
+			expect(toLifiSimulationSlot(value)).toBeUndefined();
 		});
 	});
 
@@ -480,7 +510,7 @@ describe('lifi-active-tx.utils', () => {
 	describe('toLifiCreationRefs', () => {
 		const params = {
 			hash: `0x${'ab'.repeat(32)}`,
-			nonce: 7,
+			source: { nonce: 7 },
 			quote: { tool: 'across', transactionId: `0x${'cd'.repeat(32)}` },
 			sourceToken: BASE_ETH_TOKEN,
 			destinationToken: mockLifiBaseUsdcToken,
@@ -552,6 +582,31 @@ describe('lifi-active-tx.utils', () => {
 					LIFI_EXTERNAL_REF_KEYS.USD_SOURCE_VALUE
 				]
 			).toBeUndefined();
+		});
+
+		describe('a Solana source transaction', () => {
+			const signature = '5'.repeat(88);
+			const blockhash = 'HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN';
+
+			it('should carry its blockhash and the slot it was simulated at, and no nonce', () => {
+				const refs = toLifiCreationRefs({
+					...params,
+					hash: signature,
+					source: { blockhash, simulationSlot: 461_778_178n }
+				});
+
+				expect(refs[LIFI_EXTERNAL_REF_KEYS.TX_HASH]).toBe(signature);
+				expect(refs[LIFI_EXTERNAL_REF_KEYS.BLOCKHASH]).toBe(blockhash);
+				expect(refs[LIFI_EXTERNAL_REF_KEYS.SIMULATION_SLOT]).toBe('461778178');
+				expect(refs).not.toHaveProperty(LIFI_EXTERNAL_REF_KEYS.TX_NONCE);
+			});
+
+			it('should leave out a simulation slot it was not given', () => {
+				const refs = toLifiCreationRefs({ ...params, hash: signature, source: { blockhash } });
+
+				expect(refs[LIFI_EXTERNAL_REF_KEYS.BLOCKHASH]).toBe(blockhash);
+				expect(refs).not.toHaveProperty(LIFI_EXTERNAL_REF_KEYS.SIMULATION_SLOT);
+			});
 		});
 	});
 });

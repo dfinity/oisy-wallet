@@ -173,17 +173,25 @@ export const encodeRecoverableSignature = ({
 
 type PsbtInput = Psbt['data']['inputs'][number];
 
+type PsbtOutpoint = Pick<Psbt['txInputs'][number], 'hash' | 'index'>;
+
 const nonWitnessPrevout = ({
 	nonWitnessUtxo,
-	vout
+	outpoint: { hash, index }
 }: {
 	nonWitnessUtxo: Uint8Array;
-	vout: number;
+	outpoint: PsbtOutpoint;
 }): WalletConnectBtcPsbtPrevout | undefined => {
 	try {
-		const { outs } = Transaction.fromBuffer(Buffer.from(nonWitnessUtxo));
+		const transaction = Transaction.fromBuffer(Buffer.from(nonWitnessUtxo));
 
-		const out = outs[vout];
+		// Only the transaction the outpoint names proves what the output is worth; any other
+		// transaction is a value the dApp chose.
+		if (!transaction.getHash().equals(Buffer.from(hash))) {
+			return;
+		}
+
+		const out = transaction.outs[index];
 
 		return nonNullish(out) ? { value: BigInt(out.value), script: out.script } : undefined;
 	} catch (_: unknown) {
@@ -212,19 +220,20 @@ const prevoutsMatch = ({
  *
  * Therefore: when both fields are present they must describe the same previous output, and the
  * resolved prevout is taken from `nonWitnessUtxo`, the field the signature actually commits to.
- * A disagreement, or a `nonWitnessUtxo` that cannot be read, is reported as `ambiguous` with no
- * prevout, so the caller refuses the request instead of picking one of two contradicting readings.
+ * A disagreement, or a `nonWitnessUtxo` that cannot be read or is not the transaction the input's
+ * outpoint names, is flagged as `ambiguous` with no prevout, so the caller refuses the request
+ * instead of picking one of two contradicting readings.
  *
- * An input carrying only `nonWitnessUtxo` resolves to no prevout: OISY signs P2WPKH inputs only and
- * rejects such an input before signing, so the review leaves it unpriced rather than pricing a
- * previous output no signature will commit to.
+ * A `witnessUtxo` on its own is only what the dApp states: a SegWit signature commits to the value
+ * of the input it signs and to no other input's, so it does not prove the value either. The prevout
+ * is `proven` only when it is read from the previous transaction the outpoint names.
  */
 export const resolvePsbtInputPrevout = ({
 	input,
-	vout
+	outpoint
 }: {
 	input: PsbtInput;
-	vout: number;
+	outpoint: PsbtOutpoint;
 }): WalletConnectBtcPsbtInputPrevout => {
 	const { witnessUtxo, nonWitnessUtxo } = input;
 
@@ -233,18 +242,19 @@ export const resolvePsbtInputPrevout = ({
 			prevout: nonNullish(witnessUtxo)
 				? { value: BigInt(witnessUtxo.value), script: witnessUtxo.script }
 				: undefined,
+			proven: false,
 			ambiguous: false
 		};
 	}
 
-	const signedPrevout = nonWitnessPrevout({ nonWitnessUtxo, vout });
+	const signedPrevout = nonWitnessPrevout({ nonWitnessUtxo, outpoint });
 
 	if (isNullish(signedPrevout)) {
-		return { prevout: undefined, ambiguous: true };
+		return { prevout: undefined, proven: false, ambiguous: true };
 	}
 
 	if (isNullish(witnessUtxo)) {
-		return { prevout: undefined, ambiguous: false };
+		return { prevout: signedPrevout, proven: true, ambiguous: false };
 	}
 
 	const declaredPrevout: WalletConnectBtcPsbtPrevout = {
@@ -253,6 +263,6 @@ export const resolvePsbtInputPrevout = ({
 	};
 
 	return prevoutsMatch({ a: declaredPrevout, b: signedPrevout })
-		? { prevout: signedPrevout, ambiguous: false }
-		: { prevout: undefined, ambiguous: true };
+		? { prevout: signedPrevout, proven: true, ambiguous: false }
+		: { prevout: undefined, proven: false, ambiguous: true };
 };

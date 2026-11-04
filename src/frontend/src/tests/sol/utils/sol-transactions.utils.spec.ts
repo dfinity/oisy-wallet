@@ -10,12 +10,14 @@ import {
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
 import {
+	countSolRequiredSignatures,
 	isSolCompiledTransactionMessage,
 	mapSolTransactionMessage,
 	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
 import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import {
+	createMockSolBase64Transaction,
 	createMockSolCompiledTransactionMessageBytes,
 	mockSolParsedTransactionMessage
 } from '$tests/mocks/sol-transactions.mock';
@@ -43,6 +45,8 @@ import {
 } from '@solana-program/system';
 import {
 	AuthorityType,
+	getApproveCheckedInstruction,
+	getApproveInstruction,
 	getBatchInstruction,
 	getBurnInstruction,
 	getCloseAccountInstruction,
@@ -52,6 +56,7 @@ import {
 	getTransferCheckedInstruction
 } from '@solana-program/token';
 import {
+	getApproveInstruction as getToken2022ApproveInstruction,
 	getBatchInstruction as getToken2022BatchInstruction,
 	getBurnInstruction as getToken2022BurnInstruction,
 	getSetAuthorityInstruction as getToken2022SetAuthorityInstruction,
@@ -69,12 +74,16 @@ import {
 	getBase64Decoder,
 	getBase64EncodedWireTransaction,
 	getBase64Encoder,
+	getCompiledTransactionMessageEncoder,
+	getTransactionEncoder,
 	pipe,
 	setTransactionMessageConfig,
 	setTransactionMessageFeePayer,
 	setTransactionMessageLifetimeUsingBlockhash,
 	type Instruction,
+	type SignaturesMap,
 	type TransactionMessage,
+	type TransactionMessageBytes,
 	type V1TransactionConfig
 } from '@solana/kit';
 import type { MockInstance } from 'vitest';
@@ -886,6 +895,89 @@ describe('sol-transactions.utils', () => {
 			});
 		});
 
+		describe('with an approval', () => {
+			// The real instruction mapper, since whether an approval names its token and decimals is
+			// decided by the instruction it decodes.
+			beforeEach(() => {
+				spyMapSolInstruction.mockRestore();
+			});
+
+			const approve = getApproveInstruction({
+				source: address(mockAtaAddress),
+				delegate: address(mockSolAddress2),
+				owner: createNoopSigner(address(mockSolAddress)),
+				amount: 1_000_000n
+			});
+
+			const mappedApproval = {
+				amount: 1_000_000n,
+				source: mockAtaAddress,
+				destination: mockSolAddress2,
+				isApproval: true
+			};
+
+			it('should flag an `Approve` as an unchecked approval', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: { ...mockSolParsedTransactionMessage, instructions: [approve] },
+						userAddress: mockSolAddress
+					})
+				).toStrictEqual({ ...mappedApproval, uncheckedApproval: true });
+			});
+
+			it('should flag a Token-2022 `Approve` as an unchecked approval', () => {
+				const token2022Approve = getToken2022ApproveInstruction({
+					source: address(mockAtaAddress),
+					delegate: address(mockSolAddress2),
+					owner: createNoopSigner(address(mockSolAddress)),
+					amount: 1_000_000n
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [token2022Approve]
+						},
+						userAddress: mockSolAddress
+					})
+				).toStrictEqual({ ...mappedApproval, uncheckedApproval: true });
+			});
+
+			it('should flag an `Approve` carried in a token batch as an unchecked approval', () => {
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [getBatchInstruction([approve])]
+						},
+						userAddress: mockSolAddress
+					})
+				).toStrictEqual({ ...mappedApproval, uncheckedApproval: true });
+			});
+
+			it('should not flag an `ApproveChecked` as an unchecked approval', () => {
+				const approveChecked = getApproveCheckedInstruction({
+					source: address(mockAtaAddress),
+					mint: address(JUP_TOKEN.address),
+					delegate: address(mockSolAddress2),
+					owner: createNoopSigner(address(mockSolAddress)),
+					amount: 1_000_000n,
+					decimals: 6
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [approveChecked]
+						},
+						userAddress: mockSolAddress
+					})
+				).toStrictEqual({ ...mappedApproval, tokenAddress: JUP_TOKEN.address });
+			});
+		});
+
 		describe('with a dust transfer hiding a takeover or a burn', () => {
 			// These exercise the real instruction mapper end to end, which is the point: the attack
 			// lives in how a decoded instruction is reduced, not in a stubbed verdict.
@@ -1470,6 +1562,56 @@ describe('sol-transactions.utils', () => {
 			expect(texts.filter((text) => isSolCompiledTransactionMessage(encode(text)))).toStrictEqual(
 				[]
 			);
+		});
+	});
+
+	describe('countSolRequiredSignatures', () => {
+		it.each(['legacy', 0, 1] as const)(
+			'should count the fee payer alone as one signature in a message of version %s',
+			(version) => {
+				expect(countSolRequiredSignatures(createMockSolBase64Transaction({ version }))).toBe(1);
+			}
+		);
+
+		it.each(['legacy', 0, 1] as const)(
+			'should count a co-signer the message requires in a message of version %s',
+			(version) => {
+				expect(
+					countSolRequiredSignatures(
+						createMockSolBase64Transaction({ version, coSigners: [mockSolAddress3] })
+					)
+				).toBe(2);
+			}
+		);
+
+		// No message built through kit lists a signer its instructions do not name, so this one is
+		// encoded by hand. Decompiling it would lose the second signer, which the network still
+		// requires and still charges for.
+		it('should count a signer that no instruction names', () => {
+			const messageBytes = getCompiledTransactionMessageEncoder().encode({
+				version: 'legacy',
+				header: {
+					numSignerAccounts: 2,
+					numReadonlySignerAccounts: 1,
+					numReadonlyNonSignerAccounts: 1
+				},
+				staticAccounts: [
+					address(mockSolAddress),
+					address(mockSolAddress3),
+					address(SYSTEM_PROGRAM_ADDRESS)
+				],
+				lifetimeToken: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+				instructions: [{ programAddressIndex: 2, accountIndices: [0] }]
+			});
+
+			const transaction = getBase64Decoder().decode(
+				getTransactionEncoder().encode({
+					messageBytes: messageBytes as TransactionMessageBytes,
+					signatures: { [mockSolAddress]: null, [mockSolAddress3]: null } as SignaturesMap
+				})
+			);
+
+			expect(countSolRequiredSignatures(transaction)).toBe(2);
 		});
 	});
 });

@@ -1,3 +1,4 @@
+import { cyclesTopUpWizardSteps } from '$lib/config/cycles-top-up.config';
 import {
 	allSendNftsWizardSteps,
 	allSendWizardSteps,
@@ -119,11 +120,37 @@ describe('send.config', () => {
 		i18n: en
 	};
 
+	const expectedSendOrTopUpConfig: WizardSteps<WizardStepsSend> = [
+		{
+			name: WizardStepsSend.SEND_OR_TOP_UP,
+			title: en.send.text.send
+		}
+	];
+
+	const expectedTopUpConfig = cyclesTopUpWizardSteps(mockParams);
+
 	describe('sendWizardStepsWithQrCodeScan', () => {
 		it('should return the correct steps with expected text and state', () => {
 			const steps = sendWizardStepsWithQrCodeScan(mockParams);
 
 			expect(steps).toStrictEqual([...expectedSendConfig, ...expectedQrCodeConfig]);
+		});
+
+		it('should leave out the choice and the top-up when sendOrTopUp is false', () => {
+			const steps = sendWizardStepsWithQrCodeScan({ ...mockParams, sendOrTopUp: false });
+
+			expect(steps).toStrictEqual([...expectedSendConfig, ...expectedQrCodeConfig]);
+		});
+
+		it('should start with the choice and end with the top-up when sendOrTopUp is true', () => {
+			const steps = sendWizardStepsWithQrCodeScan({ ...mockParams, sendOrTopUp: true });
+
+			expect(steps).toStrictEqual([
+				...expectedSendOrTopUpConfig,
+				...expectedSendConfig,
+				...expectedQrCodeConfig,
+				...expectedTopUpConfig
+			]);
 		});
 
 		it('should return the correct steps with expected text and state when converting is false', () => {
@@ -192,6 +219,18 @@ describe('send.config', () => {
 				...expectedAllSendConfig,
 				...expectedSendConfig,
 				...expectedQrCodeConfig
+			]);
+		});
+
+		it('should put the choice after the token list and the top-up last when sendOrTopUp is true', () => {
+			const steps = allSendWizardSteps({ ...mockParams, sendOrTopUp: true });
+
+			expect(steps).toStrictEqual([
+				...expectedAllSendConfig,
+				...expectedSendOrTopUpConfig,
+				...expectedSendConfig,
+				...expectedQrCodeConfig,
+				...expectedTopUpConfig
 			]);
 		});
 

@@ -12,8 +12,9 @@ import {
 } from '$lib/stores/swap-supported-tokens.store';
 import type { GetSupportedDestinationsFn, SwapProvider, SwapTokenCategory } from '$lib/types/swap';
 import { determineCoverage } from '$lib/utils/swap-tokens-filter.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
+import { get } from 'svelte/store';
 
 const resolveProviderGroup = <
 	P extends {
@@ -132,4 +133,41 @@ export const loadSwapSupportedTokens = async ({
 	];
 
 	swapSupportedTokensStore.set({ aggregated, providers });
+};
+
+let solReloadGeneration = 0;
+
+/**
+ * Reads the Solana registry's source lists again into loaded swap lists, and leaves the other
+ * registries' as they are. LI.FI's is the Solana mainnet tokens known when it is read, and the
+ * default and custom SPL tokens load after the swap lists, or are added later. NEAR Intents answers
+ * from its cache. Does nothing before the swap lists have loaded, and only the latest of overlapping
+ * reads is kept.
+ */
+export const reloadSolSwapSupportedTokens = async (): Promise<void> => {
+	if (isNullish(get(swapSupportedTokensStore))) {
+		return;
+	}
+
+	const generation = ++solReloadGeneration;
+
+	const solProviders = await resolveProviderGroup({
+		providers: solSwapProviders,
+		sourceCategory: 'sol',
+		callFn: (fn) => fn()
+	});
+
+	const loaded = get(swapSupportedTokensStore);
+
+	if (generation !== solReloadGeneration || isNullish(loaded)) {
+		return;
+	}
+
+	swapSupportedTokensStore.set({
+		aggregated: { ...loaded.aggregated, sol: aggregateCategory(solProviders) },
+		providers: [
+			...loaded.providers.filter(({ sourceCategory }) => sourceCategory !== 'sol'),
+			...solProviders
+		]
+	});
 };

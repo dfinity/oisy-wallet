@@ -551,6 +551,7 @@ interface I18nHelp {
 		explorers_description: string;
 		explorers_velora_description: string;
 		explorers_near_intents_description: string;
+		explorers_lifi_description: string;
 		explorers_onesec_description: string;
 		explorers_chain_eth: string;
 		explorers_chain_sol: string;
@@ -939,6 +940,9 @@ interface I18nCycles_top_up {
 		unknown_fresh: string;
 		sent_to_canister: string;
 		sent_to_canister_top_up: string;
+		choice_send: string;
+		choice_send_description: string;
+		choice_top_up_description: string;
 	};
 	error: {
 		invalid_canister_id: string;
@@ -1084,6 +1088,8 @@ interface I18nSwap {
 		finishing_in_background: string;
 		refreshing_ui: string;
 		swap_provider: string;
+		smart_swap: string;
+		finding_best_rate: string;
 		swap_provider_website: string;
 		swap_route: string;
 		included_network_fees: string;
@@ -1102,6 +1108,8 @@ interface I18nSwap {
 		gasless: string;
 		swap_fees: string;
 		cross_chain_networks_info: string;
+		two_swaps_info: string;
+		two_swaps_first_button: string;
 		near_intents_estimated_time: string;
 		lifi_route_via: string;
 		lifi_route_via_estimated_time: string;
@@ -1137,6 +1145,7 @@ interface I18nSwap {
 		cannot_save_provider_agreement: string;
 		swap_refunded: string;
 		swap_replaced_or_dropped: string;
+		swap_expired: string;
 		near_intents_quote_unverified: string;
 		near_intents_quote_expired: string;
 		near_intents_deposit_expired: string;
@@ -1148,6 +1157,7 @@ interface I18nSwap {
 		oisy_trade_recovery_failed: string;
 		lifi_status_unknown: string;
 		lifi_fee_changed: string;
+		lifi_route_unverified: string;
 	};
 }
 
@@ -1488,6 +1498,7 @@ interface I18nWallet_connect {
 		network: string;
 		amount: string;
 		hex_data: string;
+		base64_data: string;
 		tab_operations: string;
 		unreviewed_instructions: string;
 		unreviewed_instructions_simulated: string;
@@ -1496,6 +1507,8 @@ interface I18nWallet_connect {
 		unread_programs_acknowledge: string;
 		cannot_be_shown: string;
 		close_pays_others: string;
+		fee_paid_by_others: string;
+		approval_without_simulation: string;
 		simulated_instructions: string;
 		multiple_operations: string;
 		simulated_review: string;
@@ -1531,6 +1544,7 @@ interface I18nWallet_connect {
 		allowance_increase: string;
 		allowance_decrease: string;
 		unverifiable_erc20_request: string;
+		unlisted_erc20_request: string;
 		token_call_with_value: string;
 		unverifiable_approval_for_all_request: string;
 		approval_for_all_grant: string;
@@ -1607,6 +1621,7 @@ interface I18nWallet_connect {
 		btc_psbt_input_not_segwit: string;
 		btc_psbt_input_not_owned: string;
 		btc_psbt_input_ambiguous: string;
+		btc_psbt_input_unverified: string;
 		from_address_not_wallet: string;
 		unknown_destination: string;
 		cketh_deposit_refused: string;
@@ -1614,6 +1629,8 @@ interface I18nWallet_connect {
 		token_call_with_value: string;
 		ambiguous_transaction: string;
 		close_pays_others: string;
+		fee_paid_by_others: string;
+		approval_without_simulation: string;
 		unreviewed_without_simulation: string;
 		unreviewed_not_described_by_simulation: string;
 		unread_programs_unconfirmed: string;
@@ -2098,7 +2115,7 @@ interface I18nContact {
 	form: { edit_contact: string; add_new_contact: string };
 	fields: { name: string };
 	delete: { title: string; delete_contact: string; content_text: string };
-	error: { create: string; update: string; delete: string; name_too_long: string };
+	error: { create: string; update: string; delete: string; load: string; name_too_long: string };
 }
 
 interface I18nAddress {

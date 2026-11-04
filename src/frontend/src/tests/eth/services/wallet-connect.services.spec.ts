@@ -51,6 +51,12 @@ const HOLDER = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
 const SPENDER = '0xcA11bde05977b3631167028862bE2a173976CA11';
 const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f';
 
+// The signer canister returns r ‖ s followed by the bare y-parity, 0 or 1.
+const SIGNATURE_R_S = `${'11'.repeat(32)}${'22'.repeat(32)}`;
+const signerSignature = (parity: 0 | 1): string => `0x${SIGNATURE_R_S}0${parity}`;
+// The same signature with `v` as 27 (0x1b) or 28 (0x1c), the form a dApp verifies on-chain.
+const dappSignature = (v: 27 | 28): string => `0x${SIGNATURE_R_S}${v.toString(16)}`;
+
 const daiPermitJson = (allowed: unknown): string => {
 	const typedData: WalletConnectEthSignTypedDataV4 = {
 		domain: { name: 'Dai Stablecoin', version: '1', chainId: '1', verifyingContract: DAI },
@@ -107,8 +113,8 @@ describe('eth wallet-connect.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 			authStore.setForTesting(mockIdentity);
-			vi.mocked(signPrehash).mockResolvedValue('0xPREHASH_SIGNATURE');
-			vi.mocked(signMessageApi).mockResolvedValue('0xRAW_SIGNATURE');
+			vi.mocked(signPrehash).mockResolvedValue(signerSignature(0));
+			vi.mocked(signMessageApi).mockResolvedValue(signerSignature(1));
 		});
 
 		it('signs a valid typed-data permit via signPrehash and approves', async () => {
@@ -125,7 +131,7 @@ describe('eth wallet-connect.services', () => {
 			expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
 				id: request.id,
 				topic: request.topic,
-				message: '0xPREHASH_SIGNATURE'
+				message: dappSignature(27)
 			});
 			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
 		});
@@ -201,7 +207,7 @@ describe('eth wallet-connect.services', () => {
 			expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
 				id: request.id,
 				topic: request.topic,
-				message: '0xRAW_SIGNATURE'
+				message: dappSignature(28)
 			});
 		});
 
@@ -226,7 +232,39 @@ describe('eth wallet-connect.services', () => {
 				expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
 					id: request.id,
 					topic: request.topic,
-					message: '0xRAW_SIGNATURE'
+					message: dappSignature(28)
+				});
+			}
+		);
+
+		it.each([
+			{ method: SESSION_REQUEST_ETH_SIGN_V4, parity: 0, v: 27 },
+			{ method: SESSION_REQUEST_ETH_SIGN_V4, parity: 1, v: 28 },
+			{ method: SESSION_REQUEST_PERSONAL_SIGN, parity: 0, v: 27 },
+			{ method: SESSION_REQUEST_PERSONAL_SIGN, parity: 1, v: 28 }
+		] as const)(
+			'returns the $method signature with signer parity $parity to the dApp with v $v',
+			async ({ method, parity, v }) => {
+				// A contract verifying the signature on-chain (e.g. an ERC-2612 `permit`) accepts
+				// `v` only as 27 or 28, so the bare parity the signer appends is re-encoded.
+				vi.mocked(signPrehash).mockResolvedValue(signerSignature(parity));
+				vi.mocked(signMessageApi).mockResolvedValue(signerSignature(parity));
+
+				const request = buildRequest({
+					method,
+					params:
+						method === SESSION_REQUEST_ETH_SIGN_V4
+							? [HOLDER, daiPermitJson(true)]
+							: ['0x48656c6c6f', HOLDER]
+				});
+
+				const result = await signMessage(buildParams(request));
+
+				expect(result).toStrictEqual({ success: true });
+				expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
+					id: request.id,
+					topic: request.topic,
+					message: dappSignature(v)
 				});
 			}
 		);

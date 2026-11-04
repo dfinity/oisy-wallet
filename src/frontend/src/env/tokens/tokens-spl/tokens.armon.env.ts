@@ -26,6 +26,5 @@ export const ARMON_TOKEN: RequiredSpl2022Token = {
 	address: '15SsCZqCsM9fZGhTmP4rdJTPT9WGZKazDSsgeQ8ondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
-	freezeAuthority: 'Chm9dcASBc9C54FGxcSRGv9qC998TueQqr5XzGZkEVCc',
 	groupData: ARMON_TOKEN_GROUP
 };

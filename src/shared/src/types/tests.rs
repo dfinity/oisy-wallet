@@ -862,3 +862,33 @@ mod stored_contacts {
         assert_eq!(decoded.contacts[&1], contact(1, None));
     }
 }
+
+mod get_contact_images_request {
+    //! Tests for `GetContactImagesRequest` validation
+    use candid::{Decode, Encode};
+
+    use crate::{
+        types::contact::{GetContactImagesRequest, MAX_CONTACT_IMAGES_PER_CALL},
+        validate::{test_validate_on_deserialize, TestVector, Validate},
+    };
+
+    test_validate_on_deserialize!(
+        GetContactImagesRequest,
+        [
+            TestVector {
+                description: "GetContactImagesRequest at the per-call limit",
+                input: GetContactImagesRequest {
+                    contact_ids: (0..MAX_CONTACT_IMAGES_PER_CALL as u64).collect(),
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "GetContactImagesRequest over the per-call limit",
+                input: GetContactImagesRequest {
+                    contact_ids: (0..=MAX_CONTACT_IMAGES_PER_CALL as u64).collect(),
+                },
+                valid: false,
+            }
+        ]
+    );
+}

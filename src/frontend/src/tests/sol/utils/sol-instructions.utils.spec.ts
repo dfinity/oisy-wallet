@@ -1599,7 +1599,7 @@ describe('sol-instructions.utils', () => {
 			});
 		});
 
-		it('should forward the delegate as destination and flag an `Approve` instruction as an approval', () => {
+		it('should forward the delegate as destination and flag an `Approve` instruction as an unchecked approval', () => {
 			const instruction = getApproveInstruction({
 				source: address(mockSolAddress),
 				delegate: address(mockSolAddress2),
@@ -1611,7 +1611,8 @@ describe('sol-instructions.utils', () => {
 				amount: 100n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
-				isApproval: true
+				isApproval: true,
+				uncheckedApproval: true
 			});
 		});
 
@@ -1670,7 +1671,7 @@ describe('sol-instructions.utils', () => {
 			});
 		});
 
-		it('should forward the delegate and flag a Token-2022 `Approve` instruction as an approval', () => {
+		it('should forward the delegate and flag a Token-2022 `Approve` instruction as an unchecked approval', () => {
 			const instruction = getToken2022ApproveInstruction({
 				source: address(mockSolAddress),
 				delegate: address(mockSolAddress2),
@@ -1682,7 +1683,8 @@ describe('sol-instructions.utils', () => {
 				amount: 100n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
-				isApproval: true
+				isApproval: true,
+				uncheckedApproval: true
 			});
 		});
 
@@ -2094,7 +2096,11 @@ describe('sol-instructions.utils', () => {
 		});
 
 		it('should ignore a Memo instruction', () => {
-			const instruction = getAddMemoInstruction({ memo: 'Deposit 42' });
+			// The client now defaults to the Memo v4 program; pin the v3 one we recognise.
+			const instruction = getAddMemoInstruction(
+				{ memo: 'Deposit 42' },
+				{ programAddress: address(MEMO_PROGRAM_ADDRESS) }
+			);
 
 			expect(mapSolInstruction({ instruction })).toStrictEqual({ amount: undefined });
 

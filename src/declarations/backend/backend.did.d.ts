@@ -709,6 +709,26 @@ export interface ContactImage {
 	data: Uint8Array;
 	mime_type: ImageMimeType;
 }
+/**
+ * A contact's image, as returned by `get_contact_images`.
+ */
+export interface ContactImageEntry {
+	contact_id: bigint;
+	image: ContactImage;
+}
+/**
+ * A page of the caller's contacts, as returned by `get_contacts_page`.
+ */
+export interface ContactsPage {
+	/**
+	 * Contacts in ID order, without their images; `get_contact_images` returns those.
+	 */
+	contacts: Array<Contact>;
+	/**
+	 * What to pass as `after` for the next page; none once this page holds the last contact.
+	 */
+	next: [] | [bigint];
+}
 export interface CreateActiveUserTransactionRequest {
 	id: string;
 	external_refs: Array<ActiveUserTransactionRef>;
@@ -1010,6 +1030,25 @@ export type GetAllowedCyclesResult =
 			 */
 			Err: GetAllowedCyclesError;
 	  };
+/**
+ * The caller's contacts whose images `get_contact_images` returns.
+ */
+export interface GetContactImagesRequest {
+	contact_ids: BigUint64Array;
+}
+export type GetContactImagesResult =
+	| {
+			/**
+			 * The images were retrieved successfully.
+			 */
+			Ok: Array<ContactImageEntry>;
+	  }
+	| {
+			/**
+			 * The images were not retrieved due to an error.
+			 */
+			Err: ContactError;
+	  };
 export type GetContactResult =
 	| {
 			/**
@@ -1020,6 +1059,19 @@ export type GetContactResult =
 	| {
 			/**
 			 * The contacts were not retrieved due to an error.
+			 */
+			Err: ContactError;
+	  };
+export type GetContactsPageResult =
+	| {
+			/**
+			 * The page was retrieved successfully.
+			 */
+			Ok: ContactsPage;
+	  }
+	| {
+			/**
+			 * The page was not retrieved due to an error.
 			 */
 			Err: ContactError;
 	  };
@@ -2799,6 +2851,13 @@ export interface _SERVICE {
 	 */
 	get_allowed_cycles: ActorMethod<[], GetAllowedCyclesResult>;
 	/**
+	 * Returns usage guidance for AI agents and other API clients.
+	 *
+	 * The Candid interface remains the source of truth for method signatures and
+	 * exact error variants.
+	 */
+	get_api_doc: ActorMethod<[], string>;
+	/**
 	 * Returns the currently stored API keys.
 	 *
 	 * Restricted to canister controllers only.
@@ -2820,6 +2879,18 @@ export interface _SERVICE {
 	 */
 	get_contact: ActorMethod<[bigint], GetContactResult>;
 	/**
+	 * Returns the images of the given contacts of the caller.
+	 *
+	 * A call takes at most `MAX_CONTACT_IMAGES_PER_CALL` contact IDs, so that the reply stays below
+	 * the 2 MiB a certified call can return.
+	 * # Arguments
+	 * * `request` - The IDs of the caller's contacts whose images to return.
+	 * # Returns
+	 * * `Ok(Vec<ContactImageEntry>)` - The images found; contacts the caller does not have, and
+	 * contacts without an image, are left out.
+	 */
+	get_contact_images: ActorMethod<[GetContactImagesRequest], GetContactImagesResult>;
+	/**
 	 * Returns all contacts for the caller
 	 *
 	 * This query function returns a list of the user's contacts.
@@ -2827,6 +2898,18 @@ export interface _SERVICE {
 	 * * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	 */
 	get_contacts: ActorMethod<[], GetContactsResult>;
+	/**
+	 * Returns a page of the caller's contacts, without their images.
+	 *
+	 * A page holds contacts in ID order until their encoded size reaches `CONTACTS_PAGE_MAX_BYTES`, so
+	 * that the reply stays below the 2 MiB a certified call can return. `get_contact_images` returns
+	 * the images.
+	 * # Arguments
+	 * * `after` - The `next` of the previous page; none for the first page.
+	 * # Returns
+	 * * `Ok(ContactsPage)` - The page, with `next` set while contacts remain after it.
+	 */
+	get_contacts_page: ActorMethod<[[] | [bigint]], GetContactsPageResult>;
 	get_exchange_rate: ActorMethod<[TokenId], [] | [ExchangeRate]>;
 	/**
 	 * Returns the latest USD prices for the caller's priceable tokens.

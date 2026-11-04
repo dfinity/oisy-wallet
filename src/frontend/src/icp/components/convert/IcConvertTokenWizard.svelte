@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
+	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
+	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
 	import IcConvertForm from '$icp/components/convert/IcConvertForm.svelte';
 	import IcConvertProgress from '$icp/components/convert/IcConvertProgress.svelte';
 	import IcConvertReview from '$icp/components/convert/IcConvertReview.svelte';
@@ -46,9 +48,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { KnownDestinations } from '$lib/types/transactions';
 	import type { WizardStep } from '$lib/types/wizard';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
+	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 
@@ -94,6 +97,16 @@
 	let isDestinationCustom = $derived(!isNullishOrEmpty(customDestination));
 
 	let networkId = $derived($destinationToken.network.id);
+
+	// The assets leave on the twin network, so only a previous send there makes a custom destination
+	// familiar. Without that history every custom destination counts as first-time.
+	let knownDestinations: KnownDestinations = $derived(
+		(isNetworkIdBitcoin(networkId)
+			? $btcKnownDestinations
+			: isNetworkIdEthereum(networkId)
+				? $ethKnownDestinations
+				: undefined) ?? {}
+	);
 
 	let minimumBtcRetrieveAmount = $derived(
 		nonNullish($minterInfo) && 'retrieve_btc_min_amount' in $minterInfo.data
@@ -237,6 +250,7 @@
 				<IcConvertReview
 					destination={isDestinationCustom ? customDestination : defaultDestination}
 					{isDestinationCustom}
+					{knownDestinations}
 					onConvert={convert}
 					{receiveAmount}
 					{sendAmount}
@@ -249,6 +263,7 @@
 				<IcConvertProgress {convertProgressStep} />
 			{:else if currentStep?.name === WizardStepsConvert.DESTINATION}
 				<DestinationWizardStep
+					{knownDestinations}
 					{networkId}
 					{onDestinationBack}
 					{onQRCodeScan}
