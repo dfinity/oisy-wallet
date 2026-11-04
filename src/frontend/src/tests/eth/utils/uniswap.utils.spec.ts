@@ -282,6 +282,46 @@ describe('uniswap.utils', () => {
 			expect(getUniswapSwap(params({ data }))).toBeUndefined();
 		});
 
+		// Permit2 refuses a permit once its signature has expired, which reverts the transaction with it.
+		it.each([
+			{
+				case: 'the permit signature deadline when it comes first',
+				sigDeadline: DEADLINE - 60n,
+				deadline: DEADLINE,
+				stated: Number(DEADLINE - 60n)
+			},
+			{
+				case: "the transaction's deadline when the permit signature outlives it",
+				sigDeadline: DEADLINE + 60n,
+				deadline: DEADLINE,
+				stated: Number(DEADLINE)
+			},
+			{
+				case: 'the permit signature deadline when the transaction has none',
+				sigDeadline: DEADLINE,
+				deadline: null,
+				stated: Number(DEADLINE)
+			}
+		])('should state $case', ({ sigDeadline, deadline, stated }) => {
+			const data = execute({
+				commands: [permit({ sigDeadline }), v3Swap({ amount: 1_000_000n, amountLimit: 1n })],
+				deadline
+			});
+
+			expect(getUniswapSwap(params({ data }))?.deadline).toBe(stated);
+		});
+
+		it('should state no deadline for a permit whose signature outlives a transaction without one', () => {
+			const data = execute({
+				commands: [permit(), v3Swap({ amount: 1_000_000n, amountLimit: 1n })],
+				deadline: null
+			});
+			const swap = getUniswapSwap(params({ data }));
+
+			expect(swap).toBeDefined();
+			expect(swap?.deadline).toBeUndefined();
+		});
+
 		it('should not describe a swap granting two allowances', () => {
 			const data = execute({
 				commands: [

@@ -62,7 +62,7 @@ interface UniswapPlan {
 	pulled: Map<string, bigint>;
 	deliveries: UniswapDelivery[];
 	fees: UniswapPlanFee[];
-	approvals: { token: string; amount: bigint; expiration: bigint }[];
+	approvals: { token: string; amount: bigint; expiration: bigint; sigDeadline: bigint }[];
 	// Whether the router pulls only what the swaps take, which `pulled` caps.
 	atMost: boolean;
 }
@@ -591,7 +591,7 @@ const readCommand = ({
 			return party(recipient).kind === 'router' && pull({ plan, token, amount });
 		}
 		case UNISWAP_COMMANDS.PERMIT2_PERMIT: {
-			const [[[token, amount, expiration], spender]] = args;
+			const [[[token, amount, expiration], spender, sigDeadline]] = args;
 
 			// The swap spends the router's allowance only. An allowance for anyone else is not part of
 			// it, and an expiration of 0 lasts for the current block, which is no date to show. Nor is
@@ -606,7 +606,7 @@ const readCommand = ({
 				return false;
 			}
 
-			plan.approvals.push({ token: token.toLowerCase(), amount, expiration });
+			plan.approvals.push({ token: token.toLowerCase(), amount, expiration, sigDeadline });
 
 			return true;
 		}
@@ -786,6 +786,14 @@ const toSwap = ({
 
 	const [{ recipient: party }] = deliveries;
 
+	// Permit2 refuses a permit once its signature has expired, which reverts the transaction with it.
+	const end = [deadline, approval?.sigDeadline]
+		.filter(nonNullish)
+		.reduce<bigint | undefined>(
+			(earliest, time) => (isNullish(earliest) || time < earliest ? time : earliest),
+			undefined
+		);
+
 	return {
 		router,
 		paid: {
@@ -808,9 +816,9 @@ const toSwap = ({
 					expiration: Number(approval.expiration)
 				}
 			}),
-		...(nonNullish(deadline) &&
-			Number.isFinite(new Date(Number(deadline) * 1000).getTime()) && {
-				deadline: Number(deadline)
+		...(nonNullish(end) &&
+			Number.isFinite(new Date(Number(end) * 1000).getTime()) && {
+				deadline: Number(end)
 			})
 	};
 };

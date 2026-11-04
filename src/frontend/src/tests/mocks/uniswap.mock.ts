@@ -5,7 +5,7 @@ import {
 	UNISWAP_EXECUTE_HASH,
 	UNISWAP_EXECUTE_WITHOUT_DEADLINE_HASH
 } from '$eth/constants/uniswap.constants';
-import { MAX_UINT_160, ZERO } from '$lib/constants/app.constants';
+import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import { AbiCoder } from 'ethers/abi';
 import { solidityPacked } from 'ethers/hash';
 import { hexlify, toUtf8Bytes } from 'ethers/utils';
@@ -100,24 +100,25 @@ export const encodeUniswapSweep = ({
 		values: [token, recipient, amountMin]
 	});
 
+// By default the permit's signature outlives any deadline, so the transaction's own is the one that
+// ends it.
 export const encodeUniswapPermit = ({
 	token = EURC_TOKEN.address,
 	amount = MAX_UINT_160,
 	expiration = 1_795_682_829n,
-	spender = mockUniswapRouter
+	spender = mockUniswapRouter,
+	sigDeadline = MAX_UINT_256
 }: {
 	token?: string;
 	amount?: bigint;
 	expiration?: bigint;
 	spender?: string;
+	sigDeadline?: bigint;
 } = {}): MockUniswapCommand =>
 	encodeUniswapCommand({
 		type: UNISWAP_COMMANDS.PERMIT2_PERMIT,
 		types: ['tuple(tuple(address,uint160,uint48,uint48),address,uint256)', 'bytes'],
-		values: [
-			[[token, amount, expiration, ZERO], spender, mockUniswapDeadline],
-			`0x${'11'.repeat(65)}`
-		]
+		values: [[[token, amount, expiration, ZERO], spender, sigDeadline], `0x${'11'.repeat(65)}`]
 	});
 
 // `deadline: null` calls `execute` without one.
