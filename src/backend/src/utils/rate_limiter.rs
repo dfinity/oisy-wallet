@@ -43,7 +43,7 @@ thread_local! {
     /// No global tier: a shared budget would let one user with many accounts block every BTC
     /// send. A canister-wide budget is a pending decision of the BTC send-via-backend spec.
     pub(crate) static BTC_BROADCAST_TX_RATE_LIMITER: TieredRateLimiter =
-        TieredRateLimiter::with_tiers(3, 20, u32::MAX, u32::MAX);
+        TieredRateLimiter::per_caller(3, 20);
 
     /// Rate-limits `btc_get_pending_transactions`: max 15 calls per caller per minute.
     pub(crate) static BTC_GET_PENDING_TX_RATE_LIMITER: RateLimiter =
@@ -377,8 +377,12 @@ impl RateLimiter {
 pub(crate) struct TieredRateLimiter {
     caller_minute: RateLimiter,
     caller_hour: RateLimiter,
-    global_minute: RateLimiter,
-    global_hour: RateLimiter,
+    /// `None` for a limiter without a shared budget ([`Self::per_caller`]): a
+    /// global tier records every allowed call under one key and counts them on
+    /// each check, so a never-binding one would only cost work that grows with
+    /// all callers' traffic.
+    global_minute: Option<RateLimiter>,
+    global_hour: Option<RateLimiter>,
 }
 
 impl TieredRateLimiter {
@@ -404,8 +408,21 @@ impl TieredRateLimiter {
         Self {
             caller_minute: RateLimiter::new(caller_minute, Self::MINUTE_NS),
             caller_hour: RateLimiter::new(caller_hour, Self::HOUR_NS),
-            global_minute: RateLimiter::new(global_minute, Self::MINUTE_NS),
-            global_hour: RateLimiter::new(global_hour, Self::HOUR_NS),
+            global_minute: Some(RateLimiter::new(global_minute, Self::MINUTE_NS)),
+            global_hour: Some(RateLimiter::new(global_hour, Self::HOUR_NS)),
+        }
+    }
+
+    /// Only the per-caller tiers, for an endpoint where a shared budget would
+    /// do more harm than good: one principal with many accounts could exhaust
+    /// it and block every other caller.
+    #[must_use]
+    pub fn per_caller(caller_minute: u32, caller_hour: u32) -> Self {
+        Self {
+            caller_minute: RateLimiter::new(caller_minute, Self::MINUTE_NS),
+            caller_hour: RateLimiter::new(caller_hour, Self::HOUR_NS),
+            global_minute: None,
+            global_hour: None,
         }
     }
 
@@ -421,8 +438,8 @@ impl TieredRateLimiter {
         Self {
             caller_minute: RateLimiter::new(caller_minute, Self::MINUTE_NS),
             caller_hour: RateLimiter::new(10, Self::HOUR_NS),
-            global_minute: RateLimiter::new(20, Self::MINUTE_NS),
-            global_hour: RateLimiter::new(100, Self::HOUR_NS),
+            global_minute: Some(RateLimiter::new(20, Self::MINUTE_NS)),
+            global_hour: Some(RateLimiter::new(100, Self::HOUR_NS)),
         }
     }
 
@@ -445,25 +462,26 @@ impl TieredRateLimiter {
         // caller (otherwise it reports as anonymous).
         self.caller_minute.check_only(caller, now_ns)?;
         self.caller_hour.check_only(caller, now_ns)?;
-        self.global_minute
-            .check_only(global_bucket, now_ns)
-            .map_err(|mut e| {
+        for global in self.global_tiers() {
+            global.check_only(global_bucket, now_ns).map_err(|mut e| {
                 e.caller = caller;
                 e
             })?;
-        self.global_hour
-            .check_only(global_bucket, now_ns)
-            .map_err(|mut e| {
-                e.caller = caller;
-                e
-            })?;
+        }
 
         // Every tier is within limits — record the call.
         self.caller_minute.record(caller, now_ns);
         self.caller_hour.record(caller, now_ns);
-        self.global_minute.record(global_bucket, now_ns);
-        self.global_hour.record(global_bucket, now_ns);
+        for global in self.global_tiers() {
+            global.record(global_bucket, now_ns);
+        }
         Ok(())
+    }
+
+    fn global_tiers(&self) -> impl Iterator<Item = &RateLimiter> {
+        [&self.global_minute, &self.global_hour]
+            .into_iter()
+            .flatten()
     }
 }
 
@@ -1031,5 +1049,48 @@ mod tests {
         // callers.
         rl.record(test_principal(6), 111 * ONE_SEC);
         assert_eq!(rl.tracked_callers(), 2);
+    }
+
+    #[test]
+    fn per_caller_limits_each_caller_per_minute_and_per_hour() {
+        let rl = TieredRateLimiter::per_caller(3, 20);
+        let caller = test_principal(1);
+
+        for call in 0..3 {
+            assert!(rl.check_at(caller, ONE_SEC).is_ok(), "call {call}");
+        }
+        let err = rl.check_at(caller, ONE_SEC).unwrap_err();
+        assert_eq!((err.max_calls, err.window_ns), (3, 60 * ONE_SEC));
+
+        // 3 a minute over the next minutes reaches the hourly 20 within the hour.
+        let mut allowed = 3;
+        for minute in 1..10 {
+            for _ in 0..3 {
+                let at = minute * TieredRateLimiter::MINUTE_NS + ONE_SEC;
+                if rl.check_at(caller, at).is_ok() {
+                    allowed += 1;
+                }
+            }
+        }
+        assert_eq!(allowed, 20);
+        let err = rl
+            .check_at(caller, 10 * TieredRateLimiter::MINUTE_NS + ONE_SEC)
+            .unwrap_err();
+        assert_eq!((err.max_calls, err.window_ns), (20, 60 * 60 * ONE_SEC));
+    }
+
+    #[test]
+    fn per_caller_has_no_shared_budget_and_records_no_shared_traffic() {
+        let rl = TieredRateLimiter::per_caller(3, 20);
+
+        for id in 1..=200u8 {
+            for call in 0..3 {
+                assert!(
+                    rl.check_at(test_principal(id), ONE_SEC).is_ok(),
+                    "caller {id} call {call}"
+                );
+            }
+        }
+        assert_eq!(rl.global_tiers().count(), 0);
     }
 }
