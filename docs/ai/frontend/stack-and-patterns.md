@@ -521,7 +521,8 @@ component uses. Never re-implement an icon that already exists.
 - Auth flows go through `@icp-sdk/auth` and the helpers in
   `$lib/services/auth.services` and `$lib/providers/auth-client.providers`.
 - Any HTML coming from backend / user input must be sanitized before
-  `{@html …}`.
+  `{@html …}`. `sanitize` (the `Html` default) drops `<style>` elements: a
+  style element applies to the whole page, and no text we render needs one.
 - Text authored by a third party — e.g. a consent message built from data a
   relying party supplies — goes through `sanitizeUntrusted` (`untrusted` prop
   on `Html` / `Markdown`), which keeps only the markup Markdown can produce.
