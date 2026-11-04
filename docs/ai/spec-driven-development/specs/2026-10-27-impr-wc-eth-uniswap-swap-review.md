@@ -113,6 +113,10 @@ All of the following hold; otherwise the review stays exactly as it is today for
     keeps 0.3% of each transfer into or out of its V2 pair, from the router and its pools alike, so
     it arrives short at that pair, which a dApp can name as the recipient or a fee recipient; the
     wallet is none of its pools.
+12. A V2 exact input paying anyone but the wallet is its recipient's only delivery. The router
+    checks its minimum as a change in the recipient's balance, which another address can move out
+    and back during the swap, through code a token on the path runs, so added to another delivery's
+    the same tokens could count twice. The wallet's balance moves only under allowances it gave.
 
 ### Pinned routers
 
@@ -267,8 +271,9 @@ Only from checks the router enforces:
     described, with the V4 swap's minimum output as the minimum.
 11. A plan with `EXECUTE_SUB_PLAN`, a token OISY doesn't list, a received token the user added,
     a V2 exact output paying anyone but the router, FLOKI going to anyone but the wallet or paid as
-    a fee, two paid tokens, a value with bits beyond its type, or a 2.0.0 layout sent to a 2.1.x
-    router (or the reverse): unknown.
+    a fee, a V2 exact input paying another address that another delivery to it adds to, two paid
+    tokens, a value with bits beyond its type, or a 2.0.0 layout sent to a 2.1.x router (or the
+    reverse): unknown.
 12. An exact-output swap the wallet pays for: "You pay at most" its maximum input. One the router
     pays out of a `PERMIT2_TRANSFER_FROM` or the native value, or that a V4 `SETTLE` of a stated
     amount pays: "You pay" that amount.

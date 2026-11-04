@@ -581,6 +581,41 @@ describe('uniswap.utils', () => {
 					amount: 1_010_000n
 				});
 			});
+
+			// An exact input's minimum is a change in the recipient's balance, which another address can
+			// move out and back during the swap, through a token on the path.
+			const sweptAndSwapped = (recipient: string) =>
+				execute({
+					commands: [
+						v3Swap({ recipient: UNISWAP_RECIPIENT_ROUTER, amount: 1_000_000n, amountLimit: ZERO }),
+						sweep({ recipient, amountMin: 1_000_000n }),
+						v2Swap({ exactInput: true, recipient, path: [EURC, UNLISTED, USDC] })
+					]
+				});
+
+			it('should not describe an exact input paying another address that another delivery to it adds to', () => {
+				expect(getUniswapSwap(params({ data: sweptAndSwapped(OTHER) }))).toBeUndefined();
+			});
+
+			it('should describe an exact input paying the wallet that another delivery to it adds to', () => {
+				expect(getUniswapSwap(params({ data: sweptAndSwapped(WALLET) }))?.received).toEqual({
+					token: USDC_TOKEN,
+					amount: 2_010_000n
+				});
+			});
+
+			it('should describe an exact input paying another address on its own', () => {
+				const data = execute({
+					commands: [v2Swap({ exactInput: true, recipient: OTHER, path: [EURC, UNLISTED, USDC] })]
+				});
+
+				expect(getUniswapSwap(params({ data }))).toEqual(
+					expect.objectContaining({
+						recipient: OTHER,
+						received: { token: USDC_TOKEN, amount: 1_010_000n }
+					})
+				);
+			});
 		});
 
 		// FLOKI's tax handler takes 0.3% of each transfer into or out of its V2 pair on Ethereum, from

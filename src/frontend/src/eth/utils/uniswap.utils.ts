@@ -53,6 +53,9 @@ interface UniswapDelivery {
 	recipient: UniswapParty;
 	// The least the router lets reach the recipient: 0 when it enforces nothing.
 	minimum: bigint;
+	// Whether the router checks the minimum as a change in the recipient's balance, as it does for a
+	// V2 exact input only.
+	measuredAtRecipient?: boolean;
 }
 
 type UniswapPlanFee = { token: string; recipient: EthAddress } & UniswapSwapFeeAmount;
@@ -183,14 +186,15 @@ const deliver = ({
 	plan,
 	token,
 	recipient,
-	minimum
+	minimum,
+	measuredAtRecipient
 }: { plan: UniswapPlan } & UniswapDelivery): void => {
 	// What the router keeps, it holds for the commands that follow: that is no delivery.
 	if (recipient.kind === 'router') {
 		return;
 	}
 
-	plan.deliveries.push({ token: token.toLowerCase(), recipient, minimum });
+	plan.deliveries.push({ token: token.toLowerCase(), recipient, minimum, measuredAtRecipient });
 };
 
 // A share of what the router holds of a token, where 10^18 is all of it. Paid to a third party, it
@@ -225,7 +229,8 @@ const swap = ({
 	exactInput,
 	amount,
 	amountLimit,
-	payerIsUser
+	payerIsUser,
+	measuredAtRecipient
 }: {
 	reader: UniswapReader;
 	recipient: string;
@@ -235,6 +240,7 @@ const swap = ({
 	amount: bigint;
 	amountLimit: bigint;
 	payerIsUser: boolean;
+	measuredAtRecipient?: boolean;
 }): boolean => {
 	// Exact input: `amount` in, at least `amountLimit` out. Exact output: `amount` out, at most
 	// `amountLimit` in.
@@ -249,7 +255,13 @@ const swap = ({
 		plan.atMost = true;
 	}
 
-	deliver({ plan, token: tokenOut, recipient: party(recipient), minimum: amountOut });
+	deliver({
+		plan,
+		token: tokenOut,
+		recipient: party(recipient),
+		minimum: amountOut,
+		measuredAtRecipient
+	});
 
 	return true;
 };
@@ -581,7 +593,8 @@ const readCommand = ({
 				exactInput,
 				amount,
 				amountLimit,
-				payerIsUser
+				payerIsUser,
+				measuredAtRecipient: exactInput
 			});
 		}
 		case UNISWAP_COMMANDS.PERMIT2_TRANSFER_FROM: {
@@ -738,6 +751,18 @@ const toSwap = ({
 		isNullish(recipient) ||
 		otherRecipients.length > 0 ||
 		plan.approvals.length > 1
+	) {
+		return;
+	}
+
+	// A minimum checked as a change in the recipient's balance can be met by tokens another address
+	// moves out and back during the swap, through code a token on the path runs, so added to another
+	// delivery's, the same tokens would count twice. The wallet's balance moves only under allowances
+	// it gave, which could take it anyway.
+	if (
+		recipient !== 'wallet' &&
+		deliveries.length > 1 &&
+		deliveries.some(({ measuredAtRecipient }) => measuredAtRecipient === true)
 	) {
 		return;
 	}
