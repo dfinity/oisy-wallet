@@ -476,7 +476,10 @@ details in a grey `bg-secondary` card on top (not the rows' hover tint, as it is
 every offer below. The card is the one mark of the pick, so the rows carry no check, and with a
 single offer the card is the whole step, with no list and no Best Rate. Tapping the offer in use only goes back:
 `setManualProvider` would pin the automatic pick, and a better offer in the next round could no
-longer replace it. The cell
+longer replace it. A manual pick holds for the amount it was made at: `swapAmountsStore` records
+that amount, keeps the pick through refreshes and a return from Review (the same amount), and
+lets it go for a round at another amount, which selects the top offer again. A new pair resets
+the store, so it never carries a pick over either. The cell
 replaces the old Select link and the inline details disclosure, and stays disabled while a
 foreground round compares, since the details would describe a stale offer. The left column holds
 the "OISY Smart Swap" title and one line under it: the status while comparing, then, when the

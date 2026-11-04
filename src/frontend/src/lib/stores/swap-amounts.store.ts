@@ -3,7 +3,7 @@ import type { OptionAmount } from '$lib/types/send';
 import type { SwapMappedResult, SwapProvider, SwapQuoteError } from '$lib/types/swap';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
-import { writable, type Readable } from 'svelte/store';
+import { get, writable, type Readable } from 'svelte/store';
 
 export interface SwapAmountsStoreData {
 	swaps: SwapMappedResult[];
@@ -27,22 +27,31 @@ export interface SwapAmountsStore extends Readable<Nullish<SwapAmountsStoreData>
 }
 
 export const initSwapAmountsStore = (): SwapAmountsStore => {
-	const { subscribe, set, update } = writable<Nullish<SwapAmountsStoreData>>(undefined);
+	const store = writable<Nullish<SwapAmountsStoreData>>(undefined);
+	const { subscribe, set, update } = store;
 
 	let manualProviderKey: SwapProvider | undefined;
+	// A pick is made for the quote at one amount, so a round at another amount goes back to the
+	// top offer instead of carrying the pick over. Refreshes and a return from Review re-quote at
+	// the same amount and keep it; a new pair resets the store.
+	let manualAmount: OptionAmount;
 
 	return {
 		subscribe,
 
 		reset: () => {
 			manualProviderKey = undefined;
+			manualAmount = undefined;
 
 			set(null);
 		},
 
 		setSwaps: ({ swaps, amountForSwap, selectedProvider, quoteError }) => {
 			if (nonNullish(manualProviderKey)) {
-				const manualMatch = swaps.find((s) => s.provider === manualProviderKey);
+				const manualMatch =
+					Number(amountForSwap) === Number(manualAmount)
+						? swaps.find((s) => s.provider === manualProviderKey)
+						: undefined;
 
 				if (nonNullish(manualMatch)) {
 					set({
@@ -57,6 +66,7 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 				}
 
 				manualProviderKey = undefined;
+				manualAmount = undefined;
 			}
 
 			set({
@@ -79,6 +89,7 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 
 		setManualProvider: (provider) => {
 			manualProviderKey = provider.provider;
+			manualAmount = get(store)?.amountForSwap;
 
 			update((data) => {
 				if (isNullish(data)) {
