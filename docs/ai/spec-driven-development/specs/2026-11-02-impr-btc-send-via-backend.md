@@ -288,10 +288,12 @@ Utxo records>, created_at_timestamp_ns: now }`. In the same block, read and set 
    - **Same txid reuses its reservation.** If a pending transaction with the **same txid**
      already reserves exactly these inputs at the same address (`has_same_txid_reservation`),
      skip the insert: a retry after an unclear outcome must not be blocked by its own reservation.
-     Whether it broadcasts again is decided by the broadcast state. Otherwise, any reserved input
-     is `UtxosAlreadyReserved`, including a same-txid reservation over other UTXOs (which only a
-     mismatched `btc_add_pending_transaction` can create) or at another network's address (which
-     would not protect this one).
+     Whether it broadcasts again is decided by the broadcast state. Otherwise, any other
+     reservation of the txid or of an input is `UtxosAlreadyReserved`, including a same-txid
+     reservation over other UTXOs (which only a mismatched `btc_add_pending_transaction` can
+     create) or at another network's address (which would not protect this one). So a txid is
+     reserved at most once per principal: releasing it frees only the inputs it reserved, and the
+     broadcast states can follow reservations by txid alone.
    - The call remembers whether it **inserted** the reservation or **reused** one. Step 10
      releases only a reservation the call inserted.
 10. `ic_cdk_bitcoin_canister::bitcoin_send_transaction(&SendTransactionRequest { network, transaction })`.
@@ -371,7 +373,8 @@ so a definitive failure keeps it.
 same-txid rule as step 9 (`reserve_without_broadcast` in `broadcast_state_model.rs`). A request
 whose txid is already pending over exactly the same UTXOs at the same address succeeds without a
 second insert; today it fails with `UtxosAlreadyReserved`, which blocks a retry of the same payment
-for an hour (see [OpenCryptoPay](#frontend-opencryptopay)). It is still refused with
+for an hour (see [OpenCryptoPay](#frontend-opencryptopay)). Any other reservation of the txid is
+refused, as in step 9. It is still refused with
 `UtxosAlreadyReserved` while a broadcast of that txid is `InFlight`: that broadcast may yet be
 refused and release the reservation it inserted, which would free inputs the call had just
 reported as reserved.

@@ -10,6 +10,11 @@
 //! the UTXO view, and releases nothing: a resend after the upgrade finds its reservation, reuses
 //! it, and so keeps it whatever the answer. A state is dropped with its reservation, so there are
 //! never more states than reservations.
+//!
+//! A txid is reserved at most once per principal, on any address: both `begin_broadcast` and
+//! `reserve_without_broadcast` refuse a txid that is already reserved unless they reuse exactly
+//! that reservation. So releasing a txid's reservation frees only the inputs it reserved, and a
+//! state can follow its reservation by txid alone.
 
 use std::{
     cell::RefCell,
@@ -207,7 +212,8 @@ pub fn begin_broadcast(
         address,
         txid,
     } = *target;
-    states.retain_reserved(principal, &pending.pending_txids(principal));
+    let reserved_txids = pending.pending_txids(principal);
+    states.retain_reserved(principal, &reserved_txids);
 
     let attempts = match states.get(principal, network, &txid) {
         None => 1,
@@ -225,7 +231,9 @@ pub fn begin_broadcast(
 
     let reservation = if pending.has_same_txid_reservation(principal, address, &txid, &utxos) {
         Reservation::Reused
-    } else if pending.has_intersecting_pending_utxos(principal, &utxos) {
+    } else if reserved_txids.contains(txid.as_slice())
+        || pending.has_intersecting_pending_utxos(principal, &utxos)
+    {
         return Err(BtcBroadcastTransactionError::UtxosAlreadyReserved);
     } else {
         pending
@@ -261,8 +269,9 @@ pub fn begin_broadcast(
 }
 
 /// Reserves a transaction OISY signed but does not broadcast itself
-/// (`btc_add_pending_transaction`), with the same same-txid rule as `begin_broadcast`: a retry over
-/// exactly the same UTXOs at the same address succeeds without a second insert.
+/// (`btc_add_pending_transaction`), with the same rules as `begin_broadcast`: a retry over exactly
+/// the same UTXOs at the same address succeeds without a second insert, and any other reservation
+/// of the txid or of an input is refused.
 ///
 /// It is refused while a broadcast of the same transaction is in flight. That broadcast may still
 /// be refused and release the reservation it inserted, which would free inputs this call had just
@@ -278,7 +287,8 @@ pub fn reserve_without_broadcast(
     address: &str,
     transaction: StoredPendingTransaction,
 ) -> Result<(), BtcAddPendingTransactionError> {
-    states.retain_reserved(principal, &pending.pending_txids(principal));
+    let reserved_txids = pending.pending_txids(principal);
+    states.retain_reserved(principal, &reserved_txids);
 
     let is_in_flight = <[u8; 32]>::try_from(transaction.txid.as_slice()).is_ok_and(|txid| {
         matches!(
@@ -293,7 +303,9 @@ pub fn reserve_without_broadcast(
     {
         return Ok(());
     }
-    if pending.has_intersecting_pending_utxos(principal, &transaction.utxos) {
+    if reserved_txids.contains(&transaction.txid)
+        || pending.has_intersecting_pending_utxos(principal, &transaction.utxos)
+    {
         return Err(BtcAddPendingTransactionError::UtxosAlreadyReserved);
     }
     pending
@@ -850,6 +862,90 @@ mod tests {
         );
         assert_eq!(
             pending.get_pending_transactions(&principal(), "tb1q-caller"),
+            vec![]
+        );
+    }
+
+    fn other_utxos() -> Vec<Utxo> {
+        vec![Utxo {
+            outpoint: OutPoint {
+                txid: Txid::from([0x22; 32]),
+                vout: 0,
+            },
+            value: 5_000,
+            height: 100,
+        }]
+    }
+
+    fn add_at(
+        pending: &mut BtcUserPendingTransactionsModel<'_>,
+        states: &mut BtcBroadcastStates,
+        network: BitcoinNetwork,
+        address: &str,
+        utxos: Vec<Utxo>,
+    ) -> Result<(), BtcAddPendingTransactionError> {
+        reserve_without_broadcast(
+            pending,
+            states,
+            principal(),
+            network,
+            address,
+            StoredPendingTransaction {
+                txid: TXID.to_vec(),
+                utxos,
+                created_at_timestamp_ns: 1,
+            },
+        )
+    }
+
+    #[test]
+    fn a_txid_reserved_over_other_inputs_is_not_reserved_twice() {
+        let (mut map, _mm) = setup();
+        let mut pending = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let mut states = BtcBroadcastStates::default();
+        add_at(&mut pending, &mut states, NETWORK, ADDRESS, other_utxos()).unwrap();
+
+        assert_eq!(
+            begin(&mut pending, &mut states, TXID),
+            Err(BtcBroadcastTransactionError::UtxosAlreadyReserved)
+        );
+        assert_eq!(
+            add_at(&mut pending, &mut states, NETWORK, ADDRESS, utxos()),
+            Err(BtcAddPendingTransactionError::UtxosAlreadyReserved)
+        );
+        assert_eq!(
+            pending.get_pending_transactions(&principal(), ADDRESS),
+            vec![StoredPendingTransaction {
+                txid: TXID.to_vec(),
+                utxos: other_utxos(),
+                created_at_timestamp_ns: 1,
+            }],
+            "the older reservation is the only one, and intact"
+        );
+    }
+
+    #[test]
+    fn a_txid_reserved_at_another_address_is_not_reserved_again() {
+        let (mut map, _mm) = setup();
+        let mut pending = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let mut states = BtcBroadcastStates::default();
+        add_at(
+            &mut pending,
+            &mut states,
+            BitcoinNetwork::Testnet,
+            "tb1q-caller",
+            other_utxos(),
+        )
+        .unwrap();
+
+        // Otherwise the testnet reservation would keep a mainnet state alive after the mainnet
+        // reservation is pruned, since states follow reservations by txid.
+        assert_eq!(
+            begin(&mut pending, &mut states, TXID),
+            Err(BtcBroadcastTransactionError::UtxosAlreadyReserved)
+        );
+        assert_eq!(
+            pending.get_pending_transactions(&principal(), ADDRESS),
             vec![]
         );
     }

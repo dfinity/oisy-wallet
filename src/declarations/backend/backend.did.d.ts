@@ -352,7 +352,8 @@ export type BtcAddPendingTransactionError =
 	  }
 	| {
 			/**
-			 * Intersects with caller's existing pending reservations
+			 * One of the UTXOs, or the txid with other UTXOs or at another address, is already reserved
+			 * by the caller, or a broadcast of this transaction is in flight.
 			 */
 			UtxosAlreadyReserved: null;
 	  };
@@ -622,7 +623,8 @@ export type BtcBroadcastTransactionError =
 	  }
 	| {
 			/**
-			 * Another pending transaction of the caller holds one of the inputs.
+			 * One of the inputs, or the txid with other inputs or at another address, is already
+			 * reserved by the caller.
 			 */
 			UtxosAlreadyReserved: null;
 	  };
