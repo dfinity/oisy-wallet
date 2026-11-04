@@ -96,7 +96,8 @@ All of the following hold; otherwise the review stays exactly as it is today for
    address. Unspent input that a command returns to the wallet doesn't count.
 6. Every other payment to an address that is not the wallet or the router is a fee: `PAY_PORTION`,
    `PAY_PORTION_FULL_PRECISION`, `TRANSFER` of a stated amount, or the V4 `TAKE_PORTION`.
-7. At most one `PERMIT2_PERMIT`, and it names this router as the spender.
+7. At most one `PERMIT2_PERMIT`, and it names this router as the spender and a token other than
+   the zero address, which the review would read as the native coin no allowance moves.
 8. OISY lists every token the review names (paid, received, fee and approved tokens) on that
    network, enabled or not, by default or because the user added it. A native coin is the
    network's own.

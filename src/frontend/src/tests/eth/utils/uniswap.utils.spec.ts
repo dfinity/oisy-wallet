@@ -269,6 +269,10 @@ describe('uniswap.utils', () => {
 			{
 				case: 'expires past the last date JavaScript can hold',
 				command: permit({ expiration: 2n ** 48n - 1n })
+			},
+			{
+				case: 'is for the zero address, which no allowance moves as the native coin',
+				command: permit({ token: ZERO_ETH_ADDRESS })
 			}
 		])('should not describe a swap whose allowance $case', ({ command }) => {
 			const data = execute({

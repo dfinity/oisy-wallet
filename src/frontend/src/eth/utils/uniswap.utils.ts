@@ -596,8 +596,10 @@ const readCommand = ({
 			// The swap spends the router's allowance only. An allowance for anyone else is not part of
 			// it, and an expiration of 0 lasts for the current block, which is no date to show. Nor is
 			// one past the last date JavaScript can hold, like permit2-sdk's `MaxAllowanceExpiration`.
+			// The zero address, which the review reads as the native coin, is no token an allowance moves.
 			if (
 				!isDestinationContractAddress({ contractAddress: router.address, destination: spender }) ||
+				token.toLowerCase() === ZERO_ETH_ADDRESS ||
 				expiration === ZERO ||
 				!Number.isFinite(new Date(Number(expiration) * 1000).getTime())
 			) {
