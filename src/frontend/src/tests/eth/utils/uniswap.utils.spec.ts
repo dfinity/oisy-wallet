@@ -1,5 +1,6 @@
 import { BASE_NETWORK, BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { FLOKI_TOKEN } from '$env/tokens/tokens-erc20/tokens.floki.env';
 import { CBBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.cbbtc.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.eurc.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
@@ -12,6 +13,7 @@ import {
 	UNISWAP_FULL_PRECISION_DENOMINATOR,
 	UNISWAP_RECIPIENT_ROUTER,
 	UNISWAP_RECIPIENT_SENDER,
+	UNISWAP_TAXED_TOKENS,
 	UNISWAP_V4_ACTIONS
 } from '$eth/constants/uniswap.constants';
 import { getUniswapSwap, type GetUniswapSwapParams } from '$eth/utils/uniswap.utils';
@@ -534,6 +536,79 @@ describe('uniswap.utils', () => {
 					token: USDC_TOKEN,
 					amount: 1_010_000n
 				});
+			});
+		});
+
+		// FLOKI's tax handler takes 0.3% of each transfer into or out of its V2 pair on Ethereum, from
+		// the router and its pools alike, and none of one to the wallet.
+		describe('a taxed token', () => {
+			const ETHEREUM_ROUTER = '0x23617e59A5925b2A4Bf75d73ff6711cD0b29De85';
+			const FLOKI = FLOKI_TOKEN.address;
+
+			const onEthereum = (data: string): GetUniswapSwapParams =>
+				params({
+					data,
+					to: ETHEREUM_ROUTER,
+					chainId: ETHEREUM_NETWORK.chainId,
+					networkId: ETHEREUM_NETWORK_ID,
+					tokens: [{ ...EURC_TOKEN, network: ETHEREUM_NETWORK }, FLOKI_TOKEN]
+				});
+
+			const intoRouter = v3Swap({
+				recipient: UNISWAP_RECIPIENT_ROUTER,
+				amount: 1_000_000n,
+				amountLimit: ZERO,
+				tokens: [EURC, FLOKI]
+			});
+
+			it('should pin FLOKI as OISY lists it', () => {
+				expect(UNISWAP_TAXED_TOKENS).toContainEqual({
+					chainId: FLOKI_TOKEN.network.chainId,
+					address: FLOKI.toLowerCase()
+				});
+			});
+
+			it('should describe it swept to the wallet', () => {
+				const data = execute({
+					commands: [intoRouter, sweep({ token: FLOKI, amountMin: 1_000n })]
+				});
+
+				expect(getUniswapSwap(onEthereum(data))?.received).toEqual({
+					token: FLOKI_TOKEN,
+					amount: 1_000n
+				});
+			});
+
+			it.each([
+				{
+					case: 'swept to another address',
+					commands: [intoRouter, sweep({ token: FLOKI, recipient: OTHER, amountMin: 1_000n })]
+				},
+				{
+					case: 'paid by a pool to another address',
+					commands: [
+						v3Swap({
+							recipient: OTHER,
+							amount: 1_000_000n,
+							amountLimit: 1_000n,
+							tokens: [EURC, FLOKI]
+						})
+					]
+				},
+				{
+					case: 'with a fee in it',
+					commands: [
+						intoRouter,
+						encode({
+							type: UNISWAP_COMMANDS.PAY_PORTION,
+							types: ['address', 'address', 'uint256'],
+							values: [FLOKI, OTHER, 25n]
+						}),
+						sweep({ token: FLOKI, amountMin: 1_000n })
+					]
+				}
+			])('should not describe it $case', ({ commands }) => {
+				expect(getUniswapSwap(onEthereum(execute({ commands })))).toBeUndefined();
 			});
 		});
 

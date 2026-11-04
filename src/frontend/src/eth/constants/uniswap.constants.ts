@@ -52,6 +52,14 @@ export const UNISWAP_UNIVERSAL_ROUTERS: UniswapUniversalRouter[] = [
 	{ chainId: 4663n, address: '0x204FAca1764B154221e35c0d20aBb3c525710498', version: '2.1.2' }
 ];
 
+// Tokens OISY lists by default that keep part of a transfer to or from some addresses, their own
+// exchange pools among them, so only what reaches the wallet is sure to arrive in full. Checked on
+// 2026-11-04 by simulating transfers of every token OISY lists by default out of its Uniswap pools.
+export const UNISWAP_TAXED_TOKENS: { chainId: bigint; address: string }[] = [
+	// FLOKI on Ethereum, whose tax handler takes 0.3% of each transfer into or out of its V2 pair.
+	{ chainId: 1n, address: '0xcf0c122c6b73ff809c693db761e7baebe62b6a2e' }
+];
+
 // execute(bytes commands, bytes[] inputs, uint256 deadline)
 export const UNISWAP_EXECUTE_HASH = '0x3593564c';
 

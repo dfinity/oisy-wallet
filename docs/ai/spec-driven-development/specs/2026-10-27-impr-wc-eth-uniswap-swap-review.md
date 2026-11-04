@@ -102,12 +102,16 @@ All of the following hold; otherwise the review stays exactly as it is today for
    network's own.
 9. The received token is not one the user added. Every minimum but a V2 exact input's is checked,
    if at all, on what the router or a pool sends, and such a token may keep part of each transfer.
-   The tokens OISY lists by default are taken to transfer in full.
+   The tokens OISY lists by default are taken to transfer in full, apart from the taxed ones below.
 10. A V2 exact-output swap pays the router. Nothing checks what it delivers: each hop gives what
     reached its pair, which the router prices from the reserves before the swap, so a pair the path
     visits twice, or a token keeping part of a transfer into or out of a pair, as FLOKI does through
     its V2 pair on Ethereum, leaves it short. Into the router, a later command's minimum checks what
     arrived.
+11. A token OISY pins as taxed goes only to the wallet, and no fee is paid in it. FLOKI on Ethereum
+    keeps 0.3% of each transfer into or out of its V2 pair, from the router and its pools alike, so
+    it arrives short at that pair, which a dApp can name as the recipient or a fee recipient; the
+    wallet is none of its pools.
 
 ### Pinned routers
 
@@ -259,8 +263,9 @@ Only from checks the router enforces:
 10. A V4 swap (`SWAP_EXACT_IN` with `SETTLE` and a `TAKE` of the whole amount to the wallet):
     described, with the V4 swap's minimum output as the minimum.
 11. A plan with `EXECUTE_SUB_PLAN`, a token OISY doesn't list, a received token the user added,
-    a V2 exact output paying anyone but the router, two paid tokens, a value with bits beyond its
-    type, or a 2.0.0 layout sent to a 2.1.x router (or the reverse): unknown.
+    a V2 exact output paying anyone but the router, FLOKI going to anyone but the wallet or paid as
+    a fee, two paid tokens, a value with bits beyond its type, or a 2.0.0 layout sent to a 2.1.x
+    router (or the reverse): unknown.
 12. An exact-output swap the wallet pays for: "You pay at most" its maximum input. One the router
     pays out of a `PERMIT2_TRANSFER_FROM` or the native value, or that a V4 `SETTLE` of a stated
     amount pays: "You pay" that amount.

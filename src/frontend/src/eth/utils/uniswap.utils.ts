@@ -10,6 +10,7 @@ import {
 	UNISWAP_OPEN_AMOUNT,
 	UNISWAP_RECIPIENT_ROUTER,
 	UNISWAP_RECIPIENT_SENDER,
+	UNISWAP_TAXED_TOKENS,
 	UNISWAP_UNIVERSAL_ROUTERS,
 	UNISWAP_V3_PATH_ADDRESS_LENGTH,
 	UNISWAP_V3_PATH_HOP_LENGTH,
@@ -735,6 +736,20 @@ const toSwap = ({
 		isNullish(recipient) ||
 		otherRecipients.length > 0 ||
 		plan.approvals.length > 1
+	) {
+		return;
+	}
+
+	// A taxed token arrives in full only at the wallet, which is none of its exchange pools: anyone
+	// else, a fee recipient included, may be one.
+	const taxed = (token: string): boolean =>
+		UNISWAP_TAXED_TOKENS.some(
+			({ chainId, address }) => chainId === router.chainId && address === token
+		);
+
+	if (
+		(taxed(receivedToken) && recipient !== 'wallet') ||
+		plan.fees.some(({ token }) => taxed(token))
 	) {
 		return;
 	}
