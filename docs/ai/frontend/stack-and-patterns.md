@@ -413,7 +413,7 @@ that remounts inherits the confirmation it mounts with, so it does not squeeze a
 
 While a foreground round compares, the cell's title and status run one `smart-thinking` band and
 its border a `smart-beam`; the confirmation plays only the squeeze. Both are scoped styles in
-`SwapProvider`, which owns the timings. Keep: the band never lighter than the plain line; a
+`SwapProviderCell`, which owns the timings. Keep: the band never lighter than the plain line; a
 fixed rem tile plus a shared animation start time keeps both lines in step; the beam turns by
 `rotate` behind a mask and pauses, not resets, between rounds. Reduced motion: plain title, grey
 status, a still `border-brand-subtle-20` ring.
@@ -457,7 +457,7 @@ policy, ignoring unfinished providers and late participation/results. This is lo
 not universal transport cancellation: nonabortable SDK/canister work may continue underneath.
 Do not apply this quote budget to swap execution, signing, deposit validity or animation timing.
 
-The five swap forms opt in with `SwapProvider isForm`; Review keeps the static label. In a form,
+The five swap forms render `SwapProviderCell`; Review's static label is `SwapProvider`. In a form,
 Smart Swap is one `<button>` card under the amount cards, styled as they are (`bg-secondary`,
 `border-tertiary`, `rounded-lg`). It opens the provider step (below), replaces the Select link
 and inline details, and is disabled (no hover or press fill) while a foreground round compares,
@@ -503,7 +503,7 @@ fees do not need an offer, ETH and BTC pass "an offer is selected". The fee comp
 quote-only, because Review renders them too.
 
 Screen readers hear the section through one `sr-only` `role="status"` region that
-`SwapProvider isForm` mounts before any round, outside the cell. Two reasons: the cell is a
+`SwapProviderCell` mounts before any round, outside the cell. Two reasons: the cell is a
 `<button>`, whose children are presentational, and a region inserted with its text already in
 place is not announced. Its text is the status while comparing, then the selected provider's
 name. The visible status is `aria-hidden`, the scroll's name is plain text for the cell's

@@ -299,7 +299,7 @@ describe('SwapIcpForm', () => {
 		expect(container).toBeInTheDocument();
 	});
 
-	it('should render SwapProvider component', () => {
+	it('should render SwapProviderCell component', () => {
 		const { container } = render(SwapIcpForm, {
 			props,
 			context: mockContext
