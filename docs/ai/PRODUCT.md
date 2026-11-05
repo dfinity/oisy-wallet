@@ -431,6 +431,8 @@ When an Ethereum or EVM send fails, what OISY says depends on how far the transa
 
 The send, convert, swap and AI assistant flows show these messages, and so do WalletConnect transaction requests; the dApp still receives a rejection. A failure OISY cannot explain keeps its flow's generic message.
 
+A send whose outcome OISY cannot know also ends there, so that the same review cannot send it a second time with the next nonce. The send, convert, swap, Harvest stake and unstake, and Liquidium supply and repay dialogs close with that message instead of going back to the review; for any other failure, Harvest and Liquidium keep their own message. The AI assistant's review replaces its Send button with the message, and keeps it that way after the assistant is closed and reopened. Any other failure goes back to the review, where the user can try again.
+
 ---
 
 ## Activity
