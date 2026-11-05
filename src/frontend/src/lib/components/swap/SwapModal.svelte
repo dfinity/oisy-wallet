@@ -2,9 +2,9 @@
 	import { getContext, onDestroy } from 'svelte';
 	import { page } from '$app/state';
 	import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
+	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
-	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 	import { SWAP_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -28,6 +28,7 @@
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
+	import { getInitialSwapSlippage } from '$lib/utils/swap.utils';
 
 	const { reset: resetSwapStore } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
@@ -50,10 +51,9 @@
 
 	let currentStep = $state<WizardStep<WizardStepsSwap> | undefined>();
 	let selectTokenType = $state<SwapSelectTokenType | undefined>();
-	let showSelectProviderModal = $state<boolean>(false);
 	let swapAmount = $state<OptionAmount>();
 	let receiveAmount = $state<number | undefined>();
-	let slippageValue = $state<OptionAmount>(SWAP_DEFAULT_SLIPPAGE_VALUE);
+	let slippageValue = $state<OptionAmount>(getInitialSwapSlippage());
 	let swapProgressStep = $state(ProgressStepsSwap.INITIALIZATION);
 	let swapFailedProgressSteps = $state<ProgressStepsSwap[]>([]);
 	let allNetworksEnabled = $state<boolean>(true);
@@ -63,9 +63,7 @@
 			? $i18n.swap.text.select_source_token
 			: selectTokenType === 'destination'
 				? $i18n.swap.text.select_destination_token
-				: showSelectProviderModal
-					? $i18n.swap.text.select_swap_provider
-					: (currentStep?.title ?? '')
+				: (currentStep?.title ?? '')
 	);
 
 	const close = () =>
@@ -78,11 +76,10 @@
 			swapAmount = undefined;
 			receiveAmount = undefined;
 			currentStep = undefined;
-			slippageValue = SWAP_DEFAULT_SLIPPAGE_VALUE;
+			slippageValue = getInitialSwapSlippage();
 			swapProgressStep = ProgressStepsSwap.INITIALIZATION;
 			allNetworksEnabled = true;
 			selectTokenType = undefined;
-			showSelectProviderModal = false;
 		});
 
 	// The swap context outlives the modal, and a navigation closes it without `close`: what the swap
@@ -91,8 +88,7 @@
 
 	let disablePointerEvents = $derived(
 		currentStep?.name === WizardStepsSwap.SWAPPING ||
-			currentStep?.name === WizardStepsSwap.TOKENS_LIST ||
-			showSelectProviderModal
+			currentStep?.name === WizardStepsSwap.TOKENS_LIST
 	);
 </script>
 
@@ -106,6 +102,12 @@
 >
 	{#snippet title()}{titleString}{/snippet}
 
+	{#snippet headerRight()}
+		{#if currentStep?.name === WizardStepsSwap.SWAP}
+			<SwapSlippage bind:slippageValue />
+		{/if}
+	{/snippet}
+
 	<SwapModalWizardSteps
 		{currentStep}
 		{modal}
@@ -117,7 +119,6 @@
 		bind:swapProgressStep
 		bind:swapFailedProgressSteps
 		bind:allNetworksEnabled
-		bind:showSelectProviderModal
 		bind:selectTokenType
 	/>
 </WizardModal>

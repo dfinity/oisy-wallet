@@ -1,35 +1,27 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, untrack } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { readable } from 'svelte/store';
-	import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
-	import { oisyTradeSwapEnabled } from '$env/oisy-trade-swap';
-	import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
-	import { LIFI_SWAP_ENABLED } from '$env/rest/lifi.env';
-	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
-	import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
-	import SwapDetailsChainFusion from '$lib/components/swap/SwapDetailsChainFusion.svelte';
-	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
-	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
-	import SwapDetailsLifi from '$lib/components/swap/SwapDetailsLifi.svelte';
-	import SwapDetailsNearIntents from '$lib/components/swap/SwapDetailsNearIntents.svelte';
-	import SwapDetailsOisyTrade from '$lib/components/swap/SwapDetailsOisyTrade.svelte';
-	import SwapDetailsOneSec from '$lib/components/swap/SwapDetailsOneSec.svelte';
-	import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
+	import IconChevronRight from '$lib/components/icons/lucide/IconChevronRight.svelte';
 	import SwapProviderAnimation from '$lib/components/swap/SwapProviderAnimation.svelte';
+	import SwapProviderDetails from '$lib/components/swap/SwapProviderDetails.svelte';
 	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import CollapsibleBottomSheet from '$lib/components/ui/CollapsibleBottomSheet.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
-	import { SWAP_PROVIDER_STATUS } from '$lib/constants/test-ids.constants';
+	import { SWAP_PROVIDER_CELL, SWAP_PROVIDER_STATUS } from '$lib/constants/test-ids.constants';
 	import {
 		MOTION_ENTER,
 		MOTION_REDUCED_FADE_DURATION,
 		MOTION_SWAP_DURATION
 	} from '$lib/constants/transition.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { swapProviderPool } from '$lib/providers/swap-provider-pool.providers';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -37,20 +29,21 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { OptionString } from '$lib/types/string';
-	import { SwapProvider } from '$lib/types/swap';
+	import type { TokenId } from '$lib/types/token';
+	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
-	import { findSwapProvider } from '$lib/utils/swap.utils';
+	import { calculateSwapGainUsd, findSwapProvider } from '$lib/utils/swap.utils';
 	import { fade, fly, slide } from '$lib/utils/transitions.utils';
-	import { UrlSchema } from '$lib/validation/url.validation';
 
 	interface Props {
 		slippageValue: OptionAmount;
 		isForm?: boolean;
-		showSelectButton?: boolean;
 		onShowProviderList?: () => void;
 	}
+
+	// Below one cent the gain line would read "+$0.00"; the offer count says more.
+	const MIN_DISPLAYED_GAIN_USD = 0.01;
 
 	const { store: swapAmountsStore, activity } =
 		getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -58,13 +51,10 @@
 	const swapContext = getContext<SwapContext | undefined>(SWAP_CONTEXT_KEY);
 	const sourceToken = swapContext?.sourceToken ?? readable(undefined);
 	const destinationToken = swapContext?.destinationToken ?? readable(undefined);
+	const destinationTokenExchangeRate =
+		swapContext?.destinationTokenExchangeRate ?? readable(undefined);
 
-	let {
-		showSelectButton = false,
-		slippageValue,
-		onShowProviderList,
-		isForm = false
-	}: Props = $props();
+	let { slippageValue, onShowProviderList, isForm = false }: Props = $props();
 	let comparing = $derived(
 		isForm && $quoteActivity?.pending === true && !$quoteActivity.background
 	);
@@ -78,17 +68,17 @@
 			: undefined
 	);
 
-	// The header re-lays out one swap duration after `comparing` changes: the outgoing labels
-	// (Select, Best Rate, or the status) fade out in place first, then the incoming ones fade in,
-	// so two sets never share the row and nothing beside them shifts mid-fade.
+	// The cell re-lays out one swap duration after `comparing` changes: the outgoing line (the
+	// result, or the status) fades out in place first, then the incoming one fades in, so the two
+	// never share the cell and nothing beside them shifts mid-fade.
 	let comparingLayout = $state(untrack(() => comparing));
 	$effect(() => {
 		const next = comparing;
 		if (next === untrack(() => comparingLayout)) {
 			return;
 		}
-		// Best Rate shows with any offer (Select with 2+); with no offer nothing has to fade out
-		// first, so the status arrives with the row instead of one swap duration after it.
+		// With no offer there is no result line to fade out first, so the status arrives with the
+		// cell instead of one swap duration after it.
 		if (next && untrack(() => ($swapAmountsStore?.swaps.length ?? 0) === 0)) {
 			comparingLayout = next;
 			return;
@@ -100,8 +90,6 @@
 		return () => clearTimeout(timer);
 	});
 	const labelIn = { duration: MOTION_SWAP_DURATION, easing: MOTION_ENTER.easing };
-
-	let displayURL = $state<OptionString>(null);
 
 	let selectedProvider = $derived($swapAmountsStore?.selectedProvider);
 	let confirmedRequestId = $state<number>();
@@ -141,14 +129,81 @@
 			}
 		}
 	});
+	let offerCount = $derived($swapAmountsStore?.swaps.length ?? 0);
 	let isBestRate = $derived(selectedProvider?.provider === $swapAmountsStore?.swaps[0]?.provider);
 	let swapDApp = $derived(
 		nonNullish(selectedProvider?.provider) ? findSwapProvider(selectedProvider.provider) : null
 	);
 
-	// One region for screen readers, mounted before any round and outside the header, whose
-	// role="button" makes its children presentational. Only its text changes, so each change is
-	// heard: the status while comparing, then the provider the comparison picked.
+	let gainUsd = $derived(
+		nonNullish(selectedProvider) && nonNullish($swapAmountsStore) && nonNullish($destinationToken)
+			? calculateSwapGainUsd({
+					swaps: $swapAmountsStore.swaps,
+					selectedProvider,
+					decimals: $destinationToken.decimals,
+					exchangeRate: $destinationTokenExchangeRate
+				})
+			: undefined
+	);
+	let gainAmount = $derived(
+		nonNullish(gainUsd) && gainUsd >= MIN_DISPLAYED_GAIN_USD
+			? formatCurrency({
+					value: gainUsd,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
+				})
+			: undefined
+	);
+	// One sentence for translators, split around the amount only to set it in the primary colour:
+	// green would fall below 4.5:1 on white at this size, and "+" already says it is a gain. A
+	// manual pick that is not the best is still worth more than the lowest offer, but showing that
+	// as a gain would present a worse choice as a win, so it gets the offer count instead.
+	let gainParts = $derived.by(() => {
+		if (isNullish(gainAmount) || !isBestRate) {
+			return;
+		}
+		const [before, after = ''] = $i18n.swap.text.smart_swap_gain.split('$amount');
+		return { before, amount: `+${gainAmount}`, after };
+	});
+	let offersLabel = $derived(
+		replacePlaceholders(
+			isBestRate
+				? $i18n.swap.text.smart_swap_best_of_offers
+				: $i18n.swap.text.smart_swap_offers_compared,
+			{ $count: `${offerCount}` }
+		)
+	);
+
+	// A single offer is one row: the provider alone says there was nothing to compare, so the line
+	// under the title is not kept. Later rounds for the same pair keep that row instead of growing
+	// and shrinking it on every amount; the provider scroll already shows that it is loading. A new
+	// pair starts with the status under the title again.
+	let settled = $derived(!comparing && !comparingLayout && offerCount > 0);
+	let singleOfferPair = $state.raw<[TokenId | undefined, TokenId | undefined]>();
+	$effect(() => {
+		if (settled) {
+			singleOfferPair =
+				offerCount === 1
+					? [untrack(() => $sourceToken?.id), untrack(() => $destinationToken?.id)]
+					: undefined;
+		}
+	});
+	let compact = $derived(
+		settled
+			? offerCount === 1
+			: nonNullish(singleOfferPair) &&
+					singleOfferPair[0] === $sourceToken?.id &&
+					singleOfferPair[1] === $destinationToken?.id
+	);
+
+	// The cell opens the offers and the selected provider's details once there is something to
+	// show; while a round compares it stays put, as the details would describe a stale offer.
+	let interactive = $derived(nonNullish(onShowProviderList) && !comparing && offerCount > 0);
+
+	// One region for screen readers, mounted before any round and outside the cell, a button whose
+	// children are presentational. Only its text changes, so each change is heard: the status while
+	// comparing, then the provider the comparison picked.
 	let announcement = $derived(
 		comparing
 			? $i18n.swap.text.finding_best_rate
@@ -157,16 +212,27 @@
 				: ''
 	);
 
+	// The title and the status line run one band: `smart-thinking` sizes it in rem, not per line, so
+	// it has the same speed and position on both, and here the status line, which mounts a fade
+	// after the title starts, takes the title's start time, so the band crosses both in step.
+	let card = $state<HTMLButtonElement | undefined>();
 	$effect(() => {
-		if (nonNullish(swapDApp)) {
-			const parsed = UrlSchema.safeParse(swapDApp.website);
-			if (parsed.success) {
-				const url = new URL(parsed.data);
-				displayURL = url.hostname.startsWith('www.') ? url.hostname.slice(4) : url.hostname;
-				return;
-			}
-			displayURL = null;
+		if (!comparing || !comparingLayout || compact || isNullish(card)) {
+			return;
 		}
+		const [lead, ...rest] = Array.from(card.querySelectorAll('.smart-thinking')).flatMap(
+			(element) =>
+				element
+					.getAnimations?.()
+					.filter((animation) =>
+						(animation as CSSAnimation).animationName?.endsWith('smart-thinking')
+					) ?? []
+		);
+		const startTime = lead?.startTime ?? document.timeline?.currentTime;
+		if (isNullish(lead) || isNullish(startTime)) {
+			return;
+		}
+		[lead, ...rest].forEach((animation) => (animation.startTime = startTime));
 	});
 </script>
 
@@ -181,86 +247,101 @@
 	gap to the next row is padding inside it, not the parent's flex gap, for the same reason. -->
 	<div class:pb-3={isForm} transition:slide>
 		<div transition:fly={{ y: 4 }}>
-			<CollapsibleBottomSheet disabled={comparing} showContentHeader>
-				{#snippet contentHeader({ isInBottomSheet })}
-					{#if isForm}
-						<div class="flex w-full min-w-0 items-center justify-between gap-2">
-							<div
-								class="flex min-w-min flex-auto flex-nowrap items-center gap-2 text-sm whitespace-nowrap text-tertiary"
-							>
-								<span class="shrink-0">{$i18n.swap.text.smart_swap}</span>
+			{#if isForm}
+				<!-- Styled as the amount cards (TokenInput). -->
+				<button
+					bind:this={card}
+					class="relative mb-3 flex w-full items-center gap-3 rounded-lg border border-tertiary bg-secondary px-4 py-3 text-left press disabled:cursor-default"
+					class:hover:bg-brand-subtle-10={interactive}
+					class:pressed:bg-brand-subtle-20={interactive}
+					data-tid={SWAP_PROVIDER_CELL}
+					disabled={!interactive}
+					onclick={() => onShowProviderList?.()}
+					type="button"
+				>
+					<span class="smart-beam" class:beaming={comparing} aria-hidden="true"><span></span></span>
+					<!-- text-base, a step under the list rows' text-lg, so the card doesn't outweigh the amount cards. -->
+					<span class="flex flex-auto flex-col">
+						<!-- The title thinks with the status line below it. Only while motion is allowed:
+						the band's reduced-motion fallback is the status line's grey, not the title's black. -->
+						<span
+							class="text-base font-bold whitespace-nowrap text-primary"
+							class:smart-thinking={comparing && !prefersReducedMotion.current}
+							>{$i18n.swap.text.smart_swap}</span
+						>
+						{#if !compact}
+							<span class="flex w-0 min-w-full pt-0.5 text-sm whitespace-nowrap" transition:slide>
 								{#if comparingLayout}
-									<!-- Zero basis keeps the status out of the group's min-content: it truncates
-							into whatever the provider scroll leaves, instead of squeezing the scroll. -->
 									<span
-										class="w-0 flex-1 truncate transition-opacity duration-150 ease-in motion-reduce:duration-100"
+										class="truncate text-tertiary transition-opacity duration-150 ease-in motion-reduce:duration-100"
 										class:opacity-0={!comparing}
+										class:smart-thinking={comparing}
 										aria-hidden="true"
 										in:fade={labelIn}>{$i18n.swap.text.finding_best_rate}</span
 									>
-								{:else if ($swapAmountsStore?.swaps.length ?? 0) > 1 && !isInBottomSheet && showSelectButton}
+								{:else}
 									<span
-										class="flex flex-none transition-opacity duration-150 ease-in motion-reduce:duration-100"
+										class="truncate transition-opacity duration-150 ease-in motion-reduce:duration-100"
 										class:opacity-0={comparing}
-										inert={comparing}
 										in:fade={labelIn}
 									>
-										<Button
-											link
-											onclick={(event) => {
-												event.stopPropagation();
-												onShowProviderList?.();
-											}}
-											styleClass="flex-none"
-											type="button">{$i18n.swap.text.select}</Button
-										>
+										{#if nonNullish(gainParts)}
+											<span class="text-tertiary"
+												>{gainParts.before}<span class="font-semibold text-primary"
+													>{gainParts.amount}</span
+												>{gainParts.after}</span
+											>
+										{:else}
+											<span class="text-tertiary">{offersLabel}</span>
+										{/if}
 									</span>
 								{/if}
-							</div>
-							<!-- While comparing, the scroll keeps room for a logo and a short name down to 320 px.
+							</span>
+						{/if}
+					</span>
+					<!-- While comparing, the scroll keeps room for a logo and a short name down to 320 px.
 					Below 390 px it is also capped there, so a long name truncates instead of
 					shortening the status on its turn. -->
-							<div
-								class="ml-auto flex items-center justify-end gap-2 text-sm text-primary"
-								class:max-[24.375rem]:max-w-24={comparingLayout}
-								class:min-w-0={!comparingLayout}
-								class:min-w-24={comparingLayout}
-							>
-								<!-- Any offer, even a single one, is the best rate found; only a manual
-								non-best choice hides it. -->
-								{#if !comparingLayout && isBestRate && ($swapAmountsStore?.swaps.length ?? 0) > 0}
-									<span
-										class="flex transition-opacity duration-150 ease-in motion-reduce:duration-100"
-										class:opacity-0={comparing}
-										in:fade={labelIn}
-									>
-										<BestRateBadge styleClass="mt-0" />
-									</span>
-								{/if}
-								<SwapProviderAnimation
-									animate={!isInBottomSheet && animate}
-									confirmationId={isInBottomSheet ? undefined : confirmationId}
-									loading={comparing}
-									pool={providerPool}
-									providers={$quoteActivity?.providers ?? []}
-									selectedProvider={selectedProvider?.provider}
-								/>
-							</div>
-						</div>
-					{:else if nonNullish(swapDApp) && nonNullish($swapAmountsStore)}
+					<span
+						class="flex flex-initial flex-col items-end"
+						class:max-[24.375rem]:max-w-24={comparingLayout}
+						class:min-w-0={!comparingLayout}
+						class:min-w-24={comparingLayout}
+					>
+						<SwapProviderAnimation
+							{animate}
+							{confirmationId}
+							loading={comparing}
+							pool={providerPool}
+							providers={$quoteActivity?.providers ?? []}
+							selectedProvider={selectedProvider?.provider}
+						/>
+					</span>
+					<span
+						class="flex shrink-0 text-tertiary transition-opacity duration-150"
+						class:opacity-40={!interactive}
+						aria-hidden="true"
+					>
+						<IconChevronRight size="20" />
+					</span>
+				</button>
+				<!-- The form's one separator, between the cell and the fee row: the cell sits with the
+				amounts it prices, the fees below it. It leaves with the cell, so a form with no offer
+				has none. -->
+				<Hr />
+			{:else if nonNullish(swapDApp) && nonNullish(selectedProvider) && nonNullish($swapAmountsStore)}
+				<CollapsibleBottomSheet showContentHeader>
+					{#snippet contentHeader()}
 						<ModalValue>
 							{#snippet label()}
 								<div class="flex justify-center gap-2">
 									{$i18n.swap.text.swap_provider}
-									{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1 && !isInBottomSheet && showSelectButton}
-										<Button link onclick={onShowProviderList}>{$i18n.swap.text.select}</Button>
-									{/if}
 								</div>
 							{/snippet}
 
 							{#snippet mainValue()}
 								<div class="flex items-start gap-3">
-									{#if isBestRate && $swapAmountsStore.swaps.length > 0}
+									{#if isBestRate && offerCount > 0}
 										<BestRateBadge />
 									{/if}
 									<div class="flex gap-2">
@@ -281,44 +362,109 @@
 								</div>
 							{/snippet}
 						</ModalValue>
-					{/if}
-				{/snippet}
-				{#snippet content()}
-					{#if !comparing && nonNullish(selectedProvider)}
-						{#if displayURL}
-							<ModalValue>
-								{#snippet label()}
-									{$i18n.swap.text.swap_provider_website}
-								{/snippet}
-
-								{#snippet mainValue()}
-									<div class="text-sm">{displayURL}</div>
-								{/snippet}
-							</ModalValue>
-						{/if}
-						{#if selectedProvider.provider === SwapProvider.KONG_SWAP && KONGSWAP_PROVIDER_ENABLED}
-							<SwapDetailsKong provider={selectedProvider} />
-						{:else if selectedProvider.provider === SwapProvider.ICP_SWAP}
-							<SwapDetailsIcp provider={selectedProvider} {slippageValue} />
-						{:else if selectedProvider.provider === SwapProvider.VELORA}
-							<SwapDetailsVelora provider={selectedProvider} />
-						{:else if selectedProvider.provider === SwapProvider.NEAR_INTENTS && NEAR_INTENTS_SWAP_ENABLED}
-							<SwapDetailsNearIntents provider={selectedProvider} {slippageValue} />
-						{:else if selectedProvider.provider === SwapProvider.ONE_SEC && ONESEC_SWAP_ENABLED}
-							<SwapDetailsOneSec provider={selectedProvider} />
-						{:else if selectedProvider.provider === SwapProvider.CHAIN_FUSION && CHAIN_FUSION_SWAP_ENABLED}
-							<SwapDetailsChainFusion provider={selectedProvider} />
-						{:else if selectedProvider.provider === SwapProvider.OISY_TRADE && oisyTradeSwapEnabled}
-							<SwapDetailsOisyTrade provider={selectedProvider} />
-						{:else if selectedProvider.provider === SwapProvider.LIFI && LIFI_SWAP_ENABLED}
-							<SwapDetailsLifi provider={selectedProvider} />
-						{/if}
-					{/if}
-				{/snippet}
-				{#snippet contentFooter(closeFn)}
-					<Button fullWidth onclick={closeFn}>Done</Button>
-				{/snippet}
-			</CollapsibleBottomSheet>
+					{/snippet}
+					{#snippet content()}
+						<SwapProviderDetails provider={selectedProvider} {slippageValue} />
+					{/snippet}
+					{#snippet contentFooter(closeFn)}
+						<Button fullWidth onclick={closeFn}>{$i18n.core.text.done}</Button>
+					{/snippet}
+				</CollapsibleBottomSheet>
+			{/if}
 		</div>
 	</div>
 {/if}
+
+<style lang="scss">
+	// A 30 rem tile, the same on every line it runs on, so the band keeps one speed and position
+	// across lines of different widths; it repeats, so a pass every 2 s loops seamlessly.
+	.smart-thinking {
+		background: linear-gradient(
+				90deg,
+				var(--color-foreground-tertiary) 0 35%,
+				var(--color-foreground-primary) 50%,
+				var(--color-foreground-tertiary) 65% 100%
+			)
+			0 0 / 30rem 100%;
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+
+		@media (prefers-reduced-motion: no-preference) {
+			animation: smart-thinking 2000ms linear infinite;
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			background: none;
+			color: var(--color-foreground-tertiary);
+		}
+	}
+
+	@keyframes smart-thinking {
+		from {
+			background-position: 0 0;
+		}
+		to {
+			background-position: 30rem 0;
+		}
+	}
+
+	// Rotates an oversized conic square behind a ring mask so only a transform animates; paused, not reset, between rounds.
+	.smart-beam {
+		position: absolute;
+		inset: -1.5px;
+		padding: 1.5px;
+		overflow: hidden;
+		border-radius: inherit;
+		pointer-events: none;
+		opacity: 0;
+		-webkit-mask:
+			linear-gradient(#000 0 0) content-box,
+			linear-gradient(#000 0 0);
+		-webkit-mask-composite: xor;
+		mask:
+			linear-gradient(#000 0 0) content-box,
+			linear-gradient(#000 0 0);
+		mask-composite: exclude;
+		transition: opacity 600ms cubic-bezier(0.23, 1, 0.32, 1);
+
+		span {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			width: 200%;
+			aspect-ratio: 1;
+			translate: -50% -50%;
+			background: conic-gradient(
+				transparent 0 45%,
+				color-mix(in srgb, var(--color-foreground-brand-primary-alt) 30%, transparent) 72%,
+				var(--color-foreground-brand-primary) 92%,
+				transparent 100%
+			);
+			animation: smart-beam 3600ms linear infinite paused;
+		}
+
+		&.beaming {
+			opacity: 1;
+			transition-duration: 500ms;
+			transition-delay: 120ms;
+
+			span {
+				animation-play-state: running;
+			}
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			span {
+				animation: none;
+				background: var(--color-border-brand-subtle-20);
+			}
+		}
+	}
+
+	@keyframes smart-beam {
+		to {
+			rotate: 1turn;
+		}
+	}
+</style>

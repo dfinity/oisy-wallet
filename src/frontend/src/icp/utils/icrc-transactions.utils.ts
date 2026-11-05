@@ -1,4 +1,5 @@
 import { ICP_EXPLORER_URL } from '$env/explorers.env';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type {
 	IcTransactionType,
 	IcTransactionUi,
@@ -18,6 +19,16 @@ import {
 	fromCandidAccount,
 	type IcrcIndexDid
 } from '@icp-sdk/canisters/ledger/icrc';
+
+// The dashboard reads the block from the ledger and its archives, so this page exists for every
+// ledger that serves ICRC-3 blocks, not only for the tokens the dashboard lists.
+export const icrcTxExplorerUrl = ({
+	ledgerCanisterId,
+	blockIndex
+}: {
+	ledgerCanisterId: LedgerCanisterIdText;
+	blockIndex: bigint | string;
+}): string => `${ICP_EXPLORER_URL}/tokens/${ledgerCanisterId}/tx/${blockIndex}`;
 
 export const mapTransactionIcrcToSelf = (tx: IcrcIndexDid.TransactionWithId): IcrcTransaction[] => {
 	const { transaction, id } = tx;

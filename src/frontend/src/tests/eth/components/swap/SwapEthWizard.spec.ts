@@ -311,17 +311,6 @@ describe('SwapEthWizard', () => {
 			expect(getByText(en.core.text.cancel)).toBeInTheDocument();
 		});
 
-		it('renders slippage section', () => {
-			const { mockContext } = createContext({
-				swaps: mockSwapProviders,
-				selectedProvider: mockSwapProviders[0]
-			});
-
-			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
-
-			expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
-		});
-
 		it('renders swap provider information', () => {
 			const { mockContext } = createContext({
 				swaps: mockSwapProviders,

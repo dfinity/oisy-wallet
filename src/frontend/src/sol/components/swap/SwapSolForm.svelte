@@ -9,7 +9,6 @@
 	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import {
@@ -209,16 +208,14 @@
 	{onMax}
 	{onNext}
 	{onShowTokensList}
+	{slippageValue}
 	bind:swapAmount
 	bind:receiveAmount
-	bind:slippageValue
 >
 	{#snippet swapDetails()}
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
-			<Hr spacing="md" />
-
-			<div class="flex flex-col">
-				<SwapProvider isForm {onShowProviderList} showSelectButton {slippageValue} />
+			<div class="mt-4 flex flex-col">
+				<SwapProvider isForm {onShowProviderList} {slippageValue} />
 
 				<SwapFeeRow>
 					<SwapSolFees {isLifi} {lifiFee} />
