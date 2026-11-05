@@ -1,3 +1,4 @@
+import type { UniswapSwap } from '$eth/types/uniswap';
 import type { Principal } from '@icp-sdk/core/principal';
 import type { TypedDataDomain, TypedDataField } from 'ethers/hash';
 
@@ -45,6 +46,9 @@ export type WalletConnectEthCall =
 	// the helper's address and so cannot tell whether the deposit converts ETH, or for whom. Held
 	// until it can.
 	| { type: 'ckEthHelperUnconfirmed' }
+	// `execute` on a Uniswap Universal Router OISY pins for the request's network, every command of
+	// which OISY reads: the swap it makes, stated from what the router enforces.
+	| { type: 'uniswapSwap'; swap: UniswapSwap }
 	// The selector is carried so the review can name the call it could not decode. It is `undefined`
 	// when the calldata is too short to hold one.
 	| { type: 'unknown'; selector: string | undefined };
