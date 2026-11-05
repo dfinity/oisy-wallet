@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
-	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
+	import SwapProviderCell from '$lib/components/swap/SwapProviderCell.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -122,9 +122,9 @@
 	onCustomValidate={customValidate}
 	{onNext}
 	{onShowTokensList}
+	{slippageValue}
 	bind:swapAmount
 	bind:receiveAmount
-	bind:slippageValue
 >
 	{#snippet message()}
 		<!-- The input only turns red, and the reserve is the part of the refusal a user cannot
@@ -138,12 +138,12 @@
 
 	{#snippet swapDetails()}
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
-			<Hr spacing="md" />
+			<div class="mt-4 flex flex-col">
+				<SwapProviderCell {onShowProviderList} />
 
-			<div class="flex flex-col gap-3">
-				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
-
-				<SwapXrpFees />
+				<SwapFeeRow>
+					<SwapXrpFees />
+				</SwapFeeRow>
 			</div>
 		{/if}
 	{/snippet}

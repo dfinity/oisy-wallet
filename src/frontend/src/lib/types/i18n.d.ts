@@ -940,6 +940,9 @@ interface I18nCycles_top_up {
 		unknown_fresh: string;
 		sent_to_canister: string;
 		sent_to_canister_top_up: string;
+		choice_send: string;
+		choice_send_description: string;
+		choice_top_up_description: string;
 	};
 	error: {
 		invalid_canister_id: string;
@@ -1085,6 +1088,13 @@ interface I18nSwap {
 		finishing_in_background: string;
 		refreshing_ui: string;
 		swap_provider: string;
+		smart_swap: string;
+		finding_best_rate: string;
+		smart_swap_gain: string;
+		smart_swap_best_of_offers: string;
+		smart_swap_offers_compared: string;
+		smart_swap_offers: string;
+		smart_swap_selected_offer: string;
 		swap_provider_website: string;
 		swap_route: string;
 		included_network_fees: string;
@@ -1092,7 +1102,6 @@ interface I18nSwap {
 		best_rate: string;
 		expected_minimum: string;
 		you_receive: string;
-		select: string;
 		select_swap_provider: string;
 		open_icp_swap: string;
 		open_instructions_link: string;
@@ -1152,6 +1161,7 @@ interface I18nSwap {
 		oisy_trade_recovery_failed: string;
 		lifi_status_unknown: string;
 		lifi_fee_changed: string;
+		lifi_route_unverified: string;
 	};
 }
 
@@ -2109,7 +2119,7 @@ interface I18nContact {
 	form: { edit_contact: string; add_new_contact: string };
 	fields: { name: string };
 	delete: { title: string; delete_contact: string; content_text: string };
-	error: { create: string; update: string; delete: string; name_too_long: string };
+	error: { create: string; update: string; delete: string; load: string; name_too_long: string };
 }
 
 interface I18nAddress {

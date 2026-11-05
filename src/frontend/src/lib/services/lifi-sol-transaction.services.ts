@@ -1,5 +1,6 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import { LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT } from '$lib/constants/swap.constants';
 import {
 	LifiQuoteRejectedError,
 	LifiRouteUnsupportedError,
@@ -8,12 +9,14 @@ import {
 import {
 	assertLifiSolInstructions,
 	assertLifiSolSimulation,
+	callsUnpinnedProgram,
 	lifiSolNetworkFee,
 	token2022AccountSize,
 	type LifiSolBinding,
 	type LifiSolCreatedAccount
 } from '$lib/utils/lifi-sol-transaction.utils';
 import { decodeLifiSolTransaction, lifiRejectedError } from '$lib/utils/lifi-swap.utils';
+import { withDeadline } from '$lib/utils/timeout.utils';
 import {
 	getAccountData,
 	getMultipleAccountsInfo,
@@ -22,6 +25,7 @@ import {
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { LIFI_SOLANA_FEE_WALLET } from '$sol/constants/lifi.constants';
 import {
+	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -201,13 +205,15 @@ const readLifiSolTransaction = async ({
 			}
 		});
 
+	const networkFee = lifiSolNetworkFee({
+		computeUnitLimit,
+		computeUnitPrice,
+		signatures: signers.length,
+		instructionsCount: transactionMessage.instructions.length
+	});
+
 	const ceiling = await lifiSolTransactionCeiling({
-		networkFee: lifiSolNetworkFee({
-			computeUnitLimit,
-			computeUnitPrice,
-			signatures: signers.length,
-			instructionsCount: transactionMessage.instructions.length
-		}),
+		networkFee,
 		createdAccounts,
 		rentExemptMinimum
 	});
@@ -222,10 +228,21 @@ const readLifiSolTransaction = async ({
 		transactionMessage,
 		wrappedSolAccount,
 		rentExemptMinimum,
+		networkFee,
 		ceiling,
 		closesWrappedSolAccount
 	};
 };
+
+// A ceiling as the user reviews it: LI.FI prices the compute units anew with each quote, and the
+// next re-quote must still fit (`LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT`). The rent does not move.
+const withNetworkFeeHeadroom = ({
+	ceiling,
+	networkFee
+}: {
+	ceiling: bigint;
+	networkFee: bigint;
+}): bigint => ceiling + (networkFee * LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT) / 100n;
 
 /**
  * Refuses a LI.FI Solana → Solana transaction unless it does what the request asked, before anything
@@ -234,12 +251,16 @@ const readLifiSolTransaction = async ({
  * blockhash kept and pre-state read at the slot it ran at, bounds what it spends and receives
  * (`assertLifiSolSimulation`).
  *
- * A ceiling above the reviewed one throws `LifiSolFeeChangedError` with it, for the review to show;
- * any other refusal throws `LifiQuoteRejectedError`. A simulation that fails, times out or cannot be
+ * A ceiling above the reviewed one throws `LifiSolFeeChangedError` with it, for the review to show,
+ * with the headroom on its network fee the displayed quote's has: without it, a retry would pass only
+ * at a price no higher than this one. Any other refusal throws `LifiQuoteRejectedError`. A simulation that fails, times out or cannot be
  * read at one slot refuses the transaction: unlike the WalletConnect review's, this one fails closed.
  *
  * Only the decompiled message is used to read the instructions and pick the accounts to simulate;
  * what is simulated, and later signed, are LI.FI's own bytes.
+ *
+ * Returns the slot the simulation ran at, where the transaction's blockhash was valid: the poller
+ * reads the blockhash's validity no earlier than that (`lifi_simulation_slot`).
  */
 export const assertLifiSolTransaction = async ({
 	quote,
@@ -251,14 +272,21 @@ export const assertLifiSolTransaction = async ({
 	request: QuoteRequestFromAmount;
 	displayedToAmountMin: bigint;
 	reviewedCeiling: bigint;
-}): Promise<void> => {
-	const { data, binding, transactionMessage, wrappedSolAccount, rentExemptMinimum, ceiling } =
-		await readLifiSolTransaction({ quote, request, displayedToAmountMin });
+}): Promise<{ simulationSlot: bigint | undefined }> => {
+	const {
+		data,
+		binding,
+		transactionMessage,
+		wrappedSolAccount,
+		rentExemptMinimum,
+		networkFee,
+		ceiling
+	} = await readLifiSolTransaction({ quote, request, displayedToAmountMin });
 	const { userAddress } = binding;
 	const network = SolanaNetworks.mainnet;
 
 	if (ceiling > reviewedCeiling) {
-		throw new LifiSolFeeChangedError({ ceiling });
+		throw new LifiSolFeeChangedError({ ceiling: withNetworkFeeHeadroom({ ceiling, networkFee }) });
 	}
 
 	const result = await simulateSolTransaction({
@@ -272,6 +300,8 @@ export const assertLifiSolTransaction = async ({
 	});
 
 	assertLifiSolSimulation({ result, binding, wrappedSolAccount, ceiling });
+
+	return { simulationSlot: result?.slot };
 };
 
 // Whether the user's wrapped SOL account holds wrapped SOL, which closing it would unwrap. One that
@@ -293,7 +323,9 @@ const holdsWrappedSol = async (account: SolAddress): Promise<boolean> => {
 
 /**
  * The LI.FI ceiling of a Solana-source quote the form shows, read off its own transaction as the
- * binding reads it before signing, short of the simulation: what the form budgets beyond the amount.
+ * binding reads it before signing, short of the simulation, with headroom on its network fee: what
+ * the form, "Max" and the review budget beyond the amount, and execution's re-quote must fit. LI.FI
+ * prices the compute units anew with each quote (`LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT`).
  *
  * A route the binding would refuse gets no offer, since it could only fail once the user confirmed
  * it. It refuses with `LifiRouteUnsupportedError`, the binding's refusal as its cause: when a Solana
@@ -335,7 +367,7 @@ export const loadLifiSolQuoteCeiling = async ({
 		throw err;
 	}
 
-	const { ceiling, wrappedSolAccount, closesWrappedSolAccount } = transaction;
+	const { networkFee, ceiling, wrappedSolAccount, closesWrappedSolAccount } = transaction;
 
 	if (closesWrappedSolAccount && (await holdsWrappedSol(wrappedSolAccount))) {
 		throw new LifiRouteUnsupportedError(
@@ -344,5 +376,68 @@ export const loadLifiSolQuoteCeiling = async ({
 		);
 	}
 
-	return ceiling;
+	return withNetworkFeeHeadroom({ ceiling, networkFee });
+};
+
+const simulateCallsUnpinnedProgram = async ({
+	data,
+	userAddress
+}: {
+	data: string;
+	userAddress: SolAddress;
+}): Promise<boolean | undefined> => {
+	const network = SolanaNetworks.mainnet;
+
+	let transactionMessage: Awaited<ReturnType<typeof parseSolBase64TransactionMessage>>;
+
+	try {
+		transactionMessage = await parseSolBase64TransactionMessage({
+			transactionMessage: data,
+			rpc: solanaHttpRpc(network)
+		});
+	} catch (_: unknown) {
+		return;
+	}
+
+	const result = await simulateSolTransaction({
+		base64EncodedTransactionMessage: data,
+		transactionMessage,
+		address: userAddress,
+		network,
+		// Only the programs it reaches are read, not what it funds.
+		rentExemptMinimumRequest: Promise.resolve(undefined)
+	});
+
+	return isNullish(result) ? undefined : callsUnpinnedProgram(result.unreadPrograms);
+};
+
+/**
+ * Whether the transaction of a Solana-source quote the review shows calls a program that is neither
+ * known nor pinned (`callsUnpinnedProgram`), from a simulation of it with its blockhash replaced: a
+ * venue Jupiter added since the pin, which the binding would refuse only once the user confirmed.
+ * Checking it at the review brings that refusal before the confirmation.
+ *
+ * `undefined` when there is no answer: a simulation that fails, a failed transaction included, a
+ * message whose lookup tables cannot be read, or no answer within
+ * `SOLANA_SIMULATION_TIMEOUT_MILLISECONDS`, the lookup tables' read included, since the review waits
+ * for it. The binding still checks the transaction that is signed.
+ */
+export const lifiSolQuoteCallsUnpinnedProgram = async ({
+	quote,
+	userAddress
+}: {
+	quote: LiFiStep;
+	userAddress: SolAddress;
+}): Promise<boolean | undefined> => {
+	const data = quote.transactionRequest?.data;
+
+	if (isNullish(data)) {
+		return;
+	}
+
+	return await withDeadline({
+		operation: simulateCallsUnpinnedProgram({ data, userAddress }),
+		fallback: undefined,
+		milliseconds: SOLANA_SIMULATION_TIMEOUT_MILLISECONDS
+	});
 };

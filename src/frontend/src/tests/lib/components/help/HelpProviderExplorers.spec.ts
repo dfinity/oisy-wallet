@@ -96,6 +96,9 @@ describe('HelpProviderExplorers', () => {
 		expect(getByTestId(`${HELP_EXPLORERS_LINK}-lifi-eth`).getAttribute('href')).toBe(
 			`${LIFI_EXPLORER_URL}/wallet/${mockEthAddress}`
 		);
+		expect(getByTestId(`${HELP_EXPLORERS_LINK}-lifi-sol`).getAttribute('href')).toBe(
+			`${LIFI_EXPLORER_URL}/wallet/${mockSolAddress}`
+		);
 		expect(getByTestId(`${HELP_EXPLORERS_LINK}-oneSec-icp`).getAttribute('href')).toBe(
 			`${ONESEC_EXPLORER_URL}/explorer/?address=${mockPrincipalText}`
 		);
