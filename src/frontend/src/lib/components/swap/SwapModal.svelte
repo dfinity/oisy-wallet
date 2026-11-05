@@ -2,9 +2,9 @@
 	import { getContext, onDestroy } from 'svelte';
 	import { page } from '$app/state';
 	import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
+	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
-	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 	import { SWAP_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -28,6 +28,7 @@
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
+	import { getInitialSwapSlippage } from '$lib/utils/swap.utils';
 
 	const { reset: resetSwapStore } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
@@ -52,7 +53,7 @@
 	let selectTokenType = $state<SwapSelectTokenType | undefined>();
 	let swapAmount = $state<OptionAmount>();
 	let receiveAmount = $state<number | undefined>();
-	let slippageValue = $state<OptionAmount>(SWAP_DEFAULT_SLIPPAGE_VALUE);
+	let slippageValue = $state<OptionAmount>(getInitialSwapSlippage());
 	let swapProgressStep = $state(ProgressStepsSwap.INITIALIZATION);
 	let swapFailedProgressSteps = $state<ProgressStepsSwap[]>([]);
 	let allNetworksEnabled = $state<boolean>(true);
@@ -75,7 +76,7 @@
 			swapAmount = undefined;
 			receiveAmount = undefined;
 			currentStep = undefined;
-			slippageValue = SWAP_DEFAULT_SLIPPAGE_VALUE;
+			slippageValue = getInitialSwapSlippage();
 			swapProgressStep = ProgressStepsSwap.INITIALIZATION;
 			allNetworksEnabled = true;
 			selectTokenType = undefined;
@@ -100,6 +101,12 @@
 	bind:currentStep
 >
 	{#snippet title()}{titleString}{/snippet}
+
+	{#snippet headerRight()}
+		{#if currentStep?.name === WizardStepsSwap.SWAP}
+			<SwapSlippage bind:slippageValue />
+		{/if}
+	{/snippet}
 
 	<SwapModalWizardSteps
 		{currentStep}
