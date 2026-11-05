@@ -750,6 +750,24 @@ The review fails closed when it cannot state the amount: when the contract does 
 
 The token is **not** added to the user's tokens. The review reads it for that request only.
 
+### Uniswap swaps requested by an Ethereum dApp
+
+An `eth_sendTransaction` request that calls `execute` on Uniswap's Universal Router is reviewed as a **swap** when OISY can read all of it. OISY knows the router by its address on each network: versions 2.0.0, 2.1.1 and 2.1.2 on Ethereum, Sepolia, Base, BNB Smart Chain, Polygon and Arbitrum, and 2.1.1 and 2.1.2 on Base Sepolia and Robinhood Chain. The same call to any other address, or to that address on another network, is reviewed like any call OISY cannot read.
+
+The review is titled "Swap" and states:
+
+- **You pay:** the token and amount the transaction takes from the wallet, "You pay at most" when the router takes from the wallet only what the swap uses: for an exact output, and for an exact input into a V3 or V4 pool, which takes less when its liquidity runs out. An amount the wallet hands over up front is exact, whatever the swap: the native coin the transaction sends, or a stated transfer or settlement.
+- **You receive at least:** the token and the least the router lets arrive. Tokens the router keeps at the end count as not received.
+- **Recipient:** only when the tokens go to an address that is not this wallet.
+- **App fee:** each share or amount the swap pays to another address, with that address. A share too small to show reads "< 0.0001%", never 0%.
+- **New spending allowance:** when the transaction also grants the router a Permit2 allowance, what it can spend and until when. The allowance lasts beyond the transaction.
+- **Valid until:** the earliest of the swap's deadline, the permit's signature deadline and, when the swap pulls the permit's token after it, the allowance's expiration, as Permit2 refuses the permit or that pull after them and the swap reverts; or "No deadline".
+- **Interacting with:** "Uniswap Universal Router" with its version and address.
+
+Three red notes can show above the summary, each leaving Approve enabled: when the tokens go to another address, when the swap guarantees no minimum amount, and when the deadline has passed by the device's clock.
+
+Every amount is one the router enforces, read from the router's own commands and checked to be exactly their encoding. OISY describes a swap only when it reads every command, the wallet pays exactly one token, exactly one other token arrives at one address, and every other payment is a fee. A swap through a command OISY does not read (a sub-plan, a batch permit, a bridge deposit, liquidity management), into or out of a token OISY doesn't list, into a token the user added, for an exact amount out of Uniswap V2 pairs paid to anyone but the router, or with an allowance for anyone but the router or one the transaction lets fail, is reviewed like any call OISY cannot read. A token the user added may keep part of each transfer, which the router's minimums leave out; the tokens OISY lists by default are taken to transfer in full wherever the router checks a minimum, apart from FLOKI on Ethereum, which keeps 0.3% of each transfer into or out of its V2 pair and so is described only when it goes to the wallet and no fee is paid in it. Nothing checks what such a V2 swap delivers: the router prices it from the pairs' reserves before the swap, and a token can keep part of each transfer into or out of a pair, as FLOKI does on Ethereum. Uniswap's newer router 2.2.0, its swap proxy and signed executions are not described yet. What is signed is the transaction exactly as the dApp sent it.
+
 ### Starting a pairing from the scanner
 
 A WalletConnect pairing is started from the universal scanner by scanning (or pasting) a pairing code. The scanner accepts two forms: a bare `wc:` URI, and an OISY WalletConnect deep-link URL that wraps it — `<OISY host>/wc/?uri=<url-encoded wc: uri>`. When a deep-link URL is scanned, OISY unwraps the inner `uri` and pairs with it. The URL form is only unwrapped when its host is **OISY's own domain** for the running environment (`oisy.com` in production); a `uri` param carried by any other host is never treated as a pairing. A well-formed WalletConnect deep-link URL whose host is a different domain shows a dedicated "this link is for a different domain" error rather than the generic invalid-code message, so the user understands the link was valid but pointed elsewhere.
