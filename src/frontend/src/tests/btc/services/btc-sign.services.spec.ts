@@ -1,3 +1,4 @@
+import { BTC_SIGN_INPUTS_BATCH_SIZE } from '$btc/constants/btc.constants';
 import { createBtcPrehashSigner, signAndFinalizeBtcPsbt } from '$btc/services/btc-sign.services';
 import { buildBtcSendPsbt } from '$btc/utils/btc-psbt.utils';
 import * as btcWalletConnectUtils from '$btc/utils/wallet-connect.utils';
@@ -105,6 +106,40 @@ describe('btc-sign.services', () => {
 
 			expect(txid).toBe(unsignedTxid);
 			expect(Transaction.fromHex(hex).getId()).toBe(txid);
+		});
+
+		it('signs at most BTC_SIGN_INPUTS_BATCH_SIZE inputs at the same time', async () => {
+			const inputs = 2 * BTC_SIGN_INPUTS_BATCH_SIZE + 5;
+
+			let inFlight = 0;
+			let maxInFlight = 0;
+
+			vi.mocked(signerApi.signBtcPrehash).mockImplementation(async (params) => {
+				inFlight++;
+				maxInFlight = Math.max(maxInFlight, inFlight);
+
+				try {
+					return await signWith({ key: privateKey })(params);
+				} finally {
+					inFlight--;
+				}
+			});
+
+			const psbt = buildBtcSendPsbt({
+				utxos: Array.from({ length: inputs }, (_, index) =>
+					utxo({ txidByte: index + 1, value: 1_000n })
+				),
+				outputs: [{ destination: recipientAddress, amount: 10_000n }],
+				changeAddress: walletAddress,
+				feeSatoshis: 3_000n,
+				network: 'mainnet'
+			});
+
+			const { hex } = await signAndFinalizeBtcPsbt({ psbt, identity: mockIdentity });
+
+			expect(signerApi.signBtcPrehash).toHaveBeenCalledTimes(inputs);
+			expect(maxInFlight).toBe(BTC_SIGN_INPUTS_BATCH_SIZE);
+			expect(Transaction.fromHex(hex).ins).toHaveLength(inputs);
 		});
 
 		it('sends a high-S signature from the signer as low-S', async () => {

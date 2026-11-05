@@ -30,6 +30,12 @@ export const BTC_MINIMUM_AMOUNT = 700n;
 // built here has the layout CFS builds from the same inputs, outputs and fee.
 export const BTC_CHANGE_DUST_THRESHOLD_SATOSHIS = 1_000n;
 
+// How many inputs of one transaction are signed at the same time. Each is a `btc_sign_prehash`
+// call, so one `sign_with_ecdsa` request. The subnet queues only 20 requests per key beyond the
+// pre-signatures it has ready, shared by every caller of the key, and refuses the rest. The chain
+// fusion signer's `btc_caller_send` signs one input at a time.
+export const BTC_SIGN_INPUTS_BATCH_SIZE = 10;
+
 // Fee tolerance percentage for Bitcoin transactions (±10%)
 // Percentage of tolerated increase in transaction fees compared to the confirmed fee.
 export const BTC_SEND_FEE_TOLERANCE_PERCENTAGE = 10n;

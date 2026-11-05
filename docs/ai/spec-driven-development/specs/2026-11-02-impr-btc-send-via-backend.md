@@ -553,10 +553,20 @@ Decided in PR 5:
   signature from `btc_sign_prehash` is tested to come out low-S.
 - `verify` is given plain `Uint8Array`s: `@noble/secp256k1` refuses a `Buffer` from another realm,
   as in the jsdom tests.
-- The inputs are signed concurrently, one `signInputAsync` per index. bitcoinjs-lib 6.1.7 computes
-  an input's sighash before calling the signer and adds only that input's signature afterwards,
-  which is also how its own `signAllInputsAsync` works. That one skips inputs that fail to sign, so
-  it is not used.
+- The inputs are signed in batches of `BTC_SIGN_INPUTS_BATCH_SIZE` (10), one `signInputAsync` per
+  index, concurrently within a batch.
+  - Concurrency is safe: bitcoinjs-lib 6.1.7 computes an input's sighash before calling the signer
+    and adds only that input's signature afterwards. Its own `signAllInputsAsync` works the same
+    way, but it skips inputs that fail to sign, so it is not used.
+  - The batches bound the burst. Each `btc_sign_prehash` is one `sign_with_ecdsa`, and
+    `ecdsa:secp256k1:key_1` queues at most 20 requests beyond the pre-signatures it has ready,
+    shared by every caller of the key. It refuses the rest
+    ([chain-key signing performance, March 2026](https://forum.dfinity.org/t/chain-key-signing-performance-improvements/64672)).
+    Selection sets no limit on inputs, so signing all at once could fail a large send after some
+    signatures had already been charged. CFS's `btc_caller_send` signs one input at a time.
+- WalletConnect's `signPsbt` changes in two ways with the shared signer. A high-S signature goes
+  out low-S. A signature whose r or s is outside 1…n−1 is refused, where it used to go into the
+  PSBT that the dApp receives, even though it could never verify.
 - The dust constant is `BTC_CHANGE_DUST_THRESHOLD_SATOSHIS` (1 000).
 - `buildBtcSendPsbt` takes each input's `witnessUtxo` script from `changeAddress`, which is the
   wallet's P2WPKH address in a send. If it is not the signer's own, signing refuses every input.
@@ -1024,7 +1034,9 @@ Every PR is safe on its own.
 - **Signing latency.** One `btc_sign_prehash` update call per input instead of one CFS call for the
   whole transaction; a 10-input send makes 10 signer calls. Sign inputs concurrently where
   `bitcoinjs-lib` allows (`signInputAsync` per index), else sequentially; measure. PR 5 signs them
-  concurrently, which bitcoinjs-lib 6.1.7 allows. The latency is still to be measured in PR 8.
+  in concurrent batches of 10, which bitcoinjs-lib 6.1.7 allows, to stay within the signing queue
+  (see [Decided in PR 5](#frontend-psbt-build-sign-finalize)). The latency is still to be measured
+  in PR 8.
 
 ---
 
