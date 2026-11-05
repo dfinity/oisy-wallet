@@ -66,7 +66,7 @@ describe('SwapProviderListModal', () => {
 
 		const { container, getByTestId } = render(SwapProviderListModal, {
 			context: mockContext,
-			props: { slippageValue: 1 }
+			props: { slippageValue: 1, onSelectProvider: vi.fn(), onCloseProviderList: vi.fn() }
 		});
 
 		const details = getByTestId(SWAP_SELECTED_PROVIDER_DETAILS);
