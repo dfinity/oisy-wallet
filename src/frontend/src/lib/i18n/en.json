@@ -1079,6 +1079,7 @@
 			"xrp_destination_tag_missing": "No XRP destination tag. If you are sending to an exchange, check whether it requires one, or your funds may be lost.",
 			"fee_expired": "The fee amount calculated for this transaction has expired. Use “Back” to get an updated fee amount.",
 			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
+			"icp_memo_methods": "ICP can be sent via the legacy transfer method or the newer icrc1_transfer method. Each uses a different memo format, so make sure the recipient expects the format you are sending.",
 			"scanned_address_only_destination": "The scanned code only contained a destination address. Make sure you select the correct token, enter the right amount, and review the destination address carefully!",
 			"scanned_address_only_destination_single_token": "The scanned code only contained a destination address. Make sure you enter the right amount and review the destination address carefully!"
 		},
