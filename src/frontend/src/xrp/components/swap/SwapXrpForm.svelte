@@ -3,7 +3,7 @@
 	import { getContext } from 'svelte';
 	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
-	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
+	import SwapProviderCell from '$lib/components/swap/SwapProviderCell.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -139,7 +139,7 @@
 	{#snippet swapDetails()}
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<div class="mt-4 flex flex-col">
-				<SwapProvider isForm {onShowProviderList} {slippageValue} />
+				<SwapProviderCell {onShowProviderList} />
 
 				<SwapFeeRow>
 					<SwapXrpFees />
