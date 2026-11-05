@@ -228,8 +228,11 @@ sequence with a BIP68 relative lock), `InvalidUtxos` (an input that is not the c
 
    Then look up the caller's [broadcast state](#broadcast-state-per-txid) for the decoded txid.
    `Sent` returns the txid and `InFlight` returns `BroadcastInProgress`, both before any paid call.
-   This way a same-bytes retry of a successful send gets its success back even after its inputs
-   have left the UTXO view, which step 6 would otherwise report as `InvalidUtxos`. The same lookup
+   This way a same-bytes retry of a successful send gets its success back even when its inputs
+   are missing from this call's UTXO view, which step 6 would otherwise report as `InvalidUtxos`.
+   That lasts as long as the reservation: a prune that drops it drops the state with it (see
+   [Broadcast state per txid](#broadcast-state-per-txid)), and the same bytes are then handled as
+   a new request. The same lookup
    runs again after the awaits of steps 5 and 6, before the ownership check: a concurrent
    submission of the same bytes may have been sent meanwhile. The step-9 block still re-checks the
    state atomically before a new broadcast.
@@ -797,8 +800,7 @@ Every PR is safe on its own.
    - The [broadcast state](#broadcast-state-per-txid) as a model with unit tests for its
      interleavings:
      - A rejected while B is in flight;
-     - a retry after `Sent`, including one whose inputs have left the UTXO view (returns the txid,
-       not `InvalidUtxos`);
+     - a retry after `Sent` (returns the txid, not `InvalidUtxos`, while the reservation lasts);
      - a rejected retry after `Unknown` (returns `BroadcastOutcomeUnknown` and keeps the
        reservation);
      - a rejected resend that finds its reservation but no state, as after an upgrade (returns

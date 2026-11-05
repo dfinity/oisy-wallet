@@ -504,19 +504,41 @@ mod tests {
     }
 
     #[test]
-    fn a_retry_after_sent_pays_nothing_even_once_its_inputs_left_the_utxo_view() {
+    fn a_retry_after_sent_pays_nothing_while_its_reservation_lasts() {
         let (mut map, _mm) = setup();
         let mut pending = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let mut states = BtcBroadcastStates::default();
         let attempt = begin(&mut pending, &mut states, TXID).unwrap().unwrap();
         finish(&mut pending, &mut states, attempt, BroadcastOutcome::Sent).unwrap();
 
-        // Answered before the UTXO fetch, so the inputs' absence from the view never matters.
+        // Answered before the UTXO fetch, so the inputs' absence from this call's view never
+        // matters.
         assert_eq!(
             states.settled_answer(principal(), NETWORK, &TXID),
             Some(Ok(()))
         );
         assert_eq!(begin(&mut pending, &mut states, TXID), Ok(None));
+
+        // Once the transaction confirms, its inputs leave the view, and the next prune drops the
+        // reservation and the state with it. A retry is then a new request.
+        let unrelated = Utxo {
+            outpoint: OutPoint {
+                txid: Txid::from([0x22; 32]),
+                vout: 0,
+            },
+            value: 10_000,
+            height: 101,
+        };
+        pending.prune_pending_transactions(
+            principal(),
+            ADDRESS,
+            &[unrelated],
+            RESERVED_AT_NS + 1,
+            RESERVED_AT_NS + 2,
+        );
+        states.retain_reserved(principal(), &pending.pending_txids(principal()));
+        assert_eq!(reserved_txids(&pending), Vec::<Vec<u8>>::new());
+        assert_eq!(states.settled_answer(principal(), NETWORK, &TXID), None);
     }
 
     #[test]

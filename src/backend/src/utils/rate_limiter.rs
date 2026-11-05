@@ -349,15 +349,18 @@ impl RateLimiter {
     }
 }
 
-/// Two-tier rate limiter: a per-caller limit plus a shared global limit, each
-/// over a short (per-minute) and a long (per-hour) window, backed by four
-/// [`RateLimiter`]s.
+/// Tiered rate limiter: per-caller minute and hour tiers, plus either shared
+/// global minute and hour tiers ([`Self::new`], [`Self::with_tiers`],
+/// [`Self::with_caller_burst`]) or a per-caller day tier and no shared budget
+/// ([`Self::per_caller`]).
 ///
 /// The per-caller tiers bound one principal; the global tiers bound aggregate
-/// load, which is the only thing that stops a flood spread across many
-/// principals. Built for the vetKey endpoints, hence [`Self::new`]'s defaults,
-/// but the shape is what any endpoint wants when a single caller's budget is not
-/// the whole risk — see [`Self::with_tiers`].
+/// load, the only thing that stops a flood spread across many principals. Built
+/// for the vetKey endpoints, hence [`Self::new`]'s defaults; the global shape is
+/// what an endpoint wants when a single caller's budget is not the whole risk.
+/// [`Self::per_caller`] caps no aggregate load: use it only where a shared
+/// budget would do more harm, because one principal with many accounts could
+/// exhaust it for everyone.
 ///
 /// Every tier is peeked before any tier records (see [`Self::check_at`]), so a
 /// rejected call leaves no state: a per-caller rejection never touches the

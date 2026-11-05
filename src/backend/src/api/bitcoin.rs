@@ -269,8 +269,9 @@ pub async fn btc_get_pending_transactions(
 /// The checks that need no paid call run first, so a bad request costs no Bitcoin canister call.
 /// The inputs are reserved in the same synchronous block that checks them against the caller's
 /// other pending transactions, before the broadcast. Sending the same bytes again is safe: after
-/// a success it returns the txid without a second broadcast, and after an unclear outcome it
-/// broadcasts again, at most `MAX_BROADCAST_ATTEMPTS` times in all.
+/// a success it returns the txid without a second broadcast for as long as the inputs stay
+/// reserved, and after an unclear outcome it broadcasts again, at most `MAX_BROADCAST_ATTEMPTS`
+/// times in all. Once the reservation is pruned, the same bytes are handled as a new request.
 ///
 /// Requires a valid II delegation chain to verify the caller authenticated through Internet
 /// Identity. Controllers bypass this check.
@@ -309,8 +310,9 @@ pub async fn btc_broadcast_transaction(
             txid: txid.to_vec(),
         };
 
-        // Before the UTXO fetch, so a retry of a transaction already sent gets its txid back even
-        // after its inputs have left the UTXO view.
+        // Before the UTXO fetch, so a retry of a transaction already sent gets its txid back
+        // whatever this call's UTXO view shows. That lasts as long as the reservation: a prune
+        // that drops it drops the state too.
         let settled_answer = || {
             with_btc_broadcast_states(|states| {
                 states.settled_answer(principal, params.network, &txid)
