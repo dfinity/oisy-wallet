@@ -178,9 +178,12 @@
 			};
 		}
 
+		// The pay side's own filters once it has them, so all asset types picked there carries over too.
+		const payFilters = getTokenListFilters('source');
+
 		return {
 			network: getUsableNetwork({ network: $sourceToken?.network ?? $selectedNetwork, side }),
-			category: getTokenListFilters('source')?.category ?? pageCategory
+			category: nonNullish(payFilters) ? payFilters.category : pageCategory
 		};
 	};
 

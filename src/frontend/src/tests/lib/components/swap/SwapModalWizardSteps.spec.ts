@@ -9,6 +9,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
 import { swapWizardSteps } from '$lib/config/swap.config';
+import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
 	MODAL_TOKENS_LIST,
 	NETWORK_FILTER,
@@ -20,6 +21,7 @@ import {
 import * as addressDerived from '$lib/derived/address.derived';
 import * as swapDerived from '$lib/derived/swap.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import {
 	MODAL_NETWORKS_LIST_CONTEXT_KEY,
@@ -29,6 +31,7 @@ import {
 	MODAL_TOKENS_LIST_CONTEXT_KEY,
 	initModalTokensListContext
 } from '$lib/stores/modal-tokens-list.store';
+import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import {
 	SWAP_AMOUNTS_CONTEXT_KEY,
 	initSwapAmountsStore,
@@ -40,6 +43,7 @@ import SwapModalWizardStepsTestHost from '$tests/lib/components/swap/SwapModalWi
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { openFilterChip } from '$tests/utils/filter-chip.test-utils';
 import {
@@ -467,6 +471,39 @@ describe('SwapModalWizardSteps', () => {
 				expect(
 					rendered.queryByRole('button', { name: new RegExp(`^${BTC_MAINNET_TOKEN.symbol}`) })
 				).not.toBeInTheDocument();
+			});
+		});
+
+		describe('on the assets page with an asset type picked', () => {
+			beforeEach(() => {
+				mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Tokens}` });
+
+				tokenCategoryFilterStore.set({
+					key: 'token-category-filter',
+					value: { value: TokenCategoryTagValue.CRYPTO }
+				});
+			});
+
+			afterEach(() => {
+				tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
+
+				mockPage.reset();
+			});
+
+			it('opens the receive list on all asset types once the pay list is cleared to them', async () => {
+				const rendered = renderHost();
+
+				await openList({ rendered, side: 0 });
+
+				expect(assetTypeChip()).toHaveTextContent(en.token_tag.category.crypto);
+
+				await fireEvent.click(screen.getByTestId(`${TOKEN_CATEGORY_FILTER}-clear`));
+
+				await cancelList(rendered);
+
+				await openList({ rendered, side: 1 });
+
+				expect(assetTypeChip()).toHaveTextContent(en.tokens.text.asset_type_all_short);
 			});
 		});
 
