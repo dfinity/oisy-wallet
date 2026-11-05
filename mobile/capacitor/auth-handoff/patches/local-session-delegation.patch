@@ -1,0 +1,118 @@
+--- a/crates/icp-core/src/delegation.rs
++++ b/crates/icp-core/src/delegation.rs
+@@ -387,6 +387,13 @@
+     }
+ }
+
++/// Domain-separated delegation payload, using ic-agent's canonical encoding.
++/// Exposed for platform keys that append a local hop without exporting a key.
++#[cfg_attr(feature = "uniffi", uniffi::export)]
++pub fn delegation_signable(delegation: Delegation) -> Result<Vec<u8>, AgentError> {
++    Ok(delegation.to_ic()?.signable())
++}
++
+ impl SignedDelegation {
+     /// Same as `to_ic`, exposed for the signing path.
+     pub fn to_ic_public(&self) -> Result<IcSignedDelegation, AgentError> {
+--- a/languages/swift/Sources/IcpSdkAuth/AuthClient.swift
++++ b/languages/swift/Sources/IcpSdkAuth/AuthClient.swift
+@@ -533,6 +533,49 @@
+             return agent
+         } catch {
+             throw asAuthError(error)
++        }
++    }
++
++    /// Append one local, II-scoped hop for a trusted receiver's public key.
++    /// This does not call the experimental session re-issuance API.
++    /// The caller must bind delivery to its document/session generation and
++    /// pass the original absolute deadline, never a new lifetime on reload.
++    public func delegateSession(
++        to publicKeyDer: Data, expiresAtNs: UInt64
++    ) async throws -> DelegationChain {
++        try await restore()
++        return try await holding(ceremony) {
++            try Task.checkCancellation()
++            guard let session = self.lock.withLock({ self.live }),
++                let credential = try await self.credentials.get(slot: self.slots.session),
++                credential.chain == session.sessionChain
++            else { throw sessionGone() }
++            let chain = credential.chain
++            guard !publicKeyDer.isEmpty, publicKeyDer.count <= 512,
++                chain.delegations.count < 20,
++                publicKeyDer != chain.publicKey,
++                !chain.delegations.contains(where: { $0.delegation.pubkey == publicKeyDer })
++            else { throw misconfigured("a session handoff needs a fresh, bounded public key") }
++            try checkSessionChain(
++                sessionKeyDer: credential.identity.publicKeyDer(), canister: self.canister,
++                maxTimeToLiveNs: nil, chain: chain, nowNs: self.clock.nowNs())
++            guard let parentExpiry = chainExpiryNs(chain) else { throw sessionGone() }
++            let expiry = min(expiresAtNs, parentExpiry)
++            guard expiry > self.clock.nowNs() else { throw sessionGone() }
++            let delegation = Delegation(
++                pubkey: publicKeyDer, expirationNs: expiry,
++                targets: [self.canister.bytes], permissions: nil)
++            let signature = try await credential.identity.sign(
++                payload: delegationSignable(delegation: delegation))
++            try Task.checkCancellation()
++            guard self.lock.withLock({ self.live?.machine === session.machine }),
++                expiry > self.clock.nowNs()
++            else { throw sessionGone() }
++            return DelegationChain(
++                publicKey: chain.publicKey,
++                delegations: chain.delegations + [
++                    SignedDelegation(delegation: delegation, signature: signature)
++                ])
+         }
+     }
+
+--- a/languages/swift/Suites/AuthClient/AuthClientSuite.swift
++++ b/languages/swift/Suites/AuthClient/AuthClientSuite.swift
+@@ -1573,6 +1573,39 @@
+
+     }
+
++    static func localSessionHandoff() async throws {
++        let store = MapStore()
++        try seed(store, head, now + month)
++        let client = try self.client(store)
++        let receiver = Data("fresh-web-public-key".utf8)
++        let deadline = now + 3600 * secondNs
++        let original = store.chain(slotSession)
++        let handed = try await client.delegateSession(to: receiver, expiresAtNs: deadline)
++        check("handoff preserves the original chain", Array(handed.delegations.dropLast()) == original?.delegations)
++        check("handoff keeps the session root", handed.publicKey == original?.publicKey)
++        check("handoff terminates at the web key", handed.delegations.last?.delegation.pubkey == receiver)
++        check("handoff has the absolute deadline", handed.delegations.last?.delegation.expirationNs == deadline)
++        check("handoff reaches only II", handed.delegations.last?.delegation.targets == [try ii().bytes])
++        check("handoff does not mutate the stored session", store.chain(slotSession) == original)
++        let capped = try await client.delegateSession(to: receiver, expiresAtNs: now + 2 * month)
++        check("handoff cannot extend the parent", capped.delegations.last?.delegation.expirationNs == now + month)
++        for key in [Data(), Data(repeating: 1, count: 513), head, keyDer(sessionName)] {
++            do {
++                _ = try await client.delegateSession(to: key, expiresAtNs: deadline)
++                check("invalid receiver is refused", false)
++            } catch { check("invalid receiver is refused", true) }
++        }
++        do {
++            _ = try await client.delegateSession(to: receiver, expiresAtNs: now)
++            check("expired handoff is refused", false)
++        } catch { check("expired handoff is refused", true) }
++        try? await client.signOut()
++        do {
++            _ = try await client.delegateSession(to: receiver, expiresAtNs: deadline)
++            check("signed-out handoff is refused", false)
++        } catch { check("signed-out handoff is refused", true) }
++    }
++
+     static func main() async {
+         do {
+             try theSessionChain()
+@@ -1580,6 +1613,7 @@
+             failures += 1
+             print("  FAIL the session chain stopped on \(error)")
+         }
++        await run("local session handoff", localSessionHandoff)
+         await run("a cold start", coldStart)
+         await run("calling", calling)
+         await run("a mint that fails", aMintThatFails)

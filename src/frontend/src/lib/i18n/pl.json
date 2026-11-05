@@ -205,7 +205,10 @@
 			"internet_identity": "",
 			"asset_types": "Krypto, akcje, surowce, przedmioty kolekcjonerskie i zaszyfrowane notatki.",
 			"advanced_cryptography": "Prywatne i odporne na manipulacje. Niewidoczne, gdy tego potrzebujesz.",
-			"move_swap_grow": "Zarabiaj, pożyczaj i handluj z wbudowanym asystentem AI."
+			"move_swap_grow": "Zarabiaj, pożyczaj i handluj z wbudowanym asystentem AI.",
+			"return_to_app": "",
+			"continue_sign_in_in_app": "",
+			"open_app": ""
 		},
 		"alt": {
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie",
@@ -230,7 +233,8 @@
 		"error": {
 			"no_internet_identity": "Brak tożsamości internetowej.",
 			"error_while_signing_in": "Coś poszło nie tak podczas logowania.",
-			"unexpected_issue_with_syncing": "Nieoczekiwany problem podczas synchronizacji statusu uwierzytelnienia."
+			"unexpected_issue_with_syncing": "Nieoczekiwany problem podczas synchronizacji statusu uwierzytelnienia.",
+			"missing_mobile_callback": ""
 		},
 		"help": {
 			"text": {

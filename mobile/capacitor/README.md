@@ -14,6 +14,17 @@ button opens Notes, Earn, Borrow and Search. Web dialogs hide the native control
 until closed. Notes uses a shared web page and a full-screen mobile editor.
 Read AGENTS.md before making changes.
 
+## Live-website migration prototype
+
+The [November migration spec](../../docs/ai/spec-driven-development/specs/2026-11-05-feat-mobile-live-web-sdk-auth.md)
+targets the deployed website with SDK-derived authentication. Implementation is
+authorized; the isolated M1 handoff harness is under test. The installed app and
+contracts below remain the current baseline.
+
+Pinned sources, local verification and audit deployment instructions live with
+the prototype.
+Source: [SDK authentication handoff prototype](./auth-handoff/README.md)
+
 ## Ownership
 
 | Area                                                                    | Owner                                                                                         |

@@ -205,7 +205,10 @@
 			"internet_identity": "",
 			"asset_types": "क्रिप्टो, स्टॉक, कमोडिटी, कलेक्टिबल्स और एन्क्रिप्टेड नोट्स।",
 			"advanced_cryptography": "निजी और छेड़छाड़-रोधी। ज़रूरत हो तो अदृश्य।",
-			"move_swap_grow": "कमाएँ, उधार लें और ट्रेड करें, अंतर्निर्मित AI असिस्टेंट के साथ।"
+			"move_swap_grow": "कमाएँ, उधार लें और ट्रेड करें, अंतर्निर्मित AI असिस्टेंट के साथ।",
+			"return_to_app": "",
+			"continue_sign_in_in_app": "",
+			"open_app": ""
 		},
 		"alt": {
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर",
@@ -230,7 +233,8 @@
 		"error": {
 			"no_internet_identity": "कोई इंटरनेट पहचान नहीं।",
 			"error_while_signing_in": "साइन-इन करते समय कुछ गलत हो गया।",
-			"unexpected_issue_with_syncing": "आपकी प्रमाणीकरण की स्थिति को सिंक्रनाइज़ करते समय अप्रत्याशित समस्या।"
+			"unexpected_issue_with_syncing": "आपकी प्रमाणीकरण की स्थिति को सिंक्रनाइज़ करते समय अप्रत्याशित समस्या।",
+			"missing_mobile_callback": ""
 		},
 		"help": {
 			"text": {

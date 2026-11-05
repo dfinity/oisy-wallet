@@ -205,7 +205,10 @@
 			"internet_identity": "",
 			"asset_types": "Cripto, acciones, materias primas, coleccionables y notas cifradas.",
 			"advanced_cryptography": "Privado y a prueba de manipulaciones. Invisible, si lo necesitas.",
-			"move_swap_grow": "Gana, pide prestado y opera, con un asistente de IA integrado."
+			"move_swap_grow": "Gana, pide prestado y opera, con un asistente de IA integrado.",
+			"return_to_app": "",
+			"continue_sign_in_in_app": "",
+			"open_app": ""
 		},
 		"alt": {
 			"preview": "Vista previa de $oisy_name una vez iniciada la sesión, tanto en escritorio como en móvil",
@@ -230,7 +233,8 @@
 		"error": {
 			"no_internet_identity": "No hay identidad de Internet.",
 			"error_while_signing_in": "Algo salió mal durante el inicio de sesión.",
-			"unexpected_issue_with_syncing": "Problema inesperado al sincronizar el estado de tu autenticación."
+			"unexpected_issue_with_syncing": "Problema inesperado al sincronizar el estado de tu autenticación.",
+			"missing_mobile_callback": ""
 		},
 		"help": {
 			"text": {

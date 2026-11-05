@@ -205,7 +205,10 @@
 			"internet_identity": "",
 			"asset_types": "加密货币、股票、大宗商品、收藏品和加密笔记。",
 			"advanced_cryptography": "私密且防篡改。需要时可隐身。",
-			"move_swap_grow": "赚取、借贷、交易，内置 AI 助手。"
+			"move_swap_grow": "赚取、借贷、交易，内置 AI 助手。",
+			"return_to_app": "",
+			"continue_sign_in_in_app": "",
+			"open_app": ""
 		},
 		"alt": {
 			"preview": "登录后 $oisy_name 的预览效果，适用于桌面端和移动端",
@@ -230,7 +233,8 @@
 		"error": {
 			"no_internet_identity": "没有 Internet Identity。",
 			"error_while_signing_in": "登录过程中发生错误。",
-			"unexpected_issue_with_syncing": "在同步你的认证状态时发生了意外问题。"
+			"unexpected_issue_with_syncing": "在同步你的认证状态时发生了意外问题。",
+			"missing_mobile_callback": ""
 		},
 		"help": {
 			"text": {

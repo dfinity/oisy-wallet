@@ -205,7 +205,10 @@
 			"internet_identity": "",
 			"asset_types": "Tiền mã hoá, cổ phiếu, hàng hoá, vật phẩm sưu tầm và ghi chú được mã hoá.",
 			"advanced_cryptography": "Riêng tư và chống giả mạo. Vô hình, khi bạn cần.",
-			"move_swap_grow": "Kiếm lời, vay và giao dịch, với trợ lý AI tích hợp."
+			"move_swap_grow": "Kiếm lời, vay và giao dịch, với trợ lý AI tích hợp.",
+			"return_to_app": "",
+			"continue_sign_in_in_app": "",
+			"open_app": ""
 		},
 		"alt": {
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động",
@@ -230,7 +233,8 @@
 		"error": {
 			"no_internet_identity": "Không có Internet Identity.",
 			"error_while_signing_in": "Đã xảy ra lỗi trong khi đăng nhập.",
-			"unexpected_issue_with_syncing": "Sự cố không mong muốn trong khi đồng bộ hóa trạng thái xác thực của bạn."
+			"unexpected_issue_with_syncing": "Sự cố không mong muốn trong khi đồng bộ hóa trạng thái xác thực của bạn.",
+			"missing_mobile_callback": ""
 		},
 		"help": {
 			"text": {

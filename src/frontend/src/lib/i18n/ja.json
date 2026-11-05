@@ -205,7 +205,10 @@
 			"internet_identity": "",
 			"asset_types": "暗号資産、株式、コモディティ、コレクティブル、暗号化されたノート。",
 			"advanced_cryptography": "プライベートで改ざん不可。必要なときは非表示に。",
-			"move_swap_grow": "AIアシスタント搭載で、稼ぐ・借りる・取引する。"
+			"move_swap_grow": "AIアシスタント搭載で、稼ぐ・借りる・取引する。",
+			"return_to_app": "",
+			"continue_sign_in_in_app": "",
+			"open_app": ""
 		},
 		"alt": {
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー",
@@ -230,7 +233,8 @@
 		"error": {
 			"no_internet_identity": "internet identityが見つかりません。",
 			"error_while_signing_in": "サインイン処理中に問題が発生しました。",
-			"unexpected_issue_with_syncing": "認証状態の同期中に予期せぬ問題が発生しました。"
+			"unexpected_issue_with_syncing": "認証状態の同期中に予期せぬ問題が発生しました。",
+			"missing_mobile_callback": ""
 		},
 		"help": {
 			"text": {

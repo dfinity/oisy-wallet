@@ -1,0 +1,12 @@
+[
+	{
+		"relation": ["delegate_permission/common.handle_all_urls"],
+		"target": {
+			"namespace": "android_app",
+			"package_name": "com.oisy.wallet",
+			"sha256_cert_fingerprints": [
+				"99:1B:FB:E8:8C:24:A1:E9:A3:37:0C:06:38:62:47:B4:91:D5:37:5A:09:57:8F:CF:A9:06:35:7E:1E:38:66:80"
+			]
+		}
+	}
+]

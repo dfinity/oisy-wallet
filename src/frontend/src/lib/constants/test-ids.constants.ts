@@ -503,3 +503,5 @@ export const BUY_MODAL_ONRAMPER_IFRAME = 'buy-modal-onramper-iframe';
 
 // CONFIRMATION POPUP
 export const CONFIRMATION_POPUP_MODAL = 'confirmation-popup-modal';
+
+export const SIGNER_CALLBACK_RETURN_BUTTON = 'signer-callback-return';

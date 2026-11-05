@@ -186,6 +186,9 @@ interface I18nAuth {
 		asset_types: string;
 		advanced_cryptography: string;
 		move_swap_grow: string;
+		return_to_app: string;
+		continue_sign_in_in_app: string;
+		open_app: string;
 	};
 	alt: {
 		preview: string;
@@ -201,6 +204,7 @@ interface I18nAuth {
 		no_internet_identity: string;
 		error_while_signing_in: string;
 		unexpected_issue_with_syncing: string;
+		missing_mobile_callback: string;
 	};
 	help: {
 		text: {

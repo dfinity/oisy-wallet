@@ -205,7 +205,10 @@
 			"internet_identity": "",
 			"asset_types": "암호화폐, 주식, 원자재, 수집품, 암호화된 노트.",
 			"advanced_cryptography": "비공개이며 변조 불가능. 원하면 보이지 않게.",
-			"move_swap_grow": "내장 AI 어시스턴트로 벌고, 빌리고, 거래하세요."
+			"move_swap_grow": "내장 AI 어시스턴트로 벌고, 빌리고, 거래하세요.",
+			"return_to_app": "",
+			"continue_sign_in_in_app": "",
+			"open_app": ""
 		},
 		"alt": {
 			"preview": "데스크탑과 모바일에서 로그인 후 $oisy_name의 미리보기",
@@ -230,7 +233,8 @@
 		"error": {
 			"no_internet_identity": "인터넷 아이덴티티가 없습니다.",
 			"error_while_signing_in": "로그인 중 문제가 발생했습니다.",
-			"unexpected_issue_with_syncing": "인증 상태를 동기화하는 중 예기치 않은 문제가 발생했습니다."
+			"unexpected_issue_with_syncing": "인증 상태를 동기화하는 중 예기치 않은 문제가 발생했습니다.",
+			"missing_mobile_callback": ""
 		},
 		"help": {
 			"text": {

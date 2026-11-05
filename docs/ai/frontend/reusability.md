@@ -18,6 +18,16 @@
    the same PR (still atomic — one logical change: "consolidate X").
 4. **Add a row here.** Don't make the next agent re-discover it.
 
+## Mobile authentication callback
+
+`getMobileAuthCallbackUrl` in `$lib/utils/mobile-auth-callback.utils.ts` preserves
+the existing preview’s bounded fragment and fixed `oisy://auth-callback` destination.
+The public `/signer-callback` route uses it; native authentication still validates
+the request and delegation. Keep the relay while the SDK HTTPS callback is tested.
+Audit association files are packaged by `mobile/capacitor/auth-handoff/prepare-audit-assets.mjs`
+only for the exact audit domain. See the [prototype](../../../mobile/capacitor/auth-handoff/README.md)
+for the isolated SDK handoff and deployment contract.
+
 ## Mobile wallet reuse
 
 Capacitor builds the same `(app)` routes: Wallet (`Assets`/`Hero`), Token

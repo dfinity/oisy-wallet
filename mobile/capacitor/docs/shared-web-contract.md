@@ -35,6 +35,21 @@ no remote `server.url`), the mobile target in `svelte.config.js`, and
 revision, dirty state, environment and contract, but is not a complete reproducible
 release manifest. Release builds should have a clean recorded revision.
 
+## Audit callback and association deployment
+
+The normal website build restores `/signer-callback` for the installed preview's
+`oisy://auth-callback` return link. The native auth owner still validates the
+request and delegation. Keep that route during SDK migration.
+
+`build:post-process` runs `auth-handoff/prepare-audit-assets.mjs`. Only the exact
+resolved domain `https://audit.oisy.com` receives the reviewed association and II
+callback files. Preserve existing Apple/Android registrations; other environments
+must not inherit this preview identity. Do not copy those files into global static
+assets or remove the callback while a working preview depends on it. Deployment
+instructions and the separate SDK harness are in the
+[prototype README](../auth-handoff/README.md). The installed app still loads its
+bundled wallet; audit redeployment alone does not migrate it to the new auth path.
+
 ## Provider configuration
 
 The mobile bundle reads env files from its own worktree. Website deployment

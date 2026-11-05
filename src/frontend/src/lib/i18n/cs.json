@@ -205,7 +205,10 @@
 			"internet_identity": "",
 			"asset_types": "Krypto, akcie, komodity, sběratelské předměty a šifrované poznámky.",
 			"advanced_cryptography": "Soukromé a odolné proti manipulaci. Neviditelné, když potřebujete.",
-			"move_swap_grow": "Vydělávejte, půjčujte si a obchodujte s vestavěným AI asistentem."
+			"move_swap_grow": "Vydělávejte, půjčujte si a obchodujte s vestavěným AI asistentem.",
+			"return_to_app": "",
+			"continue_sign_in_in_app": "",
+			"open_app": ""
 		},
 		"alt": {
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu",
@@ -230,7 +233,8 @@
 		"error": {
 			"no_internet_identity": "Žádná internetová identita.",
 			"error_while_signing_in": "Při přihlašování se něco pokazilo.",
-			"unexpected_issue_with_syncing": "Při synchronizaci stavu vašeho ověření došlo k neočekávanému problému."
+			"unexpected_issue_with_syncing": "Při synchronizaci stavu vašeho ověření došlo k neočekávanému problému.",
+			"missing_mobile_callback": ""
 		},
 		"help": {
 			"text": {

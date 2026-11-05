@@ -15,6 +15,20 @@ Keep Capacitor, the shared Svelte routes/data pipeline, native navigation and th
 isolated Explore browser. Migrate authentication first. Enforcing native approval
 for wallet operations requires a separate change to signing authority.
 
+## Current M1 work — 2026-11-05
+
+The [live-website migration spec](../../../docs/ai/spec-driven-development/specs/2026-11-05-feat-mobile-live-web-sdk-auth.md)
+is authorized. Its [prototype](../auth-handoff/README.md) appends a local native→web
+session delegation and uses public Auth 11 session APIs. II confirmed that the
+experimental `SessionHandle.issueTo` app-suite API is unnecessary for one app.
+Source-built native suites, added local-hop tests and cross-language fixtures pass;
+real-device callback, account continuity and backend proof remain unverified.
+
+The sections below preserve the October investigation, including its **superseded
+app-credential-only handoff**. Follow the November spec for new implementation;
+keep the current session guide for the installed app. The prototype has separate
+storage and does not upgrade the app's dependencies or credential policy.
+
 ## Session policy and scope
 
 The user chose fixed one-hour sessions with sign-in again after expiry, without
@@ -138,8 +152,9 @@ com.apple.developer.associated-domains:
 Verify the signed app and embedded profile, not only project settings. After the
 domain update, check Apple's association cache and test on the phone; a correct
 origin file does not prove that the device has received it. Preserve the existing
-relay until the new flow passes acceptance. The deployed relay's source revision
-is still unknown and must be recovered before replacing audit with this branch.
+relay until the new flow passes acceptance. The relay source was recovered on 2026-11-05 from
+`claude/mobile-app-architecture-1d1cde` at
+`6f3eae46807029453a9eeb7f36084c95b1cd711f` and restored in this branch.
 These are proposed changes, not a deployment performed by this preparation.
 
 ## Repeatable deployment check
@@ -175,7 +190,7 @@ changes, missing capabilities, expired profiles and malformed or oversized files
 npm exec -- vitest run src/frontend/src/tests/mobile-auth-deployment.spec.ts
 ```
 
-## Authentication implementation sequence
+## Earlier authentication sequence (superseded for new work)
 
 1. **Add the verified SDK release behind the native adapter.** Use the iOS Apple
    storage/system-browser initializer. The development API's generic initializer
@@ -243,7 +258,7 @@ and allowlisted Sepolia reads only. Do not enable `personal_sign`, typed-data
 signing, transaction execution or unrestricted chain changes as part of SDK auth.
 `IcpSdkSigner` is not a replacement for this incoming EIP-1193 provider.
 
-## Next external prerequisites
+## October prerequisites (see prototype for current status)
 
 - SDK owners: publish/install a supported release with a web-child delegation API
   and binary assets accessible through the supported SwiftPM distribution path.

@@ -20,6 +20,7 @@
 		"./e2e/**/*.ts",
 		"./scripts/*.mjs",
 		"./mobile/capacitor/*.mjs",
+		"./mobile/capacitor/auth-handoff/*.mjs",
 		"./mobile/capacitor/*.ts",
 		"./mobile/capacitor/ios/App/App/Resources/*.js",
 		"./scripts/*.ts",

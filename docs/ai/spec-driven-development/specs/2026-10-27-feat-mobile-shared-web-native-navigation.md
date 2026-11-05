@@ -16,6 +16,14 @@ and preparation of the shared web and mobile apps, followed by cleanup, commit
 and push for review. Capacitor core, CLI and iOS are pinned to 8.5.3. Audit
 deployment and transaction execution are outside this review.
 
+## Successor implementation — 2026-11-05
+
+The [live-website and SDK-auth spec](./2026-11-05-feat-mobile-live-web-sdk-auth.md)
+proposes a new delivery model, starting with an audit authentication handoff.
+Implementation is authorized and an isolated M1 harness is under test. This document remains
+the record of the Capacitor baseline; do not infer that the phone now loads the
+live website or uses SDK session authentication.
+
 ## Current implementation
 
 Main was merged through release 2.6.3 (`cb4863433`), merge HEAD `9946d6b9b`.

@@ -205,7 +205,10 @@
 			"internet_identity": "",
 			"asset_types": "العملات المشفّرة والأسهم والسلع والمقتنيات والملاحظات المشفّرة.",
 			"advanced_cryptography": "خاص وغير قابل للعبث. غير مرئي عند الحاجة.",
-			"move_swap_grow": "اربح واقترض وتداول، مع مساعد ذكاء اصطناعي مدمج."
+			"move_swap_grow": "اربح واقترض وتداول، مع مساعد ذكاء اصطناعي مدمج.",
+			"return_to_app": "",
+			"continue_sign_in_in_app": "",
+			"open_app": ""
 		},
 		"alt": {
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال",
@@ -230,7 +233,8 @@
 		"error": {
 			"no_internet_identity": "لا توجد هوية إنترنت.",
 			"error_while_signing_in": "حدث خطأ ما أثناء تسجيل الدخول.",
-			"unexpected_issue_with_syncing": "مشكلة غير متوقعة أثناء مزامنة حالة المصادقة الخاصة بك."
+			"unexpected_issue_with_syncing": "مشكلة غير متوقعة أثناء مزامنة حالة المصادقة الخاصة بك.",
+			"missing_mobile_callback": ""
 		},
 		"help": {
 			"text": {
