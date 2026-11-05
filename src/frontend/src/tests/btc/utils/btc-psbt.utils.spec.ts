@@ -278,6 +278,32 @@ describe('btc-psbt.utils', () => {
 			expect(psbt.txOutputs[0].address).toBe(CFS_RECIPIENT_ADDRESS);
 		});
 
+		it.each([
+			{ network: 'testnet', prefix: 'tb' },
+			{ network: 'regtest', prefix: 'bcrt' }
+		] as const)(
+			'reports $network addresses for a $network send, with the same bytes',
+			({ network, prefix }) => {
+				// The CFS addresses' programs, on this network: they compile to the same scripts.
+				const onNetwork = (mainnetAddress: string): string =>
+					btcAddressLib.toBech32(btcAddressLib.fromBech32(mainnetAddress).data, 0, prefix);
+
+				const recipient = onNetwork(CFS_RECIPIENT_ADDRESS);
+				const wallet = onNetwork(CFS_WALLET_ADDRESS);
+
+				const psbt = buildBtcSendPsbt({
+					utxos: CFS_TX_1_INPUT_UTXOS,
+					outputs: [{ destination: recipient, amount: 10_000n }],
+					changeAddress: wallet,
+					feeSatoshis: 141n,
+					network
+				});
+
+				expect(psbt.txOutputs.map(({ address }) => address)).toEqual([recipient, wallet]);
+				expect(unsignedTransaction(psbt).toHex()).toBe(withoutWitnesses(CFS_TX_1_INPUT_HEX));
+			}
+		);
+
 		it('gives every input a witnessUtxo with its value and the wallet script', () => {
 			const psbt = buildBtcSendPsbt({
 				utxos: CFS_TX_4_INPUTS_UTXOS,

@@ -152,7 +152,8 @@ export const buildBtcSendPsbt = ({
 		);
 	}
 
-	const psbt = new Psbt();
+	// The network does not change the bytes, only the addresses `psbt.txOutputs` reports.
+	const psbt = new Psbt({ network: BITCOIN_JS_NETWORKS[network] });
 	psbt.setVersion(2);
 	psbt.setLocktime(0);
 
