@@ -16,6 +16,9 @@ import {
 	NEAR_INTENTS_BLOCKCHAIN_MAP,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_ETH_TOKEN_PLACEHOLDER,
+	SWAP_SLIPPAGE_INVALID_VALUE,
+	SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
+	SWAP_SLIPPAGE_WARNING_VALUE,
 	swapProvidersDetails
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
@@ -39,13 +42,15 @@ import {
 	type ProviderFee,
 	type Slippage,
 	type SwapMappedResult,
-	type SwapProvidersConfig
+	type SwapProvidersConfig,
+	type SwapSlippageStatus
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
+import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -175,6 +180,46 @@ export const calculateSlippage = ({
 export const slippagePercentToBasisPoints = (slippageValue: Amount): number => {
 	const basisPoints = Math.abs(Number(slippageValue)) * 100;
 	return Math.floor(Math.round(basisPoints * 1e6) / 1e6);
+};
+
+/**
+ * The lowest slippage a swap from this network refuses, in percent: ICP swaps accept a wider
+ * tolerance than Velora, whose limit applies to every other source network.
+ */
+export const getSwapSlippageInvalidValue = (networkId: NetworkId | undefined): number =>
+	isNetworkIdICP(networkId) ? SWAP_SLIPPAGE_INVALID_VALUE : SWAP_SLIPPAGE_VELORA_INVALID_VALUE;
+
+/**
+ * Whether a slippage can be swapped with, and whether it is high enough to warn about. An empty
+ * value counts as 0 %, which no swap accepts: written as "not inside the range" so that a value
+ * that is not a number is refused too.
+ */
+export const getSwapSlippageStatus = ({
+	slippageValue,
+	maxSlippageInvalidValue
+}: {
+	slippageValue: OptionAmount;
+	maxSlippageInvalidValue: number;
+}): SwapSlippageStatus => {
+	const value = nonNullish(slippageValue) ? Number(slippageValue) : 0;
+
+	if (!(value > 0 && value < maxSlippageInvalidValue)) {
+		return 'invalid';
+	}
+
+	return value >= SWAP_SLIPPAGE_WARNING_VALUE ? 'warning' : 'valid';
+};
+
+/**
+ * A slippage percentage with at most two decimals, for a place too narrow for the four the input
+ * takes. Cut rather than rounded, so a value never reads as more than it is (49.996 must not show
+ * as the refused 50), with the float noise rounded away first as in `slippagePercentToBasisPoints`.
+ * A value below 0.01 keeps its own digits rather than reading as a refused 0.
+ */
+export const formatSwapSlippageShort = (value: number): string => {
+	const cut = Math.trunc(Math.round(value * 1e8) / 1e6) / 100;
+
+	return `${cut === 0 ? value : cut}`;
 };
 
 /**
