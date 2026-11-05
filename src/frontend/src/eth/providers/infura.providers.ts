@@ -171,14 +171,18 @@ export class InfuraProvider {
 		recover?: (params: FallbackFailure) => Promise<T>;
 		milliseconds: number;
 	}): Promise<T> => {
+		const fallbackCall = Promise.resolve().then(() => call(fallbackProvider));
+
 		try {
-			return await withTimeout({ promise: call(fallbackProvider), milliseconds });
+			return await withTimeout({ promise: fallbackCall, milliseconds });
 		} catch {
 			if (isNullish(recover)) {
 				throw infuraErr;
 			}
 
-			return await recover({ infuraErr, fallbackProvider });
+			const recovery = recover({ infuraErr, fallbackProvider });
+
+			return await Promise.race([recovery, fallbackCall.catch(() => recovery)]);
 		}
 	};
 

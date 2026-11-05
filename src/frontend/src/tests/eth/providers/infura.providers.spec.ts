@@ -505,6 +505,45 @@ describe('infura.providers', () => {
 			);
 		});
 
+		it('should take the success Alchemy still gives while the transaction is looked up', async () => {
+			vi.useFakeTimers();
+
+			const { provider } = buildProvider();
+
+			// Infura fails at once. Alchemy accepts the transaction 5 s past its own time limit, while
+			// the lookup, which is about to find nothing, is still running.
+			mockBroadcastTransaction
+				.mockRejectedValueOnce(internalError)
+				.mockImplementationOnce(
+					() =>
+						new Promise((resolve) =>
+							setTimeout(
+								() => resolve(alchemyResponse),
+								INFURA_SUBMISSION_TIMEOUT_MILLISECONDS + 5_000
+							)
+						)
+				);
+			mockGetTransaction.mockImplementationOnce(
+				() =>
+					new Promise((resolve) =>
+						setTimeout(() => resolve(null), INFURA_READ_TIMEOUT_MILLISECONDS - 1_000)
+					)
+			);
+
+			const outcome = provider.sendTransaction(signedTransaction).catch((err: unknown) => err);
+
+			await vi.advanceTimersByTimeAsync(INFURA_SUBMISSION_TIMEOUT_MILLISECONDS + 5_000);
+
+			await expect(outcome).resolves.toBe(alchemyResponse);
+
+			expect(trackProviderFallback).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					trigger: 'error',
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+				})
+			);
+		});
+
 		it('should leave the call to Alchemy when Infura fails past its time limit', async () => {
 			vi.useFakeTimers();
 
