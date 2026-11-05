@@ -88,7 +88,14 @@ export interface ICPSwapResult {
 	receiveAmount: bigint;
 }
 
-export interface FetchSwapAmountsParams {
+/** Reports participation in pricing, including cached quotes and local calculations.
+ * Not a promise of a fresh network request or of an available offer.
+ */
+export interface SwapQuoteObserver {
+	onProviderParticipating?: (provider: SwapProvider) => void;
+}
+
+export interface FetchSwapAmountsParams extends SwapQuoteObserver {
 	identity: Identity;
 	sourceToken: Token;
 	destinationToken: Token;
@@ -107,6 +114,8 @@ export interface FetchSwapAmountsParams {
 }
 
 export type Slippage = string | number;
+
+export type SwapSlippageStatus = 'valid' | 'warning' | 'invalid';
 
 /**
  * The reason no offer could be quoted, when a provider named one.
@@ -199,9 +208,10 @@ export type SwapMappedResult =
 			// The request the quote answers, which execution re-quotes with: it may differ from the
 			// one built for the form's inputs (see `fetchLifiSwapQuote`).
 			request: QuoteRequestFromAmount;
-			// A Solana-source quote's LI.FI ceiling, read off its own transaction: its network fee plus
-			// the rent of the accounts it creates, in lamports, what the form budgets beyond the amount.
-			// An EVM source's is priced in the form from the quote's gas.
+			// A Solana-source quote's LI.FI ceiling, read off its own transaction: its network fee, with
+			// headroom for the re-quote execution signs, plus the rent of the accounts it creates, in
+			// lamports. What the form and the review budget beyond the amount, and execution holds the
+			// re-quote's own ceiling to. An EVM source's is priced in the form from the quote's gas.
 			solFeeCeiling?: bigint;
 			type?: string;
 	  };
@@ -217,7 +227,7 @@ interface IcpQuoteParams {
 	destToken: IcToken;
 }
 
-interface SwapQuoteParams {
+interface SwapQuoteParams extends SwapQuoteObserver {
 	identity: Identity;
 	sourceToken: IcToken;
 	destinationToken: IcToken;
@@ -330,7 +340,7 @@ export interface GetQuoteParams extends QuoteParams<'all' | 'market'> {
 	destChainId?: number;
 }
 
-export interface EvmQuoteParams {
+export interface EvmQuoteParams extends SwapQuoteObserver {
 	sourceToken: Erc20Token;
 	destinationToken: Erc20Token | IcToken;
 	amount: bigint;
@@ -341,7 +351,7 @@ export interface EvmQuoteParams {
 	slippage: Slippage;
 }
 
-export interface NearIntentsQuoteParams {
+export interface NearIntentsQuoteParams extends SwapQuoteObserver {
 	sourceToken: Token;
 	destinationToken: Token;
 	amount: bigint;
@@ -451,7 +461,7 @@ export interface OneSecEvmToIcpParams extends RequiredTransactionFeeData {
 	swapId: string;
 }
 
-export interface IcpBridgeQuoteParams {
+export interface IcpBridgeQuoteParams extends SwapQuoteObserver {
 	sourceToken: Token;
 	destinationToken: Token;
 	amount: bigint;
@@ -467,7 +477,7 @@ export interface IcpBridgeSwapProviderConfig {
 	getSupportedDestinations: GetSupportedDestinationsFn;
 }
 
-export interface BtcQuoteParams {
+export interface BtcQuoteParams extends SwapQuoteObserver {
 	sourceToken: Token;
 	destinationToken: Token;
 	amount: bigint;
@@ -533,6 +543,19 @@ export interface SwapLifiEvmParams extends RequiredTransactionFeeData {
 	// The ERC-20s OISY knows on the source network, enabled or not: those with an allowance to the
 	// Diamond are what no call of the route may target (`lifiUserTokenAddresses`).
 	userTokenAddresses: string[];
+}
+
+export interface SwapLifiSolParams {
+	identity: Identity;
+	progress: (step: ProgressStep) => void;
+	sourceToken: Token;
+	destinationToken: Token;
+	swapAmount: Amount;
+	userAddress: SolAddress;
+	offer: Extract<SwapMappedResult, { provider: SwapProvider.LIFI }>;
+	// The LI.FI ceiling the user reviewed, in lamports: the transaction's network fee plus the rent of
+	// the accounts it creates. Execution never signs one whose ceiling is above it.
+	reviewedCeiling: bigint;
 }
 
 interface SwapNearIntentsParams {
