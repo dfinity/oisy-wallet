@@ -1,8 +1,9 @@
+import type { SwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import type { OptionAmount } from '$lib/types/send';
 import type { SwapMappedResult, SwapProvider, SwapQuoteError } from '$lib/types/swap';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
-import { writable, type Readable } from 'svelte/store';
+import { get, readable, writable, type Readable } from 'svelte/store';
 
 export interface SwapAmountsStoreData {
 	swaps: SwapMappedResult[];
@@ -25,10 +26,19 @@ export interface SwapAmountsStore extends Readable<Nullish<SwapAmountsStoreData>
 	setManualProvider: (provider: SwapMappedResult) => void;
 }
 
-export const initSwapAmountsStore = (): SwapAmountsStore => {
-	const { subscribe, set, update } = writable<Nullish<SwapAmountsStoreData>>(undefined);
+export const initSwapAmountsStore = ({
+	amountSetToMax = readable(false)
+}: {
+	amountSetToMax?: Readable<boolean>;
+} = {}): SwapAmountsStore => {
+	const store = writable<Nullish<SwapAmountsStoreData>>(undefined);
+	const { subscribe, set, update } = store;
 
 	let manualProviderKey: SwapProvider | undefined;
+	// Max applies its amount again whenever the provider-dependent fee changes, so a pick made
+	// while Max is on follows those amounts. A pick made before Max went on does not: the first
+	// Max press is a new amount the user asked for, like a typed one.
+	let manualPickAtMax = false;
 
 	return {
 		subscribe,
@@ -41,7 +51,15 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 
 		setSwaps: ({ swaps, amountForSwap, selectedProvider, quoteError }) => {
 			if (nonNullish(manualProviderKey)) {
-				const manualMatch = swaps.find((s) => s.provider === manualProviderKey);
+				// A pick belongs to the amount of the quote it was made on, which the store still
+				// holds: refreshes, a return from Review and Max applying its amount again keep it, a
+				// round at another amount goes back to the top offer, and a new pair resets the store.
+				const sameAmount = Number(amountForSwap) === Number(get(store)?.amountForSwap);
+				const maxAppliedAgain = manualPickAtMax && get(amountSetToMax);
+				const manualMatch =
+					sameAmount || maxAppliedAgain
+						? swaps.find((s) => s.provider === manualProviderKey)
+						: undefined;
 
 				if (nonNullish(manualMatch)) {
 					set({
@@ -78,6 +96,7 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 
 		setManualProvider: (provider) => {
 			manualProviderKey = provider.provider;
+			manualPickAtMax = get(amountSetToMax);
 
 			update((data) => {
 				if (isNullish(data)) {
@@ -96,6 +115,7 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 
 export interface SwapAmountsContext {
 	store: SwapAmountsStore;
+	activity?: SwapQuoteActivityStore;
 }
 
 export const SWAP_AMOUNTS_CONTEXT_KEY = Symbol('swap-amounts');

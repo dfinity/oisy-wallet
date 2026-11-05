@@ -6,6 +6,7 @@ import {
 import { EthNonceReadError, EthSubmissionUnconfirmedError } from '$eth/types/send';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
+import { SwapBroadcastOutcomeUnknownError } from '$lib/types/errors';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -352,9 +353,11 @@ const DEFINITIVE_REFUSAL_PATTERN =
 /**
  * Whether a broadcast failed because the node refused the transaction outright, so that it was
  * neither taken nor relayed: the account cannot pay for it, or the transaction is invalid. Only the
- * node's own answer to the broadcast counts, never a transport failure, which may have relayed it.
+ * node's own answer to the broadcast counts, never a transport failure, which may have relayed it,
+ * nor a refusal that came after one (`SwapBroadcastOutcomeUnknownError`, whose cause it is).
  */
 export const isDefinitiveTransactionRefusal = (err: unknown): boolean =>
+	!(err instanceof SwapBroadcastOutcomeUnknownError) &&
 	!answersOtherRequest(err) &&
 	(isInsufficientBalanceError(err) ||
 		collectErrorRecords({ err }).some(

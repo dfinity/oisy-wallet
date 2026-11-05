@@ -1214,7 +1214,10 @@
 			"unknown": "チャージが完了したかどうか、OISYはまだ判断できません。完了していれば$tokenのアクティビティに表示されます。もう一度チャージすると同じチャージが再送信されますが、完了するのは1回だけです。このチャージが完了していた場合、新しいチャージや内容を変えたチャージを行うと、サイクルがもう一度追加されます。",
 			"unknown_fresh": "前回のチャージが完了したかどうか、OISYはまだ判断できません。完了していた場合、このチャージでサイクルがもう一度追加されます。先に$tokenのアクティビティを確認してください。",
 			"sent_to_canister": "キャニスターに$tokenを送ってもチャージにはなりません。$tokenはキャニスターのアカウントに届き、キャニスター自身のコードが引き出した場合にのみサイクルになります。",
-			"sent_to_canister_top_up": "キャニスターにサイクルを追加するには、$tokenのページで「チャージ」を使ってください。"
+			"sent_to_canister_top_up": "キャニスターにサイクルを追加するには、$tokenのページで「チャージ」を使ってください。",
+			"choice_send": "$tokenを送信",
+			"choice_send_description": "$tokenトークンを別のアカウントに送信します。キャニスターに$tokenを送ってもチャージにはなりません。",
+			"choice_top_up_description": "$tokenトークンをサイクルに変換して、任意のキャニスターにチャージします。"
 		},
 		"error": {
 			"invalid_canister_id": "キャニスターIDを入力してください。ユーザーのプリンシパル、アカウントID、他のネットワークのアドレスにはチャージできません。",
@@ -1366,6 +1369,13 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "UIを更新中",
 			"swap_provider": "スワッププロバイダー",
+			"smart_swap": "",
+			"finding_best_rate": "",
+			"smart_swap_gain": "",
+			"smart_swap_best_of_offers": "",
+			"smart_swap_offers_compared": "",
+			"smart_swap_offers": "",
+			"smart_swap_selected_offer": "",
 			"swap_provider_website": "ウェブサイト",
 			"swap_route": "スワップルート",
 			"included_network_fees": "含まれるネットワーク手数料",
@@ -1373,7 +1383,6 @@
 			"best_rate": "最良レート",
 			"expected_minimum": "予想される最低受取額",
 			"you_receive": "受取額",
-			"select": "選択 >",
 			"select_swap_provider": "スワッププロバイダーを選択",
 			"open_icp_swap": "ICP Swapウェブサイトを開く",
 			"open_instructions_link": "指示リンクを開く",
@@ -1432,7 +1441,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
@@ -1859,6 +1869,7 @@
 			"allowance_increase": "このリクエストは、以下の使用者の許可額を、既に使用可能な分に加えて表示された金額だけ引き上げます。使用者は、取り消すまでいつでもこのトークンをその金額分だけウォレットから送金できます。",
 			"allowance_decrease": "このリクエストは、以下の使用者の許可額を表示された金額だけ引き下げます。それ自体は資金を移動しません。",
 			"unverifiable_erc20_request": "このリクエストは、OISYが識別またはデコードできないトークンに関するものです。表示内容と実際に署名される内容が異なる可能性があるため、承認は無効になっています。",
+			"unlisted_erc20_request": "このトークンはOISYに登録されていません。シンボルと表示される金額はトークン自身のコントラクトから読み取られており、誰でも任意のシンボルでトークンを作成できます。承認する前にトークンのアドレスを確認してください。",
 			"token_call_with_value": "このリクエストは、下に表示されているトークンの金額に加えて、$amount をトークンのコントラクトに送信します。トークンの送金や承認で $symbol が送信されることはないため、安全のため、OISY はこれに署名しません。",
 			"unverifiable_approval_for_all_request": "このリクエストは、NFTコレクションの管理権をオペレーターに引き渡しますが、OISYはどのオペレーターかをデコードできません。表示内容と実際に署名される内容が異なる可能性があるため、承認は無効になっています。",
 			"approval_for_all_grant": "このリクエストにより、以下のオペレーターは、あなたが現在所有している、または後で取得するこのコレクション内の任意のNFTを、取り消すまでいつでも転送できるようになります。それ自体は資金を移動しません。",
@@ -2487,6 +2498,7 @@
 			"create": "連絡先の作成に失敗しました",
 			"update": "連絡先の更新に失敗しました",
 			"delete": "連絡先の削除に失敗しました",
+			"load": "連絡先の読み込みに失敗しました",
 			"name_too_long": "名前は$maxCharacters文字以下にしてください。"
 		}
 	},

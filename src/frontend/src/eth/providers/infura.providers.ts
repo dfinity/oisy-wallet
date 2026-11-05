@@ -42,7 +42,6 @@ import { get } from 'svelte/store';
 // What a call that both providers failed leaves to decide it by.
 interface FallbackFailure {
 	infuraErr: unknown;
-	fallbackErr: unknown;
 	fallbackProvider: JsonRpcProvider;
 }
 
@@ -125,8 +124,10 @@ export class InfuraProvider {
 			return await call(this.provider);
 		}
 
+		const infuraCall = call(this.provider);
+
 		try {
-			return await withTimeout({ promise: call(this.provider), milliseconds });
+			return await withTimeout({ promise: infuraCall, milliseconds });
 		} catch (infuraErr: unknown) {
 			const track = (resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES) =>
 				trackProviderFallback({
@@ -136,14 +137,19 @@ export class InfuraProvider {
 					resultStatus
 				});
 
+			const fallback = this.askFallback({
+				call,
+				recover,
+				milliseconds,
+				fallbackProvider,
+				infuraErr
+			});
+
 			try {
-				const result = await this.askFallback({
-					call,
-					recover,
-					milliseconds,
-					fallbackProvider,
-					infuraErr
-				});
+				// Infura's call carries on past its time limit, and a success it still gives while the
+				// fallback is asked serves the call as well. A failure it gives changes nothing: the
+				// fallback decides, so once that has failed the call fails with Infura's timeout.
+				const result = await Promise.race([fallback, infuraCall.catch(() => fallback)]);
 
 				track(PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS);
 
@@ -169,12 +175,12 @@ export class InfuraProvider {
 	}): Promise<T> => {
 		try {
 			return await withTimeout({ promise: call(fallbackProvider), milliseconds });
-		} catch (fallbackErr: unknown) {
+		} catch {
 			if (isNullish(recover)) {
 				throw infuraErr;
 			}
 
-			return await recover({ infuraErr, fallbackErr, fallbackProvider });
+			return await recover({ infuraErr, fallbackProvider });
 		}
 	};
 
@@ -188,7 +194,7 @@ export class InfuraProvider {
 				operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.SUBMISSION,
 				milliseconds: INFURA_SUBMISSION_TIMEOUT_MILLISECONDS,
 				call: (provider) => provider.broadcastTransaction(signedTransaction),
-				recover: async ({ infuraErr, fallbackErr, fallbackProvider }) => {
+				recover: async ({ infuraErr, fallbackProvider }) => {
 					// Neither error proves the transaction went nowhere. Infura can pass a transaction on
 					// and still fail the request, and a node answers a transaction it already holds with an
 					// error of its own. Only the network knows, so it is asked before the send is reported
@@ -202,12 +208,10 @@ export class InfuraProvider {
 						return submitted;
 					}
 
-					// An outright refusal states something about the transaction; a provider failing the
-					// request does not. So the user is told whichever there is, Infura's when both refuse.
-					throw !isDefinitiveTransactionRefusal(infuraErr) &&
-						isDefinitiveTransactionRefusal(fallbackErr)
-						? fallbackErr
-						: infuraErr;
+					// Infura's error is the one reported, whatever Alchemy answered. Unless Infura refused
+					// the transaction outright, it may have passed it on before failing the request, and a
+					// refusal of Alchemy's attempt afterwards answers only that attempt.
+					throw infuraErr;
 				}
 			});
 		} catch (err: unknown) {
