@@ -45,7 +45,7 @@ import {
 	mockModalNetworksListContextEntry,
 	mockModalTokensListContextEntry
 } from '$tests/utils/misc.context.test-utils';
-import { fireEvent, render, screen, within } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get, readable } from 'svelte/store';
 
@@ -79,8 +79,10 @@ describe('SwapModalWizardSteps', () => {
 		selectedProvider: mockSwapProviders[0]
 	};
 
-	const mockModal = {
-		set: vi.fn()
+	const mockModal: WizardModal<WizardStepsSwap> = {
+		set: vi.fn(),
+		next: vi.fn(),
+		back: vi.fn()
 	};
 
 	beforeEach(() => {
@@ -137,7 +139,7 @@ describe('SwapModalWizardSteps', () => {
 				onClose: vi.fn(),
 				currentStep,
 				swapProgressStep: ProgressStepsSwap.INITIALIZATION,
-				modal: mockModal as unknown as WizardModal<WizardStepsSwap>,
+				modal: mockModal,
 				steps: [
 					{
 						name: WizardStepsSwap.SWAP,
@@ -295,14 +297,13 @@ describe('SwapModalWizardSteps', () => {
 
 	describe('token list filters', () => {
 		const steps = swapWizardSteps({ i18n: en });
-		const modal = mockModal as unknown as WizardModal<WizardStepsSwap>;
 
 		const swapStep = { name: WizardStepsSwap.SWAP, title: 'title' };
 		const tokensListStep = { name: WizardStepsSwap.TOKENS_LIST, title: 'title' };
 
 		const renderHost = () =>
 			render(SwapModalWizardStepsTestHost, {
-				props: { currentStep: swapStep, steps, modal },
+				props: { currentStep: swapStep, steps, modal: mockModal },
 				context: mockContext
 			});
 
@@ -310,12 +311,19 @@ describe('SwapModalWizardSteps', () => {
 
 		const openList = async ({ rendered, side }: { rendered: Rendered; side: 0 | 1 }) => {
 			await fireEvent.click(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[side]);
-			await rendered.rerender({ currentStep: tokensListStep, steps, modal });
+			await rendered.rerender({ currentStep: tokensListStep, steps, modal: mockModal });
+		};
+
+		const showForm = async (rendered: Rendered) => {
+			await rendered.rerender({ currentStep: swapStep, steps, modal: mockModal });
+
+			// A filter panel closed just before plays its exit first, and the list stays until it ends.
+			await waitFor(() => expect(screen.queryByTestId(MODAL_TOKENS_LIST)).not.toBeInTheDocument());
 		};
 
 		const cancelList = async (rendered: Rendered) => {
 			await fireEvent.click(rendered.getByText(en.core.text.cancel));
-			await rendered.rerender({ currentStep: swapStep, steps, modal });
+			await showForm(rendered);
 		};
 
 		const pickFromChip = async ({ chip, option }: { chip: string; option: string }) => {
@@ -359,7 +367,7 @@ describe('SwapModalWizardSteps', () => {
 
 			// All networks, then a pick on Internet Computer: the old picker switched to its network.
 			await fireEvent.click(rendered.getByRole('button', { name: new RegExp(ICP_TOKEN.symbol) }));
-			await rendered.rerender({ currentStep: swapStep, steps, modal });
+			await showForm(rendered);
 
 			await openList({ rendered, side: 0 });
 

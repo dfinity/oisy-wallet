@@ -16,7 +16,9 @@
 
 	let { currentStep, steps, modal }: Props = $props();
 
-	let swapAmount = $state<OptionAmount>('1');
+	// No amount: the form would validate it 300 ms after it mounts, by when these tests have moved on
+	// to a token list and the form is gone.
+	let swapAmount = $state<OptionAmount>();
 	let receiveAmount = $state<number | undefined>(2);
 	let slippageValue = $state<OptionAmount>();
 	let swapProgressStep = $state(ProgressStepsSwap.INITIALIZATION);
