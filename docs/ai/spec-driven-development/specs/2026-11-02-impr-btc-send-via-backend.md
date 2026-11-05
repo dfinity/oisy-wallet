@@ -479,12 +479,15 @@ Decided in PR 4:
   wallet can make is possible from its largest UTXOs, and the frontend's selection (the smallest
   sufficient UTXO, else the largest) works on the list unchanged.
 - The UTXOs and `pending_transactions` share one budget, `MAX_SPENDABLE_UTXOS_REPLY_BYTES`
-  (2 000 000 bytes, leaving room for the Candid header). The existing limits allow about 2 MB of
-  pending transactions by themselves, for example 300 of 128 inputs each, so the UTXOs get what is
-  left (`BtcGetSpendableUtxosResponse::max_utxos_beside`). Pending transactions that alone take
-  more fail with `InternalError` instead of being cut: only the caller's own reservations can grow
-  that large, and they are pruned within an hour. `btc_get_pending_transactions` has the same
-  limit and fails at about the same size.
+  (2 000 000 bytes, leaving room for the Candid header). The existing limits allow about 3.9 MB of
+  pending transactions by themselves: 600 of 128 inputs each from `btc_add_pending_transaction`
+  (10 calls a minute, each kept for an hour), plus 20 of 100 inputs from
+  `btc_broadcast_transaction`. So the UTXOs get what is left
+  (`BtcGetSpendableUtxosResponse::max_utxos_beside`). Pending transactions that alone take more
+  than the budget, from 318 of 128 inputs each (about half of what the limits allow), fail with
+  `InternalError` instead of being cut. Only the caller's own reservations can grow that large,
+  which takes about 40 700 of their confirmed UTXOs, and they are pruned within an hour.
+  `btc_get_pending_transactions` has the same limit and fails at about the same size.
 - Max is not covered by that. `calculateMaxSpendableAmount` prices every UTXO, so with the flag on
   a wallet with more than `MAX_BROADCAST_TX_INPUTS` UTXOs would be offered an amount the backend
   refuses with `TooManyInputs`. PR 8 must keep Max, and the send it builds, within that many

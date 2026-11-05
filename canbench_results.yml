@@ -7,13 +7,15 @@ benches:
     scopes: {}
   bench_btc_add_pending_transaction_200:
     total:
-      instructions: 25787781
-      heap_increase: 1
+      calls: 1
+      instructions: 21300362
+      heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_btc_add_pending_transaction_5:
     total:
-      instructions: 1475471
+      calls: 1
+      instructions: 1239391
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
