@@ -9,6 +9,7 @@
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { toIcNftSendErrorType } from '$icp/utils/ic-nft.utils';
+	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_IC_SEND_ERROR,
@@ -65,7 +66,7 @@
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendToken, sendTokenSymbol } =
+	const { sendTokenDecimals, sendToken, sendTokenSymbol, sendMemo } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
@@ -172,6 +173,7 @@
 					unitName: $sendTokenDecimals
 				}),
 				identity: $authIdentity,
+				...(!invalidIcrcAddress(destination) ? { memo: $sendMemo || undefined } : {}),
 				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step)
 			};
 
