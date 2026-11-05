@@ -2,6 +2,7 @@ import { sendBtc } from '$btc/services/btc-send.services';
 import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { VELORA_AUGUSTUS_ADDRESSES, VELORA_DELTA_ADDRESSES } from '$env/rest/velora.env';
@@ -3176,6 +3177,19 @@ describe('swap.services', () => {
 
 				expect(approveToken).not.toHaveBeenCalled();
 				expect(mockSwapBuildTx).not.toHaveBeenCalled();
+			});
+
+			it('refuses a destination on another network before approving anything', async () => {
+				await expect(
+					fetchVeloraMarketSwap({
+						...params,
+						destinationToken: { ...mockDestinationToken, network: BASE_NETWORK }
+					})
+				).rejects.toThrow('Velora swap rejected: a Market swap cannot settle on another network');
+
+				expect(approveToken).not.toHaveBeenCalled();
+				expect(mockSwapBuildTx).not.toHaveBeenCalled();
+				expect(sendEvmSwap).not.toHaveBeenCalled();
 			});
 
 			it.each([

@@ -2112,6 +2112,10 @@ export const fetchVeloraMarketSwap = async ({
 		fetch: window.fetch
 	});
 
+	if (destinationToken.network.chainId !== sourceNetwork.chainId) {
+		throw veloraRejectedError('a Market swap cannot settle on another network');
+	}
+
 	// The call target and spender are pinned, never taken from the API.
 	const augustusAddress = VELORA_AUGUSTUS_ADDRESSES[sourceNetwork.id];
 
