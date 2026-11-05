@@ -370,17 +370,34 @@ describe('SwapAmountsContext.svelte', () => {
 	});
 
 	it.each([
-		{ amountSetToMax: true, expected: SwapProvider.KONG_SWAP },
-		{ amountSetToMax: false, expected: mockSwapProviders[0].provider }
+		{
+			newAmount: 'Max applying its amount again',
+			pickedAtMax: true,
+			amountSetToMax: true,
+			expected: SwapProvider.KONG_SWAP
+		},
+		{
+			newAmount: 'the first Max press',
+			pickedAtMax: false,
+			amountSetToMax: true,
+			expected: mockSwapProviders[0].provider
+		},
+		{
+			newAmount: 'a typed amount',
+			pickedAtMax: true,
+			amountSetToMax: false,
+			expected: mockSwapProviders[0].provider
+		}
 	])(
-		'keeps a manual pick for a new amount only while Max sets it ($amountSetToMax)',
-		async ({ amountSetToMax, expected }) => {
+		'keeps a manual pick at a new amount only for Max applying its amount again ($newAmount)',
+		async ({ pickedAtMax, amountSetToMax, expected }) => {
 			vi.spyOn(swapService, 'fetchSwapAmounts').mockResolvedValue(mockSwapProviders);
 
 			store.setSwaps({
 				swaps: mockSwapProviders,
 				amountForSwap: 10,
-				selectedProvider: mockSwapProviders[0]
+				selectedProvider: mockSwapProviders[0],
+				amountSetToMax: pickedAtMax
 			});
 
 			store.setManualProvider(mockSwapProviders[1]);
@@ -390,7 +407,6 @@ describe('SwapAmountsContext.svelte', () => {
 				amountSetToMax: readable(amountSetToMax)
 			});
 
-			// Max lowered the amount for the picked provider's fee.
 			await renderWithContext({
 				amount: '9.5',
 				sourceToken,

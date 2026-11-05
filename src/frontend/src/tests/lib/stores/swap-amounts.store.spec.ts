@@ -440,7 +440,40 @@ describe('swap-amounts.store', () => {
 			expect(state?.manuallySelectedProviderKey).toBeUndefined();
 		});
 
-		it('should keep the selection at another amount when the round asks to', () => {
+		it('should keep the selection when Max applies its amount again', () => {
+			const store = initSwapAmountsStore();
+
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: '1000000',
+				selectedProvider: evmSwaps[0],
+				amountSetToMax: true
+			});
+
+			store.setManualProvider(evmSwaps[1]);
+
+			// Max lowered its amount for the picked provider's fee.
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: '990000',
+				selectedProvider: evmSwaps[0],
+				amountSetToMax: true
+			});
+
+			// The pick now belongs to the new amount: a refresh there keeps it.
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: 990000,
+				selectedProvider: evmSwaps[0]
+			});
+
+			const state = get(store);
+
+			expect(state?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
+			expect(state?.manuallySelectedProviderKey).toBe(SwapProvider.NEAR_INTENTS);
+		});
+
+		it('should release the selection on the first Max press', () => {
 			const store = initSwapAmountsStore();
 
 			store.setSwaps({
@@ -453,22 +486,15 @@ describe('swap-amounts.store', () => {
 
 			store.setSwaps({
 				swaps: evmSwaps,
-				amountForSwap: '990000',
+				amountForSwap: '5000000',
 				selectedProvider: evmSwaps[0],
-				keepManualProvider: true
-			});
-
-			// The pick now belongs to the new amount: a refresh there keeps it without asking.
-			store.setSwaps({
-				swaps: evmSwaps,
-				amountForSwap: 990000,
-				selectedProvider: evmSwaps[0]
+				amountSetToMax: true
 			});
 
 			const state = get(store);
 
-			expect(state?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
-			expect(state?.manuallySelectedProviderKey).toBe(SwapProvider.NEAR_INTENTS);
+			expect(state?.selectedProvider?.provider).toBe(SwapProvider.VELORA);
+			expect(state?.manuallySelectedProviderKey).toBeUndefined();
 		});
 
 		it('should stay automatic after a release, back at the amount of the selection too', () => {

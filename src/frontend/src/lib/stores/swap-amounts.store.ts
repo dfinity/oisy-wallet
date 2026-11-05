@@ -20,9 +20,9 @@ export interface SwapAmountsStore extends Readable<Nullish<SwapAmountsStoreData>
 		amountForSwap: OptionAmount;
 		selectedProvider?: SwapMappedResult;
 		quoteError?: SwapQuoteError;
-		// The amount changed without the user entering it (Max applied again after a fee change),
-		// so a manual pick still holds at the new amount.
-		keepManualProvider?: boolean;
+		// Max set the round's amount. Max applies it again whenever the provider-dependent fee
+		// changes, so a pick made at Max holds through those rounds.
+		amountSetToMax?: boolean;
 	}) => void;
 	reset: () => void;
 	setSelectedProvider: (provider: SwapMappedResult | undefined) => void;
@@ -34,30 +34,31 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 	const { subscribe, set, update } = store;
 
 	let manualProviderKey: SwapProvider | undefined;
+	let lastAmountSetToMax = false;
 
 	return {
 		subscribe,
 
 		reset: () => {
 			manualProviderKey = undefined;
+			lastAmountSetToMax = false;
 
 			set(null);
 		},
 
-		setSwaps: ({
-			swaps,
-			amountForSwap,
-			selectedProvider,
-			quoteError,
-			keepManualProvider = false
-		}) => {
+		setSwaps: ({ swaps, amountForSwap, selectedProvider, quoteError, amountSetToMax = false }) => {
+			// Only a Max round after another Max round is Max applying its amount again. The first
+			// Max press is a new amount the user asked for, like a typed one.
+			const maxAppliedAgain = amountSetToMax && lastAmountSetToMax;
+			lastAmountSetToMax = amountSetToMax;
+
 			if (nonNullish(manualProviderKey)) {
 				// A pick belongs to the amount of the quote it was made on, which the store still
-				// holds: refreshes and a return from Review re-quote that amount and keep it, a round
-				// at another amount goes back to the top offer, and a new pair resets the store.
+				// holds: refreshes, a return from Review and Max applying its amount again keep it, a
+				// round at another amount goes back to the top offer, and a new pair resets the store.
 				const sameAmount = Number(amountForSwap) === Number(get(store)?.amountForSwap);
 				const manualMatch =
-					keepManualProvider || sameAmount
+					sameAmount || maxAppliedAgain
 						? swaps.find((s) => s.provider === manualProviderKey)
 						: undefined;
 

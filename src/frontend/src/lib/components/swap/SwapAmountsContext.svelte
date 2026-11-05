@@ -53,8 +53,8 @@
 	}: Props = $props();
 
 	const { store, activity } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
-	// Max applies the amount again when the fee changes, and the fee depends on the selected
-	// provider, so a manual pick would otherwise undo itself one round later.
+	// The store needs to know which rounds Max set, so a manual pick made at Max survives Max
+	// applying its amount again after the picked provider's fee.
 	const amountSetToMax =
 		getContext<SwapContext | undefined>(SWAP_CONTEXT_KEY)?.amountSetToMax ?? readable(false);
 
@@ -204,7 +204,7 @@
 				swaps: swapAmounts,
 				amountForSwap: parsedAmount,
 				selectedProvider: swapAmounts[0],
-				keepManualProvider: $amountSetToMax
+				amountSetToMax: $amountSetToMax
 			});
 		} catch (err: unknown) {
 			if (!isCurrentRequest()) {

@@ -431,9 +431,10 @@ clearing activity, so a same-amount remount cannot accidentally reuse them. Comp
 background refresh retain the existing Review-remount and manual-provider behavior.
 
 A manual pick holds only at the amount it was made at: refreshes and a return from Review keep
-it; a round at another amount, or a new pair, goes back to the top offer. While `amountSetToMax`
-is on, `SwapAmountsContext` passes `keepManualProvider`, because Max applies the amount again
-whenever the provider-dependent fee changes.
+it; a round at another amount, or a new pair, goes back to the top offer. `SwapAmountsContext`
+passes `amountSetToMax` with each round, because Max applies its amount again whenever the
+provider-dependent fee changes: a Max round after another Max round keeps the pick, while the
+first Max press is a new amount and goes back to the top offer.
 
 Every foreground round with a participant stays pending for at least
 `SWAP_PROVIDER_MIN_COMPARISON_MS` (two scroll turns) from its first participant, so fast or
