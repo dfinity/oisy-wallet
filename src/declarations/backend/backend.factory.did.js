@@ -153,6 +153,38 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: BtcAddPendingTransactionError
 	});
+	const BtcBroadcastTransactionRequest = IDL.Record({
+		transaction: IDL.Vec(IDL.Nat8),
+		ii_delegation_chain: IDL.Opt(IIDelegationChain),
+		network: Network
+	});
+	const BtcBroadcastTransactionResponse = IDL.Record({
+		txid: IDL.Vec(IDL.Nat8)
+	});
+	const BtcBroadcastTransactionError = IDL.Variant({
+		TooManyInputs: IDL.Null,
+		DuplicateInputs: IDL.Null,
+		InvalidUtxos: IDL.Null,
+		InvalidInput: IDL.Record({ index: IDL.Nat32 }),
+		InvalidOutput: IDL.Record({ index: IDL.Nat32 }),
+		UnsupportedLockTime: IDL.Null,
+		InvalidSignature: IDL.Record({ index: IDL.Nat32 }),
+		BroadcastInProgress: IDL.Null,
+		FeeTooLow: IDL.Null,
+		BroadcastOutcomeUnknown: IDL.Record({ msg: IDL.Text }),
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
+		TransactionTooLarge: IDL.Null,
+		TooManyOutputs: IDL.Null,
+		MalformedTransaction: IDL.Null,
+		RateLimited: RateLimitError,
+		BroadcastRejected: IDL.Record({ msg: IDL.Text }),
+		InternalError: IDL.Record({ msg: IDL.Text }),
+		UtxosAlreadyReserved: IDL.Null
+	});
+	const BtcBroadcastTransactionResult = IDL.Variant({
+		Ok: BtcBroadcastTransactionResponse,
+		Err: BtcBroadcastTransactionError
+	});
 	const BtcGetFeePercentilesRequest = IDL.Record({ network: Network });
 	const BtcGetFeePercentilesResponse = IDL.Record({
 		fee_percentiles: IDL.Vec(IDL.Nat64)
@@ -643,8 +675,27 @@ export const idlFactory = ({ IDL }) => {
 		Ok: Contact,
 		Err: ContactError
 	});
+	const GetContactImagesRequest = IDL.Record({
+		contact_ids: IDL.Vec(IDL.Nat64)
+	});
+	const ContactImageEntry = IDL.Record({
+		contact_id: IDL.Nat64,
+		image: ContactImage
+	});
+	const GetContactImagesResult = IDL.Variant({
+		Ok: IDL.Vec(ContactImageEntry),
+		Err: ContactError
+	});
 	const GetContactsResult = IDL.Variant({
 		Ok: IDL.Vec(Contact),
+		Err: ContactError
+	});
+	const ContactsPage = IDL.Record({
+		contacts: IDL.Vec(Contact),
+		next: IDL.Opt(IDL.Nat64)
+	});
+	const GetContactsPageResult = IDL.Variant({
+		Ok: ContactsPage,
 		Err: ContactError
 	});
 	const ExchangeData = IDL.Record({
@@ -1011,6 +1062,11 @@ export const idlFactory = ({ IDL }) => {
 			[BtcAddPendingTransactionResult],
 			[]
 		),
+		btc_broadcast_transaction: IDL.Func(
+			[BtcBroadcastTransactionRequest],
+			[BtcBroadcastTransactionResult],
+			[]
+		),
 		btc_get_current_fee_percentiles: IDL.Func(
 			[BtcGetFeePercentilesRequest],
 			[BtcGetFeePercentilesResult],
@@ -1053,7 +1109,9 @@ export const idlFactory = ({ IDL }) => {
 		get_api_keys: IDL.Func([], [ApiKeys], ['query']),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_contact: IDL.Func([IDL.Nat64], [GetContactResult], ['query']),
+		get_contact_images: IDL.Func([GetContactImagesRequest], [GetContactImagesResult], ['query']),
 		get_contacts: IDL.Func([], [GetContactsResult], ['query']),
+		get_contacts_page: IDL.Func([IDL.Opt(IDL.Nat64)], [GetContactsPageResult], ['query']),
 		get_exchange_rate: IDL.Func([TokenId], [IDL.Opt(ExchangeRate)], ['query']),
 		get_exchange_rates: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenId, IDL.Opt(ExchangeRate)))], []),
 		get_my_tips: IDL.Func([], [GetMyTipsResult], ['query']),
