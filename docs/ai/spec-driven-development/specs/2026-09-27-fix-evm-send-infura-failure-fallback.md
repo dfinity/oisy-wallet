@@ -194,6 +194,7 @@ PR 3:
 - A submission whose outcome is unknown says that OISY could not confirm it and asks the user to
   check their activity first. No path says the transaction was not sent once it was handed to a
   provider.
+- A swap whose broadcast outcome is unknown says the same, even when its last attempt was refused.
 - A WalletConnect transaction the balance cannot pay for shows the existing insufficient-funds
   message.
 - A send that runs out of gas keeps its out-of-gas message.
