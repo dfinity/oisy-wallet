@@ -3,7 +3,7 @@ import type { OptionAmount } from '$lib/types/send';
 import type { SwapMappedResult, SwapProvider, SwapQuoteError } from '$lib/types/swap';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
-import { get, writable, type Readable } from 'svelte/store';
+import { get, readable, writable, type Readable } from 'svelte/store';
 
 export interface SwapAmountsStoreData {
 	swaps: SwapMappedResult[];
@@ -20,43 +20,42 @@ export interface SwapAmountsStore extends Readable<Nullish<SwapAmountsStoreData>
 		amountForSwap: OptionAmount;
 		selectedProvider?: SwapMappedResult;
 		quoteError?: SwapQuoteError;
-		// Max set the round's amount. Max applies it again whenever the provider-dependent fee
-		// changes, so a pick made at Max holds through those rounds.
-		amountSetToMax?: boolean;
 	}) => void;
 	reset: () => void;
 	setSelectedProvider: (provider: SwapMappedResult | undefined) => void;
 	setManualProvider: (provider: SwapMappedResult) => void;
 }
 
-export const initSwapAmountsStore = (): SwapAmountsStore => {
+export const initSwapAmountsStore = ({
+	amountSetToMax = readable(false)
+}: {
+	amountSetToMax?: Readable<boolean>;
+} = {}): SwapAmountsStore => {
 	const store = writable<Nullish<SwapAmountsStoreData>>(undefined);
 	const { subscribe, set, update } = store;
 
 	let manualProviderKey: SwapProvider | undefined;
-	let lastAmountSetToMax = false;
+	// Max applies its amount again whenever the provider-dependent fee changes, so a pick made
+	// while Max is on follows those amounts. A pick made before Max went on does not: the first
+	// Max press is a new amount the user asked for, like a typed one.
+	let manualPickAtMax = false;
 
 	return {
 		subscribe,
 
 		reset: () => {
 			manualProviderKey = undefined;
-			lastAmountSetToMax = false;
 
 			set(null);
 		},
 
-		setSwaps: ({ swaps, amountForSwap, selectedProvider, quoteError, amountSetToMax = false }) => {
-			// Only a Max round after another Max round is Max applying its amount again. The first
-			// Max press is a new amount the user asked for, like a typed one.
-			const maxAppliedAgain = amountSetToMax && lastAmountSetToMax;
-			lastAmountSetToMax = amountSetToMax;
-
+		setSwaps: ({ swaps, amountForSwap, selectedProvider, quoteError }) => {
 			if (nonNullish(manualProviderKey)) {
 				// A pick belongs to the amount of the quote it was made on, which the store still
 				// holds: refreshes, a return from Review and Max applying its amount again keep it, a
 				// round at another amount goes back to the top offer, and a new pair resets the store.
 				const sameAmount = Number(amountForSwap) === Number(get(store)?.amountForSwap);
+				const maxAppliedAgain = manualPickAtMax && get(amountSetToMax);
 				const manualMatch =
 					sameAmount || maxAppliedAgain
 						? swaps.find((s) => s.provider === manualProviderKey)
@@ -97,6 +96,7 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 
 		setManualProvider: (provider) => {
 			manualProviderKey = provider.provider;
+			manualPickAtMax = get(amountSetToMax);
 
 			update((data) => {
 				if (isNullish(data)) {

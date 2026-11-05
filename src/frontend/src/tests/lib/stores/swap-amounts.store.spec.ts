@@ -5,7 +5,7 @@ import {
 	mockSwapProviders,
 	mockVeloraMarketProvider
 } from '$tests/mocks/swap.mocks';
-import { get } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 describe('swap-amounts.store', () => {
 	it('should initialize with nullish data', () => {
@@ -440,15 +440,17 @@ describe('swap-amounts.store', () => {
 			expect(state?.manuallySelectedProviderKey).toBeUndefined();
 		});
 
-		it('should keep the selection when Max applies its amount again', () => {
-			const store = initSwapAmountsStore();
+		it('should keep a selection made at Max when Max applies its amount again', () => {
+			const amountSetToMax = writable(false);
+			const store = initSwapAmountsStore({ amountSetToMax });
 
+			// The typed amount is the maximum, so pressing Max starts no quote round.
 			store.setSwaps({
 				swaps: evmSwaps,
 				amountForSwap: '1000000',
-				selectedProvider: evmSwaps[0],
-				amountSetToMax: true
+				selectedProvider: evmSwaps[0]
 			});
+			amountSetToMax.set(true);
 
 			store.setManualProvider(evmSwaps[1]);
 
@@ -456,8 +458,7 @@ describe('swap-amounts.store', () => {
 			store.setSwaps({
 				swaps: evmSwaps,
 				amountForSwap: '990000',
-				selectedProvider: evmSwaps[0],
-				amountSetToMax: true
+				selectedProvider: evmSwaps[0]
 			});
 
 			// The pick now belongs to the new amount: a refresh there keeps it.
@@ -473,8 +474,9 @@ describe('swap-amounts.store', () => {
 			expect(state?.manuallySelectedProviderKey).toBe(SwapProvider.NEAR_INTENTS);
 		});
 
-		it('should release the selection on the first Max press', () => {
-			const store = initSwapAmountsStore();
+		it('should release a selection made before Max on the first Max press', () => {
+			const amountSetToMax = writable(false);
+			const store = initSwapAmountsStore({ amountSetToMax });
 
 			store.setSwaps({
 				swaps: evmSwaps,
@@ -484,11 +486,36 @@ describe('swap-amounts.store', () => {
 
 			store.setManualProvider(evmSwaps[1]);
 
+			amountSetToMax.set(true);
 			store.setSwaps({
 				swaps: evmSwaps,
 				amountForSwap: '5000000',
-				selectedProvider: evmSwaps[0],
-				amountSetToMax: true
+				selectedProvider: evmSwaps[0]
+			});
+
+			const state = get(store);
+
+			expect(state?.selectedProvider?.provider).toBe(SwapProvider.VELORA);
+			expect(state?.manuallySelectedProviderKey).toBeUndefined();
+		});
+
+		it('should release a selection made at Max for a typed amount', () => {
+			const amountSetToMax = writable(true);
+			const store = initSwapAmountsStore({ amountSetToMax });
+
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: '5000000',
+				selectedProvider: evmSwaps[0]
+			});
+
+			store.setManualProvider(evmSwaps[1]);
+
+			amountSetToMax.set(false);
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: '2000000',
+				selectedProvider: evmSwaps[0]
 			});
 
 			const state = get(store);

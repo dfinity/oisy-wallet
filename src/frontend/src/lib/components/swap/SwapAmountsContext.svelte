@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, untrack, type Snippet } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
-	import { readable } from 'svelte/store';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import {
 		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
@@ -22,7 +21,6 @@
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
-	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { SwapAmountTooLowError, SwapViaIntermediateTokenError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapProvider } from '$lib/types/swap';
@@ -53,10 +51,6 @@
 	}: Props = $props();
 
 	const { store, activity } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
-	// The store needs to know which rounds Max set, so a manual pick made at Max survives Max
-	// applying its amount again after the picked provider's fee.
-	const amountSetToMax =
-		getContext<SwapContext | undefined>(SWAP_CONTEXT_KEY)?.amountSetToMax ?? readable(false);
 
 	const sourceTokenId = $derived(sourceToken?.id);
 	const destinationTokenId = $derived(destinationToken?.id);
@@ -203,8 +197,7 @@
 			store.setSwaps({
 				swaps: swapAmounts,
 				amountForSwap: parsedAmount,
-				selectedProvider: swapAmounts[0],
-				amountSetToMax: $amountSetToMax
+				selectedProvider: swapAmounts[0]
 			});
 		} catch (err: unknown) {
 			if (!isCurrentRequest()) {
