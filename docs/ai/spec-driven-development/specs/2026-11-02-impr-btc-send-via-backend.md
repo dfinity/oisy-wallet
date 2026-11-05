@@ -560,9 +560,13 @@ Decided in PR 5:
 - The dust constant is `BTC_CHANGE_DUST_THRESHOLD_SATOSHIS` (1 000).
 - `buildBtcSendPsbt` takes each input's `witnessUtxo` script from `changeAddress`, which is the
   wallet's P2WPKH address in a send. If it is not the signer's own, signing refuses every input.
-- `btcAddressToOutputScript` lands in PR 5, in `btc-address.utils.ts`, because the builder needs
-  it. It comes with its network check and the tests for P2TR without `initEccLib` and for
-  wrong-network addresses. PR 6 uses it for the fee sizing.
+- `btcAddressToOutputScript` lands in PR 5 because the builder needs it. It comes with its network
+  check and the tests for P2TR without `initEccLib` and for wrong-network addresses. PR 6 uses it
+  for the fee sizing.
+- It lives in `btc-psbt.utils.ts`, not `btc-address.utils.ts`. The ICRC wallet worker imports
+  `btc-address.utils.ts` through `send.utils.ts`, and workers share no chunks with the app, so
+  bitcoinjs-lib there added 208 KB to the bundle, over CI's 100 KB limit. No worker imports
+  `btc-psbt.utils.ts`, nor the fee and send modules that PRs 6 and 8 change. Keep it that way.
 
 ### Frontend: fee estimation by output script
 
