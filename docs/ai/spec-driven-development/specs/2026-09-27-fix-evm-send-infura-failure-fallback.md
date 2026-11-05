@@ -69,9 +69,10 @@ learn how often Infura fails.
 - Before reporting a submission as failed, OISY looks its hash up on Alchemy. If the network knows
   it, the submission succeeded.
 - The user is told Infura's error, whatever Alchemy answered. When Infura refuses the transaction
-  outright (the account cannot pay for it, or it is invalid), that refusal is the reason. When it
-  fails the request in any other way, it may have passed the transaction on, so a refusal from
-  Alchemy afterwards answers only Alchemy's own attempt.
+  outright (the account cannot pay for it, or it is invalid), that refusal is the reason, and the
+  transaction is not handed to Alchemy at all: Alchemy could relay it once the balance or the base
+  fee has changed. When Infura fails the request in any other way, it may have passed the
+  transaction on, so a refusal from Alchemy afterwards answers only Alchemy's own attempt.
 - A submission Infura does not answer within 30 seconds counts as failed, which is safe for the same
   reason. Its request stays open, though, and a success Infura still gives while Alchemy is asked
   is taken, as is one Alchemy still gives while the transaction is looked up.
@@ -164,9 +165,9 @@ PR 1:
   or the WalletConnect dApp, receives the hash it would have received from Infura.
 - Alchemy answers that it already holds the transaction: success.
 - Both fail, but Alchemy knows the hash: success.
-- Both fail and the hash is unknown: failure, carrying the most specific reason either provider
-  gave.
+- Both fail and the hash is unknown: failure with Infura's error, whatever Alchemy answered.
 - Infura accepts: Alchemy is not asked.
+- Infura refuses outright: Alchemy is not asked.
 - A network without Infura: one submission, as today.
 - With the kill switch off, every call behaves as today.
 - Each fallback is counted in analytics with its operation, network and outcome, and with no
