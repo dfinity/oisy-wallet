@@ -77,7 +77,10 @@ const twoOffersCompared = replacePlaceholders(en.swap.text.smart_swap_offers_com
 });
 // The gain sentence around its amount, which is a separate, coloured element.
 const gainSentence = new RegExp(
-	en.swap.text.smart_swap_gain.split('$amount')[1].trim().replace(/\./g, '\\.')
+	en.swap.text.smart_swap_gain
+		.split('$amount')[1]
+		.trim()
+		.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 );
 
 describe('SwapProvider form cell', () => {
