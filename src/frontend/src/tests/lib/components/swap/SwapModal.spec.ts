@@ -15,8 +15,9 @@ import {
 import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext, type SwapContext } from '$lib/stores/swap.store';
+import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('SwapModal', () => {
@@ -36,6 +37,31 @@ describe('SwapModal', () => {
 				[IC_TOKEN_FEE_CONTEXT_KEY, { store: icTokenFeeStore }]
 			])
 		});
+
+	describe('slippage', () => {
+		const slippageName = new RegExp(`^${en.swap.text.max_slippage} `);
+
+		it('should show the slippage in the header, right before the close button', () => {
+			const { getByRole, getByTestId } = renderModal();
+
+			const trigger = getByRole('button', { name: slippageName });
+
+			expect(trigger.nextElementSibling).toBe(getByTestId('close-modal'));
+			expect(within(trigger).getByText('1.5%')).toBeInTheDocument();
+		});
+
+		it('should hide the slippage once the swap leaves its form step', async () => {
+			const { getAllByText, queryByRole, getByTestId } = renderModal();
+
+			await fireEvent.click(getAllByText(en.tokens.text.select_token)[0]);
+
+			await waitFor(() =>
+				expect(getByTestId('modal-title')).toHaveTextContent(en.swap.text.select_source_token)
+			);
+
+			expect(queryByRole('button', { name: slippageName })).not.toBeInTheDocument();
+		});
+	});
 
 	// The swap context outlives the modal: a navigation closes the modal without its own `close`.
 	it('should reset the swap context when destroyed without being closed', () => {

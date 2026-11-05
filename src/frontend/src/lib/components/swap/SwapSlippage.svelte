@@ -1,145 +1,69 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
-	import IconGixWarning from '$lib/components/icons/IconGixWarning.svelte';
-	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
-	import TokenInputCurrency from '$lib/components/tokens/TokenInputCurrency.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Collapsible from '$lib/components/ui/Collapsible.svelte';
-	import {
-		SWAP_SLIPPAGE_PRESET_VALUES,
-		SWAP_SLIPPAGE_VALUE_DECIMALS,
-		SWAP_SLIPPAGE_WARNING_VALUE
-	} from '$lib/constants/swap.constants';
+	import { getContext } from 'svelte';
+	import IconSettings from '$lib/components/icons/lucide/IconSettings.svelte';
+	import SwapSlippageEditor from '$lib/components/swap/SwapSlippageEditor.svelte';
+	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { fade } from '$lib/utils/transitions.utils';
+	import type { SwapSlippageStatus } from '$lib/types/swap';
+	import {
+		formatSwapSlippageShort,
+		getSwapSlippageInvalidValue,
+		getSwapSlippageStatus
+	} from '$lib/utils/swap.utils';
 
 	interface Props {
 		slippageValue: OptionAmount;
-		name?: string;
-		maxSlippageInvalidValue: number;
 	}
 
-	let {
-		slippageValue = $bindable(undefined),
-		name = 'swap-slippage',
-		maxSlippageInvalidValue
-	}: Props = $props();
+	let { slippageValue = $bindable(undefined) }: Props = $props();
+
+	const { sourceToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	let maxSlippageInvalidValue = $derived(getSwapSlippageInvalidValue($sourceToken?.network.id));
 
 	let parsedValue = $derived(nonNullish(slippageValue) ? Number(slippageValue) : 0);
 
-	let slippageValueWarning = $derived(
-		parsedValue < maxSlippageInvalidValue && parsedValue >= SWAP_SLIPPAGE_WARNING_VALUE
-	);
+	let status = $derived(getSwapSlippageStatus({ slippageValue, maxSlippageInvalidValue }));
 
-	let slippageValueError = $derived(parsedValue >= maxSlippageInvalidValue || parsedValue <= 0);
+	let visible = $state(false);
 
-	let cmp = $state<Collapsible | undefined>();
-	let expanded = $state(false);
-
-	const extendedToggleContent = () => {
-		expanded = !expanded;
-		cmp?.toggleContent();
+	// Background only: coloured text on these tints fails 4.5:1.
+	const tints: Record<SwapSlippageStatus, string> = {
+		valid: 'bg-brand-subtle-20 hover:bg-brand-subtle-30',
+		warning: 'bg-warning-subtle-10 hover:bg-warning-subtle-30',
+		invalid: 'bg-error-subtle-10 hover:bg-error-subtle-30'
 	};
 
-	let focused = $state(false);
-	const onFocus = () => (focused = true);
-	const onBlur = () => (focused = false);
-
-	const onPresetValueClick = (value: OptionAmount) => {
-		slippageValue = value;
-
-		extendedToggleContent();
-	};
+	let button = $state<HTMLButtonElement | undefined>();
 </script>
 
-<div class="mt-6 mb-2 flex items-center">
-	<span class="text-sm text-tertiary">{$i18n.swap.text.max_slippage}</span>
+<!-- Label is sr-only so the pill fits the 320 px header; the name still reads "Max slippage 1.5%". -->
+<button
+	bind:this={button}
+	class={`hit-area relative me-3 flex items-center gap-1 rounded-md px-2 py-0.5 text-sm font-bold whitespace-nowrap text-primary hit-area-touch press ${tints[status]}`}
+	aria-expanded={visible}
+	aria-haspopup="dialog"
+	onclick={() => (visible = true)}
+	type="button"
+>
+	<span class="sr-only">{$i18n.swap.text.max_slippage} </span>
+	<span>{formatSwapSlippageShort(parsedValue)}%</span>
 
-	<button
-		class="ml-2 flex gap-1 rounded-md px-2 py-0.5 text-sm font-bold hover:bg-brand-subtle-30"
-		class:bg-brand-subtle-20={!slippageValueError && !slippageValueWarning}
-		class:bg-error-subtle-10={slippageValueError}
-		class:bg-warning-subtle-10={slippageValueWarning}
-		class:hover:bg-brand-subtle-30={!slippageValueError && !slippageValueWarning}
-		class:hover:bg-error-subtle-30={slippageValueError}
-		class:hover:bg-warning-subtle-30={slippageValueWarning}
-		class:text-brand-primary={!slippageValueError && !slippageValueWarning}
-		class:text-error-primary={slippageValueError}
-		class:text-warning-primary={slippageValueWarning}
-		aria-label={$i18n.swap.text.max_slippage}
-		onclick={extendedToggleContent}
-	>
-		<span>{parsedValue}%</span>
+	<IconSettings size="16" />
+</button>
 
-		<span class="text-primary transition" class:rotate-180={expanded}>
-			<IconExpandMore size="16" />
-		</span>
-	</button>
-</div>
-
-<div class="-m-2">
-	<!-- todo: css hack, fix in gix component -->
-	<Collapsible bind:this={cmp} expandButton={false} externalToggle={true}>
-		{#snippet header()}{/snippet}
-		<div class="p-2"
-			><!-- offset above hack -->
-			<div class="flex items-center">
-				<TokenInputContainer error={slippageValueError} {focused} styleClass="h-12">
-					<TokenInputCurrency
-						{name}
-						decimals={SWAP_SLIPPAGE_VALUE_DECIMALS}
-						error={slippageValueError}
-						{onBlur}
-						{onFocus}
-						onInput={() => {}}
-						bind:value={slippageValue}
-					>
-						{#snippet innerEnd()}
-							<span class="text-tertiary">%</span>
-						{/snippet}
-					</TokenInputCurrency>
-				</TokenInputContainer>
-
-				{#each SWAP_SLIPPAGE_PRESET_VALUES as presetValue (presetValue)}
-					<Button
-						colorStyle="secondary-light"
-						onclick={() => onPresetValueClick(presetValue)}
-						paddingSmall={true}
-						styleClass={`${nonNullish(slippageValue) && presetValue === Number(slippageValue) ? 'border border-brand-primary' : ''} min-w-16 ml-3 h-12 flex-initial`}
-					>
-						{presetValue}%
-					</Button>
-				{/each}
-			</div>
-
-			<div
-				class="mt-2 text-sm text-tertiary"
-				class:text-error-primary={slippageValueError}
-				class:text-tertiary={!slippageValueError && !slippageValueWarning}
-				class:text-warning-primary={slippageValueWarning}
-			>
-				{#if slippageValueError}
-					<div in:fade
-						>{replacePlaceholders($i18n.swap.text.max_slippage_error, {
-							$maxSlippage: maxSlippageInvalidValue.toString()
-						})}</div
-					>
-				{:else if slippageValueWarning}
-					<div class="flex gap-1" in:fade>
-						<IconGixWarning />
-						<span>{$i18n.swap.text.max_slippage_warning}</span>
-					</div>
-				{:else}
-					<div in:fade>
-						{replacePlaceholders($i18n.swap.text.max_slippage_info, {
-							$maxSlippage: maxSlippageInvalidValue.toString()
-						})}</div
-					>
-				{/if}
-			</div>
+<!-- No 30 vh minimum: the sheet fits the editor. -->
+<ResponsivePopover {button} sheetContentClass="" title={$i18n.swap.text.max_slippage} bind:visible>
+	{#snippet content()}
+		<div class="w-full md:w-90">
+			<SwapSlippageEditor
+				{maxSlippageInvalidValue}
+				onPresetValueClick={() => (visible = false)}
+				bind:slippageValue
+			/>
 		</div>
-	</Collapsible>
-</div>
+	{/snippet}
+</ResponsivePopover>
