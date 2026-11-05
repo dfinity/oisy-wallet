@@ -5077,6 +5077,26 @@ describe('sol-instruction-summary.utils', () => {
 			).toEqual([]);
 		});
 
+		it('should name a pool whose payout the receiving account only transfers to itself', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						transfer({
+							source: elsewhere,
+							destination: elsewhere,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
 		it('should name a listed pool that pays elsewhere with a transfer that holds back a fee', () => {
 			expect(
 				paying({

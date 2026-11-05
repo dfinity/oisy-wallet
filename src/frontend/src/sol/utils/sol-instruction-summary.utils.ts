@@ -2512,6 +2512,11 @@ export const findSolProgramsPayingOthers = ({
 
 			const { source, destination, authority, value, credited = value } = payment;
 
+			// A transfer from an account to itself moves nothing.
+			if (nonNullish(source) && source === destination) {
+				return acc;
+			}
+
 			const waiting = passOn({ waiting: acc.waiting, account: source, parentIndex, value });
 
 			if (
