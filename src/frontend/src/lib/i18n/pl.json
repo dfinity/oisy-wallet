@@ -1149,6 +1149,7 @@
 			"solana_insufficient_funds_for_fee": "Twoje saldo SOL jest niewystarczające do pokrycia opłat transakcyjnych.",
 			"solana_insufficient_funds_for_rent": "Twoje saldo SOL jest niewystarczające do pokrycia czynszu wymaganego do utworzenia konta.",
 			"fee_calc_unsupported_standard": "Nie można obliczyć opłaty, ponieważ podany standard tokena nie jest obsługiwany.",
+			"memo_too_long": "Notatka jest za długa. Proszę ją skrócić i spróbować ponownie.",
 			"xrp_send_expired": "Twoje wysłanie $amount $symbol w sieci $network nie zostało ukończone: sieć nie uwzględniła go na czas. Nic nie opuściło Twojego portfela i bezpiecznie jest wysłać ponownie.",
 			"xrp_send_already_in_flight": "Wcześniejsza płatność XRP z tego adresu nie została jeszcze rozliczona. Nic nie zostało wysłane — poczekaj na jej zakończenie, co zajmuje około minuty, a następnie wyślij ponownie.",
 			"xrp_send_not_guarded": "Nie mogliśmy sprawdzić, czy wcześniejsza płatność XRP jest jeszcze rozliczana. Nic nie zostało wysłane — spróbuj ponownie za chwilę.",

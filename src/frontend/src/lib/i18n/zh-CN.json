@@ -1149,6 +1149,7 @@
 			"solana_insufficient_funds_for_fee": "您的SOL余额不足以支付交易费用。",
 			"solana_insufficient_funds_for_rent": "您的SOL余额不足以支付创建账户所需的租金。",
 			"fee_calc_unsupported_standard": "由于提供的代币标准不受支持，无法计算费用。",
+			"memo_too_long": "备注太长。请缩短后重试。",
 			"xrp_send_expired": "您在 $network 上发送 $amount $symbol 未能完成：网络未及时收录。您的钱包中没有任何资金转出，可以安全地重新发送。",
 			"xrp_send_already_in_flight": "此地址上一笔 XRP 付款尚未结算完成。未发送任何内容——请等待其完成，大约需要一分钟，然后再次发送。",
 			"xrp_send_not_guarded": "我们无法检查上一笔 XRP 付款是否仍在结算。未发送任何内容——请稍后重试。",
