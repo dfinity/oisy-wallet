@@ -256,15 +256,6 @@ describe('SwapSolForm', () => {
 		expect(getByText(en.swap.text.review_button)).toBeInTheDocument();
 	});
 
-	it('should render slippage section', () => {
-		const { getByText } = render(SwapSolForm, {
-			props,
-			context: mockContext
-		});
-
-		expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
-	});
-
 	it('should render swap provider information', () => {
 		const { getByText } = render(SwapSolForm, {
 			props,

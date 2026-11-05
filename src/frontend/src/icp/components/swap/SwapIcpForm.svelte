@@ -329,9 +329,9 @@
 	onCustomValidate={customValidate}
 	{onNext}
 	{onShowTokensList}
+	{slippageValue}
 	bind:swapAmount
 	bind:receiveAmount
-	bind:slippageValue
 	bind:errorType
 >
 	{#snippet message()}
