@@ -170,9 +170,9 @@
 	onCustomValidate={customValidate}
 	{onNext}
 	{onShowTokensList}
+	{slippageValue}
 	bind:swapAmount
 	bind:receiveAmount
-	bind:slippageValue
 >
 	{#snippet message()}
 		{#if errorType === 'minimum-amount-not-reached'}
