@@ -1369,6 +1369,8 @@
 			"swap_provider": "स्वैप प्रदाता",
 			"smart_swap": "",
 			"finding_best_rate": "",
+			"smart_swap_offers": "",
+			"smart_swap_selected_offer": "",
 			"swap_provider_website": "वेबसाइट",
 			"swap_route": "स्वैप मार्ग",
 			"included_network_fees": "शामिल नेटवर्क शुल्क",

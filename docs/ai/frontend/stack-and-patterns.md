@@ -463,6 +463,14 @@ the slot grow to the name. During foreground comparison,
 stale details. Custom sheet triggers receive `{ open, disabled }` and must forward disabled
 to their native control. Other disclosure callers retain the default enabled behavior.
 
+The provider step (`SwapProviderListModal`, titled "OISY Smart Swap") opens on the selected
+offer: a grey card (`rounded-lg border border-tertiary bg-secondary px-4 py-3`) with the provider
+and its `SwapProviderDetails`, without the website each row already shows, then every offer
+below. The card is the one mark of the pick, so the rows carry no check; with a single offer the
+card is the whole step, with no list and no Best Rate. Tapping the offer in use only goes back:
+`setManualProvider` would pin the automatic pick, and a better offer at the same amount could no
+longer replace it. The step leaves with Back, since nothing is cancelled.
+
 No hard cuts in the section. The Smart Swap row and the fee row (`SwapFeeRow`) open and close
 with `slide` (height, 250 ms) while their content fades up 4 px with `fly`; the fee row follows
 `SWAP_DETAILS_ROW_STAGGER_MS` (60 ms) later. The 12 px gap is `pb-3` inside the sliding row, not

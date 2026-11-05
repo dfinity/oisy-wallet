@@ -25,6 +25,6 @@ export const swapWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps<Wizard
 	},
 	{
 		name: WizardStepsSwap.SELECT_PROVIDER,
-		title: i18n.swap.text.select_swap_provider
+		title: i18n.swap.text.smart_swap
 	}
 ];
