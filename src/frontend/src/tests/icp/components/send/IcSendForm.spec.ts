@@ -3,6 +3,7 @@ import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 import {
 	SEND_DESTINATION_SECTION,
+	SEND_FORM_NEXT_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
@@ -55,22 +56,52 @@ describe('IcSendForm', () => {
 		expect(toolbar).not.toBeNull();
 	});
 
-	it('should not render the memo input field for non-ICRC destinations', () => {
+	it('should not render the memo input field for non-IC destinations', () => {
 		const { queryByPlaceholderText } = render(IcSendForm, {
 			props,
 			context: mockContext
 		});
 
 		expect(queryByPlaceholderText(en.send.placeholder.enter_memo)).toBeNull();
+		expect(queryByPlaceholderText(en.send.placeholder.enter_memo_nat64)).toBeNull();
 	});
 
-	it('should render the memo input field for ICRC destinations', () => {
+	it('should render the free-text memo input field for ICRC destinations', () => {
 		const { getByPlaceholderText } = render(IcSendForm, {
 			props: { ...props, destination: 'rrkah-fqaaa-aaaaa-aaaaq-cai' },
 			context: mockContext
 		});
 
 		expect(getByPlaceholderText(en.send.placeholder.enter_memo)).toBeInTheDocument();
+	});
+
+	it('should render the nat64 memo input field for classic ICP destinations', () => {
+		const { getByPlaceholderText } = render(IcSendForm, {
+			props: {
+				...props,
+				destination: '6c04faf793b42b156206f805d13ba1b3b697ec18f519e6a11484eed091859d5a'
+			},
+			context: mockContext
+		});
+
+		expect(getByPlaceholderText(en.send.placeholder.enter_memo_nat64)).toBeInTheDocument();
+	});
+
+	it('should show an error and disable submit for an invalid nat64 memo', () => {
+		const context = initSendContext({ token: ETHEREUM_TOKEN });
+		context.sendMemo.set('not-a-number');
+		const contextWithMemo = new Map([[SEND_CONTEXT_KEY, context]]);
+
+		const { getByText, getByTestId } = render(IcSendForm, {
+			props: {
+				...props,
+				destination: '6c04faf793b42b156206f805d13ba1b3b697ec18f519e6a11484eed091859d5a'
+			},
+			context: contextWithMemo
+		});
+
+		expect(getByText(en.send.assertion.invalid_nat64_memo)).toBeInTheDocument();
+		expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
 	});
 
 	it('should not render the fee if the user is the minting account', () => {

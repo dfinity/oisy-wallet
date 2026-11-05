@@ -1063,6 +1063,7 @@
 			"enter_recipient_address": "Saisir l'adresse du destinataire, le nom ou l'alias",
 			"enter_wallet_address": "Saisir l'adresse du portefeuille, le nom ou l'alias",
 			"enter_memo": "Saisir un mémo (optionnel)",
+			"enter_memo_nat64": "",
 			"xrp_destination_tag": "Saisir le tag de destination XRP (facultatif)",
 			"select_network": "Sélectionner le réseau",
 			"search_nfts": "Rechercher des objets de collection"
@@ -1094,6 +1095,7 @@
 			"unknown_cketh": "Le token ckETH ne peut pas être récupéré.",
 			"destination_address_invalid": "L'adresse de destination est invalide.",
 			"amount_invalid": "Le montant est invalide.",
+			"invalid_nat64_memo": "",
 			"xrp_destination_tag_invalid": "Le tag de destination XRP doit être un nombre entier entre 0 et 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Fonds insuffisants : le montant doit laisser de quoi couvrir les frais et la réserve de compte XRP requise.",
