@@ -306,6 +306,17 @@ describe('eth-error.utils', () => {
 			expect(mapEthereumErrorMsg(err)).toBe(en.send.error.ethereum_transaction_unconfirmed);
 		});
 
+		// An earlier attempt may have relayed the swap, so the refusal of the last says nothing of it.
+		it('says the outcome is unknown for a swap refused only after an attempt that may have relayed it', () => {
+			const refusal = Object.assign(new Error('insufficient funds'), {
+				code: 'INSUFFICIENT_FUNDS'
+			});
+
+			expect(mapEthereumErrorMsg(new SwapBroadcastOutcomeUnknownError({ cause: refusal }))).toBe(
+				en.send.error.ethereum_transaction_unconfirmed
+			);
+		});
+
 		it('leaves an error it cannot explain to the caller', () => {
 			expect(mapEthereumErrorMsg(new Error('nonce too low'))).toBeUndefined();
 

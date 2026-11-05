@@ -397,7 +397,10 @@ const isErrorOfKind = ({
 	kind
 }: {
 	err: unknown;
-	kind: typeof EthNonceReadError | typeof EthSubmissionUnconfirmedError;
+	kind:
+		| typeof EthNonceReadError
+		| typeof EthSubmissionUnconfirmedError
+		| typeof SwapBroadcastOutcomeUnknownError;
 }): boolean => collectErrorRecords({ err }).some((record) => record instanceof kind);
 
 /**
@@ -407,7 +410,8 @@ const isErrorOfKind = ({
  * was never signed, so it was not sent and retrying it is safe. One whose submission every provider
  * failed without a word may have reached the network all the same, and a retry would be signed with
  * the next nonce, so the message sends the user to their activity first and never says it was not
- * sent.
+ * sent. A swap whose broadcast outcome is unknown gets the same message, even when its last attempt
+ * was refused: an earlier attempt may have relayed it, and the refusal answers only the last one.
  *
  * Resolves i18n strings imperatively so callers don't need to pass them. Returns `undefined` when
  * the error is not one we can explain, allowing callers to fall through to their own generic
@@ -422,7 +426,10 @@ export const mapEthereumErrorMsg = (err: unknown): string | undefined => {
 		return error.ethereum_transaction_not_sent;
 	}
 
-	if (isErrorOfKind({ err, kind: EthSubmissionUnconfirmedError })) {
+	if (
+		isErrorOfKind({ err, kind: EthSubmissionUnconfirmedError }) ||
+		isErrorOfKind({ err, kind: SwapBroadcastOutcomeUnknownError })
+	) {
 		return error.ethereum_transaction_unconfirmed;
 	}
 
