@@ -342,7 +342,10 @@
 			</TokenInputNetworkWrapper>
 		</div>
 
-		{@render message?.()}
+		<!-- mt-4 like the notices below; when empty, its margin collapses into the next row's. -->
+		<div class="mt-4">
+			{@render message?.()}
+		</div>
 
 		{#if nonNullish(twoSwapsQuoteError)}
 			{#key twoSwapsQuoteError.intermediateToken.id}
