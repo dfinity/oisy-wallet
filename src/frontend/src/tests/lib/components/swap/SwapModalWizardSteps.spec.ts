@@ -312,6 +312,11 @@ describe('SwapModalWizardSteps', () => {
 		const openList = async ({ rendered, side }: { rendered: Rendered; side: 0 | 1 }) => {
 			await fireEvent.click(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[side]);
 			await rendered.rerender({ currentStep: tokensListStep, steps, modal: mockModal });
+
+			// The form plays its exit first and stays until it ends, with its own token buttons.
+			await waitFor(() =>
+				expect(screen.queryByTestId(SWAP_SWITCH_TOKENS_BUTTON)).not.toBeInTheDocument()
+			);
 		};
 
 		const showForm = async (rendered: Rendered) => {
