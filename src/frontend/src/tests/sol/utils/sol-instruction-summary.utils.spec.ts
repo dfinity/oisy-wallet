@@ -59,6 +59,7 @@ import {
 } from '@solana-program/token-2022';
 import {
 	AccountRole,
+	createNoopSigner,
 	decompileTransactionMessage,
 	getCompiledTransactionMessageDecoder,
 	address as toAddress
@@ -846,7 +847,7 @@ describe('sol-instruction-summary.utils', () => {
 			});
 
 			it('should read the same opening stated by the message itself', () => {
-				const signer = (address: string) => ({ address }) as never;
+				const signer = (address: string) => createNoopSigner(toAddress(address));
 
 				expect(
 					mapSolInstructionSummaries({
@@ -934,7 +935,7 @@ describe('sol-instruction-summary.utils', () => {
 				});
 
 				it('should read the same opening stated by the message itself', () => {
-					const signer = (address: string) => ({ address }) as never;
+					const signer = (address: string) => createNoopSigner(toAddress(address));
 
 					expect(
 						mapSolInstructionSummaries({
@@ -3230,7 +3231,7 @@ describe('sol-instruction-summary.utils', () => {
 			const them = '9zsjmwXjZzuKfArqhLDpvcvLKUxLZfCzeMcqhAcPr8Jm';
 			const mint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
-			const signer = (address: string) => ({ address }) as never;
+			const signer = (address: string) => createNoopSigner(toAddress(address));
 
 			// A message delivers kit instructions; the review decodes them before the effects are
 			// read. Going straight to the mapper would test a path no caller takes.

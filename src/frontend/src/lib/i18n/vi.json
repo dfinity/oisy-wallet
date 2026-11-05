@@ -1212,7 +1212,10 @@
 			"unknown": "OISY chưa thể biết việc nạp đã thành công hay chưa. Nếu đã thành công, hoạt động $token của bạn sẽ hiển thị. Hãy nạp lại để gửi lại cùng một lần nạp: lần nạp đó chỉ có thể thành công một lần. Một lần nạp mới hoặc đã thay đổi sẽ thêm cycles một lần nữa nếu lần nạp này đã thành công.",
 			"unknown_fresh": "OISY chưa thể biết lần nạp gần nhất của bạn đã thành công hay chưa. Nếu đã thành công, lần nạp này sẽ thêm cycles một lần nữa. Hãy kiểm tra hoạt động $token trước.",
 			"sent_to_canister": "Gửi $token đến một canister không nạp cho canister đó. Số $token sẽ vào tài khoản của canister, và canister chỉ nhận được cycles nếu mã của chính nó rút chúng ra.",
-			"sent_to_canister_top_up": "Để thêm cycles cho một canister, hãy dùng “Nạp” trên trang $token."
+			"sent_to_canister_top_up": "Để thêm cycles cho một canister, hãy dùng “Nạp” trên trang $token.",
+			"choice_send": "Gửi $token",
+			"choice_send_description": "Gửi token $token đến một tài khoản khác. Gửi $token đến một canister không nạp cho canister đó.",
+			"choice_top_up_description": "Chuyển đổi token $token thành cycles để nạp cho bất kỳ canister nào."
 		},
 		"error": {
 			"invalid_canister_id": "Nhập ID canister. Không thể nạp cho principal người dùng, ID tài khoản và địa chỉ trên các mạng khác.",
@@ -1364,6 +1367,13 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "Đang làm mới giao diện người dùng",
 			"swap_provider": "Nhà cung cấp hoán đổi",
+			"smart_swap": "",
+			"finding_best_rate": "",
+			"smart_swap_gain": "",
+			"smart_swap_best_of_offers": "",
+			"smart_swap_offers_compared": "",
+			"smart_swap_offers": "",
+			"smart_swap_selected_offer": "",
 			"swap_provider_website": "Trang web",
 			"swap_route": "Lộ trình hoán đổi",
 			"included_network_fees": "Phí mạng đã bao gồm",
@@ -1371,7 +1381,6 @@
 			"best_rate": "Tỷ giá tốt nhất",
 			"expected_minimum": "Tối thiểu dự kiến",
 			"you_receive": "Bạn nhận được",
-			"select": "Chọn >",
 			"select_swap_provider": "Chọn nhà cung cấp hoán đổi",
 			"open_icp_swap": "Mở trang web ICP Swap",
 			"open_instructions_link": "Mở liên kết hướng dẫn",
@@ -1430,7 +1439,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
@@ -1857,6 +1867,7 @@
 			"allowance_increase": "Yêu cầu này tăng hạn mức của người chi tiêu bên dưới thêm số tiền hiển thị, ngoài số tiền mà họ đã có thể chi. Người chi tiêu có thể chuyển số lượng token đó ra khỏi ví của bạn bất cứ lúc nào, cho đến khi bạn thu hồi quyền này.",
 			"allowance_decrease": "Yêu cầu này giảm hạn mức của người chi tiêu bên dưới theo số tiền hiển thị. Bản thân yêu cầu này không chuyển bất kỳ khoản tiền nào.",
 			"unverifiable_erc20_request": "Yêu cầu này liên quan đến một token mà OISY không thể xác định hoặc giải mã. Nội dung hiển thị có thể khác với nội dung thực sự sẽ được ký, vì vậy việc phê duyệt đã bị vô hiệu hóa.",
+			"unlisted_erc20_request": "OISY không liệt kê token này. Ký hiệu và số tiền hiển thị được đọc từ chính hợp đồng của token, và bất kỳ ai cũng có thể tạo token với ký hiệu bất kỳ. Hãy kiểm tra địa chỉ token trước khi phê duyệt.",
 			"token_call_with_value": "Ngoài số lượng token hiển thị bên dưới, yêu cầu này còn gửi $amount đến hợp đồng token. Giao dịch chuyển hoặc phê duyệt token không gửi $symbol, vì vậy vì sự an toàn của bạn, OISY sẽ không ký yêu cầu này.",
 			"unverifiable_approval_for_all_request": "Yêu cầu này sẽ trao cho một bên vận hành quyền kiểm soát một bộ sưu tập NFT, và OISY không thể giải mã đó là bên vận hành nào. Nội dung hiển thị có thể khác với nội dung thực sự sẽ được ký, vì vậy việc phê duyệt đã bị vô hiệu hóa.",
 			"approval_for_all_grant": "Yêu cầu này cho phép bên vận hành bên dưới chuyển bất kỳ NFT nào trong bộ sưu tập này mà bạn sở hữu hiện tại hoặc có được sau này, vào bất kỳ lúc nào, cho đến khi bạn thu hồi quyền này. Bản thân yêu cầu này không chuyển bất kỳ khoản tiền nào.",
@@ -2485,6 +2496,7 @@
 			"create": "Không thể tạo liên hệ",
 			"update": "Không thể cập nhật liên hệ",
 			"delete": "Không thể xóa liên hệ",
+			"load": "Không thể tải danh sách liên hệ",
 			"name_too_long": "Vui lòng giữ tên không quá $maxCharacters ký tự."
 		}
 	},

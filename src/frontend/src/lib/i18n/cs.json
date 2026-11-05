@@ -1212,7 +1212,10 @@
 			"unknown": "OISY zatím nedokáže určit, zda dobití proběhlo. Pokud ano, uvidíte ho v aktivitě $token. Dobijte znovu, abyste stejné dobití odeslali znovu: může proběhnout jen jednou. Nové nebo změněné dobití by přidalo cykly znovu, pokud toto proběhlo.",
 			"unknown_fresh": "OISY zatím nedokáže určit, zda vaše poslední dobití proběhlo. Pokud ano, toto dobití přidá cykly znovu. Nejprve zkontrolujte aktivitu $token.",
 			"sent_to_canister": "Odesláním $token do kanistru se kanistr nedobije. $token skončí na účtu kanistru a kanistr získá cykly, jen pokud si je vybere jeho vlastní kód.",
-			"sent_to_canister_top_up": "Chcete-li kanistru přidat cykly, použijte „Dobít“ na stránce $token."
+			"sent_to_canister_top_up": "Chcete-li kanistru přidat cykly, použijte „Dobít“ na stránce $token.",
+			"choice_send": "Odeslat $token",
+			"choice_send_description": "Odešlete tokeny $token na jiný účet. Odesláním $token do kanistru se kanistr nedobije.",
+			"choice_top_up_description": "Převeďte tokeny $token na cykly a dobijte jimi libovolný kanistr."
 		},
 		"error": {
 			"invalid_canister_id": "Zadejte ID kanistru. Uživatelské principaly, ID účtů a adresy v jiných sítích nelze dobít.",
@@ -1364,6 +1367,13 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "Aktualizace uživatelského rozhraní",
 			"swap_provider": "Poskytovatel výměny",
+			"smart_swap": "",
+			"finding_best_rate": "",
+			"smart_swap_gain": "",
+			"smart_swap_best_of_offers": "",
+			"smart_swap_offers_compared": "",
+			"smart_swap_offers": "",
+			"smart_swap_selected_offer": "",
 			"swap_provider_website": "Webové stránky",
 			"swap_route": "Trasa výměny",
 			"included_network_fees": "Zahrnuté síťové poplatky",
@@ -1371,7 +1381,6 @@
 			"best_rate": "Nejlepší kurz",
 			"expected_minimum": "Očekávané minimum",
 			"you_receive": "Obdržíte",
-			"select": "Vybrat >",
 			"select_swap_provider": "Vybrat poskytovatele výměny",
 			"open_icp_swap": "Otevřít webové stránky ICP Swap",
 			"open_instructions_link": "Otevřít odkaz na pokyny",
@@ -1430,7 +1439,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
@@ -1857,6 +1867,7 @@
 			"allowance_increase": "Tento požadavek zvyšuje limit útraty níže uvedeného příjemce o zobrazenou částku, nad rámec toho, co již může utratit. Příjemce může tuto částku tokenu kdykoli převést z vaší peněženky, dokud toto oprávnění neodvoláte.",
 			"allowance_decrease": "Tento požadavek snižuje limit útraty níže uvedeného příjemce o zobrazenou částku. Sám o sobě nepřevádí žádné prostředky.",
 			"unverifiable_erc20_request": "Tento požadavek se týká tokenu, který OISY nedokáže identifikovat ani dekódovat. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je schválení zakázáno.",
+			"unlisted_erc20_request": "OISY tento token neuvádí. Jeho symbol a zobrazená částka se čtou přímo z kontraktu tokenu a kdokoli může vytvořit token s libovolným symbolem. Před schválením zkontrolujte adresu tokenu.",
 			"token_call_with_value": "Kromě níže uvedené částky tokenu posílá tento požadavek $amount na smlouvu tokenu. Převod ani schválení tokenu $symbol neposílá, proto ho OISY pro vaši bezpečnost nepodepíše.",
 			"unverifiable_approval_for_all_request": "Tento požadavek by předal operátorovi kontrolu nad NFT kolekcí a OISY nedokáže dekódovat, o kterého operátora se jedná. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je schválení zakázáno.",
 			"approval_for_all_grant": "Tento požadavek umožňuje níže uvedenému operátorovi převést jakékoli NFT v této kolekci, které nyní vlastníte nebo v budoucnu získáte, kdykoli, dokud toto oprávnění neodvoláte. Sám o sobě nepřevádí žádné prostředky.",
@@ -2485,6 +2496,7 @@
 			"create": "Nepodařilo se vytvořit kontakt",
 			"update": "Nepodařilo se aktualizovat kontakt",
 			"delete": "Nepodařilo se smazat kontakt",
+			"load": "Nepodařilo se načíst kontakty",
 			"name_too_long": "Název nesmí být delší než $maxCharacters znaků."
 		}
 	},

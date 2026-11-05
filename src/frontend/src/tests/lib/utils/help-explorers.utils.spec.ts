@@ -55,11 +55,12 @@ describe('help-explorers.utils', () => {
 			]);
 		});
 
-		it('links LI.FI Scan to the Ethereum address every LI.FI transfer leaves from', () => {
+		it('links LI.FI Scan to the Ethereum and Solana addresses LI.FI transfers leave from', () => {
 			const [, , lifi] = buildHelpExplorerGroups(allAddresses);
 
 			expect(lifi.links).toEqual([
-				{ chain: 'eth', url: `${LIFI_EXPLORER_URL}/wallet/${mockEthAddress}` }
+				{ chain: 'eth', url: `${LIFI_EXPLORER_URL}/wallet/${mockEthAddress}` },
+				{ chain: 'sol', url: `${LIFI_EXPLORER_URL}/wallet/${mockSolAddress}` }
 			]);
 		});
 
@@ -102,9 +103,10 @@ describe('help-explorers.utils', () => {
 				principal: mockPrincipalText
 			});
 
-			// Velora and LI.FI are EVM-only, so without an Ethereum address they have nothing to offer.
+			// Velora is EVM-only, so without an Ethereum address it has nothing to offer.
 			expect(groups.map(({ provider }) => provider)).toEqual([
 				SwapProvider.NEAR_INTENTS,
+				SwapProvider.LIFI,
 				SwapProvider.ONE_SEC
 			]);
 		});

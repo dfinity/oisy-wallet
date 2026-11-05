@@ -9,30 +9,24 @@ import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import {
 	LIFI_APPROVAL_RECEIPT_ATTEMPTS,
-	LIFI_APPROVAL_RECEIPT_POLL_MILLIS,
-	LIFI_ROW_DELETE_ATTEMPTS,
-	LIFI_ROW_DELETE_RETRY_DELAY_MILLIS
+	LIFI_APPROVAL_RECEIPT_POLL_MILLIS
 } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
-import { fetchLifiQuote } from '$lib/rest/lifi.rest';
-import {
-	createActiveUserTransaction,
-	deleteActiveUserTransaction
-} from '$lib/services/active-user-transactions.services';
 import { assertLifiEvmCalldata } from '$lib/services/lifi-calldata.services';
+import {
+	createLifiRow,
+	deleteLifiRow,
+	isSlippageExceeded,
+	requoteAtLeast
+} from '$lib/services/lifi-swap-execution.services';
 import { enableSwapDestinationToken, waitForSwapAllowance } from '$lib/services/swap.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { LifiFeeChangedError, LifiRouteUnsupportedError } from '$lib/types/errors';
+import { LifiFeeChangedError } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
 import type { SwapLifiEvmParams } from '$lib/types/swap';
 import { consoleError } from '$lib/utils/console.utils';
-import {
-	toLifiCreationRefs,
-	toLifiData,
-	toLifiExternalRefs
-} from '$lib/utils/lifi-active-tx.utils';
-import { isLifiRouteExecutable } from '$lib/utils/lifi-calldata.utils';
+import { toLifiCreationRefs, toLifiData } from '$lib/utils/lifi-active-tx.utils';
 import {
 	lifiApprovalCount,
 	lifiQuoteGas,
@@ -40,83 +34,19 @@ import {
 	withLifiGasBuffer,
 	withLifiReviewGasBuffer
 } from '$lib/utils/lifi-fee.utils';
-import { assertLifiQuote } from '$lib/utils/lifi-swap.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { Identity } from '@icp-sdk/core/agent';
 import { HTTPError, SDKError, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
 import type { TransactionRequest } from 'ethers/providers';
 import { makeError } from 'ethers/utils';
 import { get } from 'svelte/store';
-
-// 404 is "no available quotes", 422 "none of the available routes could generate a transaction".
-const isNoRouteError = (err: unknown): boolean =>
-	err instanceof SDKError &&
-	err.cause instanceof HTTPError &&
-	(err.cause.status === 404 || err.cause.status === 422);
 
 // Ethers' own error, which the wizard maps to the existing insufficient-funds copy.
 const insufficientFundsError = (transaction: TransactionRequest) =>
 	makeError('insufficient funds for the swap and its network fee', 'INSUFFICIENT_FUNDS', {
 		transaction
 	});
-
-// The prefix the wizard recognises a slippage error by.
-const SLIPPAGE_EXCEEDED = 'Slippage exceeded.';
-
-const isSlippageExceeded = (err: unknown): boolean =>
-	err instanceof Error && err.message.startsWith(SLIPPAGE_EXCEEDED);
-
-/**
- * Re-quotes `request` and refuses a quote that fails the trust checks, or whose route the calldata
- * binding would refuse. When no route comes back, or its minimum is below the one displayed, the
- * swap aborts as a slippage error.
- */
-const requoteAtLeast = async ({
-	request,
-	sourceNetworkId,
-	displayedToAmountMin
-}: {
-	request: QuoteRequestFromAmount;
-	sourceNetworkId: NetworkId;
-	displayedToAmountMin: bigint;
-}): Promise<LiFiStep> => {
-	let quote: LiFiStep;
-
-	try {
-		// A copy, because the SDK fills its defaults into the object it is given.
-		quote = await fetchLifiQuote({ ...request });
-	} catch (err: unknown) {
-		if (isNoRouteError(err)) {
-			throw new Error(`${SLIPPAGE_EXCEEDED} LI.FI no longer has a route for the swap.`, {
-				cause: err
-			});
-		}
-
-		throw err;
-	}
-
-	assertLifiQuote({ quote, request, sourceNetworkId });
-
-	// The pinned bridge does not pin the route's shape: a refreshed Across route can put a DEX swap
-	// before the bridge. Refused here, it costs no approval.
-	if (!isLifiRouteExecutable(quote)) {
-		throw new LifiRouteUnsupportedError(
-			`LI.FI's refreshed route via ${quote.tool} cannot be executed`
-		);
-	}
-
-	const toAmountMin = BigInt(quote.estimate.toAmountMin);
-
-	if (toAmountMin < displayedToAmountMin) {
-		throw new Error(
-			`${SLIPPAGE_EXCEEDED} LI.FI now guarantees ${toAmountMin}, below the ${displayedToAmountMin} displayed.`
-		);
-	}
-
-	return quote;
-};
 
 // LI.FI validates `allowExchanges` against its own list of exchange keys, and a route's swap step can
 // name a tool outside it: the pin is then refused as a bad request (400, code 1011, 2026-10-21).
@@ -300,24 +230,6 @@ const waitForApproval = async ({ networkId, hash }: { networkId: NetworkId; hash
 	}
 };
 
-// A delete that keeps failing leaves the row to the poller, which settles it as replaced or
-// dropped once its nonce is used.
-const deleteLifiRow = async ({ identity, id }: { identity: Identity; id: string }) => {
-	for (let attempt = 1; attempt <= LIFI_ROW_DELETE_ATTEMPTS; attempt++) {
-		try {
-			await deleteActiveUserTransaction({ identity, id });
-
-			return;
-		} catch (err: unknown) {
-			consoleError(err);
-		}
-
-		if (attempt < LIFI_ROW_DELETE_ATTEMPTS) {
-			await waitForMilliseconds(LIFI_ROW_DELETE_RETRY_DELAY_MILLIS);
-		}
-	}
-};
-
 /**
  * Executes a LI.FI swap from an EVM token, as `fetchVeloraMarketSwap` does a Velora one: approve
  * the pinned Diamond, then sign and broadcast LI.FI's transaction. LI.FI's quotes are unsigned, so
@@ -471,35 +383,21 @@ export const fetchLifiEvmSwap = async ({
 	let rowId: string | undefined;
 
 	const createRow = async ({ hash, nonce }: { hash: string; nonce: number }) => {
-		const id = crypto.randomUUID();
-
-		try {
-			await createActiveUserTransaction({
-				identity,
-				id,
-				data: rowData,
-				externalRefs: toLifiExternalRefs(
-					toLifiCreationRefs({
-						hash,
-						nonce,
-						quote,
-						sourceToken,
-						destinationToken,
-						amount: `${swapAmount}`,
-						usdSourceValue: nonNullish(sourceTokenExchangeRate)
-							? `${Number(swapAmount) * sourceTokenExchangeRate}`
-							: undefined
-					})
-				)
-			});
-		} catch (err: unknown) {
-			// The backend may have committed the row all the same, if only its answer was lost.
-			await deleteLifiRow({ identity, id });
-
-			throw err;
-		}
-
-		rowId = id;
+		rowId = await createLifiRow({
+			identity,
+			data: rowData,
+			refs: toLifiCreationRefs({
+				hash,
+				source: { nonce },
+				quote,
+				sourceToken,
+				destinationToken,
+				amount: `${swapAmount}`,
+				usdSourceValue: nonNullish(sourceTokenExchangeRate)
+					? `${Number(swapAmount) * sourceTokenExchangeRate}`
+					: undefined
+			})
+		});
 	};
 
 	try {

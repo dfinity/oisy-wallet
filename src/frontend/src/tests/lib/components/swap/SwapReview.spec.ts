@@ -1,4 +1,8 @@
 import SwapReview from '$lib/components/swap/SwapReview.svelte';
+import {
+	SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
+	SWAP_SLIPPAGE_WARNING_VALUE
+} from '$lib/constants/swap.constants';
 import * as userProviderAgreementsDerived from '$lib/derived/user-provider-agreements.derived';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type SwapContext, type SwapError } from '$lib/stores/swap.store';
@@ -98,6 +102,45 @@ describe('SwapReview', () => {
 			expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
 			expect(getByText('0.5%')).toBeInTheDocument();
 		});
+
+		it.each([
+			`${SWAP_SLIPPAGE_WARNING_VALUE}`,
+			'8',
+			`${SWAP_SLIPPAGE_VELORA_INVALID_VALUE - 0.01}`
+		])('should flag %s% as high without blocking the swap', (slippageValue) => {
+			const { context } = createSwapContext();
+
+			const { getByText } = render(SwapReview, {
+				props: { ...baseProps, slippageValue },
+				context
+			});
+
+			expect(getByText(en.swap.text.max_slippage_warning)).toBeInTheDocument();
+			expect(getByText(en.swap.text.swap_button).closest('button')).toBeEnabled();
+
+			const sign = getByText(`${slippageValue}%`).previousElementSibling;
+
+			expect(sign).toHaveTextContent('⚠');
+			expect(sign).toHaveClass('text-warning-primary');
+			expect(sign).toHaveAttribute('aria-hidden', 'true');
+			expect(getByText(`${slippageValue}%`).closest('.text-warning-primary')).toBeNull();
+		});
+
+		it.each(['0.5', `${SWAP_SLIPPAGE_WARNING_VALUE - 0.01}`])(
+			'should not warn about the risk at %s%',
+			(slippageValue) => {
+				const { context } = createSwapContext();
+
+				const { queryByText } = render(SwapReview, {
+					props: { ...baseProps, slippageValue },
+					context
+				});
+
+				expect(queryByText(en.swap.text.max_slippage_warning)).not.toBeInTheDocument();
+				expect(queryByText(`${slippageValue}%`)?.closest('.text-warning-primary')).toBeNull();
+				expect(queryByText('⚠')).not.toBeInTheDocument();
+			}
+		);
 
 		it('should render value difference label when exchange rates are provided', () => {
 			const { context } = createSwapContext();

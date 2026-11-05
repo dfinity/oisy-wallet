@@ -34,7 +34,7 @@ describe('swap.config', () => {
 				},
 				{
 					name: WizardStepsSwap.SELECT_PROVIDER,
-					title: en.swap.text.select_swap_provider
+					title: en.swap.text.smart_swap
 				}
 			]);
 		});

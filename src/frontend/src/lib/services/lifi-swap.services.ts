@@ -1,4 +1,5 @@
 import { LIFI_INTEGRATOR } from '$env/rest/lifi.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import {
 	LIFI_QUOTE_REFRESH_INTERVAL_MS,
 	LIFI_QUOTE_TIMEOUT_MS
@@ -14,6 +15,7 @@ import {
 } from '$lib/enums/plausible';
 import { fetchLifiQuote } from '$lib/rest/lifi.rest';
 import { trackEvent } from '$lib/services/analytics.services';
+import { loadLifiSolQuoteCeiling } from '$lib/services/lifi-sol-transaction.services';
 import {
 	LifiQuoteRejectedError,
 	LifiRouteUnsupportedError,
@@ -37,6 +39,10 @@ import {
 	findLifiListedToken,
 	mapLifiSwapResult
 } from '$lib/utils/lifi-swap.utils';
+import { isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
+import { resolveSwapTokenLookup } from '$lib/utils/swap-tokens-filter.utils';
+import { untilAborted } from '$lib/utils/timeout.utils';
+import { splTokens } from '$sol/derived/spl.derived';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	ChainId,
@@ -138,12 +144,11 @@ const toSwapOfferError = (
 			: { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE };
 	}
 
-	// `LIFI_QUOTE_TIMEOUT_MS` aborts the fetch, and the SDK wraps that abort as it does any error.
-	if (
-		err instanceof SDKError &&
-		err.cause instanceof DOMException &&
-		err.cause.name === 'TimeoutError'
-	) {
+	// `LIFI_QUOTE_TIMEOUT_MS` aborts the fetch, and the SDK wraps that abort as it does any error; a
+	// Solana ceiling read that outlasts it rejects with the abort unwrapped.
+	const abort = err instanceof SDKError ? err.cause : err;
+
+	if (abort instanceof DOMException && abort.name === 'TimeoutError') {
 		return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.TIMEOUT };
 	}
 
@@ -181,11 +186,16 @@ const fetchTrustedLifiQuote = async ({
 };
 
 /**
- * A trusted quote whose route the calldata binding could accept, with the request it answers. When
- * LI.FI's best route goes through a bridge in a shape the binding refuses (Across behind a DEX swap,
- * or any bridge followed by another step), LI.FI is asked once more without that bridge, so that
- * another allowed one can serve the pair; that request is the one execution re-quotes with. Both
- * requests share the caller's deadline: the form waits for every provider's answer.
+ * A trusted quote whose route the binding could accept, with the request it answers.
+ *
+ * A Solana source's transaction is read as its binding reads it, which also gives the LI.FI ceiling
+ * the form budgets (`loadLifiSolQuoteCeiling`).
+ *
+ * When an EVM source's best route goes through a bridge in a shape the calldata binding refuses
+ * (Across behind a DEX swap, or any bridge followed by another step), LI.FI is asked once more
+ * without that bridge, so that another allowed one can serve the pair; that request is the one
+ * execution re-quotes with. Both requests share the caller's deadline: the form waits for every
+ * provider's answer.
  *
  * When there is no such route, the refused one travels with the `LifiRouteUnsupportedError`, for the
  * two-swap hint.
@@ -198,8 +208,19 @@ const fetchExecutableLifiQuote = async ({
 	request: QuoteRequestFromAmount;
 	sourceNetworkId: NetworkId;
 	signal: AbortSignal;
-}): Promise<{ quote: LiFiStep; request: QuoteRequestFromAmount }> => {
+}): Promise<{ quote: LiFiStep; request: QuoteRequestFromAmount; solFeeCeiling?: bigint }> => {
 	const quote = await fetchTrustedLifiQuote({ request, sourceNetworkId, signal });
+
+	if (request.fromChain === ChainId.SOL) {
+		// The RPC reads behind the ceiling cannot be handed the signal, so it bounds them from here: the
+		// form waits for every provider's answer, and the cache shares one that never settles.
+		const solFeeCeiling = await untilAborted({
+			operation: loadLifiSolQuoteCeiling({ quote, request }),
+			signal
+		});
+
+		return { quote, request, solFeeCeiling };
+	}
 
 	if (isLifiRouteExecutable(quote)) {
 		return { quote, request };
@@ -392,6 +413,8 @@ export const fetchLifiSwapQuote = async (
 		return;
 	}
 
+	params.onProviderParticipating?.(SwapProvider.LIFI);
+
 	const key = JSON.stringify(request);
 
 	if (nonNullish(quoteCache) && quoteCache.key === key && isFresh(quoteCache)) {
@@ -414,3 +437,19 @@ export const fetchLifiSwapQuote = async (
 
 	return toLifiSwapQuoteResult(outcome);
 };
+
+/**
+ * The Solana sources LI.FI may quote, keyed as the swap source filter keys them: native SOL and every
+ * SPL token on Solana mainnet known when the swap modal loads its lists. A list rather than a
+ * wildcard: the Solana category is a chain family, not an environment, so a wildcard would also make
+ * the devnet and local SOL tokens selectable, for which LI.FI is never asked.
+ */
+export const lifiSolSupportedTokens = (): Promise<Set<string>> =>
+	Promise.resolve(
+		new Set(
+			[SOLANA_TOKEN, ...get(splTokens)]
+				.filter(({ network: { id } }) => isNetworkIdSOLMainnet(id))
+				.map((token) => resolveSwapTokenLookup({ token })?.identifier)
+				.filter(nonNullish)
+		)
+	);

@@ -1,12 +1,14 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import LiquidiumRepayForm from '$lib/components/liquidium/repay/LiquidiumRepayForm.svelte';
 import { ZERO } from '$lib/constants/app.constants';
-import { STAKE_FORM_REVIEW_BUTTON } from '$lib/constants/test-ids.constants';
+import { MAX_BUTTON, STAKE_FORM_REVIEW_BUTTON } from '$lib/constants/test-ids.constants';
 import type { LiquidiumRepayPreview } from '$lib/services/liquidium-repay.services';
+import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { LiquidiumReserve } from '$lib/types/liquidium';
+import { formatToken } from '$lib/utils/format.utils';
 import en from '$tests/mocks/i18n.mock';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 
 describe('LiquidiumRepayForm', () => {
@@ -170,8 +172,8 @@ describe('LiquidiumRepayForm', () => {
 
 	it('blocks the form when pending repays cover the debt but accrued interest leaves dust in the cap', () => {
 		const { container, getByTestId } = render(LiquidiumRepayForm, {
-			// 1.005 BTC pending ≥ 1 BTC principal + 0.005 BTC interest.
-			props: { ...baseProps, maxRepay: 38n, pendingRepay: 100_500_000n },
+			// 1 BTC pending ≥ the 1 BTC debt (interest included).
+			props: { ...baseProps, maxRepay: 38n, pendingRepay: 100_000_000n },
 			context: mockContext()
 		});
 
@@ -186,5 +188,67 @@ describe('LiquidiumRepayForm', () => {
 		});
 
 		expect(container).not.toHaveTextContent(en.liquidium.text.repay_pending_covers_debt);
+	});
+
+	describe('Max', () => {
+		const expectedMax = (value: bigint) =>
+			formatToken({
+				value,
+				unitName: BTC_MAINNET_TOKEN.decimals,
+				displayDecimals: BTC_MAINNET_TOKEN.decimals
+			});
+
+		beforeEach(() => {
+			balancesStore.set({
+				id: BTC_MAINNET_TOKEN.id,
+				data: { data: 1_000_000_000n, certified: true }
+			});
+		});
+
+		afterEach(() => {
+			balancesStore.reset(BTC_MAINNET_TOKEN.id);
+		});
+
+		it('offers the debt when the balance can repay all of it', async () => {
+			const { getByTestId } = render(LiquidiumRepayForm, {
+				props: baseProps,
+				context: mockContext()
+			});
+
+			await waitFor(() => {
+				expect(getByTestId(MAX_BUTTON)).toHaveTextContent(expectedMax(100_000_000n));
+			});
+		});
+
+		it('offers only what the balance can still repay when that is below the debt', async () => {
+			const { getByTestId } = render(LiquidiumRepayForm, {
+				props: { ...baseProps, maxSpendable: 30_000_000n },
+				context: mockContext()
+			});
+
+			await waitFor(() => {
+				expect(getByTestId(MAX_BUTTON)).toHaveTextContent(expectedMax(30_000_000n));
+			});
+		});
+
+		it('keeps the debt when the balance can repay more than it', async () => {
+			const { getByTestId } = render(LiquidiumRepayForm, {
+				props: { ...baseProps, maxSpendable: 200_000_000n },
+				context: mockContext()
+			});
+
+			await waitFor(() => {
+				expect(getByTestId(MAX_BUTTON)).toHaveTextContent(expectedMax(100_000_000n));
+			});
+		});
+
+		it('does not flag an amount above what the balance can still repay as above the debt', () => {
+			const { container } = render(LiquidiumRepayForm, {
+				props: { ...baseProps, amount: 0.5, maxSpendable: 30_000_000n },
+				context: mockContext()
+			});
+
+			expect(container).not.toHaveTextContent(en.liquidium.text.repay_exceeds_debt);
+		});
 	});
 });

@@ -352,7 +352,8 @@ export type BtcAddPendingTransactionError =
 	  }
 	| {
 			/**
-			 * Intersects with caller's existing pending reservations
+			 * One of the UTXOs, or the txid with other UTXOs or at another address, is already reserved
+			 * by the caller, or a broadcast of this transaction is in flight.
 			 */
 			UtxosAlreadyReserved: null;
 	  };
@@ -508,6 +509,153 @@ export type BtcAddress =
 			 */
 			P2TR: string;
 	  };
+/**
+ * Each error describes this call only. `BroadcastOutcomeUnknown` and `BroadcastInProgress` leave
+ * open whether the transaction was broadcast. Any other error means this call broadcast nothing
+ * and reserved nothing, but says nothing about an earlier submission of the same transaction,
+ * whose reservation stays until it is pruned. After an unclear outcome, a later error is no
+ * reason to build a new transaction.
+ */
+export type BtcBroadcastTransactionError =
+	| {
+			/**
+			 * More than `MAX_BROADCAST_TX_INPUTS`.
+			 */
+			TooManyInputs: null;
+	  }
+	| {
+			/**
+			 * Two inputs spend the same outpoint.
+			 */
+			DuplicateInputs: null;
+	  }
+	| {
+			/**
+			 * An input is not one of the caller's UTXOs with enough confirmations.
+			 */
+			InvalidUtxos: null;
+	  }
+	| {
+			/**
+			 * A non-empty `script_sig`, or a sequence with a BIP68 relative lock.
+			 */
+			InvalidInput: { index: number };
+	  }
+	| {
+			/**
+			 * A non-standard script, dust, or a malformed or second `OP_RETURN`.
+			 */
+			InvalidOutput: { index: number };
+	  }
+	| {
+			/**
+			 * The lock time is not 0.
+			 */
+			UnsupportedLockTime: null;
+	  }
+	| {
+			/**
+			 * The witness is not a valid `SIGHASH_ALL` signature by the caller's key.
+			 */
+			InvalidSignature: { index: number };
+	  }
+	| {
+			/**
+			 * Another broadcast of the same transaction is still in flight.
+			 */
+			BroadcastInProgress: null;
+	  }
+	| {
+			/**
+			 * The fee is below 1 sat/vB.
+			 */
+			FeeTooLow: null;
+	  }
+	| {
+			/**
+			 * The transaction may have been broadcast. Its inputs stay reserved, and the same bytes may
+			 * be sent again.
+			 */
+			BroadcastOutcomeUnknown: { msg: string };
+	  }
+	| {
+			/**
+			 * The provided II delegation chain is missing or failed verification.
+			 */
+			InvalidDelegationChain: { msg: string };
+	  }
+	| {
+			/**
+			 * More than `MAX_BROADCAST_TX_BYTES`.
+			 */
+			TransactionTooLarge: null;
+	  }
+	| {
+			/**
+			 * More than `MAX_BROADCAST_TX_OUTPUTS`.
+			 */
+			TooManyOutputs: null;
+	  }
+	| {
+			/**
+			 * Not exactly one consensus-encoded transaction, no inputs or no outputs, a version other
+			 * than 1 or 2, or fewer than 65 bytes without the witnesses.
+			 */
+			MalformedTransaction: null;
+	  }
+	| {
+			/**
+			 * The caller has exceeded the call rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * Nothing was broadcast, and the inputs this call reserved are free again.
+			 */
+			BroadcastRejected: { msg: string };
+	  }
+	| {
+			/**
+			 * Server-side / unexpected
+			 */
+			InternalError: { msg: string };
+	  }
+	| {
+			/**
+			 * One of the inputs, or the txid with other inputs or at another address, is already
+			 * reserved by the caller.
+			 */
+			UtxosAlreadyReserved: null;
+	  };
+export interface BtcBroadcastTransactionRequest {
+	/**
+	 * The fully signed, consensus-serialized transaction, at most `MAX_BROADCAST_TX_BYTES`.
+	 */
+	transaction: Uint8Array;
+	ii_delegation_chain: [] | [IIDelegationChain];
+	network: Network;
+}
+export interface BtcBroadcastTransactionResponse {
+	/**
+	 * In internal byte order, as `StoredPendingTransaction::txid`: the reverse of the hex a
+	 * block explorer shows.
+	 */
+	txid: Uint8Array;
+}
+export type BtcBroadcastTransactionResult =
+	| {
+			/**
+			 * The transaction was broadcast, now or by an earlier call.
+			 */
+			Ok: BtcBroadcastTransactionResponse;
+	  }
+	| {
+			/**
+			 * See the error for whether the transaction may have been broadcast.
+			 */
+			Err: BtcBroadcastTransactionError;
+	  };
 export type BtcGetFeePercentilesError = {
 	InternalError: { msg: string };
 };
@@ -563,6 +711,56 @@ export type BtcGetPendingTransactionsResult =
 			 * The pending transactions were not retrieved due to an error.
 			 */
 			Err: BtcGetPendingTransactionsError;
+	  };
+export type BtcGetSpendableUtxosError =
+	| {
+			/**
+			 * The provided II delegation chain is missing or failed verification.
+			 */
+			InvalidDelegationChain: { msg: string };
+	  }
+	| {
+			/**
+			 * The caller has exceeded the call rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * Server-side / unexpected
+			 */
+			InternalError: { msg: string };
+	  };
+export interface BtcGetSpendableUtxosRequest {
+	ii_delegation_chain: [] | [IIDelegationChain];
+	network: Network;
+}
+export interface BtcGetSpendableUtxosResponse {
+	/**
+	 * The caller's pending transactions at the address these UTXOs belong to, as
+	 * `btc_get_pending_transactions` returns them.
+	 */
+	pending_transactions: Array<PendingTransaction>;
+	/**
+	 * The caller's UTXOs with at least 4 confirmations (1 on regtest), from all pages, that no
+	 * pending transaction of the caller reserves: the largest by value, largest first. At most
+	 * `MAX_SPENDABLE_UTXOS` (10 000), and fewer if the pending transactions leave less room in
+	 * the reply.
+	 */
+	utxos: Array<Utxo>;
+}
+export type BtcGetSpendableUtxosResult =
+	| {
+			/**
+			 * The spendable UTXOs and pending transactions were retrieved successfully.
+			 */
+			Ok: BtcGetSpendableUtxosResponse;
+	  }
+	| {
+			/**
+			 * The spendable UTXOs were not retrieved due to an error.
+			 */
+			Err: BtcGetSpendableUtxosError;
 	  };
 /**
  * Bitcoin transaction data.
@@ -708,6 +906,26 @@ export type ContactError =
 export interface ContactImage {
 	data: Uint8Array;
 	mime_type: ImageMimeType;
+}
+/**
+ * A contact's image, as returned by `get_contact_images`.
+ */
+export interface ContactImageEntry {
+	contact_id: bigint;
+	image: ContactImage;
+}
+/**
+ * A page of the caller's contacts, as returned by `get_contacts_page`.
+ */
+export interface ContactsPage {
+	/**
+	 * Contacts in ID order, without their images; `get_contact_images` returns those.
+	 */
+	contacts: Array<Contact>;
+	/**
+	 * What to pass as `after` for the next page; none once this page holds the last contact.
+	 */
+	next: [] | [bigint];
 }
 export interface CreateActiveUserTransactionRequest {
 	id: string;
@@ -1010,6 +1228,25 @@ export type GetAllowedCyclesResult =
 			 */
 			Err: GetAllowedCyclesError;
 	  };
+/**
+ * The caller's contacts whose images `get_contact_images` returns.
+ */
+export interface GetContactImagesRequest {
+	contact_ids: BigUint64Array;
+}
+export type GetContactImagesResult =
+	| {
+			/**
+			 * The images were retrieved successfully.
+			 */
+			Ok: Array<ContactImageEntry>;
+	  }
+	| {
+			/**
+			 * The images were not retrieved due to an error.
+			 */
+			Err: ContactError;
+	  };
 export type GetContactResult =
 	| {
 			/**
@@ -1020,6 +1257,19 @@ export type GetContactResult =
 	| {
 			/**
 			 * The contacts were not retrieved due to an error.
+			 */
+			Err: ContactError;
+	  };
+export type GetContactsPageResult =
+	| {
+			/**
+			 * The page was retrieved successfully.
+			 */
+			Ok: ContactsPage;
+	  }
+	| {
+			/**
+			 * The page was not retrieved due to an error.
 			 */
 			Err: ContactError;
 	  };
@@ -2611,6 +2861,27 @@ export interface _SERVICE {
 		BtcAddPendingTransactionResult
 	>;
 	/**
+	 * Validates a signed transaction of the caller, reserves its inputs and broadcasts it, paying the
+	 * Bitcoin canister from the backend's own cycles.
+	 *
+	 * The checks that need no paid call run first, so a bad request costs no Bitcoin canister call.
+	 * The inputs are reserved in the same synchronous block that checks them against the caller's
+	 * other pending transactions, before the broadcast. Sending the same bytes again is safe: after
+	 * a success it returns the txid without a second broadcast for as long as the inputs stay
+	 * reserved, and after an unclear outcome it broadcasts again, at most `MAX_BROADCAST_ATTEMPTS`
+	 * times in all. Once the reservation is pruned, the same bytes are handled as a new request.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated through Internet
+	 * Identity. Controllers bypass this check.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `BtcBroadcastTransactionError`.
+	 */
+	btc_broadcast_transaction: ActorMethod<
+		[BtcBroadcastTransactionRequest],
+		BtcBroadcastTransactionResult
+	>;
+	/**
 	 * Retrieves the current fee percentiles for Bitcoin transactions from the cache
 	 * for the specified network. Fee percentiles are measured in millisatoshi per byte
 	 * and are periodically updated in the background.
@@ -2643,6 +2914,24 @@ export interface _SERVICE {
 		[BtcGetPendingTransactionsRequest],
 		BtcGetPendingTransactionsResult
 	>;
+	/**
+	 * Returns the caller's spendable UTXOs and pending transactions on the given network.
+	 *
+	 * The UTXOs are those at the caller's address with at least 4 confirmations (1 on regtest), from
+	 * all pages, that no pending transaction of the caller reserves on any of its addresses: the
+	 * largest by value, largest first, at most 10 000 and fewer if the pending transactions leave less
+	 * room in the reply. The pending transactions are those at that address, as
+	 * `btc_get_pending_transactions` returns them.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `BtcGetSpendableUtxosError`. `InternalError` also covers pending
+	 * transactions too large for a reply, which only the caller's own reservations can cause, until
+	 * they are pruned.
+	 */
+	btc_get_spendable_utxos: ActorMethod<[BtcGetSpendableUtxosRequest], BtcGetSpendableUtxosResult>;
 	/**
 	 * Stops an unclaimed tip of the caller's from being claimable. The allowance
 	 * itself is the caller's to revoke — the client pairs this with an
@@ -2827,6 +3116,18 @@ export interface _SERVICE {
 	 */
 	get_contact: ActorMethod<[bigint], GetContactResult>;
 	/**
+	 * Returns the images of the given contacts of the caller.
+	 *
+	 * A call takes at most `MAX_CONTACT_IMAGES_PER_CALL` contact IDs, so that the reply stays below
+	 * the 2 MiB a certified call can return.
+	 * # Arguments
+	 * * `request` - The IDs of the caller's contacts whose images to return.
+	 * # Returns
+	 * * `Ok(Vec<ContactImageEntry>)` - The images found; contacts the caller does not have, and
+	 * contacts without an image, are left out.
+	 */
+	get_contact_images: ActorMethod<[GetContactImagesRequest], GetContactImagesResult>;
+	/**
 	 * Returns all contacts for the caller
 	 *
 	 * This query function returns a list of the user's contacts.
@@ -2834,6 +3135,18 @@ export interface _SERVICE {
 	 * * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	 */
 	get_contacts: ActorMethod<[], GetContactsResult>;
+	/**
+	 * Returns a page of the caller's contacts, without their images.
+	 *
+	 * A page holds contacts in ID order until their encoded size reaches `CONTACTS_PAGE_MAX_BYTES`, so
+	 * that the reply stays below the 2 MiB a certified call can return. `get_contact_images` returns
+	 * the images.
+	 * # Arguments
+	 * * `after` - The `next` of the previous page; none for the first page.
+	 * # Returns
+	 * * `Ok(ContactsPage)` - The page, with `next` set while contacts remain after it.
+	 */
+	get_contacts_page: ActorMethod<[[] | [bigint]], GetContactsPageResult>;
 	get_exchange_rate: ActorMethod<[TokenId], [] | [ExchangeRate]>;
 	/**
 	 * Returns the latest USD prices for the caller's priceable tokens.
