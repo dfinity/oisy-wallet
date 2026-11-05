@@ -51,6 +51,7 @@ import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
+import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -220,6 +221,24 @@ export const formatSwapSlippageShort = (value: number): string => {
 	const cut = Math.trunc(Math.round(value * 1e8) / 1e6) / 100;
 
 	return `${cut === 0 ? value : cut}`;
+};
+
+export const getInitialSwapSlippage = (): OptionAmount =>
+	loadSwapSlippage() ?? SWAP_DEFAULT_SLIPPAGE_VALUE;
+
+export const keepSwapSlippage = (slippageValue: OptionAmount) => {
+	// The next swap may start from any network.
+	const status = getSwapSlippageStatus({
+		slippageValue,
+		maxSlippageInvalidValue: Math.min(
+			SWAP_SLIPPAGE_INVALID_VALUE,
+			SWAP_SLIPPAGE_VELORA_INVALID_VALUE
+		)
+	});
+
+	if (status !== 'invalid') {
+		saveSwapSlippage(slippageValue);
+	}
 };
 
 /**

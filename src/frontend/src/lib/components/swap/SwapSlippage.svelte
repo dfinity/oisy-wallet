@@ -11,7 +11,8 @@
 	import {
 		formatSwapSlippageShort,
 		getSwapSlippageInvalidValue,
-		getSwapSlippageStatus
+		getSwapSlippageStatus,
+		keepSwapSlippage
 	} from '$lib/utils/swap.utils';
 
 	interface Props {
@@ -29,6 +30,17 @@
 	let status = $derived(getSwapSlippageStatus({ slippageValue, maxSlippageInvalidValue }));
 
 	let visible = $state(false);
+
+	// Saved when the editor closes, so typing "60" does not leave "6" behind on the way, and never on
+	// mount, where nothing was chosen.
+	let wasOpen = false;
+	$effect(() => {
+		if (wasOpen && !visible) {
+			keepSwapSlippage(slippageValue);
+		}
+
+		wasOpen = visible;
+	});
 
 	// Background only: coloured text on these tints fails 4.5:1.
 	const tints: Record<SwapSlippageStatus, string> = {
