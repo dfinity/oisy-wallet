@@ -405,13 +405,14 @@ describe('infura.providers', () => {
 			});
 		});
 
-		it('should report the reason Alchemy gave over Infura failing the request', async () => {
+		it('should report Infura failing the request even when Alchemy then refuses', async () => {
+			// Infura may have passed the transaction on, so Alchemy's refusal answers only its own attempt.
 			const { provider } = buildProvider();
 
 			mockBroadcastTransaction.mockRejectedValueOnce(internalError).mockRejectedValueOnce(refusal);
 			mockGetTransaction.mockResolvedValueOnce(null);
 
-			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(refusal);
+			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(internalError);
 		});
 
 		it('should not take an already-used nonce as a reason over Infura failing the request', async () => {

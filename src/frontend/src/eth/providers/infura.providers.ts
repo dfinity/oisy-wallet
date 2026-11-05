@@ -9,7 +9,6 @@ import { ethersFallbackProvider, ethersProvider } from '$eth/providers/ethers.pr
 import type { EthAddress } from '$eth/types/address';
 import type { GetFeeData } from '$eth/types/infura';
 import type { EthersProviderNetwork } from '$eth/types/network';
-import { isDefinitiveTransactionRefusal } from '$eth/utils/eth-error.utils';
 import { isEthersError } from '$eth/utils/eth.utils';
 import {
 	OP_STACK_GAS_PRICE_ORACLE_ABI,
@@ -41,7 +40,6 @@ import { get } from 'svelte/store';
 // What a call that both providers failed leaves to decide it by.
 interface FallbackFailure {
 	infuraErr: unknown;
-	fallbackErr: unknown;
 	fallbackProvider: JsonRpcProvider;
 }
 
@@ -168,12 +166,12 @@ export class InfuraProvider {
 	}): Promise<T> => {
 		try {
 			return await withTimeout({ promise: call(fallbackProvider), milliseconds });
-		} catch (fallbackErr: unknown) {
+		} catch {
 			if (isNullish(recover)) {
 				throw infuraErr;
 			}
 
-			return await recover({ infuraErr, fallbackErr, fallbackProvider });
+			return await recover({ infuraErr, fallbackProvider });
 		}
 	};
 
@@ -186,7 +184,7 @@ export class InfuraProvider {
 			operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.SUBMISSION,
 			milliseconds: INFURA_SUBMISSION_TIMEOUT_MILLISECONDS,
 			call: (provider) => provider.broadcastTransaction(signedTransaction),
-			recover: async ({ infuraErr, fallbackErr, fallbackProvider }) => {
+			recover: async ({ infuraErr, fallbackProvider }) => {
 				// Neither error proves the transaction went nowhere. Infura can pass a transaction on and
 				// still fail the request, and a node answers a transaction it already holds with an error
 				// of its own. Only the network knows, so it is asked before the send is reported as failed.
@@ -199,12 +197,10 @@ export class InfuraProvider {
 					return submitted;
 				}
 
-				// An outright refusal states something about the transaction; a provider failing the
-				// request does not. So the user is told whichever there is, Infura's when both refuse.
-				throw !isDefinitiveTransactionRefusal(infuraErr) &&
-					isDefinitiveTransactionRefusal(fallbackErr)
-					? fallbackErr
-					: infuraErr;
+				// Infura's error is the one reported, whatever Alchemy answered. Unless Infura refused the
+				// transaction outright, it may have passed it on before failing the request, and a refusal
+				// of Alchemy's attempt afterwards answers only that attempt.
+				throw infuraErr;
 			}
 		});
 
