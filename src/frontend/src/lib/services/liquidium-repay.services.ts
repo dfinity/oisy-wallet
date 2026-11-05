@@ -4,11 +4,7 @@ import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import { liquidiumClient } from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
-import {
-	LIQUIDIUM_BPS_SCALE,
-	LIQUIDIUM_REPAY_BUFFER_BPS,
-	LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS
-} from '$lib/constants/liquidium.constants';
+import { LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS } from '$lib/constants/liquidium.constants';
 import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import {
 	createActiveUserTransaction,
@@ -50,13 +46,9 @@ export interface LiquidiumRepayPreview {
 	projectedHealthPercent: number;
 }
 
-// Full outstanding debt (accrued interest included) plus a small buffer, in base units, for the
-// "Max (full debt)" shortcut. Not the SDK's `getMaxRepayAmount` alone: it adds `debtInterest` on
-// top of `borrowed`, which already includes it, so its max overshoots the debt and the repay is not
-// credited. It still caps ours, so we never send more than the SDK sanctions should it ever quote
-// less (a fixed double count, a smaller buffer). `null` when the user has no profile yet (should
-// not happen for a position that already carries debt, but guarded so callers can no-op
-// gracefully).
+// Full outstanding debt (accrued interest included) plus the SDK's small buffer, in base units, for
+// the "Max (full debt)" shortcut. `null` when the user has no profile yet (should not happen for a
+// position that already carries debt, but guarded so callers can no-op gracefully).
 export const getLiquidiumMaxRepayAmount = async ({
 	identity,
 	ethAddress,
@@ -78,19 +70,9 @@ export const getLiquidiumMaxRepayAmount = async ({
 		return null;
 	}
 
-	const [position, { amount: sdkMaxRepay }] = await Promise.all([
-		positions.getPosition(profileId, poolId),
-		positions.getMaxRepayAmount(profileId, poolId)
-	]);
+	const { amount } = await positions.getMaxRepayAmount(profileId, poolId);
 
-	if (isNullish(position) || position.borrowed <= ZERO) {
-		return ZERO;
-	}
-
-	const maxRepay =
-		(position.borrowed * (LIQUIDIUM_BPS_SCALE + LIQUIDIUM_REPAY_BUFFER_BPS)) / LIQUIDIUM_BPS_SCALE;
-
-	return maxRepay < sdkMaxRepay ? maxRepay : sdkMaxRepay;
+	return amount;
 };
 
 // USD value of this position's lifetime borrow interest, derived from the reserve's own price basis
