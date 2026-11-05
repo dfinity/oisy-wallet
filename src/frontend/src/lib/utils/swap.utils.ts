@@ -47,6 +47,7 @@ import {
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { areAddressesEqual } from '$lib/utils/address.utils';
+import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
@@ -463,6 +464,37 @@ export const calculateValueDifference = ({
 	}
 
 	return ((receivedValue - paidValue) / paidValue) * 100;
+};
+
+// What the selected offer is worth above the lowest offer, in USD. Offers are ranked by receive
+// amount, so this is the same measure that makes an offer the best rate. `undefined` when there
+// is nothing to compare, no price to compare in, or no gain.
+export const calculateSwapGainUsd = ({
+	swaps,
+	selectedProvider,
+	decimals,
+	exchangeRate
+}: {
+	swaps: SwapMappedResult[];
+	selectedProvider: SwapMappedResult;
+	decimals: number;
+	exchangeRate: number | undefined;
+}): number | undefined => {
+	if (swaps.length < 2 || isNullish(exchangeRate)) {
+		return;
+	}
+
+	const lowest = swaps.reduce(
+		(min, { receiveAmount }) => (receiveAmount < min ? receiveAmount : min),
+		selectedProvider.receiveAmount
+	);
+	const gain = selectedProvider.receiveAmount - lowest;
+
+	if (gain <= ZERO) {
+		return;
+	}
+
+	return usdValue({ decimals, balance: gain, exchangeRate });
 };
 
 export const isKongSupportedIcToken = (token: TokenReply): token is { IC: ICTokenReply } =>
