@@ -773,20 +773,21 @@ describe('liquidium.utils', () => {
 			});
 		});
 
-		it('prices the debt from `borrowed` alone, which already includes the accrued interest', () => {
+		it("takes the debt's USD value from the SDK as reported, without adding the interest", () => {
 			const reserve: UserReserve = {
 				position: buildPosition({ borrowed: 5_000n, borrowedDecimals: 6n, debtInterest: 1_000n }),
 				pool: buildPool(),
 				priceUsd: 60_000,
 				suppliedUsd: ZERO,
-				// The SDK values `borrowed + debtInterest`: 0.006 × 60k = 360.
-				borrowedUsd: 36_000n,
+				// Deliberately off `borrowed × priceUsd` (300) so the assertion shows the SDK's figure is
+				// mapped as is rather than recomputed; `debtInterest` (0.001 × 60k = 60) is not added.
+				borrowedUsd: 30_012n,
 				usdDecimals: 2n
 			};
 
 			const { borrowedUsd, debtInterest } = mapLiquidiumReserve(reserve);
 
-			expect(borrowedUsd).toBeCloseTo(300);
+			expect(borrowedUsd).toBeCloseTo(300.12);
 			expect(debtInterest).toBe(1_000n);
 		});
 	});
