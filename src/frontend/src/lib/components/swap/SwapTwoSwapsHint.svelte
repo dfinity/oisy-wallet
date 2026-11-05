@@ -80,8 +80,8 @@
 </script>
 
 {#if nonNullish($sourceToken) && nonNullish($destinationToken)}
-	<div class="mt-6">
-		<MessageBox styleClass="sm:text-sm" testId={SWAP_TWO_SWAPS_HINT}>
+	<div class="mt-4">
+		<MessageBox testId={SWAP_TWO_SWAPS_HINT}>
 			<p>
 				{replacePlaceholders(replaceOisyPlaceholders($i18n.swap.text.two_swaps_info), {
 					$sourceSymbol: $sourceToken.symbol,

@@ -41,6 +41,18 @@ pub const MAX_BROADCAST_TX_OUTPUTS: usize = 4;
 // so traps on read, above `MAX_UTXOS_LEN` UTXOs.
 const _: () = assert!(MAX_BROADCAST_TX_INPUTS <= MAX_UTXOS_LEN);
 
+/// The most UTXOs `btc_get_spendable_utxos` returns, the largest by value.
+///
+/// 10 000 take about 490 kB of a reply. A transaction spends at most `MAX_BROADCAST_TX_INPUTS`
+/// inputs, so any send a wallet can make is possible with its largest UTXOs.
+pub const MAX_SPENDABLE_UTXOS: usize = 10_000;
+
+/// The size `btc_get_spendable_utxos` keeps its UTXOs and pending transactions within: the 2 MiB
+/// (2 097 152 bytes) reply limit, less room for the Candid header, type table and result variant.
+pub const MAX_SPENDABLE_UTXOS_REPLY_BYTES: usize = 2_000_000;
+
+const _: () = assert!(MAX_BROADCAST_TX_INPUTS <= MAX_SPENDABLE_UTXOS);
+
 /// Delay before the first async fee update, giving the canister time to settle after
 /// `init` or `post_upgrade` (stable memory deserialization uses heap).
 pub const FEE_PERCENTILES_INITIAL_DELAY: Duration = Duration::from_secs(10);
@@ -197,4 +209,32 @@ pub enum BtcBroadcastTransactionError {
     BroadcastOutcomeUnknown { msg: String },
     /// Server-side / unexpected
     InternalError { msg: String },
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct BtcGetSpendableUtxosRequest {
+    pub network: BitcoinNetwork,
+    pub ii_delegation_chain: Option<IIDelegationChain>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct BtcGetSpendableUtxosResponse {
+    /// The caller's UTXOs with at least 4 confirmations (1 on regtest), from all pages, that no
+    /// pending transaction of the caller reserves: the largest by value, largest first. At most
+    /// `MAX_SPENDABLE_UTXOS` (10 000), and fewer if the pending transactions leave less room in
+    /// the reply.
+    pub utxos: Vec<Utxo>,
+    /// The caller's pending transactions at the address these UTXOs belong to, as
+    /// `btc_get_pending_transactions` returns them.
+    pub pending_transactions: Vec<PendingTransaction>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcGetSpendableUtxosError {
+    /// Server-side / unexpected
+    InternalError { msg: String },
+    /// The caller has exceeded the call rate limit.
+    RateLimited(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain { msg: String },
 }
