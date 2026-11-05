@@ -202,6 +202,83 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
             .flat_map(|tx| tx.utxos.iter())
             .any(|u| new_keys.contains(&(u.outpoint.txid, u.outpoint.vout)))
     }
+
+    /// Checks whether a pending transaction of the principal at `address` already reserves exactly
+    /// `utxos` under `txid`.
+    ///
+    /// A retry of a transaction whose outcome was unclear has the same txid over the same UTXOs,
+    /// and must not be blocked by its own reservation. Only the address the request is for counts:
+    /// a reservation at another network's address does not protect this one.
+    pub fn has_same_txid_reservation(
+        &self,
+        principal: Principal,
+        address: &str,
+        txid: &[u8],
+        utxos: &[Utxo],
+    ) -> bool {
+        let keys: HashSet<(Txid, u32)> = utxos
+            .iter()
+            .map(|u| (u.outpoint.txid, u.outpoint.vout))
+            .collect();
+
+        self.get_pending_transactions(&principal, address)
+            .iter()
+            .filter(|tx| tx.txid == txid)
+            .any(|tx| {
+                let tx_keys: HashSet<(Txid, u32)> = tx
+                    .utxos
+                    .iter()
+                    .map(|u| (u.outpoint.txid, u.outpoint.vout))
+                    .collect();
+                tx_keys == keys
+            })
+    }
+
+    /// Removes the pending transaction `txid` of the principal at `address`, if there is one.
+    pub fn remove_pending_transaction(&mut self, principal: Principal, address: &str, txid: &[u8]) {
+        let stored_principal = StoredPrincipal(principal);
+        let Some(mut address_map) = self
+            .pending_transactions_map
+            .get(&stored_principal)
+            .map(|c| c.0)
+        else {
+            return;
+        };
+        let Some(transactions) = address_map.get_mut(address) else {
+            return;
+        };
+
+        let initial_len = transactions.len();
+        transactions.retain(|tx| tx.txid != txid);
+        if transactions.len() == initial_len {
+            return;
+        }
+
+        if transactions.is_empty() {
+            address_map.remove(address);
+        }
+        if address_map.is_empty() {
+            self.pending_transactions_map.remove(&stored_principal);
+        } else {
+            self.pending_transactions_map
+                .insert(stored_principal, Candid(address_map));
+        }
+    }
+
+    /// Returns the txids of the principal's pending transactions, on every address.
+    pub fn pending_txids(&self, principal: Principal) -> HashSet<Vec<u8>> {
+        self.pending_transactions_map
+            .get(&StoredPrincipal(principal))
+            .map(|address_map| {
+                address_map
+                    .0
+                    .values()
+                    .flatten()
+                    .map(|tx| tx.txid.clone())
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
 }
 
 #[cfg(test)]
@@ -930,5 +1007,138 @@ mod tests {
             assert_eq!(pending_txs.len(), 1);
             assert_eq!(pending_txs[0], tx);
         }
+    }
+
+    fn pending(txid: &[u8], utxos: &[&Utxo]) -> StoredPendingTransaction {
+        StoredPendingTransaction {
+            txid: txid.to_vec(),
+            utxos: utxos.iter().map(|u| (*u).clone()).collect(),
+            created_at_timestamp_ns: 1_000_000,
+        }
+    }
+
+    #[test]
+    fn test_has_same_txid_reservation_needs_the_same_txid_and_utxo_set() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+        let other = Principal::from_text(PRINCIPAL_TEXT_2).unwrap();
+        model
+            .add_pending_transaction(
+                principal,
+                ADDRESS_1.to_string(),
+                pending(&TXID_C, &[&UTXO_1, &UTXO_2]),
+            )
+            .unwrap();
+
+        let reversed = [(*UTXO_2).clone(), (*UTXO_1).clone()];
+        assert!(model.has_same_txid_reservation(principal, ADDRESS_1, &TXID_C, &reversed));
+        assert!(!model.has_same_txid_reservation(principal, ADDRESS_1, &TXID_B, &reversed));
+        assert!(!model.has_same_txid_reservation(
+            principal,
+            ADDRESS_1,
+            &TXID_C,
+            &[(*UTXO_1).clone()]
+        ));
+        assert!(!model.has_same_txid_reservation(
+            principal,
+            ADDRESS_1,
+            &TXID_C,
+            &[(*UTXO_1).clone(), (*UTXO_2).clone(), (*UTXO_3).clone()]
+        ));
+        assert!(!model.has_same_txid_reservation(other, ADDRESS_1, &TXID_C, &reversed));
+        assert!(
+            !model.has_same_txid_reservation(principal, ADDRESS_2, &TXID_C, &reversed),
+            "another address, as another network's, does not count"
+        );
+    }
+
+    #[test]
+    fn test_remove_pending_transaction_removes_only_that_txid_at_that_address() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+        model
+            .add_pending_transaction(
+                principal,
+                ADDRESS_1.to_string(),
+                pending(&TXID_A, &[&UTXO_1]),
+            )
+            .unwrap();
+        model
+            .add_pending_transaction(
+                principal,
+                ADDRESS_1.to_string(),
+                pending(&TXID_B, &[&UTXO_3]),
+            )
+            .unwrap();
+        model
+            .add_pending_transaction(
+                principal,
+                ADDRESS_2.to_string(),
+                pending(&TXID_C, &[&UTXO_5]),
+            )
+            .unwrap();
+
+        model.remove_pending_transaction(principal, ADDRESS_2, &TXID_A);
+        model.remove_pending_transaction(principal, ADDRESS_1, &TXID_A);
+
+        assert_eq!(
+            model.get_pending_transactions(&principal, ADDRESS_1),
+            vec![pending(&TXID_B, &[&UTXO_3])]
+        );
+        assert_eq!(
+            model.get_pending_transactions(&principal, ADDRESS_2),
+            vec![pending(&TXID_C, &[&UTXO_5])]
+        );
+    }
+
+    #[test]
+    fn test_remove_pending_transaction_drops_emptied_address_and_principal() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+        model
+            .add_pending_transaction(
+                principal,
+                ADDRESS_1.to_string(),
+                pending(&TXID_A, &[&UTXO_1]),
+            )
+            .unwrap();
+
+        model.remove_pending_transaction(principal, ADDRESS_1, &TXID_A);
+
+        assert!(model.pending_txids(principal).is_empty());
+        assert!(map.get(&StoredPrincipal(principal)).is_none());
+    }
+
+    #[test]
+    fn test_pending_txids_lists_every_address_of_the_principal_only() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+        let other = Principal::from_text(PRINCIPAL_TEXT_2).unwrap();
+        model
+            .add_pending_transaction(
+                principal,
+                ADDRESS_1.to_string(),
+                pending(&TXID_A, &[&UTXO_1]),
+            )
+            .unwrap();
+        model
+            .add_pending_transaction(
+                principal,
+                ADDRESS_2.to_string(),
+                pending(&TXID_B, &[&UTXO_3]),
+            )
+            .unwrap();
+        model
+            .add_pending_transaction(other, ADDRESS_1.to_string(), pending(&TXID_C, &[&UTXO_5]))
+            .unwrap();
+
+        assert_eq!(
+            model.pending_txids(principal),
+            [TXID_A.to_vec(), TXID_B.to_vec()].into_iter().collect()
+        );
     }
 }
