@@ -430,6 +430,12 @@ Cancelling queued/pending foreground work discards offers priced for the previou
 clearing activity, so a same-amount remount cannot accidentally reuse them. Completed quotes and
 background refresh retain the existing Review-remount and manual-provider behavior.
 
+A manual pick holds only at the amount it was made at: refreshes and a return from Review keep
+it; a round at another amount, or a new pair, goes back to the top offer. `SwapContexts` gives
+the store the swap context's `amountSetToMax`, because Max applies its amount again whenever the
+provider-dependent fee changes: a pick made while Max is on follows those amounts, while a pick
+made before Max went on goes back to the top offer on the first Max press, like a typed amount.
+
 Every foreground round with a participant stays pending for at least
 `SWAP_PROVIDER_MIN_COMPARISON_MS` (two scroll turns) from its first participant, so fast or
 cached quotes, and one-provider pairs through the provider pool, still show more than one name
