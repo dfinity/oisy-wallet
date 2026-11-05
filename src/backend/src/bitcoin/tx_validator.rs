@@ -35,7 +35,8 @@ use bitcoin::{
 };
 use ic_cdk_bitcoin_canister::{Txid, Utxo};
 use shared::types::bitcoin::{
-    MAX_BROADCAST_TX_BYTES, MAX_BROADCAST_TX_INPUTS, MAX_BROADCAST_TX_OUTPUTS,
+    BtcBroadcastTransactionError, MAX_BROADCAST_TX_BYTES, MAX_BROADCAST_TX_INPUTS,
+    MAX_BROADCAST_TX_OUTPUTS,
 };
 
 /// Bitcoin Core's long-standing default `-minrelaytxfee`, and the frontend's lowest fee rate
@@ -80,6 +81,30 @@ pub enum TxValidationError {
     InvalidSignature { index: usize },
     /// The fee is below `MIN_FEE_SATS_PER_VBYTE` of the transaction's virtual size.
     FeeTooLow,
+}
+
+impl From<TxValidationError> for BtcBroadcastTransactionError {
+    fn from(err: TxValidationError) -> Self {
+        // The caps keep every index below `MAX_BROADCAST_TX_INPUTS`.
+        let index = |index: usize| u32::try_from(index).unwrap_or(u32::MAX);
+        match err {
+            TxValidationError::MalformedTransaction => Self::MalformedTransaction,
+            TxValidationError::TransactionTooLarge => Self::TransactionTooLarge,
+            TxValidationError::TooManyInputs => Self::TooManyInputs,
+            TxValidationError::TooManyOutputs => Self::TooManyOutputs,
+            TxValidationError::DuplicateInputs => Self::DuplicateInputs,
+            TxValidationError::InvalidOutput { index: i } => {
+                Self::InvalidOutput { index: index(i) }
+            }
+            TxValidationError::UnsupportedLockTime => Self::UnsupportedLockTime,
+            TxValidationError::InvalidInput { index: i } => Self::InvalidInput { index: index(i) },
+            TxValidationError::InvalidUtxos => Self::InvalidUtxos,
+            TxValidationError::InvalidSignature { index: i } => {
+                Self::InvalidSignature { index: index(i) }
+            }
+            TxValidationError::FeeTooLow => Self::FeeTooLow,
+        }
+    }
 }
 
 /// Decodes a signed transaction and enforces the broadcast caps.
