@@ -3,6 +3,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import {
 	CONVERT_AMOUNT_DISPLAY_SKELETON,
 	MAX_BUTTON,
+	SWAP_FEE_ROW,
 	SWAP_PROVIDER_STATUS,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
@@ -187,12 +188,12 @@ describe('SwapSolForm', () => {
 	});
 
 	it('should render swap details when tokens are selected', () => {
-		const { container } = render(SwapSolForm, {
+		const { queryByTestId } = render(SwapSolForm, {
 			props,
 			context: mockContext
 		});
 
-		expect(container.querySelector('hr')).toBeInTheDocument();
+		expect(queryByTestId(SWAP_FEE_ROW)).toBeInTheDocument();
 	});
 
 	it('should not render swap details when no destination token', () => {
@@ -206,12 +207,12 @@ describe('SwapSolForm', () => {
 		contextWithoutDestination.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore() });
 		contextWithoutDestination.set(SOL_FEE_CONTEXT_KEY, createFeeContext());
 
-		const { container } = render(SwapSolForm, {
+		const { queryByTestId } = render(SwapSolForm, {
 			props,
 			context: contextWithoutDestination
 		});
 
-		expect(container.querySelector('hr')).not.toBeInTheDocument();
+		expect(queryByTestId(SWAP_FEE_ROW)).not.toBeInTheDocument();
 	});
 
 	it('should not render swap details when no source token', () => {
@@ -225,12 +226,12 @@ describe('SwapSolForm', () => {
 		contextWithoutSource.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore() });
 		contextWithoutSource.set(SOL_FEE_CONTEXT_KEY, createFeeContext());
 
-		const { container } = render(SwapSolForm, {
+		const { queryByTestId } = render(SwapSolForm, {
 			props,
 			context: contextWithoutSource
 		});
 
-		expect(container.querySelector('hr')).not.toBeInTheDocument();
+		expect(queryByTestId(SWAP_FEE_ROW)).not.toBeInTheDocument();
 	});
 
 	it('should handle loading state', () => {
