@@ -3,7 +3,8 @@ use serde_bytes::ByteBuf;
 
 use super::{
     bitcoin::{
-        BtcAddPendingTransactionError, BtcGetPendingTransactionsError,
+        BtcAddPendingTransactionError, BtcBroadcastTransactionError,
+        BtcBroadcastTransactionResponse, BtcGetPendingTransactionsError,
         BtcGetPendingTransactionsReponse, BtcGetSpendableUtxosError, BtcGetSpendableUtxosResponse,
     },
     dapp::AddDappSettingsError,
@@ -292,6 +293,24 @@ impl From<Result<(), BtcAddPendingTransactionError>> for BtcAddPendingTransactio
         match result {
             Ok(()) => BtcAddPendingTransactionResult::Ok(()),
             Err(err) => BtcAddPendingTransactionResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcBroadcastTransactionResult {
+    /// The transaction was broadcast, now or by an earlier call.
+    Ok(BtcBroadcastTransactionResponse),
+    /// See the error for whether the transaction may have been broadcast.
+    Err(BtcBroadcastTransactionError),
+}
+impl From<Result<BtcBroadcastTransactionResponse, BtcBroadcastTransactionError>>
+    for BtcBroadcastTransactionResult
+{
+    fn from(result: Result<BtcBroadcastTransactionResponse, BtcBroadcastTransactionError>) -> Self {
+        match result {
+            Ok(response) => BtcBroadcastTransactionResult::Ok(response),
+            Err(err) => BtcBroadcastTransactionResult::Err(err),
         }
     }
 }

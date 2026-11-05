@@ -5,9 +5,9 @@ use ic_cdk_bitcoin_canister::Utxo;
 use serde::{de, Deserializer};
 
 use super::{
-    BtcAddPendingTransactionRequest, BtcGetSpendableUtxosResponse, PendingTransaction,
-    StoredPendingTransaction, MAX_SPENDABLE_UTXOS, MAX_SPENDABLE_UTXOS_REPLY_BYTES, MAX_TXID_BYTES,
-    MAX_UTXOS_LEN,
+    BtcAddPendingTransactionRequest, BtcBroadcastTransactionRequest, BtcGetSpendableUtxosResponse,
+    PendingTransaction, StoredPendingTransaction, MAX_BROADCAST_TX_BYTES, MAX_SPENDABLE_UTXOS,
+    MAX_SPENDABLE_UTXOS_REPLY_BYTES, MAX_TXID_BYTES, MAX_UTXOS_LEN,
 };
 use crate::validate::{validate_on_deserialize, Validate};
 
@@ -92,3 +92,16 @@ impl Validate for StoredPendingTransaction {
     }
 }
 validate_on_deserialize!(StoredPendingTransaction);
+
+impl Validate for BtcBroadcastTransactionRequest {
+    fn validate(&self) -> Result<(), candid::Error> {
+        let len = self.transaction.len();
+        if len > MAX_BROADCAST_TX_BYTES {
+            return Err(candid::Error::msg(format!(
+                "Transaction has too many bytes: {len} > {MAX_BROADCAST_TX_BYTES}"
+            )));
+        }
+        Ok(())
+    }
+}
+validate_on_deserialize!(BtcBroadcastTransactionRequest);
