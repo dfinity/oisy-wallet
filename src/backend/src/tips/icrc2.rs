@@ -156,3 +156,59 @@ pub async fn transfer_from(
         Err(err) => Err(TransferFromCallError::Failed(format!("{err:?}"))),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use ic_cdk::call::{CallPerformFailed, CallRejected, InsufficientLiquidCycleBalance};
+
+    use super::*;
+
+    fn rejected(raw_reject_code: u32) -> CallFailed {
+        CallFailed::CallRejected(CallRejected::with_rejection(
+            raw_reject_code,
+            "rejected".to_string(),
+        ))
+    }
+
+    #[test]
+    fn a_deadline_with_no_answer_is_unresolved() {
+        assert!(is_unresolved(&rejected(RejectCode::SysUnknown as u32)));
+    }
+
+    #[test]
+    fn an_answer_from_the_ledger_is_never_unresolved() {
+        for code in [
+            RejectCode::SysFatal,
+            RejectCode::SysTransient,
+            RejectCode::DestinationInvalid,
+            RejectCode::CanisterReject,
+            RejectCode::CanisterError,
+        ] {
+            assert!(!is_unresolved(&rejected(code as u32)), "{code:?}");
+        }
+    }
+
+    /// A code the CDK cannot name is not a statement that the outcome is
+    /// unknown, so it stays a definite failure rather than defaulting into the
+    /// one case that keeps a claim held.
+    #[test]
+    fn a_reject_code_outside_the_known_set_is_not_unresolved() {
+        assert!(!is_unresolved(&rejected(99)));
+    }
+
+    /// Both of these say the message never reached the ledger, so the payout
+    /// certainly did not happen — `InsufficientLiquidCycleBalance` is what an
+    /// outgoing call raises once the canister's own liquid balance runs short.
+    #[test]
+    fn a_call_that_never_left_is_not_unresolved() {
+        assert!(!is_unresolved(&CallFailed::CallPerformFailed(
+            CallPerformFailed
+        )));
+        assert!(!is_unresolved(&CallFailed::InsufficientLiquidCycleBalance(
+            InsufficientLiquidCycleBalance {
+                available: 1,
+                required: 2,
+            }
+        )));
+    }
+}
