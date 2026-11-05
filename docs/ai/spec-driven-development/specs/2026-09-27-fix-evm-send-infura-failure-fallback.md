@@ -117,7 +117,7 @@ English copy, in the register of the neighbouring send errors:
 - Not sent: _"The transaction was not sent: we could not reach the network to prepare it. It is safe
   to try again."_
 - Outcome unknown: _"We could not confirm whether the transaction reached the network. It may still
-  go through, so check your activity before you send it again."_
+  go through, so wait a minute or two and check your activity before you send it again."_
 
 New copy is translated into every shipped locale (the `Languages` enum; `ar.json` is not shipped).
 
