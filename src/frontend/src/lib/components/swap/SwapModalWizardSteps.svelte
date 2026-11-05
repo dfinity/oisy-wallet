@@ -291,6 +291,7 @@
 			<SwapProviderListModal
 				onCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
 				onSelectProvider={selectProvider}
+				{slippageValue}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapTokenWizard

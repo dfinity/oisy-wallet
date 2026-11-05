@@ -1369,6 +1369,8 @@
 			"swap_provider": "兑换服务商",
 			"smart_swap": "",
 			"finding_best_rate": "",
+			"smart_swap_offers": "",
+			"smart_swap_selected_offer": "",
 			"swap_provider_website": "官网",
 			"swap_route": "兑换路径",
 			"included_network_fees": "包含的网络费用",
