@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::{cmp::Reverse, collections::HashSet};
 
 use candid::Principal;
 use ic_cdk_bitcoin_canister::{Txid, Utxo};
@@ -203,30 +203,39 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
             .any(|u| new_keys.contains(&(u.outpoint.txid, u.outpoint.vout)))
     }
 
-    /// Returns `utxos` without those a pending transaction of the principal spends, in their
-    /// order.
+    /// Returns the `max_len` largest of `utxos` by value, largest first, that no pending
+    /// transaction of the principal spends.
     ///
     /// Matches by outpoint across all of the principal's addresses, as
     /// [`Self::has_intersecting_pending_utxos`] does, so no UTXO it returns is refused as
-    /// already reserved.
-    pub fn unreserved_utxos(&self, principal: Principal, utxos: Vec<Utxo>) -> Vec<Utxo> {
-        let stored_principal = StoredPrincipal(principal);
-        let Some(address_map) = self.pending_transactions_map.get(&stored_principal) else {
-            return utxos;
-        };
+    /// already reserved. UTXOs of equal value keep their order.
+    pub fn spendable_utxos(
+        &self,
+        principal: Principal,
+        utxos: Vec<Utxo>,
+        max_len: usize,
+    ) -> Vec<Utxo> {
+        let reserved_keys: HashSet<(Txid, u32)> = self
+            .pending_transactions_map
+            .get(&StoredPrincipal(principal))
+            .map(|address_map| {
+                address_map
+                    .0
+                    .values()
+                    .flat_map(|txs| txs.iter())
+                    .flat_map(|tx| tx.utxos.iter())
+                    .map(|u| (u.outpoint.txid, u.outpoint.vout))
+                    .collect()
+            })
+            .unwrap_or_default();
 
-        let reserved_keys: HashSet<(Txid, u32)> = address_map
-            .0
-            .values()
-            .flat_map(|txs| txs.iter())
-            .flat_map(|tx| tx.utxos.iter())
-            .map(|u| (u.outpoint.txid, u.outpoint.vout))
-            .collect();
-
-        utxos
+        let mut spendable: Vec<Utxo> = utxos
             .into_iter()
             .filter(|u| !reserved_keys.contains(&(u.outpoint.txid, u.outpoint.vout)))
-            .collect()
+            .collect();
+        spendable.sort_by_key(|u| Reverse(u.value));
+        spendable.truncate(max_len);
+        spendable
     }
 }
 
@@ -923,17 +932,20 @@ mod tests {
     }
 
     #[test]
-    fn test_unreserved_utxos_returns_all_without_pending_transactions() {
+    fn test_spendable_utxos_returns_all_largest_first_without_pending_transactions() {
         let (mut map, _mm) = setup();
         let model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
-        let utxos = vec![(*UTXO_1).clone(), (*UTXO_2).clone()];
-        assert_eq!(model.unreserved_utxos(principal, utxos.clone()), utxos);
+        let utxos = vec![(*UTXO_1).clone(), (*UTXO_3).clone(), (*UTXO_2).clone()];
+        assert_eq!(
+            model.spendable_utxos(principal, utxos, 10),
+            vec![(*UTXO_3).clone(), (*UTXO_2).clone(), (*UTXO_1).clone()]
+        );
     }
 
     #[test]
-    fn test_unreserved_utxos_drops_reserved_on_any_address_and_keeps_order() {
+    fn test_spendable_utxos_drops_reserved_on_any_address() {
         let (mut map, _mm) = setup();
         let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
@@ -963,18 +975,18 @@ mod tests {
 
         let utxos = vec![
             (*UTXO_5).clone(),
-            (*UTXO_3).clone(),
-            (*UTXO_2).clone(),
             (*UTXO_1).clone(),
+            (*UTXO_2).clone(),
+            (*UTXO_3).clone(),
         ];
         assert_eq!(
-            model.unreserved_utxos(principal, utxos),
+            model.spendable_utxos(principal, utxos, 10),
             vec![(*UTXO_3).clone(), (*UTXO_1).clone()]
         );
     }
 
     #[test]
-    fn test_unreserved_utxos_matches_by_outpoint_even_if_fields_differ() {
+    fn test_spendable_utxos_matches_by_outpoint_even_if_fields_differ() {
         let (mut map, _mm) = setup();
         let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
@@ -993,13 +1005,13 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            model.unreserved_utxos(principal, vec![(*UTXO_4).clone(), (*UTXO_1).clone()]),
+            model.spendable_utxos(principal, vec![(*UTXO_4).clone(), (*UTXO_1).clone()], 10),
             vec![(*UTXO_1).clone()]
         );
     }
 
     #[test]
-    fn test_unreserved_utxos_ignores_other_principals_reservations() {
+    fn test_spendable_utxos_ignores_other_principals_reservations() {
         let (mut map, _mm) = setup();
         let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
         let principal_1 = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
@@ -1018,7 +1030,67 @@ mod tests {
             .unwrap();
 
         let utxos = vec![(*UTXO_1).clone(), (*UTXO_2).clone()];
-        assert_eq!(model.unreserved_utxos(principal_1, utxos.clone()), utxos);
+        assert_eq!(
+            model.spendable_utxos(principal_1, utxos, 10),
+            vec![(*UTXO_2).clone(), (*UTXO_1).clone()]
+        );
+    }
+
+    #[test]
+    fn test_spendable_utxos_keeps_the_largest_unreserved_up_to_max_len() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        let utxos = vec![
+            (*UTXO_1).clone(),
+            (*UTXO_5).clone(),
+            (*UTXO_3).clone(),
+            (*UTXO_2).clone(),
+        ];
+        assert_eq!(
+            model.spendable_utxos(principal, utxos.clone(), 2),
+            vec![(*UTXO_5).clone(), (*UTXO_3).clone()]
+        );
+
+        // The cap applies to what is left once the reserved UTXOs are gone.
+        model
+            .add_pending_transaction(
+                principal,
+                ADDRESS_1.to_string(),
+                StoredPendingTransaction {
+                    txid: vec![1],
+                    utxos: vec![(*UTXO_5).clone()],
+                    created_at_timestamp_ns: 1_000_000,
+                },
+            )
+            .unwrap();
+        assert_eq!(
+            model.spendable_utxos(principal, utxos, 2),
+            vec![(*UTXO_3).clone(), (*UTXO_2).clone()]
+        );
+    }
+
+    #[test]
+    fn test_spendable_utxos_keeps_the_order_of_equal_values() {
+        let (mut map, _mm) = setup();
+        let model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        let same_value_as_utxo_1 = Utxo {
+            outpoint: OutPoint {
+                txid: Txid::from(TXID_C),
+                vout: 0,
+            },
+            ..(*UTXO_1).clone()
+        };
+
+        for utxos in [
+            vec![(*UTXO_1).clone(), same_value_as_utxo_1.clone()],
+            vec![same_value_as_utxo_1.clone(), (*UTXO_1).clone()],
+        ] {
+            assert_eq!(model.spendable_utxos(principal, utxos.clone(), 10), utxos);
+        }
     }
 
     #[test]

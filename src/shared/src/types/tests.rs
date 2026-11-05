@@ -7,7 +7,8 @@ mod bitcoin {
 
     use crate::{
         types::bitcoin::{
-            BtcAddPendingTransactionRequest, PendingTransaction, MAX_TXID_BYTES, MAX_UTXOS_LEN,
+            BtcAddPendingTransactionRequest, BtcGetSpendableUtxosResponse, PendingTransaction,
+            MAX_SPENDABLE_UTXOS, MAX_TXID_BYTES, MAX_UTXOS_LEN,
         },
         validate::{test_validate_on_deserialize, TestVector, Validate},
     };
@@ -114,6 +115,32 @@ mod bitcoin {
             },
         ]
     );
+
+    /// A reply is limited to 2 MiB. The UTXOs must leave most of it to the pending transactions,
+    /// which only the caller's own reservations bound.
+    #[test]
+    fn spendable_utxos_at_the_cap_take_under_half_a_mebibyte() {
+        let response = BtcGetSpendableUtxosResponse {
+            utxos: vec![
+                Utxo {
+                    outpoint: OutPoint {
+                        txid: Txid::from([0xff; MAX_TXID_BYTES]),
+                        vout: u32::MAX,
+                    },
+                    value: u64::MAX,
+                    height: u32::MAX,
+                };
+                MAX_SPENDABLE_UTXOS
+            ],
+            pending_transactions: vec![],
+        };
+
+        let encoded_len = Encode!(&response).unwrap().len();
+        assert!(
+            encoded_len < 512 * 1024,
+            "{MAX_SPENDABLE_UTXOS} UTXOs take {encoded_len} bytes"
+        );
+    }
 }
 
 mod contact_image {

@@ -12,7 +12,7 @@ use shared::types::{
         BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse, BtcGetPendingTransactionsError,
         BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsRequest,
         BtcGetSpendableUtxosError, BtcGetSpendableUtxosRequest, BtcGetSpendableUtxosResponse,
-        PendingTransaction, StoredPendingTransaction,
+        PendingTransaction, StoredPendingTransaction, MAX_SPENDABLE_UTXOS,
     },
     result_types::{
         BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
@@ -233,9 +233,10 @@ pub async fn btc_get_pending_transactions(
 
 /// Returns the caller's spendable UTXOs and pending transactions on the given network.
 ///
-/// The UTXOs are those at the caller's address with at least 4 confirmations (1 on regtest), all
-/// pages, minus those a pending transaction of the caller reserves on any of its addresses. The
-/// pending transactions are those at that address, as `btc_get_pending_transactions` returns them.
+/// The UTXOs are those at the caller's address with at least 4 confirmations (1 on regtest), from
+/// all pages, that no pending transaction of the caller reserves on any of its addresses: at most
+/// 10 000, the largest by value, largest first. The pending transactions are those at that
+/// address, as `btc_get_pending_transactions` returns them.
 ///
 /// Requires a valid II delegation chain to verify the caller authenticated
 /// through Internet Identity. Controllers bypass this check.
@@ -280,7 +281,7 @@ pub async fn btc_get_spendable_utxos(
                 None,
             );
             (
-                model.unreserved_utxos(principal, current_utxos),
+                model.spendable_utxos(principal, current_utxos, MAX_SPENDABLE_UTXOS),
                 model.get_pending_transactions(&principal, &source_address),
             )
         });
