@@ -174,22 +174,20 @@ describe('liquidium-repay.services', () => {
 
 	describe('getLiquidiumMaxRepayAmount', () => {
 		const getProfileId = vi.fn();
-		const getPosition = vi.fn();
 		const getMaxRepayAmount = vi.fn();
 
 		beforeEach(() => {
 			vi.clearAllMocks();
 			vi.mocked(liquidiumApi.liquidiumClient).mockReturnValue({
 				accounts: { getProfileId },
-				positions: { getPosition, getMaxRepayAmount }
+				positions: { getMaxRepayAmount }
 			} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
-			// What the SDK quotes for the position below: (borrowed + debtInterest) × 1.001.
-			getMaxRepayAmount.mockResolvedValue({ amount: 100_600_500n, decimals: 8n });
 		});
 
-		it('returns the debt plus a 0.1% buffer, without adding the interest it already includes', async () => {
+		it("returns the SDK's buffered full-debt amount", async () => {
 			getProfileId.mockResolvedValue(profileId);
-			getPosition.mockResolvedValue({ borrowed: 100_000_000n, debtInterest: 500_000n });
+			// The SDK quotes `borrowed × 1.001`; `borrowed` already includes the accrued interest.
+			getMaxRepayAmount.mockResolvedValue({ amount: 100_100_000n, decimals: 8n });
 
 			const amount = await getLiquidiumMaxRepayAmount({
 				identity: mockIdentity,
@@ -198,30 +196,12 @@ describe('liquidium-repay.services', () => {
 			});
 
 			expect(amount).toBe(100_100_000n);
-			expect(getPosition).toHaveBeenCalledExactlyOnceWith(profileId, poolId);
 			expect(getMaxRepayAmount).toHaveBeenCalledExactlyOnceWith(profileId, poolId);
 		});
 
-		it('is capped by the SDK max repay when it quotes less', async () => {
+		it('returns zero when the SDK reports no debt', async () => {
 			getProfileId.mockResolvedValue(profileId);
-			getPosition.mockResolvedValue({ borrowed: 100_000_000n, debtInterest: 500_000n });
-			getMaxRepayAmount.mockResolvedValue({ amount: 100_050_000n, decimals: 8n });
-
-			await expect(
-				getLiquidiumMaxRepayAmount({ identity: mockIdentity, ethAddress, poolId })
-			).resolves.toBe(100_050_000n);
-		});
-
-		it('returns zero without a position or debt', async () => {
-			getProfileId.mockResolvedValue(profileId);
-
-			getPosition.mockResolvedValueOnce(null);
-
-			await expect(
-				getLiquidiumMaxRepayAmount({ identity: mockIdentity, ethAddress, poolId })
-			).resolves.toBe(ZERO);
-
-			getPosition.mockResolvedValueOnce({ borrowed: ZERO, debtInterest: 500_000n });
+			getMaxRepayAmount.mockResolvedValue({ amount: ZERO, decimals: 8n });
 
 			await expect(
 				getLiquidiumMaxRepayAmount({ identity: mockIdentity, ethAddress, poolId })
@@ -243,7 +223,6 @@ describe('liquidium-repay.services', () => {
 			await expect(
 				getLiquidiumMaxRepayAmount({ identity: mockIdentity, ethAddress, poolId })
 			).resolves.toBeNull();
-			expect(getPosition).not.toHaveBeenCalled();
 			expect(getMaxRepayAmount).not.toHaveBeenCalled();
 		});
 	});
