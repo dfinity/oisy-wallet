@@ -1212,7 +1212,10 @@
 			"unknown": "OISY nie wie jeszcze, czy doładowanie się powiodło. Jeśli tak, zobaczysz je w aktywności $token. Doładuj ponownie, aby wysłać to samo doładowanie jeszcze raz: może się powieść tylko raz. Nowe lub zmienione doładowanie dodałoby cykle ponownie, jeśli to się powiodło.",
 			"unknown_fresh": "OISY nie wie jeszcze, czy Twoje ostatnie doładowanie się powiodło. Jeśli tak, to doładowanie doda cykle ponownie. Najpierw sprawdź aktywność $token.",
 			"sent_to_canister": "Wysłanie $token do kanistra go nie doładowuje. $token trafiają na konto kanistra, a kanister dostaje cykle tylko wtedy, gdy wypłaci je jego własny kod.",
-			"sent_to_canister_top_up": "Aby dodać cykle do kanistra, użyj opcji „Doładuj” na stronie $token."
+			"sent_to_canister_top_up": "Aby dodać cykle do kanistra, użyj opcji „Doładuj” na stronie $token.",
+			"choice_send": "Wyślij $token",
+			"choice_send_description": "Wyślij tokeny $token na inne konto. Wysłanie $token do kanistra go nie doładowuje.",
+			"choice_top_up_description": "Zamień tokeny $token na cykle, aby doładować dowolny kanister."
 		},
 		"error": {
 			"invalid_canister_id": "Wpisz ID kanistra. Principali użytkowników, ID kont i adresów w innych sieciach nie można doładować.",
@@ -1364,6 +1367,13 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "Odświeżanie interfejsu użytkownika",
 			"swap_provider": "Dostawca wymiany",
+			"smart_swap": "",
+			"finding_best_rate": "",
+			"smart_swap_gain": "",
+			"smart_swap_best_of_offers": "",
+			"smart_swap_offers_compared": "",
+			"smart_swap_offers": "",
+			"smart_swap_selected_offer": "",
 			"swap_provider_website": "Strona internetowa",
 			"swap_route": "Trasa wymiany",
 			"included_network_fees": "Wliczone opłaty sieciowe",
@@ -1371,7 +1381,6 @@
 			"best_rate": "Najlepsza stawka",
 			"expected_minimum": "Oczekiwane minimum",
 			"you_receive": "Otrzymasz",
-			"select": "Wybierz >",
 			"select_swap_provider": "Wybierz dostawcę wymiany",
 			"open_icp_swap": "Otwórz stronę internetową ICP Swap",
 			"open_instructions_link": "Otwórz link z instrukcjami",
@@ -1430,7 +1439,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
@@ -1857,6 +1867,7 @@
 			"allowance_increase": "To żądanie zwiększa limit wydatków upoważnionego poniżej o pokazaną kwotę, oprócz tego, co już może wydać. Upoważniony może przenieść tę kwotę tego tokena z Twojego portfela w dowolnym momencie, dopóki nie odwołasz uprawnienia.",
 			"allowance_decrease": "To żądanie zmniejsza limit wydatków upoważnionego poniżej o pokazaną kwotę. Samo w sobie nie przenosi żadnych środków.",
 			"unverifiable_erc20_request": "To żądanie dotyczy tokena, którego OISY nie może zidentyfikować ani zdekodować. Wyświetlana treść może różnić się od tej, która faktycznie zostałaby podpisana, dlatego zatwierdzenie jest wyłączone.",
+			"unlisted_erc20_request": "OISY nie obsługuje tego tokena na swojej liście. Jego symbol i wyświetlana kwota są odczytywane z kontraktu samego tokena, a każdy może utworzyć token z dowolnym symbolem. Przed zatwierdzeniem sprawdź adres tokena.",
 			"token_call_with_value": "Oprócz poniższej kwoty tokenów to żądanie wysyła $amount do kontraktu tokena. Transfer ani zatwierdzenie tokena nie wysyła $symbol, dlatego dla Twojego bezpieczeństwa OISY go nie podpisze.",
 			"unverifiable_approval_for_all_request": "To żądanie przekazałoby operatorowi kontrolę nad kolekcją NFT, a OISY nie może zdekodować, o którego operatora chodzi. Wyświetlana treść może różnić się od tej, która faktycznie zostałaby podpisana, dlatego zatwierdzenie jest wyłączone.",
 			"approval_for_all_grant": "To żądanie pozwala operatorowi poniżej przenosić dowolny NFT z tej kolekcji, który posiadasz teraz lub nabędziesz później, w dowolnym momencie, dopóki nie odwołasz uprawnienia. Samo w sobie nie przenosi żadnych środków.",
@@ -2485,6 +2496,7 @@
 			"create": "Nie udało się utworzyć kontaktu",
 			"update": "Nie udało się zaktualizować kontaktu",
 			"delete": "Nie udało się usunąć kontaktu",
+			"load": "Nie udało się załadować kontaktów",
 			"name_too_long": "Proszę, aby nazwa miała $maxCharacters znaków lub mniej."
 		}
 	},

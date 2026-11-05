@@ -25,3 +25,13 @@ export const CONTACT_TEXT_COLORS: NonEmptyArray<string> = [
 	`text-contact-8`,
 	`text-contact-9`
 ];
+
+// Loading the contacts is tried this many times before the user is told it failed.
+export const CONTACTS_LOAD_MAX_ATTEMPTS = 3;
+
+// The wait before a retry doubles each time: 2 s before the second attempt, 4 s before the third.
+export const CONTACTS_LOAD_RETRY_BASE_DELAY = 2_000;
+
+// The most contact images the backend returns per call (`MAX_CONTACT_IMAGES_PER_CALL`), which keeps
+// the reply below the 2 MiB of a certified call.
+export const CONTACT_IMAGES_BATCH_SIZE = 16;
