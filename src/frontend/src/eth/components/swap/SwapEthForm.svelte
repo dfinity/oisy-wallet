@@ -297,11 +297,7 @@
 
 			{#if insufficientFundsForFee}
 				<div transition:slide>
-					<MessageBox
-						level="warning"
-						styleClass="mt-4 sm:text-sm"
-						testId={SWAP_INSUFFICIENT_FEE_INFO}
-					>
+					<MessageBox level="warning" styleClass="mt-4" testId={SWAP_INSUFFICIENT_FEE_INFO}>
 						{replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
 							$symbol: nativeEthereumToken.symbol,
 							$balance: formatToken({
