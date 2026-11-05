@@ -116,10 +116,12 @@ const PAYOUT_TIMEOUT_SECONDS: u32 = 30;
 ///
 /// # Errors
 /// [`TransferFromCallError::InsufficientAllowance`] when the reservation no
-/// longer covers the payout; [`TransferFromCallError::Failed`] for any other
-/// ledger rejection or transport failure, [`PAYOUT_TIMEOUT_SECONDS`] included.
-/// A payout that reaches the deadline leaves its outcome unknown — see the
-/// module comment for why the claim state machine can take that answer.
+/// longer covers the payout; [`TransferFromCallError::InsufficientFunds`] when
+/// the sender's balance dropped below it; [`TransferFromCallError::Unresolved`]
+/// when [`PAYOUT_TIMEOUT_SECONDS`] passes with no answer, leaving the outcome
+/// unknown — see the module comment for why the claim state machine can take
+/// that answer; [`TransferFromCallError::Failed`] for any other ledger
+/// rejection or transport failure.
 pub async fn transfer_from(
     ledger: Principal,
     args: TransferFromArgs,
