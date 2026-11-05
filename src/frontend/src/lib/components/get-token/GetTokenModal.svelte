@@ -8,7 +8,6 @@
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { getTokenWizardSteps } from '$lib/config/get-token.config';
-	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsGetToken } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -33,6 +32,7 @@
 	import type { WizardStep } from '$lib/types/wizard';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { getInitialSwapSlippage } from '$lib/utils/swap.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -67,7 +67,7 @@
 	let selectTokenType = $state<SwapSelectTokenType | undefined>();
 	let swapAmount = $state<OptionAmount>();
 	let receiveAmount = $state<number | undefined>();
-	let slippageValue = $state<OptionAmount>(SWAP_DEFAULT_SLIPPAGE_VALUE);
+	let slippageValue = $state<OptionAmount>(getInitialSwapSlippage());
 	let swapProgressStep = $state(ProgressStepsSwap.INITIALIZATION);
 	let swapFailedProgressSteps = $state<ProgressStepsSwap[]>([]);
 	let allNetworksEnabled = $state<boolean>(true);
@@ -89,7 +89,7 @@
 		selectTokenType = undefined;
 		swapAmount = undefined;
 		receiveAmount = undefined;
-		slippageValue = SWAP_DEFAULT_SLIPPAGE_VALUE;
+		slippageValue = getInitialSwapSlippage();
 		swapProgressStep = ProgressStepsSwap.INITIALIZATION;
 		allNetworksEnabled = true;
 
