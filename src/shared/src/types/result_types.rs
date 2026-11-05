@@ -5,7 +5,7 @@ use super::{
     bitcoin::{
         BtcAddPendingTransactionError, BtcBroadcastTransactionError,
         BtcBroadcastTransactionResponse, BtcGetPendingTransactionsError,
-        BtcGetPendingTransactionsReponse,
+        BtcGetPendingTransactionsReponse, BtcGetSpendableUtxosError, BtcGetSpendableUtxosResponse,
     },
     dapp::AddDappSettingsError,
     notification::AddDismissedNotificationError,
@@ -259,6 +259,24 @@ impl From<Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsErro
         match result {
             Ok(response) => BtcGetPendingTransactionsResult::Ok(response),
             Err(err) => BtcGetPendingTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcGetSpendableUtxosResult {
+    /// The spendable UTXOs and pending transactions were retrieved successfully.
+    Ok(BtcGetSpendableUtxosResponse),
+    /// The spendable UTXOs were not retrieved due to an error.
+    Err(BtcGetSpendableUtxosError),
+}
+impl From<Result<BtcGetSpendableUtxosResponse, BtcGetSpendableUtxosError>>
+    for BtcGetSpendableUtxosResult
+{
+    fn from(result: Result<BtcGetSpendableUtxosResponse, BtcGetSpendableUtxosError>) -> Self {
+        match result {
+            Ok(response) => BtcGetSpendableUtxosResult::Ok(response),
+            Err(err) => BtcGetSpendableUtxosResult::Err(err),
         }
     }
 }
