@@ -564,6 +564,54 @@ export type BtcGetPendingTransactionsResult =
 			 */
 			Err: BtcGetPendingTransactionsError;
 	  };
+export type BtcGetSpendableUtxosError =
+	| {
+			/**
+			 * The provided II delegation chain is missing or failed verification.
+			 */
+			InvalidDelegationChain: { msg: string };
+	  }
+	| {
+			/**
+			 * The caller has exceeded the call rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * Server-side / unexpected
+			 */
+			InternalError: { msg: string };
+	  };
+export interface BtcGetSpendableUtxosRequest {
+	ii_delegation_chain: [] | [IIDelegationChain];
+	network: Network;
+}
+export interface BtcGetSpendableUtxosResponse {
+	/**
+	 * The caller's pending transactions at the address these UTXOs belong to, as
+	 * `btc_get_pending_transactions` returns them.
+	 */
+	pending_transactions: Array<PendingTransaction>;
+	/**
+	 * The caller's UTXOs with at least 4 confirmations (1 on regtest), all pages, minus those a
+	 * pending transaction of the caller reserves.
+	 */
+	utxos: Array<Utxo>;
+}
+export type BtcGetSpendableUtxosResult =
+	| {
+			/**
+			 * The spendable UTXOs and pending transactions were retrieved successfully.
+			 */
+			Ok: BtcGetSpendableUtxosResponse;
+	  }
+	| {
+			/**
+			 * The spendable UTXOs were not retrieved due to an error.
+			 */
+			Err: BtcGetSpendableUtxosError;
+	  };
 /**
  * Bitcoin transaction data.
  */
@@ -2695,6 +2743,20 @@ export interface _SERVICE {
 		[BtcGetPendingTransactionsRequest],
 		BtcGetPendingTransactionsResult
 	>;
+	/**
+	 * Returns the caller's spendable UTXOs and pending transactions on the given network.
+	 *
+	 * The UTXOs are those at the caller's address with at least 4 confirmations (1 on regtest), all
+	 * pages, minus those a pending transaction of the caller reserves on any of its addresses. The
+	 * pending transactions are those at that address, as `btc_get_pending_transactions` returns them.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `BtcGetSpendableUtxosError`.
+	 */
+	btc_get_spendable_utxos: ActorMethod<[BtcGetSpendableUtxosRequest], BtcGetSpendableUtxosResult>;
 	/**
 	 * Stops an unclaimed tip of the caller's from being claimable. The allowance
 	 * itself is the caller's to revoke — the client pairs this with an
