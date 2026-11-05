@@ -216,6 +216,23 @@ export const idlFactory = ({ IDL }) => {
 		Ok: BtcGetPendingTransactionsReponse,
 		Err: BtcGetPendingTransactionsError
 	});
+	const BtcGetSpendableUtxosRequest = IDL.Record({
+		ii_delegation_chain: IDL.Opt(IIDelegationChain),
+		network: Network
+	});
+	const BtcGetSpendableUtxosResponse = IDL.Record({
+		pending_transactions: IDL.Vec(PendingTransaction),
+		utxos: IDL.Vec(Utxo)
+	});
+	const BtcGetSpendableUtxosError = IDL.Variant({
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
+		RateLimited: RateLimitError,
+		InternalError: IDL.Record({ msg: IDL.Text })
+	});
+	const BtcGetSpendableUtxosResult = IDL.Variant({
+		Ok: BtcGetSpendableUtxosResponse,
+		Err: BtcGetSpendableUtxosError
+	});
 	const TipError = IDL.Variant({
 		InvalidExpiry: IDL.Null,
 		ClaimInProgress: IDL.Null,
@@ -1075,6 +1092,11 @@ export const idlFactory = ({ IDL }) => {
 		btc_get_pending_transactions: IDL.Func(
 			[BtcGetPendingTransactionsRequest],
 			[BtcGetPendingTransactionsResult],
+			[]
+		),
+		btc_get_spendable_utxos: IDL.Func(
+			[BtcGetSpendableUtxosRequest],
+			[BtcGetSpendableUtxosResult],
 			[]
 		),
 		cancel_tip: IDL.Func([IDL.Text], [CancelTipResult], []),

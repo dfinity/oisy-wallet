@@ -371,8 +371,9 @@ The state lives in heap memory, not stable memory, so `StoredPendingTransaction`
 (stable state; see [Pending decisions](#pending-decisions-facts-are-clear--we-just-need-to-decide)).
 An entry is dropped with its reservation (prune or release), so the map never holds more entries
 than there are reservations. So every caller of `prune_pending_transactions` calls
-`retain_reserved_broadcasts` right after it, as `btc_add_pending_transaction` and
-`btc_get_pending_transactions` do since PR 3, and PR 4's `btc_get_spendable_utxos` must too. An upgrade clears the map, which allows at most
+`retain_reserved_broadcasts` right after it: `btc_add_pending_transaction` since PR 3, and
+`btc_get_pending_transactions` and `btc_get_spendable_utxos` through their shared
+`get_utxos_and_prune` since PR 4. An upgrade clears the map, which allows at most
 `MAX_BROADCAST_ATTEMPTS` more paid broadcasts of a transaction whose inputs are still in the UTXO
 view. It does not release anything: a resend after the upgrade finds its reservation and reuses it,
 so a definitive failure keeps it.
@@ -454,7 +455,8 @@ needs:
 ```rust
 pub struct BtcGetSpendableUtxosResponse {
     /// The caller's UTXOs with at least `MIN_CONFIRMATIONS_ACCEPTED_BTC_TX` confirmations,
-    /// all pages, minus those reserved by a pending transaction.
+    /// from all pages, minus those reserved by a pending transaction: the largest first, at
+    /// most `MAX_SPENDABLE_UTXOS` and as many as fit in the reply beside the pending ones.
     pub utxos: Vec<Utxo>,
     /// The pending transactions, as `btc_get_pending_transactions` returns them today
     /// (still needed for the balance's `locked` term).
@@ -465,6 +467,40 @@ pub struct BtcGetSpendableUtxosResponse {
 Costs the same as `btc_get_pending_transactions` (one `get_all_utxos`), which it replaces in the
 send flow. `btc_get_pending_transactions` stays until nothing calls it (the wallet scheduler's
 balance path can move later).
+
+Decided in PR 4:
+
+- A UTXO counts as reserved if any pending transaction of the caller spends its outpoint, on any of
+  the caller's addresses. That is the rule `has_intersecting_pending_utxos` applies when it refuses
+  a reservation, so the frontend is never offered a UTXO a send would be refused for.
+- At most `MAX_SPENDABLE_UTXOS` (10 000) UTXOs, the largest by value, largest first. A reply is
+  limited to 2 MiB, about 42 000 UTXOs, so returning every page would fail outright for the
+  largest wallets. A transaction spends at most `MAX_BROADCAST_TX_INPUTS` inputs, so every send a
+  wallet can make is possible from its largest UTXOs, and the frontend's selection (the smallest
+  sufficient UTXO, else the largest) works on the list unchanged.
+- The UTXOs and `pending_transactions` share one budget, `MAX_SPENDABLE_UTXOS_REPLY_BYTES`
+  (2 000 000 bytes, leaving room for the Candid header). The existing limits allow about 2 MB of
+  pending transactions by themselves, for example 300 of 128 inputs each, so the UTXOs get what is
+  left (`BtcGetSpendableUtxosResponse::max_utxos_beside`). Pending transactions that alone take
+  more fail with `InternalError` instead of being cut: only the caller's own reservations can grow
+  that large, and they are pruned within an hour. `btc_get_pending_transactions` has the same
+  limit and fails at about the same size.
+- Max is not covered by that. `calculateMaxSpendableAmount` prices every UTXO, so with the flag on
+  a wallet with more than `MAX_BROADCAST_TX_INPUTS` UTXOs would be offered an amount the backend
+  refuses with `TooManyInputs`. PR 8 must keep Max, and the send it builds, within that many
+  inputs.
+- `pending_transactions` are those at the fetched address, as `btc_get_pending_transactions`
+  returns them.
+- The prune's absence rule matches by outpoint too. It compared whole `Utxo` records, so a
+  reservation whose UTXO came back with another height (a reorg mining the funding transaction
+  again) or that was reserved with other metadata was pruned while the output was unspent, and this
+  endpoint would then offer that output as spendable.
+- Both endpoints share one fetch-and-prune helper, `get_utxos_and_prune` in
+  `src/backend/src/api/bitcoin.rs`, which also syncs the broadcast states after the prune
+  (`retain_reserved_broadcasts`, from PR 3).
+- Its own rate limiter, `BTC_GET_SPENDABLE_UTXOS_RATE_LIMITER`, also 15 per minute. The wallet
+  scheduler keeps polling `btc_get_pending_transactions` for the balance, every 30 seconds per BTC
+  network and tab, so with a shared budget that polling could block the send flow's loads.
 
 ### Backend: `btc_get_balance` (optional, last PR)
 
@@ -949,6 +985,10 @@ Every PR is safe on its own.
   broadcast per attempt, about a cent, and no funds; CFS has the same gap today. The send never
   confirms, and its reservation lasts until the usual prune.
 
+- **Deep reorgs (pre-existing).** A reorg that leaves a reserved UTXO below 4 confirmations drops it
+  from the view, so the absence rule prunes its reservation while the output is unspent. When it
+  reaches 4 confirmations again, it looks free. On mainnet that needs a reorg at least 4 blocks
+  deep.
 - **1-hour expiry (pre-existing).** A low-fee transaction can stay in the mempool longer than
   `HOUR_IN_NS`; its UTXOs then look free again in the ≥4-confirmation view. The Bitcoin canister has
   no mempool view, so owning the reservations does not fix this by itself.
