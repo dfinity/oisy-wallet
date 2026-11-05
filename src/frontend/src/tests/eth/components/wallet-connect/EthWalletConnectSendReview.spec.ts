@@ -803,15 +803,19 @@ describe('EthWalletConnectSendReview', () => {
 			expect(getByText(`1 ${ETHEREUM_TOKEN.symbol}`)).toBeInTheDocument();
 		});
 
-		// The warning states what OISY could not establish; it does not withhold the decision. Blocking
-		// every selector OISY has never decoded would take most dApps offline, so approval stays with
-		// the user and the review stops misdescribing what they are deciding on.
-		it('should warn without disabling approval', () => {
-			const { getByTestId, getByRole } = renderUnknownCall({
+		// The notice states what OISY could not establish and leaves the decision with the user, once
+		// they confirm they understand it. Blocking every selector OISY has never decoded would take
+		// most dApps offline.
+		it('should hold approval until the user confirms it', async () => {
+			const { getByTestId, getByRole, getByLabelText } = renderUnknownCall({
 				data: `${PERMIT2_APPROVE_HASH}deadbeef`
 			});
 
 			expect(getByTestId(unknownTestId)).toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+
+			await fireEvent.click(getByLabelText(en.wallet_connect.text.unread_programs_acknowledge));
+
 			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 		});
 
