@@ -48,6 +48,16 @@ describe('BottomSheet component', () => {
 		expect(title.nextElementSibling).toHaveAttribute('aria-label', en.core.alt.close_details);
 	});
 
+	it('names the sheet by its title when it has no label of its own', () => {
+		render(BottomSheetTest, {
+			visible: true,
+			contentTest: 'Main content',
+			title: 'Sheet title'
+		});
+
+		expect(screen.getByRole('dialog')).toHaveAccessibleName('Sheet title');
+	});
+
 	it('keeps the header row to the close button without a title', () => {
 		render(BottomSheetTest, {
 			visible: true,

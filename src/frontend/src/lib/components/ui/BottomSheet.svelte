@@ -57,7 +57,7 @@
 
 {#if visible}
 	<div class="fixed inset-0 z-14" data-tid={testId}>
-		<BottomSheetContainer {ariaLabel} onClose={handleClose} transition>
+		<BottomSheetContainer ariaLabel={ariaLabel ?? title} onClose={handleClose} transition>
 			{#snippet header()}
 				{#if nonNullish(title)}
 					<div class="flex w-full items-center justify-between gap-4 p-4">
