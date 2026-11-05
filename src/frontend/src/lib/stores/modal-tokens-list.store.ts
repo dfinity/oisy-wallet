@@ -40,12 +40,11 @@ export const initModalTokensListContext = (
 	const filterNfts = derived([data], ([{ filterNfts }]) => filterNfts);
 	const filterCategoryTag = derived([data], ([{ filterCategoryTag }]) => filterCategoryTag);
 
-	// The list the picker offers for the current search: the network and asset type the person picks
-	// narrow it in `ModalTokensList`, which knows which of them the list can show.
-	const filteredTokens = derived(
+	// The tokens the picker can offer at all: the fixed constraints (networks, NFTs, a balance), before
+	// the search and the filters the person picks.
+	const eligibleTokens = derived(
 		[
 			tokens,
-			filterQuery,
 			filterZeroBalance,
 			sortByBalance,
 			exchanges,
@@ -58,7 +57,6 @@ export const initModalTokensListContext = (
 		],
 		([
 			$tokens,
-			$filterQuery,
 			$filterZeroBalance,
 			$sortByBalance,
 			$exchanges,
@@ -69,16 +67,14 @@ export const initModalTokensListContext = (
 			$filterNetworksIds,
 			$filterNfts
 		]) => {
-			const filteredByQuery = filterTokens({ tokens: $tokens, filter: $filterQuery ?? '' });
-
 			const filteredByNetworkIds =
 				nonNullish($filterNetworksIds) && $filterNetworksIds.length > 0
 					? filterTokensForSelectedNetworks([
-							filteredByQuery,
+							$tokens,
 							$filterNetworksIds,
 							isNullish($filterNetworksIds)
 						])
-					: filteredByQuery;
+					: $tokens;
 
 			const filteredByNft = filterTokensByNft({
 				tokens: filteredByNetworkIds,
@@ -110,8 +106,16 @@ export const initModalTokensListContext = (
 		}
 	);
 
+	// The list the picker offers for the current search: the network and asset type the person picks
+	// narrow it in `ModalTokensList`, which knows which of them the list can show.
+	const filteredTokens = derived(
+		[eligibleTokens, filterQuery],
+		([$eligibleTokens, $filterQuery]): TokenUi[] =>
+			filterTokens({ tokens: $eligibleTokens, filter: $filterQuery ?? '' })
+	);
+
 	return {
-		tokens,
+		eligibleTokens,
 		filterQuery,
 		filterNetwork,
 		filterCategoryTag,
@@ -157,7 +161,7 @@ export const initModalTokensListContext = (
 };
 
 export interface ModalTokensListContext {
-	tokens: Readable<Token[]>;
+	eligibleTokens: Readable<TokenUi[]>;
 	filterQuery: Readable<string | undefined>;
 	filterNetwork: Readable<Network | undefined>;
 	filterCategoryTag: Readable<TokenCategoryTagValue | undefined>;

@@ -53,7 +53,7 @@
 	}: Props = $props();
 
 	const {
-		tokens,
+		eligibleTokens,
 		filteredTokens,
 		filterNetwork,
 		setFilterNetwork,
@@ -93,8 +93,9 @@
 			: undefined
 	);
 
-	// Only the asset types the list holds, so no pick can empty it on its own.
-	let categories = $derived(getTokensCategories($tokens));
+	// Only the asset types among the tokens the list can offer, before the search: a type with nothing
+	// to pick (a stock with no balance where only funded tokens show) is never offered.
+	let categories = $derived(getTokensCategories($eligibleTokens));
 
 	let category = $derived(
 		$showTokenCategoryFilter &&
@@ -115,7 +116,12 @@
 	let canClearNetwork = $derived(!networkSelectorViewOnly && nonNullish(network));
 
 	// What clearing the filters would show: the query stays, and so does a network the picker locks.
-	let tokensWithoutFilters = $derived(canClearNetwork ? $filteredTokens : networkTokens);
+	// All networks means mainnets only, as `networkTokens` reads it without a network.
+	let tokensWithoutFilters = $derived(
+		canClearNetwork
+			? filterTokensForSelectedNetwork([$filteredTokens, undefined, true])
+			: networkTokens
+	);
 
 	let canClearFilters = $derived(
 		noTokensMatch && (canClearNetwork || nonNullish(category)) && tokensWithoutFilters.length > 0

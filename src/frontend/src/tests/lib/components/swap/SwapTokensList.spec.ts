@@ -41,12 +41,14 @@ describe('SwapTokensList', () => {
 		sourceToken,
 		destinationToken = mockValidIcCkToken,
 		receiveSupportedData,
-		filterNetwork
+		filterNetwork,
+		networks = [ICP_NETWORK, BTC_MAINNET_NETWORK]
 	}: {
 		sourceToken?: Token;
 		destinationToken?: Token;
 		receiveSupportedData?: SwapSupportedTokensData;
 		filterNetwork?: Network;
+		networks?: Network[];
 	} = {}) =>
 		mockContextMap([
 			[
@@ -59,7 +61,7 @@ describe('SwapTokensList', () => {
 				}
 			],
 			mockModalTokensListContextEntry({ tokens: [ICP_TOKEN], filterNetwork }),
-			mockModalNetworksListContextEntry({ networks: [ICP_NETWORK, BTC_MAINNET_NETWORK] })
+			mockModalNetworksListContextEntry({ networks })
 		]);
 
 	const networkChip = () => screen.getByTestId(NETWORK_FILTER);
@@ -156,6 +158,18 @@ describe('SwapTokensList', () => {
 			expect(networkChip()).toHaveTextContent(BTC_MAINNET_NETWORK.name);
 			expect(rowFor(btcToken.symbol)).toBeInTheDocument();
 			expect(rowFor(icpToken.symbol)).toBeUndefined();
+		});
+
+		it('leaves out the tokens on networks this side may not use', () => {
+			// As on the receive side, where the networks are the ones the pay token reaches.
+			render(SwapTokensList, {
+				props: sourceProps,
+				context: mockContext({ networks: [ICP_NETWORK] })
+			});
+
+			expect(networkChip()).toHaveTextContent(get(i18n).networks.chain_fusion);
+			expect(rowFor(icpToken.symbol)).toBeInTheDocument();
+			expect(rowFor(btcToken.symbol)).toBeUndefined();
 		});
 
 		it('offers only the networks with something to pick', async () => {
