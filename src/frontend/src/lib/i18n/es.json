@@ -1937,6 +1937,7 @@
 			"request_rejected": "Solicitud de WalletConnect rechazada",
 			"unknown_parameter": "Parámetro desconocido.",
 			"wallet_not_initialized": "Error inesperado. La dirección de tu billetera no está inicializada.",
+			"btc_address_not_signer": "",
 			"btc_broadcast_not_supported": "Difundir la transacción firmada aún no es compatible. Solicite la transacción con \"broadcast: false\" para recibir el PSBT firmado y difundirlo usted mismo.",
 			"btc_non_mainnet_sign_not_supported": "Firmar transacciones de Bitcoin solo es compatible en mainnet. Por su seguridad, esta solicitud no fue firmada.",
 			"btc_psbt_decode": "Esta transacción no pudo decodificarse para su revisión. Por su seguridad, no fue firmada.",

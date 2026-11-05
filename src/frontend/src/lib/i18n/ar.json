@@ -1937,6 +1937,7 @@
 			"request_rejected": "تم رفض طلب WalletConnect",
 			"unknown_parameter": "معلمة غير معروفة.",
 			"wallet_not_initialized": "خطأ غير متوقع. عنوان محفظتك غير مهيأ.",
+			"btc_address_not_signer": "",
 			"btc_broadcast_not_supported": "",
 			"btc_non_mainnet_sign_not_supported": "",
 			"btc_psbt_decode": "",
