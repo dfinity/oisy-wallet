@@ -652,18 +652,33 @@ describe('infura.providers', () => {
 			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(internalError);
 		});
 
-		it('should report the reason Infura gave when both refuse the transaction', async () => {
-			const { provider } = buildProvider();
+		it.each([
+			{ reason: 'a fee below the base fee', infuraRefusal: refusal },
+			{
+				reason: 'a balance that cannot pay',
+				infuraRefusal: Object.assign(new Error('insufficient funds'), {
+					code: 'INSUFFICIENT_FUNDS'
+				})
+			}
+		])(
+			'should not hand a transaction Infura refused for $reason to Alchemy',
+			async ({ infuraRefusal }) => {
+				// Alchemy could relay what Infura refused, the state having changed since, and lose its
+				// answer; the refusal would then be reported for a transaction that may be in.
+				const { provider } = buildProvider();
 
-			const infuraRefusal = Object.assign(new Error('insufficient funds'), {
-				code: 'INSUFFICIENT_FUNDS'
-			});
+				mockBroadcastTransaction
+					.mockRejectedValueOnce(infuraRefusal)
+					.mockRejectedValueOnce(internalError);
+				mockGetTransaction.mockRejectedValueOnce(new Error('lookup failed'));
 
-			mockBroadcastTransaction.mockRejectedValueOnce(infuraRefusal).mockRejectedValueOnce(refusal);
-			mockGetTransaction.mockResolvedValueOnce(null);
+				await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(infuraRefusal);
 
-			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(infuraRefusal);
-		});
+				expect(mockBroadcastTransaction).toHaveBeenCalledOnce();
+				expect(mockGetTransaction).not.toHaveBeenCalled();
+				expect(trackProviderFallback).not.toHaveBeenCalled();
+			}
+		);
 
 		it('should fail when the lookup cannot be answered either', async () => {
 			const { provider } = buildProvider();
