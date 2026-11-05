@@ -18,7 +18,7 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
 	import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
-	import { isEthersError, isSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import { findEthersError, isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { capSendAmountToFee, shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -253,6 +253,8 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
+			const ethersErr = findEthersError(err);
+
 			trackEvent({
 				name: TRACK_NFT_SEND,
 				metadata: {
@@ -263,7 +265,7 @@
 					tokenId: String(nft.id),
 					network: sourceNetwork.name,
 					// Only the code: ethers' message holds the signed transaction and the node's answer.
-					...(isEthersError(err) && { error: err.code })
+					...(nonNullish(ethersErr) && { error: ethersErr.code })
 				}
 			});
 
