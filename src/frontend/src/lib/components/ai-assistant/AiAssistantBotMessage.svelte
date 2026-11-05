@@ -15,7 +15,7 @@
 </script>
 
 <div class="message mb-5 w-full overflow-hidden text-sm">
-	<Markdown text={content} />
+	<Markdown text={content} untrusted />
 
 	{#if retryable && isLastItem}
 		<button
