@@ -8,10 +8,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
-import {
-	filterTokensForSelectedNetwork,
-	filterTokensForSelectedNetworks
-} from '$lib/utils/network.utils';
+import { filterTokensForSelectedNetworks } from '$lib/utils/network.utils';
 import { mapTokenUi } from '$lib/utils/token.utils';
 import { filterTokens, filterTokensByNft, sortTokens } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -43,11 +40,12 @@ export const initModalTokensListContext = (
 	const filterNfts = derived([data], ([{ filterNfts }]) => filterNfts);
 	const filterCategoryTag = derived([data], ([{ filterCategoryTag }]) => filterCategoryTag);
 
+	// The list the picker offers for the current search: the network and asset type the person picks
+	// narrow it in `ModalTokensList`, which knows which of them the list can show.
 	const filteredTokens = derived(
 		[
 			tokens,
 			filterQuery,
-			filterNetwork,
 			filterZeroBalance,
 			sortByBalance,
 			exchanges,
@@ -61,7 +59,6 @@ export const initModalTokensListContext = (
 		([
 			$tokens,
 			$filterQuery,
-			$filterNetwork,
 			$filterZeroBalance,
 			$sortByBalance,
 			$exchanges,
@@ -83,14 +80,8 @@ export const initModalTokensListContext = (
 						])
 					: filteredByQuery;
 
-			const filteredByNetwork = filterTokensForSelectedNetwork([
-				filteredByNetworkIds,
-				$filterNetwork,
-				isNullish($filterNetwork)
-			]);
-
 			const filteredByNft = filterTokensByNft({
-				tokens: filteredByNetwork,
+				tokens: filteredByNetworkIds,
 				filterNfts: $filterNfts
 			});
 
@@ -120,6 +111,7 @@ export const initModalTokensListContext = (
 	);
 
 	return {
+		tokens,
 		filterQuery,
 		filterNetwork,
 		filterCategoryTag,
@@ -165,6 +157,7 @@ export const initModalTokensListContext = (
 };
 
 export interface ModalTokensListContext {
+	tokens: Readable<Token[]>;
 	filterQuery: Readable<string | undefined>;
 	filterNetwork: Readable<Network | undefined>;
 	filterCategoryTag: Readable<TokenCategoryTagValue | undefined>;

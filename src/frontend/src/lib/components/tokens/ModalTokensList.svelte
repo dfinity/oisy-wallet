@@ -1,49 +1,62 @@
 <script lang="ts">
-	import { notEmptyString } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
+	import NetworkFilterDropdown from '$lib/components/networks/NetworkFilterDropdown.svelte';
 	import TokenCategoryFilterDropdown from '$lib/components/tokens/TokenCategoryFilterDropdown.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
-	import ModalFilterButton from '$lib/components/ui/ModalFilterButton.svelte';
 	import {
+		MODAL_TOKEN_LIST_CLEAR_FILTERS,
 		MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS,
+		MODAL_TOKEN_LIST_NO_MATCH,
 		MODAL_TOKENS_LIST
 	} from '$lib/constants/test-ids.constants';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { showTokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 	import { isDesktop } from '$lib/utils/device.utils';
-	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getNoTokensMatchMessage } from '$lib/utils/modal-tokens-list.utils';
+	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
+	import { filterTokensUiByCategory, getTokensCategories } from '$lib/utils/token-tag.utils';
 
 	interface Props {
 		networkSelectorViewOnly?: boolean;
+		// The networks the network filter offers; every mainnet when absent.
+		networks?: Network[];
+		showStakeBalance?: boolean;
 		tokenListItem: Snippet<[Token, () => void]>;
 		toolbar: Snippet;
 		noResults?: Snippet;
 		topBanner?: Snippet;
-		onSelectNetworkFilter?: () => void;
 		onTokenButtonClick?: (token: Token) => void;
 	}
 
 	let {
 		networkSelectorViewOnly = false,
+		networks,
+		showStakeBalance = true,
 		tokenListItem,
 		toolbar,
 		noResults,
 		topBanner,
-		onSelectNetworkFilter,
 		onTokenButtonClick
 	}: Props = $props();
 
 	const {
+		tokens,
 		filteredTokens,
 		filterNetwork,
+		setFilterNetwork,
 		filterQuery,
 		setFilterQuery,
 		filterCategoryTag,
@@ -68,13 +81,85 @@
 		setFilterQuery(filter);
 	});
 
-	let displayTokens = $derived(
-		$showTokenCategoryFilter
-			? filterTokensUiByCategory({ tokens: $filteredTokens, category: $filterCategoryTag })
-			: $filteredTokens
+	// A network or asset type the list does not offer (carried in from the assets page, or kept from a
+	// visit with other tokens) reads as "all", without being cleared, so it applies again where it fits.
+	// A network the picker locks always applies.
+	let network = $derived(
+		networkSelectorViewOnly ||
+			isNullish($filterNetwork) ||
+			isNullish(networks) ||
+			networks.some(({ id }) => id === $filterNetwork.id)
+			? $filterNetwork
+			: undefined
 	);
 
+	// Only the asset types the list holds, so no pick can empty it on its own.
+	let categories = $derived(getTokensCategories($tokens));
+
+	let category = $derived(
+		$showTokenCategoryFilter &&
+			nonNullish($filterCategoryTag) &&
+			categories.includes($filterCategoryTag)
+			? $filterCategoryTag
+			: undefined
+	);
+
+	let networkTokens = $derived(
+		filterTokensForSelectedNetwork([$filteredTokens, network, isNullish(network)])
+	);
+
+	let displayTokens = $derived(filterTokensUiByCategory({ tokens: networkTokens, category }));
+
 	let noTokensMatch = $derived(displayTokens.length === 0);
+
+	let canClearNetwork = $derived(!networkSelectorViewOnly && nonNullish(network));
+
+	// What clearing the filters would show: the query stays, and so does a network the picker locks.
+	let tokensWithoutFilters = $derived(canClearNetwork ? $filteredTokens : networkTokens);
+
+	let canClearFilters = $derived(
+		noTokensMatch && (canClearNetwork || nonNullish(category)) && tokensWithoutFilters.length > 0
+	);
+
+	let showNoMatch = $derived(canClearFilters || notEmptyString(filter.trim()));
+
+	let noMatchMessage = $derived(
+		getNoTokensMatchMessage({
+			i18n: $i18n,
+			language: $currentLanguage,
+			query: filter,
+			network: canClearFilters || networkSelectorViewOnly ? network : undefined,
+			category: canClearFilters ? category : undefined
+		})
+	);
+
+	const clearFilters = () => {
+		setFilterCategoryTag(undefined);
+
+		if (!networkSelectorViewOnly) {
+			setFilterNetwork(undefined);
+		}
+	};
+
+	let searchPlaceholder = $derived(
+		nonNullish(network)
+			? replacePlaceholders($i18n.tokens.placeholder.search_token_on_network, {
+					$network: network.name
+				})
+			: $i18n.tokens.placeholder.search_token
+	);
+
+	// The list never shrinks while the modal is open, so narrowing it with a filter does not pull the
+	// modal's bottom edge up under the pointer. Desktop only: on a phone the modal fills the screen.
+	let listHeight = $state(0);
+
+	let listMinHeight = $state(0);
+
+	$effect(() => {
+		if (listHeight > listMinHeight) {
+			listMinHeight = listHeight;
+		}
+	});
 </script>
 
 <div data-tid={MODAL_TOKENS_LIST}>
@@ -82,37 +167,64 @@
 		{@render topBanner()}
 	{/if}
 
-	<div class="input-field condensed mb-4 flex-1">
+	<div class="input-field condensed mb-3 flex-1">
 		<InputSearch
 			autofocus={isDesktop()}
-			placeholder={$i18n.tokens.placeholder.search_token}
+			placeholder={searchPlaceholder}
 			showResetButton={notEmptyString(filter)}
 			bind:filter
 		/>
 	</div>
 
-	<div class="flex items-center gap-2">
-		<ModalFilterButton
-			ariaLabel={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
-			disabled={networkSelectorViewOnly}
-			onclick={() => !networkSelectorViewOnly && onSelectNetworkFilter?.()}
-		>
-			{$filterNetwork?.name ?? $i18n.networks.chain_fusion}
-		</ModalFilterButton>
+	<div class="flex min-w-0 items-center gap-2">
+		<div class="flex min-w-0">
+			<NetworkFilterDropdown
+				locked={networkSelectorViewOnly}
+				{networks}
+				onSelect={setFilterNetwork}
+				selectedNetwork={network}
+				{showStakeBalance}
+			/>
+		</div>
 
 		{#if $showTokenCategoryFilter}
-			<TokenCategoryFilterDropdown
-				onSelect={setFilterCategoryTag}
-				selectedCategory={$filterCategoryTag}
-			/>
+			<div class="flex shrink-0">
+				<TokenCategoryFilterDropdown
+					{categories}
+					onSelect={setFilterCategoryTag}
+					selectedCategory={category}
+				/>
+			</div>
 		{/if}
 	</div>
 </div>
 
-<div class="my-4 flex flex-col overflow-y-hidden sm:max-h-[26rem]">
+<div
+	style={`--list-min-height: ${listMinHeight}px`}
+	class="my-4 flex flex-col overflow-y-hidden sm:max-h-[26rem] sm:min-h-(--list-min-height)"
+	bind:clientHeight={listHeight}
+>
 	<div class="gap-6 overflow-y-auto overscroll-contain">
 		{#if noTokensMatch}
-			{#if noResults}
+			{#if showNoMatch}
+				<div
+					class="flex flex-col items-center gap-3 px-4 py-8 text-center"
+					data-tid={MODAL_TOKEN_LIST_NO_MATCH}
+				>
+					<p class="text-primary">{noMatchMessage}</p>
+
+					{#if canClearFilters}
+						<Button
+							colorStyle="secondary-light"
+							onclick={clearFilters}
+							paddingSmall
+							testId={MODAL_TOKEN_LIST_CLEAR_FILTERS}
+						>
+							{$i18n.tokens.text.clear_filters}
+						</Button>
+					{/if}
+				</div>
+			{:else if noResults}
 				{@render noResults()}
 			{:else}
 				<p class="text-primary" data-tid={MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS}>

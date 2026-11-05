@@ -145,16 +145,16 @@ describe('modalTokensListStore', () => {
 		expect(get(filterNetwork)).toBeUndefined();
 	});
 
-	it('should filter tokens by network', () => {
-		const { filterNetwork, filteredTokens, filterQuery } = initModalTokensListContext({
+	// `ModalTokensList` narrows the list to the picked network, once it knows the list offers it.
+	it('should keep the picked network without narrowing the list to it', () => {
+		const { filterNetwork, filteredTokens } = initModalTokensListContext({
 			filterNetwork: ETHEREUM_NETWORK,
 			filterZeroBalance: true,
 			tokens: [mockToken1, mockToken2]
 		});
 
 		expect(get(filterNetwork)).toBe(ETHEREUM_NETWORK);
-		expect(get(filterQuery)).toBe(undefined);
-		expect(get(filteredTokens)).toStrictEqual([]);
+		expect(get(filteredTokens)).toStrictEqual([mockTokenUi2, mockTokenUi1]);
 	});
 
 	it('should filter tokens by query', () => {
@@ -319,7 +319,7 @@ describe('modalTokensListStore', () => {
 			expect(result).toEqual([mockTokenUi3, mockTokenUi4]);
 		});
 
-		it('should combine filterNetworksIds with filterNetwork', () => {
+		it('should apply filterNetworksIds and leave the picked network to the list', () => {
 			const { filteredTokens } = initModalTokensListContext({
 				tokens: [mockToken3, mockToken4],
 				filterNetworksIds: [ETHEREUM_NETWORK.id, ARBITRUM_MAINNET_NETWORK.id],
@@ -327,7 +327,7 @@ describe('modalTokensListStore', () => {
 				filterZeroBalance: false
 			});
 
-			expect(get(filteredTokens)).toEqual([mockTokenUi3]);
+			expect(get(filteredTokens)).toEqual([mockTokenUi3, mockTokenUi4]);
 		});
 
 		it('should combine filterNetworksIds with filterQuery', () => {
