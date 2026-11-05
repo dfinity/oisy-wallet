@@ -64,8 +64,14 @@
 
 	let pairedToken = $derived(side === 'destination' ? $sourceToken : $destinationToken);
 
+	// Only the networks this side may use (to receive: the ones the pay token reaches), so "All
+	// networks" means all of those and never shows a token the swap cannot reach.
+	let allowedSwapTokens: TokenToggleable<Token>[] = $derived(
+		allSwapTokens.filter(({ network }) => $filteredNetworks.some(({ id }) => id === network.id))
+	);
+
 	let tokensUi: TokenToggleable<TokenUi>[] = $derived(
-		allSwapTokens
+		allowedSwapTokens
 			.filter((token: TokenToggleable<Token>) => token.id !== pairedToken?.id)
 			.map((token: TokenToggleable<Token>) =>
 				mapTokenUi({

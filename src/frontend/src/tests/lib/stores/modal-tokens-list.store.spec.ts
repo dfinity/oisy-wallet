@@ -170,6 +170,17 @@ describe('modalTokensListStore', () => {
 		expect(get(filteredTokens)).toStrictEqual([mockTokenUi1]);
 	});
 
+	it('should keep the eligible tokens whatever the search', () => {
+		const { eligibleTokens, filteredTokens } = initModalTokensListContext({
+			filterQuery: 'ckBTC',
+			filterZeroBalance: true,
+			tokens: [mockToken1, mockToken2]
+		});
+
+		expect(get(filteredTokens)).toStrictEqual([mockTokenUi1]);
+		expect(get(eligibleTokens)).toStrictEqual([mockTokenUi2, mockTokenUi1]);
+	});
+
 	it('should filter zero-balance tokens', () => {
 		const { filterNetwork, filteredTokens, filterQuery } = initModalTokensListContext({
 			filterNetwork: ICP_NETWORK,

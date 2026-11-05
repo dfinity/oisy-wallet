@@ -19,6 +19,8 @@
 		tokens: Token[];
 		renderNoResults: boolean;
 		filterNfts?: boolean;
+		filterZeroBalance?: boolean;
+		filterQuery?: string;
 		filterNetwork?: Network;
 		filterCategoryTag?: TokenCategoryTagValue;
 		networkSelectorViewOnly?: boolean;
@@ -30,6 +32,8 @@
 		tokens,
 		renderNoResults,
 		filterNfts = false,
+		filterZeroBalance = false,
+		filterQuery = '',
 		filterNetwork,
 		filterCategoryTag,
 		networkSelectorViewOnly = false,
@@ -43,10 +47,10 @@
 		// svelte-ignore state_referenced_locally -- set once, as the modals do
 		initModalTokensListContext({
 			tokens,
-			filterZeroBalance: false,
+			filterZeroBalance,
 			filterNetwork,
 			filterCategoryTag,
-			filterQuery: '',
+			filterQuery,
 			filterNfts
 		})
 	);

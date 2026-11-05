@@ -1,6 +1,6 @@
 import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import {
 	MODAL_TOKEN_LIST_CLEAR_FILTERS,
@@ -8,10 +8,12 @@ import {
 	NETWORK_FILTER,
 	TOKEN_CATEGORY_FILTER
 } from '$lib/constants/test-ids.constants';
-import { TokenCategoryTagValue } from '$lib/enums/token-tag';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import ModalTokensListHost from '$tests/lib/components/tokens/ModalTokensListTestHost.svelte';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
@@ -266,6 +268,23 @@ describe('ModalTokensList', () => {
 			await expect(findByTestId(MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS)).resolves.toBeInTheDocument();
 			expect(queryByTestId(MODAL_TOKEN_LIST_CLEAR_FILTERS)).not.toBeInTheDocument();
 		});
+
+		it('offers no way out that would still show nothing', async () => {
+			// The search matches a testnet token only, which all networks (mainnets) leaves out too.
+			const { findByTestId, queryByTestId } = render(ModalTokensListHost, {
+				props: {
+					...baseProps,
+					tokens: [ETHEREUM_TOKEN, BTC_TESTNET_TOKEN],
+					renderNoResults: true,
+					networks,
+					filterNetwork: ETHEREUM_NETWORK,
+					filterQuery: 'Testnet'
+				}
+			});
+
+			await expect(findByTestId(MODAL_TOKEN_LIST_NO_MATCH)).resolves.toBeInTheDocument();
+			expect(queryByTestId(MODAL_TOKEN_LIST_CLEAR_FILTERS)).not.toBeInTheDocument();
+		});
 	});
 
 	describe('asset type filter', () => {
@@ -288,6 +307,41 @@ describe('ModalTokensList', () => {
 					...baseProps,
 					tokens: mockTokens,
 					renderNoResults: false,
+					filterCategoryTag: TokenCategoryTagValue.STOCK
+				}
+			});
+
+			await expect(findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}BTC`)).resolves.toBeInTheDocument();
+			expect(getByTestId(TOKEN_CATEGORY_FILTER)).toHaveTextContent(
+				get(i18n).tokens.text.asset_type_all_short
+			);
+		});
+	});
+
+	describe('asset types of tokens the list leaves out', () => {
+		// A stock with no balance, in a picker that shows funded tokens only.
+		const unfundedStock: Token = {
+			...ETHEREUM_TOKEN,
+			id: parseTokenId('mock-unfunded-stock'),
+			symbol: 'MSTK',
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }]
+		};
+
+		beforeEach(() => {
+			balancesStore.set({ id: BTC_MAINNET_TOKEN.id, data: { data: 100n, certified: true } });
+		});
+
+		afterEach(() => {
+			balancesStore.reset(BTC_MAINNET_TOKEN.id);
+		});
+
+		it('neither offers nor applies them', async () => {
+			const { findByTestId, getByTestId } = render(ModalTokensListHost, {
+				props: {
+					...baseProps,
+					tokens: [BTC_MAINNET_TOKEN, unfundedStock],
+					renderNoResults: false,
+					filterZeroBalance: true,
 					filterCategoryTag: TokenCategoryTagValue.STOCK
 				}
 			});
