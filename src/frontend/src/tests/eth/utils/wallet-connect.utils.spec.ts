@@ -1,5 +1,13 @@
-import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { BASE_NETWORK, BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	ETHEREUM_NETWORK,
+	ETHEREUM_NETWORK_ID,
+	SEPOLIA_NETWORK_ID
+} from '$env/networks/networks.eth.env';
+import { EURC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.eurc.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { CKETH_ABI, CKETH_DEPOSIT_HASH } from '$eth/constants/cketh.constants';
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
@@ -8,6 +16,7 @@ import {
 	ERC20_INCREASE_ALLOWANCE_HASH,
 	ERC20_TRANSFER_HASH
 } from '$eth/constants/erc20.constants';
+import { UNISWAP_EXECUTE_HASH } from '$eth/constants/uniswap.constants';
 import {
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_LEGACY,
@@ -39,6 +48,11 @@ import {
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+import {
+	encodeUniswapEurcToUsdc,
+	mockUniswapRouter,
+	mockUniswapWallet
+} from '$tests/mocks/uniswap.mock';
 import { toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
@@ -489,6 +503,17 @@ describe('wallet-connect.utils', () => {
 			principal: mockPrincipal
 		};
 
+		// What the classifier also reads a swap against. No token is listed, so none of these
+		// requests is one.
+		const classifyParams = {
+			...params,
+			chainId: ETHEREUM_NETWORK.chainId,
+			value: ZERO,
+			wallet: mockUniswapWallet,
+			nativeToken: ETHEREUM_TOKEN,
+			tokens: []
+		};
+
 		describe('toWalletConnectCkEthHelperContractAddress', () => {
 			it.each([
 				{ network: 'Ethereum', networkId: ETHEREUM_NETWORK_ID },
@@ -708,7 +733,7 @@ describe('wallet-connect.utils', () => {
 
 		describe('classifyWalletConnectEthSendTransaction', () => {
 			it('should classify a deposit to the principal of the user as a ckETH deposit', () => {
-				const call = classifyWalletConnectEthSendTransaction(params);
+				const call = classifyWalletConnectEthSendTransaction(classifyParams);
 
 				expect(call.type).toBe('ckEthDeposit');
 				expect(call.type === 'ckEthDeposit' && call.principal.toText()).toBe(
@@ -719,7 +744,7 @@ describe('wallet-connect.utils', () => {
 			it('should refuse a deposit to another principal', () => {
 				expect(
 					classifyWalletConnectEthSendTransaction({
-						...params,
+						...classifyParams,
 						data: encodeDeposit(OTHER_PRINCIPAL)
 					})
 				).toEqual({ type: 'ckEthDepositRefused' });
@@ -727,12 +752,15 @@ describe('wallet-connect.utils', () => {
 
 			it('should refuse calldata to the helper that is not a deposit', () => {
 				expect(
-					classifyWalletConnectEthSendTransaction({ ...params, data: `${ERC20_TRANSFER_HASH}00` })
+					classifyWalletConnectEthSendTransaction({
+						...classifyParams,
+						data: `${ERC20_TRANSFER_HASH}00`
+					})
 				).toEqual({ type: 'ckEthDepositRefused' });
 			});
 
 			it('should classify a request to the helper carrying no calldata as native', () => {
-				expect(classifyWalletConnectEthSendTransaction({ ...params, data: '0x' })).toEqual({
+				expect(classifyWalletConnectEthSendTransaction({ ...classifyParams, data: '0x' })).toEqual({
 					type: 'native'
 				});
 			});
@@ -740,7 +768,7 @@ describe('wallet-connect.utils', () => {
 			it('should classify a request to another contract by its calldata alone', () => {
 				expect(
 					classifyWalletConnectEthSendTransaction({
-						...params,
+						...classifyParams,
 						to: SPENDER,
 						data: encodeDeposit(OTHER_PRINCIPAL)
 					})
@@ -748,7 +776,7 @@ describe('wallet-connect.utils', () => {
 
 				expect(
 					classifyWalletConnectEthSendTransaction({
-						...params,
+						...classifyParams,
 						to: SPENDER,
 						data: `${ERC20_TRANSFER_HASH}${'de'.repeat(64)}`
 					})
@@ -757,14 +785,47 @@ describe('wallet-connect.utils', () => {
 
 			it('should hold a deposit while the helper contract is not confirmed', () => {
 				expect(
-					classifyWalletConnectEthSendTransaction({ ...params, minterInfo: undefined })
+					classifyWalletConnectEthSendTransaction({ ...classifyParams, minterInfo: undefined })
 				).toEqual({ type: 'ckEthHelperUnconfirmed' });
 			});
 
 			it('should classify a deposit on an EVM network without ckETH by its calldata alone', () => {
 				expect(
-					classifyWalletConnectEthSendTransaction({ ...params, networkId: BASE_NETWORK_ID })
+					classifyWalletConnectEthSendTransaction({ ...classifyParams, networkId: BASE_NETWORK_ID })
 				).toEqual({ type: 'unknown', selector: CKETH_DEPOSIT_HASH });
+			});
+
+			describe('Uniswap swaps', () => {
+				const swapParams = {
+					...classifyParams,
+					to: mockUniswapRouter,
+					data: encodeUniswapEurcToUsdc(),
+					networkId: BASE_NETWORK_ID,
+					chainId: BASE_NETWORK.chainId,
+					nativeToken: BASE_ETH_TOKEN,
+					tokens: [EURC_TOKEN, USDC_TOKEN]
+				};
+
+				it('should classify an execute on a pinned router as the swap it makes', () => {
+					const call = classifyWalletConnectEthSendTransaction(swapParams);
+
+					expect(call.type).toBe('uniswapSwap');
+					expect(call.type === 'uniswapSwap' && call.swap.paid.token).toEqual(EURC_TOKEN);
+					expect(call.type === 'uniswapSwap' && call.swap.received.token).toEqual(USDC_TOKEN);
+				});
+
+				it('should classify the same execute to another contract by its calldata alone', () => {
+					expect(classifyWalletConnectEthSendTransaction({ ...swapParams, to: SPENDER })).toEqual({
+						type: 'unknown',
+						selector: UNISWAP_EXECUTE_HASH
+					});
+				});
+
+				it('should classify a swap OISY cannot describe by its calldata alone', () => {
+					expect(
+						classifyWalletConnectEthSendTransaction({ ...swapParams, tokens: [EURC_TOKEN] })
+					).toEqual({ type: 'unknown', selector: UNISWAP_EXECUTE_HASH });
+				});
 			});
 		});
 	});
