@@ -122,8 +122,10 @@ export class InfuraProvider {
 			return await call(this.provider);
 		}
 
+		const infuraCall = call(this.provider);
+
 		try {
-			return await withTimeout({ promise: call(this.provider), milliseconds });
+			return await withTimeout({ promise: infuraCall, milliseconds });
 		} catch (infuraErr: unknown) {
 			const track = (resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES) =>
 				trackProviderFallback({
@@ -133,14 +135,19 @@ export class InfuraProvider {
 					resultStatus
 				});
 
+			const fallback = this.askFallback({
+				call,
+				recover,
+				milliseconds,
+				fallbackProvider,
+				infuraErr
+			});
+
 			try {
-				const result = await this.askFallback({
-					call,
-					recover,
-					milliseconds,
-					fallbackProvider,
-					infuraErr
-				});
+				// Infura's call carries on past its time limit, and a success it still gives while the
+				// fallback is asked serves the call as well. A failure it gives changes nothing: the
+				// fallback decides, so once that has failed the call fails with Infura's timeout.
+				const result = await Promise.race([fallback, infuraCall.catch(() => fallback)]);
 
 				track(PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS);
 

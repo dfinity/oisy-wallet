@@ -73,7 +73,8 @@ learn how often Infura fails.
   fails the request in any other way, it may have passed the transaction on, so a refusal from
   Alchemy afterwards answers only Alchemy's own attempt.
 - A submission Infura does not answer within 30 seconds counts as failed, which is safe for the same
-  reason.
+  reason. Its request stays open, though, and a success Infura still gives while Alchemy is asked
+  is taken.
 - This covers every submission OISY makes itself, since they all go through the same provider: send,
   convert, swap, approvals, ERC-4626 deposits and withdrawals, NFT transfers and WalletConnect. A
   WalletConnect dApp receives the hash of that one transaction, whichever provider accepted it. Open
