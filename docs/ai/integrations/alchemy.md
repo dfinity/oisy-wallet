@@ -59,7 +59,8 @@ builds. Alchemy is asked only after Infura answers with an error or gives no ans
 in time, never alongside it.
 
 - **Submission** — `eth_sendRawTransaction` with the same signed bytes, when
-  Infura did not accept them within 30 s (`INFURA_SUBMISSION_TIMEOUT_MILLISECONDS`).
+  Infura did not accept them within 30 s (`INFURA_SUBMISSION_TIMEOUT_MILLISECONDS`),
+  unless Infura refused them outright (`isDefinitiveTransactionRefusal`).
   If Alchemy fails too, `eth_getTransactionByHash` (10 s,
   `INFURA_READ_TIMEOUT_MILLISECONDS`) settles whether the network has the
   transaction anyway before the send is reported as failed.
