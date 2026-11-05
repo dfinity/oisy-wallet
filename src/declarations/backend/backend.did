@@ -228,7 +228,8 @@ type BtcAddPendingTransactionError = variant {
 	RateLimited : RateLimitError;
 	// Server-side / unexpected
 	InternalError : record { msg : text };
-	// Intersects with caller's existing pending reservations
+	// One of the UTXOs, or the txid with other UTXOs or at another address, is already reserved
+	// by the caller, or a broadcast of this transaction is in flight.
 	UtxosAlreadyReserved
 };
 type BtcAddPendingTransactionRequest = record {
@@ -355,6 +356,69 @@ type BtcAddress = variant {
 	// - `bc1pxwww0ct9ue7e8tdnlmug5m2tamfn7q06sahstg39ys4c9f3340qqxrdu9k`
 	P2TR : text
 };
+// Each error describes this call only. `BroadcastOutcomeUnknown` and `BroadcastInProgress` leave
+// open whether the transaction was broadcast. Any other error means this call broadcast nothing
+// and reserved nothing, but says nothing about an earlier submission of the same transaction,
+// whose reservation stays until it is pruned. After an unclear outcome, a later error is no
+// reason to build a new transaction.
+type BtcBroadcastTransactionError = variant {
+	// More than `MAX_BROADCAST_TX_INPUTS`.
+	TooManyInputs;
+	// Two inputs spend the same outpoint.
+	DuplicateInputs;
+	// An input is not one of the caller's UTXOs with enough confirmations.
+	InvalidUtxos;
+	// A non-empty `script_sig`, or a sequence with a BIP68 relative lock.
+	InvalidInput : record { index : nat32 };
+	// A non-standard script, dust, or a malformed or second `OP_RETURN`.
+	InvalidOutput : record { index : nat32 };
+	// The lock time is not 0.
+	UnsupportedLockTime;
+	// The witness is not a valid `SIGHASH_ALL` signature by the caller's key.
+	InvalidSignature : record { index : nat32 };
+	// Another broadcast of the same transaction is still in flight.
+	BroadcastInProgress;
+	// The fee is below 1 sat/vB.
+	FeeTooLow;
+	// The transaction may have been broadcast. Its inputs stay reserved, and the same bytes may
+	// be sent again.
+	BroadcastOutcomeUnknown : record { msg : text };
+	// The provided II delegation chain is missing or failed verification.
+	InvalidDelegationChain : record { msg : text };
+	// More than `MAX_BROADCAST_TX_BYTES`.
+	TransactionTooLarge;
+	// More than `MAX_BROADCAST_TX_OUTPUTS`.
+	TooManyOutputs;
+	// Not exactly one consensus-encoded transaction, no inputs or no outputs, a version other
+	// than 1 or 2, or fewer than 65 bytes without the witnesses.
+	MalformedTransaction;
+	// The caller has exceeded the call rate limit.
+	RateLimited : RateLimitError;
+	// Nothing was broadcast, and the inputs this call reserved are free again.
+	BroadcastRejected : record { msg : text };
+	// Server-side / unexpected
+	InternalError : record { msg : text };
+	// One of the inputs, or the txid with other inputs or at another address, is already
+	// reserved by the caller.
+	UtxosAlreadyReserved
+};
+type BtcBroadcastTransactionRequest = record {
+	// The fully signed, consensus-serialized transaction, at most `MAX_BROADCAST_TX_BYTES`.
+	transaction : blob;
+	ii_delegation_chain : opt IIDelegationChain;
+	network : Network
+};
+type BtcBroadcastTransactionResponse = record {
+	// In internal byte order, as `StoredPendingTransaction::txid`: the reverse of the hex a
+	// block explorer shows.
+	txid : blob
+};
+type BtcBroadcastTransactionResult = variant {
+	// The transaction was broadcast, now or by an earlier call.
+	Ok : BtcBroadcastTransactionResponse;
+	// See the error for whether the transaction may have been broadcast.
+	Err : BtcBroadcastTransactionError
+};
 type BtcGetFeePercentilesError = variant {
 	InternalError : record { msg : text }
 };
@@ -385,6 +449,34 @@ type BtcGetPendingTransactionsResult = variant {
 	Ok : BtcGetPendingTransactionsReponse;
 	// The pending transactions were not retrieved due to an error.
 	Err : BtcGetPendingTransactionsError
+};
+type BtcGetSpendableUtxosError = variant {
+	// The provided II delegation chain is missing or failed verification.
+	InvalidDelegationChain : record { msg : text };
+	// The caller has exceeded the call rate limit.
+	RateLimited : RateLimitError;
+	// Server-side / unexpected
+	InternalError : record { msg : text }
+};
+type BtcGetSpendableUtxosRequest = record {
+	ii_delegation_chain : opt IIDelegationChain;
+	network : Network
+};
+type BtcGetSpendableUtxosResponse = record {
+	// The caller's pending transactions at the address these UTXOs belong to, as
+	// `btc_get_pending_transactions` returns them.
+	pending_transactions : vec PendingTransaction;
+	// The caller's UTXOs with at least 4 confirmations (1 on regtest), from all pages, that no
+	// pending transaction of the caller reserves: the largest by value, largest first. At most
+	// `MAX_SPENDABLE_UTXOS` (10 000), and fewer if the pending transactions leave less room in
+	// the reply.
+	utxos : vec Utxo
+};
+type BtcGetSpendableUtxosResult = variant {
+	// The spendable UTXOs and pending transactions were retrieved successfully.
+	Ok : BtcGetSpendableUtxosResponse;
+	// The spendable UTXOs were not retrieved due to an error.
+	Err : BtcGetSpendableUtxosError
 };
 // Bitcoin transaction data.
 type BtcTransactionData = record { fee : opt nat };
@@ -1716,6 +1808,24 @@ service : (Arg) -> {
 	btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (
 		BtcAddPendingTransactionResult
 	);
+	// Validates a signed transaction of the caller, reserves its inputs and broadcasts it, paying the
+	// Bitcoin canister from the backend's own cycles.
+	//
+	// The checks that need no paid call run first, so a bad request costs no Bitcoin canister call.
+	// The inputs are reserved in the same synchronous block that checks them against the caller's
+	// other pending transactions, before the broadcast. Sending the same bytes again is safe: after
+	// a success it returns the txid without a second broadcast for as long as the inputs stay
+	// reserved, and after an unclear outcome it broadcasts again, at most `MAX_BROADCAST_ATTEMPTS`
+	// times in all. Once the reservation is pruned, the same bytes are handled as a new request.
+	//
+	// Requires a valid II delegation chain to verify the caller authenticated through Internet
+	// Identity. Controllers bypass this check.
+	//
+	// # Errors
+	// Errors are enumerated by: `BtcBroadcastTransactionError`.
+	btc_broadcast_transaction : (BtcBroadcastTransactionRequest) -> (
+		BtcBroadcastTransactionResult
+	);
 	// Retrieves the current fee percentiles for Bitcoin transactions from the cache
 	// for the specified network. Fee percentiles are measured in millisatoshi per byte
 	// and are periodically updated in the background.
@@ -1742,6 +1852,24 @@ service : (Arg) -> {
 	// Errors are enumerated by: `BtcGetPendingTransactionsError`.
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
 		BtcGetPendingTransactionsResult
+	);
+	// Returns the caller's spendable UTXOs and pending transactions on the given network.
+	//
+	// The UTXOs are those at the caller's address with at least 4 confirmations (1 on regtest), from
+	// all pages, that no pending transaction of the caller reserves on any of its addresses: the
+	// largest by value, largest first, at most 10 000 and fewer if the pending transactions leave less
+	// room in the reply. The pending transactions are those at that address, as
+	// `btc_get_pending_transactions` returns them.
+	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
+	//
+	// # Errors
+	// Errors are enumerated by: `BtcGetSpendableUtxosError`. `InternalError` also covers pending
+	// transactions too large for a reply, which only the caller's own reservations can cause, until
+	// they are pruned.
+	btc_get_spendable_utxos : (BtcGetSpendableUtxosRequest) -> (
+		BtcGetSpendableUtxosResult
 	);
 	// Stops an unclaimed tip of the caller's from being claimable. The allowance
 	// itself is the caller's to revoke — the client pairs this with an

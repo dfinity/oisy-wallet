@@ -14,7 +14,7 @@ import type { IcTransactionUi, IcrcTransaction } from '$icp/types/ic-transaction
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { MINT_MEMO_KYT_FAIL, decodeBurnMemo, decodeMintMemo } from '$icp/utils/ckbtc-memo.utils';
 import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
-import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
+import { icrcTxExplorerUrl, mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
@@ -47,8 +47,8 @@ export const mapCkBTCTransaction = ({
 		id,
 		from,
 		to,
+		txExplorerUrl: icrcTxExplorerUrl({ ledgerCanisterId, blockIndex: transaction.id }),
 		...(notEmptyString(ckBTCExplorerUrl) && {
-			txExplorerUrl: `${ckBTCExplorerUrl}/transaction/${id}`,
 			...(notEmptyString(from) && { fromExplorerUrl: `${ckBTCExplorerUrl}/account/${from}` }),
 			...(notEmptyString(to) && { toExplorerUrl: `${ckBTCExplorerUrl}/account/${to}` })
 		}),
