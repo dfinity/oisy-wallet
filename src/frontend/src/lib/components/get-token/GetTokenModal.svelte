@@ -64,7 +64,6 @@
 	let currentStep = $state<WizardStep<WizardStepsGetTokenType> | undefined>();
 	let modal = $state<WizardModal<WizardStepsGetTokenType>>();
 
-	let showSelectProviderModal = $state<boolean>(false);
 	let selectTokenType = $state<SwapSelectTokenType | undefined>();
 	let swapAmount = $state<OptionAmount>();
 	let receiveAmount = $state<number | undefined>();
@@ -92,7 +91,6 @@
 		receiveAmount = undefined;
 		slippageValue = getInitialSwapSlippage();
 		swapProgressStep = ProgressStepsSwap.INITIALIZATION;
-		showSelectProviderModal = false;
 		allNetworksEnabled = true;
 
 		resetSwapStore();
@@ -180,7 +178,6 @@
 				bind:swapProgressStep
 				bind:swapFailedProgressSteps
 				bind:allNetworksEnabled
-				bind:showSelectProviderModal
 				bind:selectTokenType
 			/>
 		{/if}

@@ -51,7 +51,6 @@
 
 	let currentStep = $state<WizardStep<WizardStepsSwap> | undefined>();
 	let selectTokenType = $state<SwapSelectTokenType | undefined>();
-	let showSelectProviderModal = $state<boolean>(false);
 	let swapAmount = $state<OptionAmount>();
 	let receiveAmount = $state<number | undefined>();
 	let slippageValue = $state<OptionAmount>(getInitialSwapSlippage());
@@ -64,9 +63,7 @@
 			? $i18n.swap.text.select_source_token
 			: selectTokenType === 'destination'
 				? $i18n.swap.text.select_destination_token
-				: showSelectProviderModal
-					? $i18n.swap.text.select_swap_provider
-					: (currentStep?.title ?? '')
+				: (currentStep?.title ?? '')
 	);
 
 	const close = () =>
@@ -83,7 +80,6 @@
 			swapProgressStep = ProgressStepsSwap.INITIALIZATION;
 			allNetworksEnabled = true;
 			selectTokenType = undefined;
-			showSelectProviderModal = false;
 		});
 
 	// The swap context outlives the modal, and a navigation closes it without `close`: what the swap
@@ -92,8 +88,7 @@
 
 	let disablePointerEvents = $derived(
 		currentStep?.name === WizardStepsSwap.SWAPPING ||
-			currentStep?.name === WizardStepsSwap.TOKENS_LIST ||
-			showSelectProviderModal
+			currentStep?.name === WizardStepsSwap.TOKENS_LIST
 	);
 </script>
 
@@ -124,7 +119,6 @@
 		bind:swapProgressStep
 		bind:swapFailedProgressSteps
 		bind:allNetworksEnabled
-		bind:showSelectProviderModal
 		bind:selectTokenType
 	/>
 </WizardModal>
