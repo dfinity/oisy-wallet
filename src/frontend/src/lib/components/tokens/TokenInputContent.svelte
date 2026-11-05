@@ -54,6 +54,10 @@
 		// primitive that changes only when those values do; `undefined` keeps the old behaviour.
 		revalidateKey?: unknown;
 		showTokenNetwork?: boolean;
+		// Opt-in: keeps the selector's symbol on one line, cut with an ellipsis when it is too long.
+		// Only for a host that names the token in full elsewhere (the send form lists its symbol,
+		// name and address below the field), since a cut symbol alone no longer identifies it.
+		truncateSymbol?: boolean;
 		onClick?: () => void;
 		title?: Snippet;
 		amountInfo: Snippet;
@@ -82,6 +86,7 @@
 		onCustomErrorValidate = () => undefined,
 		revalidateKey = undefined,
 		showTokenNetwork = false,
+		truncateSymbol = false,
 		onClick,
 		title,
 		amountInfo,
@@ -253,7 +258,13 @@
 		>
 			{#if token}
 				<TokenLogo data={token} logoSize="xs" />
-				<div class="ml-2 text-sm font-semibold">{getTokenDisplaySymbol(token)}</div>
+				<div
+					class="ml-2 text-sm font-semibold"
+					class:max-w-24={truncateSymbol}
+					class:truncate={truncateSymbol}
+				>
+					{getTokenDisplaySymbol(token)}
+				</div>
 			{:else}
 				<!-- Grey rather than brand while the picker is unavailable: the plus is
 					 the field's only affordance, so leaving it blue reads as actionable. The

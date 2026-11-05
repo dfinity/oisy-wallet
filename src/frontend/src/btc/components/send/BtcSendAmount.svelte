@@ -72,6 +72,7 @@
 		onClick={onTokensList}
 		onCustomErrorValidate={customValidate}
 		token={$sendToken}
+		truncateSymbol
 		bind:amount
 		bind:amountSetToMax
 		bind:error={amountError}
