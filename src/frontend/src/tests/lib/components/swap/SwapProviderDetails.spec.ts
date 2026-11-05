@@ -42,6 +42,17 @@ describe('SwapProviderDetails', () => {
 		expect(getByText('0.95 ICP')).toBeInTheDocument();
 	});
 
+	it('leaves the website out on request and keeps the details', () => {
+		const { getByText, queryByText } = render(SwapProviderDetails, {
+			props: { provider, slippageValue: 5, showWebsite: false },
+			context
+		});
+
+		expect(queryByText(en.swap.text.swap_provider_website)).not.toBeInTheDocument();
+		expect(queryByText('icpswap.com')).not.toBeInTheDocument();
+		expect(getByText('0.95 ICP')).toBeInTheDocument();
+	});
+
 	it('passes the slippage through to the provider details', () => {
 		const { queryByText } = render(SwapProviderDetails, {
 			props: { provider, slippageValue: undefined },

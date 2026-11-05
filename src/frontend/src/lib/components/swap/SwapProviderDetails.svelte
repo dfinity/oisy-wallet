@@ -24,9 +24,11 @@
 	interface Props {
 		provider: SwapMappedResult;
 		slippageValue: OptionAmount;
+		// The provider step lists the website under each offer already.
+		showWebsite?: boolean;
 	}
 
-	let { provider, slippageValue }: Props = $props();
+	let { provider, slippageValue, showWebsite = true }: Props = $props();
 
 	let displayURL = $derived.by(() => {
 		const parsed = UrlSchema.safeParse(findSwapProvider(provider.provider)?.website);
@@ -38,7 +40,7 @@
 	});
 </script>
 
-{#if nonNullish(displayURL)}
+{#if showWebsite && nonNullish(displayURL)}
 	<ModalValue>
 		{#snippet label()}
 			{$i18n.swap.text.swap_provider_website}
