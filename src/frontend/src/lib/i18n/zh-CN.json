@@ -1212,7 +1212,10 @@
 			"unknown": "OISY 暂时无法确定充值是否成功。如果成功，您的 $token 活动中会显示。再次充值会重新发送同一笔充值：它只能成功一次。如果这笔充值已成功，新的或修改过的充值会再次添加 Cycles。",
 			"unknown_fresh": "OISY 暂时无法确定您上一笔充值是否成功。如果已成功，这笔充值会再次添加 Cycles。请先检查您的 $token 活动。",
 			"sent_to_canister": "向 Canister 发送 $token 不会为其充值。这些 $token 会进入该 Canister 的账户，只有当 Canister 自己的代码将其提取时，它才能获得 Cycles。",
-			"sent_to_canister_top_up": "要为 Canister 添加 Cycles，请在 $token 页面使用“充值”。"
+			"sent_to_canister_top_up": "要为 Canister 添加 Cycles，请在 $token 页面使用“充值”。",
+			"choice_send": "发送 $token",
+			"choice_send_description": "将 $token 代币发送到另一个账户。向 Canister 发送 $token 不会为其充值。",
+			"choice_top_up_description": "将 $token 代币转换为 Cycles，为任意 Canister 充值。"
 		},
 		"error": {
 			"invalid_canister_id": "请输入 Canister ID。用户 Principal、账户 ID 和其他网络的地址无法充值。",
@@ -1366,6 +1369,11 @@
 			"swap_provider": "兑换服务商",
 			"smart_swap": "",
 			"finding_best_rate": "",
+			"smart_swap_gain": "",
+			"smart_swap_best_of_offers": "",
+			"smart_swap_offers_compared": "",
+			"smart_swap_offers": "",
+			"smart_swap_selected_offer": "",
 			"swap_provider_website": "官网",
 			"swap_route": "兑换路径",
 			"included_network_fees": "包含的网络费用",
@@ -1373,7 +1381,6 @@
 			"best_rate": "最佳汇率",
 			"expected_minimum": "预计最少获得",
 			"you_receive": "你将收到",
-			"select": "选择 >",
 			"select_swap_provider": "选择兑换服务商",
 			"open_icp_swap": "打开 ICP Swap 网站",
 			"open_instructions_link": "打开说明链接",
@@ -1432,7 +1439,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
@@ -2488,6 +2496,7 @@
 			"create": "创建联系人失败",
 			"update": "更新联系人失败",
 			"delete": "删除联系人失败",
+			"load": "加载联系人失败",
 			"name_too_long": "请将名称控制在 $maxCharacters 个字符以内。"
 		}
 	},

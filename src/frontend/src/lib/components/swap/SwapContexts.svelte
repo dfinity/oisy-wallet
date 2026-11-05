@@ -37,13 +37,13 @@
 
 	let { children }: Props = $props();
 
-	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
-		store: initSwapAmountsStore(),
-		activity: initSwapQuoteActivityStore()
-	});
-
 	const swapContext = initSwapContext();
 	setContext<SwapContext>(SWAP_CONTEXT_KEY, swapContext);
+
+	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
+		store: initSwapAmountsStore({ amountSetToMax: swapContext.amountSetToMax }),
+		activity: initSwapQuoteActivityStore()
+	});
 
 	const { destinationToken, receiveSupportedData, setDestinationToken } = swapContext;
 

@@ -124,7 +124,6 @@ describe('SwapModalWizardSteps', () => {
 				slippageValue: undefined,
 				onClose: vi.fn(),
 				currentStep,
-				showSelectProviderModal: false,
 				swapProgressStep: ProgressStepsSwap.INITIALIZATION,
 				allNetworksEnabled: true,
 				modal: mockModal as unknown as WizardModal<WizardStepsSwap>,
