@@ -39,6 +39,19 @@ export const isNetworkIdETHMainnet = (networkId: NetworkId | undefined): boolean
 export const isNetworkIdETH = (networkId: NetworkId | undefined): boolean =>
 	nonNullish(networkId) && isNetworkIdEthereum(networkId);
 
+const MAX_NAT64 = 18446744073709551615n; // 2n ** 64n - 1n
+
+export const isInvalidNat64Memo = (memo: string): boolean => {
+	if (!/^\d+$/.test(memo.trim())) {
+		return true;
+	}
+	try {
+		return BigInt(memo.trim()) > MAX_NAT64;
+	} catch {
+		return true;
+	}
+};
+
 export const isInvalidDestinationIc = ({
 	destination,
 	tokenStandard,

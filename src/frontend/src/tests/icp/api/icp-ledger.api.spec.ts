@@ -68,6 +68,20 @@ describe('icp-ledger.api', () => {
 			});
 		});
 
+		it('successfully calls transfer endpoint with nat64 memo', async () => {
+			const memo = 42n;
+
+			const result = await transfer({ ...params, memo });
+
+			expect(result).toEqual(mockBlock);
+
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				to: AccountIdentifier.fromHex(mockAccountIdentifierText),
+				memo
+			});
+		});
+
 		it('throws an error if identity is undefined', async () => {
 			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
 		});
