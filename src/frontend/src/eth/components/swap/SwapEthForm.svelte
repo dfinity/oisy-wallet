@@ -9,8 +9,7 @@
 	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
-	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
+	import SwapProviderCell from '$lib/components/swap/SwapProviderCell.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -257,16 +256,14 @@
 	{onMax}
 	{onNext}
 	{onShowTokensList}
+	{slippageValue}
 	bind:swapAmount
 	bind:receiveAmount
-	bind:slippageValue
 >
 	{#snippet swapDetails()}
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
-			<Hr spacing="md" />
-
-			<div class="flex flex-col">
-				<SwapProvider isForm {onShowProviderList} showSelectButton {slippageValue} />
+			<div class="mt-4 flex flex-col">
+				<SwapProviderCell {onShowProviderList} />
 
 				<SwapFeeRow
 					show={nonNullish($swapAmountsStore?.selectedProvider) && nonNullish($feeTokenIdStore)}
