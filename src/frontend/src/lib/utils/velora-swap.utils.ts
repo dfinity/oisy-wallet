@@ -77,10 +77,25 @@ export const veloraMinimumAmount = ({
 	slippageBasisPoints: number;
 }): bigint => (amount * (BASIS_POINTS - BigInt(slippageBasisPoints))) / BASIS_POINTS;
 
+// `amount` of the order's token in the units of the token the bridge delivers: the settlement
+// scales it by ten to the power of `scalingFactor` on the destination network.
+const bridgeScaledAmount = ({
+	amount,
+	scalingFactor
+}: {
+	amount: bigint;
+	scalingFactor: number;
+}): bigint =>
+	scalingFactor >= 0
+		? amount * 10n ** BigInt(scalingFactor)
+		: amount / 10n ** BigInt(-scalingFactor);
+
 /**
  * Refuses a Delta route that does not sell the reviewed amount of the source token for the
  * destination token, on their networks. The order settles the route's origin step while the review
- * shows its destination step, so a same-chain route, which needs no bridge, must make both the same.
+ * shows its destination step, so a same-chain route, which needs no bridge, must make both the same,
+ * and a cross-chain route must bridge to the destination token and show no more than its origin step
+ * comes to once the bridge scales it.
  *
  * Run before the approval or permit, so that a refused route costs neither.
  */
@@ -120,6 +135,21 @@ export const assertVeloraDeltaRoute = ({
 	if (sourceChainId !== destinationChainId) {
 		if (isNullish(bridge)) {
 			throw veloraRejectedError('the cross-chain route has no bridge');
+		}
+
+		const {
+			contractParams: { outputToken, scalingFactor }
+		} = bridge;
+
+		if (!isSameAddress({ actual: outputToken, expected: destinationTokenAddress })) {
+			throw veloraRejectedError('the bridge does not deliver the reviewed token');
+		}
+
+		if (
+			BigInt(destination.output.amount) >
+			bridgeScaledAmount({ amount: BigInt(origin.output.amount), scalingFactor })
+		) {
+			throw veloraRejectedError('the cross-chain route shows more than its bridge delivers');
 		}
 
 		return;

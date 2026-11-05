@@ -16,6 +16,8 @@ const OTHER = '0x1111111111111111111111111111111111111111';
 const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f';
+const USDC_BASE = '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913';
+const USDC_BSC = '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d';
 const AUGUSTUS = '0x6a000f20005980200259b80c5102003040001068';
 const NO_METADATA = `0x${'00'.repeat(32)}`;
 
@@ -98,34 +100,54 @@ describe('velora-swap.utils', () => {
 			}
 		};
 
-		const crossChainRoute: DeltaRoute = {
-			...sameChainRoute,
-			destination: {
-				input: { token: { chainId: 8453, address: DAI }, amount: '99976241', amountUSD: '99.95' },
-				output: { token: { chainId: 8453, address: DAI }, amount: '99976241', amountUSD: '99.95' }
-			},
-			bridge: {
-				protocol: 'Across',
-				estimatedTimeMs: 2000,
-				tags: ['recommended'],
-				contractParams: {
-					protocolSelector: '0x2e09f389',
-					outputToken: DAI,
-					scalingFactor: -12,
-					protocolData: '0xabcdef'
-				}
+		const crossChainBridge: NonNullable<DeltaRoute['bridge']> = {
+			protocol: 'Across',
+			estimatedTimeMs: 2000,
+			tags: ['recommended', 'best-return'],
+			contractParams: {
+				protocolSelector: '0x2e09f389',
+				outputToken: USDC_BASE,
+				scalingFactor: 0,
+				protocolData: `0x${'00'.repeat(62)}6bde`
 			}
 		};
 
+		// The route Velora returned on 2026-11-05 for 100 USDC on Ethereum to USDC on Base.
+		const crossChainRoute: DeltaRoute = {
+			origin: {
+				input: { token: { chainId: 1, address: USDC }, amount: '100000000', amountUSD: '99.95' },
+				output: { token: { chainId: 1, address: USDC }, amount: '99892993', amountUSD: '99.84' }
+			},
+			destination: {
+				input: {
+					token: { chainId: 8453, address: USDC_BASE },
+					amount: '99879162',
+					amountUSD: '99.83'
+				},
+				output: {
+					token: { chainId: 8453, address: USDC_BASE },
+					amount: '99879162',
+					amountUSD: '99.83'
+				}
+			},
+			bridge: crossChainBridge,
+			fees: {
+				gas: {
+					token: { chainId: 1, address: SWAP_ETH_TOKEN_PLACEHOLDER },
+					amount: '260000',
+					amountUSD: '0.11'
+				},
+				bridge: [{ token: { chainId: 8453, address: USDC }, amount: '13807', amountUSD: '0.01' }]
+			}
+		};
+
+		// An order for that route at 1% slippage.
 		const crossChainOrder: DeltaAuctionOrder = {
 			...sameChainOrder,
-			bridge: {
-				protocolSelector: '0x2e09f389',
-				destinationChainId: 8453,
-				outputToken: DAI,
-				scalingFactor: -12,
-				protocolData: '0xabcdef'
-			}
+			destToken: USDC,
+			destAmount: '98894063',
+			expectedAmount: '99892993',
+			bridge: { ...crossChainBridge.contractParams, destinationChainId: 8453 }
 		};
 
 		describe('assertVeloraDeltaRoute', () => {
@@ -147,7 +169,7 @@ describe('velora-swap.utils', () => {
 					assertVeloraDeltaRoute({
 						...params,
 						route: crossChainRoute,
-						destinationTokenAddress: DAI,
+						destinationTokenAddress: USDC_BASE,
 						destinationChainId: 8453n
 					})
 				).not.toThrow();
@@ -197,13 +219,156 @@ describe('velora-swap.utils', () => {
 					case: 'a cross-chain route without a bridge',
 					change: {
 						route: { ...crossChainRoute, bridge: null },
-						destinationTokenAddress: DAI,
+						destinationTokenAddress: USDC_BASE,
 						destinationChainId: 8453n
 					},
 					reason: 'has no bridge'
 				}
 			])('refuses $case', ({ change, reason }) => {
 				expect(() => assertVeloraDeltaRoute({ ...params, ...change })).toThrow(reason);
+			});
+
+			describe('bridged to the destination', () => {
+				const crossChainParams = {
+					...params,
+					route: crossChainRoute,
+					destinationTokenAddress: USDC_BASE,
+					destinationChainId: 8453n
+				};
+
+				const scaledBridge: NonNullable<DeltaRoute['bridge']> = {
+					...crossChainBridge,
+					contractParams: {
+						...crossChainBridge.contractParams,
+						scalingFactor: -12,
+						protocolData: `0x${'00'.repeat(57)}62d1bd6f2b9d5c`
+					}
+				};
+
+				// The route Velora returned on 2026-11-05 for 100 USDC on BSC (18 decimals) to USDC on
+				// Base (6 decimals): the bridge scales the origin output by 10^-12.
+				const scaledRoute: DeltaRoute = {
+					origin: {
+						input: {
+							token: { chainId: 56, address: USDC_BSC },
+							amount: '100000000000000000000',
+							amountUSD: '99.95'
+						},
+						output: {
+							token: { chainId: 56, address: USDC_BSC },
+							amount: '99990136018689438167',
+							amountUSD: '99.94'
+						}
+					},
+					destination: {
+						input: {
+							token: { chainId: 8453, address: USDC_BASE },
+							amount: '99976189',
+							amountUSD: '99.93'
+						},
+						output: {
+							token: { chainId: 8453, address: USDC_BASE },
+							amount: '99976189',
+							amountUSD: '99.93'
+						}
+					},
+					bridge: scaledBridge,
+					fees: {
+						gas: {
+							token: { chainId: 56, address: SWAP_ETH_TOKEN_PLACEHOLDER },
+							amount: '260000',
+							amountUSD: '0.01'
+						},
+						bridge: [
+							{
+								token: { chainId: 8453, address: USDC_BSC },
+								amount: '13907579630898862',
+								amountUSD: '0.01'
+							}
+						]
+					}
+				};
+
+				const scaledParams = {
+					...crossChainParams,
+					route: scaledRoute,
+					sourceTokenAddress: USDC_BSC,
+					sourceChainId: 56n,
+					amount: 100000000000000000000n
+				};
+
+				const showing = ({ route, amount }: { route: DeltaRoute; amount: string }): DeltaRoute => ({
+					...route,
+					destination: {
+						input: { ...route.destination.input, amount },
+						output: { ...route.destination.output, amount }
+					}
+				});
+
+				const bridgingWith = ({
+					route,
+					bridge,
+					contractParams
+				}: {
+					route: DeltaRoute;
+					bridge: NonNullable<DeltaRoute['bridge']>;
+					contractParams: Partial<NonNullable<DeltaRoute['bridge']>['contractParams']>;
+				}): DeltaRoute => ({
+					...route,
+					bridge: { ...bridge, contractParams: { ...bridge.contractParams, ...contractParams } }
+				});
+
+				it('accepts the route Velora quoted from BSC to Base, scaled by the bridge', () => {
+					expect(() => assertVeloraDeltaRoute(scaledParams)).not.toThrow();
+				});
+
+				it('accepts an amount shown up to the origin output once scaled', () => {
+					// 99990136018689438167 at 10^-12, rounded down.
+					expect(() =>
+						assertVeloraDeltaRoute({
+							...scaledParams,
+							route: showing({ route: scaledRoute, amount: '99990136' })
+						})
+					).not.toThrow();
+				});
+
+				it.each([
+					{
+						case: 'a bridge to another token',
+						change: {
+							route: bridgingWith({
+								route: crossChainRoute,
+								bridge: crossChainBridge,
+								contractParams: { outputToken: OTHER }
+							})
+						},
+						reason: 'does not deliver the reviewed token'
+					},
+					{
+						case: 'an amount shown above the origin output',
+						change: { route: showing({ route: crossChainRoute, amount: '99892994' }) },
+						reason: 'shows more than its bridge delivers'
+					},
+					{
+						case: 'an amount shown above the origin output once scaled',
+						change: { ...scaledParams, route: showing({ route: scaledRoute, amount: '99990137' }) },
+						reason: 'shows more than its bridge delivers'
+					},
+					{
+						case: 'a bridge that scales the origin output below the amount shown',
+						change: {
+							...scaledParams,
+							route: bridgingWith({
+								route: scaledRoute,
+								bridge: scaledBridge,
+								contractParams: { scalingFactor: -13 }
+							})
+						},
+						reason: 'shows more than its bridge delivers'
+					}
+				])('refuses $case', ({ change, reason }) => {
+					expect(() => assertVeloraDeltaRoute({ ...crossChainParams, ...change })).toThrow(reason);
+				});
 			});
 		});
 
