@@ -98,7 +98,7 @@ What OISY may claim depends on how far the send got:
   a swap may already have sent its approval before it reads the nonce for the swap itself. Reads of
   the fee and gas fail before a review can be approved and keep their own message, and a signing
   failure keeps its current one, since in a flow with an approval the approval may already be out.
-- **A node refused it outright**: the account cannot pay for it, or it is invalid. The message
+- **Infura refused it outright**: the account cannot pay for it, or it is invalid. The message
   states the reason, as the send flow already does for a transaction the balance cannot pay for. A
   transaction that runs out of gas keeps its own message, which already allows that another node
   may still mine it.
