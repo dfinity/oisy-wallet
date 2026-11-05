@@ -584,6 +584,58 @@ fn cancelling_a_tip_drops_its_recoverable_claim_code() {
 }
 
 #[test]
+fn a_cleanup_right_after_an_upgrade_still_drops_the_stored_claim_code() {
+    // The claim-code store opens lazily, and its heap handle does not survive an
+    // upgrade while its stable memory does. Here the cancel is the first call
+    // after the upgrade that touches the store, so it has to reopen it rather
+    // than find nothing open and skip the delete. Cancel stands in for every
+    // cleanup path: create, claim and the hourly sweep go through the same helper.
+    let env = setup_tips();
+    let tip_id = "tip-upgrade-secret";
+
+    // Long enough to outlive the time the upgrade helper advances.
+    let expires_at_ns = now_ns(&env.pic_setup) + 48 * ONE_HOUR_NS;
+    env.approve(tip_id, TIP_AMOUNT + TRANSFER_FEE, Some(expires_at_ns));
+    assert_eq!(
+        env.create(
+            tip_id,
+            "claim-code-upgrade-secret",
+            TIP_AMOUNT,
+            expires_at_ns
+        ),
+        Ok(())
+    );
+
+    let _: SetTipSecretResult = env
+        .pic_setup
+        .update(
+            env.sender,
+            "set_tip_secret",
+            SetTipSecretRequest {
+                tip_id: tip_id.to_string(),
+                encrypted_claim_code: ByteBuf::from(vec![5u8; 32]),
+            },
+        )
+        .expect("storing should succeed");
+
+    env.pic_setup
+        .upgrade_latest_wasm(None)
+        .expect("upgrade should succeed");
+
+    assert_eq!(env.cancel(env.sender, tip_id), Ok(()));
+
+    let after: GetTipSecretResult = env
+        .pic_setup
+        .query(env.sender, "get_tip_secret", tip_id.to_string())
+        .expect("the query still answers");
+    assert_eq!(
+        after,
+        GetTipSecretResult::Ok(None),
+        "the first cleanup after an upgrade must still drop the stored claim code"
+    );
+}
+
+#[test]
 fn claiming_a_tip_drops_its_recoverable_claim_code() {
     // A spent link has nothing left to recover, so its stored copy should go with
     // it. This is the case that used to leak: removal was addressed to whoever was
