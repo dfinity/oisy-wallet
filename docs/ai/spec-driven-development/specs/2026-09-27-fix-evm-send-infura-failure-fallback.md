@@ -173,9 +173,9 @@ PR 1:
   or the WalletConnect dApp, receives the hash it would have received from Infura.
 - Alchemy answers that it already holds the transaction: success.
 - Both fail, but Alchemy knows the hash: success.
-- Both fail and the hash is unknown: failure, carrying the most specific reason either provider
-  gave.
+- Both fail and the hash is unknown: failure with Infura's error, whatever Alchemy answered.
 - Infura accepts: Alchemy is not asked.
+- Infura refuses outright: Alchemy is not asked.
 - A network without Infura: one submission, as today.
 - With the kill switch off, every call behaves as today.
 - Each fallback is counted in analytics with its operation, network and outcome, and with no
