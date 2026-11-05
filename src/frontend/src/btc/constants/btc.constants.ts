@@ -24,6 +24,12 @@ export const BTC_CONVERT_FEE = ZERO;
 export const DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE = 0.00001;
 export const BTC_MINIMUM_AMOUNT = 700n;
 
+// Change below this goes to the miner rather than to a change output. The same as `DUST_THRESHOLD`
+// in the chain fusion signer's `build_p2wpkh_transaction`
+// (`src/signer/canister/src/sign/bitcoin/tx_utils.rs` in dfinity/chain-fusion-signer), so a send
+// built here has the layout CFS builds from the same inputs, outputs and fee.
+export const BTC_CHANGE_DUST_THRESHOLD_SATOSHIS = 1_000n;
+
 // Fee tolerance percentage for Bitcoin transactions (±10%)
 // Percentage of tolerated increase in transaction fees compared to the confirmed fee.
 export const BTC_SEND_FEE_TOLERANCE_PERCENTAGE = 10n;

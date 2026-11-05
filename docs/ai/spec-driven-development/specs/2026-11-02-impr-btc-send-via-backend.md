@@ -545,6 +545,25 @@ them). `bitcoinjs-lib` (^6.1.7) is already a dependency; nothing new is added.
   refuses such a transaction, because BIP143 commits to the value, so no funds move. In the OpenCryptoPay order
   signing comes before the reservation, so a bad signature fails before any coins are reserved.
 
+Decided in PR 5:
+
+- The check, finalization and extraction are a pure `finalizeSignedBtcPsbt({ psbt })` in
+  `btc-psbt.utils.ts`, which `signAndFinalizeBtcPsbt` calls after signing. The shared signer
+  normalizes to low-S first, so the high-S refusal is tested on `finalizeSignedBtcPsbt`. A high-S
+  signature from `btc_sign_prehash` is tested to come out low-S.
+- `verify` is given plain `Uint8Array`s: `@noble/secp256k1` refuses a `Buffer` from another realm,
+  as in the jsdom tests.
+- The inputs are signed concurrently, one `signInputAsync` per index. bitcoinjs-lib 6.1.7 computes
+  an input's sighash before calling the signer and adds only that input's signature afterwards,
+  which is also how its own `signAllInputsAsync` works. That one skips inputs that fail to sign, so
+  it is not used.
+- The dust constant is `BTC_CHANGE_DUST_THRESHOLD_SATOSHIS` (1 000).
+- `buildBtcSendPsbt` takes each input's `witnessUtxo` script from `changeAddress`, which is the
+  wallet's P2WPKH address in a send. If it is not the signer's own, signing refuses every input.
+- `btcAddressToOutputScript` lands in PR 5, in `btc-address.utils.ts`, because the builder needs
+  it. It comes with its network check and the tests for P2TR without `initEccLib` and for
+  wrong-network addresses. PR 6 uses it for the fee sizing.
+
 ### Frontend: fee estimation by output script
 
 `estimateTransactionVSize` and `calculateFeeSatoshis` (`src/frontend/src/btc/utils/btc-utxos.utils.ts`)
@@ -851,17 +870,23 @@ Every PR is safe on its own.
    - Tests prove the PSBT path produces a transaction **byte-identical** (before witnesses) to CFS's
      layout for the same inputs, outputs and fee, and that change below 1 000 sats is dropped.
    - Tests check that `signAndFinalizeBtcPsbt` throws on a signature made with a key other than the
-     input's, and on a high-S one.
-6. `fix(frontend): size BTC fee estimates by the recipient's script type`. Independent; must land
-   before 8. See [Fee estimation by output script](#frontend-fee-estimation-by-output-script).
-   - Scope: `btcAddressToOutputScript`, selection, the pre-broadcast validation, and Max
-     (`calculateMaxSpendableAmount`, its derived store, and its callers).
+     input's. The high-S refusal is tested on `finalizeSignedBtcPsbt`, which it calls, since the
+     shared signer normalizes to low-S first (see
+     [Decided in PR 5](#frontend-psbt-build-sign-finalize)).
+   - `btcAddressToOutputScript` with its network check, moved here from PR 6 because the builder
+     needs it. Tests check that a P2TR recipient's script is built without `initEccLib`, and that
+     each address type from the wrong network (mainnet ↔ testnet, testnet ↔ regtest via the Bech32
+     prefix) is refused.
+6. `fix(frontend): size BTC fee estimates by the recipient's script type` (needs 5 for
+   `btcAddressToOutputScript`). Must land before 8. See
+   [Fee estimation by output script](#frontend-fee-estimation-by-output-script).
+   - Scope: selection, the pre-broadcast validation, and Max (`calculateMaxSpendableAmount`, its
+     derived store, and its callers), all sized through `btcAddressToOutputScript`.
    - Tests cover each script type at 1 sat/vB against the vsize of the built transaction.
    - Tests check that the Max offered for each script type, and with no recipient yet, is accepted
      by selection.
-   - Tests check that a P2TR recipient's script is built without `initEccLib`.
-   - Tests check that each address type from the wrong network (mainnet ↔ testnet, testnet ↔
-     regtest via the Bech32 prefix) is refused before signing.
+   - Tests check that the sizing refuses an address for the wrong network too, before anything is
+     signed.
 7. `feat(frontend): load BTC UTXOs from the backend behind a flag` (needs 4).
    - Adds `BTC_SEND_VIA_BACKEND_ENABLED`, on for local and staging.
    - With the flag on, `AllUtxosLoader` and the pending loader move to `btc_get_spendable_utxos`.
@@ -994,7 +1019,8 @@ Every PR is safe on its own.
   no mempool view, so owning the reservations does not fix this by itself.
 - **Signing latency.** One `btc_sign_prehash` update call per input instead of one CFS call for the
   whole transaction; a 10-input send makes 10 signer calls. Sign inputs concurrently where
-  `bitcoinjs-lib` allows (`signInputAsync` per index), else sequentially; measure.
+  `bitcoinjs-lib` allows (`signInputAsync` per index), else sequentially; measure. PR 5 signs them
+  concurrently, which bitcoinjs-lib 6.1.7 allows. The latency is still to be measured in PR 8.
 
 ---
 
