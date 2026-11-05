@@ -21,6 +21,7 @@ import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores
 import type { Token } from '$lib/types/token';
 import * as solanaApi from '$sol/api/solana.api';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
@@ -106,6 +107,24 @@ describe('AiAssistantReviewSendTokenTool', () => {
 		expect(container).toHaveTextContent(ARBITRUM_ETH_TOKEN.symbol);
 		expect(container).toHaveTextContent(ARBITRUM_ETH_TOKEN.network.name);
 	});
+
+	// Kept in the chat history, the outcome reaches a review rebuilt after the assistant reopens.
+	it.each([ETHEREUM_TOKEN, ARBITRUM_ETH_TOKEN])(
+		'replaces Send with the could-not-confirm text for a send on $network.name whose outcome is unknown',
+		(token) => {
+			const { container, queryByTestId } = render(AiAssistantReviewSendTokenTool, {
+				props: {
+					...props,
+					token,
+					sendOutcomeUnknown: true
+				},
+				context: mockContext(token)
+			});
+
+			expect(queryByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).not.toBeInTheDocument();
+			expect(container).toHaveTextContent(en.send.error.ethereum_transaction_unconfirmed);
+		}
+	);
 
 	it('renders correctly for a SOL token', () => {
 		const { getByTestId, container } = render(AiAssistantReviewSendTokenTool, {

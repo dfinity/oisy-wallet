@@ -34,8 +34,16 @@
 		sendEnabled: boolean;
 	}
 
-	let { amount, contact, address, contactAddress, sendEnabled, sendCompleted, id }: Props =
-		$props();
+	let {
+		amount,
+		contact,
+		address,
+		contactAddress,
+		sendEnabled,
+		sendCompleted,
+		sendOutcomeUnknown = false,
+		id
+	}: Props = $props();
 
 	const { sendToken, sendTokenExchangeRate, sendTokenNetworkId } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -50,6 +58,10 @@
 
 	const onSendCompleted = () => {
 		aiAssistantStore.setSendToolActionAsCompleted(id);
+	};
+
+	const onSendOutcomeUnknown = () => {
+		aiAssistantStore.setSendToolActionAsOutcomeUnknown(id);
 	};
 </script>
 
@@ -78,8 +90,10 @@
 				{destination}
 				nativeEthereumToken={$nativeEthereumTokenWithFallback}
 				{onSendCompleted}
+				{onSendOutcomeUnknown}
 				{sendCompleted}
 				{sendEnabled}
+				{sendOutcomeUnknown}
 				sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 			/>
 		{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken) && isNetworkEthereum($sendToken.network)}
@@ -88,8 +102,10 @@
 				{destination}
 				nativeEthereumToken={evmNativeEthereumToken}
 				{onSendCompleted}
+				{onSendOutcomeUnknown}
 				{sendCompleted}
 				{sendEnabled}
+				{sendOutcomeUnknown}
 				sourceNetwork={$selectedEvmNetwork ?? $sendToken.network}
 			/>
 		{:else if isNetworkIdBitcoin($sendTokenNetworkId)}

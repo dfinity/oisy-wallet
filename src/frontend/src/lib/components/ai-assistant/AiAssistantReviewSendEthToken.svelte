@@ -13,7 +13,7 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isEthAddress } from '$eth/utils/account.utils';
-	import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
+	import { isSendOutcomeUnknown, toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -58,7 +58,9 @@
 		sourceNetwork: EthereumNetwork;
 		sendCompleted: boolean;
 		sendEnabled: boolean;
+		sendOutcomeUnknown?: boolean;
 		onSendCompleted: () => void;
+		onSendOutcomeUnknown: () => void;
 	}
 
 	let {
@@ -68,7 +70,9 @@
 		sourceNetwork,
 		sendCompleted,
 		sendEnabled,
-		onSendCompleted
+		sendOutcomeUnknown = false,
+		onSendCompleted,
+		onSendOutcomeUnknown
 	}: Props = $props();
 
 	const {
@@ -267,6 +271,12 @@
 				token: $sendToken,
 				context: PLAUSIBLE_EVENT_CONTEXTS.AI_ASSISTANT
 			});
+
+			// A transaction that may have reached the network is not offered again: sent again, it
+			// would be signed with the next nonce, and both could execute.
+			if (isSendOutcomeUnknown(err)) {
+				onSendOutcomeUnknown();
+			}
 		}
 	};
 </script>
@@ -290,7 +300,11 @@
 		</EthFeeContext>
 	</div>
 
-	{#if !sendCompleted}
+	{#if sendOutcomeUnknown}
+		<p class="text-center text-sm text-warning-primary">
+			{$i18n.send.error.ethereum_transaction_unconfirmed}
+		</p>
+	{:else if !sendCompleted}
 		{#if notEmptyString(insufficientFundsErrorMessage) || invalidDestination}
 			<p class="mb-2 text-center text-sm text-error-primary" transition:slide={SLIDE_DURATION}>
 				{notEmptyString(insufficientFundsErrorMessage)

@@ -42,6 +42,9 @@ export interface ReviewSendTokensToolResult {
 	amount: number;
 	token: Token;
 	sendCompleted: boolean;
+	// The send failed without settling whether its transaction reached the network, so the review no
+	// longer offers it. Kept in the chat history, it outlives the assistant being closed and reopened.
+	sendOutcomeUnknown?: boolean;
 	id: string;
 	contact?: ExtendedAddressContactUi;
 	contactAddress?: ContactAddressUiWithId;
