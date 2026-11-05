@@ -68,12 +68,14 @@ learn how often Infura fails.
   a successful submission, recognised by the lookup below rather than by the wording of the answer.
 - Before reporting a submission as failed, OISY looks its hash up on Alchemy. If the network knows
   it, the submission succeeded.
-- When a provider refuses the transaction outright (the account cannot pay for it, or it is
-  invalid), that refusal is what the user is told, not the other provider's bare internal error. An
-  answer that the transaction is already known, or that its nonce is too low, is no such refusal:
-  the transaction may be in.
+- The user is told Infura's error, whatever Alchemy answered. When Infura refuses the transaction
+  outright (the account cannot pay for it, or it is invalid), that refusal is the reason, and the
+  transaction is not handed to Alchemy at all: Alchemy could relay it once the balance or the base
+  fee has changed. When Infura fails the request in any other way, it may have passed the
+  transaction on, so a refusal from Alchemy afterwards answers only Alchemy's own attempt.
 - A submission Infura does not answer within 30 seconds counts as failed, which is safe for the same
-  reason.
+  reason. Its request stays open, though, and a success Infura still gives while Alchemy is asked
+  is taken, as is one Alchemy still gives while the transaction is looked up.
 - This covers every submission OISY makes itself, since they all go through the same provider: send,
   convert, swap, approvals, ERC-4626 deposits and withdrawals, NFT transfers and WalletConnect. A
   WalletConnect dApp receives the hash of that one transaction, whichever provider accepted it. Open
@@ -99,7 +101,7 @@ What OISY may claim depends on how far the send got:
   a swap may already have sent its approval before it reads the nonce for the swap itself. Reads of
   the fee and gas fail before a review can be approved and keep their own message, and a signing
   failure keeps its current one, since in a flow with an approval the approval may already be out.
-- **A node refused it outright**: the account cannot pay for it, or it is invalid. The message
+- **Infura refused it outright**: the account cannot pay for it, or it is invalid. The message
   states the reason, as the send flow already does for a transaction the balance cannot pay for. A
   transaction that runs out of gas keeps its own message, which already allows that another node
   may still mine it.
@@ -195,6 +197,7 @@ PR 3:
 - A submission whose outcome is unknown says that OISY could not confirm it and asks the user to
   check their activity first. No path says the transaction was not sent once it was handed to a
   provider.
+- A swap whose broadcast outcome is unknown says the same, even when its last attempt was refused.
 - A WalletConnect transaction the balance cannot pay for shows the existing insufficient-funds
   message.
 - A send that runs out of gas keeps its out-of-gas message.

@@ -23,6 +23,7 @@ import {
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { trackProviderFallback } from '$lib/services/provider-fallback-analytics.services';
+import { TimeoutError } from '$lib/types/errors';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -473,6 +474,125 @@ describe('infura.providers', () => {
 			);
 		});
 
+		it('should take the success Infura still gives while Alchemy is asked', async () => {
+			vi.useFakeTimers();
+
+			const { provider } = buildProvider();
+
+			// Infura accepts the transaction 5 s past its time limit, while Alchemy, which is about to
+			// fail it, has not answered yet.
+			mockBroadcastTransaction
+				.mockImplementationOnce(
+					() =>
+						new Promise((resolve) =>
+							setTimeout(
+								() => resolve(infuraResponse),
+								INFURA_SUBMISSION_TIMEOUT_MILLISECONDS + 5_000
+							)
+						)
+				)
+				.mockImplementationOnce(
+					() => new Promise((_, reject) => setTimeout(() => reject(internalError), 10_000))
+				);
+			mockGetTransaction.mockResolvedValueOnce(null);
+
+			const outcome = provider.sendTransaction(signedTransaction).catch((err: unknown) => err);
+
+			await vi.advanceTimersByTimeAsync(INFURA_SUBMISSION_TIMEOUT_MILLISECONDS + 5_000);
+
+			await expect(outcome).resolves.toBe(infuraResponse);
+
+			expect(trackProviderFallback).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					trigger: 'timeout',
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+				})
+			);
+		});
+
+		it('should take the success Alchemy still gives while the transaction is looked up', async () => {
+			vi.useFakeTimers();
+
+			const { provider } = buildProvider();
+
+			// Infura fails at once. Alchemy accepts the transaction 5 s past its own time limit, while
+			// the lookup, which is about to find nothing, is still running.
+			mockBroadcastTransaction
+				.mockRejectedValueOnce(internalError)
+				.mockImplementationOnce(
+					() =>
+						new Promise((resolve) =>
+							setTimeout(
+								() => resolve(alchemyResponse),
+								INFURA_SUBMISSION_TIMEOUT_MILLISECONDS + 5_000
+							)
+						)
+				);
+			mockGetTransaction.mockImplementationOnce(
+				() =>
+					new Promise((resolve) =>
+						setTimeout(() => resolve(null), INFURA_READ_TIMEOUT_MILLISECONDS - 1_000)
+					)
+			);
+
+			const outcome = provider.sendTransaction(signedTransaction).catch((err: unknown) => err);
+
+			await vi.advanceTimersByTimeAsync(INFURA_SUBMISSION_TIMEOUT_MILLISECONDS + 5_000);
+
+			await expect(outcome).resolves.toBe(alchemyResponse);
+
+			expect(trackProviderFallback).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					trigger: 'error',
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+				})
+			);
+		});
+
+		it('should leave the call to Alchemy when Infura fails past its time limit', async () => {
+			vi.useFakeTimers();
+
+			const { provider } = buildProvider();
+
+			mockBroadcastTransaction
+				.mockImplementationOnce(
+					() =>
+						new Promise((_, reject) =>
+							setTimeout(
+								() => reject(internalError),
+								INFURA_SUBMISSION_TIMEOUT_MILLISECONDS + 5_000
+							)
+						)
+				)
+				.mockImplementationOnce(
+					() => new Promise((resolve) => setTimeout(() => resolve(alchemyResponse), 10_000))
+				);
+
+			const outcome = provider.sendTransaction(signedTransaction).catch((err: unknown) => err);
+
+			await vi.advanceTimersByTimeAsync(INFURA_SUBMISSION_TIMEOUT_MILLISECONDS + 10_000);
+
+			await expect(outcome).resolves.toBe(alchemyResponse);
+		});
+
+		it('should fail with the timeout once Alchemy fails before Infura answers', async () => {
+			vi.useFakeTimers();
+
+			const { provider } = buildProvider();
+
+			mockBroadcastTransaction
+				.mockReturnValueOnce(new Promise(() => {}))
+				.mockRejectedValueOnce(internalError);
+			mockGetTransaction.mockResolvedValueOnce(null);
+
+			const outcome = provider.sendTransaction(signedTransaction).catch((err: unknown) => err);
+
+			await vi.advanceTimersByTimeAsync(INFURA_SUBMISSION_TIMEOUT_MILLISECONDS);
+
+			await expect(outcome).resolves.toBeInstanceOf(EthSubmissionUnconfirmedError);
+			await expect(outcome).resolves.toHaveProperty('cause', expect.any(TimeoutError));
+		});
+
 		it('should succeed when both fail but the network knows the transaction', async () => {
 			// Alchemy answers a transaction it already holds with an error of its own, and Infura may
 			// have passed it on before failing the request.
@@ -518,13 +638,19 @@ describe('infura.providers', () => {
 			});
 		});
 
-		it('should report the reason Alchemy gave over Infura failing the request', async () => {
+		it('should report Infura failing the request even when Alchemy then refuses', async () => {
+			// Infura may have passed the transaction on, so Alchemy's refusal answers only its own attempt.
 			const { provider } = buildProvider();
 
 			mockBroadcastTransaction.mockRejectedValueOnce(internalError).mockRejectedValueOnce(refusal);
 			mockGetTransaction.mockResolvedValueOnce(null);
 
-			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(refusal);
+			const outcome = await provider
+				.sendTransaction(signedTransaction)
+				.catch((err: unknown) => err);
+
+			expect(outcome).toBeInstanceOf(EthSubmissionUnconfirmedError);
+			expect(outcome).toHaveProperty('cause', internalError);
 		});
 
 		it('should not take an already-used nonce as a reason over Infura failing the request', async () => {
@@ -548,18 +674,33 @@ describe('infura.providers', () => {
 			expect(outcome).toHaveProperty('cause', internalError);
 		});
 
-		it('should report the reason Infura gave when both refuse the transaction', async () => {
-			const { provider } = buildProvider();
+		it.each([
+			{ reason: 'a fee below the base fee', infuraRefusal: refusal },
+			{
+				reason: 'a balance that cannot pay',
+				infuraRefusal: Object.assign(new Error('insufficient funds'), {
+					code: 'INSUFFICIENT_FUNDS'
+				})
+			}
+		])(
+			'should not hand a transaction Infura refused for $reason to Alchemy',
+			async ({ infuraRefusal }) => {
+				// Alchemy could relay what Infura refused, the state having changed since, and lose its
+				// answer; the refusal would then be reported for a transaction that may be in.
+				const { provider } = buildProvider();
 
-			const infuraRefusal = Object.assign(new Error('insufficient funds'), {
-				code: 'INSUFFICIENT_FUNDS'
-			});
+				mockBroadcastTransaction
+					.mockRejectedValueOnce(infuraRefusal)
+					.mockRejectedValueOnce(internalError);
+				mockGetTransaction.mockRejectedValueOnce(new Error('lookup failed'));
 
-			mockBroadcastTransaction.mockRejectedValueOnce(infuraRefusal).mockRejectedValueOnce(refusal);
-			mockGetTransaction.mockResolvedValueOnce(null);
+				await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(infuraRefusal);
 
-			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(infuraRefusal);
-		});
+				expect(mockBroadcastTransaction).toHaveBeenCalledOnce();
+				expect(mockGetTransaction).not.toHaveBeenCalled();
+				expect(trackProviderFallback).not.toHaveBeenCalled();
+			}
+		);
 
 		it('should leave running out of gas to its own explanation', async () => {
 			const { provider } = buildProvider();

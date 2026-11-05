@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
+	import { readable } from 'svelte/store';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
-	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
 	import SwapTwoSwapsHint from '$lib/components/swap/SwapTwoSwapsHint.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
@@ -16,11 +16,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import {
-		SUPPORTED_CROSS_SWAP_NETWORKS,
-		SWAP_SLIPPAGE_INVALID_VALUE,
-		SWAP_SLIPPAGE_VELORA_INVALID_VALUE
-	} from '$lib/constants/swap.constants';
+	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -33,8 +29,8 @@
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatToken, formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNetworkIdICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { getSwapSlippageInvalidValue, getSwapSlippageStatus } from '$lib/utils/swap.utils';
 	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
@@ -71,7 +67,7 @@
 	let {
 		swapAmount = $bindable(),
 		receiveAmount = $bindable(),
-		slippageValue = $bindable(),
+		slippageValue,
 		isSwapAmountsLoading,
 		swapDetails,
 		message,
@@ -97,15 +93,21 @@
 		switchTokens
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const { store: swapAmountsStore, activity } =
+		getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const quoteActivity = activity ?? readable(undefined);
+	const foregroundQuotePending = $derived(
+		$quoteActivity?.pending === true && !$quoteActivity.background
+	);
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	let swapAmountsLoading = $derived(
-		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
-			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
-			: false
+		foregroundQuotePending ||
+			(nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
+				? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
+				: false)
 	);
 
 	let showSwapNotOfferedError = $derived(
@@ -160,6 +162,13 @@
 		return condition1 || condition2;
 	});
 
+	let maxSlippageInvalidValue = $derived(getSwapSlippageInvalidValue($sourceToken?.network.id));
+
+	// The slippage is edited from the modal header, so the form names the reason it blocks Review.
+	let slippageInvalid = $derived(
+		getSwapSlippageStatus({ slippageValue, maxSlippageInvalidValue }) === 'invalid'
+	);
+
 	let invalid = $derived(
 		nonNullish(errorType) ||
 			isNullish(swapAmount) ||
@@ -167,7 +176,8 @@
 			isNullish(receiveAmount) ||
 			isNullish(fee) ||
 			swapAmountsLoading ||
-			(nonNullish(slippageValue) && Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE)
+			foregroundQuotePending ||
+			slippageInvalid
 	);
 
 	let isCrossChainNetworks = $derived($sourceToken?.network.id !== $destinationToken?.network.id);
@@ -332,7 +342,10 @@
 			</TokenInputNetworkWrapper>
 		</div>
 
-		{@render message?.()}
+		<!-- mt-4 like the notices below; when empty, its margin collapses into the next row's. -->
+		<div class="mt-4">
+			{@render message?.()}
+		</div>
 
 		{#if nonNullish(twoSwapsQuoteError)}
 			{#key twoSwapsQuoteError.intermediateToken.id}
@@ -345,12 +358,13 @@
 			<SwapCrossChainInfo />
 		{/if}
 
-		<SwapSlippage
-			maxSlippageInvalidValue={isNetworkIdICP($sourceToken?.network.id)
-				? SWAP_SLIPPAGE_INVALID_VALUE
-				: SWAP_SLIPPAGE_VELORA_INVALID_VALUE}
-			bind:slippageValue
-		/>
+		{#if slippageInvalid}
+			<p class="mt-4 text-sm text-error-primary" transition:slide={SLIDE_DURATION}>
+				{replacePlaceholders($i18n.swap.text.max_slippage_error, {
+					$maxSlippage: maxSlippageInvalidValue.toString()
+				})}
+			</p>
+		{/if}
 
 		{@render swapDetails?.()}
 	</div>

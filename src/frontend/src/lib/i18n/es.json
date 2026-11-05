@@ -1214,7 +1214,10 @@
 			"unknown": "OISY aún no puede saber si la recarga se completó. Si fue así, tu actividad de $token la mostrará. Vuelve a recargar para reenviar la misma recarga: solo puede completarse una vez. Una recarga nueva o modificada añadiría ciclos otra vez si esta se completó.",
 			"unknown_fresh": "OISY aún no puede saber si tu última recarga se completó. Si fue así, esta recarga añade ciclos otra vez. Revisa primero tu actividad de $token.",
 			"sent_to_canister": "Enviar $token a un canister no lo recarga. Los $token llegan a la cuenta del canister, y el canister solo recibe ciclos si su propio código los retira.",
-			"sent_to_canister_top_up": "Para añadir ciclos a un canister, usa «Recargar» en la página de $token."
+			"sent_to_canister_top_up": "Para añadir ciclos a un canister, usa «Recargar» en la página de $token.",
+			"choice_send": "Enviar $token",
+			"choice_send_description": "Envía tokens $token a otra cuenta. Enviar $token a un canister no lo recarga.",
+			"choice_top_up_description": "Convierte tokens $token en ciclos para recargar cualquier canister."
 		},
 		"error": {
 			"invalid_canister_id": "Introduce un ID de canister. Los principals de usuario, los ID de cuenta y las direcciones de otras redes no se pueden recargar.",
@@ -1366,6 +1369,13 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "Actualizando UI",
 			"swap_provider": "Proveedor de intercambio",
+			"smart_swap": "",
+			"finding_best_rate": "",
+			"smart_swap_gain": "",
+			"smart_swap_best_of_offers": "",
+			"smart_swap_offers_compared": "",
+			"smart_swap_offers": "",
+			"smart_swap_selected_offer": "",
 			"swap_provider_website": "sitio_web_del_proveedor_de_intercambio",
 			"swap_route": "Ruta de intercambio",
 			"included_network_fees": "Comisiones de red incluidas",
@@ -1373,7 +1383,6 @@
 			"best_rate": "Mejor Tarifa",
 			"expected_minimum": "Mínimo esperado",
 			"you_receive": "Tú recibes",
-			"select": "Seleccionar >",
 			"select_swap_provider": "Seleccionar proveedor de intercambio",
 			"open_icp_swap": "Abrir el sitio web de ICP Swap",
 			"open_instructions_link": "Abrir enlace de instrucciones",
@@ -1432,7 +1441,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
@@ -1859,6 +1869,7 @@
 			"allowance_increase": "Esta solicitud aumenta la asignación del gastador indicado abajo en la cantidad mostrada, además de lo que ya puede gastar. El gastador puede transferir esa cantidad de este token desde su billetera, en cualquier momento, hasta que la revoque.",
 			"allowance_decrease": "Esta solicitud reduce la asignación del gastador indicado abajo en la cantidad mostrada. No mueve fondos por sí sola.",
 			"unverifiable_erc20_request": "Esta solicitud involucra un token que OISY no puede identificar ni decodificar. Lo que se muestra puede diferir de lo que realmente se firmaría, por lo que la aprobación está deshabilitada.",
+			"unlisted_erc20_request": "OISY no incluye este token. Su símbolo y el importe mostrado se leen del propio contrato del token, y cualquiera puede crear un token con cualquier símbolo. Comprueba la dirección del token antes de aprobar.",
 			"token_call_with_value": "Además del importe de tokens que se muestra abajo, esta solicitud envía $amount al contrato del token. Una transferencia o aprobación de tokens no envía $symbol, así que, por tu seguridad, OISY no la firmará.",
 			"unverifiable_approval_for_all_request": "Esta solicitud entregaría a un operador el control de una colección de NFT, y OISY no puede decodificar cuál operador. Lo que se muestra puede diferir de lo que realmente se firmaría, por lo que la aprobación está deshabilitada.",
 			"approval_for_all_grant": "Esta solicitud permite que el operador indicado abajo transfiera cualquier NFT de esta colección que usted posea ahora o adquiera después, en cualquier momento, hasta que lo revoque. No mueve fondos por sí sola.",
@@ -2487,6 +2498,7 @@
 			"create": "No se pudo crear el contacto",
 			"update": "No se pudo actualizar el contacto",
 			"delete": "No se pudo eliminar el contacto",
+			"load": "No se pudieron cargar los contactos",
 			"name_too_long": "Por favor, mantén el nombre con $maxCharacters caracteres o menos."
 		}
 	},

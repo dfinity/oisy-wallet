@@ -61,8 +61,9 @@ the end.
   (`src/frontend/src/eth/services/eth-transactions.services.ts`).
 - **Broadcast signed transactions** — `sendTransaction` wraps ethers'
   `broadcastTransaction`; used by the send, swap, approve and NFT-transfer services.
-  When Infura does not accept a signed transaction within 30 s, the same bytes go to
-  Alchemy — see [Alchemy → EVM — fallback for Infura](./alchemy.md#evm--fallback-for-infura).
+  When Infura does not accept a signed transaction within 30 s, without refusing it
+  outright, the same bytes go to Alchemy — see
+  [Alchemy → EVM — fallback for Infura](./alchemy.md#evm--fallback-for-infura).
 - **Populate unsigned transactions** — `populateTransaction` / `populateApprove`
   build the payloads for ERC-20, ckETH (`infura-cketh.providers.ts`), ckERC20
   (`infura-ckerc20.providers.ts`) and ICP-burn (`infura-erc20-icp.providers.ts`)

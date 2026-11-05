@@ -1214,7 +1214,10 @@
 			"unknown": "",
 			"unknown_fresh": "",
 			"sent_to_canister": "",
-			"sent_to_canister_top_up": ""
+			"sent_to_canister_top_up": "",
+			"choice_send": "",
+			"choice_send_description": "",
+			"choice_top_up_description": ""
 		},
 		"error": {
 			"invalid_canister_id": "",
@@ -1366,6 +1369,13 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "جاري تحديث واجهة المستخدم",
 			"swap_provider": "مزود التبديل",
+			"smart_swap": "",
+			"finding_best_rate": "",
+			"smart_swap_gain": "",
+			"smart_swap_best_of_offers": "",
+			"smart_swap_offers_compared": "",
+			"smart_swap_offers": "",
+			"smart_swap_selected_offer": "",
 			"swap_provider_website": "الموقع الإلكتروني",
 			"swap_route": "مسار التبديل",
 			"included_network_fees": "رسوم الشبكة المضمنة",
@@ -1373,7 +1383,6 @@
 			"best_rate": "أفضل سعر",
 			"expected_minimum": "الحد الأدنى المتوقع",
 			"you_receive": "أنت تستلم",
-			"select": "تحديد >",
 			"select_swap_provider": "حدد مزود التبديل",
 			"open_icp_swap": "افتح موقع ICP Swap",
 			"open_instructions_link": "افتح رابط التعليمات",
@@ -1432,7 +1441,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
@@ -1859,6 +1869,7 @@
 			"allowance_increase": "",
 			"allowance_decrease": "",
 			"unverifiable_erc20_request": "",
+			"unlisted_erc20_request": "",
 			"token_call_with_value": "",
 			"unverifiable_approval_for_all_request": "",
 			"approval_for_all_grant": "",
@@ -2487,6 +2498,7 @@
 			"create": "فشل إنشاء جهة الاتصال",
 			"update": "فشل تحديث جهة الاتصال",
 			"delete": "فشل حذف جهة الاتصال",
+			"load": "",
 			"name_too_long": "يرجى أن يكون الاسم مكونًا من $maxCharacters حرفًا أو أقل."
 		}
 	},
