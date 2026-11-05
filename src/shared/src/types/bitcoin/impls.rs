@@ -48,6 +48,15 @@ impl Validate for PendingTransaction {
 }
 validate_on_deserialize!(PendingTransaction);
 
+impl From<StoredPendingTransaction> for PendingTransaction {
+    fn from(transaction: StoredPendingTransaction) -> Self {
+        Self {
+            txid: transaction.txid,
+            utxos: transaction.utxos,
+        }
+    }
+}
+
 impl Validate for StoredPendingTransaction {
     fn validate(&self) -> Result<(), candid::Error> {
         validate_txid_bytes(&self.txid)?;

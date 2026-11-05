@@ -132,3 +132,29 @@ pub enum BtcGetPendingTransactionsError {
         msg: String,
     },
 }
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct BtcGetSpendableUtxosRequest {
+    pub network: BitcoinNetwork,
+    pub ii_delegation_chain: Option<IIDelegationChain>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct BtcGetSpendableUtxosResponse {
+    /// The caller's UTXOs with at least 4 confirmations (1 on regtest), all pages, minus those a
+    /// pending transaction of the caller reserves.
+    pub utxos: Vec<Utxo>,
+    /// The caller's pending transactions at the address these UTXOs belong to, as
+    /// `btc_get_pending_transactions` returns them.
+    pub pending_transactions: Vec<PendingTransaction>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcGetSpendableUtxosError {
+    /// Server-side / unexpected
+    InternalError { msg: String },
+    /// The caller has exceeded the call rate limit.
+    RateLimited(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain { msg: String },
+}

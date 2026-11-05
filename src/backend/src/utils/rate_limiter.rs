@@ -36,6 +36,11 @@ thread_local! {
     pub(crate) static BTC_GET_PENDING_TX_RATE_LIMITER: RateLimiter =
         RateLimiter::new(15, 60 * 1_000_000_000);
 
+    /// Rate-limits `btc_get_spendable_utxos`: max 15 calls per caller per minute. Separate from
+    /// `btc_get_pending_transactions`'s limiter, which the wallet's balance polling still uses.
+    pub(crate) static BTC_GET_SPENDABLE_UTXOS_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(15, 60 * 1_000_000_000);
+
     /// Rate-limits `sign_onramper_widget_url`: max 30 calls per caller per minute. The widget
     /// re-signs on reactive input changes, so the limit is generous for legitimate use while still
     /// bounding abuse of the endpoint as a signing oracle for the shared `OnRamper` secret.

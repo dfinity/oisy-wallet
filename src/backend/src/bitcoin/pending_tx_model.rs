@@ -202,6 +202,32 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
             .flat_map(|tx| tx.utxos.iter())
             .any(|u| new_keys.contains(&(u.outpoint.txid, u.outpoint.vout)))
     }
+
+    /// Returns `utxos` without those a pending transaction of the principal spends, in their
+    /// order.
+    ///
+    /// Matches by outpoint across all of the principal's addresses, as
+    /// [`Self::has_intersecting_pending_utxos`] does, so no UTXO it returns is refused as
+    /// already reserved.
+    pub fn unreserved_utxos(&self, principal: Principal, utxos: Vec<Utxo>) -> Vec<Utxo> {
+        let stored_principal = StoredPrincipal(principal);
+        let Some(address_map) = self.pending_transactions_map.get(&stored_principal) else {
+            return utxos;
+        };
+
+        let reserved_keys: HashSet<(Txid, u32)> = address_map
+            .0
+            .values()
+            .flat_map(|txs| txs.iter())
+            .flat_map(|tx| tx.utxos.iter())
+            .map(|u| (u.outpoint.txid, u.outpoint.vout))
+            .collect();
+
+        utxos
+            .into_iter()
+            .filter(|u| !reserved_keys.contains(&(u.outpoint.txid, u.outpoint.vout)))
+            .collect()
+    }
 }
 
 #[cfg(test)]
@@ -894,6 +920,105 @@ mod tests {
         };
 
         assert!(!model.has_intersecting_pending_utxos(principal, &[candidate]));
+    }
+
+    #[test]
+    fn test_unreserved_utxos_returns_all_without_pending_transactions() {
+        let (mut map, _mm) = setup();
+        let model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        let utxos = vec![(*UTXO_1).clone(), (*UTXO_2).clone()];
+        assert_eq!(model.unreserved_utxos(principal, utxos.clone()), utxos);
+    }
+
+    #[test]
+    fn test_unreserved_utxos_drops_reserved_on_any_address_and_keeps_order() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        model
+            .add_pending_transaction(
+                principal,
+                ADDRESS_1.to_string(),
+                StoredPendingTransaction {
+                    txid: vec![1],
+                    utxos: vec![(*UTXO_2).clone()],
+                    created_at_timestamp_ns: 1_000_000,
+                },
+            )
+            .unwrap();
+        model
+            .add_pending_transaction(
+                principal,
+                ADDRESS_2.to_string(),
+                StoredPendingTransaction {
+                    txid: vec![2],
+                    utxos: vec![(*UTXO_5).clone()],
+                    created_at_timestamp_ns: 1_000_000,
+                },
+            )
+            .unwrap();
+
+        let utxos = vec![
+            (*UTXO_5).clone(),
+            (*UTXO_3).clone(),
+            (*UTXO_2).clone(),
+            (*UTXO_1).clone(),
+        ];
+        assert_eq!(
+            model.unreserved_utxos(principal, utxos),
+            vec![(*UTXO_3).clone(), (*UTXO_1).clone()]
+        );
+    }
+
+    #[test]
+    fn test_unreserved_utxos_matches_by_outpoint_even_if_fields_differ() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        // UTXO_3 and UTXO_4 share an outpoint but differ in value and height.
+        model
+            .add_pending_transaction(
+                principal,
+                ADDRESS_1.to_string(),
+                StoredPendingTransaction {
+                    txid: vec![1],
+                    utxos: vec![(*UTXO_3).clone()],
+                    created_at_timestamp_ns: 1_000_000,
+                },
+            )
+            .unwrap();
+
+        assert_eq!(
+            model.unreserved_utxos(principal, vec![(*UTXO_4).clone(), (*UTXO_1).clone()]),
+            vec![(*UTXO_1).clone()]
+        );
+    }
+
+    #[test]
+    fn test_unreserved_utxos_ignores_other_principals_reservations() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal_1 = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+        let principal_2 = Principal::from_text(PRINCIPAL_TEXT_2).unwrap();
+
+        model
+            .add_pending_transaction(
+                principal_2,
+                ADDRESS_1.to_string(),
+                StoredPendingTransaction {
+                    txid: vec![1],
+                    utxos: vec![(*UTXO_1).clone()],
+                    created_at_timestamp_ns: 1_000_000,
+                },
+            )
+            .unwrap();
+
+        let utxos = vec![(*UTXO_1).clone(), (*UTXO_2).clone()];
+        assert_eq!(model.unreserved_utxos(principal_1, utxos.clone()), utxos);
     }
 
     #[test]

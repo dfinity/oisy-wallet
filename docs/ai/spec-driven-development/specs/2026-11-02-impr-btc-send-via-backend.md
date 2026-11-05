@@ -425,6 +425,20 @@ Costs the same as `btc_get_pending_transactions` (one `get_all_utxos`), which it
 send flow. `btc_get_pending_transactions` stays until nothing calls it (the wallet scheduler's
 balance path can move later).
 
+Decided in PR 4:
+
+- A UTXO counts as reserved if any pending transaction of the caller spends its outpoint, on any of
+  the caller's addresses. That is the rule `has_intersecting_pending_utxos` applies when it refuses
+  a reservation, so the frontend is never offered a UTXO a send would be refused for.
+- `pending_transactions` are those at the fetched address, as `btc_get_pending_transactions`
+  returns them.
+- Both endpoints share one fetch-and-prune helper, `get_utxos_and_prune` in
+  `src/backend/src/api/bitcoin.rs`. PR 3's sync of the broadcast states after a prune
+  (`retain_reserved_broadcasts`) goes there, whichever of PRs 3 and 4 lands second.
+- Its own rate limiter, `BTC_GET_SPENDABLE_UTXOS_RATE_LIMITER`, also 15 per minute. The wallet
+  scheduler keeps polling `btc_get_pending_transactions` for the balance, every 30 seconds per BTC
+  network and tab, so with a shared budget that polling could block the send flow's loads.
+
 ### Backend: `btc_get_balance` (optional, last PR)
 
 Replaces the certified path's `btc_caller_balance` in `btc-wallet.scheduler.ts` with a backend call
