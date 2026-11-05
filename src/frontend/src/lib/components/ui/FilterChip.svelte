@@ -113,19 +113,19 @@
 			transition-duration: 0s;
 		}
 
-		// A 40 px target (44 px on touch) that grows outward, past the chip's end, so it never takes
-		// clicks from the trigger it sits on. `hit-area` centres on the button and would.
+		// A 40 px tall target (44 px on touch) that grows outward from the button's start, so it never
+		// takes clicks from the trigger it sits on (`hit-area` centres on the button and would). 32 px
+		// wide reaches 4 px past the chip, half the gap to a filter beside it, never into that filter.
 		&::after {
 			content: '';
 			position: absolute;
 			top: 50%;
 			inset-inline-start: 0;
-			width: 40px;
+			width: 32px;
 			height: 40px;
 			translate: 0 -50%;
 
 			@include interaction.coarse {
-				width: var(--touch-target-min-height);
 				height: var(--touch-target-min-height);
 			}
 		}
