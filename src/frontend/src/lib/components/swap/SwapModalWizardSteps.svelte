@@ -42,7 +42,6 @@
 		currentStep?: WizardStep<WizardStepsSwap | WizardStepsGetTokenType>;
 		selectTokenType?: SwapSelectTokenType;
 		modal: WizardModal<WizardStepsSwap | WizardStepsGetTokenType>;
-		showSelectProviderModal: boolean;
 		onClose: () => void;
 		swapAmount: OptionAmount;
 		receiveAmount: number | undefined;
@@ -62,7 +61,6 @@
 		swapFailedProgressSteps = $bindable(),
 		allNetworksEnabled = $bindable(),
 		currentStep,
-		showSelectProviderModal = $bindable(),
 		selectTokenType = $bindable(),
 		onClose
 	}: Props = $props();
