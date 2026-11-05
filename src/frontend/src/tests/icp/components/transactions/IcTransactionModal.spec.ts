@@ -147,4 +147,25 @@ describe('IcTransactionModal', () => {
 			expect(getByText('burn')).toBeInTheDocument();
 		});
 	});
+
+	it('should display the memo if present in the transaction', () => {
+		const memo = 'payment for invoice #42';
+
+		const { getByText } = render(IcTransactionModal, {
+			transaction: { ...mockIcTransactionUi, memo },
+			token: ICP_TOKEN
+		});
+
+		expect(getByText(get(i18n).send.text.memo)).toBeInTheDocument();
+		expect(getByText(memo)).toBeInTheDocument();
+	});
+
+	it('should not display the memo label when memo is not present', () => {
+		const { queryByText } = render(IcTransactionModal, {
+			transaction: mockIcTransactionUi,
+			token: ICP_TOKEN
+		});
+
+		expect(queryByText(get(i18n).send.text.memo)).toBeNull();
+	});
 });
