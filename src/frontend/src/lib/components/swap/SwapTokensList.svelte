@@ -58,12 +58,15 @@
 		})
 	);
 
+	// This side's own pick stays in the list, checked, so reopening the list shows what is picked
+	// and a network with one token (Bitcoin) is never empty. The other side's pick is left out.
+	let selectedToken = $derived(side === 'destination' ? $destinationToken : $sourceToken);
+
+	let pairedToken = $derived(side === 'destination' ? $sourceToken : $destinationToken);
+
 	let tokensUi: TokenToggleable<TokenUi>[] = $derived(
 		allSwapTokens
-			.filter(
-				(token: TokenToggleable<Token>) =>
-					token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
-			)
+			.filter((token: TokenToggleable<Token>) => token.id !== pairedToken?.id)
 			.map((token: TokenToggleable<Token>) =>
 				mapTokenUi({
 					token,
@@ -99,7 +102,7 @@
 	showStakeBalance={false}
 >
 	{#snippet tokenListItem(token, onClick)}
-		<ModalTokensListItem {onClick} {token} />
+		<ModalTokensListItem {onClick} selected={token.id === selectedToken?.id} {token} />
 	{/snippet}
 	{#snippet toolbar()}
 		<ButtonCancel fullWidth={true} onclick={onCloseTokensList} />
