@@ -96,6 +96,11 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
     ///   not really used in the transaction. We don't remove in partial presence because, in the
     ///   end, partial presence will be temporary for one hour.
     ///
+    /// The second rule matches utxos by outpoint, as every other reservation check does. A
+    /// reservation's value and height are whatever was reserved, and the height changes when a
+    /// reorg mines the funding transaction again, so they say nothing about whether the output is
+    /// spent.
+    ///
     /// The second rule applies only to the pending transactions of `utxos_address`, the address
     /// `current_utxos` were fetched for. The principal has one address per network, and the utxos
     /// of one network say nothing about the reservations of another.
@@ -128,6 +133,11 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
             return;
         };
 
+        let current_outpoints: HashSet<(Txid, u32)> = current_utxos
+            .iter()
+            .map(|u| (u.outpoint.txid, u.outpoint.vout))
+            .collect();
+
         let mut changed = false;
         let mut addresses_to_remove = Vec::new();
         for (address, transactions) in &mut address_map {
@@ -142,7 +152,7 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
                     && pending_transaction
                         .utxos
                         .iter()
-                        .all(|utxo| !current_utxos.contains(utxo));
+                        .all(|u| !current_outpoints.contains(&(u.outpoint.txid, u.outpoint.vout)));
 
                 !is_old && !none_of_tx_utxos_are_still_present
             });
@@ -752,6 +762,49 @@ mod tests {
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs, vec![same_round_as_snapshot, after_snapshot]);
+    }
+
+    #[test]
+    fn test_prune_matches_utxos_by_outpoint() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        let reserved = StoredPendingTransaction {
+            txid: vec![1],
+            utxos: vec![(*UTXO_1).clone()],
+            created_at_timestamp_ns: 1_000,
+        };
+        model
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), reserved.clone())
+            .unwrap();
+
+        // The same unspent outpoint, mined again at another height after a reorg, or reserved
+        // with other metadata than the Bitcoin canister reports.
+        let reported = Utxo {
+            height: UTXO_1.height + 1,
+            ..(*UTXO_1).clone()
+        };
+        model.prune_pending_transactions(
+            principal,
+            ADDRESS_1,
+            std::slice::from_ref(&reported),
+            2_000,
+            3_000,
+        );
+
+        assert_eq!(
+            model.get_pending_transactions(&principal, ADDRESS_1),
+            vec![reserved]
+        );
+        assert_eq!(model.spendable_utxos(principal, vec![reported], 10), vec![]);
+
+        // Once the outpoint is gone, the reservation goes too.
+        model.prune_pending_transactions(principal, ADDRESS_1, &[(*UTXO_2).clone()], 2_000, 3_000);
+        assert_eq!(
+            model.get_pending_transactions(&principal, ADDRESS_1),
+            vec![]
+        );
     }
 
     #[test]

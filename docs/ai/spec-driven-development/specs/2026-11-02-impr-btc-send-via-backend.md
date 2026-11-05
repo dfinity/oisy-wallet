@@ -449,6 +449,10 @@ Decided in PR 4:
   inputs.
 - `pending_transactions` are those at the fetched address, as `btc_get_pending_transactions`
   returns them.
+- The prune's absence rule matches by outpoint too. It compared whole `Utxo` records, so a
+  reservation whose UTXO came back with another height (a reorg mining the funding transaction
+  again) or that was reserved with other metadata was pruned while the output was unspent, and this
+  endpoint would then offer that output as spendable.
 - Both endpoints share one fetch-and-prune helper, `get_utxos_and_prune` in
   `src/backend/src/api/bitcoin.rs`. PR 3's sync of the broadcast states after a prune
   (`retain_reserved_broadcasts`) goes there, whichever of PRs 3 and 4 lands second.
@@ -940,6 +944,10 @@ Every PR is safe on its own.
   broadcast per attempt, about a cent, and no funds; CFS has the same gap today. The send never
   confirms, and its reservation lasts until the usual prune.
 
+- **Deep reorgs (pre-existing).** A reorg that leaves a reserved UTXO below 4 confirmations drops it
+  from the view, so the absence rule prunes its reservation while the output is unspent. When it
+  reaches 4 confirmations again, it looks free. On mainnet that needs a reorg at least 4 blocks
+  deep.
 - **1-hour expiry (pre-existing).** A low-fee transaction can stay in the mempool longer than
   `HOUR_IN_NS`; its UTXOs then look free again in the ≥4-confirmation view. The Bitcoin canister has
   no mempool view, so owning the reservations does not fix this by itself.
