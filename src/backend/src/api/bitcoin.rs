@@ -12,7 +12,7 @@ use shared::types::{
         BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse, BtcGetPendingTransactionsError,
         BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsRequest,
         BtcGetSpendableUtxosError, BtcGetSpendableUtxosRequest, BtcGetSpendableUtxosResponse,
-        PendingTransaction, StoredPendingTransaction, MAX_SPENDABLE_UTXOS,
+        PendingTransaction, StoredPendingTransaction,
     },
     result_types::{
         BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
@@ -234,15 +234,18 @@ pub async fn btc_get_pending_transactions(
 /// Returns the caller's spendable UTXOs and pending transactions on the given network.
 ///
 /// The UTXOs are those at the caller's address with at least 4 confirmations (1 on regtest), from
-/// all pages, that no pending transaction of the caller reserves on any of its addresses: at most
-/// 10 000, the largest by value, largest first. The pending transactions are those at that
-/// address, as `btc_get_pending_transactions` returns them.
+/// all pages, that no pending transaction of the caller reserves on any of its addresses: the
+/// largest by value, largest first, at most 10 000 and fewer if the pending transactions leave less
+/// room in the reply. The pending transactions are those at that address, as
+/// `btc_get_pending_transactions` returns them.
 ///
 /// Requires a valid II delegation chain to verify the caller authenticated
 /// through Internet Identity. Controllers bypass this check.
 ///
 /// # Errors
-/// Errors are enumerated by: `BtcGetSpendableUtxosError`.
+/// Errors are enumerated by: `BtcGetSpendableUtxosError`. `InternalError` also covers pending
+/// transactions too large for a reply, which only the caller's own reservations can cause, until
+/// they are pruned.
 #[update(guard = "caller_is_registered_user")]
 pub async fn btc_get_spendable_utxos(
     params: BtcGetSpendableUtxosRequest,
@@ -274,24 +277,26 @@ pub async fn btc_get_spendable_utxos(
                 .await
                 .map_err(|msg| BtcGetSpendableUtxosError::InternalError { msg })?;
 
-        let (utxos, stored_transactions) = mutate_state(|state| {
+        mutate_state(|state| {
             let model = BtcUserPendingTransactionsModel::new(
                 &mut state.btc_user_pending_transactions,
                 None,
                 None,
             );
-            (
-                model.spendable_utxos(principal, current_utxos, MAX_SPENDABLE_UTXOS),
-                model.get_pending_transactions(&principal, &source_address),
-            )
-        });
-
-        Ok(BtcGetSpendableUtxosResponse {
-            utxos,
-            pending_transactions: stored_transactions
+            let pending_transactions: Vec<PendingTransaction> = model
+                .get_pending_transactions(&principal, &source_address)
                 .into_iter()
                 .map(PendingTransaction::from)
-                .collect(),
+                .collect();
+            let max_utxos = BtcGetSpendableUtxosResponse::max_utxos_beside(&pending_transactions)
+                .ok_or_else(|| BtcGetSpendableUtxosError::InternalError {
+                msg: "The pending transactions take more than a reply can hold".to_string(),
+            })?;
+
+            Ok(BtcGetSpendableUtxosResponse {
+                utxos: model.spendable_utxos(principal, current_utxos, max_utxos),
+                pending_transactions,
+            })
         })
     }
     inner(params).await.into()

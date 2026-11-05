@@ -42,11 +42,13 @@ const _: () = assert!(MAX_BROADCAST_TX_INPUTS <= MAX_UTXOS_LEN);
 
 /// The most UTXOs `btc_get_spendable_utxos` returns, the largest by value.
 ///
-/// A reply is limited to 2 MiB, which holds about 42 000 UTXOs. 10 000 take about 490 kB, which
-/// leaves the rest for the pending transactions. A transaction spends at most
-/// `MAX_BROADCAST_TX_INPUTS` inputs, so any send a wallet can make is possible with its largest
-/// UTXOs.
+/// 10 000 take about 490 kB of a reply. A transaction spends at most `MAX_BROADCAST_TX_INPUTS`
+/// inputs, so any send a wallet can make is possible with its largest UTXOs.
 pub const MAX_SPENDABLE_UTXOS: usize = 10_000;
+
+/// The size `btc_get_spendable_utxos` keeps its UTXOs and pending transactions within: the 2 MiB
+/// (2 097 152 bytes) reply limit, less room for the Candid header, type table and result variant.
+pub const MAX_SPENDABLE_UTXOS_REPLY_BYTES: usize = 2_000_000;
 
 const _: () = assert!(MAX_BROADCAST_TX_INPUTS <= MAX_SPENDABLE_UTXOS);
 
@@ -152,8 +154,9 @@ pub struct BtcGetSpendableUtxosRequest {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct BtcGetSpendableUtxosResponse {
     /// The caller's UTXOs with at least 4 confirmations (1 on regtest), from all pages, that no
-    /// pending transaction of the caller reserves: at most `MAX_SPENDABLE_UTXOS` (10 000), the
-    /// largest by value, largest first.
+    /// pending transaction of the caller reserves: the largest by value, largest first. At most
+    /// `MAX_SPENDABLE_UTXOS` (10 000), and fewer if the pending transactions leave less room in
+    /// the reply.
     pub utxos: Vec<Utxo>,
     /// The caller's pending transactions at the address these UTXOs belong to, as
     /// `btc_get_pending_transactions` returns them.
