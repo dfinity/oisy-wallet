@@ -3,21 +3,8 @@
 	import { getContext, untrack } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { readable } from 'svelte/store';
-	import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
-	import { oisyTradeSwapEnabled } from '$env/oisy-trade-swap';
-	import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
-	import { LIFI_SWAP_ENABLED } from '$env/rest/lifi.env';
-	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
-	import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
-	import SwapDetailsChainFusion from '$lib/components/swap/SwapDetailsChainFusion.svelte';
-	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
-	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
-	import SwapDetailsLifi from '$lib/components/swap/SwapDetailsLifi.svelte';
-	import SwapDetailsNearIntents from '$lib/components/swap/SwapDetailsNearIntents.svelte';
-	import SwapDetailsOisyTrade from '$lib/components/swap/SwapDetailsOisyTrade.svelte';
-	import SwapDetailsOneSec from '$lib/components/swap/SwapDetailsOneSec.svelte';
-	import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
 	import SwapProviderAnimation from '$lib/components/swap/SwapProviderAnimation.svelte';
+	import SwapProviderDetails from '$lib/components/swap/SwapProviderDetails.svelte';
 	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import CollapsibleBottomSheet from '$lib/components/ui/CollapsibleBottomSheet.svelte';
@@ -37,13 +24,10 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { OptionString } from '$lib/types/string';
-	import { SwapProvider } from '$lib/types/swap';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
 	import { findSwapProvider } from '$lib/utils/swap.utils';
 	import { fade, fly, slide } from '$lib/utils/transitions.utils';
-	import { UrlSchema } from '$lib/validation/url.validation';
 
 	interface Props {
 		slippageValue: OptionAmount;
@@ -101,8 +85,6 @@
 	});
 	const labelIn = { duration: MOTION_SWAP_DURATION, easing: MOTION_ENTER.easing };
 
-	let displayURL = $state<OptionString>(null);
-
 	let selectedProvider = $derived($swapAmountsStore?.selectedProvider);
 	let confirmedRequestId = $state<number>();
 	// Completion snapshots survive form/review navigation. Keep the observed foreground round
@@ -156,18 +138,6 @@
 				? resolveText({ i18n: $i18n, path: swapDApp.name })
 				: ''
 	);
-
-	$effect(() => {
-		if (nonNullish(swapDApp)) {
-			const parsed = UrlSchema.safeParse(swapDApp.website);
-			if (parsed.success) {
-				const url = new URL(parsed.data);
-				displayURL = url.hostname.startsWith('www.') ? url.hostname.slice(4) : url.hostname;
-				return;
-			}
-			displayURL = null;
-		}
-	});
 </script>
 
 {#if isForm}
@@ -285,34 +255,7 @@
 				{/snippet}
 				{#snippet content()}
 					{#if !comparing && nonNullish(selectedProvider)}
-						{#if displayURL}
-							<ModalValue>
-								{#snippet label()}
-									{$i18n.swap.text.swap_provider_website}
-								{/snippet}
-
-								{#snippet mainValue()}
-									<div class="text-sm">{displayURL}</div>
-								{/snippet}
-							</ModalValue>
-						{/if}
-						{#if selectedProvider.provider === SwapProvider.KONG_SWAP && KONGSWAP_PROVIDER_ENABLED}
-							<SwapDetailsKong provider={selectedProvider} />
-						{:else if selectedProvider.provider === SwapProvider.ICP_SWAP}
-							<SwapDetailsIcp provider={selectedProvider} {slippageValue} />
-						{:else if selectedProvider.provider === SwapProvider.VELORA}
-							<SwapDetailsVelora provider={selectedProvider} />
-						{:else if selectedProvider.provider === SwapProvider.NEAR_INTENTS && NEAR_INTENTS_SWAP_ENABLED}
-							<SwapDetailsNearIntents provider={selectedProvider} {slippageValue} />
-						{:else if selectedProvider.provider === SwapProvider.ONE_SEC && ONESEC_SWAP_ENABLED}
-							<SwapDetailsOneSec provider={selectedProvider} />
-						{:else if selectedProvider.provider === SwapProvider.CHAIN_FUSION && CHAIN_FUSION_SWAP_ENABLED}
-							<SwapDetailsChainFusion provider={selectedProvider} />
-						{:else if selectedProvider.provider === SwapProvider.OISY_TRADE && oisyTradeSwapEnabled}
-							<SwapDetailsOisyTrade provider={selectedProvider} />
-						{:else if selectedProvider.provider === SwapProvider.LIFI && LIFI_SWAP_ENABLED}
-							<SwapDetailsLifi provider={selectedProvider} />
-						{/if}
+						<SwapProviderDetails provider={selectedProvider} {slippageValue} />
 					{/if}
 				{/snippet}
 				{#snippet contentFooter(closeFn)}
