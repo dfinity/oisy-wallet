@@ -49,8 +49,9 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	// The two-swap hints shown since the swap modal opened. Kept here rather than in the hint, which
 	// comes and goes with the quotes and is rebuilt with the form, so that each one counts once.
 	const twoSwapsHintsShown: TwoSwapsHintShown[] = [];
-	// The network and asset type each side's token list was left on, so it reopens on them and a pick
-	// never moves them. Kept here because the list's own context is shared by every token picker.
+	// The network and asset type the person set on each side's token list, so it reopens on them and a
+	// pick never moves them; a side with none opens where the wizard starts it. Kept here because the
+	// list's own context is shared by every token picker.
 	const tokenListFilters = new Map<SwapSelectTokenType, SwapTokenListFilters>();
 
 	const sourceToken = derived(

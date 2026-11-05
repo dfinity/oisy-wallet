@@ -16,7 +16,6 @@
 	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { allSwapUniverseTokens } from '$lib/derived/swap.derived';
 	import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
-	import type { TokenCategoryTagValue } from '$lib/enums/token-tag';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import {
 		MODAL_NETWORKS_LIST_CONTEXT_KEY,
@@ -30,7 +29,11 @@
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
-	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
+	import {
+		SWAP_CONTEXT_KEY,
+		type SwapContext,
+		type SwapTokenListFilters
+	} from '$lib/stores/swap.store';
 	import type { WizardStepsGetTokenType } from '$lib/types/get-token';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
@@ -97,25 +100,6 @@
 
 	type TokenSide = 'source' | 'destination';
 
-	// The asset type either side starts on: the assets page's, as Send does.
-	const getInitialCategory = (): TokenCategoryTagValue | undefined =>
-		isRouteTokens(page) ? $tokenCategoryFilter : undefined;
-
-	// The header's network, where either side starts when it can use it.
-	const getInitialNetwork = (allowedIds?: NetworkId[]): Network | undefined => {
-		const network = $selectedNetwork;
-
-		if (isNullish(network) || !$crossChainSwapNetworksMainnetsIds.includes(network.id)) {
-			return;
-		}
-
-		if (nonNullish(allowedIds) && allowedIds.length > 0 && !allowedIds.includes(network.id)) {
-			return;
-		}
-
-		return network;
-	};
-
 	const computeDestinationAllowedIds = (source: Token): NetworkId[] | undefined => {
 		const baseAllowedIds = SUPPORTED_CROSS_SWAP_NETWORKS[source.network.id];
 
@@ -139,18 +123,16 @@
 		return baseAllowedIds.filter((id) => reachableSet.has(id));
 	};
 
-	// The networks the list may offer: every swap network to pay with; to receive, the ones the pay
-	// token reaches. Returns what it allowed, `undefined` for no constraint.
-	const applyNetworkConstraints = (side: TokenSide): NetworkId[] | undefined => {
-		if (side === 'source' || isNullish($sourceToken)) {
-			resetAllowedNetworkIds();
+	// The networks a side's list may offer: every swap network to pay with; to receive, the ones the
+	// pay token reaches (the static cross-swap pre-filter, intersected with the networks that have a
+	// destination the providers supporting the pay token reach). `undefined` for no constraint.
+	const getAllowedNetworkIds = (side: TokenSide): NetworkId[] | undefined =>
+		side === 'source' || isNullish($sourceToken)
+			? undefined
+			: computeDestinationAllowedIds($sourceToken);
 
-			return;
-		}
-
-		// Intersect the static cross-swap pre-filter with networks that have at least one reachable
-		// destination via the providers supporting the source.
-		const allowedIds = computeDestinationAllowedIds($sourceToken);
+	const applyNetworkConstraints = (side: TokenSide) => {
+		const allowedIds = getAllowedNetworkIds(side);
 
 		if (isNullish(allowedIds)) {
 			resetAllowedNetworkIds();
@@ -159,8 +141,65 @@
 		}
 
 		setAllowedNetworkIds(allowedIds);
+	};
 
-		return allowedIds;
+	// A network a side's list can open on: a swap network it may offer. Any other opens on all.
+	const getUsableNetwork = ({
+		network,
+		side
+	}: {
+		network: Network | undefined;
+		side: TokenSide;
+	}): Network | undefined => {
+		if (isNullish(network) || !$crossChainSwapNetworksMainnetsIds.includes(network.id)) {
+			return;
+		}
+
+		const allowedIds = getAllowedNetworkIds(side);
+
+		if (nonNullish(allowedIds) && allowedIds.length > 0 && !allowedIds.includes(network.id)) {
+			return;
+		}
+
+		return network;
+	};
+
+	// Where a side's list opens until the person changes its filters. To pay: the header's network and
+	// the assets page's asset type, as Send does. To receive: the pay side's, that is the pay token's
+	// network and the asset type the pay list was left on, so a same-network swap takes one step and a
+	// cross-chain one is a choice.
+	const getStartFilters = (side: TokenSide): SwapTokenListFilters => {
+		const pageCategory = isRouteTokens(page) ? $tokenCategoryFilter : undefined;
+
+		if (side === 'source') {
+			return {
+				network: getUsableNetwork({ network: $selectedNetwork, side }),
+				category: pageCategory
+			};
+		}
+
+		return {
+			network: getUsableNetwork({ network: $sourceToken?.network ?? $selectedNetwork, side }),
+			category: getTokenListFilters('source')?.category ?? pageCategory
+		};
+	};
+
+	// A side keeps its filters once the person has changed them, and from then on reopens on them.
+	// Until then nothing is kept, so the receive side goes on following the pay side.
+	const keepTokenListFilters = (side: TokenSide) => {
+		const filters: SwapTokenListFilters = {
+			network: get(filterNetwork),
+			category: get(filterCategoryTag)
+		};
+
+		const start = getStartFilters(side);
+
+		const changed =
+			filters.network?.id !== start.network?.id || filters.category !== start.category;
+
+		if (changed || nonNullish(getTokenListFilters(side))) {
+			setTokenListFilters({ side, filters });
+		}
 	};
 
 	const enterTokenList = (side: TokenSide) => {
@@ -172,15 +211,11 @@
 
 		goToStep(WizardStepsSwap.TOKENS_LIST);
 
-		const allowedIds = applyNetworkConstraints(side);
+		applyNetworkConstraints(side);
 
-		// Each side reopens on the network and asset type it was left on, so a pick never moves them
-		// and the two sides never share them. Kept in the swap context, which outlives this component
+		// A pick never moves a side's filters. Kept in the swap context, which outlives this component
 		// (Get Token rebuilds it on every step).
-		const { network, category } = getTokenListFilters(side) ?? {
-			network: getInitialNetwork(allowedIds),
-			category: getInitialCategory()
-		};
+		const { network, category } = getTokenListFilters(side) ?? getStartFilters(side);
 
 		setFilterNetwork(network);
 
@@ -191,10 +226,7 @@
 
 	const closeTokenList = () => {
 		if (nonNullish(selectTokenType)) {
-			setTokenListFilters({
-				side: selectTokenType,
-				filters: { network: get(filterNetwork), category: get(filterCategoryTag) }
-			});
+			keepTokenListFilters(selectTokenType);
 		}
 
 		goToStep(WizardStepsSwap.SWAP);
