@@ -201,6 +201,23 @@ describe('SwapModalWizardSteps', () => {
 			expect(getByTestId(SWAP_SWITCH_TOKENS_BUTTON)).toBeInTheDocument();
 		});
 
+		it('should show the networks in their brand colours', () => {
+			const { icon, iconColored } = mockValidIcToken.network;
+
+			const { container } = renderSwapModalWizardSteps({
+				name: WizardStepsSwap.SWAP,
+				title: 'title'
+			});
+
+			const sources = Array.from(container.querySelectorAll('img')).map((img) =>
+				img.getAttribute('src')
+			);
+
+			expect(iconColored).toBeDefined();
+			expect(sources).toContain(iconColored);
+			expect(sources).not.toContain(icon);
+		});
+
 		it('should display REVIEW step', () => {
 			const { getByText } = renderSwapModalWizardSteps({
 				name: WizardStepsSwap.REVIEW,
