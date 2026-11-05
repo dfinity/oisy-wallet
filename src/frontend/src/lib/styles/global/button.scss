@@ -691,6 +691,64 @@ a.as-button {
 	}
 }
 
+// A filter in a token picker (`FilterChip`): 32 px and 14 px text, fully round, so a network and an
+// asset type fit on one line at 375 px. The tap area stays 40 px (44 px on touch) through
+// `hit-area` on the button, so only the visible box shrinks.
+.dropdown-button.compact {
+	@apply h-8;
+	@apply min-h-8;
+	@apply rounded-full;
+	@apply ps-3;
+	@apply pe-2.5;
+	@apply py-0;
+	@apply gap-1.5;
+	@apply text-sm;
+
+	@include interaction.coarse {
+		min-height: 2rem;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		transition:
+			color 0.15s ease-out,
+			background 0.15s ease-out,
+			border-color 0.15s ease-out,
+			padding-inline-end 0.3s cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	// A logo sits as far from the edge as from the top and bottom, concentric with the chip.
+	&.with-icon {
+		@apply ps-1;
+	}
+
+	// A value is picked: tinted, and room at the end for the clear button. Blue-800 on light and
+	// blue-300 on dark (`brand-hover`) is the one brand foreground that holds 4.5:1 on the subtle
+	// tint in both themes; `brand-primary` drops to 4.2:1 on light and 2.5:1 on dark there.
+	&.has-value {
+		@apply pe-[30px];
+		@apply bg-brand-subtle-10;
+		color: var(--color-foreground-brand-hover);
+
+		&.border {
+			@apply border-brand-subtle-20;
+		}
+
+		.dropdown-chevron {
+			color: inherit;
+		}
+
+		@include interaction.hover {
+			&:not(.disabled):not([disabled]) {
+				@apply bg-brand-subtle-20;
+			}
+		}
+
+		&:active:not(.disabled):not([disabled]) {
+			@apply bg-brand-subtle-30;
+		}
+	}
+}
+
 // Tighter on phones, keeping the 2px start/end split for the chevron's blank space.
 @media (width <= theme(--breakpoint-sm)) {
 	.dropdown-button {

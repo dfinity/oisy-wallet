@@ -10,6 +10,9 @@
 		selectable?: boolean;
 		expanded?: boolean;
 		selected?: boolean;
+		// The pressed state for a row that marks its own selection, without the check column
+		// `selectable` adds.
+		pressed?: boolean;
 		dividers?: boolean;
 		hover?: boolean;
 		rounded?: boolean;
@@ -33,6 +36,7 @@
 		selectable = false,
 		expanded,
 		selected = false,
+		pressed,
 		dividers = false,
 		hover = true,
 		rounded = true,
@@ -66,7 +70,7 @@
 		class="flex w-full rounded-lg border-0 px-2"
 		class:cursor-default={isNullish(onClick)}
 		aria-expanded={expanded}
-		aria-pressed={selectable ? selected : undefined}
+		aria-pressed={selectable ? selected : pressed}
 		data-tid={testId}
 		onclick={onClick}
 	>

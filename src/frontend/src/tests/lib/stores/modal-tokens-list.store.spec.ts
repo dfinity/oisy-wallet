@@ -396,4 +396,66 @@ describe('modalTokensListStore', () => {
 			expect(result).toEqual([mockTokenUi3, mockTokenUi4]);
 		});
 	});
+
+	describe('saved filters', () => {
+		it('restores the network and asset type saved under a key', () => {
+			const {
+				saveFilters,
+				restoreFilters,
+				setFilterNetwork,
+				setFilterCategoryTag,
+				filterNetwork,
+				filterCategoryTag
+			} = initModalTokensListContext({ tokens: [] });
+
+			setFilterNetwork(ICP_NETWORK);
+			setFilterCategoryTag(TokenCategoryTagValue.STABLECOIN);
+			saveFilters('source');
+
+			setFilterNetwork(ETHEREUM_NETWORK);
+			setFilterCategoryTag(undefined);
+
+			expect(restoreFilters('source')).toBeTruthy();
+			expect(get(filterNetwork)).toEqual(ICP_NETWORK);
+			expect(get(filterCategoryTag)).toBe(TokenCategoryTagValue.STABLECOIN);
+		});
+
+		it('reports a key with nothing saved and leaves the filters alone', () => {
+			const { restoreFilters, setFilterNetwork, filterNetwork } = initModalTokensListContext({
+				tokens: []
+			});
+
+			setFilterNetwork(ICP_NETWORK);
+
+			expect(restoreFilters('destination')).toBeFalsy();
+			expect(get(filterNetwork)).toEqual(ICP_NETWORK);
+		});
+
+		it('forgets saved filters on reset', () => {
+			const { saveFilters, restoreFilters, setFilterNetwork, resetFilters } =
+				initModalTokensListContext({ tokens: [] });
+
+			setFilterNetwork(ICP_NETWORK);
+			saveFilters('source');
+			resetFilters();
+
+			expect(restoreFilters('source')).toBeFalsy();
+		});
+	});
+
+	describe('filteredTokensAllNetworks', () => {
+		it('lists the tokens of every network whatever network is picked', () => {
+			const { filteredTokensAllNetworks, filteredTokens } = initModalTokensListContext({
+				tokens: [ICP_TOKEN, ETHEREUM_TOKEN],
+				filterNetwork: ICP_NETWORK,
+				sortByBalance: false
+			});
+
+			expect(get(filteredTokens).map(({ id }) => id)).toEqual([ICP_TOKEN.id]);
+			expect(get(filteredTokensAllNetworks).map(({ id }) => id)).toEqual([
+				ICP_TOKEN.id,
+				ETHEREUM_TOKEN.id
+			]);
+		});
+	});
 });

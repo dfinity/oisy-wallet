@@ -15,7 +15,7 @@ import {
 import { mapTokenUi } from '$lib/utils/token.utils';
 import { filterTokens, filterTokensByNft, sortTokens } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { derived, writable, type Readable } from 'svelte/store';
+import { derived, get, readable, writable, type Readable } from 'svelte/store';
 
 export interface ModalTokensListData {
 	tokens: Token[];
@@ -43,83 +43,111 @@ export const initModalTokensListContext = (
 	const filterNfts = derived([data], ([{ filterNfts }]) => filterNfts);
 	const filterCategoryTag = derived([data], ([{ filterCategoryTag }]) => filterCategoryTag);
 
-	const filteredTokens = derived(
-		[
-			tokens,
-			filterQuery,
-			filterNetwork,
-			filterZeroBalance,
-			sortByBalance,
-			exchanges,
-			balancesStore,
-			stakeBalances,
-			tokensToPin,
-			networks,
-			filterNetworksIds,
-			filterNfts
-		],
-		([
-			$tokens,
-			$filterQuery,
-			$filterNetwork,
-			$filterZeroBalance,
-			$sortByBalance,
-			$exchanges,
-			$balances,
-			$stakeBalances,
-			$tokensToPin,
-			$networksToPin,
-			$filterNetworksIds,
-			$filterNfts
-		]) => {
-			const filteredByQuery = filterTokens({ tokens: $tokens, filter: $filterQuery ?? '' });
-
-			const filteredByNetworkIds =
-				nonNullish($filterNetworksIds) && $filterNetworksIds.length > 0
-					? filterTokensForSelectedNetworks([
-							filteredByQuery,
-							$filterNetworksIds,
-							isNullish($filterNetworksIds)
-						])
-					: filteredByQuery;
-
-			const filteredByNetwork = filterTokensForSelectedNetwork([
-				filteredByNetworkIds,
+	const filterTokensFor = ({
+		selectedNetwork,
+		sorted
+	}: {
+		selectedNetwork: Readable<Network | undefined>;
+		sorted: boolean;
+	}): Readable<TokenUi[]> =>
+		derived(
+			[
+				tokens,
+				filterQuery,
+				selectedNetwork,
+				filterZeroBalance,
+				sortByBalance,
+				exchanges,
+				balancesStore,
+				stakeBalances,
+				tokensToPin,
+				networks,
+				filterNetworksIds,
+				filterNfts
+			],
+			([
+				$tokens,
+				$filterQuery,
 				$filterNetwork,
-				isNullish($filterNetwork)
-			]);
-
-			const filteredByNft = filterTokensByNft({
-				tokens: filteredByNetwork,
-				filterNfts: $filterNfts
-			});
-
-			if (!$sortByBalance) {
-				return filteredByNft;
-			}
-
-			const tokensUi = filteredByNft.map((token) =>
-				mapTokenUi({
-					token,
-					$balances,
-					$stakeBalances,
-					$exchanges
-				})
-			);
-
-			const pinnedWithBalance = sortTokens({
-				$tokens: tokensUi,
+				$filterZeroBalance,
+				$sortByBalance,
+				$exchanges,
+				$balances,
+				$stakeBalances,
 				$tokensToPin,
-				$networksToPin
-			});
+				$networksToPin,
+				$filterNetworksIds,
+				$filterNfts
+			]) => {
+				const filteredByQuery = filterTokens({ tokens: $tokens, filter: $filterQuery ?? '' });
 
-			return $filterZeroBalance
-				? pinnedWithBalance.filter(({ balance }) => (balance ?? ZERO) > ZERO)
-				: pinnedWithBalance;
-		}
-	);
+				const filteredByNetworkIds =
+					nonNullish($filterNetworksIds) && $filterNetworksIds.length > 0
+						? filterTokensForSelectedNetworks([
+								filteredByQuery,
+								$filterNetworksIds,
+								isNullish($filterNetworksIds)
+							])
+						: filteredByQuery;
+
+				const filteredByNetwork = filterTokensForSelectedNetwork([
+					filteredByNetworkIds,
+					$filterNetwork,
+					isNullish($filterNetwork)
+				]);
+
+				const filteredByNft = filterTokensByNft({
+					tokens: filteredByNetwork,
+					filterNfts: $filterNfts
+				});
+
+				if (!$sortByBalance) {
+					return filteredByNft;
+				}
+
+				const tokensUi = filteredByNft.map((token) =>
+					mapTokenUi({
+						token,
+						$balances,
+						$stakeBalances,
+						$exchanges
+					})
+				);
+
+				const ordered = sorted
+					? sortTokens({
+							$tokens: tokensUi,
+							$tokensToPin,
+							$networksToPin
+						})
+					: tokensUi;
+
+				return $filterZeroBalance
+					? ordered.filter(({ balance }) => (balance ?? ZERO) > ZERO)
+					: ordered;
+			}
+		);
+
+	// Filters set aside under a key, for a modal with more than one list (Swap's pay and receive),
+	// so each list reopens on its own. Cleared with the other filters.
+	const savedFilters = new Map<
+		string,
+		Pick<ModalTokensListData, 'filterNetwork' | 'filterCategoryTag'>
+	>();
+
+	const filteredTokens = filterTokensFor({ selectedNetwork: filterNetwork, sorted: true });
+
+	// The same list as if no network were picked, to tell an empty list whether clearing the network
+	// would bring tokens back. Only its length is used, so it is not sorted; `ModalTokensList` reads it
+	// only while a network can be cleared.
+	const filteredTokensAllNetworks = filterTokensFor({
+		selectedNetwork: readable(undefined),
+		sorted: false
+	});
 
 	return {
+		tokens,
+		filteredTokensAllNetworks,
 		filterQuery,
 		filterNetwork,
 		filterCategoryTag,
@@ -149,7 +177,25 @@ export const initModalTokensListContext = (
 				...state,
 				filterCategoryTag: categoryTag
 			})),
+		saveFilters: (key: string) => {
+			const { filterNetwork, filterCategoryTag } = get(data);
+
+			savedFilters.set(key, { filterNetwork, filterCategoryTag });
+		},
+		restoreFilters: (key: string): boolean => {
+			const saved = savedFilters.get(key);
+
+			if (isNullish(saved)) {
+				return false;
+			}
+
+			update((state) => ({ ...state, ...saved }));
+
+			return true;
+		},
 		resetFilters: () => {
+			savedFilters.clear();
+
 			update((state) => ({
 				...state,
 				filterQuery: undefined,
@@ -165,6 +211,8 @@ export const initModalTokensListContext = (
 };
 
 export interface ModalTokensListContext {
+	tokens: Readable<Token[]>;
+	filteredTokensAllNetworks: Readable<TokenUi[]>;
 	filterQuery: Readable<string | undefined>;
 	filterNetwork: Readable<Network | undefined>;
 	filterCategoryTag: Readable<TokenCategoryTagValue | undefined>;
@@ -174,6 +222,9 @@ export interface ModalTokensListContext {
 	setFilterNetwork: (network: Network | undefined) => void;
 	setFilterNetworksIds: (networksIds: NetworkId[] | undefined) => void;
 	setFilterCategoryTag: (categoryTag: TokenCategoryTagValue | undefined) => void;
+	saveFilters: (key: string) => void;
+	// Applies the filters saved under `key`; `false` when there are none.
+	restoreFilters: (key: string) => boolean;
 	resetFilters: () => void;
 }
 

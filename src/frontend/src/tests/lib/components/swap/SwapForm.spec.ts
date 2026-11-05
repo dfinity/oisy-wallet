@@ -1,3 +1,5 @@
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import type { IcToken } from '$icp/types/ic-token';
 import SwapForm from '$lib/components/swap/SwapForm.svelte';
@@ -15,6 +17,7 @@ import {
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { trackSwapTwoSwapsHint } from '$lib/services/swap-two-swaps-hint-analytics.services';
+import { COLORED_NETWORK_LOGOS_CONTEXT_KEY } from '$lib/stores/colored-network-logos.store';
 import {
 	SWAP_AMOUNTS_CONTEXT_KEY,
 	initSwapAmountsStore,
@@ -913,6 +916,69 @@ describe('SwapForm', () => {
 			const inputs = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
 			expect(inputs[1]).toHaveValue('0');
+		});
+	});
+
+	describe('networks', () => {
+		beforeEach(() => {
+			setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
+
+			const originalContext = initSwapContext({
+				sourceToken: mockValidIcToken,
+				destinationToken: mockValidErc20Token
+			});
+
+			mockContext.set(SWAP_CONTEXT_KEY, {
+				...originalContext,
+				sourceTokenExchangeRate: readable(10),
+				destinationTokenExchangeRate: readable(2)
+			});
+
+			// As `SwapModalWizardSteps` does around the whole swap.
+			mockContext.set(COLORED_NETWORK_LOGOS_CONTEXT_KEY, true);
+		});
+
+		afterEach(() => {
+			mockContext.delete(COLORED_NETWORK_LOGOS_CONTEXT_KEY);
+		});
+
+		const renderSwapForm = () =>
+			render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					receiveAmount: 2,
+					slippageValue: '1',
+					isSwapAmountsLoading: false,
+					fee: 1000n,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+
+		const networkLogoAlt = (name: string): string =>
+			replacePlaceholders(en.core.alt.logo, { $name: name });
+
+		it("should show each side's network with its coloured mark", () => {
+			const { getByAltText } = renderSwapForm();
+
+			expect(getByAltText(networkLogoAlt(ICP_NETWORK.name))).toHaveAttribute(
+				'src',
+				ICP_NETWORK.iconColored
+			);
+			expect(getByAltText(networkLogoAlt(ETHEREUM_NETWORK.name))).toHaveAttribute(
+				'src',
+				ETHEREUM_NETWORK.iconColored
+			);
+		});
+
+		it('should not frame the panels in a network gradient when the networks differ', () => {
+			const { container } = renderSwapForm();
+
+			expect(container.querySelector('.bg-linear-to-b')).toBeNull();
 		});
 	});
 

@@ -1044,7 +1044,6 @@
 			"open_qr_modal": "Spustit skenování QR kódu pro podrobnosti transakce",
 			"scan_qr": "Skenovat QR kód",
 			"select_token": "Vybrat token k odeslání",
-			"select_network_filter": "Vybrat síťový filtr",
 			"send_again": "Odeslat znovu",
 			"recently_used_tab": "Nedávno použité",
 			"contacts_tab": "Kontakty",
@@ -1516,6 +1515,18 @@
 			"hide_asset_types": "Skrýt typy aktiv",
 			"asset_type": "Typ aktiva v $oisy_name",
 			"asset_type_all": "Všechny typy aktiv",
+			"asset_type_all_short": "",
+			"clear_network_filter": "",
+			"clear_asset_type_filter": "",
+			"filter_asset_types": "",
+			"clear_filters": "",
+			"no_match_network": "",
+			"no_match_asset_type": "",
+			"no_match_asset_type_network": "",
+			"no_match_query": "",
+			"no_match_query_network": "",
+			"no_match_query_asset_type": "",
+			"no_match_query_asset_type_network": "",
 			"no_tokens_for_asset_type": "Ve tvé peněžence nejsou žádné $asset_type",
 			"no_tokens_for_asset_type_zero_tokens": "V vybrané síti nejsou žádné $asset_type",
 			"no_tokens_for_asset_type_description": "Vyber z <strong>$count podporovaných tokenů</strong> a přizpůsob si zobrazení portfolia."
@@ -1625,7 +1636,8 @@
 		"placeholder": {
 			"enter_contract_address": "Zadejte adresu smlouvy ERC20",
 			"enter_token_address": "Zadejte adresu tokenu SPL",
-			"search_token": "Hledat token"
+			"search_token": "Hledat token",
+			"search_token_on_network": ""
 		},
 		"warning": {
 			"trust_token": "Ujistěte se, že důvěřujete tokenu, který přidáváte. Pokud je token, který přidáváte, ovládán škodlivou stranou, mohli by se vás pokusit podvést, např. tím, že vás přesvědčí, že jste obdrželi značné množství tokenů, aby vás zmanipulovali a poslali jste jim tokeny na oplátku nebo provedli jiné nežádoucí akce. Více se dozvíte o podvodech a bezpečnostních rizicích např. <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">zde</a>."

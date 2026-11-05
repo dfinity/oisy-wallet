@@ -10,7 +10,6 @@
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import TokenInputBalance from '$lib/components/tokens/TokenInputBalance.svelte';
-	import TokenInputNetworkWrapper from '$lib/components/tokens/TokenInputNetworkWrapper.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -180,8 +179,6 @@
 			slippageInvalid
 	);
 
-	let isCrossChainNetworks = $derived($sourceToken?.network.id !== $destinationToken?.network.id);
-
 	$effect(() => {
 		receiveAmount =
 			nonNullish($destinationToken) &&
@@ -217,129 +214,115 @@
 	<div>
 		<div class="relative">
 			<div class="mb-2">
-				<TokenInputNetworkWrapper
-					showGradient={nonNullish($sourceToken) &&
-						nonNullish($destinationToken) &&
-						isCrossChainNetworks}
-					tokenNetworkId={$sourceToken?.network?.id}
+				<TokenInput
+					displayUnit={inputUnit}
+					exchangeRate={$sourceTokenExchangeRate}
+					onClick={() => onShowTokensList('source')}
+					{onCustomValidate}
+					showTokenNetwork
+					token={$sourceToken}
+					bind:amount={swapAmount}
+					bind:errorType
+					bind:amountSetToMax={$amountSetToMax}
 				>
-					{#snippet tokenInput()}
-						<TokenInput
-							displayUnit={inputUnit}
-							exchangeRate={$sourceTokenExchangeRate}
-							onClick={() => onShowTokensList('source')}
-							{onCustomValidate}
-							showTokenNetwork
-							token={$sourceToken}
-							bind:amount={swapAmount}
-							bind:errorType
-							bind:amountSetToMax={$amountSetToMax}
-						>
-							{#snippet title()}{$i18n.tokens.text.source_token_title}{/snippet}
+					{#snippet title()}{$i18n.tokens.text.source_token_title}{/snippet}
 
-							{#snippet amountInfo()}
-								{#if nonNullish($sourceToken)}
-									<div class="text-tertiary">
-										<TokenInputAmountExchange
-											amount={swapAmount}
-											exchangeRate={$sourceTokenExchangeRate}
-											token={$sourceToken}
-											bind:displayUnit={exchangeValueUnit}
-										/>
-									</div>
-								{/if}
-							{/snippet}
-
-							{#snippet balance()}
-								{#if nonNullish($sourceToken)}
-									{#if nonNullish(fee)}
-										<MaxBalanceButton
-											balance={$sourceTokenBalance}
-											error={nonNullish(errorType)}
-											{fee}
-											{maxAmount}
-											{onMax}
-											token={$sourceToken}
-											bind:amountSetToMax={$amountSetToMax}
-											bind:amount={swapAmount}
-										/>
-									{:else}
-										<div class="w-14 sm:w-16">
-											<SkeletonText />
-										</div>
-									{/if}
-								{/if}
-							{/snippet}
-						</TokenInput>
+					{#snippet amountInfo()}
+						{#if nonNullish($sourceToken)}
+							<div class="text-tertiary">
+								<TokenInputAmountExchange
+									amount={swapAmount}
+									exchangeRate={$sourceTokenExchangeRate}
+									token={$sourceToken}
+									bind:displayUnit={exchangeValueUnit}
+								/>
+							</div>
+						{/if}
 					{/snippet}
-				</TokenInputNetworkWrapper>
+
+					{#snippet balance()}
+						{#if nonNullish($sourceToken)}
+							{#if nonNullish(fee)}
+								<MaxBalanceButton
+									balance={$sourceTokenBalance}
+									error={nonNullish(errorType)}
+									{fee}
+									{maxAmount}
+									{onMax}
+									token={$sourceToken}
+									bind:amountSetToMax={$amountSetToMax}
+									bind:amount={swapAmount}
+								/>
+							{:else}
+								<div class="w-14 sm:w-16">
+									<SkeletonText />
+								</div>
+							{/if}
+						{/if}
+					{/snippet}
+				</TokenInput>
 			</div>
 
 			<SwapSwitchTokensButton disabled={isSwitchTokensButtonDisabled()} {onTokensSwitch} />
 
-			<TokenInputNetworkWrapper
-				showGradient={isCrossChainNetworks}
-				tokenNetworkId={$destinationToken?.network?.id}
-			>
-				{#snippet tokenInput()}
-					<TokenInput
-						amount={swapAmountsLoading ? 0 : receiveAmount}
-						disabled={true}
-						displayUnit={inputUnit}
-						exchangeRate={$destinationTokenExchangeRate}
-						loading={swapAmountsLoading}
-						onClick={() => onShowTokensList('destination')}
-						showTokenNetwork
-						token={$destinationToken}
-					>
-						{#snippet title()}{$i18n.tokens.text.destination_token_title}{/snippet}
+			<div class="mb-2">
+				<TokenInput
+					amount={swapAmountsLoading ? 0 : receiveAmount}
+					disabled={true}
+					displayUnit={inputUnit}
+					exchangeRate={$destinationTokenExchangeRate}
+					loading={swapAmountsLoading}
+					onClick={() => onShowTokensList('destination')}
+					showTokenNetwork
+					token={$destinationToken}
+				>
+					{#snippet title()}{$i18n.tokens.text.destination_token_title}{/snippet}
 
-						{#snippet amountInfo()}
-							{#if nonNullish($destinationToken)}
-								{#if showSwapNotOfferedError}
-									<div class="text-error-primary" transition:slide={SLIDE_DURATION}
-										>{#if quoteError?.type === 'amount-too-low'}
-											{#if nonNullish(quoteErrorMinAmount) && nonNullish($sourceToken)}
-												{replacePlaceholders($i18n.swap.text.swap_amount_too_low_minimum, {
-													$amount: quoteErrorMinAmount,
-													$symbol: $sourceToken.symbol
-												})}
-											{:else}
-												{$i18n.swap.text.swap_amount_too_low}
-											{/if}
+					{#snippet amountInfo()}
+						{#if nonNullish($destinationToken)}
+							{#if showSwapNotOfferedError}
+								<div class="text-error-primary" transition:slide={SLIDE_DURATION}
+									>{#if quoteError?.type === 'amount-too-low'}
+										{#if nonNullish(quoteErrorMinAmount) && nonNullish($sourceToken)}
+											{replacePlaceholders($i18n.swap.text.swap_amount_too_low_minimum, {
+												$amount: quoteErrorMinAmount,
+												$symbol: $sourceToken.symbol
+											})}
 										{:else}
-											{$i18n.swap.text.swap_is_not_offered}
-										{/if}</div
-									>
-								{:else}
-									<div class="flex gap-3 text-tertiary">
-										<TokenInputAmountExchange
-											amount={swapAmountsLoading ? 0 : receiveAmount}
-											exchangeRate={$destinationTokenExchangeRate}
-											token={$destinationToken}
-											bind:displayUnit={exchangeValueUnit}
-										/>
-
-										{#if swapAmountsLoading}
-											<span class="mt-0.5 w-10">
-												<SkeletonText />
-											</span>
-										{:else}
-											<SwapValueDifference {receiveAmount} {swapAmount} />
+											{$i18n.swap.text.swap_amount_too_low}
 										{/if}
-									</div>
-								{/if}
-							{/if}
-						{/snippet}
+									{:else}
+										{$i18n.swap.text.swap_is_not_offered}
+									{/if}</div
+								>
+							{:else}
+								<div class="flex gap-3 text-tertiary">
+									<TokenInputAmountExchange
+										amount={swapAmountsLoading ? 0 : receiveAmount}
+										exchangeRate={$destinationTokenExchangeRate}
+										token={$destinationToken}
+										bind:displayUnit={exchangeValueUnit}
+									/>
 
-						{#snippet balance()}
-							{#if nonNullish($destinationToken)}
-								<TokenInputBalance balance={$destinationTokenBalance} token={$destinationToken} />
+									{#if swapAmountsLoading}
+										<span class="mt-0.5 w-10">
+											<SkeletonText />
+										</span>
+									{:else}
+										<SwapValueDifference {receiveAmount} {swapAmount} />
+									{/if}
+								</div>
 							{/if}
-						{/snippet}
-					</TokenInput>
-				{/snippet}
-			</TokenInputNetworkWrapper>
+						{/if}
+					{/snippet}
+
+					{#snippet balance()}
+						{#if nonNullish($destinationToken)}
+							<TokenInputBalance balance={$destinationTokenBalance} token={$destinationToken} />
+						{/if}
+					{/snippet}
+				</TokenInput>
+			</div>
 		</div>
 
 		<!-- mt-4 like the notices below; when empty, its margin collapses into the next row's. -->

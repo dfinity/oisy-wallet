@@ -15,6 +15,9 @@
 
 	interface Props {
 		anchor?: HTMLElement;
+		// Where focus goes when the panel closes, when the anchor itself cannot take it (a wrapper
+		// around the button that opened it). The anchor by default.
+		returnFocus?: HTMLElement;
 		visible?: boolean;
 		direction?: PopoverDirection;
 		placement?: PopoverPlacement;
@@ -28,6 +31,7 @@
 
 	let {
 		anchor,
+		returnFocus,
 		visible = $bindable(false),
 		direction = 'ltr',
 		placement = 'below',
@@ -179,7 +183,7 @@
 			role="dialog"
 			tabindex="-1"
 			use:observePanelWidth
-			use:overlayFocus={{ onClose: close, returnFocus: anchor }}
+			use:overlayFocus={{ onClose: close, returnFocus: returnFocus ?? anchor }}
 			in:scale|global={{ delay: 25, duration: 150, easing: cubicOut, start: 0.96 }}
 			out:scale|global={{ duration: 100, easing: cubicIn, start: 0.96 }}
 		>

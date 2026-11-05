@@ -1044,7 +1044,6 @@
 			"open_qr_modal": "开始扫描二维码以获取交易详情",
 			"scan_qr": "扫描二维码",
 			"select_token": "选择要发送的代币",
-			"select_network_filter": "选择网络筛选器",
 			"send_again": "再次发送",
 			"recently_used_tab": "最近使用",
 			"contacts_tab": "联系人",
@@ -1516,6 +1515,18 @@
 			"hide_asset_types": "隐藏资产类型",
 			"asset_type": "$oisy_name 中的资产类型",
 			"asset_type_all": "所有资产类型",
+			"asset_type_all_short": "",
+			"clear_network_filter": "",
+			"clear_asset_type_filter": "",
+			"filter_asset_types": "",
+			"clear_filters": "",
+			"no_match_network": "",
+			"no_match_asset_type": "",
+			"no_match_asset_type_network": "",
+			"no_match_query": "",
+			"no_match_query_network": "",
+			"no_match_query_asset_type": "",
+			"no_match_query_asset_type_network": "",
 			"no_tokens_for_asset_type": "您的钱包中没有 $asset_type",
 			"no_tokens_for_asset_type_zero_tokens": "所选网络中没有 $asset_type",
 			"no_tokens_for_asset_type_description": "从 <strong>$count 个支持的代币</strong>中选择，自定义您的投资组合视图。"
@@ -1625,7 +1636,8 @@
 		"placeholder": {
 			"enter_contract_address": "输入 ERC20 合约地址",
 			"enter_token_address": "输入 SPL 代币地址",
-			"search_token": "搜索代币"
+			"search_token": "搜索代币",
+			"search_token_on_network": ""
 		},
 		"warning": {
 			"trust_token": "请确保你信任正在添加的代币。如果该代币由恶意方控制，他们可能会试图欺骗你，例如让你误以为收到了大量代币，从而诱导你向他们转账或执行其他不希望发生的操作。有关诈骗和安全风险的更多信息，例如请参见 <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">这里</a>。"

@@ -1,18 +1,24 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, setContext } from 'svelte';
 	import { get } from 'svelte/store';
+	import { page } from '$app/state';
 	import SwapBtcContexts from '$btc/components/swap/SwapBtcContexts.svelte';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
-	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
-	import { crossChainSwapNetworksMainnets } from '$lib/derived/cross-chain-networks.derived';
+	import {
+		crossChainSwapNetworksMainnets,
+		crossChainSwapNetworksMainnetsIds
+	} from '$lib/derived/cross-chain-networks.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { allSwapUniverseTokens } from '$lib/derived/swap.derived';
 	import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
+	import type { TokenCategoryTagValue } from '$lib/enums/token-tag';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+	import { COLORED_NETWORK_LOGOS_CONTEXT_KEY } from '$lib/stores/colored-network-logos.store';
 	import {
 		MODAL_NETWORKS_LIST_CONTEXT_KEY,
 		type ModalNetworksListContext
@@ -32,6 +38,7 @@
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import type { WizardModal, WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { tryParseToken } from '$lib/utils/parse.utils';
 	import { networksWithSupport } from '$lib/utils/swap-tokens-filter.utils';
@@ -48,7 +55,6 @@
 		slippageValue: OptionAmount;
 		swapProgressStep: ProgressStepsSwap;
 		swapFailedProgressSteps?: ProgressStepsSwap[];
-		allNetworksEnabled: boolean;
 	}
 
 	let {
@@ -59,7 +65,6 @@
 		slippageValue = $bindable(),
 		swapProgressStep = $bindable(),
 		swapFailedProgressSteps = $bindable(),
-		allNetworksEnabled = $bindable(),
 		currentStep,
 		selectTokenType = $bindable(),
 		onClose
@@ -73,72 +78,39 @@
 		receiveSupportedData
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const { setFilterNetwork, setFilterQuery } = getContext<ModalTokensListContext>(
-		MODAL_TOKENS_LIST_CONTEXT_KEY
+	const { setFilterNetwork, setFilterQuery, setFilterCategoryTag, saveFilters, restoreFilters } =
+		getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
+
+	const { setAllowedNetworkIds, resetAllowedNetworkIds } = getContext<ModalNetworksListContext>(
+		MODAL_NETWORKS_LIST_CONTEXT_KEY
 	);
 
-	const { filteredNetworks, setAllowedNetworkIds, resetAllowedNetworkIds } =
-		getContext<ModalNetworksListContext>(MODAL_NETWORKS_LIST_CONTEXT_KEY);
-
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+
+	// A swap is told apart by its two networks, so every network logo in it is in its brand colour.
+	setContext(COLORED_NETWORK_LOGOS_CONTEXT_KEY, true);
 
 	let isBitcoinSource = $derived(isNetworkIdBitcoin($sourceToken?.network?.id));
 
 	type TokenSide = 'source' | 'destination';
 
-	const setNetworksMode = ({
-		enabled,
-		allowedIds
-	}: {
-		enabled: boolean;
-		allowedIds?: NetworkId[];
-	}) => {
-		allNetworksEnabled = enabled;
+	// The asset type either side starts on: the assets page's, as Send does.
+	const getInitialCategory = (): TokenCategoryTagValue | undefined =>
+		isRouteTokens(page) ? $tokenCategoryFilter : undefined;
 
-		if (enabled) {
-			resetAllowedNetworkIds();
+	// The header's network, where either side starts when it can use it.
+	const getInitialNetwork = (allowedIds?: NetworkId[]): Network | undefined => {
+		const network = $selectedNetwork;
 
+		if (isNullish(network) || !$crossChainSwapNetworksMainnetsIds.includes(network.id)) {
 			return;
 		}
 
-		if (nonNullish(allowedIds)) {
-			setAllowedNetworkIds(allowedIds);
+		if (nonNullish(allowedIds) && allowedIds.length > 0 && !allowedIds.includes(network.id)) {
+			return;
 		}
-	};
 
-	// Returns the preferred network for a given side.
-	// Priority order:
-	// 1) Primary token network
-	// 2) Selected page network
-	// 3) Secondary token network
-	// If allowedIds is provided, returns the first candidate whose id is allowed.
-	// If none match (or none exist), returns undefined.
-	const getPreferredNetworkForSide = ({
-		side,
-		allowedIds
-	}: {
-		side: TokenSide;
-		allowedIds?: readonly NetworkId[];
-	}): Network | undefined => {
-		const primary = side === 'source' ? $sourceToken?.network : $destinationToken?.network;
-
-		const secondary = side === 'source' ? $destinationToken?.network : $sourceToken?.network;
-
-		return [primary, $selectedNetwork, secondary].reduce<Network | undefined>((acc, current) => {
-			if (nonNullish(acc)) {
-				return acc;
-			}
-
-			if (isNullish(current)) {
-				return;
-			}
-
-			if (nonNullish(allowedIds) && !allowedIds.includes(current.id)) {
-				return;
-			}
-
-			return current;
-		}, undefined);
+		return network;
 	};
 
 	const computeDestinationAllowedIds = (source: Token): NetworkId[] | undefined => {
@@ -164,33 +136,28 @@
 		return baseAllowedIds.filter((id) => reachableSet.has(id));
 	};
 
-	const applyListConstraints = (side: TokenSide) => {
-		// SOURCE list: user can browse all networks (but keep current network preselected if any)
-		if (side === 'source') {
-			setNetworksMode({ enabled: true });
-
-			setFilterNetwork(getPreferredNetworkForSide({ side }));
-
-			return;
-		}
-
-		// DESTINATION list: constrain based on source/destination
-		if (isNullish($sourceToken)) {
-			// no source yet: no constraints
-			setNetworksMode({ enabled: false });
-
-			setFilterNetwork(getPreferredNetworkForSide({ side }));
+	// The networks the list may offer: every swap network to pay with; to receive, the ones the pay
+	// token reaches. Returns what it allowed, `undefined` for no constraint.
+	const applyNetworkConstraints = (side: TokenSide): NetworkId[] | undefined => {
+		if (side === 'source' || isNullish($sourceToken)) {
+			resetAllowedNetworkIds();
 
 			return;
 		}
 
-		// source selected: intersect the static cross-swap pre-filter with networks
-		// that have at least one reachable destination via the providers supporting the source.
+		// Intersect the static cross-swap pre-filter with networks that have at least one reachable
+		// destination via the providers supporting the source.
 		const allowedIds = computeDestinationAllowedIds($sourceToken);
 
-		setNetworksMode({ enabled: false, allowedIds });
+		if (isNullish(allowedIds)) {
+			resetAllowedNetworkIds();
 
-		setFilterNetwork(getPreferredNetworkForSide({ side, allowedIds }));
+			return;
+		}
+
+		setAllowedNetworkIds(allowedIds);
+
+		return allowedIds;
 	};
 
 	const enterTokenList = (side: TokenSide) => {
@@ -202,15 +169,31 @@
 
 		goToStep(WizardStepsSwap.TOKENS_LIST);
 
-		applyListConstraints(side);
+		const allowedIds = applyNetworkConstraints(side);
+
+		// Each side reopens on the network and asset type it was left on, so a pick never moves them
+		// and the two sides never share them. They live in the tokens list context, which outlives this
+		// component (Get Token rebuilds it on every step). A kept network the side can no longer use
+		// gives way to all networks in `SwapTokensList`, which knows what the list holds.
+		if (restoreFilters(side)) {
+			return;
+		}
+
+		setFilterNetwork(getInitialNetwork(allowedIds));
+
+		setFilterCategoryTag(getInitialCategory());
 	};
 
 	const showTokensList = (tokenSource: TokenSide) => enterTokenList(tokenSource);
 
 	const closeTokenList = () => {
+		if (nonNullish(selectTokenType)) {
+			saveFilters(selectTokenType);
+		}
+
 		goToStep(WizardStepsSwap.SWAP);
 
-		setNetworksMode({ enabled: true });
+		resetAllowedNetworkIds();
 
 		setFilterQuery('');
 
@@ -218,6 +201,15 @@
 	};
 
 	const selectToken = (token: Token) => {
+		const selectedToken = selectTokenType === 'source' ? $sourceToken : $destinationToken;
+
+		// The pick that is already made: nothing to change.
+		if (token.id === selectedToken?.id) {
+			closeTokenList();
+
+			return;
+		}
+
 		if (selectTokenType === 'source') {
 			// The amount survives a source-token change, but the new token may not be able to
 			// represent its precision — a Max on BTC (8 decimals) followed by a switch to USDC (6)
@@ -232,12 +224,8 @@
 			}
 
 			setSourceToken(token);
-
-			setFilterNetwork(token.network);
 		} else if (selectTokenType === 'destination') {
 			setDestinationToken(token);
-
-			setFilterNetwork(token.network);
 		}
 
 		closeTokenList();
@@ -276,16 +264,8 @@
 		{#if currentStep?.name === WizardStepsSwap.TOKENS_LIST}
 			<SwapTokensList
 				onCloseTokensList={closeTokenList}
-				onSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
 				onSelectToken={selectToken}
 				side={selectTokenType}
-			/>
-		{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
-			<ModalNetworksFilter
-				{allNetworksEnabled}
-				filteredNetworks={$filteredNetworks}
-				onNetworkFilter={() => goToStep(WizardStepsSwap.TOKENS_LIST)}
-				showStakeBalance={false}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
 			<SwapProviderListModal

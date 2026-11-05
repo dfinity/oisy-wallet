@@ -2,17 +2,23 @@ import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-t
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
+import { swapWizardSteps } from '$lib/config/swap.config';
 import {
 	MODAL_FILTER_NETWORKS,
 	MODAL_TOKENS_LIST,
 	SWAP_MODAL_SELECT_PROVIDER_STEP,
-	SWAP_SWITCH_TOKENS_BUTTON
+	SWAP_SWITCH_TOKENS_BUTTON,
+	TOKEN_INPUT_SELECT_TOKEN_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as addressDerived from '$lib/derived/address.derived';
+import * as swapDerived from '$lib/derived/swap.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import {
 	MODAL_NETWORKS_LIST_CONTEXT_KEY,
@@ -20,7 +26,8 @@ import {
 } from '$lib/stores/modal-networks-list.store';
 import {
 	MODAL_TOKENS_LIST_CONTEXT_KEY,
-	initModalTokensListContext
+	initModalTokensListContext,
+	type ModalTokensListContext
 } from '$lib/stores/modal-tokens-list.store';
 import {
 	SWAP_AMOUNTS_CONTEXT_KEY,
@@ -29,11 +36,12 @@ import {
 } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { WizardModal, WizardStep } from '$lib/types/wizard';
+import SwapModalWizardStepsTestHost from '$tests/lib/components/swap/SwapModalWizardStepsTestHost.svelte';
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get, readable } from 'svelte/store';
 
@@ -125,7 +133,6 @@ describe('SwapModalWizardSteps', () => {
 				onClose: vi.fn(),
 				currentStep,
 				swapProgressStep: ProgressStepsSwap.INITIALIZATION,
-				allNetworksEnabled: true,
 				modal: mockModal as unknown as WizardModal<WizardStepsSwap>,
 				steps: [
 					{
@@ -143,10 +150,6 @@ describe('SwapModalWizardSteps', () => {
 					{
 						name: WizardStepsSwap.TOKENS_LIST,
 						title: en.send.text.select_token
-					},
-					{
-						name: WizardStepsSwap.FILTER_NETWORKS,
-						title: en.send.text.select_network_filter
 					},
 					{
 						name: WizardStepsSwap.SELECT_PROVIDER,
@@ -174,9 +177,9 @@ describe('SwapModalWizardSteps', () => {
 			expect(getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument();
 		});
 
-		it('should display FILTER_NETWORKS step', () => {
+		it('should show the network filter in the TOKENS_LIST step', () => {
 			const { getByTestId } = renderSwapModalWizardSteps({
-				name: WizardStepsSwap.FILTER_NETWORKS,
+				name: WizardStepsSwap.TOKENS_LIST,
 				title: 'title'
 			});
 
@@ -283,6 +286,118 @@ describe('SwapModalWizardSteps', () => {
 
 			expect(btcStoresPopulated()).toBeTruthy();
 			expect(loadBtcPendingSentTransactions).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('token list filters', () => {
+		let tokensListContext: ModalTokensListContext;
+
+		const steps = swapWizardSteps({ i18n: en });
+		const modal = mockModal as unknown as WizardModal<WizardStepsSwap>;
+
+		const swapStep = { name: WizardStepsSwap.SWAP, title: 'title' };
+		const tokensListStep = { name: WizardStepsSwap.TOKENS_LIST, title: 'title' };
+
+		const renderHost = () =>
+			render(SwapModalWizardStepsTestHost, {
+				props: { currentStep: swapStep, steps, modal },
+				context: mockContext
+			});
+
+		type Rendered = ReturnType<typeof renderHost>;
+
+		const openList = async ({ rendered, side }: { rendered: Rendered; side: 0 | 1 }) => {
+			await fireEvent.click(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[side]);
+			await rendered.rerender({ currentStep: tokensListStep, steps, modal });
+		};
+
+		const cancelList = async (rendered: Rendered) => {
+			await fireEvent.click(rendered.getByText(en.core.text.cancel));
+			await rendered.rerender({ currentStep: swapStep, steps, modal });
+		};
+
+		beforeEach(() => {
+			setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
+
+			tokensListContext = initModalTokensListContext({ tokens: [] });
+			mockContext.set(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
+
+			mockContext.set(
+				MODAL_NETWORKS_LIST_CONTEXT_KEY,
+				initModalNetworksListContext({ networks: [ICP_NETWORK] })
+			);
+
+			// A universe with something on ICP, so the list keeps an ICP filter rather than falling
+			// back to all networks for want of tokens there.
+			vi.spyOn(swapDerived, 'allSwapUniverseTokens', 'get').mockReturnValue(
+				readable([{ ...ICP_TOKEN, enabled: true }])
+			);
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it("opens the pay list on all networks, not on the pay token's network", async () => {
+			const rendered = renderHost();
+
+			await openList({ rendered, side: 0 });
+
+			expect(get(tokensListContext.filterNetwork)).toBeUndefined();
+		});
+
+		it('keeps the network the list was left on after a token is picked', async () => {
+			const rendered = renderHost();
+
+			await openList({ rendered, side: 0 });
+
+			// All networks, then a pick on Internet Computer: the old picker switched to its network.
+			await fireEvent.click(rendered.getByRole('button', { name: new RegExp(ICP_TOKEN.symbol) }));
+			await rendered.rerender({ currentStep: swapStep, steps, modal });
+
+			await openList({ rendered, side: 0 });
+
+			expect(get(tokensListContext.filterNetwork)).toBeUndefined();
+		});
+
+		it("shows the network's coloured mark on the filter chip inside a swap", async () => {
+			const rendered = renderHost();
+
+			await openList({ rendered, side: 0 });
+
+			tokensListContext.setFilterNetwork(ICP_NETWORK);
+
+			await waitFor(() =>
+				expect(rendered.getByTestId(MODAL_FILTER_NETWORKS).querySelector('img')).toHaveAttribute(
+					'src',
+					ICP_NETWORK.iconColored
+				)
+			);
+		});
+
+		it('reopens each side on the filters it was left on', async () => {
+			const rendered = renderHost();
+
+			await openList({ rendered, side: 0 });
+
+			tokensListContext.setFilterNetwork(ICP_NETWORK);
+			tokensListContext.setFilterCategoryTag(TokenCategoryTagValue.CRYPTO);
+
+			await cancelList(rendered);
+
+			// The other side starts on its own filters, not the ones the pay list was left on.
+			await openList({ rendered, side: 1 });
+
+			expect(get(tokensListContext.filterNetwork)).toBeUndefined();
+			expect(get(tokensListContext.filterCategoryTag)).toBeUndefined();
+
+			await cancelList(rendered);
+
+			await openList({ rendered, side: 0 });
+
+			expect(get(tokensListContext.filterNetwork)).toEqual(ICP_NETWORK);
+			expect(get(tokensListContext.filterCategoryTag)).toBe(TokenCategoryTagValue.CRYPTO);
 		});
 	});
 });

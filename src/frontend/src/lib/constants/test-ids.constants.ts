@@ -349,7 +349,10 @@ export const HOW_TO_CONVERT_ETHEREUM_INFO = 'how-to-convert-ethereum-info';
 export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code';
 
 export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
+export const MODAL_TOKEN_LIST_NO_MATCH = 'modal-token-list-no-match';
+export const MODAL_TOKEN_LIST_CLEAR_FILTERS = 'modal-token-list-clear-filters';
 export const MODAL_TOKENS_LIST = 'modal-tokens-list';
+export const TOKEN_CATEGORY_FILTER = 'token-category-filter';
 
 export const ADDRESS_BOOK_MODAL = 'address-book-modal';
 export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';

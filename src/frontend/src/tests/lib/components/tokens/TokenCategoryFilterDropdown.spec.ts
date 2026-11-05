@@ -23,20 +23,18 @@ describe('TokenCategoryFilterDropdown', () => {
 		expect(button).toBeInTheDocument();
 	});
 
-	it('should render with the correct aria label', () => {
-		const { container } = render(TokenCategoryFilterDropdown);
+	it('should name the trigger after its value', () => {
+		const { getByRole } = render(TokenCategoryFilterDropdown);
 
-		const button = container.querySelector(
-			`[aria-label="${get(i18n).tokens.text.asset_type_all}"]`
-		);
-
-		expect(button).toBeInTheDocument();
+		expect(
+			getByRole('button', { name: get(i18n).tokens.text.asset_type_all_short })
+		).toBeInTheDocument();
 	});
 
-	it('should display "All asset types" label when no category is selected', () => {
+	it('should display "All types" label when no category is selected', () => {
 		const { getByText } = render(TokenCategoryFilterDropdown);
 
-		expect(getByText(get(i18n).tokens.text.asset_type_all)).toBeInTheDocument();
+		expect(getByText(get(i18n).tokens.text.asset_type_all_short)).toBeInTheDocument();
 	});
 
 	it('should display selected category label when a category is set', () => {
@@ -122,7 +120,9 @@ describe('TokenCategoryFilterDropdown', () => {
 
 	it('announces the selected category after selecting and reopening', async () => {
 		const { getByRole } = render(TokenCategoryFilterDropdown);
-		await fireEvent.click(getByRole('button', { name: get(i18n).tokens.text.asset_type_all }));
+		await fireEvent.click(
+			getByRole('button', { name: get(i18n).tokens.text.asset_type_all_short })
+		);
 		let dialog = within(getByRole('dialog'));
 
 		expect(
@@ -220,7 +220,7 @@ describe('TokenCategoryFilterDropdown', () => {
 				}
 			});
 
-			expect(getByText(get(i18n).tokens.text.asset_type_all)).toBeInTheDocument();
+			expect(getByText(get(i18n).tokens.text.asset_type_all_short)).toBeInTheDocument();
 		});
 
 		it('should call onSelect instead of updating the store', async () => {
@@ -284,7 +284,7 @@ describe('TokenCategoryFilterDropdown', () => {
 	it('shows the open state on its trigger while the options are open', async () => {
 		const { getByRole, getByText } = render(TokenCategoryFilterDropdown);
 
-		const trigger = getByRole('button', { name: get(i18n).tokens.text.asset_type_all });
+		const trigger = getByRole('button', { name: get(i18n).tokens.text.asset_type_all_short });
 
 		expect(trigger).not.toHaveClass('opened');
 

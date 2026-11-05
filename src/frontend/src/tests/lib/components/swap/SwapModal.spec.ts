@@ -2,7 +2,8 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import SwapModal from '$lib/components/swap/SwapModal.svelte';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
-import { TokenCategoryTagValue } from '$lib/enums/token-tag';
+import * as swapDerived from '$lib/derived/swap.derived';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import {
 	MODAL_NETWORKS_LIST_CONTEXT_KEY,
 	initModalNetworksListContext
@@ -15,11 +16,14 @@ import {
 import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext, type SwapContext } from '$lib/stores/swap.store';
+import type { Token } from '$lib/types/token';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
-import { get } from 'svelte/store';
+import { get, readable } from 'svelte/store';
 
 describe('SwapModal', () => {
 	const renderModal = ({
@@ -96,17 +100,30 @@ describe('SwapModal', () => {
 	});
 
 	describe('asset type filter', () => {
+		// A list that holds a stablecoin, so the asset type is one the list can show.
+		const stablecoin: TokenToggleable<Token> = {
+			...ETHEREUM_TOKEN,
+			id: parseTokenId('mock-stablecoin'),
+			symbol: 'MUSD',
+			tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STABLECOIN }],
+			enabled: true
+		};
+
 		beforeEach(() => {
 			tokenCategoryFilterStore.set({
 				key: 'token-category-filter',
 				value: { value: TokenCategoryTagValue.STABLECOIN }
 			});
+
+			vi.spyOn(swapDerived, 'allSwapUniverseTokens', 'get').mockReturnValue(readable([stablecoin]));
 		});
 
 		afterEach(() => {
 			tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
 
 			mockPage.reset();
+
+			vi.restoreAllMocks();
 		});
 
 		// The tokens list context outlives the modal, so it may still hold the asset type of a
@@ -114,22 +131,30 @@ describe('SwapModal', () => {
 		const initTokensListContext = () =>
 			initModalTokensListContext({ tokens: [], filterCategoryTag: TokenCategoryTagValue.CRYPTO });
 
-		it('should open the token lists on the asset type selected on the assets page', () => {
+		const openPayList = async ({ getAllByText, getByTestId }: ReturnType<typeof renderModal>) => {
+			await fireEvent.click(getAllByText(en.tokens.text.select_token)[0]);
+
+			await waitFor(() =>
+				expect(getByTestId('modal-title')).toHaveTextContent(en.swap.text.select_source_token)
+			);
+		};
+
+		it('should open the token lists on the asset type selected on the assets page', async () => {
 			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Tokens}` });
 
 			const tokensListContext = initTokensListContext();
 
-			renderModal({ tokensListContext });
+			await openPayList(renderModal({ tokensListContext }));
 
 			expect(get(tokensListContext.filterCategoryTag)).toBe(TokenCategoryTagValue.STABLECOIN);
 		});
 
-		it('should open the token lists on all asset types outside the assets page', () => {
+		it('should open the token lists on all asset types outside the assets page', async () => {
 			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Activity}` });
 
 			const tokensListContext = initTokensListContext();
 
-			renderModal({ tokensListContext });
+			await openPayList(renderModal({ tokensListContext }));
 
 			expect(get(tokensListContext.filterCategoryTag)).toBeUndefined();
 		});

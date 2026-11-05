@@ -25,8 +25,7 @@ describe('SendNftsList.spec', () => {
 		nftStore.addAll(mockNfts);
 		const { getByText, getByRole } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
+			filterNetwork: undefined
 		});
 
 		for (const nft of mockNfts) {
@@ -42,8 +41,7 @@ describe('SendNftsList.spec', () => {
 		nftStore.addAll(mockNfts);
 		const { getByText, queryByText, getByPlaceholderText } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
+			filterNetwork: undefined
 		});
 
 		const input = getByPlaceholderText(get(i18n).send.placeholder.search_nfts) as HTMLInputElement;
@@ -59,8 +57,7 @@ describe('SendNftsList.spec', () => {
 		nftStore.addAll(mockNfts);
 		const { getByPlaceholderText, getByText, queryByText } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
+			filterNetwork: undefined
 		});
 
 		const input = getByPlaceholderText(get(i18n).send.placeholder.search_nfts) as HTMLInputElement;
@@ -75,10 +72,8 @@ describe('SendNftsList.spec', () => {
 
 	it('shows filtered network name when set', async () => {
 		nftStore.addAll(mockNfts);
-		const onSelectNetwork = vi.fn();
 		const { getByRole } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			onSelectNetwork,
 			filterNetwork: POLYGON_AMOY_NETWORK
 		});
 
@@ -89,7 +84,23 @@ describe('SendNftsList.spec', () => {
 
 		await fireEvent.click(btn);
 
-		expect(onSelectNetwork).toHaveBeenCalledOnce();
+		expect(btn).toHaveAttribute('aria-expanded', 'true');
+	});
+
+	it('clears the network filter from the chip', async () => {
+		nftStore.addAll(mockNfts);
+		const { getByRole, findByRole } = render(SendNftsListTestHost, {
+			onSelect: vi.fn(),
+			filterNetwork: POLYGON_AMOY_NETWORK
+		});
+
+		await fireEvent.click(
+			getByRole('button', { name: get(i18n).tokens.text.clear_network_filter })
+		);
+
+		await expect(
+			findByRole('button', { name: get(i18n).networks.chain_fusion })
+		).resolves.toBeInTheDocument();
 	});
 
 	it('renders NFTs that have no name', () => {
@@ -105,8 +116,7 @@ describe('SendNftsList.spec', () => {
 		nftStore.addAll(namelessNfts);
 		const { getByText } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
+			filterNetwork: undefined
 		});
 
 		expect(getByText('NamelessOnes')).toBeInTheDocument();
@@ -156,8 +166,7 @@ describe('SendNftsList.spec', () => {
 		nftStore.addAll(unsorted);
 		const { container } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
+			filterNetwork: undefined
 		});
 
 		expect(orderOf({ container, labels: ['#11 – B', '#12 – C', '#10 – A'] })).toEqual([
@@ -191,8 +200,7 @@ describe('SendNftsList.spec', () => {
 
 		const { container } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
+			filterNetwork: undefined
 		});
 
 		expect(orderOf({ container, labels: ['#10 – A', '#11 – B'] })).toEqual(['#11 – B', '#10 – A']);
@@ -203,8 +211,7 @@ describe('SendNftsList.spec', () => {
 		const onSelect = vi.fn();
 		const { getByText } = render(SendNftsListTestHost, {
 			onSelect,
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
+			filterNetwork: undefined
 		});
 
 		const nftCard = getByText('#1 – Eins');
@@ -239,8 +246,7 @@ describe('SendNftsList.spec', () => {
 		nftStore.addAll(sectionMockNfts);
 		const { getByPlaceholderText, getByText, queryByText } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
+			filterNetwork: undefined
 		});
 
 		const input = getByPlaceholderText(get(i18n).send.placeholder.search_nfts) as HTMLInputElement;
