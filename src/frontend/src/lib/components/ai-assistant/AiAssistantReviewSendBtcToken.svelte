@@ -173,6 +173,7 @@
 				await validateBtcSend({
 					utxosFee,
 					source,
+					destination,
 					amount,
 					network,
 					identity: $authIdentity
