@@ -12,6 +12,8 @@ import {
 } from '$icp/canisters/cycles-ledger.errors';
 import {
 	CMC_NOTIFY_ATTEMPTS,
+	CMC_ROW_DELETE_ATTEMPTS,
+	CMC_ROW_DELETE_RETRY_DELAY_MILLIS,
 	CMC_TOP_UP_MEMO,
 	CMC_TRANSFER_START_WINDOW_NS
 } from '$icp/constants/cmc.constants';
@@ -549,12 +551,29 @@ describe('cycles-top-up.services', () => {
 			);
 		});
 
-		it('abandons a top-up whose tab was suspended before sending', async () => {
+		// The backend may have kept the row all the same; it then reports its own ending, as
+		// never sent, once the poller closes it: reporting it here too would count it twice.
+		it('leaves the ending of a top-up that could not start to a row it could not delete', async () => {
+			vi.mocked(createActiveUserTransaction).mockRejectedValue(new Error('Network error'));
+			vi.mocked(deleteActiveUserTransaction).mockRejectedValue(new Error('Network error'));
+
+			await expect(errorKind()).resolves.toBe('not_trackable');
+
+			expect(icrc1Transfer).not.toHaveBeenCalled();
+			expect(trackCyclesTopUp).not.toHaveBeenCalledWith(
+				expect.objectContaining({ errorCode: 'not_trackable' })
+			);
+		});
+
+		const suspendBeforeSending = () =>
 			vi.mocked(createActiveUserTransaction).mockImplementation(() => {
 				vi.setSystemTime(NOW_MS + Number(CMC_TRANSFER_START_WINDOW_NS / 1_000_000n) + 1);
 
 				return Promise.resolve();
 			});
+
+		it('abandons a top-up whose tab was suspended before sending', async () => {
+			suspendBeforeSending();
 
 			await expect(errorKind()).resolves.toBe('timed_out');
 
@@ -563,6 +582,17 @@ describe('cycles-top-up.services', () => {
 				identity: mockIdentity,
 				id: 'top-up-1'
 			});
+		});
+
+		it('leaves the ending of an abandoned top-up to a row it could not delete', async () => {
+			suspendBeforeSending();
+			vi.mocked(deleteActiveUserTransaction).mockRejectedValue(new Error('Network error'));
+
+			await expect(errorKind()).resolves.toBe('timed_out');
+
+			expect(trackCyclesTopUp).not.toHaveBeenCalledWith(
+				expect.objectContaining({ errorCode: 'timed_out' })
+			);
 		});
 
 		// The ledger answered and refused: nothing moved, and the modal shows it.
@@ -576,6 +606,38 @@ describe('cycles-top-up.services', () => {
 				id: 'top-up-1'
 			});
 			expect(notifyTopUp).not.toHaveBeenCalled();
+		});
+
+		it('retries deleting the row of a refused transfer, and reports the ending once it is gone', async () => {
+			vi.mocked(icrc1Transfer).mockRejectedValue(new InsufficientFundsError(ZERO));
+			vi.mocked(deleteActiveUserTransaction)
+				.mockRejectedValueOnce(new Error('Network error'))
+				.mockResolvedValueOnce();
+
+			await expect(errorKind()).resolves.toBe('transfer_failed');
+
+			expect(deleteActiveUserTransaction).toHaveBeenCalledTimes(2);
+			expect(waitForMilliseconds).toHaveBeenCalledExactlyOnceWith(
+				CMC_ROW_DELETE_RETRY_DELAY_MILLIS
+			);
+			expect(trackCyclesTopUp).toHaveBeenLastCalledWith(
+				expect.objectContaining({ errorCode: 'transfer_failed' })
+			);
+		});
+
+		// The row survives and reports the ending itself, as never sent, once the poller closes it.
+		it('leaves the ending of a refused transfer to a row it could not delete', async () => {
+			vi.mocked(icrc1Transfer).mockRejectedValue(new InsufficientFundsError(ZERO));
+			vi.mocked(deleteActiveUserTransaction).mockRejectedValue(new Error('Network error'));
+
+			await expect(errorKind()).resolves.toBe('transfer_failed');
+
+			expect(deleteActiveUserTransaction).toHaveBeenCalledTimes(CMC_ROW_DELETE_ATTEMPTS);
+			expect(waitForMilliseconds).toHaveBeenCalledTimes(CMC_ROW_DELETE_ATTEMPTS - 1);
+			expect(waitForMilliseconds).toHaveBeenCalledWith(CMC_ROW_DELETE_RETRY_DELAY_MILLIS);
+			expect(trackCyclesTopUp).not.toHaveBeenCalledWith(
+				expect.objectContaining({ errorCode: 'transfer_failed' })
+			);
 		});
 
 		// No answer: the transfer may have landed, and the poller finds out from the ICP history.
