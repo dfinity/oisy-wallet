@@ -465,8 +465,9 @@ describe('btc-send.services', () => {
 			const feePricedForALargerOutput = { ...validUtxosFee, feeSatoshis: 650n };
 
 			it.each([
-				// The P2WPKH address above, on testnet.
-				'tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx',
+				// The P2WPKH recipient above on testnet: the same witness program, which its output
+				// script alone would pay on mainnet.
+				'tb1qar0srrr7xfkvy5l643lydnw9re59gtzzy00gkn',
 				'not-an-address'
 			])(
 				'should refuse the recipient %s before anything else is checked or loaded',

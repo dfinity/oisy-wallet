@@ -113,9 +113,10 @@ export const validateBtcSend = async ({
 }: {
 	utxosFee: UtxosFee;
 	source: BtcAddress;
-	// The recipient. Omitted only where it is not known before the broadcast, as for a NEAR Intents
-	// swap, whose deposit address comes with the execution quote: the fee is then checked against
-	// the largest output a send can pay, which is how it was priced.
+	// The recipient, passed exactly when the fee was priced with it: its output is then sized from
+	// its script, and an address for another network is refused. Without it, as for Convert, every
+	// swap and Liquidium, even where the address is known, the fee is checked against the largest
+	// output a send can pay, which is how it was priced.
 	destination?: BtcAddress;
 	amount: Amount;
 	network: BitcoinNetwork;
