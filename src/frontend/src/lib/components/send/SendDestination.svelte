@@ -42,7 +42,7 @@
 
 		{#snippet content()}
 			{#if isNullish(selectedContact)}
-				{addressToDisplay}
+				<span class="w-full break-all whitespace-normal">{destination}</span>
 			{:else}
 				<SendContactName address={destination} contact={selectedContact} />
 
