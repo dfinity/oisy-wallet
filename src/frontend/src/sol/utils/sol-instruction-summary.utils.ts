@@ -2833,7 +2833,7 @@ export const findSolProgramsPayingOthers = ({
 		named: { program: SolAddress; position: number }[];
 		waiting: WaitingPayout[];
 	}>(
-		(acc, { parentIndex, topLevel, instruction }, position) => {
+		(acc, { parentIndex, topLevel, instruction, madeBy: calledBy }, position) => {
 			const opened = opensAt(instruction);
 
 			if (nonNullish(opened)) {
@@ -2944,6 +2944,12 @@ export const findSolProgramsPayingOthers = ({
 				return { named: [...acc.named, { program: madeBy, position }], waiting };
 			}
 
+			// What a token program pays into an account inside its own call, such as a reallocation's
+			// top-up, is rent the account has to keep: only a close passes it on, as for an opening.
+			const rentFunding =
+				nonNullish(calledBy) &&
+				[TOKEN_PROGRAM_ADDRESS, TOKEN_2022_PROGRAM_ADDRESS].includes(calledBy);
+
 			return {
 				...acc,
 				waiting: [
@@ -2951,7 +2957,7 @@ export const findSolProgramsPayingOthers = ({
 					{
 						program: madeBy,
 						account: destination,
-						asset: received,
+						asset: rentFunding ? 'rent' : received,
 						parentIndex,
 						position,
 						left: credited

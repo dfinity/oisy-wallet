@@ -5916,6 +5916,48 @@ describe('sol-instruction-summary.utils', () => {
 			).toEqual([WHIRLPOOL]);
 		});
 
+		// A reallocation raises the account's rent by its top-up, which a withdrawal of the excess
+		// cannot move.
+		it('should name a listed pool whose reallocation top-up a withdrawal of the excess cannot pass on', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						{
+							program: 'spl-token-2022',
+							programId: TOKEN_2022_PROGRAM_ADDRESS,
+							parsed: {
+								type: 'reallocate',
+								info: {
+									account: elsewhere,
+									payer: mockSolAddress2,
+									systemProgram: '11111111111111111111111111111111',
+									owner: mockSolAddress3,
+									extensionTypes: ['memoTransfer']
+								}
+							},
+							stackHeight: 2
+						},
+						send({
+							source: mockSolAddress2,
+							destination: elsewhere,
+							lamports: 6_960,
+							stackHeight: 3
+						}),
+						{
+							program: 'spl-token-2022',
+							programId: TOKEN_2022_PROGRAM_ADDRESS,
+							parsed: {
+								type: 'withdrawExcessLamports',
+								info: { source: elsewhere, destination: mockSolAddress, authority: mockSolAddress3 }
+							},
+							stackHeight: 2
+						}
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
 		it.each([
 			{ label: 'paid by the user', payer: mockSolAddress, wallet: mockSolAddress3 },
 			{ label: 'opened for the user', payer: mockSolAddress2, wallet: mockSolAddress }
