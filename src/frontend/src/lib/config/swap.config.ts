@@ -20,10 +20,6 @@ export const swapWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps<Wizard
 		title: i18n.send.text.select_token
 	},
 	{
-		name: WizardStepsSwap.FILTER_NETWORKS,
-		title: i18n.send.text.select_network_filter
-	},
-	{
 		name: WizardStepsSwap.SELECT_PROVIDER,
 		title: i18n.swap.text.smart_swap
 	}

@@ -1044,7 +1044,6 @@
 			"open_qr_modal": "Iniciar escaneo de código QR para detalles de la transacción",
 			"scan_qr": "Escanear código QR",
 			"select_token": "Seleccionar token para enviar",
-			"select_network_filter": "Seleccionar filtro de red",
 			"send_again": "Enviar de nuevo",
 			"recently_used_tab": "Usados Recientemente",
 			"contacts_tab": "Contactos",
@@ -1139,6 +1138,8 @@
 			"ethereum_out_of_gas_gas_sent": "Gas enviado: $gasSent",
 			"ethereum_transaction_hash": "Hash de la transacción: $hash",
 			"ethereum_unsigned_transaction": "Transacción sin firmar: $transaction",
+			"ethereum_transaction_not_sent": "La transacción no se envió: no pudimos conectar con la red para prepararla. Es seguro volver a intentarlo.",
+			"ethereum_transaction_unconfirmed": "No pudimos confirmar si la transacción llegó a la red. Todavía puede completarse, así que espera uno o dos minutos y revisa tu actividad antes de enviarla de nuevo.",
 			"solana_transaction_expired": "Su transacción no fue procesada por la red Solana y expiró, muy probablemente porque la tarifa de prioridad proporcionada no era suficiente. La hemos actualizado al importe recomendado más reciente, por lo que por favor inténtelo de nuevo.",
 			"solana_confirmation_failed": "No recibimos confirmación para la transacción que acaba de crear. Por favor, espere unos segundos y luego compruebe la lista de transacciones de su token para ver si su transacción se creó correctamente.",
 			"solana_insufficient_funds": "El saldo de su token no es suficiente para completar esta transacción. Su saldo puede haber cambiado desde la última vez que se mostró.",
@@ -1507,7 +1508,8 @@
 			"chain_key": "Clave de Cadena",
 			"show_more_networks": "Mostrar $number redes más",
 			"hide_more_networks": "Ocultar más redes",
-			"on_network": "en red ",
+			"on_network": " en $network",
+			"on_network_label": "En $network",
 			"delete_token": "Eliminar token",
 			"edit_token": "Editar token",
 			"sort_by_value": "Valor",
@@ -1516,6 +1518,18 @@
 			"hide_asset_types": "Ocultar tipos de activos",
 			"asset_type": "Tipo de activo en $oisy_name",
 			"asset_type_all": "Todos los tipos de activos",
+			"asset_type_all_short": "",
+			"clear_network_filter": "",
+			"clear_asset_type_filter": "",
+			"filter_asset_types": "",
+			"clear_filters": "",
+			"no_match_network": "",
+			"no_match_asset_type": "",
+			"no_match_asset_type_network": "",
+			"no_match_query": "",
+			"no_match_query_network": "",
+			"no_match_query_asset_type": "",
+			"no_match_query_asset_type_network": "",
 			"no_tokens_for_asset_type": "No hay $asset_type en tu cartera",
 			"no_tokens_for_asset_type_zero_tokens": "No hay $asset_type en la red seleccionada",
 			"no_tokens_for_asset_type_description": "Elige entre <strong>$count tokens compatibles</strong> para personalizar tu vista de cartera."
@@ -1625,7 +1639,8 @@
 		"placeholder": {
 			"enter_contract_address": "Introduce una dirección de contrato ERC20",
 			"enter_token_address": "Introduce una dirección de token SPL",
-			"search_token": "Buscar el token"
+			"search_token": "Buscar el token",
+			"search_token_on_network": ""
 		},
 		"warning": {
 			"trust_token": "Asegúrate de confiar en el token que estás añadiendo. Si el token que estás añadiendo está controlado por una parte maliciosa, podrían intentar estafarte, por ejemplo, haciéndote creer que has recibido una cantidad significativa de tokens para engañarte y que les envíes tokens a cambio o realices otras acciones no deseadas. Aprende más sobre estafas y riesgos de seguridad, por ejemplo, <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">aquí</a>."

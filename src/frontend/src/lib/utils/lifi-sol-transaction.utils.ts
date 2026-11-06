@@ -761,9 +761,17 @@ export const assertLifiSolSimulation = ({
 
 	// A closed account is reported holding no lamports as a System account, which reads as a change of
 	// its program and owner. Nothing is left to control there; the close rules below hold it instead.
+	// An account the run opens is compared with an empty one, so the user set as its close authority
+	// is a change as well: the rule for created accounts below accepts that one.
 	if (
 		controlChanges.some(
-			({ account }) => !closedAccounts.some(({ account: closed }) => closed === account)
+			({ account, field, to }) =>
+				!closedAccounts.some(({ account: closed }) => closed === account) &&
+				!(
+					field === 'closeAuthority' &&
+					to === userAddress &&
+					createdAccounts.some(({ account: created }) => created === account)
+				)
 		)
 	) {
 		throw rejected("the transaction changes who controls an account of the user's");
