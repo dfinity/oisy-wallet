@@ -519,6 +519,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"minglechat": {
+				"name": "Mingle Chat",
+				"one_liner": "Messaggistica crittografata con token integrati.",
+				"description": "Mingle Chat è un servizio di messaggistica con crittografia end-to-end che funziona interamente su Internet Computer. Chatta a tu per tu o in gruppo, condividi messaggi vocali, immagini e file e invia token direttamente da una conversazione. Ogni trasferimento viene firmato in OISY."
 			}
 		}
 	},
