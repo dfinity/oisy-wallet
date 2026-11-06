@@ -3,6 +3,7 @@
 	import { getContext } from 'svelte';
 	import UtxosFeeContexts from '$btc/components/fee/UtxosFeeContexts.svelte';
 	import UtxosFeeLoader from '$btc/components/fee/UtxosFeeLoader.svelte';
+	import { getBtcSourceAddress } from '$btc/services/btc-address.services';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 	import { selectedEvmNetwork } from '$evm/derived/network.derived';
@@ -41,6 +42,10 @@
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let destination = $derived(contactAddress?.address ?? address ?? '');
+
+	// Must match the source `AiAssistantReviewSendBtcToken` signs from: the fee loader selects
+	// the UTXOs that send then spends.
+	let btcSource = $derived(getBtcSourceAddress($sendTokenNetworkId));
 
 	let fallbackEvmToken = $derived(
 		$enabledEvmTokens.find(({ network: { id: networkId } }) => $sendToken.network.id === networkId)
@@ -94,7 +99,7 @@
 			/>
 		{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
 			<UtxosFeeContexts>
-				<UtxosFeeLoader {amount} networkId={$sendTokenNetworkId} source={destination}>
+				<UtxosFeeLoader {amount} networkId={$sendTokenNetworkId} source={btcSource}>
 					<AiAssistantReviewSendBtcToken
 						{amount}
 						{destination}

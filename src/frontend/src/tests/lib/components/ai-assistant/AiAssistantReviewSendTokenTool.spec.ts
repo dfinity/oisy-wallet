@@ -17,11 +17,14 @@ import * as bitcoinApi from '$icp/api/bitcoin.api';
 import AiAssistantReviewSendTokenTool from '$lib/components/ai-assistant/AiAssistantReviewSendTokenTool.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { AI_ASSISTANT_SEND_TOKENS_BUTTON } from '$lib/constants/test-ids.constants';
+import { btcAddressMainnetStore } from '$lib/stores/address.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { Token } from '$lib/types/token';
 import * as solanaApi from '$sol/api/solana.api';
+import { mockBtcAddress, mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
 	initMinedTransactionsListener: () => ({
@@ -44,25 +47,30 @@ describe('AiAssistantReviewSendTokenTool', () => {
 		id: 'mock-id'
 	};
 
+	let getUtxosQuerySpy: MockInstance<typeof bitcoinApi.getUtxosQuery>;
+	let loadBtcPendingSentTransactionsSpy: MockInstance<
+		typeof btcPendingSentTransactionsServices.loadBtcPendingSentTransactions
+	>;
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 
 		allUtxosStore.reset();
 		feeRatePercentilesStore.reset();
 		btcPendingSentTransactionsStore.reset();
+		btcAddressMainnetStore.reset();
 
 		vi.spyOn(solanaApi, 'estimatePriorityFee').mockResolvedValue(ZERO);
-		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
+		getUtxosQuerySpy = vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
 			utxos: [],
 			tip_block_hash: new Uint8Array(),
 			tip_height: 100,
 			next_page: []
 		});
 		vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
-		vi.spyOn(
-			btcPendingSentTransactionsServices,
-			'loadBtcPendingSentTransactions'
-		).mockResolvedValue({ success: true });
+		loadBtcPendingSentTransactionsSpy = vi
+			.spyOn(btcPendingSentTransactionsServices, 'loadBtcPendingSentTransactions')
+			.mockResolvedValue({ success: true });
 	});
 
 	it('renders correctly for a BTC token', () => {
@@ -77,6 +85,28 @@ describe('AiAssistantReviewSendTokenTool', () => {
 		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toBeInTheDocument();
 		expect(container).toHaveTextContent(BTC_MAINNET_TOKEN.symbol);
 		expect(container).toHaveTextContent(BTC_MAINNET_TOKEN.network.name);
+	});
+
+	it('loads the BTC fee from the user own address, not from the recipient', async () => {
+		btcAddressMainnetStore.set({ certified: true, data: mockBtcAddress });
+
+		render(AiAssistantReviewSendTokenTool, {
+			props: {
+				...props,
+				address: mockBtcP2SHAddress,
+				token: BTC_MAINNET_TOKEN
+			},
+			context: mockContext(BTC_MAINNET_TOKEN)
+		});
+
+		await waitFor(() => {
+			expect(getUtxosQuerySpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ address: mockBtcAddress })
+			);
+			expect(loadBtcPendingSentTransactionsSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ address: mockBtcAddress })
+			);
+		});
 	});
 
 	it('renders correctly for an ETH token', () => {
