@@ -436,6 +436,29 @@ describe('velora-swap.utils', () => {
 				).not.toThrow();
 			});
 
+			it.each([
+				{ feePercent: 0.125, fee: 12n },
+				{ feePercent: 0.29, fee: 29n }
+			])('accepts $fee basis points on a quote of $feePercent percent', ({ feePercent, fee }) => {
+				expect(() =>
+					assertVeloraDeltaOrder({
+						...params,
+						order: { ...sameChainOrder, partnerAndFee: `${(1n << 96n) | fee}` },
+						feePercent
+					})
+				).not.toThrow();
+			});
+
+			it('refuses 13 basis points on a quote of 0.125 percent', () => {
+				expect(() =>
+					assertVeloraDeltaOrder({
+						...params,
+						order: { ...sameChainOrder, partnerAndFee: `${(1n << 96n) | 13n}` },
+						feePercent: 0.125
+					})
+				).toThrow('partner fee');
+			});
+
 			it('accepts a cross-chain order carrying the route bridge', () => {
 				expect(() =>
 					assertVeloraDeltaOrder({
@@ -653,6 +676,28 @@ describe('velora-swap.utils', () => {
 						withData(encode({ data: { ...swapData, toAmount: minimum - 1n } }))
 					)
 				).toThrow('Slippage exceeded.');
+			});
+		});
+
+		describe('a partner fee between two basis points', () => {
+			const charging = ({ fee, feePercent }: { fee: bigint; feePercent: number }) => ({
+				...withData(
+					augustus.encodeFunctionData('swapExactAmountIn', [OTHER, swapData, fee, '0x', '0x'])
+				),
+				feePercent
+			});
+
+			it.each([
+				{ feePercent: 0.125, fee: 12n },
+				{ feePercent: 0.29, fee: 29n }
+			])('accepts $fee basis points on a quote of $feePercent percent', ({ feePercent, fee }) => {
+				expect(() => assertVeloraMarketTransaction(charging({ fee, feePercent }))).not.toThrow();
+			});
+
+			it('refuses 13 basis points on a quote of 0.125 percent', () => {
+				expect(() =>
+					assertVeloraMarketTransaction(charging({ fee: 13n, feePercent: 0.125 }))
+				).toThrow('partner fee');
 			});
 		});
 

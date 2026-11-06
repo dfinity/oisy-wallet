@@ -60,8 +60,12 @@ const isWalletBeneficiary = ({
 const isSameHex = ({ actual, expected }: { actual: string; expected: string }): boolean =>
 	actual.toLowerCase() === expected.toLowerCase();
 
-// Velora quotes the partner fee in percent; the signed order and calldata carry basis points.
-const quotedFeeBasisPoints = (feePercent: number): bigint => BigInt(Math.round(feePercent * 100));
+// Velora quotes the partner fee in percent; the signed order and calldata carry whole basis points.
+// The quote is read to a ten-thousandth of a basis point, which drops float noise (0.29 % is 29
+// basis points, not 28.999…), and rounded down, so that a quote between two basis points allows the
+// lower one.
+const quotedFeeBasisPoints = (feePercent: number): bigint =>
+	BigInt(Math.floor(Math.round(feePercent * 1_000_000) / 10_000));
 
 const slippageExceeded = ({ signed, minimum }: { signed: bigint; minimum: bigint }): Error =>
 	new Error(`Slippage exceeded. Velora returned ${signed}, expected at least ${minimum}.`);
