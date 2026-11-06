@@ -181,7 +181,9 @@ const resolveChainFusionBtcQuote = ({
 			displayDecimals: sourceToken.decimals
 		}),
 		source: userBtcAddress,
-		destination: depositAddress,
+		// No recipient, although the deposit address is known: the swap is sent with the fee of the
+		// loader `SwapBtcContexts` mounts for every provider, which cannot know it. So this prices
+		// the largest output too, and the offer quotes the inputs and the fee the swap then sends.
 		allUtxos,
 		feeRateMiliSatoshisPerVByte
 	});

@@ -173,11 +173,11 @@
 			// may have reserved one of the UTXOs this selection covers. Going back lets the
 			// user refresh the fee preview and retry, exactly as the Convert wizard does.
 			try {
+				// No recipient: a swap's fee comes from the loader `SwapBtcContexts` mounts for every
+				// provider, priced for the largest output, so it is checked against that.
 				await validateBtcSend({
 					utxosFee,
 					source: sourceAddress,
-					// A NEAR Intents deposit address only comes with the execution quote.
-					destination: isNearIntentsProvider ? undefined : depositAddress,
 					amount: swapAmount,
 					network,
 					identity: $authIdentity
