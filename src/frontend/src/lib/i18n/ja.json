@@ -1267,7 +1267,7 @@
 			"unconfirmed": "OISYは$tokenの送金を確認できませんでした。送金が完了していれば、チャージはバックグラウンドで完了します。進行状況はアクティブなトランザクションで確認できます。"
 		},
 		"alt": {
-			"enable_token": "$tokenを有効にして支払いに使う"
+			"enable_token": "支払いに使うために$tokenを有効にする"
 		}
 	},
 	"active_user_transactions": {
