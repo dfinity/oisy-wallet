@@ -131,11 +131,11 @@ pub enum ActiveUserTransactionData {
     /// modes, discriminated by the `mode` field; the auction id, order hash,
     /// transaction hash and nonce ride in `external_refs`.
     Velora(VeloraData),
-    /// Chain Fusion ck conversion (BTC↔ckBTC, ETH↔ckETH, ERC20↔ckERC20). A
-    /// single variant covers all six directions, discriminated by the
-    /// `direction` field; the minter block indices, the BTC txid and deposit
-    /// address, and the Ethereum deposit tx hash and block number ride in
-    /// `external_refs`.
+    /// Chain Fusion ck conversion (BTC↔ckBTC, ETH↔ckETH, ERC20↔ckERC20,
+    /// SOL↔ckSOL). A single variant covers all eight directions, discriminated
+    /// by the `direction` field; the minter block indices, the BTC txid and
+    /// deposit address, and the Ethereum deposit tx hash and block number ride
+    /// in `external_refs`.
     ChainFusion(ChainFusionData),
     /// OISY Trade order-book swap. Both legs are Internet Computer ledgers, and
     /// the row is opened *before* the deposit — it is the record that tells a
@@ -241,9 +241,9 @@ pub struct VeloraData {
 }
 
 /// Which ck conversion an active transaction tracks. Determines which minter the
-/// frontend asks about settlement, and how: the three withdrawal directions have
-/// an exact status keyed by the minter's burn block index, while the mint
-/// directions are observed from the deposit side.
+/// frontend asks about settlement, and how: the four withdrawal directions have
+/// an exact status keyed by the minter's burn block index, while each mint
+/// direction is followed the way its minter reports deposits.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum ChainFusionDirection {
     BtcToCkBtc,
@@ -252,25 +252,29 @@ pub enum ChainFusionDirection {
     CkEthToEth,
     Erc20ToCkErc20,
     CkErc20ToErc20,
+    SolToCkSol,
+    CkSolToSol,
 }
 
 impl ChainFusionDirection {
     /// Every direction, in declaration order. Tests iterate this instead of
     /// hand-spelling the list, so a new direction is added in one place.
-    pub const ALL: [Self; 6] = [
+    pub const ALL: [Self; 8] = [
         Self::BtcToCkBtc,
         Self::CkBtcToBtc,
         Self::EthToCkEth,
         Self::CkEthToEth,
         Self::Erc20ToCkErc20,
         Self::CkErc20ToErc20,
+        Self::SolToCkSol,
+        Self::CkSolToSol,
     ];
 }
 
 /// Chain Fusion ck conversion payload. Every settlement pointer is learned
 /// mid-flow — a minter block index, a BTC txid, an Ethereum deposit tx hash — so
 /// those live in `external_refs`; only the canonical immutable fields are
-/// captured here, which is why all six directions share one variant.
+/// captured here, which is why all eight directions share one variant.
 ///
 /// `direction` is explicit rather than inferred from the token pair: the poller
 /// selects its settlement oracle from it, and re-deriving "is this a mint or a
@@ -603,6 +607,7 @@ mod tests {
     const CKBTC_LEDGER: &str = "mxzaz-hqaaa-aaaar-qaada-cai";
     const CKETH_LEDGER: &str = "ss2fx-dyaaa-aaaar-qacoq-cai";
     const CKUSDC_LEDGER: &str = "xevnm-gaaaa-aaaar-qafnq-cai";
+    const CKSOL_LEDGER: &str = "ls5lp-lqaaa-aaaar-qb5oa-cai";
     const USDC_ETHEREUM: &str = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
 
     fn icrc(ledger: &str) -> TokenId {
@@ -621,12 +626,14 @@ mod tests {
             ChainFusionDirection::CkEthToEth => (icrc(CKETH_LEDGER), TokenId::EvmNative(1)),
             ChainFusionDirection::Erc20ToCkErc20 => (erc20(USDC_ETHEREUM, 1), icrc(CKUSDC_LEDGER)),
             ChainFusionDirection::CkErc20ToErc20 => (icrc(CKUSDC_LEDGER), erc20(USDC_ETHEREUM, 1)),
+            ChainFusionDirection::SolToCkSol => (TokenId::SolNativeMainnet, icrc(CKSOL_LEDGER)),
+            ChainFusionDirection::CkSolToSol => (icrc(CKSOL_LEDGER), TokenId::SolNativeMainnet),
         }
     }
 
     #[test]
     fn chain_fusion_variant_roundtrips() {
-        // All six directions share one variant, so each must survive the
+        // All eight directions share one variant, so each must survive the
         // round-trip untouched — the direction is what the FE poller routes on.
         for direction in ChainFusionDirection::ALL {
             let (source_token, dest_token) = chain_fusion_leg(&direction);
