@@ -629,7 +629,9 @@ notice, because it only sees scripts. Today CFS refuses such an address
 - A Base58 version must be the network's `pubKeyHash` or `scriptHash`. These are `0x00` / `0x05` on
   mainnet, and `0x6f` / `0xc4` on testnet and regtest, which share them.
 - The fee sizing passes the same network to `parseBtcAddress`, whose `@icp-sdk/canisters/ckbtc`
-  parser takes one; the repo's wrapper currently omits it and so defaults to mainnet.
+  parser takes one; the repo's wrapper currently omits it and so defaults to mainnet. Superseded in
+  PR 6: the sizing uses `btcAddressToOutputScript` and takes no network, and `validateBtcSend`
+  refuses a wrong-network address.
 - A mismatch is a validation error before signing, so nothing is signed or paid for.
 
 **Who uses it.** Everything that prices a send uses the same sizing:
@@ -647,13 +649,58 @@ amount it offers is always fundable.
 
 This also fixes the CFS path, so it lands on its own (PR 6) before the backend path is switched on.
 
+Decided in PR 6:
+
+- **Sizing.** The size is `btcOutputVSize({ address })` in `btc-psbt.utils.ts`: 9 bytes plus the
+  script from `btcAddressToOutputScript`, so the fee and the builder always see the same script.
+  - Sizing does not take a network. The size is the same on every network, so an address for any
+    of them gets its size.
+  - The wrong-network refusal is in `validateBtcSend`, on both paths, before anything is loaded
+    or signed, and again in `buildBtcSendPsbt`.
+  - `parseBtcAddress` is not used, so it keeps its mainnet default.
+- **Unknown recipient.** When there is no recipient, or the address does not decode, the fee is
+  priced for `BTC_LARGEST_OUTPUT_VSIZE` (43). That is the case when:
+  - the fee loader runs before the recipient is entered;
+  - Liquidium sends, whose target only arrives in the broadcast callback;
+  - any swap sends: a NEAR Intents deposit address only comes with the execution quote, and both
+    providers send with the fee of the loader `SwapBtcContexts` mounts for them all. So the Chain
+    Fusion quote, its validation and Swap's Max price the largest output too, although its
+    deposit address is known. Otherwise the offer quoted one selection and the swap sent another,
+    as Copilot found on PR 6: with UTXOs of 10 150 and 9 000 sats, a 10 000-sat swap at 1 sat/vB
+    was quoted one input and 141 sats, then sent with two inputs and 221;
+  - Convert sends, for the same deposit as the Chain Fusion swap. Its fee would otherwise wait for
+    the ckBTC deposit address, and an amount refused for the fee before the address arrived kept
+    that fee with Next disabled. The loader skips while `amountError` is set, and Convert only
+    re-checks the amount on input; Copilot found this on PR 6;
+  - OpenCryptoPay quotes its fee before it has the payment address.
+
+  These overpay by at most 12 vB at the rate, 8.5% of a one-input fee. A P2TR target, which today
+  is quoted below 1 sat/vB at the floor, is covered.
+
+- **Callers.**
+  - `prepareBtcSend` and `UtxosFeeLoader` take an optional `destination`. The loader prices the
+    fee again when the recipient changes, and the fee store records `destinationForFee`.
+  - Send and the AI assistant pass the recipient. Convert and swaps pass none, anywhere.
+  - Send's `amountError` only covers invalid and below-minimum amounts, never the fee, so a
+    recipient entered after the amount still prices the fee again.
+- **Validation.** `validateBtcSend` takes an optional `destination`.
+  - With one, it refuses an invalid or wrong-network address as `InvalidDestination`, then checks
+    the fee against that output's size.
+  - Without one, it checks the fee against the largest output, as that fee was priced.
+  - The ±10% tolerance is unchanged. A fee priced as P2WPKH for a P2TR recipient (−7.8% at one
+    input) would still pass. That can only happen if the fee were stale, since the loader prices
+    again when the recipient changes. On the backend path, the fee floor refuses it.
+- **Max.** `initBtcMaxSendAmount({ source, destination })` prices the same way. Send passes the
+  recipient; Convert and Swap pass none, like the rest of their flows.
+
 ### Frontend: `sendBtc`
 
 `sendBtc` keeps its parameters (`SendBtcParams`) and gains one optional field, `beforeBroadcast`
 (below), so the callers that do not track the send do not change. Inside, behind a flag:
 `export const BTC_SEND_VIA_BACKEND_ENABLED = LOCAL || STAGING;`, the idiom of `ONRAMPER_ENABLED`
-in `src/frontend/src/env/rest/onramper.env.ts`. It lives next to the BTC network flags in
-`src/frontend/src/env/networks/networks.btc.env.ts`, and PR 10 makes it `true`:
+in `src/frontend/src/env/rest/onramper.env.ts`. It lives next to the other BTC feature flag,
+`BTC_EXTENSION_FEATURE_FLAG_ENABLED`, in `src/frontend/src/env/btc.env.ts` (PR 7), and PR 10 makes
+it `true`:
 
 1. Build the PSBT from `utxosFee.utxos`, `[{ destination, amount }]`, the source address as change,
    `utxosFee.feeSatoshis`.
@@ -794,6 +841,41 @@ would block all of them in production until a new release. With the flag off, th
 (`wallet-connect.services.ts`, `chain-fusion-swap-active-tx.services.ts`,
 `ckbtc-update-balance.scheduler.ts`), which read other addresses or other confirmation floors.
 
+Decided in PR 7:
+
+- **One call fills both stores.** With the flag on, `loadBtcPendingSentTransactions` calls
+  `btc_get_spendable_utxos` and fills `allUtxosStore` as well as the pending store, and
+  `AllUtxosLoader` makes no call: every flow mounts it inside `BtcPendingSentTransactionsLoader`.
+  - Each `btc_get_pending_transactions` call of these flows becomes one `btc_get_spendable_utxos`
+    call, so the number of update calls is unchanged, and the `getUtxosQuery` query goes.
+  - The re-checks that reload the pending transactions (`validateBtcSend`, Convert's mount)
+    refresh the UTXOs with them, from one snapshot.
+- **A rate limit is an error.** `btcGetPendingTransactions` answers a rate limit with no pending
+  transactions; `btcGetSpendableUtxos` throws instead, since no UTXOs would read as an empty wallet.
+- **On a failure**, the pending transactions become `null`, as today. If no UTXOs were loaded yet,
+  `allUtxosStore` gets an empty list, so the fee reports `PendingTransactionsNotAvailable` instead
+  of waiting forever, Max stays unset and OpenCryptoPay's readiness wait ends. UTXOs already loaded
+  are kept, since the pending error alone stops a send.
+- **Locked funds stay locked, not missing.** The backend's list already leaves reserved UTXOs out,
+  so a wallet whose every UTXO a pending send reserves gets none. `prepareBtcSend` stopped at its
+  empty-list check with `InsufficientBalance`, so the user was told the balance was too low. It
+  now returns `UtxoLocked` when the list is empty and pending transactions reserve some, the
+  message the frontend's own filter gives with the flag off (sbpublic).
+- **A failed fee is priced again.** `UtxosFeeLoader` kept any fee while the amount was unchanged, so
+  a fee priced from a failed load outlived a later load that succeeded, and Next stayed disabled.
+  Convert hits this when its own load at mount and the loader's race and the first one fails
+  (Copilot). The loader now keeps only a fee that priced, and prices a failed one again whenever it
+  runs, on both paths. No flow sends with a failed fee (`validateBtcSend` refuses it first), so this
+  cannot change a send under way. Pricing again on every UTXO change instead would also do so after
+  `validateBtcSend`'s reload, in the middle of a send.
+- **Regtest.** The backend's floor is 1 confirmation there (`get_all_utxos` lowers it; 4
+  elsewhere, as `getUtxosQuery` used). The frontend's filter compares block heights, not
+  confirmations, so it keeps those outputs, and local sends can spend newer ones.
+- **Tests run with the flag off.** Vitest builds as `local`, where the flag is on, so
+  `vitest.setup.ts` mocks it with a getter that starts each test off, matching production. Specs for
+  the backend path turn it on through `btcSendViaBackend` in `$tests/utils/btc-env.test-utils`.
+  PR 11 removes both.
+
 ### Frontend: OpenCryptoPay
 
 `payBtc` builds and signs with the same utils (no broadcast: OpenCryptoPay broadcasts), passes the
@@ -899,12 +981,16 @@ Every PR is safe on its own.
    - Tests cover each script type at 1 sat/vB against the vsize of the built transaction.
    - Tests check that the Max offered for each script type, and with no recipient yet, is accepted
      by selection.
-   - Tests check that the sizing refuses an address for the wrong network too, before anything is
-     signed.
+   - Tests check that `validateBtcSend` refuses an address for the wrong network, before anything
+     is loaded or signed. The sizing itself takes no network (see
+     [Decided in PR 6](#frontend-fee-estimation-by-output-script)).
 7. `feat(frontend): load BTC UTXOs from the backend behind a flag` (needs 4).
-   - Adds `BTC_SEND_VIA_BACKEND_ENABLED`, on for local and staging.
-   - With the flag on, `AllUtxosLoader` and the pending loader move to `btc_get_spendable_utxos`.
-     With it off, they load as today.
+   - Adds `BTC_SEND_VIA_BACKEND_ENABLED` in `src/frontend/src/env/btc.env.ts`, on for local and
+     staging.
+   - With the flag on, the pending loader fills the UTXOs and the pending transactions from one
+     `btc_get_spendable_utxos` call, and `AllUtxosLoader` makes none. With it off, they load as
+     today. See [Decided in PR 7](#frontend-utxo-loading).
+   - `PRODUCT.md` gains "Spendable outputs from the backend (local and staging)" under `## Bitcoin`.
 8. `feat(frontend): send BTC through the backend behind the flag` (needs 3, 5, 6, 7).
    - `beforeBroadcast` and `isDefinitiveBtcBroadcastRefusal` are added. The Chain Fusion and NEAR
      Intents rows are created in `beforeBroadcast` when the flag is on, and in `onBroadcast` when it
