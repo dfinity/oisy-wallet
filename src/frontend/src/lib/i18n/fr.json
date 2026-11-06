@@ -1509,6 +1509,7 @@
 			"show_more_networks": "Afficher $number réseaux de plus",
 			"hide_more_networks": "Masquer plus de réseaux",
 			"on_network": " sur $network",
+			"on_network_label": "Sur $network",
 			"delete_token": "Supprimer le token",
 			"edit_token": "Modifier le token",
 			"sort_by_value": "Valeur",

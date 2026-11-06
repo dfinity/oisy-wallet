@@ -1509,6 +1509,7 @@
 			"show_more_networks": "$number और नेटवर्क दिखाएं",
 			"hide_more_networks": "अधिक नेटवर्क छुपाएं",
 			"on_network": " $network पर",
+			"on_network_label": "$network पर",
 			"delete_token": "टोकन मिटाएँ",
 			"edit_token": "टोकन संपादित करें",
 			"sort_by_value": "मूल्य",

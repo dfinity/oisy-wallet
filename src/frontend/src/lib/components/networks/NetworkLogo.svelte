@@ -28,7 +28,7 @@
 		alwaysInverted = false
 	}: Props = $props();
 
-	// The brand-coloured mark on a screen that tells networks apart by colour (the swap modal);
+	// The brand-coloured mark on a screen that tells networks apart by colour (the swap and send modals);
 	// networks without one keep the monochrome mark.
 	const colored = getContext<boolean | undefined>(COLORED_NETWORK_LOGOS_CONTEXT_KEY) ?? false;
 

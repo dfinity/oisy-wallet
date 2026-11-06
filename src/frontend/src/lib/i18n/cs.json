@@ -1509,6 +1509,7 @@
 			"show_more_networks": "Zobrazit $number dalších sítí",
 			"hide_more_networks": "Skrýt další sítě",
 			"on_network": " na $network",
+			"on_network_label": "Na $network",
 			"delete_token": "Smazat token",
 			"edit_token": "Upravit token",
 			"sort_by_value": "Hodnota",

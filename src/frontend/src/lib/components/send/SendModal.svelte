@@ -49,6 +49,7 @@
 	import { WizardStepsCyclesTopUp, WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { loadTokenAndRun } from '$lib/services/token.services';
+	import { COLORED_NETWORK_LOGOS_CONTEXT_KEY } from '$lib/stores/colored-network-logos.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
@@ -200,6 +201,10 @@
 	);
 
 	setContext<boolean>(SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY, nonNullish(initialModalData));
+
+	// The same token can be held on several networks, and the amount field names the one it is
+	// sent on, so network logos here are in their brand colour, as in the swap modal.
+	setContext(COLORED_NETWORK_LOGOS_CONTEXT_KEY, true);
 
 	const reset = () => {
 		destination = '';

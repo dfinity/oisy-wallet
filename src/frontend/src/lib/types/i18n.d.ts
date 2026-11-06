@@ -1226,6 +1226,7 @@ interface I18nTokens {
 		show_more_networks: string;
 		hide_more_networks: string;
 		on_network: string;
+		on_network_label: string;
 		delete_token: string;
 		edit_token: string;
 		sort_by_value: string;

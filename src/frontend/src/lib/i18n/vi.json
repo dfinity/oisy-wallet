@@ -1509,6 +1509,7 @@
 			"show_more_networks": "Hiển thị thêm $number mạng",
 			"hide_more_networks": "Ẩn thêm mạng",
 			"on_network": " trên mạng $network",
+			"on_network_label": "Trên mạng $network",
 			"delete_token": "Xóa token",
 			"edit_token": "Chỉnh sửa token",
 			"sort_by_value": "Giá trị",

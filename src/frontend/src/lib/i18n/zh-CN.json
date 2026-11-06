@@ -1509,6 +1509,7 @@
 			"show_more_networks": "显示另外 $number 个网络",
 			"hide_more_networks": "隐藏更多网络",
 			"on_network": " 于 $network",
+			"on_network_label": "在 $network 上",
 			"delete_token": "删除代币",
 			"edit_token": "编辑代币",
 			"sort_by_value": "价值",
