@@ -4928,6 +4928,39 @@ describe('sol-instruction-summary.utils', () => {
 			stackHeight
 		});
 
+		const create = ({
+			source,
+			newAccount,
+			lamports,
+			space = 0,
+			owner = '11111111111111111111111111111111',
+			seeded = false,
+			stackHeight
+		}: {
+			source: string;
+			newAccount: string;
+			lamports: number;
+			space?: number;
+			owner?: string;
+			seeded?: boolean;
+			stackHeight: number;
+		}) => ({
+			program: 'system',
+			programId: '11111111111111111111111111111111',
+			parsed: {
+				type: seeded ? 'createAccountWithSeed' : 'createAccount',
+				info: {
+					source,
+					newAccount,
+					...(seeded && { base: source, seed: 'position' }),
+					lamports,
+					space,
+					owner
+				}
+			},
+			stackHeight
+		});
+
 		const unwrap = ({
 			source,
 			destination,
@@ -5662,6 +5695,97 @@ describe('sol-instruction-summary.utils', () => {
 							destination: elsewhere,
 							amount: '1000',
 							authority: mockSolAddress,
+							stackHeight: 2
+						})
+					]
+				})
+			).toEqual([]);
+		});
+
+		// Creating an account pays it what the creation funds it with, as a transfer would, its rent
+		// included: whoever holds the new account can close it and keep all of it.
+		it.each([
+			{
+				label: 'a System account it funds with 1 SOL',
+				inner: [
+					create({
+						source: mockSolAddress2,
+						newAccount: mockSolAddress4,
+						lamports: 1_000_000_000,
+						stackHeight: 2
+					})
+				]
+			},
+			{
+				label: 'the same at a seed-derived address',
+				inner: [
+					create({
+						source: mockSolAddress2,
+						newAccount: mockSolAddress4,
+						lamports: 1_000_000_000,
+						seeded: true,
+						stackHeight: 2
+					})
+				]
+			},
+			{
+				label: 'a token account it opens on its rent alone',
+				inner: [
+					create({
+						source: mockSolAddress2,
+						newAccount: mockSolAddress4,
+						lamports: RENT,
+						space: 165,
+						owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						stackHeight: 2
+					}),
+					token({
+						type: 'initializeAccount3',
+						info: { account: mockSolAddress4, mint: mockSplAddress, owner: mockSolAddress3 },
+						stackHeight: 2
+					})
+				]
+			},
+			{
+				label: 'a token account it opens with 1 SOL above its rent',
+				inner: [
+					create({
+						source: mockSolAddress2,
+						newAccount: mockSolAddress4,
+						lamports: RENT + 1_000_000_000,
+						space: 165,
+						owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						stackHeight: 2
+					}),
+					token({
+						type: 'initializeAccount3',
+						info: { account: mockSolAddress4, mint: mockSplAddress, owner: mockSolAddress3 },
+						stackHeight: 2
+					})
+				]
+			}
+		])(
+			'should name a listed pool that creates an account for somebody else: $label',
+			({ inner }) => {
+				expect(
+					paying({
+						instructions: [calling({ program: WHIRLPOOL })],
+						inner,
+						rent: BigInt(RENT)
+					})
+				).toEqual([WHIRLPOOL]);
+			}
+		);
+
+		it('should not name a pool for an account the user funds for somebody else', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						create({
+							source: mockSolAddress,
+							newAccount: mockSolAddress4,
+							lamports: 1_000_000_000,
 							stackHeight: 2
 						})
 					]

@@ -2389,6 +2389,7 @@ type PaymentAsset = 'lamports' | 'tokens';
 // its destination, and with them what a wrapped SOL account wraps. A burn, a permissioned one
 // included, takes token units out of its account into nowhere, and a deposit into the account's
 // confidential balance takes them where no transfer this check reads can reach them.
+// A creation pays the lamports it funds a new account with, its rent included, into that account.
 const paymentOf = ({
 	program,
 	parsed: { type, info }
@@ -2409,6 +2410,16 @@ const paymentOf = ({
 		return {
 			source: systemTransferSource(info),
 			destination: address({ info, key: 'destination' }),
+			value: amount({ info, key: 'lamports' }),
+			sent: 'lamports',
+			received: 'lamports'
+		};
+	}
+
+	if (program === 'system' && isAccountCreation(type)) {
+		return {
+			source: funderOf({ info }),
+			destination: address({ info, key: 'newAccount' }),
 			value: amount({ info, key: 'lamports' }),
 			sent: 'lamports',
 			received: 'lamports'
