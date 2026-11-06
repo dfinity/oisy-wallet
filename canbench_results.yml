@@ -285,6 +285,12 @@ benches:
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
+  bench_update_user_agreements_full_history:
+    total:
+      instructions: 7579150
+      heap_increase: 1
+      stable_memory_increase: 0
+    scopes: {}
   bench_update_user_experimental_features:
     total:
       instructions: 3555611
