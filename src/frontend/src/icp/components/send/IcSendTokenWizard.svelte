@@ -8,6 +8,7 @@
 	import { sendNft } from '$icp/services/nft-send.services';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
+	import { invalidIcpAddress } from '$icp/utils/account.utils';
 	import { toIcNftSendErrorType } from '$icp/utils/ic-nft.utils';
 	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -173,7 +174,9 @@
 					unitName: $sendTokenDecimals
 				}),
 				identity: $authIdentity,
-				...(!invalidIcrcAddress(destination) ? { memo: $sendMemo || undefined } : {}),
+				...(!invalidIcrcAddress(destination) || !invalidIcpAddress(destination)
+					? { memo: $sendMemo || undefined }
+					: {}),
 				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step)
 			};
 

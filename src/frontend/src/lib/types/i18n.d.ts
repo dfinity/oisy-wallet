@@ -793,6 +793,7 @@ interface I18nSend {
 		enter_recipient_address: string;
 		enter_wallet_address: string;
 		enter_memo: string;
+		enter_memo_nat64: string;
 		xrp_destination_tag: string;
 		select_network: string;
 		search_nfts: string;
@@ -824,6 +825,7 @@ interface I18nSend {
 		unknown_cketh: string;
 		destination_address_invalid: string;
 		amount_invalid: string;
+		invalid_nat64_memo: string;
 		xrp_destination_tag_invalid: string;
 		insufficient_funds_verbose_btc: string;
 		insufficient_funds_for_reserve: string;
