@@ -19,6 +19,7 @@ import {
 	isErc20TransactionTransfer,
 	isErcTransactionSetApprovalForAll
 } from '$eth/utils/transactions.utils';
+import { getUniswapSwap, type GetUniswapSwapParams } from '$eth/utils/uniswap.utils';
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
@@ -208,24 +209,42 @@ export const getWalletConnectEthCkEthDeposit = ({
 /**
  * What an `eth_sendTransaction` request is, read from where it goes as well as from its calldata.
  *
- * A `deposit(bytes32)` means something only at the ckETH helper contract, so the destination is
- * what decides whether it is a conversion. Everything else is classified by its calldata alone, see
+ * A `deposit(bytes32)` means something only at the ckETH helper contract, and the commands of an
+ * `execute` only at a Uniswap Universal Router, so the destination is what decides whether either
+ * is read. Everything else is classified by its calldata alone, see
  * {@link classifyWalletConnectEthCall}.
  */
 export const classifyWalletConnectEthSendTransaction = ({
+	to,
 	data,
-	...rest
-}: WalletConnectEthCkEthDepositParams): WalletConnectEthCall => {
+	networkId,
+	minterInfo,
+	principal,
+	...swap
+}: WalletConnectEthCkEthDepositParams &
+	Omit<GetUniswapSwapParams, 'to' | 'data' | 'networkId'>): WalletConnectEthCall => {
 	try {
-		const principal = getWalletConnectEthCkEthDeposit({ data, ...rest });
+		const deposited = getWalletConnectEthCkEthDeposit({
+			to,
+			data,
+			networkId,
+			minterInfo,
+			principal
+		});
 
-		if (nonNullish(principal)) {
-			return { type: 'ckEthDeposit', principal };
+		if (nonNullish(deposited)) {
+			return { type: 'ckEthDeposit', principal: deposited };
 		}
 	} catch (err: unknown) {
 		return err instanceof WalletConnectEthCkEthHelperUnconfirmedError
 			? { type: 'ckEthHelperUnconfirmed' }
 			: { type: 'ckEthDepositRefused' };
+	}
+
+	const uniswapSwap = getUniswapSwap({ to, data, networkId, ...swap });
+
+	if (nonNullish(uniswapSwap)) {
+		return { type: 'uniswapSwap', swap: uniswapSwap };
 	}
 
 	return classifyWalletConnectEthCall(data);
