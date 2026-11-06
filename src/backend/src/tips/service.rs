@@ -289,7 +289,7 @@ pub fn get_tip_details(request: TipClaimRequest) -> Result<TipDetails, TipError>
 /// that overlap, but only while the ledger still recognises the stamp
 /// ([`TIP_PAYOUT_DEDUP_WINDOW_NS`]); past that the tip starts a new transaction
 /// identity and the question is open again. What stops both from paying either
-/// way is the allowance covering exactly one payout, which the client sizes and
+/// way is the allowance covering exactly one payout, which the frontend sizes and
 /// `create_tip` only checks a lower bound on. So "exactly once" remains a
 /// property of the allowance, and this code's job is not to weaken it.
 ///

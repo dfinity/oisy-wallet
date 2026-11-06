@@ -138,7 +138,7 @@ impl TipRecord {
     /// deduplicate against it, and renewed once it has aged past
     /// [`TIP_PAYOUT_DEDUP_WINDOW_NS`] — a stamp the ledger would answer `TooOld`
     /// for is worse than no stamp, since it refuses the retry instead of
-    /// resolving it. Renewing is the point at which the earlier attempt's
+    /// resolving it. Renewing is the point at which the previous attempt's
     /// outcome stops being knowable: nothing below the ledger can tell whether
     /// it landed, and the allowance covering exactly one payout is what still
     /// keeps a tip from paying twice.
@@ -180,7 +180,7 @@ impl TipRecord {
     /// that stamp, so every retry carrying it would be refused the same way and
     /// the tip would be unclaimable for the rest of its life. Dropping it costs
     /// the one thing the stamp bought — from here on the ledger cannot say
-    /// whether the earlier attempt landed — which is why no other failure does.
+    /// whether the previous attempt landed — which is why no other failure does.
     pub fn released_after_failure(
         self,
         reason: TipClaimFailureReason,

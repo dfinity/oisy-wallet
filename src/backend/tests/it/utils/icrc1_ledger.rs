@@ -221,7 +221,7 @@ pub fn approve(
 
 /// `icrc2_transfer_from`, called as `spender` — which is what the backend is when
 /// it pays a tip out. Exists so a test can put the ledger itself through the
-/// retry the backend relies on, without needing the backend to lose a reply.
+/// retry the backend depends on, without needing the backend to lose a reply.
 pub fn transfer_from(
     pic: &PocketIc,
     ledger: Principal,

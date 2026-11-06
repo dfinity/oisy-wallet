@@ -71,7 +71,7 @@ pub enum TransferFromCallError {
 ///
 /// `TooOld` is the one answer that leaves the outcome genuinely unknown. The
 /// stamp has fallen outside the ledger's transaction window, so the ledger can
-/// no longer say whether the earlier attempt landed, and will refuse every
+/// no longer say whether the previous attempt landed, and will refuse every
 /// further retry that carries it. `TIP_PAYOUT_DEDUP_WINDOW_NS` is meant to
 /// retire a stamp before this happens; reaching it anyway means the ledger's own
 /// window is shorter than that, and the caller renews the stamp so the tip stays

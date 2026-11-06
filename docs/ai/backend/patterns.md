@@ -156,7 +156,7 @@ is nothing to match it against.
   original block. Treat that as **success** carrying that block index.
 - `TooOld` means the stamp has aged out of the ledger's transaction window (24
   hours on the ledgers this repo targets), so the ledger can no longer say what
-  became of the earlier attempt and will refuse every retry carrying it. Retire
+  became of the previous attempt and will refuse every retry carrying it. Retire
   the stamp so the next attempt pins a fresh one — and renew it before the
   window closes rather than spending an attempt on the refusal
   (`TIP_PAYOUT_DEDUP_WINDOW_NS`).
