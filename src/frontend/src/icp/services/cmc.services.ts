@@ -1,12 +1,17 @@
 import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
-import { getAccountIdentifierTransactions } from '$icp/api/icp-index.api';
-import { icrc1Transfer } from '$icp/api/icp-ledger.api';
+import {
+	getAccountIdentifierTransactions,
+	getIcpIndexNumBlocksSynced
+} from '$icp/api/icp-index.api';
+import { getIcpLedgerBlockTimestamp, icrc1Transfer } from '$icp/api/icp-ledger.api';
 import {
 	CMC_DEPOSIT_LOOKUP_PAGE_SIZE,
+	CMC_TRANSFER_START_WINDOW_NS,
 	ICP_LEDGER_PERMITTED_DRIFT_NS
 } from '$icp/constants/cmc.constants';
 import { isCmcDeposit } from '$icp/utils/cmc.utils';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { TxDuplicateError } from '@icp-sdk/canisters/ledger/icp';
 import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
@@ -19,6 +24,9 @@ import type { Identity } from '@icp-sdk/core/agent';
  * `createdAt` stays the same for the whole flow, so sending again after a call that got no
  * answer cannot pay twice: the ledger recognises the transfer and answers with the block
  * the first one landed in.
+ *
+ * It is not sent past `CMC_TRANSFER_START_WINDOW_NS` from `createdAt`, counted once the ledger
+ * is ready (`IcTransferDeadlineError`), so the poller's landing window holds for it.
  */
 export const transferIcpToCmc = async ({
 	identity,
@@ -41,6 +49,7 @@ export const transferIcpToCmc = async ({
 			amount,
 			createdAt,
 			memo,
+			notAfter: createdAt + CMC_TRANSFER_START_WINDOW_NS,
 			ledgerCanisterId: ICP_LEDGER_CANISTER_ID
 		});
 	} catch (err: unknown) {
@@ -130,4 +139,40 @@ export const findCmcDeposit = async ({
 	}
 
 	return undefined;
+};
+
+/**
+ * Whether the ICP index already holds every block up to `timestampNs`. The ledger appends
+ * blocks in time order and the index takes them in the same order, so it does once the
+ * last block it has taken is later. The index keeps its blocks only encoded, so that
+ * block's time is read from the ledger. A block the ledger has already archived reads as
+ * "not yet": the index is then far behind anyway, and the row only waits longer.
+ *
+ * Certified, like the lookup: a "yes" lets a row close as never sent.
+ */
+export const hasIcpIndexSyncedPast = async ({
+	identity,
+	timestampNs
+}: {
+	identity: Identity;
+	timestampNs: bigint;
+}): Promise<boolean> => {
+	const numBlocksSynced = await getIcpIndexNumBlocksSynced({
+		identity,
+		indexCanisterId: ICP_INDEX_CANISTER_ID,
+		certified: true
+	});
+
+	if (numBlocksSynced === ZERO) {
+		return false;
+	}
+
+	const lastSyncedAtNs = await getIcpLedgerBlockTimestamp({
+		identity,
+		ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
+		index: numBlocksSynced - 1n,
+		certified: true
+	});
+
+	return nonNullish(lastSyncedAtNs) && lastSyncedAtNs > timestampNs;
 };

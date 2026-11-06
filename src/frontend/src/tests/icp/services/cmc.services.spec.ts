@@ -4,9 +4,14 @@ import * as icpLedgerApi from '$icp/api/icp-ledger.api';
 import {
 	CMC_DEPOSIT_LOOKUP_PAGE_SIZE,
 	CMC_MINT_CYCLES_MEMO,
+	CMC_TRANSFER_START_WINDOW_NS,
 	ICP_LEDGER_PERMITTED_DRIFT_NS
 } from '$icp/constants/cmc.constants';
-import { findCmcDeposit, transferIcpToCmc } from '$icp/services/cmc.services';
+import {
+	findCmcDeposit,
+	hasIcpIndexSyncedPast,
+	transferIcpToCmc
+} from '$icp/services/cmc.services';
 import { getCmcDepositAccount } from '$icp/utils/cmc.utils';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { ZERO } from '$lib/constants/app.constants';
@@ -81,6 +86,7 @@ describe('cmc.services', () => {
 				amount: AMOUNT,
 				createdAt: CREATED_AT_NS,
 				memo: CMC_MINT_CYCLES_MEMO,
+				notAfter: CREATED_AT_NS + CMC_TRANSFER_START_WINDOW_NS,
 				ledgerCanisterId: ICP_LEDGER_CANISTER_ID
 			});
 		});
@@ -161,6 +167,67 @@ describe('cmc.services', () => {
 			await expect(find()).resolves.toBeUndefined();
 
 			expect(lookupSpy).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('hasIcpIndexSyncedPast', () => {
+		const TIMESTAMP_NS = 1_790_000_900_000_000_000n;
+
+		let syncedSpy: ReturnType<typeof vi.spyOn>;
+		let blockTimeSpy: ReturnType<typeof vi.spyOn>;
+
+		const hasSyncedPast = () =>
+			hasIcpIndexSyncedPast({ identity: mockIdentity, timestampNs: TIMESTAMP_NS });
+
+		beforeEach(() => {
+			vi.restoreAllMocks();
+
+			syncedSpy = vi.spyOn(icpIndexApi, 'getIcpIndexNumBlocksSynced').mockResolvedValue(1_000n);
+			blockTimeSpy = vi
+				.spyOn(icpLedgerApi, 'getIcpLedgerBlockTimestamp')
+				.mockResolvedValue(TIMESTAMP_NS);
+		});
+
+		// A "yes" lets a row close as never sent.
+		it('reads the index’s height and its last block’s time, certified', async () => {
+			await hasSyncedPast();
+
+			expect(syncedSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				indexCanisterId: ICP_INDEX_CANISTER_ID,
+				certified: true
+			});
+			expect(blockTimeSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
+				index: 999n,
+				certified: true
+			});
+		});
+
+		it('is true once the last synced block is later than the time', async () => {
+			blockTimeSpy.mockResolvedValue(TIMESTAMP_NS + 1n);
+
+			await expect(hasSyncedPast()).resolves.toBeTruthy();
+		});
+
+		it('is false while the last synced block is not later than the time', async () => {
+			await expect(hasSyncedPast()).resolves.toBeFalsy();
+		});
+
+		// The index is then far behind the ledger anyway.
+		it('is false when the ledger has archived the last synced block', async () => {
+			blockTimeSpy.mockResolvedValue(undefined);
+
+			await expect(hasSyncedPast()).resolves.toBeFalsy();
+		});
+
+		it('is false for an index that has synced nothing, without asking the ledger', async () => {
+			syncedSpy.mockResolvedValue(ZERO);
+
+			await expect(hasSyncedPast()).resolves.toBeFalsy();
+
+			expect(blockTimeSpy).not.toHaveBeenCalled();
 		});
 	});
 });
