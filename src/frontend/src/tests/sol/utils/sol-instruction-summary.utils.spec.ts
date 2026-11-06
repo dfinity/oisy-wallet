@@ -4961,6 +4961,46 @@ describe('sol-instruction-summary.utils', () => {
 			stackHeight
 		});
 
+		const system = ({
+			type,
+			info,
+			stackHeight
+		}: {
+			type: string;
+			info: object;
+			stackHeight: number;
+		}) => ({
+			program: 'system',
+			programId: '11111111111111111111111111111111',
+			parsed: { type, info },
+			stackHeight
+		});
+
+		const associatedAccount = ({
+			payer,
+			wallet,
+			stackHeight
+		}: {
+			payer: string;
+			wallet: string;
+			stackHeight: number;
+		}) => ({
+			program: 'spl-associated-token-account',
+			programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+			parsed: {
+				type: 'create',
+				info: {
+					source: payer,
+					account: mockSolAddress4,
+					wallet,
+					mint: mockSplAddress,
+					systemProgram: '11111111111111111111111111111111',
+					tokenProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+				}
+			},
+			stackHeight
+		});
+
 		const unwrap = ({
 			source,
 			destination,
@@ -5792,6 +5832,120 @@ describe('sol-instruction-summary.utils', () => {
 				})
 			).toEqual([]);
 		});
+
+		// The associated token account program and Token-2022 act on what their caller asks, paid by
+		// whoever it names, and the run gives their calls without the accounts they were made with.
+		it.each([
+			{
+				label: 'an account the associated token account program opens for somebody else',
+				inner: [
+					associatedAccount({ payer: mockSolAddress2, wallet: mockSolAddress3, stackHeight: 2 }),
+					create({
+						source: mockSolAddress2,
+						newAccount: mockSolAddress4,
+						lamports: RENT,
+						space: 165,
+						owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						stackHeight: 3
+					}),
+					token({
+						type: 'initializeAccount3',
+						info: { account: mockSolAddress4, mint: mockSplAddress, owner: mockSolAddress3 },
+						stackHeight: 3
+					})
+				]
+			},
+			{
+				label: 'the same at an address already holding lamports',
+				inner: [
+					associatedAccount({ payer: mockSolAddress2, wallet: mockSolAddress3, stackHeight: 2 }),
+					send({
+						source: mockSolAddress2,
+						destination: mockSolAddress4,
+						lamports: 1_039_280,
+						stackHeight: 3
+					}),
+					system({
+						type: 'allocate',
+						info: { account: mockSolAddress4, space: 165 },
+						stackHeight: 3
+					}),
+					system({
+						type: 'assign',
+						info: {
+							account: mockSolAddress4,
+							owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+						},
+						stackHeight: 3
+					}),
+					token({
+						type: 'initializeAccount3',
+						info: { account: mockSolAddress4, mint: mockSplAddress, owner: mockSolAddress3 },
+						stackHeight: 3
+					})
+				]
+			},
+			{
+				label: "the rent of a Token-2022 reallocation of somebody else's account",
+				inner: [
+					{
+						program: 'spl-token-2022',
+						programId: TOKEN_2022_PROGRAM_ADDRESS,
+						parsed: {
+							type: 'reallocate',
+							info: {
+								account: elsewhere,
+								payer: mockSolAddress2,
+								systemProgram: '11111111111111111111111111111111',
+								owner: mockSolAddress3,
+								extensionTypes: ['memoTransfer']
+							}
+						},
+						stackHeight: 2
+					},
+					send({ source: mockSolAddress2, destination: elsewhere, lamports: 6_960, stackHeight: 3 })
+				]
+			}
+		])('should name a listed pool paying through a program it calls: $label', ({ inner }) => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner,
+					rent: BigInt(RENT)
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it.each([
+			{ label: 'paid by the user', payer: mockSolAddress, wallet: mockSolAddress3 },
+			{ label: 'opened for the user', payer: mockSolAddress2, wallet: mockSolAddress }
+		])(
+			'should not name a pool for an account the associated token account program opens $label',
+			({ payer, wallet }) => {
+				expect(
+					paying({
+						instructions: [calling({ program: WHIRLPOOL })],
+						inner: [
+							associatedAccount({ payer, wallet, stackHeight: 2 }),
+							create({
+								source: payer,
+								newAccount: mockSolAddress4,
+								lamports: RENT,
+								space: 165,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								stackHeight: 3
+							}),
+							token({
+								type: 'initializeAccount3',
+								info: { account: mockSolAddress4, mint: mockSplAddress, owner: wallet },
+								stackHeight: 3
+							})
+						],
+						rent: BigInt(RENT)
+					})
+				).toEqual([]);
+			}
+		);
 
 		it('should name a listed pool that withdraws the excess lamports of its account to somebody else', () => {
 			expect(

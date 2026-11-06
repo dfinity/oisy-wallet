@@ -458,6 +458,8 @@ interface FlattenedInstruction {
 	madeBy?: SolAddress;
 	// The accounts the call that made this instruction names, which carry the signatures it acts with.
 	madeWith?: SolAddress[];
+	// That call, as the run gives it.
+	madeIn?: unknown;
 	batch?: SolBatchMark;
 	// A token batch left whole, whose steps nobody read in order.
 	wholeBatch?: boolean;
@@ -487,6 +489,7 @@ const flatten = ({
 					topLevel: true,
 					madeBy: undefined,
 					madeWith: [],
+					madeIn: undefined,
 					madeCalls: solRpcBatchMadeCalls({ inner })
 				},
 				...inner.map((nested, index) => ({
@@ -494,6 +497,7 @@ const flatten = ({
 					topLevel: false,
 					madeBy: programAddressOf(callers[index]),
 					madeWith: accountsOf(callers[index]),
+					madeIn: callers[index],
 					madeCalls: solRpcBatchMadeCalls({ inner, position: index })
 				}))
 			]
@@ -503,7 +507,7 @@ const flatten = ({
 				// whose contents cannot be read, or whose steps cannot be put in order with the calls
 				// made inside it, stays whole, and describes nothing.
 				.flatMap<FlattenedInstruction>(
-					({ instruction: candidate, topLevel, madeBy, madeWith, madeCalls }, position) => {
+					({ instruction: candidate, topLevel, madeBy, madeWith, madeIn, madeCalls }, position) => {
 						const parsed = candidate as SolParsedRpcInstruction;
 						const carried = solRpcOrderedBatchedInstructions({ instruction: parsed, madeCalls });
 
@@ -513,7 +517,7 @@ const flatten = ({
 										parentIndex,
 										topLevel,
 										instruction: parsed,
-										...(nonNullish(madeBy) && { madeBy, madeWith }),
+										...(nonNullish(madeBy) && { madeBy, madeWith, madeIn }),
 										...(isTokenBatch(parsed) && { wholeBatch: true })
 									}
 								]
@@ -521,7 +525,7 @@ const flatten = ({
 									parentIndex,
 									topLevel,
 									instruction: entry,
-									...(nonNullish(madeBy) && { madeBy, madeWith }),
+									...(nonNullish(madeBy) && { madeBy, madeWith, madeIn }),
 									batch: { id: `${parentIndex}:${position}`, program: parsed.programId }
 								}));
 					}
@@ -2755,6 +2759,29 @@ const closeOut = ({
 	);
 
 /**
+ * The program an instruction is made for, with the accounts it was called with: the program whose
+ * call made it, or, when the run gives that call parsed, the one that made that call in turn.
+ * The programs the RPC parses, such as System, the token programs and associated token accounts,
+ * act on what their caller asks, with accounts it names, and their calls come without the
+ * accounts they were made with.
+ */
+const onBehalfOf = ({
+	flattened,
+	position
+}: {
+	flattened: FlattenedInstruction[];
+	position: number;
+}): Pick<FlattenedInstruction, 'madeBy' | 'madeWith'> => {
+	const { madeBy, madeWith, madeIn } = flattened[position];
+
+	const call = isNullish(madeIn)
+		? -1
+		: flattened.findIndex(({ instruction }) => instruction === madeIn);
+
+	return call >= 0 ? onBehalfOf({ flattened, position: call }) : { madeBy, madeWith };
+};
+
+/**
  * The programs that, called with the wallet among their accounts, pay out of an account that is not
  * the user's into another one that is not theirs either, each named once, in the order they do it.
  * Routers are left out: what passes through their own accounts is a swap on its way, or a fee.
@@ -2806,7 +2833,7 @@ export const findSolProgramsPayingOthers = ({
 		named: { program: SolAddress; position: number }[];
 		waiting: WaitingPayout[];
 	}>(
-		(acc, { parentIndex, topLevel, instruction, madeBy, madeWith = [] }, position) => {
+		(acc, { parentIndex, topLevel, instruction }, position) => {
 			const opened = opensAt(instruction);
 
 			if (nonNullish(opened)) {
@@ -2889,6 +2916,8 @@ export const findSolProgramsPayingOthers = ({
 						value,
 						emptying
 					});
+
+			const { madeBy, madeWith = [] } = onBehalfOf({ flattened, position });
 
 			if (
 				topLevel ||
