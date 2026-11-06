@@ -148,12 +148,10 @@
 	{@render title?.()}
 	{#if showTokenNetwork && nonNullish(token)}
 		<div class="flex text-xs font-normal text-tertiary">
-			<!-- The key is written to follow a token's name (" on Solana"), so it is trimmed here and
-				 its first letter raised to open the row; a script without case keeps its own. -->
-			<span class="mr-1 inline-block text-sm first-letter:uppercase"
-				>{replacePlaceholders($i18n.tokens.text.on_network, {
+			<span class="mr-1 text-sm"
+				>{replacePlaceholders($i18n.tokens.text.on_network_label, {
 					$network: token.network.name
-				}).trim()}</span
+				})}</span
 			>
 			<NetworkLogo network={token.network} />
 		</div>

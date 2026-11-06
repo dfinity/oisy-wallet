@@ -1508,6 +1508,7 @@
 			"show_more_networks": "Показать еще $number сетей",
 			"hide_more_networks": "Скрыть больше сетей",
 			"on_network": " в сети $network",
+			"on_network_label": "В сети $network",
 			"delete_token": "Удалить токен",
 			"edit_token": "Редактировать токен",
 			"sort_by_value": "Стоимость",

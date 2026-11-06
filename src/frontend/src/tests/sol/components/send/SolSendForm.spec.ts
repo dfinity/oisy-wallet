@@ -102,9 +102,9 @@ describe('SolSendForm', () => {
 
 		expect(
 			getByText(
-				replacePlaceholders(en.tokens.text.on_network, {
+				replacePlaceholders(en.tokens.text.on_network_label, {
 					$network: SOLANA_TOKEN.network.name
-				}).trim()
+				})
 			)
 		).toBeInTheDocument();
 	});

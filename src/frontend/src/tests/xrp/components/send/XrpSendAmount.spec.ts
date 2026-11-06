@@ -209,7 +209,7 @@ describe('XrpSendAmount', () => {
 
 		expect(
 			getByText(
-				replacePlaceholders(en.tokens.text.on_network, { $network: XRP_TOKEN.network.name }).trim()
+				replacePlaceholders(en.tokens.text.on_network_label, { $network: XRP_TOKEN.network.name })
 			)
 		).toBeInTheDocument();
 	});

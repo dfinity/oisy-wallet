@@ -158,9 +158,9 @@ describe('BtcSendAmount', () => {
 
 		expect(
 			getByText(
-				replacePlaceholders(en.tokens.text.on_network, {
+				replacePlaceholders(en.tokens.text.on_network_label, {
 					$network: BTC_MAINNET_TOKEN.network.name
-				}).trim()
+				})
 			)
 		).toBeInTheDocument();
 	});

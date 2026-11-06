@@ -38,9 +38,9 @@ describe('TokenInput (via StakeForm) out-of-range amount', () => {
 });
 
 describe('TokenInput network row', () => {
-	const onNetwork = replacePlaceholders(en.tokens.text.on_network, {
+	const onNetwork = replacePlaceholders(en.tokens.text.on_network_label, {
 		$network: ICP_TOKEN.network.name
-	}).trim();
+	});
 
 	const props = {
 		token: ICP_TOKEN,
@@ -58,10 +58,10 @@ describe('TokenInput network row', () => {
 		vi.useRealTimers();
 	});
 
-	it("names the token's network, opening with a capital", () => {
+	it("names the token's network", () => {
 		const { getByText } = render(TokenInput, { props: { ...props, showTokenNetwork: true } });
 
-		expect(getByText(onNetwork)).toHaveClass('first-letter:uppercase');
+		expect(getByText(onNetwork)).toBeInTheDocument();
 	});
 
 	it('leaves the network out unless asked to show it', () => {

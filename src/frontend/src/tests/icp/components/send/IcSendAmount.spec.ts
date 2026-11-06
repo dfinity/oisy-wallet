@@ -152,7 +152,7 @@ describe('IcSendAmount', () => {
 
 		expect(
 			getByText(
-				replacePlaceholders(en.tokens.text.on_network, { $network: ICP_TOKEN.network.name }).trim()
+				replacePlaceholders(en.tokens.text.on_network_label, { $network: ICP_TOKEN.network.name })
 			)
 		).toBeInTheDocument();
 	});

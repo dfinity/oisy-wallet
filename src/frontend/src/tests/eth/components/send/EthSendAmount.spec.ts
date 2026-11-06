@@ -358,9 +358,9 @@ describe('EthSendAmount', () => {
 
 		expect(
 			queryByText(
-				replacePlaceholders(en.tokens.text.on_network, {
+				replacePlaceholders(en.tokens.text.on_network_label, {
 					$network: ETHEREUM_TOKEN.network.name
-				}).trim()
+				})
 			)
 		).toBeInTheDocument();
 	});
