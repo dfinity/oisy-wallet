@@ -7,8 +7,9 @@ use shared::types::{
         AgreementHistoryEntry, AgreementType, GetAgreementHistoryError, ProviderAgreementProvider,
         ProviderAgreementScope, ProviderAgreementType, UpdateAgreementsError,
         UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest, UserAgreement,
-        UserAgreements, SHA256_HEX_LENGTH,
+        UserAgreements, MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER, SHA256_HEX_LENGTH,
     },
+    signer::RateLimitError,
     user_profile::{CreateUserProfileError, GetUserProfileError, UserProfile},
     Timestamp, Version,
 };
@@ -959,6 +960,146 @@ fn test_agreement_history_accumulates_across_updates() {
 }
 
 #[test]
+fn test_agreement_history_records_only_changed_agreements() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
+
+    let accepted = UserAgreement {
+        accepted: Some(true),
+        text_sha256: Some("a".repeat(SHA256_HEX_LENGTH)),
+        last_updated_at_ms: Some(1_700_000_000_000),
+        ..Default::default()
+    };
+
+    let arg1 = UpdateUserAgreementsRequest {
+        current_user_version: profile.version,
+        agreements: UserAgreements {
+            license_agreement: accepted.clone(),
+            terms_of_use: accepted.clone(),
+            privacy_policy: UserAgreement::default(),
+        },
+    };
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg1)
+        .unwrap()
+        .unwrap();
+
+    let user_profile = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap();
+
+    // The license agreement and terms of use are sent again as stored; only the privacy policy
+    // changes.
+    let arg2 = UpdateUserAgreementsRequest {
+        current_user_version: user_profile.version,
+        agreements: UserAgreements {
+            license_agreement: accepted.clone(),
+            terms_of_use: accepted.clone(),
+            privacy_policy: accepted,
+        },
+    };
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg2)
+        .unwrap()
+        .unwrap();
+
+    let history = pic_setup
+        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+            caller,
+            "get_user_agreement_history",
+            (),
+        )
+        .unwrap()
+        .unwrap();
+
+    let agreement_types: Vec<AgreementType> = history
+        .into_iter()
+        .map(|entry| entry.agreement_type)
+        .collect();
+    assert_eq!(
+        agreement_types,
+        vec![
+            AgreementType::LicenseAgreement,
+            AgreementType::TermsOfUse,
+            AgreementType::PrivacyPolicy,
+        ]
+    );
+}
+
+#[test]
+fn test_agreement_history_keeps_only_the_newest_entries() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
+
+    // Every update flips all three agreements, so it adds three entries.
+    let updates = MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER / 3 + 1;
+    for i in 0..updates {
+        // One update per minute stays clear of the per-caller call limit.
+        pic_setup.pic.advance_time(Duration::from_secs(60));
+
+        let user_profile = pic_setup
+            .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+            .unwrap()
+            .unwrap();
+        let agreement = UserAgreement {
+            accepted: Some(i % 2 == 0),
+            ..Default::default()
+        };
+        let arg = UpdateUserAgreementsRequest {
+            current_user_version: user_profile.version,
+            agreements: UserAgreements {
+                license_agreement: agreement.clone(),
+                terms_of_use: agreement.clone(),
+                privacy_policy: agreement,
+            },
+        };
+        pic_setup
+            .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg)
+            .unwrap()
+            .unwrap();
+    }
+
+    let history = pic_setup
+        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+            caller,
+            "get_user_agreement_history",
+            (),
+        )
+        .unwrap()
+        .unwrap();
+
+    let agreement_types = [
+        AgreementType::LicenseAgreement,
+        AgreementType::TermsOfUse,
+        AgreementType::PrivacyPolicy,
+    ];
+    let recorded = (0..updates).flat_map(|i| {
+        agreement_types
+            .iter()
+            .map(move |agreement_type| (agreement_type.clone(), i % 2 == 0))
+    });
+    let expected: Vec<(AgreementType, bool)> = recorded
+        .skip(updates * agreement_types.len() - MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER)
+        .collect();
+    let stored: Vec<(AgreementType, bool)> = history
+        .into_iter()
+        .map(|entry| (entry.agreement_type, entry.accepted))
+        .collect();
+    assert_eq!(stored, expected);
+}
+
+#[test]
 fn test_agreement_history_not_recorded_when_no_change() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
@@ -1333,4 +1474,83 @@ fn test_provider_agreements_no_change_when_accepted_none() {
         provider.is_none() || provider.unwrap().is_empty(),
         "Provider agreements should be empty or None"
     );
+}
+
+// ---------------------------------------------------------------------------
+// Call limits
+// ---------------------------------------------------------------------------
+
+/// Calls `method` with the caller's current profile version 10 times, then asserts that the
+/// 11th call within the same minute returns `UpdateAgreementsError::RateLimited`.
+fn assert_rate_limited_after_ten_calls<T: candid::CandidType>(
+    method: &str,
+    request: impl Fn(Option<Version>) -> T,
+) {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
+
+    let call = || {
+        let user_profile = pic_setup
+            .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+            .unwrap()
+            .unwrap();
+        pic_setup
+            .update::<Result<(), UpdateAgreementsError>>(
+                caller,
+                method,
+                request(user_profile.version),
+            )
+            .unwrap()
+    };
+
+    for i in 0..10 {
+        let result = call();
+        assert_eq!(result, Ok(()), "call {i} should succeed");
+    }
+
+    assert_eq!(
+        call(),
+        Err(UpdateAgreementsError::RateLimited(RateLimitError {
+            max_calls: 10,
+            window_ns: 60 * 1_000_000_000,
+            caller,
+        }))
+    );
+
+    pic_setup.pic.advance_time(Duration::from_secs(60));
+    assert_eq!(call(), Ok(()), "a call after the window should succeed");
+}
+
+#[test]
+fn test_update_user_agreements_rate_limited_after_exceeding_limit() {
+    assert_rate_limited_after_ten_calls("update_user_agreements", |current_user_version| {
+        UpdateUserAgreementsRequest {
+            current_user_version,
+            agreements: INITIAL_AGREEMENTS.clone(),
+        }
+    });
+}
+
+#[test]
+fn test_update_provider_agreements_rate_limited_after_exceeding_limit() {
+    assert_rate_limited_after_ten_calls("update_provider_agreements", |current_user_version| {
+        UpdateProviderAgreementsRequest {
+            current_user_version,
+            provider_agreements: provider_agreements_map(vec![(
+                ProviderAgreementType {
+                    provider: ProviderAgreementProvider::NearIntents,
+                    scope: ProviderAgreementScope::Swap,
+                },
+                UserAgreement {
+                    accepted: Some(true),
+                    ..Default::default()
+                },
+            )]),
+        }
+    });
 }

@@ -1,7 +1,8 @@
 use ic_cdk::{api::msg_caller, query, update};
 use shared::types::{
     agreement::{
-        GetAgreementHistoryError, UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest,
+        GetAgreementHistoryError, UpdateAgreementsError, UpdateProviderAgreementsRequest,
+        UpdateUserAgreementsRequest,
     },
     dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
     experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
@@ -22,7 +23,12 @@ use crate::{
     state::{self, mutate_state, read_state},
     types::StoredPrincipal,
     user_profile::{model::UserProfileModel, service},
-    utils::guards::{caller_is_controller, caller_is_not_anonymous, caller_is_registered_user},
+    utils::{
+        guards::{caller_is_controller, caller_is_not_anonymous, caller_is_registered_user},
+        rate_limiter::{
+            self, UPDATE_PROVIDER_AGREEMENTS_RATE_LIMITER, UPDATE_USER_AGREEMENTS_RATE_LIMITER,
+        },
+    },
 };
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
@@ -163,10 +169,17 @@ pub fn add_user_dismissed_notification(
 ///   same value.
 ///
 /// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+///   the caller made too many calls in the last minute.
 #[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUserAgreementsResult {
+    if let Err(e) =
+        UPDATE_USER_AGREEMENTS_RATE_LIMITER.with(rate_limiter::RateLimiter::check_caller)
+    {
+        return Err(UpdateAgreementsError::RateLimited(e)).into();
+    }
+
     let UpdateUserAgreementsRequest {
         current_user_version,
         agreements,
@@ -198,12 +211,19 @@ pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUse
 ///   set to the same value.
 ///
 /// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+///   the caller made too many calls in the last minute.
 #[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn update_provider_agreements(
     request: UpdateProviderAgreementsRequest,
 ) -> UpdateProviderAgreementsResult {
+    if let Err(e) =
+        UPDATE_PROVIDER_AGREEMENTS_RATE_LIMITER.with(rate_limiter::RateLimiter::check_caller)
+    {
+        return Err(UpdateAgreementsError::RateLimited(e)).into();
+    }
+
     let UpdateProviderAgreementsRequest {
         current_user_version,
         provider_agreements,
@@ -224,10 +244,11 @@ pub fn update_provider_agreements(
     .into()
 }
 
-/// Returns the full agreement consent/rejection history for the caller.
+/// Returns the agreement consent/rejection history for the caller.
 ///
 /// # Returns
-/// - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail.
+/// - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail: the newest
+///   `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 ///
 /// # Errors
 /// - `Err(UserNotFound)` if no history exists and the user has no profile.

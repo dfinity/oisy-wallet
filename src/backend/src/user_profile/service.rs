@@ -4,7 +4,7 @@ use ic_cdk::api::time;
 use shared::types::{
     agreement::{
         AgreementHistoryEntry, AgreementType, ProviderAgreementType, UpdateAgreementsError,
-        UserAgreement, UserAgreements,
+        UserAgreement, UserAgreements, MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER,
     },
     dapp::AddDappSettingsError,
     experimental_feature::{
@@ -163,15 +163,64 @@ pub fn add_dismissed_notifications(
     Ok(())
 }
 
-/// Builds history entries for agreements that were actually changed.
-fn collect_history_entries(request: &UserAgreements, now: Timestamp) -> Vec<AgreementHistoryEntry> {
+/// Whether applying `requested` changes the stored agreement `current`.
+///
+/// Only an agreement the request sets (`accepted` is `Some(_)`) can change. `last_accepted_at_ns`
+/// is server-owned and never read from the request, so it is left out of the comparison.
+fn is_agreement_changed(current: Option<&UserAgreement>, requested: &UserAgreement) -> bool {
+    requested.accepted.is_some()
+        && current.is_none_or(|current| {
+            current.accepted != requested.accepted
+                || current.last_updated_at_ms != requested.last_updated_at_ms
+                || current.text_sha256 != requested.text_sha256
+        })
+}
+
+/// Appends `new_entries` to the user's agreement history and keeps only the newest
+/// [`MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER`] entries, so the history stays bounded.
+fn append_history_entries(
+    agreement_history: &mut AgreementHistoryMap,
+    principal: StoredPrincipal,
+    new_entries: Vec<AgreementHistoryEntry>,
+) {
+    if new_entries.is_empty() {
+        return;
+    }
+    let mut history = agreement_history.get(&principal).unwrap_or_default().0;
+    history.extend(new_entries);
+    let excess = history
+        .len()
+        .saturating_sub(MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER);
+    let newest = history.split_off(excess);
+    agreement_history.insert(principal, Candid(newest));
+}
+
+/// Builds history entries for the agreements in `request` that change the stored `current` ones.
+fn collect_history_entries(
+    current: &UserAgreements,
+    request: &UserAgreements,
+    now: Timestamp,
+) -> Vec<AgreementHistoryEntry> {
     [
-        (AgreementType::LicenseAgreement, &request.license_agreement),
-        (AgreementType::TermsOfUse, &request.terms_of_use),
-        (AgreementType::PrivacyPolicy, &request.privacy_policy),
+        (
+            AgreementType::LicenseAgreement,
+            &current.license_agreement,
+            &request.license_agreement,
+        ),
+        (
+            AgreementType::TermsOfUse,
+            &current.terms_of_use,
+            &request.terms_of_use,
+        ),
+        (
+            AgreementType::PrivacyPolicy,
+            &current.privacy_policy,
+            &request.privacy_policy,
+        ),
     ]
     .into_iter()
-    .filter_map(|(agreement_type, agreement)| {
+    .filter(|(_, current, requested)| is_agreement_changed(Some(current), requested))
+    .filter_map(|(agreement_type, _, agreement)| {
         agreement.accepted.map(|accepted| AgreementHistoryEntry {
             agreement_type,
             accepted,
@@ -217,24 +266,26 @@ pub fn update_agreements(
     user_profile_model.store_new(principal, now, &new_profile);
 
     if new_profile.version != user_profile.version {
-        let new_entries = collect_history_entries(agreements, now);
-        if !new_entries.is_empty() {
-            let mut history = agreement_history.get(&principal).unwrap_or_default().0;
-            history.extend(new_entries);
-            agreement_history.insert(principal, Candid(history));
-        }
+        let current = user_profile.agreements.unwrap_or_default().agreements;
+        let new_entries = collect_history_entries(&current, agreements, now);
+        append_history_entries(agreement_history, principal, new_entries);
     }
 
     Ok(())
 }
 
-/// Builds history entries for provider agreements that were actually changed.
+/// Builds history entries for the provider agreements in `request` that change the stored
+/// `current` ones.
 fn collect_provider_history_entries(
+    current: &BTreeMap<ProviderAgreementType, UserAgreement>,
     request: &BTreeMap<ProviderAgreementType, UserAgreement>,
     now: Timestamp,
 ) -> Vec<AgreementHistoryEntry> {
     request
         .iter()
+        .filter(|(provider_type, agreement)| {
+            is_agreement_changed(current.get(*provider_type), agreement)
+        })
         .filter_map(|(provider_type, agreement)| {
             agreement.accepted.map(|accepted| AgreementHistoryEntry {
                 agreement_type: AgreementType::Provider(provider_type.clone()),
@@ -282,12 +333,12 @@ pub fn update_provider_agreements(
     user_profile_model.store_new(principal, now, &new_profile);
 
     if new_profile.version != user_profile.version {
-        let new_entries = collect_provider_history_entries(provider_agreements, now);
-        if !new_entries.is_empty() {
-            let mut history = agreement_history.get(&principal).unwrap_or_default().0;
-            history.extend(new_entries);
-            agreement_history.insert(principal, Candid(history));
-        }
+        let current = user_profile
+            .agreements
+            .and_then(|agreements| agreements.provider_agreements)
+            .unwrap_or_default();
+        let new_entries = collect_provider_history_entries(&current, provider_agreements, now);
+        append_history_entries(agreement_history, principal, new_entries);
     }
 
     Ok(())
@@ -350,4 +401,131 @@ pub fn update_transaction_filter_settings(
         user_profile.with_transaction_filter_settings(profile_version, now, filter)?;
     user_profile_model.store_new(principal, now, &new_profile);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use std::cell::RefCell;
+
+    use candid::Principal;
+    use ic_stable_structures::{
+        memory_manager::{MemoryId, MemoryManager},
+        DefaultMemoryImpl,
+    };
+    use pretty_assertions::assert_eq;
+    use shared::types::agreement::{
+        AgreementHistoryEntry, AgreementType, UserAgreement, MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER,
+    };
+
+    use super::{append_history_entries, is_agreement_changed};
+    use crate::types::{AgreementHistoryMap, StoredPrincipal};
+
+    fn accepted(text_sha256: &str) -> UserAgreement {
+        UserAgreement {
+            accepted: Some(true),
+            last_accepted_at_ns: None,
+            last_updated_at_ms: Some(1_700_000_000_000),
+            text_sha256: Some(text_sha256.repeat(64)),
+        }
+    }
+
+    #[test]
+    fn agreement_not_set_by_the_request_is_unchanged() {
+        assert!(!is_agreement_changed(
+            Some(&accepted("a")),
+            &UserAgreement::default()
+        ));
+        assert!(!is_agreement_changed(None, &UserAgreement::default()));
+    }
+
+    #[test]
+    fn agreement_matching_the_stored_one_is_unchanged() {
+        let stored = UserAgreement {
+            last_accepted_at_ns: Some(42),
+            ..accepted("a")
+        };
+
+        assert!(!is_agreement_changed(Some(&stored), &accepted("a")));
+    }
+
+    #[test]
+    fn agreement_without_a_stored_one_is_changed() {
+        assert!(is_agreement_changed(None, &accepted("a")));
+        assert!(is_agreement_changed(
+            Some(&UserAgreement::default()),
+            &accepted("a")
+        ));
+    }
+
+    #[test]
+    fn agreement_with_a_different_field_is_changed() {
+        let stored = accepted("a");
+
+        let rejected = UserAgreement {
+            accepted: Some(false),
+            ..accepted("a")
+        };
+        let new_version = UserAgreement {
+            last_updated_at_ms: Some(1_800_000_000_000),
+            ..accepted("a")
+        };
+
+        assert!(is_agreement_changed(Some(&stored), &rejected));
+        assert!(is_agreement_changed(Some(&stored), &new_version));
+        assert!(is_agreement_changed(Some(&stored), &accepted("b")));
+    }
+
+    fn history_entry(timestamp_ns: u64) -> AgreementHistoryEntry {
+        AgreementHistoryEntry {
+            agreement_type: AgreementType::TermsOfUse,
+            accepted: true,
+            timestamp_ns,
+            text_sha256: None,
+            last_updated_at_ms: None,
+        }
+    }
+
+    fn stored_timestamps(map: &AgreementHistoryMap, principal: StoredPrincipal) -> Vec<u64> {
+        map.get(&principal)
+            .unwrap_or_default()
+            .0
+            .into_iter()
+            .map(|entry| entry.timestamp_ns)
+            .collect()
+    }
+
+    #[test]
+    fn history_keeps_only_the_newest_entries() {
+        let memory = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+        let mut map = AgreementHistoryMap::new(memory.borrow().get(MemoryId::new(12)));
+        let principal = StoredPrincipal(Principal::anonymous());
+        let max = u64::try_from(MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER).unwrap();
+
+        append_history_entries(&mut map, principal, (0..max).map(history_entry).collect());
+        assert_eq!(
+            stored_timestamps(&map, principal),
+            (0..max).collect::<Vec<_>>()
+        );
+
+        append_history_entries(
+            &mut map,
+            principal,
+            (max..max + 3).map(history_entry).collect(),
+        );
+        assert_eq!(
+            stored_timestamps(&map, principal),
+            (3..max + 3).collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn history_is_not_written_without_new_entries() {
+        let memory = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+        let mut map = AgreementHistoryMap::new(memory.borrow().get(MemoryId::new(12)));
+        let principal = StoredPrincipal(Principal::anonymous());
+
+        append_history_entries(&mut map, principal, Vec::new());
+
+        assert!(!map.contains_key(&principal));
+    }
 }

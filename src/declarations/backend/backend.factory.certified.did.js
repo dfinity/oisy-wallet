@@ -969,13 +969,13 @@ export const idlFactory = ({ IDL }) => {
 		current_user_version: IDL.Opt(IDL.Nat64),
 		show_testnets: IDL.Bool
 	});
-	const UpdateAgreementsError = IDL.Variant({
+	const SetTestnetsSettingsError = IDL.Variant({
 		VersionMismatch: IDL.Null,
 		UserNotFound: IDL.Null
 	});
 	const SetUserShowTestnetsResult = IDL.Variant({
 		Ok: IDL.Null,
-		Err: UpdateAgreementsError
+		Err: SetTestnetsSettingsError
 	});
 	const SignOnramperWidgetUrlRequest = IDL.Record({
 		network_wallets: IDL.Vec(OnramperSignedEntry),
@@ -1047,9 +1047,22 @@ export const idlFactory = ({ IDL }) => {
 		current_user_version: IDL.Opt(IDL.Nat64),
 		provider_agreements: IDL.Vec(IDL.Tuple(ProviderAgreementType, UserAgreement))
 	});
+	const UpdateAgreementsError = IDL.Variant({
+		VersionMismatch: IDL.Null,
+		RateLimited: RateLimitError,
+		UserNotFound: IDL.Null
+	});
+	const UpdateProviderAgreementsResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: UpdateAgreementsError
+	});
 	const UpdateUserAgreementsRequest = IDL.Record({
 		agreements: UserAgreements,
 		current_user_version: IDL.Opt(IDL.Nat64)
+	});
+	const UpdateUserAgreementsResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: UpdateAgreementsError
 	});
 	const UpdateExperimentalFeaturesSettingsRequest = IDL.Record({
 		experimental_features: IDL.Vec(
@@ -1195,12 +1208,12 @@ export const idlFactory = ({ IDL }) => {
 		update_contact: IDL.Func([Contact], [GetContactResult], []),
 		update_provider_agreements: IDL.Func(
 			[UpdateProviderAgreementsRequest],
-			[SetUserShowTestnetsResult],
+			[UpdateProviderAgreementsResult],
 			[]
 		),
 		update_user_agreements: IDL.Func(
 			[UpdateUserAgreementsRequest],
-			[SetUserShowTestnetsResult],
+			[UpdateUserAgreementsResult],
 			[]
 		),
 		update_user_experimental_feature_settings: IDL.Func(
