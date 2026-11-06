@@ -856,6 +856,11 @@ Decided in PR 7:
   `allUtxosStore` gets an empty list, so the fee reports `PendingTransactionsNotAvailable` instead
   of waiting forever, Max stays unset and OpenCryptoPay's readiness wait ends. UTXOs already loaded
   are kept, since the pending error alone stops a send.
+- **Locked funds stay locked, not missing.** The backend's list already leaves reserved UTXOs out,
+  so a wallet whose every UTXO a pending send reserves gets none. `prepareBtcSend` stopped at its
+  empty-list check with `InsufficientBalance`, so the user was told the balance was too low. It
+  now returns `UtxoLocked` when the list is empty and pending transactions reserve some, the
+  message the frontend's own filter gives with the flag off (sbpublic).
 - **A failed fee is priced again.** `UtxosFeeLoader` kept any fee while the amount was unchanged, so
   a fee priced from a failed load outlived a later load that succeeded, and Next stayed disabled.
   Convert hits this when its own load at mount and the loader's race and the first one fails
