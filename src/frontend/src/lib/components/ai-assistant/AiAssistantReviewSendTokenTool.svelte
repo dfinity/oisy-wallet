@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import UtxosFeeContexts from '$btc/components/fee/UtxosFeeContexts.svelte';
 	import UtxosFeeLoader from '$btc/components/fee/UtxosFeeLoader.svelte';
@@ -112,16 +112,20 @@
 			/>
 		{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
 			<UtxosFeeContexts>
-				<UtxosFeeLoader {amount} networkId={$sendTokenNetworkId} source={btcSource}>
-					<AiAssistantReviewSendBtcToken
-						{amount}
-						{destination}
-						{onSendCompleted}
-						{sendCompleted}
-						{sendEnabled}
-						source={btcSource}
-					/>
-				</UtxosFeeLoader>
+				<!-- The loaders only guard against a nullish source: an empty one, before the
+				     address has loaded, would query the bitcoin canister for no address. So the
+				     loader mounts beside the review, once the address is there. -->
+				{#if notEmptyString(btcSource)}
+					<UtxosFeeLoader {amount} networkId={$sendTokenNetworkId} source={btcSource} />
+				{/if}
+				<AiAssistantReviewSendBtcToken
+					{amount}
+					{destination}
+					{onSendCompleted}
+					{sendCompleted}
+					{sendEnabled}
+					source={btcSource}
+				/>
 			</UtxosFeeContexts>
 		{:else if isNetworkIdSolana($sendToken.network.id)}
 			<AiAssistantReviewSendSolToken

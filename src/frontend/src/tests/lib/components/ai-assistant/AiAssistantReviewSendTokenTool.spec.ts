@@ -110,7 +110,7 @@ describe('AiAssistantReviewSendTokenTool', () => {
 	});
 
 	it('loads the BTC fee from the user address once it loads after the review renders', async () => {
-		render(AiAssistantReviewSendTokenTool, {
+		const { getByTestId } = render(AiAssistantReviewSendTokenTool, {
 			props: {
 				...props,
 				address: mockBtcP2SHAddress,
@@ -119,14 +119,17 @@ describe('AiAssistantReviewSendTokenTool', () => {
 			context: mockContext(BTC_MAINNET_TOKEN)
 		});
 
-		expect(loadBtcPendingSentTransactionsSpy).not.toHaveBeenCalledWith(
-			expect.objectContaining({ address: mockBtcAddress })
-		);
+		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toBeDisabled();
+		expect(getUtxosQuerySpy).not.toHaveBeenCalled();
+		expect(loadBtcPendingSentTransactionsSpy).not.toHaveBeenCalled();
 
 		btcAddressMainnetStore.set({ certified: true, data: mockBtcAddress });
 
 		await waitFor(() => {
-			expect(loadBtcPendingSentTransactionsSpy).toHaveBeenCalledWith(
+			expect(getUtxosQuerySpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ address: mockBtcAddress })
+			);
+			expect(loadBtcPendingSentTransactionsSpy).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ address: mockBtcAddress })
 			);
 		});
