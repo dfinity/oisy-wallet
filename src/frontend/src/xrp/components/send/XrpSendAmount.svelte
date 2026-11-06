@@ -9,17 +9,31 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
+	import { formatToken } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import { XRP_BASE_RESERVE_DROPS } from '$xrp/constants/xrp.constants';
 	import { XRP_FEE_CONTEXT_KEY, type XrpFeeContext } from '$xrp/stores/xrp-fee.store';
-	import { XrpAmountAssertionError } from '$xrp/types/xrp-send';
+	import {
+		XrpAmountAssertionError,
+		XrpAmountBelowDestinationReserveError
+	} from '$xrp/types/xrp-send';
 
 	interface Props {
 		amount: OptionAmount;
 		amountError?: XrpAmountAssertionError;
+		// The ledger reported that the recipient has no account yet, so this payment has to create
+		// it. `false` while that is unknown — the lookup is still running or it failed.
+		destinationUnfunded?: boolean;
 		onTokensList: () => void;
 	}
 
-	let { amount = $bindable(), amountError = $bindable(), onTokensList }: Props = $props();
+	let {
+		amount = $bindable(),
+		amountError = $bindable(),
+		destinationUnfunded = false,
+		onTokensList
+	}: Props = $props();
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 
@@ -32,7 +46,7 @@
 
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
-	const { sendToken, sendBalance, sendTokenExchangeRate } =
+	const { sendToken, sendBalance, sendTokenDecimals, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { feeStore: fee, reserveStore: reserve }: XrpFeeContext =
@@ -60,8 +74,11 @@
 	// outlives the change and the form is wrong in one direction or the other until the amount is
 	// edited, with nothing on screen saying why.
 	//
+	// The destination is the one input the form does not gate on, and it moves the verdict the same
+	// way: its lookup usually answers after the amount was typed.
+	//
 	// A string rather than the values, so an unchanged set compares equal and nothing reruns.
-	let revalidateKey = $derived(`${$fee}:${$reserve}:${$sendBalance}`);
+	let revalidateKey = $derived(`${$fee}:${$reserve}:${$sendBalance}:${destinationUnfunded}`);
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
@@ -84,7 +101,25 @@
 		) {
 			return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_reserve);
 		}
+
+		// Below the base reserve XRPL applies a payment that has to create its recipient as
+		// `tecNO_DST_INSUF_XRP`: the payment fails and the fee is claimed. `sendXrp` refuses it before
+		// signing, but only once Send is pressed; this says so where the amount is typed. The send
+		// keeps its own check, because the recipient can be funded in between.
+		if (destinationUnfunded && userAmount < XRP_BASE_RESERVE_DROPS) {
+			return new XrpAmountBelowDestinationReserveError(
+				replacePlaceholders($i18n.send.assertion.xrp_destination_unfunded, {
+					$reserve: formatToken({ value: XRP_BASE_RESERVE_DROPS, unitName: $sendTokenDecimals })
+				})
+			);
+		}
 	};
+
+	// Max turns red with an amount error, which reads as the amount being over what can be sent. For
+	// an amount too small to create the recipient that points the wrong way: it has to go up.
+	let maxError = $derived(
+		nonNullish(amountError) && !(amountError instanceof XrpAmountBelowDestinationReserveError)
+	);
 </script>
 
 <div class="mb-4">
@@ -119,7 +154,7 @@
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
 					balance={$sendBalance}
-					error={nonNullish(amountError)}
+					error={maxError}
 					fee={unavailable}
 					token={$sendToken}
 					bind:amount
