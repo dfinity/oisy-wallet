@@ -1044,7 +1044,6 @@
 			"open_qr_modal": "Bắt đầu quét mã QR để xem chi tiết giao dịch",
 			"scan_qr": "Quét mã QR",
 			"select_token": "Chọn token để gửi",
-			"select_network_filter": "Chọn bộ lọc mạng",
 			"send_again": "Gửi lại",
 			"recently_used_tab": "Đã dùng gần đây",
 			"contacts_tab": "Liên hệ",
@@ -1518,6 +1517,18 @@
 			"hide_asset_types": "Ẩn loại tài sản",
 			"asset_type": "Loại tài sản trong $oisy_name",
 			"asset_type_all": "Tất cả loại tài sản",
+			"asset_type_all_short": "",
+			"clear_network_filter": "",
+			"clear_asset_type_filter": "",
+			"filter_asset_types": "",
+			"clear_filters": "",
+			"no_match_network": "",
+			"no_match_asset_type": "",
+			"no_match_asset_type_network": "",
+			"no_match_query": "",
+			"no_match_query_network": "",
+			"no_match_query_asset_type": "",
+			"no_match_query_asset_type_network": "",
 			"no_tokens_for_asset_type": "Ví của bạn không có $asset_type nào",
 			"no_tokens_for_asset_type_zero_tokens": "Không có $asset_type nào trong mạng đã chọn",
 			"no_tokens_for_asset_type_description": "Chọn từ <strong>$count token được hỗ trợ</strong> để tùy chỉnh chế độ xem danh mục đầu tư của bạn."
@@ -1627,7 +1638,8 @@
 		"placeholder": {
 			"enter_contract_address": "Nhập địa chỉ hợp đồng ERC20",
 			"enter_token_address": "Nhập địa chỉ token SPL",
-			"search_token": "Tìm kiếm token"
+			"search_token": "Tìm kiếm token",
+			"search_token_on_network": ""
 		},
 		"warning": {
 			"trust_token": "Đảm bảo bạn tin tưởng token bạn đang thêm. Nếu token bạn đang thêm bị kiểm soát bởi một bên độc hại, họ có thể cố gắng lừa đảo bạn, ví dụ, bằng cách khiến bạn tin rằng bạn đã nhận được một lượng lớn token để lừa bạn gửi lại cho họ hoặc thực hiện các hành động không mong muốn khác. Tìm hiểu thêm về các chiêu lừa đảo và rủi ro bảo mật, ví dụ <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">tại đây</a>."

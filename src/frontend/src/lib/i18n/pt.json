@@ -1044,7 +1044,6 @@
 			"open_qr_modal": "Iniciar scan de código QR para detalhes da transação",
 			"scan_qr": "Scan código QR",
 			"select_token": "Selecionar token para enviar",
-			"select_network_filter": "Selecionar filtro de rede",
 			"send_again": "Enviar novamente",
 			"recently_used_tab": "Usados recentemente",
 			"contacts_tab": "Contatos",
@@ -1518,6 +1517,18 @@
 			"hide_asset_types": "Ocultar tipos de ativos",
 			"asset_type": "Tipo de ativo em $oisy_name",
 			"asset_type_all": "Todos os tipos de ativos",
+			"asset_type_all_short": "",
+			"clear_network_filter": "",
+			"clear_asset_type_filter": "",
+			"filter_asset_types": "",
+			"clear_filters": "",
+			"no_match_network": "",
+			"no_match_asset_type": "",
+			"no_match_asset_type_network": "",
+			"no_match_query": "",
+			"no_match_query_network": "",
+			"no_match_query_asset_type": "",
+			"no_match_query_asset_type_network": "",
 			"no_tokens_for_asset_type": "Não há $asset_type na sua carteira",
 			"no_tokens_for_asset_type_zero_tokens": "Não há $asset_type na rede selecionada",
 			"no_tokens_for_asset_type_description": "Escolha entre <strong>$count tokens suportados</strong> para personalizar a visualização do seu portfólio."
@@ -1627,7 +1638,8 @@
 		"placeholder": {
 			"enter_contract_address": "Insira um endereço de contrato ERC20",
 			"enter_token_address": "Insira um endereço de token SPL",
-			"search_token": "Pesquisar o token"
+			"search_token": "Pesquisar o token",
+			"search_token_on_network": ""
 		},
 		"warning": {
 			"trust_token": "Certifique-se de que você confia no token que está adicionando. Se o token que você está adicionando for controlado por uma parte maliciosa, eles podem tentar enganá-lo, por exemplo, fazendo-o acreditar que recebeu uma quantidade significativa de tokens para que você os envie de volta ou execute outras ações indesejadas. Saiba mais sobre scams e riscos de segurança, por exemplo, <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">aqui</a>."
