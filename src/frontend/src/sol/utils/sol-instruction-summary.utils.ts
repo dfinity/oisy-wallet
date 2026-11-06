@@ -2812,7 +2812,7 @@ export const findSolProgramsPayingOthers = ({
 						waiting: acc.waiting,
 						...opened,
 						parentIndex,
-						rent: rentExemptMinimum
+						rent: instruction.programId === TOKEN_PROGRAM_ADDRESS ? rentExemptMinimum : undefined
 					})
 				};
 			}

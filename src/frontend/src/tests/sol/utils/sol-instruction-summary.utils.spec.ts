@@ -5358,6 +5358,39 @@ describe('sol-instruction-summary.utils', () => {
 			).toEqual([WHIRLPOOL]);
 		});
 
+		// A Token-2022 account's rent grows with its extensions: this one needs 34,800 lamports more
+		// than the minimum the review reads.
+		it('should take all the lamports at an opening by Token-2022 as its rent', () => {
+			const token2022 = ({ type, info }: { type: string; info: object }) => ({
+				program: 'spl-token',
+				programId: TOKEN_2022_PROGRAM_ADDRESS,
+				parsed: { type, info },
+				stackHeight: 3
+			});
+
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: RENT, stackHeight: 3 }),
+						call({ program: DLMM, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 34_800, stackHeight: 3 }),
+						call({ program: WHIRLPOOL, withWallet: false, stackHeight: 2 }),
+						token2022({
+							type: 'initializeAccount3',
+							info: { account: elsewhere, mint: mockSplAddress, owner: mockSolAddress3 }
+						}),
+						token2022({
+							type: 'withdrawExcessLamports',
+							info: { source: elsewhere, destination: mockSolAddress4, authority: mockSolAddress3 }
+						})
+					],
+					rent: BigInt(RENT)
+				})
+			).toEqual([WHIRLPOOL, DLMM]);
+		});
+
 		it('should name a pool whose lamports an account opened for another mint takes in, when its tokens leave', () => {
 			expect(
 				paying({
