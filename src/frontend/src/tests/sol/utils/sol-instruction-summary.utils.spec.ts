@@ -4910,6 +4910,23 @@ describe('sol-instruction-summary.utils', () => {
 			stackHeight
 		});
 
+		const send = ({
+			source,
+			destination,
+			lamports,
+			stackHeight
+		}: {
+			source: string;
+			destination: string;
+			lamports: number;
+			stackHeight: number;
+		}) => ({
+			program: 'system',
+			programId: '11111111111111111111111111111111',
+			parsed: { type: 'transfer', info: { source, destination, lamports } },
+			stackHeight
+		});
+
 		const unwrap = ({
 			source,
 			destination,
@@ -5117,6 +5134,45 @@ describe('sol-instruction-summary.utils', () => {
 					]
 				})
 			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should name a pool whose lamports paid into an account only token units leave', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should not name a pool whose lamports paid into an account leave it as lamports', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						send({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							lamports: 1000,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([]);
 		});
 
 		it.each([

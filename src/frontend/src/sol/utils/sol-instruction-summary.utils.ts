@@ -2377,10 +2377,14 @@ export const mapSolInstructionSummaries = ({
 	return groupUnread({ effects: listed, programs, unread });
 };
 
-// What a transfer moves where: from a System account, a seed-derived one or a nonce account, or from
-// a token account on the signature of its authority. A Token-2022 mint that charges a fee on
-// transfers holds it back in the destination, which is credited the rest. An unwrap pays lamports
-// out of a wrapped SOL account the same way, and one that states no amount empties the account.
+// What a payment moves: lamports, or units of the one mint a token account holds.
+type PaymentAsset = 'lamports' | 'tokens';
+
+// What a transfer moves where: lamports from a System account, a seed-derived one or a nonce
+// account, or token units from a token account on the signature of its authority. A Token-2022 mint
+// that charges a fee on transfers holds it back in the destination, which is credited the rest. An
+// unwrap takes token units out of a wrapped SOL account and pays them into its destination as
+// lamports, and one that states no amount empties the account.
 const paymentOf = ({
 	program,
 	parsed: { type, info }
@@ -2392,13 +2396,17 @@ const paymentOf = ({
 			value?: bigint;
 			credited?: bigint;
 			emptying?: boolean;
+			sent: PaymentAsset;
+			received: PaymentAsset;
 	  }
 	| undefined => {
 	if (program === 'system' && SYSTEM_TRANSFERS.includes(type)) {
 		return {
 			source: systemTransferSource(info),
 			destination: address({ info, key: 'destination' }),
-			value: amount({ info, key: 'lamports' })
+			value: amount({ info, key: 'lamports' }),
+			sent: 'lamports',
+			received: 'lamports'
 		};
 	}
 
@@ -2415,7 +2423,9 @@ const paymentOf = ({
 			destination: address({ info, key: 'destination' }),
 			authority: address({ info, key: 'authority' }) ?? address({ info, key: 'multisigAuthority' }),
 			value,
-			...(nonNullish(value) && nonNullish(fee) && { credited: value - fee })
+			...(nonNullish(value) && nonNullish(fee) && { credited: value - fee }),
+			sent: 'tokens',
+			received: 'tokens'
 		};
 	}
 
@@ -2427,7 +2437,9 @@ const paymentOf = ({
 			destination: address({ info, key: 'destination' }),
 			authority: address({ info, key: 'authority' }) ?? address({ info, key: 'multisigAuthority' }),
 			value,
-			...(isNullish(value) && { emptying: true })
+			...(isNullish(value) && { emptying: true }),
+			sent: 'tokens',
+			received: 'lamports'
 		};
 	}
 };
@@ -2435,23 +2447,27 @@ const paymentOf = ({
 interface WaitingPayout {
 	program: SolAddress;
 	account: SolAddress;
+	asset: PaymentAsset;
 	parentIndex: number;
 	position: number;
 	left: bigint;
 }
 
 // A transfer out of an account passes its amount on to the payouts into that account within the same
-// instruction that are still waiting, oldest first. One that empties the account passes on all of
-// them, whatever it moves.
+// instruction that are still waiting, oldest first, and only to those paid in what it moves: token
+// units leaving an account pass on none of the lamports paid into it. One that empties the account
+// passes all of those on, whatever its amount.
 const passOn = ({
 	waiting,
 	account,
+	asset,
 	parentIndex,
 	value,
 	emptying = false
 }: {
 	waiting: WaitingPayout[];
 	account: SolAddress | undefined;
+	asset: PaymentAsset;
 	parentIndex: number;
 	value: bigint | undefined;
 	emptying?: boolean;
@@ -2460,7 +2476,11 @@ const passOn = ({
 		? waiting
 		: waiting.reduce<{ rest: bigint | undefined; waiting: WaitingPayout[] }>(
 				({ rest, waiting: acc }, payout) => {
-					if (payout.account !== account || payout.parentIndex !== parentIndex) {
+					if (
+						payout.account !== account ||
+						payout.asset !== asset ||
+						payout.parentIndex !== parentIndex
+					) {
 						return { rest, waiting: [...acc, payout] };
 					}
 
@@ -2528,7 +2548,16 @@ export const findSolProgramsPayingOthers = ({
 				return acc;
 			}
 
-			const { source, destination, authority, value, credited = value, emptying } = payment;
+			const {
+				source,
+				destination,
+				authority,
+				value,
+				credited = value,
+				emptying,
+				sent,
+				received
+			} = payment;
 
 			// A transfer from an account to itself moves nothing.
 			if (nonNullish(source) && source === destination) {
@@ -2538,6 +2567,7 @@ export const findSolProgramsPayingOthers = ({
 			const waiting = passOn({
 				waiting: acc.waiting,
 				account: source,
+				asset: sent,
 				parentIndex,
 				value,
 				emptying
@@ -2571,7 +2601,14 @@ export const findSolProgramsPayingOthers = ({
 				...acc,
 				waiting: [
 					...waiting,
-					{ program: madeBy, account: destination, parentIndex, position, left: credited }
+					{
+						program: madeBy,
+						account: destination,
+						asset: received,
+						parentIndex,
+						position,
+						left: credited
+					}
 				]
 			};
 		},
