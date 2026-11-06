@@ -35,7 +35,8 @@ import {
 	parseTokenAccountState,
 	selectSolSimulationAddresses,
 	solClosedAccountsReachWallet,
-	solOpenAppAccountsLostLamports
+	solOpenAppAccountsLostLamports,
+	sortSolProgramsByRun
 } from '$sol/utils/sol-simulation.utils';
 import { solWalletLamportsStated } from '$sol/utils/sol-transaction-summary.utils';
 import {
@@ -486,9 +487,10 @@ const simulate = async ({
 			partial: false
 		},
 		// A known program too, when it is called with the wallet and pays out of an account that is
-		// not the user's into another one: a position it holds for them, which no line states.
-		unreadPrograms: [
-			...new Set([
+		// not the user's into another one: a position it holds for them, which no line states. Both
+		// kinds in the order the run reaches them.
+		unreadPrograms: sortSolProgramsByRun({
+			programs: [
 				...unreadPrograms,
 				...findSolProgramsPayingOthers({
 					instructions: [...transactionMessage.instructions].map(asSolParsedRpcInstructionOrSelf),
@@ -498,8 +500,10 @@ const simulate = async ({
 					accountHolders,
 					accountMintsBefore
 				})
-			])
-		],
+			],
+			instructions: transactionMessage.instructions,
+			innerInstructions
+		}),
 		slot: snapshot.slot
 	};
 };

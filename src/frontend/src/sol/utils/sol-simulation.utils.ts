@@ -474,6 +474,43 @@ export const findSolUnreadPrograms = ({
 	return [...new Set(reached)];
 };
 
+/**
+ * Programs, each once, in the order a simulated run first reaches them: the message's own
+ * instructions in turn, each followed by the calls made inside it. The review names the programs it
+ * cannot read and the listed ones paying others in one notice, so both go by this order, whichever
+ * check found them.
+ */
+export const sortSolProgramsByRun = ({
+	programs,
+	instructions,
+	innerInstructions
+}: {
+	programs: SolAddress[];
+	instructions: CompilableTransactionMessage['instructions'];
+	innerInstructions: SolanaSimulatedInnerInstructions;
+}): SolAddress[] => {
+	const run: SolAddress[] = [...instructions].flatMap(({ programAddress }, index) => [
+		programAddress,
+		...[...innerInstructions]
+			.filter(({ index: parent }) => Number(parent) === index)
+			.flatMap(({ instructions: nested }) =>
+				[...nested].map((instruction) =>
+					'programId' in instruction ? instruction.programId : undefined
+				)
+			)
+			.filter(nonNullish)
+	]);
+
+	// Neither check names a program the run does not reach; one would go last.
+	const reachedAt = (program: SolAddress): number => {
+		const at = run.indexOf(program);
+
+		return at === -1 ? run.length : at;
+	};
+
+	return [...new Set(programs)].sort((first, second) => reachedAt(first) - reachedAt(second));
+};
+
 // The programs whose accounts a run's lines already account for: what leaves a wallet does so by a
 // transfer the run states, and a token account is closed by an instruction that names where its
 // balance goes.

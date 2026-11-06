@@ -21,7 +21,8 @@ import {
 	selectSolSimulationAddresses,
 	solClosedAccountsReachWallet,
 	solOpenAppAccountsLostLamports,
-	solSimulationReassignsWallet
+	solSimulationReassignsWallet,
+	sortSolProgramsByRun
 } from '$sol/utils/sol-simulation.utils';
 import {
 	mockAtaAddress,
@@ -873,6 +874,50 @@ describe('sol-simulation.utils', () => {
 					])
 				})
 			).toBeUndefined();
+		});
+	});
+
+	describe('sortSolProgramsByRun', () => {
+		const raw = (programId: SolAddress) => ({ programId, accounts: [], data: '', stackHeight: 2 });
+
+		const run = (groups: { index: number; instructions: unknown[] }[]) =>
+			groups as unknown as SolanaSimulatedInnerInstructions;
+
+		const message = (programs: SolAddress[]) =>
+			programs.map((programAddress) => ({
+				programAddress,
+				accounts: [],
+				data: new Uint8Array()
+			})) as unknown as CompilableTransactionMessage['instructions'];
+
+		it('should order programs by the instruction of the message that first calls them', () => {
+			expect(
+				sortSolProgramsByRun({
+					programs: [mockSolAddress3, mockSolAddress2],
+					instructions: message([mockSolAddress2, mockSolAddress3]),
+					innerInstructions: run([])
+				})
+			).toEqual([mockSolAddress2, mockSolAddress3]);
+		});
+
+		it('should order a program first reached inside an instruction before the instructions after it', () => {
+			expect(
+				sortSolProgramsByRun({
+					programs: [mockSolAddress3, mockSplAddress],
+					instructions: message([mockSolAddress2, mockSolAddress3]),
+					innerInstructions: run([{ index: 0, instructions: [raw(mockSplAddress)] }])
+				})
+			).toEqual([mockSplAddress, mockSolAddress3]);
+		});
+
+		it('should name each program once', () => {
+			expect(
+				sortSolProgramsByRun({
+					programs: [mockSolAddress2, mockSolAddress2],
+					instructions: message([mockSolAddress2]),
+					innerInstructions: run([])
+				})
+			).toEqual([mockSolAddress2]);
 		});
 	});
 
