@@ -1599,7 +1599,7 @@ describe('sol-instructions.utils', () => {
 			});
 		});
 
-		it('should forward the delegate as destination and flag an `Approve` instruction as an unchecked approval', () => {
+		it('should forward the delegate as destination and flag an `Approve` instruction as an approval', () => {
 			const instruction = getApproveInstruction({
 				source: address(mockSolAddress),
 				delegate: address(mockSolAddress2),
@@ -1611,8 +1611,7 @@ describe('sol-instructions.utils', () => {
 				amount: 100n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
-				isApproval: true,
-				uncheckedApproval: true
+				isApproval: true
 			});
 		});
 
@@ -1671,7 +1670,7 @@ describe('sol-instructions.utils', () => {
 			});
 		});
 
-		it('should forward the delegate and flag a Token-2022 `Approve` instruction as an unchecked approval', () => {
+		it('should forward the delegate and flag a Token-2022 `Approve` instruction as an approval', () => {
 			const instruction = getToken2022ApproveInstruction({
 				source: address(mockSolAddress),
 				delegate: address(mockSolAddress2),
@@ -1683,8 +1682,7 @@ describe('sol-instructions.utils', () => {
 				amount: 100n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
-				isApproval: true,
-				uncheckedApproval: true
+				isApproval: true
 			});
 		});
 

@@ -896,8 +896,8 @@ describe('sol-transactions.utils', () => {
 		});
 
 		describe('with an approval', () => {
-			// The real instruction mapper, since whether an approval names its token and decimals is
-			// decided by the instruction it decodes.
+			// The real instruction mapper, since whether an instruction is an approval, and whether it
+			// names its token, is decided by the instruction it decodes.
 			beforeEach(() => {
 				spyMapSolInstruction.mockRestore();
 			});
@@ -916,16 +916,16 @@ describe('sol-transactions.utils', () => {
 				isApproval: true
 			};
 
-			it('should flag an `Approve` as an unchecked approval', () => {
+			it('should flag an `Approve` as an approval', () => {
 				expect(
 					mapSolTransactionMessage({
 						transactionMessage: { ...mockSolParsedTransactionMessage, instructions: [approve] },
 						userAddress: mockSolAddress
 					})
-				).toStrictEqual({ ...mappedApproval, uncheckedApproval: true });
+				).toStrictEqual(mappedApproval);
 			});
 
-			it('should flag a Token-2022 `Approve` as an unchecked approval', () => {
+			it('should flag a Token-2022 `Approve` as an approval', () => {
 				const token2022Approve = getToken2022ApproveInstruction({
 					source: address(mockAtaAddress),
 					delegate: address(mockSolAddress2),
@@ -941,10 +941,10 @@ describe('sol-transactions.utils', () => {
 						},
 						userAddress: mockSolAddress
 					})
-				).toStrictEqual({ ...mappedApproval, uncheckedApproval: true });
+				).toStrictEqual(mappedApproval);
 			});
 
-			it('should flag an `Approve` carried in a token batch as an unchecked approval', () => {
+			it('should flag an `Approve` carried in a token batch as an approval', () => {
 				expect(
 					mapSolTransactionMessage({
 						transactionMessage: {
@@ -953,10 +953,10 @@ describe('sol-transactions.utils', () => {
 						},
 						userAddress: mockSolAddress
 					})
-				).toStrictEqual({ ...mappedApproval, uncheckedApproval: true });
+				).toStrictEqual(mappedApproval);
 			});
 
-			it('should not flag an `ApproveChecked` as an unchecked approval', () => {
+			it('should flag an `ApproveChecked` as an approval of its mint', () => {
 				const approveChecked = getApproveCheckedInstruction({
 					source: address(mockAtaAddress),
 					mint: address(JUP_TOKEN.address),

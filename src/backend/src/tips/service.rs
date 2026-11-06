@@ -269,10 +269,12 @@ pub fn get_tip_details(request: TipClaimRequest) -> Result<TipDetails, TipError>
 ///
 /// The record flips to `Claiming` **before** the ledger call, so a second caller
 /// arriving mid-flight sees `ClaimInProgress` rather than starting a second
-/// payout. Every failure reverts to `Reserved`, which is safe even for an
-/// answer that never came back: the payout carries the tip's own
-/// `created_at_time`, so the retry is the *same* transaction and the ledger
-/// either executes it once or names the block where it already did.
+/// payout. A definite failure reverts it to `Reserved`; a deadline with no
+/// answer leaves it `Claiming` until [`TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS`] has
+/// passed. A retry is safe either way, even after a payout whose answer never
+/// arrived: the payout carries the tip's own `created_at_time`, so a retry by
+/// the same claimer is the *same* transaction and the ledger either executes it
+/// once or names the block where it already did.
 ///
 /// That is what an ambiguous answer is worth resolving into. Without the stamp a
 /// payout that landed and whose reply was lost came back on the next attempt as
@@ -399,6 +401,14 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
                 block_index,
             })
         }
+        // The deadline passing is not an answer, so the slot is left exactly as
+        // it was. `cancel_tip` admits `Reserved` only, and releasing the claim
+        // here would hand it a tip whose payout may still be running and may
+        // still pay — the case the guard there exists to refuse. The tip is not
+        // stranded either: `is_claimable` opens it to a fresh claim once
+        // `TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS` has passed, as it does for a claim
+        // whose reply never came back at all.
+        Err(TransferFromCallError::Unresolved(msg)) => Err(TipError::TransferFailed { msg }),
         Err(err) => Err(refuse_claim(&key, claimer, now, err)),
     }
 }
@@ -410,6 +420,9 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
 /// reason and the caller's error partition the ledger's refusals exactly the
 /// same way, and letting them drift apart is how a claimer and a sender end up
 /// with different accounts of the same attempt.
+///
+/// `Unresolved` never reaches it: `claim_tip` answers that one without touching
+/// the slot.
 fn refuse_claim(
     key: &TipId,
     claimer: Principal,
@@ -421,9 +434,9 @@ fn refuse_claim(
         TransferFromCallError::InsufficientFunds => TipClaimFailureReason::InsufficientFunds,
         // Nothing finer to say about a stale stamp: it is one more attempt that
         // did not pay out, and retrying is the advice.
-        TransferFromCallError::TooOld | TransferFromCallError::Failed(_) => {
-            TipClaimFailureReason::TransferFailed
-        }
+        TransferFromCallError::TooOld
+        | TransferFromCallError::Unresolved(_)
+        | TransferFromCallError::Failed(_) => TipClaimFailureReason::TransferFailed,
     };
 
     release_claim(
@@ -442,7 +455,9 @@ fn refuse_claim(
                   the next attempt starts a new one"
                 .to_string(),
         },
-        TransferFromCallError::Failed(msg) => TipError::TransferFailed { msg },
+        TransferFromCallError::Unresolved(msg) | TransferFromCallError::Failed(msg) => {
+            TipError::TransferFailed { msg }
+        }
     }
 }
 
