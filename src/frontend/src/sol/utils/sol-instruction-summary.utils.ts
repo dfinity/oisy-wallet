@@ -2384,8 +2384,9 @@ type PaymentAsset = 'lamports' | 'tokens';
 // account, or token units from a token account on the signature of its authority. A Token-2022 mint
 // that charges a fee on transfers holds it back in the destination, which is credited the rest. An
 // unwrap takes token units out of a wrapped SOL account and pays them into its destination as
-// lamports, and one that states no amount empties the account. A close pays every lamport its
-// account holds into its destination, and with them what a wrapped SOL account wraps.
+// lamports, and one that states no amount empties the account. A withdrawal of excess lamports pays
+// everything its account holds above its rent. A close pays every lamport its account holds into
+// its destination, and with them what a wrapped SOL account wraps.
 const paymentOf = ({
 	program,
 	parsed: { type, info }
@@ -2441,6 +2442,21 @@ const paymentOf = ({
 			value,
 			...(isNullish(value) && { emptying: true }),
 			sent: 'tokens',
+			received: 'lamports'
+		};
+	}
+
+	if (
+		nonNullish(program) &&
+		TOKEN_PROGRAMS.includes(program) &&
+		type === 'withdrawExcessLamports'
+	) {
+		return {
+			source: address({ info, key: 'source' }),
+			destination: address({ info, key: 'destination' }),
+			authority: address({ info, key: 'authority' }) ?? address({ info, key: 'multisigAuthority' }),
+			emptying: true,
+			sent: 'lamports',
 			received: 'lamports'
 		};
 	}

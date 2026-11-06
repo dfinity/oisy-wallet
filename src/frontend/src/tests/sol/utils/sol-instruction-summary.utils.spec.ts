@@ -5302,6 +5302,42 @@ describe('sol-instruction-summary.utils', () => {
 			).toEqual([WHIRLPOOL]);
 		});
 
+		it('should name a listed pool that withdraws the excess lamports of its account to somebody else', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+						token({
+							type: 'withdrawExcessLamports',
+							info: { source: vault, destination: mockSolAddress4, authority: mockSolAddress2 },
+							stackHeight: 2
+						})
+					],
+					mints: { [vault]: mockSplAddress }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should not name a pool whose lamports paid into a token account it withdraws on as its excess', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						token({
+							type: 'withdrawExcessLamports',
+							info: { source: elsewhere, destination: mockSolAddress4, authority: mockSolAddress3 },
+							stackHeight: 3
+						})
+					],
+					mints: { [elsewhere]: mockSplAddress }
+				})
+			).toEqual([]);
+		});
+
 		it("should name a listed pool that closes an account of its own into somebody else's", () => {
 			expect(
 				paying({
