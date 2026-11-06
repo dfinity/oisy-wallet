@@ -13,6 +13,7 @@ import {
 	VELORA_AUGUSTUS_SELL_ABI,
 	VELORA_DELTA_ORDER_TYPES
 } from '$eth/constants/velora.constants';
+import { infuraProviders } from '$eth/providers/infura.providers';
 import { approve as approveToken } from '$eth/services/approve.services';
 import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
@@ -306,6 +307,10 @@ vi.mock('@velora-dex/sdk', async (importOriginal) => {
 vi.mock('$eth/services/approve.services', () => ({
 	approve: vi.fn(),
 	erc20ContractAllowance: vi.fn()
+}));
+
+vi.mock('$eth/providers/infura.providers', () => ({
+	infuraProviders: vi.fn()
 }));
 
 vi.mock('$eth/services/swap.services', () => ({
@@ -2909,6 +2914,7 @@ describe('swap.services', () => {
 			to?: string;
 			chainId?: number;
 			value?: string;
+			gas?: string;
 		} = {}) => ({
 			from: mockEthAddress,
 			to: mockAugustusAddress,
@@ -2950,8 +2956,19 @@ describe('swap.services', () => {
 		const mockTxHash = '0xMarketTxHash';
 		const mockTxNonce = 7;
 
+		// The node's estimate, and the limit the swap signs with: the estimate plus 20 %.
+		const mockEstimatedGas = 100000n;
+		const mockSignedGas = '120000';
+
+		const mockEstimateGas = vi.fn();
+
 		beforeEach(() => {
 			vi.clearAllMocks();
+
+			mockEstimateGas.mockResolvedValue(mockEstimatedGas);
+			vi.mocked(infuraProviders).mockReturnValue({
+				estimateGas: mockEstimateGas
+			} as unknown as ReturnType<typeof infuraProviders>);
 
 			mockSwapGetSpender = vi.fn();
 			mockSwapBuildTx = vi.fn();
@@ -3173,8 +3190,35 @@ describe('swap.services', () => {
 				await fetchVeloraMarketSwap(params);
 
 				expect(sendEvmSwap).toHaveBeenCalledExactlyOnceWith(
-					expect.objectContaining({ to: mockAugustusAddress, transaction: mockTransaction() })
+					expect.objectContaining({
+						to: mockAugustusAddress,
+						transaction: { ...mockTransaction(), gas: mockSignedGas }
+					})
 				);
+			});
+
+			it('signs with the gas the node estimates, plus the buffer, not the limit Velora sets', async () => {
+				mockSwapBuildTx.mockResolvedValue(mockTransaction({ gas: '30000000' }));
+
+				await fetchVeloraMarketSwap(params);
+
+				expect(mockEstimateGas).toHaveBeenCalledExactlyOnceWith({
+					from: mockUserAddress,
+					to: mockAugustusAddress,
+					data: mockTransaction().data,
+					value: ZERO
+				});
+				expect(sendEvmSwap).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ transaction: { ...mockTransaction(), gas: mockSignedGas } })
+				);
+			});
+
+			it('stops before signing a transaction the node cannot estimate', async () => {
+				mockEstimateGas.mockRejectedValue(new Error('execution reverted'));
+
+				await expect(fetchVeloraMarketSwap(params)).rejects.toThrow('execution reverted');
+
+				expect(sendEvmSwap).not.toHaveBeenCalled();
 			});
 
 			it('refuses a network with no pinned Augustus before approving anything', async () => {
@@ -3263,7 +3307,7 @@ describe('swap.services', () => {
 					expect(sendEvmSwap).toHaveBeenCalledExactlyOnceWith(
 						expect.objectContaining({
 							to: mockAugustusAddress,
-							transaction: nativeTransaction(nativeAmount)
+							transaction: { ...nativeTransaction(nativeAmount), gas: mockSignedGas }
 						})
 					);
 				});

@@ -10,6 +10,7 @@ import {
 	VELORA_DELTA_EIP712_DOMAIN,
 	VELORA_DELTA_ORDER_TYPES
 } from '$eth/constants/velora.constants';
+import { infuraProviders } from '$eth/providers/infura.providers';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/approve.services';
 import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
@@ -47,7 +48,12 @@ import {
 	ZERO
 } from '$lib/constants/app.constants';
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
-import { ICP_SWAP_POOL_FEE, SWAP_QUOTE_TIMEOUT_MS, SWAP_SIDE } from '$lib/constants/swap.constants';
+import {
+	ICP_SWAP_POOL_FEE,
+	SWAP_QUOTE_TIMEOUT_MS,
+	SWAP_SIDE,
+	VELORA_GAS_LIMIT_BUFFER_PERCENT
+} from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import {
 	PLAUSIBLE_EVENTS,
@@ -2181,6 +2187,15 @@ export const fetchVeloraMarketSwap = async ({
 		wallet: userAddress
 	});
 
+	// Velora's gas limit is unsigned, and a failing estimate is a transaction that would revert.
+	const estimatedGas = await infuraProviders(sourceNetwork.id).estimateGas({
+		from: userAddress,
+		to: augustusAddress,
+		data: txParams.data,
+		value: BigInt(txParams.value)
+	});
+	const swapGas = (estimatedGas * (100n + VELORA_GAS_LIMIT_BUFFER_PERCENT)) / 100n;
+
 	// The transaction is broadcast from here on — the point of no return. `swap`
 	// also kicks off `processTransactionSent`, which populates the pending row in
 	// the token's transaction list; the AUT row adds the durable, cross-session
@@ -2188,7 +2203,7 @@ export const fetchVeloraMarketSwap = async ({
 	const { hash, nonce } = await swap({
 		from: userAddress,
 		to: augustusAddress,
-		transaction: txParams,
+		transaction: { ...txParams, gas: `${swapGas}` },
 		amount: parsedSwapAmount,
 		identity,
 		token: sourceToken,
