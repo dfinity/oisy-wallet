@@ -191,8 +191,8 @@ fn append_history_entries(
     let excess = history
         .len()
         .saturating_sub(MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER);
-    history.drain(..excess);
-    agreement_history.insert(principal, Candid(history));
+    let newest = history.split_off(excess);
+    agreement_history.insert(principal, Candid(newest));
 }
 
 /// Builds history entries for the agreements in `request` that change the stored `current` ones.
