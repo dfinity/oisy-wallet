@@ -16,6 +16,7 @@
 		onBack: () => void;
 		onNext: () => void;
 		sendAmount: Snippet;
+		memo?: Snippet;
 		priority?: Snippet;
 		fee?: Snippet;
 		info?: Snippet;
@@ -31,6 +32,7 @@
 		onBack,
 		onNext,
 		sendAmount,
+		memo,
 		priority,
 		fee,
 		info,
@@ -54,6 +56,7 @@
 			{selectedContact}
 		/>
 
+		{@render memo?.()}
 		{@render priority?.()}
 
 		{@render fee?.()}

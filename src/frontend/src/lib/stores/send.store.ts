@@ -59,6 +59,8 @@ export const initSendContext = ({
 
 	const sendDestination = writable<Address>('');
 
+	const sendMemo = writable('');
+
 	const isIcBurning = derived(
 		[sendToken, sendDestination],
 		([$sendToken, $sendDestination]) =>
@@ -121,6 +123,7 @@ export const initSendContext = ({
 		sendTokenNetworkId,
 		sendBalance,
 		sendDestination,
+		sendMemo,
 		isIcBurning,
 		sendEthCustomNonce,
 		sendEthFeePriority,
@@ -138,6 +141,7 @@ export interface SendContext {
 	sendTokenNetworkId: Readable<NetworkId>;
 	sendBalance: Readable<OptionBalance>;
 	sendDestination: Writable<Address>;
+	sendMemo: Writable<string>;
 	isIcBurning: Readable<boolean>;
 	sendEthCustomNonce: Writable<number | undefined>;
 	sendEthFeePriority: Writable<EthFeePriority>;
