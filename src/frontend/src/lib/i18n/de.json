@@ -519,6 +519,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Community-Foren auf dem Internet Computer.",
+				"description": "IC Forums ist eine Community-Plattform, die vollständig auf dem Internet Computer läuft. Diskutiere in mehr als 100 Communities mit oder gründe deine eigene, mit eigener Struktur, eigenen Rollen und eigener Moderation. Eine Identität gilt für alle Communities."
 			}
 		}
 	},

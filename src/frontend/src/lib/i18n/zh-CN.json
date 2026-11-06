@@ -519,6 +519,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Internet Computer 上的社区论坛。",
+				"description": "IC Forums 是一个完全运行在 Internet Computer 上的社区平台。你可以参与 100 多个社区的讨论，也可以创建自己的社区，并设置独立的结构、角色和管理规则。一个身份即可通行所有社区。"
 			}
 		}
 	},
