@@ -2396,7 +2396,6 @@ const paymentOf = ({
 	| {
 			source?: SolAddress;
 			destination?: SolAddress;
-			authority?: SolAddress;
 			value?: bigint;
 			credited?: bigint;
 			emptying?: boolean;
@@ -2427,7 +2426,6 @@ const paymentOf = ({
 		return {
 			source: address({ info, key: 'source' }),
 			destination: address({ info, key: 'destination' }),
-			authority: address({ info, key: 'authority' }) ?? address({ info, key: 'multisigAuthority' }),
 			value,
 			...(nonNullish(value) && nonNullish(fee) && { credited: value - fee }),
 			sent: 'tokens',
@@ -2441,7 +2439,6 @@ const paymentOf = ({
 		return {
 			source: address({ info, key: 'source' }),
 			destination: address({ info, key: 'destination' }),
-			authority: address({ info, key: 'authority' }) ?? address({ info, key: 'multisigAuthority' }),
 			value,
 			...(isNullish(value) && { emptying: true }),
 			sent: 'tokens',
@@ -2457,7 +2454,6 @@ const paymentOf = ({
 		return {
 			source: address({ info, key: 'source' }),
 			destination: address({ info, key: 'destination' }),
-			authority: address({ info, key: 'authority' }) ?? address({ info, key: 'multisigAuthority' }),
 			emptying: true,
 			sent: 'lamports',
 			received: 'lamports'
@@ -2477,11 +2473,6 @@ const paymentOf = ({
 	) {
 		return {
 			source: address({ info, key: 'account' }),
-			authority:
-				address({ info, key: 'authority' }) ??
-				address({ info, key: 'multisigAuthority' }) ??
-				address({ info, key: 'owner' }) ??
-				address({ info, key: 'multisigOwner' }),
 			value: tokenAmount({ info }).amount ?? amount({ info, key: 'amount' }),
 			burning: true,
 			sent: 'tokens',
@@ -2493,7 +2484,6 @@ const paymentOf = ({
 		return {
 			source: address({ info, key: 'account' }),
 			destination: address({ info, key: 'destination' }),
-			authority: address({ info, key: 'owner' }) ?? address({ info, key: 'multisigOwner' }),
 			closing: true,
 			sent: 'lamports',
 			received: 'lamports'
@@ -2832,7 +2822,6 @@ export const findSolProgramsPayingOthers = ({
 			const {
 				source,
 				destination,
-				authority,
 				value,
 				credited = value,
 				emptying,
@@ -2896,9 +2885,9 @@ export const findSolProgramsPayingOthers = ({
 				return { ...acc, waiting };
 			}
 
-			const fromUser = (closing ? [source] : [authority, source]).some(
-				(account) => nonNullish(account) && ownedAt({ account, position })
-			);
+			// Whose a payment is follows the account it leaves, not who signs: the wallet can sign as a
+			// delegate for an account of somebody else's, and what leaves that is still theirs.
+			const fromUser = nonNullish(source) && ownedAt({ account: source, position });
 			const toUser =
 				nonNullish(destination) && ownedAt({ account: destination, position, arriving: true });
 

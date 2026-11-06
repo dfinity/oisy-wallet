@@ -5613,6 +5613,62 @@ describe('sol-instruction-summary.utils', () => {
 			).toEqual([WHIRLPOOL]);
 		});
 
+		// The wallet signs for an account it is a delegate of just as it signs for its own, yet what
+		// leaves that account is its holder's.
+		it.each([
+			{
+				label: 'a plain transfer',
+				payout: transfer({
+					source: vault,
+					destination: elsewhere,
+					amount: '1000',
+					authority: mockSolAddress,
+					stackHeight: 2
+				})
+			},
+			{
+				label: 'a transfer that holds back a fee',
+				payout: transferWithFee({
+					source: vault,
+					destination: elsewhere,
+					amount: '1000',
+					fee: '10',
+					authority: mockSolAddress,
+					stackHeight: 2
+				})
+			}
+		])(
+			"should name a listed pool whose vault pays elsewhere by $label the wallet signs as the vault's delegate",
+			({ payout }) => {
+				expect(
+					paying({
+						instructions: [calling({ program: WHIRLPOOL })],
+						inner: [
+							transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+							payout
+						]
+					})
+				).toEqual([WHIRLPOOL]);
+			}
+		);
+
+		it('should not name a pool for what the user pays out of their own account to somebody else', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({
+							source: userAccount,
+							destination: elsewhere,
+							amount: '1000',
+							authority: mockSolAddress,
+							stackHeight: 2
+						})
+					]
+				})
+			).toEqual([]);
+		});
+
 		it('should name a listed pool that withdraws the excess lamports of its account to somebody else', () => {
 			expect(
 				paying({
