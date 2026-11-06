@@ -1212,7 +1212,10 @@
 			"unknown": "OISY nie wie jeszcze, czy doładowanie się powiodło. Jeśli tak, zobaczysz je w aktywności $token. Doładuj ponownie, aby wysłać to samo doładowanie jeszcze raz: może się powieść tylko raz. Nowe lub zmienione doładowanie dodałoby cykle ponownie, jeśli to się powiodło.",
 			"unknown_fresh": "OISY nie wie jeszcze, czy Twoje ostatnie doładowanie się powiodło. Jeśli tak, to doładowanie doda cykle ponownie. Najpierw sprawdź aktywność $token.",
 			"sent_to_canister": "Wysłanie $token do kanistra go nie doładowuje. $token trafiają na konto kanistra, a kanister dostaje cykle tylko wtedy, gdy wypłaci je jego własny kod.",
-			"sent_to_canister_top_up": "Aby dodać cykle do kanistra, użyj opcji „Doładuj” na stronie $token."
+			"sent_to_canister_top_up": "Aby dodać cykle do kanistra, użyj opcji „Doładuj” na stronie $token.",
+			"choice_send": "Wyślij $token",
+			"choice_send_description": "Wyślij tokeny $token na inne konto. Wysłanie $token do kanistra go nie doładowuje.",
+			"choice_top_up_description": "Zamień tokeny $token na cykle, aby doładować dowolny kanister."
 		},
 		"error": {
 			"invalid_canister_id": "Wpisz ID kanistra. Principali użytkowników, ID kont i adresów w innych sieciach nie można doładować.",
@@ -1364,6 +1367,13 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "Odświeżanie interfejsu użytkownika",
 			"swap_provider": "Dostawca wymiany",
+			"smart_swap": "",
+			"finding_best_rate": "",
+			"smart_swap_gain": "",
+			"smart_swap_best_of_offers": "",
+			"smart_swap_offers_compared": "",
+			"smart_swap_offers": "",
+			"smart_swap_selected_offer": "",
 			"swap_provider_website": "Strona internetowa",
 			"swap_route": "Trasa wymiany",
 			"included_network_fees": "Wliczone opłaty sieciowe",
@@ -1371,7 +1381,6 @@
 			"best_rate": "Najlepsza stawka",
 			"expected_minimum": "Oczekiwane minimum",
 			"you_receive": "Otrzymasz",
-			"select": "Wybierz >",
 			"select_swap_provider": "Wybierz dostawcę wymiany",
 			"open_icp_swap": "Otwórz stronę internetową ICP Swap",
 			"open_instructions_link": "Otwórz link z instrukcjami",
@@ -1430,7 +1439,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
@@ -1866,6 +1876,22 @@
 			"cketh_deposit_principal": "Odbiorca ckETH",
 			"cketh_deposit_refused": "To żądanie wywołuje kontrakt konwersji ckETH dla principala Internet Computer, który nie jest Twój, lub z danymi, których OISY nie potrafi odczytać. Dla Twojego bezpieczeństwa OISY go nie podpisze.",
 			"cketh_helper_unconfirmed": "OISY nie może jeszcze potwierdzić kontraktu konwersji ckETH, więc nie może sprawdzić tej wpłaty. Zatwierdzenie pozostanie wyłączone, dopóki nie będzie to możliwe.",
+			"swap_title": "",
+			"swap_pay": "",
+			"swap_pay_at_most": "",
+			"swap_receive_at_least": "",
+			"swap_recipient": "",
+			"swap_app_fee": "",
+			"swap_app_fee_share": "",
+			"swap_allowance": "",
+			"swap_allowance_amount": "",
+			"swap_allowance_unlimited": "",
+			"swap_valid_until": "",
+			"swap_no_deadline": "",
+			"swap_router": "",
+			"swap_recipient_not_wallet": "",
+			"swap_no_minimum": "",
+			"swap_expired": "",
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość",
 			"sign_psbt": "Podpisz transakcję",
@@ -2486,6 +2512,7 @@
 			"create": "Nie udało się utworzyć kontaktu",
 			"update": "Nie udało się zaktualizować kontaktu",
 			"delete": "Nie udało się usunąć kontaktu",
+			"load": "Nie udało się załadować kontaktów",
 			"name_too_long": "Proszę, aby nazwa miała $maxCharacters znaków lub mniej."
 		}
 	},

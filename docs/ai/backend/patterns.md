@@ -184,6 +184,12 @@ there.
   canister**. Wiring is in
   [`signer/service.rs`](../../../src/backend/src/signer/service.rs)
   (`allow_signing`, `get_allowed_cycles`, top-up flow, allowance maths).
+- A user's signer public keys (and so their BTC / ETH / SOL addresses) are
+  derived offline from the signer's root keys, which
+  [`signer/service.rs`](../../../src/backend/src/signer/service.rs) fetches
+  once and caches (`cfs_ecdsa_root_key`, `cfs_ed25519_root_key`, derivation
+  via `ic-secp256k1` / `ic-ed25519`). Don't call `ecdsa_public_key` /
+  `schnorr_public_key` per user.
 - See [SIGNER_DOMAINS.md](../../../SIGNER_DOMAINS.md) for the architecture
   and per-domain considerations.
 

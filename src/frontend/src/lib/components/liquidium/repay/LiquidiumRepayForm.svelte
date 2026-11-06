@@ -27,6 +27,10 @@
 		maxRepay?: bigint;
 		// The debt request failed, so there is no cap: surfaces a retry message (stays disabled).
 		maxRepayUnavailable?: boolean;
+		// What the balance can still repay (base units) when it holds transfers not yet out of it.
+		// Caps the "Max" shortcut alongside `maxRepay`; unlike it, not an error above it, which is
+		// the rail's balance check.
+		maxSpendable?: bigint;
 		// Net amount of this pool's repays still settling.
 		pendingRepay?: bigint;
 		// Network (gas/UTXO) fee, for the Max shortcut + disabled gate.
@@ -52,6 +56,7 @@
 		amount = $bindable(),
 		maxRepay,
 		maxRepayUnavailable = false,
+		maxSpendable,
 		pendingRepay = ZERO,
 		totalFee,
 		inflowFee,
@@ -73,6 +78,12 @@
 	let maxRepayMissing = $derived(isNullish(maxRepay));
 
 	let pendingCoversDebt = $derived(liquidiumPendingCoversDebt({ pendingRepay, maxRepay, reserve }));
+
+	let maxAmount = $derived(
+		nonNullish(maxRepay) && nonNullish(maxSpendable) && maxSpendable < maxRepay
+			? maxSpendable
+			: maxRepay
+	);
 
 	// Repaying more than the outstanding debt is rejected before the rail-specific affordability
 	// check, so the user sees the relevant cap (mirrors Borrow's "exceeds power" / Withdraw's
@@ -105,7 +116,7 @@
 	autofocus={isDesktop()}
 	disabled={feeMissing || maxRepayMissing || inflowFeeUnavailable || pendingCoversDebt}
 	isSelectable={nonNullish(onSelectToken)}
-	maxAmount={maxRepay}
+	{maxAmount}
 	onClick={onSelectToken}
 	{onClose}
 	onCustomErrorValidate={validateAmount}

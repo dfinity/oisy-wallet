@@ -749,7 +749,7 @@ describe('liquidium.utils', () => {
 	describe('mapLiquidiumReserve', () => {
 		it('maps a reserve to oisy units (USD numbers, base-unit amounts kept)', () => {
 			const reserve: UserReserve = {
-				position: buildPosition({ borrowed: 5n, borrowedDecimals: 6n }),
+				position: buildPosition({ borrowed: 5_000n, borrowedDecimals: 6n }),
 				pool: buildPool(),
 				priceUsd: 60_000,
 				suppliedUsd: 6_000_000n,
@@ -765,12 +765,30 @@ describe('liquidium.utils', () => {
 				borrowApy: expect.closeTo(9),
 				deposited: 100_000_000n,
 				depositedDecimals: 8,
-				borrowed: 5n,
+				borrowed: 5_000n,
 				borrowedDecimals: 6,
 				debtInterest: ZERO,
 				suppliedUsd: 60_000,
-				borrowedUsd: 300
+				borrowedUsd: expect.closeTo(300)
 			});
+		});
+
+		it("takes the debt's USD value from the SDK as reported, without adding the interest", () => {
+			const reserve: UserReserve = {
+				position: buildPosition({ borrowed: 5_000n, borrowedDecimals: 6n, debtInterest: 1_000n }),
+				pool: buildPool(),
+				priceUsd: 60_000,
+				suppliedUsd: ZERO,
+				// Deliberately off `borrowed × priceUsd` (300) so the assertion shows the SDK's figure is
+				// mapped as is rather than recomputed; `debtInterest` (0.001 × 60k = 60) is not added.
+				borrowedUsd: 30_012n,
+				usdDecimals: 2n
+			};
+
+			const { borrowedUsd, debtInterest } = mapLiquidiumReserve(reserve);
+
+			expect(borrowedUsd).toBeCloseTo(300.12);
+			expect(debtInterest).toBe(1_000n);
 		});
 	});
 

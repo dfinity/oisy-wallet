@@ -811,7 +811,7 @@
 			"explorers_description": "$oisy_name routes swaps and bridge transfers through third-party providers. If one takes longer than expected, open the provider's own explorer: it shows where your transfer stands, already filtered to your wallet.",
 			"explorers_velora_description": "Swaps on Ethereum and other EVM networks.",
 			"explorers_near_intents_description": "Cross-chain swaps between EVM networks, Solana and Bitcoin.",
-			"explorers_lifi_description": "Swaps and bridge transfers from EVM networks, including to Solana.",
+			"explorers_lifi_description": "Swaps and bridge transfers from EVM networks, including to Solana, and swaps on Solana.",
 			"explorers_onesec_description": "Bridge transfers between the Internet Computer and EVM networks.",
 			"explorers_chain_eth": "Ethereum & EVM networks",
 			"explorers_chain_sol": "Solana",
@@ -1212,7 +1212,10 @@
 			"unknown": "OISY can't tell yet whether the top-up went through. Your $token activity will show it if it did. Top up again to resend the same top-up: it can only go through once. A new or changed top-up would add cycles again if this one went through.",
 			"unknown_fresh": "OISY can't tell yet whether your last top-up went through. If it did, this top-up adds cycles again. Check your $token activity first.",
 			"sent_to_canister": "Sending $token to a canister doesn't top it up. The $token land in the canister's account, and the canister only gets cycles if its own code withdraws them.",
-			"sent_to_canister_top_up": "To add cycles to a canister, use Top up on the $token page."
+			"sent_to_canister_top_up": "To add cycles to a canister, use Top up on the $token page.",
+			"choice_send": "Send $token",
+			"choice_send_description": "Send $token tokens to another account. Sending $token to a canister doesn't top it up.",
+			"choice_top_up_description": "Convert $token tokens into cycles to top up any canister."
 		},
 		"error": {
 			"invalid_canister_id": "Enter a canister ID. User principals, account IDs and addresses on other networks can't be topped up.",
@@ -1364,6 +1367,13 @@
 			"finishing_in_background": "Wrapping up. We'll keep working on it in the background.",
 			"refreshing_ui": "Refreshing UI",
 			"swap_provider": "Swap provider",
+			"smart_swap": "OISY Smart Swap",
+			"finding_best_rate": "Finding the best rate...",
+			"smart_swap_gain": "Est. $amount vs. lowest quote",
+			"smart_swap_best_of_offers": "Best of $count offers",
+			"smart_swap_offers_compared": "$count offers compared",
+			"smart_swap_offers": "Offers",
+			"smart_swap_selected_offer": "Selected offer",
 			"swap_provider_website": "Website",
 			"swap_route": "Swap route",
 			"included_network_fees": "Included network fees",
@@ -1371,7 +1381,6 @@
 			"best_rate": "Best Rate",
 			"expected_minimum": "Expected minimum",
 			"you_receive": "You receive",
-			"select": "Select >",
 			"select_swap_provider": "Select swap provider",
 			"open_icp_swap": "Open ICP Swap website",
 			"open_instructions_link": "Open instructions link",
@@ -1430,7 +1439,8 @@
 			"oisy_trade_order_not_placed": "OISY Trade did not accept the order, so your funds were returned to your wallet. You were only charged network fees.",
 			"oisy_trade_recovery_failed": "OISY Trade did not accept the order, and your funds could not be returned to your wallet automatically. Please check your balances in the Trading tab to withdraw them.",
 			"lifi_status_unknown": "LI.FI could not report the outcome of this swap. Please check your destination wallet.",
-			"lifi_fee_changed": "The network fee for this swap rose since you reviewed it. Please check the new maximum fee and confirm the swap again."
+			"lifi_fee_changed": "The network fee for this swap rose since you reviewed it. Please check the new maximum fee and confirm the swap again.",
+			"lifi_route_unverified": "This LI.FI route goes through an exchange $oisy_short can't verify yet, so it can't be confirmed. Please choose another provider."
 		}
 	},
 	"buy": {
@@ -1866,6 +1876,22 @@
 			"cketh_deposit_principal": "ckETH recipient",
 			"cketh_deposit_refused": "This request calls the ckETH conversion contract for an Internet Computer principal that isn't yours, or with data OISY can't read. For your security, OISY won't sign it.",
 			"cketh_helper_unconfirmed": "OISY can't confirm the ckETH conversion contract yet, so it can't check this deposit. Approval stays disabled until it can.",
+			"swap_title": "Swap",
+			"swap_pay": "You pay",
+			"swap_pay_at_most": "You pay at most",
+			"swap_receive_at_least": "You receive at least",
+			"swap_recipient": "Recipient",
+			"swap_app_fee": "App fee",
+			"swap_app_fee_share": "$share of $symbol",
+			"swap_allowance": "New spending allowance",
+			"swap_allowance_amount": "The router can spend up to $amount $symbol until $date",
+			"swap_allowance_unlimited": "The router can spend any amount of $symbol until $date",
+			"swap_valid_until": "Valid until",
+			"swap_no_deadline": "No deadline",
+			"swap_router": "Uniswap Universal Router $version",
+			"swap_recipient_not_wallet": "The tokens from this swap go to an address that isn't this wallet. Check the recipient below before signing.",
+			"swap_no_minimum": "This swap doesn't guarantee a minimum amount, so you could receive much less than expected. Only sign if you trust this app.",
+			"swap_expired": "This swap has expired and will fail if you sign it. Return to the app to get a new quote.",
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message",
 			"sign_psbt": "Sign Transaction",
@@ -2486,6 +2512,7 @@
 			"create": "Failed to create the contact",
 			"update": "Failed to update the contact",
 			"delete": "Failed to delete the contact",
+			"load": "Failed to load contacts",
 			"name_too_long": "Please keep the name to $maxCharacters characters or fewer."
 		}
 	},

@@ -27,6 +27,7 @@
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
+	import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 	import { initSwapContext, SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
 
@@ -36,12 +37,13 @@
 
 	let { children }: Props = $props();
 
-	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
-		store: initSwapAmountsStore()
-	});
-
 	const swapContext = initSwapContext();
 	setContext<SwapContext>(SWAP_CONTEXT_KEY, swapContext);
+
+	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
+		store: initSwapAmountsStore({ amountSetToMax: swapContext.amountSetToMax }),
+		activity: initSwapQuoteActivityStore()
+	});
 
 	const { destinationToken, receiveSupportedData, setDestinationToken } = swapContext;
 
