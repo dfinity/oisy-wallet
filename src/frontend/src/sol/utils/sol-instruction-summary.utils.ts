@@ -2386,8 +2386,9 @@ type PaymentAsset = 'lamports' | 'tokens';
 // unwrap takes token units out of a wrapped SOL account and pays them into its destination as
 // lamports, and one that states no amount empties the account. A withdrawal of excess lamports pays
 // everything its account holds above its rent. A close pays every lamport its account holds into
-// its destination, and with them what a wrapped SOL account wraps. A burn takes token units out of
-// its account into nowhere.
+// its destination, and with them what a wrapped SOL account wraps. A burn, a permissioned one
+// included, takes token units out of its account into nowhere, and a deposit into the account's
+// confidential balance takes them where no transfer this check reads can reach them.
 const paymentOf = ({
 	program,
 	parsed: { type, info }
@@ -2466,11 +2467,21 @@ const paymentOf = ({
 	if (
 		nonNullish(program) &&
 		TOKEN_PROGRAMS.includes(program) &&
-		['burn', 'burnChecked'].includes(type)
+		[
+			'burn',
+			'burnChecked',
+			'permissionedBurn',
+			'permissionedBurnChecked',
+			'depositConfidentialTransfer'
+		].includes(type)
 	) {
 		return {
 			source: address({ info, key: 'account' }),
-			authority: address({ info, key: 'authority' }) ?? address({ info, key: 'multisigAuthority' }),
+			authority:
+				address({ info, key: 'authority' }) ??
+				address({ info, key: 'multisigAuthority' }) ??
+				address({ info, key: 'owner' }) ??
+				address({ info, key: 'multisigOwner' }),
 			value: tokenAmount({ info }).amount ?? amount({ info, key: 'amount' }),
 			burning: true,
 			sent: 'tokens',

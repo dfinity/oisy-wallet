@@ -5716,6 +5716,70 @@ describe('sol-instruction-summary.utils', () => {
 			).toEqual([WHIRLPOOL]);
 		});
 
+		it.each([
+			{
+				label: 'a permissioned burn',
+				type: 'permissionedBurn',
+				info: { permissionedBurnAuthority: mockSolAddress4, amount: '1000' }
+			},
+			{
+				label: 'a checked permissioned burn',
+				type: 'permissionedBurnChecked',
+				info: {
+					permissionedBurnAuthority: mockSolAddress4,
+					tokenAmount: { amount: '1000', decimals: 6 }
+				}
+			},
+			{
+				label: 'a deposit into its confidential balance',
+				type: 'depositConfidentialTransfer',
+				info: { amount: 1000, decimals: 6, owner: mockSolAddress3 }
+			}
+		])(
+			'should name a pool whose payout $label takes, though the account is refilled and sends as much on',
+			({ type, info }) => {
+				expect(
+					paying({
+						instructions: [calling({ program: OKX })],
+						inner: [
+							call({ program: WHIRLPOOL, stackHeight: 2 }),
+							transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+							call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+							{
+								program: 'spl-token-2022',
+								programId: TOKEN_2022_PROGRAM_ADDRESS,
+								parsed: {
+									type,
+									info: {
+										account: elsewhere,
+										mint: mockSplAddress,
+										authority: mockSolAddress3,
+										...info
+									}
+								},
+								stackHeight: 3
+							},
+							transfer({
+								source: mockSolAddress4,
+								destination: elsewhere,
+								amount: '1000',
+								authority: mockSolAddress4,
+								stackHeight: 3
+							}),
+							transfer({
+								source: elsewhere,
+								destination: mockSolAddress4,
+								amount: '1000',
+								authority: mockSolAddress3,
+								stackHeight: 3
+							})
+						],
+						mints: { [elsewhere]: mockSplAddress }
+					})
+				).toEqual([WHIRLPOOL]);
+			}
+		);
+
 		it('should not name a pool paying nothing elsewhere', () => {
 			expect(
 				paying({
