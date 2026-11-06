@@ -732,15 +732,12 @@ type EthAddress = variant {
 	// - `0x1D1479C185d32EB90533a08b36B3CFa5F84A0E6B`
 	Public : text
 };
-// EVM / Ethereum-family transaction data.
+// EVM / Ethereum-family transaction data: what the wallet shows for a transaction.
 type EvmTransactionData = record {
 	// NFT token ID (ERC-721 / ERC-1155).
 	nft_token_id : opt nat;
-	// Hex-encoded input data.
+	// Hex-encoded input data, stored cut to `MAX_STORED_USER_TRANSACTION_DATA_LEN`.
 	data : opt text;
-	chain_id : opt nat64;
-	nonce : opt nat64;
-	gas_limit : opt nat;
 	gas_used : opt nat;
 	gas_price : opt nat
 };
@@ -1709,8 +1706,11 @@ type UserTransaction = record {
 	timestamp : nat64
 };
 type UserTransactionError = variant {
+	// The user already stores transactions for `MAX_USER_TRANSACTION_TOKENS_PER_USER` tokens.
+	TooManyTokens;
 	// Reserved — duplicates are currently silently skipped during save.
 	DuplicateTransaction : record { id : text };
+	RateLimited : RateLimitError;
 	InternalError : record { msg : text };
 	TooManyTransactions;
 	// Reserved for future caller-validation logic.
