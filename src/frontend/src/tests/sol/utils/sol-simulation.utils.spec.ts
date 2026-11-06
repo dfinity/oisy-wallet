@@ -1,5 +1,8 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
+	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	MEMO_LEGACY_PROGRAM_ADDRESS,
 	SPL_TOKEN_MAX_AMOUNT,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -18,7 +21,8 @@ import {
 	selectSolSimulationAddresses,
 	solClosedAccountsReachWallet,
 	solOpenAppAccountsLostLamports,
-	solSimulationReassignsWallet
+	solSimulationReassignsWallet,
+	sortSolProgramsByRun
 } from '$sol/utils/sol-simulation.utils';
 import {
 	mockAtaAddress,
@@ -765,10 +769,19 @@ describe('sol-simulation.utils', () => {
 		const run = (groups: { index: number; instructions: unknown[] }[]) =>
 			groups as unknown as SolanaSimulatedInnerInstructions;
 
+		// The message's own instructions, by the program each one calls.
+		const message = (programs: SolAddress[]) =>
+			programs.map((programAddress) => ({
+				programAddress,
+				accounts: [],
+				data: new Uint8Array()
+			})) as unknown as CompilableTransactionMessage['instructions'];
+
 		it('should find nothing in a run whose nested calls all reach known programs', () => {
 			expect(
-				findSolUnreadPrograms(
-					run([
+				findSolUnreadPrograms({
+					instructions: message([SYSTEM_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS, JUPITER]),
+					innerInstructions: run([
 						{
 							index: 2,
 							instructions: [
@@ -778,18 +791,21 @@ describe('sol-simulation.utils', () => {
 							]
 						}
 					])
-				)
+				})
 			).toEqual([]);
 		});
 
 		it('should find nothing in a run without nested calls', () => {
-			expect(findSolUnreadPrograms(run([]))).toEqual([]);
+			expect(
+				findSolUnreadPrograms({ instructions: message([JUPITER]), innerInstructions: run([]) })
+			).toEqual([]);
 		});
 
 		it('should name each other program once, in the order the run first reaches it', () => {
 			expect(
-				findSolUnreadPrograms(
-					run([
+				findSolUnreadPrograms({
+					instructions: message([JUPITER, JUPITER]),
+					innerInstructions: run([
 						{
 							index: 0,
 							instructions: [
@@ -801,23 +817,107 @@ describe('sol-simulation.utils', () => {
 						},
 						{ index: 1, instructions: [raw(mockSolAddress2), parsed(STAKE_PROGRAM_ADDRESS)] }
 					])
-				)
+				})
 			).toEqual([mockSolAddress3, STAKE_PROGRAM_ADDRESS, mockSolAddress2]);
+		});
+
+		// A single transfer the program makes inside itself would otherwise account for its whole
+		// instruction, and it would run with the wallet's signature unnamed.
+		it('should name a program the message calls itself that is not among the known ones', () => {
+			expect(
+				findSolUnreadPrograms({
+					instructions: message([SYSTEM_PROGRAM_ADDRESS, mockSolAddress3]),
+					innerInstructions: run([
+						{ index: 1, instructions: [parsed(SYSTEM_PROGRAM_ADDRESS), raw(JUPITER)] }
+					])
+				})
+			).toEqual([mockSolAddress3]);
+		});
+
+		it('should name a program the message calls before the programs it calls itself', () => {
+			expect(
+				findSolUnreadPrograms({
+					instructions: message([mockSolAddress3]),
+					innerInstructions: run([
+						{ index: 0, instructions: [raw(mockSolAddress2), raw(mockSolAddress3)] }
+					])
+				})
+			).toEqual([mockSolAddress3, mockSolAddress2]);
+		});
+
+		it('should not name a program the message calls itself that the review decodes', () => {
+			expect(
+				findSolUnreadPrograms({
+					instructions: message([
+						STAKE_PROGRAM_ADDRESS,
+						ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
+						MEMO_LEGACY_PROGRAM_ADDRESS,
+						COMPUTE_BUDGET_PROGRAM_ADDRESS,
+						JUPITER
+					]),
+					innerInstructions: run([])
+				})
+			).toEqual([]);
 		});
 
 		// A call that only points into the account list could reach anything, and an empty list
 		// would say it reaches a known program.
 		it('should find nothing to rely on when a nested call does not name its program', () => {
 			expect(
-				findSolUnreadPrograms(
-					run([
+				findSolUnreadPrograms({
+					instructions: message([JUPITER]),
+					innerInstructions: run([
 						{
 							index: 0,
 							instructions: [raw(JUPITER), { programIdIndex: 7, accounts: [], data: '' }]
 						}
 					])
-				)
+				})
 			).toBeUndefined();
+		});
+	});
+
+	describe('sortSolProgramsByRun', () => {
+		const raw = (programId: SolAddress) => ({ programId, accounts: [], data: '', stackHeight: 2 });
+
+		const run = (groups: { index: number; instructions: unknown[] }[]) =>
+			groups as unknown as SolanaSimulatedInnerInstructions;
+
+		const message = (programs: SolAddress[]) =>
+			programs.map((programAddress) => ({
+				programAddress,
+				accounts: [],
+				data: new Uint8Array()
+			})) as unknown as CompilableTransactionMessage['instructions'];
+
+		it('should order programs by the instruction of the message that first calls them', () => {
+			expect(
+				sortSolProgramsByRun({
+					programs: [mockSolAddress3, mockSolAddress2],
+					instructions: message([mockSolAddress2, mockSolAddress3]),
+					innerInstructions: run([])
+				})
+			).toEqual([mockSolAddress2, mockSolAddress3]);
+		});
+
+		it('should order a program first reached inside an instruction before the instructions after it', () => {
+			expect(
+				sortSolProgramsByRun({
+					programs: [mockSolAddress3, mockSplAddress],
+					instructions: message([mockSolAddress2, mockSolAddress3]),
+					innerInstructions: run([{ index: 0, instructions: [raw(mockSplAddress)] }])
+				})
+			).toEqual([mockSplAddress, mockSolAddress3]);
+		});
+
+		it('should name each program once', () => {
+			expect(
+				sortSolProgramsByRun({
+					programs: [mockSolAddress2, mockSolAddress2],
+					instructions: message([mockSolAddress2]),
+					innerInstructions: run([])
+				})
+			).toEqual([mockSolAddress2]);
 		});
 	});
 
