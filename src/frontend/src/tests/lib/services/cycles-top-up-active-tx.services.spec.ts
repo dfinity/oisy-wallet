@@ -19,6 +19,7 @@ import {
 	resetCyclesTopUpSettleObservations
 } from '$lib/services/cycles-top-up-active-tx.services';
 import { CYCLES_TOP_UP_EXTERNAL_REF_KEYS } from '$lib/types/cycles-top-up-active-tx';
+import * as consoleUtils from '$lib/utils/console.utils';
 import {
 	toCyclesTopUpExternalRefs,
 	toCyclesTopUpExternalRefsMap
@@ -268,6 +269,62 @@ describe('cycles-top-up-active-tx.services', () => {
 			await pollPastGrace([funded]);
 
 			expect(applySpy).not.toHaveBeenCalled();
+		});
+
+		describe('when something fails', () => {
+			beforeEach(() => {
+				vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => undefined);
+			});
+
+			it('keeps polling the other rows when the index fails for one', async () => {
+				lookupSpy.mockRejectedValue(new Error('index unavailable'));
+				notifySpy.mockResolvedValue({ status: 'topped_up', cycles: 2_490_000_000_000n });
+
+				const other: ActiveUserTransaction = { ...funded, id: 'other-top-up' };
+
+				await pollPastGrace([unobserved, other]);
+
+				expect(lookupSpy).toHaveBeenCalled();
+				expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						tx: other,
+						update: expect.objectContaining({ status: { Succeeded: null } })
+					})
+				);
+			});
+
+			it('waits a full grace period again before retrying a row that failed', async () => {
+				notifySpy.mockRejectedValueOnce(new Error('CMC unavailable'));
+
+				await pollPastGrace([funded]);
+
+				expect(notifySpy).toHaveBeenCalledOnce();
+
+				for (let i = 1; i < CMC_SETTLE_GRACE_OBSERVATIONS; i++) {
+					await poll([funded]);
+				}
+
+				expect(notifySpy).toHaveBeenCalledOnce();
+
+				await poll([funded]);
+
+				expect(notifySpy).toHaveBeenCalledTimes(2);
+			});
+
+			// The row keeps its old status, so the next grace period finds it again.
+			it('writes a terminal update again on a later poll when the write failed', async () => {
+				notifySpy.mockResolvedValue({ status: 'topped_up', cycles: 2_490_000_000_000n });
+				applySpy.mockResolvedValueOnce(false);
+
+				await pollPastGrace([funded]);
+
+				expect(applySpy).toHaveBeenCalledOnce();
+
+				await pollPastGrace([funded]);
+
+				expect(applySpy).toHaveBeenCalledTimes(2);
+				expect(applySpy.mock.calls[1]).toEqual(applySpy.mock.calls[0]);
+			});
 		});
 
 		describe('a row without a deposit', () => {
