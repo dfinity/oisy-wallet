@@ -2176,6 +2176,7 @@ export const fetchVeloraMarketSwap = async ({
 			amount: BigInt(swapDetails.destAmount),
 			slippageBasisPoints
 		}),
+		quotedAmount: BigInt(swapDetails.destAmount),
 		feePercent: swapDetails.partnerFee,
 		wallet: userAddress
 	});

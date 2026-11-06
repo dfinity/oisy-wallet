@@ -38,11 +38,24 @@ export const VELORA_DELTA_ORDER_TYPES = {
 // `OrderKind.Sell`: OISY only sells a given amount.
 export const VELORA_DELTA_ORDER_KIND_SELL = 0;
 
-// The low byte of a Delta order's `partnerAndFee`: the partner fee in basis points.
+// The low byte of a Delta order's `partnerAndFee`: the partner fee in basis points
+// (`FeeManagerLib.FEE_IN_BASIS_POINTS_MASK` of the settlement modules).
 export const VELORA_DELTA_FEE_BPS_MASK = 0xffn;
+
+// `FeeManagerLib` splits what a Delta fill brings above the order's `expectedAmount`: half goes to
+// Velora, the other half to the partner when `PARTNER_TAKES_SURPLUS_MASK` is set, and
+// `CAP_SURPLUS_MASK` caps the split at 1 % of `expectedAmount`.
+export const VELORA_DELTA_PARTNER_TAKES_SURPLUS_FLAG = 0x100n;
+export const VELORA_DELTA_CAP_SURPLUS_FLAG = 0x200n;
 
 // `AugustusFees.FEE_PERCENT_IN_BASIS_POINTS_MASK`
 export const VELORA_AUGUSTUS_FEE_BPS_MASK = 0x3fffn;
+
+// `AugustusFees` takes what a Market fill brings above the calldata's `quotedAmount` for Velora,
+// shares it with the partner on `IS_TAKE_SURPLUS_MASK` or `IS_REFERRAL_MASK`, and
+// `IS_CAP_SURPLUS_MASK` caps it at 1 % of `quotedAmount`.
+export const VELORA_AUGUSTUS_PARTNER_SURPLUS_FLAGS = (1n << 95n) | (1n << 94n);
+export const VELORA_AUGUSTUS_CAP_SURPLUS_FLAG = 1n << 92n;
 
 const SWAP_DATA_HEAD =
 	'address srcToken, address destToken, uint256 fromAmount, uint256 toAmount, uint256 quotedAmount, bytes32 metadata';

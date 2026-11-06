@@ -1,11 +1,15 @@
 import {
+	VELORA_AUGUSTUS_CAP_SURPLUS_FLAG,
 	VELORA_AUGUSTUS_FEE_BPS_MASK,
+	VELORA_AUGUSTUS_PARTNER_SURPLUS_FLAGS,
 	VELORA_AUGUSTUS_SELL_ABI,
 	VELORA_BALANCER_V2_BATCH_SWAP_SELECTOR,
 	VELORA_BALANCER_V2_SWAP_SELECTOR,
+	VELORA_DELTA_CAP_SURPLUS_FLAG,
 	VELORA_DELTA_FEE_BPS_MASK,
 	VELORA_DELTA_ORDER_KIND_SELL,
-	VELORA_DELTA_ORDER_TYPES
+	VELORA_DELTA_ORDER_TYPES,
+	VELORA_DELTA_PARTNER_TAKES_SURPLUS_FLAG
 } from '$eth/constants/velora.constants';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { SWAP_ETH_TOKEN_PLACEHOLDER } from '$lib/constants/swap.constants';
@@ -29,6 +33,8 @@ interface VeloraMarketSale {
 	toAmount: bigint;
 	beneficiary: string;
 	partnerAndFee: bigint;
+	// The amount Augustus' fee step measures the surplus from; an RFQ fill runs no fee step.
+	quotedAmount?: bigint;
 }
 
 // `IAugustusRFQ.Order`, as far as the check reads it.
@@ -188,7 +194,9 @@ export const assertVeloraDeltaRoute = ({
 /**
  * Refuses a built Delta order that is not the reviewed swap. It must be the wallet's sell order for
  * the route's origin step, paid to the wallet, carrying the permit OISY signed for it (or none), no
- * partner fee above the quoted one, and the route's own bridge, or none on a same-chain route.
+ * partner fee above the quoted one, the surplus terms Velora builds for OISY (no partner share, the
+ * cap, measured from at least the route's origin output), and the route's own bridge, or none on a
+ * same-chain route.
  *
  * The order is then hashed with OISY's own EIP-712 domain and types, so this is what gets signed.
  */
@@ -234,6 +242,18 @@ export const assertVeloraDeltaOrder = ({
 		quotedFeeBasisPoints(feePercent)
 	) {
 		throw veloraRejectedError('the order takes a partner fee above the quoted one');
+	}
+
+	if ((BigInt(order.partnerAndFee) & VELORA_DELTA_PARTNER_TAKES_SURPLUS_FLAG) !== ZERO) {
+		throw veloraRejectedError('the order gives a partner the surplus');
+	}
+
+	if ((BigInt(order.partnerAndFee) & VELORA_DELTA_CAP_SURPLUS_FLAG) === ZERO) {
+		throw veloraRejectedError('the order does not cap the surplus');
+	}
+
+	if (BigInt(order.expectedAmount) < BigInt(origin.output.amount)) {
+		throw veloraRejectedError('the order measures the surplus from less than its route');
 	}
 
 	const expectedBridge = isNullish(bridge)
@@ -299,14 +319,16 @@ const balancerV2Tokens = (vaultCall: string): Pick<VeloraMarketSale, 'srcToken' 
 const toMarketSale = ({ name, args }: { name: string; args: Result }): VeloraMarketSale => {
 	if (name === 'swapExactAmountInOnBalancerV2') {
 		const [balancerData, partnerAndFee, , vaultCall] = args;
-		const { fromAmount, toAmount, beneficiaryAndApproveFlag } = balancerData.toObject();
+		const { fromAmount, toAmount, quotedAmount, beneficiaryAndApproveFlag } =
+			balancerData.toObject();
 
 		return {
 			...balancerV2Tokens(vaultCall),
 			fromAmount,
 			toAmount,
 			beneficiary: toBeHex(beneficiaryAndApproveFlag & ADDRESS_MASK, 20),
-			partnerAndFee
+			partnerAndFee,
+			quotedAmount
 		};
 	}
 
@@ -348,9 +370,10 @@ const toMarketSale = ({ name, args }: { name: string; args: Result }): VeloraMar
 
 	// The generic route takes the executor first; every other route starts with its swap data.
 	const [swapData, partnerAndFee] = name === 'swapExactAmountIn' ? args.slice(1) : args;
-	const { srcToken, destToken, fromAmount, toAmount, beneficiary } = swapData.toObject();
+	const { srcToken, destToken, fromAmount, toAmount, quotedAmount, beneficiary } =
+		swapData.toObject();
 
-	return { srcToken, destToken, fromAmount, toAmount, beneficiary, partnerAndFee };
+	return { srcToken, destToken, fromAmount, toAmount, beneficiary, partnerAndFee, quotedAmount };
 };
 
 const decodeMarketSale = (data: string): VeloraMarketSale => {
@@ -375,8 +398,9 @@ const decodeMarketSale = (data: string): VeloraMarketSale => {
  * Refuses a Market transaction that is not the reviewed swap: it must call the pinned Augustus on
  * the source network, send native ETH only when selling it, and sell exactly the reviewed amount of
  * the source token for the destination token, to the wallet, with no partner fee above the quoted
- * one and at least the minimum the review states. Augustus pays out at least that minimum or
- * reverts.
+ * one, the surplus terms Velora builds for OISY (no partner share, the cap, measured from at least
+ * the quoted amount) and at least the minimum the review states. Augustus pays out at least that
+ * minimum or reverts.
  */
 export const assertVeloraMarketTransaction = ({
 	transaction: { to, chainId, value, data },
@@ -387,6 +411,7 @@ export const assertVeloraMarketTransaction = ({
 	amount,
 	isNativeSource,
 	minimum,
+	quotedAmount,
 	feePercent,
 	wallet
 }: {
@@ -398,6 +423,7 @@ export const assertVeloraMarketTransaction = ({
 	amount: bigint;
 	isNativeSource: boolean;
 	minimum: bigint;
+	quotedAmount: bigint;
 	feePercent: number;
 	wallet: string;
 }) => {
@@ -430,6 +456,20 @@ export const assertVeloraMarketTransaction = ({
 
 	if ((sale.partnerAndFee & VELORA_AUGUSTUS_FEE_BPS_MASK) > quotedFeeBasisPoints(feePercent)) {
 		throw veloraRejectedError('the transaction takes a partner fee above the quoted one');
+	}
+
+	if (nonNullish(sale.quotedAmount)) {
+		if ((sale.partnerAndFee & VELORA_AUGUSTUS_PARTNER_SURPLUS_FLAGS) !== ZERO) {
+			throw veloraRejectedError('the transaction gives a partner the surplus');
+		}
+
+		if ((sale.partnerAndFee & VELORA_AUGUSTUS_CAP_SURPLUS_FLAG) === ZERO) {
+			throw veloraRejectedError('the transaction does not cap the surplus');
+		}
+
+		if (sale.quotedAmount < quotedAmount) {
+			throw veloraRejectedError('the transaction measures the surplus from less than the quote');
+		}
 	}
 
 	if (sale.toAmount < minimum) {

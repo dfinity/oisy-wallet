@@ -2899,7 +2899,8 @@ describe('swap.services', () => {
 		const augustus = new Interface(VELORA_AUGUSTUS_SELL_ABI);
 
 		// The transaction Velora builds for the mock quote at the default 0.5% slippage: the quoted
-		// 900000000 less the slippage, paid to the caller through a zero beneficiary.
+		// 900000000 less the slippage, paid to the caller through a zero beneficiary, with the surplus
+		// cap (`AugustusFees.IS_CAP_SURPLUS_MASK`) as its only fee flag.
 		const mockTransaction = ({
 			sale,
 			...transaction
@@ -2925,7 +2926,7 @@ describe('swap.services', () => {
 					pools: '0x',
 					...sale
 				},
-				ZERO,
+				1n << 92n,
 				'0x'
 			]),
 			...transaction
@@ -3208,6 +3209,10 @@ describe('swap.services', () => {
 				{
 					case: 'sells another amount',
 					transaction: { sale: { fromAmount: 1n } }
+				},
+				{
+					case: 'measures the surplus from less than the quote',
+					transaction: { sale: { quotedAmount: 899999999n } }
 				}
 			])('refuses to send a transaction that $case', async ({ transaction }) => {
 				mockSwapBuildTx.mockResolvedValue(mockTransaction(transaction));

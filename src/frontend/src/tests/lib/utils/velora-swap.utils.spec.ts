@@ -21,6 +21,11 @@ const USDC_BSC = '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d';
 const AUGUSTUS = '0x6a000f20005980200259b80c5102003040001068';
 const NO_METADATA = `0x${'00'.repeat(32)}`;
 
+// The surplus cap Velora sets on OISY's Delta orders (`FeeManagerLib.CAP_SURPLUS_MASK`) and Market
+// transactions (`AugustusFees.IS_CAP_SURPLUS_MASK`).
+const DELTA_CAP_SURPLUS = 0x200n;
+const AUGUSTUS_CAP_SURPLUS = 1n << 92n;
+
 const augustus = new Interface(VELORA_AUGUSTUS_SELL_ABI);
 
 const balancerVault = new Interface([
@@ -430,7 +435,7 @@ describe('velora-swap.utils', () => {
 				expect(() =>
 					assertVeloraDeltaOrder({
 						...params,
-						order: { ...sameChainOrder, partnerAndFee: `${(1n << 96n) | 25n}` },
+						order: { ...sameChainOrder, partnerAndFee: `${(1n << 96n) | DELTA_CAP_SURPLUS | 25n}` },
 						feePercent: 0.25
 					})
 				).not.toThrow();
@@ -443,7 +448,7 @@ describe('velora-swap.utils', () => {
 				expect(() =>
 					assertVeloraDeltaOrder({
 						...params,
-						order: { ...sameChainOrder, partnerAndFee: `${(1n << 96n) | fee}` },
+						order: { ...sameChainOrder, partnerAndFee: `${(1n << 96n) | DELTA_CAP_SURPLUS | fee}` },
 						feePercent
 					})
 				).not.toThrow();
@@ -453,7 +458,7 @@ describe('velora-swap.utils', () => {
 				expect(() =>
 					assertVeloraDeltaOrder({
 						...params,
-						order: { ...sameChainOrder, partnerAndFee: `${(1n << 96n) | 13n}` },
+						order: { ...sameChainOrder, partnerAndFee: `${(1n << 96n) | DELTA_CAP_SURPLUS | 13n}` },
 						feePercent: 0.125
 					})
 				).toThrow('partner fee');
@@ -495,6 +500,21 @@ describe('velora-swap.utils', () => {
 					case: 'a bridge on a same-chain route',
 					order: { bridge: crossChainOrder.bridge },
 					reason: 'bridges other than the route'
+				},
+				{
+					case: 'a partner taking the surplus',
+					order: { partnerAndFee: `${DELTA_CAP_SURPLUS | 0x100n}` },
+					reason: 'gives a partner the surplus'
+				},
+				{
+					case: 'an uncapped surplus',
+					order: { partnerAndFee: '0' },
+					reason: 'does not cap the surplus'
+				},
+				{
+					case: 'a surplus measured from less than the route',
+					order: { expectedAmount: '41589349059580100' },
+					reason: 'measures the surplus from less than its route'
 				}
 			])('refuses $case', ({ order, reason }) => {
 				expect(() =>
@@ -554,6 +574,7 @@ describe('velora-swap.utils', () => {
 			amount,
 			isNativeSource: false,
 			minimum,
+			quotedAmount: swapData.quotedAmount,
 			feePercent: 0,
 			wallet: WALLET
 		};
@@ -584,7 +605,7 @@ describe('velora-swap.utils', () => {
 			const data = augustus.encodeFunctionData('swapExactAmountIn', [
 				OTHER,
 				{ ...swapData, srcToken: SWAP_ETH_TOKEN_PLACEHOLDER },
-				ZERO,
+				AUGUSTUS_CAP_SURPLUS,
 				'0x',
 				'0x'
 			]);
@@ -611,12 +632,12 @@ describe('velora-swap.utils', () => {
 		describe.each([
 			{
 				name: 'swapExactAmountIn',
-				encode: ({ data, fee = ZERO }: Sale) =>
+				encode: ({ data, fee = AUGUSTUS_CAP_SURPLUS }: Sale) =>
 					augustus.encodeFunctionData('swapExactAmountIn', [OTHER, data, fee, '0x', '0x'])
 			},
 			{
 				name: 'swapExactAmountInOnUniswapV2',
-				encode: ({ data, fee = ZERO }: Sale) =>
+				encode: ({ data, fee = AUGUSTUS_CAP_SURPLUS }: Sale) =>
 					augustus.encodeFunctionData('swapExactAmountInOnUniswapV2', [
 						{ ...data, pools: '0x' },
 						fee,
@@ -625,7 +646,7 @@ describe('velora-swap.utils', () => {
 			},
 			{
 				name: 'swapExactAmountInOnCurveV1',
-				encode: ({ data, fee = ZERO }: Sale) =>
+				encode: ({ data, fee = AUGUSTUS_CAP_SURPLUS }: Sale) =>
 					augustus.encodeFunctionData('swapExactAmountInOnCurveV1', [
 						{ curveData: ZERO, curveAssets: ZERO, ...data },
 						fee,
@@ -634,7 +655,7 @@ describe('velora-swap.utils', () => {
 			},
 			{
 				name: 'swapExactAmountInOnCurveV2',
-				encode: ({ data, fee = ZERO }: Sale) =>
+				encode: ({ data, fee = AUGUSTUS_CAP_SURPLUS }: Sale) =>
 					augustus.encodeFunctionData('swapExactAmountInOnCurveV2', [
 						{ curveData: ZERO, i: ZERO, j: 1n, poolAddress: OTHER, ...data },
 						fee,
@@ -666,7 +687,9 @@ describe('velora-swap.utils', () => {
 
 			it('refuses a partner fee above the quoted one', () => {
 				expect(() =>
-					assertVeloraMarketTransaction(withData(encode({ data: swapData, fee: 1n })))
+					assertVeloraMarketTransaction(
+						withData(encode({ data: swapData, fee: AUGUSTUS_CAP_SURPLUS | 1n }))
+					)
 				).toThrow('partner fee');
 			});
 
@@ -679,10 +702,64 @@ describe('velora-swap.utils', () => {
 			});
 		});
 
+		describe('the surplus terms', () => {
+			const selling = ({
+				partnerAndFee = AUGUSTUS_CAP_SURPLUS,
+				quotedAmount = swapData.quotedAmount
+			}: {
+				partnerAndFee?: bigint;
+				quotedAmount?: bigint;
+			}) =>
+				withData(
+					augustus.encodeFunctionData('swapExactAmountIn', [
+						OTHER,
+						{ ...swapData, quotedAmount },
+						partnerAndFee,
+						'0x',
+						'0x'
+					])
+				);
+
+			it('accepts a surplus measured from more than the quote', () => {
+				expect(() =>
+					assertVeloraMarketTransaction(selling({ quotedAmount: swapData.quotedAmount + 1n }))
+				).not.toThrow();
+			});
+
+			it.each([
+				{
+					case: 'a partner taking the surplus',
+					partnerAndFee: AUGUSTUS_CAP_SURPLUS | (1n << 95n),
+					reason: 'gives a partner the surplus'
+				},
+				{
+					case: 'a referral share of the surplus',
+					partnerAndFee: AUGUSTUS_CAP_SURPLUS | (1n << 94n),
+					reason: 'gives a partner the surplus'
+				},
+				{ case: 'an uncapped surplus', partnerAndFee: ZERO, reason: 'does not cap the surplus' },
+				{
+					case: 'a surplus measured from less than the quote',
+					quotedAmount: swapData.quotedAmount - 1n,
+					reason: 'measures the surplus from less than the quote'
+				}
+			])('refuses $case', ({ partnerAndFee, quotedAmount, reason }) => {
+				expect(() =>
+					assertVeloraMarketTransaction(selling({ partnerAndFee, quotedAmount }))
+				).toThrow(reason);
+			});
+		});
+
 		describe('a partner fee between two basis points', () => {
 			const charging = ({ fee, feePercent }: { fee: bigint; feePercent: number }) => ({
 				...withData(
-					augustus.encodeFunctionData('swapExactAmountIn', [OTHER, swapData, fee, '0x', '0x'])
+					augustus.encodeFunctionData('swapExactAmountIn', [
+						OTHER,
+						swapData,
+						AUGUSTUS_CAP_SURPLUS | fee,
+						'0x',
+						'0x'
+					])
 				),
 				feePercent
 			});
@@ -729,21 +806,23 @@ describe('velora-swap.utils', () => {
 
 			const encode = ({
 				vaultCall,
-				beneficiary = WALLET
+				beneficiary = WALLET,
+				partnerAndFee = AUGUSTUS_CAP_SURPLUS
 			}: {
 				vaultCall: string;
 				beneficiary?: string;
+				partnerAndFee?: bigint;
 			}): string =>
 				augustus.encodeFunctionData('swapExactAmountInOnBalancerV2', [
 					{
 						fromAmount: amount,
 						toAmount: minimum,
-						quotedAmount: minimum,
+						quotedAmount: swapData.quotedAmount,
 						metadata: NO_METADATA,
 						// The approve flag rides in the top bit.
 						beneficiaryAndApproveFlag: (1n << 255n) | BigInt(beneficiary)
 					},
-					ZERO,
+					partnerAndFee,
 					'0x',
 					vaultCall
 				]);
@@ -778,6 +857,16 @@ describe('velora-swap.utils', () => {
 						)
 					)
 				).toThrow('not paid');
+			});
+
+			it('refuses a sale that does not cap the surplus', () => {
+				expect(() =>
+					assertVeloraMarketTransaction(
+						withData(
+							encode({ vaultCall: single({ assetIn: USDC, assetOut: WETH }), partnerAndFee: ZERO })
+						)
+					)
+				).toThrow('does not cap the surplus');
 			});
 
 			it('refuses a vault call selling another token', () => {
