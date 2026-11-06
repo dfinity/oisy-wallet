@@ -41,6 +41,8 @@ the end.
 ## Fees & gas
 
 - **Fee data** — `getFeeData` (base / max / priority fee) via the base provider.
+  When Infura does not answer it within 10 s, it goes to Alchemy — see
+  [Alchemy → EVM — fallback for Infura](./alchemy.md#evm--fallback-for-infura).
 - **Gas estimation** — `estimateGas` for transfers, approvals, burns and deposits
   (the various `infura-*.providers.ts`).
 - **Suggested gas fees (REST, not RPC)** — `InfuraGasRest.getSuggestedFeeData`
