@@ -5,13 +5,13 @@
 	import BtcUtxosFeeDisplay from '$btc/components/send/BtcUtxosFeeDisplay.svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
 	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
-	import { getBtcSourceAddress } from '$btc/services/btc-address.services';
 	import {
 		handleBtcValidationError,
 		sendBtc,
 		validateBtcSend
 	} from '$btc/services/btc-send.services';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
+	import type { BtcAddress } from '$btc/types/address';
 	import { BtcValidationError } from '$btc/types/btc-send';
 	import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
 	import { invalidSendAmount } from '$btc/utils/input.utils';
@@ -46,19 +46,20 @@
 	interface Props {
 		amount: number;
 		destination: Address;
+		// The address the fee loader selected the UTXOs from, so validation checks the same ones.
+		source: BtcAddress;
 		sendCompleted: boolean;
 		sendEnabled: boolean;
 		onSendCompleted: () => void;
 	}
 
-	let { amount, destination, sendCompleted, onSendCompleted, sendEnabled }: Props = $props();
+	let { amount, destination, source, sendCompleted, onSendCompleted, sendEnabled }: Props =
+		$props();
 
 	const { sendTokenNetworkId, sendTokenDecimals, sendToken, sendBalance, sendTokenSymbol } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { store: storeUtxosFeeData } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
-
-	let source = $derived(getBtcSourceAddress($sendTokenNetworkId));
 
 	let loading = $state(false);
 
@@ -172,6 +173,7 @@
 				await validateBtcSend({
 					utxosFee,
 					source,
+					destination,
 					amount,
 					network,
 					identity: $authIdentity

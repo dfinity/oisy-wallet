@@ -1,12 +1,14 @@
 import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import type { BtcAddress } from '$btc/types/address';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
+import { btcOutputVSize } from '$btc/utils/btc-psbt.utils';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
 import { getPendingTransactionUtxoOutpoints } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Amount } from '$lib/types/send';
+import type { OptionString } from '$lib/types/string';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { isNullish } from '@dfinity/utils';
 import type { BitcoinNetwork, CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
@@ -15,6 +17,9 @@ import type { Identity } from '@icp-sdk/core/agent';
 export interface BtcReviewServiceParams {
 	amount: Amount;
 	source: BtcAddress;
+	// The recipient's address, which sizes its output in the fee. Before it is known, the fee is
+	// priced for the largest output a send can pay.
+	destination?: OptionString;
 	allUtxos: CkBtcMinterDid.Utxo[];
 	feeRateMiliSatoshisPerVByte: bigint;
 }
@@ -27,6 +32,7 @@ export interface BtcReviewServiceParams {
 export const prepareBtcSend = ({
 	amount,
 	source,
+	destination,
 	allUtxos,
 	feeRateMiliSatoshisPerVByte
 }: BtcReviewServiceParams): UtxosFee => {
@@ -77,6 +83,7 @@ export const prepareBtcSend = ({
 	const selection = calculateUtxoSelection({
 		availableUtxos: filteredUtxos,
 		amountSatoshis,
+		recipientOutputVSize: btcOutputVSize({ address: destination }),
 		feeRateMiliSatoshisPerVByte
 	});
 

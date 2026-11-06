@@ -165,6 +165,28 @@ describe('BtcConvertTokenWizard', () => {
 		expect(addPendingTransactionApiSpy).toHaveResolvedWith(pendingBtcTransactionResponse);
 	});
 
+	// Convert prices the deposit's output as the largest one, as the Chain Fusion swap does: its fee
+	// must not wait for the deposit address, or an amount refused for the fee before the address
+	// arrives keeps that fee with Next disabled.
+	it('should check the fee without a recipient, as it was priced', async () => {
+		mockSignerApi();
+		mockBackendApi();
+		mockAuthStore();
+		mockBtcAddressStore();
+		mockAddressesStore();
+
+		const { container } = render(BtcConvertTokenWizard, {
+			props,
+			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStore(mockUtxosFee) })
+		});
+
+		await clickConvertButton(container);
+
+		expect(btcSendServices.validateBtcSend).toHaveBeenCalledExactlyOnceWith(
+			expect.not.objectContaining({ destination: expect.anything() })
+		);
+	});
+
 	it('should not call sendBtc if authIdentity is not defined', async () => {
 		const btcSendApiSpy = mockSignerApi();
 		const addPendingTransactionApiSpy = mockBackendApi();

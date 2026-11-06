@@ -4,6 +4,7 @@ import * as icpLedgerApi from '$icp/api/icp-ledger.api';
 import {
 	CMC_DEPOSIT_LOOKUP_PAGE_SIZE,
 	CMC_MINT_CYCLES_MEMO,
+	CMC_TRANSFER_START_WINDOW_NS,
 	ICP_LEDGER_PERMITTED_DRIFT_NS
 } from '$icp/constants/cmc.constants';
 import {
@@ -85,6 +86,7 @@ describe('cmc.services', () => {
 				amount: AMOUNT,
 				createdAt: CREATED_AT_NS,
 				memo: CMC_MINT_CYCLES_MEMO,
+				notAfter: CREATED_AT_NS + CMC_TRANSFER_START_WINDOW_NS,
 				ledgerCanisterId: ICP_LEDGER_CANISTER_ID
 			});
 		});

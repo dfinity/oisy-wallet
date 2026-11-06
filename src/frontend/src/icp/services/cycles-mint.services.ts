@@ -10,6 +10,7 @@ import {
 } from '$icp/constants/cmc.constants';
 import { transferIcpToCmc } from '$icp/services/cmc.services';
 import { CyclesMintError, type CyclesMintNotifyResult } from '$icp/types/cycles-mint';
+import { IcTransferDeadlineError } from '$icp/types/ic-send';
 import { getCmcDepositAccount, toCmcNotifyFailure } from '$icp/utils/cmc.utils';
 import { randomSubMillisecondNs } from '$icp/utils/cycles-mint.utils';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
@@ -257,6 +258,11 @@ export const mintCycles = async ({
 		});
 	} catch (err: unknown) {
 		consoleError(err);
+
+		// Past the start window by the time the ledger was ready: nothing was sent, as above.
+		if (err instanceof IcTransferDeadlineError) {
+			throw (await deleteRow()) ? fail('timed_out') : new CyclesMintError('timed_out');
+		}
 
 		// The ledger answered and refused: nothing moved.
 		if (err instanceof IcrcError) {

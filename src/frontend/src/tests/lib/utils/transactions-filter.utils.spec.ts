@@ -183,7 +183,7 @@ describe('applyTransactionsFilter', () => {
 					value: 100n,
 					timestamp: ZERO
 				}
-			} as unknown as AllTransactionUiWithCmp;
+			} satisfies AllTransactionUiWithCmp;
 
 			const tcyclesTopUpTx = {
 				component: 'ic',
@@ -198,7 +198,7 @@ describe('applyTransactionsFilter', () => {
 					value: 100n,
 					timestamp: ZERO
 				}
-			} as unknown as AllTransactionUiWithCmp;
+			} satisfies AllTransactionUiWithCmp;
 
 			const transactions = [...allTxs, icpTopUpTx, tcyclesTopUpTx];
 
@@ -220,6 +220,53 @@ describe('applyTransactionsFilter', () => {
 				});
 
 				expect(result).toEqual([btcSendTx, ethSendTx, icpSendToHexTx, solSendTx]);
+			});
+
+			describe('with a contact that holds only the canister', () => {
+				const canisterContact: ContactUi = {
+					name: 'My canister',
+					id: 7n,
+					updateTimestampNs: ZERO,
+					addresses: [{ address: 'ywcsb-maaaa-aaaai-q6k7a-cai', addressType: 'Icrcv2' }]
+				};
+
+				// As `cmcDepositAccountCanisterIds` maps the contact's canister.
+				const cmcDepositAccountCanisterIds = {
+					'cmc-deposit-account-id': 'ywcsb-maaaa-aaaai-q6k7a-cai'
+				};
+
+				it('keeps its ICP and TCYCLES top-ups under the Top up and Contacts filters together', () => {
+					const result = applyTransactionsFilter({
+						transactions,
+						filter: { ...EMPTY_TRANSACTIONS_FILTER, types: ['top_up'], contactIds: ['7'] },
+						contacts: [canisterContact],
+						cmcDepositAccountCanisterIds
+					});
+
+					expect(result).toEqual([icpTopUpTx, tcyclesTopUpTx]);
+				});
+
+				it('keeps both under the Contacts filter alone', () => {
+					const result = applyTransactionsFilter({
+						transactions,
+						filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['7'] },
+						contacts: [canisterContact],
+						cmcDepositAccountCanisterIds
+					});
+
+					expect(result).toEqual([icpTopUpTx, tcyclesTopUpTx]);
+				});
+
+				// The ICP top-up only reaches the canister through the CMC's deposit account for it.
+				it('keeps only the TCYCLES top-up while that deposit account is not known', () => {
+					const result = applyTransactionsFilter({
+						transactions,
+						filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['7'] },
+						contacts: [canisterContact]
+					});
+
+					expect(result).toEqual([tcyclesTopUpTx]);
+				});
 			});
 		});
 	});

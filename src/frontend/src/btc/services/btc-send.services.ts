@@ -2,6 +2,7 @@ import { BTC_SEND_FEE_TOLERANCE_PERCENTAGE } from '$btc/constants/btc.constants'
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import type { BtcAddress } from '$btc/types/address';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
+import { btcAddressToOutputScript, btcOutputVSize } from '$btc/utils/btc-psbt.utils';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateFeeSatoshis, extractUtxoOutpoints } from '$btc/utils/btc-utxos.utils';
 import type { SendBtcResponse, SignBtcResponse } from '$declarations/signer/signer.did';
@@ -105,12 +106,18 @@ export const handleBtcValidationError = ({ err }: { err: BtcValidationError }) =
 export const validateBtcSend = async ({
 	utxosFee,
 	source,
+	destination,
 	amount,
 	network,
 	identity
 }: {
 	utxosFee: UtxosFee;
 	source: BtcAddress;
+	// The recipient, passed exactly when the fee was priced with it: its output is then sized from
+	// its script, and an address for another network is refused. Without it, as for Convert, every
+	// swap and Liquidium, even where the address is known, the fee is checked against the largest
+	// output a send can pay, which is how it was priced.
+	destination?: BtcAddress;
 	amount: Amount;
 	network: BitcoinNetwork;
 	identity: Identity;
@@ -123,6 +130,16 @@ export const validateBtcSend = async ({
 	// 1. Validate general input parameters first before accessing any properties
 	if (invalidAmount(amount)) {
 		throw new BtcValidationError(BtcSendValidationError.InvalidAmount);
+	}
+
+	// An output script carries no network, so an address for another network would pay the same
+	// program on this one. Refused here, before anything is signed.
+	if (nonNullish(destination)) {
+		try {
+			btcAddressToOutputScript({ address: destination, network });
+		} catch (_: unknown) {
+			throw new BtcValidationError(BtcSendValidationError.InvalidDestination);
+		}
 	}
 
 	const { utxos, feeSatoshis, feeRateMiliSatoshisPerVByte } = utxosFee;
@@ -179,7 +196,7 @@ export const validateBtcSend = async ({
 	}
 
 	// 4. Validate the fee prices the transaction structure this selection will broadcast
-	// (recipient + change), at the rate it was quoted with.
+	// (the recipient's output, sized from its script, + change), at the rate it was quoted with.
 	//
 	// The rate comes from the fee itself, never from a fresh sample of the percentiles. The
 	// two are not interchangeable: the median percentile shifts by more than this tolerance
@@ -190,6 +207,7 @@ export const validateBtcSend = async ({
 	// has approved.
 	const expectedFee = calculateFeeSatoshis({
 		numInputs: utxos.length,
+		recipientOutputVSize: btcOutputVSize({ address: destination }),
 		feeRateMiliSatoshisPerVByte
 	});
 

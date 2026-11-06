@@ -1,3 +1,4 @@
+import { getTopUpCanisterId } from '$icp/utils/cycles-top-up.utils';
 import type { ContactUi } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
@@ -24,7 +25,13 @@ export const transactionsFilterTokenKey = ({
 	return `${tokenDesc}-${networkDesc}`;
 };
 
-const candidateAddresses = (transactionUi: AllTransactionUiWithCmp): string[] => {
+const candidateAddresses = ({
+	transactionUi,
+	cmcDepositAccountCanisterIds
+}: {
+	transactionUi: AllTransactionUiWithCmp;
+	cmcDepositAccountCanisterIds: Record<string, string>;
+}): string[] => {
 	const collected: (string | undefined)[] = [];
 
 	if (transactionUi.component === 'bitcoin') {
@@ -47,6 +54,9 @@ const candidateAddresses = (transactionUi: AllTransactionUiWithCmp): string[] =>
 		const { transaction } = transactionUi;
 		collected.push(transaction.from);
 		collected.push(transaction.to);
+		// A top-up's row shows the canister that got the cycles, while an ICP top-up's `to` is only
+		// the CMC's deposit account for it.
+		collected.push(getTopUpCanisterId({ transaction, cmcDepositAccountCanisterIds }));
 	} else if (transactionUi.component === 'solana') {
 		// Solana — prefer the owner (the wallet-level address) over the SPL
 		// token-account (ATA), matching what TransactionContactCard resolves
@@ -70,12 +80,14 @@ const candidateAddresses = (transactionUi: AllTransactionUiWithCmp): string[] =>
 
 const matchesContact = ({
 	transactionUi,
-	contacts
+	contacts,
+	cmcDepositAccountCanisterIds
 }: {
 	transactionUi: AllTransactionUiWithCmp;
 	contacts: ContactUi[];
+	cmcDepositAccountCanisterIds: Record<string, string>;
 }): boolean => {
-	const addresses = candidateAddresses(transactionUi);
+	const addresses = candidateAddresses({ transactionUi, cmcDepositAccountCanisterIds });
 
 	if (addresses.length === 0) {
 		return false;
@@ -97,11 +109,15 @@ const transactionsFilterType = (transactionUi: AllTransactionUiWithCmp): Transac
 export const applyTransactionsFilter = ({
 	transactions,
 	filter,
-	contacts
+	contacts,
+	cmcDepositAccountCanisterIds = {}
 }: {
 	transactions: AllTransactionUiWithCmp[];
 	filter: TransactionsFilter;
 	contacts: ContactUi[];
+	// The contacts' canister IDs by their CMC deposit account identifier, so that an ICP top-up
+	// matches the contact holding its canister, as its row shows (`getTopUpCanisterId`).
+	cmcDepositAccountCanisterIds?: Record<string, string>;
 }): AllTransactionUiWithCmp[] => {
 	const { types, tokenIds, contactIds } = filter;
 
@@ -133,7 +149,14 @@ export const applyTransactionsFilter = ({
 			}
 		}
 
-		if (hasContactFilter && !matchesContact({ transactionUi, contacts: selectedContacts })) {
+		if (
+			hasContactFilter &&
+			!matchesContact({
+				transactionUi,
+				contacts: selectedContacts,
+				cmcDepositAccountCanisterIds
+			})
+		) {
 			return false;
 		}
 
