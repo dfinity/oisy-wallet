@@ -7,12 +7,13 @@ import {
 	AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE
 } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import * as toasts from '$lib/stores/toasts.store';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
 describe('AiAssistantReviewSendIcToken', () => {
@@ -125,5 +126,44 @@ describe('AiAssistantReviewSendIcToken', () => {
 		await fireEvent.click(button);
 
 		expect(sendSpy).not.toHaveBeenCalled();
+	});
+
+	describe('when a send fails', () => {
+		beforeEach(() => {
+			mockAuthStore();
+
+			vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
+
+			vi.useFakeTimers({ toFake: ['Date'] });
+			vi.setSystemTime(new Date('2026-11-06T10:00:00Z'));
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('should send the same transfer again', async () => {
+			sendSpy.mockRejectedValueOnce(new Error('Test error')).mockResolvedValueOnce(undefined);
+
+			const { getByTestId } = render(AiAssistantReviewSendIcToken, {
+				props,
+				context: mockContext()
+			});
+
+			await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+			await waitFor(() => expect(toasts.toastsError).toHaveBeenCalledOnce());
+
+			vi.setSystemTime(new Date('2026-11-06T10:01:00Z'));
+
+			await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+			await waitFor(() => expect(sendSpy).toHaveBeenCalledTimes(2));
+
+			const [[first], [second]] = sendSpy.mock.calls;
+
+			expect(first.createdAt).toBe(BigInt(new Date('2026-11-06T10:00:00Z').getTime()) * 1_000_000n);
+			expect(second.createdAt).toBe(first.createdAt);
+		});
 	});
 });
