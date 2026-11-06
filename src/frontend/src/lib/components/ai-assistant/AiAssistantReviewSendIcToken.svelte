@@ -3,9 +3,9 @@
 	import { getContext } from 'svelte';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import { sendIc } from '$icp/services/ic-send.services';
-	import type { IcTransferParams } from '$icp/types/ic-send';
+	import type { IcSendRequest, IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
-	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
+	import { isInvalidDestinationIc, toIcSendRequest } from '$icp/utils/ic-send.utils';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
 		AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
@@ -63,6 +63,10 @@
 
 	let loading = $state(false);
 
+	// Send stays on screen after a failed send, so pressing it again sends the same transfer rather
+	// than a second one (see `toIcSendRequest`).
+	let sendRequest: IcSendRequest | undefined;
+
 	const send = async () => {
 		const sharedTrackingEventMetadata = {
 			token: $sendTokenSymbol
@@ -106,9 +110,17 @@
 		try {
 			loading = true;
 
-			const params: IcTransferParams = {
+			sendRequest = toIcSendRequest({
+				previous: sendRequest,
+				tokenId: $sendToken.id,
 				to: destination,
-				amount: parsedAmount,
+				amount: parsedAmount
+			});
+
+			const params: IcTransferParams = {
+				to: sendRequest.to,
+				amount: sendRequest.amount,
+				createdAt: sendRequest.createdAt,
 				identity: $authIdentity
 			};
 

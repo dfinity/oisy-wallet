@@ -68,6 +68,25 @@ describe('icp-ledger.api', () => {
 			});
 		});
 
+		it('passes createdAt through to the ledger', async () => {
+			const createdAt = 1_700_000_000_000_000_000n;
+
+			await transfer({ ...params, createdAt });
+
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				to: AccountIdentifier.fromHex(mockAccountIdentifierText),
+				createdAt
+			});
+		});
+
+		it('leaves createdAt unset when none is given', async () => {
+			await transfer(params);
+
+			expect(ledgerCanisterMock.transfer.mock.calls[0][0].createdAt).toBeUndefined();
+			expect(nowInBigIntNanoSeconds).not.toHaveBeenCalled();
+		});
+
 		it('throws an error if identity is undefined', async () => {
 			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
 		});
