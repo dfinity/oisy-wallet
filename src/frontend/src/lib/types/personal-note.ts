@@ -30,6 +30,11 @@ export interface PersonalNoteDecryptionFailure {
 
 export type PersonalNoteEntryUi = PersonalNoteUi | PersonalNoteDecryptionFailure;
 
+/** Opens the note modal on that note's read-only view; without an id, on the editor for a new note. */
+export interface NotesModalParams {
+	noteId?: string;
+}
+
 export const isPersonalNoteDecryptionFailure = (
 	entry: PersonalNoteEntryUi
 ): entry is PersonalNoteDecryptionFailure =>

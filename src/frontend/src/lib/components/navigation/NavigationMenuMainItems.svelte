@@ -49,7 +49,6 @@
 	} from '$lib/constants/test-ids.constants';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { activeAssetsTabStore } from '$lib/stores/settings.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import type {
@@ -68,6 +67,7 @@
 		isRouteRewards,
 		isRouteSettings,
 		isRouteHelp,
+		isRouteNotes,
 		isRouteTokens,
 		isRouteOisyTradeProvider,
 		isRouteTrading,
@@ -96,8 +96,6 @@
 		},
 		more: { label: () => $i18n.navigation.text.section_more, testId: NAVIGATION_GROUP_MORE }
 	};
-
-	const notesModalId = Symbol();
 
 	// Which group's bottom sheet is open on mobile (null = none).
 	let openSheet = $state<NavigationGroupId | null>(null);
@@ -253,10 +251,8 @@
 				href: url(AppPath.Explore),
 				selected: isRouteDappExplorer(page)
 			},
-			// Interim: opens the Notes modal (not a page yet), so it never takes the
-			// blue "current page" treatment. Gated on PERSONAL_NOTES_ENABLED to match
-			// the modal host (Modals.svelte), which only mounts NotesModal under the same
-			// flag — without the gate the nav shows a dead entry in production (flag off).
+			// Gated on PERSONAL_NOTES_ENABLED like the page and its modal host
+			// (Modals.svelte), so the flag hides the whole surface at once.
 			...(PERSONAL_NOTES_ENABLED
 				? {
 						notes: {
@@ -264,8 +260,8 @@
 							ariaLabel: $i18n.navigation.alt.notes,
 							testId: prefixedTestId(NAVIGATION_ITEM_NOTES),
 							icon: IconNotebook,
-							onclick: () => modalStore.openNotes(notesModalId),
-							selected: false
+							href: url(AppPath.Notes),
+							selected: isRouteNotes(page)
 						}
 					}
 				: {}),

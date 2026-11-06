@@ -9,8 +9,8 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import {
-		NOTES_BACK_BUTTON,
 		NOTES_VIEW,
+		NOTES_VIEW_CLOSE_BUTTON,
 		NOTES_VIEW_DELETE_BUTTON,
 		NOTES_VIEW_EDIT_BUTTON,
 		NOTES_VIEW_SHARE_BUTTON
@@ -23,7 +23,7 @@
 
 	interface Props {
 		note: PersonalNoteUi;
-		onBack: () => void;
+		onClose: () => void;
 		// Optional so the read-only view can render without the edit/delete actions
 		// (they are wired once the editor and delete flows exist).
 		onEdit?: () => void;
@@ -32,7 +32,7 @@
 		onShare?: () => void;
 	}
 
-	let { note, onBack, onEdit, onDelete, onShare }: Props = $props();
+	let { note, onClose, onEdit, onDelete, onShare }: Props = $props();
 
 	const metaLine = $derived.by(() => {
 		const created = formatPersonalNoteTimestamp({
@@ -150,8 +150,8 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<Button colorStyle="primary" fullWidth onclick={onBack} testId={NOTES_BACK_BUTTON}>
-				{$i18n.notes.text.back}
+			<Button colorStyle="primary" fullWidth onclick={onClose} testId={NOTES_VIEW_CLOSE_BUTTON}>
+				{$i18n.core.text.close}
 			</Button>
 		</ButtonGroup>
 	{/snippet}

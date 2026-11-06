@@ -37,6 +37,7 @@
 		modalTipClaimData,
 		modalAddressBook,
 		modalNotes,
+		modalNotesData,
 		modalVipQrCodeData,
 		modalIcHideTokenData,
 		modalHideTokenData,
@@ -93,7 +94,7 @@
 	{:else if $modalAddressBook}
 		<AddressBookModal />
 	{:else if PERSONAL_NOTES_ENABLED && $modalNotes}
-		<NotesModal />
+		<NotesModal noteId={$modalNotesData?.noteId} />
 	{:else if $modalNftImageConsent && nonNullish($modalNftImageConsentData)}
 		<NftImageConsentModal collection={$modalNftImageConsentData} />
 	{:else if $modalNftFullscreenDisplayOpen && nonNullish($modalNftFullscreenDisplayData?.imageUrl)}

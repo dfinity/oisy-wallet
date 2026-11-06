@@ -24,6 +24,7 @@ import {
 	isEarningPath,
 	isHelpPath,
 	isNftsPath,
+	isNotesPath,
 	isRewardsPath,
 	isRouteActivity,
 	isRouteDappExplorer,
@@ -31,6 +32,7 @@ import {
 	isRouteEarning,
 	isRouteHelp,
 	isRouteNfts,
+	isRouteNotes,
 	isRouteRewards,
 	isRouteSettings,
 	isRouteTokens,
@@ -550,6 +552,26 @@ describe('nav.utils', () => {
 			});
 		});
 
+		describe('isRouteNotes', () => {
+			const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Notes}`;
+
+			it('should return true when route id matches Notes path', () => {
+				expect(isRouteNotes(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteNotes(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
+			});
+
+			it('should return false when route id does not match Notes path', () => {
+				expect(isRouteNotes(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
+
+				expect(isRouteNotes(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
+
+				expect(isRouteNotes(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
+
+				// The public page a shared note opens on is not the Notes page.
+				expect(isRouteNotes(mockPage('/(public)/notes/share/[token]'))).toBeFalsy();
+			});
+		});
+
 		describe('isRouteDappExplorer', () => {
 			it('should return true when route id matches Explore path', () => {
 				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Explore}`;
@@ -720,6 +742,13 @@ describe('nav.utils', () => {
 			expect(isHelpPath('/(app)/help')).toBeTruthy();
 			expect(isHelpPath('/(app)/help/wrong')).toBeFalsy();
 			expect(isHelpPath(null)).toBeFalsy();
+		});
+
+		it('isNotesPath', () => {
+			expect(isNotesPath(withAppPrefix(AppPath.Notes))).toBeTruthy();
+			expect(isNotesPath('/(app)/notes')).toBeTruthy();
+			expect(isNotesPath('/(app)/notes/wrong')).toBeFalsy();
+			expect(isNotesPath(null)).toBeFalsy();
 		});
 
 		it('isDappExplorerPath', () => {

@@ -3029,7 +3029,6 @@
 			"edit_note": "Modifier la note",
 			"delete_note": "Supprimer la note",
 			"delete_confirm_text": "Cela supprimera la note '$note'. Cette action est irréversible.",
-			"back": "Retour",
 			"empty_title": "Vous n'avez pas encore de notes",
 			"empty_subtitle": "Créez des notes privées et chiffrées pour garder vos informations en sécurité aux côtés de votre wallet.",
 			"empty_add": "Ajouter une nouvelle note",

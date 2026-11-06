@@ -3029,7 +3029,6 @@
 			"edit_note": "Editar nota",
 			"delete_note": "Eliminar nota",
 			"delete_confirm_text": "Isto vai eliminar a nota '$note'. Esta ação não pode ser desfeita.",
-			"back": "Voltar",
 			"empty_title": "Ainda não tens notas",
 			"empty_subtitle": "Cria notas privadas e encriptadas para manter informações importantes seguras junto à tua carteira.",
 			"empty_add": "Adicionar nova nota",

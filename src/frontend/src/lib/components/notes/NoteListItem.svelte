@@ -1,7 +1,12 @@
 <script lang="ts">
-	import IconChevronRight from '$lib/components/icons/lucide/IconChevronRight.svelte';
+	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { NOTES_LIST_ITEM, NOTES_RETRY_DECRYPT_BUTTON } from '$lib/constants/test-ids.constants';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import {
+		NOTES_LIST_ITEM,
+		NOTES_LIST_ITEM_DELETE_BUTTON,
+		NOTES_RETRY_DECRYPT_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -17,10 +22,11 @@
 	interface Props {
 		note: PersonalNoteEntryUi;
 		onSelect: (id: string) => void;
+		onDelete: (id: string) => void;
 		onRetry: () => void;
 	}
 
-	let { note, onSelect, onRetry }: Props = $props();
+	let { note, onSelect, onDelete, onRetry }: Props = $props();
 
 	// Never-edited notes read "Created …"; edited notes "Updated …" (and sort to the
 	// top). All times render in the user's local timezone.
@@ -37,8 +43,8 @@
 		});
 	});
 
-	// Plain-text preview: first line as a bold title, the rest collapsed to one
-	// lighter line. Both are auto-escaped by Svelte and bidi-neutralized.
+	// Plain-text preview: first line as a bold title, the rest collapsed into a
+	// lighter paragraph. Both are auto-escaped by Svelte and bidi-neutralized.
 	const parts = $derived(
 		isPersonalNoteDecryptionFailure(note)
 			? { title: '', body: '' }
@@ -60,28 +66,39 @@
 		</Button>
 	</div>
 {:else}
-	<button
-		class="flex w-full items-center gap-3 rounded-xl row-feedback px-2 py-3 text-left"
-		data-tid={NOTES_LIST_ITEM}
-		onclick={() => onSelect(note.id)}
-		type="button"
-	>
-		<span class="flex min-w-0 flex-1 flex-col gap-1">
+	<!-- The delete button sits beside the row button rather than inside it: a button
+		cannot contain another, and the row's pressed fill must not light up for it. -->
+	<div class="flex w-full items-center gap-1">
+		<button
+			class="flex min-w-0 flex-1 flex-col items-stretch gap-1 rounded-xl row-feedback px-2 py-3 text-left"
+			data-tid={NOTES_LIST_ITEM}
+			onclick={() => onSelect(note.id)}
+			type="button"
+		>
 			<span style="overflow-wrap: anywhere;" class="truncate font-bold text-primary">
 				{parts.title}
 			</span>
-			<!-- Apple-Notes style meta line: the timestamp leads and the body preview
-				follows on the same line, so every row keeps the same two-line height
-				whether or not the note has body text. -->
-			<span class="flex min-w-0 items-baseline gap-1.5 text-xs">
-				<span class="shrink-0 text-secondary">{timestamp}</span>
-				{#if parts.body !== ''}
-					<span class="min-w-0 flex-1 truncate text-tertiary">{parts.body}</span>
-				{/if}
-			</span>
-		</span>
-		<span class="shrink-0 text-disabled">
-			<IconChevronRight />
-		</span>
-	</button>
+			<!-- Up to two lines of the body, then the timestamp on a line of its own, so
+				a row grows with its preview (a title-only note stays two lines). -->
+			{#if parts.body !== ''}
+				<span style="overflow-wrap: anywhere;" class="line-clamp-2 text-sm text-tertiary">
+					{parts.body}
+				</span>
+			{/if}
+			<span class="text-xs text-secondary">{timestamp}</span>
+		</button>
+
+		<ButtonIcon
+			ariaLabel={$i18n.notes.text.delete_note}
+			colorStyle="error"
+			link={false}
+			onclick={() => onDelete(note.id)}
+			testId={NOTES_LIST_ITEM_DELETE_BUTTON}
+			transparent
+		>
+			{#snippet icon()}
+				<IconTrash />
+			{/snippet}
+		</ButtonIcon>
+	</div>
 {/if}
