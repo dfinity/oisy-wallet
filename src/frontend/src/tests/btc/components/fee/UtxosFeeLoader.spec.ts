@@ -8,10 +8,12 @@ import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store'
 import { initUtxosFeeStore, type UtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
+import * as backendApi from '$lib/api/backend.api';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
@@ -86,6 +88,45 @@ describe('UtxosFeeLoader', () => {
 		mockGetUtxosQuery();
 		mockGetFeeRateFromPercentiles();
 		mockLoadBtcPendingSentTransactions();
+	});
+
+	describe('with BTC_SEND_VIA_BACKEND_ENABLED', () => {
+		beforeEach(() => {
+			btcSendViaBackend.enabled = true;
+
+			// The real pending loader, which fills the UTXOs too.
+			vi.restoreAllMocks();
+			mockGetFeeRateFromPercentiles();
+		});
+
+		it('should price the fee from the UTXOs of one backend call', async () => {
+			const getUtxosQuerySpy = mockGetUtxosQuery();
+			const getPendingBtcTransactionsSpy = vi.spyOn(backendApi, 'getPendingBtcTransactions');
+			const getSpendableBtcUtxosSpy = vi
+				.spyOn(backendApi, 'getSpendableBtcUtxos')
+				.mockResolvedValue({ utxos: mockAllUtxos, pending_transactions: [] });
+			const prepareBtcSendSpy = mockPrepareBtcSend();
+
+			mockAuthStore();
+
+			render(UtxosFeeLoader, {
+				props,
+				context: mockContext({ utxosFeeStore })
+			});
+
+			await waitFor(() => {
+				expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith({
+					amount,
+					source,
+					allUtxos: mockAllUtxos,
+					feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles
+				});
+			});
+
+			expect(getSpendableBtcUtxosSpy).toHaveBeenCalledOnce();
+			expect(getUtxosQuerySpy).not.toHaveBeenCalled();
+			expect(getPendingBtcTransactionsSpy).not.toHaveBeenCalled();
+		});
 	});
 
 	it('should call prepareBtcSend with proper params', async () => {

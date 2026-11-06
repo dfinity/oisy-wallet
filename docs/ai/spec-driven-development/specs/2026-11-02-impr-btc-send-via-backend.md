@@ -652,8 +652,9 @@ This also fixes the CFS path, so it lands on its own (PR 6) before the backend p
 `sendBtc` keeps its parameters (`SendBtcParams`) and gains one optional field, `beforeBroadcast`
 (below), so the callers that do not track the send do not change. Inside, behind a flag:
 `export const BTC_SEND_VIA_BACKEND_ENABLED = LOCAL || STAGING;`, the idiom of `ONRAMPER_ENABLED`
-in `src/frontend/src/env/rest/onramper.env.ts`. It lives next to the BTC network flags in
-`src/frontend/src/env/networks/networks.btc.env.ts`, and PR 10 makes it `true`:
+in `src/frontend/src/env/rest/onramper.env.ts`. It lives next to the other BTC feature flag,
+`BTC_EXTENSION_FEATURE_FLAG_ENABLED`, in `src/frontend/src/env/btc.env.ts` (PR 7), and PR 10 makes
+it `true`:
 
 1. Build the PSBT from `utxosFee.utxos`, `[{ destination, amount }]`, the source address as change,
    `utxosFee.feeSatoshis`.
@@ -794,6 +795,29 @@ would block all of them in production until a new release. With the flag off, th
 (`wallet-connect.services.ts`, `chain-fusion-swap-active-tx.services.ts`,
 `ckbtc-update-balance.scheduler.ts`), which read other addresses or other confirmation floors.
 
+Decided in PR 7:
+
+- **One call fills both stores.** With the flag on, `loadBtcPendingSentTransactions` calls
+  `btc_get_spendable_utxos` and fills `allUtxosStore` as well as the pending store, and
+  `AllUtxosLoader` makes no call: every flow mounts it inside `BtcPendingSentTransactionsLoader`.
+  - Each `btc_get_pending_transactions` call of these flows becomes one `btc_get_spendable_utxos`
+    call, so the number of update calls is unchanged, and the `getUtxosQuery` query goes.
+  - The re-checks that reload the pending transactions (`validateBtcSend`, Convert's mount)
+    refresh the UTXOs with them, from one snapshot.
+- **A rate limit is an error.** `btcGetPendingTransactions` answers a rate limit with no pending
+  transactions; `btcGetSpendableUtxos` throws instead, since no UTXOs would read as an empty wallet.
+- **On a failure**, the pending transactions become `null`, as today. If no UTXOs were loaded yet,
+  `allUtxosStore` gets an empty list, so the fee reports `PendingTransactionsNotAvailable` instead
+  of waiting forever, Max stays unset and OpenCryptoPay's readiness wait ends. UTXOs already loaded
+  are kept, since the pending error alone stops a send.
+- **Regtest.** The backend's floor is 1 confirmation there (`get_all_utxos` lowers it; 4
+  elsewhere, as `getUtxosQuery` used). The frontend's filter compares block heights, not
+  confirmations, so it keeps those outputs, and local sends can spend newer ones.
+- **Tests run with the flag off.** Vitest builds as `local`, where the flag is on, so
+  `vitest.setup.ts` mocks it with a getter that starts each test off, matching production. Specs for
+  the backend path turn it on through `btcSendViaBackend` in `$tests/utils/btc-env.test-utils`.
+  PR 11 removes both.
+
 ### Frontend: OpenCryptoPay
 
 `payBtc` builds and signs with the same utils (no broadcast: OpenCryptoPay broadcasts), passes the
@@ -902,9 +926,12 @@ Every PR is safe on its own.
    - Tests check that the sizing refuses an address for the wrong network too, before anything is
      signed.
 7. `feat(frontend): load BTC UTXOs from the backend behind a flag` (needs 4).
-   - Adds `BTC_SEND_VIA_BACKEND_ENABLED`, on for local and staging.
-   - With the flag on, `AllUtxosLoader` and the pending loader move to `btc_get_spendable_utxos`.
-     With it off, they load as today.
+   - Adds `BTC_SEND_VIA_BACKEND_ENABLED` in `src/frontend/src/env/btc.env.ts`, on for local and
+     staging.
+   - With the flag on, the pending loader fills the UTXOs and the pending transactions from one
+     `btc_get_spendable_utxos` call, and `AllUtxosLoader` makes none. With it off, they load as
+     today. See [Decided in PR 7](#frontend-utxo-loading).
+   - `PRODUCT.md` gains "Spendable outputs from the backend (local and staging)" under `## Bitcoin`.
 8. `feat(frontend): send BTC through the backend behind the flag` (needs 3, 5, 6, 7).
    - `beforeBroadcast` and `isDefinitiveBtcBroadcastRefusal` are added. The Chain Fusion and NEAR
      Intents rows are created in `beforeBroadcast` when the flag is on, and in `onBroadcast` when it

@@ -3,6 +3,7 @@ import {
 	mapBtcAddPendingTransactionError,
 	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
+	mapBtcGetSpendableUtxosError,
 	mapGetAllowedCyclesError,
 	mapSignOnramperWidgetUrlError
 } from '$lib/canisters/backend.errors';
@@ -122,6 +123,43 @@ describe('backend.errors', () => {
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
 			expect(err.message).toBe('Unknown BtcGetPendingTransactionsError');
+		});
+	});
+
+	describe('mapBtcGetSpendableUtxosError', () => {
+		it('should map InternalError', () => {
+			const err = mapBtcGetSpendableUtxosError({ InternalError: { msg: 'reply too large' } });
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('reply too large');
+		});
+
+		it('should map RateLimited', () => {
+			const err = mapBtcGetSpendableUtxosError({
+				RateLimited: { max_calls: 15, window_ns: 60_000_000_000n, caller: mockPrincipal }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe(
+				'Rate limit exceeded. Maximum of 15 calls allowed every 60 seconds.'
+			);
+		});
+
+		it('should map InvalidDelegationChain', () => {
+			const err = mapBtcGetSpendableUtxosError({
+				InvalidDelegationChain: { msg: 'chain expired' }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('II delegation chain verification failed: chain expired');
+		});
+
+		it('should return unknown error for unrecognized variant', () => {
+			// @ts-expect-error testing unknown error variant
+			const err = mapBtcGetSpendableUtxosError({ SomeOther: null });
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Unknown BtcGetSpendableUtxosError');
 		});
 	});
 
