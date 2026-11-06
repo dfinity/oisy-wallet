@@ -519,6 +519,26 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"minglechat": {
+				"name": "Mingle Chat",
+				"one_liner": "Šifrované zprávy s vestavěnými tokeny.",
+				"description": "Mingle Chat je komunikátor s koncovým šifrováním, který běží plně na Internet Computeru. Pište si ve dvou nebo ve skupinách, sdílejte hlasové zprávy, obrázky a soubory a posílejte tokeny přímo z konverzace. Každý převod se podepisuje v OISY."
+			},
+			"icforums": {
+				"name": "IC Forums",
+				"one_liner": "Komunitní fóra na Internet Computeru.",
+				"description": "IC Forums je komunitní platforma, která běží plně na Internet Computeru. Zapojte se do diskusí ve více než 100 komunitách, nebo založte vlastní s vlastní strukturou, rolemi a moderováním. Jedna identita platí pro všechny komunity."
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Vlastní cloudové úložiště na Internet Computeru.",
+				"description": "Storica zhruba za minutu nasadí soukromý úložný kanystr na Internet Computeru, placený v ICP. Kanystr, jeho soubory, oprávnění i aktualizace máte pod kontrolou vy. Soubory spravujte z webové konzole, nástroje pro příkazový řádek nebo TypeScript SDK a přihlaste se přes OISY nebo Internet Identity."
+			},
+			"blitzgrid": {
+				"name": "Blitz Grid Fantasy Football",
+				"one_liner": "Ligy fantasy amerického fotbalu, které běží plně na Internet Computeru.",
+				"description": "Blitz Grid je hra fantasy amerického fotbalu navržená pro mobil. Ligy, draft, soupisky, výměny i týdenní bodování běží v kanystrech na Internet Computeru. Připojte OISY a posílejte ICP ostatním manažerům ve své lize. Každý převod se podepisuje v OISY."
 			}
 		}
 	},

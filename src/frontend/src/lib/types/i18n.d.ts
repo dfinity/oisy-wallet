@@ -343,6 +343,10 @@ interface I18nDapps {
 			carousel: { text: string; call_to_action: string };
 		};
 		hyperliquid: { name: string; one_liner: string; description: string };
+		minglechat: { name: string; one_liner: string; description: string };
+		icforums: { name: string; one_liner: string; description: string };
+		storica: { name: string; one_liner: string; description: string };
+		blitzgrid: { name: string; one_liner: string; description: string };
 	};
 }
 
