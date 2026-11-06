@@ -163,15 +163,45 @@ pub fn add_dismissed_notifications(
     Ok(())
 }
 
-/// Builds history entries for agreements that were actually changed.
-fn collect_history_entries(request: &UserAgreements, now: Timestamp) -> Vec<AgreementHistoryEntry> {
+/// Whether applying `requested` changes the stored agreement `current`.
+///
+/// Only an agreement the request sets (`accepted` is `Some(_)`) can change. `last_accepted_at_ns`
+/// is server-owned and never read from the request, so it is left out of the comparison.
+fn is_agreement_changed(current: Option<&UserAgreement>, requested: &UserAgreement) -> bool {
+    requested.accepted.is_some()
+        && current.is_none_or(|current| {
+            current.accepted != requested.accepted
+                || current.last_updated_at_ms != requested.last_updated_at_ms
+                || current.text_sha256 != requested.text_sha256
+        })
+}
+
+/// Builds history entries for the agreements in `request` that change the stored `current` ones.
+fn collect_history_entries(
+    current: &UserAgreements,
+    request: &UserAgreements,
+    now: Timestamp,
+) -> Vec<AgreementHistoryEntry> {
     [
-        (AgreementType::LicenseAgreement, &request.license_agreement),
-        (AgreementType::TermsOfUse, &request.terms_of_use),
-        (AgreementType::PrivacyPolicy, &request.privacy_policy),
+        (
+            AgreementType::LicenseAgreement,
+            &current.license_agreement,
+            &request.license_agreement,
+        ),
+        (
+            AgreementType::TermsOfUse,
+            &current.terms_of_use,
+            &request.terms_of_use,
+        ),
+        (
+            AgreementType::PrivacyPolicy,
+            &current.privacy_policy,
+            &request.privacy_policy,
+        ),
     ]
     .into_iter()
-    .filter_map(|(agreement_type, agreement)| {
+    .filter(|(_, current, requested)| is_agreement_changed(Some(current), requested))
+    .filter_map(|(agreement_type, _, agreement)| {
         agreement.accepted.map(|accepted| AgreementHistoryEntry {
             agreement_type,
             accepted,
@@ -217,7 +247,8 @@ pub fn update_agreements(
     user_profile_model.store_new(principal, now, &new_profile);
 
     if new_profile.version != user_profile.version {
-        let new_entries = collect_history_entries(agreements, now);
+        let current = user_profile.agreements.unwrap_or_default().agreements;
+        let new_entries = collect_history_entries(&current, agreements, now);
         if !new_entries.is_empty() {
             let mut history = agreement_history.get(&principal).unwrap_or_default().0;
             history.extend(new_entries);
@@ -228,13 +259,18 @@ pub fn update_agreements(
     Ok(())
 }
 
-/// Builds history entries for provider agreements that were actually changed.
+/// Builds history entries for the provider agreements in `request` that change the stored
+/// `current` ones.
 fn collect_provider_history_entries(
+    current: &BTreeMap<ProviderAgreementType, UserAgreement>,
     request: &BTreeMap<ProviderAgreementType, UserAgreement>,
     now: Timestamp,
 ) -> Vec<AgreementHistoryEntry> {
     request
         .iter()
+        .filter(|(provider_type, agreement)| {
+            is_agreement_changed(current.get(*provider_type), agreement)
+        })
         .filter_map(|(provider_type, agreement)| {
             agreement.accepted.map(|accepted| AgreementHistoryEntry {
                 agreement_type: AgreementType::Provider(provider_type.clone()),
@@ -282,7 +318,11 @@ pub fn update_provider_agreements(
     user_profile_model.store_new(principal, now, &new_profile);
 
     if new_profile.version != user_profile.version {
-        let new_entries = collect_provider_history_entries(provider_agreements, now);
+        let current = user_profile
+            .agreements
+            .and_then(|agreements| agreements.provider_agreements)
+            .unwrap_or_default();
+        let new_entries = collect_provider_history_entries(&current, provider_agreements, now);
         if !new_entries.is_empty() {
             let mut history = agreement_history.get(&principal).unwrap_or_default().0;
             history.extend(new_entries);
@@ -350,4 +390,66 @@ pub fn update_transaction_filter_settings(
         user_profile.with_transaction_filter_settings(profile_version, now, filter)?;
     user_profile_model.store_new(principal, now, &new_profile);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use shared::types::agreement::UserAgreement;
+
+    use super::is_agreement_changed;
+
+    fn accepted(text_sha256: &str) -> UserAgreement {
+        UserAgreement {
+            accepted: Some(true),
+            last_accepted_at_ns: None,
+            last_updated_at_ms: Some(1_700_000_000_000),
+            text_sha256: Some(text_sha256.repeat(64)),
+        }
+    }
+
+    #[test]
+    fn agreement_not_set_by_the_request_is_unchanged() {
+        assert!(!is_agreement_changed(
+            Some(&accepted("a")),
+            &UserAgreement::default()
+        ));
+        assert!(!is_agreement_changed(None, &UserAgreement::default()));
+    }
+
+    #[test]
+    fn agreement_matching_the_stored_one_is_unchanged() {
+        let stored = UserAgreement {
+            last_accepted_at_ns: Some(42),
+            ..accepted("a")
+        };
+
+        assert!(!is_agreement_changed(Some(&stored), &accepted("a")));
+    }
+
+    #[test]
+    fn agreement_without_a_stored_one_is_changed() {
+        assert!(is_agreement_changed(None, &accepted("a")));
+        assert!(is_agreement_changed(
+            Some(&UserAgreement::default()),
+            &accepted("a")
+        ));
+    }
+
+    #[test]
+    fn agreement_with_a_different_field_is_changed() {
+        let stored = accepted("a");
+
+        let rejected = UserAgreement {
+            accepted: Some(false),
+            ..accepted("a")
+        };
+        let new_version = UserAgreement {
+            last_updated_at_ms: Some(1_800_000_000_000),
+            ..accepted("a")
+        };
+
+        assert!(is_agreement_changed(Some(&stored), &rejected));
+        assert!(is_agreement_changed(Some(&stored), &new_version));
+        assert!(is_agreement_changed(Some(&stored), &accepted("b")));
+    }
 }

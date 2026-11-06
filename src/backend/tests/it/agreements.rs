@@ -959,6 +959,79 @@ fn test_agreement_history_accumulates_across_updates() {
 }
 
 #[test]
+fn test_agreement_history_records_only_changed_agreements() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
+
+    let accepted = UserAgreement {
+        accepted: Some(true),
+        text_sha256: Some("a".repeat(SHA256_HEX_LENGTH)),
+        last_updated_at_ms: Some(1_700_000_000_000),
+        ..Default::default()
+    };
+
+    let arg1 = UpdateUserAgreementsRequest {
+        current_user_version: profile.version,
+        agreements: UserAgreements {
+            license_agreement: accepted.clone(),
+            terms_of_use: accepted.clone(),
+            privacy_policy: UserAgreement::default(),
+        },
+    };
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg1)
+        .unwrap()
+        .unwrap();
+
+    let user_profile = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap();
+
+    // The license agreement and terms of use are sent again as stored; only the privacy policy
+    // changes.
+    let arg2 = UpdateUserAgreementsRequest {
+        current_user_version: user_profile.version,
+        agreements: UserAgreements {
+            license_agreement: accepted.clone(),
+            terms_of_use: accepted.clone(),
+            privacy_policy: accepted,
+        },
+    };
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg2)
+        .unwrap()
+        .unwrap();
+
+    let history = pic_setup
+        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+            caller,
+            "get_user_agreement_history",
+            (),
+        )
+        .unwrap()
+        .unwrap();
+
+    let agreement_types: Vec<AgreementType> = history
+        .into_iter()
+        .map(|entry| entry.agreement_type)
+        .collect();
+    assert_eq!(
+        agreement_types,
+        vec![
+            AgreementType::LicenseAgreement,
+            AgreementType::TermsOfUse,
+            AgreementType::PrivacyPolicy,
+        ]
+    );
+}
+
+#[test]
 fn test_agreement_history_not_recorded_when_no_change() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
