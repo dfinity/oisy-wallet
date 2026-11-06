@@ -96,6 +96,7 @@
 		onCustomErrorValidate={customValidate}
 		{revalidateKey}
 		token={$sendToken}
+		truncateSymbol
 		bind:amount
 		bind:amountSetToMax
 		bind:error={amountError}

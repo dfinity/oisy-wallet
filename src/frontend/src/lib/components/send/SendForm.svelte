@@ -1,10 +1,13 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
+	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
+	import SendTokenDetails from '$lib/components/send/SendTokenDetails.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { SEND_FORM_NEXT_BUTTON } from '$lib/constants/test-ids.constants';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { preventDefault } from '$lib/utils/event-modifiers.utils';
 
@@ -38,6 +41,8 @@
 		topBanner
 	}: Props = $props();
 
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
 	const back = () => onBack();
 </script>
 
@@ -53,6 +58,12 @@
 			onSendDestinationStep={back}
 			{selectedContact}
 		/>
+
+		<!-- Same lines, in the same order, as the review step: the token is named by its network,
+			 symbol, name and address, never by a symbol alone, which any token can copy. -->
+		<ReviewNetwork sourceNetwork={$sendToken.network} />
+
+		<SendTokenDetails token={$sendToken} />
 
 		{@render priority?.()}
 

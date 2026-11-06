@@ -2,14 +2,18 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import { ZERO } from '$lib/constants/app.constants';
-import { MAX_BUTTON, TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
+import {
+	MAX_BUTTON,
+	TOKEN_INPUT_CURRENCY_TOKEN,
+	TOKEN_INPUT_SELECT_TOKEN_BUTTON
+} from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import type { Token } from '$lib/types/token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
-import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 describe('EthSendAmount', () => {
@@ -112,7 +116,7 @@ describe('EthSendAmount', () => {
 
 		const maxButton = () => container.querySelector(`[data-tid="${MAX_BUTTON}"]`);
 
-		return { input, queryByText, maxButton, feeStore };
+		return { container, input, queryByText, maxButton, feeStore };
 	};
 
 	const setupWithoutCeiling = () => setup({ ceilingKnown: false });
@@ -174,6 +178,16 @@ describe('EthSendAmount', () => {
 		await waitFor(() => {
 			expect(queryByText(expectedError)).not.toBeInTheDocument();
 		});
+	});
+
+	it('keeps the token symbol in the selector on one line', () => {
+		const { container } = setup();
+
+		const button = container.querySelector(`[data-tid="${TOKEN_INPUT_SELECT_TOKEN_BUTTON}"]`);
+
+		assertNonNullish(button);
+
+		expect(within(button as HTMLElement).getByText(ETHEREUM_TOKEN.symbol)).toHaveClass('truncate');
 	});
 
 	// A "Max" offered before the fee arrives would be the whole balance: `getMaxTransactionAmount`

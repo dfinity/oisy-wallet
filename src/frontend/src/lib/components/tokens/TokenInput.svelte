@@ -29,6 +29,7 @@
 		onCustomErrorValidate?: (userAmount: bigint) => Error | undefined;
 		revalidateKey?: unknown;
 		showTokenNetwork?: boolean;
+		truncateSymbol?: boolean;
 		onClick?: () => void;
 		title?: Snippet;
 		amountInfo: Snippet;
@@ -54,6 +55,7 @@
 		onCustomErrorValidate = () => undefined,
 		revalidateKey = undefined,
 		showTokenNetwork = false,
+		truncateSymbol = false,
 		onClick,
 		title,
 		amountInfo,
@@ -89,6 +91,7 @@
 		{showTokenNetwork}
 		{title}
 		{token}
+		{truncateSymbol}
 		bind:amount
 		bind:errorType
 		bind:error
