@@ -5284,6 +5284,99 @@ describe('sol-instruction-summary.utils', () => {
 			).toEqual([WHIRLPOOL]);
 		});
 
+		// The last unwrap moves nothing: the first one left the 1,000 in the account as lamports.
+		it('should name a pool whose wrapped SOL the receiving account unwraps into itself', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						unwrap({
+							source: elsewhere,
+							destination: elsewhere,
+							authority: mockSolAddress3,
+							stackHeight: 3
+						}),
+						unwrap({
+							source: elsewhere,
+							destination: mockSolAddress,
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					],
+					mints: { [elsewhere]: WSOL_TOKEN.address }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should turn only what an unwrap into its own account states, oldest payout first', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: WHIRLPOOL, withWallet: false, stackHeight: 2 }),
+						unwrap({
+							source: elsewhere,
+							destination: elsewhere,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						}),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					],
+					mints: { [elsewhere]: WSOL_TOKEN.address }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should split a payout that an unwrap into its own account turns in part', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						unwrap({
+							source: elsewhere,
+							destination: elsewhere,
+							amount: '400',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						}),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '600',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						}),
+						token({ type: 'syncNative', info: { account: elsewhere }, stackHeight: 3 }),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '400',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					],
+					mints: { [elsewhere]: WSOL_TOKEN.address }
+				})
+			).toEqual([]);
+		});
+
 		it.each([
 			{ label: 'a stated amount', amount: '1000' },
 			{ label: 'no amount, everything the vault wraps', amount: undefined }

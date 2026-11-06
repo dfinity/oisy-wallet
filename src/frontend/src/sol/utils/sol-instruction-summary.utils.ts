@@ -2569,6 +2569,47 @@ const wrapIn = ({
 			: payout
 	);
 
+// An unwrap into its own account turns the wrapped SOL it states, or all of it when it states none,
+// into lamports that stay there: the token payouts still waiting on the account become lamport
+// payouts, oldest first, and one it turns in part splits in two.
+const unwrapIn = ({
+	waiting,
+	account,
+	parentIndex,
+	value
+}: {
+	waiting: WaitingPayout[];
+	account: SolAddress;
+	parentIndex: number;
+	value: bigint | undefined;
+}): WaitingPayout[] =>
+	waiting.reduce<{ rest: bigint | undefined; waiting: WaitingPayout[] }>(
+		({ rest, waiting: acc }, payout) => {
+			if (
+				payout.account !== account ||
+				payout.asset !== 'tokens' ||
+				payout.parentIndex !== parentIndex ||
+				(payout.closed ?? false) ||
+				rest === ZERO
+			) {
+				return { rest, waiting: [...acc, payout] };
+			}
+
+			const turned = isNullish(rest) || payout.left < rest ? payout.left : rest;
+
+			return {
+				rest: nonNullish(rest) ? rest - turned : rest,
+				waiting: [
+					...acc,
+					{ ...payout, asset: 'lamports', left: turned },
+					...(payout.left > turned ? [{ ...payout, left: payout.left - turned }] : [])
+				]
+			};
+		},
+		// Nothing limits what an unwrap that states no amount turns.
+		{ rest: value, waiting: [] }
+	).waiting;
+
 // A close empties its account into its destination, which passes on every payout still waiting
 // there that the close moves: all of them out of a wrapped SOL account, and the lamports out of any
 // other, whose tokens had to leave before it could close. What it leaves can no longer be passed
@@ -2663,9 +2704,15 @@ export const findSolProgramsPayingOthers = ({
 				received
 			} = payment;
 
-			// A transfer from an account to itself moves nothing.
+			// A transfer from an account to itself moves nothing, though an unwrap into its own account
+			// turns what it unwraps into lamports that stay there.
 			if (nonNullish(source) && source === destination) {
-				return acc;
+				return sent === received
+					? acc
+					: {
+							...acc,
+							waiting: unwrapIn({ waiting: acc.waiting, account: source, parentIndex, value })
+						};
 			}
 
 			const waiting = closing
