@@ -109,6 +109,29 @@ describe('AiAssistantReviewSendTokenTool', () => {
 		});
 	});
 
+	it('loads the BTC fee from the user address once it loads after the review renders', async () => {
+		render(AiAssistantReviewSendTokenTool, {
+			props: {
+				...props,
+				address: mockBtcP2SHAddress,
+				token: BTC_MAINNET_TOKEN
+			},
+			context: mockContext(BTC_MAINNET_TOKEN)
+		});
+
+		expect(loadBtcPendingSentTransactionsSpy).not.toHaveBeenCalledWith(
+			expect.objectContaining({ address: mockBtcAddress })
+		);
+
+		btcAddressMainnetStore.set({ certified: true, data: mockBtcAddress });
+
+		await waitFor(() => {
+			expect(loadBtcPendingSentTransactionsSpy).toHaveBeenCalledWith(
+				expect.objectContaining({ address: mockBtcAddress })
+			);
+		});
+	});
+
 	it('renders correctly for an ETH token', () => {
 		const { getByTestId, container } = render(AiAssistantReviewSendTokenTool, {
 			props: {

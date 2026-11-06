@@ -3,7 +3,6 @@
 	import { getContext } from 'svelte';
 	import UtxosFeeContexts from '$btc/components/fee/UtxosFeeContexts.svelte';
 	import UtxosFeeLoader from '$btc/components/fee/UtxosFeeLoader.svelte';
-	import { getBtcSourceAddress } from '$btc/services/btc-address.services';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 	import { selectedEvmNetwork } from '$evm/derived/network.derived';
@@ -18,6 +17,11 @@
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
+	import {
+		btcAddressMainnet,
+		btcAddressRegtest,
+		btcAddressTestnet
+	} from '$lib/derived/address.derived';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -25,6 +29,8 @@
 	import {
 		isNetworkEthereum,
 		isNetworkIdBitcoin,
+		isNetworkIdBTCRegtest,
+		isNetworkIdBTCTestnet,
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
 		isNetworkIdICP,
@@ -43,9 +49,16 @@
 
 	let destination = $derived(contactAddress?.address ?? address ?? '');
 
-	// Must match the source `AiAssistantReviewSendBtcToken` signs from: the fee loader selects
-	// the UTXOs that send then spends.
-	let btcSource = $derived(getBtcSourceAddress($sendTokenNetworkId));
+	// One source for both the fee loader and the send: the loader selects the UTXOs that
+	// `AiAssistantReviewSendBtcToken` then validates and spends. Read the address stores
+	// reactively, so an address that loads after the review renders still reaches both.
+	let btcSource = $derived(
+		(isNetworkIdBTCTestnet($sendTokenNetworkId)
+			? $btcAddressTestnet
+			: isNetworkIdBTCRegtest($sendTokenNetworkId)
+				? $btcAddressRegtest
+				: $btcAddressMainnet) ?? ''
+	);
 
 	let fallbackEvmToken = $derived(
 		$enabledEvmTokens.find(({ network: { id: networkId } }) => $sendToken.network.id === networkId)
@@ -106,6 +119,7 @@
 						{onSendCompleted}
 						{sendCompleted}
 						{sendEnabled}
+						source={btcSource}
 					/>
 				</UtxosFeeLoader>
 			</UtxosFeeContexts>
