@@ -14,6 +14,17 @@ describe('BtcWalletConnectSignReview', () => {
 		onReject: vi.fn()
 	};
 
+	it('shows the message in the order it is signed, with its line breaks', () => {
+		const { getByText } = render(BtcWalletConnectSignReview, {
+			props: { ...props, message: 'Sign in to Example\nPay \u202E0001\u202C BTC' }
+		});
+
+		const message = getByText('Sign in to Example Pay 0001 BTC');
+
+		expect(message.textContent).toBe('Sign in to Example\nPay 0001 BTC');
+		expect(message).toHaveClass('whitespace-pre-wrap');
+	});
+
 	it('offers to approve a request Verify does not flag', () => {
 		const { getByRole, queryByTestId } = render(BtcWalletConnectSignReview, { props });
 

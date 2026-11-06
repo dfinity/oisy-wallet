@@ -23,6 +23,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { fireEvent, render } from '@testing-library/svelte';
+import { hexlify, toUtf8Bytes } from 'ethers/utils';
 
 describe('EthWalletConnectMessage', () => {
 	// The raw message lives on its own tab. Reaching it is a click, not a scroll.
@@ -813,6 +814,35 @@ describe('EthWalletConnectMessage', () => {
 		expect(
 			getByText(getSignParamsMessageUtf8(newRequest.params.request.params))
 		).toBeInTheDocument();
+	});
+
+	it('should show a raw message in the order it is signed, with its line breaks', async () => {
+		const newRequest: WalletKitTypes.SessionRequest = {
+			...request,
+			params: {
+				...request.params,
+				request: {
+					method: SESSION_REQUEST_PERSONAL_SIGN,
+					params: [
+						hexlify(toUtf8Bytes('Sign in to Example\nPay \u202E0001\u202C USDC')),
+						'0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95'
+					]
+				}
+			}
+		} as WalletKitTypes.SessionRequest;
+
+		const { getByText, getByRole } = render(EthWalletConnectMessage, {
+			props: {
+				request: newRequest
+			}
+		});
+
+		await openRawTab(getByRole);
+
+		const message = getByText('Sign in to Example Pay 0001 USDC');
+
+		expect(message.textContent).toBe('Sign in to Example\nPay 0001 USDC');
+		expect(message).toHaveClass('whitespace-pre-wrap');
 	});
 
 	// The reported hole: an unlimited ERC-2612 permit rendered as a bare spender over a folded

@@ -31,6 +31,7 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { visibleMessageText } from '$lib/utils/wallet-connect.utils';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
@@ -315,7 +316,9 @@
 			</div>
 		{:else}
 			<p class="mb-4 font-normal">
-				<output class="break-all">{getSignParamsMessageUtf8(request.params.request.params)}</output>
+				<output class="break-all whitespace-pre-wrap"
+					>{visibleMessageText(getSignParamsMessageUtf8(request.params.request.params))}</output
+				>
 			</p>
 		{/if}
 	{/if}

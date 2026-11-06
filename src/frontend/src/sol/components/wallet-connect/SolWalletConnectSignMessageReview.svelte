@@ -3,6 +3,7 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectScamWarning from '$lib/components/wallet-connect/WalletConnectScamWarning.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { visibleMessageText } from '$lib/utils/wallet-connect.utils';
 
 	interface Props {
 		application: string;
@@ -42,7 +43,9 @@
 	<p class="mb-4 font-normal"><output class="break-all">{source}</output></p>
 
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>
-	<p class="mb-4 font-normal"><output class="break-all">{message}</output></p>
+	<p class="mb-4 font-normal">
+		<output class="break-all whitespace-pre-wrap">{visibleMessageText(message)}</output>
+	</p>
 
 	{#snippet toolbar()}
 		<WalletConnectActions approve={!flaggedAsScam} {onApprove} {onReject} />
