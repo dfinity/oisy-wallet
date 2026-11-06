@@ -2379,7 +2379,8 @@ export const mapSolInstructionSummaries = ({
 
 // What a transfer moves where: from a System account, a seed-derived one or a nonce account, or from
 // a token account on the signature of its authority. A Token-2022 mint that charges a fee on
-// transfers holds it back in the destination, which is credited the rest.
+// transfers holds it back in the destination, which is credited the rest. An unwrap pays lamports
+// out of a wrapped SOL account the same way, and one that states no amount empties the account.
 const paymentOf = ({
 	program,
 	parsed: { type, info }
@@ -2390,6 +2391,7 @@ const paymentOf = ({
 			authority?: SolAddress;
 			value?: bigint;
 			credited?: bigint;
+			emptying?: boolean;
 	  }
 	| undefined => {
 	if (program === 'system' && SYSTEM_TRANSFERS.includes(type)) {
@@ -2416,6 +2418,18 @@ const paymentOf = ({
 			...(nonNullish(value) && nonNullish(fee) && { credited: value - fee })
 		};
 	}
+
+	if (nonNullish(program) && TOKEN_PROGRAMS.includes(program) && type === 'unwrapLamports') {
+		const value = amount({ info, key: 'amount' });
+
+		return {
+			source: address({ info, key: 'source' }),
+			destination: address({ info, key: 'destination' }),
+			authority: address({ info, key: 'authority' }) ?? address({ info, key: 'multisigAuthority' }),
+			value,
+			...(isNullish(value) && { emptying: true })
+		};
+	}
 };
 
 interface WaitingPayout {
@@ -2427,34 +2441,38 @@ interface WaitingPayout {
 }
 
 // A transfer out of an account passes its amount on to the payouts into that account within the same
-// instruction that are still waiting, oldest first.
+// instruction that are still waiting, oldest first. One that empties the account passes on all of
+// them, whatever it moves.
 const passOn = ({
 	waiting,
 	account,
 	parentIndex,
-	value
+	value,
+	emptying = false
 }: {
 	waiting: WaitingPayout[];
 	account: SolAddress | undefined;
 	parentIndex: number;
 	value: bigint | undefined;
+	emptying?: boolean;
 }): WaitingPayout[] =>
-	isNullish(account) || isNullish(value)
+	isNullish(account) || (isNullish(value) && !emptying)
 		? waiting
-		: waiting.reduce<{ rest: bigint; waiting: WaitingPayout[] }>(
+		: waiting.reduce<{ rest: bigint | undefined; waiting: WaitingPayout[] }>(
 				({ rest, waiting: acc }, payout) => {
 					if (payout.account !== account || payout.parentIndex !== parentIndex) {
 						return { rest, waiting: [...acc, payout] };
 					}
 
-					const taken = payout.left < rest ? payout.left : rest;
+					const taken = isNullish(rest) || payout.left < rest ? payout.left : rest;
 
 					return {
-						rest: rest - taken,
+						rest: nonNullish(rest) ? rest - taken : rest,
 						waiting: [...acc, { ...payout, left: payout.left - taken }]
 					};
 				},
-				{ rest: value, waiting: [] }
+				// Nothing limits what an emptying transfer passes on.
+				{ rest: emptying ? undefined : value, waiting: [] }
 			).waiting;
 
 /**
@@ -2510,14 +2528,20 @@ export const findSolProgramsPayingOthers = ({
 				return acc;
 			}
 
-			const { source, destination, authority, value, credited = value } = payment;
+			const { source, destination, authority, value, credited = value, emptying } = payment;
 
 			// A transfer from an account to itself moves nothing.
 			if (nonNullish(source) && source === destination) {
 				return acc;
 			}
 
-			const waiting = passOn({ waiting: acc.waiting, account: source, parentIndex, value });
+			const waiting = passOn({
+				waiting: acc.waiting,
+				account: source,
+				parentIndex,
+				value,
+				emptying
+			});
 
 			if (
 				topLevel ||

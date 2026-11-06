@@ -4910,6 +4910,28 @@ describe('sol-instruction-summary.utils', () => {
 			stackHeight
 		});
 
+		const unwrap = ({
+			source,
+			destination,
+			amount,
+			authority = mockSolAddress2,
+			stackHeight
+		}: {
+			source: string;
+			destination: string;
+			amount?: string;
+			authority?: string;
+			stackHeight: number;
+		}) => ({
+			program: 'spl-token',
+			programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+			parsed: {
+				type: 'unwrapLamports',
+				info: { source, destination, authority, ...(nonNullish(amount) && { amount }) }
+			},
+			stackHeight
+		});
+
 		const paying = ({
 			instructions,
 			inner
@@ -5096,6 +5118,50 @@ describe('sol-instruction-summary.utils', () => {
 				})
 			).toEqual([WHIRLPOOL]);
 		});
+
+		it.each([
+			{ label: 'a stated amount', amount: '1000' },
+			{ label: 'no amount, everything the vault wraps', amount: undefined }
+		])(
+			'should name a listed pool that unwraps its vault to somebody else, with $label',
+			({ amount }) => {
+				expect(
+					paying({
+						instructions: [calling({ program: WHIRLPOOL })],
+						inner: [
+							transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+							unwrap({ source: vault, destination: mockSolAddress4, amount, stackHeight: 2 })
+						]
+					})
+				).toEqual([WHIRLPOOL]);
+			}
+		);
+
+		it.each([
+			{ label: 'a stated amount', amount: '1000' },
+			{ label: 'no amount, emptying the account', amount: undefined }
+		])(
+			'should not name a pool whose payout the receiving account unwraps on, with $label',
+			({ amount }) => {
+				expect(
+					paying({
+						instructions: [calling({ program: OKX })],
+						inner: [
+							call({ program: WHIRLPOOL, stackHeight: 2 }),
+							transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+							call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+							unwrap({
+								source: elsewhere,
+								destination: mockSolAddress4,
+								amount,
+								authority: mockSolAddress3,
+								stackHeight: 3
+							})
+						]
+					})
+				).toEqual([]);
+			}
+		);
 
 		it('should name a listed pool that pays elsewhere with a transfer that holds back a fee', () => {
 			expect(
