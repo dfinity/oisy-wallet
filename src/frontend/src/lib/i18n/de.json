@@ -519,6 +519,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"blitzgrid": {
+				"name": "Blitz Grid Fantasy Football",
+				"one_liner": "Fantasy-Football-Ligen, die vollständig auf dem Internet Computer laufen.",
+				"description": "Blitz Grid ist ein Fantasy-Football-Spiel, das für Mobilgeräte entwickelt wurde. Ligen, Draft, Kader, Trades und die wöchentliche Wertung laufen alle in Canistern auf dem Internet Computer. Verbinde OISY, um ICP an andere Manager deiner Liga zu senden. Jeder Transfer wird in OISY signiert."
 			}
 		}
 	},

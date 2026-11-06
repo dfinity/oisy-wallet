@@ -519,6 +519,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"blitzgrid": {
+				"name": "Blitz Grid Fantasy Football",
+				"one_liner": "Giải đấu fantasy football chạy hoàn toàn trên Internet Computer.",
+				"description": "Blitz Grid là trò chơi fantasy football được thiết kế cho thiết bị di động. Giải đấu, draft, đội hình, trao đổi cầu thủ và tính điểm hằng tuần đều chạy trong các canister trên Internet Computer. Kết nối OISY để gửi ICP cho các quản lý khác trong giải đấu của bạn. Mọi giao dịch chuyển đều được ký trong OISY."
 			}
 		}
 	},
