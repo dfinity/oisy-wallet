@@ -133,7 +133,7 @@
 			"section_finance": "金融",
 			"section_more": "更多",
 			"airdrops": "奖励",
-			"canister_top_up": "Canister 充值",
+			"tools": "工具",
 			"earning": "赚取",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "打开借贷视图",
 			"earning": "打开赚取视图",
 			"airdrops": "打开奖励视图",
-			"canister_top_up": "使用 ICP 或 TCYCLES 为 Canister 充值",
+			"tools": "打开工具",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "你的钱包地址、设置、登出与外部链接",
@@ -807,8 +807,8 @@
 			"support_title": "支持",
 			"support_description": "在 $oisy_name 文档的支持页面查找答案和更多信息，如果仍无法解决，请联系团队。",
 			"support_link": "前往我们的支持页面",
-			"network_explorers_title": "区块浏览器",
-			"network_explorers_description": "$oisy_name 根据第三方索引服务构建您的历史记录，这些数据可能落后于链上状态。区块浏览器会显示网络本身为您的地址记录的内容。",
+			"network_explorers_title": "区块链浏览器",
+			"network_explorers_description": "打开这些链接，即可在区块链浏览器中查看您的地址，跟踪实时余额和完整的交易记录。区块链是公开账本，因此您可以独立验证和调查 $oisy_name 中的所有链上活动。",
 			"explorers_title": "服务商交易状态",
 			"explorers_description": "$oisy_name 通过第三方服务商处理兑换和跨链桥转账。如果某笔转账耗时超出预期，请打开该服务商自己的浏览器：它会显示您的转账进度，并已按您的钱包筛选。",
 			"explorers_velora_description": "以太坊及其他 EVM 网络上的兑换。",
@@ -838,7 +838,7 @@
 			"withdraw": "提取"
 		},
 		"alt": {
-			"network_explorer_link": "为您的地址打开 $network 区块浏览器",
+			"network_explorer_link": "为您的地址打开 $network 区块链浏览器",
 			"explorer_link": "为您的 $chain 地址打开 $provider 浏览器",
 			"select_token_first": "选择资金池的第一个代币",
 			"select_token_second": "选择资金池的第二个代币",
@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "禁用隐藏价值非常小的交易",
 			"save_spam_filter_success": "您的垃圾信息过滤器设置已更新。",
 			"export_data": "导出数据",
+			"export_data_moved": "导出功能已移至“工具”。",
+			"open_tools": "打开工具",
 			"export_data_description": "将您的代币和交易下载为 CSV — Basic 包含基础信息，Extended 包含更多属性。",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -909,6 +911,12 @@
 			"loading_profile": "加载用户资料时出错。请刷新页面以获得完整体验。",
 			"export_exchange_rate_unavailable": "汇率仍在加载。请稍后重试。",
 			"export_failed": "无法生成您的导出文件。请重试。"
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "工具",
+			"top_up_canister": "使用 ICP 或 TCYCLES 为 Canister 充值"
 		}
 	},
 	"shortcuts": {
@@ -1206,6 +1214,8 @@
 			"description": "Cycles 会从您的 $token 余额转入 Canister，Canister 用它们支付计算和存储。",
 			"description_icp": "您的 $token 会按网络汇率转换为 Cycles，Canister 用它们支付计算和存储。",
 			"pay_with": "选择用于支付充值的代币。",
+			"enable_token": "启用",
+			"not_enough_to_pay": "余额不足以充值",
 			"no_token_title": "使用 ICP 或 TCYCLES 充值",
 			"no_token_description": "Canister 依靠 Cycles 运行，充值会为 Canister 增加 Cycles。当您的钱包中有足够的 ICP 或 TCYCLES 时，即可在此充值。",
 			"canister_id_placeholder": "输入 Canister ID",
@@ -1255,6 +1265,9 @@
 			"not_started": "无法开始充值。您的钱包中没有资金转出。请稍后再试。",
 			"transfer_failed": "$token 转账未成功。您的钱包中没有资金转出。请稍后再试。",
 			"unconfirmed": "OISY 无法确认 $token 转账。如果转账已完成，充值将在后台完成：可在活跃交易中查看进度。"
+		},
+		"alt": {
+			"enable_token": "启用 $token 以用其支付"
 		}
 	},
 	"active_user_transactions": {

@@ -133,7 +133,7 @@
 			"section_finance": "금융",
 			"section_more": "더보기",
 			"airdrops": "리워드",
-			"canister_top_up": "캐니스터 충전",
+			"tools": "도구",
 			"earning": "수익",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "대출 보기 열기",
 			"earning": "수익 보기 열기",
 			"airdrops": "리워드 보기 열기",
-			"canister_top_up": "ICP 또는 TCYCLES로 캐니스터 충전",
+			"tools": "도구 열기",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "지갑 주소, 설정, 로그아웃 및 외부 링크",
@@ -807,8 +807,8 @@
 			"support_title": "지원",
 			"support_description": "$oisy_name 문서의 지원 페이지에서 답변과 자세한 정보를 확인할 수 있습니다. 해결되지 않으면 팀에 문의하세요.",
 			"support_link": "지원 페이지로 이동",
-			"network_explorers_title": "블록 탐색기",
-			"network_explorers_description": "$oisy_name의 내역은 서드파티 인덱서의 데이터로 구성되므로 체인보다 늦게 반영될 수 있습니다. 블록 탐색기에서는 네트워크 자체가 사용자 주소에 대해 기록한 내용을 확인할 수 있습니다.",
+			"network_explorers_title": "블록체인 탐색기",
+			"network_explorers_description": "이 링크를 열어 블록체인 탐색기에서 사용자 주소를 확인하고 실시간 잔액과 전체 트랜잭션 내역을 추적하세요. 블록체인은 공개 원장이므로 $oisy_name의 모든 온체인 활동을 독립적으로 확인하고 조사할 수 있습니다.",
 			"explorers_title": "제공업체 거래 상태",
 			"explorers_description": "$oisy_name의 스왑과 브릿지 전송은 서드파티 제공업체를 통해 처리됩니다. 예상보다 오래 걸린다면 해당 제공업체의 탐색기를 열어 보세요. 사용자 지갑으로 이미 필터링된 상태에서 전송이 어디까지 진행되었는지 보여 줍니다.",
 			"explorers_velora_description": "이더리움 및 기타 EVM 네트워크의 스왑.",
@@ -838,7 +838,7 @@
 			"withdraw": "출금"
 		},
 		"alt": {
-			"network_explorer_link": "사용자 주소로 $network 블록 탐색기 열기",
+			"network_explorer_link": "사용자 주소로 $network 블록체인 탐색기 열기",
 			"explorer_link": "사용자의 $chain 주소로 $provider 탐색기 열기",
 			"select_token_first": "풀의 첫 번째 토큰 선택",
 			"select_token_second": "풀의 두 번째 토큰 선택",
@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 비활성화",
 			"save_spam_filter_success": "스팸 필터 설정이 업데이트되었습니다.",
 			"export_data": "데이터 내보내기",
+			"export_data_moved": "내보내기가 도구로 이동했습니다.",
+			"open_tools": "도구 열기",
 			"export_data_description": "토큰과 거래를 CSV로 다운로드하세요 — 기본 항목은 Basic, 추가 속성은 Extended로 확인할 수 있습니다.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -909,6 +911,12 @@
 			"loading_profile": "프로필을 불러오는 중 오류가 발생했습니다. 전체 경험을 위해 페이지를 새로고침해 주세요.",
 			"export_exchange_rate_unavailable": "환율을 아직 불러오는 중입니다. 잠시 후 다시 시도해 주세요.",
 			"export_failed": "내보내기를 생성하지 못했습니다. 다시 시도해 주세요."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "도구",
+			"top_up_canister": "ICP 또는 TCYCLES로 캐니스터 충전"
 		}
 	},
 	"shortcuts": {
@@ -1206,6 +1214,8 @@
 			"description": "사이클은 $token 잔액에서 캐니스터로 이동하며, 캐니스터는 이를 연산과 스토리지에 사용합니다.",
 			"description_icp": "$token은 네트워크 환율로 사이클로 변환되며, 캐니스터는 이를 연산과 스토리지에 사용합니다.",
 			"pay_with": "충전 비용을 지불할 토큰을 선택하세요.",
+			"enable_token": "활성화",
+			"not_enough_to_pay": "충전하기에 부족합니다",
 			"no_token_title": "ICP 또는 TCYCLES로 충전",
 			"no_token_description": "캐니스터는 사이클로 작동하며, 충전하면 캐니스터에 사이클이 추가됩니다. 지갑에 ICP 또는 TCYCLES가 충분히 있으면 여기에서 충전할 수 있습니다.",
 			"canister_id_placeholder": "캐니스터 ID 입력",
@@ -1255,6 +1265,9 @@
 			"not_started": "충전을 시작하지 못했습니다. 지갑에서 빠져나간 것은 없습니다. 잠시 후 다시 시도하세요.",
 			"transfer_failed": "$token 전송이 완료되지 않았습니다. 지갑에서 빠져나간 것은 없습니다. 잠시 후 다시 시도하세요.",
 			"unconfirmed": "OISY가 $token 전송을 확인하지 못했습니다. 전송이 완료되었다면 충전은 백그라운드에서 완료되며, 활성 트랜잭션에서 진행 상황을 확인할 수 있습니다."
+		},
+		"alt": {
+			"enable_token": "결제에 사용할 수 있도록 $token 활성화"
 		}
 	},
 	"active_user_transactions": {

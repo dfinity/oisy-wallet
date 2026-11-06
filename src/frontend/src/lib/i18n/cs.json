@@ -133,7 +133,7 @@
 			"section_finance": "Finance",
 			"section_more": "Více",
 			"airdrops": "Odměny",
-			"canister_top_up": "Dobití kanistru",
+			"tools": "Nástroje",
 			"earning": "Vydělávat",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "Otevřít zobrazení půjček",
 			"earning": "Otevřít zobrazení vydělávání",
 			"airdrops": "Otevřít zobrazení odměn",
-			"canister_top_up": "Dobít kanistr pomocí ICP nebo TCYCLES",
+			"tools": "Otevřít nástroje",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "Vaše adresa peněženky, nastavení, odhlášení a externí odkazy",
@@ -807,8 +807,8 @@
 			"support_title": "Podpora",
 			"support_description": "Odpovědi a další informace najdete na stránce podpory v dokumentaci $oisy_name. Pokud si nebudete vědět rady, obraťte se na tým.",
 			"support_link": "Přejít na naši stránku podpory",
-			"network_explorers_title": "Průzkumníky bloků",
-			"network_explorers_description": "$oisy_name sestavuje vaši historii z indexerů třetích stran, které se mohou za blockchainem opožďovat. Průzkumník bloků ukazuje, co pro vaši adresu zaznamenává samotná síť.",
+			"network_explorers_title": "Průzkumníky blockchainu",
+			"network_explorers_description": "Otevřete tyto odkazy, abyste viděli své adresy v průzkumnících blockchainu a mohli sledovat své zůstatky v reálném čase a úplnou historii transakcí. Blockchainy jsou veřejné účetní knihy, takže můžete nezávisle ověřit a prozkoumat veškerou on-chain aktivitu své peněženky $oisy_name.",
 			"explorers_title": "Stav transakcí u poskytovatele",
 			"explorers_description": "$oisy_name provádí swapy a převody přes most prostřednictvím poskytovatelů třetích stran. Pokud některý trvá déle, než se čekalo, otevřete průzkumník daného poskytovatele: ukáže, v jakém stavu je váš převod, už vyfiltrovaný na vaši peněženku.",
 			"explorers_velora_description": "Swapy na Ethereu a dalších sítích EVM.",
@@ -838,7 +838,7 @@
 			"withdraw": "Vybrat"
 		},
 		"alt": {
-			"network_explorer_link": "Otevřít průzkumník bloků sítě $network pro vaši adresu",
+			"network_explorer_link": "Otevřít průzkumník blockchainu sítě $network pro vaši adresu",
 			"explorer_link": "Otevřít průzkumník $provider pro vaši adresu ($chain)",
 			"select_token_first": "Vyberte první token poolu",
 			"select_token_second": "Vyberte druhý token poolu",
@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "Zakázat skrývání transakcí s velmi malými hodnotami",
 			"save_spam_filter_success": "Nastavení filtru spamu bylo aktualizováno.",
 			"export_data": "Exportovat data",
+			"export_data_moved": "Export se přesunul do Nástrojů.",
+			"open_tools": "Otevřít Nástroje",
 			"export_data_description": "Stáhněte si své tokeny a transakce jako CSV — Basic pro to nejdůležitější, Extended pro další atributy.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -909,6 +911,12 @@
 			"loading_profile": "Chyba při načítání profilu. Pro plnohodnotný zážitek prosím obnovte stránku.",
 			"export_exchange_rate_unavailable": "Směnné kurzy se stále načítají. Zkuste to za chvíli znovu.",
 			"export_failed": "Nepodařilo se nám vygenerovat váš export. Zkuste to prosím znovu."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "Nástroje",
+			"top_up_canister": "Dobít kanistr pomocí ICP nebo TCYCLES"
 		}
 	},
 	"shortcuts": {
@@ -1206,6 +1214,8 @@
 			"description": "Cykly se převedou z vašeho zůstatku $token do kanistru, který je spotřebuje na výpočty a úložiště.",
 			"description_icp": "Váš $token se převede na cykly podle kurzu sítě a kanistr je spotřebuje na výpočty a úložiště.",
 			"pay_with": "Vyberte, čím dobití zaplatíte.",
+			"enable_token": "Aktivovat",
+			"not_enough_to_pay": "Na dobití nestačí",
 			"no_token_title": "Dobíjejte pomocí ICP nebo TCYCLES",
 			"no_token_description": "Kanistry běží na cyklech a dobití je kanistru přidá. Jakmile budete mít v peněžence dost ICP nebo TCYCLES, můžete dobíjet zde.",
 			"canister_id_placeholder": "Zadejte ID kanistru",
@@ -1255,6 +1265,9 @@
 			"not_started": "Dobití se nepodařilo spustit. Z peněženky nic neodešlo. Zkuste to za chvíli znovu.",
 			"transfer_failed": "Převod $token neproběhl. Z peněženky nic neodešlo. Zkuste to za chvíli znovu.",
 			"unconfirmed": "OISY nemohl potvrdit převod $token. Pokud proběhl, dobití se dokončí na pozadí: sledovat ho můžete v aktivních transakcích."
+		},
+		"alt": {
+			"enable_token": "Aktivovat $token a platit jím"
 		}
 	},
 	"active_user_transactions": {

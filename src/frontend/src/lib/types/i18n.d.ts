@@ -117,7 +117,7 @@ interface I18nNavigation {
 		section_finance: string;
 		section_more: string;
 		airdrops: string;
-		canister_top_up: string;
+		tools: string;
 		earning: string;
 		pay: string;
 		wallet_connect: string;
@@ -151,7 +151,7 @@ interface I18nNavigation {
 		borrow: string;
 		earning: string;
 		airdrops: string;
-		canister_top_up: string;
+		tools: string;
 		pay: string;
 		wallet_connect: string;
 		menu: string;
@@ -627,6 +627,8 @@ interface I18nSettings {
 		disable_hide_micro_transactions: string;
 		save_spam_filter_success: string;
 		export_data: string;
+		export_data_moved: string;
+		open_tools: string;
 		export_data_description: string;
 		export_basic: string;
 		export_extended: string;
@@ -648,6 +650,10 @@ interface I18nSettings {
 		export_exchange_rate_unavailable: string;
 		export_failed: string;
 	};
+}
+
+interface I18nTools {
+	text: { title: string; top_up_canister: string };
 }
 
 interface I18nShortcuts {
@@ -933,6 +939,8 @@ interface I18nCycles_top_up {
 		description: string;
 		description_icp: string;
 		pay_with: string;
+		enable_token: string;
+		not_enough_to_pay: string;
 		no_token_title: string;
 		no_token_description: string;
 		canister_id_placeholder: string;
@@ -983,6 +991,7 @@ interface I18nCycles_top_up {
 		transfer_failed: string;
 		unconfirmed: string;
 	};
+	alt: { enable_token: string };
 }
 
 interface I18nActive_user_transactions {
@@ -2813,6 +2822,7 @@ interface I18n {
 	hero: I18nHero;
 	help: I18nHelp;
 	settings: I18nSettings;
+	tools: I18nTools;
 	shortcuts: I18nShortcuts;
 	networks: I18nNetworks;
 	receive: I18nReceive;

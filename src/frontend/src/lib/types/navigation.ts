@@ -13,7 +13,7 @@ export type NavigationItemId =
 	| 'help'
 	| 'settings'
 	| 'rewards'
-	| 'canisterTopUp';
+	| 'tools';
 
 export type NavigationGroupId = 'portfolio' | 'finance' | 'more';
 

@@ -133,7 +133,7 @@
 			"section_finance": "Tài chính",
 			"section_more": "Thêm",
 			"airdrops": "Phần thưởng",
-			"canister_top_up": "Nạp canister",
+			"tools": "Công cụ",
 			"earning": "Kiếm tiền",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "Mở chế độ xem khoản vay",
 			"earning": "Mở chế độ xem kiếm tiền",
 			"airdrops": "Mở chế độ xem Phần thưởng",
-			"canister_top_up": "Nạp cho canister bằng ICP hoặc TCYCLES",
+			"tools": "Mở công cụ",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "Địa chỉ ví, cài đặt, đăng xuất và các liên kết bên ngoài của bạn",
@@ -807,8 +807,8 @@
 			"support_title": "Hỗ trợ",
 			"support_description": "Tìm câu trả lời và thêm thông tin trên trang hỗ trợ trong tài liệu $oisy_name, hoặc liên hệ với đội ngũ nếu bạn gặp khó khăn.",
 			"support_link": "Đến trang hỗ trợ của chúng tôi",
-			"network_explorers_title": "Trình khám phá khối",
-			"network_explorers_description": "$oisy_name xây dựng lịch sử của bạn từ các bộ lập chỉ mục bên thứ ba, vốn có thể chậm hơn chuỗi. Trình khám phá khối cho thấy những gì chính mạng lưới ghi nhận cho địa chỉ của bạn.",
+			"network_explorers_title": "Trình khám phá blockchain",
+			"network_explorers_description": "Mở các liên kết này để xem địa chỉ của bạn trên trình khám phá blockchain và theo dõi số dư theo thời gian thực cùng toàn bộ lịch sử giao dịch. Blockchain là sổ cái công khai, vì vậy bạn có thể tự mình xác minh và tra cứu mọi hoạt động on-chain của ví $oisy_name của bạn.",
 			"explorers_title": "Trạng thái giao dịch tại nhà cung cấp",
 			"explorers_description": "$oisy_name thực hiện swap và chuyển qua cầu nối thông qua các nhà cung cấp bên thứ ba. Nếu một giao dịch mất nhiều thời gian hơn dự kiến, hãy mở trình khám phá của chính nhà cung cấp đó: nó cho biết giao dịch của bạn đang ở bước nào, đã được lọc theo ví của bạn.",
 			"explorers_velora_description": "Swap trên Ethereum và các mạng EVM khác.",
@@ -838,7 +838,7 @@
 			"withdraw": "Rút"
 		},
 		"alt": {
-			"network_explorer_link": "Mở trình khám phá khối $network cho địa chỉ của bạn",
+			"network_explorer_link": "Mở trình khám phá blockchain $network cho địa chỉ của bạn",
 			"explorer_link": "Mở trình khám phá $provider cho địa chỉ $chain của bạn",
 			"select_token_first": "Chọn token thứ nhất của pool",
 			"select_token_second": "Chọn token thứ hai của pool",
@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "Tắt ẩn các giao dịch có giá trị rất nhỏ",
 			"save_spam_filter_success": "Cài đặt bộ lọc spam của bạn đã được cập nhật.",
 			"export_data": "Xuất dữ liệu",
+			"export_data_moved": "Tính năng xuất dữ liệu đã chuyển sang Công cụ.",
+			"open_tools": "Mở Công cụ",
 			"export_data_description": "Tải xuống token và giao dịch của bạn dưới dạng CSV — Basic cho thông tin cơ bản, Extended cho các thuộc tính bổ sung.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -909,6 +911,12 @@
 			"loading_profile": "Lỗi khi tải hồ sơ. Vui lòng làm mới trang để có trải nghiệm đầy đủ.",
 			"export_exchange_rate_unavailable": "Tỷ giá hối đoái vẫn đang được tải. Vui lòng thử lại sau ít phút.",
 			"export_failed": "Chúng tôi không thể tạo bản xuất của bạn. Vui lòng thử lại."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "Công cụ",
+			"top_up_canister": "Nạp cho canister bằng ICP hoặc TCYCLES"
 		}
 	},
 	"shortcuts": {
@@ -1206,6 +1214,8 @@
 			"description": "Cycles được chuyển từ số dư $token của bạn vào canister, nơi chúng được dùng cho tính toán và lưu trữ.",
 			"description_icp": "$token của bạn được chuyển đổi thành cycles theo tỷ giá của mạng, và canister dùng chúng cho tính toán và lưu trữ.",
 			"pay_with": "Chọn token để thanh toán cho việc nạp.",
+			"enable_token": "Kích hoạt",
+			"not_enough_to_pay": "Không đủ để nạp",
 			"no_token_title": "Nạp bằng ICP hoặc TCYCLES",
 			"no_token_description": "Canister chạy bằng cycles, và việc nạp sẽ bổ sung cycles cho canister. Khi ví của bạn có đủ ICP hoặc TCYCLES, bạn có thể nạp tại đây.",
 			"canister_id_placeholder": "Nhập ID canister",
@@ -1255,6 +1265,9 @@
 			"not_started": "Không thể bắt đầu việc nạp. Không có gì rời khỏi ví của bạn. Vui lòng thử lại sau giây lát.",
 			"transfer_failed": "Chuyển $token không thành công. Không có gì rời khỏi ví của bạn. Vui lòng thử lại sau giây lát.",
 			"unconfirmed": "OISY không thể xác nhận việc chuyển $token. Nếu đã chuyển thành công, việc nạp sẽ hoàn tất trong nền: theo dõi trong các giao dịch đang hoạt động."
+		},
+		"alt": {
+			"enable_token": "Kích hoạt $token để thanh toán bằng token này"
 		}
 	},
 	"active_user_transactions": {

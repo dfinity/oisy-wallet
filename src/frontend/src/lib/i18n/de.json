@@ -133,7 +133,7 @@
 			"section_finance": "Finanzen",
 			"section_more": "Mehr",
 			"airdrops": "Prämien",
-			"canister_top_up": "Canister-Aufladung",
+			"tools": "Werkzeuge",
 			"earning": "Verdienen",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "Kreditübersicht öffnen",
 			"earning": "Verdienstübersicht öffnen",
 			"airdrops": "Belohnungsübersicht öffnen",
-			"canister_top_up": "Einen Canister mit ICP oder TCYCLES aufladen",
+			"tools": "Werkzeuge öffnen",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "Deine Wallet-Adresse, Einstellungen, Abmelden und externe Links",
@@ -807,8 +807,8 @@
 			"support_title": "Support",
 			"support_description": "Antworten und weitere Informationen findest du auf der Support-Seite in der $oisy_name-Dokumentation. Wenn du nicht weiterkommst, melde dich beim Team.",
 			"support_link": "Zu unserer Support-Seite",
-			"network_explorers_title": "Block-Explorer",
-			"network_explorers_description": "$oisy_name erstellt deinen Verlauf aus Daten von Drittanbieter-Indexern, die der Blockchain hinterherhinken können. Ein Block-Explorer zeigt, was das Netzwerk selbst für deine Adresse verzeichnet.",
+			"network_explorers_title": "Blockchain-Explorer",
+			"network_explorers_description": "Öffne diese Links, um deine Adressen in den Blockchain-Explorern anzusehen und deine Guthaben in Echtzeit sowie deine vollständigen Transaktionsverläufe zu verfolgen. Blockchains sind öffentliche Register, daher kannst du alle On-Chain-Aktivitäten deines $oisy_name unabhängig überprüfen und untersuchen.",
 			"explorers_title": "Transaktionsstatus beim Anbieter",
 			"explorers_description": "$oisy_name wickelt Swaps und Bridge-Transfers über Drittanbieter ab. Dauert einer länger als erwartet, öffne den Explorer des Anbieters: Er zeigt, wo dein Transfer steht, bereits nach deinem Wallet gefiltert.",
 			"explorers_velora_description": "Swaps auf Ethereum und anderen EVM-Netzwerken.",
@@ -838,7 +838,7 @@
 			"withdraw": "Auszahlen"
 		},
 		"alt": {
-			"network_explorer_link": "Block-Explorer von $network für deine Adresse öffnen",
+			"network_explorer_link": "Blockchain-Explorer von $network für deine Adresse öffnen",
 			"explorer_link": "Explorer von $provider für deine Adresse auf $chain öffnen",
 			"select_token_first": "Erstes Token des Pools auswählen",
 			"select_token_second": "Zweites Token des Pools auswählen",
@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "Ausblenden von Transaktionen mit sehr kleinen Werten deaktivieren",
 			"save_spam_filter_success": "Ihre Spam-Filter-Einstellungen wurden aktualisiert.",
 			"export_data": "Daten exportieren",
+			"export_data_moved": "Der Export befindet sich jetzt unter Werkzeuge.",
+			"open_tools": "Werkzeuge öffnen",
 			"export_data_description": "Lade deine Tokens und Transaktionen als CSV herunter — Basic für das Wesentliche, Extended für zusätzliche Attribute.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -909,6 +911,12 @@
 			"loading_profile": "Fehler beim Laden des Profils. Bitte aktualisiere die Seite, um das volle Erlebnis zu haben.",
 			"export_exchange_rate_unavailable": "Wechselkurse werden noch geladen. Versuche es in einem Moment erneut.",
 			"export_failed": "Wir konnten deinen Export nicht erstellen. Bitte versuche es erneut."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "Werkzeuge",
+			"top_up_canister": "Einen Canister mit ICP oder TCYCLES aufladen"
 		}
 	},
 	"shortcuts": {
@@ -1206,6 +1214,8 @@
 			"description": "Die Cycles gehen von deinem $token-Guthaben in den Canister, der sie für Rechenleistung und Speicher verbraucht.",
 			"description_icp": "Deine $token werden zum Kurs des Netzwerks in Cycles umgewandelt, und der Canister verbraucht sie für Rechenleistung und Speicher.",
 			"pay_with": "Wähle, womit du die Aufladung bezahlst.",
+			"enable_token": "Aktivieren",
+			"not_enough_to_pay": "Reicht nicht zum Aufladen",
 			"no_token_title": "Mit ICP oder TCYCLES aufladen",
 			"no_token_description": "Canister laufen mit Cycles, und eine Aufladung fügt einem Canister welche hinzu. Sobald deine Wallet genug ICP oder TCYCLES enthält, kannst du hier aufladen.",
 			"canister_id_placeholder": "Canister-ID eingeben",
@@ -1255,6 +1265,9 @@
 			"not_started": "Die Aufladung konnte nicht gestartet werden. Nichts hat deine Wallet verlassen. Versuche es gleich noch einmal.",
 			"transfer_failed": "Die $token-Überweisung ist nicht durchgegangen. Nichts hat deine Wallet verlassen. Versuche es gleich noch einmal.",
 			"unconfirmed": "OISY konnte die $token-Überweisung nicht bestätigen. Falls sie durchgegangen ist, wird die Aufladung im Hintergrund abgeschlossen: Du kannst sie in den aktiven Transaktionen verfolgen."
+		},
+		"alt": {
+			"enable_token": "$token aktivieren, um damit zu bezahlen"
 		}
 	},
 	"active_user_transactions": {

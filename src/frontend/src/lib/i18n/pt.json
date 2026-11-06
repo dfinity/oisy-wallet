@@ -133,7 +133,7 @@
 			"section_finance": "Finanças",
 			"section_more": "Mais",
 			"airdrops": "Recompensas",
-			"canister_top_up": "Recarga de canister",
+			"tools": "Ferramentas",
 			"earning": "Ganhar",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "Abrir a visualização de Crédito",
 			"earning": "Abrir a visualização de Ganhos",
 			"airdrops": "Abrir a visualização de airdrops",
-			"canister_top_up": "Recarregar um canister com ICP ou TCYCLES",
+			"tools": "Abrir ferramentas",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "Seu endereço de carteira, configurações, sair e links externos",
@@ -807,8 +807,8 @@
 			"support_title": "Suporte",
 			"support_description": "Encontre respostas e mais informações na página de suporte da documentação do $oisy_name, ou fale com a equipe se você travar.",
 			"support_link": "Ir para nossa página de suporte",
-			"network_explorers_title": "Exploradores de blocos",
-			"network_explorers_description": "O $oisy_name monta seu histórico a partir de indexadores de terceiros, que podem ficar atrás da blockchain. Um explorador de blocos mostra o que a própria rede registra para o seu endereço.",
+			"network_explorers_title": "Exploradores de blockchain",
+			"network_explorers_description": "Abra estes links para ver seus endereços nos exploradores de blockchain e acompanhar seus saldos em tempo real e o histórico completo de transações. As blockchains são registros públicos, então você pode verificar e investigar de forma independente toda a atividade on-chain da sua carteira $oisy_name.",
 			"explorers_title": "Status da transação no provedor",
 			"explorers_description": "O $oisy_name faz swaps e transferências via bridge por meio de provedores terceiros. Se alguma demorar mais do que o esperado, abra o explorador do próprio provedor: ele mostra em que ponto está sua transferência, já filtrado para a sua carteira.",
 			"explorers_velora_description": "Swaps no Ethereum e em outras redes EVM.",
@@ -838,7 +838,7 @@
 			"withdraw": "Sacar"
 		},
 		"alt": {
-			"network_explorer_link": "Abrir o explorador de blocos de $network para o seu endereço",
+			"network_explorer_link": "Abrir o explorador de blockchain de $network para o seu endereço",
 			"explorer_link": "Abrir o explorador de $provider para o seu endereço em $chain",
 			"select_token_first": "Selecionar o primeiro token do pool",
 			"select_token_second": "Selecionar o segundo token do pool",
@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "Desativar a ocultação de transações com valores muito pequenos",
 			"save_spam_filter_success": "As configurações do seu filtro de spam foram atualizadas.",
 			"export_data": "Exportar dados",
+			"export_data_moved": "A exportação foi movida para Ferramentas.",
+			"open_tools": "Abrir Ferramentas",
 			"export_data_description": "Baixe seus tokens e transações como CSV — Basic para o essencial, Extended para atributos adicionais.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -909,6 +911,12 @@
 			"loading_profile": "Erro ao carregar o perfil. Por favor, atualize a página para ter a experiência completa.",
 			"export_exchange_rate_unavailable": "As taxas de câmbio ainda estão carregando. Tente novamente em alguns instantes.",
 			"export_failed": "Não foi possível gerar sua exportação. Tente novamente."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "Ferramentas",
+			"top_up_canister": "Recarregar um canister com ICP ou TCYCLES"
 		}
 	},
 	"shortcuts": {
@@ -1206,6 +1214,8 @@
 			"description": "Os ciclos saem do seu saldo de $token para o canister, que os gasta em computação e armazenamento.",
 			"description_icp": "Seus $token são convertidos em ciclos pela taxa da rede, e o canister os gasta em computação e armazenamento.",
 			"pay_with": "Escolha com o que pagar a recarga.",
+			"enable_token": "Ativar",
+			"not_enough_to_pay": "Não é suficiente para recarregar",
 			"no_token_title": "Recarregue com ICP ou TCYCLES",
 			"no_token_description": "Canisters funcionam com ciclos, e uma recarga os adiciona a um canister. Quando sua carteira tiver ICP ou TCYCLES suficientes, você poderá recarregar aqui.",
 			"canister_id_placeholder": "Insira um ID de canister",
@@ -1255,6 +1265,9 @@
 			"not_started": "Não foi possível iniciar a recarga. Nada saiu da sua carteira. Tente novamente em instantes.",
 			"transfer_failed": "A transferência de $token não foi concluída. Nada saiu da sua carteira. Tente novamente em instantes.",
 			"unconfirmed": "OISY não conseguiu confirmar a transferência de $token. Se ela foi concluída, a recarga terminará em segundo plano: acompanhe-a nas transações ativas."
+		},
+		"alt": {
+			"enable_token": "Ativar $token para pagar com ele"
 		}
 	},
 	"active_user_transactions": {
