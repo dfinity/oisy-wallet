@@ -436,6 +436,31 @@ describe('SwapModalWizardSteps', () => {
 			expect(assetTypeChip()).toHaveTextContent(en.token_tag.category.crypto);
 		});
 
+		it('keeps Max when the pay token already picked is picked again', async () => {
+			const swapContext = initSwapContext({
+				sourceToken: ICP_TOKEN,
+				destinationToken: mockValidIcToken
+			});
+
+			swapContext.amountSetToMax.set(true);
+
+			mockContext.set(SWAP_CONTEXT_KEY, {
+				...swapContext,
+				sourceTokenExchangeRate: readable(10),
+				destinationTokenExchangeRate: readable(2)
+			});
+
+			const rendered = renderHost();
+
+			await openList({ rendered, side: 0 });
+
+			// Nothing changes, so nothing is reset: a new pay token would clear Max and its LI.FI fee.
+			await fireEvent.click(rendered.getByRole('button', { name: new RegExp(ICP_TOKEN.symbol) }));
+			await showForm(rendered);
+
+			expect(get(swapContext.amountSetToMax)).toBeTruthy();
+		});
+
 		describe('with Bitcoin to pay', () => {
 			const btcToken = { ...BTC_MAINNET_TOKEN, enabled: true };
 
