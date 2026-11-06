@@ -1,12 +1,15 @@
 import { initStorageStore, type StorageStore } from '$lib/stores/storage.store';
-import type { TransactionType } from '$lib/types/transaction';
-import { EMPTY_TRANSACTIONS_FILTER, type TransactionsFilter } from '$lib/types/transactions-filter';
+import {
+	EMPTY_TRANSACTIONS_FILTER,
+	type TransactionsFilter,
+	type TransactionsFilterType
+} from '$lib/types/transactions-filter';
 import { get as getStore } from 'svelte/store';
 
 export const TRANSACTIONS_FILTER_STORAGE_KEY = 'oisy_transactions_filter';
 
 export interface TransactionsFilterStore extends StorageStore<TransactionsFilter> {
-	toggleType: (type: TransactionType) => void;
+	toggleType: (type: TransactionsFilterType) => void;
 	toggleTokenId: (tokenId: string) => void;
 	toggleContactId: (contactId: string) => void;
 	retainTokenIds: (availableTokenIds: string[]) => void;

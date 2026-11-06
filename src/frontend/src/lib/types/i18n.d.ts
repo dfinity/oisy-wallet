@@ -2003,6 +2003,9 @@ interface I18nTransaction {
 		confirmations: string;
 		for: string;
 		for_copied: string;
+		canister: string;
+		canister_copied: string;
+		canister_unknown: string;
 		expiration: string;
 		approve_label: string;
 	};
@@ -2024,6 +2027,7 @@ interface I18nTransaction {
 		approve: string;
 		burn: string;
 		mint: string;
+		top_up: string;
 	};
 	filter: {
 		types_label: string;

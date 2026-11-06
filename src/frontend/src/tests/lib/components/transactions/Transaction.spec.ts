@@ -98,6 +98,50 @@ describe('Transaction', () => {
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: toAddress }));
 	});
 
+	it('should show the prefix and the unknown label when there is no address to show', () => {
+		const { getByText } = render(Transaction, {
+			type: 'send',
+			status: 'confirmed',
+			token: ICP_TOKEN,
+			iconType: 'transaction',
+			addressPrefixLabel: en.transaction.text.canister,
+			unknownAddressLabel: en.transaction.text.canister_unknown,
+			children: mockSnippet
+		});
+
+		expect(getByText(en.transaction.text.canister)).toBeInTheDocument();
+		expect(getByText(en.transaction.text.canister_unknown)).toBeInTheDocument();
+	});
+
+	it('should show the address rather than the unknown label when there is one', () => {
+		const toAddress = '0xno-contact';
+
+		const { container, queryByText } = render(Transaction, {
+			type: 'send',
+			status: 'confirmed',
+			token: ICP_TOKEN,
+			iconType: 'transaction',
+			to: toAddress,
+			unknownAddressLabel: en.transaction.text.canister_unknown,
+			children: mockSnippet
+		});
+
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: toAddress }));
+		expect(queryByText(en.transaction.text.canister_unknown)).not.toBeInTheDocument();
+	});
+
+	it('should show no address line without an address or an unknown label', () => {
+		const { queryByText } = render(Transaction, {
+			type: 'send',
+			status: 'confirmed',
+			token: ICP_TOKEN,
+			iconType: 'transaction',
+			children: mockSnippet
+		});
+
+		expect(queryByText(/^to$/i)).not.toBeInTheDocument();
+	});
+
 	it('should render `to` when we BURN address', () => {
 		const toAddress = '0xburnaddr';
 
