@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, setContext } from 'svelte';
 	import { get } from 'svelte/store';
 	import { page } from '$app/state';
 	import SwapBtcContexts from '$btc/components/swap/SwapBtcContexts.svelte';
@@ -17,6 +17,7 @@
 	import { allSwapUniverseTokens } from '$lib/derived/swap.derived';
 	import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+	import { COLORED_NETWORK_LOGOS_CONTEXT_KEY } from '$lib/stores/colored-network-logos.store';
 	import {
 		MODAL_NETWORKS_LIST_CONTEXT_KEY,
 		type ModalNetworksListContext
@@ -95,6 +96,9 @@
 	);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+
+	// A swap is told apart by its two networks, so every network logo in it is in its brand colour.
+	setContext(COLORED_NETWORK_LOGOS_CONTEXT_KEY, true);
 
 	let isBitcoinSource = $derived(isNetworkIdBitcoin($sourceToken?.network?.id));
 

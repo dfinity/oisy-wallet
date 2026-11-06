@@ -4,6 +4,7 @@ import HarvestUnstakeWizard from '$eth/components/stake/harvest-autopilot/Harves
 import * as erc4626Services from '$eth/services/erc4626.services';
 import type { EthFeeStore, FeeStoreData } from '$eth/stores/eth-fee.store';
 import * as feeStoreMod from '$eth/stores/eth-fee.store';
+import { EthSubmissionUnconfirmedError } from '$eth/types/send';
 import { STAKE_REVIEW_FORM_BUTTON } from '$lib/constants/test-ids.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import * as idDerived from '$lib/derived/auth.derived';
@@ -22,6 +23,7 @@ import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { fireEvent, render } from '@testing-library/svelte';
+import { makeError } from 'ethers/utils';
 import { readable, writable, type Writable } from 'svelte/store';
 
 vi.mock('$eth/derived/tokens.derived', () => ({
@@ -203,6 +205,34 @@ describe('HarvestUnstakeWizard', () => {
 					result_error_text: 'execution reverted',
 					result_error: 'Error',
 					result_error_code: 'CALL_EXCEPTION'
+				})
+			});
+		});
+
+		it('should track the ethers code behind a withdrawal it cannot confirm', async () => {
+			const unstakeError = new EthSubmissionUnconfirmedError(
+				makeError('could not coalesce error', 'UNKNOWN_ERROR', {
+					error: { code: -32603, message: 'Internal error' }
+				})
+			);
+			vi.spyOn(erc4626Services, 'withdrawErc4626').mockRejectedValue(unstakeError);
+
+			const { getByTestId } = render(HarvestUnstakeWizard, {
+				props: {
+					...baseProps,
+					currentStep: { name: WizardStepsUnstake.REVIEW, title: 'Review' }
+				},
+				context: buildContext()
+			});
+
+			await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(analytics.trackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.UNSTAKE,
+				metadata: expect.objectContaining({
+					result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+					result_error_code: 'UNKNOWN_ERROR'
 				})
 			});
 		});
