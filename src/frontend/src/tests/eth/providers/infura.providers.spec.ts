@@ -11,6 +11,7 @@ import {
 import { InfuraProvider, infuraProviders } from '$eth/providers/infura.providers';
 import type { GetFeeData } from '$eth/types/infura';
 import type { EthereumNetwork } from '$eth/types/network';
+import { EthSubmissionUnconfirmedError } from '$eth/types/send';
 import {
 	OP_STACK_GAS_PRICE_ORACLE_ABI,
 	OP_STACK_GAS_PRICE_ORACLE_ADDRESS
@@ -584,7 +585,8 @@ describe('infura.providers', () => {
 
 			await vi.advanceTimersByTimeAsync(INFURA_SUBMISSION_TIMEOUT_MILLISECONDS);
 
-			await expect(outcome).resolves.toBeInstanceOf(TimeoutError);
+			await expect(outcome).resolves.toBeInstanceOf(EthSubmissionUnconfirmedError);
+			await expect(outcome).resolves.toHaveProperty('cause', expect.any(TimeoutError));
 		});
 
 		it('should succeed when both fail but the network knows the transaction', async () => {
@@ -608,7 +610,7 @@ describe('infura.providers', () => {
 			);
 		});
 
-		it('should fail with Infura error when the network does not know the transaction', async () => {
+		it('should report the outcome as unknown when the network does not know the transaction', async () => {
 			const { provider } = buildProvider();
 
 			mockBroadcastTransaction
@@ -616,8 +618,14 @@ describe('infura.providers', () => {
 				.mockRejectedValueOnce(new Error('Alchemy failed too'));
 			mockGetTransaction.mockResolvedValueOnce(null);
 
-			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(internalError);
+			const outcome = await provider
+				.sendTransaction(signedTransaction)
+				.catch((err: unknown) => err);
 
+			// A retry would be signed with the next nonce, so the send must not claim it went nowhere.
+			expect(outcome).toBeInstanceOf(EthSubmissionUnconfirmedError);
+			expect(outcome).toHaveProperty('cause', internalError);
+			expect(outcome).toHaveProperty('message', internalError.message);
 			expect(trackProviderFallback).toHaveBeenCalledExactlyOnceWith({
 				operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.SUBMISSION,
 				trigger: 'error',
@@ -633,7 +641,12 @@ describe('infura.providers', () => {
 			mockBroadcastTransaction.mockRejectedValueOnce(internalError).mockRejectedValueOnce(refusal);
 			mockGetTransaction.mockResolvedValueOnce(null);
 
-			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(internalError);
+			const outcome = await provider
+				.sendTransaction(signedTransaction)
+				.catch((err: unknown) => err);
+
+			expect(outcome).toBeInstanceOf(EthSubmissionUnconfirmedError);
+			expect(outcome).toHaveProperty('cause', internalError);
 		});
 
 		it('should not take an already-used nonce as a reason over Infura failing the request', async () => {
@@ -649,7 +662,12 @@ describe('infura.providers', () => {
 				.mockRejectedValueOnce(nonceExpired);
 			mockGetTransaction.mockResolvedValueOnce(null);
 
-			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(internalError);
+			const outcome = await provider
+				.sendTransaction(signedTransaction)
+				.catch((err: unknown) => err);
+
+			expect(outcome).toBeInstanceOf(EthSubmissionUnconfirmedError);
+			expect(outcome).toHaveProperty('cause', internalError);
 		});
 
 		it.each([
@@ -680,6 +698,22 @@ describe('infura.providers', () => {
 			}
 		);
 
+		it('should leave running out of gas to its own explanation', async () => {
+			const { provider } = buildProvider();
+
+			// The node's answer to a transaction that runs out of the gas it was signed with, as Base
+			// words it. Another node can still mine it, so it is no outright refusal.
+			const outOfGas = Object.assign(new Error('could not coalesce error'), {
+				code: 'UNKNOWN_ERROR',
+				error: { code: -32000, message: 'out of gas: gas required exceeds: 21000' }
+			});
+
+			mockBroadcastTransaction.mockRejectedValue(outOfGas);
+			mockGetTransaction.mockResolvedValueOnce(null);
+
+			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(outOfGas);
+		});
+
 		it('should fail when the lookup cannot be answered either', async () => {
 			const { provider } = buildProvider();
 
@@ -688,7 +722,12 @@ describe('infura.providers', () => {
 				.mockRejectedValueOnce(new Error('Alchemy failed too'));
 			mockGetTransaction.mockRejectedValueOnce(new Error('lookup failed'));
 
-			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(internalError);
+			const outcome = await provider
+				.sendTransaction(signedTransaction)
+				.catch((err: unknown) => err);
+
+			expect(outcome).toBeInstanceOf(EthSubmissionUnconfirmedError);
+			expect(outcome).toHaveProperty('cause', internalError);
 
 			expect(trackProviderFallback).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR })
@@ -714,7 +753,8 @@ describe('infura.providers', () => {
 
 			await vi.advanceTimersByTimeAsync(INFURA_READ_TIMEOUT_MILLISECONDS);
 
-			await expect(outcome).resolves.toBe(internalError);
+			await expect(outcome).resolves.toBeInstanceOf(EthSubmissionUnconfirmedError);
+			await expect(outcome).resolves.toHaveProperty('cause', internalError);
 		});
 
 		describe('when the fallback is switched off', () => {
@@ -722,16 +762,29 @@ describe('infura.providers', () => {
 				mockFallbackEnabled.value = false;
 			});
 
-			it('should submit through Infura alone and report its error', async () => {
+			it('should submit through Infura alone and report its outcome as unknown', async () => {
 				const { provider } = buildProvider();
 
 				mockBroadcastTransaction.mockRejectedValueOnce(internalError);
 
-				await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(internalError);
+				const outcome = await provider
+					.sendTransaction(signedTransaction)
+					.catch((err: unknown) => err);
+
+				expect(outcome).toBeInstanceOf(EthSubmissionUnconfirmedError);
+				expect(outcome).toHaveProperty('cause', internalError);
 
 				expect(mockBroadcastTransaction).toHaveBeenCalledOnce();
 				expect(mockGetTransaction).not.toHaveBeenCalled();
 				expect(trackProviderFallback).not.toHaveBeenCalled();
+			});
+
+			it('should report a refusal from Infura as it is', async () => {
+				const { provider } = buildProvider();
+
+				mockBroadcastTransaction.mockRejectedValueOnce(refusal);
+
+				await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(refusal);
 			});
 
 			it('should not cut Infura short either', async () => {
@@ -761,8 +814,11 @@ describe('infura.providers', () => {
 
 			mockBroadcastTransaction.mockRejectedValueOnce(internalError);
 
-			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(internalError);
+			const outcome = await provider
+				.sendTransaction(signedTransaction)
+				.catch((err: unknown) => err);
 
+			expect(outcome).toBeInstanceOf(EthSubmissionUnconfirmedError);
 			expect(mockBroadcastTransaction).toHaveBeenCalledOnce();
 			expect(trackProviderFallback).not.toHaveBeenCalled();
 		});
