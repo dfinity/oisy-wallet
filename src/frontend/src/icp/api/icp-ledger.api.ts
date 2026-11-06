@@ -39,11 +39,13 @@ export const transfer = async ({
 	identity,
 	to,
 	amount,
+	createdAt,
 	ledgerCanisterId
 }: {
 	identity: NullishIdentity;
 	to: string;
 	amount: bigint;
+	createdAt?: bigint;
 	ledgerCanisterId: CanisterIdText;
 }): Promise<BlockHeight> => {
 	assertNonNullish(identity);
@@ -52,7 +54,8 @@ export const transfer = async ({
 
 	return transfer({
 		to: AccountIdentifier.fromHex(to),
-		amount
+		amount,
+		createdAt
 	});
 };
 
