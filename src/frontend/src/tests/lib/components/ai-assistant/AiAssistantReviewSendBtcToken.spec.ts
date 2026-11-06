@@ -23,7 +23,7 @@ import type { AddPendingTransactionOutcome } from '$lib/types/api';
 import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
+import { mockBtcAddress, mockBtcP2SHAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -52,6 +52,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 	const props = {
 		amount: sendAmount,
 		destination: mockBtcAddress,
+		source: mockBtcP2SHAddress,
 		sendCompleted: false,
 		sendEnabled: true,
 		onSendCompleted: vi.fn()
@@ -107,7 +108,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 		mockBtcAddressStore();
 		mockBalance();
 		mockPrepareBtcSendApi();
-		mockValidateBtcSend();
+		const validateBtcSendSpy = mockValidateBtcSend();
 
 		const { getByTestId } = render(AiAssistantReviewSendBtcToken, {
 			props,
@@ -119,6 +120,9 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 			await fireEvent.click(button);
 
+			expect(validateBtcSendSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ source: mockBtcP2SHAddress, utxosFee: mockUtxosFee })
+			);
 			expect(btcSendApiSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				network: mapToSignerBitcoinNetwork({ network: BTC_MAINNET_TOKEN.network.env }),
