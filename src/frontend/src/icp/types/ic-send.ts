@@ -2,6 +2,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { TransferParams } from '$lib/types/send';
+import type { TokenId } from '$lib/types/token';
 import type { PartialSpecific } from '$lib/types/utils';
 
 export type IcTransferParams = Pick<TransferParams, 'amount' | 'to'> & {
@@ -13,6 +14,17 @@ export type IcTransferParams = Pick<TransferParams, 'amount' | 'to'> & {
 	// a second transfer.
 	createdAt?: bigint;
 };
+
+/**
+ * A transfer as a send flow submits it: one `createdAt` for as long as the user sends the same
+ * token, amount and destination.
+ */
+export interface IcSendRequest {
+	tokenId: TokenId;
+	to: string;
+	amount: bigint;
+	createdAt: bigint;
+}
 
 export type IcSendParams = PartialSpecific<IcTransferParams, 'progress'> &
 	Pick<IcToken, 'ledgerCanisterId'>;
