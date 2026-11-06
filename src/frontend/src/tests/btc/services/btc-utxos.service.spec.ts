@@ -302,6 +302,33 @@ describe('btc-utxos.service', () => {
 			});
 		});
 
+		// The backend's `btc_get_spendable_utxos` leaves reserved UTXOs out, so a wallet whose every
+		// UTXO a pending send reserves gets none at all, beside that send.
+		it('should return UtxoLocked when there are no UTXOs and pending transactions reserve some', () => {
+			mockStoreApi.setStoreValue({
+				[mockBtcAddress]: {
+					certified: true as const,
+					data: [
+						{
+							txid: new Uint8Array([99]),
+							utxos: [
+								{ value: 500_000n, outpoint: { txid: new Uint8Array([1, 2, 3, 4]), vout: 0 } }
+							]
+						}
+					]
+				}
+			});
+
+			const result = prepareBtcSend({ ...defaultParams, allUtxos: [] });
+
+			expect(result).toEqual({
+				feeSatoshis: ZERO,
+				feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles,
+				utxos: [],
+				error: BtcPrepareSendError.UtxoLocked
+			});
+		});
+
 		it('should return UtxoLocked error when all UTXOs are filtered out by confirmations', () => {
 			const unconfirmedUtxo: CkBtcMinterDid.Utxo = {
 				value: 500000n,

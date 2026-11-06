@@ -842,6 +842,12 @@ While a BTC send initiated through the wallet is unconfirmed, its UTXOs are rese
 
 The Bitcoin address scoped to a reservation is always **derived from the authenticated principal** (P2WPKH from the threshold-ECDSA-derived public key). The caller cannot specify which address's pending transactions are read, added, or pruned — there is no API surface for that, and there is no support for a single user owning multiple addresses. The reservation system is a self-affecting UX guard; double-spend itself is prevented by Bitcoin consensus.
 
+### Spendable outputs from the backend (local and staging)
+
+On local and staging builds, every BTC flow loads the outputs it can spend from the backend instead of reading them from the Bitcoin canister itself: send, convert, swap, the AI assistant's send, Liquidium supply and repay, and OpenCryptoPay. One certified call returns them with the pending transactions. It covers every page of the address's outputs, already leaves out those a pending send has reserved, and keeps the 10 000 largest. A wallet with more outputs than the Bitcoin canister returns in one page could previously spend only that first page. Each check for pending transactions before a send refreshes the outputs too, from the same answer. A wallet whose outputs a pending send has all reserved is still told its funds are locked by pending transactions, not that its balance is too low.
+
+If the backend cannot answer, the flow reports that pending transactions are unavailable and offers no send, as it already does when only the pending transactions fail to load. On regtest the backend counts an output as spendable from 1 confirmation rather than 4, so local sends can use newer outputs; testnet and mainnet keep 4. The send itself still goes through the Chain Fusion Signer. Beta and production load as before.
+
 ---
 
 ## XRP Ledger
