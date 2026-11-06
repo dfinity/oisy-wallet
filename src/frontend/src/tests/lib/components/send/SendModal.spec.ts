@@ -730,4 +730,20 @@ describe('SendModal', () => {
 			expect(getByTestId('stub-filter-category').textContent).toBe('');
 		});
 	});
+
+	describe('network logos', () => {
+		beforeEach(() => {
+			token.reset();
+		});
+
+		it('shows the networks in their brand colours', async () => {
+			const { getByTestId } = render(SendModal, {
+				props: { isTransactionsPage: false, isNftsPage: false }
+			});
+
+			await waitFor(() =>
+				expect(getByTestId('stub-colored-network-logos')).toHaveTextContent('true')
+			);
+		});
+	});
 });

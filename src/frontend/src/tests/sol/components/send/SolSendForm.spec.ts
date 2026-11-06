@@ -6,6 +6,7 @@ import {
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as solanaApi from '$sol/api/solana.api';
 import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 import { SOL_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$sol/stores/sol-fee.store';
@@ -84,6 +85,28 @@ describe('SolSendForm', () => {
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 
 		expect(toolbar).not.toBeNull();
+	});
+
+	it('names the network the token is sent on', () => {
+		mockContext.set(
+			SEND_CONTEXT_KEY,
+			initSendContext({
+				token: SOLANA_TOKEN
+			})
+		);
+
+		const { getByText } = render(SolSendForm, {
+			props,
+			context: mockContext
+		});
+
+		expect(
+			getByText(
+				replacePlaceholders(en.tokens.text.on_network, {
+					$network: SOLANA_TOKEN.network.name
+				}).trim()
+			)
+		).toBeInTheDocument();
 	});
 
 	describe('with SPL token', () => {

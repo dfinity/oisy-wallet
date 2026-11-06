@@ -2,6 +2,8 @@ import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import en from '$tests/mocks/i18n.mock';
 import XrpSendAmount from '$xrp/components/send/XrpSendAmount.svelte';
 import {
 	XRP_FEE_CONTEXT_KEY,
@@ -200,5 +202,15 @@ describe('XrpSendAmount', () => {
 		const { container: withThree } = renderAmount();
 
 		expect(maxAmount(withThree)).toBeLessThan(none);
+	});
+
+	it('names the network the token is sent on', () => {
+		const { getByText } = renderAmount();
+
+		expect(
+			getByText(
+				replacePlaceholders(en.tokens.text.on_network, { $network: XRP_TOKEN.network.name }).trim()
+			)
+		).toBeInTheDocument();
 	});
 });

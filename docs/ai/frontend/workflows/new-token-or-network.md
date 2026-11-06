@@ -62,7 +62,7 @@ run; extend that script first (`scripts/build.*` is a protected path, see
    `icon` is the monochrome mark from `$lib/assets/networks/` (inverted
    on dark). Set `iconColored` too when the brand-coloured mark is in the
    repo, usually the native token's logo: screens that tell networks
-   apart by colour (the Swap modal) set `COLORED_NETWORK_LOGOS_CONTEXT_KEY`,
+   apart by colour (the Swap and Send modals) set `COLORED_NETWORK_LOGOS_CONTEXT_KEY`,
    and a network without one keeps its monochrome mark there.
 3. Create the native token (and any twin tokens) under
    `$env/tokens/<chain>/`. Place icons under `$<chain>/assets/` (or

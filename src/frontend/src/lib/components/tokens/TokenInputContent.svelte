@@ -15,6 +15,7 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { tryParseToken } from '$lib/utils/parse.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -147,7 +148,13 @@
 	{@render title?.()}
 	{#if showTokenNetwork && nonNullish(token)}
 		<div class="flex text-xs font-normal text-tertiary">
-			<span class="mr-1 text-sm">On {token.network.name}</span>
+			<!-- The key is written to follow a token's name (" on Solana"), so it is trimmed here and
+				 its first letter raised to open the row; a script without case keeps its own. -->
+			<span class="mr-1 inline-block text-sm first-letter:uppercase"
+				>{replacePlaceholders($i18n.tokens.text.on_network, {
+					$network: token.network.name
+				}).trim()}</span
+			>
 			<NetworkLogo network={token.network} />
 		</div>
 	{/if}
