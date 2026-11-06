@@ -483,6 +483,44 @@ describe('cycles-top-up.services', () => {
 			]);
 		});
 
+		// The ICP has moved by then: a failed write is logged, and the next one repeats the status
+		// and every ref learned so far.
+		it('keeps topping up when the Executing write fails, and records the transfer later', async () => {
+			vi.mocked(updateActiveUserTransaction).mockRejectedValueOnce(new Error('backend'));
+
+			await expect(topUpCanisterWithIcp(params)).resolves.toEqual({
+				status: 'topped_up',
+				cycles: 2_490_000_000_000n
+			});
+
+			expect(notifyTopUp).toHaveBeenCalledOnce();
+			expect(updateActiveUserTransaction).toHaveBeenCalledTimes(2);
+			expect(updateActiveUserTransaction).toHaveBeenLastCalledWith({
+				identity: mockIdentity,
+				id: 'top-up-1',
+				status: { Succeeded: null },
+				externalRefs: toCyclesTopUpExternalRefs({
+					...displayRefs,
+					[CYCLES_TOP_UP_EXTERNAL_REF_KEYS.TRANSFER_BLOCK_INDEX]: '42',
+					[CYCLES_TOP_UP_EXTERNAL_REF_KEYS.OUTCOME]: 'topped_up',
+					[CYCLES_TOP_UP_EXTERNAL_REF_KEYS.CYCLES]: '2.49'
+				})
+			});
+		});
+
+		it('returns the outcome when the terminal write fails', async () => {
+			vi.mocked(updateActiveUserTransaction)
+				.mockResolvedValueOnce()
+				.mockRejectedValueOnce(new Error('backend'));
+
+			await expect(topUpCanisterWithIcp(params)).resolves.toEqual({
+				status: 'topped_up',
+				cycles: 2_490_000_000_000n
+			});
+
+			expect(updateActiveUserTransaction).toHaveBeenCalledTimes(2);
+		});
+
 		// The terminal event is the Active transactions loader's, once per row.
 		it('reports the top-up as executing from the navigation, and leaves its outcome to the row', async () => {
 			await topUpCanisterWithIcp(params);
