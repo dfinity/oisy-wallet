@@ -1446,8 +1446,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "Kaufen",
-			"buy_dev": "Kaufen (Entwicklungsumgebung)",
+			"buy_sell": "Kaufen/Verkaufen",
+			"buy_sell_dev": "Kaufen/Verkaufen (Entwicklungsumgebung)",
 			"unavailable_title": "Tokens kaufen ist vorübergehend nicht verfügbar",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",

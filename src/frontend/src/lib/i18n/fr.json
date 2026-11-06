@@ -1446,8 +1446,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "Acheter",
-			"buy_dev": "Acheter (Env. de Dév.)",
+			"buy_sell": "Acheter/Vendre",
+			"buy_sell_dev": "Acheter/Vendre (Env. de Dév.)",
 			"unavailable_title": "L'achat de jetons est temporairement indisponible",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",

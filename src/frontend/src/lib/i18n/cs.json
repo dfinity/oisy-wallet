@@ -1446,8 +1446,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "Koupit",
-			"buy_dev": "Koupit (vývojové prostředí)",
+			"buy_sell": "Koupit/Prodat",
+			"buy_sell_dev": "Koupit/Prodat (vývojové prostředí)",
 			"unavailable_title": "Nákup tokenů je dočasně nedostupný",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",
