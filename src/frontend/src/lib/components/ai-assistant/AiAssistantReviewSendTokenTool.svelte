@@ -94,7 +94,7 @@
 			/>
 		{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
 			<UtxosFeeContexts>
-				<UtxosFeeLoader {amount} networkId={$sendTokenNetworkId} source={destination}>
+				<UtxosFeeLoader {amount} {destination} networkId={$sendTokenNetworkId} source={destination}>
 					<AiAssistantReviewSendBtcToken
 						{amount}
 						{destination}

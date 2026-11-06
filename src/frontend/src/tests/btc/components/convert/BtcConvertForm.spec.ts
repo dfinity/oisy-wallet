@@ -1,4 +1,5 @@
 import BtcConvertForm from '$btc/components/convert/BtcConvertForm.svelte';
+import { BTC_LARGEST_OUTPUT_VSIZE } from '$btc/constants/btc.constants';
 import * as btcPendingSendTransactionsStatusStore from '$btc/derived/btc-pending-sent-transactions-status.derived';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
@@ -200,7 +201,13 @@ describe('BtcConvertForm', () => {
 		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
 
 		const expectedMax = formatToken({
-			value: 1_000n - calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte: 1_000n }),
+			value:
+				1_000n -
+				calculateFeeSatoshis({
+					numInputs: 1,
+					recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+					feeRateMiliSatoshisPerVByte: 1_000n
+				}),
 			unitName: BTC_MAINNET_TOKEN.decimals,
 			displayDecimals: BTC_MAINNET_TOKEN.decimals
 		});

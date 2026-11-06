@@ -181,6 +181,7 @@ const resolveChainFusionBtcQuote = ({
 			displayDecimals: sourceToken.decimals
 		}),
 		source: userBtcAddress,
+		destination: depositAddress,
 		allUtxos,
 		feeRateMiliSatoshisPerVByte
 	});

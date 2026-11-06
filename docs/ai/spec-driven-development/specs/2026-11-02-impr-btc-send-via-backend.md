@@ -629,7 +629,9 @@ notice, because it only sees scripts. Today CFS refuses such an address
 - A Base58 version must be the network's `pubKeyHash` or `scriptHash`. These are `0x00` / `0x05` on
   mainnet, and `0x6f` / `0xc4` on testnet and regtest, which share them.
 - The fee sizing passes the same network to `parseBtcAddress`, whose `@icp-sdk/canisters/ckbtc`
-  parser takes one; the repo's wrapper currently omits it and so defaults to mainnet.
+  parser takes one; the repo's wrapper currently omits it and so defaults to mainnet. Superseded in
+  PR 6: the sizing uses `btcAddressToOutputScript` and takes no network, and `validateBtcSend`
+  refuses a wrong-network address.
 - A mismatch is a validation error before signing, so nothing is signed or paid for.
 
 **Who uses it.** Everything that prices a send uses the same sizing:
@@ -646,6 +648,39 @@ amount. When no recipient is known yet, Max assumes the largest supported output
 amount it offers is always fundable.
 
 This also fixes the CFS path, so it lands on its own (PR 6) before the backend path is switched on.
+
+Decided in PR 6:
+
+- **Sizing.** The size is `btcOutputVSize({ address })` in `btc-psbt.utils.ts`: 9 bytes plus the
+  script from `btcAddressToOutputScript`, so the fee and the builder always see the same script.
+  - Sizing does not take a network. The size is the same on every network, so an address for any
+    of them gets its size.
+  - The wrong-network refusal is in `validateBtcSend`, on both paths, before anything is loaded
+    or signed, and again in `buildBtcSendPsbt`.
+  - `parseBtcAddress` is not used, so it keeps its mainnet default.
+- **Unknown recipient.** When there is no recipient, or the address does not decode, the fee is
+  priced for `BTC_LARGEST_OUTPUT_VSIZE` (43). That is the case when:
+  - the fee loader runs before the recipient is entered;
+  - Liquidium sends, whose target only arrives in the broadcast callback;
+  - NEAR Intents swaps send, whose deposit address only comes with the execution quote;
+  - OpenCryptoPay quotes its fee before it has the payment address.
+
+  These overpay by at most 12 vB at the rate, 8.5% of a one-input fee. A P2TR target, which today
+  is quoted below 1 sat/vB at the floor, is covered.
+
+- **Callers.**
+  - `prepareBtcSend` and `UtxosFeeLoader` take an optional `destination`. The loader prices the
+    fee again when the recipient changes, and the fee store records `destinationForFee`.
+  - Send, Convert, the Chain Fusion swap and the AI assistant pass the recipient.
+- **Validation.** `validateBtcSend` takes an optional `destination`.
+  - With one, it refuses an invalid or wrong-network address as `InvalidDestination`, then checks
+    the fee against that output's size.
+  - Without one, it checks the fee against the largest output, as that fee was priced.
+  - The ±10% tolerance is unchanged. A fee priced as P2WPKH for a P2TR recipient (−7.8% at one
+    input) would still pass. That can only happen if the fee were stale, since the loader prices
+    again when the recipient changes. On the backend path, the fee floor refuses it.
+- **Max.** `initBtcMaxSendAmount({ source, destination })` prices the same way. Send and Convert
+  pass the recipient; Swap passes none, since a NEAR Intents deposit address is not known there.
 
 ### Frontend: `sendBtc`
 
@@ -899,8 +934,9 @@ Every PR is safe on its own.
    - Tests cover each script type at 1 sat/vB against the vsize of the built transaction.
    - Tests check that the Max offered for each script type, and with no recipient yet, is accepted
      by selection.
-   - Tests check that the sizing refuses an address for the wrong network too, before anything is
-     signed.
+   - Tests check that `validateBtcSend` refuses an address for the wrong network, before anything
+     is loaded or signed. The sizing itself takes no network (see
+     [Decided in PR 6](#frontend-fee-estimation-by-output-script)).
 7. `feat(frontend): load BTC UTXOs from the backend behind a flag` (needs 4).
    - Adds `BTC_SEND_VIA_BACKEND_ENABLED`, on for local and staging.
    - With the flag on, `AllUtxosLoader` and the pending loader move to `btc_get_spendable_utxos`.

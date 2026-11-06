@@ -1,5 +1,10 @@
-import { BTC_CHANGE_DUST_THRESHOLD_SATOSHIS } from '$btc/constants/btc.constants';
+import {
+	BTC_CHANGE_DUST_THRESHOLD_SATOSHIS,
+	BTC_LARGEST_OUTPUT_VSIZE
+} from '$btc/constants/btc.constants';
 import { ZERO } from '$lib/constants/app.constants';
+import type { OptionString } from '$lib/types/string';
+import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { BitcoinNetwork, CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { verify } from '@noble/secp256k1';
@@ -108,6 +113,30 @@ export const btcAddressToOutputScript = ({
 	}
 
 	throw new Error(`Bitcoin address ${address} is not a ${network} address`);
+};
+
+/**
+ * The vsize of the output that pays `address`: 8 bytes of value, 1 of script length and the
+ * script, all non-witness.
+ *
+ * The size does not depend on the network, so an address for any network gets its size. A wrong
+ * network is refused where the send is validated and built. Without an address, or with one that
+ * does not decode, it is `BTC_LARGEST_OUTPUT_VSIZE`, so the fee it prices covers any recipient.
+ */
+export const btcOutputVSize = ({ address }: { address: OptionString }): number => {
+	if (isNullishOrEmpty(address)) {
+		return BTC_LARGEST_OUTPUT_VSIZE;
+	}
+
+	for (const network of Object.keys(BITCOIN_JS_NETWORKS) as BitcoinNetwork[]) {
+		try {
+			return 9 + btcAddressToOutputScript({ address, network }).length;
+		} catch (_: unknown) {
+			// Not an address for this network; try the next.
+		}
+	}
+
+	return BTC_LARGEST_OUTPUT_VSIZE;
 };
 
 /**

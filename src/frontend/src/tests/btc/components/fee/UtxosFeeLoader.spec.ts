@@ -284,6 +284,84 @@ describe('UtxosFeeLoader', () => {
 		});
 	});
 
+	describe('recipient', () => {
+		const destination = 'bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0';
+
+		it('should price the fee for the recipient', async () => {
+			const setUtxosFeeSpy = vi.spyOn(utxosFeeStore, 'setUtxosFee');
+			const prepareBtcSendSpy = mockPrepareBtcSend();
+
+			mockAuthStore();
+			setupStoresWithData();
+
+			render(UtxosFeeLoader, {
+				props: { ...props, destination },
+				context: mockContext({ utxosFeeStore })
+			});
+
+			await waitFor(() => {
+				expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith({
+					amount,
+					source,
+					destination,
+					allUtxos: mockAllUtxos,
+					feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles
+				});
+				expect(setUtxosFeeSpy).toHaveBeenCalledExactlyOnceWith({
+					utxosFee: mockBtcReviewResult,
+					amountForFee: amount,
+					destinationForFee: destination
+				});
+			});
+		});
+
+		it('should price the fee again for the same amount when the recipient changes', async () => {
+			const prepareBtcSendSpy = mockPrepareBtcSend();
+
+			mockAuthStore();
+			setupStoresWithData();
+
+			utxosFeeStore.setUtxosFee({
+				utxosFee: mockBtcReviewResult,
+				amountForFee: amount,
+				destinationForFee: mockBtcAddress
+			});
+
+			render(UtxosFeeLoader, {
+				props: { ...props, destination },
+				context: mockContext({ utxosFeeStore })
+			});
+
+			await waitFor(() => {
+				expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ amount, destination })
+				);
+			});
+		});
+
+		it('should not price the fee again for the same amount and recipient', async () => {
+			const prepareBtcSendSpy = mockPrepareBtcSend();
+
+			mockAuthStore();
+			setupStoresWithData();
+
+			utxosFeeStore.setUtxosFee({
+				utxosFee: mockBtcReviewResult,
+				amountForFee: amount,
+				destinationForFee: destination
+			});
+
+			render(UtxosFeeLoader, {
+				props: { ...props, destination },
+				context: mockContext({ utxosFeeStore })
+			});
+
+			await waitFor(() => {
+				expect(prepareBtcSendSpy).not.toHaveBeenCalled();
+			});
+		});
+	});
+
 	it('should not call prepareBtcSend if source is empty', async () => {
 		const prepareBtcSendSpy = mockPrepareBtcSend();
 

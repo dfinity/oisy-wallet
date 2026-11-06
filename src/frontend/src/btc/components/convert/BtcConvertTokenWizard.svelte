@@ -122,6 +122,7 @@
 				await validateBtcSend({
 					utxosFee: $utxosFeeStore.utxosFee,
 					source: sourceAddress,
+					destination: destinationAddress,
 					amount: sendAmount,
 					network,
 					identity: $authIdentity
@@ -175,10 +176,17 @@
 	const back = () => onBack();
 </script>
 
-<UtxosFeeLoader amount={sendAmount} {amountError} {networkId} source={sourceAddress}>
+<UtxosFeeLoader
+	amount={sendAmount}
+	{amountError}
+	destination={destinationAddress}
+	{networkId}
+	source={sourceAddress}
+>
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsConvert.CONVERT}
 			<BtcConvertForm
+				destination={destinationAddress}
 				{onNext}
 				source={sourceAddress}
 				bind:sendAmount

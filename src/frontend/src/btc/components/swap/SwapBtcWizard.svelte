@@ -176,6 +176,8 @@
 				await validateBtcSend({
 					utxosFee,
 					source: sourceAddress,
+					// A NEAR Intents deposit address only comes with the execution quote.
+					destination: isNearIntentsProvider ? undefined : depositAddress,
 					amount: swapAmount,
 					network,
 					identity: $authIdentity
