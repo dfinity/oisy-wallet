@@ -386,19 +386,31 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
                 block_index,
             })
         }
+        // The deadline passing is not an answer, so the slot is left exactly as
+        // it was. `cancel_tip` admits `Reserved` only, and releasing the claim
+        // here would hand it a tip whose payout may still be running and may
+        // still pay — the case the guard there exists to refuse. The tip is not
+        // stranded either: `is_claimable` opens it to a fresh claim once
+        // `TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS` has passed, as it does for a claim
+        // whose reply never came back at all.
+        Err(TransferFromCallError::Unresolved(msg)) => Err(TipError::TransferFailed { msg }),
         Err(err) => {
             let reason = match &err {
                 TransferFromCallError::InsufficientAllowance => TipClaimFailureReason::Uncovered,
                 TransferFromCallError::InsufficientFunds => {
                     TipClaimFailureReason::InsufficientFunds
                 }
-                TransferFromCallError::Failed(_) => TipClaimFailureReason::TransferFailed,
+                TransferFromCallError::Unresolved(_) | TransferFromCallError::Failed(_) => {
+                    TipClaimFailureReason::TransferFailed
+                }
             };
             release_claim(&key, claimer, now, reason);
             match err {
                 TransferFromCallError::InsufficientAllowance => Err(TipError::Uncovered),
                 TransferFromCallError::InsufficientFunds => Err(TipError::InsufficientFunds),
-                TransferFromCallError::Failed(msg) => Err(TipError::TransferFailed { msg }),
+                TransferFromCallError::Unresolved(msg) | TransferFromCallError::Failed(msg) => {
+                    Err(TipError::TransferFailed { msg })
+                }
             }
         }
     }

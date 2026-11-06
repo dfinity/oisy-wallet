@@ -15,6 +15,7 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { findEthersError } from '$eth/utils/eth.utils';
 	import { getHarvestAutopilotBaseTrackingMetadata } from '$eth/utils/harvest-autopilots.utils';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import StakeProgress from '$lib/components/stake/StakeProgress.svelte';
@@ -220,7 +221,8 @@
 			const errorMessage =
 				errorDetailToString(error) ?? $i18n.stake.error.unexpected_error_on_stake;
 			const errorName = error instanceof Error ? error.name : undefined;
-			const errorCode = (error as { code?: string }).code;
+			// The deposit may have wrapped the ethers error to say what became of its transaction.
+			const errorCode = findEthersError(error)?.code ?? (error as { code?: string }).code;
 
 			trackEvent({
 				name: PLAUSIBLE_EVENTS.STAKE,

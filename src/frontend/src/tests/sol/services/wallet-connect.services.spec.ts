@@ -18,7 +18,9 @@ import {
 	getSplTokenMetadata
 } from '$sol/api/solana.api';
 import {
+	SOLANA_SIMULATION_MAX_ACCOUNTS,
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
+	SPL_TOKEN_MAX_AMOUNT,
 	STAKE_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
 import {
@@ -43,6 +45,7 @@ import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-me
 import * as solInstructionSummaryUtils from '$sol/utils/sol-instruction-summary.utils';
 import * as solSignUtils from '$sol/utils/sol-sign.utils';
 import { signTransaction } from '$sol/utils/sol-sign.utils';
+import { selectSolSimulationAddresses } from '$sol/utils/sol-simulation.utils';
 import * as solTransactionsUtils from '$sol/utils/sol-transactions.utils';
 import {
 	countSolRequiredSignatures,
@@ -66,13 +69,23 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
+import { getApproveCheckedInstruction } from '@solana-program/token';
 import type { SignatureBytes } from '@solana/keys';
 import {
+	AccountRole,
 	address,
+	appendTransactionMessageInstructions,
+	blockhash,
+	createNoopSigner,
+	createTransactionMessage,
+	getAddressDecoder,
 	getBase58Decoder,
 	getBase58Encoder,
 	isTransactionMessageWithBlockhashLifetime,
 	lamports,
+	pipe,
+	setTransactionMessageFeePayer,
+	setTransactionMessageLifetimeUsingBlockhash,
 	type Rpc,
 	type SolanaRpcApi
 } from '@solana/kit';
@@ -1538,12 +1551,11 @@ describe('wallet-connect.services', () => {
 			});
 		});
 
-		describe('with an unchecked approval', () => {
+		describe('with an approval', () => {
 			beforeEach(() => {
 				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
 					...mockMappedTransaction,
-					isApproval: true,
-					uncheckedApproval: true
+					isApproval: true
 				});
 			});
 
@@ -1574,7 +1586,6 @@ describe('wallet-connect.services', () => {
 				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
 					...mockMappedTransaction,
 					isApproval: true,
-					uncheckedApproval: true,
 					unreviewed: true
 				});
 
@@ -1599,18 +1610,86 @@ describe('wallet-connect.services', () => {
 				expect(mockListener.approveRequest).toHaveBeenCalledOnce();
 			});
 
-			it('should sign a checked approval when no simulation came back', async () => {
+			// A checked approval states its amount on its line among the operations, a tab away from the
+			// spender the summary names, so it waits for a run as an unchecked one does.
+			it('should refuse a checked approval when no simulation came back', async () => {
 				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
 					...mockMappedTransaction,
-					isApproval: true
+					isApproval: true,
+					tokenAddress: mockSplAddress
 				});
 
 				const result = await sign({ ...mockParams, simulated: false, simulationRan: false });
 
-				expect(result).toEqual(expect.objectContaining({ success: true }));
+				expect(result).toEqual({ success: false });
 
-				expect(spyToastsError).not.toHaveBeenCalled();
-				expect(mockListener.approveRequest).toHaveBeenCalledOnce();
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.wallet_connect.error.approval_without_simulation }
+				});
+
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.rejectRequest).toHaveBeenCalledOnce();
+			});
+
+			// The real mapper, on a checked approval that names more writable accounts than a run
+			// reads, so that none is made: it still reads as an approval, and nothing else refuses it.
+			it('should refuse a checked approval naming more accounts than a run reads', async () => {
+				const { mapSolTransactionMessage: mapper } = await vi.importActual<{
+					mapSolTransactionMessage: typeof mapSolTransactionMessage;
+				}>('$sol/utils/sol-transactions.utils');
+
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockImplementation(mapper);
+
+				const approveChecked = getApproveCheckedInstruction({
+					source: address(mockAtaAddress),
+					mint: address(mockSplAddress),
+					delegate: address(mockSolAddress2),
+					owner: createNoopSigner(address(mockSolAddress)),
+					amount: SPL_TOKEN_MAX_AMOUNT,
+					decimals: 6
+				});
+
+				const unused = Array.from({ length: SOLANA_SIMULATION_MAX_ACCOUNTS }, (_, index) => ({
+					address: getAddressDecoder().decode(new Uint8Array(32).fill(index + 1)),
+					role: AccountRole.WRITABLE
+				}));
+
+				const transactionMessage = pipe(
+					createTransactionMessage({ version: 0 }),
+					(tx) => setTransactionMessageFeePayer(address(mockSolAddress), tx),
+					(tx) =>
+						setTransactionMessageLifetimeUsingBlockhash(
+							{
+								blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+								lastValidBlockHeight: 100n
+							},
+							tx
+						),
+					(tx) =>
+						appendTransactionMessageInstructions(
+							[{ ...approveChecked, accounts: [...approveChecked.accounts, ...unused] }],
+							tx
+						)
+				);
+
+				expect(selectSolSimulationAddresses(transactionMessage).length).toBeGreaterThan(
+					SOLANA_SIMULATION_MAX_ACCOUNTS
+				);
+
+				vi.spyOn(solTransactionsUtils, 'parseSolBase64TransactionMessage').mockResolvedValue(
+					transactionMessage
+				);
+
+				const result = await sign({ ...mockParams, simulated: false, simulationRan: false });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.wallet_connect.error.approval_without_simulation }
+				});
+
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.rejectRequest).toHaveBeenCalledOnce();
 			});
 		});
 
