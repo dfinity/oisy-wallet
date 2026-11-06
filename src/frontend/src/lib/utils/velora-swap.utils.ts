@@ -4,7 +4,8 @@ import {
 	VELORA_BALANCER_V2_BATCH_SWAP_SELECTOR,
 	VELORA_BALANCER_V2_SWAP_SELECTOR,
 	VELORA_DELTA_FEE_BPS_MASK,
-	VELORA_DELTA_ORDER_KIND_SELL
+	VELORA_DELTA_ORDER_KIND_SELL,
+	VELORA_DELTA_ORDER_TYPES
 } from '$eth/constants/velora.constants';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { SWAP_ETH_TOKEN_PLACEHOLDER } from '$lib/constants/swap.constants';
@@ -13,6 +14,7 @@ import { areAddressesEqual } from '$lib/utils/address.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { DeltaAuctionOrder, DeltaRoute, TransactionParams } from '@velora-dex/sdk';
 import { Interface, type Result } from 'ethers/abi';
+import { TypedDataEncoder } from 'ethers/hash';
 import { dataSlice, toBeHex, toBigInt } from 'ethers/utils';
 
 const BASIS_POINTS = 10_000n;
@@ -94,8 +96,8 @@ const bridgeScaledAmount = ({
  * Refuses a Delta route that does not sell the reviewed amount of the source token for the
  * destination token, on their networks. The order settles the route's origin step while the review
  * shows its destination step, so a same-chain route, which needs no bridge, must make both the same,
- * and a cross-chain route must bridge to the destination token and show no more than its origin step
- * comes to once the bridge scales it.
+ * and a cross-chain route must carry a bridge the order format can encode, bridge to the destination
+ * token and show no more than its origin step comes to once the bridge scales it.
  *
  * Run before the approval or permit, so that a refused route costs neither.
  */
@@ -135,6 +137,18 @@ export const assertVeloraDeltaRoute = ({
 	if (sourceChainId !== destinationChainId) {
 		if (isNullish(bridge)) {
 			throw veloraRejectedError('the cross-chain route has no bridge');
+		}
+
+		// The order carrying this bridge is hashed only after the approval or permit, so a bridge
+		// the order format cannot encode is refused here, before either.
+		try {
+			TypedDataEncoder.hashStruct(
+				'Bridge',
+				{ Bridge: VELORA_DELTA_ORDER_TYPES.Bridge },
+				{ ...bridge.contractParams, destinationChainId }
+			);
+		} catch (_: unknown) {
+			throw veloraRejectedError('the bridge cannot be signed');
 		}
 
 		const {

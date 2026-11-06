@@ -334,6 +334,39 @@ describe('velora-swap.utils', () => {
 
 				it.each([
 					{
+						case: 'a bridge with a scaling factor outside int8',
+						change: {
+							route: bridgingWith({
+								route: crossChainRoute,
+								bridge: crossChainBridge,
+								contractParams: { scalingFactor: 200 }
+							})
+						},
+						reason: 'the bridge cannot be signed'
+					},
+					{
+						case: 'a bridge with a 2-byte protocol selector',
+						change: {
+							route: bridgingWith({
+								route: crossChainRoute,
+								bridge: crossChainBridge,
+								contractParams: { protocolSelector: '0x1234' }
+							})
+						},
+						reason: 'the bridge cannot be signed'
+					},
+					{
+						case: 'a bridge with protocol data that is not hex',
+						change: {
+							route: bridgingWith({
+								route: crossChainRoute,
+								bridge: crossChainBridge,
+								contractParams: { protocolData: 'xyz' }
+							})
+						},
+						reason: 'the bridge cannot be signed'
+					},
+					{
 						case: 'a bridge to another token',
 						change: {
 							route: bridgingWith({
