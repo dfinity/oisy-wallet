@@ -413,13 +413,57 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
     }
 }
 
-/// The failure half of [`claim_tip`]: returns the tip to the pool, records why,
-/// and says what the claimer is told.
+/// What a refused payout means for the tip: the reason History records,
+/// whether the payout stamp is retired, and what the claimer is told.
 ///
-/// One function because the two are the same decision read twice — History's
-/// reason and the caller's error partition the ledger's refusals exactly the
-/// same way, and letting them drift apart is how a claimer and a sender end up
-/// with different accounts of the same attempt.
+/// One decision read three ways, so it is made in one place. History's reason
+/// and the caller's error partition the ledger's refusals exactly the same way,
+/// and letting them drift apart is how a claimer and a sender end up with
+/// different accounts of the same attempt. Free of state, so the stamp rule has
+/// a unit test: the ledger in the integration tests cannot be made to answer
+/// `TooOld`.
+struct Refusal {
+    reason: TipClaimFailureReason,
+    retire_payout_stamp: bool,
+    error: TipError,
+}
+
+impl From<TransferFromCallError> for Refusal {
+    fn from(err: TransferFromCallError) -> Self {
+        match err {
+            TransferFromCallError::InsufficientAllowance => Self {
+                reason: TipClaimFailureReason::Uncovered,
+                retire_payout_stamp: false,
+                error: TipError::Uncovered,
+            },
+            TransferFromCallError::InsufficientFunds => Self {
+                reason: TipClaimFailureReason::InsufficientFunds,
+                retire_payout_stamp: false,
+                error: TipError::InsufficientFunds,
+            },
+            // Nothing finer to say about a stale stamp in History: it is one more
+            // attempt that did not pay out, and retrying is the advice. The stamp
+            // itself goes, since the ledger refuses every retry that carries it.
+            TransferFromCallError::TooOld => Self {
+                reason: TipClaimFailureReason::TransferFailed,
+                retire_payout_stamp: true,
+                error: TipError::TransferFailed {
+                    msg: "the payout's created_at_time fell outside the ledger's transaction \
+                          window; the next attempt starts a new one"
+                        .to_string(),
+                },
+            },
+            TransferFromCallError::Unresolved(msg) | TransferFromCallError::Failed(msg) => Self {
+                reason: TipClaimFailureReason::TransferFailed,
+                retire_payout_stamp: false,
+                error: TipError::TransferFailed { msg },
+            },
+        }
+    }
+}
+
+/// The failure half of [`claim_tip`]: returns the tip to the pool as its
+/// [`Refusal`] says, and hands back what the claimer is told.
 ///
 /// `Unresolved` never reaches it: `claim_tip` answers that one without touching
 /// the slot.
@@ -429,36 +473,13 @@ fn refuse_claim(
     started_at_ns: u64,
     err: TransferFromCallError,
 ) -> TipError {
-    let reason = match &err {
-        TransferFromCallError::InsufficientAllowance => TipClaimFailureReason::Uncovered,
-        TransferFromCallError::InsufficientFunds => TipClaimFailureReason::InsufficientFunds,
-        // Nothing finer to say about a stale stamp: it is one more attempt that
-        // did not pay out, and retrying is the advice.
-        TransferFromCallError::TooOld
-        | TransferFromCallError::Unresolved(_)
-        | TransferFromCallError::Failed(_) => TipClaimFailureReason::TransferFailed,
-    };
-
-    release_claim(
-        key,
-        claimer,
-        started_at_ns,
+    let Refusal {
         reason,
-        matches!(err, TransferFromCallError::TooOld),
-    );
-
-    match err {
-        TransferFromCallError::InsufficientAllowance => TipError::Uncovered,
-        TransferFromCallError::InsufficientFunds => TipError::InsufficientFunds,
-        TransferFromCallError::TooOld => TipError::TransferFailed {
-            msg: "the payout's created_at_time fell outside the ledger's transaction window; \
-                  the next attempt starts a new one"
-                .to_string(),
-        },
-        TransferFromCallError::Unresolved(msg) | TransferFromCallError::Failed(msg) => {
-            TipError::TransferFailed { msg }
-        }
-    }
+        retire_payout_stamp,
+        error,
+    } = err.into();
+    release_claim(key, claimer, started_at_ns, reason, retire_payout_stamp);
+    error
 }
 
 /// Whether the record is still the `Claiming` slot this call created.
@@ -852,5 +873,46 @@ mod tests {
             vec!["a-old".to_string()],
             "retention boundary is exclusive, and another sender's rows never leak in"
         );
+    }
+
+    /// The link between the ledger refusing a stamp and the next attempt pinning
+    /// a fresh one. `classify`, `released_after_failure` and `start_claim` each
+    /// have tests of their own; this pins the flag that joins them, so a stamp the
+    /// ledger refused never rides along on the retry.
+    #[test]
+    fn only_a_stale_stamp_is_retired_and_the_retry_pins_a_fresh_one() {
+        let stale = Refusal::from(TransferFromCallError::TooOld);
+        assert!(stale.retire_payout_stamp);
+        assert_eq!(stale.reason, TipClaimFailureReason::TransferFailed);
+        assert!(matches!(stale.error, TipError::TransferFailed { .. }));
+
+        for err in [
+            TransferFromCallError::InsufficientAllowance,
+            TransferFromCallError::InsufficientFunds,
+            TransferFromCallError::Unresolved("deadline".to_string()),
+            TransferFromCallError::Failed("rejected".to_string()),
+        ] {
+            let label = format!("{err:?}");
+            assert!(
+                !Refusal::from(err).retire_payout_stamp,
+                "{label} keeps the stamp, which a retry still needs"
+            );
+        }
+
+        let claimer = test_principal(2);
+        let first_attempt = 1_000;
+        let (claiming, refused_stamp) =
+            record_with(TipState::Reserved, u64::MAX).start_claim(claimer, first_attempt);
+        let released = claiming.released_after_failure(
+            stale.reason,
+            first_attempt + 1,
+            stale.retire_payout_stamp,
+        );
+        assert_eq!(released.payout_created_at_ns, None);
+
+        let retry = first_attempt + 2;
+        let (_, fresh) = released.start_claim(claimer, retry);
+        assert_eq!(fresh, retry, "the retry pins a fresh stamp");
+        assert_ne!(fresh, refused_stamp, "not the one the ledger refused");
     }
 }
