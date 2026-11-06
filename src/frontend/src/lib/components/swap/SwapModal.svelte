@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { getContext, onDestroy } from 'svelte';
-	import { page } from '$app/state';
 	import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
 	import { SWAP_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
-	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -27,17 +25,13 @@
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { getInitialSwapSlippage } from '$lib/utils/swap.utils';
 
 	const { reset: resetSwapStore } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const { resetFilters: resetTokensListFilters, setFilterCategoryTag } =
-		getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
-
-	// The tokens list context outlives the modal, so the asset type is applied each time it opens.
-	// It applies on the assets page only, like the hero's balance.
-	setFilterCategoryTag(isRouteTokens(page) ? $tokenCategoryFilter : undefined);
+	const { resetFilters: resetTokensListFilters } = getContext<ModalTokensListContext>(
+		MODAL_TOKENS_LIST_CONTEXT_KEY
+	);
 
 	const { resetAllowedNetworkIds } = getContext<ModalNetworksListContext>(
 		MODAL_NETWORKS_LIST_CONTEXT_KEY
@@ -56,7 +50,6 @@
 	let slippageValue = $state<OptionAmount>(getInitialSwapSlippage());
 	let swapProgressStep = $state(ProgressStepsSwap.INITIALIZATION);
 	let swapFailedProgressSteps = $state<ProgressStepsSwap[]>([]);
-	let allNetworksEnabled = $state<boolean>(true);
 
 	let titleString = $derived(
 		selectTokenType === 'source'
@@ -78,7 +71,6 @@
 			currentStep = undefined;
 			slippageValue = getInitialSwapSlippage();
 			swapProgressStep = ProgressStepsSwap.INITIALIZATION;
-			allNetworksEnabled = true;
 			selectTokenType = undefined;
 		});
 
@@ -118,7 +110,6 @@
 		bind:slippageValue
 		bind:swapProgressStep
 		bind:swapFailedProgressSteps
-		bind:allNetworksEnabled
 		bind:selectTokenType
 	/>
 </WizardModal>

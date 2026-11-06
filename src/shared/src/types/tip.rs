@@ -30,6 +30,12 @@ pub const MAX_TIP_ID_BYTES: u32 = 64;
 /// bytes) — it is user-facing text, and the design specifies 250 characters.
 pub const MAX_TIP_MESSAGE_CHARS: usize = 250;
 
+/// Maximum width, in bits, of a tip's `amount`. ICRC ledgers keep balances and
+/// allowances in at most 256 bits, so a wider amount is one no allowance can
+/// cover. `Nat` is variable-length on the wire, so without this bound a single
+/// tip could carry megabytes of digits.
+pub const MAX_TIP_AMOUNT_BITS: u64 = 256;
+
 /// Byte length of the stored claim-code hash: SHA-256 of the claim code that
 /// lives only in the link fragment. The code itself never reaches the canister
 /// and no endpoint returns the hash.
@@ -71,6 +77,16 @@ pub const TIP_RETENTION_AFTER_TERMINAL_NS: u64 = 30 * 24 * 60 * 60 * 1_000_000_0
 /// outgrow a single response; this bounds it explicitly rather than letting the
 /// call fail at the message-size limit.
 pub const MAX_TIPS_RETURNED: usize = 200;
+
+/// Maximum number of tips one sender keeps stored, History included.
+///
+/// [`MAX_TIPS_PER_USER`] counts only live tips, and a finished one is kept for
+/// [`TIP_RETENTION_AFTER_TERMINAL_NS`], so without this a sender's stored rows
+/// would be bounded by how many tips they create in that window rather than by
+/// a count. History never shows more than [`MAX_TIPS_RETURNED`] rows, so that
+/// is the bound. It must stay above the live cap, so a new tip finds finished
+/// rows to make room with unless every one of them is still `Claiming`.
+pub const MAX_STORED_TIPS_PER_USER: usize = MAX_TIPS_RETURNED;
 
 /// Create-tip request. The canister stores the tip and verifies the sender's
 /// allowance covers it; it never takes custody.
@@ -246,7 +262,9 @@ pub enum TipError {
     /// The `tip_id` already exists; the client should generate a fresh random
     /// id and retry.
     DuplicateTipId,
-    /// The caller already holds [`MAX_TIPS_PER_USER`] active tips.
+    /// The caller already holds [`MAX_TIPS_PER_USER`] active tips, or
+    /// [`MAX_STORED_TIPS_PER_USER`] stored ones that cannot make room for
+    /// another because the finished ones are still `Claiming`.
     TooManyTips,
     /// No claimable tip for this id. Also returned for an expired, cancelled or
     /// already-claimed tip, and for a wrong claim code — every case collapsed
@@ -256,6 +274,10 @@ pub enum TipError {
     /// no longer covers it — they spent, reduced or revoked it. The one
     /// deliberately distinguishable failure, reachable only with a valid link,
     /// because telling the claimer "come back later" is useless.
+    ///
+    /// At creation: the allowance does not cover the amount plus its fee, or
+    /// the amount is wider than [`MAX_TIP_AMOUNT_BITS`], which no allowance
+    /// can cover.
     Uncovered,
     /// The sender's account no longer holds the amount. The reservation is still
     /// granted and the claim code is still valid, so the same link works again

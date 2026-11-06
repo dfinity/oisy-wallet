@@ -775,7 +775,6 @@ interface I18nSend {
 		open_qr_modal: string;
 		scan_qr: string;
 		select_token: string;
-		select_network_filter: string;
 		send_again: string;
 		recently_used_tab: string;
 		contacts_tab: string;
@@ -1227,6 +1226,7 @@ interface I18nTokens {
 		show_more_networks: string;
 		hide_more_networks: string;
 		on_network: string;
+		on_network_label: string;
 		delete_token: string;
 		edit_token: string;
 		sort_by_value: string;
@@ -1235,6 +1235,18 @@ interface I18nTokens {
 		hide_asset_types: string;
 		asset_type: string;
 		asset_type_all: string;
+		asset_type_all_short: string;
+		clear_network_filter: string;
+		clear_asset_type_filter: string;
+		filter_asset_types: string;
+		clear_filters: string;
+		no_match_network: string;
+		no_match_asset_type: string;
+		no_match_asset_type_network: string;
+		no_match_query: string;
+		no_match_query_network: string;
+		no_match_query_asset_type: string;
+		no_match_query_asset_type_network: string;
 		no_tokens_for_asset_type: string;
 		no_tokens_for_asset_type_zero_tokens: string;
 		no_tokens_for_asset_type_description: string;
@@ -1326,6 +1338,7 @@ interface I18nTokens {
 		enter_contract_address: string;
 		enter_token_address: string;
 		search_token: string;
+		search_token_on_network: string;
 	};
 	warning: { trust_token: string };
 	error: {

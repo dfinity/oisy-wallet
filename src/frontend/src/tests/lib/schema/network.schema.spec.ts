@@ -51,6 +51,7 @@ describe('network.schema', () => {
 		const validNetwork = {
 			...validNetworkWithRequiredFields,
 			icon: 'https://example.com/icon.svg',
+			iconColored: 'https://example.com/icon-colored.svg',
 			buy: { onramperId: 'icp' },
 			pay: { openCryptoPay: 'InternetComputer' }
 		};
@@ -96,6 +97,15 @@ describe('network.schema', () => {
 			const invalidNetwork = {
 				...validNetwork,
 				icon: 'https://example.com/invalid-icon-bw.png'
+			};
+
+			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
+		});
+
+		it('should fail validation when iconColored is not a valid SVG string', () => {
+			const invalidNetwork = {
+				...validNetwork,
+				iconColored: 'https://example.com/invalid-icon-colored.png'
 			};
 
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();

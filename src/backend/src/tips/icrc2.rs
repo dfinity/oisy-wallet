@@ -8,19 +8,21 @@
 //!
 //! The **calls** stay local, for two reasons that survive that:
 //!
-//! - `CyclesLedgerService` uses `Call::bounded_wait` throughout. The payout does too. It once used
-//!   `unbounded_wait`, on the grounds that a payout must not come back "maybe": a wait that times
-//!   out leaves the canister unable to say whether money moved. The premise holds; the conclusion
-//!   did not follow. The ledger is whichever canister the sender named, and a call that waits
-//!   unboundedly keeps its response reservation held until that canister answers — so one that
-//!   never answers holds a slice of the backend's cycles indefinitely, and enough slices held at
-//!   once leave it unable to make any outgoing call at all, this feature's and every other's.
-//!   `claim_tip` has to survive a "maybe" either way: `TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS` lets the
-//!   `Claiming` guard lapse while a first `icrc2_transfer_from` may still be in flight, so a second
-//!   attempt can overlap the first whatever shape the wait has, and what keeps that safe is the
-//!   allowance covering exactly one payout, as `service::claim_tip` says at length. The deadline is
-//!   [`PAYOUT_TIMEOUT_SECONDS`] rather than the `bounded_wait` default of 300 s, which is far
-//!   longer than a ledger's answer stays worth having.
+//! - `CyclesLedgerService` uses `Call::bounded_wait` throughout, and so does every call here. The
+//!   two reads at creation are the plain case: a read that times out only fails that one create.
+//!   The payout once used `unbounded_wait`, on the grounds that a payout must not come back
+//!   "maybe": a wait that times out leaves the canister unable to say whether money moved. The
+//!   premise holds; the conclusion did not follow. The ledger is whichever canister the sender
+//!   named, and a call that waits unboundedly keeps its response reservation held until that
+//!   canister answers — so one that never answers holds a slice of the backend's cycles
+//!   indefinitely, and enough slices held at once leave it unable to make any outgoing call at all,
+//!   this feature's and every other's. `claim_tip` has to survive a "maybe" either way:
+//!   `TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS` lets the `Claiming` guard lapse while a first
+//!   `icrc2_transfer_from` may still be in flight, so a second attempt can overlap the first
+//!   whatever shape the wait has, and what keeps that safe is the allowance covering exactly one
+//!   payout, as `service::claim_tip` says at length. The deadline is [`PAYOUT_TIMEOUT_SECONDS`]
+//!   rather than the `bounded_wait` default of 300 s, which is far longer than a ledger's answer
+//!   stays worth having.
 //! - That client is a struct bound to one canister and bundles cycles-only methods — `deposit`,
 //!   `withdraw`, `create_canister`. Tips points at whatever ledger the sender chose, and needs
 //!   three methods.
@@ -79,7 +81,7 @@ fn is_unresolved(err: &CallFailed) -> bool {
 /// # Errors
 /// Returns the ledger's own message when the call fails or cannot be decoded.
 pub async fn fee(ledger: Principal) -> Result<Nat, String> {
-    Call::unbounded_wait(ledger, "icrc1_fee")
+    Call::bounded_wait(ledger, "icrc1_fee")
         .with_args(&())
         .await
         .map_err(|err| format!("icrc1_fee call failed: {err:?}"))?
@@ -92,7 +94,7 @@ pub async fn fee(ledger: Principal) -> Result<Nat, String> {
 /// # Errors
 /// Returns the ledger's own message when the call fails or cannot be decoded.
 pub async fn allowance(ledger: Principal, args: AllowanceArgs) -> Result<Allowance, String> {
-    Call::unbounded_wait(ledger, "icrc2_allowance")
+    Call::bounded_wait(ledger, "icrc2_allowance")
         .with_args(&(args,))
         .await
         .map_err(|err| format!("icrc2_allowance call failed: {err:?}"))?

@@ -1044,7 +1044,6 @@
 			"open_qr_modal": "Démarrer le scan du code QR pour les détails de la transaction",
 			"scan_qr": "Scanner le code QR",
 			"select_token": "Sélectionner le token à envoyer",
-			"select_network_filter": "Sélectionner le filtre réseau",
 			"send_again": "Envoyer à nouveau",
 			"recently_used_tab": "Récemment utilisé",
 			"contacts_tab": "Contacts",
@@ -1510,6 +1509,7 @@
 			"show_more_networks": "Afficher $number réseaux de plus",
 			"hide_more_networks": "Masquer plus de réseaux",
 			"on_network": " sur $network",
+			"on_network_label": "Sur $network",
 			"delete_token": "Supprimer le token",
 			"edit_token": "Modifier le token",
 			"sort_by_value": "Valeur",
@@ -1518,6 +1518,18 @@
 			"hide_asset_types": "Masquer les types d'actifs",
 			"asset_type": "Type d'actif dans $oisy_name",
 			"asset_type_all": "Tous les types d'actifs",
+			"asset_type_all_short": "",
+			"clear_network_filter": "",
+			"clear_asset_type_filter": "",
+			"filter_asset_types": "",
+			"clear_filters": "",
+			"no_match_network": "",
+			"no_match_asset_type": "",
+			"no_match_asset_type_network": "",
+			"no_match_query": "",
+			"no_match_query_network": "",
+			"no_match_query_asset_type": "",
+			"no_match_query_asset_type_network": "",
 			"no_tokens_for_asset_type": "Il n'y a pas de $asset_type dans votre portefeuille",
 			"no_tokens_for_asset_type_zero_tokens": "Il n'y a pas de $asset_type dans le réseau sélectionné",
 			"no_tokens_for_asset_type_description": "Choisissez parmi <strong>$count tokens pris en charge</strong> pour personnaliser votre vue de portefeuille."
@@ -1627,7 +1639,8 @@
 		"placeholder": {
 			"enter_contract_address": "Saisir une adresse de contrat ERC20",
 			"enter_token_address": "Saisir une adresse de token SPL",
-			"search_token": "Rechercher le token"
+			"search_token": "Rechercher le token",
+			"search_token_on_network": ""
 		},
 		"warning": {
 			"trust_token": "Assurez-vous de faire confiance au token que vous ajoutez. Si le token que vous ajoutez est contrôlé par une partie malveillante, elle pourrait essayer de vous arnaquer, par exemple en vous faisant croire que vous avez reçu une quantité importante de tokens afin de vous inciter à leur envoyer des tokens en retour ou à effectuer d'autres actions indésirables. En savoir plus sur les arnaques et les risques de sécurité, par exemple <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">ici</a>."

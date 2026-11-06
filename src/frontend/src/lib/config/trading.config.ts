@@ -14,10 +14,6 @@ export const tradingDepositWizardSteps = ({
 		title: i18n.trading.deposit.title
 	},
 	{
-		name: WizardStepsTradingDeposit.FILTER_NETWORKS,
-		title: i18n.send.text.select_network_filter
-	},
-	{
 		name: WizardStepsTradingDeposit.REVIEW,
 		title: i18n.trading.deposit.review_title
 	},
