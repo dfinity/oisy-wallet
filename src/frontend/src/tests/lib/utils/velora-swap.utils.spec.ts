@@ -23,7 +23,7 @@ const NO_METADATA = `0x${'00'.repeat(32)}`;
 
 // The surplus cap Velora sets on OISY's Delta orders (`FeeManagerLib.CAP_SURPLUS_MASK`) and Market
 // transactions (`AugustusFees.IS_CAP_SURPLUS_MASK`).
-const DELTA_CAP_SURPLUS = 0x200n;
+const DELTA_CAP_SURPLUS = 1n << 9n;
 const AUGUSTUS_CAP_SURPLUS = 1n << 92n;
 
 const augustus = new Interface(VELORA_AUGUSTUS_SELL_ABI);
@@ -503,7 +503,7 @@ describe('velora-swap.utils', () => {
 				},
 				{
 					case: 'a partner taking the surplus',
-					order: { partnerAndFee: `${DELTA_CAP_SURPLUS | 0x100n}` },
+					order: { partnerAndFee: `${DELTA_CAP_SURPLUS | (1n << 8n)}` },
 					reason: 'gives a partner the surplus'
 				},
 				{
