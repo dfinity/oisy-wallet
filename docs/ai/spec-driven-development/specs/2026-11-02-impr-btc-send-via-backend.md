@@ -668,6 +668,10 @@ Decided in PR 6:
     deposit address is known. Otherwise the offer quoted one selection and the swap sent another,
     as Copilot found on PR 6: with UTXOs of 10 150 and 9 000 sats, a 10 000-sat swap at 1 sat/vB
     was quoted one input and 141 sats, then sent with two inputs and 221;
+  - Convert sends, for the same deposit as the Chain Fusion swap. Its fee would otherwise wait for
+    the ckBTC deposit address, and an amount refused for the fee before the address arrived kept
+    that fee with Next disabled. The loader skips while `amountError` is set, and Convert only
+    re-checks the amount on input; Copilot found this on PR 6;
   - OpenCryptoPay quotes its fee before it has the payment address.
 
   These overpay by at most 12 vB at the rate, 8.5% of a one-input fee. A P2TR target, which today
@@ -676,7 +680,9 @@ Decided in PR 6:
 - **Callers.**
   - `prepareBtcSend` and `UtxosFeeLoader` take an optional `destination`. The loader prices the
     fee again when the recipient changes, and the fee store records `destinationForFee`.
-  - Send, Convert and the AI assistant pass the recipient. A swap passes none, anywhere.
+  - Send and the AI assistant pass the recipient. Convert and swaps pass none, anywhere.
+  - Send's `amountError` only covers invalid and below-minimum amounts, never the fee, so a
+    recipient entered after the amount still prices the fee again.
 - **Validation.** `validateBtcSend` takes an optional `destination`.
   - With one, it refuses an invalid or wrong-network address as `InvalidDestination`, then checks
     the fee against that output's size.
@@ -684,8 +690,8 @@ Decided in PR 6:
   - The ±10% tolerance is unchanged. A fee priced as P2WPKH for a P2TR recipient (−7.8% at one
     input) would still pass. That can only happen if the fee were stale, since the loader prices
     again when the recipient changes. On the backend path, the fee floor refuses it.
-- **Max.** `initBtcMaxSendAmount({ source, destination })` prices the same way. Send and Convert
-  pass the recipient; Swap passes none, like the rest of the swap.
+- **Max.** `initBtcMaxSendAmount({ source, destination })` prices the same way. Send passes the
+  recipient; Convert and Swap pass none, like the rest of their flows.
 
 ### Frontend: `sendBtc`
 

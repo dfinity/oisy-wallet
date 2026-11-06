@@ -17,13 +17,10 @@
 		type TokenActionValidationErrorsContext
 	} from '$lib/stores/token-action-validation-errors.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { OptionString } from '$lib/types/string';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
 	interface Props {
 		source: string;
-		// The ckBTC minter's deposit address, which sizes its output in the fee Max leaves room for.
-		destination?: OptionString;
 		sendAmount: OptionAmount;
 		receiveAmount?: number;
 		amountError?: boolean;
@@ -33,7 +30,6 @@
 
 	let {
 		source,
-		destination,
 		sendAmount = $bindable(),
 		receiveAmount = $bindable(),
 		amountError = $bindable(),
@@ -50,7 +46,8 @@
 		amountError = $insufficientFunds || $insufficientFundsForFee;
 	});
 
-	let maxSendAmountStore = $derived(initBtcMaxSendAmount({ source, destination }));
+	// No recipient, as Convert's fee (see `BtcConvertTokenWizard`).
+	let maxSendAmountStore = $derived(initBtcMaxSendAmount({ source }));
 
 	let hasPendingTransactionsStore = $derived(initPendingSentTransactionsStatus(source));
 

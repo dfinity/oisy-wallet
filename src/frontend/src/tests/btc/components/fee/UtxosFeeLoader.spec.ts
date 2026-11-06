@@ -8,13 +8,17 @@ import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store'
 import { initUtxosFeeStore, type UtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
+import type { OptionString } from '$lib/types/string';
+import UtxosFeeLoaderTest from '$tests/btc/components/fee/UtxosFeeLoaderTest.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
+import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
+import { writable } from 'svelte/store';
 
 describe('UtxosFeeLoader', () => {
 	const amount = 10;
@@ -315,22 +319,32 @@ describe('UtxosFeeLoader', () => {
 			});
 		});
 
+		// Changes only the recipient of a mounted loader. A new mount would price on mount even if the
+		// effect did not track the recipient, and so would `rerender`, which replaces every prop.
 		it('should price the fee again for the same amount when the recipient changes', async () => {
 			const prepareBtcSendSpy = mockPrepareBtcSend();
 
 			mockAuthStore();
 			setupStoresWithData();
 
-			utxosFeeStore.setUtxosFee({
-				utxosFee: mockBtcReviewResult,
-				amountForFee: amount,
-				destinationForFee: mockBtcAddress
-			});
+			const destinationStore = writable<OptionString>(mockBtcAddress);
 
-			render(UtxosFeeLoader, {
-				props: { ...props, destination },
+			render(UtxosFeeLoaderTest, {
+				props: { source, amount, networkId, destination: destinationStore },
 				context: mockContext({ utxosFeeStore })
 			});
+
+			await waitFor(() => {
+				expect(prepareBtcSendSpy).toHaveBeenCalledWith(
+					expect.objectContaining({ amount, destination: mockBtcAddress })
+				);
+			});
+
+			// Let the mount settle, so the only call left to come is the recipient change's.
+			await runResolvedPromises();
+			prepareBtcSendSpy.mockClear();
+
+			destinationStore.set(destination);
 
 			await waitFor(() => {
 				expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith(
