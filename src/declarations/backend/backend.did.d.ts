@@ -1987,7 +1987,7 @@ export type SetUserShowTestnetsResult =
 			/**
 			 * The user's show testnets was not set due to an error.
 			 */
-			Err: UpdateAgreementsError;
+			Err: SetTestnetsSettingsError;
 	  };
 export interface Settings {
 	networks: NetworksSettings;
@@ -2630,7 +2630,8 @@ export interface UpdateActiveUserTransactionRequest {
 	progress_step: [] | [string];
 	error: [] | [string];
 }
-export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: null };
+export type UpdateAgreementsError =
+	{ VersionMismatch: null } | { RateLimited: RateLimitError } | { UserNotFound: null };
 export interface UpdateExperimentalFeaturesSettingsRequest {
 	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
 	current_user_version: [] | [bigint];
@@ -2639,6 +2640,19 @@ export interface UpdateProviderAgreementsRequest {
 	current_user_version: [] | [bigint];
 	provider_agreements: Array<[ProviderAgreementType, UserAgreement]>;
 }
+export type UpdateProviderAgreementsResult =
+	| {
+			/**
+			 * The user's provider agreements were updated successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The user's provider agreements were not updated due to an error.
+			 */
+			Err: UpdateAgreementsError;
+	  };
 export interface UpdateTransactionFilterSettingsRequest {
 	filter: TransactionFilterSettings;
 	current_user_version: [] | [bigint];
@@ -2647,6 +2661,19 @@ export interface UpdateUserAgreementsRequest {
 	agreements: UserAgreements;
 	current_user_version: [] | [bigint];
 }
+export type UpdateUserAgreementsResult =
+	| {
+			/**
+			 * The user's agreements were updated successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The user's agreements were not updated due to an error.
+			 */
+			Err: UpdateAgreementsError;
+	  };
 /**
  * Per-agreement status/metadata.
  */
@@ -3316,10 +3343,11 @@ export interface _SERVICE {
 	 */
 	get_tip_vetkey_public_key: ActorMethod<[], TipVetkeyResult>;
 	/**
-	 * Returns the full agreement consent/rejection history for the caller.
+	 * Returns the agreement consent/rejection history for the caller.
 	 *
 	 * # Returns
-	 * - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail.
+	 * - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail: the newest
+	 * `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 	 *
 	 * # Errors
 	 * - `Err(UserNotFound)` if no history exists and the user has no profile.
@@ -3554,11 +3582,12 @@ export interface _SERVICE {
 	 * set to the same value.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+	 * the caller made too many calls in the last minute.
 	 */
 	update_provider_agreements: ActorMethod<
 		[UpdateProviderAgreementsRequest],
-		SetUserShowTestnetsResult
+		UpdateProviderAgreementsResult
 	>;
 	/**
 	 * Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
@@ -3572,9 +3601,10 @@ export interface _SERVICE {
 	 * same value.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+	 * the caller made too many calls in the last minute.
 	 */
-	update_user_agreements: ActorMethod<[UpdateUserAgreementsRequest], SetUserShowTestnetsResult>;
+	update_user_agreements: ActorMethod<[UpdateUserAgreementsRequest], UpdateUserAgreementsResult>;
 	/**
 	 * Updates the user's preference to enable (or disable) experimental features in the interface,
 	 * merging with any existing entries.

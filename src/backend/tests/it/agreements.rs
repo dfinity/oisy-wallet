@@ -9,6 +9,7 @@ use shared::types::{
         UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest, UserAgreement,
         UserAgreements, MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER, SHA256_HEX_LENGTH,
     },
+    signer::RateLimitError,
     user_profile::{CreateUserProfileError, GetUserProfileError, UserProfile},
     Timestamp, Version,
 };
@@ -1044,6 +1045,9 @@ fn test_agreement_history_keeps_only_the_newest_entries() {
     // Every update flips all three agreements, so it adds three entries.
     let updates = MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER / 3 + 1;
     for i in 0..updates {
+        // One update per minute stays clear of the per-caller call limit.
+        pic_setup.pic.advance_time(Duration::from_secs(60));
+
         let user_profile = pic_setup
             .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
             .unwrap()
@@ -1470,4 +1474,83 @@ fn test_provider_agreements_no_change_when_accepted_none() {
         provider.is_none() || provider.unwrap().is_empty(),
         "Provider agreements should be empty or None"
     );
+}
+
+// ---------------------------------------------------------------------------
+// Call limits
+// ---------------------------------------------------------------------------
+
+/// Calls `method` with the caller's current profile version 10 times, then asserts that the
+/// 11th call within the same minute returns `UpdateAgreementsError::RateLimited`.
+fn assert_rate_limited_after_ten_calls<T: candid::CandidType>(
+    method: &str,
+    request: impl Fn(Option<Version>) -> T,
+) {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
+
+    let call = || {
+        let user_profile = pic_setup
+            .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+            .unwrap()
+            .unwrap();
+        pic_setup
+            .update::<Result<(), UpdateAgreementsError>>(
+                caller,
+                method,
+                request(user_profile.version),
+            )
+            .unwrap()
+    };
+
+    for i in 0..10 {
+        let result = call();
+        assert_eq!(result, Ok(()), "call {i} should succeed");
+    }
+
+    assert_eq!(
+        call(),
+        Err(UpdateAgreementsError::RateLimited(RateLimitError {
+            max_calls: 10,
+            window_ns: 60 * 1_000_000_000,
+            caller,
+        }))
+    );
+
+    pic_setup.pic.advance_time(Duration::from_secs(60));
+    assert_eq!(call(), Ok(()), "a call after the window should succeed");
+}
+
+#[test]
+fn test_update_user_agreements_rate_limited_after_exceeding_limit() {
+    assert_rate_limited_after_ten_calls("update_user_agreements", |current_user_version| {
+        UpdateUserAgreementsRequest {
+            current_user_version,
+            agreements: INITIAL_AGREEMENTS.clone(),
+        }
+    });
+}
+
+#[test]
+fn test_update_provider_agreements_rate_limited_after_exceeding_limit() {
+    assert_rate_limited_after_ten_calls("update_provider_agreements", |current_user_version| {
+        UpdateProviderAgreementsRequest {
+            current_user_version,
+            provider_agreements: provider_agreements_map(vec![(
+                ProviderAgreementType {
+                    provider: ProviderAgreementProvider::NearIntents,
+                    scope: ProviderAgreementScope::Swap,
+                },
+                UserAgreement {
+                    accepted: Some(true),
+                    ..Default::default()
+                },
+            )]),
+        }
+    });
 }

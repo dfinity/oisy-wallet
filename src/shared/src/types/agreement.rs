@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use candid::{CandidType, Deserialize};
 
 use crate::{
-    types::{Timestamp, Version},
+    types::{signer::RateLimitError, Timestamp, Version},
     validate::Validate,
 };
 
@@ -138,6 +138,7 @@ impl Validate for Agreements {
 pub enum UpdateAgreementsError {
     UserNotFound,
     VersionMismatch,
+    RateLimited(RateLimitError),
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
