@@ -171,10 +171,11 @@ Worked example: `classify` in
 `TipRecord::start_claim` in
 [`tips/model.rs`](../../../src/backend/src/tips/model.rs).
 
-`icrc2_approve` is a different kind of call — it sets an allowance to an
-absolute value rather than accumulating, so a repeat does not compound;
-[`signer/service.rs`](../../../src/backend/src/signer/service.rs) passes `None`
-there.
+`icrc2_approve` sets an allowance to an absolute value, but a repeat can restore
+allowance already consumed by the spender and charges another approval fee.
+[`signer/service.rs`](../../../src/backend/src/signer/service.rs) uses `None`
+for replenishing signing allowances; do not generalise this to retries of a
+one-shot approval, which should preserve their transaction identity.
 
 ## Threshold signatures — chain-fusion signer only
 
