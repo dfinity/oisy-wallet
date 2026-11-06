@@ -3,6 +3,10 @@ import type { IcToken } from '$icp/types/ic-token';
 import SwapForm from '$lib/components/swap/SwapForm.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	SWAP_SLIPPAGE_INVALID_VALUE,
+	SWAP_SLIPPAGE_VELORA_INVALID_VALUE
+} from '$lib/constants/swap.constants';
+import {
 	SWAP_SWITCH_TOKENS_BUTTON,
 	SWAP_TWO_SWAPS_HINT,
 	SWAP_TWO_SWAPS_HINT_BUTTON,
@@ -108,6 +112,40 @@ describe('SwapForm', () => {
 			await act(() => review.click());
 
 			expect(onNext).not.toHaveBeenCalled();
+		});
+
+		// A form reporting a problem off the pay field (an EVM swap whose network coin cannot cover
+		// the gas) holds Review without painting the field, which only an amount error does.
+		it.each([
+			{ reason: 'the form reports itself', held: { disabled: true }, decorated: false },
+			{
+				reason: 'in the pay field',
+				held: { errorType: 'insufficient-funds' as const },
+				decorated: true
+			}
+		])('holds Review for a problem $reason', ({ held, decorated }) => {
+			setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
+			const { container, getByRole } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					slippageValue: '1',
+					isSwapAmountsLoading: false,
+					fee: 1000n,
+					...held,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+			const payField = container
+				.querySelector(`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`)
+				?.closest('.token-input-currency');
+
+			expect(getByRole('button', { name: en.swap.text.review_button })).toBeDisabled();
+			expect(payField?.classList.contains('text-error-primary')).toBe(decorated);
 		});
 	});
 
@@ -909,6 +947,91 @@ describe('SwapForm', () => {
 			const inputs = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
 			expect(inputs[1]).toHaveValue('0');
+		});
+	});
+
+	// The slippage is edited from the modal header: the form only blocks Review and says why.
+	describe('slippage', () => {
+		const renderWithSlippage = (slippageValue: OptionAmount) => {
+			setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
+
+			return render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					slippageValue,
+					isSwapAmountsLoading: false,
+					fee: 1000n,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+		};
+
+		const slippageError = (maxSlippage: number) =>
+			replacePlaceholders(en.swap.text.max_slippage_error, {
+				$maxSlippage: maxSlippage.toString()
+			});
+
+		const useErc20Source = () => {
+			const originalContext = initSwapContext({
+				sourceToken: mockValidErc20Token,
+				destinationToken: mockValidIcToken
+			});
+
+			mockContext.set(SWAP_CONTEXT_KEY, {
+				...originalContext,
+				sourceTokenExchangeRate: readable(10),
+				destinationTokenExchangeRate: readable(2)
+			});
+		};
+
+		it('should not render the slippage control', () => {
+			const { queryByRole } = renderWithSlippage('1');
+
+			expect(
+				queryByRole('button', { name: new RegExp(`^${en.swap.text.max_slippage}`) })
+			).not.toBeInTheDocument();
+		});
+
+		it.each(['1', '8', '49.9999'])('should allow Review at %s%% from ICP', (slippageValue) => {
+			const { getByRole, queryByText } = renderWithSlippage(slippageValue);
+
+			expect(getByRole('button', { name: en.swap.text.review_button })).toBeEnabled();
+			expect(queryByText(slippageError(SWAP_SLIPPAGE_INVALID_VALUE))).not.toBeInTheDocument();
+		});
+
+		it.each([undefined, '', '0', `${SWAP_SLIPPAGE_INVALID_VALUE}`])(
+			'should block Review and say why at "%s" from ICP',
+			(slippageValue) => {
+				const { getByRole, getByText } = renderWithSlippage(slippageValue);
+
+				expect(getByRole('button', { name: en.swap.text.review_button })).toBeDisabled();
+				expect(getByText(slippageError(SWAP_SLIPPAGE_INVALID_VALUE))).toBeInTheDocument();
+			}
+		);
+
+		it('should block Review from 15% on other networks', () => {
+			useErc20Source();
+
+			const { getByRole, getByText } = renderWithSlippage(`${SWAP_SLIPPAGE_VELORA_INVALID_VALUE}`);
+
+			expect(getByRole('button', { name: en.swap.text.review_button })).toBeDisabled();
+			expect(getByText(slippageError(SWAP_SLIPPAGE_VELORA_INVALID_VALUE))).toBeInTheDocument();
+		});
+
+		it('should allow Review below 15% on other networks', () => {
+			useErc20Source();
+
+			const { getByRole, queryByText } = renderWithSlippage('14');
+
+			expect(getByRole('button', { name: en.swap.text.review_button })).toBeEnabled();
+			expect(
+				queryByText(slippageError(SWAP_SLIPPAGE_VELORA_INVALID_VALUE))
+			).not.toBeInTheDocument();
 		});
 	});
 });

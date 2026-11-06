@@ -202,6 +202,16 @@ export interface GetContactParams {
 	contactId: bigint;
 }
 
+export interface GetContactsPageParams {
+	identity: Identity;
+	after?: bigint;
+}
+
+export interface GetContactImagesParams {
+	identity: Identity;
+	contactIds: bigint[];
+}
+
 export interface CreateContactParams {
 	identity: Identity;
 	name: string;

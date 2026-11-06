@@ -325,12 +325,26 @@ The two gas figures show how far estimates fall short, per token and network. Th
 
 [Topping up a canister](#top-up-a-canister) emits one structured event, **`cycles_top_up`**, under `event_context: compute` and `source_location: token_details`, with the TCYCLES symbol as `token_symbol`. It carries no amount, no amount range and no canister ID: any of them, with the event's time, would pick out the one burn on the public cycles ledger, and with it the user's account. Almost every burn there is below $1, so even a range would single out a larger top-up.
 
-| `event_modifier` | Fires when                   | `result_status`                 | Properties                                     |
-| ---------------- | ---------------------------- | ------------------------------- | ---------------------------------------------- |
-| `open`           | the Top up modal opens       | none                            | none                                           |
-| `top_up`         | a top-up starts and finishes | `executing` → `success`/`error` | `token_symbol`; `result_error_code` on failure |
+| `event_modifier` | Fires when                                          | `result_status`                 | Properties                                     |
+| ---------------- | --------------------------------------------------- | ------------------------------- | ---------------------------------------------- |
+| `open`           | the Top up modal opens, or Top up is picked in Send | none                            | none                                           |
+| `top_up`         | a top-up starts and finishes                        | `executing` → `success`/`error` | `token_symbol`; `result_error_code` on failure |
 
 `result_error_code` says why a top-up ended in `error`: `refused` (the ledger refused before burning anything, so nothing moved), `refunded` (the canister could not receive the cycles, which came back minus the ledger's fees) or `unknown` (no answer, so the top-up may or may not have gone through). A failed top-up also carries `event_severity` for the monitoring dashboards: `warn` for `refused` and `unknown`, `error` for `refunded`, which cost twice the fee.
+
+### Contacts tracking
+
+Loading the user's contacts emits one structured **`contact`** event under `event_context: contacts`, following the domain-service pattern (the step in `event_modifier`, the outcome in `result_status`). It never carries a contact name, an address, a contact id, or PII.
+
+The contacts load when the user signs in or opens OISY already signed in: first the contacts without their images, in pages, then the images in batches of 16, so that every certified reply stays below 2 MiB. A load that fails is tried again after 2 seconds and, if that fails too, after another 4 seconds. Once the third attempt fails, the user sees a "Failed to load contacts" error toast. A contact whose image did not load shows without it, and editing that contact reads the image first, so the edit keeps it.
+
+| `event_modifier` | Fires when                 | `result_status` | `event_severity` | Extra                                             |
+| ---------------- | -------------------------- | --------------- | ---------------- | ------------------------------------------------- |
+| `load_all`       | the third attempt fails    | `error`         | `error`          | `result_error_type`: `call_rejected` or `unknown` |
+| `load_all`       | a retry loads the contacts | `success`       | `warn`           | —                                                 |
+| `load_images`    | an image batch fails       | `error`         | `warn`           | `result_error_type`: `call_rejected` or `unknown` |
+
+A load that succeeds on the first attempt sends nothing. A failure is tracked by its category only: `call_rejected` when the backend rejected the call, `unknown` for anything else. The error text stays out, since an agent error carries the call context.
 
 ---
 
@@ -353,7 +367,7 @@ ICP on the same EVM chains is intentionally **not** metadata-only: some users ma
 
 ### Asset types
 
-Every token belongs to one asset type, and the token list can be filtered by it: **All asset types**, then **Crypto**, **Stablecoins**, **Stocks**, **Commodities** and **Compute**, in that order. The types appear as pills above the token list, and as a dropdown in the modals' token lists (Send, Swap, Manage tokens and others). A token group is shown when any of its tokens matches, and the user can hide the filter altogether.
+Every token belongs to one asset type, and the token list can be filtered by it: **All asset types**, then **Crypto**, **Stablecoins**, **Stocks**, **Commodities** and **Compute**, in that order. The types appear as pills above the token list, and as a dropdown in the modals' token lists (Send, Swap, Manage tokens and others). A token group is shown when any of its tokens matches, and the user can hide the filter altogether. Send and Swap opened from the assets page start their token lists on the asset type selected there, as they do on its network; opened from any other page, where the filter is not shown, they start on All asset types.
 
 **Compute** holds the tokens that pay for computation on the Internet Computer. Today that is only **TCYCLES**, which used to sit under Stablecoins. OISY shows it as **ICP Cycles (Trillion)** rather than the ledger's own name, "Trillion Cycles", which does not say which network's cycles they are. At rest its pill looks like its neighbours. What sets it apart is a brand-blue arc that runs two laps around its border when the pill appears and again each time the pointer enters it, then goes away. Selected, it looks like every other selected pill, so which filter is on always reads the same. It runs a set number of laps and not a loop, so the pill does not keep moving above a list people open every day; with reduced motion turned on in the system, there is no arc at all.
 
@@ -732,6 +746,24 @@ The review fails closed when it cannot state the amount: when the contract does 
 
 The token is **not** added to the user's tokens. The review reads it for that request only.
 
+### Uniswap swaps requested by an Ethereum dApp
+
+An `eth_sendTransaction` request that calls `execute` on Uniswap's Universal Router is reviewed as a **swap** when OISY can read all of it. OISY knows the router by its address on each network: versions 2.0.0, 2.1.1 and 2.1.2 on Ethereum, Sepolia, Base, BNB Smart Chain, Polygon and Arbitrum, and 2.1.1 and 2.1.2 on Base Sepolia and Robinhood Chain. The same call to any other address, or to that address on another network, is reviewed like any call OISY cannot read.
+
+The review is titled "Swap" and states:
+
+- **You pay:** the token and amount the transaction takes from the wallet, "You pay at most" when the router takes from the wallet only what the swap uses: for an exact output, and for an exact input into a V3 or V4 pool, which takes less when its liquidity runs out. An amount the wallet hands over up front is exact, whatever the swap: the native coin the transaction sends, or a stated transfer or settlement.
+- **You receive at least:** the token and the least the router lets arrive. Tokens the router keeps at the end count as not received.
+- **Recipient:** only when the tokens go to an address that is not this wallet.
+- **App fee:** each share or amount the swap pays to another address, with that address. A share too small to show reads "< 0.0001%", never 0%.
+- **New spending allowance:** when the transaction also grants the router a Permit2 allowance, what it can spend and until when. The allowance lasts beyond the transaction.
+- **Valid until:** the earliest of the swap's deadline, the permit's signature deadline and, when the swap pulls the permit's token after it, the allowance's expiration, as Permit2 refuses the permit or that pull after them and the swap reverts; or "No deadline".
+- **Interacting with:** "Uniswap Universal Router" with its version and address.
+
+Three red notes can show above the summary, each leaving Approve enabled: when the tokens go to another address, when the swap guarantees no minimum amount, and when the deadline has passed by the device's clock.
+
+Every amount is one the router enforces, read from the router's own commands and checked to be exactly their encoding. OISY describes a swap only when it reads every command, the wallet pays exactly one token, exactly one other token arrives at one address, and every other payment is a fee. A swap through a command OISY does not read (a sub-plan, a batch permit, a bridge deposit, liquidity management), into or out of a token OISY doesn't list, into a token the user added, for an exact amount out of Uniswap V2 pairs paid to anyone but the router, or with an allowance for anyone but the router or one the transaction lets fail, is reviewed like any call OISY cannot read. A token the user added may keep part of each transfer, which the router's minimums leave out; the tokens OISY lists by default are taken to transfer in full wherever the router checks a minimum, apart from FLOKI on Ethereum, which keeps 0.3% of each transfer into or out of its V2 pair and so is described only when it goes to the wallet and no fee is paid in it. Nothing checks what such a V2 swap delivers: the router prices it from the pairs' reserves before the swap, and a token can keep part of each transfer into or out of a pair, as FLOKI does on Ethereum. Uniswap's newer router 2.2.0, its swap proxy and signed executions are not described yet. What is signed is the transaction exactly as the dApp sent it.
+
 ### Starting a pairing from the scanner
 
 A WalletConnect pairing is started from the universal scanner by scanning (or pasting) a pairing code. The scanner accepts two forms: a bare `wc:` URI, and an OISY WalletConnect deep-link URL that wraps it — `<OISY host>/wc/?uri=<url-encoded wc: uri>`. When a deep-link URL is scanned, OISY unwraps the inner `uri` and pairs with it. The URL form is only unwrapped when its host is **OISY's own domain** for the running environment (`oisy.com` in production); a `uri` param carried by any other host is never treated as a pairing. A well-formed WalletConnect deep-link URL whose host is a different domain shows a dedicated "this link is for a different domain" error rather than the generic invalid-code message, so the user understands the link was valid but pointed elsewhere.
@@ -870,6 +902,10 @@ What this deliberately does not do: TCYCLES → ICP (the CMC cannot), minting in
 The TCYCLES token page has a fifth hero button, **Top up**, after Mint, with a fuel pump icon. It puts cycles from the user's TCYCLES balance into any canister on the Internet Computer through the cycles ledger's `withdraw`, which burns the TCYCLES and deposits the same number of cycles into the canister in one call. Only the mainnet cycles ledger's token has it, and it is disabled whenever Send is, since it spends TCYCLES, except while the signed-in principal has a top-up without an answer, which it then opens to resend.
 
 It is on in every environment; `CYCLES_TOP_UP_ENABLED` (`src/frontend/src/env/cycles-top-up.env.ts`) is kept as a kill switch that hides it.
+
+**From Send.** Sending TCYCLES, picked from the token list or from the TCYCLES page, first asks whether to send them or to top up a canister. Send goes on with the send steps and Top up with the steps below, in the same modal. Back from the destination step or from the canister step returns to that choice, and Back from the choice returns to the token list; on the TCYCLES page, where Send has no token list, the choice offers Cancel instead. Switching to TCYCLES from another token's amount step starts at the choice too, even with an address that would let Send skip its destination step, and Send then asks for that address again, filled in. Picking Top up clears the address Send had, and a picked contact, as a top-up starts without its own canister ID, so Send after a top-up asks for a new address. Picking Top up also resumes a top-up without an answer on its Review, as the Top up button does. A send that started from a scanned address skips the choice: the address is where the user wants to send.
+
+The choice is on for local and staging builds only, behind `CYCLES_SEND_OR_TOP_UP_ENABLED` in the same file, until it has been tried on staging.
 
 **Canister.** The first step takes a canister ID and nothing else: a user principal, the anonymous principal, an account with a subaccount, an ICP account identifier, an address on another network or text that is not a principal gets a request for a canister ID, and the principal's checksum catches typos. Before going on, OISY reads the canister's public state, which needs no controller rights. Every canister lists its controllers there, with or without code, so a canister without code is accepted. An ID with no canister behind it is refused: the subnet that hosts the ID's range proves there is none, or the boundary node answers that no subnet hosts the ID. A check that could not be made can be retried, and the step does not go on without it. **Recently topped up** lists the canisters the loaded TCYCLES history shows top-ups to, newest first, each with its last top-up, and picking one fills in the ID and goes on, after the same check as Next. It is read from history alone, so nothing is stored.
 

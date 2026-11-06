@@ -940,6 +940,9 @@ interface I18nCycles_top_up {
 		unknown_fresh: string;
 		sent_to_canister: string;
 		sent_to_canister_top_up: string;
+		choice_send: string;
+		choice_send_description: string;
+		choice_top_up_description: string;
 	};
 	error: {
 		invalid_canister_id: string;
@@ -1087,6 +1090,11 @@ interface I18nSwap {
 		swap_provider: string;
 		smart_swap: string;
 		finding_best_rate: string;
+		smart_swap_gain: string;
+		smart_swap_best_of_offers: string;
+		smart_swap_offers_compared: string;
+		smart_swap_offers: string;
+		smart_swap_selected_offer: string;
 		swap_provider_website: string;
 		swap_route: string;
 		included_network_fees: string;
@@ -1094,7 +1102,6 @@ interface I18nSwap {
 		best_rate: string;
 		expected_minimum: string;
 		you_receive: string;
-		select: string;
 		select_swap_provider: string;
 		open_icp_swap: string;
 		open_instructions_link: string;
@@ -1550,6 +1557,22 @@ interface I18nWallet_connect {
 		cketh_deposit_principal: string;
 		cketh_deposit_refused: string;
 		cketh_helper_unconfirmed: string;
+		swap_title: string;
+		swap_pay: string;
+		swap_pay_at_most: string;
+		swap_receive_at_least: string;
+		swap_recipient: string;
+		swap_app_fee: string;
+		swap_app_fee_share: string;
+		swap_allowance: string;
+		swap_allowance_amount: string;
+		swap_allowance_unlimited: string;
+		swap_valid_until: string;
+		swap_no_deadline: string;
+		swap_router: string;
+		swap_recipient_not_wallet: string;
+		swap_no_minimum: string;
+		swap_expired: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;
@@ -2112,7 +2135,7 @@ interface I18nContact {
 	form: { edit_contact: string; add_new_contact: string };
 	fields: { name: string };
 	delete: { title: string; delete_contact: string; content_text: string };
-	error: { create: string; update: string; delete: string; name_too_long: string };
+	error: { create: string; update: string; delete: string; load: string; name_too_long: string };
 }
 
 interface I18nAddress {

@@ -4,7 +4,6 @@
 	import { readable } from 'svelte/store';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
-	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
 	import SwapTwoSwapsHint from '$lib/components/swap/SwapTwoSwapsHint.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
@@ -17,11 +16,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import {
-		SUPPORTED_CROSS_SWAP_NETWORKS,
-		SWAP_SLIPPAGE_INVALID_VALUE,
-		SWAP_SLIPPAGE_VELORA_INVALID_VALUE
-	} from '$lib/constants/swap.constants';
+	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -34,8 +29,8 @@
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatToken, formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNetworkIdICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { getSwapSlippageInvalidValue, getSwapSlippageStatus } from '$lib/utils/swap.utils';
 	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
@@ -46,6 +41,12 @@
 		swapDetails?: Snippet;
 		message?: Snippet;
 		errorType?: TokenActionErrorType;
+		/**
+		 * Holds Review for a problem the form reports itself, away from the pay field — an EVM
+		 * swap whose network coin cannot cover the gas. Unlike `errorType`, it leaves the pay field
+		 * undecorated: no amount typed there fixes it.
+		 */
+		disabled?: boolean;
 		/**
 		 * Set by a form that already accounts for the absence of an offer itself — because the
 		 * inputs a quote needs are still loading, or because it is showing the specific reason
@@ -72,11 +73,12 @@
 	let {
 		swapAmount = $bindable(),
 		receiveAmount = $bindable(),
-		slippageValue = $bindable(),
+		slippageValue,
 		isSwapAmountsLoading,
 		swapDetails,
 		message,
 		errorType = $bindable(),
+		disabled = false,
 		notOfferedExplained = false,
 		onCustomValidate,
 		fee,
@@ -167,15 +169,23 @@
 		return condition1 || condition2;
 	});
 
+	let maxSlippageInvalidValue = $derived(getSwapSlippageInvalidValue($sourceToken?.network.id));
+
+	// The slippage is edited from the modal header, so the form names the reason it blocks Review.
+	let slippageInvalid = $derived(
+		getSwapSlippageStatus({ slippageValue, maxSlippageInvalidValue }) === 'invalid'
+	);
+
 	let invalid = $derived(
-		nonNullish(errorType) ||
+		disabled ||
+			nonNullish(errorType) ||
 			isNullish(swapAmount) ||
 			Number(swapAmount) <= 0 ||
 			isNullish(receiveAmount) ||
 			isNullish(fee) ||
 			swapAmountsLoading ||
 			foregroundQuotePending ||
-			(nonNullish(slippageValue) && Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE)
+			slippageInvalid
 	);
 
 	let isCrossChainNetworks = $derived($sourceToken?.network.id !== $destinationToken?.network.id);
@@ -340,7 +350,10 @@
 			</TokenInputNetworkWrapper>
 		</div>
 
-		{@render message?.()}
+		<!-- mt-4 like the notices below; when empty, its margin collapses into the next row's. -->
+		<div class="mt-4">
+			{@render message?.()}
+		</div>
 
 		{#if nonNullish(twoSwapsQuoteError)}
 			{#key twoSwapsQuoteError.intermediateToken.id}
@@ -353,12 +366,13 @@
 			<SwapCrossChainInfo />
 		{/if}
 
-		<SwapSlippage
-			maxSlippageInvalidValue={isNetworkIdICP($sourceToken?.network.id)
-				? SWAP_SLIPPAGE_INVALID_VALUE
-				: SWAP_SLIPPAGE_VELORA_INVALID_VALUE}
-			bind:slippageValue
-		/>
+		{#if slippageInvalid}
+			<p class="mt-4 text-sm text-error-primary" transition:slide={SLIDE_DURATION}>
+				{replacePlaceholders($i18n.swap.text.max_slippage_error, {
+					$maxSlippage: maxSlippageInvalidValue.toString()
+				})}
+			</p>
+		{/if}
 
 		{@render swapDetails?.()}
 	</div>

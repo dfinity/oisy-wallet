@@ -1,5 +1,5 @@
 import { consoleError } from '$lib/utils/console.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 import DOMPurify, { type Config } from 'dompurify';
 
 let domPurify: typeof DOMPurify | undefined = undefined;
@@ -48,6 +48,16 @@ const UNTRUSTED_CONFIG: Config = {
 };
 
 /**
+ * DOMPurify's defaults, without `style` elements.
+ *
+ * A `style` element applies to the whole page rather than to the text it comes with, so it could
+ * restyle any view open next to that text. None of our texts uses one.
+ */
+const DEFAULT_CONFIG: Config = {
+	FORBID_TAGS: ['style']
+};
+
+/**
  * A workaround to preserve target="_blank" attribute from sanitizer.
  * Utilizes data-target flag (set by flagTargetAttributeHook).
  *
@@ -85,7 +95,7 @@ const flagTargetAttributeHook = (node: Element) => {
 	return node;
 };
 
-const sanitizeWithConfig = ({ text, config }: { text: string; config?: Config }): string => {
+const sanitizeWithConfig = ({ text, config }: { text: string; config: Config }): string => {
 	try {
 		// DOMPurify initialization
 		if (isNullish(domPurify)) {
@@ -96,7 +106,7 @@ const sanitizeWithConfig = ({ text, config }: { text: string; config?: Config })
 			domPurify.addHook('afterSanitizeAttributes', restoreTargetAttributeHook);
 		}
 
-		return nonNullish(config) ? domPurify.sanitize(text, config) : domPurify.sanitize(text);
+		return domPurify.sanitize(text, config);
 	} catch (err: unknown) {
 		consoleError('Failed to sanitize HTML content', err);
 	}
@@ -105,18 +115,34 @@ const sanitizeWithConfig = ({ text, config }: { text: string; config?: Config })
 };
 
 /**
- * Sanitize a text with DOMPurify.
+ * Sanitize a text with DOMPurify's defaults, without `style` elements (see `DEFAULT_CONFIG`).
  *
  * For a text we do not author ourselves - e.g. anything derived from data a third party supplies -
  * use `sanitizeUntrusted` instead.
  */
-export const sanitize = (text: string): string => sanitizeWithConfig({ text });
+export const sanitize = (text: string): string =>
+	sanitizeWithConfig({ text, config: DEFAULT_CONFIG });
 
 /**
  * Sanitize a text authored by a third party, keeping only the markup listed in `UNTRUSTED_CONFIG`.
  */
 export const sanitizeUntrusted = (text: string): string =>
 	sanitizeWithConfig({ text, config: UNTRUSTED_CONFIG });
+
+/**
+ * Escape a value so that it reads as plain text once placed into HTML.
+ *
+ * Use it for a value we do not author - e.g. a token symbol or an NFT collection name - before it is
+ * substituted into a translated text that `Html` renders. Sanitizing alone is not enough there: even
+ * `sanitizeUntrusted` keeps headings, paragraphs and links, which such a value must never add.
+ */
+export const escapeHtml = (text: string): string =>
+	text
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
 
 let elementsCounters: Record<string, number> = {};
 
