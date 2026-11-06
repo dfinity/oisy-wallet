@@ -1,4 +1,5 @@
 import { ARBITRUM_EXPLORER_URL, ARBITRUM_SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
+import arbitrumMainnetIconColored from '$eth/assets/arb.svg';
 import type { EthereumNetwork } from '$eth/types/network';
 import arbitrumMainnetIcon from '$lib/assets/networks/arbitrum-mainnet.svg';
 import arbitrumSepoliaIcon from '$lib/assets/networks/arbitrum-sepolia.svg';
@@ -24,6 +25,7 @@ export const ARBITRUM_MAINNET_NETWORK: EthereumNetwork = {
 	name: 'Arbitrum',
 	chainId: 42161n,
 	icon: arbitrumMainnetIcon,
+	iconColored: arbitrumMainnetIconColored,
 	explorerUrl: ARBITRUM_EXPLORER_URL,
 	supportsNft: true,
 	providers: {

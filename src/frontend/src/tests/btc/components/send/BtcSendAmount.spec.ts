@@ -149,4 +149,19 @@ describe('BtcSendAmount', () => {
 			expect(getByText(en.send.assertion.amount_invalid)).toBeInTheDocument();
 		});
 	});
+
+	it('names the network the token is sent on', () => {
+		const { getByText } = render(BtcSendAmount, {
+			props,
+			context: createMockContext()
+		});
+
+		expect(
+			getByText(
+				replacePlaceholders(en.tokens.text.on_network_label, {
+					$network: BTC_MAINNET_TOKEN.network.name
+				})
+			)
+		).toBeInTheDocument();
+	});
 });

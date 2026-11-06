@@ -9,7 +9,12 @@ import {
 } from '$sol/constants/wallet-connect.constants';
 import { decode, sign } from '$sol/services/wallet-connect.services';
 import en from '$tests/mocks/i18n.mock';
-import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import {
+	mockAtaAddress,
+	mockSolAddress,
+	mockSolAddress2,
+	mockSplAddress
+} from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { lamports } from '@solana/kit';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -348,15 +353,35 @@ describe('SolWalletConnectSignModal', () => {
 		});
 	});
 
-	// Signing refuses an unchecked approval no run came back for, so the review holds the button.
-	it('should hold approval on an unchecked approval with no simulation', async () => {
+	// Signing refuses an approval no run came back for, so the review holds the button. A checked
+	// one too: the amount its line among the operations states is a tab away from the summary.
+	it.each([
+		{ form: 'an unchecked', decoded: {} },
+		{
+			form: 'a checked',
+			decoded: {
+				tokenAddress: mockSplAddress,
+				instructions: [
+					{
+						kind: 'approve' as const,
+						account: mockAtaAddress,
+						amount: 1n,
+						decimals: 6,
+						tokenAddress: mockSplAddress,
+						counterparty: mockSolAddress2
+					}
+				],
+				simulatedInstructions: false
+			}
+		}
+	])('should hold approval on $form approval with no simulation', async ({ decoded }) => {
 		vi.mocked(decode).mockResolvedValueOnce({
 			amount: 1n,
 			requiredSignatures: 1,
 			destination: mockSolAddress2,
 			isApproval: true,
-			uncheckedApproval: true,
-			parties: { sources: [], destinations: [], partial: true }
+			parties: { sources: [], destinations: [], partial: true },
+			...decoded
 		});
 
 		const { getByRole, getByText } = render(SolWalletConnectSignModal, {
@@ -370,13 +395,12 @@ describe('SolWalletConnectSignModal', () => {
 		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
 	});
 
-	it('should let an unchecked approval through when a simulation came back', async () => {
+	it('should let an approval through when a simulation came back', async () => {
 		const args = await approve({
 			amount: 1n,
 			requiredSignatures: 1,
 			destination: mockSolAddress2,
 			isApproval: true,
-			uncheckedApproval: true,
 			instructions: [
 				{ kind: 'approve', account: mockAtaAddress, amount: 1n, counterparty: mockSolAddress2 }
 			],

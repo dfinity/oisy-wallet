@@ -93,27 +93,18 @@ describe('send.config', () => {
 		}
 	];
 
-	const expectedFilterNetworksConfig: WizardSteps<WizardStepsSend> = [
-		{
-			name: WizardStepsSend.FILTER_NETWORKS,
-			title: en.send.text.select_network_filter
-		}
-	];
-
 	const expectedAllSendConfig: WizardSteps<WizardStepsSend> = [
 		{
 			name: WizardStepsSend.TOKENS_LIST,
 			title: en.send.text.select_token
-		},
-		...expectedFilterNetworksConfig
+		}
 	];
 
 	const expectedNftAllSendConfig: WizardSteps<WizardStepsSend> = [
 		{
 			name: WizardStepsSend.NFTS_LIST,
 			title: en.send.text.select_nft
-		},
-		...expectedFilterNetworksConfig
+		}
 	];
 
 	const mockParams = {

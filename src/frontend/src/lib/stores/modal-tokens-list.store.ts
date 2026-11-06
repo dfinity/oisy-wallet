@@ -8,10 +8,8 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
-import {
-	filterTokensForSelectedNetwork,
-	filterTokensForSelectedNetworks
-} from '$lib/utils/network.utils';
+import { derivedMemo } from '$lib/utils/derived-memo.utils';
+import { filterTokensForSelectedNetworks } from '$lib/utils/network.utils';
 import { mapTokenUi } from '$lib/utils/token.utils';
 import { filterTokens, filterTokensByNft, sortTokens } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -34,20 +32,26 @@ export const initModalTokensListContext = (
 	const data = writable<ModalTokensListData>(modalTokensListData);
 	const { update } = data;
 
-	const tokens = derived([data], ([{ tokens }]) => tokens);
+	// By reference: a plain `derived` passes an array on at every change of `data`, a keystroke in the
+	// search included, and `eligibleTokens` would map every token again.
+	const tokens = derivedMemo([data], ([{ tokens }]) => tokens, Object.is);
 	const filterQuery = derived([data], ([{ filterQuery }]) => filterQuery);
 	const filterNetwork = derived([data], ([{ filterNetwork }]) => filterNetwork);
 	const filterZeroBalance = derived([data], ([{ filterZeroBalance }]) => filterZeroBalance);
 	const sortByBalance = derived([data], ([{ sortByBalance }]) => sortByBalance ?? true);
-	const filterNetworksIds = derived([data], ([{ filterNetworksIds }]) => filterNetworksIds);
+	const filterNetworksIds = derivedMemo(
+		[data],
+		([{ filterNetworksIds }]) => filterNetworksIds,
+		Object.is
+	);
 	const filterNfts = derived([data], ([{ filterNfts }]) => filterNfts);
 	const filterCategoryTag = derived([data], ([{ filterCategoryTag }]) => filterCategoryTag);
 
-	const filteredTokens = derived(
+	// The tokens the picker can offer at all: the fixed constraints (networks, NFTs, a balance), before
+	// the search and the filters the person picks.
+	const eligibleTokens = derived(
 		[
 			tokens,
-			filterQuery,
-			filterNetwork,
 			filterZeroBalance,
 			sortByBalance,
 			exchanges,
@@ -60,8 +64,6 @@ export const initModalTokensListContext = (
 		],
 		([
 			$tokens,
-			$filterQuery,
-			$filterNetwork,
 			$filterZeroBalance,
 			$sortByBalance,
 			$exchanges,
@@ -72,25 +74,17 @@ export const initModalTokensListContext = (
 			$filterNetworksIds,
 			$filterNfts
 		]) => {
-			const filteredByQuery = filterTokens({ tokens: $tokens, filter: $filterQuery ?? '' });
-
 			const filteredByNetworkIds =
 				nonNullish($filterNetworksIds) && $filterNetworksIds.length > 0
 					? filterTokensForSelectedNetworks([
-							filteredByQuery,
+							$tokens,
 							$filterNetworksIds,
 							isNullish($filterNetworksIds)
 						])
-					: filteredByQuery;
-
-			const filteredByNetwork = filterTokensForSelectedNetwork([
-				filteredByNetworkIds,
-				$filterNetwork,
-				isNullish($filterNetwork)
-			]);
+					: $tokens;
 
 			const filteredByNft = filterTokensByNft({
-				tokens: filteredByNetwork,
+				tokens: filteredByNetworkIds,
 				filterNfts: $filterNfts
 			});
 
@@ -119,7 +113,16 @@ export const initModalTokensListContext = (
 		}
 	);
 
+	// The list the picker offers for the current search: the network and asset type the person picks
+	// narrow it in `ModalTokensList`, which knows which of them the list can show.
+	const filteredTokens = derived(
+		[eligibleTokens, filterQuery],
+		([$eligibleTokens, $filterQuery]): TokenUi[] =>
+			filterTokens({ tokens: $eligibleTokens, filter: $filterQuery ?? '' })
+	);
+
 	return {
+		eligibleTokens,
 		filterQuery,
 		filterNetwork,
 		filterCategoryTag,
@@ -165,6 +168,7 @@ export const initModalTokensListContext = (
 };
 
 export interface ModalTokensListContext {
+	eligibleTokens: Readable<TokenUi[]>;
 	filterQuery: Readable<string | undefined>;
 	filterNetwork: Readable<Network | undefined>;
 	filterCategoryTag: Readable<TokenCategoryTagValue | undefined>;
