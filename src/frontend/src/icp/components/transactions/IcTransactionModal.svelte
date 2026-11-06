@@ -4,7 +4,7 @@
 	import { isIcrcTokenSupportIcrc3 } from '$icp/services/icrc.services';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
-	import { icrcTxExplorerUrl } from '$icp/utils/icrc-transactions.utils';
+	import { icrcAccountExplorerUrl, icrcTxExplorerUrl } from '$icp/utils/icrc-transactions.utils';
 	import { isTokenIcrc } from '$icp/utils/icrc.utils';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -44,9 +44,22 @@
 		fee,
 		incoming,
 		approveSpender,
+		approveSpenderExplorerUrl,
 		approveExpiresAt,
 		typeLabel
 	} = $derived(transaction);
+
+	// ICP's mapper links the spender's account identifier. An ICRC spender is an ICRC-1 account,
+	// which only the ledger's own account page on the dashboard can show.
+	let spenderExplorerUrl = $derived(
+		approveSpenderExplorerUrl ??
+			(nonNullish(approveSpender) && nonNullish(token) && isTokenIcrc(token)
+				? icrcAccountExplorerUrl({
+						ledgerCanisterId: token.ledgerCanisterId,
+						account: approveSpender
+					})
+				: undefined)
+	);
 
 	// Only the mappers of ICP and the ck tokens link the ID. Any other ICRC ledger gets the
 	// dashboard link once it confirms it serves ICRC-3 blocks: without them the page is empty.
@@ -138,6 +151,7 @@
 		{#if (nonNullish(to) && nonNullish(from)) || (type === 'approve' && nonNullish(from))}
 			<TransactionContactCard
 				{approveSpender}
+				approveSpenderExplorerUrl={spenderExplorerUrl}
 				{from}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
