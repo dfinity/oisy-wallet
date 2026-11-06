@@ -5195,6 +5195,96 @@ describe('sol-instruction-summary.utils', () => {
 		});
 
 		it.each([
+			{
+				label: 'a transfer',
+				onward: transfer({
+					source: elsewhere,
+					destination: mockSolAddress4,
+					amount: '1000',
+					authority: mockSolAddress3,
+					stackHeight: 3
+				})
+			},
+			{
+				label: 'an unwrap',
+				onward: unwrap({
+					source: elsewhere,
+					destination: mockSolAddress4,
+					amount: '1000',
+					authority: mockSolAddress3,
+					stackHeight: 3
+				})
+			}
+		])(
+			'should not name a pool whose lamports a wrapped SOL account syncs and sends on by $label',
+			({ onward }) => {
+				expect(
+					paying({
+						instructions: [calling({ program: OKX })],
+						inner: [
+							call({ program: WHIRLPOOL, stackHeight: 2 }),
+							send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+							call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+							token({ type: 'syncNative', info: { account: elsewhere }, stackHeight: 3 }),
+							onward
+						],
+						mints: { [elsewhere]: WSOL_TOKEN.address }
+					})
+				).toEqual([]);
+			}
+		);
+
+		it('should not name a pool whose lamports an account opened for wrapped SOL takes in and sends on', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						token({
+							type: 'initializeAccount3',
+							info: { account: elsewhere, mint: WSOL_TOKEN.address, owner: mockSolAddress3 },
+							stackHeight: 3
+						}),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([]);
+		});
+
+		it('should name a pool whose lamports an account opened for another mint takes in, when its tokens leave', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						token({
+							type: 'initializeAccount3',
+							info: { account: elsewhere, mint: mockSplAddress, owner: mockSolAddress3 },
+							stackHeight: 3
+						}),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it.each([
 			{ label: 'a stated amount', amount: '1000' },
 			{ label: 'no amount, everything the vault wraps', amount: undefined }
 		])(

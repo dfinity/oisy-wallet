@@ -2526,6 +2526,49 @@ const passOn = ({
 				{ rest: emptying ? undefined : value, waiting: [] }
 			).waiting;
 
+// The account an instruction wraps the lamports of: one a sync counts in, which the token programs
+// refuse for any account but a wrapped SOL one, or one opened for a native mint, which counts all
+// it holds above its rent as wrapped SOL from the start.
+const wrapsAt = ({
+	program,
+	parsed: { type, info }
+}: SolParsedRpcInstruction): SolAddress | undefined => {
+	if (isNullish(program) || !TOKEN_PROGRAMS.includes(program)) {
+		return undefined;
+	}
+
+	const account = address({ info, key: 'account' });
+
+	if (type === 'syncNative') {
+		return account;
+	}
+
+	return ['initializeAccount', 'initializeAccount2', 'initializeAccount3'].includes(type) &&
+		isNativeMint(address({ info, key: 'mint' }))
+		? account
+		: undefined;
+};
+
+// Wrapping turns the lamport payouts still waiting on an account into token payouts of the same
+// amount, which its wrapped SOL now carries. Payouts a close has ended stay as they are.
+const wrapIn = ({
+	waiting,
+	account,
+	parentIndex
+}: {
+	waiting: WaitingPayout[];
+	account: SolAddress;
+	parentIndex: number;
+}): WaitingPayout[] =>
+	waiting.map((payout) =>
+		payout.account === account &&
+		payout.parentIndex === parentIndex &&
+		payout.asset === 'lamports' &&
+		!(payout.closed ?? false)
+			? { ...payout, asset: 'tokens' }
+			: payout
+	);
+
 // A close empties its account into its destination, which passes on every payout still waiting
 // there that the close moves: all of them out of a wrapped SOL account, and the lamports out of any
 // other, whose tokens had to leave before it could close. What it leaves can no longer be passed
@@ -2596,6 +2639,12 @@ export const findSolProgramsPayingOthers = ({
 		waiting: WaitingPayout[];
 	}>(
 		(acc, { parentIndex, topLevel, instruction, madeBy, madeWith = [] }, position) => {
+			const wrapped = wrapsAt(instruction);
+
+			if (nonNullish(wrapped)) {
+				return { ...acc, waiting: wrapIn({ waiting: acc.waiting, account: wrapped, parentIndex }) };
+			}
+
 			const payment = paymentOf(instruction);
 
 			if (isNullish(payment)) {
