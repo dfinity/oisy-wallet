@@ -8,6 +8,10 @@ export type IcTransferParams = Pick<TransferParams, 'amount' | 'to'> & {
 	identity: NullishIdentity;
 	progress?: (step: ProgressStepsSendIc) => void;
 	ckErc20ToErc20MaxCkEthFees?: bigint;
+	// The ledger's `created_at_time` for an ICRC or ICP transfer. Sending the same transfer again
+	// with the same value is answered with the block the first one landed in, if it did, instead of
+	// a second transfer.
+	createdAt?: bigint;
 };
 
 export type IcSendParams = PartialSpecific<IcTransferParams, 'progress'> &
