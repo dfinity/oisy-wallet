@@ -5604,6 +5604,7 @@ describe('sol-instruction-summary.utils', () => {
 			).toEqual([WHIRLPOOL]);
 		});
 
+		// Whatever took the tokens out before the close, the check did not read it.
 		it('should not let an account opened again at a closed address pass on a payout made before the close', () => {
 			expect(
 				paying({
@@ -5611,16 +5612,6 @@ describe('sol-instruction-summary.utils', () => {
 					inner: [
 						call({ program: WHIRLPOOL, stackHeight: 2 }),
 						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
-						token({
-							type: 'burn',
-							info: {
-								account: elsewhere,
-								mint: mockSplAddress,
-								authority: mockSolAddress3,
-								amount: '1000'
-							},
-							stackHeight: 2
-						}),
 						token({
 							type: 'closeAccount',
 							info: { account: elsewhere, destination: mockSolAddress4, owner: mockSolAddress3 },
@@ -5636,6 +5627,86 @@ describe('sol-instruction-summary.utils', () => {
 							source: elsewhere,
 							destination: mockSolAddress4,
 							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					],
+					mints: { [elsewhere]: mockSplAddress }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should name a pool whose payout is burned in full, though the account is refilled and sends as much on', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						token({
+							type: 'burn',
+							info: {
+								account: elsewhere,
+								mint: mockSplAddress,
+								authority: mockSolAddress3,
+								amount: '1000'
+							},
+							stackHeight: 3
+						}),
+						transfer({
+							source: mockSolAddress4,
+							destination: elsewhere,
+							amount: '1000',
+							authority: mockSolAddress4,
+							stackHeight: 3
+						}),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					],
+					mints: { [elsewhere]: mockSplAddress }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// The burn takes the oldest payout's units first; what is left of it and the other payout
+		// pass on.
+		it('should name only the pool whose payout a part burn takes, though the account is refilled', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: WHIRLPOOL, withWallet: false, stackHeight: 2 }),
+						token({
+							type: 'burnChecked',
+							info: {
+								account: elsewhere,
+								mint: mockSplAddress,
+								authority: mockSolAddress3,
+								tokenAmount: { amount: '500', decimals: 6 }
+							},
+							stackHeight: 3
+						}),
+						transfer({
+							source: mockSolAddress4,
+							destination: elsewhere,
+							amount: '500',
+							authority: mockSolAddress4,
+							stackHeight: 3
+						}),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '2000',
 							authority: mockSolAddress3,
 							stackHeight: 3
 						})

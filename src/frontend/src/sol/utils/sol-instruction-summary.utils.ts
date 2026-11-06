@@ -2386,7 +2386,8 @@ type PaymentAsset = 'lamports' | 'tokens';
 // unwrap takes token units out of a wrapped SOL account and pays them into its destination as
 // lamports, and one that states no amount empties the account. A withdrawal of excess lamports pays
 // everything its account holds above its rent. A close pays every lamport its account holds into
-// its destination, and with them what a wrapped SOL account wraps.
+// its destination, and with them what a wrapped SOL account wraps. A burn takes token units out of
+// its account into nowhere.
 const paymentOf = ({
 	program,
 	parsed: { type, info }
@@ -2399,6 +2400,7 @@ const paymentOf = ({
 			credited?: bigint;
 			emptying?: boolean;
 			closing?: boolean;
+			burning?: boolean;
 			sent: PaymentAsset;
 			received: PaymentAsset;
 	  }
@@ -2461,6 +2463,21 @@ const paymentOf = ({
 		};
 	}
 
+	if (
+		nonNullish(program) &&
+		TOKEN_PROGRAMS.includes(program) &&
+		['burn', 'burnChecked'].includes(type)
+	) {
+		return {
+			source: address({ info, key: 'account' }),
+			authority: address({ info, key: 'authority' }) ?? address({ info, key: 'multisigAuthority' }),
+			value: tokenAmount({ info }).amount ?? amount({ info, key: 'amount' }),
+			burning: true,
+			sent: 'tokens',
+			received: 'tokens'
+		};
+	}
+
 	if (nonNullish(program) && TOKEN_PROGRAMS.includes(program) && type === 'closeAccount') {
 		return {
 			source: address({ info, key: 'account' }),
@@ -2480,7 +2497,8 @@ interface WaitingPayout {
 	parentIndex: number;
 	position: number;
 	left: bigint;
-	closed?: boolean;
+	// What a close or a burn left of a payout, which nothing can pass on any more.
+	ended?: boolean;
 }
 
 // A transfer out of an account passes its amount on to the payouts into that account within the same
@@ -2510,7 +2528,7 @@ const passOn = ({
 						payout.account !== account ||
 						payout.asset !== asset ||
 						payout.parentIndex !== parentIndex ||
-						(payout.closed ?? false)
+						(payout.ended ?? false)
 					) {
 						return { rest, waiting: [...acc, payout] };
 					}
@@ -2564,7 +2582,7 @@ const wrapIn = ({
 		payout.account === account &&
 		payout.parentIndex === parentIndex &&
 		payout.asset === 'lamports' &&
-		!(payout.closed ?? false)
+		!(payout.ended ?? false)
 			? { ...payout, asset: 'tokens' }
 			: payout
 	);
@@ -2589,7 +2607,7 @@ const unwrapIn = ({
 				payout.account !== account ||
 				payout.asset !== 'tokens' ||
 				payout.parentIndex !== parentIndex ||
-				(payout.closed ?? false) ||
+				(payout.ended ?? false) ||
 				rest === ZERO
 			) {
 				return { rest, waiting: [...acc, payout] };
@@ -2610,6 +2628,47 @@ const unwrapIn = ({
 		{ rest: value, waiting: [] }
 	).waiting;
 
+// A burn takes the token units it states out of its account for good: the token payouts still
+// waiting there lose that much, oldest first, and the part burned is ended, while the rest keeps
+// waiting. One that states no amount ends all of them.
+const burnOut = ({
+	waiting,
+	account,
+	parentIndex,
+	value
+}: {
+	waiting: WaitingPayout[];
+	account: SolAddress | undefined;
+	parentIndex: number;
+	value: bigint | undefined;
+}): WaitingPayout[] =>
+	waiting.reduce<{ rest: bigint | undefined; waiting: WaitingPayout[] }>(
+		({ rest, waiting: acc }, payout) => {
+			if (
+				payout.account !== account ||
+				payout.asset !== 'tokens' ||
+				payout.parentIndex !== parentIndex ||
+				(payout.ended ?? false) ||
+				payout.left === ZERO ||
+				rest === ZERO
+			) {
+				return { rest, waiting: [...acc, payout] };
+			}
+
+			const burned = isNullish(rest) || payout.left < rest ? payout.left : rest;
+
+			return {
+				rest: nonNullish(rest) ? rest - burned : rest,
+				waiting: [
+					...acc,
+					{ ...payout, left: burned, ended: true },
+					...(payout.left > burned ? [{ ...payout, left: payout.left - burned }] : [])
+				]
+			};
+		},
+		{ rest: value, waiting: [] }
+	).waiting;
+
 // A close empties its account into its destination, which passes on every payout still waiting
 // there that the close moves: all of them out of a wrapped SOL account, and the lamports out of any
 // other, whose tokens had to leave before it could close. What it leaves can no longer be passed
@@ -2626,11 +2685,11 @@ const closeOut = ({
 	wrapped: boolean;
 }): WaitingPayout[] =>
 	waiting.map((payout) =>
-		payout.account !== account || payout.parentIndex !== parentIndex || (payout.closed ?? false)
+		payout.account !== account || payout.parentIndex !== parentIndex || (payout.ended ?? false)
 			? payout
 			: wrapped || payout.asset === 'lamports'
 				? { ...payout, left: ZERO }
-				: { ...payout, closed: true }
+				: { ...payout, ended: true }
 	);
 
 /**
@@ -2700,9 +2759,18 @@ export const findSolProgramsPayingOthers = ({
 				credited = value,
 				emptying,
 				closing = false,
+				burning = false,
 				sent,
 				received
 			} = payment;
+
+			// A burn pays nobody: what it takes of a payout is gone, and no transfer out passes it on.
+			if (burning) {
+				return {
+					...acc,
+					waiting: burnOut({ waiting: acc.waiting, account: source, parentIndex, value })
+				};
+			}
 
 			// A transfer from an account to itself moves nothing, though an unwrap into its own account
 			// turns what it unwraps into lamports that stay there.
