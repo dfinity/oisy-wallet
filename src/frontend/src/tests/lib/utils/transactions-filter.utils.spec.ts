@@ -183,7 +183,7 @@ describe('applyTransactionsFilter', () => {
 					value: 100n,
 					timestamp: ZERO
 				}
-			} as unknown as AllTransactionUiWithCmp;
+			} satisfies AllTransactionUiWithCmp;
 
 			const tcyclesTopUpTx = {
 				component: 'ic',
@@ -198,7 +198,7 @@ describe('applyTransactionsFilter', () => {
 					value: 100n,
 					timestamp: ZERO
 				}
-			} as unknown as AllTransactionUiWithCmp;
+			} satisfies AllTransactionUiWithCmp;
 
 			const transactions = [...allTxs, icpTopUpTx, tcyclesTopUpTx];
 
