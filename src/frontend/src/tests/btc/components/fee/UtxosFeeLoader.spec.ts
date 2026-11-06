@@ -8,13 +8,17 @@ import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store'
 import { initUtxosFeeStore, type UtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
+import type { OptionString } from '$lib/types/string';
+import UtxosFeeLoaderTest from '$tests/btc/components/fee/UtxosFeeLoaderTest.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
+import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
+import { writable } from 'svelte/store';
 
 describe('UtxosFeeLoader', () => {
 	const amount = 10;
@@ -281,6 +285,94 @@ describe('UtxosFeeLoader', () => {
 		await waitFor(() => {
 			expect(resetSpy).toHaveBeenCalledOnce();
 			expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('recipient', () => {
+		const destination = 'bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0';
+
+		it('should price the fee for the recipient', async () => {
+			const setUtxosFeeSpy = vi.spyOn(utxosFeeStore, 'setUtxosFee');
+			const prepareBtcSendSpy = mockPrepareBtcSend();
+
+			mockAuthStore();
+			setupStoresWithData();
+
+			render(UtxosFeeLoader, {
+				props: { ...props, destination },
+				context: mockContext({ utxosFeeStore })
+			});
+
+			await waitFor(() => {
+				expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith({
+					amount,
+					source,
+					destination,
+					allUtxos: mockAllUtxos,
+					feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles
+				});
+				expect(setUtxosFeeSpy).toHaveBeenCalledExactlyOnceWith({
+					utxosFee: mockBtcReviewResult,
+					amountForFee: amount,
+					destinationForFee: destination
+				});
+			});
+		});
+
+		// Changes only the recipient of a mounted loader. A new mount would price on mount even if the
+		// effect did not track the recipient, and so would `rerender`, which replaces every prop.
+		it('should price the fee again for the same amount when the recipient changes', async () => {
+			const prepareBtcSendSpy = mockPrepareBtcSend();
+
+			mockAuthStore();
+			setupStoresWithData();
+
+			const destinationStore = writable<OptionString>(mockBtcAddress);
+
+			render(UtxosFeeLoaderTest, {
+				props: { source, amount, networkId, destination: destinationStore },
+				context: mockContext({ utxosFeeStore })
+			});
+
+			await waitFor(() => {
+				expect(prepareBtcSendSpy).toHaveBeenCalledWith(
+					expect.objectContaining({ amount, destination: mockBtcAddress })
+				);
+			});
+
+			// Let the mount settle, so the only call left to come is the recipient change's.
+			await runResolvedPromises();
+			prepareBtcSendSpy.mockClear();
+
+			destinationStore.set(destination);
+
+			await waitFor(() => {
+				expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ amount, destination })
+				);
+			});
+		});
+
+		it('should not price the fee again for the same amount and recipient', async () => {
+			const prepareBtcSendSpy = mockPrepareBtcSend();
+
+			mockAuthStore();
+			setupStoresWithData();
+
+			utxosFeeStore.setUtxosFee({
+				utxosFee: mockBtcReviewResult,
+				amountForFee: amount,
+				destinationForFee: destination
+			});
+
+			render(UtxosFeeLoader, {
+				props: { ...props, destination },
+				context: mockContext({ utxosFeeStore })
+			});
+
+			await waitFor(() => {
+				expect(prepareBtcSendSpy).not.toHaveBeenCalled();
+			});
 		});
 	});
 

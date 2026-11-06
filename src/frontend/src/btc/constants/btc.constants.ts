@@ -30,6 +30,11 @@ export const BTC_MINIMUM_AMOUNT = 700n;
 // built here has the layout CFS builds from the same inputs, outputs and fee.
 export const BTC_CHANGE_DUST_THRESHOLD_SATOSHIS = 1_000n;
 
+// The largest output a send can pay, P2WSH or P2TR, in vbytes: 8 (value) + 1 (script length) +
+// 34 (script). A fee priced with it covers any recipient, so it stands in until the recipient is
+// known.
+export const BTC_LARGEST_OUTPUT_VSIZE = 43;
+
 // How many inputs of one transaction are signed at the same time. Each is a `btc_sign_prehash`
 // call, so one `sign_with_ecdsa` request. The subnet queues only 20 requests per key beyond the
 // pre-signatures it has ready, shared by every caller of the key, and refuses the rest. The chain

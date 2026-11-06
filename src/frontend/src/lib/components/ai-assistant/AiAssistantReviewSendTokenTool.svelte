@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import UtxosFeeContexts from '$btc/components/fee/UtxosFeeContexts.svelte';
 	import UtxosFeeLoader from '$btc/components/fee/UtxosFeeLoader.svelte';
@@ -17,6 +17,11 @@
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
+	import {
+		btcAddressMainnet,
+		btcAddressRegtest,
+		btcAddressTestnet
+	} from '$lib/derived/address.derived';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -24,6 +29,8 @@
 	import {
 		isNetworkEthereum,
 		isNetworkIdBitcoin,
+		isNetworkIdBTCRegtest,
+		isNetworkIdBTCTestnet,
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
 		isNetworkIdICP,
@@ -41,6 +48,17 @@
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let destination = $derived(contactAddress?.address ?? address ?? '');
+
+	// One source for both the fee loader and the send: the loader selects the UTXOs that
+	// `AiAssistantReviewSendBtcToken` then validates and spends. Read the address stores
+	// reactively, so an address that loads after the review renders still reaches both.
+	let btcSource = $derived(
+		(isNetworkIdBTCTestnet($sendTokenNetworkId)
+			? $btcAddressTestnet
+			: isNetworkIdBTCRegtest($sendTokenNetworkId)
+				? $btcAddressRegtest
+				: $btcAddressMainnet) ?? ''
+	);
 
 	let fallbackEvmToken = $derived(
 		$enabledEvmTokens.find(({ network: { id: networkId } }) => $sendToken.network.id === networkId)
@@ -94,15 +112,25 @@
 			/>
 		{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
 			<UtxosFeeContexts>
-				<UtxosFeeLoader {amount} networkId={$sendTokenNetworkId} source={destination}>
-					<AiAssistantReviewSendBtcToken
+				<!-- The loaders only guard against a nullish source: an empty one, before the
+				     address has loaded, would query the bitcoin canister for no address. So the
+				     loader mounts beside the review, once the address is there. -->
+				{#if notEmptyString(btcSource)}
+					<UtxosFeeLoader
 						{amount}
 						{destination}
-						{onSendCompleted}
-						{sendCompleted}
-						{sendEnabled}
+						networkId={$sendTokenNetworkId}
+						source={btcSource}
 					/>
-				</UtxosFeeLoader>
+				{/if}
+				<AiAssistantReviewSendBtcToken
+					{amount}
+					{destination}
+					{onSendCompleted}
+					{sendCompleted}
+					{sendEnabled}
+					source={btcSource}
+				/>
 			</UtxosFeeContexts>
 		{:else if isNetworkIdSolana($sendToken.network.id)}
 			<AiAssistantReviewSendSolToken

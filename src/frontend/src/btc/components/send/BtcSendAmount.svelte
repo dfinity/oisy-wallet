@@ -14,6 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { OptionString } from '$lib/types/string';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
@@ -22,10 +23,18 @@
 		amount: OptionAmount;
 		amountError?: BtcAmountAssertionError;
 		source: string;
+		// Sizes the recipient's output in the fee Max leaves room for.
+		destination?: OptionString;
 		onTokensList: () => void;
 	}
 
-	let { amount = $bindable(), amountError = $bindable(), source, onTokensList }: Props = $props();
+	let {
+		amount = $bindable(),
+		amountError = $bindable(),
+		source,
+		destination,
+		onTokensList
+	}: Props = $props();
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 
@@ -41,7 +50,7 @@
 
 	// TODO: Enable Max button by passing the `calculateMax` prop - https://dfinity.atlassian.net/browse/GIX-3114
 
-	let maxSendAmountStore = $derived(initBtcMaxSendAmount(source));
+	let maxSendAmountStore = $derived(initBtcMaxSendAmount({ source, destination }));
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		// calculate-UTXOs-fee endpoint only accepts "userAmount > 0"
@@ -71,6 +80,7 @@
 		exchangeRate={$sendTokenExchangeRate}
 		onClick={onTokensList}
 		onCustomErrorValidate={customValidate}
+		showTokenNetwork
 		token={$sendToken}
 		bind:amount
 		bind:amountSetToMax
