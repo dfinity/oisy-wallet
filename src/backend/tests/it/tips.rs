@@ -956,3 +956,85 @@ fn a_tip_survives_an_upgrade_and_still_pays_exactly_once() {
         "and the allowance that paid for it is spent, so nothing can draw on it again"
     );
 }
+
+/// The payout deadline, end to end.
+///
+/// Nothing here is a slow ledger: this ledger answers as soon as it is asked.
+/// What produces the deadline is the round the exchange falls into.
+/// `submit_call` holds the claim between rounds, so time can move past the
+/// call's deadline while the transfer is in flight, and the system then answers
+/// the backend with `SysUnknown` — the one outcome that says nothing about
+/// whether the payout happened.
+///
+/// It happened. That is the case the hold exists for: the ledger executed the
+/// transfer and only the reply missed the deadline, so a record released as
+/// failed here would contradict the ledger, and a tip cancelled on the strength
+/// of it would be cancelled after it had paid.
+#[test]
+fn a_payout_past_its_deadline_holds_the_claim_and_pays_exactly_once() {
+    let env = setup_tips();
+    let tip_id = "tip-deadline";
+    let claim_code = "deadline-code";
+    let claimer = Principal::self_authenticating("deadline-claimer");
+
+    env.reserve(tip_id, claim_code, TIP_AMOUNT);
+
+    let request = encode_one(TipClaimRequest {
+        tip_id: tip_id.to_string(),
+        claim_code: claim_code.to_string(),
+    })
+    .expect("the claim request encodes");
+    let claim = env
+        .pic_setup
+        .pic
+        .submit_call(env.pic_setup.canister_id(), claimer, "claim_tip", request)
+        .expect("claim_tip should be accepted");
+
+    // One round runs `claim_tip` up to its await, which leaves the transfer in
+    // flight; 31 s is one second past the payout's deadline.
+    env.pic_setup.pic.tick();
+    env.pic_setup.pic.advance_time(Duration::from_secs(31));
+
+    let reply = env
+        .pic_setup
+        .pic
+        .await_call(claim)
+        .expect("claim_tip should return rather than trap");
+    let result: Result<TipClaim, TipError> =
+        candid::decode_one(&reply).expect("the claim result decodes");
+
+    assert!(
+        matches!(result, Err(TipError::TransferFailed { .. })),
+        "the claimer is told the payout did not definitely land: {result:?}"
+    );
+    assert_eq!(
+        env.balance(claimer),
+        Nat::from(TIP_AMOUNT),
+        "while on the ledger it did land, which is why the outcome is unknown rather than failed"
+    );
+    assert_eq!(
+        env.tip_allowance(tip_id),
+        Nat::from(0u64),
+        "and the allowance that paid for it is spent"
+    );
+    assert!(
+        env.cancel(env.sender, tip_id).is_err(),
+        "so the tip stays held and cancelling it is refused, rather than storing a tip that paid as cancelled"
+    );
+
+    // Past the in-flight window the tip is open to a fresh claim, and the spent
+    // allowance is what keeps that claim from paying a second time.
+    env.pic_setup
+        .pic
+        .advance_time(Duration::from_secs(5 * 60 + 1));
+
+    assert!(
+        env.claim(claimer, tip_id, claim_code).is_err(),
+        "a later attempt finds nothing left to draw on"
+    );
+    assert_eq!(
+        env.balance(claimer),
+        Nat::from(TIP_AMOUNT),
+        "so the claimer is paid exactly once across an outcome the canister could not read"
+    );
+}
