@@ -461,6 +461,9 @@ interface FlattenedInstruction {
 	// That call, as the run gives it.
 	madeIn?: unknown;
 	batch?: SolBatchMark;
+	// For a step taken out of a token batch, the batch's call, which no longer stands in the list
+	// itself, so the calls made inside the batch can still be followed back to it.
+	carriedIn?: unknown;
 	// A token batch left whole, whose steps nobody read in order.
 	wholeBatch?: boolean;
 }
@@ -526,7 +529,8 @@ const flatten = ({
 									topLevel,
 									instruction: entry,
 									...(nonNullish(madeBy) && { madeBy, madeWith, madeIn }),
-									batch: { id: `${parentIndex}:${position}`, program: parsed.programId }
+									batch: { id: `${parentIndex}:${position}`, program: parsed.programId },
+									carriedIn: parsed
 								}));
 					}
 				)
@@ -2776,7 +2780,9 @@ const onBehalfOf = ({
 
 	const call = isNullish(madeIn)
 		? -1
-		: flattened.findIndex(({ instruction }) => instruction === madeIn);
+		: flattened.findIndex(
+				({ instruction, carriedIn }) => instruction === madeIn || carriedIn === madeIn
+			);
 
 	return call >= 0 ? onBehalfOf({ flattened, position: call }) : { madeBy, madeWith };
 };
