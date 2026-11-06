@@ -1,4 +1,12 @@
+import { BSC_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import { USDC_TOKEN as BSC_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { VELORA_AUGUSTUS_SELL_ABI } from '$eth/constants/velora.constants';
+import type { Erc20Token } from '$eth/types/erc20';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { SWAP_ETH_TOKEN_PLACEHOLDER } from '$lib/constants/swap.constants';
 import { VeloraSwapRejectedError } from '$lib/types/errors';
@@ -6,6 +14,7 @@ import {
 	assertVeloraDeltaOrder,
 	assertVeloraDeltaRoute,
 	assertVeloraMarketTransaction,
+	veloraBridgeableTokenAddresses,
 	veloraMinimumAmount
 } from '$lib/utils/velora-swap.utils';
 import type { DeltaAuctionOrder, DeltaRoute, TransactionParams } from '@velora-dex/sdk';
@@ -162,6 +171,7 @@ describe('velora-swap.utils', () => {
 				sourceChainId: 1n,
 				destinationTokenAddress: WETH,
 				destinationChainId: 1n,
+				bridgeableTokenAddresses: [] as string[],
 				amount: 100000000n
 			};
 
@@ -175,7 +185,8 @@ describe('velora-swap.utils', () => {
 						...params,
 						route: crossChainRoute,
 						destinationTokenAddress: USDC_BASE,
-						destinationChainId: 8453n
+						destinationChainId: 8453n,
+						bridgeableTokenAddresses: [USDC]
 					})
 				).not.toThrow();
 			});
@@ -238,7 +249,8 @@ describe('velora-swap.utils', () => {
 					...params,
 					route: crossChainRoute,
 					destinationTokenAddress: USDC_BASE,
-					destinationChainId: 8453n
+					destinationChainId: 8453n,
+					bridgeableTokenAddresses: [USDC]
 				};
 
 				const scaledBridge: NonNullable<DeltaRoute['bridge']> = {
@@ -299,6 +311,7 @@ describe('velora-swap.utils', () => {
 					route: scaledRoute,
 					sourceTokenAddress: USDC_BSC,
 					sourceChainId: 56n,
+					bridgeableTokenAddresses: [USDC_BSC],
 					amount: 100000000000000000000n
 				};
 
@@ -338,6 +351,41 @@ describe('velora-swap.utils', () => {
 				});
 
 				it.each([
+					{
+						// A route that buys another token on the source network, its minimum then counted
+						// in that token.
+						case: 'a bridge from a token OISY does not group with the reviewed one',
+						change: {
+							route: {
+								...crossChainRoute,
+								origin: {
+									...crossChainRoute.origin,
+									output: {
+										token: { chainId: 1, address: DAI },
+										amount: '999999999999999999999',
+										amountUSD: '0'
+									}
+								}
+							}
+						},
+						reason: 'bridges a token OISY does not group with the reviewed one'
+					},
+					{
+						case: 'a bridge from the grouped token on another network',
+						change: {
+							route: {
+								...crossChainRoute,
+								origin: {
+									...crossChainRoute.origin,
+									output: {
+										...crossChainRoute.origin.output,
+										token: { chainId: 8453, address: USDC }
+									}
+								}
+							}
+						},
+						reason: 'bridges a token OISY does not group with the reviewed one'
+					},
 					{
 						case: 'a bridge with a scaling factor outside int8',
 						change: {
@@ -407,6 +455,57 @@ describe('velora-swap.utils', () => {
 				])('refuses $case', ({ change, reason }) => {
 					expect(() => assertVeloraDeltaRoute({ ...crossChainParams, ...change })).toThrow(reason);
 				});
+			});
+		});
+
+		describe('veloraBridgeableTokenAddresses', () => {
+			const tokens = [ETHEREUM_TOKEN, USDC_TOKEN, BSC_USDC_TOKEN, BASE_USDC_TOKEN, BASE_ETH_TOKEN];
+
+			it.each([
+				{
+					case: 'USDC on Ethereum for USDC on Base',
+					sourceNetworkId: ETHEREUM_NETWORK_ID,
+					destinationToken: BASE_USDC_TOKEN,
+					expected: [USDC_TOKEN.address]
+				},
+				{
+					case: 'USDC on BSC for USDC on Base',
+					sourceNetworkId: BSC_MAINNET_NETWORK_ID,
+					destinationToken: BASE_USDC_TOKEN,
+					expected: [BSC_USDC_TOKEN.address]
+				},
+				{
+					case: 'ETH on Ethereum, by the placeholder, for ETH on Base',
+					sourceNetworkId: ETHEREUM_NETWORK_ID,
+					destinationToken: BASE_ETH_TOKEN,
+					expected: [SWAP_ETH_TOKEN_PLACEHOLDER]
+				}
+			])('names $case', ({ sourceNetworkId, destinationToken, expected }) => {
+				expect(
+					veloraBridgeableTokenAddresses({ tokens, sourceNetworkId, destinationToken })
+				).toEqual(expected);
+			});
+
+			it('leaves out a custom token in the same group', () => {
+				const customUsdc: Erc20Token = { ...USDC_TOKEN, address: OTHER, category: 'custom' };
+
+				expect(
+					veloraBridgeableTokenAddresses({
+						tokens: [customUsdc],
+						sourceNetworkId: ETHEREUM_NETWORK_ID,
+						destinationToken: BASE_USDC_TOKEN
+					})
+				).toEqual([]);
+			});
+
+			it('names none for a destination token in no group', () => {
+				expect(
+					veloraBridgeableTokenAddresses({
+						tokens,
+						sourceNetworkId: ETHEREUM_NETWORK_ID,
+						destinationToken: { ...BASE_USDC_TOKEN, groupData: undefined }
+					})
+				).toEqual([]);
 			});
 		});
 

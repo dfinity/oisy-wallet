@@ -11,9 +11,12 @@ import {
 	VELORA_DELTA_ORDER_TYPES,
 	VELORA_DELTA_PARTNER_TAKES_SURPLUS_FLAG
 } from '$eth/constants/velora.constants';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { SWAP_ETH_TOKEN_PLACEHOLDER } from '$lib/constants/swap.constants';
 import { VeloraSwapRejectedError } from '$lib/types/errors';
+import type { NetworkId } from '$lib/types/network';
+import type { Token } from '$lib/types/token';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { DeltaAuctionOrder, DeltaRoute, TransactionParams } from '@velora-dex/sdk';
@@ -103,11 +106,48 @@ const bridgeScaledAmount = ({
 		: amount / 10n ** BigInt(-scalingFactor);
 
 /**
+ * The tokens a cross-chain Delta order may buy on the source network, as a swap names them. Delta
+ * bridges the token it bought as the same asset on the destination network, so these are the
+ * curated tokens OISY groups with the destination token there: ETH for ETH, USDC for USDC.
+ */
+export const veloraBridgeableTokenAddresses = ({
+	tokens,
+	sourceNetworkId,
+	destinationToken
+}: {
+	tokens: Token[];
+	sourceNetworkId: NetworkId;
+	destinationToken: Token;
+}): string[] => {
+	const groupId = destinationToken.groupData?.id;
+
+	if (isNullish(groupId)) {
+		return [];
+	}
+
+	return tokens
+		.filter(
+			(token) =>
+				token.network.id === sourceNetworkId &&
+				token.category === 'default' &&
+				token.groupData?.id === groupId
+		)
+		.flatMap((token) =>
+			isDefaultEthereumToken(token)
+				? [SWAP_ETH_TOKEN_PLACEHOLDER]
+				: 'address' in token && typeof token.address === 'string'
+					? [token.address]
+					: []
+		);
+};
+
+/**
  * Refuses a Delta route that does not sell the reviewed amount of the source token for the
  * destination token, on their networks. The order settles the route's origin step while the review
  * shows its destination step, so a same-chain route, which needs no bridge, must make both the same,
  * and a cross-chain route must carry a bridge the order format can encode, bridge to the destination
- * token and show no more than its origin step comes to once the bridge scales it.
+ * token from one of `bridgeableTokenAddresses` on the source network and show no more than its
+ * origin step comes to once the bridge scales it.
  *
  * Run before the approval or permit, so that a refused route costs neither.
  */
@@ -117,6 +157,7 @@ export const assertVeloraDeltaRoute = ({
 	sourceChainId,
 	destinationTokenAddress,
 	destinationChainId,
+	bridgeableTokenAddresses,
 	amount
 }: {
 	route: DeltaRoute;
@@ -124,6 +165,7 @@ export const assertVeloraDeltaRoute = ({
 	sourceChainId: bigint;
 	destinationTokenAddress: string;
 	destinationChainId: bigint;
+	bridgeableTokenAddresses: string[];
 	amount: bigint;
 }) => {
 	if (
@@ -167,6 +209,19 @@ export const assertVeloraDeltaRoute = ({
 
 		if (!isSameAddress({ actual: outputToken, expected: destinationTokenAddress })) {
 			throw veloraRejectedError('the bridge does not deliver the reviewed token');
+		}
+
+		// The order's minimum is counted in the token it buys here, which the bridge then carries:
+		// any other token than the destination token's own on this network could be worth nothing.
+		if (
+			BigInt(origin.output.token.chainId) !== sourceChainId ||
+			!bridgeableTokenAddresses.some((address) =>
+				isSameAddress({ actual: origin.output.token.address, expected: address })
+			)
+		) {
+			throw veloraRejectedError(
+				'the route bridges a token OISY does not group with the reviewed one'
+			);
 		}
 
 		if (

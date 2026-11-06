@@ -55,6 +55,7 @@ import {
 	VELORA_GAS_LIMIT_BUFFER_PERCENT
 } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { fungibleTokens } from '$lib/derived/tokens.derived';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
@@ -161,6 +162,7 @@ import {
 	assertVeloraDeltaOrder,
 	assertVeloraDeltaRoute,
 	assertVeloraMarketTransaction,
+	veloraBridgeableTokenAddresses,
 	veloraMinimumAmount,
 	veloraRejectedError
 } from '$lib/utils/velora-swap.utils';
@@ -1931,6 +1933,11 @@ export const fetchVeloraDeltaSwap = async ({
 		sourceChainId: sourceNetwork.chainId,
 		destinationTokenAddress: geSwapEthTokenAddress(destinationToken),
 		destinationChainId,
+		bridgeableTokenAddresses: veloraBridgeableTokenAddresses({
+			tokens: get(fungibleTokens),
+			sourceNetworkId: sourceNetwork.id,
+			destinationToken
+		}),
 		amount: parsedSwapAmount
 	});
 
