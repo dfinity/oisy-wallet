@@ -95,6 +95,11 @@ export const LIFI_QUOTE_TIMEOUT_MS = SWAP_QUOTE_TIMEOUT_MS;
 // gas still pays for it.
 export const LIFI_GAS_LIMIT_BUFFER_PERCENT = 20n;
 
+// Added to the gas the node estimates a Velora Market transaction at, which execution signs with
+// instead of the limit Velora builds it with: the route can cost more when mined than when
+// estimated, and a transaction that runs out of gas still pays for it.
+export const VELORA_GAS_LIMIT_BUFFER_PERCENT = 20n;
+
 // Added to LI.FI's own gas estimate for the fee the user reviews, where execution adds the buffer
 // above to the node's: the node estimates the very same transaction a few percent higher (3–5 %
 // for USDC → ETH on Base, on every exchange, 2026-10-21), and a review priced below execution

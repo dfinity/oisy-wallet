@@ -16,10 +16,14 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { OptionString } from '$lib/types/string';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	interface Props {
 		source: string;
+		// The recipient, which sizes its output in the fee. Until it is known, the fee is priced
+		// for the largest output a send can pay.
+		destination?: OptionString;
 		amount?: OptionAmount;
 		networkId?: NetworkId;
 		amountError?: boolean;
@@ -29,7 +33,7 @@
 		children?: Snippet;
 	}
 
-	let { source, amount, networkId, amountError = false, children }: Props = $props();
+	let { source, destination, amount, networkId, amountError = false, children }: Props = $props();
 
 	const { store } = getContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY);
 
@@ -61,12 +65,13 @@
 				: DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE;
 
 		// WizardModal re-renders content on step change (e.g. when switching between Convert to Review steps)
-		// To avoid re-fetching the fees, we need to check if the amount hasn't changed since the last request
+		// To avoid re-fetching the fees, we need to check if the amount and the recipient haven't changed
+		// since the last request
 		if (
 			amountError ||
 			isNullish(networkId) ||
 			isNullishOrEmpty(source) ||
-			(keepFee && $store?.amountForFee === parsedAmount)
+			(keepFee && $store?.amountForFee === parsedAmount && $store.destinationForFee === destination)
 		) {
 			return;
 		}
@@ -78,18 +83,20 @@
 		const utxosFee = prepareBtcSend({
 			amount: parsedAmount,
 			source,
+			destination,
 			allUtxos,
 			feeRateMiliSatoshisPerVByte: feeRateFromPercentiles
 		});
 
 		store.setUtxosFee({
 			utxosFee,
-			amountForFee: parsedAmount
+			amountForFee: parsedAmount,
+			destinationForFee: destination
 		});
 	};
 
 	$effect(() => {
-		[amount, networkId, source];
+		[amount, networkId, source, destination];
 
 		if (
 			nonNullish($btcPendingSentTransactionsStore[source]) &&

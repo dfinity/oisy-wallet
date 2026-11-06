@@ -116,7 +116,12 @@
 				     address has loaded, would query the bitcoin canister for no address. So the
 				     loader mounts beside the review, once the address is there. -->
 				{#if notEmptyString(btcSource)}
-					<UtxosFeeLoader {amount} networkId={$sendTokenNetworkId} source={btcSource} />
+					<UtxosFeeLoader
+						{amount}
+						{destination}
+						networkId={$sendTokenNetworkId}
+						source={btcSource}
+					/>
 				{/if}
 				<AiAssistantReviewSendBtcToken
 					{amount}
