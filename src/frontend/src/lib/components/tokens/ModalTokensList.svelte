@@ -94,8 +94,15 @@
 	);
 
 	// Only the asset types among the tokens the list can offer, before the search: a type with nothing
-	// to pick (a stock with no balance where only funded tokens show) is never offered.
-	let categories = $derived(getTokensCategories($eligibleTokens));
+	// to pick (a stock with no balance where only funded tokens show) is never offered. On a network the
+	// picker locks, only that network's tokens count, since no other network can be picked.
+	let categories = $derived(
+		getTokensCategories(
+			networkSelectorViewOnly
+				? filterTokensForSelectedNetwork([$eligibleTokens, network, isNullish(network)])
+				: $eligibleTokens
+		)
+	);
 
 	let category = $derived(
 		$showTokenCategoryFilter &&
