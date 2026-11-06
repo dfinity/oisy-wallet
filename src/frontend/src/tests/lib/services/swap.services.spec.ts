@@ -7,6 +7,7 @@ import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.e
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { VELORA_AUGUSTUS_ADDRESSES, VELORA_DELTA_ADDRESSES } from '$env/rest/velora.env';
 import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import {
 	VELORA_AUGUSTUS_SELL_ABI,
@@ -33,7 +34,11 @@ import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
-import { LIFI_QUOTE_TIMEOUT_MS, SWAP_QUOTE_TIMEOUT_MS } from '$lib/constants/swap.constants';
+import {
+	LIFI_QUOTE_TIMEOUT_MS,
+	SWAP_ETH_TOKEN_PLACEHOLDER,
+	SWAP_QUOTE_TIMEOUT_MS
+} from '$lib/constants/swap.constants';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
 import {
 	PLAUSIBLE_EVENTS,
@@ -2902,6 +2907,7 @@ describe('swap.services', () => {
 			sale?: Record<string, unknown>;
 			to?: string;
 			chainId?: number;
+			value?: string;
 		} = {}) => ({
 			from: mockEthAddress,
 			to: mockAugustusAddress,
@@ -3219,6 +3225,57 @@ describe('swap.services', () => {
 				);
 
 				expect(sendEvmSwap).not.toHaveBeenCalled();
+			});
+
+			describe('selling the network coin', () => {
+				// The wizard passes the network's coin as it passes any source token.
+				const nativeParams = { ...params, sourceToken: ETHEREUM_TOKEN as Erc20Token };
+
+				const nativeAmount = parseToken({
+					value: mockSwapAmount,
+					unitName: ETHEREUM_TOKEN.decimals
+				});
+
+				const nativeTransaction = (value: bigint) =>
+					mockTransaction({
+						sale: { srcToken: SWAP_ETH_TOKEN_PLACEHOLDER, fromAmount: nativeAmount },
+						value: `${value}`
+					});
+
+				beforeEach(() => {
+					vi.mocked(ethUtils.isNotDefaultEthereumToken).mockReturnValue(false);
+					vi.mocked(geSwapEthTokenAddress).mockImplementation((token) =>
+						ethUtils.isDefaultEthereumToken(token) ? SWAP_ETH_TOKEN_PLACEHOLDER : token.address
+					);
+				});
+
+				it('sends a transaction carrying the amount sold as its value, with no approval', async () => {
+					mockSwapBuildTx.mockResolvedValue(nativeTransaction(nativeAmount));
+
+					await fetchVeloraMarketSwap(nativeParams);
+
+					expect(approveToken).not.toHaveBeenCalled();
+					expect(sendEvmSwap).toHaveBeenCalledExactlyOnceWith(
+						expect.objectContaining({
+							to: mockAugustusAddress,
+							transaction: nativeTransaction(nativeAmount)
+						})
+					);
+				});
+
+				it.each([
+					{ case: 'no value', value: ZERO },
+					{ case: 'less than the amount sold', value: nativeAmount - 1n },
+					{ case: 'more than the amount sold', value: nativeAmount + 1n }
+				])('refuses a transaction carrying $case before sending it', async ({ value }) => {
+					mockSwapBuildTx.mockResolvedValue(nativeTransaction(value));
+
+					await expect(fetchVeloraMarketSwap(nativeParams)).rejects.toThrow(
+						VeloraSwapRejectedError
+					);
+
+					expect(sendEvmSwap).not.toHaveBeenCalled();
+				});
 			});
 		});
 	});
