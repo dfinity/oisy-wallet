@@ -12,6 +12,7 @@ import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { balancesStore } from '$lib/stores/balances.store';
 import { initModalTokensListContext } from '$lib/stores/modal-tokens-list.store';
 import { usdValue } from '$lib/utils/exchange.utils';
+import * as tokenUtils from '$lib/utils/token.utils';
 import { bn1Bi, bn2Bi } from '$tests/mocks/balances.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -179,6 +180,28 @@ describe('modalTokensListStore', () => {
 
 		expect(get(filteredTokens)).toStrictEqual([mockTokenUi1]);
 		expect(get(eligibleTokens)).toStrictEqual([mockTokenUi2, mockTokenUi1]);
+	});
+
+	it('should not map the eligible tokens again when only the search changes', () => {
+		const mapTokenUiSpy = vi.spyOn(tokenUtils, 'mapTokenUi');
+
+		const { filteredTokens, setFilterQuery } = initModalTokensListContext({
+			filterZeroBalance: true,
+			tokens: [mockToken1, mockToken2]
+		});
+
+		const unsubscribe = filteredTokens.subscribe(() => {});
+
+		const callsBeforeSearch = mapTokenUiSpy.mock.calls.length;
+
+		setFilterQuery('ckBTC');
+
+		expect(get(filteredTokens)).toStrictEqual([mockTokenUi1]);
+		expect(mapTokenUiSpy).toHaveBeenCalledTimes(callsBeforeSearch);
+
+		unsubscribe();
+
+		mapTokenUiSpy.mockRestore();
 	});
 
 	it('should filter zero-balance tokens', () => {

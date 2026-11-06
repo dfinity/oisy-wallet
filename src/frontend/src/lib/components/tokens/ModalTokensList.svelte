@@ -156,7 +156,9 @@
 	);
 
 	// The list never shrinks while the modal is open, so narrowing it with a filter does not pull the
-	// modal's bottom edge up under the pointer. Desktop only: on a phone the modal fills the screen.
+	// modal's bottom edge up under the pointer. Desktop only: on a phone the modal fills the screen. The
+	// height is capped at the desktop maximum, since one taken on a phone can be taller, and
+	// `min-height` wins over `max-height`.
 	let listHeight = $state(0);
 
 	let listMinHeight = $state(0);
@@ -206,8 +208,8 @@
 </div>
 
 <div
-	style={`--list-min-height: ${listMinHeight}px`}
-	class="my-4 flex flex-col overflow-y-hidden sm:max-h-[26rem] sm:min-h-(--list-min-height)"
+	style={`--list-max-height: 26rem; --list-min-height: min(${listMinHeight}px, var(--list-max-height))`}
+	class="my-4 flex flex-col overflow-y-hidden sm:max-h-(--list-max-height) sm:min-h-(--list-min-height)"
 	bind:clientHeight={listHeight}
 >
 	<div class="gap-6 overflow-y-auto overscroll-contain">
