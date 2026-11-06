@@ -30,6 +30,16 @@ export const icrcTxExplorerUrl = ({
 	blockIndex: bigint | string;
 }): string => `${ICP_EXPLORER_URL}/tokens/${ledgerCanisterId}/tx/${blockIndex}`;
 
+// The account page reads the balance from the ledger, so it serves every ICRC ledger; it takes the
+// ICRC-1 text form of the account, with or without a subaccount.
+export const icrcAccountExplorerUrl = ({
+	ledgerCanisterId,
+	account
+}: {
+	ledgerCanisterId: LedgerCanisterIdText;
+	account: string;
+}): string => `${ICP_EXPLORER_URL}/tokens/${ledgerCanisterId}/account/${account}`;
+
 export const mapTransactionIcrcToSelf = (tx: IcrcIndexDid.TransactionWithId): IcrcTransaction[] => {
 	const { transaction, id } = tx;
 	const { transfer: t } = transaction;
@@ -150,9 +160,6 @@ export const mapIcrcTransaction = ({
 		timestamp,
 		status: 'executed',
 		...(nonNullish(approveSpender) && { approveSpender }),
-		...(nonNullish(approveSpender) && {
-			approveSpenderExplorerUrl: `${ICP_EXPLORER_URL}/account/${approveSpender}`
-		}),
 		...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
 		...(nonNullish(transferSpender) && { transferSpender })
 	};
