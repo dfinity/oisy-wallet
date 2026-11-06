@@ -12,7 +12,7 @@ import {
 } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import { getCyclesMintDepositAccountIdentifier } from '$icp/utils/cycles-mint.utils';
+import { getCmcDepositAccountIdentifier } from '$icp/utils/cmc.utils';
 import { authStore } from '$lib/stores/auth.store';
 import { token } from '$lib/stores/token.store';
 import type { TokenId } from '$lib/types/token';
@@ -224,7 +224,7 @@ describe('ic-transactions.derived', () => {
 			authStore.setForTesting(mockIdentity);
 
 			const [userInitiated] = transactions;
-			const depositAccount = getCyclesMintDepositAccountIdentifier(mockIdentity.getPrincipal());
+			const depositAccount = getCmcDepositAccountIdentifier(mockIdentity.getPrincipal());
 			const mintDeposits: IcCertifiedTransaction[] = [
 				depositAccount,
 				depositAccount.toUpperCase()
@@ -237,6 +237,32 @@ describe('ic-transactions.derived', () => {
 			icTransactionsStore.append({
 				tokenId: ICP_TOKEN_ID,
 				transactions: [userInitiated, ...mintDeposits]
+			});
+
+			expect(get(icKnownDestinations)).toEqual({
+				[userInitiated.data.to as string]: {
+					amounts: [{ value: userInitiated.data.value, token: ICP_TOKEN }],
+					timestamp: Number(userInitiated.data.timestamp),
+					address: userInitiated.data.to
+				}
+			});
+		});
+
+		it('should leave out the deposit of a canister top-up through the CMC', () => {
+			const [userInitiated] = transactions;
+			const topUp: IcCertifiedTransaction = {
+				certified: true,
+				data: {
+					...createCertifiedIcTransactionUiMock('top-up').data,
+					to: 'canister-deposit-account',
+					typeLabel: 'transaction.label.canister_top_up'
+				}
+			};
+
+			token.set(ICP_TOKEN);
+			icTransactionsStore.append({
+				tokenId: ICP_TOKEN_ID,
+				transactions: [userInitiated, topUp]
 			});
 
 			expect(get(icKnownDestinations)).toEqual({

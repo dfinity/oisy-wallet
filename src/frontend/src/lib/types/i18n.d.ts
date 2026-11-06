@@ -2028,6 +2028,7 @@ interface I18nTransaction {
 		pending: string;
 		top_up: string;
 		top_up_refund: string;
+		canister_top_up: string;
 	};
 	alt: {
 		open_block_explorer: string;
