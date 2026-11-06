@@ -1,4 +1,5 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -74,14 +75,31 @@ describe('NetworkLogo', () => {
 			expect(container.querySelector('.always-inverted')).toBeNull();
 		});
 
+		// Neither network has a token logo of its own (both pay gas in ETH), so each has a brand mark.
+		it.each([BASE_NETWORK, ROBINHOOD_MAINNET_NETWORK])(
+			'should render the coloured mark of $name, which has no token logo of its own',
+			(network) => {
+				const { container } = render(NetworkLogo, {
+					props: { network, testId },
+					context: coloredScreen
+				});
+
+				expect(network.iconColored).toBeDefined();
+				expect(network.iconColored).not.toBe(network.icon);
+				expect(getSrc(container)).toBe(network.iconColored);
+				expect(container.querySelector('.invert-on-dark-theme')).toBeNull();
+			}
+		);
+
 		it('should fall back to the monochrome mark for a network without a coloured one', () => {
+			const network = { ...BASE_NETWORK, iconColored: undefined };
+
 			const { container } = render(NetworkLogo, {
-				props: { network: BASE_NETWORK, testId },
+				props: { network, testId },
 				context: coloredScreen
 			});
 
-			expect(BASE_NETWORK.iconColored).toBeUndefined();
-			expect(getSrc(container)).toBe(BASE_NETWORK.icon);
+			expect(getSrc(container)).toBe(network.icon);
 			expect(container.querySelector('.invert-on-dark-theme')).not.toBeNull();
 		});
 	});
