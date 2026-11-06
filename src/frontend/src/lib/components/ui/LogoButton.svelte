@@ -9,6 +9,8 @@
 	interface Props {
 		selectable?: boolean;
 		expanded?: boolean;
+		// Announced as pressed or not; unset for a row that is not a choice. `selectable` adds a check
+		// column for it.
 		selected?: boolean;
 		dividers?: boolean;
 		hover?: boolean;
@@ -32,7 +34,7 @@
 	let {
 		selectable = false,
 		expanded,
-		selected = false,
+		selected,
 		dividers = false,
 		hover = true,
 		rounded = true,
@@ -66,7 +68,7 @@
 		class="flex w-full rounded-lg border-0 px-2"
 		class:cursor-default={isNullish(onClick)}
 		aria-expanded={expanded}
-		aria-pressed={selectable ? selected : undefined}
+		aria-pressed={selected}
 		data-tid={testId}
 		onclick={onClick}
 	>

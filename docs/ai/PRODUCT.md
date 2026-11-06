@@ -425,6 +425,12 @@ The fee shown for a swap from Solana is the most it can cost: the network fee LI
 
 Like the other cross-chain swaps, the modal closes once the transaction is sent, and the swap appears in the Active-transactions panel labelled "LI.FI" until it settles. The row is recorded before the transaction is broadcast, so a swap is never sent untracked; if the network refuses the transaction outright, the row is removed again. If the network's answer is lost instead, OISY sends the same signed transaction again a few times, which cannot run it twice; if the outcome is still unknown, the swap counts as sent and stays tracked until it settles: it is never offered for signing a second time, which could make it run twice.
 
+### When an Ethereum send fails
+
+When an Ethereum or EVM send fails, what OISY says depends on how far the transaction got. If the network could not be reached to read the transaction's nonce, the transaction was never signed, so the message says it was not sent and that trying again is safe. If Infura refused the transaction outright, such as for a balance that cannot cover it, the message states that reason, and a transaction that [runs out of gas](#a-send-that-runs-out-of-gas) keeps its own message. If every provider failed the submission, or answered in a way that leaves it open, such as that the transaction's nonce is already used, OISY cannot know whether the network received the transaction, and the message says exactly that: it may still go through, so the user should wait a minute or two and check their activity before sending it again. A swap whose earlier broadcast attempt may have reached the network gets the same message, even when a later attempt is refused. It never says such a transaction was not sent, because a new attempt is signed with the next nonce, and if the first one did get through, both would execute and the user would pay twice.
+
+The send, convert, swap and AI assistant flows show these messages, and so do WalletConnect transaction requests; the dApp still receives a rejection. A failure OISY cannot explain keeps its flow's generic message.
+
 ---
 
 ## Activity
@@ -786,9 +792,15 @@ Requests are still handled **one at a time**: while a request from one dApp is u
 
 When an Ethereum send or approval flow is open, OISY fetches the current network gas fee and keeps it current for as long as the flow stays open. If the wallet is backgrounded — common on mobile, where switching apps, locking the screen, or bouncing between a dApp and OISY during a WalletConnect approval suspends the tab — the fee fetch can be interrupted. OISY recovers on its own: it re-fetches the fee when the wallet returns to the foreground, and retries transient fetch failures automatically, so a send is not left permanently unable to proceed.
 
+When Infura, OISY's primary EVM provider, fails that fee read, or gives no answer within 10 seconds, OISY reads the fee from Alchemy instead, computed the same way, so a failing provider no longer leaves a send or a WalletConnect request without a fee. If both fail, the retries carry on as before. Gas estimation stays with Infura.
+
 A transaction is never submitted without a resolved fee: every Ethereum send path refuses to proceed until the fee is available.
 
 The fee a send quotes is what the transaction is **expected to cost**, not the most it could cost. Ethereum charges the network's own base fee plus whatever tip the sender adds, and refunds the difference between that and the ceiling the sender authorised; it also refunds gas the transaction did not use. Quoting the ceiling would overstate the price, often close to double for a token transfer, because the ceiling deliberately carries headroom for a base-fee rise and because token transfers pad their gas limit. The ceiling still decides whether a send is **affordable**: the balance checks and the "max" amount button hold the user to the worst case, so a send can never start out payable and end up short. When the network does not report a base fee, the quote falls back to the ceiling, since overstating the cost is safer than showing none. The send flow and WalletConnect transaction requests quote an expected cost; swap, convert and stake still quote the maximum. This is currently limited to local and staging builds: beta and production still quote the maximum everywhere, unchanged.
+
+### Transaction nonce
+
+Every Ethereum or EVM transaction carries a nonce, the account's next sequence number, and the network runs an account's transactions strictly in that order. OISY reads it right before signing, as the pending count: the next number after every transaction the provider knows of, pending ones included. When Infura fails that read, or gives no answer within 10 seconds, OISY reads the same count from Alchemy instead, so a failing provider no longer stops a send before it is signed. If both fail, the send stops before anything is signed, and nothing has left the wallet. The confirmed count, which a Velora swap reads to tell whether its transaction was replaced, is no send's nonce and stays with Infura alone.
 
 ### Transaction priority
 

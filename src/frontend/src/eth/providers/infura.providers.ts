@@ -9,7 +9,8 @@ import { ethersFallbackProvider, ethersProvider } from '$eth/providers/ethers.pr
 import type { EthAddress } from '$eth/types/address';
 import type { GetFeeData } from '$eth/types/infura';
 import type { EthersProviderNetwork } from '$eth/types/network';
-import { isDefinitiveTransactionRefusal } from '$eth/utils/eth-error.utils';
+import { EthSubmissionUnconfirmedError } from '$eth/types/send';
+import { isDefinitiveTransactionRefusal, isOutOfGasRefusal } from '$eth/utils/eth-error.utils';
 import { isEthersError } from '$eth/utils/eth.utils';
 import {
 	OP_STACK_GAS_PRICE_ORACLE_ABI,
@@ -64,7 +65,14 @@ export class InfuraProvider {
 
 	balance = (address: EthAddress): Promise<bigint> => this.provider.getBalance(address);
 
-	getFeeData = (): Promise<FeeData> => this.provider.getFeeData();
+	// Every review waits on this sample, and ethers computes it the same way whichever provider
+	// answers, so Alchemy's is as good a fee as Infura's would have been.
+	getFeeData = (): Promise<FeeData> =>
+		this.callWithFallback({
+			operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.FEE,
+			milliseconds: INFURA_READ_TIMEOUT_MILLISECONDS,
+			call: (provider) => provider.getFeeData()
+		});
 
 	estimateGas = (params: GetFeeData): Promise<bigint> => this.provider.estimateGas(params);
 
@@ -199,33 +207,45 @@ export class InfuraProvider {
 	// so the network mines at most one copy however many providers it is handed to. That is what
 	// makes it safe to hand the same bytes to the fallback when Infura does not accept them, or does
 	// not answer in time.
-	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> =>
-		this.callWithFallback({
-			operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.SUBMISSION,
-			milliseconds: INFURA_SUBMISSION_TIMEOUT_MILLISECONDS,
-			call: (provider) => provider.broadcastTransaction(signedTransaction),
-			// Handed to Alchemy, a transaction Infura refused outright could be relayed after all, the
-			// base fee or the balance having changed since, while the refusal is what the send reports.
-			isRefusal: isDefinitiveTransactionRefusal,
-			recover: async ({ infuraErr, fallbackProvider }) => {
-				// Neither error proves the transaction went nowhere. Infura can pass a transaction on and
-				// still fail the request, and a node answers a transaction it already holds with an error
-				// of its own. Only the network knows, so it is asked before the send is reported as failed.
-				const submitted = await this.findSubmittedTransaction({
-					signedTransaction,
-					fallbackProvider
-				});
+	sendTransaction = async (signedTransaction: string): Promise<TransactionResponse> => {
+		try {
+			return await this.callWithFallback({
+				operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.SUBMISSION,
+				milliseconds: INFURA_SUBMISSION_TIMEOUT_MILLISECONDS,
+				call: (provider) => provider.broadcastTransaction(signedTransaction),
+				// Handed to Alchemy, a transaction Infura refused outright could be relayed after all, the
+				// base fee or the balance having changed since, while the refusal is what the send reports.
+				isRefusal: isDefinitiveTransactionRefusal,
+				recover: async ({ infuraErr, fallbackProvider }) => {
+					// Neither error proves the transaction went nowhere. Infura can pass a transaction on
+					// and still fail the request, and a node answers a transaction it already holds with an
+					// error of its own. Only the network knows, so it is asked before the send is reported
+					// as failed.
+					const submitted = await this.findSubmittedTransaction({
+						signedTransaction,
+						fallbackProvider
+					});
 
-				if (nonNullish(submitted)) {
-					return submitted;
+					if (nonNullish(submitted)) {
+						return submitted;
+					}
+
+					// Infura's error is the one reported, whatever Alchemy answered. Infura may have passed
+					// the transaction on before failing the request, and a refusal of Alchemy's attempt
+					// afterwards answers only that attempt.
+					throw infuraErr;
 				}
-
-				// Infura's error is the one reported, whatever Alchemy answered. Infura may have passed the
-				// transaction on before failing the request, and a refusal of Alchemy's attempt afterwards
-				// answers only that attempt.
-				throw infuraErr;
-			}
-		});
+			});
+		} catch (err: unknown) {
+			// An outright refusal is the network's answer: the transaction was not taken. Running out
+			// of gas is explained on its own, fee included. Anything else leaves open whether the
+			// transaction reached the network, which the send must say rather than claim either way,
+			// since a retry is signed with the next nonce and both could execute.
+			throw isDefinitiveTransactionRefusal(err) || isOutOfGasRefusal(err)
+				? err
+				: new EthSubmissionUnconfirmedError(err);
+		}
+	};
 
 	// A transaction's hash is the hash of its signed bytes, so it is known before any node answers.
 	private findSubmittedTransaction = async ({
@@ -250,13 +270,23 @@ export class InfuraProvider {
 	getTransactionReceipt = (hash: string): Promise<TransactionReceipt | null> =>
 		this.provider.getTransactionReceipt(hash);
 
+	// The pending count is the nonce a send signs with, so it falls back when Infura fails it. The
+	// latest count is a confirmed-history read — the one that tells whether a Velora swap was replaced
+	// — which no send waits on, and it stays with Infura alone.
 	getTransactionCount = ({
 		address,
 		tag
 	}: {
 		address: EthAddress;
 		tag: 'pending' | 'latest';
-	}): Promise<number> => this.provider.getTransactionCount(address, tag);
+	}): Promise<number> =>
+		tag === 'pending'
+			? this.callWithFallback({
+					operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.NONCE,
+					milliseconds: INFURA_READ_TIMEOUT_MILLISECONDS,
+					call: (provider) => provider.getTransactionCount(address, tag)
+				})
+			: this.provider.getTransactionCount(address, tag);
 
 	getTransactionCountLatest = (address: EthAddress): Promise<number> =>
 		this.getTransactionCount({ address, tag: 'latest' });

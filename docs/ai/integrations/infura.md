@@ -41,6 +41,8 @@ the end.
 ## Fees & gas
 
 - **Fee data** — `getFeeData` (base / max / priority fee) via the base provider.
+  When Infura does not answer it within 10 s, it goes to Alchemy — see
+  [Alchemy → EVM — fallback for Infura](./alchemy.md#evm--fallback-for-infura).
 - **Gas estimation** — `estimateGas` for transfers, approvals, burns and deposits
   (the various `infura-*.providers.ts`).
 - **Suggested gas fees (REST, not RPC)** — `InfuraGasRest.getSuggestedFeeData`
@@ -52,7 +54,9 @@ the end.
 ## Transaction lifecycle
 
 - **Nonce** — `getTransactionCount` with `latest` / `pending` tags, exposed as
-  `getTransactionCountLatest` / `getTransactionCountPending`.
+  `getTransactionCountLatest` / `getTransactionCountPending`. When Infura does not
+  answer the `pending` read within 10 s, it goes to Alchemy — see
+  [Alchemy → EVM — fallback for Infura](./alchemy.md#evm--fallback-for-infura).
 - **Block number** — `getBlockNumber`, used for transaction finality tracking
   (`src/frontend/src/eth/services/eth-transactions.services.ts`).
 - **Broadcast signed transactions** — `sendTransaction` wraps ethers'
