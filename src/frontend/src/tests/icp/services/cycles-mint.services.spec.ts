@@ -23,6 +23,7 @@ import {
 	transferIcpForCyclesMint
 } from '$icp/services/cycles-mint.services';
 import { CyclesMintError } from '$icp/types/cycles-mint';
+import { IcTransferDeadlineError } from '$icp/types/ic-send';
 import { getCmcDepositAccount } from '$icp/utils/cmc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
@@ -83,6 +84,7 @@ describe('cycles-mint.services', () => {
 				amount: params.amount,
 				createdAt: params.createdAt,
 				memo: CMC_MINT_CYCLES_MEMO,
+				notAfter: params.createdAt + CMC_TRANSFER_START_WINDOW_NS,
 				ledgerCanisterId: ICP_LEDGER_CANISTER_ID
 			});
 		});
@@ -468,6 +470,22 @@ describe('cycles-mint.services', () => {
 			expect(notifyMintCycles).not.toHaveBeenCalled();
 			expect(trackCyclesMint).toHaveBeenLastCalledWith(
 				expect.objectContaining({ errorCode: 'transfer_failed' })
+			);
+		});
+
+		// The ledger was only ready past the start window, so the transfer was never sent.
+		it('abandons a mint whose transfer missed its deadline once the ledger was ready', async () => {
+			vi.mocked(icrc1Transfer).mockRejectedValue(new IcTransferDeadlineError());
+
+			await expect(errorKind()).resolves.toBe('timed_out');
+
+			expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				id: 'mint-1'
+			});
+			expect(notifyMintCycles).not.toHaveBeenCalled();
+			expect(trackCyclesMint).toHaveBeenLastCalledWith(
+				expect.objectContaining({ errorCode: 'timed_out' })
 			);
 		});
 

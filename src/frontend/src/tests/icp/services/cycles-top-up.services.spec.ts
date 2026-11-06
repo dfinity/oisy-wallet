@@ -24,6 +24,7 @@ import {
 	transferIcpForCyclesTopUp
 } from '$icp/services/cycles-top-up.services';
 import { CyclesTopUpIcpError } from '$icp/types/cycles-top-up';
+import { IcTransferDeadlineError } from '$icp/types/ic-send';
 import type { IcrcTransaction } from '$icp/types/ic-transaction';
 import { getCmcDepositAccount } from '$icp/utils/cmc.utils';
 import { ZERO } from '$lib/constants/app.constants';
@@ -104,6 +105,7 @@ describe('cycles-top-up.services', () => {
 				amount: params.amount,
 				createdAt: params.createdAt,
 				memo: CMC_TOP_UP_MEMO,
+				notAfter: params.createdAt + CMC_TRANSFER_START_WINDOW_NS,
 				ledgerCanisterId: ICP_LEDGER_CANISTER_ID
 			});
 		});
@@ -675,6 +677,22 @@ describe('cycles-top-up.services', () => {
 			expect(waitForMilliseconds).toHaveBeenCalledWith(CMC_ROW_DELETE_RETRY_DELAY_MILLIS);
 			expect(trackCyclesTopUp).not.toHaveBeenCalledWith(
 				expect.objectContaining({ errorCode: 'transfer_failed' })
+			);
+		});
+
+		// The ledger was only ready past the start window, so the transfer was never sent.
+		it('abandons a top-up whose transfer missed its deadline once the ledger was ready', async () => {
+			vi.mocked(icrc1Transfer).mockRejectedValue(new IcTransferDeadlineError());
+
+			await expect(errorKind()).resolves.toBe('timed_out');
+
+			expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				id: 'top-up-1'
+			});
+			expect(notifyTopUp).not.toHaveBeenCalled();
+			expect(trackCyclesTopUp).toHaveBeenLastCalledWith(
+				expect.objectContaining({ errorCode: 'timed_out' })
 			);
 		});
 

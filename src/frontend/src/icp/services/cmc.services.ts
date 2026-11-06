@@ -6,6 +6,7 @@ import {
 import { getIcpLedgerBlockTimestamp, icrc1Transfer } from '$icp/api/icp-ledger.api';
 import {
 	CMC_DEPOSIT_LOOKUP_PAGE_SIZE,
+	CMC_TRANSFER_START_WINDOW_NS,
 	ICP_LEDGER_PERMITTED_DRIFT_NS
 } from '$icp/constants/cmc.constants';
 import { isCmcDeposit } from '$icp/utils/cmc.utils';
@@ -23,6 +24,9 @@ import type { Identity } from '@icp-sdk/core/agent';
  * `createdAt` stays the same for the whole flow, so sending again after a call that got no
  * answer cannot pay twice: the ledger recognises the transfer and answers with the block
  * the first one landed in.
+ *
+ * It is not sent past `CMC_TRANSFER_START_WINDOW_NS` from `createdAt`, counted once the ledger
+ * is ready (`IcTransferDeadlineError`), so the poller's landing window holds for it.
  */
 export const transferIcpToCmc = async ({
 	identity,
@@ -45,6 +49,7 @@ export const transferIcpToCmc = async ({
 			amount,
 			createdAt,
 			memo,
+			notAfter: createdAt + CMC_TRANSFER_START_WINDOW_NS,
 			ledgerCanisterId: ICP_LEDGER_CANISTER_ID
 		});
 	} catch (err: unknown) {

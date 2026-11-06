@@ -23,6 +23,7 @@ import {
 	type CyclesTopUpNotifyResult,
 	type CyclesTopUpResult
 } from '$icp/types/cycles-top-up';
+import { IcTransferDeadlineError } from '$icp/types/ic-send';
 import { getCmcDepositAccount, toCmcNotifyFailure } from '$icp/utils/cmc.utils';
 import { isTopUpRefundMemo } from '$icp/utils/cycles-ledger.utils';
 import { randomSubMillisecondNs } from '$icp/utils/cycles-mint.utils';
@@ -418,6 +419,11 @@ export const topUpCanisterWithIcp = async ({
 		});
 	} catch (err: unknown) {
 		consoleError(err);
+
+		// Past the start window by the time the ledger was ready: nothing was sent, as above.
+		if (err instanceof IcTransferDeadlineError) {
+			throw (await deleteRow()) ? fail('timed_out') : new CyclesTopUpIcpError('timed_out');
+		}
 
 		// The ledger answered and refused: nothing moved.
 		if (err instanceof IcrcError) {
