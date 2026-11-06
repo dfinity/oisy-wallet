@@ -239,12 +239,11 @@ export const SWAP_PROVIDER_STATUS = 'swap-provider-status';
 export const SWAP_PROVIDER_CELL = 'swap-provider-cell';
 export const SWAP_SELECTED_PROVIDER_DETAILS = 'swap-selected-provider-details';
 export const SWAP_FEE_ROW = 'swap-fee-row';
+export const SWAP_INSUFFICIENT_FEE_INFO = 'swap-insufficient-fee-info';
 export const SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE = 'swap-lifi-insufficient-funds-for-fee';
 export const SWAP_LIFI_UNVERIFIED_ROUTE = 'swap-lifi-unverified-route';
 export const SWAP_TWO_SWAPS_HINT = 'swap-two-swaps-hint';
 export const SWAP_TWO_SWAPS_HINT_BUTTON = 'swap-two-swaps-hint-button';
-
-export const MODAL_FILTER_NETWORKS = 'MODAL_FILTER_NETWORKS';
 
 export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
@@ -349,7 +348,11 @@ export const HOW_TO_CONVERT_ETHEREUM_INFO = 'how-to-convert-ethereum-info';
 export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code';
 
 export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
+export const MODAL_TOKEN_LIST_NO_MATCH = 'modal-token-list-no-match';
+export const MODAL_TOKEN_LIST_CLEAR_FILTERS = 'modal-token-list-clear-filters';
 export const MODAL_TOKENS_LIST = 'modal-tokens-list';
+export const NETWORK_FILTER = 'network-filter';
+export const TOKEN_CATEGORY_FILTER = 'token-category-filter';
 
 export const ADDRESS_BOOK_MODAL = 'address-book-modal';
 export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';

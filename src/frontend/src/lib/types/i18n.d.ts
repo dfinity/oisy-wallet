@@ -775,7 +775,6 @@ interface I18nSend {
 		open_qr_modal: string;
 		scan_qr: string;
 		select_token: string;
-		select_network_filter: string;
 		send_again: string;
 		recently_used_tab: string;
 		contacts_tab: string;
@@ -870,6 +869,8 @@ interface I18nSend {
 		ethereum_out_of_gas_gas_sent: string;
 		ethereum_transaction_hash: string;
 		ethereum_unsigned_transaction: string;
+		ethereum_transaction_not_sent: string;
+		ethereum_transaction_unconfirmed: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
 		solana_insufficient_funds: string;
@@ -1234,6 +1235,18 @@ interface I18nTokens {
 		hide_asset_types: string;
 		asset_type: string;
 		asset_type_all: string;
+		asset_type_all_short: string;
+		clear_network_filter: string;
+		clear_asset_type_filter: string;
+		filter_asset_types: string;
+		clear_filters: string;
+		no_match_network: string;
+		no_match_asset_type: string;
+		no_match_asset_type_network: string;
+		no_match_query: string;
+		no_match_query_network: string;
+		no_match_query_asset_type: string;
+		no_match_query_asset_type_network: string;
 		no_tokens_for_asset_type: string;
 		no_tokens_for_asset_type_zero_tokens: string;
 		no_tokens_for_asset_type_description: string;
@@ -1325,6 +1338,7 @@ interface I18nTokens {
 		enter_contract_address: string;
 		enter_token_address: string;
 		search_token: string;
+		search_token_on_network: string;
 	};
 	warning: { trust_token: string };
 	error: {
@@ -1558,6 +1572,22 @@ interface I18nWallet_connect {
 		cketh_deposit_principal: string;
 		cketh_deposit_refused: string;
 		cketh_helper_unconfirmed: string;
+		swap_title: string;
+		swap_pay: string;
+		swap_pay_at_most: string;
+		swap_receive_at_least: string;
+		swap_recipient: string;
+		swap_app_fee: string;
+		swap_app_fee_share: string;
+		swap_allowance: string;
+		swap_allowance_amount: string;
+		swap_allowance_unlimited: string;
+		swap_valid_until: string;
+		swap_no_deadline: string;
+		swap_router: string;
+		swap_recipient_not_wallet: string;
+		swap_no_minimum: string;
+		swap_expired: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;

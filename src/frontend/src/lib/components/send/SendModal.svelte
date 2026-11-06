@@ -20,7 +20,6 @@
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
-	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import {
 		allSendNftsWizardSteps,
@@ -363,7 +362,6 @@
 	<WizardModal
 		bind:this={modal}
 		disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
-			currentStep?.name === WizardStepsSend.FILTER_NETWORKS ||
 			currentStep?.name === WizardStepsCyclesTopUp.TOPPING_UP}
 		onClose={close}
 		{steps}
@@ -404,11 +402,7 @@
 		{:else}
 			{#key currentStep?.name}
 				{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
-					<SendTokensList
-						{lockedNetwork}
-						onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
-						{onSendToken}
-					/>
+					<SendTokensList {lockedNetwork} {onSendToken} />
 				{:else if currentStep?.name === WizardStepsSend.SEND_OR_TOP_UP && isTokenCyclesLedger($token)}
 					<CyclesSendOrTopUp
 						formCancelAction={isTransactionsPage ? 'close' : 'back'}
@@ -419,15 +413,7 @@
 						token={$token}
 					/>
 				{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
-					<SendNftsList
-						onSelect={selectNft}
-						onSelectNetwork={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
-					/>
-				{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
-					<ModalNetworksFilter
-						onNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-						showStakeBalance={false}
-					/>
+					<SendNftsList onSelect={selectNft} />
 				{:else if currentStep?.name === WizardStepsSend.DESTINATION}
 					<SendDestinationWizardStep
 						formCancelAction={!sendOrTopUp &&

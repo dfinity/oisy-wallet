@@ -41,6 +41,12 @@
 		message?: Snippet;
 		errorType?: TokenActionErrorType;
 		/**
+		 * Holds Review for a problem the form reports itself, away from the pay field — an EVM
+		 * swap whose network coin cannot cover the gas. Unlike `errorType`, it leaves the pay field
+		 * undecorated: no amount typed there fixes it.
+		 */
+		disabled?: boolean;
+		/**
 		 * Set by a form that already accounts for the absence of an offer itself — because the
 		 * inputs a quote needs are still loading, or because it is showing the specific reason
 		 * the amount cannot be quoted. Suppresses the generic "swap is not offered", which in
@@ -71,6 +77,7 @@
 		swapDetails,
 		message,
 		errorType = $bindable(),
+		disabled = false,
 		notOfferedExplained = false,
 		onCustomValidate,
 		fee,
@@ -169,7 +176,8 @@
 	);
 
 	let invalid = $derived(
-		nonNullish(errorType) ||
+		disabled ||
+			nonNullish(errorType) ||
 			isNullish(swapAmount) ||
 			Number(swapAmount) <= 0 ||
 			isNullish(receiveAmount) ||

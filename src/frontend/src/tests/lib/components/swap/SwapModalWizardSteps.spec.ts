@@ -6,8 +6,8 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
 import {
-	MODAL_FILTER_NETWORKS,
 	MODAL_TOKENS_LIST,
+	NETWORK_FILTER,
 	SWAP_MODAL_SELECT_PROVIDER_STEP,
 	SWAP_SWITCH_TOKENS_BUTTON
 } from '$lib/constants/test-ids.constants';
@@ -125,7 +125,6 @@ describe('SwapModalWizardSteps', () => {
 				onClose: vi.fn(),
 				currentStep,
 				swapProgressStep: ProgressStepsSwap.INITIALIZATION,
-				allNetworksEnabled: true,
 				modal: mockModal as unknown as WizardModal<WizardStepsSwap>,
 				steps: [
 					{
@@ -143,10 +142,6 @@ describe('SwapModalWizardSteps', () => {
 					{
 						name: WizardStepsSwap.TOKENS_LIST,
 						title: en.send.text.select_token
-					},
-					{
-						name: WizardStepsSwap.FILTER_NETWORKS,
-						title: en.send.text.select_network_filter
 					},
 					{
 						name: WizardStepsSwap.SELECT_PROVIDER,
@@ -174,13 +169,13 @@ describe('SwapModalWizardSteps', () => {
 			expect(getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument();
 		});
 
-		it('should display FILTER_NETWORKS step', () => {
+		it('should show the network filter in the TOKENS_LIST step', () => {
 			const { getByTestId } = renderSwapModalWizardSteps({
-				name: WizardStepsSwap.FILTER_NETWORKS,
+				name: WizardStepsSwap.TOKENS_LIST,
 				title: 'title'
 			});
 
-			expect(getByTestId(MODAL_FILTER_NETWORKS)).toBeInTheDocument();
+			expect(getByTestId(NETWORK_FILTER)).toBeInTheDocument();
 		});
 
 		it('should display SELECT_PROVIDER step', () => {

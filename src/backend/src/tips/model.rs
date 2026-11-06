@@ -6,8 +6,8 @@ use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
 use shared::types::tip::{
     MyTip, PublicTip, TipClaimFailure, TipDetails, TipError, TipStatus, MAX_TIPS_PER_USER,
-    MAX_TIP_EXPIRY_NS, MAX_TIP_ID_BYTES, MAX_TIP_MESSAGE_CHARS, TIP_CLAIM_CODE_HASH_BYTES,
-    TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS,
+    MAX_TIP_AMOUNT_BITS, MAX_TIP_EXPIRY_NS, MAX_TIP_ID_BYTES, MAX_TIP_MESSAGE_CHARS,
+    TIP_CLAIM_CODE_HASH_BYTES, TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS,
 };
 
 /// Where a tip is in its lifecycle, as stored.
@@ -243,6 +243,25 @@ pub fn validate_amount(amount: &Nat, ledger_fee: &Nat) -> Result<(), TipError> {
     Ok(())
 }
 
+/// Refuses an amount wider than [`MAX_TIP_AMOUNT_BITS`]. No allowance can
+/// cover it, so the answer is the one a ledger would give, `Uncovered` — but
+/// without asking one, so the width check runs before any ledger call.
+pub fn validate_amount_width(amount: &Nat) -> Result<(), TipError> {
+    if amount.0.bits() > MAX_TIP_AMOUNT_BITS {
+        return Err(TipError::Uncovered);
+    }
+    Ok(())
+}
+
+/// The block index a `Claimed` record keeps: the ledger's answer, capped at
+/// `u64::MAX`. The value comes from whichever ledger the sender named, decoded
+/// with no size limit, so without the cap it would be the one number in the
+/// record with no fixed width. No ledger reaches 2^64 blocks, so the cap never
+/// changes a real index.
+pub fn stored_block_index(block_index: &Nat) -> Nat {
+    Nat::from(u64::try_from(&block_index.0).unwrap_or(u64::MAX))
+}
+
 /// Whether creating another tip would exceed the per-sender active-tip cap.
 pub fn new_tip_exceeds_cap(active_count: usize) -> bool {
     active_count >= MAX_TIPS_PER_USER
@@ -348,6 +367,35 @@ mod tests {
         );
         assert!(validate_amount(&fee, &fee).is_ok());
         assert!(validate_amount(&Nat::from(10_001u64), &fee).is_ok());
+    }
+
+    #[test]
+    fn amount_width_boundary() {
+        let widest = Nat::from(u128::MAX) * Nat::from(u128::MAX);
+        assert_eq!(widest.0.bits(), MAX_TIP_AMOUNT_BITS);
+        assert!(validate_amount_width(&widest).is_ok());
+        assert!(validate_amount_width(&Nat::from(1u8)).is_ok());
+        assert_eq!(
+            validate_amount_width(&(widest * Nat::from(2u8))),
+            Err(TipError::Uncovered)
+        );
+    }
+
+    #[test]
+    fn stored_block_index_keeps_64_bits_and_caps_the_rest() {
+        let widest = Nat::from(u64::MAX);
+        assert_eq!(stored_block_index(&Nat::from(7u8)), Nat::from(7u8));
+        assert_eq!(stored_block_index(&widest), widest);
+        assert_eq!(
+            stored_block_index(&(widest.clone() + Nat::from(1u8))),
+            widest,
+            "one past 64 bits is stored at the cap"
+        );
+        assert_eq!(
+            stored_block_index(&(Nat::from(u128::MAX) * Nat::from(u128::MAX))),
+            widest,
+            "and so is any wider answer"
+        );
     }
 
     #[test]

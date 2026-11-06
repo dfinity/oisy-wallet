@@ -462,6 +462,37 @@ fn a_tip_without_a_covering_allowance_is_refused_at_creation() {
 }
 
 #[test]
+fn an_amount_no_allowance_can_cover_is_refused_before_any_ledger_call() {
+    let env = setup_tips();
+    // Not a canister: asking it anything ends in `TransferFailed`, so `Uncovered`
+    // shows the width check answered before a ledger was called.
+    let no_ledger = Principal::from_slice(&[0xab; 10]);
+    let wider_than_256_bits = Nat::from(u128::MAX) * Nat::from(u128::MAX) * Nat::from(2u8);
+
+    let result = env
+        .pic_setup
+        .update::<Result<(), TipError>>(
+            env.sender,
+            "create_tip",
+            CreateTipRequest {
+                tip_id: "tip-too-wide".to_string(),
+                ledger_canister_id: no_ledger,
+                amount: wider_than_256_bits,
+                expires_at_ns: now_ns(&env.pic_setup) + ONE_HOUR_NS,
+                message: None,
+                claim_code_hash: claim_code_hash("code-too-wide"),
+            },
+        )
+        .expect("create_tip should reach the handler");
+
+    assert_eq!(result, Err(TipError::Uncovered));
+    assert!(
+        env.my_tips(env.sender).is_empty(),
+        "a refused tip leaves nothing stored"
+    );
+}
+
+#[test]
 fn a_stored_claim_code_is_readable_only_by_the_sender_who_stored_it() {
     // The recovery store exists so a sender can get back to their own link. It
     // must not become a way to read anybody else's: `EncryptedMaps` keys every
@@ -549,6 +580,58 @@ fn cancelling_a_tip_drops_its_recoverable_claim_code() {
         after,
         GetTipSecretResult::Ok(None),
         "cancelling must drop the stored claim code"
+    );
+}
+
+#[test]
+fn a_cleanup_right_after_an_upgrade_still_drops_the_stored_claim_code() {
+    // The claim-code store opens lazily, and its heap handle does not survive an
+    // upgrade while its stable memory does. Here the cancel is the first call
+    // after the upgrade that touches the store, so it has to reopen it rather
+    // than find nothing open and skip the delete. Cancel stands in for every
+    // cleanup path: create, claim and the hourly sweep go through the same helper.
+    let env = setup_tips();
+    let tip_id = "tip-upgrade-secret";
+
+    // Long enough to outlive the time the upgrade helper advances.
+    let expires_at_ns = now_ns(&env.pic_setup) + 48 * ONE_HOUR_NS;
+    env.approve(tip_id, TIP_AMOUNT + TRANSFER_FEE, Some(expires_at_ns));
+    assert_eq!(
+        env.create(
+            tip_id,
+            "claim-code-upgrade-secret",
+            TIP_AMOUNT,
+            expires_at_ns
+        ),
+        Ok(())
+    );
+
+    let _: SetTipSecretResult = env
+        .pic_setup
+        .update(
+            env.sender,
+            "set_tip_secret",
+            SetTipSecretRequest {
+                tip_id: tip_id.to_string(),
+                encrypted_claim_code: ByteBuf::from(vec![5u8; 32]),
+            },
+        )
+        .expect("storing should succeed");
+
+    env.pic_setup
+        .upgrade_latest_wasm(None)
+        .expect("upgrade should succeed");
+
+    assert_eq!(env.cancel(env.sender, tip_id), Ok(()));
+
+    let after: GetTipSecretResult = env
+        .pic_setup
+        .query(env.sender, "get_tip_secret", tip_id.to_string())
+        .expect("the query still answers");
+    assert_eq!(
+        after,
+        GetTipSecretResult::Ok(None),
+        "the first cleanup after an upgrade must still drop the stored claim code"
     );
 }
 
@@ -871,5 +954,87 @@ fn a_tip_survives_an_upgrade_and_still_pays_exactly_once() {
         env.tip_allowance(tip_id),
         Nat::from(0u64),
         "and the allowance that paid for it is spent, so nothing can draw on it again"
+    );
+}
+
+/// The payout deadline, end to end.
+///
+/// Nothing here is a slow ledger: this ledger answers as soon as it is asked.
+/// What produces the deadline is the round the exchange falls into.
+/// `submit_call` holds the claim between rounds, so time can move past the
+/// call's deadline while the transfer is in flight, and the system then answers
+/// the backend with `SysUnknown` — the one outcome that says nothing about
+/// whether the payout happened.
+///
+/// It happened. That is the case the hold exists for: the ledger executed the
+/// transfer and only the reply missed the deadline, so a record released as
+/// failed here would contradict the ledger, and a tip cancelled on the strength
+/// of it would be cancelled after it had paid.
+#[test]
+fn a_payout_past_its_deadline_holds_the_claim_and_pays_exactly_once() {
+    let env = setup_tips();
+    let tip_id = "tip-deadline";
+    let claim_code = "deadline-code";
+    let claimer = Principal::self_authenticating("deadline-claimer");
+
+    env.reserve(tip_id, claim_code, TIP_AMOUNT);
+
+    let request = encode_one(TipClaimRequest {
+        tip_id: tip_id.to_string(),
+        claim_code: claim_code.to_string(),
+    })
+    .expect("the claim request encodes");
+    let claim = env
+        .pic_setup
+        .pic
+        .submit_call(env.pic_setup.canister_id(), claimer, "claim_tip", request)
+        .expect("claim_tip should be accepted");
+
+    // One round runs `claim_tip` up to its await, which leaves the transfer in
+    // flight; 31 s is one second past the payout's deadline.
+    env.pic_setup.pic.tick();
+    env.pic_setup.pic.advance_time(Duration::from_secs(31));
+
+    let reply = env
+        .pic_setup
+        .pic
+        .await_call(claim)
+        .expect("claim_tip should return rather than trap");
+    let result: Result<TipClaim, TipError> =
+        candid::decode_one(&reply).expect("the claim result decodes");
+
+    assert!(
+        matches!(result, Err(TipError::TransferFailed { .. })),
+        "the claimer is told the payout did not definitely land: {result:?}"
+    );
+    assert_eq!(
+        env.balance(claimer),
+        Nat::from(TIP_AMOUNT),
+        "while on the ledger it did land, which is why the outcome is unknown rather than failed"
+    );
+    assert_eq!(
+        env.tip_allowance(tip_id),
+        Nat::from(0u64),
+        "and the allowance that paid for it is spent"
+    );
+    assert!(
+        env.cancel(env.sender, tip_id).is_err(),
+        "so the tip stays held and cancelling it is refused, rather than storing a tip that paid as cancelled"
+    );
+
+    // Past the in-flight window the tip is open to a fresh claim, and the spent
+    // allowance is what keeps that claim from paying a second time.
+    env.pic_setup
+        .pic
+        .advance_time(Duration::from_secs(5 * 60 + 1));
+
+    assert!(
+        env.claim(claimer, tip_id, claim_code).is_err(),
+        "a later attempt finds nothing left to draw on"
+    );
+    assert_eq!(
+        env.balance(claimer),
+        Nat::from(TIP_AMOUNT),
+        "so the claimer is paid exactly once across an outcome the canister could not read"
     );
 }

@@ -116,6 +116,40 @@ describe('SwapForm', () => {
 
 			expect(onNext).not.toHaveBeenCalled();
 		});
+
+		// A form reporting a problem off the pay field (an EVM swap whose network coin cannot cover
+		// the gas) holds Review without painting the field, which only an amount error does.
+		it.each([
+			{ reason: 'the form reports itself', held: { disabled: true }, decorated: false },
+			{
+				reason: 'in the pay field',
+				held: { errorType: 'insufficient-funds' as const },
+				decorated: true
+			}
+		])('holds Review for a problem $reason', ({ held, decorated }) => {
+			setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
+			const { container, getByRole } = render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					slippageValue: '1',
+					isSwapAmountsLoading: false,
+					fee: 1000n,
+					...held,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+			const payField = container
+				.querySelector(`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`)
+				?.closest('.token-input-currency');
+
+			expect(getByRole('button', { name: en.swap.text.review_button })).toBeDisabled();
+			expect(payField?.classList.contains('text-error-primary')).toBe(decorated);
+		});
 	});
 
 	describe('switch tokens button', () => {

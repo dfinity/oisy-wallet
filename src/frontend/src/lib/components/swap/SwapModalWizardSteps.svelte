@@ -6,7 +6,6 @@
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
-	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
 	import { crossChainSwapNetworksMainnets } from '$lib/derived/cross-chain-networks.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
@@ -49,7 +48,6 @@
 		slippageValue: OptionAmount;
 		swapProgressStep: ProgressStepsSwap;
 		swapFailedProgressSteps?: ProgressStepsSwap[];
-		allNetworksEnabled: boolean;
 	}
 
 	let {
@@ -60,7 +58,6 @@
 		slippageValue = $bindable(),
 		swapProgressStep = $bindable(),
 		swapFailedProgressSteps = $bindable(),
-		allNetworksEnabled = $bindable(),
 		currentStep,
 		selectTokenType = $bindable(),
 		onClose
@@ -78,8 +75,9 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY
 	);
 
-	const { filteredNetworks, setAllowedNetworkIds, resetAllowedNetworkIds } =
-		getContext<ModalNetworksListContext>(MODAL_NETWORKS_LIST_CONTEXT_KEY);
+	const { setAllowedNetworkIds, resetAllowedNetworkIds } = getContext<ModalNetworksListContext>(
+		MODAL_NETWORKS_LIST_CONTEXT_KEY
+	);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -97,8 +95,6 @@
 		enabled: boolean;
 		allowedIds?: NetworkId[];
 	}) => {
-		allNetworksEnabled = enabled;
-
 		if (enabled) {
 			resetAllowedNetworkIds();
 
@@ -280,16 +276,8 @@
 		{#if currentStep?.name === WizardStepsSwap.TOKENS_LIST}
 			<SwapTokensList
 				onCloseTokensList={closeTokenList}
-				onSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
 				onSelectToken={selectToken}
 				side={selectTokenType}
-			/>
-		{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
-			<ModalNetworksFilter
-				{allNetworksEnabled}
-				filteredNetworks={$filteredNetworks}
-				onNetworkFilter={() => goToStep(WizardStepsSwap.TOKENS_LIST)}
-				showStakeBalance={false}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
 			<SwapProviderListModal

@@ -70,15 +70,13 @@
 	let slippageValue = $state<OptionAmount>(getInitialSwapSlippage());
 	let swapProgressStep = $state(ProgressStepsSwap.INITIALIZATION);
 	let swapFailedProgressSteps = $state<ProgressStepsSwap[]>([]);
-	let allNetworksEnabled = $state<boolean>(true);
 
 	let showSwapWizard = $derived(
 		currentStep?.name === WizardStepsGetToken.SWAP ||
 			currentStep?.name === WizardStepsGetToken.REVIEW ||
 			currentStep?.name === WizardStepsGetToken.SWAPPING ||
 			currentStep?.name === WizardStepsGetToken.SELECT_PROVIDER ||
-			currentStep?.name === WizardStepsGetToken.TOKENS_LIST ||
-			currentStep?.name === WizardStepsGetToken.FILTER_NETWORKS
+			currentStep?.name === WizardStepsGetToken.TOKENS_LIST
 	);
 
 	const reset = (fullReset = false) => {
@@ -91,7 +89,6 @@
 		receiveAmount = undefined;
 		slippageValue = getInitialSwapSlippage();
 		swapProgressStep = ProgressStepsSwap.INITIALIZATION;
-		allNetworksEnabled = true;
 
 		resetSwapStore();
 		resetTokensListFilters();
@@ -126,8 +123,7 @@
 
 <WizardModal
 	bind:this={modal}
-	disablePointerEvents={currentStep?.name === WizardStepsGetToken.SWAPPING ||
-		currentStep?.name === WizardStepsGetToken.FILTER_NETWORKS}
+	disablePointerEvents={currentStep?.name === WizardStepsGetToken.SWAPPING}
 	onClose={close}
 	{steps}
 	bind:currentStep
@@ -177,7 +173,6 @@
 				bind:slippageValue
 				bind:swapProgressStep
 				bind:swapFailedProgressSteps
-				bind:allNetworksEnabled
 				bind:selectTokenType
 			/>
 		{/if}

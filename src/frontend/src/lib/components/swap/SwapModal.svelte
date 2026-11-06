@@ -56,7 +56,6 @@
 	let slippageValue = $state<OptionAmount>(getInitialSwapSlippage());
 	let swapProgressStep = $state(ProgressStepsSwap.INITIALIZATION);
 	let swapFailedProgressSteps = $state<ProgressStepsSwap[]>([]);
-	let allNetworksEnabled = $state<boolean>(true);
 
 	let titleString = $derived(
 		selectTokenType === 'source'
@@ -78,7 +77,6 @@
 			currentStep = undefined;
 			slippageValue = getInitialSwapSlippage();
 			swapProgressStep = ProgressStepsSwap.INITIALIZATION;
-			allNetworksEnabled = true;
 			selectTokenType = undefined;
 		});
 
@@ -118,7 +116,6 @@
 		bind:slippageValue
 		bind:swapProgressStep
 		bind:swapFailedProgressSteps
-		bind:allNetworksEnabled
 		bind:selectTokenType
 	/>
 </WizardModal>
