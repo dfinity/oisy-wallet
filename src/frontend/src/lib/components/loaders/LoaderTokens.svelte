@@ -22,7 +22,8 @@
 	} from '$icp/services/icpunks.services';
 	import {
 		loadDefaultIcrcTokens,
-		processCustomTokens as processIcrcCustomTokens
+		processCustomTokens as processIcrcCustomTokens,
+		saveDefaultEnabledIcrcTokens
 	} from '$icp/services/icrc.services';
 	import {
 		loadDefaultIcrc7Tokens,
@@ -150,12 +151,18 @@
 			return;
 		}
 
+		// By the time the processing settles, `loadParams` may already hold the next answer.
+		const params = loadParams;
+
 		await Promise.allSettled([
-			processIcrcCustomTokens(loadParams),
-			processExtCustomTokens(loadParams),
-			processIcPunksCustomTokens(loadParams),
-			processIcrc7CustomTokens(loadParams)
+			processIcrcCustomTokens(params),
+			processExtCustomTokens(params),
+			processIcPunksCustomTokens(params),
+			processIcrc7CustomTokens(params)
 		]);
+
+		// After the processing, so the ICRC tokens it sets cannot replace those reloaded after a save.
+		await Promise.allSettled([saveDefaultEnabledIcrcTokens(params)]);
 	};
 
 	const processFetchedEthTokens = async () => {

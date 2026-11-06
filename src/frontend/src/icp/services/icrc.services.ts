@@ -1,5 +1,8 @@
 import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
-import { ADDITIONAL_ICRC_TOKENS_INDEXED } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
+import {
+	ADDITIONAL_ICRC_TOKENS_INDEXED,
+	ICRC_DEFAULT_ENABLED_LEDGER_CANISTER_IDS
+} from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { ICRC_TOKENS, ICRC_TOKENS_METADATA } from '$env/tokens/tokens-icrc/tokens.icrc.env';
 import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
@@ -30,6 +33,7 @@ import {
 	mapTokenOisySymbol,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
+import { setManyCustomTokens } from '$lib/api/backend.api';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
 import {
 	PLAUSIBLE_EVENTS,
@@ -44,9 +48,10 @@ import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { LoadCustomTokenParams } from '$lib/types/custom-token';
+import type { LoadCustomTokenParams, SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
+import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { isTcyclesLedgerCanisterId } from '$lib/utils/exchange.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -301,6 +306,64 @@ export const processCustomTokens = async (params: LoadCustomTokenParams): Promis
 			onCustomTokensUpdateError({ error: err });
 		}
 	}
+};
+
+/**
+ * Saves the ICRC tokens enabled by default as enabled to the user's token list, for those the list
+ * has no entry for yet. Saved, a token stays enabled once it leaves `ICRC_DEFAULT_ENABLED_LEDGER_CANISTER_IDS`.
+ *
+ * Only the certified token list is trusted to tell which entries are missing. An entry the user
+ * already has, enabled or disabled, is never overwritten: the save carries no version, so the backend
+ * refuses it for a token that has gained an entry in the meantime, e.g. from another device.
+ *
+ * A token this build does not curate (a local build has no additional ICRC tokens) is skipped:
+ * saved, it would show up as a custom token.
+ *
+ * A failed save is not reported: the next sign-in tries again.
+ */
+export const saveDefaultEnabledIcrcTokens = async ({
+	identity,
+	certified,
+	tokens
+}: LoadCustomTokenParams): Promise<void> => {
+	if (!certified || isNullish(identity) || isNullish(tokens)) {
+		return;
+	}
+
+	const savedLedgerCanisterIds = new Set(
+		tokens.flatMap(({ token }) => ('Icrc' in token ? [token.Icrc.ledger_id.toText()] : []))
+	);
+
+	const unsavedTokens = ICRC_DEFAULT_ENABLED_LEDGER_CANISTER_IDS.filter(
+		(ledgerCanisterId) => !savedLedgerCanisterIds.has(ledgerCanisterId)
+	).reduce<SaveCustomTokenWithKey[]>((acc, ledgerCanisterId) => {
+		const curatedToken = ICRC_TOKENS.find((token) => token.ledgerCanisterId === ledgerCanisterId);
+
+		return isNullish(curatedToken)
+			? acc
+			: [
+					...acc,
+					{
+						ledgerCanisterId,
+						indexCanisterId: curatedToken.indexCanisterId,
+						enabled: true,
+						networkKey: 'Icrc'
+					}
+				];
+	}, []);
+
+	if (unsavedTokens.length === 0) {
+		return;
+	}
+
+	try {
+		await setManyCustomTokens({ identity, tokens: unsavedTokens.map(toCustomToken) });
+	} catch (_: unknown) {
+		return;
+	}
+
+	// Without the version the backend gave the new entries, it would refuse the user's next change to these tokens.
+	await loadCustomTokens({ identity });
 };
 
 const onDefaultTokensUpdateError = ({

@@ -1,7 +1,12 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
+import * as tokensIcrcAdditionalEnv from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
+import {
+	GLDT_LEDGER_CANISTER_ID,
+	TCYCLES_LEDGER_CANISTER_ID
+} from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import * as tokensIcrcEnv from '$env/tokens/tokens-icrc/tokens.icrc.env';
 import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
 import {
 	hasSufficientIcrcAllowance,
@@ -9,10 +14,12 @@ import {
 	isIcrcTokenSupportIcrc3,
 	loadCustomTokens,
 	loadDisabledIcrcTokensBalances,
-	loadDisabledIcrcTokensExchanges
+	loadDisabledIcrcTokensExchanges,
+	saveDefaultEnabledIcrcTokens
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import * as icrcMetadataUtils from '$icp/utils/icrc-metadata.utils';
+import * as backendApi from '$lib/api/backend.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
@@ -548,6 +555,194 @@ describe('icrc.services', () => {
 
 				expect(mockOnSuccess).not.toHaveBeenCalled();
 			});
+		});
+	});
+
+	describe('saveDefaultEnabledIcrcTokens', () => {
+		const tcyclesIndexCanisterId = 'ul4oc-4iaaa-aaaaq-qaabq-cai';
+
+		const mockSavedToken = ({
+			ledgerCanisterId,
+			enabled
+		}: {
+			ledgerCanisterId: CanisterIdText;
+			enabled: boolean;
+		}): CustomToken => ({
+			token: {
+				Icrc: {
+					ledger_id: Principal.fromText(ledgerCanisterId),
+					index_id: toNullable()
+				}
+			},
+			version: toNullable(1n),
+			enabled,
+			section: toNullable(),
+			allow_external_content_source: toNullable(),
+			allowed_external_content_source_urls: toNullable()
+		});
+
+		const mockSavedErc20Token: CustomToken = {
+			token: { Erc20: { token_address: mockEthAddress, chain_id: 1n } },
+			version: toNullable(1n),
+			enabled: true,
+			section: toNullable(),
+			allow_external_content_source: toNullable(),
+			allowed_external_content_source_urls: toNullable()
+		};
+
+		let spySetManyCustomTokens: MockInstance<typeof backendApi.setManyCustomTokens>;
+		let spyListCustomTokens: MockInstance<typeof backendApi.listCustomTokens>;
+
+		const savedLedgerCanisterIds = (): (string | undefined)[] =>
+			(spySetManyCustomTokens.mock.calls[0]?.[0].tokens ?? []).map(({ token }) =>
+				'Icrc' in token ? token.Icrc.ledger_id.toText() : undefined
+			);
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			// A local build, which the tests run as, curates no additional ICRC tokens.
+			vi.spyOn(tokensIcrcEnv, 'ICRC_TOKENS', 'get').mockReturnValue([
+				{ ledgerCanisterId: TCYCLES_LEDGER_CANISTER_ID, indexCanisterId: tcyclesIndexCanisterId },
+				{ ledgerCanisterId: GLDT_LEDGER_CANISTER_ID, indexCanisterId: mockIndexCanisterId }
+			]);
+
+			vi.spyOn(
+				tokensIcrcAdditionalEnv,
+				'ICRC_DEFAULT_ENABLED_LEDGER_CANISTER_IDS',
+				'get'
+			).mockReturnValue([TCYCLES_LEDGER_CANISTER_ID]);
+
+			spySetManyCustomTokens = vi.spyOn(backendApi, 'setManyCustomTokens').mockResolvedValue();
+			spyListCustomTokens = vi.spyOn(backendApi, 'listCustomTokens').mockResolvedValue([]);
+		});
+
+		it('should save a default-enabled token the user has no entry for as enabled', async () => {
+			await saveDefaultEnabledIcrcTokens({ identity: mockIdentity, certified: true, tokens: [] });
+
+			expect(spySetManyCustomTokens).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				tokens: [
+					{
+						token: {
+							Icrc: {
+								ledger_id: Principal.fromText(TCYCLES_LEDGER_CANISTER_ID),
+								index_id: toNullable(Principal.fromText(tcyclesIndexCanisterId))
+							}
+						},
+						version: toNullable(),
+						enabled: true,
+						section: toNullable(),
+						allow_external_content_source: toNullable(),
+						allowed_external_content_source_urls: toNullable()
+					}
+				]
+			});
+		});
+
+		it('should save a default-enabled token next to entries for other tokens', async () => {
+			await saveDefaultEnabledIcrcTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [
+					mockSavedToken({ ledgerCanisterId: mockLedgerCanisterId, enabled: true }),
+					mockSavedErc20Token
+				]
+			});
+
+			expect(savedLedgerCanisterIds()).toEqual([TCYCLES_LEDGER_CANISTER_ID]);
+		});
+
+		it.each([
+			{ description: 'disabled', enabled: false },
+			{ description: 'enabled', enabled: true }
+		])('should not save a token the user has $description', async ({ enabled }) => {
+			await saveDefaultEnabledIcrcTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [mockSavedToken({ ledgerCanisterId: TCYCLES_LEDGER_CANISTER_ID, enabled })]
+			});
+
+			expect(spySetManyCustomTokens).not.toHaveBeenCalled();
+			expect(spyListCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should only save the default-enabled tokens the user has no entry for', async () => {
+			vi.spyOn(
+				tokensIcrcAdditionalEnv,
+				'ICRC_DEFAULT_ENABLED_LEDGER_CANISTER_IDS',
+				'get'
+			).mockReturnValue([TCYCLES_LEDGER_CANISTER_ID, GLDT_LEDGER_CANISTER_ID]);
+
+			await saveDefaultEnabledIcrcTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [mockSavedToken({ ledgerCanisterId: TCYCLES_LEDGER_CANISTER_ID, enabled: false })]
+			});
+
+			expect(savedLedgerCanisterIds()).toEqual([GLDT_LEDGER_CANISTER_ID]);
+		});
+
+		it('should not save a default-enabled token this build does not curate', async () => {
+			vi.spyOn(tokensIcrcEnv, 'ICRC_TOKENS', 'get').mockReturnValue([]);
+
+			await saveDefaultEnabledIcrcTokens({ identity: mockIdentity, certified: true, tokens: [] });
+
+			expect(spySetManyCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should not save when no token is enabled by default', async () => {
+			vi.spyOn(
+				tokensIcrcAdditionalEnv,
+				'ICRC_DEFAULT_ENABLED_LEDGER_CANISTER_IDS',
+				'get'
+			).mockReturnValue([]);
+
+			await saveDefaultEnabledIcrcTokens({ identity: mockIdentity, certified: true, tokens: [] });
+
+			expect(spySetManyCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should not save on the uncertified token list', async () => {
+			await saveDefaultEnabledIcrcTokens({ identity: mockIdentity, certified: false, tokens: [] });
+
+			expect(spySetManyCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should not save without a token list', async () => {
+			await saveDefaultEnabledIcrcTokens({ identity: mockIdentity, certified: true });
+
+			expect(spySetManyCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should not save without an identity', async () => {
+			await saveDefaultEnabledIcrcTokens({ identity: null, certified: true, tokens: [] });
+
+			expect(spySetManyCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should reload the ICRC custom tokens after the save', async () => {
+			await saveDefaultEnabledIcrcTokens({ identity: mockIdentity, certified: true, tokens: [] });
+
+			expect(spyListCustomTokens).toHaveBeenCalled();
+
+			const [saveOrder] = spySetManyCustomTokens.mock.invocationCallOrder;
+			const [reloadOrder] = spyListCustomTokens.mock.invocationCallOrder;
+
+			expect(saveOrder).toBeLessThan(reloadOrder);
+		});
+
+		it('should neither throw, reload nor toast when the save fails', async () => {
+			const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+			spySetManyCustomTokens.mockRejectedValueOnce(new Error('Version mismatch'));
+
+			await expect(
+				saveDefaultEnabledIcrcTokens({ identity: mockIdentity, certified: true, tokens: [] })
+			).resolves.toBeUndefined();
+
+			expect(spyListCustomTokens).not.toHaveBeenCalled();
+			expect(spyToastsError).not.toHaveBeenCalled();
 		});
 	});
 
