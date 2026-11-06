@@ -2,17 +2,26 @@ import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-t
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
+import { swapWizardSteps } from '$lib/config/swap.config';
+import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
 	MODAL_TOKENS_LIST,
 	NETWORK_FILTER,
 	SWAP_MODAL_SELECT_PROVIDER_STEP,
-	SWAP_SWITCH_TOKENS_BUTTON
+	SWAP_SWITCH_TOKENS_BUTTON,
+	TOKEN_CATEGORY_FILTER,
+	TOKEN_INPUT_SELECT_TOKEN_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as addressDerived from '$lib/derived/address.derived';
+import * as swapDerived from '$lib/derived/swap.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import {
 	MODAL_NETWORKS_LIST_CONTEXT_KEY,
@@ -22,6 +31,7 @@ import {
 	MODAL_TOKENS_LIST_CONTEXT_KEY,
 	initModalTokensListContext
 } from '$lib/stores/modal-tokens-list.store';
+import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import {
 	SWAP_AMOUNTS_CONTEXT_KEY,
 	initSwapAmountsStore,
@@ -29,11 +39,18 @@ import {
 } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { WizardModal, WizardStep } from '$lib/types/wizard';
+import SwapModalWizardStepsTestHost from '$tests/lib/components/swap/SwapModalWizardStepsTestHost.svelte';
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
-import { render } from '@testing-library/svelte';
+import { openFilterChip } from '$tests/utils/filter-chip.test-utils';
+import {
+	mockModalNetworksListContextEntry,
+	mockModalTokensListContextEntry
+} from '$tests/utils/misc.context.test-utils';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get, readable } from 'svelte/store';
 
@@ -67,8 +84,10 @@ describe('SwapModalWizardSteps', () => {
 		selectedProvider: mockSwapProviders[0]
 	};
 
-	const mockModal = {
-		set: vi.fn()
+	const mockModal: WizardModal<WizardStepsSwap> = {
+		set: vi.fn(),
+		next: vi.fn(),
+		back: vi.fn()
 	};
 
 	beforeEach(() => {
@@ -125,7 +144,7 @@ describe('SwapModalWizardSteps', () => {
 				onClose: vi.fn(),
 				currentStep,
 				swapProgressStep: ProgressStepsSwap.INITIALIZATION,
-				modal: mockModal as unknown as WizardModal<WizardStepsSwap>,
+				modal: mockModal,
 				steps: [
 					{
 						name: WizardStepsSwap.SWAP,
@@ -295,6 +314,281 @@ describe('SwapModalWizardSteps', () => {
 
 			expect(btcStoresPopulated()).toBeTruthy();
 			expect(loadBtcPendingSentTransactions).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('token list filters', () => {
+		const steps = swapWizardSteps({ i18n: en });
+
+		const swapStep = { name: WizardStepsSwap.SWAP, title: 'title' };
+		const tokensListStep = { name: WizardStepsSwap.TOKENS_LIST, title: 'title' };
+
+		const renderHost = () =>
+			render(SwapModalWizardStepsTestHost, {
+				props: { currentStep: swapStep, steps, modal: mockModal },
+				context: mockContext
+			});
+
+		type Rendered = ReturnType<typeof renderHost>;
+
+		const openList = async ({ rendered, side }: { rendered: Rendered; side: 0 | 1 }) => {
+			await fireEvent.click(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[side]);
+			await rendered.rerender({ currentStep: tokensListStep, steps, modal: mockModal });
+
+			// The form plays its exit first and stays until it ends, with its own token buttons.
+			await waitFor(() =>
+				expect(screen.queryByTestId(SWAP_SWITCH_TOKENS_BUTTON)).not.toBeInTheDocument()
+			);
+		};
+
+		const showForm = async (rendered: Rendered) => {
+			await rendered.rerender({ currentStep: swapStep, steps, modal: mockModal });
+
+			// A filter panel closed just before plays its exit first, and the list stays until it ends.
+			await waitFor(() => expect(screen.queryByTestId(MODAL_TOKENS_LIST)).not.toBeInTheDocument());
+		};
+
+		const cancelList = async (rendered: Rendered) => {
+			await fireEvent.click(rendered.getByText(en.core.text.cancel));
+			await showForm(rendered);
+		};
+
+		const pickFromChip = async ({ chip, option }: { chip: string; option: string }) => {
+			const panel = await openFilterChip(chip);
+
+			await fireEvent.click(within(panel).getByText(option));
+		};
+
+		const networkChip = () => screen.getByTestId(NETWORK_FILTER);
+		const assetTypeChip = () => screen.getByTestId(TOKEN_CATEGORY_FILTER);
+
+		beforeEach(() => {
+			setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
+
+			mockContext.set(...mockModalTokensListContextEntry({ tokens: [] }));
+			mockContext.set(...mockModalNetworksListContextEntry({ networks: [ICP_NETWORK] }));
+
+			// A universe with something on ICP, so the list offers Internet Computer as a network.
+			vi.spyOn(swapDerived, 'allSwapUniverseTokens', 'get').mockReturnValue(
+				readable([{ ...ICP_TOKEN, enabled: true }])
+			);
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it("opens the pay list on all networks, not on the pay token's network", async () => {
+			const rendered = renderHost();
+
+			await openList({ rendered, side: 0 });
+
+			expect(networkChip()).toHaveTextContent(en.networks.chain_fusion);
+		});
+
+		it('keeps the network the list was left on after a token is picked', async () => {
+			const rendered = renderHost();
+
+			await openList({ rendered, side: 0 });
+
+			// All networks, then a pick on Internet Computer: the old picker switched to its network.
+			await fireEvent.click(rendered.getByRole('button', { name: new RegExp(ICP_TOKEN.symbol) }));
+			await showForm(rendered);
+
+			await openList({ rendered, side: 0 });
+
+			expect(networkChip()).toHaveTextContent(en.networks.chain_fusion);
+		});
+
+		it('reopens the pay list on the filters it was left on', async () => {
+			const rendered = renderHost();
+
+			await openList({ rendered, side: 0 });
+
+			await pickFromChip({ chip: NETWORK_FILTER, option: ICP_NETWORK.name });
+			await pickFromChip({ chip: TOKEN_CATEGORY_FILTER, option: en.token_tag.category.crypto });
+
+			await cancelList(rendered);
+
+			await openList({ rendered, side: 0 });
+
+			expect(networkChip()).toHaveTextContent(ICP_NETWORK.name);
+			expect(assetTypeChip()).toHaveTextContent(en.token_tag.category.crypto);
+		});
+
+		it("opens the receive list on the pay token's network and the pay list's asset type", async () => {
+			const rendered = renderHost();
+
+			await openList({ rendered, side: 0 });
+
+			await pickFromChip({ chip: TOKEN_CATEGORY_FILTER, option: en.token_tag.category.crypto });
+
+			await cancelList(rendered);
+
+			await openList({ rendered, side: 1 });
+
+			// The pay token is on Internet Computer: a same-network swap is one pick away.
+			expect(networkChip()).toHaveTextContent(ICP_NETWORK.name);
+			expect(assetTypeChip()).toHaveTextContent(en.token_tag.category.crypto);
+		});
+
+		it('keeps the receive list following the pay side until its filters are changed', async () => {
+			const rendered = renderHost();
+
+			await openList({ rendered, side: 1 });
+
+			expect(assetTypeChip()).toHaveTextContent(en.tokens.text.asset_type_all_short);
+
+			await cancelList(rendered);
+
+			await openList({ rendered, side: 0 });
+
+			await pickFromChip({ chip: TOKEN_CATEGORY_FILTER, option: en.token_tag.category.crypto });
+
+			await cancelList(rendered);
+
+			await openList({ rendered, side: 1 });
+
+			expect(assetTypeChip()).toHaveTextContent(en.token_tag.category.crypto);
+		});
+
+		it('keeps Max when the pay token already picked is picked again', async () => {
+			const swapContext = initSwapContext({
+				sourceToken: ICP_TOKEN,
+				destinationToken: mockValidIcToken
+			});
+
+			swapContext.amountSetToMax.set(true);
+
+			mockContext.set(SWAP_CONTEXT_KEY, {
+				...swapContext,
+				sourceTokenExchangeRate: readable(10),
+				destinationTokenExchangeRate: readable(2)
+			});
+
+			const rendered = renderHost();
+
+			await openList({ rendered, side: 0 });
+
+			// Nothing changes, so nothing is reset: a new pay token would clear Max and its LI.FI fee.
+			await fireEvent.click(rendered.getByRole('button', { name: new RegExp(ICP_TOKEN.symbol) }));
+			await showForm(rendered);
+
+			expect(get(swapContext.amountSetToMax)).toBeTruthy();
+		});
+
+		describe('with Bitcoin to pay', () => {
+			const btcToken = { ...BTC_MAINNET_TOKEN, enabled: true };
+
+			beforeEach(() => {
+				vi.spyOn(addressDerived, 'btcAddressMainnet', 'get').mockReturnValue(
+					readable(mockBtcAddress)
+				);
+
+				mockContext.set(SWAP_CONTEXT_KEY, {
+					...initSwapContext({ sourceToken: btcToken, destinationToken: mockValidIcToken }),
+					sourceTokenExchangeRate: readable(10),
+					destinationTokenExchangeRate: readable(2)
+				});
+
+				mockContext.set(
+					...mockModalNetworksListContextEntry({ networks: [ICP_NETWORK, BTC_MAINNET_NETWORK] })
+				);
+
+				vi.spyOn(swapDerived, 'allSwapUniverseTokens', 'get').mockReturnValue(
+					readable([{ ...ICP_TOKEN, enabled: true }, btcToken])
+				);
+			});
+
+			it('opens the receive list on all networks, since Bitcoin has nothing else to receive', async () => {
+				const rendered = renderHost();
+
+				await openList({ rendered, side: 1 });
+
+				expect(networkChip()).toHaveTextContent(en.networks.chain_fusion);
+				expect(
+					rendered.getByRole('button', { name: new RegExp(ICP_TOKEN.symbol) })
+				).toBeInTheDocument();
+				expect(
+					rendered.queryByRole('button', { name: new RegExp(`^${BTC_MAINNET_TOKEN.symbol}`) })
+				).not.toBeInTheDocument();
+			});
+		});
+
+		describe('on the assets page with an asset type picked', () => {
+			beforeEach(() => {
+				mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Tokens}` });
+
+				tokenCategoryFilterStore.set({
+					key: 'token-category-filter',
+					value: { value: TokenCategoryTagValue.CRYPTO }
+				});
+			});
+
+			afterEach(() => {
+				tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
+
+				mockPage.reset();
+			});
+
+			it('opens the receive list on all asset types once the pay list is cleared to them', async () => {
+				const rendered = renderHost();
+
+				await openList({ rendered, side: 0 });
+
+				expect(assetTypeChip()).toHaveTextContent(en.token_tag.category.crypto);
+
+				await fireEvent.click(screen.getByTestId(`${TOKEN_CATEGORY_FILTER}-clear`));
+
+				await cancelList(rendered);
+
+				await openList({ rendered, side: 1 });
+
+				expect(assetTypeChip()).toHaveTextContent(en.tokens.text.asset_type_all_short);
+			});
+		});
+
+		it("keeps the receive list's own filters once changed, even back to where they started", async () => {
+			const rendered = renderHost();
+
+			await openList({ rendered, side: 1 });
+
+			await pickFromChip({ chip: TOKEN_CATEGORY_FILTER, option: en.token_tag.category.crypto });
+			await pickFromChip({ chip: TOKEN_CATEGORY_FILTER, option: en.tokens.text.asset_type_all });
+
+			await cancelList(rendered);
+
+			await openList({ rendered, side: 0 });
+
+			await pickFromChip({ chip: TOKEN_CATEGORY_FILTER, option: en.token_tag.category.crypto });
+
+			await cancelList(rendered);
+
+			await openList({ rendered, side: 1 });
+
+			expect(assetTypeChip()).toHaveTextContent(en.tokens.text.asset_type_all_short);
+		});
+
+		it("keeps the receive list's own filters once they are changed", async () => {
+			const rendered = renderHost();
+
+			await openList({ rendered, side: 1 });
+
+			await fireEvent.click(screen.getByTestId(`${NETWORK_FILTER}-clear`));
+
+			await cancelList(rendered);
+
+			await openList({ rendered, side: 0 });
+
+			await pickFromChip({ chip: TOKEN_CATEGORY_FILTER, option: en.token_tag.category.crypto });
+
+			await cancelList(rendered);
+
+			await openList({ rendered, side: 1 });
+
+			expect(networkChip()).toHaveTextContent(en.networks.chain_fusion);
+			expect(assetTypeChip()).toHaveTextContent(en.tokens.text.asset_type_all_short);
 		});
 	});
 });

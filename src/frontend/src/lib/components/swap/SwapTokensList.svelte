@@ -31,9 +31,10 @@
 		side?: SwapSelectTokenType;
 		onSelectToken: (token: Token) => void;
 		onCloseTokensList: () => void;
+		onFiltersChange?: () => void;
 	}
 
-	let { side, onSelectToken, onCloseTokensList }: Props = $props();
+	let { side, onSelectToken, onCloseTokensList, onFiltersChange }: Props = $props();
 
 	const { sourceToken, destinationToken, receiveSupportedData } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
@@ -58,6 +59,12 @@
 		})
 	);
 
+	// This side's own pick stays in the list, checked, so reopening the list shows what is picked
+	// and a network with one token (Bitcoin) is never empty. The other side's pick is left out.
+	let selectedToken = $derived(side === 'destination' ? $destinationToken : $sourceToken);
+
+	let pairedToken = $derived(side === 'destination' ? $sourceToken : $destinationToken);
+
 	// Only the networks this side may use (to receive: the ones the pay token reaches), so "All
 	// networks" means all of those and never shows a token the swap cannot reach.
 	let allowedSwapTokens: TokenToggleable<Token>[] = $derived(
@@ -66,10 +73,7 @@
 
 	let tokensUi: TokenToggleable<TokenUi>[] = $derived(
 		allowedSwapTokens
-			.filter(
-				(token: TokenToggleable<Token>) =>
-					token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
-			)
+			.filter((token: TokenToggleable<Token>) => token.id !== pairedToken?.id)
 			.map((token: TokenToggleable<Token>) =>
 				mapTokenUi({
 					token,
@@ -101,11 +105,12 @@
 
 <ModalTokensList
 	networks={availableNetworks}
+	{onFiltersChange}
 	onTokenButtonClick={onSelectToken}
 	showStakeBalance={false}
 >
 	{#snippet tokenListItem(token, onClick)}
-		<ModalTokensListItem {onClick} {token} />
+		<ModalTokensListItem {onClick} selected={token.id === selectedToken?.id} {token} />
 	{/snippet}
 	{#snippet toolbar()}
 		<ButtonCancel fullWidth={true} onclick={onCloseTokensList} />

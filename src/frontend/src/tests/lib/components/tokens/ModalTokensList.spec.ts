@@ -128,10 +128,18 @@ describe('ModalTokensList', () => {
 
 	describe('network filter', () => {
 		it('filters by the network picked in the dropdown', async () => {
+			const onFiltersChange = vi.fn();
+
 			const { getByTestId, findByTestId, queryByTestId, findByPlaceholderText } = render(
 				ModalTokensListHost,
 				{
-					props: { ...baseProps, tokens: mockTokens, renderNoResults: false, networks }
+					props: {
+						...baseProps,
+						tokens: mockTokens,
+						renderNoResults: false,
+						networks,
+						onFiltersChange
+					}
 				}
 			);
 
@@ -144,6 +152,8 @@ describe('ModalTokensList', () => {
 			const panel = await findByTestId('popover-content');
 
 			await fireEvent.click(within(panel).getByText(BTC_MAINNET_NETWORK.name));
+
+			expect(onFiltersChange).toHaveBeenCalledOnce();
 
 			await expect(findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}BTC`)).resolves.toBeInTheDocument();
 			expect(queryByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}ETH`)).not.toBeInTheDocument();
@@ -252,6 +262,25 @@ describe('ModalTokensList', () => {
 			await fireEvent.click(getByTestId(MODAL_TOKEN_LIST_CLEAR_FILTERS));
 
 			await expect(findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}ETH`)).resolves.toBeInTheDocument();
+		});
+
+		it('tells the host when the filters are cleared', async () => {
+			const onFiltersChange = vi.fn();
+
+			const { findByTestId } = render(ModalTokensListHost, {
+				props: {
+					...baseProps,
+					tokens: [ETHEREUM_TOKEN],
+					renderNoResults: true,
+					networks,
+					filterNetwork: BTC_MAINNET_NETWORK,
+					onFiltersChange
+				}
+			});
+
+			await fireEvent.click(await findByTestId(MODAL_TOKEN_LIST_CLEAR_FILTERS));
+
+			expect(onFiltersChange).toHaveBeenCalledOnce();
 		});
 
 		it('never clears a locked network', async () => {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
@@ -134,12 +134,14 @@
 		error = onCustomErrorValidate(parsedValue);
 	};
 
-	const debounceValidate = debounce(validate, 300);
-
+	// Waits for typing to pause. The cleanup drops a pending check when the amount changes again, and
+	// when the input goes away: a check run after that would read the state of a form that is gone.
 	$effect(() => {
 		[amount, token, revalidateKey];
 
-		debounceValidate();
+		const timer = setTimeout(validate, 300);
+
+		return () => clearTimeout(timer);
 	});
 </script>
 

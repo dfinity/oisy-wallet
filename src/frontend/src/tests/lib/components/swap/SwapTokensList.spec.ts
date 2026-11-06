@@ -138,11 +138,35 @@ describe('SwapTokensList', () => {
 		const rowFor = (symbol: string) =>
 			screen.getAllByRole('button').find((button) => button.textContent?.trim().startsWith(symbol));
 
+		it("keeps this side's pick in the list, marked as selected", () => {
+			render(SwapTokensList, {
+				props: sourceProps,
+				context: mockContext({ sourceToken: btcToken, destinationToken: mockValidIcCkToken })
+			});
+
+			expect(rowFor(btcToken.symbol)).toHaveAttribute('aria-pressed', 'true');
+			expect(rowFor(icpToken.symbol)).toHaveAttribute('aria-pressed', 'false');
+		});
+
+		it("leaves the other side's pick out of the list", () => {
+			render(SwapTokensList, {
+				props: sourceProps,
+				context: mockContext({ sourceToken: icpToken, destinationToken: btcToken })
+			});
+
+			expect(rowFor(btcToken.symbol)).toBeUndefined();
+			expect(rowFor(icpToken.symbol)).toBeInTheDocument();
+		});
+
 		it('shows all networks when the kept network has nothing left to pick', () => {
 			// Bitcoin's only token is the receive side's pick, as after pressing ⇅.
 			render(SwapTokensList, {
 				props: sourceProps,
-				context: mockContext({ destinationToken: btcToken, filterNetwork: BTC_MAINNET_NETWORK })
+				context: mockContext({
+					sourceToken: icpToken,
+					destinationToken: btcToken,
+					filterNetwork: BTC_MAINNET_NETWORK
+				})
 			});
 
 			expect(networkChip()).toHaveTextContent(get(i18n).networks.chain_fusion);
@@ -152,11 +176,14 @@ describe('SwapTokensList', () => {
 		it('keeps a network that still has tokens', () => {
 			render(SwapTokensList, {
 				props: sourceProps,
-				context: mockContext({ filterNetwork: BTC_MAINNET_NETWORK })
+				context: mockContext({
+					sourceToken: btcToken,
+					destinationToken: mockValidIcCkToken,
+					filterNetwork: BTC_MAINNET_NETWORK
+				})
 			});
 
 			expect(networkChip()).toHaveTextContent(BTC_MAINNET_NETWORK.name);
-			expect(rowFor(btcToken.symbol)).toBeInTheDocument();
 			expect(rowFor(icpToken.symbol)).toBeUndefined();
 		});
 
@@ -175,7 +202,7 @@ describe('SwapTokensList', () => {
 		it('offers only the networks with something to pick', async () => {
 			render(SwapTokensList, {
 				props: sourceProps,
-				context: mockContext({ destinationToken: btcToken })
+				context: mockContext({ sourceToken: icpToken, destinationToken: btcToken })
 			});
 
 			const panel = await openFilterChip(NETWORK_FILTER);
