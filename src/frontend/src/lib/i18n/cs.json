@@ -858,6 +858,7 @@
 		"text": {
 			"title": "Nastavení",
 			"general": "Obecné",
+			"security": "Zabezpečení",
 			"preferences": "Předvolby",
 			"principal": "Váše Hlavní ICP ID",
 			"principal_copied": "Hlavní ICP ID zkopírováno do schránky",
