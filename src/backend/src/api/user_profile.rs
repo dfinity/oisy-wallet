@@ -224,10 +224,11 @@ pub fn update_provider_agreements(
     .into()
 }
 
-/// Returns the full agreement consent/rejection history for the caller.
+/// Returns the agreement consent/rejection history for the caller.
 ///
 /// # Returns
-/// - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail.
+/// - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail: the newest
+///   `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 ///
 /// # Errors
 /// - `Err(UserNotFound)` if no history exists and the user has no profile.

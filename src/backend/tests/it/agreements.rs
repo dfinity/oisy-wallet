@@ -7,7 +7,7 @@ use shared::types::{
         AgreementHistoryEntry, AgreementType, GetAgreementHistoryError, ProviderAgreementProvider,
         ProviderAgreementScope, ProviderAgreementType, UpdateAgreementsError,
         UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest, UserAgreement,
-        UserAgreements, SHA256_HEX_LENGTH,
+        UserAgreements, MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER, SHA256_HEX_LENGTH,
     },
     user_profile::{CreateUserProfileError, GetUserProfileError, UserProfile},
     Timestamp, Version,
@@ -1029,6 +1029,70 @@ fn test_agreement_history_records_only_changed_agreements() {
             AgreementType::PrivacyPolicy,
         ]
     );
+}
+
+#[test]
+fn test_agreement_history_keeps_only_the_newest_entries() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
+
+    // Every update flips all three agreements, so it adds three entries.
+    let updates = MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER / 3 + 1;
+    for i in 0..updates {
+        let user_profile = pic_setup
+            .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+            .unwrap()
+            .unwrap();
+        let agreement = UserAgreement {
+            accepted: Some(i % 2 == 0),
+            ..Default::default()
+        };
+        let arg = UpdateUserAgreementsRequest {
+            current_user_version: user_profile.version,
+            agreements: UserAgreements {
+                license_agreement: agreement.clone(),
+                terms_of_use: agreement.clone(),
+                privacy_policy: agreement,
+            },
+        };
+        pic_setup
+            .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg)
+            .unwrap()
+            .unwrap();
+    }
+
+    let history = pic_setup
+        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+            caller,
+            "get_user_agreement_history",
+            (),
+        )
+        .unwrap()
+        .unwrap();
+
+    let agreement_types = [
+        AgreementType::LicenseAgreement,
+        AgreementType::TermsOfUse,
+        AgreementType::PrivacyPolicy,
+    ];
+    let recorded = (0..updates).flat_map(|i| {
+        agreement_types
+            .iter()
+            .map(move |agreement_type| (agreement_type.clone(), i % 2 == 0))
+    });
+    let expected: Vec<(AgreementType, bool)> = recorded
+        .skip(updates * agreement_types.len() - MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER)
+        .collect();
+    let stored: Vec<(AgreementType, bool)> = history
+        .into_iter()
+        .map(|entry| (entry.agreement_type, entry.accepted))
+        .collect();
+    assert_eq!(stored, expected);
 }
 
 #[test]

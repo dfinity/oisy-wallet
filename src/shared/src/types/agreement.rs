@@ -9,6 +9,10 @@ use crate::{
 
 pub const SHA256_HEX_LENGTH: usize = 64;
 
+/// Maximum number of agreement history entries kept per user. An update that goes past it drops
+/// the oldest entries.
+pub const MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER: usize = 100;
+
 /// Which external provider the agreement belongs to.
 ///
 /// Add a new variant and redeploy the canister when onboarding a new provider.
