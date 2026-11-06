@@ -97,6 +97,10 @@
 		// the token nor its decimals, and no simulated run came back to state how much the spender
 		// may spend. The signing flow refuses it.
 		approvalWithoutSimulation?: boolean;
+		// Whether the message carries an instruction OISY cannot read that no simulated run described:
+		// none came back, or the one that did left that instruction unaccounted for. The signing flow
+		// refuses it.
+		unreviewedNotDescribed?: boolean;
 		// The programs the simulated run calls from inside another program's instruction that OISY
 		// does not know. What such a call does to funds the user holds in an application is in
 		// neither the balance changes nor the operations, so the review names them and asks the user
@@ -134,6 +138,7 @@
 		closesPayOthers = false,
 		feePaidByOthers = false,
 		approvalWithoutSimulation = false,
+		unreviewedNotDescribed = false,
 		unreadPrograms = [],
 		unreadProgramsAcknowledged = $bindable(false),
 		flaggedAsScam = false,
@@ -310,9 +315,9 @@
 	     sign makes every caveat below it moot, since they qualify a review nobody is going to act
 	     on. It is the only notice here that is an error rather than a warning, because it describes
 	     what the wallet has already decided rather than something for the user to weigh.
-	     A message OISY could not decode is a warning either way, and
+	     A message OISY could not decode is a warning once a simulated run described it, and
 	     says the review is simulated only when a simulation was in fact obtained, since one can
-	     fail. A message that decoded but does not reduce to a send, a receive or a swap the run
+	     fail; without such a run it is refused. A message that decoded but does not reduce to a send, a receive or a swap the run
 	     agrees with is the case the user has to read the detail for, so it says so; it names the
 	     simulated changes, so it waits for a run to exist and for the decode to settle, and the
 	     absence of a run has a warning of its own. A message that does reduce still shows
@@ -327,7 +332,7 @@
 	<!-- Above the caveats, because it is the one notice that asks something of the user: approving
 	     waits for the confirmation it carries. A refusal hides it, since there is nothing left to
 	     confirm on a request OISY will not sign. -->
-	{#if !feePaidByOthers && !ambiguous && !closesPayOthers && unreadPrograms.length > 0}
+	{#if !feePaidByOthers && !ambiguous && !closesPayOthers && !unreviewedNotDescribed && unreadPrograms.length > 0}
 		<SolWalletConnectUnreadPrograms
 			network={token.network}
 			programs={unreadPrograms}
@@ -360,6 +365,16 @@
 		<div role="alert">
 			<MessageBox level="error">{$i18n.wallet_connect.text.approval_without_simulation}</MessageBox>
 		</div>
+	{:else if unreviewedNotDescribed}
+		<!-- Same live region, same reason. Worded as the signing flow's refusal is, which tells a run
+		     that never came back from one that left the instruction unaccounted for. -->
+		<div role="alert">
+			<MessageBox level="error">
+				{simulatedInstructions
+					? $i18n.wallet_connect.text.unreviewed_not_described_by_simulation
+					: $i18n.wallet_connect.text.unreviewed_without_simulation}
+			</MessageBox>
+		</div>
 	{:else if unreviewed}
 		<MessageBox level="warning">
 			{nonNullish(preview)
@@ -375,7 +390,7 @@
 	<!-- Everything below qualifies a review that is going to be acted on. None of it applies to a
 	     message the wallet has already decided it will not sign, and the partial-parties notice is
 	     actively wrong there: it tells the user which lists to read on a request that is refused. -->
-	{#if !feePaidByOthers && !ambiguous && !closesPayOthers && !approvalWithoutSimulation}
+	{#if !feePaidByOthers && !ambiguous && !closesPayOthers && !approvalWithoutSimulation && !unreviewedNotDescribed}
 		<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
 		     theft as nothing happening. It is named first among the fund warnings for that reason. -->
 		{#if nonNullish(preview) && preview.controlChanges.length > 0}

@@ -385,6 +385,23 @@ export const solSimulationReassignsWallet = ({
 	);
 
 /**
+ * Whether the message carries an instruction OISY cannot read that no simulated run described.
+ *
+ * What makes such an instruction a warning rather than a refusal is the run, which states what the
+ * message would do to the user's own accounts whether or not any decoder read it. Without a run
+ * that described it, approving it is approving an effect nobody stated. The review and the signing
+ * flow both ask this, so the review holds the button on exactly what signing refuses.
+ */
+export const solUnreviewedNotDescribed = ({
+	unreviewed,
+	simulated
+}: {
+	unreviewed: boolean | undefined;
+	// Whether a simulated run described every instruction of the message.
+	simulated: boolean;
+}): boolean => (unreviewed ?? false) && !simulated;
+
+/**
  * The programs a simulated run calls from inside another program's instruction that are not among
  * the known ones, each named once, in the order the run first reaches them.
  *

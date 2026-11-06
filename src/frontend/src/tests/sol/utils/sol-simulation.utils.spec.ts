@@ -18,7 +18,8 @@ import {
 	selectSolSimulationAddresses,
 	solClosedAccountsReachWallet,
 	solOpenAppAccountsLostLamports,
-	solSimulationReassignsWallet
+	solSimulationReassignsWallet,
+	solUnreviewedNotDescribed
 } from '$sol/utils/sol-simulation.utils';
 import {
 	mockAtaAddress,
@@ -601,6 +602,25 @@ describe('sol-simulation.utils', () => {
 			expect(
 				solSimulationReassignsWallet({ preview: diffed, userAddress: mockSolAddress })
 			).toBeTruthy();
+		});
+	});
+
+	describe('solUnreviewedNotDescribed', () => {
+		it('should hold an instruction nobody read that no run described', () => {
+			expect(solUnreviewedNotDescribed({ unreviewed: true, simulated: false })).toBeTruthy();
+		});
+
+		it('should let an instruction nobody read through once a run described it', () => {
+			expect(solUnreviewedNotDescribed({ unreviewed: true, simulated: true })).toBeFalsy();
+		});
+
+		// The simulation stays best effort for a message OISY read in full.
+		it('should let a message read in full through without a run', () => {
+			expect(solUnreviewedNotDescribed({ unreviewed: false, simulated: false })).toBeFalsy();
+		});
+
+		it('should treat a message the mapper flagged nothing on as read', () => {
+			expect(solUnreviewedNotDescribed({ unreviewed: undefined, simulated: false })).toBeFalsy();
 		});
 	});
 

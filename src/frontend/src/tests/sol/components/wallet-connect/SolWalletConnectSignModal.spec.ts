@@ -387,6 +387,66 @@ describe('SolWalletConnectSignModal', () => {
 		expect(args).toEqual(expect.objectContaining({ simulationRan: true }));
 	});
 
+	// Signing refuses an instruction nobody read that no run described, on the same value the modal
+	// hands it, so the review holds the button on exactly that.
+	describe('an instruction nobody read', () => {
+		const renderModal = (decoded: Awaited<ReturnType<typeof decode>>) => {
+			vi.mocked(decode).mockResolvedValueOnce(decoded);
+
+			return render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+		};
+
+		it('should hold approval when no run came back', async () => {
+			const { getByRole, getByText } = renderModal({
+				amount: 1n,
+				requiredSignatures: 1,
+				unreviewed: true,
+				parties: { sources: [], destinations: [], partial: true }
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.wallet_connect.text.unreviewed_without_simulation)).toBeInTheDocument();
+			});
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should hold approval when the run left it unaccounted for', async () => {
+			const { getByRole, getByText } = renderModal({
+				amount: 1n,
+				requiredSignatures: 1,
+				unreviewed: true,
+				simulatedInstructions: true,
+				instructions: [{ kind: 'unknown' }],
+				preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] },
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			await waitFor(() => {
+				expect(
+					getByText(en.wallet_connect.text.unreviewed_not_described_by_simulation)
+				).toBeInTheDocument();
+			});
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should let it through when the run described it', async () => {
+			const args = await approve({
+				amount: 1n,
+				requiredSignatures: 1,
+				unreviewed: true,
+				simulatedInstructions: true,
+				instructions: [{ kind: 'route' }, { kind: 'send', amount: 1n }],
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ simulated: true }));
+		});
+	});
+
 	// An account the run opens inside another program's instruction with more than its size costs is
 	// refused by signing like an ambiguous message, so the review holds the button the same way.
 	it('should hold approval when the run opens an account above its rent', async () => {
