@@ -8,6 +8,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
+import { derivedMemo } from '$lib/utils/derived-memo.utils';
 import { filterTokensForSelectedNetworks } from '$lib/utils/network.utils';
 import { mapTokenUi } from '$lib/utils/token.utils';
 import { filterTokens, filterTokensByNft, sortTokens } from '$lib/utils/tokens.utils';
@@ -31,12 +32,18 @@ export const initModalTokensListContext = (
 	const data = writable<ModalTokensListData>(modalTokensListData);
 	const { update } = data;
 
-	const tokens = derived([data], ([{ tokens }]) => tokens);
+	// By reference: a plain `derived` passes an array on at every change of `data`, a keystroke in the
+	// search included, and `eligibleTokens` would map every token again.
+	const tokens = derivedMemo([data], ([{ tokens }]) => tokens, Object.is);
 	const filterQuery = derived([data], ([{ filterQuery }]) => filterQuery);
 	const filterNetwork = derived([data], ([{ filterNetwork }]) => filterNetwork);
 	const filterZeroBalance = derived([data], ([{ filterZeroBalance }]) => filterZeroBalance);
 	const sortByBalance = derived([data], ([{ sortByBalance }]) => sortByBalance ?? true);
-	const filterNetworksIds = derived([data], ([{ filterNetworksIds }]) => filterNetworksIds);
+	const filterNetworksIds = derivedMemo(
+		[data],
+		([{ filterNetworksIds }]) => filterNetworksIds,
+		Object.is
+	);
 	const filterNfts = derived([data], ([{ filterNfts }]) => filterNfts);
 	const filterCategoryTag = derived([data], ([{ filterCategoryTag }]) => filterCategoryTag);
 
