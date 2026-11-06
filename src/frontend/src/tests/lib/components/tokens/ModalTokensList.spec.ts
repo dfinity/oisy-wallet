@@ -128,10 +128,18 @@ describe('ModalTokensList', () => {
 
 	describe('network filter', () => {
 		it('filters by the network picked in the dropdown', async () => {
+			const onFiltersChange = vi.fn();
+
 			const { getByTestId, findByTestId, queryByTestId, findByPlaceholderText } = render(
 				ModalTokensListHost,
 				{
-					props: { ...baseProps, tokens: mockTokens, renderNoResults: false, networks }
+					props: {
+						...baseProps,
+						tokens: mockTokens,
+						renderNoResults: false,
+						networks,
+						onFiltersChange
+					}
 				}
 			);
 
@@ -144,6 +152,8 @@ describe('ModalTokensList', () => {
 			const panel = await findByTestId('popover-content');
 
 			await fireEvent.click(within(panel).getByText(BTC_MAINNET_NETWORK.name));
+
+			expect(onFiltersChange).toHaveBeenCalledOnce();
 
 			await expect(findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}BTC`)).resolves.toBeInTheDocument();
 			expect(queryByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}ETH`)).not.toBeInTheDocument();
@@ -254,6 +264,25 @@ describe('ModalTokensList', () => {
 			await expect(findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}ETH`)).resolves.toBeInTheDocument();
 		});
 
+		it('tells the host when the filters are cleared', async () => {
+			const onFiltersChange = vi.fn();
+
+			const { findByTestId } = render(ModalTokensListHost, {
+				props: {
+					...baseProps,
+					tokens: [ETHEREUM_TOKEN],
+					renderNoResults: true,
+					networks,
+					filterNetwork: BTC_MAINNET_NETWORK,
+					onFiltersChange
+				}
+			});
+
+			await fireEvent.click(await findByTestId(MODAL_TOKEN_LIST_CLEAR_FILTERS));
+
+			expect(onFiltersChange).toHaveBeenCalledOnce();
+		});
+
 		it('never clears a locked network', async () => {
 			const { findByTestId, queryByTestId } = render(ModalTokensListHost, {
 				props: {
@@ -350,6 +379,32 @@ describe('ModalTokensList', () => {
 			expect(getByTestId(TOKEN_CATEGORY_FILTER)).toHaveTextContent(
 				get(i18n).tokens.text.asset_type_all_short
 			);
+		});
+
+		it('counts only the tokens on a network the picker locks', async () => {
+			// A funded stock on Ethereum, while the picker is locked to Bitcoin.
+			const fundedStock: Token = { ...unfundedStock, id: parseTokenId('mock-funded-stock') };
+
+			balancesStore.set({ id: fundedStock.id, data: { data: 100n, certified: true } });
+
+			const { findByTestId, getByTestId } = render(ModalTokensListHost, {
+				props: {
+					...baseProps,
+					tokens: [BTC_MAINNET_TOKEN, fundedStock],
+					renderNoResults: false,
+					filterZeroBalance: true,
+					networkSelectorViewOnly: true,
+					filterNetwork: BTC_MAINNET_NETWORK,
+					filterCategoryTag: TokenCategoryTagValue.STOCK
+				}
+			});
+
+			await expect(findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}BTC`)).resolves.toBeInTheDocument();
+			expect(getByTestId(TOKEN_CATEGORY_FILTER)).toHaveTextContent(
+				get(i18n).tokens.text.asset_type_all_short
+			);
+
+			balancesStore.reset(fundedStock.id);
 		});
 	});
 

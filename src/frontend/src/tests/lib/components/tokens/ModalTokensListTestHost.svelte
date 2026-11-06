@@ -26,6 +26,7 @@
 		networkSelectorViewOnly?: boolean;
 		networks?: Network[];
 		onTokenButtonClick: (token: Token) => void;
+		onFiltersChange?: () => void;
 	}
 
 	let {
@@ -38,7 +39,8 @@
 		filterCategoryTag,
 		networkSelectorViewOnly = false,
 		networks,
-		onTokenButtonClick
+		onTokenButtonClick,
+		onFiltersChange
 	}: Props = $props();
 
 	setContext<ModalTokensListContext>(
@@ -56,7 +58,7 @@
 	);
 </script>
 
-<ModalTokensList {networkSelectorViewOnly} {networks} {onTokenButtonClick}>
+<ModalTokensList {networkSelectorViewOnly} {networks} {onFiltersChange} {onTokenButtonClick}>
 	{#snippet noResults()}
 		{#if renderNoResults}
 			<div data-tid={MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS}>No results custom message</div>

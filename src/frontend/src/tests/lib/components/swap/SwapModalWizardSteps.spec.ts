@@ -524,6 +524,27 @@ describe('SwapModalWizardSteps', () => {
 			});
 		});
 
+		it("keeps the receive list's own filters once changed, even back to where they started", async () => {
+			const rendered = renderHost();
+
+			await openList({ rendered, side: 1 });
+
+			await pickFromChip({ chip: TOKEN_CATEGORY_FILTER, option: en.token_tag.category.crypto });
+			await pickFromChip({ chip: TOKEN_CATEGORY_FILTER, option: en.tokens.text.asset_type_all });
+
+			await cancelList(rendered);
+
+			await openList({ rendered, side: 0 });
+
+			await pickFromChip({ chip: TOKEN_CATEGORY_FILTER, option: en.token_tag.category.crypto });
+
+			await cancelList(rendered);
+
+			await openList({ rendered, side: 1 });
+
+			expect(assetTypeChip()).toHaveTextContent(en.tokens.text.asset_type_all_short);
+		});
+
 		it("keeps the receive list's own filters once they are changed", async () => {
 			const rendered = renderHost();
 

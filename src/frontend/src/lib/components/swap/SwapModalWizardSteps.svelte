@@ -191,21 +191,23 @@
 		};
 	};
 
-	// A side keeps its filters once the person has changed them, and from then on reopens on them.
-	// Until then nothing is kept, so the receive side goes on following the pay side.
-	const keepTokenListFilters = (side: TokenSide) => {
-		const filters: SwapTokenListFilters = {
-			network: get(filterNetwork),
-			category: get(filterCategoryTag)
-		};
+	// A side has its own filters once the person changes one on its list, even back to where it
+	// started; from then on it reopens on them. Until then nothing is kept, so the receive side goes on
+	// following the pay side.
+	const keepTokenListFilters = ({ side, changed }: { side: TokenSide; changed: boolean }) => {
+		if (!changed && isNullish(getTokenListFilters(side))) {
+			return;
+		}
 
-		const start = getStartFilters(side);
+		setTokenListFilters({
+			side,
+			filters: { network: get(filterNetwork), category: get(filterCategoryTag) }
+		});
+	};
 
-		const changed =
-			filters.network?.id !== start.network?.id || filters.category !== start.category;
-
-		if (changed || nonNullish(getTokenListFilters(side))) {
-			setTokenListFilters({ side, filters });
+	const onTokenListFiltersChange = () => {
+		if (nonNullish(selectTokenType)) {
+			keepTokenListFilters({ side: selectTokenType, changed: true });
 		}
 	};
 
@@ -233,7 +235,7 @@
 
 	const closeTokenList = () => {
 		if (nonNullish(selectTokenType)) {
-			keepTokenListFilters(selectTokenType);
+			keepTokenListFilters({ side: selectTokenType, changed: false });
 		}
 
 		goToStep(WizardStepsSwap.SWAP);
@@ -309,6 +311,7 @@
 		{#if currentStep?.name === WizardStepsSwap.TOKENS_LIST}
 			<SwapTokensList
 				onCloseTokensList={closeTokenList}
+				onFiltersChange={onTokenListFiltersChange}
 				onSelectToken={selectToken}
 				side={selectTokenType}
 			/>
