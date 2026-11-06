@@ -2592,8 +2592,9 @@ export const findSolProgramsPayingOthers = ({
 				return { ...acc, waiting };
 			}
 
-			// A payout whose account or amount is unknown cannot be followed on.
-			if (isNullish(destination) || isNullish(credited)) {
+			// A payout whose account or amount is unknown cannot be followed on, and of one the fee takes
+			// in full, nothing reaches the account to be passed on.
+			if (isNullish(destination) || isNullish(credited) || credited === ZERO) {
 				return { named: [...acc.named, { program: madeBy, position }], waiting };
 			}
 

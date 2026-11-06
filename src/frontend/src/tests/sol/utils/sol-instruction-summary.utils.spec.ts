@@ -5265,6 +5265,24 @@ describe('sol-instruction-summary.utils', () => {
 			).toEqual([]);
 		});
 
+		it('should name a listed pool whose payout elsewhere the fee takes in full', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+						transferWithFee({
+							source: vault,
+							destination: elsewhere,
+							amount: '1000',
+							fee: '1000',
+							stackHeight: 2
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
 		it('should not name a pool paying nothing elsewhere', () => {
 			expect(
 				paying({
