@@ -249,4 +249,51 @@ describe('IcTransactionModal', () => {
 			expect(isIcrcTokenSupportIcrc3).not.toHaveBeenCalled();
 		});
 	});
+
+	describe('approve spender link', () => {
+		const spenderLabel = get(i18n).transaction.alt.open_for_block_explorer;
+
+		const approve = { ...mockIcTransactionUi, type: 'approve' as const };
+
+		it('should link an ICRC spender to its account page on the ledger', () => {
+			const ledgerCanisterId = '2ouva-viaaa-aaaaq-aaamq-cai';
+			const icrcToken = { ...mockValidIcrcToken, ledgerCanisterId };
+			const spender =
+				'2jvtu-yqaaa-aaaaq-aaama-cai-mj6qsda.29cdfecd0adc7575bfaee5d32884308ef53271bb348c7d287e9f62142c8e9bb3';
+
+			const { getByRole } = render(IcTransactionModal, {
+				transaction: { ...approve, approveSpender: spender },
+				token: icrcToken
+			});
+
+			expect(getByRole('link', { name: spenderLabel })).toHaveAttribute(
+				'href',
+				`${ICP_EXPLORER_URL}/tokens/${ledgerCanisterId}/account/${spender}`
+			);
+		});
+
+		it('should keep the spender link the ICP mapper set', () => {
+			const spender = 'a498bfac62d235242a60c2141bdad25c7924b62676af755286fa3b8eead72889';
+			const approveSpenderExplorerUrl = `${ICP_EXPLORER_URL}/account/${spender}`;
+
+			const { getByRole } = render(IcTransactionModal, {
+				transaction: { ...approve, approveSpender: spender, approveSpenderExplorerUrl },
+				token: ICP_TOKEN
+			});
+
+			expect(getByRole('link', { name: spenderLabel })).toHaveAttribute(
+				'href',
+				approveSpenderExplorerUrl
+			);
+		});
+
+		it('should not link the spender of a DIP20 approval', () => {
+			const { queryByRole } = render(IcTransactionModal, {
+				transaction: { ...approve, approveSpender: 'ryjl3-tyaaa-aaaaa-aaaba-cai' },
+				token: mockValidDip20Token
+			});
+
+			expect(queryByRole('link', { name: spenderLabel })).not.toBeInTheDocument();
+		});
+	});
 });

@@ -1728,6 +1728,43 @@ describe('lifi-sol-transaction.utils', () => {
 			).toThrow(LifiQuoteRejectedError);
 		});
 
+		const parsedSystemAccount = (lamports: bigint): NonNullable<SolanaParsedAccountInfo> =>
+			({
+				executable: false,
+				lamports,
+				owner: SYSTEM_PROGRAM_ADDRESS,
+				space: ZERO,
+				data: ['', 'base64']
+			}) as unknown as NonNullable<SolanaParsedAccountInfo>;
+
+		type TokenAccountControl = Partial<Record<'delegate' | 'closeAuthority', SolAddress>>;
+
+		const parsedTokenAccount = ({
+			mint,
+			amount,
+			decimals,
+			control = {}
+		}: {
+			mint: SolAddress;
+			amount: bigint;
+			decimals: number;
+			control?: TokenAccountControl;
+		}): NonNullable<SolanaParsedAccountInfo> =>
+			({
+				executable: false,
+				lamports: 2_039_280n,
+				owner: TOKEN_PROGRAM_ADDRESS,
+				space: 165n,
+				data: {
+					program: 'spl-token',
+					space: 165n,
+					parsed: {
+						type: 'account',
+						info: { mint, owner: user, tokenAmount: { amount: `${amount}`, decimals }, ...control }
+					}
+				}
+			}) as unknown as NonNullable<SolanaParsedAccountInfo>;
+
 		describe('created accounts', () => {
 			it.each([
 				{ account: 'owned by anyone else', control: { owner: mockSolAddress2 } },
@@ -1761,42 +1798,36 @@ describe('lifi-sol-transaction.utils', () => {
 					})
 				).not.toThrow();
 			});
+
+			// SOL → USDC at its bounds, opening the user's USDC account with `control` on it.
+			const previewOpening = (control: TokenAccountControl) =>
+				mapSolSimulationPreview({
+					addresses: [user, usdcAccount],
+					preAccounts: [parsedSystemAccount(1_000_000_000n), null],
+					postAccounts: [
+						parsedSystemAccount(1_000_000_000n - amount - ceiling),
+						parsedTokenAccount({ mint: USDC, amount: toAmountMin, decimals: 6, control })
+					],
+					userAddress: user
+				});
+
+			it('should accept one the simulation shows opened closable by the user', () => {
+				expect(() =>
+					assertWith({ result: resultWith({ preview: previewOpening({ closeAuthority: user }) }) })
+				).not.toThrow();
+			});
+
+			it.each([
+				{ account: 'with a delegate', control: { delegate: mockSolAddress2 } },
+				{ account: 'closable by anyone else', control: { closeAuthority: mockSolAddress2 } }
+			])('should refuse one the simulation shows opened $account', ({ control }) => {
+				expect(() =>
+					assertWith({ result: resultWith({ preview: previewOpening(control) }) })
+				).toThrow(LifiQuoteRejectedError);
+			});
 		});
 
 		describe('closed accounts', () => {
-			const parsedSystemAccount = (lamports: bigint): NonNullable<SolanaParsedAccountInfo> =>
-				({
-					executable: false,
-					lamports,
-					owner: SYSTEM_PROGRAM_ADDRESS,
-					space: ZERO,
-					data: ['', 'base64']
-				}) as unknown as NonNullable<SolanaParsedAccountInfo>;
-
-			const parsedTokenAccount = ({
-				mint,
-				amount,
-				decimals
-			}: {
-				mint: SolAddress;
-				amount: bigint;
-				decimals: number;
-			}): NonNullable<SolanaParsedAccountInfo> =>
-				({
-					executable: false,
-					lamports: 2_039_280n,
-					owner: TOKEN_PROGRAM_ADDRESS,
-					space: 165n,
-					data: {
-						program: 'spl-token',
-						space: 165n,
-						parsed: {
-							type: 'account',
-							info: { mint, owner: user, tokenAmount: { amount: `${amount}`, decimals } }
-						}
-					}
-				}) as unknown as NonNullable<SolanaParsedAccountInfo>;
-
 			// Mainnet reported a wrapped SOL account a LI.FI route closed as the latter (2026-10-23).
 			const closedRepresentations = [
 				{ representation: 'no account', closed: null },
