@@ -4968,11 +4968,13 @@ describe('sol-instruction-summary.utils', () => {
 		const paying = ({
 			instructions,
 			inner,
-			mints = {}
+			mints = {},
+			rent
 		}: {
 			instructions: unknown[];
 			inner: unknown[];
 			mints?: Record<string, string>;
+			rent?: bigint;
 		}): string[] =>
 			findSolProgramsPayingOthers({
 				instructions,
@@ -4984,7 +4986,18 @@ describe('sol-instruction-summary.utils', () => {
 					[vault]: mockSolAddress2,
 					[elsewhere]: mockSolAddress3
 				},
-				accountMintsBefore: mints
+				accountMintsBefore: mints,
+				rentExemptMinimum: rent
+			});
+
+		// What a token account's opening takes as its rent.
+		const RENT = 2_039_280;
+
+		const opening = (mint: string) =>
+			token({
+				type: 'initializeAccount3',
+				info: { account: elsewhere, mint, owner: mockSolAddress3 },
+				stackHeight: 3
 			});
 
 		// A withdrawal from a position the wallet owns, its second payout sent elsewhere: the first,
@@ -5234,7 +5247,36 @@ describe('sol-instruction-summary.utils', () => {
 			}
 		);
 
+		// Its opening takes the rent out of what is there and wraps the rest, and its close hands the
+		// rent on.
 		it('should not name a pool whose lamports an account opened for wrapped SOL takes in and sends on', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: RENT + 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						opening(WSOL_TOKEN.address),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						}),
+						token({
+							type: 'closeAccount',
+							info: { account: elsewhere, destination: mockSolAddress, owner: mockSolAddress3 },
+							stackHeight: 3
+						})
+					],
+					rent: BigInt(RENT)
+				})
+			).toEqual([]);
+		});
+
+		it('should name a pool whose lamports pay the rent of an account opened for wrapped SOL, though all it wraps is unwrapped', () => {
 			expect(
 				paying({
 					instructions: [calling({ program: OKX })],
@@ -5242,21 +5284,78 @@ describe('sol-instruction-summary.utils', () => {
 						call({ program: WHIRLPOOL, stackHeight: 2 }),
 						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
 						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
-						token({
-							type: 'initializeAccount3',
-							info: { account: elsewhere, mint: WSOL_TOKEN.address, owner: mockSolAddress3 },
-							stackHeight: 3
-						}),
-						transfer({
+						opening(WSOL_TOKEN.address),
+						unwrap({
 							source: elsewhere,
 							destination: mockSolAddress4,
-							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					],
+					rent: BigInt(RENT)
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should name a pool whose lamports pay the rent of an account opened for another mint, though its excess is withdrawn', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						opening(mockSplAddress),
+						token({
+							type: 'withdrawExcessLamports',
+							info: { source: elsewhere, destination: mockSolAddress4, authority: mockSolAddress3 },
+							stackHeight: 3
+						})
+					],
+					rent: BigInt(RENT)
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should not name a pool whose lamports pay the rent of an account a close then empties', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						opening(mockSplAddress),
+						token({
+							type: 'closeAccount',
+							info: { account: elsewhere, destination: mockSolAddress, owner: mockSolAddress3 },
+							stackHeight: 3
+						})
+					],
+					rent: BigInt(RENT)
+				})
+			).toEqual([]);
+		});
+
+		// An unwrap of everything it wraps would pass on all of it, were any of it wrapped.
+		it('should take all the lamports at an opening as its rent when the minimum is unknown', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: RENT + 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						opening(WSOL_TOKEN.address),
+						unwrap({
+							source: elsewhere,
+							destination: mockSolAddress4,
 							authority: mockSolAddress3,
 							stackHeight: 3
 						})
 					]
 				})
-			).toEqual([]);
+			).toEqual([WHIRLPOOL]);
 		});
 
 		it('should name a pool whose lamports an account opened for another mint takes in, when its tokens leave', () => {
@@ -5265,13 +5364,9 @@ describe('sol-instruction-summary.utils', () => {
 					instructions: [calling({ program: OKX })],
 					inner: [
 						call({ program: WHIRLPOOL, stackHeight: 2 }),
-						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						send({ source: vault, destination: elsewhere, lamports: RENT + 1000, stackHeight: 3 }),
 						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
-						token({
-							type: 'initializeAccount3',
-							info: { account: elsewhere, mint: mockSplAddress, owner: mockSolAddress3 },
-							stackHeight: 3
-						}),
+						opening(mockSplAddress),
 						transfer({
 							source: elsewhere,
 							destination: mockSolAddress4,

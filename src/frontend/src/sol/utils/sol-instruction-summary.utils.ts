@@ -2504,7 +2504,8 @@ const paymentOf = ({
 interface WaitingPayout {
 	program: SolAddress;
 	account: SolAddress;
-	asset: PaymentAsset;
+	// Rent: lamports an account's opening took as its rent, which only a close moves on.
+	asset: PaymentAsset | 'rent';
 	parentIndex: number;
 	position: number;
 	left: bigint;
@@ -2555,28 +2556,77 @@ const passOn = ({
 				{ rest: emptying ? undefined : value, waiting: [] }
 			).waiting;
 
-// The account an instruction wraps the lamports of: one a sync counts in, which the token programs
-// refuse for any account but a wrapped SOL one, or one opened for a native mint, which counts all
-// it holds above its rent as wrapped SOL from the start.
-const wrapsAt = ({
+// The account a sync counts the lamports of as wrapped SOL, which the token programs refuse for any
+// account but a wrapped SOL one.
+const syncsAt = ({
 	program,
 	parsed: { type, info }
-}: SolParsedRpcInstruction): SolAddress | undefined => {
-	if (isNullish(program) || !TOKEN_PROGRAMS.includes(program)) {
-		return undefined;
-	}
+}: SolParsedRpcInstruction): SolAddress | undefined =>
+	nonNullish(program) && TOKEN_PROGRAMS.includes(program) && type === 'syncNative'
+		? address({ info, key: 'account' })
+		: undefined;
 
+// The account an instruction opens, and whether for a native mint, which counts all it holds above
+// its rent as wrapped SOL from the start.
+const opensAt = ({
+	program,
+	parsed: { type, info }
+}: SolParsedRpcInstruction): { account: SolAddress; wrapped: boolean } | undefined => {
 	const account = address({ info, key: 'account' });
 
-	if (type === 'syncNative') {
-		return account;
-	}
-
-	return ['initializeAccount', 'initializeAccount2', 'initializeAccount3'].includes(type) &&
-		isNativeMint(address({ info, key: 'mint' }))
-		? account
+	return nonNullish(program) &&
+		TOKEN_PROGRAMS.includes(program) &&
+		['initializeAccount', 'initializeAccount2', 'initializeAccount3'].includes(type) &&
+		nonNullish(account)
+		? { account, wrapped: isNativeMint(address({ info, key: 'mint' })) }
 		: undefined;
 };
+
+// Opening an account takes its rent out of the lamports already at its address: the lamport payouts
+// waiting there pay it first, oldest first, up to the minimum, and that part becomes rent, which
+// only a close moves on. What is left is wrapped SOL for a native mint and stays lamports for any
+// other. With no minimum known, all of them are taken as rent.
+const openIn = ({
+	waiting,
+	account,
+	wrapped,
+	parentIndex,
+	rent
+}: {
+	waiting: WaitingPayout[];
+	account: SolAddress;
+	wrapped: boolean;
+	parentIndex: number;
+	rent: bigint | undefined;
+}): WaitingPayout[] =>
+	waiting.reduce<{ rest: bigint | undefined; waiting: WaitingPayout[] }>(
+		({ rest, waiting: acc }, payout) => {
+			if (
+				payout.account !== account ||
+				payout.asset !== 'lamports' ||
+				payout.parentIndex !== parentIndex ||
+				(payout.ended ?? false) ||
+				payout.left === ZERO
+			) {
+				return { rest, waiting: [...acc, payout] };
+			}
+
+			const taken = isNullish(rest) || payout.left < rest ? payout.left : rest;
+			const kept = payout.left - taken;
+
+			return {
+				rest: nonNullish(rest) ? rest - taken : rest,
+				waiting: [
+					...acc,
+					...(taken > ZERO ? [{ ...payout, asset: 'rent' as const, left: taken }] : []),
+					...(kept > ZERO
+						? [{ ...payout, asset: wrapped ? ('tokens' as const) : payout.asset, left: kept }]
+						: [])
+				]
+			};
+		},
+		{ rest: rent, waiting: [] }
+	).waiting;
 
 // Wrapping turns the lamport payouts still waiting on an account into token payouts of the same
 // amount, which its wrapped SOL now carries. Payouts a close has ended stay as they are.
@@ -2681,9 +2731,9 @@ const burnOut = ({
 	).waiting;
 
 // A close empties its account into its destination, which passes on every payout still waiting
-// there that the close moves: all of them out of a wrapped SOL account, and the lamports out of any
-// other, whose tokens had to leave before it could close. What it leaves can no longer be passed
-// on, as whatever opens at the address next is another account.
+// there that the close moves: all of them out of a wrapped SOL account, and the lamports and the
+// rent out of any other, whose tokens had to leave before it could close. What it leaves can no
+// longer be passed on, as whatever opens at the address next is another account.
 const closeOut = ({
 	waiting,
 	account,
@@ -2698,7 +2748,7 @@ const closeOut = ({
 	waiting.map((payout) =>
 		payout.account !== account || payout.parentIndex !== parentIndex || (payout.ended ?? false)
 			? payout
-			: wrapped || payout.asset === 'lamports'
+			: wrapped || payout.asset !== 'tokens'
 				? { ...payout, left: ZERO }
 				: { ...payout, ended: true }
 	);
@@ -2723,7 +2773,8 @@ export const findSolProgramsPayingOthers = ({
 	ownedAddresses,
 	userAddress,
 	accountHolders = {},
-	accountMintsBefore = {}
+	accountMintsBefore = {},
+	rentExemptMinimum
 }: {
 	instructions: readonly unknown[];
 	innerInstructions?: readonly SolInstructionGroup[];
@@ -2731,6 +2782,8 @@ export const findSolProgramsPayingOthers = ({
 	userAddress: OptionSolAddress;
 	accountHolders?: Partial<Record<SolAddress, SolAddress>>;
 	accountMintsBefore?: Partial<Record<SolAddress, SplTokenAddress>>;
+	// What an account's opening takes as its rent.
+	rentExemptMinimum?: bigint;
 }): SolAddress[] => {
 	if (isNullish(userAddress)) {
 		return [];
@@ -2750,10 +2803,24 @@ export const findSolProgramsPayingOthers = ({
 		waiting: WaitingPayout[];
 	}>(
 		(acc, { parentIndex, topLevel, instruction, madeBy, madeWith = [] }, position) => {
-			const wrapped = wrapsAt(instruction);
+			const opened = opensAt(instruction);
 
-			if (nonNullish(wrapped)) {
-				return { ...acc, waiting: wrapIn({ waiting: acc.waiting, account: wrapped, parentIndex }) };
+			if (nonNullish(opened)) {
+				return {
+					...acc,
+					waiting: openIn({
+						waiting: acc.waiting,
+						...opened,
+						parentIndex,
+						rent: rentExemptMinimum
+					})
+				};
+			}
+
+			const synced = syncsAt(instruction);
+
+			if (nonNullish(synced)) {
+				return { ...acc, waiting: wrapIn({ waiting: acc.waiting, account: synced, parentIndex }) };
 			}
 
 			const payment = paymentOf(instruction);

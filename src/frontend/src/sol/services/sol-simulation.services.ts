@@ -498,7 +498,8 @@ const simulate = async ({
 					ownedAddresses: [address, ...ownedAddresses],
 					userAddress: address,
 					accountHolders,
-					accountMintsBefore
+					accountMintsBefore,
+					rentExemptMinimum
 				})
 			],
 			instructions: transactionMessage.instructions,
