@@ -57,4 +57,5 @@ export interface IcTransactionUi {
 	// Set when the transfer was pulled by an approved spender (ICRC-2 `transfer_from`) instead of
 	// being initiated by the account owner.
 	transferSpender?: string;
+	memo?: string;
 }
