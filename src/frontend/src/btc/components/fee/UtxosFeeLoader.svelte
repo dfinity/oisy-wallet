@@ -41,8 +41,14 @@
 			return;
 		}
 
+		// Only a fee that priced is kept. A failed one may come from data that was missing, like
+		// pending transactions whose first load failed and a later one succeeded, so it is priced
+		// again whenever this runs. No flow sends with it (`validateBtcSend` refuses it first), so
+		// pricing it again cannot change a send under way.
+		const keepFee = nonNullish($store?.utxosFee) && isNullish($store.utxosFee.error);
+
 		// If utxos are already known and the new amount is nullish or zero, we keep using the previous fee value
-		if (nonNullish($store?.utxosFee) && (isNullish(amount) || Number(amount) === 0)) {
+		if (keepFee && (isNullish(amount) || Number(amount) === 0)) {
 			return;
 		}
 
@@ -60,7 +66,7 @@
 			amountError ||
 			isNullish(networkId) ||
 			isNullishOrEmpty(source) ||
-			(nonNullish($store) && $store.amountForFee === parsedAmount)
+			(keepFee && $store?.amountForFee === parsedAmount)
 		) {
 			return;
 		}
