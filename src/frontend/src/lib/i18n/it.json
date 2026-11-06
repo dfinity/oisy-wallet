@@ -519,6 +519,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Il tuo cloud storage personale su Internet Computer.",
+				"description": "Storica crea in circa un minuto un canister di archiviazione privato su Internet Computer, pagato in ICP. Controlli tu il canister, i suoi file, i permessi e gli aggiornamenti. Gestisci i tuoi file dalla console web, dallo strumento a riga di comando o dall'SDK TypeScript, e accedi con OISY o Internet Identity."
 			}
 		}
 	},

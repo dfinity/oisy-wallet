@@ -519,6 +519,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Vlastní cloudové úložiště na Internet Computeru.",
+				"description": "Storica zhruba za minutu nasadí soukromý úložný kanystr na Internet Computeru, placený v ICP. Kanystr, jeho soubory, oprávnění i aktualizace máte pod kontrolou vy. Soubory spravujte z webové konzole, nástroje pro příkazový řádek nebo TypeScript SDK a přihlaste se přes OISY nebo Internet Identity."
 			}
 		}
 	},

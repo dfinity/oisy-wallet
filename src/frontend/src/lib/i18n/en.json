@@ -519,6 +519,11 @@
 				"name": "Hyperliquid",
 				"one_liner": "Hyperliquid is the top perps DEX, giving traders centralized-exchange speed and tools while keeping self-custody of funds.",
 				"description": "Hyperliquid is the leading decentralized perpetual-futures exchange, offering traders centralized-exchange-level speed and a fully on-chain order book with up to 50x leverage. It supports the advanced tooling active traders expect — limit orders, stop-loss and take-profit, plus cross-margin and isolated-margin modes for flexible risk management — all collateralized in USDC. Crucially, traders execute directly from their own wallets without KYC and never give up custody of their funds, combining CEX performance with the self-custody and transparency of DeFi."
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Your own cloud storage on the Internet Computer.",
+				"description": "Storica deploys a private storage canister on the Internet Computer in about a minute, paid with ICP. You control the canister, its files, permissions and upgrades. Manage your files from the web console, the command-line tool or the TypeScript SDK, and sign in with OISY or Internet Identity."
 			}
 		}
 	},

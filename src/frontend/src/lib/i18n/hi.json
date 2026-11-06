@@ -519,6 +519,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Internet Computer पर आपका अपना क्लाउड स्टोरेज।",
+				"description": "Storica लगभग एक मिनट में Internet Computer पर एक निजी स्टोरेज कैनिस्टर डिप्लॉय करता है, जिसका भुगतान ICP से होता है। कैनिस्टर, उसकी फ़ाइलें, अनुमतियां और अपग्रेड आपके नियंत्रण में रहते हैं। वेब कंसोल, कमांड-लाइन टूल या TypeScript SDK से अपनी फ़ाइलें मैनेज करें, और OISY या Internet Identity से साइन इन करें।"
 			}
 		}
 	},

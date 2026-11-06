@@ -519,6 +519,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"storica": {
+				"name": "Storica",
+				"one_liner": "Internet Computer 위의 나만의 클라우드 스토리지.",
+				"description": "Storica는 약 1분 만에 Internet Computer에 개인 스토리지 캐니스터를 배포하며, 비용은 ICP로 결제합니다. 캐니스터와 그 파일, 권한, 업그레이드는 모두 사용자가 직접 관리합니다. 웹 콘솔, 명령줄 도구 또는 TypeScript SDK로 파일을 관리하고, OISY 또는 Internet Identity로 로그인하세요."
 			}
 		}
 	},
