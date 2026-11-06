@@ -3214,9 +3214,17 @@ describe('swap.services', () => {
 			});
 
 			it('stops before signing a transaction the node cannot estimate', async () => {
-				mockEstimateGas.mockRejectedValue(new Error('execution reverted'));
+				// Ethers' message for a failed estimate carries the transaction, wallet address included.
+				mockEstimateGas.mockRejectedValue(
+					new Error(`missing revert data (transaction={ "from": "${mockUserAddress}" })`)
+				);
 
-				await expect(fetchVeloraMarketSwap(params)).rejects.toThrow('execution reverted');
+				const swap = fetchVeloraMarketSwap(params);
+
+				await expect(swap).rejects.toBeInstanceOf(VeloraSwapRejectedError);
+				await expect(swap).rejects.toThrow(
+					new Error('Velora swap rejected: the transaction gas could not be estimated')
+				);
 
 				expect(sendEvmSwap).not.toHaveBeenCalled();
 			});

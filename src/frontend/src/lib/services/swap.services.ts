@@ -2188,12 +2188,17 @@ export const fetchVeloraMarketSwap = async ({
 	});
 
 	// Velora's gas limit is unsigned, and a failing estimate is a transaction that would revert.
-	const estimatedGas = await infuraProviders(sourceNetwork.id).estimateGas({
-		from: userAddress,
-		to: augustusAddress,
-		data: txParams.data,
-		value: BigInt(txParams.value)
-	});
+	let estimatedGas: bigint;
+	try {
+		estimatedGas = await infuraProviders(sourceNetwork.id).estimateGas({
+			from: userAddress,
+			to: augustusAddress,
+			data: txParams.data,
+			value: BigInt(txParams.value)
+		});
+	} catch (_: unknown) {
+		throw veloraRejectedError('the transaction gas could not be estimated');
+	}
 	const swapGas = (estimatedGas * (100n + VELORA_GAS_LIMIT_BUFFER_PERCENT)) / 100n;
 
 	// The transaction is broadcast from here on — the point of no return. `swap`
