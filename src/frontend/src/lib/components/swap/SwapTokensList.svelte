@@ -31,9 +31,10 @@
 		side?: SwapSelectTokenType;
 		onSelectToken: (token: Token) => void;
 		onCloseTokensList: () => void;
+		onFiltersChange?: () => void;
 	}
 
-	let { side, onSelectToken, onCloseTokensList }: Props = $props();
+	let { side, onSelectToken, onCloseTokensList, onFiltersChange }: Props = $props();
 
 	const { sourceToken, destinationToken, receiveSupportedData } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
@@ -104,6 +105,7 @@
 
 <ModalTokensList
 	networks={availableNetworks}
+	{onFiltersChange}
 	onTokenButtonClick={onSelectToken}
 	showStakeBalance={false}
 >

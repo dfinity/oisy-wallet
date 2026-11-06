@@ -16,6 +16,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { showTokenCategoryFilter } from '$lib/derived/settings.derived';
+	import type { TokenCategoryTagValue } from '$lib/enums/token-tag';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -39,6 +40,8 @@
 		noResults?: Snippet;
 		topBanner?: Snippet;
 		onTokenButtonClick?: (token: Token) => void;
+		// The person changed a filter: a chip, its clear button or "Clear filters".
+		onFiltersChange?: () => void;
 	}
 
 	let {
@@ -49,7 +52,8 @@
 		toolbar,
 		noResults,
 		topBanner,
-		onTokenButtonClick
+		onTokenButtonClick,
+		onFiltersChange
 	}: Props = $props();
 
 	const {
@@ -146,12 +150,26 @@
 		})
 	);
 
+	const selectNetwork = (value: Network | undefined) => {
+		setFilterNetwork(value);
+
+		onFiltersChange?.();
+	};
+
+	const selectCategory = (value: TokenCategoryTagValue | undefined) => {
+		setFilterCategoryTag(value);
+
+		onFiltersChange?.();
+	};
+
 	const clearFilters = () => {
 		setFilterCategoryTag(undefined);
 
 		if (!networkSelectorViewOnly) {
 			setFilterNetwork(undefined);
 		}
+
+		onFiltersChange?.();
 	};
 
 	let searchPlaceholder = $derived(
@@ -196,7 +214,7 @@
 			<NetworkFilterDropdown
 				locked={networkSelectorViewOnly}
 				{networks}
-				onSelect={setFilterNetwork}
+				onSelect={selectNetwork}
 				selectedNetwork={network}
 				{showStakeBalance}
 			/>
@@ -206,7 +224,7 @@
 			<div class="flex shrink-0">
 				<TokenCategoryFilterDropdown
 					{categories}
-					onSelect={setFilterCategoryTag}
+					onSelect={selectCategory}
 					selectedCategory={category}
 				/>
 			</div>
