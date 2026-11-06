@@ -105,6 +105,7 @@ export const balance = async ({
  * @param {IcrcAccount} params.to - The recipient's account.
  * @param {bigint} params.amount - The amount to transfer.
  * @param {bigint} [params.createdAt] - Optional timestamp for when the transfer was created.
+ * @param {Uint8Array} [params.memo] - Optional memo bytes to attach to the transfer.
  * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
  * @returns {Promise<IcrcBlockIndex>} The block index of the transfer.
  */
@@ -113,12 +114,14 @@ export const transfer = async ({
 	to,
 	amount,
 	createdAt,
+	memo,
 	ledgerCanisterId
 }: {
 	identity: NullishIdentity;
 	to: IcrcAccount;
 	amount: bigint;
 	createdAt?: bigint;
+	memo?: Uint8Array;
 	ledgerCanisterId: CanisterIdText;
 }): Promise<IcrcLedgerDid.BlockIndex> => {
 	assertNonNullish(identity);
@@ -128,6 +131,7 @@ export const transfer = async ({
 	return transfer({
 		to: toCandidAccount(to),
 		amount,
+		...(memo !== undefined ? { memo } : {}),
 		created_at_time: createdAt ?? nowInBigIntNanoSeconds()
 	});
 };
