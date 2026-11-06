@@ -1,6 +1,7 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
+import { getFakeOwnedTokenIds } from '$eth/services/nft-mock.services';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { EthNonFungibleToken } from '$eth/types/nft';
 import { TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL } from '$lib/constants/analytics.constants';
@@ -128,7 +129,7 @@ export const loadNftsByNetwork = async ({
 		return [];
 	}
 
-	const { getNftsByOwner } = alchemyProviders(networkId);
+	const { getNftsByOwner, getNftMetadata } = alchemyProviders(networkId);
 
 	const batches = createBatches<EthNonFungibleToken>({ items: tokens, batchSize: 40 });
 
@@ -142,6 +143,22 @@ export const loadNftsByNetwork = async ({
 				`Failed to load NFTs for tokens: ${tokenAddresses} on network: ${networkId.toString()}.`,
 				err
 			);
+		}
+	}
+
+	// LOCAL SIMULATION ONLY — do not merge.
+	// Fake possession of a hard-coded list of token ids, still resolving their
+	// metadata/media through Alchemy so the result matches what the user sees.
+	for (const token of tokens) {
+		for (const tokenId of getFakeOwnedTokenIds(token)) {
+			try {
+				nfts.push(await getNftMetadata({ token, tokenId }));
+			} catch (err: unknown) {
+				consoleWarn(
+					`Failed to load faked NFT ${tokenId} for token: ${token.address} on network: ${networkId.toString()}.`,
+					err
+				);
+			}
 		}
 	}
 
