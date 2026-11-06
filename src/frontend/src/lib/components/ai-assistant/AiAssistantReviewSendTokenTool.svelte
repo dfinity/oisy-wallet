@@ -3,10 +3,7 @@
 	import { getContext } from 'svelte';
 	import UtxosFeeContexts from '$btc/components/fee/UtxosFeeContexts.svelte';
 	import UtxosFeeLoader from '$btc/components/fee/UtxosFeeLoader.svelte';
-	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
-	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
-	import { selectedEvmNetwork } from '$evm/derived/network.derived';
-	import { evmNativeToken } from '$evm/derived/token.derived';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import AiAssistantReviewSendBtcToken from '$lib/components/ai-assistant/AiAssistantReviewSendBtcToken.svelte';
 	import AiAssistantReviewSendEthToken from '$lib/components/ai-assistant/AiAssistantReviewSendEthToken.svelte';
@@ -16,7 +13,6 @@
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -24,8 +20,6 @@
 	import {
 		isNetworkEthereum,
 		isNetworkIdBitcoin,
-		isNetworkIdEthereum,
-		isNetworkIdEvm,
 		isNetworkIdICP,
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
@@ -42,11 +36,14 @@
 
 	let destination = $derived(contactAddress?.address ?? address ?? '');
 
-	let fallbackEvmToken = $derived(
-		$enabledEvmTokens.find(({ network: { id: networkId } }) => $sendToken.network.id === networkId)
+	// The assistant picks the token from every enabled network, whichever one the navigation has
+	// selected. The review states the token's own network, so that is the network the send signs on
+	// and the one whose native token pays the fee.
+	let nativeEthereumToken = $derived(
+		[...$enabledEthereumTokens, ...$enabledEvmTokens].find(
+			({ network: { id: networkId } }) => $sendToken.network.id === networkId
+		)
 	);
-
-	let evmNativeEthereumToken = $derived($evmNativeToken ?? fallbackEvmToken);
 
 	const onSendCompleted = () => {
 		aiAssistantStore.setSendToolActionAsCompleted(id);
@@ -72,25 +69,15 @@
 
 		<Hr />
 
-		{#if isNetworkIdEthereum($sendTokenNetworkId)}
+		{#if isNetworkEthereum($sendToken.network) && nonNullish(nativeEthereumToken)}
 			<AiAssistantReviewSendEthToken
 				{amount}
 				{destination}
-				nativeEthereumToken={$nativeEthereumTokenWithFallback}
+				{nativeEthereumToken}
 				{onSendCompleted}
 				{sendCompleted}
 				{sendEnabled}
-				sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
-			/>
-		{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken) && isNetworkEthereum($sendToken.network)}
-			<AiAssistantReviewSendEthToken
-				{amount}
-				{destination}
-				nativeEthereumToken={evmNativeEthereumToken}
-				{onSendCompleted}
-				{sendCompleted}
-				{sendEnabled}
-				sourceNetwork={$selectedEvmNetwork ?? $sendToken.network}
+				sourceNetwork={$sendToken.network}
 			/>
 		{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
 			<UtxosFeeContexts>
