@@ -2384,7 +2384,8 @@ type PaymentAsset = 'lamports' | 'tokens';
 // account, or token units from a token account on the signature of its authority. A Token-2022 mint
 // that charges a fee on transfers holds it back in the destination, which is credited the rest. An
 // unwrap takes token units out of a wrapped SOL account and pays them into its destination as
-// lamports, and one that states no amount empties the account.
+// lamports, and one that states no amount empties the account. A close pays every lamport its
+// account holds into its destination, and with them what a wrapped SOL account wraps.
 const paymentOf = ({
 	program,
 	parsed: { type, info }
@@ -2396,6 +2397,7 @@ const paymentOf = ({
 			value?: bigint;
 			credited?: bigint;
 			emptying?: boolean;
+			closing?: boolean;
 			sent: PaymentAsset;
 			received: PaymentAsset;
 	  }
@@ -2442,6 +2444,17 @@ const paymentOf = ({
 			received: 'lamports'
 		};
 	}
+
+	if (nonNullish(program) && TOKEN_PROGRAMS.includes(program) && type === 'closeAccount') {
+		return {
+			source: address({ info, key: 'account' }),
+			destination: address({ info, key: 'destination' }),
+			authority: address({ info, key: 'owner' }) ?? address({ info, key: 'multisigOwner' }),
+			closing: true,
+			sent: 'lamports',
+			received: 'lamports'
+		};
+	}
 };
 
 interface WaitingPayout {
@@ -2451,6 +2464,7 @@ interface WaitingPayout {
 	parentIndex: number;
 	position: number;
 	left: bigint;
+	closed?: boolean;
 }
 
 // A transfer out of an account passes its amount on to the payouts into that account within the same
@@ -2479,7 +2493,8 @@ const passOn = ({
 					if (
 						payout.account !== account ||
 						payout.asset !== asset ||
-						payout.parentIndex !== parentIndex
+						payout.parentIndex !== parentIndex ||
+						(payout.closed ?? false)
 					) {
 						return { rest, waiting: [...acc, payout] };
 					}
@@ -2494,6 +2509,29 @@ const passOn = ({
 				// Nothing limits what an emptying transfer passes on.
 				{ rest: emptying ? undefined : value, waiting: [] }
 			).waiting;
+
+// A close empties its account into its destination, which passes on every payout still waiting
+// there that the close moves: all of them out of a wrapped SOL account, and the lamports out of any
+// other, whose tokens had to leave before it could close. What it leaves can no longer be passed
+// on, as whatever opens at the address next is another account.
+const closeOut = ({
+	waiting,
+	account,
+	parentIndex,
+	wrapped
+}: {
+	waiting: WaitingPayout[];
+	account: SolAddress | undefined;
+	parentIndex: number;
+	wrapped: boolean;
+}): WaitingPayout[] =>
+	waiting.map((payout) =>
+		payout.account !== account || payout.parentIndex !== parentIndex || (payout.closed ?? false)
+			? payout
+			: wrapped || payout.asset === 'lamports'
+				? { ...payout, left: ZERO }
+				: { ...payout, closed: true }
+	);
 
 /**
  * The programs that, called with the wallet among their accounts, pay out of an account that is not
@@ -2555,6 +2593,7 @@ export const findSolProgramsPayingOthers = ({
 				value,
 				credited = value,
 				emptying,
+				closing = false,
 				sent,
 				received
 			} = payment;
@@ -2564,14 +2603,31 @@ export const findSolProgramsPayingOthers = ({
 				return acc;
 			}
 
-			const waiting = passOn({
-				waiting: acc.waiting,
-				account: source,
-				asset: sent,
-				parentIndex,
-				value,
-				emptying
-			});
+			const waiting = closing
+				? closeOut({
+						waiting: acc.waiting,
+						account: source,
+						parentIndex,
+						wrapped:
+							nonNullish(source) &&
+							isNativeMint(
+								openedAs({
+									account: source,
+									flattened,
+									accountHolders,
+									accountMintsBefore,
+									until: position
+								}).mint
+							)
+					})
+				: passOn({
+						waiting: acc.waiting,
+						account: source,
+						asset: sent,
+						parentIndex,
+						value,
+						emptying
+					});
 
 			if (
 				topLevel ||

@@ -4949,12 +4949,29 @@ describe('sol-instruction-summary.utils', () => {
 			stackHeight
 		});
 
+		const token = ({
+			type,
+			info,
+			stackHeight
+		}: {
+			type: string;
+			info: object;
+			stackHeight: number;
+		}) => ({
+			program: 'spl-token',
+			programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+			parsed: { type, info },
+			stackHeight
+		});
+
 		const paying = ({
 			instructions,
-			inner
+			inner,
+			mints = {}
 		}: {
 			instructions: unknown[];
 			inner: unknown[];
+			mints?: Record<string, string>;
 		}): string[] =>
 			findSolProgramsPayingOthers({
 				instructions,
@@ -4965,7 +4982,8 @@ describe('sol-instruction-summary.utils', () => {
 					[userAccount]: mockSolAddress,
 					[vault]: mockSolAddress2,
 					[elsewhere]: mockSolAddress3
-				}
+				},
+				accountMintsBefore: mints
 			});
 
 		// A withdrawal from a position the wallet owns, its second payout sent elsewhere: the first,
@@ -5279,6 +5297,130 @@ describe('sol-instruction-summary.utils', () => {
 							stackHeight: 2
 						})
 					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it("should name a listed pool that closes an account of its own into somebody else's", () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+						token({
+							type: 'closeAccount',
+							info: { account: vault, destination: mockSolAddress4, owner: mockSolAddress2 },
+							stackHeight: 2
+						})
+					],
+					mints: { [vault]: WSOL_TOKEN.address }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// A router unwrapping a pool's wrapped SOL to the user by closing the account it took it in.
+		it('should not name a pool whose payout into a wrapped SOL account a close passes on', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						token({
+							type: 'closeAccount',
+							info: { account: elsewhere, destination: mockSolAddress, owner: mockSolAddress3 },
+							stackHeight: 2
+						})
+					],
+					mints: { [elsewhere]: WSOL_TOKEN.address }
+				})
+			).toEqual([]);
+		});
+
+		it('should not name a pool whose lamports paid into a token account a close passes on', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						token({
+							type: 'closeAccount',
+							info: { account: elsewhere, destination: mockSolAddress, owner: mockSolAddress3 },
+							stackHeight: 2
+						})
+					],
+					mints: { [elsewhere]: mockSplAddress }
+				})
+			).toEqual([]);
+		});
+
+		// The tokens had to leave before the account could close, and a burn passes nothing on.
+		it('should name a pool whose tokens leave the receiving account only by a burn before its close', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						token({
+							type: 'burn',
+							info: {
+								account: elsewhere,
+								mint: mockSplAddress,
+								authority: mockSolAddress3,
+								amount: '1000'
+							},
+							stackHeight: 2
+						}),
+						token({
+							type: 'closeAccount',
+							info: { account: elsewhere, destination: mockSolAddress, owner: mockSolAddress3 },
+							stackHeight: 2
+						})
+					],
+					mints: { [elsewhere]: mockSplAddress }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should not let an account opened again at a closed address pass on a payout made before the close', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						token({
+							type: 'burn',
+							info: {
+								account: elsewhere,
+								mint: mockSplAddress,
+								authority: mockSolAddress3,
+								amount: '1000'
+							},
+							stackHeight: 2
+						}),
+						token({
+							type: 'closeAccount',
+							info: { account: elsewhere, destination: mockSolAddress4, owner: mockSolAddress3 },
+							stackHeight: 2
+						}),
+						token({
+							type: 'initializeAccount3',
+							info: { account: elsewhere, mint: mockSplAddress, owner: mockSolAddress3 },
+							stackHeight: 2
+						}),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					],
+					mints: { [elsewhere]: mockSplAddress }
 				})
 			).toEqual([WHIRLPOOL]);
 		});
