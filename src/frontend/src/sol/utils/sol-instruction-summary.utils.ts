@@ -2756,6 +2756,9 @@ const closeOut = ({
  * program running in that instruction moves anything out of that account, and a program the dApp
  * brings itself is named on its own. A transfer out passes its amount on once, to the payouts into
  * the account oldest first, so a split route paying one account from two pools is still a hop.
+ *
+ * It reads only what instructions state. A program can also move lamports straight out of an
+ * account it owns without any instruction, and a payout made that way goes unseen here.
  */
 export const findSolProgramsPayingOthers = ({
 	instructions,
