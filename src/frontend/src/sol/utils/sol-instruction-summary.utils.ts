@@ -2896,7 +2896,7 @@ export const findSolProgramsPayingOthers = ({
 				return { ...acc, waiting };
 			}
 
-			const fromUser = [authority, source].some(
+			const fromUser = (closing ? [source] : [authority, source]).some(
 				(account) => nonNullish(account) && ownedAt({ account, position })
 			);
 			const toUser =

@@ -5666,6 +5666,24 @@ describe('sol-instruction-summary.utils', () => {
 			).toEqual([WHIRLPOOL]);
 		});
 
+		// The wallet may close the account, but the account is somebody else's.
+		it("should name a listed pool closing somebody else's account into a stranger's on the wallet's close authority", () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+						token({
+							type: 'closeAccount',
+							info: { account: elsewhere, destination: mockSolAddress4, owner: mockSolAddress },
+							stackHeight: 2
+						})
+					],
+					mints: { [elsewhere]: WSOL_TOKEN.address }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
 		// A router unwrapping a pool's wrapped SOL to the user by closing the account it took it in.
 		it('should not name a pool whose payout into a wrapped SOL account a close passes on', () => {
 			expect(
