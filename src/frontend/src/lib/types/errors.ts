@@ -151,3 +151,10 @@ export class LifiSolFeeChangedError extends Error {
 		this.ceiling = ceiling;
 	}
 }
+
+/**
+ * A Velora swap failed OISY's own checks before signing: its order or transaction is not the swap
+ * the user reviewed, or it names a contract other than the one pinned for the network. Velora's
+ * answers are unsigned, so such a swap is never signed.
+ */
+export class VeloraSwapRejectedError extends Error {}
