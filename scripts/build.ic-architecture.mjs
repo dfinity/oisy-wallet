@@ -2,14 +2,7 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ENV, IS_SIGNER_BUILD } from './build.utils.mjs';
 import OISY_DOMAINS from './domains.json' with { type: 'json' };
-
-// Signer builds also target `ic`, but they are served by their own canisters and domains, which
-// this manifest does not describe.
-if (ENV !== 'production' || IS_SIGNER_BUILD) {
-	process.exit(0);
-}
 
 const canisterIds = JSON.parse(readFileSync(join(process.cwd(), 'canister_ids.json'), 'utf8'));
 const frontendId = canisterIds.frontend?.ic;
