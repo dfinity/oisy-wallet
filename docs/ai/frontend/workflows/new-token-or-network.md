@@ -66,7 +66,7 @@ run; extend that script first (`scripts/build.*` is a protected path, see
    and a network without one keeps its monochrome mark there.
    A network whose native token belongs to another network (Base pays
    gas in ETH) has no token logo to reuse: put its brand mark under
-   `$evm/<network>/assets/`, as `$evm/base/assets/base.svg` is.
+   `$evm/<network>/assets/`, as Base's and Robinhood Chain's are.
 3. Create the native token (and any twin tokens) under
    `$env/tokens/<chain>/`. Place icons under `$<chain>/assets/` (or
    `$icp-eth/assets/` for ck-twins).

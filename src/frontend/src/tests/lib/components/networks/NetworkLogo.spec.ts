@@ -75,27 +75,31 @@ describe('NetworkLogo', () => {
 			expect(container.querySelector('.always-inverted')).toBeNull();
 		});
 
-		// Base's native token is ETH, so its coloured mark is its own brand mark, not a token logo.
-		it('should render the coloured mark of a network that has no token logo of its own', () => {
-			const { container } = render(NetworkLogo, {
-				props: { network: BASE_NETWORK, testId },
-				context: coloredScreen
-			});
+		// Neither network has a token logo of its own (both pay gas in ETH), so each has a brand mark.
+		it.each([BASE_NETWORK, ROBINHOOD_MAINNET_NETWORK])(
+			'should render the coloured mark of $name, which has no token logo of its own',
+			(network) => {
+				const { container } = render(NetworkLogo, {
+					props: { network, testId },
+					context: coloredScreen
+				});
 
-			expect(BASE_NETWORK.iconColored).toBeDefined();
-			expect(BASE_NETWORK.iconColored).not.toBe(BASE_NETWORK.icon);
-			expect(getSrc(container)).toBe(BASE_NETWORK.iconColored);
-			expect(container.querySelector('.invert-on-dark-theme')).toBeNull();
-		});
+				expect(network.iconColored).toBeDefined();
+				expect(network.iconColored).not.toBe(network.icon);
+				expect(getSrc(container)).toBe(network.iconColored);
+				expect(container.querySelector('.invert-on-dark-theme')).toBeNull();
+			}
+		);
 
 		it('should fall back to the monochrome mark for a network without a coloured one', () => {
+			const network = { ...BASE_NETWORK, iconColored: undefined };
+
 			const { container } = render(NetworkLogo, {
-				props: { network: ROBINHOOD_MAINNET_NETWORK, testId },
+				props: { network, testId },
 				context: coloredScreen
 			});
 
-			expect(ROBINHOOD_MAINNET_NETWORK.iconColored).toBeUndefined();
-			expect(getSrc(container)).toBe(ROBINHOOD_MAINNET_NETWORK.icon);
+			expect(getSrc(container)).toBe(network.icon);
 			expect(container.querySelector('.invert-on-dark-theme')).not.toBeNull();
 		});
 	});
