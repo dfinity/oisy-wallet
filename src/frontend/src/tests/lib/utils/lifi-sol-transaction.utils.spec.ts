@@ -4,6 +4,7 @@ import { LifiQuoteRejectedError } from '$lib/types/errors';
 import {
 	assertLifiSolInstructions,
 	assertLifiSolSimulation,
+	callsUnpinnedProgram,
 	decodeJupiterRoute,
 	jupiterRouteMinimum,
 	lifiSolNetworkFee,
@@ -222,6 +223,8 @@ const instructionAt = ({
 };
 
 describe('lifi-sol-transaction.utils', () => {
+	const WHIRLPOOL = 'whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc';
+
 	beforeAll(() => {
 		// The derivation of associated token accounts hashes, which the kit refuses outside a secure
 		// context.
@@ -1620,6 +1623,16 @@ describe('lifi-sol-transaction.utils', () => {
 		});
 	});
 
+	describe('callsUnpinnedProgram', () => {
+		it('should leave out a known program', () => {
+			expect(callsUnpinnedProgram([WHIRLPOOL])).toBeFalsy();
+		});
+
+		it('should find a program neither known nor pinned beside a known one', () => {
+			expect(callsUnpinnedProgram([WHIRLPOOL, mockSolAddress2])).toBeTruthy();
+		});
+	});
+
 	describe('assertLifiSolSimulation', () => {
 		const user = mockLifiSolUser;
 		const wrappedSolAccount = mockAtaAddress;
@@ -1698,6 +1711,19 @@ describe('lifi-sol-transaction.utils', () => {
 						result: resultWith({
 							preview: solToUsdcPreview,
 							unreadPrograms: ['HBVw6bZtcCaezhcBrmfyXBSBRWCdv72271xQ4GPvms2z']
+						})
+					})
+				).not.toThrow();
+			});
+
+			// The review names a known pool that pays out of an account that is not the user's into
+			// another one; that is no venue missing from the pin.
+			it('should accept a known program the review finds paying others', () => {
+				expect(() =>
+					assertWith({
+						result: resultWith({
+							preview: solToUsdcPreview,
+							unreadPrograms: ['HBVw6bZtcCaezhcBrmfyXBSBRWCdv72271xQ4GPvms2z', WHIRLPOOL]
 						})
 					})
 				).not.toThrow();
