@@ -8,6 +8,8 @@ export interface ChatMessageContent {
 	text?: string;
 	context?: string;
 	retryable?: boolean;
+	// Set on user messages typed in the chat input, as opposed to messages OISY writes on the user's behalf (for example after a tap on a card).
+	typedByUser?: boolean;
 	tool?: {
 		calls: ToolCall[];
 		results: ToolResult[];

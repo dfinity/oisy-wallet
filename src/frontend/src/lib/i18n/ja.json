@@ -3009,6 +3009,7 @@
 			"send_token_on_network_message": "$networkネットワークで$tokenトークンを送りたい。",
 			"send_token_message": "$tokenトークンを送りたい。",
 			"send_on_network_message": "$networkネットワークでトークンを送りたい。",
+			"type_send_address_message": "",
 			"send_token_succeeded": "トランザクション完了!",
 			"show_total_balance_tool_card_title": "総残高",
 			"no_contacts_found_message": "申し訳ありません、アドレス帳に該当する連絡先が見つかりませんでした。",

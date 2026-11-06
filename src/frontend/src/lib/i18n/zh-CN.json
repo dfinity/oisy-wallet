@@ -3009,6 +3009,7 @@
 			"send_token_on_network_message": "",
 			"send_token_message": "",
 			"send_on_network_message": "",
+			"type_send_address_message": "",
 			"send_token_succeeded": "交易已完成！",
 			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "抱歉，我在你的地址簿中找不到合适的联系人。",

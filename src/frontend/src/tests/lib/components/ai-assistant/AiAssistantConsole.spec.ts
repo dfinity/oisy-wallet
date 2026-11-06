@@ -70,6 +70,40 @@ describe('AiAssistantConsole', () => {
 		});
 	});
 
+	it('marks a message from the chat input as typed by the user', async () => {
+		mockAuthStore();
+
+		const { getByTestId, getByPlaceholderText } = render(AiAssistantConsole);
+
+		await fireEvent.input(
+			getByPlaceholderText(en.ai_assistant.text.send_message_input_placeholder),
+			{ target: { value: newMessageContent } }
+		);
+		await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_MESSAGE_BUTTON));
+
+		await waitFor(() => {
+			const [{ data }] = get(aiAssistantStore)?.chatHistory ?? [];
+
+			expect(data.text).toBe(newMessageContent);
+			expect(data.typedByUser).toBeTruthy();
+		});
+	});
+
+	it('does not mark a message OISY writes for the user as typed by the user', async () => {
+		mockAuthStore();
+
+		const { getByText } = render(AiAssistantConsole);
+
+		await fireEvent.click(getByText(en.ai_assistant.text.action_button_contacts_title));
+
+		await waitFor(() => {
+			const [{ data }] = get(aiAssistantStore)?.chatHistory ?? [];
+
+			expect(data.text).toBe(en.ai_assistant.text.action_button_contacts_prompt);
+			expect(data).not.toHaveProperty('typedByUser');
+		});
+	});
+
 	it('hides the mobile navigation bar while open', async () => {
 		render(AiAssistantConsole);
 
