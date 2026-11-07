@@ -11,5 +11,5 @@
 		"strict": true,
 		"types": ["node", "@types/dom-view-transitions"]
 	},
-	"exclude": ["src/frontend/src/tests/**/*"]
+	"exclude": ["src/frontend/src/tests/**/*", "src/extension/**/*"]
 }

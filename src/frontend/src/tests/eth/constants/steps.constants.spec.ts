@@ -72,7 +72,7 @@ describe('steps.constants', () => {
 	describe('walletConnectSendSteps', () => {
 		const expectedWalletConnectSendStep: ProgressStep = {
 			step: ProgressStepsSend.APPROVE_WALLET_CONNECT,
-			text: en.send.text.approving_wallet_connect,
+			text: en.send.text.approving,
 			state: 'next'
 		};
 
@@ -106,7 +106,7 @@ describe('steps.constants', () => {
 				},
 				{
 					step: ProgressStepsSign.APPROVE_WALLET_CONNECT,
-					text: en.send.text.approving_wallet_connect,
+					text: en.send.text.approving,
 					state: 'next'
 				}
 			]);
