@@ -15,6 +15,9 @@
 		opened?: boolean;
 		fullWidth?: boolean;
 		border?: boolean;
+		// For a trigger beside 40 px icon buttons: on touch screens it keeps their height and grows
+		// only its tap area to 44 px, instead of its box.
+		hitArea?: boolean;
 		testId?: string;
 	}
 
@@ -28,6 +31,7 @@
 		opened = false,
 		fullWidth = false,
 		border = false,
+		hitArea = false,
 		testId
 	}: Props = $props();
 
@@ -39,7 +43,10 @@
 	class="dropdown-button"
 	class:border
 	class:disabled
+	class:hit-area={hitArea}
+	class:hit-area-touch={hitArea}
 	class:opened
+	class:relative={hitArea}
 	class:w-full={fullWidth}
 	aria-describedby={nonNullish(ariaDescription) ? descriptionId : undefined}
 	aria-expanded={opened}

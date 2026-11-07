@@ -16,6 +16,7 @@
 		ariaDescription?: string;
 		buttonFullWidth?: boolean;
 		buttonBorder?: boolean;
+		buttonHitArea?: boolean;
 		testId?: string;
 	}
 
@@ -30,6 +31,7 @@
 		ariaDescription,
 		buttonFullWidth = false,
 		buttonBorder = false,
+		buttonHitArea = false,
 		testId
 	}: Props = $props();
 
@@ -48,6 +50,7 @@
 	border={buttonBorder}
 	{disabled}
 	fullWidth={buttonFullWidth}
+	hitArea={buttonHitArea}
 	onClick={() => (visible = true)}
 	opened={visible}
 	{testId}
