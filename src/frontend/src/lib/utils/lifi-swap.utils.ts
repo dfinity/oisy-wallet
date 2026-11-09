@@ -68,8 +68,8 @@ export const toLifiTokenAddress = (token: Token): string | undefined => {
  * answers with a wildcard for the category it quotes into.
  *
  * The routing sends a pair to the Solana registry whenever either side is Solana, so the EVM entry
- * quotes EVM → EVM (`{ evm: 'any' }`) and the Solana entry EVM → Solana (`{ sol: 'any' }`). A Solana
- * source gets nothing from either until the Solana swap wizard can execute a LI.FI quote.
+ * quotes EVM → EVM (`{ evm: 'any' }`) and the Solana entry EVM → Solana and Solana → Solana
+ * (`{ sol: 'any' }`). A Solana source gets nothing from the EVM entry: Solana → EVM is not quoted.
  */
 export const buildLifiSupportedDestinations =
 	(registry: 'evm' | 'sol'): GetSupportedDestinationsFn =>
@@ -77,14 +77,17 @@ export const buildLifiSupportedDestinations =
 		// The same tests the quote request applies, so no destination is offered for a source LI.FI
 		// is never asked about.
 		if (
-			!isNetworkEthereum(sourceToken.network) ||
 			isNullish(toLifiChainId(sourceToken.network)) ||
 			isNullish(toLifiTokenAddress(sourceToken))
 		) {
 			return;
 		}
 
-		return registry === 'evm' ? { evm: 'any' } : { sol: 'any' };
+		if (registry === 'sol') {
+			return { sol: 'any' };
+		}
+
+		return isNetworkEthereum(sourceToken.network) ? { evm: 'any' } : undefined;
 	};
 
 /**

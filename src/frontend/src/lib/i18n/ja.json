@@ -1044,7 +1044,6 @@
 			"open_qr_modal": "トランザクション詳細のQRコードをスキャン開始",
 			"scan_qr": "QRコードをスキャン",
 			"select_token": "送信するトークンを選択",
-			"select_network_filter": "ネットワークフィルターを選択",
 			"send_again": "再度送信",
 			"recently_used_tab": "最近使用したアドレス",
 			"contacts_tab": "アドレス帳",
@@ -1139,6 +1138,8 @@
 			"ethereum_out_of_gas_gas_sent": "送信したガス: $gasSent",
 			"ethereum_transaction_hash": "トランザクションハッシュ: $hash",
 			"ethereum_unsigned_transaction": "未署名のトランザクション: $transaction",
+			"ethereum_transaction_not_sent": "トランザクションは送信されませんでした。準備のためにネットワークに接続できなかったためです。もう一度お試しいただいても安全です。",
+			"ethereum_transaction_unconfirmed": "トランザクションがネットワークに届いたかどうかを確認できませんでした。まだ成立する可能性があるため、1〜2分ほど待ち、再送する前に履歴を確認してください。",
 			"solana_transaction_expired": "お客様のトランザクションはSolanaネットワークで処理されず、期限切れになりました。これは、提供された優先手数料が不十分だったためと考えられます。最新の推奨額に更新しましたので、再度お試しください。",
 			"solana_confirmation_failed": "作成されたトランザクションの確認を受信できませんでした。数秒お待ちいただいた後、トークンのトランザクション一覧でトランザクションが正しく作成されたかご確認ください。",
 			"solana_insufficient_funds": "このトランザクションを完了するためのトークン残高が不足しています。残高は最後に表示されてから変わっている可能性があります。",
@@ -1212,7 +1213,10 @@
 			"unknown": "チャージが完了したかどうか、OISYはまだ判断できません。完了していれば$tokenのアクティビティに表示されます。もう一度チャージすると同じチャージが再送信されますが、完了するのは1回だけです。このチャージが完了していた場合、新しいチャージや内容を変えたチャージを行うと、サイクルがもう一度追加されます。",
 			"unknown_fresh": "前回のチャージが完了したかどうか、OISYはまだ判断できません。完了していた場合、このチャージでサイクルがもう一度追加されます。先に$tokenのアクティビティを確認してください。",
 			"sent_to_canister": "キャニスターに$tokenを送ってもチャージにはなりません。$tokenはキャニスターのアカウントに届き、キャニスター自身のコードが引き出した場合にのみサイクルになります。",
-			"sent_to_canister_top_up": "キャニスターにサイクルを追加するには、$tokenのページで「チャージ」を使ってください。"
+			"sent_to_canister_top_up": "キャニスターにサイクルを追加するには、$tokenのページで「チャージ」を使ってください。",
+			"choice_send": "$tokenを送信",
+			"choice_send_description": "$tokenトークンを別のアカウントに送信します。キャニスターに$tokenを送ってもチャージにはなりません。",
+			"choice_top_up_description": "$tokenトークンをサイクルに変換して、任意のキャニスターにチャージします。"
 		},
 		"error": {
 			"invalid_canister_id": "キャニスターIDを入力してください。ユーザーのプリンシパル、アカウントID、他のネットワークのアドレスにはチャージできません。",
@@ -1364,6 +1368,13 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "UIを更新中",
 			"swap_provider": "スワッププロバイダー",
+			"smart_swap": "",
+			"finding_best_rate": "",
+			"smart_swap_gain": "",
+			"smart_swap_best_of_offers": "",
+			"smart_swap_offers_compared": "",
+			"smart_swap_offers": "",
+			"smart_swap_selected_offer": "",
 			"swap_provider_website": "ウェブサイト",
 			"swap_route": "スワップルート",
 			"included_network_fees": "含まれるネットワーク手数料",
@@ -1371,7 +1382,6 @@
 			"best_rate": "最良レート",
 			"expected_minimum": "予想される最低受取額",
 			"you_receive": "受取額",
-			"select": "選択 >",
 			"select_swap_provider": "スワッププロバイダーを選択",
 			"open_icp_swap": "ICP Swapウェブサイトを開く",
 			"open_instructions_link": "指示リンクを開く",
@@ -1430,7 +1440,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
@@ -1498,6 +1509,7 @@
 			"show_more_networks": "$number のネットワークをさらに表示",
 			"hide_more_networks": "ネットワークを非表示",
 			"on_network": "$network上",
+			"on_network_label": "$network上",
 			"delete_token": "トークンを削除",
 			"edit_token": "トークンを編集",
 			"sort_by_value": "価値",
@@ -1506,6 +1518,18 @@
 			"hide_asset_types": "アセットタイプを非表示",
 			"asset_type": "$oisy_nameのアセットタイプ",
 			"asset_type_all": "すべてのアセットタイプ",
+			"asset_type_all_short": "",
+			"clear_network_filter": "",
+			"clear_asset_type_filter": "",
+			"filter_asset_types": "",
+			"clear_filters": "",
+			"no_match_network": "",
+			"no_match_asset_type": "",
+			"no_match_asset_type_network": "",
+			"no_match_query": "",
+			"no_match_query_network": "",
+			"no_match_query_asset_type": "",
+			"no_match_query_asset_type_network": "",
 			"no_tokens_for_asset_type": "ウォレットに$asset_typeはありません",
 			"no_tokens_for_asset_type_zero_tokens": "選択したネットワークに $asset_type はありません",
 			"no_tokens_for_asset_type_description": "<strong>$count種類の対応トークン</strong>から選択してポートフォリオ表示をカスタマイズしてください。"
@@ -1615,7 +1639,8 @@
 		"placeholder": {
 			"enter_contract_address": "ERC20コントラクトアドレスを入力",
 			"enter_token_address": "SPLトークンアドレスを入力",
-			"search_token": "トークンを検索"
+			"search_token": "トークンを検索",
+			"search_token_on_network": ""
 		},
 		"warning": {
 			"trust_token": "追加するトークンが信頼できることを確認してください。悪意のある第三者がトークンを操作し、ユーザーを騙して資産を送信させる可能性があります。詐欺やセキュリティリスクの詳細については、<a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">こちら</a>をご覧ください。"
@@ -1866,6 +1891,22 @@
 			"cketh_deposit_principal": "ckETH の受取人",
 			"cketh_deposit_refused": "このリクエストは、あなたのものではない Internet Computer プリンシパル宛てに、または OISY が読み取れないデータで、ckETH 変換コントラクトを呼び出します。安全のため、OISY はこれに署名しません。",
 			"cketh_helper_unconfirmed": "OISY はまだ ckETH 変換コントラクトを確認できないため、この入金を検証できません。検証できるまで承認は無効のままです。",
+			"swap_title": "",
+			"swap_pay": "",
+			"swap_pay_at_most": "",
+			"swap_receive_at_least": "",
+			"swap_recipient": "",
+			"swap_app_fee": "",
+			"swap_app_fee_share": "",
+			"swap_allowance": "",
+			"swap_allowance_amount": "",
+			"swap_allowance_unlimited": "",
+			"swap_valid_until": "",
+			"swap_no_deadline": "",
+			"swap_router": "",
+			"swap_recipient_not_wallet": "",
+			"swap_no_minimum": "",
+			"swap_expired": "",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
 			"sign_psbt": "トランザクションに署名",
@@ -2486,6 +2527,7 @@
 			"create": "連絡先の作成に失敗しました",
 			"update": "連絡先の更新に失敗しました",
 			"delete": "連絡先の削除に失敗しました",
+			"load": "連絡先の読み込みに失敗しました",
 			"name_too_long": "名前は$maxCharacters文字以下にしてください。"
 		}
 	},

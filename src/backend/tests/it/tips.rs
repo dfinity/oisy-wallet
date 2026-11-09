@@ -18,7 +18,8 @@ use shared::types::{
     result_types::{CancelTipResult, GetTipSecretResult, SetTipSecretResult},
     tip::{
         CreateTipRequest, MyTip, PublicTip, SetTipSecretRequest, TipClaim, TipClaimRequest,
-        TipDetails, TipError, TipStatus,
+        TipDetails, TipError, TipStatus, TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS,
+        TIP_PAYOUT_DEDUP_WINDOW_NS,
     },
 };
 
@@ -462,6 +463,37 @@ fn a_tip_without_a_covering_allowance_is_refused_at_creation() {
 }
 
 #[test]
+fn an_amount_no_allowance_can_cover_is_refused_before_any_ledger_call() {
+    let env = setup_tips();
+    // Not a canister: asking it anything ends in `TransferFailed`, so `Uncovered`
+    // shows the width check answered before a ledger was called.
+    let no_ledger = Principal::from_slice(&[0xab; 10]);
+    let wider_than_256_bits = Nat::from(u128::MAX) * Nat::from(u128::MAX) * Nat::from(2u8);
+
+    let result = env
+        .pic_setup
+        .update::<Result<(), TipError>>(
+            env.sender,
+            "create_tip",
+            CreateTipRequest {
+                tip_id: "tip-too-wide".to_string(),
+                ledger_canister_id: no_ledger,
+                amount: wider_than_256_bits,
+                expires_at_ns: now_ns(&env.pic_setup) + ONE_HOUR_NS,
+                message: None,
+                claim_code_hash: claim_code_hash("code-too-wide"),
+            },
+        )
+        .expect("create_tip should reach the handler");
+
+    assert_eq!(result, Err(TipError::Uncovered));
+    assert!(
+        env.my_tips(env.sender).is_empty(),
+        "a refused tip leaves nothing stored"
+    );
+}
+
+#[test]
 fn a_stored_claim_code_is_readable_only_by_the_sender_who_stored_it() {
     // The recovery store exists so a sender can get back to their own link. It
     // must not become a way to read anybody else's: `EncryptedMaps` keys every
@@ -549,6 +581,58 @@ fn cancelling_a_tip_drops_its_recoverable_claim_code() {
         after,
         GetTipSecretResult::Ok(None),
         "cancelling must drop the stored claim code"
+    );
+}
+
+#[test]
+fn a_cleanup_right_after_an_upgrade_still_drops_the_stored_claim_code() {
+    // The claim-code store opens lazily, and its heap handle does not survive an
+    // upgrade while its stable memory does. Here the cancel is the first call
+    // after the upgrade that touches the store, so it has to reopen it rather
+    // than find nothing open and skip the delete. Cancel stands in for every
+    // cleanup path: create, claim and the hourly sweep go through the same helper.
+    let env = setup_tips();
+    let tip_id = "tip-upgrade-secret";
+
+    // Long enough to outlive the time the upgrade helper advances.
+    let expires_at_ns = now_ns(&env.pic_setup) + 48 * ONE_HOUR_NS;
+    env.approve(tip_id, TIP_AMOUNT + TRANSFER_FEE, Some(expires_at_ns));
+    assert_eq!(
+        env.create(
+            tip_id,
+            "claim-code-upgrade-secret",
+            TIP_AMOUNT,
+            expires_at_ns
+        ),
+        Ok(())
+    );
+
+    let _: SetTipSecretResult = env
+        .pic_setup
+        .update(
+            env.sender,
+            "set_tip_secret",
+            SetTipSecretRequest {
+                tip_id: tip_id.to_string(),
+                encrypted_claim_code: ByteBuf::from(vec![5u8; 32]),
+            },
+        )
+        .expect("storing should succeed");
+
+    env.pic_setup
+        .upgrade_latest_wasm(None)
+        .expect("upgrade should succeed");
+
+    assert_eq!(env.cancel(env.sender, tip_id), Ok(()));
+
+    let after: GetTipSecretResult = env
+        .pic_setup
+        .query(env.sender, "get_tip_secret", tip_id.to_string())
+        .expect("the query still answers");
+    assert_eq!(
+        after,
+        GetTipSecretResult::Ok(None),
+        "the first cleanup after an upgrade must still drop the stored claim code"
     );
 }
 
@@ -871,5 +955,290 @@ fn a_tip_survives_an_upgrade_and_still_pays_exactly_once() {
         env.tip_allowance(tip_id),
         Nat::from(0u64),
         "and the allowance that paid for it is spent, so nothing can draw on it again"
+    );
+}
+
+#[test]
+fn the_ledger_deduplicates_a_repeated_payout_inside_its_window_and_refuses_a_stale_one() {
+    // The assumptions the payout's `created_at_time` rests on, put to the real
+    // ledger rather than taken on trust: an identical repeat is answered with the
+    // block of the original instead of paying again, that still holds past the
+    // point `TIP_PAYOUT_DEDUP_WINDOW_NS` renews the stamp, and a stamp older than
+    // the ledger's window is refused outright. Called as a plain spender, since
+    // the ledger neither knows nor cares that the caller is the backend.
+    let env = setup_tips();
+    let pic = &env.pic_setup.pic;
+    let spender = Principal::self_authenticating("dedup-spender");
+    let claimer = Principal::self_authenticating("dedup-claimer");
+
+    icrc1_ledger::approve(
+        pic,
+        env.ledger,
+        env.sender,
+        icrc1_ledger::account_owner(spender),
+        3 * (TIP_AMOUNT + TRANSFER_FEE),
+        None,
+    )
+    .expect("approve should succeed");
+
+    let payout = |created_at_time: u64| icrc1_ledger::TransferFromArgs {
+        spender_subaccount: None,
+        from: icrc1_ledger::account_owner(env.sender),
+        to: icrc1_ledger::account_owner(claimer),
+        amount: Nat::from(TIP_AMOUNT),
+        fee: None,
+        memo: None,
+        created_at_time: Some(created_at_time),
+    };
+
+    let stamp = now_ns(&env.pic_setup);
+    let block = icrc1_ledger::transfer_from(pic, env.ledger, spender, payout(stamp))
+        .expect("the first payout executes");
+
+    assert_eq!(
+        icrc1_ledger::transfer_from(pic, env.ledger, spender, payout(stamp)),
+        Err(icrc1_ledger::TransferFromError::Duplicate {
+            duplicate_of: block.clone()
+        }),
+        "an identical repeat is the same transaction: answered with the original block, not paid again"
+    );
+    assert_eq!(env.balance(claimer), Nat::from(TIP_AMOUNT));
+
+    // `TIP_PAYOUT_DEDUP_WINDOW_NS` is 23 hours. The ledger must still recognise
+    // the stamp at that age, or renewing there would give up deduplication the
+    // ledger was still offering.
+    pic.advance_time(Duration::from_nanos(TIP_PAYOUT_DEDUP_WINDOW_NS));
+    assert_eq!(
+        icrc1_ledger::transfer_from(pic, env.ledger, spender, payout(stamp)),
+        Err(icrc1_ledger::TransferFromError::Duplicate {
+            duplicate_of: block
+        }),
+        "still inside the ledger's window at the age the stamp is renewed"
+    );
+
+    // And well past a day, it is refused rather than recognised.
+    pic.advance_time(Duration::from_hours(2));
+    assert_eq!(
+        icrc1_ledger::transfer_from(pic, env.ledger, spender, payout(stamp)),
+        Err(icrc1_ledger::TransferFromError::TooOld),
+        "outside the window the ledger can no longer say what became of it"
+    );
+    assert_eq!(
+        env.balance(claimer),
+        Nat::from(TIP_AMOUNT),
+        "and none of the repeats paid"
+    );
+
+    // A stamp ahead of the ledger's clock writes nothing, so the very same
+    // transaction is fine to send again once that clock arrives.
+    let ahead = now_ns(&env.pic_setup) + ONE_HOUR_NS;
+    assert!(matches!(
+        icrc1_ledger::transfer_from(pic, env.ledger, spender, payout(ahead)),
+        Err(icrc1_ledger::TransferFromError::CreatedInFuture { .. })
+    ));
+    assert_eq!(env.balance(claimer), Nat::from(TIP_AMOUNT));
+}
+
+#[test]
+fn a_claim_whose_answer_was_lost_is_paid_not_refused_when_it_is_retried() {
+    // The case this whole change exists for. A payout is in flight, the backend
+    // is upgraded under it, and the ledger's reply has nowhere to land: the
+    // money moved, and the backend has no record that it did. The retry must find
+    // the payout the ledger already made and say so, rather than meet a spent
+    // allowance and tell the claimer the tip is gone while the money sits in
+    // their account.
+    let env = setup_tips();
+    let tip_id = "tip-lost-answer";
+    let code = "code-lost-answer";
+    let claimer = Principal::self_authenticating("lost-answer-claimer");
+    env.reserve(tip_id, code, TIP_AMOUNT);
+
+    let in_flight = env
+        .pic_setup
+        .pic
+        .submit_call(
+            env.pic_setup.canister_id(),
+            claimer,
+            "claim_tip",
+            encode_one(TipClaimRequest {
+                tip_id: tip_id.to_string(),
+                claim_code: code.to_string(),
+            })
+            .unwrap(),
+        )
+        .expect("claim_tip should be accepted");
+
+    // One round: the backend has written `Claiming` — stamp included — and handed
+    // the payout to the ledger, which has not run it yet.
+    env.pic_setup.pic.tick();
+
+    // The upgrade goes in alongside the payout rather than after it, so the
+    // ledger's reply arrives at a canister that has just been replaced and has
+    // nothing to receive it. The real backend is then put back without moving the
+    // clock: the retry has to find the stamp the first attempt pinned, and a
+    // day-old stamp is renewed by design.
+    let upgrade = env.pic_setup.submit_upgrade_to_empty_module();
+    env.pic_setup
+        .pic
+        .await_call(upgrade)
+        .expect("the upgrade succeeds with a payout in flight");
+    let _ = env.pic_setup.pic.await_call(in_flight);
+    env.pic_setup
+        .restore_latest_wasm_in_place()
+        .expect("the backend comes back with its state");
+
+    // The preconditions, stated so that a change in how pocket-ic schedules
+    // rounds fails here rather than passing for the wrong reason.
+    assert_eq!(
+        env.balance(claimer),
+        Nat::from(TIP_AMOUNT),
+        "the payout landed at the ledger"
+    );
+    let before = env.my_tips(env.sender);
+    assert_eq!(
+        before[0].status,
+        TipStatus::Reserved,
+        "but the backend never recorded it: the answer was lost"
+    );
+    let blocks_before = icrc1_ledger::chain_length(&env.pic_setup.pic, env.ledger);
+
+    env.pic_setup
+        .pic
+        .advance_time(Duration::from_nanos(TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS + 1));
+    let claim = env
+        .claim(claimer, tip_id, code)
+        .expect("the retry is told the payout happened, not that the tip is gone");
+
+    assert_eq!(claim.amount, Nat::from(TIP_AMOUNT));
+    assert_eq!(
+        claim.block_index,
+        Nat::from(blocks_before - 1),
+        "and it carries the block the first attempt wrote — the last one on the ledger — not a new one"
+    );
+    assert_eq!(
+        icrc1_ledger::chain_length(&env.pic_setup.pic, env.ledger),
+        blocks_before,
+        "the retry wrote no block of its own"
+    );
+    assert_eq!(
+        env.balance(claimer),
+        Nat::from(TIP_AMOUNT),
+        "paid exactly once"
+    );
+    assert_eq!(env.tip_allowance(tip_id), Nat::from(0u8));
+
+    let row = env
+        .my_tips(env.sender)
+        .into_iter()
+        .find(|tip| tip.tip_id == tip_id)
+        .expect("the tip is on record");
+    assert_eq!(
+        row.status,
+        TipStatus::Claimed,
+        "History says claimed, not that the reservation was revoked"
+    );
+    assert_eq!(row.claimed_by, Some(claimer));
+}
+
+/// The payout deadline, end to end.
+///
+/// Nothing here is a slow ledger: this ledger answers as soon as it is asked.
+/// What produces the deadline is the round the exchange falls into.
+/// `submit_call` holds the claim between rounds, so time can move past the
+/// call's deadline while the transfer is in flight, and the system then answers
+/// the backend with `SysUnknown` — the one outcome that says nothing about
+/// whether the payout happened.
+///
+/// It happened. That is the case the hold exists for: the ledger executed the
+/// transfer and only the reply missed the deadline, so a record released as
+/// failed here would contradict the ledger, and a tip cancelled on the strength
+/// of it would be cancelled after it had paid.
+#[test]
+fn a_payout_past_its_deadline_holds_the_claim_and_pays_exactly_once() {
+    let env = setup_tips();
+    let tip_id = "tip-deadline";
+    let claim_code = "deadline-code";
+    let claimer = Principal::self_authenticating("deadline-claimer");
+
+    env.reserve(tip_id, claim_code, TIP_AMOUNT);
+
+    let request = encode_one(TipClaimRequest {
+        tip_id: tip_id.to_string(),
+        claim_code: claim_code.to_string(),
+    })
+    .expect("the claim request encodes");
+    let claim = env
+        .pic_setup
+        .pic
+        .submit_call(env.pic_setup.canister_id(), claimer, "claim_tip", request)
+        .expect("claim_tip should be accepted");
+
+    // One round runs `claim_tip` up to its await, which leaves the transfer in
+    // flight; 31 s is one second past the payout's deadline.
+    env.pic_setup.pic.tick();
+    env.pic_setup.pic.advance_time(Duration::from_secs(31));
+
+    let reply = env
+        .pic_setup
+        .pic
+        .await_call(claim)
+        .expect("claim_tip should return rather than trap");
+    let result: Result<TipClaim, TipError> =
+        candid::decode_one(&reply).expect("the claim result decodes");
+
+    assert!(
+        matches!(result, Err(TipError::TransferFailed { .. })),
+        "the claimer is told the payout did not definitely land: {result:?}"
+    );
+    assert_eq!(
+        env.balance(claimer),
+        Nat::from(TIP_AMOUNT),
+        "while on the ledger it did land, which is why the outcome is unknown rather than failed"
+    );
+    assert_eq!(
+        env.tip_allowance(tip_id),
+        Nat::from(0u64),
+        "and the allowance that paid for it is spent"
+    );
+    assert!(
+        env.cancel(env.sender, tip_id).is_err(),
+        "so the tip stays held and cancelling it is refused, rather than storing a tip that paid as cancelled"
+    );
+
+    // Past the in-flight window the tip is open to a fresh claim. The claimer's
+    // retry carries the stamp the first attempt pinned, so the ledger answers it
+    // with the payout it already made instead of drawing on the allowance again.
+    env.pic_setup
+        .pic
+        .advance_time(Duration::from_secs(5 * 60 + 1));
+    let blocks_before = icrc1_ledger::chain_length(&env.pic_setup.pic, env.ledger);
+
+    let retry = env
+        .claim(claimer, tip_id, claim_code)
+        .expect("a later attempt is told the payout happened");
+    assert_eq!(
+        retry.block_index,
+        Nat::from(blocks_before - 1),
+        "and it carries the block the first attempt wrote"
+    );
+    assert_eq!(
+        icrc1_ledger::chain_length(&env.pic_setup.pic, env.ledger),
+        blocks_before,
+        "without writing one of its own"
+    );
+    assert_eq!(
+        env.balance(claimer),
+        Nat::from(TIP_AMOUNT),
+        "so the claimer is paid exactly once across an outcome the canister could not read"
+    );
+    let row = env
+        .my_tips(env.sender)
+        .into_iter()
+        .find(|tip| tip.tip_id == tip_id)
+        .expect("the tip is on record");
+    assert_eq!(
+        row.status,
+        TipStatus::Claimed,
+        "and History records the payout"
     );
 }

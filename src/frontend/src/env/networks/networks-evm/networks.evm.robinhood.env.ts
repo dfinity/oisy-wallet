@@ -1,5 +1,6 @@
 import { ROBINHOOD_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumNetwork } from '$eth/types/network';
+import robinhoodMainnetIconColored from '$evm/robinhood/assets/robinhood.svg';
 import robinhoodMainnetIcon from '$lib/assets/networks/robinhood-mainnet.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
@@ -30,6 +31,8 @@ export const ROBINHOOD_MAINNET_NETWORK: EthereumNetwork = {
 	name: 'Robinhood Chain',
 	chainId: 4663n,
 	icon: robinhoodMainnetIcon,
+	// The brand mark on Robin Neon, one of Robinhood Chain's approved pairings (its brand guidelines).
+	iconColored: robinhoodMainnetIconColored,
 	explorerUrl: ROBINHOOD_EXPLORER_URL,
 	supportsNft: false,
 	providers: {
