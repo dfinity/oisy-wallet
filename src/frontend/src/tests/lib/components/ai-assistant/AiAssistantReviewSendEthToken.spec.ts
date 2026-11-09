@@ -3,6 +3,7 @@ import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import * as sendServices from '$eth/services/send.services';
 import * as ethFeeStore from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
+import { EthSubmissionUnconfirmedError } from '$eth/types/send';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import AiAssistantReviewSendEthToken from '$lib/components/ai-assistant/AiAssistantReviewSendEthToken.svelte';
 import {
@@ -12,10 +13,12 @@ import {
 import { ethAddressStore } from '$lib/stores/address.store';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import * as toasts from '$lib/stores/toasts.store';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { isNullish } from '@dfinity/utils';
@@ -91,7 +94,8 @@ describe('AiAssistantReviewSendEthToken', () => {
 		sendCompleted: false,
 		sourceNetwork: ETHEREUM_NETWORK,
 		sendEnabled: true,
-		onSendCompleted: vi.fn()
+		onSendCompleted: vi.fn(),
+		onSendOutcomeUnknown: vi.fn()
 	};
 	let sendSpy: MockInstance;
 
@@ -114,6 +118,81 @@ describe('AiAssistantReviewSendEthToken', () => {
 
 		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrow();
 		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE)).toBeInTheDocument();
+	});
+
+	it('should render the could-not-confirm text instead of the button if the outcome of the send is unknown', () => {
+		const { getByTestId, getByText } = render(AiAssistantReviewSendEthToken, {
+			props: {
+				...props,
+				sendOutcomeUnknown: true
+			},
+			context: mockContext()
+		});
+
+		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrow();
+		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE)).toThrow();
+		expect(getByText(en.send.error.ethereum_transaction_unconfirmed)).toBeInTheDocument();
+	});
+
+	// The transaction may have reached the network: sent again, it would be signed with the next
+	// nonce, and both could execute.
+	it('should stop offering the send when its outcome is unknown', async () => {
+		mockAuthStore();
+		mockCkEthMinterInfoStore();
+		mockEthAddressStore();
+		mockBalance();
+		mockEthFeeStore();
+
+		vi.spyOn(toasts, 'toastsErrorNoTrace').mockImplementation(() => Symbol('toast'));
+		sendSpy.mockRejectedValueOnce(new EthSubmissionUnconfirmedError(new Error('Internal error')));
+
+		const onSendCompleted = vi.fn();
+		const onSendOutcomeUnknown = vi.fn();
+
+		const { getByTestId } = render(AiAssistantReviewSendEthToken, {
+			props: { ...props, onSendCompleted, onSendOutcomeUnknown },
+			context: mockContext()
+		});
+
+		await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+		await vi.waitFor(() => expect(onSendOutcomeUnknown).toHaveBeenCalledOnce());
+
+		expect(onSendCompleted).not.toHaveBeenCalled();
+		expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ msg: { text: en.send.error.ethereum_transaction_unconfirmed } })
+		);
+	});
+
+	it('should keep offering the send after any other failure', async () => {
+		mockAuthStore();
+		mockCkEthMinterInfoStore();
+		mockEthAddressStore();
+		mockBalance();
+		mockEthFeeStore();
+
+		vi.spyOn(toasts, 'toastsErrorNoTrace').mockImplementation(() => Symbol('toast'));
+		sendSpy.mockRejectedValueOnce(
+			Object.assign(new Error('insufficient funds'), { code: 'INSUFFICIENT_FUNDS' })
+		);
+
+		const onSendOutcomeUnknown = vi.fn();
+
+		const { getByTestId } = render(AiAssistantReviewSendEthToken, {
+			props: { ...props, onSendOutcomeUnknown },
+			context: mockContext()
+		});
+
+		await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+		await vi.waitFor(() =>
+			expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ msg: { text: en.send.error.ethereum_insufficient_funds } })
+			)
+		);
+
+		expect(onSendOutcomeUnknown).not.toHaveBeenCalled();
+		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toBeInTheDocument();
 	});
 
 	it('should call send if all requirements are met', async () => {

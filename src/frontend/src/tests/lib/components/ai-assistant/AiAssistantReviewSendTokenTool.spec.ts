@@ -44,6 +44,7 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
@@ -217,6 +218,24 @@ describe('AiAssistantReviewSendTokenTool', () => {
 		expect(container).toHaveTextContent(ARBITRUM_ETH_TOKEN.symbol);
 		expect(container).toHaveTextContent(ARBITRUM_ETH_TOKEN.network.name);
 	});
+
+	// Kept in the chat history, the outcome reaches a review rebuilt after the assistant reopens.
+	it.each([ETHEREUM_TOKEN, ARBITRUM_ETH_TOKEN])(
+		'replaces Send with the could-not-confirm text for a send on $network.name whose outcome is unknown',
+		(token) => {
+			const { container, queryByTestId } = render(AiAssistantReviewSendTokenTool, {
+				props: {
+					...props,
+					token,
+					sendOutcomeUnknown: true
+				},
+				context: mockContext(token)
+			});
+
+			expect(queryByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).not.toBeInTheDocument();
+			expect(container).toHaveTextContent(en.send.error.ethereum_transaction_unconfirmed);
+		}
+	);
 
 	it('renders correctly for a SOL token', () => {
 		const { getByTestId, container } = render(AiAssistantReviewSendTokenTool, {
