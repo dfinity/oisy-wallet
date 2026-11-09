@@ -491,11 +491,14 @@ fn erc20_custom_token(address: String) -> CustomToken {
     }
 }
 
-/// Fills `token_activity` with two holders of 1,000 ERC-20 tokens each, then has a third user ask
-/// for [`QUEUED_ADDRESS`] while a refresh the first holder started holds the lock, so that the
-/// token is queued. Answers that refresh's lookups, which releases the lock, and returns the
-/// holders.
-fn queue_a_token_the_full_activity_map_did_not_take(pic_setup: &PicBackend) -> Vec<Principal> {
+/// Turns the price refresh on and fills `token_activity` with two holders of 1,000 ERC-20 tokens
+/// each. Returns the holders.
+fn fill_token_activity(pic_setup: &PicBackend) -> Vec<Principal> {
+    // `init` starts a first refresh on a timer. Running it while the refresh is still off keeps it
+    // from holding the lock with a lookup nobody answers.
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
     enable_exchange_rate_refresh(pic_setup);
     // A refresh of 2,000 tokens sends about 40 lookups at once, each reserving about 110B cycles
     // in PocketIC, more than the default balance leaves liquid.
@@ -516,6 +519,15 @@ fn queue_a_token_the_full_activity_map_did_not_take(pic_setup: &PicBackend) -> V
             Ok(())
         );
     }
+
+    holders
+}
+
+/// Fills `token_activity` (see [`fill_token_activity`]), then has a third user ask for
+/// [`QUEUED_ADDRESS`] while a refresh the first holder started holds the lock, so that the token is
+/// queued. Answers that refresh's lookups, which releases the lock, and returns the holders.
+fn queue_a_token_the_full_activity_map_did_not_take(pic_setup: &PicBackend) -> Vec<Principal> {
+    let holders = fill_token_activity(pic_setup);
 
     // This call starts a refresh of the holder's tokens, which holds the lock while its lookups
     // are unanswered.
