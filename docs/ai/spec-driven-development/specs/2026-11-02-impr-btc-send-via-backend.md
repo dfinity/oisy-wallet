@@ -905,9 +905,6 @@ Decided in PR 7:
   runs, on both paths. No flow sends with a failed fee (`validateBtcSend` refuses it first), so this
   cannot change a send under way. Pricing again on every UTXO change instead would also do so after
   `validateBtcSend`'s reload, in the middle of a send.
-- **Regtest.** The backend's floor is 1 confirmation there (`get_all_utxos` lowers it; 4
-  elsewhere, as `getUtxosQuery` used). The frontend's filter compares block heights, not
-  confirmations, so it keeps those outputs, and local sends can spend newer ones.
 - **Tests run with the flag off.** Vitest builds as `local`, where the flag is on, so
   `vitest.setup.ts` mocks it with a getter that starts each test off, matching production. Specs for
   the backend path turn it on through `btcSendViaBackend` in `$tests/utils/btc-env.test-utils`.
@@ -1008,8 +1005,7 @@ Every PR is safe on its own.
      [Decided in PR 5](#frontend-psbt-build-sign-finalize)).
    - `btcAddressToOutputScript` with its network check, moved here from PR 6 because the builder
      needs it. Tests check that a P2TR recipient's script is built without `initEccLib`, and that
-     each address type from the wrong network (mainnet ↔ testnet, testnet ↔ regtest via the Bech32
-     prefix) is refused.
+     each address type from the wrong network is refused.
 6. `fix(frontend): size BTC fee estimates by the recipient's script type` (needs 5 for
    `btcAddressToOutputScript`). Must land before 8. See
    [Fee estimation by output script](#frontend-fee-estimation-by-output-script).

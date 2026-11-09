@@ -848,7 +848,7 @@ The Bitcoin address scoped to a reservation is always **derived from the authent
 
 On local and staging builds, every BTC flow loads the outputs it can spend from the backend instead of reading them from the Bitcoin canister itself: send, convert, swap, the AI assistant's send, Liquidium supply and repay, and OpenCryptoPay. One certified call returns them with the pending transactions. It covers every page of the address's outputs, already leaves out those a pending send has reserved, and keeps the 10 000 largest. A wallet with more outputs than the Bitcoin canister returns in one page could previously spend only that first page. Each check for pending transactions before a send refreshes the outputs too, from the same answer. A wallet whose outputs a pending send has all reserved is still told its funds are locked by pending transactions, not that its balance is too low.
 
-If the backend cannot answer, the flow reports that pending transactions are unavailable and offers no send, as it already does when only the pending transactions fail to load. On regtest the backend counts an output as spendable from 1 confirmation rather than 4, so local sends can use newer outputs; testnet and mainnet keep 4. Beta and production load as before.
+If the backend cannot answer, the flow reports that pending transactions are unavailable and offers no send, as it already does when only the pending transactions fail to load. Beta and production load as before.
 
 ### Sending through the backend (local and staging)
 
