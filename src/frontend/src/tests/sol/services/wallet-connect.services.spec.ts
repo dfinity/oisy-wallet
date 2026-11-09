@@ -69,7 +69,7 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { getApproveCheckedInstruction } from '@solana-program/token';
+import { getApproveCheckedInstruction, getApproveInstruction } from '@solana-program/token';
 import type { SignatureBytes } from '@solana/keys';
 import {
 	AccountRole,
@@ -594,6 +594,22 @@ describe('wallet-connect.services', () => {
 				expect(result).toEqual(expect.objectContaining({ keepsBatchWhole: true }));
 			});
 
+			it('should pass on that the run makes a token call the wallet signs for a multisig', async () => {
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					parties: mockParties,
+					unreadPrograms: [],
+					signsForMultisig: true
+				});
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(result).toEqual(expect.objectContaining({ signsForMultisig: true }));
+			});
+
 			it('should decode without a preview when the simulation yields none', async () => {
 				vi.mocked(simulateSolTransaction).mockResolvedValue({
 					parties: mockParties,
@@ -951,6 +967,7 @@ describe('wallet-connect.services', () => {
 			rentExemptMinimum: mockRentExemptMinimum,
 			opensAccountBeyondRent: false,
 			keepsBatchWhole: false,
+			signsForMultisig: false,
 			reassignsWallet: false
 		};
 
@@ -978,6 +995,7 @@ describe('wallet-connect.services', () => {
 				rentExemptMinimum: mockRentExemptMinimum,
 				opensAccountBeyondRent: false,
 				keepsBatchWhole: false,
+				signsForMultisig: false,
 				reassignsWallet: false
 			};
 
@@ -1128,6 +1146,7 @@ describe('wallet-connect.services', () => {
 				rentExemptMinimum: mockRentExemptMinimum,
 				opensAccountBeyondRent: false,
 				keepsBatchWhole: false,
+				signsForMultisig: false,
 				reassignsWallet: false
 			};
 
@@ -1840,6 +1859,81 @@ describe('wallet-connect.services', () => {
 					id: mockRequest.id,
 					error: UNEXPECTED_ERROR
 				});
+			});
+		});
+
+		// A token account a multisig holds answers to the keys it lists, and a program can make a token
+		// call with the wallet among them inside its own instruction, which only the run shows.
+		describe('with a token call signed for a multisig inside an instruction', () => {
+			it('should refuse to sign and reject the request', async () => {
+				const result = await sign({ ...mockParams, signsForMultisig: true });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
+			});
+		});
+
+		// The real mapper, on an approval of the largest amount for a token account a multisig holds,
+		// with the wallet the key signing for it. The run came back, and the account is not one the user
+		// holds, so nothing but the message's own reading refuses it.
+		describe('with an approval the wallet signs for a multisig', () => {
+			it('should refuse to sign although a simulation came back', async () => {
+				const { mapSolTransactionMessage: mapper } = await vi.importActual<{
+					mapSolTransactionMessage: typeof mapSolTransactionMessage;
+				}>('$sol/utils/sol-transactions.utils');
+
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockImplementation(mapper);
+
+				const approve = getApproveInstruction({
+					source: address(mockAtaAddress),
+					delegate: address(mockSolAddress2),
+					owner: address(mockSolAddress3),
+					amount: SPL_TOKEN_MAX_AMOUNT,
+					multiSigners: [createNoopSigner(address(mockSolAddress))]
+				});
+
+				const transactionMessage = pipe(
+					createTransactionMessage({ version: 0 }),
+					(tx) => setTransactionMessageFeePayer(address(mockSolAddress), tx),
+					(tx) =>
+						setTransactionMessageLifetimeUsingBlockhash(
+							{
+								blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+								lastValidBlockHeight: 100n
+							},
+							tx
+						),
+					(tx) => appendTransactionMessageInstructions([approve], tx)
+				);
+
+				vi.spyOn(solTransactionsUtils, 'parseSolBase64TransactionMessage').mockResolvedValue(
+					transactionMessage
+				);
+
+				const result = await sign({ ...mockParams, simulated: true, simulationRan: true });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+				expect(mockListener.rejectRequest).toHaveBeenCalledOnce();
 			});
 		});
 

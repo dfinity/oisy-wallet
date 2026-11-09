@@ -111,6 +111,10 @@
 	// A token batch the run keeps whole, which the list states none of the steps of. `sign()` refuses
 	// it as it does an ambiguous message, so the review says so the same way.
 	let keepsBatchWhole = $state<boolean | undefined>();
+	// A token call the run makes inside another program's instruction with the wallet among the keys
+	// signing for a multisig. `sign()` refuses it as it does an ambiguous message, so the review says
+	// so the same way.
+	let signsForMultisig = $state<boolean | undefined>();
 	// Whether the message names an account other than the wallet to pay its fee. A send goes out with
 	// the wallet as the fee payer instead, which the review never ran, so `sign()` refuses to send such
 	// a message and the review says so. Signing it without sending keeps the payer it names.
@@ -158,6 +162,7 @@
 				rentExemptMinimum,
 				opensAccountBeyondRent,
 				keepsBatchWhole,
+				signsForMultisig,
 				feePaidByOthers
 			} = await decodeService({
 				base64EncodedTransactionMessage: data,
@@ -282,6 +287,7 @@
 			rentExemptMinimum,
 			opensAccountBeyondRent: opensAccountBeyondRent ?? false,
 			keepsBatchWhole: keepsBatchWhole ?? false,
+			signsForMultisig: signsForMultisig ?? false,
 			reassignsWallet
 		});
 
@@ -311,6 +317,7 @@
 				ambiguous={(ambiguous ?? false) ||
 					(opensAccountBeyondRent ?? false) ||
 					(keepsBatchWhole ?? false) ||
+					(signsForMultisig ?? false) ||
 					reassignsWallet}
 				{application}
 				{approvalWithoutSimulation}
@@ -319,6 +326,7 @@
 					(ambiguous ?? false) ||
 					(opensAccountBeyondRent ?? false) ||
 					(keepsBatchWhole ?? false) ||
+					(signsForMultisig ?? false) ||
 					reassignsWallet ||
 					closesPayOthers ||
 					approvalWithoutSimulation}

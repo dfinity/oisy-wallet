@@ -22,6 +22,7 @@ import {
 	solClosingInstructionCandidates,
 	solKeepsBatchWhole,
 	solOpensAccountBeyondRent,
+	solSignsForMultisig,
 	type SolInstructionGroup
 } from '$sol/utils/sol-instruction-summary.utils';
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
@@ -478,6 +479,10 @@ const simulate = async ({
 			instructions: [...transactionMessage.instructions].map(asSolParsedRpcInstructionOrSelf),
 			innerInstructions: innerInstructionGroups
 		}) && { keepsBatchWhole: true }),
+		...(solSignsForMultisig({
+			innerInstructions: innerInstructionGroups,
+			userAddress: address
+		}) && { signsForMultisig: true }),
 		parties: {
 			...deriveSolTransferParties({
 				legs,
