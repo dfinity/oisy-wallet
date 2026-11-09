@@ -219,12 +219,22 @@ one-shot approval, which should preserve their transaction identity.
   [`shared::types::api_keys::ApiKeys`](../../../src/shared/src/types/api_keys.rs).
   - `get_exchange_rates` is the per-caller fetch endpoint: it returns the
     USD price for each of the caller's priceable tokens (native + custom,
-    minus testnets / NFTs / ERC-4626), re-marks them as active so the timer
-    keeps them warm, and awaits a one-shot refresh for any token whose
-    cache is older than `PRICE_STALENESS_THRESHOLD_SEC` (2 min) or missing.
-    Entries that remain stale or missing after the refresh attempt are
+    minus testnets / NFTs / ERC-4626), records the custom ones as active so
+    the timer keeps them warm, and starts a background refresh for any token
+    whose cache is older than `PRICE_STALENESS_THRESHOLD_SEC` (2 min) or
+    missing. Entries that are stale or missing at the time of the call are
     returned as `None`, so returned prices never exceed the freshness window.
-    It's an `update` (mutates `token_activity`, may issue HTTP outcalls).
+    It's an `update` (writes `token_activity`, may issue HTTP outcalls).
+  - **Token activity** is recorded only through
+    `exchange::record_token_activity`: only while the refresh is on, only for
+    priceable custom tokens (the natives are refreshed while callers ask for
+    rates), at most 3 times a minute per caller
+    (`TOKEN_ACTIVITY_RATE_LIMITER`, which also gates the refresh that
+    `get_exchange_rates` starts), and for at most 2,000 tokens at a time
+    (`MAX_TOKEN_ACTIVITY_ENTRIES`). Housekeeping evicts inactive entries in
+    budgeted timer batches.
+  - A refresh fetches the native tokens and the custom tokens as two groups
+    and caches each as soon as its own lookups return.
   - `get_exchange_rate(TokenId)` is a legacy cache-only query for callers
     that already know the token ID and do not need activation or freshness.
 
