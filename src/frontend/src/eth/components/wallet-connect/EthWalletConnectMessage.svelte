@@ -26,6 +26,7 @@
 	import Json from '$lib/components/ui/Json.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
+	import WalletConnectAcknowledgement from '$lib/components/wallet-connect/WalletConnectAcknowledgement.svelte';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
@@ -35,6 +36,7 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { visibleMessageText } from '$lib/utils/wallet-connect.utils';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
@@ -45,9 +47,17 @@
 		// so the two states deciding what this component renders are settled in one place. Deriving
 		// it here would parse the payload a third time to reach the same answer.
 		unreviewableTypedData?: boolean;
+		// Ticked by the user to confirm they sign typed data OISY can't describe. The review holds
+		// Approve until then, and signing checks it again.
+		unreviewableTypedDataAcknowledged?: boolean;
 	}
 
-	let { request, invalidTypedData = false, unreviewableTypedData = false }: Props = $props();
+	let {
+		request,
+		invalidTypedData = false,
+		unreviewableTypedData = false,
+		unreviewableTypedDataAcknowledged = $bindable(false)
+	}: Props = $props();
 
 	let application = $derived(request.verifyContext.verified.origin);
 
@@ -229,9 +239,11 @@
 		{$i18n.wallet_connect.text.invalid_typed_data}
 	</MessageBox>
 {:else if unreviewableTypedData}
-	<MessageBox level="error" testId="wallet-connect-unreviewable-typed-data">
-		{unreviewableText}
-	</MessageBox>
+	<WalletConnectAcknowledgement
+		testId="wallet-connect-unreviewable-typed-data"
+		text={unreviewableText}
+		bind:acknowledged={unreviewableTypedDataAcknowledged}
+	/>
 {:else if hasUnsignedKeys}
 	<MessageBox level="info" testId="wallet-connect-unsigned-typed-data-info">
 		{$i18n.wallet_connect.text.unsigned_typed_data_keys}
@@ -358,7 +370,9 @@
 			</div>
 		{:else}
 			<p class="mb-4 font-normal">
-				<output class="break-all">{getSignParamsMessageUtf8(request.params.request.params)}</output>
+				<output class="break-all whitespace-pre-wrap [unicode-bidi:isolate-override]" dir="ltr"
+					>{visibleMessageText(getSignParamsMessageUtf8(request.params.request.params))}</output
+				>
 			</p>
 		{/if}
 	{/if}

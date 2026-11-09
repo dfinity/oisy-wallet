@@ -4,7 +4,7 @@ import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnec
 import { SESSION_REQUEST_ETH_SIGN_V4 } from '$eth/constants/wallet-connect.constants';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 describe('WalletConnectSignReview', () => {
 	const HOLDER = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
@@ -322,35 +322,46 @@ describe('WalletConnectSignReview', () => {
 	});
 
 	// A Hyperliquid action is signable and benign, and OISY still cannot say what it authorizes. It
-	// is warned about like any other unrecognised schema rather than waved through on the strength
-	// of the dApp it came from, which is the cost of not guessing: an acknowledgement, not a block.
-	it('warns about a Hyperliquid action without blocking it', () => {
-		const { getByText, queryByText, getByRole } = render(WalletConnectSignReview, {
+	// is treated like any other unrecognised schema rather than waved through on the strength of the
+	// dApp it came from, which is the cost of not guessing: an acknowledgement, not a block.
+	it('holds approval of a Hyperliquid action until the user confirms it', async () => {
+		const { getByText, queryByText, getByRole, getByLabelText } = render(WalletConnectSignReview, {
 			props: { ...props, request: hyperliquidAcceptTermsRequest() }
 		});
 
 		expect(queryByText(en.wallet_connect.text.invalid_typed_data)).not.toBeInTheDocument();
 		expect(getByText(en.wallet_connect.text.unreviewable_typed_data)).toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+
+		await fireEvent.click(getByLabelText(en.wallet_connect.text.unread_programs_acknowledge));
+
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 
 	// A signature that moves USDC is summarized like a permit: the token, the amount and where it goes.
-	it('states what an ERC-3009 authorization sends instead of warning about it', () => {
-		const { getByTestId, queryByText, getByRole } = render(WalletConnectSignReview, {
-			props: { ...props, request: transferWithAuthorizationRequest() }
-		});
+	it('states what an ERC-3009 authorization sends without asking for a confirmation', () => {
+		const { getByTestId, queryByText, queryByLabelText, getByRole } = render(
+			WalletConnectSignReview,
+			{
+				props: { ...props, request: transferWithAuthorizationRequest() }
+			}
+		);
 
 		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
 		expect(queryByText(en.wallet_connect.text.methods)).not.toBeInTheDocument();
+		expect(
+			queryByLabelText(en.wallet_connect.text.unread_programs_acknowledge)
+		).not.toBeInTheDocument();
 
 		expect(getByTestId('wallet-connect-typed-data-recipient')).toHaveTextContent(SPENDER);
 
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 
-	// The transfer is stated, and the witness bound to it is the part OISY can't describe.
-	it('states the transfer of a Permit2 witness transfer and warns about the rest', () => {
-		const { getByText, queryByText, getByRole } = render(WalletConnectSignReview, {
+	// The transfer is stated, and the witness bound to it is the part OISY can't describe, so approval
+	// waits for the user's confirmation as it does for any request OISY can't fully describe.
+	it('states the transfer of a Permit2 witness transfer and holds approval until the user confirms it', async () => {
+		const { getByText, queryByText, getByRole, getByLabelText } = render(WalletConnectSignReview, {
 			props: { ...props, request: permit2WitnessTransferRequest() }
 		});
 
@@ -361,6 +372,22 @@ describe('WalletConnectSignReview', () => {
 		expect(getByText(SPENDER)).toBeInTheDocument();
 		expect(getByText(en.wallet_connect.text.methods)).toBeInTheDocument();
 
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+
+		await fireEvent.click(getByLabelText(en.wallet_connect.text.unread_programs_acknowledge));
+
+		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+	});
+
+	// A schema OISY describes asks nothing of the user before approving.
+	it('asks no confirmation for a permit whose schema is recognised', () => {
+		const { queryByLabelText, getByRole } = render(WalletConnectSignReview, {
+			props: { ...props, request: daiPermitRequest(true) }
+		});
+
+		expect(
+			queryByLabelText(en.wallet_connect.text.unread_programs_acknowledge)
+		).not.toBeInTheDocument();
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 

@@ -93,6 +93,8 @@
 
 	let signProgressStep = $state<ProgressStepsSign>(ProgressStepsSign.INITIALIZATION);
 
+	let unreviewableTypedDataAcknowledged = $state(false);
+
 	/**
 	 * Reject a message
 	 */
@@ -111,6 +113,7 @@
 		const { success } = await signMessage({
 			request,
 			listener,
+			unreviewableTypedDataAcknowledged,
 			modalNext: modal.next,
 			progress: (step: ProgressStepsSign) => (signProgressStep = step)
 		});
@@ -132,7 +135,12 @@
 		{#if currentStep?.name === WizardStepsSign.SIGNING}
 			<InProgressWizard progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
-			<WalletConnectSignReview onApprove={approve} onReject={reject} {request} />
+			<WalletConnectSignReview
+				onApprove={approve}
+				onReject={reject}
+				{request}
+				bind:unreviewableTypedDataAcknowledged
+			/>
 		{/if}
 	{/key}
 </WizardModal>

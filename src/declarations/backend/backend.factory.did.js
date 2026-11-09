@@ -346,6 +346,12 @@ export const idlFactory = ({ IDL }) => {
 		amount: IDL.Nat,
 		dest_token: TokenId
 	});
+	const CyclesTopUpData = IDL.Record({
+		transfer_created_at_ns: IDL.Nat64,
+		canister_id: IDL.Principal,
+		source_token: TokenId,
+		amount: IDL.Nat
+	});
 	const NearIntentsData = IDL.Record({
 		source_address: IDL.Opt(IDL.Text),
 		source_token: TokenId,
@@ -400,6 +406,7 @@ export const idlFactory = ({ IDL }) => {
 		OneSecIcpToEvm: OneSecIcpToEvmData,
 		Lifi: LifiData,
 		OisyTrade: OisyTradeData,
+		CyclesTopUp: CyclesTopUpData,
 		NearIntents: NearIntentsData,
 		CyclesMint: CyclesMintData,
 		ChainFusion: ChainFusionData,
