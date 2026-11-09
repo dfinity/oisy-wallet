@@ -1,14 +1,21 @@
 use std::{cell::RefCell, collections::HashMap};
 
+use ic_cdk::call::{CallResult, Error as CallError, RejectCode};
 use ic_cdk_bitcoin_canister::{
-    bitcoin_get_current_fee_percentiles, bitcoin_get_utxos, GetCurrentFeePercentilesRequest,
-    GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte, Network as BitcoinNetwork, Page, Utxo,
-    UtxosFilterInRequest,
+    bitcoin_get_current_fee_percentiles, bitcoin_get_utxos, bitcoin_send_transaction,
+    GetCurrentFeePercentilesRequest, GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte,
+    Network as BitcoinNetwork, Page, SendTransactionRequest, Utxo, UtxosFilterInRequest,
 };
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::bitcoin::{
     FEE_PERCENTILES_INITIAL_DELAY, FEE_PERCENTILES_UPDATE_INTERVAL, FEE_UPDATE_TIMEOUT_NS,
 };
+
+use super::broadcast_state_model::BroadcastOutcome;
+
+/// The start of the reject message the Bitcoin canister sends when its `send_transaction` returns
+/// an error, which it does only before queueing the transaction (a transaction it cannot decode).
+const SEND_TRANSACTION_REFUSED_PREFIX: &str = "send_transaction failed:";
 
 // Default fee values for different networks when API fails
 const DEFAULT_MAINNET_FEE: u64 = 10_000; // 10 sat/byte (10,000 msat/byte)
@@ -71,6 +78,57 @@ pub async fn get_all_utxos(
     }
 
     Ok(all_utxos)
+}
+
+/// Broadcasts a signed transaction from the backend's own cycles.
+///
+/// NOTE: Relies on the `bitcoin_send_transaction` endpoint.
+/// See [IC Interface](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_send_transaction)
+pub async fn send_transaction(network: BitcoinNetwork, transaction: Vec<u8>) -> BroadcastOutcome {
+    broadcast_outcome(
+        bitcoin_send_transaction(&SendTransactionRequest {
+            network: network.into(),
+            transaction,
+        })
+        .await,
+    )
+}
+
+/// Tells a call that went out from one that did not, or may not have.
+///
+/// The call is unbounded-wait, so there is no `SysUnknown`. A refusal is certain only when the
+/// call was never made, the system rejected it before the Bitcoin canister ran it
+/// (`SysFatal`, `SysTransient`, `DestinationInvalid`), or the Bitcoin canister rejected it with its
+/// own error. Any other `CanisterReject` can come from the canister being uninstalled after it
+/// forwarded the transaction, and a `CanisterError` (a trap) can come after the forwarding too.
+/// A reply that does not decode is still a reply, so the transaction went out.
+fn broadcast_outcome(result: CallResult<()>) -> BroadcastOutcome {
+    match result {
+        Ok(()) | Err(CallError::CandidDecodeFailed(_)) => BroadcastOutcome::Sent,
+        Err(
+            err @ (CallError::InsufficientLiquidCycleBalance(_) | CallError::CallPerformFailed(_)),
+        ) => BroadcastOutcome::Refused {
+            msg: err.to_string(),
+        },
+        Err(CallError::CallRejected(rejected)) => {
+            let msg = rejected.to_string();
+            match rejected.reject_code() {
+                Ok(
+                    RejectCode::SysFatal
+                    | RejectCode::SysTransient
+                    | RejectCode::DestinationInvalid,
+                ) => BroadcastOutcome::Refused { msg },
+                Ok(RejectCode::CanisterReject)
+                    if rejected
+                        .reject_message()
+                        .starts_with(SEND_TRANSACTION_REFUSED_PREFIX) =>
+                {
+                    BroadcastOutcome::Refused { msg }
+                }
+                _ => BroadcastOutcome::Unknown { msg },
+            }
+        }
+    }
 }
 
 /// Spawns a fee-cache update only if no previous update is still in flight.
@@ -263,4 +321,92 @@ fn initialize_default_fee_percentiles(network: BitcoinNetwork) -> Vec<u64> {
     );
 
     percentiles
+}
+
+#[cfg(test)]
+mod tests {
+    use ic_cdk::call::{
+        CallPerformFailed, CallRejected, Error as CallError, InsufficientLiquidCycleBalance,
+        RejectCode,
+    };
+    use pretty_assertions::assert_eq;
+
+    use super::{broadcast_outcome, BroadcastOutcome};
+
+    fn rejected(code: RejectCode, message: &str) -> CallError {
+        CallError::CallRejected(CallRejected::with_rejection(
+            code as u32,
+            message.to_string(),
+        ))
+    }
+
+    fn is_refused(outcome: &BroadcastOutcome) -> bool {
+        matches!(outcome, BroadcastOutcome::Refused { .. })
+    }
+
+    #[test]
+    fn a_reply_is_sent() {
+        assert_eq!(broadcast_outcome(Ok(())), BroadcastOutcome::Sent);
+    }
+
+    #[test]
+    fn a_call_never_made_is_refused() {
+        for err in [
+            CallError::InsufficientLiquidCycleBalance(InsufficientLiquidCycleBalance {
+                available: 1,
+                required: 2,
+            }),
+            CallError::CallPerformFailed(CallPerformFailed),
+        ] {
+            assert!(is_refused(&broadcast_outcome(Err(err))));
+        }
+    }
+
+    #[test]
+    fn a_system_reject_before_execution_is_refused() {
+        for code in [
+            RejectCode::SysFatal,
+            RejectCode::SysTransient,
+            RejectCode::DestinationInvalid,
+        ] {
+            assert!(
+                is_refused(&broadcast_outcome(Err(rejected(code, "queue full")))),
+                "{code}"
+            );
+        }
+    }
+
+    #[test]
+    fn only_the_bitcoin_canisters_own_reject_is_refused() {
+        assert!(is_refused(&broadcast_outcome(Err(rejected(
+            RejectCode::CanisterReject,
+            "send_transaction failed: MalformedTransaction",
+        )))));
+        assert_eq!(
+            broadcast_outcome(Err(rejected(
+                RejectCode::CanisterReject,
+                "Canister has been uninstalled.",
+            ))),
+            BroadcastOutcome::Unknown {
+                msg: "call rejected: 4 - Canister has been uninstalled.".to_string()
+            }
+        );
+    }
+
+    #[test]
+    fn a_trap_or_an_unknown_code_is_unknown() {
+        for err in [
+            rejected(
+                RejectCode::CanisterError,
+                "Sending transaction bitcoin network must succeed",
+            ),
+            rejected(RejectCode::SysUnknown, "timeout"),
+            CallError::CallRejected(CallRejected::with_rejection(42, "new code".to_string())),
+        ] {
+            assert!(matches!(
+                broadcast_outcome(Err(err)),
+                BroadcastOutcome::Unknown { .. }
+            ));
+        }
+    }
 }

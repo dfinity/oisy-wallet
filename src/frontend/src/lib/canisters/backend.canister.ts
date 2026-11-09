@@ -2,6 +2,7 @@ import type {
 	ActiveUserTransaction,
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
+	BtcGetSpendableUtxosResponse,
 	Contact,
 	ContactImageEntry,
 	ContactsPage,
@@ -33,6 +34,7 @@ import {
 	mapBtcAddPendingTransactionError,
 	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
+	mapBtcGetSpendableUtxosError,
 	mapGetAllowedCyclesError,
 	mapPersonalNotesVetkeyError,
 	mapSignOnramperWidgetUrlError
@@ -53,6 +55,7 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
+	BtcGetSpendableUtxosParams,
 	CreateActiveUserTransactionParams,
 	CreateUserProfileResponse,
 	GetPendingTransactionsOutcome,
@@ -303,6 +306,26 @@ export class BackendCanister extends Canister<BackendService> {
 		}
 
 		throw mapBtcGetPendingTransactionsError(response.Err);
+	};
+
+	btcGetSpendableUtxos = async ({
+		network,
+		iiDelegationChain
+	}: BtcGetSpendableUtxosParams): Promise<BtcGetSpendableUtxosResponse> => {
+		const { btc_get_spendable_utxos } = this.caller({ certified: true });
+
+		const response = await btc_get_spendable_utxos({
+			network,
+			ii_delegation_chain: iiDelegationChain
+		});
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		// Unlike `btcGetPendingTransactions`, a rate limit throws too: an empty list would read as a
+		// wallet with nothing to spend.
+		throw mapBtcGetSpendableUtxosError(response.Err);
 	};
 
 	btcGetCurrentFeePercentiles = async ({
@@ -595,7 +618,9 @@ export class BackendCanister extends Canister<BackendService> {
 		start,
 		maxResults
 	}: GetUserTransactionsParams): Promise<GetUserTransactionsResponse> => {
-		const { get_user_transactions } = this.caller({ certified: false });
+		// The stored history decides which addresses count as used before on the send review, so it is
+		// always read certified.
+		const { get_user_transactions } = this.caller({ certified: true });
 
 		const response = await get_user_transactions({
 			token_id: tokenId,

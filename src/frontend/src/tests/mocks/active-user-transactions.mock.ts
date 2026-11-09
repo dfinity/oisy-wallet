@@ -5,6 +5,7 @@ import type {
 	ActiveUserTransactionRef,
 	ChainFusionData,
 	CyclesMintData,
+	CyclesTopUpData,
 	LifiData,
 	LiquidiumData,
 	NearIntentsData,
@@ -20,6 +21,7 @@ import type {
 } from '$lib/types/api';
 import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
 import { CYCLES_MINT_EXTERNAL_REF_KEYS } from '$lib/types/cycles-mint-active-tx';
+import { CYCLES_TOP_UP_EXTERNAL_REF_KEYS } from '$lib/types/cycles-top-up-active-tx';
 import { LIFI_EXTERNAL_REF_KEYS } from '$lib/types/lifi';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
@@ -205,6 +207,30 @@ export const mockCyclesMintActiveUserTransaction: ActiveUserTransaction = {
 		{ key: CYCLES_MINT_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Internet Computer' },
 		{ key: CYCLES_MINT_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'TCYCLES' },
 		{ key: CYCLES_MINT_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Internet Computer' }
+	],
+	created_at_ns: ZERO,
+	updated_at_ns: ZERO,
+	error: []
+};
+
+export const mockCyclesTopUpData: CyclesTopUpData = {
+	source_token: { Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
+	canister_id: Principal.fromText('ywcsb-maaaa-aaaai-q6k7a-cai'),
+	amount: 150_000_000n,
+	transfer_created_at_ns: 1_700_000_000_000_000_000n
+};
+
+export const mockCyclesTopUpActiveUserTransaction: ActiveUserTransaction = {
+	id: '77777777-7777-4777-8777-777777777777',
+	status: { Executing: null },
+	data: { CyclesTopUp: mockCyclesTopUpData },
+	progress_step: [],
+	external_refs: [
+		{ key: CYCLES_TOP_UP_EXTERNAL_REF_KEYS.TRANSFER_BLOCK_INDEX, value: '12' },
+		{ key: CYCLES_TOP_UP_EXTERNAL_REF_KEYS.AMOUNT, value: '1.5' },
+		{ key: CYCLES_TOP_UP_EXTERNAL_REF_KEYS.USD_SOURCE_VALUE, value: '4.5' },
+		{ key: CYCLES_TOP_UP_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL, value: 'ICP' },
+		{ key: CYCLES_TOP_UP_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Internet Computer' }
 	],
 	created_at_ns: ZERO,
 	updated_at_ns: ZERO,

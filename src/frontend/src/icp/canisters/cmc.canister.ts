@@ -5,6 +5,7 @@ import { mapCmcNotifyError } from '$icp/canisters/cmc.errors';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices, type QueryParams } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export class CmcCanister extends Canister<CmcService> {
 	static async create({
@@ -56,6 +57,35 @@ export class CmcCanister extends Canister<CmcService> {
 			block_index: blockIndex,
 			to_subaccount: [],
 			deposit_memo: []
+		});
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapCmcNotifyError(response.Err);
+	};
+
+	/**
+	 * Asks the CMC to top up a canister for an ICP deposit, and returns the cycles it
+	 * deposited. The CMC looks for the deposit under the subaccount derived from
+	 * `canisterId`, so a notify that names another canister fails. Anyone may notify.
+	 *
+	 * @throws {CmcNotifyError} with `retryable` telling whether notifying the
+	 * same block again can still top up.
+	 */
+	notifyTopUp = async ({
+		blockIndex,
+		canisterId
+	}: {
+		blockIndex: bigint;
+		canisterId: Principal;
+	}): Promise<bigint> => {
+		const { notify_top_up } = this.caller({ certified: true });
+
+		const response = await notify_top_up({
+			block_index: blockIndex,
+			canister_id: canisterId
 		});
 
 		if ('Ok' in response) {
