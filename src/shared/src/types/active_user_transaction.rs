@@ -162,6 +162,14 @@ pub enum ActiveUserTransactionData {
     /// `external_refs`. The two chains are those of `source_token` /
     /// `dest_token`.
     Lifi(LifiData),
+    /// Topping up a canister with ICP through the NNS Cycles Minting Canister:
+    /// an ICP transfer to the CMC's deposit account for the canister, then
+    /// `notify_top_up`. The ledger records that account only as a hash, so the
+    /// row, opened before the transfer, is the one place that keeps the canister,
+    /// and what lets a later session finish a top-up whose tab closed between the
+    /// two calls. The ICP block index, learned once the transfer returns, rides
+    /// in `external_refs`.
+    CyclesTopUp(CyclesTopUpData),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -365,6 +373,25 @@ pub struct LifiData {
     pub amount: Nat,
 }
 
+/// Cycles top-up payload: the values fixed when the top-up starts. The row opens
+/// before the ICP transfer, so the transfer's creation timestamp is one of them;
+/// only the block index is learned later, in `external_refs`.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct CyclesTopUpData {
+    pub source_token: TokenId,
+    /// The canister the cycles go to. The CMC's deposit account is derived from
+    /// it, and the ICP ledger keeps only that account's hash, so neither the
+    /// ledger nor its index can give the canister back.
+    pub canister_id: Principal,
+    /// Source-token amount in base units: the ICP sent to the CMC, without the
+    /// ledger fee.
+    pub amount: Nat,
+    /// `created_at_time` of the ICP transfer. Reusing it on a retry lets the
+    /// ledger deduplicate the transfer, and it is what finds the block again
+    /// when the tab died before the transfer returned.
+    pub transfer_created_at_ns: Timestamp,
+}
+
 /// In-flight high-level user operation, persisted so the FE can resume polling
 /// across logout / tab close.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -439,7 +466,7 @@ mod tests {
     use super::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
+        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, CyclesTopUpData,
         GetActiveUserTransactionsResponse, LifiData, LiquidiumAction, LiquidiumData,
         NearIntentsData, OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
         UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode, XrpData,
@@ -659,6 +686,22 @@ mod tests {
             let original = ActiveUserTransactionData::CyclesMint(CyclesMintData {
                 source_token,
                 dest_token: icrc(CYCLES_LEDGER),
+                amount: Nat::from(100_000_000u64),
+                transfer_created_at_ns: 1_790_000_000_000_000_000,
+            });
+            assert_eq!(roundtrip(&original), original);
+        }
+    }
+
+    const TOP_UP_CANISTER: &str = "ywcsb-maaaa-aaaai-q6k7a-cai";
+
+    #[test]
+    fn cycles_top_up_variant_roundtrips() {
+        // As for a mint, the source is ICP in either spelling.
+        for source_token in [icrc(ICP_LEDGER), TokenId::IcpNative] {
+            let original = ActiveUserTransactionData::CyclesTopUp(CyclesTopUpData {
+                source_token,
+                canister_id: Principal::from_text(TOP_UP_CANISTER).unwrap(),
                 amount: Nat::from(100_000_000u64),
                 transfer_created_at_ns: 1_790_000_000_000_000_000,
             });
