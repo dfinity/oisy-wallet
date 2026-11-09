@@ -54,10 +54,6 @@ export type SendBtcParams = CommonBtcServiceParams & {
 	// Backend path only: runs once the transaction is signed, before it is broadcast, with the
 	// txid it will have. If it rejects, nothing is broadcast and `sendBtc` rejects with its error.
 	beforeBroadcast?: (params: { txid: string }) => Promise<void>;
-	// Takes the backend path when `BTC_SEND_VIA_BACKEND_ENABLED` is on, for a caller that handles
-	// its outcomes: a broadcast whose outcome is unclear (`isUnclearBtcBroadcastOutcome`) may have
-	// gone out. Every other caller keeps the Chain Fusion Signer until it does too.
-	viaBackend?: boolean;
 };
 
 export type SignBtcParams = CommonBtcServiceParams & {
@@ -275,10 +271,10 @@ export const signBtc = async ({
 	});
 };
 
+// Through the backend when `BTC_SEND_VIA_BACKEND_ENABLED` is on. A caller then handles its
+// outcomes: a broadcast whose outcome is unclear (`isUnclearBtcBroadcastOutcome`) may have gone out.
 export const sendBtc = async (params: SendBtcParams): Promise<string> =>
-	BTC_SEND_VIA_BACKEND_ENABLED && params.viaBackend === true
-		? await sendBtcViaBackend(params)
-		: await sendBtcViaSigner(params);
+	BTC_SEND_VIA_BACKEND_ENABLED ? await sendBtcViaBackend(params) : await sendBtcViaSigner(params);
 
 /**
  * Builds and signs the transaction in the frontend, then has the backend broadcast it.
@@ -351,7 +347,6 @@ const sendBtcViaSigner = async ({
 	onProgress,
 	onBroadcast,
 	beforeBroadcast: _beforeBroadcast,
-	viaBackend: _viaBackend,
 	...rest
 }: SendBtcParams): Promise<string> => {
 	const { txid } = await send({ onProgress, utxosFee, network, identity, ...rest });
@@ -387,7 +382,7 @@ const send = async ({
 	amount,
 	utxosFee,
 	onProgress
-}: Omit<SendBtcParams, 'source' | 'beforeBroadcast' | 'viaBackend'>): Promise<SendBtcResponse> => {
+}: Omit<SendBtcParams, 'source' | 'beforeBroadcast'>): Promise<SendBtcResponse> => {
 	const satoshisAmount = convertNumberToSatoshis({ amount });
 	const signerBitcoinNetwork = mapToSignerBitcoinNetwork({ network });
 

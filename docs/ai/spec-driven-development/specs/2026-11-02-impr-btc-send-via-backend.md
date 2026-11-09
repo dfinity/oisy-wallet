@@ -880,6 +880,27 @@ Decided in PR 8b:
 - **`SwapBtcWizard`** shows `mapBtcBroadcastErrorToMessage`'s message where it has one, and closes
   after an unclear outcome instead of returning to the form.
 
+Decided in PR 8c:
+
+- **`viaBackend` is gone.** Every caller of `sendBtc` now handles the backend path's outcomes, so
+  `sendBtc` goes through the backend whenever the flag is on.
+- **Liquidium's `broadcast` callbacks take `beforeBroadcast`.** The BTC wizards hand it to
+  `sendBtc`. The ETH and ICRC wizards ignore it, since their transports learn the txid only by
+  broadcasting.
+- **Supply** writes its row, with the txid, in `beforeBroadcast`. The write must succeed: if it
+  fails, nothing is broadcast and the row is deleted all the same. A refusal outright deletes it,
+  with `deleteUnbroadcastActiveUserTransaction`, and after an unclear outcome it stays. On the CFS
+  path the row is still created after the broadcast, best effort.
+- **Repay** still creates its row before the transfer, and `beforeBroadcast` writes the txid into
+  it. A failure then deletes the row only if the txid was never recorded, that is before the
+  broadcast or on the CFS path, or if the broadcast was refused outright. Otherwise the row stays
+  and keeps counting against the repay max until it settles. The txid is not written a second
+  time after the broadcast.
+- **`flow.submit({ txid })`** still runs only after a successful broadcast, for both.
+- **Both BTC wizards** show `mapBtcBroadcastErrorToMessage`'s message ahead of "Transaction failed",
+  and close after an unclear outcome instead of returning to a form that offers the full amount
+  again.
+
 ### Frontend: UTXO loading
 
 `AllUtxosLoader.svelte` and `loadBtcPendingSentTransactions` read from `btc_get_spendable_utxos`

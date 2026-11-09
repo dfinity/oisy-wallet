@@ -240,7 +240,6 @@ describe('btc-send.services', () => {
 	describe('sendBtc through the backend', () => {
 		const signed = { txid: 'signed-txid', hex: '0001', bytes: Uint8Array.from([0, 1]) };
 		const psbt = {} as Psbt;
-		const viaBackendParams: SendBtcParams = { ...defaultParams, viaBackend: true };
 
 		let buildBtcSendPsbtSpy: MockInstance;
 		let signAndFinalizeBtcPsbtSpy: MockInstance;
@@ -269,7 +268,7 @@ describe('btc-send.services', () => {
 		it('should build, sign and broadcast through the backend, and record nothing after', async () => {
 			const onProgress = vi.fn();
 
-			const result = await sendBtc({ ...viaBackendParams, onProgress });
+			const result = await sendBtc({ ...defaultParams, onProgress });
 
 			expect(result).toBe(signed.txid);
 			expect(buildBtcSendPsbtSpy).toHaveBeenCalledExactlyOnceWith({
@@ -299,13 +298,10 @@ describe('btc-send.services', () => {
 			expect(addPendingBtcTransactionSpy).not.toHaveBeenCalled();
 		});
 
-		it.each([
-			{ label: 'a caller that does not opt in', enabled: true, viaBackend: undefined },
-			{ label: 'the flag off', enabled: false, viaBackend: true }
-		])('should keep the Chain Fusion Signer for $label', async ({ enabled, viaBackend }) => {
-			btcSendViaBackend.enabled = enabled;
+		it('should keep the Chain Fusion Signer with the flag off', async () => {
+			btcSendViaBackend.enabled = false;
 
-			const result = await sendBtc({ ...defaultParams, viaBackend });
+			const result = await sendBtc(defaultParams);
 
 			expect(result).toBe(txid);
 			expect(signerSendBtcSpy).toHaveBeenCalledOnce();
@@ -323,7 +319,7 @@ describe('btc-send.services', () => {
 			});
 			const onBroadcast = vi.fn();
 
-			await sendBtc({ ...viaBackendParams, beforeBroadcast, onBroadcast });
+			await sendBtc({ ...defaultParams, beforeBroadcast, onBroadcast });
 
 			expect(beforeBroadcast).toHaveBeenCalledExactlyOnceWith({ txid: signed.txid });
 			expect(onBroadcast).toHaveBeenCalledExactlyOnceWith({ txid: signed.txid });
@@ -332,7 +328,7 @@ describe('btc-send.services', () => {
 		it('should broadcast nothing when beforeBroadcast rejects', async () => {
 			const beforeBroadcast = vi.fn().mockRejectedValue(error);
 
-			await expect(sendBtc({ ...viaBackendParams, beforeBroadcast })).rejects.toThrow(error);
+			await expect(sendBtc({ ...defaultParams, beforeBroadcast })).rejects.toThrow(error);
 
 			expect(broadcastBtcTransactionSpy).not.toHaveBeenCalled();
 		});
@@ -345,7 +341,7 @@ describe('btc-send.services', () => {
 			broadcastBtcTransactionSpy.mockRejectedValue(refusal);
 			const onBroadcast = vi.fn();
 
-			await expect(sendBtc({ ...viaBackendParams, onBroadcast })).rejects.toBe(refusal);
+			await expect(sendBtc({ ...defaultParams, onBroadcast })).rejects.toBe(refusal);
 
 			expect(onBroadcast).not.toHaveBeenCalled();
 		});
@@ -353,7 +349,7 @@ describe('btc-send.services', () => {
 		it('should reject as unconfirmed when the broadcast fails with no typed answer', async () => {
 			broadcastBtcTransactionSpy.mockRejectedValue(error);
 
-			const res = sendBtc(viaBackendParams);
+			const res = sendBtc(defaultParams);
 
 			await expect(res).rejects.toBeInstanceOf(BtcBroadcastUnconfirmedError);
 			await expect(res).rejects.toHaveProperty('cause', error);
@@ -371,7 +367,7 @@ describe('btc-send.services', () => {
 					throw error;
 				});
 
-			const result = await sendBtc({ ...viaBackendParams, onProgress });
+			const result = await sendBtc({ ...defaultParams, onProgress });
 
 			expect(result).toBe(signed.txid);
 			expect(broadcastBtcTransactionSpy).toHaveBeenCalledOnce();
@@ -384,7 +380,7 @@ describe('btc-send.services', () => {
 			vi.spyOn(walletUtils, 'waitAndTriggerWallet').mockRejectedValue(error);
 
 			const result = await sendBtc({
-				...viaBackendParams,
+				...defaultParams,
 				onBroadcast: () => {
 					throw error;
 				}

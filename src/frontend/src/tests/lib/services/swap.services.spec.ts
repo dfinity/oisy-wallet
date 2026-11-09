@@ -4876,8 +4876,7 @@ describe('swap.services', () => {
 					utxosFee: mockUtxosFee,
 					source: mockBtcAddress,
 					destination: depositAddress,
-					amount: '0.01',
-					viaBackend: true
+					amount: '0.01'
 				})
 			);
 		});

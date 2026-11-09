@@ -118,7 +118,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 		);
 	});
 
-	it('should send through the backend, and record an unclear outcome', async () => {
+	it('should record an unclear outcome', async () => {
 		const err = new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') });
 		const sendBtcSpy = vi.spyOn(btcSendServices, 'sendBtc').mockRejectedValue(err);
 		const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError').mockReturnValue(Symbol('toast'));
@@ -137,9 +137,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 		await waitFor(() => expect(props.onSendOutcomeUnclear).toHaveBeenCalledOnce());
 
-		expect(sendBtcSpy).toHaveBeenCalledExactlyOnceWith(
-			expect.objectContaining({ viaBackend: true })
-		);
+		expect(sendBtcSpy).toHaveBeenCalledOnce();
 		expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
 			msg: { text: en.send.error.btc_transaction_unconfirmed },
 			err

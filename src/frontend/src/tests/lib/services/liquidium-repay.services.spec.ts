@@ -1,9 +1,11 @@
+import { BtcBroadcastUnconfirmedError } from '$btc/types/btc-send';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import type { EthAddress } from '$eth/types/address';
 import * as liquidiumApi from '$lib/api/liquidium.api';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import { LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS } from '$lib/constants/liquidium.constants';
@@ -28,6 +30,7 @@ import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import type { Token, TokenId } from '$lib/types/token';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { nonNullish } from '@dfinity/utils';
 import type { SupplyFlow, SupplyTarget } from '@liquidium/client';
 import { get } from 'svelte/store';
 
@@ -303,7 +306,8 @@ describe('liquidium-repay.services', () => {
 			// Gross transfer = net repayment (100_000_000) + provider inflow fee (50).
 			expect(broadcast).toHaveBeenCalledExactlyOnceWith({
 				target: nativeTarget,
-				amount: 100_000_050n
+				amount: 100_000_050n,
+				beforeBroadcast: expect.any(Function)
 			});
 			expect(submit).toHaveBeenCalledExactlyOnceWith({ txid: '0xhash' });
 
@@ -589,6 +593,104 @@ describe('liquidium-repay.services', () => {
 			const [[arg]] = createActiveUserTransaction.mock.calls;
 
 			expect(arg).not.toHaveProperty('progressStep');
+		});
+
+		describe('when the transport knows the txid before broadcasting', () => {
+			const sent = vi.fn();
+
+			// As the BTC wizard's `sendBtc` does through the backend: `beforeBroadcast` once signed,
+			// then the broadcast, which either goes out or fails with `failure`.
+			const broadcastThroughBackend = (failure?: unknown) =>
+				broadcast.mockImplementation(
+					async ({
+						beforeBroadcast
+					}: {
+						beforeBroadcast: (params: { txid: string }) => Promise<void>;
+					}) => {
+						await beforeBroadcast({ txid: '0xhash' });
+
+						sent();
+
+						if (nonNullish(failure)) {
+							throw failure;
+						}
+
+						return '0xhash';
+					}
+				);
+
+			const rowId = () => createActiveUserTransaction.mock.calls[0]?.[0].id;
+
+			beforeEach(() => {
+				sent.mockClear();
+				supply.mockResolvedValue(buildFlow(nativeTarget));
+			});
+
+			it('writes the txid to the row before the broadcast, and only once', async () => {
+				updateActiveUserTransaction.mockImplementation(() => {
+					expect(sent).not.toHaveBeenCalled();
+
+					return Promise.resolve();
+				});
+				broadcastThroughBackend();
+
+				await run();
+
+				expect(updateActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: rowId(),
+					externalRefs: expect.arrayContaining([
+						{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
+					])
+				});
+				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+				expect(submit).toHaveBeenCalledExactlyOnceWith({ txid: '0xhash' });
+			});
+
+			it('broadcasts nothing and deletes the row when the txid cannot be written', async () => {
+				updateActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
+				broadcastThroughBackend();
+
+				await expect(run()).rejects.toThrow('backend unavailable');
+
+				expect(sent).not.toHaveBeenCalled();
+				expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: rowId()
+				});
+			});
+
+			it('deletes the row when the broadcast is refused outright', async () => {
+				const refusal = new BtcBroadcastTransactionCanisterError(
+					{ UtxosAlreadyReserved: null },
+					'reserved'
+				);
+				broadcastThroughBackend(refusal);
+
+				await expect(run()).rejects.toBe(refusal);
+
+				expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: rowId()
+				});
+			});
+
+			// The row nets this repay out of the repay max until it settles, so a second full repay
+			// cannot follow a first that went out.
+			it.each([
+				new BtcBroadcastTransactionCanisterError(
+					{ BroadcastOutcomeUnknown: { msg: 'trap' } },
+					'unknown'
+				),
+				new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') })
+			])('keeps the row when the transfer may have gone out: %s', async (unclear) => {
+				broadcastThroughBackend(unclear);
+
+				await expect(run()).rejects.toBe(unclear);
+
+				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+				expect(submit).not.toHaveBeenCalled();
+			});
 		});
 	});
 
