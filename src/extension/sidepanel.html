@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>OISY</title>
+		<link rel="stylesheet" href="sidepanel.css" />
+	</head>
+	<body>
+		<section id="loading" class="state">
+			<img src="icons/icon-48.png" alt="" width="40" height="40" />
+			<p class="muted">Loading OISY…</p>
+		</section>
+
+		<section id="unreachable" class="state" hidden>
+			<img src="icons/icon-48.png" alt="" width="40" height="40" />
+			<h1>OISY didn't load</h1>
+			<p class="muted">Check your connection, then try again.</p>
+			<button id="retry" type="button">Retry</button>
+			<a id="open-oisy" target="_blank" rel="noopener noreferrer">Open oisy.com</a>
+		</section>
+
+		<!-- OISY's own page. Everything in the panel after this point is OISY, not extension code. -->
+		<iframe id="oisy" title="OISY" hidden></iframe>
+
+		<script type="module" src="sidepanel.js"></script>
+	</body>
+</html>
