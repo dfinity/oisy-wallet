@@ -236,13 +236,14 @@ export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
 export const SWAP_MODAL_SELECT_PROVIDER_STEP = 'swap-modal-select-provider-step';
 export const SWAP_PROVIDER_ANIMATION = 'swap-provider-animation';
 export const SWAP_PROVIDER_STATUS = 'swap-provider-status';
+export const SWAP_PROVIDER_CELL = 'swap-provider-cell';
+export const SWAP_SELECTED_PROVIDER_DETAILS = 'swap-selected-provider-details';
 export const SWAP_FEE_ROW = 'swap-fee-row';
+export const SWAP_INSUFFICIENT_FEE_INFO = 'swap-insufficient-fee-info';
 export const SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE = 'swap-lifi-insufficient-funds-for-fee';
 export const SWAP_LIFI_UNVERIFIED_ROUTE = 'swap-lifi-unverified-route';
 export const SWAP_TWO_SWAPS_HINT = 'swap-two-swaps-hint';
 export const SWAP_TWO_SWAPS_HINT_BUTTON = 'swap-two-swaps-hint-button';
-
-export const MODAL_FILTER_NETWORKS = 'MODAL_FILTER_NETWORKS';
 
 export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
@@ -312,6 +313,7 @@ export const CYCLES_TOP_UP_BUTTON = 'cycles-top-up-button';
 export const CYCLES_TOP_UP_CANISTER = 'cycles-top-up-canister';
 export const CYCLES_TOP_UP_CANISTER_INPUT = 'cycles-top-up-canister-input';
 export const CYCLES_TOP_UP_CANISTER_NEXT_BUTTON = 'cycles-top-up-canister-next-button';
+export const CYCLES_TOP_UP_CANISTER_BACK_BUTTON = 'cycles-top-up-canister-back-button';
 export const CYCLES_TOP_UP_RECENT_CANISTER = 'cycles-top-up-recent-canister';
 export const CYCLES_TOP_UP_AMOUNT = 'cycles-top-up-amount';
 export const CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON = 'cycles-top-up-amount-next-button';
@@ -319,6 +321,9 @@ export const CYCLES_TOP_UP_REVIEW = 'cycles-top-up-review';
 export const CYCLES_TOP_UP_REVIEW_BACK_BUTTON = 'cycles-top-up-review-back-button';
 export const CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON = 'cycles-top-up-review-top-up-button';
 export const CYCLES_SENT_TO_CANISTER_WARNING = 'cycles-sent-to-canister-warning';
+export const CYCLES_SEND_OR_TOP_UP = 'cycles-send-or-top-up';
+export const CYCLES_SEND_OR_TOP_UP_SEND_BUTTON = 'cycles-send-or-top-up-send-button';
+export const CYCLES_SEND_OR_TOP_UP_TOP_UP_BUTTON = 'cycles-send-or-top-up-top-up-button';
 
 export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
 export const HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON = 'help-auth-new-identity-version-button';
@@ -343,7 +348,11 @@ export const HOW_TO_CONVERT_ETHEREUM_INFO = 'how-to-convert-ethereum-info';
 export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code';
 
 export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
+export const MODAL_TOKEN_LIST_NO_MATCH = 'modal-token-list-no-match';
+export const MODAL_TOKEN_LIST_CLEAR_FILTERS = 'modal-token-list-clear-filters';
 export const MODAL_TOKENS_LIST = 'modal-tokens-list';
+export const NETWORK_FILTER = 'network-filter';
+export const TOKEN_CATEGORY_FILTER = 'token-category-filter';
 
 export const ADDRESS_BOOK_MODAL = 'address-book-modal';
 export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';

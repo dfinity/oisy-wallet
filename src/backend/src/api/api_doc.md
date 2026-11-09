@@ -53,8 +53,12 @@ the caller's behalf. Methods such as `allow_signing` and
 general authorization or transaction-signing methods. The tip methods move
 tokens only within their own flow: `create_tip` records a tip against an ICRC-2
 allowance the tipper has already granted to this canister, and `claim_tip` pays
-it out to the claimer once, from that allowance. Use the relevant wallet flow
-and its explicit user approval for any asset movement.
+it out to the claimer once, from that allowance. `btc_broadcast_transaction`
+only relays a Bitcoin transaction the caller has already signed: it checks that
+the transaction spends the caller's own confirmed UTXOs with valid signatures,
+reserves those inputs, and broadcasts it. It signs nothing and cannot change
+where the funds go. Use the relevant wallet flow and its explicit user approval
+for any asset movement.
 
 ## Calling guidance
 
@@ -67,7 +71,10 @@ and its explicit user approval for any asset movement.
   update calls.
 - Update methods can mutate caller-scoped state, perform inter-canister calls,
   or incur update-call latency and cycles. Do not retry non-idempotent actions
-  blindly; inspect the method's documented idempotency and result first.
+  blindly; inspect the method's documented idempotency and result first. For
+  example, `btc_broadcast_transaction` may be called again with the same bytes
+  after `BroadcastOutcomeUnknown`. After `BroadcastOutcomeUnknown`, never build a
+  new transaction to the same recipient: the first one may still confirm.
 - A returned `Err` is an application-level result described by the Candid
   variant. Handle it explicitly; a successful canister call does not mean the
   operation itself returned `Ok`.

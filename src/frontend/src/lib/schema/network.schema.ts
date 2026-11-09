@@ -52,6 +52,9 @@ export const NetworkSchema = z.object({
 	env: NetworkEnvironmentSchema,
 	name: z.string(),
 	icon: IconSchema.optional(),
+	// The mark in the brand's own colours, for the screens that opt in to tell networks apart by
+	// colour. `icon` stays monochrome so it can be inverted for the dark theme.
+	iconColored: IconSchema.optional(),
 	explorerUrl: UrlSchema,
 	exchange: NetworkExchangeSchema.optional(),
 	buy: NetworkBuySchema.optional(),

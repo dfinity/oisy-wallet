@@ -33,7 +33,11 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes, SwapProvider as SwapProviderEnum } from '$lib/types/swap';
-	import { calculateValueDifference } from '$lib/utils/swap.utils';
+	import {
+		calculateValueDifference,
+		getSwapSlippageInvalidValue,
+		getSwapSlippageStatus
+	} from '$lib/utils/swap.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -104,6 +108,13 @@
 		nonNullish(valueDifference) && valueDifference <= SWAP_VALUE_DIFFERENCE_ERROR_VALUE
 	);
 
+	let isSlippageWarning = $derived(
+		getSwapSlippageStatus({
+			slippageValue,
+			maxSlippageInvalidValue: getSwapSlippageInvalidValue($sourceToken?.network.id)
+		}) === 'warning'
+	);
+
 	let isMissingTokenPrice = $derived(
 		isNullish($sourceTokenExchangeRate) || isNullish($destinationTokenExchangeRate)
 	);
@@ -157,7 +168,15 @@
 		{/snippet}
 
 		{#snippet mainValue()}
-			{slippageValue}%
+			{#if isSlippageWarning}
+				<!-- Amber text fails 4.5:1, so only the sign is amber. -->
+				<span class="inline-flex items-center gap-2">
+					<span class="text-warning-primary" aria-hidden="true">⚠</span>
+					<span>{slippageValue}%</span>
+				</span>
+			{:else}
+				{slippageValue}%
+			{/if}
 		{/snippet}
 	</ModalValue>
 
@@ -169,6 +188,14 @@
 	{#if isNearIntentsProvider && !$hasAcknowledgedNearIntentsSwap}
 		<div class="mt-4">
 			<SwapNearIntentsTos />
+		</div>
+	{/if}
+
+	{#if isSlippageWarning}
+		<div class="mt-4">
+			<MessageBox level="warning" styleClass="!mb-0">
+				{$i18n.swap.text.max_slippage_warning}
+			</MessageBox>
 		</div>
 	{/if}
 

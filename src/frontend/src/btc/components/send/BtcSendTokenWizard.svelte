@@ -144,6 +144,7 @@
 				await validateBtcSend({
 					utxosFee: $utxosFeeStore.utxosFee,
 					source,
+					destination,
 					amount,
 					network,
 					identity: $authIdentity
@@ -196,7 +197,7 @@
 	};
 </script>
 
-<UtxosFeeLoader {amount} {amountError} {networkId} {source}>
+<UtxosFeeLoader {amount} {amountError} {destination} {networkId} {source}>
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsSend.REVIEW}
 			<BtcSendReview {amount} {destination} {onBack} onSend={send} {selectedContact} />
