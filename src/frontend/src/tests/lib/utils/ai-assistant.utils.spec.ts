@@ -29,6 +29,7 @@ import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
 
 describe('ai-assistant.utils', () => {
@@ -268,6 +269,14 @@ describe('ai-assistant.utils', () => {
 					messages: [typedMessage(`Send 1 ETH to ${mockEthAddress}00`)]
 				})
 			).toBeFalsy();
+		});
+
+		it('returns false for the bare principal when the user typed an account with a subaccount', () => {
+			const icrcAccount = `${mockPrincipalText}-6cc627i.1`;
+			const messages = [typedMessage(`Send 1 ICP to ${icrcAccount}`)];
+
+			expect(isAddressTypedByUser({ address: mockPrincipalText, messages })).toBeFalsy();
+			expect(isAddressTypedByUser({ address: icrcAccount, messages })).toBeTruthy();
 		});
 
 		it('returns false without an address', () => {

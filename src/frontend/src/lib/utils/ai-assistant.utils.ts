@@ -194,7 +194,7 @@ export const parseReviewSendTokensToolArguments = ({
 	};
 };
 
-const ADDRESS_CHARACTER = /[a-z0-9]/i;
+const ADDRESS_CHARACTER = /[a-z0-9-]/i;
 
 const includesAddress = ({ text, address }: { text: string; address: string }): boolean => {
 	let index = text.indexOf(address);
