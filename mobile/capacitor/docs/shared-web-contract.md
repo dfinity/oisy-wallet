@@ -178,7 +178,9 @@ Preparation captures the underlying screen while the web panel is hidden. That
 image stays in memory behind the native sheet. The same WebView then fills the
 sheet, including its existing overlay focus trap. Closing freezes the departing
 panel before its web outro removes it; release restores the WebView to Wallet.
-Native navigation stays blocked until release. Document replacement, process
+Native navigation stays blocked until release. Preparation and presentation reject
+a hidden Wallet or a native flow already presented by the shell, so a delayed web
+dialog cannot appear over Explore or Account. Document replacement, process
 failure, expiry and logout clear the presentation and its images.
 
 Nested web dialogs reuse the open system sheet and their existing overlay stack;

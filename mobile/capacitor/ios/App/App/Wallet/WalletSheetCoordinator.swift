@@ -20,13 +20,16 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
 
   func prepare(id: UUID) async throws {
     guard identifier == nil, let owner, owner.isReady, owner.view.window != nil,
-      owner.presentedViewController == nil, let webView
+      !owner.view.isHidden, owner.presentedViewController == nil,
+      owner.hostPlugin.host?.presentedViewController == nil, let webView
     else { throw WalletHostCommandError.unavailable }
     identifier = id
     owner.hostPlugin.host?.updateNavigationVisibility()
     do {
       let image = try await webView.takeSnapshot(configuration: nil)
-      guard identifier == id, owner.isReady, owner.session.isActive else {
+      guard identifier == id, owner.isReady, owner.session.isActive, !owner.view.isHidden,
+        owner.hostPlugin.host?.presentedViewController == nil
+      else {
         throw WalletHostCommandError.unavailable
       }
       let snapshot = UIImageView(image: image)
@@ -60,7 +63,9 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
       }
       return
     }
-    guard owner.presentedViewController == nil else {
+    guard !owner.view.isHidden, owner.presentedViewController == nil,
+      owner.hostPlugin.host?.presentedViewController == nil
+    else {
       reset()
       throw WalletHostCommandError.unavailable
     }

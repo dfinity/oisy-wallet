@@ -11,8 +11,8 @@ This inventories the branch, not every deployed environment. The stages below
 remain proposed except where implementation and evidence are stated explicitly.
 They do not replace the migration spec's cross-platform milestones.
 
-The mobile app already packages the normal web routes, components, stores and
-workers. Expand this implementation; keep Swift responsible for system integration,
+The mobile app loads the normal web routes, components, stores and workers from
+the configured live website. Expand this implementation; keep Swift responsible for system integration,
 navigation controls, authentication and isolated Explore. Do not create another
 wallet UI or data pipeline.
 
@@ -28,8 +28,17 @@ fallback behavior and dismissal guards.
 
 The simulator checks cover same-document/session preservation, accessory dismissal,
 full-page Send/Swap review and cancellation, Contacts, Notes editing, enlarged text
-and Back restoration. No funded transaction was submitted. Deployment and physical
-acceptance for this presentation update are pending.
+and Back restoration. A separate native test verifies that hidden Wallet and
+native Account presentation reject a delayed sheet request. No funded transaction
+was submitted.
+
+The frontend at `d114b2b7ae` was deployed to audit in
+[run 42642935268](https://github.com/dfinity/oisy-wallet/actions/runs/42642935268).
+Published assets contain the sheet adapter and exclude test fixtures; II callback
+and Apple association files are unchanged. The signed app, including the native
+visibility guard, was installed over the existing iPhone preview and launched on
+2026-11-09.
+Physical presentation and dismissal acceptance is still pending.
 
 ## Reading the inventory
 

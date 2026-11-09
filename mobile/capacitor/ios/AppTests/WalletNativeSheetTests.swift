@@ -67,6 +67,24 @@ import XCTest
       } catch {}
     }
     XCTAssertNil(wallet.nativeSheet?.identifier)
+    wallet.view.isHidden = true
+    do {
+      try await command("prepare")
+      XCTFail("A hidden wallet must not present above Explore")
+    } catch {}
+    wallet.view.isHidden = false
+    let account = UIViewController()
+    await withCheckedContinuation { continuation in
+      shell.present(account, animated: false) { continuation.resume() }
+    }
+    do {
+      try await command("prepare")
+      XCTFail("An accessory must not replace another native flow")
+    } catch {}
+    await withCheckedContinuation { continuation in
+      account.dismiss(animated: false) { continuation.resume() }
+    }
+    XCTAssertNil(wallet.nativeSheet?.identifier)
     try await command("prepare")
     try await command("present")
     let coordinator = try XCTUnwrap(wallet.nativeSheet)
