@@ -14,7 +14,6 @@
 		iconSize = 'small',
 		expandButton = true,
 		externalToggle = false,
-		disabled = false,
 		wrapHeight = false,
 		children,
 		header,
@@ -29,17 +28,7 @@
 	let userUpdated = $state(false);
 	let maxHeight = $state<number | undefined>();
 
-	$effect(() => {
-		if (disabled) {
-			userUpdated = true;
-			expanded = false;
-		}
-	});
-
 	export const toggleContent = () => {
-		if (disabled) {
-			return;
-		}
 		userUpdated = true;
 		expanded = !expanded;
 		onToggle?.({ expanded });
@@ -81,13 +70,11 @@
 	<div
 		id={nonNullish(id) ? `heading${id}` : undefined}
 		class={`header ${externalToggle ? 'external' : ''}`}
-		class:disabled
-		aria-disabled={disabled}
 		data-tid="collapsible-header"
 		onclick={toggle}
 		onkeypress={($event) => handleKeyPress({ $event, callback: toggle })}
 		role="button"
-		tabindex={externalToggle || disabled ? -1 : 0}
+		tabindex={externalToggle ? -1 : 0}
 	>
 		<div class="header-content">
 			{@render header()}
@@ -100,7 +87,6 @@
 				aria-controls={id}
 				aria-expanded={expanded}
 				data-tid="collapsible-expand-button"
-				{disabled}
 				tabindex="-1"
 				title={expanded ? $i18n.core.text.collapse : $i18n.core.text.expand}
 				type="button"
@@ -140,7 +126,7 @@
 
 		outline: none;
 
-		&:not(.external):not(.disabled) {
+		&:not(.external) {
 			@include interaction.tappable;
 			user-select: none;
 		}

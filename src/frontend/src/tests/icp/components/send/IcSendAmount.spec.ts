@@ -6,6 +6,7 @@ import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import type { Token } from '$lib/types/token';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -141,5 +142,18 @@ describe('IcSendAmount', () => {
 			expect(input?.value).toBe(`${newAmount}`);
 			expect(() => getByText(en.send.assertion.insufficient_funds)).toThrow();
 		});
+	});
+
+	it('names the network the token is sent on', () => {
+		const { getByText } = render(IcSendAmount, {
+			props,
+			context: mockContext
+		});
+
+		expect(
+			getByText(
+				replacePlaceholders(en.tokens.text.on_network_label, { $network: ICP_TOKEN.network.name })
+			)
+		).toBeInTheDocument();
 	});
 });

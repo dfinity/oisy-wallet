@@ -39,6 +39,10 @@ export class InvalidMetadataImageUrl extends NftError {}
 
 export class AuthClientNotInitializedError extends Error {}
 
+// A call that did not settle within the time it was given. It says nothing about the outcome: the
+// call itself carries on, and may still succeed or fail after this was raised.
+export class TimeoutError extends Error {}
+
 /**
  * A swap quote provider refused the requested amount as below its minimum.
  *
@@ -147,3 +151,10 @@ export class LifiSolFeeChangedError extends Error {
 		this.ceiling = ceiling;
 	}
 }
+
+/**
+ * A Velora swap failed OISY's own checks before signing: its order or transaction is not the swap
+ * the user reviewed, or it names a contract other than the one pinned for the network. Velora's
+ * answers are unsigned, so such a swap is never signed.
+ */
+export class VeloraSwapRejectedError extends Error {}

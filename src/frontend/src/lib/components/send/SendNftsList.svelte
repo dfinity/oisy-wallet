@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import NetworkFilterDropdown from '$lib/components/networks/NetworkFilterDropdown.svelte';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftList from '$lib/components/nfts/NftList.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
-	import ModalFilterButton from '$lib/components/ui/ModalFilterButton.svelte';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -20,12 +20,13 @@
 
 	interface Props {
 		onSelect: (nft: Nft) => void;
-		onSelectNetwork: () => void;
 	}
 
-	let { onSelect, onSelectNetwork }: Props = $props();
+	let { onSelect }: Props = $props();
 
-	const { filterNetwork } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
+	const { filterNetwork, setFilterNetwork } = getContext<ModalTokensListContext>(
+		MODAL_TOKENS_LIST_CONTEXT_KEY
+	);
 
 	let filter = $state('');
 
@@ -57,13 +58,12 @@
 		/>
 	</div>
 
-	<div class="flex items-center">
-		<ModalFilterButton
-			ariaLabel={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
-			onclick={onSelectNetwork}
-		>
-			{$filterNetwork?.name ?? $i18n.networks.chain_fusion}
-		</ModalFilterButton>
+	<div class="flex min-w-0 items-center">
+		<NetworkFilterDropdown
+			onSelect={setFilterNetwork}
+			selectedNetwork={$filterNetwork}
+			showStakeBalance={false}
+		/>
 	</div>
 </div>
 
