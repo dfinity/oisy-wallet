@@ -2,6 +2,7 @@ import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ADDITIONAL_ICRC_TOKENS_INDEXED } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { ICRC_TOKENS, ICRC_TOKENS_METADATA } from '$env/tokens/tokens-icrc/tokens.icrc.env';
+import { RETIRED_ICRC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.retired.env';
 import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
 import { SUPPORTED_ICP_TOKENS_INDEXED } from '$env/tokens/tokens.icp.env';
 import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
@@ -181,6 +182,10 @@ const loadCustomIcrcTokensData = async ({
 		const indexCanisterId = fromNullable(index_id);
 
 		const ledgerCanisterIdText = ledger_id.toText();
+
+		if (RETIRED_ICRC_LEDGER_CANISTER_IDS.includes(ledgerCanisterIdText)) {
+			return;
+		}
 
 		// For performance reasons, if we can build the token metadata using the known custom tokens from the environments, we do so and save a call to the ledger to fetch the metadata.
 		const meta = buildIcrcCustomTokenMetadataPseudoResponse({
