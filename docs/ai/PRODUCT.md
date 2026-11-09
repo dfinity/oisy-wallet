@@ -412,6 +412,10 @@ Burning is deliberately **not** exempt. Sending assets to a minter account by mi
 
 Sending TCYCLES to an account a canister owns, with or without a subaccount, does not top the canister up: the TCYCLES land in the canister's account on the cycles ledger, and they become cycles only if the canister's own code withdraws them. The send flow says so on the address step and again on Review, and points to [Top up](#top-up-a-canister) while that flow's flag is on. It does not block the send, since a canister can own TCYCLES on purpose. No other token shows the warning.
 
+### Sending again on the Internet Computer
+
+A send of ICP or an ICRC token gives its transfer a creation time, which the ledger uses to recognise a transfer it already holds. The send flow keeps that transfer, creation time included, while the user stays on the amount and review steps with the same token, amount and destination, and the AI assistant keeps it for the request it shows. When a send ends in an error, the send flow returns to Review and the AI assistant keeps its Send button; pressing Send again submits the same transfer. If the first one reached the ledger, the ledger answers with the block it landed in and OISY shows the send as done; otherwise the transfer goes through as usual. A different token, amount or destination is a new transfer, and so is a send started again from the address step, a new Send, or a new request to the AI assistant, so an intended second payment of the same amount to the same recipient is sent as one. The ledger recognises a transfer for 24 hours after its creation time, so pressing Send again on a review left open longer than that is refused. XTC transfers carry no creation time.
+
 ### Sending through the AI assistant
 
 The AI assistant picks the token to send from every enabled network, whichever network the navigation has selected. Its send review names that token's network, and for a token on Ethereum or an EVM network the transaction is built and signed for that network, with the fee paid in its native token. Send stays disabled if the network a send is prepared for is not the token's own.
