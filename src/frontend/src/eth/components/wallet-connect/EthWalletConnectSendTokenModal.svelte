@@ -200,6 +200,8 @@
 
 	let sendProgressStep = $state<ProgressStep>(ProgressStepsSend.INITIALIZATION);
 
+	let unknownCallAcknowledged = $state(false);
+
 	let requestedGas = $derived(getSendParamsGas(firstTransaction.gas));
 
 	const send = async () => {
@@ -219,7 +221,9 @@
 			identity: $authIdentity,
 			minterInfo,
 			sourceNetwork,
-			targetNetwork
+			targetNetwork,
+			unknownCallAcknowledged,
+			tokens: $ercFungibleTokens
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
@@ -277,6 +281,7 @@
 						{requestedGas}
 						{sourceNetwork}
 						{targetNetwork}
+						bind:unknownCallAcknowledged
 					/>
 				{/if}
 			{/key}

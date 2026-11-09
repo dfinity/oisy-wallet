@@ -1195,8 +1195,8 @@ interface I18nSwap {
 
 interface I18nBuy {
 	text: {
-		buy: string;
-		buy_dev: string;
+		buy_sell: string;
+		buy_sell_dev: string;
 		unavailable_title: string;
 		unavailable_description_disabled: string;
 		unavailable_description_signing_failed: string;
@@ -1696,6 +1696,7 @@ interface I18nWallet_connect {
 		unreviewed_without_simulation: string;
 		unreviewed_not_described_by_simulation: string;
 		unread_programs_unconfirmed: string;
+		unexplained_request_unconfirmed: string;
 		sol_transaction_as_message: string;
 		request_not_defined: string;
 		unexpected_processing_request: string;
@@ -2003,6 +2004,9 @@ interface I18nTransaction {
 		confirmations: string;
 		for: string;
 		for_copied: string;
+		canister: string;
+		canister_copied: string;
+		canister_unknown: string;
 		expiration: string;
 		approve_label: string;
 	};
@@ -2024,6 +2028,7 @@ interface I18nTransaction {
 		approve: string;
 		burn: string;
 		mint: string;
+		top_up: string;
 	};
 	filter: {
 		types_label: string;

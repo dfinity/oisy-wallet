@@ -1473,8 +1473,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "Comprar",
-			"buy_dev": "Comprar (Ambiente de Desenvolvimento)",
+			"buy_sell": "Comprar/Vender",
+			"buy_sell_dev": "Comprar/Vender (Ambiente de Desenvolvimento)",
 			"unavailable_title": "A compra de tokens está temporariamente indisponível",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",
@@ -2018,6 +2018,7 @@
 			"unreviewed_without_simulation": "A OISY não conseguiu ler parte desta transação e a rede também não devolveu uma simulação, por isso nada descreve o que essa parte faria. Para a sua segurança, não foi assinada.",
 			"unreviewed_not_described_by_simulation": "A OISY não conseguiu ler parte desta transação e a simulação também não mostrou o que essa parte faria. Para a sua segurança, não foi assinada.",
 			"unread_programs_unconfirmed": "Esta transação chama um programa que a OISY não consegue ler e não foi confirmada na revisão. Para a sua segurança, não foi assinada.",
+			"unexplained_request_unconfirmed": "A OISY não consegue mostrar o que esta solicitação faz e não foi confirmada na revisão. Para a sua segurança, não foi assinada.",
 			"sol_transaction_as_message": "Esta mensagem é uma transação Solana, que só pode ser aprovada por meio de uma revisão de transação. Por sua segurança, ela não foi assinada.",
 			"request_not_defined": "Erro inesperado: A solicitação não está definida, portanto, não pode ser processada.",
 			"unexpected_processing_request": "Erro inesperado ao processar a solicitação com WalletConnect."
@@ -2332,6 +2333,9 @@
 			"confirmations": "Confirmações",
 			"for": "",
 			"for_copied": "",
+			"canister": "Canister",
+			"canister_copied": "ID do canister copiado para a área de transferência.",
+			"canister_unknown": "desconhecido",
 			"expiration": "",
 			"approve_label": ""
 		},
@@ -2352,7 +2356,8 @@
 			"deposit": "Depositar",
 			"approve": "Aprovar",
 			"burn": "Burn",
-			"mint": "Mint"
+			"mint": "Mint",
+			"top_up": "Recarga"
 		},
 		"filter": {
 			"types_label": "",

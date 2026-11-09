@@ -63,6 +63,26 @@ export const getCanisterNetworkContacts = (contacts: ContactUi[]): NetworkContac
 		{}
 	);
 
+/**
+ * The canister an Activity top-up went to, when it can be told. A TCYCLES top-up names it.
+ * An ICP top-up only names the CMC's deposit account for it, a hash no canister can be read
+ * back from, so it is told only when a contact's canister pays into that account.
+ */
+export const getTopUpCanisterId = ({
+	transaction: { typeLabel, to },
+	cmcDepositAccountCanisterIds
+}: {
+	transaction: Pick<IcTransactionUi, 'typeLabel' | 'to'>;
+	// The contacts' canister IDs by their CMC deposit account identifier, in lower case.
+	cmcDepositAccountCanisterIds: Record<string, string>;
+}): string | undefined => {
+	if (typeLabel !== 'transaction.label.top_up' || isNullish(to)) {
+		return;
+	}
+
+	return nonNullish(parseCanisterId(to)) ? to : cmcDepositAccountCanisterIds[to.toLowerCase()];
+};
+
 export interface RecentlyToppedUpCanister {
 	canisterId: string;
 	// The newest top-up's amount, in cycles.

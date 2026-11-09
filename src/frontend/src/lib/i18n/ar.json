@@ -1473,8 +1473,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "شراء",
-			"buy_dev": "شراء (بيئة تطوير)",
+			"buy_sell": "",
+			"buy_sell_dev": "",
 			"unavailable_title": "شراء الرموز غير متاح مؤقتًا",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",
@@ -2018,6 +2018,7 @@
 			"unreviewed_without_simulation": "",
 			"unreviewed_not_described_by_simulation": "",
 			"unread_programs_unconfirmed": "",
+			"unexplained_request_unconfirmed": "",
 			"sol_transaction_as_message": "",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
 			"unexpected_processing_request": "خطأ غير متوقع أثناء معالجة الطلب باستخدام WalletConnect."
@@ -2332,6 +2333,9 @@
 			"confirmations": "التأكيدات",
 			"for": "",
 			"for_copied": "",
+			"canister": "",
+			"canister_copied": "",
+			"canister_unknown": "",
 			"expiration": "",
 			"approve_label": ""
 		},
@@ -2352,7 +2356,8 @@
 			"deposit": "إيداع",
 			"approve": "موافقة",
 			"burn": "حرق",
-			"mint": "إنشاء"
+			"mint": "إنشاء",
+			"top_up": ""
 		},
 		"filter": {
 			"types_label": "",

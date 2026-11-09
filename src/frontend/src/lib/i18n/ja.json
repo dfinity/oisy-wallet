@@ -1473,8 +1473,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "購入",
-			"buy_dev": "購入（開発環境）",
+			"buy_sell": "購入/売却",
+			"buy_sell_dev": "購入/売却（開発環境）",
 			"unavailable_title": "トークンの購入は一時的にご利用いただけません",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",
@@ -2018,6 +2018,7 @@
 			"unreviewed_without_simulation": "OISY はこのトランザクションの一部を読み取れず、ネットワークからシミュレーションも返されなかったため、その部分が何を行うのかを示すものがありません。安全のため、署名されませんでした。",
 			"unreviewed_not_described_by_simulation": "OISY はこのトランザクションの一部を読み取れず、シミュレーションでもその部分が何を行うのかは示されませんでした。安全のため、署名されませんでした。",
 			"unread_programs_unconfirmed": "このトランザクションはOISYが読み取れないプログラムを呼び出しており、レビューで確認されませんでした。安全のため、署名されませんでした。",
+			"unexplained_request_unconfirmed": "OISYはこのリクエストの内容を表示できず、レビューで確認されませんでした。安全のため、署名されませんでした。",
 			"sol_transaction_as_message": "このメッセージはSolanaのトランザクションであり、トランザクションレビューを通じてのみ承認できます。安全のため、署名されませんでした。",
 			"request_not_defined": "予期しないエラー: リクエストが定義されていないため、処理できません。",
 			"unexpected_processing_request": "WalletConnectでリクエストを処理中に予期しないエラーが発生しました。"
@@ -2332,6 +2333,9 @@
 			"confirmations": "確認数",
 			"for": "承認先",
 			"for_copied": "承認先アドレスをクリップボードにコピーしました。",
+			"canister": "キャニスター",
+			"canister_copied": "キャニスターIDがコピーされました。",
+			"canister_unknown": "不明",
 			"expiration": "有効期限",
 			"approve_label": "$approveAmount を承認"
 		},
@@ -2352,7 +2356,8 @@
 			"deposit": "入金",
 			"approve": "承認",
 			"burn": "バーン",
-			"mint": "ミント"
+			"mint": "ミント",
+			"top_up": "チャージ"
 		},
 		"filter": {
 			"types_label": "",

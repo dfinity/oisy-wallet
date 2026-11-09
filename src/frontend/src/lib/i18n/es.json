@@ -1473,8 +1473,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "Comprar",
-			"buy_dev": "Comprar (Entorno de Desarrollo)",
+			"buy_sell": "Comprar/Vender",
+			"buy_sell_dev": "Comprar/Vender (Entorno de Desarrollo)",
 			"unavailable_title": "La compra de tokens no está disponible temporalmente",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",
@@ -2018,6 +2018,7 @@
 			"unreviewed_without_simulation": "OISY no pudo leer una parte de esta transacción y la red tampoco devolvió una simulación, por lo que nada describe lo que haría esa parte. Por su seguridad, no se firmó.",
 			"unreviewed_not_described_by_simulation": "OISY no pudo leer una parte de esta transacción y su simulación tampoco mostró lo que haría esa parte. Por su seguridad, no se firmó.",
 			"unread_programs_unconfirmed": "Esta transacción llama a un programa que OISY no puede leer y no se confirmó en la revisión. Por su seguridad, no se firmó.",
+			"unexplained_request_unconfirmed": "OISY no puede mostrar lo que hace esta solicitud y no se confirmó en la revisión. Por su seguridad, no se firmó.",
 			"sol_transaction_as_message": "Este mensaje es una transacción de Solana, que solo puede aprobarse mediante una revisión de transacción. Por su seguridad, no fue firmada.",
 			"request_not_defined": "Error inesperado: La solicitud no está definida, por lo tanto no se puede procesar.",
 			"unexpected_processing_request": "Error inesperado al procesar la solicitud con WalletConnect."
@@ -2332,6 +2333,9 @@
 			"confirmations": "Confirmaciones",
 			"for": "Para",
 			"for_copied": "Dirección del gastador copiada al portapapeles.",
+			"canister": "Canister",
+			"canister_copied": "ID del canister copiado al portapapeles.",
+			"canister_unknown": "desconocido",
 			"expiration": "Vencimiento",
 			"approve_label": "Aprobar $approveAmount"
 		},
@@ -2352,7 +2356,8 @@
 			"deposit": "Depositar",
 			"approve": "Aprobar",
 			"burn": "Quemar",
-			"mint": "Acuñar"
+			"mint": "Acuñar",
+			"top_up": "Recarga"
 		},
 		"filter": {
 			"types_label": "",
