@@ -5,7 +5,7 @@ import {
 	initUtxosFeeStore,
 	type UtxosFeeContext
 } from '$btc/stores/utxos-fee.store';
-import type { UtxosFee } from '$btc/types/btc-send';
+import { BtcBroadcastUnconfirmedError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
@@ -15,16 +15,19 @@ import * as signerApi from '$lib/api/signer.api';
 import AiAssistantReviewSendBtcToken from '$lib/components/ai-assistant/AiAssistantReviewSendBtcToken.svelte';
 import {
 	AI_ASSISTANT_SEND_TOKENS_BUTTON,
-	AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE
+	AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE,
+	AI_ASSISTANT_SEND_TOKENS_UNCLEAR_MESSAGE
 } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import type { AddPendingTransactionOutcome } from '$lib/types/api';
 import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockBtcP2SHAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { toNullable } from '@dfinity/utils';
@@ -55,7 +58,9 @@ describe('AiAssistantReviewSendBtcToken', () => {
 		source: mockBtcP2SHAddress,
 		sendCompleted: false,
 		sendEnabled: true,
-		onSendCompleted: vi.fn()
+		sendOutcomeUnclear: false,
+		onSendCompleted: vi.fn(),
+		onSendOutcomeUnclear: vi.fn()
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
@@ -99,6 +104,47 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrow();
 		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE)).toBeInTheDocument();
+	});
+
+	it('should offer no second send once a send may have gone out', () => {
+		const { getByTestId } = render(AiAssistantReviewSendBtcToken, {
+			props: { ...props, sendOutcomeUnclear: true },
+			context: mockContext({ utxosFee: mockUtxosFee })
+		});
+
+		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrow();
+		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_UNCLEAR_MESSAGE)).toHaveTextContent(
+			en.send.error.btc_transaction_unconfirmed
+		);
+	});
+
+	it('should send through the backend, and record an unclear outcome', async () => {
+		const err = new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') });
+		const sendBtcSpy = vi.spyOn(btcSendServices, 'sendBtc').mockRejectedValue(err);
+		const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError').mockReturnValue(Symbol('toast'));
+		mockAuthStore();
+		mockBtcAddressStore();
+		mockBalance();
+		mockPrepareBtcSendApi();
+		mockValidateBtcSend();
+
+		const { getByTestId } = render(AiAssistantReviewSendBtcToken, {
+			props,
+			context: mockContext({ utxosFee: mockUtxosFee })
+		});
+
+		await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+		await waitFor(() => expect(props.onSendOutcomeUnclear).toHaveBeenCalledOnce());
+
+		expect(sendBtcSpy).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ viaBackend: true })
+		);
+		expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
+			msg: { text: en.send.error.btc_transaction_unconfirmed },
+			err
+		});
+		expect(props.onSendCompleted).not.toHaveBeenCalled();
 	});
 
 	it('should call sendBtc if all requirements are met', async () => {

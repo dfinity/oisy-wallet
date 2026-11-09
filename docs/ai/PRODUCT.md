@@ -848,7 +848,15 @@ The Bitcoin address scoped to a reservation is always **derived from the authent
 
 On local and staging builds, every BTC flow loads the outputs it can spend from the backend instead of reading them from the Bitcoin canister itself: send, convert, swap, the AI assistant's send, Liquidium supply and repay, and OpenCryptoPay. One certified call returns them with the pending transactions. It covers every page of the address's outputs, already leaves out those a pending send has reserved, and keeps the 10 000 largest. A wallet with more outputs than the Bitcoin canister returns in one page could previously spend only that first page. Each check for pending transactions before a send refreshes the outputs too, from the same answer. A wallet whose outputs a pending send has all reserved is still told its funds are locked by pending transactions, not that its balance is too low.
 
-If the backend cannot answer, the flow reports that pending transactions are unavailable and offers no send, as it already does when only the pending transactions fail to load. On regtest the backend counts an output as spendable from 1 confirmation rather than 4, so local sends can use newer outputs; testnet and mainnet keep 4. The send itself still goes through the Chain Fusion Signer. Beta and production load as before.
+If the backend cannot answer, the flow reports that pending transactions are unavailable and offers no send, as it already does when only the pending transactions fail to load. On regtest the backend counts an output as spendable from 1 confirmation rather than 4, so local sends can use newer outputs; testnet and mainnet keep 4. Beta and production load as before.
+
+### Sending through the backend (local and staging)
+
+On local and staging builds, Send, Convert and the AI assistant's BTC send build and sign the transaction in OISY, then have the backend broadcast it. The backend reserves the inputs in the same step, so no send can pick them up in the meantime. A send there spends at most 100 inputs, and the amount offered as Max stays within that.
+
+When the broadcast's outcome is unclear, the transaction may have gone out. The user is told to check their activity before sending again, and the flow does not offer the form again: its inputs stay reserved, so a second send would spend other coins and could pay twice. In the AI assistant, the card shows that message in place of its Send button. A send the backend refuses outright returns to the form as before, with the locked-funds message when its inputs are already reserved.
+
+Swaps, Liquidium and OpenCryptoPay still send through the Chain Fusion Signer. Beta and production send as before.
 
 ---
 

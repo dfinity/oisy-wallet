@@ -1,6 +1,7 @@
 import {
 	mapAllowSigningError,
 	mapBtcAddPendingTransactionError,
+	mapBtcBroadcastTransactionError,
 	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
 	mapBtcGetSpendableUtxosError,
@@ -8,6 +9,7 @@ import {
 	mapSignOnramperWidgetUrlError
 } from '$lib/canisters/backend.errors';
 import {
+	BtcBroadcastTransactionCanisterError,
 	CanisterInternalError,
 	OnramperRateLimitedError,
 	OnramperSecretNotConfiguredError
@@ -86,6 +88,33 @@ describe('backend.errors', () => {
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
 			expect(err.message).toBe('Unknown BtcAddPendingTransactionError');
+		});
+	});
+
+	describe('mapBtcBroadcastTransactionError', () => {
+		it.each([
+			{
+				variant: {
+					RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal }
+				},
+				message: 'Rate limit exceeded. Maximum of 5 calls allowed every 60 seconds.'
+			},
+			{
+				variant: { BroadcastOutcomeUnknown: { msg: 'trap' } },
+				message: 'btc_broadcast_transaction: BroadcastOutcomeUnknown: trap'
+			},
+			{
+				variant: { InvalidSignature: { index: 2 } },
+				message: 'btc_broadcast_transaction: InvalidSignature (index 2)'
+			},
+			{ variant: { FeeTooLow: null }, message: 'btc_broadcast_transaction: FeeTooLow' }
+		])('should keep the variant $variant and name it', ({ variant, message }) => {
+			const err = mapBtcBroadcastTransactionError(variant);
+
+			expect(err).toBeInstanceOf(BtcBroadcastTransactionCanisterError);
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.variant).toBe(variant);
+			expect(err.message).toBe(message);
 		});
 	});
 

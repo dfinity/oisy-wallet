@@ -59,6 +59,7 @@ vi.mock('$btc/services/btc-pending-sent-transactions.services', () => ({
 	loadBtcPendingSentTransactions: vi.fn().mockResolvedValue({ success: true })
 }));
 
+import { BTC_BROADCAST_MAX_INPUTS } from '$btc/constants/btc.constants';
 import { getFeeRateFromPercentiles, prepareBtcSend } from '$btc/services/btc-utxos.service';
 import type { BtcAddress } from '$btc/types/address';
 import { BtcPrepareSendError } from '$btc/types/btc-send';
@@ -66,6 +67,7 @@ import * as backendApi from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Amount } from '$lib/types/send';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import type { BitcoinNetwork, CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 // Mock environment variables
@@ -327,6 +329,27 @@ describe('btc-utxos.service', () => {
 				utxos: [],
 				error: BtcPrepareSendError.UtxoLocked
 			});
+		});
+
+		it('should refuse, with the flag on, an amount that needs more inputs than the backend takes', () => {
+			const utxos: CkBtcMinterDid.Utxo[] = Array.from(
+				{ length: BTC_BROADCAST_MAX_INPUTS + 1 },
+				(_, i) => ({
+					value: 10_000n,
+					height: 100,
+					outpoint: { txid: Uint8Array.from([3, i]), vout: 0 }
+				})
+			);
+			// At 5 sat/vB for the largest output, 100 inputs carry 965 575 sats and 101 carry 975 235.
+			const amount = 0.0097;
+
+			expect(prepareBtcSend({ ...defaultParams, allUtxos: utxos, amount }).error).toBeUndefined();
+
+			btcSendViaBackend.enabled = true;
+
+			expect(prepareBtcSend({ ...defaultParams, allUtxos: utxos, amount }).error).toBe(
+				BtcPrepareSendError.InsufficientBalanceForFee
+			);
 		});
 
 		it('should return UtxoLocked error when all UTXOs are filtered out by confirmations', () => {

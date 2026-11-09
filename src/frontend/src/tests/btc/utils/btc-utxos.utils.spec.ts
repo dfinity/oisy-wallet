@@ -1,8 +1,10 @@
+import { BTC_BROADCAST_MAX_INPUTS } from '$btc/constants/btc.constants';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import { btcOutputVSize, buildBtcSendPsbt, finalizeSignedBtcPsbt } from '$btc/utils/btc-psbt.utils';
 import {
+	btcSendMaxInputs,
 	calculateFeeSatoshis,
 	calculateMaxSpendableAmount,
 	calculateUtxoSelection,
@@ -15,6 +17,7 @@ import {
 } from '$btc/utils/btc-utxos.utils';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { assertNonNullish } from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { getPublicKey, signAsync } from '@noble/secp256k1';
@@ -1026,6 +1029,88 @@ describe('btc-utxos.utils', () => {
 				).toBeFalsy();
 				expect(maxFor(p2trOutputVSize)).toBe(9_847n);
 			});
+		});
+	});
+
+	describe('the backend broadcast input cap', () => {
+		const rate = 1000n;
+		const recipientOutputVSize = 31;
+		const fee = (numInputs: number) =>
+			calculateFeeSatoshis({ numInputs, recipientOutputVSize, feeRateMiliSatoshisPerVByte: rate });
+		const utxos = ({ count, value, from = 0 }: { count: number; value: number; from?: number }) =>
+			Array.from({ length: count }, (_, i) =>
+				createMockUtxo({ value, txid: Uint8Array.from([7, (from + i) % 256, (from + i) >> 8]) })
+			);
+
+		it('should cap a send at the backend limit only with the flag on', () => {
+			expect(btcSendMaxInputs()).toBeUndefined();
+
+			btcSendViaBackend.enabled = true;
+
+			expect(btcSendMaxInputs()).toBe(BTC_BROADCAST_MAX_INPUTS);
+		});
+
+		it('should select up to the cap, and refuse funds that need one input more', () => {
+			const availableUtxos = utxos({ count: BTC_BROADCAST_MAX_INPUTS + 1, value: 10_000 });
+			const atCap = BigInt(BTC_BROADCAST_MAX_INPUTS) * 10_000n - fee(BTC_BROADCAST_MAX_INPUTS);
+			const select = ({
+				amountSatoshis,
+				maxInputs
+			}: {
+				amountSatoshis: bigint;
+				maxInputs?: number;
+			}) =>
+				calculateUtxoSelection({
+					availableUtxos,
+					amountSatoshis,
+					recipientOutputVSize,
+					feeRateMiliSatoshisPerVByte: rate,
+					maxInputs
+				});
+
+			const fits = select({ amountSatoshis: atCap, maxInputs: BTC_BROADCAST_MAX_INPUTS });
+
+			expect(fits.sufficientFunds).toBeTruthy();
+			expect(fits.selectedUtxos).toHaveLength(BTC_BROADCAST_MAX_INPUTS);
+
+			expect(
+				select({ amountSatoshis: atCap + 1n, maxInputs: BTC_BROADCAST_MAX_INPUTS }).sufficientFunds
+			).toBeFalsy();
+			expect(select({ amountSatoshis: atCap + 1n }).sufficientFunds).toBeTruthy();
+		});
+
+		it('should offer as Max what the largest inputs within the cap carry, and the selection accept it', () => {
+			const large = utxos({ count: BTC_BROADCAST_MAX_INPUTS, value: 10_000 });
+			const small = utxos({ count: 50, value: 1_000, from: BTC_BROADCAST_MAX_INPUTS });
+			const all = [...small, ...large];
+
+			const max = calculateMaxSpendableAmount({
+				utxos: all,
+				pendingUtxoOutpoints: [],
+				recipientOutputVSize,
+				feeRateMiliSatoshisPerVByte: rate,
+				maxInputs: BTC_BROADCAST_MAX_INPUTS
+			});
+
+			expect(max).toBe(BigInt(BTC_BROADCAST_MAX_INPUTS) * 10_000n - fee(BTC_BROADCAST_MAX_INPUTS));
+			expect(
+				calculateUtxoSelection({
+					availableUtxos: all,
+					amountSatoshis: max,
+					recipientOutputVSize,
+					feeRateMiliSatoshisPerVByte: rate,
+					maxInputs: BTC_BROADCAST_MAX_INPUTS
+				}).sufficientFunds
+			).toBeTruthy();
+
+			expect(
+				calculateMaxSpendableAmount({
+					utxos: all,
+					pendingUtxoOutpoints: [],
+					recipientOutputVSize,
+					feeRateMiliSatoshisPerVByte: rate
+				})
+			).toBe(BigInt(BTC_BROADCAST_MAX_INPUTS) * 10_000n + 50n * 1_000n - fee(all.length));
 		});
 	});
 

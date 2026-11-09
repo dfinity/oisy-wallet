@@ -1,14 +1,26 @@
 import { BTC_SEND_FEE_TOLERANCE_PERCENTAGE } from '$btc/constants/btc.constants';
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
+import { signAndFinalizeBtcPsbt } from '$btc/services/btc-sign.services';
 import type { BtcAddress } from '$btc/types/address';
-import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
-import { btcAddressToOutputScript, btcOutputVSize } from '$btc/utils/btc-psbt.utils';
+import {
+	BtcBroadcastUnconfirmedError,
+	BtcSendValidationError,
+	BtcValidationError,
+	type UtxosFee
+} from '$btc/types/btc-send';
+import {
+	btcAddressToOutputScript,
+	btcOutputVSize,
+	buildBtcSendPsbt
+} from '$btc/utils/btc-psbt.utils';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateFeeSatoshis, extractUtxoOutpoints } from '$btc/utils/btc-utxos.utils';
 import type { SendBtcResponse, SignBtcResponse } from '$declarations/signer/signer.did';
+import { BTC_SEND_VIA_BACKEND_ENABLED } from '$env/btc.env';
 import { getPendingTransactionUtxoOutpoints, txidStringToUint8Array } from '$icp/utils/btc.utils';
-import { addPendingBtcTransaction } from '$lib/api/backend.api';
+import { addPendingBtcTransaction, broadcastBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi, signBtc as signBtcApi } from '$lib/api/signer.api';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -39,6 +51,13 @@ export type SendBtcParams = CommonBtcServiceParams & {
 	// a caller that must record it (e.g. as an active user transaction) cannot wait
 	// behind steps whose failure would swallow the txid.
 	onBroadcast?: (params: { txid: string }) => Promise<void> | void;
+	// Backend path only: runs once the transaction is signed, before it is broadcast, with the
+	// txid it will have. If it rejects, nothing is broadcast and `sendBtc` rejects with its error.
+	beforeBroadcast?: (params: { txid: string }) => Promise<void>;
+	// Takes the backend path when `BTC_SEND_VIA_BACKEND_ENABLED` is on, for a caller that handles
+	// its outcomes: a broadcast whose outcome is unclear (`isUnclearBtcBroadcastOutcome`) may have
+	// gone out. Every other caller keeps the Chain Fusion Signer until it does too.
+	viaBackend?: boolean;
 };
 
 export type SignBtcParams = CommonBtcServiceParams & {
@@ -256,13 +275,85 @@ export const signBtc = async ({
 	});
 };
 
-export const sendBtc = async ({
+export const sendBtc = async (params: SendBtcParams): Promise<string> =>
+	BTC_SEND_VIA_BACKEND_ENABLED && params.viaBackend === true
+		? await sendBtcViaBackend(params)
+		: await sendBtcViaSigner(params);
+
+/**
+ * Builds and signs the transaction in the frontend, then has the backend broadcast it.
+ *
+ * The backend reserves the inputs in the same call, so nothing is recorded afterwards. A failure
+ * before the broadcast call sent nothing. The broadcast's own failure is its typed answer
+ * (`BtcBroadcastTransactionCanisterError`), or, with none, `BtcBroadcastUnconfirmedError`: the
+ * transaction may have gone out.
+ */
+const sendBtcViaBackend = async ({
+	utxosFee,
+	network,
+	source,
+	destination,
+	amount,
+	identity,
+	onProgress,
+	beforeBroadcast,
+	onBroadcast
+}: SendBtcParams): Promise<string> => {
+	const psbt = buildBtcSendPsbt({
+		utxos: utxosFee.utxos,
+		outputs: [{ destination, amount: convertNumberToSatoshis({ amount }) }],
+		changeAddress: source,
+		feeSatoshis: utxosFee.feeSatoshis,
+		network
+	});
+
+	onProgress?.();
+
+	const { txid, bytes } = await signAndFinalizeBtcPsbt({ psbt, identity });
+
+	await beforeBroadcast?.({ txid });
+
+	try {
+		await broadcastBtcTransaction({
+			identity,
+			network: mapToSignerBitcoinNetwork({ network }),
+			transaction: bytes,
+			iiDelegationChain: extractIIDelegationChain(identity)
+		});
+	} catch (err: unknown) {
+		throw err instanceof BtcBroadcastTransactionCanisterError
+			? err
+			: new BtcBroadcastUnconfirmedError({ cause: err });
+	}
+
+	// The transaction is out, so nothing from here may fail the send: a caller would read that as
+	// not sent, and could send it again.
+	try {
+		await onBroadcast?.({ txid });
+	} catch (err: unknown) {
+		consoleError(err);
+	}
+
+	onProgress?.();
+
+	try {
+		await waitAndTriggerWallet();
+	} catch (err: unknown) {
+		consoleError(err);
+	}
+
+	return txid;
+};
+
+const sendBtcViaSigner = async ({
 	utxosFee,
 	network,
 	source: _source,
 	identity,
 	onProgress,
 	onBroadcast,
+	beforeBroadcast: _beforeBroadcast,
+	viaBackend: _viaBackend,
 	...rest
 }: SendBtcParams): Promise<string> => {
 	const { txid } = await send({ onProgress, utxosFee, network, identity, ...rest });
@@ -298,7 +389,7 @@ const send = async ({
 	amount,
 	utxosFee,
 	onProgress
-}: Omit<SendBtcParams, 'source'>): Promise<SendBtcResponse> => {
+}: Omit<SendBtcParams, 'source' | 'beforeBroadcast' | 'viaBackend'>): Promise<SendBtcResponse> => {
 	const satoshisAmount = convertNumberToSatoshis({ amount });
 	const signerBitcoinNetwork = mapToSignerBitcoinNetwork({ network });
 

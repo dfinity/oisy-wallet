@@ -1,4 +1,8 @@
-import { ToolResultType, type ChatMessage } from '$lib/types/ai-assistant';
+import {
+	ToolResultType,
+	type ChatMessage,
+	type ReviewSendTokensToolResult
+} from '$lib/types/ai-assistant';
 import { nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
@@ -15,12 +19,53 @@ export interface AiAssistantStore extends Readable<AiAssistant | undefined> {
 	appendMessage: (message: ChatMessage) => void;
 	removeLastMessage: () => void;
 	setSendToolActionAsCompleted: (id: string) => void;
+	setSendToolActionAsUnclear: (id: string) => void;
 }
 
 const initialState = {
 	isOpen: false,
 	chatHistory: []
 } as AiAssistant;
+
+const updateSendToolResult =
+	({
+		id,
+		patch
+	}: {
+		id: string;
+		patch: Partial<Pick<ReviewSendTokensToolResult, 'sendCompleted' | 'sendOutcomeUnclear'>>;
+	}) =>
+	(state: AiAssistant): AiAssistant => ({
+		...state,
+		chatHistory: state.chatHistory.map((message) =>
+			message.role === 'assistant' && message.data.tool?.results
+				? {
+						...message,
+						data: {
+							...message.data,
+							tool: {
+								...message.data.tool,
+								results: message.data.tool.results.map((toolResult) => {
+									if (
+										toolResult.type === ToolResultType.REVIEW_SEND_TOKENS &&
+										nonNullish(toolResult.result) &&
+										'id' in toolResult.result &&
+										toolResult.result.id === id
+									) {
+										return {
+											...toolResult,
+											result: { ...toolResult.result, ...patch }
+										};
+									}
+
+									return toolResult;
+								})
+							}
+						}
+					}
+				: message
+		)
+	});
 
 const initAiAssistantStore = (): AiAssistantStore => {
 	const { subscribe, update, set } = writable<AiAssistant>(initialState);
@@ -53,37 +98,11 @@ const initAiAssistantStore = (): AiAssistantStore => {
 		},
 
 		setSendToolActionAsCompleted: (id: string) => {
-			update((state) => ({
-				...state,
-				chatHistory: state.chatHistory.map((message) =>
-					message.role === 'assistant' && message.data.tool?.results
-						? {
-								...message,
-								data: {
-									...message.data,
-									tool: {
-										...message.data.tool,
-										results: message.data.tool.results.map((toolResult) => {
-											if (
-												toolResult.type === ToolResultType.REVIEW_SEND_TOKENS &&
-												nonNullish(toolResult.result) &&
-												'id' in toolResult.result &&
-												toolResult.result.id === id
-											) {
-												return {
-													...toolResult,
-													result: { ...toolResult.result, sendCompleted: true }
-												};
-											}
+			update(updateSendToolResult({ id, patch: { sendCompleted: true } }));
+		},
 
-											return toolResult;
-										})
-									}
-								}
-							}
-						: message
-				)
-			}));
+		setSendToolActionAsUnclear: (id: string) => {
+			update(updateSendToolResult({ id, patch: { sendOutcomeUnclear: true } }));
 		}
 	};
 };

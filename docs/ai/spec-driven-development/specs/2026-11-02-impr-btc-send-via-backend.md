@@ -822,6 +822,32 @@ CFS path.
   pay the recipient twice. This is the plain-send version of the Liquidium repay gap below. There
   is no automatic retry in v1.
 
+Decided in PR 8a (PR 8 is split in three, see the [Delivery plan](#delivery-plan)):
+
+- **Callers opt in.** `sendBtc` takes the backend path only when the flag is on and the caller
+  passes `viaBackend: true`, which says it handles the backend path's outcomes. PR 8a migrates
+  Send, Convert and the AI assistant. The swaps (8b) and Liquidium (8c) keep the CFS send even
+  with the flag on until theirs are handled. 8c removes `viaBackend` once every caller passes it.
+- **`beforeBroadcast` comes with 8a**, as part of the send's order, though only 8b and 8c use it.
+- **Errors.** `broadcastBtcTransaction` throws `BtcBroadcastTransactionCanisterError`, which
+  carries the variant. A failure of the broadcast call with no typed answer becomes
+  `BtcBroadcastUnconfirmedError`. Beside `isDefinitiveBtcBroadcastRefusal` there is
+  `isUnclearBtcBroadcastOutcome`. An error from before the broadcast, such as a signing failure,
+  is neither: nothing went out, but no answer of the backend's says so.
+- **Nothing after the broadcast fails the send.** `onBroadcast` and the wallet refresh are best
+  effort, so a caller never reads a broadcast transaction as not sent.
+- **The message** is `send.error.btc_transaction_unconfirmed`, beside
+  `send.error.ethereum_transaction_unconfirmed`.
+- **Closing after an unclear outcome.** Send and Convert close. The AI assistant has no flow to
+  close, so its tool result gets `sendOutcomeUnclear`, and the card shows the message instead of
+  the Send button. It is kept in `aiAssistantStore`, so a remounted card offers no second send
+  either.
+- **At most 100 inputs.** With the flag on, `prepareBtcSend` and Max stay within
+  `BTC_BROADCAST_MAX_INPUTS` (`MAX_BROADCAST_TX_INPUTS`). Every pick of the selection but the last
+  is the largest left, so it still finds a set whenever any set of that many inputs covers the
+  amount. Max spends the largest of them. 100 P2WPKH inputs make about 15 000 bytes, within
+  `MAX_BROADCAST_TX_BYTES`.
+
 ### Frontend: UTXO loading
 
 `AllUtxosLoader.svelte` and `loadBtcPendingSentTransactions` read from `btc_get_spendable_utxos`
@@ -991,7 +1017,15 @@ Every PR is safe on its own.
      `btc_get_spendable_utxos` call, and `AllUtxosLoader` makes none. With it off, they load as
      today. See [Decided in PR 7](#frontend-utxo-loading).
    - `PRODUCT.md` gains "Spendable outputs from the backend (local and staging)" under `## Bitcoin`.
-8. `feat(frontend): send BTC through the backend behind the flag` (needs 3, 5, 6, 7).
+8. `feat(frontend): send BTC through the backend behind the flag` (needs 3, 5, 6, 7). Split in
+   three, each safe on its own because a flow takes the backend path only once its outcomes are
+   handled (see [Decided in PR 8a](#frontend-sendbtc)):
+   - **8a:** the backend send in `sendBtc`, its typed errors and messages, the 100-input cap, and
+     Send, Convert and the AI assistant.
+   - **8b:** the Chain Fusion and NEAR Intents swaps.
+   - **8c:** Liquidium supply and repay, and removing `viaBackend`.
+
+   Together they do the following:
    - `beforeBroadcast` and `isDefinitiveBtcBroadcastRefusal` are added. The Chain Fusion and NEAR
      Intents rows are created in `beforeBroadcast` when the flag is on, and in `onBroadcast` when it
      is off.
@@ -999,6 +1033,7 @@ Every PR is safe on its own.
      row only on a definitive refusal, and show "may have gone out" after an unclear outcome. See
      [Liquidium supply and repay](#frontend-sendbtc).
    - Verified on regtest locally and with a small mainnet send on staging.
+
 9. `feat(frontend): OpenCryptoPay signs BTC with btc_sign_prehash behind the flag` (needs 3, 5, 7).
    With the flag off, it keeps `btc_caller_sign`.
 10. `feat(frontend): enable backend BTC send in production`. The flag is turned on, so the UTXO

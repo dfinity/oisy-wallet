@@ -41,8 +41,16 @@
 		sendEnabled: boolean;
 	}
 
-	let { amount, contact, address, contactAddress, sendEnabled, sendCompleted, id }: Props =
-		$props();
+	let {
+		amount,
+		contact,
+		address,
+		contactAddress,
+		sendEnabled,
+		sendCompleted,
+		sendOutcomeUnclear = false,
+		id
+	}: Props = $props();
 
 	const { sendToken, sendTokenExchangeRate, sendTokenNetworkId } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -68,6 +76,10 @@
 
 	const onSendCompleted = () => {
 		aiAssistantStore.setSendToolActionAsCompleted(id);
+	};
+
+	const onSendOutcomeUnclear = () => {
+		aiAssistantStore.setSendToolActionAsUnclear(id);
 	};
 </script>
 
@@ -127,8 +139,10 @@
 					{amount}
 					{destination}
 					{onSendCompleted}
+					{onSendOutcomeUnclear}
 					{sendCompleted}
 					{sendEnabled}
+					{sendOutcomeUnclear}
 					source={btcSource}
 				/>
 			</UtxosFeeContexts>

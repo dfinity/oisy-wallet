@@ -35,6 +35,11 @@ export const BTC_CHANGE_DUST_THRESHOLD_SATOSHIS = 1_000n;
 // known.
 export const BTC_LARGEST_OUTPUT_VSIZE = 43;
 
+// The most inputs the backend's `btc_broadcast_transaction` accepts, which refuses more with
+// `TooManyInputs`. Must stay in sync with `MAX_BROADCAST_TX_INPUTS` in
+// `src/shared/src/types/bitcoin.rs`.
+export const BTC_BROADCAST_MAX_INPUTS = 100;
+
 // How many inputs of one transaction are signed at the same time. Each is a `btc_sign_prehash`
 // call, so one `sign_with_ecdsa` request. The subnet queues only 20 requests per key beyond the
 // pre-signatures it has ready, shared by every caller of the key, and refuses the rest. The chain

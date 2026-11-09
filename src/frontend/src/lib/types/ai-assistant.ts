@@ -42,6 +42,9 @@ export interface ReviewSendTokensToolResult {
 	amount: number;
 	token: Token;
 	sendCompleted: boolean;
+	// Set when the send's broadcast outcome is unclear: it may have gone out, so the card offers no
+	// second send.
+	sendOutcomeUnclear?: boolean;
 	id: string;
 	contact?: ExtendedAddressContactUi;
 	contactAddress?: ContactAddressUiWithId;

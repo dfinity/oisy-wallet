@@ -134,4 +134,42 @@ describe('ai-assistant.store', () => {
 			]
 		});
 	});
+
+	it('should mark a review_send_token tool whose send may have gone out', () => {
+		const toolMessage = {
+			role: 'assistant',
+			data: {
+				tool: {
+					calls: [],
+					results: [
+						{
+							type: ToolResultType.REVIEW_SEND_TOKENS,
+							result: { sendCompleted: false, id: mockRandomUUID }
+						} as ToolResult,
+						{
+							type: ToolResultType.REVIEW_SEND_TOKENS,
+							result: { sendCompleted: false, id: 'another-id' }
+						} as ToolResult
+					]
+				}
+			}
+		} as ChatMessage;
+
+		aiAssistantStore.appendMessage(toolMessage);
+
+		aiAssistantStore.setSendToolActionAsUnclear(mockRandomUUID);
+
+		const [{ data }] = get(aiAssistantStore)?.chatHistory.slice(-1) ?? [];
+
+		expect(data?.tool?.results).toStrictEqual([
+			{
+				type: ToolResultType.REVIEW_SEND_TOKENS,
+				result: { sendCompleted: false, sendOutcomeUnclear: true, id: mockRandomUUID }
+			},
+			{
+				type: ToolResultType.REVIEW_SEND_TOKENS,
+				result: { sendCompleted: false, id: 'another-id' }
+			}
+		]);
+	});
 });

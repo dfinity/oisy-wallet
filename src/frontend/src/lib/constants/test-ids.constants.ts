@@ -466,6 +466,7 @@ export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistant-console-button';
 export const AI_ASSISTANT_SEND_MESSAGE_BUTTON = 'ai-assistant-send-message-button';
 export const AI_ASSISTANT_SEND_TOKENS_BUTTON = 'ai-assistant-send-tokens-button';
 export const AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE = 'ai-assistant-send-tokens-success-message';
+export const AI_ASSISTANT_SEND_TOKENS_UNCLEAR_MESSAGE = 'ai-assistant-send-tokens-unclear-message';
 
 // Agreements
 export const AGREEMENTS_WARNING_BANNER = 'agreements-warning-banner';

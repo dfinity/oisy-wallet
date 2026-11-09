@@ -11,6 +11,10 @@
 		UTXOS_FEE_CONTEXT_KEY,
 		type UtxosFeeContext as UtxosFeeContextType
 	} from '$btc/stores/utxos-fee.store';
+	import {
+		isUnclearBtcBroadcastOutcome,
+		mapBtcBroadcastErrorToMessage
+	} from '$btc/utils/btc-send.utils';
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import { btcAddressStore } from '$icp/stores/btc.store';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -142,6 +146,7 @@
 				network,
 				source: sourceAddress,
 				identity: $authIdentity,
+				viaBackend: true,
 				onProgress: () => {
 					if (convertProgressStep === ProgressStepsConvert.INITIALIZATION) {
 						progress(ProgressStepsConvert.CONVERT);
@@ -160,13 +165,22 @@
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			toastsError({
-				msg: { text: $i18n.convert.error.unexpected },
+				msg: {
+					text:
+						mapBtcBroadcastErrorToMessage({ err, i18n: $i18n }) ?? $i18n.convert.error.unexpected
+				},
 				err
 			});
 
 			trackEvent({
 				name: TRACK_COUNT_CONVERT_BTC_TO_CKBTC_ERROR
 			});
+
+			// As for a send: the conversion may have gone out, so the form is not offered again.
+			if (isUnclearBtcBroadcastOutcome(err)) {
+				close();
+				return;
+			}
 
 			back();
 		}
