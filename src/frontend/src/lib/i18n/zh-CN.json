@@ -1274,6 +1274,7 @@
 			"pay_at_failure": "向 $receipt 支付失败",
 			"pay_at_not_confirmed": "",
 			"payment_not_confirmed_description": "",
+			"payment_not_confirmed_description_generic": "",
 			"try_again": "再试一次",
 			"payment_confirmed": "支付已确认",
 			"payment_failed": "支付失败",

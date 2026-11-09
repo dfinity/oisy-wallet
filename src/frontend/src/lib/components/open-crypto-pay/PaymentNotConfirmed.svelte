@@ -16,20 +16,24 @@
 	let { onClose }: Props = $props();
 
 	const { data } = getContext<PayContext>(PAY_CONTEXT_KEY);
+
+	let description = $derived(
+		nonNullish($data?.displayName)
+			? replacePlaceholders($i18n.scanner.text.payment_not_confirmed_description, {
+					$receipt: $data.displayName
+				})
+			: $i18n.scanner.text.payment_not_confirmed_description_generic
+	);
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col w-full">
 	<PaymentStatusHero status="not_confirmed" />
 
-	{#if nonNullish($data?.displayName)}
-		<div class="mt-4">
-			<MessageBox level="warning">
-				{replacePlaceholders($i18n.scanner.text.payment_not_confirmed_description, {
-					$receipt: $data.displayName
-				})}
-			</MessageBox>
-		</div>
-	{/if}
+	<div class="mt-4">
+		<MessageBox level="warning">
+			{description}
+		</MessageBox>
+	</div>
 
 	{#snippet toolbar()}
 		<Button fullWidth onclick={onClose}>{$i18n.core.text.close}</Button>

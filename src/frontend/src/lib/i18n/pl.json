@@ -1274,6 +1274,7 @@
 			"pay_at_failure": "Płatność w $receipt nie powiodła się",
 			"pay_at_not_confirmed": "",
 			"payment_not_confirmed_description": "",
+			"payment_not_confirmed_description_generic": "",
 			"try_again": "Spróbuj ponownie",
 			"payment_confirmed": "Płatność potwierdzona",
 			"payment_failed": "Płatność nie powiodła się",

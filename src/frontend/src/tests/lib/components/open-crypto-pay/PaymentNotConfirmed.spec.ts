@@ -35,9 +35,31 @@ describe('PaymentNotConfirmed', () => {
 		expect(getByText(description)).toBeInTheDocument();
 	});
 
-	it('should not render the explanation without a receipt name', () => {
-		const { queryByText } = renderWithContext(undefined);
+	it('should say that the payment may have gone through when the response has no merchant name', () => {
+		const responseWithoutName: OpenCryptoPayResponse = {
+			id: 'pl_test123',
+			externalId: 'test-external',
+			mode: 'Multiple',
+			tag: 'payRequest',
+			callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123',
+			minSendable: 1000,
+			maxSendable: 10000,
+			metadata: '[["text/plain", "Test"]]',
+			standard: 'OpenCryptoPay',
+			possibleStandards: ['OpenCryptoPay'],
+			displayQr: true,
+			requestedAmount: {
+				asset: 'CHF',
+				amount: '10'
+			},
+			transferAmounts: []
+		};
 
+		const { getByText, queryByText } = renderWithContext(responseWithoutName);
+
+		expect(
+			getByText(en.scanner.text.payment_not_confirmed_description_generic)
+		).toBeInTheDocument();
 		expect(queryByText(description)).not.toBeInTheDocument();
 	});
 

@@ -1001,6 +1001,7 @@ interface I18nScanner {
 		pay_at_failure: string;
 		pay_at_not_confirmed: string;
 		payment_not_confirmed_description: string;
+		payment_not_confirmed_description_generic: string;
 		try_again: string;
 		payment_confirmed: string;
 		payment_failed: string;

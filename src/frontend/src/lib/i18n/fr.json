@@ -1274,6 +1274,7 @@
 			"pay_at_failure": "Échec du paiement à $receipt",
 			"pay_at_not_confirmed": "",
 			"payment_not_confirmed_description": "",
+			"payment_not_confirmed_description_generic": "",
 			"try_again": "Réessayer",
 			"payment_confirmed": "Paiement confirmé",
 			"payment_failed": "Paiement échoué",
