@@ -359,6 +359,26 @@ describe('btc-send.services', () => {
 			await expect(res).rejects.toHaveProperty('cause', error);
 		});
 
+		it('should resolve once broadcast though the progress callback throws after it', async () => {
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+			const waitAndTriggerWalletSpy = vi
+				.spyOn(walletUtils, 'waitAndTriggerWallet')
+				.mockResolvedValue(undefined);
+			const onProgress = vi
+				.fn()
+				.mockImplementationOnce(() => undefined)
+				.mockImplementationOnce(() => {
+					throw error;
+				});
+
+			const result = await sendBtc({ ...viaBackendParams, onProgress });
+
+			expect(result).toBe(signed.txid);
+			expect(broadcastBtcTransactionSpy).toHaveBeenCalledOnce();
+			expect(onProgress).toHaveBeenCalledTimes(2);
+			expect(waitAndTriggerWalletSpy).toHaveBeenCalledOnce();
+		});
+
 		it('should resolve once broadcast, whatever onBroadcast and the wallet refresh do', async () => {
 			vi.spyOn(console, 'error').mockImplementation(() => {});
 			vi.spyOn(walletUtils, 'waitAndTriggerWallet').mockRejectedValue(error);

@@ -327,22 +327,20 @@ const sendBtcViaBackend = async ({
 	}
 
 	// The transaction is out, so nothing from here may fail the send: a caller would read that as
-	// not sent, and could send it again.
-	try {
-		await onBroadcast?.({ txid });
-	} catch (err: unknown) {
-		consoleError(err);
-	}
-
-	onProgress?.();
-
-	try {
-		await waitAndTriggerWallet();
-	} catch (err: unknown) {
-		consoleError(err);
-	}
+	// not sent, and could send it again. Each step runs whatever the one before did.
+	await runAfterBroadcast(() => onBroadcast?.({ txid }));
+	await runAfterBroadcast(() => onProgress?.());
+	await runAfterBroadcast(waitAndTriggerWallet);
 
 	return txid;
+};
+
+const runAfterBroadcast = async (step: () => unknown): Promise<void> => {
+	try {
+		await step();
+	} catch (err: unknown) {
+		consoleError(err);
+	}
 };
 
 const sendBtcViaSigner = async ({
