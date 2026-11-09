@@ -1062,7 +1062,7 @@ fn test_agreement_history_records_only_changed_agreements() {
 }
 
 #[test]
-fn test_agreement_history_keeps_only_the_newest_entries() {
+fn test_agreement_history_refuses_changes_past_the_limit() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
 
@@ -1071,9 +1071,7 @@ fn test_agreement_history_keeps_only_the_newest_entries() {
         .expect("Create call failed")
         .expect("Signups should be open");
 
-    // Every update flips all three agreements, so it adds three entries.
-    let updates = MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER / 3 + 1;
-    for i in 0..updates {
+    let update = |agreements: UserAgreements| {
         // One update per minute stays clear of the per-caller call limit.
         pic_setup.pic.advance_time(Duration::from_secs(60));
 
@@ -1081,51 +1079,58 @@ fn test_agreement_history_keeps_only_the_newest_entries() {
             .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
             .unwrap()
             .unwrap();
+        let result = pic_setup
+            .update::<Result<(), UpdateAgreementsError>>(
+                caller,
+                "update_user_agreements",
+                UpdateUserAgreementsRequest {
+                    current_user_version: user_profile.version,
+                    agreements,
+                },
+            )
+            .unwrap();
+        (user_profile, result)
+    };
+    let all_three = |accepted: bool| {
         let agreement = UserAgreement {
-            accepted: Some(i % 2 == 0),
+            accepted: Some(accepted),
             ..Default::default()
         };
-        let arg = UpdateUserAgreementsRequest {
-            current_user_version: user_profile.version,
-            agreements: UserAgreements {
-                license_agreement: agreement.clone(),
-                terms_of_use: agreement.clone(),
-                privacy_policy: agreement,
-            },
-        };
+        UserAgreements {
+            license_agreement: agreement.clone(),
+            terms_of_use: agreement.clone(),
+            privacy_policy: agreement,
+        }
+    };
+    let history = || {
         pic_setup
-            .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg)
+            .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+                caller,
+                "get_user_agreement_history",
+                (),
+            )
             .unwrap()
-            .unwrap();
-    }
+            .unwrap()
+    };
 
-    let history = pic_setup
-        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
-            caller,
-            "get_user_agreement_history",
-            (),
-        )
+    // Every update flips all three agreements, so it adds three entries.
+    let full_updates = MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER / 3;
+    for i in 0..full_updates {
+        assert_eq!(update(all_three(i % 2 == 0)).1, Ok(()));
+    }
+    let filled = history();
+    assert_eq!(filled.len(), full_updates * 3);
+
+    // Three more entries do not fit: the change is refused and nothing is written.
+    let (before, refused) = update(all_three(full_updates.is_multiple_of(2)));
+    assert_eq!(refused, Err(UpdateAgreementsError::TooManyHistoryEntries));
+    assert_eq!(history(), filled);
+    let after = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
         .unwrap()
         .unwrap();
-
-    let agreement_types = [
-        AgreementType::LicenseAgreement,
-        AgreementType::TermsOfUse,
-        AgreementType::PrivacyPolicy,
-    ];
-    let recorded = (0..updates).flat_map(|i| {
-        agreement_types
-            .iter()
-            .map(move |agreement_type| (agreement_type.clone(), i % 2 == 0))
-    });
-    let expected: Vec<(AgreementType, bool)> = recorded
-        .skip(updates * agreement_types.len() - MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER)
-        .collect();
-    let stored: Vec<(AgreementType, bool)> = history
-        .into_iter()
-        .map(|entry| (entry.agreement_type, entry.accepted))
-        .collect();
-    assert_eq!(stored, expected);
+    assert_eq!(after.version, before.version);
+    assert_eq!(after.agreements, before.agreements);
 }
 
 #[test]

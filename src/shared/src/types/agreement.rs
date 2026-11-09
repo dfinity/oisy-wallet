@@ -9,8 +9,8 @@ use crate::{
 
 pub const SHA256_HEX_LENGTH: usize = 64;
 
-/// Maximum number of agreement history entries kept per user. An update that goes past it drops
-/// the oldest entries.
+/// Maximum number of agreement history entries stored per user. An update that would go past it
+/// is refused; no entry is ever removed.
 pub const MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER: usize = 100;
 
 /// Which external provider the agreement belongs to.
@@ -139,6 +139,9 @@ pub enum UpdateAgreementsError {
     UserNotFound,
     VersionMismatch,
     RateLimited(RateLimitError),
+    /// The change would take the user's agreement history past
+    /// `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
+    TooManyHistoryEntries,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

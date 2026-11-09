@@ -1057,7 +1057,8 @@ export const idlFactory = ({ IDL }) => {
 	const UpdateAgreementsError = IDL.Variant({
 		VersionMismatch: IDL.Null,
 		RateLimited: RateLimitError,
-		UserNotFound: IDL.Null
+		UserNotFound: IDL.Null,
+		TooManyHistoryEntries: IDL.Null
 	});
 	const UpdateProviderAgreementsResult = IDL.Variant({
 		Ok: IDL.Null,

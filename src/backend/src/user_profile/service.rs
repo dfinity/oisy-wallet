@@ -176,19 +176,29 @@ fn is_agreement_changed(current: Option<&UserAgreement>, requested: &UserAgreeme
         })
 }
 
-/// Appends `new_entries` to the user's agreement history and keeps only the newest
-/// [`MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER`] entries, so the history stays bounded.
+/// Appends `new_entries` to the user's agreement history.
+///
+/// The history is the record of what the user agreed to, so no entry is ever removed: a change
+/// that would take it past [`MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER`] entries is refused instead,
+/// and nothing is written.
+///
+/// # Errors
+/// - Returns `Err(TooManyHistoryEntries)` if the new entries do not fit under the limit.
 fn append_history_entries(
     agreement_history: &mut AgreementHistoryMap,
     principal: StoredPrincipal,
     new_entries: Vec<AgreementHistoryEntry>,
-) {
+) -> Result<(), UpdateAgreementsError> {
     if new_entries.is_empty() {
-        return;
+        return Ok(());
     }
     let mut history = agreement_history.get(&principal).unwrap_or_default().0;
+    if history.len().saturating_add(new_entries.len()) > MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER {
+        return Err(UpdateAgreementsError::TooManyHistoryEntries);
+    }
     history.extend(new_entries);
-    agreement_history.insert(principal, Candid(newest_history_entries(history)));
+    agreement_history.insert(principal, Candid(history));
+    Ok(())
 }
 
 /// Returns the newest [`MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER`] entries of `history`.
@@ -260,7 +270,9 @@ fn collect_history_entries(
 /// - Returns `Ok(())` if the agreements were successfully updated or no change was needed.
 ///
 /// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+///   the change would take the agreement history past `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER`
+///   entries.
 pub fn update_agreements(
     principal: StoredPrincipal,
     profile_version: Option<Version>,
@@ -273,13 +285,14 @@ pub fn update_agreements(
     let now = time();
     let new_profile = user_profile.with_agreements(profile_version, now, agreements.clone())?;
 
-    user_profile_model.store_new(principal, now, &new_profile);
-
+    // The history is written first, so a change it refuses leaves the profile untouched too.
     if new_profile.version != user_profile.version {
         let current = user_profile.agreements.unwrap_or_default().agreements;
         let new_entries = collect_history_entries(&current, agreements, now);
-        append_history_entries(agreement_history, principal, new_entries);
+        append_history_entries(agreement_history, principal, new_entries)?;
     }
+
+    user_profile_model.store_new(principal, now, &new_profile);
 
     Ok(())
 }
@@ -326,7 +339,9 @@ fn collect_provider_history_entries(
 /// - Returns `Ok(())` if the provider agreements were successfully updated or no change was needed.
 ///
 /// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
+///   the change would take the agreement history past `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER`
+///   entries.
 pub fn update_provider_agreements(
     principal: StoredPrincipal,
     profile_version: Option<Version>,
@@ -340,16 +355,17 @@ pub fn update_provider_agreements(
     let new_profile =
         user_profile.with_provider_agreements(profile_version, now, provider_agreements.clone())?;
 
-    user_profile_model.store_new(principal, now, &new_profile);
-
+    // The history is written first, so a change it refuses leaves the profile untouched too.
     if new_profile.version != user_profile.version {
         let current = user_profile
             .agreements
             .and_then(|agreements| agreements.provider_agreements)
             .unwrap_or_default();
         let new_entries = collect_provider_history_entries(&current, provider_agreements, now);
-        append_history_entries(agreement_history, principal, new_entries);
+        append_history_entries(agreement_history, principal, new_entries)?;
     }
+
+    user_profile_model.store_new(principal, now, &new_profile);
 
     Ok(())
 }
@@ -424,7 +440,8 @@ mod tests {
     };
     use pretty_assertions::assert_eq;
     use shared::types::agreement::{
-        AgreementHistoryEntry, AgreementType, UserAgreement, MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER,
+        AgreementHistoryEntry, AgreementType, UpdateAgreementsError, UserAgreement,
+        MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER,
     };
 
     use super::{append_history_entries, is_agreement_changed, newest_history_entries};
@@ -505,26 +522,42 @@ mod tests {
     }
 
     #[test]
-    fn history_keeps_only_the_newest_entries() {
+    fn history_refuses_entries_past_the_limit() {
         let memory = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
         let mut map = AgreementHistoryMap::new(memory.borrow().get(MemoryId::new(12)));
         let principal = StoredPrincipal(Principal::anonymous());
         let max = u64::try_from(MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER).unwrap();
 
-        append_history_entries(&mut map, principal, (0..max).map(history_entry).collect());
+        let filled = append_history_entries(
+            &mut map,
+            principal,
+            (0..max - 1).map(history_entry).collect(),
+        );
+        assert_eq!(filled, Ok(()));
+
+        let past_the_limit = append_history_entries(
+            &mut map,
+            principal,
+            ((max - 1)..=max).map(history_entry).collect(),
+        );
+        assert_eq!(
+            past_the_limit,
+            Err(UpdateAgreementsError::TooManyHistoryEntries)
+        );
+        assert_eq!(
+            stored_timestamps(&map, principal),
+            (0..max - 1).collect::<Vec<_>>()
+        );
+
+        let up_to_the_limit = append_history_entries(
+            &mut map,
+            principal,
+            (max - 1..max).map(history_entry).collect(),
+        );
+        assert_eq!(up_to_the_limit, Ok(()));
         assert_eq!(
             stored_timestamps(&map, principal),
             (0..max).collect::<Vec<_>>()
-        );
-
-        append_history_entries(
-            &mut map,
-            principal,
-            (max..max + 3).map(history_entry).collect(),
-        );
-        assert_eq!(
-            stored_timestamps(&map, principal),
-            (3..max + 3).collect::<Vec<_>>()
         );
     }
 
@@ -552,7 +585,10 @@ mod tests {
         let mut map = AgreementHistoryMap::new(memory.borrow().get(MemoryId::new(12)));
         let principal = StoredPrincipal(Principal::anonymous());
 
-        append_history_entries(&mut map, principal, Vec::new());
+        assert_eq!(
+            append_history_entries(&mut map, principal, Vec::new()),
+            Ok(())
+        );
 
         assert!(!map.contains_key(&principal));
     }

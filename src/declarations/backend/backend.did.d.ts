@@ -2668,7 +2668,16 @@ export interface UpdateActiveUserTransactionRequest {
 	error: [] | [string];
 }
 export type UpdateAgreementsError =
-	{ VersionMismatch: null } | { RateLimited: RateLimitError } | { UserNotFound: null };
+	| { VersionMismatch: null }
+	| { RateLimited: RateLimitError }
+	| { UserNotFound: null }
+	| {
+			/**
+			 * The change would take the user's agreement history past
+			 * `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
+			 */
+			TooManyHistoryEntries: null;
+	  };
 export interface UpdateExperimentalFeaturesSettingsRequest {
 	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
 	current_user_version: [] | [bigint];
@@ -3619,8 +3628,9 @@ export interface _SERVICE {
 	 * set to the same value.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
-	 * the caller made too many calls in the last minute.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	 * the caller made too many calls in the last minute, or the change would take the agreement
+	 * history past `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 	 */
 	update_provider_agreements: ActorMethod<
 		[UpdateProviderAgreementsRequest],
@@ -3638,8 +3648,9 @@ export interface _SERVICE {
 	 * same value.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
-	 * the caller made too many calls in the last minute.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	 * the caller made too many calls in the last minute, or the change would take the agreement
+	 * history past `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 	 */
 	update_user_agreements: ActorMethod<[UpdateUserAgreementsRequest], UpdateUserAgreementsResult>;
 	/**
