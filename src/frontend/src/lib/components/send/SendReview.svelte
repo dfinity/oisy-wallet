@@ -38,6 +38,7 @@
 		selectedContact?: ContactUi;
 		nft?: Nft;
 		network?: Snippet;
+		memo?: Snippet;
 		fee?: Snippet;
 		info?: Snippet;
 		topBanner?: Snippet;
@@ -61,6 +62,7 @@
 		selectedContact,
 		nft,
 		network,
+		memo,
 		fee,
 		info,
 		topBanner,
@@ -133,6 +135,8 @@
 	</div>
 
 	{@render network?.()}
+
+	{@render memo?.()}
 
 	{@render fee?.()}
 

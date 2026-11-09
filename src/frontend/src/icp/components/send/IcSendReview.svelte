@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import CyclesSentToCanisterWarning from '$icp/components/cycles-top-up/CyclesSentToCanisterWarning.svelte';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
@@ -8,6 +8,7 @@
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft } from '$lib/types/nft';
@@ -25,7 +26,7 @@
 
 	let { destination = '', amount, selectedContact, nft, onBack, onSend }: Props = $props();
 
-	const { sendTokenStandard, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenStandard, sendToken, sendMemo } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = $derived(
@@ -44,13 +45,22 @@
 		<CyclesSentToCanisterWarning {destination} styleClass="mb-6" token={$sendToken} />
 	{/snippet}
 
+	{#snippet network()}
+		<IcReviewNetwork />
+	{/snippet}
+
+	{#snippet memo()}
+		{#if notEmptyString($sendMemo.trim())}
+			<div class="mb-4">
+				<p class="text-sm text-tertiary">{$i18n.send.text.memo}</p>
+				<p>{$sendMemo.trim()}</p>
+			</div>
+		{/if}
+	{/snippet}
+
 	{#snippet fee()}
 		{#if !$isIcMintingAccount}
 			<IcTokenFee />
 		{/if}
-	{/snippet}
-
-	{#snippet network()}
-		<IcReviewNetwork />
 	{/snippet}
 </SendReview>
