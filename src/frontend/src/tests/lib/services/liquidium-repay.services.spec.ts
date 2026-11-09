@@ -673,17 +673,19 @@ describe('liquidium-repay.services', () => {
 				);
 			});
 
-			it('broadcasts nothing and deletes the row when the txid cannot be written', async () => {
-				updateActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
+			// The write may have committed with only its answer lost, leaving the txid on the row,
+			// where the poller's cleanup of rows without one could not remove it.
+			it('broadcasts nothing and deletes the row, with retries, when the txid write fails', async () => {
+				updateActiveUserTransaction.mockRejectedValueOnce(new Error('agent timeout'));
 				broadcastThroughBackend();
 
-				await expect(run()).rejects.toThrow('backend unavailable');
+				await expect(run()).rejects.toThrow('agent timeout');
 
 				expect(sent).not.toHaveBeenCalled();
-				expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
-					identity: mockIdentity,
-					id: rowId()
-				});
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity, id: rowId() });
+				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
 			});
 
 			// The row carries the txid by now, so the poller's cleanup of rows without one cannot

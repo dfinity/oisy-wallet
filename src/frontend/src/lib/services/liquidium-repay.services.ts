@@ -388,8 +388,13 @@ export const executeLiquidiumRepay = async ({
 	// calls: the row then carries the txid, so the poller keeps it, and from there the transfer
 	// can go out.
 	let txidRecorded = false;
+	// Set before the write: one that committed but whose answer was lost leaves the txid on the row
+	// all the same.
+	let txidWriteAttempted = false;
 
 	const recordTxid = async ({ txid: signedTxid }: { txid: string }) => {
+		txidWriteAttempted = true;
+
 		await updateActiveUserTransaction({
 			identity,
 			id,
@@ -418,12 +423,14 @@ export const executeLiquidiumRepay = async ({
 		// sent, as the wizard reports it. Once the broadcast began, only a refusal outright proves
 		// nothing went out: otherwise the row stays, and the repay keeps counting against the max
 		// until it settles, so a second full repay cannot follow it.
-		if (!txidRecorded) {
-			await deleteRow();
-		} else if (isDefinitiveBtcBroadcastRefusal(err)) {
-			// The row carries the txid by now, so the poller's cleanup of rows without one cannot
-			// remove it, and the delete is retried.
+		const sentNothing = !txidRecorded || isDefinitiveBtcBroadcastRefusal(err);
+
+		if (sentNothing && txidWriteAttempted) {
+			// The row may carry the txid, written or committed with its answer lost, and the poller's
+			// cleanup of rows without one could not remove it, so the delete is retried.
 			await deleteUnbroadcastActiveUserTransaction({ identity, id });
+		} else if (sentNothing) {
+			await deleteRow();
 		}
 
 		throw err;

@@ -895,8 +895,10 @@ Decided in PR 8c:
   it. A failure then deletes the row only if the txid was never recorded, that is before the
   broadcast or on the CFS path, or if the broadcast was refused outright. Otherwise the row stays
   and keeps counting against the repay max until it settles.
-  - After a refusal the row carries the txid, which the poller's cleanup of rows without one cannot
-    remove, so the delete retries (`deleteUnbroadcastActiveUserTransaction`) (Copilot).
+  - Once a txid write has been attempted, the delete retries (`deleteUnbroadcastActiveUserTransaction`):
+    the row may carry the txid, written or committed with its answer lost, and the poller's cleanup
+    of rows without one cannot remove it. This covers a refusal outright and a failed txid write
+    (Copilot).
   - The txid is written again after the broadcast. A poller in another tab can read the row
     without it and delete it just after the first write, since `delete_active_user_transaction`
     takes no condition, and the second write then answers `NotFound` and recreates the row
