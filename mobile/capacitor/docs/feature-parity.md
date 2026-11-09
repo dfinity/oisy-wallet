@@ -47,7 +47,16 @@ details and a safe-area jump on closing. The follow-up hides the pending backdro
 clears web sheet layout before release, and holds the page image until WebKit has
 painted the restored viewport and scroll position. The simulator checks the real
 shared transaction dialog, unchanged document/session, native scroll restoration
-and the existing primary flows. Physical smoothness acceptance for this follow-up
+and the existing primary flows. All 89 focused frontend tests and 10 simulator
+checks passed, with zero Svelte/type warnings. The release-order regression fails
+against the previous implementation. Recorded simulator frames show the corrected
+transition.
+
+The fix at `380cb0dda1` was deployed to audit in
+[run 42648864851](https://github.com/dfinity/oisy-wallet/actions/runs/42648864851),
+and the signed update was installed and launched on the iPhone on 2026-11-09.
+Public CSS contains the pending-backdrop fix; test fixtures are absent and auth
+association files are unchanged. Physical smoothness acceptance for this follow-up
 is pending.
 
 ## Reading the inventory
