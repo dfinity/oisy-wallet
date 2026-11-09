@@ -1308,6 +1308,22 @@ describe('backend.canister', () => {
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
+
+		it.each([
+			{
+				name: 'RateLimited',
+				err: { RateLimited: { max_calls: 10, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			},
+			{ name: 'VersionMismatch', err: { VersionMismatch: null } }
+		])('should throw the error if update_user_agreements returns $name', async ({ err }) => {
+			service.update_user_agreements.mockResolvedValue({ Err: err });
+
+			const { updateUserAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(updateUserAgreements({ agreements: mockUserAgreements })).rejects.toEqual(err);
+		});
 	});
 
 	describe('updateProviderAgreements', () => {
@@ -1367,6 +1383,24 @@ describe('backend.canister', () => {
 			});
 
 			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it.each([
+			{
+				name: 'RateLimited',
+				err: { RateLimited: { max_calls: 10, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			},
+			{ name: 'VersionMismatch', err: { VersionMismatch: null } }
+		])('should throw the error if update_provider_agreements returns $name', async ({ err }) => {
+			service.update_provider_agreements.mockResolvedValue({ Err: err });
+
+			const { updateProviderAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(
+				updateProviderAgreements({ providerAgreements: mockUserProviderAgreements })
+			).rejects.toEqual(err);
 		});
 	});
 

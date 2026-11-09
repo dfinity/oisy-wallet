@@ -3065,6 +3065,7 @@
 			"send_token_on_network_message": "Tôi muốn gửi token $token trên mạng $network.",
 			"send_token_message": "Tôi muốn gửi token $token.",
 			"send_on_network_message": "Tôi muốn gửi một token trên mạng $network.",
+			"type_send_address_message": "Nhập địa chỉ bạn muốn gửi đến hoặc chọn một trong các liên hệ của bạn.",
 			"send_token_succeeded": "Giao dịch đã hoàn tất!",
 			"show_total_balance_tool_card_title": "Tổng số dư",
 			"no_contacts_found_message": "Rất tiếc, tôi không thể tìm thấy bất kỳ liên hệ phù hợp nào trong sổ địa chỉ của bạn.",

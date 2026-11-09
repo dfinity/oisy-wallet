@@ -3065,6 +3065,7 @@
 			"send_token_on_network_message": "Quiero enviar el token $token en la red $network.",
 			"send_token_message": "Quiero enviar el token $token.",
 			"send_on_network_message": "Quiero enviar un token en la red $network.",
+			"type_send_address_message": "Escribe la dirección a la que quieres enviar o elige uno de tus contactos.",
 			"send_token_succeeded": "¡Transacción completada!",
 			"show_total_balance_tool_card_title": "Saldo total",
 			"no_contacts_found_message": "Lo siento, no encontré ningún contacto adecuado en tu libreta de direcciones.",

@@ -3065,6 +3065,7 @@
 			"send_token_on_network_message": "Отправить токен в сети",
 			"send_token_message": "Отправить токен",
 			"send_on_network_message": "Отправить в сети",
+			"type_send_address_message": "Введите адрес, на который хотите отправить, или выберите один из своих контактов.",
 			"send_token_succeeded": "Транзакция завершена!",
 			"show_total_balance_tool_card_title": "Показать общий баланс",
 			"no_contacts_found_message": "Извините, я не нашел подходящих контактов в вашей адресной книге.",
