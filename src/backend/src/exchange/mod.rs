@@ -29,6 +29,7 @@ use crate::{
     },
     read_state,
     state::{mutate_state, with_api_keys},
+    token::MAX_TOKEN_ACTIVITY_ENTRIES,
     types::{
         storable::{Candid, StoredTokenId},
         StoredPrincipal,
@@ -222,6 +223,9 @@ fn staleness_floor_ns(now: u64) -> u64 {
     now.saturating_sub(PRICE_STALENESS_THRESHOLD_SEC * NANOS_PER_SEC)
 }
 
+/// Returns the custom tokens active within [`PRICE_ACTIVITY_THRESHOLD_SEC`], at most
+/// [`MAX_TOKEN_ACTIVITY_ENTRIES`] of them, so that a refresh stays within that bound even while a
+/// map written before the cap existed still holds more.
 fn active_custom_tokens_for_refresh(
     activity: impl IntoIterator<Item = (StoredTokenId, u64)>,
     now: u64,
@@ -232,6 +236,7 @@ fn active_custom_tokens_for_refresh(
         .into_iter()
         .filter(|(_, last_active_ns)| *last_active_ns > threshold)
         .map(|(token_id, _)| token_id)
+        .take(usize::try_from(MAX_TOKEN_ACTIVITY_ENTRIES).unwrap_or(usize::MAX))
         .collect()
 }
 
@@ -970,6 +975,21 @@ mod tests {
         );
 
         assert_eq!(tokens, vec![active]);
+    }
+
+    #[test]
+    fn active_custom_tokens_for_refresh_takes_at_most_the_cap() {
+        let now = 1_000 * NANOS_PER_SEC;
+        let activity = (0..MAX_TOKEN_ACTIVITY_ENTRIES + 10).map(|n| {
+            (
+                StoredTokenId(TokenId::Icrc(Principal::from_slice(&n.to_be_bytes()))),
+                now,
+            )
+        });
+
+        let tokens = active_custom_tokens_for_refresh(activity, now);
+
+        assert_eq!(tokens.len() as u64, MAX_TOKEN_ACTIVITY_ENTRIES);
     }
 
     #[test]

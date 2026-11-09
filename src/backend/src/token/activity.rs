@@ -19,8 +19,9 @@ pub(crate) const TOKEN_ACTIVITY_RETENTION_SEC: u64 = 30 * 60;
 
 /// Most tokens `token_activity` holds at once.
 ///
-/// Every refresh prices each token held here, 50 to a `CoinGecko` lookup, so this keeps a refresh
-/// within 40 lookups besides the native tokens, and keeps eviction within as many entries.
+/// Every refresh prices each token held here, 50 to a `CoinGecko` lookup on each platform, so this
+/// keeps a refresh within about 40 lookups besides the native tokens, and keeps eviction within
+/// as many entries.
 pub(crate) const MAX_TOKEN_ACTIVITY_ENTRIES: u64 = 2_000;
 
 fn add_to_token_activity(
@@ -28,15 +29,22 @@ fn add_to_token_activity(
     token_activity: &mut StableBTreeMap<StoredTokenId, Timestamp, VMem>,
     timestamp: Timestamp,
 ) {
-    if token_activity.len() < MAX_TOKEN_ACTIVITY_ENTRIES || token_activity.contains_key(&token_id) {
+    let held = token_activity.len();
+
+    // A map written before the cap existed can hold more. Writing nothing then lets every entry
+    // age out through eviction, which brings the map back within the cap.
+    if held < MAX_TOKEN_ACTIVITY_ENTRIES
+        || (held == MAX_TOKEN_ACTIVITY_ENTRIES && token_activity.contains_key(&token_id))
+    {
         token_activity.insert(token_id, timestamp);
     }
 }
 
 /// Records `token_ids` as active at `now_ns`.
 ///
-/// A token held already is always updated. One not held yet is recorded only while fewer than
-/// [`MAX_TOKEN_ACTIVITY_ENTRIES`] are held; otherwise it waits until eviction makes room.
+/// While fewer than [`MAX_TOKEN_ACTIVITY_ENTRIES`] are held, every token is recorded. At the cap,
+/// a token held already is updated and a new one waits until eviction makes room. Above it,
+/// nothing is recorded until eviction brings the map back within the cap.
 ///
 /// Endpoints go through `exchange::record_token_activity`, which decides which tokens the price
 /// refresh needs.
@@ -126,6 +134,31 @@ mod tests {
         mark_tokens_active(&[first.clone(), over_the_cap.clone()], 2);
         assert_eq!(last_active(first), Some(2));
         assert_eq!(last_active(over_the_cap), None);
+    }
+
+    #[test]
+    fn a_map_above_the_cap_records_nothing_and_empties_through_eviction() {
+        const OVER: u64 = MAX_TOKEN_ACTIVITY_ENTRIES + 10;
+        // Written directly, as a map from before the cap existed would be.
+        mutate_state(|s| {
+            for n in 0..OVER {
+                s.token_activity.insert(StoredTokenId(icrc(n)), 1);
+            }
+        });
+        let held_token = icrc(0);
+        let new_token = icrc(OVER);
+
+        mark_tokens_active(&[held_token.clone(), new_token.clone()], 2);
+        assert_eq!(
+            last_active(&held_token),
+            Some(1),
+            "a held token is not updated"
+        );
+        assert_eq!(last_active(&new_token), None);
+        assert_eq!(read_state(|s| s.token_activity.len()), OVER);
+
+        assert_eq!(evict(None, 2 + RETENTION_NS, || true), (None, OVER));
+        assert_eq!(held(), Vec::<TokenId>::new());
     }
 
     const RETENTION_NS: u64 = TOKEN_ACTIVITY_RETENTION_SEC * 1_000_000_000;
