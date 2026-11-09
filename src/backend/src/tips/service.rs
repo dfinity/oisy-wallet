@@ -43,12 +43,14 @@ use crate::{
 /// One `u64` answers both questions, which is what keeps the cap check a single
 /// range scan.
 ///
-/// This used to store `0` for a terminal tip. That freed the slot correctly and
-/// silently broke retention: the test is `now - value > retention`, and with
-/// `value = 0` that reads `now > 30 days`, which is true by a factor of ~700
-/// for every nanosecond timestamp there will ever be. Every claimed and
-/// cancelled tip was therefore collectable the moment it became terminal, and
-/// vanished from History on the next create or the next hourly sweep.
+/// A version of this function that never reached `main` stored `0` for a
+/// terminal tip, so no stored index entry holds `0`. That freed the slot
+/// correctly and silently broke retention: the test is
+/// `now - value > retention`, and with `value = 0` that reads `now > 30 days`,
+/// which is true by a factor of ~700 for every nanosecond timestamp there will
+/// ever be. Every claimed and cancelled tip would have been collectable the
+/// moment it became terminal, and would have vanished from History on the next
+/// create or the next hourly sweep.
 fn active_until(record: &TipRecord) -> u64 {
     match record.state {
         TipState::Reserved | TipState::Claiming { .. } => record.expires_at_ns,
