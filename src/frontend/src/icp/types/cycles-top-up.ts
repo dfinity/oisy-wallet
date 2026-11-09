@@ -35,3 +35,24 @@ export interface CyclesTopUpRequest {
  * Whether a canister exists. `unknown` means the check could not be made.
  */
 export type CanisterExistence = 'exists' | 'not_found' | 'unknown';
+
+/**
+ * A top-up paid with ICP that ended before its ICP reached the CMC, or whose transfer went
+ * unanswered, with a mint's kinds (`CyclesMintError`).
+ *
+ * - `not_trackable`: the top-up could not be recorded as an active transaction, so it did
+ *   not start.
+ * - `timed_out`: too long passed between recording the top-up and sending the ICP (a
+ *   suspended tab), so it was abandoned before sending.
+ * - `transfer_failed`: the ICP ledger refused the transfer.
+ * - `unconfirmed`: the transfer got no answer, so it may have landed; the top-up's row is kept
+ *   and the background finishes it or finds that nothing moved.
+ *
+ * Nothing left the wallet in the first three.
+ */
+export class CyclesTopUpIcpError extends Error {
+	constructor(readonly kind: 'not_trackable' | 'timed_out' | 'transfer_failed' | 'unconfirmed') {
+		super(`Cycles top-up error: ${kind}`);
+		this.name = 'CyclesTopUpIcpError';
+	}
+}
