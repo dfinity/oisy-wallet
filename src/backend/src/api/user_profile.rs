@@ -261,10 +261,12 @@ pub fn get_user_agreement_history() -> GetAgreementHistoryResult {
         if !s.user_profile_updated.contains_key(&stored_principal) {
             return Err(GetAgreementHistoryError::UserNotFound);
         }
-        Ok(s.agreement_history
-            .get(&stored_principal)
-            .unwrap_or_default()
-            .0)
+        Ok(service::newest_history_entries(
+            s.agreement_history
+                .get(&stored_principal)
+                .unwrap_or_default()
+                .0,
+        ))
     })
     .into()
 }
