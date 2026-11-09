@@ -2021,6 +2021,7 @@
 			"request_rejected": "WalletConnect-Anfrage abgelehnt.",
 			"unknown_parameter": "Unbekannter Parameter.",
 			"wallet_not_initialized": "Unerwarteter Fehler. Deine Wallet-Adresse ist nicht initialisiert.",
+			"btc_address_not_signer": "",
 			"btc_broadcast_not_supported": "Das Übertragen der signierten Transaktion wird noch nicht unterstützt. Fordern Sie die Transaktion mit \"broadcast: false\" an, um das signierte PSBT zu erhalten und es selbst zu übertragen.",
 			"btc_non_mainnet_sign_not_supported": "Das Signieren von Bitcoin-Transaktionen wird nur im Mainnet unterstützt. Aus Sicherheitsgründen wurde diese Anfrage nicht signiert.",
 			"btc_psbt_decode": "Diese Transaktion konnte zur Überprüfung nicht entschlüsselt werden. Aus Sicherheitsgründen wurde sie nicht signiert.",

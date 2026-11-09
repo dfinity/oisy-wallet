@@ -2021,6 +2021,7 @@
 			"request_rejected": "Demande WalletConnect rejetée",
 			"unknown_parameter": "Paramètre inconnu.",
 			"wallet_not_initialized": "Erreur inattendue. Votre adresse de portefeuille n'est pas initialisée.",
+			"btc_address_not_signer": "",
 			"btc_broadcast_not_supported": "La diffusion de la transaction signée n'est pas encore prise en charge. Demandez la transaction avec \"broadcast: false\" pour recevoir le PSBT signé et le diffuser vous-même.",
 			"btc_non_mainnet_sign_not_supported": "La signature des transactions Bitcoin n'est prise en charge que sur le mainnet. Pour votre sécurité, cette demande n'a pas été signée.",
 			"btc_psbt_decode": "Cette transaction n'a pas pu être décodée pour vérification. Pour votre sécurité, elle n'a pas été signée.",

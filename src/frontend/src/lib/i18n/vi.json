@@ -2021,6 +2021,7 @@
 			"request_rejected": "Yêu cầu WalletConnect bị từ chối",
 			"unknown_parameter": "Tham số không xác định.",
 			"wallet_not_initialized": "Lỗi không mong muốn. Địa chỉ ví của bạn chưa được khởi tạo.",
+			"btc_address_not_signer": "",
 			"btc_broadcast_not_supported": "Việc phát sóng giao dịch đã ký chưa được hỗ trợ. Hãy yêu cầu giao dịch với \"broadcast: false\" để nhận PSBT đã ký và tự phát sóng nó.",
 			"btc_non_mainnet_sign_not_supported": "Việc ký giao dịch Bitcoin chỉ được hỗ trợ trên mainnet. Vì lý do bảo mật, yêu cầu này chưa được ký.",
 			"btc_psbt_decode": "Không thể giải mã giao dịch này để xem xét. Vì lý do bảo mật, giao dịch chưa được ký.",

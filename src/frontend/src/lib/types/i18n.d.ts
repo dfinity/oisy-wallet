@@ -1695,6 +1695,7 @@ interface I18nWallet_connect {
 		request_rejected: string;
 		unknown_parameter: string;
 		wallet_not_initialized: string;
+		btc_address_not_signer: string;
 		btc_broadcast_not_supported: string;
 		btc_non_mainnet_sign_not_supported: string;
 		btc_psbt_decode: string;

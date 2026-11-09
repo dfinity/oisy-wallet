@@ -2021,6 +2021,7 @@
 			"request_rejected": "Požadavek WalletConnect byl zamítnut",
 			"unknown_parameter": "Neznámý parametr.",
 			"wallet_not_initialized": "Neočekávaná chyba. Vaše adresa peněženky není inicializována.",
+			"btc_address_not_signer": "",
 			"btc_broadcast_not_supported": "Odeslání podepsané transakce do sítě zatím není podporováno. Vyžádejte transakci s parametrem \"broadcast: false\", abyste obdrželi podepsaný PSBT a odeslali jej do sítě sami.",
 			"btc_non_mainnet_sign_not_supported": "Podepisování bitcoinových transakcí je podporováno pouze na mainnetu. Z bezpečnostních důvodů nebyl tento požadavek podepsán.",
 			"btc_psbt_decode": "Tuto transakci se nepodařilo dekódovat ke kontrole. Z bezpečnostních důvodů nebyla podepsána.",

@@ -2021,6 +2021,7 @@
 			"request_rejected": "Żądanie WalletConnect odrzucone",
 			"unknown_parameter": "Nieznany parametr.",
 			"wallet_not_initialized": "Nieoczekiwany błąd. Twój adres portfela nie jest zainicjowany.",
+			"btc_address_not_signer": "",
 			"btc_broadcast_not_supported": "Rozgłaszanie podpisanej transakcji nie jest jeszcze obsługiwane. Zażądaj transakcji z \"broadcast: false\", aby otrzymać podpisany PSBT i rozgłosić go samodzielnie.",
 			"btc_non_mainnet_sign_not_supported": "Podpisywanie transakcji Bitcoin jest obsługiwane tylko w sieci mainnet. Ze względów bezpieczeństwa to żądanie nie zostało podpisane.",
 			"btc_psbt_decode": "Nie udało się zdekodować tej transakcji do przeglądu. Ze względów bezpieczeństwa nie została podpisana.",
