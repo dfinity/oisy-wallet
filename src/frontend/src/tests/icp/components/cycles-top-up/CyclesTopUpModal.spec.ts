@@ -3,6 +3,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as canisterStateApi from '$icp/api/canister-state.api';
 import * as cmcApi from '$icp/api/cmc.api';
 import CyclesTopUpModal from '$icp/components/cycles-top-up/CyclesTopUpModal.svelte';
+import * as icrcDerived from '$icp/derived/icrc.derived';
 import * as cyclesTopUpServices from '$icp/services/cycles-top-up.services';
 import { lastCyclesTopUps } from '$icp/stores/cycles-top-up.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
@@ -13,6 +14,7 @@ import {
 	type CyclesTopUpResult
 } from '$icp/types/cycles-top-up';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import {
 	CYCLES_TOP_UP_AMOUNT,
 	CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON,
@@ -24,6 +26,7 @@ import {
 	CYCLES_TOP_UP_REVIEW,
 	CYCLES_TOP_UP_REVIEW_BACK_BUTTON,
 	CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON,
+	CYCLES_TOP_UP_TOKEN_ENABLE_BUTTON,
 	CYCLES_TOP_UP_TOKEN_OPTION,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
@@ -31,6 +34,7 @@ import * as authDerived from '$lib/derived/auth.derived';
 import * as tokensDerived from '$lib/derived/tokens.derived';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import * as cyclesTopUpAnalytics from '$lib/services/cycles-top-up-analytics.services';
+import * as tokenServices from '$lib/services/token.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { contactsStore } from '$lib/stores/contacts.store';
 import { modalStore } from '$lib/stores/modal.store';
@@ -41,6 +45,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as walletUtils from '$lib/utils/wallet.utils';
 import { mockTcyclesToken, mockXdrPermyriadPerIcp } from '$tests/mocks/cycles-mint.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity, mockPrincipal2, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -174,14 +179,23 @@ describe('CyclesTopUpModal', () => {
 		vi.useRealTimers();
 	});
 
-	it('opens on the canister step and reports the open', () => {
+	it('opens on the canister step, titled Canister top-up, and reports the open', () => {
 		const { container } = renderModal();
 
-		expect(container).toHaveTextContent(en.cycles_top_up.text.title);
+		expect(container).toHaveTextContent(en.cycles_top_up.text.canister_top_up);
 		expect(trackSpy).toHaveBeenCalledExactlyOnceWith({
 			step: 'open',
 			sourceLocation: 'token_details'
 		});
+	});
+
+	it('keeps its earlier title while the Canister top-up flag is off', () => {
+		vi.spyOn(canisterTopUpEnv, 'CANISTER_TOP_UP_ENABLED', 'get').mockReturnValue(false);
+
+		const { container } = renderModal();
+
+		expect(container).toHaveTextContent(en.cycles_top_up.text.title);
+		expect(container).not.toHaveTextContent(en.cycles_top_up.text.canister_top_up);
 	});
 
 	describe('canister step', () => {
@@ -1274,11 +1288,14 @@ describe('CyclesTopUpModal', () => {
 		});
 	});
 
-	describe('from the navigation', () => {
+	describe('from Tools', () => {
 		let rateSpy: MockInstance;
 		let topUpWithIcpSpy: MockInstance;
 
-		const renderFromNavigation = () => render(CyclesTopUpModal, { props: {} });
+		const renderFromTools = () => render(CyclesTopUpModal, { props: {} });
+
+		// TCYCLES as the picker finds it among all ICRC tokens, enabled or not.
+		const listedToken: IcrcCustomToken = { ...mockIcrcCustomToken, ...token, enabled: true };
 
 		// ICP first, as the picker lists them.
 		const pickToken = async ({
@@ -1342,7 +1359,7 @@ describe('CyclesTopUpModal', () => {
 		};
 
 		const toIcpReview = async () => {
-			const result = renderFromNavigation();
+			const result = renderFromTools();
 
 			await pickToken({ result, index: 0 });
 
@@ -1361,6 +1378,7 @@ describe('CyclesTopUpModal', () => {
 		beforeEach(() => {
 			vi.spyOn(canisterTopUpEnv, 'CANISTER_TOP_UP_ENABLED', 'get').mockReturnValue(true);
 			vi.spyOn(tokensDerived, 'enabledIcTokens', 'get').mockReturnValue(readable([token]));
+			vi.spyOn(icrcDerived, 'icrcTokens', 'get').mockReturnValue(readable([listedToken]));
 
 			rateSpy = vi
 				.spyOn(cmcApi, 'getIcpXdrConversionRate')
@@ -1373,39 +1391,55 @@ describe('CyclesTopUpModal', () => {
 		});
 
 		it('opens on the token picker when ICP and TCYCLES can both pay, and reports the open from there', () => {
-			const { container, getAllByTestId } = renderFromNavigation();
+			const { container, getAllByTestId } = renderFromTools();
 
 			expect(container).toHaveTextContent(en.cycles_top_up.text.canister_top_up);
 			expect(getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION)).toHaveLength(2);
 			expect(trackSpy).toHaveBeenCalledExactlyOnceWith({
 				step: 'open',
-				sourceLocation: 'navigation'
+				sourceLocation: 'tools_page'
 			});
 		});
 
-		it('starts on the canister step with ICP when only ICP can pay, with Cancel', async () => {
+		it('shows TCYCLES but does not pick it when only ICP can pay, and says why', async () => {
 			// Twice the TCYCLES fee: no amount above the fee is left to pay with.
 			balancesStore.set({
 				id: mockTcyclesToken.id,
 				data: { data: 200_000_000n, certified: true }
 			});
 
-			const result = renderFromNavigation();
+			const result = renderFromTools();
+
+			const options = result.getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION);
+
+			expect(options).toHaveLength(2);
+			expect(options[0]).not.toHaveTextContent(en.cycles_top_up.text.not_enough_to_pay);
+			expect(options[1]).toHaveTextContent(en.cycles_top_up.text.not_enough_to_pay);
+			expect(options[1].querySelector('button')).toBeNull();
+
+			await pickToken({ result, index: 0 });
 
 			await onCanisterStep(result);
 
 			expect(result.container).toHaveTextContent(
 				replacePlaceholders(en.cycles_top_up.text.description_icp, { $token: 'ICP' })
 			);
-			expect(result.queryByTestId(CYCLES_TOP_UP_TOKEN_OPTION)).toBeNull();
-			expect(result.getByText(en.core.text.cancel)).toBeInTheDocument();
+			// Back, not Cancel: the picker came first.
+			expect(result.getByText(en.core.text.back)).toBeInTheDocument();
 		});
 
-		it('starts on the canister step with TCYCLES when only TCYCLES can pay', async () => {
+		it('shows ICP but does not pick it when only TCYCLES can pay, and says why', async () => {
 			// The 0.0003 ICP a refund keeps and the fee: no amount above them is left.
 			balancesStore.set({ id: ICP_TOKEN.id, data: { data: 40_000n, certified: true } });
 
-			const result = renderFromNavigation();
+			const result = renderFromTools();
+
+			const [icp] = result.getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION);
+
+			expect(icp).toHaveTextContent(en.cycles_top_up.text.not_enough_to_pay);
+			expect(icp.querySelector('button')).toBeNull();
+
+			await pickToken({ result, index: 1 });
 
 			await onCanisterStep(result);
 
@@ -1414,43 +1448,73 @@ describe('CyclesTopUpModal', () => {
 			);
 		});
 
-		it('counts a balance that has not loaded as zero', async () => {
+		it('shows a token whose balance has not loaded, without picking it or saying why', () => {
 			balancesStore.reset(ICP_TOKEN.id);
 
-			const result = renderFromNavigation();
+			const result = renderFromTools();
 
-			await onCanisterStep(result);
+			const options = result.getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION);
 
-			expect(result.container).toHaveTextContent(
-				replacePlaceholders(en.cycles_top_up.text.description, { $token: 'TCYCLES' })
-			);
+			expect(options).toHaveLength(2);
+			expect(options[0]).not.toHaveTextContent(en.cycles_top_up.text.not_enough_to_pay);
+			expect(options[0].querySelector('button')).toBeNull();
 		});
 
-		it('counts TCYCLES out while it is not enabled', async () => {
+		it('offers to enable TCYCLES while it is not enabled, without picking it', async () => {
+			const disabled: IcrcCustomToken = { ...listedToken, enabled: false };
+
+			vi.spyOn(icrcDerived, 'icrcTokens', 'get').mockReturnValue(readable([disabled]));
 			vi.spyOn(tokensDerived, 'enabledIcTokens', 'get').mockReturnValue(readable([]));
 
-			const result = renderFromNavigation();
+			const enableSpy = vi
+				.spyOn(tokenServices, 'autoLoadSingleToken')
+				.mockResolvedValue({ result: 'loaded' });
 
-			await onCanisterStep(result);
+			const result = renderFromTools();
 
-			expect(result.container).toHaveTextContent(
-				replacePlaceholders(en.cycles_top_up.text.description_icp, { $token: 'ICP' })
+			const options = result.getAllByTestId(CYCLES_TOP_UP_TOKEN_OPTION);
+
+			expect(options).toHaveLength(2);
+
+			const enable = result.getByTestId(CYCLES_TOP_UP_TOKEN_ENABLE_BUTTON);
+
+			expect([...options[1].querySelectorAll('button')]).toEqual([enable]);
+
+			await fireEvent.click(enable);
+
+			expect(enableSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ token: disabled, identity: mockIdentity })
 			);
 		});
 
 		it('explains what a top-up is and goes no further when no token can pay', () => {
-			balancesStore.reset(ICP_TOKEN.id);
-			balancesStore.reset(mockTcyclesToken.id);
+			balancesStore.set({ id: ICP_TOKEN.id, data: { data: 40_000n, certified: true } });
+			balancesStore.set({
+				id: mockTcyclesToken.id,
+				data: { data: 200_000_000n, certified: true }
+			});
 
-			const { container, queryByTestId } = renderFromNavigation();
+			const { container, queryByTestId } = renderFromTools();
 
 			expect(container).toHaveTextContent(en.cycles_top_up.text.no_token_title);
 			expect(queryByTestId(CYCLES_TOP_UP_TOKEN_OPTION)).toBeNull();
 			expect(queryByTestId(CYCLES_TOP_UP_CANISTER_INPUT)).toBeNull();
 		});
 
+		it('explains it the same way while TCYCLES is not enabled and ICP cannot pay', () => {
+			vi.spyOn(icrcDerived, 'icrcTokens', 'get').mockReturnValue(
+				readable([{ ...listedToken, enabled: false }])
+			);
+			balancesStore.set({ id: ICP_TOKEN.id, data: { data: 40_000n, certified: true } });
+
+			const { container, queryByTestId } = renderFromTools();
+
+			expect(container).toHaveTextContent(en.cycles_top_up.text.no_token_title);
+			expect(queryByTestId(CYCLES_TOP_UP_TOKEN_ENABLE_BUTTON)).toBeNull();
+		});
+
 		it('returns from the canister step to the picker', async () => {
-			const result = renderFromNavigation();
+			const result = renderFromTools();
 
 			await pickToken({ result, index: 0 });
 
@@ -1471,7 +1535,7 @@ describe('CyclesTopUpModal', () => {
 				}
 			});
 
-			const result = renderFromNavigation();
+			const result = renderFromTools();
 
 			await backOnReview(result);
 
@@ -1488,8 +1552,8 @@ describe('CyclesTopUpModal', () => {
 			});
 		});
 
-		it('tops up with TCYCLES, reported from the navigation, without loading the ICP rate', async () => {
-			const result = renderFromNavigation();
+		it('tops up with TCYCLES, reported from Tools, without loading the ICP rate', async () => {
+			const result = renderFromTools();
 
 			await pickToken({ result, index: 1 });
 
@@ -1503,7 +1567,7 @@ describe('CyclesTopUpModal', () => {
 				expect(trackSpy).toHaveBeenNthCalledWith(3, {
 					step: 'top_up',
 					tokenSymbol: 'TCYCLES',
-					sourceLocation: 'navigation',
+					sourceLocation: 'tools_page',
 					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 				});
 			});
@@ -1547,7 +1611,7 @@ describe('CyclesTopUpModal', () => {
 				// The top-up's row reports how it ended.
 				expect(trackSpy).toHaveBeenCalledExactlyOnceWith({
 					step: 'open',
-					sourceLocation: 'navigation'
+					sourceLocation: 'tools_page'
 				});
 			});
 

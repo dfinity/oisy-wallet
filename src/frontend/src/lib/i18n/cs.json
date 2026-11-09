@@ -133,7 +133,7 @@
 			"section_finance": "Finance",
 			"section_more": "Více",
 			"airdrops": "Odměny",
-			"canister_top_up": "Dobití kanistru",
+			"tools": "Nástroje",
 			"earning": "Vydělávat",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "Otevřít zobrazení půjček",
 			"earning": "Otevřít zobrazení vydělávání",
 			"airdrops": "Otevřít zobrazení odměn",
-			"canister_top_up": "Dobít kanistr pomocí ICP nebo TCYCLES",
+			"tools": "Otevřít nástroje",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "Vaše adresa peněženky, nastavení, odhlášení a externí odkazy",
@@ -807,8 +807,8 @@
 			"support_title": "Podpora",
 			"support_description": "Odpovědi a další informace najdete na stránce podpory v dokumentaci $oisy_name. Pokud si nebudete vědět rady, obraťte se na tým.",
 			"support_link": "Přejít na naši stránku podpory",
-			"network_explorers_title": "Průzkumníky bloků",
-			"network_explorers_description": "$oisy_name sestavuje vaši historii z indexerů třetích stran, které se mohou za blockchainem opožďovat. Průzkumník bloků ukazuje, co pro vaši adresu zaznamenává samotná síť.",
+			"network_explorers_title": "Průzkumníky blockchainu",
+			"network_explorers_description": "Otevřete tyto odkazy, abyste viděli své adresy v průzkumnících blockchainu a mohli sledovat své zůstatky v reálném čase a úplnou historii transakcí. Blockchainy jsou veřejné účetní knihy, takže můžete nezávisle ověřit a prozkoumat veškerou on-chain aktivitu své peněženky $oisy_name.",
 			"explorers_title": "Stav transakcí u poskytovatele",
 			"explorers_description": "$oisy_name provádí swapy a převody přes most prostřednictvím poskytovatelů třetích stran. Pokud některý trvá déle, než se čekalo, otevřete průzkumník daného poskytovatele: ukáže, v jakém stavu je váš převod, už vyfiltrovaný na vaši peněženku.",
 			"explorers_velora_description": "Swapy na Ethereu a dalších sítích EVM.",
@@ -838,7 +838,7 @@
 			"withdraw": "Vybrat"
 		},
 		"alt": {
-			"network_explorer_link": "Otevřít průzkumník bloků sítě $network pro vaši adresu",
+			"network_explorer_link": "Otevřít průzkumník blockchainu sítě $network pro vaši adresu",
 			"explorer_link": "Otevřít průzkumník $provider pro vaši adresu ($chain)",
 			"select_token_first": "Vyberte první token poolu",
 			"select_token_second": "Vyberte druhý token poolu",
@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "Zakázat skrývání transakcí s velmi malými hodnotami",
 			"save_spam_filter_success": "Nastavení filtru spamu bylo aktualizováno.",
 			"export_data": "Exportovat data",
+			"export_data_moved": "Export se přesunul do Nástrojů.",
+			"open_tools": "Otevřít Nástroje",
 			"export_data_description": "Stáhněte si své tokeny a transakce jako CSV — Basic pro to nejdůležitější, Extended pro další atributy.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -909,6 +911,12 @@
 			"loading_profile": "Chyba při načítání profilu. Pro plnohodnotný zážitek prosím obnovte stránku.",
 			"export_exchange_rate_unavailable": "Směnné kurzy se stále načítají. Zkuste to za chvíli znovu.",
 			"export_failed": "Nepodařilo se nám vygenerovat váš export. Zkuste to prosím znovu."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "Nástroje",
+			"top_up_canister": "Dobít kanistr pomocí ICP nebo TCYCLES"
 		}
 	},
 	"shortcuts": {
@@ -1206,6 +1214,8 @@
 			"description": "Cykly se převedou z vašeho zůstatku $token do kanistru, který je spotřebuje na výpočty a úložiště.",
 			"description_icp": "Váš $token se převede na cykly podle kurzu sítě a kanistr je spotřebuje na výpočty a úložiště.",
 			"pay_with": "Vyberte, čím dobití zaplatíte.",
+			"enable_token": "Aktivovat",
+			"not_enough_to_pay": "Na dobití nestačí",
 			"no_token_title": "Dobíjejte pomocí ICP nebo TCYCLES",
 			"no_token_description": "Kanistry běží na cyklech a dobití je kanistru přidá. Jakmile budete mít v peněžence dost ICP nebo TCYCLES, můžete dobíjet zde.",
 			"canister_id_placeholder": "Zadejte ID kanistru",
@@ -1255,6 +1265,9 @@
 			"not_started": "Dobití se nepodařilo spustit. Z peněženky nic neodešlo. Zkuste to za chvíli znovu.",
 			"transfer_failed": "Převod $token neproběhl. Z peněženky nic neodešlo. Zkuste to za chvíli znovu.",
 			"unconfirmed": "OISY nemohl potvrdit převod $token. Pokud proběhl, dobití se dokončí na pozadí: sledovat ho můžete v aktivních transakcích."
+		},
+		"alt": {
+			"enable_token": "Aktivovat $token a platit jím"
 		}
 	},
 	"active_user_transactions": {
@@ -1299,9 +1312,13 @@
 			"select_token_to_pay": "Vyberte token k platbě",
 			"pay_at_successful": "Zaplaceno dne $receipt",
 			"pay_at_failure": "Platba selhala dne $receipt",
+			"pay_at_not_confirmed": "",
+			"payment_not_confirmed_description": "",
+			"payment_not_confirmed_description_generic": "",
 			"try_again": "Zkusit znovu",
 			"payment_confirmed": "Platba potvrzena",
 			"payment_failed": "Platba se nezdařila",
+			"payment_not_confirmed": "",
 			"what_is_scan": "Co je skener",
 			"no_camera_permission": "Pro skenování QR kódů musíte povolit přístup ke kameře v nastavení webu ve vašem prohlížeči.",
 			"what_is_scan_description": "Skener $oisy_short dokáže přečíst různé QR kódy a okamžitě provést správnou akci. Naskenujte QR kód WalletConnect pro navázání nového spojení nebo naskenujte platební kód v jakémkoli obchodě používajícím Open CryptoPay a zaplaťte účet pomocí $oisy_short Pay.",
@@ -1852,7 +1869,7 @@
 			"spender": "Příjemce",
 			"operator": "Operátor",
 			"application": "Aplikace",
-			"review": "Zkontrolovat požadovaná oprávnění $chain_name ($key)",
+			"granted_permissions": "Oprávnění, která tato aplikace získá",
 			"method": "Metoda",
 			"interacting_with": "",
 			"type": "Typ",
@@ -1862,6 +1879,7 @@
 			"expiration": "Platnost",
 			"token": "Token",
 			"network": "Síť",
+			"networks": "Sítě",
 			"amount": "Částka",
 			"hex_data": "HEX data",
 			"base64_data": "Base64 data",
@@ -1875,6 +1893,8 @@
 			"close_pays_others": "Tato transakce zavírá jeden z vašich tokenových účtů a vyplácí jeho zůstatek na adresu, která není vaše peněženka. Pro vaši bezpečnost ji OISY nepodepíše.",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
+			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
 			"simulated_instructions": "Simulované instrukce",
 			"multiple_operations": "Tato transakce obsahuje více operací, které ovlivňují vaši peněženku. Zkontrolujte simulované změny zůstatku a obsažené instrukce a tuto transakci schvalte pouze v případě, že také důvěřujete aplikaci.",
 			"simulated_review": "Kontrola níže je predikcí toho, jak by tato transakce dopadla při simulaci proti aktuálnímu stavu sítě. Skutečný výsledek se může lišit.",
@@ -1900,6 +1920,7 @@
 			"high_gas_limit": "Tento požadavek nastavuje neobvykle vysoký limit gasu, takže maximální poplatek uvedený výše je mnohem vyšší, než by tato transakce měla stát. Pečlivě ji zkontrolujte a podepište pouze v případě, že této aplikaci důvěřujete.",
 			"invalid_typed_data": "Tento požadavek obsahuje hodnotu, jejíž typ neodpovídá schématu deklarovanému aplikací. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je podepsání zakázáno.",
 			"unreviewable_typed_data": "OISY nerozpoznává obsah, který vás tato aplikace žádá podepsat, takže souhrn ho nedokáže popsat. Ujistěte se, že aplikaci důvěřujete, a před podpisem zkontrolujte její surová data.",
+			"unreviewable_typed_data_witness": "OISY dokáže popsat tokeny, které si díky tomuto podpisu může vzít příjemce, ale nerozpoznává zbytek obsahu, který vás tato aplikace žádá podepsat. Ujistěte se, že aplikaci důvěřujete, a před podpisem zkontrolujte její surová data.",
 			"unsigned_typed_data_keys": "Tato aplikace odeslala další data, která její schéma nedeklaruje. Tato data nejsou pokryta podpisem, takže jsou zobrazena pouze níže uvedená pole.",
 			"tab_summary": "Souhrn",
 			"tab_raw_data": "Surová data",
