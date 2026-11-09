@@ -159,7 +159,7 @@ describe('IcTransactionModal', () => {
 		it('should keep the plain type on another ledger', () => {
 			const { getByText } = render(IcTransactionModal, {
 				transaction: topUp,
-				token: ICP_TOKEN
+				token: mockValidIcrcToken
 			});
 
 			expect(getByText('burn')).toBeInTheDocument();
@@ -294,6 +294,22 @@ describe('IcTransactionModal', () => {
 			});
 
 			expect(queryByRole('link', { name: spenderLabel })).not.toBeInTheDocument();
+		});
+	});
+
+	describe('ICP top-ups', () => {
+		it('should title a canister top-up as one', () => {
+			const { container } = render(IcTransactionModal, {
+				transaction: {
+					...mockIcTransactionUi,
+					type: 'send' as const,
+					typeLabel: 'transaction.label.canister_top_up'
+				},
+				token: ICP_TOKEN
+			});
+
+			expect(container).toHaveTextContent(get(i18n).transaction.label.canister_top_up);
+			expect(container).not.toHaveTextContent(/\bsend\b/);
 		});
 	});
 });

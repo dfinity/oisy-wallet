@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { CANISTER_TOP_UP_ENABLED } from '$env/canister-top-up.env';
 	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
 	import { TIPS_ENABLED } from '$env/tips.env';
 	import EthHideTokenModal from '$eth/components/tokens/EthHideTokenModal.svelte';
+	import CyclesTopUpModal from '$icp/components/cycles-top-up/CyclesTopUpModal.svelte';
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
@@ -37,6 +39,7 @@
 		modalTipClaimData,
 		modalAddressBook,
 		modalNotes,
+		modalCanisterTopUp,
 		modalVipQrCodeData,
 		modalIcHideTokenData,
 		modalHideTokenData,
@@ -94,6 +97,9 @@
 		<AddressBookModal />
 	{:else if PERSONAL_NOTES_ENABLED && $modalNotes}
 		<NotesModal />
+	{:else if CANISTER_TOP_UP_ENABLED && $modalCanisterTopUp}
+		<!-- Without a token: opened from the navigation, it lets the user pick what pays. -->
+		<CyclesTopUpModal />
 	{:else if $modalNftImageConsent && nonNullish($modalNftImageConsentData)}
 		<NftImageConsentModal collection={$modalNftImageConsentData} />
 	{:else if $modalNftFullscreenDisplayOpen && nonNullish($modalNftFullscreenDisplayData?.imageUrl)}

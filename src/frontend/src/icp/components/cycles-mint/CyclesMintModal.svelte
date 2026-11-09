@@ -6,7 +6,7 @@
 	import CyclesMintForm from '$icp/components/cycles-mint/CyclesMintForm.svelte';
 	import CyclesMintProgress from '$icp/components/cycles-mint/CyclesMintProgress.svelte';
 	import CyclesMintReview from '$icp/components/cycles-mint/CyclesMintReview.svelte';
-	import { CYCLES_MINT_RATE_REFRESH_INTERVAL_MILLIS } from '$icp/constants/cmc.constants';
+	import { CMC_RATE_REFRESH_INTERVAL_MILLIS } from '$icp/constants/cmc.constants';
 	import { mintCycles, type CyclesMintResult } from '$icp/services/cycles-mint.services';
 	import { CyclesMintError } from '$icp/types/cycles-mint';
 	import type { IcToken } from '$icp/types/ic-token';
@@ -103,7 +103,7 @@
 		trackCyclesMint({ step: 'open' });
 
 		loadRate();
-		rateTimer = setInterval(loadRate, CYCLES_MINT_RATE_REFRESH_INTERVAL_MILLIS);
+		rateTimer = setInterval(loadRate, CMC_RATE_REFRESH_INTERVAL_MILLIS);
 	});
 
 	onDestroy(() => clearInterval(rateTimer));

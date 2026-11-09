@@ -14,6 +14,7 @@ import {
 	LIFI_SOLANA_FEE_WALLET,
 	LIFI_SOLANA_PROGRAM_ADDRESSES
 } from '$sol/constants/lifi.constants';
+import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
@@ -701,12 +702,17 @@ const sumDeltas = ({
 	);
 
 /**
- * Whether a simulation reached by CPI a program that is neither known nor pinned for LI.FI
+ * Whether a simulation reached a program that is neither known nor pinned for LI.FI
  * (`LIFI_SOLANA_PROGRAM_ADDRESSES`): a venue Jupiter added since the pin, which the binding refuses.
- * `unreadPrograms` already leaves out the known ones (`SOLANA_KNOWN_PROGRAM_ADDRESSES`).
+ * The known ones (`SOLANA_KNOWN_PROGRAM_ADDRESSES`) are left out here, since `unreadPrograms` also
+ * names a known program the review finds paying others, which is no unpinned venue.
  */
 export const callsUnpinnedProgram = (unreadPrograms: SolAddress[]): boolean =>
-	unreadPrograms.some((program) => !LIFI_SOLANA_PROGRAM_ADDRESSES.includes(program));
+	unreadPrograms.some(
+		(program) =>
+			!SOLANA_KNOWN_PROGRAM_ADDRESSES.includes(program) &&
+			!LIFI_SOLANA_PROGRAM_ADDRESSES.includes(program)
+	);
 
 /**
  * Refuses a LI.FI Solana transaction unless a simulation of its exact bytes, with the pre-state read
