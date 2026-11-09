@@ -1,50 +1,70 @@
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
-import { MODAL_TOKENS_LIST } from '$lib/constants/test-ids.constants';
-import {
-	initModalTokensListContext,
-	MODAL_TOKENS_LIST_CONTEXT_KEY
-} from '$lib/stores/modal-tokens-list.store';
+import { MODAL_TOKENS_LIST, NETWORK_FILTER } from '$lib/constants/test-ids.constants';
+import * as swapDerived from '$lib/derived/swap.derived';
+import { i18n } from '$lib/stores/i18n.store';
 import {
 	swapSupportedTokensStore,
 	type SwapSupportedTokensData
 } from '$lib/stores/swap-supported-tokens.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import type { Network } from '$lib/types/network';
 import { SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { render } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import { mockContextMap } from '$tests/utils/context.test-utils';
+import { openFilterChip } from '$tests/utils/filter-chip.test-utils';
+import {
+	mockModalNetworksListContextEntry,
+	mockModalTokensListContextEntry
+} from '$tests/utils/misc.context.test-utils';
+import { render, screen, within } from '@testing-library/svelte';
+import { get, readable } from 'svelte/store';
 
 describe('SwapTokensList', () => {
 	const props = {
 		onSelectToken: () => {},
-		onSelectNetworkFilter: () => {},
 		onCloseTokensList: () => {}
 	};
 
+	const sourceProps = { ...props, side: 'source' as const };
+
 	const destinationProps = { ...props, side: 'destination' as const };
+
+	const btcToken = { ...BTC_MAINNET_TOKEN, enabled: true };
+	const icpToken = { ...ICP_TOKEN, enabled: true };
 
 	const mockContext = ({
 		sourceToken,
-		receiveSupportedData
+		destinationToken = mockValidIcCkToken,
+		receiveSupportedData,
+		filterNetwork,
+		networks = [ICP_NETWORK, BTC_MAINNET_NETWORK]
 	}: {
 		sourceToken?: Token;
+		destinationToken?: Token;
 		receiveSupportedData?: SwapSupportedTokensData;
-	} = {}) => {
-		const result = new Map();
+		filterNetwork?: Network;
+		networks?: Network[];
+	} = {}) =>
+		mockContextMap([
+			[
+				SWAP_CONTEXT_KEY,
+				{
+					sourceToken: readable(sourceToken),
+					destinationToken: readable(destinationToken),
+					destinationTokenExchangeRate: readable(0.00002),
+					receiveSupportedData: readable(receiveSupportedData)
+				}
+			],
+			mockModalTokensListContextEntry({ tokens: [ICP_TOKEN], filterNetwork }),
+			mockModalNetworksListContextEntry({ networks })
+		]);
 
-		result.set(SWAP_CONTEXT_KEY, {
-			sourceToken: readable(sourceToken),
-			destinationToken: readable(mockValidIcCkToken),
-			destinationTokenExchangeRate: readable(0.00002),
-			receiveSupportedData: readable(receiveSupportedData)
-		});
-
-		result.set(MODAL_TOKENS_LIST_CONTEXT_KEY, initModalTokensListContext({ tokens: [ICP_TOKEN] }));
-
-		return result;
-	};
+	const networkChip = () => screen.getByTestId(NETWORK_FILTER);
 
 	beforeEach(() => {
 		swapSupportedTokensStore.reset();
@@ -102,5 +122,93 @@ describe('SwapTokensList', () => {
 		});
 
 		expect(getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument();
+	});
+
+	describe('with a known token universe', () => {
+		beforeEach(() => {
+			vi.spyOn(swapDerived, 'allSwapUniverseTokens', 'get').mockReturnValue(
+				readable([btcToken, icpToken])
+			);
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		const rowFor = (symbol: string) =>
+			screen.getAllByRole('button').find((button) => button.textContent?.trim().startsWith(symbol));
+
+		it("keeps this side's pick in the list, marked as selected", () => {
+			render(SwapTokensList, {
+				props: sourceProps,
+				context: mockContext({ sourceToken: btcToken, destinationToken: mockValidIcCkToken })
+			});
+
+			expect(rowFor(btcToken.symbol)).toHaveAttribute('aria-pressed', 'true');
+			expect(rowFor(icpToken.symbol)).toHaveAttribute('aria-pressed', 'false');
+		});
+
+		it("leaves the other side's pick out of the list", () => {
+			render(SwapTokensList, {
+				props: sourceProps,
+				context: mockContext({ sourceToken: icpToken, destinationToken: btcToken })
+			});
+
+			expect(rowFor(btcToken.symbol)).toBeUndefined();
+			expect(rowFor(icpToken.symbol)).toBeInTheDocument();
+		});
+
+		it('shows all networks when the kept network has nothing left to pick', () => {
+			// Bitcoin's only token is the receive side's pick, as after pressing ⇅.
+			render(SwapTokensList, {
+				props: sourceProps,
+				context: mockContext({
+					sourceToken: icpToken,
+					destinationToken: btcToken,
+					filterNetwork: BTC_MAINNET_NETWORK
+				})
+			});
+
+			expect(networkChip()).toHaveTextContent(get(i18n).networks.chain_fusion);
+			expect(rowFor(icpToken.symbol)).toBeInTheDocument();
+		});
+
+		it('keeps a network that still has tokens', () => {
+			render(SwapTokensList, {
+				props: sourceProps,
+				context: mockContext({
+					sourceToken: btcToken,
+					destinationToken: mockValidIcCkToken,
+					filterNetwork: BTC_MAINNET_NETWORK
+				})
+			});
+
+			expect(networkChip()).toHaveTextContent(BTC_MAINNET_NETWORK.name);
+			expect(rowFor(icpToken.symbol)).toBeUndefined();
+		});
+
+		it('leaves out the tokens on networks this side may not use', () => {
+			// As on the receive side, where the networks are the ones the pay token reaches.
+			render(SwapTokensList, {
+				props: sourceProps,
+				context: mockContext({ networks: [ICP_NETWORK] })
+			});
+
+			expect(networkChip()).toHaveTextContent(get(i18n).networks.chain_fusion);
+			expect(rowFor(icpToken.symbol)).toBeInTheDocument();
+			expect(rowFor(btcToken.symbol)).toBeUndefined();
+		});
+
+		it('offers only the networks with something to pick', async () => {
+			render(SwapTokensList, {
+				props: sourceProps,
+				context: mockContext({ sourceToken: icpToken, destinationToken: btcToken })
+			});
+
+			const panel = await openFilterChip(NETWORK_FILTER);
+
+			expect(within(panel).getByText(ICP_NETWORK.name)).toBeInTheDocument();
+			expect(within(panel).queryByText(BTC_MAINNET_NETWORK.name)).not.toBeInTheDocument();
+		});
 	});
 });

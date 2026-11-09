@@ -21,7 +21,8 @@
 		<span class="text-xs text-tertiary sm:text-sm">{@render description()}</span>
 	</div>
 
-	<div class="flex xs:shrink-0">
+	<!-- Only the button is centered: the icon stays next to the title. -->
+	<div class="flex self-center xs:shrink-0">
 		{@render button()}
 	</div>
 </div>

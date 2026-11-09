@@ -6,6 +6,7 @@ import { MAX_BUTTON, TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import type { Token } from '$lib/types/token';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
@@ -350,5 +351,17 @@ describe('EthSendAmount', () => {
 			expect(queryByText(expectedError)).not.toBeInTheDocument();
 			expect(maxButton()).not.toHaveClass('text-error-primary');
 		});
+	});
+
+	it('names the network the token is sent on', () => {
+		const { queryByText } = setup();
+
+		expect(
+			queryByText(
+				replacePlaceholders(en.tokens.text.on_network_label, {
+					$network: ETHEREUM_TOKEN.network.name
+				})
+			)
+		).toBeInTheDocument();
 	});
 });

@@ -1,5 +1,6 @@
 import { POLYGON_AMOY_EXPLORER_URL, POLYGON_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumNetwork } from '$eth/types/network';
+import polygonMainnetIconColored from '$evm/polygon/assets/pol.svg';
 import polygonAmoyIcon from '$lib/assets/networks/polygon-amoy.svg';
 import polygonMainnetIcon from '$lib/assets/networks/polygon-mainnet.svg';
 import type { NetworkId } from '$lib/types/network';
@@ -22,6 +23,7 @@ export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 	name: 'Polygon',
 	chainId: 137n,
 	icon: polygonMainnetIcon,
+	iconColored: polygonMainnetIconColored,
 	explorerUrl: POLYGON_EXPLORER_URL,
 	supportsNft: true,
 	providers: {

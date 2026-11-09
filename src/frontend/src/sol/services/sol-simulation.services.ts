@@ -17,6 +17,7 @@ import type { SolClosedAccount, SolSimulationResult } from '$sol/types/sol-simul
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import type { SplTokenAddress } from '$sol/types/spl';
 import {
+	findSolProgramsPayingOthers,
 	mapSolInstructionSummaries,
 	solClosingInstructionCandidates,
 	solKeepsBatchWhole,
@@ -34,7 +35,8 @@ import {
 	parseTokenAccountState,
 	selectSolSimulationAddresses,
 	solClosedAccountsReachWallet,
-	solOpenAppAccountsLostLamports
+	solOpenAppAccountsLostLamports,
+	sortSolProgramsByRun
 } from '$sol/utils/sol-simulation.utils';
 import { solWalletLamportsStated } from '$sol/utils/sol-transaction-summary.utils';
 import {
@@ -276,7 +278,10 @@ const simulate = async ({
 
 	// A run with a nested call that names no program cannot be said to call only known ones, and
 	// the review would read the empty list as exactly that.
-	const unreadPrograms = findSolUnreadPrograms(innerInstructions);
+	const unreadPrograms = findSolUnreadPrograms({
+		instructions: transactionMessage.instructions,
+		innerInstructions
+	});
 
 	if (isNullish(unreadPrograms)) {
 		return undefined;
@@ -481,7 +486,25 @@ const simulate = async ({
 			}),
 			partial: false
 		},
-		unreadPrograms,
+		// A known program too, when it is called with the wallet and pays out of an account that is
+		// not the user's into another one: a position it holds for them, which no line states. Both
+		// kinds in the order the run reaches them.
+		unreadPrograms: sortSolProgramsByRun({
+			programs: [
+				...unreadPrograms,
+				...findSolProgramsPayingOthers({
+					instructions: [...transactionMessage.instructions].map(asSolParsedRpcInstructionOrSelf),
+					innerInstructions: innerInstructionGroups,
+					ownedAddresses: [address, ...ownedAddresses],
+					userAddress: address,
+					accountHolders,
+					accountMintsBefore,
+					rentExemptMinimum
+				})
+			],
+			instructions: transactionMessage.instructions,
+			innerInstructions
+		}),
 		slot: snapshot.slot
 	};
 };
