@@ -117,6 +117,7 @@ interface I18nNavigation {
 		section_finance: string;
 		section_more: string;
 		airdrops: string;
+		canister_top_up: string;
 		earning: string;
 		pay: string;
 		wallet_connect: string;
@@ -150,6 +151,7 @@ interface I18nNavigation {
 		borrow: string;
 		earning: string;
 		airdrops: string;
+		canister_top_up: string;
 		pay: string;
 		wallet_connect: string;
 		menu: string;
@@ -927,16 +929,34 @@ interface I18nCycles_top_up {
 	text: {
 		top_up: string;
 		title: string;
+		canister_top_up: string;
 		description: string;
+		description_icp: string;
+		pay_with: string;
+		no_token_title: string;
+		no_token_description: string;
 		canister_id_placeholder: string;
 		checking_canister: string;
 		recently_topped_up: string;
+		recently_topped_up_empty_state_title: string;
+		recently_topped_up_empty_state_description: string;
+		icp_hint_title: string;
+		icp_hint_description: string;
+		contacts_empty_state_title: string;
+		contacts_empty_state_description: string;
 		canister: string;
 		you_top_up: string;
 		total: string;
+		canister_receives: string;
+		cycles_estimate: string;
+		rate: string;
+		converted_by: string;
 		one_way: string;
+		one_way_icp: string;
 		topping_up: string;
 		topped_up: string;
+		topped_up_cycles: string;
+		pending: string;
 		unknown: string;
 		unknown_fresh: string;
 		sent_to_canister: string;
@@ -950,11 +970,18 @@ interface I18nCycles_top_up {
 		canister_not_found: string;
 		canister_check_failed: string;
 		amount_too_small: string;
+		amount_too_small_icp: string;
+		rate_unavailable: string;
 		refused: string;
 		insufficient_funds: string;
 		clock: string;
 		refunded: string;
 		refunded_nothing: string;
+		refunded_icp: string;
+		failed: string;
+		not_started: string;
+		transfer_failed: string;
+		unconfirmed: string;
 	};
 }
 
@@ -1172,8 +1199,8 @@ interface I18nSwap {
 
 interface I18nBuy {
 	text: {
-		buy: string;
-		buy_dev: string;
+		buy_sell: string;
+		buy_sell_dev: string;
 		unavailable_title: string;
 		unavailable_description_disabled: string;
 		unavailable_description_signing_failed: string;
@@ -1673,6 +1700,7 @@ interface I18nWallet_connect {
 		unreviewed_without_simulation: string;
 		unreviewed_not_described_by_simulation: string;
 		unread_programs_unconfirmed: string;
+		unexplained_request_unconfirmed: string;
 		sol_transaction_as_message: string;
 		request_not_defined: string;
 		unexpected_processing_request: string;
@@ -1980,6 +2008,9 @@ interface I18nTransaction {
 		confirmations: string;
 		for: string;
 		for_copied: string;
+		canister: string;
+		canister_copied: string;
+		canister_unknown: string;
 		expiration: string;
 		approve_label: string;
 	};
@@ -2001,6 +2032,7 @@ interface I18nTransaction {
 		approve: string;
 		burn: string;
 		mint: string;
+		top_up: string;
 	};
 	filter: {
 		types_label: string;
@@ -2032,6 +2064,7 @@ interface I18nTransaction {
 		pending: string;
 		top_up: string;
 		top_up_refund: string;
+		canister_top_up: string;
 	};
 	alt: {
 		open_block_explorer: string;

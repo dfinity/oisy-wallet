@@ -3,8 +3,8 @@ import { CanisterInternalError } from '$lib/canisters/errors';
 import { fromNullable } from '@dfinity/utils';
 
 // `retryable` answers the one question a caller has when a notify fails: can
-// notifying the same block again still mint? The CMC keeps a block's status
-// only for its final answers, so everything but those is worth retrying.
+// notifying the same block again still mint, or top up? The CMC keeps a block's
+// status only for its final answers, so everything but those is worth retrying.
 export class CmcNotifyError extends CanisterInternalError {
 	readonly retryable: boolean;
 
@@ -22,7 +22,7 @@ export class CmcNotifyProcessingError extends CmcNotifyError {
 	}
 }
 
-// Final: the CMC could not mint and returned the ICP, minus its fees.
+// Final: the CMC could not mint, or top up, and returned the ICP, minus its fees.
 export class CmcNotifyRefundedError extends CmcNotifyError {
 	constructor(
 		readonly refundBlockIndex: bigint | undefined,
@@ -40,8 +40,8 @@ export class CmcNotifyTransactionTooOldError extends CmcNotifyError {
 	}
 }
 
-// Final: the block is not a transfer to the caller's deposit account with the
-// expected memo.
+// Final: the block is not a transfer to the deposit account the notify names,
+// the caller's for a mint and the canister's for a top-up, with the expected memo.
 export class CmcNotifyInvalidTransactionError extends CmcNotifyError {
 	constructor(reason: string) {
 		super({ message: reason, retryable: false });
@@ -53,7 +53,9 @@ export class CmcNotifyInvalidTransactionError extends CmcNotifyError {
 // call, which a retry repeats. The CMC clears a block's status after every error
 // except `Refunded`, so any other code is retried: an internal error (e.g. no
 // conversion rate yet), a ledger it could not reach, a refund it could not send,
-// and a code added later, which must not close a mint whose ICP it still holds.
+// and a code added later, which must not close a mint, or a top-up, whose ICP it
+// still holds. A top-up can only get the retried ones: the others belong to
+// other methods.
 const FINAL_OTHER_ERROR_CODES: bigint[] = [4n, 5n, 6n];
 
 export class CmcNotifyOtherError extends CmcNotifyError {
