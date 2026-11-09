@@ -12,7 +12,8 @@ import {
 	mapSolInstructionSummaries,
 	solClosingInstructionCandidates,
 	solOpensAccountBeyondRent,
-	solSignsForMultisig
+	solSignsForMultisig,
+	type SolInstructionGroup
 } from '$sol/utils/sol-instruction-summary.utils';
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import { solClosedAccountsReachWallet } from '$sol/utils/sol-simulation.utils';
@@ -6404,7 +6405,46 @@ describe('sol-instruction-summary.utils', () => {
 			}
 		];
 
-		const signs = (innerInstructions: ReturnType<typeof approve>) =>
+		// What the RPC returns for a batch a program runs inside its own instruction: each step with
+		// the keys it names, the batch itself with none.
+		const batch = ({
+			program = 'spl-token',
+			programId = TOKEN_PROGRAM_ADDRESS,
+			info
+		}: {
+			program?: string;
+			programId?: string;
+			info: object;
+		}): SolInstructionGroup[] => [
+			{
+				index: 0,
+				instructions: [
+					{
+						program,
+						programId,
+						parsed: {
+							type: 'batch',
+							info: {
+								instructions: [
+									{
+										type: 'approve',
+										info: {
+											source: mockAtaAddress,
+											delegate: mockSolAddress2,
+											amount: '18446744073709551615',
+											...info
+										}
+									}
+								]
+							}
+						},
+						stackHeight: 2
+					}
+				]
+			}
+		];
+
+		const signs = (innerInstructions: readonly SolInstructionGroup[]) =>
 			solSignsForMultisig({ innerInstructions, userAddress: mockSolAddress });
 
 		it('should flag a token call with the wallet among the keys signing for a multisig', () => {
@@ -6429,9 +6469,33 @@ describe('sol-instruction-summary.utils', () => {
 			).toBeTruthy();
 		});
 
+		it('should flag a batch step with the wallet among the keys signing for a multisig', () => {
+			expect(
+				signs(batch({ info: { multisigOwner: mockSolAddress4, signers: [mockSolAddress] } }))
+			).toBeTruthy();
+		});
+
+		it('should flag a Token-2022 batch step with the wallet among the keys signing for a multisig', () => {
+			expect(
+				signs(
+					batch({
+						program: 'spl-token-2022',
+						programId: TOKEN_2022_PROGRAM_ADDRESS,
+						info: { multisigOwner: mockSolAddress4, signers: [mockSolAddress3, mockSolAddress] }
+					})
+				)
+			).toBeTruthy();
+		});
+
 		it('should not flag a multisig the wallet does not sign for', () => {
 			expect(
 				signs(approve({ info: { multisigOwner: mockSolAddress4, signers: [mockSolAddress3] } }))
+			).toBeFalsy();
+		});
+
+		it('should not flag a batch step signed for a multisig by other keys only', () => {
+			expect(
+				signs(batch({ info: { multisigOwner: mockSolAddress4, signers: [mockSolAddress3] } }))
 			).toBeFalsy();
 		});
 

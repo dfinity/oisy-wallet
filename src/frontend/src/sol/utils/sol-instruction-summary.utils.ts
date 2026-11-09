@@ -2021,7 +2021,7 @@ export const solKeepsBatchWhole = ({
 
 /**
  * Whether a simulated run makes a token call inside another program's instruction with the wallet
- * among the keys signing for a multisig.
+ * among the keys signing for a multisig. A token batch carries each step's keys with the step.
  *
  * The message's own token instructions are read for this when the message is mapped, which reads
  * the top level only. One a program makes inside its own call reaches the review through the run
@@ -2041,18 +2041,17 @@ export const solSignsForMultisig = ({
 				return false;
 			}
 
-			const {
-				program,
-				parsed: { info }
-			} = instruction;
+			const { program } = instruction;
 
 			if (isNullish(program) || !TOKEN_PROGRAMS.includes(program)) {
 				return false;
 			}
 
-			const signers = field({ info, key: 'signers' });
+			return solRpcBatchedInstructions(instruction).some(({ parsed: { info } }) => {
+				const signers = field({ info, key: 'signers' });
 
-			return Array.isArray(signers) && signers.includes(userAddress);
+				return Array.isArray(signers) && signers.includes(userAddress);
+			});
 		})
 	);
 
