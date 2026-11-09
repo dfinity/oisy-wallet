@@ -201,20 +201,6 @@ fn append_history_entries(
     Ok(())
 }
 
-/// Returns the newest [`MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER`] entries of `history`.
-///
-/// The read path uses it too, because a history stored before the limit existed can hold more
-/// entries until the user's next agreement change.
-#[must_use]
-pub fn newest_history_entries(
-    mut history: Vec<AgreementHistoryEntry>,
-) -> Vec<AgreementHistoryEntry> {
-    let excess = history
-        .len()
-        .saturating_sub(MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER);
-    history.split_off(excess)
-}
-
 /// Builds history entries for the agreements in `request` that change the stored `current` ones.
 fn collect_history_entries(
     current: &UserAgreements,
@@ -444,8 +430,8 @@ mod tests {
         MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER,
     };
 
-    use super::{append_history_entries, is_agreement_changed, newest_history_entries};
-    use crate::types::{AgreementHistoryMap, Candid, StoredPrincipal};
+    use super::{append_history_entries, is_agreement_changed};
+    use crate::types::{AgreementHistoryMap, StoredPrincipal};
 
     fn accepted(text_sha256: &str) -> UserAgreement {
         UserAgreement {
@@ -559,24 +545,6 @@ mod tests {
             stored_timestamps(&map, principal),
             (0..max).collect::<Vec<_>>()
         );
-    }
-
-    #[test]
-    fn history_stored_above_the_limit_reads_back_the_newest_entries() {
-        let memory = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
-        let mut map = AgreementHistoryMap::new(memory.borrow().get(MemoryId::new(12)));
-        let principal = StoredPrincipal(Principal::anonymous());
-        let max = u64::try_from(MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER).unwrap();
-
-        // Stored directly, as a history written before the limit existed.
-        map.insert(principal, Candid((0..max + 3).map(history_entry).collect()));
-
-        let timestamps: Vec<u64> =
-            newest_history_entries(map.get(&principal).unwrap_or_default().0)
-                .into_iter()
-                .map(|entry| entry.timestamp_ns)
-                .collect();
-        assert_eq!(timestamps, (3..max + 3).collect::<Vec<_>>());
     }
 
     #[test]

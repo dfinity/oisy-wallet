@@ -3389,11 +3389,10 @@ export interface _SERVICE {
 	 */
 	get_tip_vetkey_public_key: ActorMethod<[], TipVetkeyResult>;
 	/**
-	 * Returns the agreement consent/rejection history for the caller.
+	 * Returns the full agreement consent/rejection history for the caller.
 	 *
 	 * # Returns
-	 * - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail: the newest
-	 * `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
+	 * - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail.
 	 *
 	 * # Errors
 	 * - `Err(UserNotFound)` if no history exists and the user has no profile.

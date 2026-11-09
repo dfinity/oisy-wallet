@@ -246,11 +246,10 @@ pub fn update_provider_agreements(
     .into()
 }
 
-/// Returns the agreement consent/rejection history for the caller.
+/// Returns the full agreement consent/rejection history for the caller.
 ///
 /// # Returns
-/// - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail: the newest
-///   `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
+/// - `Ok(Vec<AgreementHistoryEntry>)` — the chronological audit trail.
 ///
 /// # Errors
 /// - `Err(UserNotFound)` if no history exists and the user has no profile.
@@ -263,12 +262,10 @@ pub fn get_user_agreement_history() -> GetAgreementHistoryResult {
         if !s.user_profile_updated.contains_key(&stored_principal) {
             return Err(GetAgreementHistoryError::UserNotFound);
         }
-        Ok(service::newest_history_entries(
-            s.agreement_history
-                .get(&stored_principal)
-                .unwrap_or_default()
-                .0,
-        ))
+        Ok(s.agreement_history
+            .get(&stored_principal)
+            .unwrap_or_default()
+            .0)
     })
     .into()
 }
