@@ -25,15 +25,15 @@ import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import { token } from '$lib/stores/token.store';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import {
-	resetStubWizardMounts,
-	stubWizardMounts
-} from '$tests/lib/components/send/SendModalWizardStub.svelte';
 import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipalText2 } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import {
+	resetStubWizardMounts,
+	stubWizardMounts
+} from '$tests/utils/send-wizard-stub-mounts.test-utils';
 import {
 	createSelectedNftHarness,
 	createStepsHarness

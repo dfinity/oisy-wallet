@@ -1,20 +1,9 @@
 <!-- Stubs the chain-specific `SendWizard` when unit-testing `SendModal`'s amount handling and steps. -->
-<script lang="ts" module>
-	let mounts = 0;
-
-	// How often the modal has mounted a wizard: one wizard should serve the amount, review and
-	// sending steps, since it holds what they share.
-	export const stubWizardMounts = (): number => mounts;
-
-	export const resetStubWizardMounts = () => {
-		mounts = 0;
-	};
-</script>
-
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { countStubWizardMount } from '$tests/utils/send-wizard-stub-mounts.test-utils';
 
 	interface Props {
 		currentStep?: WizardStep;
@@ -36,9 +25,7 @@
 		onTokensList
 	}: Props = $props();
 
-	onMount(() => {
-		mounts++;
-	});
+	onMount(countStubWizardMount);
 </script>
 
 <span data-tid="stub-step">{currentStep?.name ?? ''}</span>
