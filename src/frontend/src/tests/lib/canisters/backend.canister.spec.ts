@@ -4,6 +4,7 @@ import type {
 	_SERVICE as BackendService,
 	BtcAddPendingTransactionResult,
 	BtcGetPendingTransactionsResult,
+	BtcGetSpendableUtxosResult,
 	CustomToken,
 	IcrcToken,
 	SignOnramperWidgetUrlResult,
@@ -64,12 +65,16 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 
 describe('backend.canister', () => {
 	const createBackendCanister = ({
-		serviceOverride
-	}: Pick<CreateCanisterOptions<BackendService>, 'serviceOverride'>): Promise<BackendCanister> =>
+		serviceOverride,
+		certifiedServiceOverride = serviceOverride
+	}: Pick<
+		CreateCanisterOptions<BackendService>,
+		'serviceOverride' | 'certifiedServiceOverride'
+	>): Promise<BackendCanister> =>
 		BackendCanister.create({
 			canisterId: Principal.fromText('d3nvo-aaaaa-aaaar-qagzq-cai'),
 			identity: mockIdentity,
-			certifiedServiceOverride: serviceOverride,
+			certifiedServiceOverride,
 			serviceOverride
 		});
 	const service = mock<ActorSubclass<BackendService>>();
@@ -563,6 +568,71 @@ describe('backend.canister', () => {
 
 			await expect(btcGetPendingTransactions(btcGetPendingTransactionParams)).rejects.toThrow(
 				new CanisterInternalError('II delegation chain verification failed: chain expired')
+			);
+		});
+	});
+
+	describe('btc_get_spendable_utxos', () => {
+		const spendableUtxos = {
+			utxos: btcAddPendingTransactionParams.utxos,
+			pending_transactions: [
+				{
+					utxos: btcAddPendingTransactionParams.utxos,
+					txid: btcAddPendingTransactionParams.txId
+				}
+			]
+		};
+
+		it('should return the spendable UTXOs and the pending transactions', async () => {
+			service.btc_get_spendable_utxos.mockResolvedValue({ Ok: spendableUtxos });
+
+			const { btcGetSpendableUtxos } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcGetSpendableUtxos(btcGetPendingTransactionParams);
+
+			expect(service.btc_get_spendable_utxos).toHaveBeenCalledExactlyOnceWith(
+				btcGetPendingTransactionEndpointParams
+			);
+			expect(res).toEqual(spendableUtxos);
+		});
+
+		it.each([
+			{
+				Err: { InternalError: { msg: 'reply too large' } },
+				error: new CanisterInternalError('reply too large')
+			},
+			{
+				Err: { InvalidDelegationChain: { msg: 'chain expired' } },
+				error: new CanisterInternalError('II delegation chain verification failed: chain expired')
+			},
+			// Unlike the pending transactions, there is nothing to fall back on.
+			{
+				Err: { RateLimited: { max_calls: 15, window_ns: 60_000_000_000n, caller: mockPrincipal } },
+				error: new CanisterInternalError(
+					'Rate limit exceeded. Maximum of 15 calls allowed every 60 seconds.'
+				)
+			}
+		])('should throw on $Err', async ({ Err, error }) => {
+			service.btc_get_spendable_utxos.mockResolvedValue({ Err } as BtcGetSpendableUtxosResult);
+
+			const { btcGetSpendableUtxos } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(btcGetSpendableUtxos(btcGetPendingTransactionParams)).rejects.toThrow(error);
+		});
+
+		it('should throw if btc_get_spendable_utxos throws', async () => {
+			service.btc_get_spendable_utxos.mockRejectedValue(mockResponseError);
+
+			const { btcGetSpendableUtxos } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(btcGetSpendableUtxos(btcGetPendingTransactionParams)).rejects.toThrow(
+				mockResponseError
 			);
 		});
 	});
@@ -1317,6 +1387,24 @@ describe('backend.canister', () => {
 			expect(res).toEqual(mockContact);
 		});
 
+		it('should read the contact through the certified service', async () => {
+			const [mockContact] = getMockContacts({ n: 1 });
+			const queryService = mock<ActorSubclass<BackendService>>();
+			const certifiedService = mock<ActorSubclass<BackendService>>();
+
+			certifiedService.get_contact.mockResolvedValue({ Ok: mockContact });
+
+			const { getContact } = await createBackendCanister({
+				serviceOverride: queryService,
+				certifiedServiceOverride: certifiedService
+			});
+
+			await expect(getContact(1n)).resolves.toEqual(mockContact);
+
+			expect(certifiedService.get_contact).toHaveBeenCalledExactlyOnceWith(1n);
+			expect(queryService.get_contact).not.toHaveBeenCalled();
+		});
+
 		it('should throw an error if get_contact throws', async () => {
 			service.get_contact.mockImplementation(async () => {
 				await Promise.resolve();
@@ -1333,36 +1421,91 @@ describe('backend.canister', () => {
 		});
 	});
 
-	describe('getContacts', () => {
-		it('should call get_contacts service', async () => {
+	describe('getContactsPage', () => {
+		it('should read the first page through the certified service', async () => {
 			const mockContacts = getMockContacts({ n: 4 });
-			const response = { Ok: mockContacts };
+			const page = { contacts: mockContacts, next: toNullable<bigint>() };
+			const queryService = mock<ActorSubclass<BackendService>>();
+			const certifiedService = mock<ActorSubclass<BackendService>>();
 
-			service.get_contacts.mockResolvedValue(response);
+			certifiedService.get_contacts_page.mockResolvedValue({ Ok: page });
 
-			const { getContacts } = await createBackendCanister({
+			const { getContactsPage } = await createBackendCanister({
+				serviceOverride: queryService,
+				certifiedServiceOverride: certifiedService
+			});
+
+			await expect(getContactsPage()).resolves.toEqual(page);
+
+			expect(certifiedService.get_contacts_page).toHaveBeenCalledExactlyOnceWith([]);
+			expect(queryService.get_contacts_page).not.toHaveBeenCalled();
+		});
+
+		it('should pass the cursor of the previous page', async () => {
+			const page = { contacts: getMockContacts({ n: 1 }), next: toNullable(7n) };
+
+			service.get_contacts_page.mockResolvedValue({ Ok: page });
+
+			const { getContactsPage } = await createBackendCanister({
 				serviceOverride: service
 			});
 
-			const res = await getContacts();
+			await expect(getContactsPage(3n)).resolves.toEqual(page);
 
-			expect(service.get_contacts).toHaveBeenCalledOnce();
-			expect(res).toEqual(mockContacts);
+			expect(service.get_contacts_page).toHaveBeenCalledWith([3n]);
 		});
 
-		it('should throw an error if get_contact throws', async () => {
-			service.get_contacts.mockImplementation(async () => {
+		it('should throw an error if get_contacts_page throws', async () => {
+			service.get_contacts_page.mockImplementation(async () => {
 				await Promise.resolve();
 				throw mockResponseError;
 			});
 
-			const { getContacts } = await createBackendCanister({
+			const { getContactsPage } = await createBackendCanister({
 				serviceOverride: service
 			});
 
-			const res = getContacts();
+			await expect(getContactsPage()).rejects.toThrow(mockResponseError);
+		});
+	});
 
-			await expect(res).rejects.toThrow(mockResponseError);
+	describe('getContactImages', () => {
+		it('should read the images through the certified service', async () => {
+			const entries = [
+				{
+					contact_id: 1n,
+					image: { data: new Uint8Array([1, 2, 3]), mime_type: { 'image/png': null } }
+				}
+			];
+			const queryService = mock<ActorSubclass<BackendService>>();
+			const certifiedService = mock<ActorSubclass<BackendService>>();
+
+			certifiedService.get_contact_images.mockResolvedValue({ Ok: entries });
+
+			const { getContactImages } = await createBackendCanister({
+				serviceOverride: queryService,
+				certifiedServiceOverride: certifiedService
+			});
+
+			await expect(getContactImages([1n, 2n])).resolves.toEqual(entries);
+
+			expect(certifiedService.get_contact_images).toHaveBeenCalledExactlyOnceWith({
+				contact_ids: BigUint64Array.from([1n, 2n])
+			});
+			expect(queryService.get_contact_images).not.toHaveBeenCalled();
+		});
+
+		it('should throw an error if get_contact_images throws', async () => {
+			service.get_contact_images.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getContactImages } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getContactImages([1n])).rejects.toThrow(mockResponseError);
 		});
 	});
 
