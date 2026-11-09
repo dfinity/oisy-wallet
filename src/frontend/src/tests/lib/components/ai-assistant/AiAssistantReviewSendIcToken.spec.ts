@@ -1,20 +1,23 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import * as sendServices from '$icp/services/ic-send.services';
-import type { IcCkToken } from '$icp/types/ic-token';
+import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import AiAssistantReviewSendIcToken from '$lib/components/ai-assistant/AiAssistantReviewSendIcToken.svelte';
 import {
 	AI_ASSISTANT_SEND_TOKENS_BUTTON,
 	AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE
 } from '$lib/constants/test-ids.constants';
 import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
+import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import * as toasts from '$lib/stores/toasts.store';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import en from '$tests/mocks/i18n.mock';
+import { mockValidDip20Token, mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import type { MockInstance } from 'vitest';
 
 describe('AiAssistantReviewSendIcToken', () => {
@@ -43,6 +46,7 @@ describe('AiAssistantReviewSendIcToken', () => {
 		mockPage.reset();
 
 		aiAssistantStore.reset();
+		balancesStore.reinitialize();
 
 		sendSpy = vi.spyOn(sendServices, 'sendIc').mockResolvedValue(undefined);
 	});
@@ -232,6 +236,86 @@ describe('AiAssistantReviewSendIcToken', () => {
 				BigInt(new Date('2026-11-06T10:01:00Z').getTime()) * 1_000_000n
 			);
 			expect(second.createdAt).not.toBe(first.createdAt);
+		});
+
+		describe('when the balance no longer covers the transfer', () => {
+			const transferAmount = parseToken({ value: `${sendAmount}`, unitName: ckBtcToken.decimals });
+
+			const setBalance = ({ id, balance }: { id: IcToken['id']; balance: bigint }) =>
+				balancesStore.set({ id, data: { data: balance, certified: true } });
+
+			it('should keep Send enabled for the transfer the review already sent', async () => {
+				setBalance({ id: ckBtcToken.id, balance: transferAmount + ckBtcToken.fee });
+
+				sendSpy.mockRejectedValueOnce(new Error('Test error')).mockResolvedValueOnce(undefined);
+
+				const { getByTestId, queryByText } = render(AiAssistantReviewSendIcToken, {
+					props,
+					context: mockContext()
+				});
+
+				await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+				await waitFor(() => expect(toasts.toastsError).toHaveBeenCalledOnce());
+
+				// The first transfer went through, its response did not arrive.
+				setBalance({ id: ckBtcToken.id, balance: ckBtcToken.fee });
+
+				await tick();
+
+				expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).not.toBeDisabled();
+				expect(queryByText(en.send.assertion.insufficient_funds)).not.toBeInTheDocument();
+
+				await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+				await waitFor(() => expect(sendSpy).toHaveBeenCalledTimes(2));
+
+				const [[first], [second]] = sendSpy.mock.calls;
+
+				expect(second.createdAt).toBe(first.createdAt);
+			});
+
+			it('should keep the balance check for a transfer the review has not sent', () => {
+				setBalance({ id: ckBtcToken.id, balance: ckBtcToken.fee });
+
+				const { getByTestId, getByText } = render(AiAssistantReviewSendIcToken, {
+					props,
+					context: mockContext()
+				});
+
+				expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toBeDisabled();
+				expect(getByText(en.send.assertion.insufficient_funds)).toBeInTheDocument();
+			});
+
+			it('should keep the balance check for XTC', async () => {
+				const xtcAmount = parseToken({
+					value: `${sendAmount}`,
+					unitName: mockValidDip20Token.decimals
+				});
+
+				setBalance({ id: mockValidDip20Token.id, balance: xtcAmount + mockValidDip20Token.fee });
+
+				sendSpy.mockRejectedValueOnce(new Error('Test error'));
+
+				const { getByTestId } = render(AiAssistantReviewSendIcToken, {
+					props,
+					context: new Map<symbol, SendContext>([
+						[SEND_CONTEXT_KEY, initSendContext({ token: mockValidDip20Token })]
+					])
+				});
+
+				expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).not.toBeDisabled();
+
+				await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+				await waitFor(() => expect(toasts.toastsError).toHaveBeenCalledOnce());
+
+				setBalance({ id: mockValidDip20Token.id, balance: mockValidDip20Token.fee });
+
+				await tick();
+
+				expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toBeDisabled();
+			});
 		});
 	});
 });

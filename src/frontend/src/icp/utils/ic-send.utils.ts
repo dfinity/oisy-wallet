@@ -68,6 +68,17 @@ export const isInvalidDestinationIc = ({
 	return invalidIcpAddress(destination) && invalidIcrcAddress(destination);
 };
 
+export const isSameIcSendRequest = ({
+	previous,
+	request
+}: {
+	previous: IcSendRequest;
+	request: Omit<IcSendRequest, 'createdAt'>;
+}): boolean =>
+	previous.tokenId === request.tokenId &&
+	previous.to === request.to &&
+	previous.amount === request.amount;
+
 /**
  * The transfer a send submits. While the token, destination and amount stay the same it is the
  * previous one, `createdAt` included, so sending it again after an error cannot pay twice: if the
@@ -77,9 +88,6 @@ export const toIcSendRequest = ({
 	previous,
 	...request
 }: Omit<IcSendRequest, 'createdAt'> & { previous: IcSendRequest | undefined }): IcSendRequest =>
-	nonNullish(previous) &&
-	previous.tokenId === request.tokenId &&
-	previous.to === request.to &&
-	previous.amount === request.amount
+	nonNullish(previous) && isSameIcSendRequest({ previous, request })
 		? previous
 		: { ...request, createdAt: nowInBigIntNanoSeconds() };

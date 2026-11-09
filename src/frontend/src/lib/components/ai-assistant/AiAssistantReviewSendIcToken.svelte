@@ -1,11 +1,16 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import { sendIc } from '$icp/services/ic-send.services';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
-	import { isInvalidDestinationIc, toIcSendRequest } from '$icp/utils/ic-send.utils';
+	import {
+		isInvalidDestinationIc,
+		isSameIcSendRequest,
+		toIcSendRequest
+	} from '$icp/utils/ic-send.utils';
+	import { isTokenDip20 } from '$icp/utils/icrc.utils';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
 		AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
@@ -51,7 +56,23 @@
 		})
 	);
 
-	let amountError = $derived(parsedAmount + ($sendToken as IcToken).fee > ($sendBalance ?? ZERO));
+	let previousRequest = $derived($aiAssistantStore?.icSendRequests[id]);
+
+	// A transfer this review already sent may have gone through with its response lost, leaving a
+	// balance that no longer covers it. Sending it again stays possible, since the ledger answers
+	// with the block the first one landed in; XTC transfers get no such answer.
+	let resend = $derived(
+		nonNullish(previousRequest) &&
+			!isTokenDip20($sendToken as IcToken) &&
+			isSameIcSendRequest({
+				previous: previousRequest,
+				request: { tokenId: $sendToken.id, to: destination, amount: parsedAmount }
+			})
+	);
+
+	let amountError = $derived(
+		!resend && parsedAmount + ($sendToken as IcToken).fee > ($sendBalance ?? ZERO)
+	);
 
 	let invalidDestination = $derived(
 		isNullishOrEmpty(destination) ||
@@ -111,7 +132,7 @@
 			// Kept in the assistant store, by this review's tool result `id`, so it outlives this
 			// component when the assistant closes (see `AiAssistant.icSendRequests`).
 			const sendRequest = toIcSendRequest({
-				previous: $aiAssistantStore?.icSendRequests[id],
+				previous: previousRequest,
 				tokenId: $sendToken.id,
 				to: destination,
 				amount: parsedAmount
