@@ -781,6 +781,8 @@ The list currently appears on the WalletConnect sign review. Showing it on an ex
 
 The `signPsbt` review shows only values OISY can check. An input that spends one of the wallet's own unspent outputs, as the Bitcoin canister lists them (on mainnet, the only network OISY signs for), is the user's and is priced from that list; any other input is priced from the previous transaction the request includes for it, whose ID must match the output it spends, whichever address the input names. A request that states another value or address for one of the wallet's outputs, or that has an input OISY can price neither way, is **refused**: the review says why and keeps Approve disabled, and the signing step reads the wallet's outputs again and runs the same check. Every request offered for approval therefore states a checked value for each input and a known fee. The review shows a spinner while the wallet's outputs load.
 
+Every Bitcoin request is answered for one account only. `getAccountAddresses`, `signMessage` and `signPsbt` check that the address the request is answered or reviewed with is the address of the key OISY signs with, and refuse the request otherwise, so the address a dApp or the review shows always belongs to the key that signs.
+
 ### ckETH conversions requested by an Ethereum dApp
 
 An `eth_sendTransaction` request addressed to the ckETH helper contract, the minter contract whose `deposit(bytes32)` turns ETH into ckETH for the principal it names, is reviewed as a **conversion** when it deposits to the signed-in user's own Internet Computer principal: the review says so, shows the principal the ckETH is credited to, and names the Internet Computer as the destination network. What is signed is the deposit exactly as the dApp sent it.
@@ -1070,6 +1072,12 @@ A NEAR Intents swap from any chain fails on its own once its deposit can no long
 ### NEAR Intents deposits replaced or dropped on an EVM network
 
 A NEAR Intents swap from an EVM network records its deposit transaction (hash, nonce and network) when the deposit is sent. Until 1Click processes the deposit, the swap is also followed on that network, the same way LI.FI and Velora swaps are: when another transaction has taken the deposit's nonce on two polls in a row, the deposit can never arrive, and the swap fails with the message that the transaction was replaced or dropped. A deposit that reverted fails the swap with the generic failure message. A deposit that is only slow to confirm stays in progress, and once 1Click processes the deposit, 1Click alone decides. A deposit hash OISY has passed to 1Click does not count as a deposit that arrived. A dropped deposit whose nonce no later transaction takes reads as still in flight on the network, so this does not settle it; the [quote deadline](#near-intents-deposits-that-never-arrive) does. Swaps sent before this was added carry no deposit transaction and are followed through 1Click only.
+
+### Offers follow the max slippage
+
+Changing the max slippage asks the providers for new offers, the same way changing the amount does: the receive amount shows as loading and Review stays disabled until the offers for the new setting arrive. A provider can bind its offer to the slippage it was asked with, so an offer counts only for that slippage.
+
+NEAR Intents does: 1Click signs a minimum receive amount derived from the slippage into its quote, and the deposit settles against it. Its expected minimum, on the form and on Review, is that signed figure; only a quote without one shows the slippage applied to the quoted amount. The slippage goes to 1Click in whole basis points, rounded down, so a quote never allows more than the setting. Right before the deposit, next to the signature and expiry checks, OISY checks that the quote was requested with the max slippage Review showed; a quote for another one stops before anything is sent, with a message that no funds were sent.
 
 ### 1Sec restricted to the unwrapping direction
 
