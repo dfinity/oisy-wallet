@@ -1,5 +1,8 @@
 import { sendBtc } from '$btc/services/btc-send.services';
-import { isDefinitiveBtcBroadcastRefusal } from '$btc/utils/btc-send.utils';
+import {
+	isDefinitiveBtcBroadcastRefusal,
+	isUnclearBtcBroadcastOutcome
+} from '$btc/utils/btc-send.utils';
 import type {
 	ActiveUserTransactionData,
 	ActiveUserTransactionRef,
@@ -1285,6 +1288,12 @@ export const fetchNearIntentsBtcSwap = async ({
 				// out, so the row stays for the poller, which fails it once the deposit expires.
 				if (nonNullish(rowId) && isDefinitiveBtcBroadcastRefusal(err)) {
 					await deleteUnbroadcastActiveUserTransaction({ identity, id: rowId });
+				}
+
+				// The deposit may have gone out, so the destination is enabled as after a sent one:
+				// the swapped asset must not land in a token the user cannot see.
+				if (isUnclearBtcBroadcastOutcome(err)) {
+					await enableSwapDestinationToken({ destinationToken, identity });
 				}
 
 				if (isNullish(broadcastTxid)) {

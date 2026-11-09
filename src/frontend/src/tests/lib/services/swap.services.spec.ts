@@ -5123,6 +5123,28 @@ describe('swap.services', () => {
 					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
 				).not.toHaveBeenCalled();
 			});
+
+			// The deposit may have gone out, so the swapped asset must not land in a hidden token.
+			it('should enable a disabled destination after an unclear outcome, but not after a refusal', async () => {
+				const disabledDestinationToken = { ...destinationToken, enabled: false };
+
+				sendThroughBackend(new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') }));
+
+				await expect(
+					fetchNearIntentsBtcSwap({ ...baseParams, destinationToken: disabledDestinationToken })
+				).rejects.toBeInstanceOf(BtcBroadcastUnconfirmedError);
+
+				expect(setCustomToken).toHaveBeenCalledOnce();
+
+				vi.mocked(setCustomToken).mockClear();
+				sendThroughBackend(new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee'));
+
+				await expect(
+					fetchNearIntentsBtcSwap({ ...baseParams, destinationToken: disabledDestinationToken })
+				).rejects.toBeInstanceOf(BtcBroadcastTransactionCanisterError);
+
+				expect(setCustomToken).not.toHaveBeenCalled();
+			});
 		});
 	});
 
