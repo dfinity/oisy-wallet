@@ -21,6 +21,9 @@ export type WalletConnectApproveRequestMessage =
 export abstract class WalletConnectListener implements WebSocketListener {
 	abstract pair(uri: string): Promise<PairingTypes.Struct>;
 	abstract approveSession(proposal: WalletKitTypes.SessionProposal): Promise<void>;
+	// What approving the proposal grants, as `approveSession` would send it, so the review can state
+	// it before the user approves.
+	abstract approvedNamespaces(proposal: WalletKitTypes.SessionProposal): SessionTypes.Namespaces;
 	abstract rejectSession(proposal: WalletKitTypes.SessionProposal): Promise<void>;
 	abstract attachHandlers(handlers: {
 		onSessionProposal: (proposal: WalletKitTypes.SessionProposal) => void;

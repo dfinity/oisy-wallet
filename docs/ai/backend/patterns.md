@@ -213,6 +213,14 @@ one-shot approval, which should preserve their transaction identity.
 - Don't add a new ad-hoc timer at module load time. Wire it through one
   of the existing entry points and ensure both `init` and `post_upgrade`
   trigger it.
+- **Timer work over a collection that grows with users runs in batches.**
+  Each batch is a timer message of its own that stops once
+  `ic_cdk::api::instruction_counter()` passes a budget well below the 40B
+  limit, always after at least one item, and schedules the next batch from
+  the last key it reached. Take the budget check as a closure so unit tests
+  can drive it. Examples: `contacts::migration::schedule_batch` and the tip
+  sweep (`utils::housekeeping::schedule_tip_sweep_batch` over
+  `tips::service::prune_expired_tips`).
 - **Exchange rates:** Controllers store API keys via `set_api_keys`. Periodic
   refreshes are opt-in: they run only when `coingecko_api_key` is set and
   `exchange_rate_enabled` is `opt true` (`null` / unset is treated as disabled). See

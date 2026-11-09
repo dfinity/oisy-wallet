@@ -133,7 +133,7 @@
 			"section_finance": "Finanza",
 			"section_more": "Altro",
 			"airdrops": "Ricompense",
-			"canister_top_up": "Ricarica canister",
+			"tools": "Strumenti",
 			"earning": "Guadagna",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "Apri la vista Prestiti",
 			"earning": "Apri la vista Guadagni",
 			"airdrops": "Apri la vista Ricompense",
-			"canister_top_up": "Ricarica un canister con ICP o TCYCLES",
+			"tools": "Apri gli strumenti",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "Il tuo indirizzo del wallet, impostazioni, disconnessione e collegamenti esterni",
@@ -807,8 +807,8 @@
 			"support_title": "Supporto",
 			"support_description": "Trovi risposte e altre informazioni nella pagina di supporto della documentazione di $oisy_name, oppure contatta il team se sei bloccato.",
 			"support_link": "Vai alla nostra pagina di supporto",
-			"network_explorers_title": "Block explorer",
-			"network_explorers_description": "$oisy_name costruisce la tua cronologia da indicizzatori di terze parti, che possono essere in ritardo rispetto alla blockchain. Un block explorer mostra ciò che la rete stessa registra per il tuo indirizzo.",
+			"network_explorers_title": "Blockchain explorer",
+			"network_explorers_description": "Apri questi link per vedere i tuoi indirizzi sui blockchain explorer e seguire in tempo reale i tuoi saldi e la cronologia completa delle transazioni. Le blockchain sono registri pubblici, quindi puoi verificare e analizzare in modo indipendente tutta l'attività on-chain del tuo wallet $oisy_name.",
 			"explorers_title": "Stato delle transazioni presso i provider",
 			"explorers_description": "$oisy_name esegue swap e trasferimenti tramite bridge attraverso provider di terze parti. Se uno richiede più tempo del previsto, apri l'explorer del provider: mostra a che punto è il tuo trasferimento, già filtrato sul tuo wallet.",
 			"explorers_velora_description": "Swap su Ethereum e altre reti EVM.",
@@ -838,7 +838,7 @@
 			"withdraw": "Preleva"
 		},
 		"alt": {
-			"network_explorer_link": "Apri il block explorer di $network per il tuo indirizzo",
+			"network_explorer_link": "Apri il blockchain explorer di $network per il tuo indirizzo",
 			"explorer_link": "Apri l'explorer di $provider per il tuo indirizzo $chain",
 			"select_token_first": "Seleziona il primo token del pool",
 			"select_token_second": "Seleziona il secondo token del pool",
@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "Disabilita l'occultamento delle transazioni con valori molto piccoli",
 			"save_spam_filter_success": "Le impostazioni del filtro antispam sono state aggiornate.",
 			"export_data": "Esporta dati",
+			"export_data_moved": "L'esportazione è stata spostata in Strumenti.",
+			"open_tools": "Apri Strumenti",
 			"export_data_description": "Scarica i tuoi token e le tue transazioni in formato CSV — Basic per l'essenziale, Extended per attributi aggiuntivi.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -909,6 +911,12 @@
 			"loading_profile": "Errore durante il caricamento del profilo. Si prega di aggiornare la pagina per avere l'esperienza completa.",
 			"export_exchange_rate_unavailable": "I tassi di cambio sono ancora in caricamento. Riprova tra un momento.",
 			"export_failed": "Non siamo riusciti a generare l'esportazione. Riprova."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "Strumenti",
+			"top_up_canister": "Ricarica un canister con ICP o TCYCLES"
 		}
 	},
 	"shortcuts": {
@@ -1206,6 +1214,8 @@
 			"description": "I cicli passano dal tuo saldo $token al canister, che li usa per calcolo e archiviazione.",
 			"description_icp": "I tuoi $token vengono convertiti in cicli al tasso della rete, e il canister li usa per calcolo e archiviazione.",
 			"pay_with": "Scegli con cosa pagare la ricarica.",
+			"enable_token": "Abilita",
+			"not_enough_to_pay": "Non basta per ricaricare",
 			"no_token_title": "Ricarica con ICP o TCYCLES",
 			"no_token_description": "I canister funzionano con i cicli, e una ricarica li aggiunge a un canister. Quando il tuo wallet avrà abbastanza ICP o TCYCLES, potrai ricaricare qui.",
 			"canister_id_placeholder": "Inserisci un ID canister",
@@ -1255,6 +1265,9 @@
 			"not_started": "Impossibile avviare la ricarica. Nulla è uscito dal tuo wallet. Riprova tra un attimo.",
 			"transfer_failed": "Il trasferimento di $token non è andato a buon fine. Nulla è uscito dal tuo wallet. Riprova tra un attimo.",
 			"unconfirmed": "OISY non è riuscito a confermare il trasferimento di $token. Se è andato a buon fine, la ricarica verrà completata in background: puoi seguirla nelle transazioni attive."
+		},
+		"alt": {
+			"enable_token": "Abilita $token per pagare con esso"
 		}
 	},
 	"active_user_transactions": {
@@ -1299,9 +1312,13 @@
 			"select_token_to_pay": "Seleziona il token per pagare",
 			"pay_at_successful": "Pagato presso $receipt",
 			"pay_at_failure": "Pagamento fallito presso $receipt",
+			"pay_at_not_confirmed": "",
+			"payment_not_confirmed_description": "",
+			"payment_not_confirmed_description_generic": "",
 			"try_again": "Riprova",
 			"payment_confirmed": "Pagamento confermato",
 			"payment_failed": "Pagamento fallito",
+			"payment_not_confirmed": "",
 			"what_is_scan": "Cos'è lo scanner",
 			"no_camera_permission": "Per scansionare i codici QR, devi consentire l'accesso alla fotocamera nelle impostazioni del sito del tuo browser.",
 			"what_is_scan_description": "Lo scanner di $oisy_short può leggere una grande varietà di codici QR e avviare immediatamente l'azione corretta. Scansiona un codice QR WalletConnect per stabilire una nuova connessione, oppure scansiona il codice di pagamento in qualsiasi negozio che utilizza Open CryptoPay per saldare il conto con $oisy_short Pay.",
@@ -1473,8 +1490,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "Acquista",
-			"buy_dev": "Acquista (Ambiente di sviluppo)",
+			"buy_sell": "Acquista/Vendi",
+			"buy_sell_dev": "Acquista/Vendi (Ambiente di sviluppo)",
 			"unavailable_title": "L'acquisto di token è temporaneamente non disponibile",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",
@@ -1851,7 +1868,7 @@
 			"spender": "Delegato",
 			"operator": "Operatore",
 			"application": "Applicazione",
-			"review": "Rivedi i permessi richiesti per $chain_name ($key)",
+			"granted_permissions": "Permessi che questa app ottiene",
 			"method": "Metodo",
 			"interacting_with": "",
 			"type": "Tipo",
@@ -1861,6 +1878,7 @@
 			"expiration": "Scadenza",
 			"token": "Token",
 			"network": "Rete",
+			"networks": "Reti",
 			"amount": "Importo",
 			"hex_data": "Dati HEX",
 			"base64_data": "Dati Base64",
@@ -1874,6 +1892,8 @@
 			"close_pays_others": "Questa transazione chiude uno dei tuoi conti token e versa il suo saldo a un indirizzo che non è il tuo wallet. Per la tua sicurezza, OISY non la firma.",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
+			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
 			"simulated_instructions": "Istruzioni simulate",
 			"multiple_operations": "Questa transazione contiene più operazioni che interessano il tuo wallet. Verifica le variazioni di saldo simulate e le istruzioni contenute, e approva questa transazione solo se ti fidi anche dell'applicazione.",
 			"simulated_review": "La revisione qui sotto è ciò che prevede la simulazione di questa transazione rispetto allo stato attuale della rete. Ciò che accade durante l'esecuzione effettiva può differire.",
@@ -1899,6 +1919,7 @@
 			"high_gas_limit": "Questa richiesta imposta un limite di gas insolitamente alto, quindi la commissione massima sopra indicata è molto superiore a quanto questa transazione dovrebbe costare. Controllala attentamente e firma solo se ti fidi di questa app.",
 			"invalid_typed_data": "Questa richiesta contiene un valore il cui tipo non corrisponde allo schema dichiarato dall'app. Quanto visualizzato potrebbe differire da ciò che verrebbe effettivamente firmato, pertanto la firma è disabilitata.",
 			"unreviewable_typed_data": "OISY non riconosce il contenuto che questa app ti chiede di firmare, quindi il riepilogo non può descriverlo. Assicurati di fidarti dell'applicazione e controlla i suoi dati grezzi prima di firmare.",
+			"unreviewable_typed_data_witness": "OISY può descrivere i token che questa firma consente al delegato di prelevare, ma non riconosce il resto del contenuto che questa app ti chiede di firmare. Assicurati di fidarti dell'applicazione e controlla i suoi dati grezzi prima di firmare.",
 			"unsigned_typed_data_keys": "Questa app ha inviato dati aggiuntivi che il suo schema non dichiara. Tali dati non sono coperti dalla firma, quindi vengono mostrati solo i campi sottostanti.",
 			"tab_summary": "Riepilogo",
 			"tab_raw_data": "Dati grezzi",
@@ -2018,6 +2039,7 @@
 			"unreviewed_without_simulation": "OISY non ha potuto leggere una parte di questa transazione e la rete non ne ha restituito nemmeno una simulazione, quindi nulla descrive cosa farebbe quella parte. Per la tua sicurezza, non è stata firmata.",
 			"unreviewed_not_described_by_simulation": "OISY non ha potuto leggere una parte di questa transazione e nemmeno la sua simulazione ha mostrato cosa farebbe quella parte. Per la tua sicurezza, non è stata firmata.",
 			"unread_programs_unconfirmed": "Questa transazione chiama un programma che OISY non riesce a leggere e non è stata confermata nella revisione. Per la tua sicurezza, non è stata firmata.",
+			"unexplained_request_unconfirmed": "OISY non può mostrare cosa fa questa richiesta e non è stata confermata nella revisione. Per la tua sicurezza, non è stata firmata.",
 			"sol_transaction_as_message": "Questo messaggio è una transazione Solana, che può essere approvata solo tramite una revisione della transazione. Per la tua sicurezza, non è stata firmata.",
 			"request_not_defined": "Errore inaspettato: la richiesta non è definita, pertanto non può essere elaborata.",
 			"unexpected_processing_request": "Errore inaspettato durante l'elaborazione della richiesta con WalletConnect."
@@ -2332,6 +2354,9 @@
 			"confirmations": "Conferme",
 			"for": "",
 			"for_copied": "",
+			"canister": "Canister",
+			"canister_copied": "ID canister copiato negli appunti.",
+			"canister_unknown": "sconosciuto",
 			"expiration": "",
 			"approve_label": ""
 		},
@@ -2352,7 +2377,8 @@
 			"deposit": "Deposito",
 			"approve": "Approvazione",
 			"burn": "Burn",
-			"mint": "Mint"
+			"mint": "Mint",
+			"top_up": "Ricarica"
 		},
 		"filter": {
 			"types_label": "",

@@ -112,6 +112,44 @@ describe('onramper.utils', () => {
 			expect(result).toBe(expectedUrl);
 		});
 
+		it('should add the sell_* parameters for the Sell tab', async () => {
+			const signedQuery = `networkWallets=bitcoin:${mockBtcAddress}&wallets=btc:${mockBtcAddress}`;
+			mockSignOnramperWidgetUrl(signedQuery);
+
+			const params: BuildOnramperLinkParams = {
+				identity: mockIdentity,
+				mode: 'buy,sell',
+				defaultFiat: Currency.EUR,
+				defaultCrypto: 'eth',
+				onlyCryptos: ['btc', 'eth'],
+				onlyCryptoNetworks: ['bitcoin', 'ethereum'],
+				sell_defaultFiat: Currency.EUR,
+				sell_defaultCrypto: 'eth',
+				sell_onlyCryptos: ['btc', 'eth'],
+				sell_onlyCryptoNetworks: ['bitcoin', 'ethereum'],
+				wallets: [{ cryptoId: 'btc', wallet: mockBtcAddress }],
+				networkWallets: [{ networkId: 'bitcoin', wallet: mockBtcAddress }],
+				supportRecurringPayments: true,
+				enableCountrySelector: true,
+				themeName: 'dark'
+			};
+
+			const expectedUrl =
+				`${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}` +
+				`&mode=buy,sell&defaultFiat=eur&defaultCrypto=eth` +
+				`&onlyCryptos=btc,eth&onlyCryptoNetworks=bitcoin,ethereum` +
+				`&sell_defaultFiat=eur&sell_defaultCrypto=eth` +
+				`&sell_onlyCryptos=btc,eth&sell_onlyCryptoNetworks=bitcoin,ethereum` +
+				`&supportRecurringPayments=true&enableCountrySelector=true` +
+				`&themeName=dark` +
+				`&${signedQuery}` +
+				`&signature=${mockSignature}`;
+
+			const result = await buildOnramperLink(params);
+
+			expect(result).toBe(expectedUrl);
+		});
+
 		it('should handle empty wallets array', async () => {
 			mockSignOnramperWidgetUrl('');
 
