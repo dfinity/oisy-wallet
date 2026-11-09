@@ -1422,6 +1422,28 @@ describe('chain-fusion-swap.services', () => {
 				expect(createActiveUserTransaction).toHaveBeenCalledOnce();
 				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
 			});
+
+			// The deposit may have gone out, so the minted ckBTC must not land in a hidden token.
+			it('should enable the destination after an unclear outcome, but not after a refusal', async () => {
+				const enableDestinationToken = vi.fn().mockResolvedValue(undefined);
+
+				sendThroughBackend(new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') }));
+
+				await expect(
+					fetchChainFusionBtcSwap({ ...swapParams, enableDestinationToken })
+				).rejects.toBeInstanceOf(BtcBroadcastUnconfirmedError);
+
+				expect(enableDestinationToken).toHaveBeenCalledOnce();
+
+				enableDestinationToken.mockClear();
+				sendThroughBackend(new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee'));
+
+				await expect(
+					fetchChainFusionBtcSwap({ ...swapParams, enableDestinationToken })
+				).rejects.toBeInstanceOf(BtcBroadcastTransactionCanisterError);
+
+				expect(enableDestinationToken).not.toHaveBeenCalled();
+			});
 		});
 	});
 });

@@ -7,7 +7,8 @@ import type { UtxosFee } from '$btc/types/btc-send';
 import {
 	convertNumberToSatoshis,
 	isDefinitiveBtcBroadcastRefusal,
-	isInvalidUtxosFee
+	isInvalidUtxosFee,
+	isUnclearBtcBroadcastOutcome
 } from '$btc/utils/btc-send.utils';
 import type { ChainFusionDirection } from '$declarations/backend/backend.did';
 import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
@@ -964,6 +965,12 @@ export const fetchChainFusionBtcSwap = async ({
 		// sent the deposit, so the row stays for the poller to settle.
 		if (rowOpened && isDefinitiveBtcBroadcastRefusal(err)) {
 			await deleteUnbroadcastActiveUserTransaction({ identity, id: swapId });
+		}
+
+		// The deposit may have gone out, so the destination is enabled as after a sent one: the
+		// minted ckBTC must not land in a token the user cannot see.
+		if (isUnclearBtcBroadcastOutcome(err)) {
+			await enableDestination(enableDestinationToken);
 		}
 
 		throw err;
