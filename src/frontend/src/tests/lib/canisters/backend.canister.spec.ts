@@ -4,6 +4,7 @@ import type {
 	_SERVICE as BackendService,
 	BtcAddPendingTransactionResult,
 	BtcGetPendingTransactionsResult,
+	BtcGetSpendableUtxosResult,
 	CustomToken,
 	IcrcToken,
 	SignOnramperWidgetUrlResult,
@@ -567,6 +568,71 @@ describe('backend.canister', () => {
 
 			await expect(btcGetPendingTransactions(btcGetPendingTransactionParams)).rejects.toThrow(
 				new CanisterInternalError('II delegation chain verification failed: chain expired')
+			);
+		});
+	});
+
+	describe('btc_get_spendable_utxos', () => {
+		const spendableUtxos = {
+			utxos: btcAddPendingTransactionParams.utxos,
+			pending_transactions: [
+				{
+					utxos: btcAddPendingTransactionParams.utxos,
+					txid: btcAddPendingTransactionParams.txId
+				}
+			]
+		};
+
+		it('should return the spendable UTXOs and the pending transactions', async () => {
+			service.btc_get_spendable_utxos.mockResolvedValue({ Ok: spendableUtxos });
+
+			const { btcGetSpendableUtxos } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcGetSpendableUtxos(btcGetPendingTransactionParams);
+
+			expect(service.btc_get_spendable_utxos).toHaveBeenCalledExactlyOnceWith(
+				btcGetPendingTransactionEndpointParams
+			);
+			expect(res).toEqual(spendableUtxos);
+		});
+
+		it.each([
+			{
+				Err: { InternalError: { msg: 'reply too large' } },
+				error: new CanisterInternalError('reply too large')
+			},
+			{
+				Err: { InvalidDelegationChain: { msg: 'chain expired' } },
+				error: new CanisterInternalError('II delegation chain verification failed: chain expired')
+			},
+			// Unlike the pending transactions, there is nothing to fall back on.
+			{
+				Err: { RateLimited: { max_calls: 15, window_ns: 60_000_000_000n, caller: mockPrincipal } },
+				error: new CanisterInternalError(
+					'Rate limit exceeded. Maximum of 15 calls allowed every 60 seconds.'
+				)
+			}
+		])('should throw on $Err', async ({ Err, error }) => {
+			service.btc_get_spendable_utxos.mockResolvedValue({ Err } as BtcGetSpendableUtxosResult);
+
+			const { btcGetSpendableUtxos } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(btcGetSpendableUtxos(btcGetPendingTransactionParams)).rejects.toThrow(error);
+		});
+
+		it('should throw if btc_get_spendable_utxos throws', async () => {
+			service.btc_get_spendable_utxos.mockRejectedValue(mockResponseError);
+
+			const { btcGetSpendableUtxos } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(btcGetSpendableUtxos(btcGetPendingTransactionParams)).rejects.toThrow(
+				mockResponseError
 			);
 		});
 	});

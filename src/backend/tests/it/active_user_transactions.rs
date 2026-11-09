@@ -6,8 +6,8 @@ use shared::types::{
     active_user_transaction::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, LifiData,
-        NearIntentsData, OisyTradeData, OisyTradeSide, OneSecIcpToEvmData,
+        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, CyclesTopUpData,
+        LifiData, NearIntentsData, OisyTradeData, OisyTradeSide, OneSecIcpToEvmData,
         UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode, XrpData,
         LIFI_REF_BLOCKHASH, LIFI_REF_NONCE, LIFI_REF_TX_HASH,
         MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
@@ -465,6 +465,48 @@ fn create_cycles_mint_variant_roundtrip() {
 
     // Read back through the query path so the stored (not just echoed)
     // representation is what the assertion sees.
+    let listed = list_active(&pic, user);
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].data, data);
+}
+
+#[test]
+fn create_cycles_top_up_variant_roundtrip() {
+    // As for a mint, the row is opened before the ICP transfer, so it carries no
+    // block index yet. The canister is in the payload: the ledger cannot give it
+    // back.
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let data = ActiveUserTransactionData::CyclesTopUp(CyclesTopUpData {
+        source_token: TokenId::Icrc(Principal::from_text("ryjl3-tyaaa-aaaaa-aaaba-cai").unwrap()),
+        canister_id: Principal::from_text("ywcsb-maaaa-aaaai-q6k7a-cai").unwrap(),
+        amount: Nat::from(100_000_000u64),
+        transfer_created_at_ns: 1_790_000_000_000_000_000,
+    });
+
+    let created = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data: data.clone(),
+                ..create_req(TX_ID)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed");
+
+    match created {
+        ActiveUserTransactionResult::Ok(tx) => {
+            assert_eq!(tx.id, TX_ID);
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, data);
+            assert_eq!(tx.external_refs, vec![]);
+        }
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
     let listed = list_active(&pic, user);
     assert_eq!(listed.len(), 1);
     assert_eq!(listed[0].data, data);
