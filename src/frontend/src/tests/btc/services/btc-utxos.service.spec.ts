@@ -302,6 +302,33 @@ describe('btc-utxos.service', () => {
 			});
 		});
 
+		// The backend's `btc_get_spendable_utxos` leaves reserved UTXOs out, so a wallet whose every
+		// UTXO a pending send reserves gets none at all, beside that send.
+		it('should return UtxoLocked when there are no UTXOs and pending transactions reserve some', () => {
+			mockStoreApi.setStoreValue({
+				[mockBtcAddress]: {
+					certified: true as const,
+					data: [
+						{
+							txid: new Uint8Array([99]),
+							utxos: [
+								{ value: 500_000n, outpoint: { txid: new Uint8Array([1, 2, 3, 4]), vout: 0 } }
+							]
+						}
+					]
+				}
+			});
+
+			const result = prepareBtcSend({ ...defaultParams, allUtxos: [] });
+
+			expect(result).toEqual({
+				feeSatoshis: ZERO,
+				feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles,
+				utxos: [],
+				error: BtcPrepareSendError.UtxoLocked
+			});
+		});
+
 		it('should return UtxoLocked error when all UTXOs are filtered out by confirmations', () => {
 			const unconfirmedUtxo: CkBtcMinterDid.Utxo = {
 				value: 500000n,
@@ -368,6 +395,25 @@ describe('btc-utxos.service', () => {
 			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
 			expect(result.error).toBeUndefined();
 		});
+
+		// 1 input + recipient + P2WPKH change, at 5 sat/vB.
+		it.each([
+			{ recipient: 'a P2WPKH recipient', destination: mockBtcAddress, feeSatoshis: 141n * 5n },
+			{
+				recipient: 'a P2TR recipient',
+				destination: 'bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0',
+				feeSatoshis: 153n * 5n
+			},
+			{ recipient: 'no recipient yet', destination: undefined, feeSatoshis: 153n * 5n }
+		])(
+			'should size the recipient output in the fee for $recipient',
+			({ destination, feeSatoshis }) => {
+				const result = prepareBtcSend({ ...defaultParams, destination });
+
+				expect(result.feeSatoshis).toBe(feeSatoshis);
+				expect(result.utxos).toHaveLength(1);
+			}
+		);
 	});
 
 	describe('getFeeRateFromPercentiles', () => {

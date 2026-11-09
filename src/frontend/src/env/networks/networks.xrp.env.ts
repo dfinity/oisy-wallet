@@ -6,6 +6,7 @@ import type { Network, NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
+import xrpMainnetIconColored from '$xrp/assets/xrp.svg';
 import type { XrpNetwork } from '$xrp/types/network';
 
 // XRP Ledger uses the same enablement convention as every other chain — the
@@ -23,6 +24,7 @@ export const XRP_MAINNET_NETWORK: XrpNetwork = {
 	env: 'mainnet',
 	name: 'XRP Ledger',
 	icon: xrpMainnetIcon,
+	iconColored: xrpMainnetIconColored,
 	explorerUrl: XRP_MAINNET_EXPLORER_URL
 };
 

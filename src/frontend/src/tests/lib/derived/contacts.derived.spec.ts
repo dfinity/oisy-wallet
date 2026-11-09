@@ -144,8 +144,10 @@ describe('contacts.derived', () => {
 				n: 1,
 				names: ['Alice'],
 				addresses: [
-					[{ label: ['Test'], token_account_id: { Eth: { Public: mockEthAddress } } }],
-					[{ label: ['Test 2'], token_account_id: { Eth: { Public: mockEthAddress2 } } }]
+					[
+						{ label: ['Test'], token_account_id: { Eth: { Public: mockEthAddress } } },
+						{ label: ['Test 2'], token_account_id: { Eth: { Public: mockEthAddress2 } } }
+					]
 				]
 			}).map(mapToFrontendContact);
 
@@ -155,6 +157,60 @@ describe('contacts.derived', () => {
 
 			result[`${contactsData[0].id}`].addresses.forEach((address) => {
 				expect(address).toHaveProperty('id');
+			});
+		});
+
+		describe('address IDs', () => {
+			const contactsData = getMockContacts({
+				n: 1,
+				names: ['Alice'],
+				addresses: [
+					[
+						{ label: ['Test'], token_account_id: { Eth: { Public: mockEthAddress } } },
+						{ label: ['Test 2'], token_account_id: { Eth: { Public: mockEthAddress2 } } }
+					]
+				]
+			}).map(mapToFrontendContact);
+
+			const [contact] = contactsData;
+
+			const addressIds = () =>
+				get(extendedAddressContacts)[`${contact.id}`].addresses.map(({ id }) => id);
+
+			beforeEach(() => {
+				contactsStore.addContact(contact);
+			});
+
+			it('should give every address its own ID', () => {
+				const ids = addressIds();
+
+				expect(new Set(ids).size).toBe(contact.addresses.length);
+			});
+
+			it('should keep the IDs when only the images of the contacts change', () => {
+				const before = addressIds();
+
+				contactsStore.update((contacts) =>
+					contacts?.map((contactUi) => ({
+						...contactUi,
+						image: { data: new Uint8Array([1, 2, 3]), mime_type: { 'image/png': null } }
+					}))
+				);
+
+				expect(addressIds()).toEqual(before);
+			});
+
+			it('should give an address a new ID when the address changes', () => {
+				const [, before] = addressIds();
+
+				contactsStore.updateContact({
+					...contact,
+					addresses: [contact.addresses[0], { ...contact.addresses[1], address: mockEthAddress }]
+				});
+
+				const [, after] = addressIds();
+
+				expect(after).not.toBe(before);
 			});
 		});
 	});

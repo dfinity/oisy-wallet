@@ -95,6 +95,11 @@ export const LIFI_QUOTE_TIMEOUT_MS = SWAP_QUOTE_TIMEOUT_MS;
 // gas still pays for it.
 export const LIFI_GAS_LIMIT_BUFFER_PERCENT = 20n;
 
+// Added to the gas the node estimates a Velora Market transaction at, which execution signs with
+// instead of the limit Velora builds it with: the route can cost more when mined than when
+// estimated, and a transaction that runs out of gas still pays for it.
+export const VELORA_GAS_LIMIT_BUFFER_PERCENT = 20n;
+
 // Added to LI.FI's own gas estimate for the fee the user reviews, where execution adds the buffer
 // above to the node's: the node estimates the very same transaction a few percent higher (3–5 %
 // for USDC → ETH on Base, on every exchange, 2026-10-21), and a review priced below execution
@@ -111,6 +116,13 @@ export const LIFI_CARRIED_FEE_HEADROOM_PERCENT = 10n;
 // earlier in 39–64 % of samples, by up to 5.5 % (2026-10-22): an amount with no room above the
 // form's fee could not be confirmed.
 export const LIFI_MAX_FEE_HEADROOM_PERCENT = 10n;
+
+// Added to the network fee of a Solana-source LI.FI quote's ceiling, which the form, "Max" and the
+// review budget and execution's re-quote must fit. LI.FI prices the compute units anew with each
+// quote, at 100,000 to 200,000 micro-lamports a unit for a limit fixed at 1.4M, and a re-quote came
+// out up to 34 % above the quote displayed a moment before, 57 % above one 30 s before
+// (Solana → Solana, 2026-10-29). The rent of the accounts it creates does not move.
+export const LIFI_SOL_NETWORK_FEE_HEADROOM_PERCENT = 100n;
 
 // A LI.FI row whose transaction the node refused outright is deleted, retried as a cycles mint's
 // is: a few attempts, a second apart.

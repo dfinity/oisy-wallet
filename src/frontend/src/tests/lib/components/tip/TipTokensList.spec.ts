@@ -4,6 +4,7 @@ import {
 	initModalTokensListContext,
 	MODAL_TOKENS_LIST_CONTEXT_KEY
 } from '$lib/stores/modal-tokens-list.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -25,7 +26,11 @@ describe('TipTokensList', () => {
 			context: new Map([[MODAL_TOKENS_LIST_CONTEXT_KEY, context]])
 		});
 
-		expect(getByText(get(i18n).core.text.no_results)).toBeInTheDocument();
+		expect(
+			getByText(
+				replacePlaceholders(get(i18n).tokens.text.no_match_query, { $query: 'zzzz-no-such-token' })
+			)
+		).toBeInTheDocument();
 
 		// The copy this branch used to show. Asserted as absent rather than only
 		// asserting the right one, because the failure was showing a true-sounding

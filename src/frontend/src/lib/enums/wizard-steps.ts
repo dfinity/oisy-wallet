@@ -1,8 +1,8 @@
 export enum WizardStepsSend {
 	TOKENS_LIST = 'Tokens List',
 	NFTS_LIST = 'NFTs List',
+	SEND_OR_TOP_UP = 'Send Or Top Up',
 	DESTINATION = 'Destination',
-	FILTER_NETWORKS = 'Filter Networks',
 	SEND = 'Send',
 	REVIEW = 'Review',
 	SENDING = 'Sending',
@@ -27,7 +27,6 @@ export enum WizardStepsSwap {
 	REVIEW = 'Review',
 	SWAPPING = 'Swapping',
 	TOKENS_LIST = 'Tokens List',
-	FILTER_NETWORKS = 'Filter Networks',
 	SELECT_PROVIDER = 'Select swap provider'
 }
 
@@ -138,7 +137,6 @@ export enum WizardStepsClaimStakingReward {
 export enum WizardStepsTradingDeposit {
 	DEPOSIT = 'Deposit',
 	TOKENS_LIST = 'Tokens List',
-	FILTER_NETWORKS = 'Filter Networks',
 	REVIEW = 'Review',
 	DEPOSITING = 'Depositing'
 }
@@ -181,6 +179,8 @@ export enum WizardStepsCyclesMint {
 export enum WizardStepsCyclesTopUp {
 	CANISTER = 'Canister',
 	AMOUNT = 'Amount',
-	REVIEW = 'Review',
+	// Not 'Review': the send wizard hosts these steps next to its own Review step, and steps are
+	// found by name.
+	REVIEW = 'Top Up Review',
 	TOPPING_UP = 'ToppingUp'
 }

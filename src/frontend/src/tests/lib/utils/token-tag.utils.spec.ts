@@ -1,5 +1,7 @@
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { Languages } from '$lib/enums/languages';
-import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
+import { TokenCategoryTagValue, TokenRiskTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
@@ -7,7 +9,8 @@ import {
 	filterTokensByCategory,
 	filterTokensUiByCategory,
 	getTokenCategorySentenceLabel,
-	getTokenCategoryTag
+	getTokenCategoryTag,
+	getTokensCategories
 } from '$lib/utils/token-tag.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
@@ -297,6 +300,27 @@ describe('token-tag.utils', () => {
 					language: Languages.GERMAN
 				})
 			).toBe('Token für Rechenleistung');
+		});
+	});
+
+	describe('getTokensCategories', () => {
+		it('lists each asset type once', () => {
+			const stock: Pick<Token, 'tags'> = {
+				tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.STOCK }]
+			};
+
+			expect(getTokensCategories([BTC_MAINNET_TOKEN, stock, ETHEREUM_TOKEN])).toEqual([
+				TokenCategoryTagValue.CRYPTO,
+				TokenCategoryTagValue.STOCK
+			]);
+		});
+
+		it('skips tokens without an asset type', () => {
+			const riskOnly: Pick<Token, 'tags'> = {
+				tags: [{ type: TokenTagType.RISK, value: TokenRiskTagValue.LOW }]
+			};
+
+			expect(getTokensCategories([riskOnly])).toEqual([]);
 		});
 	});
 });

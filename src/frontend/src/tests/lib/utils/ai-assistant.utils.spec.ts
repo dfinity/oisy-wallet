@@ -26,17 +26,14 @@ import { mapToFrontendContact } from '$lib/utils/contact.utils';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
-import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { get } from 'svelte/store';
 
 describe('ai-assistant.utils', () => {
 	const contactsData = getMockContacts({
 		n: 1,
 		names: ['Alice'],
-		addresses: [
-			[{ label: ['Test'], token_account_id: { Eth: { Public: mockEthAddress } } }],
-			[{ label: ['Test 2'], token_account_id: { Eth: { Public: mockEthAddress2 } } }]
-		]
+		addresses: [[{ label: ['Test'], token_account_id: { Eth: { Public: mockEthAddress } } }]]
 	}).map(mapToFrontendContact);
 
 	contactsData.forEach((contact) => contactsStore.addContact(contact));
@@ -106,6 +103,37 @@ describe('ai-assistant.utils', () => {
 				id: mockRandomUUID,
 				sendCompleted: false
 			});
+		});
+
+		it('resolves a selectedContactAddressId taken before the images of the contacts loaded', () => {
+			// Real IDs, so that an ID handed out again on the update would not match.
+			vi.mocked(globalThis.crypto.randomUUID).mockRestore();
+
+			const original = get(contactsStore);
+			const [{ id: addressId }] = get(extendedAddressContacts)[`${contactsData[0].id}`].addresses;
+
+			contactsStore.update((contacts) =>
+				contacts?.map((contact) => ({
+					...contact,
+					image: { data: new Uint8Array([1, 2, 3]), mime_type: { 'image/png': null } }
+				}))
+			);
+
+			const result = parseReviewSendTokensToolArguments({
+				filterParams: [
+					{ value: addressId, name: 'selectedContactAddressId' },
+					{ value: `${sendValue}`, name: 'amountNumber' },
+					{ value: 'ICP', name: 'tokenSymbol' },
+					{ value: 'ICP', name: 'networkId' }
+				],
+				tokens: [ICP_TOKEN, ETHEREUM_TOKEN, BTC_MAINNET_TOKEN],
+				extendedAddressContacts: get(extendedAddressContacts)
+			});
+
+			contactsStore.set(original);
+
+			expect(result?.contactAddress?.id).toBe(addressId);
+			expect(result?.contactAddress?.address).toBe(extendedAddressContactUi.addresses[0].address);
 		});
 
 		it('returns undefined when the token could not be identified', () => {

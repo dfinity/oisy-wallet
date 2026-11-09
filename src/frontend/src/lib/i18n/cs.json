@@ -1044,7 +1044,6 @@
 			"open_qr_modal": "Spustit skenování QR kódu pro podrobnosti transakce",
 			"scan_qr": "Skenovat QR kód",
 			"select_token": "Vybrat token k odeslání",
-			"select_network_filter": "Vybrat síťový filtr",
 			"send_again": "Odeslat znovu",
 			"recently_used_tab": "Nedávno použité",
 			"contacts_tab": "Kontakty",
@@ -1139,6 +1138,8 @@
 			"ethereum_out_of_gas_gas_sent": "Odeslaný gas: $gasSent",
 			"ethereum_transaction_hash": "Hash transakce: $hash",
 			"ethereum_unsigned_transaction": "Nepodepsaná transakce: $transaction",
+			"ethereum_transaction_not_sent": "Transakce nebyla odeslána: nepodařilo se nám spojit se sítí, abychom ji připravili. Můžete to bezpečně zkusit znovu.",
+			"ethereum_transaction_unconfirmed": "Nepodařilo se nám potvrdit, zda transakce dorazila do sítě. Stále může projít, proto počkejte minutu nebo dvě a před dalším odesláním zkontrolujte svou aktivitu.",
 			"solana_transaction_expired": "Vaše transakce nebyla zpracována sítí Solana a vypršela, nejpravděpodobněji proto, že zadaný prioritní poplatek nebyl dostatečný. Aktualizovali jsme ho na nejnovější doporučenou částku, zkuste to prosím znovu.",
 			"solana_confirmation_failed": "Neobdrželi jsme potvrzení pro transakci, kterou jste právě vytvořili. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí vašeho tokenu, zda byla vaše transakce vytvořena správně.",
 			"solana_insufficient_funds": "Zůstatek vašeho tokenu není dostatečný k dokončení této transakce. Váš zůstatek se mohl od posledního zobrazení změnit.",
@@ -1212,7 +1213,10 @@
 			"unknown": "OISY zatím nedokáže určit, zda dobití proběhlo. Pokud ano, uvidíte ho v aktivitě $token. Dobijte znovu, abyste stejné dobití odeslali znovu: může proběhnout jen jednou. Nové nebo změněné dobití by přidalo cykly znovu, pokud toto proběhlo.",
 			"unknown_fresh": "OISY zatím nedokáže určit, zda vaše poslední dobití proběhlo. Pokud ano, toto dobití přidá cykly znovu. Nejprve zkontrolujte aktivitu $token.",
 			"sent_to_canister": "Odesláním $token do kanistru se kanistr nedobije. $token skončí na účtu kanistru a kanistr získá cykly, jen pokud si je vybere jeho vlastní kód.",
-			"sent_to_canister_top_up": "Chcete-li kanistru přidat cykly, použijte „Dobít“ na stránce $token."
+			"sent_to_canister_top_up": "Chcete-li kanistru přidat cykly, použijte „Dobít“ na stránce $token.",
+			"choice_send": "Odeslat $token",
+			"choice_send_description": "Odešlete tokeny $token na jiný účet. Odesláním $token do kanistru se kanistr nedobije.",
+			"choice_top_up_description": "Převeďte tokeny $token na cykly a dobijte jimi libovolný kanistr."
 		},
 		"error": {
 			"invalid_canister_id": "Zadejte ID kanistru. Uživatelské principaly, ID účtů a adresy v jiných sítích nelze dobít.",
@@ -1369,6 +1373,11 @@
 			"swap_provider": "Poskytovatel výměny",
 			"smart_swap": "",
 			"finding_best_rate": "",
+			"smart_swap_gain": "",
+			"smart_swap_best_of_offers": "",
+			"smart_swap_offers_compared": "",
+			"smart_swap_offers": "",
+			"smart_swap_selected_offer": "",
 			"swap_provider_website": "Webové stránky",
 			"swap_route": "Trasa výměny",
 			"included_network_fees": "Zahrnuté síťové poplatky",
@@ -1376,7 +1385,6 @@
 			"best_rate": "Nejlepší kurz",
 			"expected_minimum": "Očekávané minimum",
 			"you_receive": "Obdržíte",
-			"select": "Vybrat >",
 			"select_swap_provider": "Vybrat poskytovatele výměny",
 			"open_icp_swap": "Otevřít webové stránky ICP Swap",
 			"open_instructions_link": "Otevřít odkaz na pokyny",
@@ -1435,7 +1443,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
@@ -1503,6 +1512,7 @@
 			"show_more_networks": "Zobrazit $number dalších sítí",
 			"hide_more_networks": "Skrýt další sítě",
 			"on_network": " na $network",
+			"on_network_label": "Na $network",
 			"delete_token": "Smazat token",
 			"edit_token": "Upravit token",
 			"sort_by_value": "Hodnota",
@@ -1511,6 +1521,18 @@
 			"hide_asset_types": "Skrýt typy aktiv",
 			"asset_type": "Typ aktiva v $oisy_name",
 			"asset_type_all": "Všechny typy aktiv",
+			"asset_type_all_short": "",
+			"clear_network_filter": "",
+			"clear_asset_type_filter": "",
+			"filter_asset_types": "",
+			"clear_filters": "",
+			"no_match_network": "",
+			"no_match_asset_type": "",
+			"no_match_asset_type_network": "",
+			"no_match_query": "",
+			"no_match_query_network": "",
+			"no_match_query_asset_type": "",
+			"no_match_query_asset_type_network": "",
 			"no_tokens_for_asset_type": "Ve tvé peněžence nejsou žádné $asset_type",
 			"no_tokens_for_asset_type_zero_tokens": "V vybrané síti nejsou žádné $asset_type",
 			"no_tokens_for_asset_type_description": "Vyber z <strong>$count podporovaných tokenů</strong> a přizpůsob si zobrazení portfolia."
@@ -1620,7 +1642,8 @@
 		"placeholder": {
 			"enter_contract_address": "Zadejte adresu smlouvy ERC20",
 			"enter_token_address": "Zadejte adresu tokenu SPL",
-			"search_token": "Hledat token"
+			"search_token": "Hledat token",
+			"search_token_on_network": ""
 		},
 		"warning": {
 			"trust_token": "Ujistěte se, že důvěřujete tokenu, který přidáváte. Pokud je token, který přidáváte, ovládán škodlivou stranou, mohli by se vás pokusit podvést, např. tím, že vás přesvědčí, že jste obdrželi značné množství tokenů, aby vás zmanipulovali a poslali jste jim tokeny na oplátku nebo provedli jiné nežádoucí akce. Více se dozvíte o podvodech a bezpečnostních rizicích např. <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">zde</a>."
@@ -1871,6 +1894,22 @@
 			"cketh_deposit_principal": "Příjemce ckETH",
 			"cketh_deposit_refused": "Tento požadavek volá kontrakt pro převod ckETH pro principal na Internet Computeru, který není váš, nebo s daty, která OISY nedokáže přečíst. Pro vaši bezpečnost ho OISY nepodepíše.",
 			"cketh_helper_unconfirmed": "OISY zatím nedokáže ověřit kontrakt pro převod ckETH, a proto nemůže tento vklad zkontrolovat. Schválení zůstane zakázáno, dokud to nebude možné.",
+			"swap_title": "",
+			"swap_pay": "",
+			"swap_pay_at_most": "",
+			"swap_receive_at_least": "",
+			"swap_recipient": "",
+			"swap_app_fee": "",
+			"swap_app_fee_share": "",
+			"swap_allowance": "",
+			"swap_allowance_amount": "",
+			"swap_allowance_unlimited": "",
+			"swap_valid_until": "",
+			"swap_no_deadline": "",
+			"swap_router": "",
+			"swap_recipient_not_wallet": "",
+			"swap_no_minimum": "",
+			"swap_expired": "",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",
 			"sign_psbt": "Podepsat transakci",
@@ -2491,6 +2530,7 @@
 			"create": "Nepodařilo se vytvořit kontakt",
 			"update": "Nepodařilo se aktualizovat kontakt",
 			"delete": "Nepodařilo se smazat kontakt",
+			"load": "Nepodařilo se načíst kontakty",
 			"name_too_long": "Název nesmí být delší než $maxCharacters znaků."
 		}
 	},
