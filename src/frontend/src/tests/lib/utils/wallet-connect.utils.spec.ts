@@ -66,18 +66,34 @@ describe('wallet-connect.utils', () => {
 			{ name: 'left-to-right mark', character: '\u200E' },
 			{ name: 'right-to-left mark', character: '\u200F' },
 			{ name: 'Arabic letter mark', character: '\u061C' },
+			{ name: 'null', character: '\u0000' },
+			{ name: 'escape', character: '\u001B' },
+			{ name: 'next line', character: '\u0085' }
+		])('leaves out a $name', ({ character }) => {
+			expect(visibleMessageText(`Sign${character} in`)).toBe('Sign in');
+		});
+
+		it.each([
 			{ name: 'zero-width space', character: '\u200B' },
 			{ name: 'zero-width non-joiner', character: '\u200C' },
 			{ name: 'zero-width joiner', character: '\u200D' },
 			{ name: 'word joiner', character: '\u2060' },
 			{ name: 'byte order mark', character: '\uFEFF' },
 			{ name: 'soft hyphen', character: '\u00AD' },
-			{ name: 'variation selector', character: '\uFE0F' },
-			{ name: 'null', character: '\u0000' },
-			{ name: 'escape', character: '\u001B' },
-			{ name: 'next line', character: '\u0085' }
-		])('leaves out a $name', ({ character }) => {
-			expect(visibleMessageText(`Sign${character} in`)).toBe('Sign in');
+			{ name: 'variation selector', character: '\uFE0F' }
+		])('keeps a $name', ({ character }) => {
+			expect(visibleMessageText(`Sign${character} in`)).toBe(`Sign${character} in`);
+		});
+
+		it.each([
+			{ name: 'the Arabic number sign before digits', message: '\u0600123' },
+			{ name: 'an emoji joined by a zero-width joiner', message: '\u{1F469}\u200D\u2695\uFE0F' },
+			{
+				name: 'a flag built from tag characters',
+				message: '\u{1F3F4}\u{E0067}\u{E0062}\u{E0073}\u{E0063}\u{E0074}\u{E007F}'
+			}
+		])('keeps $name', ({ message }) => {
+			expect(visibleMessageText(message)).toBe(message);
 		});
 
 		it('turns carriage returns into line breaks', () => {
