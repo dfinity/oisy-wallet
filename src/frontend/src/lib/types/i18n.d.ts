@@ -1035,9 +1035,13 @@ interface I18nScanner {
 		select_token_to_pay: string;
 		pay_at_successful: string;
 		pay_at_failure: string;
+		pay_at_not_confirmed: string;
+		payment_not_confirmed_description: string;
+		payment_not_confirmed_description_generic: string;
 		try_again: string;
 		payment_confirmed: string;
 		payment_failed: string;
+		payment_not_confirmed: string;
 		what_is_scan: string;
 		no_camera_permission: string;
 		what_is_scan_description: string;
