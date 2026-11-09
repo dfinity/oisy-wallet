@@ -3,7 +3,11 @@ pub(crate) mod provider;
 mod providers;
 mod supplemental;
 
-use std::{cell::Cell, time::Duration};
+use std::{
+    cell::{Cell, RefCell},
+    collections::BTreeSet,
+    time::Duration,
+};
 
 use candid::Principal;
 use futures::future::join;
@@ -110,7 +114,17 @@ thread_local! {
     /// re-armed on every init / upgrade (see [`start_exchange_rate_timer`]) and
     /// by every `get_exchange_rates` call.
     static LAST_RATE_REQUEST_AT: Cell<Option<u64>> = const { Cell::new(None) };
+
+    /// Stale custom tokens that `get_exchange_rates` found no refresh covering: `token_activity`
+    /// did not take them, so the recurring refresh does not know them, and another refresh held
+    /// the lock. [`refresh_exchange_rates`] fetches them on its next run and clears the set.
+    /// Ephemeral like the lock: after an upgrade, the next call queues them again.
+    static QUEUED_FOR_REFRESH: RefCell<BTreeSet<StoredTokenId>> =
+        const { RefCell::new(BTreeSet::new()) };
 }
+
+/// Most tokens [`QUEUED_FOR_REFRESH`] holds: about 10 lookups on top of a refresh.
+const MAX_QUEUED_FOR_REFRESH: usize = 500;
 
 /// Records that a caller requested exchange rates at `now_ns`, re-arming the
 /// native-token refresh performed by [`refresh_exchange_rates`].
@@ -513,17 +527,23 @@ pub(crate) fn priceable_tokens_for_caller(caller: StoredPrincipal) -> Vec<Stored
 /// has asked for rates (see [`should_refresh_natives`]) and never consults `token_activity` for
 /// them, so an entry for one would only be re-marked on every call and never evicted.
 ///
-/// Returns whether the refresh is on and `caller` was within its limit.
-pub(crate) fn record_token_activity(caller: Principal, token_ids: &[TokenId], now_ns: u64) -> bool {
+/// Returns `None` while the refresh is off or `caller` is over its limit, and otherwise the
+/// tokens `token_activity` did not take, so that the caller can queue them for the next refresh
+/// (see [`queue_for_next_refresh`]).
+pub(crate) fn record_token_activity(
+    caller: Principal,
+    token_ids: &[TokenId],
+    now_ns: u64,
+) -> Option<Vec<StoredTokenId>> {
     if !is_exchange_rate_refresh_enabled() {
-        return false;
+        return None;
     }
 
     if TOKEN_ACTIVITY_RATE_LIMITER
         .with(|limiter| limiter.check_at(caller, now_ns))
         .is_err()
     {
-        return false;
+        return None;
     }
 
     let natives = native_token_ids();
@@ -535,11 +555,34 @@ pub(crate) fn record_token_activity(caller: Principal, token_ids: &[TokenId], no
         .cloned()
         .collect();
 
-    if !to_record.is_empty() {
-        crate::token::mark_tokens_active(&to_record, now_ns);
+    if to_record.is_empty() {
+        return Some(Vec::new());
     }
 
-    true
+    Some(crate::token::mark_tokens_active(&to_record, now_ns))
+}
+
+/// Adds `token_ids` to [`QUEUED_FOR_REFRESH`] while it holds fewer than
+/// [`MAX_QUEUED_FOR_REFRESH`] tokens.
+pub(crate) fn queue_for_next_refresh(token_ids: impl IntoIterator<Item = StoredTokenId>) {
+    QUEUED_FOR_REFRESH.with(|queued| {
+        let mut queued = queued.borrow_mut();
+        for token_id in token_ids {
+            if queued.len() >= MAX_QUEUED_FOR_REFRESH {
+                break;
+            }
+            queued.insert(token_id);
+        }
+    });
+}
+
+/// Empties [`QUEUED_FOR_REFRESH`] and returns what it held.
+fn take_queued_for_refresh() -> Vec<StoredTokenId> {
+    QUEUED_FOR_REFRESH.with(|queued| {
+        std::mem::take(&mut *queued.borrow_mut())
+            .into_iter()
+            .collect()
+    })
 }
 
 /// Single-pass read of the cache for `token_ids`. Returns:
@@ -590,7 +633,12 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
     // Idle gating: only keep the always-on natives warm while a caller has
     // requested rates recently — otherwise skip them to save outcall cycles.
     let include_natives = should_refresh_natives(now, LAST_RATE_REQUEST_AT.with(Cell::get));
-    let tokens_to_fetch = refresh_candidates(active_custom_tokens, include_natives);
+    let tokens_to_fetch = refresh_candidates(
+        active_custom_tokens
+            .into_iter()
+            .chain(take_queued_for_refresh()),
+        include_natives,
+    );
 
     let freshness_floor_ns = now.saturating_sub(PRICE_FRESHNESS_GRACE_NS);
     let tokens_to_fetch = read_state(|s| {
@@ -855,11 +903,10 @@ mod tests {
     fn record_token_activity_records_nothing_while_refresh_is_off() {
         set_exchange_config(Some("key"), Some(false));
 
-        assert!(!record_token_activity(
-            caller(1),
-            &[custom_token(1).0],
-            1_000
-        ));
+        assert_eq!(
+            record_token_activity(caller(1), &[custom_token(1).0], 1_000),
+            None
+        );
         assert_eq!(recorded_activity(), Vec::<(TokenId, u64)>::new());
     }
 
@@ -870,32 +917,58 @@ mod tests {
         let start = 10 * MINUTE_NS;
 
         for n in 0..3 {
-            assert!(record_token_activity(
-                caller(1),
-                &[custom_token(n).0],
-                start + u64::from(n)
-            ));
+            assert_eq!(
+                record_token_activity(caller(1), &[custom_token(n).0], start + u64::from(n)),
+                Some(vec![])
+            );
         }
-        assert!(!record_token_activity(
-            caller(1),
-            &[custom_token(3).0],
-            start + 3
-        ));
+        assert_eq!(
+            record_token_activity(caller(1), &[custom_token(3).0], start + 3),
+            None
+        );
         assert_eq!(
             recorded_activity().len(),
             3,
             "a recording over the limit writes nothing"
         );
 
-        assert!(
+        assert_eq!(
             record_token_activity(caller(2), &[custom_token(4).0], start + 4),
+            Some(vec![]),
             "the limit is per caller"
         );
-        assert!(
+        assert_eq!(
             record_token_activity(caller(1), &[custom_token(5).0], start + MINUTE_NS),
+            Some(vec![]),
             "the first recording leaves the window a minute later"
         );
         assert_eq!(recorded_activity().len(), 5);
+    }
+
+    #[test]
+    fn record_token_activity_returns_the_tokens_a_full_map_did_not_take() {
+        set_exchange_config(Some("key"), Some(true));
+        let held: Vec<TokenId> = (0..MAX_TOKEN_ACTIVITY_ENTRIES)
+            .map(|n| TokenId::Icrc(Principal::from_slice(&n.to_be_bytes())))
+            .collect();
+        crate::token::mark_tokens_active(&held, 1_000);
+        let new = custom_token(1);
+
+        assert_eq!(
+            record_token_activity(caller(1), &[held[0].clone(), new.0.clone()], 2_000),
+            Some(vec![new])
+        );
+    }
+
+    #[test]
+    fn the_refresh_queue_holds_at_most_500_tokens_until_taken() {
+        queue_for_next_refresh(
+            (0..MAX_QUEUED_FOR_REFRESH as u64 + 10)
+                .map(|n| StoredTokenId(TokenId::Icrc(Principal::from_slice(&n.to_be_bytes())))),
+        );
+
+        assert_eq!(take_queued_for_refresh().len(), MAX_QUEUED_FOR_REFRESH);
+        assert_eq!(take_queued_for_refresh(), Vec::<StoredTokenId>::new());
     }
 
     #[test]

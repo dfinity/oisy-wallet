@@ -232,7 +232,10 @@ one-shot approval, which should preserve their transaction identity.
     (`TOKEN_ACTIVITY_RATE_LIMITER`, which also gates the refresh that
     `get_exchange_rates` starts), and for at most 2,000 tokens at a time
     (`MAX_TOKEN_ACTIVITY_ENTRIES`). Housekeeping evicts inactive entries in
-    budgeted timer batches.
+    budgeted timer batches. A caller's stale tokens the map did not take are
+    fetched by the refresh `get_exchange_rates` starts or, while another
+    refresh holds the lock, queued for the next one (at most 500,
+    `QUEUED_FOR_REFRESH`).
   - A refresh fetches the native tokens and the custom tokens as two groups
     and caches each as soon as its own lookups return.
   - `get_exchange_rate(TokenId)` is a legacy cache-only query for callers

@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use candid::Principal;
 use pocket_ic::common::rest::{CanisterHttpReply, CanisterHttpResponse, MockCanisterHttpResponse};
 use pretty_assertions::assert_eq;
@@ -442,4 +444,107 @@ fn native_prices_are_cached_while_a_custom_token_lookup_is_pending() {
         .query::<Option<ExchangeRate>>(caller, "get_exchange_rate", TokenId::EvmNative(1))
         .expect("get_exchange_rate should answer for ETH");
     assert_eq!(eth.and_then(|rate| rate.usd.price), Some(3000.0));
+}
+
+/// Answers every pending HTTP outcall with `body`, then lets the canister process the replies.
+fn answer_pending_outcalls(pic_setup: &PicBackend, body: &str) {
+    let mut requests = Vec::new();
+    for _ in 0..10 {
+        pic_setup.pic.tick();
+        requests = pic_setup.pic.get_canister_http();
+        if !requests.is_empty() {
+            break;
+        }
+    }
+    for request in requests {
+        pic_setup
+            .pic
+            .mock_canister_http_response(MockCanisterHttpResponse {
+                subnet_id: request.subnet_id,
+                request_id: request.request_id,
+                response: CanisterHttpResponse::CanisterHttpReply(CanisterHttpReply {
+                    status: 200,
+                    headers: vec![],
+                    body: body.as_bytes().to_vec(),
+                }),
+                additional_responses: vec![],
+            });
+    }
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+}
+
+#[test]
+fn a_token_the_full_activity_map_did_not_take_is_fetched_by_the_next_refresh() {
+    const NEW_ADDRESS: &str = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
+    let pic_setup = setup();
+    enable_exchange_rate_refresh(&pic_setup);
+    // A refresh of 2,000 tokens sends about 40 lookups at once, each reserving about 110B cycles
+    // in PocketIC, more than the default balance leaves liquid.
+    pic_setup
+        .pic
+        .add_cycles(pic_setup.canister_id, 20_000_000_000_000);
+
+    let erc20 = |address: String| CustomToken {
+        token: Token::Erc20(ErcToken {
+            token_address: ErcTokenId(address),
+            chain_id: 1,
+        }),
+        enabled: true,
+        version: None,
+        section: None,
+        allow_external_content_source: None,
+        allowed_external_content_source_urls: None,
+    };
+
+    // Two accounts with 1,000 ERC-20 tokens each fill `token_activity`.
+    let holders: Vec<Principal> = (0..2u32)
+        .map(|account| Principal::self_authenticating(account.to_be_bytes()))
+        .collect();
+    for (account, holder) in (0u32..).zip(&holders) {
+        pic_setup.ensure_user_profile(*holder);
+        let tokens: Vec<CustomToken> = (0..1_000u32)
+            .map(|n| erc20(format!("0x{:040x}", account * 1_000 + n)))
+            .collect();
+        assert_eq!(
+            pic_setup.update::<()>(*holder, "set_many_custom_tokens", tokens),
+            Ok(())
+        );
+    }
+
+    // This call starts a refresh of the holder's tokens, which holds the lock while its lookups
+    // are unanswered.
+    pic_setup
+        .update::<Vec<(TokenId, Option<ExchangeRate>)>>(holders[0], "get_exchange_rates", ())
+        .expect("get_exchange_rates should answer");
+
+    // A token the full map does not take, asked for while that refresh runs.
+    let caller = Principal::from_text(USER_1).expect("valid user principal");
+    pic_setup.ensure_user_profile(caller);
+    assert_eq!(
+        pic_setup.update::<()>(caller, "set_custom_token", erc20(NEW_ADDRESS.to_string())),
+        Ok(())
+    );
+    pic_setup
+        .update::<Vec<(TokenId, Option<ExchangeRate>)>>(caller, "get_exchange_rates", ())
+        .expect("get_exchange_rates should answer");
+
+    answer_pending_outcalls(&pic_setup, "{}");
+
+    pic_setup.pic.advance_time(Duration::from_secs(60));
+    let mut requests = Vec::new();
+    for _ in 0..10 {
+        pic_setup.pic.tick();
+        requests = pic_setup.pic.get_canister_http();
+        if !requests.is_empty() {
+            break;
+        }
+    }
+    assert!(
+        requests
+            .iter()
+            .any(|request| request.url.contains(NEW_ADDRESS)),
+        "The next refresh should ask for the token the map did not take"
+    );
 }

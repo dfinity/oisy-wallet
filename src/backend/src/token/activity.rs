@@ -24,20 +24,22 @@ pub(crate) const TOKEN_ACTIVITY_RETENTION_SEC: u64 = 30 * 60;
 /// as many entries.
 pub(crate) const MAX_TOKEN_ACTIVITY_ENTRIES: u64 = 2_000;
 
+/// Records `token_id` as active at `timestamp`, and returns whether it did.
 fn add_to_token_activity(
-    token_id: StoredTokenId,
+    token_id: &StoredTokenId,
     token_activity: &mut StableBTreeMap<StoredTokenId, Timestamp, VMem>,
     timestamp: Timestamp,
-) {
+) -> bool {
     let held = token_activity.len();
 
     // A map written before the cap existed can hold more. Writing nothing then lets every entry
     // age out through eviction, which brings the map back within the cap.
-    if held < MAX_TOKEN_ACTIVITY_ENTRIES
-        || (held == MAX_TOKEN_ACTIVITY_ENTRIES && token_activity.contains_key(&token_id))
-    {
-        token_activity.insert(token_id, timestamp);
+    let recorded = held < MAX_TOKEN_ACTIVITY_ENTRIES
+        || (held == MAX_TOKEN_ACTIVITY_ENTRIES && token_activity.contains_key(token_id));
+    if recorded {
+        token_activity.insert(token_id.clone(), timestamp);
     }
+    recorded
 }
 
 /// Records `token_ids` as active at `now_ns`.
@@ -46,18 +48,18 @@ fn add_to_token_activity(
 /// a token held already is updated and a new one waits until eviction makes room. Above it,
 /// nothing is recorded until eviction brings the map back within the cap.
 ///
+/// Returns the tokens it did not record.
+///
 /// Endpoints go through `exchange::record_token_activity`, which decides which tokens the price
 /// refresh needs.
-pub fn mark_tokens_active(token_ids: &[TokenId], now_ns: Timestamp) {
+pub fn mark_tokens_active(token_ids: &[TokenId], now_ns: Timestamp) -> Vec<StoredTokenId> {
     mutate_state(|s| {
-        for token_id in token_ids {
-            add_to_token_activity(
-                StoredTokenId(token_id.clone()),
-                &mut s.token_activity,
-                now_ns,
-            );
-        }
-    });
+        token_ids
+            .iter()
+            .map(|token_id| StoredTokenId(token_id.clone()))
+            .filter(|token_id| !add_to_token_activity(token_id, &mut s.token_activity, now_ns))
+            .collect()
+    })
 }
 
 /// Evicts the `token_activity` entries that come after `after`, one at a time, for as long as
@@ -131,7 +133,11 @@ mod tests {
         );
         assert_eq!(last_active(over_the_cap), None);
 
-        mark_tokens_active(&[first.clone(), over_the_cap.clone()], 2);
+        assert_eq!(
+            mark_tokens_active(&[first.clone(), over_the_cap.clone()], 2),
+            vec![StoredTokenId(over_the_cap.clone())],
+            "the token it did not record is returned"
+        );
         assert_eq!(last_active(first), Some(2));
         assert_eq!(last_active(over_the_cap), None);
     }
@@ -148,7 +154,13 @@ mod tests {
         let held_token = icrc(0);
         let new_token = icrc(OVER);
 
-        mark_tokens_active(&[held_token.clone(), new_token.clone()], 2);
+        assert_eq!(
+            mark_tokens_active(&[held_token.clone(), new_token.clone()], 2),
+            vec![
+                StoredTokenId(held_token.clone()),
+                StoredTokenId(new_token.clone())
+            ]
+        );
         assert_eq!(
             last_active(&held_token),
             Some(1),
