@@ -5,6 +5,7 @@ import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OisyTradeOrderView, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
+import type { NotesModalParams } from '$lib/types/personal-note';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
 import type { SendModalData } from '$lib/types/send';
@@ -314,6 +315,11 @@ export const modalAddressBook: Readable<boolean> = derived(
 export const modalNotes: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'notes'
+);
+export const modalNotesData: Readable<NotesModalParams | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'notes' ? ($modalStore?.data as NotesModalParams | undefined) : undefined
 );
 export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,

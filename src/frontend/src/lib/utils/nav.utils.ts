@@ -30,6 +30,8 @@ export const isSettingsPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Settings}`;
 export const isHelpPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Help}`;
+export const isNotesPath = (path: string | null) =>
+	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Notes}`;
 export const isDappExplorerPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Explore}`;
 export const isActivityPath = (path: string | null) =>
@@ -62,6 +64,8 @@ export const isRouteTransactions = ({ route: { id } }: Page): boolean => isTrans
 export const isRouteSettings = ({ route: { id } }: Page): boolean => isSettingsPath(id);
 
 export const isRouteHelp = ({ route: { id } }: Page): boolean => isHelpPath(id);
+
+export const isRouteNotes = ({ route: { id } }: Page): boolean => isNotesPath(id);
 
 export const isRouteDappExplorer = ({ route: { id } }: Page): boolean => isDappExplorerPath(id);
 

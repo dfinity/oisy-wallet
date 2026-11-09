@@ -3029,7 +3029,6 @@
 			"edit_note": "编辑笔记",
 			"delete_note": "删除笔记",
 			"delete_confirm_text": "这将删除笔记 '$note'。此操作无法撤销。",
-			"back": "返回",
 			"empty_title": "您还没有笔记",
 			"empty_subtitle": "创建私密的加密笔记，将重要信息与您的钱包一起安全保存。",
 			"empty_add": "添加新笔记",

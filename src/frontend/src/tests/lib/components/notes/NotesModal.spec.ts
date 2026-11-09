@@ -1,31 +1,23 @@
-import { PersonalNotesRateLimitedError } from '$lib/canisters/errors';
 import NotesModal from '$lib/components/notes/NotesModal.svelte';
-import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 import {
-	NOTES_ADD_BUTTON,
+	NOTES_CANCEL_BUTTON,
 	NOTES_DELETE_CONFIRM_BUTTON,
 	NOTES_INPUT,
-	NOTES_LIST_ITEM,
-	NOTES_NO_RESULTS,
 	NOTES_SAVE_BUTTON,
-	NOTES_SEARCH_INPUT,
-	NOTES_UNAVAILABLE,
-	NOTES_UNAVAILABLE_RETRY_BUTTON,
-	NOTES_UNLOCKING,
 	NOTES_VIEW,
+	NOTES_VIEW_CLOSE_BUTTON,
 	NOTES_VIEW_DELETE_BUTTON,
 	NOTES_VIEW_EDIT_BUTTON
 } from '$lib/constants/test-ids.constants';
-import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
-import { trackPersonalNote } from '$lib/services/personal-notes-analytics.services';
 import * as notesServices from '$lib/services/personal-notes.services';
+import { modalStore } from '$lib/stores/modal.store';
 import { personalNotesStore } from '$lib/stores/personal-notes.store';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import en from '$tests/mocks/i18n.mock';
 import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
+import { get } from 'svelte/store';
 
 const note = (id: string): PersonalNoteUi => ({
 	id,
@@ -45,85 +37,44 @@ vi.mock('$lib/services/personal-notes-analytics.services', () => ({
 }));
 
 describe('NotesModal', () => {
+	// Opens the modal the way the Notes page does, so closing it is observable.
+	const renderModal = (noteId?: string) => {
+		modalStore.openNotes({ id: Symbol(), data: { noteId } });
+
+		return render(NotesModal, { props: { noteId } });
+	};
+
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		vi.clearAllMocks();
 		mockAuthStore();
 		personalNotesStore.reset();
-	});
-
-	it('tracks the notes surface opening on mount', () => {
-		setLoadedNotes({ entries: [], count: 0 });
-
-		render(NotesModal);
-
-		expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
-			step: 'open',
-			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
-		});
-	});
-
-	it('renders the empty state when there are no notes', () => {
-		setLoadedNotes({ entries: [], count: 0 });
-
-		const { getByText, getByTestId } = render(NotesModal);
-
-		expect(getByText(en.notes.text.empty_title)).toBeInTheDocument();
-		expect(getByTestId(NOTES_ADD_BUTTON)).toBeInTheDocument();
-	});
-
-	it('renders the notes list', () => {
 		setLoadedNotes({ entries: [note('a'), note('b')], count: 2 });
-
-		const { getAllByTestId } = render(NotesModal);
-
-		expect(getAllByTestId(NOTES_LIST_ITEM)).toHaveLength(2);
 	});
 
-	it('shows the unavailable panel with the rate-limited message when the load is rate-limited', async () => {
-		vi.spyOn(notesServices, 'loadPersonalNotes').mockRejectedValue(
-			new PersonalNotesRateLimitedError('rate limited')
-		);
+	it('opens on the read-only view of the given note', () => {
+		const { getByTestId, getByText, queryByTestId } = renderModal('a');
 
-		const { getByTestId } = render(NotesModal);
-
-		await waitFor(() => expect(getByTestId(NOTES_UNAVAILABLE)).toBeInTheDocument());
-
-		expect(getByTestId(NOTES_UNAVAILABLE)).toHaveTextContent(en.notes.error.rate_limited);
+		expect(getByTestId(NOTES_VIEW)).toBeInTheDocument();
+		expect(getByText('note a')).toBeInTheDocument();
+		expect(queryByTestId(NOTES_INPUT)).toBeNull();
 	});
 
-	it('shows the generic unavailable message on a non-rate-limit failure and retries on click', async () => {
-		const loadSpy = vi
-			.spyOn(notesServices, 'loadPersonalNotes')
-			.mockRejectedValue(new Error('boom'));
+	it('returns to the page when the view is closed', async () => {
+		const { getByTestId } = renderModal('a');
 
-		const { getByTestId } = render(NotesModal);
+		await fireEvent.click(getByTestId(NOTES_VIEW_CLOSE_BUTTON));
 
-		await waitFor(() => expect(getByTestId(NOTES_UNAVAILABLE)).toBeInTheDocument());
-
-		expect(getByTestId(NOTES_UNAVAILABLE)).toHaveTextContent(en.notes.error.load);
-
-		loadSpy.mockClear();
-		await fireEvent.click(getByTestId(NOTES_UNAVAILABLE_RETRY_BUTTON));
-
-		expect(loadSpy).toHaveBeenCalled();
+		expect(get(modalStore)).toBeNull();
 	});
 
-	it('disables "Add note" at the per-user cap', () => {
-		setLoadedNotes({ entries: [note('a')], count: MAX_PERSONAL_NOTES_PER_USER });
-
-		const { getByTestId } = render(NotesModal);
-
-		expect(getByTestId(NOTES_ADD_BUTTON)).toBeDisabled();
-	});
-
-	it('saves a new note through the service', async () => {
+	it('opens on the editor without a note, saves it as a new note and returns to the page', async () => {
 		const saveSpy = vi.spyOn(notesServices, 'savePersonalNote').mockResolvedValue(note('new'));
-		setLoadedNotes({ entries: [], count: 0 });
 
-		const { getByTestId } = render(NotesModal);
+		const { getByTestId, queryByTestId } = renderModal();
 
-		await fireEvent.click(getByTestId(NOTES_ADD_BUTTON));
+		expect(queryByTestId(NOTES_VIEW)).toBeNull();
+
 		await fireEvent.input(getByTestId(NOTES_INPUT), { target: { value: 'fresh note' } });
 		await tick();
 		await fireEvent.click(getByTestId(NOTES_SAVE_BUTTON));
@@ -135,60 +86,54 @@ describe('NotesModal', () => {
 				note: 'fresh note'
 			})
 		);
+		await waitFor(() => expect(get(modalStore)).toBeNull());
 	});
 
-	it('filters the list with the search field', async () => {
-		setLoadedNotes({ entries: [note('apple'), note('banana')], count: 2 });
+	it('returns to the page when a new note is cancelled', async () => {
+		const { getByTestId } = renderModal();
 
-		const { getByTestId, getAllByTestId, queryByTestId } = render(NotesModal);
+		await fireEvent.click(getByTestId(NOTES_CANCEL_BUTTON));
 
-		expect(getAllByTestId(NOTES_LIST_ITEM)).toHaveLength(2);
-
-		await fireEvent.input(getByTestId(NOTES_SEARCH_INPUT), { target: { value: 'apple' } });
-
-		expect(getAllByTestId(NOTES_LIST_ITEM)).toHaveLength(1);
-
-		await fireEvent.input(getByTestId(NOTES_SEARCH_INPUT), { target: { value: 'zzz' } });
-
-		expect(queryByTestId(NOTES_LIST_ITEM)).toBeNull();
-		expect(getByTestId(NOTES_NO_RESULTS)).toBeInTheDocument();
+		expect(get(modalStore)).toBeNull();
 	});
 
-	it('opens the read-only view on row click and reaches the editor via Edit', async () => {
-		setLoadedNotes({ entries: [note('a')], count: 1 });
+	it('reaches the editor via Edit and returns to the view on save', async () => {
+		const saveSpy = vi.spyOn(notesServices, 'savePersonalNote').mockResolvedValue(note('a'));
 
-		const { getByTestId, getByText } = render(NotesModal);
-
-		await fireEvent.click(getByText('note a'));
-
-		expect(getByTestId(NOTES_VIEW)).toBeInTheDocument();
+		const { getByTestId } = renderModal('a');
 
 		await fireEvent.click(getByTestId(NOTES_VIEW_EDIT_BUTTON));
+		await fireEvent.input(getByTestId(NOTES_INPUT), { target: { value: 'note a, edited' } });
+		await tick();
+		await fireEvent.click(getByTestId(NOTES_SAVE_BUTTON));
 
-		expect(getByTestId(NOTES_INPUT)).toBeInTheDocument();
+		await waitFor(() =>
+			expect(saveSpy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				id: 'a',
+				note: 'note a, edited'
+			})
+		);
+		await waitFor(() => expect(getByTestId(NOTES_VIEW)).toBeInTheDocument());
+
+		expect(get(modalStore)).not.toBeNull();
 	});
 
-	it('tracks opening a note preview on row click', async () => {
-		setLoadedNotes({ entries: [note('a')], count: 1 });
+	it('returns to the view when an edit is cancelled', async () => {
+		const { getByTestId } = renderModal('a');
 
-		const { getByText } = render(NotesModal);
+		await fireEvent.click(getByTestId(NOTES_VIEW_EDIT_BUTTON));
+		await fireEvent.click(getByTestId(NOTES_CANCEL_BUTTON));
 
-		await fireEvent.click(getByText('note a'));
-
-		expect(trackPersonalNote).toHaveBeenCalledWith({
-			step: 'view',
-			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
-		});
+		expect(getByTestId(NOTES_VIEW)).toBeInTheDocument();
+		expect(get(modalStore)).not.toBeNull();
 	});
 
-	it('deletes a note only after the confirmation step', async () => {
+	it('deletes a note only after the confirmation step, then returns to the page', async () => {
 		const deleteSpy = vi.spyOn(notesServices, 'deletePersonalNote').mockResolvedValue();
-		setLoadedNotes({ entries: [note('a')], count: 1 });
 
-		const { getByTestId, getByText } = render(NotesModal);
+		const { getByTestId } = renderModal('a');
 
-		// Open the note (row → view), where Delete lives, then request deletion.
-		await fireEvent.click(getByText('note a'));
 		await fireEvent.click(getByTestId(NOTES_VIEW_DELETE_BUTTON));
 
 		// The confirmation is shown; nothing is deleted yet.
@@ -199,14 +144,11 @@ describe('NotesModal', () => {
 		await waitFor(() =>
 			expect(deleteSpy).toHaveBeenCalledWith({ identity: mockIdentity, id: 'a' })
 		);
+		await waitFor(() => expect(get(modalStore)).toBeNull());
 	});
 
-	it('returns to the list when the viewed note disappears', async () => {
-		setLoadedNotes({ entries: [note('a'), note('b')], count: 2 });
-
-		const { getByTestId, getByText, queryByTestId } = render(NotesModal);
-
-		await fireEvent.click(getByText('note a'));
+	it('returns to the page when the viewed note disappears', async () => {
+		const { getByTestId } = renderModal('a');
 
 		expect(getByTestId(NOTES_VIEW)).toBeInTheDocument();
 
@@ -217,59 +159,6 @@ describe('NotesModal', () => {
 			count: 1
 		});
 
-		await waitFor(() => {
-			expect(queryByTestId(NOTES_VIEW)).toBeNull();
-			expect(getByText('note b')).toBeInTheDocument();
-		});
-	});
-
-	it('shows the unavailable panel, not the empty state, when the initial load fails', async () => {
-		// No setLoaded → onMount runs the initial load, which rejects; the skeleton
-		// must clear to the unavailable panel rather than fall through to empty.
-		vi.spyOn(notesServices, 'loadPersonalNotes').mockRejectedValue(new Error('load failed'));
-
-		const { getByTestId, queryByText } = render(NotesModal);
-
-		await waitFor(() => expect(getByTestId(NOTES_UNAVAILABLE)).toBeInTheDocument());
-
-		expect(queryByText(en.notes.text.empty_title)).toBeNull();
-	});
-
-	it('shows the unlocking screen while the vetKey is being derived', async () => {
-		vi.spyOn(notesServices, 'loadPersonalNotes').mockImplementation(async ({ onDeriveStart }) => {
-			// Enter the derivation phase, then stay pending so it stays observable.
-			onDeriveStart?.();
-			await new Promise(() => {});
-		});
-
-		const { getByTestId } = render(NotesModal);
-
-		await waitFor(() => expect(getByTestId(NOTES_UNLOCKING)).toBeInTheDocument());
-	});
-
-	it('shows the skeleton, not the unlocking screen, during the initial fetch', async () => {
-		// Load in progress but derivation has not started (onDeriveStart not called).
-		vi.spyOn(notesServices, 'loadPersonalNotes').mockImplementation(() => new Promise(() => {}));
-
-		const { queryByTestId, queryByText } = render(NotesModal);
-
-		await tick();
-
-		expect(queryByTestId(NOTES_UNLOCKING)).toBeNull();
-		// Still loading: neither the empty state nor a list yet.
-		expect(queryByText(en.notes.text.empty_title)).toBeNull();
-	});
-
-	it('never shows the unlocking screen for an empty load (no derivation)', async () => {
-		vi.spyOn(notesServices, 'loadPersonalNotes').mockImplementation(() => {
-			setLoadedNotes({ entries: [], count: 0 });
-			return Promise.resolve();
-		});
-
-		const { getByText, queryByTestId } = render(NotesModal);
-
-		await waitFor(() => expect(getByText(en.notes.text.empty_title)).toBeInTheDocument());
-
-		expect(queryByTestId(NOTES_UNLOCKING)).toBeNull();
+		await waitFor(() => expect(get(modalStore)).toBeNull());
 	});
 });

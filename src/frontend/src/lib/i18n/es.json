@@ -3029,7 +3029,6 @@
 			"edit_note": "Editar nota",
 			"delete_note": "Eliminar nota",
 			"delete_confirm_text": "Esto eliminará la nota '$note'. Esta acción no se puede deshacer.",
-			"back": "Atrás",
 			"empty_title": "Aún no tienes notas",
 			"empty_subtitle": "Crea notas privadas y cifradas para guardar detalles importantes junto a tu wallet.",
 			"empty_add": "Añadir nueva nota",

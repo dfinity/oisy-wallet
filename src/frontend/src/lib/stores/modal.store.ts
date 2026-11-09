@@ -9,6 +9,7 @@ import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OisyTradeOrderView, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
+import type { NotesModalParams } from '$lib/types/personal-note';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
 import type { SendModalData } from '$lib/types/send';
@@ -158,7 +159,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openTipClaim: (params: SetWithDataParams<PendingTipClaim>) => void;
 	openTipWelcome: (id: symbol) => void;
 	openAddressBook: (params: SetWithOptionalDataParams<AddressBookModalParams>) => void;
-	openNotes: (id: symbol) => void;
+	openNotes: (params: SetWithOptionalDataParams<NotesModalParams>) => void;
 	openDappDetails: (params: SetWithDataParams<OisyDappDescription>) => void;
 	openVipRewardState: (params: SetWithDataParams<VipRewardStateData>) => void;
 	openRewardDetails: (params: SetWithDataParams<RewardCampaignDescription>) => void;
@@ -276,7 +277,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openAddressBook: <(params: SetWithOptionalDataParams<AddressBookModalParams>) => void>(
 			setTypeWithData('address-book')
 		),
-		openNotes: setType('notes'),
+		openNotes: <(params: SetWithOptionalDataParams<NotesModalParams>) => void>(
+			setTypeWithData('notes')
+		),
 		openDappDetails: <(params: SetWithDataParams<OisyDappDescription>) => void>(
 			setTypeWithData('dapp-details')
 		),

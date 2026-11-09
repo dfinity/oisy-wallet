@@ -3029,7 +3029,6 @@
 			"edit_note": "Edit note",
 			"delete_note": "Delete note",
 			"delete_confirm_text": "This will delete the note '$note'. This action cannot be undone.",
-			"back": "Back",
 			"empty_title": "Your notes are empty",
 			"empty_subtitle": "Create private, encrypted notes to keep details safe alongside your wallet.",
 			"empty_add": "Add new note",
