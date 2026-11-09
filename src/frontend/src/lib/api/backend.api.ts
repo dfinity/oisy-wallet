@@ -1,6 +1,7 @@
 import type {
 	ActiveUserTransaction,
 	BtcGetFeePercentilesResponse,
+	BtcGetSpendableUtxosResponse,
 	Contact,
 	ContactImageEntry,
 	ContactsPage,
@@ -33,6 +34,7 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
+	BtcGetSpendableUtxosParams,
 	CreateActiveUserTransactionParams,
 	CreateContactParams,
 	CreateUserProfileResponse,
@@ -151,6 +153,15 @@ export const getPendingBtcTransactions = async ({
 	const { btcGetPendingTransactions } = await backendCanister({ identity });
 
 	return btcGetPendingTransactions(params);
+};
+
+export const getSpendableBtcUtxos = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcGetSpendableUtxosParams>): Promise<BtcGetSpendableUtxosResponse> => {
+	const { btcGetSpendableUtxos } = await backendCanister({ identity });
+
+	return btcGetSpendableUtxos(params);
 };
 
 export const getCurrentBtcFeePercentiles = async ({

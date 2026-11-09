@@ -57,7 +57,12 @@ export const prepareBtcSend = ({
 			feeSatoshis: ZERO,
 			feeRateMiliSatoshisPerVByte,
 			utxos: [],
-			error: BtcPrepareSendError.InsufficientBalance
+			// The backend's `btc_get_spendable_utxos` already leaves reserved UTXOs out, so none left
+			// beside a pending send that reserves some means the funds are locked, not missing.
+			error:
+				pendingUtxoOutpoints.length > 0
+					? BtcPrepareSendError.UtxoLocked
+					: BtcPrepareSendError.InsufficientBalance
 		};
 	}
 

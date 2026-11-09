@@ -9,14 +9,30 @@ import {
 import type { SolAddress } from '$sol/types/address';
 
 /**
- * The programs a simulated run may call from inside another program's instruction without the
- * WalletConnect review asking the user to confirm the transaction separately.
+ * Routers, whose own calls show up inside the swaps they route. They keep no balance of the user's:
+ * what one moves between accounts that are not the user's is a swap passing through it, or a fee.
+ */
+export const SOLANA_ROUTER_PROGRAM_ADDRESSES: SolAddress[] = [
+	'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4', // Jupiter v6
+	'routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS', // Raydium router
+	'DF1ow4tspfHX9JwWJsAb9epbkA8hmpSEAtxXy1V27QBH', // DFlow v4
+	'proVF4pMXVaYqmy4NjniPh4pqKNfMmsihgd4wdkCX3u', // OKX DEX Router
+	'T1TANpTeScyeqVzzgNViGDNrkQ6qHz9KrSBS4aNXvGT' // Titan
+];
+
+/**
+ * The programs a simulated run may reach, whether the message calls them itself or another program
+ * calls them inside its own instruction, without the WalletConnect review asking the user to confirm
+ * the transaction separately.
  *
  * The balance changes and the operations describe what a transaction does to the user's wallet and
- * token accounts. A call made inside another program's instruction can also act on what the user
- * holds in an application - a stake account, a lending deposit - and neither of the two shows that.
- * The review names every program outside this list that the run calls that way, and approving
- * waits for the user to confirm they understand OISY cannot say what it does.
+ * token accounts. A program can also act on what the user holds in an application - a stake
+ * account, a lending deposit - and neither of the two shows that. The review names every program
+ * outside this list that the run reaches, and approving waits for the user to confirm they
+ * understand OISY cannot say what it does. A program on the list other than a router is named as
+ * well when, called with the wallet, it pays from an account that is not the user's into another one
+ * that is not theirs either: some of these pools hold the user's liquidity in a position, which no
+ * balance change shows, and such a payout has no line.
  *
  * Sized from the calls ordinary swaps make: the runs of swaps built through Jupiter (Ultra and the
  * Swap API) and Raydium, and swaps made on chain through DFlow, OKX, Titan, Orca, Meteora and
@@ -35,12 +51,7 @@ export const SOLANA_KNOWN_PROGRAM_ADDRESSES: SolAddress[] = [
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	MEMO_PROGRAM_ADDRESS,
 
-	// Routers, whose own calls show up inside the swaps they route.
-	'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4', // Jupiter v6
-	'routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS', // Raydium router
-	'DF1ow4tspfHX9JwWJsAb9epbkA8hmpSEAtxXy1V27QBH', // DFlow v4
-	'proVF4pMXVaYqmy4NjniPh4pqKNfMmsihgd4wdkCX3u', // OKX DEX Router
-	'T1TANpTeScyeqVzzgNViGDNrkQ6qHz9KrSBS4aNXvGT', // Titan
+	...SOLANA_ROUTER_PROGRAM_ADDRESSES,
 
 	// Raydium.
 	'675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8', // AMM v4
