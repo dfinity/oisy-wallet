@@ -7,17 +7,20 @@ import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 
 const OWN_ACCOUNT_IDENTIFIER = getAccountIdentifier(mockPrincipal).toHex();
 const OTHER_ACCOUNT_IDENTIFIER = 'a1b2c3';
+const SPENDER_ACCOUNT_IDENTIFIER = 'd4e5f6';
 
 const transfer = ({
 	from = OWN_ACCOUNT_IDENTIFIER,
 	to = OTHER_ACCOUNT_IDENTIFIER,
 	memo = ZERO,
-	icrc1Memo
+	icrc1Memo,
+	spender
 }: {
 	from?: string;
 	to?: string;
 	memo?: bigint;
 	icrc1Memo?: Uint8Array;
+	spender?: string;
 }): IcpTransaction => ({
 	id: 7n,
 	transaction: {
@@ -29,7 +32,7 @@ const transfer = ({
 				to,
 				amount: { e8s: 100_000_000n },
 				fee: { e8s: 10_000n },
-				spender: []
+				spender: spender === undefined ? [] : [spender]
 			}
 		},
 		timestamp: [{ timestamp_nanos: 1_790_000_000_000_000_000n }],
@@ -67,6 +70,25 @@ describe('icp-transactions.utils', () => {
 			{ label: 'an ordinary send', transaction: transfer({}) }
 		])('does not label $label', ({ transaction }) => {
 			expect(mapIcpTransaction({ transaction, identity: mockIdentity }).typeLabel).toBeUndefined();
+		});
+
+		it('keeps a transfer a spender made with the top-up memo a send to its destination', () => {
+			const mapped = mapIcpTransaction({
+				transaction: transfer({
+					icrc1Memo: CMC_TOP_UP_MEMO,
+					spender: SPENDER_ACCOUNT_IDENTIFIER
+				}),
+				identity: mockIdentity
+			});
+
+			expect(mapped).toEqual(
+				expect.objectContaining({
+					type: 'send',
+					to: OTHER_ACCOUNT_IDENTIFIER,
+					transferSpender: SPENDER_ACCOUNT_IDENTIFIER
+				})
+			);
+			expect(mapped.typeLabel).toBeUndefined();
 		});
 	});
 });
