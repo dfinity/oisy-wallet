@@ -17,6 +17,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import * as authDerived from '$lib/derived/auth.derived';
 import { TokenCategoryTagValue } from '$lib/enums/token-tag';
+import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import * as cyclesTopUpAnalytics from '$lib/services/cycles-top-up-analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { modalStore } from '$lib/stores/modal.store';
@@ -24,6 +25,10 @@ import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import { token } from '$lib/stores/token.store';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import {
+	resetStubWizardMounts,
+	stubWizardMounts
+} from '$tests/lib/components/send/SendModalWizardStub.svelte';
 import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
@@ -320,6 +325,47 @@ describe('SendModal', () => {
 			await waitFor(() => expect(getByTestId('stub-amount')).toBeInTheDocument());
 
 			expect(getByTestId('stub-amount')).toHaveTextContent('5');
+		});
+	});
+
+	describe('the wizard of the amount, review and sending steps', () => {
+		beforeEach(() => {
+			token.reset();
+			resetStubWizardMounts();
+		});
+
+		it('stays mounted from Review to Sending and back to Review', async () => {
+			const { getByTestId } = render(SendModal, {
+				props: { isTransactionsPage: false, isNftsPage: false }
+			});
+
+			const expectStep = async (step: WizardStepsSend) =>
+				await waitFor(() => expect(getByTestId('stub-step')).toHaveTextContent(step));
+
+			await waitFor(() => expect(getByTestId('stub-select-token-a')).toBeInTheDocument());
+
+			await fireEvent.click(getByTestId('stub-select-token-a'));
+
+			await waitFor(() => expect(getByTestId('stub-destination-next')).toBeInTheDocument());
+
+			await fireEvent.click(getByTestId('stub-destination-next'));
+
+			await expectStep(WizardStepsSend.SEND);
+
+			await fireEvent.click(getByTestId('stub-next'));
+
+			await expectStep(WizardStepsSend.REVIEW);
+
+			await fireEvent.click(getByTestId('stub-next'));
+
+			await expectStep(WizardStepsSend.SENDING);
+
+			// A failed send goes back to Review, where Send submits the transfer the wizard holds.
+			await fireEvent.click(getByTestId('stub-back'));
+
+			await expectStep(WizardStepsSend.REVIEW);
+
+			expect(stubWizardMounts()).toBe(1);
 		});
 	});
 
