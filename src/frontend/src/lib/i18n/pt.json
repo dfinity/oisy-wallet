@@ -133,6 +133,7 @@
 			"section_finance": "Finanças",
 			"section_more": "Mais",
 			"airdrops": "Recompensas",
+			"tools": "Ferramentas",
 			"earning": "Ganhar",
 			"pay": "",
 			"wallet_connect": "",
@@ -166,6 +167,7 @@
 			"borrow": "Abrir a visualização de Crédito",
 			"earning": "Abrir a visualização de Ganhos",
 			"airdrops": "Abrir a visualização de airdrops",
+			"tools": "Abrir ferramentas",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "Seu endereço de carteira, configurações, sair e links externos",
@@ -805,8 +807,8 @@
 			"support_title": "Suporte",
 			"support_description": "Encontre respostas e mais informações na página de suporte da documentação do $oisy_name, ou fale com a equipe se você travar.",
 			"support_link": "Ir para nossa página de suporte",
-			"network_explorers_title": "Exploradores de blocos",
-			"network_explorers_description": "O $oisy_name monta seu histórico a partir de indexadores de terceiros, que podem ficar atrás da blockchain. Um explorador de blocos mostra o que a própria rede registra para o seu endereço.",
+			"network_explorers_title": "Exploradores de blockchain",
+			"network_explorers_description": "Abra estes links para ver seus endereços nos exploradores de blockchain e acompanhar seus saldos em tempo real e o histórico completo de transações. As blockchains são registros públicos, então você pode verificar e investigar de forma independente toda a atividade on-chain da sua carteira $oisy_name.",
 			"explorers_title": "Status da transação no provedor",
 			"explorers_description": "O $oisy_name faz swaps e transferências via bridge por meio de provedores terceiros. Se alguma demorar mais do que o esperado, abra o explorador do próprio provedor: ele mostra em que ponto está sua transferência, já filtrado para a sua carteira.",
 			"explorers_velora_description": "Swaps no Ethereum e em outras redes EVM.",
@@ -836,7 +838,7 @@
 			"withdraw": "Sacar"
 		},
 		"alt": {
-			"network_explorer_link": "Abrir o explorador de blocos de $network para o seu endereço",
+			"network_explorer_link": "Abrir o explorador de blockchain de $network para o seu endereço",
 			"explorer_link": "Abrir o explorador de $provider para o seu endereço em $chain",
 			"select_token_first": "Selecionar o primeiro token do pool",
 			"select_token_second": "Selecionar o segundo token do pool",
@@ -887,6 +889,8 @@
 			"disable_hide_micro_transactions": "Desativar a ocultação de transações com valores muito pequenos",
 			"save_spam_filter_success": "As configurações do seu filtro de spam foram atualizadas.",
 			"export_data": "Exportar dados",
+			"export_data_moved": "A exportação foi movida para Ferramentas.",
+			"open_tools": "Abrir Ferramentas",
 			"export_data_description": "Baixe seus tokens e transações como CSV — Basic para o essencial, Extended para atributos adicionais.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -907,6 +911,12 @@
 			"loading_profile": "Erro ao carregar o perfil. Por favor, atualize a página para ter a experiência completa.",
 			"export_exchange_rate_unavailable": "As taxas de câmbio ainda estão carregando. Tente novamente em alguns instantes.",
 			"export_failed": "Não foi possível gerar sua exportação. Tente novamente."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "Ferramentas",
+			"top_up_canister": "Recarregar um canister com ICP ou TCYCLES"
 		}
 	},
 	"shortcuts": {
@@ -1044,7 +1054,6 @@
 			"open_qr_modal": "Iniciar scan de código QR para detalhes da transação",
 			"scan_qr": "Scan código QR",
 			"select_token": "Selecionar token para enviar",
-			"select_network_filter": "Selecionar filtro de rede",
 			"send_again": "Enviar novamente",
 			"recently_used_tab": "Usados recentemente",
 			"contacts_tab": "Contatos",
@@ -1201,16 +1210,36 @@
 		"text": {
 			"top_up": "Recarregar",
 			"title": "Recarregar um canister",
+			"canister_top_up": "Recarga de canister",
 			"description": "Os ciclos saem do seu saldo de $token para o canister, que os gasta em computação e armazenamento.",
+			"description_icp": "Seus $token são convertidos em ciclos pela taxa da rede, e o canister os gasta em computação e armazenamento.",
+			"pay_with": "Escolha com o que pagar a recarga.",
+			"enable_token": "Ativar",
+			"not_enough_to_pay": "Não é suficiente para recarregar",
+			"no_token_title": "Recarregue com ICP ou TCYCLES",
+			"no_token_description": "Canisters funcionam com ciclos, e uma recarga os adiciona a um canister. Quando sua carteira tiver ICP ou TCYCLES suficientes, você poderá recarregar aqui.",
 			"canister_id_placeholder": "Insira um ID de canister",
 			"checking_canister": "Verificando o canister...",
 			"recently_topped_up": "Recarregados recentemente",
+			"recently_topped_up_empty_state_title": "Os canisters que você recarregar aparecerão aqui",
+			"recently_topped_up_empty_state_description": "Recarregue um canister para encontrá-lo aqui da próxima vez",
+			"icp_hint_title": "Canisters recarregados com ICP não aparecem aqui",
+			"icp_hint_description": "Salve um ID de canister em um contato para encontrá-lo em Contatos da próxima vez",
+			"contacts_empty_state_title": "Os contatos com um ID de canister aparecerão aqui",
+			"contacts_empty_state_description": "Salve um ID de canister em um contato para encontrá-lo aqui",
 			"canister": "Canister",
 			"you_top_up": "Você recarrega",
 			"total": "Total",
+			"canister_receives": "O canister recebe",
+			"cycles_estimate": "≈ $amountT ciclos",
+			"rate": "1 $token ≈ $amountT ciclos",
+			"converted_by": "Convertido por",
 			"one_way": "Uma recarga não pode ser desfeita: os ciclos ficam no canister.",
+			"one_way_icp": "Uma recarga não pode ser desfeita: os ciclos ficam no canister e não podem ser convertidos de volta em $token.",
 			"topping_up": "Recarregando $canister...",
 			"topped_up": "$canister recarregado com $amount $token.",
+			"topped_up_cycles": "$canister recarregado com $amountT ciclos.",
+			"pending": "Sua recarga está demorando mais do que o normal. Ela será concluída em segundo plano: acompanhe-a nas transações ativas.",
 			"unknown": "OISY ainda não sabe se a recarga foi concluída. Se foi, sua atividade de $token vai mostrá-la. Recarregue de novo para reenviar a mesma recarga: ela só pode ser concluída uma vez. Uma recarga nova ou alterada adicionaria ciclos de novo se esta foi concluída.",
 			"unknown_fresh": "OISY ainda não sabe se sua última recarga foi concluída. Se foi, esta recarga adiciona ciclos de novo. Verifique primeiro sua atividade de $token.",
 			"sent_to_canister": "Enviar $token para um canister não o recarrega. Os $token chegam à conta do canister, e o canister só recebe ciclos se o próprio código dele os sacar.",
@@ -1224,11 +1253,21 @@
 			"canister_not_found": "Não existe nenhum canister com este ID no Internet Computer. Verifique o ID.",
 			"canister_check_failed": "OISY não conseguiu verificar este canister. Tente novamente em instantes.",
 			"amount_too_small": "Insira mais do que a taxa de $fee $token.",
+			"amount_too_small_icp": "Insira mais de $amount $token: um reembolso reteria esse valor em taxas.",
+			"rate_unavailable": "OISY não conseguiu carregar a taxa dos ciclos. Tente novamente em instantes.",
 			"refused": "A recarga não foi concluída. Nada saiu da sua carteira. Tente novamente em instantes.",
 			"insufficient_funds": "Não há $token suficientes para esta recarga e a taxa. Nada saiu da sua carteira. Reduza o valor.",
 			"clock": "A recarga não foi concluída porque o relógio do seu dispositivo está errado. Nada saiu da sua carteira. Ajuste a hora correta e tente novamente.",
 			"refunded": "O canister não conseguiu receber os ciclos. $refund $token voltaram para sua carteira, e a tentativa custou $fees $token em taxas. Verifique o ID do canister.",
-			"refunded_nothing": "O canister não conseguiu receber os ciclos, e as taxas consumiram todo o valor. Verifique o ID do canister."
+			"refunded_nothing": "O canister não conseguiu receber os ciclos, e as taxas consumiram todo o valor. Verifique o ID do canister.",
+			"refunded_icp": "O canister não conseguiu receber os ciclos. Seus $token voltaram para sua carteira, menos $fees $token em taxas. Verifique o ID do canister.",
+			"failed": "A recarga não foi concluída, e os $token enviados para ela não voltaram. Entre em contato com o suporte para obter ajuda.",
+			"not_started": "Não foi possível iniciar a recarga. Nada saiu da sua carteira. Tente novamente em instantes.",
+			"transfer_failed": "A transferência de $token não foi concluída. Nada saiu da sua carteira. Tente novamente em instantes.",
+			"unconfirmed": "OISY não conseguiu confirmar a transferência de $token. Se ela foi concluída, a recarga terminará em segundo plano: acompanhe-a nas transações ativas."
+		},
+		"alt": {
+			"enable_token": "Ativar $token para pagar com ele"
 		}
 	},
 	"active_user_transactions": {
@@ -1273,9 +1312,13 @@
 			"select_token_to_pay": "Selecionar token para pagar",
 			"pay_at_successful": "Pago em $receipt",
 			"pay_at_failure": "Falha ao pagar em $receipt",
+			"pay_at_not_confirmed": "",
+			"payment_not_confirmed_description": "",
+			"payment_not_confirmed_description_generic": "",
 			"try_again": "Tentar novamente",
 			"payment_confirmed": "Pagamento confirmado",
 			"payment_failed": "Pagamento falhou",
+			"payment_not_confirmed": "",
 			"what_is_scan": "O que é o scanner",
 			"no_camera_permission": "Para ler códigos QR, você precisa permitir o acesso à câmera nas configurações do site no seu navegador.",
 			"what_is_scan_description": "O scanner do $oisy_short pode ler diversos códigos QR e iniciar a ação correta imediatamente. Leia um código QR WalletConnect para estabelecer uma nova conexão, ou leia o código de pagamento em qualquer loja que use Open CryptoPay para pagar a conta com $oisy_short Pay.",
@@ -1447,8 +1490,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "Comprar",
-			"buy_dev": "Comprar (Ambiente de Desenvolvimento)",
+			"buy_sell": "Comprar/Vender",
+			"buy_sell_dev": "Comprar/Vender (Ambiente de Desenvolvimento)",
 			"unavailable_title": "A compra de tokens está temporariamente indisponível",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",
@@ -1510,6 +1553,7 @@
 			"show_more_networks": "Mostrar mais $number redes",
 			"hide_more_networks": "Ocultar mais redes",
 			"on_network": " na rede $network",
+			"on_network_label": "Na rede $network",
 			"delete_token": "Excluir token",
 			"edit_token": "Editar token",
 			"sort_by_value": "Valor",
@@ -1518,6 +1562,18 @@
 			"hide_asset_types": "Ocultar tipos de ativos",
 			"asset_type": "Tipo de ativo em $oisy_name",
 			"asset_type_all": "Todos os tipos de ativos",
+			"asset_type_all_short": "",
+			"clear_network_filter": "",
+			"clear_asset_type_filter": "",
+			"filter_asset_types": "",
+			"clear_filters": "",
+			"no_match_network": "",
+			"no_match_asset_type": "",
+			"no_match_asset_type_network": "",
+			"no_match_query": "",
+			"no_match_query_network": "",
+			"no_match_query_asset_type": "",
+			"no_match_query_asset_type_network": "",
 			"no_tokens_for_asset_type": "Não há $asset_type na sua carteira",
 			"no_tokens_for_asset_type_zero_tokens": "Não há $asset_type na rede selecionada",
 			"no_tokens_for_asset_type_description": "Escolha entre <strong>$count tokens suportados</strong> para personalizar a visualização do seu portfólio."
@@ -1627,7 +1683,8 @@
 		"placeholder": {
 			"enter_contract_address": "Insira um endereço de contrato ERC20",
 			"enter_token_address": "Insira um endereço de token SPL",
-			"search_token": "Pesquisar o token"
+			"search_token": "Pesquisar o token",
+			"search_token_on_network": ""
 		},
 		"warning": {
 			"trust_token": "Certifique-se de que você confia no token que está adicionando. Se o token que você está adicionando for controlado por uma parte maliciosa, eles podem tentar enganá-lo, por exemplo, fazendo-o acreditar que recebeu uma quantidade significativa de tokens para que você os envie de volta ou execute outras ações indesejadas. Saiba mais sobre scams e riscos de segurança, por exemplo, <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">aqui</a>."
@@ -1811,7 +1868,7 @@
 			"spender": "Autorizado",
 			"operator": "Operador",
 			"application": "Aplicação",
-			"review": "Rever permissões necessárias de $chain_name ($key)",
+			"granted_permissions": "Permissões que esta aplicação recebe",
 			"method": "Método",
 			"interacting_with": "",
 			"type": "Tipo",
@@ -1821,6 +1878,7 @@
 			"expiration": "Expiração",
 			"token": "Token",
 			"network": "Rede",
+			"networks": "Redes",
 			"amount": "Valor",
 			"hex_data": "Dados HEX",
 			"base64_data": "Dados Base64",
@@ -1834,6 +1892,8 @@
 			"close_pays_others": "Esta transação encerra uma das suas contas de tokens e envia o saldo dela para um endereço que não é a sua carteira. Para a sua segurança, a OISY não a assina.",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
+			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
 			"simulated_instructions": "Instruções simuladas",
 			"multiple_operations": "Esta transação contém várias operações que afetam sua carteira. Verifique as alterações de saldo simuladas e as instruções contidas, e aprove esta transação somente se também confiar na aplicação.",
 			"simulated_review": "A revisão abaixo é o que a simulação desta transação prevê em relação ao estado atual da rede. O que acontece na execução real pode ser diferente.",
@@ -1859,6 +1919,7 @@
 			"high_gas_limit": "Esta solicitação define um limite de gás incomumente alto, portanto a taxa máxima acima é muito maior do que esta transação deveria custar. Verifique-a com cuidado e assine somente se confiar neste aplicativo.",
 			"invalid_typed_data": "Esta solicitação contém um valor cujo tipo não corresponde ao esquema declarado pelo aplicativo. O que é exibido pode diferir do que seria realmente assinado, portanto a assinatura está desativada.",
 			"unreviewable_typed_data": "OISY não reconhece o conteúdo que este aplicativo pede que você assine, portanto o resumo não consegue descrevê-lo. Certifique-se de confiar na aplicação e revise os dados brutos antes de assinar.",
+			"unreviewable_typed_data_witness": "OISY consegue descrever os tokens que esta assinatura permite ao autorizado retirar, mas não reconhece o restante do conteúdo que este aplicativo pede que você assine. Certifique-se de confiar na aplicação e revise os dados brutos antes de assinar.",
 			"unsigned_typed_data_keys": "Este aplicativo enviou dados adicionais que seu esquema não declara. Esses dados não estão cobertos pela assinatura, portanto apenas os campos abaixo são exibidos.",
 			"tab_summary": "Resumo",
 			"tab_raw_data": "Dados brutos",
@@ -1978,6 +2039,7 @@
 			"unreviewed_without_simulation": "A OISY não conseguiu ler parte desta transação e a rede também não devolveu uma simulação, por isso nada descreve o que essa parte faria. Para a sua segurança, não foi assinada.",
 			"unreviewed_not_described_by_simulation": "A OISY não conseguiu ler parte desta transação e a simulação também não mostrou o que essa parte faria. Para a sua segurança, não foi assinada.",
 			"unread_programs_unconfirmed": "Esta transação chama um programa que a OISY não consegue ler e não foi confirmada na revisão. Para a sua segurança, não foi assinada.",
+			"unexplained_request_unconfirmed": "A OISY não consegue mostrar o que esta solicitação faz e não foi confirmada na revisão. Para a sua segurança, não foi assinada.",
 			"sol_transaction_as_message": "Esta mensagem é uma transação Solana, que só pode ser aprovada por meio de uma revisão de transação. Por sua segurança, ela não foi assinada.",
 			"request_not_defined": "Erro inesperado: A solicitação não está definida, portanto, não pode ser processada.",
 			"unexpected_processing_request": "Erro inesperado ao processar a solicitação com WalletConnect."
@@ -2292,6 +2354,9 @@
 			"confirmations": "Confirmações",
 			"for": "",
 			"for_copied": "",
+			"canister": "Canister",
+			"canister_copied": "ID do canister copiado para a área de transferência.",
+			"canister_unknown": "desconhecido",
 			"expiration": "",
 			"approve_label": ""
 		},
@@ -2312,7 +2377,8 @@
 			"deposit": "Depositar",
 			"approve": "Aprovar",
 			"burn": "Burn",
-			"mint": "Mint"
+			"mint": "Mint",
+			"top_up": "Recarga"
 		},
 		"filter": {
 			"types_label": "",
@@ -2343,7 +2409,8 @@
 			"no_date_available": "Data não disponível",
 			"pending": "Pendente",
 			"top_up": "Recarga",
-			"top_up_refund": "Reembolso da recarga"
+			"top_up_refund": "Reembolso da recarga",
+			"canister_top_up": "Recarga de canister"
 		},
 		"alt": {
 			"open_block_explorer": "Abrir esta transação no explorador de blocos",

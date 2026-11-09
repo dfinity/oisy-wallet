@@ -120,6 +120,7 @@ export const BUY_TOKENS_MODAL_OPEN_BUTTON = 'buy-tokens-modal-open-button';
 
 export const SETTINGS_ADDRESS_LABEL = 'settings-address-label';
 export const SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON = 'settings-active-networks-edit-button';
+export const SETTINGS_EXPORT_DATA_TOOLS_BUTTON = 'settings-export-data-tools-button';
 
 export const SETTINGS_NETWORKS_MODAL = 'settings-networks-modal';
 export const SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX = 'settings-networks-modal-testnet-checkbox';
@@ -168,6 +169,9 @@ export const NAVIGATION_MORE_MENU_SOURCE_CODE = 'navigation-more-menu-source-cod
 export const NAVIGATION_MORE_MENU_X = 'navigation-more-menu-x';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
+export const NAVIGATION_ITEM_TOOLS = 'navigation-item-tools';
+
+export const TOOLS_CANISTER_TOP_UP_BUTTON = 'tools-canister-top-up-button';
 
 export const NAVIGATION_GROUP_PORTFOLIO = 'navigation-group-portfolio';
 export const NAVIGATION_GROUP_FINANCE = 'navigation-group-finance';
@@ -239,12 +243,11 @@ export const SWAP_PROVIDER_STATUS = 'swap-provider-status';
 export const SWAP_PROVIDER_CELL = 'swap-provider-cell';
 export const SWAP_SELECTED_PROVIDER_DETAILS = 'swap-selected-provider-details';
 export const SWAP_FEE_ROW = 'swap-fee-row';
+export const SWAP_INSUFFICIENT_FEE_INFO = 'swap-insufficient-fee-info';
 export const SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE = 'swap-lifi-insufficient-funds-for-fee';
 export const SWAP_LIFI_UNVERIFIED_ROUTE = 'swap-lifi-unverified-route';
 export const SWAP_TWO_SWAPS_HINT = 'swap-two-swaps-hint';
 export const SWAP_TWO_SWAPS_HINT_BUTTON = 'swap-two-swaps-hint-button';
-
-export const MODAL_FILTER_NETWORKS = 'MODAL_FILTER_NETWORKS';
 
 export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
@@ -311,13 +314,20 @@ export const CYCLES_MINT_REVIEW_BACK_BUTTON = 'cycles-mint-review-back-button';
 export const CYCLES_MINT_REVIEW_MINT_BUTTON = 'cycles-mint-review-mint-button';
 export const CYCLES_MINT_RATE = 'cycles-mint-rate';
 export const CYCLES_TOP_UP_BUTTON = 'cycles-top-up-button';
+export const CYCLES_TOP_UP_TOKEN = 'cycles-top-up-token';
+export const CYCLES_TOP_UP_TOKEN_OPTION = 'cycles-top-up-token-option';
+export const CYCLES_TOP_UP_TOKEN_ENABLE_BUTTON = 'cycles-top-up-token-enable-button';
 export const CYCLES_TOP_UP_CANISTER = 'cycles-top-up-canister';
 export const CYCLES_TOP_UP_CANISTER_INPUT = 'cycles-top-up-canister-input';
 export const CYCLES_TOP_UP_CANISTER_NEXT_BUTTON = 'cycles-top-up-canister-next-button';
 export const CYCLES_TOP_UP_CANISTER_BACK_BUTTON = 'cycles-top-up-canister-back-button';
 export const CYCLES_TOP_UP_RECENT_CANISTER = 'cycles-top-up-recent-canister';
+export const CYCLES_TOP_UP_CONTACT = 'cycles-top-up-contact';
+export const CYCLES_TOP_UP_ICP_HINT = 'cycles-top-up-icp-hint';
 export const CYCLES_TOP_UP_AMOUNT = 'cycles-top-up-amount';
 export const CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON = 'cycles-top-up-amount-next-button';
+export const CYCLES_TOP_UP_ESTIMATE = 'cycles-top-up-estimate';
+export const CYCLES_TOP_UP_RATE = 'cycles-top-up-rate';
 export const CYCLES_TOP_UP_REVIEW = 'cycles-top-up-review';
 export const CYCLES_TOP_UP_REVIEW_BACK_BUTTON = 'cycles-top-up-review-back-button';
 export const CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON = 'cycles-top-up-review-top-up-button';
@@ -349,7 +359,11 @@ export const HOW_TO_CONVERT_ETHEREUM_INFO = 'how-to-convert-ethereum-info';
 export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code';
 
 export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
+export const MODAL_TOKEN_LIST_NO_MATCH = 'modal-token-list-no-match';
+export const MODAL_TOKEN_LIST_CLEAR_FILTERS = 'modal-token-list-clear-filters';
 export const MODAL_TOKENS_LIST = 'modal-tokens-list';
+export const NETWORK_FILTER = 'network-filter';
+export const TOKEN_CATEGORY_FILTER = 'token-category-filter';
 
 export const ADDRESS_BOOK_MODAL = 'address-book-modal';
 export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';

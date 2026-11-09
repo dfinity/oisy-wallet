@@ -1,4 +1,5 @@
-import SettingsExportData from '$lib/components/settings/SettingsExportData.svelte';
+import ToolsExportData from '$lib/components/tools/ToolsExportData.svelte';
+import { OISY_EXPORT_DATA_DOCS_URL } from '$lib/constants/oisy.constants';
 import * as exportDataServices from '$lib/services/export-data.services';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -8,22 +9,26 @@ const extendedTokensLabel = `${en.settings.text.export_tokens} (${en.settings.te
 const basicTransactionsLabel = `${en.settings.text.export_transactions} (${en.settings.text.export_basic})`;
 const extendedTransactionsLabel = `${en.settings.text.export_transactions} (${en.settings.text.export_extended})`;
 
-describe('SettingsExportData', () => {
+describe('ToolsExportData', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 	});
 
-	it('labels the help toggle and starts it closed', () => {
-		const { getByRole } = render(SettingsExportData);
+	it('shows its text and Learn more link without a help toggle, as every card on Tools does', () => {
+		const { getByText, getByRole, queryByRole } = render(ToolsExportData);
 
-		const help = getByRole('button', { name: en.core.text.info });
-
-		expect(help).toHaveAttribute('aria-expanded', 'false');
-		expect(help).toHaveClass('hit-area', 'press-icon');
+		expect(
+			getByText(en.settings.text.export_data_description, { exact: false })
+		).toBeInTheDocument();
+		expect(getByRole('link', { name: en.settings.text.learn_more })).toHaveAttribute(
+			'href',
+			OISY_EXPORT_DATA_DOCS_URL
+		);
+		expect(queryByRole('button', { name: en.core.text.info })).not.toBeInTheDocument();
 	});
 
 	it('renders both subsection labels and all four download buttons', () => {
-		const { getByText, getByRole } = render(SettingsExportData);
+		const { getByText, getByRole } = render(ToolsExportData);
 
 		expect(getByText(en.settings.text.export_data)).toBeInTheDocument();
 		expect(getByText(en.settings.text.export_basic)).toBeInTheDocument();
@@ -38,7 +43,7 @@ describe('SettingsExportData', () => {
 	it('calls exportTokensCsv with variant=basic when the basic tokens button is clicked', async () => {
 		const spy = vi.spyOn(exportDataServices, 'exportTokensCsv').mockReturnValue(true);
 
-		const { getByRole } = render(SettingsExportData);
+		const { getByRole } = render(ToolsExportData);
 
 		await fireEvent.click(getByRole('button', { name: basicTokensLabel }));
 
@@ -49,7 +54,7 @@ describe('SettingsExportData', () => {
 	it('calls exportTokensCsv with variant=extended when the extended tokens button is clicked', async () => {
 		const spy = vi.spyOn(exportDataServices, 'exportTokensCsv').mockReturnValue(true);
 
-		const { getByRole } = render(SettingsExportData);
+		const { getByRole } = render(ToolsExportData);
 
 		await fireEvent.click(getByRole('button', { name: extendedTokensLabel }));
 
@@ -60,7 +65,7 @@ describe('SettingsExportData', () => {
 	it('calls exportTransactionsCsv with variant=basic when the basic transactions button is clicked', async () => {
 		const spy = vi.spyOn(exportDataServices, 'exportTransactionsCsv').mockResolvedValue(true);
 
-		const { getByRole } = render(SettingsExportData);
+		const { getByRole } = render(ToolsExportData);
 
 		await fireEvent.click(getByRole('button', { name: basicTransactionsLabel }));
 
@@ -71,7 +76,7 @@ describe('SettingsExportData', () => {
 	it('calls exportTransactionsCsv with variant=extended when the extended transactions button is clicked', async () => {
 		const spy = vi.spyOn(exportDataServices, 'exportTransactionsCsv').mockResolvedValue(true);
 
-		const { getByRole } = render(SettingsExportData);
+		const { getByRole } = render(ToolsExportData);
 
 		await fireEvent.click(getByRole('button', { name: extendedTransactionsLabel }));
 

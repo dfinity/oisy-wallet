@@ -79,6 +79,8 @@ export interface BtcGetPendingTransactionParams {
 	iiDelegationChain: Nullable<IIDelegationChain>;
 }
 
+export type BtcGetSpendableUtxosParams = BtcGetPendingTransactionParams;
+
 export interface BtcAddPendingTransactionParams extends BtcGetPendingTransactionParams {
 	txId: Uint8Array;
 	utxos: Utxo[];
