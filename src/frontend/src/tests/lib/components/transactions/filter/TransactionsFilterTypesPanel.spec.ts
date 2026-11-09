@@ -17,14 +17,23 @@ describe('TransactionsFilterTypesPanel', () => {
 		transactionsFilterStore.clear();
 	});
 
-	it('renders one row per known transaction type, sorted alphabetically', () => {
+	it('renders one row per known transaction type and one for top-ups, sorted alphabetically', () => {
 		const { container } = render(TransactionsFilterTypesPanel);
 
 		const labels = Array.from(
 			container.querySelectorAll(`[data-tid="${TRANSACTIONS_FILTER_TYPE_LABEL}"]`)
 		).map((el) => el.textContent?.trim() ?? '');
 
-		const expected = ['Approve', 'Burn', 'Deposit', 'Mint', 'Receive', 'Send', 'Withdraw'];
+		const expected = [
+			'Approve',
+			'Burn',
+			'Deposit',
+			'Mint',
+			'Receive',
+			'Send',
+			'Top up',
+			'Withdraw'
+		];
 
 		expect(labels).toEqual(expected);
 	});

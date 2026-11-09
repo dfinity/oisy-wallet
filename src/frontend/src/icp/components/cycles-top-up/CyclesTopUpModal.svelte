@@ -16,16 +16,13 @@
 		CMC_RATE_REFRESH_INTERVAL_MILLIS,
 		CYCLES_TOP_UP_REFUND_FEES
 	} from '$icp/constants/cmc.constants';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { topUpCanisterWithIcp } from '$icp/services/cycles-top-up.services';
 	import { lastCyclesTopUps } from '$icp/stores/cycles-top-up.store';
 	import { CyclesTopUpIcpError, type CyclesTopUpNotifyResult } from '$icp/types/cycles-top-up';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
-	import {
-		formatTrillionCycles,
-		isCyclesTopUpTokenUsable,
-		parseCanisterId
-	} from '$icp/utils/cycles-top-up.utils';
+	import { formatTrillionCycles, parseCanisterId } from '$icp/utils/cycles-top-up.utils';
 	import { isTokenIcp } from '$icp/utils/icrc.utils';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
@@ -39,7 +36,6 @@
 		type CyclesTopUpSourceLocation,
 		trackCyclesTopUp
 	} from '$lib/services/cycles-top-up-analytics.services';
-	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -54,40 +50,39 @@
 
 	interface Props {
 		// The TCYCLES token of the page the modal opened from, which pays. Without it, the modal
-		// opened from the navigation, which offers ICP too.
+		// opened from Tools, which offers ICP too.
 		token?: IcToken;
 	}
 
 	let { token: pageToken }: Props = $props();
 
-	let fromNavigation = $derived(isNullish(pageToken));
+	let fromTools = $derived(isNullish(pageToken));
 
-	// The TCYCLES token: the page's, or from the navigation the enabled one, while Top up with
+	// The TCYCLES token: the page's, or from Tools the enabled one, while Top up with
 	// TCYCLES is on. Its history lists the canisters topped up before, whatever pays.
 	let cyclesToken = $derived(
 		pageToken ?? (CYCLES_TOP_UP_ENABLED ? $enabledIcTokens.find(isTokenCyclesLedger) : undefined)
 	);
 
-	// The tokens whose balance can pay for a top-up, ICP first, as the picker lists them.
-	let usableTokens = $derived(
-		[ICP_TOKEN, cyclesToken].filter(
-			(token): token is IcToken =>
-				nonNullish(token) &&
-				isCyclesTopUpTokenUsable({ token, balance: $balancesStore?.[token.id]?.data })
-		)
-	);
+	// What the picker lists from Tools, ICP first: ICP and, while Top up with TCYCLES is on,
+	// TCYCLES, enabled or not, so both ways to pay show. The picker tells which can pay.
+	let payTokens = $derived.by<IcToken[]>(() => {
+		const tcycles = CYCLES_TOP_UP_ENABLED ? $icrcTokens.find(isTokenCyclesLedger) : undefined;
+
+		return nonNullish(tcycles) ? [ICP_TOKEN, tcycles] : [ICP_TOKEN];
+	});
 
 	let pickedToken = $state<IcToken | undefined>();
 
-	// What the top-up is paid with: from the TCYCLES page its token, from the navigation the
-	// token picked, or the only one that can pay.
+	// What the top-up is paid with: from the TCYCLES page its token, from Tools the token
+	// picked.
 	let payToken = $derived(pageToken ?? pickedToken);
 
 	let paidWithIcp = $derived(nonNullish(payToken) && isTokenIcp(payToken));
 
 	let sourceLocation = $derived<CyclesTopUpSourceLocation>(
-		fromNavigation
-			? PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION
+		fromTools
+			? PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE
 			: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOKEN_DETAILS
 	);
 
@@ -129,7 +124,7 @@
 			: $i18n.cycles_top_up.text.title
 	);
 
-	// Fixed for the modal's life, as a WizardModal needs: from the navigation, the token step
+	// Fixed for the modal's life, as a WizardModal needs: from Tools, the token step
 	// comes first, even when the modal opens past it (below).
 	let steps = $derived.by<WizardSteps<WizardStepsCyclesTopUp>>(() => {
 		const topUpSteps: WizardSteps<WizardStepsCyclesTopUp> = [
@@ -151,9 +146,7 @@
 			}
 		];
 
-		return fromNavigation
-			? [{ name: WizardStepsCyclesTopUp.TOKEN, title }, ...topUpSteps]
-			: topUpSteps;
+		return fromTools ? [{ name: WizardStepsCyclesTopUp.TOKEN, title }, ...topUpSteps] : topUpSteps;
 	});
 
 	// Reported here whatever pays, before anything is picked: the wizard leaves it to the modal.
@@ -194,9 +187,8 @@
 
 	// A modal opened while the principal's last TCYCLES top-up has no answer goes to that
 	// top-up's Review with TCYCLES, from either entry point, where the wizard fills it in so Top
-	// up resends it.
-	// Otherwise, a modal opened from the navigation when only one token can pay starts on the
-	// canister step with that token: there is nothing to pick.
+	// up resends it. Otherwise, from Tools, it starts on the token picker, even when only one
+	// token can pay: the picker shows both ways to pay.
 	let opened = false;
 
 	$effect(() => {
@@ -211,21 +203,12 @@
 				pickedToken = cyclesToken;
 
 				goTo(WizardStepsCyclesTopUp.REVIEW);
-				return;
-			}
-
-			if (fromNavigation && usableTokens.length === 1) {
-				[pickedToken] = usableTokens;
-
-				goTo(WizardStepsCyclesTopUp.CANISTER);
 			}
 		});
 	});
 
-	// Back to the token picker from the canister step, when there was a choice to make.
-	let backToToken = $derived(
-		fromNavigation && usableTokens.length > 1 ? () => modal?.back() : undefined
-	);
+	// Back to the token picker from the canister step, which comes first from Tools.
+	let backToToken = $derived(fromTools ? () => modal?.back() : undefined);
 
 	const pickToken = (token: IcToken) => {
 		// An amount is in its token's units.
@@ -452,7 +435,7 @@
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 	{#if currentStep?.name === WizardStepsCyclesTopUp.TOKEN}
-		<CyclesTopUpToken onCancel={close} onSelect={pickToken} tokens={usableTokens} />
+		<CyclesTopUpToken onCancel={close} onSelect={pickToken} tokens={payTokens} />
 	{:else if nonNullish(payToken) && !paidWithIcp}
 		<!-- Paid with TCYCLES, the top-up runs as on the TCYCLES page and in Send. -->
 		<CyclesTopUpWizard

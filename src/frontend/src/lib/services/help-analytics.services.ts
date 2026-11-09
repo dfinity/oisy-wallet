@@ -19,6 +19,10 @@ import { nonNullish, notEmptyString } from '@dfinity/utils';
 // event covers the whole page rather than a family of `help_*` names.
 export type HelpAction = 'open' | 'contact' | 'explorer' | 'scan' | 'select_pool' | 'withdraw';
 
+// Where a Help card is shown → `source_location`. The Block explorers card also sits on Tools.
+export type HelpSourceLocation =
+	PLAUSIBLE_EVENT_SOURCE_LOCATIONS.HELP_PAGE | PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE;
+
 export interface TrackHelpParams {
 	// The action → `event_modifier`.
 	action: HelpAction;
@@ -49,6 +53,8 @@ export interface TrackHelpParams {
 	// Failure category → `result_error_type`; omitted when the action succeeded. Never the
 	// canister's own message - see `toHelpErrorType`.
 	errorType?: PLAUSIBLE_EVENT_HELP_ERROR_TYPES;
+	// The page the card is on → `source_location`; the Help page unless given.
+	sourceLocation?: HelpSourceLocation;
 }
 
 // ICPSwap's `InternalError` carries free text that `mapIcpSwapFactoryError` interpolates verbatim,
@@ -92,13 +98,14 @@ export const buildHelpEvent = ({
 	link,
 	provider,
 	network,
-	errorType
+	errorType,
+	sourceLocation = PLAUSIBLE_EVENT_SOURCE_LOCATIONS.HELP_PAGE
 }: TrackHelpParams): TrackEventParams => ({
 	name: PLAUSIBLE_EVENTS.HELP,
 	metadata: {
 		event_context: PLAUSIBLE_EVENT_CONTEXTS.HELP,
 		event_modifier: action,
-		source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.HELP_PAGE,
+		source_location: sourceLocation,
 		result_status: resultStatus,
 		...(nonNullish(subcontext) && { event_subcontext: subcontext }),
 		...(nonNullish(token) && { token_symbol: token, token_network: 'icp' }),

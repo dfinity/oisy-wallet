@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
+	import { cmcDepositAccountCanisterIds } from '$icp/derived/cycles-top-up.derived';
 	import { isIcrcTokenSupportIcrc3 } from '$icp/services/icrc.services';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
+	import { getTopUpCanisterId } from '$icp/utils/cycles-top-up.utils';
 	import { icrcAccountExplorerUrl, icrcTxExplorerUrl } from '$icp/utils/icrc-transactions.utils';
 	import { isTokenIcp, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import List from '$lib/components/common/List.svelte';
@@ -109,6 +111,17 @@
 		nonNullish(typeLabel) && nonNullish(token) && (isTokenCyclesLedger(token) || isTokenIcp(token))
 	);
 
+	// As in the list: a top-up shows the canister that got the cycles. The CMC deposit account an
+	// ICP top-up pays into is never shown, nor its explorer link.
+	let topUp = $derived(showTypeLabel && typeLabel === 'transaction.label.top_up');
+
+	let topUpCanisterId = $derived(
+		getTopUpCanisterId({
+			transaction,
+			cmcDepositAccountCanisterIds: $cmcDepositAccountCanisterIds
+		})
+	);
+
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openIcTransaction({
 			id: Symbol(),
@@ -151,7 +164,14 @@
 			{/snippet}
 		</ModalHero>
 
-		{#if (nonNullish(to) && nonNullish(from)) || (type === 'approve' && nonNullish(from))}
+		{#if topUp}
+			<TransactionContactCard
+				{onSaveAddressComplete}
+				to={topUpCanisterId}
+				toExplorerUrl={topUpCanisterId === to ? toExplorerUrl : undefined}
+				type="top_up"
+			/>
+		{:else if (nonNullish(to) && nonNullish(from)) || (type === 'approve' && nonNullish(from))}
 			<TransactionContactCard
 				{approveSpender}
 				approveSpenderExplorerUrl={spenderExplorerUrl}
