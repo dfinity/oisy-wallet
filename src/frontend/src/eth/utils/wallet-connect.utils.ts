@@ -5,6 +5,7 @@ import type { OptionEthAddress } from '$eth/types/address';
 import type {
 	WalletConnectEthCall,
 	WalletConnectEthSignTypedDataV4,
+	WalletConnectEthTypedDataAllowance,
 	WalletConnectEthTypedDataApproval
 } from '$eth/types/wallet-connect';
 import { isEthAddress } from '$eth/utils/account.utils';
@@ -19,6 +20,7 @@ import {
 	isErc20TransactionTransfer,
 	isErcTransactionSetApprovalForAll
 } from '$eth/utils/transactions.utils';
+import { getUniswapSwap, type GetUniswapSwapParams } from '$eth/utils/uniswap.utils';
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
@@ -208,24 +210,42 @@ export const getWalletConnectEthCkEthDeposit = ({
 /**
  * What an `eth_sendTransaction` request is, read from where it goes as well as from its calldata.
  *
- * A `deposit(bytes32)` means something only at the ckETH helper contract, so the destination is
- * what decides whether it is a conversion. Everything else is classified by its calldata alone, see
+ * A `deposit(bytes32)` means something only at the ckETH helper contract, and the commands of an
+ * `execute` only at a Uniswap Universal Router, so the destination is what decides whether either
+ * is read. Everything else is classified by its calldata alone, see
  * {@link classifyWalletConnectEthCall}.
  */
 export const classifyWalletConnectEthSendTransaction = ({
+	to,
 	data,
-	...rest
-}: WalletConnectEthCkEthDepositParams): WalletConnectEthCall => {
+	networkId,
+	minterInfo,
+	principal,
+	...swap
+}: WalletConnectEthCkEthDepositParams &
+	Omit<GetUniswapSwapParams, 'to' | 'data' | 'networkId'>): WalletConnectEthCall => {
 	try {
-		const principal = getWalletConnectEthCkEthDeposit({ data, ...rest });
+		const deposited = getWalletConnectEthCkEthDeposit({
+			to,
+			data,
+			networkId,
+			minterInfo,
+			principal
+		});
 
-		if (nonNullish(principal)) {
-			return { type: 'ckEthDeposit', principal };
+		if (nonNullish(deposited)) {
+			return { type: 'ckEthDeposit', principal: deposited };
 		}
 	} catch (err: unknown) {
 		return err instanceof WalletConnectEthCkEthHelperUnconfirmedError
 			? { type: 'ckEthHelperUnconfirmed' }
 			: { type: 'ckEthDepositRefused' };
+	}
+
+	const uniswapSwap = getUniswapSwap({ to, data, networkId, ...swap });
+
+	if (nonNullish(uniswapSwap)) {
+		return { type: 'uniswapSwap', swap: uniswapSwap };
 	}
 
 	return classifyWalletConnectEthCall(data);
@@ -608,13 +628,18 @@ export const getSignedEthTypedData = (
 	}
 };
 
+interface EthTypedDataApprovalParams {
+	message: Record<string, unknown>;
+	domain: TypedDataDomain;
+}
+
 interface EthTypedDataApprovalSchema {
 	primaryType: string;
 	types: Record<string, Array<TypedDataField>>;
-	toApproval: (params: {
-		message: Record<string, unknown>;
-		domain: TypedDataDomain;
-	}) => WalletConnectEthTypedDataApproval;
+	// A Permit2 witness transfer: its primary type declares one member past those listed here,
+	// typed by structs of the dApp's own that the schema cannot list in advance.
+	witness?: boolean;
+	toApproval: (params: EthTypedDataApprovalParams) => WalletConnectEthTypedDataApproval;
 }
 
 const toDeclaredAddress = (value: unknown): string | undefined =>
@@ -647,17 +672,22 @@ export const toTypedDataDomainChainId = (value: unknown): bigint | undefined => 
 	}
 };
 
+// The last second a JavaScript `Date` can hold, 8.64e15 milliseconds after the epoch.
+const MAX_DATE_SECONDS = 8_640_000_000_000n;
+
 /**
  * A deadline as a number of seconds, when it is one a date can be built from.
  *
- * ERC-2612 permits routinely say "never expires" with a saturated `uint256`, and that is not a
- * moment in time: turned into a `Number` it becomes a year with seventy digits. Such a deadline is
- * left out rather than rendered, since a nonsense date reads as a real one.
+ * ERC-2612 permits routinely say "never expires" with a saturated `uint256`, and Permit2 with a
+ * saturated `uint48`, and neither is a moment in time: past the last second a `Date` holds, the
+ * date renders as "Invalid Date", or as a year with seventy digits once it is past what a `Number`
+ * holds exactly. Such a deadline is left out rather than rendered, since a nonsense date reads as
+ * a real one.
  */
 const toExpirationSeconds = (value: unknown): number | undefined => {
 	const seconds = toDeclaredUint(value);
 
-	return nonNullish(seconds) && seconds >= ZERO && seconds <= BigInt(Number.MAX_SAFE_INTEGER)
+	return nonNullish(seconds) && seconds >= ZERO && seconds <= MAX_DATE_SECONDS
 		? Number(seconds)
 		: undefined;
 };
@@ -666,6 +696,112 @@ const toDeclaredStruct = (value: unknown): Record<string, unknown> =>
 	nonNullish(value) && typeof value === 'object' && !Array.isArray(value)
 		? (value as Record<string, unknown>)
 		: {};
+
+const PERMIT2_DETAILS: Array<TypedDataField> = [
+	{ name: 'token', type: 'address' },
+	{ name: 'amount', type: 'uint160' },
+	{ name: 'expiration', type: 'uint48' },
+	{ name: 'nonce', type: 'uint48' }
+];
+
+// Permit2 names the token it is granting an allowance over, and the contract verifying the
+// signature is Permit2 itself rather than that token, so the domain must not be read here.
+const toPermit2Allowance = (details: unknown): WalletConnectEthTypedDataAllowance => {
+	const { token, amount, expiration } = toDeclaredStruct(details);
+
+	const declaredAmount = toDeclaredUint(amount);
+
+	return {
+		token: toDeclaredAddress(token),
+		amount: declaredAmount,
+		unlimited: declaredAmount === MAX_UINT_160,
+		expiration: toExpirationSeconds(expiration)
+	};
+};
+
+const PERMIT2_TOKEN_PERMISSIONS: Array<TypedDataField> = [
+	{ name: 'token', type: 'address' },
+	{ name: 'amount', type: 'uint256' }
+];
+
+const PERMIT2_TRANSFER_FROM: Array<TypedDataField> = [
+	{ name: 'permitted', type: 'TokenPermissions' },
+	{ name: 'spender', type: 'address' },
+	{ name: 'nonce', type: 'uint256' },
+	{ name: 'deadline', type: 'uint256' }
+];
+
+const PERMIT2_BATCH_TRANSFER_FROM: Array<TypedDataField> = [
+	{ name: 'permitted', type: 'TokenPermissions[]' },
+	{ name: 'spender', type: 'address' },
+	{ name: 'nonce', type: 'uint256' },
+	{ name: 'deadline', type: 'uint256' }
+];
+
+// A Permit2 signature transfer lets its spender, and no one else, move up to `amount` of `token`
+// once before the deadline. It names no recipient: the spender chooses where the tokens go when it
+// takes them, which is why the spender is the party the summary states.
+const toPermit2TransferAllowance = ({
+	permitted,
+	deadline
+}: {
+	permitted: unknown;
+	deadline: unknown;
+}): WalletConnectEthTypedDataAllowance => {
+	const { token, amount } = toDeclaredStruct(permitted);
+
+	const declaredAmount = toDeclaredUint(amount);
+
+	return {
+		token: toDeclaredAddress(token),
+		amount: declaredAmount,
+		unlimited: declaredAmount === MAX_UINT_256,
+		expiration: toExpirationSeconds(deadline)
+	};
+};
+
+const toPermit2TransferApproval = ({
+	message: { permitted, spender, deadline }
+}: Pick<EthTypedDataApprovalParams, 'message'>): WalletConnectEthTypedDataApproval => ({
+	spender: toDeclaredAddress(spender),
+	allowances: [toPermit2TransferAllowance({ permitted, deadline })]
+});
+
+const toPermit2BatchTransferApproval = ({
+	message: { permitted, spender, deadline }
+}: Pick<EthTypedDataApprovalParams, 'message'>): WalletConnectEthTypedDataApproval => ({
+	spender: toDeclaredAddress(spender),
+	allowances: (Array.isArray(permitted) ? permitted : []).map((entry) =>
+		toPermit2TransferAllowance({ permitted: entry, deadline })
+	)
+});
+
+const ERC3009_AUTHORIZATION: Array<TypedDataField> = [
+	{ name: 'from', type: 'address' },
+	{ name: 'to', type: 'address' },
+	{ name: 'value', type: 'uint256' },
+	{ name: 'validAfter', type: 'uint256' },
+	{ name: 'validBefore', type: 'uint256' },
+	{ name: 'nonce', type: 'bytes32' }
+];
+
+// ERC-3009, like ERC-2612, names no token: the token contract verifies the authorization itself,
+// and the domain states that contract. The authorization moves exactly `value` to `to` or nothing,
+// so unlike an allowance it is never unlimited. `validAfter` only delays it, which adds nothing to
+// what the user gives.
+const toErc3009Approval = ({
+	message: { to, value, validBefore },
+	domain: { verifyingContract }
+}: EthTypedDataApprovalParams): WalletConnectEthTypedDataApproval => ({
+	recipient: toDeclaredAddress(to),
+	allowances: [
+		{
+			token: toDeclaredAddress(verifyingContract),
+			amount: toDeclaredUint(value),
+			expiration: toExpirationSeconds(validBefore)
+		}
+	]
+});
 
 /**
  * The EIP-712 schemas OISY understands well enough to summarize above the raw
@@ -685,28 +821,69 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 				{ name: 'spender', type: 'address' },
 				{ name: 'sigDeadline', type: 'uint256' }
 			],
-			PermitDetails: [
-				{ name: 'token', type: 'address' },
-				{ name: 'amount', type: 'uint160' },
-				{ name: 'expiration', type: 'uint48' },
-				{ name: 'nonce', type: 'uint48' }
-			]
+			PermitDetails: PERMIT2_DETAILS
 		},
-		// Permit2 names the token it is granting an allowance over, and the contract verifying the
-		// signature is Permit2 itself rather than that token, so the domain must not be read here.
-		toApproval: ({ message: { spender, details } }) => {
-			const { token, amount, expiration } = toDeclaredStruct(details);
-
-			const declaredAmount = toDeclaredUint(amount);
-
-			return {
-				spender: toDeclaredAddress(spender),
-				token: toDeclaredAddress(token),
-				amount: declaredAmount,
-				unlimited: declaredAmount === MAX_UINT_160,
-				expiration: toExpirationSeconds(expiration)
-			};
-		}
+		toApproval: ({ message: { spender, details } }) => ({
+			spender: toDeclaredAddress(spender),
+			allowances: [toPermit2Allowance(details)]
+		})
+	},
+	// Uniswap Permit2 `PermitBatch`: one signature setting an allowance over every token it lists,
+	// each with its own amount and expiration, all for the same spender.
+	{
+		primaryType: 'PermitBatch',
+		types: {
+			PermitBatch: [
+				{ name: 'details', type: 'PermitDetails[]' },
+				{ name: 'spender', type: 'address' },
+				{ name: 'sigDeadline', type: 'uint256' }
+			],
+			PermitDetails: PERMIT2_DETAILS
+		},
+		toApproval: ({ message: { spender, details } }) => ({
+			spender: toDeclaredAddress(spender),
+			allowances: (Array.isArray(details) ? details : []).map(toPermit2Allowance)
+		})
+	},
+	// Uniswap Permit2 `PermitTransferFrom`: one transfer, of up to the amount it names.
+	{
+		primaryType: 'PermitTransferFrom',
+		types: {
+			PermitTransferFrom: PERMIT2_TRANSFER_FROM,
+			TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+		},
+		toApproval: toPermit2TransferApproval
+	},
+	// Uniswap Permit2 `PermitBatchTransferFrom`: the same over every token it lists, under one
+	// deadline, for the same spender.
+	{
+		primaryType: 'PermitBatchTransferFrom',
+		types: {
+			PermitBatchTransferFrom: PERMIT2_BATCH_TRANSFER_FROM,
+			TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+		},
+		toApproval: toPermit2BatchTransferApproval
+	},
+	// The witness variants of both, the single one being what UniswapX orders are signed as: the
+	// same transfer, bound to a struct of the dApp's own that the spender checks when it takes the
+	// tokens.
+	{
+		primaryType: 'PermitWitnessTransferFrom',
+		types: {
+			PermitWitnessTransferFrom: PERMIT2_TRANSFER_FROM,
+			TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+		},
+		witness: true,
+		toApproval: toPermit2TransferApproval
+	},
+	{
+		primaryType: 'PermitBatchWitnessTransferFrom',
+		types: {
+			PermitBatchWitnessTransferFrom: PERMIT2_BATCH_TRANSFER_FROM,
+			TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+		},
+		witness: true,
+		toApproval: toPermit2BatchTransferApproval
 	},
 	// Standard ERC-2612 `Permit`.
 	{
@@ -728,10 +905,14 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 
 			return {
 				spender: toDeclaredAddress(spender),
-				token: toDeclaredAddress(verifyingContract),
-				amount: declaredValue,
-				unlimited: declaredValue === MAX_UINT_256,
-				expiration: toExpirationSeconds(deadline)
+				allowances: [
+					{
+						token: toDeclaredAddress(verifyingContract),
+						amount: declaredValue,
+						unlimited: declaredValue === MAX_UINT_256,
+						expiration: toExpirationSeconds(deadline)
+					}
+				]
 			};
 		}
 	},
@@ -752,11 +933,28 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 		// a word in the folded message.
 		toApproval: ({ message: { spender, expiry, allowed }, domain: { verifyingContract } }) => ({
 			spender: toDeclaredAddress(spender),
-			token: toDeclaredAddress(verifyingContract),
-			amount: allowed === true ? undefined : ZERO,
-			unlimited: allowed === true,
-			expiration: toExpirationSeconds(expiry)
+			allowances: [
+				{
+					token: toDeclaredAddress(verifyingContract),
+					amount: allowed === true ? undefined : ZERO,
+					unlimited: allowed === true,
+					expiration: toExpirationSeconds(expiry)
+				}
+			]
 		})
+	},
+	// ERC-3009 `TransferWithAuthorization`, as USDC implements it: a transfer that anyone holding
+	// the signature can submit to the token.
+	{
+		primaryType: 'TransferWithAuthorization',
+		types: { TransferWithAuthorization: ERC3009_AUTHORIZATION },
+		toApproval: toErc3009Approval
+	},
+	// ERC-3009 `ReceiveWithAuthorization`: the same transfer, which only its recipient can submit.
+	{
+		primaryType: 'ReceiveWithAuthorization',
+		types: { ReceiveWithAuthorization: ERC3009_AUTHORIZATION },
+		toApproval: toErc3009Approval
 	}
 ];
 
@@ -772,23 +970,41 @@ const sameTypedDataFields = ({
 		({ name, type }, index) => expected[index].name === name && expected[index].type === type
 	);
 
+/**
+ * Whether a payload declares a schema's structs, member for member, and nothing else.
+ *
+ * A witness schema is the one exception: Permit2 lets the dApp append a member of its own to the
+ * primary type, typed by structs of its own, so that last member and those structs are taken as
+ * declared. Once structs the schema does not list are accepted, the struct the digest is rooted at
+ * need no longer be the schema's primary type: one wrapping it would be hashed instead, and would
+ * be no Permit2 signature at all. The root is therefore held to the schema's.
+ */
 const matchesApprovalSchema = ({
 	types,
-	schema
+	schema: { primaryType, types: expectedTypes, witness = false }
 }: {
 	types: Record<string, Array<TypedDataField>>;
 	schema: EthTypedDataApprovalSchema;
 }): boolean => {
-	const expectedNames = Object.keys(schema.types);
+	const expectedNames = Object.keys(expectedTypes);
 
-	return (
-		Object.keys(types).length === expectedNames.length &&
-		expectedNames.every((name) => {
-			const fields = types[name];
+	if (!witness && Object.keys(types).length !== expectedNames.length) {
+		return false;
+	}
 
-			return nonNullish(fields) && sameTypedDataFields({ fields, expected: schema.types[name] });
-		})
-	);
+	const declared = expectedNames.every((name) => {
+		const fields = types[name];
+
+		return (
+			Array.isArray(fields) &&
+			sameTypedDataFields({
+				fields: witness && name === primaryType ? fields.slice(0, -1) : fields,
+				expected: expectedTypes[name]
+			})
+		);
+	});
+
+	return declared && getEthTypedDataPrimaryType({ types }) === primaryType;
 };
 
 /**
@@ -799,6 +1015,9 @@ const matchesApprovalSchema = ({
  * exactly and every value conforms to it. That is what keeps the summary honest:
  * each fact it carries is a declared member of the struct being hashed, so it
  * cannot be steered by a key that the signature does not cover.
+ *
+ * A Permit2 witness transfer is matched up to its witness. The transfer is summarized, and the
+ * witness is flagged rather than described.
  */
 export const getEthTypedDataApproval = ({
 	domain,
@@ -807,18 +1026,23 @@ export const getEthTypedDataApproval = ({
 }: WalletConnectEthSignTypedDataV4): WalletConnectEthTypedDataApproval | undefined => {
 	const { EIP712Domain: _EIP712Domain, ...rest } = types;
 
-	const schema = ETH_TYPED_DATA_APPROVAL_SCHEMAS.find((schema) =>
-		matchesApprovalSchema({ types: rest, schema })
-	);
-
-	if (isNullish(schema)) {
-		return;
-	}
-
 	try {
+		// Matched inside the `try` as well: the types are the dApp's own, and a struct declared as
+		// anything but a list of members can throw while it is compared. Such a payload is left
+		// unsummarized, as one with a non-conforming value is, rather than breaking the review.
+		const schema = ETH_TYPED_DATA_APPROVAL_SCHEMAS.find((schema) =>
+			matchesApprovalSchema({ types: rest, schema })
+		);
+
+		if (isNullish(schema)) {
+			return;
+		}
+
 		assertValidEthTypedData({ types: rest, primaryType: schema.primaryType, message });
 
-		return schema.toApproval({ message, domain });
+		const approval = schema.toApproval({ message, domain });
+
+		return schema.witness === true ? { ...approval, hasWitness: true } : approval;
 	} catch (_err: unknown) {
 		// A payload that does not conform to its own schema is not summarized: it
 		// is rejected for signing anyway, and any value read from it would be
@@ -908,6 +1132,29 @@ export const isEthSignTypedDataMethod = (method: string): boolean =>
 	SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS.includes(method);
 
 /**
+ * The struct an EIP-712 payload hashes, as the hash derives it from the type graph.
+ *
+ * The payload's own `primaryType` is never hashed: `TypedDataEncoder.hash` roots the digest at the
+ * one struct no other struct references, whatever the payload declares. That field is the
+ * request's label for itself, and naming the request after it would let a struct granting an
+ * allowance read as whatever the dApp chose to call it.
+ *
+ * `undefined` for a type graph with no single root, which is not signed at all.
+ */
+export const getEthTypedDataPrimaryType = ({
+	types
+}: Pick<WalletConnectEthSignTypedDataV4, 'types'>): string | undefined => {
+	try {
+		const { EIP712Domain: _EIP712Domain, ...rest } = types;
+
+		return TypedDataEncoder.getPrimaryType(rest);
+	} catch (_err: unknown) {
+		// No types, or no single root: such typed data is warned about and blocked as invalid, not
+		// named.
+	}
+};
+
+/**
  * The structs an EIP-712 payload hashes, the one it is rooted at and the ones it declares beneath.
  *
  * `eth_signTypedData_v4` shows `eth_signTypedData_v4` as its method, which names the RPC call and
@@ -921,61 +1168,64 @@ export const isEthSignTypedDataMethod = (method: string): boolean =>
 export const getEthTypedDataMethods = ({
 	types
 }: WalletConnectEthSignTypedDataV4): { name: string; depth: number }[] => {
-	const { EIP712Domain: _EIP712Domain, ...rest } = types;
+	const root = getEthTypedDataPrimaryType({ types });
 
-	try {
-		const root = TypedDataEncoder.getPrimaryType(rest);
-
-		const methods: { name: string; depth: number }[] = [];
-		const walked = new Set<string>();
-
-		// Walked from the root rather than read off the keys of `types`, so each struct is listed
-		// beneath the one that declares it. Reading the keys put every struct at one level, which
-		// said a struct nested two deep was a member of the root, and would have named a declaration
-		// the root never reaches as though the signature covered it.
-		const walk = ({ name, depth }: { name: string; depth: number }) => {
-			if (walked.has(name)) {
-				return;
-			}
-
-			walked.add(name);
-
-			methods.push({ name, depth });
-
-			(rest[name] ?? []).forEach(({ type }) => {
-				// A member declared as an array is the same struct, however many dimensions deep.
-				const member = type.replace(/(\[\d*\])*$/, '');
-
-				if (member in rest) {
-					walk({ name: member, depth: depth + 1 });
-				}
-			});
-		};
-
-		walk({ name: root, depth: 0 });
-
-		return methods;
-	} catch (_err: unknown) {
-		// Typed data whose root cannot be resolved would not be signed at all, and is warned about
-		// and blocked as invalid rather than named here. `getPrimaryType` is what rejects a payload
-		// declaring a struct nothing reaches, so this arm covers that case too.
+	// Typed data whose root cannot be resolved would not be signed at all, and is warned about and
+	// blocked as invalid rather than named here. `getPrimaryType` is what rejects a payload declaring
+	// a struct nothing reaches, so this covers that case too.
+	if (isNullish(root)) {
 		return [];
 	}
+
+	const { EIP712Domain: _EIP712Domain, ...rest } = types;
+
+	const methods: { name: string; depth: number }[] = [];
+	const walked = new Set<string>();
+
+	// Walked from the root rather than read off the keys of `types`, so each struct is listed
+	// beneath the one that declares it. Reading the keys put every struct at one level, which
+	// said a struct nested two deep was a member of the root, and would have named a declaration
+	// the root never reaches as though the signature covered it.
+	const walk = ({ name, depth }: { name: string; depth: number }) => {
+		if (walked.has(name)) {
+			return;
+		}
+
+		walked.add(name);
+
+		methods.push({ name, depth });
+
+		(rest[name] ?? []).forEach(({ type }) => {
+			// A member declared as an array is the same struct, however many dimensions deep.
+			const member = type.replace(/(\[\d*\])*$/, '');
+
+			if (member in rest) {
+				walk({ name: member, depth: depth + 1 });
+			}
+		});
+	};
+
+	walk({ name: root, depth: 0 });
+
+	return methods;
 };
 
 /**
  * Whether a request would be signed without OISY being able to state what it authorizes.
  *
- * A signature is not a lesser thing than a transaction. An ERC-3009 authorization lets its holder
- * pull tokens out of the wallet, a Permit2 batch grants allowances over several tokens at once, and
- * a marketplace order sells an NFT; each is a struct OISY does not recognise, and each used to be
- * previewed as an application, a method name and a collapsed blob of JSON, with approval enabled
- * and nothing said about what signing it would allow.
+ * A signature is not a lesser thing than a transaction. A marketplace order sells an NFT, and the
+ * witness of a Permit2 transfer ties the tokens it releases to terms only the spender reads; each is
+ * something OISY does not recognise, and each used to be previewed as an application, a method
+ * name and a collapsed blob of JSON, with approval enabled and nothing said about what signing it
+ * would allow.
  *
  * This is the `eth_sendTransaction` fallback in the other review: the summary is built from an
  * allowlist, and everything the allowlist does not cover falls through to a preview that states
  * nothing rather than to one that states it cannot say. Recognising one more schema improves what
  * the user is told; it is not what stands between them and an unexplained signature.
+ *
+ * A Permit2 witness transfer is one of these although the summary states its transfer: the
+ * witness is signed too, and nothing describes it.
  *
  * `false` for a raw-message method. Those carry no schema and OISY makes no claim about them: the
  * message shown is the message signed, so there is no summary that could be silently absent.
@@ -1000,7 +1250,9 @@ export const hasUnreviewableTypedData = ({
 	}
 
 	try {
-		return isNullish(getEthTypedDataApproval(getSignParamsMessageTypedDataV4(params)));
+		const approval = getEthTypedDataApproval(getSignParamsMessageTypedDataV4(params));
+
+		return isNullish(approval) || approval.hasWitness === true;
 	} catch (_err: unknown) {
 		// Typed data that cannot even be read is the invalid case above, not this one.
 		return false;

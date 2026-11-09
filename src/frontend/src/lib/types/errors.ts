@@ -39,6 +39,10 @@ export class InvalidMetadataImageUrl extends NftError {}
 
 export class AuthClientNotInitializedError extends Error {}
 
+// A call that did not settle within the time it was given. It says nothing about the outcome: the
+// call itself carries on, and may still succeed or fail after this was raised.
+export class TimeoutError extends Error {}
+
 /**
  * A swap quote provider refused the requested amount as below its minimum.
  *
@@ -102,6 +106,19 @@ export class LifiRouteUnsupportedError extends Error {
 }
 
 /**
+ * A swap transaction's broadcast ended without showing whether it was sent. An earlier attempt failed
+ * in a way that may have relayed the signed bytes, so a refusal of a later one answers only that
+ * attempt, against a state the first may already have changed (a balance it spent). The swap counts
+ * as sent and its tracking row stays, as for any other unknown outcome. `cause` is the last attempt's
+ * error.
+ */
+export class SwapBroadcastOutcomeUnknownError extends Error {
+	constructor({ cause }: { cause: unknown }) {
+		super('The swap transaction may have been sent: its broadcast outcome is unknown.', { cause });
+	}
+}
+
+/**
  * The LI.FI swap's network fee ceiling, from OISY's own gas estimate at execution, exceeds the one
  * the user reviewed, so it was not signed. It carries what that ceiling was made of — the gas and
  * the L1 data fee of that very transaction — back to the review, which prices them at its own fee
@@ -122,7 +139,8 @@ export class LifiFeeChangedError extends Error {
 /**
  * The LI.FI Solana swap's ceiling — its network fee plus the rent of the accounts it creates, read
  * from the transaction about to be signed — exceeds the one the user reviewed, so it was not signed.
- * It carries that ceiling, in lamports, back to the review for the user to confirm.
+ * It carries that ceiling, in lamports, with the headroom on its network fee a displayed quote's
+ * has, back to the review for the user to confirm.
  */
 export class LifiSolFeeChangedError extends Error {
 	readonly ceiling: bigint;
@@ -133,3 +151,10 @@ export class LifiSolFeeChangedError extends Error {
 		this.ceiling = ceiling;
 	}
 }
+
+/**
+ * A Velora swap failed OISY's own checks before signing: its order or transaction is not the swap
+ * the user reviewed, or it names a contract other than the one pinned for the network. Velora's
+ * answers are unsigned, so such a swap is never signed.
+ */
+export class VeloraSwapRejectedError extends Error {}

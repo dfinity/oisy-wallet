@@ -4,23 +4,33 @@
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import EthFeePriority from '$eth/components/fee/EthFeePriority.svelte';
 	import EthWalletConnectCallMethods from '$eth/components/wallet-connect/EthWalletConnectCallMethods.svelte';
+	import EthWalletConnectUniswapSwap from '$eth/components/wallet-connect/EthWalletConnectUniswapSwap.svelte';
 	import {
 		ETH_WALLET_CONNECT_GAS_BASELINE_FLOOR,
 		ETH_WALLET_CONNECT_GAS_NOTICE_MULTIPLIER,
 		ETH_WALLET_CONNECT_GAS_WARNING_MULTIPLIER
 	} from '$eth/constants/eth.constants';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
+	import {
+		loadUnlistedErc20TokenData,
+		type UnlistedErc20TokenData
+	} from '$eth/services/erc20-unlisted.services';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { WalletConnectEthCall } from '$eth/types/wallet-connect';
+	import { toUnlistedErc20Token, unlistedErc20Name } from '$eth/utils/erc20-unlisted.utils';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import { decodeErc20AbiData, decodeSetApprovalForAllData } from '$eth/utils/transactions.utils';
 	import { isWalletConnectEthTokenCallWithValue } from '$eth/utils/wallet-connect.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
+	import WalletConnectAcknowledgement from '$lib/components/wallet-connect/WalletConnectAcknowledgement.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
@@ -54,6 +64,9 @@
 		// offers Reject only.
 		flaggedAsScam?: boolean;
 		approveDisabled?: boolean;
+		// Ticked by the user to confirm they sign a call OISY can't read. The review holds Approve
+		// until then, and signing checks it again.
+		unknownCallAcknowledged?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
 	}
@@ -69,6 +82,7 @@
 		targetNetwork,
 		flaggedAsScam = false,
 		approveDisabled = false,
+		unknownCallAcknowledged = $bindable(false),
 		onApprove,
 		onReject
 	}: Props = $props();
@@ -119,6 +133,17 @@
 
 	let ckEthHelperUnconfirmed = $derived(call.type === 'ckEthHelperUnconfirmed');
 
+	let swap = $derived(call.type === 'uniswapSwap' ? call.swap : undefined);
+
+	// Each states something the summary rows cannot carry on their own, so several can show at once.
+	let swapToOtherAddress = $derived(nonNullish(swap?.recipient));
+
+	let swapWithoutMinimum = $derived(swap?.received.amount === ZERO);
+
+	// Judged when the review opens, against this device's clock. The deadline itself is a row of the
+	// summary, so the box is the only part that depends on the clock being right.
+	let swapExpired = $derived(nonNullish(swap?.deadline) && swap.deadline < Date.now() / 1000);
+
 	let erc20 = $derived(erc20Approve || erc20Transfer || allowanceDelta);
 
 	let decodedErc20Data = $derived.by(() => {
@@ -151,21 +176,97 @@
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let token = $derived(
+	// The tokens OISY lists, enabled or not, and the ones the user added.
+	let listedToken = $derived(
 		erc20
 			? $ercFungibleTokens.find(
 					({ address, network: { id: networkId } }) =>
 						areAddressesEqual({ address1: address, address2: destination, networkId }) &&
 						networkId === sourceNetworkProp.id
 				)
-			: $sendToken
+			: undefined
+	);
+
+	// Any other token is stated in what its own contract reports. Calldata that does not decode has
+	// no amount to state, so there is nothing to read for it.
+	let readsUnlistedToken = $derived(
+		erc20 && isNullish(listedToken) && nonNullish(decodedErc20Data)
+	);
+
+	type UnlistedTokenRead =
+		| { status: 'loading' }
+		| { status: 'loaded'; data: UnlistedErc20TokenData }
+		| { status: 'failed' };
+
+	let unlistedTokenRead = $state<UnlistedTokenRead | undefined>();
+
+	$effect(() => {
+		if (!readsUnlistedToken) {
+			unlistedTokenRead = undefined;
+			return;
+		}
+
+		// A read that a newer one replaced must not overwrite it when it answers late.
+		let current = true;
+
+		unlistedTokenRead = { status: 'loading' };
+
+		loadUnlistedErc20TokenData({
+			address: destination,
+			networkId: sourceNetworkProp.id,
+			owner: $ethAddress ?? undefined
+		})
+			.then((data) => {
+				if (current) {
+					unlistedTokenRead = isNullish(data) ? { status: 'failed' } : { status: 'loaded', data };
+				}
+			})
+			.catch(() => {
+				if (current) {
+					unlistedTokenRead = { status: 'failed' };
+				}
+			});
+
+		return () => {
+			current = false;
+		};
+	});
+
+	let unlistedTokenLoading = $derived(unlistedTokenRead?.status === 'loading');
+
+	let unlistedTokenData = $derived(
+		unlistedTokenRead?.status === 'loaded' ? unlistedTokenRead.data : undefined
+	);
+
+	let unlistedToken = $derived(
+		nonNullish(unlistedTokenData)
+			? toUnlistedErc20Token({
+					address: destination,
+					network: sourceNetworkProp,
+					decimals: unlistedTokenData.decimals,
+					name: unlistedErc20Name({
+						symbol: unlistedTokenData.symbol,
+						unknownTokenLabel: $i18n.transaction.text.unknown_token,
+						unknownTokenNamedLabel: $i18n.transaction.text.unknown_token_named
+					})
+				})
+			: undefined
+	);
+
+	let token = $derived(erc20 ? (listedToken ?? unlistedToken) : $sendToken);
+
+	let tokenExplorerUrl = $derived(
+		`${getExplorerUrl({ network: sourceNetworkProp })}/token/${destination}`
 	);
 
 	let amountDisplay = $derived(erc20 ? decodedErc20Data?.value : amount);
 
 	// A transfer moves tokens to the address encoded in the calldata, not to the
-	// contract the transaction is addressed to.
-	let destinationDisplay = $derived(erc20Transfer ? (decodedErc20Data?.to ?? null) : destination);
+	// contract the transaction is addressed to. Any other token call is addressed to the token
+	// itself, which for a token OISY does not list has a row of its own, with its controls.
+	let destinationDisplay = $derived(
+		erc20Transfer ? (decodedErc20Data?.to ?? null) : nonNullish(unlistedToken) ? null : destination
+	);
 
 	// Fail closed: without both the token and its decoded calldata, the review cannot state what
 	// the user would actually approve. This covers approve as well as transfer, since an
@@ -198,7 +299,16 @@
 	// dropped rather than filled with a figure that describes nothing.
 	let noAmount = $derived((setApprovalForAll || unknownCall) && amount === ZERO);
 
-	let balance = $derived(nonNullish(token) ? $balancesStore?.[token.id]?.data : undefined);
+	let balance = $derived(
+		nonNullish(unlistedToken)
+			? unlistedTokenData?.balance
+			: nonNullish(token)
+				? $balancesStore?.[token.id]?.data
+				: undefined
+	);
+
+	// A balance the contract did not report is left out rather than shown as zero.
+	let unlistedBalanceUnknown = $derived(nonNullish(unlistedToken) && isNullish(balance));
 
 	// Names the fee rows for a screen reader. A `label` cannot do it: it only labels form controls,
 	// so its `for` would be ignored here and the group would be announced without a name.
@@ -206,6 +316,30 @@
 
 	let activeTab = $state('summary');
 </script>
+
+<!-- Shared by the swap summary and the send summary. -->
+{#snippet sourceNetwork()}
+	<WalletConnectModalValue label={$i18n.send.text.source_network} ref="source-network">
+		<NetworkWithLogo network={sourceNetworkProp} />
+	</WalletConnectModalValue>
+{/snippet}
+
+<!-- The fee is two rows that belong together, so it takes a heading like every other block in the
+     summary rather than trailing loose off the end of it. -->
+{#snippet fee()}
+	<span id={FEE_SECTION_LABEL} class="font-bold">{$i18n.fee.text.fee}</span>
+
+	<div class="mb-4" aria-labelledby={FEE_SECTION_LABEL} role="group">
+		<EthFeePriority gas={signedGas} styleClass="mb-2" />
+
+		<EthFeeDisplay estimated gas={signedGas}>
+			{#snippet label()}
+				<!-- "Fee" is the heading above; repeating it in the row would say it twice. -->
+				{$i18n.fee.text.estimated}
+			{/snippet}
+		</EthFeeDisplay>
+	</div>
+{/snippet}
 
 <ContentWithToolbar>
 	{#if flaggedAsScam}
@@ -225,14 +359,16 @@
 			{$i18n.wallet_connect.text.cketh_deposit}
 		</MessageBox>
 	{:else if unknownCall}
-		<MessageBox level="error" testId="wallet-connect-unknown-call">
-			{$i18n.wallet_connect.text.unknown_call}
-		</MessageBox>
+		<WalletConnectAcknowledgement
+			testId="wallet-connect-unknown-call"
+			text={$i18n.wallet_connect.text.unknown_call}
+			bind:acknowledged={unknownCallAcknowledged}
+		/>
 	{:else if tokenCallWithValue}
 		<MessageBox level="error" testId="wallet-connect-token-call-with-value">
 			{tokenCallValue}
 		</MessageBox>
-	{:else if unverifiableErc20}
+	{:else if unverifiableErc20 && !unlistedTokenLoading}
 		<MessageBox level="warning" testId="wallet-connect-unverifiable-erc20-warning">
 			{$i18n.wallet_connect.text.unverifiable_erc20_request}
 		</MessageBox>
@@ -260,6 +396,32 @@
 		</MessageBox>
 	{/if}
 
+	<!-- Beside the notice about what the call authorizes, not instead of it. A request the review
+	     refuses shows only its refusal. -->
+	{#if nonNullish(unlistedToken) && !tokenCallWithValue}
+		<MessageBox level="warning" testId="wallet-connect-unlisted-erc20-warning">
+			{$i18n.wallet_connect.text.unlisted_erc20_request}
+		</MessageBox>
+	{/if}
+
+	{#if swapToOtherAddress}
+		<MessageBox level="error" testId="wallet-connect-swap-recipient">
+			{$i18n.wallet_connect.text.swap_recipient_not_wallet}
+		</MessageBox>
+	{/if}
+
+	{#if swapWithoutMinimum}
+		<MessageBox level="error" testId="wallet-connect-swap-no-minimum">
+			{$i18n.wallet_connect.text.swap_no_minimum}
+		</MessageBox>
+	{/if}
+
+	{#if swapExpired}
+		<MessageBox level="error" testId="wallet-connect-swap-expired">
+			{$i18n.wallet_connect.text.swap_expired}
+		</MessageBox>
+	{/if}
+
 	<!-- Padding an estimate is ordinary dApp behaviour and unused gas is refunded, so both tiers
 	     inform instead of blocking the way undecodable ERC20 calldata does. They sit with the other
 	     warnings rather than in a tab, since a warning behind a tab is one the user need not see. -->
@@ -281,26 +443,30 @@
 		]}
 		bind:activeTab
 	>
-		{#if activeTab === 'summary'}
+		{#if activeTab === 'summary' && unlistedTokenLoading}
+			<div class="mb-4" data-tid="wallet-connect-unlisted-erc20-loading" role="status">
+				<LoaderSpinner inline size="small" />
+				<span class="sr-only">{$i18n.init.info.hold_loading}</span>
+			</div>
+		{:else if activeTab === 'summary' && nonNullish(swap)}
+			<EthWalletConnectUniswapSwap {application} network={sourceNetworkProp} {sourceNetwork} {swap}>
+				{@render fee()}
+			</EthWalletConnectUniswapSwap>
+		{:else if activeTab === 'summary'}
 			<SendData
 				amount={amountDisplay}
 				{application}
 				{balance}
 				destination={destinationDisplay}
 				showAmount={!noAmount}
-				showBalance={!noAmount}
+				showBalance={!noAmount && !unlistedBalanceUnknown}
 				showNullishAmountLabel={unverifiableErc20}
 				showSigner={false}
 				showUnlimitedAmountLabel={erc20Approve || allowanceIncrease}
 				source={$ethAddress ?? ''}
+				{sourceNetwork}
 				{token}
 			>
-				{#snippet sourceNetwork()}
-					<WalletConnectModalValue label={$i18n.send.text.source_network} ref="source-network">
-						<NetworkWithLogo network={sourceNetworkProp} />
-					</WalletConnectModalValue>
-				{/snippet}
-
 				{#snippet destinationNetwork()}
 					{#if nonNullish(targetNetwork)}
 						<WalletConnectModalValue
@@ -311,6 +477,23 @@
 						</WalletConnectModalValue>
 					{/if}
 				{/snippet}
+
+				<!-- The address is what the user can look a token up by when OISY does not list it. -->
+				{#if nonNullish(unlistedToken)}
+					<WalletConnectModalValue label={$i18n.tokens.text.token_address} ref="token-address">
+						<span class="flex flex-wrap items-center gap-2">
+							{destination}
+
+							<AddressActions
+								copyAddress={destination}
+								copyAddressText={$i18n.tokens.details.token_address_copied}
+								externalLink={tokenExplorerUrl}
+								externalLinkAriaLabel={$i18n.tokens.alt.open_token_address_block_explorer}
+								inline
+							/>
+						</span>
+					</WalletConnectModalValue>
+				{/if}
 
 				{#if (erc20Approve || allowanceDelta) && nonNullish(spender)}
 					<SendDataSpender {spender} />
@@ -329,20 +512,7 @@
 					</WalletConnectModalValue>
 				{/if}
 
-				<!-- The fee is two rows that belong together, so it takes a heading like every other
-				     block in this summary rather than trailing loose off the end of it. -->
-				<span id={FEE_SECTION_LABEL} class="font-bold">{$i18n.fee.text.fee}</span>
-
-				<div class="mb-4" aria-labelledby={FEE_SECTION_LABEL} role="group">
-					<EthFeePriority gas={signedGas} styleClass="mb-2" />
-
-					<EthFeeDisplay estimated gas={signedGas}>
-						{#snippet label()}
-							<!-- "Fee" is the heading above; repeating it in the row would say it twice. -->
-							{$i18n.fee.text.estimated}
-						{/snippet}
-					</EthFeeDisplay>
-				</div>
+				{@render fee()}
 			</SendData>
 		{:else}
 			<!-- What the transaction calls is the one thing the review can still state about calldata
@@ -358,6 +528,7 @@
 		<WalletConnectActions
 			approve={!flaggedAsScam}
 			approveDisabled={approveDisabled ||
+				(unknownCall && !unknownCallAcknowledged) ||
 				tokenCallWithValue ||
 				unverifiableErc20 ||
 				unverifiableSetApprovalForAll ||

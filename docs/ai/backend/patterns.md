@@ -123,6 +123,60 @@ pub fn create_contact(req: CreateContactRequest) -> CreateContactResult {
 - Update `backend.did` via `npm run generate` after any change to the
   set / signature of `#[update]` / `#[query]` exports.
 
+## Reads a certified call returns — below 2 MiB
+
+A certified call runs a `#[query]` in replicated execution, where a reply
+is capped at 2 MiB (a query gets 3 MiB). A read whose result grows with
+user data must stay below that at the caps, not only for typical data:
+
+- Return lists in pages filled up to an encoded-size budget, measured per
+  item with `candid::encode_one`. The caller passes `after` (the `next` of
+  the previous page, none for the first page), the reply sets `next` while
+  items remain, and every page holds at least one item. Example:
+  `get_contacts_page` with `CONTACTS_PAGE_MAX_BYTES` (1.5 MiB).
+- Keep blobs out of list replies and return them in fixed batches sized
+  from their own cap: `get_contact_images` takes at most
+  `MAX_CONTACT_IMAGES_PER_CALL` (16) IDs of images up to 100 KiB, a bound
+  enforced while the request decodes.
+- Leave the existing endpoint as it is for callers that already use it
+  (`get_contacts`).
+
+## Ledger transfers — carry a `created_at_time`
+
+Any call that **moves** tokens (`icrc1_transfer`, `icrc2_transfer_from`) sets
+`created_at_time`, and the value is pinned on the record a retry reads back —
+not taken fresh per attempt, or the retry is a different transaction and there
+is nothing to match it against.
+
+- Without it, a call that times out, traps on the way back, or fails to decode
+  is indistinguishable from one that never executed, and the canister writes off
+  a payout that landed as a failure.
+- With it, the ledger deduplicates: an identical retry is not executed again and
+  the reply is `TransferFromError::Duplicate { duplicate_of }`, naming the
+  original block. Treat that as **success** carrying that block index.
+- `TooOld` means the stamp has aged out of the ledger's transaction window (24
+  hours on the ledgers this repo targets), so the ledger can no longer say what
+  became of the previous attempt and will refuse every retry carrying it. Retire
+  the stamp so the next attempt pins a fresh one — and renew it before the
+  window closes rather than spending an attempt on the refusal
+  (`TIP_PAYOUT_DEDUP_WINDOW_NS`).
+- `CreatedInFuture` is a plain failure: nothing was written, and the same stamp
+  is accepted once the ledger's clock passes it.
+- Deduplication narrows the ambiguous window; it does not replace the invariant
+  that makes a second payout impossible. For tips that is the allowance covering
+  exactly one payout. Keep both.
+
+Worked example: `classify` in
+[`tips/icrc2.rs`](../../../src/backend/src/tips/icrc2.rs) and
+`TipRecord::start_claim` in
+[`tips/model.rs`](../../../src/backend/src/tips/model.rs).
+
+`icrc2_approve` sets an allowance to an absolute value, but a repeat can restore
+allowance already consumed by the spender and charges another approval fee.
+[`signer/service.rs`](../../../src/backend/src/signer/service.rs) uses `None`
+for replenishing signing allowances; do not generalise this to retries of a
+one-shot approval, which should preserve their transaction identity.
+
 ## Threshold signatures — chain-fusion signer only
 
 - Direct calls to `sign_with_ecdsa` / `sign_with_schnorr` are forbidden
@@ -131,6 +185,12 @@ pub fn create_contact(req: CreateContactRequest) -> CreateContactResult {
   canister**. Wiring is in
   [`signer/service.rs`](../../../src/backend/src/signer/service.rs)
   (`allow_signing`, `get_allowed_cycles`, top-up flow, allowance maths).
+- A user's signer public keys (and so their BTC / ETH / SOL addresses) are
+  derived offline from the signer's root keys, which
+  [`signer/service.rs`](../../../src/backend/src/signer/service.rs) fetches
+  once and caches (`cfs_ecdsa_root_key`, `cfs_ed25519_root_key`, derivation
+  via `ic-secp256k1` / `ic-ed25519`). Don't call `ecdsa_public_key` /
+  `schnorr_public_key` per user.
 - See [SIGNER_DOMAINS.md](../../../SIGNER_DOMAINS.md) for the architecture
   and per-domain considerations.
 
@@ -153,6 +213,14 @@ pub fn create_contact(req: CreateContactRequest) -> CreateContactResult {
 - Don't add a new ad-hoc timer at module load time. Wire it through one
   of the existing entry points and ensure both `init` and `post_upgrade`
   trigger it.
+- **Timer work over a collection that grows with users runs in batches.**
+  Each batch is a timer message of its own that stops once
+  `ic_cdk::api::instruction_counter()` passes a budget well below the 40B
+  limit, always after at least one item, and schedules the next batch from
+  the last key it reached. Take the budget check as a closure so unit tests
+  can drive it. Examples: `contacts::migration::schedule_batch` and the tip
+  sweep (`utils::housekeeping::schedule_tip_sweep_batch` over
+  `tips::service::prune_expired_tips`).
 - **Exchange rates:** Controllers store API keys via `set_api_keys`. Periodic
   refreshes are opt-in: they run only when `coingecko_api_key` is set and
   `exchange_rate_enabled` is `opt true` (`null` / unset is treated as disabled). See

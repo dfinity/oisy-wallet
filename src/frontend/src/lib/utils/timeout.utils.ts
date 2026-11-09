@@ -1,3 +1,4 @@
+import { TimeoutError } from '$lib/types/errors';
 import { nonNullish } from '@dfinity/utils';
 
 /**
@@ -34,10 +35,79 @@ export const withDeadline = async <T>({
 	}
 };
 
+/**
+ * Rejects with `signal`'s reason once it aborts, unless `operation` settles first: the deadline of
+ * work that cannot be handed the signal itself, such as a chain of RPC reads. The work goes on, and
+ * what it settles with afterwards is ignored.
+ */
+export const untilAborted = async <T>({
+	operation,
+	signal
+}: {
+	operation: Promise<T>;
+	signal: AbortSignal;
+}): Promise<T> => {
+	let onAbort: (() => void) | undefined;
+
+	// As above, `operation` is subscribed to straight away, so a rejection arriving after the signal
+	// aborted is still handled and cannot surface as an unhandled rejection. The abort comes first:
+	// `Promise.race` settles with the first entry already settled, so a signal that had aborted before
+	// the call wins over an operation that had already settled too.
+	try {
+		return await Promise.race([
+			new Promise<never>((_, reject) => {
+				onAbort = () => reject(signal.reason);
+
+				if (signal.aborted) {
+					onAbort();
+					return;
+				}
+
+				signal.addEventListener('abort', onAbort, { once: true });
+			}),
+			operation
+		]);
+	} finally {
+		if (nonNullish(onAbort)) {
+			signal.removeEventListener('abort', onAbort);
+		}
+	}
+};
+
 export const waitForMilliseconds = (milliseconds: number): Promise<void> =>
 	new Promise((resolve) => {
 		setTimeout(resolve, milliseconds);
 	});
+
+// Stands in for an answer that never came: no value a caller's promise can resolve with equals it.
+const NO_ANSWER = Symbol('no answer');
+
+/**
+ * Settles as `promise` does, unless it takes longer than `milliseconds`, in which case it rejects
+ * with a `TimeoutError`: `withDeadline` for a caller that must tell a late answer from any value.
+ *
+ * Nothing is cancelled: the work behind `promise` carries on, only its answer is no longer waited
+ * for. So a caller may give up only on work that is safe to repeat or to abandon.
+ */
+export const withTimeout = async <T>({
+	promise,
+	milliseconds
+}: {
+	promise: Promise<T>;
+	milliseconds: number;
+}): Promise<T> => {
+	const answer = await withDeadline<T | typeof NO_ANSWER>({
+		operation: promise,
+		fallback: NO_ANSWER,
+		milliseconds
+	});
+
+	if (answer === NO_ANSWER) {
+		throw new TimeoutError(`No answer within ${milliseconds} ms`);
+	}
+
+	return answer;
+};
 
 export const waitReady = async ({
 	retries,

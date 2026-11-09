@@ -3,16 +3,18 @@
 
 	interface Props {
 		dropdown?: boolean;
+		title?: string;
+		sheetContentClass?: string;
 	}
 
-	const { dropdown = false }: Props = $props();
+	const { dropdown = false, title, sheetContentClass }: Props = $props();
 
 	let button = $state<HTMLButtonElement | undefined>();
 </script>
 
 <button bind:this={button}>Test</button>
 
-<ResponsivePopover {button} {dropdown} visible>
+<ResponsivePopover {button} {dropdown} {sheetContentClass} {title} visible>
 	{#snippet content()}
 		Test content
 	{/snippet}

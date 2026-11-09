@@ -4,6 +4,7 @@ import { LifiQuoteRejectedError } from '$lib/types/errors';
 import {
 	assertLifiSolInstructions,
 	assertLifiSolSimulation,
+	callsUnpinnedProgram,
 	decodeJupiterRoute,
 	jupiterRouteMinimum,
 	lifiSolNetworkFee,
@@ -222,6 +223,8 @@ const instructionAt = ({
 };
 
 describe('lifi-sol-transaction.utils', () => {
+	const WHIRLPOOL = 'whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc';
+
 	beforeAll(() => {
 		// The derivation of associated token accounts hashes, which the kit refuses outside a secure
 		// context.
@@ -449,14 +452,16 @@ describe('lifi-sol-transaction.utils', () => {
 							mint: USDC,
 							tokenProgram: TOKEN_PROGRAM_ADDRESS
 						}
-					]
+					],
+					closesWrappedSolAccount: true
 				});
 			});
 
 			it('should accept USDC → SOL, its fee paid in USDC', async () => {
 				await expect(assertWith({ fixture: mockLifiSolUsdcToSol })).resolves.toEqual(
 					expect.objectContaining({
-						createdAccounts: [expect.objectContaining({ mint: WSOL_TOKEN.address })]
+						createdAccounts: [expect.objectContaining({ mint: WSOL_TOKEN.address })],
+						closesWrappedSolAccount: true
 					})
 				);
 			});
@@ -474,7 +479,7 @@ describe('lifi-sol-transaction.utils', () => {
 			// Whether that account held wrapped SOL only the simulation says.
 			it("should accept a route closing the user's own wrapped SOL account", async () => {
 				await expect(assertWith({ fixture: mockLifiSolSolToUsdcWithWsolAccount })).resolves.toEqual(
-					expect.objectContaining({ createdAccounts: [] })
+					expect.objectContaining({ createdAccounts: [], closesWrappedSolAccount: true })
 				);
 			});
 
@@ -498,7 +503,7 @@ describe('lifi-sol-transaction.utils', () => {
 
 			it('should accept USDC → USDT, with no wrapped SOL at all', async () => {
 				await expect(assertWith({ fixture: mockLifiSolUsdcToUsdt })).resolves.toEqual(
-					expect.objectContaining({ computeUnitLimit: 1_400_000n })
+					expect.objectContaining({ computeUnitLimit: 1_400_000n, closesWrappedSolAccount: false })
 				);
 			});
 
@@ -1618,6 +1623,16 @@ describe('lifi-sol-transaction.utils', () => {
 		});
 	});
 
+	describe('callsUnpinnedProgram', () => {
+		it('should leave out a known program', () => {
+			expect(callsUnpinnedProgram([WHIRLPOOL])).toBeFalsy();
+		});
+
+		it('should find a program neither known nor pinned beside a known one', () => {
+			expect(callsUnpinnedProgram([WHIRLPOOL, mockSolAddress2])).toBeTruthy();
+		});
+	});
+
 	describe('assertLifiSolSimulation', () => {
 		const user = mockLifiSolUser;
 		const wrappedSolAccount = mockAtaAddress;
@@ -1701,6 +1716,19 @@ describe('lifi-sol-transaction.utils', () => {
 				).not.toThrow();
 			});
 
+			// The review names a known pool that pays out of an account that is not the user's into
+			// another one; that is no venue missing from the pin.
+			it('should accept a known program the review finds paying others', () => {
+				expect(() =>
+					assertWith({
+						result: resultWith({
+							preview: solToUsdcPreview,
+							unreadPrograms: ['HBVw6bZtcCaezhcBrmfyXBSBRWCdv72271xQ4GPvms2z', WHIRLPOOL]
+						})
+					})
+				).not.toThrow();
+			});
+
 			it('should refuse a program neither known nor pinned', () => {
 				expect(() =>
 					assertWith({
@@ -1725,6 +1753,43 @@ describe('lifi-sol-transaction.utils', () => {
 				})
 			).toThrow(LifiQuoteRejectedError);
 		});
+
+		const parsedSystemAccount = (lamports: bigint): NonNullable<SolanaParsedAccountInfo> =>
+			({
+				executable: false,
+				lamports,
+				owner: SYSTEM_PROGRAM_ADDRESS,
+				space: ZERO,
+				data: ['', 'base64']
+			}) as unknown as NonNullable<SolanaParsedAccountInfo>;
+
+		type TokenAccountControl = Partial<Record<'delegate' | 'closeAuthority', SolAddress>>;
+
+		const parsedTokenAccount = ({
+			mint,
+			amount,
+			decimals,
+			control = {}
+		}: {
+			mint: SolAddress;
+			amount: bigint;
+			decimals: number;
+			control?: TokenAccountControl;
+		}): NonNullable<SolanaParsedAccountInfo> =>
+			({
+				executable: false,
+				lamports: 2_039_280n,
+				owner: TOKEN_PROGRAM_ADDRESS,
+				space: 165n,
+				data: {
+					program: 'spl-token',
+					space: 165n,
+					parsed: {
+						type: 'account',
+						info: { mint, owner: user, tokenAmount: { amount: `${amount}`, decimals }, ...control }
+					}
+				}
+			}) as unknown as NonNullable<SolanaParsedAccountInfo>;
 
 		describe('created accounts', () => {
 			it.each([
@@ -1759,42 +1824,36 @@ describe('lifi-sol-transaction.utils', () => {
 					})
 				).not.toThrow();
 			});
+
+			// SOL → USDC at its bounds, opening the user's USDC account with `control` on it.
+			const previewOpening = (control: TokenAccountControl) =>
+				mapSolSimulationPreview({
+					addresses: [user, usdcAccount],
+					preAccounts: [parsedSystemAccount(1_000_000_000n), null],
+					postAccounts: [
+						parsedSystemAccount(1_000_000_000n - amount - ceiling),
+						parsedTokenAccount({ mint: USDC, amount: toAmountMin, decimals: 6, control })
+					],
+					userAddress: user
+				});
+
+			it('should accept one the simulation shows opened closable by the user', () => {
+				expect(() =>
+					assertWith({ result: resultWith({ preview: previewOpening({ closeAuthority: user }) }) })
+				).not.toThrow();
+			});
+
+			it.each([
+				{ account: 'with a delegate', control: { delegate: mockSolAddress2 } },
+				{ account: 'closable by anyone else', control: { closeAuthority: mockSolAddress2 } }
+			])('should refuse one the simulation shows opened $account', ({ control }) => {
+				expect(() =>
+					assertWith({ result: resultWith({ preview: previewOpening(control) }) })
+				).toThrow(LifiQuoteRejectedError);
+			});
 		});
 
 		describe('closed accounts', () => {
-			const parsedSystemAccount = (lamports: bigint): NonNullable<SolanaParsedAccountInfo> =>
-				({
-					executable: false,
-					lamports,
-					owner: SYSTEM_PROGRAM_ADDRESS,
-					space: ZERO,
-					data: ['', 'base64']
-				}) as unknown as NonNullable<SolanaParsedAccountInfo>;
-
-			const parsedTokenAccount = ({
-				mint,
-				amount,
-				decimals
-			}: {
-				mint: SolAddress;
-				amount: bigint;
-				decimals: number;
-			}): NonNullable<SolanaParsedAccountInfo> =>
-				({
-					executable: false,
-					lamports: 2_039_280n,
-					owner: TOKEN_PROGRAM_ADDRESS,
-					space: 165n,
-					data: {
-						program: 'spl-token',
-						space: 165n,
-						parsed: {
-							type: 'account',
-							info: { mint, owner: user, tokenAmount: { amount: `${amount}`, decimals } }
-						}
-					}
-				}) as unknown as NonNullable<SolanaParsedAccountInfo>;
-
 			// Mainnet reported a wrapped SOL account a LI.FI route closed as the latter (2026-10-23).
 			const closedRepresentations = [
 				{ representation: 'no account', closed: null },

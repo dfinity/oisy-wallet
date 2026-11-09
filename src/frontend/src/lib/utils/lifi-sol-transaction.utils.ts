@@ -14,6 +14,7 @@ import {
 	LIFI_SOLANA_FEE_WALLET,
 	LIFI_SOLANA_PROGRAM_ADDRESSES
 } from '$sol/constants/lifi.constants';
+import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
@@ -95,6 +96,8 @@ export interface LifiSolInstructions {
 	computeUnitLimit: bigint;
 	computeUnitPrice?: bigint;
 	createdAccounts: LifiSolCreatedAccount[];
+	// Whether the transaction closes the user's wrapped SOL account, which unwraps whatever it holds.
+	closesWrappedSolAccount: boolean;
 }
 
 export interface JupiterRouteArguments {
@@ -585,8 +588,9 @@ export const assertLifiSolInstructions = ({
 	}));
 
 	const closable = [accounts.wrappedSolAccount, ...createdAccounts.map(({ account }) => account)];
+	const closes = ofKind('close');
 
-	if (ofKind('close').some(({ account }) => !closable.includes(account))) {
+	if (closes.some(({ account }) => !closable.includes(account))) {
 		throw rejected('the transaction closes an account it did not create');
 	}
 
@@ -614,7 +618,8 @@ export const assertLifiSolInstructions = ({
 	return {
 		computeUnitLimit: limit.units,
 		...(nonNullish(price) && { computeUnitPrice: price.microLamports }),
-		createdAccounts
+		createdAccounts,
+		closesWrappedSolAccount: closes.some(({ account }) => account === accounts.wrappedSolAccount)
 	};
 };
 
@@ -697,6 +702,19 @@ const sumDeltas = ({
 	);
 
 /**
+ * Whether a simulation reached a program that is neither known nor pinned for LI.FI
+ * (`LIFI_SOLANA_PROGRAM_ADDRESSES`): a venue Jupiter added since the pin, which the binding refuses.
+ * The known ones (`SOLANA_KNOWN_PROGRAM_ADDRESSES`) are left out here, since `unreadPrograms` also
+ * names a known program the review finds paying others, which is no unpinned venue.
+ */
+export const callsUnpinnedProgram = (unreadPrograms: SolAddress[]): boolean =>
+	unreadPrograms.some(
+		(program) =>
+			!SOLANA_KNOWN_PROGRAM_ADDRESSES.includes(program) &&
+			!LIFI_SOLANA_PROGRAM_ADDRESSES.includes(program)
+	);
+
+/**
  * Refuses a LI.FI Solana transaction unless a simulation of its exact bytes, with the pre-state read
  * at the slot it ran at, shows it doing only what the request asked, within `ceiling`, the LI.FI
  * ceiling of this very transaction (its network fee and the rent of every account it creates):
@@ -731,7 +749,7 @@ export const assertLifiSolSimulation = ({
 
 	const { preview, unreadPrograms } = result;
 
-	if (unreadPrograms.some((program) => !LIFI_SOLANA_PROGRAM_ADDRESSES.includes(program))) {
+	if (callsUnpinnedProgram(unreadPrograms)) {
 		throw rejected('the route calls a program outside the pinned ones');
 	}
 
@@ -749,9 +767,17 @@ export const assertLifiSolSimulation = ({
 
 	// A closed account is reported holding no lamports as a System account, which reads as a change of
 	// its program and owner. Nothing is left to control there; the close rules below hold it instead.
+	// An account the run opens is compared with an empty one, so the user set as its close authority
+	// is a change as well: the rule for created accounts below accepts that one.
 	if (
 		controlChanges.some(
-			({ account }) => !closedAccounts.some(({ account: closed }) => closed === account)
+			({ account, field, to }) =>
+				!closedAccounts.some(({ account: closed }) => closed === account) &&
+				!(
+					field === 'closeAuthority' &&
+					to === userAddress &&
+					createdAccounts.some(({ account: created }) => created === account)
+				)
 		)
 	) {
 		throw rejected("the transaction changes who controls an account of the user's");

@@ -1,5 +1,6 @@
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { visibleTokenSymbol } from '$lib/utils/token-symbol.utils';
 import type { SplTokenMetadata, SplTokenMetadataData } from '$sol/stores/spl-token-metadata.store';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
@@ -23,20 +24,8 @@ const namesOn = ({
 	return nonNullish(network) ? (metadata[network] ?? {}) : {};
 };
 
-// The longest symbol of its own a mint is shown with, the ellipsis included. Tickers run to a
-// handful of characters, and the symbol sits inside a sentence, which a longer one would swamp.
-const OWN_SYMBOL_MAX_LENGTH = 12;
-
-// Characters that show nothing themselves or rearrange the ones around them: controls, format
-// characters such as the bidirectional overrides and the zero-width joiners, code points that are
-// private, unassigned or half of a pair, and the ones Unicode marks as ignorable by default, such
-// as the variation selectors and the Hangul fillers, which are marks and letters by category.
-const INVISIBLE_CHARACTERS = /[\p{Cc}\p{Cf}\p{Co}\p{Cn}\p{Cs}\p{Default_Ignorable_Code_Point}]/gu;
-
 /**
- * The symbol a mint carries in its own account, as it may be shown. Whoever creates the mint
- * writes it, so it is kept to what is visible and cut to a ticker's length. Nothing left of it is
- * no symbol at all.
+ * The symbol a mint carries in its own account, as it may be shown.
  */
 const ownSymbol = ({
 	tokenAddress,
@@ -46,28 +35,8 @@ const ownSymbol = ({
 	tokenAddress: SplTokenAddress;
 	networkId: NetworkId;
 	metadata: SplTokenMetadataData;
-}): string | undefined => {
-	const symbol = namesOn({ metadata, networkId })[tokenAddress]?.symbol;
-
-	if (isNullish(symbol)) {
-		return undefined;
-	}
-
-	// Counted in code points, so a symbol cannot stretch past the bound on marks stacked onto a
-	// single letter.
-	const characters = [...symbol.replace(INVISIBLE_CHARACTERS, '').replace(/\s+/gu, ' ').trim()];
-
-	if (characters.length === 0) {
-		return undefined;
-	}
-
-	return characters.length > OWN_SYMBOL_MAX_LENGTH
-		? `${characters
-				.slice(0, OWN_SYMBOL_MAX_LENGTH - 1)
-				.join('')
-				.trimEnd()}…`
-		: characters.join('');
-};
+}): string | undefined =>
+	visibleTokenSymbol(namesOn({ metadata, networkId })[tokenAddress]?.symbol);
 
 /**
  * How a mint is named, wherever one is named.

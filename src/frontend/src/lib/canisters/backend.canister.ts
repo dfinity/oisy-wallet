@@ -2,7 +2,10 @@ import type {
 	ActiveUserTransaction,
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
+	BtcGetSpendableUtxosResponse,
 	Contact,
+	ContactImageEntry,
+	ContactsPage,
 	CreatePersonalNoteShareRequest,
 	CreateTipRequest,
 	CustomToken,
@@ -31,6 +34,7 @@ import {
 	mapBtcAddPendingTransactionError,
 	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
+	mapBtcGetSpendableUtxosError,
 	mapGetAllowedCyclesError,
 	mapPersonalNotesVetkeyError,
 	mapSignOnramperWidgetUrlError
@@ -51,6 +55,7 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
+	BtcGetSpendableUtxosParams,
 	CreateActiveUserTransactionParams,
 	CreateUserProfileResponse,
 	GetPendingTransactionsOutcome,
@@ -303,6 +308,26 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcGetPendingTransactionsError(response.Err);
 	};
 
+	btcGetSpendableUtxos = async ({
+		network,
+		iiDelegationChain
+	}: BtcGetSpendableUtxosParams): Promise<BtcGetSpendableUtxosResponse> => {
+		const { btc_get_spendable_utxos } = this.caller({ certified: true });
+
+		const response = await btc_get_spendable_utxos({
+			network,
+			ii_delegation_chain: iiDelegationChain
+		});
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		// Unlike `btcGetPendingTransactions`, a rate limit throws too: an empty list would read as a
+		// wallet with nothing to spend.
+		throw mapBtcGetSpendableUtxosError(response.Err);
+	};
+
 	btcGetCurrentFeePercentiles = async ({
 		network
 	}: BtcGetFeePercentilesParams): Promise<BtcGetFeePercentilesResponse> => {
@@ -467,8 +492,9 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 	};
 
+	// Contact addresses can become send destinations, so contacts are always read certified.
 	getContact = async (id: bigint): Promise<Contact> => {
-		const { get_contact } = this.caller({ certified: false });
+		const { get_contact } = this.caller({ certified: true });
 		const response = await get_contact(id);
 
 		if ('Ok' in response) {
@@ -477,9 +503,19 @@ export class BackendCanister extends Canister<BackendService> {
 		throw response.Err;
 	};
 
-	getContacts = async (): Promise<Contact[]> => {
-		const { get_contacts } = this.caller({ certified: false });
-		const response = await get_contacts();
+	getContactsPage = async (after?: bigint): Promise<ContactsPage> => {
+		const { get_contacts_page } = this.caller({ certified: true });
+		const response = await get_contacts_page(toNullable(after));
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getContactImages = async (contactIds: bigint[]): Promise<ContactImageEntry[]> => {
+		const { get_contact_images } = this.caller({ certified: true });
+		const response = await get_contact_images({ contact_ids: BigUint64Array.from(contactIds) });
 
 		if ('Ok' in response) {
 			return response.Ok;
@@ -582,7 +618,9 @@ export class BackendCanister extends Canister<BackendService> {
 		start,
 		maxResults
 	}: GetUserTransactionsParams): Promise<GetUserTransactionsResponse> => {
-		const { get_user_transactions } = this.caller({ certified: false });
+		// The stored history decides which addresses count as used before on the send review, so it is
+		// always read certified.
+		const { get_user_transactions } = this.caller({ certified: true });
 
 		const response = await get_user_transactions({
 			token_id: tokenId,

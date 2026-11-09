@@ -1,6 +1,10 @@
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { USDC_SYMBOL, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { EURC_TOKEN as BASE_EURC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.eurc.env';
+import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthWalletConnectSendReview from '$eth/components/wallet-connect/EthWalletConnectSendReview.svelte';
 import { CKETH_ABI } from '$eth/constants/cketh.constants';
@@ -13,6 +17,8 @@ import {
 } from '$eth/constants/erc20.constants';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { MULTICALL_HASH } from '$eth/constants/multicall.constants';
+import { UNISWAP_COMMANDS, UNISWAP_RECIPIENT_ROUTER } from '$eth/constants/uniswap.constants';
+import { loadUnlistedErc20TokenData } from '$eth/services/erc20-unlisted.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import {
@@ -36,16 +42,31 @@ import {
 import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
 import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import { formatSecondsToDate } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+import {
+	encodeUniswapCommand,
+	encodeUniswapEurcToUsdc,
+	encodeUniswapExecute,
+	encodeUniswapPermit,
+	encodeUniswapSweep,
+	encodeUniswapV3Swap,
+	mockUniswapRouter,
+	mockUniswapWallet
+} from '$tests/mocks/uniswap.mock';
 import { isNullish, toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
 import { fireEvent, render, within } from '@testing-library/svelte';
 import { AbiCoder, Interface } from 'ethers/abi';
 import { writable } from 'svelte/store';
+
+vi.mock('$eth/services/erc20-unlisted.services', () => ({
+	loadUnlistedErc20TokenData: vi.fn()
+}));
 
 describe('EthWalletConnectSendReview', () => {
 	const RECIPIENT = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
@@ -112,6 +133,7 @@ describe('EthWalletConnectSendReview', () => {
 	};
 
 	const warningTestId = 'wallet-connect-unverifiable-erc20-warning';
+	const unlistedTestId = 'wallet-connect-unlisted-erc20-warning';
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -121,6 +143,9 @@ describe('EthWalletConnectSendReview', () => {
 
 		erc20DefaultTokensStore.add(USDC_TOKEN);
 		erc20CustomTokensStore.setAll([{ data: { ...USDC_TOKEN, enabled: true }, certified: false }]);
+
+		// A contract that answers nothing, unless a case says otherwise.
+		vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue(undefined);
 	});
 
 	it('should render the token, the decoded recipient and the decoded amount of an ERC20 transfer', () => {
@@ -224,10 +249,10 @@ describe('EthWalletConnectSendReview', () => {
 		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
 	});
 
-	it('should warn and disable approval for an ERC20 transfer of an unknown token', () => {
+	it('should warn and disable approval for an ERC20 transfer of an unlisted token whose contract does not answer', async () => {
 		const data = encodeCall({ selector: ERC20_TRANSFER_HASH, to: RECIPIENT, value: 1_500_000n });
 
-		const { getByTestId, getByRole } = render(EthWalletConnectSendReview, {
+		const { findByTestId, getByRole, getByText } = render(EthWalletConnectSendReview, {
 			props: {
 				...props,
 				call: classifyWalletConnectEthCall(data),
@@ -237,8 +262,211 @@ describe('EthWalletConnectSendReview', () => {
 			context: mockContext
 		});
 
-		expect(getByTestId(warningTestId)).toBeInTheDocument();
+		await expect(findByTestId(warningTestId)).resolves.toBeInTheDocument();
+		expect(getByText(en.send.error.unable_to_retrieve_amount)).toBeInTheDocument();
 		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
+	describe('a token OISY does not list', () => {
+		const PAXG_ADDRESS = '0x45804880De22913dAFE09f4980848ECE6EcbAf78';
+
+		const renderUnlisted = ({ selector, value }: { selector: string; value: bigint }) => {
+			const data = encodeCall({ selector, to: RECIPIENT, value });
+
+			return render(EthWalletConnectSendReview, {
+				props: {
+					...props,
+					call: classifyWalletConnectEthCall(data),
+					data,
+					destination: PAXG_ADDRESS
+				},
+				context: mockContext
+			});
+		};
+
+		beforeEach(() => {
+			vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue({
+				decimals: 18,
+				symbol: 'PAXG',
+				balance: 3_000_000_000_000_000_000n
+			});
+		});
+
+		it('should read the token from its own contract on the network of the request', async () => {
+			const { findByTestId } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000_000_000_000_000n
+			});
+
+			await findByTestId(unlistedTestId);
+
+			expect(loadUnlistedErc20TokenData).toHaveBeenCalledExactlyOnceWith({
+				address: PAXG_ADDRESS,
+				networkId: ETHEREUM_NETWORK.id,
+				owner: undefined
+			});
+		});
+
+		it('should state an approval in the contract decimals, name the token and enable approval', async () => {
+			const { findByText, getByText, getByTestId, queryByTestId, getByRole } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000_000_000_000_000n
+			});
+
+			await expect(findByText('2 Unknown token (PAXG)')).resolves.toBeInTheDocument();
+			expect(getByText('3 Unknown token (PAXG)')).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.spender)).toBeInTheDocument();
+
+			expect(getByTestId(unlistedTestId)).toHaveTextContent(
+				en.wallet_connect.text.unlisted_erc20_request
+			);
+			expect(queryByTestId(warningTestId)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should show the token address with its controls in place of the destination', async () => {
+			const { findByText, container, queryByText, getByRole } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000_000_000_000_000n
+			});
+
+			await expect(findByText(PAXG_ADDRESS)).resolves.toBeInTheDocument();
+			expect(container.querySelector('#token-address')).not.toBeNull();
+			expect(container.querySelector('#destination')).toBeNull();
+			expect(queryByText(en.send.text.destination)).not.toBeInTheDocument();
+
+			expect(
+				getByRole('link', { name: en.tokens.alt.open_token_address_block_explorer })
+			).toHaveAttribute('href', `${ETHEREUM_NETWORK.explorerUrl}/token/${PAXG_ADDRESS}`);
+		});
+
+		it('should call an approval of the largest amount unlimited', async () => {
+			const { findByText } = renderUnlisted({ selector: ERC20_APPROVE_HASH, value: MAX_UINT_256 });
+
+			await expect(findByText('Unlimited Unknown token (PAXG)')).resolves.toBeInTheDocument();
+		});
+
+		// An approval of zero is a revocation, so a nonzero one must not round to it.
+		it('should state an approval below eight decimals as less than the smallest step, not as zero', async () => {
+			const { findByText, queryByText, getByRole } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 1_000_000_000n
+			});
+
+			await expect(findByText('< 0.00000001 Unknown token (PAXG)')).resolves.toBeInTheDocument();
+			expect(queryByText('0 Unknown token (PAXG)')).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should state a transfer to its recipient, with the token address in a row of its own', async () => {
+			const { findByText, getByText, container, getByRole } = renderUnlisted({
+				selector: ERC20_TRANSFER_HASH,
+				value: 1_500_000_000_000_000_000n
+			});
+
+			await expect(findByText('1.5 Unknown token (PAXG)')).resolves.toBeInTheDocument();
+			expect(getByText(RECIPIENT)).toBeInTheDocument();
+			expect(container.querySelector('#token-address')).toHaveTextContent(PAXG_ADDRESS);
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		// Anybody can deploy a contract that calls itself after a token OISY lists.
+		it('should never let the symbol a contract reports stand on its own', async () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue({ decimals: 6, symbol: USDC_SYMBOL });
+
+			const { findByText, queryByText } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000n
+			});
+
+			await expect(findByText(`2 Unknown token (${USDC_SYMBOL})`)).resolves.toBeInTheDocument();
+			expect(queryByText(`2 ${USDC_SYMBOL}`)).not.toBeInTheDocument();
+		});
+
+		it('should name a token whose contract reports no visible symbol with the bare placeholder', async () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue({ decimals: 18, symbol: '\u200B' });
+
+			const { findByText } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000_000_000_000_000n
+			});
+
+			await expect(
+				findByText(`2 ${en.transaction.text.unknown_token}`)
+			).resolves.toBeInTheDocument();
+		});
+
+		it('should leave the balance out rather than show zero when the contract did not report it', async () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue({ decimals: 18, symbol: 'PAXG' });
+
+			const { findByText, container } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000_000_000_000_000n
+			});
+
+			await findByText('2 Unknown token (PAXG)');
+
+			expect(container.querySelector('#balance')).toBeNull();
+		});
+
+		it('should show a spinner and hold approval while the contract is read', () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockReturnValue(new Promise(() => {}));
+
+			const { getByTestId, queryByTestId, getByRole } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000_000_000_000_000n
+			});
+
+			expect(getByTestId('wallet-connect-unlisted-erc20-loading')).toBeInTheDocument();
+			expect(queryByTestId(warningTestId)).not.toBeInTheDocument();
+			expect(queryByTestId(unlistedTestId)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+			expect(getByRole('button', { name: en.core.text.reject })).not.toBeDisabled();
+		});
+
+		it('should fall back to the review it cannot state when the read throws', async () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockRejectedValue(new Error('unexpected'));
+
+			const { findByTestId, getByRole } = renderUnlisted({
+				selector: ERC20_APPROVE_HASH,
+				value: 2_000_000_000_000_000_000n
+			});
+
+			await expect(findByTestId(warningTestId)).resolves.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should not read anything for a token OISY lists', () => {
+			const data = encodeCall({ selector: ERC20_APPROVE_HASH, to: RECIPIENT, value: 2_000_000n });
+
+			render(EthWalletConnectSendReview, {
+				props: {
+					...props,
+					call: classifyWalletConnectEthCall(data),
+					data,
+					destination: USDC_TOKEN.address
+				},
+				context: mockContext
+			});
+
+			expect(loadUnlistedErc20TokenData).not.toHaveBeenCalled();
+		});
+
+		it('should not read anything for calldata that does not decode', () => {
+			const data = `${ERC20_APPROVE_HASH}deadbeef`;
+
+			render(EthWalletConnectSendReview, {
+				props: {
+					...props,
+					call: classifyWalletConnectEthCall(data),
+					data,
+					destination: PAXG_ADDRESS
+				},
+				context: mockContext
+			});
+
+			expect(loadUnlistedErc20TokenData).not.toHaveBeenCalled();
+		});
 	});
 
 	it('should warn and disable approval for an ERC20 transfer with undecodable calldata', () => {
@@ -416,15 +644,50 @@ describe('EthWalletConnectSendReview', () => {
 			expect(getByTestId(deltaTestId)).toHaveTextContent(en.wallet_connect.text.allowance_decrease);
 		});
 
-		it('should warn and disable approval for an allowance delta on an unknown token', () => {
-			const { getByTestId, getByRole } = renderAllowanceDelta({
+		it('should warn and disable approval for an allowance delta on an unlisted token whose contract does not answer', async () => {
+			const { findByTestId, getByRole } = renderAllowanceDelta({
 				selector: ERC20_INCREASE_ALLOWANCE_HASH,
 				value: MAX_UINT_256,
 				destination: UNKNOWN_CONTRACT
 			});
 
-			expect(getByTestId(warningTestId)).toBeInTheDocument();
+			await expect(findByTestId(warningTestId)).resolves.toBeInTheDocument();
 			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should state an unlimited increase on an unlisted token in the token the contract reports', async () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue({ decimals: 18, symbol: 'PAXG' });
+
+			const { findByText, getByTestId, getByRole, queryByTestId } = renderAllowanceDelta({
+				selector: ERC20_INCREASE_ALLOWANCE_HASH,
+				value: MAX_UINT_256,
+				destination: UNKNOWN_CONTRACT
+			});
+
+			await expect(findByText('Unlimited Unknown token (PAXG)')).resolves.toBeInTheDocument();
+
+			// What the call authorizes is still stated, beside the notice about the token.
+			expect(getByTestId(deltaTestId)).toHaveTextContent(en.wallet_connect.text.allowance_increase);
+			expect(getByTestId(unlistedTestId)).toBeInTheDocument();
+			expect(queryByTestId(warningTestId)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should state a decrease on an unlisted token in the token the contract reports', async () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue({ decimals: 18, symbol: 'PAXG' });
+
+			const { findByText, getByTestId, getByRole, queryByTestId } = renderAllowanceDelta({
+				selector: ERC20_DECREASE_ALLOWANCE_HASH,
+				value: 2_000_000_000_000_000_000n,
+				destination: UNKNOWN_CONTRACT
+			});
+
+			await expect(findByText('2 Unknown token (PAXG)')).resolves.toBeInTheDocument();
+
+			expect(getByTestId(deltaTestId)).toHaveTextContent(en.wallet_connect.text.allowance_decrease);
+			expect(getByTestId(unlistedTestId)).toBeInTheDocument();
+			expect(queryByTestId(warningTestId)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 		});
 
 		it('should warn and disable approval when the spender cannot be decoded', () => {
@@ -556,15 +819,19 @@ describe('EthWalletConnectSendReview', () => {
 			expect(getByText(`1 ${ETHEREUM_TOKEN.symbol}`)).toBeInTheDocument();
 		});
 
-		// The warning states what OISY could not establish; it does not withhold the decision. Blocking
-		// every selector OISY has never decoded would take most dApps offline, so approval stays with
-		// the user and the review stops misdescribing what they are deciding on.
-		it('should warn without disabling approval', () => {
-			const { getByTestId, getByRole } = renderUnknownCall({
+		// The notice states what OISY could not establish and leaves the decision with the user, once
+		// they confirm they understand it. Blocking every selector OISY has never decoded would take
+		// most dApps offline.
+		it('should hold approval until the user confirms it', async () => {
+			const { getByTestId, getByRole, getByLabelText } = renderUnknownCall({
 				data: `${PERMIT2_APPROVE_HASH}deadbeef`
 			});
 
 			expect(getByTestId(unknownTestId)).toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+
+			await fireEvent.click(getByLabelText(en.wallet_connect.text.unread_programs_acknowledge));
+
 			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 		});
 
@@ -596,6 +863,336 @@ describe('EthWalletConnectSendReview', () => {
 
 			expect(queryByTestId(unknownTestId)).not.toBeInTheDocument();
 			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+	});
+
+	describe('Uniswap swaps', () => {
+		const OTHER = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
+
+		const inAnHour = () => BigInt(Math.floor(Date.now() / 1000) + 60 * 60);
+
+		const renderSwapWithValue = ({ data, value }: { data: string; value: bigint }) =>
+			render(EthWalletConnectSendReview, {
+				props: {
+					...props,
+					// The classifier the modal uses, so every case reaches the branch production reaches.
+					call: classifyWalletConnectEthSendTransaction({
+						to: mockUniswapRouter,
+						data,
+						networkId: BASE_NETWORK.id,
+						minterInfo: undefined,
+						principal: mockPrincipal,
+						chainId: BASE_NETWORK.chainId,
+						value,
+						wallet: mockUniswapWallet,
+						nativeToken: BASE_ETH_TOKEN,
+						tokens: [BASE_EURC_TOKEN, BASE_USDC_TOKEN]
+					}),
+					data,
+					destination: mockUniswapRouter,
+					sourceNetwork: BASE_NETWORK
+				},
+				context: mockContext
+			});
+
+		const renderSwap = (data: string) => renderSwapWithValue({ data, value: ZERO });
+
+		it('should state what the swap pays, what it receives at least and until when', () => {
+			const deadline = inAnHour();
+
+			const { getByText, queryByTestId, getByRole, container } = renderSwap(
+				encodeUniswapEurcToUsdc({ deadline })
+			);
+
+			expect(container.querySelector('#swap-pay')).toHaveTextContent('1 EURC');
+			expect(getByText(en.wallet_connect.text.swap_pay_at_most)).toBeInTheDocument();
+			expect(container.querySelector('#swap-receive')).toHaveTextContent('1.087807 USDC');
+			expect(container.querySelector('#swap-deadline')).toHaveTextContent(
+				formatSecondsToDate({ seconds: Number(deadline) })
+			);
+			expect(
+				getByText(replacePlaceholders(en.wallet_connect.text.swap_router, { $version: '2.1.2' }))
+			).toBeInTheDocument();
+
+			expect(container.querySelector('#swap-recipient')).not.toBeInTheDocument();
+			expect(queryByTestId('wallet-connect-unknown-call')).not.toBeInTheDocument();
+			expect(queryByTestId('wallet-connect-swap-recipient')).not.toBeInTheDocument();
+			expect(queryByTestId('wallet-connect-swap-no-minimum')).not.toBeInTheDocument();
+			expect(queryByTestId('wallet-connect-swap-expired')).not.toBeInTheDocument();
+
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should name the recipient of tokens that go to another address, and say so', () => {
+			const { getByTestId, container, getByRole } = renderSwap(
+				encodeUniswapEurcToUsdc({ recipient: OTHER, deadline: inAnHour() })
+			);
+
+			expect(getByTestId('wallet-connect-swap-recipient')).toHaveTextContent(
+				en.wallet_connect.text.swap_recipient_not_wallet
+			);
+			expect(container.querySelector('#swap-recipient')).toHaveTextContent(OTHER);
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should say so when the swap guarantees no minimum', () => {
+			const { getByTestId, getByRole } = renderSwap(
+				encodeUniswapEurcToUsdc({ amountOutMin: ZERO, deadline: inAnHour() })
+			);
+
+			expect(getByTestId('wallet-connect-swap-no-minimum')).toHaveTextContent(
+				en.wallet_connect.text.swap_no_minimum
+			);
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should say so when the swap has expired', () => {
+			const { getByTestId, getByRole } = renderSwap(
+				encodeUniswapEurcToUsdc({ deadline: BigInt(Math.floor(Date.now() / 1000) - 60) })
+			);
+
+			expect(getByTestId('wallet-connect-swap-expired')).toHaveTextContent(
+				en.wallet_connect.text.swap_expired
+			);
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should state a swap without a deadline as such', () => {
+			const { container, queryByTestId } = renderSwap(encodeUniswapEurcToUsdc({ deadline: null }));
+
+			expect(container.querySelector('#swap-deadline')).toHaveTextContent(
+				en.wallet_connect.text.swap_no_deadline
+			);
+			expect(queryByTestId('wallet-connect-swap-expired')).not.toBeInTheDocument();
+		});
+
+		it('should state the most an exact-output swap pays', () => {
+			const { container, getByText } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapV3Swap({
+							exactInput: false,
+							amount: 1_087_807n,
+							amountLimit: 1_010_000n
+						})
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			expect(getByText(en.wallet_connect.text.swap_pay_at_most)).toBeInTheDocument();
+			expect(container.querySelector('#swap-pay')).toHaveTextContent('1.01 EURC');
+		});
+
+		it('should state what the wallet transfers in to swap as what it pays', () => {
+			const { container, getByText } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapCommand({
+							type: UNISWAP_COMMANDS.PERMIT2_TRANSFER_FROM,
+							types: ['address', 'address', 'uint160'],
+							values: [BASE_EURC_TOKEN.address, UNISWAP_RECIPIENT_ROUTER, 1_000_000n]
+						}),
+						encodeUniswapV3Swap({
+							amount: 1_000_000n,
+							amountLimit: 1_087_807n,
+							payerIsUser: false
+						})
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			expect(getByText(en.wallet_connect.text.swap_pay)).toBeInTheDocument();
+			expect(container.querySelector('#swap-pay')).toHaveTextContent('1 EURC');
+		});
+
+		it('should state the allowance the swap grants, with when it ends', () => {
+			const expiration = 1_795_682_829n;
+
+			const { container } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapPermit({ expiration }),
+						encodeUniswapV3Swap({ amount: 1_000_000n, amountLimit: 1_087_807n })
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			expect(container.querySelector('#swap-allowance')).toHaveTextContent(
+				replacePlaceholders(en.wallet_connect.text.swap_allowance_unlimited, {
+					$symbol: 'EURC',
+					$date: formatSecondsToDate({ seconds: Number(expiration) })
+				})
+			);
+		});
+
+		it('should state each fee the swap pays out, with who gets it', () => {
+			const { container } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapV3Swap({
+							recipient: UNISWAP_RECIPIENT_ROUTER,
+							amount: 1_000_000n,
+							amountLimit: ZERO
+						}),
+						encodeUniswapCommand({
+							type: UNISWAP_COMMANDS.PAY_PORTION,
+							types: ['address', 'address', 'uint256'],
+							values: [BASE_USDC_TOKEN.address, OTHER, 25n]
+						}),
+						encodeUniswapSweep({ amountMin: 1_080_000n })
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			const fee = container.querySelector('#swap-app-fee-0');
+
+			expect(fee).toHaveTextContent(
+				replacePlaceholders(en.wallet_connect.text.swap_app_fee_share, {
+					$share: '0.25%',
+					$symbol: 'USDC'
+				})
+			);
+			expect(fee).toHaveTextContent(OTHER);
+		});
+
+		// As 0%, a share too small for the precision shown would read as no fee, though the router pays
+		// it.
+		it.each([
+			{ portion: 400_000_000_000n, share: '< 0.0001%' },
+			{ portion: 500_000_000_000n, share: '0.0001%' },
+			{ portion: ZERO, share: '0%' }
+		])('should state a share of $portion in 10^18 as $share', ({ portion, share }) => {
+			const { container } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapV3Swap({
+							recipient: UNISWAP_RECIPIENT_ROUTER,
+							amount: 1_000_000n,
+							amountLimit: ZERO
+						}),
+						encodeUniswapCommand({
+							type: UNISWAP_COMMANDS.PAY_PORTION_FULL_PRECISION,
+							types: ['address', 'address', 'uint256'],
+							values: [BASE_USDC_TOKEN.address, OTHER, portion]
+						}),
+						encodeUniswapSweep({ amountMin: 1_080_000n })
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			// The whole text: "0.0001%" is part of "< 0.0001%".
+			expect(container.querySelector('#swap-app-fee-0 span')?.textContent).toBe(
+				replacePlaceholders(en.wallet_connect.text.swap_app_fee_share, {
+					$share: share,
+					$symbol: 'USDC'
+				})
+			);
+		});
+
+		// Rounded to eight decimals, an 18-decimal amount could read as less than the wallet pays or as
+		// more than the minimum the router enforces.
+		describe('an 18-decimal amount', () => {
+			const BASE_WETH = '0x4200000000000000000000000000000000000006';
+
+			it('should state a payment in full', () => {
+				const value = 1_000_000_004_999_999_999n;
+
+				const { container } = renderSwapWithValue({
+					data: encodeUniswapExecute({
+						commands: [
+							encodeUniswapCommand({
+								type: UNISWAP_COMMANDS.WRAP_ETH,
+								types: ['address', 'uint256'],
+								values: [UNISWAP_RECIPIENT_ROUTER, value]
+							}),
+							encodeUniswapV3Swap({
+								amount: value,
+								amountLimit: 1_087_807n,
+								tokens: [BASE_WETH, BASE_USDC_TOKEN.address],
+								payerIsUser: false
+							})
+						],
+						deadline: inAnHour()
+					}),
+					value
+				});
+
+				expect(container.querySelector('#swap-pay')).toHaveTextContent('1.000000004999999999 ETH');
+			});
+
+			it('should state a minimum in full', () => {
+				const { container } = renderSwap(
+					encodeUniswapExecute({
+						commands: [
+							encodeUniswapV3Swap({
+								recipient: UNISWAP_RECIPIENT_ROUTER,
+								amount: 1_000_000n,
+								amountLimit: ZERO,
+								tokens: [BASE_EURC_TOKEN.address, BASE_WETH]
+							}),
+							encodeUniswapCommand({
+								type: UNISWAP_COMMANDS.UNWRAP_WETH,
+								types: ['address', 'uint256'],
+								values: [mockUniswapWallet, 1_000_000_005_000_000_000n]
+							})
+						],
+						deadline: inAnHour()
+					})
+				);
+
+				expect(container.querySelector('#swap-receive')).toHaveTextContent('1.000000005 ETH');
+			});
+		});
+
+		// Rounded to four decimals, either would read as less than the router may spend or pays.
+		it('should state a finite allowance in full', () => {
+			const expiration = 1_795_682_829n;
+
+			const { container } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapPermit({ amount: 1_234_540n, expiration }),
+						encodeUniswapV3Swap({ amount: 1_000_000n, amountLimit: 1_087_807n })
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			expect(container.querySelector('#swap-allowance')).toHaveTextContent(
+				replacePlaceholders(en.wallet_connect.text.swap_allowance_amount, {
+					$amount: '1.23454',
+					$symbol: 'EURC',
+					$date: formatSecondsToDate({ seconds: Number(expiration) })
+				})
+			);
+		});
+
+		it('should state a fee of a stated amount in full', () => {
+			const { container } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapV3Swap({
+							recipient: UNISWAP_RECIPIENT_ROUTER,
+							amount: 1_000_000n,
+							amountLimit: ZERO
+						}),
+						encodeUniswapCommand({
+							type: UNISWAP_COMMANDS.TRANSFER,
+							types: ['address', 'address', 'uint256'],
+							values: [BASE_USDC_TOKEN.address, OTHER, 12_000_049n]
+						}),
+						encodeUniswapSweep({ amountMin: 1_080_000n })
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			expect(container.querySelector('#swap-app-fee-0 span')?.textContent).toBe('12.000049 USDC');
 		});
 	});
 
@@ -637,7 +1234,12 @@ describe('EthWalletConnectSendReview', () => {
 						data,
 						networkId: ETHEREUM_NETWORK.id,
 						minterInfo: unconfirmed ? undefined : minterInfo,
-						principal: mockPrincipal
+						principal: mockPrincipal,
+						chainId: ETHEREUM_NETWORK.chainId,
+						value: 1_000_000_000_000_000_000n,
+						wallet: mockUniswapWallet,
+						nativeToken: ETHEREUM_TOKEN,
+						tokens: []
 					}),
 					data,
 					destination: to,
@@ -1060,6 +1662,22 @@ describe('EthWalletConnectSendReview', () => {
 
 			expect(getByTestId(tokenCallWithValueTestId)).toBeInTheDocument();
 			expect(queryByTestId(warningTestId)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should still refuse a token call with native value once the unlisted token is read', async () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue({ decimals: 18, symbol: 'PAXG' });
+
+			const { getByTestId, queryByTestId, getByRole, findByText } = renderTokenCall({
+				selector: ERC20_APPROVE_HASH,
+				amount: 5_000_000_000_000_000_000n,
+				destination: UNKNOWN_CONTRACT
+			});
+
+			await findByText(UNKNOWN_CONTRACT);
+
+			expect(getByTestId(tokenCallWithValueTestId)).toBeInTheDocument();
+			expect(queryByTestId(unlistedTestId)).not.toBeInTheDocument();
 			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
 		});
 	});
