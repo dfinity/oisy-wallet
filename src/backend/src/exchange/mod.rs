@@ -238,9 +238,11 @@ fn staleness_floor_ns(now: u64) -> u64 {
     now.saturating_sub(PRICE_STALENESS_THRESHOLD_SEC * NANOS_PER_SEC)
 }
 
-/// Returns the custom tokens active within [`PRICE_ACTIVITY_THRESHOLD_SEC`], at most
-/// [`MAX_TOKEN_ACTIVITY_ENTRIES`] of them, so that a refresh stays within that bound even while a
-/// map written before the cap existed still holds more.
+/// Returns the custom tokens active within [`PRICE_ACTIVITY_THRESHOLD_SEC`] among the first
+/// [`MAX_TOKEN_ACTIVITY_ENTRIES`] entries of `activity`.
+///
+/// Reading only that many keeps a refresh within that bound even while a map written before the
+/// cap existed still holds more: its other entries only wait for eviction.
 fn active_custom_tokens_for_refresh(
     activity: impl IntoIterator<Item = (StoredTokenId, u64)>,
     now: u64,
@@ -249,9 +251,9 @@ fn active_custom_tokens_for_refresh(
 
     activity
         .into_iter()
+        .take(usize::try_from(MAX_TOKEN_ACTIVITY_ENTRIES).unwrap_or(usize::MAX))
         .filter(|(_, last_active_ns)| *last_active_ns > threshold)
         .map(|(token_id, _)| token_id)
-        .take(usize::try_from(MAX_TOKEN_ACTIVITY_ENTRIES).unwrap_or(usize::MAX))
         .collect()
 }
 
@@ -1050,6 +1052,26 @@ mod tests {
         );
 
         assert_eq!(tokens, vec![active]);
+    }
+
+    #[test]
+    fn active_custom_tokens_for_refresh_reads_at_most_the_cap() {
+        let now = 1_000 * NANOS_PER_SEC;
+        let read = std::cell::Cell::new(0u64);
+        // Mostly inactive, as a map written before the cap is once its entries have aged out.
+        let activity = (0..MAX_TOKEN_ACTIVITY_ENTRIES + 10_000).map(|n| {
+            read.set(read.get() + 1);
+            let last_active_ns = if n % 1_000 == 0 { now } else { 0 };
+            (
+                StoredTokenId(TokenId::Icrc(Principal::from_slice(&n.to_be_bytes()))),
+                last_active_ns,
+            )
+        });
+
+        let tokens = active_custom_tokens_for_refresh(activity, now);
+
+        assert_eq!(read.get(), MAX_TOKEN_ACTIVITY_ENTRIES);
+        assert_eq!(tokens.len(), 2, "the active ones among the entries read");
     }
 
     #[test]
