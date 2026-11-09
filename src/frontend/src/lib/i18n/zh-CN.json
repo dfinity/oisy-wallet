@@ -133,7 +133,7 @@
 			"section_finance": "金融",
 			"section_more": "更多",
 			"airdrops": "奖励",
-			"canister_top_up": "Canister 充值",
+			"tools": "工具",
 			"earning": "赚取",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "打开借贷视图",
 			"earning": "打开赚取视图",
 			"airdrops": "打开奖励视图",
-			"canister_top_up": "使用 ICP 或 TCYCLES 为 Canister 充值",
+			"tools": "打开工具",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "你的钱包地址、设置、登出与外部链接",
@@ -807,8 +807,8 @@
 			"support_title": "支持",
 			"support_description": "在 $oisy_name 文档的支持页面查找答案和更多信息，如果仍无法解决，请联系团队。",
 			"support_link": "前往我们的支持页面",
-			"network_explorers_title": "区块浏览器",
-			"network_explorers_description": "$oisy_name 根据第三方索引服务构建您的历史记录，这些数据可能落后于链上状态。区块浏览器会显示网络本身为您的地址记录的内容。",
+			"network_explorers_title": "区块链浏览器",
+			"network_explorers_description": "打开这些链接，即可在区块链浏览器中查看您的地址，跟踪实时余额和完整的交易记录。区块链是公开账本，因此您可以独立验证和调查 $oisy_name 中的所有链上活动。",
 			"explorers_title": "服务商交易状态",
 			"explorers_description": "$oisy_name 通过第三方服务商处理兑换和跨链桥转账。如果某笔转账耗时超出预期，请打开该服务商自己的浏览器：它会显示您的转账进度，并已按您的钱包筛选。",
 			"explorers_velora_description": "以太坊及其他 EVM 网络上的兑换。",
@@ -838,7 +838,7 @@
 			"withdraw": "提取"
 		},
 		"alt": {
-			"network_explorer_link": "为您的地址打开 $network 区块浏览器",
+			"network_explorer_link": "为您的地址打开 $network 区块链浏览器",
 			"explorer_link": "为您的 $chain 地址打开 $provider 浏览器",
 			"select_token_first": "选择资金池的第一个代币",
 			"select_token_second": "选择资金池的第二个代币",
@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "禁用隐藏价值非常小的交易",
 			"save_spam_filter_success": "您的垃圾信息过滤器设置已更新。",
 			"export_data": "导出数据",
+			"export_data_moved": "导出功能已移至“工具”。",
+			"open_tools": "打开工具",
 			"export_data_description": "将您的代币和交易下载为 CSV — Basic 包含基础信息，Extended 包含更多属性。",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -909,6 +911,12 @@
 			"loading_profile": "加载用户资料时出错。请刷新页面以获得完整体验。",
 			"export_exchange_rate_unavailable": "汇率仍在加载。请稍后重试。",
 			"export_failed": "无法生成您的导出文件。请重试。"
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "工具",
+			"top_up_canister": "使用 ICP 或 TCYCLES 为 Canister 充值"
 		}
 	},
 	"shortcuts": {
@@ -1206,6 +1214,8 @@
 			"description": "Cycles 会从您的 $token 余额转入 Canister，Canister 用它们支付计算和存储。",
 			"description_icp": "您的 $token 会按网络汇率转换为 Cycles，Canister 用它们支付计算和存储。",
 			"pay_with": "选择用于支付充值的代币。",
+			"enable_token": "启用",
+			"not_enough_to_pay": "余额不足以充值",
 			"no_token_title": "使用 ICP 或 TCYCLES 充值",
 			"no_token_description": "Canister 依靠 Cycles 运行，充值会为 Canister 增加 Cycles。当您的钱包中有足够的 ICP 或 TCYCLES 时，即可在此充值。",
 			"canister_id_placeholder": "输入 Canister ID",
@@ -1255,6 +1265,9 @@
 			"not_started": "无法开始充值。您的钱包中没有资金转出。请稍后再试。",
 			"transfer_failed": "$token 转账未成功。您的钱包中没有资金转出。请稍后再试。",
 			"unconfirmed": "OISY 无法确认 $token 转账。如果转账已完成，充值将在后台完成：可在活跃交易中查看进度。"
+		},
+		"alt": {
+			"enable_token": "启用 $token 以用其支付"
 		}
 	},
 	"active_user_transactions": {
@@ -1299,9 +1312,13 @@
 			"select_token_to_pay": "选择用于支付的代币",
 			"pay_at_successful": "已成功支付给 $receipt",
 			"pay_at_failure": "向 $receipt 支付失败",
+			"pay_at_not_confirmed": "",
+			"payment_not_confirmed_description": "",
+			"payment_not_confirmed_description_generic": "",
 			"try_again": "再试一次",
 			"payment_confirmed": "支付已确认",
 			"payment_failed": "支付失败",
+			"payment_not_confirmed": "",
 			"what_is_scan": "什么是扫描器",
 			"no_camera_permission": "要扫描二维码，您需要在浏览器的网站设置中允许访问摄像头。",
 			"what_is_scan_description": "$oisy_short 扫描器可以读取各种二维码并立即执行相应操作。扫描 WalletConnect 二维码建立新连接，或在使用 Open CryptoPay 的商店扫描结账码，通过 $oisy_short Pay 完成付款。",
@@ -1473,8 +1490,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "购买",
-			"buy_dev": "购买（开发环境）",
+			"buy_sell": "购买/出售",
+			"buy_sell_dev": "购买/出售（开发环境）",
 			"unavailable_title": "购买代币暂时不可用",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",
@@ -1851,7 +1868,7 @@
 			"spender": "支出方",
 			"operator": "操作员",
 			"application": "应用",
-			"review": "审核 $chain_name ($key) 所需的权限",
+			"granted_permissions": "此应用获得的权限",
 			"method": "方法",
 			"interacting_with": "",
 			"type": "类型",
@@ -1861,6 +1878,7 @@
 			"expiration": "过期时间",
 			"token": "代币",
 			"network": "网络",
+			"networks": "网络",
 			"amount": "金额",
 			"hex_data": "HEX 数据",
 			"base64_data": "Base64 数据",
@@ -1874,6 +1892,8 @@
 			"close_pays_others": "此交易会关闭您的一个代币账户，并将其余额支付到不属于您钱包的地址。为了您的安全，OISY 不会签署该交易。",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
+			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
 			"simulated_instructions": "模拟指令",
 			"multiple_operations": "此交易包含多个影响您钱包的操作。请核实模拟的余额变化和包含的指令，仅在您也信任该应用程序时才批准此交易。",
 			"simulated_review": "以下审查是根据网络当前状态模拟此交易所预测的结果。实际执行时的结果可能与此不同。",
@@ -1899,6 +1919,7 @@
 			"high_gas_limit": "此请求设置的 Gas 限额异常高，导致上方的最高费用远超此交易应有的成本。请仔细检查，仅在您信任此应用时才签名。",
 			"invalid_typed_data": "此请求包含一个类型与应用声明的架构不匹配的值。显示的内容可能与实际将被签名的内容不同，因此签名功能已被禁用。",
 			"unreviewable_typed_data": "OISY 无法识别此应用请求您签名的内容，因此摘要无法对其进行描述。请确保您信任该应用程序，并在签名前查看其原始数据。",
+			"unreviewable_typed_data_witness": "OISY 可以说明此签名允许支出方取走的代币，但无法识别此应用请求您签名的其余内容。请确保您信任该应用程序，并在签名前查看其原始数据。",
 			"unsigned_typed_data_keys": "此应用发送了其架构未声明的额外数据。该数据不受签名保护，因此仅显示以下字段。",
 			"tab_summary": "摘要",
 			"tab_raw_data": "原始数据",
@@ -2018,6 +2039,7 @@
 			"unreviewed_without_simulation": "OISY 无法读取此交易的一部分，网络也未返回其模拟结果，因此没有任何信息说明该部分会做什么。为了您的安全，该交易未被签名。",
 			"unreviewed_not_described_by_simulation": "OISY 无法读取此交易的一部分，其模拟结果也未显示该部分会做什么。为了您的安全，该交易未被签名。",
 			"unread_programs_unconfirmed": "此交易调用了一个 OISY 无法读取的程序，且未在审查中得到确认。为了您的安全，该交易未被签署。",
+			"unexplained_request_unconfirmed": "OISY 无法显示此请求会做什么，且未在审查中得到确认。为了您的安全，该请求未被签署。",
 			"sol_transaction_as_message": "此消息是一笔 Solana 交易，只能通过交易审查来批准。出于安全考虑，该交易未被签名。",
 			"request_not_defined": "意外错误：请求未定义，因此无法处理。",
 			"unexpected_processing_request": "处理 WalletConnect 请求时发生意外错误。"
@@ -2332,6 +2354,9 @@
 			"confirmations": "确认数",
 			"for": "用于",
 			"for_copied": "支出方地址已复制到剪贴板。",
+			"canister": "Canister",
+			"canister_copied": "Canister ID 已复制到剪贴板。",
+			"canister_unknown": "未知",
 			"expiration": "过期时间",
 			"approve_label": "批准 $approveAmount"
 		},
@@ -2352,7 +2377,8 @@
 			"deposit": "存入",
 			"approve": "批准",
 			"burn": "销毁",
-			"mint": "铸造"
+			"mint": "铸造",
+			"top_up": "充值"
 		},
 		"filter": {
 			"types_label": "",

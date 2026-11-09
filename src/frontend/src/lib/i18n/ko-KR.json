@@ -133,7 +133,7 @@
 			"section_finance": "금융",
 			"section_more": "더보기",
 			"airdrops": "리워드",
-			"canister_top_up": "캐니스터 충전",
+			"tools": "도구",
 			"earning": "수익",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "대출 보기 열기",
 			"earning": "수익 보기 열기",
 			"airdrops": "리워드 보기 열기",
-			"canister_top_up": "ICP 또는 TCYCLES로 캐니스터 충전",
+			"tools": "도구 열기",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "지갑 주소, 설정, 로그아웃 및 외부 링크",
@@ -807,8 +807,8 @@
 			"support_title": "지원",
 			"support_description": "$oisy_name 문서의 지원 페이지에서 답변과 자세한 정보를 확인할 수 있습니다. 해결되지 않으면 팀에 문의하세요.",
 			"support_link": "지원 페이지로 이동",
-			"network_explorers_title": "블록 탐색기",
-			"network_explorers_description": "$oisy_name의 내역은 서드파티 인덱서의 데이터로 구성되므로 체인보다 늦게 반영될 수 있습니다. 블록 탐색기에서는 네트워크 자체가 사용자 주소에 대해 기록한 내용을 확인할 수 있습니다.",
+			"network_explorers_title": "블록체인 탐색기",
+			"network_explorers_description": "이 링크를 열어 블록체인 탐색기에서 사용자 주소를 확인하고 실시간 잔액과 전체 트랜잭션 내역을 추적하세요. 블록체인은 공개 원장이므로 $oisy_name의 모든 온체인 활동을 독립적으로 확인하고 조사할 수 있습니다.",
 			"explorers_title": "제공업체 거래 상태",
 			"explorers_description": "$oisy_name의 스왑과 브릿지 전송은 서드파티 제공업체를 통해 처리됩니다. 예상보다 오래 걸린다면 해당 제공업체의 탐색기를 열어 보세요. 사용자 지갑으로 이미 필터링된 상태에서 전송이 어디까지 진행되었는지 보여 줍니다.",
 			"explorers_velora_description": "이더리움 및 기타 EVM 네트워크의 스왑.",
@@ -838,7 +838,7 @@
 			"withdraw": "출금"
 		},
 		"alt": {
-			"network_explorer_link": "사용자 주소로 $network 블록 탐색기 열기",
+			"network_explorer_link": "사용자 주소로 $network 블록체인 탐색기 열기",
 			"explorer_link": "사용자의 $chain 주소로 $provider 탐색기 열기",
 			"select_token_first": "풀의 첫 번째 토큰 선택",
 			"select_token_second": "풀의 두 번째 토큰 선택",
@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 비활성화",
 			"save_spam_filter_success": "스팸 필터 설정이 업데이트되었습니다.",
 			"export_data": "데이터 내보내기",
+			"export_data_moved": "내보내기가 도구로 이동했습니다.",
+			"open_tools": "도구 열기",
 			"export_data_description": "토큰과 거래를 CSV로 다운로드하세요 — 기본 항목은 Basic, 추가 속성은 Extended로 확인할 수 있습니다.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -909,6 +911,12 @@
 			"loading_profile": "프로필을 불러오는 중 오류가 발생했습니다. 전체 경험을 위해 페이지를 새로고침해 주세요.",
 			"export_exchange_rate_unavailable": "환율을 아직 불러오는 중입니다. 잠시 후 다시 시도해 주세요.",
 			"export_failed": "내보내기를 생성하지 못했습니다. 다시 시도해 주세요."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "도구",
+			"top_up_canister": "ICP 또는 TCYCLES로 캐니스터 충전"
 		}
 	},
 	"shortcuts": {
@@ -1206,6 +1214,8 @@
 			"description": "사이클은 $token 잔액에서 캐니스터로 이동하며, 캐니스터는 이를 연산과 스토리지에 사용합니다.",
 			"description_icp": "$token은 네트워크 환율로 사이클로 변환되며, 캐니스터는 이를 연산과 스토리지에 사용합니다.",
 			"pay_with": "충전 비용을 지불할 토큰을 선택하세요.",
+			"enable_token": "활성화",
+			"not_enough_to_pay": "충전하기에 부족합니다",
 			"no_token_title": "ICP 또는 TCYCLES로 충전",
 			"no_token_description": "캐니스터는 사이클로 작동하며, 충전하면 캐니스터에 사이클이 추가됩니다. 지갑에 ICP 또는 TCYCLES가 충분히 있으면 여기에서 충전할 수 있습니다.",
 			"canister_id_placeholder": "캐니스터 ID 입력",
@@ -1255,6 +1265,9 @@
 			"not_started": "충전을 시작하지 못했습니다. 지갑에서 빠져나간 것은 없습니다. 잠시 후 다시 시도하세요.",
 			"transfer_failed": "$token 전송이 완료되지 않았습니다. 지갑에서 빠져나간 것은 없습니다. 잠시 후 다시 시도하세요.",
 			"unconfirmed": "OISY가 $token 전송을 확인하지 못했습니다. 전송이 완료되었다면 충전은 백그라운드에서 완료되며, 활성 트랜잭션에서 진행 상황을 확인할 수 있습니다."
+		},
+		"alt": {
+			"enable_token": "결제에 사용할 수 있도록 $token 활성화"
 		}
 	},
 	"active_user_transactions": {
@@ -1299,9 +1312,13 @@
 			"select_token_to_pay": "결제할 토큰 선택",
 			"pay_at_successful": "$receipt에서 결제 완료",
 			"pay_at_failure": "$receipt에서 결제 실패",
+			"pay_at_not_confirmed": "",
+			"payment_not_confirmed_description": "",
+			"payment_not_confirmed_description_generic": "",
 			"try_again": "다시 시도",
 			"payment_confirmed": "결제 확인됨",
 			"payment_failed": "결제 실패",
+			"payment_not_confirmed": "",
 			"what_is_scan": "스캐너란",
 			"no_camera_permission": "QR 코드를 스캔하려면 브라우저의 사이트 설정에서 카메라 접근을 허용해야 합니다.",
 			"what_is_scan_description": "$oisy_short 스캐너는 다양한 QR 코드를 읽고 즉시 적절한 작업을 수행할 수 있습니다. WalletConnect QR 코드를 스캔하여 새 연결을 설정하거나, Open CryptoPay를 사용하는 매장에서 결제 코드를 스캔하여 $oisy_short Pay로 결제할 수 있습니다.",
@@ -1473,8 +1490,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "구매",
-			"buy_dev": "구매 (개발 환경)",
+			"buy_sell": "구매/판매",
+			"buy_sell_dev": "구매/판매 (개발 환경)",
 			"unavailable_title": "토큰 구매는 일시적으로 사용할 수 없습니다",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",
@@ -1851,7 +1868,7 @@
 			"spender": "사용자",
 			"operator": "오퍼레이터",
 			"application": "애플리케이션",
-			"review": "$chain_name ($key) 필수 권한 검토",
+			"granted_permissions": "이 앱이 받는 권한",
 			"method": "메서드",
 			"interacting_with": "",
 			"type": "유형",
@@ -1861,6 +1878,7 @@
 			"expiration": "만료",
 			"token": "토큰",
 			"network": "네트워크",
+			"networks": "네트워크",
 			"amount": "금액",
 			"hex_data": "HEX 데이터",
 			"base64_data": "Base64 데이터",
@@ -1874,6 +1892,8 @@
 			"close_pays_others": "이 트랜잭션은 회원님의 토큰 계정 중 하나를 닫고 잔액을 회원님의 지갑이 아닌 주소로 보냅니다. 안전을 위해 OISY는 서명하지 않습니다.",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
+			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
 			"simulated_instructions": "시뮬레이션된 지침",
 			"multiple_operations": "이 트랜잭션에는 지갑에 영향을 미치는 여러 작업이 포함되어 있습니다. 시뮬레이션된 잔액 변경 사항과 포함된 지침을 확인하고, 애플리케이션도 신뢰하는 경우에만 이 트랜잭션을 승인하세요.",
 			"simulated_review": "아래 검토는 이 트랜잭션을 네트워크의 현재 상태에 대해 시뮬레이션했을 때 예측되는 내용입니다. 실제로 실행될 때의 결과는 다를 수 있습니다.",
@@ -1899,6 +1919,7 @@
 			"high_gas_limit": "이 요청은 비정상적으로 높은 가스 한도를 설정하여, 위의 최대 수수료가 이 트랜잭션이 실제로 들어야 할 비용보다 훨씬 큽니다. 신중히 확인하고 이 앱을 신뢰하는 경우에만 서명하세요.",
 			"invalid_typed_data": "이 요청에는 앱이 선언한 스키마와 유형이 일치하지 않는 값이 포함되어 있습니다. 표시된 내용이 실제로 서명될 내용과 다를 수 있으므로 서명이 비활성화되었습니다.",
 			"unreviewable_typed_data": "OISY는 이 앱이 서명을 요청하는 내용을 인식하지 못하므로 요약에서 이를 설명할 수 없습니다. 애플리케이션을 신뢰하는지 확인하고 서명하기 전에 원시 데이터를 검토하세요.",
+			"unreviewable_typed_data_witness": "OISY는 이 서명으로 지출자가 가져갈 수 있는 토큰은 설명할 수 있지만, 이 앱이 서명을 요청하는 나머지 내용은 인식하지 못합니다. 애플리케이션을 신뢰하는지 확인하고 서명하기 전에 원시 데이터를 검토하세요.",
 			"unsigned_typed_data_keys": "이 앱은 스키마에 선언되지 않은 추가 데이터를 보냈습니다. 해당 데이터는 서명에 포함되지 않으므로 아래 필드만 표시됩니다.",
 			"tab_summary": "요약",
 			"tab_raw_data": "원시 데이터",
@@ -2018,6 +2039,7 @@
 			"unreviewed_without_simulation": "OISY가 이 트랜잭션의 일부를 읽을 수 없었고 네트워크에서 시뮬레이션도 반환되지 않아, 해당 부분이 무엇을 하는지 설명할 수 있는 것이 없습니다. 안전을 위해 서명되지 않았습니다.",
 			"unreviewed_not_described_by_simulation": "OISY가 이 트랜잭션의 일부를 읽을 수 없었고, 시뮬레이션에서도 해당 부분이 무엇을 하는지 드러나지 않았습니다. 안전을 위해 서명되지 않았습니다.",
 			"unread_programs_unconfirmed": "이 트랜잭션은 OISY가 읽을 수 없는 프로그램을 호출하며, 검토에서 확인되지 않았습니다. 안전을 위해 서명되지 않았습니다.",
+			"unexplained_request_unconfirmed": "OISY가 이 요청이 하는 일을 보여줄 수 없으며, 검토에서 확인되지 않았습니다. 안전을 위해 서명되지 않았습니다.",
 			"sol_transaction_as_message": "이 메시지는 Solana 트랜잭션으로, 트랜잭션 검토를 통해서만 승인될 수 있습니다. 보안을 위해 서명되지 않았습니다.",
 			"request_not_defined": "예기치 않은 오류: 요청이 정의되지 않아 처리할 수 없습니다.",
 			"unexpected_processing_request": "WalletConnect로 요청을 처리하는 중 예기치 않은 오류가 발생했습니다."
@@ -2332,6 +2354,9 @@
 			"confirmations": "확인 수",
 			"for": "대상",
 			"for_copied": "사용자 주소가 클립보드에 복사되었습니다.",
+			"canister": "캐니스터",
+			"canister_copied": "캐니스터 ID가 클립보드에 복사되었습니다.",
+			"canister_unknown": "알 수 없음",
 			"expiration": "만료",
 			"approve_label": "$approveAmount 승인"
 		},
@@ -2352,7 +2377,8 @@
 			"deposit": "입금",
 			"approve": "승인",
 			"burn": "소각",
-			"mint": "민트"
+			"mint": "민트",
+			"top_up": "충전"
 		},
 		"filter": {
 			"types_label": "",

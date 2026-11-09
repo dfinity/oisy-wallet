@@ -133,7 +133,7 @@
 			"section_finance": "Tài chính",
 			"section_more": "Thêm",
 			"airdrops": "Phần thưởng",
-			"canister_top_up": "Nạp canister",
+			"tools": "Công cụ",
 			"earning": "Kiếm tiền",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "Mở chế độ xem khoản vay",
 			"earning": "Mở chế độ xem kiếm tiền",
 			"airdrops": "Mở chế độ xem Phần thưởng",
-			"canister_top_up": "Nạp cho canister bằng ICP hoặc TCYCLES",
+			"tools": "Mở công cụ",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "Địa chỉ ví, cài đặt, đăng xuất và các liên kết bên ngoài của bạn",
@@ -807,8 +807,8 @@
 			"support_title": "Hỗ trợ",
 			"support_description": "Tìm câu trả lời và thêm thông tin trên trang hỗ trợ trong tài liệu $oisy_name, hoặc liên hệ với đội ngũ nếu bạn gặp khó khăn.",
 			"support_link": "Đến trang hỗ trợ của chúng tôi",
-			"network_explorers_title": "Trình khám phá khối",
-			"network_explorers_description": "$oisy_name xây dựng lịch sử của bạn từ các bộ lập chỉ mục bên thứ ba, vốn có thể chậm hơn chuỗi. Trình khám phá khối cho thấy những gì chính mạng lưới ghi nhận cho địa chỉ của bạn.",
+			"network_explorers_title": "Trình khám phá blockchain",
+			"network_explorers_description": "Mở các liên kết này để xem địa chỉ của bạn trên trình khám phá blockchain và theo dõi số dư theo thời gian thực cùng toàn bộ lịch sử giao dịch. Blockchain là sổ cái công khai, vì vậy bạn có thể tự mình xác minh và tra cứu mọi hoạt động on-chain của ví $oisy_name của bạn.",
 			"explorers_title": "Trạng thái giao dịch tại nhà cung cấp",
 			"explorers_description": "$oisy_name thực hiện swap và chuyển qua cầu nối thông qua các nhà cung cấp bên thứ ba. Nếu một giao dịch mất nhiều thời gian hơn dự kiến, hãy mở trình khám phá của chính nhà cung cấp đó: nó cho biết giao dịch của bạn đang ở bước nào, đã được lọc theo ví của bạn.",
 			"explorers_velora_description": "Swap trên Ethereum và các mạng EVM khác.",
@@ -838,7 +838,7 @@
 			"withdraw": "Rút"
 		},
 		"alt": {
-			"network_explorer_link": "Mở trình khám phá khối $network cho địa chỉ của bạn",
+			"network_explorer_link": "Mở trình khám phá blockchain $network cho địa chỉ của bạn",
 			"explorer_link": "Mở trình khám phá $provider cho địa chỉ $chain của bạn",
 			"select_token_first": "Chọn token thứ nhất của pool",
 			"select_token_second": "Chọn token thứ hai của pool",
@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "Tắt ẩn các giao dịch có giá trị rất nhỏ",
 			"save_spam_filter_success": "Cài đặt bộ lọc spam của bạn đã được cập nhật.",
 			"export_data": "Xuất dữ liệu",
+			"export_data_moved": "Tính năng xuất dữ liệu đã chuyển sang Công cụ.",
+			"open_tools": "Mở Công cụ",
 			"export_data_description": "Tải xuống token và giao dịch của bạn dưới dạng CSV — Basic cho thông tin cơ bản, Extended cho các thuộc tính bổ sung.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -909,6 +911,12 @@
 			"loading_profile": "Lỗi khi tải hồ sơ. Vui lòng làm mới trang để có trải nghiệm đầy đủ.",
 			"export_exchange_rate_unavailable": "Tỷ giá hối đoái vẫn đang được tải. Vui lòng thử lại sau ít phút.",
 			"export_failed": "Chúng tôi không thể tạo bản xuất của bạn. Vui lòng thử lại."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "Công cụ",
+			"top_up_canister": "Nạp cho canister bằng ICP hoặc TCYCLES"
 		}
 	},
 	"shortcuts": {
@@ -1206,6 +1214,8 @@
 			"description": "Cycles được chuyển từ số dư $token của bạn vào canister, nơi chúng được dùng cho tính toán và lưu trữ.",
 			"description_icp": "$token của bạn được chuyển đổi thành cycles theo tỷ giá của mạng, và canister dùng chúng cho tính toán và lưu trữ.",
 			"pay_with": "Chọn token để thanh toán cho việc nạp.",
+			"enable_token": "Kích hoạt",
+			"not_enough_to_pay": "Không đủ để nạp",
 			"no_token_title": "Nạp bằng ICP hoặc TCYCLES",
 			"no_token_description": "Canister chạy bằng cycles, và việc nạp sẽ bổ sung cycles cho canister. Khi ví của bạn có đủ ICP hoặc TCYCLES, bạn có thể nạp tại đây.",
 			"canister_id_placeholder": "Nhập ID canister",
@@ -1255,6 +1265,9 @@
 			"not_started": "Không thể bắt đầu việc nạp. Không có gì rời khỏi ví của bạn. Vui lòng thử lại sau giây lát.",
 			"transfer_failed": "Chuyển $token không thành công. Không có gì rời khỏi ví của bạn. Vui lòng thử lại sau giây lát.",
 			"unconfirmed": "OISY không thể xác nhận việc chuyển $token. Nếu đã chuyển thành công, việc nạp sẽ hoàn tất trong nền: theo dõi trong các giao dịch đang hoạt động."
+		},
+		"alt": {
+			"enable_token": "Kích hoạt $token để thanh toán bằng token này"
 		}
 	},
 	"active_user_transactions": {
@@ -1299,9 +1312,13 @@
 			"select_token_to_pay": "Chọn token để thanh toán",
 			"pay_at_successful": "Đã thanh toán tại $receipt",
 			"pay_at_failure": "Thanh toán thất bại tại $receipt",
+			"pay_at_not_confirmed": "",
+			"payment_not_confirmed_description": "",
+			"payment_not_confirmed_description_generic": "",
 			"try_again": "Thử lại",
 			"payment_confirmed": "Thanh toán đã được xác nhận",
 			"payment_failed": "Thanh toán thất bại",
+			"payment_not_confirmed": "",
 			"what_is_scan": "Máy quét là gì",
 			"no_camera_permission": "Để quét mã QR, bạn cần cho phép truy cập camera trong cài đặt trang web của trình duyệt.",
 			"what_is_scan_description": "Máy quét $oisy_short có thể đọc nhiều loại mã QR và thực hiện hành động phù hợp ngay lập tức. Quét mã QR WalletConnect để thiết lập kết nối mới, hoặc quét mã thanh toán tại bất kỳ cửa hàng nào sử dụng Open CryptoPay để thanh toán hóa đơn bằng $oisy_short Pay.",
@@ -1473,8 +1490,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "Mua",
-			"buy_dev": "Mua (Dev Environment)",
+			"buy_sell": "Mua/Bán",
+			"buy_sell_dev": "Mua/Bán (Dev Environment)",
 			"unavailable_title": "Mua token tạm thời không khả dụng",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",
@@ -1851,7 +1868,7 @@
 			"spender": "Người chi tiêu",
 			"operator": "Bên vận hành",
 			"application": "Ứng dụng",
-			"review": "Xem lại quyền cần thiết của $chain_name ($key)",
+			"granted_permissions": "Quyền mà ứng dụng này nhận được",
 			"method": "Hàm",
 			"interacting_with": "",
 			"type": "Loại",
@@ -1861,6 +1878,7 @@
 			"expiration": "Hết hạn",
 			"token": "Token",
 			"network": "Mạng",
+			"networks": "Mạng lưới",
 			"amount": "Số lượng",
 			"hex_data": "Dữ liệu HEX",
 			"base64_data": "Dữ liệu Base64",
@@ -1874,6 +1892,8 @@
 			"close_pays_others": "Giao dịch này đóng một trong các tài khoản token của bạn và trả số dư của nó cho một địa chỉ không phải ví của bạn. Vì sự an toàn của bạn, OISY sẽ không ký giao dịch này.",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
+			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
 			"simulated_instructions": "Chỉ dẫn được mô phỏng",
 			"multiple_operations": "Giao dịch này chứa nhiều thao tác ảnh hưởng đến ví của bạn. Hãy kiểm tra các thay đổi số dư được mô phỏng và các chỉ dẫn chứa trong đó, và chỉ phê duyệt giao dịch này nếu bạn cũng tin tưởng ứng dụng.",
 			"simulated_review": "Phần xem xét bên dưới là những gì mô phỏng giao dịch này đối với trạng thái hiện tại của mạng dự đoán. Kết quả khi thực sự chạy có thể khác.",
@@ -1899,6 +1919,7 @@
 			"high_gas_limit": "Yêu cầu này đặt giới hạn gas cao bất thường, khiến phí tối đa ở trên cao hơn nhiều so với chi phí thực tế của giao dịch này. Hãy kiểm tra kỹ và chỉ ký nếu bạn tin tưởng ứng dụng này.",
 			"invalid_typed_data": "Yêu cầu này chứa một giá trị có kiểu không khớp với schema mà ứng dụng đã khai báo. Nội dung hiển thị có thể khác với nội dung thực sự sẽ được ký, vì vậy việc ký đã bị vô hiệu hóa.",
 			"unreviewable_typed_data": "OISY không nhận ra nội dung mà ứng dụng này yêu cầu bạn ký, vì vậy bản tóm tắt không thể mô tả nó. Hãy đảm bảo bạn tin tưởng ứng dụng này và xem lại dữ liệu thô của nó trước khi ký.",
+			"unreviewable_typed_data_witness": "OISY có thể mô tả các token mà chữ ký này cho phép người chi tiêu lấy đi, nhưng không nhận ra phần còn lại của nội dung mà ứng dụng này yêu cầu bạn ký. Hãy đảm bảo bạn tin tưởng ứng dụng này và xem lại dữ liệu thô của nó trước khi ký.",
 			"unsigned_typed_data_keys": "Ứng dụng này đã gửi thêm dữ liệu mà schema của nó không khai báo. Dữ liệu đó không được chữ ký bao gồm, vì vậy chỉ các trường bên dưới được hiển thị.",
 			"tab_summary": "Tóm tắt",
 			"tab_raw_data": "Dữ liệu thô",
@@ -2018,6 +2039,7 @@
 			"unreviewed_without_simulation": "OISY không thể đọc một phần của giao dịch này và mạng cũng không trả về bản mô phỏng, nên không có gì mô tả phần đó sẽ làm gì. Vì sự an toàn của bạn, giao dịch đã không được ký.",
 			"unreviewed_not_described_by_simulation": "OISY không thể đọc một phần của giao dịch này và bản mô phỏng của nó cũng không cho thấy phần đó sẽ làm gì. Vì sự an toàn của bạn, giao dịch đã không được ký.",
 			"unread_programs_unconfirmed": "Giao dịch này gọi một chương trình mà OISY không thể đọc và chưa được xác nhận trong phần xem xét. Vì sự an toàn của bạn, giao dịch đã không được ký.",
+			"unexplained_request_unconfirmed": "OISY không thể cho biết yêu cầu này làm gì và yêu cầu chưa được xác nhận trong phần xem xét. Vì sự an toàn của bạn, yêu cầu đã không được ký.",
 			"sol_transaction_as_message": "Thông báo này là một giao dịch Solana, chỉ có thể được phê duyệt thông qua việc xem xét giao dịch. Vì lý do bảo mật, giao dịch chưa được ký.",
 			"request_not_defined": "Lỗi không mong muốn: Yêu cầu không được xác định nên không thể xử lý.",
 			"unexpected_processing_request": "Lỗi không mong muốn trong khi xử lý yêu cầu với WalletConnect."
@@ -2332,6 +2354,9 @@
 			"confirmations": "Xác nhận",
 			"for": "",
 			"for_copied": "",
+			"canister": "Canister",
+			"canister_copied": "ID canister đã được sao chép vào khay nhớ tạm.",
+			"canister_unknown": "không xác định",
 			"expiration": "",
 			"approve_label": ""
 		},
@@ -2352,7 +2377,8 @@
 			"deposit": "Tiền gửi",
 			"approve": "Chấp thuận",
 			"burn": "Đốt",
-			"mint": "Tạo"
+			"mint": "Tạo",
+			"top_up": "Nạp"
 		},
 		"filter": {
 			"types_label": "",

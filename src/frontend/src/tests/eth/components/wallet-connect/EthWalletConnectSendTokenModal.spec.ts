@@ -311,4 +311,30 @@ describe('EthWalletConnectSendTokenModal', () => {
 			expect(getByText(en.wallet_connect.text.unknown_call_title)).toBeInTheDocument();
 		});
 	});
+
+	// The review holds Approve until the user ticks the box, and signing checks the same answer.
+	it('should hand signing the confirmation the user gave on the review of a call OISY cannot read', async () => {
+		vi.mocked(sendServices).mockResolvedValue({ success: true });
+
+		const { getByRole, getByLabelText } = setup({
+			firstTransaction: {
+				from: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+				to: '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a',
+				data: '0xdeadbeef'
+			}
+		});
+
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+
+		await fireEvent.click(getByLabelText(en.wallet_connect.text.unread_programs_acknowledge));
+		await fireEvent.click(getByRole('button', { name: en.core.text.approve }));
+
+		await waitFor(() => {
+			expect(sendServices).toHaveBeenCalledOnce();
+		});
+
+		expect(vi.mocked(sendServices).mock.calls[0][0]).toMatchObject({
+			unknownCallAcknowledged: true
+		});
+	});
 });

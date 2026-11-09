@@ -1755,6 +1755,31 @@ describe('backend.canister', () => {
 			expect(res).toEqual(mockGetUserTransactionsResponse);
 		});
 
+		it('should read the stored transactions through the certified service', async () => {
+			const queryService = mock<ActorSubclass<BackendService>>();
+			const certifiedService = mock<ActorSubclass<BackendService>>();
+
+			certifiedService.get_user_transactions.mockResolvedValue({
+				Ok: mockCandidGetUserTransactionsResponse
+			});
+
+			const { getUserTransactions } = await createBackendCanister({
+				serviceOverride: queryService,
+				certifiedServiceOverride: certifiedService
+			});
+
+			await expect(getUserTransactions(getUserTransactionsParams)).resolves.toEqual(
+				mockGetUserTransactionsResponse
+			);
+
+			expect(certifiedService.get_user_transactions).toHaveBeenCalledExactlyOnceWith({
+				token_id: mockUserTransactionTokenId,
+				start: [5n],
+				max_results: 10n
+			});
+			expect(queryService.get_user_transactions).not.toHaveBeenCalled();
+		});
+
 		it('should pass empty array for start when undefined', async () => {
 			service.get_user_transactions.mockResolvedValue({
 				Ok: mockCandidGetUserTransactionsResponse

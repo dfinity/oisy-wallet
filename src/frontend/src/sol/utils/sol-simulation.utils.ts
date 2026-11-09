@@ -419,6 +419,23 @@ export const solSimulationReassignsWallet = ({
 		({ account, field }) => field === 'program' && account === userAddress
 	);
 
+/**
+ * Whether the message carries an instruction OISY cannot read that no simulated run described.
+ *
+ * What makes such an instruction a warning rather than a refusal is the run, which states what the
+ * message would do to the user's own accounts whether or not any decoder read it. Without a run
+ * that described it, approving it is approving an effect nobody stated. The review and the signing
+ * flow both ask this, so the review holds the button on exactly what signing refuses.
+ */
+export const solUnreviewedNotDescribed = ({
+	unreviewed,
+	simulated
+}: {
+	unreviewed: boolean | undefined;
+	// Whether a simulated run described every instruction of the message.
+	simulated: boolean;
+}): boolean => (unreviewed ?? false) && !simulated;
+
 // Programs the review decodes when the message calls them itself, besides the known ones: it states
 // what their instructions do from the message alone.
 const SOLANA_DECODED_PROGRAM_ADDRESSES: SolAddress[] = [
