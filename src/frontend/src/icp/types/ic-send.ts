@@ -26,3 +26,6 @@ export type IcCkWithdrawalResult =
 	| { type: 'ckErc20ToErc20'; ckEthBlockIndex: bigint; ckErc20BlockIndex: bigint };
 
 export class IcAmountAssertionError extends Error {}
+
+// A transfer that would have been sent past its deadline, and so was not sent at all.
+export class IcTransferDeadlineError extends Error {}

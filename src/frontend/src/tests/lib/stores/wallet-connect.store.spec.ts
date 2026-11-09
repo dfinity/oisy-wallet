@@ -13,6 +13,7 @@ describe('wallet-connect.store', () => {
 		const mockListener1: WalletConnectListener = {
 			pair: vi.fn(),
 			approveSession: vi.fn(),
+			approvedNamespaces: vi.fn(),
 			rejectSession: vi.fn(),
 			attachHandlers: vi.fn(),
 			detachHandlers: vi.fn(),
@@ -26,6 +27,7 @@ describe('wallet-connect.store', () => {
 		const mockListener2: WalletConnectListener = {
 			pair: vi.fn(),
 			approveSession: vi.fn(),
+			approvedNamespaces: vi.fn(),
 			rejectSession: vi.fn(),
 			attachHandlers: vi.fn(),
 			detachHandlers: vi.fn(),

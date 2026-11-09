@@ -4,10 +4,17 @@ mod bitcoin {
     //! Tests for the bitcoin types.
     use candid::{Decode, Encode};
     use ic_cdk_bitcoin_canister::{Network as BitcoinNetwork, OutPoint, Txid, Utxo};
+    use serde_bytes::ByteBuf;
 
     use crate::{
-        types::bitcoin::{
-            BtcAddPendingTransactionRequest, PendingTransaction, MAX_TXID_BYTES, MAX_UTXOS_LEN,
+        types::{
+            bitcoin::{
+                BtcAddPendingTransactionRequest, BtcBroadcastTransactionRequest,
+                BtcGetSpendableUtxosResponse, PendingTransaction, MAX_BROADCAST_TX_BYTES,
+                MAX_SPENDABLE_UTXOS, MAX_SPENDABLE_UTXOS_REPLY_BYTES, MAX_TXID_BYTES,
+                MAX_UTXOS_LEN,
+            },
+            result_types::BtcGetSpendableUtxosResult,
         },
         validate::{test_validate_on_deserialize, TestVector, Validate},
     };
@@ -114,6 +121,104 @@ mod bitcoin {
             },
         ]
     );
+
+    test_validate_on_deserialize!(
+        BtcBroadcastTransactionRequest,
+        [
+            TestVector {
+                description: "BtcBroadcastTransactionRequest with a transaction at the size cap",
+                input: BtcBroadcastTransactionRequest {
+                    network: BitcoinNetwork::Mainnet,
+                    transaction: ByteBuf::from(vec![0; MAX_BROADCAST_TX_BYTES]),
+                    ii_delegation_chain: None,
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "BtcBroadcastTransactionRequest with a transaction above the size cap",
+                input: BtcBroadcastTransactionRequest {
+                    network: BitcoinNetwork::Mainnet,
+                    transaction: ByteBuf::from(vec![0; MAX_BROADCAST_TX_BYTES + 1]),
+                    ii_delegation_chain: None,
+                },
+                valid: false,
+            },
+        ]
+    );
+
+    const REPLY_LIMIT_BYTES: usize = 2 * 1024 * 1024;
+
+    fn largest_utxo() -> Utxo {
+        Utxo {
+            outpoint: OutPoint {
+                txid: Txid::from([0xff; MAX_TXID_BYTES]),
+                vout: u32::MAX,
+            },
+            value: u64::MAX,
+            height: u32::MAX,
+        }
+    }
+
+    fn largest_pending_transactions(count: usize) -> Vec<PendingTransaction> {
+        vec![
+            PendingTransaction {
+                txid: vec![0xff; MAX_TXID_BYTES],
+                utxos: vec![largest_utxo(); MAX_UTXOS_LEN],
+            };
+            count
+        ]
+    }
+
+    /// Encodes the reply `btc_get_spendable_utxos` sends with as many UTXOs as fit beside
+    /// `pending_transactions`.
+    fn encoded_reply_len(pending_transactions: Vec<PendingTransaction>) -> usize {
+        let max_utxos = BtcGetSpendableUtxosResponse::max_utxos_beside(&pending_transactions)
+            .expect("the pending transactions fit");
+        let reply = BtcGetSpendableUtxosResult::Ok(BtcGetSpendableUtxosResponse {
+            utxos: vec![largest_utxo(); max_utxos],
+            pending_transactions,
+        });
+        Encode!(&reply).unwrap().len()
+    }
+
+    #[test]
+    fn spendable_utxos_without_pending_transactions_fill_the_cap_within_the_reply_limit() {
+        assert_eq!(
+            BtcGetSpendableUtxosResponse::max_utxos_beside(&[]),
+            Some(MAX_SPENDABLE_UTXOS)
+        );
+        assert!(encoded_reply_len(vec![]) < REPLY_LIMIT_BYTES);
+    }
+
+    /// 300 pending transactions of 128 inputs each fit the existing limits and take about 1.9 MB.
+    #[test]
+    fn spendable_utxos_shrink_to_fit_beside_large_pending_transactions() {
+        let pending_transactions = largest_pending_transactions(300);
+        let max_utxos =
+            BtcGetSpendableUtxosResponse::max_utxos_beside(&pending_transactions).unwrap();
+        assert!(max_utxos < MAX_SPENDABLE_UTXOS, "{max_utxos} UTXOs");
+
+        let encoded_len = encoded_reply_len(pending_transactions);
+        assert!(encoded_len < REPLY_LIMIT_BYTES, "{encoded_len} bytes");
+        assert!(
+            encoded_len > MAX_SPENDABLE_UTXOS_REPLY_BYTES - 64,
+            "the budget is used up to the last UTXO: {encoded_len} bytes"
+        );
+    }
+
+    #[test]
+    fn spendable_utxos_have_no_room_beside_pending_transactions_that_overflow_the_reply() {
+        // 317 take 1 999 319 bytes, 318 take 2 005 626.
+        assert_eq!(
+            BtcGetSpendableUtxosResponse::max_utxos_beside(&largest_pending_transactions(317)),
+            Some(13)
+        );
+        assert!(encoded_reply_len(largest_pending_transactions(317)) < REPLY_LIMIT_BYTES);
+        assert_eq!(
+            BtcGetSpendableUtxosResponse::max_utxos_beside(&largest_pending_transactions(318)),
+            None
+        );
+    }
 }
 
 mod contact_image {

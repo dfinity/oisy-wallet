@@ -1,3 +1,4 @@
+import * as canisterTopUpEnv from '$env/canister-top-up.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import NavigationMainMenuItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
 import { AppPath } from '$lib/constants/routes.constants';
@@ -14,6 +15,7 @@ import {
 	NAVIGATION_ITEM_REWARDS,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_ITEM_TOKENS,
+	NAVIGATION_ITEM_TOOLS,
 	NAVIGATION_ITEM_TRADE,
 	NAVIGATION_MORE_MENU_BUTTON
 } from '$lib/constants/test-ids.constants';
@@ -22,6 +24,7 @@ import { TokenTypes } from '$lib/enums/token-types';
 import { activeAssetsTabStore } from '$lib/stores/settings.store';
 import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
+import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 
@@ -316,5 +319,47 @@ describe('NavigationMainMenuItems', () => {
 		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
 
 		expect(tokenLink.getAttribute('href')).not.toContain(ETHEREUM_NETWORK_ID.description);
+	});
+
+	describe('Tools', () => {
+		const follows = ({ first, second }: { first: HTMLElement; second: HTMLElement }): boolean =>
+			(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+
+		it('ends the sidebar More group, after Rewards, and links to the Tools page', () => {
+			const { getByTestId } = render(NavigationMainMenuItems);
+
+			const item = getByTestId(NAVIGATION_ITEM_TOOLS);
+
+			expect(item).toHaveTextContent(en.navigation.text.tools);
+			expect(item).toHaveAttribute('aria-label', en.navigation.alt.tools);
+			expect(item.getAttribute('href')).toContain(AppPath.Tools);
+			expect(follows({ first: getByTestId(NAVIGATION_ITEM_REWARDS), second: item })).toBeTruthy();
+		});
+
+		it('shows while the Canister top-up flag is off', () => {
+			const flag = vi
+				.spyOn(canisterTopUpEnv, 'CANISTER_TOP_UP_ENABLED', 'get')
+				.mockReturnValue(false);
+
+			const { getByTestId } = render(NavigationMainMenuItems);
+
+			expect(getByTestId(NAVIGATION_ITEM_TOOLS)).toBeInTheDocument();
+
+			flag.mockRestore();
+		});
+
+		it('sits between Rewards and Help in the mobile More sheet', async () => {
+			const { getByTestId } = await openMobileMore();
+
+			const card = getByTestId(`mobile-${NAVIGATION_ITEM_TOOLS}`);
+
+			expect(card.getAttribute('href')).toContain(AppPath.Tools);
+			expect(
+				follows({ first: getByTestId(`mobile-${NAVIGATION_ITEM_REWARDS}`), second: card })
+			).toBeTruthy();
+			expect(
+				follows({ first: card, second: getByTestId(`mobile-${NAVIGATION_ITEM_HELP}`) })
+			).toBeTruthy();
+		});
 	});
 });
