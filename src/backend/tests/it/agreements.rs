@@ -993,6 +993,16 @@ fn test_agreement_history_records_only_changed_agreements() {
         .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
         .unwrap()
         .unwrap();
+    let first_acceptance = user_profile
+        .agreements
+        .as_ref()
+        .unwrap()
+        .agreements
+        .license_agreement
+        .last_accepted_at_ns;
+    assert!(first_acceptance.is_some());
+
+    pic_setup.pic.advance_time(Duration::from_secs(60));
 
     // The license agreement and terms of use are sent again as stored; only the privacy policy
     // changes.
@@ -1030,6 +1040,25 @@ fn test_agreement_history_records_only_changed_agreements() {
             AgreementType::PrivacyPolicy,
         ]
     );
+
+    // The agreements sent again unchanged keep their first acceptance time; only the privacy
+    // policy gets a new one.
+    let agreements = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap()
+        .agreements
+        .unwrap()
+        .agreements;
+    assert_eq!(
+        agreements.license_agreement.last_accepted_at_ns,
+        first_acceptance
+    );
+    assert_eq!(
+        agreements.terms_of_use.last_accepted_at_ns,
+        first_acceptance
+    );
+    assert!(agreements.privacy_policy.last_accepted_at_ns > first_acceptance);
 }
 
 #[test]
