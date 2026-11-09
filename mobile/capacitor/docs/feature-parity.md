@@ -37,8 +37,10 @@ The frontend at `d114b2b7ae` was deployed to audit in
 Published assets contain the sheet adapter and exclude test fixtures; II callback
 and Apple association files are unchanged. The signed app, including the native
 visibility guard, was installed over the existing iPhone preview and launched on
-2026-11-09.
-Physical presentation and dismissal acceptance is still pending.
+2026-11-09. The user confirmed on the phone that Sorting opens and closes as a
+native sheet, Send/Swap/Contacts open full-screen, and Wallet still shows the
+expected balances. This confirms presentation acceptance, not funded transaction
+execution.
 
 ## Reading the inventory
 
