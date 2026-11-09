@@ -1,7 +1,7 @@
 // Navigation is deliberately limited to the integrated shared feature pages.
 export const mobileRouteAllowed = (url: URL): boolean =>
-	url.protocol === 'capacitor:' &&
-	url.hostname === 'localhost' &&
+	((url.protocol === 'capacitor:' && url.hostname === 'localhost') ||
+		(url.protocol === 'https:' && url.origin === globalThis.location?.origin)) &&
 	!url.port &&
 	!url.username &&
 	!url.password &&

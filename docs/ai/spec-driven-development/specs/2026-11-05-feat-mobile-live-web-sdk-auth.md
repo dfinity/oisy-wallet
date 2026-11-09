@@ -7,8 +7,10 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 
 # Live OISY website in a native mobile shell
 
-**Status:** Implementation authorized; M1 prototype in progress. The installed
-Capacitor preview is unchanged. M1 acceptance and II review remain open.
+**Status:** SDK sign-in is integrated and phone account continuity passed on
+2026-11-06. M2 runtime detection and the live WKWebView controller are implemented
+and pass local regression checks. Audit deployment, live phone acceptance, broader
+M1 acceptance and II review remain open.
 **Date:** 2026-11-05.
 **Baseline:** `codex/ios-sdk-auth-preparation` at `4a5136c4ac`.
 
@@ -16,6 +18,24 @@ Move the mobile wallet from bundled web assets to the deployed OISY website.
 Keep wallet features in the web application and a small native host for system
 authentication, navigation, device capabilities and isolated Explore browsing.
 Start with a verified native-to-web authentication handoff on audit.
+
+2026-11-05 continuation: SDK authentication is now wired into the actual app source,
+including web/worker handoff and original-deadline handling. Local validation and
+real phone acceptance are in progress. Audit deployment `dee72ab616` completed;
+the preview's association files are live. M2 live website delivery remains open.
+See [app integration](../../../../mobile/capacitor/docs/sdk-app-integration.md).
+
+2026-11-09 continuation: the user authorized live website delivery, preserving
+native navigation, II authentication and Explore. The shared frontend now supports
+runtime host detection and worker session selection without `VITE_MOBILE_SHELL`.
+The user explicitly approved controller replacement and local testing. The HTTPS
+bridge and integrated controller passed origin/subframe/document-isolation,
+reload and process-failure checks. Shared-screen regressions, 240 focused frontend
+tests, application/test type checks and repository lint pass. Detailed evidence is
+in [app integration](../../../../mobile/capacitor/docs/sdk-app-integration.md#live-host-verification-on-2026-11-09).
+Commit and push were approved on 2026-11-09. Audit deployment and phone installation
+have not been performed for M2. See the
+[live-host contract](../../../../mobile/capacitor/docs/shared-web-contract.md#live-host-2026-11-09).
 
 ## Relationship to existing work
 

@@ -59,7 +59,7 @@ import XCTest
     let window = UIWindow(windowScene: scene)
     let name = "oisy.welcome.motion.\(UUID())"
     let preferences = try XCTUnwrap(UserDefaults(suiteName: name))
-    let store = KeychainStore(service: name)
+    let store = TestAuthStore(service: name)
     let auth = AuthModel(store: store, preferences: preferences)
     defer {
       window.isHidden = true
@@ -99,7 +99,7 @@ import XCTest
     }
     let name = "oisy.welcome.visual.\(UUID())"
     let preferences = try XCTUnwrap(UserDefaults(suiteName: name))
-    let store = KeychainStore(service: name)
+    let store = TestAuthStore(service: name)
     defer {
       try? store.clear()
       preferences.removePersistentDomain(forName: name)
@@ -110,8 +110,8 @@ import XCTest
         try store.save(
           fixtureSession(
             key: Curve25519.Signing.PrivateKey(), expiry: .now.addingTimeInterval(600)))
-        auth.restore()
-        auth.restore(now: try XCTUnwrap(auth.session).expiresAt)
+        await auth.restore()
+        await auth.restore(now: try XCTUnwrap(auth.session).expiresAt)
       }
       XCTAssertEqual(auth.showsWelcomeBack, returning)
       XCTAssertNil(auth.session)

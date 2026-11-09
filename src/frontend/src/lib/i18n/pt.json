@@ -113,6 +113,8 @@
 			"copy_failed": ""
 		},
 		"mobile_shell": {
+			"wallet_unavailable": "",
+			"wallet_retry_description": "",
 			"account": "",
 			"refresh_failed": ""
 		}

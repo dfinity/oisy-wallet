@@ -32,6 +32,7 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
   private(set) var walletRoot: WalletRoot = .wallet
   #if DEBUG
     var walletBootstrapScript: String?
+    var walletTestSource: WalletTestSource?
   #endif
 
   init(auth: AuthModel = AuthModel()) {
@@ -98,6 +99,7 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
     showWallet()
     syncSession()
     observeAuth()
+    Task { await auth.restore() }
   }
   private func mount(_ child: UIViewController, reservesNavigationSpace: Bool = false) {
     if reservesNavigationSpace {
@@ -143,6 +145,7 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
       wallet.hostPlugin.host = self
       #if DEBUG
         wallet.bootstrapScript = walletBootstrapScript
+        wallet.testSource = walletTestSource
       #endif
       mount(wallet)
     }
@@ -176,7 +179,7 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
   func resume() {
     interactionsSuspended = false
     wallet?.session.checkExpiration()
-    auth.restore()
+    Task { await auth.restore() }
     syncSession()
     updateBackNavigation()
   }
@@ -233,7 +236,7 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
   @discardableResult func commitNavigation(_ state: WalletNavigationState) -> Bool {
     guard let wallet, state.requestID == navigationRequestID,
       state.revision > navigationRevision,
-      state.backURL == nil || WalletBackNavigationPolicy.isToken(wallet.webView?.url)
+      state.backURL == nil || WalletBackNavigationPolicy.isToken(wallet.webView?.url, origin: wallet.origin)
     else { return false }
     navigationRevision = state.revision
     usesNavigationState = true

@@ -8,8 +8,8 @@
 		"@capacitor/ios": "8.5.3"
 	},
 	"scripts": {
-		"sync:ios": "cap sync ios && npm run project:ios",
+		"sync:ios": "cap update ios && npm run project:ios",
 		"open:ios": "cap open ios",
-		"project:ios": "xcodegen generate --spec ios/App/project.yml --project ios/App"
+		"project:ios": "node prepare-app-config.mjs && xcodegen generate --spec ios/App/project.yml --project ios/App"
 	}
 }

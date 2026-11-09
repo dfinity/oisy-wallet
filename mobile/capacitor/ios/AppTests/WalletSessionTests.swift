@@ -3,61 +3,66 @@ import XCTest
 
 @testable import App
 
-@MainActor
-final class WalletSessionTests: XCTestCase {
-  func testBoundedChildKeepsPrincipalAndCannotRestoreAfterExpiry() throws {
-    let native = try fixtureSession(
-      key: Curve25519.Signing.PrivateKey(), expiry: .now.addingTimeInterval(3600))
+@MainActor final class WalletSessionTests: XCTestCase {
+  func testGrantLifetimeAccountBindingAndDocumentReplacement() async throws {
+    let native = try fixtureSession(key: .init(), expiry: .now.addingTimeInterval(3600))
     var expired: AuthSession?
     var account: BrowserAccount?
     let session = WalletSession(
       native: native, onExpired: { expired = $0 }, onAccount: { account = $0 })
-    let child = Curve25519.Signing.PrivateKey()
-    _ = try session.authorize(publicKey: Icrc167.derPublicKey(child))
+    _ = try await session.authorize(
+      publicKey: P256.Signing.PrivateKey().publicKey.derRepresentation)
     let grant = try XCTUnwrap(session.grant)
     XCTAssertEqual(grant.principal, native.principal)
-    try AuthSession(privateKey: child.rawRepresentation, chain: grant.chain).validate()
-    XCTAssertEqual(grant.expiresAt, native.expiresAt.timeIntervalSince1970 * 1000)
-    XCTAssertFalse(session.checkExpiration(now: native.expiresAt.addingTimeInterval(-1)))
+    XCTAssertEqual(grant.expiresAt, native.expiresAt.timeIntervalSince1970 * 1000, accuracy: 1)
     try session.setAccount(
       grantID: grant.id, principal: grant.principal,
       address: "0x2222222222222222222222222222222222222222")
     XCTAssertNotNil(account)
-    XCTAssertFalse(session.checkExpiration())
-    XCTAssertNil(expired)
-    XCTAssertTrue(session.checkExpiration(now: Date(timeIntervalSince1970: grant.expiresAt / 1000)))
-    XCTAssertEqual(expired, native)
-    XCTAssertNil(account)
-    XCTAssertThrowsError(try session.authorize(publicKey: Icrc167.derPublicKey(child)))
-    XCTAssertThrowsError(
-      try session.setAccount(grantID: grant.id, principal: grant.principal, address: nil))
-  }
-  func testDocumentChangeRejectsStaleAccountAndInvalidKeys() throws {
-    let native = try fixtureSession(
-      key: Curve25519.Signing.PrivateKey(), expiry: .now.addingTimeInterval(600))
-    let session = WalletSession(
-      native: native, onExpired: { _ in XCTFail("Not expired") }, onAccount: { _ in })
-    defer { session.close() }
-    XCTAssertThrowsError(try session.authorize(publicKey: Data()))
-    XCTAssertThrowsError(try session.authorize(publicKey: native.chain.publicKey))
-    XCTAssertThrowsError(
-      try session.authorize(
-        publicKey: XCTUnwrap(native.chain.signerDelegation.last?.delegation.pubkey)))
-    _ = try session.authorize(publicKey: Icrc167.derPublicKey(Curve25519.Signing.PrivateKey()))
-    let grant = try XCTUnwrap(session.grant)
     session.resetDocument()
-    _ = try session.authorize(publicKey: Icrc167.derPublicKey(Curve25519.Signing.PrivateKey()))
-    XCTAssertEqual(session.grant?.expiresAt, grant.expiresAt)
+    XCTAssertNil(account)
     XCTAssertThrowsError(
       try session.setAccount(grantID: grant.id, principal: grant.principal, address: nil))
+    _ = try await session.authorize(
+      publicKey: P256.Signing.PrivateKey().publicKey.derRepresentation)
+    XCTAssertTrue(session.checkExpiration(now: native.expiresAt))
+    XCTAssertEqual(expired, native)
+    do {
+      _ = try await session.authorize(publicKey: Data([1]))
+      XCTFail("Expired session accepted a key")
+    } catch {}
   }
-  func testParentTimerExpiresWithoutAWebResponse() async throws {
-    let native = try fixtureSession(
-      key: Curve25519.Signing.PrivateKey(), expiry: .now.addingTimeInterval(1))
-    let ended = expectation(description: "expired")
-    let session = WalletSession(
-      native: native, onExpired: { _ in ended.fulfill() }, onAccount: { _ in })
-    await fulfillment(of: [ended], timeout: 4)
-    XCTAssertFalse(session.isActive)
+  func testLateGrantCannotAttachToReplacementDocument() async throws {
+    let fixture = try fixtureSession(key: .init(), expiry: .now.addingTimeInterval(600))
+    var answer: CheckedContinuation<WebDelegation, Error>?
+    let native = AuthSession(
+      id: fixture.id, principal: fixture.principal, expiresAt: fixture.expiresAt
+    ) { _ in
+      try await withCheckedThrowingContinuation { answer = $0 }
+    }
+    let session = WalletSession(native: native, onExpired: { _ in }, onAccount: { _ in })
+    let key = P256.Signing.PrivateKey().publicKey.derRepresentation
+    let task = Task { try await session.authorize(publicKey: key) }
+    for _ in 0..<10 where answer == nil { await Task.yield() }
+    session.resetDocument()
+    answer?.resume(returning: try await fixture.delegate(key))
+    do {
+      _ = try await task.value
+      XCTFail("Stale grant accepted")
+    } catch {}
+    XCTAssertNil(session.grant)
+  }
+  func testRepeatedAuthorizationIsSingleUseUntilDocumentReplacement() async throws {
+    let native = try fixtureSession(key: .init(), expiry: .now.addingTimeInterval(600))
+    let session = WalletSession(native: native, onExpired: { _ in }, onAccount: { _ in })
+    let key = P256.Signing.PrivateKey().publicKey.derRepresentation
+    _ = try await session.authorize(publicKey: key)
+    do {
+      _ = try await session.authorize(publicKey: key)
+      XCTFail("Repeated grant accepted")
+    } catch {}
+    session.close()
+    XCTAssertNil(session.grant)
+    XCTAssertTrue(session.checkExpiration())
   }
 }

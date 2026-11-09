@@ -5,35 +5,84 @@ tags: [mobile, frontend, architecture, compatibility]
 
 # Shared web and mobile compatibility
 
-The website is the primary feature implementation. The Capacitor app packages
-those same Svelte routes, components, services, stores and workers. Read this guide
+The website is the primary feature implementation. The iOS shell loads its deployed
+Svelte routes, components, services, stores and workers over HTTPS. Read this guide
 before changing shared routes/layouts, modal primitives, authentication, providers,
 workers, host messages or build configuration. It defines the maintenance policy;
 the feature inventory records current coverage and proposed additions.
 
+SDK authentication is being integrated into the actual app. Before changing mobile
+credentials, providers, workers or build dependencies, read
+[SDK app integration](./sdk-app-integration.md). Browser Auth 6 and the private
+mobile Auth 11 adapter intentionally coexist; do not flatten the SDK dependency
+versions or replace the original session deadline with an app credential's expiry.
+
 ## One implementation, two hosts
+
+### Live host (2026-11-09)
+
+The normal website build now detects the document-start `window.__oisyHost`
+transport. `mobile.constants.ts` selects mobile presentation before auth startup;
+`mobile-host.providers.ts` handles transport details. Ordinary website visits
+still use browser navigation and AuthClient storage. An unsupported native host
+must fail startup rather than fall back to browser credentials.
+
+Workers select mobile mode through their first `mobileSession` message and private
+MessagePort, before loading an identity. They do not depend on a mobile-only Vite
+build. The existing packaged-host transport remains compatible during migration.
+
+`TrustedWalletViewController` now loads the exact origin from `app-environment.json`
+in a nonpersistent WKWebView. `LiveWalletBridge` and `LiveWalletOriginPolicy` enforce
+the HTTPS boundary. Real WebKit tests cover the configured origin, subframes,
+stale documents, reloads and process failure. The user approved the controller
+replacement and local testing. Audit deployment and phone acceptance are pending.
+
+For the live rollout:
+
+- Deploy the normal audit frontend with runtime-host support before installing a
+  host that loads it. Keep the current audit derivation origin and Apple identity.
+- Negotiate protocol v2 and required capabilities before requesting the session
+  handoff. Add optional capabilities without changing existing meanings; breaking
+  changes need a new protocol and an explicit unsupported-version response.
+- Load new web assets on a new document or explicit safe reload. Do not force a
+  reload on foregrounding, a release announcement or a version-check response
+  while a transaction may be pending.
+- Preserve the original session deadline and the principal-bound operation journal
+  across reloads. A network failure must not erase unknown transaction outcomes.
+- Treat frontend deployment access as wallet-security access. Trusted website
+  code receives a signing-capable app identity; exact-origin checks do not protect
+  against malicious code released on that trusted origin. The UI feature gates
+  are not cryptographic restrictions on that identity.
+
+Native code must check the exact configured origin and main frame on every call,
+bind it to the current document, and reject late responses after reload or logout.
+Explore keeps a separate WebView, data store and provider; it receives no wallet
+host transport. The native session key never crosses this boundary.
 
 ```mermaid
 flowchart TD
-  Source[Shared Svelte features and data logic] --> Web[Website build and web navigation]
-  Source --> Bundle[Versioned mobile web bundle]
-  Bundle --> Wallet[One trusted Capacitor WebView]
+  Source[Shared Svelte features and data logic] --> Web[Normal audit website deployment]
+  Web --> Browser[Browser navigation and browser auth]
+  Web --> Wallet[One trusted HTTPS wallet WebView]
   Swift[Swift tabs, system sign-in and Keychain] <--> Wallet
   Swift --> Explore[Separate Explore WebView]
   Wallet --> Backend[Live canisters and chain APIs]
-  Web --> Backend
+  Browser --> Backend
 ```
 
-Publishing the website on audit does not replace HTML/JS in an installed app.
-Frontend source changes enter the app at its next build/install. A live canister,
-API, II callback relay or provider configuration change can affect an already
-installed app immediately. Keep that distinction in release notes and reviews.
+Publishing audit updates the screens on the next wallet document load. An already
+open document keeps running; the host does not replace it during Send or Swap.
+Native navigation, auth and capabilities still require an app update. Roll out the
+compatible website before installing this host; the existing deployed frontend
+does not yet contain these runtime changes.
 
-The current source of truth is `mobile/capacitor/capacitor.config.ts` (`webDir`,
-no remote `server.url`), the mobile target in `svelte.config.js`, and
-`mobile/capacitor/write-build-info.mjs`. Build metadata identifies the source
-revision, dirty state, environment and contract, but is not a complete reproducible
-release manifest. Release builds should have a clean recorded revision.
+`app-environment.json` and `TrustedWalletViewController` own delivery. The existing
+Capacitor package/config scaffold remains, but this controller does not instantiate
+a Capacitor bridge or load its `webDir`. `mobile:sync:ios` updates native scaffold
+and project configuration without building or copying the website. Offline shared-screen fixtures belong only
+to the XCTest bundle. There is no packaged-wallet fallback. HTTP failure, an
+incompatible page or WebKit process loss shows a native Retry screen. It discards
+the document and its workers without erasing the session or operation journal.
 
 ## Audit callback and association deployment
 
@@ -47,22 +96,20 @@ callback files. Preserve existing Apple/Android registrations; other environment
 must not inherit this preview identity. Do not copy those files into global static
 assets or remove the callback while a working preview depends on it. Deployment
 instructions and the separate SDK harness are in the
-[prototype README](../auth-handoff/README.md). The installed app still loads its
-bundled wallet; audit redeployment alone does not migrate it to the new auth path.
+[prototype README](../auth-handoff/README.md). The SDK host uses the associated
+HTTPS callback. Keep compatibility assets for previously installed previews.
 
 ## Provider configuration
 
-The mobile bundle reads env files from its own worktree. Website deployment
-secrets and env files in a sibling checkout do not flow into it automatically.
-`check-build-env.mjs` requires Etherscan, Infura and Alchemy client keys plus an
-HTTPS XRP RPC URL when XRP is enabled. It prints variable names only. Keep their
-values in ignored local config or build secrets, and keep generated bundles
-untracked. These client credentials are visible in the installed web assets;
+The live wallet uses the website deployment's provider configuration and HTTPS
+origin. Local mobile env files no longer supply the installed wallet's API keys.
+Keep values in ignored config or deployment secrets, and keep generated bundles
+untracked. Client credentials remain visible in the delivered web assets;
 they must not grant server administration or wallet signing authority.
 
-Preflight checks presence and URL syntax, not endpoint access. Verify enabled
-provider reads from `capacitor://localhost`, including provider domain allowlists.
-A successful browser request from `oisy.com` does not prove app access. Never
+Verify enabled provider reads from the configured audit HTTPS origin, including
+provider domain allowlists. A successful request from `oisy.com` does not prove
+audit access. Never
 bypass a provider restriction through origin spoofing or a generic native proxy.
 See [build setup](../README.md#build-and-run).
 
@@ -81,7 +128,7 @@ See [build setup](../README.md#build-and-run).
 | Device-specific share, files, camera and feedback                      | Narrow host capability when needed          | Provide ordinary browser behavior; no plugin imports throughout feature components |
 
 Keep this repository together while the integration develops. If a separate mobile
-repo is required later, consume a versioned compiled frontend artifact and bridge
+repo is required later, consume the deployed frontend and a versioned bridge
 contract. Do not copy the Svelte tree. Swift/Kotlin shells may differ while feature
 logic stays shared.
 
@@ -96,22 +143,22 @@ logic stays shared.
 | Authentication lifetime           | Web `AUTH_MAX_TIME_TO_LIVE`, native `AuthSession.duration`, callback bound and web/worker expiry checks; preserve saved deadline and shorter II expiry                             |
 | Worker creation or auth consumers | `AuthClientProvider`, `_worker.services.ts`, `workers/workers.ts`, `mobile-runtime` and `mobile-worker-session` adapters; install identity before starting work                    |
 | Backend II proof                  | `delegation.utils.ts` extracts the II-signed link for that proof; the full native→web→worker chain still authenticates requests                                                    |
-| Build/provider configuration      | Mobile Vite/Svelte target, CSP, environment preflight, packaged assets, native config; check the actual target, not just the browser build                                         |
+| Build/provider configuration      | Normal website build, deployed CSP/provider configuration, native origin config and test-only fixtures; verify browser and WKWebView runtime modes                                 |
 
 Frontend names above are under `src/frontend/src/`; native sources are under
 `mobile/capacitor/ios/App/App/`. The current bridge is strict v2. Native validates
-local origin, top frame, method, active runtime and session independently of JS.
+configured HTTPS origin, top frame, method, active document and session independently of JS.
 Do not broaden route/method checks to arbitrary URLs, code, fetch or signing.
 
 Existing mobile modal CSS reaches into `.modal > .wrapper.dialog`, headers,
 containers and footer structure. That is a fragile dependency, not a stable public
 API. When those primitives change, introduce explicit presentation data hooks/CSS
-variables owned by the shared component and test the actual packaged modal.
+variables owned by the shared component and test the modal in WebKit.
 The existing `mobilePresentation` prop should remain the feature-facing entry.
 
 ## Token navigation contract
 
-The v2 `navigationState` capability is packaged with its matching web bundle.
+The v2 `navigationState` capability is negotiated with the deployed website.
 Native root requests carry a monotonic `requestId`; web reports the committed
 root, that request ID, a monotonically increasing document revision, and an
 optional bounded `backPath`. Native rejects stale reports and validates the
@@ -148,9 +195,31 @@ settling animation. Mobile list/header intro transitions are disabled so the fin
 shared page does not expand again after the gesture.
 
 The generic old `navigate` command cannot overwrite modern navigation state after
-the host has accepted that capability's first report. Rebuild native and web
-assets together when changing this contract; the old strict handshake schema does
-not accept the new capability name.
+the host has accepted that capability's first report. Coordinate native and web
+rollout when changing required capabilities; retain support for installed hosts.
+Optional capability names and
+additive handshake metadata are forward-compatible; command payloads remain strict.
+
+## Host transport and document authority
+
+`mobile-host.providers.ts` selects the live WebKit transport or the older packaged
+host adapter. Shared services validate messages and consume that provider; feature
+components must not import either transport. On iOS, `LiveWalletBridge` forwards
+validated calls to `WalletHostCommands`. WebKit supplies the actual requesting
+frame/security origin and binds replies to its JS context. Only the top frame gets
+the immutable bootstrap; raw subframe calls are still rejected natively.
+
+The v2 handshake includes the environment, app version and a random `documentId`.
+The web adapter requires `nativeNavigation`, `delegation`, `sessionHandoff` and
+`documentBinding`; unknown bounded capability names are optional. Every subsequent
+command and native event carries the document ID. Native validates it before work
+and again after an awaited operation. Reload, logout and document replacement
+invalidate it. A delayed command from an old page cannot sign out, publish an
+Explore account or alter operation records for its replacement.
+
+The token binds a request to a document; it does not protect against malicious code
+already executing in the trusted document. Explore has a separate WebView and no
+access to this transport. No native method accepts arbitrary JavaScript or URLs.
 
 ## Wallet refresh contract
 
@@ -158,7 +227,7 @@ Native `UIRefreshControl` is enabled only on a committed Wallet list without an
 open overlay, Account, pending root request or Search. Only that surface allows
 vertical overscroll. Set the public global `bounces` permission before its axis
 settings: [WebKit keeps a separate client flag](https://github.com/WebKit/WebKit/blob/main/Source/WebKit/UIProcess/ios/WKScrollView.mm)
-that can otherwise restore Capacitor's initial disabled value on the next layout.
+that can otherwise restore the initial disabled value on the next layout.
 Horizontal bounce remains disabled. An accepted pull produces one light UIKit haptic and one
 monotonic request ID. There is no generic JavaScript haptic method.
 
@@ -200,7 +269,8 @@ pipeline or a second fetch path. Ordinary website polling keeps its existing API
    TS and Swift should cover accepted/rejected destinations and message versions;
    this is a proposed improvement, not an existing generated schema system.
 5. Run the relevant checks below, one heavy job at a time. For a bridge/protocol
-   change, build native and packaged web together. Keep the normal website working.
+   change, test native with the normal website build's runtime adapter. Check older
+   host compatibility before deployment. Keep ordinary browser visits working.
 6. Record mobile impact, checks and remaining device acceptance in the PR. Update
    the inventory/owning guide only where behavior changed. Do not claim parity
    from a screenshot or a successful compilation.
@@ -210,16 +280,16 @@ pipeline or a second fetch path. Ordinary website polling keeps its existing API
 | Change                         | Required validation for that change                                                                                                                  |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Shared feature logic           | Existing Vitest cases and app/test type checks; mobile feature regression when the code path is shared                                               |
-| Route, tabs, Back or overlays  | TS navigation/host tests plus actual bundled WalletWebKitTests and affected native UI tests; cancellation, origin, focus and scroll                  |
-| Modal/layout/CSS primitive     | Browser presentation check plus light/dark, keyboard, large text and safe areas in packaged iOS; nested overlay lifetime                             |
+| Route, tabs, Back or overlays  | TS navigation/host tests plus shared-screen WebKit tests and affected native UI tests; cancellation, origin, focus and scroll                        |
+| Modal/layout/CSS primitive     | Browser presentation check plus light/dark, keyboard, large text and safe areas in iOS WebKit; nested overlay lifetime                               |
 | Auth/provider/workers          | Browser and mobile auth/worker tests, native AuthTests/WalletSessionTests and WebKit expiry; no IDB/native-key leakage or stale runtime restoration  |
-| Build/environment/host         | Mobile build/sync, native compile and origin/schema tests; verify version/environment/revision and exclude UI fixtures from normal build             |
+| Build/environment/host         | Normal website build, native compile and origin/schema/reload tests; verify environment and exclude UI fixtures from deployment and app target       |
 | Send/Swap/provider integration | All relevant unit/integration checks plus scoped device acceptance for review, cancellation, expiry/background return and pending recovery           |
 | Canister/API/relay change      | Compatibility with supported installed app versions, not only latest website; physical callback/provider check where mocks cannot establish behavior |
 
 Use existing tests under `src/frontend/src/tests/` and
 `mobile/capacitor/ios/AppTests`/`AppUITests`. The existing WebKit suite loads the
-real bundled routes and worker adapter with isolated fixtures; it is not another
+real shared routes and worker adapter from test-only resources; it is not another
 mock wallet implementation. No new Playwright framework/specs are required.
 See [the build and verification commands](../README.md#verification).
 
@@ -304,8 +374,9 @@ Proposed next changes:
 - Run the existing simulator suite on macOS for those changes, including same-source
   web UI and native bridge tests. Keep fake identities isolated and block real
   transaction/network execution in test fixtures.
-- Before device/release packaging, rebuild with `VITE_MOBILE_UI_TEST=false` and
-  assert fixture absence, intended environment, matching contract and signing identity.
+- Build the website with `VITE_MOBILE_UI_TEST=false` and assert fixture absence.
+  Before device installation, check environment, host compatibility and signing
+  identity; the app target must not include the test-only `public/` resources.
 - Add shared route/message fixtures and explicit unsupported-route coverage so
   changes to one language's contract cannot silently diverge from the other.
 - Record and support a defined range of installed app versions for canister/API

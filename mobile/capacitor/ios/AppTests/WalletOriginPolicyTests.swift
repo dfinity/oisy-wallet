@@ -5,26 +5,26 @@ import XCTest
 @testable import App
 
 final class WalletOriginPolicyTests: XCTestCase {
-  func testOnlyBundledTopFrameCanCallTheHost() {
+  func testOnlyLiveTopFrameCanCallTheHost() {
     XCTAssertTrue(
-      WalletOriginPolicy.accepts(URL(string: "capacitor://localhost/"), mainFrame: true))
+      WalletOriginPolicy.accepts(URL(string: "https://audit.oisy.com/"), mainFrame: true))
     for path in [
       "/activity/", "/transactions/?network=InternetComputer&token=ICP", "/?search=true",
       "/settings/", "/notes/", "/earn/", "/borrow/",
     ] {
       XCTAssertTrue(
-        WalletOriginPolicy.accepts(URL(string: "capacitor://localhost" + path), mainFrame: true))
+        WalletOriginPolicy.accepts(URL(string: "https://audit.oisy.com" + path), mainFrame: true))
     }
     for value in [
-      "capacitor://localhost/mobile/", "capacitor://localhost/?redirect=https://evil.test",
-      "https://localhost", "capacitor://localhost.evil/", "capacitor://localhost:443/",
-      "capacitor://user@localhost/", "capacitor://localhost/other",
-      "capacitor://localhost/?native=1", "https://app.uniswap.org", "file:///index.html",
+      "https://audit.oisy.com/mobile/", "https://audit.oisy.com/?redirect=https://evil.test",
+      "https://localhost", "https://audit.oisy.com.evil/", "https://audit.oisy.com:443/",
+      "capacitor://user@localhost/", "https://audit.oisy.com/other",
+      "https://audit.oisy.com/?native=1", "https://app.uniswap.org", "file:///index.html",
     ] {
       XCTAssertFalse(WalletOriginPolicy.accepts(URL(string: value), mainFrame: true), value)
     }
     XCTAssertFalse(
-      WalletOriginPolicy.accepts(URL(string: "capacitor://localhost"), mainFrame: false))
+      WalletOriginPolicy.accepts(URL(string: "https://audit.oisy.com"), mainFrame: false))
     XCTAssertFalse(WalletOriginPolicy.accepts(nil, mainFrame: true))
   }
   func testRootsAreAnAllowlist() {
@@ -33,7 +33,7 @@ final class WalletOriginPolicyTests: XCTestCase {
     XCTAssertEqual(WalletRoot.allCases.count, 6)
   }
   @MainActor func testRootChangesKeepOneWalletAndLogoutRemovesIt() async throws {
-    let store = KeychainStore(service: "oisy.capacitor.test.\(UUID())")
+    let store = TestAuthStore(service: "oisy.capacitor.test.\(UUID())")
     defer { try? store.clear() }
     let native = try fixtureSession(
       key: Curve25519.Signing.PrivateKey(), expiry: .now.addingTimeInterval(600))
@@ -70,7 +70,8 @@ final class WalletOriginPolicyTests: XCTestCase {
     XCTAssertFalse(tabs.isHidden, "Signing out must reset blocking presentation state")
     shell.select(.wallet)
     XCTAssertEqual(shell.walletRoot, .wallet)
-    XCTAssertNil(try store.load())
+    for _ in 0..<10 { await Task.yield() }
+    XCTAssertNil(store.value)
   }
 
   func testNavigationStateRejectsMalformedAndUnboundedMetadata() {
@@ -106,7 +107,7 @@ final class WalletOriginPolicyTests: XCTestCase {
       XCTAssertNotNil(WalletBackNavigationPolicy.parentURL(path: path, root: root))
     }
     for path in [
-      "https://example.com/", "capacitor://localhost/", "//localhost/", "/transactions/",
+      "https://example.com/", "https://audit.oisy.com/", "//localhost/", "/transactions/",
       "/?token=ICP", "/?redirect=https://example.com", "/#fragment", "/?network=",
       "/?network=one&network=two", "/?search=false", "/?search=true",
       "/?network=" + String(repeating: "x", count: 257),
@@ -117,15 +118,15 @@ final class WalletOriginPolicyTests: XCTestCase {
     XCTAssertNil(WalletBackNavigationPolicy.parentURL(path: "/", root: .activity))
     XCTAssertTrue(
       WalletBackNavigationPolicy.isToken(
-        URL(string: "capacitor://localhost/transactions/?network=InternetComputer&token=ICP")))
+        URL(string: "https://audit.oisy.com/transactions/?network=InternetComputer&token=ICP")))
     for path in ["/", "/transactions/", "/transactions/?network=Ethereum&token="] {
       XCTAssertFalse(
-        WalletBackNavigationPolicy.isToken(URL(string: "capacitor://localhost" + path)))
+        WalletBackNavigationPolicy.isToken(URL(string: "https://audit.oisy.com" + path)))
     }
   }
 
   @MainActor func testOnlyLatestRequestAndNewRevisionCommitRootSelection() throws {
-    let store = KeychainStore(service: "oisy.capacitor.navigation.\(UUID())")
+    let store = TestAuthStore(service: "oisy.capacitor.navigation.\(UUID())")
     defer { try? store.clear() }
     try store.save(
       fixtureSession(key: Curve25519.Signing.PrivateKey(), expiry: .now.addingTimeInterval(600)))

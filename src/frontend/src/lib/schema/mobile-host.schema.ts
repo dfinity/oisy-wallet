@@ -4,6 +4,7 @@ export const MobileRootSchema = z.enum(['wallet', 'activity', 'search', 'notes',
 export const MobileNavigationSchema = z
 	.object({
 		version: z.literal(2),
+		documentId: z.string().uuid(),
 		requestId: z.number().int().nonnegative().safe().optional(),
 		root: z.enum([
 			'wallet',
@@ -17,25 +18,26 @@ export const MobileNavigationSchema = z
 		])
 	})
 	.strict();
-export const MobileHandshakeSchema = z
-	.object({
-		version: z.literal(2),
-		root: MobileRootSchema,
-		requestId: z.number().int().nonnegative().safe().optional(),
-		mode: z.literal('audit-read-only'),
-		runtimeId: z.string().uuid(),
-		capabilities: z.array(
-			z.enum([
-				'nativeNavigation',
-				'account',
-				'delegation',
-				'navigationState',
-				'walletInteractions',
-				'operationJournal'
-			])
+export const MobileHandshakeSchema = z.object({
+	version: z.literal(2),
+	root: MobileRootSchema,
+	requestId: z.number().int().nonnegative().safe().optional(),
+	mode: z.literal('audit-read-only'),
+	runtimeId: z.string().uuid(),
+	documentId: z.string().uuid(),
+	hostVersion: z.string().min(1).max(64),
+	environment: z.literal('audit'),
+	// Optional capabilities may be added independently. Command payloads stay strict.
+	capabilities: z
+		.array(
+			z
+				.string()
+				.min(1)
+				.max(64)
+				.regex(/^[a-zA-Z][a-zA-Z0-9]*$/)
 		)
-	})
-	.strict();
+		.max(32)
+});
 // No arbitrary destination URLs: this is the recorded list parent of a token.
 const MobileListParentSchema = z
 	.string()
@@ -91,13 +93,19 @@ export const MobileBackPreparationSchema = z
 	})
 	.strict()
 	.refine(matchingListParent);
-export const MobileBackEventSchema = z.object({ version: z.literal(2) }).strict();
+export const MobileBackEventSchema = z
+	.object({ version: z.literal(2), documentId: z.string().uuid() })
+	.strict();
 export const MobileRefreshSchema = z
 	.object({
 		version: z.literal(2),
 		requestId: z.number().int().nonnegative().safe()
 	})
 	.strict();
+
+export const MobileRefreshEventSchema = MobileRefreshSchema.extend({
+	documentId: z.string().uuid()
+});
 
 export type MobileNavigationState = z.infer<typeof MobileNavigationStateSchema>;
 export interface MobileNavigationRequest {
@@ -108,7 +116,7 @@ export type MobileRoot = z.infer<typeof MobileRootSchema>;
 
 export type MobileScreen = z.infer<typeof MobileNavigationSchema>['root'];
 export const MobileWalletRequestSchema = z.discriminatedUnion('method', [
-	z.object({ method: z.literal('authorize'), publicKey: z.string().min(1).max(128) }).strict(),
+	z.object({ method: z.literal('authorize'), publicKey: z.string().min(1).max(684) }).strict(),
 	z
 		.object({
 			method: z.literal('account'),

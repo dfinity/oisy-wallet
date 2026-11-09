@@ -94,7 +94,12 @@ interface I18nCore {
 	};
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
 	error: { copy_failed: string };
-	mobile_shell: { account: string; refresh_failed: string };
+	mobile_shell: {
+		wallet_unavailable: string;
+		wallet_retry_description: string;
+		account: string;
+		refresh_failed: string;
+	};
 }
 
 interface I18nProgress {

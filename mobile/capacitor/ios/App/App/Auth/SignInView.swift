@@ -1,10 +1,8 @@
-import AuthenticationServices
 import SwiftUI
 
 struct SignInView: View {
   var openExplore: () -> Void
   @Environment(AuthModel.self) private var auth
-  @Environment(\.webAuthenticationSession) private var browser
   @Environment(\.colorScheme) private var colorScheme
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @Environment(\.scenePhase) private var scenePhase
@@ -79,7 +77,7 @@ struct SignInView: View {
           .accessibilityIdentifier("auth.error")
       }
       Button {
-        Task { await auth.signIn(using: browser) }
+        Task { await auth.signIn() }
       } label: {
         HStack(spacing: 10) {
           if auth.isSigningIn { ProgressView().tint(.white) }

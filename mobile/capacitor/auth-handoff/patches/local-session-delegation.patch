@@ -1,6 +1,20 @@
+diff --git a/crates/icp-core/src/agent/signature.rs b/crates/icp-core/src/agent/signature.rs
+index da2db0a..95c7ad5 100644
+--- a/crates/icp-core/src/agent/signature.rs
++++ b/crates/icp-core/src/agent/signature.rs
+@@ -29,6 +29,7 @@ pub enum SignatureAlgorithm {
+ /// envelope rather than a crypto error, so it is worth having in one place.
+ ///
+ /// Ed25519 and RSA signatures pass through untouched.
++#[cfg_attr(feature = "uniffi", uniffi::export)]
+ pub fn normalise_signature(
+     algorithm: SignatureAlgorithm,
+     sig: Vec<u8>,
+diff --git a/crates/icp-core/src/delegation.rs b/crates/icp-core/src/delegation.rs
+index 9073a32..68f3bbf 100644
 --- a/crates/icp-core/src/delegation.rs
 +++ b/crates/icp-core/src/delegation.rs
-@@ -387,6 +387,13 @@
+@@ -387,6 +387,13 @@ impl Delegation {
      }
  }
 
@@ -14,15 +28,14 @@
  impl SignedDelegation {
      /// Same as `to_ic`, exposed for the signing path.
      pub fn to_ic_public(&self) -> Result<IcSignedDelegation, AgentError> {
+diff --git a/languages/swift/Sources/IcpSdkAuth/AuthClient.swift b/languages/swift/Sources/IcpSdkAuth/AuthClient.swift
+index c17266d..75cb421 100644
 --- a/languages/swift/Sources/IcpSdkAuth/AuthClient.swift
 +++ b/languages/swift/Sources/IcpSdkAuth/AuthClient.swift
-@@ -533,6 +533,49 @@
-             return agent
-         } catch {
-             throw asAuthError(error)
-+        }
-+    }
-+
+@@ -536,6 +536,53 @@ public final class AuthClient: @unchecked Sendable {
+         }
+     }
+
 +    /// Append one local, II-scoped hop for a trusted receiver's public key.
 +    /// This does not call the experimental session re-issuance API.
 +    /// The caller must bind delivery to its document/session generation and
@@ -52,8 +65,12 @@
 +            let delegation = Delegation(
 +                pubkey: publicKeyDer, expirationNs: expiry,
 +                targets: [self.canister.bytes], permissions: nil)
-+            let signature = try await credential.identity.sign(
-+                payload: delegationSignable(delegation: delegation))
++            // Platform keys return DER ECDSA; delegation signatures need the
++            // same fixed-width encoding as ordinary IC request signatures.
++            let signature = try normaliseSignature(
++                algorithm: credential.identity.algorithm(),
++                sig: await credential.identity.sign(
++                    payload: delegationSignable(delegation: delegation)))
 +            try Task.checkCancellation()
 +            guard self.lock.withLock({ self.live?.machine === session.machine }),
 +                expiry > self.clock.nowNs()
@@ -63,15 +80,68 @@
 +                delegations: chain.delegations + [
 +                    SignedDelegation(delegation: delegation, signature: signature)
 +                ])
-         }
-     }
++        }
++    }
++
+     // -- one app switch, several calls --------------------------------------
 
+     /// One app switch answering every call in it.
+diff --git a/languages/swift/Suites/AuthClient/AuthClientSuite.swift b/languages/swift/Suites/AuthClient/AuthClientSuite.swift
+index f9257ab..a817dc4 100644
 --- a/languages/swift/Suites/AuthClient/AuthClientSuite.swift
 +++ b/languages/swift/Suites/AuthClient/AuthClientSuite.swift
-@@ -1573,6 +1573,39 @@
+@@ -1,3 +1,4 @@
++import CryptoKit
+ import Foundation
+ import IcpSdkCore
+ import IcpSdkSigner
+@@ -97,6 +98,21 @@ final class MapIdentity: Identity, @unchecked Sendable {
+     func sign(payload: Data) async throws -> Data { Data(repeating: 0, count: 64) }
+ }
+
++/// Exercise the same DER-producing Apple signer used by Secure Enclave keys.
++final class AppleHandoffStore: MapStore, @unchecked Sendable {
++    let identity: KeychainIdentity
++
++    init(identity: KeychainIdentity) { self.identity = identity }
++
++    override func get(slot: String) async throws -> Credential? {
++        guard let credential = try await super.get(slot: slot) else { return nil }
++        guard slot == slotSession else { return credential }
++        var chain = credential.chain
++        chain.delegations[chain.delegations.count - 1].delegation.pubkey = identity.publicKeyDer()
++        return Credential(identity: identity, chain: chain)
++    }
++}
++
+ /// Both stores in one object, so a case wires one thing and reads both
+ /// halves back.
+ class MapStore: CredentialStorage, StateStorage, @unchecked Sendable {
+@@ -1573,6 +1589,60 @@ enum AuthClientSuite {
 
      }
 
++    static func appleSessionHandoff() async throws {
++        let identity = try KeychainIdentity.generate(storage: .software)
++        let store = AppleHandoffStore(identity: identity)
++        try seed(store, head, now + month)
++        let receiver = P256.Signing.PrivateKey().publicKey.derRepresentation
++        let handed = try await client(store).delegateSession(
++            to: receiver, expiresAtNs: now + 3600 * secondNs)
++        guard let leaf = handed.delegations.last else {
++            check("Apple local handoff has a leaf", false)
++            return
++        }
++        check("Apple local handoff emits fixed-width P-256", leaf.signature.count == 64)
++        let signature = try P256.Signing.ECDSASignature(rawRepresentation: leaf.signature)
++        let publicKey = try P256.Signing.PublicKey(derRepresentation: identity.publicKeyDer())
++        let payload = try delegationSignable(delegation: leaf.delegation)
++        check("Apple local hop verifies over the canonical payload",
++            publicKey.isValidSignature(signature, for: payload))
++        check("Apple local hop rejects a different payload",
++            !publicKey.isValidSignature(signature, for: payload + Data([0])))
++    }
++
 +    static func localSessionHandoff() async throws {
 +        let store = MapStore()
 +        try seed(store, head, now + month)
@@ -108,11 +178,12 @@
      static func main() async {
          do {
              try theSessionChain()
-@@ -1580,6 +1613,7 @@
+@@ -1580,6 +1650,8 @@ enum AuthClientSuite {
              failures += 1
              print("  FAIL the session chain stopped on \(error)")
          }
 +        await run("local session handoff", localSessionHandoff)
++        await run("Apple local session handoff", appleSessionHandoff)
          await run("a cold start", coldStart)
          await run("calling", calling)
          await run("a mint that fails", aMintThatFails)

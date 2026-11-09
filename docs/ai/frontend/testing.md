@@ -278,3 +278,25 @@ other mobile build-tool tests. Passing these checks does not prove live sign-in,
 code-signature validity or device domain association. See the
 [SDK migration preparation](../../../mobile/capacitor/docs/sdk-auth-migration.md#repeatable-deployment-check)
 for inputs, limitations and device acceptance steps.
+
+## Mobile authentication regression checks
+
+Changes to shared auth, workers or the host adapter also run the session and host
+Vitest tests plus native `AppTests`. `WalletScreensWebKitTests` loads the real shared
+Wallet, Token, Activity, Send, Swap and Notes views with the existing
+`VITE_MOBILE_UI_TEST=true` fixtures. Its deterministic SDK minter is selected only
+for the fixture account; it cannot authorize real funds. Keep the independent
+pending-network/bootstrap test and origin-isolation tests.
+
+The live host uses the normal website build with `VITE_MOBILE_SHELL` unset/false.
+Include runtime detection and `mobile-host.providers` tests; worker startup must
+select mobile mode from the first private session message before reading an
+identity. Native `LiveWalletBridgeTests` and `LiveWalletControllerTests` cover real
+WebKit frame/origin checks, stale documents, reload and process failure. Offline
+shared-screen resources belong to AppTests.xctest, never the app target.
+
+Build deployment assets with `VITE_MOBILE_UI_TEST=false` and check that fixture
+code is absent. Use `npm run lint -- --max-warnings 0`, matching CI;
+a lint run that leaves warnings is not a passing gate. The
+[shared web contract](../../../mobile/capacitor/docs/shared-web-contract.md) defines
+ownership, document binding and required validation for host changes.

@@ -40,15 +40,19 @@ vi.mock('@capacitor/core', () => ({
 
 describe('mobile host boundary', () => {
 	const remove = vi.fn();
+	const documentId = '1696411f-bd18-408d-9a52-868595de827e';
 	const state = {
 		version: 2,
+		documentId,
 		mode: 'audit-read-only',
 		root: 'wallet',
 		runtimeId: '82ef3353-9d37-45d2-8106-af14b19e3195',
-		capabilities: ['nativeNavigation', 'account', 'delegation']
+		hostVersion: '0.1.0',
+		environment: 'audit',
+		capabilities: ['nativeNavigation', 'account', 'delegation', 'sessionHandoff', 'documentBinding']
 	};
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		vi.clearAllMocks();
 		vi.stubEnv('VITE_MOBILE_SHELL', 'true');
 		vi.stubGlobal('location', new URL('capacitor://localhost/'));
@@ -57,6 +61,8 @@ describe('mobile host boundary', () => {
 		host.ready.mockResolvedValue(state);
 		host.addListener.mockResolvedValue({ remove });
 		remove.mockResolvedValue(undefined);
+		await connectMobileHost(vi.fn());
+		vi.clearAllMocks();
 	});
 
 	afterEach(() => {
@@ -106,25 +112,25 @@ describe('mobile host boundary', () => {
 		const disconnect = await connectMobileInteractions({ onBack, onRefresh });
 		const back = host.addListener.mock.calls.find(([name]) => name === 'back')?.[1];
 		const refresh = host.addListener.mock.calls.find(([name]) => name === 'refresh')?.[1];
-		back?.({ version: 2, url: 'https://evil.example' });
+		back?.({ version: 2, documentId, url: 'https://evil.example' });
 		back?.({ version: 1 });
-		refresh?.({ version: 2, requestId: -1 });
-		refresh?.({ version: 2, requestId: 1, extra: true });
+		refresh?.({ version: 2, documentId, requestId: -1 });
+		refresh?.({ version: 2, documentId, requestId: 1, extra: true });
 
 		expect(onBack).not.toHaveBeenCalled();
 		expect(onRefresh).not.toHaveBeenCalled();
 
-		back?.({ version: 2 });
-		refresh?.({ version: 2, requestId: 2 });
-		refresh?.({ version: 2, requestId: 1 });
-		refresh?.({ version: 2, requestId: 2 });
+		back?.({ version: 2, documentId });
+		refresh?.({ version: 2, documentId, requestId: 2 });
+		refresh?.({ version: 2, documentId, requestId: 1 });
+		refresh?.({ version: 2, documentId, requestId: 2 });
 
 		expect(onBack).toHaveBeenCalledOnce();
 		expect(onRefresh).toHaveBeenCalledExactlyOnceWith(2);
 
 		await disconnect();
-		back?.({ version: 2 });
-		refresh?.({ version: 2, requestId: 3 });
+		back?.({ version: 2, documentId });
+		refresh?.({ version: 2, documentId, requestId: 3 });
 
 		expect(remove).toHaveBeenCalledTimes(2);
 		expect(onBack).toHaveBeenCalledOnce();
@@ -147,11 +153,16 @@ describe('mobile host boundary', () => {
 
 		expect(host.prepareBack).toHaveBeenCalledExactlyOnceWith({
 			version: 2,
+			documentId,
 			root: 'search',
 			backPath: '/?search=true&network=ICP'
 		});
-		expect(host.finishRefresh).toHaveBeenCalledExactlyOnceWith({ version: 2, requestId: 7 });
-		expect(host.clearBack).toHaveBeenCalledExactlyOnceWith({ version: 2 });
+		expect(host.finishRefresh).toHaveBeenCalledExactlyOnceWith({
+			version: 2,
+			documentId,
+			requestId: 7
+		});
+		expect(host.clearBack).toHaveBeenCalledExactlyOnceWith({ version: 2, documentId });
 		await expect(
 			prepareMobileBack({ root: 'wallet', backPath: '/?search=true' })
 		).rejects.toThrow();
@@ -198,16 +209,58 @@ describe('mobile host boundary', () => {
 		expect(remove).toHaveBeenCalledOnce();
 	});
 
+	it('accepts bounded additive capabilities but requires the authentication contract', async () => {
+		host.ready.mockResolvedValue({
+			...state,
+			capabilities: [...state.capabilities, 'futureScanner'],
+			futureMetadata: true
+		});
+
+		await expect(connectMobileHost(vi.fn())).resolves.toMatchObject({ documentId });
+
+		host.ready.mockResolvedValue({ ...state, documentId: 'invalid' });
+
+		await expect(connectMobileHost(vi.fn())).rejects.toThrow();
+	});
+
+	it('ignores old-document events and forbids commands after disconnect', async () => {
+		const navigate = vi.fn();
+		const connection = await connectMobileHost(navigate);
+		const listener = host.addListener.mock.calls.at(-1)?.[1];
+		navigate.mockClear();
+		listener?.({ version: 2, documentId: crypto.randomUUID(), root: 'activity', requestId: 7 });
+
+		expect(navigate).not.toHaveBeenCalled();
+
+		await connection.disconnect();
+
+		await expect(requestMobileWallet({ method: 'signOut' })).rejects.toThrow('unavailable');
+		expect(host.wallet).not.toHaveBeenCalled();
+	});
+
 	it('does not replace a newer selection with an older handshake response', async () => {
 		const navigate = vi.fn();
 		host.ready.mockImplementationOnce(() => {
 			const [[, listener]] = host.addListener.mock.calls;
-			listener({ version: 2, root: 'search', requestId: 2 });
+			listener({ version: 2, documentId, root: 'search', requestId: 2 });
 			return Promise.resolve({ ...state, requestId: 1 });
 		});
 		await connectMobileHost(navigate);
 
 		expect(navigate).toHaveBeenCalledExactlyOnceWith({ screen: 'search', requestId: 2 });
+	});
+
+	it('retains a current-document selection when stale events precede the handshake', async () => {
+		const navigate = vi.fn();
+		host.ready.mockImplementationOnce(() => {
+			const [[, listener]] = host.addListener.mock.calls;
+			listener({ version: 2, documentId, root: 'activity', requestId: 2 });
+			listener({ version: 2, documentId: crypto.randomUUID(), root: 'search', requestId: 3 });
+			return Promise.resolve({ ...state, requestId: 1 });
+		});
+		await connectMobileHost(navigate);
+
+		expect(navigate).toHaveBeenCalledExactlyOnceWith({ screen: 'activity', requestId: 2 });
 	});
 
 	it('removes the listener if the native handshake fails', async () => {
@@ -225,15 +278,15 @@ describe('mobile host boundary', () => {
 		for (const bad of [
 			null,
 			{ version: 3, root: 'wallet' },
-			{ version: 2, root: 'https://evil' },
-			{ version: 2, root: 'search', script: 'x' }
+			{ version: 2, documentId, root: 'https://evil' },
+			{ version: 2, documentId, root: 'search', script: 'x' }
 		]) {
 			listener(bad);
 		}
 
 		expect(navigate).not.toHaveBeenCalled();
 
-		listener({ version: 2, root: 'activity' });
+		listener({ version: 2, documentId, root: 'activity' });
 
 		expect(navigate).toHaveBeenCalledExactlyOnceWith({ screen: 'activity', requestId: 0 });
 	});
@@ -245,7 +298,7 @@ describe('mobile host boundary', () => {
 			await connectMobileHost(navigate);
 			const [[, listener]] = host.addListener.mock.calls;
 			navigate.mockClear();
-			listener({ version: 2, root });
+			listener({ version: 2, documentId, root });
 
 			expect(navigate).toHaveBeenCalledExactlyOnceWith({ screen: root, requestId: 0 });
 		}
@@ -255,8 +308,12 @@ describe('mobile host boundary', () => {
 		await navigateMobileHost('search');
 		await openMobileAccount();
 
-		expect(host.navigate).toHaveBeenCalledExactlyOnceWith({ version: 2, root: 'search' });
-		expect(host.openAccount).toHaveBeenCalledExactlyOnceWith({ version: 2 });
+		expect(host.navigate).toHaveBeenCalledExactlyOnceWith({
+			version: 2,
+			documentId,
+			root: 'search'
+		});
+		expect(host.openAccount).toHaveBeenCalledExactlyOnceWith({ version: 2, documentId });
 	});
 
 	it('reports committed navigation with bounded parent and request identity', async () => {
@@ -269,6 +326,7 @@ describe('mobile host boundary', () => {
 
 		expect(host.navigationState).toHaveBeenCalledExactlyOnceWith({
 			version: 2,
+			documentId,
 			root: 'search',
 			requestId: 7,
 			revision: 12,
@@ -308,8 +366,8 @@ describe('mobile host boundary', () => {
 		await connectMobileHost(navigate);
 		const [[, listener]] = host.addListener.mock.calls;
 		navigate.mockClear();
-		listener({ version: 2, root: 'search', requestId: 8 });
-		listener({ version: 2, root: 'wallet', requestId: -1 });
+		listener({ version: 2, documentId, root: 'search', requestId: 8 });
+		listener({ version: 2, documentId, root: 'wallet', requestId: -1 });
 
 		expect(navigate).toHaveBeenCalledExactlyOnceWith({ screen: 'search', requestId: 8 });
 	});
@@ -319,8 +377,8 @@ describe('mobile host boundary', () => {
 		await setMobilePresentation(false);
 
 		expect(host.presentation.mock.calls).toEqual([
-			[{ version: 2, blocking: true }],
-			[{ version: 2, blocking: false }]
+			[{ version: 2, documentId, blocking: true }],
+			[{ version: 2, documentId, blocking: false }]
 		]);
 	});
 
@@ -330,6 +388,7 @@ describe('mobile host boundary', () => {
 		await expect(requestMobileWallet({ method: 'sessionExpired' })).resolves.toBe('{}');
 		expect(host.wallet).toHaveBeenCalledExactlyOnceWith({
 			version: 2,
+			documentId,
 			request: { method: 'sessionExpired' }
 		});
 		await expect(requestMobileWallet({ method: 'sign' })).rejects.toThrow();

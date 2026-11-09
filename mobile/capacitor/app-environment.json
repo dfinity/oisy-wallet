@@ -1,0 +1,14 @@
+{
+	"environment": "audit",
+	"derivationOrigin": "https://audit.oisy.com",
+	"authCallbackURL": "https://audit.oisy.com/signer-callback",
+	"internetIdentityCanisterID": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+	"internetComputerHost": "https://icp-api.io",
+	"teamID": "7FY8G6QYKD",
+	"deviceBundleID": "org.dfinity.oisy.native.preview.artem",
+	"simulatorBundleID": "org.dfinity.oisy.capacitor.preview",
+	"legacyKeychainService": "com.oisy.native.mvp.audit-session",
+	"sdkKeyTagPrefix": "com.oisy.native.mvp.audit-session.sdk.",
+	"sdkStorageDirectory": "oisy-sdk-auth-audit",
+	"internetIdentityAuthorizeURL": "https://id.ai/authorize"
+}

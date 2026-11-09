@@ -1,7 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
+import environment from './app-environment.json';
 
 const config: CapacitorConfig = {
-	appId: 'org.dfinity.oisy.capacitor.preview',
+	appId: environment.simulatorBundleID,
 	appName: 'OISY Preview',
 	webDir: '../../build-mobile',
 	loggingBehavior: 'none',

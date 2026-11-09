@@ -92,6 +92,9 @@ const config: UserConfig = {
 			]
 		}
 	},
+	// Preserve each package's SDK version during SvelteKit's server build analysis.
+	// Externalizing both SDKs under the same module name resolves the mobile API to Auth 6.
+	ssr: { noExternal: ['@icp-sdk/auth', '@icp-sdk/core', '@icp-sdk/signer'] },
 	worker: {
 		format: 'es'
 	}

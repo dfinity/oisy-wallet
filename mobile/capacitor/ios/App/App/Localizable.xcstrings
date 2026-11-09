@@ -673,6 +673,39 @@
           }
         }
       }
+    },
+    "wallet.loading": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opening your wallet…"
+          }
+        }
+      }
+    },
+    "wallet.retry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry"
+          }
+        }
+      }
+    },
+    "wallet.unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t open your wallet. Check your connection and try again. If this continues, the website may need an update for this app."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -1,69 +1,104 @@
 import {
+	mobileHostTransport as host,
+	mobileHostAvailable
+} from '$lib/providers/mobile-host.providers';
+import {
 	MobileBackEventSchema,
 	MobileBackPreparationSchema,
 	MobileHandshakeSchema,
 	MobileNavigationSchema,
 	MobileNavigationStateSchema,
+	MobileRefreshEventSchema,
 	MobileRefreshSchema,
 	MobileWalletRequestSchema,
 	MobileWalletResponseSchema,
 	type MobileNavigationRequest,
 	type MobileNavigationState,
-	type MobileRoot,
-	type MobileWalletRequest
+	type MobileRoot
 } from '$lib/schema/mobile-host.schema';
-import { Capacitor, registerPlugin, type PluginListenerHandle } from '@capacitor/core';
+import type { PluginListenerHandle } from '@capacitor/core';
 
-interface MobileHostPlugin {
-	wallet(options: { version: 2; request: MobileWalletRequest }): Promise<unknown>;
-	ready(options: { version: 2 }): Promise<unknown>;
-	navigate(options: { version: 2; root: MobileRoot }): Promise<void>;
-	navigationState(options: MobileNavigationState): Promise<void>;
-	openAccount(options: { version: 2 }): Promise<void>;
-	presentation(options: { version: 2; blocking: boolean }): Promise<void>;
-	prepareBack(options: { version: 2; root: 'wallet' | 'search'; backPath: string }): Promise<void>;
-	clearBack(options: { version: 2 }): Promise<void>;
-	finishRefresh(options: { version: 2; requestId: number }): Promise<void>;
-	addListener(
-		event: 'navigate' | 'back' | 'refresh',
-		listener: (value: unknown) => void
-	): Promise<PluginListenerHandle>;
-}
-const host = registerPlugin<MobileHostPlugin>('OisyHost');
+export { mobileHostAvailable } from '$lib/providers/mobile-host.providers';
 
-// A build/platform guard is useful here, but native frame/origin validation is the trust boundary.
-export const mobileHostAvailable = (): boolean =>
-	import.meta.env.VITE_MOBILE_SHELL === 'true' &&
-	Capacitor.isNativePlatform() &&
-	globalThis.location?.hostname === 'localhost' &&
-	((Capacitor.getPlatform() === 'ios' && globalThis.location.protocol === 'capacitor:') ||
-		(Capacitor.getPlatform() === 'android' && globalThis.location.protocol === 'https:'));
+let activeDocument: string | undefined;
+let connectionGeneration = 0;
+const documentRequest = () => {
+	if (!mobileHostAvailable() || !activeDocument) {
+		throw new Error('Mobile host unavailable');
+	}
+	return { version: 2 as const, documentId: activeDocument };
+};
 
 export const connectMobileHost = async (onNavigate: (request: MobileNavigationRequest) => void) => {
 	if (!mobileHostAvailable()) {
 		throw new Error('Mobile host unavailable');
 	}
+	const generation = ++connectionGeneration;
+	activeDocument = undefined;
 	let latestRequestId = -1;
-	const dispatch = (request: MobileNavigationRequest) => {
-		// An older ready response must not overwrite a selection received while it was in flight.
-		if (request.requestId < latestRequestId) {
+	let document: string | undefined;
+	const pending: unknown[] = [];
+	const dispatch = (value: unknown) => {
+		const result = MobileNavigationSchema.safeParse(value);
+		if (!result.success || generation !== connectionGeneration) {
 			return;
 		}
-		latestRequestId = request.requestId;
-		onNavigate(request);
-	};
-	// Subscribe before ready so a root selection during startup is not lost.
-	const listener = await host.addListener('navigate', (value) => {
-		const result = MobileNavigationSchema.safeParse(value);
-		if (result.success) {
-			dispatch({ screen: result.data.root, requestId: result.data.requestId ?? 0 });
+		if (!document) {
+			pending.push(result.data);
+			if (pending.length > 32) {
+				pending.shift();
+			}
+			return;
 		}
-	});
+		if (result.data.documentId !== document) {
+			return;
+		}
+		const requestId = result.data.requestId ?? 0;
+		if (requestId < latestRequestId) {
+			return;
+		}
+		latestRequestId = requestId;
+		onNavigate({ screen: result.data.root, requestId });
+	};
+	const listener = await host.addListener('navigate', dispatch);
 	try {
 		const state = MobileHandshakeSchema.parse(await host.ready({ version: 2 }));
-		dispatch({ screen: state.root, requestId: state.requestId ?? 0 });
-		return { ...state, disconnect: () => listener.remove() };
+		if (generation !== connectionGeneration) {
+			throw new Error('Superseded host connection');
+		}
+		if (
+			!['nativeNavigation', 'delegation', 'sessionHandoff', 'documentBinding'].every((capability) =>
+				state.capabilities.includes(capability)
+			)
+		) {
+			throw new Error('Unsupported host capabilities');
+		}
+		document = state.documentId;
+		activeDocument = document;
+		for (const event of pending) {
+			dispatch(event);
+		}
+		pending.length = 0;
+		dispatch({
+			version: 2,
+			documentId: document,
+			root: state.root,
+			requestId: state.requestId ?? 0
+		});
+		return {
+			...state,
+			disconnect: async () => {
+				if (generation === connectionGeneration) {
+					activeDocument = undefined;
+					connectionGeneration++;
+				}
+				await listener.remove();
+			}
+		};
 	} catch (error) {
+		if (generation === connectionGeneration) {
+			activeDocument = undefined;
+		}
 		await listener.remove();
 		throw error;
 	}
@@ -72,7 +107,7 @@ export const navigateMobileHost = async (root: MobileRoot): Promise<void> => {
 	if (!mobileHostAvailable()) {
 		throw new Error('Mobile host unavailable');
 	}
-	await host.navigate({ version: 2, root });
+	await host.navigate({ ...documentRequest(), root });
 };
 export const publishMobileNavigation = async (
 	state: Omit<MobileNavigationState, 'version'>
@@ -80,13 +115,16 @@ export const publishMobileNavigation = async (
 	if (!mobileHostAvailable()) {
 		throw new Error('Mobile host unavailable');
 	}
-	await host.navigationState(MobileNavigationStateSchema.parse({ version: 2, ...state }));
+	await host.navigationState({
+		...MobileNavigationStateSchema.parse({ version: 2, ...state }),
+		...documentRequest()
+	});
 };
 export const openMobileAccount = async (): Promise<void> => {
 	if (!mobileHostAvailable()) {
 		throw new Error('Mobile host unavailable');
 	}
-	await host.openAccount({ version: 2 });
+	await host.openAccount(documentRequest());
 };
 
 // Presentation only: this command grants no data or wallet capabilities.
@@ -94,7 +132,7 @@ export const setMobilePresentation = async (blocking: boolean): Promise<void> =>
 	if (!mobileHostAvailable()) {
 		throw new Error('Mobile host unavailable');
 	}
-	await host.presentation({ version: 2, blocking });
+	await host.presentation({ ...documentRequest(), blocking });
 };
 
 export const requestMobileWallet = async (request: Record<string, string>): Promise<string> => {
@@ -102,8 +140,9 @@ export const requestMobileWallet = async (request: Record<string, string>): Prom
 		throw new Error('Mobile host unavailable');
 	}
 	const payload = MobileWalletRequestSchema.parse(request);
-	return MobileWalletResponseSchema.parse(await host.wallet({ version: 2, request: payload }))
-		.response;
+	return MobileWalletResponseSchema.parse(
+		await host.wallet({ ...documentRequest(), request: payload })
+	).response;
 };
 
 // Separate from startup/auth: these listeners live only while the shared wallet is mounted.
@@ -118,6 +157,7 @@ export const connectMobileInteractions = async ({
 		throw new Error('Mobile host unavailable');
 	}
 	const listeners: PluginListenerHandle[] = [];
+	const document = documentRequest().documentId;
 	let active = true;
 	let lastRefreshId = -1;
 	const disconnect = async () => {
@@ -127,15 +167,27 @@ export const connectMobileInteractions = async ({
 	try {
 		listeners.push(
 			await host.addListener('back', (value) => {
-				if (active && MobileBackEventSchema.safeParse(value).success) {
+				const result = MobileBackEventSchema.safeParse(value);
+				if (
+					active &&
+					activeDocument === document &&
+					result.success &&
+					result.data.documentId === document
+				) {
 					onBack();
 				}
 			})
 		);
 		listeners.push(
 			await host.addListener('refresh', (value) => {
-				const result = MobileRefreshSchema.safeParse(value);
-				if (!active || !result.success || result.data.requestId <= lastRefreshId) {
+				const result = MobileRefreshEventSchema.safeParse(value);
+				if (
+					!active ||
+					activeDocument !== document ||
+					!result.success ||
+					result.data.documentId !== document ||
+					result.data.requestId <= lastRefreshId
+				) {
 					return;
 				}
 				lastRefreshId = result.data.requestId;
@@ -155,18 +207,24 @@ export const prepareMobileBack = async (parent: {
 	if (!mobileHostAvailable()) {
 		throw new Error('Mobile host unavailable');
 	}
-	await host.prepareBack(MobileBackPreparationSchema.parse({ version: 2, ...parent }));
+	await host.prepareBack({
+		...MobileBackPreparationSchema.parse({ version: 2, ...parent }),
+		...documentRequest()
+	});
 };
 export const finishMobileRefresh = async (requestId: number): Promise<void> => {
 	if (!mobileHostAvailable()) {
 		throw new Error('Mobile host unavailable');
 	}
-	await host.finishRefresh(MobileRefreshSchema.parse({ version: 2, requestId }));
+	await host.finishRefresh({
+		...MobileRefreshSchema.parse({ version: 2, requestId }),
+		...documentRequest()
+	});
 };
 
 export const clearMobileBack = async (): Promise<void> => {
 	if (!mobileHostAvailable()) {
 		throw new Error('Mobile host unavailable');
 	}
-	await host.clearBack({ version: 2 });
+	await host.clearBack(documentRequest());
 };

@@ -46,9 +46,11 @@ async function run() {
 			throw new Error('Invalid native reply');
 		}
 		const identity = await receiver.accept({
-			chain: DelegationChain.fromJSON(reply.chain),
-			expectedAccount: Principal.fromText(reply.expectedAccount),
-			expiresAtMs: reply.expiresAtMs
+			grant: {
+				chain: DelegationChain.fromJSON(reply.chain),
+				expectedAccount: Principal.fromText(reply.expectedAccount),
+				expiresAtMs: reply.expiresAtMs
+			}
 		});
 		label.textContent = 'Web app delegation received. Verifying signed ingress…';
 		const agent = await HttpAgent.create({ host: 'https://icp-api.io', identity });

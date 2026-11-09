@@ -212,7 +212,8 @@
 			listScroll = { path: `${from.url.pathname}${from.url.search}`, x: scrollX, y: scrollY };
 		}
 		if (
-			(to.url.protocol !== 'https:' && !mobileRouteAllowed(to.url)) ||
+			(to.url.origin === page.url.origin && !mobileRouteAllowed(to.url)) ||
+			(to.url.origin !== page.url.origin && to.url.protocol !== 'https:') ||
 			(type === 'popstate' && !navigation.canGoBack(to.url))
 		) {
 			cancel();

@@ -8,3 +8,6 @@ export const mobileScreenStore = writable<MobileNavigationRequest>({
 });
 // Installed only for the lifetime of the authenticated shared web host.
 export const mobileBackStore = writable<(() => void) | undefined>();
+
+// A recoverable startup failure replaces private routes until a fresh document retries.
+export const mobileRuntimeRecoveryStore = writable(false);

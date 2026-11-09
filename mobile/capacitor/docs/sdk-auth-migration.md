@@ -5,6 +5,11 @@ tags: [ios, internet-identity, sdk, authentication, migration]
 
 # SDK authentication migration preparation
 
+**2026-11-05 update:** the actual app now has an SDK integration under validation;
+see [SDK app integration](./sdk-app-integration.md). The comparison below records
+the migration investigation and earlier baseline. The installed phone has not yet
+passed the new HTTPS sign-in flow.
+
 Checked on 2026-10-27. This preparation adds a deployment checker and records the
 conditions for replacing custom native authentication with
 [dfinity/icp-native-sdk](https://github.com/dfinity/icp-native-sdk). It does not

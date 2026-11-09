@@ -1,12 +1,12 @@
 ---
-title: OISY Capacitor app
+title: OISY mobile app
 tags: [mobile, capacitor, ios, development]
 ---
 
-# OISY Capacitor app
+# OISY mobile app
 
 This is the only active mobile app as of 2026-10-27. After sign-in, it opens the
-shared OISY web wallet. Native iOS code handles navigation, system-browser sign-in,
+shared OISY web wallet at the configured audit HTTPS origin. Native iOS code handles navigation, system-browser sign-in,
 Keychain and Explore, the isolated browser for connecting apps.
 
 Wallet, Activity and Explore tabs float over the web content. A separate More
@@ -18,12 +18,19 @@ Read AGENTS.md before making changes.
 
 The [November migration spec](../../docs/ai/spec-driven-development/specs/2026-11-05-feat-mobile-live-web-sdk-auth.md)
 targets the deployed website with SDK-derived authentication. Implementation is
-authorized; the isolated M1 handoff harness is under test. The installed app and
-contracts below remain the current baseline.
+authorized. SDK authentication is integrated; the user confirmed ICP account
+continuity on 2026-11-06. The controller now loads the live website. Its runtime
+adapter must be deployed to audit before installing this version on the phone.
+Local verification and remaining acceptance checks are recorded in the spec.
 
 Pinned sources, local verification and audit deployment instructions live with
 the prototype.
 Source: [SDK authentication handoff prototype](./auth-handoff/README.md)
+
+## SDK integration in this app
+
+Build setup, compatibility boundary and acceptance status for the actual app.
+Source: [SDK app integration](./docs/sdk-app-integration.md)
 
 ## Ownership
 
@@ -31,14 +38,14 @@ Source: [SDK authentication handoff prototype](./auth-handoff/README.md)
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | Wallet, token details, Activity, Search, Receive, Contacts, preferences | Normal `src/frontend/src/routes/(app)/` pages and existing components                         |
 | Data and authentication                                                 | Normal Loaders/stores/schedulers; shared AuthClientProvider with an in-memory mobile identity |
-| Typed Capacitor transport                                               | `lib/services/mobile-host.services.ts`, contract v2                                           |
+| Typed host transport                                                    | `lib/providers/mobile-host.providers.ts`, `LiveWalletBridge.swift`, contract v2               |
 | Native tabs and account controls                                        | `ios/App/App/ShellViewController.swift`, `AccountView.swift`                                  |
 | Internet Identity / session                                             | `ios/App/App/Auth/`, `Wallet/WalletSession.swift`                                             |
 | Uniswap / 1inch, EIP-1193/6963 discovery and consent                    | `ios/App/App/Explore/`, isolated WebKit/provider                                              |
-| Static frontend delivery                                                | Capacitor 8.5.3, packaged local assets, no loopback server                                    |
+| Frontend delivery                                                       | Exact configured HTTPS origin in a nonpersistent WKWebView                                    |
 
-The separate Swift wallet, its native SDK and balance bindings, custom screens,
-sample portfolio and old app target were removed. `mobile/ios-native/` contains
+The separate Swift wallet, native balance bindings, custom screens, sample
+portfolio and old app target were removed. This shell uses the SDK only for auth. `mobile/ios-native/` contains
 historical documentation; all active native resources live here.
 
 ## Feature coverage and navigation
@@ -90,22 +97,25 @@ Source: [Authentication and Explore review](./docs/authentication-review.md)
 
 ## Session and isolation
 
-The app keeps the existing Internet Identity relay, URL scheme and Keychain service.
-The parent key stays native. The trusted web wallet generates an in-memory child
-key and receives a time-limited delegation. AuthClientProvider, the auth store,
-loaders and workers use this session. Each worker has its own key and receives a
-bounded delegation through a private MessagePort. Browser builds keep their
-AuthClient/IDB flow. See [Session boundary](./docs/session-boundary.md).
+The app now uses the pinned native SDK, an associated HTTPS callback, and SDK
+Apple storage. It preserves the existing app ID, welcome preference and operation
+journal. A new sign-in is required; legacy credentials are removed only after
+successful replacement or explicit logout.
 
-The session lasts at most one hour from sign-in, or less if II grants a shorter
-lifetime. Its deadline is persisted in Keychain and shared by web/worker grants;
-relaunch and activity do not extend it. Old saved sessions without a deadline
-require sign-in again. Expiry clears Keychain, closes the wallet, revokes Explore
-grants and shows “Welcome back!”. There is no automatic renewal. Missing API data
+The trusted wallet receives an II-scoped session grant for a fresh in-memory key.
+The mobile SDK adapter obtains an app delegation for the same audit principal.
+Workers use independent keys and app delegations. Browser sign-in keeps its current
+AuthClient/IDB implementation. See [Session boundary](./docs/session-boundary.md).
+
+The original one-hour deadline survives reload and relaunch. SDK app credentials
+can rotate inside that hour; the II session itself is not extended. Logout hides
+the wallet immediately and saves a local tombstone before attempting SDK revocation.
+Expiry shows “Welcome back!”; explicit logout shows the introduction.
+Missing API data
 must be shown as unavailable rather than zero.
 
-Only the exact local `capacitor://localhost` main wallet document may use the fixed
-v2 bridge. General-purpose Capacitor HTTP/cookie plugins remain blocked. Wallet and
+Only the configured HTTPS main wallet document may use the fixed v2 bridge.
+The live controller registers no general-purpose Capacitor plugins. Wallet and
 Explore each use nonpersistent, separate WebKit storage. Explore exposes a public
 account only after origin-specific native consent; it supports Sepolia reads only.
 The shared Send flow supports ICP, canonical ck-tokens, ETH and ERC-20 transfers.
@@ -118,27 +128,21 @@ broadcast. See [Send scope](./docs/shared-web-contract.md#shared-send),
 
 ## Build and run
 
-The mobile audit bundle uses the same development environment resolution as
-`vite.config.ts`. Set `VITE_ETHERSCAN_API_KEY`, `VITE_INFURA_API_KEY` and
-`VITE_ALCHEMY_API_KEY` in an ignored `.env.development.local` at the **worktree
-root**, or in the build environment. If XRP is enabled (the default), also set
-`VITE_XRP_RPC_URL_MAINNET` to the approved HTTPS RPC endpoint. A local env file
-in another checkout is not automatically available here. Use client credentials
-authorized for the enabled networks; never commit values or generated bundles.
+The app uses the deployed website's client API configuration and audit HTTPS
+origin. Keep provider keys in ignored config or deployment secrets. Never commit
+values or generated bundles. Verify provider allowlists for the audit domain;
+do not spoof origins or add a generic native HTTP proxy.
 
-`npm run build:mobile` rejects missing credentials and invalid XRP URL syntax.
-This is a presence check, not a provider-access test. Provider origin restrictions
-must permit the app's `capacitor://localhost` origin; verify responses from the
-installed app. Do not work around provider restrictions by spoofing an origin,
-adding a generic native HTTP proxy or falling back to unapproved public RPCs.
-The 15-second refresh deadline may otherwise report unavailable data even while
-previously loaded balances remain on screen. Rebuild/reinstall after configuration
-changes; updating the website alone does not update the app's packaged settings.
+Build and deploy the normal audit website with the runtime host adapter first.
+Leave `VITE_MOBILE_SHELL` unset/false; the document-start native transport selects
+mobile presentation and authentication. New website releases reach the app on its
+next document load. The host does not force reloads during an operation.
 
 From the repository root:
 
 ```sh
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+node mobile/capacitor/prepare-native-sdk.mjs
 npm run mobile:sync:ios
 xcodebuild -project mobile/capacitor/ios/App/App.xcodeproj -scheme App \
   -destination 'generic/platform=iOS Simulator' \
@@ -152,22 +156,26 @@ A signed-out simulator shows the welcome screen and Explore. Automated tests
 use isolated signed fixtures and block network calls; there is no user-facing sample
 mode. Physical sign-in still requires the user's passkey interaction.
 
-`build-mobile/` and `.svelte-kit-mobile/` remain isolated from the website build.
-`mobile-build.json` records source revision, dirty state, contract and audit mode.
-The packaged CSP allows HTTPS/WSS data endpoints and local scripts, including
-inline bootstrap code. Publishing `audit.oisy.com` does not update the installed UI.
+`build-mobile/` and `.svelte-kit-mobile/` are retained for offline shared-screen
+tests and legacy packaging tools. The production app target does not package
+their pages. The website deployment owns CSP, feature code and provider settings;
+native origin/callback configuration still requires an app release.
 
-For the existing physical preview, use the previously configured development team
-and bundle identifier override; do not uninstall it or switch Keychain entitlements.
-Those personal settings stay local. The generic simulator app identifier remains
-`org.dfinity.oisy.capacitor.preview`; display name is OISY Preview.
+Device and simulator IDs now come from the public `app-environment.json` through
+generated build settings. Device builds preserve the installed preview ID and team;
+simulators keep `org.dfinity.oisy.capacitor.preview`. Build preflight rejects a
+mismatched identity. Follow [SDK app integration](./docs/sdk-app-integration.md#build)
+for device signing, association checks and cache provenance. Do not uninstall the
+existing preview or change its storage namespaces to resolve a build failure.
 
 ## Build ownership
 
-`ios/App/project.yml` owns the Xcode project; `cap sync` owns CapApp-SPM, config and
-public assets. Root npm and SPM pin Capacitor 8.5.3. Swift 6 complete checking and the
-existing experimental SPM tools 6.2 setting support the iOS 26 target. Do not patch
-generated projects or dependencies. Android SDK/JDK and an Android host remain pending.
+`ios/App/project.yml` owns the Xcode project. The existing Capacitor 8.5.3 package
+scaffold remains for separate cleanup; the active wallet controller uses WKWebView
+directly. `mobile:sync:ios` updates that scaffold and generates the native project,
+without building or copying web pages. Do not patch
+generated projects or dependencies. Swift 6 complete checking is enabled. Android
+SDK/JDK and an Android host remain pending.
 
 ## Remaining shared-runtime work
 
@@ -183,8 +191,9 @@ The migration handoff records actual results and remaining physical-device check
 with `VITE_MOBILE_UI_TEST=true` for its Notes and navigation fixtures. They seed
 shared in-memory profile/balance/Notes stores while main-frame and worker fetches
 remain pending. They never weaken signed canister-response verification and are
-compiled out of normal builds. Always rebuild with the flag false before phone
-installation and check that fixture events are absent. The screenshots show fixture
+compiled out of normal website builds. Test resources are packaged only in
+AppTests.xctest; the app target excludes `public/`. Check that deployed website
+assets exclude fixture events. The screenshots show fixture
 data, not a funded-account test.
 
 ```sh
@@ -196,7 +205,9 @@ npm exec -- vitest run src/frontend/src/tests/lib/services/mobile-host.services.
   src/frontend/src/tests/lib/utils/mobile-history.utils.spec.ts \
   src/frontend/src/tests/lib/components/ui/ModalExitHandler.spec.ts \
   src/frontend/src/tests/routes/layout.spec.ts
-VITE_MOBILE_UI_TEST=true npm run mobile:sync:ios
+DFX_NETWORK=audit OISY_MOBILE_SHELL=1 VITE_MOBILE_SHELL=false VITE_MOBILE_UI_TEST=true npm exec -- vite build
+rsync -a --delete build-mobile/ mobile/capacitor/ios/App/App/public/
+npm --prefix mobile/capacitor run project:ios
 xcodebuild -project mobile/capacitor/ios/App/App.xcodeproj -scheme App \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
   -derivedDataPath /tmp/oisy-capacitor-build \

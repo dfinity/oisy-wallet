@@ -13,11 +13,15 @@ The implementation needs architecture and security review before release. Passin
 tests and working balances do not establish that Internet Identity has approved
 the authentication design.
 
+The actual app is now being upgraded to SDK authentication. This review records
+the previous preview; see [SDK app integration](./sdk-app-integration.md) for the
+current implementation and outstanding real-device acceptance checks.
+
 ## Read these first
 
 | Area                              | Implementation                                                                                                                                                                                                                                                                                         |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Wallet sign-in and callback       | [AuthModel.swift](../ios/App/App/Auth/AuthModel.swift), [Icrc167.swift](../ios/App/App/Auth/Icrc167.swift)                                                                                                                                                                                             |
+| Wallet sign-in and callback       | [AuthModel.swift](../ios/App/App/Auth/AuthModel.swift), [Icrc167.swift](https://github.com/dfinity/oisy-wallet/blob/dee72ab616d4f8a6f97b5e9c07d91a0078497174/mobile/capacitor/ios/App/App/Auth/Icrc167.swift)                                                                                          |
 | Delegation validation and storage | [AuthSession.swift](../ios/App/App/Auth/AuthSession.swift), [KeychainStore.swift](../ios/App/App/Auth/KeychainStore.swift)                                                                                                                                                                             |
 | Native → trusted web session      | [WebDelegation.swift](../ios/App/App/Auth/WebDelegation.swift), [WalletSession.swift](../ios/App/App/Wallet/WalletSession.swift)                                                                                                                                                                       |
 | WebView isolation and bridge      | [TrustedWalletViewController.swift](../ios/App/App/TrustedWalletViewController.swift), [OisyHostPlugin.swift](../ios/App/App/OisyHostPlugin.swift)                                                                                                                                                     |

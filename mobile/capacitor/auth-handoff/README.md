@@ -7,9 +7,13 @@ tags: [mobile, ios, sdk, authentication, prototype]
 
 This is the isolated M1 implementation for the live-website migration. It appends
 one local delegation from the native II session key to a fresh web key, then uses
-the web SDK's public session APIs. The installed wallet still uses its existing
-authentication. The harness code is not included in the app's build; the normal
-website build uses only the audit asset preparation script described below.
+the web SDK's public session APIs. The actual app now uses the same receiver and
+pinned SDK; see [SDK app integration](../docs/sdk-app-integration.md). The signed
+update was installed and launched on the phone on 2026-11-06. After fixing two
+adapter bugs, real SDK startup succeeds and the user confirmed that ICP matches
+without an error. Remaining backend-proof and wallet-flow acceptance checks are
+still pending. Harness-only UI is excluded from the app; the normal website build uses the audit asset
+preparation script described below.
 
 ## Why a local hop
 
@@ -24,6 +28,9 @@ The [local patch](./patches/local-session-delegation.patch) adds
 signs one child scoped to II. The child ends at the earlier of the supplied
 absolute deadline and the original chain expiry. Signing uses the SDK's key
 handle and `ic-agent`'s canonical delegation payload; no private key is exported.
+It passes platform signatures through the SDK core's existing normalizer before
+appending the hop: Apple keys return DER ECDSA, while the IC requires fixed-width
+`r || s`. The Apple-key regression covers this production boundary.
 Sign-in, sign-out and this operation use the SDK's ceremony gate. Delivery still
 needs the host's document/session generation checks.
 
@@ -43,8 +50,9 @@ Generated bindings must be rebuilt after applying the patch.
 
 `web-dependencies/` pins test-only packages and their integrity hashes. The runner
 installs them in a temporary directory. Production dependencies remain owned by
-the repository root; OISY's Auth 6 / Core 4 have not been upgraded. Review the Core
-6 migration before importing this adapter into the shared frontend.
+the repository root, including the private `@oisy/mobile-session` package with
+Auth 11 / Core 6. Browser Auth 6 / Core 4 remain unchanged. The harness re-exports
+the same production receiver; it does not maintain a separate session adapter.
 
 ## Web receiver
 
@@ -201,8 +209,11 @@ Native still validates the response; the page does not authenticate it.
 6. Verify Apple's association cache and complete the physical-device HTTPS callback
    test. A valid source file or a passing deployment checker does not prove routing.
 
-Nothing has been pushed or deployed by this preparation. The phone remains on the
-working preview. Audit redeployment will not change its bundled auth implementation.
+Preparation commit `dee72ab616` was pushed with approval and deployed to audit
+in [run 42068308798](https://github.com/dfinity/oisy-wallet/actions/runs/42068308798).
+All three public files and the callback were verified. The new app integration
+is a subsequent local change; deploying the site does not update an installed
+app's bundled auth implementation.
 
 ## Verification and remaining M1 work
 
@@ -213,7 +224,7 @@ Verified locally on 2026-11-05:
   or successful real II login has been claimed.
 - Added native local-hop cases, including the AuthClient suite omitted by upstream's
   iOS runner; strict Swift 6 host and fixture compilation.
-- All 19 web receiver tests, including cross-language signature verification,
+- All 20 web receiver tests, including cross-language signature verification,
   wrong account/key/scope, original deadline, one-use delivery and cancellation.
 - Simulator launch/restore and bundled web page inspected in the signed-out state.
   The Apple storage namespace failure was fixed; no session was granted while signed out.
@@ -226,11 +237,11 @@ Verified locally on 2026-11-05:
 
 These tests do not establish real II acceptance. Remaining work:
 
-1. Deploy audit assets and verify the explicit Apple profile and real HTTPS callback.
+1. Audit assets are deployed. Verify the explicit Apple profile and real HTTPS callback.
 2. Compare the same II account with the audit web wallet, exercise the signed proof,
    reload, relaunch, logout and actual expiry. Review the SDK patch with II.
-3. Integrate public session APIs into the shared auth provider/workers, reviewing
-   Auth 11/Core 6 compatibility. Verify allowance/profile/Notes backend proofs.
+3. The shared provider/workers now use public session APIs. Verify real
+   allowance/profile/Notes backend proofs and full wallet flows on the phone.
 4. Test the full hostile-message and lifecycle matrix on the eventual HTTPS host.
    The bundled test page's gate is not yet the production remote-origin contract.
 

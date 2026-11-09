@@ -6,8 +6,8 @@ import XCTest
 
 @MainActor
 final class WalletInteractionsTests: XCTestCase {
-  private let parent = URL(string: "capacitor://localhost/")!
-  private let token = URL(string: "capacitor://localhost/transactions/?network=ICP&token=ICP")!
+  private let parent = URL(string: "https://audit.oisy.com/")!
+  private let token = URL(string: "https://audit.oisy.com/transactions/?network=ICP&token=ICP")!
 
   private func image() -> UIImage {
     UIGraphicsImageRenderer(size: CGSize(width: 10, height: 10)).image { context in

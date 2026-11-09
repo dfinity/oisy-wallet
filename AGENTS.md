@@ -18,7 +18,7 @@ and `Cargo.toml`. The non-obvious bits:
 
 - **AI-active areas (ship with little to no human review):** `src/frontend/`,
   `src/backend/`, `src/shared/`. CI gates and CODEOWNERS still apply.
-- **Shared mobile app:** `mobile/capacitor/` packages the same frontend. Before changing
+- **Shared mobile app:** `mobile/capacitor/` loads the deployed frontend in its iOS shell. Before changing
   shared routes/layouts/modals, auth/providers/workers or build/host contracts, read
   [web/mobile compatibility](./mobile/capacitor/docs/shared-web-contract.md).
 - **Do not hand-edit:** `src/declarations/` (regenerate via `npm run generate`).

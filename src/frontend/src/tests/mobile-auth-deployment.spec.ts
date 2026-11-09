@@ -28,7 +28,10 @@ const run = ({
 	try {
 		const files = {
 			allowlist: { callbacks: [callback] },
-			association: { webcredentials: { apps: [appID] } },
+			association: {
+				webcredentials: { apps: [appID] },
+				applinks: { details: [{ appIDs: [appID], components: [{ '/': '/signer-callback' }] }] }
+			},
 			entitlements,
 			profile,
 			...documents
@@ -53,17 +56,46 @@ describe('mobile HTTPS authentication deployment', () => {
 		expect(result.stdout).toContain('Supplied-file checks only');
 	});
 
-	it('accepts the wildcard domain entitlement used by explicit provisioning profiles', () => {
+	it.each([{ domains: ['*'] }, { domains: '*' }])(
+		'accepts a provisioning profile wildcard in either Apple format: $domains',
+		({ domains }) => {
+			const result = run({
+				documents: {
+					profile: {
+						...profile,
+						Entitlements: { ...entitlements, 'com.apple.developer.associated-domains': domains }
+					}
+				}
+			});
+
+			expect(result.status).toBe(0);
+		}
+	);
+
+	it.each([{ domains: ['*'] }, { domains: '*' }])(
+		'rejects wildcard domains in signed app entitlements: $domains',
+		({ domains }) => {
+			const result = run({
+				documents: {
+					entitlements: { ...entitlements, 'com.apple.developer.associated-domains': domains }
+				}
+			});
+
+			expect(result.status).toBe(1);
+		}
+	);
+
+	it('rejects arbitrary string domain entitlements in a profile', () => {
 		const result = run({
 			documents: {
 				profile: {
 					...profile,
-					Entitlements: { ...entitlements, 'com.apple.developer.associated-domains': ['*'] }
+					Entitlements: { ...entitlements, 'com.apple.developer.associated-domains': domain }
 				}
 			}
 		});
 
-		expect(result.status).toBe(0);
+		expect(result.status).toBe(1);
 	});
 
 	it.each([
@@ -106,6 +138,35 @@ describe('mobile HTTPS authentication deployment', () => {
 
 		expect(result.status).toBe(1);
 		expect(result.stdout).toContain('FAIL Signed app enables webcredentials');
+	});
+
+	it('rejects a missing callback route or an excluded Universal Link', () => {
+		for (const components of [
+			[],
+			[{ '/': '/another-path' }],
+			[{ '/': '/signer-callback', exclude: true }]
+		]) {
+			const result = run({
+				documents: {
+					association: {
+						webcredentials: { apps: [appID] },
+						applinks: { details: [{ appIDs: [appID], components }] }
+					}
+				}
+			});
+
+			expect(result.status).toBe(1);
+			expect(result.stdout).toContain('FAIL AASA applinks');
+		}
+	});
+
+	it('rejects a signed app or profile without the callback applinks entitlement', () => {
+		const withoutAppLink = { ...entitlements, 'com.apple.developer.associated-domains': [domain] };
+
+		expect(run({ documents: { entitlements: withoutAppLink } }).status).toBe(1);
+		expect(
+			run({ documents: { profile: { ...profile, Entitlements: withoutAppLink } } }).status
+		).toBe(1);
 	});
 
 	it('rejects the wrong signed app or team', () => {

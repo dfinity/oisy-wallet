@@ -175,6 +175,7 @@ export default [
 			'build-mobile',
 			'.svelte-kit-mobile',
 			'mobile/capacitor/ios/App/App/public',
+			'mobile/capacitor/.native-sdk',
 			'mobile/ios-native/docs',
 			// Isolated Auth 11/Core 6 harness: verify.sh type-checks and tests it against
 			// its own pinned packages, rather than the app's Auth 6/Core 4.

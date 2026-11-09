@@ -69,7 +69,7 @@
 		"benchmark": "canbench --persist --show-summary",
 		"perf:memory": "node scripts/perf.memory.mjs",
 		"build:mobile": "node mobile/capacitor/check-build-env.mjs && DFX_NETWORK=audit OISY_MOBILE_SHELL=1 VITE_MOBILE_SHELL=true vite build && node mobile/capacitor/write-build-info.mjs",
-		"mobile:sync:ios": "npm run build:mobile && npm --prefix mobile/capacitor run sync:ios"
+		"mobile:sync:ios": "npm --prefix mobile/capacitor run sync:ios"
 	},
 	"dependencies": {
 		"@capacitor/core": "8.5.3",
@@ -85,6 +85,7 @@
 		"@lifi/sdk": "^4.12.1",
 		"@liquidium/client": "^0.9.0",
 		"@metamask/detect-provider": "^2.0.0",
+		"@oisy/mobile-session": "file:mobile/capacitor/session-sdk",
 		"@plausible-analytics/tracker": "^0.4.6",
 		"@reown/walletkit": "^1.5.5",
 		"@solana-program/address-lookup-table": "^0.14.1",
@@ -164,6 +165,9 @@
 			"@icp-sdk/core": "^5.4.0",
 			"@icp-sdk/canisters": "^3.6.0",
 			"@dfinity/utils": "^4.2.1"
+		},
+		"@oisy/mobile-session": {
+			"@icp-sdk/core": "6.0.0"
 		}
 	},
 	"engines": {

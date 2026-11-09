@@ -6,7 +6,7 @@ import { onCkEthMinterInfoMessage } from '$icp/workers/cketh-minter-info.worker'
 import { onDip20WalletMessage } from '$icp/workers/dip20-wallet.worker';
 import { onIcpWalletMessage } from '$icp/workers/icp-wallet.worker';
 import { onIcrcWalletMessage } from '$icp/workers/icrc-wallet.worker';
-import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
+import { MOBILE_SHELL, enableMobileWorkerRuntime } from '$lib/constants/mobile.constants';
 import {
 	installMobileWorkerSession,
 	mobileWorkerInitSchema
@@ -73,7 +73,14 @@ export const messageToHandler: PostMessageRequestMap = {
 
 let mobileSessionInstalled = false;
 let mobileSessionInstalling = false;
+let runtimeSelected = false;
 onmessage = async (ev: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
+	if (!runtimeSelected) {
+		runtimeSelected = true;
+		if (mobileWorkerInitSchema.safeParse(ev.data).success && ev.ports.length === 1) {
+			enableMobileWorkerRuntime();
+		}
+	}
 	if (MOBILE_SHELL) {
 		const session = mobileWorkerInitSchema.safeParse(ev.data);
 		if (

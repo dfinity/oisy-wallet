@@ -26,3 +26,6 @@ src/frontend/src/tests/fixtures/solana/rpc
 /mobile/capacitor/ios/App/App/capacitor.config.json
 /mobile/ios-native/docs
 /docs/ai/spec-driven-development/specs/2026-10-22-feat-ios-native-mvp/evidence
+
+# Pinned third-party SDK checkout and generated native build artifacts.
+/mobile/capacitor/.native-sdk

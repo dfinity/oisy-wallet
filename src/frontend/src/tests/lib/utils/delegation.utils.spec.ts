@@ -1,4 +1,4 @@
-import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
+import { extractIIDelegationChain, freshIIDelegationChain } from '$lib/utils/delegation.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import type { DerEncodedPublicKey, Signature } from '@icp-sdk/core/agent';
@@ -10,6 +10,22 @@ import {
 } from '@icp-sdk/core/identity';
 
 describe('delegation.utils', () => {
+	it('preserves the existing browser proof without refreshing or changing it', async () => {
+		const root = Ed25519KeyIdentity.generate();
+		const key = Ed25519KeyIdentity.generate();
+		const chain = await DelegationChain.create(
+			root,
+			key.getPublicKey(),
+			new Date(Date.now() + 60_000)
+		);
+		const identity = DelegationIdentity.fromDelegation(key, chain);
+
+		await expect(freshIIDelegationChain({ identity })).resolves.toEqual(
+			extractIIDelegationChain(identity)
+		);
+		await expect(freshIIDelegationChain({ identity: mockIdentity })).resolves.toEqual([]);
+	});
+
 	describe('extractIIDelegationChain', () => {
 		it('should return empty array for non-DelegationIdentity', () => {
 			const result = extractIIDelegationChain(mockIdentity);

@@ -36,7 +36,13 @@ export class AuthClientProvider {
 	readonly #storage: IdbStorage;
 
 	#authClient: AuthClient | undefined;
-	#mobileIdentity: DelegationIdentity | undefined;
+	#mobileIdentity:
+		| (DelegationIdentity & {
+				refresh?: () => Promise<void>;
+				readonly isActive?: boolean;
+				readonly sessionExpiresAt?: number;
+		  })
+		| undefined;
 
 	private constructor() {
 		this.#storage = new IdbStorage();
@@ -141,9 +147,15 @@ export class AuthClientProvider {
 	 */
 	loadIdentity = async (): Promise<Identity | undefined> => {
 		if (MOBILE_SHELL) {
-			return this.#mobileIdentity && isDelegationValid(this.#mobileIdentity.getDelegation())
-				? this.#mobileIdentity
-				: undefined;
+			const identity = this.#mobileIdentity;
+			if (!identity || identity.isActive === false) {
+				return;
+			}
+			if (identity.refresh) {
+				await identity.refresh();
+				return this.#mobileIdentity === identity ? identity : undefined;
+			}
+			return isDelegationValid(identity.getDelegation()) ? identity : undefined;
 		}
 		if (!(await this.#hasValidDelegation())) {
 			return;
@@ -162,8 +174,16 @@ export class AuthClientProvider {
 		this.#mobileIdentity = identity;
 	};
 
+	get mobileSessionExpiresAt(): number | undefined {
+		if (this.#mobileIdentity?.isActive === false) {
+			return 0;
+		}
+		return this.#mobileIdentity?.sessionExpiresAt;
+	}
+
 	loadDelegation = async (): Promise<DelegationChain | undefined> => {
 		if (MOBILE_SHELL) {
+			await this.#mobileIdentity?.refresh?.();
 			return this.#mobileIdentity?.getDelegation();
 		}
 		const raw = await this.#storage.get(KEY_STORAGE_DELEGATION);

@@ -52,6 +52,18 @@ const stopIdleTimer = () => {
 };
 
 const onIdleSignOut = async () => {
+	const deadline = AuthClientProvider.getInstance().mobileSessionExpiresAt;
+	if (deadline !== undefined) {
+		if (deadline <= Date.now()) {
+			logout();
+			return;
+		}
+		postMessage({
+			msg: 'delegationRemainingTime',
+			data: { authRemainingTime: deadline - Date.now() }
+		});
+		return;
+	}
 	const chain = await checkDelegationChain();
 
 	// Delegation is valid — the user has an active session

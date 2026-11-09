@@ -22,6 +22,7 @@
 		"./mobile/capacitor/*.mjs",
 		"./mobile/capacitor/auth-handoff/*.mjs",
 		"./mobile/capacitor/*.ts",
+		"./mobile/capacitor/session-sdk/*.ts",
 		"./mobile/capacitor/ios/App/App/Resources/*.js",
 		"./scripts/*.ts",
 		"./eslint.config.mjs",

@@ -59,10 +59,14 @@ fi
 # Isolated test dependencies: the app's root lockfile and installed SDK stay intact.
 cp "$source_dir"/web-dependencies/package*.json "$cache/"
 cp "$source_dir"/web/*.ts "$cache/"
+mkdir -p "$cache/session-sdk"
+cp "$source_dir"/../session-sdk/session.ts "$source_dir"/../session-sdk/compatible-request.ts "$cache/session-sdk/"
+cp "$source_dir"/../app-environment.json "$cache/"
+printf '%s\n' "export * from './session-sdk/session.js';" > "$cache/session.ts"
 cd "$cache"
 logged web-dependencies npm ci --ignore-scripts --no-audit --no-fund
 logged web-types node "$repo/node_modules/typescript/bin/tsc" \
-  --strict --skipLibCheck --target ES2022 --module NodeNext --moduleResolution NodeNext \
+  --strict --skipLibCheck --resolveJsonModule --target ES2022 --module NodeNext --moduleResolution NodeNext \
   --types node --typeRoots "$repo/node_modules/@types" --outDir "$cache/dist" \
   "$cache/session.ts" "$cache/session.test.ts" "$cache/handoff.ts"
 logged web-handoff env OISY_HANDOFF_VECTOR="$cache/handoff-vector" \

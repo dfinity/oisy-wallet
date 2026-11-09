@@ -1,29 +1,28 @@
-import Capacitor
+import UIKit
 import WebKit
 
-/// Local top-level wallet only; the Explore WebView has no Capacitor bridge.
-enum WalletOriginPolicy {
-  static func accepts(_ url: URL?, mainFrame: Bool) -> Bool {
-    guard let url, let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-    else { return false }
-    return mainFrame && url.scheme == "capacitor" && url.host == "localhost"
-      && url.port == nil && url.user == nil && url.password == nil
-      && [
-        "", "/", "/index.html", "/activity/", "/transactions/", "/settings/", "/notes/", "/earn/",
-        "/borrow/",
-      ].contains(
-        components.path)
-      && (components.queryItems ?? []).allSatisfy {
-        ["network", "token", "search"].contains($0.name)
-      }
+typealias WalletOriginPolicy = LiveWalletOriginPolicy
+
+#if DEBUG
+  /// Supplied only by XCTest. The production target has no bundled wallet fallback.
+  struct WalletTestSource {
+    let handler: WKURLSchemeHandler
+    var origin: URL? { URL(string: "capacitor://localhost") }
   }
-}
+#endif
 
 @MainActor
-final class TrustedWalletViewController: CAPBridgeViewController {
-  let hostPlugin = OisyHostPlugin()
+final class TrustedWalletViewController: UIViewController, WKNavigationDelegate {
+  let hostPlugin: LiveWalletBridge
   let session: WalletSession
-  private var messageGate: WalletMessageGate?
+  private(set) var webView: WKWebView?
+  private(set) var isReady = false
+  private var closed = false
+  private var timeout: Task<Void, Never>?
+  private let cover = UIView()
+  private let message = UILabel()
+  private let spinner = UIActivityIndicatorView(style: .large)
+  private let retry = UIButton(type: .system)
   private var navigationObservations: [NSKeyValueObservation] = []
   private var approvedBackURL: URL?
   private var permitsBackNavigation = false
@@ -31,43 +30,55 @@ final class TrustedWalletViewController: CAPBridgeViewController {
   private(set) var interactions: WalletInteractions?
   #if DEBUG
     var bootstrapScript: String?
+    var testSource: WalletTestSource?
   #endif
+  var origin: URL? {
+    #if DEBUG
+      if let testSource { return testSource.origin }
+    #endif
+    return WalletOriginPolicy.baseURL
+  }
 
   init(session: WalletSession) {
     self.session = session
+    hostPlugin = LiveWalletBridge(session: session)
     super.init(nibName: nil, bundle: nil)
   }
   required init?(coder: NSCoder) { nil }
-  override func webViewConfiguration(for configuration: InstanceConfiguration)
-    -> WKWebViewConfiguration
-  {
-    let result = super.webViewConfiguration(for: configuration)
-    result.websiteDataStore = .nonPersistent()
-    return result
-  }
-  override func capacitorDidLoad() {
-    guard let webView,
-      let forward = webView.navigationDelegate as? WebViewDelegationHandler
-    else { return }
-    let gate = WalletMessageGate(forward: forward)
-    let controller = webView.configuration.userContentController
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    view.backgroundColor = .systemBackground
+    let configuration = WKWebViewConfiguration()
+    configuration.websiteDataStore = .nonPersistent()
+    configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
     #if DEBUG
-      if let bootstrapScript {
-        controller.addUserScript(
-          WKUserScript(
-            source: bootstrapScript,
-            injectionTime: .atDocumentStart, forMainFrameOnly: true))
+      if let testSource {
+        configuration.setURLSchemeHandler(testSource.handler, forURLScheme: "capacitor")
+        hostPlugin.testOrigin = testSource.origin
       }
     #endif
-    controller.removeScriptMessageHandler(forName: "bridge")
-    controller.add(gate, name: "bridge")
-    messageGate = gate
-    bridge?.registerPluginInstance(hostPlugin)
-    webView.scrollView.bounces = false
-    webView.scrollView.contentInsetAdjustmentBehavior = .never
-    webView.allowsBackForwardNavigationGestures = false
+    configuration.userContentController.addScriptMessageHandler(
+      hostPlugin, contentWorld: .page, name: "oisyHost")
+    let web = WKWebView(frame: .zero, configuration: configuration)
+    webView = web
+    hostPlugin.webView = web
+    hostPlugin.onReady = { [weak self] in self?.hostReady() }
+    web.navigationDelegate = self
+    web.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(web)
+    NSLayoutConstraint.activate([
+      web.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+      web.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+      web.topAnchor.constraint(equalTo: view.topAnchor),
+      web.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+    ])
+    web.scrollView.bounces = false
+    web.scrollView.contentInsetAdjustmentBehavior = .never
+    web.allowsBackForwardNavigationGestures = false
+    web.isInspectable = _isDebugAssertConfiguration()
     interactions = WalletInteractions(
-      webView: webView,
+      webView: web, origin: origin,
       onBack: { [weak self] in self?.hostPlugin.returnToParent() },
       onRefresh: { [weak self] requestID in self?.hostPlugin.refresh(requestID: requestID) })
     registerForTraitChanges([UITraitUserInterfaceStyle.self]) {
@@ -75,18 +86,199 @@ final class TrustedWalletViewController: CAPBridgeViewController {
       controller.interactions?.clearBack()
     }
     navigationObservations = [
-      webView.observe(\.url, options: [.new]) { [weak self] _, _ in
+      web.observe(\.url, options: [.new]) { [weak self] _, _ in
         MainActor.assumeIsolated { self?.refreshBackNavigation() }
       },
-      webView.observe(\.canGoBack, options: [.new]) { [weak self] _, _ in
+      web.observe(\.canGoBack, options: [.new]) { [weak self] _, _ in
         MainActor.assumeIsolated { self?.refreshBackNavigation() }
       },
-      webView.observe(\.canGoForward, options: [.new]) { [weak self] _, _ in
+      web.observe(\.canGoForward, options: [.new]) { [weak self] _, _ in
         MainActor.assumeIsolated { self?.refreshBackNavigation() }
       },
     ]
-    webView.isInspectable = _isDebugAssertConfiguration()
+    configureCover()
+    loadWallet()
   }
+
+  private func configureCover() {
+    cover.backgroundColor = .systemBackground
+    cover.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(cover)
+    message.font = .preferredFont(forTextStyle: .body)
+    message.adjustsFontForContentSizeCategory = true
+    message.textAlignment = .center
+    message.numberOfLines = 0
+    var configuration = UIButton.Configuration.filled()
+    configuration.title = NSLocalizedString("wallet.retry", comment: "Retry loading the wallet")
+    configuration.cornerStyle = .capsule
+    retry.configuration = configuration
+    retry.accessibilityIdentifier = "wallet.retry"
+    retry.addTarget(self, action: #selector(loadWallet), for: .touchUpInside)
+    let stack = UIStackView(arrangedSubviews: [spinner, message, retry])
+    stack.axis = .vertical
+    stack.alignment = .center
+    stack.spacing = 24
+    stack.translatesAutoresizingMaskIntoConstraints = false
+    cover.addSubview(stack)
+    NSLayoutConstraint.activate([
+      cover.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+      cover.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+      cover.topAnchor.constraint(equalTo: view.topAnchor),
+      cover.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+      stack.centerYAnchor.constraint(equalTo: cover.safeAreaLayoutGuide.centerYAnchor),
+      stack.leadingAnchor.constraint(
+        equalTo: cover.safeAreaLayoutGuide.leadingAnchor, constant: 32),
+      stack.trailingAnchor.constraint(
+        equalTo: cover.safeAreaLayoutGuide.trailingAnchor, constant: -32),
+      retry.heightAnchor.constraint(greaterThanOrEqualToConstant: 48),
+      retry.widthAnchor.constraint(greaterThanOrEqualToConstant: 160),
+    ])
+  }
+
+  @objc func loadWallet() {
+    guard !closed, !session.checkExpiration(), let url = origin else { return }
+    // Explicit start/retry only. A release or foreground event must not interrupt a pending operation.
+    webView?.load(
+      URLRequest(url: url.appendingPathComponent("/"), cachePolicy: .reloadRevalidatingCacheData))
+  }
+
+  private func beginDocument() -> Bool {
+    hostPlugin.isAvailable = false
+    isReady = false
+    timeout?.cancel()
+    interactions?.invalidate()
+    hostPlugin.host?.setBlockingPresentation(false)
+    hostPlugin.host?.resetNavigationForDocument()
+    session.resetDocument()
+    guard !closed, session.isActive, let script = try? hostPlugin.bootstrap() else { return false }
+    let controller = webView?.configuration.userContentController
+    controller?.removeAllUserScripts()
+    controller?.addUserScript(script)
+    #if DEBUG
+      if let bootstrapScript {
+        controller?.addUserScript(
+          WKUserScript(
+            source: bootstrapScript,
+            injectionTime: .atDocumentStart, forMainFrameOnly: true))
+      }
+    #endif
+    hostPlugin.isAvailable = true
+    cover.isHidden = false
+    retry.isHidden = true
+    message.text = NSLocalizedString("wallet.loading", comment: "Loading the live wallet")
+    spinner.startAnimating()
+    let document = session.documentID
+    timeout = Task { @MainActor [weak self] in
+      do { try await Task.sleep(for: .seconds(30)) } catch { return }
+      guard let self, self.session.documentID == document, !self.isReady else { return }
+      self.showFailure()
+    }
+    return true
+  }
+
+  func hostReady() {
+    guard hostPlugin.isAvailable, !session.checkExpiration() else { return }
+    timeout?.cancel()
+    timeout = nil
+    isReady = true
+    cover.isHidden = true
+    spinner.stopAnimating()
+  }
+
+  private func showFailure() {
+    guard !closed, !session.checkExpiration() else { return }
+    timeout?.cancel()
+    timeout = nil
+    hostPlugin.isAvailable = false
+    isReady = false
+    session.resetDocument()
+    interactions?.invalidate()
+    hostPlugin.host?.resetNavigationForDocument()
+    webView?.stopLoading()
+    // Discard the failed document and its workers, without ending the native session or journal.
+    webView?.loadHTMLString("", baseURL: nil)
+    cover.isHidden = false
+    retry.isHidden = false
+    spinner.stopAnimating()
+    message.text = NSLocalizedString("wallet.unavailable", comment: "Live wallet unavailable")
+  }
+
+  func webView(
+    _ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
+    decisionHandler: @escaping @MainActor @Sendable (WKNavigationActionPolicy) -> Void
+  ) {
+    if !hostPlugin.isAvailable, action.request.url?.absoluteString == "about:blank" {
+      decisionHandler(.allow)
+      return
+    }
+    // Subframes may render web content, but never receive the bootstrap or use native privileges.
+    if action.targetFrame?.isMainFrame == false {
+      decisionHandler(.allow)
+      return
+    }
+    if WalletOriginPolicy.accepts(
+      action.request.url, mainFrame: action.targetFrame?.isMainFrame == true, origin: origin),
+      beginDocument()
+    {
+      decisionHandler(.allow)
+      return
+    }
+    if action.navigationType == .linkActivated, action.sourceFrame.isMainFrame,
+      let url = action.request.url, url.scheme == "https", url.host != nil,
+      url.user == nil, url.password == nil
+    {
+      UIApplication.shared.open(url)
+    } else if action.targetFrame?.isMainFrame == true {
+      showFailure()
+    }
+    decisionHandler(.cancel)
+  }
+
+  func webView(
+    _ webView: WKWebView, decidePolicyFor response: WKNavigationResponse,
+    decisionHandler: @escaping @MainActor @Sendable (WKNavigationResponsePolicy) -> Void
+  ) {
+    decideResponse(
+      response.response, mainFrame: response.isForMainFrame, decisionHandler: decisionHandler)
+  }
+
+  func decideResponse(
+    _ response: URLResponse, mainFrame: Bool,
+    decisionHandler: @MainActor @Sendable (WKNavigationResponsePolicy) -> Void
+  ) {
+    guard mainFrame else {
+      decisionHandler(.allow)
+      return
+    }
+    if !hostPlugin.isAvailable, response.url?.absoluteString == "about:blank" {
+      decisionHandler(.allow)
+      return
+    }
+    var successful =
+      (response as? HTTPURLResponse).map { (200..<300).contains($0.statusCode) } ?? false
+    #if DEBUG
+      // WebKit represents custom-scheme XCTest fixtures as URLResponse, without HTTP status.
+      if testSource != nil, response.url?.scheme == "capacitor" { successful = true }
+    #endif
+    guard WalletOriginPolicy.accepts(response.url, mainFrame: true, origin: origin),
+      successful, response.mimeType == "text/html"
+    else {
+      decisionHandler(.cancel)
+      showFailure()
+      return
+    }
+    decisionHandler(.allow)
+  }
+  func webView(
+    _ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!,
+    withError error: Error
+  ) {
+    if (error as NSError).code != NSURLErrorCancelled { showFailure() }
+  }
+  func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+    if (error as NSError).code != NSURLErrorCancelled { showFailure() }
+  }
+  func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { showFailure() }
   func setBackNavigation(parent: URL?, enabled: Bool, refreshEnabled: Bool = false) {
     approvedBackURL = parent
     permitsBackNavigation = enabled
@@ -108,15 +300,15 @@ final class TrustedWalletViewController: CAPBridgeViewController {
   }
   private func refreshBackNavigation() {
     guard let webView else { return }
-    let allowed = permitsBackNavigation && session.isActive
+    let allowed = isReady && permitsBackNavigation && session.isActive
     let isRoot =
-      WalletOriginPolicy.accepts(webView.url, mainFrame: true)
+      WalletOriginPolicy.accepts(webView.url, mainFrame: true, origin: origin)
       && webView.url.flatMap {
         WalletBackNavigationPolicy.parentURL(
-          path: $0.path + ($0.query.map { "?" + $0 } ?? ""), root: .wallet)
+          path: $0.path + ($0.query.map { "?" + $0 } ?? ""), root: .wallet, origin: origin)
       } != nil
     interactions?.update(
-      backAllowed: allowed && WalletBackNavigationPolicy.isToken(webView.url)
+      backAllowed: allowed && WalletBackNavigationPolicy.isToken(webView.url, origin: origin)
         && approvedBackURL != nil && approvedBackURL == interactions?.parentURL
         && webView.backForwardList.backItem?.url == approvedBackURL
         && webView.backForwardList.forwardItem == nil,
@@ -124,46 +316,22 @@ final class TrustedWalletViewController: CAPBridgeViewController {
     webView.allowsBackForwardNavigationGestures = false
   }
   func close() {
+    closed = true
+    hostPlugin.isAvailable = false
+    isReady = false
+    timeout?.cancel()
+    timeout = nil
     interactions?.close()
     interactions = nil
-    setBackNavigation(parent: nil, enabled: false)
     navigationObservations.removeAll()
     session.close()
     hostPlugin.host = nil
+    hostPlugin.webView = nil
+    hostPlugin.onReady = nil
     webView?.stopLoading()
-    webView?.configuration.userContentController.removeScriptMessageHandler(forName: "bridge")
+    webView?.configuration.userContentController.removeAllScriptMessageHandlers()
     webView?.configuration.userContentController.removeAllUserScripts()
     webView?.navigationDelegate = nil
     webView?.loadHTMLString("", baseURL: nil)
-    messageGate = nil
-  }
-}
-
-@MainActor
-private final class WalletMessageGate: NSObject, WKScriptMessageHandler {
-  private weak var forward: WebViewDelegationHandler?
-  init(forward: WebViewDelegationHandler) { self.forward = forward }
-  func userContentController(
-    _ controller: WKUserContentController, didReceive message: WKScriptMessage
-  ) {
-    guard
-      WalletOriginPolicy.accepts(
-        message.frameInfo.request.url, mainFrame: message.frameInfo.isMainFrame),
-      WalletOriginPolicy.accepts(message.webView?.url, mainFrame: true),
-      message.frameInfo.securityOrigin.protocol == "capacitor",
-      message.frameInfo.securityOrigin.host == "localhost"
-    else { return }
-    guard let body = message.body as? [String: Any], body["type"] as? String == "message",
-      body["pluginId"] as? String == "OisyHost",
-      let method = body["methodName"] as? String,
-      [
-        "ready", "navigate", "navigationState", "presentation", "openAccount", "wallet",
-        "prepareBack", "clearBack", "finishRefresh",
-        "addListener",
-        "removeListener",
-      ].contains(
-        method)
-    else { return }
-    forward?.userContentController(controller, didReceive: message)
   }
 }

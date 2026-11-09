@@ -5,9 +5,11 @@ tags: [mobile, authentication, internet-identity, sdk, security, prototype]
 
 # Native-to-web authentication handoff
 
-This is the M1 contract for the live-website mobile migration. The isolated local-hop
-prototype passes synthetic native/web tests; real II sign-in and backend acceptance
-remain open. Keep the working preview until those checks pass.
+This is the M1 contract for the live-website mobile migration. The local-hop
+implementation is now wired into the actual app and shared provider/workers.
+Synthetic native/web tests pass; real II sign-in and backend acceptance remain
+open. See [SDK app integration](../../../../../mobile/capacitor/docs/sdk-app-integration.md)
+for current build and validation status.
 
 ## Source and terminology
 
@@ -36,8 +38,9 @@ it is not a published upstream API.
 
 The isolated web receiver pins published Auth 11.1.0 and Core 6.0.0. It uses public
 `SessionMinter`, `SessionIdentity` and `MemoryCredentialStorage` APIs. There is no
-public `AuthClient.importSession` method in that version. The app still uses Auth 6
-and Core 4; upgrading its providers and workers is separate from proving this path.
+public `AuthClient.importSession` method in that version. The browser retains Auth 6 / Core 4. The app uses the newer APIs through the
+root-lockfile-owned `@oisy/mobile-session` package and a public-value compatibility
+adapter; providers and workers share that adapter.
 
 ## Candidate sequence
 

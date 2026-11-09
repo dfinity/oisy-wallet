@@ -7,12 +7,14 @@ import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
+import * as mobileConstants from '$lib/constants/mobile.constants';
 import { loadAddresses } from '$lib/services/addresses.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
 import * as authServices from '$lib/services/auth.services';
 import { infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
+import { handleMobileRuntimeFailure } from '$lib/services/mobile-runtime.services';
 import { authStore } from '$lib/stores/auth.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { AllowSigningOutcome } from '$lib/types/api';
@@ -39,6 +41,10 @@ vi.mock('$lib/services/addresses.services', () => ({
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn(),
 	trackRateLimited: vi.fn()
+}));
+
+vi.mock('$lib/services/mobile-runtime.services', () => ({
+	handleMobileRuntimeFailure: vi.fn(() => Promise.resolve(true))
 }));
 
 describe('loader.services', () => {
@@ -372,4 +378,51 @@ describe('loader.services', () => {
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, []);
 		});
 	});
+});
+
+describe('mobile loader startup recovery', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		vi.spyOn(mobileConstants, 'MOBILE_SHELL', 'get').mockReturnValue(true);
+		vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockReturnValue(true);
+		vi.spyOn(authServices, 'signOut').mockResolvedValue();
+		vi.spyOn(authServices, 'errorSignOut').mockResolvedValue();
+		vi.mocked(loadUserProfile).mockResolvedValue({ success: true, profileCreated: false });
+		vi.mocked(loadAddresses).mockResolvedValue({ success: true });
+		vi.spyOn(api, 'allowSigning').mockResolvedValue({
+			response: { status: { Executed: null }, allowed_cycles: 100n }
+		});
+		mockAuthStore(mockIdentity);
+		authStore.setForTesting(mockIdentity);
+	});
+
+	afterEach(() => vi.restoreAllMocks());
+
+	it.each(['profile', 'allowance', 'addresses'])(
+		'keeps native authentication after %s failure',
+		async (stage) => {
+			if (stage === 'profile') {
+				vi.mocked(loadUserProfile).mockResolvedValue({
+					success: false,
+					err: 'unknown',
+					profileCreated: false
+				});
+			} else if (stage === 'allowance') {
+				vi.mocked(api.allowSigning).mockRejectedValue(new Error('Offline'));
+			} else {
+				vi.mocked(loadAddresses).mockResolvedValue({ success: false });
+			}
+			const progressAndLoad = vi.fn();
+			await initLoader({ identity: mockIdentity, progressAndLoad });
+
+			expect(handleMobileRuntimeFailure).toHaveBeenCalledOnce();
+			expect(authServices.signOut).not.toHaveBeenCalled();
+			expect(authServices.errorSignOut).not.toHaveBeenCalled();
+			expect(progressAndLoad).not.toHaveBeenCalled();
+
+			if (stage !== 'addresses') {
+				expect(loadAddresses).not.toHaveBeenCalled();
+			}
+		}
+	);
 });

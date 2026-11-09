@@ -34,3 +34,33 @@ export const extractIIDelegationChain = (identity: Identity): Nullable<IIDelegat
 		}))
 	});
 };
+
+/** Refresh rotating mobile app credentials before copying the separate backend proof. */
+export const freshIIDelegationChain = async ({
+	identity
+}: {
+	identity: Identity;
+}): Promise<Nullable<IIDelegationChain>> => {
+	if (!(identity instanceof DelegationIdentity)) {
+		return [];
+	}
+	if (hasCredentialRefresh(identity)) {
+		await identity.refresh();
+		// The SDK keeps the old credential when a transient mint fails. Never
+		// embed that expired proof in a request that may independently refresh.
+		const deadline = BigInt(Date.now() + 10_000) * BigInt(1_000_000);
+		const chain = identity.getDelegation();
+		if (
+			chain.delegations.length === 0 ||
+			chain.delegations.some(({ delegation }) => delegation.expiration <= deadline)
+		) {
+			throw new Error('A fresh Internet Identity proof is unavailable');
+		}
+	}
+	return extractIIDelegationChain(identity);
+};
+
+const hasCredentialRefresh = (
+	identity: DelegationIdentity
+): identity is DelegationIdentity & { refresh: () => Promise<void> } =>
+	'refresh' in identity && typeof identity.refresh === 'function';

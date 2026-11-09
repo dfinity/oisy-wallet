@@ -3,8 +3,13 @@ import { spawnSync } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+// The standalone host shares the app's validated public config; it has no frontend aliases.
+// eslint-disable-next-line import/no-relative-parent-imports
+import { readAppEnvironment } from '../app-environment.mjs';
 
 const source = dirname(fileURLToPath(import.meta.url));
+const environment = readAppEnvironment();
+const domain = new URL(environment.derivationOrigin).hostname;
 const [sdkArgument, cacheArgument, target] = process.argv.slice(2);
 if ((target && target !== '--device') || process.argv.length > 5) {
 	throw new Error('Supported target: --device; omit for simulator');
@@ -52,7 +57,12 @@ for (const [name, expected] of [
 		throw new Error('Unexpected SDK dependency');
 	}
 }
-copyFileSync(join(source, 'web/session.ts'), join(cache, 'session.ts'));
+mkdirSync(join(cache, 'session-sdk'), { recursive: true });
+for (const name of ['session.ts', 'compatible-request.ts']) {
+	copyFileSync(join(source, '../session-sdk', name), join(cache, 'session-sdk', name));
+}
+copyFileSync(join(source, '../app-environment.json'), join(cache, 'app-environment.json'));
+writeFileSync(join(cache, 'session.ts'), "export * from './session-sdk/session.js';\n");
 copyFileSync(join(source, 'web/handoff.ts'), join(cache, 'handoff.ts'));
 copyFileSync(join(source, 'web/handoff.html'), join(web, 'handoff.html'));
 await build({
@@ -104,15 +114,15 @@ const spec = {
 				path: 'Handoff.entitlements',
 				properties: {
 					'com.apple.developer.associated-domains': [
-						'applinks:audit.oisy.com',
-						'webcredentials:audit.oisy.com'
+						`applinks:${domain}`,
+						`webcredentials:${domain}`
 					]
 				}
 			},
 			settings: {
 				base: {
-					PRODUCT_BUNDLE_IDENTIFIER: 'org.dfinity.oisy.native.preview.artem',
-					DEVELOPMENT_TEAM: '7FY8G6QYKD',
+					PRODUCT_BUNDLE_IDENTIFIER: environment.deviceBundleID,
+					DEVELOPMENT_TEAM: environment.teamID,
 					CODE_SIGN_STYLE: 'Automatic',
 					SWIFT_VERSION: '6.0',
 					SWIFT_STRICT_CONCURRENCY: 'complete',

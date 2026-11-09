@@ -29,8 +29,9 @@ final class OperationJournalTests: XCTestCase {
       native: native, onExpired: { _ in }, onAccount: { _ in }, operationStore: store)
   }
 
-  private func authorize(_ session: WalletSession) throws {
-    _ = try session.authorize(publicKey: Icrc167.derPublicKey(Curve25519.Signing.PrivateKey()))
+  private func authorize(_ session: WalletSession) async throws {
+    _ = try await session.authorize(
+      publicKey: P256.Signing.PrivateKey().publicKey.derRepresentation)
   }
 
   func testOnlyBoundedJournalEnvelopesAreAccepted() throws {
@@ -96,7 +97,7 @@ final class OperationJournalTests: XCTestCase {
     XCTAssertEqual(try store.read(principal: "wallet-a"), second)
   }
 
-  func testAuthenticatedWalletIsolationAcrossLogoutExpiryAndDocumentReplacement() throws {
+  func testAuthenticatedWalletIsolationAcrossLogoutExpiryAndDocumentReplacement() async throws {
     let store = OperationJournalStore(service: "oisy.operation.tests.\(UUID())")
     let firstNative = try fixtureSession(
       key: Curve25519.Signing.PrivateKey(), expiry: .now.addingTimeInterval(600))
@@ -104,13 +105,13 @@ final class OperationJournalTests: XCTestCase {
     defer { firstSession.close() }
     XCTAssertThrowsError(try firstSession.readOperations())
     XCTAssertThrowsError(try firstSession.writeOperations(revision: "", value: "[]"))
-    try authorize(firstSession)
+    try await authorize(firstSession)
     let saved = try firstSession.writeOperations(revision: "", value: encode([record()]))
     defer { clear(store) }
     firstSession.resetDocument()
     XCTAssertThrowsError(try firstSession.readOperations())
     XCTAssertThrowsError(try firstSession.writeOperations(revision: saved.revision, value: "[]"))
-    try authorize(firstSession)
+    try await authorize(firstSession)
     XCTAssertEqual(try firstSession.readOperations(), saved)
     firstSession.close()
     XCTAssertThrowsError(try firstSession.readOperations())
@@ -121,14 +122,14 @@ final class OperationJournalTests: XCTestCase {
     let otherSession = session(native: otherNative, store: store)
     defer { otherSession.close() }
     XCTAssertNotEqual(otherNative.principal, firstNative.principal)
-    try authorize(otherSession)
+    try await authorize(otherSession)
     XCTAssertEqual(try otherSession.readOperations(), .empty)
     let otherSaved = try otherSession.writeOperations(
       revision: "", value: encode([record(kind: "icpSwap")]))
 
     let restored = session(native: firstNative, store: .init(service: store.service))
     defer { restored.close() }
-    try authorize(restored)
+    try await authorize(restored)
     XCTAssertEqual(try restored.readOperations(), saved)
     XCTAssertTrue(restored.checkExpiration(now: firstNative.expiresAt))
     XCTAssertThrowsError(try restored.readOperations())
@@ -136,7 +137,7 @@ final class OperationJournalTests: XCTestCase {
     XCTAssertEqual(try otherSession.readOperations(), otherSaved)
     let afterExpiry = session(native: firstNative, store: .init(service: store.service))
     defer { afterExpiry.close() }
-    try authorize(afterExpiry)
+    try await authorize(afterExpiry)
     XCTAssertEqual(try afterExpiry.readOperations(), saved)
   }
 

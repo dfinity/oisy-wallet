@@ -1,11 +1,14 @@
+import CryptoKit
 import Foundation
 
-/// A bounded delegation for the one bundled wallet. No native balance pipeline.
+/// A bounded SDK session for the one trusted wallet. No native balance pipeline.
 @MainActor
 final class WalletSession {
   let native: AuthSession
   private(set) var grant: WebDelegation?
   private(set) var isActive = true
+  private(set) var documentID = UUID()
+  private var authorizing = false
   private var timer: Task<Void, Never>?
   private let onExpired: (AuthSession) -> Void
   private let onAccount: (BrowserAccount?) -> Void
@@ -32,9 +35,20 @@ final class WalletSession {
     onExpired(native)
     return true
   }
-  func authorize(publicKey: Data) throws -> String {
+  func authorize(publicKey: Data) async throws -> String {
     guard !checkExpiration() else { throw AuthError.expired }
-    let issued = try WebDelegation(session: native, publicKey: publicKey)
+    guard !authorizing, grant == nil,
+      (try? P256.Signing.PublicKey(derRepresentation: publicKey)) != nil
+    else {
+      throw AuthError.invalidResponse
+    }
+    authorizing = true
+    let pending = documentID
+    defer { if pending == documentID { authorizing = false } }
+    let issued = try await native.delegate(publicKey)
+    guard pending == documentID, !checkExpiration(), issued.principal == native.principal,
+      issued.expiresAt <= native.expiresAt.timeIntervalSince1970 * 1000
+    else { throw AuthError.expired }
     grant = issued
     onAccount(nil)
     schedule()
@@ -72,6 +86,8 @@ final class WalletSession {
 
   func resetDocument() {
     guard !checkExpiration() else { return }
+    documentID = UUID()
+    authorizing = false
     grant = nil
     onAccount(nil)
     schedule()
@@ -80,6 +96,8 @@ final class WalletSession {
     timer?.cancel()
     timer = nil
     grant = nil
+    documentID = UUID()
+    authorizing = false
     isActive = false
     onAccount(nil)
   }

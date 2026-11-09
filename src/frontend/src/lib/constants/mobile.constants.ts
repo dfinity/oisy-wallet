@@ -1,7 +1,20 @@
 import { AUTH_MAX_TIME_TO_LIVE } from '$lib/constants/app.constants';
+import type {} from '$lib/types/mobile-host';
 
-// Build target, not a trust signal. Native independently validates every bridge call.
-export const MOBILE_SHELL = import.meta.env.VITE_MOBILE_SHELL === 'true';
+// Presentation/runtime selection, not a trust signal. Native validates every call.
+// Even an unsupported host must fail closed rather than load browser credentials.
+export let MOBILE_SHELL =
+	import.meta.env.VITE_MOBILE_SHELL === 'true' ||
+	(typeof window !== 'undefined' && window.__oisyHost !== undefined);
+
+// Workers have no Window. Their parent selects this runtime before installing a
+// private MessagePort session; they never fall back to browser auth storage.
+export const enableMobileWorkerRuntime = (): void => {
+	if (typeof window !== 'undefined' || typeof globalThis.postMessage !== 'function') {
+		throw new Error('Worker runtime required');
+	}
+	MOBILE_SHELL = true;
+};
 
 // Use the web sign-in lifetime; AuthSession.duration must match in the native host.
 // Grants keep the original sign-in deadline.

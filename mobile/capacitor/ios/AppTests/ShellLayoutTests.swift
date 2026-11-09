@@ -5,7 +5,7 @@ import XCTest
 
 @MainActor final class ShellLayoutTests: XCTestCase {
   func testExternalKeyboardDoesNotHideRootNavigationAfterSignInReturn() throws {
-    let store = KeychainStore(service: "oisy.capacitor.shell-layout.\(UUID())")
+    let store = TestAuthStore(service: "oisy.capacitor.shell-layout.\(UUID())")
     defer { try? store.clear() }
     let shell = ShellViewController(auth: AuthModel(store: store))
     let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)

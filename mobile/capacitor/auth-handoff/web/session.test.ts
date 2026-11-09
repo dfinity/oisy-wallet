@@ -1,4 +1,8 @@
-import type { AppDelegationSource, SessionMinterOptions } from '@icp-sdk/auth/client';
+import {
+	SessionGoneError,
+	type AppDelegationSource,
+	type SessionMinterOptions
+} from '@icp-sdk/auth/client';
 import { IC_REQUEST_AUTH_DELEGATION_DOMAIN_SEPARATOR, requestIdOf } from '@icp-sdk/core/agent';
 import {
 	Delegation,
@@ -14,8 +18,8 @@ import { prepareWebSession } from './session.js';
 
 const ii = Principal.fromText('rdmx6-jaaaa-aaaaa-aaadq-cai');
 
-async function fixture() {
-	const receiver = await prepareWebSession();
+async function fixture(onSessionGone?: () => void) {
+	const receiver = await prepareWebSession({ onSessionGone });
 	const root = await ECDSAKeyIdentity.generate();
 	const native = await ECDSAKeyIdentity.generate();
 	const account = await ECDSAKeyIdentity.generate();
@@ -51,12 +55,15 @@ function replaceLeaf(chain: DelegationChain, delegation: Delegation): Delegation
 test('uses SDK session APIs and a non-exportable web key; holds the expected app account', async () => {
 	const f = await fixture();
 	try {
-		const identity = await f.receiver.accept(f.grant, async (options) => {
-			assert.equal(options.canisterId.compareTo(ii), 'eq');
-			assert.equal(options.sessionChain, f.grant.chain);
-			assert.ok(options.sessionKey instanceof ECDSAKeyIdentity);
-			assert.equal(options.sessionKey.getKeyPair().privateKey.extractable, false);
-			return f.source;
+		const identity = await f.receiver.accept({
+			grant: f.grant,
+			makeMinter: async (options) => {
+				assert.equal(options.canisterId.compareTo(ii), 'eq');
+				assert.equal(options.sessionChain, f.grant.chain);
+				assert.ok(options.sessionKey instanceof ECDSAKeyIdentity);
+				assert.equal(options.sessionKey.getKeyPair().privateKey.extractable, false);
+				return f.source;
+			}
 		});
 		assert.ok(identity instanceof DelegationIdentity);
 		assert.equal(identity.getPrincipal().compareTo(f.account.getPrincipal()), 'eq');
@@ -76,8 +83,11 @@ test('refuses a grant for another web key before minting', async () => {
 		new Delegation(stranger.getPublicKey().toDer(), leaf.expiration, [ii])
 	);
 	await assert.rejects(
-		f.receiver.accept({ ...f.grant, chain }, async () => {
-			assert.fail('invalid grant reached minting');
+		f.receiver.accept({
+			grant: { ...f.grant, chain },
+			makeMinter: async () => {
+				assert.fail('invalid grant reached minting');
+			}
 		}),
 		/Invalid bounded/
 	);
@@ -106,7 +116,7 @@ for (const kind of ['no-scope', 'other-scope', 'extra-scope', 'queries'] as cons
 			)
 		);
 		await assert.rejects(
-			f.receiver.accept({ ...f.grant, chain }, async () => f.source),
+			f.receiver.accept({ grant: { ...f.grant, chain }, makeMinter: async () => f.source }),
 			/Invalid bounded/
 		);
 	});
@@ -128,7 +138,7 @@ test('refuses an incompatible ancestor scope', async () => {
 		f.grant.chain.publicKey
 	);
 	await assert.rejects(
-		f.receiver.accept({ ...f.grant, chain }, async () => f.source),
+		f.receiver.accept({ grant: { ...f.grant, chain }, makeMinter: async () => f.source }),
 		/Invalid bounded/
 	);
 });
@@ -138,31 +148,36 @@ for (const kind of ['expired', 'extended', 'nan'] as const) {
 		const f = await fixture();
 		const expiresAtMs =
 			kind === 'expired' ? Date.now() - 1 : kind === 'extended' ? f.grant.expiresAtMs + 1 : NaN;
-		await assert.rejects(f.receiver.accept({ ...f.grant, expiresAtMs }, async () => f.source));
+		await assert.rejects(
+			f.receiver.accept({ grant: { ...f.grant, expiresAtMs }, makeMinter: async () => f.source })
+		);
 	});
 }
 
 test('refuses an app delegation for a different account', async () => {
 	const f = await fixture();
 	await assert.rejects(
-		f.receiver.accept(
-			{ ...f.grant, expectedAccount: f.native.getPrincipal() },
-			async () => f.source
-		)
+		f.receiver.accept({
+			grant: { ...f.grant, expectedAccount: f.native.getPrincipal() },
+			makeMinter: async () => f.source
+		})
 	);
 });
 
 test('refuses an app grant that outlives the original deadline', async () => {
 	const f = await fixture();
 	await assert.rejects(
-		f.receiver.accept(f.grant, async () => ({
-			mint: (key) =>
-				DelegationChain.create(
-					f.account,
-					{ toDer: () => key },
-					new Date(f.grant.expiresAtMs + 60_000)
-				)
-		})),
+		f.receiver.accept({
+			grant: f.grant,
+			makeMinter: async () => ({
+				mint: (key) =>
+					DelegationChain.create(
+						f.account,
+						{ toDer: () => key },
+						new Date(f.grant.expiresAtMs + 60_000)
+					)
+			})
+		}),
 		/exceeds the session deadline/
 	);
 });
@@ -170,9 +185,9 @@ test('refuses an app grant that outlives the original deadline', async () => {
 test('one handoff cannot be consumed twice', async () => {
 	const f = await fixture();
 	try {
-		await f.receiver.accept(f.grant, async () => f.source);
+		await f.receiver.accept({ grant: f.grant, makeMinter: async () => f.source });
 		await assert.rejects(
-			f.receiver.accept(f.grant, async () => f.source),
+			f.receiver.accept({ grant: f.grant, makeMinter: async () => f.source }),
 			/already consumed/
 		);
 	} finally {
@@ -186,7 +201,7 @@ test('close cancels a pending minter setup', async () => {
 	const waiting = new Promise<AppDelegationSource>((resolve) => {
 		release = resolve;
 	});
-	const accepted = f.receiver.accept(f.grant, async () => waiting);
+	const accepted = f.receiver.accept({ grant: f.grant, makeMinter: async () => waiting });
 	f.receiver.close();
 	release(f.source);
 	await assert.rejects(accepted, /session has ended/);
@@ -194,7 +209,7 @@ test('close cancels a pending minter setup', async () => {
 
 test('a retained identity cannot sign after close', async () => {
 	const f = await fixture();
-	const identity = await f.receiver.accept(f.grant, async () => f.source);
+	const identity = await f.receiver.accept({ grant: f.grant, makeMinter: async () => f.source });
 	f.receiver.close();
 	await assert.rejects(identity.sign(new Uint8Array([1])), /session has ended/);
 	assert.throws(() => identity.getDelegation(), /session has ended/);
@@ -202,7 +217,7 @@ test('a retained identity cannot sign after close', async () => {
 
 test('a retained identity cannot sign after expiry', async () => {
 	const f = await fixture();
-	const identity = await f.receiver.accept(f.grant, async () => f.source);
+	const identity = await f.receiver.accept({ grant: f.grant, makeMinter: async () => f.source });
 	const original = Date.now;
 	try {
 		Date.now = () => f.grant.expiresAtMs;
@@ -216,13 +231,16 @@ test('a retained identity cannot sign after expiry', async () => {
 test('a network failure does not produce a usable or anonymous identity', async () => {
 	const f = await fixture();
 	await assert.rejects(
-		f.receiver.accept(f.grant, async (_options: SessionMinterOptions) => {
-			throw new Error('fixture network unavailable');
+		f.receiver.accept({
+			grant: f.grant,
+			makeMinter: async (_options: SessionMinterOptions) => {
+				throw new Error('fixture network unavailable');
+			}
 		}),
 		/network unavailable/
 	);
 	await assert.rejects(
-		f.receiver.accept(f.grant, async () => f.source),
+		f.receiver.accept({ grant: f.grant, makeMinter: async () => f.source }),
 		/already consumed/
 	);
 });
@@ -265,7 +283,10 @@ test('Swift/Rust local hops verify in JS and enter the public web session APIs',
 			);
 			keyDer = delegation.pubkey;
 		}
-		const identity = await f.receiver.accept({ ...f.grant, chain }, async () => f.source);
+		const identity = await f.receiver.accept({
+			grant: { ...f.grant, chain },
+			makeMinter: async () => f.source
+		});
 		assert.equal(identity.getPrincipal().compareTo(f.account.getPrincipal()), 'eq');
 	} finally {
 		f.receiver.close();
@@ -282,15 +303,38 @@ test('close during an actual mint discards its late result', async () => {
 	const entered = new Promise<void>((resolve) => {
 		started = resolve;
 	});
-	const accepted = f.receiver.accept(f.grant, async () => ({
-		async mint(key) {
-			started();
-			await waiting;
-			return f.source.mint(key);
-		}
-	}));
+	const accepted = f.receiver.accept({
+		grant: f.grant,
+		makeMinter: async () => ({
+			async mint(key) {
+				started();
+				await waiting;
+				return f.source.mint(key);
+			}
+		})
+	});
 	await entered;
 	f.receiver.close();
 	release();
 	await assert.rejects(accepted, /session has ended/);
+});
+
+test('only terminal SDK loss reports to the native auth owner', async () => {
+	for (const terminal of [false, true]) {
+		let ended = 0;
+		const f = await fixture(() => ended++);
+		await assert.rejects(
+			f.receiver.accept({
+				grant: f.grant,
+				makeMinter: async () => ({
+					mint: async () => {
+						throw terminal ? new SessionGoneError('Revoked') : new Error('Offline');
+					}
+				})
+			})
+		);
+		assert.equal(ended, terminal ? 1 : 0);
+		f.receiver.close();
+		assert.equal(ended, terminal ? 1 : 0);
+	}
 });

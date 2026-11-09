@@ -6,6 +6,7 @@ import WebKit
 @MainActor
 final class WalletInteractions: NSObject, UIGestureRecognizerDelegate {
   private weak var webView: WKWebView?
+  private let origin: URL?
   private let onBack: () -> Void
   private let onRefresh: (Int) -> Void
   private let haptic: () -> Void
@@ -33,13 +34,14 @@ final class WalletInteractions: NSObject, UIGestureRecognizerDelegate {
   let edgePan = UIScreenEdgePanGestureRecognizer()
 
   init(
-    webView: WKWebView, onBack: @escaping () -> Void,
+    webView: WKWebView, origin: URL? = WalletOriginPolicy.baseURL, onBack: @escaping () -> Void,
     onRefresh: @escaping (Int) -> Void,
     haptic: @escaping () -> Void = {
       UIImpactFeedbackGenerator(style: .light).impactOccurred(intensity: 0.55)
     }, snapshot: ((@escaping @MainActor (UIImage?) -> Void) -> Void)? = nil
   ) {
     self.webView = webView
+    self.origin = origin
     self.onBack = onBack
     self.onRefresh = onRefresh
     self.haptic = haptic
@@ -136,7 +138,7 @@ final class WalletInteractions: NSObject, UIGestureRecognizerDelegate {
     webView?.allowsBackForwardNavigationGestures = false
     // Root refresh is the only place where the wallet can overscroll. WebKit
     // remembers the global client permission separately from UIKit axis values;
-    // set it first so Capacitor's initial false does not win again on repaint.
+    // set it first so WebKit's initial false does not win again on repaint.
     webView?.scrollView.bounces = refreshAllowed
     webView?.scrollView.bouncesVertically = refreshAllowed
     webView?.scrollView.bouncesHorizontally = false
@@ -148,7 +150,7 @@ final class WalletInteractions: NSObject, UIGestureRecognizerDelegate {
   func navigationCommitted(url: URL?) {
     if awaitingBack, url == parentURL {
       clearBack()
-    } else if !WalletBackNavigationPolicy.isToken(url) && captureCompletion == nil {
+    } else if !WalletBackNavigationPolicy.isToken(url, origin: origin) && captureCompletion == nil {
       clearBack()
     }
   }

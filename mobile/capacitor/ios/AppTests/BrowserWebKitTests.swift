@@ -32,7 +32,7 @@ final class BrowserWebKitTests: XCTestCase {
     let server = try BrowserTestServer()
     let url = try await server.start()
     defer { server.listener.cancel() }
-    let store = KeychainStore(service: "oisy.explore.logout.\(UUID())")
+    let store = TestAuthStore(service: "oisy.explore.logout.\(UUID())")
     defer { try? store.clear() }
     try store.save(
       fixtureSession(

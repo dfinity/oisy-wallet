@@ -14,29 +14,49 @@ settings:
     MARKETING_VERSION: '0.1.0'
     CURRENT_PROJECT_VERSION: '2'
 packages:
+  IcpSdk:
+    path: ../../.native-sdk/source
   CapApp-SPM:
     path: CapApp-SPM
 targets:
   App:
     type: application
     platform: iOS
+    configFiles:
+      Debug: ../../.native-sdk/Audit.xcconfig
+      Release: ../../.native-sdk/Audit.xcconfig
+    preBuildScripts:
+      - name: Verify audit app identity
+        script: '"$OISY_NODE_BINARY" "$SRCROOT/../../prepare-app-config.mjs" --check-build'
+        basedOnDependencyAnalysis: false
     sources:
+      - path: ../../app-environment.json
+        buildPhase: resources
+      - path: ../../auth-handoff/native/DelegationJSON.swift
       - path: App
         excludes: [public, Base.lproj/Main.storyboard]
-      - path: App/public
-        type: folder
-        buildPhase: resources
     dependencies:
       - package: CapApp-SPM
+      - package: IcpSdk
+        product: IcpSdkCore
+      - package: IcpSdk
+        product: IcpSdkAuth
+      - framework: ../../.native-sdk/IcpCore.xcframework
+        embed: false
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: org.dfinity.oisy.capacitor.preview
+        CODE_SIGN_ENTITLEMENTS: ../../.native-sdk/App.entitlements
         INFOPLIST_FILE: App/Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: ''
   AppTests:
     type: bundle.unit-test
     platform: iOS
-    sources: [../AppTests]
+    sources:
+      - path: ../AppTests
+      - path: App/public
+        type: folder
+        buildPhase: resources
+        optional: true
     dependencies: [{ target: App }]
     settings:
       base:

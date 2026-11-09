@@ -48,7 +48,14 @@ export abstract class AppWorker {
 			if (MOBILE_SHELL) {
 				const { connectMobileWorkerSession } =
 					await import('$lib/services/mobile-worker-session.services');
-				await connectMobileWorkerSession(worker);
+				await connectMobileWorkerSession({
+					worker,
+					onSessionGone: () => {
+						void import('$lib/services/mobile-runtime.services')
+							.then(({ endMobileRuntime }) => endMobileRuntime())
+							.catch(() => undefined);
+					}
+				});
 			}
 			return worker;
 		} catch (error) {
