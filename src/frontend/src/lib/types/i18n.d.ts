@@ -1193,6 +1193,7 @@ interface I18nSwap {
 		swap_expired: string;
 		near_intents_quote_unverified: string;
 		near_intents_quote_expired: string;
+		near_intents_quote_slippage: string;
 		near_intents_deposit_expired: string;
 		near_intents_quote_deposit_memo: string;
 		oisy_trade_not_trackable: string;
@@ -1694,6 +1695,7 @@ interface I18nWallet_connect {
 		request_rejected: string;
 		unknown_parameter: string;
 		wallet_not_initialized: string;
+		btc_address_not_signer: string;
 		btc_broadcast_not_supported: string;
 		btc_non_mainnet_sign_not_supported: string;
 		btc_psbt_decode: string;

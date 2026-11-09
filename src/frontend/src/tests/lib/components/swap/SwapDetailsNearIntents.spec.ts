@@ -5,6 +5,7 @@ import * as userProviderAgreementsDerived from '$lib/derived/user-provider-agree
 import { initSwapContext, SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import { SwapProvider } from '$lib/types/swap';
+import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
@@ -55,10 +56,64 @@ describe('SwapDetailsNearIntents', () => {
 		).toBeInTheDocument();
 	});
 
-	it('does not render expected minimum when slippage is undefined', () => {
-		const { queryByText } = render(SwapDetailsNearIntents, {
+	it('renders the minimum signed into the quote rather than the slippage applied to the receive amount', () => {
+		const { getByText, queryByText } = render(SwapDetailsNearIntents, {
 			props: {
 				provider: baseProvider,
+				slippageValue: 0.5
+			},
+			context: mockContext
+		});
+
+		const signedMinimum = formatToken({
+			value: 891_000n,
+			unitName: ICP_TOKEN.decimals,
+			displayDecimals: ICP_TOKEN.decimals
+		});
+		const derivedMinimum = formatToken({
+			value: 895_500n,
+			unitName: ICP_TOKEN.decimals,
+			displayDecimals: ICP_TOKEN.decimals
+		});
+
+		expect(getByText(`${signedMinimum} ${ICP_TOKEN.symbol}`)).toBeInTheDocument();
+		expect(queryByText(`${derivedMinimum} ${ICP_TOKEN.symbol}`)).not.toBeInTheDocument();
+	});
+
+	it('renders the minimum signed into the quote when slippage is undefined', () => {
+		const { getByText } = render(SwapDetailsNearIntents, {
+			props: {
+				provider: baseProvider,
+				slippageValue: undefined
+			},
+			context: mockContext
+		});
+
+		expect(getByText(en.swap.text.expected_minimum)).toBeInTheDocument();
+	});
+
+	it('derives the minimum from the slippage for a quote without one', () => {
+		const { getByText } = render(SwapDetailsNearIntents, {
+			props: {
+				provider: { ...baseProvider, receiveOutMinimum: undefined },
+				slippageValue: 0.5
+			},
+			context: mockContext
+		});
+
+		const derivedMinimum = formatToken({
+			value: 895_500n,
+			unitName: ICP_TOKEN.decimals,
+			displayDecimals: ICP_TOKEN.decimals
+		});
+
+		expect(getByText(`${derivedMinimum} ${ICP_TOKEN.symbol}`)).toBeInTheDocument();
+	});
+
+	it('does not render expected minimum for a quote without one when slippage is undefined', () => {
+		const { queryByText } = render(SwapDetailsNearIntents, {
+			props: {
+				provider: { ...baseProvider, receiveOutMinimum: undefined },
 				slippageValue: undefined
 			},
 			context: mockContext
