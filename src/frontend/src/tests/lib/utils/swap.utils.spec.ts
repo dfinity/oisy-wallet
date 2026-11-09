@@ -669,6 +669,7 @@ describe('swap utils', () => {
 		it.each([
 			SwapErrorCodes.NEAR_INTENTS_QUOTE_UNVERIFIED,
 			SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED,
+			SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE,
 			SwapErrorCodes.NEAR_INTENTS_QUOTE_DEPOSIT_MEMO
 		])('should return the message of a %s error', (code) => {
 			const error = new SwapError(code, 'No funds were sent.');
@@ -1018,6 +1019,46 @@ describe('swap utils', () => {
 				receiveAmount: 900000n,
 				receiveOutMinimum: 891000n,
 				swapDetails: quoteWithDecimals
+			});
+		});
+
+		it('should keep amounts above Number.MAX_SAFE_INTEGER exact', () => {
+			const quoteWithLargeAmounts = {
+				...mockNearIntentsQuoteResponse,
+				quote: {
+					...mockNearIntentsQuoteResponse.quote,
+					amountOut: '900000000000000099',
+					minAmountOut: '891000000000000099'
+				}
+			};
+
+			const result = mapNearIntentsQuoteResult(quoteWithLargeAmounts);
+
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: 900000000000000099n,
+				receiveOutMinimum: 891000000000000099n,
+				swapDetails: quoteWithLargeAmounts
+			});
+		});
+
+		it('should floor decimal amounts above Number.MAX_SAFE_INTEGER exactly', () => {
+			const quoteWithLargeDecimals = {
+				...mockNearIntentsQuoteResponse,
+				quote: {
+					...mockNearIntentsQuoteResponse.quote,
+					amountOut: '900000000000000099.7',
+					minAmountOut: '891000000000000099.9'
+				}
+			};
+
+			const result = mapNearIntentsQuoteResult(quoteWithLargeDecimals);
+
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: 900000000000000099n,
+				receiveOutMinimum: 891000000000000099n,
+				swapDetails: quoteWithLargeDecimals
 			});
 		});
 	});
