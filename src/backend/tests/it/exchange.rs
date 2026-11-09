@@ -599,3 +599,58 @@ fn a_caller_started_refresh_fetches_the_queued_tokens() {
         "A caller-started refresh should ask for the queued token"
     );
 }
+
+#[test]
+fn a_caller_started_refresh_skips_queued_tokens_another_refresh_has_priced() {
+    let pic_setup = setup();
+    let holders = fill_token_activity(&pic_setup);
+
+    // Two users ask for a token the full map does not take: the first call starts a refresh that
+    // fetches it, the second finds the lock held and queues it.
+    for seed in [1u8, 2] {
+        let caller = Principal::self_authenticating([seed; 8]);
+        pic_setup.ensure_user_profile(caller);
+        assert_eq!(
+            pic_setup.update::<()>(
+                caller,
+                "set_custom_token",
+                erc20_custom_token(QUEUED_ADDRESS.to_string())
+            ),
+            Ok(())
+        );
+        pic_setup
+            .update::<Vec<(TokenId, Option<ExchangeRate>)>>(caller, "get_exchange_rates", ())
+            .expect("get_exchange_rates should answer");
+    }
+
+    // The first refresh prices the token and releases the lock.
+    let now_secs = pic_setup.pic.get_time().as_nanos_since_unix_epoch() / 1_000_000_000;
+    answer_pending_outcalls(
+        &pic_setup,
+        &format!(r#"{{"{QUEUED_ADDRESS}":{{"usd":5.0,"last_updated_at":{now_secs}}}}}"#),
+    );
+    let queued = TokenId::Erc20(ErcTokenId(QUEUED_ADDRESS.to_string()), 1);
+    assert_eq!(
+        pic_setup
+            .query::<Option<ExchangeRate>>(holders[0], "get_exchange_rate", queued)
+            .expect("get_exchange_rate should answer")
+            .and_then(|rate| rate.usd.price),
+        Some(5.0)
+    );
+
+    // A holder's call starts a refresh of its own stale tokens, which takes the queue.
+    pic_setup
+        .update::<Vec<(TokenId, Option<ExchangeRate>)>>(holders[0], "get_exchange_rates", ())
+        .expect("get_exchange_rates should answer");
+
+    let urls = pending_outcall_urls(&pic_setup);
+    assert!(
+        urls.iter()
+            .any(|url| url.contains("/simple/token_price/ethereum")),
+        "The holder's refresh should ask for its own tokens"
+    );
+    assert!(
+        !urls.iter().any(|url| url.contains(QUEUED_ADDRESS)),
+        "The queued token already has a fresh price"
+    );
+}

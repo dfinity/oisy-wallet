@@ -93,7 +93,7 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
     // Holding the lock, this refresh also takes the tokens queued by calls that
     // found it held, so they need not wait for the recurring refresh.
     let mut to_fetch = stale;
-    to_fetch.extend(take_queued_for_refresh());
+    to_fetch.extend(snapshot_and_stale(take_queued_for_refresh()).1);
     to_fetch.sort_unstable();
     to_fetch.dedup();
 
