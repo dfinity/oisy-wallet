@@ -204,7 +204,7 @@ const includesAddress = ({ text, address }: { text: string; address: string }): 
 		const before = text.charAt(index - 1);
 		const after = text.charAt(index + address.length);
 
-		if (!ADDRESS_CHARACTER.test(before) && !ADDRESS_CHARACTER.test(after)) {
+		if (before !== '.' && !ADDRESS_CHARACTER.test(before) && !ADDRESS_CHARACTER.test(after)) {
 			return true;
 		}
 
