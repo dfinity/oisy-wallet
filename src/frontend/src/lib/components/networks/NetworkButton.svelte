@@ -10,7 +10,6 @@
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { LabelSize } from '$lib/types/components';
 	import type { Network, NetworkId, OptionNetworkId } from '$lib/types/network';
 	import { formatCurrency } from '$lib/utils/format.utils';
 
@@ -20,7 +19,6 @@
 		usdBalance?: number;
 		isTestnet?: boolean;
 		testId?: string;
-		labelsSize?: LabelSize;
 		onSelected?: (networkId: OptionNetworkId) => void;
 	}
 
@@ -30,7 +28,6 @@
 		usdBalance,
 		isTestnet = false,
 		testId,
-		labelsSize = 'md',
 		onSelected
 	}: Props = $props();
 
@@ -50,20 +47,14 @@ TODO: Find a way to have the "All networks" not be a fallback for undefined netw
 	{/snippet}
 
 	{#snippet title()}
-		<span
-			class="menu-row-label mr-2 font-normal md:text-base"
-			class:md:text-base={labelsSize === 'md'}
-			class:md:text-lg={labelsSize === 'lg'}
-			class:text-base={labelsSize === 'lg'}
-			class:text-sm={labelsSize === 'md'}
-		>
+		<span class="menu-row-label mr-2 text-sm font-normal md:text-base">
 			{network?.name ?? $i18n.networks.chain_fusion}
 		</span>
 	{/snippet}
 
 	{#snippet descriptionEnd()}
 		<span>
-			<span class:md:text-base={labelsSize === 'lg'} class:text-sm={labelsSize === 'lg'}>
+			<span>
 				{#if nonNullish(usdBalance)}
 					{#if $isPrivacyMode}
 						<IconDots variant="xs" />

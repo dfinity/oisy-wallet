@@ -3,7 +3,8 @@ mod service;
 
 pub(crate) use canister_ids::{CYCLES_LEDGER, ICP_LEDGER};
 pub(crate) use service::{
-    approve_signing, btc_principal_to_p2wpkh_address, eth_principal_to_address, get_allowed_cycles,
+    approve_signing, btc_p2wpkh_address, btc_principal_to_p2wpkh_address,
+    btc_principal_to_public_key, eth_principal_to_address, get_allowed_cycles,
     has_sufficient_allowance, principal_to_account_identifier_hex, sol_principal_to_address,
     top_up_cycles_ledger,
 };

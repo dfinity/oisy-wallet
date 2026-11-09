@@ -9,6 +9,7 @@ import * as ethTransactionServicesLib from '$eth/services/eth-transaction.servic
 import { processTransactionSent } from '$eth/services/eth-transaction.services';
 import { swap } from '$eth/services/swap.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { EthSubmissionUnconfirmedError } from '$eth/types/send';
 import { isDefinitiveTransactionRefusal } from '$eth/utils/eth-error.utils';
 import * as signerApiLib from '$lib/api/signer.api';
 import { signTransaction } from '$lib/api/signer.api';
@@ -57,6 +58,13 @@ vi.mock('$lib/api/signer.api', () => ({
 
 vi.mock('$lib/utils/timeout.utils', () => ({
 	waitForMilliseconds: vi.fn()
+}));
+
+// What this suite tests is the swap's own retry of a broadcast. The provider asking Alchemy when
+// Infura fails is tested with the provider, and left on it would answer some of the attempts here.
+vi.mock('$env/rest/alchemy.env', () => ({
+	ALCHEMY_API_KEY: 'test-alchemy-key',
+	ALCHEMY_EVM_FALLBACK_ENABLED: false
 }));
 
 vi.mock('$lib/utils/console.utils', () => ({
@@ -254,8 +262,10 @@ describe('swap.services', () => {
 
 				const err = await rejectionOf(swap(mockSwapParams));
 
+				// The provider's own unknown outcome, inside the swap's.
 				expect(err).toBeInstanceOf(SwapBroadcastOutcomeUnknownError);
-				expect(err).toHaveProperty('cause', last);
+				expect(err).toHaveProperty('cause', expect.any(EthSubmissionUnconfirmedError));
+				expect(err).toHaveProperty('cause.cause', last);
 				expect(mockSendTransaction).toHaveBeenCalledTimes(SWAP_BROADCAST_ATTEMPTS);
 				expect(processTransactionSent).not.toHaveBeenCalled();
 			});
@@ -275,22 +285,31 @@ describe('swap.services', () => {
 				expect(mockSendTransaction).toHaveBeenCalledTimes(2);
 			});
 
+			it('should not send again after a definitive refusal, which it rejects with as it is', async () => {
+				const err = nodeAnswer('max fee per gas less than block base fee');
+
+				mockSendTransaction.mockRejectedValue(err);
+
+				await expect(rejectionOf(swap(mockSwapParams))).resolves.toBe(err);
+
+				expect(mockSendTransaction).toHaveBeenCalledOnce();
+			});
+
+			// The provider reports these as an outcome it cannot confirm, the node's answer as the cause.
 			it.each([
-				{ answer: 'a definitive refusal', message: 'max fee per gas less than block base fee' },
 				{ answer: 'already known', message: 'already known' },
 				{ answer: 'nonce too low', message: 'nonce too low: next nonce 43, tx nonce 42' }
-			])(
-				'should not send again after $answer, which it rejects with as it is',
-				async ({ message }) => {
-					const err = nodeAnswer(message);
+			])('should not send again after $answer', async ({ message }) => {
+				const err = nodeAnswer(message);
 
-					mockSendTransaction.mockRejectedValue(err);
+				mockSendTransaction.mockRejectedValue(err);
 
-					await expect(rejectionOf(swap(mockSwapParams))).resolves.toBe(err);
+				const outcome = await rejectionOf(swap(mockSwapParams));
 
-					expect(mockSendTransaction).toHaveBeenCalledOnce();
-				}
-			);
+				expect(outcome).toBeInstanceOf(EthSubmissionUnconfirmedError);
+				expect(outcome).toHaveProperty('cause', err);
+				expect(mockSendTransaction).toHaveBeenCalledOnce();
+			});
 
 			// A first attempt relayed despite its failure: the next one finds it in.
 			it('should stop at an answer that the transaction is in', async () => {
@@ -302,7 +321,8 @@ describe('swap.services', () => {
 				const err = await rejectionOf(swap(mockSwapParams));
 
 				expect(err).toBeInstanceOf(SwapBroadcastOutcomeUnknownError);
-				expect(err).toHaveProperty('cause', known);
+				expect(err).toHaveProperty('cause', expect.any(EthSubmissionUnconfirmedError));
+				expect(err).toHaveProperty('cause.cause', known);
 				expect(mockSendTransaction).toHaveBeenCalledTimes(2);
 			});
 		});
