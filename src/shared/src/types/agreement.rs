@@ -3,11 +3,15 @@ use std::collections::BTreeMap;
 use candid::{CandidType, Deserialize};
 
 use crate::{
-    types::{Timestamp, Version},
+    types::{signer::RateLimitError, Timestamp, Version},
     validate::Validate,
 };
 
 pub const SHA256_HEX_LENGTH: usize = 64;
+
+/// Maximum number of agreement history entries stored per user. An update that would go past it
+/// is refused; no entry is ever removed.
+pub const MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER: usize = 100;
 
 /// Which external provider the agreement belongs to.
 ///
@@ -134,6 +138,10 @@ impl Validate for Agreements {
 pub enum UpdateAgreementsError {
     UserNotFound,
     VersionMismatch,
+    RateLimited(RateLimitError),
+    /// The change would take the user's agreement history past
+    /// `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
+    TooManyHistoryEntries,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

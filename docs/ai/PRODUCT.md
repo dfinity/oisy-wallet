@@ -408,9 +408,17 @@ Burning is deliberately **not** exempt. Sending assets to a minter account by mi
 
 **Conversions to another address.** Converting ckBTC, ckETH or a ckERC-20 token back to its twin pays the user's own address on the twin network by default, which needs no confirmation. When the user enters another address instead, the conversion applies the same rule: the destination step warns, and the review shows the whole address rather than a shortened one, with the same confirmation box, the Convert button staying disabled until it is ticked. Only a previous send on the twin network makes such an address familiar, read from the history OISY has loaded; without any, the address counts as first-time. In practice that asks more often than the send flow: an earlier conversion to the same address is a burn and does not count, and the Ethereum send history only counts on an Ethereum token's page, so a conversion to an Ethereum address, started from the ck token's page, asks every time.
 
+### Destinations in the AI assistant's send review
+
+The AI assistant's send review shows a destination only when it comes from the user: one of their contacts, or an address the user typed in the chat. A message OISY writes on the user's behalf, such as the one sent after a tap on a balance card, does not count, and neither does an address the model comes up with on its own. For any other address no review appears, and the assistant asks the user to type the address or pick a contact. The tokens the model can name for a send or a balance are the fungible ones only, since the assistant does not send NFTs.
+
 ### TCYCLES sent to a canister
 
 Sending TCYCLES to an account a canister owns, with or without a subaccount, does not top the canister up: the TCYCLES land in the canister's account on the cycles ledger, and they become cycles only if the canister's own code withdraws them. The send flow says so on the address step and again on Review, and points to [Top up](#top-up-a-canister) while that flow's flag is on. It does not block the send, since a canister can own TCYCLES on purpose. No other token shows the warning.
+
+### Sending again on the Internet Computer
+
+A send of ICP or an ICRC token gives its transfer a creation time, which the ledger uses to recognise a transfer it already holds. The send flow keeps that transfer, creation time included, while the user stays on the amount and review steps with the same token, amount and destination, and the AI assistant keeps it for the request it shows. When a send ends in an error, the send flow returns to Review and the AI assistant keeps its Send button; pressing Send again submits the same transfer. If the first one reached the ledger, the ledger answers with the block it landed in and OISY shows the send as done; otherwise the transfer goes through as usual. A different token, amount or destination is a new transfer, and so is a send started again from the address step, a new Send, or a new request to the AI assistant, so an intended second payment of the same amount to the same recipient is sent as one. The ledger recognises a transfer for 24 hours after its creation time, so pressing Send again on a review left open longer than that is refused. XTC transfers carry no creation time.
 
 ### Sending through the AI assistant
 
@@ -457,6 +465,8 @@ Like the other cross-chain swaps, the modal closes once the transaction is sent,
 When an Ethereum or EVM send fails, what OISY says depends on how far the transaction got. If the network could not be reached to read the transaction's nonce, the transaction was never signed, so the message says it was not sent and that trying again is safe. If Infura refused the transaction outright, such as for a balance that cannot cover it, the message states that reason, and a transaction that [runs out of gas](#a-send-that-runs-out-of-gas) keeps its own message. If every provider failed the submission, or answered in a way that leaves it open, such as that the transaction's nonce is already used, OISY cannot know whether the network received the transaction, and the message says exactly that: it may still go through, so the user should wait a minute or two and check their activity before sending it again. A swap whose earlier broadcast attempt may have reached the network gets the same message, even when a later attempt is refused. It never says such a transaction was not sent, because a new attempt is signed with the next nonce, and if the first one did get through, both would execute and the user would pay twice.
 
 The send, convert, swap and AI assistant flows show these messages, and so do WalletConnect transaction requests; the dApp still receives a rejection. A failure OISY cannot explain keeps its flow's generic message.
+
+A send whose outcome OISY cannot know also ends there, so that the same review cannot send it a second time with the next nonce. The send, convert, swap, Harvest stake and unstake, and Liquidium supply and repay dialogs close with that message instead of going back to the review; for any other failure, Harvest and Liquidium keep their own message. The AI assistant's review replaces its Send button with the message, and keeps it that way after the assistant is closed and reopened. Any other failure goes back to the review, where the user can try again.
 
 ---
 
