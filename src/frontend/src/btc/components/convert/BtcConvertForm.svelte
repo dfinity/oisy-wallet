@@ -46,7 +46,8 @@
 		amountError = $insufficientFunds || $insufficientFundsForFee;
 	});
 
-	let maxSendAmountStore = $derived(initBtcMaxSendAmount(source));
+	// No recipient, as Convert's fee (see `BtcConvertTokenWizard`).
+	let maxSendAmountStore = $derived(initBtcMaxSendAmount({ source }));
 
 	let hasPendingTransactionsStore = $derived(initPendingSentTransactionsStatus(source));
 

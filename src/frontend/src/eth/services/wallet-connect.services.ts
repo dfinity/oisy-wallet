@@ -3,6 +3,7 @@ import type { FeeStoreData } from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
 import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
+import type { GetUniswapSwapParams } from '$eth/utils/uniswap.utils';
 import {
 	classifyWalletConnectEthCall,
 	classifyWalletConnectEthSendTransaction,
@@ -49,6 +50,8 @@ type WalletConnectSendParams = WalletConnectExecuteParams & {
 	amount: bigint;
 	// Whether the user ticked, on the review, that they sign a call OISY can't read.
 	unknownCallAcknowledged: boolean;
+	// The tokens the review read the call with, so signing reads it the same way.
+	tokens: GetUniswapSwapParams['tokens'];
 } & SendParams;
 
 type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
@@ -72,6 +75,7 @@ export const send = ({
 	sourceNetwork,
 	targetNetwork,
 	unknownCallAcknowledged,
+	tokens,
 	...params
 }: WalletConnectSendParams): Promise<ResultSuccess> =>
 	execute({
@@ -209,7 +213,12 @@ export const send = ({
 				data,
 				networkId: sourceNetwork.id,
 				minterInfo,
-				principal: identity?.getPrincipal()
+				principal: identity?.getPrincipal(),
+				chainId: sourceNetwork.chainId,
+				value: amount,
+				wallet: address,
+				nativeToken: token,
+				tokens
 			});
 
 			if (call.type === 'unknown' && !unknownCallAcknowledged) {

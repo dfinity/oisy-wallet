@@ -1,5 +1,5 @@
 import BtcSendAmount from '$btc/components/send/BtcSendAmount.svelte';
-import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
+import { BTC_LARGEST_OUTPUT_VSIZE, BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
@@ -65,13 +65,51 @@ describe('BtcSendAmount', () => {
 		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
 
 		const expectedMax = formatToken({
-			value: 1_000n - calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte: 1_000n }),
+			value:
+				1_000n -
+				calculateFeeSatoshis({
+					numInputs: 1,
+					recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+					feeRateMiliSatoshisPerVByte: 1_000n
+				}),
 			unitName: BTC_MAINNET_TOKEN.decimals,
 			displayDecimals: BTC_MAINNET_TOKEN.decimals
 		});
 
 		const { getByTestId } = render(BtcSendAmount, {
 			props,
+			context: createMockContext()
+		});
+
+		await waitFor(() => {
+			expect(getByTestId(MAX_BUTTON)).toHaveTextContent(expectedMax);
+		});
+	});
+
+	it('should price Max for the recipient once it is known', async () => {
+		balancesStore.set({
+			id: BTC_MAINNET_TOKEN.id,
+			data: { data: 10_000n, certified: true }
+		});
+
+		allUtxosStore.setAllUtxos({
+			allUtxos: [{ value: 10_000n, height: 10, outpoint: { txid: new Uint8Array([1]), vout: 0 } }]
+		});
+		btcPendingSentTransactionsStore.setPendingTransactions({
+			address: mockBtcAddress,
+			pendingTransactions: []
+		});
+		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
+
+		// 1 input + a P2WPKH recipient + change = 141 vB at 1 sat/vB.
+		const expectedMax = formatToken({
+			value: 10_000n - 141n,
+			unitName: BTC_MAINNET_TOKEN.decimals,
+			displayDecimals: BTC_MAINNET_TOKEN.decimals
+		});
+
+		const { getByTestId } = render(BtcSendAmount, {
+			props: { ...props, destination: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq' },
 			context: createMockContext()
 		});
 
@@ -148,5 +186,20 @@ describe('BtcSendAmount', () => {
 			expect(input?.value).toBe('0');
 			expect(getByText(en.send.assertion.amount_invalid)).toBeInTheDocument();
 		});
+	});
+
+	it('names the network the token is sent on', () => {
+		const { getByText } = render(BtcSendAmount, {
+			props,
+			context: createMockContext()
+		});
+
+		expect(
+			getByText(
+				replacePlaceholders(en.tokens.text.on_network_label, {
+					$network: BTC_MAINNET_TOKEN.network.name
+				})
+			)
+		).toBeInTheDocument();
 	});
 });

@@ -14,20 +14,16 @@ secret never ships in the frontend bundle.
 ## Availability (feature flag)
 
 The buy widget is gated by `ONRAMPER_ENABLED` (`src/frontend/src/env/rest/onramper.env.ts`), which
-is enabled only on **local, staging and beta** — `LOCAL || STAGING || BETA` (`STAGING` covers the
-`test_fe_*` / `audit` / `e2e` environments). On **production (`ic`)** the flag is `false`, so the
-buy flow shows the unavailable notice regardless of backend state. Within the enabled environments,
-the widget is additionally gated on `onramper_enabled` (secret provisioned) — see below.
+is enabled on **every environment** — `LOCAL || STAGING || BETA || PROD` (`STAGING` covers the
+`test_fe_*` / `audit` / `e2e` environments). Dropping `PROD` (or `BETA`) turns the widget off there
+on the next deploy. The widget also needs the signing secret — see below.
 
 ## Runtime behavior
 
 - `sign_onramper_widget_url` (update, authenticated, rate-limited): signs the caller's
   `wallets` / `networkWallets` / `walletAddressTags` and returns the hex HMAC.
-- `onramper_enabled` (query, public): returns `true` iff the secret is configured. The frontend
-  gates the buy widget on it (`BuyModalContent.svelte`), so a missing secret shows the
-  "buy unavailable" notice instead of a widget that would fail on open.
 - If the secret is missing, `sign_onramper_widget_url` returns `SecretNotConfigured` and the widget
-  self-disables — defense in depth behind `onramper_enabled`.
+  (`OnramperWidget.svelte`) shows the "buy unavailable" notice instead of loading.
 
 **Until the secret is provisioned on an environment, the buy widget stays unavailable there**, even
 with `ONRAMPER_ENABLED = true`.
@@ -48,7 +44,9 @@ ONRAMPER_SIGNING_SECRET='sk_...' ./scripts/provision-onramper-signing-secret.sh 
 ./scripts/provision-onramper-signing-secret.sh --network staging --identity <controller-identity>
 ```
 
-The script prints `onramper_enabled` afterward; expect `(true)`.
+To check it worked, open Buy on that environment: the OnRamper widget loads instead of the "buy
+unavailable" notice. `Invalid Signature` inside the widget means the secret doesn't match the
+`apiKey` the frontend was built with.
 
 On `ic` / `beta`, the controller is governance — provisioning goes through the appropriate ops /
 proposal path rather than a personal `dfx` identity.

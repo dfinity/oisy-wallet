@@ -700,10 +700,39 @@ describe('export-data.utils', () => {
 			expect(row.explorer_url).toBe(`${BTC_MAINNET_NETWORK.explorerUrl}/tx/btc-tx-1`);
 		});
 
-		it('falls back to <network.explorerUrl>/transaction/<id> for ICRC when tx.txExplorerUrl is missing', () => {
-			// mapIcrcTransaction (unlike mapIcpTransaction) doesn't pre-populate txExplorerUrl.
-			// The adapter must reach the same URL the IC modal renders: ICP's dashboard uses
-			// `/transaction/`, not `/tx/`.
+		it('links the dashboard block of an ICRC-3 ledger when tx.txExplorerUrl is missing', () => {
+			const icTxNoExplorer: IcTransactionUi = { ...icTx, txExplorerUrl: undefined };
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'ic', transaction: icTxNoExplorer, token: icrcToken }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				icrc3LedgerCanisterIds: new Set(['mxzaz-hqaaa-aaaar-qaada-cai']),
+				exportedAt
+			});
+
+			expect(row.explorer_url).toBe(
+				`${ICP_NETWORK.explorerUrl}/tokens/mxzaz-hqaaa-aaaar-qaada-cai/tx/42`
+			);
+		});
+
+		it('links the block index for the receive half of an ICRC transfer to self', () => {
+			const icTxSelf: IcTransactionUi = { ...icTx, id: '42-self', txExplorerUrl: undefined };
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'ic', transaction: icTxSelf, token: icrcToken }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				icrc3LedgerCanisterIds: new Set(['mxzaz-hqaaa-aaaar-qaada-cai']),
+				exportedAt
+			});
+
+			expect(row.explorer_url).toBe(
+				`${ICP_NETWORK.explorerUrl}/tokens/mxzaz-hqaaa-aaaar-qaada-cai/tx/42`
+			);
+		});
+
+		it('leaves the explorer cell empty for an ICRC ledger not known to serve ICRC-3', () => {
 			const icTxNoExplorer: IcTransactionUi = { ...icTx, txExplorerUrl: undefined };
 			const [row] = buildTransactionRows({
 				transactions: [{ component: 'ic', transaction: icTxNoExplorer, token: icrcToken }],
@@ -713,7 +742,22 @@ describe('export-data.utils', () => {
 				exportedAt
 			});
 
-			expect(row.explorer_url).toBe(`${ICP_NETWORK.explorerUrl}/transaction/42`);
+			expect(row.explorer_url).toBe('');
+		});
+
+		it('keeps the mapper link of an ICRC transaction', () => {
+			const txExplorerUrl = `${ICP_NETWORK.explorerUrl}/tokens/mxzaz-hqaaa-aaaar-qaada-cai/tx/42`;
+			const [row] = buildTransactionRows({
+				transactions: [
+					{ component: 'ic', transaction: { ...icTx, txExplorerUrl }, token: icrcToken }
+				],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.explorer_url).toBe(txExplorerUrl);
 		});
 
 		it('joins multiple BTC recipients with a semicolon', () => {

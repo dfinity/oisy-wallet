@@ -115,6 +115,8 @@ export interface FetchSwapAmountsParams extends SwapQuoteObserver {
 
 export type Slippage = string | number;
 
+export type SwapSlippageStatus = 'valid' | 'warning' | 'invalid';
+
 /**
  * The reason no offer could be quoted, when a provider named one.
  *

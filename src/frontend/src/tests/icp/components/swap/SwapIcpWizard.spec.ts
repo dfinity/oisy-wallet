@@ -150,12 +150,6 @@ describe('SwapIcpWizard', () => {
 		expect(getByText(en.core.text.cancel)).toBeInTheDocument();
 	});
 
-	it('renders slippage section', () => {
-		const { getByText } = renderWithStep(WizardStepsSwap.SWAP);
-
-		expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
-	});
-
 	it('renders swap provider information', () => {
 		const { getByText } = renderWithStep(WizardStepsSwap.SWAP);
 

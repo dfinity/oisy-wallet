@@ -17,6 +17,7 @@
 		role = 'dialog',
 		testId,
 		disablePointerEvents = false,
+		closeOnBackdropClick = true,
 		title,
 		ariaLabel,
 		headerLeft,
@@ -67,7 +68,10 @@
 		role={role === 'alert' ? 'alertdialog' : role}
 		in:fade|global={{ duration: 25 }}
 	>
-		<Backdrop {disablePointerEvents} onClose={() => onClose?.()} />
+		<Backdrop
+			disablePointerEvents={disablePointerEvents || !closeOnBackdropClick}
+			onClose={closeOnBackdropClick ? () => onClose?.() : undefined}
+		/>
 		<div
 			class={`wrapper ${role} outline-none`}
 			tabindex="-1"

@@ -1,6 +1,10 @@
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { USDC_SYMBOL, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { EURC_TOKEN as BASE_EURC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.eurc.env';
+import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthWalletConnectSendReview from '$eth/components/wallet-connect/EthWalletConnectSendReview.svelte';
 import { CKETH_ABI } from '$eth/constants/cketh.constants';
@@ -13,6 +17,7 @@ import {
 } from '$eth/constants/erc20.constants';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { MULTICALL_HASH } from '$eth/constants/multicall.constants';
+import { UNISWAP_COMMANDS, UNISWAP_RECIPIENT_ROUTER } from '$eth/constants/uniswap.constants';
 import { loadUnlistedErc20TokenData } from '$eth/services/erc20-unlisted.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
@@ -37,10 +42,21 @@ import {
 import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
 import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import { formatSecondsToDate } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+import {
+	encodeUniswapCommand,
+	encodeUniswapEurcToUsdc,
+	encodeUniswapExecute,
+	encodeUniswapPermit,
+	encodeUniswapSweep,
+	encodeUniswapV3Swap,
+	mockUniswapRouter,
+	mockUniswapWallet
+} from '$tests/mocks/uniswap.mock';
 import { isNullish, toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
@@ -850,6 +866,336 @@ describe('EthWalletConnectSendReview', () => {
 		});
 	});
 
+	describe('Uniswap swaps', () => {
+		const OTHER = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
+
+		const inAnHour = () => BigInt(Math.floor(Date.now() / 1000) + 60 * 60);
+
+		const renderSwapWithValue = ({ data, value }: { data: string; value: bigint }) =>
+			render(EthWalletConnectSendReview, {
+				props: {
+					...props,
+					// The classifier the modal uses, so every case reaches the branch production reaches.
+					call: classifyWalletConnectEthSendTransaction({
+						to: mockUniswapRouter,
+						data,
+						networkId: BASE_NETWORK.id,
+						minterInfo: undefined,
+						principal: mockPrincipal,
+						chainId: BASE_NETWORK.chainId,
+						value,
+						wallet: mockUniswapWallet,
+						nativeToken: BASE_ETH_TOKEN,
+						tokens: [BASE_EURC_TOKEN, BASE_USDC_TOKEN]
+					}),
+					data,
+					destination: mockUniswapRouter,
+					sourceNetwork: BASE_NETWORK
+				},
+				context: mockContext
+			});
+
+		const renderSwap = (data: string) => renderSwapWithValue({ data, value: ZERO });
+
+		it('should state what the swap pays, what it receives at least and until when', () => {
+			const deadline = inAnHour();
+
+			const { getByText, queryByTestId, getByRole, container } = renderSwap(
+				encodeUniswapEurcToUsdc({ deadline })
+			);
+
+			expect(container.querySelector('#swap-pay')).toHaveTextContent('1 EURC');
+			expect(getByText(en.wallet_connect.text.swap_pay_at_most)).toBeInTheDocument();
+			expect(container.querySelector('#swap-receive')).toHaveTextContent('1.087807 USDC');
+			expect(container.querySelector('#swap-deadline')).toHaveTextContent(
+				formatSecondsToDate({ seconds: Number(deadline) })
+			);
+			expect(
+				getByText(replacePlaceholders(en.wallet_connect.text.swap_router, { $version: '2.1.2' }))
+			).toBeInTheDocument();
+
+			expect(container.querySelector('#swap-recipient')).not.toBeInTheDocument();
+			expect(queryByTestId('wallet-connect-unknown-call')).not.toBeInTheDocument();
+			expect(queryByTestId('wallet-connect-swap-recipient')).not.toBeInTheDocument();
+			expect(queryByTestId('wallet-connect-swap-no-minimum')).not.toBeInTheDocument();
+			expect(queryByTestId('wallet-connect-swap-expired')).not.toBeInTheDocument();
+
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should name the recipient of tokens that go to another address, and say so', () => {
+			const { getByTestId, container, getByRole } = renderSwap(
+				encodeUniswapEurcToUsdc({ recipient: OTHER, deadline: inAnHour() })
+			);
+
+			expect(getByTestId('wallet-connect-swap-recipient')).toHaveTextContent(
+				en.wallet_connect.text.swap_recipient_not_wallet
+			);
+			expect(container.querySelector('#swap-recipient')).toHaveTextContent(OTHER);
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should say so when the swap guarantees no minimum', () => {
+			const { getByTestId, getByRole } = renderSwap(
+				encodeUniswapEurcToUsdc({ amountOutMin: ZERO, deadline: inAnHour() })
+			);
+
+			expect(getByTestId('wallet-connect-swap-no-minimum')).toHaveTextContent(
+				en.wallet_connect.text.swap_no_minimum
+			);
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should say so when the swap has expired', () => {
+			const { getByTestId, getByRole } = renderSwap(
+				encodeUniswapEurcToUsdc({ deadline: BigInt(Math.floor(Date.now() / 1000) - 60) })
+			);
+
+			expect(getByTestId('wallet-connect-swap-expired')).toHaveTextContent(
+				en.wallet_connect.text.swap_expired
+			);
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should state a swap without a deadline as such', () => {
+			const { container, queryByTestId } = renderSwap(encodeUniswapEurcToUsdc({ deadline: null }));
+
+			expect(container.querySelector('#swap-deadline')).toHaveTextContent(
+				en.wallet_connect.text.swap_no_deadline
+			);
+			expect(queryByTestId('wallet-connect-swap-expired')).not.toBeInTheDocument();
+		});
+
+		it('should state the most an exact-output swap pays', () => {
+			const { container, getByText } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapV3Swap({
+							exactInput: false,
+							amount: 1_087_807n,
+							amountLimit: 1_010_000n
+						})
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			expect(getByText(en.wallet_connect.text.swap_pay_at_most)).toBeInTheDocument();
+			expect(container.querySelector('#swap-pay')).toHaveTextContent('1.01 EURC');
+		});
+
+		it('should state what the wallet transfers in to swap as what it pays', () => {
+			const { container, getByText } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapCommand({
+							type: UNISWAP_COMMANDS.PERMIT2_TRANSFER_FROM,
+							types: ['address', 'address', 'uint160'],
+							values: [BASE_EURC_TOKEN.address, UNISWAP_RECIPIENT_ROUTER, 1_000_000n]
+						}),
+						encodeUniswapV3Swap({
+							amount: 1_000_000n,
+							amountLimit: 1_087_807n,
+							payerIsUser: false
+						})
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			expect(getByText(en.wallet_connect.text.swap_pay)).toBeInTheDocument();
+			expect(container.querySelector('#swap-pay')).toHaveTextContent('1 EURC');
+		});
+
+		it('should state the allowance the swap grants, with when it ends', () => {
+			const expiration = 1_795_682_829n;
+
+			const { container } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapPermit({ expiration }),
+						encodeUniswapV3Swap({ amount: 1_000_000n, amountLimit: 1_087_807n })
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			expect(container.querySelector('#swap-allowance')).toHaveTextContent(
+				replacePlaceholders(en.wallet_connect.text.swap_allowance_unlimited, {
+					$symbol: 'EURC',
+					$date: formatSecondsToDate({ seconds: Number(expiration) })
+				})
+			);
+		});
+
+		it('should state each fee the swap pays out, with who gets it', () => {
+			const { container } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapV3Swap({
+							recipient: UNISWAP_RECIPIENT_ROUTER,
+							amount: 1_000_000n,
+							amountLimit: ZERO
+						}),
+						encodeUniswapCommand({
+							type: UNISWAP_COMMANDS.PAY_PORTION,
+							types: ['address', 'address', 'uint256'],
+							values: [BASE_USDC_TOKEN.address, OTHER, 25n]
+						}),
+						encodeUniswapSweep({ amountMin: 1_080_000n })
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			const fee = container.querySelector('#swap-app-fee-0');
+
+			expect(fee).toHaveTextContent(
+				replacePlaceholders(en.wallet_connect.text.swap_app_fee_share, {
+					$share: '0.25%',
+					$symbol: 'USDC'
+				})
+			);
+			expect(fee).toHaveTextContent(OTHER);
+		});
+
+		// As 0%, a share too small for the precision shown would read as no fee, though the router pays
+		// it.
+		it.each([
+			{ portion: 400_000_000_000n, share: '< 0.0001%' },
+			{ portion: 500_000_000_000n, share: '0.0001%' },
+			{ portion: ZERO, share: '0%' }
+		])('should state a share of $portion in 10^18 as $share', ({ portion, share }) => {
+			const { container } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapV3Swap({
+							recipient: UNISWAP_RECIPIENT_ROUTER,
+							amount: 1_000_000n,
+							amountLimit: ZERO
+						}),
+						encodeUniswapCommand({
+							type: UNISWAP_COMMANDS.PAY_PORTION_FULL_PRECISION,
+							types: ['address', 'address', 'uint256'],
+							values: [BASE_USDC_TOKEN.address, OTHER, portion]
+						}),
+						encodeUniswapSweep({ amountMin: 1_080_000n })
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			// The whole text: "0.0001%" is part of "< 0.0001%".
+			expect(container.querySelector('#swap-app-fee-0 span')?.textContent).toBe(
+				replacePlaceholders(en.wallet_connect.text.swap_app_fee_share, {
+					$share: share,
+					$symbol: 'USDC'
+				})
+			);
+		});
+
+		// Rounded to eight decimals, an 18-decimal amount could read as less than the wallet pays or as
+		// more than the minimum the router enforces.
+		describe('an 18-decimal amount', () => {
+			const BASE_WETH = '0x4200000000000000000000000000000000000006';
+
+			it('should state a payment in full', () => {
+				const value = 1_000_000_004_999_999_999n;
+
+				const { container } = renderSwapWithValue({
+					data: encodeUniswapExecute({
+						commands: [
+							encodeUniswapCommand({
+								type: UNISWAP_COMMANDS.WRAP_ETH,
+								types: ['address', 'uint256'],
+								values: [UNISWAP_RECIPIENT_ROUTER, value]
+							}),
+							encodeUniswapV3Swap({
+								amount: value,
+								amountLimit: 1_087_807n,
+								tokens: [BASE_WETH, BASE_USDC_TOKEN.address],
+								payerIsUser: false
+							})
+						],
+						deadline: inAnHour()
+					}),
+					value
+				});
+
+				expect(container.querySelector('#swap-pay')).toHaveTextContent('1.000000004999999999 ETH');
+			});
+
+			it('should state a minimum in full', () => {
+				const { container } = renderSwap(
+					encodeUniswapExecute({
+						commands: [
+							encodeUniswapV3Swap({
+								recipient: UNISWAP_RECIPIENT_ROUTER,
+								amount: 1_000_000n,
+								amountLimit: ZERO,
+								tokens: [BASE_EURC_TOKEN.address, BASE_WETH]
+							}),
+							encodeUniswapCommand({
+								type: UNISWAP_COMMANDS.UNWRAP_WETH,
+								types: ['address', 'uint256'],
+								values: [mockUniswapWallet, 1_000_000_005_000_000_000n]
+							})
+						],
+						deadline: inAnHour()
+					})
+				);
+
+				expect(container.querySelector('#swap-receive')).toHaveTextContent('1.000000005 ETH');
+			});
+		});
+
+		// Rounded to four decimals, either would read as less than the router may spend or pays.
+		it('should state a finite allowance in full', () => {
+			const expiration = 1_795_682_829n;
+
+			const { container } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapPermit({ amount: 1_234_540n, expiration }),
+						encodeUniswapV3Swap({ amount: 1_000_000n, amountLimit: 1_087_807n })
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			expect(container.querySelector('#swap-allowance')).toHaveTextContent(
+				replacePlaceholders(en.wallet_connect.text.swap_allowance_amount, {
+					$amount: '1.23454',
+					$symbol: 'EURC',
+					$date: formatSecondsToDate({ seconds: Number(expiration) })
+				})
+			);
+		});
+
+		it('should state a fee of a stated amount in full', () => {
+			const { container } = renderSwap(
+				encodeUniswapExecute({
+					commands: [
+						encodeUniswapV3Swap({
+							recipient: UNISWAP_RECIPIENT_ROUTER,
+							amount: 1_000_000n,
+							amountLimit: ZERO
+						}),
+						encodeUniswapCommand({
+							type: UNISWAP_COMMANDS.TRANSFER,
+							types: ['address', 'address', 'uint256'],
+							values: [BASE_USDC_TOKEN.address, OTHER, 12_000_049n]
+						}),
+						encodeUniswapSweep({ amountMin: 1_080_000n })
+					],
+					deadline: inAnHour()
+				})
+			);
+
+			expect(container.querySelector('#swap-app-fee-0 span')?.textContent).toBe('12.000049 USDC');
+		});
+	});
+
 	describe('ckETH helper contract deposits', () => {
 		// The ckETH helper contract on Ethereum mainnet, as the minter returns it.
 		const CKETH_HELPER = '0x7574eB42cA208A4f6960ECCAfDF186D627dCC175';
@@ -888,7 +1234,12 @@ describe('EthWalletConnectSendReview', () => {
 						data,
 						networkId: ETHEREUM_NETWORK.id,
 						minterInfo: unconfirmed ? undefined : minterInfo,
-						principal: mockPrincipal
+						principal: mockPrincipal,
+						chainId: ETHEREUM_NETWORK.chainId,
+						value: 1_000_000_000_000_000_000n,
+						wallet: mockUniswapWallet,
+						nativeToken: ETHEREUM_TOKEN,
+						tokens: []
 					}),
 					data,
 					destination: to,
