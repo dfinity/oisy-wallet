@@ -73,6 +73,7 @@
 		isRouteHelp,
 		isRouteDappExplorer,
 		isRouteSettings,
+		isRouteTools,
 		networkUrl
 	} from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
@@ -123,8 +124,14 @@
 	const activityRoute = $derived(isRouteActivity(page));
 	const rewardsRoute = $derived(isRouteRewards(page));
 	const helpRoute = $derived(isRouteHelp(page));
+	const toolsRoute = $derived(isRouteTools(page));
 	const addressesOption = $derived(
-		!settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute && !helpRoute
+		!settingsRoute &&
+			!dAppExplorerRoute &&
+			!activityRoute &&
+			!rewardsRoute &&
+			!helpRoute &&
+			!toolsRoute
 	);
 
 	const addressModalId = Symbol();

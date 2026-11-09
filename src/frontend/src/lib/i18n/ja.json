@@ -133,7 +133,7 @@
 			"section_finance": "金融",
 			"section_more": "その他",
 			"airdrops": "エアドロップ",
-			"canister_top_up": "キャニスターチャージ",
+			"tools": "ツール",
 			"earning": "収益",
 			"pay": "",
 			"wallet_connect": "",
@@ -167,7 +167,7 @@
 			"borrow": "借入画面を表示",
 			"earning": "収益画面を表示",
 			"airdrops": "エアドロップ報酬を表示",
-			"canister_top_up": "ICPまたはTCYCLESでキャニスターにチャージ",
+			"tools": "ツールを開く",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "ウォレットアドレス、設定、サインアウト、外部リンク",
@@ -807,8 +807,8 @@
 			"support_title": "サポート",
 			"support_description": "$oisy_name ドキュメントのサポートページで回答や詳しい情報をご確認いただけます。解決しない場合はチームまでご連絡ください。",
 			"support_link": "サポートページへ",
-			"network_explorers_title": "ブロックエクスプローラー",
-			"network_explorers_description": "$oisy_name は第三者のインデクサーから履歴を作成しているため、チェーンより反映が遅れることがあります。ブロックエクスプローラーでは、ネットワーク自体がお客様のアドレスについて記録している内容を確認できます。",
+			"network_explorers_title": "ブロックチェーンエクスプローラー",
+			"network_explorers_description": "これらのリンクを開くと、ブロックチェーンエクスプローラーでお客様のアドレスを表示し、リアルタイムの残高とトランザクション履歴全体を確認できます。ブロックチェーンは公開台帳のため、$oisy_name のすべてのオンチェーンアクティビティをご自身で検証・調査できます。",
 			"explorers_title": "プロバイダーでの取引状況",
 			"explorers_description": "$oisy_name はスワップやブリッジ送金を第三者のプロバイダー経由で行います。想定より時間がかかっている場合は、プロバイダーのエクスプローラーを開いてください。お客様のウォレットで絞り込まれた状態で、送金の進行状況を確認できます。",
 			"explorers_velora_description": "Ethereum およびその他の EVM ネットワークでのスワップ。",
@@ -838,7 +838,7 @@
 			"withdraw": "出金"
 		},
 		"alt": {
-			"network_explorer_link": "お客様のアドレスで $network のブロックエクスプローラーを開く",
+			"network_explorer_link": "お客様のアドレスで $network のブロックチェーンエクスプローラーを開く",
 			"explorer_link": "お客様の $chain アドレスで $provider のエクスプローラーを開く",
 			"select_token_first": "プールの 1 つ目のトークンを選択",
 			"select_token_second": "プールの 2 つ目のトークンを選択",
@@ -889,6 +889,8 @@
 			"disable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を無効にする",
 			"save_spam_filter_success": "スパムフィルターの設定が更新されました。",
 			"export_data": "データをエクスポート",
+			"export_data_moved": "エクスポートは「ツール」に移動しました。",
+			"open_tools": "ツールを開く",
 			"export_data_description": "トークンと取引をCSVとしてダウンロード — 基本情報には Basic、追加項目には Extended をご利用ください。",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -909,6 +911,12 @@
 			"loading_profile": "プロフィールの読み込み中にエラーが発生しました。ページを更新してください。",
 			"export_exchange_rate_unavailable": "為替レートを読み込み中です。しばらくしてから再度お試しください。",
 			"export_failed": "エクスポートを作成できませんでした。もう一度お試しください。"
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "ツール",
+			"top_up_canister": "ICPまたはTCYCLESでキャニスターにチャージ"
 		}
 	},
 	"shortcuts": {
@@ -1206,6 +1214,8 @@
 			"description": "サイクルは$tokenの残高からキャニスターに送られ、キャニスターはそれを計算とストレージに使います。",
 			"description_icp": "$tokenはネットワークのレートでサイクルに変換され、キャニスターはそれを計算とストレージに使います。",
 			"pay_with": "チャージの支払いに使うトークンを選んでください。",
+			"enable_token": "有効にする",
+			"not_enough_to_pay": "チャージには不足しています",
 			"no_token_title": "ICPまたはTCYCLESでチャージ",
 			"no_token_description": "キャニスターはサイクルで動き、チャージするとキャニスターにサイクルが追加されます。ウォレットに十分なICPまたはTCYCLESがあれば、ここでチャージできます。",
 			"canister_id_placeholder": "キャニスターIDを入力",
@@ -1255,6 +1265,9 @@
 			"not_started": "チャージを開始できませんでした。ウォレットからは何も出ていません。しばらくしてからもう一度お試しください。",
 			"transfer_failed": "$tokenの送金は完了しませんでした。ウォレットからは何も出ていません。しばらくしてからもう一度お試しください。",
 			"unconfirmed": "OISYは$tokenの送金を確認できませんでした。送金が完了していれば、チャージはバックグラウンドで完了します。進行状況はアクティブなトランザクションで確認できます。"
+		},
+		"alt": {
+			"enable_token": "支払いに使うために$tokenを有効にする"
 		}
 	},
 	"active_user_transactions": {

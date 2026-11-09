@@ -1017,8 +1017,8 @@ describe('LoaderActiveUserTransactions', () => {
 			});
 		});
 
-		// Only the navigation pays with ICP, so that is the source of every top-up row.
-		it('fires one cycles_top_up success from the navigation and refreshes the wallet when a top-up settles', async () => {
+		// Only Tools pays with ICP, so that is the source of every top-up row.
+		it('fires one cycles_top_up success from Tools and refreshes the wallet when a top-up settles', async () => {
 			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
 			activeUserTransactionsStore.upsert({
 				transaction: cyclesTopUp({ id: 'cycles-top-up-a', status: { Executing: null } })
@@ -1044,7 +1044,7 @@ describe('LoaderActiveUserTransactions', () => {
 				metadata: expect.objectContaining({
 					event_modifier: 'top_up',
 					result_status: 'success',
-					source_location: 'navigation',
+					source_location: 'tools_page',
 					token_symbol: 'ICP'
 				})
 			});
