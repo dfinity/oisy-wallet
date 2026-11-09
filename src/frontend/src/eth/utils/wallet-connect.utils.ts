@@ -996,7 +996,7 @@ const matchesApprovalSchema = ({
 		const fields = types[name];
 
 		return (
-			nonNullish(fields) &&
+			Array.isArray(fields) &&
 			sameTypedDataFields({
 				fields: witness && name === primaryType ? fields.slice(0, -1) : fields,
 				expected: expectedTypes[name]
@@ -1026,15 +1026,18 @@ export const getEthTypedDataApproval = ({
 }: WalletConnectEthSignTypedDataV4): WalletConnectEthTypedDataApproval | undefined => {
 	const { EIP712Domain: _EIP712Domain, ...rest } = types;
 
-	const schema = ETH_TYPED_DATA_APPROVAL_SCHEMAS.find((schema) =>
-		matchesApprovalSchema({ types: rest, schema })
-	);
-
-	if (isNullish(schema)) {
-		return;
-	}
-
 	try {
+		// Matched inside the `try` as well: the types are the dApp's own, and a struct declared as
+		// anything but a list of members can throw while it is compared. Such a payload is left
+		// unsummarized, as one with a non-conforming value is, rather than breaking the review.
+		const schema = ETH_TYPED_DATA_APPROVAL_SCHEMAS.find((schema) =>
+			matchesApprovalSchema({ types: rest, schema })
+		);
+
+		if (isNullish(schema)) {
+			return;
+		}
+
 		assertValidEthTypedData({ types: rest, primaryType: schema.primaryType, message });
 
 		const approval = schema.toApproval({ message, domain });

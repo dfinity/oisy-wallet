@@ -1245,6 +1245,36 @@ describe('EthWalletConnectMessage', () => {
 				expect(getByText('Order')).toBeInTheDocument();
 				expect(getByText('TokenPermissions')).toBeInTheDocument();
 			});
+
+			// A witness struct declared as anything but a list of members cannot be signed, and the
+			// review resolves it as invalid. It must still render to say so.
+			it.each([
+				{ struct: 'PermitWitnessTransferFrom', shape: 'an object', declared: {} },
+				{ struct: 'PermitBatchWitnessTransferFrom', shape: 'an object', declared: {} },
+				{
+					struct: 'PermitWitnessTransferFrom',
+					shape: 'a list of nulls',
+					declared: [null, null, null, null, null]
+				}
+			])(
+				'should warn about a $struct declared as $shape instead of failing to render',
+				({ struct, declared }) => {
+					const { getByTestId, queryByText } = render(EthWalletConnectMessage, {
+						props: {
+							request: toRequest({
+								types: { ...PERMIT2_TYPES, [struct]: declared },
+								domain: PERMIT2_DOMAIN,
+								primaryType: struct,
+								message: PERMIT2_TRANSFER_MESSAGE
+							}),
+							invalidTypedData: true
+						}
+					});
+
+					expect(getByTestId('wallet-connect-invalid-typed-data-warning')).toBeInTheDocument();
+					expect(queryByText(en.wallet_connect.text.spender)).not.toBeInTheDocument();
+				}
+			);
 		});
 	});
 });

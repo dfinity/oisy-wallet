@@ -1918,6 +1918,37 @@ describe('wallet-connect.utils', () => {
 
 				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
 			});
+
+			// The types are the dApp's own, parsed from JSON. A struct declared as anything but a list
+			// of members is typed data that cannot be signed, and comparing it must not throw.
+			it.each([
+				{ transfer: permit2WitnessTransfer, shape: 'an object', declared: {} },
+				{ transfer: permit2BatchWitnessTransfer, shape: 'an object', declared: {} },
+				{
+					transfer: permit2WitnessTransfer,
+					shape: 'a list of nulls',
+					declared: [null, null, null, null, null]
+				}
+			])(
+				'summarizes nothing for a $transfer.primaryType declared as $shape',
+				({ transfer, declared }) => {
+					const typedData: WalletConnectEthSignTypedDataV4 = JSON.parse(
+						JSON.stringify({
+							...transfer,
+							types: { ...transfer.types, [transfer.primaryType]: declared }
+						})
+					);
+
+					expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+					expect(
+						hasInvalidTypedData({
+							method: SESSION_REQUEST_ETH_SIGN_V4,
+							params: toParams(typedData),
+							sessionChainId: MAINNET_SESSION
+						})
+					).toBeTruthy();
+				}
+			);
 		});
 
 		it('summarizes nothing for an unrelated struct that declares spender and details', () => {
