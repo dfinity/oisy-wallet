@@ -1195,8 +1195,8 @@ interface I18nSwap {
 
 interface I18nBuy {
 	text: {
-		buy: string;
-		buy_dev: string;
+		buy_sell: string;
+		buy_sell_dev: string;
 		unavailable_title: string;
 		unavailable_description_disabled: string;
 		unavailable_description_signing_failed: string;
