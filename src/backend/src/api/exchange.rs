@@ -10,7 +10,8 @@ use crate::{
     exchange::{
         fetch_and_update_prices, is_exchange_rate_refresh_enabled, note_rate_request,
         priceable_tokens_for_caller, queue_for_next_refresh, record_token_activity,
-        release_refresh_lock, snapshot_and_stale, try_acquire_refresh_lock,
+        release_refresh_lock, snapshot_and_stale, take_queued_for_refresh,
+        try_acquire_refresh_lock,
     },
     state::{mutate_api_keys, read_state},
     types::{StoredPrincipal, StoredTokenId},
@@ -89,12 +90,19 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
         return snapshot;
     };
 
+    // Holding the lock, this refresh also takes the tokens queued by calls that
+    // found it held, so they need not wait for the recurring refresh.
+    let mut to_fetch = stale;
+    to_fetch.extend(take_queued_for_refresh());
+    to_fetch.sort_unstable();
+    to_fetch.dedup();
+
     // Background-spawn the refresh so the response isn't gated on the outcall
     // round-trip. The 60s recurring refresh will also pick up the recorded
     // tokens; this spawn just shortens the convergence window for tokens the
     // recurring refresh hasn't gotten to yet.
     ic_cdk::futures::spawn_migratory(async move {
-        let outcome = fetch_and_update_prices(&stale).await;
+        let outcome = fetch_and_update_prices(&to_fetch).await;
         release_refresh_lock(lock);
         if let Err(err) = outcome {
             ic_cdk::println!("get_exchange_rates background refresh failed: {err:?}");

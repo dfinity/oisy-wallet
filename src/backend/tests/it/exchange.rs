@@ -475,18 +475,10 @@ fn answer_pending_outcalls(pic_setup: &PicBackend, body: &str) {
     }
 }
 
-#[test]
-fn a_token_the_full_activity_map_did_not_take_is_fetched_by_the_next_refresh() {
-    const NEW_ADDRESS: &str = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
-    let pic_setup = setup();
-    enable_exchange_rate_refresh(&pic_setup);
-    // A refresh of 2,000 tokens sends about 40 lookups at once, each reserving about 110B cycles
-    // in PocketIC, more than the default balance leaves liquid.
-    pic_setup
-        .pic
-        .add_cycles(pic_setup.canister_id, 20_000_000_000_000);
+const QUEUED_ADDRESS: &str = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
 
-    let erc20 = |address: String| CustomToken {
+fn erc20_custom_token(address: String) -> CustomToken {
+    CustomToken {
         token: Token::Erc20(ErcToken {
             token_address: ErcTokenId(address),
             chain_id: 1,
@@ -496,16 +488,28 @@ fn a_token_the_full_activity_map_did_not_take_is_fetched_by_the_next_refresh() {
         section: None,
         allow_external_content_source: None,
         allowed_external_content_source_urls: None,
-    };
+    }
+}
 
-    // Two accounts with 1,000 ERC-20 tokens each fill `token_activity`.
+/// Fills `token_activity` with two holders of 1,000 ERC-20 tokens each, then has a third user ask
+/// for [`QUEUED_ADDRESS`] while a refresh the first holder started holds the lock, so that the
+/// token is queued. Answers that refresh's lookups, which releases the lock, and returns the
+/// holders.
+fn queue_a_token_the_full_activity_map_did_not_take(pic_setup: &PicBackend) -> Vec<Principal> {
+    enable_exchange_rate_refresh(pic_setup);
+    // A refresh of 2,000 tokens sends about 40 lookups at once, each reserving about 110B cycles
+    // in PocketIC, more than the default balance leaves liquid.
+    pic_setup
+        .pic
+        .add_cycles(pic_setup.canister_id, 20_000_000_000_000);
+
     let holders: Vec<Principal> = (0..2u32)
         .map(|account| Principal::self_authenticating(account.to_be_bytes()))
         .collect();
     for (account, holder) in (0u32..).zip(&holders) {
         pic_setup.ensure_user_profile(*holder);
         let tokens: Vec<CustomToken> = (0..1_000u32)
-            .map(|n| erc20(format!("0x{:040x}", account * 1_000 + n)))
+            .map(|n| erc20_custom_token(format!("0x{:040x}", account * 1_000 + n)))
             .collect();
         assert_eq!(
             pic_setup.update::<()>(*holder, "set_many_custom_tokens", tokens),
@@ -523,28 +527,63 @@ fn a_token_the_full_activity_map_did_not_take_is_fetched_by_the_next_refresh() {
     let caller = Principal::from_text(USER_1).expect("valid user principal");
     pic_setup.ensure_user_profile(caller);
     assert_eq!(
-        pic_setup.update::<()>(caller, "set_custom_token", erc20(NEW_ADDRESS.to_string())),
+        pic_setup.update::<()>(
+            caller,
+            "set_custom_token",
+            erc20_custom_token(QUEUED_ADDRESS.to_string())
+        ),
         Ok(())
     );
     pic_setup
         .update::<Vec<(TokenId, Option<ExchangeRate>)>>(caller, "get_exchange_rates", ())
         .expect("get_exchange_rates should answer");
 
-    answer_pending_outcalls(&pic_setup, "{}");
+    answer_pending_outcalls(pic_setup, "{}");
 
-    pic_setup.pic.advance_time(Duration::from_secs(60));
-    let mut requests = Vec::new();
+    holders
+}
+
+/// Ticks until the canister has pending HTTP outcalls, and returns their URLs.
+fn pending_outcall_urls(pic_setup: &PicBackend) -> Vec<String> {
     for _ in 0..10 {
         pic_setup.pic.tick();
-        requests = pic_setup.pic.get_canister_http();
+        let requests = pic_setup.pic.get_canister_http();
         if !requests.is_empty() {
-            break;
+            return requests.into_iter().map(|request| request.url).collect();
         }
     }
+    Vec::new()
+}
+
+#[test]
+fn a_token_the_full_activity_map_did_not_take_is_fetched_by_the_next_refresh() {
+    let pic_setup = setup();
+    queue_a_token_the_full_activity_map_did_not_take(&pic_setup);
+
+    pic_setup.pic.advance_time(Duration::from_secs(60));
+
     assert!(
-        requests
+        pending_outcall_urls(&pic_setup)
             .iter()
-            .any(|request| request.url.contains(NEW_ADDRESS)),
+            .any(|url| url.contains(QUEUED_ADDRESS)),
         "The next refresh should ask for the token the map did not take"
+    );
+}
+
+#[test]
+fn a_caller_started_refresh_fetches_the_queued_tokens() {
+    let pic_setup = setup();
+    let holders = queue_a_token_the_full_activity_map_did_not_take(&pic_setup);
+
+    // Before the next recurring refresh: the second holder's call starts a refresh of its own.
+    pic_setup
+        .update::<Vec<(TokenId, Option<ExchangeRate>)>>(holders[1], "get_exchange_rates", ())
+        .expect("get_exchange_rates should answer");
+
+    assert!(
+        pending_outcall_urls(&pic_setup)
+            .iter()
+            .any(|url| url.contains(QUEUED_ADDRESS)),
+        "A caller-started refresh should ask for the queued token"
     );
 }

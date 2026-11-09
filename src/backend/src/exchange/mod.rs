@@ -117,7 +117,8 @@ thread_local! {
 
     /// Stale custom tokens that `get_exchange_rates` found no refresh covering: `token_activity`
     /// did not take them, so the recurring refresh does not know them, and another refresh held
-    /// the lock. [`refresh_exchange_rates`] fetches them on its next run and clears the set.
+    /// the lock. The next refresh, the recurring one or one `get_exchange_rates` starts, fetches
+    /// them and clears the set (see [`take_queued_for_refresh`]).
     /// Ephemeral like the lock: after an upgrade, the next call queues them again.
     static QUEUED_FOR_REFRESH: RefCell<BTreeSet<StoredTokenId>> =
         const { RefCell::new(BTreeSet::new()) };
@@ -576,8 +577,9 @@ pub(crate) fn queue_for_next_refresh(token_ids: impl IntoIterator<Item = StoredT
     });
 }
 
-/// Empties [`QUEUED_FOR_REFRESH`] and returns what it held.
-fn take_queued_for_refresh() -> Vec<StoredTokenId> {
+/// Empties [`QUEUED_FOR_REFRESH`] and returns what it held. Called by whichever refresh holds the
+/// lock: the recurring one and the one `get_exchange_rates` starts.
+pub(crate) fn take_queued_for_refresh() -> Vec<StoredTokenId> {
     QUEUED_FOR_REFRESH.with(|queued| {
         std::mem::take(&mut *queued.borrow_mut())
             .into_iter()
