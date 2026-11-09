@@ -533,6 +533,38 @@ describe('SolWalletConnectSignModal', () => {
 		expect(args).toEqual(expect.objectContaining({ keepsBatchWhole: false }));
 	});
 
+	// A token call the run makes with the wallet among the keys signing for a multisig acts on an
+	// account the review does not count as the user's, and signing refuses it like an ambiguous
+	// message, so the review holds the button the same way.
+	it('should hold approval when the run makes a token call the wallet signs for a multisig', async () => {
+		vi.mocked(decode).mockResolvedValueOnce({
+			amount: 1n,
+			requiredSignatures: 1,
+			signsForMultisig: true,
+			parties: { sources: [], destinations: [], partial: false }
+		});
+
+		const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+			props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+		});
+
+		await waitFor(() => {
+			expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+		});
+
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
+	it('should hand signing no multisig signature when the run made none', async () => {
+		const args = await approve({
+			amount: 1n,
+			requiredSignatures: 1,
+			parties: { sources: [], destinations: [], partial: true }
+		});
+
+		expect(args).toEqual(expect.objectContaining({ signsForMultisig: false }));
+	});
+
 	describe('the wallet handed to another program', () => {
 		beforeEach(() => {
 			solAddressMainnetStore.set({ data: mockSolAddress, certified: true });

@@ -472,6 +472,58 @@ describe('sol-simulation.services', () => {
 		});
 	});
 
+	// A token call a program makes inside its own instruction reaches the review through the run alone,
+	// so it is the run that says whether the wallet signs one for a multisig.
+	describe('token calls signed for a multisig inside an instruction', () => {
+		const innerApproval = (info: object): SolanaSimulatedInnerInstructions =>
+			[
+				{
+					index: 0,
+					instructions: [
+						{
+							program: 'spl-token',
+							programId: address(TOKEN_PROGRAM_ADDRESS),
+							parsed: {
+								type: 'approve',
+								info: {
+									source: mockSolAddress3,
+									delegate: mockSolAddress2,
+									amount: '18446744073709551615',
+									...info
+								}
+							}
+						}
+					]
+				}
+			] satisfies SolanaSimulatedInnerInstructions;
+
+		it('should say so when the wallet is among the keys signing for a multisig', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [],
+					innerInstructions: innerApproval({
+						multisigOwner: mockSolAddress4,
+						signers: [mockSolAddress]
+					})
+				})
+			);
+
+			const result = await simulateSolTransaction(params(message([])));
+
+			expect(result?.signsForMultisig).toBeTruthy();
+		});
+
+		it('should say nothing when the wallet signs as the owner', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({ accounts: [], innerInstructions: innerApproval({ owner: mockSolAddress }) })
+			);
+
+			const result = await simulateSolTransaction(params(message([])));
+
+			expect(result).not.toHaveProperty('signsForMultisig');
+		});
+	});
+
 	// The run returns the calls a step of a token batch makes, such as a transfer running its mint's
 	// hook, after all of the batch's steps, so nothing puts them in order and the list keeps the batch
 	// whole. That holds however fully the message's own mapping reads the steps.
