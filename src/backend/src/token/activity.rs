@@ -16,15 +16,26 @@ use crate::{
 /// time, not to gate refreshes.
 pub(crate) const TOKEN_ACTIVITY_RETENTION_SEC: u64 = 30 * 60;
 
+/// Most tokens `token_activity` holds at once.
+///
+/// Every refresh prices each token held here, 50 to a `CoinGecko` lookup, so this keeps a refresh
+/// within 40 lookups besides the native tokens, and keeps eviction within as many entries.
+pub(crate) const MAX_TOKEN_ACTIVITY_ENTRIES: u64 = 2_000;
+
 fn add_to_token_activity(
     token_id: StoredTokenId,
     token_activity: &mut StableBTreeMap<StoredTokenId, Timestamp, VMem>,
     timestamp: Timestamp,
 ) {
-    token_activity.insert(token_id, timestamp);
+    if token_activity.len() < MAX_TOKEN_ACTIVITY_ENTRIES || token_activity.contains_key(&token_id) {
+        token_activity.insert(token_id, timestamp);
+    }
 }
 
 /// Records `token_ids` as active at `now_ns`.
+///
+/// A token held already is always updated. One not held yet is recorded only while fewer than
+/// [`MAX_TOKEN_ACTIVITY_ENTRIES`] are held; otherwise it waits until eviction makes room.
 ///
 /// Endpoints go through `exchange::record_token_activity`, which decides which tokens the price
 /// refresh needs.
@@ -64,4 +75,39 @@ pub fn evict_inactive_tokens(retention_sec: u64) -> u64 {
         }
         removed
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use candid::Principal;
+    use pretty_assertions::assert_eq;
+
+    use super::*;
+    use crate::state::read_state;
+
+    fn icrc(n: u64) -> TokenId {
+        TokenId::Icrc(Principal::from_slice(&n.to_be_bytes()))
+    }
+
+    fn last_active(token_id: &TokenId) -> Option<Timestamp> {
+        read_state(|s| s.token_activity.get(&StoredTokenId(token_id.clone())))
+    }
+
+    #[test]
+    fn mark_tokens_active_holds_at_most_the_cap_and_keeps_updating_held_tokens() {
+        let tokens: Vec<TokenId> = (0..=MAX_TOKEN_ACTIVITY_ENTRIES).map(icrc).collect();
+        let first = &tokens[0];
+        let over_the_cap = &tokens[tokens.len() - 1];
+
+        mark_tokens_active(&tokens, 1);
+        assert_eq!(
+            read_state(|s| s.token_activity.len()),
+            MAX_TOKEN_ACTIVITY_ENTRIES
+        );
+        assert_eq!(last_active(over_the_cap), None);
+
+        mark_tokens_active(&[first.clone(), over_the_cap.clone()], 2);
+        assert_eq!(last_active(first), Some(2));
+        assert_eq!(last_active(over_the_cap), None);
+    }
 }
