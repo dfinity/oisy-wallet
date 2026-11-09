@@ -3236,8 +3236,9 @@ export interface _SERVICE {
 	 * - the caller's custom tokens, filtered to variants the configured providers can actually price
 	 * (testnets, NFTs and ERC-4626 vaults are excluded).
 	 *
-	 * The endpoint also re-marks the returned tokens as active so the
-	 * background refresh timer keeps them warm. If any cached price is
+	 * While the backend price refresh is on, the endpoint also records the
+	 * caller's custom tokens as active so the background refresh timer keeps
+	 * them warm (see [`record_token_activity`]). If any cached price is
 	 * missing or older than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`]
 	 * seconds, the endpoint kicks off a refresh for that subset **in the
 	 * background** (via `ic_cdk::futures::spawn_migratory`) and returns the current cache
@@ -3446,7 +3447,7 @@ export interface _SERVICE {
 	 *
 	 * Note: This method was previously exposed as a *query* but is now an *update*
 	 * call. The change is intentional and breaking: `list_custom_tokens` now tracks
-	 * token activity by calling `mark_tokens_active`, which mutates canister state.
+	 * token activity by calling `record_token_activity`, which mutates canister state.
 	 * Because queries must not modify state on the IC, this function must be an
 	 * update, not a query.
 	 *

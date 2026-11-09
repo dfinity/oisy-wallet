@@ -178,6 +178,15 @@ thread_local! {
     /// calls it when the user accepts a provider's terms before a swap.
     pub(crate) static UPDATE_PROVIDER_AGREEMENTS_RATE_LIMITER: RateLimiter =
         RateLimiter::new(10, 60 * 1_000_000_000);
+
+    /// Limits how often a caller records token activity for the backend price refresh: 3 times
+    /// per minute, shared by `get_exchange_rates` and the custom-token endpoints.
+    ///
+    /// A recording writes an entry for each of the caller's custom tokens, up to 1,000, and keeps
+    /// them in the refresh for 10 minutes, so a second one within the minute adds nothing. The
+    /// wallet asks for rates once a minute; 3 leaves room for a reload or a token change.
+    pub(crate) static TOKEN_ACTIVITY_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(3, 60 * 1_000_000_000);
 }
 
 /// Per-caller sliding-window rate limiter for IC canister methods.

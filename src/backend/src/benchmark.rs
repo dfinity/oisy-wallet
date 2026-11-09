@@ -1149,3 +1149,43 @@ fn bench_prune_expired_tips_oversized() -> BenchResult {
         std::hint::black_box(prune_expired_tips(None, now, || true));
     })
 }
+
+// ---------------------------------------------------------------------------
+// Token activity
+// ---------------------------------------------------------------------------
+
+/// Evicts from a full `token_activity` twice: first at a time when no entry is past the retention
+/// window, which only reads them, then once half of them are, which also evicts those 1,000
+/// entries. The two scopes give the cost of reading one entry and of evicting one.
+#[bench(raw)]
+fn bench_evict_inactive_tokens_2000() -> BenchResult {
+    // `token::activity::MAX_TOKEN_ACTIVITY_ENTRIES`.
+    const COUNT: u64 = 2_000;
+    // Far past the 30-minute retention window of anything last active at 0.
+    const LATER_NS: u64 = 1 << 62;
+
+    for n in 0..COUNT {
+        // Even tokens were last active at 0, odd tokens at `LATER_NS`, so only even tokens are
+        // past the retention window at `LATER_NS`, and none is at 0.
+        let last_active_ns = if n % 2 == 0 { 0 } else { LATER_NS };
+        token::mark_tokens_active(
+            &[TokenId::Erc20(ErcTokenId(format!("0x{n:040x}")), 1)],
+            last_active_ns,
+        );
+    }
+
+    bench_fn(|| {
+        {
+            let _scope = bench_scope("read_2000");
+            std::hint::black_box(mutate_state(|s| {
+                token::evict_inactive_tokens(s, None, 0, || true)
+            }));
+        }
+        {
+            let _scope = bench_scope("read_2000_evict_1000");
+            std::hint::black_box(mutate_state(|s| {
+                token::evict_inactive_tokens(s, None, LATER_NS, || true)
+            }));
+        }
+    })
+}
