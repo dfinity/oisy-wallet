@@ -1,12 +1,22 @@
+import { ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
+import { notifyTopUp } from '$icp/api/cmc.api';
 import { withdrawCycles } from '$icp/api/cycles-ledger.api';
+import { icrc1Transfer } from '$icp/api/icp-ledger.api';
 import { getTransactions } from '$icp/api/icrc-index-ng.api';
+import { CmcNotifyProcessingError, CmcNotifyRefundedError } from '$icp/canisters/cmc.errors';
 import {
 	CyclesLedgerWithdrawDuplicateError,
 	CyclesLedgerWithdrawFailedError,
 	CyclesLedgerWithdrawRefusedError
 } from '$icp/canisters/cycles-ledger.errors';
-import { topUpCanister } from '$icp/services/cycles-top-up.services';
+import { CMC_TOP_UP_MEMO } from '$icp/constants/cmc.constants';
+import {
+	notifyCyclesTopUp,
+	topUpCanister,
+	transferIcpForCyclesTopUp
+} from '$icp/services/cycles-top-up.services';
 import type { IcrcTransaction } from '$icp/types/ic-transaction';
+import { getCmcDepositAccount } from '$icp/utils/cmc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import * as consoleUtils from '$lib/utils/console.utils';
 import {
@@ -25,7 +35,105 @@ vi.mock('$icp/api/icrc-index-ng.api', () => ({
 	getTransactions: vi.fn()
 }));
 
+vi.mock('$icp/api/icp-ledger.api', () => ({
+	icrc1Transfer: vi.fn()
+}));
+
+vi.mock('$icp/api/cmc.api', () => ({
+	notifyTopUp: vi.fn()
+}));
+
 describe('cycles-top-up.services', () => {
+	describe('transferIcpForCyclesTopUp', () => {
+		const canisterId = Principal.fromText('ywcsb-maaaa-aaaai-q6k7a-cai');
+
+		const params = {
+			identity: mockIdentity,
+			canisterId,
+			amount: 100_000_000n,
+			createdAt: 1_790_000_000_000_000_000n
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it("should send the ICP to the CMC's deposit account for the canister with the TPUP memo", async () => {
+			vi.mocked(icrc1Transfer).mockResolvedValue(42n);
+
+			await expect(transferIcpForCyclesTopUp(params)).resolves.toBe(42n);
+			expect(icrc1Transfer).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				to: getCmcDepositAccount(canisterId),
+				amount: params.amount,
+				createdAt: params.createdAt,
+				memo: CMC_TOP_UP_MEMO,
+				ledgerCanisterId: ICP_LEDGER_CANISTER_ID
+			});
+		});
+
+		it('should send TPUP as an 8-byte little-endian number', () => {
+			const view = new DataView(CMC_TOP_UP_MEMO.buffer);
+
+			expect(CMC_TOP_UP_MEMO).toHaveLength(8);
+			expect(view.getBigUint64(0, true)).toBe(0x50555054n);
+		});
+
+		it('should throw without an identity, before sending anything', async () => {
+			await expect(transferIcpForCyclesTopUp({ ...params, identity: undefined })).rejects.toThrow();
+			expect(icrc1Transfer).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('notifyCyclesTopUp', () => {
+		const params = {
+			identity: mockIdentity,
+			blockIndex: 42n,
+			canisterId: Principal.fromText('ywcsb-maaaa-aaaai-q6k7a-cai')
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should report the cycles the CMC deposited into the canister', async () => {
+			vi.mocked(notifyTopUp).mockResolvedValue(2_500_000_000_000n);
+
+			await expect(notifyCyclesTopUp(params)).resolves.toEqual({
+				status: 'topped_up',
+				cycles: 2_500_000_000_000n
+			});
+			expect(notifyTopUp).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				blockIndex: 42n,
+				to: params.canisterId
+			});
+		});
+
+		it('should report a refund with its block', async () => {
+			vi.mocked(notifyTopUp).mockRejectedValue(
+				new CmcNotifyRefundedError(43n, 'Canister not found')
+			);
+
+			await expect(notifyCyclesTopUp(params)).resolves.toEqual({
+				status: 'refunded',
+				reason: 'Canister not found',
+				refundBlockIndex: 43n
+			});
+		});
+
+		it('should keep the top-up pending while the CMC is processing', async () => {
+			vi.mocked(notifyTopUp).mockRejectedValue(new CmcNotifyProcessingError());
+
+			await expect(notifyCyclesTopUp(params)).resolves.toEqual({ status: 'pending' });
+		});
+
+		it('should throw without an identity rather than report the top-up pending', async () => {
+			await expect(notifyCyclesTopUp({ ...params, identity: undefined })).rejects.toThrow();
+			expect(notifyTopUp).not.toHaveBeenCalled();
+		});
+	});
+
 	describe('topUpCanister', () => {
 		const canisterId = Principal.fromText('ywcsb-maaaa-aaaai-q6k7a-cai');
 
