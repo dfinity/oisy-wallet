@@ -1044,7 +1044,6 @@
 			"open_qr_modal": "트랜잭션 세부 정보를 위한 QR 코드 스캔 시작",
 			"scan_qr": "QR 코드 스캔",
 			"select_token": "보낼 토큰 선택",
-			"select_network_filter": "네트워크 필터 선택",
 			"send_again": "다시 보내기",
 			"recently_used_tab": "최근 사용",
 			"contacts_tab": "연락처",
@@ -1139,6 +1138,8 @@
 			"ethereum_out_of_gas_gas_sent": "보낸 가스: $gasSent",
 			"ethereum_transaction_hash": "트랜잭션 해시: $hash",
 			"ethereum_unsigned_transaction": "서명되지 않은 트랜잭션: $transaction",
+			"ethereum_transaction_not_sent": "트랜잭션이 전송되지 않았습니다. 트랜잭션을 준비하기 위해 네트워크에 연결할 수 없었습니다. 다시 시도해도 안전합니다.",
+			"ethereum_transaction_unconfirmed": "트랜잭션이 네트워크에 도달했는지 확인할 수 없었습니다. 아직 처리될 수 있으므로 1~2분 정도 기다린 후, 다시 보내기 전에 활동 내역을 확인하세요.",
 			"solana_transaction_expired": "귀하의 트랜잭션은 Solana 네트워크에서 처리되지 않고 만료되었습니다. 제공된 우선순위 수수료가 충분하지 않았기 때문일 가능성이 높습니다. 최신 권장 금액으로 업데이트했으니 다시 시도해 주세요.",
 			"solana_confirmation_failed": "방금 생성하신 트랜잭션에 대한 확인을 받지 못했습니다. 몇 초 기다린 후 토큰의 트랜잭션 목록에서 트랜잭션이 올바르게 생성되었는지 확인해 주세요.",
 			"solana_insufficient_funds": "이 트랜잭션을 완료하기에 토큰 잔액이 부족합니다. 잔액이 마지막으로 표시된 이후 변경되었을 수 있습니다.",
@@ -1212,7 +1213,10 @@
 			"unknown": "OISY가 아직 충전 완료 여부를 확인할 수 없습니다. 완료되었다면 $token 활동에 표시됩니다. 다시 충전하면 같은 충전이 다시 전송되며, 한 번만 처리됩니다. 이 충전이 완료되었다면 새로운 충전이나 내용을 바꾼 충전은 사이클을 한 번 더 추가합니다.",
 			"unknown_fresh": "OISY가 아직 마지막 충전의 완료 여부를 확인할 수 없습니다. 완료되었다면 이번 충전으로 사이클이 한 번 더 추가됩니다. 먼저 $token 활동을 확인하세요.",
 			"sent_to_canister": "캐니스터에 $token을 보내도 충전되지 않습니다. $token은 캐니스터의 계정으로 들어가며, 캐니스터 자체 코드가 인출할 때만 사이클이 됩니다.",
-			"sent_to_canister_top_up": "캐니스터에 사이클을 추가하려면 $token 페이지에서 '충전'을 사용하세요."
+			"sent_to_canister_top_up": "캐니스터에 사이클을 추가하려면 $token 페이지에서 '충전'을 사용하세요.",
+			"choice_send": "$token 보내기",
+			"choice_send_description": "다른 계정으로 $token 토큰을 보냅니다. 캐니스터에 $token을 보내도 충전되지 않습니다.",
+			"choice_top_up_description": "$token 토큰을 사이클로 전환해 어떤 캐니스터든 충전합니다."
 		},
 		"error": {
 			"invalid_canister_id": "캐니스터 ID를 입력하세요. 사용자 프린시펄, 계정 ID, 다른 네트워크의 주소는 충전할 수 없습니다.",
@@ -1364,6 +1368,13 @@
 			"finishing_in_background": "",
 			"refreshing_ui": "UI 새로고침 중",
 			"swap_provider": "스왑 제공자",
+			"smart_swap": "",
+			"finding_best_rate": "",
+			"smart_swap_gain": "",
+			"smart_swap_best_of_offers": "",
+			"smart_swap_offers_compared": "",
+			"smart_swap_offers": "",
+			"smart_swap_selected_offer": "",
 			"swap_provider_website": "웹사이트",
 			"swap_route": "스왑 경로",
 			"included_network_fees": "포함된 네트워크 수수료",
@@ -1371,7 +1382,6 @@
 			"best_rate": "최선 환율",
 			"expected_minimum": "예상 최소값",
 			"you_receive": "받는 금액",
-			"select": "선택 >",
 			"select_swap_provider": "스왑 제공자 선택",
 			"open_icp_swap": "ICP Swap 웹사이트 열기",
 			"open_instructions_link": "안내 링크 열기",
@@ -1430,7 +1440,8 @@
 			"oisy_trade_order_not_placed": "",
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
-			"lifi_fee_changed": ""
+			"lifi_fee_changed": "",
+			"lifi_route_unverified": ""
 		}
 	},
 	"buy": {
@@ -1498,6 +1509,7 @@
 			"show_more_networks": "$number개의 네트워크 더 보기",
 			"hide_more_networks": "네트워크 더 보기 숨기기",
 			"on_network": " : $network",
+			"on_network_label": "$network 네트워크",
 			"delete_token": "토큰 삭제",
 			"edit_token": "토큰 편집",
 			"sort_by_value": "가치",
@@ -1506,6 +1518,18 @@
 			"hide_asset_types": "자산 유형 숨기기",
 			"asset_type": "$oisy_name의 자산 유형",
 			"asset_type_all": "모든 자산 유형",
+			"asset_type_all_short": "",
+			"clear_network_filter": "",
+			"clear_asset_type_filter": "",
+			"filter_asset_types": "",
+			"clear_filters": "",
+			"no_match_network": "",
+			"no_match_asset_type": "",
+			"no_match_asset_type_network": "",
+			"no_match_query": "",
+			"no_match_query_network": "",
+			"no_match_query_asset_type": "",
+			"no_match_query_asset_type_network": "",
 			"no_tokens_for_asset_type": "지갑에 $asset_type 자산이 없습니다",
 			"no_tokens_for_asset_type_zero_tokens": "선택한 네트워크에 $asset_type이(가) 없습니다",
 			"no_tokens_for_asset_type_description": "<strong>$count개의 지원 토큰</strong> 중에서 선택하여 포트폴리오 보기를 맞춤 설정하세요."
@@ -1615,7 +1639,8 @@
 		"placeholder": {
 			"enter_contract_address": "ERC20 컨트랙트 주소 입력",
 			"enter_token_address": "SPL 토큰 주소 입력",
-			"search_token": "토큰 검색"
+			"search_token": "토큰 검색",
+			"search_token_on_network": ""
 		},
 		"warning": {
 			"trust_token": "추가하려는 토큰을 신뢰할 수 있는지 확인하세요. 추가하려는 토큰이 악의적인 주체에 의해 통제되는 경우, 상당한 양의 토큰을 받은 것처럼 속여 토큰을 보내도록 유도하거나 기타 원치 않는 행동을 유발하는 등의 사기 시도가 있을 수 있습니다. 사기 및 보안 위험에 대해 자세히 알아보려면 <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">여기</a>를 참고하세요."
@@ -1866,6 +1891,22 @@
 			"cketh_deposit_principal": "ckETH 수신자",
 			"cketh_deposit_refused": "이 요청은 회원님의 것이 아닌 Internet Computer 프린시팔을 대상으로, 또는 OISY가 읽을 수 없는 데이터로 ckETH 전환 컨트랙트를 호출합니다. 안전을 위해 OISY는 서명하지 않습니다.",
 			"cketh_helper_unconfirmed": "OISY가 아직 ckETH 전환 컨트랙트를 확인할 수 없어 이 입금을 검사할 수 없습니다. 검사할 수 있을 때까지 승인이 비활성화된 상태로 유지됩니다.",
+			"swap_title": "",
+			"swap_pay": "",
+			"swap_pay_at_most": "",
+			"swap_receive_at_least": "",
+			"swap_recipient": "",
+			"swap_app_fee": "",
+			"swap_app_fee_share": "",
+			"swap_allowance": "",
+			"swap_allowance_amount": "",
+			"swap_allowance_unlimited": "",
+			"swap_valid_until": "",
+			"swap_no_deadline": "",
+			"swap_router": "",
+			"swap_recipient_not_wallet": "",
+			"swap_no_minimum": "",
+			"swap_expired": "",
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
 			"sign_message": "메시지 서명",
 			"sign_psbt": "트랜잭션 서명",
@@ -2486,6 +2527,7 @@
 			"create": "연락처를 만들지 못했습니다",
 			"update": "연락처를 업데이트하지 못했습니다",
 			"delete": "연락처를 삭제하지 못했습니다",
+			"load": "연락처를 불러오지 못했습니다",
 			"name_too_long": "이름을 $maxCharacters자 이하로 입력해 주세요."
 		}
 	},

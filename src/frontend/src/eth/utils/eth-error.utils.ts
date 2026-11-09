@@ -3,8 +3,10 @@ import {
 	trackEthTransactionSendOutOfGas,
 	type EthTransactionSendContext
 } from '$eth/services/eth-transaction-send-analytics.services';
+import { EthNonceReadError, EthSubmissionUnconfirmedError } from '$eth/types/send';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
+import { SwapBroadcastOutcomeUnknownError } from '$lib/types/errors';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -90,7 +92,10 @@ const isNodeInsufficientBalanceAnswer = ({ code, message }: Record<string, unkno
 	INSUFFICIENT_BALANCE_PATTERN.test(message) &&
 	!EXECUTION_REVERTED_PATTERN.test(message);
 
-const isInsufficientBalanceError = (err: unknown): boolean =>
+/**
+ * Whether the account cannot pay for the transaction, by ethers' own verdict or by the node's answer.
+ */
+export const isInsufficientBalanceError = (err: unknown): boolean =>
 	collectErrorRecords({ err }).some(
 		(record) =>
 			record.code === ETHERS_INSUFFICIENT_FUNDS_CODE || isNodeInsufficientBalanceAnswer(record)
@@ -348,9 +353,11 @@ const DEFINITIVE_REFUSAL_PATTERN =
 /**
  * Whether a broadcast failed because the node refused the transaction outright, so that it was
  * neither taken nor relayed: the account cannot pay for it, or the transaction is invalid. Only the
- * node's own answer to the broadcast counts, never a transport failure, which may have relayed it.
+ * node's own answer to the broadcast counts, never a transport failure, which may have relayed it,
+ * nor a refusal that came after one (`SwapBroadcastOutcomeUnknownError`, whose cause it is).
  */
 export const isDefinitiveTransactionRefusal = (err: unknown): boolean =>
+	!(err instanceof SwapBroadcastOutcomeUnknownError) &&
 	!answersOtherRequest(err) &&
 	(isInsufficientBalanceError(err) ||
 		collectErrorRecords({ err }).some(
@@ -378,7 +385,33 @@ export const isBroadcastRetriable = (err: unknown): boolean =>
 	);
 
 /**
- * Maps an error raised while broadcasting an Ethereum or EVM transaction to a user-friendly message.
+ * Whether the node turned the broadcast down because the transaction runs out of the gas it was
+ * signed with. No outright refusal, since another node can still mine it to revert, but one with an
+ * explanation of its own: the gas sent, the gas needed, and the fee it may have cost.
+ */
+export const isOutOfGasRefusal = (err: unknown): boolean => nonNullish(findNodeOutOfGasAnswer(err));
+
+// Whether the error, or one it wraps, is of the given kind: a caller may wrap a send's error again.
+const isErrorOfKind = ({
+	err,
+	kind
+}: {
+	err: unknown;
+	kind:
+		| typeof EthNonceReadError
+		| typeof EthSubmissionUnconfirmedError
+		| typeof SwapBroadcastOutcomeUnknownError;
+}): boolean => collectErrorRecords({ err }).some((record) => record instanceof kind);
+
+/**
+ * Maps an error raised by an Ethereum or EVM send to a user-friendly message.
+ *
+ * What a message may claim depends on how far the transaction got. One whose nonce could not be read
+ * was never signed, so it was not sent and retrying it is safe. One whose submission every provider
+ * failed without a word may have reached the network all the same, and a retry would be signed with
+ * the next nonce, so the message sends the user to their activity first and never says it was not
+ * sent. A swap whose broadcast outcome is unknown gets the same message, even when its last attempt
+ * was refused: an earlier attempt may have relayed it, and the refusal answers only the last one.
  *
  * Resolves i18n strings imperatively so callers don't need to pass them. Returns `undefined` when
  * the error is not one we can explain, allowing callers to fall through to their own generic
@@ -388,6 +421,17 @@ export const mapEthereumErrorMsg = (err: unknown): string | undefined => {
 	const {
 		send: { error }
 	} = get(i18n);
+
+	if (isErrorOfKind({ err, kind: EthNonceReadError })) {
+		return error.ethereum_transaction_not_sent;
+	}
+
+	if (
+		isErrorOfKind({ err, kind: EthSubmissionUnconfirmedError }) ||
+		isErrorOfKind({ err, kind: SwapBroadcastOutcomeUnknownError })
+	) {
+		return error.ethereum_transaction_unconfirmed;
+	}
 
 	if (isInsufficientBalanceError(err)) {
 		return error.ethereum_insufficient_funds;
