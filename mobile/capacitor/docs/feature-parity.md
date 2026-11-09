@@ -160,7 +160,13 @@ router still owns the route change, scroll and search state. Capture failure lea
 the visible Back control usable. See the [interaction contract](./shared-web-contract.md#token-navigation-contract)
 for validation, privacy cleanup and bounded capture/return behavior.
 
-Roots, pending tab requests, Account and blocking overlays disable the gesture.
+Roots, pending tab requests, Account and blocking overlays disable the native token gesture.
+Send, Swap and Contacts have a separate shared-web edge swipe that follows their
+leading Back control and closes the flow. The parent page remains rendered beneath
+it; cancelling preserves the form. Nested wizard steps retain their existing Back
+buttons. Submission, busy state and topmost accessory dialogs block the page swipe.
+See the [page presentation contract](./shared-web-contract.md#system-sheets).
+
 Explore retains its independent browser history. Root requests replace history;
 this is one approved parent, not independent retained tab stacks.
 

@@ -94,6 +94,7 @@
 	bind:this={modal}
 	{disablePointerEvents}
 	mobilePresentation="fullScreen"
+	mobileSwipeBack
 	onClose={close}
 	{steps}
 	testId={SWAP_TOKENS_MODAL}

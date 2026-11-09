@@ -197,6 +197,19 @@ unsaved-change checks and transaction guards still apply.
 Send, Swap, Contacts and other multi-step `WizardModal` flows use full-page web
 presentation, with Back/Cancel controls. Notes editors also stay full-page. They
 do not create a native sheet; only accessory overlays above them can do so.
+Send, Swap and Contacts opt into `mobileSwipeBack` on the shared `WizardModal`.
+Only their topmost full-page panel handles a rightward touch starting within 24 CSS
+pixels of the left screen edge. It follows the finger above the actual parent DOM;
+no screenshot, route pop, WebView reload or session handoff is needed. A completed
+swipe calls the same guarded callback as the leading Back button. This closes the
+flow; the existing in-form Back buttons still navigate individual wizard steps.
+A cancelled swipe leaves form values and the underlying route/scroll intact.
+Busy/submitting states, disabled/hidden Back controls and overlays above the page
+block the gesture. Size/visibility changes cancel it. Reduce Motion removes the
+settling animation. Ordinary browser modals and accessory sheets do not install
+these handlers. The native token-route recognizer remains blocked while any web
+page flow is open; it cannot pop the token underneath.
+
 Receive-address QR dialogs explicitly opt into sheet presentation. Alerts retain
 their existing web presentation. Do not build native copies of
 Send, Swap or pickers to get system presentation.

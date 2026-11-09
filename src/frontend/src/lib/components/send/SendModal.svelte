@@ -321,6 +321,7 @@
 			disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
 				currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 			mobilePresentation="fullScreen"
+			mobileSwipeBack
 			onClose={close}
 			{steps}
 			testId={SEND_TOKENS_MODAL}

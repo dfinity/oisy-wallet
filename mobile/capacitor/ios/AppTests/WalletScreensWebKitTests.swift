@@ -90,6 +90,45 @@ import XCTest
     XCTAssertTrue(web.superview === wallet.view)
     capture(window, name: "activity-after-transaction-sheet")
   }
+  private func swipePage(
+    _ web: WKWebView, selector: String, window: UIWindow, commit: Bool
+  ) async throws {
+    let nonce = try await evaluate(web, "return window.testDocumentNonce;")
+    let location = web.url
+    let moved = try await evaluate(
+      web,
+      """
+      const panel = document.querySelector('[data-tid=\(selector)] > .wrapper');
+      const send = (type, x) => {
+        const touch = new Touch({identifier: 1, target: panel, clientX: x, clientY: 220});
+        panel.dispatchEvent(new TouchEvent(type, {bubbles: true, cancelable: true,
+          touches: [touch], changedTouches: [touch]}));
+      };
+      send('touchstart', 4);
+      send('touchmove', innerWidth * 0.48);
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      return String(panel.getBoundingClientRect().left > innerWidth * 0.4);
+      """)
+    XCTAssertEqual(moved, "true", "The full-page panel must follow the finger")
+    try await Task.sleep(for: .milliseconds(100))
+    capture(window, name: selector + (commit ? "-swipe-completing" : "-swipe-cancelling"))
+    _ = try await evaluate(
+      web,
+      """
+      const panel = document.querySelector('[data-tid=\(selector)] > .wrapper');
+      panel.dispatchEvent(new TouchEvent('\(commit ? "touchend" : "touchcancel")',
+        {bubbles: true, cancelable: true, touches: [], changedTouches: []}));
+      return 'ended';
+      """)
+    try await waitFor(
+      web,
+      commit
+        ? "!document.querySelector('[data-tid=\(selector)]')"
+        : "document.querySelector('[data-tid=\(selector)] > .wrapper')?.style.translate === ''")
+    let after = try await evaluate(web, "return window.testDocumentNonce;")
+    XCTAssertEqual(after, nonce, "Page swipes must retain the document and its session")
+    XCTAssertEqual(web.url, location, "Page Back must not pop the underlying token route")
+  }
   private func verifySharedSwapForm(
     _ web: WKWebView, shell: ShellViewController, window: UIWindow
   ) async throws {
@@ -120,10 +159,8 @@ import XCTest
       try await Task.sleep(for: .milliseconds(400))
       capture(window, name: "capacitor-icp-swap-" + name)
     }
-    _ = try await evaluate(
-      web,
-      "document.querySelector('[data-tid=swap-tokens-modal] [data-tid=close-modal]').click(); return 'closed';"
-    )
+    try await swipePage(web, selector: "swap-tokens-modal", window: window, commit: false)
+    try await swipePage(web, selector: "swap-tokens-modal", window: window, commit: true)
     try await waitFor(web, "!document.querySelector('[data-tid=swap-tokens-modal]')")
     try await waitForNativeSheet(shell, visible: false)
     XCTAssertFalse(tabs.isHidden)
@@ -151,7 +188,9 @@ import XCTest
     XCTAssertTrue(web.superview === shell.wallet?.view)
     XCTAssertTrue(tabs.isHidden, "The shared Send sheet must hide native tabs")
     XCTAssertTrue(more.isHidden)
-    XCTAssertFalse(interactions.canBeginBack, "An edge swipe must not leave an open Send flow")
+    XCTAssertFalse(
+      interactions.canBeginBack, "The underlying token gesture must stay blocked while Send is open"
+    )
     XCTAssertFalse(interactions.refreshControl.isEnabled)
 
     // Exercise the real destination validation: an Ethereum address cannot
@@ -211,6 +250,8 @@ import XCTest
         && !!modal.querySelector('[data-tid=send-first-time-destination-confirm]'));
       """)
     XCTAssertEqual(review, "true", "Review must show ICP, its fee, recipient and confirmation")
+    try await swipePage(web, selector: "send-tokens-modal", window: window, commit: false)
+    try await waitFor(web, "!!document.querySelector('[data-tid=review-form-send-button]')")
     // Acknowledge the recipient, but never invoke the final Send action. Both
     // the wallet and worker fetch functions remain blocked by this test harness.
     _ = try await evaluate(
@@ -260,10 +301,7 @@ import XCTest
       web,
       "document.querySelector('[data-tid=send-tokens-modal] input[data-tid=destination-input]')?.value === '\(recipient)'"
     )
-    _ = try await evaluate(
-      web,
-      "document.querySelector('[data-tid=send-form-destination-next-button]').previousElementSibling.click(); return 'cancelled';"
-    )
+    try await swipePage(web, selector: "send-tokens-modal", window: window, commit: true)
     try await waitFor(web, "!document.querySelector('[data-tid=send-tokens-modal]')")
     try await waitForNativeSheet(shell, visible: false)
     XCTAssertFalse(tabs.isHidden)
@@ -746,8 +784,8 @@ import XCTest
       XCTAssertEqual(rejected, "rejected")
       XCTAssertTrue(tabs.isHidden)
     }
-    _ = try await evaluate(
-      web, "document.querySelector('[data-tid=close-modal]').click(); return 'closed';")
+    try await swipePage(web, selector: "address-book-modal", window: window, commit: false)
+    try await swipePage(web, selector: "address-book-modal", window: window, commit: true)
     try await Task.sleep(for: .milliseconds(500))
     try await waitForNativeSheet(shell, visible: false)
     XCTAssertFalse(tabs.isHidden)

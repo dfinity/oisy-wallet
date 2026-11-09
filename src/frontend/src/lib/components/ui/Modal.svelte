@@ -6,6 +6,7 @@
 	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
 	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
+	import { mobilePageSwipe } from '$lib/services/mobile-page-swipe.services';
 	import { nativeSheet } from '$lib/services/mobile-sheet.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -18,6 +19,7 @@
 	let {
 		visible = true,
 		mobilePresentation = 'sheet',
+		mobileSwipeBack = false,
 		showCloseButton = true,
 		role = 'dialog',
 		testId,
@@ -81,6 +83,12 @@
 		<div
 			class={`wrapper ${role}`}
 			tabindex="-1"
+			use:mobilePageSwipe={pagePresentation && mobileSwipeBack
+				? {
+						enabled: showCloseButton && !disablePointerEvents && nonNullish(onClose),
+						onBack: closeWithKeyboard
+					}
+				: undefined}
 			use:nativeSheet={{
 				enabled: role === 'dialog' && mobilePresentation === 'sheet',
 				size: 'large'

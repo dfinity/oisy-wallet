@@ -13,6 +13,7 @@
 	interface Props {
 		steps: WizardSteps<T>;
 		mobilePresentation?: ModalProps['mobilePresentation'];
+		mobileSwipeBack?: boolean;
 		disablePointerEvents?: boolean;
 		testId?: string;
 		currentStep?: WizardStep<T>;
@@ -24,6 +25,7 @@
 	let {
 		steps,
 		mobilePresentation = 'fullScreen',
+		mobileSwipeBack = false,
 		disablePointerEvents = false,
 		testId,
 		currentStep = $bindable(),
@@ -64,7 +66,14 @@
 </script>
 
 {#if visible}
-	<Modal {disablePointerEvents} {mobilePresentation} onClose={close} {testId} {title}>
+	<Modal
+		{disablePointerEvents}
+		{mobilePresentation}
+		{mobileSwipeBack}
+		onClose={close}
+		{testId}
+		{title}
+	>
 		<WizardTransition {transition}>
 			{@render children()}
 		</WizardTransition>

@@ -344,7 +344,12 @@ Older hosts keep the full-viewport web backdrop and content-sized sheet. Forms c
 request `mobilePresentation="fullScreen"` for full-page web presentation in the app.
 This is also the default for `WizardModal`: Send, Swap, Contacts and other
 multi-step flows are pages, never system sheets. Mobile pages use a leading Back
-control and retain the shared step/cancellation logic. Receive-address QR dialogs
+control and retain the shared step/cancellation logic. Send, Swap and Contacts
+also opt into `mobileSwipeBack`, backed by `mobile-page-swipe.services.ts`. It moves
+the existing page above its live parent and calls the leading Back callback on
+completion. `overlayFocus` supplies the topmost check; busy/disabled state blocks
+the gesture. Cancel does not unmount the form. Do not add feature-specific touch
+handlers, history pops or native copies of these flows. Receive-address QR dialogs
 explicitly opt into sheet presentation. `showCloseButton={false}` supports editors
 with explicit Cancel/Save without CSS that hides unrelated close buttons.
 `ContentWithToolbar.showToolbar` omits page-only or redundant footers; a mobile

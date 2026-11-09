@@ -24,6 +24,8 @@ const topmostOverlay = (): OverlayEntry | undefined =>
 			topmost?.options.priority === 'high' && entry.options.priority !== 'high' ? topmost : entry,
 		undefined
 	);
+export const isTopmostOverlay = (node: HTMLElement): boolean => topmostOverlay()?.node === node;
+
 // Native gestures use the same topmost callback as Escape, including busy/dirty guards.
 export const requestTopmostOverlayClose = () => {
 	const entry = topmostOverlay();
