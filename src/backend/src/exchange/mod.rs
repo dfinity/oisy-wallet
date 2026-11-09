@@ -457,20 +457,31 @@ pub(crate) fn priceable_tokens_for_caller(caller: StoredPrincipal) -> Vec<Stored
     tokens
 }
 
-/// Filters `tokens` to the non-native subset, as `TokenId`s ready for
-/// [`crate::token::mark_tokens_active`].
+/// Records `token_ids` as active at `now_ns`, so that [`refresh_exchange_rates`] keeps their
+/// prices current.
 ///
-/// The always-on native tokens are deliberately excluded: [`refresh_exchange_rates`]
-/// fetches them unconditionally and never consults `token_activity` for them,
-/// so marking them active only adds a per-call stable write and an entry that
-/// can never be evicted (it would be re-marked on every call forever).
-pub(crate) fn custom_tokens_to_mark(tokens: &[StoredTokenId]) -> Vec<TokenId> {
+/// `token_activity` serves only that refresh, so nothing is recorded while it is off (see
+/// [`is_exchange_rate_refresh_enabled`]), and only the custom tokens the providers can price are
+/// recorded. The always-on native tokens are left out: the refresh fetches them whenever a caller
+/// has asked for rates (see [`should_refresh_natives`]) and never consults `token_activity` for
+/// them, so an entry for one would only be re-marked on every call and never evicted.
+pub(crate) fn record_token_activity(token_ids: &[TokenId], now_ns: u64) {
+    if !is_exchange_rate_refresh_enabled() {
+        return;
+    }
+
     let natives = native_token_ids();
-    tokens
+    let to_record: Vec<TokenId> = token_ids
         .iter()
-        .filter(|&stored| !natives.contains(stored))
-        .map(|stored| stored.0.clone())
-        .collect()
+        .filter(|&token_id| {
+            is_priceable_token_id(token_id) && !natives.iter().any(|native| native.0 == *token_id)
+        })
+        .cloned()
+        .collect();
+
+    if !to_record.is_empty() {
+        crate::token::mark_tokens_active(&to_record, now_ns);
+    }
 }
 
 /// Single-pass read of the cache for `token_ids`. Returns:
@@ -579,22 +590,6 @@ mod tests {
     fn reset_refresh_lock() {
         REFRESH_IN_FLIGHT.with(|cell| cell.set(None));
         REFRESH_LOCK_GENERATION.with(|cell| cell.set(0));
-    }
-
-    #[test]
-    fn custom_tokens_to_mark_excludes_natives_keeps_custom() {
-        let icrc = StoredTokenId(TokenId::Icrc(Principal::anonymous()));
-
-        let mut input = native_token_ids();
-        input.push(icrc.clone());
-
-        // Only the custom (non-native) token is returned for activity marking.
-        assert_eq!(custom_tokens_to_mark(&input), vec![icrc.0]);
-    }
-
-    #[test]
-    fn custom_tokens_to_mark_empty_for_natives_only() {
-        assert_eq!(custom_tokens_to_mark(&native_token_ids()), vec![]);
     }
 
     #[test]
@@ -743,6 +738,43 @@ mod tests {
 
     fn stored_rate(token_id: &StoredTokenId) -> Option<ExchangeRate> {
         read_state(|s| s.exchange_rates.get(token_id).map(|rate| rate.0))
+    }
+
+    fn recorded_activity() -> Vec<(TokenId, u64)> {
+        read_state(|s| {
+            s.token_activity
+                .iter()
+                .map(|entry| (entry.key().0.clone(), entry.value()))
+                .collect()
+        })
+    }
+
+    #[test]
+    fn record_token_activity_records_nothing_while_refresh_is_off() {
+        set_exchange_config(Some("key"), Some(false));
+
+        record_token_activity(&[custom_token(1).0], 1_000);
+
+        assert!(recorded_activity().is_empty());
+    }
+
+    #[test]
+    fn record_token_activity_records_only_priceable_custom_tokens() {
+        set_exchange_config(Some("key"), Some(true));
+        let priceable = custom_token(1).0;
+
+        record_token_activity(
+            &[
+                TokenId::EvmNative(1),
+                TokenId::XrpNativeMainnet,
+                priceable.clone(),
+                TokenId::SolNativeDevnet,
+                TokenId::BtcNativeTestnet,
+            ],
+            1_000,
+        );
+
+        assert_eq!(recorded_activity(), vec![(priceable, 1_000)]);
     }
 
     #[test]

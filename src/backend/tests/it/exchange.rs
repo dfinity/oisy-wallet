@@ -15,6 +15,18 @@ fn api_keys_with_coingecko() -> ApiKeys {
     }
 }
 
+/// Turns the backend price refresh on, as a controller does: a `CoinGecko` key, then the opt-in.
+pub(crate) fn enable_exchange_rate_refresh(pic_setup: &PicBackend) {
+    assert_eq!(
+        pic_setup.update::<()>(controller(), "set_api_keys", api_keys_with_coingecko()),
+        Ok(())
+    );
+    assert_eq!(
+        pic_setup.update::<()>(controller(), "set_exchange_rate_enabled", true),
+        Ok(())
+    );
+}
+
 /// Answers the pending `CoinGecko` `simple/price` outcall with `body`, then lets the canister
 /// process the reply.
 fn reply_to_coingecko_simple_price(pic_setup: &PicBackend, body: &str) {

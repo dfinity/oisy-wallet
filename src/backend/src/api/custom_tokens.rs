@@ -1,10 +1,14 @@
-use ic_cdk::{api::msg_caller, update};
+use ic_cdk::{
+    api::{msg_caller, time},
+    update,
+};
 use shared::types::{
     custom_token::{CustomToken, CustomTokenId},
     token_id::TokenId,
 };
 
 use crate::{
+    exchange,
     state::{mutate_state, read_state},
     token::{self, MAX_TOKEN_LIST_LENGTH},
     types::StoredPrincipal,
@@ -69,7 +73,7 @@ pub fn set_custom_token(token: CustomToken) {
 
     let CustomToken { token, .. } = token;
 
-    token::mark_token_active(&TokenId::from(&token));
+    exchange::record_token_activity(&[TokenId::from(&token)], time());
 }
 
 #[update(guard = "caller_is_registered_user")]
@@ -99,7 +103,7 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
         );
     });
 
-    token::mark_tokens_active(&ids);
+    exchange::record_token_activity(&ids, time());
 }
 
 /// Remove custom token for the user.
@@ -122,7 +126,7 @@ pub fn remove_custom_token(token: CustomToken) {
 ///
 /// Note: This method was previously exposed as a *query* but is now an *update*
 /// call. The change is intentional and breaking: `list_custom_tokens` now tracks
-/// token activity by calling `mark_tokens_active`, which mutates canister state.
+/// token activity by calling `record_token_activity`, which mutates canister state.
 /// Because queries must not modify state on the IC, this function must be an
 /// update, not a query.
 ///
@@ -141,7 +145,7 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
     if !tokens.is_empty() {
         let ids: Vec<TokenId> = tokens.iter().map(|t| TokenId::from(&t.token)).collect();
 
-        token::mark_tokens_active(&ids);
+        exchange::record_token_activity(&ids, time());
     }
 
     tokens

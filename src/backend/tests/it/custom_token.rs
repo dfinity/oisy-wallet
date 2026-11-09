@@ -10,10 +10,13 @@ use shared::types::{
     Stats, TokenVersion,
 };
 
-use crate::utils::{
-    assertion::{assert_custom_tokens_eq, assert_tokens_data_eq},
-    mock::CALLER,
-    pocketic::{controller, setup, PicCanisterTrait},
+use crate::{
+    exchange::enable_exchange_rate_refresh,
+    utils::{
+        assertion::{assert_custom_tokens_eq, assert_tokens_data_eq},
+        mock::CALLER,
+        pocketic::{controller, setup, PicCanisterTrait},
+    },
 };
 
 static ICRC_TOKEN: LazyLock<IcrcToken> = LazyLock::new(|| IcrcToken {
@@ -722,6 +725,7 @@ fn test_user_cannot_list_another_custom_tokens() {
 #[test]
 fn test_set_custom_token_tracks_activity() {
     let pic_setup = setup();
+    enable_exchange_rate_refresh(&pic_setup);
 
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
@@ -744,8 +748,37 @@ fn test_set_custom_token_tracks_activity() {
 }
 
 #[test]
+fn test_custom_tokens_track_no_activity_while_price_refresh_is_off() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    pic_setup
+        .update::<()>(caller, "set_custom_token", USER_TOKEN.clone())
+        .expect("Failed to set custom token");
+    pic_setup
+        .update::<()>(
+            caller,
+            "set_many_custom_tokens",
+            vec![ANOTHER_USER_TOKEN.clone()],
+        )
+        .expect("Failed to set many custom tokens");
+    pic_setup
+        .update::<Vec<CustomToken>>(caller, "list_custom_tokens", ())
+        .expect("Failed to list custom tokens");
+
+    let stats = pic_setup
+        .query::<Stats>(controller(), "stats", ())
+        .expect("Failed to get stats");
+
+    assert_eq!(stats.token_activity_count, 0);
+}
+
+#[test]
 fn test_set_many_custom_tokens_tracks_activity() {
     let pic_setup = setup();
+    enable_exchange_rate_refresh(&pic_setup);
 
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
@@ -766,6 +799,7 @@ fn test_set_many_custom_tokens_tracks_activity() {
 #[test]
 fn test_set_custom_token_updates_activity_for_same_token() {
     let pic_setup = setup();
+    enable_exchange_rate_refresh(&pic_setup);
 
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
@@ -801,6 +835,7 @@ fn test_set_custom_token_updates_activity_for_same_token() {
 #[test]
 fn test_housekeeping_evicts_stale_token_activity() {
     let pic_setup = setup();
+    enable_exchange_rate_refresh(&pic_setup);
 
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
