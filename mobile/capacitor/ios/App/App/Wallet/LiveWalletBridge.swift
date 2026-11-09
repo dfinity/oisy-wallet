@@ -82,6 +82,10 @@ final class LiveWalletBridge: NSObject, WKScriptMessageHandlerWithReply {
       arguments: ["name": name, "value": values], in: nil, in: .page,
       completionHandler: nil)
   }
+  func dismissSheet(id: UUID) {
+    guard host?.wallet?.nativeSheet?.identifier == id else { return }
+    event("dismissSheet", values: ["id": id.uuidString.lowercased()])
+  }
   func returnToParent() {
     guard host?.walletInteractionsAllowed == true else { return }
     event("back")

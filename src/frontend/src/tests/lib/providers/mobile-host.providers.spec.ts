@@ -1,5 +1,11 @@
 import { mobileHostAvailable, mobileHostTransport } from '$lib/providers/mobile-host.providers';
-import { connectMobileHost, requestMobileWallet } from '$lib/services/mobile-host.services';
+import {
+	connectMobileHost,
+	connectMobileSheetDismiss,
+	nativeSheetsAvailable,
+	presentMobileSheet,
+	requestMobileWallet
+} from '$lib/services/mobile-host.services';
 import type { WebKitMobileHost } from '$lib/types/mobile-host';
 
 describe('live website host transport', () => {
@@ -48,6 +54,62 @@ describe('live website host transport', () => {
 		await connection.disconnect();
 
 		await expect(requestMobileWallet({ method: 'readOperations' })).rejects.toThrow('unavailable');
+	});
+
+	it('negotiates native sheets and binds dismissal to the current document', async () => {
+		const old = await connectMobileHost(vi.fn());
+
+		expect(nativeSheetsAvailable()).toBeFalsy();
+
+		const sheet = { id: crypto.randomUUID(), phase: 'prepare' as const, size: 'large' as const };
+
+		await expect(presentMobileSheet(sheet)).rejects.toThrow('unavailable');
+
+		await old.disconnect();
+		request.mockResolvedValue({
+			ok: true,
+			value: { ...handshake, capabilities: [...handshake.capabilities, 'nativeSheets'] }
+		});
+		const connection = await connectMobileHost(vi.fn());
+
+		expect(nativeSheetsAvailable()).toBeTruthy();
+
+		request.mockResolvedValue({ ok: true, value: {} });
+		await presentMobileSheet(sheet);
+
+		expect(request).toHaveBeenLastCalledWith('sheet', { ...sheet, version: 2, documentId });
+
+		const dismiss = vi.fn();
+		const callbacks: ((value: unknown) => void)[] = [];
+		addListener.mockImplementationOnce(
+			// The bridge listener callback has a fixed positional signature.
+			// eslint-disable-next-line local-rules/prefer-object-params
+			(_event: string, callback: (value: unknown) => void) => {
+				callbacks.push(callback);
+				return Promise.resolve({ remove });
+			}
+		);
+		const listener = await connectMobileSheetDismiss(dismiss);
+		const event = { version: 2, documentId, id: sheet.id };
+		callbacks[0]({ ...event, documentId: crypto.randomUUID() });
+		callbacks[0]({ ...event, version: 1 });
+		callbacks[0]({ ...event, extra: 'untrusted' });
+
+		expect(dismiss).not.toHaveBeenCalled();
+
+		callbacks[0](event);
+
+		expect(dismiss).toHaveBeenCalledExactlyOnceWith(sheet.id);
+
+		await connection.disconnect();
+
+		expect(nativeSheetsAvailable()).toBeFalsy();
+
+		callbacks[0](event);
+
+		expect(dismiss).toHaveBeenCalledOnce();
+
+		await listener.remove();
 	});
 
 	it('does not enable the host in an ordinary browser or over HTTP', () => {

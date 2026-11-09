@@ -330,10 +330,20 @@ The [compatibility guide](../../../mobile/capacitor/docs/shared-web-contract.md)
 
 ## Shared mobile modal presentation and Notes
 
-`MobileHost.svelte` adapts the existing `Modal` and bottom-sheet surfaces only in
-the embedded mobile build. Keep feature bodies in shared web components. Dialogs
-use a full-viewport backdrop with a content-sized sheet; forms can request
-`mobilePresentation="fullScreen"`. `showCloseButton={false}` supports editors
+`MobileHost.svelte` adapts the existing `Modal` and bottom-sheet surfaces when the
+website runs in the mobile host. Keep feature bodies in shared web components.
+Hosts advertising `nativeSheets` use the shared `nativeSheet` Svelte action to
+present the same WebView in a UIKit sheet. Accessory `Modal` dialogs use a large detent;
+dismissible `BottomSheetContainer` starts at medium. Nested dialogs reuse that
+container. The action preserves the web focus/close guards and falls back to web
+presentation on unsupported hosts or preparation failure. See the
+[system sheet contract](../../../mobile/capacitor/docs/shared-web-contract.md#system-sheets).
+Older hosts keep the full-viewport web backdrop and content-sized sheet. Forms can
+request `mobilePresentation="fullScreen"` for full-page web presentation in the app.
+This is also the default for `WizardModal`: Send, Swap, Contacts and other
+multi-step flows are pages, never system sheets. Mobile pages use a leading Back
+control and retain the shared step/cancellation logic. Receive-address QR dialogs
+explicitly opt into sheet presentation. `showCloseButton={false}` supports editors
 with explicit Cancel/Save without CSS that hides unrelated close buttons.
 `ContentWithToolbar.showToolbar` omits page-only or redundant footers; a mobile
 modal suppresses its sole `ButtonCloseModal` footer when the header already closes it.

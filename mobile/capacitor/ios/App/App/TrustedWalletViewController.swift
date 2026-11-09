@@ -17,6 +17,8 @@ final class TrustedWalletViewController: UIViewController, WKNavigationDelegate 
   let session: WalletSession
   private(set) var webView: WKWebView?
   private(set) var isReady = false
+  private(set) var nativeSheet: WalletSheetCoordinator?
+  private var webConstraints: [NSLayoutConstraint] = []
   private var closed = false
   private var timeout: Task<Void, Never>?
   private let cover = UIView()
@@ -65,14 +67,8 @@ final class TrustedWalletViewController: UIViewController, WKNavigationDelegate 
     hostPlugin.webView = web
     hostPlugin.onReady = { [weak self] in self?.hostReady() }
     web.navigationDelegate = self
-    web.translatesAutoresizingMaskIntoConstraints = false
-    view.addSubview(web)
-    NSLayoutConstraint.activate([
-      web.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-      web.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-      web.topAnchor.constraint(equalTo: view.topAnchor),
-      web.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-    ])
+    moveWebView(to: view)
+    nativeSheet = WalletSheetCoordinator(owner: self, webView: web)
     web.scrollView.bounces = false
     web.scrollView.contentInsetAdjustmentBehavior = .never
     web.allowsBackForwardNavigationGestures = false
@@ -98,6 +94,25 @@ final class TrustedWalletViewController: UIViewController, WKNavigationDelegate 
     ]
     configureCover()
     loadWallet()
+  }
+
+  func moveWebView(to container: UIView) {
+    guard let webView else { return }
+    NSLayoutConstraint.deactivate(webConstraints)
+    webView.removeFromSuperview()
+    webView.translatesAutoresizingMaskIntoConstraints = false
+    if container === view {
+      container.insertSubview(webView, at: 0)
+    } else {
+      container.addSubview(webView)
+    }
+    webConstraints = [
+      webView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+      webView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+      webView.topAnchor.constraint(equalTo: container.topAnchor),
+      webView.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+    ]
+    NSLayoutConstraint.activate(webConstraints)
   }
 
   private func configureCover() {
@@ -143,6 +158,7 @@ final class TrustedWalletViewController: UIViewController, WKNavigationDelegate 
   }
 
   private func beginDocument() -> Bool {
+    nativeSheet?.reset()
     hostPlugin.isAvailable = false
     isReady = false
     timeout?.cancel()
@@ -186,6 +202,7 @@ final class TrustedWalletViewController: UIViewController, WKNavigationDelegate 
   }
 
   private func showFailure() {
+    nativeSheet?.reset()
     guard !closed, !session.checkExpiration() else { return }
     timeout?.cancel()
     timeout = nil
@@ -312,7 +329,8 @@ final class TrustedWalletViewController: UIViewController, WKNavigationDelegate 
         && approvedBackURL != nil && approvedBackURL == interactions?.parentURL
         && webView.backForwardList.backItem?.url == approvedBackURL
         && webView.backForwardList.forwardItem == nil,
-      refreshAllowed: allowed && permitsRefresh && isRoot)
+      refreshAllowed: allowed && permitsRefresh && isRoot,
+      temporaryResize: nativeSheet?.identifier != nil)
     webView.allowsBackForwardNavigationGestures = false
   }
   func close() {
@@ -321,6 +339,8 @@ final class TrustedWalletViewController: UIViewController, WKNavigationDelegate 
     isReady = false
     timeout?.cancel()
     timeout = nil
+    nativeSheet?.reset()
+    nativeSheet = nil
     interactions?.close()
     interactions = nil
     navigationObservations.removeAll()

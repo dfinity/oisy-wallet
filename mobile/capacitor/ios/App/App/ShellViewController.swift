@@ -23,7 +23,8 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
   var navigationRoot: WalletRoot { requestedRoot ?? walletRoot }
   var acceptsLegacyNavigation: Bool { !usesNavigationState }
   var walletInteractionsAllowed: Bool {
-    !navigationPending && !blockingPresentation && !accountPresentation
+    !navigationPending && !blockingPresentation && wallet?.nativeSheet?.identifier == nil
+      && !accountPresentation
       && wallet?.view.isHidden == false && !interactionsSuspended
   }
   private var interactionsSuspended = false
@@ -236,7 +237,8 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
   @discardableResult func commitNavigation(_ state: WalletNavigationState) -> Bool {
     guard let wallet, state.requestID == navigationRequestID,
       state.revision > navigationRevision,
-      state.backURL == nil || WalletBackNavigationPolicy.isToken(wallet.webView?.url, origin: wallet.origin)
+      state.backURL == nil
+        || WalletBackNavigationPolicy.isToken(wallet.webView?.url, origin: wallet.origin)
     else { return false }
     navigationRevision = state.revision
     usesNavigationState = true
@@ -284,11 +286,12 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
     }
     updateNavigationVisibility()
   }
-  private func updateNavigationVisibility() {
+  func updateNavigationVisibility() {
     let isWelcomeVisible = wallet == nil && signIn?.view.isHidden == false
     let hidden =
       isWelcomeVisible
-      || (blockingPresentation && wallet != nil && wallet?.view.isHidden == false)
+      || ((blockingPresentation || wallet?.nativeSheet?.identifier != nil)
+        && wallet != nil && wallet?.view.isHidden == false)
     tabs.isHidden = hidden
     moreButton.isHidden = hidden
     tabs.accessibilityElementsHidden = hidden

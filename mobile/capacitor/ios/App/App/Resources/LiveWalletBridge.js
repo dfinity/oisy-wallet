@@ -19,6 +19,7 @@
 		'clearBack',
 		'finishRefresh',
 		'presentation',
+		'sheet',
 		'openAccount',
 		'wallet'
 	]);
@@ -36,7 +37,7 @@
 			},
 			addListener: (...args) => {
 				const [name, listener] = args;
-				if (!['navigate', 'back', 'refresh'].includes(name)) {
+				if (!['navigate', 'back', 'refresh', 'dismissSheet'].includes(name)) {
 					return Promise.reject(new Error('Unsupported host event'));
 				}
 				const entries = listeners.get(name) ?? new Set();

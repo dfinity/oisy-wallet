@@ -10,17 +10,23 @@ import {
 	MobileNavigationStateSchema,
 	MobileRefreshEventSchema,
 	MobileRefreshSchema,
+	MobileSheetDismissSchema,
+	MobileSheetRequestSchema,
 	MobileWalletRequestSchema,
 	MobileWalletResponseSchema,
 	type MobileNavigationRequest,
 	type MobileNavigationState,
-	type MobileRoot
+	type MobileRoot,
+	type MobileSheetRequest
 } from '$lib/schema/mobile-host.schema';
 import type { PluginListenerHandle } from '@capacitor/core';
 
 export { mobileHostAvailable } from '$lib/providers/mobile-host.providers';
 
 let activeDocument: string | undefined;
+let activeCapabilities: readonly string[] = [];
+export const nativeSheetsAvailable = () =>
+	mobileHostAvailable() && !!activeDocument && activeCapabilities.includes('nativeSheets');
 let connectionGeneration = 0;
 const documentRequest = () => {
 	if (!mobileHostAvailable() || !activeDocument) {
@@ -35,6 +41,7 @@ export const connectMobileHost = async (onNavigate: (request: MobileNavigationRe
 	}
 	const generation = ++connectionGeneration;
 	activeDocument = undefined;
+	activeCapabilities = [];
 	let latestRequestId = -1;
 	let document: string | undefined;
 	const pending: unknown[] = [];
@@ -75,6 +82,7 @@ export const connectMobileHost = async (onNavigate: (request: MobileNavigationRe
 		}
 		document = state.documentId;
 		activeDocument = document;
+		activeCapabilities = state.capabilities;
 		for (const event of pending) {
 			dispatch(event);
 		}
@@ -90,6 +98,7 @@ export const connectMobileHost = async (onNavigate: (request: MobileNavigationRe
 			disconnect: async () => {
 				if (generation === connectionGeneration) {
 					activeDocument = undefined;
+					activeCapabilities = [];
 					connectionGeneration++;
 				}
 				await listener.remove();
@@ -98,6 +107,7 @@ export const connectMobileHost = async (onNavigate: (request: MobileNavigationRe
 	} catch (error) {
 		if (generation === connectionGeneration) {
 			activeDocument = undefined;
+			activeCapabilities = [];
 		}
 		await listener.remove();
 		throw error;
@@ -227,4 +237,20 @@ export const clearMobileBack = async (): Promise<void> => {
 		throw new Error('Mobile host unavailable');
 	}
 	await host.clearBack(documentRequest());
+};
+
+export const presentMobileSheet = async (request: MobileSheetRequest): Promise<void> => {
+	if (!nativeSheetsAvailable()) {
+		throw new Error('Native sheets unavailable');
+	}
+	await host.sheet({ ...MobileSheetRequestSchema.parse(request), ...documentRequest() });
+};
+export const connectMobileSheetDismiss = (onDismiss: (id: string) => void) => {
+	const document = documentRequest().documentId;
+	return host.addListener('dismissSheet', (value) => {
+		const result = MobileSheetDismissSchema.safeParse(value);
+		if (activeDocument === document && result.success && result.data.documentId === document) {
+			onDismiss(result.data.id);
+		}
+	});
 };

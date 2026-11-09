@@ -2,6 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { cubicIn, cubicOut } from 'svelte/easing';
+	import { nativeSheetsAvailable } from '$lib/services/mobile-host.services';
+	import { nativeSheet } from '$lib/services/mobile-sheet.services';
 	import { overlayFocus } from '$lib/utils/overlay.utils';
 	import { slide } from '$lib/utils/transitions.utils';
 
@@ -25,7 +27,7 @@
 		children
 	}: Props = $props();
 
-	let transitionFn = $derived(transition ? slide : () => ({}));
+	let transitionFn = $derived(transition || nativeSheetsAvailable() ? slide : () => ({}));
 
 	const manageFocus = (node: HTMLElement) =>
 		onClose ? overlayFocus(node, { onClose }) : undefined;
@@ -40,6 +42,7 @@
 	role="dialog"
 	tabindex="-1"
 	use:manageFocus
+	use:nativeSheet={{ enabled: !!onClose, size: 'medium' }}
 	in:transitionFn|global={{ axis: 'y', duration: 250, easing: cubicOut }}
 	out:transitionFn|global={{ axis: 'y', duration: 200, easing: cubicIn }}
 >

@@ -5,7 +5,7 @@ export interface WebKitMobileHost {
 	readonly documentId: string;
 	request(method: string, options: unknown): Promise<unknown>;
 	addListener(
-		event: 'navigate' | 'back' | 'refresh',
+		event: 'navigate' | 'back' | 'refresh' | 'dismissSheet',
 		listener: (value: unknown) => void
 	): Promise<{ remove(): Promise<void> }>;
 }

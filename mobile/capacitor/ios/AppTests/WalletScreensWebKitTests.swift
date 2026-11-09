@@ -22,6 +22,22 @@ import XCTest
     // Let native acknowledgement and the shared list's coalesced render finish.
     try await Task.sleep(for: .milliseconds(200))
   }
+  private func waitForNativeSheet(_ shell: ShellViewController, visible: Bool) async throws {
+    for _ in 0..<60 {
+      let coordinator = shell.wallet?.nativeSheet
+      if visible {
+        if let panel = coordinator?.controller, panel.presentingViewController != nil,
+          !panel.isBeingPresented
+        {
+          return
+        }
+      } else if coordinator?.identifier == nil {
+        return
+      }
+      try await Task.sleep(for: .milliseconds(50))
+    }
+    XCTFail("Native sheet did not finish presentation or release")
+  }
   private func capture(_ window: UIWindow, name: String) {
     let attachment = XCTAttachment(
       image: UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
@@ -50,6 +66,8 @@ import XCTest
       return String(modal.textContent.includes('Swap')
         && !modal.textContent.includes('Swapping in the app is not available yet.'));
       """)
+    XCTAssertNil(shell.wallet?.nativeSheet?.identifier, "Primary flows must be pages, not sheets")
+    XCTAssertTrue(web.superview === shell.wallet?.view)
     XCTAssertEqual(preview, "true")
     XCTAssertTrue(tabs.isHidden)
     XCTAssertFalse(interactions.canBeginBack)
@@ -64,6 +82,7 @@ import XCTest
       "document.querySelector('[data-tid=swap-tokens-modal] [data-tid=close-modal]').click(); return 'closed';"
     )
     try await waitFor(web, "!document.querySelector('[data-tid=swap-tokens-modal]')")
+    try await waitForNativeSheet(shell, visible: false)
     XCTAssertFalse(tabs.isHidden)
     XCTAssertEqual(web.url, tokenURL)
   }
@@ -85,6 +104,8 @@ import XCTest
       web,
       "!!document.querySelector('[data-tid=send-tokens-modal] input[data-tid=destination-input]')"
     )
+    XCTAssertNil(shell.wallet?.nativeSheet?.identifier, "Primary flows must be pages, not sheets")
+    XCTAssertTrue(web.superview === shell.wallet?.view)
     XCTAssertTrue(tabs.isHidden, "The shared Send sheet must hide native tabs")
     XCTAssertTrue(more.isHidden)
     XCTAssertFalse(interactions.canBeginBack, "An edge swipe must not leave an open Send flow")
@@ -165,6 +186,20 @@ import XCTest
     XCTAssertFalse(interactions.canBeginBack)
     XCTAssertEqual(web.url, tokenURL, "Review must stay inside the token's shared modal")
 
+    _ = try await evaluate(
+      web, "document.documentElement.style.fontSize = '130%'; return 'scaled';")
+    try await Task.sleep(for: .milliseconds(300))
+    let largeText = try await evaluate(
+      web,
+      """
+      const button = document.querySelector('[data-tid=review-form-send-button]').getBoundingClientRect();
+      return String(button.top >= 0 && button.bottom <= innerHeight && button.right <= innerWidth);
+      """)
+    XCTAssertEqual(largeText, "true", "Review actions must remain reachable with enlarged web text")
+    capture(window, name: "send-page-enlarged-text")
+    _ = try await evaluate(web, "document.documentElement.style.fontSize = ''; return 'restored';")
+    try await Task.sleep(for: .milliseconds(300))
+
     // Back preserves the draft; Cancel discards it and restores native controls.
     _ = try await evaluate(
       web,
@@ -187,6 +222,7 @@ import XCTest
       "document.querySelector('[data-tid=send-form-destination-next-button]').previousElementSibling.click(); return 'cancelled';"
     )
     try await waitFor(web, "!document.querySelector('[data-tid=send-tokens-modal]')")
+    try await waitForNativeSheet(shell, visible: false)
     XCTAssertFalse(tabs.isHidden)
     XCTAssertFalse(more.isHidden)
     XCTAssertTrue(shell.walletInteractionsAllowed)
@@ -205,6 +241,7 @@ import XCTest
       "document.querySelector('[data-tid=send-tokens-modal] [data-tid=close-modal]').click(); return 'closed';"
     )
     try await waitFor(web, "!document.querySelector('[data-tid=send-tokens-modal]')")
+    try await waitForNativeSheet(shell, visible: false)
     XCTAssertFalse(tabs.isHidden)
     XCTAssertFalse(more.isHidden)
     XCTAssertTrue(shell.walletInteractionsAllowed)
@@ -482,6 +519,7 @@ import XCTest
       "document.querySelector('[data-tid=address-book-modal] [data-tid=close-modal]').click(); return 'closed';"
     )
     try await waitFor(web, "!document.querySelector('[data-tid=address-book-modal]')")
+    try await waitForNativeSheet(shell, visible: false)
     XCTAssertFalse(web.allowsBackForwardNavigationGestures)
     XCTAssertTrue(interactions.canBeginBack)
     XCTAssertTrue(interactions.beginBack())
@@ -494,6 +532,24 @@ import XCTest
     )
     XCTAssertEqual(shell.walletRoot, .search)
     XCTAssertFalse(web.allowsBackForwardNavigationGestures)
+    _ = try await evaluate(
+      web, "document.querySelector('button[aria-label=Sorting]').click(); return 'opened';")
+    try await waitForNativeSheet(shell, visible: true)
+    let accessory = try XCTUnwrap(wallet.nativeSheet)
+    let accessoryPanel = try XCTUnwrap(accessory.controller)
+    XCTAssertEqual(accessoryPanel.sheetPresentationController?.selectedDetentIdentifier, .medium)
+    XCTAssertTrue(web.superview === accessoryPanel.view)
+    for (style, name) in [(UIUserInterfaceStyle.light, "light"), (.dark, "dark")] {
+      window.overrideUserInterfaceStyle = style
+      try await Task.sleep(for: .milliseconds(400))
+      capture(window, name: "native-sorting-sheet-" + name)
+    }
+    let accessoryPresentation = try XCTUnwrap(accessoryPanel.presentationController)
+    XCTAssertFalse(accessory.presentationControllerShouldDismiss(accessoryPresentation))
+    accessory.presentationControllerDidAttemptToDismiss(accessoryPresentation)
+    try await waitFor(web, "!document.querySelector('[data-tid=bottom-sheet]')")
+    try await waitForNativeSheet(shell, visible: false)
+    XCTAssertTrue(web.superview === wallet.view)
     let nonceAfterBack = try await evaluate(web, "return window.testDocumentNonce;")
     XCTAssertEqual(nonceAfterBack, documentNonce, "Back must retain the wallet document")
     XCTAssertEqual(wallet.session.grant?.id, grantID, "Back must retain its native grant")
@@ -549,13 +605,14 @@ import XCTest
     XCTAssertEqual(shell.walletRoot, .notes)
     let tabs = try XCTUnwrap(shell.view.subviews.compactMap { $0 as? UITabBar }.first)
     let navigationMore = try XCTUnwrap(shell.view.subviews.compactMap { $0 as? UIButton }.first)
+    try await waitForNativeSheet(shell, visible: false)
     XCTAssertFalse(tabs.isHidden)
     for (style, name) in [(UIUserInterfaceStyle.light, "light"), (.dark, "dark")] {
       window.overrideUserInterfaceStyle = style
       try await Task.sleep(for: .milliseconds(500))
       capture(window, name: "capacitor-notes-page-" + name)
     }
-    // The real shared editor opens full screen; Cancel never persists this draft.
+    // The shared editor stays a full-screen page; Cancel never persists this draft.
     _ = try await evaluate(
       web,
       """
@@ -565,6 +622,7 @@ import XCTest
     try await Task.sleep(for: .milliseconds(600))
     XCTAssertTrue(tabs.isHidden)
     XCTAssertTrue(navigationMore.isHidden)
+    XCTAssertNil(wallet.nativeSheet?.identifier)
     let editor = try await evaluate(
       web,
       """
@@ -576,17 +634,31 @@ import XCTest
       """)
     XCTAssertEqual(
       editor, "true", "Editor actions must remain inside the keyboard-adjusted viewport")
-    try await Task.sleep(for: .milliseconds(400))
+    _ = try await evaluate(
+      web, "document.querySelector('[data-tid=notes-input]').focus(); return 'focused';")
+    try await Task.sleep(for: .milliseconds(600))
+    let keyboardLayout = try await evaluate(
+      web,
+      """
+      const input = document.querySelector('[data-tid=notes-input]');
+      const save = document.querySelector('[data-tid=notes-save-button]').getBoundingClientRect();
+      return String(document.activeElement === input && save.top >= 0
+        && save.bottom <= visualViewport.height + visualViewport.offsetTop);
+      """)
+    XCTAssertEqual(keyboardLayout, "true", "Editor controls must stay above the keyboard viewport")
     capture(window, name: "capacitor-notes-editor-dark")
+    window.endEditing(true)
     _ = try await evaluate(
       web, "document.querySelector('[data-tid=notes-cancel-button]').click(); return 'cancelled';")
     try await Task.sleep(for: .milliseconds(500))
+    try await waitForNativeSheet(shell, visible: false)
     XCTAssertFalse(tabs.isHidden)
     XCTAssertFalse(navigationMore.isHidden)
-    // Shared Contacts exercises the common sheet with the same live bridge.
+    // Contacts is a full-page flow using the same shared components/session.
     wallet.hostPlugin.select("contacts")
     try await Task.sleep(for: .milliseconds(800))
     XCTAssertTrue(tabs.isHidden)
+    XCTAssertNil(wallet.nativeSheet?.identifier)
     let sheetBounds = try await evaluate(
       web,
       """
@@ -596,15 +668,16 @@ import XCTest
       const close = modal.querySelector('[data-tid=modal-dismiss]');
       const toolbar = close?.closest('[data-modal-toolbar]');
       return String(bounds.top === 0 && Math.abs(bounds.bottom - innerHeight) < 1
-        && Math.abs(panel.bottom - innerHeight) < 1 && panel.top > 0
+        && Math.abs(panel.bottom - innerHeight) < 1 && Math.abs(panel.top) < 1
+        && modal.dataset.mobilePresentation === 'fullScreen'
         && (!toolbar || getComputedStyle(toolbar).display === 'none'));
       """)
     XCTAssertEqual(
-      sheetBounds, "true", "Backdrop must cover the viewport; the sheet must reach its bottom")
+      sheetBounds, "true", "Contacts must fill the screen without a native sheet")
     for (style, name) in [(UIUserInterfaceStyle.light, "light"), (.dark, "dark")] {
       window.overrideUserInterfaceStyle = style
       try await Task.sleep(for: .milliseconds(400))
-      capture(window, name: "capacitor-shared-sheet-" + name)
+      capture(window, name: "contacts-page-" + name)
     }
     for payload in [
       "{version: 3, blocking: false}", "{version: 2, blocking: 'false'}",
@@ -625,6 +698,7 @@ import XCTest
     _ = try await evaluate(
       web, "document.querySelector('[data-tid=close-modal]').click(); return 'closed';")
     try await Task.sleep(for: .milliseconds(500))
+    try await waitForNativeSheet(shell, visible: false)
     XCTAssertFalse(tabs.isHidden)
     shell.select(.wallet)
     try await waitFor(

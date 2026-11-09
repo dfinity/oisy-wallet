@@ -355,4 +355,39 @@
 		max-height: calc(100dvh - env(safe-area-inset-top) - 12px);
 		border-radius: 28px 28px 0 0;
 	}
+
+	/* Optional UIKit sheet host: the same web panel fills its native container. */
+	:global([data-native-sheet-pending]) {
+		visibility: hidden !important;
+	}
+	:global(body[data-native-sheet-host] [data-native-sheet-root]) {
+		opacity: 1 !important;
+	}
+	:global(body[data-native-sheet-host] [data-native-sheet-root] > .backdrop) {
+		display: none;
+	}
+	:global(
+		body[data-native-sheet-host]:has([data-mobile-host])
+			.modal
+			> .wrapper.dialog[data-native-sheet-panel]
+	),
+	:global(
+		body[data-native-sheet-host]:has([data-mobile-host]) .bottom-sheet[data-native-sheet-panel]
+	) {
+		position: fixed;
+		inset: 0;
+		width: 100%;
+		max-width: 100%;
+		height: 100%;
+		max-height: 100%;
+		margin: 0;
+		border-radius: 0;
+		box-shadow: none;
+		box-sizing: border-box;
+		/* The web background extends behind UIKit’s grabber in either appearance. */
+		padding-top: 20px;
+		padding-bottom: env(safe-area-inset-bottom);
+		opacity: 1 !important;
+		transform: none !important;
+	}
 </style>

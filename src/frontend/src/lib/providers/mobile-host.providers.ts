@@ -1,6 +1,7 @@
 import type {
 	MobileNavigationState,
 	MobileRoot,
+	MobileSheetRequest,
 	MobileWalletRequest
 } from '$lib/schema/mobile-host.schema';
 import type {} from '$lib/types/mobile-host';
@@ -14,6 +15,7 @@ export interface MobileHostTransport {
 		request: MobileWalletRequest;
 	}): Promise<unknown>;
 	ready(options: { version: 2 }): Promise<unknown>;
+	sheet(options: MobileSheetRequest & { version: 2; documentId: string }): Promise<void>;
 	navigate(options: { version: 2; documentId: string; root: MobileRoot }): Promise<void>;
 	navigationState(options: MobileNavigationState & { documentId: string }): Promise<void>;
 	openAccount(options: { version: 2; documentId: string }): Promise<void>;
@@ -27,7 +29,7 @@ export interface MobileHostTransport {
 	clearBack(options: { version: 2; documentId: string }): Promise<void>;
 	finishRefresh(options: { version: 2; documentId: string; requestId: number }): Promise<void>;
 	addListener(
-		event: 'navigate' | 'back' | 'refresh',
+		event: 'navigate' | 'back' | 'refresh' | 'dismissSheet',
 		listener: (value: unknown) => void
 	): Promise<PluginListenerHandle>;
 }
@@ -61,6 +63,7 @@ const command = async (args: { method: string; options: unknown }): Promise<void
 // Existing packaged hosts remain compatible. New live hosts use only the narrow
 // WebKit transport; feature components do not know either transport's API.
 export const mobileHostTransport: MobileHostTransport = {
+	sheet: (options) => command({ method: 'sheet', options }),
 	ready: (options) =>
 		liveHost() ? request({ method: 'ready', options }) : bundledHost.ready(options),
 	wallet: (options) =>

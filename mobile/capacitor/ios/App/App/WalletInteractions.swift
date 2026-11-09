@@ -131,7 +131,7 @@ final class WalletInteractions: NSObject, UIGestureRecognizerDelegate {
       completion?(true)
     }
   }
-  func update(backAllowed: Bool, refreshAllowed: Bool) {
+  func update(backAllowed: Bool, refreshAllowed: Bool, temporaryResize: Bool = false) {
     if edgePan.view == nil { webView?.superview?.addGestureRecognizer(edgePan) }
     self.backAllowed = backAllowed
     self.refreshAllowed = refreshAllowed
@@ -145,7 +145,7 @@ final class WalletInteractions: NSObject, UIGestureRecognizerDelegate {
     webView?.scrollView.alwaysBounceVertical = refreshAllowed
     refreshControl.isEnabled = refreshAllowed
     if !refreshAllowed { cancelRefresh() }
-    if parentImage != nil && !geometryMatches { clearBack() }
+    if !temporaryResize && parentImage != nil && !geometryMatches { clearBack() }
   }
   func navigationCommitted(url: URL?) {
     if awaitingBack, url == parentURL {

@@ -138,3 +138,20 @@ export const MobileWalletRequestSchema = z.discriminatedUnion('method', [
 ]);
 export type MobileWalletRequest = z.infer<typeof MobileWalletRequestSchema>;
 export const MobileWalletResponseSchema = z.object({ response: z.string().max(65_536) }).strict();
+
+// Optional presentation capability. Existing v2 hosts keep their web dialogs.
+export const MobileSheetRequestSchema = z
+	.object({
+		id: z.string().uuid(),
+		phase: z.enum(['prepare', 'present', 'dismiss', 'release']),
+		size: z.enum(['medium', 'large'])
+	})
+	.strict();
+export type MobileSheetRequest = z.infer<typeof MobileSheetRequestSchema>;
+export const MobileSheetDismissSchema = z
+	.object({
+		version: z.literal(2),
+		documentId: z.string().uuid(),
+		id: z.string().uuid()
+	})
+	.strict();

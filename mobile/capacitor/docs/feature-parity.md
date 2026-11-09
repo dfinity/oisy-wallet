@@ -16,6 +16,21 @@ workers. Expand this implementation; keep Swift responsible for system integrati
 navigation controls, authentication and isolated Explore. Do not create another
 wallet UI or data pipeline.
 
+## Presentation update (2026-11-09)
+
+Send, Swap, Contacts and other shared multi-step wizards use full-page mobile
+presentation with Back/Cancel controls. They keep the existing web form and
+cancellation logic; this does not add independent native screens or route stacks.
+Accessory dialogs, such as Sorting, filters and receive-address QR details, can
+use the optional `nativeSheets` host capability. See the
+[system sheet contract](./shared-web-contract.md#system-sheets) for ownership,
+fallback behavior and dismissal guards.
+
+The simulator checks cover same-document/session preservation, accessory dismissal,
+full-page Send/Swap review and cancellation, Contacts, Notes editing, enlarged text
+and Back restoration. No funded transaction was submitted. Deployment and physical
+acceptance for this presentation update are pending.
+
 ## Reading the inventory
 
 “Reachable” means the source exposes a mobile entry point and permits its route.

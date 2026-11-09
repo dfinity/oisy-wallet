@@ -5,6 +5,7 @@ interface OverlayOptions {
 	onClose?: () => void;
 	returnFocus?: HTMLElement;
 	priority?: 'normal' | 'high';
+	nativeDismissible?: boolean;
 }
 
 // Only the topmost overlay handles keys. A dialog opened from a popover can
@@ -23,6 +24,14 @@ const topmostOverlay = (): OverlayEntry | undefined =>
 			topmost?.options.priority === 'high' && entry.options.priority !== 'high' ? topmost : entry,
 		undefined
 	);
+// Native gestures use the same topmost callback as Escape, including busy/dirty guards.
+export const requestTopmostOverlayClose = () => {
+	const entry = topmostOverlay();
+	if (entry?.options.nativeDismissible !== false) {
+		entry?.options.onClose?.();
+	}
+};
+
 const focusableSelector = 'button, a[href], input, select, textarea, iframe, [tabindex]';
 // Regions drawn above overlays that must stay reachable while one is open, such as the
 // toasts: a persistent notification can be dismissed without closing the dialog.
@@ -52,6 +61,15 @@ const focusableElements = (node: HTMLElement): HTMLElement[] => {
 			!element.closest('[hidden], [inert]') &&
 			isVisible(element)
 	);
+};
+
+// Reparenting a WebView can clear focus. Restore the existing topmost overlay
+// after native presentation, without replacing its trap or return target.
+export const focusTopmostOverlay = () => {
+	const entry = topmostOverlay();
+	if (entry && !entry.node.contains(document.activeElement)) {
+		(focusableElements(entry.node)[0] ?? entry.node).focus({ preventScroll: true });
+	}
 };
 
 const reachableElements = (): HTMLElement[] =>

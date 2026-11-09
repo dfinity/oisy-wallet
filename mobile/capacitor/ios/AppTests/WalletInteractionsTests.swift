@@ -15,6 +15,26 @@ final class WalletInteractionsTests: XCTestCase {
       context.fill(CGRect(x: 0, y: 0, width: 10, height: 10))
     }
   }
+  func testSheetResizeKeepsBackImageUntilRootGeometryIsRestored() {
+    let root = CGRect(x: 0, y: 0, width: 390, height: 844)
+    let container = UIView(frame: root)
+    let web = WKWebView(frame: root)
+    container.addSubview(web)
+    let interactions = WalletInteractions(
+      webView: web, onBack: {}, onRefresh: { _ in }, snapshot: { $0(self.image()) })
+    defer { interactions.close() }
+    interactions.capture(parent: parent) { XCTAssertTrue($0) }
+    web.frame.size.height = 420
+    interactions.update(backAllowed: false, refreshAllowed: false, temporaryResize: true)
+    XCTAssertEqual(interactions.parentURL, parent)
+    XCTAssertFalse(interactions.canBeginBack)
+    web.frame = root
+    interactions.update(backAllowed: true, refreshAllowed: false)
+    XCTAssertTrue(interactions.canBeginBack)
+    web.frame.size.width = 600
+    interactions.update(backAllowed: true, refreshAllowed: false)
+    XCTAssertNil(interactions.parentURL, "A real geometry change must still invalidate Back")
+  }
   func testCancellationKeepsRouteAndCompletionWaitsForPaintedParent() {
     let container = UIView(frame: CGRect(x: 0, y: 0, width: 390, height: 844))
     let web = WKWebView(frame: container.bounds)

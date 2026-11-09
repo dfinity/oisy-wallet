@@ -23,7 +23,7 @@
 
 	let {
 		steps,
-		mobilePresentation,
+		mobilePresentation = 'fullScreen',
 		disablePointerEvents = false,
 		testId,
 		currentStep = $bindable(),

@@ -139,7 +139,7 @@ logic stays shared.
 | Change                            | Current files / invariant                                                                                                                                                          |
 | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Destination or query parameter    | `lib/schema/mobile-host.schema.ts`, `lib/utils/mobile-navigation.utils.ts`, `MobileHost.svelte`, native `WalletRoot` and `WalletOriginPolicy`; update both allowlists and mappings |
-| Host message                      | TS schemas/services, `OisyHostPlugin.swift`, `WalletMessageGate`, tests and build metadata; version breaking changes explicitly                                                    |
+| Host message                      | TS schemas/services, `LiveWalletBridge`, `WalletHostCommands`, tests and build metadata; version breaking changes explicitly                                                       |
 | Modal markup/styles               | `Modal`, `ContentWithToolbar`, overlay focus store and `MobileHost.svelte` presentation rules; blocking overlays hide native controls until final unmount                          |
 | Safe-area/navigation geometry     | `MobileHost.svelte` and `ShellViewController.swift` currently both use an 88px navigation inset; keyboard/overlay/content must agree                                               |
 | Authentication lifetime           | Web `AUTH_MAX_TIME_TO_LIVE`, native `AuthSession.duration`, callback bound and web/worker expiry checks; preserve saved deadline and shorter II expiry                             |
@@ -157,6 +157,49 @@ containers and footer structure. That is a fragile dependency, not a stable publ
 API. When those primitives change, introduce explicit presentation data hooks/CSS
 variables owned by the shared component and test the modal in WebKit.
 The existing `mobilePresentation` prop should remain the feature-facing entry.
+
+## System sheets
+
+The optional v2 `nativeSheets` capability moves the existing trusted WKWebView
+into a `UISheetPresentationController`. It does not create a second document,
+reload the page, hand off another identity or serialize feature state. The shared
+Svelte components still own forms, data, validation, signing and cancellation.
+Explore has no access to this capability.
+
+Accessory `Modal` dialogs (`mobilePresentation="sheet"`) and dismissible
+`BottomSheetContainer` use
+`nativeSheet` from `mobile-sheet.services.ts`. The adapter sends a document-bound
+`sheet` command with a UUID, a fixed phase (`prepare`, `present`, `dismiss`,
+`release`) and a size (`medium`, `large`). Native validates those fields through
+the existing origin, main-frame, document and session boundary. No URLs, HTML,
+JavaScript, credentials or form values are passed in this command.
+
+Preparation captures the underlying screen while the web panel is hidden. That
+image stays in memory behind the native sheet. The same WebView then fills the
+sheet, including its existing overlay focus trap. Closing freezes the departing
+panel before its web outro removes it; release restores the WebView to Wallet.
+Native navigation stays blocked until release. Document replacement, process
+failure, expiry and logout clear the presentation and its images.
+
+Nested web dialogs reuse the open system sheet and their existing overlay stack;
+a larger nested form expands a medium sheet. A swipe requests the topmost shared
+Close callback. UIKit does not dismiss unconditionally: busy state, hidden Close,
+unsaved-change checks and transaction guards still apply.
+
+Send, Swap, Contacts and other multi-step `WizardModal` flows use full-page web
+presentation, with Back/Cancel controls. Notes editors also stay full-page. They
+do not create a native sheet; only accessory overlays above them can do so.
+Receive-address QR dialogs explicitly opt into sheet presentation. Alerts retain
+their existing web presentation. Do not build native copies of
+Send, Swap or pickers to get system presentation.
+
+Browsers and installed hosts without `nativeSheets` retain the existing web sheets.
+A native preparation failure also restores that presentation. Deploy the additive
+frontend adapter before installing the new host. Subsequent shared content changes
+still arrive through normal frontend releases; changes to UIKit require an app
+update. The simulator suite covers same-document/session/draft preservation,
+rejected stale commands, web dismissal guards and accessory sheets above shared
+pages without submitting a transaction.
 
 ## Token navigation contract
 

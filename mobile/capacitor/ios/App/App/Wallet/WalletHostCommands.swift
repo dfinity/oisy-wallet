@@ -40,7 +40,7 @@ final class WalletHostCommands {
         "root": host.navigationRoot.rawValue, "requestId": host.navigationRequestID,
         "capabilities": [
           "nativeNavigation", "navigationState", "walletInteractions", "account",
-          "delegation", "operationJournal", "sessionHandoff", "documentBinding",
+          "delegation", "operationJournal", "sessionHandoff", "documentBinding", "nativeSheets",
         ],
       ])
     case "navigate":
@@ -73,6 +73,22 @@ final class WalletHostCommands {
         let request = WalletNavigationState.integer(options["requestId"]),
         wallet.interactions?.finishRefresh(requestID: request) == true
       else { throw WalletHostCommandError.invalid }
+      result = WalletHostReply(value: [:])
+    case "sheet":
+      guard Set(options.keys) == ["version", "id", "phase", "size"],
+        let rawID = options["id"] as? String, let id = UUID(uuidString: rawID),
+        let phase = options["phase"] as? String,
+        let rawSize = options["size"] as? String,
+        let size = WalletSheetCoordinator.Size(rawValue: rawSize),
+        let sheet = wallet.nativeSheet
+      else { throw WalletHostCommandError.invalid }
+      switch phase {
+      case "prepare": try await sheet.prepare(id: id)
+      case "present": try await sheet.present(id: id, size: size)
+      case "dismiss": try await sheet.dismiss(id: id)
+      case "release": try await sheet.release(id: id)
+      default: throw WalletHostCommandError.invalid
+      }
       result = WalletHostReply(value: [:])
     case "presentation":
       guard Set(options.keys) == ["version", "blocking"],
