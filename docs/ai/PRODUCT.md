@@ -852,11 +852,13 @@ If the backend cannot answer, the flow reports that pending transactions are una
 
 ### Sending through the backend (local and staging)
 
-On local and staging builds, Send, Convert and the AI assistant's BTC send build and sign the transaction in OISY, then have the backend broadcast it. The backend reserves the inputs in the same step, so no send can pick them up in the meantime. A send there spends at most 38 inputs, the most whose signing a login's approval always covers, and the amount offered as Max stays within that. A wallet spread over more outputs needs more than one send to move everything.
+On local and staging builds, Send, Convert, the AI assistant's BTC send and the BTC swaps (Chain Fusion and NEAR Intents) build and sign the transaction in OISY, then have the backend broadcast it. The backend reserves the inputs in the same step, so no send can pick them up in the meantime. A send there spends at most 38 inputs, the most whose signing a login's approval always covers, and the amount offered as Max stays within that. A wallet spread over more outputs needs more than one send to move everything.
 
 When the broadcast's outcome is unclear, the transaction may have gone out. The user is told to check their activity before sending again, and the flow does not offer the form again: its inputs stay reserved, so a second send would spend other coins and could pay twice. In the AI assistant, the card shows that message in place of its Send button. A send the backend refuses outright returns to the form as before, with the locked-funds message when its inputs are already reserved.
 
-Swaps, Liquidium and OpenCryptoPay still send through the Chain Fusion Signer. Beta and production send as before.
+A swap's activity row is created before its deposit is broadcast, so it is tracked whatever the broadcast answers. A deposit the backend refuses outright removes the row. One whose outcome is unclear keeps it, and the swap settles, or fails, once the deposit is seen or never arrives.
+
+Liquidium and OpenCryptoPay still send through the Chain Fusion Signer. Beta and production send as before.
 
 ---
 

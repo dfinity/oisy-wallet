@@ -1,4 +1,5 @@
 import { sendBtc } from '$btc/services/btc-send.services';
+import { BtcBroadcastUnconfirmedError } from '$btc/types/btc-send';
 import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
@@ -34,6 +35,7 @@ import * as icpSwapFactory from '$lib/api/icp-swap-factory.api';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import {
 	LIFI_QUOTE_TIMEOUT_MS,
@@ -137,6 +139,7 @@ import {
 	XrpSendNotGuardedError,
 	type XrpPaymentRecord
 } from '$xrp/types/xrp-send';
+import { nonNullish } from '@dfinity/utils';
 import {
 	constructSimpleSDK,
 	type BuildDeltaOrderParams,
@@ -274,7 +277,8 @@ vi.mock('$lib/services/near-intents.services', () => ({
 }));
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
-	createActiveUserTransaction: vi.fn()
+	createActiveUserTransaction: vi.fn(),
+	deleteUnbroadcastActiveUserTransaction: vi.fn()
 }));
 
 vi.mock('$eth/services/send.services', () => ({
@@ -4872,7 +4876,8 @@ describe('swap.services', () => {
 					utxosFee: mockUtxosFee,
 					source: mockBtcAddress,
 					destination: depositAddress,
-					amount: '0.01'
+					amount: '0.01',
+					viaBackend: true
 				})
 			);
 		});
@@ -5017,6 +5022,108 @@ describe('swap.services', () => {
 
 			expect(setCustomToken).toHaveBeenCalledOnce();
 			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
+		});
+
+		describe('through the backend', () => {
+			const broadcast = vi.fn();
+
+			// As the real `sendBtc` does on the backend path: `beforeBroadcast` once signed, then the
+			// broadcast, which either goes out or fails with `failure`.
+			const sendThroughBackend = (failure?: unknown) =>
+				vi.mocked(sendBtc).mockImplementation(async ({ beforeBroadcast, onBroadcast }) => {
+					await beforeBroadcast?.({ txid: btcTxid });
+
+					broadcast();
+
+					if (nonNullish(failure)) {
+						throw failure;
+					}
+
+					await onBroadcast?.({ txid: btcTxid });
+
+					return btcTxid;
+				});
+
+			const createdRowId = () =>
+				vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mock.calls[0]?.[0].id;
+
+			beforeEach(() => {
+				broadcast.mockClear();
+				vi.mocked(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).mockResolvedValue(undefined);
+			});
+
+			it('should create the row before the broadcast, and only once', async () => {
+				vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockImplementation(
+					() => {
+						expect(broadcast).not.toHaveBeenCalled();
+
+						return Promise.resolve();
+					}
+				);
+				sendThroughBackend();
+
+				await fetchNearIntentsBtcSwap(baseParams);
+
+				// Without the source address, which only an XRP deposit carries.
+				expect(
+					activeUserTransactionsServices.createActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						data: {
+							NearIntents: expect.objectContaining({ source_address: [] })
+						},
+						externalRefs: expect.arrayContaining([
+							{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: depositAddress }
+						])
+					})
+				);
+				expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledExactlyOnceWith({
+					depositAddress,
+					txHash: btcTxid
+				});
+			});
+
+			it('should broadcast nothing when the row cannot be written, and delete it all the same', async () => {
+				vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockRejectedValue(
+					new Error('backend down')
+				);
+				sendThroughBackend();
+
+				await expect(fetchNearIntentsBtcSwap(baseParams)).rejects.toThrow('backend down');
+
+				expect(broadcast).not.toHaveBeenCalled();
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity, id: createdRowId() });
+			});
+
+			it('should delete the row when the broadcast is refused outright', async () => {
+				const refusal = new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee');
+				sendThroughBackend(refusal);
+
+				await expect(fetchNearIntentsBtcSwap(baseParams)).rejects.toBe(refusal);
+
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity, id: createdRowId() });
+				expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+			});
+
+			it.each([
+				new BtcBroadcastTransactionCanisterError({ BroadcastInProgress: null }, 'in progress'),
+				new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') })
+			])('should keep the row after an unclear outcome: %s', async (unclear) => {
+				sendThroughBackend(unclear);
+
+				await expect(fetchNearIntentsBtcSwap(baseParams)).rejects.toBe(unclear);
+
+				expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).not.toHaveBeenCalled();
+			});
 		});
 	});
 

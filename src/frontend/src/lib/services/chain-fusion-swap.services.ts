@@ -4,7 +4,11 @@ import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import type { BtcAddress } from '$btc/types/address';
 import type { UtxosFee } from '$btc/types/btc-send';
-import { convertNumberToSatoshis, isInvalidUtxosFee } from '$btc/utils/btc-send.utils';
+import {
+	convertNumberToSatoshis,
+	isDefinitiveBtcBroadcastRefusal,
+	isInvalidUtxosFee
+} from '$btc/utils/btc-send.utils';
 import type { ChainFusionDirection } from '$declarations/backend/backend.did';
 import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
@@ -43,7 +47,10 @@ import {
 	ProgressStepsSendIc,
 	ProgressStepsSwap
 } from '$lib/enums/progress-steps';
-import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
+import {
+	createActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import type { Address } from '$lib/types/address';
 import type { CanisterIdText } from '$lib/types/canister';
 import {
@@ -530,18 +537,7 @@ const toSwapProgressStep = (step: ProgressStepsSendIc): ProgressStepsSwap =>
  * Either way the conversion degrades to untracked, which is the Convert flow's
  * behaviour today, rather than to aborted.
  */
-const createChainFusionActiveUserTransaction = async ({
-	identity,
-	swapId,
-	direction,
-	sourceToken,
-	destinationToken,
-	minterCanisterId,
-	amount,
-	swapAmount,
-	usdSourceValue,
-	extraRefs
-}: {
+interface ChainFusionActiveUserTransactionParams {
 	identity: Identity;
 	swapId: string;
 	direction: ChainFusionDirection;
@@ -552,32 +548,75 @@ const createChainFusionActiveUserTransaction = async ({
 	swapAmount: Amount;
 	usdSourceValue?: string;
 	extraRefs: Partial<Record<ChainFusionExternalRefKey, string>>;
-}): Promise<void> => {
+}
+
+// Creates the row, or returns `false` without one for a conversion it cannot track.
+const writeChainFusionActiveUserTransaction = async ({
+	identity,
+	swapId,
+	direction,
+	sourceToken,
+	destinationToken,
+	minterCanisterId,
+	amount,
+	swapAmount,
+	usdSourceValue,
+	extraRefs
+}: ChainFusionActiveUserTransactionParams): Promise<boolean> => {
+	const data = toChainFusionData({ direction, sourceToken, destinationToken, amount });
+
+	if (isNullish(data) || isNullish(minterCanisterId)) {
+		consoleError('Skipping an untrackable Chain Fusion conversion', { swapId });
+		return false;
+	}
+
+	await createActiveUserTransaction({
+		identity,
+		id: swapId,
+		data,
+		externalRefs: toChainFusionExternalRefs({
+			...toChainFusionDisplayRefs({
+				sourceToken,
+				destinationToken,
+				amount: `${swapAmount}`,
+				usdSourceValue
+			}),
+			[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID]: minterCanisterId,
+			...extraRefs
+		})
+	});
+
+	return true;
+};
+
+const createChainFusionActiveUserTransaction = async (
+	params: ChainFusionActiveUserTransactionParams
+): Promise<void> => {
 	try {
-		const data = toChainFusionData({ direction, sourceToken, destinationToken, amount });
-
-		if (isNullish(data) || isNullish(minterCanisterId)) {
-			consoleError('Skipping an untrackable Chain Fusion conversion', { swapId });
-			return;
-		}
-
-		await createActiveUserTransaction({
-			identity,
-			id: swapId,
-			data,
-			externalRefs: toChainFusionExternalRefs({
-				...toChainFusionDisplayRefs({
-					sourceToken,
-					destinationToken,
-					amount: `${swapAmount}`,
-					usdSourceValue
-				}),
-				[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID]: minterCanisterId,
-				...extraRefs
-			})
-		});
+		await writeChainFusionActiveUserTransaction(params);
 	} catch (err: unknown) {
 		consoleError(err);
+	}
+};
+
+/**
+ * Creates the row of a conversion whose deposit is signed and not yet broadcast, so it is tracked
+ * whatever the broadcast answers. Unlike `createChainFusionActiveUserTransaction`, a failed write
+ * rejects, so nothing is broadcast untracked; its row is deleted all the same, since the backend may
+ * have committed it if only its answer was lost. Returns whether a row was created.
+ */
+const openChainFusionActiveUserTransaction = async (
+	params: ChainFusionActiveUserTransactionParams
+): Promise<boolean> => {
+	try {
+		return await writeChainFusionActiveUserTransaction(params);
+	} catch (err: unknown) {
+		await deleteUnbroadcastActiveUserTransaction({
+			identity: params.identity,
+			id: params.swapId
+		});
+
+		throw err;
 	}
 };
 
@@ -841,11 +880,15 @@ export const fetchChainFusionEvmSwap = async ({
  * already-quoted UTXO selection, so no fee is recomputed at the point of no return.
  *
  * `sendBtc` records the pending transaction and refreshes the wallet itself, and hands
- * over the broadcast transaction id — the row's poll key: the minter is asked whether it
- * has taken *these* coins, and told to mint them once they are confirmed. The row is
- * created from `onBroadcast`, not from `sendBtc`'s resolution: the steps between the two
- * are best-effort bookkeeping whose failure must not leave an irreversible deposit
- * untracked.
+ * over the transaction id — the row's poll key: the minter is asked whether it has taken
+ * *these* coins, and told to mint them once they are confirmed.
+ *
+ * Through the backend, the txid is known once the deposit is signed, so the row is created
+ * in `beforeBroadcast`: a refusal outright deletes it, and after an unclear outcome it stays
+ * for the poller. Through the Chain Fusion Signer, the txid exists only once it has broadcast,
+ * so the row is created from `onBroadcast`, not from `sendBtc`'s resolution: the steps
+ * between the two are best-effort bookkeeping whose failure must not leave an irreversible
+ * deposit untracked.
  */
 export const fetchChainFusionBtcSwap = async ({
 	identity,
@@ -875,35 +918,56 @@ export const fetchChainFusionBtcSwap = async ({
 	// before it asks the signer, once after the transaction is recorded as pending.
 	let signed = false;
 
-	await sendBtc({
-		...rest,
+	// The row carries what the poller needs without any store: the transaction to look for,
+	// the address it was sent to, and the minter to ask to mint it.
+	const rowParams = ({ txid }: { txid: string }): ChainFusionActiveUserTransactionParams => ({
 		identity,
-		destination: depositAddress,
-		onProgress: () => {
-			progress(signed ? ProgressStepsSwap.UPDATE_UI : ProgressStepsSwap.SWAP);
-			signed = true;
-		},
-		// The deposit is irreversible the moment it is broadcast, so the row is created
-		// right there. It carries what the poller needs without any store: the transaction
-		// to look for, the address it was sent to, and the minter to ask to mint it.
-		onBroadcast: ({ txid }) =>
-			createChainFusionActiveUserTransaction({
-				identity,
-				swapId,
-				direction: { BtcToCkBtc: null },
-				sourceToken,
-				destinationToken,
-				// The ck destination is the token being minted, so its minter is the one to ask.
-				minterCanisterId: destinationToken.minterCanisterId,
-				amount: convertNumberToSatoshis({ amount: rest.amount }),
-				swapAmount: rest.amount,
-				usdSourceValue,
-				extraRefs: {
-					[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_TXID]: txid,
-					[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_DEPOSIT_ADDRESS]: depositAddress
-				}
-			})
+		swapId,
+		direction: { BtcToCkBtc: null },
+		sourceToken,
+		destinationToken,
+		// The ck destination is the token being minted, so its minter is the one to ask.
+		minterCanisterId: destinationToken.minterCanisterId,
+		amount: convertNumberToSatoshis({ amount: rest.amount }),
+		swapAmount: rest.amount,
+		usdSourceValue,
+		extraRefs: {
+			[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_TXID]: txid,
+			[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_DEPOSIT_ADDRESS]: depositAddress
+		}
 	});
+
+	// Whether `beforeBroadcast`, which `sendBtc` calls only on the backend path, wrote the row.
+	let rowOpened = false;
+
+	try {
+		await sendBtc({
+			...rest,
+			identity,
+			destination: depositAddress,
+			viaBackend: true,
+			onProgress: () => {
+				progress(signed ? ProgressStepsSwap.UPDATE_UI : ProgressStepsSwap.SWAP);
+				signed = true;
+			},
+			beforeBroadcast: async ({ txid }) => {
+				rowOpened = await openChainFusionActiveUserTransaction(rowParams({ txid }));
+			},
+			onBroadcast: async ({ txid }) => {
+				if (!rowOpened) {
+					await createChainFusionActiveUserTransaction(rowParams({ txid }));
+				}
+			}
+		});
+	} catch (err: unknown) {
+		// A refusal outright sent nothing. Any other failure after the row was written may have
+		// sent the deposit, so the row stays for the poller to settle.
+		if (rowOpened && isDefinitiveBtcBroadcastRefusal(err)) {
+			await deleteUnbroadcastActiveUserTransaction({ identity, id: swapId });
+		}
+
+		throw err;
+	}
 
 	await enableDestination(enableDestinationToken);
 };

@@ -859,6 +859,27 @@ Decided in PR 8a (PR 8 is split in three, see the [Delivery plan](#delivery-plan
     the last is the largest left, so it still finds a set whenever any set of 38 inputs covers the
     amount. Max spends the 38 largest.
 
+Decided in PR 8b:
+
+- **Each swap passes both hooks and lets `sendBtc` pick.** `sendBtc` calls `beforeBroadcast` only
+  on the backend path, so the row is created there when it runs, and in `onBroadcast` otherwise.
+  Neither swap reads the flag.
+- **Creating the row before the broadcast must succeed**, as `createLifiRow`'s does: a failed write
+  rejects, so nothing is broadcast untracked, and the row is deleted all the same, since the backend
+  may have committed it. On the CFS path the row is still created best effort in `onBroadcast`.
+- **A definitive refusal deletes the row** with the new `deleteUnbroadcastActiveUserTransaction`,
+  in `active-user-transactions.services.ts`: three attempts a second apart, as a LI.FI row's. A
+  delete that keeps failing leaves the row to its poller. After an unclear outcome the row stays.
+- **NEAR Intents gets `openSwap`.** `executeNearIntentsSwap` hands its transports `openSwap()`,
+  which creates the swap's row, rejects if it cannot, and returns the row's id. `registerSwap`
+  swallows failures and keeps the id to itself. `swapRecord` (XRP's) carries the deposit's source
+  address, which the backend counts in its one-XRP-payment-in-flight check, so a BTC row must not
+  set it.
+- **An untrackable swap still proceeds untracked**, as both providers' best-effort paths already
+  do: no row is written, and nothing is deleted.
+- **`SwapBtcWizard`** shows `mapBtcBroadcastErrorToMessage`'s message where it has one, and closes
+  after an unclear outcome instead of returning to the form.
+
 ### Frontend: UTXO loading
 
 `AllUtxosLoader.svelte` and `loadBtcPendingSentTransactions` read from `btc_get_spendable_utxos`
