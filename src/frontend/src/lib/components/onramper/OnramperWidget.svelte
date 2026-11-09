@@ -118,11 +118,15 @@
 
 		buildOnramperLink({
 			identity: currentIdentity,
-			mode: 'buy',
+			mode: 'buy,sell',
 			defaultFiat: $currentCurrency,
 			defaultCrypto,
 			onlyCryptos,
 			onlyCryptoNetworks,
+			sell_defaultFiat: $currentCurrency,
+			sell_defaultCrypto: defaultCrypto,
+			sell_onlyCryptos: onlyCryptos,
+			sell_onlyCryptoNetworks: onlyCryptoNetworks,
 			wallets: [],
 			networkWallets,
 			supportRecurringPayments: true,

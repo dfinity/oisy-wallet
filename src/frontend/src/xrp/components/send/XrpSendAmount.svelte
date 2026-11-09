@@ -95,6 +95,7 @@
 		onClick={onTokensList}
 		onCustomErrorValidate={customValidate}
 		{revalidateKey}
+		showTokenNetwork
 		token={$sendToken}
 		truncateSymbol
 		bind:amount

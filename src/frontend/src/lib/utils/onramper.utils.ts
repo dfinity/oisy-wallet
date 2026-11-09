@@ -21,6 +21,11 @@ export interface BuildOnramperLinkParams {
 	defaultCrypto?: OnramperId;
 	onlyCryptos: OnramperId[];
 	onlyCryptoNetworks: OnramperNetworkId[];
+	// The Sell tab ignores the fields above and reads its own `sell_*` copies of them.
+	sell_defaultFiat?: OnramperFiatId;
+	sell_defaultCrypto?: OnramperId;
+	sell_onlyCryptos?: OnramperId[];
+	sell_onlyCryptoNetworks?: OnramperNetworkId[];
 	wallets: OnramperCryptoWallet[];
 	networkWallets: OnramperNetworkWallet[];
 	supportRecurringPayments: boolean;

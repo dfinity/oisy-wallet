@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
@@ -15,6 +15,7 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { tryParseToken } from '$lib/utils/parse.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -139,12 +140,14 @@
 		error = onCustomErrorValidate(parsedValue);
 	};
 
-	const debounceValidate = debounce(validate, 300);
-
+	// Waits for typing to pause. The cleanup drops a pending check when the amount changes again, and
+	// when the input goes away: a check run after that would read the state of a form that is gone.
 	$effect(() => {
 		[amount, token, revalidateKey];
 
-		debounceValidate();
+		const timer = setTimeout(validate, 300);
+
+		return () => clearTimeout(timer);
 	});
 </script>
 
@@ -152,7 +155,11 @@
 	{@render title?.()}
 	{#if showTokenNetwork && nonNullish(token)}
 		<div class="flex text-xs font-normal text-tertiary">
-			<span class="mr-1 text-sm">On {token.network.name}</span>
+			<span class="mr-1 text-sm"
+				>{replacePlaceholders($i18n.tokens.text.on_network_label, {
+					$network: token.network.name
+				})}</span
+			>
 			<NetworkLogo network={token.network} />
 		</div>
 	{/if}

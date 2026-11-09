@@ -80,7 +80,9 @@
 		isNullish(utxosFee) || isInvalidUtxosFee(utxosFee) || nonNullish(errorType)
 	);
 
-	let maxSendAmountStore = $derived(initBtcMaxSendAmount(source));
+	// The recipient is unknown here: a NEAR Intents deposit address only comes with the
+	// execution quote. So Max is priced for the largest output a send can pay.
+	let maxSendAmountStore = $derived(initBtcMaxSendAmount({ source }));
 
 	let hasPendingTransactionsStore = $derived(initPendingSentTransactionsStatus(source));
 

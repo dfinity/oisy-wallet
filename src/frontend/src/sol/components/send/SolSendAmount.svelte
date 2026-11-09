@@ -80,6 +80,7 @@
 		exchangeRate={$sendTokenExchangeRate}
 		onClick={onTokensList}
 		onCustomErrorValidate={customValidate}
+		showTokenNetwork
 		token={$sendToken}
 		truncateSymbol
 		bind:amount

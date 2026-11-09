@@ -1,6 +1,10 @@
-import { BTC_CHANGE_DUST_THRESHOLD_SATOSHIS } from '$btc/constants/btc.constants';
+import {
+	BTC_CHANGE_DUST_THRESHOLD_SATOSHIS,
+	BTC_LARGEST_OUTPUT_VSIZE
+} from '$btc/constants/btc.constants';
 import {
 	btcAddressToOutputScript,
+	btcOutputVSize,
 	buildBtcSendPsbt,
 	finalizeSignedBtcPsbt
 } from '$btc/utils/btc-psbt.utils';
@@ -209,6 +213,53 @@ describe('btc-psbt.utils', () => {
 			'refuses the invalid address "%s"',
 			(address) => {
 				expect(() => scriptHex({ address, network: 'mainnet' })).toThrow();
+			}
+		);
+	});
+
+	describe('btcOutputVSize', () => {
+		it.each([
+			{ type: 'P2PKH', address: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2', vsize: 34 },
+			{ type: 'P2SH', address: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy', vsize: 32 },
+			{ type: 'P2WPKH', address: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq', vsize: 31 },
+			{
+				type: 'P2WSH',
+				address: 'bc1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3qccfmv3',
+				vsize: 43
+			},
+			{
+				type: 'P2TR',
+				address: 'bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0',
+				vsize: 43
+			}
+		])('should size a $type output at $vsize vbytes', ({ address, vsize }) => {
+			expect(btcOutputVSize({ address })).toBe(vsize);
+		});
+
+		it.each([
+			// BIP350 vectors: a testnet P2TR address and a testnet P2WSH one.
+			{ address: 'tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c', vsize: 43 },
+			{
+				address: 'tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7',
+				vsize: 43
+			},
+			// The CFS recipient's program as a regtest address.
+			{
+				address: btcAddressLib.toBech32(
+					btcAddressLib.fromBech32('bc1q44r2nattvp03mvcw986848l3s8squ88477rusl').data,
+					0,
+					'bcrt'
+				),
+				vsize: 31
+			}
+		])('should size an address for another network too: $address', ({ address, vsize }) => {
+			expect(btcOutputVSize({ address })).toBe(vsize);
+		});
+
+		it.each([undefined, null, '', 'not-an-address'])(
+			'should take the largest output for the recipient %s',
+			(address) => {
+				expect(btcOutputVSize({ address })).toBe(BTC_LARGEST_OUTPUT_VSIZE);
 			}
 		);
 	});

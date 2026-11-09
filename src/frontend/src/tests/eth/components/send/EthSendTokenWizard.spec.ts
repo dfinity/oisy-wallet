@@ -12,6 +12,7 @@ import {
 	type EthFeeStore,
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
+import { EthSubmissionUnconfirmedError } from '$eth/types/send';
 import * as tokenUtils from '$eth/utils/token.utils';
 import * as ckethServices from '$icp-eth/services/cketh.services';
 import {
@@ -326,6 +327,43 @@ describe('EthSendTokenWizard.spec', () => {
 					}
 				})
 			);
+		});
+
+		it('tracks the ethers code behind a broadcast it cannot confirm, and says it could not', async () => {
+			const spyToastsErrorNoTrace = vi
+				.spyOn(toasts, 'toastsErrorNoTrace')
+				.mockImplementation(() => Symbol('toast'));
+
+			const err = new EthSubmissionUnconfirmedError(
+				makeError('could not coalesce error', 'UNKNOWN_ERROR', {
+					error: { code: -32603, message: 'Internal error' }
+				})
+			);
+			vi.mocked(nftSendServices.sendNft).mockRejectedValueOnce(err);
+
+			const { getByTestId } = renderHost({
+				currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+				sendProgressStep: ProgressStepsSend.INITIALIZATION,
+				nft,
+				destination,
+				sourceNetwork: ETHEREUM_NETWORK,
+				nativeEthereumToken: ETHEREUM_TOKEN,
+				sendToken: collectionToken,
+				sendTokenDecimals: 0
+			});
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(analytics.trackEvent).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					metadata: expect.objectContaining({ resultStatus: 'error', error: 'UNKNOWN_ERROR' })
+				})
+			);
+			expect(spyToastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.error.ethereum_transaction_unconfirmed },
+				err
+			});
 		});
 	});
 
