@@ -349,7 +349,8 @@
 					destinationToken: $destinationToken,
 					swapAmount,
 					userAddress: $solAddressMainnet,
-					swapDetails: selectedProvider.swapDetails
+					swapDetails: selectedProvider.swapDetails,
+					slippageValue
 				});
 			} else if (selectedProvider?.provider === SwapProvider.LIFI && nonNullish(lifiFee)) {
 				await fetchLifiSolSwap({
