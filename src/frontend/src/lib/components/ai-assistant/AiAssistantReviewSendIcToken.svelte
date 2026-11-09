@@ -3,7 +3,7 @@
 	import { getContext } from 'svelte';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import { sendIc } from '$icp/services/ic-send.services';
-	import type { IcSendRequest, IcTransferParams } from '$icp/types/ic-send';
+	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { isInvalidDestinationIc, toIcSendRequest } from '$icp/utils/ic-send.utils';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -21,6 +21,7 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -30,6 +31,7 @@
 	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
+		id: string;
 		amount: number;
 		destination: Address;
 		sendCompleted: boolean;
@@ -37,7 +39,7 @@
 		onSendCompleted: () => void;
 	}
 
-	let { amount, destination, sendCompleted, onSendCompleted, sendEnabled }: Props = $props();
+	let { id, amount, destination, sendCompleted, onSendCompleted, sendEnabled }: Props = $props();
 
 	const { sendToken, sendBalance, sendTokenStandard, sendTokenSymbol, sendTokenDecimals } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -62,10 +64,6 @@
 	let invalid = $derived(!sendEnabled || invalidDestination || amountError || isNullish(amount));
 
 	let loading = $state(false);
-
-	// Send stays on screen after a failed send, so pressing it again sends the same transfer rather
-	// than a second one (see `toIcSendRequest`).
-	let sendRequest: IcSendRequest | undefined;
 
 	const send = async () => {
 		const sharedTrackingEventMetadata = {
@@ -110,12 +108,16 @@
 		try {
 			loading = true;
 
-			sendRequest = toIcSendRequest({
-				previous: sendRequest,
+			// Kept in the assistant store, by this review's tool result `id`, so it outlives this
+			// component when the assistant closes (see `AiAssistant.icSendRequests`).
+			const sendRequest = toIcSendRequest({
+				previous: $aiAssistantStore?.icSendRequests[id],
 				tokenId: $sendToken.id,
 				to: destination,
 				amount: parsedAmount
 			});
+
+			aiAssistantStore.setIcSendRequest({ id, request: sendRequest });
 
 			const params: IcTransferParams = {
 				to: sendRequest.to,

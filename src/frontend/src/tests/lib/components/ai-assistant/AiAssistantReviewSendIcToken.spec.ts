@@ -6,6 +6,7 @@ import {
 	AI_ASSISTANT_SEND_TOKENS_BUTTON,
 	AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE
 } from '$lib/constants/test-ids.constants';
+import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import * as toasts from '$lib/stores/toasts.store';
 import { parseToken } from '$lib/utils/parse.utils';
@@ -27,6 +28,7 @@ describe('AiAssistantReviewSendIcToken', () => {
 		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token: ckBtcToken })]]);
 
 	const props = {
+		id: 'd7775002-80bf-4208-a2f0-84225281677a',
 		amount: sendAmount,
 		destination: mockPrincipalText,
 		sendCompleted: false,
@@ -39,6 +41,8 @@ describe('AiAssistantReviewSendIcToken', () => {
 		vi.clearAllMocks();
 
 		mockPage.reset();
+
+		aiAssistantStore.reset();
 
 		sendSpy = vi.spyOn(sendServices, 'sendIc').mockResolvedValue(undefined);
 	});
@@ -164,6 +168,70 @@ describe('AiAssistantReviewSendIcToken', () => {
 
 			expect(first.createdAt).toBe(BigInt(new Date('2026-11-06T10:00:00Z').getTime()) * 1_000_000n);
 			expect(second.createdAt).toBe(first.createdAt);
+		});
+
+		it('should send the same transfer again once the review is mounted again', async () => {
+			sendSpy.mockRejectedValueOnce(new Error('Test error')).mockResolvedValueOnce(undefined);
+
+			const { getByTestId, unmount } = render(AiAssistantReviewSendIcToken, {
+				props,
+				context: mockContext()
+			});
+
+			await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+			await waitFor(() => expect(toasts.toastsError).toHaveBeenCalledOnce());
+
+			// As when the assistant is closed and opened again: the chat keeps the review.
+			unmount();
+
+			vi.setSystemTime(new Date('2026-11-06T10:01:00Z'));
+
+			const { getByTestId: getByTestIdAgain } = render(AiAssistantReviewSendIcToken, {
+				props,
+				context: mockContext()
+			});
+
+			await fireEvent.click(getByTestIdAgain(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+			await waitFor(() => expect(sendSpy).toHaveBeenCalledTimes(2));
+
+			const [[first], [second]] = sendSpy.mock.calls;
+
+			expect(second.createdAt).toBe(first.createdAt);
+		});
+
+		it('should send a new transfer from another review', async () => {
+			sendSpy.mockRejectedValueOnce(new Error('Test error')).mockResolvedValueOnce(undefined);
+
+			const { getByTestId, unmount } = render(AiAssistantReviewSendIcToken, {
+				props,
+				context: mockContext()
+			});
+
+			await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+			await waitFor(() => expect(toasts.toastsError).toHaveBeenCalledOnce());
+
+			unmount();
+
+			vi.setSystemTime(new Date('2026-11-06T10:01:00Z'));
+
+			const { getByTestId: getByTestIdOther } = render(AiAssistantReviewSendIcToken, {
+				props: { ...props, id: 'another-review' },
+				context: mockContext()
+			});
+
+			await fireEvent.click(getByTestIdOther(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+			await waitFor(() => expect(sendSpy).toHaveBeenCalledTimes(2));
+
+			const [[first], [second]] = sendSpy.mock.calls;
+
+			expect(second.createdAt).toBe(
+				BigInt(new Date('2026-11-06T10:01:00Z').getTime()) * 1_000_000n
+			);
+			expect(second.createdAt).not.toBe(first.createdAt);
 		});
 	});
 });
