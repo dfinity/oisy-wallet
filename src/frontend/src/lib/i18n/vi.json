@@ -3065,7 +3065,7 @@
 			"send_token_on_network_message": "",
 			"send_token_message": "",
 			"send_on_network_message": "",
-			"type_send_address_message": "",
+			"type_send_address_message": "Nhập địa chỉ bạn muốn gửi đến hoặc chọn một trong các liên hệ của bạn.",
 			"send_token_succeeded": "Giao dịch đã hoàn tất!",
 			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "Rất tiếc, tôi không thể tìm thấy bất kỳ liên hệ phù hợp nào trong sổ địa chỉ của bạn.",

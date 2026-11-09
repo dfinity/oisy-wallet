@@ -3065,7 +3065,7 @@
 			"send_token_on_network_message": "",
 			"send_token_message": "",
 			"send_on_network_message": "",
-			"type_send_address_message": "",
+			"type_send_address_message": "Digite o endereço para o qual você quer enviar ou escolha um dos seus contatos.",
 			"send_token_succeeded": "",
 			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "Desculpe, não consegui encontrar nenhum contato adequado na sua lista de contatos.",
