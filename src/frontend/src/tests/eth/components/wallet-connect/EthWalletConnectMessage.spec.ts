@@ -843,6 +843,8 @@ describe('EthWalletConnectMessage', () => {
 
 		expect(message.textContent).toBe('Sign in to Example\nPay 0001 USDC');
 		expect(message).toHaveClass('whitespace-pre-wrap');
+		expect(message).toHaveAttribute('dir', 'ltr');
+		expect(message).toHaveClass('[unicode-bidi:isolate-override]');
 	});
 
 	// The reported hole: an unlimited ERC-2612 permit rendered as a bare spender over a folded

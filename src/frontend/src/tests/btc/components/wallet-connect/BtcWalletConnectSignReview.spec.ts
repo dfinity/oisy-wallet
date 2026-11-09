@@ -23,6 +23,8 @@ describe('BtcWalletConnectSignReview', () => {
 
 		expect(message.textContent).toBe('Sign in to Example\nPay 0001 BTC');
 		expect(message).toHaveClass('whitespace-pre-wrap');
+		expect(message).toHaveAttribute('dir', 'ltr');
+		expect(message).toHaveClass('[unicode-bidi:isolate-override]');
 	});
 
 	it('offers to approve a request Verify does not flag', () => {

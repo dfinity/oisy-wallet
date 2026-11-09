@@ -32,6 +32,8 @@ describe('SolWalletConnectSignMessageReview', () => {
 
 		expect(message.textContent).toBe('Sign in to Example\nPay 0001 USDC');
 		expect(message).toHaveClass('whitespace-pre-wrap');
+		expect(message).toHaveAttribute('dir', 'ltr');
+		expect(message).toHaveClass('[unicode-bidi:isolate-override]');
 	});
 
 	it('should render the field labels', () => {

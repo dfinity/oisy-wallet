@@ -44,7 +44,9 @@
 
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>
 	<p class="mb-4 font-normal">
-		<output class="break-all whitespace-pre-wrap">{visibleMessageText(message)}</output>
+		<output class="break-all whitespace-pre-wrap [unicode-bidi:isolate-override]" dir="ltr"
+			>{visibleMessageText(message)}</output
+		>
 	</p>
 
 	{#snippet toolbar()}

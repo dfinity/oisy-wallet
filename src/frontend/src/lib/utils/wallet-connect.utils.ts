@@ -18,8 +18,10 @@ const INVISIBLE_MESSAGE_CHARACTERS = /(?![\t\n])[\p{Cc}\p{Cf}\p{Default_Ignorabl
 
 /**
  * A message a dApp asks to sign, as the review shows it. The dApp writes every character, so the
- * text is kept to what is visible and reads in the order its bytes are signed. Only the display
- * changes: what is signed is the request's own payload.
+ * text is kept to what is visible. The reviews lay it out with `dir="ltr"` and
+ * `unicode-bidi: isolate-override`, so right-to-left letters do not reorder the digits and
+ * punctuation next to them either, and it reads in the order its bytes are signed. Only the
+ * display changes: what is signed is the request's own payload.
  */
 export const visibleMessageText = (message: string): string =>
 	message.replace(/\r\n?/gu, '\n').replace(INVISIBLE_MESSAGE_CHARACTERS, '');

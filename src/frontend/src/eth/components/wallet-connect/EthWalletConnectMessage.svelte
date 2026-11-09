@@ -316,7 +316,7 @@
 			</div>
 		{:else}
 			<p class="mb-4 font-normal">
-				<output class="break-all whitespace-pre-wrap"
+				<output class="break-all whitespace-pre-wrap [unicode-bidi:isolate-override]" dir="ltr"
 					>{visibleMessageText(getSignParamsMessageUtf8(request.params.request.params))}</output
 				>
 			</p>
