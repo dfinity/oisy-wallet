@@ -5,6 +5,12 @@ import type {
 	VeloraSwapMode
 } from '$declarations/backend/backend.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import { VELORA_AUGUSTUS_ADDRESSES, VELORA_DELTA_ADDRESSES } from '$env/rest/velora.env';
+import {
+	VELORA_DELTA_EIP712_DOMAIN,
+	VELORA_DELTA_ORDER_TYPES
+} from '$eth/constants/velora.constants';
+import { infuraProviders } from '$eth/providers/infura.providers';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/approve.services';
 import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
@@ -42,8 +48,15 @@ import {
 	ZERO
 } from '$lib/constants/app.constants';
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
-import { ICP_SWAP_POOL_FEE, SWAP_QUOTE_TIMEOUT_MS, SWAP_SIDE } from '$lib/constants/swap.constants';
+import {
+	ICP_SWAP_POOL_FEE,
+	SWAP_DEFAULT_SLIPPAGE_VALUE,
+	SWAP_QUOTE_TIMEOUT_MS,
+	SWAP_SIDE,
+	VELORA_GAS_LIMIT_BUFFER_PERCENT
+} from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { fungibleTokens } from '$lib/derived/tokens.derived';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
@@ -81,7 +94,7 @@ import {
 } from '$lib/types/near-intents';
 import type { NetworkId } from '$lib/types/network';
 import type { OisyTradeQuote } from '$lib/types/oisy-trade-swap';
-import type { Amount } from '$lib/types/send';
+import type { Amount, OptionAmount } from '$lib/types/send';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -146,6 +159,14 @@ import {
 	toVeloraDisplayRefs,
 	toVeloraExternalRefs
 } from '$lib/utils/velora-active-tx.utils';
+import {
+	assertVeloraDeltaOrder,
+	assertVeloraDeltaRoute,
+	assertVeloraMarketTransaction,
+	veloraBridgeableTokenAddresses,
+	veloraMinimumAmount,
+	veloraRejectedError
+} from '$lib/utils/velora-swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
@@ -914,6 +935,7 @@ const executeNearIntentsSwap = async ({
 	destinationToken,
 	swapAmount,
 	swapDetails,
+	slippageValue,
 	sendTransaction,
 	enableDestinationToken
 }: {
@@ -923,6 +945,7 @@ const executeNearIntentsSwap = async ({
 	destinationToken: Token;
 	swapAmount: Amount;
 	swapDetails: NearIntentsQuoteResponse;
+	slippageValue: OptionAmount;
 	// `registerSwap` creates the swap's AUT row. A transport whose send is irreversible
 	// the moment it is broadcast (BTC) must invoke it from its broadcast callback, so the
 	// row exists even if any later step of the send throws (the `fetchChainFusionBtcSwap`
@@ -970,6 +993,18 @@ const executeNearIntentsSwap = async ({
 		throwSwapError({
 			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED,
 			message: get(i18n).swap.error.near_intents_quote_expired
+		});
+	}
+
+	// 1Click derives the signed minimum from the tolerance the quote was requested with, so the quote
+	// must carry the max slippage the review showed, converted as the request converts it.
+	if (
+		swapDetails.quoteRequest.slippageTolerance !==
+		slippagePercentToBasisPoints(slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE)
+	) {
+		throwSwapError({
+			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE,
+			message: get(i18n).swap.error.near_intents_quote_slippage
 		});
 	}
 
@@ -1100,7 +1135,8 @@ export const fetchNearIntentsEvmSwap = async ({
 	gas,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
-	swapDetails
+	swapDetails,
+	slippageValue
 }: SwapNearIntentsEvmParams): Promise<void> => {
 	await executeNearIntentsSwap({
 		identity,
@@ -1109,6 +1145,7 @@ export const fetchNearIntentsEvmSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
+		slippageValue,
 		sendTransaction: async ({ amount, depositAddress, recordPollRefs }) => {
 			const { hash, nonce } = await sendEvm({
 				from: userAddress,
@@ -1143,7 +1180,8 @@ export const fetchNearIntentsSolSwap = async ({
 	destinationToken,
 	swapAmount,
 	userAddress,
-	swapDetails
+	swapDetails,
+	slippageValue
 }: SwapNearIntentsSolParams): Promise<void> => {
 	await executeNearIntentsSwap({
 		identity,
@@ -1152,6 +1190,7 @@ export const fetchNearIntentsSolSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
+		slippageValue,
 		sendTransaction: async ({ amount, depositAddress }) =>
 			await sendSol({
 				identity,
@@ -1172,6 +1211,7 @@ export const fetchNearIntentsBtcSwap = async ({
 	destinationToken,
 	swapAmount,
 	swapDetails,
+	slippageValue,
 	userAddress,
 	network,
 	utxosFee
@@ -1183,6 +1223,7 @@ export const fetchNearIntentsBtcSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
+		slippageValue,
 		// `sendBtc` converts the display amount to satoshis itself, so it takes the raw
 		// `swapAmount` rather than the parsed base-unit amount the core hands over.
 		sendTransaction: async ({ depositAddress, registerSwap }) => {
@@ -1229,6 +1270,7 @@ export const fetchNearIntentsXrpSwap = async ({
 	destinationToken,
 	swapAmount,
 	swapDetails,
+	slippageValue,
 	userAddress,
 	network,
 	fee
@@ -1250,6 +1292,7 @@ export const fetchNearIntentsXrpSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
+		slippageValue,
 		// The swap is the transaction and the deposit a part of it, so the payment is recorded
 		// under the swap's own row, which `sendXrp` creates after signing and before the submit —
 		// where the in-flight check needs it. `sendXrp` never throws once the payment may be on the
@@ -1898,13 +1941,31 @@ export const fetchVeloraDeltaSwap = async ({
 		fetch: window.fetch
 	});
 
-	const deltaContract = await sdk.delta.getDeltaContract();
+	// The spender and the contract the order is signed for are pinned, never taken from the API.
+	const deltaContract = VELORA_DELTA_ADDRESSES[sourceNetwork.id];
 
 	if (isNullish(deltaContract)) {
-		return;
+		throw veloraRejectedError('no Delta contract is pinned for the network');
 	}
 
+	const destinationChainId = destinationToken.network.chainId;
+
+	assertVeloraDeltaRoute({
+		route: swapDetails.route,
+		sourceTokenAddress: sourceToken.address,
+		sourceChainId: sourceNetwork.chainId,
+		destinationTokenAddress: geSwapEthTokenAddress(destinationToken),
+		destinationChainId,
+		bridgeableTokenAddresses: veloraBridgeableTokenAddresses({
+			tokens: get(fungibleTokens),
+			sourceNetworkId: sourceNetwork.id,
+			destinationToken
+		}),
+		amount: parsedSwapAmount
+	});
+
 	let builtOrder;
+	let permit = '0x';
 
 	const slippageBasisPoints = slippagePercentToBasisPoints(slippageValue);
 
@@ -1928,6 +1989,8 @@ export const fetchVeloraDeltaSwap = async ({
 			value: parsedSwapAmount.toString(),
 			identity
 		});
+
+		permit = encodedPermit;
 
 		progress(ProgressStepsSwap.SWAP);
 
@@ -1962,11 +2025,12 @@ export const fetchVeloraDeltaSwap = async ({
 	}
 
 	// The server derives the signed on-chain minimum (`destAmount`) from the route and the
-	// slippage; re-derive it from the quoted origin output (the leg the on-chain order settles)
-	// and refuse to sign an order that guarantees less than the user accepted.
-	const minDestAmount = calculateSlippage({
-		quoteAmount: BigInt(swapDetails.route.origin.output.amount),
-		slippagePercentage: slippageBasisPoints / 100
+	// slippage; re-derive it from the quoted origin output (the leg the on-chain order settles),
+	// on integers as Velora does, and refuse to sign an order that guarantees less than the user
+	// accepted.
+	const minDestAmount = veloraMinimumAmount({
+		amount: BigInt(swapDetails.route.origin.output.amount),
+		slippageBasisPoints
 	});
 
 	if (BigInt(builtOrder.toSign.value.destAmount) < minDestAmount) {
@@ -1975,7 +2039,26 @@ export const fetchVeloraDeltaSwap = async ({
 		);
 	}
 
-	const hash = getSignParamsEIP712(builtOrder.toSign);
+	assertVeloraDeltaOrder({
+		order: builtOrder.toSign.value,
+		route: swapDetails.route,
+		wallet: userAddress,
+		amount: parsedSwapAmount,
+		permit,
+		feePercent: swapDetails.partner.feePercent,
+		destinationChainId
+	});
+
+	// Hashed with OISY's own domain and types: the API's would let it choose what is signed.
+	const hash = getSignParamsEIP712({
+		domain: {
+			...VELORA_DELTA_EIP712_DOMAIN,
+			chainId: Number(sourceNetwork.chainId),
+			verifyingContract: deltaContract
+		},
+		types: VELORA_DELTA_ORDER_TYPES,
+		value: builtOrder.toSign.value
+	});
 
 	const signature = await signPrehash({
 		hash,
@@ -2065,13 +2148,22 @@ export const fetchVeloraMarketSwap = async ({
 		fetch: window.fetch
 	});
 
-	const TokenTransferProxy = await sdk.swap.getSpender();
+	if (destinationToken.network.chainId !== sourceNetwork.chainId) {
+		throw veloraRejectedError('a Market swap cannot settle on another network');
+	}
+
+	// The call target and spender are pinned, never taken from the API.
+	const augustusAddress = VELORA_AUGUSTUS_ADDRESSES[sourceNetwork.id];
+
+	if (isNullish(augustusAddress)) {
+		throw veloraRejectedError('no Augustus is pinned for the network');
+	}
 
 	if (isNotDefaultEthereumToken(sourceToken)) {
 		await approveToken({
 			token: sourceToken,
 			from: userAddress,
-			to: TokenTransferProxy,
+			to: augustusAddress,
 			amount: parsedSwapAmount,
 			sourceNetwork,
 			identity,
@@ -2086,7 +2178,7 @@ export const fetchVeloraMarketSwap = async ({
 		await waitForSwapAllowance({
 			token: sourceToken,
 			owner: userAddress,
-			spender: TokenTransferProxy,
+			spender: augustusAddress,
 			networkId: sourceNetwork.id,
 			amount: parsedSwapAmount
 		});
@@ -2094,15 +2186,50 @@ export const fetchVeloraMarketSwap = async ({
 
 	progress(ProgressStepsSwap.SWAP);
 
+	const srcToken = geSwapEthTokenAddress(sourceToken);
+	const destToken = geSwapEthTokenAddress(destinationToken);
+	const slippageBasisPoints = slippagePercentToBasisPoints(slippageValue);
+
 	const txParams = await sdk.swap.buildTx({
-		srcToken: geSwapEthTokenAddress(sourceToken),
-		destToken: geSwapEthTokenAddress(destinationToken),
+		srcToken,
+		destToken,
 		srcAmount: swapDetails.srcAmount,
-		slippage: slippagePercentToBasisPoints(slippageValue),
+		slippage: slippageBasisPoints,
 		priceRoute: swapDetails,
 		userAddress,
 		partner: OISY_URL_HOSTNAME
 	});
+
+	assertVeloraMarketTransaction({
+		transaction: txParams,
+		augustusAddress,
+		sourceChainId: sourceNetwork.chainId,
+		srcToken,
+		destToken,
+		amount: parsedSwapAmount,
+		isNativeSource: isDefaultEthereumToken(sourceToken),
+		minimum: veloraMinimumAmount({
+			amount: BigInt(swapDetails.destAmount),
+			slippageBasisPoints
+		}),
+		quotedAmount: BigInt(swapDetails.destAmount),
+		feePercent: swapDetails.partnerFee,
+		wallet: userAddress
+	});
+
+	// Velora's gas limit is unsigned, and a failing estimate is a transaction that would revert.
+	let estimatedGas: bigint;
+	try {
+		estimatedGas = await infuraProviders(sourceNetwork.id).estimateGas({
+			from: userAddress,
+			to: augustusAddress,
+			data: txParams.data,
+			value: BigInt(txParams.value)
+		});
+	} catch (_: unknown) {
+		throw veloraRejectedError('the transaction gas could not be estimated');
+	}
+	const swapGas = (estimatedGas * (100n + VELORA_GAS_LIMIT_BUFFER_PERCENT)) / 100n;
 
 	// The transaction is broadcast from here on — the point of no return. `swap`
 	// also kicks off `processTransactionSent`, which populates the pending row in
@@ -2110,8 +2237,8 @@ export const fetchVeloraMarketSwap = async ({
 	// settlement record on top of it.
 	const { hash, nonce } = await swap({
 		from: userAddress,
-		to: txParams.to,
-		transaction: txParams,
+		to: augustusAddress,
+		transaction: { ...txParams, gas: `${swapGas}` },
 		amount: parsedSwapAmount,
 		identity,
 		token: sourceToken,

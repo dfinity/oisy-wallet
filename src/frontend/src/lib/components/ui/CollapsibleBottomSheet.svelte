@@ -15,11 +15,10 @@
 		contentHeader: Snippet<[{ isInBottomSheet: boolean }]>;
 		contentFooter?: Snippet<[closeFn: () => void]>;
 		showContentHeader?: boolean;
-		disabled?: boolean;
 		buttonTestId?: string;
 		// Replaces the default info-icon button on mobile, for sheets whose trigger is the current
 		// value rather than a hint that details exist.
-		trigger?: Snippet<[{ open: () => void; disabled: boolean }]>;
+		trigger?: Snippet<[{ open: () => void }]>;
 		sheetTitle?: string;
 	}
 
@@ -28,36 +27,24 @@
 		contentHeader,
 		contentFooter,
 		showContentHeader = false,
-		disabled = false,
 		buttonTestId,
 		trigger,
 		sheetTitle
 	}: Props = $props();
 
 	let expanded = $state(false);
-	$effect(() => {
-		if (disabled) {
-			expanded = false;
-		}
-	});
-	const open = () => {
-		if (!disabled) {
-			expanded = true;
-		}
-	};
 </script>
 
 <Responsive down="sm">
 	<div class="flex w-full items-center justify-between">
 		{@render contentHeader({ isInBottomSheet: false })}
 		{#if nonNullish(trigger)}
-			{@render trigger({ open, disabled })}
+			{@render trigger({ open: () => (expanded = true) })}
 		{:else}
 			<ButtonIcon
 				ariaLabel={$i18n.core.alt.open_details}
 				colorStyle="muted"
-				{disabled}
-				onclick={open}
+				onclick={() => (expanded = true)}
 				styleClass="text-disabled mb-2 items-end"
 				testId={buttonTestId}
 				width="w-8"
@@ -113,7 +100,7 @@
 
 <Responsive up="md">
 	<div class="modal-expandable-values">
-		<Collapsible {disabled} initiallyExpanded={expanded} bind:expanded>
+		<Collapsible initiallyExpanded={expanded} bind:expanded>
 			{#snippet header()}
 				<div class="flex w-[calc(100%-1.5rem)] items-center">
 					{@render contentHeader({ isInBottomSheet: false })}

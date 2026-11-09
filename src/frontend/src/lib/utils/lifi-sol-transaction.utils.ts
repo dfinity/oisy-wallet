@@ -14,6 +14,7 @@ import {
 	LIFI_SOLANA_FEE_WALLET,
 	LIFI_SOLANA_PROGRAM_ADDRESSES
 } from '$sol/constants/lifi.constants';
+import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
@@ -701,12 +702,17 @@ const sumDeltas = ({
 	);
 
 /**
- * Whether a simulation reached by CPI a program that is neither known nor pinned for LI.FI
+ * Whether a simulation reached a program that is neither known nor pinned for LI.FI
  * (`LIFI_SOLANA_PROGRAM_ADDRESSES`): a venue Jupiter added since the pin, which the binding refuses.
- * `unreadPrograms` already leaves out the known ones (`SOLANA_KNOWN_PROGRAM_ADDRESSES`).
+ * The known ones (`SOLANA_KNOWN_PROGRAM_ADDRESSES`) are left out here, since `unreadPrograms` also
+ * names a known program the review finds paying others, which is no unpinned venue.
  */
 export const callsUnpinnedProgram = (unreadPrograms: SolAddress[]): boolean =>
-	unreadPrograms.some((program) => !LIFI_SOLANA_PROGRAM_ADDRESSES.includes(program));
+	unreadPrograms.some(
+		(program) =>
+			!SOLANA_KNOWN_PROGRAM_ADDRESSES.includes(program) &&
+			!LIFI_SOLANA_PROGRAM_ADDRESSES.includes(program)
+	);
 
 /**
  * Refuses a LI.FI Solana transaction unless a simulation of its exact bytes, with the pre-state read
@@ -761,9 +767,17 @@ export const assertLifiSolSimulation = ({
 
 	// A closed account is reported holding no lamports as a System account, which reads as a change of
 	// its program and owner. Nothing is left to control there; the close rules below hold it instead.
+	// An account the run opens is compared with an empty one, so the user set as its close authority
+	// is a change as well: the rule for created accounts below accepts that one.
 	if (
 		controlChanges.some(
-			({ account }) => !closedAccounts.some(({ account: closed }) => closed === account)
+			({ account, field, to }) =>
+				!closedAccounts.some(({ account: closed }) => closed === account) &&
+				!(
+					field === 'closeAuthority' &&
+					to === userAddress &&
+					createdAccounts.some(({ account: created }) => created === account)
+				)
 		)
 	) {
 		throw rejected("the transaction changes who controls an account of the user's");

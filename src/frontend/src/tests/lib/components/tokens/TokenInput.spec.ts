@@ -1,8 +1,12 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import StakeForm from '$lib/components/stake/StakeForm.svelte';
+import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 import { STAKE_FORM_REVIEW_BUTTON } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import en from '$tests/mocks/i18n.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
 // TokenInput.validate() runs inside a 300ms debounced $effect. Parsing an
@@ -30,5 +34,47 @@ describe('TokenInput (via StakeForm) out-of-range amount', () => {
 
 		// Wait for the debounced validate() to run and mark the amount invalid.
 		await waitFor(() => expect(getByTestId(STAKE_FORM_REVIEW_BUTTON)).toHaveAttribute('disabled'));
+	});
+});
+
+describe('TokenInput network row', () => {
+	const onNetwork = replacePlaceholders(en.tokens.text.on_network_label, {
+		$network: ICP_TOKEN.network.name
+	});
+
+	const props = {
+		token: ICP_TOKEN,
+		amount: undefined,
+		amountInfo: mockSnippet,
+		balance: mockSnippet
+	};
+
+	// The amount check waits for typing to pause; fake timers keep it from firing after a test.
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	it("names the token's network", () => {
+		const { getByText } = render(TokenInput, { props: { ...props, showTokenNetwork: true } });
+
+		expect(getByText(onNetwork)).toBeInTheDocument();
+	});
+
+	it('leaves the network out unless asked to show it', () => {
+		const { queryByText } = render(TokenInput, { props });
+
+		expect(queryByText(onNetwork)).not.toBeInTheDocument();
+	});
+
+	it('leaves the network out while no token is picked', () => {
+		const { queryByText } = render(TokenInput, {
+			props: { ...props, token: undefined, showTokenNetwork: true }
+		});
+
+		expect(queryByText(onNetwork)).not.toBeInTheDocument();
 	});
 });

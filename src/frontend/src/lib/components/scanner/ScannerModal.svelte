@@ -192,7 +192,7 @@
 					<ScannerInfo onButtonClick={goToScanStep} />
 				{:else if currentStep?.name === WizardStepsScanner.SCAN}
 					<ScannerCode {onNext} onOpenInfo={goToInfoStep} />
-				{:else if currentStep?.name === WizardStepsScanner.PAY || currentStep?.name === WizardStepsScanner.TOKENS_LIST || currentStep?.name === WizardStepsScanner.PAYING || currentStep?.name === WizardStepsScanner.PAYMENT_FAILED || currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
+				{:else if currentStep?.name === WizardStepsScanner.PAY || currentStep?.name === WizardStepsScanner.TOKENS_LIST || currentStep?.name === WizardStepsScanner.PAYING || currentStep?.name === WizardStepsScanner.PAYMENT_FAILED || currentStep?.name === WizardStepsScanner.PAYMENT_NOT_CONFIRMED || currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
 					<OpenCryptoPayWizard {currentStep} {modal} {steps} bind:payProgressStep />
 				{:else if currentStep?.name === WizardStepsScanner.WALLET_CONNECT_CONNECT || currentStep?.name === WizardStepsScanner.WALLET_CONNECT_REVIEW}
 					<WalletConnectSessionWizard {currentStep} onConnect={onWalletConnectConnect} />

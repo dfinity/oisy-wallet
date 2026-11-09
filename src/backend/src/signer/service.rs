@@ -340,6 +340,25 @@ fn transform_network(network: BitcoinNetwork) -> Network {
     }
 }
 
+/// Computes the chain-fusion signer's Bitcoin public key for `principal`, the key its P2WPKH
+/// address on every network is derived from.
+///
+/// # Errors
+/// - The signer public key could not be retrieved, or it is not a compressed secp256k1 key.
+pub async fn btc_principal_to_public_key(
+    principal: &Principal,
+) -> Result<CompressedPublicKey, String> {
+    let ecdsa_pubkey = cfs_ecdsa_pubkey_of(principal, SCHEMA_BTC).await?;
+    CompressedPublicKey::from_slice(&ecdsa_pubkey)
+        .map_err(|_| "Error getting P2WPKH from public key".to_string())
+}
+
+/// Returns the P2WPKH address of `public_key` on `network`.
+#[must_use]
+pub fn btc_p2wpkh_address(public_key: &CompressedPublicKey, network: BitcoinNetwork) -> String {
+    Address::p2wpkh(public_key, transform_network(network)).to_string()
+}
+
 /// Converts a public key to a P2PKH address.
 ///
 /// # Errors
@@ -348,12 +367,8 @@ pub async fn btc_principal_to_p2wpkh_address(
     network: BitcoinNetwork,
     principal: &Principal,
 ) -> Result<String, String> {
-    let ecdsa_pubkey = cfs_ecdsa_pubkey_of(principal, SCHEMA_BTC).await?;
-    if let Ok(compressed_public_key) = CompressedPublicKey::from_slice(&ecdsa_pubkey) {
-        Ok(Address::p2wpkh(&compressed_public_key, transform_network(network)).to_string())
-    } else {
-        Err("Error getting P2WPKH from public key".to_string())
-    }
+    let public_key = btc_principal_to_public_key(principal).await?;
+    Ok(btc_p2wpkh_address(&public_key, network))
 }
 
 /// Derives the caller's Ethereum address from their principal, reproducing the chain-fusion

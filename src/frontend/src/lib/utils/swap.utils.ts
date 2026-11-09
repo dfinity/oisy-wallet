@@ -16,6 +16,9 @@ import {
 	NEAR_INTENTS_BLOCKCHAIN_MAP,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_ETH_TOKEN_PLACEHOLDER,
+	SWAP_SLIPPAGE_INVALID_VALUE,
+	SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
+	SWAP_SLIPPAGE_WARNING_VALUE,
 	swapProvidersDetails
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
@@ -39,12 +42,16 @@ import {
 	type ProviderFee,
 	type Slippage,
 	type SwapMappedResult,
-	type SwapProvidersConfig
+	type SwapProvidersConfig,
+	type SwapSlippageStatus
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { areAddressesEqual } from '$lib/utils/address.utils';
+import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
+import { isNetworkIdICP } from '$lib/utils/network.utils';
+import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -177,6 +184,64 @@ export const slippagePercentToBasisPoints = (slippageValue: Amount): number => {
 };
 
 /**
+ * The lowest slippage a swap from this network refuses, in percent: ICP swaps accept a wider
+ * tolerance than Velora, whose limit applies to every other source network.
+ */
+export const getSwapSlippageInvalidValue = (networkId: NetworkId | undefined): number =>
+	isNetworkIdICP(networkId) ? SWAP_SLIPPAGE_INVALID_VALUE : SWAP_SLIPPAGE_VELORA_INVALID_VALUE;
+
+/**
+ * Whether a slippage can be swapped with, and whether it is high enough to warn about. An empty
+ * value counts as 0 %, which no swap accepts: written as "not inside the range" so that a value
+ * that is not a number is refused too.
+ */
+export const getSwapSlippageStatus = ({
+	slippageValue,
+	maxSlippageInvalidValue
+}: {
+	slippageValue: OptionAmount;
+	maxSlippageInvalidValue: number;
+}): SwapSlippageStatus => {
+	const value = nonNullish(slippageValue) ? Number(slippageValue) : 0;
+
+	if (!(value > 0 && value < maxSlippageInvalidValue)) {
+		return 'invalid';
+	}
+
+	return value >= SWAP_SLIPPAGE_WARNING_VALUE ? 'warning' : 'valid';
+};
+
+/**
+ * A slippage percentage with at most two decimals, for a place too narrow for the four the input
+ * takes. Cut rather than rounded, so a value never reads as more than it is (49.996 must not show
+ * as the refused 50), with the float noise rounded away first as in `slippagePercentToBasisPoints`.
+ * A value below 0.01 keeps its own digits rather than reading as a refused 0.
+ */
+export const formatSwapSlippageShort = (value: number): string => {
+	const cut = Math.trunc(Math.round(value * 1e8) / 1e6) / 100;
+
+	return `${cut === 0 ? value : cut}`;
+};
+
+export const getInitialSwapSlippage = (): OptionAmount =>
+	loadSwapSlippage() ?? SWAP_DEFAULT_SLIPPAGE_VALUE;
+
+export const keepSwapSlippage = (slippageValue: OptionAmount) => {
+	// The next swap may start from any network.
+	const status = getSwapSlippageStatus({
+		slippageValue,
+		maxSlippageInvalidValue: Math.min(
+			SWAP_SLIPPAGE_INVALID_VALUE,
+			SWAP_SLIPPAGE_VELORA_INVALID_VALUE
+		)
+	});
+
+	if (status !== 'invalid') {
+		saveSwapSlippage(slippageValue);
+	}
+};
+
+/**
  * Formats the minimum expected receive amount after applying slippage.
  *
  * @param {OptionAmount} params.slippageValue - The slippage percentage (as string or number or undefined).
@@ -223,11 +288,20 @@ export const mapVeloraMarketSwapResult = (swap: OptimalRate): SwapMappedResult =
 	type: VeloraSwapTypes.MARKET
 });
 
+// 1Click states amounts in base units as decimal strings. Read through `Number`, anything above
+// `Number.MAX_SAFE_INTEGER` (about 0.009 of an 18-decimal token) would round, so the whole part is
+// taken from the string itself; only a form that is not plain digits goes through `Number`.
+const nearIntentsAmountToBigInt = (amount: string): bigint => {
+	const whole = /^(\d+)(?:\.\d*)?$/.exec(amount)?.[1];
+
+	return nonNullish(whole) ? BigInt(whole) : BigInt(Math.floor(Number(amount)));
+};
+
 export const mapNearIntentsQuoteResult = (quote: NearIntentsQuoteResponse): SwapMappedResult => ({
 	provider: SwapProvider.NEAR_INTENTS,
-	receiveAmount: BigInt(Math.floor(Number(quote.quote.amountOut))),
+	receiveAmount: nearIntentsAmountToBigInt(quote.quote.amountOut),
 	receiveOutMinimum: nonNullish(quote.quote.minAmountOut)
-		? BigInt(Math.floor(Number(quote.quote.minAmountOut)))
+		? nearIntentsAmountToBigInt(quote.quote.minAmountOut)
 		: undefined,
 	swapDetails: quote
 });
@@ -341,6 +415,7 @@ export const isSwapError = (err: unknown): err is SwapError => err instanceof Sw
 const NEAR_INTENTS_QUOTE_REJECTED_CODES: SwapErrorCodes[] = [
 	SwapErrorCodes.NEAR_INTENTS_QUOTE_UNVERIFIED,
 	SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED,
+	SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE,
 	SwapErrorCodes.NEAR_INTENTS_QUOTE_DEPOSIT_MEMO
 ];
 
@@ -418,6 +493,37 @@ export const calculateValueDifference = ({
 	}
 
 	return ((receivedValue - paidValue) / paidValue) * 100;
+};
+
+// What the selected offer is worth above the lowest offer, in USD. Offers are ranked by receive
+// amount, so this is the same measure that makes an offer the best rate. `undefined` when there
+// is nothing to compare, no price to compare in, or no gain.
+export const calculateSwapGainUsd = ({
+	swaps,
+	selectedProvider,
+	decimals,
+	exchangeRate
+}: {
+	swaps: SwapMappedResult[];
+	selectedProvider: SwapMappedResult;
+	decimals: number;
+	exchangeRate: number | undefined;
+}): number | undefined => {
+	if (swaps.length < 2 || isNullish(exchangeRate)) {
+		return;
+	}
+
+	const lowest = swaps.reduce(
+		(min, { receiveAmount }) => (receiveAmount < min ? receiveAmount : min),
+		selectedProvider.receiveAmount
+	);
+	const gain = selectedProvider.receiveAmount - lowest;
+
+	if (gain <= ZERO) {
+		return;
+	}
+
+	return usdValue({ decimals, balance: gain, exchangeRate });
 };
 
 export const isKongSupportedIcToken = (token: TokenReply): token is { IC: ICTokenReply } =>

@@ -43,3 +43,22 @@ export const getExplorerUrl = ({
 // knows about the failure, such as the request it sent and the node's answer.
 export const isEthersError = (err: unknown): err is EthersError =>
 	err instanceof Error && 'shortMessage' in err && typeof err.shortMessage === 'string';
+
+// How many `cause` links to follow: a send wraps an ethers error once, and a caller may wrap that.
+const MAX_CAUSE_DEPTH = 5;
+
+/**
+ * The ethers error behind `err`: `err` itself, or the one a send wrapped as the cause to say what
+ * became of its transaction (`EthNonceReadError`, `EthSubmissionUnconfirmedError`).
+ */
+export const findEthersError = (err: unknown): EthersError | undefined => {
+	let current: unknown = err;
+
+	for (let depth = 0; depth <= MAX_CAUSE_DEPTH && current instanceof Error; depth++) {
+		if (isEthersError(current)) {
+			return current;
+		}
+
+		current = current.cause;
+	}
+};
