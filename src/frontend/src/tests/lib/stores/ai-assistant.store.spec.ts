@@ -185,4 +185,51 @@ describe('ai-assistant.store', () => {
 			]
 		});
 	});
+
+	it('should mark only the given review_send_token tool as having an unknown send outcome', () => {
+		const otherId = '0b8e2c43-6f0f-4b9e-9d5c-2f5b4b0c9a11';
+
+		const reviewResult = (result: object) =>
+			({ type: ToolResultType.REVIEW_SEND_TOKENS, result }) as ToolResult;
+
+		const toolMessage = {
+			role: 'assistant',
+			data: {
+				tool: {
+					calls: [],
+					results: [
+						reviewResult({ sendCompleted: false, id: mockRandomUUID }),
+						reviewResult({ sendCompleted: false, id: otherId })
+					]
+				}
+			}
+		} as ChatMessage;
+
+		aiAssistantStore.appendMessage(toolMessage);
+
+		aiAssistantStore.setSendToolActionAsOutcomeUnknown(mockRandomUUID);
+
+		expect(get(aiAssistantStore)).toStrictEqual({
+			...defaultState,
+			chatHistory: [
+				{
+					...toolMessage,
+					data: {
+						...toolMessage.data,
+						tool: {
+							...toolMessage.data.tool,
+							results: [
+								reviewResult({
+									sendCompleted: false,
+									sendOutcomeUnknown: true,
+									id: mockRandomUUID
+								}),
+								reviewResult({ sendCompleted: false, id: otherId })
+							]
+						}
+					}
+				} as ChatMessage
+			]
+		});
+	});
 });
