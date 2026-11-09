@@ -15,10 +15,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import {
-		SUPPORTED_CROSS_SWAP_NETWORKS,
-		SWAP_DEFAULT_SLIPPAGE_VALUE
-	} from '$lib/constants/swap.constants';
+	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -112,15 +109,11 @@
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
-	// The offers hold for the amount and the slippage they were requested with; for any other value
-	// of either, new offers are on their way.
 	let swapAmountsLoading = $derived(
 		foregroundQuotePending ||
 			(nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
 				? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
-				: false) ||
-			(nonNullish($swapAmountsStore?.slippageForSwap) &&
-				Number(slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE) !== $swapAmountsStore.slippageForSwap)
+				: false)
 	);
 
 	let showSwapNotOfferedError = $derived(
