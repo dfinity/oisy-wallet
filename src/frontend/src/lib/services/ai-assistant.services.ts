@@ -99,10 +99,13 @@ export const askLlm = async ({
 		});
 	}
 
+	// The address request is shown next to any other tool results, so the model's own text is kept only for responses without them.
 	return {
 		text: sendAddressRequested
 			? get(i18n).ai_assistant.text.type_send_address_message
-			: fromNullable(content),
+			: toolResults.length > 0
+				? undefined
+				: fromNullable(content),
 		tool: {
 			calls: tool_calls,
 			results: toolResults

@@ -6,6 +6,7 @@ import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 import type { ChatMessage } from '$lib/types/ai-assistant';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { toNullable } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -101,6 +102,44 @@ describe('AiAssistantConsole', () => {
 
 			expect(data.text).toBe(en.ai_assistant.text.action_button_contacts_prompt);
 			expect(data).not.toHaveProperty('typedByUser');
+		});
+	});
+
+	it('shows the address request next to the card of another tool', async () => {
+		mockAuthStore();
+
+		vi.mocked(llmChat).mockResolvedValueOnce({
+			message: {
+				content: toNullable(),
+				tool_calls: [
+					{
+						id: 'review',
+						function: {
+							name: 'review_send_tokens',
+							arguments: [
+								{ name: 'address', value: mockEthAddress },
+								{ name: 'amountNumber', value: '0.01' },
+								{ name: 'tokenSymbol', value: 'ETH' },
+								{ name: 'networkId', value: 'ETH' }
+							]
+						}
+					},
+					{ id: 'contacts', function: { name: 'show_all_contacts', arguments: [] } }
+				]
+			}
+		} as chat_response_v1);
+
+		const { getByText, getByTestId, getByPlaceholderText } = render(AiAssistantConsole);
+
+		await fireEvent.input(
+			getByPlaceholderText(en.ai_assistant.text.send_message_input_placeholder),
+			{ target: { value: 'Send 0.01 ETH and show my contacts' } }
+		);
+		await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_MESSAGE_BUTTON));
+
+		await waitFor(() => {
+			expect(getByText(en.ai_assistant.text.no_contacts_found_message)).toBeInTheDocument();
+			expect(getByText(en.ai_assistant.text.type_send_address_message)).toBeInTheDocument();
 		});
 	});
 

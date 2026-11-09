@@ -176,6 +176,56 @@ describe('ai-assistant.services', () => {
 				}
 			});
 		});
+
+		it('keeps the address request next to the results of other tools', async () => {
+			aiAssistantStore.reset();
+
+			const toolCall = reviewSendTokensToolCall({ name: 'address', value: mockEthAddress });
+			const response = {
+				message: {
+					content: toNullable('content'),
+					tool_calls: [toolCall, showAllContactsToolCall]
+				}
+			} as chat_response_v1;
+
+			vi.mocked(llmChat).mockResolvedValue(response);
+
+			const result = await aiAssistantServices.askLlm({
+				identity: mockIdentity,
+				messages: [{ user: { content: 'test' } }]
+			});
+
+			expect(result).toStrictEqual({
+				text: en.ai_assistant.text.type_send_address_message,
+				tool: {
+					calls: [toolCall, showAllContactsToolCall],
+					results: [
+						{
+							result: { contacts: [] },
+							type: 'show_all_contacts'
+						}
+					]
+				}
+			});
+		});
+
+		it('leaves out the model text next to tool results', async () => {
+			const response = {
+				message: {
+					content: toNullable('content'),
+					tool_calls: [showAllContactsToolCall]
+				}
+			} as chat_response_v1;
+
+			vi.mocked(llmChat).mockResolvedValue(response);
+
+			const result = await aiAssistantServices.askLlm({
+				identity: mockIdentity,
+				messages: [{ user: { content: 'test' } }]
+			});
+
+			expect(result.text).toBeUndefined();
+		});
 	});
 
 	describe('executeTool', () => {

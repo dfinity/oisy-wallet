@@ -105,7 +105,8 @@
 				data:
 					(tool?.calls ?? []).length > 0 && (tool?.results ?? []).length > 0
 						? {
-								tool
+								tool,
+								...(notEmptyString(text) && { text })
 							}
 						: {
 								text: isNullishOrEmpty(text) ? $i18n.ai_assistant.errors.no_response : text,
