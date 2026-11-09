@@ -42,7 +42,8 @@
 		request: WalletKitTypes.SessionRequest;
 		invalidTypedData?: boolean;
 		// Valid typed data whose schema OISY does not recognise, so none of the summary rows below
-		// can be filled. Resolved in the review beside `invalidTypedData`, which does gate approval,
+		// can be filled, or a Permit2 witness transfer, whose rows state the transfer but not the
+		// witness. Resolved in the review beside `invalidTypedData`, which does gate approval,
 		// so the two states deciding what this component renders are settled in one place. Deriving
 		// it here would parse the payload a third time to reach the same answer.
 		unreviewableTypedData?: boolean;
@@ -120,7 +121,15 @@
 		(nonNullish(json) ? getEthTypedDataApproval(json) : undefined) ?? { allowances: [] }
 	);
 
-	let { spender, allowances } = $derived(approval);
+	let { spender, recipient, allowances, hasWitness } = $derived(approval);
+
+	// A witness transfer is described up to its witness, so its notice speaks to the rest of the
+	// request instead of saying the summary describes none of it.
+	let unreviewableText = $derived(
+		hasWitness === true
+			? $i18n.wallet_connect.text.unreviewable_typed_data_witness
+			: $i18n.wallet_connect.text.unreviewable_typed_data
+	);
 
 	// EIP-712 declares `chainId` as a `uint256`, so a number, a decimal string and a hex string are
 	// all the same chain and all hash alike. Comparing the text matched one form only.
@@ -207,8 +216,9 @@
 		})
 	);
 
-	// Listed only where the summary rows are empty. A schema OISY describes states its spender, its
-	// amount and its expiry, which says more than the name of the struct they came out of.
+	// Listed only where the summary falls short. A schema OISY describes states its spender, its
+	// amount and its expiry, which says more than the name of the struct they came out of; a witness
+	// transfer lists its structs too, since the witness among them is what the rows leave out.
 	let methods = $derived(
 		unreviewableTypedData && nonNullish(json) ? getEthTypedDataMethods(json) : []
 	);
@@ -231,7 +241,7 @@
 {:else if unreviewableTypedData}
 	<WalletConnectAcknowledgement
 		testId="wallet-connect-unreviewable-typed-data"
-		text={$i18n.wallet_connect.text.unreviewable_typed_data}
+		text={unreviewableText}
 		bind:acknowledged={unreviewableTypedDataAcknowledged}
 	/>
 {:else if hasUnsignedKeys}
@@ -344,6 +354,13 @@
 		{#if nonNullish(spender)}
 			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.spender}</p>
 			<p class="mb-4 font-normal">{spender}</p>
+		{/if}
+
+		<!-- An ERC-3009 authorization names who receives the tokens rather than who may take them. It
+		     is labelled as the send review labels the recipient of a token transfer. -->
+		{#if nonNullish(recipient)}
+			<p class="mb-0.5 font-bold">{$i18n.send.text.destination}</p>
+			<p class="mb-4 font-normal" data-tid="wallet-connect-typed-data-recipient">{recipient}</p>
 		{/if}
 	{:else}
 		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>
