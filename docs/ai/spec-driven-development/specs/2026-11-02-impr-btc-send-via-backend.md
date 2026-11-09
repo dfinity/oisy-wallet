@@ -894,8 +894,14 @@ Decided in PR 8c:
 - **Repay** still creates its row before the transfer, and `beforeBroadcast` writes the txid into
   it. A failure then deletes the row only if the txid was never recorded, that is before the
   broadcast or on the CFS path, or if the broadcast was refused outright. Otherwise the row stays
-  and keeps counting against the repay max until it settles. The txid is not written a second
-  time after the broadcast.
+  and keeps counting against the repay max until it settles.
+  - After a refusal the row carries the txid, which the poller's cleanup of rows without one cannot
+    remove, so the delete retries (`deleteUnbroadcastActiveUserTransaction`) (Copilot).
+  - The txid is written again after the broadcast. A poller in another tab can read the row
+    without it and delete it just after the first write, since `delete_active_user_transaction`
+    takes no condition, and the second write then answers `NotFound` and recreates the row
+    (Copilot). Making the poller's delete conditional on the row it read would need a backend API
+    change.
 - **`flow.submit({ txid })`** still runs only after a successful broadcast, for both.
 - **Both BTC wizards** show `mapBtcBroadcastErrorToMessage`'s message ahead of "Transaction failed",
   and close after an unclear outcome instead of returning to a form that offers the full amount

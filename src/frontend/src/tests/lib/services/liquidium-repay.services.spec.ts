@@ -41,6 +41,7 @@ vi.mock('$lib/services/liquidium.services', () => ({ getOrCreateLiquidiumProfile
 vi.mock('$lib/services/active-user-transactions.services', () => ({
 	createActiveUserTransaction: vi.fn(),
 	deleteActiveUserTransaction: vi.fn(),
+	deleteUnbroadcastActiveUserTransaction: vi.fn(),
 	updateActiveUserTransaction: vi.fn()
 }));
 vi.mock('$lib/services/analytics.services', () => ({ trackEvent: vi.fn() }));
@@ -626,8 +627,8 @@ describe('liquidium-repay.services', () => {
 				supply.mockResolvedValue(buildFlow(nativeTarget));
 			});
 
-			it('writes the txid to the row before the broadcast, and only once', async () => {
-				updateActiveUserTransaction.mockImplementation(() => {
+			it('writes the txid to the row before the broadcast, and again after it', async () => {
+				updateActiveUserTransaction.mockImplementationOnce(() => {
 					expect(sent).not.toHaveBeenCalled();
 
 					return Promise.resolve();
@@ -636,15 +637,40 @@ describe('liquidium-repay.services', () => {
 
 				await run();
 
-				expect(updateActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+				const write = {
 					identity: mockIdentity,
 					id: rowId(),
 					externalRefs: expect.arrayContaining([
 						{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
 					])
-				});
+				};
+
+				expect(updateActiveUserTransaction).toHaveBeenCalledTimes(2);
+				expect(updateActiveUserTransaction).toHaveBeenNthCalledWith(1, write);
+				expect(updateActiveUserTransaction).toHaveBeenNthCalledWith(2, write);
 				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
 				expect(submit).toHaveBeenCalledExactlyOnceWith({ txid: '0xhash' });
+			});
+
+			// A poller in another tab read the row before the txid write and deleted it just after:
+			// its delete is not conditional on what it read.
+			it('records the row again when a poller deleted it after the txid was written', async () => {
+				updateActiveUserTransaction
+					.mockResolvedValueOnce(undefined)
+					.mockRejectedValueOnce({ NotFound: null });
+				broadcastThroughBackend();
+
+				await expect(run()).resolves.toBeUndefined();
+
+				expect(createActiveUserTransaction).toHaveBeenCalledTimes(2);
+				expect(createActiveUserTransaction.mock.calls[1][0]).toEqual(
+					expect.objectContaining({
+						id: rowId(),
+						externalRefs: expect.arrayContaining([
+							{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
+						])
+					})
+				);
 			});
 
 			it('broadcasts nothing and deletes the row when the txid cannot be written', async () => {
@@ -660,7 +686,10 @@ describe('liquidium-repay.services', () => {
 				});
 			});
 
-			it('deletes the row when the broadcast is refused outright', async () => {
+			// The row carries the txid by now, so the poller's cleanup of rows without one cannot
+			// remove it: the delete retries (`deleteUnbroadcastActiveUserTransaction`'s own spec
+			// covers a first attempt failing and the next succeeding).
+			it('deletes the row, with retries, when the broadcast is refused outright', async () => {
 				const refusal = new BtcBroadcastTransactionCanisterError(
 					{ UtxosAlreadyReserved: null },
 					'reserved'
@@ -669,10 +698,10 @@ describe('liquidium-repay.services', () => {
 
 				await expect(run()).rejects.toBe(refusal);
 
-				expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
-					identity: mockIdentity,
-					id: rowId()
-				});
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity, id: rowId() });
+				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
 			});
 
 			// The row nets this repay out of the repay max until it settles, so a second full repay
@@ -689,6 +718,9 @@ describe('liquidium-repay.services', () => {
 				await expect(run()).rejects.toBe(unclear);
 
 				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).not.toHaveBeenCalled();
 				expect(submit).not.toHaveBeenCalled();
 			});
 		});

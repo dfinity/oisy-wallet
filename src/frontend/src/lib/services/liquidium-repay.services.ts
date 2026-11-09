@@ -10,6 +10,7 @@ import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import {
 	createActiveUserTransaction,
 	deleteActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction,
 	updateActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -417,8 +418,12 @@ export const executeLiquidiumRepay = async ({
 		// sent, as the wizard reports it. Once the broadcast began, only a refusal outright proves
 		// nothing went out: otherwise the row stays, and the repay keeps counting against the max
 		// until it settles, so a second full repay cannot follow it.
-		if (!txidRecorded || isDefinitiveBtcBroadcastRefusal(err)) {
+		if (!txidRecorded) {
 			await deleteRow();
+		} else if (isDefinitiveBtcBroadcastRefusal(err)) {
+			// The row carries the txid by now, so the poller's cleanup of rows without one cannot
+			// remove it, and the delete is retried.
+			await deleteUnbroadcastActiveUserTransaction({ identity, id });
 		}
 
 		throw err;
@@ -445,17 +450,19 @@ export const executeLiquidiumRepay = async ({
 	//
 	// The txid first: it is what the poller correlates the row on, and a row still without one once
 	// the grace period is over is dropped. `external_refs` is replaced wholesale, so the other refs
-	// go along again. Already written before the broadcast when the transport could.
+	// go along again.
+	//
+	// Written again when the transport already wrote it before the broadcast: a poller in another
+	// tab may have read the row without it and deleted it just after, its delete not being
+	// conditional on what it read. A row it deleted answers `NotFound` here and is recreated.
 	const sentRefs = { ...refs, [LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid };
 
 	try {
-		if (!txidRecorded) {
-			await updateActiveUserTransaction({
-				identity,
-				id,
-				externalRefs: toLiquidiumExternalRefs(sentRefs)
-			});
-		}
+		await updateActiveUserTransaction({
+			identity,
+			id,
+			externalRefs: toLiquidiumExternalRefs(sentRefs)
+		});
 	} catch (err: unknown) {
 		consoleError(err);
 
