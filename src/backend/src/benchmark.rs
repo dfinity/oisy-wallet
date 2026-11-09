@@ -464,8 +464,8 @@ fn bench_update_user_agreements() -> BenchResult {
     })
 }
 
-/// An update that changes all three agreements while the history is full, so it also drops the
-/// three oldest entries: the most an agreement update costs.
+/// An update that changes all three agreements and fills the history to
+/// `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries: the most an accepted agreement update costs.
 #[bench(raw)]
 fn bench_update_user_agreements_full_history() -> BenchResult {
     let version = ensure_profile_version();
@@ -480,7 +480,10 @@ fn bench_update_user_agreements_full_history() -> BenchResult {
     mutate_state(|s| {
         s.agreement_history.insert(
             sp,
-            Candid(vec![stored_entry; MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER]),
+            Candid(vec![
+                stored_entry;
+                MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER - 3
+            ]),
         );
     });
     let agreement = UserAgreement {
@@ -514,7 +517,7 @@ fn bench_update_user_agreements_full_history() -> BenchResult {
         history.len() == MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER
             && history.last().map(|entry| &entry.agreement_type)
                 == Some(&AgreementType::PrivacyPolicy),
-        "the update must add three entries and drop the three oldest"
+        "the update must add three entries and fill the history"
     );
     result
 }
