@@ -1,3 +1,4 @@
+import { createBtcPrehashSigner } from '$btc/services/btc-sign.services';
 import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
 import type {
 	WalletConnectBtcDecodedPsbt,
@@ -606,9 +607,9 @@ export const signPsbt = ({
 			try {
 				progress(ProgressStepsSign.SIGN);
 
-				const publicKey = Buffer.from(deriveBtcPublicKey({ principal: identity.getPrincipal() }));
+				const signer = createBtcPrehashSigner({ identity });
 
-				if (!isAddressOfKey({ address, publicKey, network })) {
+				if (!isAddressOfKey({ address, publicKey: signer.publicKey, network })) {
 					toastsError({
 						msg: { text: get(i18n).wallet_connect.error.btc_address_not_signer }
 					});
@@ -646,19 +647,7 @@ export const signPsbt = ({
 
 				// Expected P2WPKH script for the wallet's own key — used to confirm an input is ours and
 				// of the only address type we can sign (the signer manages a single P2WPKH key).
-				const walletWitnessScript = payments.p2wpkh({ pubkey: publicKey, network }).output;
-
-				const signer = {
-					publicKey,
-					sign: async (hash: Buffer): Promise<Buffer> => {
-						const rawSignature = await signBtcPrehash({
-							identity,
-							hash: Uint8Array.from(hash)
-						});
-
-						return Buffer.from(rawSignature);
-					}
-				};
+				const walletWitnessScript = payments.p2wpkh({ pubkey: signer.publicKey, network }).output;
 
 				// Reown's `signInputs` selects which inputs to sign; if absent, sign every input that is
 				// ours. Each must be a P2WPKH input owned by this wallet — anything else is rejected.

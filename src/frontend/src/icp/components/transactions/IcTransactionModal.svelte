@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
+	import { isIcrcTokenSupportIcrc3 } from '$icp/services/icrc.services';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
+	import { icrcAccountExplorerUrl, icrcTxExplorerUrl } from '$icp/utils/icrc-transactions.utils';
+	import { isTokenIcp, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -13,6 +16,7 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
@@ -40,14 +44,70 @@
 		fee,
 		incoming,
 		approveSpender,
+		approveSpenderExplorerUrl,
 		approveExpiresAt,
 		typeLabel
 	} = $derived(transaction);
 
+	// ICP's mapper links the spender's account identifier. An ICRC spender is an ICRC-1 account,
+	// which only the ledger's own account page on the dashboard can show.
+	let spenderExplorerUrl = $derived(
+		approveSpenderExplorerUrl ??
+			(nonNullish(approveSpender) && nonNullish(token) && isTokenIcrc(token)
+				? icrcAccountExplorerUrl({
+						ledgerCanisterId: token.ledgerCanisterId,
+						account: approveSpender
+					})
+				: undefined)
+	);
+
+	// Only the mappers of ICP and the ck tokens link the ID. Any other ICRC ledger gets the
+	// dashboard link once it confirms it serves ICRC-3 blocks: without them the page is empty.
+	let unlinkedIcrcLedgerCanisterId = $derived(
+		isNullish(txExplorerUrl) && nonNullish(token) && isTokenIcrc(token)
+			? token.ledgerCanisterId
+			: undefined
+	);
+
+	let icrc3LedgerCanisterId = $state<string | undefined>();
+
+	$effect(() => {
+		const ledgerCanisterId = unlinkedIcrcLedgerCanisterId;
+
+		if (isNullish(ledgerCanisterId)) {
+			return;
+		}
+
+		isIcrcTokenSupportIcrc3({ identity: $authIdentity, ledgerCanisterId })
+			.then((supported) => {
+				if (supported) {
+					icrc3LedgerCanisterId = ledgerCanisterId;
+				}
+			})
+			.catch(() => {
+				// Without an answer the ID keeps its copy button only.
+			});
+	});
+
+	let idExplorerUrl = $derived(
+		txExplorerUrl ??
+			(nonNullish(unlinkedIcrcLedgerCanisterId) &&
+			icrc3LedgerCanisterId === unlinkedIcrcLedgerCanisterId
+				? icrcTxExplorerUrl({
+						ledgerCanisterId: unlinkedIcrcLedgerCanisterId,
+						// The receive half of a transfer to self carries a suffix the ledger does not know.
+						blockIndex: id.replace('-self', '')
+					})
+				: undefined)
+	);
+
 	let isIncoming = $derived(type === 'receive' || type === 'mint');
 
-	// A TCYCLES top-up and its refund read as such here too, as they do in the list.
-	let showTypeLabel = $derived(nonNullish(typeLabel) && isTokenCyclesLedger(token));
+	// A top-up, and a TCYCLES top-up's refund, read as such here too, as they do in the list.
+	// On ICP only a canister top-up has a label.
+	let showTypeLabel = $derived(
+		nonNullish(typeLabel) && nonNullish(token) && (isTokenCyclesLedger(token) || isTokenIcp(token))
+	);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openIcTransaction({
@@ -94,6 +154,7 @@
 		{#if (nonNullish(to) && nonNullish(from)) || (type === 'approve' && nonNullish(from))}
 			<TransactionContactCard
 				{approveSpender}
+				approveSpenderExplorerUrl={spenderExplorerUrl}
 				{from}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
@@ -134,7 +195,7 @@
 					<AddressActions
 						copyAddress={`${id}`}
 						copyAddressText={$i18n.transaction.text.id_copied}
-						externalLink={txExplorerUrl}
+						externalLink={idExplorerUrl}
 						externalLinkAriaLabel={$i18n.transaction.alt.open_block_explorer}
 					/>
 				</span>

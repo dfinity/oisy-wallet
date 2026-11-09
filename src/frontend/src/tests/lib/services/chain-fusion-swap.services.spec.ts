@@ -966,6 +966,18 @@ describe('chain-fusion-swap.services', () => {
 			);
 		});
 
+		// Regression: the quote priced the deposit address's P2WPKH output while the swap is sent
+		// with the shared loader's fee, priced for the largest output. With UTXOs of 10 150 and
+		// 9 000 sats, a 10 000-sat swap at 1 sat/vB was quoted one input and 141 sats, then sent
+		// with two inputs and 221.
+		it('should price the fee without a recipient, as the swap is sent', async () => {
+			await btcQuote();
+
+			expect(prepareBtcSend).toHaveBeenLastCalledWith(
+				expect.not.objectContaining({ destination: expect.anything() })
+			);
+		});
+
 		it('should not quote a testnet Bitcoin source', async () => {
 			await expect(btcQuote({ sourceToken: BTC_TESTNET_TOKEN })).resolves.toBeUndefined();
 		});

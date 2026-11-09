@@ -6,14 +6,15 @@
 		visible: boolean;
 		contentTest: string;
 		footerTest?: string;
+		title?: string;
 	}
 
-	let { visible = $bindable(), contentTest, footerTest }: Props = $props();
+	let { visible = $bindable(), contentTest, footerTest, title }: Props = $props();
 
 	export { visible };
 </script>
 
-<BottomSheet bind:visible>
+<BottomSheet {title} bind:visible>
 	{#snippet content()}
 		{contentTest}
 	{/snippet}
