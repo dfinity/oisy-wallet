@@ -63,6 +63,29 @@ const unfaithfulInstruction = (): MappedSolTransaction => ({
 	ambiguous: true
 });
 
+/**
+ * Whether the wallet signs a token instruction as one of a multisig's keys.
+ *
+ * A token account can be held by a multisig rather than by a key, and an instruction acting on it
+ * carries the keys signing for the multisig after the accounts it names. The wallet among them
+ * acts on an account it does not hold, and every reading of the user's accounts, simulated or not,
+ * counts only the ones the wallet holds itself: nothing the review shows would say what that
+ * signature grants or moves.
+ */
+const signsForMultisig = ({
+	instruction: { accounts },
+	parsedInstruction,
+	userAddress
+}: {
+	instruction: SolInstruction;
+	parsedInstruction: SolParsedInstruction;
+	userAddress?: OptionSolAddress;
+}): boolean =>
+	nonNullish(userAddress) &&
+	'accounts' in parsedInstruction &&
+	(accounts ?? []).some(({ address }) => address === userAddress) &&
+	!Object.values(parsedInstruction.accounts).some((meta) => meta?.address === userAddress);
+
 const mapSystemParsedInstruction = ({
 	type,
 	info
@@ -1586,6 +1609,15 @@ export const mapSolInstruction = ({
 	}
 
 	const { programAddress } = parsedInstruction;
+
+	// Asked before the readings below, which state what a token instruction does without asking
+	// whose account it acts on.
+	if (
+		(programAddress === TOKEN_PROGRAM_ADDRESS || programAddress === TOKEN_2022_PROGRAM_ADDRESS) &&
+		signsForMultisig({ instruction, parsedInstruction, userAddress })
+	) {
+		return unfaithfulInstruction();
+	}
 
 	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
 		return mapSolSystemInstruction({
