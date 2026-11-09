@@ -3065,6 +3065,7 @@
 			"send_token_on_network_message": "",
 			"send_token_message": "",
 			"send_on_network_message": "",
+			"type_send_address_message": "वह पता टाइप करें जिस पर आप भेजना चाहते हैं, या अपने संपर्कों में से एक चुनें।",
 			"send_token_succeeded": "लेनदेन पूरा हुआ!",
 			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "क्षमा करें, मुझे आपकी पता पुस्तिका में कोई उपयुक्त संपर्क नहीं मिला।",

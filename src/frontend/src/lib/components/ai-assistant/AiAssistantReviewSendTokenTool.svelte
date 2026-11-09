@@ -143,6 +143,7 @@
 			/>
 		{:else if isNetworkIdICP($sendTokenNetworkId)}
 			<AiAssistantReviewSendIcToken
+				{id}
 				{amount}
 				{destination}
 				{onSendCompleted}

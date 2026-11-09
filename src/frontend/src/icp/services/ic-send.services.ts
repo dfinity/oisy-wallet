@@ -10,8 +10,8 @@ import { transfer as transferIcrc } from '$icp/api/icrc-ledger.api';
 import { transfer as transferDip20 } from '$icp/api/xtc-ledger.api';
 import {
 	convertCkBTCToBtc,
-	convertCkETHToEth,
-	convertCkErc20ToErc20
+	convertCkErc20ToErc20,
+	convertCkETHToEth
 } from '$icp/services/ck.services';
 import type { IcCkWithdrawalResult, IcSendParams, IcTransferParams } from '$icp/types/ic-send';
 import type { IcToken } from '$icp/types/ic-token';
@@ -24,8 +24,13 @@ import type { NetworkId } from '$lib/types/network';
 import { consoleError } from '$lib/utils/console.utils';
 import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import type { BlockHeight } from '@icp-sdk/canisters/ledger/icp';
-import { decodeIcrcAccount, type IcrcLedgerDid } from '@icp-sdk/canisters/ledger/icrc';
+import { isNullish } from '@dfinity/utils';
+import { TxDuplicateError, type BlockHeight } from '@icp-sdk/canisters/ledger/icp';
+import {
+	decodeIcrcAccount,
+	IcrcTransferError,
+	type IcrcLedgerDid
+} from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
@@ -119,11 +124,42 @@ const send = async ({
 	});
 };
 
+// The block a transfer landed in, when the ledger answers that it already holds it: the same
+// transfer, `createdAt` included, was sent before and went through.
+const duplicateOf = (err: unknown): bigint | undefined => {
+	if (err instanceof TxDuplicateError) {
+		return err.duplicateOf;
+	}
+
+	if (err instanceof IcrcTransferError) {
+		const { errorType }: IcrcTransferError<IcrcLedgerDid.TransferError> = err;
+
+		if ('Duplicate' in errorType) {
+			return errorType.Duplicate.duplicate_of;
+		}
+	}
+};
+
+const sentOrDuplicate = async (transfer: Promise<bigint>): Promise<bigint> => {
+	try {
+		return await transfer;
+	} catch (err: unknown) {
+		const blockIndex = duplicateOf(err);
+
+		if (isNullish(blockIndex)) {
+			throw err;
+		}
+
+		return blockIndex;
+	}
+};
+
 export const sendIcrc = ({
 	to,
 	amount,
 	identity,
 	ledgerCanisterId,
+	createdAt,
 	progress
 }: IcSendParams): Promise<IcrcLedgerDid.BlockIndex> => {
 	const validIcrcAddress = !invalidIcrcAddress(to);
@@ -135,12 +171,15 @@ export const sendIcrc = ({
 
 	progress?.(ProgressStepsSendIc.SEND);
 
-	return transferIcrc({
-		identity,
-		ledgerCanisterId,
-		to: decodeIcrcAccount(to),
-		amount
-	});
+	return sentOrDuplicate(
+		transferIcrc({
+			identity,
+			ledgerCanisterId,
+			to: decodeIcrcAccount(to),
+			amount,
+			createdAt
+		})
+	);
 };
 
 export const sendIcp = ({
@@ -148,6 +187,7 @@ export const sendIcp = ({
 	amount,
 	identity,
 	ledgerCanisterId,
+	createdAt,
 	progress
 }: IcSendParams): Promise<BlockHeight> => {
 	const validIcrcAddress = !invalidIcrcAddress(to);
@@ -160,19 +200,23 @@ export const sendIcp = ({
 
 	progress?.(ProgressStepsSendIc.SEND);
 
-	return validIcrcAddress
-		? icrc1TransferIcp({
-				identity,
-				ledgerCanisterId,
-				to: decodeIcrcAccount(to),
-				amount
-			})
-		: transferIcp({
-				identity,
-				ledgerCanisterId,
-				to,
-				amount
-			});
+	return sentOrDuplicate(
+		validIcrcAddress
+			? icrc1TransferIcp({
+					identity,
+					ledgerCanisterId,
+					to: decodeIcrcAccount(to),
+					amount,
+					createdAt
+				})
+			: transferIcp({
+					identity,
+					ledgerCanisterId,
+					to,
+					amount,
+					createdAt
+				})
+	);
 };
 
 export const sendDip20 = ({

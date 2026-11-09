@@ -168,6 +168,16 @@ thread_local! {
     /// already been paid for.
     pub(crate) static GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER: RateLimiter =
         RateLimiter::new(30, 60 * 1_000_000_000);
+
+    /// Rate-limits `update_user_agreements`: max 10 calls per caller per minute. The wallet
+    /// calls it when the user accepts a new version of the agreements.
+    pub(crate) static UPDATE_USER_AGREEMENTS_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(10, 60 * 1_000_000_000);
+
+    /// Rate-limits `update_provider_agreements`: max 10 calls per caller per minute. The wallet
+    /// calls it when the user accepts a provider's terms before a swap.
+    pub(crate) static UPDATE_PROVIDER_AGREEMENTS_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(10, 60 * 1_000_000_000);
 }
 
 /// Per-caller sliding-window rate limiter for IC canister methods.
