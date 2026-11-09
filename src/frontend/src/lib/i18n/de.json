@@ -2333,6 +2333,9 @@
 			"confirmations": "Bestätigungen",
 			"for": "Für",
 			"for_copied": "Adresse in die Zwischenablage kopiert.",
+			"canister": "Canister",
+			"canister_copied": "Canister-ID in die Zwischenablage kopiert.",
+			"canister_unknown": "unbekannt",
 			"expiration": "Ablaufdatum",
 			"approve_label": ""
 		},
@@ -2353,7 +2356,8 @@
 			"deposit": "Einzahlung",
 			"approve": "Genehmigung",
 			"burn": "Burn",
-			"mint": "Mint"
+			"mint": "Mint",
+			"top_up": "Aufladung"
 		},
 		"filter": {
 			"types_label": "",

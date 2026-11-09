@@ -98,10 +98,11 @@ The TCYCLES amount step is unchanged. With ICP:
 
 ### 5.6 History and recently used destinations
 
-1. **ICP Activity** labels an outgoing ICP transfer with the `TPUP` memo, as the legacy memo or as the 8-byte ICRC-1 memo, as **Canister top-up**, in the list and in the details. It does not name the canister (§3.4). The label also covers top-ups made outside OISY. It rests on the memo alone, which only the sender sets.
+1. **ICP Activity** labels an outgoing ICP transfer with the `TPUP` memo, as the legacy memo or as the 8-byte ICRC-1 memo, as **Top up**, in the list and in the details, as TCYCLES Activity labels a top-up. The label also covers top-ups made outside OISY. It rests on the memo alone, which only the sender sets. The transfer's destination is the CMC's deposit account for the canister, a hash that names no canister (§3.4), so the canister is named only when one of the user's contacts holds a canister ID whose deposit account it is; otherwise the row reads **Canister unknown** and the details **Canister: unknown**. The deposit account, its explorer link and Save address never show.
 2. The refund of a failed ICP top-up arrives as a plain incoming transfer without a memo, and stays an ordinary receive.
-3. TCYCLES Activity is unchanged.
+3. **Both** show the canister under **Canister** where a send shows **To**, as an approval shows its spender under **For**: the tokens do not go to the canister. TCYCLES Activity keeps naming its canister from the burn's memo.
 4. **An ICP top-up is never a recently used destination** in Send and never makes its account familiar for the first-time destination warning (PRODUCT.md → Send → First-time destination addresses). It is recognised by its memo, since its account differs per canister. ICP sent to that account without the memo is never topped up.
+5. **Type filter.** Activity's Type filter has a **Top up** entry with ICP and TCYCLES top-ups, which no longer fall under Send and Burn.
 
 ## 6. Settlement across sessions
 
@@ -147,7 +148,7 @@ The existing **`cycles_top_up`** family (PRODUCT.md → Cycles top-up tracking) 
 - **AC11** After the transfer, `Processing`, a failed notify or `Other` code 1, 2 or 3 never shows the top-up as failed, and it is notified again. A refund shows as failed, says the ICP came back minus 0.0003 ICP, and never shows the CMC's reason text.
 - **AC12** A top-up whose modal was closed, or whose tab was refreshed or closed, or whose user logged out between the transfer and the notify, completes or shows as refunded in the next session without user action, while the CMC still accepts the notify. No recovery path sends ICP. If the row cannot be created, no ICP moves.
 - **AC13** An ICP top-up in flight or finished after its ICP left the wallet shows in the Active transactions list; one that ends in the modal before any ICP moves does not.
-- **AC14** ICP Activity shows an outgoing transfer with the `TPUP` memo (legacy or 8-byte ICRC-1) as Canister top-up, in the list and the details, without a canister; every other ICP transfer is unchanged.
+- **AC14** Activity titles an ICP top-up (an outgoing transfer with the `TPUP` memo, legacy or 8-byte ICRC-1) and a TCYCLES top-up **Top up**, with the canister under **Canister**, in the list and the details. An ICP top-up names its canister only through a contact's canister ID, reads Canister unknown otherwise, and never shows the CMC deposit account. The Type filter's Top up entry holds both, and Send and Burn hold neither. Every other ICP transfer is unchanged.
 - **AC15** No ICP top-up appears in Send's Recently used list or suppresses the first-time destination warning, and tests pin it.
 - **AC16** The backend accepts the new variant only with ICP as source, a valid amount and a canister ID.
 - **AC17** The analytics fire as in §8 and never carry an amount, a canister ID or a principal.
@@ -156,7 +157,7 @@ The existing **`cycles_top_up`** family (PRODUCT.md → Cycles top-up tracking) 
 
 ## 10. Non-goals
 
-- Naming the canister of an ICP top-up in Activity or listing it in Recently topped up (§3.4).
+- Naming the canister of an ICP top-up in Activity other than through a contact, or listing it in Recently topped up (§3.4).
 - Reading Recently topped up from active user transactions. If it comes later, deleting a row becomes a soft delete first, so the data stays readable (§12, R9).
 - Labelling the refund of a failed ICP top-up.
 - A Top up entry on the ICP page, a "Send or Top up" choice when ICP is picked in Send, a choice of token inside the TCYCLES page's Top up, Mint with a "to a canister" option, or offering ICP only when TCYCLES runs short (§12, R1).
@@ -169,14 +170,15 @@ The existing **`cycles_top_up`** family (PRODUCT.md → Cycles top-up tracking) 
 
 ## 11. Implementation plan
 
-Six PRs, stacked linearly, each in granular commits and each behaviour PR with its own PRODUCT.md entry. This spec lands with PR 1, not as a PR of its own (§12, R16):
+Seven PRs, stacked linearly, each in granular commits and each behaviour PR with its own PRODUCT.md entry. This spec lands with PR 1, not as a PR of its own (§12, R16):
 
 1. `feat(backend)!: add a cycles top-up active-user-transaction variant`: this spec, and §6.7 as the only code change, with a `BREAKING CHANGE:` line.
 2. `feat(frontend): top up a canister from ICP through the CMC`: `notify_top_up` in the wrapper, the transfer with `TPUP`, the top-up service with Mint's retry semantics, the deposit lookup (§6.4), the ICP Activity label (§5.6.1) and the Recently used exclusion (§5.6.4), with unit tests. No UI.
 3. `feat(frontend): offer contacts when picking a canister to top up`: the new flag (§4.4), and behind it the tabs, contact names, the opening rule and the empty states (§5.2), with component tests.
 4. `feat(frontend): top up a canister from the navigation with ICP or TCYCLES`: the navigation item, the token picker and its empty state, the ICP amount, review and progress, the row and its poller handling, the hint, the title and the analytics, in English, with component tests.
 5. Translations for every shipped locale.
-6. Turning the flag on in production after a real ICP top-up on staging, the recovery path included. Staging talks to the mainnet CMC, so this spends real ICP; a small amount suffices.
+6. `feat(frontend): show ICP and TCYCLES top-ups alike in Activity`: the Top up title for ICP top-ups, the Canister label for both, the contact's canister or Canister unknown for ICP, and the Type filter's Top up entry (§5.6), translated, with tests. Added after testing on fe1 (R17).
+7. Turning the flag on in production after a real ICP top-up on staging, the recovery path included. Staging talks to the mainnet CMC, so this spends real ICP; a small amount suffices.
 
 **Overlap with open drafts.** #14448 and #14449 extract and extend the top-up wizard that PR 3 and PR 4 change. Whichever lands second takes the merge. Through #14449, a top-up started from Send's choice gets the new canister step too.
 
@@ -203,7 +205,7 @@ Decided on 2026-10-28.
 - **R5 TCYCLES page:** its Top up button stays and opens the flow with TCYCLES picked (§4.2).
 - **R6 Settlement:** an active user transaction with a new variant that stores the canister ID, opened before the ICP is sent (§6). The AUT is needed anyway, and the chain does not keep the canister (§3.4).
 - **R7 Memo:** the canister ID cannot go into the transfer's memo (§3.4).
-- **R8 ICP Activity:** a top-up shows as a top-up, without its canister (§5.6.1).
+- **R8 ICP Activity:** a top-up shows as a top-up; its canister only through a contact since R17 (§5.6.1).
 - **R9 Recently topped up:** from TCYCLES history only. Active user transactions are not a source; if they become one later, deleting a row becomes a soft delete first.
 - **R10 Contacts:** a Contacts tab with every contact address that is a canister ID, and contact names in Recently topped up (§5.2).
 - **R11 ICP hint and opening tab:** the hint shows whenever ICP is picked; the step opens on Contacts when Recently topped up is empty and Contacts is not (§5.2).
@@ -211,4 +213,5 @@ Decided on 2026-10-28.
 - **R13 Unit:** the ICP flow shows the cycles a canister receives as cycles, in trillions ("≈ 2.49T cycles"), never as TCYCLES: TCYCLES is a token, and a top-up paid with ICP involves none (§5.3.2).
 - **R14 Active transactions wording:** the action, the amount and the token paid, as in "Canister top-up 1 ICP" (§6.6).
 - **R15 Tab label:** Recently topped up, as today (§5.2.2).
-- **R16 PRs:** six PRs, stacked linearly; this spec lands with PR 1, not as a PR of its own (§11).
+- **R16 PRs:** PRs stacked linearly, six at first and seven since R17; this spec lands with PR 1, not as a PR of its own (§11).
+- **R17 Activity naming** (2026-10-29, after testing on fe1): ICP and TCYCLES top-ups are both titled **Top up**. The canister shows under **Canister**, not **To**, since the tokens do not go to it, as an approval's spender shows under **For**. An ICP top-up's canister is named through a contact's canister ID when one matches, and reads **Canister unknown** otherwise; the CMC deposit account never shows. The Type filter gets a **Top up** entry for both. The Active transactions row keeps "Canister top-up 1 ICP" (R14).
