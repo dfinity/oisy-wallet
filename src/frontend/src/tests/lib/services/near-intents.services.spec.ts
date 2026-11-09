@@ -163,6 +163,43 @@ describe('near-intents.services', () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
 		});
 
+		it('reports participation after resolving assets and before requesting the price', async () => {
+			const onProviderParticipating = vi.fn();
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockImplementationOnce(() => {
+				expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.NEAR_INTENTS);
+
+				return Promise.resolve(mockNearIntentsQuoteResponse);
+			});
+			await fetchNearIntentsSwapQuote({
+				sourceToken,
+				destinationToken,
+				amount: 1_000_000n,
+				userAddress: mockEthAddress,
+				slippage,
+				onProviderParticipating
+			});
+
+			expect(onProviderParticipating).toHaveBeenCalledOnce();
+		});
+
+		it('does not report participation when asset resolution finds no pair', async () => {
+			const onProviderParticipating = vi.fn();
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue([]);
+
+			await expect(
+				fetchNearIntentsSwapQuote({
+					sourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockEthAddress,
+					slippage,
+					onProviderParticipating
+				})
+			).resolves.toBeUndefined();
+			expect(onProviderParticipating).not.toHaveBeenCalled();
+			expect(nearIntentsApi.fetchNearIntentsQuote).not.toHaveBeenCalled();
+		});
+
 		it('should reject a quote whose signature does not verify', async () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
 				mockNearIntentsQuoteResponse

@@ -15,7 +15,7 @@ import type {
 	NearIntentsToken
 } from '$lib/types/near-intents';
 import type { NetworkId } from '$lib/types/network';
-import type { NearIntentsQuoteParams, SwapMappedResult } from '$lib/types/swap';
+import { SwapProvider, type NearIntentsQuoteParams, type SwapMappedResult } from '$lib/types/swap';
 import {
 	findNearIntentsQuoteRequestMismatch,
 	isNearIntentsQuoteExpired,
@@ -137,7 +137,8 @@ export const fetchNearIntentsSwapQuote = async ({
 	amount,
 	userAddress,
 	recipientAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: NearIntentsQuoteParams): Promise<SwapMappedResult | undefined> => {
 	if (!NEAR_INTENTS_SWAP_ENABLED || isNullish(userAddress)) {
 		return;
@@ -166,6 +167,8 @@ export const fetchNearIntentsSwapQuote = async ({
 		recipientAddress,
 		deadlineMs
 	});
+
+	onProviderParticipating?.(SwapProvider.NEAR_INTENTS);
 
 	const quoteResponse = await fetchNearIntentsQuote(quoteRequest);
 

@@ -1,8 +1,10 @@
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
+import { btcOutputVSize } from '$btc/utils/btc-psbt.utils';
 import { calculateMaxSpendableAmount } from '$btc/utils/btc-utxos.utils';
 import { getPendingTransactionUtxoOutpoints } from '$icp/utils/btc.utils';
+import type { OptionString } from '$lib/types/string';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -16,8 +18,17 @@ import { derived, type Readable } from 'svelte/store';
  *
  * `undefined` until all three are loaded — the caller then keeps its own default rather than
  * showing a cap computed from a set we do not have yet.
+ *
+ * The fee is priced for `destination`'s output, as the selection prices it. Without one, it is
+ * priced for the largest output a send can pay, so the cap is fundable whoever the recipient is.
  */
-export const initBtcMaxSendAmount = (source: string): Readable<bigint | undefined> =>
+export const initBtcMaxSendAmount = ({
+	source,
+	destination
+}: {
+	source: string;
+	destination?: OptionString;
+}): Readable<bigint | undefined> =>
 	derived(
 		[allUtxosStore, btcPendingSentTransactionsStore, feeRatePercentilesStore],
 		([$allUtxosStore, $btcPendingSentTransactionsStore, $feeRatePercentilesStore]) => {
@@ -41,6 +52,7 @@ export const initBtcMaxSendAmount = (source: string): Readable<bigint | undefine
 			return calculateMaxSpendableAmount({
 				utxos,
 				pendingUtxoOutpoints,
+				recipientOutputVSize: btcOutputVSize({ address: destination }),
 				feeRateMiliSatoshisPerVByte
 			});
 		}

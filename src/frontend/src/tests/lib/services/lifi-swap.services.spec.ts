@@ -109,6 +109,34 @@ describe('lifi-swap.services', () => {
 	});
 
 	describe('fetchLifiSwapQuote', () => {
+		it('reports participation before pricing, including shared and cached quotes', async () => {
+			const onProviderParticipating = vi.fn();
+			const observed = { ...params, onProviderParticipating };
+			const first = fetchLifiSwapQuote(observed);
+
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.LIFI);
+
+			await Promise.all([first, fetchLifiSwapQuote(observed)]);
+			await fetchLifiSwapQuote(observed);
+
+			expect(onProviderParticipating).toHaveBeenCalledTimes(3);
+			expect(fetchLifiQuote).toHaveBeenCalledOnce();
+		});
+
+		it('does not report an ineligible Solana source as participating', async () => {
+			const onProviderParticipating = vi.fn();
+			await fetchLifiSwapQuote({
+				...params,
+				sourceToken: SOLANA_TOKEN,
+				destinationToken: mockValidSplToken,
+				userAddress: mockSolAddress,
+				onProviderParticipating
+			});
+
+			expect(onProviderParticipating).not.toHaveBeenCalled();
+			expect(fetchLifiQuote).not.toHaveBeenCalled();
+		});
+
 		it('should return the offer of a quote that answers the request', async () => {
 			await expect(fetchLifiSwapQuote(params)).resolves.toStrictEqual({
 				provider: SwapProvider.LIFI,
