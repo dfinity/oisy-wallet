@@ -18,6 +18,7 @@ import {
 } from '$eth/constants/wallet-connect.constants';
 import { send as executeSend } from '$eth/services/send.services';
 import { send, signMessage } from '$eth/services/wallet-connect.services';
+import { EthNonceReadError, EthSubmissionUnconfirmedError } from '$eth/types/send';
 import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -28,6 +29,7 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
@@ -590,6 +592,68 @@ describe('eth wallet-connect.services', () => {
 					data,
 					sourceNetwork: BASE_NETWORK
 				});
+			});
+		});
+
+		describe('when the send fails', () => {
+			beforeEach(() => {
+				vi.spyOn(toastsStore, 'toastsError').mockImplementation(() => Symbol('toast'));
+				vi.spyOn(toastsStore, 'toastsErrorNoTrace').mockImplementation(() => Symbol('toast'));
+			});
+
+			it('rejects the request and says whether the transaction may have reached the network', async () => {
+				const err = new EthSubmissionUnconfirmedError(new Error('Internal error'));
+				vi.mocked(executeSend).mockRejectedValueOnce(err);
+
+				await expect(send(buildParams())).resolves.toEqual({ success: false, err });
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: 'mock-topic',
+					id: 1,
+					error: UNEXPECTED_ERROR
+				});
+				expect(toastsStore.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.send.error.ethereum_transaction_unconfirmed },
+					err
+				});
+				expect(toastsStore.toastsError).not.toHaveBeenCalled();
+			});
+
+			it('says the transaction was not sent when its nonce could not be read', async () => {
+				const err = new EthNonceReadError(new Error('Internal error'));
+				vi.mocked(executeSend).mockRejectedValueOnce(err);
+
+				await send(buildParams());
+
+				expect(toastsStore.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.send.error.ethereum_transaction_not_sent },
+					err
+				});
+			});
+
+			it('explains a balance that cannot pay for the transaction as the send flow does', async () => {
+				const err = Object.assign(new Error('insufficient funds'), { code: 'INSUFFICIENT_FUNDS' });
+				vi.mocked(executeSend).mockRejectedValueOnce(err);
+
+				await send(buildParams());
+
+				expect(toastsStore.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.send.error.ethereum_insufficient_funds },
+					err
+				});
+			});
+
+			it('keeps the generic WalletConnect message for an error it cannot explain', async () => {
+				const err = new Error('Mock error');
+				vi.mocked(executeSend).mockRejectedValueOnce(err);
+
+				await expect(send(buildParams())).resolves.toEqual({ success: false, err });
+
+				expect(toastsStore.toastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.wallet_connect.error.unexpected_processing_request },
+					err
+				});
+				expect(toastsStore.toastsErrorNoTrace).not.toHaveBeenCalled();
 			});
 		});
 	});

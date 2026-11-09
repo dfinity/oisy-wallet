@@ -15,10 +15,6 @@ vi.mock('$btc/services/btc-pending-sent-transactions.services', () => ({
 	loadBtcPendingSentTransactions: vi.fn().mockResolvedValue(undefined)
 }));
 
-vi.mock('$btc/utils/btc-address.services', () => ({
-	getBtcSourceAddress: vi.fn().mockReturnValue('test-btc-address')
-}));
-
 vi.mock('$icp/utils/btc.utils', () => ({
 	getBtcWalletBalance: vi.fn().mockReturnValue({ confirmed: 1000n, total: 1000n }),
 	mapTokenIdToNetworkId: vi.fn().mockReturnValue('test-network-id')

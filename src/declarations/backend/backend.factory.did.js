@@ -153,6 +153,38 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: BtcAddPendingTransactionError
 	});
+	const BtcBroadcastTransactionRequest = IDL.Record({
+		transaction: IDL.Vec(IDL.Nat8),
+		ii_delegation_chain: IDL.Opt(IIDelegationChain),
+		network: Network
+	});
+	const BtcBroadcastTransactionResponse = IDL.Record({
+		txid: IDL.Vec(IDL.Nat8)
+	});
+	const BtcBroadcastTransactionError = IDL.Variant({
+		TooManyInputs: IDL.Null,
+		DuplicateInputs: IDL.Null,
+		InvalidUtxos: IDL.Null,
+		InvalidInput: IDL.Record({ index: IDL.Nat32 }),
+		InvalidOutput: IDL.Record({ index: IDL.Nat32 }),
+		UnsupportedLockTime: IDL.Null,
+		InvalidSignature: IDL.Record({ index: IDL.Nat32 }),
+		BroadcastInProgress: IDL.Null,
+		FeeTooLow: IDL.Null,
+		BroadcastOutcomeUnknown: IDL.Record({ msg: IDL.Text }),
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
+		TransactionTooLarge: IDL.Null,
+		TooManyOutputs: IDL.Null,
+		MalformedTransaction: IDL.Null,
+		RateLimited: RateLimitError,
+		BroadcastRejected: IDL.Record({ msg: IDL.Text }),
+		InternalError: IDL.Record({ msg: IDL.Text }),
+		UtxosAlreadyReserved: IDL.Null
+	});
+	const BtcBroadcastTransactionResult = IDL.Variant({
+		Ok: BtcBroadcastTransactionResponse,
+		Err: BtcBroadcastTransactionError
+	});
 	const BtcGetFeePercentilesRequest = IDL.Record({ network: Network });
 	const BtcGetFeePercentilesResponse = IDL.Record({
 		fee_percentiles: IDL.Vec(IDL.Nat64)
@@ -183,6 +215,23 @@ export const idlFactory = ({ IDL }) => {
 	const BtcGetPendingTransactionsResult = IDL.Variant({
 		Ok: BtcGetPendingTransactionsReponse,
 		Err: BtcGetPendingTransactionsError
+	});
+	const BtcGetSpendableUtxosRequest = IDL.Record({
+		ii_delegation_chain: IDL.Opt(IIDelegationChain),
+		network: Network
+	});
+	const BtcGetSpendableUtxosResponse = IDL.Record({
+		pending_transactions: IDL.Vec(PendingTransaction),
+		utxos: IDL.Vec(Utxo)
+	});
+	const BtcGetSpendableUtxosError = IDL.Variant({
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
+		RateLimited: RateLimitError,
+		InternalError: IDL.Record({ msg: IDL.Text })
+	});
+	const BtcGetSpendableUtxosResult = IDL.Variant({
+		Ok: BtcGetSpendableUtxosResponse,
+		Err: BtcGetSpendableUtxosError
 	});
 	const TipError = IDL.Variant({
 		InvalidExpiry: IDL.Null,
@@ -1030,6 +1079,11 @@ export const idlFactory = ({ IDL }) => {
 			[BtcAddPendingTransactionResult],
 			[]
 		),
+		btc_broadcast_transaction: IDL.Func(
+			[BtcBroadcastTransactionRequest],
+			[BtcBroadcastTransactionResult],
+			[]
+		),
 		btc_get_current_fee_percentiles: IDL.Func(
 			[BtcGetFeePercentilesRequest],
 			[BtcGetFeePercentilesResult],
@@ -1038,6 +1092,11 @@ export const idlFactory = ({ IDL }) => {
 		btc_get_pending_transactions: IDL.Func(
 			[BtcGetPendingTransactionsRequest],
 			[BtcGetPendingTransactionsResult],
+			[]
+		),
+		btc_get_spendable_utxos: IDL.Func(
+			[BtcGetSpendableUtxosRequest],
+			[BtcGetSpendableUtxosResult],
 			[]
 		),
 		cancel_tip: IDL.Func([IDL.Text], [CancelTipResult], []),

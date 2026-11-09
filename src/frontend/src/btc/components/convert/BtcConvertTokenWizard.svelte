@@ -119,6 +119,7 @@
 			// Last-line guard against a race: between fee preview and broadcast
 			// another tab may have reserved one of the UTXOs we selected.
 			try {
+				// No recipient: the fee is priced for the largest output, like a swap's (see the loader below).
 				await validateBtcSend({
 					utxosFee: $utxosFeeStore.utxosFee,
 					source: sourceAddress,
@@ -175,6 +176,10 @@
 	const back = () => onBack();
 </script>
 
+<!-- No recipient, although the deposit address is the minter's P2WPKH one: priced for the largest
+     output, as the Chain Fusion swap prices the same deposit. Pricing the address would make the
+     fee wait for it, and an amount refused for the fee before it arrives would keep that fee, since
+     the loader skips while `amountError` is set and Convert only re-checks the amount on input. -->
 <UtxosFeeLoader amount={sendAmount} {amountError} {networkId} source={sourceAddress}>
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsConvert.CONVERT}

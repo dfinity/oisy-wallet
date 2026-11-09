@@ -714,8 +714,7 @@ const mapSolTokenInstruction = ({
 			amount,
 			source,
 			destination,
-			isApproval: true,
-			uncheckedApproval: true
+			isApproval: true
 		};
 	}
 
@@ -835,8 +834,7 @@ const mapSolToken2022Instruction = ({
 			amount,
 			source,
 			destination,
-			isApproval: true,
-			uncheckedApproval: true
+			isApproval: true
 		};
 	}
 
