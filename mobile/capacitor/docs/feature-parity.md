@@ -56,8 +56,8 @@ The fix at `380cb0dda1` was deployed to audit in
 [run 42648864851](https://github.com/dfinity/oisy-wallet/actions/runs/42648864851),
 and the signed update was installed and launched on the iPhone on 2026-11-09.
 Public CSS contains the pending-backdrop fix; test fixtures are absent and auth
-association files are unchanged. Physical smoothness acceptance for this follow-up
-is pending.
+association files are unchanged. The user confirmed on the iPhone that transaction
+details now open and close smoothly, with the flash and list jump resolved.
 
 ## Reading the inventory
 
