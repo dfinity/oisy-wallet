@@ -1904,18 +1904,27 @@ describe('sol-instructions.utils', () => {
 
 			const approve = ({
 				owner = multisig,
+				delegate = address(mockSolAddress2),
 				multiSigners = [wallet]
 			}: {
 				owner?: typeof multisig;
+				delegate?: typeof multisig;
 				multiSigners?: (typeof wallet)[];
 			} = {}) =>
 				getApproveInstruction({
 					source: address(mockSolAddress3),
-					delegate: address(mockSolAddress2),
+					delegate,
 					owner,
 					amount: SPL_TOKEN_MAX_AMOUNT,
 					multiSigners
 				});
+
+			const closeToWallet = getCloseAccountInstruction({
+				account: address(mockSolAddress3),
+				destination: address(mockSolAddress),
+				owner: multisig,
+				multiSigners: [wallet]
+			});
 
 			const map = (instruction: SolInstruction) =>
 				mapSolInstruction({ instruction, userAddress: mockSolAddress });
@@ -1978,6 +1987,29 @@ describe('sol-instructions.utils', () => {
 				});
 			});
 
+			it('should fail closed on an `Approve` naming the wallet as the delegate that it signs for a multisig', () => {
+				expect(map(approve({ delegate: address(mockSolAddress) }))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed on a close paying the wallet that it signs for a multisig', () => {
+				expect(map(closeToWallet)).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on a batch carrying instructions naming the wallet that it signs for a multisig', () => {
+				expect(
+					map(getBatchInstruction([approve({ delegate: address(mockSolAddress) }), closeToWallet]))
+				).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on an `Approve` naming the wallet as the owner and listing it again after the named accounts', () => {
+				expect(
+					map(approve({ owner: address(mockSolAddress), multiSigners: [wallet] }))
+				).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
 			it('should read an `Approve` for a multisig the wallet does not sign for as before', () => {
 				expect(map(approve({ multiSigners: [other] }))).toStrictEqual({
 					amount: SPL_TOKEN_MAX_AMOUNT,
@@ -1988,9 +2020,7 @@ describe('sol-instructions.utils', () => {
 			});
 
 			it('should read an `Approve` the wallet signs for as the owner as before', () => {
-				expect(
-					map(approve({ owner: address(mockSolAddress), multiSigners: [wallet] }))
-				).toStrictEqual({
+				expect(map(approve({ owner: address(mockSolAddress), multiSigners: [] }))).toStrictEqual({
 					amount: SPL_TOKEN_MAX_AMOUNT,
 					source: mockSolAddress3,
 					destination: mockSolAddress2,

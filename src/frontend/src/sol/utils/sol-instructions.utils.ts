@@ -71,6 +71,12 @@ const unfaithfulInstruction = (): MappedSolTransaction => ({
  * acts on an account it does not hold, and every reading of the user's accounts, simulated or not,
  * counts only the ones the wallet holds itself: nothing the review shows would say what that
  * signature grants or moves.
+ *
+ * The wallet can fill a named role as well, such as the delegate or the close destination, so what
+ * counts is whether it is listed more often than named; a parser leaves an absent optional account
+ * out without taking a position, so positions would not tell. The token program reads the keys
+ * after the named accounts only when the authority is a multisig, so a well-formed request never
+ * lists the wallet there, as the owner or otherwise.
  */
 const signsForMultisig = ({
 	instruction: { accounts },
@@ -80,11 +86,18 @@ const signsForMultisig = ({
 	instruction: SolInstruction;
 	parsedInstruction: SolParsedInstruction;
 	userAddress?: OptionSolAddress;
-}): boolean =>
-	nonNullish(userAddress) &&
-	'accounts' in parsedInstruction &&
-	(accounts ?? []).some(({ address }) => address === userAddress) &&
-	!Object.values(parsedInstruction.accounts).some((meta) => meta?.address === userAddress);
+}): boolean => {
+	if (isNullish(userAddress) || !('accounts' in parsedInstruction)) {
+		return false;
+	}
+
+	const listed = (accounts ?? []).filter(({ address }) => address === userAddress).length;
+	const named = Object.values(parsedInstruction.accounts).filter(
+		(meta) => meta?.address === userAddress
+	).length;
+
+	return listed > named;
+};
 
 const mapSystemParsedInstruction = ({
 	type,
