@@ -1529,7 +1529,8 @@
 			"asset_type_all": "Todos los tipos de activos",
 			"no_tokens_for_asset_type": "No hay $asset_type en tu cartera",
 			"no_tokens_for_asset_type_zero_tokens": "No hay $asset_type en la red seleccionada",
-			"no_tokens_for_asset_type_description": "Elige entre <strong>$count tokens compatibles</strong> para personalizar tu vista de cartera."
+			"no_tokens_for_asset_type_description": "Elige entre <strong>$count tokens compatibles</strong> para personalizar tu vista de cartera.",
+			"mobile_web_update_test": ""
 		},
 		"details": {
 			"title": "Detalles del token",

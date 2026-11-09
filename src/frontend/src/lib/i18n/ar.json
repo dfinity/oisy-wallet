@@ -1529,7 +1529,8 @@
 			"asset_type_all": "",
 			"no_tokens_for_asset_type": "",
 			"no_tokens_for_asset_type_zero_tokens": "",
-			"no_tokens_for_asset_type_description": ""
+			"no_tokens_for_asset_type_description": "",
+			"mobile_web_update_test": ""
 		},
 		"details": {
 			"title": "تفاصيل التوكن",

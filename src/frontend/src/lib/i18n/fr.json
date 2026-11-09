@@ -1529,7 +1529,8 @@
 			"asset_type_all": "Tous les types d'actifs",
 			"no_tokens_for_asset_type": "Il n'y a pas de $asset_type dans votre portefeuille",
 			"no_tokens_for_asset_type_zero_tokens": "Il n'y a pas de $asset_type dans le réseau sélectionné",
-			"no_tokens_for_asset_type_description": "Choisissez parmi <strong>$count tokens pris en charge</strong> pour personnaliser votre vue de portefeuille."
+			"no_tokens_for_asset_type_description": "Choisissez parmi <strong>$count tokens pris en charge</strong> pour personnaliser votre vue de portefeuille.",
+			"mobile_web_update_test": ""
 		},
 		"details": {
 			"title": "Détails du token",
