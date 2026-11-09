@@ -47,6 +47,49 @@ import XCTest
     attachment.lifetime = .keepAlways
     add(attachment)
   }
+  private func verifyTransactionSheetTransition(
+    _ web: WKWebView, shell: ShellViewController, window: UIWindow
+  ) async throws {
+    let wallet = try XCTUnwrap(shell.wallet)
+    let nonce = try await evaluate(web, "return window.testDocumentNonce;")
+    let geometry = """
+      return JSON.stringify({top: getComputedStyle(document.body).paddingTop,
+        scrollY, height: innerHeight, width: innerWidth});
+      """
+    let before = try await evaluate(web, geometry)
+    _ = try await evaluate(
+      web,
+      """
+      window.testBackdropFlashes = [];
+      window.testSheetObserver = new MutationObserver(() => {
+        const backdrop = document.querySelector('[data-native-sheet-pending] .backdrop');
+        if (backdrop && getComputedStyle(backdrop).visibility !== 'hidden') {
+          window.testBackdropFlashes.push('visible web backdrop before UIKit presentation');
+        }
+      });
+      window.testSheetObserver.observe(document.body, {subtree:true, childList:true, attributes:true});
+      window.dispatchEvent(new Event('oisyTestTransaction'));
+      return 'opened';
+      """)
+    try await waitForNativeSheet(shell, visible: true)
+    let flashes = try await evaluate(web, "return JSON.stringify(window.testBackdropFlashes);")
+    XCTAssertEqual(flashes, "[]", "The native transition must not start with a web backdrop flash")
+    capture(window, name: "native-transaction-details")
+    _ = try await evaluate(
+      web,
+      """
+      window.testSheetObserver.disconnect();
+      document.querySelector('.modal [data-tid=close-modal]').click();
+      return 'closed';
+      """)
+    try await waitForNativeSheet(shell, visible: false)
+    let after = try await evaluate(web, geometry)
+    XCTAssertEqual(after, before, "Activity must restore its viewport, safe area and scroll")
+    let nonceAfter = try await evaluate(web, "return window.testDocumentNonce;")
+    XCTAssertEqual(nonceAfter, nonce, "Closing transaction details must not reload the document")
+    XCTAssertTrue(web.superview === wallet.view)
+    capture(window, name: "activity-after-transaction-sheet")
+  }
   private func verifySharedSwapForm(
     _ web: WKWebView, shell: ShellViewController, window: UIWindow
   ) async throws {
@@ -290,6 +333,7 @@ import XCTest
       };
       window.testErrors = [];
       window.addEventListener('unhandledrejection', e => window.testErrors.push(String(e.reason)));
+      window.addEventListener('error', e => window.testErrors.push(e.message));
       """
     let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
     let previous = scene.keyWindow
@@ -313,6 +357,12 @@ import XCTest
           "return document.querySelector('[data-mobile-host]') && window.testAuthWorkerReady ? 'ready' : ''; "
         )) ?? ""
       if stage == "ready" { break }
+      let errors =
+        (try? await evaluate(web, "return JSON.stringify(window.testErrors || []);")) ?? "[]"
+      if errors != "[]" {
+        XCTFail("Offline fixture startup failed: " + errors)
+        return
+      }
       try await Task.sleep(for: .milliseconds(100))
     }
     XCTAssertEqual(
@@ -561,6 +611,7 @@ import XCTest
     XCTAssertEqual(
       beforeTabHistoryLength, afterTabHistoryLength, "Tabs must not append browser history")
     XCTAssertEqual(shell.walletRoot, .activity)
+    try await verifyTransactionSheetTransition(web, shell: shell, window: window)
     XCTAssertFalse(web.allowsBackForwardNavigationGestures)
     XCTAssertTrue(web === shell.wallet?.webView)
     XCTAssertEqual(wallet.session.grant?.id, grantID, "Client routing must preserve the session")

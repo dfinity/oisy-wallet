@@ -97,7 +97,7 @@ final class TrustedWalletViewController: UIViewController, WKNavigationDelegate 
   }
 
   func moveWebView(to container: UIView) {
-    guard let webView else { return }
+    guard let webView, webView.superview !== container else { return }
     NSLayoutConstraint.deactivate(webConstraints)
     webView.removeFromSuperview()
     webView.translatesAutoresizingMaskIntoConstraints = false

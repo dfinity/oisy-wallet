@@ -336,7 +336,9 @@ Hosts advertising `nativeSheets` use the shared `nativeSheet` Svelte action to
 present the same WebView in a UIKit sheet. Accessory `Modal` dialogs use a large detent;
 dismissible `BottomSheetContainer` starts at medium. Nested dialogs reuse that
 container. The action preserves the web focus/close guards and falls back to web
-presentation on unsupported hosts or preparation failure. See the
+presentation on unsupported hosts or preparation failure. Pending native panels
+explicitly hide their web backdrop; release clears sheet layout before native
+reveals the repainted page. See the
 [system sheet contract](../../../mobile/capacitor/docs/shared-web-contract.md#system-sheets).
 Older hosts keep the full-viewport web backdrop and content-sized sheet. Forms can
 request `mobilePresentation="fullScreen"` for full-page web presentation in the app.

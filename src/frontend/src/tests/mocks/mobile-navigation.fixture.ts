@@ -2,13 +2,16 @@
 // responses; these are the same store inputs used by frontend component tests.
 import type { UserAgreement } from '$declarations/backend/backend.did';
 import { agreementsData } from '$env/agreements.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { EnvAgreements } from '$env/types/env-agreements';
 import { authIdentity } from '$lib/derived/auth.derived';
 import { nativeTokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { initialLoading } from '$lib/stores/loader.store';
+import { modalStore } from '$lib/stores/modal.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
+import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -46,10 +49,23 @@ export const installNavigationFixture = (): (() => void) => {
 		}
 		initialLoading.set(false);
 	};
+	const showTransaction = () => {
+		if (get(authIdentity)) {
+			modalStore.openIcTransaction({
+				id: Symbol(),
+				data: {
+					token: ICP_TOKEN,
+					transaction: { ...createCertifiedIcTransactionUiMock('100').data, status: 'executed' }
+				}
+			});
+		}
+	};
 	window.addEventListener('oisyTestNavigation', seed);
+	window.addEventListener('oisyTestTransaction', showTransaction);
 	document.documentElement.dataset.mobileNavigationFixture = 'ready';
 	return () => {
 		window.removeEventListener('oisyTestNavigation', seed);
+		window.removeEventListener('oisyTestTransaction', showTransaction);
 		delete document.documentElement.dataset.mobileNavigationFixture;
 	};
 };

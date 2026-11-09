@@ -12,6 +12,7 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
   private(set) var controller: UIViewController?
   private var backgroundSnapshot: UIImageView?
   private var dismissing = false
+  private var contentOffset: CGPoint?
 
   init(owner: TrustedWalletViewController, webView: WKWebView) {
     self.owner = owner
@@ -23,6 +24,7 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
       !owner.view.isHidden, owner.presentedViewController == nil,
       owner.hostPlugin.host?.presentedViewController == nil, let webView
     else { throw WalletHostCommandError.unavailable }
+    contentOffset = webView.scrollView.contentOffset
     identifier = id
     owner.hostPlugin.host?.updateNavigationVisibility()
     do {
@@ -36,6 +38,7 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
       snapshot.contentMode = .scaleToFill
       snapshot.isUserInteractionEnabled = true
       snapshot.accessibilityElementsHidden = true
+      snapshot.accessibilityIdentifier = "wallet.sheetBackground"
       snapshot.translatesAutoresizingMaskIntoConstraints = false
       owner.view.addSubview(snapshot)
       NSLayoutConstraint.activate([
@@ -132,7 +135,25 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
         panel.dismiss(animated: false) { continuation.resume() }
       }
     }
+    guard identifier == id, let webView else { return }
+    restoreWebView()
+    // Reparenting changes WebKit's viewport and env(safe-area-inset-*).
+    // Keep the original page image until WebKit has painted the restored layout.
+    // A one-point snapshot is a rendering fence, not another retained screenshot.
+    let configuration = WKSnapshotConfiguration()
+    configuration.rect = CGRect(x: 0, y: 0, width: 1, height: 1)
+    configuration.afterScreenUpdates = true
+    _ = try? await webView.takeSnapshot(configuration: configuration)
     if identifier == id { reset() }
+  }
+
+  private func restoreWebView() {
+    guard let owner, let webView, webView.superview !== owner.view else { return }
+    owner.moveWebView(to: owner.view)
+    owner.view.layoutIfNeeded()
+    if let contentOffset {
+      webView.scrollView.setContentOffset(contentOffset, animated: false)
+    }
   }
 
   func reset() {
@@ -141,10 +162,8 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
     dismissing = false
     let panel = controller
     controller = nil
-    if let owner {
-      owner.moveWebView(to: owner.view)
-      owner.view.layoutIfNeeded()
-    }
+    restoreWebView()
+    contentOffset = nil
     backgroundSnapshot?.removeFromSuperview()
     backgroundSnapshot = nil
     panel?.dismiss(animated: false)

@@ -26,8 +26,11 @@ const ready = () =>
 	vi.waitFor(() =>
 		expect(mocks.request).toHaveBeenCalledWith(expect.objectContaining({ phase: 'present' }))
 	);
-const released = () =>
-	vi.waitFor(() => expect(document.body.dataset.nativeSheetHost).toBeUndefined());
+const released = (count = 1) =>
+	vi.waitFor(() => {
+		expect(document.body.dataset.nativeSheetHost).toBeUndefined();
+		expect(mocks.remove).toHaveBeenCalledTimes(count);
+	});
 
 describe('shared native sheet lifecycle', () => {
 	beforeEach(() => {
@@ -120,6 +123,37 @@ describe('shared native sheet lifecycle', () => {
 		]);
 	});
 
+	it('clears sheet layout before native restores the underlying page', async () => {
+		const { node, root } = panel();
+		const action = nativeSheet(node, { enabled: true, size: 'large' });
+		await ready();
+		let finishDismiss: (() => void) | undefined;
+		const restoredWithSheetLayout = vi.fn();
+		mocks.request.mockImplementation(({ phase }) => {
+			if (phase === 'dismiss') {
+				return new Promise<void>((resolve) => {
+					finishDismiss = resolve;
+				});
+			}
+			if (phase === 'release') {
+				restoredWithSheetLayout(!!document.body.dataset.nativeSheetHost);
+			}
+			return Promise.resolve();
+		});
+		node.dispatchEvent(new Event('outrostart'));
+		action?.destroy();
+		root.remove();
+		await vi.waitFor(() => expect(finishDismiss).toBeDefined());
+
+		expect(document.body.dataset.nativeSheetHost).toBeTruthy();
+
+		finishDismiss?.();
+		await released();
+		await vi.waitFor(() => expect(mocks.remove).toHaveBeenCalledOnce());
+
+		expect(restoredWithSheetLayout).toHaveBeenCalledExactlyOnceWith(false);
+	});
+
 	it('falls back to the same web dialog if native preparation fails', async () => {
 		mocks.request.mockRejectedValueOnce(new Error('Snapshot unavailable'));
 		const { node, root } = panel();
@@ -154,6 +188,6 @@ describe('shared native sheet lifecycle', () => {
 		next.node.dispatchEvent(new Event('outrostart'));
 		actionNext?.destroy();
 		next.root.remove();
-		await released();
+		await released(2);
 	});
 });

@@ -357,7 +357,9 @@
 	}
 
 	/* Optional UIKit sheet host: the same web panel fills its native container. */
-	:global([data-native-sheet-pending]) {
+	/* Tailwind's .visible utility on Backdrop overrides inherited visibility. */
+	:global([data-native-sheet-pending]),
+	:global([data-native-sheet-pending] .backdrop) {
 		visibility: hidden !important;
 	}
 	:global(body[data-native-sheet-host] [data-native-sheet-root]) {

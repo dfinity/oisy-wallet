@@ -42,6 +42,14 @@ native sheet, Send/Swap/Contacts open full-screen, and Wallet still shows the
 expected balances. This confirms presentation acceptance, not funded transaction
 execution.
 
+A subsequent phone recording exposed a web-backdrop flash on opening transaction
+details and a safe-area jump on closing. The follow-up hides the pending backdrop,
+clears web sheet layout before release, and holds the page image until WebKit has
+painted the restored viewport and scroll position. The simulator checks the real
+shared transaction dialog, unchanged document/session, native scroll restoration
+and the existing primary flows. Physical smoothness acceptance for this follow-up
+is pending.
+
 ## Reading the inventory
 
 “Reachable” means the source exposes a mobile entry point and permits its route.

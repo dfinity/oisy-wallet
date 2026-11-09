@@ -35,7 +35,8 @@ import XCTest
     web.loadSimulatedRequest(
       URLRequest(url: url),
       responseHTML: """
-        <html><body><input id="draft" value="keep this draft"><script>
+        <html><head><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head>
+        <body style="min-height:200vh;padding-top:env(safe-area-inset-top)"><input id="draft" value="keep this draft"><script>
         window.documentNonce = crypto.randomUUID(); window.dismissedSheet = '';
         window.__oisyHost.addListener('dismissSheet', event => window.dismissedSheet = event.id);
         window.__oisyHost.request('ready', {version:2});
@@ -85,6 +86,10 @@ import XCTest
       account.dismiss(animated: false) { continuation.resume() }
     }
     XCTAssertNil(wallet.nativeSheet?.identifier)
+    web.scrollView.setContentOffset(CGPoint(x: 0, y: 160), animated: false)
+    let originalOffset = web.scrollView.contentOffset
+    let originalPadding =
+      try await web.evaluateJavaScript("getComputedStyle(document.body).paddingTop") as? String
     try await command("prepare")
     try await command("present")
     let coordinator = try XCTUnwrap(wallet.nativeSheet)
@@ -120,6 +125,12 @@ import XCTest
     let restoredNonce = try await web.evaluateJavaScript("window.documentNonce") as? String
     XCTAssertEqual(restoredNonce, nonce)
     XCTAssertEqual(store.signOutCalls, 0)
+    XCTAssertEqual(web.scrollView.contentOffset.y, originalOffset.y, accuracy: 1)
+    let restoredPadding =
+      try await web.evaluateJavaScript("getComputedStyle(document.body).paddingTop") as? String
+    XCTAssertEqual(restoredPadding, originalPadding)
+    XCTAssertFalse(
+      wallet.view.subviews.contains { $0.accessibilityIdentifier == "wallet.sheetBackground" })
 
     // Process loss during an open sheet restores native recovery, not a stale snapshot.
     let secondID = UUID()

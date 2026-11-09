@@ -174,10 +174,16 @@ Accessory `Modal` dialogs (`mobilePresentation="sheet"`) and dismissible
 the existing origin, main-frame, document and session boundary. No URLs, HTML,
 JavaScript, credentials or form values are passed in this command.
 
-Preparation captures the underlying screen while the web panel is hidden. That
-image stays in memory behind the native sheet. The same WebView then fills the
+Preparation captures the underlying screen while the web panel and its backdrop
+are explicitly hidden. Hiding only the parent is insufficient: the Backdrop uses
+a visibility utility that overrides inheritance. The captured image stays in
+memory behind the native sheet. The same WebView then fills the
 sheet, including its existing overlay focus trap. Closing freezes the departing
-panel before its web outro removes it; release restores the WebView to Wallet.
+panel before its web outro removes it. Before release, web removes the sheet layout
+attributes. Native restores the WebView and its original scroll offset under the
+page image, then waits for a WebKit snapshot with `afterScreenUpdates` before
+removing that cover. This lets safe-area CSS and viewport changes paint without
+flashing Activity at a temporary offset. Moving to the existing parent is a no-op.
 Native navigation stays blocked until release. Preparation and presentation reject
 a hidden Wallet or a native flow already presented by the shell, so a delayed web
 dialog cannot appear over Explore or Account. Document replacement, process

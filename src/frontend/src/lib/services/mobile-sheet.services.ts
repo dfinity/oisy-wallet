@@ -118,11 +118,13 @@ const releaseIfEmpty = (group: SheetGroup) => {
 	}
 	dismissIfLeaving(group);
 	group.work = group.work.then(async () => {
-		await request({ group, phase: 'release' }).catch(() => undefined);
-		await group.listener?.remove().catch(() => undefined);
+		// UIKit still covers the page. Restore web layout before the host reveals it.
 		if (document.body.dataset.nativeSheetHost === group.id) {
 			delete document.body.dataset.nativeSheetHost;
 		}
+		await tick();
+		await request({ group, phase: 'release' }).catch(() => undefined);
+		await group.listener?.remove().catch(() => undefined);
 		if (current === group) {
 			current = undefined;
 		}
