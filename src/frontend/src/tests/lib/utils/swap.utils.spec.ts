@@ -1021,6 +1021,46 @@ describe('swap utils', () => {
 				swapDetails: quoteWithDecimals
 			});
 		});
+
+		it('should keep amounts above Number.MAX_SAFE_INTEGER exact', () => {
+			const quoteWithLargeAmounts = {
+				...mockNearIntentsQuoteResponse,
+				quote: {
+					...mockNearIntentsQuoteResponse.quote,
+					amountOut: '900000000000000099',
+					minAmountOut: '891000000000000099'
+				}
+			};
+
+			const result = mapNearIntentsQuoteResult(quoteWithLargeAmounts);
+
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: 900000000000000099n,
+				receiveOutMinimum: 891000000000000099n,
+				swapDetails: quoteWithLargeAmounts
+			});
+		});
+
+		it('should floor decimal amounts above Number.MAX_SAFE_INTEGER exactly', () => {
+			const quoteWithLargeDecimals = {
+				...mockNearIntentsQuoteResponse,
+				quote: {
+					...mockNearIntentsQuoteResponse.quote,
+					amountOut: '900000000000000099.7',
+					minAmountOut: '891000000000000099.9'
+				}
+			};
+
+			const result = mapNearIntentsQuoteResult(quoteWithLargeDecimals);
+
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: 900000000000000099n,
+				receiveOutMinimum: 891000000000000099n,
+				swapDetails: quoteWithLargeDecimals
+			});
+		});
 	});
 
 	describe('resolveNearIntentsBlockchain', () => {

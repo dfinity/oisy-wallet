@@ -288,11 +288,20 @@ export const mapVeloraMarketSwapResult = (swap: OptimalRate): SwapMappedResult =
 	type: VeloraSwapTypes.MARKET
 });
 
+// 1Click states amounts in base units as decimal strings. Read through `Number`, anything above
+// `Number.MAX_SAFE_INTEGER` (about 0.009 of an 18-decimal token) would round, so the whole part is
+// taken from the string itself; only a form that is not plain digits goes through `Number`.
+const nearIntentsAmountToBigInt = (amount: string): bigint => {
+	const whole = /^(\d+)(?:\.\d*)?$/.exec(amount)?.[1];
+
+	return nonNullish(whole) ? BigInt(whole) : BigInt(Math.floor(Number(amount)));
+};
+
 export const mapNearIntentsQuoteResult = (quote: NearIntentsQuoteResponse): SwapMappedResult => ({
 	provider: SwapProvider.NEAR_INTENTS,
-	receiveAmount: BigInt(Math.floor(Number(quote.quote.amountOut))),
+	receiveAmount: nearIntentsAmountToBigInt(quote.quote.amountOut),
 	receiveOutMinimum: nonNullish(quote.quote.minAmountOut)
-		? BigInt(Math.floor(Number(quote.quote.minAmountOut)))
+		? nearIntentsAmountToBigInt(quote.quote.minAmountOut)
 		: undefined,
 	swapDetails: quote
 });
