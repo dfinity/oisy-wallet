@@ -2,6 +2,15 @@
 
 use std::{collections::BTreeMap, sync::OnceLock};
 
+use bitcoin::{
+    absolute::LockTime,
+    consensus, ecdsa,
+    hashes::Hash,
+    secp256k1::{Message, Secp256k1, SecretKey},
+    sighash::{EcdsaSighashType, SighashCache},
+    transaction::Version,
+    Amount, CompressedPublicKey, ScriptBuf, Sequence, Transaction, TxIn, TxOut, Witness,
+};
 use canbench_rs::{bench, bench_fn, bench_scope, BenchResult};
 use candid::{Nat, Principal};
 use ic_cdk_bitcoin_canister::{OutPoint, Txid, Utxo};
@@ -32,7 +41,7 @@ use shared::{
 use crate::{
     active_user_transactions::model as active_user_transactions_model,
     api::admin::http_request,
-    bitcoin::pending_tx_model::BtcUserPendingTransactionsModel,
+    bitcoin::{pending_tx_model::BtcUserPendingTransactionsModel, tx_validator},
     personal_notes::service as personal_notes_service,
     state::{mutate_state, read_config, read_state, State},
     tips::{
@@ -599,7 +608,13 @@ fn bench_btc_add_pending_transaction_with_count(existing_count: u8) -> BenchResu
     bench_fn(|| {
         mutate_state(|state| {
             with_btc_pending_model(state, |model| {
-                model.prune_pending_transactions(principal, &current_utxos, now_ns);
+                model.prune_pending_transactions(
+                    principal,
+                    &address,
+                    &current_utxos,
+                    now_ns,
+                    now_ns,
+                );
 
                 assert!(
                     !model.has_intersecting_pending_utxos(principal, &new_utxos),
@@ -657,7 +672,7 @@ fn bench_btc_get_pending_transactions_with_count(count: u8) -> BenchResult {
     bench_fn(|| {
         let stored = mutate_state(|state| {
             with_btc_pending_model(state, |model| {
-                model.prune_pending_transactions(principal, &utxos, now_ns);
+                model.prune_pending_transactions(principal, &address, &utxos, now_ns, now_ns);
                 model.get_pending_transactions(&principal, &address)
             })
         });
@@ -682,6 +697,86 @@ fn bench_btc_get_pending_transactions_5() -> BenchResult {
 #[bench(raw)]
 fn bench_btc_get_pending_transactions_200() -> BenchResult {
     bench_btc_get_pending_transactions_with_count(200)
+}
+
+/// A transaction in CFS's layout spending `input_count` of one key's P2WPKH UTXOs to one output,
+/// with that key and the UTXOs. Signing happens here, outside the measured closure.
+fn signed_btc_transaction(input_count: u8) -> (Vec<u8>, CompressedPublicKey, Vec<Utxo>) {
+    let secp = Secp256k1::signing_only();
+    let secret_key = SecretKey::from_slice(&[0x11; 32]).expect("valid secret key");
+    let public_key = CompressedPublicKey(secret_key.public_key(&secp));
+    let script_pubkey = ScriptBuf::new_p2wpkh(&public_key.wpubkey_hash());
+
+    let utxos: Vec<Utxo> = (0..input_count).map(|i| make_utxo(i, 0, 10_000)).collect();
+    let mut tx = Transaction {
+        version: Version::TWO,
+        lock_time: LockTime::ZERO,
+        input: utxos
+            .iter()
+            .map(|utxo| TxIn {
+                previous_output: bitcoin::OutPoint {
+                    txid: bitcoin::Txid::from_byte_array(utxo.outpoint.txid.into()),
+                    vout: utxo.outpoint.vout,
+                },
+                script_sig: ScriptBuf::new(),
+                sequence: Sequence::MAX,
+                witness: Witness::new(),
+            })
+            .collect(),
+        output: vec![TxOut {
+            value: Amount::from_sat(u64::from(input_count) * 9_000),
+            script_pubkey: script_pubkey.clone(),
+        }],
+    };
+
+    let unsigned = tx.clone();
+    let mut sighash_cache = SighashCache::new(&unsigned);
+    for (index, utxo) in utxos.iter().enumerate() {
+        let sighash = sighash_cache
+            .p2wpkh_signature_hash(
+                index,
+                &script_pubkey,
+                Amount::from_sat(utxo.value),
+                EcdsaSighashType::All,
+            )
+            .expect("valid input index");
+        let signature = ecdsa::Signature {
+            signature: secp.sign_ecdsa(&Message::from(sighash), &secret_key),
+            sighash_type: EcdsaSighashType::All,
+        };
+        tx.input[index].witness = Witness::p2wpkh(&signature, &public_key.0);
+    }
+
+    (consensus::serialize(&tx), public_key, utxos)
+}
+
+/// The validation `btc_broadcast_transaction` runs before it pays for a broadcast. The `verify`
+/// scope grows with the inputs: one BIP143 sighash and one signature verification each.
+fn bench_btc_validate_signed_transaction_with_inputs(input_count: u8) -> BenchResult {
+    let (bytes, public_key, utxos) = signed_btc_transaction(input_count);
+
+    bench_fn(|| {
+        let tx = {
+            let _scope = bench_scope("decode");
+            tx_validator::decode_transaction(&bytes).expect("valid transaction")
+        };
+        {
+            let _scope = bench_scope("policy");
+            tx_validator::check_transaction_policy(&tx).expect("standard transaction");
+        }
+        let _scope = bench_scope("verify");
+        tx_validator::verify_transaction_spend(&tx, &public_key, &utxos).expect("valid spend");
+    })
+}
+
+#[bench(raw)]
+fn bench_btc_validate_signed_transaction_1_input() -> BenchResult {
+    bench_btc_validate_signed_transaction_with_inputs(1)
+}
+
+#[bench(raw)]
+fn bench_btc_validate_signed_transaction_100_inputs() -> BenchResult {
+    bench_btc_validate_signed_transaction_with_inputs(100)
 }
 
 // ---------------------------------------------------------------------------

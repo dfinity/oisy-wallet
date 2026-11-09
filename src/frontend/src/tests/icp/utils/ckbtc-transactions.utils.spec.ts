@@ -2,7 +2,8 @@ import {
 	BTC_MAINNET_EXPLORER_URL,
 	BTC_TESTNET_EXPLORER_URL,
 	CKBTC_EXPLORER_URL,
-	CKBTC_TESTNET_EXPLORER_URL
+	CKBTC_TESTNET_EXPLORER_URL,
+	ICP_EXPLORER_URL
 } from '$env/explorers.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -45,7 +46,10 @@ describe('ckbtc-transactions.utils', () => {
 			});
 
 			expect(result.id).toBe('100');
-			expect(result.txExplorerUrl).toContain(CKBTC_EXPLORER_URL);
+			expect(result.txExplorerUrl).toBe(
+				`${ICP_EXPLORER_URL}/tokens/${IC_CKBTC_LEDGER_CANISTER_ID}/tx/100`
+			);
+			expect(result.toExplorerUrl).toContain(CKBTC_EXPLORER_URL);
 		});
 
 		it('should use testnet ckBTC explorer URL for testnet env', () => {
@@ -56,21 +60,28 @@ describe('ckbtc-transactions.utils', () => {
 				env: 'testnet'
 			});
 
-			expect(result.txExplorerUrl).toContain(CKBTC_TESTNET_EXPLORER_URL);
+			expect(result.txExplorerUrl).toBe(
+				`${ICP_EXPLORER_URL}/tokens/${IC_CKBTC_LEDGER_CANISTER_ID}/tx/100`
+			);
+			expect(result.toExplorerUrl).toContain(CKBTC_TESTNET_EXPLORER_URL);
 		});
 
-		it('should not include ckBTC explorer URLs for unknown ledger', () => {
+		it('should link the block of any other ckBTC ledger without account links', () => {
 			const result = mapCkBTCTransaction({
 				transaction: baseMockTransaction,
 				identity: undefined,
-				ledgerCanisterId: 'unknown-canister-id',
+				ledgerCanisterId: 'mc6ru-gyaaa-aaaar-qaaaq-cai',
 				env: 'mainnet'
 			});
 
-			expect(result.txExplorerUrl).toBeUndefined();
+			expect(result.txExplorerUrl).toBe(
+				`${ICP_EXPLORER_URL}/tokens/mc6ru-gyaaa-aaaar-qaaaq-cai/tx/100`
+			);
+			expect(result.fromExplorerUrl).toBeUndefined();
+			expect(result.toExplorerUrl).toBeUndefined();
 		});
 
-		it('should not include ckBTC explorer URLs when env is undefined', () => {
+		it('should link the block without account links when env is undefined', () => {
 			const result = mapCkBTCTransaction({
 				transaction: baseMockTransaction,
 				identity: undefined,
@@ -78,7 +89,28 @@ describe('ckbtc-transactions.utils', () => {
 				env: undefined
 			});
 
-			expect(result.txExplorerUrl).toBeUndefined();
+			expect(result.txExplorerUrl).toBe(
+				`${ICP_EXPLORER_URL}/tokens/${IC_CKBTC_LEDGER_CANISTER_ID}/tx/100`
+			);
+			expect(result.fromExplorerUrl).toBeUndefined();
+			expect(result.toExplorerUrl).toBeUndefined();
+		});
+
+		it('should link the block index for the receive half of a transfer to self', () => {
+			const result = mapCkBTCTransaction({
+				transaction: {
+					...baseMockTransaction,
+					transaction: { ...baseMockTransaction.transaction, transferToSelf: 'receive' }
+				},
+				identity: undefined,
+				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+				env: 'mainnet'
+			});
+
+			expect(result.id).toBe('100-self');
+			expect(result.txExplorerUrl).toBe(
+				`${ICP_EXPLORER_URL}/tokens/${IC_CKBTC_LEDGER_CANISTER_ID}/tx/100`
+			);
 		});
 
 		describe('mint transactions', () => {

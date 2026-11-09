@@ -1,5 +1,6 @@
 import { BASE_EXPLORER_URL, BASE_SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumNetwork } from '$eth/types/network';
+import baseMainnetIconColored from '$evm/base/assets/base.svg';
 import baseMainnetIcon from '$lib/assets/networks/base-mainnet.svg';
 import baseSepoliaIcon from '$lib/assets/networks/base-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
@@ -22,6 +23,8 @@ export const BASE_NETWORK: EthereumNetwork = {
 	name: 'Base',
 	chainId: 8453n,
 	icon: baseMainnetIcon,
+	// Base's native token is ETH, so its coloured mark is the Base symbol itself in Base Blue.
+	iconColored: baseMainnetIconColored,
 	explorerUrl: BASE_EXPLORER_URL,
 	supportsNft: true,
 	providers: {

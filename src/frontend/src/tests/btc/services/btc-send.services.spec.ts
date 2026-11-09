@@ -243,9 +243,13 @@ describe('btc-send.services', () => {
 			utxos: [validUtxo]
 		};
 
+		// A P2WPKH recipient: its output is the 31 vB `validUtxosFee` is priced for.
+		const p2wpkhDestination = 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq';
+
 		const defaultValidateParams = {
 			utxosFee: validUtxosFee,
 			source: 'bc1qt0nkp96r7p95xfacyp98pww2eu64yzuf78l4a2wy0sttt83hux4q6u2nl7',
+			destination: p2wpkhDestination,
 			amount: 0.0001,
 			network: 'mainnet' as const,
 			identity: mockIdentity
@@ -450,6 +454,56 @@ describe('btc-send.services', () => {
 						BtcSendValidationError.InvalidFeeCalculation
 					);
 				}
+			});
+		});
+
+		describe('recipient', () => {
+			const p2trDestination = 'bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0';
+
+			// Above the 10% tolerance for a P2WPKH recipient (564 sats, so at most 620) but within it
+			// for a P2TR one (1 input + 43 + 31 = 153 vB at 4 sat/vB = 612 sats, so at most 673).
+			const feePricedForALargerOutput = { ...validUtxosFee, feeSatoshis: 650n };
+
+			it.each([
+				// The P2WPKH recipient above on testnet: the same witness program, which its output
+				// script alone would pay on mainnet.
+				'tb1qar0srrr7xfkvy5l643lydnw9re59gtzzy00gkn',
+				'not-an-address'
+			])(
+				'should refuse the recipient %s before anything else is checked or loaded',
+				async (destination) => {
+					await expect(
+						validateBtcSend({ ...defaultValidateParams, destination })
+					).rejects.toMatchObject({ type: BtcSendValidationError.InvalidDestination });
+
+					expect(
+						btcPendingSentTransactionsServices.loadBtcPendingSentTransactions
+					).not.toHaveBeenCalled();
+				}
+			);
+
+			it('should check the fee against the recipient output, sized from its script', async () => {
+				await expect(
+					validateBtcSend({
+						...defaultValidateParams,
+						destination: p2trDestination,
+						utxosFee: feePricedForALargerOutput
+					})
+				).resolves.not.toThrow();
+
+				await expect(
+					validateBtcSend({ ...defaultValidateParams, utxosFee: feePricedForALargerOutput })
+				).rejects.toMatchObject({ type: BtcSendValidationError.InvalidFeeCalculation });
+			});
+
+			it('should check the fee against the largest output when the recipient is not known', async () => {
+				await expect(
+					validateBtcSend({
+						...defaultValidateParams,
+						destination: undefined,
+						utxosFee: feePricedForALargerOutput
+					})
+				).resolves.not.toThrow();
 			});
 		});
 

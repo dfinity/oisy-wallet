@@ -1,3 +1,7 @@
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { alchemyProviders } from '$eth/providers/alchemy.providers';
+import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import type { EthAddress } from '$eth/types/address';
 import * as liquidiumApi from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
@@ -10,17 +14,25 @@ import {
 	computeLiquidiumRepayPreview,
 	executeLiquidiumRepay,
 	getLiquidiumMaxRepayAmount,
+	holdLiquidiumRepayUntilMined,
 	liquidiumDebtInterestUsd,
 	liquidiumPendingCoversDebt,
-	liquidiumRepayCapError
+	liquidiumRepayCapError,
+	liquidiumRepaySpendable
 } from '$lib/services/liquidium-repay.services';
 import * as liquidiumServices from '$lib/services/liquidium.services';
+import { balancesStore } from '$lib/stores/balances.store';
+import { liquidiumUnminedRepaysStore } from '$lib/stores/liquidium-unmined-repays.store';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
+import type { Token, TokenId } from '$lib/types/token';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { SupplyFlow, SupplyTarget } from '@liquidium/client';
+import { get } from 'svelte/store';
 
+vi.mock('$eth/providers/alchemy.providers', () => ({ alchemyProviders: vi.fn() }));
+vi.mock('$eth/services/eth-balance.services', () => ({ reloadEthereumBalance: vi.fn() }));
 vi.mock('$lib/api/liquidium.api', () => ({ liquidiumClient: vi.fn() }));
 vi.mock('$lib/services/liquidium.services', () => ({ getOrCreateLiquidiumProfile: vi.fn() }));
 vi.mock('$lib/services/active-user-transactions.services', () => ({
@@ -162,22 +174,20 @@ describe('liquidium-repay.services', () => {
 
 	describe('getLiquidiumMaxRepayAmount', () => {
 		const getProfileId = vi.fn();
-		const getPosition = vi.fn();
 		const getMaxRepayAmount = vi.fn();
 
 		beforeEach(() => {
 			vi.clearAllMocks();
 			vi.mocked(liquidiumApi.liquidiumClient).mockReturnValue({
 				accounts: { getProfileId },
-				positions: { getPosition, getMaxRepayAmount }
+				positions: { getMaxRepayAmount }
 			} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
-			// What the SDK quotes for the position below: (borrowed + debtInterest) × 1.001.
-			getMaxRepayAmount.mockResolvedValue({ amount: 100_600_500n, decimals: 8n });
 		});
 
-		it('returns the debt plus a 0.1% buffer, without adding the interest it already includes', async () => {
+		it("returns the SDK's buffered full-debt amount", async () => {
 			getProfileId.mockResolvedValue(profileId);
-			getPosition.mockResolvedValue({ borrowed: 100_000_000n, debtInterest: 500_000n });
+			// The SDK quotes `borrowed × 1.001`; `borrowed` already includes the accrued interest.
+			getMaxRepayAmount.mockResolvedValue({ amount: 100_100_000n, decimals: 8n });
 
 			const amount = await getLiquidiumMaxRepayAmount({
 				identity: mockIdentity,
@@ -186,30 +196,12 @@ describe('liquidium-repay.services', () => {
 			});
 
 			expect(amount).toBe(100_100_000n);
-			expect(getPosition).toHaveBeenCalledExactlyOnceWith(profileId, poolId);
 			expect(getMaxRepayAmount).toHaveBeenCalledExactlyOnceWith(profileId, poolId);
 		});
 
-		it('is capped by the SDK max repay when it quotes less', async () => {
+		it('returns zero when the SDK reports no debt', async () => {
 			getProfileId.mockResolvedValue(profileId);
-			getPosition.mockResolvedValue({ borrowed: 100_000_000n, debtInterest: 500_000n });
-			getMaxRepayAmount.mockResolvedValue({ amount: 100_050_000n, decimals: 8n });
-
-			await expect(
-				getLiquidiumMaxRepayAmount({ identity: mockIdentity, ethAddress, poolId })
-			).resolves.toBe(100_050_000n);
-		});
-
-		it('returns zero without a position or debt', async () => {
-			getProfileId.mockResolvedValue(profileId);
-
-			getPosition.mockResolvedValueOnce(null);
-
-			await expect(
-				getLiquidiumMaxRepayAmount({ identity: mockIdentity, ethAddress, poolId })
-			).resolves.toBe(ZERO);
-
-			getPosition.mockResolvedValueOnce({ borrowed: ZERO, debtInterest: 500_000n });
+			getMaxRepayAmount.mockResolvedValue({ amount: ZERO, decimals: 8n });
 
 			await expect(
 				getLiquidiumMaxRepayAmount({ identity: mockIdentity, ethAddress, poolId })
@@ -231,7 +223,6 @@ describe('liquidium-repay.services', () => {
 			await expect(
 				getLiquidiumMaxRepayAmount({ identity: mockIdentity, ethAddress, poolId })
 			).resolves.toBeNull();
-			expect(getPosition).not.toHaveBeenCalled();
 			expect(getMaxRepayAmount).not.toHaveBeenCalled();
 		});
 	});
@@ -598,6 +589,438 @@ describe('liquidium-repay.services', () => {
 			const [[arg]] = createActiveUserTransaction.mock.calls;
 
 			expect(arg).not.toHaveProperty('progressStep');
+		});
+	});
+
+	describe('liquidiumRepaySpendable', () => {
+		const held = ({ amount, tokenId = USDC_TOKEN.id }: { amount: bigint; tokenId?: TokenId }) => ({
+			[`0x${amount.toString(16).padStart(64, '0')}`]: [{ tokenId, amount }]
+		});
+
+		// 23.757982 USDC with a 16.40 repay still unmined in it, and a 1.40 provider fee.
+		it('takes a held transfer out of the balance and the reserved fees out of the Max', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 23_757_982n,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: held({ amount: 16_400_000n }),
+					reserved: 1_400_000n
+				})
+			).toEqual({ spendable: 7_357_982n, maxSpendable: 5_957_982n });
+		});
+
+		it('adds up every held transfer of the token', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 100n,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: { ...held({ amount: 10n }), ...held({ amount: 20n }) },
+					reserved: 5n
+				})
+			).toEqual({ spendable: 70n, maxSpendable: 65n });
+		});
+
+		it('adds up the value and the gas a native repay holds of the token', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 100n,
+					tokenId: ETHEREUM_TOKEN.id,
+					unminedRepays: {
+						[`0x${'ab'.repeat(32)}`]: [
+							{ tokenId: ETHEREUM_TOKEN.id, amount: 10n },
+							{ tokenId: ETHEREUM_TOKEN.id, amount: 3n }
+						]
+					},
+					reserved: 5n
+				})
+			).toEqual({ spendable: 87n, maxSpendable: 82n });
+		});
+
+		it('takes only the gas a token repay holds of the native token', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 100n,
+					tokenId: ETHEREUM_TOKEN.id,
+					unminedRepays: {
+						[`0x${'ab'.repeat(32)}`]: [
+							{ tokenId: USDC_TOKEN.id, amount: 10n },
+							{ tokenId: ETHEREUM_TOKEN.id, amount: 3n }
+						]
+					}
+				})
+			).toEqual({ spendable: 97n });
+		});
+
+		it('ignores the transfers held for another token', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 100n,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: held({ amount: 10n, tokenId: ETHEREUM_TOKEN.id }),
+					reserved: 5n
+				})
+			).toEqual({ spendable: 100n });
+		});
+
+		it('leaves the balance and the Max to the form with nothing held', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 100n,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: {},
+					reserved: 5n
+				})
+			).toEqual({ spendable: 100n });
+		});
+
+		it('floors at zero when the held transfers exceed the balance', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 10n,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: held({ amount: 20n }),
+					reserved: 5n
+				})
+			).toEqual({ spendable: ZERO, maxSpendable: ZERO });
+		});
+
+		it('floors the Max at zero when the fees use up what is left', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 30n,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: held({ amount: 20n }),
+					reserved: 15n
+				})
+			).toEqual({ spendable: 10n, maxSpendable: ZERO });
+		});
+
+		it('has no Max until the fees are known', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 30n,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: held({ amount: 20n })
+				})
+			).toEqual({ spendable: 10n });
+		});
+
+		it.each([null, undefined])('passes a %s balance through', (balance) => {
+			expect(
+				liquidiumRepaySpendable({
+					balance,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: held({ amount: 20n }),
+					reserved: 5n
+				})
+			).toEqual({ spendable: balance });
+		});
+	});
+
+	describe('holdLiquidiumRepayUntilMined', () => {
+		const hash = `0x${'ab'.repeat(32)}`;
+		const amount = 23_757_982n;
+		const gasFee = 120_000_000_000_000n;
+
+		const params = {
+			hash,
+			token: USDC_TOKEN,
+			amount,
+			feeToken: ETHEREUM_TOKEN,
+			gasFee,
+			unmined: undefined
+		};
+
+		const holds = [
+			{ tokenId: USDC_TOKEN.id, amount },
+			{ tokenId: ETHEREUM_TOKEN.id, amount: gasFee }
+		];
+
+		const wait = vi.fn();
+
+		// What the reload stores lands in `balancesStore` later, as `batchSet` does on the next frame.
+		const storeBalance = ({ token: { id }, data = ZERO }: { token: Token; data?: bigint }) =>
+			balancesStore.set({ id, data: { data, certified: false } });
+
+		const macrotask = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+		beforeEach(() => {
+			liquidiumUnminedRepaysStore.reset();
+			balancesStore.reinitialize();
+
+			wait.mockReset();
+			vi.mocked(alchemyProviders, { partial: true }).mockReset().mockReturnValue({ wait });
+			vi.mocked(reloadEthereumBalance)
+				.mockReset()
+				.mockImplementation((reloadToken) => {
+					storeBalance({ token: reloadToken });
+
+					return Promise.resolve({ success: true });
+				});
+		});
+
+		it('holds the amount and the gas back as soon as it is called', () => {
+			wait.mockReturnValue(new Promise(() => {}));
+
+			holdLiquidiumRepayUntilMined(params);
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+		});
+
+		it('holds the amount and the gas of a native repay against the native token', () => {
+			wait.mockReturnValue(new Promise(() => {}));
+
+			holdLiquidiumRepayUntilMined({ ...params, token: ETHEREUM_TOKEN });
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({
+				[hash]: [
+					{ tokenId: ETHEREUM_TOKEN.id, amount },
+					{ tokenId: ETHEREUM_TOKEN.id, amount: gasFee }
+				]
+			});
+		});
+
+		it('waits on the token network for the transfer', async () => {
+			wait.mockResolvedValue('success');
+
+			await holdLiquidiumRepayUntilMined(params);
+
+			expect(alchemyProviders).toHaveBeenCalledWith(USDC_TOKEN.network.id);
+			expect(wait).toHaveBeenCalledWith(hash);
+		});
+
+		it('keeps both held until both balances have reloaded after the transfer is mined', async () => {
+			wait.mockResolvedValue('success');
+
+			const heldDuringReload: unknown[] = [];
+
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
+				heldDuringReload.push(get(liquidiumUnminedRepaysStore)[hash]);
+
+				storeBalance({ token: reloadToken });
+
+				return Promise.resolve({ success: true });
+			});
+
+			await holdLiquidiumRepayUntilMined(params);
+
+			expect(reloadEthereumBalance).toHaveBeenCalledTimes(2);
+			expect(reloadEthereumBalance).toHaveBeenCalledWith(USDC_TOKEN);
+			expect(reloadEthereumBalance).toHaveBeenCalledWith(ETHEREUM_TOKEN);
+			expect(heldDuringReload).toEqual([holds, holds]);
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('keeps both held until the reloaded balances are in the store', async () => {
+			wait.mockResolvedValue('success');
+			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: true });
+
+			const held = holdLiquidiumRepayUntilMined(params);
+
+			await vi.waitFor(() => expect(reloadEthereumBalance).toHaveBeenCalledTimes(2));
+			await macrotask();
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+
+			storeBalance({ token: USDC_TOKEN });
+			await macrotask();
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+
+			storeBalance({ token: ETHEREUM_TOKEN });
+			await held;
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('keeps both held while the reloaded balances are still the ones before the transfer', async () => {
+			storeBalance({ token: USDC_TOKEN, data: 100n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+
+			wait.mockResolvedValue('success');
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
+				storeBalance({ token: reloadToken, data: reloadToken.id === USDC_TOKEN.id ? 100n : 10n });
+
+				return Promise.resolve({ success: true });
+			});
+
+			const held = holdLiquidiumRepayUntilMined({ ...params, unmined: get(balancesStore) });
+
+			await vi.waitFor(() => expect(reloadEthereumBalance).toHaveBeenCalledTimes(2));
+			await macrotask();
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+
+			storeBalance({ token: USDC_TOKEN, data: 50n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 9n });
+			await held;
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('keeps both held when a poll commits the balances from before the transfer after the receipt', async () => {
+			storeBalance({ token: USDC_TOKEN, data: 100n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+
+			wait.mockImplementation(() => {
+				storeBalance({ token: USDC_TOKEN, data: 100n });
+				storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+
+				return Promise.resolve('success');
+			});
+			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: true });
+
+			const held = holdLiquidiumRepayUntilMined({ ...params, unmined: get(balancesStore) });
+
+			await vi.waitFor(() => expect(reloadEthereumBalance).toHaveBeenCalledTimes(2));
+			await macrotask();
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+
+			storeBalance({ token: USDC_TOKEN, data: 50n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 9n });
+			await held;
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('compares with the balances from before the send when the store already has the mined ones', async () => {
+			storeBalance({ token: USDC_TOKEN, data: 100n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+
+			const unmined = get(balancesStore);
+
+			// A poll committed the mined balances before the send returned.
+			storeBalance({ token: USDC_TOKEN, data: 50n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 9n });
+
+			wait.mockResolvedValue('success');
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
+				storeBalance({ token: reloadToken, data: reloadToken.id === USDC_TOKEN.id ? 50n : 9n });
+
+				return Promise.resolve({ success: true });
+			});
+
+			holdLiquidiumRepayUntilMined({ ...params, unmined });
+
+			await vi.waitFor(() => expect(get(liquidiumUnminedRepaysStore)).toEqual({}));
+		});
+
+		it('does not wait on the store for a reload that reports no success', async () => {
+			wait.mockResolvedValue('success');
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) =>
+				Promise.resolve({ success: reloadToken.id !== ETHEREUM_TOKEN.id })
+			);
+
+			const held = holdLiquidiumRepayUntilMined(params);
+
+			await vi.waitFor(() => expect(reloadEthereumBalance).toHaveBeenCalledTimes(2));
+			await macrotask();
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+
+			storeBalance({ token: USDC_TOKEN });
+			await held;
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('releases both right away when no reload reports success', async () => {
+			wait.mockResolvedValue('success');
+			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: false });
+
+			await holdLiquidiumRepayUntilMined(params);
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it.each(['reverted', 'replaced'])(
+			'holds only the gas of a %s token repay until the native balance has changed',
+			async (status) => {
+				storeBalance({ token: USDC_TOKEN, data: 100n });
+				storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+
+				wait.mockResolvedValue(status);
+
+				const heldDuringReload: unknown[] = [];
+
+				vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
+					heldDuringReload.push(get(liquidiumUnminedRepaysStore)[hash]);
+
+					storeBalance({ token: reloadToken, data: 9n });
+
+					return Promise.resolve({ success: true });
+				});
+
+				await holdLiquidiumRepayUntilMined({ ...params, unmined: get(balancesStore) });
+
+				expect(reloadEthereumBalance).toHaveBeenCalledExactlyOnceWith(ETHEREUM_TOKEN);
+				expect(heldDuringReload).toEqual([[{ tokenId: ETHEREUM_TOKEN.id, amount: gasFee }]]);
+				expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+			}
+		);
+
+		it.each(['reverted', 'replaced'])('holds only the gas of a %s native repay', async (status) => {
+			wait.mockResolvedValue(status);
+
+			let heldDuringReload: unknown;
+
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
+				heldDuringReload = get(liquidiumUnminedRepaysStore)[hash];
+
+				storeBalance({ token: reloadToken });
+
+				return Promise.resolve({ success: true });
+			});
+
+			await holdLiquidiumRepayUntilMined({ ...params, token: ETHEREUM_TOKEN });
+
+			expect(reloadEthereumBalance).toHaveBeenCalledExactlyOnceWith(ETHEREUM_TOKEN);
+			expect(heldDuringReload).toEqual([{ tokenId: ETHEREUM_TOKEN.id, amount: gasFee }]);
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('reloads the native balance once for a native repay', async () => {
+			wait.mockResolvedValue('success');
+
+			await holdLiquidiumRepayUntilMined({ ...params, token: ETHEREUM_TOKEN });
+
+			expect(reloadEthereumBalance).toHaveBeenCalledExactlyOnceWith(ETHEREUM_TOKEN);
+		});
+
+		it('releases both and rejects when the wait fails', async () => {
+			wait.mockRejectedValue(new Error('timed out'));
+
+			await expect(holdLiquidiumRepayUntilMined(params)).rejects.toThrow('timed out');
+
+			expect(reloadEthereumBalance).not.toHaveBeenCalled();
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('releases both when a balance reload fails', async () => {
+			wait.mockResolvedValue('success');
+			vi.mocked(reloadEthereumBalance).mockRejectedValue(new Error('rpc down'));
+
+			await expect(holdLiquidiumRepayUntilMined(params)).rejects.toThrow('rpc down');
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('leaves the other held transfers in place', async () => {
+			const other = `0x${'cd'.repeat(32)}`;
+
+			liquidiumUnminedRepaysStore.add({
+				hash: other,
+				holds: [{ tokenId: USDC_TOKEN.id, amount: 1n }]
+			});
+
+			wait.mockResolvedValue('success');
+
+			await holdLiquidiumRepayUntilMined(params);
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({
+				[other]: [{ tokenId: USDC_TOKEN.id, amount: 1n }]
+			});
 		});
 	});
 });

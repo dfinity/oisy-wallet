@@ -11,6 +11,7 @@ import {
 	type ModalNetworksListContext
 } from '$lib/stores/modal-networks-list.store';
 import { MODAL_TOKENS_LIST_CONTEXT_KEY } from '$lib/stores/modal-tokens-list.store';
+import * as swapAmountsStoreModule from '$lib/stores/swap-amounts.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
 import * as swapStoreModule from '$lib/stores/swap.store';
@@ -62,6 +63,16 @@ describe('SwapContexts', () => {
 					})
 				})
 			);
+		});
+
+		it('should give the swap amounts store the Max state of the swap context', () => {
+			const initSwapAmountsStore = vi.spyOn(swapAmountsStoreModule, 'initSwapAmountsStore');
+
+			render(SwapContexts, { children: mockSnippet });
+
+			expect(initSwapAmountsStore).toHaveBeenCalledExactlyOnceWith({
+				amountSetToMax: swapContext.amountSetToMax
+			});
 		});
 
 		it('should initialize swap context', () => {

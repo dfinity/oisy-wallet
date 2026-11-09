@@ -8,8 +8,11 @@
 //!
 //! The ICP account identifier is pure local computation (it never needs the signer), so the test
 //! can compute the caller's expected ICP address and assert the happy path; mismatched and
-//! underivable addresses are rejected.
+//! underivable addresses are rejected. The expected BTC and SOL addresses are derived from
+//! `PocketIC`'s master keys along the signer's full path, which checks the backend's derivation
+//! from the signer's root key against `PocketIC`'s own.
 
+use bitcoin::{Address, CompressedPublicKey, Network};
 use candid::Principal;
 use ic_ledger_types::{AccountIdentifier, DEFAULT_SUBACCOUNT};
 use pretty_assertions::assert_eq;
@@ -20,7 +23,7 @@ use shared::types::{
 };
 
 use crate::utils::{
-    mock::CALLER,
+    mock::{CALLER, SIGNER_CANISTER_ID},
     pocketic::{controller, setup, PicBackend, PicCanisterTrait},
 };
 
@@ -40,6 +43,40 @@ fn provision_signing_secret(pic_setup: &PicBackend, secret: &str) {
 /// `networkWallets` value it will accept. Computed the same way the backend does.
 fn caller_icp_account_id(caller: Principal) -> String {
     AccountIdentifier::new(&caller, &DEFAULT_SUBACCOUNT).to_hex()
+}
+
+fn signer_canister_id() -> Principal {
+    Principal::from_text(SIGNER_CANISTER_ID).expect("valid signer canister id")
+}
+
+/// The caller's mainnet P2WPKH address under the test signer, derived along the signer's full path
+/// from `PocketIC`'s `test_key_1` master key — independently of the backend, which derives it from
+/// the signer's root key.
+fn caller_btc_address(caller: Principal) -> String {
+    let (public_key, _) = ic_secp256k1::PublicKey::derive_pocketic_key(
+        ic_secp256k1::PocketIcMasterPublicKeyId::EcdsaTestKey1,
+        &signer_canister_id(),
+        &[vec![0x00], caller.as_slice().to_vec()],
+    );
+    let public_key = CompressedPublicKey::from_slice(&public_key.serialize_sec1(true))
+        .expect("valid compressed public key");
+    Address::p2wpkh(&public_key, Network::Bitcoin).to_string()
+}
+
+/// The caller's Solana mainnet address under the test signer, derived like
+/// [`caller_btc_address`].
+fn caller_sol_address(caller: Principal) -> String {
+    let (public_key, _) = ic_ed25519::PublicKey::derive_pocketic_key(
+        ic_ed25519::PocketIcMasterPublicKeyId::TestKey1,
+        &signer_canister_id(),
+        &[
+            vec![0xfe],
+            caller.as_slice().to_vec(),
+            b"SOL".to_vec(),
+            b"mainnet".to_vec(),
+        ],
+    );
+    bs58::encode(public_key.serialize_raw()).into_string()
 }
 
 fn network_wallets_request(entries: Vec<OnramperSignedEntry>) -> SignOnramperWidgetUrlRequest {
@@ -125,6 +162,36 @@ fn sign_onramper_widget_url_signs_the_callers_verified_icp_address() {
         format!("networkWallets=icp:{icp_address}")
     );
     assert_eq!(response.signature.len(), 64);
+}
+
+#[test]
+fn sign_onramper_widget_url_signs_the_callers_verified_btc_and_sol_addresses() {
+    let pic_setup = setup();
+    provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+    let btc_address = caller_btc_address(caller);
+    let sol_address = caller_sol_address(caller);
+
+    // The first call fetches the signer's root keys, the second derives from the cached ones.
+    for _ in 0..2 {
+        let result = sign(
+            &pic_setup,
+            caller,
+            network_wallets_request(vec![
+                entry("bitcoin", &btc_address),
+                entry("solana", &sol_address),
+            ]),
+        );
+
+        let response = match result {
+            SignOnramperWidgetUrlResult::Ok(response) => response,
+            SignOnramperWidgetUrlResult::Err(err) => panic!("expected Ok response but got {err:?}"),
+        };
+        assert_eq!(
+            response.signed_query,
+            format!("networkWallets=bitcoin:{btc_address},solana:{sol_address}")
+        );
+    }
 }
 
 #[test]

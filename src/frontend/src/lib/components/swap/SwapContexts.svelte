@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import { setContext, type Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import {
@@ -11,7 +11,6 @@
 		crossChainSwapNetworksMainnets,
 		crossChainSwapNetworksMainnetsIds
 	} from '$lib/derived/cross-chain-networks.derived';
-	import { selectedNetwork } from '$lib/derived/network.derived';
 	import {
 		initModalNetworksListContext,
 		MODAL_NETWORKS_LIST_CONTEXT_KEY,
@@ -37,13 +36,13 @@
 
 	let { children }: Props = $props();
 
-	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
-		store: initSwapAmountsStore(),
-		activity: initSwapQuoteActivityStore()
-	});
-
 	const swapContext = initSwapContext();
 	setContext<SwapContext>(SWAP_CONTEXT_KEY, swapContext);
+
+	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
+		store: initSwapAmountsStore({ amountSetToMax: swapContext.amountSetToMax }),
+		activity: initSwapQuoteActivityStore()
+	});
 
 	const { destinationToken, receiveSupportedData, setDestinationToken } = swapContext;
 
@@ -75,13 +74,9 @@
 		}
 	});
 
+	// The network and asset type each list opens on are set by `SwapModalWizardSteps`, per side.
 	const tokensListContext = initModalTokensListContext({
 		tokens: [],
-		filterNetwork:
-			nonNullish($selectedNetwork) &&
-			$crossChainSwapNetworksMainnetsIds.includes($selectedNetwork.id)
-				? $selectedNetwork
-				: undefined,
 		filterNetworksIds: $crossChainSwapNetworksMainnetsIds
 	});
 

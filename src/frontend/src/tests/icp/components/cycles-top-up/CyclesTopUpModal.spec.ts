@@ -8,6 +8,7 @@ import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import {
 	CYCLES_TOP_UP_AMOUNT,
 	CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON,
+	CYCLES_TOP_UP_CANISTER_BACK_BUTTON,
 	CYCLES_TOP_UP_CANISTER_INPUT,
 	CYCLES_TOP_UP_CANISTER_NEXT_BUTTON,
 	CYCLES_TOP_UP_RECENT_CANISTER,
@@ -167,6 +168,13 @@ describe('CyclesTopUpModal', () => {
 	});
 
 	describe('canister step', () => {
+		it('offers Cancel, not Back, as nothing led to the top-up', () => {
+			const { getByText, queryByTestId } = renderModal();
+
+			expect(getByText(en.core.text.cancel)).toBeInTheDocument();
+			expect(queryByTestId(CYCLES_TOP_UP_CANISTER_BACK_BUTTON)).not.toBeInTheDocument();
+		});
+
 		it('asks for a canister ID when the text is not one', async () => {
 			const result = renderModal();
 

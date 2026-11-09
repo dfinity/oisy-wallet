@@ -11,23 +11,24 @@ use std::{cmp::Reverse, ops::Bound};
 use candid::Principal;
 use ic_cdk::api::{canister_self, msg_caller, time};
 use shared::types::tip::{
-    CreateTipRequest, MyTip, PublicTip, TipClaim, TipClaimFailure, TipClaimFailureReason,
-    TipClaimRequest, TipDetails, TipError, MAX_TIPS_RETURNED, TIP_RETENTION_AFTER_TERMINAL_NS,
+    CreateTipRequest, MyTip, PublicTip, TipClaim, TipClaimFailureReason, TipClaimRequest,
+    TipDetails, TipError, MAX_STORED_TIPS_PER_USER, MAX_TIPS_RETURNED,
+    TIP_RETENTION_AFTER_TERMINAL_NS,
 };
 
 use super::{
     icrc2::{self, Account, AllowanceArgs, TransferFromArgs, TransferFromCallError},
     model::{
-        claim_code_matches, new_tip_exceeds_cap, spender_subaccount, validate_amount,
-        validate_claim_code_hash, validate_expiry, validate_message, validate_tip_id, TipRecord,
-        TipState,
+        claim_code_matches, new_tip_exceeds_cap, spender_subaccount, stored_block_index,
+        validate_amount, validate_amount_width, validate_claim_code_hash, validate_expiry,
+        validate_message, validate_tip_id, TipRecord, TipState,
     },
     secrets,
 };
 use crate::{
     state::{mutate_state, read_state, State},
     types::{
-        maps::TipsBySenderMap,
+        maps::{TipMap, TipsBySenderMap},
         storable::{Candid, StoredPrincipal, TipId, TipSenderKey},
     },
 };
@@ -91,6 +92,62 @@ fn partition_sender_tips(
     (active, collectable)
 }
 
+/// The finished tips one sender has to give up so that one more tip keeps them
+/// within [`MAX_STORED_TIPS_PER_USER`].
+///
+/// Live tips are never chosen. Finished ones go in the order the retention
+/// sweep would take them anyway, earliest `active_until` first, so this only
+/// brings that sweep forward for a sender who creates tips faster than
+/// retention lets them go.
+///
+/// A `Claiming` tip is never chosen either, even past its expiry: its payout
+/// may still be outstanding, and a payout that lands writes `Claimed` to the
+/// record it finds. The state decides this, not `has_claim_in_flight`, which
+/// turns false at expiry. Retention still collects such a row like any other.
+///
+/// # Errors
+/// [`TipError::TooManyTips`] when too few rows can be given up to make room.
+fn finished_tips_over_storage_cap(
+    tips: &TipMap,
+    by_sender: &TipsBySenderMap,
+    sender: Principal,
+    now_ns: u64,
+) -> Result<Vec<TipId>, TipError> {
+    let prefix = StoredPrincipal(sender);
+    let start = TipSenderKey(prefix, TipId(String::new()));
+    let mut stored = 0usize;
+    let mut finished = Vec::new();
+    for entry in by_sender
+        .range(start..)
+        .take_while(|entry| entry.key().0 == prefix)
+    {
+        stored += 1;
+        let active_until_ns = entry.value();
+        if active_until_ns <= now_ns {
+            finished.push((active_until_ns, entry.key().1.clone()));
+        }
+    }
+
+    let excess = (stored + 1).saturating_sub(MAX_STORED_TIPS_PER_USER);
+    finished.sort_unstable();
+    // Lazy, so only as many records are decoded as it takes to find `excess`
+    // rows, usually one.
+    let given_up: Vec<TipId> = finished
+        .into_iter()
+        .map(|(_, tip_id)| tip_id)
+        .filter(|tip_id| {
+            !tips
+                .get(tip_id)
+                .is_some_and(|Candid(record)| matches!(record.state, TipState::Claiming { .. }))
+        })
+        .take(excess)
+        .collect();
+    if given_up.len() < excess {
+        return Err(TipError::TooManyTips);
+    }
+    Ok(given_up)
+}
+
 fn remove_tip(state: &mut State, tip_id: &TipId, sender: Principal) {
     state.tips.remove(tip_id);
     state
@@ -135,6 +192,7 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
     validate_tip_id(&request.tip_id)?;
     validate_claim_code_hash(&request.claim_code_hash)?;
     validate_message(request.message.as_deref())?;
+    validate_amount_width(&request.amount)?;
     let now = time();
     validate_expiry(request.expires_at_ns, now)?;
 
@@ -183,7 +241,8 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
         return Err(TipError::InvalidExpiry);
     }
 
-    mutate_state(|s| {
+    let mut removed = Vec::new();
+    let created = mutate_state(|s| {
         // Re-read the clock. `now` above was taken before two awaited ledger
         // calls, and an expiry that was in the future when the request arrived
         // can be in the past by the time it is written — which would store a tip
@@ -199,12 +258,20 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
         let (active_count, collectable) = partition_sender_tips(&s.tips_by_sender, sender, now);
         for stale in collectable {
             remove_tip(s, &stale, sender);
+            removed.push(stale);
         }
         if s.tips.contains_key(&tip_id) {
             return Err(TipError::DuplicateTipId);
         }
         if new_tip_exceeds_cap(active_count) {
             return Err(TipError::TooManyTips);
+        }
+
+        // A tip that lapses frees its live slot at once but stays for retention,
+        // so the live cap alone does not bound what a sender keeps stored.
+        for finished in finished_tips_over_storage_cap(&s.tips, &s.tips_by_sender, sender, now)? {
+            remove_tip(s, &finished, sender);
+            removed.push(finished);
         }
 
         store_tip(
@@ -221,10 +288,19 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
                 state: TipState::Reserved,
                 terminal_at_ns: None,
                 last_claim_failure: None,
+                payout_created_at_ns: None,
             },
         );
         Ok(())
-    })
+    });
+
+    // Outside the borrow above, as in `prune_expired_tips`: dropping a secret
+    // goes through `mutate_state` itself.
+    for tip_id in removed {
+        let _ = secrets::remove_tip_secret_for(sender, tip_id.0);
+    }
+
+    created
 }
 
 /// What an anonymous reader of a tip link sees: amount, token, deadline.
@@ -268,17 +344,30 @@ pub fn get_tip_details(request: TipClaimRequest) -> Result<TipDetails, TipError>
 ///
 /// The record flips to `Claiming` **before** the ledger call, so a second caller
 /// arriving mid-flight sees `ClaimInProgress` rather than starting a second
-/// payout. Every failure reverts to `Reserved` — safe even for an ambiguous
-/// transport error, because the allowance is the source of truth: if the
-/// transfer did happen, the next claim finds it consumed and fails `Uncovered`.
+/// payout. A definite failure reverts it to `Reserved`; a deadline with no
+/// answer leaves it `Claiming` until [`TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS`] has
+/// passed. A retry is safe either way, even after a payout whose answer never
+/// arrived: the payout carries the tip's own `created_at_time`, so a retry by
+/// the same claimer is the *same* transaction and the ledger either executes it
+/// once or names the block where it already did.
+///
+/// That is what an ambiguous answer is worth resolving into. Without the stamp a
+/// payout that landed and whose reply was lost came back on the next attempt as
+/// a spent allowance — the claimer told the tip was no longer available while
+/// the money sat in their account, and the sender's History saying the
+/// reservation had been revoked. Both wrong, in the one direction a payments
+/// feature cannot afford.
 ///
 /// **Once, but not by this state machine alone.** The `Claiming` guard lapses
 /// after [`TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS`], because a claim whose reply never
 /// comes back must not strand the tip forever. A first `transfer_from` that is
 /// still genuinely in flight past that point — a congested subnet, not only the
-/// upgrade case — can therefore overlap a second attempt. What stops both from
-/// paying is the allowance covering exactly one payout, which the client sizes
-/// and `create_tip` only checks a lower bound on. So "exactly once" is a
+/// upgrade case — can therefore overlap a second attempt. Deduplication covers
+/// that overlap, but only while the ledger still recognises the stamp
+/// ([`TIP_PAYOUT_DEDUP_WINDOW_NS`]); past that the tip starts a new transaction
+/// identity and the question is open again. What stops both from paying either
+/// way is the allowance covering exactly one payout, which the frontend sizes and
+/// `create_tip` only checks a lower bound on. So "exactly once" remains a
 /// property of the allowance, and this code's job is not to weaken it.
 ///
 /// # Errors
@@ -291,7 +380,7 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
     let key = TipId(tip_id.clone());
 
     // Reserve the claim, then release the state borrow before awaiting.
-    let record = mutate_state(|s| {
+    let (record, payout_created_at_ns) = mutate_state(|s| {
         let Some(Candid(record)) = s.tips.get(&key) else {
             return Err(TipError::NotFound);
         };
@@ -307,15 +396,11 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
             return Err(TipError::NotFound);
         }
 
-        let claiming = TipRecord {
-            state: TipState::Claiming {
-                claimer,
-                started_at_ns: now,
-            },
-            ..record
-        };
+        // Pinned here rather than at the call below, and committed with the
+        // reservation: a stamp the retry cannot read back is no stamp at all.
+        let (claiming, payout_created_at_ns) = record.start_claim(claimer, now);
         store_tip(s, &key, claiming.clone());
-        Ok(claiming)
+        Ok((claiming, payout_created_at_ns))
     })?;
 
     let transfer = icrc2::transfer_from(
@@ -338,7 +423,12 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
             amount: record.amount.clone(),
             fee: None,
             memo: None,
-            created_at_time: None,
+            // The tip's own stamp, not this attempt's. Every other field here is
+            // already fixed by the tip, so pinning this one makes a retry the
+            // same transaction to the ledger — which is what turns "the answer
+            // never came back" from a payout written off as a failure into a
+            // payout the ledger can still account for.
+            created_at_time: Some(payout_created_at_ns),
         },
     )
     .await;
@@ -363,7 +453,7 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
                         TipRecord {
                             state: TipState::Claimed {
                                 claimer,
-                                block_index: block_index.clone(),
+                                block_index: stored_block_index(&block_index),
                                 claimed_at_ns,
                             },
                             ..current
@@ -386,22 +476,85 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
                 block_index,
             })
         }
-        Err(err) => {
-            let reason = match &err {
-                TransferFromCallError::InsufficientAllowance => TipClaimFailureReason::Uncovered,
-                TransferFromCallError::InsufficientFunds => {
-                    TipClaimFailureReason::InsufficientFunds
-                }
-                TransferFromCallError::Failed(_) => TipClaimFailureReason::TransferFailed,
-            };
-            release_claim(&key, claimer, now, reason);
-            match err {
-                TransferFromCallError::InsufficientAllowance => Err(TipError::Uncovered),
-                TransferFromCallError::InsufficientFunds => Err(TipError::InsufficientFunds),
-                TransferFromCallError::Failed(msg) => Err(TipError::TransferFailed { msg }),
-            }
+        // The deadline passing is not an answer, so the slot is left exactly as
+        // it was. `cancel_tip` admits `Reserved` only, and releasing the claim
+        // here would hand it a tip whose payout may still be running and may
+        // still pay — the case the guard there exists to refuse. The tip is not
+        // stranded either: `is_claimable` opens it to a fresh claim once
+        // `TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS` has passed, as it does for a claim
+        // whose reply never came back at all.
+        Err(TransferFromCallError::Unresolved(msg)) => Err(TipError::TransferFailed { msg }),
+        Err(err) => Err(refuse_claim(&key, claimer, now, err)),
+    }
+}
+
+/// What a refused payout means for the tip: the reason History records,
+/// whether the payout stamp is retired, and what the claimer is told.
+///
+/// One decision read three ways, so it is made in one place. History's reason
+/// and the caller's error partition the ledger's refusals exactly the same way,
+/// and letting them drift apart is how a claimer and a sender end up with
+/// different accounts of the same attempt. Free of state, so the stamp rule has
+/// a unit test: the ledger in the integration tests cannot be made to answer
+/// `TooOld`.
+struct Refusal {
+    reason: TipClaimFailureReason,
+    retire_payout_stamp: bool,
+    error: TipError,
+}
+
+impl From<TransferFromCallError> for Refusal {
+    fn from(err: TransferFromCallError) -> Self {
+        match err {
+            TransferFromCallError::InsufficientAllowance => Self {
+                reason: TipClaimFailureReason::Uncovered,
+                retire_payout_stamp: false,
+                error: TipError::Uncovered,
+            },
+            TransferFromCallError::InsufficientFunds => Self {
+                reason: TipClaimFailureReason::InsufficientFunds,
+                retire_payout_stamp: false,
+                error: TipError::InsufficientFunds,
+            },
+            // Nothing finer to say about a stale stamp in History: it is one more
+            // attempt that did not pay out, and retrying is the advice. The stamp
+            // itself goes, since the ledger refuses every retry that carries it.
+            TransferFromCallError::TooOld => Self {
+                reason: TipClaimFailureReason::TransferFailed,
+                retire_payout_stamp: true,
+                error: TipError::TransferFailed {
+                    msg: "the payout's created_at_time fell outside the ledger's transaction \
+                          window; the next attempt starts a new one"
+                        .to_string(),
+                },
+            },
+            TransferFromCallError::Unresolved(msg) | TransferFromCallError::Failed(msg) => Self {
+                reason: TipClaimFailureReason::TransferFailed,
+                retire_payout_stamp: false,
+                error: TipError::TransferFailed { msg },
+            },
         }
     }
+}
+
+/// The failure half of [`claim_tip`]: returns the tip to the pool as its
+/// [`Refusal`] says, and hands back what the claimer is told.
+///
+/// `Unresolved` never reaches it: `claim_tip` answers that one without touching
+/// the slot.
+fn refuse_claim(
+    key: &TipId,
+    claimer: Principal,
+    started_at_ns: u64,
+    err: TransferFromCallError,
+) -> TipError {
+    let Refusal {
+        reason,
+        retire_payout_stamp,
+        error,
+    } = err.into();
+    release_claim(key, claimer, started_at_ns, reason, retire_payout_stamp);
+    error
 }
 
 /// Whether the record is still the `Claiming` slot this call created.
@@ -429,29 +582,23 @@ fn claim_is_ours(record: &TipRecord, claimer: Principal, started_at_ns: u64) -> 
 /// The record is what lets History separate "nobody has tried this yet" from
 /// "somebody tried and it did not pay out", which is the only one of the two the
 /// sender can act on.
+///
+/// `retire_payout_stamp` is passed through to
+/// [`TipRecord::released_after_failure`], which says when it is right to set it.
 fn release_claim(
     key: &TipId,
     claimer: Principal,
     started_at_ns: u64,
     reason: TipClaimFailureReason,
+    retire_payout_stamp: bool,
 ) {
     mutate_state(|s| {
         let Some(Candid(current)) = s.tips.get(key) else {
             return;
         };
         if claim_is_ours(&current, claimer, started_at_ns) {
-            store_tip(
-                s,
-                key,
-                TipRecord {
-                    state: TipState::Reserved,
-                    last_claim_failure: Some(TipClaimFailure {
-                        at_ns: time(),
-                        reason,
-                    }),
-                    ..current
-                },
-            );
+            let released = current.released_after_failure(reason, time(), retire_payout_stamp);
+            store_tip(s, key, released);
         }
     });
 }
@@ -629,6 +776,7 @@ mod tests {
     };
     use pretty_assertions::assert_eq;
     use serde_bytes::ByteBuf;
+    use shared::types::tip::MAX_TIPS_PER_USER;
 
     use super::*;
 
@@ -653,6 +801,7 @@ mod tests {
             state,
             terminal_at_ns: None,
             last_claim_failure: None,
+            payout_created_at_ns: None,
         }
     }
 
@@ -924,5 +1073,224 @@ mod tests {
             "every batch makes progress, so the sweep always ends"
         );
         assert_eq!(stored_tip_ids(), vec!["first", "second"]);
+    }
+
+    /// The link between the ledger refusing a stamp and the next attempt pinning
+    /// a fresh one. `classify`, `released_after_failure` and `start_claim` each
+    /// have tests of their own; this pins the flag that joins them, so a stamp the
+    /// ledger refused never rides along on the retry.
+    #[test]
+    fn only_a_stale_stamp_is_retired_and_the_retry_pins_a_fresh_one() {
+        let stale = Refusal::from(TransferFromCallError::TooOld);
+        assert!(stale.retire_payout_stamp);
+        assert_eq!(stale.reason, TipClaimFailureReason::TransferFailed);
+        assert!(matches!(stale.error, TipError::TransferFailed { .. }));
+
+        for err in [
+            TransferFromCallError::InsufficientAllowance,
+            TransferFromCallError::InsufficientFunds,
+            TransferFromCallError::Unresolved("deadline".to_string()),
+            TransferFromCallError::Failed("rejected".to_string()),
+        ] {
+            let label = format!("{err:?}");
+            assert!(
+                !Refusal::from(err).retire_payout_stamp,
+                "{label} keeps the stamp, which a retry still needs"
+            );
+        }
+
+        let claimer = test_principal(2);
+        let first_attempt = 1_000;
+        let (claiming, refused_stamp) =
+            record_with(TipState::Reserved, u64::MAX).start_claim(claimer, first_attempt);
+        let released = claiming.released_after_failure(
+            stale.reason,
+            first_attempt + 1,
+            stale.retire_payout_stamp,
+        );
+        assert_eq!(released.payout_created_at_ns, None);
+
+        let retry = first_attempt + 2;
+        let (_, fresh) = released.start_claim(claimer, retry);
+        assert_eq!(fresh, retry, "the retry pins a fresh stamp");
+        assert_ne!(fresh, refused_stamp, "not the one the ledger refused");
+    }
+
+    fn insert_tips(map: &mut TipsBySenderMap, sender: Principal, rows: &[(&str, u64)]) {
+        for (tip_id, active_until_ns) in rows {
+            map.insert(
+                TipSenderKey(StoredPrincipal(sender), TipId((*tip_id).to_string())),
+                *active_until_ns,
+            );
+        }
+    }
+
+    fn ids(tip_ids: &[TipId]) -> Vec<String> {
+        tip_ids.iter().map(|id| id.0.clone()).collect()
+    }
+
+    fn in_memory_tip_map() -> TipMap {
+        let mm = MemoryManager::init(DefaultMemoryImpl::default());
+        TipMap::init(mm.get(MemoryId::new(0)))
+    }
+
+    /// A claim that started before the tip's expiry and has no answer yet: the
+    /// state a payout still outstanding past expiry leaves in both maps.
+    fn insert_claiming_past_expiry(
+        tips: &mut TipMap,
+        by_sender: &mut TipsBySenderMap,
+        tip_id: &str,
+        expired_at_ns: u64,
+    ) {
+        let record = record_with(
+            TipState::Claiming {
+                claimer: test_principal(2),
+                started_at_ns: expired_at_ns - 1,
+            },
+            expired_at_ns,
+        );
+        by_sender.insert(
+            TipSenderKey(StoredPrincipal(record.sender), TipId(tip_id.to_string())),
+            active_until(&record),
+        );
+        tips.insert(TipId(tip_id.to_string()), Candid(record));
+    }
+
+    #[test]
+    fn the_live_cap_leaves_room_under_the_storage_cap() {
+        const { assert!(shared::types::tip::MAX_TIPS_PER_USER < MAX_STORED_TIPS_PER_USER) };
+    }
+
+    #[test]
+    fn a_sender_below_the_storage_cap_keeps_every_row() {
+        let mut map = in_memory_by_sender_map();
+        let alice = test_principal(1);
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+
+        let names: Vec<String> = (0..MAX_STORED_TIPS_PER_USER - 1)
+            .map(|i| format!("done-{i}"))
+            .collect();
+        let rows: Vec<(&str, u64)> = names.iter().map(|name| (name.as_str(), now - 1)).collect();
+        insert_tips(&mut map, alice, &rows);
+
+        assert_eq!(
+            finished_tips_over_storage_cap(&in_memory_tip_map(), &map, alice, now),
+            Ok(vec![]),
+            "one more tip still fits, so nothing is given up"
+        );
+    }
+
+    #[test]
+    fn the_storage_cap_gives_up_the_earliest_finished_rows_and_never_a_live_one() {
+        let mut map = in_memory_by_sender_map();
+        let alice = test_principal(1);
+        let bob = test_principal(2);
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+
+        // A full store: one live tip, the rest finished at different instants.
+        let names: Vec<String> = (0..MAX_STORED_TIPS_PER_USER - 1)
+            .map(|i| format!("done-{i:03}"))
+            .collect();
+        let mut rows: Vec<(&str, u64)> = names
+            .iter()
+            .zip(1u64..)
+            .map(|(name, age)| (name.as_str(), now - age))
+            .collect();
+        rows.push(("live", now + 1));
+        insert_tips(&mut map, alice, &rows);
+        // Another sender's rows never count towards alice's store.
+        insert_tips(&mut map, bob, &[("b-done", now - 1), ("b-live", now + 1)]);
+
+        let tips = in_memory_tip_map();
+        let last = format!("done-{:03}", MAX_STORED_TIPS_PER_USER - 2);
+        assert_eq!(
+            finished_tips_over_storage_cap(&tips, &map, alice, now).map(|given_up| ids(&given_up)),
+            Ok(vec![last]),
+            "one more tip takes the row that finished first, the one retention would take next"
+        );
+        assert_eq!(
+            finished_tips_over_storage_cap(&tips, &map, bob, now),
+            Ok(vec![]),
+            "and alice's rows never count towards bob's"
+        );
+    }
+
+    #[test]
+    fn a_store_far_over_the_cap_is_brought_back_under_it_in_one_create() {
+        let mut map = in_memory_by_sender_map();
+        let alice = test_principal(1);
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+
+        let names: Vec<String> = (0..MAX_STORED_TIPS_PER_USER + 10)
+            .map(|i| format!("done-{i:03}"))
+            .collect();
+        let rows: Vec<(&str, u64)> = names
+            .iter()
+            .zip(1u64..)
+            .map(|(name, age)| (name.as_str(), now - age))
+            .collect();
+        insert_tips(&mut map, alice, &rows);
+
+        let given_up = ids(
+            &finished_tips_over_storage_cap(&in_memory_tip_map(), &map, alice, now)
+                .expect("finished rows can make room"),
+        );
+        assert_eq!(given_up.len(), 11);
+        assert_eq!(
+            given_up[0],
+            format!("done-{:03}", MAX_STORED_TIPS_PER_USER + 9),
+            "earliest-finished first"
+        );
+    }
+
+    #[test]
+    fn the_storage_cap_never_gives_up_a_claiming_row_past_its_expiry() {
+        let mut tips = in_memory_tip_map();
+        let mut map = in_memory_by_sender_map();
+        let alice = test_principal(1);
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+
+        // A full store whose oldest finished row is a claim still awaiting its
+        // payout.
+        let names: Vec<String> = (0..MAX_STORED_TIPS_PER_USER - 1)
+            .map(|i| format!("done-{i:03}"))
+            .collect();
+        let rows: Vec<(&str, u64)> = names
+            .iter()
+            .zip(1u64..)
+            .map(|(name, age)| (name.as_str(), now - age))
+            .collect();
+        insert_tips(&mut map, alice, &rows);
+        insert_claiming_past_expiry(&mut tips, &mut map, "paying", now - 1_000);
+
+        let next = format!("done-{:03}", MAX_STORED_TIPS_PER_USER - 2);
+        assert_eq!(
+            finished_tips_over_storage_cap(&tips, &map, alice, now).map(|given_up| ids(&given_up)),
+            Ok(vec![next]),
+            "the claim keeps its record, so a payout that lands can still write `Claimed`"
+        );
+    }
+
+    #[test]
+    fn a_full_store_whose_finished_rows_are_all_claiming_takes_no_new_tip() {
+        let mut tips = in_memory_tip_map();
+        let mut map = in_memory_by_sender_map();
+        let alice = test_principal(1);
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+
+        let live: Vec<String> = (0..MAX_TIPS_PER_USER)
+            .map(|i| format!("live-{i:03}"))
+            .collect();
+        let rows: Vec<(&str, u64)> = live.iter().map(|name| (name.as_str(), now + 1)).collect();
+        insert_tips(&mut map, alice, &rows);
+        for i in MAX_TIPS_PER_USER..MAX_STORED_TIPS_PER_USER {
+            insert_claiming_past_expiry(&mut tips, &mut map, &format!("paying-{i:03}"), now - 1);
+        }
+
+        assert_eq!(
+            finished_tips_over_storage_cap(&tips, &map, alice, now),
+            Err(TipError::TooManyTips),
+            "no row can make room, so the store stays at the cap"
+        );
     }
 }
