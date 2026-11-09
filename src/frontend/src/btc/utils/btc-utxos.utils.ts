@@ -1,5 +1,5 @@
 import {
-	BTC_BROADCAST_MAX_INPUTS,
+	BTC_SEND_MAX_INPUTS,
 	CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 } from '$btc/constants/btc.constants';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
@@ -20,11 +20,12 @@ export interface UtxoSelectionResult {
 }
 
 /**
- * The most inputs a send may spend: with `BTC_SEND_VIA_BACKEND_ENABLED`, what the backend's
- * broadcast accepts, so the selection and Max never offer a send it refuses. `undefined` otherwise.
+ * The most inputs a send may spend: with `BTC_SEND_VIA_BACKEND_ENABLED`, `BTC_SEND_MAX_INPUTS`, so
+ * the selection and Max never offer a send whose signing can outrun its approval. `undefined`
+ * otherwise.
  */
 export const btcSendMaxInputs = (): number | undefined =>
-	BTC_SEND_VIA_BACKEND_ENABLED ? BTC_BROADCAST_MAX_INPUTS : undefined;
+	BTC_SEND_VIA_BACKEND_ENABLED ? BTC_SEND_MAX_INPUTS : undefined;
 
 /**
  * Extracts outpoint keys (txid + vout) from an array of UTXOs.

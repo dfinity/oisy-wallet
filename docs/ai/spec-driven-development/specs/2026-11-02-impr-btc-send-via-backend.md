@@ -842,11 +842,22 @@ Decided in PR 8a (PR 8 is split in three, see the [Delivery plan](#delivery-plan
   close, so its tool result gets `sendOutcomeUnclear`, and the card shows the message instead of
   the Send button. It is kept in `aiAssistantStore`, so a remounted card offers no second send
   either.
-- **At most 100 inputs.** With the flag on, `prepareBtcSend` and Max stay within
-  `BTC_BROADCAST_MAX_INPUTS` (`MAX_BROADCAST_TX_INPUTS`). Every pick of the selection but the last
-  is the largest left, so it still finds a set whenever any set of that many inputs covers the
-  amount. Max spends the largest of them. 100 P2WPKH inputs make about 15 000 bytes, within
-  `MAX_BROADCAST_TX_BYTES`.
+- **At most 38 inputs**, fewer than the backend's `MAX_BROADCAST_TX_INPUTS` (100), because signing
+  is now charged per input (Copilot):
+  - `btc_caller_send` charged a whole transaction at once, so CFS refused one the approval could
+    not pay before spending anything. Each `btc_sign_prehash` is charged on its own, 37B plus the
+    1B ledger fee, so a send larger than the approval stops partway through signing. The backend's
+    cycles for the inputs signed so far are spent, nothing is broadcast, and the user's other
+    signing fails until the next top-up.
+  - `allow_signing` runs only at login, and tops the per-user approval up only below 1.458T
+    (`SUFFICIENT_CYCLES_THRESHOLD`). 38 inputs cost 1.444T, so a send within
+    `BTC_SEND_MAX_INPUTS` fits in what a login leaves. A session that has already spent its
+    approval can still run short, as any signing can today.
+  - A top-up before each send was considered and left out: the frontend calls `allow_signing` only
+    at login today. A larger approval, so that a send can never run short, is a backend change.
+  - With the flag on, `prepareBtcSend` and Max stay within the cap. Every pick of the selection but
+    the last is the largest left, so it still finds a set whenever any set of 38 inputs covers the
+    amount. Max spends the 38 largest.
 
 ### Frontend: UTXO loading
 
@@ -1020,7 +1031,7 @@ Every PR is safe on its own.
 8. `feat(frontend): send BTC through the backend behind the flag` (needs 3, 5, 6, 7). Split in
    three, each safe on its own because a flow takes the backend path only once its outcomes are
    handled (see [Decided in PR 8a](#frontend-sendbtc)):
-   - **8a:** the backend send in `sendBtc`, its typed errors and messages, the 100-input cap, and
+   - **8a:** the backend send in `sendBtc`, its typed errors and messages, the 38-input cap, and
      Send, Convert and the AI assistant.
    - **8b:** the Chain Fusion and NEAR Intents swaps.
    - **8c:** Liquidium supply and repay, and removing `viaBackend`.

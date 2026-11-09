@@ -35,10 +35,13 @@ export const BTC_CHANGE_DUST_THRESHOLD_SATOSHIS = 1_000n;
 // known.
 export const BTC_LARGEST_OUTPUT_VSIZE = 43;
 
-// The most inputs the backend's `btc_broadcast_transaction` accepts, which refuses more with
-// `TooManyInputs`. Must stay in sync with `MAX_BROADCAST_TX_INPUTS` in
-// `src/shared/src/types/bitcoin.rs`.
-export const BTC_BROADCAST_MAX_INPUTS = 100;
+// The most inputs a send through the backend spends. Each input is one `btc_sign_prehash`, which
+// the signer charges at 37B plus the 1B ledger fee against the per-user approval the backend grants
+// at login. `allow_signing` tops that approval up only below 1.458T (`SUFFICIENT_CYCLES_THRESHOLD`
+// in `src/backend/src/signer/service.rs`), so a send of 38 inputs (1.444T) fits in what a login
+// leaves, and signing does not run out halfway, after spending cycles on a transaction it never
+// broadcasts. The backend's own limit, `MAX_BROADCAST_TX_INPUTS`, is 100.
+export const BTC_SEND_MAX_INPUTS = 38;
 
 // How many inputs of one transaction are signed at the same time. Each is a `btc_sign_prehash`
 // call, so one `sign_with_ecdsa` request. The subnet queues only 20 requests per key beyond the

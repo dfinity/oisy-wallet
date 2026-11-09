@@ -59,10 +59,11 @@ vi.mock('$btc/services/btc-pending-sent-transactions.services', () => ({
 	loadBtcPendingSentTransactions: vi.fn().mockResolvedValue({ success: true })
 }));
 
-import { BTC_BROADCAST_MAX_INPUTS } from '$btc/constants/btc.constants';
+import { BTC_LARGEST_OUTPUT_VSIZE, BTC_SEND_MAX_INPUTS } from '$btc/constants/btc.constants';
 import { getFeeRateFromPercentiles, prepareBtcSend } from '$btc/services/btc-utxos.service';
 import type { BtcAddress } from '$btc/types/address';
 import { BtcPrepareSendError } from '$btc/types/btc-send';
+import { calculateFeeSatoshis } from '$btc/utils/btc-utxos.utils';
 import * as backendApi from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Amount } from '$lib/types/send';
@@ -331,17 +332,26 @@ describe('btc-utxos.service', () => {
 			});
 		});
 
-		it('should refuse, with the flag on, an amount that needs more inputs than the backend takes', () => {
+		it('should refuse, with the flag on, an amount that needs more inputs than the cap', () => {
 			const utxos: CkBtcMinterDid.Utxo[] = Array.from(
-				{ length: BTC_BROADCAST_MAX_INPUTS + 1 },
+				{ length: BTC_SEND_MAX_INPUTS + 1 },
 				(_, i) => ({
 					value: 10_000n,
 					height: 100,
 					outpoint: { txid: Uint8Array.from([3, i]), vout: 0 }
 				})
 			);
-			// At 5 sat/vB for the largest output, 100 inputs carry 965 575 sats and 101 carry 975 235.
-			const amount = 0.0097;
+			// One satoshi more than the cap's inputs carry, at this rate and for the largest output.
+			const amount =
+				Number(
+					BigInt(BTC_SEND_MAX_INPUTS) * 10_000n -
+						calculateFeeSatoshis({
+							numInputs: BTC_SEND_MAX_INPUTS,
+							recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+							feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles
+						}) +
+						1n
+				) / 100_000_000;
 
 			expect(prepareBtcSend({ ...defaultParams, allUtxos: utxos, amount }).error).toBeUndefined();
 

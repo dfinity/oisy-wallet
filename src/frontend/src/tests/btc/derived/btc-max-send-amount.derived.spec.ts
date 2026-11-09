@@ -1,4 +1,4 @@
-import { BTC_BROADCAST_MAX_INPUTS, BTC_LARGEST_OUTPUT_VSIZE } from '$btc/constants/btc.constants';
+import { BTC_LARGEST_OUTPUT_VSIZE, BTC_SEND_MAX_INPUTS } from '$btc/constants/btc.constants';
 import { initBtcMaxSendAmount } from '$btc/derived/btc-max-send-amount.derived';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
@@ -154,8 +154,8 @@ describe('initBtcMaxSendAmount', () => {
 		expect(get(initBtcMaxSendAmount({ source: mockAddress, destination }))).toBe(10_000n - fee);
 	});
 
-	it('should keep Max within the backend broadcast input cap with the flag on', () => {
-		const utxos = Array.from({ length: BTC_BROADCAST_MAX_INPUTS + 20 }, (_, i) =>
+	it('should keep Max within the send input cap with the flag on', () => {
+		const utxos = Array.from({ length: BTC_SEND_MAX_INPUTS + 20 }, (_, i) =>
 			createMockUtxo({ value: 10_000, txid: Uint8Array.from([5, i]) })
 		);
 		allUtxosStore.setAllUtxos({ allUtxos: utxos });
@@ -176,7 +176,7 @@ describe('initBtcMaxSendAmount', () => {
 		btcSendViaBackend.enabled = true;
 
 		expect(get(initBtcMaxSendAmount({ source: mockAddress }))).toBe(
-			BigInt(BTC_BROADCAST_MAX_INPUTS) * 10_000n - fee(BTC_BROADCAST_MAX_INPUTS)
+			BigInt(BTC_SEND_MAX_INPUTS) * 10_000n - fee(BTC_SEND_MAX_INPUTS)
 		);
 	});
 });
