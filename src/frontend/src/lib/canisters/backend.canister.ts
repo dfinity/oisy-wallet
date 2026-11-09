@@ -474,10 +474,15 @@ export class BackendCanister extends Canister<BackendService> {
 	}: SaveUserAgreements): Promise<void> => {
 		const { update_user_agreements } = this.caller({ certified: true });
 
-		await update_user_agreements({
+		const response = await update_user_agreements({
 			agreements: mapBackendUserAgreements(agreements),
 			current_user_version: toNullable(currentUserVersion)
 		});
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
 	};
 
 	updateProviderAgreements = async ({
@@ -486,10 +491,15 @@ export class BackendCanister extends Canister<BackendService> {
 	}: SaveProviderAgreements): Promise<void> => {
 		const { update_provider_agreements } = this.caller({ certified: true });
 
-		await update_provider_agreements({
+		const response = await update_provider_agreements({
 			provider_agreements: mapBackendProviderAgreements(providerAgreements),
 			current_user_version: toNullable(currentUserVersion)
 		});
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
 	};
 
 	// Contact addresses can become send destinations, so contacts are always read certified.
