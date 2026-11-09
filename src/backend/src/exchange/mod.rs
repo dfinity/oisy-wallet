@@ -855,7 +855,7 @@ mod tests {
             &[custom_token(1).0],
             1_000
         ));
-        assert!(recorded_activity().is_empty());
+        assert_eq!(recorded_activity(), Vec::<(TokenId, u64)>::new());
     }
 
     #[test]

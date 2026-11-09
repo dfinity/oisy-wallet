@@ -176,7 +176,7 @@ mod tests {
         assert_eq!(second, (Some(StoredTokenId(icrc(4))), 2));
 
         assert_eq!(evict(second.0, now, two_per_batch()), (None, 1));
-        assert!(held().is_empty());
+        assert_eq!(held(), Vec::<TokenId>::new());
     }
 
     #[test]
