@@ -1,7 +1,12 @@
 use candid::Principal;
 use pocket_ic::common::rest::{CanisterHttpReply, CanisterHttpResponse, MockCanisterHttpResponse};
 use pretty_assertions::assert_eq;
-use shared::types::{api_keys::ApiKeys, exchange::ExchangeRate, token_id::TokenId};
+use shared::types::{
+    api_keys::ApiKeys,
+    custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
+    exchange::ExchangeRate,
+    token_id::TokenId,
+};
 
 use crate::utils::{
     mock::USER_1,
@@ -389,4 +394,52 @@ fn set_exchange_rate_enabled_rejects_authenticated_non_controller() {
         stored.exchange_rate_enabled, None,
         "Rejected non-controller calls must not mutate the stored refresh setting."
     );
+}
+
+#[test]
+fn native_prices_are_cached_while_a_custom_token_lookup_is_pending() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(USER_1).expect("valid user principal");
+    pic_setup.ensure_user_profile(caller);
+    enable_exchange_rate_refresh(&pic_setup);
+
+    let erc20 = CustomToken {
+        token: Token::Erc20(ErcToken {
+            token_address: ErcTokenId("0x1f9840a85d5af5bf1d1762f925bdaddc4201f984".to_string()),
+            chain_id: 1,
+        }),
+        enabled: true,
+        version: None,
+        section: None,
+        allow_external_content_source: None,
+        allowed_external_content_source_urls: None,
+    };
+    assert_eq!(
+        pic_setup.update::<()>(caller, "set_custom_token", erc20),
+        Ok(())
+    );
+
+    // The cache is empty, so this call starts a refresh of the native tokens and of the ERC-20.
+    pic_setup
+        .update::<Vec<(TokenId, Option<ExchangeRate>)>>(caller, "get_exchange_rates", ())
+        .expect("get_exchange_rates should answer on an empty cache");
+
+    let now_secs = pic_setup.pic.get_time().as_nanos_since_unix_epoch() / 1_000_000_000;
+    reply_to_coingecko_simple_price(
+        &pic_setup,
+        &format!(r#"{{"ethereum":{{"usd":3000.0,"last_updated_at":{now_secs}}}}}"#),
+    );
+
+    assert!(
+        pic_setup
+            .pic
+            .get_canister_http()
+            .iter()
+            .any(|request| request.url.contains("/simple/token_price/ethereum")),
+        "The ERC-20 lookup should still be pending"
+    );
+    let eth = pic_setup
+        .query::<Option<ExchangeRate>>(caller, "get_exchange_rate", TokenId::EvmNative(1))
+        .expect("get_exchange_rate should answer for ETH");
+    assert_eq!(eth.and_then(|rate| rate.usd.price), Some(3000.0));
 }

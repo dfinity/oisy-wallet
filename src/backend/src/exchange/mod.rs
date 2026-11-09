@@ -6,6 +6,7 @@ mod supplemental;
 use std::{cell::Cell, time::Duration};
 
 use candid::Principal;
+use futures::future::join;
 use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::{
@@ -19,6 +20,7 @@ use shared::{
 use crate::{
     exchange::{
         composite::fetch_all_prices,
+        provider::ExchangePriceProvider,
         providers::{
             coingecko::{is_priceable_token_id, CoinGeckoProvider},
             icpswap::IcpSwapProvider,
@@ -408,7 +410,7 @@ pub(crate) async fn fetch_and_update_prices(
     let provider = CoinGeckoProvider::new(api_key, replicated);
     let supplementals = supplemental_price_providers(replicated);
 
-    let prices = fetch_all_prices(
+    fetch_and_store_prices(
         &provider,
         COINGECKO_PROVIDER_ENABLED,
         &supplementals,
@@ -416,11 +418,48 @@ pub(crate) async fn fetch_and_update_prices(
     )
     .await;
 
+    Ok(())
+}
+
+/// Fetches the prices of the native tokens and of the custom tokens among `token_ids` side by
+/// side, and caches each group as soon as its own lookups return.
+///
+/// The native tokens take one lookup, the custom tokens one per 50, so the native prices are
+/// cached without waiting on any custom-token lookup.
+async fn fetch_and_store_prices<P: ExchangePriceProvider>(
+    primary: &P,
+    primary_enabled: bool,
+    supplementals: &[Box<dyn SupplementalPriceProvider>],
+    token_ids: &[StoredTokenId],
+) {
+    let natives = native_token_ids();
+    let (native_ids, custom_ids): (Vec<StoredTokenId>, Vec<StoredTokenId>) = token_ids
+        .iter()
+        .cloned()
+        .partition(|token_id| natives.contains(token_id));
+
+    join(
+        fetch_and_store_group(primary, primary_enabled, supplementals, &native_ids),
+        fetch_and_store_group(primary, primary_enabled, supplementals, &custom_ids),
+    )
+    .await;
+}
+
+async fn fetch_and_store_group<P: ExchangePriceProvider>(
+    primary: &P,
+    primary_enabled: bool,
+    supplementals: &[Box<dyn SupplementalPriceProvider>],
+    token_ids: &[StoredTokenId],
+) {
+    if token_ids.is_empty() {
+        return;
+    }
+
+    let prices = fetch_all_prices(primary, primary_enabled, supplementals, token_ids).await;
+
     for (token_id, exchange_data) in prices {
         update_price(&token_id, &exchange_data);
     }
-
-    Ok(())
 }
 
 /// Returns the deduplicated set of priceable tokens associated with `caller`,
@@ -563,6 +602,7 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
 #[cfg(test)]
 mod tests {
     use candid::Principal;
+    use futures::FutureExt;
     use pretty_assertions::assert_eq;
     use shared::types::exchange::ExchangeData;
 
@@ -752,6 +792,45 @@ mod tests {
 
     fn stored_rate(token_id: &StoredTokenId) -> Option<ExchangeRate> {
         read_state(|s| s.exchange_rates.get(token_id).map(|rate| rate.0))
+    }
+
+    /// Prices a lookup made of native tokens only, and never answers any other lookup.
+    struct NativesOnlyProvider;
+
+    impl ExchangePriceProvider for NativesOnlyProvider {
+        async fn fetch_prices(
+            &self,
+            token_ids: &[StoredTokenId],
+        ) -> Result<Vec<(StoredTokenId, ExchangeData)>, String> {
+            let natives = native_token_ids();
+            if !token_ids.iter().all(|token_id| natives.contains(token_id)) {
+                std::future::pending::<()>().await;
+            }
+            Ok(token_ids
+                .iter()
+                .map(|token_id| (token_id.clone(), exchange_rate(1_000).usd))
+                .collect())
+        }
+    }
+
+    #[test]
+    fn native_prices_are_cached_while_a_custom_token_lookup_is_still_pending() {
+        let eth = StoredTokenId(TokenId::EvmNative(1));
+        let custom = custom_token(1);
+        let token_ids = [eth.clone(), custom.clone()];
+        let mut refresh = std::pin::pin!(fetch_and_store_prices(
+            &NativesOnlyProvider,
+            true,
+            &[],
+            &token_ids
+        ));
+
+        assert!(
+            refresh.as_mut().now_or_never().is_none(),
+            "the custom-token lookup should still be pending"
+        );
+        assert_eq!(stored_rate(&eth), Some(exchange_rate(1_000)));
+        assert_eq!(stored_rate(&custom), None);
     }
 
     fn recorded_activity() -> Vec<(TokenId, u64)> {
