@@ -22,8 +22,10 @@ authorized. SDK authentication is integrated; the user confirmed ICP account
 continuity on 2026-11-06. The controller now loads the live website. Its runtime
 adapter was deployed to audit on 2026-11-09, and the signed update was installed
 and launched on the existing iPhone preview. The user confirmed that Internet
-Identity sign-in returns to Wallet and the ICP quantity matches.
-Verification and remaining acceptance checks are recorded in the spec.
+Identity sign-in returns to Wallet and the ICP quantity matches. A later
+frontend-only test release also appeared after reopening the same installed app,
+with ICP still matching. Verification and remaining acceptance checks are
+recorded in the spec.
 
 Pinned sources, local verification and audit deployment instructions live with
 the prototype.

@@ -180,8 +180,19 @@ The update was installed over the existing preview and launched on the iPhone
 entry assets immediately before launch. No uninstall or storage reset was used.
 The user approved Internet Identity sign-in and confirmed: "Wallet opens and ICP
 matches." This verifies live-host sign-in and ICP account continuity for this
-deployment. No funded transaction was submitted. Token history, Activity, Explore
-and delivery of a subsequent web-only release still need live-host acceptance.
+deployment. No funded transaction was submitted. Token history, Activity and
+Explore still need live-host acceptance.
+
+A subsequent frontend-only [deployment 42627757577](https://github.com/dfinity/oisy-wallet/actions/runs/42627757577)
+from `b92e8919fc` added an audit/mobile-only “Web update test · 01” badge to Wallet.
+The published component and translation were verified, and the AASA/II callback
+allowlist remained unchanged. The installed native source/configuration matched
+`e6810e4876`; no native build or installation ran for this test. After fully
+closing and reopening OISY, the user confirmed: “Badge appears and ICP matches.”
+This verifies delivery of a later frontend release on the same installed app.
+The temporary badge and its translation key were then removed for a second
+frontend-only deployment. Pull-to-refresh remains data-only; a new wallet
+document loads the updated website.
 
 ## Verified on 2026-11-05
 
