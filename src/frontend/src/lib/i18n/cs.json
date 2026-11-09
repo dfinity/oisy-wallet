@@ -3065,6 +3065,7 @@
 			"send_token_on_network_message": "Chtěl bych poslat token $token v síti $network.",
 			"send_token_message": "Chtěl bych poslat token $token.",
 			"send_on_network_message": "Chtěl bych poslat token v síti $network.",
+			"type_send_address_message": "Zadejte adresu, na kterou chcete odeslat, nebo vyberte jeden ze svých kontaktů.",
 			"send_token_succeeded": "Transakce dokončena!",
 			"show_total_balance_tool_card_title": "Celkový zůstatek",
 			"no_contacts_found_message": "Omlouvám se, ale ve vašem adresáři jsem nenašel žádné vhodné kontakty.",

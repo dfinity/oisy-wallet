@@ -1299,7 +1299,7 @@ type SetUserShowTestnetsResult = variant {
 	// The user's show testnets was set successfully.
 	Ok;
 	// The user's show testnets was not set due to an error.
-	Err : UpdateAgreementsError
+	Err : SetTestnetsSettingsError
 };
 type Settings = record {
 	networks : NetworksSettings;
@@ -1665,7 +1665,14 @@ type UpdateActiveUserTransactionRequest = record {
 	progress_step : opt text;
 	error : opt text
 };
-type UpdateAgreementsError = variant { VersionMismatch; UserNotFound };
+type UpdateAgreementsError = variant {
+	VersionMismatch;
+	RateLimited : RateLimitError;
+	UserNotFound;
+	// The change would take the user's agreement history past
+	// `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
+	TooManyHistoryEntries
+};
 type UpdateExperimentalFeaturesSettingsRequest = record {
 	experimental_features : vec record {
 		ExperimentalFeatureSettingsFor;
@@ -1677,6 +1684,12 @@ type UpdateProviderAgreementsRequest = record {
 	current_user_version : opt nat64;
 	provider_agreements : vec record { ProviderAgreementType; UserAgreement }
 };
+type UpdateProviderAgreementsResult = variant {
+	// The user's provider agreements were updated successfully.
+	Ok;
+	// The user's provider agreements were not updated due to an error.
+	Err : UpdateAgreementsError
+};
 type UpdateTransactionFilterSettingsRequest = record {
 	filter : TransactionFilterSettings;
 	current_user_version : opt nat64
@@ -1684,6 +1697,12 @@ type UpdateTransactionFilterSettingsRequest = record {
 type UpdateUserAgreementsRequest = record {
 	agreements : UserAgreements;
 	current_user_version : opt nat64
+};
+type UpdateUserAgreementsResult = variant {
+	// The user's agreements were updated successfully.
+	Ok;
+	// The user's agreements were not updated due to an error.
+	Err : UpdateAgreementsError
 };
 // Per-agreement status/metadata.
 type UserAgreement = record {
@@ -2412,9 +2431,11 @@ service : (Arg) -> {
 	// set to the same value.
 	//
 	// # Errors
-	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	// the caller made too many calls in the last minute, or the change would take the agreement
+	// history past `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 	update_provider_agreements : (UpdateProviderAgreementsRequest) -> (
-		SetUserShowTestnetsResult
+		UpdateProviderAgreementsResult
 	);
 	// Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
 	// for every agreement that was actually changed.
@@ -2427,9 +2448,11 @@ service : (Arg) -> {
 	// same value.
 	//
 	// # Errors
-	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	// the caller made too many calls in the last minute, or the change would take the agreement
+	// history past `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 	update_user_agreements : (UpdateUserAgreementsRequest) -> (
-		SetUserShowTestnetsResult
+		UpdateUserAgreementsResult
 	);
 	// Updates the user's preference to enable (or disable) experimental features in the interface,
 	// merging with any existing entries.
