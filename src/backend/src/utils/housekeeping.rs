@@ -5,10 +5,8 @@ use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::signer::topup::TopUpCyclesLedgerResult;
 
 use crate::{
-    api,
-    personal_notes::share::service::prune_expired_shares,
-    tips::service::prune_expired_tips,
-    token::{evict_inactive_tokens, TOKEN_ACTIVITY_RETENTION_SEC},
+    api, personal_notes::share::service::prune_expired_shares, state::mutate_state,
+    tips::service::prune_expired_tips, token::evict_inactive_tokens, types::StoredTokenId,
 };
 
 thread_local! {
@@ -20,6 +18,17 @@ thread_local! {
 /// longer than this, we consider it stuck and force-unlock so the next timer
 /// tick can proceed.
 const HOUSEKEEPING_TIMEOUT_NS: u64 = 2 * 60 * 60 * 1_000_000_000;
+
+/// Instructions a token eviction batch may use before the remaining entries wait for the next
+/// batch.
+///
+/// A timer message may use 40B instructions. A batch stops after the entry that crosses this
+/// budget, and taking one entry costs under 1M and evicting it about 5M more
+/// (`bench_evict_inactive_tokens_2000`), well inside the headroom above it.
+const TOKEN_EVICTION_BATCH_INSTRUCTION_BUDGET: u64 = 2_000_000_000;
+
+/// Pause between token eviction batches, so that eviction leaves room for other messages.
+const TOKEN_EVICTION_BATCH_INTERVAL: Duration = Duration::from_secs(1);
 
 /// Returns `true` if a housekeeping run is currently in flight and has not
 /// timed out.  If the lock has been held longer than `HOUSEKEEPING_TIMEOUT_NS`,
@@ -75,7 +84,7 @@ pub(crate) fn start_periodic_housekeeping_timers() {
 
 /// Runs hourly housekeeping tasks:
 /// - Top up the cycles ledger.
-/// - Evict `token_activity` entries older than [`TOKEN_ACTIVITY_RETENTION_SEC`].
+/// - Start evicting `token_activity` entries inactive for over 30 minutes, in timer batches.
 /// - Prune expired `personal_note_shares` entries.
 async fn hourly_housekeeping_tasks() {
     // Tops up the account on the cycles ledger
@@ -88,10 +97,7 @@ async fn hourly_housekeeping_tasks() {
         // failing.
     }
 
-    let evicted = evict_inactive_tokens(TOKEN_ACTIVITY_RETENTION_SEC);
-    if evicted > 0 {
-        ic_cdk::println!("Evicted {evicted} stale token_activity entries");
-    }
+    schedule_token_eviction_batch(None, 0);
 
     let pruned = prune_expired_shares();
     if pruned > 0 {
@@ -104,6 +110,39 @@ async fn hourly_housekeeping_tasks() {
     if pruned_tips > 0 {
         ic_cdk::println!("Pruned {pruned_tips} tips past their retention window");
     }
+}
+
+/// Runs a batch of token eviction on a timer, from the entry after `after`, and schedules the
+/// next batch while entries remain.
+///
+/// Each batch is a message of its own, within [`TOKEN_EVICTION_BATCH_INSTRUCTION_BUDGET`], so
+/// eviction's cost does not depend on how many tokens are held, and a batch that fails rolls back
+/// nothing but itself; the next hourly run starts eviction over. An eviction still running then
+/// only overlaps it: an evicted entry is gone, so none is evicted twice. Mirrors
+/// `contacts::migration::schedule_batch`.
+fn schedule_token_eviction_batch(after: Option<StoredTokenId>, evicted_so_far: u64) {
+    let delay = if after.is_none() {
+        Duration::ZERO
+    } else {
+        TOKEN_EVICTION_BATCH_INTERVAL
+    };
+
+    set_timer(delay, async move {
+        let (next, evicted) = mutate_state(|s| {
+            evict_inactive_tokens(s, after, time(), || {
+                ic_cdk::api::instruction_counter() < TOKEN_EVICTION_BATCH_INSTRUCTION_BUDGET
+            })
+        });
+        let evicted_so_far = evicted_so_far + evicted;
+
+        match next {
+            Some(after) => schedule_token_eviction_batch(Some(after), evicted_so_far),
+            None if evicted_so_far > 0 => {
+                ic_cdk::println!("Evicted {evicted_so_far} stale token_activity entries");
+            }
+            None => {}
+        }
+    });
 }
 
 #[cfg(test)]

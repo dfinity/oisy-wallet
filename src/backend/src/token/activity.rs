@@ -1,9 +1,10 @@
-use ic_cdk::api::time;
+use std::ops::Bound;
+
 use ic_stable_structures::StableBTreeMap;
 use shared::types::{token_id::TokenId, Timestamp};
 
 use crate::{
-    state::mutate_state,
+    state::{mutate_state, State},
     types::{StoredTokenId, VMem},
 };
 
@@ -51,30 +52,46 @@ pub fn mark_tokens_active(token_ids: &[TokenId], now_ns: Timestamp) {
     });
 }
 
-/// Removes entries from `token_activity` whose timestamp is older than
-/// `retention_sec` seconds before now, and returns the number of removed
-/// entries.
+/// Evicts the `token_activity` entries that come after `after`, one at a time, for as long as
+/// `within_budget` holds, and always at least one, so that every batch makes progress. An entry
+/// is evicted once it was last active more than [`TOKEN_ACTIVITY_RETENTION_SEC`] before `now_ns`.
 ///
-/// Intended to be called from periodic housekeeping; safe to call when the
-/// map is empty (returns `0`).
-pub fn evict_inactive_tokens(retention_sec: u64) -> u64 {
-    let now = time();
-    let cutoff_ns = now.saturating_sub(retention_sec.saturating_mul(1_000_000_000));
+/// Returns the last entry taken while entries remain, or `None` once all of them are done,
+/// together with the number of entries evicted. Intended for periodic housekeeping, in batches.
+/// Mirrors `contacts::migration::migrate_batch`.
+pub(crate) fn evict_inactive_tokens(
+    s: &mut State,
+    mut after: Option<StoredTokenId>,
+    now_ns: u64,
+    mut within_budget: impl FnMut() -> bool,
+) -> (Option<StoredTokenId>, u64) {
+    let cutoff_ns =
+        now_ns.saturating_sub(TOKEN_ACTIVITY_RETENTION_SEC.saturating_mul(1_000_000_000));
+    let mut evicted = 0;
 
-    mutate_state(|s| {
-        let stale: Vec<StoredTokenId> = s
-            .token_activity
-            .iter()
-            .filter(|entry| entry.value() < cutoff_ns)
-            .map(|entry| entry.key().clone())
-            .collect();
-
-        let removed = stale.len() as u64;
-        for key in stale {
-            s.token_activity.remove(&key);
+    loop {
+        let next = match &after {
+            Some(after) => s
+                .token_activity
+                .range((Bound::Excluded(after.clone()), Bound::Unbounded))
+                .next(),
+            None => s.token_activity.iter().next(),
         }
-        removed
-    })
+        .map(|entry| (entry.key().clone(), entry.value()));
+        let Some((token_id, last_active_ns)) = next else {
+            return (None, evicted);
+        };
+
+        if last_active_ns < cutoff_ns {
+            s.token_activity.remove(&token_id);
+            evicted += 1;
+        }
+        after = Some(token_id);
+
+        if !within_budget() {
+            return (after, evicted);
+        }
+    }
 }
 
 #[cfg(test)]
@@ -109,5 +126,68 @@ mod tests {
         mark_tokens_active(&[first.clone(), over_the_cap.clone()], 2);
         assert_eq!(last_active(first), Some(2));
         assert_eq!(last_active(over_the_cap), None);
+    }
+
+    const RETENTION_NS: u64 = TOKEN_ACTIVITY_RETENTION_SEC * 1_000_000_000;
+
+    fn held() -> Vec<TokenId> {
+        read_state(|s| s.token_activity.keys().map(|key| key.0).collect())
+    }
+
+    fn evict(
+        after: Option<StoredTokenId>,
+        now_ns: u64,
+        within_budget: impl FnMut() -> bool,
+    ) -> (Option<StoredTokenId>, u64) {
+        mutate_state(|s| evict_inactive_tokens(s, after, now_ns, within_budget))
+    }
+
+    #[test]
+    fn eviction_removes_only_tokens_inactive_past_retention() {
+        let now = 10 * RETENTION_NS;
+        mark_tokens_active(&[icrc(1)], now);
+        mark_tokens_active(&[icrc(2)], now - RETENTION_NS);
+        mark_tokens_active(&[icrc(3)], now - RETENTION_NS - 1);
+        mark_tokens_active(&[icrc(4)], 0);
+
+        assert_eq!(evict(None, now, || true), (None, 2));
+        assert_eq!(held(), vec![icrc(1), icrc(2)]);
+    }
+
+    #[test]
+    fn an_eviction_batch_stops_at_its_budget_and_the_next_resumes_after_it() {
+        let now = 10 * RETENTION_NS;
+        for n in 1..=5 {
+            mark_tokens_active(&[icrc(n)], 0);
+        }
+        let two_per_batch = || {
+            let mut taken = 0;
+            move || {
+                taken += 1;
+                taken < 2
+            }
+        };
+
+        let first = evict(None, now, two_per_batch());
+        assert_eq!(first, (Some(StoredTokenId(icrc(2))), 2));
+        assert_eq!(held(), vec![icrc(3), icrc(4), icrc(5)]);
+
+        let second = evict(first.0, now, two_per_batch());
+        assert_eq!(second, (Some(StoredTokenId(icrc(4))), 2));
+
+        assert_eq!(evict(second.0, now, two_per_batch()), (None, 1));
+        assert!(held().is_empty());
+    }
+
+    #[test]
+    fn an_eviction_batch_past_its_budget_still_takes_one_entry() {
+        let now = 10 * RETENTION_NS;
+        mark_tokens_active(&[icrc(1), icrc(2)], 0);
+
+        assert_eq!(
+            evict(None, now, || false),
+            (Some(StoredTokenId(icrc(1))), 1)
+        );
+        assert_eq!(held(), vec![icrc(2)]);
     }
 }

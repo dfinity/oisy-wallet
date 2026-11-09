@@ -899,3 +899,56 @@ fn test_housekeeping_evicts_stale_token_activity() {
         .expect("Failed to get stats");
     assert_eq!(stats_after.token_activity_count, 0);
 }
+
+#[test]
+fn test_housekeeping_evicts_a_full_token_activity_in_batches() {
+    const FULL: u64 = 2_000;
+    let pic_setup = setup();
+    enable_exchange_rate_refresh(&pic_setup);
+
+    let token_activity_count = || {
+        pic_setup
+            .query::<Stats>(controller(), "stats", ())
+            .expect("Failed to get stats")
+            .token_activity_count
+    };
+
+    // Two accounts with 1,000 ERC-20 tokens each fill `token_activity`.
+    for account in 0..2u32 {
+        let caller = Principal::self_authenticating(account.to_be_bytes());
+        pic_setup.ensure_user_profile(caller);
+        let tokens: Vec<CustomToken> = (0..1_000u32)
+            .map(|n| CustomToken {
+                token: Token::Erc20(ErcToken {
+                    token_address: ErcTokenId(format!("0x{:040x}", account * 1_000 + n)),
+                    chain_id: 1,
+                }),
+                ..USER_TOKEN.clone()
+            })
+            .collect();
+        pic_setup
+            .update::<()>(caller, "set_many_custom_tokens", tokens)
+            .expect("Failed to set many custom tokens");
+    }
+    assert_eq!(token_activity_count(), FULL);
+
+    pic_setup.pic.advance_time(Duration::from_secs(60 * 60 + 1));
+    let mut count = token_activity_count();
+    for _ in 0..20 {
+        if count < FULL {
+            break;
+        }
+        pic_setup.pic.tick();
+        count = token_activity_count();
+    }
+    assert!(
+        0 < count && count < FULL,
+        "The first batch should stop at its budget and leave entries for the next, left {count}"
+    );
+
+    for _ in 0..20 {
+        pic_setup.pic.advance_time(Duration::from_secs(1));
+        pic_setup.pic.tick();
+    }
+    assert_eq!(token_activity_count(), 0);
+}
