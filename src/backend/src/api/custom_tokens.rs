@@ -73,7 +73,7 @@ pub fn set_custom_token(token: CustomToken) {
 
     let CustomToken { token, .. } = token;
 
-    exchange::record_token_activity(&[TokenId::from(&token)], time());
+    exchange::record_token_activity(msg_caller(), &[TokenId::from(&token)], time());
 }
 
 #[update(guard = "caller_is_registered_user")]
@@ -103,7 +103,7 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
         );
     });
 
-    exchange::record_token_activity(&ids, time());
+    exchange::record_token_activity(msg_caller(), &ids, time());
 }
 
 /// Remove custom token for the user.
@@ -145,7 +145,7 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
     if !tokens.is_empty() {
         let ids: Vec<TokenId> = tokens.iter().map(|t| TokenId::from(&t.token)).collect();
 
-        exchange::record_token_activity(&ids, time());
+        exchange::record_token_activity(msg_caller(), &ids, time());
     }
 
     tokens

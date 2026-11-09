@@ -776,6 +776,46 @@ fn test_custom_tokens_track_no_activity_while_price_refresh_is_off() {
 }
 
 #[test]
+fn test_custom_tokens_record_activity_three_times_a_minute_per_caller() {
+    let pic_setup = setup();
+    enable_exchange_rate_refresh(&pic_setup);
+
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    let icrc_token = |ledger: u8| CustomToken {
+        token: Token::Icrc(IcrcToken {
+            ledger_id: Principal::from_slice(&[ledger, 1]),
+            index_id: None,
+        }),
+        ..USER_TOKEN.clone()
+    };
+    let token_activity_count = || {
+        pic_setup
+            .query::<Stats>(controller(), "stats", ())
+            .expect("Failed to get stats")
+            .token_activity_count
+    };
+
+    for ledger in 1..=4 {
+        pic_setup
+            .update::<()>(caller, "set_custom_token", icrc_token(ledger))
+            .expect("Failed to set custom token");
+    }
+    assert_eq!(
+        token_activity_count(),
+        3,
+        "The fourth token within the minute should not be recorded"
+    );
+
+    pic_setup.pic.advance_time(Duration::from_secs(60));
+    pic_setup
+        .update::<()>(caller, "set_custom_token", icrc_token(5))
+        .expect("Failed to set custom token");
+    assert_eq!(token_activity_count(), 4);
+}
+
+#[test]
 fn test_set_many_custom_tokens_tracks_activity() {
     let pic_setup = setup();
     enable_exchange_rate_refresh(&pic_setup);

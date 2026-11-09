@@ -5,6 +5,7 @@ mod supplemental;
 
 use std::{cell::Cell, time::Duration};
 
+use candid::Principal;
 use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::{
@@ -30,6 +31,7 @@ use crate::{
         storable::{Candid, StoredTokenId},
         StoredPrincipal,
     },
+    utils::rate_limiter::TOKEN_ACTIVITY_RATE_LIMITER,
 };
 
 /// How often exchange rates are refreshed (1 minute).
@@ -457,17 +459,27 @@ pub(crate) fn priceable_tokens_for_caller(caller: StoredPrincipal) -> Vec<Stored
     tokens
 }
 
-/// Records `token_ids` as active at `now_ns`, so that [`refresh_exchange_rates`] keeps their
-/// prices current.
+/// Records `token_ids` as active at `now_ns` on behalf of `caller`, so that
+/// [`refresh_exchange_rates`] keeps their prices current.
 ///
 /// `token_activity` serves only that refresh, so nothing is recorded while it is off (see
-/// [`is_exchange_rate_refresh_enabled`]), and only the custom tokens the providers can price are
+/// [`is_exchange_rate_refresh_enabled`]) or once `caller` has used up
+/// [`TOKEN_ACTIVITY_RATE_LIMITER`], and only the custom tokens the providers can price are
 /// recorded. The always-on native tokens are left out: the refresh fetches them whenever a caller
 /// has asked for rates (see [`should_refresh_natives`]) and never consults `token_activity` for
 /// them, so an entry for one would only be re-marked on every call and never evicted.
-pub(crate) fn record_token_activity(token_ids: &[TokenId], now_ns: u64) {
+///
+/// Returns whether the refresh is on and `caller` was within its limit.
+pub(crate) fn record_token_activity(caller: Principal, token_ids: &[TokenId], now_ns: u64) -> bool {
     if !is_exchange_rate_refresh_enabled() {
-        return;
+        return false;
+    }
+
+    if TOKEN_ACTIVITY_RATE_LIMITER
+        .with(|limiter| limiter.check_at(caller, now_ns))
+        .is_err()
+    {
+        return false;
     }
 
     let natives = native_token_ids();
@@ -482,6 +494,8 @@ pub(crate) fn record_token_activity(token_ids: &[TokenId], now_ns: u64) {
     if !to_record.is_empty() {
         crate::token::mark_tokens_active(&to_record, now_ns);
     }
+
+    true
 }
 
 /// Single-pass read of the cache for `token_ids`. Returns:
@@ -749,13 +763,55 @@ mod tests {
         })
     }
 
+    fn caller(seed: u8) -> Principal {
+        Principal::from_slice(&[seed, 0xca])
+    }
+
     #[test]
     fn record_token_activity_records_nothing_while_refresh_is_off() {
         set_exchange_config(Some("key"), Some(false));
 
-        record_token_activity(&[custom_token(1).0], 1_000);
-
+        assert!(!record_token_activity(
+            caller(1),
+            &[custom_token(1).0],
+            1_000
+        ));
         assert!(recorded_activity().is_empty());
+    }
+
+    #[test]
+    fn record_token_activity_holds_each_caller_to_three_recordings_a_minute() {
+        const MINUTE_NS: u64 = 60 * NANOS_PER_SEC;
+        set_exchange_config(Some("key"), Some(true));
+        let start = 10 * MINUTE_NS;
+
+        for n in 0..3 {
+            assert!(record_token_activity(
+                caller(1),
+                &[custom_token(n).0],
+                start + u64::from(n)
+            ));
+        }
+        assert!(!record_token_activity(
+            caller(1),
+            &[custom_token(3).0],
+            start + 3
+        ));
+        assert_eq!(
+            recorded_activity().len(),
+            3,
+            "a recording over the limit writes nothing"
+        );
+
+        assert!(
+            record_token_activity(caller(2), &[custom_token(4).0], start + 4),
+            "the limit is per caller"
+        );
+        assert!(
+            record_token_activity(caller(1), &[custom_token(5).0], start + MINUTE_NS),
+            "the first recording leaves the window a minute later"
+        );
+        assert_eq!(recorded_activity().len(), 5);
     }
 
     #[test]
@@ -764,6 +820,7 @@ mod tests {
         let priceable = custom_token(1).0;
 
         record_token_activity(
+            caller(1),
             &[
                 TokenId::EvmNative(1),
                 TokenId::XrpNativeMainnet,

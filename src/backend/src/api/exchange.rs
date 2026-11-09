@@ -45,23 +45,26 @@ use crate::{
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
-    let caller = StoredPrincipal(msg_caller());
+    let caller = msg_caller();
 
     // Signal that a caller wants rates, so the recurring timer keeps the
     // always-on native tokens warm (see `should_refresh_natives`).
     note_rate_request();
 
-    let tokens = priceable_tokens_for_caller(caller);
+    let tokens = priceable_tokens_for_caller(StoredPrincipal(caller));
 
     if tokens.is_empty() {
         return Vec::new();
     }
 
     let token_ids: Vec<TokenId> = tokens.iter().map(|stored| stored.0.clone()).collect();
-    record_token_activity(&token_ids, time());
+    let recorded = record_token_activity(caller, &token_ids, time());
 
+    // A refresh started from here sends outcalls on the caller's behalf, so it
+    // is held to the same per-caller limit as recording activity. The recurring
+    // refresh covers the recorded tokens either way.
     let (snapshot, stale) = snapshot_and_stale(tokens);
-    let refresh_lock = if stale.is_empty() || !is_exchange_rate_refresh_enabled() {
+    let refresh_lock = if stale.is_empty() || !recorded {
         None
     } else {
         try_acquire_refresh_lock()
