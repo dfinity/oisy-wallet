@@ -20,8 +20,10 @@ The [November migration spec](../../docs/ai/spec-driven-development/specs/2026-1
 targets the deployed website with SDK-derived authentication. Implementation is
 authorized. SDK authentication is integrated; the user confirmed ICP account
 continuity on 2026-11-06. The controller now loads the live website. Its runtime
-adapter must be deployed to audit before installing this version on the phone.
-Local verification and remaining acceptance checks are recorded in the spec.
+adapter was deployed to audit on 2026-11-09, and the signed update was installed
+and launched on the existing iPhone preview. The user confirmed that Internet
+Identity sign-in returns to Wallet and the ICP quantity matches.
+Verification and remaining acceptance checks are recorded in the spec.
 
 Pinned sources, local verification and audit deployment instructions live with
 the prototype.

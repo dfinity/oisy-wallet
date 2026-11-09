@@ -35,7 +35,9 @@ build. The existing packaged-host transport remains compatible during migration.
 in a nonpersistent WKWebView. `LiveWalletBridge` and `LiveWalletOriginPolicy` enforce
 the HTTPS boundary. Real WebKit tests cover the configured origin, subframes,
 stale documents, reloads and process failure. The user approved the controller
-replacement and local testing. Audit deployment and phone acceptance are pending.
+replacement and local testing. Audit deployment and phone installation completed
+on 2026-11-09. The user confirmed that sign-in opens Wallet and ICP matches. See
+[deployment evidence](./sdk-app-integration.md#live-host-verification-on-2026-11-09).
 
 For the live rollout:
 
@@ -73,8 +75,8 @@ flowchart TD
 Publishing audit updates the screens on the next wallet document load. An already
 open document keeps running; the host does not replace it during Send or Swap.
 Native navigation, auth and capabilities still require an app update. Roll out the
-compatible website before installing this host; the existing deployed frontend
-does not yet contain these runtime changes.
+compatible website before installing this host. The audit frontend deployed on
+2026-11-09 contains these runtime changes.
 
 `app-environment.json` and `TrustedWalletViewController` own delivery. The existing
 Capacitor package/config scaffold remains, but this controller does not instantiate

@@ -33,8 +33,11 @@ bridge and integrated controller passed origin/subframe/document-isolation,
 reload and process-failure checks. Shared-screen regressions, 240 focused frontend
 tests, application/test type checks and repository lint pass. Detailed evidence is
 in [app integration](../../../../mobile/capacitor/docs/sdk-app-integration.md#live-host-verification-on-2026-11-09).
-Commit and push were approved on 2026-11-09. Audit deployment and phone installation
-have not been performed for M2. See the
+Commit, push, audit deployment and phone installation were approved on 2026-11-09.
+Frontend deployment `e6810e4876` completed and its public runtime/auth assets were
+verified. The signed update was installed and launched over the existing iPhone
+preview. The user confirmed that live-host sign-in opens Wallet and ICP matches.
+Remaining M2 device checks are recorded in the app integration guide. See the
 [live-host contract](../../../../mobile/capacitor/docs/shared-web-contract.md#live-host-2026-11-09).
 
 ## Relationship to existing work
@@ -49,8 +52,9 @@ Keep the existing app, bundle/signing overrides, Keychain service and transactio
 recovery records during development. Work in `mobile/capacitor/` initially; its
 directory name is not a reason to move files or create a second wallet app.
 Do not restore the retired native wallet. The user authorized implementation and
-audit deployment preparation. Ask before pushing. The user will trigger the audit
-deployment; production deployment and funded transaction tests remain separate.
+audit deployment preparation, then explicitly authorized deploying this branch to
+audit and installing the updated app on 2026-11-09. Ask before future pushes.
+Production deployment and funded transaction tests remain separate.
 
 ## Problem and intended result
 

@@ -165,7 +165,23 @@ preview. Keep `VITE_MOBILE_SHELL` and `VITE_MOBILE_UI_TEST` unset/false for depl
 Check real II sign-in, ICP account continuity, token history, Activity and Explore
 on the phone. A subsequent web-only release must appear after a new wallet document
 loads, without interrupting an open operation. Commit and push were approved on
-2026-11-09; audit deployment and phone acceptance remain pending for this live-host step.
+2026-11-09. The user then authorized audit deployment and phone installation.
+
+Frontend-only [deployment 42606650989](https://github.com/dfinity/oisy-wallet/actions/runs/42606650989)
+succeeded for commit `e6810e48760cf2239b5a8466f38a91ff34eb852e`. The published
+audit HTML uses new entry assets and imports the live native-host adapter. The
+HTTPS callback serves HTML; the AASA and II callback allowlist are unchanged and
+pass the deployment checker against the signed app and provisioning profile.
+
+The Release device build is signed and passes signature verification with the
+existing preview ID and team. It contains no bundled wallet pages or test bundle.
+The update was installed over the existing preview and launched on the iPhone
+14 Pro Max on 2026-11-09 after USB reconnection. Audit still served the verified
+entry assets immediately before launch. No uninstall or storage reset was used.
+The user approved Internet Identity sign-in and confirmed: "Wallet opens and ICP
+matches." This verifies live-host sign-in and ICP account continuity for this
+deployment. No funded transaction was submitted. Token history, Activity, Explore
+and delivery of a subsequent web-only release still need live-host acceptance.
 
 ## Verified on 2026-11-05
 
