@@ -133,6 +133,7 @@
 			"section_finance": "",
 			"section_more": "",
 			"airdrops": "المكافآت",
+			"tools": "",
 			"earning": "الكسب والمكافآت",
 			"pay": "",
 			"wallet_connect": "",
@@ -166,6 +167,7 @@
 			"borrow": "",
 			"earning": "",
 			"airdrops": "افتح عرض المكافآت",
+			"tools": "",
 			"pay": "",
 			"wallet_connect": "",
 			"menu": "عنوان محفظتك، الإعدادات، تسجيل الخروج والروابط الخارجية",
@@ -887,6 +889,8 @@
 			"disable_hide_micro_transactions": "تعطيل إخفاء المعاملات ذات القيم الصغيرة جدًا",
 			"save_spam_filter_success": "تم تحديث إعدادات مرشح البريد العشوائي الخاصة بك.",
 			"export_data": "تصدير البيانات",
+			"export_data_moved": "",
+			"open_tools": "",
 			"export_data_description": "قم بتنزيل الرموز والمعاملات الخاصة بك كملف CSV — Basic للأساسيات، Extended للسمات الإضافية.",
 			"export_basic": "Basic",
 			"export_extended": "Extended",
@@ -907,6 +911,12 @@
 			"loading_profile": "خطأ أثناء تحميل الملف الشخصي. يرجى تحديث الصفحة للحصول على التجربة الكاملة.",
 			"export_exchange_rate_unavailable": "لا تزال أسعار الصرف قيد التحميل. حاول مرة أخرى بعد لحظة.",
 			"export_failed": "لم نتمكن من إنشاء التصدير الخاص بك. يرجى المحاولة مرة أخرى."
+		}
+	},
+	"tools": {
+		"text": {
+			"title": "",
+			"top_up_canister": ""
 		}
 	},
 	"shortcuts": {
@@ -1200,16 +1210,36 @@
 		"text": {
 			"top_up": "",
 			"title": "",
+			"canister_top_up": "",
 			"description": "",
+			"description_icp": "",
+			"pay_with": "",
+			"enable_token": "",
+			"not_enough_to_pay": "",
+			"no_token_title": "",
+			"no_token_description": "",
 			"canister_id_placeholder": "",
 			"checking_canister": "",
 			"recently_topped_up": "",
+			"recently_topped_up_empty_state_title": "",
+			"recently_topped_up_empty_state_description": "",
+			"icp_hint_title": "",
+			"icp_hint_description": "",
+			"contacts_empty_state_title": "",
+			"contacts_empty_state_description": "",
 			"canister": "",
 			"you_top_up": "",
 			"total": "",
+			"canister_receives": "",
+			"cycles_estimate": "",
+			"rate": "",
+			"converted_by": "",
 			"one_way": "",
+			"one_way_icp": "",
 			"topping_up": "",
 			"topped_up": "",
+			"topped_up_cycles": "",
+			"pending": "",
 			"unknown": "",
 			"unknown_fresh": "",
 			"sent_to_canister": "",
@@ -1223,11 +1253,21 @@
 			"canister_not_found": "",
 			"canister_check_failed": "",
 			"amount_too_small": "",
+			"amount_too_small_icp": "",
+			"rate_unavailable": "",
 			"refused": "",
 			"insufficient_funds": "",
 			"clock": "",
 			"refunded": "",
-			"refunded_nothing": ""
+			"refunded_nothing": "",
+			"refunded_icp": "",
+			"failed": "",
+			"not_started": "",
+			"transfer_failed": "",
+			"unconfirmed": ""
+		},
+		"alt": {
+			"enable_token": ""
 		}
 	},
 	"active_user_transactions": {
@@ -1272,9 +1312,13 @@
 			"select_token_to_pay": "اختر الرمز للدفع",
 			"pay_at_successful": "تم الدفع في $receipt",
 			"pay_at_failure": "فشل الدفع في $receipt",
+			"pay_at_not_confirmed": "",
+			"payment_not_confirmed_description": "",
+			"payment_not_confirmed_description_generic": "",
 			"try_again": "حاول مرة أخرى",
 			"payment_confirmed": "تم تأكيد الدفع",
 			"payment_failed": "فشل الدفع",
+			"payment_not_confirmed": "",
 			"what_is_scan": "ما هو الماسح الضوئي",
 			"no_camera_permission": "لمسح رموز QR، تحتاج إلى السماح بالوصول إلى الكاميرا في إعدادات الموقع في متصفحك.",
 			"what_is_scan_description": "يمكن لماسح $oisy_short قراءة مجموعة متنوعة من رموز QR وبدء الإجراء الصحيح على الفور. امسح رمز QR الخاص بـ WalletConnect لإنشاء اتصال جديد، أو امسح رمز الدفع في أي متجر يستخدم Open CryptoPay لتسوية الفاتورة باستخدام $oisy_short Pay.",
@@ -1432,6 +1476,7 @@
 			"swap_expired": "",
 			"near_intents_quote_unverified": "",
 			"near_intents_quote_expired": "",
+			"near_intents_quote_slippage": "",
 			"near_intents_deposit_expired": "",
 			"near_intents_quote_deposit_memo": "",
 			"oisy_trade_not_trackable": "",
@@ -1446,8 +1491,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "شراء",
-			"buy_dev": "شراء (بيئة تطوير)",
+			"buy_sell": "",
+			"buy_sell_dev": "",
 			"unavailable_title": "شراء الرموز غير متاح مؤقتًا",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",
@@ -1824,7 +1869,7 @@
 			"spender": "",
 			"operator": "",
 			"application": "",
-			"review": "مراجعة الأذونات المطلوبة لـ $chain_name ($key)",
+			"granted_permissions": "",
 			"method": "الطريقة",
 			"interacting_with": "",
 			"type": "",
@@ -1834,6 +1879,7 @@
 			"expiration": "",
 			"token": "",
 			"network": "",
+			"networks": "",
 			"amount": "",
 			"hex_data": "بيانات HEX",
 			"base64_data": "",
@@ -1847,6 +1893,8 @@
 			"close_pays_others": "",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
+			"unreviewed_without_simulation": "",
+			"unreviewed_not_described_by_simulation": "",
 			"simulated_instructions": "",
 			"multiple_operations": "",
 			"simulated_review": "",
@@ -1872,6 +1920,7 @@
 			"high_gas_limit": "",
 			"invalid_typed_data": "",
 			"unreviewable_typed_data": "",
+			"unreviewable_typed_data_witness": "",
 			"unsigned_typed_data_keys": "",
 			"tab_summary": "",
 			"tab_raw_data": "",
@@ -1972,6 +2021,7 @@
 			"request_rejected": "تم رفض طلب WalletConnect",
 			"unknown_parameter": "معلمة غير معروفة.",
 			"wallet_not_initialized": "خطأ غير متوقع. عنوان محفظتك غير مهيأ.",
+			"btc_address_not_signer": "",
 			"btc_broadcast_not_supported": "",
 			"btc_non_mainnet_sign_not_supported": "",
 			"btc_psbt_decode": "",
@@ -1991,6 +2041,7 @@
 			"unreviewed_without_simulation": "",
 			"unreviewed_not_described_by_simulation": "",
 			"unread_programs_unconfirmed": "",
+			"unexplained_request_unconfirmed": "",
 			"sol_transaction_as_message": "",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
 			"unexpected_processing_request": "خطأ غير متوقع أثناء معالجة الطلب باستخدام WalletConnect."
@@ -2305,6 +2356,9 @@
 			"confirmations": "التأكيدات",
 			"for": "",
 			"for_copied": "",
+			"canister": "",
+			"canister_copied": "",
+			"canister_unknown": "",
 			"expiration": "",
 			"approve_label": ""
 		},
@@ -2325,7 +2379,8 @@
 			"deposit": "إيداع",
 			"approve": "موافقة",
 			"burn": "حرق",
-			"mint": "إنشاء"
+			"mint": "إنشاء",
+			"top_up": ""
 		},
 		"filter": {
 			"types_label": "",
@@ -2356,7 +2411,8 @@
 			"no_date_available": "لا يوجد تاريخ متاح",
 			"pending": "معلق",
 			"top_up": "",
-			"top_up_refund": ""
+			"top_up_refund": "",
+			"canister_top_up": ""
 		},
 		"alt": {
 			"open_block_explorer": "افتح هذه المعاملة في مستكشف الكتل",
