@@ -466,3 +466,32 @@ export const isIcrcTokenSupportIcrc2 = async ({
 
 	return supportedStandards.some(({ name }) => name === IcTokenStandards.icrc2);
 };
+
+// A ledger's standards do not change while the app runs, so each ledger is asked once per session.
+const icrc3SupportByLedger = new Map<CanisterIdText, Promise<boolean>>();
+
+export const isIcrcTokenSupportIcrc3 = ({
+	identity,
+	ledgerCanisterId
+}: {
+	identity: NullishIdentity;
+	ledgerCanisterId: CanisterIdText;
+}): Promise<boolean> => {
+	const cached = icrc3SupportByLedger.get(ledgerCanisterId);
+
+	if (nonNullish(cached)) {
+		return cached;
+	}
+
+	const supported = icrc1SupportedStandards({ identity, ledgerCanisterId, certified: false })
+		.then((standards) => standards.some(({ name }) => name === IcTokenStandards.icrc3))
+		.catch((err: unknown) => {
+			// A failed call is not an answer: the next caller asks the ledger again.
+			icrc3SupportByLedger.delete(ledgerCanisterId);
+			throw err;
+		});
+
+	icrc3SupportByLedger.set(ledgerCanisterId, supported);
+
+	return supported;
+};

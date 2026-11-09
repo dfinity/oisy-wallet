@@ -11,6 +11,7 @@
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconPlant from '$lib/components/icons/IconPlant.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
+	import IconWrench from '$lib/components/icons/IconWrench.svelte';
 	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
@@ -45,6 +46,7 @@
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_HELP,
 		NAVIGATION_ITEM_TOKENS,
+		NAVIGATION_ITEM_TOOLS,
 		NAVIGATION_ITEM_TRADE
 	} from '$lib/constants/test-ids.constants';
 	import { TokenTypes } from '$lib/enums/token-types';
@@ -68,6 +70,7 @@
 		isRouteRewards,
 		isRouteSettings,
 		isRouteHelp,
+		isRouteTools,
 		isRouteTokens,
 		isRouteOisyTradeProvider,
 		isRouteTrading,
@@ -298,6 +301,16 @@
 				icon: IconGift,
 				href: url(AppPath.Rewards),
 				selected: isRouteRewards(page)
+			},
+			// Not flagged: Export data lives on the page whatever the flags, while the Canister
+			// top-up section on it follows its own flag.
+			tools: {
+				label: $i18n.navigation.text.tools,
+				ariaLabel: $i18n.navigation.alt.tools,
+				testId: prefixedTestId(NAVIGATION_ITEM_TOOLS),
+				icon: IconWrench,
+				href: url(AppPath.Tools),
+				selected: isRouteTools(page)
 			}
 		})
 	);
@@ -355,11 +368,17 @@
 				{@render cardInner()}
 			</a>
 		{:else}
+			<!-- A card that opens a modal starts no navigation, so it closes its sheet itself, as
+			     instantly as a navigation would. -->
 			<button
 				class={cardClass}
 				aria-label={descriptor.ariaLabel}
 				data-tid={descriptor.testId}
-				onclick={descriptor.onclick}
+				onclick={() => {
+					closeSheetInstantly = true;
+					openSheet = null;
+					descriptor.onclick?.();
+				}}
 				type="button"
 			>
 				{@render cardInner()}

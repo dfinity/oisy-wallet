@@ -2,7 +2,10 @@ import { WSOL_DECIMALS, WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.en
 import { ZERO } from '$lib/constants/app.constants';
 import { maxBigInt } from '$lib/utils/bigint.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
-import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
+import {
+	SOLANA_KNOWN_PROGRAM_ADDRESSES,
+	SOLANA_ROUTER_PROGRAM_ADDRESSES
+} from '$sol/constants/sol-known-programs.constants';
 import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -68,10 +71,17 @@ const funderOf = ({ info }: { info: object }): SolAddress | undefined =>
 	address({ info, key: 'source' }) ?? address({ info, key: 'payer' });
 
 /**
- * The amount of a `transferChecked`, which nests it with the decimals the mint uses.
+ * The amount of a `transferChecked`, which nests it with the decimals the mint uses. A
+ * `transferCheckedWithFee` nests the fee it holds back the same way, under `feeAmount`.
  */
-const tokenAmount = (info: object): { amount?: bigint; decimals?: number } => {
-	const value = field({ info, key: 'tokenAmount' });
+const tokenAmount = ({
+	info,
+	key = 'tokenAmount'
+}: {
+	info: object;
+	key?: string;
+}): { amount?: bigint; decimals?: number } => {
+	const value = field({ info, key });
 
 	if (isNullish(value) || typeof value !== 'object') {
 		return {};
@@ -412,7 +422,7 @@ const stackHeightOf = (instruction: unknown): number | undefined =>
 		: undefined;
 
 /**
- * The program that made each call inside one top-level instruction: the closest call before it one
+ * The call that made each call inside one top-level instruction: the closest call before it one
  * level up, from the depth the RPC reports for every nested call. A call reported without its depth
  * is left without a caller rather than guessed at.
  */
@@ -422,8 +432,8 @@ const callersOf = ({
 }: {
 	instruction: unknown;
 	inner: readonly unknown[];
-}): (SolAddress | undefined)[] => {
-	const stack: (SolAddress | undefined)[] = [programAddressOf(instruction)];
+}): unknown[] => {
+	const stack: unknown[] = [instruction];
 
 	return inner.map((nested) => {
 		const height = stackHeightOf(nested);
@@ -435,7 +445,7 @@ const callersOf = ({
 		const caller = stack[height - 2];
 
 		stack.length = height;
-		stack[height - 1] = programAddressOf(nested);
+		stack[height - 1] = nested;
 
 		return caller;
 	});
@@ -446,7 +456,14 @@ interface FlattenedInstruction {
 	topLevel: boolean;
 	instruction: SolParsedRpcInstruction;
 	madeBy?: SolAddress;
+	// The accounts the call that made this instruction names, which carry the signatures it acts with.
+	madeWith?: SolAddress[];
+	// That call, as the run gives it.
+	madeIn?: unknown;
 	batch?: SolBatchMark;
+	// For a step taken out of a token batch, the batch's call, which no longer stands in the list
+	// itself, so the calls made inside the batch can still be followed back to it.
+	carriedIn?: unknown;
 	// A token batch left whole, whose steps nobody read in order.
 	wholeBatch?: boolean;
 }
@@ -474,12 +491,16 @@ const flatten = ({
 					instruction,
 					topLevel: true,
 					madeBy: undefined,
+					madeWith: [],
+					madeIn: undefined,
 					madeCalls: solRpcBatchMadeCalls({ inner })
 				},
 				...inner.map((nested, index) => ({
 					instruction: nested,
 					topLevel: false,
-					madeBy: callers[index],
+					madeBy: programAddressOf(callers[index]),
+					madeWith: accountsOf(callers[index]),
+					madeIn: callers[index],
 					madeCalls: solRpcBatchMadeCalls({ inner, position: index })
 				}))
 			]
@@ -489,7 +510,7 @@ const flatten = ({
 				// whose contents cannot be read, or whose steps cannot be put in order with the calls
 				// made inside it, stays whole, and describes nothing.
 				.flatMap<FlattenedInstruction>(
-					({ instruction: candidate, topLevel, madeBy, madeCalls }, position) => {
+					({ instruction: candidate, topLevel, madeBy, madeWith, madeIn, madeCalls }, position) => {
 						const parsed = candidate as SolParsedRpcInstruction;
 						const carried = solRpcOrderedBatchedInstructions({ instruction: parsed, madeCalls });
 
@@ -499,7 +520,7 @@ const flatten = ({
 										parentIndex,
 										topLevel,
 										instruction: parsed,
-										...(nonNullish(madeBy) && { madeBy }),
+										...(nonNullish(madeBy) && { madeBy, madeWith, madeIn }),
 										...(isTokenBatch(parsed) && { wholeBatch: true })
 									}
 								]
@@ -507,8 +528,9 @@ const flatten = ({
 									parentIndex,
 									topLevel,
 									instruction: entry,
-									...(nonNullish(madeBy) && { madeBy }),
-									batch: { id: `${parentIndex}:${position}`, program: parsed.programId }
+									...(nonNullish(madeBy) && { madeBy, madeWith, madeIn }),
+									batch: { id: `${parentIndex}:${position}`, program: parsed.programId },
+									carriedIn: parsed
 								}));
 					}
 				)
@@ -600,7 +622,7 @@ const transferEffect = ({
 	const authority =
 		address({ info, key: 'authority' }) ?? address({ info, key: 'multisigAuthority' });
 
-	const { amount: checked, decimals } = tokenAmount(info);
+	const { amount: checked, decimals } = tokenAmount({ info });
 	const value = checked ?? amount({ info, key: 'amount' });
 
 	const tokenAddress =
@@ -1047,7 +1069,7 @@ const toEffect = ({
 				return undefined;
 			}
 
-			const { amount: checked, decimals } = tokenAmount(info);
+			const { amount: checked, decimals } = tokenAmount({ info });
 			const delegate = address({ info, key: 'delegate' });
 			const approved = address({ info, key: 'mint' }) ?? mintAt({ account: source, position });
 
@@ -1080,7 +1102,7 @@ const toEffect = ({
 				return undefined;
 			}
 
-			const { amount: checked, decimals } = tokenAmount(info);
+			const { amount: checked, decimals } = tokenAmount({ info });
 			const value = checked ?? amount({ info, key: 'amount' });
 			const mint = address({ info, key: 'mint' }) ?? mintAt({ account, position });
 
@@ -1319,7 +1341,7 @@ const balanceAtInstruction = ({
 			}
 
 			const moved =
-				type === 'transferChecked' ? tokenAmount(info).amount : amount({ info, key: 'amount' });
+				type === 'transferChecked' ? tokenAmount({ info }).amount : amount({ info, key: 'amount' });
 
 			// An amount nobody knows stays unknown whatever moves after it.
 			if (isNullish(moved) || isNullish(held.amount)) {
@@ -1639,7 +1661,9 @@ const closePayouts = ({
 				['transfer', 'transferChecked'].includes(type)
 			) {
 				const moved =
-					type === 'transferChecked' ? tokenAmount(info).amount : amount({ info, key: 'amount' });
+					type === 'transferChecked'
+						? tokenAmount({ info }).amount
+						: amount({ info, key: 'amount' });
 				const source = address({ info, key: 'source' });
 				const destination = address({ info, key: 'destination' });
 
@@ -1996,6 +2020,58 @@ export const solKeepsBatchWhole = ({
 	flatten({ instructions, innerInstructions }).some(({ wholeBatch }) => wholeBatch ?? false);
 
 /**
+ * Whose an account is as of an instruction: the holder its current lifecycle began with, where that
+ * is known, and the accounts named as the user's otherwise. Those are every account the user held
+ * at any point of the message, so read alone they lend an address that was somebody else's before
+ * it was opened for the user, or after the user's was closed, to the user.
+ *
+ * An address with no account open is neither: the message closed what was there, or opens the first
+ * account there only later. Nothing of the user's can leave it, and what arrives lands in the
+ * account opened there next, so it is whoever that one is opened for.
+ */
+const ownershipAt =
+	({
+		flattened,
+		owned,
+		accountHolders,
+		accountMintsBefore
+	}: {
+		flattened: { instruction: SolParsedRpcInstruction }[];
+		owned: Set<SolAddress>;
+		accountHolders: Partial<Record<SolAddress, SolAddress>>;
+		accountMintsBefore: Partial<Record<SolAddress, SplTokenAddress>>;
+	}) =>
+	({
+		account,
+		position,
+		arriving = false
+	}: {
+		account: SolAddress;
+		position: number;
+		arriving?: boolean;
+	}): boolean => {
+		const { holder, closed } = openedAs({
+			account,
+			flattened,
+			accountHolders,
+			accountMintsBefore,
+			until: position
+		});
+
+		if (nonNullish(holder)) {
+			return owned.has(holder);
+		}
+
+		const { holder: next } = openedNext({ account, flattened, from: position });
+
+		if ((closed ?? false) || nonNullish(next)) {
+			return arriving && nonNullish(next) && owned.has(next);
+		}
+
+		return owned.has(account);
+	};
+
+/**
  * The instruction list the review shows, from a transaction's own instructions and the ones a
  * simulation says it would make inside them.
  *
@@ -2106,39 +2182,12 @@ export const mapSolInstructionSummaries = ({
 			})
 	});
 
-	const owned = expandOwnedAccounts({ flattened, ownedAddresses });
-
-	// Whose an account is as of an instruction: the holder its current lifecycle began with, where
-	// that is known, and the accounts named as the user's otherwise. Those are every account the
-	// user held at any point of the message, so read alone they lend an address that was somebody
-	// else's before it was opened for the user, or after the user's was closed, to the user.
-	//
-	// An address with no account open is neither: the message closed what was there, or opens the
-	// first account there only later. Nothing of the user's can leave it, and what arrives lands in
-	// the account opened there next, so it is whoever that one is opened for.
-	const ownedAt = ({
-		account,
-		position,
-		arriving = false
-	}: {
-		account: SolAddress;
-		position: number;
-		arriving?: boolean;
-	}): boolean => {
-		const { holder, closed } = openedAt({ account, position });
-
-		if (nonNullish(holder)) {
-			return owned.has(holder);
-		}
-
-		const { holder: next } = openedNext({ account, flattened, from: position });
-
-		if ((closed ?? false) || nonNullish(next)) {
-			return arriving && nonNullish(next) && owned.has(next);
-		}
-
-		return owned.has(account);
-	};
+	const ownedAt = ownershipAt({
+		flattened,
+		owned: expandOwnedAccounts({ flattened, ownedAddresses }),
+		accountHolders,
+		accountMintsBefore
+	});
 
 	// Read from the top-level instructions themselves: a router's own instruction is precisely the
 	// one the RPC cannot parse, so taking it from the flattened list would name the first inner
@@ -2334,4 +2383,600 @@ export const mapSolInstructionSummaries = ({
 	);
 
 	return groupUnread({ effects: listed, programs, unread });
+};
+
+// What a payment moves: lamports, or units of the one mint a token account holds.
+type PaymentAsset = 'lamports' | 'tokens';
+
+// What a transfer moves where: lamports from a System account, a seed-derived one or a nonce
+// account, or token units from a token account on the signature of its authority. A Token-2022 mint
+// that charges a fee on transfers holds it back in the destination, which is credited the rest. An
+// unwrap takes token units out of a wrapped SOL account and pays them into its destination as
+// lamports, and one that states no amount empties the account. A withdrawal of excess lamports pays
+// everything its account holds above its rent. A close pays every lamport its account holds into
+// its destination, and with them what a wrapped SOL account wraps. A burn, a permissioned one
+// included, takes token units out of its account into nowhere, and a deposit into the account's
+// confidential balance takes them where no transfer this check reads can reach them.
+// A creation pays the lamports it funds a new account with, its rent included, into that account.
+const paymentOf = ({
+	program,
+	parsed: { type, info }
+}: SolParsedRpcInstruction):
+	| {
+			source?: SolAddress;
+			destination?: SolAddress;
+			value?: bigint;
+			credited?: bigint;
+			emptying?: boolean;
+			closing?: boolean;
+			burning?: boolean;
+			sent: PaymentAsset;
+			received: PaymentAsset;
+	  }
+	| undefined => {
+	if (program === 'system' && SYSTEM_TRANSFERS.includes(type)) {
+		return {
+			source: systemTransferSource(info),
+			destination: address({ info, key: 'destination' }),
+			value: amount({ info, key: 'lamports' }),
+			sent: 'lamports',
+			received: 'lamports'
+		};
+	}
+
+	if (program === 'system' && isAccountCreation(type)) {
+		return {
+			source: funderOf({ info }),
+			destination: address({ info, key: 'newAccount' }),
+			value: amount({ info, key: 'lamports' }),
+			sent: 'lamports',
+			received: 'lamports'
+		};
+	}
+
+	if (
+		nonNullish(program) &&
+		TOKEN_PROGRAMS.includes(program) &&
+		['transfer', 'transferChecked', 'transferCheckedWithFee'].includes(type)
+	) {
+		const value = tokenAmount({ info }).amount ?? amount({ info, key: 'amount' });
+		const fee = tokenAmount({ info, key: 'feeAmount' }).amount;
+
+		return {
+			source: address({ info, key: 'source' }),
+			destination: address({ info, key: 'destination' }),
+			value,
+			...(nonNullish(value) && nonNullish(fee) && { credited: value - fee }),
+			sent: 'tokens',
+			received: 'tokens'
+		};
+	}
+
+	if (nonNullish(program) && TOKEN_PROGRAMS.includes(program) && type === 'unwrapLamports') {
+		const value = amount({ info, key: 'amount' });
+
+		return {
+			source: address({ info, key: 'source' }),
+			destination: address({ info, key: 'destination' }),
+			value,
+			...(isNullish(value) && { emptying: true }),
+			sent: 'tokens',
+			received: 'lamports'
+		};
+	}
+
+	if (
+		nonNullish(program) &&
+		TOKEN_PROGRAMS.includes(program) &&
+		type === 'withdrawExcessLamports'
+	) {
+		return {
+			source: address({ info, key: 'source' }),
+			destination: address({ info, key: 'destination' }),
+			emptying: true,
+			sent: 'lamports',
+			received: 'lamports'
+		};
+	}
+
+	if (
+		nonNullish(program) &&
+		TOKEN_PROGRAMS.includes(program) &&
+		[
+			'burn',
+			'burnChecked',
+			'permissionedBurn',
+			'permissionedBurnChecked',
+			'depositConfidentialTransfer'
+		].includes(type)
+	) {
+		return {
+			source: address({ info, key: 'account' }),
+			value: tokenAmount({ info }).amount ?? amount({ info, key: 'amount' }),
+			burning: true,
+			sent: 'tokens',
+			received: 'tokens'
+		};
+	}
+
+	if (nonNullish(program) && TOKEN_PROGRAMS.includes(program) && type === 'closeAccount') {
+		return {
+			source: address({ info, key: 'account' }),
+			destination: address({ info, key: 'destination' }),
+			closing: true,
+			sent: 'lamports',
+			received: 'lamports'
+		};
+	}
+};
+
+interface WaitingPayout {
+	program: SolAddress;
+	account: SolAddress;
+	// Rent: lamports an account's opening took as its rent, which only a close moves on.
+	asset: PaymentAsset | 'rent';
+	parentIndex: number;
+	position: number;
+	left: bigint;
+	// What a close or a burn left of a payout, which nothing can pass on any more.
+	ended?: boolean;
+}
+
+// A transfer out of an account passes its amount on to the payouts into that account within the same
+// instruction that are still waiting, oldest first, and only to those paid in what it moves: token
+// units leaving an account pass on none of the lamports paid into it. One that empties the account
+// passes all of those on, whatever its amount.
+const passOn = ({
+	waiting,
+	account,
+	asset,
+	parentIndex,
+	value,
+	emptying = false
+}: {
+	waiting: WaitingPayout[];
+	account: SolAddress | undefined;
+	asset: PaymentAsset;
+	parentIndex: number;
+	value: bigint | undefined;
+	emptying?: boolean;
+}): WaitingPayout[] =>
+	isNullish(account) || (isNullish(value) && !emptying)
+		? waiting
+		: waiting.reduce<{ rest: bigint | undefined; waiting: WaitingPayout[] }>(
+				({ rest, waiting: acc }, payout) => {
+					if (
+						payout.account !== account ||
+						payout.asset !== asset ||
+						payout.parentIndex !== parentIndex ||
+						(payout.ended ?? false)
+					) {
+						return { rest, waiting: [...acc, payout] };
+					}
+
+					const taken = isNullish(rest) || payout.left < rest ? payout.left : rest;
+
+					return {
+						rest: nonNullish(rest) ? rest - taken : rest,
+						waiting: [...acc, { ...payout, left: payout.left - taken }]
+					};
+				},
+				// Nothing limits what an emptying transfer passes on.
+				{ rest: emptying ? undefined : value, waiting: [] }
+			).waiting;
+
+// The account a sync counts the lamports of as wrapped SOL, which the token programs refuse for any
+// account but a wrapped SOL one.
+const syncsAt = ({
+	program,
+	parsed: { type, info }
+}: SolParsedRpcInstruction): SolAddress | undefined =>
+	nonNullish(program) && TOKEN_PROGRAMS.includes(program) && type === 'syncNative'
+		? address({ info, key: 'account' })
+		: undefined;
+
+// The account an instruction opens, and whether for a native mint, which counts all it holds above
+// its rent as wrapped SOL from the start.
+const opensAt = ({
+	program,
+	parsed: { type, info }
+}: SolParsedRpcInstruction): { account: SolAddress; wrapped: boolean } | undefined => {
+	const account = address({ info, key: 'account' });
+
+	return nonNullish(program) &&
+		TOKEN_PROGRAMS.includes(program) &&
+		['initializeAccount', 'initializeAccount2', 'initializeAccount3'].includes(type) &&
+		nonNullish(account)
+		? { account, wrapped: isNativeMint(address({ info, key: 'mint' })) }
+		: undefined;
+};
+
+// Opening an account takes its rent out of the lamports already at its address: the lamport payouts
+// waiting there pay it first, oldest first, up to the minimum, and that part becomes rent, which
+// only a close moves on. What is left is wrapped SOL for a native mint and stays lamports for any
+// other. With no minimum known, all of them are taken as rent.
+const openIn = ({
+	waiting,
+	account,
+	wrapped,
+	parentIndex,
+	rent
+}: {
+	waiting: WaitingPayout[];
+	account: SolAddress;
+	wrapped: boolean;
+	parentIndex: number;
+	rent: bigint | undefined;
+}): WaitingPayout[] =>
+	waiting.reduce<{ rest: bigint | undefined; waiting: WaitingPayout[] }>(
+		({ rest, waiting: acc }, payout) => {
+			if (
+				payout.account !== account ||
+				payout.asset !== 'lamports' ||
+				payout.parentIndex !== parentIndex ||
+				(payout.ended ?? false) ||
+				payout.left === ZERO
+			) {
+				return { rest, waiting: [...acc, payout] };
+			}
+
+			const taken = isNullish(rest) || payout.left < rest ? payout.left : rest;
+			const kept = payout.left - taken;
+
+			return {
+				rest: nonNullish(rest) ? rest - taken : rest,
+				waiting: [
+					...acc,
+					...(taken > ZERO ? [{ ...payout, asset: 'rent' as const, left: taken }] : []),
+					...(kept > ZERO
+						? [{ ...payout, asset: wrapped ? ('tokens' as const) : payout.asset, left: kept }]
+						: [])
+				]
+			};
+		},
+		{ rest: rent, waiting: [] }
+	).waiting;
+
+// Wrapping turns the lamport payouts still waiting on an account into token payouts of the same
+// amount, which its wrapped SOL now carries. Payouts a close has ended stay as they are.
+const wrapIn = ({
+	waiting,
+	account,
+	parentIndex
+}: {
+	waiting: WaitingPayout[];
+	account: SolAddress;
+	parentIndex: number;
+}): WaitingPayout[] =>
+	waiting.map((payout) =>
+		payout.account === account &&
+		payout.parentIndex === parentIndex &&
+		payout.asset === 'lamports' &&
+		!(payout.ended ?? false)
+			? { ...payout, asset: 'tokens' }
+			: payout
+	);
+
+// An unwrap into its own account turns the wrapped SOL it states, or all of it when it states none,
+// into lamports that stay there: the token payouts still waiting on the account become lamport
+// payouts, oldest first, and one it turns in part splits in two.
+const unwrapIn = ({
+	waiting,
+	account,
+	parentIndex,
+	value
+}: {
+	waiting: WaitingPayout[];
+	account: SolAddress;
+	parentIndex: number;
+	value: bigint | undefined;
+}): WaitingPayout[] =>
+	waiting.reduce<{ rest: bigint | undefined; waiting: WaitingPayout[] }>(
+		({ rest, waiting: acc }, payout) => {
+			if (
+				payout.account !== account ||
+				payout.asset !== 'tokens' ||
+				payout.parentIndex !== parentIndex ||
+				(payout.ended ?? false) ||
+				rest === ZERO
+			) {
+				return { rest, waiting: [...acc, payout] };
+			}
+
+			const turned = isNullish(rest) || payout.left < rest ? payout.left : rest;
+
+			return {
+				rest: nonNullish(rest) ? rest - turned : rest,
+				waiting: [
+					...acc,
+					{ ...payout, asset: 'lamports', left: turned },
+					...(payout.left > turned ? [{ ...payout, left: payout.left - turned }] : [])
+				]
+			};
+		},
+		// Nothing limits what an unwrap that states no amount turns.
+		{ rest: value, waiting: [] }
+	).waiting;
+
+// A burn takes the token units it states out of its account for good: the token payouts still
+// waiting there lose that much, oldest first, and the part burned is ended, while the rest keeps
+// waiting. One that states no amount ends all of them.
+const burnOut = ({
+	waiting,
+	account,
+	parentIndex,
+	value
+}: {
+	waiting: WaitingPayout[];
+	account: SolAddress | undefined;
+	parentIndex: number;
+	value: bigint | undefined;
+}): WaitingPayout[] =>
+	waiting.reduce<{ rest: bigint | undefined; waiting: WaitingPayout[] }>(
+		({ rest, waiting: acc }, payout) => {
+			if (
+				payout.account !== account ||
+				payout.asset !== 'tokens' ||
+				payout.parentIndex !== parentIndex ||
+				(payout.ended ?? false) ||
+				payout.left === ZERO ||
+				rest === ZERO
+			) {
+				return { rest, waiting: [...acc, payout] };
+			}
+
+			const burned = isNullish(rest) || payout.left < rest ? payout.left : rest;
+
+			return {
+				rest: nonNullish(rest) ? rest - burned : rest,
+				waiting: [
+					...acc,
+					{ ...payout, left: burned, ended: true },
+					...(payout.left > burned ? [{ ...payout, left: payout.left - burned }] : [])
+				]
+			};
+		},
+		{ rest: value, waiting: [] }
+	).waiting;
+
+// A close empties its account into its destination, which passes on every payout still waiting
+// there that the close moves: all of them out of a wrapped SOL account, and the lamports and the
+// rent out of any other, whose tokens had to leave before it could close. What it leaves can no
+// longer be passed on, as whatever opens at the address next is another account.
+const closeOut = ({
+	waiting,
+	account,
+	parentIndex,
+	wrapped
+}: {
+	waiting: WaitingPayout[];
+	account: SolAddress | undefined;
+	parentIndex: number;
+	wrapped: boolean;
+}): WaitingPayout[] =>
+	waiting.map((payout) =>
+		payout.account !== account || payout.parentIndex !== parentIndex || (payout.ended ?? false)
+			? payout
+			: wrapped || payout.asset !== 'tokens'
+				? { ...payout, left: ZERO }
+				: { ...payout, ended: true }
+	);
+
+/**
+ * The program an instruction is made for, with the accounts it was called with: the program whose
+ * call made it, or, when the run gives that call parsed, the one that made that call in turn.
+ * The programs the RPC parses, such as System, the token programs and associated token accounts,
+ * act on what their caller asks, with accounts it names, and their calls come without the
+ * accounts they were made with.
+ */
+const onBehalfOf = ({
+	flattened,
+	position
+}: {
+	flattened: FlattenedInstruction[];
+	position: number;
+}): Pick<FlattenedInstruction, 'madeBy' | 'madeWith'> => {
+	const { madeBy, madeWith, madeIn } = flattened[position];
+
+	const call = isNullish(madeIn)
+		? -1
+		: flattened.findIndex(
+				({ instruction, carriedIn }) => instruction === madeIn || carriedIn === madeIn
+			);
+
+	return call >= 0 ? onBehalfOf({ flattened, position: call }) : { madeBy, madeWith };
+};
+
+/**
+ * The programs that, called with the wallet among their accounts, pay out of an account that is not
+ * the user's into another one that is not theirs either, each named once, in the order they do it.
+ * Routers are left out: what passes through their own accounts is a swap on its way, or a fee.
+ *
+ * Such a payout has no line and no balance change, while any other line of the same instruction
+ * accounts for all of it: a pool holding the user's liquidity in a position, called with the wallet
+ * the position answers to, can pay it out to somebody else beside a line of nothing paid to the
+ * user. A payout the receiving account passes on in full, later in the same instruction, is a hop
+ * of a swap, a router's account carrying the trade to its next pool, and is not counted: only a
+ * program running in that instruction moves anything out of that account, and a program the dApp
+ * brings itself is named on its own. A transfer out passes its amount on once, to the payouts into
+ * the account oldest first, so a split route paying one account from two pools is still a hop.
+ *
+ * It reads only what instructions state. A program can also move lamports straight out of an
+ * account it owns without any instruction, and a payout made that way goes unseen here.
+ */
+export const findSolProgramsPayingOthers = ({
+	instructions,
+	innerInstructions = [],
+	ownedAddresses,
+	userAddress,
+	accountHolders = {},
+	accountMintsBefore = {},
+	rentExemptMinimum
+}: {
+	instructions: readonly unknown[];
+	innerInstructions?: readonly SolInstructionGroup[];
+	ownedAddresses: SolAddress[];
+	userAddress: OptionSolAddress;
+	accountHolders?: Partial<Record<SolAddress, SolAddress>>;
+	accountMintsBefore?: Partial<Record<SolAddress, SplTokenAddress>>;
+	// What an account's opening takes as its rent.
+	rentExemptMinimum?: bigint;
+}): SolAddress[] => {
+	if (isNullish(userAddress)) {
+		return [];
+	}
+
+	const flattened = flatten({ instructions, innerInstructions });
+
+	const ownedAt = ownershipAt({
+		flattened,
+		owned: expandOwnedAccounts({ flattened, ownedAddresses }),
+		accountHolders,
+		accountMintsBefore
+	});
+
+	const { named, waiting } = flattened.reduce<{
+		named: { program: SolAddress; position: number }[];
+		waiting: WaitingPayout[];
+	}>(
+		(acc, { parentIndex, topLevel, instruction, madeBy: calledBy }, position) => {
+			const opened = opensAt(instruction);
+
+			if (nonNullish(opened)) {
+				return {
+					...acc,
+					waiting: openIn({
+						waiting: acc.waiting,
+						...opened,
+						parentIndex,
+						rent: instruction.programId === TOKEN_PROGRAM_ADDRESS ? rentExemptMinimum : undefined
+					})
+				};
+			}
+
+			const synced = syncsAt(instruction);
+
+			if (nonNullish(synced)) {
+				return { ...acc, waiting: wrapIn({ waiting: acc.waiting, account: synced, parentIndex }) };
+			}
+
+			const payment = paymentOf(instruction);
+
+			if (isNullish(payment)) {
+				return acc;
+			}
+
+			const {
+				source,
+				destination,
+				value,
+				credited = value,
+				emptying,
+				closing = false,
+				burning = false,
+				sent,
+				received
+			} = payment;
+
+			// A burn pays nobody: what it takes of a payout is gone, and no transfer out passes it on.
+			if (burning) {
+				return {
+					...acc,
+					waiting: burnOut({ waiting: acc.waiting, account: source, parentIndex, value })
+				};
+			}
+
+			// A transfer from an account to itself moves nothing, though an unwrap into its own account
+			// turns what it unwraps into lamports that stay there.
+			if (nonNullish(source) && source === destination) {
+				return sent === received
+					? acc
+					: {
+							...acc,
+							waiting: unwrapIn({ waiting: acc.waiting, account: source, parentIndex, value })
+						};
+			}
+
+			const waiting = closing
+				? closeOut({
+						waiting: acc.waiting,
+						account: source,
+						parentIndex,
+						wrapped:
+							nonNullish(source) &&
+							isNativeMint(
+								openedAs({
+									account: source,
+									flattened,
+									accountHolders,
+									accountMintsBefore,
+									until: position
+								}).mint
+							)
+					})
+				: passOn({
+						waiting: acc.waiting,
+						account: source,
+						asset: sent,
+						parentIndex,
+						value,
+						emptying
+					});
+
+			const { madeBy, madeWith = [] } = onBehalfOf({ flattened, position });
+
+			if (
+				topLevel ||
+				isNullish(madeBy) ||
+				SOLANA_ROUTER_PROGRAM_ADDRESSES.includes(madeBy) ||
+				!madeWith.includes(userAddress)
+			) {
+				return { ...acc, waiting };
+			}
+
+			// Whose a payment is follows the account it leaves, not who signs: the wallet can sign as a
+			// delegate for an account of somebody else's, and what leaves that is still theirs.
+			const fromUser = nonNullish(source) && ownedAt({ account: source, position });
+			const toUser =
+				nonNullish(destination) && ownedAt({ account: destination, position, arriving: true });
+
+			if (fromUser || toUser || value === ZERO) {
+				return { ...acc, waiting };
+			}
+
+			// A payout whose account or amount is unknown cannot be followed on, and of one the fee takes
+			// in full, nothing reaches the account to be passed on.
+			if (isNullish(destination) || isNullish(credited) || credited === ZERO) {
+				return { named: [...acc.named, { program: madeBy, position }], waiting };
+			}
+
+			// What a token program pays into an account inside its own call, such as a reallocation's
+			// top-up, is rent the account has to keep: only a close passes it on, as for an opening.
+			const rentFunding =
+				nonNullish(calledBy) &&
+				[TOKEN_PROGRAM_ADDRESS, TOKEN_2022_PROGRAM_ADDRESS].includes(calledBy);
+
+			return {
+				...acc,
+				waiting: [
+					...waiting,
+					{
+						program: madeBy,
+						account: destination,
+						asset: rentFunding ? 'rent' : received,
+						parentIndex,
+						position,
+						left: credited
+					}
+				]
+			};
+		},
+		{ named: [], waiting: [] }
+	);
+
+	const paying = [...named, ...waiting.filter(({ left }) => left > ZERO)]
+		.sort(({ position: first }, { position: second }) => first - second)
+		.map(({ program }) => program);
+
+	return [...new Set(paying)];
 };

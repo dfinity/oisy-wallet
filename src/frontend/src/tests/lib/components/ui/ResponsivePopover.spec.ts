@@ -1,5 +1,6 @@
 import { screensStore } from '$lib/stores/screens.store';
 import ResponsivePopoverTest from '$tests/lib/components/ui/ResponsivePopoverTest.svelte';
+import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
@@ -63,6 +64,52 @@ describe('ResponsivePopover', () => {
 			expect(queryByTestId('popover-content')).toBeInTheDocument();
 			expect(queryByTestId('bottom-sheet')).not.toBeInTheDocument();
 		});
+	});
+
+	it('puts the title above the popover content', async () => {
+		screensStore.set('lg');
+
+		const { getByTestId } = render(ResponsivePopoverTest, { props: { title: 'Popover title' } });
+
+		await waitFor(() =>
+			expect(getByTestId('popover-content')).toHaveTextContent(
+				/^\s*Popover title\s*Test content\s*$/
+			)
+		);
+	});
+
+	it('puts the title on the sheet header row', async () => {
+		screensStore.set('xs');
+
+		const { getByText } = render(ResponsivePopoverTest, { props: { title: 'Sheet title' } });
+
+		await waitFor(() =>
+			expect(getByText('Sheet title').nextElementSibling).toHaveAttribute(
+				'aria-label',
+				en.core.alt.close_details
+			)
+		);
+	});
+
+	it.each(['xs', 'lg'] as const)(
+		'names the dialog by its title without an ariaLabel on %s screens',
+		async (size) => {
+			screensStore.set(size);
+
+			const { getByRole } = render(ResponsivePopoverTest, { props: { title: 'Dialog title' } });
+
+			await waitFor(() => expect(getByRole('dialog')).toHaveAccessibleName('Dialog title'));
+		}
+	);
+
+	it('replaces the sheet minimum height with sheetContentClass', async () => {
+		screensStore.set('xs');
+
+		const { getByText } = render(ResponsivePopoverTest, { props: { sheetContentClass: 'pb-2' } });
+
+		await waitFor(() => expect(getByText('Test content')).toHaveClass('pb-2'));
+
+		expect(getByText('Test content')).not.toHaveClass('min-h-[30vh]');
 	});
 
 	it('passes the dropdown layout on to the popover', async () => {

@@ -1,3 +1,4 @@
+import bitcoinMainnetIconColored from '$btc/assets/bitcoin.svg';
 import type { BitcoinNetwork } from '$btc/types/network';
 import {
 	BTC_MAINNET_EXPLORER_URL,
@@ -27,6 +28,7 @@ export const BTC_MAINNET_NETWORK: BitcoinNetwork = {
 	env: 'mainnet',
 	name: 'Bitcoin',
 	icon: bitcoinMainnetIcon,
+	iconColored: bitcoinMainnetIconColored,
 	explorerUrl: BTC_MAINNET_EXPLORER_URL,
 	buy: { onramperId: 'bitcoin' },
 	pay: { openCryptoPay: 'Bitcoin' }

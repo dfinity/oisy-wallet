@@ -362,5 +362,27 @@ describe('btc-open-crypto-pay.services', () => {
 				})
 			).rejects.toThrow('API request failed');
 		});
+
+		it('should resolve when recording the pending transaction fails after the provider accepted the payment', async () => {
+			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			vi.mocked(backendApi.addPendingBtcTransaction).mockRejectedValue(
+				new Error('Backend unavailable')
+			);
+
+			await expect(
+				payBtc({
+					token: mockToken,
+					identity: mockIdentity,
+					validatedData: mockValidatedData,
+					progress: mockProgress,
+					quoteId: 'quote-123',
+					callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test'
+				})
+			).resolves.toBeUndefined();
+
+			expect(fetchOpenCryptoPay).toHaveBeenCalledOnce();
+			expect(backendApi.addPendingBtcTransaction).toHaveBeenCalledOnce();
+			expect(consoleErrorSpy).toHaveBeenCalledOnce();
+		});
 	});
 });

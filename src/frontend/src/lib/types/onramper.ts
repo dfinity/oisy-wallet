@@ -13,7 +13,8 @@ export type OnramperId = z.infer<typeof OnramperIdSchema>;
 // Please, cross-reference the OISY supported currencies with the Coingecko API for supported currencies.
 export type OnramperFiatId = Currency;
 
-export type OnramperMode = 'buy';
+// OnRamper's `mode` is a comma-separated list; the order sets the order of the widget's tabs.
+export type OnramperMode = 'buy' | 'buy,sell';
 
 // TODO: refine the type for IC/ICRC address to be more clear
 export type OnramperWalletAddress = BtcAddress | EthAddress | string;

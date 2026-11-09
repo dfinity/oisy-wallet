@@ -42,6 +42,7 @@ export enum PLAUSIBLE_EVENTS {
 	TRANSACTION_SEND = 'transaction_send',
 	// The user's contacts. The step is in `event_modifier` and the outcome in `result_status`.
 	CONTACT = 'contact',
+	PROVIDER_FALLBACK = 'provider_fallback',
 	// An invariant we believed unreachable was reached. Not for flows that can legitimately
 	// fail — those keep their own event and report the outcome via `result_status`.
 	ERROR = 'error'
@@ -216,7 +217,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	CONVERT = 'convert',
 	AI_ASSISTANT = 'ai_assistant',
 	WALLET_CONNECT = 'wallet_connect',
-	CONTACTS = 'contacts'
+	CONTACTS = 'contacts',
+	PROVIDERS = 'providers'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -276,6 +278,13 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_HELP {
 	ICPSWAP_WITHDRAWAL = 'icpswap_withdrawal'
 }
 
+// The call an EVM send asked a second provider for, after the first failed it.
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS {
+	SUBMISSION = 'submission',
+	NONCE = 'nonce',
+	FEE = 'fee'
+}
+
 export enum PLAUSIBLE_EVENT_VALUES {
 	NFT = 'nft',
 	NFT_COLLECTION_PAGE = 'nft-collection-page',
@@ -323,6 +332,7 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	NOTE_SHARE_DIALOG = 'share_dialog',
 	NOTE_SHARE_RECIPIENT_PAGE = 'recipient_page',
 	HELP_PAGE = 'help_page',
+	TOOLS_PAGE = 'tools_page',
 	TIP_SENDER = 'tip_sender',
 	TIP_CLAIMER = 'tip_claimer'
 }

@@ -13,6 +13,8 @@ import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
+import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -101,5 +103,20 @@ describe('AllUtxosLoader', () => {
 		await waitFor(() => {
 			expect(getUtxosQuerySpy).not.toHaveBeenCalled();
 		});
+	});
+
+	it('should not call getUtxosQuery with BTC_SEND_VIA_BACKEND_ENABLED', async () => {
+		btcSendViaBackend.enabled = true;
+
+		const getUtxosQuerySpy = mockGetUtxosQuery();
+
+		mockAuthStore();
+
+		render(AllUtxosLoader, { props });
+
+		await runResolvedPromises();
+
+		expect(getUtxosQuerySpy).not.toHaveBeenCalled();
+		expect(get(allUtxosStore)?.allUtxos).toBeUndefined();
 	});
 });
