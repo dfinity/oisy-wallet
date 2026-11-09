@@ -14,7 +14,11 @@ import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.en
 import { ARBITRUM_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { POL_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
-import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import {
+	BTC_MAINNET_TOKEN,
+	BTC_REGTEST_TOKEN,
+	BTC_TESTNET_TOKEN
+} from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
@@ -26,12 +30,18 @@ import * as bitcoinApi from '$icp/api/bitcoin.api';
 import AiAssistantReviewSendTokenTool from '$lib/components/ai-assistant/AiAssistantReviewSendTokenTool.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { AI_ASSISTANT_SEND_TOKENS_BUTTON } from '$lib/constants/test-ids.constants';
-import { ethAddressStore } from '$lib/stores/address.store';
+import {
+	btcAddressMainnetStore,
+	btcAddressRegtestStore,
+	btcAddressTestnetStore,
+	ethAddressStore
+} from '$lib/stores/address.store';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { Token } from '$lib/types/token';
 import * as solanaApi from '$sol/api/solana.api';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockBtcAddress, mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -39,6 +49,7 @@ import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
 	initMinedTransactionsListener: () => ({
@@ -61,25 +72,32 @@ describe('AiAssistantReviewSendTokenTool', () => {
 		id: 'mock-id'
 	};
 
+	let getUtxosQuerySpy: MockInstance<typeof bitcoinApi.getUtxosQuery>;
+	let loadBtcPendingSentTransactionsSpy: MockInstance<
+		typeof btcPendingSentTransactionsServices.loadBtcPendingSentTransactions
+	>;
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 
 		allUtxosStore.reset();
 		feeRatePercentilesStore.reset();
 		btcPendingSentTransactionsStore.reset();
+		btcAddressMainnetStore.reset();
+		btcAddressTestnetStore.reset();
+		btcAddressRegtestStore.reset();
 
 		vi.spyOn(solanaApi, 'estimatePriorityFee').mockResolvedValue(ZERO);
-		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
+		getUtxosQuerySpy = vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
 			utxos: [],
 			tip_block_hash: new Uint8Array(),
 			tip_height: 100,
 			next_page: []
 		});
 		vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
-		vi.spyOn(
-			btcPendingSentTransactionsServices,
-			'loadBtcPendingSentTransactions'
-		).mockResolvedValue({ success: true });
+		loadBtcPendingSentTransactionsSpy = vi
+			.spyOn(btcPendingSentTransactionsServices, 'loadBtcPendingSentTransactions')
+			.mockResolvedValue({ success: true });
 	});
 
 	it('renders correctly for a BTC token', () => {
@@ -94,6 +112,82 @@ describe('AiAssistantReviewSendTokenTool', () => {
 		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toBeInTheDocument();
 		expect(container).toHaveTextContent(BTC_MAINNET_TOKEN.symbol);
 		expect(container).toHaveTextContent(BTC_MAINNET_TOKEN.network.name);
+	});
+
+	it("loads the BTC fee from the user's own address, not from the recipient", async () => {
+		btcAddressMainnetStore.set({ certified: true, data: mockBtcAddress });
+
+		render(AiAssistantReviewSendTokenTool, {
+			props: {
+				...props,
+				address: mockBtcP2SHAddress,
+				token: BTC_MAINNET_TOKEN
+			},
+			context: mockContext(BTC_MAINNET_TOKEN)
+		});
+
+		await waitFor(() => {
+			expect(getUtxosQuerySpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ address: mockBtcAddress })
+			);
+			expect(loadBtcPendingSentTransactionsSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ address: mockBtcAddress })
+			);
+		});
+	});
+
+	it.each([
+		{ token: BTC_TESTNET_TOKEN, addressStore: btcAddressTestnetStore },
+		{ token: BTC_REGTEST_TOKEN, addressStore: btcAddressRegtestStore }
+	])("loads the BTC fee from the user's $token.name address", async ({ token, addressStore }) => {
+		const networkAddress = `${token.network.name} address`;
+
+		btcAddressMainnetStore.set({ certified: true, data: mockBtcAddress });
+		addressStore.set({ certified: true, data: networkAddress });
+
+		render(AiAssistantReviewSendTokenTool, {
+			props: {
+				...props,
+				address: mockBtcP2SHAddress,
+				token
+			},
+			context: mockContext(token)
+		});
+
+		await waitFor(() => {
+			expect(getUtxosQuerySpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ address: networkAddress })
+			);
+			expect(loadBtcPendingSentTransactionsSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ address: networkAddress })
+			);
+		});
+	});
+
+	it("loads the BTC fee from the user's address once it loads after the review renders", async () => {
+		const { getByTestId } = render(AiAssistantReviewSendTokenTool, {
+			props: {
+				...props,
+				address: mockBtcP2SHAddress,
+				token: BTC_MAINNET_TOKEN
+			},
+			context: mockContext(BTC_MAINNET_TOKEN)
+		});
+
+		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toBeDisabled();
+		expect(getUtxosQuerySpy).not.toHaveBeenCalled();
+		expect(loadBtcPendingSentTransactionsSpy).not.toHaveBeenCalled();
+
+		btcAddressMainnetStore.set({ certified: true, data: mockBtcAddress });
+
+		await waitFor(() => {
+			expect(getUtxosQuerySpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ address: mockBtcAddress })
+			);
+			expect(loadBtcPendingSentTransactionsSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ address: mockBtcAddress })
+			);
+		});
 	});
 
 	it('renders correctly for an ETH token', () => {

@@ -3,6 +3,7 @@ import type {
 	BtcAddPendingTransactionError,
 	BtcGetFeePercentilesError,
 	BtcGetPendingTransactionsError,
+	BtcGetSpendableUtxosError,
 	GetAllowedCyclesError,
 	PersonalNoteError,
 	RateLimitError,
@@ -94,6 +95,26 @@ export const mapBtcGetPendingTransactionsError = (
 	}
 
 	return assertNeverOr(err, new CanisterInternalError('Unknown BtcGetPendingTransactionsError'));
+};
+
+export const mapBtcGetSpendableUtxosError = (
+	err: BtcGetSpendableUtxosError
+): CanisterInternalError => {
+	if ('InternalError' in err) {
+		return new CanisterInternalError(err.InternalError.msg);
+	}
+
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcGetSpendableUtxosError'));
 };
 
 export const mapBtcGetFeePercentilesError = (

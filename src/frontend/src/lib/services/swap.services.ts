@@ -5,6 +5,12 @@ import type {
 	VeloraSwapMode
 } from '$declarations/backend/backend.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import { VELORA_AUGUSTUS_ADDRESSES, VELORA_DELTA_ADDRESSES } from '$env/rest/velora.env';
+import {
+	VELORA_DELTA_EIP712_DOMAIN,
+	VELORA_DELTA_ORDER_TYPES
+} from '$eth/constants/velora.constants';
+import { infuraProviders } from '$eth/providers/infura.providers';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/approve.services';
 import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
@@ -42,8 +48,14 @@ import {
 	ZERO
 } from '$lib/constants/app.constants';
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
-import { ICP_SWAP_POOL_FEE, SWAP_SIDE } from '$lib/constants/swap.constants';
+import {
+	ICP_SWAP_POOL_FEE,
+	SWAP_QUOTE_TIMEOUT_MS,
+	SWAP_SIDE,
+	VELORA_GAS_LIMIT_BUFFER_PERCENT
+} from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { fungibleTokens } from '$lib/derived/tokens.derived';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
@@ -102,6 +114,7 @@ import {
 	type SwapNearIntentsSolParams,
 	type SwapNearIntentsXrpParams,
 	type SwapParams,
+	type SwapQuoteObserver,
 	type SwapVeloraDeltaParams,
 	type SwapVeloraMarketParams
 } from '$lib/types/swap';
@@ -145,6 +158,14 @@ import {
 	toVeloraDisplayRefs,
 	toVeloraExternalRefs
 } from '$lib/utils/velora-active-tx.utils';
+import {
+	assertVeloraDeltaOrder,
+	assertVeloraDeltaRoute,
+	assertVeloraMarketTransaction,
+	veloraBridgeableTokenAddresses,
+	veloraMinimumAmount,
+	veloraRejectedError
+} from '$lib/utils/velora-swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
@@ -442,7 +463,8 @@ export const fetchSwapAmounts = async ({
 	userEthAddress,
 	userSolAddress,
 	userBtcAddress,
-	userXrpAddress
+	userXrpAddress,
+	onProviderParticipating
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
@@ -456,7 +478,8 @@ export const fetchSwapAmounts = async ({
 				destinationToken,
 				amount: sourceAmount,
 				userEthAddress,
-				slippage
+				slippage,
+				...(onProviderParticipating && { onProviderParticipating })
 			});
 		}
 
@@ -467,7 +490,8 @@ export const fetchSwapAmounts = async ({
 			amount: sourceAmount,
 			tokens,
 			slippage,
-			isSourceTokenIcrc2
+			isSourceTokenIcrc2,
+			...(onProviderParticipating && { onProviderParticipating })
 		});
 	}
 
@@ -499,7 +523,8 @@ export const fetchSwapAmounts = async ({
 			amount: sourceAmount,
 			userBtcAddress,
 			recipientAddress,
-			slippage
+			slippage,
+			...(onProviderParticipating && { onProviderParticipating })
 		});
 	}
 
@@ -512,7 +537,8 @@ export const fetchSwapAmounts = async ({
 			amount: sourceAmount,
 			userAddress: userXrpAddress,
 			recipientAddress,
-			slippage
+			slippage,
+			...(onProviderParticipating && { onProviderParticipating })
 		});
 	}
 
@@ -532,7 +558,8 @@ export const fetchSwapAmounts = async ({
 			amount: sourceAmount,
 			userAddress: sourceAddress,
 			recipientAddress,
-			slippage
+			slippage,
+			...(onProviderParticipating && { onProviderParticipating })
 		});
 	}
 
@@ -542,7 +569,8 @@ export const fetchSwapAmounts = async ({
 		amount: sourceAmount,
 		userAddress: userEthAddress,
 		recipientAddress,
-		slippage
+		slippage,
+		...(onProviderParticipating && { onProviderParticipating })
 	});
 };
 
@@ -553,7 +581,8 @@ const fetchSwapAmountsICP = async ({
 	amount,
 	tokens,
 	slippage,
-	isSourceTokenIcrc2
+	isSourceTokenIcrc2,
+	onProviderParticipating
 }: Omit<
 	FetchSwapAmountsParams,
 	'userEthAddress' | 'userSolAddress' | 'userBtcAddress' | 'userXrpAddress' | 'amount'
@@ -562,16 +591,28 @@ const fetchSwapAmountsICP = async ({
 }): Promise<SwapMappedResult[]> => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({
+	const settledResults = await collectSwapQuotes<
+		SwapAmountsReply | ICPSwapResult | OisyTradeQuote | undefined
+	>({
+		requests: enabledProviders.map(({ key, getQuote }) => (observer) => {
+			// Kong has no provider-local eligibility guards. Its quote API must not receive
+			// the observer because it forwards the remaining arguments to the canister.
+			if (key === SwapProvider.KONG_SWAP) {
+				observer.onProviderParticipating?.(key);
+			}
+
+			return getQuote({
 				identity,
 				sourceToken: sourceToken as IcToken,
 				destinationToken: destinationToken as IcToken,
-				sourceAmount: amount
-			})
-		)
-	);
+				sourceAmount: amount,
+				// Preserve quote calls and the existing ICRC-2 offer-mapping gates below,
+				// but do not advertise an ineligible provider as participating.
+				...(key !== SwapProvider.KONG_SWAP && isSourceTokenIcrc2 && observer)
+			});
+		}),
+		onProviderParticipating
+	});
 
 	const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
 	const sourceTokenUsdValue = get(exchanges)?.[sourceToken.id]?.usd;
@@ -1424,6 +1465,68 @@ export const performManualWithdraw = async ({
 	}
 };
 
+// Preserve registry order for the existing reducers, even when providers finish out of order.
+// A deadline abandons pending quotes logically; it cannot abort APIs without signal support.
+const collectSwapQuotes = <T>({
+	requests,
+	onProviderParticipating
+}: {
+	requests: ((observer: SwapQuoteObserver) => Promise<T>)[];
+} & SwapQuoteObserver): Promise<PromiseSettledResult<T>[]> => {
+	if (requests.length === 0) {
+		return Promise.resolve([]);
+	}
+
+	return new Promise((resolve) => {
+		const results: PromiseSettledResult<T>[] = requests.map(() => ({
+			status: 'rejected',
+			reason: new Error('Swap quote collection timed out')
+		}));
+		let pending = requests.length;
+		let collecting = true;
+
+		const finish = () => {
+			collecting = false;
+			clearTimeout(timeout);
+			resolve(results);
+		};
+		const timeout = setTimeout(finish, SWAP_QUOTE_TIMEOUT_MS);
+		requests.forEach((request, index) => {
+			let quotePending = true;
+			const observer: SwapQuoteObserver = onProviderParticipating
+				? {
+						onProviderParticipating: (provider) => {
+							if (collecting && quotePending) {
+								onProviderParticipating(provider);
+							}
+						}
+					}
+				: {};
+			const settle = (result: PromiseSettledResult<T>) => {
+				quotePending = false;
+				if (!collecting) {
+					return;
+				}
+
+				results[index] = result;
+				pending -= 1;
+				if (pending === 0) {
+					finish();
+				}
+			};
+
+			// Contain synchronous throws as well as late rejections, without awaiting
+			// abandoned work or allowing it to mutate the completed round.
+			Promise.resolve()
+				.then(() => request(observer))
+				.then(
+					(value) => settle({ status: 'fulfilled', value }),
+					(reason: unknown) => settle({ status: 'rejected', reason })
+				);
+		});
+	});
+};
+
 // Shared tail of the provider fan-outs: keep the fulfilled quotes, best first. When no
 // provider quoted at all but one refused the amount as below its minimum, rethrow that
 // refusal so the UI can name the reason instead of the generic "swap is not offered".
@@ -1469,15 +1572,26 @@ const fetchSwapAmountsICPBridge = async ({
 	destinationToken,
 	amount,
 	userEthAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: IcpBridgeQuoteParams): Promise<SwapMappedResult[]> => {
 	const enabledProviders = icpBridgeProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({ sourceToken, destinationToken, amount, userEthAddress, slippage })
-		)
-	);
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userEthAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
 
 	return reduceSettledSwapResults(settledResults);
 };
@@ -1491,7 +1605,8 @@ export const fetchSwapAmountsEVM = async ({
 	amount,
 	userAddress,
 	recipientAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: EvmQuoteParams): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
 		return [];
@@ -1499,11 +1614,22 @@ export const fetchSwapAmountsEVM = async ({
 
 	const enabledProviders = evmSwapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({ sourceToken, destinationToken, amount, userAddress, recipientAddress, slippage })
-		)
-	);
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userAddress,
+						recipientAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
 
 	return reduceSettledSwapResults(settledResults);
 };
@@ -1516,22 +1642,27 @@ export const fetchSwapAmountsBTC = async ({
 	amount,
 	userBtcAddress,
 	recipientAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: BtcQuoteParams): Promise<SwapMappedResult[]> => {
 	const enabledProviders = btcSwapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({
-				sourceToken,
-				destinationToken,
-				amount,
-				userBtcAddress,
-				recipientAddress,
-				slippage
-			})
-		)
-	);
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userBtcAddress,
+						recipientAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
 
 	return reduceSettledSwapResults(settledResults);
 };
@@ -1545,7 +1676,8 @@ export const fetchSwapAmountsSOL = async ({
 	amount,
 	userAddress,
 	recipientAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: NearIntentsQuoteParams): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
 		return [];
@@ -1553,11 +1685,22 @@ export const fetchSwapAmountsSOL = async ({
 
 	const enabledProviders = solSwapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({ sourceToken, destinationToken, amount, userAddress, recipientAddress, slippage })
-		)
-	);
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userAddress,
+						recipientAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
 
 	return reduceSettledSwapResults(settledResults);
 };
@@ -1568,7 +1711,8 @@ export const fetchSwapAmountsXRP = async ({
 	amount,
 	userAddress,
 	recipientAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: NearIntentsQuoteParams): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
 		return [];
@@ -1576,11 +1720,22 @@ export const fetchSwapAmountsXRP = async ({
 
 	const enabledProviders = xrpSwapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({ sourceToken, destinationToken, amount, userAddress, recipientAddress, slippage })
-		)
-	);
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userAddress,
+						recipientAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
 
 	// An offer whose XRP deposit comes with a deposit memo is left out: nothing documents how such a
 	// memo has to travel with an XRP payment, and a deposit that does not carry it in the expected
@@ -1763,13 +1918,31 @@ export const fetchVeloraDeltaSwap = async ({
 		fetch: window.fetch
 	});
 
-	const deltaContract = await sdk.delta.getDeltaContract();
+	// The spender and the contract the order is signed for are pinned, never taken from the API.
+	const deltaContract = VELORA_DELTA_ADDRESSES[sourceNetwork.id];
 
 	if (isNullish(deltaContract)) {
-		return;
+		throw veloraRejectedError('no Delta contract is pinned for the network');
 	}
 
+	const destinationChainId = destinationToken.network.chainId;
+
+	assertVeloraDeltaRoute({
+		route: swapDetails.route,
+		sourceTokenAddress: sourceToken.address,
+		sourceChainId: sourceNetwork.chainId,
+		destinationTokenAddress: geSwapEthTokenAddress(destinationToken),
+		destinationChainId,
+		bridgeableTokenAddresses: veloraBridgeableTokenAddresses({
+			tokens: get(fungibleTokens),
+			sourceNetworkId: sourceNetwork.id,
+			destinationToken
+		}),
+		amount: parsedSwapAmount
+	});
+
 	let builtOrder;
+	let permit = '0x';
 
 	const slippageBasisPoints = slippagePercentToBasisPoints(slippageValue);
 
@@ -1793,6 +1966,8 @@ export const fetchVeloraDeltaSwap = async ({
 			value: parsedSwapAmount.toString(),
 			identity
 		});
+
+		permit = encodedPermit;
 
 		progress(ProgressStepsSwap.SWAP);
 
@@ -1827,11 +2002,12 @@ export const fetchVeloraDeltaSwap = async ({
 	}
 
 	// The server derives the signed on-chain minimum (`destAmount`) from the route and the
-	// slippage; re-derive it from the quoted origin output (the leg the on-chain order settles)
-	// and refuse to sign an order that guarantees less than the user accepted.
-	const minDestAmount = calculateSlippage({
-		quoteAmount: BigInt(swapDetails.route.origin.output.amount),
-		slippagePercentage: slippageBasisPoints / 100
+	// slippage; re-derive it from the quoted origin output (the leg the on-chain order settles),
+	// on integers as Velora does, and refuse to sign an order that guarantees less than the user
+	// accepted.
+	const minDestAmount = veloraMinimumAmount({
+		amount: BigInt(swapDetails.route.origin.output.amount),
+		slippageBasisPoints
 	});
 
 	if (BigInt(builtOrder.toSign.value.destAmount) < minDestAmount) {
@@ -1840,7 +2016,26 @@ export const fetchVeloraDeltaSwap = async ({
 		);
 	}
 
-	const hash = getSignParamsEIP712(builtOrder.toSign);
+	assertVeloraDeltaOrder({
+		order: builtOrder.toSign.value,
+		route: swapDetails.route,
+		wallet: userAddress,
+		amount: parsedSwapAmount,
+		permit,
+		feePercent: swapDetails.partner.feePercent,
+		destinationChainId
+	});
+
+	// Hashed with OISY's own domain and types: the API's would let it choose what is signed.
+	const hash = getSignParamsEIP712({
+		domain: {
+			...VELORA_DELTA_EIP712_DOMAIN,
+			chainId: Number(sourceNetwork.chainId),
+			verifyingContract: deltaContract
+		},
+		types: VELORA_DELTA_ORDER_TYPES,
+		value: builtOrder.toSign.value
+	});
 
 	const signature = await signPrehash({
 		hash,
@@ -1930,13 +2125,22 @@ export const fetchVeloraMarketSwap = async ({
 		fetch: window.fetch
 	});
 
-	const TokenTransferProxy = await sdk.swap.getSpender();
+	if (destinationToken.network.chainId !== sourceNetwork.chainId) {
+		throw veloraRejectedError('a Market swap cannot settle on another network');
+	}
+
+	// The call target and spender are pinned, never taken from the API.
+	const augustusAddress = VELORA_AUGUSTUS_ADDRESSES[sourceNetwork.id];
+
+	if (isNullish(augustusAddress)) {
+		throw veloraRejectedError('no Augustus is pinned for the network');
+	}
 
 	if (isNotDefaultEthereumToken(sourceToken)) {
 		await approveToken({
 			token: sourceToken,
 			from: userAddress,
-			to: TokenTransferProxy,
+			to: augustusAddress,
 			amount: parsedSwapAmount,
 			sourceNetwork,
 			identity,
@@ -1951,7 +2155,7 @@ export const fetchVeloraMarketSwap = async ({
 		await waitForSwapAllowance({
 			token: sourceToken,
 			owner: userAddress,
-			spender: TokenTransferProxy,
+			spender: augustusAddress,
 			networkId: sourceNetwork.id,
 			amount: parsedSwapAmount
 		});
@@ -1959,15 +2163,50 @@ export const fetchVeloraMarketSwap = async ({
 
 	progress(ProgressStepsSwap.SWAP);
 
+	const srcToken = geSwapEthTokenAddress(sourceToken);
+	const destToken = geSwapEthTokenAddress(destinationToken);
+	const slippageBasisPoints = slippagePercentToBasisPoints(slippageValue);
+
 	const txParams = await sdk.swap.buildTx({
-		srcToken: geSwapEthTokenAddress(sourceToken),
-		destToken: geSwapEthTokenAddress(destinationToken),
+		srcToken,
+		destToken,
 		srcAmount: swapDetails.srcAmount,
-		slippage: slippagePercentToBasisPoints(slippageValue),
+		slippage: slippageBasisPoints,
 		priceRoute: swapDetails,
 		userAddress,
 		partner: OISY_URL_HOSTNAME
 	});
+
+	assertVeloraMarketTransaction({
+		transaction: txParams,
+		augustusAddress,
+		sourceChainId: sourceNetwork.chainId,
+		srcToken,
+		destToken,
+		amount: parsedSwapAmount,
+		isNativeSource: isDefaultEthereumToken(sourceToken),
+		minimum: veloraMinimumAmount({
+			amount: BigInt(swapDetails.destAmount),
+			slippageBasisPoints
+		}),
+		quotedAmount: BigInt(swapDetails.destAmount),
+		feePercent: swapDetails.partnerFee,
+		wallet: userAddress
+	});
+
+	// Velora's gas limit is unsigned, and a failing estimate is a transaction that would revert.
+	let estimatedGas: bigint;
+	try {
+		estimatedGas = await infuraProviders(sourceNetwork.id).estimateGas({
+			from: userAddress,
+			to: augustusAddress,
+			data: txParams.data,
+			value: BigInt(txParams.value)
+		});
+	} catch (_: unknown) {
+		throw veloraRejectedError('the transaction gas could not be estimated');
+	}
+	const swapGas = (estimatedGas * (100n + VELORA_GAS_LIMIT_BUFFER_PERCENT)) / 100n;
 
 	// The transaction is broadcast from here on — the point of no return. `swap`
 	// also kicks off `processTransactionSent`, which populates the pending row in
@@ -1975,8 +2214,8 @@ export const fetchVeloraMarketSwap = async ({
 	// settlement record on top of it.
 	const { hash, nonce } = await swap({
 		from: userAddress,
-		to: txParams.to,
-		transaction: txParams,
+		to: augustusAddress,
+		transaction: { ...txParams, gas: `${swapGas}` },
 		amount: parsedSwapAmount,
 		identity,
 		token: sourceToken,

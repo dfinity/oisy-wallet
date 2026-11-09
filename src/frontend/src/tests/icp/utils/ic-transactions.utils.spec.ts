@@ -212,6 +212,40 @@ describe('mapIcTransaction', () => {
 		});
 	});
 
+	describe('ICRC approvals', () => {
+		it('should name the spender and leave its link to the details window', () => {
+			const transfer = createMockIcrcTransferTransaction();
+
+			const result = mapIcTransaction({
+				transaction: {
+					...transfer,
+					transaction: {
+						...transfer.transaction,
+						transfer: [],
+						approve: [
+							{
+								from: { owner: mockPrincipal, subaccount: [] },
+								spender: { owner: mockPrincipal, subaccount: [] },
+								amount: 100n,
+								fee: [],
+								memo: [],
+								created_at_time: [],
+								expected_allowance: [],
+								expires_at: []
+							}
+						]
+					}
+				},
+				token: icrcToken,
+				identity: mockIdentity
+			});
+
+			expect(result.type).toBe('approve');
+			expect(result.approveSpender).toBe(mockPrincipalText);
+			expect(result.approveSpenderExplorerUrl).toBeUndefined();
+		});
+	});
+
 	describe('cycles-ledger transactions', () => {
 		const topUp = createMockIcrcBurnTransaction({
 			memo: Uint8Array.from([

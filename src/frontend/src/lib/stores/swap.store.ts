@@ -2,13 +2,16 @@ import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { swappableTokens } from '$lib/derived/swap.derived';
+import type { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { balancesStore } from '$lib/stores/balances.store';
 import {
 	swapSupportedTokensStore,
 	type SwapSupportedTokensData
 } from '$lib/stores/swap-supported-tokens.store';
 import type { Balance } from '$lib/types/balance';
+import type { Network } from '$lib/types/network';
 import type { OptionAmount } from '$lib/types/send';
+import type { SwapSelectTokenType } from '$lib/types/swap';
 import type { Token, TokenId } from '$lib/types/token';
 import { computeReceiveSupportedTokens } from '$lib/utils/swap-tokens-filter.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -46,6 +49,10 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	// The two-swap hints shown since the swap modal opened. Kept here rather than in the hint, which
 	// comes and goes with the quotes and is rebuilt with the form, so that each one counts once.
 	const twoSwapsHintsShown: TwoSwapsHintShown[] = [];
+	// The network and asset type the person set on each side's token list, so it reopens on them and a
+	// pick never moves them; a side with none opens where the wizard starts it. Kept here because the
+	// list's own context is shared by every token picker.
+	const tokenListFilters = new Map<SwapSelectTokenType, SwapTokenListFilters>();
 
 	const sourceToken = derived(
 		[data, swappableTokens],
@@ -182,6 +189,18 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				[address]: isPermitSupported
 			})),
 
+		getTokenListFilters: (side: SwapSelectTokenType): SwapTokenListFilters | undefined =>
+			tokenListFilters.get(side),
+		setTokenListFilters: ({
+			side,
+			filters
+		}: {
+			side: SwapSelectTokenType;
+			filters: SwapTokenListFilters;
+		}) => {
+			tokenListFilters.set(side, filters);
+		},
+
 		markTwoSwapsHintShown: (hint: TwoSwapsHintShown): boolean => {
 			const shown = twoSwapsHintsShown.some(
 				({ sourceTokenId, destinationTokenId, intermediateTokenId, amount }) =>
@@ -208,19 +227,25 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			amountSetToMax.set(false);
 			lifiMaxFee.set(undefined);
 			twoSwapsHintsShown.splice(0);
+			tokenListFilters.clear();
 		}
 	};
 };
 
-// The gas and L1 data fee of a LI.FI fee ceiling that an execution found above the reviewed one,
-// for the quote inputs it was found for; the review prices them at its own fee per gas. Kept here
-// rather than in the wizard, which every step change rebuilds: the review the failed execution
-// returns to is another instance.
-export interface LifiCarriedFee {
-	key: string;
-	gas: bigint;
-	l1Fee: bigint;
-}
+// A LI.FI fee ceiling that an execution found above the reviewed one, for the quote inputs it was
+// found for: on EVM its gas and L1 data fee, which the review prices at its own fee per gas, on
+// Solana the ceiling itself, in lamports. Kept here rather than in the wizard, which every step
+// change rebuilds: the review the failed execution returns to is another instance.
+export type LifiCarriedFee =
+	| {
+			key: string;
+			gas: bigint;
+			l1Fee: bigint;
+	  }
+	| {
+			key: string;
+			solCeiling: bigint;
+	  };
 
 // The highest LI.FI fee seen for the route to a destination while "Max" holds a LI.FI amount, and
 // that destination: the fee of a route to another says nothing about the new one's.
@@ -235,6 +260,11 @@ export interface TwoSwapsHintShown {
 	destinationTokenId: TokenId;
 	intermediateTokenId: TokenId;
 	amount: OptionAmount;
+}
+
+export interface SwapTokenListFilters {
+	network?: Network;
+	category?: TokenCategoryTagValue;
 }
 
 export interface SwapContext {
@@ -267,6 +297,11 @@ export interface SwapContext {
 	switchTokens: () => void;
 	// Records a two-swap hint as shown: `true` the first time since the swap modal opened.
 	markTwoSwapsHintShown: (hint: TwoSwapsHintShown) => boolean;
+	getTokenListFilters: (side: SwapSelectTokenType) => SwapTokenListFilters | undefined;
+	setTokenListFilters: (params: {
+		side: SwapSelectTokenType;
+		filters: SwapTokenListFilters;
+	}) => void;
 	reset: () => void;
 }
 

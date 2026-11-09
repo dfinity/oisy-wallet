@@ -40,7 +40,7 @@ import {
 	type OisyTradeQuoteResult,
 	type OisyTradeResolvedOrder
 } from '$lib/types/oisy-trade-swap';
-import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
+import { SwapProvider, type SwapMappedResult, type SwapQuoteObserver } from '$lib/types/swap';
 import { consoleError } from '$lib/utils/console.utils';
 import { replaceIcErrorFields } from '$lib/utils/error.utils';
 import {
@@ -125,8 +125,9 @@ export const fetchOisyTradeQuote = async ({
 	identity,
 	sourceToken,
 	destinationToken,
-	sourceAmount
-}: {
+	sourceAmount,
+	onProviderParticipating
+}: SwapQuoteObserver & {
 	identity: Identity;
 	sourceToken: IcToken;
 	destinationToken: IcToken;
@@ -158,6 +159,8 @@ export const fetchOisyTradeQuote = async ({
 	// `limit` unset takes the canister's 100 levels per side. A walk that runs out
 	// of levels reports a book too thin, which is pessimistic rather than wrong on a
 	// book deeper than that — and no real pair is expected to be.
+	onProviderParticipating?.(SwapProvider.OISY_TRADE);
+
 	const depth = await getOrderBookDepth({
 		identity,
 		request: { trading_pair: toTradingPair(pair), limit: [] },

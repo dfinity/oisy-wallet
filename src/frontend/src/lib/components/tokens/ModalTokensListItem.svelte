@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
+	import IconGixCheck from '$lib/components/icons/IconGixCheck.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -15,9 +16,11 @@
 		logoSize?: LogoSize;
 		onClick: () => void;
 		showDividers?: boolean;
+		// The token already picked where this list was opened from; unset where a list has no pick.
+		selected?: boolean;
 	}
 
-	let { token, logoSize = 'lg', onClick, showDividers = true }: Props = $props();
+	let { token, logoSize = 'lg', onClick, showDividers = true, selected }: Props = $props();
 
 	const { oisyName, oisySymbol, symbol, network } = $derived(token);
 
@@ -26,9 +29,26 @@
 	let showBalance = $derived(!isTokenToggleable(token) || token.enabled);
 </script>
 
-<LogoButton dividers={showDividers} fullWidth {onClick}>
+<LogoButton
+	dividers={showDividers}
+	fullWidth
+	{onClick}
+	{selected}
+	styleClass={selected ? 'bg-brand-subtle-10' : undefined}
+>
 	{#snippet title()}
-		{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
+		{#if selected}
+			<!-- Beside the symbol rather than in a column of its own, so no other row shifts. Centred
+				 on the line box, then lifted 1px so it sits on the capitals' middle, not the line's. -->
+			<span class="inline-flex items-center gap-1">
+				{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
+				<span class="flex -translate-y-px text-brand-primary-alt" aria-hidden="true">
+					<IconGixCheck size="18px" />
+				</span>
+			</span>
+		{:else}
+			{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
+		{/if}
 	{/snippet}
 
 	{#snippet subtitle()}
