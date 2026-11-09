@@ -1031,6 +1031,7 @@ fn store_reserved_tip(n: u64, amount: Nat, expires_at_ns: u64) {
         state: TipState::Reserved,
         terminal_at_ns: None,
         last_claim_failure: None,
+        payout_created_at_ns: None,
     };
 
     mutate_state(|s| {
