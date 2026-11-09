@@ -1545,7 +1545,7 @@ interface I18nWallet_connect {
 		spender: string;
 		operator: string;
 		application: string;
-		review: string;
+		granted_permissions: string;
 		method: string;
 		interacting_with: string;
 		type: string;
@@ -1555,6 +1555,7 @@ interface I18nWallet_connect {
 		expiration: string;
 		token: string;
 		network: string;
+		networks: string;
 		amount: string;
 		hex_data: string;
 		base64_data: string;
