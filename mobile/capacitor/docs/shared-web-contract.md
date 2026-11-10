@@ -185,7 +185,11 @@ attributes. Native restores the WebView and its original scroll offset under the
 page image, then waits for a WebKit snapshot with `afterScreenUpdates` before
 removing that cover. This lets safe-area CSS and viewport changes paint without
 flashing Activity at a temporary offset. Moving to the existing parent is a no-op.
-Native navigation stays blocked until release. Preparation and presentation reject
+Native navigation stays blocked until release. Once the web overlay unmounts, the
+tabs can appear underneath a departing native sheet without waiting for the final
+WebKit paint fence. They remain noninteractive and hidden from accessibility until
+release. An underlying full-page flow keeps them hidden.
+Preparation and presentation reject
 a hidden Wallet or a native flow already presented by the shell, so a delayed web
 dialog cannot appear over Explore or Account. Document replacement, process
 failure, expiry and logout clear the presentation and its images.
@@ -197,14 +201,22 @@ bottom safe area, and must be within 1–100,000. UIKit clamps the custom detent
 content scrolls inside the existing web panel. ResizeObserver tracks intrinsic
 content; updates are coalesced, bound to the active document and sheet UUID, and
 stopped before dismissal. Nested dialogs resize the same container; closing one
-restores the previous panel's height.
+restores the previous panel's height. UIKit owns the presentation animation;
+`BottomSheetContainer` keeps the web panel at its natural size throughout, with a
+non-visual outro lifetime so native can capture its departing content. A web slide
+must not animate the height or padding that native measures for its initial detent.
 
 Fitted sheets hide redundant X and dismissal-only footer controls, including
 Sorting/List settings' Done button and empty header. Save, confirmation and Cancel
 actions remain. Swipe-down, tapping outside, keyboard Escape and VoiceOver Escape
 request the topmost shared Close callback. UIKit does not dismiss unconditionally:
 busy state, disabled dismissal, unsaved-change checks and transaction guards still
-apply. Older hosts retain their medium/large detents and web dismissal controls;
+apply. A tap recognizer on UIKit's presentation container forwards only touches
+outside the presented sheet through the same document-bound dismissal event.
+Touches on the content and native chrome stay with UIKit. The recognizer can run
+alongside UIKit's dimming-view gesture and is removed on reset; stale recognizers
+cannot close a later sheet. UIKit's automatic dismissal remains disabled.
+Older hosts retain their medium/large detents and web dismissal controls;
 normal browser presentation is unchanged.
 
 Send, Swap, Contacts and other multi-step `WizardModal` flows use full-page web

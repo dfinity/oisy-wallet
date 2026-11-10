@@ -4,14 +4,18 @@ import WebKit
 /// UIKit owns presentation; the existing trusted WebView keeps its document,
 /// workers and session. No second wallet WebView or authentication handoff.
 @MainActor
-final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDelegate {
+final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDelegate,
+  UIGestureRecognizerDelegate
+{
   enum Size: String { case medium, large }
   private weak var owner: TrustedWalletViewController?
   private weak var webView: WKWebView?
   private(set) var identifier: UUID?
   private(set) var controller: UIViewController?
   private var backgroundSnapshot: UIImageView?
+  private var backgroundTap: UITapGestureRecognizer?
   private var dismissing = false
+  var hidesNavigation: Bool { identifier != nil && !dismissing }
   private var contentOffset: CGPoint?
   private(set) var contentHeight: Int?
   static let contentDetent = UISheetPresentationController.Detent.Identifier("content")
@@ -111,6 +115,41 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
     guard identifier == id, owner.session.isActive else {
       throw WalletHostCommandError.unavailable
     }
+    // UIKit blocks outside taps while isModalInPresentation is true. Keep that
+    // guard and forward background taps to the web flow's own Close callback.
+    if let container = panel.presentationController?.containerView {
+      let tap = UITapGestureRecognizer(target: self, action: #selector(backgroundTapped(_:)))
+      tap.name = "wallet.sheetBackgroundTap"
+      tap.delegate = self
+      container.addGestureRecognizer(tap)
+      backgroundTap = tap
+    }
+  }
+
+  func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch)
+    -> Bool
+  {
+    guard gestureRecognizer === backgroundTap, !dismissing, owner?.isReady == true,
+      owner?.session.isActive == true, let panel = controller,
+      panel.presentedViewController == nil,
+      let presentedView = panel.presentationController?.presentedView
+    else { return false }
+    // Include the system sheet chrome/grabber, not just the embedded WebView.
+    return !presentedView.bounds.contains(touch.location(in: presentedView))
+  }
+
+  func gestureRecognizer(
+    _ gestureRecognizer: UIGestureRecognizer,
+    shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+  ) -> Bool {
+    // UIKit also recognizes taps on its dimming view. Our filtered outside tap
+    // must receive the same touch while automatic UIKit dismissal stays blocked.
+    gestureRecognizer === backgroundTap
+  }
+
+  @objc private func backgroundTapped(_ gestureRecognizer: UITapGestureRecognizer) {
+    guard gestureRecognizer === backgroundTap else { return }
+    requestDismissal()
   }
 
   func resize(id: UUID, contentHeight: Int) throws {
@@ -139,6 +178,7 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
     guard identifier == id else { throw WalletHostCommandError.invalid }
     guard !dismissing else { return }
     dismissing = true
+    owner?.hostPlugin.host?.updateNavigationVisibility()
     guard let panel = controller, let webView else { return }
     let configuration = WKSnapshotConfiguration()
     configuration.afterScreenUpdates = false
@@ -193,6 +233,8 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
 
   func reset() {
     guard identifier != nil || controller != nil || backgroundSnapshot != nil else { return }
+    if let backgroundTap { backgroundTap.view?.removeGestureRecognizer(backgroundTap) }
+    backgroundTap = nil
     identifier = nil
     dismissing = false
     let panel = controller

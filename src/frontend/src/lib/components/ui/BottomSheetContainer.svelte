@@ -27,7 +27,11 @@
 		children
 	}: Props = $props();
 
-	let transitionFn = $derived(transition || nativeSheetsAvailable() ? slide : () => ({}));
+	// UIKit owns movement. Keep an outro lifetime for its snapshot/close handshake,
+	// but never animate the measured web panel's height or padding inside it.
+	let transitionFn = $derived(
+		onClose && nativeSheetsAvailable() ? () => ({ duration: 200 }) : transition ? slide : () => ({})
+	);
 
 	const manageFocus = (node: HTMLElement) =>
 		onClose ? overlayFocus(node, { onClose }) : undefined;

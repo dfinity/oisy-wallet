@@ -290,12 +290,17 @@ final class ShellViewController: UIViewController, UITabBarDelegate {
     let isWelcomeVisible = wallet == nil && signIn?.view.isHidden == false
     let hidden =
       isWelcomeVisible
-      || ((blockingPresentation || wallet?.nativeSheet?.identifier != nil)
+      || ((blockingPresentation || wallet?.nativeSheet?.hidesNavigation == true)
         && wallet != nil && wallet?.view.isHidden == false)
     tabs.isHidden = hidden
     moreButton.isHidden = hidden
-    tabs.accessibilityElementsHidden = hidden
-    moreButton.accessibilityElementsHidden = hidden
+    // Reveal navigation under the closing sheet, but keep it inert until the
+    // same WebView and its scroll position have been restored behind it.
+    let sheetActive = wallet?.nativeSheet?.identifier != nil
+    tabs.isUserInteractionEnabled = !sheetActive
+    moreButton.isUserInteractionEnabled = !sheetActive
+    tabs.accessibilityElementsHidden = hidden || sheetActive
+    moreButton.accessibilityElementsHidden = hidden || sheetActive
     updateBackNavigation()
   }
   private func configureMoreButton() {

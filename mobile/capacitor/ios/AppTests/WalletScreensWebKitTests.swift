@@ -38,6 +38,41 @@ import XCTest
     }
     XCTFail("Native sheet did not finish presentation or release")
   }
+  private func openAccessory(
+    _ web: WKWebView, shell: ShellViewController, label: String
+  ) async throws {
+    _ = try await evaluate(web, """
+      window.testSheetAnimatedGeometry = [];
+      window.testWatchSheetOpening = true;
+      const watch = () => {
+        if (!window.testWatchSheetOpening) return;
+        const node = document.querySelector('[data-tid=bottom-sheet]');
+        if (node?.getAnimations().some(animation => animation.effect?.getKeyframes().some(frame =>
+          ['height', 'paddingTop', 'paddingBottom'].some(key => key in frame)))) {
+          window.testSheetAnimatedGeometry.push('web height animation');
+        }
+        requestAnimationFrame(watch);
+      };
+      requestAnimationFrame(watch);
+      document.querySelector('button[aria-label="\(label)"]').click(); return 'opened';
+      """)
+    var heights: Set<Int> = []
+    for _ in 0..<100 {
+      if let height = shell.wallet?.nativeSheet?.contentHeight { heights.insert(height) }
+      if let panel = shell.wallet?.nativeSheet?.controller,
+        panel.presentingViewController != nil, !panel.isBeingPresented { break }
+      try await Task.sleep(for: .milliseconds(10))
+    }
+    try await waitForNativeSheet(shell, visible: true)
+    try await Task.sleep(for: .milliseconds(300))
+    if let height = shell.wallet?.nativeSheet?.contentHeight { heights.insert(height) }
+    let geometryAnimations = try await evaluate(web, """
+      window.testWatchSheetOpening = false;
+      return JSON.stringify(window.testSheetAnimatedGeometry);
+      """)
+    XCTAssertEqual(geometryAnimations, "[]", "UIKit must be the only sheet entrance animation")
+    XCTAssertEqual(heights.count, 1, "Static content must open at its final height: \(heights)")
+  }
   private func capture(_ window: UIWindow, name: String) {
     let attachment = XCTAttachment(
       image: UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
@@ -625,9 +660,7 @@ import XCTest
     )
     XCTAssertEqual(shell.walletRoot, .search)
     XCTAssertFalse(web.allowsBackForwardNavigationGestures)
-    _ = try await evaluate(
-      web, "document.querySelector('button[aria-label=Sorting]').click(); return 'opened';")
-    try await waitForNativeSheet(shell, visible: true)
+    try await openAccessory(web, shell: shell, label: "Sorting")
     let accessory = try XCTUnwrap(wallet.nativeSheet)
     let accessoryPanel = try XCTUnwrap(accessory.controller)
     XCTAssertEqual(accessoryPanel.sheetPresentationController?.selectedDetentIdentifier, WalletSheetCoordinator.contentDetent)
@@ -677,8 +710,7 @@ import XCTest
     try await waitFor(web, "!document.querySelector('[data-tid=bottom-sheet]')")
     try await waitForNativeSheet(shell, visible: false)
     XCTAssertTrue(web.superview === wallet.view)
-    _ = try await evaluate(web, "document.querySelector('button[aria-label=\"List settings\"]').click(); return 'opened';")
-    try await waitForNativeSheet(shell, visible: true)
+    try await openAccessory(web, shell: shell, label: "List settings")
     XCTAssertLessThan(try XCTUnwrap(wallet.nativeSheet?.contentHeight), 350)
     for (style, name) in [(UIUserInterfaceStyle.light, "light"), (.dark, "dark")] {
       window.overrideUserInterfaceStyle = style

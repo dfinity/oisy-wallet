@@ -110,6 +110,36 @@ import XCTest
     let dismissed = try await web.evaluateJavaScript("window.dismissedSheet") as? String
     XCTAssertEqual(dismissed, id.uuidString.lowercased())
     XCTAssertNotNil(coordinator.controller, "A gesture cannot close the web flow directly")
+    let container = try XCTUnwrap(presentation.containerView)
+    let backgroundTap = try XCTUnwrap(
+      container.gestureRecognizers?.first {
+        $0.name == "wallet.sheetBackgroundTap"
+      } as? UITapGestureRecognizer)
+    let presentedView = try XCTUnwrap(presentation.presentedView)
+    let inside = SheetTouch(view: presentedView, point: CGPoint(x: 40, y: 60))
+    let outside = SheetTouch(view: presentedView, point: CGPoint(x: 40, y: -60))
+    XCTAssertTrue(backgroundTap.delegate === coordinator)
+    let systemTap = UITapGestureRecognizer()
+    XCTAssertTrue(
+      coordinator.gestureRecognizer(
+        backgroundTap, shouldRecognizeSimultaneouslyWith: systemTap))
+    XCTAssertFalse(
+      coordinator.gestureRecognizer(
+        systemTap, shouldRecognizeSimultaneouslyWith: backgroundTap))
+    XCTAssertTrue(coordinator.gestureRecognizer(backgroundTap, shouldReceive: outside))
+    XCTAssertFalse(coordinator.gestureRecognizer(backgroundTap, shouldReceive: inside))
+    XCTAssertFalse(
+      coordinator.gestureRecognizer(
+        backgroundTap, shouldReceive: SheetTouch(view: presentedView, point: CGPoint(x: 40, y: 2))),
+      "Tapping the native grabber must not dismiss the sheet")
+    _ = try await web.evaluateJavaScript("window.dismissedSheet = ''")
+    XCTAssertTrue(
+      UIApplication.shared.sendAction(
+        NSSelectorFromString("backgroundTapped:"), to: coordinator, from: backgroundTap, for: nil))
+    try await Task.sleep(for: .milliseconds(100))
+    let tapped = try await web.evaluateJavaScript("window.dismissedSheet") as? String
+    XCTAssertEqual(tapped, id.uuidString.lowercased())
+    XCTAssertNotNil(coordinator.controller, "Background taps must wait for the web Close guard")
     var stale = options.merging(["phase": "dismiss"]) { _, value in value }
     stale["documentId"] = UUID().uuidString
     do {
@@ -117,8 +147,26 @@ import XCTest
       XCTFail("Stale document accepted")
     } catch {}
     XCTAssertNotNil(coordinator.controller)
+    let tabs = try XCTUnwrap(shell.view.subviews.compactMap { $0 as? UITabBar }.first)
+    let more = try XCTUnwrap(
+      shell.view.subviews.first { $0.accessibilityIdentifier == "navigation.more" })
+    shell.setBlockingPresentation(true)
+    XCTAssertTrue(tabs.isHidden)
     try await command("dismiss")
+    XCTAssertTrue(tabs.isHidden, "An underlying page must keep navigation hidden")
+    shell.setBlockingPresentation(false)
+    XCTAssertFalse(tabs.isHidden, "Navigation must reappear before WebView restoration finishes")
+    XCTAssertFalse(more.isHidden)
+    XCTAssertFalse(tabs.isUserInteractionEnabled)
+    XCTAssertFalse(more.isUserInteractionEnabled)
+    XCTAssertTrue(tabs.accessibilityElementsHidden)
+    XCTAssertFalse(shell.walletInteractionsAllowed)
+    XCTAssertFalse(coordinator.gestureRecognizer(backgroundTap, shouldReceive: outside))
     try await command("release")
+    XCTAssertNil(backgroundTap.view, "The old presentation must not keep a tap handler")
+    XCTAssertTrue(tabs.isUserInteractionEnabled)
+    XCTAssertTrue(more.isUserInteractionEnabled)
+    XCTAssertFalse(tabs.accessibilityElementsHidden)
     XCTAssertNil(coordinator.controller)
     XCTAssertTrue(web.superview === wallet.view)
     XCTAssertEqual(wallet.session.documentID, document)
@@ -141,6 +189,13 @@ import XCTest
         "phase": "present", "contentHeight": 280,
       ]) { _, value in value })
     let fitted = try XCTUnwrap(coordinator.controller)
+    _ = try await web.evaluateJavaScript("window.dismissedSheet = ''")
+    XCTAssertFalse(coordinator.gestureRecognizer(backgroundTap, shouldReceive: outside))
+    _ = UIApplication.shared.sendAction(
+      NSSelectorFromString("backgroundTapped:"), to: coordinator, from: backgroundTap, for: nil)
+    try await Task.sleep(for: .milliseconds(100))
+    let staleTap = try await web.evaluateJavaScript("window.dismissedSheet") as? String
+    XCTAssertEqual(staleTap, "", "A previous sheet's recognizer must not close a new sheet")
     XCTAssertEqual(
       fitted.sheetPresentationController?.selectedDetentIdentifier,
       WalletSheetCoordinator.contentDetent)
@@ -210,5 +265,19 @@ import XCTest
     try await waitFor { shell.wallet == nil }
     XCTAssertNil(coordinator.identifier)
     XCTAssertNil(coordinator.controller)
+  }
+}
+
+/// Supplies locations to UIKit's gesture delegate without fabricating an event.
+@MainActor private final class SheetTouch: UITouch {
+  let referenceView: UIView
+  let point: CGPoint
+  init(view: UIView, point: CGPoint) {
+    referenceView = view
+    self.point = point
+    super.init()
+  }
+  override func location(in view: UIView?) -> CGPoint {
+    referenceView.convert(point, to: view)
   }
 }

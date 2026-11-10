@@ -371,7 +371,9 @@ website runs in the mobile host. Keep feature bodies in shared web components.
 Hosts advertising `nativeSheets` use the shared `nativeSheet` Svelte action to
 present the same WebView in a UIKit sheet. Hosts also advertising
 `contentSizedSheets` fit its height to the active panel, including async and nested
-content changes, and hide redundant dismissal chrome. Older hosts retain the large
+content changes, and hide redundant dismissal chrome. UIKit owns the sheet's entrance
+and exit movement; `BottomSheetContainer` keeps a non-visual outro for the snapshot
+handshake instead of animating its measured height. Older hosts retain the large
 `Modal` / medium `BottomSheetContainer` detents. Nested dialogs reuse that container. The action preserves the web focus/close guards and falls back to web
 presentation on unsupported hosts or preparation failure. Pending native panels
 explicitly hide their web backdrop; release clears sheet layout before native
