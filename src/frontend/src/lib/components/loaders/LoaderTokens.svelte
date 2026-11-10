@@ -49,8 +49,10 @@
 		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
+	import { userNetworks } from '$lib/derived/user-networks.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
+	import { saveDeprecatedErc20TokensWithBalance } from '$lib/services/suggested-tokens.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { LoadCustomTokenParams } from '$lib/types/custom-token';
@@ -163,11 +165,23 @@
 			return;
 		}
 
+		// By the time the processing settles, `loadParams` may already hold the next answer.
+		const params = loadParams;
+
 		await Promise.allSettled([
-			processErc20CustomTokens(loadParams),
-			processErc721CustomTokens(loadParams),
-			processErc1155CustomTokens(loadParams),
-			processErc4626CustomTokens(loadParams)
+			processErc20CustomTokens(params),
+			processErc721CustomTokens(params),
+			processErc1155CustomTokens(params),
+			processErc4626CustomTokens(params)
+		]);
+
+		// After the processing, so the ERC-20 tokens it sets cannot replace those reloaded after a save.
+		await Promise.allSettled([
+			saveDeprecatedErc20TokensWithBalance({
+				...params,
+				address: $ethAddress,
+				userNetworks: $userNetworks
+			})
 		]);
 	};
 

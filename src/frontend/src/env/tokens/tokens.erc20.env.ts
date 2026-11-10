@@ -179,3 +179,7 @@ export const ERC20_SUGGESTED_TOKENS = [
 	USDC_POLYGON_TOKEN,
 	USDT_POLYGON_TOKEN
 ];
+
+// Formerly suggested tokens: shown only to users whose token list has them. At sign-in, a user who
+// holds a balance in one but has no entry for it gets it saved as enabled.
+export const ERC20_DEPRECATED_TOKENS: RequiredAdditionalErc20Token[] = [];

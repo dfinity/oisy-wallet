@@ -29,6 +29,7 @@ import * as appConstants from '$lib/constants/app.constants';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import * as authDerived from '$lib/derived/auth.derived';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
+import { saveDeprecatedErc20TokensWithBalance } from '$lib/services/suggested-tokens.services';
 import {
 	ethAddressStore,
 	solAddressDevnetStore,
@@ -114,6 +115,10 @@ vi.mock('$sol/services/spl.services', () => ({
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn().mockResolvedValue([])
+}));
+
+vi.mock('$lib/services/suggested-tokens.services', () => ({
+	saveDeprecatedErc20TokensWithBalance: vi.fn().mockResolvedValue(undefined)
 }));
 
 describe('LoaderTokens', () => {
@@ -294,6 +299,76 @@ describe('LoaderTokens', () => {
 				expect(processIcrc7CustomTokens).toHaveBeenCalled();
 				expect(processErc20CustomTokens).toHaveBeenCalled();
 				expect(processSplCustomTokens).toHaveBeenCalled();
+			});
+		});
+	});
+
+	describe('Deprecated ERC-20 tokens', () => {
+		it('should check deprecated ERC-20 tokens against the certified token list', async () => {
+			setupUserNetworksStore('allEnabled');
+
+			render(LoaderTokens);
+
+			await waitFor(() => {
+				expect(saveDeprecatedErc20TokensWithBalance).toHaveBeenCalledWith(
+					expect.objectContaining({
+						tokens: [],
+						certified: true,
+						identity: mockIdentity,
+						address: mockEthAddress
+					})
+				);
+			});
+		});
+
+		it('should check deprecated ERC-20 tokens only once the ERC custom tokens are processed', async () => {
+			setupUserNetworksStore('allEnabled');
+
+			let resolveProcessing!: () => void;
+			const processing = new Promise<void>((resolve) => {
+				resolveProcessing = resolve;
+			});
+
+			vi.mocked(processErc20CustomTokens).mockReturnValue(processing);
+
+			render(LoaderTokens);
+
+			await waitFor(() => {
+				expect(processErc20CustomTokens).toHaveBeenCalled();
+			});
+
+			expect(saveDeprecatedErc20TokensWithBalance).not.toHaveBeenCalled();
+
+			resolveProcessing();
+
+			await waitFor(() => {
+				expect(saveDeprecatedErc20TokensWithBalance).toHaveBeenCalled();
+			});
+
+			vi.mocked(processErc20CustomTokens).mockResolvedValue(undefined);
+		});
+
+		it('should not check deprecated ERC-20 tokens when the EVM networks are off', async () => {
+			render(LoaderTokens);
+
+			await waitFor(() => {
+				expect(processIcrcCustomTokens).toHaveBeenCalled();
+			});
+
+			expect(saveDeprecatedErc20TokensWithBalance).not.toHaveBeenCalled();
+		});
+
+		it('should not fail when checking deprecated ERC-20 tokens rejects', async () => {
+			setupUserNetworksStore('allEnabled');
+
+			vi.mocked(saveDeprecatedErc20TokensWithBalance).mockRejectedValueOnce(
+				new Error('Check failed')
+			);
+
+			render(LoaderTokens);
+
+			await waitFor(() => {
+				expect(saveDeprecatedErc20TokensWithBalance).toHaveBeenCalled();
 			});
 		});
 	});
