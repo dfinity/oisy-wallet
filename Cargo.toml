@@ -14,7 +14,7 @@ ic-cdk = "0.20.2"
 # ic-cdk 0.20 split the management- and Bitcoin-canister bindings out of the main
 # crate; these two are the same code, just relocated.
 ic-cdk-bitcoin-canister = "0.2.0"
-ic-cdk-management-canister = "0.1.1"
+ic-cdk-management-canister = "0.3.0"
 ic-cdk-timers = "1.0.0"
 canbench-rs = { version = "0.7.0" }
 ic-cycles-ledger-client = { path = "src/cycles_ledger/client" }
