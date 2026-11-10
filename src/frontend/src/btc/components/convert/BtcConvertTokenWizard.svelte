@@ -146,7 +146,6 @@
 				network,
 				source: sourceAddress,
 				identity: $authIdentity,
-				viaBackend: true,
 				onProgress: () => {
 					if (convertProgressStep === ProgressStepsConvert.INITIALIZATION) {
 						progress(ProgressStepsConvert.CONVERT);

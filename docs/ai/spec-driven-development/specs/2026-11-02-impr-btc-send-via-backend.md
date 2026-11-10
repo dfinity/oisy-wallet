@@ -889,6 +889,35 @@ Decided in PR 8b:
   abandoned without failing a slow one, for example its reservation expired and its txid in
   neither a block nor the mempool, so it is a separate PR, 8d, which lands before PR 10.
 
+Decided in PR 8c:
+
+- **`viaBackend` is gone.** Every caller of `sendBtc` now handles the backend path's outcomes, so
+  `sendBtc` goes through the backend whenever the flag is on.
+- **Liquidium's `broadcast` callbacks take `beforeBroadcast`.** The BTC wizards hand it to
+  `sendBtc`. The ETH and ICRC wizards ignore it, since their transports learn the txid only by
+  broadcasting.
+- **Supply** writes its row, with the txid, in `beforeBroadcast`. The write must succeed: if it
+  fails, nothing is broadcast and the row is deleted all the same. A refusal outright deletes it,
+  with `deleteUnbroadcastActiveUserTransaction`, and after an unclear outcome it stays. On the CFS
+  path the row is still created after the broadcast, best effort.
+- **Repay** still creates its row before the transfer, and `beforeBroadcast` writes the txid into
+  it. A failure then deletes the row only if the txid was never recorded, that is before the
+  broadcast or on the CFS path, or if the broadcast was refused outright. Otherwise the row stays
+  and keeps counting against the repay max until it settles.
+  - Once a txid write has been attempted, the delete retries (`deleteUnbroadcastActiveUserTransaction`):
+    the row may carry the txid, written or committed with its answer lost, and the poller's cleanup
+    of rows without one cannot remove it. This covers a refusal outright and a failed txid write
+    (Copilot).
+  - The txid is written again after the broadcast. A poller in another tab can read the row
+    without it and delete it just after the first write, since `delete_active_user_transaction`
+    takes no condition, and the second write then answers `NotFound` and recreates the row
+    (Copilot). Making the poller's delete conditional on the row it read would need a backend API
+    change.
+- **`flow.submit({ txid })`** still runs only after a successful broadcast, for both.
+- **Both BTC wizards** show `mapBtcBroadcastErrorToMessage`'s message ahead of "Transaction failed",
+  and close after an unclear outcome instead of returning to a form that offers the full amount
+  again.
+
 ### Frontend: UTXO loading
 
 `AllUtxosLoader.svelte` and `loadBtcPendingSentTransactions` read from `btc_get_spendable_utxos`

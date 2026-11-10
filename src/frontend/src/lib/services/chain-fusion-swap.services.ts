@@ -946,7 +946,6 @@ export const fetchChainFusionBtcSwap = async ({
 			...rest,
 			identity,
 			destination: depositAddress,
-			viaBackend: true,
 			onProgress: () => {
 				progress(signed ? ProgressStepsSwap.UPDATE_UI : ProgressStepsSwap.SWAP);
 				signed = true;

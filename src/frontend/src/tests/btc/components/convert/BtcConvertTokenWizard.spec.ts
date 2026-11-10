@@ -209,24 +209,6 @@ describe('BtcConvertTokenWizard', () => {
 			return toastsErrorSpy;
 		};
 
-		it('should send through the backend when the flag allows it', async () => {
-			const sendBtcSpy = vi.spyOn(btcSendServices, 'sendBtc').mockResolvedValue(transactionId);
-			mockAuthStore();
-			mockBtcAddressStore();
-			mockAddressesStore();
-
-			const { container } = render(BtcConvertTokenWizard, {
-				props,
-				context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStore(mockUtxosFee) })
-			});
-
-			await clickConvertButton(container);
-
-			expect(sendBtcSpy).toHaveBeenCalledExactlyOnceWith(
-				expect.objectContaining({ viaBackend: true })
-			);
-		});
-
 		it('should close, not offer the form again, when the conversion may have gone out', async () => {
 			const err = new BtcBroadcastTransactionCanisterError(
 				{ BroadcastOutcomeUnknown: { msg: 'trap' } },

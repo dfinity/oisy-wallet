@@ -153,23 +153,6 @@ describe('BtcSendTokenWizard', () => {
 		expect(addPendingTransactionApiSpy).toHaveResolvedWith(pendingBtcTransactionResponse);
 	});
 
-	it('should send through the backend when the flag allows it', async () => {
-		const sendBtcSpy = vi.spyOn(btcSendServices, 'sendBtc').mockResolvedValue(transactionId);
-		mockAuthStore();
-		mockAddressesStore();
-
-		const { container } = render(BtcSendTokenWizard, {
-			props,
-			context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStoreWithValue(mockUtxosFee) })
-		});
-
-		await clickSendButton(container);
-
-		expect(sendBtcSpy).toHaveBeenCalledExactlyOnceWith(
-			expect.objectContaining({ viaBackend: true })
-		);
-	});
-
 	describe('when the send fails', () => {
 		const sendAndFail = async (err: unknown) => {
 			vi.spyOn(btcSendServices, 'sendBtc').mockRejectedValue(err);

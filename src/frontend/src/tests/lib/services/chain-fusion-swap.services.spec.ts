@@ -1233,8 +1233,7 @@ describe('chain-fusion-swap.services', () => {
 					source: mockBtcAddress,
 					destination: mockBtcDepositAddress,
 					network: 'mainnet',
-					utxosFee: mockUtxosFee,
-					viaBackend: true
+					utxosFee: mockUtxosFee
 				})
 			);
 		});

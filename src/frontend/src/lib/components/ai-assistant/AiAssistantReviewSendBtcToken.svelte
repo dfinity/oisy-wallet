@@ -225,8 +225,7 @@
 				utxosFee,
 				network,
 				source,
-				identity: $authIdentity,
-				viaBackend: true
+				identity: $authIdentity
 			});
 
 			trackEvent({

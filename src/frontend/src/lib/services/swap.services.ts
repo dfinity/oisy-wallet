@@ -1287,7 +1287,6 @@ export const fetchNearIntentsBtcSwap = async ({
 					source: userAddress,
 					destination: depositAddress,
 					amount: swapAmount,
-					viaBackend: true,
 					// Through the backend the deposit is known once signed, so its row is created
 					// before the broadcast, as `fetchChainFusionBtcSwap`'s is.
 					beforeBroadcast: async () => {
