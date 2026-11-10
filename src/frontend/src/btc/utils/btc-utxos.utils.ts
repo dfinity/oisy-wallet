@@ -1,9 +1,14 @@
-import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import {
+	BTC_SEND_MAX_INPUTS,
+	CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+} from '$btc/constants/btc.constants';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
+import { BTC_SEND_VIA_BACKEND_ENABLED } from '$env/btc.env';
 import { outpointToKey } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { isNullish } from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 export interface UtxoSelectionResult {
@@ -13,6 +18,14 @@ export interface UtxoSelectionResult {
 	sufficientFunds: boolean;
 	feeSatoshis: bigint;
 }
+
+/**
+ * The most inputs a send may spend: with `BTC_SEND_VIA_BACKEND_ENABLED`, `BTC_SEND_MAX_INPUTS`, so
+ * the selection and Max never offer a send whose signing can outrun its approval. `undefined`
+ * otherwise.
+ */
+export const btcSendMaxInputs = (): number | undefined =>
+	BTC_SEND_VIA_BACKEND_ENABLED ? BTC_SEND_MAX_INPUTS : undefined;
 
 /**
  * Extracts outpoint keys (txid + vout) from an array of UTXOs.
@@ -88,17 +101,23 @@ export const calculateFeeSatoshis = ({
  * The fee is recalculated after every pick because each additional input increases transaction
  * size.  Using fee(N+1) as the target when searching for the next UTXO ensures the selected
  * set will remain sufficient once the UTXO is added.
+ *
+ * With `maxInputs`, funds that need more inputs are insufficient. Since every pick but the last is
+ * the largest left, the selection then finds a set whenever any set of that many inputs covers the
+ * amount.
  */
 export const calculateUtxoSelection = ({
 	availableUtxos,
 	amountSatoshis,
 	recipientOutputVSize,
-	feeRateMiliSatoshisPerVByte
+	feeRateMiliSatoshisPerVByte,
+	maxInputs
 }: {
 	availableUtxos: CkBtcMinterDid.Utxo[];
 	amountSatoshis: bigint;
 	recipientOutputVSize: number;
 	feeRateMiliSatoshisPerVByte: bigint;
+	maxInputs?: number;
 }): UtxoSelectionResult => {
 	if (availableUtxos.length === 0) {
 		return {
@@ -117,7 +136,7 @@ export const calculateUtxoSelection = ({
 	let totalInputValue = ZERO;
 	const remaining = [...availableUtxos];
 
-	while (remaining.length > 0) {
+	while (remaining.length > 0 && (isNullish(maxInputs) || selectedUtxos.length < maxInputs)) {
 		// Fee for the transaction once we add one more input.
 		const fee = calcFee(selectedUtxos.length + 1);
 		const needed = amountSatoshis + fee - totalInputValue;
@@ -239,17 +258,22 @@ export const filterAvailableUtxos = ({
  * The fee is priced for the recipient's output, as the selection prices it, so the amount offered
  * is one the selection accepts. Before the recipient is known, `recipientOutputVSize` is
  * `BTC_LARGEST_OUTPUT_VSIZE`, and the amount is fundable whoever the recipient turns out to be.
+ *
+ * With `maxInputs`, a send spends at most that many, so the most it can carry comes from the
+ * largest of them, as the selection would pick them.
  */
 export const calculateMaxSpendableAmount = ({
 	utxos,
 	pendingUtxoOutpoints,
 	recipientOutputVSize,
-	feeRateMiliSatoshisPerVByte
+	feeRateMiliSatoshisPerVByte,
+	maxInputs
 }: {
 	utxos: CkBtcMinterDid.Utxo[];
 	pendingUtxoOutpoints: string[];
 	recipientOutputVSize: number;
 	feeRateMiliSatoshisPerVByte: bigint;
+	maxInputs?: number;
 }): bigint => {
 	const availableUtxos = filterAvailableUtxos({
 		utxos,
@@ -263,10 +287,17 @@ export const calculateMaxSpendableAmount = ({
 		return ZERO;
 	}
 
-	const totalValue = availableUtxos.reduce((sum, { value }) => sum + BigInt(value), ZERO);
+	const spentUtxos =
+		isNullish(maxInputs) || availableUtxos.length <= maxInputs
+			? availableUtxos
+			: [...availableUtxos]
+					.sort(({ value: a }, { value: b }) => (a > b ? -1 : a < b ? 1 : 0))
+					.slice(0, maxInputs);
+
+	const totalValue = spentUtxos.reduce((sum, { value }) => sum + BigInt(value), ZERO);
 
 	const feeSatoshis = calculateFeeSatoshis({
-		numInputs: availableUtxos.length,
+		numInputs: spentUtxos.length,
 		recipientOutputVSize,
 		feeRateMiliSatoshisPerVByte
 	});

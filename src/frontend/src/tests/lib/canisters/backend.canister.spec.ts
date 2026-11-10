@@ -3,6 +3,7 @@ import type {
 	AllowSigningResult,
 	_SERVICE as BackendService,
 	BtcAddPendingTransactionResult,
+	BtcBroadcastTransactionResult,
 	BtcGetPendingTransactionsResult,
 	BtcGetSpendableUtxosResult,
 	CustomToken,
@@ -12,6 +13,7 @@ import type {
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import {
+	BtcBroadcastTransactionCanisterError,
 	CanisterInternalError,
 	OnramperRateLimitedError,
 	OnramperSecretNotConfiguredError
@@ -569,6 +571,62 @@ describe('backend.canister', () => {
 			await expect(btcGetPendingTransactions(btcGetPendingTransactionParams)).rejects.toThrow(
 				new CanisterInternalError('II delegation chain verification failed: chain expired')
 			);
+		});
+	});
+
+	describe('btc_broadcast_transaction', () => {
+		const params = {
+			network: btcAddPendingTransactionParams.network,
+			transaction: Uint8Array.from([0, 1, 2]),
+			iiDelegationChain: mockIIDelegationChain
+		};
+
+		it('should broadcast and return the txid', async () => {
+			const response = { Ok: { txid: Uint8Array.from([9, 8, 7]) } };
+			service.btc_broadcast_transaction.mockResolvedValue(response);
+
+			const { btcBroadcastTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcBroadcastTransaction(params);
+
+			expect(service.btc_broadcast_transaction).toHaveBeenCalledExactlyOnceWith({
+				network: params.network,
+				transaction: params.transaction,
+				ii_delegation_chain: params.iiDelegationChain
+			});
+			expect(res).toEqual(response.Ok);
+		});
+
+		// Unlike `btc_add_pending_transaction`'s, a rate limit is not swallowed: nothing was sent.
+		it.each([
+			{ RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } },
+			{ BroadcastOutcomeUnknown: { msg: 'trap' } },
+			{ UtxosAlreadyReserved: null }
+		])('should throw the typed answer %o', async (variant) => {
+			service.btc_broadcast_transaction.mockResolvedValue({
+				Err: variant
+			} as BtcBroadcastTransactionResult);
+
+			const { btcBroadcastTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcBroadcastTransaction(params);
+
+			await expect(res).rejects.toBeInstanceOf(BtcBroadcastTransactionCanisterError);
+			await expect(res).rejects.toHaveProperty('variant', variant);
+		});
+
+		it('should rethrow a failed call as it is', async () => {
+			service.btc_broadcast_transaction.mockRejectedValue(mockResponseError);
+
+			const { btcBroadcastTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(btcBroadcastTransaction(params)).rejects.toBe(mockResponseError);
 		});
 	});
 
@@ -1308,6 +1366,22 @@ describe('backend.canister', () => {
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
+
+		it.each([
+			{
+				name: 'RateLimited',
+				err: { RateLimited: { max_calls: 10, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			},
+			{ name: 'VersionMismatch', err: { VersionMismatch: null } }
+		])('should throw the error if update_user_agreements returns $name', async ({ err }) => {
+			service.update_user_agreements.mockResolvedValue({ Err: err });
+
+			const { updateUserAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(updateUserAgreements({ agreements: mockUserAgreements })).rejects.toEqual(err);
+		});
 	});
 
 	describe('updateProviderAgreements', () => {
@@ -1367,6 +1441,24 @@ describe('backend.canister', () => {
 			});
 
 			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it.each([
+			{
+				name: 'RateLimited',
+				err: { RateLimited: { max_calls: 10, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			},
+			{ name: 'VersionMismatch', err: { VersionMismatch: null } }
+		])('should throw the error if update_provider_agreements returns $name', async ({ err }) => {
+			service.update_provider_agreements.mockResolvedValue({ Err: err });
+
+			const { updateProviderAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(
+				updateProviderAgreements({ providerAgreements: mockUserProviderAgreements })
+			).rejects.toEqual(err);
 		});
 	});
 

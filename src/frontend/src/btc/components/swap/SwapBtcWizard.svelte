@@ -9,6 +9,10 @@
 		type UtxosFeeContext as UtxosFeeContextType
 	} from '$btc/stores/utxos-fee.store';
 	import { BtcValidationError } from '$btc/types/btc-send';
+	import {
+		isUnclearBtcBroadcastOutcome,
+		mapBtcBroadcastErrorToMessage
+	} from '$btc/utils/btc-send.utils';
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import type { ProgressStep } from '$eth/types/send';
 	import { btcAddressStore } from '$icp/stores/btc.store';
@@ -234,6 +238,7 @@
 					destinationToken: $destinationToken,
 					swapAmount,
 					swapDetails: selectedProvider.swapDetails,
+					slippageValue,
 					userAddress: sourceAddress,
 					network,
 					utxosFee
@@ -306,11 +311,24 @@
 			const quoteRejected = nearIntentsQuoteRejectedMessage(err);
 
 			toastsError({
-				msg: { text: quoteRejected ?? $i18n.swap.error.unexpected },
+				msg: {
+					text:
+						quoteRejected ??
+						mapBtcBroadcastErrorToMessage({ err, i18n: $i18n }) ??
+						$i18n.swap.error.unexpected
+				},
 				// The gate aborted before any funds moved, so there is no underlying failure to
 				// attach; the message above already says everything the user needs.
 				...(isNullish(quoteRejected) ? { err } : {})
 			});
+
+			// The deposit may have gone out, and its row stays for the poller to settle. Its inputs
+			// stay reserved too, so swapping again would spend other coins: the flow closes instead
+			// of offering the form again.
+			if (isUnclearBtcBroadcastOutcome(err)) {
+				onClose();
+				return;
+			}
 
 			onBack();
 			onStartTriggerAmount();

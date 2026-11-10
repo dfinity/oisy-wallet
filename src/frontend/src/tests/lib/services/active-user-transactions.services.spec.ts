@@ -6,6 +6,7 @@ import {
 	applyActiveUserTransactionPollUpdate,
 	createActiveUserTransaction,
 	deleteActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction,
 	loadActiveUserTransactions,
 	markActiveUserTransactionsSeen,
 	reloadActiveUserTransaction,
@@ -465,6 +466,45 @@ describe('active-user-transactions.services', () => {
 				})
 			).rejects.toEqual(mockActiveUserTransactionErrorNotFound);
 			expect(get(activeUserTransactionsList)).toEqual([mockActiveUserTransaction]);
+		});
+	});
+
+	describe('deleteUnbroadcastActiveUserTransaction', () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('should delete the row on the first attempt that succeeds', async () => {
+			vi.spyOn(backendApi, 'deleteActiveUserTransaction')
+				.mockRejectedValueOnce(new Error('transport'))
+				.mockResolvedValueOnce(undefined);
+
+			const deleted = deleteUnbroadcastActiveUserTransaction({
+				identity: mockIdentity,
+				id: mockActiveUserTransactionId
+			});
+			await vi.runAllTimersAsync();
+			await deleted;
+
+			expect(backendApi.deleteActiveUserTransaction).toHaveBeenCalledTimes(2);
+		});
+
+		it('should give up after three attempts, leaving the row to its poller', async () => {
+			vi.spyOn(backendApi, 'deleteActiveUserTransaction').mockRejectedValue(new Error('transport'));
+
+			const deleted = deleteUnbroadcastActiveUserTransaction({
+				identity: mockIdentity,
+				id: mockActiveUserTransactionId
+			});
+			await vi.runAllTimersAsync();
+
+			await expect(deleted).resolves.toBeUndefined();
+			expect(backendApi.deleteActiveUserTransaction).toHaveBeenCalledTimes(3);
 		});
 	});
 

@@ -35,8 +35,16 @@
 		sendEnabled: boolean;
 	}
 
-	let { amount, contact, address, contactAddress, sendEnabled, sendCompleted, id }: Props =
-		$props();
+	let {
+		amount,
+		contact,
+		address,
+		contactAddress,
+		sendEnabled,
+		sendCompleted,
+		sendOutcomeUnknown = false,
+		id
+	}: Props = $props();
 
 	const { sendToken, sendTokenExchangeRate, sendTokenNetworkId } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -66,6 +74,10 @@
 	const onSendCompleted = () => {
 		aiAssistantStore.setSendToolActionAsCompleted(id);
 	};
+
+	const onSendOutcomeUnknown = () => {
+		aiAssistantStore.setSendToolActionAsOutcomeUnknown(id);
+	};
 </script>
 
 <SendTokenReview
@@ -93,8 +105,10 @@
 				{destination}
 				{nativeEthereumToken}
 				{onSendCompleted}
+				{onSendOutcomeUnknown}
 				{sendCompleted}
 				{sendEnabled}
+				{sendOutcomeUnknown}
 				sourceNetwork={$sendToken.network}
 			/>
 		{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
@@ -114,8 +128,10 @@
 					{amount}
 					{destination}
 					{onSendCompleted}
+					{onSendOutcomeUnknown}
 					{sendCompleted}
 					{sendEnabled}
+					{sendOutcomeUnknown}
 					source={btcSource}
 				/>
 			</UtxosFeeContexts>
@@ -129,6 +145,7 @@
 			/>
 		{:else if isNetworkIdICP($sendTokenNetworkId)}
 			<AiAssistantReviewSendIcToken
+				{id}
 				{amount}
 				{destination}
 				{onSendCompleted}

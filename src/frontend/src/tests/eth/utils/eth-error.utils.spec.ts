@@ -4,6 +4,7 @@ import {
 	isBroadcastRetriable,
 	isDefinitiveTransactionRefusal,
 	isOutOfGasRefusal,
+	isSendOutcomeUnknown,
 	mapEthereumErrorMsg,
 	toastEthereumTransactionError
 } from '$eth/utils/eth-error.utils';
@@ -215,6 +216,42 @@ describe('eth-error.utils', () => {
 					answered({ method: 'eth_sendRawTransaction', message: 'intrinsic gas too low' })
 				)
 			).toBeFalsy();
+		});
+	});
+
+	describe('isSendOutcomeUnknown', () => {
+		const insufficientFunds = () =>
+			Object.assign(new Error('insufficient funds'), { code: 'INSUFFICIENT_FUNDS' });
+
+		it.each([
+			{
+				failure: 'every provider failed the submission',
+				err: new EthSubmissionUnconfirmedError(new Error('Internal error'))
+			},
+			{
+				failure: 'a swap was refused only after an attempt that may have relayed it',
+				err: new SwapBroadcastOutcomeUnknownError({ cause: insufficientFunds() })
+			},
+			{
+				failure: 'a caller wrapped an unconfirmed submission again',
+				err: new Error('sending the transaction failed', {
+					cause: new EthSubmissionUnconfirmedError(new Error('Internal error'))
+				})
+			}
+		])('should be true when $failure', ({ err }) => {
+			expect(isSendOutcomeUnknown(err)).toBeTruthy();
+		});
+
+		it.each([
+			{
+				failure: 'the nonce could not be read, so nothing was signed',
+				err: new EthNonceReadError(new Error('Internal error'))
+			},
+			{ failure: 'the node refused the transaction outright', err: insufficientFunds() },
+			{ failure: 'the error is not an Error', err: 'boom' },
+			{ failure: 'there is no error', err: undefined }
+		])('should be false when $failure', ({ err }) => {
+			expect(isSendOutcomeUnknown(err)).toBeFalsy();
 		});
 	});
 

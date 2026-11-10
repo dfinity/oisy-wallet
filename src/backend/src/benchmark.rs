@@ -23,7 +23,10 @@ use shared::{
             CreateActiveUserTransactionRequest, OneSecIcpToEvmData,
             UpdateActiveUserTransactionRequest,
         },
-        agreement::{UserAgreement, UserAgreements},
+        agreement::{
+            AgreementHistoryEntry, AgreementType, UserAgreement, UserAgreements,
+            MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER,
+        },
         bitcoin::{PendingTransaction, StoredPendingTransaction},
         contact::{Contact, StoredContacts},
         custom_token::{CustomToken, CustomTokenId, ErcToken, ErcTokenId, Token},
@@ -459,6 +462,64 @@ fn bench_update_user_agreements() -> BenchResult {
             )
         }));
     })
+}
+
+/// An update that changes all three agreements and fills the history to
+/// `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries: the most an accepted agreement update costs.
+#[bench(raw)]
+fn bench_update_user_agreements_full_history() -> BenchResult {
+    let version = ensure_profile_version();
+    let sp = bench_stored_principal();
+    let stored_entry = AgreementHistoryEntry {
+        agreement_type: AgreementType::TermsOfUse,
+        accepted: true,
+        timestamp_ns: TS0_NS,
+        text_sha256: Some("a".repeat(64)),
+        last_updated_at_ms: Some(1_700_000_000_000),
+    };
+    mutate_state(|s| {
+        s.agreement_history.insert(
+            sp,
+            Candid(vec![
+                stored_entry;
+                MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER - 3
+            ]),
+        );
+    });
+    let agreement = UserAgreement {
+        accepted: Some(true),
+        last_accepted_at_ns: None,
+        last_updated_at_ms: Some(1_700_000_000_000),
+        text_sha256: Some("b".repeat(64)),
+    };
+    let agreements = UserAgreements {
+        license_agreement: agreement.clone(),
+        terms_of_use: agreement.clone(),
+        privacy_policy: agreement,
+    };
+
+    let result = bench_fn(|| {
+        std::hint::black_box(mutate_state(|s| {
+            let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+            user_profile::service::update_agreements(
+                sp,
+                version,
+                &agreements,
+                &mut m,
+                &mut s.agreement_history,
+            )
+        }));
+    });
+
+    // Checked outside the measured closure, so decoding the history again is not counted.
+    let history = read_state(|s| s.agreement_history.get(&sp).unwrap_or_default().0);
+    assert!(
+        history.len() == MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER
+            && history.last().map(|entry| &entry.agreement_type)
+                == Some(&AgreementType::PrivacyPolicy),
+        "the update must add three entries and fill the history"
+    );
+    result
 }
 
 #[bench(raw)]
@@ -1086,5 +1147,45 @@ fn bench_prune_expired_tips_oversized() -> BenchResult {
 
     bench_fn(|| {
         std::hint::black_box(prune_expired_tips(None, now, || true));
+    })
+}
+
+// ---------------------------------------------------------------------------
+// Token activity
+// ---------------------------------------------------------------------------
+
+/// Evicts from a full `token_activity` twice: first at a time when no entry is past the retention
+/// window, which only reads them, then once half of them are, which also evicts those 1,000
+/// entries. The two scopes give the cost of reading one entry and of evicting one.
+#[bench(raw)]
+fn bench_evict_inactive_tokens_2000() -> BenchResult {
+    // `token::activity::MAX_TOKEN_ACTIVITY_ENTRIES`.
+    const COUNT: u64 = 2_000;
+    // Far past the 30-minute retention window of anything last active at 0.
+    const LATER_NS: u64 = 1 << 62;
+
+    for n in 0..COUNT {
+        // Even tokens were last active at 0, odd tokens at `LATER_NS`, so only even tokens are
+        // past the retention window at `LATER_NS`, and none is at 0.
+        let last_active_ns = if n % 2 == 0 { 0 } else { LATER_NS };
+        token::mark_tokens_active(
+            &[TokenId::Erc20(ErcTokenId(format!("0x{n:040x}")), 1)],
+            last_active_ns,
+        );
+    }
+
+    bench_fn(|| {
+        {
+            let _scope = bench_scope("read_2000");
+            std::hint::black_box(mutate_state(|s| {
+                token::evict_inactive_tokens(s, None, 0, || true)
+            }));
+        }
+        {
+            let _scope = bench_scope("read_2000_evict_1000");
+            std::hint::black_box(mutate_state(|s| {
+                token::evict_inactive_tokens(s, None, LATER_NS, || true)
+            }));
+        }
     })
 }

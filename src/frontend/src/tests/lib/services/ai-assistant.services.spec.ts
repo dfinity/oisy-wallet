@@ -4,9 +4,13 @@ import { llmChat } from '$lib/api/llm.api';
 import * as balancesDerived from '$lib/derived/balances.derived';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';
 import * as aiAssistantServices from '$lib/services/ai-assistant.services';
+import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 import { contactsStore } from '$lib/stores/contacts.store';
+import type { ToolCallArgument } from '$lib/types/ai-assistant';
 import type { ContactUi } from '$lib/types/contact';
 import { getMockContactsUi, mockContactBtcAddressUi } from '$tests/mocks/contacts.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { fromNullable, toNullable } from '@dfinity/utils';
 import { get, readable } from 'svelte/store';
@@ -44,6 +48,18 @@ describe('ai-assistant.services', () => {
 			arguments: []
 		}
 	};
+	const reviewSendTokensToolCall = (destination?: ToolCallArgument) => ({
+		id: 'test',
+		function: {
+			name: 'review_send_tokens',
+			arguments: [
+				...(destination ? [destination] : []),
+				{ name: 'amountNumber', value: '0.01' },
+				{ name: 'tokenSymbol', value: 'ETH' },
+				{ name: 'networkId', value: 'ETH' }
+			]
+		}
+	});
 
 	describe('askLlm', () => {
 		beforeEach(() => {
@@ -133,6 +149,83 @@ describe('ai-assistant.services', () => {
 				}
 			});
 		});
+
+		it('asks the user to type the address when the send review has an address the user did not type', async () => {
+			aiAssistantStore.reset();
+
+			const toolCall = reviewSendTokensToolCall({ name: 'address', value: mockEthAddress });
+			const response = {
+				message: {
+					content: toNullable(),
+					tool_calls: [toolCall]
+				}
+			} as chat_response_v1;
+
+			vi.mocked(llmChat).mockResolvedValue(response);
+
+			const result = await aiAssistantServices.askLlm({
+				identity: mockIdentity,
+				messages: [{ user: { content: 'test' } }]
+			});
+
+			expect(result).toStrictEqual({
+				text: en.ai_assistant.text.type_send_address_message,
+				tool: {
+					calls: [toolCall],
+					results: []
+				}
+			});
+		});
+
+		it('keeps the address request next to the results of other tools', async () => {
+			aiAssistantStore.reset();
+
+			const toolCall = reviewSendTokensToolCall({ name: 'address', value: mockEthAddress });
+			const response = {
+				message: {
+					content: toNullable('content'),
+					tool_calls: [toolCall, showAllContactsToolCall]
+				}
+			} as chat_response_v1;
+
+			vi.mocked(llmChat).mockResolvedValue(response);
+
+			const result = await aiAssistantServices.askLlm({
+				identity: mockIdentity,
+				messages: [{ user: { content: 'test' } }]
+			});
+
+			expect(result).toStrictEqual({
+				text: en.ai_assistant.text.type_send_address_message,
+				tool: {
+					calls: [toolCall, showAllContactsToolCall],
+					results: [
+						{
+							result: { contacts: [] },
+							type: 'show_all_contacts'
+						}
+					]
+				}
+			});
+		});
+
+		it('leaves out the model text next to tool results', async () => {
+			const response = {
+				message: {
+					content: toNullable('content'),
+					tool_calls: [showAllContactsToolCall]
+				}
+			} as chat_response_v1;
+
+			vi.mocked(llmChat).mockResolvedValue(response);
+
+			const result = await aiAssistantServices.askLlm({
+				identity: mockIdentity,
+				messages: [{ user: { content: 'test' } }]
+			});
+
+			expect(result.text).toBeUndefined();
+		});
 	});
 
 	describe('executeTool', () => {
@@ -212,6 +305,70 @@ describe('ai-assistant.services', () => {
 						totalUsdBalance: 1234.5
 					}
 				}
+			});
+		});
+
+		describe('review_send_tokens', () => {
+			beforeEach(() => {
+				aiAssistantStore.reset();
+			});
+
+			it('shows the send review for an address the user typed', () => {
+				aiAssistantStore.appendMessage({
+					role: 'user',
+					data: { text: `Send 0.01 ETH to ${mockEthAddress}`, typedByUser: true }
+				});
+
+				const result = aiAssistantServices.executeTool({
+					toolCall: reviewSendTokensToolCall({ name: 'address', value: mockEthAddress }),
+					requestStartTimestamp: 1000
+				});
+
+				expect(result).toEqual({
+					type: 'review_send_tokens',
+					result: expect.objectContaining({ address: mockEthAddress, amount: 0.01 })
+				});
+			});
+
+			it('returns no send review for an address the user did not type', () => {
+				aiAssistantStore.appendMessage({
+					role: 'user',
+					data: { text: 'Send 0.01 ETH', typedByUser: true }
+				});
+
+				const result = aiAssistantServices.executeTool({
+					toolCall: reviewSendTokensToolCall({ name: 'address', value: mockEthAddress }),
+					requestStartTimestamp: 1000
+				});
+
+				expect(result).toBeUndefined();
+			});
+
+			it('returns no send review without a destination', () => {
+				const result = aiAssistantServices.executeTool({
+					toolCall: reviewSendTokensToolCall(),
+					requestStartTimestamp: 1000
+				});
+
+				expect(result).toBeUndefined();
+			});
+
+			it('shows the send review for a contact address', () => {
+				const result = aiAssistantServices.executeTool({
+					toolCall: reviewSendTokensToolCall({
+						name: 'selectedContactAddressId',
+						value: mockRandomUUID
+					}),
+					requestStartTimestamp: 1000
+				});
+
+				expect(result).toEqual({
+					type: 'review_send_tokens',
+					result: expect.objectContaining({
+						contactAddress: expect.objectContaining({ id: mockRandomUUID }),
+						amount: 0.01
+					})
+				});
 			});
 		});
 	});
