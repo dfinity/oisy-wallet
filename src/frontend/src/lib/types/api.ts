@@ -81,6 +81,11 @@ export interface BtcGetPendingTransactionParams {
 
 export type BtcGetSpendableUtxosParams = BtcGetPendingTransactionParams;
 
+export interface BtcBroadcastTransactionParams extends BtcGetPendingTransactionParams {
+	// Fully signed and consensus-serialized.
+	transaction: Uint8Array;
+}
+
 export interface BtcAddPendingTransactionParams extends BtcGetPendingTransactionParams {
 	txId: Uint8Array;
 	utxos: Utxo[];

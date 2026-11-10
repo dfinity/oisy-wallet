@@ -1,5 +1,10 @@
-import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
+import {
+	BtcBroadcastUnconfirmedError,
+	BtcPrepareSendError,
+	type UtxosFee
+} from '$btc/types/btc-send';
 import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import type { Amount } from '$lib/types/send';
 import { nonNullish } from '@dfinity/utils';
 
@@ -46,5 +51,48 @@ export const mapUtxosFeeErrorToMessage = ({
 			return i18n.send.assertion.pending_transactions_not_available;
 		default:
 			return i18n.send.info.no_available_utxos;
+	}
+};
+
+// The two answers that leave the broadcast's outcome open: something may have gone out.
+const isOpenBroadcastAnswer = ({ variant }: BtcBroadcastTransactionCanisterError): boolean =>
+	'BroadcastOutcomeUnknown' in variant || 'BroadcastInProgress' in variant;
+
+/**
+ * Whether `btc_broadcast_transaction` answered that nothing of this transaction went out: any of
+ * its typed errors but `BroadcastOutcomeUnknown` and `BroadcastInProgress`. A failure with no typed
+ * answer, such as a transport error, never is one.
+ */
+export const isDefinitiveBtcBroadcastRefusal = (err: unknown): boolean =>
+	err instanceof BtcBroadcastTransactionCanisterError && !isOpenBroadcastAnswer(err);
+
+/**
+ * Whether a BTC broadcast's outcome is unclear, so the transaction may have gone out: the backend
+ * answered `BroadcastOutcomeUnknown` or `BroadcastInProgress`, or gave no typed answer at all.
+ */
+export const isUnclearBtcBroadcastOutcome = (err: unknown): boolean =>
+	err instanceof BtcBroadcastUnconfirmedError ||
+	(err instanceof BtcBroadcastTransactionCanisterError && isOpenBroadcastAnswer(err));
+
+/**
+ * The message for a failed `sendBtc` that every flow shows alike, or `undefined` for the caller to
+ * keep its own.
+ */
+export const mapBtcBroadcastErrorToMessage = ({
+	err,
+	i18n
+}: {
+	err: unknown;
+	i18n: I18n;
+}): string | undefined => {
+	if (isUnclearBtcBroadcastOutcome(err)) {
+		return i18n.send.error.btc_transaction_unconfirmed;
+	}
+
+	if (
+		err instanceof BtcBroadcastTransactionCanisterError &&
+		('UtxosAlreadyReserved' in err.variant || 'InvalidUtxos' in err.variant)
+	) {
+		return i18n.send.assertion.btc_utxo_locked;
 	}
 };

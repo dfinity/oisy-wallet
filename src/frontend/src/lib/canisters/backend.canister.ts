@@ -1,6 +1,7 @@
 import type {
 	ActiveUserTransaction,
 	_SERVICE as BackendService,
+	BtcBroadcastTransactionResponse,
 	BtcGetFeePercentilesResponse,
 	BtcGetSpendableUtxosResponse,
 	Contact,
@@ -32,6 +33,7 @@ import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
 	mapBtcAddPendingTransactionError,
+	mapBtcBroadcastTransactionError,
 	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
 	mapBtcGetSpendableUtxosError,
@@ -53,6 +55,7 @@ import type {
 	AllowSigningOutcome,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
+	BtcBroadcastTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcGetSpendableUtxosParams,
@@ -273,6 +276,24 @@ export class BackendCanister extends Canister<BackendService> {
 		}
 
 		throw mapBtcAddPendingTransactionError(response.Err);
+	};
+
+	btcBroadcastTransaction = async ({
+		iiDelegationChain,
+		...rest
+	}: BtcBroadcastTransactionParams): Promise<BtcBroadcastTransactionResponse> => {
+		const { btc_broadcast_transaction } = this.caller({ certified: true });
+
+		const response = await btc_broadcast_transaction({
+			ii_delegation_chain: iiDelegationChain,
+			...rest
+		});
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapBtcBroadcastTransactionError(response.Err);
 	};
 
 	btcGetPendingTransactions = async ({
