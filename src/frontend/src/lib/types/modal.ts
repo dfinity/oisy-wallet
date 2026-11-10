@@ -11,6 +11,11 @@ export interface ModalProps {
 	role?: 'dialog' | 'alert';
 	testId?: string;
 	disablePointerEvents?: boolean;
+	/**
+	 * Whether a click on the backdrop closes the modal. Off for flows that a stray click must not
+	 * end; the close button and Escape still close the modal.
+	 */
+	closeOnBackdropClick?: boolean;
 	title?: Snippet;
 	/**
 	 * An accessible name for a modal that deliberately has no `title`.

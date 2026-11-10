@@ -26,6 +26,5 @@ export const SPCXON_TOKEN: RequiredSpl2022Token = {
 	address: 'wzAyQTorWyoVXuJKj2x8EqKEGJpS13z6EWE9z5Aondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
-	freezeAuthority: '51QVCuHfL1FeNjd8BDeffCKhCcAYoULnVB3yjNhShiuK',
 	groupData: SPCXON_TOKEN_GROUP
 };

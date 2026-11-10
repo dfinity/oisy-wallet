@@ -7,16 +7,18 @@ import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-tr
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import type { UtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import * as utxosFeeStore from '$btc/stores/utxos-fee.store';
-import type { UtxosFee } from '$btc/types/btc-send';
+import { BtcBroadcastUnconfirmedError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as backendApi from '$lib/api/backend.api';
 import * as signerApi from '$lib/api/signer.api';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import * as addressesStore from '$lib/derived/address.derived';
 import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
+import * as toastsStore from '$lib/stores/toasts.store';
 import type { AddPendingTransactionOutcome } from '$lib/types/api';
 import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
@@ -29,7 +31,7 @@ import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
 import { mockSendContextEntry } from '$tests/utils/send.context.test-utils';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('BtcSendTokenWizard', () => {
@@ -148,7 +150,73 @@ describe('BtcSendTokenWizard', () => {
 				}
 			]
 		});
-		expect(addPendingTransactionApiSpy).toHaveResolvedWith(pendingBtcTransactionResponse);
+
+		await waitFor(() =>
+			expect(addPendingTransactionApiSpy).toHaveResolvedWith(pendingBtcTransactionResponse)
+		);
+	});
+
+	describe('when the send fails', () => {
+		const sendAndFail = async (err: unknown) => {
+			vi.spyOn(btcSendServices, 'sendBtc').mockRejectedValue(err);
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+			mockAuthStore();
+			mockAddressesStore();
+
+			const { container } = render(BtcSendTokenWizard, {
+				props,
+				context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStoreWithValue(mockUtxosFee) })
+			});
+
+			await clickSendButton(container);
+
+			await waitFor(() => expect(toastsErrorSpy).toHaveBeenCalledOnce());
+
+			return toastsErrorSpy;
+		};
+
+		// The inputs stay reserved, so another send would spend other coins and could pay twice.
+		it('should close, not offer the form again, when the transaction may have gone out', async () => {
+			const err = new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') });
+
+			const toastsErrorSpy = await sendAndFail(err);
+
+			expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.error.btc_transaction_unconfirmed },
+				err
+			});
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+		});
+
+		it('should go back to the form with the locked-funds message for reserved UTXOs', async () => {
+			const err = new BtcBroadcastTransactionCanisterError(
+				{ UtxosAlreadyReserved: null },
+				'reserved'
+			);
+
+			const toastsErrorSpy = await sendAndFail(err);
+
+			expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.assertion.btc_utxo_locked },
+				err
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		it('should go back to the form with its own message for any other failure', async () => {
+			const err = new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee');
+
+			const toastsErrorSpy = await sendAndFail(err);
+
+			expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.error.unexpected },
+				err
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
 	});
 
 	it('should not call sendBtc if authIdentity is not defined', async () => {

@@ -274,6 +274,74 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
 	});
 
+	describe('an instruction nobody read that no run described', () => {
+		it('should say it will not be signed when no run came back', () => {
+			const { getByRole, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, unreviewed: true, unreviewedNotDescribed: true }
+			});
+
+			expect(getByRole('alert')).toHaveTextContent(
+				en.wallet_connect.text.unreviewed_without_simulation
+			);
+			expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
+		});
+
+		// Signing words its refusal by whether a run came back at all, so the screen does too.
+		it('should say the run did not describe it when a run came back', () => {
+			const { getByRole } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					decoded: true,
+					unreviewed: true,
+					unreviewedNotDescribed: true,
+					simulatedInstructions: true,
+					instructions: [{ kind: 'unknown' }],
+					preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(getByRole('alert')).toHaveTextContent(
+				en.wallet_connect.text.unreviewed_not_described_by_simulation
+			);
+		});
+
+		it('should say nothing else about it', () => {
+			const { queryByText, queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					decoded: true,
+					unreviewed: true,
+					unreviewedNotDescribed: true,
+					simulatedInstructions: true,
+					instructions: [{ kind: 'unknown' }],
+					unreadPrograms: [{ address: STAKE_PROGRAM_ADDRESS }],
+					parties: { sources: [], destinations: [], partial: true }
+				}
+			});
+
+			expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+			expect(queryByTestId('unread-programs')).not.toBeInTheDocument();
+		});
+
+		// The warning stays for an instruction a run did describe: that request signs.
+		it('should keep the warning for an instruction a run described', () => {
+			const { getByText, queryByRole } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					decoded: true,
+					unreviewed: true,
+					simulatedInstructions: true,
+					preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(
+				getByText(en.wallet_connect.text.unreviewed_instructions_simulated)
+			).toBeInTheDocument();
+			expect(queryByRole('alert')).not.toBeInTheDocument();
+		});
+	});
+
 	it('should say nothing else about a message it will not sign', () => {
 		// Every caveat qualifies a review nobody is going to act on, including the ones that sit
 		// outside the notice chain: the partial-parties line would tell the user which lists to read
@@ -650,7 +718,7 @@ describe('SolWalletConnectSignReview', () => {
 			});
 
 			expect(getByText(en.fee.text.base_kind)).toBeInTheDocument();
-			expect(queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.base64_data)).not.toBeInTheDocument();
 		});
 
 		// The warnings are about the request as a whole, so they belong to neither tab: hiding one
@@ -1053,17 +1121,19 @@ describe('SolWalletConnectSignReview', () => {
 		});
 
 		// What it costs belongs with what it does; the raw message is material to check it against.
-		it('should render the fees with the summary and the hex data with the operations', async () => {
+		it('should render the fees with the summary and the base64 data with the operations', async () => {
 			const queries = render(SolWalletConnectSignReview, {
 				props: { ...props, data: 'AQID', prioritizationFee: 238_217n }
 			});
 
 			expect(queries.getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
-			expect(queries.queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
+			expect(queries.queryByText(en.wallet_connect.text.base64_data)).not.toBeInTheDocument();
 
 			await showOperations(queries);
 
-			expect(queries.getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
+			expect(queries.getByText(en.wallet_connect.text.base64_data)).toBeInTheDocument();
+			// The request carries the transaction as base64, so the row must not call it hex.
+			expect(queries.queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
 			expect(queries.queryByText(en.fee.text.prioritization_kind)).not.toBeInTheDocument();
 		});
 	});
@@ -1351,7 +1421,7 @@ describe('SolWalletConnectSignReview', () => {
 
 			await showOperations(queries);
 
-			expect(queries.getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
+			expect(queries.getByText(en.wallet_connect.text.base64_data)).toBeInTheDocument();
 		});
 
 		it('should still render the simulated changes', () => {

@@ -59,13 +59,16 @@ vi.mock('$btc/services/btc-pending-sent-transactions.services', () => ({
 	loadBtcPendingSentTransactions: vi.fn().mockResolvedValue({ success: true })
 }));
 
+import { BTC_LARGEST_OUTPUT_VSIZE, BTC_SEND_MAX_INPUTS } from '$btc/constants/btc.constants';
 import { getFeeRateFromPercentiles, prepareBtcSend } from '$btc/services/btc-utxos.service';
 import type { BtcAddress } from '$btc/types/address';
 import { BtcPrepareSendError } from '$btc/types/btc-send';
+import { calculateFeeSatoshis } from '$btc/utils/btc-utxos.utils';
 import * as backendApi from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Amount } from '$lib/types/send';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import type { BitcoinNetwork, CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 // Mock environment variables
@@ -302,6 +305,63 @@ describe('btc-utxos.service', () => {
 			});
 		});
 
+		// The backend's `btc_get_spendable_utxos` leaves reserved UTXOs out, so a wallet whose every
+		// UTXO a pending send reserves gets none at all, beside that send.
+		it('should return UtxoLocked when there are no UTXOs and pending transactions reserve some', () => {
+			mockStoreApi.setStoreValue({
+				[mockBtcAddress]: {
+					certified: true as const,
+					data: [
+						{
+							txid: new Uint8Array([99]),
+							utxos: [
+								{ value: 500_000n, outpoint: { txid: new Uint8Array([1, 2, 3, 4]), vout: 0 } }
+							]
+						}
+					]
+				}
+			});
+
+			const result = prepareBtcSend({ ...defaultParams, allUtxos: [] });
+
+			expect(result).toEqual({
+				feeSatoshis: ZERO,
+				feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles,
+				utxos: [],
+				error: BtcPrepareSendError.UtxoLocked
+			});
+		});
+
+		it('should refuse, with the flag on, an amount that needs more inputs than the cap', () => {
+			const utxos: CkBtcMinterDid.Utxo[] = Array.from(
+				{ length: BTC_SEND_MAX_INPUTS + 1 },
+				(_, i) => ({
+					value: 10_000n,
+					height: 100,
+					outpoint: { txid: Uint8Array.from([3, i]), vout: 0 }
+				})
+			);
+			// One satoshi more than the cap's inputs carry, at this rate and for the largest output.
+			const amount =
+				Number(
+					BigInt(BTC_SEND_MAX_INPUTS) * 10_000n -
+						calculateFeeSatoshis({
+							numInputs: BTC_SEND_MAX_INPUTS,
+							recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+							feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles
+						}) +
+						1n
+				) / 100_000_000;
+
+			expect(prepareBtcSend({ ...defaultParams, allUtxos: utxos, amount }).error).toBeUndefined();
+
+			btcSendViaBackend.enabled = true;
+
+			expect(prepareBtcSend({ ...defaultParams, allUtxos: utxos, amount }).error).toBe(
+				BtcPrepareSendError.InsufficientBalanceForFee
+			);
+		});
+
 		it('should return UtxoLocked error when all UTXOs are filtered out by confirmations', () => {
 			const unconfirmedUtxo: CkBtcMinterDid.Utxo = {
 				value: 500000n,
@@ -368,6 +428,25 @@ describe('btc-utxos.service', () => {
 			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
 			expect(result.error).toBeUndefined();
 		});
+
+		// 1 input + recipient + P2WPKH change, at 5 sat/vB.
+		it.each([
+			{ recipient: 'a P2WPKH recipient', destination: mockBtcAddress, feeSatoshis: 141n * 5n },
+			{
+				recipient: 'a P2TR recipient',
+				destination: 'bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0',
+				feeSatoshis: 153n * 5n
+			},
+			{ recipient: 'no recipient yet', destination: undefined, feeSatoshis: 153n * 5n }
+		])(
+			'should size the recipient output in the fee for $recipient',
+			({ destination, feeSatoshis }) => {
+				const result = prepareBtcSend({ ...defaultParams, destination });
+
+				expect(result.feeSatoshis).toBe(feeSatoshis);
+				expect(result.utxos).toHaveLength(1);
+			}
+		);
 	});
 
 	describe('getFeeRateFromPercentiles', () => {

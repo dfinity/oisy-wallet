@@ -12,11 +12,10 @@
 
 	interface Props {
 		onSendToken: (token: Token) => void;
-		onSelectNetworkFilter: () => void;
 		lockedNetwork?: Network;
 	}
 
-	let { onSendToken, onSelectNetworkFilter, lockedNetwork }: Props = $props();
+	let { onSendToken, lockedNetwork }: Props = $props();
 
 	let lockedSingleToken = $derived(isNetworkIdBTCMainnet(lockedNetwork?.id));
 
@@ -27,8 +26,8 @@
 
 <ModalTokensList
 	networkSelectorViewOnly={nonNullish(lockedNetwork) || nonNullish($selectedNetwork)}
-	{onSelectNetworkFilter}
 	{onTokenButtonClick}
+	showStakeBalance={false}
 >
 	{#snippet topBanner()}
 		<ScannedPlainAddressNotice singleToken={lockedSingleToken} />

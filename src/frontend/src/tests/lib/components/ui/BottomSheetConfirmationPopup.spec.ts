@@ -51,6 +51,17 @@ describe('BottomSheetConfirmationPopup', () => {
 		expect(queryByTestId('bottom-sheet')).toBeNull();
 	});
 
+	it.each([
+		{ screen: 'xs', testId: 'bottom-sheet' },
+		{ screen: '1.5lg', testId: CONFIRMATION_POPUP_MODAL }
+	] as const)('keeps the browser focus ring off the panel on $screen', ({ screen, testId }) => {
+		screensStore.set(screen);
+
+		const { getByTestId } = render(BottomSheetConfirmationPopup, { props });
+
+		expect(getByTestId(testId)).toHaveClass('outline-none');
+	});
+
 	it.each(['xs', '1.5lg'] as const)(
 		'owns focus and Escape above a parent on %s',
 		async (screen) => {

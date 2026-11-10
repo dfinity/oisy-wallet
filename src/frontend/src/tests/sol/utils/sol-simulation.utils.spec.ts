@@ -1,5 +1,8 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
+	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	MEMO_LEGACY_PROGRAM_ADDRESS,
 	SPL_TOKEN_MAX_AMOUNT,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -18,7 +21,9 @@ import {
 	selectSolSimulationAddresses,
 	solClosedAccountsReachWallet,
 	solOpenAppAccountsLostLamports,
-	solSimulationReassignsWallet
+	solSimulationReassignsWallet,
+	solUnreviewedNotDescribed,
+	sortSolProgramsByRun
 } from '$sol/utils/sol-simulation.utils';
 import {
 	mockAtaAddress,
@@ -390,9 +395,102 @@ describe('sol-simulation.utils', () => {
 			});
 		});
 
-		// Control changes need a state before; a created account has none, so who controls it is
-		// listed apart.
+		// A created account has no state before the run, so who controls it is listed apart; what the
+		// run grants on it beyond opening it is compared with the account it was opened as.
 		describe('accounts the run creates', () => {
+			it('should state a delegate granted on one it opens empty, with its allowance', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockSolAddress, mockAtaAddress],
+					preAccounts: [systemAccount({ lamports: 1_000_000_000n }), null],
+					postAccounts: [
+						systemAccount({ lamports: 1_000_000_000n }),
+						tokenAccount({
+							amount: ZERO,
+							owner: mockSolAddress,
+							delegate: mockSolAddress2,
+							delegatedAmount: SPL_TOKEN_MAX_AMOUNT
+						})
+					],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.controlChanges).toEqual([
+					{
+						account: mockAtaAddress,
+						field: 'delegate',
+						to: mockSolAddress2,
+						allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: SPL_TOKEN_MAX_AMOUNT }
+					}
+				]);
+				expect(isEmptySolSimulationPreview(preview)).toBeFalsy();
+			});
+
+			it('should state a delegate granted on one it opens and funds', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockAtaAddress],
+					preAccounts: [null],
+					postAccounts: [
+						tokenAccount({
+							amount: 3_000_000n,
+							owner: mockSolAddress,
+							delegate: mockSolAddress2,
+							delegatedAmount: 3_000_000n
+						})
+					],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.tokenDeltas).toEqual([
+					{ account: mockAtaAddress, tokenAddress: mockSplAddress, decimals: 6, delta: 3_000_000n }
+				]);
+				expect(preview.controlChanges).toEqual([
+					{
+						account: mockAtaAddress,
+						field: 'delegate',
+						to: mockSolAddress2,
+						allowance: { tokenAddress: mockSplAddress, decimals: 6, amount: 3_000_000n }
+					}
+				]);
+			});
+
+			it('should state a close authority set on one it opens', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockAtaAddress],
+					preAccounts: [null],
+					postAccounts: [
+						tokenAccount({ amount: ZERO, owner: mockSolAddress, closeAuthority: mockSolAddress2 })
+					],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.controlChanges).toEqual([
+					{ account: mockAtaAddress, field: 'closeAuthority', to: mockSolAddress2 }
+				]);
+			});
+
+			it('should state no control change for one opened for the user alone', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockAtaAddress],
+					preAccounts: [null],
+					postAccounts: [tokenAccount({ amount: ZERO, owner: mockSolAddress })],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview.controlChanges).toEqual([]);
+				expect(isEmptySolSimulationPreview(preview)).toBeTruthy();
+			});
+
+			it('should state no control change for a wallet the run funds into existence', () => {
+				const preview = mapSolSimulationPreview({
+					addresses: [mockSolAddress],
+					preAccounts: [null],
+					postAccounts: [systemAccount({ lamports: 1_000_000n })],
+					userAddress: mockSolAddress
+				});
+
+				expect(preview).toEqual({ solDelta: 1_000_000n, tokenDeltas: [], controlChanges: [] });
+			});
+
 			it('should list one created for the user with who controls it', () => {
 				const preview = mapSolSimulationPreview({
 					addresses: [mockAtaAddress],
@@ -457,7 +555,7 @@ describe('sol-simulation.utils', () => {
 				expect(preview).toEqual({
 					tokenDeltas: [],
 					controlChanges: [],
-					closedAccounts: [mockAtaAddress]
+					closedAccounts: [{ account: mockAtaAddress, lamports: 2_039_280n }]
 				});
 				expect(isEmptySolSimulationPreview(preview)).toBeTruthy();
 			});
@@ -471,7 +569,7 @@ describe('sol-simulation.utils', () => {
 					userAddress: mockSolAddress
 				});
 
-				expect(preview.closedAccounts).toEqual([mockAtaAddress]);
+				expect(preview.closedAccounts).toEqual([{ account: mockAtaAddress, lamports: 2_039_280n }]);
 			});
 
 			it('should not list one the run did not report on', () => {
@@ -604,6 +702,25 @@ describe('sol-simulation.utils', () => {
 		});
 	});
 
+	describe('solUnreviewedNotDescribed', () => {
+		it('should hold an instruction nobody read that no run described', () => {
+			expect(solUnreviewedNotDescribed({ unreviewed: true, simulated: false })).toBeTruthy();
+		});
+
+		it('should let an instruction nobody read through once a run described it', () => {
+			expect(solUnreviewedNotDescribed({ unreviewed: true, simulated: true })).toBeFalsy();
+		});
+
+		// The simulation stays best effort for a message OISY read in full.
+		it('should let a message read in full through without a run', () => {
+			expect(solUnreviewedNotDescribed({ unreviewed: false, simulated: false })).toBeFalsy();
+		});
+
+		it('should treat a message the mapper flagged nothing on as read', () => {
+			expect(solUnreviewedNotDescribed({ unreviewed: undefined, simulated: false })).toBeFalsy();
+		});
+	});
+
 	describe('mapSolSimulationAccountOwners', () => {
 		it('should own the token accounts the user owns, not only their wallet', () => {
 			const { ownedAddresses } = mapSolSimulationAccountOwners({
@@ -672,10 +789,19 @@ describe('sol-simulation.utils', () => {
 		const run = (groups: { index: number; instructions: unknown[] }[]) =>
 			groups as unknown as SolanaSimulatedInnerInstructions;
 
+		// The message's own instructions, by the program each one calls.
+		const message = (programs: SolAddress[]) =>
+			programs.map((programAddress) => ({
+				programAddress,
+				accounts: [],
+				data: new Uint8Array()
+			})) as unknown as CompilableTransactionMessage['instructions'];
+
 		it('should find nothing in a run whose nested calls all reach known programs', () => {
 			expect(
-				findSolUnreadPrograms(
-					run([
+				findSolUnreadPrograms({
+					instructions: message([SYSTEM_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS, JUPITER]),
+					innerInstructions: run([
 						{
 							index: 2,
 							instructions: [
@@ -685,18 +811,21 @@ describe('sol-simulation.utils', () => {
 							]
 						}
 					])
-				)
+				})
 			).toEqual([]);
 		});
 
 		it('should find nothing in a run without nested calls', () => {
-			expect(findSolUnreadPrograms(run([]))).toEqual([]);
+			expect(
+				findSolUnreadPrograms({ instructions: message([JUPITER]), innerInstructions: run([]) })
+			).toEqual([]);
 		});
 
 		it('should name each other program once, in the order the run first reaches it', () => {
 			expect(
-				findSolUnreadPrograms(
-					run([
+				findSolUnreadPrograms({
+					instructions: message([JUPITER, JUPITER]),
+					innerInstructions: run([
 						{
 							index: 0,
 							instructions: [
@@ -708,23 +837,107 @@ describe('sol-simulation.utils', () => {
 						},
 						{ index: 1, instructions: [raw(mockSolAddress2), parsed(STAKE_PROGRAM_ADDRESS)] }
 					])
-				)
+				})
 			).toEqual([mockSolAddress3, STAKE_PROGRAM_ADDRESS, mockSolAddress2]);
+		});
+
+		// A single transfer the program makes inside itself would otherwise account for its whole
+		// instruction, and it would run with the wallet's signature unnamed.
+		it('should name a program the message calls itself that is not among the known ones', () => {
+			expect(
+				findSolUnreadPrograms({
+					instructions: message([SYSTEM_PROGRAM_ADDRESS, mockSolAddress3]),
+					innerInstructions: run([
+						{ index: 1, instructions: [parsed(SYSTEM_PROGRAM_ADDRESS), raw(JUPITER)] }
+					])
+				})
+			).toEqual([mockSolAddress3]);
+		});
+
+		it('should name a program the message calls before the programs it calls itself', () => {
+			expect(
+				findSolUnreadPrograms({
+					instructions: message([mockSolAddress3]),
+					innerInstructions: run([
+						{ index: 0, instructions: [raw(mockSolAddress2), raw(mockSolAddress3)] }
+					])
+				})
+			).toEqual([mockSolAddress3, mockSolAddress2]);
+		});
+
+		it('should not name a program the message calls itself that the review decodes', () => {
+			expect(
+				findSolUnreadPrograms({
+					instructions: message([
+						STAKE_PROGRAM_ADDRESS,
+						ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
+						MEMO_LEGACY_PROGRAM_ADDRESS,
+						COMPUTE_BUDGET_PROGRAM_ADDRESS,
+						JUPITER
+					]),
+					innerInstructions: run([])
+				})
+			).toEqual([]);
 		});
 
 		// A call that only points into the account list could reach anything, and an empty list
 		// would say it reaches a known program.
 		it('should find nothing to rely on when a nested call does not name its program', () => {
 			expect(
-				findSolUnreadPrograms(
-					run([
+				findSolUnreadPrograms({
+					instructions: message([JUPITER]),
+					innerInstructions: run([
 						{
 							index: 0,
 							instructions: [raw(JUPITER), { programIdIndex: 7, accounts: [], data: '' }]
 						}
 					])
-				)
+				})
 			).toBeUndefined();
+		});
+	});
+
+	describe('sortSolProgramsByRun', () => {
+		const raw = (programId: SolAddress) => ({ programId, accounts: [], data: '', stackHeight: 2 });
+
+		const run = (groups: { index: number; instructions: unknown[] }[]) =>
+			groups as unknown as SolanaSimulatedInnerInstructions;
+
+		const message = (programs: SolAddress[]) =>
+			programs.map((programAddress) => ({
+				programAddress,
+				accounts: [],
+				data: new Uint8Array()
+			})) as unknown as CompilableTransactionMessage['instructions'];
+
+		it('should order programs by the instruction of the message that first calls them', () => {
+			expect(
+				sortSolProgramsByRun({
+					programs: [mockSolAddress3, mockSolAddress2],
+					instructions: message([mockSolAddress2, mockSolAddress3]),
+					innerInstructions: run([])
+				})
+			).toEqual([mockSolAddress2, mockSolAddress3]);
+		});
+
+		it('should order a program first reached inside an instruction before the instructions after it', () => {
+			expect(
+				sortSolProgramsByRun({
+					programs: [mockSolAddress3, mockSplAddress],
+					instructions: message([mockSolAddress2, mockSolAddress3]),
+					innerInstructions: run([{ index: 0, instructions: [raw(mockSplAddress)] }])
+				})
+			).toEqual([mockSplAddress, mockSolAddress3]);
+		});
+
+		it('should name each program once', () => {
+			expect(
+				sortSolProgramsByRun({
+					programs: [mockSolAddress2, mockSolAddress2],
+					instructions: message([mockSolAddress2]),
+					innerInstructions: run([])
+				})
+			).toEqual([mockSolAddress2]);
 		});
 	});
 

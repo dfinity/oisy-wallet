@@ -79,6 +79,13 @@ export interface BtcGetPendingTransactionParams {
 	iiDelegationChain: Nullable<IIDelegationChain>;
 }
 
+export type BtcGetSpendableUtxosParams = BtcGetPendingTransactionParams;
+
+export interface BtcBroadcastTransactionParams extends BtcGetPendingTransactionParams {
+	// Fully signed and consensus-serialized.
+	transaction: Uint8Array;
+}
+
 export interface BtcAddPendingTransactionParams extends BtcGetPendingTransactionParams {
 	txId: Uint8Array;
 	utxos: Utxo[];
@@ -200,6 +207,16 @@ export interface BtcGetFeePercentilesParams {
 export interface GetContactParams {
 	identity: Identity;
 	contactId: bigint;
+}
+
+export interface GetContactsPageParams {
+	identity: Identity;
+	after?: bigint;
+}
+
+export interface GetContactImagesParams {
+	identity: Identity;
+	contactIds: bigint[];
 }
 
 export interface CreateContactParams {

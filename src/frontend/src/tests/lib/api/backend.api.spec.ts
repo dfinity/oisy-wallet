@@ -3,6 +3,7 @@ import {
 	addPendingBtcTransaction,
 	addUserDismissedNotification,
 	allowSigning,
+	broadcastBtcTransaction,
 	createActiveUserTransaction,
 	createUserProfile,
 	deleteActiveUserTransaction,
@@ -10,6 +11,7 @@ import {
 	getExchangeRate,
 	getExchangeRates,
 	getPendingBtcTransactions,
+	getSpendableBtcUtxos,
 	getUserProfile,
 	getUserTransactions,
 	listCustomTokens,
@@ -405,6 +407,75 @@ describe('backend.api', () => {
 			});
 
 			await expect(getPendingBtcTransactions(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('broadcastBtcTransaction', () => {
+		const mockParams = {
+			...baseParams,
+			network: { mainnet: null },
+			transaction: Uint8Array.from([0, 1]),
+			iiDelegationChain: mockIIDelegationChain
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.btcBroadcastTransaction.mockResolvedValue({
+				txid: Uint8Array.from([1])
+			});
+		});
+
+		it('should call the btcBroadcastTransaction endpoint', async () => {
+			const result = await broadcastBtcTransaction(mockParams);
+
+			expect(result).toEqual({ txid: Uint8Array.from([1]) });
+			expect(backendCanisterMock.btcBroadcastTransaction).toHaveBeenCalledExactlyOnceWith({
+				network: { mainnet: null },
+				transaction: Uint8Array.from([0, 1]),
+				iiDelegationChain: mockIIDelegationChain
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				broadcastBtcTransaction({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
+		});
+	});
+
+	describe('getSpendableBtcUtxos', () => {
+		const mockParams: CanisterApiFunctionParams<BtcGetPendingTransactionParams> = {
+			...baseParams,
+			network: { mainnet: null },
+			iiDelegationChain: mockIIDelegationChain
+		};
+
+		const mockResponse = {
+			utxos: [mockUtxo],
+			pending_transactions: [{ txid: new Uint8Array([1, 2, 3]), utxos: [mockUtxo] }]
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.btcGetSpendableUtxos.mockResolvedValue(mockResponse);
+		});
+
+		it('should call the btcGetSpendableUtxos endpoint', async () => {
+			const result = await getSpendableBtcUtxos(mockParams);
+
+			expect(result).toEqual(mockResponse);
+			expect(backendCanisterMock.btcGetSpendableUtxos).toHaveBeenCalledExactlyOnceWith({
+				network: { mainnet: null },
+				iiDelegationChain: mockIIDelegationChain
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(getSpendableBtcUtxos({ ...mockParams, identity: undefined })).rejects.toThrow();
+		});
+
+		it('should throw an error if btcGetSpendableUtxos throws', async () => {
+			backendCanisterMock.btcGetSpendableUtxos.mockRejectedValue(new Error('mock-error'));
+
+			await expect(getSpendableBtcUtxos(mockParams)).rejects.toThrow('mock-error');
 		});
 	});
 

@@ -55,6 +55,16 @@ export interface SolSimulationCreatedAccount {
 }
 
 /**
+ * An account of the user's that existed before the run and that the run closes, with the lamports
+ * it held before the run: wherever the close sends them, they are not part of what the run moved
+ * out of the wallet itself.
+ */
+export interface SolSimulationClosedAccount {
+	account: SolAddress;
+	lamports: bigint;
+}
+
+/**
  * What a simulation says this message would do to the accounts the user owns.
  *
  * A control change carries no amount, which is the whole reason it is reported separately: an
@@ -71,7 +81,7 @@ export interface SolSimulationPreview {
 	tokenDeltas: SolSimulationTokenDelta[];
 	controlChanges: SolSimulationControlChange[];
 	createdAccounts?: SolSimulationCreatedAccount[];
-	closedAccounts?: SolAddress[];
+	closedAccounts?: SolSimulationClosedAccount[];
 }
 
 /**
@@ -119,9 +129,16 @@ export interface SolSimulationResult {
 	// Whether the run keeps a token batch whole, which the list states as an instruction nobody read
 	// and none of its steps: a request the review refuses, whatever the message's mapping read of it.
 	keepsBatchWhole?: boolean;
+	// Whether the run makes a token call inside another program's instruction with the wallet among
+	// the keys signing for a multisig: it acts on an account the review does not count as the user's,
+	// so the review refuses it, as it does such a call the message makes itself.
+	signsForMultisig?: boolean;
 	parties: SolTransferParties;
 	// The programs the run calls from inside another program's instruction that are not among the
 	// known ones. Such a call can act on what the user holds in an application, which neither the
 	// preview nor the instructions describe. Empty when every nested call reaches a known program.
 	unreadPrograms: SolAddress[];
+	// The slot the run read the chain at: where a transaction simulated with its own blockhash found
+	// that blockhash valid.
+	slot?: bigint;
 }

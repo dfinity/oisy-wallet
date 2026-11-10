@@ -172,6 +172,8 @@ export const MAX_UINT_256 = (1n << 256n) - 1n;
 // Permit2 declares its allowance as a `uint160`, so an unlimited one saturates there rather than
 // at the 256-bit maximum.
 export const MAX_UINT_160 = (1n << 160n) - 1n;
+// An EVM account nonce and a Solana slot are both `u64`.
+export const MAX_UINT_64 = (1n << 64n) - 1n;
 
 // NFTs
 export const COLLECTION_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 seconds in milliseconds
@@ -216,6 +218,10 @@ export const ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES = 512;
 // The backend's `MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN`, in UTF-8 bytes, compared the
 // same way. An update carrying a longer ref value is rejected whole, too.
 export const ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES = 256;
+// A row whose transaction was never broadcast is deleted with a few attempts, a second apart, as a
+// LI.FI row is (`LIFI_ROW_DELETE_ATTEMPTS`).
+export const UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_ATTEMPTS = 3;
+export const UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_RETRY_DELAY_MILLIS = 1_000;
 // Minimum delay between two `forward_evm_to_icp` re-notifications for the same
 // pending OneSec EVM→ICP row (notifying is an update call, polling is 5s).
 export const ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute

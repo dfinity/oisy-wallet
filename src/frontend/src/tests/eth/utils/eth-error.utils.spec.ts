@@ -1,7 +1,10 @@
 import * as sendAnalytics from '$eth/services/eth-transaction-send-analytics.services';
+import { EthNonceReadError, EthSubmissionUnconfirmedError } from '$eth/types/send';
 import {
 	isBroadcastRetriable,
 	isDefinitiveTransactionRefusal,
+	isOutOfGasRefusal,
+	isSendOutcomeUnknown,
 	mapEthereumErrorMsg,
 	toastEthereumTransactionError
 } from '$eth/utils/eth-error.utils';
@@ -9,6 +12,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import * as analytics from '$lib/services/analytics.services';
 import * as toasts from '$lib/stores/toasts.store';
+import { SwapBroadcastOutcomeUnknownError } from '$lib/types/errors';
 import * as i18nUtils from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -68,6 +72,17 @@ describe('eth-error.utils', () => {
 					Object.assign(new Error('insufficient funds'), { code: 'INSUFFICIENT_FUNDS' })
 				)
 			).toBeTruthy();
+		});
+
+		// A refusal of a later attempt answers only that attempt: an earlier one may have been relayed.
+		it('should not be a refusal when the broadcast outcome is unknown, whatever its cause', () => {
+			expect(
+				isDefinitiveTransactionRefusal(
+					new SwapBroadcastOutcomeUnknownError({
+						cause: broadcastRefused('insufficient funds for gas * price + value')
+					})
+				)
+			).toBeFalsy();
 		});
 
 		// Each can hide a transaction that was taken: in the mempool, mined, or held by another node.
@@ -161,6 +176,85 @@ describe('eth-error.utils', () => {
 		});
 	});
 
+	describe('isOutOfGasRefusal', () => {
+		const answered = ({ method, message }: { method: string; message: string }) =>
+			Object.assign(new Error(`could not coalesce error (${message})`), {
+				code: 'UNKNOWN_ERROR',
+				error: { code: -32000, message },
+				payload: { id: 1, jsonrpc: '2.0', method }
+			});
+
+		it('should be true when the node answers the broadcast that the gas ran out', () => {
+			expect(
+				isOutOfGasRefusal(
+					answered({
+						method: 'eth_sendRawTransaction',
+						message: 'out of gas: gas required exceeds: 21000'
+					})
+				)
+			).toBeTruthy();
+		});
+
+		// An estimate or a call runs before signing: no transaction was turned down.
+		it('should be false for an answer to another request than the broadcast', () => {
+			expect(
+				isOutOfGasRefusal(answered({ method: 'eth_estimateGas', message: 'out of gas' }))
+			).toBeFalsy();
+		});
+
+		it('should be false for a revert that mentions gas', () => {
+			expect(
+				isOutOfGasRefusal(
+					answered({ method: 'eth_sendRawTransaction', message: 'execution reverted: out of gas' })
+				)
+			).toBeFalsy();
+		});
+
+		it('should be false for an outright refusal', () => {
+			expect(
+				isOutOfGasRefusal(
+					answered({ method: 'eth_sendRawTransaction', message: 'intrinsic gas too low' })
+				)
+			).toBeFalsy();
+		});
+	});
+
+	describe('isSendOutcomeUnknown', () => {
+		const insufficientFunds = () =>
+			Object.assign(new Error('insufficient funds'), { code: 'INSUFFICIENT_FUNDS' });
+
+		it.each([
+			{
+				failure: 'every provider failed the submission',
+				err: new EthSubmissionUnconfirmedError(new Error('Internal error'))
+			},
+			{
+				failure: 'a swap was refused only after an attempt that may have relayed it',
+				err: new SwapBroadcastOutcomeUnknownError({ cause: insufficientFunds() })
+			},
+			{
+				failure: 'a caller wrapped an unconfirmed submission again',
+				err: new Error('sending the transaction failed', {
+					cause: new EthSubmissionUnconfirmedError(new Error('Internal error'))
+				})
+			}
+		])('should be true when $failure', ({ err }) => {
+			expect(isSendOutcomeUnknown(err)).toBeTruthy();
+		});
+
+		it.each([
+			{
+				failure: 'the nonce could not be read, so nothing was signed',
+				err: new EthNonceReadError(new Error('Internal error'))
+			},
+			{ failure: 'the node refused the transaction outright', err: insufficientFunds() },
+			{ failure: 'the error is not an Error', err: 'boom' },
+			{ failure: 'there is no error', err: undefined }
+		])('should be false when $failure', ({ err }) => {
+			expect(isSendOutcomeUnknown(err)).toBeFalsy();
+		});
+	});
+
 	describe('mapEthereumErrorMsg', () => {
 		it('explains a balance that cannot cover what the transaction reserves', () => {
 			expect(mapEthereumErrorMsg(gasRequiredExceedsAllowance)).toBe(
@@ -229,6 +323,37 @@ describe('eth-error.utils', () => {
 			expect(mapEthereumErrorMsg(err)).toBeUndefined();
 		});
 
+		it('says the transaction was not sent when its nonce could not be read', () => {
+			expect(mapEthereumErrorMsg(new EthNonceReadError(new Error('Internal error')))).toBe(
+				en.send.error.ethereum_transaction_not_sent
+			);
+		});
+
+		it('says the outcome is unknown when every provider failed the submission', () => {
+			expect(
+				mapEthereumErrorMsg(new EthSubmissionUnconfirmedError(new Error('Internal error')))
+			).toBe(en.send.error.ethereum_transaction_unconfirmed);
+		});
+
+		it('still recognises either when a caller wraps it again', () => {
+			const err = new Error('sending the transaction failed', {
+				cause: new EthSubmissionUnconfirmedError(new Error('Internal error'))
+			});
+
+			expect(mapEthereumErrorMsg(err)).toBe(en.send.error.ethereum_transaction_unconfirmed);
+		});
+
+		// An earlier attempt may have relayed the swap, so the refusal of the last says nothing of it.
+		it('says the outcome is unknown for a swap refused only after an attempt that may have relayed it', () => {
+			const refusal = Object.assign(new Error('insufficient funds'), {
+				code: 'INSUFFICIENT_FUNDS'
+			});
+
+			expect(mapEthereumErrorMsg(new SwapBroadcastOutcomeUnknownError({ cause: refusal }))).toBe(
+				en.send.error.ethereum_transaction_unconfirmed
+			);
+		});
+
 		it('leaves an error it cannot explain to the caller', () => {
 			expect(mapEthereumErrorMsg(new Error('nonce too low'))).toBeUndefined();
 
@@ -283,6 +408,19 @@ describe('eth-error.utils', () => {
 			expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.send.error.ethereum_insufficient_funds },
 				err: gasRequiredExceedsAllowance
+			});
+
+			expect(toasts.toastsError).not.toHaveBeenCalled();
+		});
+
+		it('shows an unknown outcome on its own, without the provider text', () => {
+			const err = new EthSubmissionUnconfirmedError(new Error('Internal error'));
+
+			toastEthereumTransactionError({ err, fallbackMsg: en.send.error.unexpected, ...sendParams });
+
+			expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.error.ethereum_transaction_unconfirmed },
+				err
 			});
 
 			expect(toasts.toastsError).not.toHaveBeenCalled();

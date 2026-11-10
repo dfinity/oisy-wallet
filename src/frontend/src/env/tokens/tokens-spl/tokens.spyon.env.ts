@@ -26,6 +26,5 @@ export const SPYON_TOKEN: RequiredSpl2022Token = {
 	address: 'k18WJUULWheRkSpSquYGdNNmtuE2Vbw1hpuUi92ondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
-	freezeAuthority: '51QVCuHfL1FeNjd8BDeffCKhCcAYoULnVB3yjNhShiuK',
 	groupData: SPYON_TOKEN_GROUP
 };

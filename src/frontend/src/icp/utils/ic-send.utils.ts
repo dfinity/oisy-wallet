@@ -4,6 +4,7 @@ import { CKBTC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.c
 import { CKERC20_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
 import { CKETH_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { isEthAddress } from '$eth/utils/account.utils';
+import type { IcSendRequest } from '$icp/types/ic-send';
 import type { IcToken } from '$icp/types/ic-token';
 import { invalidIcpAddress } from '$icp/utils/account.utils';
 import { isTokenIcNft } from '$icp/utils/ic-nft.utils';
@@ -16,7 +17,7 @@ import type { OptionToken, TokenStandard } from '$lib/types/token';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdBitcoin, isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
 import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
-import { nonNullish } from '@dfinity/utils';
+import { nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 
 const isTokenLedger = ({
@@ -106,3 +107,26 @@ export const isMobileSendDestination = ({
 		tryToParseIcrcAccountStringToAccountIdentifierText(destination) ?? destination.toLowerCase();
 	return address !== mintingAddress;
 };
+export const isSameIcSendRequest = ({
+	previous,
+	request
+}: {
+	previous: IcSendRequest;
+	request: Omit<IcSendRequest, 'createdAt'>;
+}): boolean =>
+	previous.tokenId === request.tokenId &&
+	previous.to === request.to &&
+	previous.amount === request.amount;
+
+/**
+ * The transfer a send submits. While the token, destination and amount stay the same it is the
+ * previous one, `createdAt` included, so sending it again after an error cannot pay twice: if the
+ * earlier transfer went through, the ledger answers with the block it landed in.
+ */
+export const toIcSendRequest = ({
+	previous,
+	...request
+}: Omit<IcSendRequest, 'createdAt'> & { previous: IcSendRequest | undefined }): IcSendRequest =>
+	nonNullish(previous) && isSameIcSendRequest({ previous, request })
+		? previous
+		: { ...request, createdAt: nowInBigIntNanoSeconds() };

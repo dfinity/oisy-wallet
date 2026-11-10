@@ -1,6 +1,8 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { EURC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.eurc.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { CKETH_ABI } from '$eth/constants/cketh.constants';
@@ -18,6 +20,7 @@ import {
 } from '$eth/constants/wallet-connect.constants';
 import { send as executeSend } from '$eth/services/send.services';
 import { send, signMessage } from '$eth/services/wallet-connect.services';
+import { EthNonceReadError, EthSubmissionUnconfirmedError } from '$eth/types/send';
 import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -28,7 +31,13 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import {
+	encodeUniswapEurcToUsdc,
+	mockUniswapRouter,
+	mockUniswapWallet
+} from '$tests/mocks/uniswap.mock';
 import { toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
@@ -50,6 +59,12 @@ vi.mock('$eth/services/send.services', () => ({
 const HOLDER = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
 const SPENDER = '0xcA11bde05977b3631167028862bE2a173976CA11';
 const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f';
+
+// The signer canister returns r ‖ s followed by the bare y-parity, 0 or 1.
+const SIGNATURE_R_S = `${'11'.repeat(32)}${'22'.repeat(32)}`;
+const signerSignature = (parity: 0 | 1): string => `0x${SIGNATURE_R_S}0${parity}`;
+// The same signature with `v` as 27 (0x1b) or 28 (0x1c), the form a dApp verifies on-chain.
+const dappSignature = (v: 27 | 28): string => `0x${SIGNATURE_R_S}${v.toString(16)}`;
 
 const daiPermitJson = (allowed: unknown): string => {
 	const typedData: WalletConnectEthSignTypedDataV4 = {
@@ -101,14 +116,69 @@ describe('eth wallet-connect.services', () => {
 			request,
 			listener: mockListener,
 			modalNext: vi.fn(),
-			progress: vi.fn()
+			progress: vi.fn(),
+			unreviewableTypedDataAcknowledged: false
 		});
 
 		beforeEach(() => {
 			vi.clearAllMocks();
 			authStore.setForTesting(mockIdentity);
-			vi.mocked(signPrehash).mockResolvedValue('0xPREHASH_SIGNATURE');
-			vi.mocked(signMessageApi).mockResolvedValue('0xRAW_SIGNATURE');
+			vi.mocked(signPrehash).mockResolvedValue(signerSignature(0));
+			vi.mocked(signMessageApi).mockResolvedValue(signerSignature(1));
+		});
+
+		describe('typed data OISY cannot describe', () => {
+			// A struct no summary schema matches, on the session's chain, that would sign.
+			const orderRequest = () =>
+				buildRequest({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: [
+						HOLDER,
+						JSON.stringify({
+							domain: { name: 'Marketplace', chainId: '1', verifyingContract: DAI },
+							types: {
+								EIP712Domain: [
+									{ name: 'name', type: 'string' },
+									{ name: 'chainId', type: 'uint256' },
+									{ name: 'verifyingContract', type: 'address' }
+								],
+								Order: [
+									{ name: 'offerer', type: 'address' },
+									{ name: 'price', type: 'uint256' }
+								]
+							},
+							primaryType: 'Order',
+							message: { offerer: HOLDER, price: '1' }
+						})
+					]
+				});
+
+			it('refuses it when the review did not confirm it', async () => {
+				const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+				const { success } = await signMessage(buildParams(orderRequest()));
+
+				expect(success).toBeFalsy();
+				expect(signPrehash).not.toHaveBeenCalled();
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: get(i18n).wallet_connect.error.unexplained_request_unconfirmed }
+				});
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: 'mock-topic',
+					id: 1,
+					error: UNEXPECTED_ERROR
+				});
+			});
+
+			it('signs it once the review confirmed it', async () => {
+				const result = await signMessage({
+					...buildParams(orderRequest()),
+					unreviewableTypedDataAcknowledged: true
+				});
+
+				expect(result).toStrictEqual({ success: true });
+				expect(signPrehash).toHaveBeenCalledOnce();
+			});
 		});
 
 		it('signs a valid typed-data permit via signPrehash and approves', async () => {
@@ -125,7 +195,7 @@ describe('eth wallet-connect.services', () => {
 			expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
 				id: request.id,
 				topic: request.topic,
-				message: '0xPREHASH_SIGNATURE'
+				message: dappSignature(27)
 			});
 			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
 		});
@@ -201,7 +271,7 @@ describe('eth wallet-connect.services', () => {
 			expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
 				id: request.id,
 				topic: request.topic,
-				message: '0xRAW_SIGNATURE'
+				message: dappSignature(28)
 			});
 		});
 
@@ -226,7 +296,39 @@ describe('eth wallet-connect.services', () => {
 				expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
 					id: request.id,
 					topic: request.topic,
-					message: '0xRAW_SIGNATURE'
+					message: dappSignature(28)
+				});
+			}
+		);
+
+		it.each([
+			{ method: SESSION_REQUEST_ETH_SIGN_V4, parity: 0, v: 27 },
+			{ method: SESSION_REQUEST_ETH_SIGN_V4, parity: 1, v: 28 },
+			{ method: SESSION_REQUEST_PERSONAL_SIGN, parity: 0, v: 27 },
+			{ method: SESSION_REQUEST_PERSONAL_SIGN, parity: 1, v: 28 }
+		] as const)(
+			'returns the $method signature with signer parity $parity to the dApp with v $v',
+			async ({ method, parity, v }) => {
+				// A contract verifying the signature on-chain (e.g. an ERC-2612 `permit`) accepts
+				// `v` only as 27 or 28, so the bare parity the signer appends is re-encoded.
+				vi.mocked(signPrehash).mockResolvedValue(signerSignature(parity));
+				vi.mocked(signMessageApi).mockResolvedValue(signerSignature(parity));
+
+				const request = buildRequest({
+					method,
+					params:
+						method === SESSION_REQUEST_ETH_SIGN_V4
+							? [HOLDER, daiPermitJson(true)]
+							: ['0x48656c6c6f', HOLDER]
+				});
+
+				const result = await signMessage(buildParams(request));
+
+				expect(result).toStrictEqual({ success: true });
+				expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
+					id: request.id,
+					topic: request.topic,
+					message: dappSignature(v)
 				});
 			}
 		);
@@ -269,12 +371,73 @@ describe('eth wallet-connect.services', () => {
 			identity: mockIdentity,
 			minterInfo: undefined,
 			sourceNetwork: ETHEREUM_NETWORK,
-			targetNetwork: ETHEREUM_NETWORK
+			targetNetwork: ETHEREUM_NETWORK,
+			unknownCallAcknowledged: false,
+			tokens: []
 		});
 
 		beforeEach(() => {
 			vi.clearAllMocks();
 			vi.mocked(executeSend).mockResolvedValue({ hash: '0xHASH', nonce: 1 });
+		});
+
+		// The review describes this swap, so it asks for no confirmation, and signing reads the call
+		// with the same tokens and so does not take it for one OISY cannot read.
+		it('signs a Uniswap swap the review describes without the confirmation', async () => {
+			const data = encodeUniswapEurcToUsdc();
+			const params = buildParams();
+
+			const { success } = await send({
+				...params,
+				request: {
+					...params.request,
+					params: {
+						request: {
+							method: 'eth_sendTransaction',
+							params: [{ from: mockUniswapWallet, to: mockUniswapRouter, data }]
+						}
+					}
+				} as unknown as WalletKitTypes.SessionRequest,
+				address: mockUniswapWallet,
+				token: BASE_ETH_TOKEN,
+				sourceNetwork: BASE_NETWORK,
+				targetNetwork: BASE_NETWORK,
+				tokens: [EURC_TOKEN, USDC_TOKEN]
+			});
+
+			expect(success).toBeTruthy();
+			expect(vi.mocked(executeSend).mock.calls[0][0]).toMatchObject({
+				to: mockUniswapRouter,
+				data
+			});
+		});
+
+		describe('a call OISY cannot read', () => {
+			const data = '0xdeadbeef';
+
+			it('refuses it when the review did not confirm it', async () => {
+				const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+				const { success } = await send(buildParams({ data }));
+
+				expect(success).toBeFalsy();
+				expect(executeSend).not.toHaveBeenCalled();
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: get(i18n).wallet_connect.error.unexplained_request_unconfirmed }
+				});
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: 'mock-topic',
+					id: 1,
+					error: UNEXPECTED_ERROR
+				});
+			});
+
+			it('signs it once the review confirmed it', async () => {
+				const { success } = await send({ ...buildParams({ data }), unknownCallAcknowledged: true });
+
+				expect(success).toBeTruthy();
+				expect(vi.mocked(executeSend).mock.calls[0][0]).toMatchObject({ data });
+			});
 		});
 
 		it('signs the gas limit the dApp requested', async () => {
@@ -539,11 +702,13 @@ describe('eth wallet-connect.services', () => {
 			it('should not check a deposit on an EVM network without ckETH', async () => {
 				const data = encodeDeposit(Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'));
 
+				// Read as a call OISY cannot read there, which the review asks the user to confirm.
 				const { success } = await send({
 					...buildDepositParams({ to: CKETH_HELPER, data }),
 					token: BASE_ETH_TOKEN,
 					sourceNetwork: BASE_NETWORK,
-					targetNetwork: BASE_NETWORK
+					targetNetwork: BASE_NETWORK,
+					unknownCallAcknowledged: true
 				});
 
 				expect(success).toBeTruthy();
@@ -552,6 +717,68 @@ describe('eth wallet-connect.services', () => {
 					data,
 					sourceNetwork: BASE_NETWORK
 				});
+			});
+		});
+
+		describe('when the send fails', () => {
+			beforeEach(() => {
+				vi.spyOn(toastsStore, 'toastsError').mockImplementation(() => Symbol('toast'));
+				vi.spyOn(toastsStore, 'toastsErrorNoTrace').mockImplementation(() => Symbol('toast'));
+			});
+
+			it('rejects the request and says whether the transaction may have reached the network', async () => {
+				const err = new EthSubmissionUnconfirmedError(new Error('Internal error'));
+				vi.mocked(executeSend).mockRejectedValueOnce(err);
+
+				await expect(send(buildParams())).resolves.toEqual({ success: false, err });
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: 'mock-topic',
+					id: 1,
+					error: UNEXPECTED_ERROR
+				});
+				expect(toastsStore.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.send.error.ethereum_transaction_unconfirmed },
+					err
+				});
+				expect(toastsStore.toastsError).not.toHaveBeenCalled();
+			});
+
+			it('says the transaction was not sent when its nonce could not be read', async () => {
+				const err = new EthNonceReadError(new Error('Internal error'));
+				vi.mocked(executeSend).mockRejectedValueOnce(err);
+
+				await send(buildParams());
+
+				expect(toastsStore.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.send.error.ethereum_transaction_not_sent },
+					err
+				});
+			});
+
+			it('explains a balance that cannot pay for the transaction as the send flow does', async () => {
+				const err = Object.assign(new Error('insufficient funds'), { code: 'INSUFFICIENT_FUNDS' });
+				vi.mocked(executeSend).mockRejectedValueOnce(err);
+
+				await send(buildParams());
+
+				expect(toastsStore.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.send.error.ethereum_insufficient_funds },
+					err
+				});
+			});
+
+			it('keeps the generic WalletConnect message for an error it cannot explain', async () => {
+				const err = new Error('Mock error');
+				vi.mocked(executeSend).mockRejectedValueOnce(err);
+
+				await expect(send(buildParams())).resolves.toEqual({ success: false, err });
+
+				expect(toastsStore.toastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.wallet_connect.error.unexpected_processing_request },
+					err
+				});
+				expect(toastsStore.toastsErrorNoTrace).not.toHaveBeenCalled();
 			});
 		});
 	});

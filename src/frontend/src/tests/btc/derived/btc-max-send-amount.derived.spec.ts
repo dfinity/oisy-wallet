@@ -1,9 +1,11 @@
+import { BTC_LARGEST_OUTPUT_VSIZE, BTC_SEND_MAX_INPUTS } from '$btc/constants/btc.constants';
 import { initBtcMaxSendAmount } from '$btc/derived/btc-max-send-amount.derived';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import { calculateFeeSatoshis } from '$btc/utils/btc-utxos.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
@@ -44,21 +46,21 @@ describe('initBtcMaxSendAmount', () => {
 		setPendingTransactions();
 		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
 
-		expect(get(initBtcMaxSendAmount(mockAddress))).toBeUndefined();
+		expect(get(initBtcMaxSendAmount({ source: mockAddress }))).toBeUndefined();
 	});
 
 	it('should be undefined until the fee rate is loaded', () => {
 		allUtxosStore.setAllUtxos({ allUtxos: [createMockUtxo({ value: 100_000 })] });
 		setPendingTransactions();
 
-		expect(get(initBtcMaxSendAmount(mockAddress))).toBeUndefined();
+		expect(get(initBtcMaxSendAmount({ source: mockAddress }))).toBeUndefined();
 	});
 
 	it('should be undefined until the pending transactions of the address are known', () => {
 		allUtxosStore.setAllUtxos({ allUtxos: [createMockUtxo({ value: 100_000 })] });
 		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
 
-		expect(get(initBtcMaxSendAmount(mockAddress))).toBeUndefined();
+		expect(get(initBtcMaxSendAmount({ source: mockAddress }))).toBeUndefined();
 	});
 
 	it('should cap Max at the spendable UTXOs minus the fee for spending all of them', () => {
@@ -71,8 +73,13 @@ describe('initBtcMaxSendAmount', () => {
 		setPendingTransactions();
 		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
 
-		expect(get(initBtcMaxSendAmount(mockAddress))).toBe(
-			300_000n - calculateFeeSatoshis({ numInputs: 2, feeRateMiliSatoshisPerVByte })
+		expect(get(initBtcMaxSendAmount({ source: mockAddress }))).toBe(
+			300_000n -
+				calculateFeeSatoshis({
+					numInputs: 2,
+					recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+					feeRateMiliSatoshisPerVByte
+				})
 		);
 	});
 
@@ -88,8 +95,13 @@ describe('initBtcMaxSendAmount', () => {
 		setPendingTransactions();
 		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
 
-		expect(get(initBtcMaxSendAmount(mockAddress))).toBe(
-			1_000n - calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte })
+		expect(get(initBtcMaxSendAmount({ source: mockAddress }))).toBe(
+			1_000n -
+				calculateFeeSatoshis({
+					numInputs: 1,
+					recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+					feeRateMiliSatoshisPerVByte
+				})
 		);
 	});
 
@@ -102,8 +114,13 @@ describe('initBtcMaxSendAmount', () => {
 		setPendingTransactions([reserved]);
 		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
 
-		expect(get(initBtcMaxSendAmount(mockAddress))).toBe(
-			100_000n - calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte })
+		expect(get(initBtcMaxSendAmount({ source: mockAddress }))).toBe(
+			100_000n -
+				calculateFeeSatoshis({
+					numInputs: 1,
+					recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+					feeRateMiliSatoshisPerVByte
+				})
 		);
 	});
 
@@ -112,6 +129,54 @@ describe('initBtcMaxSendAmount', () => {
 		setPendingTransactions();
 		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
 
-		expect(get(initBtcMaxSendAmount(mockAddress))).toBe(ZERO);
+		expect(get(initBtcMaxSendAmount({ source: mockAddress }))).toBe(ZERO);
+	});
+
+	// 1 input + recipient + P2WPKH change at 1 sat/vB: 141 vB for a P2WPKH recipient, 153 for a
+	// P2TR one, and 153 without a recipient, priced for the largest output.
+	it.each([
+		{
+			recipient: 'a P2WPKH recipient',
+			destination: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq',
+			fee: 141n
+		},
+		{
+			recipient: 'a P2TR recipient',
+			destination: 'bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0',
+			fee: 153n
+		},
+		{ recipient: 'no recipient', destination: undefined, fee: 153n }
+	])('should price the fee for $recipient', ({ destination, fee }) => {
+		allUtxosStore.setAllUtxos({ allUtxos: [createMockUtxo({ value: 10_000 })] });
+		setPendingTransactions();
+		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
+
+		expect(get(initBtcMaxSendAmount({ source: mockAddress, destination }))).toBe(10_000n - fee);
+	});
+
+	it('should keep Max within the send input cap with the flag on', () => {
+		const utxos = Array.from({ length: BTC_SEND_MAX_INPUTS + 20 }, (_, i) =>
+			createMockUtxo({ value: 10_000, txid: Uint8Array.from([5, i]) })
+		);
+		allUtxosStore.setAllUtxos({ allUtxos: utxos });
+		setPendingTransactions();
+		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
+
+		const fee = (numInputs: number) =>
+			calculateFeeSatoshis({
+				numInputs,
+				recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+				feeRateMiliSatoshisPerVByte
+			});
+
+		expect(get(initBtcMaxSendAmount({ source: mockAddress }))).toBe(
+			BigInt(utxos.length) * 10_000n - fee(utxos.length)
+		);
+
+		btcSendViaBackend.enabled = true;
+
+		expect(get(initBtcMaxSendAmount({ source: mockAddress }))).toBe(
+			BigInt(BTC_SEND_MAX_INPUTS) * 10_000n - fee(BTC_SEND_MAX_INPUTS)
+		);
 	});
 });

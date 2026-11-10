@@ -34,7 +34,7 @@
 </script>
 
 <div
-	class="bottom-sheet"
+	class="bottom-sheet outline-none"
 	aria-label={ariaLabel}
 	aria-labelledby={ariaLabelledby}
 	aria-modal={onClose ? true : undefined}

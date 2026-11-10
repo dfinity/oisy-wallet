@@ -2,7 +2,7 @@ import { sendBtc } from '$btc/services/btc-send.services';
 import { prepareBtcSend } from '$btc/services/btc-utxos.service';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
-import { BtcPrepareSendError } from '$btc/types/btc-send';
+import { BtcBroadcastUnconfirmedError, BtcPrepareSendError } from '$btc/types/btc-send';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
@@ -21,9 +21,13 @@ import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcCkWithdrawalResult } from '$icp/types/ic-send';
 import type { IcCkToken, IcToken } from '$icp/types/ic-token';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
-import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
+import {
+	createActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import {
 	fetchChainFusionBtcQuote,
 	fetchChainFusionBtcSwap,
@@ -36,7 +40,8 @@ import {
 	SwapProvider,
 	type BtcQuoteParams,
 	type EvmQuoteParams,
-	type IcpBridgeQuoteParams
+	type IcpBridgeQuoteParams,
+	type SwapQuoteObserver
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -50,7 +55,7 @@ import {
 	mockValidIcToken
 } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { toNullable } from '@dfinity/utils';
+import { nonNullish, toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 let mockEnabled = true;
@@ -89,7 +94,8 @@ vi.mock('$eth/services/send.services', () => ({
 }));
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
-	createActiveUserTransaction: vi.fn()
+	createActiveUserTransaction: vi.fn(),
+	deleteUnbroadcastActiveUserTransaction: vi.fn()
 }));
 
 const IC_CKETH_LEDGER = 'ss2fx-dyaaa-aaaar-qacoq-cai';
@@ -147,7 +153,10 @@ const ckUsdcToken = makeCkToken({
 	symbol: 'ckUSDC'
 });
 
-const quote = (params: Partial<{ sourceToken: Token; destinationToken: Token; amount: bigint }>) =>
+const quote = (
+	params: SwapQuoteObserver &
+		Partial<{ sourceToken: Token; destinationToken: Token; amount: bigint }>
+) =>
 	fetchChainFusionEvmQuote({
 		sourceToken: ETHEREUM_TOKEN,
 		destinationToken: ckEthToken,
@@ -173,6 +182,19 @@ describe('chain-fusion-swap.services', () => {
 			mockEnabled = true;
 			ckEthMinterInfoStore.reset(ETHEREUM_TOKEN_ID);
 			setMinterInfo();
+		});
+
+		it('reports local mint pricing only after the helper prerequisites are available', async () => {
+			const onProviderParticipating = vi.fn();
+			await quote({ onProviderParticipating });
+
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.CHAIN_FUSION);
+
+			onProviderParticipating.mockClear();
+			ckEthMinterInfoStore.reset(ETHEREUM_TOKEN_ID);
+			await quote({ onProviderParticipating });
+
+			expect(onProviderParticipating).not.toHaveBeenCalled();
 		});
 
 		it('should quote ETH to ckETH one to one, with no fee deducted', async () => {
@@ -274,7 +296,9 @@ describe('chain-fusion-swap.services', () => {
 			feeLedgerCanisterId: IC_CKETH_LEDGER
 		};
 
-		const icpQuote = (params: Partial<{ sourceToken: Token; destinationToken: Token }>) =>
+		const icpQuote = (
+			params: SwapQuoteObserver & Partial<{ sourceToken: Token; destinationToken: Token }>
+		) =>
 			fetchChainFusionIcpQuote({
 				sourceToken: ckEthSource,
 				destinationToken: ETHEREUM_TOKEN,
@@ -299,6 +323,34 @@ describe('chain-fusion-swap.services', () => {
 				gas_limit: 1n,
 				timestamp: toNullable(1n)
 			});
+		});
+
+		it('reports each eligible ETH-family withdrawal pricing entry, not missing minters', async () => {
+			const onProviderParticipating = vi.fn();
+			await icpQuote({ onProviderParticipating });
+			await icpQuote({
+				sourceToken: ckUsdcSource,
+				destinationToken: USDC_TOKEN,
+				onProviderParticipating
+			});
+
+			expect(onProviderParticipating.mock.calls).toEqual([
+				[SwapProvider.CHAIN_FUSION],
+				[SwapProvider.CHAIN_FUSION]
+			]);
+
+			onProviderParticipating.mockClear();
+			await icpQuote({
+				sourceToken: { ...ckEthSource, minterCanisterId: undefined } as IcCkToken,
+				onProviderParticipating
+			});
+			await icpQuote({
+				sourceToken: { ...ckUsdcSource, feeLedgerCanisterId: undefined } as IcCkToken,
+				destinationToken: USDC_TOKEN,
+				onProviderParticipating
+			});
+
+			expect(onProviderParticipating).not.toHaveBeenCalled();
 		});
 
 		it('should quote a ckETH withdrawal 1:1 with both fees itemized, like the Convert flow', async () => {
@@ -831,7 +883,9 @@ describe('chain-fusion-swap.services', () => {
 			symbol: 'ckBTC-destination'
 		});
 
-		const btcQuote = (params: Partial<{ sourceToken: Token; destinationToken: Token }> = {}) =>
+		const btcQuote = (
+			params: SwapQuoteObserver & Partial<{ sourceToken: Token; destinationToken: Token }> = {}
+		) =>
 			fetchChainFusionBtcQuote({
 				sourceToken: BTC_MAINNET_TOKEN,
 				destinationToken: ckBtcDestination,
@@ -868,6 +922,19 @@ describe('chain-fusion-swap.services', () => {
 		// 100-satoshi `kyt_fee`. The network fee comes out of the transaction's change, so it
 		// is charged on top. `BtcConvertFees`'s zero-valued conversion-fee row is not carried
 		// over — "Free" is not a fee worth a line in an offer list.
+		it('reports BTC local pricing but not a mint without a deposit address', async () => {
+			const onProviderParticipating = vi.fn();
+			await btcQuote({ onProviderParticipating });
+
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.CHAIN_FUSION);
+
+			onProviderParticipating.mockClear();
+			btcAddressStore.reset(ckBtcDestination.id);
+			await btcQuote({ onProviderParticipating });
+
+			expect(onProviderParticipating).not.toHaveBeenCalled();
+		});
+
 		it('should deduct only the KYT fee from what the minter credits', async () => {
 			await expect(btcQuote()).resolves.toStrictEqual({
 				provider: SwapProvider.CHAIN_FUSION,
@@ -901,6 +968,18 @@ describe('chain-fusion-swap.services', () => {
 					allUtxos: [mockUtxo],
 					feeRateMiliSatoshisPerVByte: 2_000n
 				})
+			);
+		});
+
+		// Regression: the quote priced the deposit address's P2WPKH output while the swap is sent
+		// with the shared loader's fee, priced for the largest output. With UTXOs of 10 150 and
+		// 9 000 sats, a 10 000-sat swap at 1 sat/vB was quoted one input and 141 sats, then sent
+		// with two inputs and 221.
+		it('should price the fee without a recipient, as the swap is sent', async () => {
+			await btcQuote();
+
+			expect(prepareBtcSend).toHaveBeenLastCalledWith(
+				expect.not.objectContaining({ destination: expect.anything() })
 			);
 		});
 
@@ -978,7 +1057,9 @@ describe('chain-fusion-swap.services', () => {
 			symbol: 'ckBTC-source'
 		});
 
-		const icpQuote = (params: Partial<{ sourceToken: Token; destinationToken: Token }> = {}) =>
+		const icpQuote = (
+			params: SwapQuoteObserver & Partial<{ sourceToken: Token; destinationToken: Token }> = {}
+		) =>
 			fetchChainFusionIcpQuote({
 				sourceToken: ckBtcSource,
 				destinationToken: BTC_MAINNET_TOKEN,
@@ -1008,6 +1089,19 @@ describe('chain-fusion-swap.services', () => {
 		// finalized withdrawals: they pay out exactly `amount - bitcoin_fee - minter_fee`. The
 		// KYT fee `IcTokenFees` also lists is not charged to the user on a withdrawal, so it
 		// is not quoted at all — neither deducted nor on top.
+		it('reports ckBTC withdrawal pricing only with minter prerequisites', async () => {
+			const onProviderParticipating = vi.fn();
+			await icpQuote({ onProviderParticipating });
+
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.CHAIN_FUSION);
+
+			onProviderParticipating.mockClear();
+			ckBtcMinterInfoStore.reset(ckBtcSource.id);
+			await icpQuote({ onProviderParticipating });
+
+			expect(onProviderParticipating).not.toHaveBeenCalled();
+		});
+
 		it('should deduct only the Bitcoin network and minter fees, and not quote the KYT fee', async () => {
 			await expect(icpQuote()).resolves.toStrictEqual({
 				provider: SwapProvider.CHAIN_FUSION,
@@ -1242,6 +1336,113 @@ describe('chain-fusion-swap.services', () => {
 			await expect(fetchChainFusionBtcSwap(swapParams)).rejects.toThrow('wallet refresh failed');
 
 			expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+		});
+
+		describe('through the backend', () => {
+			const broadcast = vi.fn();
+
+			// As the real `sendBtc` does on the backend path: `beforeBroadcast` once signed, then the
+			// broadcast, which either goes out or fails with `failure`.
+			const sendThroughBackend = (failure?: unknown) =>
+				vi.mocked(sendBtc).mockImplementation(async ({ beforeBroadcast, onBroadcast }) => {
+					await beforeBroadcast?.({ txid: 'txid' });
+
+					broadcast();
+
+					if (nonNullish(failure)) {
+						throw failure;
+					}
+
+					await onBroadcast?.({ txid: 'txid' });
+
+					return 'txid';
+				});
+
+			beforeEach(() => {
+				broadcast.mockClear();
+				vi.mocked(deleteUnbroadcastActiveUserTransaction).mockResolvedValue(undefined);
+			});
+
+			it('should create the row before the broadcast, and only once', async () => {
+				vi.mocked(createActiveUserTransaction).mockImplementation(() => {
+					expect(broadcast).not.toHaveBeenCalled();
+
+					return Promise.resolve();
+				});
+				sendThroughBackend();
+
+				await fetchChainFusionBtcSwap(swapParams);
+
+				expect(createActiveUserTransaction).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ id: SWAP_ID })
+				);
+				expect(refsOfLastCreate()).toStrictEqual(
+					expect.objectContaining({ chain_fusion_btc_tx: 'txid' })
+				);
+				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			it('should broadcast nothing when the row cannot be written, and delete it all the same', async () => {
+				vi.mocked(createActiveUserTransaction).mockRejectedValue(new Error('backend down'));
+				sendThroughBackend();
+
+				await expect(fetchChainFusionBtcSwap(swapParams)).rejects.toThrow('backend down');
+
+				expect(broadcast).not.toHaveBeenCalled();
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: SWAP_ID
+				});
+			});
+
+			it('should delete the row when the broadcast is refused outright', async () => {
+				const refusal = new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee');
+				sendThroughBackend(refusal);
+
+				await expect(fetchChainFusionBtcSwap(swapParams)).rejects.toBe(refusal);
+
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: SWAP_ID
+				});
+			});
+
+			it.each([
+				new BtcBroadcastTransactionCanisterError(
+					{ BroadcastOutcomeUnknown: { msg: 'trap' } },
+					'unknown'
+				),
+				new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') })
+			])('should keep the row after an unclear outcome: %s', async (unclear) => {
+				sendThroughBackend(unclear);
+
+				await expect(fetchChainFusionBtcSwap(swapParams)).rejects.toBe(unclear);
+
+				expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			// The deposit may have gone out, so the minted ckBTC must not land in a hidden token.
+			it('should enable the destination after an unclear outcome, but not after a refusal', async () => {
+				const enableDestinationToken = vi.fn().mockResolvedValue(undefined);
+
+				sendThroughBackend(new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') }));
+
+				await expect(
+					fetchChainFusionBtcSwap({ ...swapParams, enableDestinationToken })
+				).rejects.toBeInstanceOf(BtcBroadcastUnconfirmedError);
+
+				expect(enableDestinationToken).toHaveBeenCalledOnce();
+
+				enableDestinationToken.mockClear();
+				sendThroughBackend(new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee'));
+
+				await expect(
+					fetchChainFusionBtcSwap({ ...swapParams, enableDestinationToken })
+				).rejects.toBeInstanceOf(BtcBroadcastTransactionCanisterError);
+
+				expect(enableDestinationToken).not.toHaveBeenCalled();
+			});
 		});
 	});
 });

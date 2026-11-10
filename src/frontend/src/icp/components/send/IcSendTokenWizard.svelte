@@ -6,10 +6,14 @@
 	import IcSendReview from '$icp/components/send/IcSendReview.svelte';
 	import { sendIc } from '$icp/services/ic-send.services';
 	import { sendNft } from '$icp/services/nft-send.services';
-	import { MobileSendSessionExpiredError, type IcTransferParams } from '$icp/types/ic-send';
+	import {
+		MobileSendSessionExpiredError,
+		type IcSendRequest,
+		type IcTransferParams
+	} from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { toIcNftSendErrorType } from '$icp/utils/ic-nft.utils';
-	import { isMobileSendDestination } from '$icp/utils/ic-send.utils';
+	import { isMobileSendDestination, toIcSendRequest } from '$icp/utils/ic-send.utils';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_IC_SEND_ERROR,
@@ -150,6 +154,9 @@
 		disposed = true;
 		clearTimeout(closeTimer);
 	});
+	// The wizard lives through the amount, review and sending steps, so the review a failed send
+	// returns to sends the same transfer again rather than a second one (see `toIcSendRequest`).
+	let sendRequest: IcSendRequest | undefined;
 
 	const send = async () => {
 		if (submitting || disposed || currentStep?.name !== WizardStepsSend.REVIEW) {
@@ -184,12 +191,20 @@
 		onNext();
 
 		try {
-			const params: IcTransferParams = {
+			sendRequest = toIcSendRequest({
+				previous: sendRequest,
+				tokenId: $sendToken.id,
 				to: destination,
 				amount: parseToken({
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
-				}),
+				})
+			});
+
+			const params: IcTransferParams = {
+				to: sendRequest.to,
+				amount: sendRequest.amount,
+				createdAt: sendRequest.createdAt,
 				identity: $authIdentity,
 				progress: (step: ProgressStepsSendIc) => {
 					if (!disposed) {

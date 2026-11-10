@@ -22,8 +22,8 @@
 		type EthSendTransactionReference,
 		type ProgressStep
 	} from '$eth/types/send';
-	import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
-	import { isEthersError, isSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import { isSendOutcomeUnknown, toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
+	import { findEthersError, isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isMobileEthSendDestination } from '$eth/utils/mobile-send.utils';
 	import { capSendAmountToFee, shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
@@ -270,6 +270,8 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
+			const ethersErr = findEthersError(err);
+
 			trackEvent({
 				name: TRACK_NFT_SEND,
 				metadata: {
@@ -280,7 +282,7 @@
 					tokenId: String(nft.id),
 					network: sourceNetwork.name,
 					// Only the code: ethers' message holds the signed transaction and the node's answer.
-					...(isEthersError(err) && { error: err.code })
+					...(nonNullish(ethersErr) && { error: ethersErr.code })
 				}
 			});
 
@@ -291,7 +293,7 @@
 				context: PLAUSIBLE_EVENT_CONTEXTS.SEND
 			});
 
-			onBack();
+			leaveFailedSend(err);
 		}
 	};
 
@@ -559,12 +561,23 @@
 				context: PLAUSIBLE_EVENT_CONTEXTS.SEND
 			});
 
-			onBack();
+			leaveFailedSend(err);
 		}
 	};
 
 	const close = () => onClose();
 	const back = () => onSendBack();
+
+	// A transaction that may have reached the network is not offered again from the review: sent
+	// again, it would be signed with the next nonce, and both could execute.
+	const leaveFailedSend = (err: unknown) => {
+		if (isSendOutcomeUnknown(err)) {
+			close();
+			return;
+		}
+
+		onBack();
+	};
 </script>
 
 <EthFeeContext

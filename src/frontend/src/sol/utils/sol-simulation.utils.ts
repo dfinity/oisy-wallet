@@ -1,6 +1,9 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
 import {
+	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
+	MEMO_LEGACY_PROGRAM_ADDRESS,
+	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -10,6 +13,7 @@ import type { SolanaParsedAccountInfo, SolanaSimulatedInnerInstructions } from '
 import type {
 	SolClosedAccount,
 	SolSimulationAllowance,
+	SolSimulationClosedAccount,
 	SolSimulationControlChange,
 	SolSimulationCreatedAccount,
 	SolSimulationPreview,
@@ -195,18 +199,50 @@ export const mapSolSimulationAccountOwners = ({
 		{ ownedAddresses: [], addressToOwner: {}, addressToToken: {} }
 	);
 
+/**
+ * The state a token account the run opens starts from: held by the owner and the program it ends
+ * with, holding nothing, and with no delegate and no close authority.
+ *
+ * Its owner and program are what it was opened for, so neither reads as a change. A delegate or a
+ * close authority it ends up with was granted by this very message, and an account opened empty
+ * shows no balance that would reveal the grant.
+ */
+const openedTokenAccountState = ({
+	program,
+	token
+}: SolAccountState): SolAccountState | undefined =>
+	nonNullish(token)
+		? {
+				program,
+				lamports: ZERO,
+				token: {
+					tokenAddress: token.tokenAddress,
+					owner: token.owner,
+					amount: ZERO,
+					decimals: token.decimals
+				}
+			}
+		: undefined;
+
 const controlChanges = ({
 	account,
-	pre,
+	pre: preState,
 	post
 }: {
 	account: SolAddress;
 	pre?: SolAccountState;
 	post?: SolAccountState;
 }): SolSimulationControlChange[] => {
-	// An account that did not exist beforehand cannot have been taken over; it was created by
-	// this very message, and whatever it ends up holding is reported as a balance instead.
-	if (isNullish(pre) || isNullish(post)) {
+	if (isNullish(post)) {
+		return [];
+	}
+
+	// An account that did not exist beforehand is compared with the one it was opened as. One that
+	// is not a token account has nothing to grant, and whatever it ends up holding is stated as a
+	// balance instead.
+	const pre = preState ?? openedTokenAccountState(post);
+
+	if (isNullish(pre)) {
 		return [];
 	}
 
@@ -293,7 +329,7 @@ export const mapSolSimulationPreview = ({
 		tokenDeltas: SolSimulationTokenDelta[];
 		changes: SolSimulationControlChange[];
 		created: SolSimulationCreatedAccount[];
-		closed: SolAddress[];
+		closed: SolSimulationClosedAccount[];
 	}>(
 		(acc, address, index) => {
 			const pre = parseAccountState(preAccounts[index]);
@@ -323,7 +359,7 @@ export const mapSolSimulationPreview = ({
 						: acc.created,
 				closed:
 					nonNullish(pre) && isEmptiedAccount(postAccounts[index])
-						? [...acc.closed, address]
+						? [...acc.closed, { account: address, lamports: pre.lamports }]
 						: acc.closed,
 				solDelta:
 					address === userAddress
@@ -384,32 +420,112 @@ export const solSimulationReassignsWallet = ({
 	);
 
 /**
- * The programs a simulated run calls from inside another program's instruction that are not among
- * the known ones, each named once, in the order the run first reaches them.
+ * Whether the message carries an instruction OISY cannot read that no simulated run described.
  *
- * Only the nested calls. The message's own instructions are the review's to list, and one it
- * cannot read is already listed as such; a nested call exists only in the run.
+ * What makes such an instruction a warning rather than a refusal is the run, which states what the
+ * message would do to the user's own accounts whether or not any decoder read it. Without a run
+ * that described it, approving it is approving an effect nobody stated. The review and the signing
+ * flow both ask this, so the review holds the button on exactly what signing refuses.
+ */
+export const solUnreviewedNotDescribed = ({
+	unreviewed,
+	simulated
+}: {
+	unreviewed: boolean | undefined;
+	// Whether a simulated run described every instruction of the message.
+	simulated: boolean;
+}): boolean => (unreviewed ?? false) && !simulated;
+
+// Programs the review decodes when the message calls them itself, besides the known ones: it states
+// what their instructions do from the message alone.
+const SOLANA_DECODED_PROGRAM_ADDRESSES: SolAddress[] = [
+	STAKE_PROGRAM_ADDRESS,
+	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
+	MEMO_LEGACY_PROGRAM_ADDRESS
+];
+
+/**
+ * The programs a simulated run reaches that OISY can't read, each named once, in the order the run
+ * first reaches them: one the message calls itself that is neither among the known ones nor one
+ * the review decodes, and one called from inside another program's instruction that is not among
+ * the known ones.
+ *
+ * The message's own instructions as well. One the review cannot read is listed as such only while
+ * no line came from it: a single transfer it makes inside itself, one lamport out of the wallet
+ * say, accounts for the whole instruction, and the program then runs with the wallet's signature
+ * unnamed, while the same program called from inside a router would be named.
  *
  * Nothing at all when a nested call does not name its program. The RPC names it for every call a
  * simulation reports, parsed or not, but the type also admits one that only points into the
  * account list, and an empty list for a run containing it would say it calls only known programs.
  */
-export const findSolUnreadPrograms = (
-	innerInstructions: SolanaSimulatedInnerInstructions
-): SolAddress[] | undefined => {
-	const calls = [...innerInstructions].flatMap(({ instructions }) => [...instructions]);
+export const findSolUnreadPrograms = ({
+	instructions,
+	innerInstructions
+}: {
+	instructions: CompilableTransactionMessage['instructions'];
+	innerInstructions: SolanaSimulatedInnerInstructions;
+}): SolAddress[] | undefined => {
+	const groups = [...innerInstructions].map(({ index, instructions: nested }) => ({
+		parent: Number(index),
+		programs: [...nested].map((instruction) =>
+			'programId' in instruction ? instruction.programId : undefined
+		)
+	}));
 
-	const programs = calls
-		.map((instruction) => ('programId' in instruction ? instruction.programId : undefined))
-		.filter(nonNullish);
-
-	if (programs.length < calls.length) {
+	if (groups.some(({ programs }) => programs.some(isNullish))) {
 		return undefined;
 	}
 
 	const known = new Set<SolAddress>(SOLANA_KNOWN_PROGRAM_ADDRESSES);
+	const decoded = new Set<SolAddress>([...known, ...SOLANA_DECODED_PROGRAM_ADDRESSES]);
 
-	return [...new Set(programs)].filter((program) => !known.has(program));
+	const reached = [...instructions].flatMap(({ programAddress }, index) => [
+		...(decoded.has(programAddress) ? [] : [programAddress]),
+		...groups
+			.filter(({ parent }) => parent === index)
+			.flatMap(({ programs }) => programs.filter(nonNullish))
+			.filter((program) => !known.has(program))
+	]);
+
+	return [...new Set(reached)];
+};
+
+/**
+ * Programs, each once, in the order a simulated run first reaches them: the message's own
+ * instructions in turn, each followed by the calls made inside it. The review names the programs it
+ * cannot read and the listed ones paying others in one notice, so both go by this order, whichever
+ * check found them.
+ */
+export const sortSolProgramsByRun = ({
+	programs,
+	instructions,
+	innerInstructions
+}: {
+	programs: SolAddress[];
+	instructions: CompilableTransactionMessage['instructions'];
+	innerInstructions: SolanaSimulatedInnerInstructions;
+}): SolAddress[] => {
+	const run: SolAddress[] = [...instructions].flatMap(({ programAddress }, index) => [
+		programAddress,
+		...[...innerInstructions]
+			.filter(({ index: parent }) => Number(parent) === index)
+			.flatMap(({ instructions: nested }) =>
+				[...nested].map((instruction) =>
+					'programId' in instruction ? instruction.programId : undefined
+				)
+			)
+			.filter(nonNullish)
+	]);
+
+	// Neither check names a program the run does not reach; one would go last.
+	const reachedAt = (program: SolAddress): number => {
+		const at = run.indexOf(program);
+
+		return at === -1 ? run.length : at;
+	};
+
+	return [...new Set(programs)].sort((first, second) => reachedAt(first) - reachedAt(second));
 };
 
 // The programs whose accounts a run's lines already account for: what leaves a wallet does so by a

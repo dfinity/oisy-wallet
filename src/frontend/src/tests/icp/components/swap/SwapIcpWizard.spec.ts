@@ -54,14 +54,23 @@ vi.mock('$lib/services/swap.services', () => ({
 }));
 
 vi.mock('$lib/services/chain-fusion-swap.services', () => ({
-	fetchChainFusionIcpSwap: (...args: unknown[]) => mockChainFusionFn(...args)
+	fetchChainFusionIcpSwap: (...args: unknown[]) => mockChainFusionFn(...args),
+	// The provider registries import these; the Smart Swap provider pool loads them with SwapProvider.
+	fetchChainFusionBtcQuote: vi.fn(),
+	fetchChainFusionEvmQuote: vi.fn(),
+	fetchChainFusionIcpQuote: vi.fn()
 }));
 
 // A factory mock, so the real module's canister-facing dependency tree is never
 // loaded. `OisyTradeSwapError` deliberately lives in `swap-errors.services`, not
 // here, so the wizard's `instanceof` branch still sees the real class.
 vi.mock('$lib/services/oisy-trade-swap.services', () => ({
-	fetchOisyTradeSwap: (...args: unknown[]) => mockOisyTradeFn(...args)
+	fetchOisyTradeSwap: (...args: unknown[]) => mockOisyTradeFn(...args),
+	// The provider registries import these; the Smart Swap provider pool loads them with SwapProvider.
+	fetchOisyTradeQuote: vi.fn(),
+	loadOisyTradeSwapPairs: vi.fn(),
+	mapOisyTradeQuoteResult: vi.fn(),
+	oisyTradeSwapPairTable: vi.fn()
 }));
 
 const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
@@ -141,16 +150,10 @@ describe('SwapIcpWizard', () => {
 		expect(getByText(en.core.text.cancel)).toBeInTheDocument();
 	});
 
-	it('renders slippage section', () => {
-		const { getByText } = renderWithStep(WizardStepsSwap.SWAP);
-
-		expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
-	});
-
 	it('renders swap provider information', () => {
 		const { getByText } = renderWithStep(WizardStepsSwap.SWAP);
 
-		expect(getByText(en.swap.text.swap_provider)).toBeInTheDocument();
+		expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
 	});
 
 	it('renders fee information', () => {

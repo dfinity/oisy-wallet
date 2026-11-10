@@ -24,6 +24,31 @@ export const BTC_CONVERT_FEE = ZERO;
 export const DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE = 0.00001;
 export const BTC_MINIMUM_AMOUNT = 700n;
 
+// Change below this goes to the miner rather than to a change output. The same as `DUST_THRESHOLD`
+// in the chain fusion signer's `build_p2wpkh_transaction`
+// (`src/signer/canister/src/sign/bitcoin/tx_utils.rs` in dfinity/chain-fusion-signer), so a send
+// built here has the layout CFS builds from the same inputs, outputs and fee.
+export const BTC_CHANGE_DUST_THRESHOLD_SATOSHIS = 1_000n;
+
+// The largest output a send can pay, P2WSH or P2TR, in vbytes: 8 (value) + 1 (script length) +
+// 34 (script). A fee priced with it covers any recipient, so it stands in until the recipient is
+// known.
+export const BTC_LARGEST_OUTPUT_VSIZE = 43;
+
+// The most inputs a send through the backend spends. Each input is one `btc_sign_prehash`, which
+// the signer charges at 37B plus the 1B ledger fee against the per-user approval the backend grants
+// at login. `allow_signing` tops that approval up only below 1.458T (`SUFFICIENT_CYCLES_THRESHOLD`
+// in `src/backend/src/signer/service.rs`), so a send of 38 inputs (1.444T) fits in what a login
+// leaves, and signing does not run out halfway, after spending cycles on a transaction it never
+// broadcasts. The backend's own limit, `MAX_BROADCAST_TX_INPUTS`, is 100.
+export const BTC_SEND_MAX_INPUTS = 38;
+
+// How many inputs of one transaction are signed at the same time. Each is a `btc_sign_prehash`
+// call, so one `sign_with_ecdsa` request. The subnet queues only 20 requests per key beyond the
+// pre-signatures it has ready, shared by every caller of the key, and refuses the rest. The chain
+// fusion signer's `btc_caller_send` signs one input at a time.
+export const BTC_SIGN_INPUTS_BATCH_SIZE = 10;
+
 // Fee tolerance percentage for Bitcoin transactions (±10%)
 // Percentage of tolerated increase in transaction fees compared to the confirmed fee.
 export const BTC_SEND_FEE_TOLERANCE_PERCENTAGE = 10n;

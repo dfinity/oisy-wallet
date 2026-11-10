@@ -1,5 +1,6 @@
 import Modal from '$lib/components/ui/Modal.svelte';
 import { busy } from '$lib/stores/busy.store';
+import en from '$tests/mocks/i18n.mock';
 import { createMockSnippet, mockSnippet } from '$tests/mocks/snippet.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { createRawSnippet, tick } from 'svelte';
@@ -40,6 +41,14 @@ describe('Modal', () => {
 		expect(getByTestId('close-modal').matches(':first-child')).toBeFalsy();
 	});
 
+	// The panel holds focus only to keep it inside the dialog. Without the class, Chrome draws
+	// its own ring around the whole panel after a click on empty space and any key press.
+	it('keeps the browser focus ring off the panel', () => {
+		const { container } = render(Modal, { props: baseProps });
+
+		expect(container.querySelector('.wrapper')).toHaveClass('outline-none');
+	});
+
 	it('preserves the autofocus of a child input when the modal mounts', async () => {
 		const { getByTestId } = render(Modal, {
 			props: {
@@ -78,5 +87,48 @@ describe('Modal', () => {
 		expect(document.activeElement).toBe(trigger);
 
 		trigger.remove();
+	});
+
+	it('closes on a backdrop click by default', async () => {
+		const onClose = vi.fn();
+		const { getByTestId } = render(Modal, { props: { ...baseProps, onClose } });
+
+		await fireEvent.click(getByTestId('backdrop'));
+
+		expect(onClose).toHaveBeenCalledOnce();
+	});
+
+	it('ignores backdrop clicks with closeOnBackdropClick off, but still closes with its button and Escape', async () => {
+		const onClose = vi.fn();
+		const { getByTestId } = render(Modal, {
+			props: { ...baseProps, onClose, closeOnBackdropClick: false }
+		});
+		await tick();
+
+		const backdrop = getByTestId('backdrop');
+		await fireEvent.click(backdrop);
+
+		expect(backdrop).toHaveClass('disablePointerEvents');
+		expect(onClose).not.toHaveBeenCalled();
+
+		await fireEvent.click(getByTestId('close-modal'));
+
+		expect(onClose).toHaveBeenCalledOnce();
+
+		await fireEvent.keyDown(window, { key: 'Escape' });
+
+		expect(onClose).toHaveBeenCalledTimes(2);
+	});
+
+	it('leaves only the working Close button to assistive technology with closeOnBackdropClick off', () => {
+		const { getAllByRole, getByTestId } = render(Modal, {
+			props: { ...baseProps, closeOnBackdropClick: false }
+		});
+
+		const closeButtons = getAllByRole('button', { name: en.core.text.close });
+
+		expect(closeButtons).toHaveLength(1);
+		expect(closeButtons[0]).toBe(getByTestId('close-modal'));
+		expect(getByTestId('backdrop')).toHaveAttribute('aria-hidden', 'true');
 	});
 });

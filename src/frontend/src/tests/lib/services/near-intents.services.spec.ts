@@ -163,6 +163,43 @@ describe('near-intents.services', () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
 		});
 
+		it('reports participation after resolving assets and before requesting the price', async () => {
+			const onProviderParticipating = vi.fn();
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockImplementationOnce(() => {
+				expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.NEAR_INTENTS);
+
+				return Promise.resolve(mockNearIntentsQuoteResponse);
+			});
+			await fetchNearIntentsSwapQuote({
+				sourceToken,
+				destinationToken,
+				amount: 1_000_000n,
+				userAddress: mockEthAddress,
+				slippage,
+				onProviderParticipating
+			});
+
+			expect(onProviderParticipating).toHaveBeenCalledOnce();
+		});
+
+		it('does not report participation when asset resolution finds no pair', async () => {
+			const onProviderParticipating = vi.fn();
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue([]);
+
+			await expect(
+				fetchNearIntentsSwapQuote({
+					sourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockEthAddress,
+					slippage,
+					onProviderParticipating
+				})
+			).resolves.toBeUndefined();
+			expect(onProviderParticipating).not.toHaveBeenCalled();
+			expect(nearIntentsApi.fetchNearIntentsQuote).not.toHaveBeenCalled();
+		});
+
 		it('should reject a quote whose signature does not verify', async () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
 				mockNearIntentsQuoteResponse
@@ -284,6 +321,33 @@ describe('near-intents.services', () => {
 				})
 			);
 		});
+
+		// The send compares the quote's tolerance with the same conversion of the max slippage, and a
+		// fraction of a basis point is dropped so the quote never allows more than the user set.
+		it.each([
+			{ slippage: '0.5', slippageTolerance: 50 },
+			{ slippage: 3, slippageTolerance: 300 },
+			{ slippage: '1.009', slippageTolerance: 100 }
+		])(
+			'should request $slippage% as $slippageTolerance basis points',
+			async ({ slippage: requestedSlippage, slippageTolerance }) => {
+				vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+					mockNearIntentsQuoteResponse
+				);
+
+				await fetchNearIntentsSwapQuote({
+					sourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockEthAddress,
+					slippage: requestedSlippage
+				});
+
+				expect(nearIntentsApi.fetchNearIntentsQuote).toHaveBeenCalledWith(
+					expect.objectContaining({ slippageTolerance })
+				);
+			}
+		);
 
 		it('should return undefined when userAddress is nullish', async () => {
 			const result = await fetchNearIntentsSwapQuote({

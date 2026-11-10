@@ -21,7 +21,7 @@
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErcFungible } from '$eth/utils/erc-fungible.utils';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
-	import { mapEthereumErrorMsg } from '$eth/utils/eth-error.utils';
+	import { isSendOutcomeUnknown, mapEthereumErrorMsg } from '$eth/utils/eth-error.utils';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
@@ -72,7 +72,7 @@
 		type SwapAmountsContext as SwapAmountsContextType
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 	import { LifiFeeChangedError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
@@ -352,7 +352,10 @@
 		const carriedFee = $lifiCarriedFee;
 
 		const carried =
-			nonNullish(carriedFee) && carriedFee.key === lifiInputsKey && nonNullish(maxFeePerGas)
+			nonNullish(carriedFee) &&
+			carriedFee.key === lifiInputsKey &&
+			'gas' in carriedFee &&
+			nonNullish(maxFeePerGas)
 				? lifiCarriedFeeCeiling({ gas: carriedFee.gas, l1Fee: carriedFee.l1Fee, maxFeePerGas })
 				: undefined;
 
@@ -736,6 +739,20 @@
 						: { error: errorDetail ?? '' })
 				}
 			});
+
+			// A swap that may have reached the network is not offered again from the review: sent
+			// again, it would be signed with the next nonce, and both could execute. The review goes
+			// with the dialog, so the message that says so is a toast.
+			if (isSendOutcomeUnknown(err)) {
+				toastsErrorNoTrace({
+					msg: { text: $i18n.send.error.ethereum_transaction_unconfirmed },
+					err
+				});
+
+				onClose();
+
+				return;
+			}
 
 			if (err instanceof LifiFeeChangedError) {
 				// Carried back to the review, which shows the higher fee for the user to confirm.

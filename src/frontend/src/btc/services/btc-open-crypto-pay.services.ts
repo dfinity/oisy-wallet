@@ -9,6 +9,7 @@ import { btcAddressMainnet } from '$lib/derived/address.derived';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
 import type { PayableToken, PayParams, ValidatedBtcPaymentData } from '$lib/types/open-crypto-pay';
+import { consoleError } from '$lib/utils/console.utils';
 import { freshIIDelegationChain } from '$lib/utils/delegation.utils';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { getPaymentUri } from '$lib/utils/open-crypto-pay.utils';
@@ -70,12 +71,18 @@ export const payBtc = async ({
 
 	const address = get(btcAddressMainnet);
 
-	nonNullish(address) &&
-		(await addPendingBtcTransaction({
-			identity,
-			network: mapToSignerBitcoinNetwork({ network: token.network.env }),
-			txId: txidStringToUint8Array(txid),
-			utxos: validatedData.utxosFee.utxos,
-			iiDelegationChain: await freshIIDelegationChain({ identity })
-		}));
+	// The provider has accepted the payment at this point, so recording the spent UTXOs as pending
+	// is best-effort: its failure must not turn a completed payment into an error.
+	try {
+		nonNullish(address) &&
+			(await addPendingBtcTransaction({
+				identity,
+				network: mapToSignerBitcoinNetwork({ network: token.network.env }),
+				txId: txidStringToUint8Array(txid),
+				utxos: validatedData.utxosFee.utxos,
+				iiDelegationChain: await freshIIDelegationChain({ identity })
+			}));
+	} catch (err: unknown) {
+		consoleError(err);
+	}
 };

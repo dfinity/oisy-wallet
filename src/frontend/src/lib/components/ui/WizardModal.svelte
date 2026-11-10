@@ -18,6 +18,7 @@
 		testId?: string;
 		currentStep?: WizardStep<T>;
 		title?: Snippet;
+		headerRight?: Snippet;
 		children: Snippet;
 		onClose?: () => void;
 	}
@@ -30,6 +31,7 @@
 		testId,
 		currentStep = $bindable(),
 		title,
+		headerRight,
 		children,
 		onClose
 	}: Props = $props();
@@ -68,6 +70,7 @@
 {#if visible}
 	<Modal
 		{disablePointerEvents}
+		{headerRight}
 		{mobilePresentation}
 		{mobileSwipeBack}
 		onClose={close}

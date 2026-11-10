@@ -4,7 +4,8 @@ import {
 	BSC_EXPLORER_URL,
 	BTC_MAINNET_ADDRESS_EXPLORER_URL,
 	ETHEREUM_EXPLORER_URL,
-	ICP_ADDRESS_EXPLORER_URL,
+	ICP_EXPLORER_URL,
+	LIFI_EXPLORER_URL,
 	NEAR_INTENTS_EXPLORER_URL,
 	ONESEC_EXPLORER_URL,
 	POLYGON_EXPLORER_URL,
@@ -36,13 +37,14 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, notEmptyString } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 
-// Display names for the three providers this card links to. Deliberately not read from
+// Display names for the providers this card links to. Deliberately not read from
 // `swapProvidersDetails`, whose NEAR Intents and 1Sec entries only exist while their swap
 // flags are on - this card outlives those flags on purpose (see below). Proper nouns, so
 // they stay out of the i18n files.
 export const HELP_EXPLORER_PROVIDER_NAMES: Partial<Record<SwapProvider, string>> = {
 	[SwapProvider.VELORA]: 'Velora',
 	[SwapProvider.NEAR_INTENTS]: 'NEAR Intents',
+	[SwapProvider.LIFI]: 'LI.FI',
 	[SwapProvider.ONE_SEC]: '1Sec'
 };
 
@@ -51,6 +53,8 @@ const veloraOrdersUrl = (address: string): string =>
 
 const nearIntentsSearchUrl = (address: string): string =>
 	`${NEAR_INTENTS_EXPLORER_URL}/?search=${address}`;
+
+const lifiWalletUrl = (address: string): string => `${LIFI_EXPLORER_URL}/wallet/${address}`;
 
 const oneSecAddressUrl = (address: string): string =>
 	`${ONESEC_EXPLORER_URL}/explorer/?address=${address}`;
@@ -100,6 +104,15 @@ export const buildHelpExplorerGroups = ({
 			]
 		},
 		{
+			// A LI.FI transfer OISY starts leaves from an EVM network or from Solana, so the address
+			// it leaves from finds it, Solana-bound ones included.
+			provider: SwapProvider.LIFI,
+			links: [
+				...toLink({ chain: 'eth', address: ethAddress, buildUrl: lifiWalletUrl }),
+				...toLink({ chain: 'sol', address: solAddress, buildUrl: lifiWalletUrl })
+			]
+		},
+		{
 			provider: SwapProvider.ONE_SEC,
 			links: [
 				...toLink({ chain: 'icp', address: principal, buildUrl: oneSecAddressUrl }),
@@ -109,13 +122,12 @@ export const buildHelpExplorerGroups = ({
 	].filter(({ links }) => links.length > 0);
 
 // Where a whole address is looked up on each mainnet network, and which of the wallet's
-// addresses to look up there. Every entry but two reuses the network's own explorer host,
-// so the Help page and a transaction link land on the same site; ICP and BTC use the
-// dedicated address explorers (see `ADDRESS_EXPLORER_URLS`).
+// addresses to look up there. Every entry but one reuses the network's own explorer host,
+// so the Help page and a transaction link land on the same site; BTC uses the dedicated
+// address explorer (see `ADDRESS_EXPLORER_URLS`).
 //
 // Keyed by network id rather than derived from `network.explorerUrl`, because the path to
-// an address is not uniform: Solana's URL is a template with the path in the middle, and
-// the ICP dashboard has no page for a principal at all.
+// an address is not uniform: Solana's URL is a template with the path in the middle.
 //
 // A mainnet network missing here simply gets no link, which is why the whole thing is
 // `Partial` - and why every network the wallet gains needs an entry added. Both XRP and
@@ -125,7 +137,9 @@ const NETWORK_ADDRESS_EXPLORERS: Partial<
 > = {
 	[ICP_NETWORK_ID]: {
 		chain: 'icp',
-		buildUrl: (address) => `${ICP_ADDRESS_EXPLORER_URL}/address/details/${address}`
+		// The ICP dashboard's address page takes the principal and lists its balance on
+		// every ledger it tracks.
+		buildUrl: (address) => `${ICP_EXPLORER_URL}/address/${address}`
 	},
 	[BTC_MAINNET_NETWORK_ID]: {
 		chain: 'btc',

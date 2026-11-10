@@ -24,6 +24,7 @@
 		role = 'dialog',
 		testId,
 		disablePointerEvents = false,
+		closeOnBackdropClick = true,
 		title,
 		ariaLabel,
 		headerLeft,
@@ -78,10 +79,13 @@
 		in:fade|global={{ duration: 25 }}
 	>
 		{#if !pagePresentation}
-			<Backdrop {disablePointerEvents} onClose={() => onClose?.()} />
+			<Backdrop
+				disablePointerEvents={disablePointerEvents || !closeOnBackdropClick}
+				onClose={closeOnBackdropClick ? () => onClose?.() : undefined}
+			/>
 		{/if}
 		<div
-			class={`wrapper ${role}`}
+			class={`wrapper ${role} outline-none`}
 			tabindex="-1"
 			use:mobilePageSwipe={pagePresentation && mobileSwipeBack
 				? {

@@ -338,7 +338,14 @@ pipeline or a second fetch path. Ordinary website polling keeps its existing API
 5. Run the relevant checks below, one heavy job at a time. For a bridge/protocol
    change, test native with the normal website build's runtime adapter. Check older
    host compatibility before deployment. Keep ordinary browser visits working.
-6. Record mobile impact, checks and remaining device acceptance in the PR. Update
+6. Before deploying a main-branch merge, compare the target backend’s published
+   Candid interface with the merged frontend’s API calls and environment flags.
+   Audit has its own backend; a successful staging release does not upgrade it.
+   For example, release 2.6.4 adds Bitcoin broadcast/UTXO methods and paginated
+   Contacts reads. Deploy the compatible backend before enabling those callers;
+   a frontend-only workflow does not update it. Obtain approval when a frontend
+   request also requires a backend upgrade.
+7. Record mobile impact, checks and remaining device acceptance in the PR. Update
    the inventory/owning guide only where behavior changed. Do not claim parity
    from a screenshot or a successful compilation.
 

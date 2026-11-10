@@ -168,7 +168,7 @@ export const getAiAssistantToolsDescription = ({
 							name: 'address',
 							enum: toNullable(),
 							description: toNullable(
-								'Blockchain address to send tokens to if not using a contact.'
+								'Blockchain address to send tokens to if not using a contact. Only an address the user typed in this conversation; if the user has not typed one, ask for it.'
 							)
 						},
 						{

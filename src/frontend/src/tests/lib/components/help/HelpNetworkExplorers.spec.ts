@@ -13,6 +13,7 @@ import {
 	HELP_NETWORK_EXPLORERS_CARD,
 	HELP_NETWORK_EXPLORERS_LINK
 } from '$lib/constants/test-ids.constants';
+import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
 	btcAddressMainnetStore,
@@ -103,7 +104,7 @@ describe('HelpNetworkExplorers', () => {
 		const href = (chain: string) =>
 			getByTestId(`${HELP_NETWORK_EXPLORERS_LINK}-${chain}`).getAttribute('href');
 
-		expect(href('icp')).toBe(`https://www.icexplorer.io/address/details/${mockPrincipalText}`);
+		expect(href('icp')).toBe(`https://dashboard.internetcomputer.org/address/${mockPrincipalText}`);
 		expect(href('btc')).toBe(`https://mempool.space/address/${mockBtcAddress}`);
 		expect(href('eth')).toBe(`https://etherscan.io/address/${mockEthAddress}`);
 		expect(href('arb')).toBe(`https://arbiscan.io/address/${mockEthAddress}`);
@@ -126,7 +127,7 @@ describe('HelpNetworkExplorers', () => {
 		expect(link.getAttribute('target')).toBe('_blank');
 		expect(link.getAttribute('rel')).toBe('external noopener noreferrer');
 		expect(link.getAttribute('aria-label')).toBe(
-			`Open the ${ETHEREUM_NETWORK.name} block explorer for your address`
+			`Open the ${ETHEREUM_NETWORK.name} blockchain explorer for your address`
 		);
 	});
 
@@ -181,6 +182,23 @@ describe('HelpNetworkExplorers', () => {
 		});
 	});
 
+	it('reports the page it is on when shown on Tools', async () => {
+		const { getByTestId } = render(HelpNetworkExplorers, {
+			props: { sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE }
+		});
+
+		await fireEvent.click(getByTestId(`${HELP_NETWORK_EXPLORERS_LINK}-pol`));
+
+		expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+			name: 'help',
+			metadata: expect.objectContaining({
+				event_modifier: 'explorer',
+				source_location: 'tools_page',
+				event_subcontext: 'network_explorers'
+			})
+		});
+	});
+
 	it('never leaks an address into the tracked event', async () => {
 		const { getByTestId } = render(HelpNetworkExplorers);
 
@@ -189,6 +207,6 @@ describe('HelpNetworkExplorers', () => {
 		const [[{ metadata }]] = vi.mocked(trackEvent).mock.calls;
 
 		expect(JSON.stringify(metadata)).not.toContain(mockPrincipalText);
-		expect(JSON.stringify(metadata)).not.toContain('icexplorer');
+		expect(JSON.stringify(metadata)).not.toContain('dashboard.internetcomputer.org');
 	});
 });
