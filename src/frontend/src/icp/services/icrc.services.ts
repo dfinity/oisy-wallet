@@ -16,6 +16,7 @@ import {
 } from '$icp/api/icrc-ledger.api';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
+import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import {
 	IcTokenStandards,
@@ -23,7 +24,7 @@ import {
 	type IcInterface,
 	type IcToken
 } from '$icp/types/ic-token';
-import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import type { IcrcCustomToken, IcrcUnavailableCustomToken } from '$icp/types/icrc-custom-token';
 import { buildIcrcCustomTokenMetadataPseudoResponse } from '$icp/utils/icrc-metadata.utils';
 import {
 	mapIcrcToken,
@@ -220,6 +221,37 @@ const loadCustomIcrcTokensData = async ({
 	};
 
 	const results = await Promise.allSettled(tokens.map(requestIcrcCustomTokenMetadata));
+
+	// A saved token that is skipped or fails to load never reaches the token list, so it is kept here for the user to delete.
+	icrcUnavailableCustomTokensStore.set(
+		tokens.reduce<IcrcUnavailableCustomToken[]>((acc, customToken, index) => {
+			const { token } = customToken;
+
+			if (!('Icrc' in token)) {
+				return acc;
+			}
+
+			const ledgerCanisterId = token.Icrc.ledger_id.toText();
+
+			if (
+				!RETIRED_ICRC_LEDGER_CANISTER_IDS.includes(ledgerCanisterId) &&
+				results[index].status === 'fulfilled'
+			) {
+				return acc;
+			}
+
+			const curatedToken = indexedIcrcCustomTokens[ledgerCanisterId];
+
+			return [
+				...acc,
+				{
+					ledgerCanisterId,
+					...(nonNullish(curatedToken) && { symbol: curatedToken.symbol }),
+					customToken
+				}
+			];
+		}, [])
+	);
 
 	return results.reduce<IcrcCustomToken[]>((acc, result, index) => {
 		if (result.status !== 'fulfilled') {
