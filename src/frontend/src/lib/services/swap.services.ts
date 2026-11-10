@@ -1,4 +1,8 @@
 import { sendBtc } from '$btc/services/btc-send.services';
+import {
+	isDefinitiveBtcBroadcastRefusal,
+	isUnclearBtcBroadcastOutcome
+} from '$btc/utils/btc-send.utils';
 import type {
 	ActiveUserTransactionData,
 	ActiveUserTransactionRef,
@@ -71,7 +75,10 @@ import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { xrpSwapProviders } from '$lib/providers/xrp-swap.providers';
-import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
+import {
+	createActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
 import { submitNearIntentsDepositTx } from '$lib/services/near-intents.services';
 import {
@@ -959,10 +966,17 @@ const executeNearIntentsSwap = async ({
 	// (XRP): it describes the swap's AUT row, with the payment's source address and poll keys
 	// added, for the transport to create at that point. Taking it marks the swap as registered,
 	// so no second row is created after the send.
+	//
+	// `openSwap` is for a transport that knows its transaction once it is signed (BTC through the
+	// backend): it creates the swap's row before the broadcast, rejecting if the write fails, so
+	// nothing goes out untracked, and returns the row's id, for the transport to delete if the
+	// broadcast is refused outright. `undefined` for a swap it cannot track, as `registerSwap`
+	// skips one. It also marks the swap as registered.
 	sendTransaction: (params: {
 		amount: bigint;
 		depositAddress: string;
 		registerSwap: () => Promise<void>;
+		openSwap: () => Promise<string | undefined>;
 		recordPollRefs: (pollRefs: ActiveUserTransactionRef[]) => void;
 		swapRecord: (params: {
 			sourceAddress: string;
@@ -1061,6 +1075,38 @@ const executeNearIntentsSwap = async ({
 		}
 	};
 
+	const openSwap = async (): Promise<string | undefined> => {
+		swapRegistered = true;
+
+		const data = toNearIntentsData({
+			sourceToken,
+			destinationToken,
+			amount: parsedSwapAmount
+		});
+
+		if (isNullish(data)) {
+			return;
+		}
+
+		const id = crypto.randomUUID();
+
+		try {
+			await createActiveUserTransaction({
+				identity,
+				id,
+				data,
+				externalRefs: swapRefsWith([])
+			});
+		} catch (err: unknown) {
+			// The backend may have committed it if only its answer was lost.
+			await deleteUnbroadcastActiveUserTransaction({ identity, id });
+
+			throw err;
+		}
+
+		return id;
+	};
+
 	const swapRecord = ({
 		sourceAddress,
 		pollRefs
@@ -1093,6 +1139,7 @@ const executeNearIntentsSwap = async ({
 		amount: parsedSwapAmount,
 		depositAddress,
 		registerSwap,
+		openSwap,
 		recordPollRefs: (refs) => {
 			broadcastPollRefs = refs;
 		},
@@ -1226,8 +1273,11 @@ export const fetchNearIntentsBtcSwap = async ({
 		slippageValue,
 		// `sendBtc` converts the display amount to satoshis itself, so it takes the raw
 		// `swapAmount` rather than the parsed base-unit amount the core hands over.
-		sendTransaction: async ({ depositAddress, registerSwap }) => {
+		sendTransaction: async ({ depositAddress, registerSwap, openSwap }) => {
 			let broadcastTxid: string | undefined;
+			// Set once `beforeBroadcast`, which `sendBtc` calls only on the backend path, has run.
+			let rowOpened = false;
+			let rowId: string | undefined;
 
 			try {
 				return await sendBtc({
@@ -1237,15 +1287,37 @@ export const fetchNearIntentsBtcSwap = async ({
 					source: userAddress,
 					destination: depositAddress,
 					amount: swapAmount,
-					// A BTC deposit is irreversible the moment it is broadcast, so the AUT row is
-					// registered right there, before the pending-transaction bookkeeping and before
-					// the send resolves; mirrors the ordering of `fetchChainFusionBtcSwap`.
+					viaBackend: true,
+					// Through the backend the deposit is known once signed, so its row is created
+					// before the broadcast, as `fetchChainFusionBtcSwap`'s is.
+					beforeBroadcast: async () => {
+						rowId = await openSwap();
+						rowOpened = true;
+					},
+					// Through the Chain Fusion Signer the deposit is irreversible the moment it is
+					// broadcast, so the row is registered right there, before the pending-transaction
+					// bookkeeping and before the send resolves.
 					onBroadcast: async ({ txid }) => {
 						broadcastTxid = txid;
-						await registerSwap();
+
+						if (!rowOpened) {
+							await registerSwap();
+						}
 					}
 				});
 			} catch (err: unknown) {
+				// A refusal outright sent nothing. After any other failure the deposit may have gone
+				// out, so the row stays for the poller, which fails it once the deposit expires.
+				if (nonNullish(rowId) && isDefinitiveBtcBroadcastRefusal(err)) {
+					await deleteUnbroadcastActiveUserTransaction({ identity, id: rowId });
+				}
+
+				// The deposit may have gone out, so the destination is enabled as after a sent one:
+				// the swapped asset must not land in a token the user cannot see.
+				if (isUnclearBtcBroadcastOutcome(err)) {
+					await enableSwapDestinationToken({ destinationToken, identity });
+				}
+
 				if (isNullish(broadcastTxid)) {
 					throw err;
 				}

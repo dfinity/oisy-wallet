@@ -6,6 +6,10 @@ import {
 	markActiveUserTransactionsSeen as markActiveUserTransactionsSeenApi,
 	updateActiveUserTransaction as updateActiveUserTransactionApi
 } from '$lib/api/backend.api';
+import {
+	UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_ATTEMPTS,
+	UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_RETRY_DELAY_MILLIS
+} from '$lib/constants/app.constants';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import type {
 	CreateActiveUserTransactionParams,
@@ -19,6 +23,7 @@ import {
 	type ActiveUserTransactionPollUpdate
 } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
+import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
@@ -132,6 +137,33 @@ export const deleteActiveUserTransaction = async ({
 	await deleteActiveUserTransactionApi({ identity, id });
 
 	activeUserTransactionsStore.remove({ id });
+};
+
+/**
+ * Deletes the row of a transaction that was never broadcast: its broadcast was refused outright, or
+ * the send stopped before it after the row was written. A delete that keeps failing leaves the row to
+ * its poller.
+ */
+export const deleteUnbroadcastActiveUserTransaction = async ({
+	identity,
+	id
+}: {
+	identity: Identity;
+	id: UpdateActiveUserTransactionParams['id'];
+}): Promise<void> => {
+	for (let attempt = 1; attempt <= UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_ATTEMPTS; attempt++) {
+		try {
+			await deleteActiveUserTransaction({ identity, id });
+
+			return;
+		} catch (err: unknown) {
+			consoleError(err);
+		}
+
+		if (attempt < UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_ATTEMPTS) {
+			await waitForMilliseconds(UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_RETRY_DELAY_MILLIS);
+		}
+	}
 };
 
 /**

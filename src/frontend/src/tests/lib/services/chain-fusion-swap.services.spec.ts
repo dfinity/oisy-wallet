@@ -2,7 +2,7 @@ import { sendBtc } from '$btc/services/btc-send.services';
 import { prepareBtcSend } from '$btc/services/btc-utxos.service';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
-import { BtcPrepareSendError } from '$btc/types/btc-send';
+import { BtcBroadcastUnconfirmedError, BtcPrepareSendError } from '$btc/types/btc-send';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
@@ -21,9 +21,13 @@ import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcCkWithdrawalResult } from '$icp/types/ic-send';
 import type { IcCkToken, IcToken } from '$icp/types/ic-token';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
-import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
+import {
+	createActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import {
 	fetchChainFusionBtcQuote,
 	fetchChainFusionBtcSwap,
@@ -51,7 +55,7 @@ import {
 	mockValidIcToken
 } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { toNullable } from '@dfinity/utils';
+import { nonNullish, toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 let mockEnabled = true;
@@ -90,7 +94,8 @@ vi.mock('$eth/services/send.services', () => ({
 }));
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
-	createActiveUserTransaction: vi.fn()
+	createActiveUserTransaction: vi.fn(),
+	deleteUnbroadcastActiveUserTransaction: vi.fn()
 }));
 
 const IC_CKETH_LEDGER = 'ss2fx-dyaaa-aaaar-qacoq-cai';
@@ -1228,7 +1233,8 @@ describe('chain-fusion-swap.services', () => {
 					source: mockBtcAddress,
 					destination: mockBtcDepositAddress,
 					network: 'mainnet',
-					utxosFee: mockUtxosFee
+					utxosFee: mockUtxosFee,
+					viaBackend: true
 				})
 			);
 		});
@@ -1331,6 +1337,113 @@ describe('chain-fusion-swap.services', () => {
 			await expect(fetchChainFusionBtcSwap(swapParams)).rejects.toThrow('wallet refresh failed');
 
 			expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+		});
+
+		describe('through the backend', () => {
+			const broadcast = vi.fn();
+
+			// As the real `sendBtc` does on the backend path: `beforeBroadcast` once signed, then the
+			// broadcast, which either goes out or fails with `failure`.
+			const sendThroughBackend = (failure?: unknown) =>
+				vi.mocked(sendBtc).mockImplementation(async ({ beforeBroadcast, onBroadcast }) => {
+					await beforeBroadcast?.({ txid: 'txid' });
+
+					broadcast();
+
+					if (nonNullish(failure)) {
+						throw failure;
+					}
+
+					await onBroadcast?.({ txid: 'txid' });
+
+					return 'txid';
+				});
+
+			beforeEach(() => {
+				broadcast.mockClear();
+				vi.mocked(deleteUnbroadcastActiveUserTransaction).mockResolvedValue(undefined);
+			});
+
+			it('should create the row before the broadcast, and only once', async () => {
+				vi.mocked(createActiveUserTransaction).mockImplementation(() => {
+					expect(broadcast).not.toHaveBeenCalled();
+
+					return Promise.resolve();
+				});
+				sendThroughBackend();
+
+				await fetchChainFusionBtcSwap(swapParams);
+
+				expect(createActiveUserTransaction).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ id: SWAP_ID })
+				);
+				expect(refsOfLastCreate()).toStrictEqual(
+					expect.objectContaining({ chain_fusion_btc_tx: 'txid' })
+				);
+				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			it('should broadcast nothing when the row cannot be written, and delete it all the same', async () => {
+				vi.mocked(createActiveUserTransaction).mockRejectedValue(new Error('backend down'));
+				sendThroughBackend();
+
+				await expect(fetchChainFusionBtcSwap(swapParams)).rejects.toThrow('backend down');
+
+				expect(broadcast).not.toHaveBeenCalled();
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: SWAP_ID
+				});
+			});
+
+			it('should delete the row when the broadcast is refused outright', async () => {
+				const refusal = new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee');
+				sendThroughBackend(refusal);
+
+				await expect(fetchChainFusionBtcSwap(swapParams)).rejects.toBe(refusal);
+
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: SWAP_ID
+				});
+			});
+
+			it.each([
+				new BtcBroadcastTransactionCanisterError(
+					{ BroadcastOutcomeUnknown: { msg: 'trap' } },
+					'unknown'
+				),
+				new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') })
+			])('should keep the row after an unclear outcome: %s', async (unclear) => {
+				sendThroughBackend(unclear);
+
+				await expect(fetchChainFusionBtcSwap(swapParams)).rejects.toBe(unclear);
+
+				expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			// The deposit may have gone out, so the minted ckBTC must not land in a hidden token.
+			it('should enable the destination after an unclear outcome, but not after a refusal', async () => {
+				const enableDestinationToken = vi.fn().mockResolvedValue(undefined);
+
+				sendThroughBackend(new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') }));
+
+				await expect(
+					fetchChainFusionBtcSwap({ ...swapParams, enableDestinationToken })
+				).rejects.toBeInstanceOf(BtcBroadcastUnconfirmedError);
+
+				expect(enableDestinationToken).toHaveBeenCalledOnce();
+
+				enableDestinationToken.mockClear();
+				sendThroughBackend(new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee'));
+
+				await expect(
+					fetchChainFusionBtcSwap({ ...swapParams, enableDestinationToken })
+				).rejects.toBeInstanceOf(BtcBroadcastTransactionCanisterError);
+
+				expect(enableDestinationToken).not.toHaveBeenCalled();
+			});
 		});
 	});
 });
