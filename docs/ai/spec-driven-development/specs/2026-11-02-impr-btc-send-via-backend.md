@@ -990,6 +990,24 @@ A retry is still possible:
   same txid over the same UTXOs (see above).
 - A retry over other UTXOs is an ordinary new reservation.
 
+Decided in PR 9:
+
+- **`payBtc` takes the new path whenever the flag is on.** It builds with `buildBtcSendPsbt`, with
+  the wallet's address (`btcAddressMainnet`) as change, and signs with `signAndFinalizeBtcPsbt`.
+  With the flag off it keeps `btc_caller_sign`, and the best-effort reservation after the hand-off.
+- **The reservation must succeed.** If `btc_add_pending_transaction` fails, nothing is handed off.
+  A rate limit counts as a failure too: `btcAddPendingTransaction` reports it as a success, since
+  the CFS paths record after the broadcast and let the user carry on, but nothing is reserved.
+- **The `PAY` step starts after the reservation.** `OpenCryptoPayWizard` reads an error from `PAY`
+  on as "not confirmed", and an earlier one as "failed". A refused reservation handed nothing off,
+  so it shows as failed and the payment can be tried again.
+- **After a failed hand-off** the payment shows as not confirmed, and its inputs stay reserved until
+  they are spent, or until the backend's one-hour age limit frees them if they never are.
+- **The 38-input cap already applies:** `calculateBtcFee` selects with `prepareBtcSend`.
+- **One new message**, `pay.error.btc_reservation_rate_limited`, for a rate-limited reservation. A
+  missing wallet address reuses `send.assertion.address_unknown`. Every other error keeps its own
+  text, as for the other tokens.
+
 ### What stays in CFS
 
 `btc_sign_prehash` and the key / address methods. `btc_caller_send`, `btc_caller_sign` and

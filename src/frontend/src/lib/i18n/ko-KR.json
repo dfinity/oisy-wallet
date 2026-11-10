@@ -1522,7 +1522,8 @@
 			"data_is_incompleted": "수신된 데이터가 불완전합니다. 일부 필수 세부 정보가 누락되었습니다.",
 			"amount_does_not_match": "수신된 데이터의 금액이 예상 값과 일치하지 않습니다.",
 			"recipient_address_is_not_valid": "수신된 데이터의 수신자 주소가 유효한 이더리움 주소가 아닙니다.",
-			"token_address_mismatch": "수신된 데이터가 예상과 다른 토큰을 참조합니다."
+			"token_address_mismatch": "수신된 데이터가 예상과 다른 토큰을 참조합니다.",
+			"btc_reservation_rate_limited": ""
 		},
 		"alt": {
 			"pay": "결제 방법에 대한 정보가 담긴 다이얼로그",

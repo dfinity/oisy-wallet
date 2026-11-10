@@ -1522,7 +1522,8 @@
 			"data_is_incompleted": "Les données reçues sont incomplètes. Certains détails requis sont manquants.",
 			"amount_does_not_match": "Le montant dans les données reçues ne correspond pas à la valeur attendue.",
 			"recipient_address_is_not_valid": "L'adresse du destinataire dans les données reçues n'est pas une adresse Ethereum valide.",
-			"token_address_mismatch": "Les données reçues font référence à un token différent de celui attendu."
+			"token_address_mismatch": "Les données reçues font référence à un token différent de celui attendu.",
+			"btc_reservation_rate_limited": ""
 		},
 		"alt": {
 			"pay": "Dialogue avec des informations sur comment payer",

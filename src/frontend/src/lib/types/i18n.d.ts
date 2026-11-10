@@ -1238,6 +1238,7 @@ interface I18nPay {
 		amount_does_not_match: string;
 		recipient_address_is_not_valid: string;
 		token_address_mismatch: string;
+		btc_reservation_rate_limited: string;
 	};
 	alt: { pay: string; where_you_can_pay: string };
 }

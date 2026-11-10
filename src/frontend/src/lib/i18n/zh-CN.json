@@ -1522,7 +1522,8 @@
 			"data_is_incompleted": "接收到的数据不完整，缺少部分必需信息。",
 			"amount_does_not_match": "接收到的数据中的金额与预期值不匹配。",
 			"recipient_address_is_not_valid": "接收到的数据中的收款地址不是有效的以太坊地址。",
-			"token_address_mismatch": "接收到的数据所指的代币与预期代币不一致。"
+			"token_address_mismatch": "接收到的数据所指的代币与预期代币不一致。",
+			"btc_reservation_rate_limited": ""
 		},
 		"alt": {
 			"pay": "包含支付说明信息的对话框",
