@@ -1151,7 +1151,7 @@
 			"ethereum_transaction_not_sent": "The transaction was not sent: we could not reach the network to prepare it. It is safe to try again.",
 			"ethereum_transaction_unconfirmed": "We could not confirm whether the transaction reached the network. It may still go through, so wait a minute or two and check your activity before you send it again.",
 			"btc_transaction_unconfirmed": "We could not confirm whether the transaction reached the Bitcoin network. It may still go through, so check your activity before you send it again.",
-			"btc_send_rate_limited": "You have sent Bitcoin several times in a short while, so this transaction was not sent. Wait about $duration, then try again.",
+			"btc_send_rate_limited": "You have tried to send Bitcoin several times in a short while, so this transaction was not sent. Wait about $duration, then try again.",
 			"btc_signing_allowance_spent": "The signing allowance OISY grants when you sign in is used up, so this transaction was not sent. Sign out and back in to renew it, then try again. It renews only a few times an hour, so if this message comes back, wait up to an hour before you sign in again.",
 			"solana_transaction_expired": "Your transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try again.",
 			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly.",

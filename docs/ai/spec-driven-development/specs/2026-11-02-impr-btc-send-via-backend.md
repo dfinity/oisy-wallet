@@ -922,7 +922,8 @@ Decided in 8e (the limit messages):
 
 - **A rate-limited broadcast says how long to wait.** `mapBtcBroadcastErrorToMessage` reads the
   window of the tier that refused it (a minute, an hour or a day) from `RateLimited` and formats it
-  with `secondsToDuration`, as the tips do.
+  with `secondsToDuration`, as the tips do. The limiter is the endpoint's first check, so failed
+  attempts count too, and the message speaks of attempts, not sends (Copilot).
 - **A spent signing approval says to sign in again.** `SignerCanisterPaymentError` keeps its
   variant. With the backend paying (`PatronPaysIcrc2Cycles`), a spent approval is
   `LedgerWithdrawFromError` with `InsufficientAllowance`, which `allow_signing` renews at the next
