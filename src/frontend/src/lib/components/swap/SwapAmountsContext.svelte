@@ -116,6 +116,9 @@
 
 		const parsedAmount = Number(amount);
 
+		const slippage = slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE;
+		const parsedSlippage = Number(slippage);
+
 		if (isNullish(isSourceTokenIcrc2) && isIcToken(sourceToken)) {
 			return;
 		}
@@ -164,7 +167,7 @@
 				destinationToken,
 				amount,
 				tokens: $tokens,
-				slippage: slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE,
+				slippage,
 				isSourceTokenIcrc2,
 				userEthAddress: $ethAddress,
 				userSolAddress: $solAddressMainnet,
@@ -189,6 +192,7 @@
 				store.setSwaps({
 					swaps: [],
 					amountForSwap: parsedAmount,
+					slippageForSwap: parsedSlippage,
 					selectedProvider: undefined
 				});
 				return;
@@ -197,6 +201,7 @@
 			store.setSwaps({
 				swaps: swapAmounts,
 				amountForSwap: parsedAmount,
+				slippageForSwap: parsedSlippage,
 				selectedProvider: swapAmounts[0]
 			});
 		} catch (err: unknown) {
@@ -212,6 +217,7 @@
 			store.setSwaps({
 				swaps: [],
 				amountForSwap: parsedAmount,
+				slippageForSwap: parsedSlippage,
 				selectedProvider: undefined,
 				...(err instanceof SwapAmountTooLowError && {
 					quoteError: { type: 'amount-too-low', minAmount: err.minAmount }
@@ -275,8 +281,14 @@
 				store.reset();
 				return;
 			}
-			// A remounted wizard may reuse its accepted quote without replaying comparison.
-			if (fetchGeneration === 1 && nonNullish($store) && $store.amountForSwap === Number(amount)) {
+			// A remounted wizard may reuse its accepted quote without replaying comparison, for the
+			// amount and the slippage it was requested with.
+			if (
+				fetchGeneration === 1 &&
+				nonNullish($store) &&
+				$store.amountForSwap === Number(amount) &&
+				$store.slippageForSwap === Number(slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE)
+			) {
 				return;
 			}
 			const requestId = ++requestSequence;

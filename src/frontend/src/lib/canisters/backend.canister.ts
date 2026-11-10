@@ -495,10 +495,15 @@ export class BackendCanister extends Canister<BackendService> {
 	}: SaveUserAgreements): Promise<void> => {
 		const { update_user_agreements } = this.caller({ certified: true });
 
-		await update_user_agreements({
+		const response = await update_user_agreements({
 			agreements: mapBackendUserAgreements(agreements),
 			current_user_version: toNullable(currentUserVersion)
 		});
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
 	};
 
 	updateProviderAgreements = async ({
@@ -507,10 +512,15 @@ export class BackendCanister extends Canister<BackendService> {
 	}: SaveProviderAgreements): Promise<void> => {
 		const { update_provider_agreements } = this.caller({ certified: true });
 
-		await update_provider_agreements({
+		const response = await update_provider_agreements({
 			provider_agreements: mapBackendProviderAgreements(providerAgreements),
 			current_user_version: toNullable(currentUserVersion)
 		});
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
 	};
 
 	// Contact addresses can become send destinations, so contacts are always read certified.
@@ -639,7 +649,9 @@ export class BackendCanister extends Canister<BackendService> {
 		start,
 		maxResults
 	}: GetUserTransactionsParams): Promise<GetUserTransactionsResponse> => {
-		const { get_user_transactions } = this.caller({ certified: false });
+		// The stored history decides which addresses count as used before on the send review, so it is
+		// always read certified.
+		const { get_user_transactions } = this.caller({ certified: true });
 
 		const response = await get_user_transactions({
 			token_id: tokenId,

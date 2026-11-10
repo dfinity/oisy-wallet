@@ -1366,6 +1366,22 @@ describe('backend.canister', () => {
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
+
+		it.each([
+			{
+				name: 'RateLimited',
+				err: { RateLimited: { max_calls: 10, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			},
+			{ name: 'VersionMismatch', err: { VersionMismatch: null } }
+		])('should throw the error if update_user_agreements returns $name', async ({ err }) => {
+			service.update_user_agreements.mockResolvedValue({ Err: err });
+
+			const { updateUserAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(updateUserAgreements({ agreements: mockUserAgreements })).rejects.toEqual(err);
+		});
 	});
 
 	describe('updateProviderAgreements', () => {
@@ -1425,6 +1441,24 @@ describe('backend.canister', () => {
 			});
 
 			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it.each([
+			{
+				name: 'RateLimited',
+				err: { RateLimited: { max_calls: 10, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			},
+			{ name: 'VersionMismatch', err: { VersionMismatch: null } }
+		])('should throw the error if update_provider_agreements returns $name', async ({ err }) => {
+			service.update_provider_agreements.mockResolvedValue({ Err: err });
+
+			const { updateProviderAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(
+				updateProviderAgreements({ providerAgreements: mockUserProviderAgreements })
+			).rejects.toEqual(err);
 		});
 	});
 
@@ -1811,6 +1845,31 @@ describe('backend.canister', () => {
 				max_results: 10n
 			});
 			expect(res).toEqual(mockGetUserTransactionsResponse);
+		});
+
+		it('should read the stored transactions through the certified service', async () => {
+			const queryService = mock<ActorSubclass<BackendService>>();
+			const certifiedService = mock<ActorSubclass<BackendService>>();
+
+			certifiedService.get_user_transactions.mockResolvedValue({
+				Ok: mockCandidGetUserTransactionsResponse
+			});
+
+			const { getUserTransactions } = await createBackendCanister({
+				serviceOverride: queryService,
+				certifiedServiceOverride: certifiedService
+			});
+
+			await expect(getUserTransactions(getUserTransactionsParams)).resolves.toEqual(
+				mockGetUserTransactionsResponse
+			);
+
+			expect(certifiedService.get_user_transactions).toHaveBeenCalledExactlyOnceWith({
+				token_id: mockUserTransactionTokenId,
+				start: [5n],
+				max_results: 10n
+			});
+			expect(queryService.get_user_transactions).not.toHaveBeenCalled();
 		});
 
 		it('should pass empty array for start when undefined', async () => {

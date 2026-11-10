@@ -2020,6 +2020,42 @@ export const solKeepsBatchWhole = ({
 	flatten({ instructions, innerInstructions }).some(({ wholeBatch }) => wholeBatch ?? false);
 
 /**
+ * Whether a simulated run makes a token call inside another program's instruction with the wallet
+ * among the keys signing for a multisig. A token batch carries each step's keys with the step.
+ *
+ * The message's own token instructions are read for this when the message is mapped, which reads
+ * the top level only. One a program makes inside its own call reaches the review through the run
+ * alone. Either way it acts on an account the multisig holds rather than the wallet, which no
+ * reading of the user's accounts counts as theirs.
+ */
+export const solSignsForMultisig = ({
+	innerInstructions,
+	userAddress
+}: {
+	innerInstructions: readonly SolInstructionGroup[];
+	userAddress: SolAddress;
+}): boolean =>
+	innerInstructions.some(({ instructions }) =>
+		instructions.some((instruction) => {
+			if (!isParsed(instruction)) {
+				return false;
+			}
+
+			const { program } = instruction;
+
+			if (isNullish(program) || !TOKEN_PROGRAMS.includes(program)) {
+				return false;
+			}
+
+			return solRpcBatchedInstructions(instruction).some(({ parsed: { info } }) => {
+				const signers = field({ info, key: 'signers' });
+
+				return Array.isArray(signers) && signers.includes(userAddress);
+			});
+		})
+	);
+
+/**
  * Whose an account is as of an instruction: the holder its current lifecycle began with, where that
  * is known, and the accounts named as the user's otherwise. Those are every account the user held
  * at any point of the message, so read alone they lend an address that was somebody else's before

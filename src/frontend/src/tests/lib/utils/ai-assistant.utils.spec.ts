@@ -14,8 +14,10 @@ import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';
 import { contactsStore } from '$lib/stores/contacts.store';
+import type { ChatMessage } from '$lib/types/ai-assistant';
 import {
 	generateAiAssistantResponseEventMetadata,
+	isAddressTypedByUser,
 	parseReviewSendTokensToolArguments,
 	parseShowBalanceToolArguments,
 	parseShowFilteredContactsToolArguments,
@@ -27,6 +29,7 @@ import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockAccountIdentifierText, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
 
 describe('ai-assistant.utils', () => {
@@ -196,6 +199,99 @@ describe('ai-assistant.utils', () => {
 				id: mockRandomUUID,
 				sendCompleted: false
 			});
+		});
+	});
+
+	describe('isAddressTypedByUser', () => {
+		const otherEthAddress = '0x1111111111111111111111111111111111111111';
+
+		const typedMessage = (text: string): ChatMessage => ({
+			role: 'user',
+			data: { text, typedByUser: true }
+		});
+
+		it('returns true when the user typed the address', () => {
+			expect(
+				isAddressTypedByUser({
+					address: mockEthAddress,
+					messages: [typedMessage(`Send 1 ETH to ${mockEthAddress}.`)]
+				})
+			).toBeTruthy();
+		});
+
+		it('returns true when the user typed the address in an earlier message', () => {
+			expect(
+				isAddressTypedByUser({
+					address: mockEthAddress,
+					messages: [
+						typedMessage(`I'd like to send ETH to ${mockEthAddress}`),
+						{ role: 'assistant', data: { text: 'How much would you like to send?' } },
+						typedMessage('1 ETH')
+					]
+				})
+			).toBeTruthy();
+		});
+
+		it('returns false when the address is only in a message OISY wrote for the user', () => {
+			expect(
+				isAddressTypedByUser({
+					address: mockEthAddress,
+					messages: [{ role: 'user', data: { text: `I'd like to send ${mockEthAddress} token.` } }]
+				})
+			).toBeFalsy();
+		});
+
+		it('returns false when the address is only in an assistant message', () => {
+			expect(
+				isAddressTypedByUser({
+					address: mockEthAddress,
+					messages: [
+						typedMessage('I would like to send 1 ETH.'),
+						{ role: 'assistant', data: { text: `Sending to ${mockEthAddress}` } }
+					]
+				})
+			).toBeFalsy();
+		});
+
+		it('returns false when the user typed a different address', () => {
+			expect(
+				isAddressTypedByUser({
+					address: mockEthAddress,
+					messages: [typedMessage(`Send 1 ETH to ${otherEthAddress}`)]
+				})
+			).toBeFalsy();
+		});
+
+		it('returns false when the address is only part of a longer typed address', () => {
+			expect(
+				isAddressTypedByUser({
+					address: mockEthAddress,
+					messages: [typedMessage(`Send 1 ETH to ${mockEthAddress}00`)]
+				})
+			).toBeFalsy();
+		});
+
+		it('returns false for the bare principal when the user typed an account with a subaccount', () => {
+			const icrcAccount = `${mockPrincipalText}-6cc627i.1`;
+			const messages = [typedMessage(`Send 1 ICP to ${icrcAccount}`)];
+
+			expect(isAddressTypedByUser({ address: mockPrincipalText, messages })).toBeFalsy();
+			expect(isAddressTypedByUser({ address: icrcAccount, messages })).toBeTruthy();
+		});
+
+		it('returns false for the subaccount alone when the user typed an account with a subaccount', () => {
+			const icrcAccount = `${mockPrincipalText}-6cc627i.${mockAccountIdentifierText}`;
+			const messages = [typedMessage(`Send 1 ICP to ${icrcAccount}.`)];
+
+			expect(isAddressTypedByUser({ address: mockAccountIdentifierText, messages })).toBeFalsy();
+			expect(isAddressTypedByUser({ address: icrcAccount, messages })).toBeTruthy();
+		});
+
+		it('returns false without an address', () => {
+			const messages = [typedMessage(`Send 1 ETH to ${mockEthAddress}`)];
+
+			expect(isAddressTypedByUser({ address: undefined, messages })).toBeFalsy();
+			expect(isAddressTypedByUser({ address: '', messages })).toBeFalsy();
 		});
 	});
 

@@ -43,9 +43,13 @@
 		currentStep = undefined;
 	};
 
-	const close = () =>
+	const close = () => {
+		// The staking step disables every close the user has (`disablePointerEvents`), so a close there
+		// comes from the wizard: a send that ended, which it tracks itself, never a cancellation.
+		const cancelled = currentStep?.name !== WizardStepsStake.STAKING;
+
 		closeModal(() => {
-			if (stakeProgressStep !== ProgressStepsStake.DONE && nonNullish(vault)) {
+			if (cancelled && stakeProgressStep !== ProgressStepsStake.DONE && nonNullish(vault)) {
 				trackEvent({
 					name: PLAUSIBLE_EVENTS.STAKE,
 					metadata: {
@@ -61,6 +65,7 @@
 
 			reset();
 		});
+	};
 </script>
 
 <TokenActionContext {token}>

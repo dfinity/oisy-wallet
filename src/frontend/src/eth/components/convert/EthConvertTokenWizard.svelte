@@ -15,7 +15,7 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
-	import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
+	import { isSendOutcomeUnknown, toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import {
 		ckErc20HelperContractAddress,
@@ -173,6 +173,13 @@
 				token: $sourceToken,
 				context: PLAUSIBLE_EVENT_CONTEXTS.CONVERT
 			});
+
+			// A transaction that may have reached the network is not offered again from the review:
+			// sent again, it would be signed with the next nonce, and both could execute.
+			if (isSendOutcomeUnknown(err)) {
+				close();
+				return;
+			}
 
 			back();
 		}

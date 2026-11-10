@@ -52,6 +52,7 @@ describe('btc wallet-connect.services', () => {
 		const mockListener = {
 			pair: vi.fn(),
 			approveSession: vi.fn(),
+			approvedNamespaces: vi.fn(),
 			rejectSession: vi.fn(),
 			attachHandlers: vi.fn(),
 			detachHandlers: vi.fn(),
@@ -89,12 +90,28 @@ describe('btc wallet-connect.services', () => {
 			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 		});
 
+		// The address of the key OISY signs with for `mockIdentity`, as the wallet loads it.
+		const identityAddress = (addressNetwork: typeof networks.bitcoin): string => {
+			const { address } = payments.p2wpkh({
+				pubkey: Buffer.from(
+					btcWalletConnectUtils.deriveBtcPublicKey({ principal: mockIdentity.getPrincipal() })
+				),
+				network: addressNetwork
+			});
+
+			assertNonNullish(address);
+
+			return address;
+		};
+
 		it('approves the request with the account address payload for the request chain', async () => {
+			const address = identityAddress(networks.bitcoin);
+
 			const result = await getAccountAddresses({
 				listener: mockListener,
 				request: mockRequest,
 				identity: mockIdentity,
-				addresses
+				addresses: new Map<NetworkId, OptionBtcAddress>([[BTC_MAINNET_NETWORK_ID, address]])
 			});
 
 			expect(result).toEqual({ success: true });
@@ -104,7 +121,7 @@ describe('btc wallet-connect.services', () => {
 				topic: mockRequest.topic,
 				message: [
 					{
-						address: mockBtcAddress,
+						address,
 						publicKey: expect.any(String),
 						path: "m/84'/0'/0'/0/0",
 						intention: 'payment'
@@ -116,6 +133,8 @@ describe('btc wallet-connect.services', () => {
 		});
 
 		it('advertises the testnet derivation path for a testnet chain request', async () => {
+			const address = identityAddress(networks.testnet);
+
 			const result = await getAccountAddresses({
 				listener: mockListener,
 				request: {
@@ -126,7 +145,7 @@ describe('btc wallet-connect.services', () => {
 					}
 				} as unknown as WalletKitTypes.SessionRequest,
 				identity: mockIdentity,
-				addresses: new Map<NetworkId, OptionBtcAddress>([[BTC_TESTNET_NETWORK_ID, mockBtcAddress]])
+				addresses: new Map<NetworkId, OptionBtcAddress>([[BTC_TESTNET_NETWORK_ID, address]])
 			});
 
 			expect(result).toEqual({ success: true });
@@ -136,7 +155,7 @@ describe('btc wallet-connect.services', () => {
 				topic: mockRequest.topic,
 				message: [
 					{
-						address: mockBtcAddress,
+						address,
 						publicKey: expect.any(String),
 						path: "m/84'/1'/0'/0/0",
 						intention: 'payment'
@@ -145,6 +164,48 @@ describe('btc wallet-connect.services', () => {
 			});
 
 			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
+		});
+
+		it('rejects without answering when the loaded address is not the address of the signing key', async () => {
+			const result = await getAccountAddresses({
+				listener: mockListener,
+				request: mockRequest,
+				identity: mockIdentity,
+				addresses
+			});
+
+			expect(result).toEqual({ success: false });
+
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				id: mockRequest.id,
+				topic: mockRequest.topic,
+				error: UNEXPECTED_ERROR
+			});
+
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.btc_address_not_signer }
+			});
+		});
+
+		it('rejects when the loaded address is the address of the signing key on another network', async () => {
+			const result = await getAccountAddresses({
+				listener: mockListener,
+				request: mockRequest,
+				identity: mockIdentity,
+				addresses: new Map<NetworkId, OptionBtcAddress>([
+					[BTC_MAINNET_NETWORK_ID, identityAddress(networks.testnet)]
+				])
+			});
+
+			expect(result).toEqual({ success: false });
+
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.btc_address_not_signer }
+			});
 		});
 
 		it('rejects when the requested chain has no loaded address', async () => {
@@ -868,6 +929,7 @@ describe('btc wallet-connect.services', () => {
 		const mockListener = {
 			pair: vi.fn(),
 			approveSession: vi.fn(),
+			approvedNamespaces: vi.fn(),
 			rejectSession: vi.fn(),
 			attachHandlers: vi.fn(),
 			detachHandlers: vi.fn(),
@@ -939,6 +1001,36 @@ describe('btc wallet-connect.services', () => {
 
 			expect(spyToastsError).toHaveBeenCalledWith({
 				msg: { text: en.wallet_connect.error.btc_non_mainnet_sign_not_supported }
+			});
+		});
+
+		it('rejects a request whose loaded address is not the address of the signing key without signing', async () => {
+			const result = await signPsbt({
+				listener: mockListener,
+				request: buildSignRequest({
+					chainId: mainnetChainId,
+					params: { psbt: buildOwnedPsbt(networks.bitcoin), broadcast: false }
+				}),
+				address: mockBtcAddress,
+				modalNext,
+				progress,
+				identity: mockIdentity
+			});
+
+			expect(result).toEqual({ success: false });
+
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				id: 456,
+				topic: 'sign-topic',
+				error: UNEXPECTED_ERROR
+			});
+
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
+			expect(bitcoinApi.getUtxosQuery).not.toHaveBeenCalled();
+
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.btc_address_not_signer }
 			});
 		});
 
@@ -1230,10 +1322,15 @@ describe('btc wallet-connect.services', () => {
 		const mockSignature = 'mock-base64-signature';
 		const mockRawSignature = new Uint8Array(64).fill(1);
 		const mockPublicKey = new Uint8Array(33).fill(2);
+		const { address: mockPublicKeyAddress } = payments.p2wpkh({
+			pubkey: Buffer.from(mockPublicKey),
+			network: networks.bitcoin
+		});
 
 		const mockListener = {
 			pair: vi.fn(),
 			approveSession: vi.fn(),
+			approvedNamespaces: vi.fn(),
 			rejectSession: vi.fn(),
 			attachHandlers: vi.fn(),
 			detachHandlers: vi.fn(),
@@ -1256,6 +1353,7 @@ describe('btc wallet-connect.services', () => {
 				id: 123,
 				topic: 'mock-topic',
 				params: {
+					chainId: BIP122_MAINNET_CHAIN_ID,
 					request: {
 						method: SESSION_REQUEST_BTC_SIGN_MESSAGE,
 						params
@@ -1264,7 +1362,7 @@ describe('btc wallet-connect.services', () => {
 			}) as WalletKitTypes.SessionRequest;
 
 		const createMockParams = (request = createMockRequest()) => ({
-			address: mockBtcAddress,
+			address: mockPublicKeyAddress,
 			modalNext: vi.fn(),
 			progress: vi.fn(),
 			identity: mockIdentity,
@@ -1370,7 +1468,7 @@ describe('btc wallet-connect.services', () => {
 			expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
 				topic: params.request.topic,
 				id: params.request.id,
-				message: { signature: mockSignature, address: mockBtcAddress }
+				message: { signature: mockSignature, address: mockPublicKeyAddress }
 			});
 			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
 			expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
@@ -1381,6 +1479,25 @@ describe('btc wallet-connect.services', () => {
 				duration: 2000
 			});
 			expect(spyToastsError).not.toHaveBeenCalled();
+		});
+
+		it('should reject the request without signing when the address is not the address of the signing key', async () => {
+			const params = createMockParams();
+
+			const result = await sign({ ...params, address: mockBtcAddress });
+
+			expect(result).toEqual({ success: false });
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				topic: params.request.topic,
+				id: params.request.id,
+				error: UNEXPECTED_ERROR
+			});
+			expect(spyToastsShow).not.toHaveBeenCalled();
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.wallet_connect.error.btc_address_not_signer }
+			});
 		});
 
 		it('should reject the request when signing fails', async () => {

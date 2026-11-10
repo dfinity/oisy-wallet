@@ -1,4 +1,5 @@
 import * as onramperEnv from '$env/rest/onramper.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as backendApi from '$lib/api/backend.api';
 import { OnramperSecretNotConfiguredError } from '$lib/canisters/errors';
 import BuyModalContent from '$lib/components/buy/BuyModalContent.svelte';
@@ -8,6 +9,7 @@ import {
 	PLAUSIBLE_EVENT_RESULT_STATUSES
 } from '$lib/enums/plausible';
 import * as analyticsServices from '$lib/services/analytics.services';
+import { token } from '$lib/stores/token.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
@@ -110,5 +112,41 @@ describe('BuyModalContent', () => {
 				})
 			)
 		);
+	});
+
+	describe('default token', () => {
+		beforeEach(() => {
+			vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => true);
+		});
+
+		afterEach(() => {
+			token.reset();
+		});
+
+		const widgetParams = async (findByTestId: (id: string) => Promise<HTMLElement>) => {
+			const iframe = await findByTestId(BUY_MODAL_ONRAMPER_IFRAME);
+
+			return new URL(iframe.getAttribute('src') ?? '').searchParams;
+		};
+
+		it('sends no default token when none is open', async () => {
+			token.reset();
+
+			const { findByTestId } = render(BuyModalContent);
+			const params = await widgetParams(findByTestId);
+
+			expect(params.has('defaultCrypto')).toBeFalsy();
+			expect(params.has('sell_defaultCrypto')).toBeFalsy();
+		});
+
+		it('sends the open token as the default of both tabs', async () => {
+			token.set(ICP_TOKEN);
+
+			const { findByTestId } = render(BuyModalContent);
+			const params = await widgetParams(findByTestId);
+
+			expect(params.get('defaultCrypto')).toBe(ICP_TOKEN.buy?.onramperId);
+			expect(params.get('sell_defaultCrypto')).toBe(ICP_TOKEN.buy?.onramperId);
+		});
 	});
 });
