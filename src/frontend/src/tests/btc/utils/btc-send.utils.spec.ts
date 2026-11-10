@@ -2,6 +2,7 @@ import { BtcBroadcastUnconfirmedError, BtcPrepareSendError } from '$btc/types/bt
 import {
 	convertNumberToSatoshis,
 	convertSatoshisToBtc,
+	isBtcSendLimitError,
 	isDefinitiveBtcBroadcastRefusal,
 	isInvalidUtxosFee,
 	isUnclearBtcBroadcastOutcome,
@@ -9,7 +10,9 @@ import {
 	mapUtxosFeeErrorToMessage
 } from '$btc/utils/btc-send.utils';
 import type { BtcBroadcastTransactionError } from '$declarations/backend/backend.did';
+import type { PaymentError } from '$declarations/signer/signer.did';
 import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
+import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -108,8 +111,27 @@ describe('BTC broadcast outcomes', () => {
 		{ InvalidUtxos: null }
 	];
 
+	// One per tier of the backend's limiter: a minute, an hour and a day.
+	const rateLimited: { variant: BtcBroadcastTransactionError; wait: string }[] = [
+		{
+			variant: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } },
+			wait: '1 minute'
+		},
+		{
+			variant: {
+				RateLimited: { max_calls: 20, window_ns: 3_600_000_000_000n, caller: mockPrincipal }
+			},
+			wait: '1 hour'
+		},
+		{
+			variant: {
+				RateLimited: { max_calls: 50, window_ns: 86_400_000_000_000n, caller: mockPrincipal }
+			},
+			wait: '1 day'
+		}
+	];
+
 	const refusedOtherwise: BtcBroadcastTransactionError[] = [
-		{ RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } },
 		{ InvalidDelegationChain: { msg: 'expired' } },
 		{ MalformedTransaction: null },
 		{ TransactionTooLarge: null },
@@ -126,7 +148,7 @@ describe('BTC broadcast outcomes', () => {
 	];
 
 	it('should cover every variant of the backend answer', () => {
-		expect(open.length + locked.length + refusedOtherwise.length).toBe(18);
+		expect(open.length + locked.length + 1 + refusedOtherwise.length).toBe(18);
 	});
 
 	describe.each(open)('the open answer %o', (variant) => {
@@ -142,12 +164,25 @@ describe('BTC broadcast outcomes', () => {
 		});
 	});
 
-	describe.each([...locked, ...refusedOtherwise])('the refusal %o', (variant) => {
-		it('should be a definitive refusal, and not unclear', () => {
-			expect(isDefinitiveBtcBroadcastRefusal(answer(variant))).toBeTruthy();
-			expect(isUnclearBtcBroadcastOutcome(answer(variant))).toBeFalsy();
-		});
-	});
+	describe.each([...locked, rateLimited[0].variant, ...refusedOtherwise])(
+		'the refusal %o',
+		(variant) => {
+			it('should be a definitive refusal, and not unclear', () => {
+				expect(isDefinitiveBtcBroadcastRefusal(answer(variant))).toBeTruthy();
+				expect(isUnclearBtcBroadcastOutcome(answer(variant))).toBeFalsy();
+			});
+		}
+	);
+
+	it.each(rateLimited)(
+		'should say to wait $wait after a rate limit, and count it as a limit',
+		({ variant, wait }) => {
+			expect(mapBtcBroadcastErrorToMessage({ err: answer(variant), i18n: en })).toBe(
+				en.send.error.btc_send_rate_limited.replace('$duration', wait)
+			);
+			expect(isBtcSendLimitError(answer(variant))).toBeTruthy();
+		}
+	);
 
 	it.each(locked)('should say the funds are locked for %o', (variant) => {
 		expect(mapBtcBroadcastErrorToMessage({ err: answer(variant), i18n: en })).toBe(
@@ -159,11 +194,19 @@ describe('BTC broadcast outcomes', () => {
 		expect(mapBtcBroadcastErrorToMessage({ err: answer(variant), i18n: en })).toBeUndefined();
 	});
 
+	it.each([...open, ...locked, ...refusedOtherwise])(
+		'should not count %o as a limit',
+		(variant) => {
+			expect(isBtcSendLimitError(answer(variant))).toBeFalsy();
+		}
+	);
+
 	it('should read a broadcast with no typed answer as unclear', () => {
 		const err = new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') });
 
 		expect(isUnclearBtcBroadcastOutcome(err)).toBeTruthy();
 		expect(isDefinitiveBtcBroadcastRefusal(err)).toBeFalsy();
+		expect(isBtcSendLimitError(err)).toBeFalsy();
 		expect(mapBtcBroadcastErrorToMessage({ err, i18n: en })).toBe(
 			en.send.error.btc_transaction_unconfirmed
 		);
@@ -177,5 +220,33 @@ describe('BTC broadcast outcomes', () => {
 		expect(isUnclearBtcBroadcastOutcome(err)).toBeFalsy();
 		expect(isDefinitiveBtcBroadcastRefusal(err)).toBeFalsy();
 		expect(mapBtcBroadcastErrorToMessage({ err, i18n: en })).toBeUndefined();
+	});
+});
+
+describe('BTC signing payment errors', () => {
+	const ledger = mockPrincipal;
+
+	it('should tell a spent signing approval to sign in again, and count it as a limit', () => {
+		const err = new SignerCanisterPaymentError({
+			LedgerWithdrawFromError: { ledger, error: { InsufficientAllowance: { allowance: 10n } } }
+		});
+
+		expect(mapBtcBroadcastErrorToMessage({ err, i18n: en })).toBe(
+			en.send.error.btc_signing_allowance_spent
+		);
+		expect(isBtcSendLimitError(err)).toBeTruthy();
+	});
+
+	// The backend's own cycles running low, or any other payment failure: a sign-in does not fix it.
+	it.each<PaymentError>([
+		{ LedgerWithdrawFromError: { ledger, error: { InsufficientFunds: { balance: 10n } } } },
+		{ LedgerWithdrawFromError: { ledger, error: { TemporarilyUnavailable: null } } },
+		{ InsufficientFunds: { needed: 20n, available: 10n } },
+		{ UnsupportedPaymentType: null }
+	])('should leave %o to the caller', (paymentError) => {
+		const err = new SignerCanisterPaymentError(paymentError);
+
+		expect(mapBtcBroadcastErrorToMessage({ err, i18n: en })).toBeUndefined();
+		expect(isBtcSendLimitError(err)).toBeFalsy();
 	});
 });

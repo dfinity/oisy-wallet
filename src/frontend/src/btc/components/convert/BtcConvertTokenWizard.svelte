@@ -13,6 +13,7 @@
 	} from '$btc/stores/utxos-fee.store';
 	import {
 		isUnclearBtcBroadcastOutcome,
+		isBtcSendLimitError,
 		mapBtcBroadcastErrorToMessage
 	} from '$btc/utils/btc-send.utils';
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
@@ -168,7 +169,7 @@
 					text:
 						mapBtcBroadcastErrorToMessage({ err, i18n: $i18n }) ?? $i18n.convert.error.unexpected
 				},
-				err
+				...(isBtcSendLimitError(err) ? {} : { err })
 			});
 
 			trackEvent({

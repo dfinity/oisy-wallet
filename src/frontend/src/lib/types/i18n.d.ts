@@ -880,6 +880,8 @@ interface I18nSend {
 		ethereum_transaction_not_sent: string;
 		ethereum_transaction_unconfirmed: string;
 		btc_transaction_unconfirmed: string;
+		btc_send_rate_limited: string;
+		btc_signing_allowance_spent: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
 		solana_insufficient_funds: string;

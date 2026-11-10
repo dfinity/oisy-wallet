@@ -918,6 +918,23 @@ Decided in PR 8c:
   and close after an unclear outcome instead of returning to a form that offers the full amount
   again.
 
+Decided in 8e (the limit messages):
+
+- **A rate-limited broadcast says how long to wait.** `mapBtcBroadcastErrorToMessage` reads the
+  window of the tier that refused it (a minute, an hour or a day) from `RateLimited` and formats it
+  with `secondsToDuration`, as the tips do.
+- **A spent signing approval says to sign in again.** `SignerCanisterPaymentError` keeps its
+  variant. With the backend paying (`PatronPaysIcrc2Cycles`), a spent approval is
+  `LedgerWithdrawFromError` with `InsufficientAllowance`, which `allow_signing` renews at the next
+  sign-in. The ledger's `InsufficientFunds` is the backend's own balance, so it keeps the flow's
+  own message.
+- **These toasts carry no detail.** Nothing was sent and the message says what to do, so
+  `isBtcSendLimitError` leaves out the error's English text, which the toast appends otherwise.
+- **`btc_get_spendable_utxos` keeps a generic message.** Its limit (15 a minute) is out of reach
+  while the broadcast allows 5, and closing the form resets the stores, so the next one reloads.
+  The pre-send check's `PendingTransactionsNotAvailable` now shows
+  `send.assertion.pending_transactions_not_available` instead of the generic failure.
+
 ### Frontend: UTXO loading
 
 `AllUtxosLoader.svelte` and `loadBtcPendingSentTransactions` read from `btc_get_spendable_utxos`
@@ -1092,6 +1109,8 @@ Every PR is safe on its own.
    - **8c:** Liquidium supply and repay, and removing `viaBackend`.
    - **8d** (follow-up, before PR 10): settling BTC rows whose deposit never landed, in the Chain
      Fusion and Liquidium pollers (open question 5).
+   - **8e** (follow-up, before PR 10): a clear message when a send hits a backend limit: a
+     rate-limited broadcast, or a spent signing approval.
 
    Together they do the following:
    - `beforeBroadcast` and `isDefinitiveBtcBroadcastRefusal` are added. The Chain Fusion and NEAR

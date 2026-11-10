@@ -16,6 +16,7 @@
 	import {
 		convertSatoshisToBtc,
 		isUnclearBtcBroadcastOutcome,
+		isBtcSendLimitError,
 		mapBtcBroadcastErrorToMessage
 	} from '$btc/utils/btc-send.utils';
 	import { invalidSendAmount } from '$btc/utils/input.utils';
@@ -247,7 +248,7 @@
 				msg: {
 					text: mapBtcBroadcastErrorToMessage({ err, i18n: $i18n }) ?? $i18n.send.error.unexpected
 				},
-				err
+				...(isBtcSendLimitError(err) ? {} : { err })
 			});
 
 			if (isUnclearBtcBroadcastOutcome(err)) {

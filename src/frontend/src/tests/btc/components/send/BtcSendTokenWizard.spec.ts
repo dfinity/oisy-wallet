@@ -15,6 +15,7 @@ import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as backendApi from '$lib/api/backend.api';
 import * as signerApi from '$lib/api/signer.api';
 import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
+import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import * as addressesStore from '$lib/derived/address.derived';
 import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -25,7 +26,7 @@ import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
@@ -197,6 +198,39 @@ describe('BtcSendTokenWizard', () => {
 			expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.send.assertion.btc_utxo_locked },
 				err
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		// Nothing was sent, and the message says what to do, so the toast carries no English detail.
+		it('should go back to the form, saying how long to wait, after a rate-limited broadcast', async () => {
+			const err = new BtcBroadcastTransactionCanisterError(
+				{ RateLimited: { max_calls: 20, window_ns: 3_600_000_000_000n, caller: mockPrincipal } },
+				'Rate limit exceeded. Maximum of 20 calls allowed every 3600 seconds.'
+			);
+
+			const toastsErrorSpy = await sendAndFail(err);
+
+			expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.error.btc_send_rate_limited.replace('$duration', '1 hour') }
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		it('should go back to the form, saying to sign in again, after a spent signing approval', async () => {
+			const err = new SignerCanisterPaymentError({
+				LedgerWithdrawFromError: {
+					ledger: mockPrincipal,
+					error: { InsufficientAllowance: { allowance: 10n } }
+				}
+			});
+
+			const toastsErrorSpy = await sendAndFail(err);
+
+			expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.error.btc_signing_allowance_spent }
 			});
 			expect(onBack).toHaveBeenCalledOnce();
 			expect(onClose).not.toHaveBeenCalled();
