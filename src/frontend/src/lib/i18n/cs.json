@@ -1522,7 +1522,8 @@
 			"data_is_incompleted": "Přijatá data jsou neúplná. Chybí některé povinné údaje.",
 			"amount_does_not_match": "Částka v přijatých datech neodpovídá očekávané hodnotě.",
 			"recipient_address_is_not_valid": "Adresa příjemce v přijatých datech není platná Ethereum adresa.",
-			"token_address_mismatch": "Přijatá data odkazují na jiný token, než se očekávalo."
+			"token_address_mismatch": "Přijatá data odkazují na jiný token, než se očekávalo.",
+			"btc_reservation_rate_limited": ""
 		},
 		"alt": {
 			"pay": "Dialog s informacemi o platbě",

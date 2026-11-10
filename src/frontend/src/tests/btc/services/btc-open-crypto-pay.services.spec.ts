@@ -15,6 +15,7 @@ import * as backendApi from '$lib/api/backend.api';
 import * as addressDerived from '$lib/derived/address.derived';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
+import { i18n } from '$lib/stores/i18n.store';
 import type {
 	PayableToken,
 	PayableTokenWithConvertedAmount,
@@ -22,11 +23,12 @@ import type {
 } from '$lib/types/open-crypto-pay';
 import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import type { BitcoinDid } from '@icp-sdk/canisters/ckbtc';
 import type { Psbt } from 'bitcoinjs-lib';
-import { readable } from 'svelte/store';
+import { get, readable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/rest/open-crypto-pay.rest', () => ({
@@ -426,11 +428,7 @@ describe('btc-open-crypto-pay.services', () => {
 		const mockValidatedData: ValidatedBtcPaymentData = {
 			destination: 'bc1qbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
 			satoshisAmount: 100000n,
-			utxosFee: {
-				feeSatoshis: 1000n,
-				feeRateMiliSatoshisPerVByte: 4000n,
-				utxos: [{ value: 200000n }] as unknown as UtxosFee['utxos']
-			}
+			utxosFee: mockUtxosFee
 		};
 
 		const params = {
@@ -538,7 +536,9 @@ describe('btc-open-crypto-pay.services', () => {
 				}
 			});
 
-			await expect(payBtc(params)).rejects.toThrow('The payment could not be reserved');
+			await expect(payBtc(params)).rejects.toThrow(
+				get(i18n).pay.error.btc_reservation_rate_limited
+			);
 
 			expect(fetchOpenCryptoPay).not.toHaveBeenCalled();
 			expect(payStepCallOrder()).toBeUndefined();
@@ -565,7 +565,7 @@ describe('btc-open-crypto-pay.services', () => {
 		it('should build nothing when the wallet address is not loaded', async () => {
 			vi.spyOn(addressDerived, 'btcAddressMainnet', 'get').mockReturnValue(readable(null));
 
-			await expect(payBtc(params)).rejects.toThrow();
+			await expect(payBtc(params)).rejects.toThrow(get(i18n).send.assertion.address_unknown);
 
 			expect(buildBtcSendPsbtSpy).not.toHaveBeenCalled();
 			expect(signAndFinalizeBtcPsbtSpy).not.toHaveBeenCalled();

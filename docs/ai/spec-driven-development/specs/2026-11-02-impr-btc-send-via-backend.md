@@ -1004,7 +1004,9 @@ Decided in PR 9:
 - **After a failed hand-off** the payment shows as not confirmed, and its inputs stay reserved until
   they are spent, or until the backend's one-hour age limit frees them if they never are.
 - **The 38-input cap already applies:** `calculateBtcFee` selects with `prepareBtcSend`.
-- **No new message.** The wizard shows each error's own text, as it does for the other tokens.
+- **One new message**, `pay.error.btc_reservation_rate_limited`, for a rate-limited reservation. A
+  missing wallet address reuses `send.assertion.address_unknown`. Every other error keeps its own
+  text, as for the other tokens.
 
 ### What stays in CFS
 

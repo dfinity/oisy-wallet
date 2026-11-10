@@ -1522,7 +1522,8 @@
 			"data_is_incompleted": "受信したデータが不完全です。一部の必須項目が不足しています",
 			"amount_does_not_match": "受信したデータの金額が予想される値と一致しません。",
 			"recipient_address_is_not_valid": "受信したデータの受取アドレスが有効なEthereumアドレスではありません。",
-			"token_address_mismatch": "受信したデータが予想と異なるトークンを参照しています。"
+			"token_address_mismatch": "受信したデータが予想と異なるトークンを参照しています。",
+			"btc_reservation_rate_limited": ""
 		},
 		"alt": {
 			"pay": "支払い方法についての情報ダイアログ",

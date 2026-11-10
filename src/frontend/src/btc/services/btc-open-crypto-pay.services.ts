@@ -11,6 +11,7 @@ import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { btcAddressMainnet } from '$lib/derived/address.derived';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
+import { i18n } from '$lib/stores/i18n.store';
 import type { PayableToken, PayParams, ValidatedBtcPaymentData } from '$lib/types/open-crypto-pay';
 import { consoleError } from '$lib/utils/console.utils';
 import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
@@ -70,7 +71,7 @@ const payBtcWithPrehash = async ({
 	const address = get(btcAddressMainnet);
 
 	if (isNullish(address)) {
-		throw new Error('The BTC address to return the change to is not loaded');
+		throw new Error(get(i18n).send.assertion.address_unknown);
 	}
 
 	const network = token.network.env;
@@ -103,9 +104,7 @@ const payBtcWithPrehash = async ({
 
 	// The canister wrapper reports a rate limit as a success, but nothing was reserved.
 	if (nonNullish(rateLimitInfo)) {
-		throw new Error(
-			'The payment could not be reserved: too many BTC payments in the last minute. Wait a minute and try again.'
-		);
+		throw new Error(get(i18n).pay.error.btc_reservation_rate_limited);
 	}
 
 	// From here an error no longer tells whether OpenCryptoPay received the payment.
