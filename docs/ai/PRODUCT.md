@@ -1091,6 +1091,8 @@ NEAR Intents does: 1Click signs a minimum receive amount derived from the slippa
 
 ### 1Sec restricted to the unwrapping direction
 
+1Sec is switched off as a swap provider: `ONESEC_SWAP_ENABLED` in `src/frontend/src/env/rest/onesec.env.ts` is `false`, so the swap form asks 1Sec for no offer, in either direction. Transfers already started are still tracked in Active transactions, and the Help page keeps its 1Sec explorer links. The rest of this section describes the rule that applies while the flag is on.
+
 1Sec (OneSec) bridges tokens between ICP and Ethereum, Base and Arbitrum. OISY offers only the way back out of a bridged position, never the way in: a user who already holds a bridged balance keeps a working exit, and nobody acquires a new one through OISY.
 
 Which leg that is depends on the token, because 1Sec wraps in both directions. Its config records the chain each token is native to, and OISY offers only the leg that returns a token to that chain:
