@@ -380,7 +380,7 @@ Every token belongs to one asset type, and the token list can be filtered by it:
 
 **Compute** holds the tokens that pay for computation on the Internet Computer. Today that is only **TCYCLES**, which used to sit under Stablecoins. OISY shows it as **ICP Cycles (Trillion)** rather than the ledger's own name, "Trillion Cycles", which does not say which network's cycles they are. At rest its pill looks like its neighbours. What sets it apart is a brand-blue arc that runs two laps around its border when the pill appears and again each time the pointer enters it, then goes away. Selected, it looks like every other selected pill, so which filter is on always reads the same. It runs a set number of laps and not a loop, so the pill does not keep moving above a list people open every day; with reduced motion turned on in the system, there is no arc at all.
 
-TCYCLES is not enabled by default, so for most users Compute opens on the empty state, which names the supported token they can enable. It is deliberately not switched on by default: a default-enabled token is not stored in the user's profile, so it could never be withdrawn again without hiding it from users who hold a balance. Other cycles-backed tokens, such as XTC, stay under Crypto.
+TCYCLES is a [suggested](#curated-tokens-vs-metadata-only-tokens) token, so Compute lists it for every user who has not switched it off. A user who switched it off sees the empty state instead, which names the supported token they can enable. Other cycles-backed tokens, such as XTC, stay under Crypto.
 
 ---
 
