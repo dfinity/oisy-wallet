@@ -493,7 +493,10 @@ describe('token.utils', () => {
 				// Same intent as above for the 1Sec-bridged USDT ICRC ledger on ICP.
 				description: '1Sec USDT ICRC ledger on ICP',
 				token: { ...mockValidIcToken, ledgerCanisterId: 'ij33n-oiaaa-aaaar-qbooa-cai' }
-			}
+			},
+			{ description: 'Deprecated ERC20 token ICP on Ethereum', token: ICP_ETH_TOKEN },
+			{ description: 'Deprecated ERC20 token ICP on Arbitrum', token: ICP_ARB_TOKEN },
+			{ description: 'Deprecated ERC20 token ICP on Base', token: ICP_BASE_TOKEN }
 		])(
 			'Every other random token is only enabled if the user enables it - $description',
 			({ token }) => {
@@ -583,9 +586,6 @@ describe('token.utils', () => {
 			},
 			{ description: 'Suggested ERC20 token USDC', token: USDC_TOKEN },
 			{ description: 'Suggested ERC20 token USDT', token: USDT_TOKEN },
-			{ description: 'Suggested ERC20 token ICP on Ethereum', token: ICP_ETH_TOKEN },
-			{ description: 'Suggested ERC20 token ICP on Arbitrum', token: ICP_ARB_TOKEN },
-			{ description: 'Suggested ERC20 token ICP on Base', token: ICP_BASE_TOKEN },
 			{ description: 'Suggested ERC20 token USDC on Arbitrum', token: USDC_ARBITRUM_TOKEN },
 			{ description: 'Suggested ERC20 token USDT0 on Arbitrum', token: USDT_ARBITRUM_TOKEN },
 			{ description: 'Suggested ERC20 token USDC on Base', token: USDC_BASE_TOKEN },
@@ -629,7 +629,7 @@ describe('token.utils', () => {
 	describe('isTokenSuggested', () => {
 		it.each([
 			{ description: 'ERC20 token USDC', token: USDC_TOKEN },
-			{ description: 'ERC20 token ICP on Base', token: ICP_BASE_TOKEN },
+			{ description: 'ERC20 token USDC on Base', token: USDC_BASE_TOKEN },
 			{ description: 'SPL token USDC on Solana', token: USDC_SOL_TOKEN }
 		])('should be true for the suggested $description', ({ token }) => {
 			expect(isTokenSuggested(token)).toBeTruthy();
@@ -650,7 +650,8 @@ describe('token.utils', () => {
 		it.each([
 			{ description: 'ERC20 token LINK', token: LINK_TOKEN },
 			{ description: 'Ethereum token', token: ETHEREUM_TOKEN },
-			{ description: 'ICRC token that is not suggested', token: mockValidIcToken }
+			{ description: 'ICRC token that is not suggested', token: mockValidIcToken },
+			{ description: 'deprecated ERC20 token ICP on Base', token: ICP_BASE_TOKEN }
 		])('should be false for the $description', ({ token }) => {
 			expect(isTokenSuggested(token)).toBeFalsy();
 		});

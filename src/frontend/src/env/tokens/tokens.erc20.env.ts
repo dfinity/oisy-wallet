@@ -168,9 +168,6 @@ export const ERC20_TWIN_TOKENS_IDS: TokenId[] = ERC20_TWIN_TOKENS.map(({ id }) =
 export const ERC20_SUGGESTED_TOKENS = [
 	USDT_TOKEN,
 	USDC_TOKEN,
-	ICP_TOKEN,
-	ICP_ARBITRUM_TOKEN,
-	ICP_BASE_TOKEN,
 	USDC_ARBITRUM_TOKEN,
 	USDT_ARBITRUM_TOKEN,
 	USDC_BASE_TOKEN,
@@ -182,4 +179,8 @@ export const ERC20_SUGGESTED_TOKENS = [
 
 // Formerly suggested tokens: shown only to users whose token list has them. At sign-in, a user who
 // holds a balance in one but has no entry for it gets it saved as enabled.
-export const ERC20_DEPRECATED_TOKENS: RequiredAdditionalErc20Token[] = [];
+export const ERC20_DEPRECATED_TOKENS: RequiredAdditionalErc20Token[] = [
+	ICP_TOKEN,
+	ICP_ARBITRUM_TOKEN,
+	ICP_BASE_TOKEN
+];
