@@ -69,10 +69,12 @@
 
 	const sendMessage = async ({
 		messageText,
-		context
+		context,
+		typedByUser
 	}: {
 		messageText?: string;
 		context?: string;
+		typedByUser?: boolean;
 	}) => {
 		if (isNullish($authIdentity)) {
 			return;
@@ -81,7 +83,7 @@
 		if (notEmptyString(messageText)) {
 			aiAssistantStore.appendMessage({
 				role: 'user',
-				data: { text: messageText, context }
+				data: { text: messageText, context, ...(typedByUser === true && { typedByUser }) }
 			});
 		}
 
@@ -103,7 +105,8 @@
 				data:
 					(tool?.calls ?? []).length > 0 && (tool?.results ?? []).length > 0
 						? {
-								tool
+								tool,
+								...(notEmptyString(text) && { text })
 							}
 						: {
 								text: isNullishOrEmpty(text) ? $i18n.ai_assistant.errors.no_response : text,
@@ -144,7 +147,7 @@
 		const nextMessage = userInput;
 		userInput = '';
 
-		await sendMessage({ messageText: nextMessage });
+		await sendMessage({ messageText: nextMessage, typedByUser: true });
 	};
 </script>
 

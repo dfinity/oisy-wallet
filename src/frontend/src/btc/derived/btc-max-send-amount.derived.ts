@@ -2,7 +2,7 @@ import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import { btcOutputVSize } from '$btc/utils/btc-psbt.utils';
-import { calculateMaxSpendableAmount } from '$btc/utils/btc-utxos.utils';
+import { btcSendMaxInputs, calculateMaxSpendableAmount } from '$btc/utils/btc-utxos.utils';
 import { getPendingTransactionUtxoOutpoints } from '$icp/utils/btc.utils';
 import type { OptionString } from '$lib/types/string';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -53,7 +53,8 @@ export const initBtcMaxSendAmount = ({
 				utxos,
 				pendingUtxoOutpoints,
 				recipientOutputVSize: btcOutputVSize({ address: destination }),
-				feeRateMiliSatoshisPerVByte
+				feeRateMiliSatoshisPerVByte,
+				maxInputs: btcSendMaxInputs()
 			});
 		}
 	);

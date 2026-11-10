@@ -44,9 +44,13 @@
 		currentStep = undefined;
 	};
 
-	const close = () =>
+	const close = () => {
+		// The unstaking step disables every close the user has (`disablePointerEvents`), so a close
+		// there comes from the wizard: a send that ended, which it tracks itself, never a cancellation.
+		const cancelled = currentStep?.name !== WizardStepsUnstake.UNSTAKING;
+
 		closeModal(() => {
-			if (unstakeProgressStep !== ProgressStepsUnstake.DONE && nonNullish(vault)) {
+			if (cancelled && unstakeProgressStep !== ProgressStepsUnstake.DONE && nonNullish(vault)) {
 				trackEvent({
 					name: PLAUSIBLE_EVENTS.UNSTAKE,
 					metadata: {
@@ -62,6 +66,7 @@
 
 			reset();
 		});
+	};
 </script>
 
 <TokenActionContext customSendBalance={totalStaked} {token}>

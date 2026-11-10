@@ -1,14 +1,19 @@
-use ic_cdk::{api::msg_caller, query, update};
+use std::collections::BTreeSet;
+
+use ic_cdk::{
+    api::{msg_caller, time},
+    query, update,
+};
 use shared::types::{exchange::ExchangeRate, token_id::TokenId};
 
 use crate::{
     exchange::{
-        custom_tokens_to_mark, fetch_and_update_prices, is_exchange_rate_refresh_enabled,
-        note_rate_request, priceable_tokens_for_caller, release_refresh_lock, snapshot_and_stale,
+        fetch_and_update_prices, is_exchange_rate_refresh_enabled, note_rate_request,
+        priceable_tokens_for_caller, queue_for_next_refresh, record_token_activity,
+        release_refresh_lock, snapshot_and_stale, take_queued_for_refresh,
         try_acquire_refresh_lock,
     },
     state::{mutate_api_keys, read_state},
-    token,
     types::{StoredPrincipal, StoredTokenId},
     utils::guards::{caller_is_controller, caller_is_not_anonymous},
 };
@@ -20,8 +25,9 @@ use crate::{
 /// - the caller's custom tokens, filtered to variants the configured providers can actually price
 ///   (testnets, NFTs and ERC-4626 vaults are excluded).
 ///
-/// The endpoint also re-marks the returned tokens as active so the
-/// background refresh timer keeps them warm. If any cached price is
+/// While the backend price refresh is on, the endpoint also records the
+/// caller's custom tokens as active so the background refresh timer keeps
+/// them warm (see [`record_token_activity`]). If any cached price is
 /// missing or older than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`]
 /// seconds, the endpoint kicks off a refresh for that subset **in the
 /// background** (via `ic_cdk::futures::spawn_migratory`) and returns the current cache
@@ -42,50 +48,66 @@ use crate::{
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
-    let caller = StoredPrincipal(msg_caller());
+    let caller = msg_caller();
 
     // Signal that a caller wants rates, so the recurring timer keeps the
     // always-on native tokens warm (see `should_refresh_natives`).
     note_rate_request();
 
-    let tokens = priceable_tokens_for_caller(caller);
+    let tokens = priceable_tokens_for_caller(StoredPrincipal(caller));
 
     if tokens.is_empty() {
         return Vec::new();
     }
 
-    let tokens_to_mark = custom_tokens_to_mark(&tokens);
-    if !tokens_to_mark.is_empty() {
-        token::mark_tokens_active(&tokens_to_mark);
+    let token_ids: Vec<TokenId> = tokens.iter().map(|stored| stored.0.clone()).collect();
+    let not_recorded = record_token_activity(caller, &token_ids, time());
+
+    // A refresh started from here sends outcalls on the caller's behalf, so it
+    // is held to the same per-caller limit as recording activity. The recurring
+    // refresh covers the recorded tokens either way.
+    let (snapshot, stale) = snapshot_and_stale(tokens);
+    let Some(not_recorded) = not_recorded else {
+        return snapshot;
+    };
+    if stale.is_empty() {
+        return snapshot;
     }
 
-    let (snapshot, stale) = snapshot_and_stale(tokens);
-    let refresh_lock = if stale.is_empty() || !is_exchange_rate_refresh_enabled() {
-        None
-    } else {
-        try_acquire_refresh_lock()
+    // We share the in-flight lock with the timer-driven refresh: if a refresh
+    // is already running (timer or another caller), this call doesn't spawn its
+    // own. This deduplicates outcalls under concurrent load (e.g. many users
+    // calling on a cold cache). The refresh in flight covers only the tokens
+    // `token_activity` holds, so the stale ones it did not take are queued for
+    // the next refresh.
+    let Some(lock) = try_acquire_refresh_lock() else {
+        let not_recorded: BTreeSet<StoredTokenId> = not_recorded.into_iter().collect();
+        queue_for_next_refresh(
+            stale
+                .into_iter()
+                .filter(|token_id| not_recorded.contains(token_id)),
+        );
+        return snapshot;
     };
 
-    if let Some(lock) = refresh_lock {
-        // Background-spawn the refresh so the response isn't gated on the
-        // outcall round-trip. The 60s recurring refresh will also pick these
-        // up; this spawn just shortens the convergence window for tokens the
-        // recurring refresh hasn't gotten to yet.
-        //
-        // We share the in-flight lock with the timer-driven refresh: if a
-        // refresh is already running (timer or another caller), this call
-        // doesn't spawn its own — the in-flight one will write the cache,
-        // and the next call will pick up the fresh values. This deduplicates
-        // outcalls under concurrent load (e.g. many users calling on a cold
-        // cache).
-        ic_cdk::futures::spawn_migratory(async move {
-            let outcome = fetch_and_update_prices(&stale).await;
-            release_refresh_lock(lock);
-            if let Err(err) = outcome {
-                ic_cdk::println!("get_exchange_rates background refresh failed: {err:?}");
-            }
-        });
-    }
+    // Holding the lock, this refresh also takes the tokens queued by calls that
+    // found it held, so they need not wait for the recurring refresh.
+    let mut to_fetch = stale;
+    to_fetch.extend(snapshot_and_stale(take_queued_for_refresh()).1);
+    to_fetch.sort_unstable();
+    to_fetch.dedup();
+
+    // Background-spawn the refresh so the response isn't gated on the outcall
+    // round-trip. The 60s recurring refresh will also pick up the recorded
+    // tokens; this spawn just shortens the convergence window for tokens the
+    // recurring refresh hasn't gotten to yet.
+    ic_cdk::futures::spawn_migratory(async move {
+        let outcome = fetch_and_update_prices(&to_fetch).await;
+        release_refresh_lock(lock);
+        if let Err(err) = outcome {
+            ic_cdk::println!("get_exchange_rates background refresh failed: {err:?}");
+        }
+    });
 
     snapshot
 }

@@ -1,4 +1,8 @@
 import { sendBtc } from '$btc/services/btc-send.services';
+import {
+	isDefinitiveBtcBroadcastRefusal,
+	isUnclearBtcBroadcastOutcome
+} from '$btc/utils/btc-send.utils';
 import type {
 	ActiveUserTransactionData,
 	ActiveUserTransactionRef,
@@ -50,6 +54,7 @@ import {
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
 import {
 	ICP_SWAP_POOL_FEE,
+	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_QUOTE_TIMEOUT_MS,
 	SWAP_SIDE,
 	VELORA_GAS_LIMIT_BUFFER_PERCENT
@@ -70,7 +75,10 @@ import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { xrpSwapProviders } from '$lib/providers/xrp-swap.providers';
-import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
+import {
+	createActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
 import { submitNearIntentsDepositTx } from '$lib/services/near-intents.services';
 import {
@@ -93,7 +101,7 @@ import {
 } from '$lib/types/near-intents';
 import type { NetworkId } from '$lib/types/network';
 import type { OisyTradeQuote } from '$lib/types/oisy-trade-swap';
-import type { Amount } from '$lib/types/send';
+import type { Amount, OptionAmount } from '$lib/types/send';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -934,6 +942,7 @@ const executeNearIntentsSwap = async ({
 	destinationToken,
 	swapAmount,
 	swapDetails,
+	slippageValue,
 	sendTransaction,
 	enableDestinationToken
 }: {
@@ -943,6 +952,7 @@ const executeNearIntentsSwap = async ({
 	destinationToken: Token;
 	swapAmount: Amount;
 	swapDetails: NearIntentsQuoteResponse;
+	slippageValue: OptionAmount;
 	// `registerSwap` creates the swap's AUT row. A transport whose send is irreversible
 	// the moment it is broadcast (BTC) must invoke it from its broadcast callback, so the
 	// row exists even if any later step of the send throws (the `fetchChainFusionBtcSwap`
@@ -956,10 +966,17 @@ const executeNearIntentsSwap = async ({
 	// (XRP): it describes the swap's AUT row, with the payment's source address and poll keys
 	// added, for the transport to create at that point. Taking it marks the swap as registered,
 	// so no second row is created after the send.
+	//
+	// `openSwap` is for a transport that knows its transaction once it is signed (BTC through the
+	// backend): it creates the swap's row before the broadcast, rejecting if the write fails, so
+	// nothing goes out untracked, and returns the row's id, for the transport to delete if the
+	// broadcast is refused outright. `undefined` for a swap it cannot track, as `registerSwap`
+	// skips one. It also marks the swap as registered.
 	sendTransaction: (params: {
 		amount: bigint;
 		depositAddress: string;
 		registerSwap: () => Promise<void>;
+		openSwap: () => Promise<string | undefined>;
 		recordPollRefs: (pollRefs: ActiveUserTransactionRef[]) => void;
 		swapRecord: (params: {
 			sourceAddress: string;
@@ -990,6 +1007,18 @@ const executeNearIntentsSwap = async ({
 		throwSwapError({
 			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED,
 			message: get(i18n).swap.error.near_intents_quote_expired
+		});
+	}
+
+	// 1Click derives the signed minimum from the tolerance the quote was requested with, so the quote
+	// must carry the max slippage the review showed, converted as the request converts it.
+	if (
+		swapDetails.quoteRequest.slippageTolerance !==
+		slippagePercentToBasisPoints(slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE)
+	) {
+		throwSwapError({
+			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE,
+			message: get(i18n).swap.error.near_intents_quote_slippage
 		});
 	}
 
@@ -1046,6 +1075,38 @@ const executeNearIntentsSwap = async ({
 		}
 	};
 
+	const openSwap = async (): Promise<string | undefined> => {
+		swapRegistered = true;
+
+		const data = toNearIntentsData({
+			sourceToken,
+			destinationToken,
+			amount: parsedSwapAmount
+		});
+
+		if (isNullish(data)) {
+			return;
+		}
+
+		const id = crypto.randomUUID();
+
+		try {
+			await createActiveUserTransaction({
+				identity,
+				id,
+				data,
+				externalRefs: swapRefsWith([])
+			});
+		} catch (err: unknown) {
+			// The backend may have committed it if only its answer was lost.
+			await deleteUnbroadcastActiveUserTransaction({ identity, id });
+
+			throw err;
+		}
+
+		return id;
+	};
+
 	const swapRecord = ({
 		sourceAddress,
 		pollRefs
@@ -1078,6 +1139,7 @@ const executeNearIntentsSwap = async ({
 		amount: parsedSwapAmount,
 		depositAddress,
 		registerSwap,
+		openSwap,
 		recordPollRefs: (refs) => {
 			broadcastPollRefs = refs;
 		},
@@ -1120,7 +1182,8 @@ export const fetchNearIntentsEvmSwap = async ({
 	gas,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
-	swapDetails
+	swapDetails,
+	slippageValue
 }: SwapNearIntentsEvmParams): Promise<void> => {
 	await executeNearIntentsSwap({
 		identity,
@@ -1129,6 +1192,7 @@ export const fetchNearIntentsEvmSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
+		slippageValue,
 		sendTransaction: async ({ amount, depositAddress, recordPollRefs }) => {
 			const { hash, nonce } = await sendEvm({
 				from: userAddress,
@@ -1163,7 +1227,8 @@ export const fetchNearIntentsSolSwap = async ({
 	destinationToken,
 	swapAmount,
 	userAddress,
-	swapDetails
+	swapDetails,
+	slippageValue
 }: SwapNearIntentsSolParams): Promise<void> => {
 	await executeNearIntentsSwap({
 		identity,
@@ -1172,6 +1237,7 @@ export const fetchNearIntentsSolSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
+		slippageValue,
 		sendTransaction: async ({ amount, depositAddress }) =>
 			await sendSol({
 				identity,
@@ -1192,6 +1258,7 @@ export const fetchNearIntentsBtcSwap = async ({
 	destinationToken,
 	swapAmount,
 	swapDetails,
+	slippageValue,
 	userAddress,
 	network,
 	utxosFee
@@ -1203,10 +1270,14 @@ export const fetchNearIntentsBtcSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
+		slippageValue,
 		// `sendBtc` converts the display amount to satoshis itself, so it takes the raw
 		// `swapAmount` rather than the parsed base-unit amount the core hands over.
-		sendTransaction: async ({ depositAddress, registerSwap }) => {
+		sendTransaction: async ({ depositAddress, registerSwap, openSwap }) => {
 			let broadcastTxid: string | undefined;
+			// Set once `beforeBroadcast`, which `sendBtc` calls only on the backend path, has run.
+			let rowOpened = false;
+			let rowId: string | undefined;
 
 			try {
 				return await sendBtc({
@@ -1216,15 +1287,36 @@ export const fetchNearIntentsBtcSwap = async ({
 					source: userAddress,
 					destination: depositAddress,
 					amount: swapAmount,
-					// A BTC deposit is irreversible the moment it is broadcast, so the AUT row is
-					// registered right there, before the pending-transaction bookkeeping and before
-					// the send resolves; mirrors the ordering of `fetchChainFusionBtcSwap`.
+					// Through the backend the deposit is known once signed, so its row is created
+					// before the broadcast, as `fetchChainFusionBtcSwap`'s is.
+					beforeBroadcast: async () => {
+						rowId = await openSwap();
+						rowOpened = true;
+					},
+					// Through the Chain Fusion Signer the deposit is irreversible the moment it is
+					// broadcast, so the row is registered right there, before the pending-transaction
+					// bookkeeping and before the send resolves.
 					onBroadcast: async ({ txid }) => {
 						broadcastTxid = txid;
-						await registerSwap();
+
+						if (!rowOpened) {
+							await registerSwap();
+						}
 					}
 				});
 			} catch (err: unknown) {
+				// A refusal outright sent nothing. After any other failure the deposit may have gone
+				// out, so the row stays for the poller, which fails it once the deposit expires.
+				if (nonNullish(rowId) && isDefinitiveBtcBroadcastRefusal(err)) {
+					await deleteUnbroadcastActiveUserTransaction({ identity, id: rowId });
+				}
+
+				// The deposit may have gone out, so the destination is enabled as after a sent one:
+				// the swapped asset must not land in a token the user cannot see.
+				if (isUnclearBtcBroadcastOutcome(err)) {
+					await enableSwapDestinationToken({ destinationToken, identity });
+				}
+
 				if (isNullish(broadcastTxid)) {
 					throw err;
 				}
@@ -1249,6 +1341,7 @@ export const fetchNearIntentsXrpSwap = async ({
 	destinationToken,
 	swapAmount,
 	swapDetails,
+	slippageValue,
 	userAddress,
 	network,
 	fee
@@ -1270,6 +1363,7 @@ export const fetchNearIntentsXrpSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
+		slippageValue,
 		// The swap is the transaction and the deposit a part of it, so the payment is recorded
 		// under the swap's own row, which `sendXrp` creates after signing and before the submit —
 		// where the in-flight check needs it. `sendXrp` never throws once the payment may be on the

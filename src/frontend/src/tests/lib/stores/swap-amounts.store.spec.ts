@@ -44,6 +44,24 @@ describe('swap-amounts.store', () => {
 		});
 	});
 
+	it('should set swaps with the slippage they were requested with', () => {
+		const store = initSwapAmountsStore();
+
+		store.setSwaps({
+			swaps: mockSwapProviders,
+			amountForSwap: '1000000',
+			slippageForSwap: 0.5,
+			selectedProvider: mockSwapProviders[0]
+		});
+
+		expect(get(store)).toEqual({
+			swaps: mockSwapProviders,
+			amountForSwap: '1000000',
+			slippageForSwap: 0.5,
+			selectedProvider: mockSwapProviders[0]
+		});
+	});
+
 	it('should set swaps with a quote error', () => {
 		const store = initSwapAmountsStore();
 
@@ -190,6 +208,31 @@ describe('swap-amounts.store', () => {
 			expect(state?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
 			expect(state?.selectedProvider?.receiveAmount).toBe(500000000n);
 			expect(state?.swaps[0].provider).toBe(SwapProvider.VELORA);
+		});
+
+		it('should keep the slippage the swaps were requested with alongside a manual selection', () => {
+			const store = initSwapAmountsStore();
+
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: '1000000',
+				slippageForSwap: 3,
+				selectedProvider: evmSwaps[0]
+			});
+
+			store.setManualProvider(evmSwaps[1]);
+
+			store.setSwaps({
+				swaps: evmSwaps,
+				amountForSwap: '1000000',
+				slippageForSwap: 0.5,
+				selectedProvider: evmSwaps[0]
+			});
+
+			const state = get(store);
+
+			expect(state?.selectedProvider?.provider).toBe(SwapProvider.NEAR_INTENTS);
+			expect(state?.slippageForSwap).toBe(0.5);
 		});
 
 		it('should keep selection when selected provider rate improves', () => {

@@ -5,21 +5,32 @@ import {
 	validateBtcSend,
 	type SendBtcParams
 } from '$btc/services/btc-send.services';
+import * as btcSignServices from '$btc/services/btc-sign.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
-import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
+import {
+	BtcBroadcastUnconfirmedError,
+	BtcSendValidationError,
+	BtcValidationError,
+	type UtxosFee
+} from '$btc/types/btc-send';
+import * as btcPsbtUtils from '$btc/utils/btc-psbt.utils';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import * as btcUtxosUtils from '$btc/utils/btc-utxos.utils';
 import * as btcUtils from '$icp/utils/btc.utils';
 import * as backendAPI from '$lib/api/backend.api';
 import * as signerAPI from '$lib/api/signer.api';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import * as walletUtils from '$lib/utils/wallet.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { toNullable } from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
+import type { Psbt } from 'bitcoinjs-lib';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -223,6 +234,159 @@ describe('btc-send.services', () => {
 			const res = sendBtc(defaultParams);
 
 			await expect(res).rejects.toThrow(error);
+		});
+	});
+
+	describe('sendBtc through the backend', () => {
+		const signed = { txid: 'signed-txid', hex: '0001', bytes: Uint8Array.from([0, 1]) };
+		const psbt = {} as Psbt;
+
+		let buildBtcSendPsbtSpy: MockInstance;
+		let signAndFinalizeBtcPsbtSpy: MockInstance;
+		let broadcastBtcTransactionSpy: MockInstance;
+		let signerSendBtcSpy: MockInstance;
+		let addPendingBtcTransactionSpy: MockInstance;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			btcSendViaBackend.enabled = true;
+
+			buildBtcSendPsbtSpy = vi.spyOn(btcPsbtUtils, 'buildBtcSendPsbt').mockReturnValue(psbt);
+			signAndFinalizeBtcPsbtSpy = vi
+				.spyOn(btcSignServices, 'signAndFinalizeBtcPsbt')
+				.mockResolvedValue(signed);
+			broadcastBtcTransactionSpy = vi
+				.spyOn(backendAPI, 'broadcastBtcTransaction')
+				.mockResolvedValue({ txid: Uint8Array.from([1]) });
+			signerSendBtcSpy = vi.spyOn(signerAPI, 'sendBtc').mockResolvedValue({ txid });
+			addPendingBtcTransactionSpy = vi
+				.spyOn(backendAPI, 'addPendingBtcTransaction')
+				.mockResolvedValue({ response: true });
+		});
+
+		it('should build, sign and broadcast through the backend, and record nothing after', async () => {
+			const onProgress = vi.fn();
+
+			const result = await sendBtc({ ...defaultParams, onProgress });
+
+			expect(result).toBe(signed.txid);
+			expect(buildBtcSendPsbtSpy).toHaveBeenCalledExactlyOnceWith({
+				utxos: defaultParams.utxosFee.utxos,
+				outputs: [
+					{
+						destination: defaultParams.destination,
+						amount: convertNumberToSatoshis({ amount: defaultParams.amount })
+					}
+				],
+				changeAddress: defaultParams.source,
+				feeSatoshis: defaultParams.utxosFee.feeSatoshis,
+				network: defaultParams.network
+			});
+			expect(signAndFinalizeBtcPsbtSpy).toHaveBeenCalledExactlyOnceWith({
+				psbt,
+				identity: defaultParams.identity
+			});
+			expect(broadcastBtcTransactionSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: defaultParams.identity,
+				network: mapToSignerBitcoinNetwork({ network: defaultParams.network }),
+				transaction: signed.bytes,
+				iiDelegationChain: []
+			});
+			expect(onProgress).toHaveBeenCalledTimes(2);
+			expect(signerSendBtcSpy).not.toHaveBeenCalled();
+			expect(addPendingBtcTransactionSpy).not.toHaveBeenCalled();
+		});
+
+		it('should keep the Chain Fusion Signer with the flag off', async () => {
+			btcSendViaBackend.enabled = false;
+
+			const result = await sendBtc(defaultParams);
+
+			expect(result).toBe(txid);
+			expect(signerSendBtcSpy).toHaveBeenCalledOnce();
+			expect(addPendingBtcTransactionSpy).toHaveBeenCalledOnce();
+			expect(broadcastBtcTransactionSpy).not.toHaveBeenCalled();
+			expect(signAndFinalizeBtcPsbtSpy).not.toHaveBeenCalled();
+		});
+
+		it('should run beforeBroadcast with the txid, after signing and before the broadcast', async () => {
+			const beforeBroadcast = vi.fn(() => {
+				expect(signAndFinalizeBtcPsbtSpy).toHaveBeenCalledOnce();
+				expect(broadcastBtcTransactionSpy).not.toHaveBeenCalled();
+
+				return Promise.resolve();
+			});
+			const onBroadcast = vi.fn();
+
+			await sendBtc({ ...defaultParams, beforeBroadcast, onBroadcast });
+
+			expect(beforeBroadcast).toHaveBeenCalledExactlyOnceWith({ txid: signed.txid });
+			expect(onBroadcast).toHaveBeenCalledExactlyOnceWith({ txid: signed.txid });
+		});
+
+		it('should broadcast nothing when beforeBroadcast rejects', async () => {
+			const beforeBroadcast = vi.fn().mockRejectedValue(error);
+
+			await expect(sendBtc({ ...defaultParams, beforeBroadcast })).rejects.toThrow(error);
+
+			expect(broadcastBtcTransactionSpy).not.toHaveBeenCalled();
+		});
+
+		it('should reject with the backend typed answer, and not call onBroadcast', async () => {
+			const refusal = new BtcBroadcastTransactionCanisterError(
+				{ FeeTooLow: null },
+				'btc_broadcast_transaction: FeeTooLow'
+			);
+			broadcastBtcTransactionSpy.mockRejectedValue(refusal);
+			const onBroadcast = vi.fn();
+
+			await expect(sendBtc({ ...defaultParams, onBroadcast })).rejects.toBe(refusal);
+
+			expect(onBroadcast).not.toHaveBeenCalled();
+		});
+
+		it('should reject as unconfirmed when the broadcast fails with no typed answer', async () => {
+			broadcastBtcTransactionSpy.mockRejectedValue(error);
+
+			const res = sendBtc(defaultParams);
+
+			await expect(res).rejects.toBeInstanceOf(BtcBroadcastUnconfirmedError);
+			await expect(res).rejects.toHaveProperty('cause', error);
+		});
+
+		it('should resolve once broadcast though the progress callback throws after it', async () => {
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+			const waitAndTriggerWalletSpy = vi
+				.spyOn(walletUtils, 'waitAndTriggerWallet')
+				.mockResolvedValue(undefined);
+			const onProgress = vi
+				.fn()
+				.mockImplementationOnce(() => undefined)
+				.mockImplementationOnce(() => {
+					throw error;
+				});
+
+			const result = await sendBtc({ ...defaultParams, onProgress });
+
+			expect(result).toBe(signed.txid);
+			expect(broadcastBtcTransactionSpy).toHaveBeenCalledOnce();
+			expect(onProgress).toHaveBeenCalledTimes(2);
+			expect(waitAndTriggerWalletSpy).toHaveBeenCalledOnce();
+		});
+
+		it('should resolve once broadcast, whatever onBroadcast and the wallet refresh do', async () => {
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+			vi.spyOn(walletUtils, 'waitAndTriggerWallet').mockRejectedValue(error);
+
+			const result = await sendBtc({
+				...defaultParams,
+				onBroadcast: () => {
+					throw error;
+				}
+			});
+
+			expect(result).toBe(signed.txid);
 		});
 	});
 

@@ -3,7 +3,11 @@ import type { BtcAddress } from '$btc/types/address';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { btcOutputVSize } from '$btc/utils/btc-psbt.utils';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
-import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
+import {
+	btcSendMaxInputs,
+	calculateUtxoSelection,
+	filterAvailableUtxos
+} from '$btc/utils/btc-utxos.utils';
 import { getPendingTransactionUtxoOutpoints } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -89,7 +93,8 @@ export const prepareBtcSend = ({
 		availableUtxos: filteredUtxos,
 		amountSatoshis,
 		recipientOutputVSize: btcOutputVSize({ address: destination }),
-		feeRateMiliSatoshisPerVByte
+		feeRateMiliSatoshisPerVByte,
+		maxInputs: btcSendMaxInputs()
 	});
 
 	// Check if there were insufficient funds during UTXO selection
