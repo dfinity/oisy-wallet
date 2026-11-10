@@ -15,8 +15,8 @@ import * as signerApi from '$lib/api/signer.api';
 import AiAssistantReviewSendBtcToken from '$lib/components/ai-assistant/AiAssistantReviewSendBtcToken.svelte';
 import {
 	AI_ASSISTANT_SEND_TOKENS_BUTTON,
-	AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE,
-	AI_ASSISTANT_SEND_TOKENS_UNCLEAR_MESSAGE
+	AI_ASSISTANT_SEND_TOKENS_OUTCOME_UNKNOWN_MESSAGE,
+	AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE
 } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
@@ -58,9 +58,9 @@ describe('AiAssistantReviewSendBtcToken', () => {
 		source: mockBtcP2SHAddress,
 		sendCompleted: false,
 		sendEnabled: true,
-		sendOutcomeUnclear: false,
+		sendOutcomeUnknown: false,
 		onSendCompleted: vi.fn(),
-		onSendOutcomeUnclear: vi.fn()
+		onSendOutcomeUnknown: vi.fn()
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
@@ -108,12 +108,12 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 	it('should offer no second send once a send may have gone out', () => {
 		const { getByTestId } = render(AiAssistantReviewSendBtcToken, {
-			props: { ...props, sendOutcomeUnclear: true },
+			props: { ...props, sendOutcomeUnknown: true },
 			context: mockContext({ utxosFee: mockUtxosFee })
 		});
 
 		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrow();
-		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_UNCLEAR_MESSAGE)).toHaveTextContent(
+		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_OUTCOME_UNKNOWN_MESSAGE)).toHaveTextContent(
 			en.send.error.btc_transaction_unconfirmed
 		);
 	});
@@ -135,7 +135,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 		await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
 
-		await waitFor(() => expect(props.onSendOutcomeUnclear).toHaveBeenCalledOnce());
+		await waitFor(() => expect(props.onSendOutcomeUnknown).toHaveBeenCalledOnce());
 
 		expect(sendBtcSpy).toHaveBeenCalledOnce();
 		expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({

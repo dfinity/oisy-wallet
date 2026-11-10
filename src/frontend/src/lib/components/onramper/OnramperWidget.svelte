@@ -4,10 +4,6 @@
 	import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 	import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
-	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
-	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { harvestAutopilots } from '$eth/derived/harvest-autopilots.derived';
 	import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -22,7 +18,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { routeAutopilotVault } from '$lib/derived/nav.derived';
-	import { networkBitcoin, networkEthereum, networkSolana } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import {
@@ -44,19 +39,9 @@
 		$erc20Tokens.find(({ address }) => address === vault?.token.assetAddress)
 	);
 
-	let defaultCrypto = $derived(
-		$token?.buy?.onramperId ??
-			vaultAssetToken?.buy?.onramperId ??
-			($networkEthereum
-				? ETHEREUM_TOKEN.buy?.onramperId
-				: $networkBitcoin
-					? BTC_MAINNET_TOKEN.buy?.onramperId
-					: $networkSolana
-						? SOLANA_TOKEN.buy?.onramperId
-						: ICP_TOKEN.buy?.onramperId) ??
-			ICP_TOKEN.buy?.onramperId ??
-			undefined
-	);
+	// Only an open token or vault sets the default. Without one, OnRamper picks its own, which
+	// avoids opening on a token that none of the enabled onramps offers.
+	let defaultCrypto = $derived($token?.buy?.onramperId ?? vaultAssetToken?.buy?.onramperId);
 
 	// List of Cryptocurrencies that are allowed to be bought
 	let onlyCryptos = $derived(
@@ -118,11 +103,15 @@
 
 		buildOnramperLink({
 			identity: currentIdentity,
-			mode: 'buy',
+			mode: 'buy,sell',
 			defaultFiat: $currentCurrency,
 			defaultCrypto,
 			onlyCryptos,
 			onlyCryptoNetworks,
+			sell_defaultFiat: $currentCurrency,
+			sell_defaultCrypto: defaultCrypto,
+			sell_onlyCryptos: onlyCryptos,
+			sell_onlyCryptoNetworks: onlyCryptoNetworks,
 			wallets: [],
 			networkWallets,
 			supportRecurringPayments: true,

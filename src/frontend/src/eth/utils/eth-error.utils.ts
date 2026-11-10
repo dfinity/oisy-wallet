@@ -404,6 +404,16 @@ const isErrorOfKind = ({
 }): boolean => collectErrorRecords({ err }).some((record) => record instanceof kind);
 
 /**
+ * Whether the send failed without settling what became of its transaction: every provider failed
+ * the submission without an answer that settles it, or a swap's broadcast outcome is unknown. The
+ * transaction may still go through, so the flow ends the send rather than offer it again: a second
+ * attempt would be signed with the next nonce, and both could execute.
+ */
+export const isSendOutcomeUnknown = (err: unknown): boolean =>
+	isErrorOfKind({ err, kind: EthSubmissionUnconfirmedError }) ||
+	isErrorOfKind({ err, kind: SwapBroadcastOutcomeUnknownError });
+
+/**
  * Maps an error raised by an Ethereum or EVM send to a user-friendly message.
  *
  * What a message may claim depends on how far the transaction got. One whose nonce could not be read
@@ -426,10 +436,7 @@ export const mapEthereumErrorMsg = (err: unknown): string | undefined => {
 		return error.ethereum_transaction_not_sent;
 	}
 
-	if (
-		isErrorOfKind({ err, kind: EthSubmissionUnconfirmedError }) ||
-		isErrorOfKind({ err, kind: SwapBroadcastOutcomeUnknownError })
-	) {
+	if (isSendOutcomeUnknown(err)) {
 		return error.ethereum_transaction_unconfirmed;
 	}
 

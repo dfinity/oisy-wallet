@@ -1,4 +1,5 @@
 import { IcpLedgerBlocksCanister } from '$icp/canisters/icp-ledger-blocks.canister';
+import { IcTransferDeadlineError } from '$icp/types/ic-send';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -39,11 +40,13 @@ export const transfer = async ({
 	identity,
 	to,
 	amount,
+	createdAt,
 	ledgerCanisterId
 }: {
 	identity: NullishIdentity;
 	to: string;
 	amount: bigint;
+	createdAt?: bigint;
 	ledgerCanisterId: CanisterIdText;
 }): Promise<BlockHeight> => {
 	assertNonNullish(identity);
@@ -52,7 +55,8 @@ export const transfer = async ({
 
 	return transfer({
 		to: AccountIdentifier.fromHex(to),
-		amount
+		amount,
+		createdAt
 	});
 };
 
@@ -62,6 +66,7 @@ export const icrc1Transfer = async ({
 	amount,
 	createdAt,
 	memo,
+	notAfter,
 	ledgerCanisterId
 }: {
 	identity: NullishIdentity;
@@ -69,11 +74,19 @@ export const icrc1Transfer = async ({
 	amount: bigint;
 	createdAt?: bigint;
 	memo?: Uint8Array;
+	// Nanoseconds since the epoch past which the transfer is not sent (`IcTransferDeadlineError`).
+	// Checked once the ledger is ready, right before the request is built: getting it ready can
+	// take arbitrarily long in a suspended tab.
+	notAfter?: bigint;
 	ledgerCanisterId: CanisterIdText;
 }): Promise<BlockHeight> => {
 	assertNonNullish(identity);
 
 	const { icrc1Transfer } = await ledgerCanister({ identity, ledgerCanisterId });
+
+	if (nonNullish(notAfter) && nowInBigIntNanoSeconds() > notAfter) {
+		throw new IcTransferDeadlineError();
+	}
 
 	return icrc1Transfer({
 		to: toCandidAccount(to),

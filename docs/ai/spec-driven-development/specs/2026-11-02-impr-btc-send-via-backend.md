@@ -839,9 +839,10 @@ Decided in PR 8a (PR 8 is split in three, see the [Delivery plan](#delivery-plan
 - **The message** is `send.error.btc_transaction_unconfirmed`, beside
   `send.error.ethereum_transaction_unconfirmed`.
 - **Closing after an unclear outcome.** Send and Convert close. The AI assistant has no flow to
-  close, so its tool result gets `sendOutcomeUnclear`, and the card shows the message instead of
-  the Send button. It is kept in `aiAssistantStore`, so a remounted card offers no second send
-  either.
+  close, so its tool result is marked with `sendOutcomeUnknown`, through
+  `aiAssistantStore.setSendToolActionAsOutcomeUnknown`, which #14565 added for EVM sends whose
+  outcome is unknown. The card shows the message instead of the Send button. It is kept in
+  `aiAssistantStore`, so a remounted card offers no second send either.
 - **At most 38 inputs**, fewer than the backend's `MAX_BROADCAST_TX_INPUTS` (100), because signing
   is now charged per input (Copilot):
   - `btc_caller_send` charged a whole transaction at once, so CFS refused one the approval could

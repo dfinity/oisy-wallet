@@ -1,5 +1,8 @@
+import type { IcSendRequest } from '$icp/types/ic-send';
 import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 import { ToolResultType, type ChatMessage, type ToolResult } from '$lib/types/ai-assistant';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
 import { get } from 'svelte/store';
@@ -9,7 +12,15 @@ describe('ai-assistant.store', () => {
 
 	const defaultState = {
 		isOpen: false,
-		chatHistory: []
+		chatHistory: [],
+		icSendRequests: {}
+	};
+
+	const icSendRequest: IcSendRequest = {
+		tokenId: mockValidIcrcToken.id,
+		to: mockPrincipalText,
+		amount: 1_000n,
+		createdAt: 1_700_000_000_000_000_000n
 	};
 
 	const message = {
@@ -49,6 +60,7 @@ describe('ai-assistant.store', () => {
 		aiAssistantStore.open();
 
 		expect(get(aiAssistantStore)).toStrictEqual({
+			...defaultState,
 			isOpen: true,
 			chatHistory: [...defaultState.chatHistory, message]
 		});
@@ -56,9 +68,48 @@ describe('ai-assistant.store', () => {
 		aiAssistantStore.resetChatHistory();
 
 		expect(get(aiAssistantStore)).toStrictEqual({
+			...defaultState,
 			isOpen: true,
 			chatHistory: []
 		});
+	});
+
+	it('should keep the IC send request of each review by its id', () => {
+		const otherRequest: IcSendRequest = { ...icSendRequest, amount: 2_000n };
+
+		aiAssistantStore.setIcSendRequest({ id: mockRandomUUID, request: icSendRequest });
+		aiAssistantStore.setIcSendRequest({ id: 'other-review', request: otherRequest });
+
+		expect(get(aiAssistantStore)?.icSendRequests).toStrictEqual({
+			[mockRandomUUID]: icSendRequest,
+			'other-review': otherRequest
+		});
+	});
+
+	it('should keep the IC send requests when the console closes', () => {
+		aiAssistantStore.open();
+		aiAssistantStore.setIcSendRequest({ id: mockRandomUUID, request: icSendRequest });
+		aiAssistantStore.close();
+
+		expect(get(aiAssistantStore)?.icSendRequests).toStrictEqual({
+			[mockRandomUUID]: icSendRequest
+		});
+	});
+
+	it('should drop the IC send requests with the chat history', () => {
+		aiAssistantStore.setIcSendRequest({ id: mockRandomUUID, request: icSendRequest });
+
+		aiAssistantStore.resetChatHistory();
+
+		expect(get(aiAssistantStore)?.icSendRequests).toStrictEqual({});
+	});
+
+	it('should drop the IC send requests on reset', () => {
+		aiAssistantStore.setIcSendRequest({ id: mockRandomUUID, request: icSendRequest });
+
+		aiAssistantStore.reset();
+
+		expect(get(aiAssistantStore)).toStrictEqual(defaultState);
 	});
 
 	it('should append a message', () => {
@@ -135,21 +186,20 @@ describe('ai-assistant.store', () => {
 		});
 	});
 
-	it('should mark a review_send_token tool whose send may have gone out', () => {
+	it('should mark only the given review_send_token tool as having an unknown send outcome', () => {
+		const otherId = '0b8e2c43-6f0f-4b9e-9d5c-2f5b4b0c9a11';
+
+		const reviewResult = (result: object) =>
+			({ type: ToolResultType.REVIEW_SEND_TOKENS, result }) as ToolResult;
+
 		const toolMessage = {
 			role: 'assistant',
 			data: {
 				tool: {
 					calls: [],
 					results: [
-						{
-							type: ToolResultType.REVIEW_SEND_TOKENS,
-							result: { sendCompleted: false, id: mockRandomUUID }
-						} as ToolResult,
-						{
-							type: ToolResultType.REVIEW_SEND_TOKENS,
-							result: { sendCompleted: false, id: 'another-id' }
-						} as ToolResult
+						reviewResult({ sendCompleted: false, id: mockRandomUUID }),
+						reviewResult({ sendCompleted: false, id: otherId })
 					]
 				}
 			}
@@ -157,19 +207,29 @@ describe('ai-assistant.store', () => {
 
 		aiAssistantStore.appendMessage(toolMessage);
 
-		aiAssistantStore.setSendToolActionAsUnclear(mockRandomUUID);
+		aiAssistantStore.setSendToolActionAsOutcomeUnknown(mockRandomUUID);
 
-		const [{ data }] = get(aiAssistantStore)?.chatHistory.slice(-1) ?? [];
-
-		expect(data?.tool?.results).toStrictEqual([
-			{
-				type: ToolResultType.REVIEW_SEND_TOKENS,
-				result: { sendCompleted: false, sendOutcomeUnclear: true, id: mockRandomUUID }
-			},
-			{
-				type: ToolResultType.REVIEW_SEND_TOKENS,
-				result: { sendCompleted: false, id: 'another-id' }
-			}
-		]);
+		expect(get(aiAssistantStore)).toStrictEqual({
+			...defaultState,
+			chatHistory: [
+				{
+					...toolMessage,
+					data: {
+						...toolMessage.data,
+						tool: {
+							...toolMessage.data.tool,
+							results: [
+								reviewResult({
+									sendCompleted: false,
+									sendOutcomeUnknown: true,
+									id: mockRandomUUID
+								}),
+								reviewResult({ sendCompleted: false, id: otherId })
+							]
+						}
+					}
+				} as ChatMessage
+			]
+		});
 	});
 });

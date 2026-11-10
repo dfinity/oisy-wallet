@@ -81,6 +81,18 @@ export type ActiveUserTransactionData =
 	  }
 	| {
 			/**
+			 * Topping up a canister with ICP through the NNS Cycles Minting Canister:
+			 * an ICP transfer to the CMC's deposit account for the canister, then
+			 * `notify_top_up`. The ledger records that account only as a hash, so the
+			 * row, opened before the transfer, is the one place that keeps the canister,
+			 * and what lets a later session finish a top-up whose tab closed between the
+			 * two calls. The ICP block index, learned once the transfer returns, rides
+			 * in `external_refs`.
+			 */
+			CyclesTopUp: CyclesTopUpData;
+	  }
+	| {
+			/**
 			 * NEAR Intents (1Click) cross-chain swap. A single variant covers every
 			 * source/destination leg (EVM and Solana); the deposit address, its
 			 * optional memo, and origin/destination tx hashes ride in `external_refs`.
@@ -1053,6 +1065,31 @@ export interface CyclesMintData {
 	amount: bigint;
 	dest_token: TokenId;
 }
+/**
+ * Cycles top-up payload: the values fixed when the top-up starts. The row opens
+ * before the ICP transfer, so the transfer's creation timestamp is one of them;
+ * only the block index is learned later, in `external_refs`.
+ */
+export interface CyclesTopUpData {
+	/**
+	 * `created_at_time` of the ICP transfer. Reusing it on a retry lets the
+	 * ledger deduplicate the transfer, and it is what finds the block again
+	 * when the tab died before the transfer returned.
+	 */
+	transfer_created_at_ns: bigint;
+	/**
+	 * The canister the cycles go to. The CMC's deposit account is derived from
+	 * it, and the ICP ledger keeps only that account's hash, so neither the
+	 * ledger nor its index can give the canister back.
+	 */
+	canister_id: Principal;
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units: the ICP sent to the CMC, without the
+	 * ledger fee.
+	 */
+	amount: bigint;
+}
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;
 }
@@ -1987,7 +2024,7 @@ export type SetUserShowTestnetsResult =
 			/**
 			 * The user's show testnets was not set due to an error.
 			 */
-			Err: UpdateAgreementsError;
+			Err: SetTestnetsSettingsError;
 	  };
 export interface Settings {
 	networks: NetworksSettings;
@@ -2630,7 +2667,17 @@ export interface UpdateActiveUserTransactionRequest {
 	progress_step: [] | [string];
 	error: [] | [string];
 }
-export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: null };
+export type UpdateAgreementsError =
+	| { VersionMismatch: null }
+	| { RateLimited: RateLimitError }
+	| { UserNotFound: null }
+	| {
+			/**
+			 * The change would take the user's agreement history past
+			 * `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
+			 */
+			TooManyHistoryEntries: null;
+	  };
 export interface UpdateExperimentalFeaturesSettingsRequest {
 	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
 	current_user_version: [] | [bigint];
@@ -2639,6 +2686,19 @@ export interface UpdateProviderAgreementsRequest {
 	current_user_version: [] | [bigint];
 	provider_agreements: Array<[ProviderAgreementType, UserAgreement]>;
 }
+export type UpdateProviderAgreementsResult =
+	| {
+			/**
+			 * The user's provider agreements were updated successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The user's provider agreements were not updated due to an error.
+			 */
+			Err: UpdateAgreementsError;
+	  };
 export interface UpdateTransactionFilterSettingsRequest {
 	filter: TransactionFilterSettings;
 	current_user_version: [] | [bigint];
@@ -2647,6 +2707,19 @@ export interface UpdateUserAgreementsRequest {
 	agreements: UserAgreements;
 	current_user_version: [] | [bigint];
 }
+export type UpdateUserAgreementsResult =
+	| {
+			/**
+			 * The user's agreements were updated successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The user's agreements were not updated due to an error.
+			 */
+			Err: UpdateAgreementsError;
+	  };
 /**
  * Per-agreement status/metadata.
  */
@@ -3163,8 +3236,9 @@ export interface _SERVICE {
 	 * - the caller's custom tokens, filtered to variants the configured providers can actually price
 	 * (testnets, NFTs and ERC-4626 vaults are excluded).
 	 *
-	 * The endpoint also re-marks the returned tokens as active so the
-	 * background refresh timer keeps them warm. If any cached price is
+	 * While the backend price refresh is on, the endpoint also records the
+	 * caller's custom tokens as active so the background refresh timer keeps
+	 * them warm (see [`record_token_activity`]). If any cached price is
 	 * missing or older than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`]
 	 * seconds, the endpoint kicks off a refresh for that subset **in the
 	 * background** (via `ic_cdk::futures::spawn_migratory`) and returns the current cache
@@ -3373,7 +3447,7 @@ export interface _SERVICE {
 	 *
 	 * Note: This method was previously exposed as a *query* but is now an *update*
 	 * call. The change is intentional and breaking: `list_custom_tokens` now tracks
-	 * token activity by calling `mark_tokens_active`, which mutates canister state.
+	 * token activity by calling `record_token_activity`, which mutates canister state.
 	 * Because queries must not modify state on the IC, this function must be an
 	 * update, not a query.
 	 *
@@ -3554,11 +3628,13 @@ export interface _SERVICE {
 	 * set to the same value.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	 * the caller made too many calls in the last minute, or the change would take the agreement
+	 * history past `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 	 */
 	update_provider_agreements: ActorMethod<
 		[UpdateProviderAgreementsRequest],
-		SetUserShowTestnetsResult
+		UpdateProviderAgreementsResult
 	>;
 	/**
 	 * Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
@@ -3572,9 +3648,11 @@ export interface _SERVICE {
 	 * same value.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	 * the caller made too many calls in the last minute, or the change would take the agreement
+	 * history past `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 	 */
-	update_user_agreements: ActorMethod<[UpdateUserAgreementsRequest], SetUserShowTestnetsResult>;
+	update_user_agreements: ActorMethod<[UpdateUserAgreementsRequest], UpdateUserAgreementsResult>;
 	/**
 	 * Updates the user's preference to enable (or disable) experimental features in the interface,
 	 * merging with any existing entries.

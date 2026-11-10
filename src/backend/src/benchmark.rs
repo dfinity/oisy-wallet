@@ -23,7 +23,10 @@ use shared::{
             CreateActiveUserTransactionRequest, OneSecIcpToEvmData,
             UpdateActiveUserTransactionRequest,
         },
-        agreement::{UserAgreement, UserAgreements},
+        agreement::{
+            AgreementHistoryEntry, AgreementType, UserAgreement, UserAgreements,
+            MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER,
+        },
         bitcoin::{PendingTransaction, StoredPendingTransaction},
         contact::{Contact, StoredContacts},
         custom_token::{CustomToken, CustomTokenId, ErcToken, ErcTokenId, Token},
@@ -31,6 +34,7 @@ use shared::{
         experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
         network::{NetworkSettings, NetworkSettingsFor},
         personal_note::{DeletePersonalNoteRequest, SetPersonalNoteRequest},
+        tip::{MAX_TIP_MESSAGE_CHARS, TIP_RETENTION_AFTER_TERMINAL_NS},
         token_id::TokenId,
         user_profile::{StoredUserProfile, UserProfile},
         Stats,
@@ -43,8 +47,15 @@ use crate::{
     bitcoin::{pending_tx_model::BtcUserPendingTransactionsModel, tx_validator},
     personal_notes::service as personal_notes_service,
     state::{mutate_state, read_config, read_state, State},
+    tips::{
+        model::{TipRecord, TipState},
+        service::prune_expired_tips,
+    },
     token,
-    types::{Candid, StoredPrincipal, StoredTokenId},
+    types::{
+        storable::{TipId, TipSenderKey},
+        Candid, StoredPrincipal, StoredTokenId,
+    },
     user_profile::{self, model::UserProfileModel},
 };
 
@@ -451,6 +462,64 @@ fn bench_update_user_agreements() -> BenchResult {
             )
         }));
     })
+}
+
+/// An update that changes all three agreements and fills the history to
+/// `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries: the most an accepted agreement update costs.
+#[bench(raw)]
+fn bench_update_user_agreements_full_history() -> BenchResult {
+    let version = ensure_profile_version();
+    let sp = bench_stored_principal();
+    let stored_entry = AgreementHistoryEntry {
+        agreement_type: AgreementType::TermsOfUse,
+        accepted: true,
+        timestamp_ns: TS0_NS,
+        text_sha256: Some("a".repeat(64)),
+        last_updated_at_ms: Some(1_700_000_000_000),
+    };
+    mutate_state(|s| {
+        s.agreement_history.insert(
+            sp,
+            Candid(vec![
+                stored_entry;
+                MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER - 3
+            ]),
+        );
+    });
+    let agreement = UserAgreement {
+        accepted: Some(true),
+        last_accepted_at_ns: None,
+        last_updated_at_ms: Some(1_700_000_000_000),
+        text_sha256: Some("b".repeat(64)),
+    };
+    let agreements = UserAgreements {
+        license_agreement: agreement.clone(),
+        terms_of_use: agreement.clone(),
+        privacy_policy: agreement,
+    };
+
+    let result = bench_fn(|| {
+        std::hint::black_box(mutate_state(|s| {
+            let mut m = UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+            user_profile::service::update_agreements(
+                sp,
+                version,
+                &agreements,
+                &mut m,
+                &mut s.agreement_history,
+            )
+        }));
+    });
+
+    // Checked outside the measured closure, so decoding the history again is not counted.
+    let history = read_state(|s| s.agreement_history.get(&sp).unwrap_or_default().0);
+    assert!(
+        history.len() == MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER
+            && history.last().map(|entry| &entry.agreement_type)
+                == Some(&AgreementType::PrivacyPolicy),
+        "the update must add three entries and fill the history"
+    );
+    result
 }
 
 #[bench(raw)]
@@ -1000,5 +1069,123 @@ fn bench_get_exchange_rates_50() -> BenchResult {
                 .map(|entry| (entry.key().0.clone(), entry.value().0.clone()))
                 .collect::<Vec<_>>()
         }));
+    })
+}
+
+// ---------------------------------------------------------------------------
+// Tips
+// ---------------------------------------------------------------------------
+
+/// Stores a reserved tip from a sender of its own, as `tips::service::store_tip` does: the
+/// by-sender index holds the tip's `active_until`, which for a reserved tip is its expiry.
+fn store_reserved_tip(n: u64, amount: Nat, expires_at_ns: u64) {
+    let sender = Principal::from_slice(&n.to_be_bytes());
+    let tip_id = TipId(format!("{n:022}"));
+    let record = TipRecord {
+        sender,
+        ledger_canister_id: *bench_principal(),
+        amount,
+        expires_at_ns,
+        created_at_ns: TS0_NS,
+        message: Some("x".repeat(MAX_TIP_MESSAGE_CHARS)),
+        claim_code_hash: ByteBuf::from(vec![0u8; 32]),
+        state: TipState::Reserved,
+        terminal_at_ns: None,
+        last_claim_failure: None,
+        payout_created_at_ns: None,
+    };
+
+    mutate_state(|s| {
+        s.tips_by_sender.insert(
+            TipSenderKey(StoredPrincipal(sender), tip_id.clone()),
+            expires_at_ns,
+        );
+        s.tips.insert(tip_id, Candid(record));
+    });
+}
+
+/// Sweeps 10,000 tips twice: first while every tip is inside its retention window, which reads
+/// only the by-sender index, then once half of them are past it, which also removes those 5,000
+/// tips. The two scopes give the cost of reading one entry and of removing one tip.
+#[bench(raw)]
+fn bench_prune_expired_tips_10000() -> BenchResult {
+    const COUNT: u64 = 10_000;
+    let now = 2 * TIP_RETENTION_AFTER_TERMINAL_NS;
+    // 256 bits, the width ICRC ledgers keep balances in.
+    let amount = Nat::from(u128::MAX) * Nat::from(u128::MAX);
+
+    for n in 0..COUNT {
+        // Even tips are past their retention window at `now` but not at `now - 2`; odd tips
+        // expire at `now`, so they stay.
+        let expires_at_ns = if n % 2 == 0 {
+            now - TIP_RETENTION_AFTER_TERMINAL_NS - 1
+        } else {
+            now
+        };
+        store_reserved_tip(n, amount.clone(), expires_at_ns);
+    }
+
+    bench_fn(|| {
+        {
+            let _scope = bench_scope("read_10000");
+            std::hint::black_box(prune_expired_tips(None, now - 2, || true));
+        }
+        {
+            let _scope = bench_scope("read_10000_remove_5000");
+            std::hint::black_box(prune_expired_tips(None, now, || true));
+        }
+    })
+}
+
+/// Removes one tip whose amount takes about 1.9 MiB, close to the 2 MiB a request can carry:
+/// the largest step a sweep batch can take after it passes its instruction budget.
+#[bench(raw)]
+fn bench_prune_expired_tips_oversized() -> BenchResult {
+    let now = 2 * TIP_RETENTION_AFTER_TERMINAL_NS;
+    let amount = Nat(Nat::from(1u8).0 << 14_000_000usize);
+    store_reserved_tip(0, amount, now - TIP_RETENTION_AFTER_TERMINAL_NS - 1);
+
+    bench_fn(|| {
+        std::hint::black_box(prune_expired_tips(None, now, || true));
+    })
+}
+
+// ---------------------------------------------------------------------------
+// Token activity
+// ---------------------------------------------------------------------------
+
+/// Evicts from a full `token_activity` twice: first at a time when no entry is past the retention
+/// window, which only reads them, then once half of them are, which also evicts those 1,000
+/// entries. The two scopes give the cost of reading one entry and of evicting one.
+#[bench(raw)]
+fn bench_evict_inactive_tokens_2000() -> BenchResult {
+    // `token::activity::MAX_TOKEN_ACTIVITY_ENTRIES`.
+    const COUNT: u64 = 2_000;
+    // Far past the 30-minute retention window of anything last active at 0.
+    const LATER_NS: u64 = 1 << 62;
+
+    for n in 0..COUNT {
+        // Even tokens were last active at 0, odd tokens at `LATER_NS`, so only even tokens are
+        // past the retention window at `LATER_NS`, and none is at 0.
+        let last_active_ns = if n % 2 == 0 { 0 } else { LATER_NS };
+        token::mark_tokens_active(
+            &[TokenId::Erc20(ErcTokenId(format!("0x{n:040x}")), 1)],
+            last_active_ns,
+        );
+    }
+
+    bench_fn(|| {
+        {
+            let _scope = bench_scope("read_2000");
+            std::hint::black_box(mutate_state(|s| {
+                token::evict_inactive_tokens(s, None, 0, || true)
+            }));
+        }
+        {
+            let _scope = bench_scope("read_2000_evict_1000");
+            std::hint::black_box(mutate_state(|s| {
+                token::evict_inactive_tokens(s, None, LATER_NS, || true)
+            }));
+        }
     })
 }

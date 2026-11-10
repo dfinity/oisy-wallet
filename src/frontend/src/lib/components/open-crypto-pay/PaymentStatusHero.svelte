@@ -8,7 +8,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		status: 'success' | 'failure';
+		status: 'success' | 'failure' | 'not_confirmed';
 	}
 
 	let { status }: Props = $props();
@@ -21,6 +21,7 @@
 		class="bg-pos-0 mb-6 flex w-full flex-col content-center items-center overflow-hidden rounded-[24px] pt-6 text-center text-primary-inverted md:rounded-[28px]"
 		class:bg-error-subtle-20={status === 'failure'}
 		class:bg-success-subtle-20={status === 'success'}
+		class:bg-warning-subtle-20={status === 'not_confirmed'}
 	>
 		<div>
 			<TokenLogo badge={{ type: 'network' }} data={$selectedToken} />
@@ -32,6 +33,10 @@
 				})}
 			{:else if status === 'failure'}
 				{replacePlaceholders($i18n.scanner.text.pay_at_failure, {
+					$receipt: $data.displayName
+				})}
+			{:else if status === 'not_confirmed'}
+				{replacePlaceholders($i18n.scanner.text.pay_at_not_confirmed, {
 					$receipt: $data.displayName
 				})}
 			{/if}
@@ -51,6 +56,7 @@
 			class="flex w-full items-center justify-center p-1 text-secondary"
 			class:bg-brand-subtle-10={status === 'success'}
 			class:bg-error-subtle-20={status === 'failure'}
+			class:bg-warning-subtle-20={status === 'not_confirmed'}
 		>
 			<p class="m-2 text-xs font-normal">{$i18n.scanner.text.powered_by}</p><IconOpenCryptoPay />
 		</div>
