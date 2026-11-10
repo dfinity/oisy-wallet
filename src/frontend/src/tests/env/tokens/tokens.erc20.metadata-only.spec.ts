@@ -10,7 +10,7 @@ import { BOB_TOKEN as BOB_BASE } from '$env/tokens/tokens-evm/tokens-base/tokens
 import { CHAT_TOKEN as CHAT_BASE } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.chat.env';
 import { GLDT_TOKEN as GLDT_BASE } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.gldt.env';
 import { ICP_TOKEN as ICP_BASE } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.icp.env';
-import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
+import { ERC20_DEPRECATED_TOKENS, ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 
 /**
  * The EVM tokens added for the 1Sec integration (BOB/CHAT/GLDT on Ethereum,
@@ -21,7 +21,8 @@ import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
  * ICP is intentionally excluded from this demotion: unlike BOB/CHAT/GLDT,
  * users may already hold a balance in the EVM ICP twin tokens, and marking
  * them metadata-only would remove them from the default ERC20 token set,
- * potentially hiding that balance unless the user explicitly imports them; ICP therefore stays curated/suggested.
+ * potentially hiding that balance unless the user explicitly imports them; ICP therefore stays curated, as a
+ * deprecated token that holders keep.
  */
 describe('1Sec EVM tokens are metadata-only', () => {
 	it.each([
@@ -46,11 +47,13 @@ describe('1Sec EVM tokens are metadata-only', () => {
 		expect(token.metadataOnly).toBeFalsy();
 	});
 
-	it('still suggests the 1Sec EVM ICP tokens', () => {
+	it('keeps the 1Sec EVM ICP tokens as deprecated, not suggested, tokens', () => {
 		const suggestedIds = new Set(ERC20_SUGGESTED_TOKENS.map(({ id }) => id));
+		const deprecatedIds = new Set(ERC20_DEPRECATED_TOKENS.map(({ id }) => id));
 
-		expect(suggestedIds.has(ICP_ETH.id)).toBeTruthy();
-		expect(suggestedIds.has(ICP_ARBITRUM.id)).toBeTruthy();
-		expect(suggestedIds.has(ICP_BASE.id)).toBeTruthy();
+		[ICP_ETH, ICP_ARBITRUM, ICP_BASE].forEach(({ id }) => {
+			expect(suggestedIds.has(id)).toBeFalsy();
+			expect(deprecatedIds.has(id)).toBeTruthy();
+		});
 	});
 });
