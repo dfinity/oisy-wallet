@@ -13,7 +13,11 @@
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import type { BtcAddress } from '$btc/types/address';
 	import { BtcValidationError } from '$btc/types/btc-send';
-	import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
+	import {
+		convertSatoshisToBtc,
+		isUnclearBtcBroadcastOutcome,
+		mapBtcBroadcastErrorToMessage
+	} from '$btc/utils/btc-send.utils';
 	import { invalidSendAmount } from '$btc/utils/input.utils';
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -27,7 +31,8 @@
 	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		AI_ASSISTANT_SEND_TOKENS_BUTTON,
-		AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE
+		AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE,
+		AI_ASSISTANT_SEND_TOKENS_OUTCOME_UNKNOWN_MESSAGE
 	} from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -50,11 +55,23 @@
 		source: BtcAddress;
 		sendCompleted: boolean;
 		sendEnabled: boolean;
+		// The send's broadcast outcome was unclear: it may have gone out, and its inputs stay
+		// reserved, so another send would spend other coins and could pay twice. None is offered.
+		sendOutcomeUnknown: boolean;
 		onSendCompleted: () => void;
+		onSendOutcomeUnknown: () => void;
 	}
 
-	let { amount, destination, source, sendCompleted, onSendCompleted, sendEnabled }: Props =
-		$props();
+	let {
+		amount,
+		destination,
+		source,
+		sendCompleted,
+		onSendCompleted,
+		sendEnabled,
+		sendOutcomeUnknown,
+		onSendOutcomeUnknown
+	}: Props = $props();
 
 	const { sendTokenNetworkId, sendTokenDecimals, sendToken, sendBalance, sendTokenSymbol } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -227,9 +244,15 @@
 			});
 
 			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
+				msg: {
+					text: mapBtcBroadcastErrorToMessage({ err, i18n: $i18n }) ?? $i18n.send.error.unexpected
+				},
 				err
 			});
+
+			if (isUnclearBtcBroadcastOutcome(err)) {
+				onSendOutcomeUnknown();
+			}
 		}
 	};
 </script>
@@ -238,7 +261,14 @@
 	<BtcUtxosFeeDisplay />
 </div>
 
-{#if !sendCompleted}
+{#if sendOutcomeUnknown}
+	<p
+		class="text-center text-sm text-error-primary"
+		data-tid={AI_ASSISTANT_SEND_TOKENS_OUTCOME_UNKNOWN_MESSAGE}
+	>
+		{$i18n.send.error.btc_transaction_unconfirmed}
+	</p>
+{:else if !sendCompleted}
 	<div class="mb-2">
 		<!-- TODO remove pendingTransactionsStatus as soon as parallel BTC transactions are also enabled for BTC convert -->
 		<BtcSendWarnings pendingTransactionsStatus={BtcPendingSentTransactionsStatus.NONE} {utxosFee} />

@@ -3,6 +3,7 @@ import {
 	addPendingBtcTransaction,
 	addUserDismissedNotification,
 	allowSigning,
+	broadcastBtcTransaction,
 	createActiveUserTransaction,
 	createUserProfile,
 	deleteActiveUserTransaction,
@@ -406,6 +407,38 @@ describe('backend.api', () => {
 			});
 
 			await expect(getPendingBtcTransactions(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('broadcastBtcTransaction', () => {
+		const mockParams = {
+			...baseParams,
+			network: { mainnet: null },
+			transaction: Uint8Array.from([0, 1]),
+			iiDelegationChain: mockIIDelegationChain
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.btcBroadcastTransaction.mockResolvedValue({
+				txid: Uint8Array.from([1])
+			});
+		});
+
+		it('should call the btcBroadcastTransaction endpoint', async () => {
+			const result = await broadcastBtcTransaction(mockParams);
+
+			expect(result).toEqual({ txid: Uint8Array.from([1]) });
+			expect(backendCanisterMock.btcBroadcastTransaction).toHaveBeenCalledExactlyOnceWith({
+				network: { mainnet: null },
+				transaction: Uint8Array.from([0, 1]),
+				iiDelegationChain: mockIIDelegationChain
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				broadcastBtcTransaction({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
 		});
 	});
 

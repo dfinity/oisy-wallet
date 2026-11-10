@@ -128,8 +128,10 @@
 					{amount}
 					{destination}
 					{onSendCompleted}
+					{onSendOutcomeUnknown}
 					{sendCompleted}
 					{sendEnabled}
+					{sendOutcomeUnknown}
 					source={btcSource}
 				/>
 			</UtxosFeeContexts>
