@@ -77,9 +77,13 @@ On November 10, 2026:
   were unchanged; the probe remained unlisted.
 - Lint, formatting and documentation-link checks passed. The temporary probe was
   removed and the existing OISY app reopened without reinstalling or clearing it.
-- A fresh OISY passkey sign-in and ICP account-continuity confirmation are pending
-  user interaction. A generic cancellation is not an association rejection; a
-  simulator pass does not replace a signed-device check.
+- After deployment, the user completed a fresh Internet Identity sign-in in
+  the existing OISY app and confirmed that Wallet opened and the ICP quantity
+  matched. No OISY reinstall was needed.
+
+A generic cancellation is not an association rejection; a simulator pass does
+not replace a signed-device check. These results verify the tested callback paths,
+not every possible malicious-browser or compromised-device scenario.
 
 ## Dependencies
 
