@@ -858,7 +858,7 @@ When the broadcast's outcome is unclear, the transaction may have gone out. The 
 
 A swap's activity row is created before its deposit is broadcast, so it is tracked whatever the broadcast answers. A deposit the backend refuses outright removes the row. One whose outcome is unclear keeps it until the deposit is seen. If the deposit never arrives, a NEAR Intents swap fails once its deposit address expires, while a Chain Fusion conversion stays in progress for now: nothing yet settles a deposit that never reached the network.
 
-A Liquidium supply or repayment is recorded with its transaction before the broadcast, and the record is removed only if the transfer was refused outright. After an unclear outcome a repayment keeps counting against the repay maximum until it settles, so the form does not offer the full debt again.
+A Liquidium supply or repayment is recorded with its transaction before the broadcast, and the record is removed only if the transfer was refused outright. After an unclear outcome a repayment keeps counting against the repay maximum until it settles, so the form does not offer the full debt again. A transfer that never reached the network is not settled yet, so its hold stays too.
 
 OpenCryptoPay still sends through the Chain Fusion Signer. Beta and production send as before.
 
