@@ -928,6 +928,9 @@ Decided in 8e (the limit messages):
   `LedgerWithdrawFromError` with `InsufficientAllowance`, which `allow_signing` renews at the next
   sign-in. The ledger's `InsufficientFunds` is the backend's own balance, so it keeps the flow's
   own message.
+  - `allow_signing` renews at most three times an hour (`ALLOW_SIGNING_RATE_LIMITER`, checked only
+    when it would top up), and the frontend reads a refusal as `Skipped`. So the message also says
+    to wait up to an hour if it comes back (Copilot).
 - **These toasts carry no detail.** Nothing was sent and the message says what to do, so
   `isBtcSendLimitError` leaves out the error's English text, which the toast appends otherwise.
 - **`btc_get_spendable_utxos` keeps a generic message.** Its limit (15 a minute) is out of reach
