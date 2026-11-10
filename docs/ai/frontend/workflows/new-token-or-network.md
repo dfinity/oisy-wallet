@@ -118,7 +118,9 @@ token the user imported. When that ledger no longer runs an ICRC ledger
 (deleted, uninstalled, or reinstalled with other code), also add its ID
 to `RETIRED_ICRC_LEDGER_CANISTER_IDS` in
 `$env/tokens/tokens-icrc/tokens.icrc.retired.env.ts`, so OISY skips it
-instead of warning on every sign-in.
+instead of warning on every sign-in. Like a saved token whose ledger
+fails to load, it is listed under "Unavailable tokens" in Manage tokens,
+where the user can delete it.
 
 ## Don'ts
 
