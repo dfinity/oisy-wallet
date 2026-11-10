@@ -1358,9 +1358,10 @@ interface I18nTokens {
 			network: string;
 			all_tokens_zero_balance: string;
 			enable_more_assets: string;
+			unavailable_tokens: string;
 		};
 		placeholder: { select_network: string };
-		info: { no_changes: string };
+		info: { no_changes: string; unavailable_tokens: string };
 		error: { unexpected_build: string; empty: string };
 	};
 	hide: { title: string; token: string; info: string; confirm: string; hiding: string };

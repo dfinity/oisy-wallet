@@ -767,8 +767,8 @@
 			"transaction_price": "加载交易价格预估时出错。",
 			"icrc_canisters": "加载 ICRC 容器时出错。",
 			"load_token_list": "",
-			"icrc_canister_loading_curated": "$tokenSymbol 代币暂无响应，目前无法加载。请稍后再试。",
-			"icrc_canister_loading_custom": "账本容器 $ledgerCanisterId 的代币暂无响应，目前无法加载。请稍后再试。",
+			"icrc_canister_loading_curated": "$tokenSymbol 代币暂无响应，目前无法加载。请稍后再试。如果问题持续存在，你可以在“管理代币”中将其删除。",
+			"icrc_canister_loading_custom": "账本容器 $ledgerCanisterId 的代币暂无响应，目前无法加载。请稍后再试。如果问题持续存在，你可以在“管理代币”中将其删除。",
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
@@ -1650,13 +1650,15 @@
 				"import_nft": "导入集合",
 				"network": "网络",
 				"all_tokens_zero_balance": "所有代币余额均为零。",
-				"enable_more_assets": "启用更多代币"
+				"enable_more_assets": "启用更多代币",
+				"unavailable_tokens": "不可用的代币"
 			},
 			"placeholder": {
 				"select_network": "选择网络"
 			},
 			"info": {
-				"no_changes": "没有需要保存的更改。"
+				"no_changes": "没有需要保存的更改。",
+				"unavailable_tokens": "这些代币在你的代币列表中，但 $oisy_short 无法加载它们。"
 			},
 			"error": {
 				"unexpected_build": "在构建已知代币列表时发生意外错误。",

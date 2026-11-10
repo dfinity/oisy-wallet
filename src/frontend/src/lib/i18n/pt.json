@@ -767,8 +767,8 @@
 			"transaction_price": "Erro ao carregar a estimativa do preço de uma transação.",
 			"icrc_canisters": "Erro ao carregar os canisters ICRC.",
 			"load_token_list": "",
-			"icrc_canister_loading_curated": "O token $tokenSymbol não está respondendo e não pode ser carregado agora. Tente novamente mais tarde.",
-			"icrc_canister_loading_custom": "O token com canister de ledger $ledgerCanisterId não está respondendo e não pode ser carregado agora. Tente novamente mais tarde.",
+			"icrc_canister_loading_curated": "O token $tokenSymbol não está respondendo e não pode ser carregado agora. Tente novamente mais tarde. Se o problema persistir, você pode excluí-lo em “Gerir tokens”.",
+			"icrc_canister_loading_custom": "O token com canister de ledger $ledgerCanisterId não está respondendo e não pode ser carregado agora. Tente novamente mais tarde. Se o problema persistir, você pode excluí-lo em “Gerir tokens”.",
 			"erc20_custom_tokens": "Erro ao carregar o token personalizado ERC20.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Erro ao carregar o token personalizado ERC721.",
@@ -1650,13 +1650,15 @@
 				"import_nft": "",
 				"network": "Rede",
 				"all_tokens_zero_balance": "Todos os tokens têm saldo zero.",
-				"enable_more_assets": "Habilitar mais tokens"
+				"enable_more_assets": "Habilitar mais tokens",
+				"unavailable_tokens": "Tokens indisponíveis"
 			},
 			"placeholder": {
 				"select_network": "Selecionar a rede"
 			},
 			"info": {
-				"no_changes": "Nenhuma alteração precisa ser salva."
+				"no_changes": "Nenhuma alteração precisa ser salva.",
+				"unavailable_tokens": "Estes tokens estão na sua lista de tokens, mas o $oisy_short não consegue carregá-los."
 			},
 			"error": {
 				"unexpected_build": "Ocorreu um erro inesperado ao construir a lista de tokens conhecidos.",

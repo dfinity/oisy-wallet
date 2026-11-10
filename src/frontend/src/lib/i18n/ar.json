@@ -1650,13 +1650,15 @@
 				"import_nft": "",
 				"network": "الشبكة",
 				"all_tokens_zero_balance": "جميع التوكنات ذات رصيد صفري.",
-				"enable_more_assets": "تمكين المزيد من التوكنات"
+				"enable_more_assets": "تمكين المزيد من التوكنات",
+				"unavailable_tokens": ""
 			},
 			"placeholder": {
 				"select_network": "حدد الشبكة"
 			},
 			"info": {
-				"no_changes": "لا توجد تغييرات تحتاج إلى حفظ."
+				"no_changes": "لا توجد تغييرات تحتاج إلى حفظ.",
+				"unavailable_tokens": ""
 			},
 			"error": {
 				"unexpected_build": "حدث خطأ غير متوقع أثناء بناء قائمة التوكنات المعروفة.",

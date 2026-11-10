@@ -767,8 +767,8 @@
 			"transaction_price": "Chyba při načítání odhadu ceny transakce.",
 			"icrc_canisters": "Chyba při načítání kanystrů ICRC.",
 			"load_token_list": "",
-			"icrc_canister_loading_curated": "Token $tokenSymbol neodpovedá a momentálne ho nie je možné načítať. Skúste to znova neskôr.",
-			"icrc_canister_loading_custom": "Token s Ledger kanystrem $ledgerCanisterId neodpovedá a momentálne ho nie je možné načítať. Skúste to znova neskôr.",
+			"icrc_canister_loading_curated": "Token $tokenSymbol neodpovídá a momentálně ho nelze načíst. Zkuste to znovu později. Pokud problém přetrvá, můžete ho smazat v části „Spravovat tokeny“.",
+			"icrc_canister_loading_custom": "Token s Ledger kanystrem $ledgerCanisterId neodpovídá a momentálně ho nelze načíst. Zkuste to znovu později. Pokud problém přetrvá, můžete ho smazat v části „Spravovat tokeny“.",
 			"erc20_custom_tokens": "Chyba při načítání vlastních tokenů ERC20",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Chyba při načítání vlastních tokenů ERC721.",
@@ -1650,13 +1650,15 @@
 				"import_nft": "Importovat kolekci",
 				"network": "Síť",
 				"all_tokens_zero_balance": "Všechny tokeny mají nulový zůstatek.",
-				"enable_more_assets": "Povolit další tokeny"
+				"enable_more_assets": "Povolit další tokeny",
+				"unavailable_tokens": "Nedostupné tokeny"
 			},
 			"placeholder": {
 				"select_network": "Vybrat síť"
 			},
 			"info": {
-				"no_changes": "Není třeba ukládat žádné změny."
+				"no_changes": "Není třeba ukládat žádné změny.",
+				"unavailable_tokens": "Tyto tokeny jsou ve vašem seznamu tokenů, ale $oisy_short je nemůže načíst."
 			},
 			"error": {
 				"unexpected_build": "Při vytváření seznamu známých tokenů došlo k neočekávané chybě.",
