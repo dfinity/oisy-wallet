@@ -3,8 +3,9 @@ use serde_bytes::ByteBuf;
 
 use super::{
     bitcoin::{
-        BtcAddPendingTransactionError, BtcGetPendingTransactionsError,
-        BtcGetPendingTransactionsReponse,
+        BtcAddPendingTransactionError, BtcBroadcastTransactionError,
+        BtcBroadcastTransactionResponse, BtcGetPendingTransactionsError,
+        BtcGetPendingTransactionsReponse, BtcGetSpendableUtxosError, BtcGetSpendableUtxosResponse,
     },
     dapp::AddDappSettingsError,
     notification::AddDismissedNotificationError,
@@ -263,6 +264,24 @@ impl From<Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsErro
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcGetSpendableUtxosResult {
+    /// The spendable UTXOs and pending transactions were retrieved successfully.
+    Ok(BtcGetSpendableUtxosResponse),
+    /// The spendable UTXOs were not retrieved due to an error.
+    Err(BtcGetSpendableUtxosError),
+}
+impl From<Result<BtcGetSpendableUtxosResponse, BtcGetSpendableUtxosError>>
+    for BtcGetSpendableUtxosResult
+{
+    fn from(result: Result<BtcGetSpendableUtxosResponse, BtcGetSpendableUtxosError>) -> Self {
+        match result {
+            Ok(response) => BtcGetSpendableUtxosResult::Ok(response),
+            Err(err) => BtcGetSpendableUtxosResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcAddPendingTransactionResult {
     /// The pending transaction was added successfully.
     Ok(()),
@@ -274,6 +293,24 @@ impl From<Result<(), BtcAddPendingTransactionError>> for BtcAddPendingTransactio
         match result {
             Ok(()) => BtcAddPendingTransactionResult::Ok(()),
             Err(err) => BtcAddPendingTransactionResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcBroadcastTransactionResult {
+    /// The transaction was broadcast, now or by an earlier call.
+    Ok(BtcBroadcastTransactionResponse),
+    /// See the error for whether the transaction may have been broadcast.
+    Err(BtcBroadcastTransactionError),
+}
+impl From<Result<BtcBroadcastTransactionResponse, BtcBroadcastTransactionError>>
+    for BtcBroadcastTransactionResult
+{
+    fn from(result: Result<BtcBroadcastTransactionResponse, BtcBroadcastTransactionError>) -> Self {
+        match result {
+            Ok(response) => BtcBroadcastTransactionResult::Ok(response),
+            Err(err) => BtcBroadcastTransactionResult::Err(err),
         }
     }
 }

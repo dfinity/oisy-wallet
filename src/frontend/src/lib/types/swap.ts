@@ -77,6 +77,7 @@ export enum SwapErrorCodes {
 	ICP_SWAP_WITHDRAW_FAILED = 'ICPSwap_withdraw_failed',
 	NEAR_INTENTS_QUOTE_UNVERIFIED = 'near_intents_quote_unverified',
 	NEAR_INTENTS_QUOTE_EXPIRED = 'near_intents_quote_expired',
+	NEAR_INTENTS_QUOTE_SLIPPAGE = 'near_intents_quote_slippage',
 	NEAR_INTENTS_QUOTE_DEPOSIT_MEMO = 'near_intents_quote_deposit_memo'
 }
 export interface ProviderFee {
@@ -114,6 +115,8 @@ export interface FetchSwapAmountsParams extends SwapQuoteObserver {
 }
 
 export type Slippage = string | number;
+
+export type SwapSlippageStatus = 'valid' | 'warning' | 'invalid';
 
 /**
  * The reason no offer could be quoted, when a provider named one.
@@ -562,6 +565,8 @@ interface SwapNearIntentsParams {
 	sourceToken: Token;
 	swapAmount: Amount;
 	swapDetails: NearIntentsQuoteResponse;
+	// The max slippage the review showed; the quote must have been requested with it.
+	slippageValue: OptionAmount;
 }
 
 export interface SwapNearIntentsEvmParams
@@ -569,7 +574,6 @@ export interface SwapNearIntentsEvmParams
 	sourceToken: ErcFungibleToken;
 	destinationToken: ErcFungibleToken;
 	receiveAmount: bigint;
-	slippageValue: Amount;
 	sourceNetwork: EthereumNetwork;
 	userAddress: EthAddress;
 }

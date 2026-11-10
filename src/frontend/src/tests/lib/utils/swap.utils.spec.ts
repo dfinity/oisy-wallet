@@ -5,6 +5,7 @@ import type {
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
@@ -18,7 +19,10 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
-	SWAP_ETH_TOKEN_PLACEHOLDER
+	SWAP_ETH_TOKEN_PLACEHOLDER,
+	SWAP_SLIPPAGE_INVALID_VALUE,
+	SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
+	SWAP_SLIPPAGE_WARNING_VALUE
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
 import {
@@ -29,20 +33,26 @@ import {
 	type ICPSwapResult
 } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
+import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 import {
 	buildNearIntentsQuoteRequest,
 	calculateSlippage,
+	calculateSwapGainUsd,
 	calculateValueDifference,
 	findNearIntentsAsset,
 	findSwapProvider,
 	formatReceiveOutMinimum,
+	formatSwapSlippageShort,
 	geSwapEthTokenAddress,
 	getKongIcTokenIdentifier,
 	getLiquidityFees,
 	getNetworkFee,
 	getSwapRoute,
+	getSwapSlippageInvalidValue,
+	getSwapSlippageStatus,
 	getWithdrawableToken,
 	isSwapError,
+	keepSwapSlippage,
 	mapIcpSwapResult,
 	mapKongSwapResult,
 	mapNearIntentsQuoteResult,
@@ -62,6 +72,7 @@ import {
 	mockNearIntentsQuoteResponse,
 	mockNearIntentsTokens
 } from '$tests/mocks/near-intents.mock';
+import { mockSwapProviders, mockVeloraMarketProvider } from '$tests/mocks/swap.mocks';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import {
 	mockVeloraCrossChainSwapResponse,
@@ -345,6 +356,102 @@ describe('swap utils', () => {
 		});
 	});
 
+	describe('getSwapSlippageInvalidValue', () => {
+		it('allows the wider ICP limit for an ICP source', () => {
+			expect(getSwapSlippageInvalidValue(ICP_NETWORK_ID)).toBe(SWAP_SLIPPAGE_INVALID_VALUE);
+		});
+
+		it.each([ETHEREUM_NETWORK.id, SOLANA_MAINNET_NETWORK.id, BTC_MAINNET_TOKEN.network.id])(
+			'applies the Velora limit to %s',
+			(networkId) => {
+				expect(getSwapSlippageInvalidValue(networkId)).toBe(SWAP_SLIPPAGE_VELORA_INVALID_VALUE);
+			}
+		);
+
+		it('applies the Velora limit before a source is chosen', () => {
+			expect(getSwapSlippageInvalidValue(undefined)).toBe(SWAP_SLIPPAGE_VELORA_INVALID_VALUE);
+		});
+	});
+
+	describe('getSwapSlippageStatus', () => {
+		const maxSlippageInvalidValue = SWAP_SLIPPAGE_VELORA_INVALID_VALUE;
+
+		it.each(['0.5', '1.5', 3, '6.9999'])('accepts %s', (slippageValue) => {
+			expect(getSwapSlippageStatus({ slippageValue, maxSlippageInvalidValue })).toBe('valid');
+		});
+
+		it.each([`${SWAP_SLIPPAGE_WARNING_VALUE}`, SWAP_SLIPPAGE_WARNING_VALUE, '14.9999'])(
+			'warns about %s',
+			(slippageValue) => {
+				expect(getSwapSlippageStatus({ slippageValue, maxSlippageInvalidValue })).toBe('warning');
+			}
+		);
+
+		it.each([
+			undefined,
+			'',
+			'0',
+			0,
+			'-1',
+			`${SWAP_SLIPPAGE_VELORA_INVALID_VALUE}`,
+			SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
+			`${SWAP_SLIPPAGE_INVALID_VALUE}`,
+			'abc'
+		])('refuses %s', (slippageValue) => {
+			expect(getSwapSlippageStatus({ slippageValue, maxSlippageInvalidValue })).toBe('invalid');
+		});
+	});
+
+	describe('formatSwapSlippageShort', () => {
+		it.each([
+			{ value: 1.5, expected: '1.5' },
+			{ value: 3, expected: '3' },
+			{ value: 12.3456, expected: '12.34' },
+			{ value: 0.29, expected: '0.29' },
+			{ value: 49.996, expected: '49.99' },
+			{ value: 14.9999, expected: '14.99' }
+		])('cuts $value to $expected', ({ value, expected }) => {
+			expect(formatSwapSlippageShort(value)).toBe(expected);
+		});
+
+		it('keeps a value below 0.01 rather than showing 0', () => {
+			expect(formatSwapSlippageShort(0.004)).toBe('0.004');
+		});
+
+		it('shows 0 as 0', () => {
+			expect(formatSwapSlippageShort(0)).toBe('0');
+		});
+	});
+
+	describe('keepSwapSlippage', () => {
+		beforeEach(() => {
+			sessionStorage.clear();
+		});
+
+		it('keeps a value every source network accepts', () => {
+			keepSwapSlippage('8');
+
+			expect(loadSwapSlippage()).toBe(8);
+		});
+
+		// The next swap may start from Ethereum, where 30 % is refused.
+		it('does not keep a value that only an ICP source accepts', () => {
+			saveSwapSlippage('8');
+
+			keepSwapSlippage('30');
+
+			expect(loadSwapSlippage()).toBe(8);
+		});
+
+		it('keeps the last accepted value when the new one is refused', () => {
+			saveSwapSlippage('8');
+
+			keepSwapSlippage('60');
+
+			expect(loadSwapSlippage()).toBe(8);
+		});
+	});
+
 	describe('slippagePercentToBasisPoints', () => {
 		it('converts whole and fractional percentages to basis points', () => {
 			expect(slippagePercentToBasisPoints(1)).toBe(100);
@@ -562,6 +669,7 @@ describe('swap utils', () => {
 		it.each([
 			SwapErrorCodes.NEAR_INTENTS_QUOTE_UNVERIFIED,
 			SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED,
+			SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE,
 			SwapErrorCodes.NEAR_INTENTS_QUOTE_DEPOSIT_MEMO
 		])('should return the message of a %s error', (code) => {
 			const error = new SwapError(code, 'No funds were sent.');
@@ -807,6 +915,63 @@ describe('swap utils', () => {
 		});
 	});
 
+	describe('calculateSwapGainUsd', () => {
+		const [icpSwap, kongSwap] = mockSwapProviders;
+
+		it('values the gain of the selected offer over the lowest one', () => {
+			expect(
+				calculateSwapGainUsd({
+					swaps: [kongSwap, icpSwap],
+					selectedProvider: kongSwap,
+					decimals: 8,
+					exchangeRate: 2
+				})
+			).toBe(20);
+		});
+
+		it('measures against the lowest of all offers, not the next best', () => {
+			expect(
+				calculateSwapGainUsd({
+					swaps: [kongSwap, icpSwap, mockVeloraMarketProvider],
+					selectedProvider: kongSwap,
+					decimals: 8,
+					exchangeRate: 2
+				})
+			).toBe(22);
+		});
+
+		it('values a manually selected offer that is not the best', () => {
+			expect(
+				calculateSwapGainUsd({
+					swaps: [kongSwap, icpSwap, mockVeloraMarketProvider],
+					selectedProvider: icpSwap,
+					decimals: 8,
+					exchangeRate: 2
+				})
+			).toBe(2);
+		});
+
+		it.each([
+			{ case: 'a single offer', swaps: [kongSwap], selectedProvider: kongSwap, exchangeRate: 2 },
+			{
+				case: 'no exchange rate',
+				swaps: [kongSwap, icpSwap],
+				selectedProvider: kongSwap,
+				exchangeRate: undefined
+			},
+			{
+				case: 'the lowest offer selected',
+				swaps: [kongSwap, icpSwap],
+				selectedProvider: icpSwap,
+				exchangeRate: 2
+			}
+		])('returns undefined for $case', ({ swaps, selectedProvider, exchangeRate }) => {
+			expect(
+				calculateSwapGainUsd({ swaps, selectedProvider, decimals: 8, exchangeRate })
+			).toBeUndefined();
+		});
+	});
+
 	describe('mapNearIntentsQuoteResult', () => {
 		it('should map quote response to SwapMappedResult', () => {
 			const result = mapNearIntentsQuoteResult(mockNearIntentsQuoteResponse);
@@ -854,6 +1019,46 @@ describe('swap utils', () => {
 				receiveAmount: 900000n,
 				receiveOutMinimum: 891000n,
 				swapDetails: quoteWithDecimals
+			});
+		});
+
+		it('should keep amounts above Number.MAX_SAFE_INTEGER exact', () => {
+			const quoteWithLargeAmounts = {
+				...mockNearIntentsQuoteResponse,
+				quote: {
+					...mockNearIntentsQuoteResponse.quote,
+					amountOut: '900000000000000099',
+					minAmountOut: '891000000000000099'
+				}
+			};
+
+			const result = mapNearIntentsQuoteResult(quoteWithLargeAmounts);
+
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: 900000000000000099n,
+				receiveOutMinimum: 891000000000000099n,
+				swapDetails: quoteWithLargeAmounts
+			});
+		});
+
+		it('should floor decimal amounts above Number.MAX_SAFE_INTEGER exactly', () => {
+			const quoteWithLargeDecimals = {
+				...mockNearIntentsQuoteResponse,
+				quote: {
+					...mockNearIntentsQuoteResponse.quote,
+					amountOut: '900000000000000099.7',
+					minAmountOut: '891000000000000099.9'
+				}
+			};
+
+			const result = mapNearIntentsQuoteResult(quoteWithLargeDecimals);
+
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: 900000000000000099n,
+				receiveOutMinimum: 891000000000000099n,
+				swapDetails: quoteWithLargeDecimals
 			});
 		});
 	});

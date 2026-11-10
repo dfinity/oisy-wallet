@@ -4,7 +4,7 @@ import {
 	BSC_EXPLORER_URL,
 	BTC_MAINNET_ADDRESS_EXPLORER_URL,
 	ETHEREUM_EXPLORER_URL,
-	ICP_ADDRESS_EXPLORER_URL,
+	ICP_EXPLORER_URL,
 	LIFI_EXPLORER_URL,
 	NEAR_INTENTS_EXPLORER_URL,
 	ONESEC_EXPLORER_URL,
@@ -122,13 +122,12 @@ export const buildHelpExplorerGroups = ({
 	].filter(({ links }) => links.length > 0);
 
 // Where a whole address is looked up on each mainnet network, and which of the wallet's
-// addresses to look up there. Every entry but two reuses the network's own explorer host,
-// so the Help page and a transaction link land on the same site; ICP and BTC use the
-// dedicated address explorers (see `ADDRESS_EXPLORER_URLS`).
+// addresses to look up there. Every entry but one reuses the network's own explorer host,
+// so the Help page and a transaction link land on the same site; BTC uses the dedicated
+// address explorer (see `ADDRESS_EXPLORER_URLS`).
 //
 // Keyed by network id rather than derived from `network.explorerUrl`, because the path to
-// an address is not uniform: Solana's URL is a template with the path in the middle, and
-// the ICP dashboard has no page for a principal at all.
+// an address is not uniform: Solana's URL is a template with the path in the middle.
 //
 // A mainnet network missing here simply gets no link, which is why the whole thing is
 // `Partial` - and why every network the wallet gains needs an entry added. Both XRP and
@@ -138,7 +137,9 @@ const NETWORK_ADDRESS_EXPLORERS: Partial<
 > = {
 	[ICP_NETWORK_ID]: {
 		chain: 'icp',
-		buildUrl: (address) => `${ICP_ADDRESS_EXPLORER_URL}/address/details/${address}`
+		// The ICP dashboard's address page takes the principal and lists its balance on
+		// every ledger it tracks.
+		buildUrl: (address) => `${ICP_EXPLORER_URL}/address/${address}`
 	},
 	[BTC_MAINNET_NETWORK_ID]: {
 		chain: 'btc',

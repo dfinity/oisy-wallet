@@ -1,3 +1,5 @@
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
@@ -5,6 +7,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
 import * as exchanges from '$lib/derived/exchange.derived';
 import type { SwappableTokens } from '$lib/derived/swap.derived';
+import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { balancesStore } from '$lib/stores/balances.store';
 import { initSwapContext } from '$lib/stores/swap.store';
 import { bn1Bi, bn2Bi } from '$tests/mocks/balances.mock';
@@ -92,6 +95,27 @@ describe('swapStore', () => {
 
 		expect(get(sourceTokenExchangeRate)).toStrictEqual(icpExchangeValue);
 		expect(get(destinationTokenExchangeRate)).toStrictEqual(ckBtcExchangeValue);
+	});
+
+	it('should forget the filters each side was set on when reset', () => {
+		const { getTokenListFilters, setTokenListFilters, reset } = initSwapContext();
+
+		const sourceFilters = { network: ICP_NETWORK, category: TokenCategoryTagValue.CRYPTO };
+		const destinationFilters = {
+			network: ETHEREUM_NETWORK,
+			category: TokenCategoryTagValue.STABLECOIN
+		};
+
+		setTokenListFilters({ side: 'source', filters: sourceFilters });
+		setTokenListFilters({ side: 'destination', filters: destinationFilters });
+
+		expect(getTokenListFilters('source')).toStrictEqual(sourceFilters);
+		expect(getTokenListFilters('destination')).toStrictEqual(destinationFilters);
+
+		reset();
+
+		expect(getTokenListFilters('source')).toBeUndefined();
+		expect(getTokenListFilters('destination')).toBeUndefined();
 	});
 
 	it('should reset all values', () => {

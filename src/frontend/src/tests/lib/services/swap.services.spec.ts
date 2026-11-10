@@ -1,15 +1,27 @@
 import { sendBtc } from '$btc/services/btc-send.services';
+import { BtcBroadcastUnconfirmedError } from '$btc/types/btc-send';
 import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { VELORA_AUGUSTUS_ADDRESSES, VELORA_DELTA_ADDRESSES } from '$env/rest/velora.env';
 import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import {
+	VELORA_AUGUSTUS_SELL_ABI,
+	VELORA_DELTA_ORDER_TYPES
+} from '$eth/constants/velora.constants';
+import { infuraProviders } from '$eth/providers/infura.providers';
+import { approve as approveToken } from '$eth/services/approve.services';
 import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { send as sendEvm } from '$eth/services/send.services';
 import { swap as sendEvmSwap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
+import { getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import {
@@ -23,8 +35,14 @@ import * as icpSwapFactory from '$lib/api/icp-swap-factory.api';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
-import { ZERO } from '$lib/constants/app.constants';
-import { LIFI_QUOTE_TIMEOUT_MS, SWAP_QUOTE_TIMEOUT_MS } from '$lib/constants/swap.constants';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
+import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
+import {
+	LIFI_QUOTE_TIMEOUT_MS,
+	SWAP_DEFAULT_SLIPPAGE_VALUE,
+	SWAP_ETH_TOKEN_PLACEHOLDER,
+	SWAP_QUOTE_TIMEOUT_MS
+} from '$lib/constants/swap.constants';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
 import {
 	PLAUSIBLE_EVENTS,
@@ -64,7 +82,11 @@ import { fetchVeloraSwapAmount } from '$lib/services/velora-swap.services';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
-import { SwapAmountTooLowError, SwapViaIntermediateTokenError } from '$lib/types/errors';
+import {
+	SwapAmountTooLowError,
+	SwapViaIntermediateTokenError,
+	VeloraSwapRejectedError
+} from '$lib/types/errors';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
@@ -83,13 +105,14 @@ import {
 	verifyNearIntentsQuoteSignature
 } from '$lib/utils/near-intents-quote.utils';
 import { parseToken } from '$lib/utils/parse.utils';
+import { geSwapEthTokenAddress, slippagePercentToBasisPoints } from '$lib/utils/swap.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import {
 	mockValidIcCkToken,
@@ -117,7 +140,15 @@ import {
 	XrpSendNotGuardedError,
 	type XrpPaymentRecord
 } from '$xrp/types/xrp-send';
-import { constructSimpleSDK, type DeltaPrice, type OptimalRate } from '@velora-dex/sdk';
+import { nonNullish } from '@dfinity/utils';
+import {
+	constructSimpleSDK,
+	type BuildDeltaOrderParams,
+	type DeltaAuctionOrder,
+	type DeltaPrice,
+	type OptimalRate
+} from '@velora-dex/sdk';
+import { Interface } from 'ethers/abi';
 import { get, readable } from 'svelte/store';
 
 vi.mock('$icp/services/icrc.services', async (importOriginal) => ({
@@ -247,7 +278,8 @@ vi.mock('$lib/services/near-intents.services', () => ({
 }));
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
-	createActiveUserTransaction: vi.fn()
+	createActiveUserTransaction: vi.fn(),
+	deleteUnbroadcastActiveUserTransaction: vi.fn()
 }));
 
 vi.mock('$eth/services/send.services', () => ({
@@ -280,6 +312,10 @@ vi.mock('@velora-dex/sdk', async (importOriginal) => {
 vi.mock('$eth/services/approve.services', () => ({
 	approve: vi.fn(),
 	erc20ContractAllowance: vi.fn()
+}));
+
+vi.mock('$eth/providers/infura.providers', () => ({
+	infuraProviders: vi.fn()
 }));
 
 vi.mock('$eth/services/swap.services', () => ({
@@ -2279,9 +2315,55 @@ describe('swap.services', () => {
 		const mockMaxFeePerGas = '20000000000';
 		const mockMaxPriorityFeePerGas = '2000000000';
 
+		// `parseToken` reads the swap amount in the token's unit, so the route sells it scaled.
+		const mockParsedSwapAmount = BigInt(mockSwapAmount) * 10n ** 18n;
+
 		const mockSwapDetails: DeltaPrice = {
-			...mockVeloraDeltaPrice
+			...mockVeloraDeltaPrice,
+			route: {
+				...mockVeloraDeltaPrice.route,
+				origin: {
+					...mockVeloraDeltaPrice.route.origin,
+					input: {
+						...mockVeloraDeltaPrice.route.origin.input,
+						amount: `${mockParsedSwapAmount}`
+					}
+				}
+			}
 		};
+
+		const mockDeltaContractAddress = VELORA_DELTA_ADDRESSES[ETHEREUM_NETWORK.id];
+
+		// The order the server builds from the mock quote at the default 0.5% slippage: the origin
+		// output (900000000) less the slippage, paid to the owner through a zero beneficiary.
+		const mockDeltaOrder = (order: Partial<DeltaAuctionOrder> = {}): DeltaAuctionOrder => ({
+			owner: mockUserAddress,
+			beneficiary: ZERO_ETH_ADDRESS,
+			srcToken: mockSourceToken.address,
+			destToken: mockDestinationToken.address,
+			srcAmount: `${mockParsedSwapAmount}`,
+			destAmount: '895500000',
+			expectedAmount: '900000000',
+			deadline: 1234567890,
+			kind: 0,
+			nonce: '1',
+			permit: '0x',
+			partnerAndFee: '512',
+			metadata: '0x',
+			bridge: {
+				protocolSelector: '0x00000000',
+				destinationChainId: 0,
+				outputToken: ZERO_ETH_ADDRESS,
+				scalingFactor: 0,
+				protocolData: '0x'
+			},
+			...order
+		});
+
+		const mockBuiltDeltaOrder = (order?: Partial<DeltaAuctionOrder>) => ({
+			toSign: { domain: {}, types: {}, value: mockDeltaOrder(order) },
+			orderHash: 'mock-order-hash'
+		});
 
 		const mockProgress = vi.fn();
 
@@ -2326,14 +2408,12 @@ describe('swap.services', () => {
 			vi.mocked(constructSimpleSDK).mockReturnValue(
 				mockSdk as unknown as ReturnType<typeof constructSimpleSDK>
 			);
-			mockDeltaContractGetDeltaContract.mockResolvedValue(mockDeltaContract);
-			// destAmount mirrors what the server would build from the mock quote's origin output
-			// (900000000) at the default 0.5% slippage.
-			mockDeltaContractBuildDeltaOrder.mockResolvedValue({
-				toSign: { domain: {}, types: {}, value: { destAmount: '895500000' } },
-				orderHash: 'mock-order-hash'
-			});
+			// The server echoes the permit it was given, or none.
+			mockDeltaContractBuildDeltaOrder.mockImplementation(({ permit }: BuildDeltaOrderParams) =>
+				Promise.resolve(mockBuiltDeltaOrder({ permit: permit ?? '0x' }))
+			);
 			mockDeltaContractPostDeltaOrder.mockResolvedValue({ id: 'mock-auction-id' });
+			vi.mocked(geSwapEthTokenAddress).mockImplementation(({ address }) => address);
 
 			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
 
@@ -2427,27 +2507,28 @@ describe('swap.services', () => {
 			expect(buildParams).not.toHaveProperty('nonce');
 		});
 
-		it('should handle delta contract not found', async () => {
-			mockDeltaContractGetDeltaContract.mockResolvedValue(null);
+		it('refuses a network with no pinned Delta contract before approving anything', async () => {
+			await expect(
+				fetchVeloraDeltaSwap({
+					identity: mockIdentity,
+					progress: mockProgress,
+					sourceToken: mockSourceToken,
+					destinationToken: mockDestinationToken,
+					swapAmount: mockSwapAmount,
+					sourceNetwork: SEPOLIA_NETWORK,
+					receiveAmount: mockReceiveAmount,
+					slippageValue: mockSlippageValue,
+					userAddress: mockUserAddress,
+					gas: BigInt(mockGas),
+					isGasless: false,
+					maxFeePerGas: BigInt(mockMaxFeePerGas),
+					maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+					swapDetails: mockSwapDetails
+				})
+			).rejects.toThrow(VeloraSwapRejectedError);
 
-			await fetchVeloraDeltaSwap({
-				identity: mockIdentity,
-				progress: mockProgress,
-				sourceToken: mockSourceToken,
-				destinationToken: mockDestinationToken,
-				swapAmount: mockSwapAmount,
-				sourceNetwork: mockSourceNetwork,
-				receiveAmount: mockReceiveAmount,
-				slippageValue: mockSlippageValue,
-				userAddress: mockUserAddress,
-				gas: BigInt(mockGas),
-				isGasless: false,
-				maxFeePerGas: BigInt(mockMaxFeePerGas),
-				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
-				swapDetails: mockSwapDetails
-			});
-
-			expect(mockProgress).not.toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
+			expect(approveToken).not.toHaveBeenCalled();
+			expect(mockDeltaContractBuildDeltaOrder).not.toHaveBeenCalled();
 			expect(mockDeltaContractPostDeltaOrder).not.toHaveBeenCalled();
 		});
 
@@ -2593,10 +2674,9 @@ describe('swap.services', () => {
 
 		it('rounds the slippage to integer basis points when building the order', async () => {
 			// 29 bps on the mock quote's origin output (900000000) → minimum 897390000.
-			mockDeltaContractBuildDeltaOrder.mockResolvedValue({
-				toSign: { domain: {}, types: {}, value: { destAmount: '897390000' } },
-				orderHash: 'mock-order-hash'
-			});
+			mockDeltaContractBuildDeltaOrder.mockResolvedValue(
+				mockBuiltDeltaOrder({ destAmount: '897390000' })
+			);
 
 			await fetchVeloraDeltaSwap({
 				identity: mockIdentity,
@@ -2624,10 +2704,9 @@ describe('swap.services', () => {
 		it('refuses to sign an order whose destAmount is below the slippage minimum', async () => {
 			// The server-built minimum guarantees less than the quoted origin output (900000000)
 			// minus the 0.5% slippage the user accepted (895500000).
-			mockDeltaContractBuildDeltaOrder.mockResolvedValue({
-				toSign: { domain: {}, types: {}, value: { destAmount: '895499999' } },
-				orderHash: 'mock-order-hash'
-			});
+			mockDeltaContractBuildDeltaOrder.mockResolvedValue(
+				mockBuiltDeltaOrder({ destAmount: '895499999' })
+			);
 
 			await expect(
 				fetchVeloraDeltaSwap({
@@ -2654,18 +2733,161 @@ describe('swap.services', () => {
 			expect(signPrehash).not.toHaveBeenCalled();
 			expect(mockDeltaContractPostDeltaOrder).not.toHaveBeenCalled();
 		});
+
+		it('signs an order whose minimum is exactly the one Velora computes on integers', async () => {
+			// A real quote and order Velora returned on 2026-10-23 for 100 USDC to WETH at 1%: the
+			// signed minimum is 41173455568984299; in floating point the same minimum comes out as
+			// 41173455568984304.
+			const quotedOutput = '41589349059580101';
+			const { origin, destination } = mockSwapDetails.route;
+
+			mockDeltaContractBuildDeltaOrder.mockResolvedValue(
+				mockBuiltDeltaOrder({ destAmount: '41173455568984299', expectedAmount: quotedOutput })
+			);
+
+			await fetchVeloraDeltaSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				receiveAmount: mockReceiveAmount,
+				slippageValue: '1',
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				isGasless: false,
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: {
+					...mockSwapDetails,
+					route: {
+						...mockSwapDetails.route,
+						origin: { ...origin, output: { ...origin.output, amount: quotedOutput } },
+						destination: {
+							...destination,
+							output: { ...destination.output, amount: quotedOutput }
+						}
+					}
+				}
+			});
+
+			expect(signPrehash).toHaveBeenCalledOnce();
+			expect(mockDeltaContractPostDeltaOrder).toHaveBeenCalledOnce();
+		});
+
+		describe('binding the order to the reviewed swap', () => {
+			const params = {
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				receiveAmount: mockReceiveAmount,
+				slippageValue: mockSlippageValue,
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				isGasless: false,
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails
+			};
+
+			it('approves the pinned Delta contract, never one the API names', async () => {
+				await fetchVeloraDeltaSwap(params);
+
+				expect(approveToken).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ to: mockDeltaContractAddress })
+				);
+				expect(mockDeltaContractGetDeltaContract).not.toHaveBeenCalled();
+			});
+
+			it('permits the pinned Delta contract', async () => {
+				await fetchVeloraDeltaSwap({ ...params, isGasless: true });
+
+				expect(createPermit).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ spender: mockDeltaContractAddress })
+				);
+			});
+
+			it('hashes the checked order with the pinned domain and the Delta order types', async () => {
+				await fetchVeloraDeltaSwap(params);
+
+				expect(getSignParamsEIP712).toHaveBeenCalledExactlyOnceWith({
+					domain: {
+						name: 'Portikus',
+						version: '2.0.0',
+						chainId: Number(mockSourceNetwork.chainId),
+						verifyingContract: mockDeltaContractAddress
+					},
+					types: VELORA_DELTA_ORDER_TYPES,
+					value: mockDeltaOrder()
+				});
+				expect(mockDeltaContractPostDeltaOrder).toHaveBeenCalledExactlyOnceWith({
+					order: mockDeltaOrder(),
+					signature: 'mock-signature'
+				});
+			});
+
+			it('refuses a route selling another amount before approving anything', async () => {
+				await expect(
+					fetchVeloraDeltaSwap({
+						...params,
+						swapDetails: {
+							...mockSwapDetails,
+							route: {
+								...mockSwapDetails.route,
+								origin: {
+									...mockSwapDetails.route.origin,
+									input: { ...mockSwapDetails.route.origin.input, amount: '1' }
+								}
+							}
+						}
+					})
+				).rejects.toThrow(VeloraSwapRejectedError);
+
+				expect(approveToken).not.toHaveBeenCalled();
+				expect(mockDeltaContractBuildDeltaOrder).not.toHaveBeenCalled();
+			});
+
+			it.each([
+				{ case: 'pays another beneficiary', order: { beneficiary: mockEthAddress2 } },
+				{ case: 'belongs to another owner', order: { owner: mockEthAddress2 } },
+				{ case: 'sells another amount', order: { srcAmount: '1' } },
+				{ case: 'carries a permit OISY did not sign', order: { permit: '0xpermitdata' } }
+			])('refuses to sign an order that $case', async ({ order }) => {
+				mockDeltaContractBuildDeltaOrder.mockResolvedValue(mockBuiltDeltaOrder(order));
+
+				await expect(fetchVeloraDeltaSwap(params)).rejects.toThrow(VeloraSwapRejectedError);
+
+				expect(signPrehash).not.toHaveBeenCalled();
+				expect(mockDeltaContractPostDeltaOrder).not.toHaveBeenCalled();
+			});
+
+			it('refuses to sign a gasless order that drops the permit', async () => {
+				mockDeltaContractBuildDeltaOrder.mockResolvedValue(mockBuiltDeltaOrder());
+
+				await expect(fetchVeloraDeltaSwap({ ...params, isGasless: true })).rejects.toThrow(
+					VeloraSwapRejectedError
+				);
+
+				expect(signPrehash).not.toHaveBeenCalled();
+			});
+		});
 	});
 
 	describe('fetchVeloraMarketSwap', () => {
+		// Real addresses: the calldata below is ABI-encoded, which takes only valid ones.
 		const mockSourceToken = {
 			...mockValidErc20Token,
-			address: mockEthAddress,
+			address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
 			decimals: 18
 		};
 
 		const mockDestinationToken = {
 			...mockValidErc20Token,
-			address: '0xDestinationToken',
+			address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
 			decimals: 6,
 			enabled: true
 		};
@@ -2681,6 +2903,45 @@ describe('swap.services', () => {
 		const mockSwapDetails: OptimalRate = {
 			...mockVeloraOptimalRate
 		};
+
+		const mockAugustusAddress = VELORA_AUGUSTUS_ADDRESSES[ETHEREUM_NETWORK.id];
+
+		const augustus = new Interface(VELORA_AUGUSTUS_SELL_ABI);
+
+		// The transaction Velora builds for the mock quote at the default 0.5% slippage: the quoted
+		// 900000000 less the slippage, paid to the caller through a zero beneficiary, with the surplus
+		// cap (`AugustusFees.IS_CAP_SURPLUS_MASK`) as its only fee flag.
+		const mockTransaction = ({
+			sale,
+			...transaction
+		}: {
+			sale?: Record<string, unknown>;
+			to?: string;
+			chainId?: number;
+			value?: string;
+			gas?: string;
+		} = {}) => ({
+			from: mockEthAddress,
+			to: mockAugustusAddress,
+			value: '0',
+			chainId: Number(ETHEREUM_NETWORK.chainId),
+			data: augustus.encodeFunctionData('swapExactAmountInOnUniswapV3', [
+				{
+					srcToken: mockSourceToken.address,
+					destToken: mockDestinationToken.address,
+					fromAmount: parseToken({ value: mockSwapAmount, unitName: mockSourceToken.decimals }),
+					toAmount: 895500000n,
+					quotedAmount: 900000000n,
+					metadata: `0x${'00'.repeat(32)}`,
+					beneficiary: ZERO_ETH_ADDRESS,
+					pools: '0x',
+					...sale
+				},
+				1n << 92n,
+				'0x'
+			]),
+			...transaction
+		});
 
 		const mockProgress = vi.fn();
 
@@ -2700,8 +2961,19 @@ describe('swap.services', () => {
 		const mockTxHash = '0xMarketTxHash';
 		const mockTxNonce = 7;
 
+		// The node's estimate, and the limit the swap signs with: the estimate plus 20 %.
+		const mockEstimatedGas = 100000n;
+		const mockSignedGas = '120000';
+
+		const mockEstimateGas = vi.fn();
+
 		beforeEach(() => {
 			vi.clearAllMocks();
+
+			mockEstimateGas.mockResolvedValue(mockEstimatedGas);
+			vi.mocked(infuraProviders).mockReturnValue({
+				estimateGas: mockEstimateGas
+			} as unknown as ReturnType<typeof infuraProviders>);
 
 			mockSwapGetSpender = vi.fn();
 			mockSwapBuildTx = vi.fn();
@@ -2719,10 +2991,8 @@ describe('swap.services', () => {
 				mockSdk as unknown as ReturnType<typeof constructSimpleSDK>
 			);
 			mockSwapGetSpender.mockResolvedValue('0xTokenTransferProxy');
-			mockSwapBuildTx.mockResolvedValue({
-				to: '0xSwapContract',
-				data: '0xswapdata'
-			});
+			mockSwapBuildTx.mockResolvedValue(mockTransaction());
+			vi.mocked(geSwapEthTokenAddress).mockImplementation(({ address }) => address);
 			vi.mocked(sendEvmSwap).mockResolvedValue({ hash: mockTxHash, nonce: mockTxNonce });
 			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
 		});
@@ -2749,7 +3019,10 @@ describe('swap.services', () => {
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SWAP);
 			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSwap.UPDATE_UI);
 
-			expect(mockSwapGetSpender).toHaveBeenCalled();
+			expect(approveToken).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ to: mockAugustusAddress })
+			);
+			expect(mockSwapGetSpender).not.toHaveBeenCalled();
 		});
 
 		it('should execute market swap successfully with default Ethereum token', async () => {
@@ -2776,7 +3049,7 @@ describe('swap.services', () => {
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SWAP);
 			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSwap.UPDATE_UI);
 
-			expect(mockSwapGetSpender).toHaveBeenCalled();
+			expect(approveToken).not.toHaveBeenCalled();
 			expect(mockSwapBuildTx).toHaveBeenCalled();
 		});
 
@@ -2807,6 +3080,9 @@ describe('swap.services', () => {
 		});
 
 		it('rounds the slippage to integer basis points when building the transaction', async () => {
+			// 29 bps on the quoted 900000000 → minimum 897390000.
+			mockSwapBuildTx.mockResolvedValue(mockTransaction({ sale: { toAmount: 897390000n } }));
+
 			await fetchVeloraMarketSwap({
 				identity: mockIdentity,
 				progress: mockProgress,
@@ -2895,6 +3171,174 @@ describe('swap.services', () => {
 			).resolves.toBeUndefined();
 
 			expect(mockProgress).toHaveBeenLastCalledWith(ProgressStepsSwap.UPDATE_UI);
+		});
+
+		describe('binding the transaction to the reviewed swap', () => {
+			const params = {
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				slippageValue: mockSlippageValue,
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails,
+				receiveAmount: BigInt(1000),
+				isGasless: false
+			};
+
+			it('sends the checked transaction to the pinned Augustus', async () => {
+				await fetchVeloraMarketSwap(params);
+
+				expect(sendEvmSwap).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						to: mockAugustusAddress,
+						transaction: { ...mockTransaction(), gas: mockSignedGas }
+					})
+				);
+			});
+
+			it('signs with the gas the node estimates, plus the buffer, not the limit Velora sets', async () => {
+				mockSwapBuildTx.mockResolvedValue(mockTransaction({ gas: '30000000' }));
+
+				await fetchVeloraMarketSwap(params);
+
+				expect(mockEstimateGas).toHaveBeenCalledExactlyOnceWith({
+					from: mockUserAddress,
+					to: mockAugustusAddress,
+					data: mockTransaction().data,
+					value: ZERO
+				});
+				expect(sendEvmSwap).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ transaction: { ...mockTransaction(), gas: mockSignedGas } })
+				);
+			});
+
+			it('stops before signing a transaction the node cannot estimate', async () => {
+				// Ethers' message for a failed estimate carries the transaction, wallet address included.
+				mockEstimateGas.mockRejectedValue(
+					new Error(`missing revert data (transaction={ "from": "${mockUserAddress}" })`)
+				);
+
+				const swap = fetchVeloraMarketSwap(params);
+
+				await expect(swap).rejects.toBeInstanceOf(VeloraSwapRejectedError);
+				await expect(swap).rejects.toThrow(
+					new Error('Velora swap rejected: the transaction gas could not be estimated')
+				);
+
+				expect(sendEvmSwap).not.toHaveBeenCalled();
+			});
+
+			it('refuses a network with no pinned Augustus before approving anything', async () => {
+				await expect(
+					fetchVeloraMarketSwap({ ...params, sourceNetwork: ROBINHOOD_MAINNET_NETWORK })
+				).rejects.toThrow(VeloraSwapRejectedError);
+
+				expect(approveToken).not.toHaveBeenCalled();
+				expect(mockSwapBuildTx).not.toHaveBeenCalled();
+			});
+
+			it('refuses a destination on another network before approving anything', async () => {
+				await expect(
+					fetchVeloraMarketSwap({
+						...params,
+						destinationToken: { ...mockDestinationToken, network: BASE_NETWORK }
+					})
+				).rejects.toThrow('Velora swap rejected: a Market swap cannot settle on another network');
+
+				expect(approveToken).not.toHaveBeenCalled();
+				expect(mockSwapBuildTx).not.toHaveBeenCalled();
+				expect(sendEvmSwap).not.toHaveBeenCalled();
+			});
+
+			it.each([
+				{ case: 'calls another contract', transaction: { to: mockDestinationToken.address } },
+				{ case: 'is for another network', transaction: { chainId: 8453 } },
+				{
+					case: 'pays another beneficiary',
+					transaction: { sale: { beneficiary: mockDestinationToken.address } }
+				},
+				{
+					case: 'sells another amount',
+					transaction: { sale: { fromAmount: 1n } }
+				},
+				{
+					case: 'measures the surplus from less than the quote',
+					transaction: { sale: { quotedAmount: 899999999n } }
+				}
+			])('refuses to send a transaction that $case', async ({ transaction }) => {
+				mockSwapBuildTx.mockResolvedValue(mockTransaction(transaction));
+
+				await expect(fetchVeloraMarketSwap(params)).rejects.toThrow(VeloraSwapRejectedError);
+
+				expect(sendEvmSwap).not.toHaveBeenCalled();
+			});
+
+			it('refuses a minimum below the reviewed one as exceeded slippage', async () => {
+				mockSwapBuildTx.mockResolvedValue(mockTransaction({ sale: { toAmount: 895499999n } }));
+
+				await expect(fetchVeloraMarketSwap(params)).rejects.toThrow(
+					'Slippage exceeded. Velora returned 895499999, expected at least 895500000.'
+				);
+
+				expect(sendEvmSwap).not.toHaveBeenCalled();
+			});
+
+			describe('selling the network coin', () => {
+				// The wizard passes the network's coin as it passes any source token.
+				const nativeParams = { ...params, sourceToken: ETHEREUM_TOKEN as Erc20Token };
+
+				const nativeAmount = parseToken({
+					value: mockSwapAmount,
+					unitName: ETHEREUM_TOKEN.decimals
+				});
+
+				const nativeTransaction = (value: bigint) =>
+					mockTransaction({
+						sale: { srcToken: SWAP_ETH_TOKEN_PLACEHOLDER, fromAmount: nativeAmount },
+						value: `${value}`
+					});
+
+				beforeEach(() => {
+					vi.mocked(ethUtils.isNotDefaultEthereumToken).mockReturnValue(false);
+					vi.mocked(geSwapEthTokenAddress).mockImplementation((token) =>
+						ethUtils.isDefaultEthereumToken(token) ? SWAP_ETH_TOKEN_PLACEHOLDER : token.address
+					);
+				});
+
+				it('sends a transaction carrying the amount sold as its value, with no approval', async () => {
+					mockSwapBuildTx.mockResolvedValue(nativeTransaction(nativeAmount));
+
+					await fetchVeloraMarketSwap(nativeParams);
+
+					expect(approveToken).not.toHaveBeenCalled();
+					expect(sendEvmSwap).toHaveBeenCalledExactlyOnceWith(
+						expect.objectContaining({
+							to: mockAugustusAddress,
+							transaction: { ...nativeTransaction(nativeAmount), gas: mockSignedGas }
+						})
+					);
+				});
+
+				it.each([
+					{ case: 'no value', value: ZERO },
+					{ case: 'less than the amount sold', value: nativeAmount - 1n },
+					{ case: 'more than the amount sold', value: nativeAmount + 1n }
+				])('refuses a transaction carrying $case before sending it', async ({ value }) => {
+					mockSwapBuildTx.mockResolvedValue(nativeTransaction(value));
+
+					await expect(fetchVeloraMarketSwap(nativeParams)).rejects.toThrow(
+						VeloraSwapRejectedError
+					);
+
+					expect(sendEvmSwap).not.toHaveBeenCalled();
+				});
+			});
 		});
 	});
 
@@ -3932,6 +4376,7 @@ describe('swap.services', () => {
 			sourceToken,
 			swapAmount: '1',
 			userAddress: mockSolAddress,
+			slippageValue: '1',
 			swapDetails: mockNearIntentsQuoteResponse
 		};
 
@@ -4070,6 +4515,74 @@ describe('swap.services', () => {
 
 			expect(sendEvm).not.toHaveBeenCalled();
 			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		describe('max slippage', () => {
+			const params = {
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				receiveAmount: 900000n,
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: mockEthAddress,
+				gas: 21000n,
+				maxFeePerGas: 20000000000n,
+				maxPriorityFeePerGas: 2000000000n
+			};
+
+			const quoteRequestedWith = (slippageTolerance: number): NearIntentsQuoteResponse => ({
+				...mockNearIntentsQuoteResponse,
+				quoteRequest: { ...mockNearIntentsQuoteResponse.quoteRequest, slippageTolerance }
+			});
+
+			it('should not send funds when the quote was requested with another slippage', async () => {
+				await expect(
+					fetchNearIntentsEvmSwap({
+						...params,
+						slippageValue: '0.5',
+						swapDetails: quoteRequestedWith(300)
+					})
+				).rejects.toMatchObject({
+					code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE,
+					message: en.swap.error.near_intents_quote_slippage
+				});
+
+				expect(sendEvm).not.toHaveBeenCalled();
+				expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+				expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			it('should send funds when the quote was requested with the reviewed slippage', async () => {
+				await fetchNearIntentsEvmSwap({
+					...params,
+					slippageValue: '0.5',
+					swapDetails: quoteRequestedWith(50)
+				});
+
+				expect(sendEvm).toHaveBeenCalledOnce();
+			});
+
+			it('should compare the default slippage when none was set', async () => {
+				await expect(
+					fetchNearIntentsEvmSwap({
+						...params,
+						slippageValue: undefined,
+						swapDetails: quoteRequestedWith(300)
+					})
+				).rejects.toMatchObject({ code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE });
+
+				expect(sendEvm).not.toHaveBeenCalled();
+
+				await fetchNearIntentsEvmSwap({
+					...params,
+					slippageValue: undefined,
+					swapDetails: quoteRequestedWith(slippagePercentToBasisPoints(SWAP_DEFAULT_SLIPPAGE_VALUE))
+				});
+
+				expect(sendEvm).toHaveBeenCalledOnce();
+			});
 		});
 
 		it('should retain the quote signature on the AUT row', async () => {
@@ -4283,6 +4796,24 @@ describe('swap.services', () => {
 			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
 		});
 
+		it('should not send funds when the quote was requested with another slippage', async () => {
+			await expect(
+				fetchNearIntentsSolSwap({
+					identity: mockIdentity,
+					progress: mockProgress,
+					sourceToken,
+					destinationToken,
+					swapAmount: '1',
+					userAddress: mockSolAddress,
+					slippageValue: '0.5',
+					swapDetails: mockNearIntentsQuoteResponse
+				})
+			).rejects.toMatchObject({ code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE });
+
+			expect(sendSol).not.toHaveBeenCalled();
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
 		it('should execute the full Solana swap flow', async () => {
 			await fetchNearIntentsSolSwap({
 				identity: mockIdentity,
@@ -4291,6 +4822,7 @@ describe('swap.services', () => {
 				destinationToken,
 				swapAmount: '1',
 				userAddress: mockSolAddress,
+				slippageValue: '1',
 				swapDetails: mockNearIntentsQuoteResponse
 			});
 
@@ -4325,6 +4857,7 @@ describe('swap.services', () => {
 				destinationToken,
 				swapAmount: '1',
 				userAddress: mockSolAddress,
+				slippageValue: '1',
 				swapDetails: mockNearIntentsQuoteResponse
 			});
 
@@ -4345,6 +4878,7 @@ describe('swap.services', () => {
 				destinationToken,
 				swapAmount: '1',
 				userAddress: mockSolAddress,
+				slippageValue: '1',
 				swapDetails: mockNearIntentsQuoteResponse
 			});
 
@@ -4372,6 +4906,7 @@ describe('swap.services', () => {
 				destinationToken,
 				swapAmount: '1',
 				userAddress: mockSolAddress,
+				slippageValue: '1',
 				swapDetails: quoteWithMemo
 			});
 
@@ -4407,6 +4942,7 @@ describe('swap.services', () => {
 			userAddress: mockBtcAddress,
 			network: 'mainnet' as const,
 			utxosFee: mockUtxosFee,
+			slippageValue: '1',
 			swapDetails: mockNearIntentsQuoteResponse
 		};
 
@@ -4421,6 +4957,15 @@ describe('swap.services', () => {
 			});
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
 			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+		});
+
+		it('should not send funds when the quote was requested with another slippage', async () => {
+			await expect(
+				fetchNearIntentsBtcSwap({ ...baseParams, slippageValue: '0.5' })
+			).rejects.toMatchObject({ code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE });
+
+			expect(sendBtc).not.toHaveBeenCalled();
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
 		});
 
 		it('should send the deposit to the quoted address on the quoted UTXO selection', async () => {
@@ -4579,6 +5124,130 @@ describe('swap.services', () => {
 			expect(setCustomToken).toHaveBeenCalledOnce();
 			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
 		});
+
+		describe('through the backend', () => {
+			const broadcast = vi.fn();
+
+			// As the real `sendBtc` does on the backend path: `beforeBroadcast` once signed, then the
+			// broadcast, which either goes out or fails with `failure`.
+			const sendThroughBackend = (failure?: unknown) =>
+				vi.mocked(sendBtc).mockImplementation(async ({ beforeBroadcast, onBroadcast }) => {
+					await beforeBroadcast?.({ txid: btcTxid });
+
+					broadcast();
+
+					if (nonNullish(failure)) {
+						throw failure;
+					}
+
+					await onBroadcast?.({ txid: btcTxid });
+
+					return btcTxid;
+				});
+
+			const createdRowId = () =>
+				vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mock.calls[0]?.[0].id;
+
+			beforeEach(() => {
+				broadcast.mockClear();
+				vi.mocked(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).mockResolvedValue(undefined);
+			});
+
+			it('should create the row before the broadcast, and only once', async () => {
+				vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockImplementation(
+					() => {
+						expect(broadcast).not.toHaveBeenCalled();
+
+						return Promise.resolve();
+					}
+				);
+				sendThroughBackend();
+
+				await fetchNearIntentsBtcSwap(baseParams);
+
+				// Without the source address, which only an XRP deposit carries.
+				expect(
+					activeUserTransactionsServices.createActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						data: {
+							NearIntents: expect.objectContaining({ source_address: [] })
+						},
+						externalRefs: expect.arrayContaining([
+							{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: depositAddress }
+						])
+					})
+				);
+				expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledExactlyOnceWith({
+					depositAddress,
+					txHash: btcTxid
+				});
+			});
+
+			it('should broadcast nothing when the row cannot be written, and delete it all the same', async () => {
+				vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockRejectedValue(
+					new Error('backend down')
+				);
+				sendThroughBackend();
+
+				await expect(fetchNearIntentsBtcSwap(baseParams)).rejects.toThrow('backend down');
+
+				expect(broadcast).not.toHaveBeenCalled();
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity, id: createdRowId() });
+			});
+
+			it('should delete the row when the broadcast is refused outright', async () => {
+				const refusal = new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee');
+				sendThroughBackend(refusal);
+
+				await expect(fetchNearIntentsBtcSwap(baseParams)).rejects.toBe(refusal);
+
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity, id: createdRowId() });
+				expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+			});
+
+			it.each([
+				new BtcBroadcastTransactionCanisterError({ BroadcastInProgress: null }, 'in progress'),
+				new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') })
+			])('should keep the row after an unclear outcome: %s', async (unclear) => {
+				sendThroughBackend(unclear);
+
+				await expect(fetchNearIntentsBtcSwap(baseParams)).rejects.toBe(unclear);
+
+				expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).not.toHaveBeenCalled();
+			});
+
+			// The deposit may have gone out, so the swapped asset must not land in a hidden token.
+			it('should enable a disabled destination after an unclear outcome, but not after a refusal', async () => {
+				const disabledDestinationToken = { ...destinationToken, enabled: false };
+
+				sendThroughBackend(new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') }));
+
+				await expect(
+					fetchNearIntentsBtcSwap({ ...baseParams, destinationToken: disabledDestinationToken })
+				).rejects.toBeInstanceOf(BtcBroadcastUnconfirmedError);
+
+				expect(setCustomToken).toHaveBeenCalledOnce();
+
+				vi.mocked(setCustomToken).mockClear();
+				sendThroughBackend(new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee'));
+
+				await expect(
+					fetchNearIntentsBtcSwap({ ...baseParams, destinationToken: disabledDestinationToken })
+				).rejects.toBeInstanceOf(BtcBroadcastTransactionCanisterError);
+
+				expect(setCustomToken).not.toHaveBeenCalled();
+			});
+		});
 	});
 
 	describe('fetchNearIntentsXrpSwap', () => {
@@ -4594,6 +5263,7 @@ describe('swap.services', () => {
 			sourceToken,
 			destinationToken,
 			swapAmount: '10',
+			slippageValue: '1',
 			swapDetails: mockNearIntentsQuoteResponse,
 			userAddress: mockXrpAddress,
 			network: XrpNetworks.mainnet,
@@ -4615,6 +5285,15 @@ describe('swap.services', () => {
 			});
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
 			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+		});
+
+		it('should not send funds when the quote was requested with another slippage', async () => {
+			await expect(
+				fetchNearIntentsXrpSwap({ ...baseParams, slippageValue: '0.5' })
+			).rejects.toMatchObject({ code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE });
+
+			expect(sendXrp).not.toHaveBeenCalled();
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
 		});
 
 		it('should pay the deposit address from the user XRP address', async () => {

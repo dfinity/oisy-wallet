@@ -1,7 +1,11 @@
 import type {
 	ActiveUserTransaction,
+	BtcBroadcastTransactionResponse,
 	BtcGetFeePercentilesResponse,
+	BtcGetSpendableUtxosResponse,
 	Contact,
+	ContactImageEntry,
+	ContactsPage,
 	CreatePersonalNoteShareRequest,
 	CreateTipRequest,
 	CustomToken,
@@ -29,13 +33,17 @@ import type {
 	AllowSigningOutcome,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
+	BtcBroadcastTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
+	BtcGetSpendableUtxosParams,
 	CreateActiveUserTransactionParams,
 	CreateContactParams,
 	CreateUserProfileResponse,
 	DeleteContactParams,
+	GetContactImagesParams,
 	GetContactParams,
+	GetContactsPageParams,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
@@ -140,6 +148,15 @@ export const addPendingBtcTransaction = async ({
 	return btcAddPendingTransaction(params);
 };
 
+export const broadcastBtcTransaction = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcBroadcastTransactionParams>): Promise<BtcBroadcastTransactionResponse> => {
+	const { btcBroadcastTransaction } = await backendCanister({ identity });
+
+	return btcBroadcastTransaction(params);
+};
+
 export const getPendingBtcTransactions = async ({
 	identity,
 	...params
@@ -147,6 +164,15 @@ export const getPendingBtcTransactions = async ({
 	const { btcGetPendingTransactions } = await backendCanister({ identity });
 
 	return btcGetPendingTransactions(params);
+};
+
+export const getSpendableBtcUtxos = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcGetSpendableUtxosParams>): Promise<BtcGetSpendableUtxosResponse> => {
+	const { btcGetSpendableUtxos } = await backendCanister({ identity });
+
+	return btcGetSpendableUtxos(params);
 };
 
 export const getCurrentBtcFeePercentiles = async ({
@@ -246,11 +272,20 @@ export const getContact = async ({
 	return getContact(contactId);
 };
 
-export const getContacts = async ({
+export const getContactsPage = async ({
+	after,
 	identity
-}: CanisterApiFunctionParams<QueryParams>): Promise<Contact[]> => {
-	const { getContacts } = await backendCanister({ identity });
-	return getContacts();
+}: CanisterApiFunctionParams<GetContactsPageParams>): Promise<ContactsPage> => {
+	const { getContactsPage } = await backendCanister({ identity });
+	return getContactsPage(after);
+};
+
+export const getContactImages = async ({
+	contactIds,
+	identity
+}: CanisterApiFunctionParams<GetContactImagesParams>): Promise<ContactImageEntry[]> => {
+	const { getContactImages } = await backendCanister({ identity });
+	return getContactImages(contactIds);
 };
 
 export const createContact = async ({

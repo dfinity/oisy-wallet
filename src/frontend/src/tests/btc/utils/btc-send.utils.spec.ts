@@ -1,13 +1,19 @@
-import { BtcPrepareSendError } from '$btc/types/btc-send';
+import { BtcBroadcastUnconfirmedError, BtcPrepareSendError } from '$btc/types/btc-send';
 import {
 	convertNumberToSatoshis,
 	convertSatoshisToBtc,
+	isDefinitiveBtcBroadcastRefusal,
 	isInvalidUtxosFee,
+	isUnclearBtcBroadcastOutcome,
+	mapBtcBroadcastErrorToMessage,
 	mapUtxosFeeErrorToMessage
 } from '$btc/utils/btc-send.utils';
+import type { BtcBroadcastTransactionError } from '$declarations/backend/backend.did';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
 
 describe('convertNumberToSatoshis', () => {
 	it('converts number to Satoshis correctly', () => {
@@ -85,5 +91,91 @@ describe('mapUtxosFeeErrorToMessage', () => {
 				i18n: en
 			})
 		).toBe(en.send.info.no_available_utxos);
+	});
+});
+
+describe('BTC broadcast outcomes', () => {
+	const answer = (variant: BtcBroadcastTransactionError) =>
+		new BtcBroadcastTransactionCanisterError(variant, 'test');
+
+	const open: BtcBroadcastTransactionError[] = [
+		{ BroadcastOutcomeUnknown: { msg: 'trap' } },
+		{ BroadcastInProgress: null }
+	];
+
+	const locked: BtcBroadcastTransactionError[] = [
+		{ UtxosAlreadyReserved: null },
+		{ InvalidUtxos: null }
+	];
+
+	const refusedOtherwise: BtcBroadcastTransactionError[] = [
+		{ RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } },
+		{ InvalidDelegationChain: { msg: 'expired' } },
+		{ MalformedTransaction: null },
+		{ TransactionTooLarge: null },
+		{ TooManyInputs: null },
+		{ TooManyOutputs: null },
+		{ DuplicateInputs: null },
+		{ InvalidOutput: { index: 1 } },
+		{ UnsupportedLockTime: null },
+		{ InvalidInput: { index: 0 } },
+		{ InvalidSignature: { index: 0 } },
+		{ FeeTooLow: null },
+		{ BroadcastRejected: { msg: 'send_transaction failed' } },
+		{ InternalError: { msg: 'boom' } }
+	];
+
+	it('should cover every variant of the backend answer', () => {
+		expect(open.length + locked.length + refusedOtherwise.length).toBe(18);
+	});
+
+	describe.each(open)('the open answer %o', (variant) => {
+		it('should be unclear, and no refusal', () => {
+			expect(isUnclearBtcBroadcastOutcome(answer(variant))).toBeTruthy();
+			expect(isDefinitiveBtcBroadcastRefusal(answer(variant))).toBeFalsy();
+		});
+
+		it('should say the transaction may have been sent', () => {
+			expect(mapBtcBroadcastErrorToMessage({ err: answer(variant), i18n: en })).toBe(
+				en.send.error.btc_transaction_unconfirmed
+			);
+		});
+	});
+
+	describe.each([...locked, ...refusedOtherwise])('the refusal %o', (variant) => {
+		it('should be a definitive refusal, and not unclear', () => {
+			expect(isDefinitiveBtcBroadcastRefusal(answer(variant))).toBeTruthy();
+			expect(isUnclearBtcBroadcastOutcome(answer(variant))).toBeFalsy();
+		});
+	});
+
+	it.each(locked)('should say the funds are locked for %o', (variant) => {
+		expect(mapBtcBroadcastErrorToMessage({ err: answer(variant), i18n: en })).toBe(
+			en.send.assertion.btc_utxo_locked
+		);
+	});
+
+	it.each(refusedOtherwise)('should leave the message to the caller for %o', (variant) => {
+		expect(mapBtcBroadcastErrorToMessage({ err: answer(variant), i18n: en })).toBeUndefined();
+	});
+
+	it('should read a broadcast with no typed answer as unclear', () => {
+		const err = new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') });
+
+		expect(isUnclearBtcBroadcastOutcome(err)).toBeTruthy();
+		expect(isDefinitiveBtcBroadcastRefusal(err)).toBeFalsy();
+		expect(mapBtcBroadcastErrorToMessage({ err, i18n: en })).toBe(
+			en.send.error.btc_transaction_unconfirmed
+		);
+	});
+
+	// An error from before the broadcast, such as a signing failure: nothing went out, but it is no
+	// answer of the backend's either.
+	it('should read any other error as neither', () => {
+		const err = new Error('signing failed');
+
+		expect(isUnclearBtcBroadcastOutcome(err)).toBeFalsy();
+		expect(isDefinitiveBtcBroadcastRefusal(err)).toBeFalsy();
+		expect(mapBtcBroadcastErrorToMessage({ err, i18n: en })).toBeUndefined();
 	});
 });

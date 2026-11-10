@@ -63,6 +63,42 @@ const unfaithfulInstruction = (): MappedSolTransaction => ({
 	ambiguous: true
 });
 
+/**
+ * Whether the wallet signs a token instruction as one of a multisig's keys.
+ *
+ * A token account can be held by a multisig rather than by a key, and an instruction acting on it
+ * carries the keys signing for the multisig after the accounts it names. The wallet among them
+ * acts on an account it does not hold, and every reading of the user's accounts, simulated or not,
+ * counts only the ones the wallet holds itself: nothing the review shows would say what that
+ * signature grants or moves.
+ *
+ * The wallet can fill a named role as well, such as the delegate or the close destination, so what
+ * counts is whether it is listed more often than named; a parser leaves an absent optional account
+ * out without taking a position, so positions would not tell. The token program reads the keys
+ * after the named accounts only when the authority is a multisig, so a well-formed request never
+ * lists the wallet there, as the owner or otherwise.
+ */
+const signsForMultisig = ({
+	instruction: { accounts },
+	parsedInstruction,
+	userAddress
+}: {
+	instruction: SolInstruction;
+	parsedInstruction: SolParsedInstruction;
+	userAddress?: OptionSolAddress;
+}): boolean => {
+	if (isNullish(userAddress) || !('accounts' in parsedInstruction)) {
+		return false;
+	}
+
+	const listed = (accounts ?? []).filter(({ address }) => address === userAddress).length;
+	const named = Object.values(parsedInstruction.accounts).filter(
+		(meta) => meta?.address === userAddress
+	).length;
+
+	return listed > named;
+};
+
 const mapSystemParsedInstruction = ({
 	type,
 	info
@@ -714,8 +750,7 @@ const mapSolTokenInstruction = ({
 			amount,
 			source,
 			destination,
-			isApproval: true,
-			uncheckedApproval: true
+			isApproval: true
 		};
 	}
 
@@ -835,8 +870,7 @@ const mapSolToken2022Instruction = ({
 			amount,
 			source,
 			destination,
-			isApproval: true,
-			uncheckedApproval: true
+			isApproval: true
 		};
 	}
 
@@ -1588,6 +1622,15 @@ export const mapSolInstruction = ({
 	}
 
 	const { programAddress } = parsedInstruction;
+
+	// Asked before the readings below, which state what a token instruction does without asking
+	// whose account it acts on.
+	if (
+		(programAddress === TOKEN_PROGRAM_ADDRESS || programAddress === TOKEN_2022_PROGRAM_ADDRESS) &&
+		signsForMultisig({ instruction, parsedInstruction, userAddress })
+	) {
+		return unfaithfulInstruction();
+	}
 
 	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
 		return mapSolSystemInstruction({

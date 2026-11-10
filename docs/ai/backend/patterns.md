@@ -141,6 +141,42 @@ user data must stay below that at the caps, not only for typical data:
 - Leave the existing endpoint as it is for callers that already use it
   (`get_contacts`).
 
+## Ledger transfers — carry a `created_at_time`
+
+Any call that **moves** tokens (`icrc1_transfer`, `icrc2_transfer_from`) sets
+`created_at_time`, and the value is pinned on the record a retry reads back —
+not taken fresh per attempt, or the retry is a different transaction and there
+is nothing to match it against.
+
+- Without it, a call that times out, traps on the way back, or fails to decode
+  is indistinguishable from one that never executed, and the canister writes off
+  a payout that landed as a failure.
+- With it, the ledger deduplicates: an identical retry is not executed again and
+  the reply is `TransferFromError::Duplicate { duplicate_of }`, naming the
+  original block. Treat that as **success** carrying that block index.
+- `TooOld` means the stamp has aged out of the ledger's transaction window (24
+  hours on the ledgers this repo targets), so the ledger can no longer say what
+  became of the previous attempt and will refuse every retry carrying it. Retire
+  the stamp so the next attempt pins a fresh one — and renew it before the
+  window closes rather than spending an attempt on the refusal
+  (`TIP_PAYOUT_DEDUP_WINDOW_NS`).
+- `CreatedInFuture` is a plain failure: nothing was written, and the same stamp
+  is accepted once the ledger's clock passes it.
+- Deduplication narrows the ambiguous window; it does not replace the invariant
+  that makes a second payout impossible. For tips that is the allowance covering
+  exactly one payout. Keep both.
+
+Worked example: `classify` in
+[`tips/icrc2.rs`](../../../src/backend/src/tips/icrc2.rs) and
+`TipRecord::start_claim` in
+[`tips/model.rs`](../../../src/backend/src/tips/model.rs).
+
+`icrc2_approve` sets an allowance to an absolute value, but a repeat can restore
+allowance already consumed by the spender and charges another approval fee.
+[`signer/service.rs`](../../../src/backend/src/signer/service.rs) uses `None`
+for replenishing signing allowances; do not generalise this to retries of a
+one-shot approval, which should preserve their transaction identity.
+
 ## Threshold signatures — chain-fusion signer only
 
 - Direct calls to `sign_with_ecdsa` / `sign_with_schnorr` are forbidden
@@ -177,18 +213,39 @@ user data must stay below that at the caps, not only for typical data:
 - Don't add a new ad-hoc timer at module load time. Wire it through one
   of the existing entry points and ensure both `init` and `post_upgrade`
   trigger it.
+- **Timer work over a collection that grows with users runs in batches.**
+  Each batch is a timer message of its own that stops once
+  `ic_cdk::api::instruction_counter()` passes a budget well below the 40B
+  limit, always after at least one item, and schedules the next batch from
+  the last key it reached. Take the budget check as a closure so unit tests
+  can drive it. Examples: `contacts::migration::schedule_batch` and the tip
+  sweep (`utils::housekeeping::schedule_tip_sweep_batch` over
+  `tips::service::prune_expired_tips`).
 - **Exchange rates:** Controllers store API keys via `set_api_keys`. Periodic
   refreshes are opt-in: they run only when `coingecko_api_key` is set and
   `exchange_rate_enabled` is `opt true` (`null` / unset is treated as disabled). See
   [`shared::types::api_keys::ApiKeys`](../../../src/shared/src/types/api_keys.rs).
   - `get_exchange_rates` is the per-caller fetch endpoint: it returns the
     USD price for each of the caller's priceable tokens (native + custom,
-    minus testnets / NFTs / ERC-4626), re-marks them as active so the timer
-    keeps them warm, and awaits a one-shot refresh for any token whose
-    cache is older than `PRICE_STALENESS_THRESHOLD_SEC` (2 min) or missing.
-    Entries that remain stale or missing after the refresh attempt are
+    minus testnets / NFTs / ERC-4626), records the custom ones as active so
+    the timer keeps them warm, and starts a background refresh for any token
+    whose cache is older than `PRICE_STALENESS_THRESHOLD_SEC` (2 min) or
+    missing. Entries that are stale or missing at the time of the call are
     returned as `None`, so returned prices never exceed the freshness window.
-    It's an `update` (mutates `token_activity`, may issue HTTP outcalls).
+    It's an `update` (writes `token_activity`, may issue HTTP outcalls).
+  - **Token activity** is recorded only through
+    `exchange::record_token_activity`: only while the refresh is on, only for
+    priceable custom tokens (the natives are refreshed while callers ask for
+    rates), at most 3 times a minute per caller
+    (`TOKEN_ACTIVITY_RATE_LIMITER`, which also gates the refresh that
+    `get_exchange_rates` starts), and for at most 2,000 tokens at a time
+    (`MAX_TOKEN_ACTIVITY_ENTRIES`). Housekeeping evicts inactive entries in
+    budgeted timer batches. A caller's stale tokens the map did not take are
+    fetched by the refresh `get_exchange_rates` starts or, while another
+    refresh holds the lock, queued for the next one (at most 500,
+    `QUEUED_FOR_REFRESH`).
+  - A refresh fetches the native tokens and the custom tokens as two groups
+    and caches each as soon as its own lookups return.
   - `get_exchange_rate(TokenId)` is a legacy cache-only query for callers
     that already know the token ID and do not need activation or freshness.
 

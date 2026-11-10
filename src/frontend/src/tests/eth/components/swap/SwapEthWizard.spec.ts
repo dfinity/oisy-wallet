@@ -10,6 +10,7 @@ import {
 	type EthFeeStore,
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
+import { EthSubmissionUnconfirmedError } from '$eth/types/send';
 import {
 	TRACK_COUNT_SWAP_ERROR,
 	TRACK_COUNT_SWAP_SUBMITTED,
@@ -27,7 +28,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type LifiMaxFee, type SwapError } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
-import { LifiFeeChangedError } from '$lib/types/errors';
+import { LifiFeeChangedError, SwapBroadcastOutcomeUnknownError } from '$lib/types/errors';
 import { SwapProvider, VeloraSwapTypes, type SwapMappedResult } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { lifiCarriedFeeCeiling } from '$lib/utils/lifi-fee.utils';
@@ -309,17 +310,6 @@ describe('SwapEthWizard', () => {
 			expect(getByText(en.tokens.text.destination_token_title)).toBeInTheDocument();
 			expect(getByText(en.swap.text.review_button)).toBeInTheDocument();
 			expect(getByText(en.core.text.cancel)).toBeInTheDocument();
-		});
-
-		it('renders slippage section', () => {
-			const { mockContext } = createContext({
-				swaps: mockSwapProviders,
-				selectedProvider: mockSwapProviders[0]
-			});
-
-			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
-
-			expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
 		});
 
 		it('renders swap provider information', () => {
@@ -661,6 +651,41 @@ describe('SwapEthWizard', () => {
 
 			expect(error?.variant).toBe('info');
 			expect(error?.message).toContain('0.5');
+		});
+
+		// The swap may have reached the network: swapped again from the review, it would be signed
+		// with the next nonce, and both could execute.
+		it.each([
+			{
+				failure: 'every provider failed its submission',
+				err: new EthSubmissionUnconfirmedError(new Error('Internal error'))
+			},
+			{
+				failure: 'its broadcast outcome is unknown',
+				err: new SwapBroadcastOutcomeUnknownError({ cause: new Error('Internal error') })
+			}
+		])('closes with the could-not-confirm toast when $failure', async ({ err }) => {
+			vi.spyOn(toasts, 'toastsErrorNoTrace').mockImplementation(() => Symbol('toast'));
+			vi.spyOn(swapServices, 'fetchVeloraMarketSwap').mockRejectedValue(err);
+
+			const { getByRole, getByText, onClose, onBack, queryByRole, failedSwapError } =
+				renderExecution();
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(getByRole('checkbox'));
+			}
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+			expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.error.ethereum_transaction_unconfirmed },
+				err
+			});
+			expect(get(failedSwapError)).toBeUndefined();
 		});
 
 		it('requires confirmation before enabling swap for high negative value difference', async () => {

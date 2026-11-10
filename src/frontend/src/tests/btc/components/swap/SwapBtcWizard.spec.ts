@@ -3,6 +3,7 @@ import type * as btcSendServices from '$btc/services/btc-send.services';
 import { validateBtcSend } from '$btc/services/btc-send.services';
 import { UTXOS_FEE_CONTEXT_KEY, initUtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import {
+	BtcBroadcastUnconfirmedError,
 	BtcPrepareSendError,
 	BtcSendValidationError,
 	BtcValidationError
@@ -10,6 +11,7 @@ import {
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { btcAddressStore } from '$icp/stores/btc.store';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import {
 	TRACK_COUNT_SWAP_ERROR,
 	TRACK_COUNT_SWAP_SUBMITTED,
@@ -380,6 +382,46 @@ describe('SwapBtcWizard', () => {
 			);
 		});
 
+		// The inputs stay reserved and the row stays for the poller, so another swap would spend
+		// other coins and could deposit twice.
+		it('closes, not offering the form again, when the deposit may have gone out', async () => {
+			const err = new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') });
+			vi.mocked(fetchChainFusionBtcSwap).mockRejectedValue(err);
+
+			const { getByText, onBack, onClose, onStartTriggerAmount } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(toasts.toastsError).toHaveBeenCalledWith({
+				msg: { text: en.send.error.btc_transaction_unconfirmed },
+				err
+			});
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+			expect(onStartTriggerAmount).not.toHaveBeenCalled();
+		});
+
+		it('goes back with the locked-funds message when the inputs are already reserved', async () => {
+			const err = new BtcBroadcastTransactionCanisterError(
+				{ UtxosAlreadyReserved: null },
+				'reserved'
+			);
+			vi.mocked(fetchChainFusionBtcSwap).mockRejectedValue(err);
+
+			const { getByText, onBack, onClose } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(toasts.toastsError).toHaveBeenCalledWith({
+				msg: { text: en.send.assertion.btc_utxo_locked },
+				err
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
 		it('refuses to send when the minter deposit address is unknown', async () => {
 			btcAddressStore.reset(ckBtcToken.id);
 
@@ -498,6 +540,7 @@ describe('SwapBtcWizard', () => {
 			expect(fetchNearIntentsBtcSwap).toHaveBeenCalledWith(
 				expect.objectContaining({
 					swapAmount: '0.01',
+					slippageValue: '0.5',
 					userAddress: mockBtcAddress,
 					network: 'mainnet',
 					utxosFee: mockUtxosFee,

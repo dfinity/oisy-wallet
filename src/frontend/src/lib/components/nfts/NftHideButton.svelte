@@ -21,6 +21,7 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NonFungibleToken } from '$lib/types/nft';
+	import { escapeHtml } from '$lib/utils/html.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getNftIdentifier } from '$lib/utils/nft.utils';
 	import { findNftsByToken } from '$lib/utils/nfts.utils';
@@ -120,7 +121,7 @@
 			<p class="text-sm">
 				<Html
 					text={replacePlaceholders($i18n.nfts.text.hide_warning_text, {
-						$collection: token.name
+						$collection: escapeHtml(token.name)
 					})}
 				/>
 			</p>

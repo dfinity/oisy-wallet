@@ -177,17 +177,6 @@ describe('SwapSolWizard', () => {
 			expect(getByText(en.core.text.cancel)).toBeInTheDocument();
 		});
 
-		it('renders slippage section', () => {
-			const { mockContext } = createContext({
-				swaps: nearIntentsSwapProviders,
-				selectedProvider: nearIntentsSwapProviders[0]
-			});
-
-			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
-
-			expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
-		});
-
 		it('renders swap provider information', () => {
 			const { mockContext } = createContext({
 				swaps: nearIntentsSwapProviders,
@@ -336,6 +325,17 @@ describe('SwapSolWizard', () => {
 			expect(swapServices.fetchNearIntentsSolSwap).toHaveBeenCalledOnce();
 			expect(onClose).toHaveBeenCalledOnce();
 			expect(onBack).not.toHaveBeenCalled();
+		});
+
+		it('passes the reviewed max slippage to the swap', async () => {
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(swapServices.fetchNearIntentsSolSwap).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ slippageValue: '0.5' })
+			);
 		});
 
 		it('calls onBack when swap fails', async () => {

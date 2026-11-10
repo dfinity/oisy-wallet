@@ -68,7 +68,7 @@
 	class:bg-brand-subtle-10={focused}
 	class:bg-secondary={!focused}
 	class:border-brand-subtle-20={focused}
-	class:border-secondary={!focused}
+	class:border-tertiary={!focused}
 >
 	<TokenInputContent
 		{name}

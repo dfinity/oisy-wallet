@@ -3,12 +3,15 @@ import type { FeeStoreData } from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
 import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
+import type { GetUniswapSwapParams } from '$eth/utils/uniswap.utils';
 import {
 	classifyWalletConnectEthCall,
+	classifyWalletConnectEthSendTransaction,
 	getSendParamsGas,
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash,
 	getWalletConnectEthCkEthDeposit,
+	hasUnreviewableTypedData,
 	isEthSignTypedDataMethod,
 	isWalletConnectEthTokenCallWithValue,
 	WalletConnectEthCkEthHelperUnconfirmedError
@@ -45,12 +48,18 @@ type WalletConnectSendParams = WalletConnectExecuteParams & {
 	fee: FeeStoreData;
 	modalNext: () => void;
 	amount: bigint;
+	// Whether the user ticked, on the review, that they sign a call OISY can't read.
+	unknownCallAcknowledged: boolean;
+	// The tokens the review read the call with, so signing reads it the same way.
+	tokens: GetUniswapSwapParams['tokens'];
 } & SendParams;
 
 type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	modalNext: () => void;
 	progress: (step: ProgressStepsSign) => void;
+	// Whether the user ticked, on the review, that they sign typed data OISY can't describe.
+	unreviewableTypedDataAcknowledged: boolean;
 };
 
 export const send = ({
@@ -65,6 +74,8 @@ export const send = ({
 	minterInfo,
 	sourceNetwork,
 	targetNetwork,
+	unknownCallAcknowledged,
+	tokens,
 	...params
 }: WalletConnectSendParams): Promise<ResultSuccess> =>
 	execute({
@@ -195,6 +206,31 @@ export const send = ({
 				return { success: false };
 			}
 
+			// The review holds Approve on a call OISY can't read until the user confirms they understand
+			// that; this is the same condition, asked where the transaction is signed.
+			const call = classifyWalletConnectEthSendTransaction({
+				to,
+				data,
+				networkId: sourceNetwork.id,
+				minterInfo,
+				principal: identity?.getPrincipal(),
+				chainId: sourceNetwork.chainId,
+				value: amount,
+				wallet: address,
+				nativeToken: token,
+				tokens
+			});
+
+			if (call.type === 'unknown' && !unknownCallAcknowledged) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.unexplained_request_unconfirmed }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
 			modalNext();
 
 			try {
@@ -257,6 +293,7 @@ export const send = ({
 export const signMessage = ({
 	modalNext,
 	progress,
+	unreviewableTypedDataAcknowledged,
 	...params
 }: WalletConnectSignMessageParams): Promise<ResultSuccess> =>
 	execute({
@@ -269,9 +306,25 @@ export const signMessage = ({
 				id,
 				topic,
 				params: {
-					request: { params }
+					request: { method, params },
+					chainId
 				}
 			} = request;
+
+			// The review holds Approve on typed data OISY can't describe until the user confirms they
+			// understand that; this is the same condition, asked where the signature is made.
+			if (
+				hasUnreviewableTypedData({ method, params, sessionChainId: chainId }) &&
+				!unreviewableTypedDataAcknowledged
+			) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.unexplained_request_unconfirmed }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
 
 			modalNext();
 

@@ -9,7 +9,12 @@ import {
 } from '$sol/constants/wallet-connect.constants';
 import { decode, sign } from '$sol/services/wallet-connect.services';
 import en from '$tests/mocks/i18n.mock';
-import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import {
+	mockAtaAddress,
+	mockSolAddress,
+	mockSolAddress2,
+	mockSplAddress
+} from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { lamports } from '@solana/kit';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -348,15 +353,35 @@ describe('SolWalletConnectSignModal', () => {
 		});
 	});
 
-	// Signing refuses an unchecked approval no run came back for, so the review holds the button.
-	it('should hold approval on an unchecked approval with no simulation', async () => {
+	// Signing refuses an approval no run came back for, so the review holds the button. A checked
+	// one too: the amount its line among the operations states is a tab away from the summary.
+	it.each([
+		{ form: 'an unchecked', decoded: {} },
+		{
+			form: 'a checked',
+			decoded: {
+				tokenAddress: mockSplAddress,
+				instructions: [
+					{
+						kind: 'approve' as const,
+						account: mockAtaAddress,
+						amount: 1n,
+						decimals: 6,
+						tokenAddress: mockSplAddress,
+						counterparty: mockSolAddress2
+					}
+				],
+				simulatedInstructions: false
+			}
+		}
+	])('should hold approval on $form approval with no simulation', async ({ decoded }) => {
 		vi.mocked(decode).mockResolvedValueOnce({
 			amount: 1n,
 			requiredSignatures: 1,
 			destination: mockSolAddress2,
 			isApproval: true,
-			uncheckedApproval: true,
-			parties: { sources: [], destinations: [], partial: true }
+			parties: { sources: [], destinations: [], partial: true },
+			...decoded
 		});
 
 		const { getByRole, getByText } = render(SolWalletConnectSignModal, {
@@ -370,13 +395,12 @@ describe('SolWalletConnectSignModal', () => {
 		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
 	});
 
-	it('should let an unchecked approval through when a simulation came back', async () => {
+	it('should let an approval through when a simulation came back', async () => {
 		const args = await approve({
 			amount: 1n,
 			requiredSignatures: 1,
 			destination: mockSolAddress2,
 			isApproval: true,
-			uncheckedApproval: true,
 			instructions: [
 				{ kind: 'approve', account: mockAtaAddress, amount: 1n, counterparty: mockSolAddress2 }
 			],
@@ -385,6 +409,66 @@ describe('SolWalletConnectSignModal', () => {
 		});
 
 		expect(args).toEqual(expect.objectContaining({ simulationRan: true }));
+	});
+
+	// Signing refuses an instruction nobody read that no run described, on the same value the modal
+	// hands it, so the review holds the button on exactly that.
+	describe('an instruction nobody read', () => {
+		const renderModal = (decoded: Awaited<ReturnType<typeof decode>>) => {
+			vi.mocked(decode).mockResolvedValueOnce(decoded);
+
+			return render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+		};
+
+		it('should hold approval when no run came back', async () => {
+			const { getByRole, getByText } = renderModal({
+				amount: 1n,
+				requiredSignatures: 1,
+				unreviewed: true,
+				parties: { sources: [], destinations: [], partial: true }
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.wallet_connect.text.unreviewed_without_simulation)).toBeInTheDocument();
+			});
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should hold approval when the run left it unaccounted for', async () => {
+			const { getByRole, getByText } = renderModal({
+				amount: 1n,
+				requiredSignatures: 1,
+				unreviewed: true,
+				simulatedInstructions: true,
+				instructions: [{ kind: 'unknown' }],
+				preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] },
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			await waitFor(() => {
+				expect(
+					getByText(en.wallet_connect.text.unreviewed_not_described_by_simulation)
+				).toBeInTheDocument();
+			});
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should let it through when the run described it', async () => {
+			const args = await approve({
+				amount: 1n,
+				requiredSignatures: 1,
+				unreviewed: true,
+				simulatedInstructions: true,
+				instructions: [{ kind: 'route' }, { kind: 'send', amount: 1n }],
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ simulated: true }));
+		});
 	});
 
 	// An account the run opens inside another program's instruction with more than its size costs is
@@ -447,6 +531,38 @@ describe('SolWalletConnectSignModal', () => {
 		});
 
 		expect(args).toEqual(expect.objectContaining({ keepsBatchWhole: false }));
+	});
+
+	// A token call the run makes with the wallet among the keys signing for a multisig acts on an
+	// account the review does not count as the user's, and signing refuses it like an ambiguous
+	// message, so the review holds the button the same way.
+	it('should hold approval when the run makes a token call the wallet signs for a multisig', async () => {
+		vi.mocked(decode).mockResolvedValueOnce({
+			amount: 1n,
+			requiredSignatures: 1,
+			signsForMultisig: true,
+			parties: { sources: [], destinations: [], partial: false }
+		});
+
+		const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+			props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+		});
+
+		await waitFor(() => {
+			expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+		});
+
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
+	it('should hand signing no multisig signature when the run made none', async () => {
+		const args = await approve({
+			amount: 1n,
+			requiredSignatures: 1,
+			parties: { sources: [], destinations: [], partial: true }
+		});
+
+		expect(args).toEqual(expect.objectContaining({ signsForMultisig: false }));
 	});
 
 	describe('the wallet handed to another program', () => {

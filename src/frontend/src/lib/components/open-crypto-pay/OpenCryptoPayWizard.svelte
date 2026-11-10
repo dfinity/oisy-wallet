@@ -5,10 +5,11 @@
 	import OpenCryptoPayProgress from '$lib/components/open-crypto-pay/OpenCryptoPayProgress.svelte';
 	import OpenCryptoPayTokensList from '$lib/components/open-crypto-pay/OpenCryptoPayTokensList.svelte';
 	import PaymentFailed from '$lib/components/open-crypto-pay/PaymentFailed.svelte';
+	import PaymentNotConfirmed from '$lib/components/open-crypto-pay/PaymentNotConfirmed.svelte';
 	import PaymentSucceeded from '$lib/components/open-crypto-pay/PaymentSucceeded.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
-	import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
+	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { pay as payApi } from '$lib/services/open-crypto-pay.services';
@@ -107,7 +108,13 @@
 
 			failedPaymentError.set(errorMessage);
 
-			goToStep(WizardStepsScanner.PAYMENT_FAILED);
+			// From the PAY step on, the payment is approved or signed and goes to the provider, so an
+			// error no longer tells whether the provider collected it.
+			goToStep(
+				payProgressStep === ProgressStepsPayment.PAY
+					? WizardStepsScanner.PAYMENT_NOT_CONFIRMED
+					: WizardStepsScanner.PAYMENT_FAILED
+			);
 		}
 	};
 
@@ -132,6 +139,8 @@
 				goToStep(WizardStepsScanner.SCAN);
 			}}
 		/>
+	{:else if currentStep?.name === WizardStepsScanner.PAYMENT_NOT_CONFIRMED}
+		<PaymentNotConfirmed {onClose} />
 	{:else if currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
 		<PaymentSucceeded {onClose} />
 	{/if}
