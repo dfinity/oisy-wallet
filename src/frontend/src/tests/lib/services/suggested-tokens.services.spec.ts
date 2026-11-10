@@ -1,8 +1,10 @@
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDC_TOKEN as USDC_SOL_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
+import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
+import { loadCustomTokens as loadCustomIcrcTokens } from '$icp/services/icrc.services';
+import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
-import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import {
 	findSuggestedTokensWithBalance,
 	saveSuggestedTokens
@@ -10,10 +12,27 @@ import {
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { Token } from '$lib/types/token';
+import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 
-vi.mock('$lib/services/save-custom-tokens.services', () => ({
-	saveCustomTokens: vi.fn().mockResolvedValue(undefined)
+vi.mock('$lib/api/backend.api', () => ({
+	setManyCustomTokens: vi.fn().mockResolvedValue(undefined)
+}));
+
+vi.mock(import('$eth/services/erc20.services'), async (importOriginal) => ({
+	...(await importOriginal()),
+	loadCustomTokens: vi.fn().mockResolvedValue(undefined)
+}));
+
+vi.mock(import('$icp/services/icrc.services'), async (importOriginal) => ({
+	...(await importOriginal()),
+	loadCustomTokens: vi.fn().mockResolvedValue(undefined)
+}));
+
+vi.mock(import('$sol/services/spl.services'), async (importOriginal) => ({
+	...(await importOriginal()),
+	loadCustomTokens: vi.fn().mockResolvedValue(undefined)
 }));
 
 describe('suggested-tokens.services', () => {
@@ -76,36 +95,50 @@ describe('suggested-tokens.services', () => {
 		it('should save the tokens as enabled', async () => {
 			await saveSuggestedTokens({ identity: mockIdentity, tokens: [usdc, usdcSol] });
 
-			expect(saveCustomTokens).toHaveBeenCalledExactlyOnceWith({
+			expect(setManyCustomTokens).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				tokens: [
 					expect.objectContaining({
-						address: USDC_TOKEN.address,
-						chainId: USDC_TOKEN.network.chainId,
 						enabled: true,
-						networkKey: 'Erc20'
+						version: toNullable(),
+						token: {
+							Erc20: { token_address: USDC_TOKEN.address, chain_id: USDC_TOKEN.network.chainId }
+						}
 					}),
 					expect.objectContaining({
-						address: USDC_SOL_TOKEN.address,
 						enabled: true,
-						networkKey: 'SplMainnet'
+						version: toNullable(),
+						token: {
+							SplMainnet: expect.objectContaining({ token_address: USDC_SOL_TOKEN.address })
+						}
 					})
 				]
 			});
 		});
 
+		it('should reload only the custom tokens of the saved standards', async () => {
+			await saveSuggestedTokens({ identity: mockIdentity, tokens: [usdc, usdcSol] });
+
+			expect(loadCustomErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomIcrcTokens).not.toHaveBeenCalled();
+		});
+
 		it('should not save without tokens', async () => {
 			await saveSuggestedTokens({ identity: mockIdentity, tokens: [] });
 
-			expect(saveCustomTokens).not.toHaveBeenCalled();
+			expect(setManyCustomTokens).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
 		});
 
-		it('should not throw when the save fails', async () => {
-			vi.mocked(saveCustomTokens).mockRejectedValueOnce(new Error('Version mismatch'));
+		it('should neither throw nor reload when the save fails', async () => {
+			vi.mocked(setManyCustomTokens).mockRejectedValueOnce(new Error('Version mismatch'));
 
 			await expect(
 				saveSuggestedTokens({ identity: mockIdentity, tokens: [usdc] })
 			).resolves.toBeUndefined();
+
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
 		});
 	});
 });
