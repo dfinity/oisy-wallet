@@ -18,8 +18,7 @@ import {
 } from '$icp/services/icpunks.services';
 import {
 	loadDefaultIcrcTokens,
-	processCustomTokens as processIcrcCustomTokens,
-	saveDefaultEnabledIcrcTokens
+	processCustomTokens as processIcrcCustomTokens
 } from '$icp/services/icrc.services';
 import {
 	loadDefaultIcrc7Tokens,
@@ -90,8 +89,7 @@ vi.mock('$eth/services/erc4626.services', () => ({
 
 vi.mock('$icp/services/icrc.services', () => ({
 	loadDefaultIcrcTokens: vi.fn().mockResolvedValue(undefined),
-	processCustomTokens: vi.fn().mockResolvedValue(undefined),
-	saveDefaultEnabledIcrcTokens: vi.fn().mockResolvedValue(undefined)
+	processCustomTokens: vi.fn().mockResolvedValue(undefined)
 }));
 
 vi.mock('$icp/services/ext.services', () => ({
@@ -296,55 +294,6 @@ describe('LoaderTokens', () => {
 				expect(processIcrc7CustomTokens).toHaveBeenCalled();
 				expect(processErc20CustomTokens).toHaveBeenCalled();
 				expect(processSplCustomTokens).toHaveBeenCalled();
-			});
-		});
-	});
-
-	describe('Default-enabled ICRC tokens', () => {
-		it('should save default-enabled ICRC tokens against the certified token list', async () => {
-			render(LoaderTokens);
-
-			await waitFor(() => {
-				expect(saveDefaultEnabledIcrcTokens).toHaveBeenCalledWith({
-					tokens: [],
-					certified: true,
-					identity: mockIdentity
-				});
-			});
-		});
-
-		it('should save default-enabled ICRC tokens only once the ICRC custom tokens are processed', async () => {
-			let resolveProcessing!: () => void;
-			const processing = new Promise<void>((resolve) => {
-				resolveProcessing = resolve;
-			});
-
-			vi.mocked(processIcrcCustomTokens).mockReturnValue(processing);
-
-			render(LoaderTokens);
-
-			await waitFor(() => {
-				expect(processIcrcCustomTokens).toHaveBeenCalled();
-			});
-
-			expect(saveDefaultEnabledIcrcTokens).not.toHaveBeenCalled();
-
-			resolveProcessing();
-
-			await waitFor(() => {
-				expect(saveDefaultEnabledIcrcTokens).toHaveBeenCalled();
-			});
-
-			vi.mocked(processIcrcCustomTokens).mockResolvedValue(undefined);
-		});
-
-		it('should not fail when saving default-enabled ICRC tokens rejects', async () => {
-			vi.mocked(saveDefaultEnabledIcrcTokens).mockRejectedValueOnce(new Error('Save failed'));
-
-			render(LoaderTokens);
-
-			await waitFor(() => {
-				expect(saveDefaultEnabledIcrcTokens).toHaveBeenCalled();
 			});
 		});
 	});

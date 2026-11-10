@@ -1,8 +1,5 @@
 import { USD1_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.usd1.env';
-import {
-	ICRC_DEFAULT_ENABLED_LEDGER_CANISTER_IDS,
-	ICRC_SUGGESTED_LEDGER_CANISTER_IDS
-} from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
+import { ICRC_SUGGESTED_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import {
 	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
 	ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS
@@ -120,16 +117,11 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 
 	const isSuggestedToken = isTokenSuggested(defaultToken);
 
-	// Until it is saved to the user's token list at sign-in, a default-enabled token behaves like a suggested one.
-	const isDefaultEnabledToken =
-		nonNullish(ledgerCanisterId) &&
-		ICRC_DEFAULT_ENABLED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
-
 	return {
 		...defaultToken,
 		enabled:
 			isEnabledByDefault ||
-			(isNullish(customToken?.enabled) && (isSuggestedToken || isDefaultEnabledToken)) ||
+			(isNullish(customToken?.enabled) && isSuggestedToken) ||
 			customToken?.enabled === true,
 		version: customToken?.version,
 		section: customToken?.section,

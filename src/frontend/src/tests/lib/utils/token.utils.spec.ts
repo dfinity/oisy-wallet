@@ -13,8 +13,6 @@ import { USDC_TOKEN as USDC_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/
 import { USDT_TOKEN as USDT_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdt.env';
 import { USDC_TOKEN as USDC_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN as USDT_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdt.env';
-import * as tokensIcrcAdditionalEnv from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
-import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import * as tokensIcrcCkEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
@@ -626,42 +624,6 @@ describe('token.utils', () => {
 				expect(result.enabled).toBeTruthy();
 			});
 		});
-
-		describe('Default-enabled ICRC token', () => {
-			const token = { ...mockValidIcToken, ledgerCanisterId: TCYCLES_LEDGER_CANISTER_ID };
-
-			beforeEach(() => {
-				vi.spyOn(
-					tokensIcrcAdditionalEnv,
-					'ICRC_DEFAULT_ENABLED_LEDGER_CANISTER_IDS',
-					'get'
-				).mockReturnValue([token.ledgerCanisterId]);
-			});
-
-			it('should enable the token if no customToken', () => {
-				const result = mapDefaultTokenToToggleable({ defaultToken: token, customToken: undefined });
-
-				expect(result.enabled).toBeTruthy();
-			});
-
-			it('should not enable the token if customToken has enabled false', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: token,
-					customToken: { ...token, enabled: false }
-				});
-
-				expect(result.enabled).toBeFalsy();
-			});
-
-			it('should enable the token if customToken has enabled true', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: token,
-					customToken: { ...token, enabled: true }
-				});
-
-				expect(result.enabled).toBeTruthy();
-			});
-		});
 	});
 
 	describe('isTokenSuggested', () => {
@@ -688,10 +650,7 @@ describe('token.utils', () => {
 		it.each([
 			{ description: 'ERC20 token LINK', token: LINK_TOKEN },
 			{ description: 'Ethereum token', token: ETHEREUM_TOKEN },
-			{
-				description: 'default-enabled ICRC token TCYCLES',
-				token: { ...mockValidIcToken, ledgerCanisterId: TCYCLES_LEDGER_CANISTER_ID }
-			}
+			{ description: 'ICRC token that is not suggested', token: mockValidIcToken }
 		])('should be false for the $description', ({ token }) => {
 			expect(isTokenSuggested(token)).toBeFalsy();
 		});
