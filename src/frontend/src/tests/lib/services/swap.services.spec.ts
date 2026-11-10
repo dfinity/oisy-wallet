@@ -1,4 +1,5 @@
 import { sendBtc } from '$btc/services/btc-send.services';
+import { BtcBroadcastUnconfirmedError } from '$btc/types/btc-send';
 import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
@@ -34,9 +35,11 @@ import * as icpSwapFactory from '$lib/api/icp-swap-factory.api';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import {
 	LIFI_QUOTE_TIMEOUT_MS,
+	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_ETH_TOKEN_PLACEHOLDER,
 	SWAP_QUOTE_TIMEOUT_MS
 } from '$lib/constants/swap.constants';
@@ -102,7 +105,7 @@ import {
 	verifyNearIntentsQuoteSignature
 } from '$lib/utils/near-intents-quote.utils';
 import { parseToken } from '$lib/utils/parse.utils';
-import { geSwapEthTokenAddress } from '$lib/utils/swap.utils';
+import { geSwapEthTokenAddress, slippagePercentToBasisPoints } from '$lib/utils/swap.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
@@ -137,6 +140,7 @@ import {
 	XrpSendNotGuardedError,
 	type XrpPaymentRecord
 } from '$xrp/types/xrp-send';
+import { nonNullish } from '@dfinity/utils';
 import {
 	constructSimpleSDK,
 	type BuildDeltaOrderParams,
@@ -274,7 +278,8 @@ vi.mock('$lib/services/near-intents.services', () => ({
 }));
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
-	createActiveUserTransaction: vi.fn()
+	createActiveUserTransaction: vi.fn(),
+	deleteUnbroadcastActiveUserTransaction: vi.fn()
 }));
 
 vi.mock('$eth/services/send.services', () => ({
@@ -4371,6 +4376,7 @@ describe('swap.services', () => {
 			sourceToken,
 			swapAmount: '1',
 			userAddress: mockSolAddress,
+			slippageValue: '1',
 			swapDetails: mockNearIntentsQuoteResponse
 		};
 
@@ -4509,6 +4515,74 @@ describe('swap.services', () => {
 
 			expect(sendEvm).not.toHaveBeenCalled();
 			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		describe('max slippage', () => {
+			const params = {
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				receiveAmount: 900000n,
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: mockEthAddress,
+				gas: 21000n,
+				maxFeePerGas: 20000000000n,
+				maxPriorityFeePerGas: 2000000000n
+			};
+
+			const quoteRequestedWith = (slippageTolerance: number): NearIntentsQuoteResponse => ({
+				...mockNearIntentsQuoteResponse,
+				quoteRequest: { ...mockNearIntentsQuoteResponse.quoteRequest, slippageTolerance }
+			});
+
+			it('should not send funds when the quote was requested with another slippage', async () => {
+				await expect(
+					fetchNearIntentsEvmSwap({
+						...params,
+						slippageValue: '0.5',
+						swapDetails: quoteRequestedWith(300)
+					})
+				).rejects.toMatchObject({
+					code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE,
+					message: en.swap.error.near_intents_quote_slippage
+				});
+
+				expect(sendEvm).not.toHaveBeenCalled();
+				expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+				expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			it('should send funds when the quote was requested with the reviewed slippage', async () => {
+				await fetchNearIntentsEvmSwap({
+					...params,
+					slippageValue: '0.5',
+					swapDetails: quoteRequestedWith(50)
+				});
+
+				expect(sendEvm).toHaveBeenCalledOnce();
+			});
+
+			it('should compare the default slippage when none was set', async () => {
+				await expect(
+					fetchNearIntentsEvmSwap({
+						...params,
+						slippageValue: undefined,
+						swapDetails: quoteRequestedWith(300)
+					})
+				).rejects.toMatchObject({ code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE });
+
+				expect(sendEvm).not.toHaveBeenCalled();
+
+				await fetchNearIntentsEvmSwap({
+					...params,
+					slippageValue: undefined,
+					swapDetails: quoteRequestedWith(slippagePercentToBasisPoints(SWAP_DEFAULT_SLIPPAGE_VALUE))
+				});
+
+				expect(sendEvm).toHaveBeenCalledOnce();
+			});
 		});
 
 		it('should retain the quote signature on the AUT row', async () => {
@@ -4722,6 +4796,24 @@ describe('swap.services', () => {
 			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
 		});
 
+		it('should not send funds when the quote was requested with another slippage', async () => {
+			await expect(
+				fetchNearIntentsSolSwap({
+					identity: mockIdentity,
+					progress: mockProgress,
+					sourceToken,
+					destinationToken,
+					swapAmount: '1',
+					userAddress: mockSolAddress,
+					slippageValue: '0.5',
+					swapDetails: mockNearIntentsQuoteResponse
+				})
+			).rejects.toMatchObject({ code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE });
+
+			expect(sendSol).not.toHaveBeenCalled();
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
 		it('should execute the full Solana swap flow', async () => {
 			await fetchNearIntentsSolSwap({
 				identity: mockIdentity,
@@ -4730,6 +4822,7 @@ describe('swap.services', () => {
 				destinationToken,
 				swapAmount: '1',
 				userAddress: mockSolAddress,
+				slippageValue: '1',
 				swapDetails: mockNearIntentsQuoteResponse
 			});
 
@@ -4764,6 +4857,7 @@ describe('swap.services', () => {
 				destinationToken,
 				swapAmount: '1',
 				userAddress: mockSolAddress,
+				slippageValue: '1',
 				swapDetails: mockNearIntentsQuoteResponse
 			});
 
@@ -4784,6 +4878,7 @@ describe('swap.services', () => {
 				destinationToken,
 				swapAmount: '1',
 				userAddress: mockSolAddress,
+				slippageValue: '1',
 				swapDetails: mockNearIntentsQuoteResponse
 			});
 
@@ -4811,6 +4906,7 @@ describe('swap.services', () => {
 				destinationToken,
 				swapAmount: '1',
 				userAddress: mockSolAddress,
+				slippageValue: '1',
 				swapDetails: quoteWithMemo
 			});
 
@@ -4846,6 +4942,7 @@ describe('swap.services', () => {
 			userAddress: mockBtcAddress,
 			network: 'mainnet' as const,
 			utxosFee: mockUtxosFee,
+			slippageValue: '1',
 			swapDetails: mockNearIntentsQuoteResponse
 		};
 
@@ -4860,6 +4957,15 @@ describe('swap.services', () => {
 			});
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
 			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+		});
+
+		it('should not send funds when the quote was requested with another slippage', async () => {
+			await expect(
+				fetchNearIntentsBtcSwap({ ...baseParams, slippageValue: '0.5' })
+			).rejects.toMatchObject({ code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE });
+
+			expect(sendBtc).not.toHaveBeenCalled();
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
 		});
 
 		it('should send the deposit to the quoted address on the quoted UTXO selection', async () => {
@@ -5018,6 +5124,130 @@ describe('swap.services', () => {
 			expect(setCustomToken).toHaveBeenCalledOnce();
 			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
 		});
+
+		describe('through the backend', () => {
+			const broadcast = vi.fn();
+
+			// As the real `sendBtc` does on the backend path: `beforeBroadcast` once signed, then the
+			// broadcast, which either goes out or fails with `failure`.
+			const sendThroughBackend = (failure?: unknown) =>
+				vi.mocked(sendBtc).mockImplementation(async ({ beforeBroadcast, onBroadcast }) => {
+					await beforeBroadcast?.({ txid: btcTxid });
+
+					broadcast();
+
+					if (nonNullish(failure)) {
+						throw failure;
+					}
+
+					await onBroadcast?.({ txid: btcTxid });
+
+					return btcTxid;
+				});
+
+			const createdRowId = () =>
+				vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mock.calls[0]?.[0].id;
+
+			beforeEach(() => {
+				broadcast.mockClear();
+				vi.mocked(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).mockResolvedValue(undefined);
+			});
+
+			it('should create the row before the broadcast, and only once', async () => {
+				vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockImplementation(
+					() => {
+						expect(broadcast).not.toHaveBeenCalled();
+
+						return Promise.resolve();
+					}
+				);
+				sendThroughBackend();
+
+				await fetchNearIntentsBtcSwap(baseParams);
+
+				// Without the source address, which only an XRP deposit carries.
+				expect(
+					activeUserTransactionsServices.createActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						data: {
+							NearIntents: expect.objectContaining({ source_address: [] })
+						},
+						externalRefs: expect.arrayContaining([
+							{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: depositAddress }
+						])
+					})
+				);
+				expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledExactlyOnceWith({
+					depositAddress,
+					txHash: btcTxid
+				});
+			});
+
+			it('should broadcast nothing when the row cannot be written, and delete it all the same', async () => {
+				vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockRejectedValue(
+					new Error('backend down')
+				);
+				sendThroughBackend();
+
+				await expect(fetchNearIntentsBtcSwap(baseParams)).rejects.toThrow('backend down');
+
+				expect(broadcast).not.toHaveBeenCalled();
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity, id: createdRowId() });
+			});
+
+			it('should delete the row when the broadcast is refused outright', async () => {
+				const refusal = new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee');
+				sendThroughBackend(refusal);
+
+				await expect(fetchNearIntentsBtcSwap(baseParams)).rejects.toBe(refusal);
+
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity, id: createdRowId() });
+				expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+			});
+
+			it.each([
+				new BtcBroadcastTransactionCanisterError({ BroadcastInProgress: null }, 'in progress'),
+				new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') })
+			])('should keep the row after an unclear outcome: %s', async (unclear) => {
+				sendThroughBackend(unclear);
+
+				await expect(fetchNearIntentsBtcSwap(baseParams)).rejects.toBe(unclear);
+
+				expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).not.toHaveBeenCalled();
+			});
+
+			// The deposit may have gone out, so the swapped asset must not land in a hidden token.
+			it('should enable a disabled destination after an unclear outcome, but not after a refusal', async () => {
+				const disabledDestinationToken = { ...destinationToken, enabled: false };
+
+				sendThroughBackend(new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') }));
+
+				await expect(
+					fetchNearIntentsBtcSwap({ ...baseParams, destinationToken: disabledDestinationToken })
+				).rejects.toBeInstanceOf(BtcBroadcastUnconfirmedError);
+
+				expect(setCustomToken).toHaveBeenCalledOnce();
+
+				vi.mocked(setCustomToken).mockClear();
+				sendThroughBackend(new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee'));
+
+				await expect(
+					fetchNearIntentsBtcSwap({ ...baseParams, destinationToken: disabledDestinationToken })
+				).rejects.toBeInstanceOf(BtcBroadcastTransactionCanisterError);
+
+				expect(setCustomToken).not.toHaveBeenCalled();
+			});
+		});
 	});
 
 	describe('fetchNearIntentsXrpSwap', () => {
@@ -5033,6 +5263,7 @@ describe('swap.services', () => {
 			sourceToken,
 			destinationToken,
 			swapAmount: '10',
+			slippageValue: '1',
 			swapDetails: mockNearIntentsQuoteResponse,
 			userAddress: mockXrpAddress,
 			network: XrpNetworks.mainnet,
@@ -5054,6 +5285,15 @@ describe('swap.services', () => {
 			});
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
 			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+		});
+
+		it('should not send funds when the quote was requested with another slippage', async () => {
+			await expect(
+				fetchNearIntentsXrpSwap({ ...baseParams, slippageValue: '0.5' })
+			).rejects.toMatchObject({ code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE });
+
+			expect(sendXrp).not.toHaveBeenCalled();
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
 		});
 
 		it('should pay the deposit address from the user XRP address', async () => {

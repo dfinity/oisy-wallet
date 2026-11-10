@@ -111,6 +111,20 @@ benches:
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
+  bench_evict_inactive_tokens_2000:
+    total:
+      instructions: 8777763176
+      heap_increase: 0
+      stable_memory_increase: 0
+    scopes:
+      read_2000:
+        instructions: 1669759252
+        heap_increase: 0
+        stable_memory_increase: 0
+      read_2000_evict_1000:
+        instructions: 7108001810
+        heap_increase: 0
+        stable_memory_increase: 0
   bench_get_account_creation_timestamps_200:
     total:
       instructions: 243734641
@@ -303,6 +317,12 @@ benches:
     total:
       instructions: 3768751
       heap_increase: 0
+      stable_memory_increase: 0
+    scopes: {}
+  bench_update_user_agreements_full_history:
+    total:
+      instructions: 7875764
+      heap_increase: 1
       stable_memory_increase: 0
     scopes: {}
   bench_update_user_experimental_features:

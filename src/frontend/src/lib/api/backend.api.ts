@@ -1,5 +1,6 @@
 import type {
 	ActiveUserTransaction,
+	BtcBroadcastTransactionResponse,
 	BtcGetFeePercentilesResponse,
 	BtcGetSpendableUtxosResponse,
 	Contact,
@@ -32,6 +33,7 @@ import type {
 	AllowSigningOutcome,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
+	BtcBroadcastTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcGetSpendableUtxosParams,
@@ -144,6 +146,15 @@ export const addPendingBtcTransaction = async ({
 	const { btcAddPendingTransaction } = await backendCanister({ identity });
 
 	return btcAddPendingTransaction(params);
+};
+
+export const broadcastBtcTransaction = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcBroadcastTransactionParams>): Promise<BtcBroadcastTransactionResponse> => {
+	const { btcBroadcastTransaction } = await backendCanister({ identity });
+
+	return btcBroadcastTransaction(params);
 };
 
 export const getPendingBtcTransactions = async ({

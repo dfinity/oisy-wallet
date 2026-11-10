@@ -110,6 +110,16 @@ A token / network add is naturally cross-cutting. To stay reviewable:
   The `networkIdToKey` / `keyToNetworkId` arms do **not** go in it: they
   need the network id constant, so they land with the frontend PR.
 
+## Removing a curated ICRC token
+
+Removing an entry from `tokens.icrc.json` leaves it in the token list of
+every user who enabled it: OISY then loads it from its ledger, like a
+token the user imported. When that ledger no longer runs an ICRC ledger
+(deleted, uninstalled, or reinstalled with other code), also add its ID
+to `RETIRED_ICRC_LEDGER_CANISTER_IDS` in
+`$env/tokens/tokens-icrc/tokens.icrc.retired.env.ts`, so OISY skips it
+instead of warning on every sign-in.
+
 ## Don'ts
 
 - Hand-edit `src/declarations/**` after a backend variant change — run

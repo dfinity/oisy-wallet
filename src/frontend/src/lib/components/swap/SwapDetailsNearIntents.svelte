@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import SwapNearIntentsTos from '$lib/components/swap/SwapNearIntentsTos.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
@@ -8,6 +8,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapProvider } from '$lib/types/swap';
+	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { formatReceiveOutMinimum } from '$lib/utils/swap.utils';
 
@@ -20,17 +21,29 @@
 
 	const { destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const formattedMinimum = $derived(
-		nonNullish($destinationToken?.decimals) &&
-			nonNullish(slippageValue) &&
-			nonNullish(provider.receiveAmount)
+	// The deposit settles against the minimum 1Click signed into the quote, so that figure is shown
+	// as stated; only a quote without one has its minimum derived from the receive amount.
+	const formattedMinimum = $derived.by(() => {
+		if (isNullish($destinationToken?.decimals)) {
+			return;
+		}
+
+		if (nonNullish(provider.receiveOutMinimum)) {
+			return formatToken({
+				value: provider.receiveOutMinimum,
+				unitName: $destinationToken.decimals,
+				displayDecimals: $destinationToken.decimals
+			});
+		}
+
+		return nonNullish(slippageValue) && nonNullish(provider.receiveAmount)
 			? formatReceiveOutMinimum({
 					slippageValue,
 					receiveAmount: provider.receiveAmount,
 					decimals: $destinationToken.decimals
 				})
-			: undefined
-	);
+			: undefined;
+	});
 
 	const estimatedTime = $derived(provider.swapDetails.quote.timeEstimate);
 </script>

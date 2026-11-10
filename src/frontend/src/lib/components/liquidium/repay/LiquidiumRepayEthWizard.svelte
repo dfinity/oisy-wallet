@@ -14,6 +14,7 @@
 		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { isSendOutcomeUnknown } from '$eth/utils/eth-error.utils';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -37,7 +38,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { liquidiumUnminedRepaysStore } from '$lib/stores/liquidium-unmined-repays.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 	import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
@@ -295,6 +296,19 @@
 
 			setTimeout(onClose, 750);
 		} catch (err: unknown) {
+			// A repayment that may have reached the network is not offered again from the review: sent
+			// again, it would be signed with the next nonce, and both could execute.
+			if (isSendOutcomeUnknown(err)) {
+				toastsErrorNoTrace({
+					msg: { text: $i18n.send.error.ethereum_transaction_unconfirmed },
+					err
+				});
+
+				onClose();
+
+				return;
+			}
+
 			toastsError({ msg: { text: $i18n.liquidium.text.transaction_failed }, err });
 
 			onBack();
