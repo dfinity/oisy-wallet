@@ -79,7 +79,11 @@ const btcValidationErrorMessages: Partial<Record<BtcSendValidationError, ($i18n:
 		[BtcSendValidationError.UtxoLocked]: ($i18n) => $i18n.send.assertion.btc_utxo_locked,
 		[BtcSendValidationError.InvalidFeeCalculation]: ($i18n) =>
 			$i18n.send.assertion.btc_invalid_fee_calculation,
-		[BtcSendValidationError.MinimumBalance]: ($i18n) => $i18n.send.assertion.minimum_btc_amount
+		[BtcSendValidationError.MinimumBalance]: ($i18n) => $i18n.send.assertion.minimum_btc_amount,
+		// Also how a rate-limited `btc_get_spendable_utxos` reaches the user: the re-check could not
+		// load the pending transactions, so it cannot tell which inputs are reserved.
+		[BtcSendValidationError.PendingTransactionsNotAvailable]: ($i18n) =>
+			$i18n.send.assertion.pending_transactions_not_available
 	};
 
 /**
