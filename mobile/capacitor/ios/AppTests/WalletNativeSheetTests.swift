@@ -132,6 +132,59 @@ import XCTest
     XCTAssertFalse(
       wallet.view.subviews.contains { $0.accessibilityIdentifier == "wallet.sheetBackground" })
 
+    // Content detents clamp to available height, resize without reloading, and
+    // reject invalid/stale layout messages. Accessibility Escape uses web guards.
+    try await command("prepare")
+    _ = try await commands.execute(
+      method: "sheet",
+      options: options.merging([
+        "phase": "present", "contentHeight": 280,
+      ]) { _, value in value })
+    let fitted = try XCTUnwrap(coordinator.controller)
+    XCTAssertEqual(
+      fitted.sheetPresentationController?.selectedDetentIdentifier,
+      WalletSheetCoordinator.contentDetent)
+    XCTAssertEqual(coordinator.contentHeight, 280)
+    for height in [600, 220, 100_000] {
+      _ = try await commands.execute(
+        method: "sheet",
+        options: options.merging([
+          "phase": "resize", "contentHeight": height,
+        ]) { _, value in value })
+      XCTAssertEqual(coordinator.contentHeight, height)
+    }
+    for badHeight: Any in [0, -1, 1.5, Double.nan, Double.infinity, 100_001, true, "200"] {
+      do {
+        _ = try await commands.execute(
+          method: "sheet",
+          options: options.merging([
+            "phase": "resize", "contentHeight": badHeight,
+          ]) { _, value in value })
+        XCTFail("Invalid content height accepted")
+      } catch {}
+    }
+    for overrides: [AnyHashable: Any] in [
+      ["phase": "resize", "contentHeight": 300, "id": UUID().uuidString],
+      ["phase": "resize", "contentHeight": 300, "documentId": UUID().uuidString],
+      ["phase": "resize"],
+      ["phase": "dismiss", "contentHeight": 300],
+    ] {
+      do {
+        _ = try await commands.execute(
+          method: "sheet", options: options.merging(overrides) { _, value in value })
+        XCTFail("Invalid or stale resize accepted")
+      } catch {}
+    }
+    XCTAssertTrue(fitted.accessibilityPerformEscape())
+    XCTAssertNotNil(coordinator.controller, "VoiceOver dismissal must wait for web guards")
+    try await command("dismiss")
+    do {
+      try coordinator.resize(id: id, contentHeight: 300)
+      XCTFail("A departing sheet must not resize")
+    } catch {}
+    try await command("release")
+    XCTAssertNil(coordinator.contentHeight)
+
     // Process loss during an open sheet restores native recovery, not a stale snapshot.
     let secondID = UUID()
     try await coordinator.prepare(id: secondID)

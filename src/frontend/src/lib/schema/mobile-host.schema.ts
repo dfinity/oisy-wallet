@@ -143,10 +143,17 @@ export const MobileWalletResponseSchema = z.object({ response: z.string().max(65
 export const MobileSheetRequestSchema = z
 	.object({
 		id: z.string().uuid(),
-		phase: z.enum(['prepare', 'present', 'dismiss', 'release']),
-		size: z.enum(['medium', 'large'])
+		phase: z.enum(['prepare', 'present', 'resize', 'dismiss', 'release']),
+		size: z.enum(['medium', 'large']),
+		// CSS pixels, excluding the bottom safe area that UIKit adds to its detent.
+		contentHeight: z.number().int().min(1).max(100_000).optional()
 	})
-	.strict();
+	.strict()
+	.refine(({ phase, contentHeight }) =>
+		phase === 'resize'
+			? contentHeight !== undefined
+			: phase === 'present' || contentHeight === undefined
+	);
 export type MobileSheetRequest = z.infer<typeof MobileSheetRequestSchema>;
 export const MobileSheetDismissSchema = z
 	.object({

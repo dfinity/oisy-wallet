@@ -1,9 +1,13 @@
+import { MobileSheetRequestSchema } from '$lib/schema/mobile-host.schema';
 import { nativeSheet } from '$lib/services/mobile-sheet.services';
 import { busy } from '$lib/stores/busy.store';
 import { overlayFocus } from '$lib/utils/overlay.utils';
 
 const mocks = vi.hoisted(() => ({
 	available: vi.fn(),
+	fitted: vi.fn(),
+	resize: undefined as (() => void) | undefined,
+	disconnect: vi.fn(),
 	request: vi.fn(),
 	listen: vi.fn(),
 	remove: vi.fn(),
@@ -11,6 +15,7 @@ const mocks = vi.hoisted(() => ({
 }));
 vi.mock('$lib/services/mobile-host.services', () => ({
 	nativeSheetsAvailable: mocks.available,
+	contentSizedSheetsAvailable: mocks.fitted,
 	presentMobileSheet: mocks.request,
 	connectMobileSheetDismiss: mocks.listen
 }));
@@ -36,6 +41,17 @@ describe('shared native sheet lifecycle', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mocks.available.mockReturnValue(true);
+		mocks.fitted.mockReturnValue(false);
+		vi.stubGlobal(
+			'ResizeObserver',
+			class {
+				constructor(callback: () => void) {
+					mocks.resize = callback;
+				}
+				observe() {}
+				disconnect = mocks.disconnect;
+			}
+		);
 		mocks.request.mockResolvedValue(undefined);
 		mocks.remove.mockResolvedValue(undefined);
 		mocks.listen.mockImplementation((callback: (id: string) => void) => {
@@ -47,6 +63,7 @@ describe('shared native sheet lifecycle', () => {
 
 	afterEach(() => {
 		document.body.replaceChildren();
+		vi.unstubAllGlobals();
 		busy.stop();
 	});
 
@@ -189,5 +206,74 @@ describe('shared native sheet lifecycle', () => {
 		actionNext?.destroy();
 		next.root.remove();
 		await released(2);
+	});
+
+	it('fits content, reacts to nested growth/shrink and stops resizing after dismissal', async () => {
+		mocks.fitted.mockReturnValue(true);
+		const first = panel();
+		let height = 250;
+		vi.spyOn(first.node, 'getBoundingClientRect').mockImplementation(
+			() => new DOMRect(0, 0, 390, height)
+		);
+		first.node.style.paddingBottom = '34px';
+		const action = nativeSheet(first.node, { enabled: true, size: 'medium' });
+		await ready();
+
+		expect(first.node.dataset.nativeSheetFitted).toBe('true');
+		expect(mocks.request).toHaveBeenCalledWith(
+			expect.objectContaining({ phase: 'present', contentHeight: 216 })
+		);
+
+		height = 500;
+		mocks.resize?.();
+		await vi.waitFor(() =>
+			expect(mocks.request).toHaveBeenCalledWith(
+				expect.objectContaining({ phase: 'resize', contentHeight: 466 })
+			)
+		);
+		const nested = panel();
+		vi.spyOn(nested.node, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 390, 600));
+		const nestedAction = nativeSheet(nested.node, { enabled: true, size: 'large' });
+		await vi.waitFor(() =>
+			expect(mocks.request).toHaveBeenLastCalledWith(
+				expect.objectContaining({ phase: 'resize', contentHeight: 600 })
+			)
+		);
+		nestedAction?.destroy();
+		nested.root.remove();
+		await vi.waitFor(() =>
+			expect(mocks.request).toHaveBeenLastCalledWith(
+				expect.objectContaining({ phase: 'resize', contentHeight: 466 })
+			)
+		);
+		height = 250;
+		mocks.resize?.();
+		first.node.dispatchEvent(new Event('outrostart'));
+		action?.destroy();
+		first.root.remove();
+		await released();
+
+		expect(mocks.request).toHaveBeenLastCalledWith(expect.objectContaining({ phase: 'release' }));
+		expect(mocks.disconnect).toHaveBeenCalled();
+		expect(first.node.dataset.nativeSheetFitted).toBeUndefined();
+	});
+
+	it('validates height and phase before sending layout messages', () => {
+		const base = { id: crypto.randomUUID(), size: 'medium', phase: 'resize' };
+		for (const height of [undefined, 0, -1, 1.5, NaN, Infinity, 100_001, true, '200']) {
+			expect(
+				MobileSheetRequestSchema.safeParse({ ...base, contentHeight: height }).success
+			).toBeFalsy();
+		}
+
+		expect(
+			MobileSheetRequestSchema.safeParse({ ...base, contentHeight: 320 }).success
+		).toBeTruthy();
+
+		for (const phase of ['prepare', 'dismiss', 'release']) {
+			expect(
+				MobileSheetRequestSchema.safeParse({ ...base, phase, contentHeight: 320 }).success
+			).toBeFalsy();
+		}
 	});
 });

@@ -52,7 +52,7 @@
 		</span>
 	{/if}
 
-	<span>
+	<span data-sheet-body>
 		{@render children()}
 	</span>
 

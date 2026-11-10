@@ -392,4 +392,36 @@
 		opacity: 1 !important;
 		transform: none !important;
 	}
+
+	:global([data-native-sheet-root]:has([data-native-sheet-fitted])) {
+		background: var(--card-background);
+	}
+	/* The fitted panel has intrinsic height. Its scrollers absorb overflow once
+	   UIKit caps the detent. Never measure a forced viewport-height surface. */
+	:global(body[data-native-sheet-host] [data-native-sheet-fitted]) {
+		bottom: auto !important;
+		height: auto !important;
+		min-height: 0 !important;
+	}
+	:global([data-native-sheet-fitted] [data-sheet-content]) {
+		min-height: 0;
+		/* Let the enclosing body scroll rather than compressing its content into
+		   the old detent. Compression can hide overflow inside bottom padding. */
+		flex-shrink: 0;
+	}
+	:global([data-native-sheet-fitted] .content > *) {
+		flex-shrink: 0;
+	}
+	:global([data-native-sheet-fitted] [data-native-sheet-dismiss]),
+	:global([data-native-sheet-fitted] .native-sheet-dismiss),
+	:global([data-native-sheet-fitted] [data-tid='close-modal']),
+	:global([data-native-sheet-fitted] > span:has(> [data-native-sheet-dismiss])),
+	:global(
+		[data-native-sheet-fitted] [data-sheet-body] > div:has(> [data-native-sheet-dismiss]:only-child)
+	) {
+		display: none !important;
+	}
+	:global([data-native-sheet-fitted] [data-sheet-body]) {
+		border-top: 0 !important;
+	}
 </style>

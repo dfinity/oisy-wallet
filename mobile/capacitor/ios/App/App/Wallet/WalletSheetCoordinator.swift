@@ -13,6 +13,8 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
   private var backgroundSnapshot: UIImageView?
   private var dismissing = false
   private var contentOffset: CGPoint?
+  private(set) var contentHeight: Int?
+  static let contentDetent = UISheetPresentationController.Detent.Identifier("content")
 
   init(owner: TrustedWalletViewController, webView: WKWebView) {
     self.owner = owner
@@ -54,12 +56,14 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
     }
   }
 
-  func present(id: UUID, size: Size) async throws {
+  func present(id: UUID, size: Size, contentHeight: Int? = nil) async throws {
     guard identifier == id, !dismissing, let owner, owner.isReady,
       owner.session.isActive, backgroundSnapshot != nil
     else { throw WalletHostCommandError.unavailable }
     if let controller {
-      if size == .large {
+      if let contentHeight {
+        try resize(id: id, contentHeight: contentHeight)
+      } else if size == .large {
         controller.sheetPresentationController?.animateChanges {
           controller.sheetPresentationController?.selectedDetentIdentifier = .large
         }
@@ -72,14 +76,25 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
       reset()
       throw WalletHostCommandError.unavailable
     }
-    let panel = UIViewController()
+    self.contentHeight = contentHeight
+    let panel = WalletSheetViewController()
+    panel.onDismiss = { [weak self] in self?.requestDismissal() }
     panel.modalPresentationStyle = .pageSheet
     panel.isModalInPresentation = true
     panel.view.backgroundColor = .systemBackground
     panel.view.accessibilityIdentifier = "wallet.nativeSheet"
     if let sheet = panel.sheetPresentationController {
-      sheet.detents = size == .medium ? [.medium(), .large()] : [.large()]
-      sheet.selectedDetentIdentifier = size == .medium ? .medium : .large
+      if contentHeight != nil {
+        sheet.detents = [
+          .custom(identifier: Self.contentDetent) { [weak self] context in
+            min(CGFloat(max(140, self?.contentHeight ?? 140)), context.maximumDetentValue)
+          }
+        ]
+        sheet.selectedDetentIdentifier = Self.contentDetent
+      } else {
+        sheet.detents = size == .medium ? [.medium(), .large()] : [.large()]
+        sheet.selectedDetentIdentifier = size == .medium ? .medium : .large
+      }
       sheet.prefersGrabberVisible = true
       sheet.prefersScrollingExpandsWhenScrolledToEdge = true
       sheet.prefersEdgeAttachedInCompactHeight = true
@@ -96,6 +111,26 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
     guard identifier == id, owner.session.isActive else {
       throw WalletHostCommandError.unavailable
     }
+  }
+
+  func resize(id: UUID, contentHeight: Int) throws {
+    guard identifier == id, !dismissing, owner?.isReady == true,
+      owner?.session.isActive == true, self.contentHeight != nil,
+      let sheet = controller?.sheetPresentationController,
+      (1...100_000).contains(contentHeight)
+    else { throw WalletHostCommandError.unavailable }
+    guard self.contentHeight != contentHeight else { return }
+    self.contentHeight = contentHeight
+    if UIAccessibility.isReduceMotionEnabled {
+      sheet.invalidateDetents()
+    } else {
+      sheet.animateChanges { sheet.invalidateDetents() }
+    }
+  }
+
+  private func requestDismissal() {
+    guard !dismissing, let identifier, owner?.session.isActive == true else { return }
+    owner?.hostPlugin.dismissSheet(id: identifier)
   }
 
   // Called at the web panel's outro start. Freeze its last rendered content so
@@ -162,6 +197,7 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
     dismissing = false
     let panel = controller
     controller = nil
+    contentHeight = nil
     restoreWebView()
     contentOffset = nil
     backgroundSnapshot?.removeFromSuperview()
@@ -179,9 +215,17 @@ final class WalletSheetCoordinator: NSObject, UISheetPresentationControllerDeleg
   func presentationControllerDidAttemptToDismiss(
     _ presentationController: UIPresentationController
   ) {
-    guard !dismissing, presentationController.presentedViewController === controller,
-      let identifier
-    else { return }
-    owner?.hostPlugin.dismissSheet(id: identifier)
+    guard presentationController.presentedViewController === controller else { return }
+    requestDismissal()
+  }
+}
+
+/// VoiceOver's escape gesture follows the same guarded dismissal as the grabber.
+@MainActor
+private final class WalletSheetViewController: UIViewController {
+  var onDismiss: (() -> Void)?
+  override func accessibilityPerformEscape() -> Bool {
+    onDismiss?()
+    return true
   }
 }

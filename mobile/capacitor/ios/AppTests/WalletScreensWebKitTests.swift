@@ -74,14 +74,19 @@ import XCTest
     try await waitForNativeSheet(shell, visible: true)
     let flashes = try await evaluate(web, "return JSON.stringify(window.testBackdropFlashes);")
     XCTAssertEqual(flashes, "[]", "The native transition must not start with a web backdrop flash")
+    let closeHidden = try await evaluate(web, "return String(!document.querySelector('.modal [data-tid=close-modal]').getClientRects().length);")
+    XCTAssertEqual(closeHidden, "true", "Fitted sheets use native dismissal instead of a web X")
     capture(window, name: "native-transaction-details")
     _ = try await evaluate(
       web,
       """
       window.testSheetObserver.disconnect();
-      document.querySelector('.modal [data-tid=close-modal]').click();
-      return 'closed';
+      return 'ready to dismiss';
       """)
+    let sheet = try XCTUnwrap(wallet.nativeSheet)
+    let sheetPanel = try XCTUnwrap(sheet.controller)
+    XCTAssertEqual(sheetPanel.sheetPresentationController?.selectedDetentIdentifier, WalletSheetCoordinator.contentDetent)
+    XCTAssertTrue(sheetPanel.accessibilityPerformEscape())
     try await waitForNativeSheet(shell, visible: false)
     let after = try await evaluate(web, geometry)
     XCTAssertEqual(after, before, "Activity must restore its viewport, safe area and scroll")
@@ -625,19 +630,63 @@ import XCTest
     try await waitForNativeSheet(shell, visible: true)
     let accessory = try XCTUnwrap(wallet.nativeSheet)
     let accessoryPanel = try XCTUnwrap(accessory.controller)
-    XCTAssertEqual(accessoryPanel.sheetPresentationController?.selectedDetentIdentifier, .medium)
+    XCTAssertEqual(accessoryPanel.sheetPresentationController?.selectedDetentIdentifier, WalletSheetCoordinator.contentDetent)
+    XCTAssertLessThan(try XCTUnwrap(accessory.contentHeight), 350, "Sorting should fit three rows")
+    let hiddenDismiss = try await evaluate(web, """
+      return String([...document.querySelectorAll('[data-native-sheet-fitted] [data-native-sheet-dismiss]')]
+        .every(element => !element.getClientRects().length));
+      """)
+    XCTAssertEqual(hiddenDismiss, "true")
     XCTAssertTrue(web.superview === accessoryPanel.view)
     for (style, name) in [(UIUserInterfaceStyle.light, "light"), (.dark, "dark")] {
       window.overrideUserInterfaceStyle = style
       try await Task.sleep(for: .milliseconds(400))
       capture(window, name: "native-sorting-sheet-" + name)
     }
+    // Async content can grow past the viewport and then shrink again.
+    let compactHeight = try XCTUnwrap(accessory.contentHeight)
+    let sheetGeometry = """
+      return JSON.stringify([...document.querySelectorAll('[data-native-sheet-fitted], [data-sheet-body], [data-sheet-content]')]
+        .map(n => ({tag: n.tagName, rect: n.getBoundingClientRect().height, scroll: n.scrollHeight,
+          client: n.clientHeight, top: n.scrollTop, padding: getComputedStyle(n).padding,
+          width: n.clientWidth, font: getComputedStyle(n).fontSize})));
+      """
+    let compactGeometry = try await evaluate(web, sheetGeometry)
+    _ = try await evaluate(web, """
+      const extra = document.createElement('div'); extra.id = 'testSheetGrowth'; extra.style.height = '1400px';
+      document.querySelector('[data-sheet-content]').append(extra); return 'expanded';
+      """)
+    try await waitFor(web, "document.querySelector('[data-sheet-body]').scrollHeight > document.querySelector('[data-sheet-body]').clientHeight + 600")
+    XCTAssertGreaterThan(try XCTUnwrap(accessory.contentHeight), 1400)
+    XCTAssertLessThan(accessoryPanel.view.bounds.height, window.bounds.height)
+    let scrolled = try await evaluate(web, """
+      const body = document.querySelector('[data-sheet-body]'); body.scrollTop = 300;
+      return String(body.scrollTop > 0);
+      """)
+    XCTAssertEqual(scrolled, "true", "Long content must remain scrollable")
+    _ = try await evaluate(web, "document.querySelector('#testSheetGrowth').remove(); return 'shrunk';")
+    for _ in 0..<40 {
+      if abs((accessory.contentHeight ?? 0) - compactHeight) < 2 { break }
+      try await Task.sleep(for: .milliseconds(50))
+    }
+    let restoredGeometry = try await evaluate(web, sheetGeometry)
+    XCTAssertEqual(accessory.contentHeight, compactHeight, "Before: \(compactGeometry), after: \(restoredGeometry)")
     let accessoryPresentation = try XCTUnwrap(accessoryPanel.presentationController)
     XCTAssertFalse(accessory.presentationControllerShouldDismiss(accessoryPresentation))
     accessory.presentationControllerDidAttemptToDismiss(accessoryPresentation)
     try await waitFor(web, "!document.querySelector('[data-tid=bottom-sheet]')")
     try await waitForNativeSheet(shell, visible: false)
     XCTAssertTrue(web.superview === wallet.view)
+    _ = try await evaluate(web, "document.querySelector('button[aria-label=\"List settings\"]').click(); return 'opened';")
+    try await waitForNativeSheet(shell, visible: true)
+    XCTAssertLessThan(try XCTUnwrap(wallet.nativeSheet?.contentHeight), 350)
+    for (style, name) in [(UIUserInterfaceStyle.light, "light"), (.dark, "dark")] {
+      window.overrideUserInterfaceStyle = style
+      try await Task.sleep(for: .milliseconds(400))
+      capture(window, name: "native-list-settings-" + name)
+    }
+    XCTAssertTrue(try XCTUnwrap(wallet.nativeSheet?.controller).accessibilityPerformEscape())
+    try await waitForNativeSheet(shell, visible: false)
     let nonceAfterBack = try await evaluate(web, "return window.testDocumentNonce;")
     XCTAssertEqual(nonceAfterBack, documentNonce, "Back must retain the wallet document")
     XCTAssertEqual(wallet.session.grant?.id, grantID, "Back must retain its native grant")

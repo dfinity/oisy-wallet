@@ -27,6 +27,8 @@ let activeDocument: string | undefined;
 let activeCapabilities: readonly string[] = [];
 export const nativeSheetsAvailable = () =>
 	mobileHostAvailable() && !!activeDocument && activeCapabilities.includes('nativeSheets');
+export const contentSizedSheetsAvailable = () =>
+	nativeSheetsAvailable() && activeCapabilities.includes('contentSizedSheets');
 let connectionGeneration = 0;
 const documentRequest = () => {
 	if (!mobileHostAvailable() || !activeDocument) {

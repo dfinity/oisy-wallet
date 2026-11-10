@@ -67,7 +67,7 @@
 						<ButtonIcon
 							ariaLabel={$i18n.core.alt.close_details}
 							onclick={() => (expanded = false)}
-							styleClass="text-disabled ml-auto"
+							styleClass="text-disabled ml-auto native-sheet-dismiss"
 						>
 							{#snippet icon()}
 								<IconClose size="24" />

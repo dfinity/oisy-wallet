@@ -60,7 +60,9 @@ visible sheet yet counts as the topmost overlay, and pulls keyboard focus away f
 		bind:visible
 	>
 		{#snippet footer()}
-			<ButtonDone onclick={() => (visible = false)} variant="secondary-light" />
+			<div data-native-sheet-dismiss>
+				<ButtonDone onclick={() => (visible = false)} variant="secondary-light" />
+			</div>
 		{/snippet}
 	</BottomSheet>
 </Responsive>

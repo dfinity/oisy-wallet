@@ -190,10 +190,22 @@ a hidden Wallet or a native flow already presented by the shell, so a delayed we
 dialog cannot appear over Explore or Account. Document replacement, process
 failure, expiry and logout clear the presentation and its images.
 
-Nested web dialogs reuse the open system sheet and their existing overlay stack;
-a larger nested form expands a medium sheet. A swipe requests the topmost shared
-Close callback. UIKit does not dismiss unconditionally: busy state, hidden Close,
-unsaved-change checks and transaction guards still apply.
+The optional `contentSizedSheets` capability adds a `contentHeight` integer to
+`present` and a `resize` phase. Height is measured in CSS pixels, excludes the
+bottom safe area, and must be within 1–100,000. UIKit clamps the custom detent to
+140 points through the available screen height and adds its safe area. Long
+content scrolls inside the existing web panel. ResizeObserver tracks intrinsic
+content; updates are coalesced, bound to the active document and sheet UUID, and
+stopped before dismissal. Nested dialogs resize the same container; closing one
+restores the previous panel's height.
+
+Fitted sheets hide redundant X and dismissal-only footer controls, including
+Sorting/List settings' Done button and empty header. Save, confirmation and Cancel
+actions remain. Swipe-down, tapping outside, keyboard Escape and VoiceOver Escape
+request the topmost shared Close callback. UIKit does not dismiss unconditionally:
+busy state, disabled dismissal, unsaved-change checks and transaction guards still
+apply. Older hosts retain their medium/large detents and web dismissal controls;
+normal browser presentation is unchanged.
 
 Send, Swap, Contacts and other multi-step `WizardModal` flows use full-page web
 presentation, with Back/Cancel controls. Notes editors also stay full-page. They

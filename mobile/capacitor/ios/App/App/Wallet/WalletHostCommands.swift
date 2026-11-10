@@ -41,6 +41,7 @@ final class WalletHostCommands {
         "capabilities": [
           "nativeNavigation", "navigationState", "walletInteractions", "account",
           "delegation", "operationJournal", "sessionHandoff", "documentBinding", "nativeSheets",
+          "contentSizedSheets",
         ],
       ])
     case "navigate":
@@ -75,16 +76,27 @@ final class WalletHostCommands {
       else { throw WalletHostCommandError.invalid }
       result = WalletHostReply(value: [:])
     case "sheet":
-      guard Set(options.keys) == ["version", "id", "phase", "size"],
+      let keys = Set(options.keys)
+      let baseKeys: Set<AnyHashable> = ["version", "id", "phase", "size"]
+      guard keys == baseKeys || keys == baseKeys.union(["contentHeight"]),
         let rawID = options["id"] as? String, let id = UUID(uuidString: rawID),
         let phase = options["phase"] as? String,
         let rawSize = options["size"] as? String,
         let size = WalletSheetCoordinator.Size(rawValue: rawSize),
         let sheet = wallet.nativeSheet
       else { throw WalletHostCommandError.invalid }
+      let contentHeight = WalletNavigationState.integer(options["contentHeight"])
+      if options["contentHeight"] != nil {
+        guard phase == "present" || phase == "resize", let contentHeight,
+          (1...100_000).contains(contentHeight)
+        else { throw WalletHostCommandError.invalid }
+      }
       switch phase {
       case "prepare": try await sheet.prepare(id: id)
-      case "present": try await sheet.present(id: id, size: size)
+      case "present": try await sheet.present(id: id, size: size, contentHeight: contentHeight)
+      case "resize":
+        guard let contentHeight else { throw WalletHostCommandError.invalid }
+        try sheet.resize(id: id, contentHeight: contentHeight)
       case "dismiss": try await sheet.dismiss(id: id)
       case "release": try await sheet.release(id: id)
       default: throw WalletHostCommandError.invalid
