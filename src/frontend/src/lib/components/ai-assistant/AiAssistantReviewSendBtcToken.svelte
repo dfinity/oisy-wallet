@@ -32,7 +32,7 @@
 	import {
 		AI_ASSISTANT_SEND_TOKENS_BUTTON,
 		AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE,
-		AI_ASSISTANT_SEND_TOKENS_UNCLEAR_MESSAGE
+		AI_ASSISTANT_SEND_TOKENS_OUTCOME_UNKNOWN_MESSAGE
 	} from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -57,9 +57,9 @@
 		sendEnabled: boolean;
 		// The send's broadcast outcome was unclear: it may have gone out, and its inputs stay
 		// reserved, so another send would spend other coins and could pay twice. None is offered.
-		sendOutcomeUnclear: boolean;
+		sendOutcomeUnknown: boolean;
 		onSendCompleted: () => void;
-		onSendOutcomeUnclear: () => void;
+		onSendOutcomeUnknown: () => void;
 	}
 
 	let {
@@ -69,8 +69,8 @@
 		sendCompleted,
 		onSendCompleted,
 		sendEnabled,
-		sendOutcomeUnclear,
-		onSendOutcomeUnclear
+		sendOutcomeUnknown,
+		onSendOutcomeUnknown
 	}: Props = $props();
 
 	const { sendTokenNetworkId, sendTokenDecimals, sendToken, sendBalance, sendTokenSymbol } =
@@ -252,7 +252,7 @@
 			});
 
 			if (isUnclearBtcBroadcastOutcome(err)) {
-				onSendOutcomeUnclear();
+				onSendOutcomeUnknown();
 			}
 		}
 	};
@@ -262,10 +262,10 @@
 	<BtcUtxosFeeDisplay />
 </div>
 
-{#if sendOutcomeUnclear}
+{#if sendOutcomeUnknown}
 	<p
 		class="text-center text-sm text-error-primary"
-		data-tid={AI_ASSISTANT_SEND_TOKENS_UNCLEAR_MESSAGE}
+		data-tid={AI_ASSISTANT_SEND_TOKENS_OUTCOME_UNKNOWN_MESSAGE}
 	>
 		{$i18n.send.error.btc_transaction_unconfirmed}
 	</p>

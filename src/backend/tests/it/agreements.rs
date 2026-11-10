@@ -7,8 +7,9 @@ use shared::types::{
         AgreementHistoryEntry, AgreementType, GetAgreementHistoryError, ProviderAgreementProvider,
         ProviderAgreementScope, ProviderAgreementType, UpdateAgreementsError,
         UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest, UserAgreement,
-        UserAgreements, SHA256_HEX_LENGTH,
+        UserAgreements, MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER, SHA256_HEX_LENGTH,
     },
+    signer::RateLimitError,
     user_profile::{CreateUserProfileError, GetUserProfileError, UserProfile},
     Timestamp, Version,
 };
@@ -959,6 +960,180 @@ fn test_agreement_history_accumulates_across_updates() {
 }
 
 #[test]
+fn test_agreement_history_records_only_changed_agreements() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
+
+    let accepted = UserAgreement {
+        accepted: Some(true),
+        text_sha256: Some("a".repeat(SHA256_HEX_LENGTH)),
+        last_updated_at_ms: Some(1_700_000_000_000),
+        ..Default::default()
+    };
+
+    let arg1 = UpdateUserAgreementsRequest {
+        current_user_version: profile.version,
+        agreements: UserAgreements {
+            license_agreement: accepted.clone(),
+            terms_of_use: accepted.clone(),
+            privacy_policy: UserAgreement::default(),
+        },
+    };
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg1)
+        .unwrap()
+        .unwrap();
+
+    let user_profile = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap();
+    let first_acceptance = user_profile
+        .agreements
+        .as_ref()
+        .unwrap()
+        .agreements
+        .license_agreement
+        .last_accepted_at_ns;
+    assert!(first_acceptance.is_some());
+
+    pic_setup.pic.advance_time(Duration::from_secs(60));
+
+    // The license agreement and terms of use are sent again as stored; only the privacy policy
+    // changes.
+    let arg2 = UpdateUserAgreementsRequest {
+        current_user_version: user_profile.version,
+        agreements: UserAgreements {
+            license_agreement: accepted.clone(),
+            terms_of_use: accepted.clone(),
+            privacy_policy: accepted,
+        },
+    };
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_user_agreements", arg2)
+        .unwrap()
+        .unwrap();
+
+    let history = pic_setup
+        .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+            caller,
+            "get_user_agreement_history",
+            (),
+        )
+        .unwrap()
+        .unwrap();
+
+    let agreement_types: Vec<AgreementType> = history
+        .into_iter()
+        .map(|entry| entry.agreement_type)
+        .collect();
+    assert_eq!(
+        agreement_types,
+        vec![
+            AgreementType::LicenseAgreement,
+            AgreementType::TermsOfUse,
+            AgreementType::PrivacyPolicy,
+        ]
+    );
+
+    // The agreements sent again unchanged keep their first acceptance time; only the privacy
+    // policy gets a new one.
+    let agreements = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap()
+        .agreements
+        .unwrap()
+        .agreements;
+    assert_eq!(
+        agreements.license_agreement.last_accepted_at_ns,
+        first_acceptance
+    );
+    assert_eq!(
+        agreements.terms_of_use.last_accepted_at_ns,
+        first_acceptance
+    );
+    assert!(agreements.privacy_policy.last_accepted_at_ns > first_acceptance);
+}
+
+#[test]
+fn test_agreement_history_refuses_changes_past_the_limit() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
+
+    let update = |agreements: UserAgreements| {
+        // One update per minute stays clear of the per-caller call limit.
+        pic_setup.pic.advance_time(Duration::from_secs(60));
+
+        let user_profile = pic_setup
+            .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+            .unwrap()
+            .unwrap();
+        let result = pic_setup
+            .update::<Result<(), UpdateAgreementsError>>(
+                caller,
+                "update_user_agreements",
+                UpdateUserAgreementsRequest {
+                    current_user_version: user_profile.version,
+                    agreements,
+                },
+            )
+            .unwrap();
+        (user_profile, result)
+    };
+    let all_three = |accepted: bool| {
+        let agreement = UserAgreement {
+            accepted: Some(accepted),
+            ..Default::default()
+        };
+        UserAgreements {
+            license_agreement: agreement.clone(),
+            terms_of_use: agreement.clone(),
+            privacy_policy: agreement,
+        }
+    };
+    let history = || {
+        pic_setup
+            .update::<Result<Vec<AgreementHistoryEntry>, GetAgreementHistoryError>>(
+                caller,
+                "get_user_agreement_history",
+                (),
+            )
+            .unwrap()
+            .unwrap()
+    };
+
+    // Every update flips all three agreements, so it adds three entries.
+    let full_updates = MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER / 3;
+    for i in 0..full_updates {
+        assert_eq!(update(all_three(i % 2 == 0)).1, Ok(()));
+    }
+    let filled = history();
+    assert_eq!(filled.len(), full_updates * 3);
+
+    // Three more entries do not fit: the change is refused and nothing is written.
+    let (before, refused) = update(all_three(full_updates.is_multiple_of(2)));
+    assert_eq!(refused, Err(UpdateAgreementsError::TooManyHistoryEntries));
+    assert_eq!(history(), filled);
+    let after = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap();
+    assert_eq!(after.version, before.version);
+    assert_eq!(after.agreements, before.agreements);
+}
+
+#[test]
 fn test_agreement_history_not_recorded_when_no_change() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
@@ -1333,4 +1508,83 @@ fn test_provider_agreements_no_change_when_accepted_none() {
         provider.is_none() || provider.unwrap().is_empty(),
         "Provider agreements should be empty or None"
     );
+}
+
+// ---------------------------------------------------------------------------
+// Call limits
+// ---------------------------------------------------------------------------
+
+/// Calls `method` with the caller's current profile version 10 times, then asserts that the
+/// 11th call within the same minute returns `UpdateAgreementsError::RateLimited`.
+fn assert_rate_limited_after_ten_calls<T: candid::CandidType>(
+    method: &str,
+    request: impl Fn(Option<Version>) -> T,
+) {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
+
+    let call = || {
+        let user_profile = pic_setup
+            .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+            .unwrap()
+            .unwrap();
+        pic_setup
+            .update::<Result<(), UpdateAgreementsError>>(
+                caller,
+                method,
+                request(user_profile.version),
+            )
+            .unwrap()
+    };
+
+    for i in 0..10 {
+        let result = call();
+        assert_eq!(result, Ok(()), "call {i} should succeed");
+    }
+
+    assert_eq!(
+        call(),
+        Err(UpdateAgreementsError::RateLimited(RateLimitError {
+            max_calls: 10,
+            window_ns: 60 * 1_000_000_000,
+            caller,
+        }))
+    );
+
+    pic_setup.pic.advance_time(Duration::from_secs(60));
+    assert_eq!(call(), Ok(()), "a call after the window should succeed");
+}
+
+#[test]
+fn test_update_user_agreements_rate_limited_after_exceeding_limit() {
+    assert_rate_limited_after_ten_calls("update_user_agreements", |current_user_version| {
+        UpdateUserAgreementsRequest {
+            current_user_version,
+            agreements: INITIAL_AGREEMENTS.clone(),
+        }
+    });
+}
+
+#[test]
+fn test_update_provider_agreements_rate_limited_after_exceeding_limit() {
+    assert_rate_limited_after_ten_calls("update_provider_agreements", |current_user_version| {
+        UpdateProviderAgreementsRequest {
+            current_user_version,
+            provider_agreements: provider_agreements_map(vec![(
+                ProviderAgreementType {
+                    provider: ProviderAgreementProvider::NearIntents,
+                    scope: ProviderAgreementScope::Swap,
+                },
+                UserAgreement {
+                    accepted: Some(true),
+                    ..Default::default()
+                },
+            )]),
+        }
+    });
 }

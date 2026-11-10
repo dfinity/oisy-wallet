@@ -10,10 +10,13 @@ use shared::types::{
     Stats, TokenVersion,
 };
 
-use crate::utils::{
-    assertion::{assert_custom_tokens_eq, assert_tokens_data_eq},
-    mock::CALLER,
-    pocketic::{controller, setup, PicCanisterTrait},
+use crate::{
+    exchange::enable_exchange_rate_refresh,
+    utils::{
+        assertion::{assert_custom_tokens_eq, assert_tokens_data_eq},
+        mock::CALLER,
+        pocketic::{controller, setup, PicCanisterTrait},
+    },
 };
 
 static ICRC_TOKEN: LazyLock<IcrcToken> = LazyLock::new(|| IcrcToken {
@@ -722,6 +725,7 @@ fn test_user_cannot_list_another_custom_tokens() {
 #[test]
 fn test_set_custom_token_tracks_activity() {
     let pic_setup = setup();
+    enable_exchange_rate_refresh(&pic_setup);
 
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
@@ -744,8 +748,77 @@ fn test_set_custom_token_tracks_activity() {
 }
 
 #[test]
+fn test_custom_tokens_track_no_activity_while_price_refresh_is_off() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    pic_setup
+        .update::<()>(caller, "set_custom_token", USER_TOKEN.clone())
+        .expect("Failed to set custom token");
+    pic_setup
+        .update::<()>(
+            caller,
+            "set_many_custom_tokens",
+            vec![ANOTHER_USER_TOKEN.clone()],
+        )
+        .expect("Failed to set many custom tokens");
+    pic_setup
+        .update::<Vec<CustomToken>>(caller, "list_custom_tokens", ())
+        .expect("Failed to list custom tokens");
+
+    let stats = pic_setup
+        .query::<Stats>(controller(), "stats", ())
+        .expect("Failed to get stats");
+
+    assert_eq!(stats.token_activity_count, 0);
+}
+
+#[test]
+fn test_custom_tokens_record_activity_three_times_a_minute_per_caller() {
+    let pic_setup = setup();
+    enable_exchange_rate_refresh(&pic_setup);
+
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    let icrc_token = |ledger: u8| CustomToken {
+        token: Token::Icrc(IcrcToken {
+            ledger_id: Principal::from_slice(&[ledger, 1]),
+            index_id: None,
+        }),
+        ..USER_TOKEN.clone()
+    };
+    let token_activity_count = || {
+        pic_setup
+            .query::<Stats>(controller(), "stats", ())
+            .expect("Failed to get stats")
+            .token_activity_count
+    };
+
+    for ledger in 1..=4 {
+        pic_setup
+            .update::<()>(caller, "set_custom_token", icrc_token(ledger))
+            .expect("Failed to set custom token");
+    }
+    assert_eq!(
+        token_activity_count(),
+        3,
+        "The fourth token within the minute should not be recorded"
+    );
+
+    pic_setup.pic.advance_time(Duration::from_secs(60));
+    pic_setup
+        .update::<()>(caller, "set_custom_token", icrc_token(5))
+        .expect("Failed to set custom token");
+    assert_eq!(token_activity_count(), 4);
+}
+
+#[test]
 fn test_set_many_custom_tokens_tracks_activity() {
     let pic_setup = setup();
+    enable_exchange_rate_refresh(&pic_setup);
 
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
@@ -766,6 +839,7 @@ fn test_set_many_custom_tokens_tracks_activity() {
 #[test]
 fn test_set_custom_token_updates_activity_for_same_token() {
     let pic_setup = setup();
+    enable_exchange_rate_refresh(&pic_setup);
 
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
@@ -801,6 +875,7 @@ fn test_set_custom_token_updates_activity_for_same_token() {
 #[test]
 fn test_housekeeping_evicts_stale_token_activity() {
     let pic_setup = setup();
+    enable_exchange_rate_refresh(&pic_setup);
 
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
@@ -823,4 +898,57 @@ fn test_housekeeping_evicts_stale_token_activity() {
         .query::<Stats>(controller(), "stats", ())
         .expect("Failed to get stats");
     assert_eq!(stats_after.token_activity_count, 0);
+}
+
+#[test]
+fn test_housekeeping_evicts_a_full_token_activity_in_batches() {
+    const FULL: u64 = 2_000;
+    let pic_setup = setup();
+    enable_exchange_rate_refresh(&pic_setup);
+
+    let token_activity_count = || {
+        pic_setup
+            .query::<Stats>(controller(), "stats", ())
+            .expect("Failed to get stats")
+            .token_activity_count
+    };
+
+    // Two accounts with 1,000 ERC-20 tokens each fill `token_activity`.
+    for account in 0..2u32 {
+        let caller = Principal::self_authenticating(account.to_be_bytes());
+        pic_setup.ensure_user_profile(caller);
+        let tokens: Vec<CustomToken> = (0..1_000u32)
+            .map(|n| CustomToken {
+                token: Token::Erc20(ErcToken {
+                    token_address: ErcTokenId(format!("0x{:040x}", account * 1_000 + n)),
+                    chain_id: 1,
+                }),
+                ..USER_TOKEN.clone()
+            })
+            .collect();
+        pic_setup
+            .update::<()>(caller, "set_many_custom_tokens", tokens)
+            .expect("Failed to set many custom tokens");
+    }
+    assert_eq!(token_activity_count(), FULL);
+
+    pic_setup.pic.advance_time(Duration::from_secs(60 * 60 + 1));
+    let mut count = token_activity_count();
+    for _ in 0..20 {
+        if count < FULL {
+            break;
+        }
+        pic_setup.pic.tick();
+        count = token_activity_count();
+    }
+    assert!(
+        0 < count && count < FULL,
+        "The first batch should stop at its budget and leave entries for the next, left {count}"
+    );
+
+    for _ in 0..20 {
+        pic_setup.pic.advance_time(Duration::from_secs(1));
+        pic_setup.pic.tick();
+    }
+    assert_eq!(token_activity_count(), 0);
 }

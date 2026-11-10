@@ -11,7 +11,7 @@
 		value?: Snippet;
 		// Optional: when omitted the help-icon button is suppressed entirely. Callers that
 		// want to surface a description per row pass a snippet; section-level callers (e.g.
-		// SettingsExportData) keep descriptions at the section header instead.
+		// ToolsExportData) keep descriptions at the section header instead.
 		info?: Snippet;
 	}
 

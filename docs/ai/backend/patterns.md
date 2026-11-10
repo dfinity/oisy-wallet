@@ -213,18 +213,39 @@ one-shot approval, which should preserve their transaction identity.
 - Don't add a new ad-hoc timer at module load time. Wire it through one
   of the existing entry points and ensure both `init` and `post_upgrade`
   trigger it.
+- **Timer work over a collection that grows with users runs in batches.**
+  Each batch is a timer message of its own that stops once
+  `ic_cdk::api::instruction_counter()` passes a budget well below the 40B
+  limit, always after at least one item, and schedules the next batch from
+  the last key it reached. Take the budget check as a closure so unit tests
+  can drive it. Examples: `contacts::migration::schedule_batch` and the tip
+  sweep (`utils::housekeeping::schedule_tip_sweep_batch` over
+  `tips::service::prune_expired_tips`).
 - **Exchange rates:** Controllers store API keys via `set_api_keys`. Periodic
   refreshes are opt-in: they run only when `coingecko_api_key` is set and
   `exchange_rate_enabled` is `opt true` (`null` / unset is treated as disabled). See
   [`shared::types::api_keys::ApiKeys`](../../../src/shared/src/types/api_keys.rs).
   - `get_exchange_rates` is the per-caller fetch endpoint: it returns the
     USD price for each of the caller's priceable tokens (native + custom,
-    minus testnets / NFTs / ERC-4626), re-marks them as active so the timer
-    keeps them warm, and awaits a one-shot refresh for any token whose
-    cache is older than `PRICE_STALENESS_THRESHOLD_SEC` (2 min) or missing.
-    Entries that remain stale or missing after the refresh attempt are
+    minus testnets / NFTs / ERC-4626), records the custom ones as active so
+    the timer keeps them warm, and starts a background refresh for any token
+    whose cache is older than `PRICE_STALENESS_THRESHOLD_SEC` (2 min) or
+    missing. Entries that are stale or missing at the time of the call are
     returned as `None`, so returned prices never exceed the freshness window.
-    It's an `update` (mutates `token_activity`, may issue HTTP outcalls).
+    It's an `update` (writes `token_activity`, may issue HTTP outcalls).
+  - **Token activity** is recorded only through
+    `exchange::record_token_activity`: only while the refresh is on, only for
+    priceable custom tokens (the natives are refreshed while callers ask for
+    rates), at most 3 times a minute per caller
+    (`TOKEN_ACTIVITY_RATE_LIMITER`, which also gates the refresh that
+    `get_exchange_rates` starts), and for at most 2,000 tokens at a time
+    (`MAX_TOKEN_ACTIVITY_ENTRIES`). Housekeeping evicts inactive entries in
+    budgeted timer batches. A caller's stale tokens the map did not take are
+    fetched by the refresh `get_exchange_rates` starts or, while another
+    refresh holds the lock, queued for the next one (at most 500,
+    `QUEUED_FOR_REFRESH`).
+  - A refresh fetches the native tokens and the custom tokens as two groups
+    and caches each as soon as its own lookups return.
   - `get_exchange_rate(TokenId)` is a legacy cache-only query for callers
     that already know the token ID and do not need activation or freshness.
 
