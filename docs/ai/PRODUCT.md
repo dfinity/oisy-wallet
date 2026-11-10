@@ -856,7 +856,7 @@ On local and staging builds, Send, Convert, the AI assistant's BTC send and the 
 
 When the broadcast's outcome is unclear, the transaction may have gone out. The user is told to check their activity before sending again, and the flow does not offer the form again: its inputs stay reserved, so a second send would spend other coins and could pay twice. In the AI assistant, the card shows that message in place of its Send button. A send the backend refuses outright returns to the form as before, with the locked-funds message when its inputs are already reserved.
 
-A swap's activity row is created before its deposit is broadcast, so it is tracked whatever the broadcast answers. A deposit the backend refuses outright removes the row. One whose outcome is unclear keeps it, and the swap settles, or fails, once the deposit is seen or never arrives.
+A swap's activity row is created before its deposit is broadcast, so it is tracked whatever the broadcast answers. A deposit the backend refuses outright removes the row. One whose outcome is unclear keeps it until the deposit is seen. If the deposit never arrives, a NEAR Intents swap fails once its deposit address expires, while a Chain Fusion conversion stays in progress for now: nothing yet settles a deposit that never reached the network.
 
 Liquidium and OpenCryptoPay still send through the Chain Fusion Signer. Beta and production send as before.
 
