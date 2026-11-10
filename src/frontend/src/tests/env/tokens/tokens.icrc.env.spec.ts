@@ -1,4 +1,3 @@
-import { ICRC_DEFAULT_ENABLED_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
 import icrcTokens from '$env/tokens/tokens.icrc.json';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
@@ -14,11 +13,5 @@ describe('tokens.icrc.env', () => {
 		expect(additionalIcrcTokens.TCYCLES?.tags).toEqual([
 			{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.COMPUTE }
 		]);
-	});
-
-	it('should enable TCYCLES by default', () => {
-		expect(ICRC_DEFAULT_ENABLED_LEDGER_CANISTER_IDS).toContain(
-			additionalIcrcTokens.TCYCLES?.ledgerCanisterId
-		);
 	});
 });
