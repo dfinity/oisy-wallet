@@ -879,6 +879,14 @@ Decided in PR 8b:
   do: no row is written, and nothing is deleted.
 - **`SwapBtcWizard`** shows `mapBtcBroadcastErrorToMessage`'s message where it has one, and closes
   after an unclear outcome instead of returning to the form.
+- **A row whose deposit never lands is left to 8d** (open question 5; Copilot, sbpublic). After an
+  unclear outcome the row stays. If the deposit never reached the network, the Chain Fusion poller
+  reads it as `'unseen'`, which stays `Executing`, since `created_at_ns` only bounds its ledger scan.
+  The Liquidium poller leaves a row with a txid but no activity unchanged (8c), so a repay keeps
+  the repay max at zero. Only NEAR Intents fails such a row, once its deposit expires
+  (`isNearIntentsDepositExpired`). Settling the others safely needs a rule that proves a deposit
+  abandoned without failing a slow one, for example its reservation expired and its txid in
+  neither a block nor the mempool, so it is a separate PR, 8d, which lands before PR 10.
 
 Decided in PR 8c:
 
@@ -1081,6 +1089,8 @@ Every PR is safe on its own.
      Send, Convert and the AI assistant.
    - **8b:** the Chain Fusion and NEAR Intents swaps.
    - **8c:** Liquidium supply and repay, and removing `viaBackend`.
+   - **8d** (follow-up, before PR 10): settling BTC rows whose deposit never landed, in the Chain
+     Fusion and Liquidium pollers (open question 5).
 
    Together they do the following:
    - `beforeBroadcast` and `isDefinitiveBtcBroadcastRefusal` are added. The Chain Fusion and NEAR
@@ -1260,9 +1270,10 @@ Every PR is safe on its own.
 4. **Regtest.** Confirm the local dfx Bitcoin setup accepts transactions broadcast by the backend
    (min confirmations is forced to 1 on regtest in `get_all_utxos`).
 5. **Rows for a deposit that never lands.** Confirm that each poller eventually fails a BTC row
-   whose txid never appears, as NEAR Intents does with an expired deposit. Otherwise PR 8 adds that
-   expiry, since `beforeBroadcast` can create rows for sends that were never broadcast. Two pollers
-   to check:
+   whose txid never appears, as NEAR Intents does with an expired deposit. If not, an expiry is
+   needed, since `beforeBroadcast` can create rows for sends that were never broadcast.
+   **Answered in PR 8b: neither does**, and the expiry is deferred to 8d, before PR 10 (see
+   [Decided in PR 8b](#frontend-sendbtc)). Two pollers checked:
    - Chain Fusion (`src/frontend/src/lib/services/chain-fusion-swap-active-tx.services.ts`), for a
      `BtcToCkBtc` row;
    - Liquidium (`src/frontend/src/lib/services/liquidium-active-tx.services.ts`). It matches rows to
