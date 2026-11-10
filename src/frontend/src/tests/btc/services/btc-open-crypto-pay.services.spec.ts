@@ -1,5 +1,6 @@
 import { calculateBtcFee, payBtc } from '$btc/services/btc-open-crypto-pay.services';
 import * as btcSendServices from '$btc/services/btc-send.services';
+import * as btcSignServices from '$btc/services/btc-sign.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
 import type { AllUtxosStore } from '$btc/stores/all-utxos.store';
 import * as allUtxosStoreLib from '$btc/stores/all-utxos.store';
@@ -7,7 +8,9 @@ import type { FeeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.s
 import * as feeRatePercentilesStoreLib from '$btc/stores/fee-rate-percentiles.store';
 import type { OptionBtcAddress } from '$btc/types/address';
 import type { UtxosFee } from '$btc/types/btc-send';
+import * as btcPsbtUtils from '$btc/utils/btc-psbt.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { txidStringToUint8Array } from '$icp/utils/btc.utils';
 import * as backendApi from '$lib/api/backend.api';
 import * as addressDerived from '$lib/derived/address.derived';
 import { ProgressStepsPayment } from '$lib/enums/progress-steps';
@@ -17,9 +20,14 @@ import type {
 	PayableTokenWithConvertedAmount,
 	ValidatedBtcPaymentData
 } from '$lib/types/open-crypto-pay';
+import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
+import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import type { BitcoinDid } from '@icp-sdk/canisters/ckbtc';
+import type { Psbt } from 'bitcoinjs-lib';
 import { readable } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/rest/open-crypto-pay.rest', () => ({
 	fetchOpenCryptoPay: vi.fn()
@@ -254,6 +262,8 @@ describe('btc-open-crypto-pay.services', () => {
 		});
 
 		it('should call signBtc with correct parameters', async () => {
+			const signAndFinalizeBtcPsbtSpy = vi.spyOn(btcSignServices, 'signAndFinalizeBtcPsbt');
+
 			await payBtc({
 				token: mockToken,
 				identity: mockIdentity,
@@ -270,6 +280,7 @@ describe('btc-open-crypto-pay.services', () => {
 				satoshisAmount: mockValidatedData.satoshisAmount,
 				destination: mockValidatedData.destination
 			});
+			expect(signAndFinalizeBtcPsbtSpy).not.toHaveBeenCalled();
 		});
 
 		it('should call progress with PAY step after signing', async () => {
@@ -383,6 +394,182 @@ describe('btc-open-crypto-pay.services', () => {
 			expect(fetchOpenCryptoPay).toHaveBeenCalledOnce();
 			expect(backendApi.addPendingBtcTransaction).toHaveBeenCalledOnce();
 			expect(consoleErrorSpy).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('payBtc with BTC_SEND_VIA_BACKEND_ENABLED', () => {
+		const mockBtcAddress = 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq';
+		const mockProgress = vi.fn();
+		const callback = 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test';
+		const signed = {
+			txid: 'a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90',
+			hex: '0200000000010abc',
+			bytes: Uint8Array.from([2, 0])
+		};
+		const psbt = {} as Psbt;
+
+		const mockToken = {
+			...BTC_MAINNET_TOKEN,
+			tokenNetwork: 'Bitcoin',
+			amount: '0.001',
+			minFee: 0.0001,
+			amountInUSD: 50,
+			feeInUSD: 0.5,
+			sumInUSD: 50.5,
+			fee: {
+				feeSatoshis: 1000n,
+				feeRateMiliSatoshisPerVByte: 4000n,
+				utxos: []
+			}
+		} as PayableTokenWithConvertedAmount;
+
+		const mockValidatedData: ValidatedBtcPaymentData = {
+			destination: 'bc1qbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			satoshisAmount: 100000n,
+			utxosFee: {
+				feeSatoshis: 1000n,
+				feeRateMiliSatoshisPerVByte: 4000n,
+				utxos: [{ value: 200000n }] as unknown as UtxosFee['utxos']
+			}
+		};
+
+		const params = {
+			token: mockToken,
+			identity: mockIdentity,
+			validatedData: mockValidatedData,
+			progress: mockProgress,
+			quoteId: 'quote-123',
+			callback
+		};
+
+		let buildBtcSendPsbtSpy: MockInstance;
+		let signAndFinalizeBtcPsbtSpy: MockInstance;
+
+		const payStepCallOrder = (): number | undefined => {
+			const index = mockProgress.mock.calls.findIndex(
+				([step]) => step === ProgressStepsPayment.PAY
+			);
+
+			return index === -1 ? undefined : mockProgress.mock.invocationCallOrder[index];
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			btcSendViaBackend.enabled = true;
+
+			vi.spyOn(addressDerived, 'btcAddressMainnet', 'get').mockReturnValue(
+				readable(mockBtcAddress)
+			);
+			buildBtcSendPsbtSpy = vi.spyOn(btcPsbtUtils, 'buildBtcSendPsbt').mockReturnValue(psbt);
+			signAndFinalizeBtcPsbtSpy = vi
+				.spyOn(btcSignServices, 'signAndFinalizeBtcPsbt')
+				.mockResolvedValue(signed);
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValue(undefined);
+			vi.mocked(backendApi.addPendingBtcTransaction).mockResolvedValue({ response: true });
+		});
+
+		it('should build the payment with the wallet as change and sign it in OISY', async () => {
+			await payBtc(params);
+
+			expect(buildBtcSendPsbtSpy).toHaveBeenCalledExactlyOnceWith({
+				utxos: mockValidatedData.utxosFee.utxos,
+				outputs: [
+					{ destination: mockValidatedData.destination, amount: mockValidatedData.satoshisAmount }
+				],
+				changeAddress: mockBtcAddress,
+				feeSatoshis: mockValidatedData.utxosFee.feeSatoshis,
+				network: mockToken.network.env
+			});
+			expect(signAndFinalizeBtcPsbtSpy).toHaveBeenCalledExactlyOnceWith({
+				psbt,
+				identity: mockIdentity
+			});
+			expect(btcSendServices.signBtc).not.toHaveBeenCalled();
+		});
+
+		it('should hand OpenCryptoPay the signed transaction', async () => {
+			await payBtc(params);
+
+			expect(fetchOpenCryptoPay).toHaveBeenCalledExactlyOnceWith(
+				`https://api.dfx.swiss/v1/lnurlp/tx/pl_test?quote=quote-123&method=Bitcoin&hex=${signed.hex}`
+			);
+		});
+
+		it('should reserve the inputs before the hand-off, and only then reach the PAY step', async () => {
+			await payBtc(params);
+
+			expect(backendApi.addPendingBtcTransaction).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				network: mapToSignerBitcoinNetwork({ network: mockToken.network.env }),
+				txId: txidStringToUint8Array(signed.txid),
+				utxos: mockValidatedData.utxosFee.utxos,
+				iiDelegationChain: extractIIDelegationChain(mockIdentity)
+			});
+
+			const [reserved] = vi.mocked(backendApi.addPendingBtcTransaction).mock.invocationCallOrder;
+			const [handedOff] = vi.mocked(fetchOpenCryptoPay).mock.invocationCallOrder;
+			const paying = payStepCallOrder();
+
+			expect(signAndFinalizeBtcPsbtSpy.mock.invocationCallOrder[0]).toBeLessThan(reserved);
+			expect(paying).toBeGreaterThan(reserved);
+			expect(handedOff).toBeGreaterThan(paying ?? Infinity);
+		});
+
+		it('should not hand the payment off when the reservation fails', async () => {
+			vi.mocked(backendApi.addPendingBtcTransaction).mockRejectedValue(
+				new Error('Some of the provided UTXOs are already reserved.')
+			);
+
+			await expect(payBtc(params)).rejects.toThrow(
+				'Some of the provided UTXOs are already reserved.'
+			);
+
+			expect(fetchOpenCryptoPay).not.toHaveBeenCalled();
+			expect(payStepCallOrder()).toBeUndefined();
+		});
+
+		it('should not hand the payment off when the reservation is rate limited', async () => {
+			vi.mocked(backendApi.addPendingBtcTransaction).mockResolvedValue({
+				response: true,
+				rateLimitInfo: {
+					endpoint: 'btc_add_pending_transaction',
+					limiter: 'BTC_ADD_PENDING_TX_RATE_LIMITER'
+				}
+			});
+
+			await expect(payBtc(params)).rejects.toThrow('The payment could not be reserved');
+
+			expect(fetchOpenCryptoPay).not.toHaveBeenCalled();
+			expect(payStepCallOrder()).toBeUndefined();
+		});
+
+		it('should reserve nothing and hand nothing off when signing fails', async () => {
+			signAndFinalizeBtcPsbtSpy.mockRejectedValue(new Error('Signing failed'));
+
+			await expect(payBtc(params)).rejects.toThrow('Signing failed');
+
+			expect(backendApi.addPendingBtcTransaction).not.toHaveBeenCalled();
+			expect(fetchOpenCryptoPay).not.toHaveBeenCalled();
+		});
+
+		it('should reject with the hand-off error, after the reservation', async () => {
+			vi.mocked(fetchOpenCryptoPay).mockRejectedValue(new Error('API request failed'));
+
+			await expect(payBtc(params)).rejects.toThrow('API request failed');
+
+			expect(backendApi.addPendingBtcTransaction).toHaveBeenCalledOnce();
+			expect(payStepCallOrder()).toBeDefined();
+		});
+
+		it('should build nothing when the wallet address is not loaded', async () => {
+			vi.spyOn(addressDerived, 'btcAddressMainnet', 'get').mockReturnValue(readable(null));
+
+			await expect(payBtc(params)).rejects.toThrow();
+
+			expect(buildBtcSendPsbtSpy).not.toHaveBeenCalled();
+			expect(signAndFinalizeBtcPsbtSpy).not.toHaveBeenCalled();
+			expect(backendApi.addPendingBtcTransaction).not.toHaveBeenCalled();
 		});
 	});
 });

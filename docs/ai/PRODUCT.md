@@ -927,7 +927,9 @@ A swap's activity row is created before its deposit is broadcast, so it is track
 
 A Liquidium supply or repayment is recorded with its transaction before the broadcast, and the record is removed only if the transfer was refused outright. After an unclear outcome a repayment keeps counting against the repay maximum until it settles, so the form does not offer the full debt again. A transfer that never reached the network is not settled yet, so its hold stays too.
 
-OpenCryptoPay still sends through the Chain Fusion Signer. Beta and production send as before.
+OpenCryptoPay payments in BTC are built and signed in OISY too, with the same 38-input limit. OpenCryptoPay broadcasts them itself, so OISY reserves their inputs just before it hands the transaction over, instead of after. If the reservation fails, nothing is handed over and the payment fails. If the hand-over fails, the payment shows as not confirmed, since OpenCryptoPay may have received it, and its inputs stay reserved until they are spent, or for an hour if they never are.
+
+Beta and production send as before.
 
 ---
 
