@@ -114,7 +114,7 @@ describe('BuyModalContent', () => {
 		);
 	});
 
-	describe('default token', () => {
+	describe('widget URL', () => {
 		beforeEach(() => {
 			vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => true);
 		});
@@ -147,6 +147,13 @@ describe('BuyModalContent', () => {
 
 			expect(params.get('defaultCrypto')).toBe(ICP_TOKEN.buy?.onramperId);
 			expect(params.get('sell_defaultCrypto')).toBe(ICP_TOKEN.buy?.onramperId);
+		});
+
+		it('turns OnRamper country selector off', async () => {
+			const { findByTestId } = render(BuyModalContent);
+			const params = await widgetParams(findByTestId);
+
+			expect(params.get('enableCountrySelector')).toBe('false');
 		});
 	});
 });
