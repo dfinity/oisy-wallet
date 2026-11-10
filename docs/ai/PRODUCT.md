@@ -372,7 +372,7 @@ The tokens added for the 1Sec (OneSec) swap integration are metadata-only:
 
 A new user does not see any of these in the wallet; a user who wants one imports it by its ledger canister ID / contract address, after which it appears with full metadata and inside its token group.
 
-ICP on the same EVM chains is intentionally **not** metadata-only: some users may already hold a balance in it, and marking it metadata-only would remove it from the default curated token set (potentially hiding that balance unless they explicitly import it). ICP stays curated and suggested there.
+ICP on the same EVM chains is intentionally **not** metadata-only: some users may already hold a balance in it, and marking it metadata-only would remove it from the default curated token set (potentially hiding that balance unless they explicitly import it). ICP stays curated there, as a [deprecated](#fixed-suggested-and-deprecated-tokens) token: holders keep seeing it, other users no longer do.
 
 ### Fixed, suggested and deprecated tokens
 
@@ -380,7 +380,7 @@ Two sets of curated tokens are enabled without the user switching them on, and a
 
 - **Fixed** tokens are always enabled; Manage tokens does not let the user switch them off. On ICP these are ICP, ckBTC, ckETH and ckUSDC.
 - **Suggested** tokens are enabled unless the user has switched them off, and OISY saves one as enabled to the user's token list once the wallet shows a balance in it and the list has no entry for it. A choice the user already made stays, and once saved, the token stays enabled for that user even after it leaves the set. Taking a token out of the suggested set hides it again only from users it was never saved for, such as those who held no balance in it while it was suggested and never switched it on or off.
-- **Deprecated** tokens are formerly suggested tokens. They show only for users whose token list has them enabled. When the wallet loads that list and finds no entry for one, it reads the user's balance in it on each network the user has switched on and, if there is one, saves the token as enabled, so a holder keeps it however long they stayed away. A balance that cannot be read counts as none until the next sign-in. Today only ERC-20 tokens can be deprecated, and there are none yet.
+- **Deprecated** tokens are formerly suggested tokens. They show only for users whose token list has them enabled. When the wallet loads that list and finds no entry for one, it reads the user's balance in it on each network the user has switched on and, if there is one, saves the token as enabled, so a holder keeps it however long they stayed away. A balance that cannot be read counts as none until the next sign-in. Today only ERC-20 tokens can be deprecated: ICP on Ethereum, Arbitrum and Base.
 
 ### Asset types
 
@@ -1090,7 +1090,7 @@ Only 1Sec is affected. Chain Fusion still converts ck twins both ways (ckUSDC st
 
 Three tokens in 1Sec's config have no practical effect in OISY: **CHAT** is bridged by 1Sec's canister but is absent from the `onesec-bridge` package's token config, so OISY has never routed it in either direction; and **ckBTC**'s wrapped ERC-20 and **cbBTC**'s wrapped ICRC ledger are not OISY tokens, so the surviving leg of each has no pay token to start from.
 
-What this deliberately does not do: it does not hide, disable or remove a token, and it does not change which tokens 1Sec accepts as a pay token — only which destinations it offers for them. In particular the wrapped ERC-20 of ICP stays a curated, [suggested](#curated-tokens-vs-metadata-only-tokens) token on all three EVM chains, precisely so that a holder's balance stays visible: it was never in most users' custom-token list, so dropping it from the curated set would hide the very balance they need to swap back.
+What this deliberately does not do: it does not hide, disable or remove a token, and it does not change which tokens 1Sec accepts as a pay token — only which destinations it offers for them. In particular the wrapped ERC-20 of ICP stays a curated, [deprecated](#fixed-suggested-and-deprecated-tokens) token on all three EVM chains, precisely so that a holder's balance stays visible: OISY saves it to a holder's token list at sign-in, so the balance they need to swap back keeps showing.
 
 The restriction is a code-level kill switch — `ONESEC_UNWRAP_ONLY` in `src/frontend/src/env/rest/onesec.env.ts`, in the same style as the price-provider flags. Setting it to `false` restores both directions unchanged.
 
