@@ -28,6 +28,7 @@ import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
 import { mockSendContextEntry } from '$tests/utils/send.context.test-utils';
@@ -219,7 +220,10 @@ describe('BtcSendTokenWizard', () => {
 			expect(onClose).not.toHaveBeenCalled();
 		});
 
+		// Only on the backend path: a `btc_caller_send` can cost more than any renewed approval.
 		it('should go back to the form, saying to sign in again, after a spent signing approval', async () => {
+			btcSendViaBackend.enabled = true;
+
 			const err = new SignerCanisterPaymentError({
 				LedgerWithdrawFromError: {
 					ledger: mockPrincipal,

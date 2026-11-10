@@ -17,6 +17,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 
 describe('convertNumberToSatoshis', () => {
 	it('converts number to Satoshis correctly', () => {
@@ -226,15 +227,32 @@ describe('BTC broadcast outcomes', () => {
 describe('BTC signing payment errors', () => {
 	const ledger = mockPrincipal;
 
-	it('should tell a spent signing approval to sign in again, and count it as a limit', () => {
-		const err = new SignerCanisterPaymentError({
+	const allowanceSpent = () =>
+		new SignerCanisterPaymentError({
 			LedgerWithdrawFromError: { ledger, error: { InsufficientAllowance: { allowance: 10n } } }
 		});
+
+	beforeEach(() => {
+		btcSendViaBackend.enabled = true;
+	});
+
+	it('should tell a spent signing approval to sign in again, and count it as a limit', () => {
+		const err = allowanceSpent();
 
 		expect(mapBtcBroadcastErrorToMessage({ err, i18n: en })).toBe(
 			en.send.error.btc_signing_allowance_spent
 		);
 		expect(isBtcSendLimitError(err)).toBeTruthy();
+	});
+
+	// `btc_caller_send` charges a whole send upfront, which can cost more than any renewed approval.
+	it('should leave a spent approval to the caller on the Chain Fusion Signer path', () => {
+		btcSendViaBackend.enabled = false;
+
+		const err = allowanceSpent();
+
+		expect(mapBtcBroadcastErrorToMessage({ err, i18n: en })).toBeUndefined();
+		expect(isBtcSendLimitError(err)).toBeFalsy();
 	});
 
 	// The backend's own cycles running low, or any other payment failure: a sign-in does not fix it.

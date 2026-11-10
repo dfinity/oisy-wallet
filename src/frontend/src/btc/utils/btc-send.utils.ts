@@ -3,6 +3,7 @@ import {
 	BtcPrepareSendError,
 	type UtxosFee
 } from '$btc/types/btc-send';
+import { BTC_SEND_VIA_BACKEND_ENABLED } from '$env/btc.env';
 import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
 import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
@@ -87,7 +88,12 @@ const btcBroadcastRateLimitWindowSeconds = (err: unknown): bigint | undefined =>
 // (`allow_signing`). Once it is spent, the cycles ledger refuses the charge, and signing fails until
 // the next sign-in tops it up. The ledger's `InsufficientFunds` is the backend's own balance
 // instead, which a sign-in does not fix.
+//
+// Only on the backend path: one input costs 38B there, so a refusal means the approval is nearly
+// spent, and a sign-in renews it. `btc_caller_send` charges a whole send upfront, with no input cap,
+// so it can cost more than any renewed approval, and a sign-in would not help (sbpublic).
 const isBtcSigningAllowanceSpent = (err: unknown): boolean =>
+	BTC_SEND_VIA_BACKEND_ENABLED &&
 	err instanceof SignerCanisterPaymentError &&
 	'LedgerWithdrawFromError' in err.paymentError &&
 	'InsufficientAllowance' in err.paymentError.LedgerWithdrawFromError.error;

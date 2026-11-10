@@ -932,6 +932,10 @@ Decided in 8e (the limit messages):
   - `allow_signing` renews at most three times an hour (`ALLOW_SIGNING_RATE_LIMITER`, checked only
     when it would top up), and the frontend reads a refusal as `Skipped`. So the message also says
     to wait up to an hour if it comes back (Copilot).
+  - Only with `BTC_SEND_VIA_BACKEND_ENABLED`. A `btc_sign_prehash` costs 38B, so a refusal means the
+    approval is nearly spent, and a sign-in renews it. `btc_caller_send` charges a whole send
+    upfront, with no input cap, so it can cost more than any renewed approval (2.917T), and its
+    refusal keeps the flow's own message (sbpublic).
 - **These toasts carry no detail.** Nothing was sent and the message says what to do, so
   `isBtcSendLimitError` leaves out the error's English text, which the toast appends otherwise.
 - **`btc_get_spendable_utxos` keeps a generic message.** Its limit (15 a minute) is out of reach
