@@ -1,3 +1,4 @@
+import type * as oneSecEnv from '$env/rest/onesec.env';
 import SwapProviderCell from '$lib/components/swap/SwapProviderCell.svelte';
 import {
 	SWAP_PROVIDER_ANIMATION,
@@ -34,6 +35,12 @@ vi.mock('svelte/motion', () => ({
 			return motion.reduced;
 		}
 	}
+}));
+
+// 1Sec is the sample second provider here; its provider details exist only while its flag is on.
+vi.mock('$env/rest/onesec.env', async (importOriginal) => ({
+	...(await importOriginal<typeof oneSecEnv>()),
+	ONESEC_SWAP_ENABLED: true
 }));
 
 // Ignore pre-existing ModalValue/Logo entry fades; only inspect the new provider motion.
