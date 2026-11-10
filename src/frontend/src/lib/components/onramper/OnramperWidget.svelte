@@ -115,7 +115,9 @@
 			wallets: [],
 			networkWallets,
 			supportRecurringPayments: true,
-			enableCountrySelector: true,
+			// OnRamper's country selector resets the selected token and fiat to the country's defaults
+			// whenever its menu is opened, so the user would lose the token preselected here.
+			enableCountrySelector: false,
 			themeName: 'dark' // we always pass dark, as some card elements aren't styled correctly (white text on white background) in light theme / onramper bug?
 		})
 			.then((url) => {
