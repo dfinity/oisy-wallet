@@ -10,6 +10,10 @@
 		UTXOS_FEE_CONTEXT_KEY,
 		type UtxosFeeContext as UtxosFeeContextType
 	} from '$btc/stores/utxos-fee.store';
+	import {
+		isUnclearBtcBroadcastOutcome,
+		mapBtcBroadcastErrorToMessage
+	} from '$btc/utils/btc-send.utils';
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
@@ -170,7 +174,8 @@
 				utxosFee: $utxosFeeStore.utxosFee,
 				network,
 				source,
-				identity: $authIdentity
+				identity: $authIdentity,
+				viaBackend: true
 			});
 
 			trackEvent({
@@ -188,9 +193,18 @@
 			});
 
 			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
+				msg: {
+					text: mapBtcBroadcastErrorToMessage({ err, i18n: $i18n }) ?? $i18n.send.error.unexpected
+				},
 				err
 			});
+
+			// The transaction may have gone out, and its inputs stay reserved, so sending again would
+			// spend other coins and could pay twice. The flow closes instead of offering the form again.
+			if (isUnclearBtcBroadcastOutcome(err)) {
+				close();
+				return;
+			}
 
 			onBack();
 		}
