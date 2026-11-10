@@ -1,3 +1,8 @@
+---
+title: PR & CI
+tags: [development, ci, deployment]
+---
+
 # PR & CI
 
 Everything an agent needs to open a green PR.
@@ -248,3 +253,22 @@ and `tag-legacy-signer-release.yml`. Don't bump versions or edit
 signer version in lockstep with the wallet, because the legacy signer is
 still rebuilt from `main` on every release. See
 [Versioning](../../SIGNER_DOMAINS.md#versioning).
+
+### Audit backend upgrades
+
+The environment deployment workflow snapshots audit's backend before upgrading it.
+It checks the target canister ID, reads its existing configuration, stops the canister,
+creates a new snapshot, and restarts it. Snapshot failure aborts the deployment;
+the exit handler attempts to restart audit. Existing snapshots are kept. If the
+snapshot limit is reached, the deployment fails rather than deleting a backup.
+The snapshot ID is recorded in the workflow run summary; the snapshot stays on the IC.
+
+Audit upgrades use `--mode upgrade --argument '(variant { Upgrade })'` to preserve
+stored configuration. Do not use the generated `Init` argument for audit:
+`build.backend.args.sh` currently falls through to local-development defaults.
+The workflow compares the full configuration before and after the deployment.
+Deploy the matching frontend only after this check succeeds. Other environments
+keep their existing deployment behavior.
+
+A snapshot restore discards state written after the snapshot. Do not restore it
+automatically after a failed check; inspect the failure and any intervening activity first.

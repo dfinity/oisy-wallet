@@ -525,11 +525,33 @@ jobs:
           DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
 
       - name: Deploy Backend to Environment
+        shell: bash
         run: |
           DFX_DEPLOY_FLAGS=() # Arguments to be added to the dfx deploy command.
           [[ "$FORCE_BACKEND" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
 
           if [ "$deploy_backend" == "true" ] ; then
+            if [[ "$NETWORK" == "audit" ]]; then
+              # Preserve audit's stored signing configuration; its generated Init args use local defaults.
+              DFX_DEPLOY_FLAGS+=('--mode' 'upgrade' '--argument' '(variant { Upgrade })')
+              AUDIT_BACKEND_ID="$(dfx canister id backend --network audit)"
+              [[ "$AUDIT_BACKEND_ID" == "vhcnk-oqaaa-aaaah-araya-cai" ]] || exit 1
+              dfx canister call "$AUDIT_BACKEND_ID" config '()' --query --network audit > "$RUNNER_TEMP/audit-config-before.did"
+
+              # Keep existing snapshots. A failed snapshot must abort deployment and restart audit.
+              trap 'dfx canister start "$AUDIT_BACKEND_ID" --network audit' EXIT
+              dfx canister stop "$AUDIT_BACKEND_ID" --network audit
+              dfx canister snapshot create "$AUDIT_BACKEND_ID" --network audit 2>&1 | tee "$RUNNER_TEMP/audit-snapshot.txt"
+              dfx canister start "$AUDIT_BACKEND_ID" --network audit
+              trap - EXIT
+              {
+                echo '### Audit backend snapshot'
+                echo '```text'
+                cat "$RUNNER_TEMP/audit-snapshot.txt"
+                echo '```'
+              } >> "$GITHUB_STEP_SUMMARY"
+            fi
+
             if git diff --quiet "origin/$BASE_REF" HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
               if [ "$FORCE_BACKEND" != "true" ]; then
                 echo "No changes in specified files/folders detected, skipping backend deployment."
@@ -540,6 +562,12 @@ jobs:
             else
               ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
               dfx deploy backend --network "$NETWORK" "${DFX_DEPLOY_FLAGS[@]}"
+            fi
+
+            if [[ "$NETWORK" == "audit" ]]; then
+              dfx canister call "$AUDIT_BACKEND_ID" config '()' --query --network audit > "$RUNNER_TEMP/audit-config-after.did"
+              cmp "$RUNNER_TEMP/audit-config-before.did" "$RUNNER_TEMP/audit-config-after.did"
+              echo 'Audit backend configuration is unchanged.' >> "$GITHUB_STEP_SUMMARY"
             fi
           fi
         env:
