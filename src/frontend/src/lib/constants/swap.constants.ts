@@ -211,16 +211,7 @@ export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersCon
 				}
 			}
 		: {}),
-	...(ONESEC_SWAP_ENABLED
-		? {
-				[SwapProvider.ONE_SEC]: {
-					website: 'https://1sec.to/',
-					name: '1Sec',
-					logo: '/images/dapps/onesec-logo.svg'
-				}
-			}
-		: {}),
-	// Unconditional, unlike the flag-gated entries above: `ActiveUserTransactionItem`
+	// Unconditional, unlike the flag-gated entry above: `ActiveUserTransactionItem`
 	// resolves a row's provider name through this map, and an AUT row outlives a flag
 	// rollback — a gated entry would leave historical rows nameless. `website` is the
 	// docs page rather than an external venue, because this is the one in-house
@@ -236,6 +227,13 @@ export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersCon
 		website: 'https://li.fi',
 		name: 'LI.FI',
 		logo: '/images/dapps/lifi-logo.svg'
+	},
+	// Unconditional for the same reason as OISY Trade: a 1Sec active-transaction row outlives its
+	// swaps being switched off, and `ActiveUserTransactionItem` names it through this map.
+	[SwapProvider.ONE_SEC]: {
+		website: 'https://1sec.to/',
+		name: '1Sec',
+		logo: '/images/dapps/onesec-logo.svg'
 	}
 };
 

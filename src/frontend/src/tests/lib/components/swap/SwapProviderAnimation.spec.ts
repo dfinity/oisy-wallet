@@ -1,4 +1,3 @@
-import type * as oneSecEnv from '$env/rest/onesec.env';
 import SwapProviderAnimation from '$lib/components/swap/SwapProviderAnimation.svelte';
 import { SWAP_PROVIDER_ANIMATION } from '$lib/constants/test-ids.constants';
 import { MOTION_EASE_OUT_CSS } from '$lib/constants/transition.constants';
@@ -14,12 +13,6 @@ vi.mock('svelte/motion', () => ({
 			return motion.reduced;
 		}
 	}
-}));
-
-// 1Sec is a sample pool provider here; its provider details exist only while its flag is on.
-vi.mock('$env/rest/onesec.env', async (importOriginal) => ({
-	...(await importOriginal<typeof oneSecEnv>()),
-	ONESEC_SWAP_ENABLED: true
 }));
 
 describe('SwapProviderAnimation', () => {
