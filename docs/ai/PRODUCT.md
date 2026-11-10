@@ -569,10 +569,10 @@ The first card explains where to get help and links out to the OISY help centre.
 
 OISY's transaction history is an index built from third-party providers, so it can lag behind the chain: a received transfer missing, a balance minutes stale, a send confirmed on-chain but not yet listed. The blockchain explorer is the ground truth, and this card opens it at the user's own address — one link per **enabled mainnet network**, labelled with that network's name and logo. Its text says what the user finds there, their balances and full transaction history, and that blockchains are public ledgers, so all on-chain activity can be checked independently.
 
-The card renders from the user's enabled mainnet networks rather than a fixed list, so switching a network off in Settings removes its link, and a network the wallet gains is one map entry away from having one. Testnets never appear: the card is about real funds, and a user running testnets already knows where the explorer is. Most of the links use the same explorer host as the rest of the wallet. Two differ on purpose:
+The card renders from the user's enabled mainnet networks rather than a fixed list, so switching a network off in Settings removes its link, and a network the wallet gains is one map entry away from having one. Testnets never appear: the card is about real funds, and a user running testnets already knows where the explorer is. Every link but one uses the same explorer host as the rest of the wallet:
 
-- **Internet Computer** uses `icexplorer.io`, not the network's own `dashboard.internetcomputer.org`, whose account page is keyed by the 64-character account identifier — while the address OISY shows a user is their principal. This is a correctness requirement, not a preference.
-- **Bitcoin** uses `mempool.space`, where the network's own explorer is `blockstream.info`. A preference.
+- **Internet Computer** opens the ICP dashboard's address page (`dashboard.internetcomputer.org/address/…`) at the user's principal, the address OISY shows them. The page lists the principal's balance on every ledger the dashboard tracks.
+- **Bitcoin** is the exception: it uses `mempool.space`, where the network's own explorer is `blockstream.info`. A preference.
 
 As on the provider card below, a link whose address has not loaded is left out, and a card with no available link is hidden.
 
