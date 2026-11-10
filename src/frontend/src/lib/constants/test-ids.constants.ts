@@ -254,6 +254,11 @@ export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
 export const MANAGE_TOKENS_MODAL_SAVE = 'manage-tokens-modal-save';
 export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggle';
 export const MANAGE_TOKENS_IC_ADD_NFT_INPUT = 'manage-tokens-ic-add-nft-input';
+export const MANAGE_TOKENS_IC_UNAVAILABLE_TOKENS = 'manage-tokens-ic-unavailable-tokens';
+export const MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_DELETE =
+	'manage-tokens-ic-unavailable-token-delete';
+export const MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_CONFIRM_DELETE =
+	'manage-tokens-ic-unavailable-token-confirm-delete';
 
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
 export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';

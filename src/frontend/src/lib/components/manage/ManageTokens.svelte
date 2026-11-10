@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onMount, setContext, type Snippet, untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
+	import IcUnavailableTokens from '$icp/components/tokens/IcUnavailableTokens.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
@@ -28,6 +29,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
+	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
@@ -140,6 +142,10 @@
 		}
 	});
 
+	let showIcUnavailableTokens = $derived(
+		!isNftsPage && (isNullish($filterNetwork) || isNetworkICP($filterNetwork))
+	);
+
 	const modifiedTokens = new SvelteMap<TokenId, Token>();
 
 	let userHasEdited = $state(false);
@@ -178,6 +184,11 @@
 {/if}
 
 <ModalTokensList networkSelectorViewOnly={nonNullish($selectedNetwork)}>
+	{#snippet topBanner()}
+		{#if showIcUnavailableTokens}
+			<IcUnavailableTokens />
+		{/if}
+	{/snippet}
 	{#snippet tokenListItem(token)}
 		<LogoButton dividers hover={false}>
 			{#snippet title()}
