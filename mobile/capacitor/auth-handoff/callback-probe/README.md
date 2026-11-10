@@ -62,9 +62,24 @@ On November 10, 2026:
 - The frontend callback, audit asset/configuration and session suite passed
   39 tests. The app's simulator auth/session suite passed 14 tests. Svelte checks
   reported no errors or warnings.
-- Claimed-domain, deployed-page and real OISY sign-in checks are pending. A generic
-  cancellation is not an association rejection; a simulator pass does not replace
-  a signed-device check.
+- The second signed build included both `applinks:audit.oisy.com` and
+  `webcredentials:audit.oisy.com`. Inspection confirmed those entitlements in the
+  signed binary. Audit did not list the probe's bundle ID. iOS again returned
+  the explicit association error and no callback. Claiming the domain in an app
+  does not substitute for authorization by the domain.
+- Before deployment, the iPhone WebKit check detected the legacy return link
+  using the fixed synthetic fragment. After deployment it reported
+  `PASS_PAGE_DISCARDS_RESPONSE`: the fragment was cleared and the link was absent.
+- [Audit deployment 42817051415](https://github.com/dfinity/oisy-wallet/actions/runs/42817051415)
+  successfully deployed fix `2c2fb1603f`. A public-asset check examined all 23
+  reachable JavaScript files: the relay was absent, the mobile host remained,
+  and UI test fixtures were absent. The Apple association and II callback allowlist
+  were unchanged; the probe remained unlisted.
+- Lint, formatting and documentation-link checks passed. The temporary probe was
+  removed and the existing OISY app reopened without reinstalling or clearing it.
+- A fresh OISY passkey sign-in and ICP account-continuity confirmation are pending
+  user interaction. A generic cancellation is not an association rejection; a
+  simulator pass does not replace a signed-device check.
 
 ## Dependencies
 
