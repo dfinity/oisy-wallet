@@ -192,8 +192,6 @@ interface I18nAuth {
 		advanced_cryptography: string;
 		move_swap_grow: string;
 		return_to_app: string;
-		continue_sign_in_in_app: string;
-		open_app: string;
 	};
 	alt: {
 		preview: string;

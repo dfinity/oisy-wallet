@@ -28,6 +28,27 @@ before SDK cleanup while removing UI authority immediately.
 Already-issued app delegations may remain usable until their signed expiry; local
 logout must not be described as immediate cryptographic revocation of every copy.
 
+## HTTPS callback boundary
+
+The callback is `https://audit.oisy.com/signer-callback`. II validates the declared
+callback and derivation origin; iOS validates the calling app's signed Associated
+Domains entitlement against the domain's Apple association file. These are
+separate checks. Copying the origin or bundle identifier does not establish the
+signed app/domain relationship.
+
+The November 10 fix removes the legacy callback page's `oisy://` relay. A browser
+visit discards the response and provides no return link. A valid SDK HTTPS session
+receives the callback before this page executes. Do not restore the relay: an
+attacker initiating a request can own its session key, so state/key matching alone
+does not compensate for delivering the resulting delegation to an unverified app.
+Existing installed SDK builds need no replacement for this frontend fix.
+
+The separate test app uses a different signed bundle identifier and never requests
+an II delegation. Its two configurations omit Associated Domains or claim audit
+without being listed by the website. Synthetic callback checks distinguish a
+platform association rejection from user cancellation.
+Source: [Callback security probe](../auth-handoff/callback-probe/README.md)
+
 ## Ownership and sequence
 
 1. `SDKAuthentication` uses the SDK system browser and exact associated HTTPS

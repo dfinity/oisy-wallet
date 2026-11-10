@@ -208,9 +208,7 @@
 			"asset_types": "Krypto, akcie, komodity, sběratelské předměty a šifrované poznámky.",
 			"advanced_cryptography": "Soukromé a odolné proti manipulaci. Neviditelné, když potřebujete.",
 			"move_swap_grow": "Vydělávejte, půjčujte si a obchodujte s vestavěným AI asistentem.",
-			"return_to_app": "",
-			"continue_sign_in_in_app": "",
-			"open_app": ""
+			"return_to_app": ""
 		},
 		"alt": {
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu",

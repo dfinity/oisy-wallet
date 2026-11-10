@@ -208,9 +208,7 @@
 			"asset_types": "Tiền mã hoá, cổ phiếu, hàng hoá, vật phẩm sưu tầm và ghi chú được mã hoá.",
 			"advanced_cryptography": "Riêng tư và chống giả mạo. Vô hình, khi bạn cần.",
 			"move_swap_grow": "Kiếm lời, vay và giao dịch, với trợ lý AI tích hợp.",
-			"return_to_app": "",
-			"continue_sign_in_in_app": "",
-			"open_app": ""
+			"return_to_app": ""
 		},
 		"alt": {
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động",

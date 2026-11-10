@@ -88,18 +88,19 @@ the document and its workers without erasing the session or operation journal.
 
 ## Audit callback and association deployment
 
-The normal website build restores `/signer-callback` for the installed preview's
-`oisy://auth-callback` return link. The native auth owner still validates the
-request and delegation. Keep that route during SDK migration.
+`/signer-callback` is an HTTPS-only authentication return. The system auth
+session intercepts it for the associated app before the page loads. If the page
+loads instead, it discards the fragment/query and shows instructions to restart
+sign-in from the current app. It must never forward a response to a custom scheme,
+external URL, opener, storage or another native app. Older custom-scheme previews
+must upgrade; compatibility does not justify forwarding a delegation.
 
 `build:post-process` runs `auth-handoff/prepare-audit-assets.mjs`. Only the exact
 resolved domain `https://audit.oisy.com` receives the reviewed association and II
 callback files. Preserve existing Apple/Android registrations; other environments
-must not inherit this preview identity. Do not copy those files into global static
-assets or remove the callback while a working preview depends on it. Deployment
-instructions and the separate SDK harness are in the
-[prototype README](../auth-handoff/README.md). The SDK host uses the associated
-HTTPS callback. Keep compatibility assets for previously installed previews.
+must not inherit this preview identity. Keep the exact HTTPS callback path and
+allowlist. See the [session boundary](./session-boundary.md#https-callback-boundary)
+for the threat model and unassociated-app checks.
 
 ## Provider configuration
 

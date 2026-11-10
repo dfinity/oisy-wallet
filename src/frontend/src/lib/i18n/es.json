@@ -208,9 +208,7 @@
 			"asset_types": "Cripto, acciones, materias primas, coleccionables y notas cifradas.",
 			"advanced_cryptography": "Privado y a prueba de manipulaciones. Invisible, si lo necesitas.",
 			"move_swap_grow": "Gana, pide prestado y opera, con un asistente de IA integrado.",
-			"return_to_app": "",
-			"continue_sign_in_in_app": "",
-			"open_app": ""
+			"return_to_app": ""
 		},
 		"alt": {
 			"preview": "Vista previa de $oisy_name una vez iniciada la sesión, tanto en escritorio como en móvil",

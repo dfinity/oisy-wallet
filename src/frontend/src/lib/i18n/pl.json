@@ -208,9 +208,7 @@
 			"asset_types": "Krypto, akcje, surowce, przedmioty kolekcjonerskie i zaszyfrowane notatki.",
 			"advanced_cryptography": "Prywatne i odporne na manipulacje. Niewidoczne, gdy tego potrzebujesz.",
 			"move_swap_grow": "Zarabiaj, pożyczaj i handluj z wbudowanym asystentem AI.",
-			"return_to_app": "",
-			"continue_sign_in_in_app": "",
-			"open_app": ""
+			"return_to_app": ""
 		},
 		"alt": {
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie",

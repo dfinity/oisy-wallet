@@ -208,9 +208,7 @@
 			"asset_types": "加密货币、股票、大宗商品、收藏品和加密笔记。",
 			"advanced_cryptography": "私密且防篡改。需要时可隐身。",
 			"move_swap_grow": "赚取、借贷、交易，内置 AI 助手。",
-			"return_to_app": "",
-			"continue_sign_in_in_app": "",
-			"open_app": ""
+			"return_to_app": ""
 		},
 		"alt": {
 			"preview": "登录后 $oisy_name 的预览效果，适用于桌面端和移动端",

@@ -172,12 +172,11 @@ these files. A non-audit build refuses stale association output instead of erasi
 registrations. Global static assets set JSON content types and a five-minute cache
 for the extensionless files. No GitHub workflow or deployment secret was changed.
 
-The old `/signer-callback` route was recovered from
-`claude/mobile-app-architecture-1d1cde` at
-`6f3eae46807029453a9eeb7f36084c95b1cd711f`. The restored page preserves the bounded
-fragment and fixed `oisy://auth-callback` destination, with a user-initiated return
-button. This keeps the installed preview usable during HTTPS callback testing.
-Native still validates the response; the page does not authenticate it.
+The `/signer-callback` path remains the associated HTTPS return. The legacy
+custom-scheme response relay was removed on November 10. If the route loads as a
+web page, it discards the response and asks the user to restart sign-in in the
+current app. SDK sign-in receives the HTTPS callback before the page executes.
+See the [callback boundary](../docs/session-boundary.md#https-callback-boundary).
 
 ### GitHub deployment
 
@@ -197,8 +196,8 @@ Native still validates the response; the page does not authenticate it.
    review its wider branch diff before choosing it.
 4. Verify HTTPS 200 with JSON, no redirect and no SPA fallback at
    `/.well-known/apple-app-site-association`, `/.well-known/ii-auth-callbacks` and
-   `/.well-known/assetlinks.json`. Check `/signer-callback` still renders and its
-   existing custom-scheme return works. Do not paste a real auth fragment into
+   `/.well-known/assetlinks.json`. Check `/signer-callback` renders without any credential-forwarding link and
+   discards a synthetic fragment. Do not paste a real auth fragment into
    issue comments, screenshots or logs.
 5. Enable **Associated Domains** on Apple's explicit
    `org.dfinity.oisy.native.preview.artem` App ID under DFINITY Stiftung. Regenerate
