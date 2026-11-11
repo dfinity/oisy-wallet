@@ -2305,6 +2305,7 @@
 			"signature_copied": "",
 			"id": "交易 ID",
 			"id_copied": "交易 ID 已复制到剪贴板。",
+			"twin_transaction": "",
 			"timestamp": "时间戳",
 			"type": "类型",
 			"from": "来自",

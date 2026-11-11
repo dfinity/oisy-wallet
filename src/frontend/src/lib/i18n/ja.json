@@ -2305,6 +2305,7 @@
 			"signature_copied": "",
 			"id": "トランザクションID",
 			"id_copied": "トランザクションIDがコピーされました。",
+			"twin_transaction": "",
 			"timestamp": "タイムスタンプ",
 			"type": "種類",
 			"from": "送信元",

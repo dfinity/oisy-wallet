@@ -2305,6 +2305,7 @@
 			"signature_copied": "",
 			"id": "Transaktions-ID",
 			"id_copied": "Transaktions-ID in die Zwischenablage kopiert.",
+			"twin_transaction": "",
 			"timestamp": "Zeitstempel",
 			"type": "Typ",
 			"from": "Von",

@@ -2305,6 +2305,7 @@
 			"signature_copied": "",
 			"id": "ID da transação",
 			"id_copied": "ID da transação copiado para a área de transferência.",
+			"twin_transaction": "",
 			"timestamp": "Timestamp",
 			"type": "Tipo",
 			"from": "De",

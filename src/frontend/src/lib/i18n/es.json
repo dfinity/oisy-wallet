@@ -2305,6 +2305,7 @@
 			"signature_copied": "",
 			"id": "ID de la transacción",
 			"id_copied": "ID de la transacción copiado al portapapeles.",
+			"twin_transaction": "",
 			"timestamp": "Marca de tiempo",
 			"type": "Tipo",
 			"from": "Desde",

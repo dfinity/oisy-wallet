@@ -2305,6 +2305,7 @@
 			"signature_copied": "",
 			"id": "ID transakce",
 			"id_copied": "ID transakce zkopírováno do schránky.",
+			"twin_transaction": "",
 			"timestamp": "Časové razítko",
 			"type": "Typ",
 			"from": "Od",
