@@ -13,10 +13,12 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import Copy from '$lib/components/ui/Copy.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import {
 		HELP_UNAVAILABLE_TOKENS_CARD,
 		HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON,
+		HELP_UNAVAILABLE_TOKENS_COPY_BUTTON,
 		HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON,
 		HELP_UNAVAILABLE_TOKENS_STATUS
 	} from '$lib/constants/test-ids.constants';
@@ -57,14 +59,9 @@
 	const tokenName = ({ symbol, ledgerCanisterId }: IcrcUnavailableCustomToken): string =>
 		symbol ?? ledgerCanisterId;
 
-	// The name too when it says more than the symbol. A token OISY never listed only has its ledger canister ID.
-	const tokenLabel = (token: IcrcUnavailableCustomToken): string => {
-		const { symbol, name } = token;
-
-		return nonNullish(symbol) && nonNullish(name) && name !== symbol
-			? `${name} (${symbol})`
-			: tokenName(token);
-	};
+	// The name too when it says more than the symbol. A token OISY never listed has neither.
+	const tokenLabel = ({ symbol, name }: IcrcUnavailableCustomToken): string | undefined =>
+		nonNullish(symbol) && nonNullish(name) && name !== symbol ? `${name} (${symbol})` : symbol;
 
 	const statusText = (status: IcrcLedgerStatus | 'checking'): string => {
 		if (status === 'checking') {
@@ -126,6 +123,15 @@
 	};
 </script>
 
+{#snippet ledgerCanisterIdWithCopy(ledgerCanisterId: LedgerCanisterIdText)}
+	{ledgerCanisterId}<Copy
+		inline
+		testId={`${HELP_UNAVAILABLE_TOKENS_COPY_BUTTON}-${ledgerCanisterId}`}
+		text={$i18n.tokens.import.text.ledger_canister_id_copied}
+		value={ledgerCanisterId}
+	/>
+{/snippet}
+
 <!-- Only a user with a saved token that OISY skips or cannot load has anything to do here. -->
 {#if $icrcUnavailableCustomTokensStore.length > 0}
 	<div data-tid={HELP_UNAVAILABLE_TOKENS_CARD}>
@@ -139,6 +145,7 @@
 
 			<ul class="flex list-none flex-col">
 				{#each $icrcUnavailableCustomTokensStore as token (token.ledgerCanisterId)}
+					{@const label = tokenLabel(token)}
 					{@const ledgerStatus = ledgerStatuses.get(token.ledgerCanisterId)}
 
 					<li class="mt-3">
@@ -171,32 +178,47 @@
 								</Button>
 							</ButtonGroup>
 						{:else}
-							<div class="flex w-full flex-row items-center justify-between gap-3">
-								<span class="flex min-w-0 flex-1 flex-col">
+							<div class="flex w-full flex-col">
+								<!-- "Delete token" shares only the first line, so the lines under it get the full
+								     width: on a phone, the ID and its copy button then fit on one line. -->
+								<div class="flex flex-row items-center justify-between gap-3">
 									<!-- break-words, not break-all: a ledger canister ID then wraps at a hyphen. -->
-									<span class="break-words">{tokenLabel(token)}</span>
+									<span class="min-w-0 flex-1 break-words">
+										{#if nonNullish(label)}
+											{label}
+										{:else}
+											{@render ledgerCanisterIdWithCopy(token.ledgerCanisterId)}
+										{/if}
+									</span>
 
-									{#if nonNullish(ledgerStatus)}
-										<span
-											class="text-sm text-tertiary"
-											data-tid={`${HELP_UNAVAILABLE_TOKENS_STATUS}-${token.ledgerCanisterId}`}
-										>
-											{statusText(ledgerStatus)}
-										</span>
-									{/if}
-								</span>
+									<!-- Button is flex-1 by default, which would stretch it across the row. -->
+									<Button
+										disabled={deleting}
+										link
+										onclick={() => (confirmLedgerCanisterId = token.ledgerCanisterId)}
+										styleClass="flex-none"
+										testId={HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON}
+										type="button"
+									>
+										{$i18n.tokens.text.delete_token}
+									</Button>
+								</div>
 
-								<!-- Button is flex-1 by default, which would stretch it across the row. -->
-								<Button
-									disabled={deleting}
-									link
-									onclick={() => (confirmLedgerCanisterId = token.ledgerCanisterId)}
-									styleClass="flex-none"
-									testId={HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON}
-									type="button"
-								>
-									{$i18n.tokens.text.delete_token}
-								</Button>
+								<!-- Under a name and symbol too, so the user can check the exact ledger and copy its ID. -->
+								{#if nonNullish(label)}
+									<span class="text-sm break-words text-tertiary">
+										{@render ledgerCanisterIdWithCopy(token.ledgerCanisterId)}
+									</span>
+								{/if}
+
+								{#if nonNullish(ledgerStatus)}
+									<span
+										class="text-sm text-tertiary"
+										data-tid={`${HELP_UNAVAILABLE_TOKENS_STATUS}-${token.ledgerCanisterId}`}
+									>
+										{statusText(ledgerStatus)}
+									</span>
+								{/if}
 							</div>
 						{/if}
 					</li>

@@ -7,10 +7,12 @@ import HelpUnavailableTokens from '$lib/components/help/HelpUnavailableTokens.sv
 import {
 	HELP_UNAVAILABLE_TOKENS_CARD,
 	HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON,
+	HELP_UNAVAILABLE_TOKENS_COPY_BUTTON,
 	HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON,
 	HELP_UNAVAILABLE_TOKENS_STATUS
 } from '$lib/constants/test-ids.constants';
 import * as toastsStore from '$lib/stores/toasts.store';
+import * as clipboardUtils from '$lib/utils/clipboard.utils';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -72,7 +74,7 @@ describe('HelpUnavailableTokens', () => {
 		expect(queryByTestId(HELP_UNAVAILABLE_TOKENS_CARD)).not.toBeInTheDocument();
 	});
 
-	it('should list each unavailable token by its symbol, or else by its ledger canister ID', () => {
+	it('should list each unavailable token by its ledger canister ID, under its symbol when OISY knows it', () => {
 		icrcUnavailableCustomTokensStore.set([importedToken, curatedToken]);
 
 		const { getByTestId, getAllByTestId } = render(HelpUnavailableTokens);
@@ -83,11 +85,31 @@ describe('HelpUnavailableTokens', () => {
 		expect(card).toHaveTextContent(
 			replaceOisyPlaceholders(en.help.text.unavailable_tokens_description)
 		);
-		expect(card).toHaveTextContent(importedToken.ledgerCanisterId);
 		expect(card).toHaveTextContent('TST');
-		expect(card).not.toHaveTextContent(curatedToken.ledgerCanisterId);
+		expect(card).toHaveTextContent(curatedToken.ledgerCanisterId);
+
+		// An imported token has no symbol, so its ID is its only label and shows once.
+		expect(card.textContent?.split(importedToken.ledgerCanisterId)).toHaveLength(2);
 
 		expect(getAllByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON)).toHaveLength(2);
+	});
+
+	it('should copy the ledger canister ID of a token', async () => {
+		const spyCopy = vi.spyOn(clipboardUtils, 'copyToClipboard').mockResolvedValue(true);
+
+		icrcUnavailableCustomTokensStore.set([importedToken, curatedToken]);
+
+		const { getByTestId } = render(HelpUnavailableTokens);
+
+		await fireEvent.click(
+			getByTestId(`${HELP_UNAVAILABLE_TOKENS_COPY_BUTTON}-${curatedToken.ledgerCanisterId}`)
+		);
+
+		expect(spyCopy).toHaveBeenCalledExactlyOnceWith({
+			value: curatedToken.ledgerCanisterId,
+			text: en.tokens.import.text.ledger_canister_id_copied,
+			withToast: false
+		});
 	});
 
 	it('should show the name too when it says more than the symbol', () => {
