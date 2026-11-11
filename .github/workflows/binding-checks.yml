@@ -89,7 +89,7 @@ jobs:
 
       - name: Install dfx
         if: steps.changes.outputs.src == 'true'
-        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
+        uses: ./.github/actions/setup-dfx
 
       - name: Install other tools
         if: steps.changes.outputs.src == 'true'

@@ -1,0 +1,34 @@
+name: 'Install dfx'
+
+description: >
+  Installs dfx at the version in dfx.json, as dfinity/setup-dfx does, but retries the install
+  script's download on any error.
+
+runs:
+  using: composite
+  steps:
+    # dfinity/setup-dfx fetches install.sh with `--retry` alone, which retries timeouts and 5xx
+    # but not other HTTP errors. internetcomputer.org intermittently answers runners with a 400,
+    # and each one failed the job outright. `--retry-all-errors` needs curl 7.71 or later, which
+    # ubuntu-24.04 and macos-14 have; upstream left it out to support ubuntu-20.04.
+    - name: Install dfx
+      shell: bash
+      env:
+        DFXVM_INIT_YES: 'true'
+      run: |
+        DFX_VERSION="$(jq -er '.dfx // ""' dfx.json || echo "")"
+        export DFX_VERSION
+        echo "DFX_VERSION is $DFX_VERSION"
+
+        install_script="$(curl --fail --silent --show-error --location --retry 6 --retry-delay 5 --retry-all-errors --connect-timeout 5 --max-time 20 https://internetcomputer.org/install.sh)"
+        sh -c "$install_script"
+
+    - name: Set up path (linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: echo "$HOME/.local/share/dfx/bin" >> "$GITHUB_PATH"
+
+    - name: Set up path (macos)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: echo "$HOME/Library/Application Support/org.dfinity.dfx/bin" >> "$GITHUB_PATH"
