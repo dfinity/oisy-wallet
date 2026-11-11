@@ -2305,6 +2305,7 @@
 			"signature_copied": "",
 			"id": "लेनदेन आईडी",
 			"id_copied": "लेनदेन आईडी क्लिपबोर्ड पर कॉपी की गई।",
+			"twin_transaction": "",
 			"timestamp": "टाइमस्टैम्प",
 			"type": "प्रकार",
 			"from": "से",

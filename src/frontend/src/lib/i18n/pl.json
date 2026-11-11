@@ -2305,6 +2305,7 @@
 			"signature_copied": "",
 			"id": "Identyfikator transakcji",
 			"id_copied": "Identyfikator transakcji skopiowany do schowka.",
+			"twin_transaction": "",
 			"timestamp": "Znacznik czasu",
 			"type": "Typ",
 			"from": "Od",
