@@ -11,7 +11,8 @@ export type OptionIcrcCustomToken = Nullish<IcrcCustomToken>;
 // A saved ICRC token OISY skips or cannot load, kept with its saved entry so the user can delete it.
 export interface IcrcUnavailableCustomToken {
 	ledgerCanisterId: LedgerCanisterIdText;
-	// The symbol of a token OISY lists. An imported or retired token has none.
+	// The symbol and name of a token OISY lists or once listed. An imported token has neither.
 	symbol?: string;
+	name?: string;
 	customToken: BackendCustomToken;
 }

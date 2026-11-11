@@ -2,7 +2,10 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
-import { RETIRED_ICRC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.retired.env';
+import {
+	RETIRED_ICRC_LEDGER_CANISTER_IDS,
+	RETIRED_ICRC_TOKENS
+} from '$env/tokens/tokens-icrc/tokens.icrc.retired.env';
 import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
 import {
 	hasSufficientIcrcAllowance,
@@ -512,7 +515,7 @@ describe('icrc.services', () => {
 				]);
 			});
 
-			it('should list a curated token whose ledger fails with its symbol', async () => {
+			it('should list a curated token whose ledger fails with its symbol and name', async () => {
 				const [curatedToken] = SNS_BUILTIN_TOKENS;
 
 				const curatedCustomToken: CustomToken = {
@@ -539,14 +542,15 @@ describe('icrc.services', () => {
 					{
 						ledgerCanisterId: curatedToken.ledgerCanisterId,
 						symbol: curatedToken.symbol,
+						name: curatedToken.name,
 						customToken: curatedCustomToken
 					}
 				]);
 			});
 
-			it.each(RETIRED_ICRC_LEDGER_CANISTER_IDS)(
-				'should list the retired ledger %s as unavailable',
-				async (retiredLedgerCanisterId) => {
+			it.each(RETIRED_ICRC_TOKENS)(
+				'should list the retired ledger $ledgerCanisterId as unavailable, with its symbol and name',
+				async ({ ledgerCanisterId: retiredLedgerCanisterId, symbol, name }) => {
 					const retiredCustomToken: CustomToken = {
 						...mockCustomToken,
 						token: {
@@ -562,7 +566,12 @@ describe('icrc.services', () => {
 					await loadCustomTokens({ identity: mockIdentity });
 
 					expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([
-						{ ledgerCanisterId: retiredLedgerCanisterId, customToken: retiredCustomToken }
+						{
+							ledgerCanisterId: retiredLedgerCanisterId,
+							symbol,
+							name,
+							customToken: retiredCustomToken
+						}
 					]);
 				}
 			);
