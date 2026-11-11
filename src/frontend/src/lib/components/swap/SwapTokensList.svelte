@@ -97,7 +97,7 @@
 		setTokens(tokens);
 	});
 
-	// Listed, but not to be picked to pay with: a token without a balance to pay from.
+	// Listed, but not to be picked to pay with: a token that is not enabled, or has a balance of zero.
 	let unpayableTokenIds = $derived(
 		new Set(
 			side === 'source' ? tokens.filter((token) => !canPayWithToken(token)).map(({ id }) => id) : []

@@ -532,16 +532,16 @@ export const isKongSupportedIcToken = (token: TokenReply): token is { IC: ICToke
 	'IC' in token && !token.IC.is_removed && token.IC.chain === 'IC';
 
 /**
- * Whether a token can be picked to pay a swap with. A balance of zero cannot pay. A token that is not
- * enabled has no balance loaded unless Swap loaded one (ICRC tokens), and without one it cannot be
- * picked either. An enabled token whose balance is still loading can.
+ * Whether a token can be picked to pay a swap with: it must be enabled, and its balance must not be
+ * zero. An enabled token whose balance is still loading can be picked. A token that is not enabled
+ * can still be received, since the swap enables it.
  */
 export const canPayWithToken = (token: TokenUi): boolean => {
-	const { balance } = token;
-
-	if (nonNullish(balance)) {
-		return balance > ZERO;
+	if (isTokenToggleable(token) && !token.enabled) {
+		return false;
 	}
 
-	return !isTokenToggleable(token) || token.enabled;
+	const { balance } = token;
+
+	return isNullish(balance) || balance > ZERO;
 };

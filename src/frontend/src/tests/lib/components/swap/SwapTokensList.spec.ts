@@ -256,7 +256,7 @@ describe('SwapTokensList', () => {
 			expect(rowFor(fundedToken.symbol)).toBeEnabled();
 		});
 
-		it('should let an inactive token with a loaded balance be picked', () => {
+		it('should not let an inactive token be picked, even with a balance', () => {
 			balancesStore.set({ id: inactiveToken.id, data: { data: 5n, certified: true } });
 
 			render(SwapTokensList, {
@@ -264,7 +264,7 @@ describe('SwapTokensList', () => {
 				context: mockContext({ sourceToken: undefined })
 			});
 
-			expect(rowFor(inactiveToken.symbol)).toBeEnabled();
+			expect(rowFor(inactiveToken.symbol)).toBeDisabled();
 		});
 
 		it('should let an enabled token whose balance is still loading be picked', () => {
