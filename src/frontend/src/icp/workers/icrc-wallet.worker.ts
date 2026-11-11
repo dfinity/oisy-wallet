@@ -7,6 +7,7 @@ import { isIndexCanisterAwake } from '$icp/services/index-canister.services';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
 import { mapCkEthereumTransaction } from '$icp/utils/cketh-transactions.utils';
+import { isCkSolActivityLedger, mapCkSolTransaction } from '$icp/utils/cksol-transactions.utils';
 import {
 	isCyclesLedger,
 	mapCyclesLedgerTransaction
@@ -71,6 +72,10 @@ const mapTransaction = ({
 
 	if (nonNullish(ledgerId) && (isTokenCkEthLedger(ledgerId) || isTokenCkErc20Ledger(ledgerId))) {
 		return mapCkEthereumTransaction({ transaction, identity, ...env, ...ledgerId });
+	}
+
+	if (nonNullish(ledgerId) && isCkSolActivityLedger(ledgerId)) {
+		return mapCkSolTransaction({ transaction, identity });
 	}
 
 	if (nonNullish(ledgerId) && isCyclesLedger(ledgerId)) {

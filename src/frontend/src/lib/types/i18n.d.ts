@@ -1963,6 +1963,7 @@ interface I18nTransaction {
 		signature_copied: string;
 		id: string;
 		id_copied: string;
+		twin_transaction: string;
 		timestamp: string;
 		type: string;
 		from: string;
