@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use ic_cdk::api::time;
-use ic_cdk_management_canister::HttpHeader;
+use ic_cdk_management_canister_outcalls::HttpHeader;
 use serde::Deserialize;
 use shared::types::exchange::ExchangeData;
 
@@ -11,9 +11,10 @@ const DEFAULT_BASE_URL: &str = "https://pro-api.coingecko.com/api/v3";
 const SIMPLE_PRICE_PATH: &str = "/simple/price";
 const TOKEN_PRICE_PATH: &str = "/simple/token_price";
 
-// `http_request` cycle cost is charged on the *reserved* `max_response_bytes`,
-// not the bytes actually returned, so a uniform cap over-charges small calls.
-// We size the reservation from the number of requested items instead.
+// Pay-as-you-go pricing charges for the bytes that actually arrive, but the
+// cycles held while the call runs are still sized from `max_response_bytes`, so
+// a uniform cap holds far more than small calls need. We size the reservation
+// from the number of requested items instead.
 //
 // Each price entry (coin id / contract address plus usd, 24h change, market
 // cap and last-updated) is comfortably under ~200 bytes in observed payloads;
