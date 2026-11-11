@@ -96,7 +96,7 @@
 		"@velora-dex/sdk": "^11.0.0",
 		"barcode-detector": "^3.2.2",
 		"bech32": "^1.1.4",
-		"bitcoinjs-lib": "^6.1.7",
+		"bitcoinjs-lib": "^6.1.10",
 		"browser-image-compression": "^2.0.2",
 		"buffer": "^6.0.3",
 		"decimal.js": "^10.6.0",
