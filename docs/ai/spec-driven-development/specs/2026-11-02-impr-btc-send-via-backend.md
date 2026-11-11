@@ -1157,6 +1157,22 @@ Every PR is safe on its own.
     - the old UTXO loading in `AllUtxosLoader` and the pending loader;
     - the flag-off row creation in `onBroadcast`.
 12. Optional: `feat(backend,frontend): certified BTC balance from the backend` (`btc_get_balance`).
+    Decided in PR 12:
+    - **`btc_get_balance`** takes the network, `min_confirmations` and the delegation chain. It is an
+      update call, so the answer is certified, for registered users with a valid II delegation
+      chain. The backend derives the caller's P2WPKH address and pays `bitcoin_get_balance` itself
+      (100M attached on mainnet, about 10M charged).
+    - **Rate limit:** 20 calls per caller per minute. The wallet reads the balance every 30 seconds,
+      for each Bitcoin network it shows, in each open tab.
+    - **Errors:** `InternalError` when the address cannot be derived, and `BalanceUnavailable` when
+      the Bitcoin canister does not answer. The two are kept apart for a second reason too: with
+      the same three variants as `BtcGetPendingTransactionsError` and `BtcGetSpendableUtxosError`,
+      the release wasm folds the identical candid type functions together, and the extracted
+      `.did` names all three after one of them, renaming types the frontend imports.
+    - **Frontend:** behind `BTC_SEND_VIA_BACKEND_ENABLED`, the wallet scheduler's certified balance
+      read goes through the backend. The query read stays on the Bitcoin canister, and with the flag
+      off `btc_caller_balance` stays. A rate limit or any other error throws, so a balance that
+      could not be read is never taken as zero.
 
 ---
 

@@ -8,10 +8,10 @@ use shared::types::{
     bitcoin::{
         BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
         BtcBroadcastTransactionError, BtcBroadcastTransactionRequest,
-        BtcBroadcastTransactionResponse, BtcGetPendingTransactionsError,
-        BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsRequest,
-        BtcGetSpendableUtxosError, BtcGetSpendableUtxosRequest, BtcGetSpendableUtxosResponse,
-        MAX_BROADCAST_TX_BYTES,
+        BtcBroadcastTransactionResponse, BtcGetBalanceError, BtcGetBalanceRequest,
+        BtcGetBalanceResponse, BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
+        BtcGetPendingTransactionsRequest, BtcGetSpendableUtxosError, BtcGetSpendableUtxosRequest,
+        BtcGetSpendableUtxosResponse, MAX_BROADCAST_TX_BYTES,
     },
     signer::RateLimitError,
 };
@@ -842,4 +842,143 @@ fn test_btc_get_spendable_utxos_rate_limit_is_separate_from_get_pending_transact
         !matches!(result, Err(BtcGetSpendableUtxosError::RateLimited(_))),
         "btc_get_spendable_utxos should not be rate-limited: {result:?}"
     );
+}
+
+// -------------------------------------------------------------------------------------------------
+// - Integration tests for btc_get_balance
+// -------------------------------------------------------------------------------------------------
+
+fn call_btc_get_balance(
+    pic_setup: &crate::utils::pocketic::PicBackend,
+    caller: Principal,
+    ii_delegation_chain: Option<shared::types::delegation::IIDelegationChain>,
+) -> Result<Result<BtcGetBalanceResponse, BtcGetBalanceError>, String> {
+    let request = BtcGetBalanceRequest {
+        network: BitcoinNetwork::Regtest,
+        min_confirmations: Some(1),
+        ii_delegation_chain,
+    };
+    pic_setup.update::<Result<BtcGetBalanceResponse, BtcGetBalanceError>>(
+        caller,
+        "btc_get_balance",
+        request,
+    )
+}
+
+#[test]
+fn test_get_balance_requires_registered_user() {
+    let pic_setup = setup();
+
+    for caller in [
+        Principal::anonymous(),
+        Principal::from_text(CALLER).unwrap(),
+    ] {
+        let response = call_btc_get_balance(&pic_setup, caller, None);
+        assert!(response.is_err(), "{caller} must be rejected by the guard");
+    }
+}
+
+#[test]
+fn test_get_balance_returns_zero_for_new_user() {
+    let (pic_setup, ii) = setup_with_ii();
+
+    let device_pubkey = b"test-device-key-for-btc-balance";
+    let (user_number, device_principal) = ii.register_identity(device_pubkey);
+
+    let session_pubkey = b"test-session-key-btc-balance";
+    let delegation_chain = ii.get_delegation_chain(
+        user_number,
+        device_principal,
+        session_pubkey,
+        "https://oisy.com",
+        None,
+    );
+
+    let caller = Principal::self_authenticating(&delegation_chain.public_key);
+    pic_setup.ensure_user_profile(caller);
+
+    let response = call_btc_get_balance(&pic_setup, caller, Some(delegation_chain))
+        .expect("Call failed")
+        .expect("Request was not successful");
+
+    // PocketIC's Bitcoin canister holds nothing for a new address.
+    assert_eq!(response, BtcGetBalanceResponse { balance: 0 });
+}
+
+#[test]
+fn test_get_balance_requires_delegation_chain() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    let response = call_btc_get_balance(&pic_setup, caller, None).expect("Canister call failed");
+
+    assert!(
+        matches!(
+            response,
+            Err(BtcGetBalanceError::InvalidDelegationChain { .. })
+        ),
+        "Expected InvalidDelegationChain error, got: {response:?}"
+    );
+}
+
+#[test]
+fn test_get_balance_enforces_guard_under_production_config() {
+    let pic_setup = setup_with_production_config();
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    let response = call_btc_get_balance(&pic_setup, caller, None).expect("Canister call failed");
+
+    assert!(
+        matches!(
+            response,
+            Err(BtcGetBalanceError::InvalidDelegationChain { .. })
+        ),
+        "Guard is enforced in production, expected InvalidDelegationChain: {response:?}"
+    );
+}
+
+#[test]
+fn test_get_balance_controller_bypasses_delegation_check() {
+    let pic_setup = setup();
+    pic_setup.ensure_user_profile(controller());
+
+    let response =
+        call_btc_get_balance(&pic_setup, controller(), None).expect("Canister call failed");
+
+    assert_eq!(response, Ok(BtcGetBalanceResponse { balance: 0 }));
+}
+
+/// Calling `btc_get_balance` more than 20 times within a minute must return
+/// `BtcGetBalanceError::RateLimited` with the expected payload.
+#[test]
+fn test_btc_get_balance_rate_limited_after_exceeding_limit() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    for i in 0..20 {
+        let result =
+            call_btc_get_balance(&pic_setup, caller, None).expect("btc_get_balance should exist");
+        assert!(
+            !matches!(result, Err(BtcGetBalanceError::RateLimited(_))),
+            "call {i} should not be rate-limited: {result:?}",
+        );
+    }
+
+    let result =
+        call_btc_get_balance(&pic_setup, caller, None).expect("btc_get_balance should exist");
+    match result {
+        Err(BtcGetBalanceError::RateLimited(RateLimitError {
+            max_calls,
+            window_ns,
+            caller: err_caller,
+        })) => {
+            assert_eq!(max_calls, 20);
+            assert_eq!(window_ns, 60 * 1_000_000_000);
+            assert_eq!(err_caller, caller);
+        }
+        other => panic!("expected BtcGetBalanceError::RateLimited, got {other:?}"),
+    }
 }

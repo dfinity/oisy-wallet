@@ -34,6 +34,7 @@ import {
 	mapAllowSigningError,
 	mapBtcAddPendingTransactionError,
 	mapBtcBroadcastTransactionError,
+	mapBtcGetBalanceError,
 	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
 	mapBtcGetSpendableUtxosError,
@@ -56,6 +57,7 @@ import type {
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcBroadcastTransactionParams,
+	BtcGetBalanceParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcGetSpendableUtxosParams,
@@ -347,6 +349,27 @@ export class BackendCanister extends Canister<BackendService> {
 		// Unlike `btcGetPendingTransactions`, a rate limit throws too: an empty list would read as a
 		// wallet with nothing to spend.
 		throw mapBtcGetSpendableUtxosError(response.Err);
+	};
+
+	btcGetBalance = async ({
+		network,
+		minConfirmations,
+		iiDelegationChain
+	}: BtcGetBalanceParams): Promise<bigint> => {
+		const { btc_get_balance } = this.caller({ certified: true });
+
+		const response = await btc_get_balance({
+			network,
+			min_confirmations: toNullable(minConfirmations),
+			ii_delegation_chain: iiDelegationChain
+		});
+
+		if ('Ok' in response) {
+			return response.Ok.balance;
+		}
+
+		// A rate limit throws too: a balance that could not be read is not a balance of zero.
+		throw mapBtcGetBalanceError(response.Err);
 	};
 
 	btcGetCurrentFeePercentiles = async ({
