@@ -7,10 +7,13 @@
 		loadDisabledIcrcTokensBalances,
 		loadDisabledIcrcTokensExchanges
 	} from '$icp/services/icrc.services';
-	import { allSortedIcrcTokens } from '$lib/derived/all-tokens.derived';
+	import { allCrossChainSwapTokens, allSortedIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { loadSwapSupportedTokens } from '$lib/services/swap-supported-tokens.services';
-	import { loadKongSwapTokens as loadKongSwapTokensService } from '$lib/services/swap.services';
+	import {
+		loadDisabledErc20AndSplTokensExchanges,
+		loadKongSwapTokens as loadKongSwapTokensService
+	} from '$lib/services/swap.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
@@ -87,7 +90,8 @@
 			}),
 			loadDisabledIcrcTokensExchanges({
 				disabledIcrcTokens: $allSortedIcrcTokens
-			})
+			}),
+			loadDisabledErc20AndSplTokensExchanges({ tokens: $allCrossChainSwapTokens })
 		]);
 	};
 </script>
