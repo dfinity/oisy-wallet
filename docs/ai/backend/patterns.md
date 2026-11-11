@@ -79,6 +79,12 @@ in the same PR — that's the
   itself (HTTP outcall data, merged lists, server-set fields) must pass
   `Validate` before it is written. See `update_price` in
   [`exchange/mod.rs`](../../../src/backend/src/exchange/mod.rs).
+- **Keys must decode cheaply.** A `StableBTreeMap` decodes every key it
+  compares, so a lookup decodes a few keys in every node on its path.
+  Write a key's bytes by hand, as `StoredTokenId` and
+  the composite keys in
+  [`types/storable.rs`](../../../src/backend/src/types/storable.rs) do; a
+  `Candid<T>` key pays a full Candid decode, plus `Validate`, per comparison.
 - Adding, renaming, or repurposing a `MemoryId` is a state migration. See
   [`workflows/state-and-migrations.md`](./workflows/state-and-migrations.md)
   for the contract.
