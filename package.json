@@ -127,7 +127,7 @@
 		"@types/dom-view-transitions": "^1.0.6",
 		"@types/node": "^22.13.4",
 		"@vitest/coverage-v8": "^4.1.10",
-		"dotenv": "^17.3.1",
+		"dotenv": "^18.0.7",
 		"fake-indexeddb": "^6.2.5",
 		"jsdom": "^30.1.2",
 		"jsqr": "^1.4.0",
