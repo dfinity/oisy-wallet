@@ -111,7 +111,10 @@
 	);
 
 	let firstTimeDestination = $derived(
-		notEmptyString(destination) &&
+		sendEnabled &&
+			!sendCompleted &&
+			!sendOutcomeUnknown &&
+			notEmptyString(destination) &&
 			isFirstTimeDestination({
 				destination,
 				networkId: $sendTokenNetworkId,
