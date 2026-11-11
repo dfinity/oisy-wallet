@@ -129,7 +129,8 @@
 		<SettingsCard>
 			{#snippet title()}{$i18n.help.text.unavailable_tokens_title}{/snippet}
 
-			<p class="text-sm text-tertiary">
+			<!-- Pulled up to the title it explains: the card's title gap is sized for rows. -->
+			<p class="-mt-4 text-sm text-tertiary">
 				{replaceOisyPlaceholders($i18n.help.text.unavailable_tokens_description)}
 			</p>
 
