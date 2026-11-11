@@ -11,12 +11,12 @@ import * as blockchainRest from '$lib/rest/blockchain.rest';
 import * as blockstreamRest from '$lib/rest/blockstream.rest';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
-import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
 import { mapCkBtcBitcoinNetworkToBackendBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockBtcTransaction } from '$tests/mocks/blockchain-transactions.mock';
 import { mockBlockchainResponse } from '$tests/mocks/blockchain.mock';
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIIDelegationChain, mockIIDelegationIdentity } from '$tests/mocks/ii-delegation.mock';
 import type { TestUtil } from '$tests/types/utils';
 import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { jsonReplacer, queryAndUpdate, type QueryAndUpdateParams } from '@dfinity/utils';
@@ -445,6 +445,12 @@ describe('btc-wallet.worker', () => {
 		it('should read the certified balance through the backend with BTC_SEND_VIA_BACKEND_ENABLED', async () => {
 			btcSendViaBackend.enabled = true;
 
+			// An Internet Identity session, as in production: the backend turns away a caller that is
+			// not a controller unless the chain comes along.
+			vi.mocked(AuthClientProvider.getInstance().loadIdentity).mockResolvedValue(
+				mockIIDelegationIdentity
+			);
+
 			const spyGetBackendBalance = vi
 				.spyOn(backendApi, 'getBtcBalance')
 				.mockResolvedValue(mockBalance);
@@ -454,10 +460,10 @@ describe('btc-wallet.worker', () => {
 			await awaitJobExecution();
 
 			expect(spyGetBackendBalance).toHaveBeenCalledWith({
-				identity: mockIdentity,
+				identity: mockIIDelegationIdentity,
 				network: mapCkBtcBitcoinNetworkToBackendBitcoinNetwork(startData.bitcoinNetwork),
 				minConfirmations: BTC_BALANCE_MIN_CONFIRMATIONS,
-				iiDelegationChain: extractIIDelegationChain(mockIdentity)
+				iiDelegationChain: mockIIDelegationChain
 			});
 			expect(signerCanisterMock.getBtcBalance).not.toHaveBeenCalled();
 			expect(postMessageMock).toHaveBeenCalledWith(
