@@ -756,6 +756,7 @@
 			"minter_ckbtc_btc": "Se requiere un minter configurado para convertir ckBTC a BTC.",
 			"minter_cketh_eth": "Se requiere un minter configurado para convertir ckETH a ETH.",
 			"minter_ckerc20_erc20": "Se requiere un minter configurado para convertir ckERC20 a ERC20.",
+			"minter_cksol_sol": "",
 			"ledger_cketh_eth": "Se requiere un ledger ckETH configurado para convertir ckERC20 a ERC20.",
 			"minter_btc": "Se requiere un minter configurado para recuperar BTC.",
 			"minter_ckbtc_info": "Se requiere un minter configurado para obtener la información de ckBTC",
