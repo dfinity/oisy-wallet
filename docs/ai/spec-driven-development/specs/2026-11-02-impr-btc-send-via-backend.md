@@ -938,6 +938,8 @@ Decided in 8d (rows whose deposit never landed):
   network. Never landed is the new `'neverLanded'` outcome, which fails the row.
 - **Liquidium:** a mainnet BTC supply or repay with a txid but no listed activity asks the network.
   Failing the row releases a repay's hold on the repay max, since a terminal row no longer counts.
+  Not a borrow or withdraw: its txid is Liquidium's own payout, which Liquidium broadcasts and
+  settles (Copilot).
 - **Both** store `send.error.btc_transaction_never_landed` on the row. It says the transaction most
   likely never went out, and to check the balance before trying again, since one evicted from a
   mempool could still arrive (Copilot). Mainnet only: the API is Blockstream's mainnet one, and a

@@ -140,7 +140,9 @@ const isRevertedEthRepay = async ({
 };
 
 // A BTC supply or repay is written before its broadcast, whose outcome can be unclear. One that never
-// reached the network is never listed by Liquidium, so it would hold its amount for good.
+// reached the network is never listed by Liquidium, so it would hold its amount for good. Only those
+// two: a borrow or withdraw carries the txid of Liquidium's own payout, which Liquidium broadcasts
+// and settles, so the network not knowing it yet says nothing about the row (Copilot).
 const isNeverLandedBtcTransfer = async ({
 	tx,
 	txid
@@ -149,6 +151,7 @@ const isNeverLandedBtcTransfer = async ({
 	txid?: string;
 }): Promise<boolean> =>
 	'Liquidium' in tx.data &&
+	('Supply' in tx.data.Liquidium.action || 'Repay' in tx.data.Liquidium.action) &&
 	'BtcNativeMainnet' in tx.data.Liquidium.token &&
 	nonNullish(txid) &&
 	(await isBtcTransactionNeverLanded({ id: tx.id, txid, updatedAtNs: tx.updated_at_ns }));

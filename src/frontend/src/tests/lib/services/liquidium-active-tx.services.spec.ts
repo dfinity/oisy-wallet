@@ -675,6 +675,26 @@ describe('liquidium-active-tx.services', () => {
 			);
 		});
 
+		// Liquidium broadcasts and settles its own payout, whose txid a borrow or withdraw carries.
+		it.each([{ Borrow: null }, { Withdraw: null }])(
+			'does not ask the network about a %o Liquidium has not found yet',
+			async (action) => {
+				getStatus.mockResolvedValue({ found: false });
+
+				const tx = asBtc(buildTx({ ...refs, [LIQUIDIUM_EXTERNAL_REF_KEYS.OUTFLOW_ID]: outflowId }));
+
+				await poll(
+					'Liquidium' in tx.data
+						? { ...tx, data: { Liquidium: { ...tx.data.Liquidium, action } } }
+						: tx
+				);
+
+				expect(getStatus).toHaveBeenCalledOnce();
+				expect(isNeverLanded).not.toHaveBeenCalled();
+				expect(apply).not.toHaveBeenCalled();
+			}
+		);
+
 		it('does not ask the network about a row in another token', async () => {
 			await poll(buildTx(refs));
 
