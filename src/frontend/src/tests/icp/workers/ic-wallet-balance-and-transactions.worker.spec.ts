@@ -1,11 +1,13 @@
 import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { IC_CKSOL_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import * as indexCanisterServices from '$icp/services/index-canister.services';
 import { isIndexCanisterAwake } from '$icp/services/index-canister.services';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { mapCkSolTransaction } from '$icp/utils/cksol-transactions.utils';
 import { mapCyclesLedgerTransaction } from '$icp/utils/cycles-ledger-transactions.utils';
 import { mapDip20Transaction } from '$icp/utils/dip20-transactions.utils';
 import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
@@ -21,8 +23,10 @@ import type {
 	PostMessageDataRequestIcrc
 } from '$lib/types/post-message';
 import * as eventsUtils from '$lib/utils/events.utils';
+import { mockCkSolBurnMemo } from '$tests/mocks/cksol.mock';
 import { createMockIcrcBurnTransaction } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import type { TestUtil } from '$tests/types/utils';
 import {
 	arrayOfNumberToUint8Array,
@@ -999,6 +1003,53 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					mockPostMessage({
 						msg: 'syncIcrcWallet',
 						ref: IC_CYCLES_LEDGER_CANISTER_ID,
+						transaction,
+						certified: true
+					})
+				);
+			});
+		});
+
+		describe('with the ckSOL ledger', () => {
+			const withdrawal = createMockIcrcBurnTransaction({
+				memo: mockCkSolBurnMemo(mockSolAddress)
+			});
+
+			const ckSolStartData = {
+				...startData,
+				ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID
+			};
+
+			let scheduler: IcWalletScheduler<PostMessageDataRequestIcrc>;
+
+			beforeEach(() => {
+				scheduler = initIcrcWalletScheduler(ckSolStartData);
+
+				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
+					balance: mockBalanceFromTransactions(),
+					transactions: [withdrawal],
+					oldest_tx_id: [mockOldestTxId]
+				});
+			});
+
+			afterEach(() => {
+				scheduler.stop();
+			});
+
+			it('should map a withdrawal to the Solana address in its memo', async () => {
+				const transaction = mapCkSolTransaction({
+					transaction: withdrawal,
+					identity: mockIdentity
+				});
+
+				expect(transaction.to).toBe(mockSolAddress);
+
+				await scheduler.trigger(ckSolStartData);
+
+				expect(postMessageMock).toHaveBeenCalledWith(
+					mockPostMessage({
+						msg: 'syncIcrcWallet',
+						ref: IC_CKSOL_LEDGER_CANISTER_ID,
 						transaction,
 						certified: true
 					})

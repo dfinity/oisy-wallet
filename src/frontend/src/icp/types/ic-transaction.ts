@@ -50,6 +50,9 @@ export interface IcTransactionUi {
 	timestamp?: bigint;
 	status: IcTransactionStatus;
 	txExplorerUrl?: string;
+	// The transaction on the twin network behind a conversion, e.g. the Solana transaction that
+	// swept a deposit the ckSOL minter converted.
+	twinTransaction?: { id: string; explorerUrl?: string };
 	tokenId?: bigint;
 	approveSpender?: string;
 	approveSpenderExplorerUrl?: string;
