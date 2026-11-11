@@ -4,20 +4,14 @@ import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { nativeEthereumTokenId } from '$eth/derived/token.derived';
 import { ethTransactionsStore, type EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { ErcTransfer } from '$eth/types/eth-transaction';
-import {
-	groupEthTransactionsByNetworkAndHash,
-	mapEthTransactionUi
-} from '$eth/utils/transactions.utils';
+import { groupEthTransactionsByNetworkAndHash } from '$eth/utils/transactions.utils';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import { ethAddress } from '$lib/derived/address.derived';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { NetworkId } from '$lib/types/network';
-import type { TokenId } from '$lib/types/token';
-import type { AnyTransactionUiWithToken } from '$lib/types/transaction-ui';
 import type { KnownDestinations } from '$lib/types/transactions';
-import { getKnownDestinations } from '$lib/utils/transactions.utils';
+import { getEthKnownDestinations } from '$lib/utils/transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -98,35 +92,12 @@ export const ethKnownDestinations: Readable<KnownDestinations> = derived(
 		$ethAddress,
 		$tokens,
 		$tokenWithFallback
-	]) => {
-		const ckMinterInfoAddresses = toCkMinterInfoAddresses(
-			$ckEthMinterInfoStore?.[$ethereumTokenId]
-		);
-
-		if (ckMinterInfoAddresses.length === 0) {
-			return {};
-		}
-
-		const tokenById = new Map($tokens.map((token) => [token.id, token]));
-
-		const mappedTransactions: AnyTransactionUiWithToken[] = [];
-		Object.getOwnPropertySymbols($ethTransactionsStore ?? {}).forEach((tokenId) => {
-			const token = tokenById.get(tokenId as TokenId);
-
-			if (nonNullish(token) && token.network.id === $tokenWithFallback.network.id) {
-				($ethTransactionsStore?.[tokenId as TokenId] ?? []).forEach(({ data: transaction }) => {
-					mappedTransactions.push({
-						...mapEthTransactionUi({
-							transaction,
-							ckMinterInfoAddresses,
-							ethAddress: $ethAddress
-						}),
-						token
-					});
-				});
-			}
-		});
-
-		return getKnownDestinations(mappedTransactions);
-	}
+	]) =>
+		getEthKnownDestinations({
+			transactions: $ethTransactionsStore,
+			ckMinterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
+			ethAddress: $ethAddress,
+			tokens: $tokens,
+			networkId: $tokenWithFallback.network.id
+		})
 );
