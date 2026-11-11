@@ -1,8 +1,12 @@
 import type { chat_response_v1 } from '$declarations/llm/llm.did';
+import { BASE_NETWORK_SYMBOL } from '$env/networks/networks-evm/networks.evm.base.env';
+import { BSC_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { ROBINHOOD_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { llmChat } from '$lib/api/llm.api';
 import * as balancesDerived from '$lib/derived/balances.derived';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';
+import { enabledNetworksSymbols } from '$lib/derived/networks.derived';
 import * as aiAssistantServices from '$lib/services/ai-assistant.services';
 import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 import { contactsStore } from '$lib/stores/contacts.store';
@@ -89,6 +93,37 @@ describe('ai-assistant.services', () => {
 					results: []
 				}
 			});
+		});
+
+		it('offers the IDs of the enabled networks as the network choices', async () => {
+			vi.mocked(llmChat).mockResolvedValue({
+				message: {
+					content: toNullable('content'),
+					tool_calls: toNullable()
+				}
+			} as chat_response_v1);
+
+			await aiAssistantServices.askLlm({
+				identity: mockIdentity,
+				messages: [{ user: { content: 'test' } }]
+			});
+
+			const [[{ request }]] = vi.mocked(llmChat).mock.calls;
+			const networkChoices = (fromNullable(request.tools) ?? []).flatMap(
+				({ function: { parameters } }) =>
+					(fromNullable(fromNullable(parameters)?.properties ?? []) ?? [])
+						.filter(({ name }) => name === 'networkId')
+						.map(({ enum: choices }) => fromNullable(choices))
+			);
+
+			expect(networkChoices).toEqual([get(enabledNetworksSymbols), get(enabledNetworksSymbols)]);
+			expect(get(enabledNetworksSymbols)).toEqual(
+				expect.arrayContaining([
+					BASE_NETWORK_SYMBOL,
+					BSC_MAINNET_NETWORK_SYMBOL,
+					ROBINHOOD_MAINNET_NETWORK_SYMBOL
+				])
+			);
 		});
 
 		it('parses API response with tool_calls correctly', async () => {
