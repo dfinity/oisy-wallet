@@ -16,6 +16,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
+	import { SWAP_DESTINATION_TOKEN_BALANCE } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -30,6 +31,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { getSwapSlippageInvalidValue, getSwapSlippageStatus } from '$lib/utils/swap.utils';
+	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
@@ -104,6 +106,15 @@
 	const quoteActivity = activity ?? readable(undefined);
 	const foregroundQuotePending = $derived(
 		$quoteActivity?.pending === true && !$quoteActivity.background
+	);
+
+	// Nothing loads the balance of an inactive token, except Swap for ICRC tokens: showing 0 would be
+	// wrong for a token the user may hold.
+	let destinationBalanceUnknown = $derived(
+		nonNullish($destinationToken) &&
+			isTokenToggleable($destinationToken) &&
+			!$destinationToken.enabled &&
+			isNullish($destinationTokenBalance)
 	);
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
@@ -325,8 +336,12 @@
 					{/snippet}
 
 					{#snippet balance()}
-						{#if nonNullish($destinationToken)}
-							<TokenInputBalance balance={$destinationTokenBalance} token={$destinationToken} />
+						{#if nonNullish($destinationToken) && !destinationBalanceUnknown}
+							<TokenInputBalance
+								balance={$destinationTokenBalance}
+								testId={SWAP_DESTINATION_TOKEN_BALANCE}
+								token={$destinationToken}
+							/>
 						{/if}
 					{/snippet}
 				</TokenInput>
