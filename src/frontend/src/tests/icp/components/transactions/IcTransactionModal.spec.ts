@@ -1,5 +1,6 @@
 import { ICP_EXPLORER_URL } from '$env/explorers.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 import { isIcrcTokenSupportIcrc3 } from '$icp/services/icrc.services';
 import { getCmcDepositAccountIdentifier } from '$icp/utils/cmc.utils';
@@ -12,8 +13,13 @@ import {
 	shortenWithMiddleEllipsis
 } from '$lib/utils/format.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockCkSolSweepSignature } from '$tests/mocks/cksol.mock';
 import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
-import { mockValidDip20Token, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockValidDip20Token,
+	mockValidIcCkToken,
+	mockValidIcrcToken
+} from '$tests/mocks/ic-tokens.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@icp-sdk/core/principal';
@@ -89,6 +95,51 @@ describe('IcTransactionModal', () => {
 
 		expect(getByText(get(i18n).networks.network)).toBeInTheDocument();
 		expect(getByText(ICP_TOKEN.network.name)).toBeInTheDocument();
+	});
+
+	describe('twin network transaction', () => {
+		const ckSolToken = { ...mockValidIcCkToken, twinToken: SOLANA_TOKEN };
+
+		const explorerUrl = `https://solscan.io/tx/${mockCkSolSweepSignature}/`;
+
+		const conversion = {
+			...mockIcTransactionUi,
+			type: 'mint' as const,
+			twinTransaction: { id: mockCkSolSweepSignature, explorerUrl }
+		};
+
+		it('should name the twin network transaction and link it', () => {
+			const { container, getByText } = render(IcTransactionModal, {
+				transaction: conversion,
+				token: ckSolToken
+			});
+
+			expect(getByText('Solana transaction')).toBeInTheDocument();
+			expect(
+				getByText(shortenWithMiddleEllipsis({ text: mockCkSolSweepSignature }))
+			).toBeInTheDocument();
+			expect(container.querySelector(`a[href="${explorerUrl}"]`)).not.toBeNull();
+		});
+
+		it('should leave the line out without a twin network transaction', () => {
+			const { queryByText } = render(IcTransactionModal, {
+				transaction: { ...conversion, twinTransaction: undefined },
+				token: ckSolToken
+			});
+
+			expect(queryByText('Solana transaction')).not.toBeInTheDocument();
+		});
+
+		it('should leave the line out for a token without a twin', () => {
+			const { queryByText } = render(IcTransactionModal, {
+				transaction: conversion,
+				token: mockValidIcrcToken
+			});
+
+			expect(
+				queryByText(shortenWithMiddleEllipsis({ text: mockCkSolSweepSignature }))
+			).not.toBeInTheDocument();
+		});
 	});
 
 	it('should display the fee', () => {

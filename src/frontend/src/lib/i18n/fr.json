@@ -2305,6 +2305,7 @@
 			"signature_copied": "",
 			"id": "ID de la transaction",
 			"id_copied": "ID de la transaction copié dans le presse-papiers.",
+			"twin_transaction": "",
 			"timestamp": "Horodatage",
 			"type": "Type",
 			"from": "De",

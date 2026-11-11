@@ -2305,6 +2305,7 @@
 			"signature_copied": "",
 			"id": "ID transazione",
 			"id_copied": "ID transazione copiato negli appunti.",
+			"twin_transaction": "",
 			"timestamp": "Timestamp",
 			"type": "Tipo",
 			"from": "Da",

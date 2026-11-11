@@ -2305,6 +2305,7 @@
 			"signature_copied": "",
 			"id": "트랜잭션 ID",
 			"id_copied": "트랜잭션 ID가 클립보드에 복사되었습니다.",
+			"twin_transaction": "",
 			"timestamp": "타임스탬프",
 			"type": "유형",
 			"from": "발신",

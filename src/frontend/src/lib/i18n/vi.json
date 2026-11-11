@@ -2305,6 +2305,7 @@
 			"signature_copied": "",
 			"id": "ID giao dịch",
 			"id_copied": "ID giao dịch đã được sao chép vào khay nhớ tạm.",
+			"twin_transaction": "",
 			"timestamp": "Thời gian",
 			"type": "Loại",
 			"from": "Từ",
