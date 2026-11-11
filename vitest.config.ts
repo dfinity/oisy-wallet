@@ -105,7 +105,7 @@ export default defineConfig((): UserConfig => ({
 				autoUpdate: true,
 				statements: 88.0,
 				branches: 83.1,
-				functions: 86.1,
+				functions: 86.2,
 				lines: 88.6
 			}
 		}
