@@ -252,7 +252,7 @@ jobs:
           key: ${{ runner.os }}-dfx-${{ needs.config-preparation.outputs.dfx-version }}
       - name: Install dfx
         if: steps.cache-dfx.outputs.cache-hit != 'true'
-        uses: ./.github/actions/setup-dfx
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
       - name: Set up dfx path
         if: steps.cache-dfx.outputs.cache-hit == 'true'
         run: echo "$HOME/.local/share/dfx/bin" >> "$GITHUB_PATH"

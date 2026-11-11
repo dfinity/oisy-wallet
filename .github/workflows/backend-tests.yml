@@ -91,7 +91,7 @@ jobs:
 
       - name: Install dfx
         if: steps.changes.outputs.backend == 'true'
-        uses: ./.github/actions/setup-dfx
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
       - name: 'Run backend tests'
         if: steps.changes.outputs.backend == 'true'
@@ -164,7 +164,7 @@ jobs:
 
       - name: Install dfx
         if: (steps.changes.outputs.backend == 'true') && (steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true')
-        uses: ./.github/actions/setup-dfx
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
       - name: Download backend.wasm.gz
         if: (steps.changes.outputs.backend == 'true') && (steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true')
