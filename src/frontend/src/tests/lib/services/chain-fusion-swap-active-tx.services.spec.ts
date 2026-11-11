@@ -563,7 +563,7 @@ describe('chain-fusion-swap-active-tx.services', () => {
 			expect(isBtcTransactionNeverLanded).toHaveBeenCalledExactlyOnceWith({
 				id: tx.id,
 				txid: DEPOSIT_TXID,
-				createdAtNs: tx.created_at_ns
+				updatedAtNs: tx.updated_at_ns
 			});
 			expect(updateBalance).not.toHaveBeenCalled();
 			expect(lastUpdate()).toStrictEqual({

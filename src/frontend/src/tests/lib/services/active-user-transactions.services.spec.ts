@@ -523,11 +523,11 @@ describe('active-user-transactions.services', () => {
 	describe('isBtcTransactionNeverLanded', () => {
 		const txid = 'a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90';
 		const now = 1_800_000_000_000;
-		// Old enough for the check to run.
-		const createdAtNs = BigInt(now - BTC_NEVER_LANDED_GRACE_MILLIS) * NANO_SECONDS_IN_MILLISECOND;
+		// Written long enough ago for the check to run.
+		const updatedAtNs = BigInt(now - BTC_NEVER_LANDED_GRACE_MILLIS) * NANO_SECONDS_IN_MILLISECOND;
 
-		const check = (params: { txid?: string; createdAtNs?: bigint } = {}) =>
-			isBtcTransactionNeverLanded({ id: 'row', txid, createdAtNs, ...params });
+		const check = (params: { txid?: string; updatedAtNs?: bigint } = {}) =>
+			isBtcTransactionNeverLanded({ id: 'row', txid, updatedAtNs, ...params });
 
 		// One check per interval, the first at `now`.
 		const checkAfter = async (intervals: number) => {
@@ -598,9 +598,10 @@ describe('active-user-transactions.services', () => {
 			expect(btcTransactionStatus).toHaveBeenCalledOnce();
 		});
 
-		it('should not ask before the grace period is over', async () => {
+		// A Liquidium repay renews its row while its broadcast is pending, and that call has no deadline.
+		it('should not ask until the row has gone the grace period without a write', async () => {
 			await expect(
-				check({ createdAtNs: BigInt(now - 1) * NANO_SECONDS_IN_MILLISECOND })
+				check({ updatedAtNs: BigInt(now - 60_000) * NANO_SECONDS_IN_MILLISECOND })
 			).resolves.toBeFalsy();
 
 			expect(btcTransactionStatus).not.toHaveBeenCalled();

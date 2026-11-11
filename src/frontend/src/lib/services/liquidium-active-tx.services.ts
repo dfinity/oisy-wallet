@@ -151,7 +151,7 @@ const isNeverLandedBtcTransfer = async ({
 	'Liquidium' in tx.data &&
 	'BtcNativeMainnet' in tx.data.Liquidium.token &&
 	nonNullish(txid) &&
-	(await isBtcTransactionNeverLanded({ id: tx.id, txid, createdAtNs: tx.created_at_ns }));
+	(await isBtcTransactionNeverLanded({ id: tx.id, txid, updatedAtNs: tx.updated_at_ns }));
 
 const pollLiquidiumActiveUserTransaction = async ({
 	tx,

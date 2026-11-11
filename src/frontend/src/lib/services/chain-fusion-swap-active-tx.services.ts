@@ -479,6 +479,7 @@ const resolveChainFusionBtcMintOutcome = async ({
 	identity,
 	txId,
 	createdAtNs,
+	updatedAtNs,
 	data,
 	refs,
 	caches
@@ -486,6 +487,7 @@ const resolveChainFusionBtcMintOutcome = async ({
 	identity: Identity;
 	txId: string;
 	createdAtNs: bigint;
+	updatedAtNs: bigint;
 	data: ChainFusionData;
 	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
 	caches: ChainFusionPollCaches;
@@ -551,7 +553,7 @@ const resolveChainFusionBtcMintOutcome = async ({
 			// can be unclear. Only the network tells them apart.
 			const neverLanded =
 				network === 'mainnet' &&
-				(await isBtcTransactionNeverLanded({ id: txId, txid, createdAtNs }));
+				(await isBtcTransactionNeverLanded({ id: txId, txid, updatedAtNs }));
 
 			return neverLanded ? 'neverLanded' : 'unseen';
 		}
@@ -610,6 +612,7 @@ const pollChainFusionBtcMint = async ({
 		identity,
 		txId: tx.id,
 		createdAtNs: tx.created_at_ns,
+		updatedAtNs: tx.updated_at_ns,
 		data,
 		refs,
 		caches

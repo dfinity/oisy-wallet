@@ -191,24 +191,28 @@ export const resetBtcNeverLandedChecks = (): void => {
  *
  * Bitcoin cannot prove that nothing was broadcast. The evidence is the network not knowing the
  * txid: neither in Blockstream's mempool nor in a block, `BTC_NEVER_LANDED_NOT_FOUND_ANSWERS_REQUIRED`
- * times in a row, at most once per `BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS`, once the row is older
- * than `BTC_NEVER_LANDED_GRACE_MILLIS`. A transaction in a mempool is found, so its row keeps
- * waiting however long it takes to confirm. A failed request counts for nothing either way.
+ * times in a row, at most once per `BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS`, once the row has gone
+ * `BTC_NEVER_LANDED_GRACE_MILLIS` without a write. A transaction in a mempool is found, so its row
+ * keeps waiting however long it takes to confirm. A failed request counts for nothing either way.
+ *
+ * The grace runs from the row's last write, not its creation: a Liquidium repay renews its row while
+ * its broadcast is pending, and that call has no deadline. Once the renewals stop, the backend frees
+ * the reservation within the hour too.
  */
 export const isBtcTransactionNeverLanded = async ({
 	id,
 	txid,
-	createdAtNs
+	updatedAtNs
 }: {
 	id: string;
 	txid: string;
-	createdAtNs: bigint;
+	updatedAtNs: bigint;
 }): Promise<boolean> => {
 	const now = Date.now();
 
 	if (
 		!BTC_TXID_REGEX.test(txid) ||
-		now - Number(createdAtNs / NANO_SECONDS_IN_MILLISECOND) < BTC_NEVER_LANDED_GRACE_MILLIS
+		now - Number(updatedAtNs / NANO_SECONDS_IN_MILLISECOND) < BTC_NEVER_LANDED_GRACE_MILLIS
 	) {
 		return false;
 	}

@@ -1,3 +1,4 @@
+import { BLOCKSTREAM_API_URL } from '$env/rest/blockstream.env';
 import { btcTransactionStatus } from '$lib/rest/blockstream.rest';
 
 describe('blockstream.rest', () => {
@@ -14,12 +15,13 @@ describe('blockstream.rest', () => {
 			) as unknown as typeof fetch;
 		};
 
-		it('should return the status of a transaction the network knows', async () => {
-			mockFetch({ ok: true, status: 200, body: { confirmed: false } });
+		// Not `tx/:txid/status`, which answers `{ confirmed: false }` for a txid nobody knows too.
+		it('should read the status of a transaction the network knows from the transaction', async () => {
+			mockFetch({ ok: true, status: 200, body: { txid, status: { confirmed: false } } });
 
 			await expect(btcTransactionStatus({ txid })).resolves.toEqual({ confirmed: false });
 
-			expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining(`tx/${txid}/status`));
+			expect(global.fetch).toHaveBeenCalledExactlyOnceWith(`${BLOCKSTREAM_API_URL}/tx/${txid}`);
 		});
 
 		it('should return undefined for a transaction the network does not know', async () => {

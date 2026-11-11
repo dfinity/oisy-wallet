@@ -922,11 +922,14 @@ Decided in PR 8c:
 Decided in 8d (rows whose deposit never landed):
 
 - **A row fails once the network does not know its txid.** Bitcoin cannot prove that nothing was
-  broadcast, so the evidence is the txid in neither a block nor Blockstream's mempool (Esplora's
-  `tx/:txid/status` answers 404). `isBtcTransactionNeverLanded`, in the AUT services, gives the
-  verdict for both pollers:
-  - only once the row is older than an hour (`BTC_NEVER_LANDED_GRACE_MILLIS`), when the backend's
-    reservation has expired too, and a broadcast has long reached the mempools;
+  broadcast, so the evidence is the txid in neither a block nor Blockstream's mempool: Esplora's
+  `tx/:txid` answers 404. Not `tx/:txid/status`, which answers `{ confirmed: false }` for a txid
+  nobody knows, as for one in the mempool (Copilot; checked against the live API).
+  `isBtcTransactionNeverLanded`, in the AUT services, gives the verdict for both pollers:
+  - only once the row has gone an hour without a write (`BTC_NEVER_LANDED_GRACE_MILLIS`). Not from
+    its creation: a Liquidium repay renews its row while its broadcast, a call with no deadline, is
+    pending (Copilot). Once the renewals stop, the backend frees the reservation within the hour
+    too, so its state has nothing more to tell;
   - after two "not found" answers in a row, at most one every 5 minutes. A found transaction
     restarts the run, and a failed request counts for nothing.
   - A transaction waiting in a mempool is found, so its row keeps waiting however long it takes.
@@ -935,8 +938,10 @@ Decided in 8d (rows whose deposit never landed):
   network. Never landed is the new `'neverLanded'` outcome, which fails the row.
 - **Liquidium:** a mainnet BTC supply or repay with a txid but no listed activity asks the network.
   Failing the row releases a repay's hold on the repay max, since a terminal row no longer counts.
-- **Both** store `send.error.btc_transaction_never_landed` on the row. Mainnet only: the API is
-  Blockstream's mainnet one, and a testnet row stays as before. The CSP already allows it.
+- **Both** store `send.error.btc_transaction_never_landed` on the row. It says the transaction most
+  likely never went out, and to check the balance before trying again, since one evicted from a
+  mempool could still arrive (Copilot). Mainnet only: the API is Blockstream's mainnet one, and a
+  testnet row stays as before. The CSP already allows it.
 
 Decided in 8e (the limit messages):
 

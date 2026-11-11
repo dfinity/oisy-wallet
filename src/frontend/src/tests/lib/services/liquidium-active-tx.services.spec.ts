@@ -646,7 +646,7 @@ describe('liquidium-active-tx.services', () => {
 			expect(isNeverLanded).toHaveBeenCalledExactlyOnceWith({
 				id: tx.id,
 				txid: btcTxid,
-				createdAtNs: tx.created_at_ns
+				updatedAtNs: tx.updated_at_ns
 			});
 			expect(apply).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
