@@ -3,6 +3,7 @@ import type {
 	ActiveUserTransactionRef,
 	ActiveUserTransactionStatus
 } from '$declarations/backend/backend.did';
+import type { WithdrawSolStatus } from '$declarations/cksol_minter/cksol_minter.did';
 import {
 	CKERC20_HELPER_CONTRACT_SIGNATURE,
 	CKETH_HELPER_CONTRACT_SIGNATURE
@@ -21,12 +22,14 @@ import {
 	chainFusionBtcWithdrawalStatusError,
 	chainFusionMintOutcomeError,
 	chainFusionMintOutcomeToStatus,
+	chainFusionSolWithdrawalStatusError,
 	chainFusionWithdrawalStatusError,
 	isChainFusionActiveUserTransaction,
 	isChainFusionBtcMintDirection,
 	isChainFusionBtcWithdrawalDirection,
 	isChainFusionEthWithdrawalDirection,
 	isChainFusionMintDirection,
+	isChainFusionSolWithdrawalDirection,
 	isSameUtxoTxid,
 	toChainFusionBtcMintOutcome,
 	toChainFusionBtcWithdrawalLearnedRefs,
@@ -36,6 +39,8 @@ import {
 	toChainFusionDisplayRefs,
 	toChainFusionExternalRefs,
 	toChainFusionExternalRefsMap,
+	toChainFusionSolWithdrawalLearnedRefs,
+	toChainFusionSolWithdrawalStatus,
 	toChainFusionWithdrawalLearnedRefs,
 	toChainFusionWithdrawalStatus,
 	toCkBtcMintDepositTxid,
@@ -156,6 +161,15 @@ describe('chain-fusion-swap-active-tx.utils', () => {
 
 			expect(isChainFusionBtcWithdrawalDirection({ BtcToCkBtc: null })).toBeFalsy();
 			expect(isChainFusionBtcWithdrawalDirection({ CkEthToEth: null })).toBeFalsy();
+		});
+
+		it('should classify the ckSOL withdrawal direction alone', () => {
+			expect(isChainFusionSolWithdrawalDirection({ CkSolToSol: null })).toBeTruthy();
+
+			expect(isChainFusionSolWithdrawalDirection({ SolToCkSol: null })).toBeFalsy();
+			expect(isChainFusionSolWithdrawalDirection({ CkBtcToBtc: null })).toBeFalsy();
+			expect(isChainFusionEthWithdrawalDirection({ CkSolToSol: null })).toBeFalsy();
+			expect(isChainFusionBtcWithdrawalDirection({ CkSolToSol: null })).toBeFalsy();
 		});
 	});
 
@@ -526,6 +540,69 @@ describe('chain-fusion-swap-active-tx.utils', () => {
 		it('should learn nothing before the minter has built a transaction', () => {
 			expect(toChainFusionBtcWithdrawalLearnedRefs({ Pending: null })).toStrictEqual({});
 			expect(toChainFusionBtcWithdrawalLearnedRefs({ Unknown: null })).toStrictEqual({});
+		});
+	});
+
+	describe('ckSOL withdrawal status', () => {
+		const SIGNATURE =
+			'5LrcE2f6uvydKRquEJ8xp19heGxSvqsVbcqUeFoiWbXe8JNip7ftPQNTAVPyTK7ijVdpkzmKKaAQR7MWMmujAhXD';
+
+		it('should map a finalized success to Succeeded and a finalized failure to Failed', () => {
+			expect(
+				toChainFusionSolWithdrawalStatus({
+					TxFinalized: { Success: { transaction_id: SIGNATURE } }
+				})
+			).toStrictEqual({ Succeeded: null });
+
+			expect(
+				toChainFusionSolWithdrawalStatus({
+					TxFinalized: { Failure: { transaction_id: SIGNATURE } }
+				})
+			).toStrictEqual({ Failed: null });
+		});
+
+		it('should keep a pending or sent withdrawal executing', () => {
+			expect(toChainFusionSolWithdrawalStatus({ Pending: null })).toStrictEqual({
+				Executing: null
+			});
+			expect(
+				toChainFusionSolWithdrawalStatus({ TxSent: { transaction_id: SIGNATURE } })
+			).toStrictEqual({ Executing: null });
+		});
+
+		// Answered until the minter has recorded the burn, so it must never fail the row.
+		it('should no-op on NotFound rather than fail', () => {
+			expect(toChainFusionSolWithdrawalStatus({ NotFound: null })).toBeUndefined();
+		});
+
+		it('should describe only a finalized failure', () => {
+			expect(
+				chainFusionSolWithdrawalStatusError({
+					TxFinalized: { Failure: { transaction_id: SIGNATURE } }
+				})
+			).toBeDefined();
+
+			expect(
+				chainFusionSolWithdrawalStatusError({
+					TxFinalized: { Success: { transaction_id: SIGNATURE } }
+				})
+			).toBeUndefined();
+			expect(chainFusionSolWithdrawalStatusError({ NotFound: null })).toBeUndefined();
+		});
+
+		it.each<{ name: string; status: WithdrawSolStatus }>([
+			{ name: 'TxSent', status: { TxSent: { transaction_id: SIGNATURE } } },
+			{ name: 'a success', status: { TxFinalized: { Success: { transaction_id: SIGNATURE } } } },
+			{ name: 'a failure', status: { TxFinalized: { Failure: { transaction_id: SIGNATURE } } } }
+		])('should learn the payout signature from $name', ({ status }) => {
+			expect(toChainFusionSolWithdrawalLearnedRefs(status)).toStrictEqual({
+				chain_fusion_sol_tx: SIGNATURE
+			});
+		});
+
+		it('should learn nothing before the minter has sent a transaction', () => {
+			expect(toChainFusionSolWithdrawalLearnedRefs({ Pending: null })).toStrictEqual({});
+			expect(toChainFusionSolWithdrawalLearnedRefs({ NotFound: null })).toStrictEqual({});
 		});
 	});
 
