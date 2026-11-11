@@ -5,15 +5,15 @@
 	import type { IcrcUnavailableCustomToken } from '$icp/types/icrc-custom-token';
 	import { removeCustomToken } from '$lib/api/backend.api';
 	import { deleteIdbIcToken } from '$lib/api/idb-tokens.api';
+	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import {
-		MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_CONFIRM_DELETE,
-		MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_DELETE,
-		MANAGE_TOKENS_IC_UNAVAILABLE_TOKENS
+		HELP_UNAVAILABLE_TOKENS_CARD,
+		HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON,
+		HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -68,64 +68,68 @@
 	};
 </script>
 
+<!-- Only a user with a saved token that OISY skips or cannot load has anything to do here. -->
 {#if $icrcUnavailableCustomTokensStore.length > 0}
-	<MessageBox level="warning" testId={MANAGE_TOKENS_IC_UNAVAILABLE_TOKENS}>
-		<p class="font-bold">{$i18n.tokens.manage.text.unavailable_tokens}</p>
+	<div data-tid={HELP_UNAVAILABLE_TOKENS_CARD}>
+		<SettingsCard>
+			{#snippet title()}{$i18n.help.text.unavailable_tokens_title}{/snippet}
 
-		<p>{replaceOisyPlaceholders($i18n.tokens.manage.info.unavailable_tokens)}</p>
+			<p class="text-sm text-tertiary">
+				{replaceOisyPlaceholders($i18n.help.text.unavailable_tokens_description)}
+			</p>
 
-		<ul class="mt-3 flex list-none flex-col gap-3">
-			{#each $icrcUnavailableCustomTokensStore as token (token.ledgerCanisterId)}
-				<li>
-					{#if confirmLedgerCanisterId === token.ledgerCanisterId}
-						<p class="mb-3 break-words">
-							<Html
-								text={replacePlaceholders(
-									replaceOisyPlaceholders($i18n.tokens.details.confirm_deletion_description),
-									{
-										$token: escapeHtml(tokenName(token))
-									}
-								)}
-							/>
-						</p>
+			<ul class="flex list-none flex-col">
+				{#each $icrcUnavailableCustomTokensStore as token (token.ledgerCanisterId)}
+					<li class="mt-3">
+						{#if confirmLedgerCanisterId === token.ledgerCanisterId}
+							<p class="mb-3 break-words">
+								<Html
+									text={replacePlaceholders(
+										replaceOisyPlaceholders($i18n.tokens.details.confirm_deletion_description),
+										{
+											$token: escapeHtml(tokenName(token))
+										}
+									)}
+								/>
+							</p>
 
-						<ButtonGroup>
-							<ButtonCancel
-								disabled={deleting}
-								onclick={() => (confirmLedgerCanisterId = undefined)}
-							/>
+							<ButtonGroup>
+								<ButtonCancel
+									disabled={deleting}
+									onclick={() => (confirmLedgerCanisterId = undefined)}
+								/>
 
-							<Button
-								colorStyle="error"
-								disabled={deleting}
-								onclick={() => deleteToken(token)}
-								testId={MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_CONFIRM_DELETE}
-								type="button"
-							>
-								{$i18n.core.text.delete}
-							</Button>
-						</ButtonGroup>
-					{:else}
-						<div class="flex flex-wrap items-center gap-x-3">
-							<span class="break-all">{tokenName(token)}</span>
+								<Button
+									colorStyle="error"
+									disabled={deleting}
+									onclick={() => deleteToken(token)}
+									testId={HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON}
+									type="button"
+								>
+									{$i18n.core.text.delete}
+								</Button>
+							</ButtonGroup>
+						{:else}
+							<div class="flex w-full flex-row items-center justify-between gap-3">
+								<!-- break-words, not break-all: a ledger canister ID then wraps at a hyphen. -->
+								<span class="min-w-0 flex-1 break-words">{tokenName(token)}</span>
 
-							<!-- Keeps the button to its text width: on its own it grows to fill the row. -->
-							<div>
+								<!-- Button is flex-1 by default, which would stretch it across the row. -->
 								<Button
 									disabled={deleting}
 									link
 									onclick={() => (confirmLedgerCanisterId = token.ledgerCanisterId)}
-									paddingSmall
-									testId={MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_DELETE}
+									styleClass="flex-none"
+									testId={HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON}
 									type="button"
 								>
 									{$i18n.tokens.text.delete_token}
 								</Button>
 							</div>
-						</div>
-					{/if}
-				</li>
-			{/each}
-		</ul>
-	</MessageBox>
+						{/if}
+					</li>
+				{/each}
+			</ul>
+		</SettingsCard>
+	</div>
 {/if}

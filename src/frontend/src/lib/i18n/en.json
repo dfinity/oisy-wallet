@@ -767,8 +767,8 @@
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
 			"load_token_list": "Something went wrong loading your token list. Please reload the page to try again.",
-			"icrc_canister_loading_curated": "The $tokenSymbol token is not responding and can't be loaded right now. Try again later. If it keeps failing, you can delete it in “Manage tokens”.",
-			"icrc_canister_loading_custom": "The token with ledger canister $ledgerCanisterId is not responding and can't be loaded right now. Try again later. If it keeps failing, you can delete it in “Manage tokens”.",
+			"icrc_canister_loading_curated": "The $tokenSymbol token is not responding and can't be loaded right now. Try again later. If it keeps failing, you can delete it on the “Help” page.",
+			"icrc_canister_loading_custom": "The token with ledger canister $ledgerCanisterId is not responding and can't be loaded right now. Try again later. If it keeps failing, you can delete it on the “Help” page.",
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
 			"erc4626_custom_tokens": "Error while loading the ERC4626 custom tokens.",
 			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
@@ -835,7 +835,9 @@
 			"nothing_to_withdraw": "Nothing to withdraw in this pool.",
 			"results_found": "Withdrawable balances found: $balances.",
 			"balance_unused": "Unused balance",
-			"withdraw": "Withdraw"
+			"withdraw": "Withdraw",
+			"unavailable_tokens_title": "Unavailable tokens",
+			"unavailable_tokens_description": "These tokens are in your token list, but $oisy_short can't load them."
 		},
 		"alt": {
 			"network_explorer_link": "Open the $network blockchain explorer for your address",
@@ -1654,15 +1656,13 @@
 				"import_nft": "Import collection",
 				"network": "Network",
 				"all_tokens_zero_balance": "All tokens have zero balance.",
-				"enable_more_assets": "Enable more tokens",
-				"unavailable_tokens": "Unavailable tokens"
+				"enable_more_assets": "Enable more tokens"
 			},
 			"placeholder": {
 				"select_network": "Select the network"
 			},
 			"info": {
-				"no_changes": "No changes need to be saved.",
-				"unavailable_tokens": "These tokens are in your token list, but $oisy_short can't load them."
+				"no_changes": "No changes need to be saved."
 			},
 			"error": {
 				"unexpected_build": "An unexpected error happened while building the list of known tokens.",

@@ -767,8 +767,8 @@
 			"transaction_price": "Errore durante il caricamento della stima del prezzo di una transazione.",
 			"icrc_canisters": "Errore durante il caricamento dei canister ICRC.",
 			"load_token_list": "",
-			"icrc_canister_loading_curated": "Il token $tokenSymbol non risponde e non può essere caricato al momento. Riprova più tardi. Se il problema persiste, puoi eliminarlo in “Gestisci token”.",
-			"icrc_canister_loading_custom": "Il token con canister ledger $ledgerCanisterId non risponde e non può essere caricato al momento. Riprova più tardi. Se il problema persiste, puoi eliminarlo in “Gestisci token”.",
+			"icrc_canister_loading_curated": "Il token $tokenSymbol non risponde e non può essere caricato al momento. Riprova più tardi. Se il problema persiste, puoi eliminarlo nella pagina “Aiuto”.",
+			"icrc_canister_loading_custom": "Il token con canister ledger $ledgerCanisterId non risponde e non può essere caricato al momento. Riprova più tardi. Se il problema persiste, puoi eliminarlo nella pagina “Aiuto”.",
 			"erc20_custom_tokens": "Errore durante il caricamento del token personalizzato ERC20.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Errore durante il caricamento del token personalizzato ERC721.",
@@ -835,7 +835,9 @@
 			"nothing_to_withdraw": "Non c’è nulla da prelevare in questo pool.",
 			"results_found": "Saldi prelevabili trovati: $balances.",
 			"balance_unused": "Saldo non utilizzato",
-			"withdraw": "Preleva"
+			"withdraw": "Preleva",
+			"unavailable_tokens_title": "Token non disponibili",
+			"unavailable_tokens_description": "Questi token sono nella tua lista di token, ma $oisy_short non riesce a caricarli."
 		},
 		"alt": {
 			"network_explorer_link": "Apri il blockchain explorer di $network per il tuo indirizzo",
@@ -1654,15 +1656,13 @@
 				"import_nft": "",
 				"network": "Rete",
 				"all_tokens_zero_balance": "Tutti i token hanno saldo zero.",
-				"enable_more_assets": "Abilita più token",
-				"unavailable_tokens": "Token non disponibili"
+				"enable_more_assets": "Abilita più token"
 			},
 			"placeholder": {
 				"select_network": "Seleziona la rete"
 			},
 			"info": {
-				"no_changes": "Nessuna modifica da salvare.",
-				"unavailable_tokens": "Questi token sono nella tua lista di token, ma $oisy_short non riesce a caricarli."
+				"no_changes": "Nessuna modifica da salvare."
 			},
 			"error": {
 				"unexpected_build": "Si è verificato un errore inatteso durante la creazione dell'elenco dei token conosciuti.",

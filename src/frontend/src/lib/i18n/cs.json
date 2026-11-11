@@ -767,8 +767,8 @@
 			"transaction_price": "Chyba při načítání odhadu ceny transakce.",
 			"icrc_canisters": "Chyba při načítání kanystrů ICRC.",
 			"load_token_list": "",
-			"icrc_canister_loading_curated": "Token $tokenSymbol neodpovídá a momentálně ho nelze načíst. Zkuste to znovu později. Pokud problém přetrvá, můžete ho smazat v části „Spravovat tokeny“.",
-			"icrc_canister_loading_custom": "Token s Ledger kanystrem $ledgerCanisterId neodpovídá a momentálně ho nelze načíst. Zkuste to znovu později. Pokud problém přetrvá, můžete ho smazat v části „Spravovat tokeny“.",
+			"icrc_canister_loading_curated": "Token $tokenSymbol neodpovídá a momentálně ho nelze načíst. Zkuste to znovu později. Pokud problém přetrvá, můžete ho smazat na stránce „Nápověda“.",
+			"icrc_canister_loading_custom": "Token s Ledger kanystrem $ledgerCanisterId neodpovídá a momentálně ho nelze načíst. Zkuste to znovu později. Pokud problém přetrvá, můžete ho smazat na stránce „Nápověda“.",
 			"erc20_custom_tokens": "Chyba při načítání vlastních tokenů ERC20",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Chyba při načítání vlastních tokenů ERC721.",
@@ -835,7 +835,9 @@
 			"nothing_to_withdraw": "V tomto poolu není co vybrat.",
 			"results_found": "Nalezené vybratelné zůstatky: $balances.",
 			"balance_unused": "Nevyužitý zůstatek",
-			"withdraw": "Vybrat"
+			"withdraw": "Vybrat",
+			"unavailable_tokens_title": "Nedostupné tokeny",
+			"unavailable_tokens_description": "Tyto tokeny jsou ve vašem seznamu tokenů, ale $oisy_short je nemůže načíst."
 		},
 		"alt": {
 			"network_explorer_link": "Otevřít průzkumník blockchainu sítě $network pro vaši adresu",
@@ -1654,15 +1656,13 @@
 				"import_nft": "Importovat kolekci",
 				"network": "Síť",
 				"all_tokens_zero_balance": "Všechny tokeny mají nulový zůstatek.",
-				"enable_more_assets": "Povolit další tokeny",
-				"unavailable_tokens": "Nedostupné tokeny"
+				"enable_more_assets": "Povolit další tokeny"
 			},
 			"placeholder": {
 				"select_network": "Vybrat síť"
 			},
 			"info": {
-				"no_changes": "Není třeba ukládat žádné změny.",
-				"unavailable_tokens": "Tyto tokeny jsou ve vašem seznamu tokenů, ale $oisy_short je nemůže načíst."
+				"no_changes": "Není třeba ukládat žádné změny."
 			},
 			"error": {
 				"unexpected_build": "Při vytváření seznamu známých tokenů došlo k neočekávané chybě.",

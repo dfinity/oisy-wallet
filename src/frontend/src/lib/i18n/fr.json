@@ -767,8 +767,8 @@
 			"transaction_price": "Erreur lors du chargement de l'estimation du prix d'une transaction.",
 			"icrc_canisters": "Erreur lors du chargement des canisters ICRC.",
 			"load_token_list": "",
-			"icrc_canister_loading_curated": "Le token $tokenSymbol ne répond pas et ne peut pas être chargé pour le moment. Veuillez réessayer plus tard. Si le problème persiste, vous pouvez le supprimer dans « Gérer les tokens ».",
-			"icrc_canister_loading_custom": "Le token avec le canister Ledger $ledgerCanisterId ne répond pas et ne peut être chargé pour le moment. Veuillez réessayer plus tard. Si le problème persiste, vous pouvez le supprimer dans « Gérer les tokens ».",
+			"icrc_canister_loading_curated": "Le token $tokenSymbol ne répond pas et ne peut pas être chargé pour le moment. Veuillez réessayer plus tard. Si le problème persiste, vous pouvez le supprimer sur la page « Aide ».",
+			"icrc_canister_loading_custom": "Le token avec le canister Ledger $ledgerCanisterId ne répond pas et ne peut être chargé pour le moment. Veuillez réessayer plus tard. Si le problème persiste, vous pouvez le supprimer sur la page « Aide ».",
 			"erc20_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC20.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC721.",
@@ -835,7 +835,9 @@
 			"nothing_to_withdraw": "Rien à retirer dans ce pool.",
 			"results_found": "Soldes récupérables trouvés : $balances.",
 			"balance_unused": "Solde non utilisé",
-			"withdraw": "Retirer"
+			"withdraw": "Retirer",
+			"unavailable_tokens_title": "Tokens indisponibles",
+			"unavailable_tokens_description": "Ces tokens figurent dans votre liste de tokens, mais $oisy_short ne peut pas les charger."
 		},
 		"alt": {
 			"network_explorer_link": "Ouvrir l'explorateur de blockchain $network pour votre adresse",
@@ -1654,15 +1656,13 @@
 				"import_nft": "Importer une collection",
 				"network": "Réseau",
 				"all_tokens_zero_balance": "Tous les tokens ont un solde nul.",
-				"enable_more_assets": "Activer plus de tokens",
-				"unavailable_tokens": "Tokens indisponibles"
+				"enable_more_assets": "Activer plus de tokens"
 			},
 			"placeholder": {
 				"select_network": "Sélectionner le réseau"
 			},
 			"info": {
-				"no_changes": "Aucun changement à enregistrer.",
-				"unavailable_tokens": "Ces tokens figurent dans votre liste de tokens, mais $oisy_short ne peut pas les charger."
+				"no_changes": "Aucun changement à enregistrer."
 			},
 			"error": {
 				"unexpected_build": "Une erreur inattendue s'est produite lors de la construction de la liste des tokens connus.",

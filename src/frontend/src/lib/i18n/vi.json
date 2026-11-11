@@ -767,8 +767,8 @@
 			"transaction_price": "Lỗi khi tải ước tính giá của một giao dịch.",
 			"icrc_canisters": "Lỗi khi tải các canister ICRC.",
 			"load_token_list": "",
-			"icrc_canister_loading_curated": "Token $tokenSymbol không phản hồi và không thể tải lúc này. Vui lòng thử lại sau. Nếu lỗi vẫn tiếp diễn, bạn có thể xóa token này trong “Quản lý token”.",
-			"icrc_canister_loading_custom": "Token với canister ledger $ledgerCanisterId không phản hồi và không thể tải lúc này. Vui lòng thử lại sau. Nếu lỗi vẫn tiếp diễn, bạn có thể xóa token này trong “Quản lý token”.",
+			"icrc_canister_loading_curated": "Token $tokenSymbol không phản hồi và không thể tải lúc này. Vui lòng thử lại sau. Nếu lỗi vẫn tiếp diễn, bạn có thể xóa token này trên trang “Trợ giúp”.",
+			"icrc_canister_loading_custom": "Token với canister ledger $ledgerCanisterId không phản hồi và không thể tải lúc này. Vui lòng thử lại sau. Nếu lỗi vẫn tiếp diễn, bạn có thể xóa token này trên trang “Trợ giúp”.",
 			"erc20_custom_tokens": "Lỗi khi tải các token ERC20.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Lỗi khi tải các token ERC721.",
@@ -835,7 +835,9 @@
 			"nothing_to_withdraw": "Không có gì để rút trong pool này.",
 			"results_found": "Số dư có thể rút đã tìm thấy: $balances.",
 			"balance_unused": "Số dư chưa dùng",
-			"withdraw": "Rút"
+			"withdraw": "Rút",
+			"unavailable_tokens_title": "Token không khả dụng",
+			"unavailable_tokens_description": "Các token này có trong danh sách token của bạn, nhưng $oisy_short không thể tải chúng."
 		},
 		"alt": {
 			"network_explorer_link": "Mở trình khám phá blockchain $network cho địa chỉ của bạn",
@@ -1654,15 +1656,13 @@
 				"import_nft": "",
 				"network": "Mạng",
 				"all_tokens_zero_balance": "Tất cả các token có số dư bằng 0.",
-				"enable_more_assets": "Kích hoạt thêm token",
-				"unavailable_tokens": "Token không khả dụng"
+				"enable_more_assets": "Kích hoạt thêm token"
 			},
 			"placeholder": {
 				"select_network": "Chọn mạng"
 			},
 			"info": {
-				"no_changes": "Không cần lưu thay đổi.",
-				"unavailable_tokens": "Các token này có trong danh sách token của bạn, nhưng $oisy_short không thể tải chúng."
+				"no_changes": "Không cần lưu thay đổi."
 			},
 			"error": {
 				"unexpected_build": "Đã xảy ra lỗi không mong muốn khi xây dựng danh sách các token đã biết.",

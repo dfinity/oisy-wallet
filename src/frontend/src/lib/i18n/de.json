@@ -767,8 +767,8 @@
 			"transaction_price": "Fehler beim Laden der Schätzung des Transaktionspreises.",
 			"icrc_canisters": "Fehler beim Laden der ICRC-Canisters.",
 			"load_token_list": "",
-			"icrc_canister_loading_curated": "Das $tokenSymbol Token antwortet nicht und kann momentan nicht geladen werden. Versuche später nochmal. Falls es weiterhin nicht klappt, kannst du es unter „Token verwalten“ löschen.",
-			"icrc_canister_loading_custom": "Das Token mit dem Ledger Kanister $ledgerCanisterId antwortet nicht und kann momentan nicht geladen werden. Versuche später nochmal. Falls es weiterhin nicht klappt, kannst du es unter „Token verwalten“ löschen.",
+			"icrc_canister_loading_curated": "Das $tokenSymbol Token antwortet nicht und kann momentan nicht geladen werden. Versuche später nochmal. Falls es weiterhin nicht klappt, kannst du es auf der Seite „Hilfe“ löschen.",
+			"icrc_canister_loading_custom": "Das Token mit dem Ledger Kanister $ledgerCanisterId antwortet nicht und kann momentan nicht geladen werden. Versuche später nochmal. Falls es weiterhin nicht klappt, kannst du es auf der Seite „Hilfe“ löschen.",
 			"erc20_custom_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Fehler beim Laden der ERC721-Benutzertoken.",
@@ -835,7 +835,9 @@
 			"nothing_to_withdraw": "In diesem Pool gibt es nichts auszuzahlen.",
 			"results_found": "Gefundene auszahlbare Guthaben: $balances.",
 			"balance_unused": "Ungenutztes Guthaben",
-			"withdraw": "Auszahlen"
+			"withdraw": "Auszahlen",
+			"unavailable_tokens_title": "Nicht verfügbare Token",
+			"unavailable_tokens_description": "Diese Token sind in deiner Tokenliste, aber $oisy_short kann sie nicht laden."
 		},
 		"alt": {
 			"network_explorer_link": "Blockchain-Explorer von $network für deine Adresse öffnen",
@@ -1654,15 +1656,13 @@
 				"import_nft": "",
 				"network": "Netzwerk",
 				"all_tokens_zero_balance": "Alle Token haben Nullsaldo.",
-				"enable_more_assets": "Weitere Token aktivieren",
-				"unavailable_tokens": "Nicht verfügbare Token"
+				"enable_more_assets": "Weitere Token aktivieren"
 			},
 			"placeholder": {
 				"select_network": "Netzwerk auswählen"
 			},
 			"info": {
-				"no_changes": "Keine Änderungen zum Speichern.",
-				"unavailable_tokens": "Diese Token sind in deiner Tokenliste, aber $oisy_short kann sie nicht laden."
+				"no_changes": "Keine Änderungen zum Speichern."
 			},
 			"error": {
 				"unexpected_build": "Beim Erstellen der Liste bekannter Token ist ein unerwarteter Fehler aufgetreten.",

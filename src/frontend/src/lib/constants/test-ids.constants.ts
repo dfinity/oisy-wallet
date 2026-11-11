@@ -158,6 +158,10 @@ export const HELP_ICPSWAP_SCAN_SUMMARY = 'help-icpswap-scan-summary';
 export const HELP_ICPSWAP_POOL_GROUP = 'help-icpswap-pool';
 export const HELP_ICPSWAP_RESULTS_SUMMARY = 'help-icpswap-results-summary';
 export const HELP_ICPSWAP_WITHDRAW_BUTTON = 'help-icpswap-withdraw';
+export const HELP_UNAVAILABLE_TOKENS_CARD = 'help-unavailable-tokens-card';
+export const HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON = 'help-unavailable-tokens-delete';
+export const HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON =
+	'help-unavailable-tokens-confirm-delete';
 
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_MORE_MENU_BUTTON = 'navigation-more-menu-button';
@@ -254,11 +258,6 @@ export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
 export const MANAGE_TOKENS_MODAL_SAVE = 'manage-tokens-modal-save';
 export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggle';
 export const MANAGE_TOKENS_IC_ADD_NFT_INPUT = 'manage-tokens-ic-add-nft-input';
-export const MANAGE_TOKENS_IC_UNAVAILABLE_TOKENS = 'manage-tokens-ic-unavailable-tokens';
-export const MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_DELETE =
-	'manage-tokens-ic-unavailable-token-delete';
-export const MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_CONFIRM_DELETE =
-	'manage-tokens-ic-unavailable-token-confirm-delete';
 
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
 export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';

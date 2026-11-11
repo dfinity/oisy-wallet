@@ -835,7 +835,9 @@
 			"nothing_to_withdraw": "",
 			"results_found": "",
 			"balance_unused": "",
-			"withdraw": ""
+			"withdraw": "",
+			"unavailable_tokens_title": "",
+			"unavailable_tokens_description": ""
 		},
 		"alt": {
 			"network_explorer_link": "",
@@ -1654,15 +1656,13 @@
 				"import_nft": "",
 				"network": "الشبكة",
 				"all_tokens_zero_balance": "جميع التوكنات ذات رصيد صفري.",
-				"enable_more_assets": "تمكين المزيد من التوكنات",
-				"unavailable_tokens": ""
+				"enable_more_assets": "تمكين المزيد من التوكنات"
 			},
 			"placeholder": {
 				"select_network": "حدد الشبكة"
 			},
 			"info": {
-				"no_changes": "لا توجد تغييرات تحتاج إلى حفظ.",
-				"unavailable_tokens": ""
+				"no_changes": "لا توجد تغييرات تحتاج إلى حفظ."
 			},
 			"error": {
 				"unexpected_build": "حدث خطأ غير متوقع أثناء بناء قائمة التوكنات المعروفة.",
