@@ -12,7 +12,7 @@ import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapDerivationPath } from '$lib/utils/signer.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { hexStringToUint8Array, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 import type { ActorSubclass } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -572,6 +572,25 @@ describe('signer.canister', () => {
 			await expect(signBtcPrehash({ hash })).rejects.toThrow(
 				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
 			);
+		});
+
+		it('should keep the payment error variant, so a spent signing approval can be told apart', async () => {
+			const PaymentError = {
+				LedgerWithdrawFromError: {
+					ledger: mockPrincipal,
+					error: { InsufficientAllowance: { allowance: 10n } }
+				}
+			};
+			service.btc_sign_prehash.mockResolvedValue({ Err: { PaymentError } });
+
+			const { signBtcPrehash } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const result = signBtcPrehash({ hash });
+
+			await expect(result).rejects.toThrow(new SignerCanisterPaymentError(PaymentError));
+			await expect(result).rejects.toMatchObject({ paymentError: PaymentError });
 		});
 
 		it('should throw an error if btc_sign_prehash returns an unknown error variant', async () => {

@@ -1151,6 +1151,8 @@
 			"ethereum_transaction_not_sent": "Transakce nebyla odeslána: nepodařilo se nám spojit se sítí, abychom ji připravili. Můžete to bezpečně zkusit znovu.",
 			"ethereum_transaction_unconfirmed": "Nepodařilo se nám potvrdit, zda transakce dorazila do sítě. Stále může projít, proto počkejte minutu nebo dvě a před dalším odesláním zkontrolujte svou aktivitu.",
 			"btc_transaction_unconfirmed": "",
+			"btc_send_rate_limited": "",
+			"btc_signing_allowance_spent": "",
 			"solana_transaction_expired": "Vaše transakce nebyla zpracována sítí Solana a vypršela, nejpravděpodobněji proto, že zadaný prioritní poplatek nebyl dostatečný. Aktualizovali jsme ho na nejnovější doporučenou částku, zkuste to prosím znovu.",
 			"solana_confirmation_failed": "Neobdrželi jsme potvrzení pro transakci, kterou jste právě vytvořili. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí vašeho tokenu, zda byla vaše transakce vytvořena správně.",
 			"solana_insufficient_funds": "Zůstatek vašeho tokenu není dostatečný k dokončení této transakce. Váš zůstatek se mohl od posledního zobrazení změnit.",
@@ -1522,7 +1524,8 @@
 			"data_is_incompleted": "Přijatá data jsou neúplná. Chybí některé povinné údaje.",
 			"amount_does_not_match": "Částka v přijatých datech neodpovídá očekávané hodnotě.",
 			"recipient_address_is_not_valid": "Adresa příjemce v přijatých datech není platná Ethereum adresa.",
-			"token_address_mismatch": "Přijatá data odkazují na jiný token, než se očekávalo."
+			"token_address_mismatch": "Přijatá data odkazují na jiný token, než se očekávalo.",
+			"btc_reservation_rate_limited": ""
 		},
 		"alt": {
 			"pay": "Dialog s informacemi o platbě",

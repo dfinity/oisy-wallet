@@ -380,7 +380,7 @@ Every token belongs to one asset type, and the token list can be filtered by it:
 
 **Compute** holds the tokens that pay for computation on the Internet Computer. Today that is only **TCYCLES**, which used to sit under Stablecoins. OISY shows it as **ICP Cycles (Trillion)** rather than the ledger's own name, "Trillion Cycles", which does not say which network's cycles they are. At rest its pill looks like its neighbours. What sets it apart is a brand-blue arc that runs two laps around its border when the pill appears and again each time the pointer enters it, then goes away. Selected, it looks like every other selected pill, so which filter is on always reads the same. It runs a set number of laps and not a loop, so the pill does not keep moving above a list people open every day; with reduced motion turned on in the system, there is no arc at all.
 
-TCYCLES is not enabled by default, so for most users Compute opens on the empty state, which names the supported token they can enable. It is deliberately not switched on by default: a default-enabled token is not stored in the user's profile, so it could never be withdrawn again without hiding it from users who hold a balance. Other cycles-backed tokens, such as XTC, stay under Crypto.
+TCYCLES is a [suggested](#curated-tokens-vs-metadata-only-tokens) token, so Compute lists it for every user who has not switched it off. A user who switched it off sees the empty state instead, which names the supported token they can enable. Other cycles-backed tokens, such as XTC, stay under Crypto.
 
 ---
 
@@ -569,10 +569,10 @@ The first card explains where to get help and links out to the OISY help centre.
 
 OISY's transaction history is an index built from third-party providers, so it can lag behind the chain: a received transfer missing, a balance minutes stale, a send confirmed on-chain but not yet listed. The blockchain explorer is the ground truth, and this card opens it at the user's own address — one link per **enabled mainnet network**, labelled with that network's name and logo. Its text says what the user finds there, their balances and full transaction history, and that blockchains are public ledgers, so all on-chain activity can be checked independently.
 
-The card renders from the user's enabled mainnet networks rather than a fixed list, so switching a network off in Settings removes its link, and a network the wallet gains is one map entry away from having one. Testnets never appear: the card is about real funds, and a user running testnets already knows where the explorer is. Most of the links use the same explorer host as the rest of the wallet. Two differ on purpose:
+The card renders from the user's enabled mainnet networks rather than a fixed list, so switching a network off in Settings removes its link, and a network the wallet gains is one map entry away from having one. Testnets never appear: the card is about real funds, and a user running testnets already knows where the explorer is. Every link but one uses the same explorer host as the rest of the wallet:
 
-- **Internet Computer** uses `icexplorer.io`, not the network's own `dashboard.internetcomputer.org`, whose account page is keyed by the 64-character account identifier — while the address OISY shows a user is their principal. This is a correctness requirement, not a preference.
-- **Bitcoin** uses `mempool.space`, where the network's own explorer is `blockstream.info`. A preference.
+- **Internet Computer** opens the ICP dashboard's address page (`dashboard.internetcomputer.org/address/…`) at the user's principal, the address OISY shows them. The page lists the principal's balance on every ledger the dashboard tracks.
+- **Bitcoin** is the exception: it uses `mempool.space`, where the network's own explorer is `blockstream.info`. A preference.
 
 As on the provider card below, a link whose address has not loaded is left out, and a card with no available link is hidden.
 
@@ -923,11 +923,15 @@ On local and staging builds, every BTC send OISY broadcasts itself builds and si
 
 When the broadcast's outcome is unclear, the transaction may have gone out. The user is told to check their activity before sending again, and the flow does not offer the form again: its inputs stay reserved, so a second send would spend other coins and could pay twice. In the AI assistant, the card shows that message in place of its Send button. A send the backend refuses outright returns to the form as before, with the locked-funds message when its inputs are already reserved.
 
+A send stopped by one of the backend's limits returns to the form too, and says why. Too many send attempts in a short while (5 a minute, 20 an hour, 50 a day, failed ones included) tells the user how long to wait. A used-up signing allowance, which OISY grants at sign-in, tells them to sign out and back in to renew it, and to wait up to an hour if it comes back: the backend renews it at most three times an hour. If the pending transactions cannot be loaded right before a send, the user is told the service is unavailable for now.
+
 A swap's activity row is created before its deposit is broadcast, so it is tracked whatever the broadcast answers. A deposit the backend refuses outright removes the row. One whose outcome is unclear keeps it until the deposit is seen. If the deposit never arrives, a NEAR Intents swap fails once its deposit address expires, while a Chain Fusion conversion stays in progress for now: nothing yet settles a deposit that never reached the network.
 
 A Liquidium supply or repayment is recorded with its transaction before the broadcast, and the record is removed only if the transfer was refused outright. After an unclear outcome a repayment keeps counting against the repay maximum until it settles, so the form does not offer the full debt again. A transfer that never reached the network is not settled yet, so its hold stays too.
 
-OpenCryptoPay still sends through the Chain Fusion Signer. Beta and production send as before.
+OpenCryptoPay payments in BTC are built and signed in OISY too, with the same 38-input limit. OpenCryptoPay broadcasts them itself, so OISY reserves their inputs just before it hands the transaction over, instead of after. If the reservation fails, nothing is handed over and the payment fails. If the hand-over fails, the payment shows as not confirmed, since OpenCryptoPay may have received it, and its inputs stay reserved until they are spent, or for an hour if they never are.
+
+Beta and production send as before.
 
 ---
 

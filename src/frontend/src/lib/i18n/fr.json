@@ -1151,6 +1151,8 @@
 			"ethereum_transaction_not_sent": "La transaction n'a pas été envoyée : nous n'avons pas pu joindre le réseau pour la préparer. Vous pouvez réessayer en toute sécurité.",
 			"ethereum_transaction_unconfirmed": "Nous n'avons pas pu confirmer si la transaction a atteint le réseau. Elle peut encore aboutir, attendez donc une minute ou deux et vérifiez votre activité avant de la renvoyer.",
 			"btc_transaction_unconfirmed": "",
+			"btc_send_rate_limited": "",
+			"btc_signing_allowance_spent": "",
 			"solana_transaction_expired": "Votre transaction n'a pas été traitée par le réseau Solana et a expiré, très probablement parce que les frais de priorité fournis n'étaient pas suffisants. Nous les avons mis à jour au montant recommandé le plus récent, veuillez donc réessayer.",
 			"solana_confirmation_failed": "Nous n'avons pas reçu de confirmation pour la transaction que vous venez de créer. Veuillez attendre quelques secondes, puis vérifier la liste des transactions de votre token pour voir si votre transaction a été créée correctement.",
 			"solana_insufficient_funds": "Le solde de votre token est insuffisant pour effectuer cette transaction. Votre solde a peut-être changé depuis son dernier affichage.",
@@ -1522,7 +1524,8 @@
 			"data_is_incompleted": "Les données reçues sont incomplètes. Certains détails requis sont manquants.",
 			"amount_does_not_match": "Le montant dans les données reçues ne correspond pas à la valeur attendue.",
 			"recipient_address_is_not_valid": "L'adresse du destinataire dans les données reçues n'est pas une adresse Ethereum valide.",
-			"token_address_mismatch": "Les données reçues font référence à un token différent de celui attendu."
+			"token_address_mismatch": "Les données reçues font référence à un token différent de celui attendu.",
+			"btc_reservation_rate_limited": ""
 		},
 		"alt": {
 			"pay": "Dialogue avec des informations sur comment payer",

@@ -918,6 +918,31 @@ Decided in PR 8c:
   and close after an unclear outcome instead of returning to a form that offers the full amount
   again.
 
+Decided in 8e (the limit messages):
+
+- **A rate-limited broadcast says how long to wait.** `mapBtcBroadcastErrorToMessage` reads the
+  window of the tier that refused it (a minute, an hour or a day) from `RateLimited` and formats it
+  with `secondsToDuration`, as the tips do. The limiter is the endpoint's first check, so failed
+  attempts count too, and the message speaks of attempts, not sends (Copilot).
+- **A spent signing approval says to sign in again.** `SignerCanisterPaymentError` keeps its
+  variant. With the backend paying (`PatronPaysIcrc2Cycles`), a spent approval is
+  `LedgerWithdrawFromError` with `InsufficientAllowance`, which `allow_signing` renews at the next
+  sign-in. The ledger's `InsufficientFunds` is the backend's own balance, so it keeps the flow's
+  own message.
+  - `allow_signing` renews at most three times an hour (`ALLOW_SIGNING_RATE_LIMITER`, checked only
+    when it would top up), and the frontend reads a refusal as `Skipped`. So the message also says
+    to wait up to an hour if it comes back (Copilot).
+  - Only with `BTC_SEND_VIA_BACKEND_ENABLED`. A `btc_sign_prehash` costs 38B, so a refusal means the
+    approval is nearly spent, and a sign-in renews it. `btc_caller_send` charges a whole send
+    upfront, with no input cap, so it can cost more than any renewed approval (2.917T), and its
+    refusal keeps the flow's own message (sbpublic).
+- **These toasts carry no detail.** Nothing was sent and the message says what to do, so
+  `isBtcSendLimitError` leaves out the error's English text, which the toast appends otherwise.
+- **`btc_get_spendable_utxos` keeps a generic message.** Its limit (15 a minute) is out of reach
+  while the broadcast allows 5, and closing the form resets the stores, so the next one reloads.
+  The pre-send check's `PendingTransactionsNotAvailable` now shows
+  `send.assertion.pending_transactions_not_available` instead of the generic failure.
+
 ### Frontend: UTXO loading
 
 `AllUtxosLoader.svelte` and `loadBtcPendingSentTransactions` read from `btc_get_spendable_utxos`
@@ -989,6 +1014,24 @@ A retry is still possible:
   does not cover the witness. It goes through because `btc_add_pending_transaction` accepts the
   same txid over the same UTXOs (see above).
 - A retry over other UTXOs is an ordinary new reservation.
+
+Decided in PR 9:
+
+- **`payBtc` takes the new path whenever the flag is on.** It builds with `buildBtcSendPsbt`, with
+  the wallet's address (`btcAddressMainnet`) as change, and signs with `signAndFinalizeBtcPsbt`.
+  With the flag off it keeps `btc_caller_sign`, and the best-effort reservation after the hand-off.
+- **The reservation must succeed.** If `btc_add_pending_transaction` fails, nothing is handed off.
+  A rate limit counts as a failure too: `btcAddPendingTransaction` reports it as a success, since
+  the CFS paths record after the broadcast and let the user carry on, but nothing is reserved.
+- **The `PAY` step starts after the reservation.** `OpenCryptoPayWizard` reads an error from `PAY`
+  on as "not confirmed", and an earlier one as "failed". A refused reservation handed nothing off,
+  so it shows as failed and the payment can be tried again.
+- **After a failed hand-off** the payment shows as not confirmed, and its inputs stay reserved until
+  they are spent, or until the backend's one-hour age limit frees them if they never are.
+- **The 38-input cap already applies:** `calculateBtcFee` selects with `prepareBtcSend`.
+- **One new message**, `pay.error.btc_reservation_rate_limited`, for a rate-limited reservation. A
+  missing wallet address reuses `send.assertion.address_unknown`. Every other error keeps its own
+  text, as for the other tokens.
 
 ### What stays in CFS
 
@@ -1092,6 +1135,8 @@ Every PR is safe on its own.
    - **8c:** Liquidium supply and repay, and removing `viaBackend`.
    - **8d** (follow-up, before PR 10): settling BTC rows whose deposit never landed, in the Chain
      Fusion and Liquidium pollers (open question 5).
+   - **8e** (follow-up, before PR 10): a clear message when a send hits a backend limit: a
+     rate-limited broadcast, or a spent signing approval.
 
    Together they do the following:
    - `beforeBroadcast` and `isDefinitiveBtcBroadcastRefusal` are added. The Chain Fusion and NEAR

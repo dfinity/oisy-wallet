@@ -1151,6 +1151,8 @@
 			"ethereum_transaction_not_sent": "La transacción no se envió: no pudimos conectar con la red para prepararla. Es seguro volver a intentarlo.",
 			"ethereum_transaction_unconfirmed": "No pudimos confirmar si la transacción llegó a la red. Todavía puede completarse, así que espera uno o dos minutos y revisa tu actividad antes de enviarla de nuevo.",
 			"btc_transaction_unconfirmed": "",
+			"btc_send_rate_limited": "",
+			"btc_signing_allowance_spent": "",
 			"solana_transaction_expired": "Su transacción no fue procesada por la red Solana y expiró, muy probablemente porque la tarifa de prioridad proporcionada no era suficiente. La hemos actualizado al importe recomendado más reciente, por lo que por favor inténtelo de nuevo.",
 			"solana_confirmation_failed": "No recibimos confirmación para la transacción que acaba de crear. Por favor, espere unos segundos y luego compruebe la lista de transacciones de su token para ver si su transacción se creó correctamente.",
 			"solana_insufficient_funds": "El saldo de su token no es suficiente para completar esta transacción. Su saldo puede haber cambiado desde la última vez que se mostró.",
@@ -1522,7 +1524,8 @@
 			"data_is_incompleted": "",
 			"amount_does_not_match": "",
 			"recipient_address_is_not_valid": "",
-			"token_address_mismatch": ""
+			"token_address_mismatch": "",
+			"btc_reservation_rate_limited": ""
 		},
 		"alt": {
 			"pay": "",

@@ -108,6 +108,10 @@ describe('btc-send.services', () => {
 			{
 				type: BtcSendValidationError.MinimumBalance,
 				text: get(i18n).send.assertion.minimum_btc_amount
+			},
+			{
+				type: BtcSendValidationError.PendingTransactionsNotAvailable,
+				text: get(i18n).send.assertion.pending_transactions_not_available
 			}
 		])('should toast the mapped message for $type', ({ type, text }) => {
 			handleBtcValidationError({ err: new BtcValidationError(type) });
@@ -117,11 +121,8 @@ describe('btc-send.services', () => {
 			});
 		});
 
-		it.each([
-			BtcSendValidationError.PendingTransactionsNotAvailable,
-			'unknown_error_type' as BtcSendValidationError
-		])('should toast the unexpected error with err for %s', (type) => {
-			const err = new BtcValidationError(type);
+		it('should toast the unexpected error with err for an unmapped type', () => {
+			const err = new BtcValidationError('unknown_error_type' as BtcSendValidationError);
 
 			handleBtcValidationError({ err });
 

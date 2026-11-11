@@ -104,7 +104,7 @@ describe('HelpNetworkExplorers', () => {
 		const href = (chain: string) =>
 			getByTestId(`${HELP_NETWORK_EXPLORERS_LINK}-${chain}`).getAttribute('href');
 
-		expect(href('icp')).toBe(`https://www.icexplorer.io/address/details/${mockPrincipalText}`);
+		expect(href('icp')).toBe(`https://dashboard.internetcomputer.org/address/${mockPrincipalText}`);
 		expect(href('btc')).toBe(`https://mempool.space/address/${mockBtcAddress}`);
 		expect(href('eth')).toBe(`https://etherscan.io/address/${mockEthAddress}`);
 		expect(href('arb')).toBe(`https://arbiscan.io/address/${mockEthAddress}`);
@@ -207,6 +207,6 @@ describe('HelpNetworkExplorers', () => {
 		const [[{ metadata }]] = vi.mocked(trackEvent).mock.calls;
 
 		expect(JSON.stringify(metadata)).not.toContain(mockPrincipalText);
-		expect(JSON.stringify(metadata)).not.toContain('icexplorer');
+		expect(JSON.stringify(metadata)).not.toContain('dashboard.internetcomputer.org');
 	});
 });

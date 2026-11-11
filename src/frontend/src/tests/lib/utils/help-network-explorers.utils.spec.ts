@@ -60,9 +60,13 @@ describe('buildHelpNetworkExplorerLinks', () => {
 		]);
 	});
 
-	it('opens the dedicated address explorers for ICP and Bitcoin', () => {
-		// The ICP dashboard keys its account page by account identifier, not by principal.
-		expect(urlFor('icp')).toBe(`https://www.icexplorer.io/address/details/${mockPrincipalText}`);
+	it('opens the ICP dashboard at the principal', () => {
+		expect(urlFor('icp')).toBe(
+			`https://dashboard.internetcomputer.org/address/${mockPrincipalText}`
+		);
+	});
+
+	it('opens the dedicated address explorer for Bitcoin', () => {
 		expect(urlFor('btc')).toBe(`https://mempool.space/address/${mockBtcAddress}`);
 	});
 
