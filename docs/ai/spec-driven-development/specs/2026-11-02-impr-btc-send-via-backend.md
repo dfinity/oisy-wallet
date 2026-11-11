@@ -1153,9 +1153,13 @@ Every PR is safe on its own.
     loading, the send and OpenCryptoPay switch together. `PRODUCT.md` is updated.
     - Decided in PR 10: `BTC_SEND_VIA_BACKEND_ENABLED` becomes `LOCAL || STAGING || BETA || PROD`,
       as `TIPS_ENABLED` and `ONRAMPER_ENABLED` are, rather than going away, so turning it off again
-      stays a one-line rollback until PR 11 removes the Chain Fusion Signer path. Specs still start with it off, since most still cover that path, and each spec of the
-      backend path turns it on. Opened as a draft, merged once 8d is in and the live checks on
-      staging are done.
+      stays a one-line rollback until PR 11 removes the Chain Fusion Signer path. Specs still start
+      with it off, since most still cover that path, and each spec of the backend path turns it on.
+    - Opened as a draft. It is merged once 8d is in, the live checks on staging are done, the
+      cycles alerting is reviewed (pending decision 5), and the production backend serves
+      `btc_get_spendable_utxos` and `btc_broadcast_transaction`, and `btc_get_balance` once PR 12
+      is in. With the flag on, the wallet's certified balance comes from `btc_get_balance`, so a
+      frontend that turns it on ahead of that backend fails every certified balance read.
 11. `chore(frontend): remove the CFS BTC send path`. Removes the flag and every flag-off branch:
     - the `sendBtc`/`signBtc` signer wrappers and the redundant pre-send re-check;
     - OpenCryptoPay's `btc_caller_sign` path;
