@@ -756,6 +756,7 @@
 			"minter_ckbtc_btc": "Cần có một minter được cấu hình để chuyển đổi ckBTC sang BTC.",
 			"minter_cketh_eth": "Cần có một minter được cấu hình để chuyển đổi ckETH sang ETH.",
 			"minter_ckerc20_erc20": "Cần có một minter được cấu hình để chuyển đổi ckERC20 sang Erc20.",
+			"minter_cksol_sol": "",
 			"ledger_cketh_eth": "Cần có một sổ cái ckETH được cấu hình để chuyển đổi ckErc20 sang Erc20.",
 			"minter_btc": "Cần có một minter được cấu hình để truy xuất BTC.",
 			"minter_ckbtc_info": "Cần có một minter được cấu hình để tìm nạp thông tin ckBTC",

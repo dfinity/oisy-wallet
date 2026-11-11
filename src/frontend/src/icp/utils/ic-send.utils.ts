@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { CKBTC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { CKERC20_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
 import { CKETH_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import { CKSOL_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { isEthAddress } from '$eth/utils/account.utils';
 import type { IcSendRequest } from '$icp/types/ic-send';
 import type { IcToken } from '$icp/types/ic-token';
@@ -33,6 +34,9 @@ export const isTokenCkEthLedger = (token: Partial<IcToken>): boolean =>
 
 export const isTokenCkErc20Ledger = (token: Partial<IcToken>): boolean =>
 	isTokenLedger({ token, ledgerCanisterIds: CKERC20_LEDGER_CANISTER_IDS });
+
+export const isTokenCkSolLedger = (token: Partial<IcToken>): boolean =>
+	isTokenLedger({ token, ledgerCanisterIds: CKSOL_LEDGER_CANISTER_IDS });
 
 export const isNetworkIdETHMainnet = (networkId: NetworkId | undefined): boolean =>
 	ETHEREUM_NETWORK_ID === networkId;

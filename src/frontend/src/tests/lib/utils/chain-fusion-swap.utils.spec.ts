@@ -3,8 +3,10 @@ import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-bas
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import { IC_CKSOL_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { IcCkInterface, IcCkToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
 import type { ChainFusionFee, ChainFusionPair } from '$lib/types/swap';
@@ -295,6 +297,63 @@ describe('chain-fusion-swap.utils', () => {
 
 			expect(
 				chainFusionCompatibleDestinations({ sourceToken: ETHEREUM_TOKEN, pairs: PAIRS })
+			).toBeUndefined();
+		});
+	});
+
+	// Local and staging builds, where the ckSOL flag is on.
+	describe('the Solana pair', () => {
+		const solPairs = toChainFusionPairs([
+			makeCkInterface({ ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID, twinToken: SOLANA_TOKEN })
+		]);
+
+		const ckSolToken = makeCkToken({
+			ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID,
+			twinToken: SOLANA_TOKEN,
+			symbol: 'ckSOL'
+		});
+
+		it('should map the mainnet ckSOL definition to a pair', () => {
+			expect(solPairs).toStrictEqual([
+				{ ckLedgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID, twinToken: SOLANA_TOKEN }
+			]);
+		});
+
+		it('should drop a devnet twin', () => {
+			expect(
+				toChainFusionPairs([
+					makeCkInterface({
+						ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID,
+						twinToken: SOLANA_DEVNET_TOKEN
+					})
+				])
+			).toStrictEqual([]);
+		});
+
+		it('should accept ckSOL as an icp source', () => {
+			expect(chainFusionSupportedSourceTokens({ category: 'icp', pairs: solPairs })).toStrictEqual(
+				new Set([IC_CKSOL_LEDGER_CANISTER_ID])
+			);
+		});
+
+		it('should narrow ckSOL to SOL', () => {
+			expect(
+				chainFusionCompatibleDestinations({ sourceToken: ckSolToken, pairs: solPairs })
+			).toStrictEqual({
+				sol: new Set([
+					nativeSwapTokenIdentifier({
+						networkId: SOLANA_TOKEN.network.id,
+						symbol: SOLANA_TOKEN.symbol
+					})
+				])
+			});
+		});
+
+		it('should offer nothing when the flag is off', () => {
+			mockEnabled = false;
+
+			expect(
+				chainFusionCompatibleDestinations({ sourceToken: ckSolToken, pairs: solPairs })
 			).toBeUndefined();
 		});
 	});

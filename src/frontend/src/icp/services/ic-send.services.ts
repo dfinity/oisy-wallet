@@ -11,18 +11,20 @@ import { transfer as transferDip20 } from '$icp/api/xtc-ledger.api';
 import {
 	convertCkBTCToBtc,
 	convertCkErc20ToErc20,
-	convertCkETHToEth
+	convertCkETHToEth,
+	convertCkSolToSol
 } from '$icp/services/ck.services';
 import type { IcCkWithdrawalResult, IcSendParams, IcTransferParams } from '$icp/types/ic-send';
 import type { IcToken } from '$icp/types/ic-token';
 import { invalidIcpAddress } from '$icp/utils/account.utils';
+import { isTokenCkSolLedger } from '$icp/utils/ic-send.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import { consoleError } from '$lib/utils/console.utils';
-import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
+import { isNetworkIdBitcoin, isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { isNullish } from '@dfinity/utils';
 import { TxDuplicateError, type BlockHeight } from '@icp-sdk/canisters/ledger/icp';
@@ -95,6 +97,13 @@ const send = async ({
 
 	if (isConvertCkErc20ToErc20({ token, networkId: targetNetworkId })) {
 		return await convertCkErc20ToErc20({
+			...rest,
+			token
+		});
+	}
+
+	if (isNetworkIdSOLMainnet(targetNetworkId) && isTokenCkSolLedger(token)) {
+		return await convertCkSolToSol({
 			...rest,
 			token
 		});

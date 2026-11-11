@@ -39,7 +39,8 @@ export type IcSendParams = PartialSpecific<IcTransferParams, 'progress'> &
 export type IcCkWithdrawalResult =
 	| { type: 'ckBtcToBtc'; blockIndex: bigint }
 	| { type: 'ckEthToEth'; blockIndex: bigint }
-	| { type: 'ckErc20ToErc20'; ckEthBlockIndex: bigint; ckErc20BlockIndex: bigint };
+	| { type: 'ckErc20ToErc20'; ckEthBlockIndex: bigint; ckErc20BlockIndex: bigint }
+	| { type: 'ckSolToSol'; blockIndex: bigint };
 
 export class IcAmountAssertionError extends Error {}
 

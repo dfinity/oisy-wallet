@@ -756,6 +756,7 @@
 			"minter_ckbtc_btc": "A configured minter is required to convert ckBTC to BTC.",
 			"minter_cketh_eth": "A configured minter is required to convert ckETH to ETH.",
 			"minter_ckerc20_erc20": "A configured minter is required to convert ckERC20 to ERC20.",
+			"minter_cksol_sol": "A configured minter is required to convert ckSOL to SOL.",
 			"ledger_cketh_eth": "A configured ckETH ledger is required to convert ckERC20 to ERC20.",
 			"minter_btc": "A configured minter is required to retrieve BTC.",
 			"minter_ckbtc_info": "A configured minter is required to fetch the ckBTC info",

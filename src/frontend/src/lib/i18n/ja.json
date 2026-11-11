@@ -756,6 +756,7 @@
 			"minter_ckbtc_btc": "ckBTCをBTCに変換するには、ミンターを設定する必要があります。",
 			"minter_cketh_eth": "ckETHをETHに変換するには、ミンターを設定する必要があります。",
 			"minter_ckerc20_erc20": "ckERC20をERC20に変換するには、ミンターを設定する必要があります。",
+			"minter_cksol_sol": "",
 			"ledger_cketh_eth": "ckERC20をERC20に変換するには、ckETH元帳を設定する必要があります。",
 			"minter_btc": "BTCを取得するには、ミンターを設定する必要があります。",
 			"minter_ckbtc_info": "ckBTC情報を取得するには、ミンターを設定する必要があります。",

@@ -756,6 +756,7 @@
 			"minter_ckbtc_btc": "Pro převod ckBTC na BTC je vyžadován nakonfigurovaný minter.",
 			"minter_cketh_eth": "Pro převod ckETH na ETH je vyžadován nakonfigurovaný minter.",
 			"minter_ckerc20_erc20": "Pro převod ckERC20 на Erc20 je vyžadován nakonfigurovaný minter.",
+			"minter_cksol_sol": "",
 			"ledger_cketh_eth": "Pro převod ckErc20 na Erc20 je vyžadována nakonfigurovaná ckETH účetní kniha.",
 			"minter_btc": "Pro získání BTC je vyžadován nakonfigurovaný minter.",
 			"minter_ckbtc_info": "Pro získání informací o ckBTC je vyžadován nakonfigurovaný minter",

@@ -31,17 +31,20 @@ describe('swap.constants', () => {
 		const loadMatrix = async ({
 			oneSec,
 			chainFusion,
+			ckSol = false,
 			nearIntentsBtc = false,
 			nearIntentsXrp = false
 		}: {
 			oneSec: boolean;
 			chainFusion: boolean;
+			ckSol?: boolean;
 			nearIntentsBtc?: boolean;
 			nearIntentsXrp?: boolean;
 		}) => {
 			vi.resetModules();
 			vi.doMock('$env/rest/onesec.env', () => ({ ONESEC_SWAP_ENABLED: oneSec }));
 			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: chainFusion }));
+			vi.doMock('$env/cksol.env', () => ({ CKSOL_ENABLED: ckSol }));
 			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
 				...(await importOriginal<typeof nearIntentsEnv>()),
 				NEAR_INTENTS_BTC_SWAP_ENABLED: nearIntentsBtc,
@@ -88,6 +91,7 @@ describe('swap.constants', () => {
 		afterEach(() => {
 			vi.doUnmock('$env/rest/onesec.env');
 			vi.doUnmock('$env/chain-fusion-swap.env');
+			vi.doUnmock('$env/cksol.env');
 			vi.doUnmock('$env/rest/near-intents.env');
 			vi.resetModules();
 		});
@@ -132,6 +136,38 @@ describe('swap.constants', () => {
 
 			expect(icpReaches(BTC_MAINNET_NETWORK_ID)).toBeTruthy();
 			expect(reachesIcp(BTC_MAINNET_NETWORK_ID)).toBeTruthy();
+		});
+
+		// ckSOL → SOL only: SOL → ckSOL waits for the ckSOL minter's automatic deposits.
+		it('opens Solana to ICP as a destination only, with Chain Fusion and ckSOL on', async () => {
+			const { icpReaches, reachesIcp, SOLANA_MAINNET_NETWORK_ID } = await loadMatrix({
+				oneSec: false,
+				chainFusion: true,
+				ckSol: true
+			});
+
+			expect(icpReaches(SOLANA_MAINNET_NETWORK_ID)).toBeTruthy();
+			expect(reachesIcp(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+		});
+
+		it('does not pair ICP with Solana without the ckSOL flag', async () => {
+			const { icpReaches, SOLANA_MAINNET_NETWORK_ID } = await loadMatrix({
+				oneSec: true,
+				chainFusion: true,
+				ckSol: false
+			});
+
+			expect(icpReaches(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+		});
+
+		it('does not pair ICP with Solana without Chain Fusion', async () => {
+			const { icpReaches, SOLANA_MAINNET_NETWORK_ID } = await loadMatrix({
+				oneSec: true,
+				chainFusion: false,
+				ckSol: true
+			});
+
+			expect(icpReaches(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 
 		it('does not open Bitcoin to Ethereum without the NEAR Intents BTC flag', async () => {

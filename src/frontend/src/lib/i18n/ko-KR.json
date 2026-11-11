@@ -756,6 +756,7 @@
 			"minter_ckbtc_btc": "ckBTC를 BTC로 전환하려면 설정된 민터가 필요합니다.",
 			"minter_cketh_eth": "ckETH를 ETH로 전환하려면 설정된 민터가 필요합니다.",
 			"minter_ckerc20_erc20": "ckERC20을 ERC20으로 전환하려면 설정된 민터가 필요합니다.",
+			"minter_cksol_sol": "",
 			"ledger_cketh_eth": "ckERC20을 ERC20으로 전환하려면 설정된 ckETH 레저가 필요합니다.",
 			"minter_btc": "BTC를 가져오려면 설정된 민터가 필요합니다.",
 			"minter_ckbtc_info": "ckBTC 정보를 가져오려면 설정된 민터가 필요합니다",

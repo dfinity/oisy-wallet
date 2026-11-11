@@ -1,5 +1,7 @@
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { IC_CKSOL_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import SwapIcpWizard from '$icp/components/swap/SwapIcpWizard.svelte';
 import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 import type { IcToken } from '$icp/types/ic-token';
@@ -23,6 +25,7 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
 	mockChainFusionProvider,
 	mockOisyTradeProvider,
@@ -725,6 +728,66 @@ describe('SwapIcpWizard', () => {
 				expect(trackEventSpy).not.toHaveBeenCalledWith(
 					expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
 				);
+			});
+		});
+
+		describe('Chain Fusion ICP→Solana withdrawal', () => {
+			const ckSolSourceToken = {
+				...mockToken,
+				ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID
+			};
+
+			const setChainFusionSolContext = () => {
+				mockContext.set(SWAP_CONTEXT_KEY, {
+					...(mockContext.get(SWAP_CONTEXT_KEY) as object),
+					sourceToken: readable(ckSolSourceToken),
+					destinationToken: readable(SOLANA_TOKEN)
+				});
+
+				const provider = mockChainFusionProvider({ sourceFees: [], externalFees: [] });
+				const amountsStore = initSwapAmountsStore();
+				amountsStore.setSwaps({ swaps: [provider], amountForSwap: 1, selectedProvider: provider });
+				mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: amountsStore });
+			};
+
+			const submit = async () => {
+				const { getByText, queryByRole } = renderWithStep(WizardStepsSwap.REVIEW);
+
+				const valueDifferenceCheckbox = queryByRole('checkbox');
+				if (valueDifferenceCheckbox) {
+					await fireEvent.click(valueDifferenceCheckbox);
+				}
+
+				await fireEvent.click(getByText(en.swap.text.swap_button));
+				await vi.runOnlyPendingTimersAsync();
+			};
+
+			beforeEach(() => {
+				mockChainFusionFn.mockResolvedValue(undefined);
+				vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+				vi.spyOn(addrDerived, 'btcAddressMainnet', 'get').mockReturnValue(readable(mockBtcAddress));
+				vi.spyOn(addrDerived, 'solAddressMainnet', 'get').mockReturnValue(readable(mockSolAddress));
+			});
+
+			it('dispatches the withdrawal to the user own Solana address', async () => {
+				setChainFusionSolContext();
+
+				await submit();
+
+				expect(mockChainFusionFn).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ destinationAddress: mockSolAddress })
+				);
+			});
+
+			it('refuses to dispatch when the Solana address is unknown', async () => {
+				vi.spyOn(addrDerived, 'solAddressMainnet', 'get').mockReturnValue(readable(undefined));
+
+				setChainFusionSolContext();
+
+				await submit();
+
+				expect(mockChainFusionFn).not.toHaveBeenCalled();
+				expect(toasts.toastsError).toHaveBeenCalled();
 			});
 		});
 	});
