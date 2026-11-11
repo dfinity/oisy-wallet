@@ -408,8 +408,8 @@ export const loadKongSwapTokens = async ({
 
 /**
  * Prices the ERC-20 and SPL tokens the swap pickers list although they are not enabled: the
- * exchange worker prices enabled tokens only. Runs when Swap opens, as `loadDisabledIcrcTokensExchanges`
- * does for ICRC tokens.
+ * exchange worker prices enabled tokens only. `loadDisabledIcrcTokensExchanges` does the same for
+ * ICRC tokens.
  */
 export const loadDisabledErc20AndSplTokensExchanges = async ({
 	tokens

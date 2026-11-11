@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
+	import { SvelteSet } from 'svelte/reactivity';
 	import { get } from 'svelte/store';
 	import { page } from '$app/state';
 	import SwapBtcContexts from '$btc/components/swap/SwapBtcContexts.svelte';
@@ -8,6 +9,7 @@
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
+	import { allCrossChainSwapTokens } from '$lib/derived/all-tokens.derived';
 	import {
 		crossChainSwapNetworksMainnets,
 		crossChainSwapNetworksMainnetsIds
@@ -17,6 +19,7 @@
 	import { allSwapUniverseTokens } from '$lib/derived/swap.derived';
 	import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+	import { loadDisabledErc20AndSplTokensExchanges } from '$lib/services/swap.services';
 	import { COLORED_NETWORK_LOGOS_CONTEXT_KEY } from '$lib/stores/colored-network-logos.store';
 	import {
 		MODAL_NETWORKS_LIST_CONTEXT_KEY,
@@ -39,8 +42,9 @@
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 	import type { WizardModal, WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { consoleWarn } from '$lib/utils/console.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { tryParseToken } from '$lib/utils/parse.utils';
@@ -99,6 +103,26 @@
 
 	// A swap is told apart by its two networks, so every network logo in it is in its brand colour.
 	setContext(COLORED_NETWORK_LOGOS_CONTEXT_KEY, true);
+
+	// The exchange worker prices enabled tokens only. Swap can open before every token list has loaded,
+	// so the disabled ERC-20 and SPL tokens it lists are priced as they arrive, each once per opening.
+	const pricedTokenIds = new SvelteSet<TokenId>();
+
+	$effect(() => {
+		const tokens = $allCrossChainSwapTokens.filter(
+			({ id, enabled }) => !enabled && !pricedTokenIds.has(id)
+		);
+
+		if (tokens.length === 0) {
+			return;
+		}
+
+		tokens.forEach(({ id }) => pricedTokenIds.add(id));
+
+		loadDisabledErc20AndSplTokensExchanges({ tokens }).catch((err: unknown) =>
+			consoleWarn('Failed to load the prices of disabled swap tokens:', err)
+		);
+	});
 
 	let isBitcoinSource = $derived(isNetworkIdBitcoin($sourceToken?.network?.id));
 
