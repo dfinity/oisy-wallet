@@ -24,7 +24,10 @@ import {
 	CHAIN_FUSION_CKBTC_MINT_LOOKUP_PAGE_SIZE,
 	CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS
 } from '$lib/constants/app.constants';
-import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
+import {
+	applyActiveUserTransactionPollUpdate,
+	isBtcTransactionNeverLanded
+} from '$lib/services/active-user-transactions.services';
 import {
 	CHAIN_FUSION_EXTERNAL_REF_KEYS,
 	type ChainFusionExternalRefKey
@@ -530,18 +533,27 @@ const resolveChainFusionBtcMintOutcome = async ({
 			// it credited and stays on the account for good.
 			const indexCanisterId = toCkBtcIndexCanisterId(minterCanisterId);
 
-			if (isNullish(indexCanisterId)) {
-				return 'unseen';
+			const minted =
+				nonNullish(indexCanisterId) &&
+				(await hasCkBtcMintForDeposit({
+					identity,
+					indexCanisterId,
+					txid,
+					createdAtNs
+				}));
+
+			if (minted) {
+				return 'minted';
 			}
 
-			const minted = await hasCkBtcMintForDeposit({
-				identity,
-				indexCanisterId,
-				txid,
-				createdAtNs
-			});
+			// The Bitcoin canister only indexes blocks, so an unseen deposit may still be in a mempool,
+			// or may never have been broadcast: the row is written before the broadcast, whose outcome
+			// can be unclear. Only the network tells them apart.
+			const neverLanded =
+				network === 'mainnet' &&
+				(await isBtcTransactionNeverLanded({ id: txId, txid, createdAtNs }));
 
-			return minted ? 'minted' : 'unseen';
+			return neverLanded ? 'neverLanded' : 'unseen';
 		}
 
 		const { min_confirmations } = await memoize({
@@ -608,7 +620,7 @@ const pollChainFusionBtcMint = async ({
 	}
 
 	// A terminal row leaves the pending set, so its throttle entry has no reader left.
-	if (outcome === 'minted' || outcome === 'rejected') {
+	if (outcome === 'minted' || outcome === 'rejected' || outcome === 'neverLanded') {
 		lastUpdateBalanceMs.delete(tx.id);
 	}
 

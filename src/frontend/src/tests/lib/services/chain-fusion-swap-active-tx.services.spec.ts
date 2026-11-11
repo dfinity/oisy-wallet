@@ -22,7 +22,10 @@ import { getTransactions } from '$icp/api/icrc-index-ng.api';
 import type { IcCkInterface } from '$icp/types/ic-token';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS, ZERO } from '$lib/constants/app.constants';
-import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
+import {
+	applyActiveUserTransactionPollUpdate,
+	isBtcTransactionNeverLanded
+} from '$lib/services/active-user-transactions.services';
 import {
 	pollChainFusionActiveUserTransactions,
 	resetChainFusionMissingDepositLogObservations,
@@ -33,6 +36,7 @@ import { toChainFusionExternalRefs } from '$lib/utils/chain-fusion-swap-active-t
 import { mockUtxo } from '$tests/mocks/btc.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import { mockCkBtcMinterInfo } from '$tests/mocks/ckbtc.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { MinterNoNewUtxosError, type CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
@@ -95,7 +99,8 @@ vi.mock('$eth/providers/infura-cketh.providers', () => ({
 }));
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
-	applyActiveUserTransactionPollUpdate: vi.fn()
+	applyActiveUserTransactionPollUpdate: vi.fn(),
+	isBtcTransactionNeverLanded: vi.fn()
 }));
 
 // Hoisted: the canister-id factories above run before the module body.
@@ -283,6 +288,7 @@ describe('chain-fusion-swap-active-tx.services', () => {
 		vi.mocked(ckBtcMinterInfo).mockResolvedValue(mockCkBtcMinterInfo);
 		vi.mocked(getKnownUtxos).mockResolvedValue([]);
 		vi.mocked(updateBalance).mockResolvedValue([]);
+		vi.mocked(isBtcTransactionNeverLanded).mockResolvedValue(false);
 		setDepositUtxos();
 		setLedgerMints([]);
 	});
@@ -542,6 +548,63 @@ describe('chain-fusion-swap-active-tx.services', () => {
 			);
 			expect(updateBalance).not.toHaveBeenCalled();
 			expect(lastUpdate()).toStrictEqual({ status: { Succeeded: null } });
+		});
+
+		// The row is written before the broadcast, whose outcome can be unclear: a deposit the network
+		// does not know either was never broadcast, and must not stay executing for good.
+		it('should fail an unseen deposit the network does not know, with its own message', async () => {
+			setDepositUtxos({ utxos: [OTHER_UTXO] });
+			vi.mocked(isBtcTransactionNeverLanded).mockResolvedValue(true);
+
+			const tx = btcMintTx();
+
+			await poll([tx]);
+
+			expect(isBtcTransactionNeverLanded).toHaveBeenCalledExactlyOnceWith({
+				id: tx.id,
+				txid: DEPOSIT_TXID,
+				createdAtNs: tx.created_at_ns
+			});
+			expect(updateBalance).not.toHaveBeenCalled();
+			expect(lastUpdate()).toStrictEqual({
+				status: { Failed: null },
+				error: en.send.error.btc_transaction_never_landed
+			});
+		});
+
+		it('should not ask the network about a deposit the ledger shows as minted', async () => {
+			setDepositUtxos({ utxos: [OTHER_UTXO] });
+			setLedgerMints([mockUtxo]);
+
+			await poll([btcMintTx()]);
+
+			expect(isBtcTransactionNeverLanded).not.toHaveBeenCalled();
+		});
+
+		it('should not ask the network about a deposit the Bitcoin canister has indexed', async () => {
+			await poll([btcMintTx()]);
+
+			expect(isBtcTransactionNeverLanded).not.toHaveBeenCalled();
+		});
+
+		// Blockstream answers for mainnet only.
+		it('should keep an unseen testnet deposit executing without asking the network', async () => {
+			setDepositUtxos({ utxos: [OTHER_UTXO] });
+
+			await poll([
+				toTx({
+					direction: { BtcToCkBtc: null },
+					source_token: { BtcNativeTestnet: null },
+					refs: {
+						[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID]: MINTER_CANISTER_ID,
+						[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_TXID]: DEPOSIT_TXID,
+						[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_DEPOSIT_ADDRESS]: DEPOSIT_ADDRESS
+					}
+				})
+			]);
+
+			expect(isBtcTransactionNeverLanded).not.toHaveBeenCalled();
+			expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
 		});
 
 		it('should keep a deposit executing when the ledger only shows unrelated mints', async () => {

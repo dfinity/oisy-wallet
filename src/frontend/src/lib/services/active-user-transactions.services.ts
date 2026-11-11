@@ -7,9 +7,14 @@ import {
 	updateActiveUserTransaction as updateActiveUserTransactionApi
 } from '$lib/api/backend.api';
 import {
+	BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS,
+	BTC_NEVER_LANDED_GRACE_MILLIS,
+	BTC_NEVER_LANDED_NOT_FOUND_ANSWERS_REQUIRED,
+	NANO_SECONDS_IN_MILLISECOND,
 	UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_ATTEMPTS,
 	UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_RETRY_DELAY_MILLIS
 } from '$lib/constants/app.constants';
+import { btcTransactionStatus } from '$lib/rest/blockstream.rest';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import type {
 	CreateActiveUserTransactionParams,
@@ -164,6 +169,75 @@ export const deleteUnbroadcastActiveUserTransaction = async ({
 			await waitForMilliseconds(UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_RETRY_DELAY_MILLIS);
 		}
 	}
+};
+
+const BTC_TXID_REGEX = /^[0-9a-f]{64}$/i;
+
+/**
+ * Each BTC row's last "is it known" check and its run of "not found" answers. In memory, like the
+ * pollers' other counters: a refresh restarts the run, which only delays a verdict.
+ */
+const btcNeverLandedChecks = new Map<string, { checkedAtMs: number; notFoundAnswers: number }>();
+
+// Test seam — module-level state would otherwise leak between cases.
+export const resetBtcNeverLandedChecks = (): void => {
+	btcNeverLandedChecks.clear();
+};
+
+/**
+ * Whether a mainnet BTC row's transaction never reached the network, so its poller can fail the row
+ * instead of waiting for it for good. A row can be written before its broadcast, which may then
+ * have sent nothing, though its outcome was unclear.
+ *
+ * Bitcoin cannot prove that nothing was broadcast. The evidence is the network not knowing the
+ * txid: neither in Blockstream's mempool nor in a block, `BTC_NEVER_LANDED_NOT_FOUND_ANSWERS_REQUIRED`
+ * times in a row, at most once per `BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS`, once the row is older
+ * than `BTC_NEVER_LANDED_GRACE_MILLIS`. A transaction in a mempool is found, so its row keeps
+ * waiting however long it takes to confirm. A failed request counts for nothing either way.
+ */
+export const isBtcTransactionNeverLanded = async ({
+	id,
+	txid,
+	createdAtNs
+}: {
+	id: string;
+	txid: string;
+	createdAtNs: bigint;
+}): Promise<boolean> => {
+	const now = Date.now();
+
+	if (
+		!BTC_TXID_REGEX.test(txid) ||
+		now - Number(createdAtNs / NANO_SECONDS_IN_MILLISECOND) < BTC_NEVER_LANDED_GRACE_MILLIS
+	) {
+		return false;
+	}
+
+	const previous = btcNeverLandedChecks.get(id);
+
+	if (nonNullish(previous) && now - previous.checkedAtMs < BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS) {
+		return false;
+	}
+
+	let notFoundAnswers = previous?.notFoundAnswers ?? 0;
+
+	try {
+		const status = await btcTransactionStatus({ txid });
+
+		notFoundAnswers = isNullish(status) ? notFoundAnswers + 1 : 0;
+	} catch (_: unknown) {
+		// Unknown either way: the run neither grows nor restarts, and the interval still applies.
+	}
+
+	if (notFoundAnswers >= BTC_NEVER_LANDED_NOT_FOUND_ANSWERS_REQUIRED) {
+		btcNeverLandedChecks.delete(id);
+
+		return true;
+	}
+
+	btcNeverLandedChecks.set(id, { checkedAtMs: now, notFoundAnswers });
+
+	return false;
 };
 
 /**

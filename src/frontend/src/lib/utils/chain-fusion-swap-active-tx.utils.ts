@@ -292,8 +292,9 @@ export const toChainFusionBtcWithdrawalLearnedRefs = (
  * in the order a deposit passes through them; `minted` and `rejected` are the
  * verdict, and only the minter itself can produce either.
  */
+// `neverLanded` is an `unseen` deposit the network does not know either: it was never broadcast.
 export type ChainFusionBtcMintOutcome =
-	'unseen' | 'awaitingConfirmations' | 'awaitingMint' | 'minted' | 'rejected';
+	'unseen' | 'neverLanded' | 'awaitingConfirmations' | 'awaitingMint' | 'minted' | 'rejected';
 
 /**
  * Maps a ckBTC deposit's observed state to the AUT status enum.
@@ -310,6 +311,7 @@ export const chainFusionBtcMintOutcomeToStatus = (
 		case 'minted':
 			return { Succeeded: null };
 		case 'rejected':
+		case 'neverLanded':
 			return { Failed: null };
 		case 'unseen':
 		case 'awaitingConfirmations':
@@ -321,7 +323,11 @@ export const chainFusionBtcMintOutcomeToStatus = (
 export const chainFusionBtcMintOutcomeError = (
 	outcome: ChainFusionBtcMintOutcome
 ): string | undefined =>
-	outcome === 'rejected' ? get(i18n).swap.error.failed_unexpectedly : undefined;
+	outcome === 'rejected'
+		? get(i18n).swap.error.failed_unexpectedly
+		: outcome === 'neverLanded'
+			? get(i18n).send.error.btc_transaction_never_landed
+			: undefined;
 
 /**
  * Reads the verdict for one deposit out of an `update_balance` response, which
