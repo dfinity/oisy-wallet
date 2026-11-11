@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { untrack } from 'svelte';
+	import { SvelteMap } from 'svelte/reactivity';
+	import { checkIcrcLedgerStatus } from '$icp/services/icrc-ledger-status.services';
 	import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
-	import type { IcrcUnavailableCustomToken } from '$icp/types/icrc-custom-token';
+	import type { IcrcLedgerStatus, IcrcUnavailableCustomToken } from '$icp/types/icrc-custom-token';
 	import { removeCustomToken } from '$lib/api/backend.api';
 	import { deleteIdbIcToken } from '$lib/api/idb-tokens.api';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
@@ -13,7 +16,8 @@
 	import {
 		HELP_UNAVAILABLE_TOKENS_CARD,
 		HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON,
-		HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON
+		HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON,
+		HELP_UNAVAILABLE_TOKENS_STATUS
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -25,9 +29,60 @@
 
 	let deleting = $state(false);
 
+	// What each listed ledger canister answered when this card checked it, once per visit.
+	const ledgerStatuses = new SvelteMap<LedgerCanisterIdText, IcrcLedgerStatus | 'checking'>();
+
+	$effect(() => {
+		const identity = $authIdentity;
+
+		if (isNullish(identity)) {
+			return;
+		}
+
+		$icrcUnavailableCustomTokensStore.forEach(({ ledgerCanisterId }) => {
+			if (untrack(() => ledgerStatuses.has(ledgerCanisterId))) {
+				return;
+			}
+
+			ledgerStatuses.set(ledgerCanisterId, 'checking');
+
+			checkIcrcLedgerStatus({ identity, ledgerCanisterId })
+				.then((status) => ledgerStatuses.set(ledgerCanisterId, status))
+				.catch(() => ledgerStatuses.set(ledgerCanisterId, { status: 'error' }));
+		});
+	});
+
 	// The name the "not responding" warning uses for the token.
 	const tokenName = ({ symbol, ledgerCanisterId }: IcrcUnavailableCustomToken): string =>
 		symbol ?? ledgerCanisterId;
+
+	// The name too when it says more than the symbol. A token OISY never listed only has its ledger canister ID.
+	const tokenLabel = (token: IcrcUnavailableCustomToken): string => {
+		const { symbol, name } = token;
+
+		return nonNullish(symbol) && nonNullish(name) && name !== symbol
+			? `${name} (${symbol})`
+			: tokenName(token);
+	};
+
+	const statusText = (status: IcrcLedgerStatus | 'checking'): string => {
+		if (status === 'checking') {
+			return $i18n.help.text.unavailable_tokens_checking;
+		}
+
+		switch (status.status) {
+			case 'responding':
+				return $i18n.help.text.unavailable_tokens_responding;
+			case 'no_ledger':
+				return $i18n.help.text.unavailable_tokens_no_ledger;
+			case 'not_responding':
+				return $i18n.help.text.unavailable_tokens_not_responding;
+			case 'error':
+				return nonNullish(status.errorCode)
+					? `${$i18n.help.text.unavailable_tokens_error} (${status.errorCode})`
+					: $i18n.help.text.unavailable_tokens_error;
+		}
+	};
 
 	const deleteToken = async (token: IcrcUnavailableCustomToken) => {
 		if (isNullish($authIdentity)) {
@@ -80,6 +135,8 @@
 
 			<ul class="flex list-none flex-col">
 				{#each $icrcUnavailableCustomTokensStore as token (token.ledgerCanisterId)}
+					{@const ledgerStatus = ledgerStatuses.get(token.ledgerCanisterId)}
+
 					<li class="mt-3">
 						{#if confirmLedgerCanisterId === token.ledgerCanisterId}
 							<p class="mb-3 break-words">
@@ -111,8 +168,19 @@
 							</ButtonGroup>
 						{:else}
 							<div class="flex w-full flex-row items-center justify-between gap-3">
-								<!-- break-words, not break-all: a ledger canister ID then wraps at a hyphen. -->
-								<span class="min-w-0 flex-1 break-words">{tokenName(token)}</span>
+								<span class="flex min-w-0 flex-1 flex-col">
+									<!-- break-words, not break-all: a ledger canister ID then wraps at a hyphen. -->
+									<span class="break-words">{tokenLabel(token)}</span>
+
+									{#if nonNullish(ledgerStatus)}
+										<span
+											class="text-sm text-tertiary"
+											data-tid={`${HELP_UNAVAILABLE_TOKENS_STATUS}-${token.ledgerCanisterId}`}
+										>
+											{statusText(ledgerStatus)}
+										</span>
+									{/if}
+								</span>
 
 								<!-- Button is flex-1 by default, which would stretch it across the row. -->
 								<Button

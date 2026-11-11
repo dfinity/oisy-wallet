@@ -837,7 +837,12 @@
 			"balance_unused": "Неиспользованный баланс",
 			"withdraw": "Вывести",
 			"unavailable_tokens_title": "Недоступные токены",
-			"unavailable_tokens_description": "Эти токены есть в вашем списке токенов, но $oisy_short не может их загрузить."
+			"unavailable_tokens_description": "Эти токены есть в вашем списке токенов, но $oisy_short не может их загрузить.",
+			"unavailable_tokens_checking": "Проверка канистера леджера…",
+			"unavailable_tokens_responding": "Канистер леджера теперь отвечает",
+			"unavailable_tokens_no_ledger": "По этому ID канистера нет леджера",
+			"unavailable_tokens_not_responding": "Канистер леджера не отвечает",
+			"unavailable_tokens_error": "Канистер леджера отвечает ошибкой"
 		},
 		"alt": {
 			"network_explorer_link": "Открыть обозреватель блокчейна $network для вашего адреса",

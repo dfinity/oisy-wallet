@@ -578,6 +578,11 @@ interface I18nHelp {
 		withdraw: string;
 		unavailable_tokens_title: string;
 		unavailable_tokens_description: string;
+		unavailable_tokens_checking: string;
+		unavailable_tokens_responding: string;
+		unavailable_tokens_no_ledger: string;
+		unavailable_tokens_not_responding: string;
+		unavailable_tokens_error: string;
 	};
 	alt: {
 		network_explorer_link: string;

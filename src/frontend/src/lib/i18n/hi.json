@@ -837,7 +837,12 @@
 			"balance_unused": "अप्रयुक्त बैलेंस",
 			"withdraw": "निकालें",
 			"unavailable_tokens_title": "अनुपलब्ध टोकन",
-			"unavailable_tokens_description": "ये टोकन आपकी टोकन सूची में हैं, लेकिन $oisy_short इन्हें लोड नहीं कर पा रहा है।"
+			"unavailable_tokens_description": "ये टोकन आपकी टोकन सूची में हैं, लेकिन $oisy_short इन्हें लोड नहीं कर पा रहा है।",
+			"unavailable_tokens_checking": "लेजर कैनिस्टर की जाँच हो रही है…",
+			"unavailable_tokens_responding": "लेजर कैनिस्टर अब जवाब दे रहा है",
+			"unavailable_tokens_no_ledger": "इस कैनिस्टर ID पर कोई लेजर नहीं है",
+			"unavailable_tokens_not_responding": "लेजर कैनिस्टर जवाब नहीं दे रहा है",
+			"unavailable_tokens_error": "लेजर कैनिस्टर त्रुटि के साथ जवाब दे रहा है"
 		},
 		"alt": {
 			"network_explorer_link": "अपने पते के लिए $network ब्लॉकचेन एक्सप्लोरर खोलें",

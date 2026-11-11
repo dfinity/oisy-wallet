@@ -837,7 +837,12 @@
 			"balance_unused": "Số dư chưa dùng",
 			"withdraw": "Rút",
 			"unavailable_tokens_title": "Token không khả dụng",
-			"unavailable_tokens_description": "Các token này có trong danh sách token của bạn, nhưng $oisy_short không thể tải chúng."
+			"unavailable_tokens_description": "Các token này có trong danh sách token của bạn, nhưng $oisy_short không thể tải chúng.",
+			"unavailable_tokens_checking": "Đang kiểm tra canister ledger…",
+			"unavailable_tokens_responding": "Canister ledger hiện đã phản hồi",
+			"unavailable_tokens_no_ledger": "Không có ledger nào ở ID canister này",
+			"unavailable_tokens_not_responding": "Canister ledger không phản hồi",
+			"unavailable_tokens_error": "Canister ledger phản hồi với lỗi"
 		},
 		"alt": {
 			"network_explorer_link": "Mở trình khám phá blockchain $network cho địa chỉ của bạn",

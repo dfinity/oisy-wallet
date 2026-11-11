@@ -1,11 +1,13 @@
+import { checkIcrcLedgerStatus } from '$icp/services/icrc-ledger-status.services';
 import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
-import type { IcrcUnavailableCustomToken } from '$icp/types/icrc-custom-token';
+import type { IcrcLedgerStatus, IcrcUnavailableCustomToken } from '$icp/types/icrc-custom-token';
 import * as backendApi from '$lib/api/backend.api';
 import HelpUnavailableTokens from '$lib/components/help/HelpUnavailableTokens.svelte';
 import {
 	HELP_UNAVAILABLE_TOKENS_CARD,
 	HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON,
-	HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON
+	HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON,
+	HELP_UNAVAILABLE_TOKENS_STATUS
 } from '$lib/constants/test-ids.constants';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -17,6 +19,10 @@ import { Principal } from '@icp-sdk/core/principal';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
+
+vi.mock('$icp/services/icrc-ledger-status.services', () => ({
+	checkIcrcLedgerStatus: vi.fn()
+}));
 
 describe('HelpUnavailableTokens', () => {
 	const mockUnavailableToken = (ledgerCanisterId: string): IcrcUnavailableCustomToken => ({
@@ -49,7 +55,12 @@ describe('HelpUnavailableTokens', () => {
 		icrcUnavailableCustomTokensStore.set([]);
 
 		mockAuthStore();
+
+		vi.mocked(checkIcrcLedgerStatus).mockResolvedValue({ status: 'no_ledger' });
 	});
+
+	const statusOf = ({ ledgerCanisterId }: IcrcUnavailableCustomToken): string =>
+		`${HELP_UNAVAILABLE_TOKENS_STATUS}-${ledgerCanisterId}`;
 
 	it('should render nothing when every saved token loads', () => {
 		const { queryByTestId } = render(HelpUnavailableTokens);
@@ -73,6 +84,136 @@ describe('HelpUnavailableTokens', () => {
 		expect(card).not.toHaveTextContent(curatedToken.ledgerCanisterId);
 
 		expect(getAllByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON)).toHaveLength(2);
+	});
+
+	it('should show the name too when it says more than the symbol', () => {
+		icrcUnavailableCustomTokensStore.set([{ ...curatedToken, name: 'Test Token' }]);
+
+		const { getByTestId } = render(HelpUnavailableTokens);
+
+		expect(getByTestId(HELP_UNAVAILABLE_TOKENS_CARD)).toHaveTextContent('Test Token (TST)');
+	});
+
+	it('should show the symbol once when the name repeats it', () => {
+		icrcUnavailableCustomTokensStore.set([{ ...curatedToken, name: 'TST' }]);
+
+		const { getByTestId } = render(HelpUnavailableTokens);
+
+		expect(getByTestId(HELP_UNAVAILABLE_TOKENS_CARD)).not.toHaveTextContent('TST (TST)');
+	});
+
+	it('should check each listed ledger and show what it answered', async () => {
+		vi.mocked(checkIcrcLedgerStatus).mockImplementation(({ ledgerCanisterId }) =>
+			Promise.resolve(
+				ledgerCanisterId === importedToken.ledgerCanisterId
+					? { status: 'error', errorCode: 'IC0536' }
+					: { status: 'no_ledger' }
+			)
+		);
+
+		icrcUnavailableCustomTokensStore.set([importedToken, curatedToken]);
+
+		const { getByTestId } = render(HelpUnavailableTokens);
+
+		await waitFor(() => {
+			expect(getByTestId(statusOf(importedToken))).toHaveTextContent(
+				`${en.help.text.unavailable_tokens_error} (IC0536)`
+			);
+		});
+
+		expect(getByTestId(statusOf(curatedToken))).toHaveTextContent(
+			en.help.text.unavailable_tokens_no_ledger
+		);
+
+		expect(checkIcrcLedgerStatus).toHaveBeenCalledTimes(2);
+		expect(checkIcrcLedgerStatus).toHaveBeenCalledWith({
+			identity: mockIdentity,
+			ledgerCanisterId: importedToken.ledgerCanisterId
+		});
+		expect(checkIcrcLedgerStatus).toHaveBeenCalledWith({
+			identity: mockIdentity,
+			ledgerCanisterId: curatedToken.ledgerCanisterId
+		});
+	});
+
+	it('should not check a ledger again when the list changes', async () => {
+		icrcUnavailableCustomTokensStore.set([importedToken, curatedToken]);
+
+		const { getByTestId } = render(HelpUnavailableTokens);
+
+		await waitFor(() => {
+			expect(getByTestId(statusOf(curatedToken))).toHaveTextContent(
+				en.help.text.unavailable_tokens_no_ledger
+			);
+		});
+
+		icrcUnavailableCustomTokensStore.set([curatedToken]);
+
+		await waitFor(() => {
+			expect(getByTestId(HELP_UNAVAILABLE_TOKENS_CARD)).not.toHaveTextContent(
+				importedToken.ledgerCanisterId
+			);
+		});
+
+		expect(checkIcrcLedgerStatus).toHaveBeenCalledTimes(2);
+	});
+
+	it('should show that a ledger is being checked', async () => {
+		vi.mocked(checkIcrcLedgerStatus).mockReturnValue(new Promise(() => {}));
+
+		icrcUnavailableCustomTokensStore.set([importedToken]);
+
+		const { getByTestId } = render(HelpUnavailableTokens);
+
+		await waitFor(() => {
+			expect(getByTestId(statusOf(importedToken))).toHaveTextContent(
+				en.help.text.unavailable_tokens_checking
+			);
+		});
+	});
+
+	it.each<{ ledgerStatus: IcrcLedgerStatus; text: string }>([
+		{ ledgerStatus: { status: 'responding' }, text: en.help.text.unavailable_tokens_responding },
+		{
+			ledgerStatus: { status: 'not_responding' },
+			text: en.help.text.unavailable_tokens_not_responding
+		},
+		{ ledgerStatus: { status: 'error' }, text: en.help.text.unavailable_tokens_error }
+	])('should show the status $ledgerStatus.status', async ({ ledgerStatus, text }) => {
+		vi.mocked(checkIcrcLedgerStatus).mockResolvedValue(ledgerStatus);
+
+		icrcUnavailableCustomTokensStore.set([importedToken]);
+
+		const { getByTestId } = render(HelpUnavailableTokens);
+
+		await waitFor(() => {
+			expect(getByTestId(statusOf(importedToken))).toHaveTextContent(text);
+		});
+	});
+
+	it('should show an error when the check itself fails', async () => {
+		vi.mocked(checkIcrcLedgerStatus).mockRejectedValue(new Error('test'));
+
+		icrcUnavailableCustomTokensStore.set([importedToken]);
+
+		const { getByTestId } = render(HelpUnavailableTokens);
+
+		await waitFor(() => {
+			expect(getByTestId(statusOf(importedToken))).toHaveTextContent(
+				en.help.text.unavailable_tokens_error
+			);
+		});
+	});
+
+	it('should not check a ledger without a signed-in identity', () => {
+		mockAuthStore(null);
+
+		icrcUnavailableCustomTokensStore.set([importedToken]);
+
+		const { queryByTestId } = render(HelpUnavailableTokens);
+
+		expect(checkIcrcLedgerStatus).not.toHaveBeenCalled();
+		expect(queryByTestId(statusOf(importedToken))).not.toBeInTheDocument();
 	});
 
 	it('should ask for confirmation and delete nothing when cancelled', async () => {

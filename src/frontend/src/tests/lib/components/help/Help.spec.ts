@@ -22,6 +22,11 @@ vi.mock('$lib/services/help-analytics.services', async (importOriginal) => ({
 	trackHelp: vi.fn()
 }));
 
+// The unavailable tokens card checks each listed ledger; here it only matters where the card is.
+vi.mock('$icp/services/icrc-ledger-status.services', () => ({
+	checkIcrcLedgerStatus: vi.fn(() => new Promise(() => {}))
+}));
+
 describe('Help', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();

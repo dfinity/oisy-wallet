@@ -837,7 +837,12 @@
 			"balance_unused": "Solde non utilisé",
 			"withdraw": "Retirer",
 			"unavailable_tokens_title": "Tokens indisponibles",
-			"unavailable_tokens_description": "Ces tokens figurent dans votre liste de tokens, mais $oisy_short ne peut pas les charger."
+			"unavailable_tokens_description": "Ces tokens figurent dans votre liste de tokens, mais $oisy_short ne peut pas les charger.",
+			"unavailable_tokens_checking": "Vérification du canister Ledger…",
+			"unavailable_tokens_responding": "Le canister Ledger répond maintenant",
+			"unavailable_tokens_no_ledger": "Aucun ledger à cet ID de canister",
+			"unavailable_tokens_not_responding": "Le canister Ledger ne répond pas",
+			"unavailable_tokens_error": "Le canister Ledger répond avec une erreur"
 		},
 		"alt": {
 			"network_explorer_link": "Ouvrir l'explorateur de blockchain $network pour votre adresse",

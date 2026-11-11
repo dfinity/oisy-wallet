@@ -837,7 +837,12 @@
 			"balance_unused": "Niewykorzystane środki",
 			"withdraw": "Wypłać",
 			"unavailable_tokens_title": "Niedostępne tokeny",
-			"unavailable_tokens_description": "Te tokeny są na Twojej liście tokenów, ale $oisy_short nie może ich załadować."
+			"unavailable_tokens_description": "Te tokeny są na Twojej liście tokenów, ale $oisy_short nie może ich załadować.",
+			"unavailable_tokens_checking": "Sprawdzanie kanistra rejestru…",
+			"unavailable_tokens_responding": "Kanister rejestru teraz odpowiada",
+			"unavailable_tokens_no_ledger": "Brak rejestru pod tym ID kanistra",
+			"unavailable_tokens_not_responding": "Kanister rejestru nie odpowiada",
+			"unavailable_tokens_error": "Kanister rejestru odpowiada błędem"
 		},
 		"alt": {
 			"network_explorer_link": "Otwórz eksplorator blockchaina sieci $network dla swojego adresu",

@@ -837,7 +837,12 @@
 			"balance_unused": "未使用の残高",
 			"withdraw": "出金",
 			"unavailable_tokens_title": "利用できないトークン",
-			"unavailable_tokens_description": "これらのトークンはトークンリストにありますが、$oisy_shortで読み込めません。"
+			"unavailable_tokens_description": "これらのトークンはトークンリストにありますが、$oisy_shortで読み込めません。",
+			"unavailable_tokens_checking": "Ledgerキャニスターを確認中…",
+			"unavailable_tokens_responding": "Ledgerキャニスターは現在応答しています",
+			"unavailable_tokens_no_ledger": "このキャニスターIDにLedgerはありません",
+			"unavailable_tokens_not_responding": "Ledgerキャニスターが応答していません",
+			"unavailable_tokens_error": "Ledgerキャニスターがエラーを返しています"
 		},
 		"alt": {
 			"network_explorer_link": "お客様のアドレスで $network のブロックチェーンエクスプローラーを開く",

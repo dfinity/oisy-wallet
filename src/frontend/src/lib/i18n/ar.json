@@ -837,7 +837,12 @@
 			"balance_unused": "",
 			"withdraw": "",
 			"unavailable_tokens_title": "",
-			"unavailable_tokens_description": ""
+			"unavailable_tokens_description": "",
+			"unavailable_tokens_checking": "",
+			"unavailable_tokens_responding": "",
+			"unavailable_tokens_no_ledger": "",
+			"unavailable_tokens_not_responding": "",
+			"unavailable_tokens_error": ""
 		},
 		"alt": {
 			"network_explorer_link": "",

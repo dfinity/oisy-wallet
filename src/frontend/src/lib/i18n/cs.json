@@ -837,7 +837,12 @@
 			"balance_unused": "Nevyužitý zůstatek",
 			"withdraw": "Vybrat",
 			"unavailable_tokens_title": "Nedostupné tokeny",
-			"unavailable_tokens_description": "Tyto tokeny jsou ve vašem seznamu tokenů, ale $oisy_short je nemůže načíst."
+			"unavailable_tokens_description": "Tyto tokeny jsou ve vašem seznamu tokenů, ale $oisy_short je nemůže načíst.",
+			"unavailable_tokens_checking": "Kontrola Ledger kanystru…",
+			"unavailable_tokens_responding": "Ledger kanystr nyní odpovídá",
+			"unavailable_tokens_no_ledger": "Na tomto ID kanystru není žádný ledger",
+			"unavailable_tokens_not_responding": "Ledger kanystr neodpovídá",
+			"unavailable_tokens_error": "Ledger kanystr odpovídá chybou"
 		},
 		"alt": {
 			"network_explorer_link": "Otevřít průzkumník blockchainu sítě $network pro vaši adresu",

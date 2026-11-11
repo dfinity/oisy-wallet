@@ -837,7 +837,12 @@
 			"balance_unused": "미사용 잔액",
 			"withdraw": "출금",
 			"unavailable_tokens_title": "사용할 수 없는 토큰",
-			"unavailable_tokens_description": "이 토큰들은 토큰 목록에 있지만 $oisy_short에서 불러올 수 없습니다."
+			"unavailable_tokens_description": "이 토큰들은 토큰 목록에 있지만 $oisy_short에서 불러올 수 없습니다.",
+			"unavailable_tokens_checking": "원장 캐니스터 확인 중…",
+			"unavailable_tokens_responding": "원장 캐니스터가 이제 응답합니다",
+			"unavailable_tokens_no_ledger": "이 캐니스터 ID에 원장이 없습니다",
+			"unavailable_tokens_not_responding": "원장 캐니스터가 응답하지 않습니다",
+			"unavailable_tokens_error": "원장 캐니스터가 오류를 반환합니다"
 		},
 		"alt": {
 			"network_explorer_link": "사용자 주소로 $network 블록체인 탐색기 열기",

@@ -837,7 +837,12 @@
 			"balance_unused": "Unused balance",
 			"withdraw": "Withdraw",
 			"unavailable_tokens_title": "Unavailable tokens",
-			"unavailable_tokens_description": "These tokens are in your token list, but $oisy_short can't load them."
+			"unavailable_tokens_description": "These tokens are in your token list, but $oisy_short can't load them.",
+			"unavailable_tokens_checking": "Checking the ledger canister…",
+			"unavailable_tokens_responding": "Ledger canister responds now",
+			"unavailable_tokens_no_ledger": "No ledger at this canister ID",
+			"unavailable_tokens_not_responding": "Ledger canister not responding",
+			"unavailable_tokens_error": "Ledger canister responds with an error"
 		},
 		"alt": {
 			"network_explorer_link": "Open the $network blockchain explorer for your address",
