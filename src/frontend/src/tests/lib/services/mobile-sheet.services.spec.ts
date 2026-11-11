@@ -1,5 +1,5 @@
 import { MobileSheetRequestSchema } from '$lib/schema/mobile-host.schema';
-import { nativeSheet } from '$lib/services/mobile-sheet.services';
+import { nativeSheet, waitForNativeSheetClosed } from '$lib/services/mobile-sheet.services';
 import { busy } from '$lib/stores/busy.store';
 import { overlayFocus } from '$lib/utils/overlay.utils';
 
@@ -169,6 +169,36 @@ describe('shared native sheet lifecycle', () => {
 		await vi.waitFor(() => expect(mocks.remove).toHaveBeenCalledOnce());
 
 		expect(restoredWithSheetLayout).toHaveBeenCalledExactlyOnceWith(false);
+	});
+
+	it('releases menu navigation only after native viewport restoration', async () => {
+		await waitForNativeSheetClosed();
+		const { node, root } = panel();
+		const action = nativeSheet(node, { enabled: true, size: 'medium' });
+		await ready();
+		let finish: (() => void) | undefined;
+		mocks.request.mockImplementation(({ phase }) =>
+			phase === 'release'
+				? new Promise<void>((resolve) => {
+						finish = resolve;
+					})
+				: Promise.resolve()
+		);
+		const navigate = vi.fn();
+		const closed = waitForNativeSheetClosed().then(navigate);
+		node.dispatchEvent(new Event('outrostart'));
+		action?.destroy();
+		root.remove();
+		await vi.waitFor(() => expect(finish).toBeDefined());
+
+		expect(navigate).not.toHaveBeenCalled();
+
+		finish?.();
+		await closed;
+
+		expect(navigate).toHaveBeenCalledOnce();
+
+		await released();
 	});
 
 	it('falls back to the same web dialog if native preparation fails', async () => {

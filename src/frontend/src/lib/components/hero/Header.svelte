@@ -127,8 +127,8 @@
 			<Scanner />
 		{/if}
 
-		{#if !MOBILE_SHELL && $authSignedIn}
-			<Menu bind:visible={menuOpen} />
+		{#if $authSignedIn}
+			<Menu onAccount={MOBILE_SHELL ? onAccount : undefined} bind:visible={menuOpen} />
 		{:else if MOBILE_SHELL}
 			{#if onAccount}<ButtonIcon
 					ariaLabel={$i18n.core.mobile_shell.account}

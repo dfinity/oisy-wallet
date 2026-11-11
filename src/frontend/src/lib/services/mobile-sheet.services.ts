@@ -32,10 +32,21 @@ interface SheetGroup {
 	listener?: PluginListenerHandle;
 	fitted: boolean;
 	height?: number;
+	onReleased: (() => void)[];
 	frame?: number;
 }
 const waiting = new Set<Entry>();
 let current: SheetGroup | undefined;
+
+/** Wait for UIKit to restore the wallet before navigating out of a sheet menu. */
+export const waitForNativeSheetClosed = (): Promise<void> =>
+	new Promise((resolve) => {
+		if (current) {
+			current.onReleased.push(resolve);
+		} else {
+			resolve();
+		}
+	});
 
 const clearEntry = (entry: Entry) => {
 	entry.disconnect?.();
@@ -166,7 +177,8 @@ const startNext = () => {
 		closing: false,
 		failed: false,
 		work: Promise.resolve(),
-		fitted: contentSizedSheetsAvailable()
+		fitted: contentSizedSheetsAvailable(),
+		onReleased: []
 	};
 	current = group;
 	for (const entry of entries) {
@@ -236,6 +248,10 @@ const releaseIfEmpty = (group: SheetGroup) => {
 		if (current === group) {
 			current = undefined;
 		}
+		for (const resolve of group.onReleased) {
+			resolve();
+		}
+		group.onReleased.length = 0;
 		startNext();
 	});
 };

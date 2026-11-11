@@ -116,6 +116,7 @@
 			"wallet_unavailable": "Couldn’t open your wallet",
 			"wallet_retry_description": "Check your connection and try again.",
 			"account": "Account",
+			"app_controls": "App controls",
 			"refresh_failed": "Some balances or prices couldn’t be refreshed. Try again."
 		}
 	},

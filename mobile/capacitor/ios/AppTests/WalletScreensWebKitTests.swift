@@ -719,6 +719,52 @@ import XCTest
     }
     XCTAssertTrue(try XCTUnwrap(wallet.nativeSheet?.controller).accessibilityPerformEscape())
     try await waitForNativeSheet(shell, visible: false)
+    // The account icon opens the same web menu inside the fitted UIKit sheet.
+    try await openAccessory(web, shell: shell, label: "Your wallet address, settings, sign-out and external links")
+    let menuPanel = try XCTUnwrap(wallet.nativeSheet?.controller)
+    XCTAssertTrue(web.superview === menuPanel.view)
+    let menuLayout = try await evaluate(web, """
+      const sheet = document.querySelector('[data-native-sheet-fitted]');
+      const menu = document.querySelector('[data-tid=navigation-menu]');
+      return String(sheet?.contains(menu) && !document.querySelector('.popover') &&
+        !sheet.querySelector('.native-sheet-dismiss').getClientRects().length &&
+        menu.getBoundingClientRect().width > innerWidth - 40);
+      """)
+    XCTAssertEqual(menuLayout, "true", "Shared menu must fill the system sheet without web chrome")
+    for (style, name) in [(UIUserInterfaceStyle.light, "light"), (.dark, "dark")] {
+      window.overrideUserInterfaceStyle = style
+      try await Task.sleep(for: .milliseconds(400))
+      capture(window, name: "native-user-menu-" + name)
+    }
+    _ = try await evaluate(web, "document.querySelector('[data-tid=theme-selector-card-dark]').click(); return 'theme';")
+    XCTAssertTrue(wallet.nativeSheet?.controller === menuPanel, "Changing appearance must keep the menu open")
+    _ = try await evaluate(web, "document.querySelector('[data-tid=navigation-menu-address-book-button]').click(); return 'contacts';")
+    try await waitFor(web, "!!document.querySelector('[data-tid=address-book-modal]')")
+    try await waitForNativeSheet(shell, visible: false)
+    XCTAssertTrue(web.superview === wallet.view, "Contacts must open after restoring the full wallet viewport")
+    _ = try await evaluate(web, "document.querySelector('[data-tid=address-book-modal] [data-tid=close-modal]').click(); return 'closed';")
+    try await waitFor(web, "!document.querySelector('[data-tid=address-book-modal]')")
+    try await openAccessory(web, shell: shell, label: "Your wallet address, settings, sign-out and external links")
+    _ = try await evaluate(web, "document.querySelector('[data-tid=mobile-app-controls]').click(); return 'app controls';")
+    try await waitForNativeSheet(shell, visible: false)
+    for _ in 0..<60 {
+      if let panel = shell.presentedViewController, !panel.isBeingPresented { break }
+      try await Task.sleep(for: .milliseconds(50))
+    }
+    let appControls = try XCTUnwrap(shell.presentedViewController)
+    await withCheckedContinuation { continuation in
+      appControls.dismiss(animated: false) { continuation.resume() }
+    }
+    try await openAccessory(web, shell: shell, label: "Your wallet address, settings, sign-out and external links")
+    _ = try await evaluate(web, "document.querySelector('[data-tid=navigation-menu-settings-button]').click(); return 'settings';")
+    try await waitFor(web, "location.pathname === '/settings/'")
+    try await waitForNativeSheet(shell, visible: false)
+    XCTAssertTrue(web.superview === wallet.view)
+    shell.select(.wallet)
+    try await waitFor(web, "location.pathname === '/'")
+    try await openAccessory(web, shell: shell, label: "Your wallet address, settings, sign-out and external links")
+    XCTAssertTrue(try XCTUnwrap(wallet.nativeSheet?.controller).accessibilityPerformEscape())
+    try await waitForNativeSheet(shell, visible: false)
     let nonceAfterBack = try await evaluate(web, "return window.testDocumentNonce;")
     XCTAssertEqual(nonceAfterBack, documentNonce, "Back must retain the wallet document")
     XCTAssertEqual(wallet.session.grant?.id, grantID, "Back must retain its native grant")

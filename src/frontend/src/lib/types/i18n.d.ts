@@ -98,6 +98,7 @@ interface I18nCore {
 		wallet_unavailable: string;
 		wallet_retry_description: string;
 		account: string;
+		app_controls: string;
 		refresh_failed: string;
 	};
 }

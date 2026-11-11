@@ -3,6 +3,7 @@ import type { UserData } from '$declarations/rewards/rewards.did';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
+import type * as MobileConstants from '$lib/constants/mobile.constants';
 import {
 	LOGIN_BUTTON,
 	NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
@@ -23,6 +24,9 @@ import {
 	NAVIGATION_MENU_WHY_OISY_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
+import * as authServices from '$lib/services/auth.services';
+import * as mobileHost from '$lib/services/mobile-host.services';
+import { waitForNativeSheetClosed } from '$lib/services/mobile-sheet.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { tipsStore } from '$lib/stores/tips.store';
@@ -35,9 +39,20 @@ import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
-import { render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
+const mobile = vi.hoisted(() => ({ enabled: false }));
+vi.mock('$lib/constants/mobile.constants', async (importOriginal) => ({
+	...(await importOriginal<typeof MobileConstants>()),
+	get MOBILE_SHELL() {
+		return mobile.enabled;
+	}
+}));
+vi.mock('$lib/services/mobile-sheet.services', () => ({
+	nativeSheet: vi.fn(),
+	waitForNativeSheetClosed: vi.fn()
+}));
 const mockGoto = vi.fn();
 vi.mock('$app/navigation', () => ({
 	goto: (...args: unknown[]) => mockGoto(...args)
@@ -73,6 +88,10 @@ describe('Menu', () => {
 	beforeEach(() => {
 		userProfileStore.reset();
 		vi.resetAllMocks();
+		mobile.enabled = false;
+		vi.spyOn(mobileHost, 'nativeSheetsAvailable').mockReturnValue(false);
+		vi.mocked(waitForNativeSheetClosed).mockResolvedValue();
+		modalStore.close();
 		mockAuthStore();
 		mockAuthSignedIn(true);
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
@@ -119,6 +138,110 @@ describe('Menu', () => {
 			}
 			return element;
 		});
+
+	describe('native user menu', () => {
+		beforeEach(() => {
+			mobile.enabled = true;
+			vi.mocked(mobileHost.nativeSheetsAvailable).mockReturnValue(true);
+		});
+
+		it('uses the shared menu in one sheet and keeps unsupported actions out', async () => {
+			const { getByTestId, getByRole, queryByTestId } = render(Menu, { onAccount: vi.fn() });
+			await fireEvent.click(getByTestId(NAVIGATION_MENU_BUTTON));
+
+			expect(getByRole('dialog')).toHaveAccessibleName(get(i18n).navigation.alt.menu);
+			expect(getByTestId('bottom-sheet')).toContainElement(
+				getByTestId(NAVIGATION_MENU_SETTINGS_BUTTON)
+			);
+			expect(queryByTestId('popover-content')).not.toBeInTheDocument();
+			expect(getByTestId('mobile-app-controls')).toBeInTheDocument();
+
+			for (const id of [
+				NAVIGATION_MENU_SCANNER_BUTTON,
+				NAVIGATION_MENU_PAY_BUTTON,
+				NAVIGATION_MENU_TIP_BUTTON,
+				NAVIGATION_MENU_REFERRAL_BUTTON
+			]) {
+				expect(queryByTestId(id)).not.toBeInTheDocument();
+			}
+		});
+
+		it.each(['contacts', 'settings', 'app controls'] as const)(
+			'waits for the native sheet to release before opening %s',
+			async (destination) => {
+				let finish: (() => void) | undefined;
+				vi.mocked(waitForNativeSheetClosed).mockReturnValue(
+					new Promise<void>((resolve) => {
+						finish = resolve;
+					})
+				);
+				const onAccount = vi.fn();
+				const openContacts = vi.spyOn(modalStore, 'openAddressBook');
+				const { getByTestId } = render(Menu, { onAccount });
+				await fireEvent.click(getByTestId(NAVIGATION_MENU_BUTTON));
+				await fireEvent.click(
+					getByTestId(
+						destination === 'contacts'
+							? NAVIGATION_MENU_ADDRESS_BOOK_BUTTON
+							: destination === 'settings'
+								? NAVIGATION_MENU_SETTINGS_BUTTON
+								: 'mobile-app-controls'
+					)
+				);
+
+				expect(openContacts).not.toHaveBeenCalled();
+				expect(mockGoto).not.toHaveBeenCalled();
+				expect(onAccount).not.toHaveBeenCalled();
+
+				finish?.();
+				await waitFor(() =>
+					expect(
+						destination === 'contacts'
+							? openContacts
+							: destination === 'settings'
+								? mockGoto
+								: onAccount
+					).toHaveBeenCalledOnce()
+				);
+			}
+		);
+
+		it('does not open a page if the session ends while the sheet closes', async () => {
+			let finish: (() => void) | undefined;
+			vi.mocked(waitForNativeSheetClosed).mockReturnValue(
+				new Promise<void>((resolve) => {
+					finish = resolve;
+				})
+			);
+			const openContacts = vi.spyOn(modalStore, 'openAddressBook');
+			const { getByTestId } = render(Menu);
+			await fireEvent.click(getByTestId(NAVIGATION_MENU_BUTTON));
+			await fireEvent.click(getByTestId(NAVIGATION_MENU_ADDRESS_BOOK_BUTTON));
+			mockAuthSignedIn(false);
+			finish?.();
+			await Promise.resolve();
+
+			expect(openContacts).not.toHaveBeenCalled();
+		});
+
+		it('keeps the shared sign-out action', async () => {
+			const signOut = vi.spyOn(authServices, 'signOut').mockResolvedValue();
+			const { getByTestId, getByRole } = render(Menu);
+			await fireEvent.click(getByTestId(NAVIGATION_MENU_BUTTON));
+			await fireEvent.click(getByRole('button', { name: get(i18n).auth.text.logout }));
+
+			expect(signOut).toHaveBeenCalledExactlyOnceWith({ resetUrl: true, source: 'menu-button' });
+		});
+
+		it('falls back to the web popover on a host without native sheets', async () => {
+			vi.mocked(mobileHost.nativeSheetsAvailable).mockReturnValue(false);
+			const { getByTestId, queryByTestId } = render(Menu);
+			await fireEvent.click(getByTestId(NAVIGATION_MENU_BUTTON));
+
+			expect(getByTestId('popover-content')).toBeInTheDocument();
+			expect(queryByTestId('bottom-sheet')).not.toBeInTheDocument();
+		});
+	});
 
 	it('keeps the menu button highlighted while the popover is open', async () => {
 		({ container } = render(Menu));

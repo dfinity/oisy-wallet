@@ -116,6 +116,7 @@
 			"wallet_unavailable": "",
 			"wallet_retry_description": "",
 			"account": "",
+			"app_controls": "",
 			"refresh_failed": ""
 		}
 	},

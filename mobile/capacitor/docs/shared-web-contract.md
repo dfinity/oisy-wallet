@@ -219,6 +219,15 @@ cannot close a later sheet. UIKit's automatic dismissal remains disabled.
 Older hosts retain their medium/large detents and web dismissal controls;
 normal browser presentation is unchanged.
 
+The signed-in header uses the shared web `Menu` in a `BottomSheet` when the host
+supports native sheets. Browser and older-host menus retain their popover.
+Contacts, Settings and App controls wait for `waitForNativeSheetClosed` before
+opening their next surface; the promise resolves after native viewport restoration,
+not merely after the web outro. An expired session cancels the pending action.
+Privacy, appearance, addresses, support/legal and sign-out reuse web handlers.
+The App controls entry retains native connection management, reload and II management.
+WalletConnect, Pay and rewards menu entries stay hidden in the mobile preview.
+
 Send, Swap, Contacts and other multi-step `WizardModal` flows use full-page web
 presentation, with Back/Cancel controls. Notes editors also stay full-page. They
 do not create a native sheet; only accessory overlays above them can do so.
