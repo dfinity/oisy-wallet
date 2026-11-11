@@ -5,12 +5,14 @@ import type { IcrcLedgerStatus, IcrcUnavailableCustomToken } from '$icp/types/ic
 import * as backendApi from '$lib/api/backend.api';
 import HelpUnavailableTokens from '$lib/components/help/HelpUnavailableTokens.svelte';
 import {
+	CONFIRMATION_POPUP_MODAL,
 	HELP_UNAVAILABLE_TOKENS_CARD,
 	HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON,
 	HELP_UNAVAILABLE_TOKENS_COPY_BUTTON,
 	HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON,
 	HELP_UNAVAILABLE_TOKENS_STATUS
 } from '$lib/constants/test-ids.constants';
+import { screensStore } from '$lib/stores/screens.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import * as clipboardUtils from '$lib/utils/clipboard.utils';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -59,6 +61,9 @@ describe('HelpUnavailableTokens', () => {
 
 		icrcCustomTokensStore.resetAll();
 		icrcUnavailableCustomTokensStore.reset();
+
+		// A phone, where the confirmation is a bottom sheet.
+		screensStore.set('xs');
 
 		mockAuthStore();
 
@@ -242,24 +247,73 @@ describe('HelpUnavailableTokens', () => {
 		expect(queryByTestId(statusOf(importedToken))).not.toBeInTheDocument();
 	});
 
-	it('should ask for confirmation and delete nothing when cancelled', async () => {
+	it('should ask for confirmation in a popup and delete nothing when cancelled', async () => {
 		const removeCustomTokenMock = vi.spyOn(backendApi, 'removeCustomToken');
 
 		icrcUnavailableCustomTokensStore.set([importedToken]);
 
-		const { getByTestId, getByText, queryByTestId } = render(HelpUnavailableTokens);
+		const { getByTestId, getByRole, queryByTestId } = render(HelpUnavailableTokens);
 
 		await fireEvent.click(getByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON));
 
-		expect(getByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON)).toBeInTheDocument();
+		const confirmButton = getByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON);
 
-		await fireEvent.click(getByText(en.core.text.cancel));
+		// Over the page, not in the card.
+		expect(getByTestId('bottom-sheet')).toContainElement(confirmButton);
+		expect(getByTestId('bottom-sheet')).toHaveTextContent(en.tokens.text.delete_token);
+		expect(getByTestId(HELP_UNAVAILABLE_TOKENS_CARD)).not.toContainElement(confirmButton);
 
-		expect(queryByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON)).not.toBeInTheDocument();
+		await fireEvent.click(getByRole('button', { name: en.core.text.cancel }));
+
+		// The bottom sheet slides out before it leaves the page.
+		await waitFor(() => {
+			expect(queryByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON)).not.toBeInTheDocument();
+		});
+
 		expect(getByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON)).toBeInTheDocument();
 
 		expect(removeCustomTokenMock).not.toHaveBeenCalled();
 		expect(get(icrcUnavailableCustomTokensStore)).toEqual([importedToken]);
+	});
+
+	it('should ask for confirmation in a dialog on desktop', async () => {
+		screensStore.set('md');
+
+		icrcUnavailableCustomTokensStore.set([importedToken]);
+
+		const { getByTestId } = render(HelpUnavailableTokens);
+
+		await fireEvent.click(getByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON));
+
+		expect(getByTestId(CONFIRMATION_POPUP_MODAL)).toContainElement(
+			getByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON)
+		);
+	});
+
+	it('should keep the confirmation open with its buttons disabled while the delete runs', async () => {
+		const backendDelete = Promise.withResolvers<void>();
+
+		vi.spyOn(backendApi, 'removeCustomToken').mockReturnValue(backendDelete.promise);
+		vi.spyOn(toastsStore, 'toastsShow').mockImplementation(vi.fn());
+
+		icrcUnavailableCustomTokensStore.set([importedToken]);
+
+		const { getByTestId, getByRole, queryByTestId } = render(HelpUnavailableTokens);
+
+		await fireEvent.click(getByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON));
+
+		await fireEvent.click(getByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON));
+
+		expect(getByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON)).toBeDisabled();
+		expect(getByRole('button', { name: en.core.text.cancel })).toBeDisabled();
+
+		backendDelete.resolve();
+
+		await waitFor(() => {
+			expect(queryByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON)).not.toBeInTheDocument();
+		});
+
+		expect(get(icrcUnavailableCustomTokensStore)).toEqual([]);
 	});
 
 	it('should delete the saved token, its cached copy and its row', async () => {

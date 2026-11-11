@@ -10,9 +10,11 @@
 	import { removeCustomToken } from '$lib/api/backend.api';
 	import { deleteIdbIcToken } from '$lib/api/idb-tokens.api';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
+	import BottomSheetConfirmationPopup from '$lib/components/ui/BottomSheetConfirmationPopup.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import {
@@ -29,6 +31,13 @@
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let confirmLedgerCanisterId: LedgerCanisterIdText | undefined = $state();
+
+	// Gone once the token is deleted, which closes the confirmation.
+	let confirmToken = $derived(
+		$icrcUnavailableCustomTokensStore.find(
+			({ ledgerCanisterId }) => ledgerCanisterId === confirmLedgerCanisterId
+		)
+	);
 
 	let deleting = $state(false);
 
@@ -149,81 +158,101 @@
 					{@const ledgerStatus = ledgerStatuses.get(token.ledgerCanisterId)}
 
 					<li class="mt-3">
-						{#if confirmLedgerCanisterId === token.ledgerCanisterId}
-							<p class="mb-3 break-words">
-								<Html
-									text={replacePlaceholders(
-										replaceOisyPlaceholders($i18n.tokens.details.confirm_deletion_description),
-										{
-											$token: escapeHtml(tokenName(token))
-										}
-									)}
-								/>
-							</p>
+						<div class="flex w-full flex-col">
+							<!-- "Delete token" shares only the first line, so the lines under it get the full
+							     width: on a phone, the ID and its copy button then fit on one line. -->
+							<div class="flex flex-row items-center justify-between gap-3">
+								<!-- break-words, not break-all: a ledger canister ID then wraps at a hyphen. -->
+								<span class="min-w-0 flex-1 break-words">
+									{#if nonNullish(label)}
+										{label}
+									{:else}
+										{@render ledgerCanisterIdWithCopy(token.ledgerCanisterId)}
+									{/if}
+								</span>
 
-							<ButtonGroup>
-								<ButtonCancel
-									disabled={deleting}
-									onclick={() => (confirmLedgerCanisterId = undefined)}
-								/>
-
+								<!-- Button is flex-1 by default, which would stretch it across the row. -->
 								<Button
-									colorStyle="error"
 									disabled={deleting}
-									onclick={() => deleteToken(token)}
-									testId={HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON}
+									link
+									onclick={() => (confirmLedgerCanisterId = token.ledgerCanisterId)}
+									styleClass="flex-none"
+									testId={HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON}
 									type="button"
 								>
-									{$i18n.core.text.delete}
+									{$i18n.tokens.text.delete_token}
 								</Button>
-							</ButtonGroup>
-						{:else}
-							<div class="flex w-full flex-col">
-								<!-- "Delete token" shares only the first line, so the lines under it get the full
-								     width: on a phone, the ID and its copy button then fit on one line. -->
-								<div class="flex flex-row items-center justify-between gap-3">
-									<!-- break-words, not break-all: a ledger canister ID then wraps at a hyphen. -->
-									<span class="min-w-0 flex-1 break-words">
-										{#if nonNullish(label)}
-											{label}
-										{:else}
-											{@render ledgerCanisterIdWithCopy(token.ledgerCanisterId)}
-										{/if}
-									</span>
-
-									<!-- Button is flex-1 by default, which would stretch it across the row. -->
-									<Button
-										disabled={deleting}
-										link
-										onclick={() => (confirmLedgerCanisterId = token.ledgerCanisterId)}
-										styleClass="flex-none"
-										testId={HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON}
-										type="button"
-									>
-										{$i18n.tokens.text.delete_token}
-									</Button>
-								</div>
-
-								<!-- Under a name and symbol too, so the user can check the exact ledger and copy its ID. -->
-								{#if nonNullish(label)}
-									<span class="text-sm break-words text-tertiary">
-										{@render ledgerCanisterIdWithCopy(token.ledgerCanisterId)}
-									</span>
-								{/if}
-
-								{#if nonNullish(ledgerStatus)}
-									<span
-										class="text-sm text-tertiary"
-										data-tid={`${HELP_UNAVAILABLE_TOKENS_STATUS}-${token.ledgerCanisterId}`}
-									>
-										{statusText(ledgerStatus)}
-									</span>
-								{/if}
 							</div>
-						{/if}
+
+							<!-- Under a name and symbol too, so the user can check the exact ledger and copy its ID. -->
+							{#if nonNullish(label)}
+								<span class="text-sm break-words text-tertiary">
+									{@render ledgerCanisterIdWithCopy(token.ledgerCanisterId)}
+								</span>
+							{/if}
+
+							{#if nonNullish(ledgerStatus)}
+								<span
+									class="text-sm text-tertiary"
+									data-tid={`${HELP_UNAVAILABLE_TOKENS_STATUS}-${token.ledgerCanisterId}`}
+								>
+									{statusText(ledgerStatus)}
+								</span>
+							{/if}
+						</div>
 					</li>
 				{/each}
 			</ul>
 		</SettingsCard>
 	</div>
+{/if}
+
+<!-- The same popup as deleting a contact or a note. It can't be dismissed while the delete runs. -->
+{#if nonNullish(confirmToken)}
+	{@const token = confirmToken}
+
+	<BottomSheetConfirmationPopup
+		disabled={deleting}
+		onCancel={() => (confirmLedgerCanisterId = undefined)}
+		showCloseButton={false}
+	>
+		{#snippet title()}
+			{$i18n.tokens.text.delete_token}
+		{/snippet}
+
+		{#snippet content()}
+			<ContentWithToolbar>
+				<!-- break-words, not break-all: a ledger canister ID then wraps at a hyphen. -->
+				<p class="my-5 px-5 text-center break-words">
+					<Html
+						text={replacePlaceholders(
+							replaceOisyPlaceholders($i18n.tokens.details.confirm_deletion_description),
+							{
+								$token: escapeHtml(tokenName(token))
+							}
+						)}
+					/>
+				</p>
+
+				{#snippet toolbar()}
+					<ButtonGroup>
+						<ButtonCancel
+							disabled={deleting}
+							onclick={() => (confirmLedgerCanisterId = undefined)}
+						/>
+
+						<Button
+							colorStyle="error"
+							disabled={deleting}
+							onclick={() => deleteToken(token)}
+							testId={HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON}
+							type="button"
+						>
+							{$i18n.core.text.delete}
+						</Button>
+					</ButtonGroup>
+				{/snippet}
+			</ContentWithToolbar>
+		{/snippet}
+	</BottomSheetConfirmationPopup>
 {/if}
