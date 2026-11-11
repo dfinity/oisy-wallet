@@ -95,13 +95,13 @@
 		try {
 			await removeCustomToken({ identity: $authIdentity, token: token.customToken });
 
-			// Like the token page: a token whose query answer mapped while its certified answer did not
-			// is in the main token list too.
+			// The backend no longer has the token, so both lists drop it before the cache cleanup, which
+			// can fail. Like the token page, that includes the main token list: a token whose query
+			// answer mapped while its certified answer did not is in it too.
 			icrcCustomTokensStore.resetByIdentifier(token.ledgerCanisterId);
+			icrcUnavailableCustomTokensStore.remove(token.ledgerCanisterId);
 
 			await deleteIdbIcToken({ identity: $authIdentity, token: token.customToken });
-
-			icrcUnavailableCustomTokensStore.remove(token.ledgerCanisterId);
 
 			toastsShow({
 				text: replacePlaceholders(

@@ -339,6 +339,39 @@ describe('HelpUnavailableTokens', () => {
 		expect(getAllByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON)).toHaveLength(1);
 	});
 
+	it('should remove the row once the backend deleted the token, even when clearing its cached copy fails', async () => {
+		const err = new Error('test');
+
+		vi.spyOn(backendApi, 'removeCustomToken').mockResolvedValue(undefined);
+		const toastsErrorMock = vi.spyOn(toastsStore, 'toastsError').mockImplementation(vi.fn());
+
+		vi.mocked(idbKeyval.get).mockRejectedValueOnce(err);
+
+		icrcUnavailableCustomTokensStore.set([importedToken, curatedToken]);
+
+		const { getAllByTestId, getByTestId } = render(HelpUnavailableTokens);
+
+		const [deleteImportedToken] = getAllByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON);
+
+		await fireEvent.click(deleteImportedToken);
+
+		await fireEvent.click(getByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON));
+
+		await waitFor(() => {
+			expect(toastsErrorMock).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.tokens.error.unexpected_error_on_token_delete },
+				err
+			});
+		});
+
+		expect(get(icrcUnavailableCustomTokensStore)).toEqual([curatedToken]);
+
+		// The backend no longer has the token, so a load that read it before stays without it too.
+		icrcUnavailableCustomTokensStore.set([importedToken, curatedToken]);
+
+		expect(get(icrcUnavailableCustomTokensStore)).toEqual([curatedToken]);
+	});
+
 	it('should keep the token and show an error when deleting fails', async () => {
 		const err = new Error('test');
 
