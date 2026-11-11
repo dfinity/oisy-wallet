@@ -10,6 +10,7 @@ import {
 	MODAL_NETWORKS_LIST_CONTEXT_KEY,
 	type ModalNetworksListContext
 } from '$lib/stores/modal-networks-list.store';
+import * as modalTokensListStoreModule from '$lib/stores/modal-tokens-list.store';
 import { MODAL_TOKENS_LIST_CONTEXT_KEY } from '$lib/stores/modal-tokens-list.store';
 import * as swapAmountsStoreModule from '$lib/stores/swap-amounts.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
@@ -103,6 +104,19 @@ describe('SwapContexts', () => {
 					setFilterNetworksIds: expect.any(Function),
 					resetFilters: expect.any(Function)
 				})
+			);
+		});
+
+		it('should leave the order of the tokens to the token list', () => {
+			const initModalTokensListContext = vi.spyOn(
+				modalTokensListStoreModule,
+				'initModalTokensListContext'
+			);
+
+			render(SwapContexts, { children: mockSnippet });
+
+			expect(initModalTokensListContext).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ sortByBalance: false })
 			);
 		});
 

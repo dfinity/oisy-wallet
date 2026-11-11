@@ -25,6 +25,7 @@
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
 	import { canPayWithToken } from '$lib/utils/swap.utils';
+	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { sortTokens } from '$lib/utils/tokens.utils';
 
@@ -85,13 +86,23 @@
 			)
 	);
 
-	let tokens: TokenUi[] = $derived(
-		sortTokens({
-			$tokens: tokensUi,
+	const isActive = (token: TokenUi): boolean => !isTokenToggleable(token) || token.enabled;
+
+	// Inactive tokens come last, by symbol: their row shows no balance, so a balance must not move
+	// them up the list.
+	let tokens: TokenUi[] = $derived([
+		...sortTokens({
+			$tokens: tokensUi.filter(isActive),
 			$tokensToPin,
 			$networksToPin: $networks
+		}),
+		...sortTokens({
+			$tokens: tokensUi.filter((token) => !isActive(token)),
+			$tokensToPin,
+			$networksToPin: $networks,
+			primarySortStrategy: 'symbol'
 		})
-	);
+	]);
 
 	$effect(() => {
 		setTokens(tokens);

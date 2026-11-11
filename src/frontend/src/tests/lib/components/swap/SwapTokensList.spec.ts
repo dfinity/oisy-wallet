@@ -24,6 +24,7 @@ import {
 	mockModalNetworksListContextEntry,
 	mockModalTokensListContextEntry
 } from '$tests/utils/misc.context.test-utils';
+import { nonNullish } from '@dfinity/utils';
 import { render, screen, within } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 
@@ -63,7 +64,8 @@ describe('SwapTokensList', () => {
 					receiveSupportedData: readable(receiveSupportedData)
 				}
 			],
-			mockModalTokensListContextEntry({ tokens: [ICP_TOKEN], filterNetwork }),
+			// As `SwapContexts` sets it up.
+			mockModalTokensListContextEntry({ tokens: [ICP_TOKEN], filterNetwork, sortByBalance: false }),
 			mockModalNetworksListContextEntry({ networks })
 		]);
 
@@ -287,6 +289,71 @@ describe('SwapTokensList', () => {
 			expect(rowFor(zeroBalanceToken.symbol)).toBeEnabled();
 			expect(rowFor(inactiveToken.symbol)).toBeEnabled();
 			expect(rowFor(fundedToken.symbol)).toBeEnabled();
+		});
+	});
+
+	describe('order', () => {
+		const fundedToken = { ...icpToken };
+		const zeroBalanceToken = { ...btcToken };
+		const inactiveWithBalance = {
+			...mockValidIcToken,
+			id: parseTokenId('InactiveWithBalanceTokenId'),
+			symbol: 'ZED',
+			enabled: false
+		};
+		const inactiveWithoutBalance = {
+			...mockValidIcToken,
+			id: parseTokenId('InactiveWithoutBalanceTokenId'),
+			symbol: 'ALPHA',
+			enabled: false
+		};
+
+		const allTokens = [inactiveWithBalance, zeroBalanceToken, inactiveWithoutBalance, fundedToken];
+
+		beforeEach(() => {
+			vi.spyOn(swapDerived, 'allSwapUniverseTokens', 'get').mockReturnValue(readable(allTokens));
+
+			allTokens.forEach(({ id }) => balancesStore.reset(id));
+
+			balancesStore.set({ id: fundedToken.id, data: { data: 5n, certified: true } });
+			balancesStore.set({ id: zeroBalanceToken.id, data: { data: ZERO, certified: true } });
+			balancesStore.set({ id: inactiveWithBalance.id, data: { data: 500n, certified: true } });
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		const listedSymbols = (): string[] =>
+			screen.getAllByRole('button').reduce<string[]>((acc, button) => {
+				const token = allTokens.find(({ symbol }) => button.textContent?.trim().startsWith(symbol));
+
+				return nonNullish(token) ? [...acc, token.symbol] : acc;
+			}, []);
+
+		const expectedSymbols = [
+			fundedToken.symbol,
+			zeroBalanceToken.symbol,
+			inactiveWithoutBalance.symbol,
+			inactiveWithBalance.symbol
+		];
+
+		it('should list inactive tokens last, by symbol, whatever their balance', () => {
+			render(SwapTokensList, {
+				props: sourceProps,
+				context: mockContext({ sourceToken: undefined })
+			});
+
+			expect(listedSymbols()).toEqual(expectedSymbols);
+		});
+
+		it('should list inactive tokens last on the receive side too', () => {
+			render(SwapTokensList, {
+				props: destinationProps,
+				context: mockContext({ sourceToken: undefined, destinationToken: undefined })
+			});
+
+			expect(listedSymbols()).toEqual(expectedSymbols);
 		});
 	});
 });
