@@ -913,15 +913,15 @@ While a BTC send initiated through the wallet is unconfirmed, its UTXOs are rese
 
 The Bitcoin address scoped to a reservation is always **derived from the authenticated principal** (P2WPKH from the threshold-ECDSA-derived public key). The caller cannot specify which address's pending transactions are read, added, or pruned — there is no API surface for that, and there is no support for a single user owning multiple addresses. The reservation system is a self-affecting UX guard; double-spend itself is prevented by Bitcoin consensus.
 
-### Spendable outputs from the backend (local and staging)
+### Spendable outputs from the backend
 
-On local and staging builds, every BTC flow loads the outputs it can spend from the backend instead of reading them from the Bitcoin canister itself: send, convert, swap, the AI assistant's send, Liquidium supply and repay, and OpenCryptoPay. One certified call returns them with the pending transactions. It covers every page of the address's outputs, already leaves out those a pending send has reserved, and keeps the 10 000 largest. A wallet with more outputs than the Bitcoin canister returns in one page could previously spend only that first page. Each check for pending transactions before a send refreshes the outputs too, from the same answer. A wallet whose outputs a pending send has all reserved is still told its funds are locked by pending transactions, not that its balance is too low.
+Every BTC flow loads the outputs it can spend from the backend instead of reading them from the Bitcoin canister itself: send, convert, swap, the AI assistant's send, Liquidium supply and repay, and OpenCryptoPay. One certified call returns them with the pending transactions. It covers every page of the address's outputs, already leaves out those a pending send has reserved, and keeps the 10 000 largest. A wallet with more outputs than the Bitcoin canister returns in one page could previously spend only that first page. Each check for pending transactions before a send refreshes the outputs too, from the same answer. A wallet whose outputs a pending send has all reserved is still told its funds are locked by pending transactions, not that its balance is too low.
 
-If the backend cannot answer, the flow reports that pending transactions are unavailable and offers no send, as it already does when only the pending transactions fail to load. Beta and production load as before.
+If the backend cannot answer, the flow reports that pending transactions are unavailable and offers no send, as it already does when only the pending transactions fail to load.
 
-### Sending through the backend (local and staging)
+### Sending through the backend
 
-On local and staging builds, every BTC send OISY broadcasts itself builds and signs the transaction in OISY, then has the backend broadcast it. That covers Send, Convert, the AI assistant's BTC send, the BTC swaps (Chain Fusion and NEAR Intents), and Liquidium supply and repayment. The backend reserves the inputs in the same step, so no send can pick them up in the meantime. A send there spends at most 38 inputs, the most whose signing a login's approval always covers, and the amount offered as Max stays within that. A wallet spread over more outputs needs more than one send to move everything.
+Every BTC send OISY broadcasts itself builds and signs the transaction in OISY, then has the backend broadcast it. That covers Send, Convert, the AI assistant's BTC send, the BTC swaps (Chain Fusion and NEAR Intents), and Liquidium supply and repayment. The backend reserves the inputs in the same step, so no send can pick them up in the meantime. A send spends at most 38 inputs, the most whose signing a login's approval always covers, and the amount offered as Max stays within that. A wallet spread over more outputs needs more than one send to move everything.
 
 When the broadcast's outcome is unclear, the transaction may have gone out. The user is told to check their activity before sending again, and the flow does not offer the form again: its inputs stay reserved, so a second send would spend other coins and could pay twice. In the AI assistant, the card shows that message in place of its Send button. A send the backend refuses outright returns to the form as before, with the locked-funds message when its inputs are already reserved.
 
@@ -932,8 +932,6 @@ A swap's activity row is created before its deposit is broadcast, so it is track
 A Liquidium supply or repayment is recorded with its transaction before the broadcast, and the record is removed only if the transfer was refused outright. After an unclear outcome a repayment keeps counting against the repay maximum until it settles, so the form does not offer the full debt again. A transfer that never reached the network is not settled yet, so its hold stays too.
 
 OpenCryptoPay payments in BTC are built and signed in OISY too, with the same 38-input limit. OpenCryptoPay broadcasts them itself, so OISY reserves their inputs just before it hands the transaction over, instead of after. If the reservation fails, nothing is handed over and the payment fails. If the hand-over fails, the payment shows as not confirmed, since OpenCryptoPay may have received it, and its inputs stay reserved until they are spent, or for an hour if they never are.
-
-Beta and production send as before.
 
 ---
 

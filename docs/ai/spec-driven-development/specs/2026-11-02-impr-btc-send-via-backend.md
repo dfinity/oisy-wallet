@@ -1151,6 +1151,11 @@ Every PR is safe on its own.
    With the flag off, it keeps `btc_caller_sign`.
 10. `feat(frontend): enable backend BTC send in production`. The flag is turned on, so the UTXO
     loading, the send and OpenCryptoPay switch together. `PRODUCT.md` is updated.
+    - Decided in PR 10: `BTC_SEND_VIA_BACKEND_ENABLED` becomes `LOCAL || STAGING || BETA || PROD`,
+      as `TIPS_ENABLED` and `ONRAMPER_ENABLED` are, rather than going away, so turning it off again
+      stays a one-line rollback until PR 11 removes the Chain Fusion Signer path. Specs still start with it off, since most still cover that path, and each spec of the
+      backend path turns it on. Opened as a draft, merged once 8d is in and the live checks on
+      staging are done.
 11. `chore(frontend): remove the CFS BTC send path`. Removes the flag and every flag-off branch:
     - the `sendBtc`/`signBtc` signer wrappers and the redundant pre-send re-check;
     - OpenCryptoPay's `btc_caller_sign` path;
