@@ -443,12 +443,11 @@ describe('SwapForm', () => {
 			balancesStore.reset(mockValidErc20Token.id);
 		});
 
+		const sourceToken = { ...mockValidIcToken, enabled: true };
+
 		const renderWithDestination = (destinationToken: Token) => {
 			mockContext.set(SWAP_CONTEXT_KEY, {
-				...initSwapContext({
-					sourceToken: { ...mockValidIcToken, enabled: true },
-					destinationToken
-				}),
+				...initSwapContext({ sourceToken, destinationToken }),
 				sourceTokenExchangeRate: readable(10),
 				destinationTokenExchangeRate: readable(2)
 			});
