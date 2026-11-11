@@ -16,3 +16,9 @@ export interface IcrcUnavailableCustomToken {
 	name?: string;
 	customToken: BackendCustomToken;
 }
+
+// What the ledger canister of an unavailable token answers when the Help page checks it.
+export type IcrcLedgerStatus =
+	| { status: 'responding' | 'no_ledger' | 'not_responding' }
+	// The IC error code (e.g. IC0536), when the replica names one.
+	| { status: 'error'; errorCode?: string };
