@@ -1,11 +1,11 @@
-import IcUnavailableTokens from '$icp/components/tokens/IcUnavailableTokens.svelte';
 import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 import type { IcrcUnavailableCustomToken } from '$icp/types/icrc-custom-token';
 import * as backendApi from '$lib/api/backend.api';
+import HelpUnavailableTokens from '$lib/components/help/HelpUnavailableTokens.svelte';
 import {
-	MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_CONFIRM_DELETE,
-	MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_DELETE,
-	MANAGE_TOKENS_IC_UNAVAILABLE_TOKENS
+	HELP_UNAVAILABLE_TOKENS_CARD,
+	HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON,
+	HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -18,7 +18,7 @@ import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 
-describe('IcUnavailableTokens', () => {
+describe('HelpUnavailableTokens', () => {
 	const mockUnavailableToken = (ledgerCanisterId: string): IcrcUnavailableCustomToken => ({
 		ledgerCanisterId,
 		customToken: {
@@ -52,27 +52,27 @@ describe('IcUnavailableTokens', () => {
 	});
 
 	it('should render nothing when every saved token loads', () => {
-		const { queryByTestId } = render(IcUnavailableTokens);
+		const { queryByTestId } = render(HelpUnavailableTokens);
 
-		expect(queryByTestId(MANAGE_TOKENS_IC_UNAVAILABLE_TOKENS)).not.toBeInTheDocument();
+		expect(queryByTestId(HELP_UNAVAILABLE_TOKENS_CARD)).not.toBeInTheDocument();
 	});
 
 	it('should list each unavailable token by its symbol, or else by its ledger canister ID', () => {
 		icrcUnavailableCustomTokensStore.set([importedToken, curatedToken]);
 
-		const { getByTestId, getAllByTestId } = render(IcUnavailableTokens);
+		const { getByTestId, getAllByTestId } = render(HelpUnavailableTokens);
 
-		const section = getByTestId(MANAGE_TOKENS_IC_UNAVAILABLE_TOKENS);
+		const card = getByTestId(HELP_UNAVAILABLE_TOKENS_CARD);
 
-		expect(section).toHaveTextContent(en.tokens.manage.text.unavailable_tokens);
-		expect(section).toHaveTextContent(
-			replaceOisyPlaceholders(en.tokens.manage.info.unavailable_tokens)
+		expect(card).toHaveTextContent(en.help.text.unavailable_tokens_title);
+		expect(card).toHaveTextContent(
+			replaceOisyPlaceholders(en.help.text.unavailable_tokens_description)
 		);
-		expect(section).toHaveTextContent(importedToken.ledgerCanisterId);
-		expect(section).toHaveTextContent('TST');
-		expect(section).not.toHaveTextContent(curatedToken.ledgerCanisterId);
+		expect(card).toHaveTextContent(importedToken.ledgerCanisterId);
+		expect(card).toHaveTextContent('TST');
+		expect(card).not.toHaveTextContent(curatedToken.ledgerCanisterId);
 
-		expect(getAllByTestId(MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_DELETE)).toHaveLength(2);
+		expect(getAllByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON)).toHaveLength(2);
 	});
 
 	it('should ask for confirmation and delete nothing when cancelled', async () => {
@@ -80,18 +80,16 @@ describe('IcUnavailableTokens', () => {
 
 		icrcUnavailableCustomTokensStore.set([importedToken]);
 
-		const { getByTestId, getByText, queryByTestId } = render(IcUnavailableTokens);
+		const { getByTestId, getByText, queryByTestId } = render(HelpUnavailableTokens);
 
-		await fireEvent.click(getByTestId(MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_DELETE));
+		await fireEvent.click(getByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON));
 
-		expect(getByTestId(MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_CONFIRM_DELETE)).toBeInTheDocument();
+		expect(getByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON)).toBeInTheDocument();
 
 		await fireEvent.click(getByText(en.core.text.cancel));
 
-		expect(
-			queryByTestId(MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_CONFIRM_DELETE)
-		).not.toBeInTheDocument();
-		expect(getByTestId(MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_DELETE)).toBeInTheDocument();
+		expect(queryByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON)).not.toBeInTheDocument();
+		expect(getByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON)).toBeInTheDocument();
 
 		expect(removeCustomTokenMock).not.toHaveBeenCalled();
 		expect(get(icrcUnavailableCustomTokensStore)).toEqual([importedToken]);
@@ -110,13 +108,13 @@ describe('IcUnavailableTokens', () => {
 
 		icrcUnavailableCustomTokensStore.set([importedToken, curatedToken]);
 
-		const { getAllByTestId, getByTestId } = render(IcUnavailableTokens);
+		const { getAllByTestId, getByTestId } = render(HelpUnavailableTokens);
 
-		const [deleteImportedToken] = getAllByTestId(MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_DELETE);
+		const [deleteImportedToken] = getAllByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON);
 
 		await fireEvent.click(deleteImportedToken);
 
-		await fireEvent.click(getByTestId(MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_CONFIRM_DELETE));
+		await fireEvent.click(getByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON));
 
 		await waitFor(() => {
 			expect(get(icrcUnavailableCustomTokensStore)).toEqual([curatedToken]);
@@ -150,11 +148,11 @@ describe('IcUnavailableTokens', () => {
 
 		icrcUnavailableCustomTokensStore.set([importedToken]);
 
-		const { getByTestId } = render(IcUnavailableTokens);
+		const { getByTestId } = render(HelpUnavailableTokens);
 
-		await fireEvent.click(getByTestId(MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_DELETE));
+		await fireEvent.click(getByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON));
 
-		await fireEvent.click(getByTestId(MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_CONFIRM_DELETE));
+		await fireEvent.click(getByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON));
 
 		await waitFor(() => {
 			expect(toastsErrorMock).toHaveBeenCalledExactlyOnceWith({
@@ -174,11 +172,11 @@ describe('IcUnavailableTokens', () => {
 
 		icrcUnavailableCustomTokensStore.set([importedToken]);
 
-		const { getByTestId } = render(IcUnavailableTokens);
+		const { getByTestId } = render(HelpUnavailableTokens);
 
-		await fireEvent.click(getByTestId(MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_DELETE));
+		await fireEvent.click(getByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON));
 
-		await fireEvent.click(getByTestId(MANAGE_TOKENS_IC_UNAVAILABLE_TOKEN_CONFIRM_DELETE));
+		await fireEvent.click(getByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON));
 
 		expect(removeCustomTokenMock).not.toHaveBeenCalled();
 		expect(get(icrcUnavailableCustomTokensStore)).toEqual([importedToken]);

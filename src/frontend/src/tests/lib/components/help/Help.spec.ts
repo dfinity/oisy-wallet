@@ -1,3 +1,4 @@
+import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 import Help from '$lib/components/help/Help.svelte';
 import { APP_VERSION } from '$lib/constants/app.constants';
 import { OISY_NAME } from '$lib/constants/oisy.constants';
@@ -5,12 +6,15 @@ import {
 	HELP_EXPLORERS_CARD,
 	HELP_ICPSWAP_CARD,
 	HELP_NETWORK_EXPLORERS_CARD,
-	HELP_SUPPORT_CARD
+	HELP_SUPPORT_CARD,
+	HELP_UNAVAILABLE_TOKENS_CARD
 } from '$lib/constants/test-ids.constants';
 import { trackHelp } from '$lib/services/help-analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import { render } from '@testing-library/svelte';
 
 vi.mock('$lib/services/help-analytics.services', async (importOriginal) => ({
@@ -23,7 +27,42 @@ describe('Help', () => {
 		vi.clearAllMocks();
 
 		ethAddressStore.reset();
+		icrcUnavailableCustomTokensStore.set([]);
 		mockAuthStore();
+	});
+
+	it('puts the unavailable tokens card first while a saved token cannot be loaded', () => {
+		const ledgerCanisterId = 'aiw2p-tyaaa-aaaam-aebyq-cai';
+
+		icrcUnavailableCustomTokensStore.set([
+			{
+				ledgerCanisterId,
+				customToken: {
+					token: {
+						Icrc: { ledger_id: Principal.fromText(ledgerCanisterId), index_id: toNullable() }
+					},
+					version: toNullable(1n),
+					enabled: true,
+					section: toNullable(),
+					allow_external_content_source: toNullable(),
+					allowed_external_content_source_urls: toNullable()
+				}
+			}
+		]);
+
+		const { getByTestId } = render(Help);
+
+		expect(
+			getByTestId(HELP_UNAVAILABLE_TOKENS_CARD).compareDocumentPosition(
+				getByTestId(HELP_SUPPORT_CARD)
+			) & Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
+	});
+
+	it('shows no unavailable tokens card while every saved token loads', () => {
+		const { queryByTestId } = render(Help);
+
+		expect(queryByTestId(HELP_UNAVAILABLE_TOKENS_CARD)).not.toBeInTheDocument();
 	});
 
 	it('renders the four cards in order: Support, networks, providers, ICPSwap', () => {
