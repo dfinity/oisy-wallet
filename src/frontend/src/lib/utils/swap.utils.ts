@@ -46,12 +46,14 @@ import {
 	type SwapSlippageStatus
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import type { TokenUi } from '$lib/types/token-ui';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
+import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -528,3 +530,18 @@ export const calculateSwapGainUsd = ({
 
 export const isKongSupportedIcToken = (token: TokenReply): token is { IC: ICTokenReply } =>
 	'IC' in token && !token.IC.is_removed && token.IC.chain === 'IC';
+
+/**
+ * Whether a token can be picked to pay a swap with. A balance of zero cannot pay. A token that is not
+ * enabled has no balance loaded unless Swap loaded one (ICRC tokens), and without one it cannot be
+ * picked either. An enabled token whose balance is still loading can.
+ */
+export const canPayWithToken = (token: TokenUi): boolean => {
+	const { balance } = token;
+
+	if (nonNullish(balance)) {
+		return balance > ZERO;
+	}
+
+	return !isTokenToggleable(token) || token.enabled;
+};

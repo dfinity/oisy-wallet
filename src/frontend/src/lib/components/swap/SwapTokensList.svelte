@@ -24,6 +24,7 @@
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
+	import { canPayWithToken } from '$lib/utils/swap.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { sortTokens } from '$lib/utils/tokens.utils';
 
@@ -96,6 +97,13 @@
 		setTokens(tokens);
 	});
 
+	// Listed, but not to be picked to pay with: a token without a balance to pay from.
+	let unpayableTokenIds = $derived(
+		new Set(
+			side === 'source' ? tokens.filter((token) => !canPayWithToken(token)).map(({ id }) => id) : []
+		)
+	);
+
 	// Only networks with something to pick: with BTC on the other side, Bitcoin has nothing left. A
 	// network kept from an earlier visit that is not among them reads as all networks in the list.
 	let availableNetworks = $derived(
@@ -110,7 +118,12 @@
 	showStakeBalance={false}
 >
 	{#snippet tokenListItem(token, onClick)}
-		<ModalTokensListItem {onClick} selected={token.id === selectedToken?.id} {token} />
+		<ModalTokensListItem
+			disabled={unpayableTokenIds.has(token.id)}
+			{onClick}
+			selected={token.id === selectedToken?.id}
+			{token}
+		/>
 	{/snippet}
 	{#snippet toolbar()}
 		<ButtonCancel fullWidth={true} onclick={onCloseTokensList} />
