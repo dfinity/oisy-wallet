@@ -151,7 +151,8 @@ dependencies = [
  "ic-canister-sig-creation",
  "ic-cdk 0.20.3",
  "ic-cdk-bitcoin-canister",
- "ic-cdk-management-canister",
+ "ic-cdk-management-canister 0.1.1",
+ "ic-cdk-management-canister 0.3.0",
  "ic-cdk-timers",
  "ic-cycles-ledger-client",
  "ic-ed25519",
@@ -1626,6 +1627,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "ic-cdk-management-canister"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c8fb578283e842e9f2c84a4477f751ee2146bea13017a10d227afd952d349a2"
+dependencies = [
+ "candid",
+ "ic-cdk 0.20.3",
+ "ic-management-canister-types 0.11.0",
+ "serde",
+ "serde_bytes",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "ic-cdk-timers"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1757,6 +1772,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ic-management-canister-types"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b3e3162bdfbdbc6ca3b4bfa8145f9ba19cddaf3eb8d1af8dc7be6a39557b76c2"
+dependencies = [
+ "candid",
+ "serde",
+ "serde_bytes",
+]
+
+[[package]]
 name = "ic-metrics-encoder"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1860,7 +1886,7 @@ dependencies = [
  "hex-literal 1.1.0",
  "hkdf",
  "ic-cdk 0.20.3",
- "ic-cdk-management-canister",
+ "ic-cdk-management-canister 0.1.1",
  "ic-stable-structures",
  "ic_bls12_381",
  "lazy_static",
@@ -3409,7 +3435,7 @@ dependencies = [
  "ic-canister-sig-creation",
  "ic-cdk 0.20.3",
  "ic-cdk-bitcoin-canister",
- "ic-cdk-management-canister",
+ "ic-cdk-management-canister 0.1.1",
  "ic-cycles-ledger-client",
  "ic-metrics-encoder",
  "paste",
