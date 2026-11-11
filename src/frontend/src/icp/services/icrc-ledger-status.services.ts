@@ -2,7 +2,8 @@ import { getCanisterExistence } from '$icp/api/canister-state.api';
 import { metadata } from '$icp/api/icrc-ledger.api';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcrcLedgerStatus } from '$icp/types/icrc-custom-token';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
+import { mapTokenMetadata } from '@icp-sdk/canisters/ledger/icrc';
 import {
 	CertifiedRejectErrorCode,
 	RejectError,
@@ -52,9 +53,11 @@ export const checkIcrcLedgerStatus = async ({
 	ledgerCanisterId: LedgerCanisterIdText;
 }): Promise<IcrcLedgerStatus> => {
 	try {
-		await metadata({ identity, ledgerCanisterId, certified: false });
+		const response = await metadata({ identity, ledgerCanisterId, certified: false });
 
-		return { status: 'responding' };
+		// An answer without the name, symbol, decimals or fee that a token needs still leaves the token
+		// unavailable, so "responds now" would be wrong for it.
+		return isNullish(mapTokenMetadata(response)) ? { status: 'error' } : { status: 'responding' };
 	} catch (err: unknown) {
 		if (err instanceof RejectError) {
 			const { code } = err;

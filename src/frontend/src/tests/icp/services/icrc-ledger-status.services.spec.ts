@@ -2,6 +2,7 @@ import * as canisterStateApi from '$icp/api/canister-state.api';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import { checkIcrcLedgerStatus } from '$icp/services/icrc-ledger-status.services';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import type { IcrcTokenMetadataResponse } from '@icp-sdk/canisters/ledger/icrc';
 import {
 	CertifiedRejectErrorCode,
 	HttpErrorCode,
@@ -36,6 +37,14 @@ describe('icrc-ledger-status.services', () => {
 				new UncertifiedRejectErrorCode(requestId, rejectCode, 'test', rejectErrorCode, undefined)
 			);
 
+		// The metadata a token needs to load: name, symbol, decimals and fee.
+		const tokenMetadata: IcrcTokenMetadataResponse = [
+			['icrc1:name', { Text: 'Test' }],
+			['icrc1:symbol', { Text: 'TST' }],
+			['icrc1:decimals', { Nat: 8n }],
+			['icrc1:fee', { Nat: 10_000n }]
+		];
+
 		const check = () => checkIcrcLedgerStatus({ identity: mockIdentity, ledgerCanisterId });
 
 		let metadataSpy: MockInstance<typeof icrcLedgerApi.metadata>;
@@ -61,10 +70,22 @@ describe('icrc-ledger-status.services', () => {
 		});
 
 		it('should report a ledger that answers', async () => {
-			metadataSpy.mockResolvedValue([]);
+			metadataSpy.mockResolvedValue(tokenMetadata);
 
 			await expect(check()).resolves.toEqual({ status: 'responding' });
 		});
+
+		it.each<{ description: string; response: IcrcTokenMetadataResponse }>([
+			{ description: 'no metadata', response: [] },
+			{ description: 'a name only', response: [['icrc1:name', { Text: 'Test' }]] }
+		])(
+			'should report a ledger that answers with $description as an error',
+			async ({ response }) => {
+				metadataSpy.mockResolvedValue(response);
+
+				await expect(check()).resolves.toEqual({ status: 'error' });
+			}
+		);
 
 		it.each(['IC0301', 'IC0537'])(
 			'should report no ledger when the replica rejects with %s',

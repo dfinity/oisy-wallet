@@ -236,9 +236,12 @@ const loadCustomIcrcTokensData = async ({
 
 			const ledgerCanisterId = token.Icrc.ledger_id.toText();
 
+			const result = results[index];
+
 			if (
 				!RETIRED_ICRC_LEDGER_CANISTER_IDS.includes(ledgerCanisterId) &&
-				results[index].status === 'fulfilled'
+				result.status === 'fulfilled' &&
+				nonNullish(result.value)
 			) {
 				return acc;
 			}

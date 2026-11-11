@@ -515,6 +515,19 @@ describe('icrc.services', () => {
 				]);
 			});
 
+			it('should list a token whose metadata cannot be mapped as unavailable', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+
+				// The ledger answers, but without the symbol, decimals and fee a token needs.
+				ledgerCanisterMock.metadata.mockResolvedValue([['icrc1:name', { Text: mockName }]]);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([
+					{ ledgerCanisterId: mockLedgerCanisterId, customToken: mockCustomToken }
+				]);
+			});
+
 			it('should list a curated token whose ledger fails with its symbol and name', async () => {
 				const [curatedToken] = SNS_BUILTIN_TOKENS;
 
