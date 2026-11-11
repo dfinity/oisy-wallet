@@ -61,7 +61,7 @@ final class BrowserTests: XCTestCase {
     let task = Task { try await request(provider, "eth_requestAccounts") }
     try await pending(provider)
     XCTAssertEqual(provider.pending?.origin, origin())
-    provider.reject()
+    provider.reject(requestID: try XCTUnwrap(provider.pending).id)
     await failure(4001) { try await task.value }
     XCTAssertFalse(provider.connected)
   }
@@ -72,7 +72,7 @@ final class BrowserTests: XCTestCase {
     let params: BrowserJSON = .array([.object(["eth_accounts": .object([:])])])
     let task = Task { try await request(provider, "wallet_requestPermissions", params) }
     try await pending(provider)
-    provider.approve()
+    provider.approve(requestID: try XCTUnwrap(provider.pending).id)
     let permissions = try await task.value
     XCTAssertEqual(permissions.array?.first?.object?["parentCapability"], .string("eth_accounts"))
     XCTAssertEqual(permissions.array?.first?.object?["invoker"], .string(origin().value))
@@ -88,11 +88,51 @@ final class BrowserTests: XCTestCase {
     let task = Task { try await request(provider, "eth_requestAccounts") }
     try await pending(provider)
     await failure(-32002) { try await self.request(provider, "eth_requestAccounts") }
+    let oldID = try XCTUnwrap(provider.pending).id
     provider.navigate(to: origin("https://1inch.com"))
     await failure(4001) { try await task.value }
-    provider.approve()
+    provider.approve(requestID: oldID)
     XCTAssertFalse(provider.connected)
   }
+  func testStaleConsentCallbacksCannotApproveOrCancelReplacementRequests() async throws {
+    // Cover cross-origin navigation, same-origin document replacement and wallet changes.
+    for replacement in 0..<3 {
+      let provider = router()
+      let first = Task { try await request(provider, "eth_requestAccounts") }
+      try await pending(provider)
+      let displayed = try XCTUnwrap(provider.pending)
+      if replacement == 2 {
+        provider.updateAccount(
+          BrowserAccount(
+            principal: "replacement", address: "0x" + String(repeating: "2", count: 40),
+            expiresAt: account.expiresAt))
+      } else {
+        provider.navigate(to: replacement == 0 ? origin("https://1inch.com") : origin())
+      }
+      await failure(4001) { try await first.value }
+      let second = Task { try await request(provider, "eth_requestAccounts") }
+      try await pending(provider)
+      let current = try XCTUnwrap(provider.pending)
+      XCTAssertNotEqual(displayed.id, current.id)
+      var events: [[String]] = []
+      provider.accountsChanged = { events.append($0) }
+
+      provider.approve(requestID: displayed.id)
+      provider.reject(requestID: displayed.id)  // Includes a delayed sheet dismissal.
+      XCTAssertEqual(provider.pending?.id, current.id)
+      XCTAssertTrue(provider.grants.isEmpty)
+      XCTAssertTrue(events.isEmpty)
+      let accounts = try await request(provider, "eth_accounts")
+      XCTAssertEqual(accounts, .array([]))
+
+      provider.approve(requestID: current.id)
+      let approved = try await second.value
+      XCTAssertEqual(approved, .array([.string(current.account.address)]))
+      XCTAssertEqual(provider.grants, [current.origin.value])
+      XCTAssertEqual(events, [[current.account.address]])
+    }
+  }
+
   func testForgedOriginAndStaleDocumentCannotRequest() async {
     let provider = router()
     let old = provider.document
@@ -116,7 +156,7 @@ final class BrowserTests: XCTestCase {
     provider.navigate(to: origin())
     let task = Task { try await request(provider, "eth_requestAccounts") }
     try await pending(provider)
-    provider.approve()
+    provider.approve(requestID: try XCTUnwrap(provider.pending).id)
     _ = try await task.value
     XCTAssertEqual(store.origins(for: account.principal), [origin().value])
     provider.navigate(to: origin("https://1inch.com"))

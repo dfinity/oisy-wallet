@@ -180,8 +180,9 @@ final class BrowserProvider {
     if pending?.origin.value == value { reject() }
     if origin?.value == value { accountsChanged?([]) }
   }
-  func approve() {
-    guard let request = pending, request.document == document, request.origin == origin,
+  func approve(requestID: UUID) {
+    guard let request = pending, request.id == requestID else { return }
+    guard request.document == document, request.origin == origin,
       request.account == account, request.account.isValid
     else {
       reject(error: .disconnected)
@@ -192,7 +193,13 @@ final class BrowserProvider {
     complete(.success(.array([.string(request.account.address)])))
     accountsChanged?([request.account.address])
   }
-  func reject(error: BrowserRPCError = .rejected) { complete(.failure(error)) }
+  func reject(requestID: UUID) {
+    guard pending?.id == requestID else { return }
+    reject()
+  }
+  // Lifecycle cancellation intentionally invalidates the current request. UI callbacks
+  // must use the request-bound overload above.
+  private func reject(error: BrowserRPCError = .rejected) { complete(.failure(error)) }
   private func complete(_ result: Result<BrowserJSON, any Error>) {
     let callback = continuation
     continuation = nil

@@ -1,4 +1,3 @@
-import Capacitor
 import UIKit
 
 @main

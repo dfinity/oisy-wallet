@@ -149,6 +149,12 @@ Tip: the `format` job in `frontend-checks.yml` will auto-commit prettier
 fixes on non-fork PRs, but you should still run `npm run format` locally to
 keep diffs reviewable.
 
+For mobile host or shared web/native contract changes, also run the simulator
+suite described in the [mobile compatibility guide](../../mobile/capacitor/docs/shared-web-contract.md#enforcement-status-and-next-safeguards).
+`mobile-checks.yml` builds the normal website and offline test fixtures separately,
+verifies the pinned native SDK, and tests the iOS host against those shared components.
+It must not receive deployment credentials or publish fixture builds.
+
 ## 5. CI jobs you must keep green
 
 | Workflow                                                     | Job(s)                   | What it runs                                                                                                                                                                                                         |

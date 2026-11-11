@@ -471,19 +471,26 @@ restrict the authenticated identity or describe the current Send/Swap capabiliti
 
 ## Enforcement status and next safeguards
 
-As audited on 2026-10-28, frontend CI runs types, lint and sharded Vitest, including
-mobile TS tests. It does **not** build the mobile target or run Xcode/real WebKit
-tests. Documentation and local checks alone cannot guarantee compatibility.
+Frontend CI runs types, lint and sharded Vitest, including mobile TypeScript tests.
+The `Mobile Compatibility` workflow additionally runs on pull requests, merge
+queues and main pushes. Its read-only macOS job:
 
-Proposed next changes:
+- checks audit configuration and native SDK provenance tests;
+- builds the normal website with test authority disabled and checks fixture absence;
+- builds offline web fixtures from the same source;
+- verifies and builds the pinned SDK plus reviewed local patch, then generates the
+  iOS project and runs all native, real WebKit and UI simulator tests;
+- checks that offline `public/` resources are confined to the test bundle.
 
-- Build the mobile target on relevant shared-frontend/config/mobile changes.
-- Run the existing simulator suite on macOS for those changes, including same-source
-  web UI and native bridge tests. Keep fake identities isolated and block real
-  transaction/network execution in test fixtures.
-- Build the website with `VITE_MOBILE_UI_TEST=false` and assert fixture absence.
-  Before device installation, check environment, host compatibility and signing
-  identity; the app target must not include the test-only `public/` resources.
+The job needs no deployment secrets, Apple account or device signing profile. It
+uses Xcode 26.2, an iPhone 17 simulator and the SDK's pinned Rust toolchain. Branch
+protection must separately require `iOS host and shared web`; adding the workflow
+does not change repository rules. The dormant `OisyHostPlugin` native Capacitor
+adapter has been removed. `LiveWalletBridge` remains the only wallet host bridge;
+the shared frontend retains its transport fallback for older installed apps.
+
+Remaining safeguards:
+
 - Add shared route/message fixtures and explicit unsupported-route coverage so
   changes to one language's contract cannot silently diverge from the other.
 - Record and support a defined range of installed app versions for canister/API
@@ -493,8 +500,7 @@ Proposed next changes:
   clock or mocked provider cannot prove actual passkeys, payment redirects or a
   funded send.
 
-CI workflows and CODEOWNERS were not changed by this audit. Those protected paths
-require an explicitly scoped repository change. Android is still unimplemented;
+CODEOWNERS and branch protection are unchanged. Android is still unimplemented;
 its future host must pass the same behavioral contract and its own device checks.
 
 ## Dependencies

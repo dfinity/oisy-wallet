@@ -4,6 +4,8 @@ struct BrowserView: View {
   @Bindable var browser: BrowserModel
   var openWallet: () -> Void
   @State private var address = ""
+  @State private var connectionRequest: BrowserConnectionRequest?
+  @State private var presentedConnectionID: UUID?
   @FocusState private var addressFocused: Bool
   @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -113,12 +115,14 @@ struct BrowserView: View {
       }
     }
     .onChange(of: browser.url, initial: true) { _, url in address = url?.absoluteString ?? "" }
-    .sheet(
-      item: Binding(
-        get: { browser.provider.pending }, set: { if $0 == nil { browser.provider.reject() } })
-    ) { request in
+    .onChange(of: browser.provider.pending?.id, initial: true) { _, _ in
+      synchronizeConnectionSheet()
+    }
+    .sheet(item: $connectionRequest, onDismiss: connectionSheetDismissed) { request in
       BrowserConnectView(
-        request: request, approve: browser.provider.approve, reject: { browser.provider.reject() }
+        request: request,
+        approve: { browser.provider.approve(requestID: request.id) },
+        reject: { browser.provider.reject(requestID: request.id) }
       )
       .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.height(520), .large])
       .presentationDragIndicator(.visible)
@@ -131,6 +135,23 @@ struct BrowserView: View {
     } message: {
       Text(verbatim: browser.error ?? "")
     }
+  }
+
+  private func synchronizeConnectionSheet() {
+    if let presentedConnectionID {
+      // Finish dismissing the old prompt before presenting its replacement. SwiftUI's
+      // delayed onDismiss must never reject a request that was not on that sheet.
+      if browser.provider.pending?.id != presentedConnectionID { connectionRequest = nil }
+    } else if let request = browser.provider.pending {
+      presentedConnectionID = request.id
+      connectionRequest = request
+    }
+  }
+
+  private func connectionSheetDismissed() {
+    if let presentedConnectionID { browser.provider.reject(requestID: presentedConnectionID) }
+    presentedConnectionID = nil
+    synchronizeConnectionSheet()
   }
 
   private func openAddress() {

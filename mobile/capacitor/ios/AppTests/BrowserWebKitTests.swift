@@ -53,6 +53,63 @@ final class BrowserWebKitTests: XCTestCase {
   func testPageWorldDiscoveryConsentEventsAndSubframeRejection() async throws {
     try await exerciseBridge(typeSize: .large, captureName: "browser-native-consent")
   }
+  func testReplacementConsentWaitsForOldSheetDismissal() async throws {
+    let browser = BrowserModel()
+    let provider = browser.provider
+    provider.updateAccount(
+      BrowserAccount(
+        principal: "consent-sheet-test", address: "0x" + String(repeating: "1", count: 40),
+        expiresAt: .now.addingTimeInterval(600)))
+    let firstOrigin = try XCTUnwrap(BrowserOrigin(url: URL(string: "https://first.example")!))
+    let secondOrigin = try XCTUnwrap(BrowserOrigin(url: URL(string: "https://second.example")!))
+    provider.navigate(to: firstOrigin)
+    let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
+    let previous = scene.keyWindow
+    let window = UIWindow(windowScene: scene)
+    let root = UIHostingController(rootView: BrowserView(browser: browser, openWallet: {}))
+    window.rootViewController = root
+    window.makeKeyAndVisible()
+    defer {
+      provider.updateAccount(nil)
+      window.isHidden = true
+      window.rootViewController = nil
+      previous?.makeKey()
+    }
+    let firstDocument = provider.document
+    let first = Task {
+      try await provider.request(
+        method: "eth_requestAccounts", origin: firstOrigin, document: firstDocument)
+    }
+    try await waitFor { root.presentedViewController != nil && provider.pending != nil }
+    try await Task.sleep(for: .milliseconds(400))
+    let oldSheet = try XCTUnwrap(root.presentedViewController)
+    let oldRequest = try XCTUnwrap(provider.pending)
+    // A navigation arrives while the user is dismissing the old prompt.
+    oldSheet.dismiss(animated: true)
+    provider.navigate(to: secondOrigin)
+    _ = await first.result
+    let secondDocument = provider.document
+    let second = Task {
+      try await provider.request(
+        method: "eth_requestAccounts", origin: secondOrigin, document: secondDocument)
+    }
+    try await waitFor { provider.pending != nil }
+    let replacement = try XCTUnwrap(provider.pending)
+    try await waitFor {
+      root.presentedViewController != nil && root.presentedViewController !== oldSheet
+    }
+    try await Task.sleep(for: .milliseconds(400))
+    XCTAssertEqual(provider.pending?.id, replacement.id)
+    XCTAssertTrue(provider.grants.isEmpty)
+    provider.approve(requestID: oldRequest.id)
+    provider.reject(requestID: oldRequest.id)
+    XCTAssertEqual(provider.pending?.id, replacement.id)
+    provider.approve(requestID: replacement.id)
+    let result = try await second.value
+    XCTAssertEqual(result, .array([.string(replacement.account.address)]))
+    try await waitFor { root.presentedViewController == nil }
+  }
+
   func testAccessibleConsentPresentation() async throws {
     try await exerciseBridge(
       typeSize: .accessibility5, captureName: "browser-native-consent-accessibility")
@@ -121,7 +178,7 @@ final class BrowserWebKitTests: XCTestCase {
     attachment.name = captureName
     attachment.lifetime = .keepAlways
     add(attachment)
-    browser.provider.approve()
+    browser.provider.approve(requestID: try XCTUnwrap(browser.provider.pending).id)
     let result = try await connect.value
     XCTAssertEqual(result, "[\"\(fixtureAddress)\"]")
     browser.provider.revoke()

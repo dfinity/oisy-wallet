@@ -28,6 +28,21 @@ before SDK cleanup while removing UI authority immediately.
 Already-issued app delegations may remain usable until their signed expiry; local
 logout must not be described as immediate cryptographic revocation of every copy.
 
+## Background privacy and Explore consent
+
+Before the scene becomes inactive, `SceneDelegate` synchronously puts an opaque
+cover over the entire window, including presented sheets. This keeps wallet data,
+notes and Explore pages out of the iOS app-switcher snapshot. Foreground return
+checks the existing session's deadline and replaces expired wallet content before
+removing the cover. This is snapshot privacy, not a biometric app lock or protection
+against screenshots taken while the app is active.
+
+Explore approval, rejection and dismissal callbacks carry the exact consent
+request ID. A stale callback cannot authorize or cancel a replacement request,
+even after same-origin navigation or an account change. The UI finishes dismissing
+the old sheet before presenting a new request. Grants remain scoped to origin and
+wallet principal; Explore still cannot sign or broadcast transactions.
+
 ## HTTPS callback boundary
 
 The callback is `https://audit.oisy.com/signer-callback`. II validates the declared
