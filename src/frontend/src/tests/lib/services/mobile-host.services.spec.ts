@@ -1,9 +1,9 @@
+import { mobileHostAvailable as hostAvailable } from '$lib/providers/mobile-host.providers';
 import {
 	clearMobileBack,
 	connectMobileHost,
 	connectMobileInteractions,
 	finishMobileRefresh,
-	mobileHostAvailable,
 	navigateMobileHost,
 	openMobileAccount,
 	prepareMobileBack,
@@ -11,7 +11,6 @@ import {
 	requestMobileWallet,
 	setMobilePresentation
 } from '$lib/services/mobile-host.services';
-import { Capacitor } from '@capacitor/core';
 
 const { host } = vi.hoisted(() => ({
 	host: {
@@ -33,9 +32,9 @@ const { host } = vi.hoisted(() => ({
 			>()
 	}
 }));
-vi.mock('@capacitor/core', () => ({
-	registerPlugin: () => host,
-	Capacitor: { isNativePlatform: vi.fn(), getPlatform: vi.fn() }
+vi.mock('$lib/providers/mobile-host.providers', () => ({
+	mobileHostTransport: host,
+	mobileHostAvailable: vi.fn()
 }));
 
 describe('mobile host boundary', () => {
@@ -54,10 +53,7 @@ describe('mobile host boundary', () => {
 
 	beforeEach(async () => {
 		vi.clearAllMocks();
-		vi.stubEnv('VITE_MOBILE_SHELL', 'true');
-		vi.stubGlobal('location', new URL('capacitor://localhost/'));
-		vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
-		vi.mocked(Capacitor.getPlatform).mockReturnValue('ios');
+		vi.mocked(hostAvailable).mockReturnValue(true);
 		host.ready.mockResolvedValue(state);
 		host.addListener.mockResolvedValue({ remove });
 		remove.mockResolvedValue(undefined);
@@ -70,25 +66,8 @@ describe('mobile host boundary', () => {
 		vi.unstubAllEnvs();
 	});
 
-	it('does not enable the host for a normal website or development server', () => {
-		for (const origin of [
-			'https://audit.oisy.com',
-			'https://localhost',
-			'capacitor://localhost.evil',
-			'http://127.0.0.1:5173'
-		]) {
-			vi.stubGlobal('location', new URL(origin));
-
-			expect(mobileHostAvailable()).toBeFalsy();
-		}
-		vi.stubGlobal('location', new URL('capacitor://localhost'));
-		vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
-
-		expect(mobileHostAvailable()).toBeFalsy();
-	});
-
-	it('requires the mobile build flag', async () => {
-		vi.stubEnv('VITE_MOBILE_SHELL', 'false');
+	it('requires the WebKit host for every command and listener', async () => {
+		vi.mocked(hostAvailable).mockReturnValue(false);
 
 		await expect(connectMobileHost(vi.fn())).rejects.toThrow('unavailable');
 		await expect(navigateMobileHost('wallet')).rejects.toThrow('unavailable');
@@ -173,13 +152,6 @@ describe('mobile host boundary', () => {
 		await expect(finishMobileRefresh(Number.NaN)).rejects.toThrow();
 		expect(host.prepareBack).toHaveBeenCalledOnce();
 		expect(host.finishRefresh).toHaveBeenCalledOnce();
-	});
-
-	it('reserves the Android https local origin without accepting iOS https', () => {
-		vi.mocked(Capacitor.getPlatform).mockReturnValue('android');
-		vi.stubGlobal('location', new URL('https://localhost'));
-
-		expect(mobileHostAvailable()).toBeTruthy();
 	});
 
 	it('subscribes before reading the root and releases its listener on unmount', async () => {

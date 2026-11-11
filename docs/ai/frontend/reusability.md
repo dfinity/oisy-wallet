@@ -347,24 +347,25 @@ with one content snippet for both presentations. Page/native-panel actions wait 
 `waitForNativeSheetClosed` before proceeding. Keep unsupported mobile actions hidden;
 App controls retains the shell's connection management and reload.
 
-## Capacitor host
+## Native WebKit host
 
-`mobile-host.services.ts` is the sole Capacitor transport; feature components do
-not import native plugins. Contract v2 validates fixed navigation, account,
+`mobile-host.services.ts` owns the shared host API; `mobile-host.providers.ts`
+uses only the document-start v2 WebKit transport. Feature components do not import
+native plugins. Listener handles use the local `MobileHostListener` type. Contract v2 validates fixed navigation, account,
 delegation and sign-out commands. `mobile-runtime.services.ts` installs the native
 child through `AuthClientProvider`; `mobile-worker-session.services.ts` provisions
 workers with independent ephemeral keys. Both reuse the normal auth/data lifecycle.
 
-`OISY_MOBILE_SHELL` writes `build-mobile/` and `.svelte-kit-mobile/`, using the same
-route tree as the website. Its build preflight requires the existing
-`VITE_ETHERSCAN_API_KEY` from the current worktree/build environment for EVM history;
-see the [Capacitor build guide](../../../mobile/capacitor/README.md#build-and-run).
+`npm run mobile:fixtures` writes `build-mobile/` and `.svelte-kit-mobile/` from the
+same route tree for XCTest only. Production loads the deployed website and its API
+configuration; there is no bundled wallet or Capacitor fallback. The injected host
+selects mobile auth at runtime. See the [iOS build guide](../../../mobile/capacitor/README.md#build-and-run).
 `MobileHost` maps native roots into Svelte navigation;
 Swift acknowledges routes without echoing navigation. The floating native More
 menu opens the shared `/notes/`, `/earn/` and `/borrow/` routes; Search remains
 the existing wallet filter. `MobileHost` reserves bottom scroll/modal space for
-the native overlay, while feature screens remain shared. Build flags are presentation
-configuration, never authorization. Read the [session boundary](../../../mobile/capacitor/docs/session-boundary.md)
+the native overlay, while feature screens remain shared. Host detection selects
+presentation, never authorization. Read the [session boundary](../../../mobile/capacitor/docs/session-boundary.md)
 for origin checks, worker isolation and the fixed one-hour deadline without renewal.
 The [compatibility guide](../../../mobile/capacitor/docs/shared-web-contract.md) owns paired host/web changes and their checks.
 

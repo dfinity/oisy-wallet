@@ -449,7 +449,7 @@ import XCTest
     _ = try await evaluate(
       web, "document.querySelector('.test-banner button')?.click(); return 'dismissed';")
     XCTAssertNotNil(wallet.session.grant)
-    XCTAssertEqual(web.url?.scheme, "capacitor")
+    XCTAssertEqual(web.url?.scheme, "oisy-test")
     XCTAssertFalse(web.configuration.websiteDataStore.isPersistent)
     for (style, name) in [(UIUserInterfaceStyle.light, "light"), (.dark, "dark")] {
       window.overrideUserInterfaceStyle = style

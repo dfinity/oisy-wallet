@@ -33,17 +33,17 @@ describe('mobile routes', () => {
 		'/earn/',
 		'/borrow/'
 	])('accepts the shared local route %s', (path) =>
-		expect(mobileRouteAllowed(new URL(`capacitor://localhost${path}`))).toBeTruthy()
+		expect(mobileRouteAllowed(new URL(`oisy-test://localhost${path}`))).toBeTruthy()
 	);
 
 	it.each([
 		'https://localhost/',
-		'capacitor://localhost.evil/',
-		'capacitor://user@localhost/',
-		'capacitor://localhost:443/',
-		'capacitor://localhost/mobile/',
-		'capacitor://localhost/?redirect=https://evil.test',
-		'capacitor://localhost/send/',
+		'oisy-test://localhost.evil/',
+		'oisy-test://user@localhost/',
+		'oisy-test://localhost:443/',
+		'oisy-test://localhost/mobile/',
+		'oisy-test://localhost/?redirect=https://evil.test',
+		'oisy-test://localhost/send/',
 		'https://app.uniswap.org/'
 	])('rejects %s', (path) => expect(mobileRouteAllowed(new URL(path))).toBeFalsy());
 });

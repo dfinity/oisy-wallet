@@ -78,10 +78,10 @@ Native navigation, auth and capabilities still require an app update. Roll out t
 compatible website before installing this host. The audit frontend deployed on
 2026-11-09 contains these runtime changes.
 
-`app-environment.json` and `TrustedWalletViewController` own delivery. The existing
-Capacitor package/config scaffold remains, but this controller does not instantiate
-a Capacitor bridge or load its `webDir`. `mobile:sync:ios` updates native scaffold
-and project configuration without building or copying the website. Offline shared-screen fixtures belong only
+`app-environment.json` and `TrustedWalletViewController` own delivery. The host uses
+WKWebView directly; Capacitor and Cordova are not dependencies. `mobile:sync:ios`
+generates app configuration and the XcodeGen project without building or copying
+the website. Offline shared-screen fixtures use the debug-only `oisy-test` handler and belong only
 to the XCTest bundle. There is no packaged-wallet fallback. HTTP failure, an
 incompatible page or WebKit process loss shows a native Retry screen. It discards
 the document and its workers without erasing the session or operation journal.
@@ -493,9 +493,10 @@ or device signing profile. They are not an automatic PR merge gate. Any future
 native CI needs a separate decision about approved SDK access and code review
 before credentials become available.
 
-The dormant `OisyHostPlugin` native Capacitor adapter has been removed.
-`LiveWalletBridge` remains the only wallet host bridge; the shared frontend retains
-its transport fallback for older installed apps.
+`LiveWalletBridge` is the only wallet host bridge. The frontend accepts the injected
+v2 WebKit transport and has no Capacitor fallback or mobile-build activation flag.
+Older bundled Capacitor previews are retired. Current live-web previews keep the
+same v2 contract, app identity and Keychain configuration.
 
 Remaining safeguards:
 
@@ -515,7 +516,7 @@ its future host must pass the same behavioral contract and its own device checks
 
 | Document                                                 | Purpose                                                    |
 | -------------------------------------------------------- | ---------------------------------------------------------- |
-| [Capacitor guide](../README.md)                          | Current runtime, build ownership and verification commands |
+| [iOS host guide](../README.md)                           | Current runtime, build ownership and verification commands |
 | [Session boundary](./session-boundary.md)                | Authoritative lifetime and isolation behavior              |
 | [Frontend testing](../../../docs/ai/frontend/testing.md) | Existing test conventions and E2E restrictions             |
 | [Repository governance](../../../docs/ai/governance.md)  | Protected files and review boundaries                      |

@@ -44,7 +44,7 @@ const MobileListParentSchema = z
 	.max(2048)
 	.refine((path) => {
 		try {
-			const url = new URL(path, 'capacitor://localhost');
+			const url = new URL(path, 'oisy-test://localhost');
 			return (
 				path.startsWith('/') &&
 				!path.startsWith('//') &&
@@ -69,7 +69,7 @@ const matchingListParent = ({ root, backPath }: { root: string; backPath?: strin
 	try {
 		return (
 			(root === 'wallet' || root === 'search') &&
-			new URL(backPath, 'capacitor://localhost').searchParams.has('search') === (root === 'search')
+			new URL(backPath, 'oisy-test://localhost').searchParams.has('search') === (root === 'search')
 		);
 	} catch {
 		return false;

@@ -27,7 +27,6 @@ describe('live website host transport', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.stubEnv('VITE_MOBILE_SHELL', 'false');
 		vi.stubGlobal('location', new URL('https://audit.oisy.com/'));
 		vi.stubGlobal('__oisyHost', host);
 		request.mockResolvedValue({ ok: true, value: handshake });
@@ -138,9 +137,35 @@ describe('live website host transport', () => {
 
 	it('does not accept the XCTest fixture origin in a deployment build', () => {
 		vi.stubEnv('VITE_MOBILE_UI_TEST', 'false');
+		vi.stubGlobal('location', new URL('oisy-test://localhost/'));
+
+		expect(mobileHostAvailable()).toBeFalsy();
+	});
+
+	it('accepts the fixture scheme only in the explicit XCTest build', () => {
+		vi.stubGlobal('location', new URL('oisy-test://localhost/'));
+		vi.stubEnv('VITE_MOBILE_UI_TEST', 'true');
+
+		expect(mobileHostAvailable()).toBeTruthy();
+
+		vi.stubGlobal('location', new URL('oisy-test://localhost.evil/'));
+
+		expect(mobileHostAvailable()).toBeFalsy();
+	});
+
+	it('does not fall back to a legacy Capacitor host for commands or listeners', async () => {
+		vi.stubGlobal('__oisyHost', undefined);
+		vi.stubGlobal('Capacitor', { isNativePlatform: () => true, getPlatform: () => 'ios' });
+		vi.stubEnv('VITE_MOBILE_SHELL', 'true');
 		vi.stubGlobal('location', new URL('capacitor://localhost/'));
 
 		expect(mobileHostAvailable()).toBeFalsy();
+		await expect(mobileHostTransport.ready({ version: 2 })).rejects.toThrow('unavailable');
+		await expect(mobileHostTransport.addListener('navigate', vi.fn())).rejects.toThrow(
+			'unavailable'
+		);
+		expect(request).not.toHaveBeenCalled();
+		expect(addListener).not.toHaveBeenCalled();
 	});
 
 	it('keeps the journal conflict code and rejects malformed replies', async () => {

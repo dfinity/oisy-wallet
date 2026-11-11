@@ -1,6 +1,6 @@
 import { createMobileHistory, mobileScreenPath } from '$lib/utils/mobile-history.utils';
 
-const url = (path: string): URL => new URL(path, 'capacitor://localhost');
+const url = (path: string): URL => new URL(path, 'oisy-test://localhost');
 const tokenPath = '/transactions/?network=InternetComputer&token=ryjl3-tyaaa-aaaaa-aaaba-cai';
 
 describe('mobile history', () => {
@@ -144,9 +144,9 @@ describe('mobile history', () => {
 
 	it.each([
 		'https://localhost/',
-		'capacitor://localhost.evil/',
-		'capacitor://localhost/?redirect=https://evil.test',
-		'capacitor://localhost/send/'
+		'oisy-test://localhost.evil/',
+		'oisy-test://localhost/?redirect=https://evil.test',
+		'oisy-test://localhost/send/'
 	])('rejects unapproved initial locations, commits and Back targets: %s', (location) => {
 		const rejected = new URL(location);
 

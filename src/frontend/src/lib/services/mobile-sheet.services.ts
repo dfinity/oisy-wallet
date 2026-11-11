@@ -5,8 +5,8 @@ import {
 	presentMobileSheet
 } from '$lib/services/mobile-host.services';
 import { busy } from '$lib/stores/busy.store';
+import type { MobileHostListener } from '$lib/types/mobile-host';
 import { focusTopmostOverlay, requestTopmostOverlayClose } from '$lib/utils/overlay.utils';
-import type { PluginListenerHandle } from '@capacitor/core';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
@@ -29,7 +29,7 @@ interface SheetGroup {
 	closing: boolean;
 	failed: boolean;
 	work: Promise<void>;
-	listener?: PluginListenerHandle;
+	listener?: MobileHostListener;
 	fitted: boolean;
 	height?: number;
 	onReleased: (() => void)[];

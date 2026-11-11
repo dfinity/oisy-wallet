@@ -23,7 +23,6 @@ src/frontend/src/tests/fixtures/solana/rpc
 /build-mobile
 /.svelte-kit-mobile
 /mobile/capacitor/ios/App/App/public
-/mobile/capacitor/ios/App/App/capacitor.config.json
 /mobile/ios-native/docs
 /docs/ai/spec-driven-development/specs/2026-10-22-feat-ios-native-mvp/evidence
 

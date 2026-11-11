@@ -16,8 +16,6 @@ settings:
 packages:
   IcpSdk:
     path: ../../.native-sdk/source
-  CapApp-SPM:
-    path: CapApp-SPM
 targets:
   App:
     type: application
@@ -34,9 +32,9 @@ targets:
         buildPhase: resources
       - path: ../../auth-handoff/native/DelegationJSON.swift
       - path: App
-        excludes: [public, Base.lproj/Main.storyboard]
+        # Old generated resources can remain in an existing checkout after an upgrade.
+        excludes: [public, Base.lproj/Main.storyboard, capacitor.config.json, config.xml]
     dependencies:
-      - package: CapApp-SPM
       - package: IcpSdk
         product: IcpSdkCore
       - package: IcpSdk

@@ -73,7 +73,7 @@ tmp
 /cycles-ledger.wasm.gz
 /icrc1-ledger.wasm.gz
 
-# Isolated Capacitor web bundle
+# Isolated WebKit test fixture bundle
 /build-mobile
 /.svelte-kit-mobile
 

@@ -7,7 +7,7 @@ typealias WalletOriginPolicy = LiveWalletOriginPolicy
   /// Supplied only by XCTest. The production target has no bundled wallet fallback.
   struct WalletTestSource {
     let handler: WKURLSchemeHandler
-    var origin: URL? { URL(string: "capacitor://localhost") }
+    var origin: URL? { URL(string: "oisy-test://localhost") }
   }
 #endif
 
@@ -56,7 +56,7 @@ final class TrustedWalletViewController: UIViewController, WKNavigationDelegate 
     configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
     #if DEBUG
       if let testSource {
-        configuration.setURLSchemeHandler(testSource.handler, forURLScheme: "capacitor")
+        configuration.setURLSchemeHandler(testSource.handler, forURLScheme: "oisy-test")
         hostPlugin.testOrigin = testSource.origin
       }
     #endif
@@ -275,7 +275,7 @@ final class TrustedWalletViewController: UIViewController, WKNavigationDelegate 
       (response as? HTTPURLResponse).map { (200..<300).contains($0.statusCode) } ?? false
     #if DEBUG
       // WebKit represents custom-scheme XCTest fixtures as URLResponse, without HTTP status.
-      if testSource != nil, response.url?.scheme == "capacitor" { successful = true }
+      if testSource != nil, response.url?.scheme == "oisy-test" { successful = true }
     #endif
     guard WalletOriginPolicy.accepts(response.url, mainFrame: true, origin: origin),
       successful, response.mimeType == "text/html"

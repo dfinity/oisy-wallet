@@ -5,10 +5,10 @@ App/App/public
 DerivedData
 xcuserdata
 
-# Cordova plugins for Capacitor
+# Retired Capacitor output may remain in older checkouts. Keep it untracked.
 capacitor-cordova-ios-plugins
 
-# Generated Config files
+# Retired generated configuration (also excluded by project.yml)
 App/App/capacitor.config.json
 App/App/config.xml
 

@@ -17,7 +17,7 @@ import XCTest
       "https://evil.test/?origin=https://audit.oisy.com", "https://audit.oisy.com:443/",
       "https://user@audit.oisy.com/", "https://audit.oisy.com/signer-callback",
       "https://audit.oisy.com/?redirect=https://evil.test", "capacitor://localhost/",
-      "file:///index.html",
+      "oisy-test://localhost/", "file:///index.html",
     ] {
       XCTAssertFalse(LiveWalletOriginPolicy.accepts(URL(string: url), mainFrame: true), url)
     }

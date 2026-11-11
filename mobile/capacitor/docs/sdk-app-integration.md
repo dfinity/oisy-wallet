@@ -161,7 +161,7 @@ ordering, failure behavior and the security implications of frontend deployment.
 
 The release order is: publish the compatible normal audit frontend, verify its
 association/callback assets, then install this native version over the existing
-preview. Keep `VITE_MOBILE_SHELL` and `VITE_MOBILE_UI_TEST` unset/false for deployment.
+preview. Keep `VITE_MOBILE_UI_TEST` unset/false for deployment.
 Check real II sign-in, ICP account continuity, token history, Activity and Explore
 on the phone. A subsequent web-only release must appear after a new wallet document
 loads, without interrupting an open operation. Commit and push were approved on

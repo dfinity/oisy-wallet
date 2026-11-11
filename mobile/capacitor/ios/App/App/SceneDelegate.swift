@@ -1,4 +1,3 @@
-import Capacitor
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -14,8 +13,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     window = UIWindow(windowScene: windowScene)
     window?.rootViewController = ShellViewController()
     window?.makeKeyAndVisible()
-
-    SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
   }
 
   func sceneWillResignActive(_ scene: UIScene) {
@@ -52,13 +49,5 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     window?.layoutIfNeeded()
     privacyCover?.removeFromSuperview()
     privacyCover = nil
-  }
-
-  func scene(_ scene: UIScene, openURLContexts urlContexts: Set<UIOpenURLContext>) {
-    SceneDelegateProxy.shared.scene(scene, openURLContexts: urlContexts)
-  }
-
-  func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
-    SceneDelegateProxy.shared.scene(scene, continue: userActivity)
   }
 }

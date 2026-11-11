@@ -19,7 +19,7 @@ import {
 	type MobileRoot,
 	type MobileSheetRequest
 } from '$lib/schema/mobile-host.schema';
-import type { PluginListenerHandle } from '@capacitor/core';
+import type { MobileHostListener } from '$lib/types/mobile-host';
 
 export { mobileHostAvailable } from '$lib/providers/mobile-host.providers';
 
@@ -168,7 +168,7 @@ export const connectMobileInteractions = async ({
 	if (!mobileHostAvailable()) {
 		throw new Error('Mobile host unavailable');
 	}
-	const listeners: PluginListenerHandle[] = [];
+	const listeners: MobileHostListener[] = [];
 	const document = documentRequest().documentId;
 	let active = true;
 	let lastRefreshId = -1;

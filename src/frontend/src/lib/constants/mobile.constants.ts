@@ -3,9 +3,7 @@ import type {} from '$lib/types/mobile-host';
 
 // Presentation/runtime selection, not a trust signal. Native validates every call.
 // Even an unsupported host must fail closed rather than load browser credentials.
-export let MOBILE_SHELL =
-	import.meta.env.VITE_MOBILE_SHELL === 'true' ||
-	(typeof window !== 'undefined' && window.__oisyHost !== undefined);
+export let MOBILE_SHELL = typeof window !== 'undefined' && window.__oisyHost !== undefined;
 
 // Workers have no Window. Their parent selects this runtime before installing a
 // private MessagePort session; they never fall back to browser auth storage.

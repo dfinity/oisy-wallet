@@ -1,7 +1,6 @@
 describe('runtime mobile selection', () => {
 	beforeEach(() => {
 		vi.resetModules();
-		vi.stubEnv('VITE_MOBILE_SHELL', 'false');
 	});
 
 	afterEach(() => {
@@ -9,7 +8,8 @@ describe('runtime mobile selection', () => {
 		vi.unstubAllEnvs();
 	});
 
-	it('keeps ordinary website visits on browser auth', async () => {
+	it('keeps ordinary website visits on browser auth even with the retired build flag', async () => {
+		vi.stubEnv('VITE_MOBILE_SHELL', 'true');
 		vi.stubGlobal('__oisyHost', undefined);
 		const runtime = await import('$lib/constants/mobile.constants');
 

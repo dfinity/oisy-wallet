@@ -1,6 +1,6 @@
 ---
 title: OISY mobile app
-tags: [mobile, capacitor, ios, development]
+tags: [mobile, webkit, ios, development]
 ---
 
 # OISY mobile app
@@ -119,7 +119,7 @@ Missing API data
 must be shown as unavailable rather than zero.
 
 Only the configured HTTPS main wallet document may use the fixed v2 bridge.
-The live controller registers no general-purpose Capacitor plugins. Wallet and
+The live controller exposes only the fixed WebKit host contract. Wallet and
 Explore each use nonpersistent, separate WebKit storage. Explore exposes a public
 account only after origin-specific native consent; it supports Sepolia reads only.
 The shared Send flow supports ICP, canonical ck-tokens, ETH and ERC-20 transfers.
@@ -138,7 +138,7 @@ values or generated bundles. Verify provider allowlists for the audit domain;
 do not spoof origins or add a generic native HTTP proxy.
 
 Build and deploy the normal audit website with the runtime host adapter first.
-Leave `VITE_MOBILE_SHELL` unset/false; the document-start native transport selects
+The document-start native transport selects
 mobile presentation and authentication. New website releases reach the app on its
 next document load. The host does not force reloads during an operation.
 
@@ -161,7 +161,7 @@ use isolated signed fixtures and block network calls; there is no user-facing sa
 mode. Physical sign-in still requires the user's passkey interaction.
 
 `build-mobile/` and `.svelte-kit-mobile/` are retained for offline shared-screen
-tests and legacy packaging tools. The production app target does not package
+tests. The production app target does not package
 their pages. The website deployment owns CSP, feature code and provider settings;
 native origin/callback configuration still requires an app release.
 
@@ -174,12 +174,19 @@ existing preview or change its storage namespaces to resolve a build failure.
 
 ## Build ownership
 
-`ios/App/project.yml` owns the Xcode project. The existing Capacitor 8.5.3 package
-scaffold remains for separate cleanup; the active wallet controller uses WKWebView
-directly. `mobile:sync:ios` updates that scaffold and generates the native project,
-without building or copying web pages. Do not patch
-generated projects or dependencies. Swift 6 complete checking is enabled. Android
-SDK/JDK and an Android host remain pending.
+`ios/App/project.yml` owns the Xcode project. XcodeGen generates a Swift/UIKit
+host with the pinned ICP SDK and a direct WKWebView bridge. Capacitor, Cordova,
+their plugins and the old bundled-host fallback are removed. `mobile:sync:ios`
+prepares app configuration and generates the project; it does not build or copy
+web pages. `npm --prefix mobile/capacitor run open:ios` opens that project in Xcode.
+Do not patch generated projects or dependencies. Swift 6 complete checking is enabled.
+Android SDK/JDK and an Android host remain pending.
+
+The `mobile/capacitor/` directory name is historical and stays in place to preserve
+existing links and tooling paths. Bundle IDs (including the simulator ID), signing
+team, associated domains, SDK storage and Keychain names are unchanged. No session
+or storage migration is needed. The SDK's `ASWebAuthenticationSession` receives the
+HTTPS callback directly; it does not depend on Capacitor scene forwarding.
 
 ## Remaining shared-runtime work
 
@@ -192,7 +199,8 @@ Source: [Session boundary](./docs/session-boundary.md)
 Run the native suite, frontend service tests and Svelte checks, one heavy job at a time.
 The migration handoff records actual results and remaining physical-device checks.
 `WalletWebKitTests` uses an isolated fake identity and rejects network calls. Build
-with `VITE_MOBILE_UI_TEST=true` for its Notes and navigation fixtures. They seed
+with `npm run mobile:fixtures` for its Notes and navigation fixtures. The debug
+WebKit scheme handler serves them at `oisy-test://localhost`; release builds cannot use it. They seed
 shared in-memory profile/balance/Notes stores while main-frame and worker fetches
 remain pending. They never weaken signed canister-response verification and are
 compiled out of normal website builds. Test resources are packaged only in
@@ -201,7 +209,6 @@ assets exclude fixture events. The screenshots show fixture
 data, not a funded-account test.
 
 ```sh
-npm exec -- vitest run src/frontend/src/tests/mobile-build-env.spec.ts
 npm run check
 npm exec -- vitest run src/frontend/src/tests/lib/services/mobile-host.services.spec.ts \
   src/frontend/src/tests/lib/services/mobile-session.services.spec.ts \
@@ -209,7 +216,7 @@ npm exec -- vitest run src/frontend/src/tests/lib/services/mobile-host.services.
   src/frontend/src/tests/lib/utils/mobile-history.utils.spec.ts \
   src/frontend/src/tests/lib/components/ui/ModalExitHandler.spec.ts \
   src/frontend/src/tests/routes/layout.spec.ts
-DFX_NETWORK=audit OISY_MOBILE_SHELL=1 VITE_MOBILE_SHELL=false VITE_MOBILE_UI_TEST=true npm exec -- vite build
+npm run mobile:fixtures
 rsync -a --delete build-mobile/ mobile/capacitor/ios/App/App/public/
 npm --prefix mobile/capacitor run project:ios
 xcodebuild -project mobile/capacitor/ios/App/App.xcodeproj -scheme App \

@@ -9,7 +9,9 @@ Read [README.md](./README.md) and repository-root AGENTS.md first.
 - Root package.json/package-lock.json own dependencies, including the private session-sdk package. Do not add plugins without
   task authorization. ios/App/project.yml owns the generated Xcode project;
   The live iOS controller loads the configured audit HTTPS origin. mobile:sync:ios
-  updates native scaffolding/project configuration without building the website.
+  generates native configuration and the XcodeGen project without building the website.
+  There is no Capacitor runtime; the directory name and existing bundle IDs are historical.
+  Do not reintroduce plugin fallbacks or route SDK callbacks through scene proxies.
   Keep offline web fixtures in AppTests.xctest, never in the app target.
 - Keep one trusted wallet WebView. Explore dApps use separate nonpersistent storage
   and no wallet host bridge. Keep exact HTTPS frame/origin/version, document and method validation.

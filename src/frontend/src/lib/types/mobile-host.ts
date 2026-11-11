@@ -1,3 +1,7 @@
+export interface MobileHostListener {
+	remove(): Promise<void>;
+}
+
 /** Injected by the native host before website code runs; never a caller-supplied URL. */
 export interface WebKitMobileHost {
 	readonly version: number;
@@ -7,7 +11,7 @@ export interface WebKitMobileHost {
 	addListener(
 		event: 'navigate' | 'back' | 'refresh' | 'dismissSheet',
 		listener: (value: unknown) => void
-	): Promise<{ remove(): Promise<void> }>;
+	): Promise<MobileHostListener>;
 }
 
 declare global {
