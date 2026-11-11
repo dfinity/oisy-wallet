@@ -7,6 +7,7 @@
 		SEND_FIRST_TIME_DESTINATION_WARNING
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { nextElementId } from '$lib/utils/html.utils';
 
 	interface Props {
 		confirmed?: boolean;
@@ -18,7 +19,7 @@
 
 	let { confirmed = false, styleClass, onConfirm }: Props = $props();
 
-	const inputId = 'send-first-time-destination-confirmation';
+	const inputId = nextElementId('send-first-time-destination-confirmation-');
 </script>
 
 {#snippet checkbox()}

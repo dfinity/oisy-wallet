@@ -1,5 +1,6 @@
 import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
@@ -8,6 +9,7 @@ import {
 	mapEthTransactionUi
 } from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
+import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
@@ -17,16 +19,20 @@ import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.st
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { getCkBtcPendingUtxoTransactions } from '$icp/utils/ckbtc-transactions.utils';
 import { getCkEthPendingTransactions } from '$icp/utils/cketh-transactions.utils';
+import { getCmcDepositAccountIdentifier } from '$icp/utils/cmc.utils';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import {
 	extendIcTransaction,
 	getAllIcTransactions,
 	getIcExtendedTransactions
 } from '$icp/utils/ic-transactions.utils';
+import { isTokenIcp } from '$icp/utils/icrc.utils';
 import { MICRO_TRANSACTION_USD_THRESHOLD, ZERO } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { Token } from '$lib/types/token';
+import type { NullishIdentity } from '$lib/types/identity';
+import type { NetworkId } from '$lib/types/network';
+import type { Token, TokenId } from '$lib/types/token';
 import type {
 	AllTransactionUiWithCmp,
 	AnyTransactionUi,
@@ -537,6 +543,119 @@ export const getKnownDestinations = (
 				: acc,
 		{}
 	);
+
+/**
+ * The known destinations of the loaded Ethereum and EVM transactions on one network.
+ *
+ * Without the ckETH minter info, which tells the minter's own transfers apart, the history is not
+ * read, and every destination counts as unknown.
+ */
+export const getEthKnownDestinations = ({
+	transactions,
+	ckMinterInfo,
+	ethAddress,
+	tokens,
+	networkId
+}: {
+	transactions: EthCertifiedTransactionsData;
+	ckMinterInfo: OptionCertifiedMinterInfo;
+	ethAddress: OptionEthAddress;
+	tokens: Token[];
+	networkId: NetworkId;
+}): KnownDestinations => {
+	const ckMinterInfoAddresses = toCkMinterInfoAddresses(ckMinterInfo);
+
+	if (ckMinterInfoAddresses.length === 0) {
+		return {};
+	}
+
+	const tokenById = new Map(tokens.map((token) => [token.id, token]));
+
+	const mappedTransactions: AnyTransactionUiWithToken[] = [];
+	Object.getOwnPropertySymbols(transactions ?? {}).forEach((tokenId) => {
+		const token = tokenById.get(tokenId as TokenId);
+
+		if (nonNullish(token) && token.network.id === networkId) {
+			(transactions?.[tokenId as TokenId] ?? []).forEach(({ data: transaction }) => {
+				mappedTransactions.push({
+					...mapEthTransactionUi({
+						transaction,
+						ckMinterInfoAddresses,
+						ethAddress
+					}),
+					token
+				});
+			});
+		}
+	});
+
+	return getKnownDestinations(mappedTransactions);
+};
+
+/**
+ * The known destinations of the loaded IC transactions that count for a send of the given token.
+ *
+ * ICP and the ck and ICRC tokens keep separate histories: an ICP send does not make an address
+ * known for an ICRC send, nor the other way round.
+ */
+export const getIcKnownDestinations = ({
+	transactions,
+	tokens,
+	token: sendToken,
+	identity
+}: {
+	transactions: IcCertifiedTransactionsData;
+	tokens: Token[];
+	token: Token;
+	identity: NullishIdentity;
+}): KnownDestinations => {
+	const isIcpToken = isTokenIcp(sendToken);
+	const { [ICP_TOKEN_ID]: icpTransactions, ...icCkTransactionsStore } = transactions ?? {};
+	const icpTransactionsStore = { [ICP_TOKEN_ID]: icpTransactions ?? [] };
+
+	const tokenById = new Map(tokens.map((token) => [token.id, token]));
+
+	// A mint sends its ICP to the CMC's deposit account for the user. ICP sent
+	// there any other way carries no mint memo, is never minted, and cannot be
+	// recovered through OISY, so the account is never offered as, or counted as,
+	// a familiar destination.
+	const cyclesMintDepositAccountIdentifier = nonNullish(identity)
+		? getCmcDepositAccountIdentifier(identity.getPrincipal()).toLowerCase()
+		: undefined;
+
+	const mappedTransactions: AnyTransactionUiWithToken[] = [];
+
+	Object.getOwnPropertySymbols(isIcpToken ? icpTransactionsStore : icCkTransactionsStore).forEach(
+		(tokenId) => {
+			const token = tokenById.get(tokenId as TokenId);
+
+			if (nonNullish(token)) {
+				(transactions?.[tokenId as TokenId] ?? []).forEach(({ data }) => {
+					if (
+						nonNullish(cyclesMintDepositAccountIdentifier) &&
+						data.to?.toLowerCase() === cyclesMintDepositAccountIdentifier
+					) {
+						return;
+					}
+
+					// A canister top-up pays into the CMC's deposit account for that canister,
+					// which differs per canister, so it is told by its memo, as its label
+					// records. ICP sent there without the memo is never topped up.
+					if (data.typeLabel === 'transaction.label.top_up') {
+						return;
+					}
+
+					mappedTransactions.push({
+						...data,
+						token
+					});
+				});
+			}
+		}
+	);
+
+	return getKnownDestinations(mappedTransactions);
+};
 
 /**
  * Finds the oldest of a list of transactions.
