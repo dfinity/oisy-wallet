@@ -935,7 +935,7 @@ type HttpRequest = record {
 };
 // # HTTP Request Result
 //
-// Result type of [`http_request`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-http_request).
+// Result type of [`http_request`](https://docs.internetcomputer.org/references/management-canister/#http_request).
 type HttpRequestResult = record {
 	// The response status (e.g. 200, 404).
 	status : nat;
