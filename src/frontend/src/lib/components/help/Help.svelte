@@ -21,11 +21,11 @@
      siblings. Each card here sits inside its own test-id wrapper, so every card is the first (and
      only) div of its type and its own margin never applies - hence the gap on the container. -->
 <div class="flex flex-col gap-5">
-	<!-- First, so a user sent here by the "not responding" warning sees it right away. It only
-	     shows while a saved token can't be loaded. -->
-	<HelpUnavailableTokens />
-
 	<HelpSupport />
+
+	<!-- Near the top, so a user sent here by the "not responding" warning sees it right away. It
+	     only shows while a saved token can't be loaded. -->
+	<HelpUnavailableTokens />
 
 	<HelpNetworkExplorers />
 

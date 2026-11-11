@@ -36,8 +36,11 @@ describe('Help', () => {
 		mockAuthStore();
 	});
 
-	it('puts the unavailable tokens card first while a saved token cannot be loaded', () => {
+	it('puts the unavailable tokens card right after Support while a saved token cannot be loaded', () => {
 		const ledgerCanisterId = 'aiw2p-tyaaa-aaaam-aebyq-cai';
+
+		// Both explorer cards hide themselves while every address is still nullish.
+		ethAddressStore.set({ data: mockEthAddress, certified: false });
 
 		icrcUnavailableCustomTokensStore.set([
 			{
@@ -57,11 +60,19 @@ describe('Help', () => {
 
 		const { getByTestId } = render(Help);
 
-		expect(
-			getByTestId(HELP_UNAVAILABLE_TOKENS_CARD).compareDocumentPosition(
-				getByTestId(HELP_SUPPORT_CARD)
-			) & Node.DOCUMENT_POSITION_FOLLOWING
-		).toBeTruthy();
+		const cards = [
+			getByTestId(HELP_SUPPORT_CARD),
+			getByTestId(HELP_UNAVAILABLE_TOKENS_CARD),
+			getByTestId(HELP_NETWORK_EXPLORERS_CARD),
+			getByTestId(HELP_EXPLORERS_CARD),
+			getByTestId(HELP_ICPSWAP_CARD)
+		];
+
+		cards.slice(0, -1).forEach((card, index) => {
+			expect(
+				card.compareDocumentPosition(cards[index + 1]) & Node.DOCUMENT_POSITION_FOLLOWING
+			).toBeTruthy();
+		});
 	});
 
 	it('shows no unavailable tokens card while every saved token loads', () => {
