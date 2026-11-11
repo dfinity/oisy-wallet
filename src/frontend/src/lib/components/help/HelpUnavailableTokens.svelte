@@ -3,6 +3,7 @@
 	import { untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { checkIcrcLedgerStatus } from '$icp/services/icrc-ledger-status.services';
+	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 	import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import type { IcrcLedgerStatus, IcrcUnavailableCustomToken } from '$icp/types/icrc-custom-token';
@@ -93,6 +94,10 @@
 
 		try {
 			await removeCustomToken({ identity: $authIdentity, token: token.customToken });
+
+			// Like the token page: a token whose query answer mapped while its certified answer did not
+			// is in the main token list too.
+			icrcCustomTokensStore.resetByIdentifier(token.ledgerCanisterId);
 
 			await deleteIdbIcToken({ identity: $authIdentity, token: token.customToken });
 

@@ -1,4 +1,5 @@
 import { checkIcrcLedgerStatus } from '$icp/services/icrc-ledger-status.services';
+import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 import type { IcrcLedgerStatus, IcrcUnavailableCustomToken } from '$icp/types/icrc-custom-token';
 import * as backendApi from '$lib/api/backend.api';
@@ -13,6 +14,7 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -53,6 +55,7 @@ describe('HelpUnavailableTokens', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		icrcCustomTokensStore.resetAll();
 		icrcUnavailableCustomTokensStore.reset();
 
 		mockAuthStore();
@@ -280,6 +283,33 @@ describe('HelpUnavailableTokens', () => {
 			level: 'success',
 			duration: 2000
 		});
+	});
+
+	it('should also remove the deleted token from the main token list', async () => {
+		vi.spyOn(backendApi, 'removeCustomToken').mockResolvedValue(undefined);
+		vi.spyOn(toastsStore, 'toastsShow').mockImplementation(vi.fn());
+
+		// A token whose query answer mapped while its certified answer did not is in both lists.
+		icrcCustomTokensStore.setAll([
+			{
+				data: { ...mockIcrcCustomToken, ledgerCanisterId: importedToken.ledgerCanisterId },
+				certified: true
+			}
+		]);
+
+		icrcUnavailableCustomTokensStore.set([importedToken]);
+
+		const { getByTestId } = render(HelpUnavailableTokens);
+
+		await fireEvent.click(getByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON));
+
+		await fireEvent.click(getByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON));
+
+		await waitFor(() => {
+			expect(get(icrcUnavailableCustomTokensStore)).toEqual([]);
+		});
+
+		expect(get(icrcCustomTokensStore)).toEqual([]);
 	});
 
 	it('should keep a deleted token out of a load that started before the delete', async () => {
