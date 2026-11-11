@@ -756,6 +756,7 @@
 			"minter_ckbtc_btc": "需要配置铸币人才能将 ckBTC 转换为 BTC。",
 			"minter_cketh_eth": "需要配置铸币人才能将 ckETH 转换为 ETH。",
 			"minter_ckerc20_erc20": "需要配置铸币人才能将 ckERC20 转换为 ERC20。",
+			"minter_cksol_sol": "",
 			"ledger_cketh_eth": "需要配置 ckETH 账本才能将 ckERC20 转换为 ERC20。",
 			"minter_btc": "需要配置铸币人才能获取 BTC。",
 			"minter_ckbtc_info": "需要配置铸币人才能获取 ckBTC 信息",

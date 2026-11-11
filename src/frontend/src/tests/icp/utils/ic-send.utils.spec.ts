@@ -1,5 +1,6 @@
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { IC_CKSOL_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -7,6 +8,7 @@ import type { IcSendRequest } from '$icp/types/ic-send';
 import {
 	isInvalidDestinationIc,
 	isSameIcSendRequest,
+	isTokenCkSolLedger,
 	toIcSendRequest
 } from '$icp/utils/ic-send.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
@@ -17,6 +19,20 @@ import { mockValidIcPunksToken } from '$tests/mocks/icpunks-tokens.mock';
 import { mockPrincipalText, mockPrincipalText2 } from '$tests/mocks/identity.mock';
 
 describe('ic-send.utils', () => {
+	describe('isTokenCkSolLedger', () => {
+		it('should match the ckSOL ledger', () => {
+			expect(isTokenCkSolLedger({ ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID })).toBeTruthy();
+		});
+
+		it('should not match another ledger', () => {
+			expect(isTokenCkSolLedger(mockValidIcrcToken)).toBeFalsy();
+		});
+
+		it('should not match a token without a ledger', () => {
+			expect(isTokenCkSolLedger({})).toBeFalsy();
+		});
+	});
+
 	describe('isInvalidDestinationIc', () => {
 		it.each([
 			{
