@@ -5,7 +5,10 @@ source_dir=$(cd "$(dirname "$0")" && pwd)
 repo=$(cd "$source_dir/../../.." && pwd)
 sdk=$(cd "${1:?usage: bash verify.sh SDK_CHECKOUT [--ios]}" && pwd)
 revision=cc22ba56b6cbab384fcef02c8e3c8624341cc30a
-[ "$(git -C "$sdk" rev-parse HEAD)" = "$revision" ] || { echo 'Wrong SDK revision' >&2; exit 1; }
+[ "$(git -C "$sdk" rev-parse HEAD)" = "$revision" ] || {
+  echo 'Wrong SDK revision' >&2
+  exit 1
+}
 git -C "$sdk" diff --quiet
 git -C "$sdk" diff --cached --quiet
 git -C "$sdk" apply --check "$source_dir/patches/local-session-delegation.patch"
@@ -27,11 +30,11 @@ logged() {
 
 cd "$sdk"
 logged native-tests bash scripts/test-swift.sh
-common=( -I out/swift -L out/swift -L target/debug
+common=(-I out/swift -L out/swift -L target/debug
   -I languages/swift/Sources/icp_coreFFI
   -Xcc "-fmodule-map-file=$sdk/languages/swift/Sources/icp_coreFFI/module.modulemap"
   -Xlinker -rpath -Xlinker "$sdk/out/swift"
-  -Xlinker -rpath -Xlinker "$sdk/target/debug" )
+  -Xlinker -rpath -Xlinker "$sdk/target/debug")
 logged swift6-consumer xcrun swiftc -swift-version 6 -strict-concurrency=complete \
   -parse-as-library "${common[@]}" -lIcpSdkCore \
   "$source_dir/native/DelegationJSON.swift" "$source_dir/native/HandoffVector.swift" -o "$cache/handoff-vector"
@@ -42,12 +45,12 @@ if [ "${2:-}" = '--ios' ]; then
   export DEVICE=${DEVICE:-iPhone 17}
   logged ios-tests bash scripts/test-swift-ios.sh
   simulator_sdk=$(xcrun --sdk iphonesimulator --show-sdk-path)
-  common=( -target "$(uname -m)-apple-ios17.4-simulator" -sdk "$simulator_sdk"
-    -Xcc -isysroot -Xcc "$simulator_sdk"
-    -Xclang-linker -isysroot -Xclang-linker "$simulator_sdk"
-    -I out/swift-ios -L out/swift-ios -L out/swift-ios/lib
-    -I languages/swift/Sources/icp_coreFFI
-    -Xcc "-fmodule-map-file=$sdk/languages/swift/Sources/icp_coreFFI/module.modulemap" )
+  common=(-target "$(uname -m)-apple-ios17.4-simulator" -sdk "$simulator_sdk"
+  -Xcc -isysroot -Xcc "$simulator_sdk"
+  -Xclang-linker -isysroot -Xclang-linker "$simulator_sdk"
+  -I out/swift-ios -L out/swift-ios -L out/swift-ios/lib
+  -I languages/swift/Sources/icp_coreFFI
+  -Xcc "-fmodule-map-file=$sdk/languages/swift/Sources/icp_coreFFI/module.modulemap")
   # The upstream iOS runner omits AuthClientSuite; include the patched cases.
   logged ios-handoff-build xcrun swiftc -swift-version 5 -parse-as-library \
     "${common[@]}" -lIcpSdkCore -lIcpSdkSigner \
@@ -62,7 +65,7 @@ cp "$source_dir"/web/*.ts "$cache/"
 mkdir -p "$cache/session-sdk"
 cp "$source_dir"/../session-sdk/session.ts "$source_dir"/../session-sdk/compatible-request.ts "$cache/session-sdk/"
 cp "$source_dir"/../app-environment.json "$cache/"
-printf '%s\n' "export * from './session-sdk/session.js';" > "$cache/session.ts"
+printf '%s\n' "export * from './session-sdk/session.js';" >"$cache/session.ts"
 cd "$cache"
 logged web-dependencies npm ci --ignore-scripts --no-audit --no-fund
 logged web-types node "$repo/node_modules/typescript/bin/tsc" \
