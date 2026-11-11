@@ -440,8 +440,8 @@ describe('btc-wallet.worker', () => {
 			expect(spyGetBackendBalance).not.toHaveBeenCalled();
 		});
 
-		// The backend pays the Bitcoin canister itself, where `btc_caller_balance` is charged to the
-		// user's signing approval on every poll.
+		// The backend pays the Bitcoin canister from its own cycles. It paid for `btc_caller_balance` too,
+		// but against the approval it grants each user for signing.
 		it('should read the certified balance through the backend with BTC_SEND_VIA_BACKEND_ENABLED', async () => {
 			btcSendViaBackend.enabled = true;
 

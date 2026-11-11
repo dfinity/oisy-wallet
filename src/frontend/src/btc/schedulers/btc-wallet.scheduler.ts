@@ -228,8 +228,9 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 						})
 					: null;
 		} else {
-			// Through the backend, which pays the Bitcoin canister itself: the Chain Fusion Signer's
-			// `btc_caller_balance` is charged to the user's signing approval on every poll.
+			// Through the backend, which pays the Bitcoin canister from its own cycles. The backend paid
+			// for the Chain Fusion Signer's `btc_caller_balance` too, but against the approval it grants
+			// each user for signing, so every poll used up part of what the user could sign.
 			confirmedBalance = BTC_SEND_VIA_BACKEND_ENABLED
 				? await getBtcBalanceFromBackend({
 						identity,

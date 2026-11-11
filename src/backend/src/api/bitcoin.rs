@@ -450,9 +450,10 @@ pub async fn btc_get_spendable_utxos(
 /// Returns the balance of the caller's P2WPKH address, counting only the outputs with at least
 /// `min_confirmations` confirmations.
 ///
-/// An update call, so the answer is certified, and the backend pays for the Bitcoin canister call
-/// from its own cycles: OISY no longer asks the chain fusion signer's `btc_caller_balance`, which
-/// the caller's signing approval paid for.
+/// An update call, so the answer is certified. The backend pays for the Bitcoin canister call from
+/// its own cycles. It used to pay the chain fusion signer's `btc_caller_balance` instead, from its
+/// cycles ledger account and against the approval it grants each caller for signing, so every read
+/// used up part of what the caller could sign.
 ///
 /// Requires a valid II delegation chain to verify the caller authenticated
 /// through Internet Identity. Controllers bypass this check.
