@@ -96,9 +96,7 @@
 
 			await deleteIdbIcToken({ identity: $authIdentity, token: token.customToken });
 
-			icrcUnavailableCustomTokensStore.update((tokens) =>
-				tokens.filter(({ ledgerCanisterId }) => ledgerCanisterId !== token.ledgerCanisterId)
-			);
+			icrcUnavailableCustomTokensStore.remove(token.ledgerCanisterId);
 
 			toastsShow({
 				text: replacePlaceholders(

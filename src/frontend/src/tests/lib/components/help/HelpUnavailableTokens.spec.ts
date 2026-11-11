@@ -18,6 +18,7 @@ import { toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import * as idbKeyval from 'idb-keyval';
+import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
 vi.mock('$icp/services/icrc-ledger-status.services', () => ({
@@ -52,7 +53,7 @@ describe('HelpUnavailableTokens', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		icrcUnavailableCustomTokensStore.set([]);
+		icrcUnavailableCustomTokensStore.reset();
 
 		mockAuthStore();
 
@@ -279,6 +280,33 @@ describe('HelpUnavailableTokens', () => {
 			level: 'success',
 			duration: 2000
 		});
+	});
+
+	it('should keep a deleted token out of a load that started before the delete', async () => {
+		vi.spyOn(backendApi, 'removeCustomToken').mockResolvedValue(undefined);
+		vi.spyOn(toastsStore, 'toastsShow').mockImplementation(vi.fn());
+
+		icrcUnavailableCustomTokensStore.set([importedToken, curatedToken]);
+
+		const { getAllByTestId, getByTestId } = render(HelpUnavailableTokens);
+
+		const [deleteImportedToken] = getAllByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON);
+
+		await fireEvent.click(deleteImportedToken);
+
+		await fireEvent.click(getByTestId(HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON));
+
+		await waitFor(() => {
+			expect(get(icrcUnavailableCustomTokensStore)).toEqual([curatedToken]);
+		});
+
+		// The certified round of a load that read the saved tokens before the delete.
+		icrcUnavailableCustomTokensStore.set([importedToken, curatedToken]);
+
+		await tick();
+
+		expect(get(icrcUnavailableCustomTokensStore)).toEqual([curatedToken]);
+		expect(getAllByTestId(HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON)).toHaveLength(1);
 	});
 
 	it('should keep the token and show an error when deleting fails', async () => {

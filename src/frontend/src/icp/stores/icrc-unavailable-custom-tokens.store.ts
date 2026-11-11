@@ -1,4 +1,39 @@
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcrcUnavailableCustomToken } from '$icp/types/icrc-custom-token';
-import { writable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
-export const icrcUnavailableCustomTokensStore = writable<IcrcUnavailableCustomToken[]>([]);
+export interface IcrcUnavailableCustomTokensStore extends Readable<IcrcUnavailableCustomToken[]> {
+	set: (tokens: IcrcUnavailableCustomToken[]) => void;
+	remove: (ledgerCanisterId: LedgerCanisterIdText) => void;
+	reset: () => void;
+}
+
+const initIcrcUnavailableCustomTokensStore = (): IcrcUnavailableCustomTokensStore => {
+	const { subscribe, set, update } = writable<IcrcUnavailableCustomToken[]>([]);
+
+	// The ledgers the user deleted since the page loaded (signing out reloads it). A loading round
+	// writes what it computed from the saved tokens it read at its start, so a round that read them
+	// before a delete would otherwise put the deleted token back.
+	const deletedLedgerCanisterIds = new Set<LedgerCanisterIdText>();
+
+	return {
+		subscribe,
+
+		set: (tokens: IcrcUnavailableCustomToken[]) =>
+			set(tokens.filter(({ ledgerCanisterId }) => !deletedLedgerCanisterIds.has(ledgerCanisterId))),
+
+		remove: (ledgerCanisterId: LedgerCanisterIdText) => {
+			deletedLedgerCanisterIds.add(ledgerCanisterId);
+
+			update((tokens) => tokens.filter(({ ledgerCanisterId: id }) => id !== ledgerCanisterId));
+		},
+
+		reset: () => {
+			deletedLedgerCanisterIds.clear();
+
+			set([]);
+		}
+	};
+};
+
+export const icrcUnavailableCustomTokensStore = initIcrcUnavailableCustomTokensStore();
