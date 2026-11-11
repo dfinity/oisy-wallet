@@ -151,9 +151,10 @@ keep diffs reviewable.
 
 For mobile host or shared web/native contract changes, also run the simulator
 suite described in the [mobile compatibility guide](../../mobile/capacitor/docs/shared-web-contract.md#enforcement-status-and-next-safeguards).
-`mobile-checks.yml` builds the normal website and offline test fixtures separately,
-verifies the pinned native SDK, and tests the iOS host against those shared components.
-It must not receive deployment credentials or publish fixture builds.
+Build the normal website and offline test fixtures separately, verify the pinned
+native SDK, and test the iOS host against those shared components. Native checks
+remain local for the concept-review prototype because its SDK is internal; do not
+add repository credentials to PR jobs or publish fixture builds.
 
 ## 5. CI jobs you must keep green
 

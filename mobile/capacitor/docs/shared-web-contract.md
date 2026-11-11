@@ -472,22 +472,30 @@ restrict the authenticated identity or describe the current Send/Swap capabiliti
 ## Enforcement status and next safeguards
 
 Frontend CI runs types, lint and sharded Vitest, including mobile TypeScript tests.
-The `Mobile Compatibility` workflow additionally runs on pull requests, merge
-queues and main pushes. Its read-only macOS job:
+Native checks remain local for this concept-review prototype. The first macOS CI
+trial passed the configuration/provenance tests and both web builds, but could not
+fetch `dfinity/icp-native-sdk`: it is an internal DFINITY repository. The owner chose
+local SDK validation instead of adding protected CI credentials. Do not publish the
+SDK source or add repository credentials to pull-request jobs to work around this.
 
-- checks audit configuration and native SDK provenance tests;
-- builds the normal website with test authority disabled and checks fixture absence;
-- builds offline web fixtures from the same source;
-- verifies and builds the pinned SDK plus reviewed local patch, then generates the
-  iOS project and runs all native, real WebKit and UI simulator tests;
-- checks that offline `public/` resources are confined to the test bundle.
+For shared web/native changes, locally:
 
-The job needs no deployment secrets, Apple account or device signing profile. It
-uses Xcode 26.2, an iPhone 17 simulator and the SDK's pinned Rust toolchain. Branch
-protection must separately require `iOS host and shared web`; adding the workflow
-does not change repository rules. The dormant `OisyHostPlugin` native Capacitor
-adapter has been removed. `LiveWalletBridge` remains the only wallet host bridge;
-the shared frontend retains its transport fallback for older installed apps.
+- run the audit configuration and native SDK provenance tests;
+- build the normal website with test authority disabled and check fixture absence;
+- build offline web fixtures from the same source;
+- verify and build the pinned SDK plus reviewed local patch, generate the iOS
+  project and run the native, real WebKit and UI simulator tests;
+- check that offline `public/` resources stay in the test bundle, outside the app.
+
+These checks use Xcode 26.2, an iPhone 17 simulator and the SDK's pinned Rust
+toolchain. They require local access to the internal SDK, but no deployment secrets
+or device signing profile. They are not an automatic PR merge gate. Any future
+native CI needs a separate decision about approved SDK access and code review
+before credentials become available.
+
+The dormant `OisyHostPlugin` native Capacitor adapter has been removed.
+`LiveWalletBridge` remains the only wallet host bridge; the shared frontend retains
+its transport fallback for older installed apps.
 
 Remaining safeguards:
 
