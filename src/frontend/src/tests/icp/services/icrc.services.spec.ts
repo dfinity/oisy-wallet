@@ -13,7 +13,8 @@ import {
 	isIcrcTokenSupportIcrc3,
 	loadCustomTokens,
 	loadDisabledIcrcTokensBalances,
-	loadDisabledIcrcTokensExchanges
+	loadDisabledIcrcTokensExchanges,
+	processCustomTokens
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
@@ -45,7 +46,8 @@ import { fromNullable, nonNullish, nowInBigIntNanoSeconds, toNullable } from '@d
 import {
 	IcrcLedgerCanister,
 	fromCandidAccount,
-	type IcrcLedgerDid
+	type IcrcLedgerDid,
+	type IcrcTokenMetadataResponse
 } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import * as idbKeyval from 'idb-keyval';
@@ -701,6 +703,88 @@ describe('icrc.services', () => {
 
 				expect(mockOnSuccess).not.toHaveBeenCalled();
 			});
+		});
+	});
+
+	describe('processCustomTokens', () => {
+		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
+
+		const customToken: CustomToken = {
+			token: {
+				Icrc: {
+					index_id: toNullable(),
+					ledger_id: Principal.fromText(mockLedgerCanisterId)
+				}
+			},
+			version: [1n],
+			enabled: true,
+			section: toNullable(),
+			allow_external_content_source: toNullable(),
+			allowed_external_content_source_urls: toNullable()
+		};
+
+		const tokenMetadata: IcrcTokenMetadataResponse = [
+			['icrc1:name', { Text: 'Test' }],
+			['icrc1:symbol', { Text: 'TST' }],
+			['icrc1:decimals', { Nat: 8n }],
+			['icrc1:fee', { Nat: 10_000n }]
+		];
+
+		const unavailableTokens = [{ ledgerCanisterId: mockLedgerCanisterId, customToken }];
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
+
+			ledgerCanisterMock.getMintingAccount.mockResolvedValue(
+				toNullable({ owner: mockPrincipal, subaccount: toNullable() })
+			);
+
+			icrcCustomTokensStore.resetAll();
+			icrcUnavailableCustomTokensStore.reset();
+		});
+
+		it('should keep the unavailable tokens of a certified round when the query round finishes after it', async () => {
+			const queryAnswer = Promise.withResolvers<IcrcTokenMetadataResponse>();
+
+			ledgerCanisterMock.metadata.mockImplementation(({ certified }) =>
+				certified ? Promise.reject(new Error('test')) : queryAnswer.promise
+			);
+
+			const queryRound = processCustomTokens({
+				identity: mockIdentity,
+				certified: false,
+				tokens: [customToken]
+			});
+
+			await processCustomTokens({ identity: mockIdentity, certified: true, tokens: [customToken] });
+
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+
+			queryAnswer.resolve(tokenMetadata);
+
+			await queryRound;
+
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+		});
+
+		it('should let a round that starts after a certified round replace its unavailable tokens', async () => {
+			ledgerCanisterMock.metadata
+				.mockRejectedValueOnce(new Error('test'))
+				.mockResolvedValue(tokenMetadata);
+
+			await processCustomTokens({ identity: mockIdentity, certified: true, tokens: [customToken] });
+
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: false,
+				tokens: [customToken]
+			});
+
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([]);
 		});
 	});
 

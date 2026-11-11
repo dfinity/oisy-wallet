@@ -128,12 +128,20 @@ const loadIcrcData = ({
 	nonNullish(data) && icrcDefaultTokensStore.set({ data, certified });
 };
 
+// The loading rounds of the saved ICRC tokens, numbered in the order they start, and the last
+// certified round that wrote the unavailable tokens.
+let customTokensRound = 0;
+let unavailableTokensCertifiedRound = 0;
+
 const loadIcrcCustomTokens = async ({
 	identity,
 	certified,
 	tokens,
 	useCache = false
 }: LoadCustomTokenParams): Promise<IcrcCustomToken[]> => {
+	// Taken before the saved tokens are fetched, so the query round of a load always comes first.
+	const round = ++customTokensRound;
+
 	const customTokens =
 		tokens ??
 		(await loadNetworkCustomTokens({
@@ -145,18 +153,21 @@ const loadIcrcCustomTokens = async ({
 	return await loadCustomIcrcTokensData({
 		tokens: customTokens,
 		identity,
-		certified
+		certified,
+		round
 	});
 };
 
 const loadCustomIcrcTokensData = async ({
 	tokens,
 	certified,
-	identity
+	identity,
+	round
 }: {
 	tokens: CustomToken[];
 	certified: boolean;
 	identity: NullishIdentity;
+	round: number;
 }): Promise<IcrcCustomToken[]> => {
 	const indexedIcrcCustomTokens = {
 		...SUPPORTED_ICP_TOKENS_INDEXED,
@@ -226,8 +237,8 @@ const loadCustomIcrcTokensData = async ({
 	const results = await Promise.allSettled(tokens.map(requestIcrcCustomTokenMetadata));
 
 	// A saved token that is skipped or fails to load never reaches the token list, so it is kept here for the user to delete.
-	icrcUnavailableCustomTokensStore.set(
-		tokens.reduce<IcrcUnavailableCustomToken[]>((acc, customToken, index) => {
+	const unavailableTokens = tokens.reduce<IcrcUnavailableCustomToken[]>(
+		(acc, customToken, index) => {
 			const { token } = customToken;
 
 			if (!('Icrc' in token)) {
@@ -258,8 +269,19 @@ const loadCustomIcrcTokensData = async ({
 					customToken
 				}
 			];
-		}, [])
+		},
+		[]
 	);
+
+	// A query round can finish after the certified round of its load, and a round of an older load
+	// after a newer one: neither may replace what a certified round that started later has written.
+	if (round > unavailableTokensCertifiedRound) {
+		if (certified) {
+			unavailableTokensCertifiedRound = round;
+		}
+
+		icrcUnavailableCustomTokensStore.set(unavailableTokens);
+	}
 
 	return results.reduce<IcrcCustomToken[]>((acc, result, index) => {
 		if (result.status !== 'fulfilled') {
