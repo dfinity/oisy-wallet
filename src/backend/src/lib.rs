@@ -15,7 +15,7 @@ use shared::{
         api_keys::ApiKeys,
         backend_config::{Arg, Config},
         bitcoin::{
-            BtcAddPendingTransactionRequest, BtcBroadcastTransactionRequest,
+            BtcAddPendingTransactionRequest, BtcBroadcastTransactionRequest, BtcGetBalanceRequest,
             BtcGetFeePercentilesRequest, BtcGetPendingTransactionsRequest,
             BtcGetSpendableUtxosRequest,
         },
@@ -32,7 +32,7 @@ use shared::{
         result_types::{
             ActiveUserTransactionResult, AddUserDismissedNotificationResult,
             AddUserHiddenDappIdResult, AllowSigningResult, BtcAddPendingTransactionResult,
-            BtcBroadcastTransactionResult, BtcGetFeePercentilesResult,
+            BtcBroadcastTransactionResult, BtcGetBalanceResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcGetSpendableUtxosResult, CancelTipResult,
             ClaimTipResult, ConsumePersonalNoteShareResult, CreateContactResult,
             CreatePersonalNoteShareResult, CreateTipResult, CreateUserProfileResult,

@@ -34,6 +34,7 @@ import type {
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcBroadcastTransactionParams,
+	BtcGetBalanceParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcGetSpendableUtxosParams,
@@ -164,6 +165,15 @@ export const getPendingBtcTransactions = async ({
 	const { btcGetPendingTransactions } = await backendCanister({ identity });
 
 	return btcGetPendingTransactions(params);
+};
+
+export const getBtcBalance = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcGetBalanceParams>): Promise<bigint> => {
+	const { btcGetBalance } = await backendCanister({ identity });
+
+	return btcGetBalance(params);
 };
 
 export const getSpendableBtcUtxos = async ({
