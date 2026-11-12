@@ -1,3 +1,4 @@
+import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 import { btcSwapProviders } from '$lib/providers/btc-swap.providers';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
@@ -11,6 +12,7 @@ import {
 	type SwapSupportedTokensInfo
 } from '$lib/stores/swap-supported-tokens.store';
 import type { GetSupportedDestinationsFn, SwapProvider, SwapTokenCategory } from '$lib/types/swap';
+import { isMobileSwapProvider } from '$lib/utils/mobile-swap.utils';
 import { determineCoverage } from '$lib/utils/swap-tokens-filter.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -34,7 +36,7 @@ const resolveProviderGroup = <
 }): Promise<SwapProviderSupport[]> =>
 	Promise.all(
 		providers
-			.filter(({ isEnabled }) => isEnabled)
+			.filter(({ isEnabled, key }) => isEnabled && (!MOBILE_SHELL || isMobileSwapProvider(key)))
 			.map(async (provider) => {
 				let supportedSourceTokens: Set<string> | undefined;
 				if (nonNullish(provider.getSupportedTokens)) {

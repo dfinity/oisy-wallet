@@ -30,6 +30,7 @@
 	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
+	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -38,6 +39,7 @@
 	import NotificationBlob from '$lib/components/ui/NotificationBlob.svelte';
 	import Popover from '$lib/components/ui/Popover.svelte';
 	import { USER_MENU_ROUTE } from '$lib/constants/analytics.constants';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { OISY_SUPPORT_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import {
@@ -62,6 +64,8 @@
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { tipsOverview } from '$lib/derived/tips.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
+	import { nativeSheetsAvailable } from '$lib/services/mobile-host.services';
+	import { waitForNativeSheetClosed } from '$lib/services/mobile-sheet.services';
 	import { getUserRoles } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -81,9 +85,10 @@
 
 	interface Props {
 		visible?: boolean;
+		onAccount?: () => void | Promise<void>;
 	}
 
-	let { visible = $bindable(false) }: Props = $props();
+	let { visible = $bindable(false), onAccount }: Props = $props();
 
 	let button = $state<HTMLButtonElement | undefined>();
 
@@ -91,7 +96,7 @@
 	let isGold = $state(false);
 
 	onMount(async () => {
-		if (nonNullish($authIdentity)) {
+		if (!MOBILE_SHELL && nonNullish($authIdentity)) {
 			({ isVip, isGold } = await getUserRoles({ identity: $authIdentity }));
 		}
 	});
@@ -102,13 +107,34 @@
 		setPrivacyMode({ enabled: !$isPrivacyMode, withToast: false, source: 'User menu click' });
 	};
 
+	// Restore the wallet viewport before opening a page or another native panel.
+	const openFromMenu = async (action: () => void | Promise<void>) => {
+		if (MOBILE_SHELL) {
+			const closed = waitForNativeSheetClosed();
+			hidePopover();
+			await closed;
+			if (!$authSignedIn) {
+				return;
+			}
+		}
+		await action();
+	};
+
 	const goToSettings = async () => {
+		const closed = waitForNativeSheetClosed();
 		hidePopover();
 		// Wait for the popover's backdrop to finish fading out before navigating.
 		// Otherwise the blurred backdrop lingers over the freshly-rendered Settings
 		// page and reads as a flicker — unlike the other menu entries, which open a
 		// covering modal and never change the route.
-		await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION);
+		if (MOBILE_SHELL) {
+			await closed;
+			if (!$authSignedIn) {
+				return;
+			}
+		} else {
+			await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION);
+		}
 		await goto(
 			networkUrl({
 				path: AppPath.Settings,
@@ -178,7 +204,7 @@
 >
 	{#snippet icon()}
 		<NotificationBlob
-			display={$tipsOverview.failed > 0}
+			display={!MOBILE_SHELL && $tipsOverview.failed > 0}
 			position="top-right"
 			testId={NAVIGATION_MENU_TIP_BADGE}
 		>
@@ -188,10 +214,11 @@
 	{$i18n.navigation.alt.menu}
 </ButtonIcon>
 
-<Popover anchor={button} direction="rtl" dropdown bind:visible>
+{#snippet menuContent(fullWidth = false)}
 	<div class="menu-surface">
 		<div
-			class="flex max-w-80 flex-col"
+			class="flex flex-col"
+			class:max-w-80={!fullWidth}
 			data-tid={NAVIGATION_MENU}
 			onclick={hidePopover}
 			role="none"
@@ -228,7 +255,7 @@
 
 				<ButtonMenu
 					ariaLabel={$i18n.navigation.alt.address_book}
-					onclick={() => modalStore.openAddressBook({ id: addressModalId })}
+					onclick={() => openFromMenu(() => modalStore.openAddressBook({ id: addressModalId }))}
 					testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
 				>
 					<IconUsersRound size="20" />
@@ -252,47 +279,48 @@
 						: $i18n.navigation.text.hide_balances}
 				</ButtonMenu>
 
-				<Hr />
+				{#if !MOBILE_SHELL}
+					<Hr />
 
-				<ButtonMenu
-					ariaLabel={$i18n.navigation.text.wallet_connect}
-					onclick={() => modalStore.openUniversalScanner({ id: universalScannerModalId })}
-					testId={NAVIGATION_MENU_SCANNER_BUTTON}
-				>
-					<IconMaximize size="20px" />
-
-					<span class="flex w-full items-center justify-between">
-						{$i18n.navigation.text.wallet_connect}
-
-						<span class="text-tertiary-inverted"><IconWalletConnect /></span>
-					</span>
-				</ButtonMenu>
-
-				<ButtonMenu
-					ariaLabel={replaceOisyPlaceholders($i18n.navigation.text.pay)}
-					onclick={() => modalStore.openPayDialog(payDialogModalId)}
-					testId={NAVIGATION_MENU_PAY_BUTTON}
-				>
-					<IconMaximize size="20px" />
-
-					<span class="flex w-full items-center justify-between">
-						{replaceOisyPlaceholders($i18n.navigation.text.pay)}
-
-						<span class="text-tertiary-inverted"><IconPay /></span>
-					</span>
-				</ButtonMenu>
-
-				<Hr />
-
-				{#if TIPS_ENABLED}
 					<ButtonMenu
-						ariaLabel={tipMenuLabel}
-						onclick={() => modalStore.openTip(tipModalId)}
-						testId={NAVIGATION_MENU_TIP_BUTTON}
+						ariaLabel={$i18n.navigation.text.wallet_connect}
+						onclick={() => modalStore.openUniversalScanner({ id: universalScannerModalId })}
+						testId={NAVIGATION_MENU_SCANNER_BUTTON}
 					>
-						<IconHeart size="20" />
+						<IconMaximize size="20px" />
 
-						<!--
+						<span class="flex w-full items-center justify-between">
+							{$i18n.navigation.text.wallet_connect}
+
+							<span class="text-tertiary-inverted"><IconWalletConnect /></span>
+						</span>
+					</ButtonMenu>
+
+					<ButtonMenu
+						ariaLabel={replaceOisyPlaceholders($i18n.navigation.text.pay)}
+						onclick={() => modalStore.openPayDialog(payDialogModalId)}
+						testId={NAVIGATION_MENU_PAY_BUTTON}
+					>
+						<IconMaximize size="20px" />
+
+						<span class="flex w-full items-center justify-between">
+							{replaceOisyPlaceholders($i18n.navigation.text.pay)}
+
+							<span class="text-tertiary-inverted"><IconPay /></span>
+						</span>
+					</ButtonMenu>
+
+					<Hr />
+
+					{#if TIPS_ENABLED}
+						<ButtonMenu
+							ariaLabel={tipMenuLabel}
+							onclick={() => modalStore.openTip(tipModalId)}
+							testId={NAVIGATION_MENU_TIP_BUTTON}
+						>
+							<IconHeart size="20" />
+
+							<!--
 						The count, where the dot on the icon only said "something". Inside the
 						menu there is room to say how many.
 
@@ -302,27 +330,27 @@
 						construction, and the count has to be in the label or it is announced
 						nowhere.
 					-->
-						<span class="flex flex-1 items-center justify-between gap-2">
-							{$i18n.navigation.text.issue_tip}
+							<span class="flex flex-1 items-center justify-between gap-2">
+								{$i18n.navigation.text.issue_tip}
 
-							{#if $tipsOverview.failed > 0}
-								<Badge testId={NAVIGATION_MENU_TIP_COUNT} variant="warning" width="w-fit">
-									{$tipsOverview.failed}
-								</Badge>
-							{/if}
-						</span>
+								{#if $tipsOverview.failed > 0}
+									<Badge testId={NAVIGATION_MENU_TIP_COUNT} variant="warning" width="w-fit">
+										{$tipsOverview.failed}
+									</Badge>
+								{/if}
+							</span>
+						</ButtonMenu>
+					{/if}
+
+					<ButtonMenu
+						ariaLabel={$i18n.navigation.alt.refer_a_friend}
+						onclick={() => modalStore.openReferralCode(referralModalId)}
+						testId={NAVIGATION_MENU_REFERRAL_BUTTON}
+					>
+						<IconShare size="20" />
+						{$i18n.navigation.text.refer_a_friend}
 					</ButtonMenu>
 				{/if}
-
-				<ButtonMenu
-					ariaLabel={$i18n.navigation.alt.refer_a_friend}
-					onclick={() => modalStore.openReferralCode(referralModalId)}
-					testId={NAVIGATION_MENU_REFERRAL_BUTTON}
-				>
-					<IconShare size="20" />
-					{$i18n.navigation.text.refer_a_friend}
-				</ButtonMenu>
-
 				<ExternalLink
 					ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.support)}
 					asMenuItem
@@ -342,7 +370,7 @@
 
 				<Hr />
 
-				{#if isVip}
+				{#if !MOBILE_SHELL && isVip}
 					<ButtonMenu
 						ariaLabel={$i18n.navigation.alt.vip_qr_code}
 						onclick={() => modalStore.openVipQrCode({ id: goldModalId, data: QrCodeType.VIP })}
@@ -353,7 +381,7 @@
 					</ButtonMenu>
 				{/if}
 
-				{#if isGold}
+				{#if !MOBILE_SHELL && isGold}
 					<ButtonMenu
 						ariaLabel={$i18n.navigation.alt.binance_qr_code}
 						onclick={() => modalStore.openVipQrCode({ id: vipModalId, data: QrCodeType.GOLD })}
@@ -364,13 +392,13 @@
 					</ButtonMenu>
 				{/if}
 
-				{#if isGold || isVip}
+				{#if !MOBILE_SHELL && (isGold || isVip)}
 					<Hr />
 				{/if}
 			{/if}
 		</div>
 
-		<div class="flex max-w-80 flex-col">
+		<div class="flex flex-col" class:max-w-80={!fullWidth}>
 			{#if $authNotSignedIn}
 				<MenuLanguageSelector />
 			{/if}
@@ -386,13 +414,23 @@
 					<IconManage size="20" />
 					{$i18n.navigation.text.settings}
 				</ButtonMenu>
+				{#if MOBILE_SHELL && onAccount}
+					<ButtonMenu
+						ariaLabel={$i18n.core.mobile_shell.app_controls}
+						onclick={() => openFromMenu(() => onAccount?.())}
+						testId="mobile-app-controls"
+					>
+						<IconUser size="20" />
+						{$i18n.core.mobile_shell.app_controls}
+					</ButtonMenu>
+				{/if}
 			{/if}
 		</div>
 
 		{#if $authSignedIn}
 			<Hr />
 
-			<div class="my-2 flex max-w-80 flex-col">
+			<div class="my-2 flex flex-col" class:max-w-80={!fullWidth}>
 				<LockOrSignOut onHidePopover={hidePopover} />
 			</div>
 		{/if}
@@ -400,11 +438,22 @@
 		<Hr />
 
 		<div
-			class="mt-2 mb-1 flex max-w-80 flex-wrap justify-center gap-x-2 gap-y-1 text-xs text-nowrap text-tertiary"
+			class="mt-2 mb-1 flex flex-wrap justify-center gap-x-2 gap-y-1 text-xs text-nowrap text-tertiary"
+			class:max-w-80={!fullWidth}
 		>
 			<TermsOfUseLink />
 			<PrivacyPolicyLink />
 			<LicenseAgreementLink />
 		</div>
 	</div>
-</Popover>
+{/snippet}
+
+{#if visible && nativeSheetsAvailable()}
+	<BottomSheet ariaLabel={$i18n.navigation.alt.menu} contentClass="" bind:visible>
+		{#snippet content()}{@render menuContent(true)}{/snippet}
+	</BottomSheet>
+{:else}
+	<Popover anchor={button} direction="rtl" dropdown bind:visible>
+		{@render menuContent()}
+	</Popover>
+{/if}

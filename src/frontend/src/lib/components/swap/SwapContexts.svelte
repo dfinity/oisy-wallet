@@ -1,16 +1,15 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { setContext, type Snippet } from 'svelte';
+	import { setContext, untrack, type Snippet } from 'svelte';
 	import { get } from 'svelte/store';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import {
 		IC_TOKEN_FEE_CONTEXT_KEY,
 		type IcTokenFeeContext,
 		icTokenFeeStore
 	} from '$icp/stores/ic-token-fee.store';
-	import {
-		crossChainSwapNetworksMainnets,
-		crossChainSwapNetworksMainnetsIds
-	} from '$lib/derived/cross-chain-networks.derived';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
+	import { crossChainSwapNetworksMainnets } from '$lib/derived/cross-chain-networks.derived';
 	import {
 		initModalNetworksListContext,
 		MODAL_NETWORKS_LIST_CONTEXT_KEY,
@@ -74,26 +73,29 @@
 		}
 	});
 
-	// The network and asset type each list opens on are set by `SwapModalWizardSteps`, per side.
+	let availableNetworks = $derived(MOBILE_SHELL ? [ICP_NETWORK] : $crossChainSwapNetworksMainnets);
+	let availableNetworkIds = $derived(availableNetworks.map(({ id }) => id));
+
+	// Each list's initial filters are owned by SwapModalWizardSteps.
 	const tokensListContext = initModalTokensListContext({
 		tokens: [],
-		filterNetworksIds: $crossChainSwapNetworksMainnetsIds
+		filterNetworksIds: untrack(() => availableNetworkIds)
 	});
 
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
 
 	const networksListContext = initModalNetworksListContext({
-		networks: $crossChainSwapNetworksMainnets
+		networks: untrack(() => availableNetworks)
 	});
 
 	setContext<ModalNetworksListContext>(MODAL_NETWORKS_LIST_CONTEXT_KEY, networksListContext);
 
 	$effect(() => {
-		networksListContext.setNetworks($crossChainSwapNetworksMainnets);
+		networksListContext.setNetworks(availableNetworks);
 	});
 
 	$effect(() => {
-		tokensListContext.setFilterNetworksIds($crossChainSwapNetworksMainnetsIds);
+		tokensListContext.setFilterNetworksIds(availableNetworkIds);
 	});
 
 	setContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY, {

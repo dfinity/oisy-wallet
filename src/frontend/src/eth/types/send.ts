@@ -42,6 +42,20 @@ export type SignAndApproveParams = Omit<
 	spender: EthAddress;
 } & Omit<WithProgress, 'progressSteps'>;
 
+export interface EthSendTransactionReference {
+	hash: string;
+	nonce: number;
+}
+
+export class MobileEthSendSessionExpiredError extends Error {}
+
+// A node can accept the signed transaction even when its response never reaches the app.
+// This error carries no raw transaction or provider dump: callers must check the saved hash.
+export class MobileEthSendPendingError extends Error {
+	constructor(readonly transaction: EthSendTransactionReference) {
+		super('Mobile transfer broadcast needs confirmation');
+	}
+}
 // An error an EVM send raised that also says what became of its transaction. The original error
 // travels as the cause, and its text as the message, so a flow that only shows the error reads
 // exactly what it did before.

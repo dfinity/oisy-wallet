@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
+	import { page } from '$app/state';
 	import IconSearch from '$lib/components/icons/lucide/IconSearch.svelte';
 	import SlidingInput from '$lib/components/ui/SlidingInput.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { TOKEN_LIST_FILTER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
@@ -44,6 +46,7 @@
 
 <SlidingInput
 	ariaLabel={$i18n.tokens.alt.filter_button}
+	forceOpen={MOBILE_SHELL && page.url.searchParams.has('search')}
 	inputPlaceholder={$i18n.tokens.text.filter_placeholder}
 	{overflowableContent}
 	testIdPrefix={TOKEN_LIST_FILTER}

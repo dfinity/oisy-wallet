@@ -1,0 +1,77 @@
+name: App
+options:
+  minimumXcodeGenVersion: 2.45.0
+  deploymentTarget:
+    iOS: '26.0'
+  developmentLanguage: en
+settings:
+  base:
+    SWIFT_VERSION: '6.0'
+    SWIFT_STRICT_CONCURRENCY: complete
+    CODE_SIGN_STYLE: Automatic
+    'CODE_SIGN_IDENTITY[sdk=iphonesimulator*]': '-'
+    TARGETED_DEVICE_FAMILY: '1'
+    MARKETING_VERSION: '0.1.0'
+    CURRENT_PROJECT_VERSION: '2'
+packages:
+  IcpSdk:
+    path: ../../.native-sdk/source
+targets:
+  App:
+    type: application
+    platform: iOS
+    configFiles:
+      Debug: ../../.native-sdk/Audit.xcconfig
+      Release: ../../.native-sdk/Audit.xcconfig
+    preBuildScripts:
+      - name: Verify audit app identity
+        script: '"$OISY_NODE_BINARY" "$SRCROOT/../../prepare-app-config.mjs" --check-build'
+        basedOnDependencyAnalysis: false
+    sources:
+      - path: ../../app-environment.json
+        buildPhase: resources
+      - path: ../../auth-handoff/native/DelegationJSON.swift
+      - path: App
+        # Old generated resources can remain in an existing checkout after an upgrade.
+        excludes: [public, Base.lproj/Main.storyboard, capacitor.config.json, config.xml]
+    dependencies:
+      - package: IcpSdk
+        product: IcpSdkCore
+      - package: IcpSdk
+        product: IcpSdkAuth
+      - framework: ../../.native-sdk/IcpCore.xcframework
+        embed: false
+    settings:
+      base:
+        CODE_SIGN_ENTITLEMENTS: ../../.native-sdk/App.entitlements
+        INFOPLIST_FILE: App/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: ''
+  AppTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: ../AppTests
+      - path: App/public
+        type: folder
+        buildPhase: resources
+        optional: true
+    dependencies: [{ target: App }]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: org.dfinity.oisy.capacitor.preview.tests
+  AppUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [../AppUITests]
+    dependencies: [{ target: App }]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: org.dfinity.oisy.capacitor.preview.uitests
+schemes:
+  App:
+    build:
+      targets: { App: all }
+    test:
+      targets: [AppTests, AppUITests]

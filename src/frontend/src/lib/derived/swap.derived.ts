@@ -5,7 +5,9 @@ import {
 	NEAR_INTENTS_XRP_SWAP_ENABLED
 } from '$env/rest/near-intents.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { isMobileSendToken } from '$icp/utils/ic-send.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 import {
 	allCrossChainSwapTokens,
 	allSortedIcrcTokens,
@@ -67,13 +69,14 @@ export const allSwapUniverseTokens: Readable<TokenToggleable<Token>[]> = derived
 		$allCrossChainSwapTokens,
 		$swapUniverseBitcoinTokens,
 		$swapUniverseXrpTokens
-	]) => [
-		{ ...ICP_TOKEN, enabled: true },
-		...$allSortedIcrcTokens,
-		...$allCrossChainSwapTokens,
-		...$swapUniverseBitcoinTokens,
-		...$swapUniverseXrpTokens
-	]
+	]) =>
+		[
+			{ ...ICP_TOKEN, enabled: true },
+			...$allSortedIcrcTokens,
+			...$allCrossChainSwapTokens,
+			...$swapUniverseBitcoinTokens,
+			...$swapUniverseXrpTokens
+		].filter((token) => !MOBILE_SHELL || isMobileSendToken(token))
 );
 
 const selectedSwappableToken: Readable<Token | undefined> = derived(
@@ -91,7 +94,7 @@ const selectedSwappableToken: Readable<Token | undefined> = derived(
 		$swapUniverseBitcoinTokens,
 		$swapUniverseXrpTokens
 	]) => {
-		if (nonNullish($pageToken)) {
+		if (nonNullish($pageToken) && (!MOBILE_SHELL || isMobileSendToken($pageToken))) {
 			const selectedToken = $pageToken;
 
 			const swappableToken: Token | undefined = [

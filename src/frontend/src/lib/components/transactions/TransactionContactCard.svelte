@@ -6,6 +6,7 @@
 	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { allContacts } from '$lib/derived/contacts.derived';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -15,6 +16,7 @@
 	import { getContactForAddress, mapAddressToContactAddressUi } from '$lib/utils/contact.utils';
 
 	interface Props {
+		readOnly?: boolean;
 		// With `top_up`, `to` is the canister the top-up went to, which receives cycles rather
 		// than the tokens, or nothing when it cannot be known, as for an ICP top-up to a canister
 		// no contact holds.
@@ -29,6 +31,7 @@
 	}
 
 	const {
+		readOnly = MOBILE_SHELL,
 		type,
 		to,
 		from,
@@ -91,7 +94,7 @@
 				<span class="font-bold">{addressLabel}: {contact?.name}</span>
 				<span class="w-full truncate">{address}</span>
 
-				{#if isNullish(contact) && isSaveable}
+				{#if !readOnly && isNullish(contact) && isSaveable}
 					<Button
 						ariaLabel={$i18n.address.save.title}
 						link

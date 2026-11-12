@@ -2,6 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { cubicIn, cubicOut } from 'svelte/easing';
+	import { nativeSheetsAvailable } from '$lib/services/mobile-host.services';
+	import { nativeSheet } from '$lib/services/mobile-sheet.services';
 	import { overlayFocus } from '$lib/utils/overlay.utils';
 	import { slide } from '$lib/utils/transitions.utils';
 
@@ -25,7 +27,11 @@
 		children
 	}: Props = $props();
 
-	let transitionFn = $derived(transition ? slide : () => ({}));
+	// UIKit owns movement. Keep an outro lifetime for its snapshot/close handshake,
+	// but never animate the measured web panel's height or padding inside it.
+	let transitionFn = $derived(
+		onClose && nativeSheetsAvailable() ? () => ({ duration: 200 }) : transition ? slide : () => ({})
+	);
 
 	const manageFocus = (node: HTMLElement) =>
 		onClose ? overlayFocus(node, { onClose }) : undefined;
@@ -40,6 +46,7 @@
 	role="dialog"
 	tabindex="-1"
 	use:manageFocus
+	use:nativeSheet={{ enabled: !!onClose, size: 'medium' }}
 	in:transitionFn|global={{ axis: 'y', duration: 250, easing: cubicOut }}
 	out:transitionFn|global={{ axis: 'y', duration: 200, easing: cubicIn }}
 >
@@ -49,7 +56,7 @@
 		</span>
 	{/if}
 
-	<span>
+	<span data-sheet-body>
 		{@render children()}
 	</span>
 

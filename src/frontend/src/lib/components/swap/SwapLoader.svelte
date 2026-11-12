@@ -7,6 +7,8 @@
 		loadDisabledIcrcTokensBalances,
 		loadDisabledIcrcTokensExchanges
 	} from '$icp/services/icrc.services';
+	import { isMobileSendToken } from '$icp/utils/ic-send.utils';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { allSortedIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { loadSwapSupportedTokens } from '$lib/services/swap-supported-tokens.services';
@@ -83,10 +85,14 @@
 			loadSupportedTokens(),
 			loadDisabledIcrcTokensBalances({
 				identity: $authIdentity,
-				disabledIcrcTokens: $allSortedIcrcTokens
+				disabledIcrcTokens: $allSortedIcrcTokens.filter(
+					(token) => !MOBILE_SHELL || isMobileSendToken(token)
+				)
 			}),
 			loadDisabledIcrcTokensExchanges({
-				disabledIcrcTokens: $allSortedIcrcTokens
+				disabledIcrcTokens: $allSortedIcrcTokens.filter(
+					(token) => !MOBILE_SHELL || isMobileSendToken(token)
+				)
 			})
 		]);
 	};

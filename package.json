@@ -19,7 +19,7 @@
 		"build:ic-domains": "node scripts/build.ic-domains.mjs",
 		"build:ic-architecture": "node scripts/build.ic-architecture.mjs",
 		"build:ii-alternative-origins": "node scripts/build.ii-alternative-origins.mjs",
-		"build:post-process": "npm run build:style && npm run build:metadata && npm run build:seo && npm run build:ic-domains && npm run build:ic-architecture && npm run build:ii-alternative-origins && npm run build:csp && npm run build:compress",
+		"build:post-process": "npm run build:style && npm run build:metadata && npm run build:seo && npm run build:ic-domains && npm run build:ic-architecture && node mobile/capacitor/auth-handoff/prepare-audit-assets.mjs && npm run build:ii-alternative-origins && npm run build:csp && npm run build:compress",
 		"build:tokens-sns": "vite-node scripts/build.tokens.sns.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.sns.json",
 		"build:tokens-ckerc20": "vite-node scripts/build.tokens.ckerc20.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.ckerc20.json",
 		"build:tokens-icrc": "vite-node scripts/build.tokens.icrc.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.icrc.json",
@@ -68,7 +68,9 @@
 		"update:oisy-eslint": "npm rm @dfinity/eslint-config-oisy-wallet && npm i @dfinity/eslint-config-oisy-wallet -D",
 		"update:oisy-eslint:next": "npm rm @dfinity/eslint-config-oisy-wallet && npm i @dfinity/eslint-config-oisy-wallet@next -D",
 		"benchmark": "canbench --persist --show-summary",
-		"perf:memory": "node scripts/perf.memory.mjs"
+		"perf:memory": "node scripts/perf.memory.mjs",
+		"mobile:sync:ios": "npm --prefix mobile/capacitor run sync:ios",
+		"mobile:fixtures": "DFX_NETWORK=audit OISY_MOBILE_SHELL=1 VITE_MOBILE_UI_TEST=true vite build"
 	},
 	"dependencies": {
 		"@dfinity/ic-pub-key": "^1.0.2",
@@ -83,6 +85,7 @@
 		"@lifi/sdk": "^4.12.1",
 		"@liquidium/client": "^0.11.1",
 		"@metamask/detect-provider": "^2.0.0",
+		"@oisy/mobile-session": "file:mobile/capacitor/session-sdk",
 		"@plausible-analytics/tracker": "^0.4.6",
 		"@reown/walletkit": "^1.6.0",
 		"@solana-program/address-lookup-table": "^0.15.0",
@@ -160,6 +163,9 @@
 			"@icp-sdk/core": "^5.4.0",
 			"@icp-sdk/canisters": "^3.6.0",
 			"@dfinity/utils": "^4.2.1"
+		},
+		"@oisy/mobile-session": {
+			"@icp-sdk/core": "6.0.0"
 		}
 	},
 	"engines": {

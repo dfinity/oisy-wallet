@@ -1,0 +1,189 @@
+diff --git a/crates/icp-core/src/agent/signature.rs b/crates/icp-core/src/agent/signature.rs
+index da2db0a..95c7ad5 100644
+--- a/crates/icp-core/src/agent/signature.rs
++++ b/crates/icp-core/src/agent/signature.rs
+@@ -29,6 +29,7 @@ pub enum SignatureAlgorithm {
+ /// envelope rather than a crypto error, so it is worth having in one place.
+ ///
+ /// Ed25519 and RSA signatures pass through untouched.
++#[cfg_attr(feature = "uniffi", uniffi::export)]
+ pub fn normalise_signature(
+     algorithm: SignatureAlgorithm,
+     sig: Vec<u8>,
+diff --git a/crates/icp-core/src/delegation.rs b/crates/icp-core/src/delegation.rs
+index 9073a32..68f3bbf 100644
+--- a/crates/icp-core/src/delegation.rs
++++ b/crates/icp-core/src/delegation.rs
+@@ -387,6 +387,13 @@ impl Delegation {
+     }
+ }
+
++/// Domain-separated delegation payload, using ic-agent's canonical encoding.
++/// Exposed for platform keys that append a local hop without exporting a key.
++#[cfg_attr(feature = "uniffi", uniffi::export)]
++pub fn delegation_signable(delegation: Delegation) -> Result<Vec<u8>, AgentError> {
++    Ok(delegation.to_ic()?.signable())
++}
++
+ impl SignedDelegation {
+     /// Same as `to_ic`, exposed for the signing path.
+     pub fn to_ic_public(&self) -> Result<IcSignedDelegation, AgentError> {
+diff --git a/languages/swift/Sources/IcpSdkAuth/AuthClient.swift b/languages/swift/Sources/IcpSdkAuth/AuthClient.swift
+index c17266d..75cb421 100644
+--- a/languages/swift/Sources/IcpSdkAuth/AuthClient.swift
++++ b/languages/swift/Sources/IcpSdkAuth/AuthClient.swift
+@@ -536,6 +536,53 @@ public final class AuthClient: @unchecked Sendable {
+         }
+     }
+
++    /// Append one local, II-scoped hop for a trusted receiver's public key.
++    /// This does not call the experimental session re-issuance API.
++    /// The caller must bind delivery to its document/session generation and
++    /// pass the original absolute deadline, never a new lifetime on reload.
++    public func delegateSession(
++        to publicKeyDer: Data, expiresAtNs: UInt64
++    ) async throws -> DelegationChain {
++        try await restore()
++        return try await holding(ceremony) {
++            try Task.checkCancellation()
++            guard let session = self.lock.withLock({ self.live }),
++                let credential = try await self.credentials.get(slot: self.slots.session),
++                credential.chain == session.sessionChain
++            else { throw sessionGone() }
++            let chain = credential.chain
++            guard !publicKeyDer.isEmpty, publicKeyDer.count <= 512,
++                chain.delegations.count < 20,
++                publicKeyDer != chain.publicKey,
++                !chain.delegations.contains(where: { $0.delegation.pubkey == publicKeyDer })
++            else { throw misconfigured("a session handoff needs a fresh, bounded public key") }
++            try checkSessionChain(
++                sessionKeyDer: credential.identity.publicKeyDer(), canister: self.canister,
++                maxTimeToLiveNs: nil, chain: chain, nowNs: self.clock.nowNs())
++            guard let parentExpiry = chainExpiryNs(chain) else { throw sessionGone() }
++            let expiry = min(expiresAtNs, parentExpiry)
++            guard expiry > self.clock.nowNs() else { throw sessionGone() }
++            let delegation = Delegation(
++                pubkey: publicKeyDer, expirationNs: expiry,
++                targets: [self.canister.bytes], permissions: nil)
++            // Platform keys return DER ECDSA; delegation signatures need the
++            // same fixed-width encoding as ordinary IC request signatures.
++            let signature = try normaliseSignature(
++                algorithm: credential.identity.algorithm(),
++                sig: await credential.identity.sign(
++                    payload: delegationSignable(delegation: delegation)))
++            try Task.checkCancellation()
++            guard self.lock.withLock({ self.live?.machine === session.machine }),
++                expiry > self.clock.nowNs()
++            else { throw sessionGone() }
++            return DelegationChain(
++                publicKey: chain.publicKey,
++                delegations: chain.delegations + [
++                    SignedDelegation(delegation: delegation, signature: signature)
++                ])
++        }
++    }
++
+     // -- one app switch, several calls --------------------------------------
+
+     /// One app switch answering every call in it.
+diff --git a/languages/swift/Suites/AuthClient/AuthClientSuite.swift b/languages/swift/Suites/AuthClient/AuthClientSuite.swift
+index f9257ab..a817dc4 100644
+--- a/languages/swift/Suites/AuthClient/AuthClientSuite.swift
++++ b/languages/swift/Suites/AuthClient/AuthClientSuite.swift
+@@ -1,3 +1,4 @@
++import CryptoKit
+ import Foundation
+ import IcpSdkCore
+ import IcpSdkSigner
+@@ -97,6 +98,21 @@ final class MapIdentity: Identity, @unchecked Sendable {
+     func sign(payload: Data) async throws -> Data { Data(repeating: 0, count: 64) }
+ }
+
++/// Exercise the same DER-producing Apple signer used by Secure Enclave keys.
++final class AppleHandoffStore: MapStore, @unchecked Sendable {
++    let identity: KeychainIdentity
++
++    init(identity: KeychainIdentity) { self.identity = identity }
++
++    override func get(slot: String) async throws -> Credential? {
++        guard let credential = try await super.get(slot: slot) else { return nil }
++        guard slot == slotSession else { return credential }
++        var chain = credential.chain
++        chain.delegations[chain.delegations.count - 1].delegation.pubkey = identity.publicKeyDer()
++        return Credential(identity: identity, chain: chain)
++    }
++}
++
+ /// Both stores in one object, so a case wires one thing and reads both
+ /// halves back.
+ class MapStore: CredentialStorage, StateStorage, @unchecked Sendable {
+@@ -1573,6 +1589,60 @@ enum AuthClientSuite {
+
+     }
+
++    static func appleSessionHandoff() async throws {
++        let identity = try KeychainIdentity.generate(storage: .software)
++        let store = AppleHandoffStore(identity: identity)
++        try seed(store, head, now + month)
++        let receiver = P256.Signing.PrivateKey().publicKey.derRepresentation
++        let handed = try await client(store).delegateSession(
++            to: receiver, expiresAtNs: now + 3600 * secondNs)
++        guard let leaf = handed.delegations.last else {
++            check("Apple local handoff has a leaf", false)
++            return
++        }
++        check("Apple local handoff emits fixed-width P-256", leaf.signature.count == 64)
++        let signature = try P256.Signing.ECDSASignature(rawRepresentation: leaf.signature)
++        let publicKey = try P256.Signing.PublicKey(derRepresentation: identity.publicKeyDer())
++        let payload = try delegationSignable(delegation: leaf.delegation)
++        check("Apple local hop verifies over the canonical payload",
++            publicKey.isValidSignature(signature, for: payload))
++        check("Apple local hop rejects a different payload",
++            !publicKey.isValidSignature(signature, for: payload + Data([0])))
++    }
++
++    static func localSessionHandoff() async throws {
++        let store = MapStore()
++        try seed(store, head, now + month)
++        let client = try self.client(store)
++        let receiver = Data("fresh-web-public-key".utf8)
++        let deadline = now + 3600 * secondNs
++        let original = store.chain(slotSession)
++        let handed = try await client.delegateSession(to: receiver, expiresAtNs: deadline)
++        check("handoff preserves the original chain", Array(handed.delegations.dropLast()) == original?.delegations)
++        check("handoff keeps the session root", handed.publicKey == original?.publicKey)
++        check("handoff terminates at the web key", handed.delegations.last?.delegation.pubkey == receiver)
++        check("handoff has the absolute deadline", handed.delegations.last?.delegation.expirationNs == deadline)
++        check("handoff reaches only II", handed.delegations.last?.delegation.targets == [try ii().bytes])
++        check("handoff does not mutate the stored session", store.chain(slotSession) == original)
++        let capped = try await client.delegateSession(to: receiver, expiresAtNs: now + 2 * month)
++        check("handoff cannot extend the parent", capped.delegations.last?.delegation.expirationNs == now + month)
++        for key in [Data(), Data(repeating: 1, count: 513), head, keyDer(sessionName)] {
++            do {
++                _ = try await client.delegateSession(to: key, expiresAtNs: deadline)
++                check("invalid receiver is refused", false)
++            } catch { check("invalid receiver is refused", true) }
++        }
++        do {
++            _ = try await client.delegateSession(to: receiver, expiresAtNs: now)
++            check("expired handoff is refused", false)
++        } catch { check("expired handoff is refused", true) }
++        try? await client.signOut()
++        do {
++            _ = try await client.delegateSession(to: receiver, expiresAtNs: deadline)
++            check("signed-out handoff is refused", false)
++        } catch { check("signed-out handoff is refused", true) }
++    }
++
+     static func main() async {
+         do {
+             try theSessionChain()
+@@ -1580,6 +1650,8 @@ enum AuthClientSuite {
+             failures += 1
+             print("  FAIL the session chain stopped on \(error)")
+         }
++        await run("local session handoff", localSessionHandoff)
++        await run("Apple local session handoff", appleSessionHandoff)
+         await run("a cold start", coldStart)
+         await run("calling", calling)
+         await run("a mint that fails", aMintThatFails)

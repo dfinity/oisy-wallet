@@ -1,3 +1,5 @@
+import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
+import { WorkerRefreshResultSchema } from '$lib/schema/post-message.schema';
 import { WorkerQueue } from '$lib/services/worker-queue.services';
 import type { WithoutWorkerId, WorkerData, WorkerId } from '$lib/types/worker';
 import { workerPoolSize } from '$lib/utils/device.utils';
@@ -13,6 +15,8 @@ export abstract class AppWorker {
 	// TODO: use generics directly in the class so that we can use type WorkerListener
 	#listener: ((ev: MessageEvent) => void) | undefined;
 	#isTerminated = false;
+	#pendingRefreshes = new Set<() => void>();
+	static #refreshCancellations = new Set<() => void>();
 
 	// Shared worker pool. Wallet workers opt in via `getInstance({ pooled: true })` and are sharded
 	// across a small number of realms (keyed by a stable token id) instead of one realm per token.
@@ -40,7 +44,25 @@ export abstract class AppWorker {
 		const Workers = await import('$lib/workers/workers?worker');
 		const worker = new Workers.default();
 		AppWorker.#liveWorkers.add(worker);
-		return worker;
+		try {
+			if (MOBILE_SHELL) {
+				const { connectMobileWorkerSession } =
+					await import('$lib/services/mobile-worker-session.services');
+				await connectMobileWorkerSession({
+					worker,
+					onSessionGone: () => {
+						void import('$lib/services/mobile-runtime.services')
+							.then(({ endMobileRuntime }) => endMobileRuntime())
+							.catch(() => undefined);
+					}
+				});
+			}
+			return worker;
+		} catch (error) {
+			worker.terminate();
+			AppWorker.#liveWorkers.delete(worker);
+			throw error;
+		}
 	};
 
 	static #resolvedPoolSize = (): number => {
@@ -153,6 +175,49 @@ export abstract class AppWorker {
 		this.#queue.send({ ...data, workerId: this.#workerId });
 	};
 
+	protected postMessageAndWait = <T>({
+		message: data,
+		signal
+	}: {
+		message: WithoutWorkerId<T>;
+		signal: AbortSignal;
+	}): Promise<void> => {
+		if (this.#isTerminated || signal.aborted) {
+			return Promise.reject(signal.reason ?? new Error('Worker unavailable'));
+		}
+		const requestId = crypto.randomUUID();
+		return new Promise<void>((resolve, reject) => {
+			const finish = (error?: Error) => {
+				this.#worker.removeEventListener('message', onMessage);
+				signal.removeEventListener('abort', cancel);
+				this.#pendingRefreshes.delete(cancel);
+				AppWorker.#refreshCancellations.delete(cancel);
+				if (error) {
+					reject(error);
+				} else {
+					resolve();
+				}
+			};
+			const cancel = () => finish(new DOMException('Worker refresh cancelled', 'AbortError'));
+			const onMessage = (event: MessageEvent<unknown>) => {
+				const result = WorkerRefreshResultSchema.safeParse(event.data);
+				if (
+					!result.success ||
+					result.data.workerId !== this.#workerId ||
+					result.data.requestId !== requestId
+				) {
+					return;
+				}
+				finish(result.data.success ? undefined : new Error('Worker refresh failed'));
+			};
+			this.#worker.addEventListener('message', onMessage);
+			signal.addEventListener('abort', cancel, { once: true });
+			this.#pendingRefreshes.add(cancel);
+			AppWorker.#refreshCancellations.add(cancel);
+			this.#queue.send({ ...data, workerId: this.#workerId, requestId });
+		});
+	};
+
 	terminate = () => {
 		// Guard against double-terminate on the same instance
 		if (this.#isTerminated) {
@@ -160,6 +225,7 @@ export abstract class AppWorker {
 		}
 
 		this.#isTerminated = true;
+		this.#pendingRefreshes.forEach((cancel) => cancel());
 
 		if (isNullish(this.#poolIndex)) {
 			this.#worker.terminate();
@@ -198,6 +264,7 @@ export abstract class AppWorker {
 	 * bookkeeping) because the document is going away anyway.
 	 */
 	static terminateAllWorkers = () => {
+		AppWorker.#refreshCancellations.forEach((cancel) => cancel());
 		AppWorker.#liveWorkers.forEach((worker) => worker.terminate());
 		AppWorker.#liveWorkers.clear();
 

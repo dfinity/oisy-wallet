@@ -1,9 +1,12 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
+	import MobileHost from '$lib/components/core/MobileHost.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
 	import ResponsiveListener from '$lib/components/ui/ResponsiveListener.svelte';
 	import Spinner from '$lib/components/ui/Spinner.svelte';
@@ -14,6 +17,7 @@
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.constants';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
 	import { routeToken } from '$lib/derived/nav.derived';
@@ -27,6 +31,7 @@
 	import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { mobileRuntimeRecoveryStore } from '$lib/stores/mobile-host.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { personalNotesStore } from '$lib/stores/personal-notes.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -41,6 +46,11 @@
 	}
 
 	let { children }: Props = $props();
+	const recoverMobileRuntime = async (error: unknown): Promise<void> => {
+		const { handleMobileRuntimeFailure } = await import('$lib/services/mobile-runtime.services');
+		await handleMobileRuntimeFailure(error);
+	};
+	const retryMobileRuntime = (): void => window.location.reload();
 
 	/**
 	 * Init dApp
@@ -69,6 +79,10 @@
 		}
 
 		try {
+			if (MOBILE_SHELL) {
+				const { initializeMobileRuntime } = await import('$lib/services/mobile-runtime.services');
+				await initializeMobileRuntime();
+			}
 			await authStore.sync();
 
 			// We are using $authStore.identity here and not the derived $authIdentity because we track the event imperatively right after authStore.sync
@@ -78,6 +92,10 @@
 					: TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 			});
 		} catch (err: unknown) {
+			if (MOBILE_SHELL) {
+				await recoverMobileRuntime(err);
+				return;
+			}
 			trackEvent({
 				name: TRACK_SYNC_AUTH_ERROR_COUNT
 			});
@@ -97,7 +115,36 @@
 
 	let worker = $state<AuthWorker | undefined>();
 
-	onMount(async () => (worker = await AuthWorker.init()));
+	const initialized = init();
+	let disposed = false;
+	onMount(() => {
+		void initialized.then(async () => {
+			if (
+				disposed ||
+				$mobileRuntimeRecoveryStore ||
+				(MOBILE_SHELL && isNullish($authStore.identity))
+			) {
+				return;
+			}
+			try {
+				const created = await AuthWorker.init();
+				if (disposed) {
+					created.destroy();
+				} else {
+					worker = created;
+				}
+			} catch (err) {
+				if (MOBILE_SHELL) {
+					await recoverMobileRuntime(err);
+				} else {
+					consoleWarn('Auth worker unavailable', err);
+				}
+			}
+		});
+		return () => {
+			disposed = true;
+		};
+	});
 
 	onMount(initWorkerCleanupOnPageUnload);
 	onDestroy(() => worker?.destroy());
@@ -132,7 +179,7 @@
 		}
 
 		// We want to display a spinner until the authentication is loaded. This to avoid a glitch when either the landing page or effective content (sign-in / sign-out) is presented.
-		if ($authStore === undefined) {
+		if ($authStore === undefined && !$mobileRuntimeRecoveryStore) {
 			return;
 		}
 
@@ -181,11 +228,16 @@
 		}
 	};
 
-	onMount(openBc);
+	onMount(() => (MOBILE_SHELL ? undefined : openBc()));
 
 	let scrollY = 0;
+	let bodyScrollLocked = false;
 
 	const lockBodyScroll = () => {
+		if (bodyScrollLocked) {
+			return;
+		}
+		bodyScrollLocked = true;
 		({ scrollY } = window);
 		document.body.style.position = 'fixed';
 		document.body.style.top = `-${scrollY}px`;
@@ -193,6 +245,10 @@
 	};
 
 	const unlockBodyScroll = () => {
+		if (!bodyScrollLocked) {
+			return;
+		}
+		bodyScrollLocked = false;
 		document.body.style.position = '';
 		document.body.style.top = '';
 		document.body.style.width = '';
@@ -226,7 +282,7 @@
 	});
 </script>
 
-{#await init()}
+{#await initialized}
 	<div
 		class="app-initializing pointer-events-none fixed inset-0 flex items-center justify-center text-brand-primary dark:text-primary"
 		in:fade
@@ -234,7 +290,25 @@
 		<Spinner inline size="48px" />
 	</div>
 {:then _}
-	{@render children()}
+	{#if $mobileRuntimeRecoveryStore}
+		<main
+			class="mobile-runtime-recovery flex min-h-dvh flex-col items-center justify-center bg-primary px-6"
+			aria-live="polite"
+		>
+			<EmptyState
+				description={$i18n.core.mobile_shell.wallet_retry_description}
+				title={$i18n.core.mobile_shell.wallet_unavailable}
+			/>
+			<div class="flex w-full max-w-xs shrink-0">
+				<Button fullWidth onclick={retryMobileRuntime} testId="mobile-session-retry" type="button"
+					>{$i18n.core.text.retry}</Button
+				>
+			</div>
+		</main>
+	{:else}
+		{#if MOBILE_SHELL}<MobileHost />{/if}
+		{@render children()}
+	{/if}
 {/await}
 
 <!-- iOS Safari applies `:active` to a tapped element only when the page has a touch listener,
@@ -249,6 +323,11 @@
 <ResponsiveListener />
 
 <style lang="scss">
+	.mobile-runtime-recovery {
+		padding-top: calc(env(safe-area-inset-top) + var(--padding-8x));
+		padding-bottom: calc(env(safe-area-inset-bottom) + var(--padding-4x));
+	}
+
 	/* The pre-hydration loader owns the same position until it is removed. */
 	:global(body:has(> #app-spinner)) .app-initializing {
 		visibility: hidden;

@@ -316,6 +316,7 @@
 <WizardModal
 	bind:this={modal}
 	disablePointerEvents={loading}
+	mobileSwipeBack
 	onClose={close}
 	{steps}
 	testId={ADDRESS_BOOK_MODAL}

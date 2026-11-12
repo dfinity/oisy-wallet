@@ -16,6 +16,7 @@
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
+	import { isMobileSendToken } from '$icp/utils/ic-send.utils';
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import Buy from '$lib/components/buy/Buy.svelte';
 	import CheckNewCollectionsButton from '$lib/components/nfts/CheckNewCollectionsButton.svelte';
@@ -23,6 +24,7 @@
 	import Send from '$lib/components/send/Send.svelte';
 	import Swap from '$lib/components/swap/Swap.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import {
 		networkEthereum,
@@ -37,6 +39,8 @@
 	import { networkBitcoinMainnetEnabled } from '$lib/derived/networks.derived';
 	import { pageToken, pageTokenWithFallback } from '$lib/derived/page-token.derived';
 	import { isPageTokenSwappable } from '$lib/derived/swap.derived';
+	import { enabledTokens } from '$lib/derived/tokens.derived';
+	import { isMobileTransferToken } from '$lib/utils/mobile-send.utils';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
@@ -56,10 +60,23 @@
 	let isNftsPage = $derived(isRouteNfts(page));
 
 	let swapAction = $derived(
-		(!isTransactionsPage || $isPageTokenSwappable || isNullish($pageToken)) && !isNftsPage
+		(!isTransactionsPage || $isPageTokenSwappable || isNullish($pageToken)) &&
+			!isNftsPage &&
+			(!MOBILE_SHELL ||
+				(isTransactionsPage
+					? isMobileSendToken($pageToken)
+					: $networkICP || $pseudoNetworkChainFusion))
 	);
 
-	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
+	let sendAction = $derived(
+		(!$allBalancesZero || isTransactionsPage) &&
+			(!MOBILE_SHELL ||
+				(!isNftsPage &&
+					(isTransactionsPage
+						? isMobileTransferToken($pageToken)
+						: ($networkICP || $networkEthereum || $networkEvm || $pseudoNetworkChainFusion) &&
+							$enabledTokens.some(isMobileTransferToken))))
+	);
 
 	let buyAction = $derived((!$networkICP || nonNullish($pageToken?.buy)) && !isNftsPage);
 
@@ -110,46 +127,48 @@
 			<Swap />
 		{/if}
 
-		{#if cyclesMintAction && isTokenCyclesLedger($pageToken)}
-			<CyclesMintButton token={$pageToken} />
-		{/if}
+		{#if !MOBILE_SHELL}
+			{#if cyclesMintAction && isTokenCyclesLedger($pageToken)}
+				<CyclesMintButton token={$pageToken} />
+			{/if}
 
-		{#if cyclesTopUpAction && isTokenCyclesLedger($pageToken)}
-			<CyclesTopUpButton token={$pageToken} />
-		{/if}
+			{#if cyclesTopUpAction && isTokenCyclesLedger($pageToken)}
+				<CyclesTopUpButton token={$pageToken} />
+			{/if}
 
-		{#if checkNewCollectionsAction}
-			<CheckNewCollectionsButton />
-		{/if}
+			{#if checkNewCollectionsAction}
+				<CheckNewCollectionsButton />
+			{/if}
 
-		{#if isTransactionsPage}
-			{#if convertEth}
-				{#if $networkICP}
-					<ConvertToEthereum />
-				{:else}
-					<ConvertToCkEth />
+			{#if isTransactionsPage}
+				{#if convertEth}
+					{#if $networkICP}
+						<ConvertToEthereum />
+					{:else}
+						<ConvertToCkEth />
+					{/if}
+				{/if}
+
+				{#if convertErc20}
+					{#if $networkICP}
+						<ConvertToEthereum />
+					{:else}
+						<ConvertToCkErc20 />
+					{/if}
+				{/if}
+
+				{#if convertCkBtc}
+					<ConvertToBtc />
+				{/if}
+
+				{#if convertBtc}
+					<ConvertToCkBtc />
 				{/if}
 			{/if}
 
-			{#if convertErc20}
-				{#if $networkICP}
-					<ConvertToEthereum />
-				{:else}
-					<ConvertToCkErc20 />
-				{/if}
+			{#if buyAction && !tooManyButtons}
+				<Buy />
 			{/if}
-
-			{#if convertCkBtc}
-				<ConvertToBtc />
-			{/if}
-
-			{#if convertBtc}
-				<ConvertToCkBtc />
-			{/if}
-		{/if}
-
-		{#if buyAction && !tooManyButtons}
-			<Buy />
 		{/if}
 	</HeroButtonGroup>
 </div>

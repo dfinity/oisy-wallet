@@ -111,6 +111,13 @@
 		},
 		"error": {
 			"copy_failed": ""
+		},
+		"mobile_shell": {
+			"wallet_unavailable": "",
+			"wallet_retry_description": "",
+			"account": "",
+			"app_controls": "",
+			"refresh_failed": ""
 		}
 	},
 	"progress": {
@@ -203,7 +210,8 @@
 			"internet_identity": "",
 			"asset_types": "Krypto, akcje, surowce, przedmioty kolekcjonerskie i zaszyfrowane notatki.",
 			"advanced_cryptography": "Prywatne i odporne na manipulacje. Niewidoczne, gdy tego potrzebujesz.",
-			"move_swap_grow": "Zarabiaj, pożyczaj i handluj z wbudowanym asystentem AI."
+			"move_swap_grow": "Zarabiaj, pożyczaj i handluj z wbudowanym asystentem AI.",
+			"return_to_app": ""
 		},
 		"alt": {
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie",
@@ -228,7 +236,8 @@
 		"error": {
 			"no_internet_identity": "Brak tożsamości internetowej.",
 			"error_while_signing_in": "Coś poszło nie tak podczas logowania.",
-			"unexpected_issue_with_syncing": "Nieoczekiwany problem podczas synchronizacji statusu uwierzytelnienia."
+			"unexpected_issue_with_syncing": "Nieoczekiwany problem podczas synchronizacji statusu uwierzytelnienia.",
+			"missing_mobile_callback": ""
 		},
 		"help": {
 			"text": {
@@ -1064,7 +1073,12 @@
 			"send_review_subtitle": "Wysyłasz",
 			"no_nfts_found": "",
 			"no_nfts_found_desc": "",
-			"select_nft": ""
+			"select_nft": "",
+			"mobile_pending": "",
+			"mobile_pending_title": "",
+			"mobile_not_confirmed": "",
+			"mobile_recovery_unavailable": "",
+			"mobile_check_status": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Wprowadź adres publiczny (0x), nazwę lub alias",
@@ -1086,7 +1100,9 @@
 			"fee_expired": "",
 			"fee_info": "Opłata zostanie uiszczona w $feeSymbol. Dostępne: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wybierasz właściwy token, wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!",
-			"scanned_address_only_destination_single_token": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!"
+			"scanned_address_only_destination_single_token": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!",
+			"mobile_ic_only": "",
+			"mobile_supported_only": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "Nieprawidłowy adres docelowy",
@@ -1168,7 +1184,8 @@
 			"xrp_destination_unfunded": "Ten adres nie ma jeszcze konta XRP. Jego utworzenie wymaga pierwszej płatności co najmniej $reserve XRP. Nic nie zostało wysłane — zwiększ kwotę lub wyślij na adres, który jest już zasilony.",
 			"xrp_destination_tag_required": "Ten adres wymaga tagu docelowego XRP. Nic nie zostało wysłane — dodaj tag otrzymany od serwisu, któremu płacisz, i wyślij ponownie.",
 			"xrp_destination_is_source": "To Twój własny adres XRP. Nic nie zostało wysłane — wybierz innego odbiorcę.",
-			"xrp_account_state_unavailable": "Portfel nie mógł odczytać danych Twojego konta, więc kwota nie została sprawdzona. Nic nie zostało wysłane — spróbuj ponownie za chwilę."
+			"xrp_account_state_unavailable": "Portfel nie mógł odczytać danych Twojego konta, więc kwota nie została sprawdzona. Nic nie zostało wysłane — spróbuj ponownie za chwilę.",
+			"mobile_unconfirmed": ""
 		}
 	},
 	"mint": {
@@ -1454,7 +1471,12 @@
 			"oisy_trade_taker_fee": "",
 			"oisy_trade_withdrawal_fee": "",
 			"value_difference_error_confirmation": "",
-			"value_difference_missing_price_confirmation": "Nie udało się pobrać ceny przynajmniej jednego z tokenów. <strong>Zweryfikuj niezależnie</strong>, czy ta oferta wymiany jest uczciwa.<br>Pamiętaj, że ustawienie poślizgu (slippage) <strong>nie</strong> chroni Cię przed ofertą z dużo niższą wartością otrzymywaną!"
+			"value_difference_missing_price_confirmation": "Nie udało się pobrać ceny przynajmniej jednego z tokenów. <strong>Zweryfikuj niezależnie</strong>, czy ta oferta wymiany jest uczciwa.<br>Pamiętaj, że ustawienie poślizgu (slippage) <strong>nie</strong> chroni Cię przed ofertą z dużo niższą wartością otrzymywaną!",
+			"mobile_pending": "",
+			"mobile_pool_not_empty": "",
+			"mobile_no_recovery_balance": "",
+			"mobile_recovered": "",
+			"mobile_recover": ""
 		},
 		"error": {
 			"kong_not_available": "Obecnie nie ma dostępnej giełdy do wymiany tokenów. Spróbuj ponownie później.",

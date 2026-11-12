@@ -3,6 +3,11 @@ import type { Snippet } from 'svelte';
 
 export interface ModalProps {
 	visible?: boolean;
+	/** Used only by the embedded mobile shell; desktop presentation is unchanged. */
+	mobilePresentation?: 'sheet' | 'fullScreen';
+	/** Opt in only full-page flows with a guarded leading Back action. */
+	mobileSwipeBack?: boolean;
+	showCloseButton?: boolean;
 	role?: 'dialog' | 'alert';
 	testId?: string;
 	disablePointerEvents?: boolean;

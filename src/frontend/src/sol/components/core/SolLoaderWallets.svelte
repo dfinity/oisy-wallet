@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { enabledSplTokens } from '$lib/derived/tokens.derived';
+	import { registerWalletRefresh } from '$lib/services/wallet-refresh.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { Token, TokenId } from '$lib/types/token';
@@ -90,6 +92,9 @@
 	};
 
 	const manageWorkers = async () => {
+		if (destroyed) {
+			return;
+		}
 		const wanted = networkWallets;
 
 		[...workers.keys()]
@@ -168,6 +173,31 @@
 		workers.forEach(({ worker }) => worker.destroy());
 		workers.clear();
 	});
+
+	onMount(() =>
+		MOBILE_SHELL
+			? registerWalletRefresh({
+					kind: 'wallet',
+					refresh: async (signal) => {
+						if ($enabledSolanaTokens.length !== networkWallets.length) {
+							throw new Error('Solana address unavailable');
+						}
+						managing = managing.then(manageWorkers);
+						await managing;
+						signal.throwIfAborted();
+						await Promise.all(
+							networkWallets.map(({ token: { network } }) => {
+								const current = workers.get(network.id);
+								if (!current) {
+									throw new Error('Solana wallet unavailable');
+								}
+								return current.worker.refresh(signal);
+							})
+						);
+					}
+				})
+			: undefined
+	);
 
 	const triggerTimer = () => workers.forEach(({ worker }) => worker.trigger());
 

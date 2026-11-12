@@ -4,6 +4,7 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { allowSigning } from '$lib/api/backend.api';
+import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 import {
 	networkBitcoinMainnetEnabled,
 	networkEthereumEnabled,
@@ -20,7 +21,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
-import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
+import { freshIIDelegationChain } from '$lib/utils/delegation.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -32,13 +33,12 @@ import { get } from 'svelte/store';
  * A "reasonable" number is currently defined as 30 calls, allowing the user to retrieve their ETH and BTC addresses
  * and perform up to 28 additional transactions.
  *
- * If an error occurs during the `allow_signing` call, the user will be signed out,
- * as the Oisy Wallet cannot function without ETH or Bitcoin addresses.
+ * The browser signs out when initialization fails. Mobile keeps the native session
+ * and offers a document reload, unless the SDK confirms terminal credential loss.
  *
  * @async
  * @function initSignerAllowance
  * @returns {Promise<ResultSuccess>} Returns an object indicating success or failure of the operation.
- * @throws Will trigger a sign-out if `allow_signing` fails.
  */
 export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	try {
@@ -46,15 +46,19 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 
 		const { rateLimitInfo } = await allowSigning({
 			identity,
-			iiDelegationChain: nonNullish(identity) ? extractIIDelegationChain(identity) : []
+			iiDelegationChain: nonNullish(identity) ? await freshIIDelegationChain({ identity }) : []
 		});
 
 		if (nonNullish(rateLimitInfo)) {
 			trackRateLimited(rateLimitInfo);
 		}
-	} catch (_err: unknown) {
-		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
-		await errorSignOut(get(i18n).init.error.allow_signing);
+	} catch (err: unknown) {
+		if (MOBILE_SHELL) {
+			const { handleMobileRuntimeFailure } = await import('$lib/services/mobile-runtime.services');
+			await handleMobileRuntimeFailure(err);
+		} else {
+			await errorSignOut(get(i18n).init.error.allow_signing);
+		}
 
 		return { success: false };
 	}
@@ -64,7 +68,7 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 /**
  * Initializes the loader by loading the user profile settings and addresses.
  *
- * If the user profile settings cannot be loaded, the user will be signed out.
+ * If profile settings cannot be loaded, the browser signs out; mobile offers Retry.
  * If the addresses are loaded from the backend correctly:
  * - The signer allowance will be initialized.
  * - The additional data will be loaded.
@@ -106,21 +110,26 @@ export const initLoader = async ({
 			return;
 		}
 
-		await signOut({});
+		if (MOBILE_SHELL) {
+			const { handleMobileRuntimeFailure } = await import('$lib/services/mobile-runtime.services');
+			await handleMobileRuntimeFailure(new Error('Wallet initialization unavailable'));
+		} else {
+			await signOut({});
+		}
 		return;
 	}
 
 	// A just-created profile has no signing allowance yet, so it must be awaited even when addresses
 	// are derived in the frontend: the wallet workers started by `progressAndLoad` issue paid signer
 	// calls (e.g. the certified BTC balance) that would otherwise race the approve.
-	if (FRONTEND_DERIVATION_ENABLED && !profileCreated) {
+	if (!MOBILE_SHELL && FRONTEND_DERIVATION_ENABLED && !profileCreated) {
 		// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
 		initSignerAllowance();
 	} else {
 		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
 		if (!initSignerAllowanceSuccess) {
-			// Sign-out is handled within the service.
+			// Sign-out or mobile recovery is handled within the service.
 			return;
 		}
 	}
@@ -136,7 +145,12 @@ export const initLoader = async ({
 	const { success: addressSuccess } = await loadAddresses(enabledNetworkIds);
 
 	if (!addressSuccess) {
-		await signOut({});
+		if (MOBILE_SHELL) {
+			const { handleMobileRuntimeFailure } = await import('$lib/services/mobile-runtime.services');
+			await handleMobileRuntimeFailure(new Error('Wallet initialization unavailable'));
+		} else {
+			await signOut({});
+		}
 		return;
 	}
 

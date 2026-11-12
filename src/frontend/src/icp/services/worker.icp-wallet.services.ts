@@ -118,4 +118,16 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 			}
 		});
 	};
+
+	refresh = (signal: AbortSignal) =>
+		this.postMessageAndWait<PostMessage<PostMessageDataRequestIcp>>({
+			message: {
+				msg: 'triggerIcpWalletTimer',
+				data: {
+					ledgerCanisterId: this.ledgerCanisterId,
+					indexCanisterId: this.indexCanisterId
+				}
+			},
+			signal
+		});
 }

@@ -1,9 +1,12 @@
 import * as cyclesTopUpEnv from '$env/cycles-top-up.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as canisterStateApi from '$icp/api/canister-state.api';
 import { lastCyclesTopUps } from '$icp/stores/cycles-top-up.store';
 import type { CanisterExistence } from '$icp/types/cycles-top-up';
 import SendModal from '$lib/components/send/SendModal.svelte';
+import * as mobile from '$lib/constants/mobile.constants';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
 	CYCLES_SEND_OR_TOP_UP,
@@ -16,10 +19,12 @@ import {
 	CYCLES_TOP_UP_REVIEW
 } from '$lib/constants/test-ids.constants';
 import * as authDerived from '$lib/derived/auth.derived';
+import * as tokensDerived from '$lib/derived/tokens.derived';
 import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import * as cyclesTopUpAnalytics from '$lib/services/cycles-top-up-analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
+import * as modalTokens from '$lib/stores/modal-tokens-list.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import { token } from '$lib/stores/token.store';
@@ -791,5 +796,36 @@ describe('SendModal', () => {
 				expect(getByTestId('stub-colored-network-logos')).toHaveTextContent('true')
 			);
 		});
+	});
+});
+
+describe('mobile Send modal', () => {
+	afterEach(() => vi.restoreAllMocks());
+
+	it('includes supported ICP and ETH assets in the shared token list', () => {
+		vi.spyOn(mobile, 'MOBILE_SHELL', 'get').mockReturnValue(true);
+		vi.spyOn(tokensDerived, 'enabledTokens', 'get').mockReturnValue(
+			readable([ICP_TOKEN, ETHEREUM_TOKEN, { ...mockValidIcrcToken, ledgerCanisterId: 'aaaaa-aa' }])
+		);
+		const context = vi.spyOn(modalTokens, 'initModalTokensListContext');
+		render(SendModal, { props: { isTransactionsPage: false, isNftsPage: false } });
+
+		expect(context).toHaveBeenCalledWith(
+			expect.objectContaining({
+				tokens: [ICP_TOKEN, ETHEREUM_TOKEN],
+				filterZeroBalance: true
+			})
+		);
+	});
+
+	it('does not render an unsupported token flow even when invoked directly', () => {
+		vi.spyOn(mobile, 'MOBILE_SHELL', 'get').mockReturnValue(true);
+		const unsupportedToken = { ...mockValidIcrcToken, ledgerCanisterId: 'aaaaa-aa' };
+		token.set(unsupportedToken);
+		const { queryByRole } = render(SendModal, {
+			props: { isTransactionsPage: true, isNftsPage: false }
+		});
+
+		expect(queryByRole('dialog')).not.toBeInTheDocument();
 	});
 });

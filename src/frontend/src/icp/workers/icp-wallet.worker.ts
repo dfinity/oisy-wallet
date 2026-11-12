@@ -70,7 +70,7 @@ const getBalanceAndTransactions = async (
 	// transactions history, so on failure we post the balance with no transaction delta and let the
 	// history catch up on the next successful tick.
 	if (transactionsResult.status === 'rejected') {
-		return { balance, transactions: [], oldest_tx_id: [] };
+		return { balance, transactions: [], oldest_tx_id: [], transactionsUnavailable: true };
 	}
 
 	// Ignore the balance reported by the Index canister. When it is low on cycles it stops syncing new
@@ -166,7 +166,11 @@ export const onIcpWalletMessage = async ({
 				schedulers.set(schedulerKey, scheduler);
 			}
 
-			await scheduler.trigger(data);
+			if ('requestId' in dataMsg && dataMsg.requestId !== undefined) {
+				await scheduler.refresh(data);
+			} else {
+				await scheduler.trigger(data);
+			}
 		}
 	}
 };

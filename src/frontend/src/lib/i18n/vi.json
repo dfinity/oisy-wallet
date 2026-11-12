@@ -111,6 +111,13 @@
 		},
 		"error": {
 			"copy_failed": ""
+		},
+		"mobile_shell": {
+			"wallet_unavailable": "",
+			"wallet_retry_description": "",
+			"account": "",
+			"app_controls": "",
+			"refresh_failed": ""
 		}
 	},
 	"progress": {
@@ -203,7 +210,8 @@
 			"internet_identity": "",
 			"asset_types": "Tiền mã hoá, cổ phiếu, hàng hoá, vật phẩm sưu tầm và ghi chú được mã hoá.",
 			"advanced_cryptography": "Riêng tư và chống giả mạo. Vô hình, khi bạn cần.",
-			"move_swap_grow": "Kiếm lời, vay và giao dịch, với trợ lý AI tích hợp."
+			"move_swap_grow": "Kiếm lời, vay và giao dịch, với trợ lý AI tích hợp.",
+			"return_to_app": ""
 		},
 		"alt": {
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động",
@@ -228,7 +236,8 @@
 		"error": {
 			"no_internet_identity": "Không có Internet Identity.",
 			"error_while_signing_in": "Đã xảy ra lỗi trong khi đăng nhập.",
-			"unexpected_issue_with_syncing": "Sự cố không mong muốn trong khi đồng bộ hóa trạng thái xác thực của bạn."
+			"unexpected_issue_with_syncing": "Sự cố không mong muốn trong khi đồng bộ hóa trạng thái xác thực của bạn.",
+			"missing_mobile_callback": ""
 		},
 		"help": {
 			"text": {
@@ -1064,7 +1073,12 @@
 			"send_review_subtitle": "Bạn gửi",
 			"no_nfts_found": "Không vật phẩm sưu tầm nào được tìm thấy",
 			"no_nfts_found_desc": "Điều chỉnh tìm kiếm hoặc mạng của bạn để tìm vật phẩm sưu tầm",
-			"select_nft": "Chọn vật phẩm sưu tầm"
+			"select_nft": "Chọn vật phẩm sưu tầm",
+			"mobile_pending": "",
+			"mobile_pending_title": "",
+			"mobile_not_confirmed": "",
+			"mobile_recovery_unavailable": "",
+			"mobile_check_status": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
@@ -1086,7 +1100,9 @@
 			"fee_expired": "",
 			"fee_info": "Phí sẽ được thanh toán bằng $feeSymbol. Khả dụng: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn chọn đúng token, nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!",
-			"scanned_address_only_destination_single_token": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!"
+			"scanned_address_only_destination_single_token": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!",
+			"mobile_ic_only": "",
+			"mobile_supported_only": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "Địa chỉ ví không hợp lệ",
@@ -1168,7 +1184,8 @@
 			"xrp_destination_unfunded": "Địa chỉ này chưa có tài khoản XRP. Việc tạo tài khoản cần một khoản thanh toán đầu tiên ít nhất $reserve XRP. Chưa có gì được gửi — hãy tăng số tiền, hoặc gửi tới một địa chỉ đã được kích hoạt.",
 			"xrp_destination_tag_required": "Địa chỉ này yêu cầu thẻ đích XRP. Chưa có gì được gửi — hãy thêm thẻ do dịch vụ bạn đang thanh toán cung cấp, rồi gửi lại.",
 			"xrp_destination_is_source": "Đây là địa chỉ XRP của chính bạn. Chưa có gì được gửi — hãy chọn người nhận khác.",
-			"xrp_account_state_unavailable": "Ví không đọc được thông tin tài khoản của bạn, nên không thể kiểm tra số tiền. Chưa có gì được gửi — vui lòng thử lại sau giây lát."
+			"xrp_account_state_unavailable": "Ví không đọc được thông tin tài khoản của bạn, nên không thể kiểm tra số tiền. Chưa có gì được gửi — vui lòng thử lại sau giây lát.",
+			"mobile_unconfirmed": ""
 		}
 	},
 	"mint": {
@@ -1454,7 +1471,12 @@
 			"oisy_trade_taker_fee": "",
 			"oisy_trade_withdrawal_fee": "",
 			"value_difference_error_confirmation": "",
-			"value_difference_missing_price_confirmation": "Không thể truy xuất giá của ít nhất một trong các token. Vui lòng <strong>xác minh độc lập</strong> rằng giao dịch swap này là một thỏa thuận công bằng.<br>Lưu ý rằng cài đặt trượt giá <strong>không</strong> bảo vệ bạn khỏi giao dịch với giá trị nhận thấp hơn nhiều!"
+			"value_difference_missing_price_confirmation": "Không thể truy xuất giá của ít nhất một trong các token. Vui lòng <strong>xác minh độc lập</strong> rằng giao dịch swap này là một thỏa thuận công bằng.<br>Lưu ý rằng cài đặt trượt giá <strong>không</strong> bảo vệ bạn khỏi giao dịch với giá trị nhận thấp hơn nhiều!",
+			"mobile_pending": "",
+			"mobile_pool_not_empty": "",
+			"mobile_no_recovery_balance": "",
+			"mobile_recovered": "",
+			"mobile_recover": ""
 		},
 		"error": {
 			"kong_not_available": "Hiện tại không có sàn giao dịch nào có sẵn để hoán đổi token. Vui lòng thử lại sau.",

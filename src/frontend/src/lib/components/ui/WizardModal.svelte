@@ -7,10 +7,13 @@
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import WizardTransition from '$lib/components/ui/WizardTransition.svelte';
 	import { WizardStepsState } from '$lib/stores/wizard.state';
+	import type { ModalProps } from '$lib/types/modal';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 
 	interface Props {
 		steps: WizardSteps<T>;
+		mobilePresentation?: ModalProps['mobilePresentation'];
+		mobileSwipeBack?: boolean;
 		disablePointerEvents?: boolean;
 		testId?: string;
 		currentStep?: WizardStep<T>;
@@ -22,6 +25,8 @@
 
 	let {
 		steps,
+		mobilePresentation = 'fullScreen',
+		mobileSwipeBack = false,
 		disablePointerEvents = false,
 		testId,
 		currentStep = $bindable(),
@@ -63,7 +68,15 @@
 </script>
 
 {#if visible}
-	<Modal {disablePointerEvents} {headerRight} onClose={close} {testId} {title}>
+	<Modal
+		{disablePointerEvents}
+		{headerRight}
+		{mobilePresentation}
+		{mobileSwipeBack}
+		onClose={close}
+		{testId}
+		{title}
+	>
 		<WizardTransition {transition}>
 			{@render children()}
 		</WizardTransition>

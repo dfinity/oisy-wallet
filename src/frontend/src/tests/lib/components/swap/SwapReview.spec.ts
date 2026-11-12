@@ -1,4 +1,5 @@
 import SwapReview from '$lib/components/swap/SwapReview.svelte';
+import * as mobile from '$lib/constants/mobile.constants';
 import {
 	SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
 	SWAP_SLIPPAGE_WARNING_VALUE
@@ -76,6 +77,30 @@ describe('SwapReview', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+	});
+
+	describe('mobile review', () => {
+		afterEach(() => vi.restoreAllMocks());
+
+		it('keeps the shared missing-price acknowledgement before submission', async () => {
+			vi.spyOn(mobile, 'MOBILE_SHELL', 'get').mockReturnValue(true);
+			const { context } = createSwapContext({ sourceTokenExchangeRate: undefined });
+			const { getByRole, getByText } = render(SwapReview, { props: baseProps, context });
+
+			expect(getByText('0.5%')).toBeInTheDocument();
+
+			const confirm = getByRole('button', { name: en.swap.text.swap_button });
+
+			expect(confirm).toBeDisabled();
+
+			await fireEvent.click(getByRole('checkbox'));
+
+			expect(confirm).not.toBeDisabled();
+
+			await fireEvent.click(confirm);
+
+			expect(baseProps.onSwap).toHaveBeenCalledOnce();
+		});
 	});
 
 	describe('basic rendering', () => {

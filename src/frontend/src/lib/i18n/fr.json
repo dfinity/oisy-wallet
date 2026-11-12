@@ -111,6 +111,13 @@
 		},
 		"error": {
 			"copy_failed": ""
+		},
+		"mobile_shell": {
+			"wallet_unavailable": "",
+			"wallet_retry_description": "",
+			"account": "",
+			"app_controls": "",
+			"refresh_failed": ""
 		}
 	},
 	"progress": {
@@ -203,7 +210,8 @@
 			"internet_identity": "",
 			"asset_types": "Crypto, actions, matières premières, objets de collection et notes chiffrées.",
 			"advanced_cryptography": "Privé et inviolable. Invisible, si vous le souhaitez.",
-			"move_swap_grow": "Gagnez, empruntez et échangez, avec un assistant IA intégré."
+			"move_swap_grow": "Gagnez, empruntez et échangez, avec un assistant IA intégré.",
+			"return_to_app": ""
 		},
 		"alt": {
 			"preview": "Aperçu de $oisy_name une fois connecté, sur ordinateur et mobile",
@@ -228,7 +236,8 @@
 		"error": {
 			"no_internet_identity": "Pas d'Internet Identity.",
 			"error_while_signing_in": "Quelque chose s'est mal passé lors de la connexion.",
-			"unexpected_issue_with_syncing": "Problème inattendu lors de la synchronisation du statut de votre authentification."
+			"unexpected_issue_with_syncing": "Problème inattendu lors de la synchronisation du statut de votre authentification.",
+			"missing_mobile_callback": ""
 		},
 		"help": {
 			"text": {
@@ -1064,7 +1073,12 @@
 			"send_review_subtitle": "Vous envoyez",
 			"no_nfts_found": "Aucun objet de collection trouvé",
 			"no_nfts_found_desc": "Ajustez votre recherche ou votre réseau pour trouver vos objets de collection",
-			"select_nft": "Sélectionner un objet de collection"
+			"select_nft": "Sélectionner un objet de collection",
+			"mobile_pending": "",
+			"mobile_pending_title": "",
+			"mobile_not_confirmed": "",
+			"mobile_recovery_unavailable": "",
+			"mobile_check_status": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Saisir l'adresse publique (0x), le nom ou l'alias",
@@ -1086,7 +1100,9 @@
 			"fee_expired": "",
 			"fee_info": "Les frais seront payés en $feeSymbol. Disponible : <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "Le code scanné ne contenait qu'une adresse de destination. Assurez-vous de sélectionner le bon token, de saisir le bon montant et de vérifier attentivement l'adresse de destination !",
-			"scanned_address_only_destination_single_token": "Le code scanné ne contenait qu'une adresse de destination. Assurez-vous de saisir le bon montant et de vérifier attentivement l'adresse de destination !"
+			"scanned_address_only_destination_single_token": "Le code scanné ne contenait qu'une adresse de destination. Assurez-vous de saisir le bon montant et de vérifier attentivement l'adresse de destination !",
+			"mobile_ic_only": "",
+			"mobile_supported_only": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "Adresse de destination invalide",
@@ -1168,7 +1184,8 @@
 			"xrp_destination_unfunded": "Cette adresse n’a pas encore de compte XRP. Sa création exige un premier paiement d’au moins $reserve XRP. Rien n’a été envoyé : augmentez le montant ou envoyez vers une adresse déjà approvisionnée.",
 			"xrp_destination_tag_required": "Cette adresse exige un tag de destination XRP. Rien n’a été envoyé : ajoutez le tag fourni par le service que vous payez, puis renvoyez.",
 			"xrp_destination_is_source": "Il s’agit de votre propre adresse XRP. Rien n’a été envoyé : choisissez un autre destinataire.",
-			"xrp_account_state_unavailable": "Le portefeuille n’a pas pu lire les informations de votre compte, le montant n’a donc pas pu être vérifié. Rien n’a été envoyé : réessayez dans un instant."
+			"xrp_account_state_unavailable": "Le portefeuille n’a pas pu lire les informations de votre compte, le montant n’a donc pas pu être vérifié. Rien n’a été envoyé : réessayez dans un instant.",
+			"mobile_unconfirmed": ""
 		}
 	},
 	"mint": {
@@ -1454,7 +1471,12 @@
 			"oisy_trade_taker_fee": "",
 			"oisy_trade_withdrawal_fee": "",
 			"value_difference_error_confirmation": "",
-			"value_difference_missing_price_confirmation": "Le prix d'au moins un des tokens n'a pas pu être récupéré. Veuillez <strong>vérifier de manière indépendante</strong> que cette offre de swap est équitable.<br>Notez que le réglage du slippage ne vous protège <strong>pas</strong> d'une offre avec une valeur de réception bien inférieure !"
+			"value_difference_missing_price_confirmation": "Le prix d'au moins un des tokens n'a pas pu être récupéré. Veuillez <strong>vérifier de manière indépendante</strong> que cette offre de swap est équitable.<br>Notez que le réglage du slippage ne vous protège <strong>pas</strong> d'une offre avec une valeur de réception bien inférieure !",
+			"mobile_pending": "",
+			"mobile_pool_not_empty": "",
+			"mobile_no_recovery_balance": "",
+			"mobile_recovered": "",
+			"mobile_recover": ""
 		},
 		"error": {
 			"kong_not_available": "Il n'y a actuellement aucun échange disponible pour échanger des tokens. Veuillez réessayer plus tard.",

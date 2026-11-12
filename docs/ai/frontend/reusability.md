@@ -1,3 +1,8 @@
+---
+title: Reusability — Catalog & Rules
+tags: [frontend, components, reuse]
+---
+
 # Reusability — Catalog & Rules
 
 > **Before you create, search.** This page is the answer to "is there
@@ -17,6 +22,50 @@
    to one of the catalog locations below and update both call sites in
    the same PR (still atomic — one logical change: "consolidate X").
 4. **Add a row here.** Don't make the next agent re-discover it.
+
+## Mobile authentication callback
+
+`getMobileAuthCallbackUrl` in `$lib/utils/mobile-auth-callback.utils.ts` preserves
+the existing preview’s bounded fragment and fixed `oisy://auth-callback` destination.
+The public `/signer-callback` route uses it; native authentication still validates
+the request and delegation. Keep the relay while the SDK HTTPS callback is tested.
+Audit association files are packaged by `mobile/capacitor/auth-handoff/prepare-audit-assets.mjs`
+only for the exact audit domain. See the [prototype](../../../mobile/capacitor/auth-handoff/README.md)
+for the isolated SDK handoff and deployment contract.
+
+## Mobile wallet reuse
+
+Capacitor builds the same `(app)` routes: Wallet (`Assets`/`Hero`), Token
+(`Transactions`) and Activity (`AllTransactions`). They use the normal auth store,
+Loaders, balances, prices and history workers. Do not add mobile-specific data
+snapshots or duplicate feature pages. `WalletViewSnapshot`, `NativePreview*`,
+`EmbeddedWalletLayout`, `routes/mobile/` and the mobile portfolio/history services
+were removed when the real route/data lifecycle was integrated.
+
+`MOBILE_SHELL` changes outer chrome and unsupported preview actions, not data
+ownership. `SplitPane.embedded` omits the web sidebar; `Header.onAccount` invokes
+the native account sheet; `OisyWalletLogo.markOnly` preserves mobile branding.
+`SlidingInput.forceOpen` lets Search in the native More menu open the existing token filter.
+Saved contacts reuse the real address book with editing hidden in the preview.
+Token/group rows use canonical Symbol IDs so equal tickers remain distinct.
+Mobile Send reuses `SendModal`, `IcSendTokenWizard` / `EthSendTokenWizard` and
+existing per-chain services. `mobile-send.utils.isMobileTransferToken` combines
+canonical ICP/ck-ledger and supported ETH/ERC-20 policy. Do not fork the form,
+fees or signing clients. `WizardModal.mobilePresentation` owns presentation.
+Swap price preloading lives in `icrc.services.loadDisabledIcrcTokensExchanges`.
+It fills missing ledger prices through `fillIcrcPricesFromFallbackProviders`,
+including ck-tokens when their twin's price is unavailable. Keep existing ledger
+or twin prices, recheck after the request, and exclude TCYCLES from market-price
+fallbacks. Wallet and Swap read the same `exchanges` store. Both the store and preload
+service use the pure `exchange.utils.icrcTokenPrice` lookup; do not import the
+derived store graph into that service, add a mobile price store, or assume a
+stablecoin is worth exactly one dollar.
+
+Mobile Swap uses the shared ICPSwap pipeline and `mobile-swap.utils` for pair and
+provider selection. `mobile-operation-journal.services` records EVM hash/nonce
+and ICPSwap stages through a principal-bound native Keychain adapter. Recovery
+uses shared RPC/canister clients. Keep expected-state/CAS, session and no-replay
+guards; see the [mobile transaction contract](../../../mobile/capacitor/docs/shared-web-contract.md#durable-mobile-operation-records).
 
 ## Where reusable things live
 
@@ -292,4 +341,92 @@ The `compact` modifier is the filter-chip size: 32 px, 14 px text, fully round, 
 
 ### Dropdown panels
 
-Pickers, filters and short option menus open a `Popover` (or `ResponsivePopover`) with `dropdown`, which `Dropdown` and `MultiSelectDropdown` set themselves: an 8 px inset, 36 px rows with a 12 px inset in line with the search text, a 40 px `InputSearch` (through the `--input-padding-*` and `--input-block-gap` hooks in `InputBase`), an inset focus ring and no row dividers. Under `pointer: coarse` rows and search grow to 44 px. Rows keep their own hover, pressed and focus fill (`row-feedback`: the hover fades in over 150 ms, the pressed fill shows at once), and menu rows keep their text colour on hover. Build the content from `menu-surface` rows, `ListItemButton` or `ListItemCheckbox`; do not override row sizes per component. Give each `Popover` an `ariaLabel` (it falls back to the anchor's label, then to the user menu's) and anchor it to the button that opens it, so closing the panel puts focus back there. Icon triggers of these menus keep their look and add `relative hit-area hit-area-touch` for a 44 px tap area on touch screens. The user menu is a dropdown too: its labelled controls use `MenuControlRow`, and its buttons and dividers sit on the 8 px panel inset. A picker opened from a row renders inline but keeps its own rows: a modal (the phone form) gets full-size rows back. On phones, `ResponsivePopover` and `Dropdown` with `asModalOnMobile` switch to a sheet or modal at their `Responsive` breakpoints; a bare `Popover` stays a popover, with 44 px rows on touch.
+Pickers, filters and short option menus open a `Popover` (or `ResponsivePopover`) with `dropdown`, which `Dropdown` and `MultiSelectDropdown` set themselves: an 8 px inset, 36 px rows with a 12 px inset in line with the search text, a 40 px `InputSearch` (through the `--input-padding-*` and `--input-block-gap` hooks in `InputBase`), an inset focus ring and no row dividers. Under `pointer: coarse` rows and search grow to 44 px. Rows keep their own hover, pressed and focus fill (`row-feedback`: the hover fades in over 150 ms, the pressed fill shows at once), and menu rows keep their text colour on hover. Build the content from `menu-surface` rows, `ListItemButton` or `ListItemCheckbox`; do not override row sizes per component. Give each `Popover` an `ariaLabel` (it falls back to the anchor's label, then to the user menu's) and anchor it to the button that opens it, so closing the panel puts focus back there. Icon triggers of these menus keep their look and add `relative hit-area hit-area-touch` for a 44 px tap area on touch screens. The user menu is a dropdown too: its labelled controls use `MenuControlRow`, and its buttons and dividers sit on the 8 px panel inset. A picker opened from a row renders inline but keeps its own rows: a modal (the phone form) gets full-size rows back. On phones, `ResponsivePopover` and `Dropdown` with `asModalOnMobile` switch to a sheet or modal at their `Responsive` breakpoints; a bare `Popover` stays a popover, with 44 px rows on touch. The shared user `Menu`
+uses a native-hosted `BottomSheet` when the installed host advertises `nativeSheets`,
+with one content snippet for both presentations. Page/native-panel actions wait for
+`waitForNativeSheetClosed` before proceeding. Keep unsupported mobile actions hidden;
+App controls retains the shell's connection management and reload.
+
+## Native WebKit host
+
+`mobile-host.services.ts` owns the shared host API; `mobile-host.providers.ts`
+uses only the document-start v2 WebKit transport. Feature components do not import
+native plugins. Listener handles use the local `MobileHostListener` type. Contract v2 validates fixed navigation, account,
+delegation and sign-out commands. `mobile-runtime.services.ts` installs the native
+child through `AuthClientProvider`; `mobile-worker-session.services.ts` provisions
+workers with independent ephemeral keys. Both reuse the normal auth/data lifecycle.
+
+`npm run mobile:fixtures` writes `build-mobile/` and `.svelte-kit-mobile/` from the
+same route tree for XCTest only. Production loads the deployed website and its API
+configuration; there is no bundled wallet or Capacitor fallback. The injected host
+selects mobile auth at runtime. See the [iOS build guide](../../../mobile/capacitor/README.md#build-and-run).
+`MobileHost` maps native roots into Svelte navigation;
+Swift acknowledges routes without echoing navigation. The floating native More
+menu opens the shared `/notes/`, `/earn/` and `/borrow/` routes; Search remains
+the existing wallet filter. `MobileHost` reserves bottom scroll/modal space for
+the native overlay, while feature screens remain shared. Host detection selects
+presentation, never authorization. Read the [session boundary](../../../mobile/capacitor/docs/session-boundary.md)
+for origin checks, worker isolation and the fixed one-hour deadline without renewal.
+The [compatibility guide](../../../mobile/capacitor/docs/shared-web-contract.md) owns paired host/web changes and their checks.
+
+## Shared mobile modal presentation and Notes
+
+`MobileHost.svelte` adapts the existing `Modal` and bottom-sheet surfaces when the
+website runs in the mobile host. Keep feature bodies in shared web components.
+Hosts advertising `nativeSheets` use the shared `nativeSheet` Svelte action to
+present the same WebView in a UIKit sheet. Hosts also advertising
+`contentSizedSheets` fit its height to the active panel, including async and nested
+content changes, and hide redundant dismissal chrome. UIKit owns the sheet's entrance
+and exit movement; `BottomSheetContainer` keeps a non-visual outro for the snapshot
+handshake instead of animating its measured height. Older hosts retain the large
+`Modal` / medium `BottomSheetContainer` detents. Nested dialogs reuse that container. The action preserves the web focus/close guards and falls back to web
+presentation on unsupported hosts or preparation failure. Pending native panels
+explicitly hide their web backdrop; release clears sheet layout before native
+reveals the repainted page. See the
+[system sheet contract](../../../mobile/capacitor/docs/shared-web-contract.md#system-sheets).
+Older hosts keep the full-viewport web backdrop and content-sized sheet. Forms can
+request `mobilePresentation="fullScreen"` for full-page web presentation in the app.
+This is also the default for `WizardModal`: Send, Swap, Contacts and other
+multi-step flows are pages, never system sheets. Mobile pages use a leading Back
+control and retain the shared step/cancellation logic. Send, Swap and Contacts
+also opt into `mobileSwipeBack`, backed by `mobile-page-swipe.services.ts`. It moves
+the existing page above its live parent and calls the leading Back callback on
+completion. `overlayFocus` supplies the topmost check; busy/disabled state blocks
+the gesture. Cancel does not unmount the form. Do not add feature-specific touch
+handlers, history pops or native copies of these flows. Receive-address QR dialogs
+explicitly opt into sheet presentation. `showCloseButton={false}` supports editors
+with explicit Cancel/Save without CSS that hides unrelated close buttons.
+`ContentWithToolbar.showToolbar` omits page-only or redundant footers; a mobile
+modal suppresses its sole `ButtonCloseModal` footer when the header already closes it.
+
+`overlayFocus` also maintains `blockingOverlayOpenStore` from its mounted stack.
+The mobile host forwards this flag to the native presentation command, hiding
+tabs/More through nested overlays and their exit transitions. Do not add per-feature
+native visibility callbacks or keyboard notification flags.
+
+`Notes.svelte` owns the existing note list/view/editor state and services.
+`NotesModal.svelte` retains the website modal entry; `(app)/notes/+page.svelte`
+uses `presentation="page"`. Both share encryption, cache, validation, search,
+retry, save/delete/share and analytics. The page owns its heading/Back control;
+`NoteView.showBackButton` omits the old modal footer in this context.
+
+### Embedded navigation
+
+`MobileHost.svelte` and `mobile-history.utils.ts` coordinate native root requests
+with the shared Svelte router. Keep token links as ordinary shared route links and
+use the shared `Back` component; do not add feature-specific native routing.
+Wallet/Search → Token records a bounded list parent, while root changes replace
+history. Shared modal exit handling blocks underlying mobile navigation until
+Close/Cancel/Save. See the [mobile contract](../../../mobile/capacitor/docs/shared-web-contract.md#token-navigation-contract)
+for request ordering, state ownership and the current single-parent limit.
+
+### Awaitable wallet refresh
+
+`wallet-refresh.services.ts` coordinates a manual refresh through the existing
+wallet, EVM and price owners. Components register their current loaders; worker
+services use `AppWorker.postMessageAndWait` for a correlated completion, including
+unchanged balances. `SchedulerTimer.refresh` joins in-flight polling and reports
+its outcome. Keep `trigger` for existing background callers. Native pull-to-refresh
+uses this shared path; it must not reload the page or create new fetch/identity
+logic. See the [refresh contract](../../../mobile/capacitor/docs/shared-web-contract.md#wallet-refresh-contract)
+for cancellation and deadlines.

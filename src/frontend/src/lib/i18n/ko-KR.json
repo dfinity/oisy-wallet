@@ -111,6 +111,13 @@
 		},
 		"error": {
 			"copy_failed": ""
+		},
+		"mobile_shell": {
+			"wallet_unavailable": "",
+			"wallet_retry_description": "",
+			"account": "",
+			"app_controls": "",
+			"refresh_failed": ""
 		}
 	},
 	"progress": {
@@ -203,7 +210,8 @@
 			"internet_identity": "",
 			"asset_types": "암호화폐, 주식, 원자재, 수집품, 암호화된 노트.",
 			"advanced_cryptography": "비공개이며 변조 불가능. 원하면 보이지 않게.",
-			"move_swap_grow": "내장 AI 어시스턴트로 벌고, 빌리고, 거래하세요."
+			"move_swap_grow": "내장 AI 어시스턴트로 벌고, 빌리고, 거래하세요.",
+			"return_to_app": ""
 		},
 		"alt": {
 			"preview": "데스크탑과 모바일에서 로그인 후 $oisy_name의 미리보기",
@@ -228,7 +236,8 @@
 		"error": {
 			"no_internet_identity": "인터넷 아이덴티티가 없습니다.",
 			"error_while_signing_in": "로그인 중 문제가 발생했습니다.",
-			"unexpected_issue_with_syncing": "인증 상태를 동기화하는 중 예기치 않은 문제가 발생했습니다."
+			"unexpected_issue_with_syncing": "인증 상태를 동기화하는 중 예기치 않은 문제가 발생했습니다.",
+			"missing_mobile_callback": ""
 		},
 		"help": {
 			"text": {
@@ -1064,7 +1073,12 @@
 			"send_review_subtitle": "전송 금액",
 			"no_nfts_found": "컬렉터블을 찾을 수 없습니다",
 			"no_nfts_found_desc": "검색어나 네트워크를 조정하여 컬렉터블을 찾아보세요",
-			"select_nft": "컬렉터블 선택"
+			"select_nft": "컬렉터블 선택",
+			"mobile_pending": "",
+			"mobile_pending_title": "",
+			"mobile_not_confirmed": "",
+			"mobile_recovery_unavailable": "",
+			"mobile_check_status": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "공개 주소 (0x), 이름 또는 별칭 입력",
@@ -1086,7 +1100,9 @@
 			"fee_expired": "",
 			"fee_info": "수수료는 $feeSymbol로 지불됩니다. 사용 가능: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 올바른 토큰을 선택하고, 정확한 금액을 입력한 후, 수신 주소를 주의 깊게 확인해 주세요!",
-			"scanned_address_only_destination_single_token": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 정확한 금액을 입력하고, 수신 주소를 주의 깊게 확인해 주세요!"
+			"scanned_address_only_destination_single_token": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 정확한 금액을 입력하고, 수신 주소를 주의 깊게 확인해 주세요!",
+			"mobile_ic_only": "",
+			"mobile_supported_only": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "유효하지 않은 수신 주소",
@@ -1168,7 +1184,8 @@
 			"xrp_destination_unfunded": "이 주소에는 아직 XRP 계정이 없습니다. 계정을 만들려면 최소 $reserve XRP의 첫 결제가 필요합니다. 아무것도 전송되지 않았습니다. 금액을 늘리거나 이미 활성화된 주소로 보내세요.",
 			"xrp_destination_tag_required": "이 주소에는 XRP 목적지 태그가 필요합니다. 아무것도 전송되지 않았습니다. 결제하려는 서비스에서 받은 태그를 입력한 뒤 다시 보내세요.",
 			"xrp_destination_is_source": "이 주소는 본인의 XRP 주소입니다. 아무것도 전송되지 않았습니다. 다른 수취인을 선택하세요.",
-			"xrp_account_state_unavailable": "지갑이 계정 정보를 읽지 못해 금액을 확인할 수 없었습니다. 아무것도 전송되지 않았습니다. 잠시 후 다시 시도해 주세요."
+			"xrp_account_state_unavailable": "지갑이 계정 정보를 읽지 못해 금액을 확인할 수 없었습니다. 아무것도 전송되지 않았습니다. 잠시 후 다시 시도해 주세요.",
+			"mobile_unconfirmed": ""
 		}
 	},
 	"mint": {
@@ -1454,7 +1471,12 @@
 			"oisy_trade_taker_fee": "",
 			"oisy_trade_withdrawal_fee": "",
 			"value_difference_error_confirmation": "",
-			"value_difference_missing_price_confirmation": "토큰 중 하나 이상의 가격을 가져올 수 없습니다. 이 스왑 제안이 공정한 거래인지 <strong>독립적으로 확인</strong>해 주세요.<br>슬리피지 설정은 받는 가치가 훨씬 낮은 제안으로부터 사용자를 보호하지 <strong>않습니다</strong>!"
+			"value_difference_missing_price_confirmation": "토큰 중 하나 이상의 가격을 가져올 수 없습니다. 이 스왑 제안이 공정한 거래인지 <strong>독립적으로 확인</strong>해 주세요.<br>슬리피지 설정은 받는 가치가 훨씬 낮은 제안으로부터 사용자를 보호하지 <strong>않습니다</strong>!",
+			"mobile_pending": "",
+			"mobile_pool_not_empty": "",
+			"mobile_no_recovery_balance": "",
+			"mobile_recovered": "",
+			"mobile_recover": ""
 		},
 		"error": {
 			"kong_not_available": "현재 토큰을 스왑할 수 있는 거래소가 없습니다. 나중에 다시 시도해 주세요.",

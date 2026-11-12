@@ -6,6 +6,7 @@
 	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { DESTINATION_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
@@ -117,7 +118,7 @@
 							}}
 						/>
 					{/if}
-					{#if nonNullish(onQRButtonClick)}
+					{#if !MOBILE_SHELL && nonNullish(onQRButtonClick)}
 						<QrButton onClick={onQRButtonClick} />
 					{/if}
 				</span>

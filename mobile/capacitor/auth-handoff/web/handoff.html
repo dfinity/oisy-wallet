@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src https://icp-api.io; base-uri 'none'; form-action 'none'"
+		/>
+		<title>OISY SDK handoff test</title>
+		<style>
+			:root {
+				color-scheme: light dark;
+				font:
+					16px -apple-system,
+					sans-serif;
+			}
+			body {
+				margin: 24px;
+				line-height: 1.5;
+			}
+			h1 {
+				font-size: 22px;
+			}
+			pre {
+				white-space: pre-wrap;
+				font: inherit;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Web session proof</h1>
+		<pre id="result" role="status">Sign in above to start.</pre>
+		<script src="handoff.js"></script>
+	</body>
+</html>

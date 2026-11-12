@@ -111,6 +111,13 @@
 		},
 		"error": {
 			"copy_failed": ""
+		},
+		"mobile_shell": {
+			"wallet_unavailable": "",
+			"wallet_retry_description": "",
+			"account": "",
+			"app_controls": "",
+			"refresh_failed": ""
 		}
 	},
 	"progress": {
@@ -203,7 +210,8 @@
 			"internet_identity": "",
 			"asset_types": "Cripto, ações, commodities, colecionáveis e notas criptografadas.",
 			"advanced_cryptography": "Privado e à prova de adulteração. Invisível, se você precisar.",
-			"move_swap_grow": "Ganhe, tome emprestado e negocie, com um assistente de IA integrado."
+			"move_swap_grow": "Ganhe, tome emprestado e negocie, com um assistente de IA integrado.",
+			"return_to_app": ""
 		},
 		"alt": {
 			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular",
@@ -228,7 +236,8 @@
 		"error": {
 			"no_internet_identity": "Nenhuma Internet Identity.",
 			"error_while_signing_in": "Algo deu errado durante o login.",
-			"unexpected_issue_with_syncing": "Problema inesperado ao sincronizar o status da sua autenticação."
+			"unexpected_issue_with_syncing": "Problema inesperado ao sincronizar o status da sua autenticação.",
+			"missing_mobile_callback": ""
 		},
 		"help": {
 			"text": {
@@ -1064,7 +1073,12 @@
 			"send_review_subtitle": "Você envia",
 			"no_nfts_found": "",
 			"no_nfts_found_desc": "",
-			"select_nft": ""
+			"select_nft": "",
+			"mobile_pending": "",
+			"mobile_pending_title": "",
+			"mobile_not_confirmed": "",
+			"mobile_recovery_unavailable": "",
+			"mobile_check_status": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Insira endereço público (0x), nome ou alias",
@@ -1086,7 +1100,9 @@
 			"fee_expired": "",
 			"fee_info": "A taxa será paga em $feeSymbol. Disponível: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "O código escaneado continha apenas um endereço de destino. Certifique-se de selecionar o token correto, inserir o valor certo e revisar o endereço de destino com atenção!",
-			"scanned_address_only_destination_single_token": "O código escaneado continha apenas um endereço de destino. Certifique-se de inserir o valor certo e revisar o endereço de destino com atenção!"
+			"scanned_address_only_destination_single_token": "O código escaneado continha apenas um endereço de destino. Certifique-se de inserir o valor certo e revisar o endereço de destino com atenção!",
+			"mobile_ic_only": "",
+			"mobile_supported_only": ""
 		},
 		"assertion": {
 			"invalid_destination_address": "Endereço de destino inválido",
@@ -1168,7 +1184,8 @@
 			"xrp_destination_unfunded": "Este endereço ainda não tem uma conta XRP. Criá-la exige um primeiro pagamento de pelo menos $reserve XRP. Nada foi enviado — aumente o valor ou envie para um endereço que já esteja ativado.",
 			"xrp_destination_tag_required": "Este endereço exige uma tag de destino XRP. Nada foi enviado — adicione a tag fornecida pelo serviço que você está pagando e envie novamente.",
 			"xrp_destination_is_source": "Este é o seu próprio endereço XRP. Nada foi enviado — escolha outro destinatário.",
-			"xrp_account_state_unavailable": "A carteira não conseguiu ler os dados da sua conta, portanto o valor não pôde ser verificado. Nada foi enviado — tente novamente em instantes."
+			"xrp_account_state_unavailable": "A carteira não conseguiu ler os dados da sua conta, portanto o valor não pôde ser verificado. Nada foi enviado — tente novamente em instantes.",
+			"mobile_unconfirmed": ""
 		}
 	},
 	"mint": {
@@ -1454,7 +1471,12 @@
 			"oisy_trade_taker_fee": "",
 			"oisy_trade_withdrawal_fee": "",
 			"value_difference_error_confirmation": "",
-			"value_difference_missing_price_confirmation": "Não foi possível obter o preço de pelo menos um dos tokens. Por favor, <strong>verifique de forma independente</strong> se esta oferta de swap é justa.<br>Observe que a configuração de slippage <strong>não</strong> o protege de uma oferta com um valor de recebimento muito menor!"
+			"value_difference_missing_price_confirmation": "Não foi possível obter o preço de pelo menos um dos tokens. Por favor, <strong>verifique de forma independente</strong> se esta oferta de swap é justa.<br>Observe que a configuração de slippage <strong>não</strong> o protege de uma oferta com um valor de recebimento muito menor!",
+			"mobile_pending": "",
+			"mobile_pool_not_empty": "",
+			"mobile_no_recovery_balance": "",
+			"mobile_recovered": "",
+			"mobile_recover": ""
 		},
 		"error": {
 			"kong_not_available": "Atualmente, não há uma troca disponível para trocar tokens. Por favor, tente novamente mais tarde.",

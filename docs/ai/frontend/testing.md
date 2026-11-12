@@ -248,3 +248,55 @@ plumbing, etc.). Given the [e2e restriction](#e2e-status-temporarily-restricted)
 - A **new** Playwright spec is allowed only if (a) the user explicitly
   asked, or (b) it is a trivially stable spec mirroring an existing
   one in `e2e/`. Otherwise, capture the manual repro and move on.
+
+## Embedded mobile presentation fixtures
+
+The Capacitor WebKit integration test uses a fake native identity and rejects
+network calls in both the page and workers. `VITE_MOBILE_UI_TEST=true` enables
+`$tests/mocks/mobile-notes.fixture.ts` and `mobile-navigation.fixture.ts`. They seed
+shared in-memory Notes, profile and balance stores for real route/Back tests, without
+bypassing signed canister responses. The normal bundle compiles them out. Always
+rebuild with the flag false before phone installation and check that fixture events
+are absent from bundled JS.
+The native WebKit test also exercises captured-parent drag cancellation/completion,
+restored scroll, unchanged session grants and root-only refresh availability. Its
+programmatic gesture callbacks and screenshots are useful integration evidence;
+physical finger tracking and haptic feel still require device acceptance.
+
+Manual refresh touches shared background workers. Run coordinator, AppWorker
+correlation, scheduler and exchange tests, plus the affected chain/loader tests.
+Cover unchanged results, joining an in-flight job, partial provider failure,
+timeout, disposal and a late reply for another request. Keep normal background
+worker calls compatible. See [mobile verification](../../../mobile/capacitor/README.md#verification).
+
+## Mobile authentication deployment checks
+
+`mobile/capacitor/check-auth-deployment.mjs` checks supplied audit callback/AASA JSON,
+signed-app entitlements and selected provisioning metadata. Its offline regression
+tests live in `src/frontend/src/tests/mobile-auth-deployment.spec.ts`, alongside
+other mobile build-tool tests. Passing these checks does not prove live sign-in,
+code-signature validity or device domain association. See the
+[SDK migration preparation](../../../mobile/capacitor/docs/sdk-auth-migration.md#repeatable-deployment-check)
+for inputs, limitations and device acceptance steps.
+
+## Mobile authentication regression checks
+
+Changes to shared auth, workers or the host adapter also run the session and host
+Vitest tests plus native `AppTests`. `WalletScreensWebKitTests` loads the real shared
+Wallet, Token, Activity, Send, Swap and Notes views with the existing
+`VITE_MOBILE_UI_TEST=true` fixtures. Its deterministic SDK minter is selected only
+for the fixture account; it cannot authorize real funds. Keep the independent
+pending-network/bootstrap test and origin-isolation tests.
+
+The live host uses the normal website build with `VITE_MOBILE_SHELL` unset/false.
+Include runtime detection and `mobile-host.providers` tests; worker startup must
+select mobile mode from the first private session message before reading an
+identity. Native `LiveWalletBridgeTests` and `LiveWalletControllerTests` cover real
+WebKit frame/origin checks, stale documents, reload and process failure. Offline
+shared-screen resources belong to AppTests.xctest, never the app target.
+
+Build deployment assets with `VITE_MOBILE_UI_TEST=false` and check that fixture
+code is absent. Use `npm run lint -- --max-warnings 0`, matching CI;
+a lint run that leaves warnings is not a passing gate. The
+[shared web contract](../../../mobile/capacitor/docs/shared-web-contract.md) defines
+ownership, document binding and required validation for host changes.

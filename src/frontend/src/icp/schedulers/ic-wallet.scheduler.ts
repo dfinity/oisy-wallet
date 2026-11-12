@@ -50,6 +50,11 @@ export abstract class IcWalletScheduler<
 		});
 	}
 
+	async refresh(data: PostMessageDataRequest | undefined) {
+		this.setRef(data);
+		await this.timer.refresh<PostMessageDataRequest>({ job: this.syncWallet, data });
+	}
+
 	async trigger(data: PostMessageDataRequest | undefined) {
 		// A scheduler created by a `trigger` (no prior `start`) would otherwise keep `ref` undefined
 		// and silently drop every sync result via the `isNullish(this.ref)` guard in the postMessage
@@ -65,7 +70,7 @@ export abstract class IcWalletScheduler<
 	protected abstract syncWallet({
 		identity,
 		...data
-	}: SchedulerJobData<PostMessageDataRequest>): Promise<void>;
+	}: SchedulerJobData<PostMessageDataRequest>): Promise<boolean>;
 
 	protected postMessageWallet({
 		data,

@@ -18,8 +18,11 @@
 	} from '$lib/utils/network.utils';
 
 	// Locally, only the Regtest worker has to be launched, in all other envs - testnet and mainnet
+	let supportedTokens = $derived(
+		$enabledBitcoinTokens.filter(({ network: { id } }) => LOCAL === isNetworkIdBTCRegtest(id))
+	);
 	let walletWorkerTokens = $derived(
-		$enabledBitcoinTokens.filter(({ network: { id: networkId } }) =>
+		supportedTokens.filter(({ network: { id: networkId } }) =>
 			LOCAL
 				? isNetworkIdBTCRegtest(networkId) && nonNullish($btcAddressRegtest)
 				: !isNetworkIdBTCRegtest(networkId) &&
@@ -40,4 +43,8 @@
 		});
 </script>
 
-<WalletWorkers {initWalletWorker} tokens={walletWorkerTokens} />
+<WalletWorkers
+	{initWalletWorker}
+	refreshReady={supportedTokens.length === walletWorkerTokens.length}
+	tokens={walletWorkerTokens}
+/>

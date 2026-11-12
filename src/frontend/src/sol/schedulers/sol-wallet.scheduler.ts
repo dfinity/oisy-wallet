@@ -222,6 +222,11 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		});
 	}
 
+	async refresh(data: PostMessageDataRequestSol | undefined) {
+		this.setData(data);
+		await this.timer.refresh<PostMessageDataRequestSol>({ job: this.syncWallet, data });
+	}
+
 	async trigger(data: PostMessageDataRequestSol | undefined) {
 		this.setData(data);
 
@@ -362,7 +367,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 			this.syncBalances(balances);
 
-			return;
+			return false;
 		}
 
 		const { value: head } = headResult;
@@ -372,7 +377,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		const { hasChanges } = this.syncWalletData({ balances, head });
 
 		if (!hasChanges) {
-			return;
+			return true;
 		}
 
 		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && head.transactions.length > 0) {
@@ -390,13 +395,14 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 				...(head.unreadable.length > 0 && { unreadableTransactions: head.unreadable })
 			}
 		});
+		return true;
 	};
 
 	private syncWallet = async ({ identity, data }: SchedulerJobData<PostMessageDataRequestSol>) => {
 		assertNonNullish(data, 'No data provided to get Solana balance.');
 
 		try {
-			await retryWithDelay({
+			return await retryWithDelay({
 				request: async () => await this.loadAndSyncWalletData({ identity, data }),
 				maxRetries: 10
 			});
@@ -404,6 +410,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			// Mirror the listener-side UI reset; otherwise the next sync only emits deltas and the UI stays empty.
 			this.store = initialStore();
 			this.postMessageWalletError({ error });
+			return false;
 		}
 	};
 

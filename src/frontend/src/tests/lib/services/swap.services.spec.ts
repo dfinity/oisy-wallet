@@ -9,6 +9,7 @@ import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.en
 import { VELORA_AUGUSTUS_ADDRESSES, VELORA_DELTA_ADDRESSES } from '$env/rest/velora.env';
 import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import {
 	VELORA_AUGUSTUS_SELL_ABI,
@@ -37,6 +38,7 @@ import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
 import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
+import * as mobile from '$lib/constants/mobile.constants';
 import {
 	LIFI_QUOTE_TIMEOUT_MS,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
@@ -56,6 +58,7 @@ import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
+import * as operationJournal from '$lib/services/mobile-operation-journal.services';
 import * as nearIntentsServices from '$lib/services/near-intents.services';
 import * as oneSecSwapServices from '$lib/services/onesec-swap.services';
 import {
@@ -158,6 +161,7 @@ vi.mock('$icp/services/icrc.services', async (importOriginal) => ({
 }));
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({
+	approve: vi.fn(),
 	icrc1SupportedStandards: vi.fn()
 }));
 
@@ -375,6 +379,199 @@ describe('swap.services', () => {
 	beforeEach(() => {
 		vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(true);
 		vi.mocked(isNearIntentsQuoteExpired).mockReturnValue(false);
+	});
+
+	describe('mobile quote preview', () => {
+		const sourceToken = { ...ICP_TOKEN, enabled: true };
+		const destinationToken = { ...mockValidIcrcToken, network: ICP_TOKEN.network, enabled: true };
+		const quoteParams = {
+			identity: mockIdentity,
+			sourceToken,
+			destinationToken,
+			amount: 1,
+			tokens: [sourceToken, destinationToken],
+			userEthAddress: undefined,
+			userSolAddress: undefined,
+			userBtcAddress: undefined,
+			userXrpAddress: undefined,
+			slippage: 0.5,
+			isSourceTokenIcrc2: true
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			vi.spyOn(mobile, 'MOBILE_SHELL', 'get').mockReturnValue(true);
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue({ receiveAmount: 10_000n });
+		});
+
+		afterEach(() => vi.restoreAllMocks());
+
+		it('quotes only ICPSwap through the existing provider and fee mapping', async () => {
+			const offers = await fetchSwapAmounts(quoteParams);
+
+			expect(offers).toHaveLength(1);
+			expect(offers[0].provider).toBe(SwapProvider.ICP_SWAP);
+			expect(offers[0].receiveAmount).toBe(10_000n - destinationToken.fee);
+			expect(icpSwapBackend.icpSwapAmounts).toHaveBeenCalledOnce();
+			expect(kongBackendApi.kongSwapAmounts).not.toHaveBeenCalled();
+			expect(icpSwapPool.depositFrom).not.toHaveBeenCalled();
+			expect(icrcLedgerApi.approve).not.toHaveBeenCalled();
+		});
+
+		it.each([false, undefined])(
+			'does not quote without confirmed ICRC-2 support: %s',
+			async (isSourceTokenIcrc2) => {
+				await expect(fetchSwapAmounts({ ...quoteParams, isSourceTokenIcrc2 })).resolves.toEqual([]);
+				expect(icpSwapBackend.icpSwapAmounts).not.toHaveBeenCalled();
+			}
+		);
+
+		it('rejects custom and cross-chain pairs before provider calls', async () => {
+			for (const destinationToken of [
+				mockValidErc20Token,
+				{ ...quoteParams.destinationToken, ledgerCanisterId: 'aaaaa-aa' }
+			]) {
+				await expect(fetchSwapAmounts({ ...quoteParams, destinationToken })).resolves.toEqual([]);
+			}
+
+			expect(icpSwapBackend.icpSwapAmounts).not.toHaveBeenCalled();
+			expect(kongBackendApi.kongSwapAmounts).not.toHaveBeenCalled();
+		});
+
+		const executionParams = {
+			identity: mockIdentity,
+			sourceToken,
+			destinationToken,
+			progress: vi.fn(),
+			swapAmount: 1,
+			receiveAmount: 10_000n,
+			slippageValue: 0.5,
+			sourceTokenFee: sourceToken.fee,
+			isSourceTokenIcrc2: true
+		};
+		const prepareExecution = () => {
+			vi.spyOn(operationJournal, 'assertMobileOperationSession').mockResolvedValue(undefined);
+			vi.spyOn(operationJournal, 'saveMobileOperation').mockResolvedValue(undefined);
+			vi.spyOn(operationJournal, 'finishMobileOperation').mockResolvedValue(undefined);
+			vi.mocked(icpSwapFactory.getPoolCanister).mockResolvedValue({
+				canisterId: mockPrincipal,
+				token0: { address: sourceToken.ledgerCanisterId, standard: 'ICRC2' },
+				token1: { address: destinationToken.ledgerCanisterId, standard: 'ICRC2' }
+			} as PoolData);
+			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValue({
+				balance0: ZERO,
+				balance1: ZERO
+			});
+			vi.mocked(hasSufficientIcrcAllowance).mockResolvedValue(false);
+			vi.mocked(icrcLedgerApi.approve).mockResolvedValue(1n);
+			vi.mocked(icpSwapPool.depositFrom).mockResolvedValue(100_000_000n);
+			vi.mocked(icpSwapPool.swap).mockResolvedValue(9_995n);
+			vi.mocked(icpSwapPool.withdraw).mockResolvedValue(1n);
+		};
+
+		it('records each stage before moving funds and withdraws the actual swap result', async () => {
+			prepareExecution();
+			await fetchIcpSwap(executionParams);
+
+			expect(operationJournal.saveMobileOperation).toHaveBeenCalledWith(
+				expect.objectContaining({
+					create: true,
+					operation: expect.objectContaining({ stage: 'approval' })
+				})
+			);
+			expect(operationJournal.saveMobileOperation).toHaveBeenCalledWith(
+				expect.objectContaining({ operation: expect.objectContaining({ stage: 'deposit' }) })
+			);
+			expect(icpSwapFactory.getPoolCanister).toHaveBeenCalledWith(
+				expect.objectContaining({ certified: true })
+			);
+			expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledWith(
+				expect.objectContaining({ certified: true })
+			);
+			expect(icpSwapPool.withdraw).toHaveBeenCalledWith(
+				expect.objectContaining({ amount: 9_995n })
+			);
+			expect(operationJournal.finishMobileOperation).toHaveBeenCalledOnce();
+			expect(
+				vi.mocked(operationJournal.saveMobileOperation).mock.invocationCallOrder[0]
+			).toBeLessThan(vi.mocked(icrcLedgerApi.approve).mock.invocationCallOrder[0]);
+		});
+
+		it('does not approve or deposit if durable storage fails', async () => {
+			prepareExecution();
+			vi.mocked(operationJournal.saveMobileOperation).mockRejectedValue(
+				new Error('Keychain unavailable')
+			);
+
+			await expect(fetchIcpSwap(executionParams)).rejects.toThrow();
+			expect(icrcLedgerApi.approve).not.toHaveBeenCalled();
+			expect(icpSwapPool.depositFrom).not.toHaveBeenCalled();
+		});
+
+		it('does not use an existing pool balance as a new swap deposit', async () => {
+			prepareExecution();
+			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValue({
+				balance0: 1n,
+				balance1: ZERO
+			});
+
+			await expect(fetchIcpSwap(executionParams)).rejects.toThrow(
+				en.swap.text.mobile_pool_not_empty
+			);
+			expect(icrcLedgerApi.approve).not.toHaveBeenCalled();
+			expect(operationJournal.saveMobileOperation).not.toHaveBeenCalled();
+		});
+
+		it.each(['depositFrom', 'swap', 'withdraw'] as const)(
+			'keeps an uncertain %s pending without automatic replay or withdrawal',
+			async (method) => {
+				prepareExecution();
+				vi.mocked(icpSwapPool[method]).mockRejectedValue(new Error('connection interrupted'));
+
+				await expect(fetchIcpSwap(executionParams)).rejects.toBeInstanceOf(
+					operationJournal.MobileOperationPendingError
+				);
+				expect(icpSwapPool[method]).toHaveBeenCalledOnce();
+				expect(operationJournal.finishMobileOperation).not.toHaveBeenCalled();
+
+				if (method !== 'withdraw') {
+					expect(icpSwapPool.withdraw).not.toHaveBeenCalled();
+				}
+				if (method === 'depositFrom') {
+					expect(icpSwapPool.swap).not.toHaveBeenCalled();
+				}
+			}
+		);
+
+		it('stops after deposit if the session expires before swapping', async () => {
+			prepareExecution();
+			vi.mocked(icpSwapPool.depositFrom).mockImplementation(() => {
+				vi.mocked(operationJournal.assertMobileOperationSession).mockRejectedValue(
+					new operationJournal.MobileOperationSessionExpiredError()
+				);
+				return Promise.resolve(100_000_000n);
+			});
+
+			await expect(fetchIcpSwap(executionParams)).rejects.toBeInstanceOf(
+				operationJournal.MobileOperationPendingError
+			);
+			expect(icpSwapPool.swap).not.toHaveBeenCalled();
+			expect(operationJournal.finishMobileOperation).not.toHaveBeenCalled();
+		});
+
+		it('rejects unsupported pairs and a dismissed wizard before any funds move', async () => {
+			prepareExecution();
+
+			await expect(
+				fetchIcpSwap({
+					...executionParams,
+					destinationToken: { ...destinationToken, ledgerCanisterId: 'aaaaa-aa' }
+				})
+			).rejects.toThrow();
+			await expect(fetchIcpSwap({ ...executionParams, canProceed: () => false })).rejects.toThrow();
+			expect(icrcLedgerApi.approve).not.toHaveBeenCalled();
+			expect(icpSwapPool.depositFrom).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('quote participation dispatch', () => {

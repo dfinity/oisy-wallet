@@ -5,6 +5,7 @@ import {
 	INTERNET_IDENTITY_CANISTER_ID,
 	TEST
 } from '$lib/constants/app.constants';
+import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { InternetIdentityDomain, type OpenIdProvider } from '$lib/types/auth';
@@ -168,6 +169,10 @@ const initAuthStore = (): AuthStore => {
 	};
 
 	const sync = async ({ forceSync }: { forceSync: boolean }) => {
+		if (MOBILE_SHELL) {
+			set({ identity: (await AuthClientProvider.getInstance().loadIdentity()) ?? null });
+			return;
+		}
 		authClient = forceSync
 			? await AuthClientProvider.getInstance().createAuthClient()
 			: await pickAuthClient();
@@ -189,6 +194,9 @@ const initAuthStore = (): AuthStore => {
 		},
 
 		signIn: async ({ domain, asPopup, openIdProvider }: AuthSignInParams) => {
+			if (MOBILE_SHELL) {
+				throw new Error('Use system authentication in the mobile host');
+			}
 			// When signing in, we require the authClient to be safely defined through the sync method (called when the window loads).
 			// We are not able to recreate authClient safely here since there are some browsers (like Safari) that block popups if there is an additional async call in this call stack.
 			if (isNullish(authClient)) {
@@ -262,6 +270,11 @@ const initAuthStore = (): AuthStore => {
 		},
 
 		signOut: async () => {
+			if (MOBILE_SHELL) {
+				AuthClientProvider.getInstance().setMobileIdentity(undefined);
+				set({ identity: null });
+				return;
+			}
 			const client: AuthClient =
 				authClient ?? (await AuthClientProvider.getInstance().createAuthClient());
 

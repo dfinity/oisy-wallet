@@ -10,6 +10,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import {
 		ADDRESS_BOOK_ADD_CONTACT_BUTTON,
 		ADDRESS_BOOK_SEARCH_CONTACT_INPUT
@@ -67,17 +68,18 @@
 				testId={ADDRESS_BOOK_SEARCH_CONTACT_INPUT}
 				bind:filter={searchTerm}
 			/>
-			<Button
-				ariaLabel={$i18n.address_book.text.add_contact}
-				colorStyle="secondary-light"
-				onclick={onAddContact}
-				styleClass="rounded-xl"
-				testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}
-			>
-				<IconPlus />
-				<span class="hidden whitespace-nowrap xs:block">{$i18n.address_book.text.add_contact}</span
-				></Button
-			>
+			{#if !MOBILE_SHELL}<Button
+					ariaLabel={$i18n.address_book.text.add_contact}
+					colorStyle="secondary-light"
+					onclick={onAddContact}
+					styleClass="rounded-xl"
+					testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}
+				>
+					<IconPlus />
+					<span class="hidden whitespace-nowrap xs:block"
+						>{$i18n.address_book.text.add_contact}</span
+					></Button
+				>{/if}
 		</div>
 
 		<List noPadding styleClass="py-6">

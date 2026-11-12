@@ -27,11 +27,12 @@
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
+		readOnly?: boolean;
 		transaction: IcTransactionUi;
 		token: OptionToken;
 	}
 
-	const { transaction, token }: Props = $props();
+	const { transaction, token, readOnly = false }: Props = $props();
 
 	let {
 		id,
@@ -178,6 +179,7 @@
 				{from}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
+				{readOnly}
 				{to}
 				{toExplorerUrl}
 				type={isIncoming ? 'receive' : type === 'approve' ? 'approve' : 'send'}

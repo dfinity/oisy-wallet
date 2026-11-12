@@ -115,4 +115,17 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 			}
 		});
 	};
+
+	refresh = (signal: AbortSignal) =>
+		this.postMessageAndWait<PostMessage<PostMessageDataRequestIcrc>>({
+			message: {
+				msg: 'triggerIcrcWalletTimer',
+				data: {
+					indexCanisterId: this.indexCanisterId,
+					ledgerCanisterId: this.ledgerCanisterId,
+					env: this.env
+				}
+			},
+			signal
+		});
 }

@@ -108,4 +108,15 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 			}
 		});
 	};
+
+	refresh = (signal: AbortSignal) =>
+		this.postMessageAndWait<PostMessage<PostMessageDataRequestDip20>>({
+			message: {
+				msg: 'triggerDip20WalletTimer',
+				data: {
+					canisterId: this.canisterId
+				}
+			},
+			signal
+		});
 }

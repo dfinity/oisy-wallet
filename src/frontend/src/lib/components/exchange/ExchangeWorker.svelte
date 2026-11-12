@@ -5,13 +5,16 @@
 	import { erc4626TokensExchangeData } from '$eth/derived/erc4626.derived';
 	import { enabledIcrcLedgerCanisterIdsNoCk } from '$icp/derived/icrc.derived';
 	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { loadBackendExchangeEnabled } from '$lib/services/backend-exchange-enabled.services';
+	import { registerWalletRefresh } from '$lib/services/wallet-refresh.services';
 	import { ExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { enabledSplTokenAddresses } from '$sol/derived/spl.derived';
 
 	let worker = $state<ExchangeWorker | undefined>();
+	let destroyed = false;
 	let backendExchangeEnabled = $state<boolean>(BACKEND_EXCHANGE_ENABLED);
 
 	onMount(async () => {
@@ -24,16 +27,43 @@
 		// is not gated on the backend query. When the runtime value resolves, the
 		// `$effect` below picks up the new `backendExchangeEnabled` and restarts
 		// the timer with the correct cadence and source.
-		worker = await ExchangeWorker.init();
+		const initializedWorker = await ExchangeWorker.init();
+		if (destroyed) {
+			initializedWorker.destroy();
+			return;
+		}
+		worker = initializedWorker;
 
 		void loadBackendExchangeEnabled().then((enabled) => {
 			backendExchangeEnabled = enabled;
 		});
 	});
 
-	onDestroy(() => worker?.destroy());
+	onDestroy(() => {
+		destroyed = true;
+		worker?.destroy();
+	});
+	onMount(() =>
+		MOBILE_SHELL
+			? registerWalletRefresh({
+					kind: 'prices',
+					refresh: async (signal) => {
+						if (EXCHANGE_DISABLED) {
+							return;
+						}
+						if (!worker) {
+							throw new Error('Prices are not ready');
+						}
+						await worker.refresh(signal);
+					}
+				})
+			: undefined
+	);
 
 	const syncTimer = () => {
+		if (destroyed) {
+			return;
+		}
 		worker?.stopExchangeTimer();
 		worker?.startExchangeTimer({
 			currentCurrency: $currentCurrency,

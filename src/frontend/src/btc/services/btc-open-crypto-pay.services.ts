@@ -14,7 +14,7 @@ import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
 import { i18n } from '$lib/stores/i18n.store';
 import type { PayableToken, PayParams, ValidatedBtcPaymentData } from '$lib/types/open-crypto-pay';
 import { consoleError } from '$lib/utils/console.utils';
-import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
+import { freshIIDelegationChain } from '$lib/utils/delegation.utils';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { getPaymentUri } from '$lib/utils/open-crypto-pay.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -151,7 +151,7 @@ const payBtcWithSigner = async ({
 				network: mapToSignerBitcoinNetwork({ network: token.network.env }),
 				txId: txidStringToUint8Array(txid),
 				utxos: validatedData.utxosFee.utxos,
-				iiDelegationChain: extractIIDelegationChain(identity)
+				iiDelegationChain: await freshIIDelegationChain({ identity })
 			}));
 	} catch (err: unknown) {
 		consoleError(err);

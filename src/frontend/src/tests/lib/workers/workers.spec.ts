@@ -104,6 +104,31 @@ describe('workers', () => {
 			});
 		});
 
+		it.each([true, false])(
+			'reports correlated refresh completion with success=%s',
+			async (success) => {
+				const postMessage = vi.spyOn(window, 'postMessage').mockImplementation(() => {});
+				const requestId = crypto.randomUUID();
+				const workerId = crypto.randomUUID();
+				if (!success) {
+					vi.mocked(onIcpWalletMessage).mockRejectedValueOnce(new Error('Provider failed'));
+				}
+				const event = new MessageEvent('message', {
+					data: { msg: 'triggerIcpWalletTimer', requestId, workerId }
+				});
+				await window.onmessage?.call(window, event);
+
+				expect(postMessage).toHaveBeenCalledExactlyOnceWith({
+					msg: 'workerRefreshFinished',
+					requestId,
+					workerId,
+					success
+				});
+
+				postMessage.mockRestore();
+			}
+		);
+
 		it.each(POST_MESSAGE_REQUESTS)(`should call only the targeted handler for %s`, async (msg) => {
 			const event = createMockEvent(msg);
 

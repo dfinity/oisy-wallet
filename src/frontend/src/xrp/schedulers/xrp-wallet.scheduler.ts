@@ -100,6 +100,11 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		});
 	}
 
+	async refresh(data: PostMessageDataRequestXrp | undefined) {
+		this.setRef(data);
+		await this.timer.refresh<PostMessageDataRequestXrp>({ job: this.syncWallet, data });
+	}
+
 	async trigger(data: PostMessageDataRequestXrp | undefined) {
 		this.setRef(data);
 
@@ -216,7 +221,9 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 				transactions: {}
 			};
 			this.postMessageWalletError({ error });
+			return false;
 		}
+		return nonNullish(await transactions);
 	};
 
 	private syncWalletData = ({

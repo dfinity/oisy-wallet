@@ -94,6 +94,13 @@ interface I18nCore {
 	};
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
 	error: { copy_failed: string };
+	mobile_shell: {
+		wallet_unavailable: string;
+		wallet_retry_description: string;
+		account: string;
+		app_controls: string;
+		refresh_failed: string;
+	};
 }
 
 interface I18nProgress {
@@ -187,6 +194,7 @@ interface I18nAuth {
 		asset_types: string;
 		advanced_cryptography: string;
 		move_swap_grow: string;
+		return_to_app: string;
 	};
 	alt: {
 		preview: string;
@@ -202,6 +210,7 @@ interface I18nAuth {
 		no_internet_identity: string;
 		error_while_signing_in: string;
 		unexpected_issue_with_syncing: string;
+		missing_mobile_callback: string;
 	};
 	help: {
 		text: {
@@ -794,6 +803,11 @@ interface I18nSend {
 		no_nfts_found: string;
 		no_nfts_found_desc: string;
 		select_nft: string;
+		mobile_pending: string;
+		mobile_pending_title: string;
+		mobile_not_confirmed: string;
+		mobile_recovery_unavailable: string;
+		mobile_check_status: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -816,6 +830,8 @@ interface I18nSend {
 		fee_info: string;
 		scanned_address_only_destination: string;
 		scanned_address_only_destination_single_token: string;
+		mobile_ic_only: string;
+		mobile_supported_only: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
@@ -898,6 +914,7 @@ interface I18nSend {
 		xrp_destination_tag_required: string;
 		xrp_destination_is_source: string;
 		xrp_account_state_unavailable: string;
+		mobile_unconfirmed: string;
 	};
 }
 
@@ -1172,6 +1189,11 @@ interface I18nSwap {
 		oisy_trade_withdrawal_fee: string;
 		value_difference_error_confirmation: string;
 		value_difference_missing_price_confirmation: string;
+		mobile_pending: string;
+		mobile_pool_not_empty: string;
+		mobile_no_recovery_balance: string;
+		mobile_recovered: string;
+		mobile_recover: string;
 	};
 	error: {
 		kong_not_available: string;

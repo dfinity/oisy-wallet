@@ -25,6 +25,7 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { routeCollection, routeNetwork, routeNft } from '$lib/derived/nav.derived';
@@ -89,7 +90,7 @@
 												id: TokenTypes.TOKENS,
 												path: `${AppPath.Tokens}${page.url.search}`
 											},
-											...(anyTradingProviderEnabled
+											...(!MOBILE_SHELL && anyTradingProviderEnabled
 												? [
 														{
 															label: $i18n.trading.text.tab_title,
@@ -99,7 +100,7 @@
 														}
 													]
 												: []),
-											...(EARNING_ENABLED
+											...(!MOBILE_SHELL && EARNING_ENABLED
 												? [
 														{
 															label: $i18n.earning.text.tab_title,
@@ -109,7 +110,7 @@
 														}
 													]
 												: []),
-											...(anyLendBorrowProviderEnabled
+											...(!MOBILE_SHELL && anyLendBorrowProviderEnabled
 												? [
 														{
 															label: $i18n.borrowings.text.tab_title,

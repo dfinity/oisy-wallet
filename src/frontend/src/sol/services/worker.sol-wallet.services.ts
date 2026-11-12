@@ -159,4 +159,13 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 			data: this.data
 		});
 	};
+
+	refresh = (signal: AbortSignal) =>
+		this.postMessageAndWait<PostMessage<PostMessageDataRequestSol>>({
+			message: {
+				msg: 'triggerSolWalletTimer',
+				data: this.data
+			},
+			signal
+		});
 }

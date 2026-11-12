@@ -1,0 +1,9 @@
+{
+	"name": "oisy-auth-handoff-spike",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"@icp-sdk/auth": "11.1.0",
+		"@icp-sdk/core": "6.0.0"
+	}
+}

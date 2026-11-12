@@ -1,10 +1,12 @@
 import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
 import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
+import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 import { syncBalancesFromCache } from '$lib/services/listener.services';
+import { registerWalletRefresh } from '$lib/services/wallet-refresh.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import type { Token } from '$lib/types/token';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -25,6 +27,11 @@ vi.mock('$lib/services/listener.services', () => ({
 	syncBalancesFromCache: vi.fn()
 }));
 
+vi.mock('$lib/constants/mobile.constants', () => ({ MOBILE_SHELL: true }));
+vi.mock('$lib/services/wallet-refresh.services', () => ({
+	registerWalletRefresh: vi.fn(() => vi.fn())
+}));
+
 describe('LoaderEthBalances', () => {
 	const mockErc20DefaultTokens: Erc20Token[] = createMockErc20Tokens({
 		n: 3,
@@ -37,6 +44,8 @@ describe('LoaderEthBalances', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.mocked(loadEthBalances).mockResolvedValue({ success: true });
+		vi.mocked(loadErc20Balances).mockResolvedValue({ success: true });
 
 		vi.useFakeTimers();
 
@@ -191,6 +200,71 @@ describe('LoaderEthBalances', () => {
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {
 			address: mockEthAddress,
 			tokens: mockErc20DefaultTokens
+		});
+	});
+
+	describe('manual refresh', () => {
+		const refresh = () => {
+			const [[owner]] = vi.mocked(registerWalletRefresh).mock.calls;
+			return owner.refresh(new AbortController().signal);
+		};
+
+		it('joins the existing ETH and ERC20 reads, including Base, rather than starting duplicates', async () => {
+			let finish: (value: { success: boolean }) => void = () => {};
+			vi.mocked(loadEthBalances).mockImplementationOnce(
+				() =>
+					new Promise((resolve) => {
+						finish = resolve;
+					})
+			);
+			render(LoaderEthBalances);
+			await tick();
+			const result = refresh();
+			const settled = vi.fn();
+			void result.then(settled);
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(loadEthBalances).toHaveBeenCalledOnce();
+			expect(loadErc20Balances).toHaveBeenCalledOnce();
+			expect(settled).not.toHaveBeenCalled();
+
+			finish({ success: true });
+			await result;
+		});
+
+		it('rejects a provider returning a handled failure', async () => {
+			render(LoaderEthBalances);
+			await vi.advanceTimersByTimeAsync(1000);
+			vi.mocked(loadErc20Balances).mockResolvedValueOnce({ success: false });
+
+			await expect(refresh()).rejects.toThrow('refresh failed');
+		});
+
+		it('completes with no reads when no EVM tokens are enabled', async () => {
+			ethAddressStore.reset();
+			vi.spyOn(enabledEthEvmNativeTokens, 'subscribe').mockImplementation((run) => {
+				run([]);
+				return () => {};
+			});
+			vi.spyOn(enabledErc20Tokens, 'subscribe').mockImplementation((run) => {
+				run([]);
+				return () => {};
+			});
+			render(LoaderEthBalances);
+			await tick();
+
+			await expect(refresh()).resolves.toBeUndefined();
+			expect(loadEthBalances).not.toHaveBeenCalled();
+			expect(loadErc20Balances).not.toHaveBeenCalled();
+		});
+
+		it('rejects promptly when enabled tokens have no address', async () => {
+			ethAddressStore.reset();
+			render(LoaderEthBalances);
+			await tick();
+
+			await expect(refresh()).rejects.toThrow('address unavailable');
+			expect(loadEthBalances).not.toHaveBeenCalled();
 		});
 	});
 });

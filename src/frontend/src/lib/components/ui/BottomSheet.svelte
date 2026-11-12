@@ -48,7 +48,11 @@
 </script>
 
 {#snippet closeButton(styleClass: string)}
-	<ButtonIcon ariaLabel={$i18n.core.alt.close_details} onclick={handleClose} {styleClass}>
+	<ButtonIcon
+		ariaLabel={$i18n.core.alt.close_details}
+		onclick={handleClose}
+		styleClass={`${styleClass} native-sheet-dismiss`}
+	>
 		{#snippet icon()}
 			<IconClose size="24" />
 		{/snippet}
@@ -66,13 +70,13 @@
 						{@render closeButton('text-disabled')}
 					</div>
 				{:else}
-					<div class="w-full p-4">
+					<div class="w-full p-4" data-native-sheet-dismiss>
 						{@render closeButton('text-disabled float-right')}
 					</div>
 				{/if}
 			{/snippet}
 
-			<div class="w-full p-4 {contentClass}">
+			<div class="w-full p-4 {contentClass}" data-sheet-content>
 				{@render content()}
 			</div>
 			{#if nonNullish(footer)}

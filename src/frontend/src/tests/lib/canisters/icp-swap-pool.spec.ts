@@ -204,11 +204,29 @@ describe('icp_swap_pool.canister', () => {
 	});
 
 	describe('getUserUnusedBalance', () => {
+		it('uses the certified caller for recovery reads', async () => {
+			const certified = mock<ActorSubclass<SwapPoolService>>();
+			const unused = { balance0: 10n, balance1: 5n };
+			certified.getUserUnusedBalance.mockResolvedValue({ ok: unused });
+			const pool = await ICPSwapPoolCanister.create({
+				canisterId: principal,
+				identity: mockIdentity,
+				serviceOverride: service,
+				certifiedServiceOverride: certified
+			});
+
+			await expect(pool.getUserUnusedBalance({ principal, certified: true })).resolves.toEqual(
+				unused
+			);
+			expect(certified.getUserUnusedBalance).toHaveBeenCalledExactlyOnceWith(principal);
+			expect(service.getUserUnusedBalance).not.toHaveBeenCalled();
+		});
+
 		it('returns user unused balance successfully', async () => {
 			const unused = { balance0: 10n, balance1: 5n };
 			service.getUserUnusedBalance.mockResolvedValue({ ok: unused });
 			const { getUserUnusedBalance } = await createPool({ serviceOverride: service });
-			const result = await getUserUnusedBalance(principal);
+			const result = await getUserUnusedBalance({ principal });
 
 			expect(result).toEqual(unused);
 		});
@@ -218,7 +236,7 @@ describe('icp_swap_pool.canister', () => {
 				err: { InternalError: 'Failed to get balance' }
 			});
 			const { getUserUnusedBalance } = await createPool({ serviceOverride: service });
-			const result = getUserUnusedBalance(principal);
+			const result = getUserUnusedBalance({ principal });
 
 			await expect(result).rejects.toThrow(
 				new CanisterInternalError('Internal error: Failed to get balance')
@@ -230,7 +248,7 @@ describe('icp_swap_pool.canister', () => {
 				throw mockResponseError;
 			});
 			const { getUserUnusedBalance } = await createPool({ serviceOverride: service });
-			const result = getUserUnusedBalance(principal);
+			const result = getUserUnusedBalance({ principal });
 
 			await expect(result).rejects.toThrow(mockResponseError);
 		});

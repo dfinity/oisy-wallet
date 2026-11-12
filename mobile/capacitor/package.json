@@ -1,0 +1,11 @@
+{
+	"name": "@dfinity/oisy-ios-host",
+	"version": "0.0.1",
+	"private": true,
+	"description": "Native host. Dependencies and lockfile are owned by the repository root.",
+	"scripts": {
+		"sync:ios": "npm run project:ios",
+		"open:ios": "open ios/App/App.xcodeproj",
+		"project:ios": "node prepare-app-config.mjs && xcodegen generate --spec ios/App/project.yml --project ios/App"
+	}
+}

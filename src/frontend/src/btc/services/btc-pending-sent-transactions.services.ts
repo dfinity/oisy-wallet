@@ -7,7 +7,7 @@ import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
-import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
+import { freshIIDelegationChain } from '$lib/utils/delegation.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapNetworkIdToBitcoinNetwork, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -50,7 +50,7 @@ export const loadBtcPendingSentTransactions = async ({
 		const params = {
 			identity,
 			network: mapToSignerBitcoinNetwork({ network }),
-			iiDelegationChain: extractIIDelegationChain(identity)
+			iiDelegationChain: await freshIIDelegationChain({ identity })
 		};
 
 		if (BTC_SEND_VIA_BACKEND_ENABLED) {

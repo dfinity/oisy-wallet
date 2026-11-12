@@ -39,7 +39,11 @@ import {
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
-import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
+import {
+	exchangeRateERC20ToUsd,
+	exchangeRateICRCToUsd,
+	fillIcrcPricesFromFallbackProviders
+} from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
@@ -48,8 +52,9 @@ import type { CanisterIdText } from '$lib/types/canister';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
-import { isTcyclesLedgerCanisterId } from '$lib/utils/exchange.utils';
+import { icrcTokenPrice, isTcyclesLedgerCanisterId } from '$lib/utils/exchange.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import {
 	fromNullable,
@@ -404,6 +409,38 @@ export const loadDisabledIcrcTokensExchanges = async ({
 			: []),
 		...(icrcResult.status === 'fulfilled' && nonNullish(icrcResult.value) ? [icrcResult.value] : [])
 	]);
+
+	// Backend prices can omit disabled tokens offered by Swap, and a ck-token's
+	// twin's CoinGecko price may be unavailable. Fill those gaps by
+	// ledger using the same flag-gated providers as the exchange worker.
+	const unpricedTokens = (): IcToken[] => {
+		const prices = get(exchangeStore);
+		return disabledIcrcTokens.filter(
+			(token) =>
+				!isTcyclesLedgerCanisterId(token.ledgerCanisterId) &&
+				isNullish(icrcTokenPrice({ token, prices })?.usd)
+		);
+	};
+	const missingTokens = unpricedTokens();
+	if (missingTokens.length === 0) {
+		return;
+	}
+
+	try {
+		const prices = await fillIcrcPricesFromFallbackProviders({
+			ledgerCanisterIds: missingTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
+		});
+		// A wallet refresh may have supplied a price while the fallback was loading.
+		exchangeStore.set([
+			Object.fromEntries(
+				unpricedTokens().flatMap(({ ledgerCanisterId }) =>
+					nonNullish(prices[ledgerCanisterId]) ? [[ledgerCanisterId, prices[ledgerCanisterId]]] : []
+				)
+			)
+		]);
+	} catch (_err: unknown) {
+		consoleWarn('Failed to load missing swap token prices.');
+	}
 };
 
 /**

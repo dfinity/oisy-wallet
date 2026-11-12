@@ -43,7 +43,7 @@
 					ariaLabel={$i18n.core.alt.close_details}
 					{disabled}
 					onclick={cancel}
-					styleClass="text-disabled"
+					styleClass="text-disabled native-sheet-dismiss"
 				>
 					{#snippet icon()}
 						<IconClose size="24" />

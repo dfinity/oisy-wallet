@@ -21,6 +21,7 @@
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import {
 		balance,
@@ -214,7 +215,10 @@
 	class:to-xrp-100={$networkXrp}
 >
 	{#if isTransactionsPage}
-		<div class="flex w-full flex-col gap-6" in:slide={SLIDE_PARAMS}>
+		<div
+			class="flex w-full flex-col gap-6"
+			in:slide={MOBILE_SHELL ? { duration: 0 } : SLIDE_PARAMS}
+		>
 			<div class="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 sm:gap-2">
 				<Back color="current" onlyArrow />
 
@@ -222,7 +226,10 @@
 					class="my-0.5 flex w-full min-w-0 items-center justify-between gap-4 text-xs text-nowrap sm:text-base {selectionClasses}"
 				>
 					{#if nonNullish(pageTokenUi)}
-						<div class="flex min-w-0 items-center justify-start gap-1 sm:gap-2" in:fade>
+						<div
+							class="flex min-w-0 items-center justify-start gap-1 sm:gap-2"
+							in:fade={MOBILE_SHELL ? { duration: 0 } : undefined}
+						>
 							<TokenLogo data={pageTokenUi} logoSize="sm" ring />
 
 							<div class="flex flex-col truncate text-left">
@@ -270,16 +277,19 @@
 			</div>
 		</div>
 	{:else if isNftsPage}
-		<div class={selectionClasses} in:slide={SLIDE_PARAMS}>
+		<div class={selectionClasses} in:slide={MOBILE_SHELL ? { duration: 0 } : SLIDE_PARAMS}>
 			<NftHeroBalance />
 		</div>
 	{:else}
-		<div class={selectionClasses} in:slide={SLIDE_PARAMS}>
+		<div class={selectionClasses} in:slide={MOBILE_SHELL ? { duration: 0 } : SLIDE_PARAMS}>
 			<ExchangeBalance hideBalance={$isPrivacyMode} />
 		</div>
 	{/if}
 
-	<div class="flex w-full justify-center text-left" in:slide|local={SLIDE_PARAMS}>
+	<div
+		class="flex w-full justify-center text-left"
+		in:slide|local={MOBILE_SHELL ? { duration: 0 } : SLIDE_PARAMS}
+	>
 		<Actions />
 	</div>
 

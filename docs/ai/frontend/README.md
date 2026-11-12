@@ -22,6 +22,11 @@ starting point. Read it once per session.
       [`stack-and-patterns.md#press-feedback`](./stack-and-patterns.md#press-feedback).
 - [ ] User-visible copy, colours, and icons follow brand rules —
       [`brand-and-copy.md`](./brand-and-copy.md).
+- [ ] I checked shared mobile impact. For routes/layouts/modals, auth/providers/workers
+      or build/host changes, follow [web/mobile compatibility](../../../mobile/capacitor/docs/shared-web-contract.md)
+      and record supported/deferred mobile behavior for new screens/actions.
+- [ ] Authentication callback pages terminate locally. Never forward delegation
+      fragments to custom URL schemes, external destinations or another window.
 - [ ] I have or extended tests where the [`testing.md`](./testing.md) policy
       requires.
 - [ ] No `console.error` / `console.warn` / `0n` / relative imports in

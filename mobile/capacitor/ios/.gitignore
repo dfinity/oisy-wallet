@@ -1,0 +1,16 @@
+App/build
+App/Pods
+App/output
+App/App/public
+DerivedData
+xcuserdata
+
+# Retired Capacitor output may remain in older checkouts. Keep it untracked.
+capacitor-cordova-ios-plugins
+
+# Retired generated configuration (also excluded by project.yml)
+App/App/capacitor.config.json
+App/App/config.xml
+
+App/App.xcodeproj/
+!App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved

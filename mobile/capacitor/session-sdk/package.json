@@ -1,0 +1,11 @@
+{
+	"name": "@oisy/mobile-session",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"exports": "./session.ts",
+	"dependencies": {
+		"@icp-sdk/auth": "11.1.0",
+		"@icp-sdk/core": "6.0.0"
+	}
+}

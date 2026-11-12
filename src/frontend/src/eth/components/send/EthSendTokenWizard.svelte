@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, setContext, untrack } from 'svelte';
+	import { getContext, onDestroy, setContext, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
@@ -16,9 +16,15 @@
 		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import type { ProgressStep } from '$eth/types/send';
+	import {
+		MobileEthSendPendingError,
+		MobileEthSendSessionExpiredError,
+		type EthSendTransactionReference,
+		type ProgressStep
+	} from '$eth/types/send';
 	import { isSendOutcomeUnknown, toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
 	import { findEthersError, isSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import { isMobileEthSendDestination } from '$eth/utils/mobile-send.utils';
 	import { capSendAmountToFee, shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -34,6 +40,7 @@
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.constants';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -41,6 +48,12 @@
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { idleSignOut } from '$lib/services/auth.services';
+	import {
+		MobileOperationPendingError,
+		MobileOperationSessionExpiredError,
+		persistMobileEthSend
+	} from '$lib/services/mobile-operation-journal.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -105,13 +118,14 @@
 	}: Props = $props();
 
 	let sendWithApproval = $derived(
-		shouldSendWithApproval({
-			to: destination,
-			tokenId: $sendTokenId,
-			erc20HelperContractAddress: toCkErc20HelperContractAddress(
-				$ckEthMinterInfoStore?.[nativeEthereumToken.id]
-			)
-		})
+		!MOBILE_SHELL &&
+			shouldSendWithApproval({
+				to: destination,
+				tokenId: $sendTokenId,
+				erc20HelperContractAddress: toCkErc20HelperContractAddress(
+					$ckEthMinterInfoStore?.[nativeEthereumToken.id]
+				)
+			})
 	);
 
 	let customNonce = $derived($sendEthCustomNonce);
@@ -181,6 +195,9 @@
 	 */
 
 	const nftSend = async () => {
+		if (MOBILE_SHELL || disposed || submitting) {
+			return;
+		}
 		if (isNullishOrEmpty(destination)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.destination_address_invalid }
@@ -280,7 +297,55 @@
 		}
 	};
 
+	let submitting = false;
+	let disposed = false;
+	let closeTimer: ReturnType<typeof setTimeout> | undefined;
+	onDestroy(() => {
+		disposed = true;
+		clearTimeout(closeTimer);
+	});
+
 	const send = async () => {
+		if (submitting || disposed || currentStep?.name !== WizardStepsSend.REVIEW) {
+			return;
+		}
+		// The balance reread can yield while the review button is still visible.
+		submitting = true;
+		try {
+			await submitSend();
+		} catch {
+			if (!disposed) {
+				toastsError({ msg: { text: $i18n.send.error.unexpected } });
+			}
+		} finally {
+			submitting = false;
+		}
+	};
+
+	const submitSend = async () => {
+		const token = $sendToken;
+		const identity = $authIdentity;
+		const from = $ethAddress;
+		const reviewedDestination = destination;
+		const reviewedAmount = amount;
+		const reviewedNetwork = sourceNetwork;
+		const minterInfo = $ckEthMinterInfoStore?.[nativeEthereumToken.id];
+		const canProceed = () =>
+			!disposed &&
+			(currentStep?.name === WizardStepsSend.REVIEW ||
+				currentStep?.name === WizardStepsSend.SENDING) &&
+			amount === reviewedAmount &&
+			token.id === $sendToken.id &&
+			identity === $authIdentity &&
+			from === $ethAddress &&
+			reviewedDestination === destination &&
+			reviewedNetwork.id === sourceNetwork.id &&
+			reviewedNetwork.chainId === sourceNetwork.chainId;
+		if (MOBILE_SHELL && !isMobileEthSendDestination({ token, destination, minterInfo })) {
+			toastsError({ msg: { text: $i18n.send.assertion.destination_address_invalid } });
+			return;
+		}
+
 		if (isNullishOrEmpty(destination)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.destination_address_invalid }
@@ -302,12 +367,11 @@
 			return;
 		}
 
-		const { valid } = assertCkEthMinterInfoLoaded({
-			minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
-		});
-
-		if (!valid) {
-			return;
+		if (!MOBILE_SHELL) {
+			const { valid } = assertCkEthMinterInfoLoaded({ minterInfo });
+			if (!valid) {
+				return;
+			}
 		}
 
 		// One snapshot for both the signature and the cap below. Rebuilding a literal from parts of it
@@ -328,7 +392,7 @@
 		}
 
 		// Unexpected errors
-		if (isNullish($ethAddress)) {
+		if (isNullish(from)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.address_unknown }
 			});
@@ -359,8 +423,12 @@
 			// through `batchSet`, which only lands on the next animation frame, so reading it back
 			// here would still yield the stale sample this re-read exists to replace.
 			const balance =
-				(await readEthBalance({ networkId: $sendToken.network.id, tokenId: $sendToken.id })) ??
+				(await readEthBalance({ networkId: token.network.id, tokenId: token.id })) ??
 				sampledBalance;
+
+			if (!canProceed()) {
+				return;
+			}
 
 			// Neither the chain nor the store can say what the account holds. `capSendAmountToFee`
 			// returns an amount it has no balance for unchanged, so going on would broadcast a "Max"
@@ -392,6 +460,9 @@
 			return;
 		}
 
+		if (!canProceed()) {
+			return;
+		}
 		onNext();
 
 		const sendTrackingEventMetadata = {
@@ -405,18 +476,43 @@
 
 		try {
 			await executeSend({
-				from: $ethAddress,
-				to: isErc20Icp($sendToken) ? destination : mapAddressStartsWith0x(destination),
-				progress: (step: ProgressStep) => (sendProgressStep = step),
-				token: $sendToken,
+				from,
+				to:
+					isErc20Icp(token) && !MOBILE_SHELL
+						? reviewedDestination
+						: mapAddressStartsWith0x(reviewedDestination),
+				progress: (step: ProgressStep) => {
+					if (!disposed) {
+						sendProgressStep = step;
+					}
+				},
+				token,
 				amount: sendAmount,
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
 				customNonce,
-				sourceNetwork,
-				identity: $authIdentity,
-				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
+				sourceNetwork: reviewedNetwork,
+				identity,
+				minterInfo,
+				canProceed,
+				...(MOBILE_SHELL
+					? {
+							beforeBroadcast: async ({ hash, nonce }: EthSendTransactionReference) => {
+								if (isNullish(identity)) {
+									throw new MobileEthSendSessionExpiredError();
+								}
+								await persistMobileEthSend({
+									identity,
+									token,
+									from,
+									to: reviewedDestination,
+									hash,
+									nonce
+								});
+							}
+						}
+					: {})
 			});
 
 			trackEvent({
@@ -424,8 +520,35 @@
 				metadata: sendTrackingEventMetadata
 			});
 
-			setTimeout(() => close(), 750);
+			if (!disposed) {
+				closeTimer = setTimeout(() => close(), 750);
+			}
 		} catch (err: unknown) {
+			if (disposed) {
+				return;
+			}
+			if (
+				MOBILE_SHELL &&
+				(err instanceof MobileEthSendSessionExpiredError ||
+					err instanceof MobileOperationSessionExpiredError)
+			) {
+				await idleSignOut();
+				return;
+			}
+			if (
+				MOBILE_SHELL &&
+				(err instanceof MobileEthSendPendingError || err instanceof MobileOperationPendingError)
+			) {
+				toastsError({ msg: { text: $i18n.send.text.mobile_pending } });
+				close();
+				return;
+			}
+			if (MOBILE_SHELL) {
+				toastsError({ msg: { text: $i18n.send.error.unexpected } });
+				onBack();
+				return;
+			}
+
 			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_ERROR,
 				metadata: sendTrackingEventMetadata

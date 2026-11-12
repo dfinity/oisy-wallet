@@ -1,10 +1,31 @@
-import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
+import { extractIIDelegationChain, freshIIDelegationChain } from '$lib/utils/delegation.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import type { DerEncodedPublicKey, Signature } from '@icp-sdk/core/agent';
-import { Delegation, DelegationChain, DelegationIdentity } from '@icp-sdk/core/identity';
+import {
+	Delegation,
+	DelegationChain,
+	DelegationIdentity,
+	Ed25519KeyIdentity
+} from '@icp-sdk/core/identity';
 
 describe('delegation.utils', () => {
+	it('preserves the existing browser proof without refreshing or changing it', async () => {
+		const root = Ed25519KeyIdentity.generate();
+		const key = Ed25519KeyIdentity.generate();
+		const chain = await DelegationChain.create(
+			root,
+			key.getPublicKey(),
+			new Date(Date.now() + 60_000)
+		);
+		const identity = DelegationIdentity.fromDelegation(key, chain);
+
+		await expect(freshIIDelegationChain({ identity })).resolves.toEqual(
+			extractIIDelegationChain(identity)
+		);
+		await expect(freshIIDelegationChain({ identity: mockIdentity })).resolves.toEqual([]);
+	});
+
 	describe('extractIIDelegationChain', () => {
 		it('should return empty array for non-DelegationIdentity', () => {
 			const result = extractIIDelegationChain(mockIdentity);
@@ -48,6 +69,40 @@ describe('delegation.utils', () => {
 			expect(extracted?.delegations[0].delegation.expiration).toBe(mockExpiration);
 			expect(extracted?.delegations[0].delegation.targets).toEqual([]);
 		});
+
+		it.each([1, 2])(
+			'keeps only the original II proof with %i child delegations',
+			async (children) => {
+				const root = Ed25519KeyIdentity.generate();
+				const key = Ed25519KeyIdentity.generate();
+				const iiChain = await DelegationChain.create(
+					root,
+					key.getPublicKey(),
+					new Date(Date.now() + 600_000)
+				);
+				let identity = DelegationIdentity.fromDelegation(key, iiChain);
+				const originalProof = extractIIDelegationChain(identity);
+
+				for (let i = 0; i < children; i++) {
+					const child = Ed25519KeyIdentity.generate();
+					const chain = await DelegationChain.create(
+						identity,
+						child.getPublicKey(),
+						new Date(Date.now() + 300_000),
+						{
+							previous: identity.getDelegation()
+						}
+					);
+					identity = DelegationIdentity.fromDelegation(child, chain);
+				}
+
+				// The backend verifies the original II proof against the caller's principal.
+				// Request authentication still carries every parent/child link to the IC replica.
+				expect(extractIIDelegationChain(identity)).toEqual(originalProof);
+				expect(identity.getPrincipal().toText()).toBe(root.getPrincipal().toText());
+				expect(identity.getDelegation().delegations).toHaveLength(children + 1);
+			}
+		);
 
 		it('should extract delegation chain with targets', () => {
 			const mockExpiration = BigInt(Date.now()) * 1_000_000n + 600_000_000_000n;

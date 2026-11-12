@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
-	import { setContext } from 'svelte';
+	import { setContext, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { CYCLES_SEND_OR_TOP_UP_ENABLED } from '$env/cycles-top-up.env';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledErc4626Tokens } from '$eth/derived/erc4626.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -27,6 +28,7 @@
 		sendNftsWizardStepsWithQrCodeScan,
 		sendWizardStepsWithQrCodeScan
 	} from '$lib/config/send.config';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import {
 		btcAddressMainnetNotLoaded,
@@ -65,6 +67,7 @@
 	import type { SendDestinationTab } from '$lib/types/send';
 	import type { OptionToken, Token, TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { isMobileTransferToken } from '$lib/utils/mobile-send.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import {
@@ -190,7 +193,7 @@
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
-			tokens: $enabledTokens,
+			tokens: MOBILE_SHELL ? $enabledTokens.filter(isMobileTransferToken) : $enabledTokens,
 			filterZeroBalance: true,
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore
 			// svelte-ignore state_referenced_locally -- the modal-tokens-list context is initialized once at mount; the reactive `lockedNetwork` (a $derived) is consumed downstream by `SendTokensList`'s view-only lock.
@@ -245,6 +248,12 @@
 		});
 	};
 
+	onMount(() => {
+		if (MOBILE_SHELL && (isNftsPage || (isTransactionsPage && !isMobileTransferToken($token)))) {
+			close();
+		}
+	});
+
 	const isDisabled = ({ network: { id } }: Token): boolean =>
 		isNetworkIdEthereum(id) || isNetworkIdEvm(id)
 			? $ethAddressNotLoaded
@@ -265,6 +274,9 @@
 										: false;
 
 	const onSendToken = async (token: Token) => {
+		if (MOBILE_SHELL && !isMobileTransferToken(token)) {
+			return;
+		}
 		if (isDisabled(token)) {
 			const status = await waitWalletReady(() => isDisabled(token));
 
@@ -358,87 +370,93 @@
 	};
 </script>
 
-<TokenActionContext token={$token}>
-	<WizardModal
-		bind:this={modal}
-		disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
-			currentStep?.name === WizardStepsCyclesTopUp.TOPPING_UP}
-		onClose={close}
-		{steps}
-		testId={SEND_TOKENS_MODAL}
-		bind:currentStep
-	>
-		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
+{#if !MOBILE_SHELL || (!isNftsPage && (!isTransactionsPage || isMobileTransferToken($token)))}
+	<TokenActionContext token={MOBILE_SHELL && !isMobileTransferToken($token) ? ICP_TOKEN : $token}>
+		<WizardModal
+			bind:this={modal}
+			disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
+				currentStep?.name === WizardStepsCyclesTopUp.TOPPING_UP}
+			mobilePresentation="fullScreen"
+			mobileSwipeBack
+			onClose={close}
+			{steps}
+			testId={SEND_TOKENS_MODAL}
+			bind:currentStep
+		>
+			{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-		<!-- The amount, review and sending steps share one wizard, and therefore one fee: rebuilding it
+			<!-- The amount, review and sending steps share one wizard, and therefore one fee: rebuilding it
 		     between them would throw away the fee the amount was priced against, leaving the review
 		     step with nothing to show or sign now that it no longer fetches its own. The wizard keys
 		     its own step components internally, so they still reset. -->
-		{#if currentStep?.name === WizardStepsSend.SEND || currentStep?.name === WizardStepsSend.REVIEW || currentStep?.name === WizardStepsSend.SENDING}
-			<SendWizard
-				{currentStep}
-				{destination}
-				nft={selectedNft}
-				onBack={modal.back}
-				onClose={close}
-				onNext={modal.next}
-				onSendBack={() => goToStep(WizardStepsSend.DESTINATION)}
-				onSendForm={() => goToStep(WizardStepsSend.SEND)}
-				onTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-				{selectedContact}
-				bind:amount
-				bind:sendProgressStep
-			/>
-		{:else if showCyclesTopUpWizard && isTokenCyclesLedger($token)}
-			<!-- Its steps share one wizard too, which holds the top-up while it is on its way. -->
-			<CyclesTopUpWizard
-				{currentStep}
-				{modal}
-				onBack={() => goToStep(WizardStepsSend.SEND_OR_TOP_UP)}
-				onClose={close}
-				{steps}
-				token={$token}
-			/>
-		{:else}
-			{#key currentStep?.name}
-				{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
-					<SendTokensList {lockedNetwork} {onSendToken} />
-				{:else if currentStep?.name === WizardStepsSend.SEND_OR_TOP_UP && isTokenCyclesLedger($token)}
-					<CyclesSendOrTopUp
-						formCancelAction={isTransactionsPage ? 'close' : 'back'}
-						onBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-						onClose={close}
-						onSend={() => goToStep(WizardStepsSend.DESTINATION)}
-						onTopUp={startTopUp}
-						token={$token}
-					/>
-				{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
-					<SendNftsList onSelect={selectNft} />
-				{:else if currentStep?.name === WizardStepsSend.DESTINATION}
-					<SendDestinationWizardStep
-						formCancelAction={!sendOrTopUp &&
-						(isTransactionsPage || (isNftsPage && nonNullish($pageNft)))
-							? 'close'
-							: 'back'}
-						onBack={() =>
-							goToStep(sendOrTopUp ? WizardStepsSend.SEND_OR_TOP_UP : WizardStepsSend.TOKENS_LIST)}
-						onClose={close}
-						onNext={modal.next}
-						onQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
-						bind:destination
-						bind:activeSendDestinationTab
-						bind:selectedContact
-					/>
-				{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-					<SendQrCodeScan
-						expectedToken={$token}
-						{onDecodeQrCode}
-						onQRCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
-						bind:destination
-						bind:amount
-					/>
-				{/if}
-			{/key}
-		{/if}
-	</WizardModal>
-</TokenActionContext>
+			{#if currentStep?.name === WizardStepsSend.SEND || currentStep?.name === WizardStepsSend.REVIEW || currentStep?.name === WizardStepsSend.SENDING}
+				<SendWizard
+					{currentStep}
+					{destination}
+					nft={selectedNft}
+					onBack={modal.back}
+					onClose={close}
+					onNext={modal.next}
+					onSendBack={() => goToStep(WizardStepsSend.DESTINATION)}
+					onSendForm={() => goToStep(WizardStepsSend.SEND)}
+					onTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+					{selectedContact}
+					bind:amount
+					bind:sendProgressStep
+				/>
+			{:else if showCyclesTopUpWizard && isTokenCyclesLedger($token)}
+				<!-- Its steps share one wizard too, which holds the top-up while it is on its way. -->
+				<CyclesTopUpWizard
+					{currentStep}
+					{modal}
+					onBack={() => goToStep(WizardStepsSend.SEND_OR_TOP_UP)}
+					onClose={close}
+					{steps}
+					token={$token}
+				/>
+			{:else}
+				{#key currentStep?.name}
+					{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
+						<SendTokensList {lockedNetwork} {onSendToken} />
+					{:else if currentStep?.name === WizardStepsSend.SEND_OR_TOP_UP && isTokenCyclesLedger($token)}
+						<CyclesSendOrTopUp
+							formCancelAction={isTransactionsPage ? 'close' : 'back'}
+							onBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+							onClose={close}
+							onSend={() => goToStep(WizardStepsSend.DESTINATION)}
+							onTopUp={startTopUp}
+							token={$token}
+						/>
+					{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
+						<SendNftsList onSelect={selectNft} />
+					{:else if currentStep?.name === WizardStepsSend.DESTINATION}
+						<SendDestinationWizardStep
+							formCancelAction={!sendOrTopUp &&
+							(isTransactionsPage || (isNftsPage && nonNullish($pageNft)))
+								? 'close'
+								: 'back'}
+							onBack={() =>
+								goToStep(
+									sendOrTopUp ? WizardStepsSend.SEND_OR_TOP_UP : WizardStepsSend.TOKENS_LIST
+								)}
+							onClose={close}
+							onNext={modal.next}
+							onQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
+							bind:destination
+							bind:activeSendDestinationTab
+							bind:selectedContact
+						/>
+					{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
+						<SendQrCodeScan
+							expectedToken={$token}
+							{onDecodeQrCode}
+							onQRCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
+							bind:destination
+							bind:amount
+						/>
+					{/if}
+				{/key}
+			{/if}
+		</WizardModal>
+	</TokenActionContext>
+{/if}

@@ -5,9 +5,10 @@
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
-	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
+	import { isMobileSendDestination, isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft } from '$lib/types/nft';
@@ -34,7 +35,9 @@
 				destination,
 				tokenStandard: $sendTokenStandard
 			}) ||
-			(isNullish(nft) && invalidAmount(amount))
+			(isNullish(nft) && invalidAmount(amount)) ||
+			(MOBILE_SHELL &&
+				(!isMobileSendDestination({ token: $sendToken, destination }) || $isIcMintingAccount))
 	);
 </script>
 

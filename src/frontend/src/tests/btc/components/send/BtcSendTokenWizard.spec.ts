@@ -152,7 +152,10 @@ describe('BtcSendTokenWizard', () => {
 				}
 			]
 		});
-		expect(addPendingTransactionApiSpy).toHaveResolvedWith(pendingBtcTransactionResponse);
+
+		await waitFor(() =>
+			expect(addPendingTransactionApiSpy).toHaveResolvedWith(pendingBtcTransactionResponse)
+		);
 	});
 
 	describe('when the send fails', () => {

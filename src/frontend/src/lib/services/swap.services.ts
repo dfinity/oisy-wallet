@@ -51,6 +51,7 @@ import {
 	NANO_SECONDS_IN_MINUTE,
 	ZERO
 } from '$lib/constants/app.constants';
+import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
 import {
 	ICP_SWAP_POOL_FEE,
@@ -75,11 +76,18 @@ import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { xrpSwapProviders } from '$lib/providers/xrp-swap.providers';
+import type { MobileIcpSwapOperation } from '$lib/schema/mobile-operation.schema';
 import {
 	createActiveUserTransaction,
 	deleteUnbroadcastActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
+import {
+	MobileOperationPendingError,
+	assertMobileOperationSession,
+	finishMobileOperation,
+	saveMobileOperation
+} from '$lib/services/mobile-operation-journal.services';
 import { submitNearIntentsDepositTx } from '$lib/services/near-intents.services';
 import {
 	executeOneSecEvmToIcpBridge,
@@ -132,6 +140,7 @@ import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+import { isMobileSwapPair, isMobileSwapProvider } from '$lib/utils/mobile-swap.utils';
 import {
 	toNearIntentsData,
 	toNearIntentsDisplayRefs,
@@ -474,6 +483,12 @@ export const fetchSwapAmounts = async ({
 	userXrpAddress,
 	onProviderParticipating
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
+	if (
+		MOBILE_SHELL &&
+		(!isMobileSwapPair({ sourceToken, destinationToken }) || !isSourceTokenIcrc2)
+	) {
+		return [];
+	}
 	const sourceAmount = parseToken({
 		value: `${amount}`,
 		unitName: sourceToken.decimals
@@ -597,7 +612,9 @@ const fetchSwapAmountsICP = async ({
 > & {
 	amount: bigint;
 }): Promise<SwapMappedResult[]> => {
-	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
+	const enabledProviders = swapProviders.filter(
+		({ isEnabled, key }) => isEnabled && (!MOBILE_SHELL || isMobileSwapProvider(key))
+	);
 
 	const settledResults = await collectSwapQuotes<
 		SwapAmountsReply | ICPSwapResult | OisyTradeQuote | undefined
@@ -730,8 +747,36 @@ export const fetchIcpSwap = async ({
 	sourceTokenFee,
 	isSourceTokenIcrc2,
 	tryToWithdraw = false,
-	withdrawDestinationTokens = false
+	withdrawDestinationTokens = false,
+	canProceed
 }: SwapParams): Promise<void> => {
+	if (MOBILE_SHELL) {
+		await assertMobileOperationSession(identity);
+		if (
+			!isMobileSwapPair({ sourceToken, destinationToken }) ||
+			!isSourceTokenIcrc2 ||
+			tryToWithdraw ||
+			withdrawDestinationTokens ||
+			!Number.isFinite(Number(swapAmount)) ||
+			Number(swapAmount) <= 0 ||
+			!Number.isFinite(Number(slippageValue)) ||
+			Number(slippageValue) < 0 ||
+			Number(slippageValue) >= 100 ||
+			receiveAmount <= ZERO ||
+			sourceTokenFee < ZERO ||
+			destinationToken.fee < ZERO
+		) {
+			throw new Error(get(i18n).swap.error.unexpected_missing_data);
+		}
+	}
+	const assertActive = async () => {
+		if (MOBILE_SHELL) {
+			await assertMobileOperationSession(identity);
+			if (canProceed && !canProceed()) {
+				throw new Error(get(i18n).swap.error.unexpected_missing_data);
+			}
+		}
+	};
 	progress(ProgressStepsSwap.SWAP);
 
 	const parsedSwapAmount = parseToken({
@@ -794,6 +839,45 @@ export const fetchIcpSwap = async ({
 		});
 	}
 
+	let operation: MobileIcpSwapOperation | undefined;
+	const recordStage = async (stage: MobileIcpSwapOperation['stage']) => {
+		await assertActive();
+		if (operation) {
+			const previous = operation;
+			const next = { ...operation, stage, updatedAt: Date.now() };
+			await saveMobileOperation({ identity, operation: next, expected: previous });
+			operation = next;
+			await assertActive();
+		}
+	};
+	const pending = () => new MobileOperationPendingError(get(i18n).swap.text.mobile_pending);
+	if (MOBILE_SHELL) {
+		await assertActive();
+		const balances = await getUserUnusedBalance({
+			identity,
+			canisterId: poolCanisterId,
+			principal: identity.getPrincipal(),
+			certified: true
+		});
+		if (balances.balance0 !== ZERO || balances.balance1 !== ZERO) {
+			throw new Error(get(i18n).swap.text.mobile_pool_not_empty);
+		}
+		operation = {
+			id: crypto.randomUUID(),
+			kind: 'icpSwap',
+			createdAt: Date.now(),
+			updatedAt: Date.now(),
+			pool: poolCanisterId,
+			source: sourceLedgerCanisterId,
+			destination: destinationLedgerCanisterId,
+			sourceSymbol: sourceToken.symbol,
+			destinationSymbol: destinationToken.symbol,
+			amount: parsedSwapAmount.toString(),
+			stage: 'approval'
+		};
+		await saveMobileOperation({ identity, operation, create: true });
+	}
+
 	try {
 		// ICPSwap is only offered for ICRC-2 sources - `fetchSwapAmounts` drops its quote otherwise -
 		// and this refuses the rest rather than relying on that. The ICRC-1 alternative, a transfer
@@ -814,6 +898,7 @@ export const fetchIcpSwap = async ({
 		});
 
 		if (isApprovalNeeded) {
+			await recordStage('approval');
 			await approve({
 				identity,
 				ledgerCanisterId: sourceLedgerCanisterId,
@@ -825,6 +910,7 @@ export const fetchIcpSwap = async ({
 			});
 		}
 
+		await recordStage('deposit');
 		await depositFrom({
 			identity,
 			canisterId: poolCanisterId,
@@ -833,6 +919,9 @@ export const fetchIcpSwap = async ({
 			fee: sourceTokenFee
 		});
 	} catch (err: unknown) {
+		if (operation) {
+			throw pending();
+		}
 		consoleError(err);
 
 		setFailedProgressStep?.(ProgressStepsSwap.SWAP);
@@ -850,6 +939,7 @@ export const fetchIcpSwap = async ({
 
 	try {
 		// Perform the actual token swap after a successful deposit
+		await recordStage('swap');
 		swappedAmount = await swapIcp({
 			identity,
 			canisterId: poolCanisterId,
@@ -858,6 +948,9 @@ export const fetchIcpSwap = async ({
 			amountOutMinimum: slippageMinimum.toString()
 		});
 	} catch (_: unknown) {
+		if (operation) {
+			throw pending();
+		}
 		setFailedProgressStep?.(ProgressStepsSwap.SWAP);
 		progress(ProgressStepsSwap.WITHDRAW);
 
@@ -887,6 +980,7 @@ export const fetchIcpSwap = async ({
 	try {
 		progress(ProgressStepsSwap.WITHDRAW);
 		// Swap succeeded, now withdraw the destination tokens
+		await recordStage('withdraw');
 		await withdraw({
 			identity,
 			canisterId: poolCanisterId,
@@ -895,6 +989,9 @@ export const fetchIcpSwap = async ({
 			fee: destinationTokenFee
 		});
 	} catch (_: unknown) {
+		if (operation) {
+			throw pending();
+		}
 		try {
 			await withdrawUserUnusedBalance({
 				identity,
@@ -912,6 +1009,14 @@ export const fetchIcpSwap = async ({
 				variant: 'error',
 				swapSucceded: true
 			});
+		}
+	}
+
+	if (operation) {
+		try {
+			await finishMobileOperation({ identity, id: operation.id, expected: operation });
+		} catch {
+			throw pending();
 		}
 	}
 

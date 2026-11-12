@@ -283,6 +283,7 @@ export interface XrpSwapProviderConfig {
 }
 
 export interface SwapParams {
+	canProceed?: () => boolean;
 	identity: Identity;
 	progress: (step: ProgressStepsSwap) => void;
 	sourceToken: IcTokenToggleable;

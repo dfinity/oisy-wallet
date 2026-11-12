@@ -1,9 +1,11 @@
+import { blockingOverlayOpenStore } from '$lib/stores/ui.store';
 import { tick } from 'svelte';
 
 interface OverlayOptions {
 	onClose?: () => void;
 	returnFocus?: HTMLElement;
 	priority?: 'normal' | 'high';
+	nativeDismissible?: boolean;
 }
 
 // Only the topmost overlay handles keys. A dialog opened from a popover can
@@ -22,6 +24,16 @@ const topmostOverlay = (): OverlayEntry | undefined =>
 			topmost?.options.priority === 'high' && entry.options.priority !== 'high' ? topmost : entry,
 		undefined
 	);
+export const isTopmostOverlay = (node: HTMLElement): boolean => topmostOverlay()?.node === node;
+
+// Native gestures use the same topmost callback as Escape, including busy/dirty guards.
+export const requestTopmostOverlayClose = () => {
+	const entry = topmostOverlay();
+	if (entry?.options.nativeDismissible !== false) {
+		entry?.options.onClose?.();
+	}
+};
+
 const focusableSelector = 'button, a[href], input, select, textarea, iframe, [tabindex]';
 // Regions drawn above overlays that must stay reachable while one is open, such as the
 // toasts: a persistent notification can be dismissed without closing the dialog.
@@ -53,6 +65,15 @@ const focusableElements = (node: HTMLElement): HTMLElement[] => {
 	);
 };
 
+// Reparenting a WebView can clear focus. Restore the existing topmost overlay
+// after native presentation, without replacing its trap or return target.
+export const focusTopmostOverlay = () => {
+	const entry = topmostOverlay();
+	if (entry && !entry.node.contains(document.activeElement)) {
+		(focusableElements(entry.node)[0] ?? entry.node).focus({ preventScroll: true });
+	}
+};
+
 const reachableElements = (): HTMLElement[] =>
 	Array.from(document.querySelectorAll<HTMLElement>(reachableSelector)).flatMap(focusableElements);
 
@@ -75,6 +96,7 @@ export const overlayFocus = (node: HTMLElement, options: OverlayOptions = {}) =>
 			: []
 	};
 	overlays.push(entry);
+	blockingOverlayOpenStore.set(true);
 	let mounted = true;
 
 	const isTopmost = () => topmostOverlay() === entry;
@@ -151,6 +173,7 @@ export const overlayFocus = (node: HTMLElement, options: OverlayOptions = {}) =>
 			mounted = false;
 			const wasTopmost = isTopmost();
 			overlays.splice(overlays.indexOf(entry), 1);
+			blockingOverlayOpenStore.set(overlays.length > 0);
 			window.removeEventListener('keydown', onKeyDown);
 			document.removeEventListener('focusin', onFocusIn);
 			const remaining = topmostOverlay()?.node;

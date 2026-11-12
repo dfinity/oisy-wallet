@@ -82,14 +82,19 @@ export class IcWalletBalanceAndTransactionsScheduler<
 		identity,
 		...data
 	}: SchedulerJobData<PostMessageDataRequest>) => {
+		let success = true;
 		await this.queryAndUpdateWithWarmup<GetBalanceAndTransactions<TWithId>>({
 			request: ({ identity: _, certified }) =>
 				this.getBalanceAndTransactions({ ...data, identity, certified }),
 			onLoad: ({ certified, ...rest }) => {
+				if (rest.response.transactionsUnavailable) {
+					success = false;
+				}
 				this.syncTransactions({ jobData: { identity, ...data }, certified, ...rest });
 				this.cleanTransactions({ certified });
 			},
 			onUpdateError: ({ error }) => {
+				success = false;
 				// Mirror the listener-side UI reset; otherwise the next sync only emits deltas and the UI stays empty.
 				this.store = { balance: undefined, transactions: {} };
 				this.initialized = false;
@@ -97,6 +102,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 			},
 			identity
 		});
+		return success;
 	};
 
 	private syncTransactions = ({

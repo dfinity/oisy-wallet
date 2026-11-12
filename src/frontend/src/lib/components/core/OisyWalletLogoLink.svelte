@@ -6,6 +6,8 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
+	let { markOnly = false }: { markOnly?: boolean } = $props();
+
 	const onclick = () => {
 		tokenListStore.set({ filter: '' });
 	};
@@ -18,5 +20,5 @@
 	href={AppPath.Tokens}
 	{onclick}
 >
-	<OisyWalletLogo />
+	<OisyWalletLogo {markOnly} />
 </a>

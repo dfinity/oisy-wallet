@@ -7,12 +7,14 @@ import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
+import * as mobileConstants from '$lib/constants/mobile.constants';
 import { loadAddresses } from '$lib/services/addresses.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
 import * as authServices from '$lib/services/auth.services';
 import { infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
+import { handleMobileRuntimeFailure } from '$lib/services/mobile-runtime.services';
 import { authStore } from '$lib/stores/auth.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { AllowSigningOutcome } from '$lib/types/api';
@@ -25,6 +27,7 @@ import {
 } from '$tests/mocks/user-profile.mock';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
+import { DelegationChain, DelegationIdentity, Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/load-user-profile.services', () => ({
@@ -38,6 +41,10 @@ vi.mock('$lib/services/addresses.services', () => ({
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn(),
 	trackRateLimited: vi.fn()
+}));
+
+vi.mock('$lib/services/mobile-runtime.services', () => ({
+	handleMobileRuntimeFailure: vi.fn(() => Promise.resolve(true))
 }));
 
 describe('loader.services', () => {
@@ -60,6 +67,7 @@ describe('loader.services', () => {
 			apiMock = vi.spyOn(api, 'allowSigning');
 
 			mockAuthStore();
+			authStore.setForTesting(mockIdentity);
 
 			Object.defineProperty(window, 'location', {
 				writable: true,
@@ -78,6 +86,51 @@ describe('loader.services', () => {
 			const result = await initSignerAllowance();
 
 			expect(result.success).toBeTruthy();
+		});
+
+		it('initializes allowance with the original II proof for a mobile child identity', async () => {
+			const root = Ed25519KeyIdentity.generate();
+			const nativeKey = Ed25519KeyIdentity.generate();
+			const webKey = Ed25519KeyIdentity.generate();
+			const iiChain = await DelegationChain.create(
+				root,
+				nativeKey.getPublicKey(),
+				new Date(Date.now() + 600_000)
+			);
+			const nativeIdentity = DelegationIdentity.fromDelegation(nativeKey, iiChain);
+			const webChain = await DelegationChain.create(
+				nativeIdentity,
+				webKey.getPublicKey(),
+				new Date(Date.now() + 300_000),
+				{ previous: iiChain }
+			);
+			const webIdentity = DelegationIdentity.fromDelegation(webKey, webChain);
+			authStore.setForTesting(webIdentity);
+			vi.mocked(allowSigning).mockImplementation(({ iiDelegationChain }) => {
+				// Mirrors the backend's one-link II proof contract; this is not signature validation.
+				if (iiDelegationChain[0]?.delegations.length !== 1) {
+					throw new Error('Expected exactly one II delegation');
+				}
+				return Promise.resolve(mockExecutedOutcome);
+			});
+			const signedOut = vi.spyOn(authServices, 'errorSignOut');
+
+			await expect(initSignerAllowance()).resolves.toEqual({ success: true });
+			expect(signedOut).not.toHaveBeenCalled();
+			expect(apiMock).toHaveBeenCalledWith({
+				identity: webIdentity,
+				iiDelegationChain: [
+					expect.objectContaining({
+						public_key: new Uint8Array(iiChain.publicKey),
+						delegations: [
+							expect.objectContaining({
+								signature: new Uint8Array(iiChain.delegations[0].signature)
+							})
+						]
+					})
+				]
+			});
+			expect(webIdentity.getDelegation().delegations).toHaveLength(2);
 		});
 
 		it('should not track event when not rate limited', async () => {
@@ -325,4 +378,51 @@ describe('loader.services', () => {
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, []);
 		});
 	});
+});
+
+describe('mobile loader startup recovery', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		vi.spyOn(mobileConstants, 'MOBILE_SHELL', 'get').mockReturnValue(true);
+		vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockReturnValue(true);
+		vi.spyOn(authServices, 'signOut').mockResolvedValue();
+		vi.spyOn(authServices, 'errorSignOut').mockResolvedValue();
+		vi.mocked(loadUserProfile).mockResolvedValue({ success: true, profileCreated: false });
+		vi.mocked(loadAddresses).mockResolvedValue({ success: true });
+		vi.spyOn(api, 'allowSigning').mockResolvedValue({
+			response: { status: { Executed: null }, allowed_cycles: 100n }
+		});
+		mockAuthStore(mockIdentity);
+		authStore.setForTesting(mockIdentity);
+	});
+
+	afterEach(() => vi.restoreAllMocks());
+
+	it.each(['profile', 'allowance', 'addresses'])(
+		'keeps native authentication after %s failure',
+		async (stage) => {
+			if (stage === 'profile') {
+				vi.mocked(loadUserProfile).mockResolvedValue({
+					success: false,
+					err: 'unknown',
+					profileCreated: false
+				});
+			} else if (stage === 'allowance') {
+				vi.mocked(api.allowSigning).mockRejectedValue(new Error('Offline'));
+			} else {
+				vi.mocked(loadAddresses).mockResolvedValue({ success: false });
+			}
+			const progressAndLoad = vi.fn();
+			await initLoader({ identity: mockIdentity, progressAndLoad });
+
+			expect(handleMobileRuntimeFailure).toHaveBeenCalledOnce();
+			expect(authServices.signOut).not.toHaveBeenCalled();
+			expect(authServices.errorSignOut).not.toHaveBeenCalled();
+			expect(progressAndLoad).not.toHaveBeenCalled();
+
+			if (stage !== 'addresses') {
+				expect(loadAddresses).not.toHaveBeenCalled();
+			}
+		}
+	);
 });

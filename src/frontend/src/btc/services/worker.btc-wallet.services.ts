@@ -135,4 +135,13 @@ export class BtcWalletWorker extends AppWorker implements WalletWorker {
 			data: this.data
 		});
 	};
+
+	refresh = (signal: AbortSignal) =>
+		this.postMessageAndWait<PostMessage<PostMessageDataRequestBtc>>({
+			message: {
+				msg: 'triggerBtcWalletTimer',
+				data: this.data
+			},
+			signal
+		});
 }

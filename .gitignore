@@ -72,3 +72,14 @@ tmp
 .qodo
 /cycles-ledger.wasm.gz
 /icrc1-ledger.wasm.gz
+
+# Isolated WebKit test fixture bundle
+/build-mobile
+/.svelte-kit-mobile
+
+# Retired native prototype research/evidence stays local; current app lives in mobile/capacitor.
+/mobile/ios-native/docs/
+/docs/ai/spec-driven-development/specs/2026-10-22-feat-ios-native-mvp/evidence/
+
+# Reproducible native SDK sources/binaries; never commit generated artifacts.
+/mobile/capacitor/.native-sdk/

@@ -71,6 +71,7 @@
 
 <WizardModal
 	bind:this={modal}
+	mobilePresentation="sheet"
 	onClose={() => closeModal(() => onClose?.())}
 	{steps}
 	testId={RECEIVE_TOKENS_MODAL}

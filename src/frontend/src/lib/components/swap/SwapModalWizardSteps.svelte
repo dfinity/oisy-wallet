@@ -4,9 +4,11 @@
 	import { get } from 'svelte/store';
 	import { page } from '$app/state';
 	import SwapBtcContexts from '$btc/components/swap/SwapBtcContexts.svelte';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
 	import {
 		crossChainSwapNetworksMainnets,
@@ -131,9 +133,11 @@
 	// pay token reaches (the static cross-swap pre-filter, intersected with the networks that have a
 	// destination the providers supporting the pay token reach). `undefined` for no constraint.
 	const getAllowedNetworkIds = (side: TokenSide): NetworkId[] | undefined =>
-		side === 'source' || isNullish($sourceToken)
-			? undefined
-			: computeDestinationAllowedIds($sourceToken);
+		MOBILE_SHELL
+			? [ICP_NETWORK.id]
+			: side === 'source' || isNullish($sourceToken)
+				? undefined
+				: computeDestinationAllowedIds($sourceToken);
 
 	const applyNetworkConstraints = (side: TokenSide) => {
 		const allowedIds = getAllowedNetworkIds(side);
@@ -226,7 +230,7 @@
 		// (Get Token rebuilds it on every step).
 		const { network, category } = getTokenListFilters(side) ?? getStartFilters(side);
 
-		setFilterNetwork(network);
+		setFilterNetwork(MOBILE_SHELL ? ICP_NETWORK : network);
 
 		setFilterCategoryTag(category);
 	};
@@ -307,34 +311,38 @@
   minute the backend allows for the reserved-outpoint list.
 -->
 <SwapBtcContexts amount={swapAmount} load={isBitcoinSource} networkId={$sourceToken?.network?.id}>
-	{#key currentStep?.name}
-		{#if currentStep?.name === WizardStepsSwap.TOKENS_LIST}
-			<SwapTokensList
-				onCloseTokensList={closeTokenList}
-				onFiltersChange={onTokenListFiltersChange}
-				onSelectToken={selectToken}
-				side={selectTokenType}
-			/>
-		{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
-			<SwapProviderListModal
-				onCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
-				onSelectProvider={selectProvider}
-				{slippageValue}
-			/>
-		{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
-			<SwapTokenWizard
-				{currentStep}
-				onBack={() => modal?.back()}
-				{onClose}
-				onNext={() => modal?.next()}
-				onShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
-				onShowTokensList={showTokensList}
-				bind:swapAmount
-				bind:receiveAmount
-				bind:slippageValue
-				bind:swapProgressStep
-				bind:swapFailedProgressSteps
-			/>
-		{/if}
-	{/key}
+	<!-- Keep the execution owner alive when Review advances to progress. Its teardown cancels
+	     pending requests; remount only when the user leaves the form/review/execution flow. -->
+	{#if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
+		<SwapTokenWizard
+			{currentStep}
+			onBack={() => modal?.back()}
+			{onClose}
+			onNext={() => modal?.next()}
+			onShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
+			onShowTokensList={showTokensList}
+			bind:swapAmount
+			bind:receiveAmount
+			bind:slippageValue
+			bind:swapProgressStep
+			bind:swapFailedProgressSteps
+		/>
+	{:else}
+		{#key currentStep?.name}
+			{#if currentStep?.name === WizardStepsSwap.TOKENS_LIST}
+				<SwapTokensList
+					onCloseTokensList={closeTokenList}
+					onFiltersChange={onTokenListFiltersChange}
+					onSelectToken={selectToken}
+					side={selectTokenType}
+				/>
+			{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
+				<SwapProviderListModal
+					onCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
+					onSelectProvider={selectProvider}
+					{slippageValue}
+				/>
+			{/if}
+		{/key}
+	{/if}
 </SwapBtcContexts>

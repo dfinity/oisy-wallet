@@ -12,6 +12,7 @@ const hoisted = vi.hoisted(() => {
 		start: ReturnType<typeof vi.fn>;
 		stop: ReturnType<typeof vi.fn>;
 		trigger: ReturnType<typeof vi.fn>;
+		refresh: ReturnType<typeof vi.fn>;
 	}[] = [];
 
 	return { schedulerInstances };
@@ -22,6 +23,7 @@ vi.mock('$icp/schedulers/ic-wallet-balance-and-transactions.scheduler', () => ({
 		start = vi.fn();
 		stop = vi.fn();
 		trigger = vi.fn();
+		refresh = vi.fn();
 
 		constructor() {
 			hoisted.schedulerInstances.push(this);
@@ -84,6 +86,17 @@ describe('icp-wallet.worker', () => {
 
 			expect(hoisted.schedulerInstances).toHaveLength(1);
 			expect(hoisted.schedulerInstances[0].trigger).toHaveBeenCalledExactlyOnceWith(data);
+		});
+
+		it('waits for the scheduler refresh when a correlation ID is supplied', async () => {
+			const data = icpData('ledger-manual-refresh');
+			await onIcpWalletMessage(
+				new MessageEvent('message', {
+					data: { msg: 'triggerIcpWalletTimer', data, requestId: crypto.randomUUID() }
+				})
+			);
+
+			expect(hoisted.schedulerInstances[0].refresh).toHaveBeenCalledExactlyOnceWith(data);
 		});
 
 		it('should trigger the scheduler already started for the Ledger canister', async () => {

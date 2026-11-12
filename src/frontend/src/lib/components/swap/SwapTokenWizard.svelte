@@ -5,6 +5,7 @@
 	import SwapEthWizard from '$eth/components/swap/SwapEthWizard.svelte';
 	import SwapIcpWizard from '$icp/components/swap/SwapIcpWizard.svelte';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
 	import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
@@ -52,7 +53,7 @@
 	let isSwapAmountsLoading = $state(false);
 	let manualPause = $state(false);
 
-	let enableAmountUpdates = $derived(!isNetworkIdICP($sourceToken?.network?.id));
+	let enableAmountUpdates = $derived(MOBILE_SHELL || !isNetworkIdICP($sourceToken?.network?.id));
 
 	let isBitcoinSource = $derived(isNetworkIdBitcoin($sourceToken?.network?.id));
 

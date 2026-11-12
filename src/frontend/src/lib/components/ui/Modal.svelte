@@ -2,8 +2,12 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { get } from 'svelte/store';
+	import IconBack from '$lib/components/icons/IconBack.svelte';
 	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
+	import { MOBILE_SHELL } from '$lib/constants/mobile.constants';
+	import { mobilePageSwipe } from '$lib/services/mobile-page-swipe.services';
+	import { nativeSheet } from '$lib/services/mobile-sheet.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ModalProps } from '$lib/types/modal';
@@ -14,6 +18,9 @@
 
 	let {
 		visible = true,
+		mobilePresentation = 'sheet',
+		mobileSwipeBack = false,
+		showCloseButton = true,
 		role = 'dialog',
 		testId,
 		disablePointerEvents = false,
@@ -31,6 +38,7 @@
 	}: ModalProps = $props();
 
 	let showHeader = $derived(nonNullish(title));
+	let pagePresentation = $derived(MOBILE_SHELL && mobilePresentation === 'fullScreen');
 
 	let showHeaderLeft = $derived(nonNullish(headerLeft));
 
@@ -62,27 +70,52 @@
 		aria-label={showHeader ? undefined : ariaLabel}
 		aria-labelledby={showHeader ? modalTitleId : undefined}
 		aria-modal="true"
+		data-dismissible={nonNullish(onClose) && showCloseButton && !disablePointerEvents}
+		data-mobile-presentation={mobilePresentation}
 		data-tid={testId}
 		onclick={stopPropagation(onClick)}
 		onintroend={onIntroEnd}
 		role={role === 'alert' ? 'alertdialog' : role}
 		in:fade|global={{ duration: 25 }}
 	>
-		<Backdrop
-			disablePointerEvents={disablePointerEvents || !closeOnBackdropClick}
-			onClose={closeOnBackdropClick ? () => onClose?.() : undefined}
-		/>
+		{#if !pagePresentation}
+			<Backdrop
+				disablePointerEvents={disablePointerEvents || !closeOnBackdropClick}
+				onClose={closeOnBackdropClick ? () => onClose?.() : undefined}
+			/>
+		{/if}
 		<div
 			class={`wrapper ${role} outline-none`}
 			tabindex="-1"
-			use:overlayFocus={{ onClose: closeWithKeyboard }}
+			use:mobilePageSwipe={pagePresentation && mobileSwipeBack
+				? {
+						enabled: showCloseButton && !disablePointerEvents && nonNullish(onClose),
+						onBack: closeWithKeyboard
+					}
+				: undefined}
+			use:nativeSheet={{
+				enabled: role === 'dialog' && mobilePresentation === 'sheet',
+				size: 'large'
+			}}
+			use:overlayFocus={{
+				onClose: closeWithKeyboard,
+				nativeDismissible: showCloseButton && !disablePointerEvents
+			}}
 			in:fade|global={{ duration: FADE_IN_DURATION, easing: cubicOut }}
 			out:fade|global={{ duration: FADE_OUT_DURATION, easing: cubicIn }}
 		>
 			{#if showHeader}
 				<div class="header">
-					{#if showHeaderLeft}
+					{#if showHeaderLeft || (pagePresentation && showCloseButton && !disablePointerEvents)}
 						<div class="header-left">
+							{#if pagePresentation && showCloseButton && !disablePointerEvents}
+								<button
+									class="hit-area relative press-icon"
+									aria-label={$i18n.core.text.back}
+									data-tid="close-modal"
+									onclick={stopPropagation(closeWithKeyboard)}><IconBack /></button
+								>
+							{/if}
 							{@render headerLeft?.()}
 						</div>
 					{/if}
@@ -94,7 +127,7 @@
 					<div class="header-right">
 						{@render headerRight?.()}
 
-						{#if !disablePointerEvents}
+						{#if !pagePresentation && !disablePointerEvents && showCloseButton}
 							<!-- Flush against the header actions, so its tap area only grows up and down
 							     when one is actually rendered before it. Not keyed on the headerRight
 							     snippet: a snippet can render nothing (Notes shows Save only in its

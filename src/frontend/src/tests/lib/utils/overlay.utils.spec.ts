@@ -1,5 +1,7 @@
+import { blockingOverlayOpenStore } from '$lib/stores/ui.store';
 import { overlayFocus } from '$lib/utils/overlay.utils';
 import { tick } from 'svelte';
+import { get } from 'svelte/store';
 
 const mountOverlay = () => {
 	const node = document.createElement('div');
@@ -11,6 +13,26 @@ const mountOverlay = () => {
 };
 
 describe('overlayFocus', () => {
+	it('keeps native navigation blocked until every nested overlay has unmounted', () => {
+		const outer = mountOverlay();
+		const inner = mountOverlay();
+		const first = overlayFocus(outer);
+		const second = overlayFocus(inner);
+
+		expect(get(blockingOverlayOpenStore)).toBeTruthy();
+
+		first.destroy();
+
+		expect(get(blockingOverlayOpenStore)).toBeTruthy();
+
+		second.destroy();
+
+		expect(get(blockingOverlayOpenStore)).toBeFalsy();
+
+		outer.remove();
+		inner.remove();
+	});
+
 	it('focuses the first available control, wraps Tab, and restores the trigger', async () => {
 		const trigger = document.createElement('button');
 		document.body.append(trigger);
