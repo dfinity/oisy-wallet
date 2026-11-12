@@ -921,6 +921,56 @@ describe('icrc.services', () => {
 			).toStrictEqual([mockLedgerCanisterId]);
 		});
 
+		it('should keep what a newer certified round saved about a token when an older one loads it after', async () => {
+			// The older round read the saved tokens before the user turned the token on.
+			const olderRound = nextIcrcCustomTokensRound();
+
+			ledgerCanisterMock.metadata.mockResolvedValue(tokenMetadata);
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [{ ...customToken, enabled: false }],
+				icrcRound: olderRound
+			});
+
+			expect(get(icrcCustomTokensStore)?.map(({ data: { enabled } }) => enabled)).toStrictEqual([
+				true
+			]);
+		});
+
+		it('should not put a token the certified round could not load back into the token list when the query round loads it after', async () => {
+			const queryRound = nextIcrcCustomTokensRound();
+
+			ledgerCanisterMock.metadata
+				.mockRejectedValueOnce(new Error('test'))
+				.mockResolvedValue(tokenMetadata);
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: false,
+				tokens: [customToken],
+				icrcRound: queryRound
+			});
+
+			expect(get(icrcCustomTokensStore)).toStrictEqual([]);
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+		});
+
 		it('should keep a token deleted while its round is running out of the token list', async () => {
 			const queryAnswer = Promise.withResolvers<IcrcTokenMetadataResponse>();
 

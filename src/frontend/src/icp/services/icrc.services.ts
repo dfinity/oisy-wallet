@@ -286,6 +286,10 @@ const loadCustomIcrcTokensData = async ({
 		icrcUnavailableCustomTokensStore.set(unavailableTokens);
 	}
 
+	// A certified round that started later already wrote what it found: an older round, query or
+	// certified, must not undo it, neither by dropping a token nor by writing its own token data over it.
+	const outdated = round < unavailableTokensCertifiedRound;
+
 	return results.reduce<IcrcCustomToken[]>((acc, result, index) => {
 		if (result.status !== 'fulfilled') {
 			trackEvent({
@@ -297,9 +301,7 @@ const loadCustomIcrcTokensData = async ({
 				}
 			});
 
-			// A certified round that started later already wrote what it found, maybe that the token
-			// loads: an older round, query or certified, must not undo it.
-			if (round < unavailableTokensCertifiedRound) {
+			if (outdated) {
 				return acc;
 			}
 
@@ -332,6 +334,10 @@ const loadCustomIcrcTokensData = async ({
 				}
 			}
 
+			return acc;
+		}
+
+		if (outdated) {
 			return acc;
 		}
 
