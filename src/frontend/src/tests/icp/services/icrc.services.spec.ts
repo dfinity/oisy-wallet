@@ -769,7 +769,15 @@ describe('icrc.services', () => {
 			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
 		});
 
-		it('should let a round that starts after a certified round replace its unavailable tokens', async () => {
+		it('should not list a token on a query answer alone', async () => {
+			ledgerCanisterMock.metadata.mockRejectedValue(new Error('test'));
+
+			await processCustomTokens({ identity: mockIdentity, certified: false, tokens: [customToken] });
+
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([]);
+		});
+
+		it('should not drop a listed token on a query answer that comes later', async () => {
 			ledgerCanisterMock.metadata
 				.mockRejectedValueOnce(new Error('test'))
 				.mockResolvedValue(tokenMetadata);
@@ -783,6 +791,20 @@ describe('icrc.services', () => {
 				certified: false,
 				tokens: [customToken]
 			});
+
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+		});
+
+		it('should let a certified round that starts later replace the unavailable tokens', async () => {
+			ledgerCanisterMock.metadata
+				.mockRejectedValueOnce(new Error('test'))
+				.mockResolvedValue(tokenMetadata);
+
+			await processCustomTokens({ identity: mockIdentity, certified: true, tokens: [customToken] });
+
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+
+			await processCustomTokens({ identity: mockIdentity, certified: true, tokens: [customToken] });
 
 			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([]);
 		});

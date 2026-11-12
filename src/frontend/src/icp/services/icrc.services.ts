@@ -139,7 +139,7 @@ const loadIcrcCustomTokens = async ({
 	tokens,
 	useCache = false
 }: LoadCustomTokenParams): Promise<IcrcCustomToken[]> => {
-	// Taken before the saved tokens are fetched, so the query round of a load always comes first.
+	// Taken before the saved tokens are fetched, so the number tells when the round started.
 	const round = ++customTokensRound;
 
 	const customTokens =
@@ -273,12 +273,10 @@ const loadCustomIcrcTokensData = async ({
 		[]
 	);
 
-	// A query round can finish after the certified round of its load, and a round of an older load
-	// after a newer one: neither may replace what a certified round that started later has written.
-	if (round > unavailableTokensCertifiedRound) {
-		if (certified) {
-			unavailableTokensCertifiedRound = round;
-		}
+	// Only a certified answer may offer a token for deletion: a query answer only shows the tokens
+	// sooner. A certified round of an older load can finish after a newer one and must not replace it.
+	if (certified && round > unavailableTokensCertifiedRound) {
+		unavailableTokensCertifiedRound = round;
 
 		icrcUnavailableCustomTokensStore.set(unavailableTokens);
 	}
