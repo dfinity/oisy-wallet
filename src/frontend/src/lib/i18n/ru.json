@@ -1097,6 +1097,7 @@
 			"minimum_ckbtc_amount": "Сумма ниже минимального значения в $amount ckBTC, необходимого для конвертации в BTC.",
 			"minimum_cketh_amount": "Сумма ниже минимальной суммы вывода в $amount $symbol.",
 			"minimum_amount": "Сумма ниже минимальной суммы вывода в $amount $symbol.",
+			"minimum_deposit_amount": "",
 			"minimum_ledger_fees": "Сумма ниже комиссий реестра $symbol.",
 			"minimum_cketh_balance": "Баланс $symbol ниже оценочной комиссии в $amount.",
 			"unknown_cketh": "Токен ckETH не может быть получен.",
@@ -1491,7 +1492,12 @@
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
-			"lifi_route_unverified": ""
+			"lifi_route_unverified": "",
+			"cksol_deposit_in_progress": "",
+			"cksol_deposit_terms_changed": "",
+			"cksol_earlier_deposit_quarantined": "",
+			"cksol_minter_unavailable": "",
+			"cksol_deposit_quarantined": ""
 		}
 	},
 	"buy": {
@@ -1828,6 +1834,8 @@
 			"convert_fee": "Комиссия за обмен",
 			"convert_inter_network_fee": "Межсетевая комиссия",
 			"convert_btc_network_fee": "Комиссия сети Bitcoin",
+			"cksol_sweep_fee": "",
+			"cksol_deposit_address_rent": "",
 			"zero_fee": "Бесплатно",
 			"total_fee": "Общая комиссия",
 			"ata_fee": "Комиссия ATA",
