@@ -1097,6 +1097,7 @@
 			"minimum_ckbtc_amount": "Số lượng dưới mức tối thiểu $amount ckBTC cần thiết để chuyển đổi sang BTC.",
 			"minimum_cketh_amount": "Số lượng dưới mức rút tối thiểu là $amount $symbol.",
 			"minimum_amount": "Số lượng dưới mức rút tối thiểu là $amount $symbol.",
+			"minimum_deposit_amount": "",
 			"minimum_ledger_fees": "Số tiền dưới mức phí sổ cái $symbol.",
 			"minimum_cketh_balance": "Số dư $symbol dưới mức phí ước tính là $amount.",
 			"unknown_cketh": "Không thể truy xuất token ckETH.",
@@ -1491,7 +1492,12 @@
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
-			"lifi_route_unverified": ""
+			"lifi_route_unverified": "",
+			"cksol_deposit_in_progress": "",
+			"cksol_deposit_terms_changed": "",
+			"cksol_earlier_deposit_quarantined": "",
+			"cksol_minter_unavailable": "",
+			"cksol_deposit_quarantined": ""
 		}
 	},
 	"buy": {
@@ -1828,6 +1834,8 @@
 			"convert_fee": "Phí chuyển đổi",
 			"convert_inter_network_fee": "Phí chuyển đổi liên mạng",
 			"convert_btc_network_fee": "Phí mạng Bitcoin",
+			"cksol_sweep_fee": "",
+			"cksol_deposit_address_rent": "",
 			"zero_fee": "Miễn phí",
 			"total_fee": "Tổng phí",
 			"ata_fee": "Phí ATA",

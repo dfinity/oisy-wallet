@@ -1097,6 +1097,7 @@
 			"minimum_ckbtc_amount": "金額がBTCへの変換に必要な最低額、$amount ckBTCを下回っています。",
 			"minimum_cketh_amount": "金額が$amount $symbolの最小引き出し金額を下回っています。",
 			"minimum_amount": "金額が$amount $symbolの最小引き出し金額を下回っています。",
+			"minimum_deposit_amount": "",
 			"minimum_ledger_fees": "金額が台帳手数料$symbolを下回っています。",
 			"minimum_cketh_balance": "$symbol残高が推定手数料$amountを下回っています。",
 			"unknown_cketh": "ckETHトークンは取得できません。",
@@ -1491,7 +1492,12 @@
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
-			"lifi_route_unverified": ""
+			"lifi_route_unverified": "",
+			"cksol_deposit_in_progress": "",
+			"cksol_deposit_terms_changed": "",
+			"cksol_earlier_deposit_quarantined": "",
+			"cksol_minter_unavailable": "",
+			"cksol_deposit_quarantined": ""
 		}
 	},
 	"buy": {
@@ -1828,6 +1834,8 @@
 			"convert_fee": "変換手数料",
 			"convert_inter_network_fee": "変換ネットワーク間手数料",
 			"convert_btc_network_fee": "Bitcoinネットワーク手数料",
+			"cksol_sweep_fee": "",
+			"cksol_deposit_address_rent": "",
 			"zero_fee": "無料",
 			"total_fee": "合計手数料",
 			"ata_fee": "ATA手数料",

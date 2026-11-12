@@ -44,7 +44,8 @@ vi.mock('$lib/services/chain-fusion-swap.services', () => ({
 	// The provider registries import these; the Smart Swap provider pool loads them with SwapProvider.
 	fetchChainFusionBtcQuote: vi.fn(),
 	fetchChainFusionEvmQuote: vi.fn(),
-	fetchChainFusionIcpQuote: vi.fn()
+	fetchChainFusionIcpQuote: vi.fn(),
+	fetchChainFusionSolQuote: vi.fn()
 }));
 
 // `handleBtcValidationError` is left real: the point of these cases is that the mapping

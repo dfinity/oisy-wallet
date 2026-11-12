@@ -1097,6 +1097,7 @@
 			"minimum_ckbtc_amount": "The amount falls below the minimum of $amount ckBTC required for converting to BTC.",
 			"minimum_cketh_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
 			"minimum_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
+			"minimum_deposit_amount": "The amount falls below the minimum deposit amount of $amount $symbol.",
 			"minimum_ledger_fees": "The amount falls below the ledger fees $symbol.",
 			"minimum_cketh_balance": "The $symbol balance falls below the estimated fee of $amount.",
 			"unknown_cketh": "The ckETH token cannot be retrieved.",
@@ -1491,7 +1492,12 @@
 			"oisy_trade_recovery_failed": "OISY Trade did not accept the order, and your funds could not be returned to your wallet automatically. Please check your balances in the Trading tab to withdraw them.",
 			"lifi_status_unknown": "LI.FI could not report the outcome of this swap. Please check your destination wallet.",
 			"lifi_fee_changed": "The network fee for this swap rose since you reviewed it. Please check the new maximum fee and confirm the swap again.",
-			"lifi_route_unverified": "This LI.FI route goes through an exchange $oisy_short can't verify yet, so it can't be confirmed. Please choose another provider."
+			"lifi_route_unverified": "This LI.FI route goes through an exchange $oisy_short can't verify yet, so it can't be confirmed. Please choose another provider.",
+			"cksol_deposit_in_progress": "A conversion from SOL to ckSOL is already in progress. You can start a new one once it has finished.",
+			"cksol_deposit_terms_changed": "The ckSOL minter changed its terms since this offer. No SOL was sent. Please check the new offer.",
+			"cksol_earlier_deposit_quarantined": "The ckSOL minter stopped processing an earlier deposit of yours and takes no new one until it is resolved. No SOL was sent.",
+			"cksol_minter_unavailable": "The ckSOL minter can't take a deposit right now. No SOL was sent. Please try again later.",
+			"cksol_deposit_quarantined": "The ckSOL minter stopped processing this deposit. It holds the SOL until a minter upgrade resolves the deposit."
 		}
 	},
 	"buy": {
@@ -1828,6 +1834,8 @@
 			"convert_fee": "Conversion fee",
 			"convert_inter_network_fee": "Inter-network fee",
 			"convert_btc_network_fee": "Bitcoin network fee",
+			"cksol_sweep_fee": "Minter's Solana fee",
+			"cksol_deposit_address_rent": "Deposit address rent",
 			"zero_fee": "Free",
 			"total_fee": "Total fee",
 			"ata_fee": "ATA fee",
