@@ -459,6 +459,73 @@ describe('backend.canister', () => {
 		});
 	});
 
+	describe('btc_get_balance', () => {
+		const params = { ...btcGetPendingTransactionParams, minConfirmations: 1 };
+
+		it('should return the balance, asked with the confirmation floor and delegation chain', async () => {
+			service.btc_get_balance.mockResolvedValue({ Ok: { balance: 12_345n } });
+
+			const { btcGetBalance } = await createBackendCanister({ serviceOverride: service });
+
+			await expect(btcGetBalance(params)).resolves.toBe(12_345n);
+
+			expect(service.btc_get_balance).toHaveBeenCalledExactlyOnceWith({
+				...btcGetPendingTransactionEndpointParams,
+				min_confirmations: [1]
+			});
+		});
+
+		it('should leave the confirmation floor to the Bitcoin canister when none is given', async () => {
+			service.btc_get_balance.mockResolvedValue({ Ok: { balance: ZERO } });
+
+			const { btcGetBalance } = await createBackendCanister({ serviceOverride: service });
+
+			await btcGetBalance(btcGetPendingTransactionParams);
+
+			expect(service.btc_get_balance).toHaveBeenCalledExactlyOnceWith({
+				...btcGetPendingTransactionEndpointParams,
+				min_confirmations: []
+			});
+		});
+
+		// A balance that could not be read is not a balance of zero.
+		it('should throw on a rate limit', async () => {
+			service.btc_get_balance.mockResolvedValue({
+				Err: {
+					RateLimited: { max_calls: 20, window_ns: 60_000_000_000n, caller: mockPrincipal }
+				}
+			});
+
+			const { btcGetBalance } = await createBackendCanister({ serviceOverride: service });
+
+			await expect(btcGetBalance(params)).rejects.toThrow(
+				new CanisterInternalError(
+					'Rate limit exceeded. Maximum of 20 calls allowed every 60 seconds.'
+				)
+			);
+		});
+
+		it('should throw when the Bitcoin canister does not answer', async () => {
+			service.btc_get_balance.mockResolvedValue({
+				Err: { BalanceUnavailable: { msg: 'canister rejected' } }
+			});
+
+			const { btcGetBalance } = await createBackendCanister({ serviceOverride: service });
+
+			await expect(btcGetBalance(params)).rejects.toThrow(
+				new CanisterInternalError('Bitcoin balance unavailable: canister rejected')
+			);
+		});
+
+		it('should throw if btc_get_balance throws', async () => {
+			service.btc_get_balance.mockRejectedValue(mockResponseError);
+
+			const { btcGetBalance } = await createBackendCanister({ serviceOverride: service });
+
+			await expect(btcGetBalance(params)).rejects.toThrow(mockResponseError);
+		});
+	});
+
 	describe('btc_get_pending_transactions', () => {
 		it('should return pending btc transactions with success response', async () => {
 			const response = {
