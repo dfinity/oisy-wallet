@@ -4,19 +4,26 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_MAINNET_NETWORKS } from '$env/networks/networks.sol.env';
 import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 import SwapContexts from '$lib/components/swap/SwapContexts.svelte';
+import { balancesStore } from '$lib/stores/balances.store';
 import {
 	MODAL_NETWORKS_LIST_CONTEXT_KEY,
 	type ModalNetworksListContext
 } from '$lib/stores/modal-networks-list.store';
-import { MODAL_TOKENS_LIST_CONTEXT_KEY } from '$lib/stores/modal-tokens-list.store';
+import * as modalTokensListStoreModule from '$lib/stores/modal-tokens-list.store';
+import {
+	MODAL_TOKENS_LIST_CONTEXT_KEY,
+	type ModalTokensListContext
+} from '$lib/stores/modal-tokens-list.store';
 import * as swapAmountsStoreModule from '$lib/stores/swap-amounts.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
 import * as swapStoreModule from '$lib/stores/swap.store';
 import { initSwapContext, SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 import { SwapProvider } from '$lib/types/swap';
+import { bn2Bi } from '$tests/mocks/balances.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcrcToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
@@ -104,6 +111,43 @@ describe('SwapContexts', () => {
 					resetFilters: expect.any(Function)
 				})
 			);
+		});
+
+		it('should leave the order of the tokens to the token list', () => {
+			const initModalTokensListContext = vi.spyOn(
+				modalTokensListStoreModule,
+				'initModalTokensListContext'
+			);
+
+			render(SwapContexts, { children: mockSnippet });
+
+			expect(initModalTokensListContext).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ sortByBalance: false })
+			);
+		});
+
+		// Closing Swap resets the list's filters, while the contexts stay for the next opening.
+		it('should leave the order of the tokens to the token list after its filters are reset', () => {
+			render(SwapContexts, { children: mockSnippet });
+
+			const call = (setContext as ReturnType<typeof vi.fn>).mock.calls.find(
+				([key]) => key === MODAL_TOKENS_LIST_CONTEXT_KEY
+			);
+			const { setTokens, resetFilters, filteredTokens } = call?.[1] as ModalTokensListContext;
+
+			// The balance sort would put ICP, which has a balance, first.
+			balancesStore.set({ id: ICP_TOKEN.id, data: { data: bn2Bi, certified: true } });
+
+			setTokens([mockValidErc20Token, ICP_TOKEN]);
+
+			resetFilters();
+
+			expect(get(filteredTokens).map(({ id }) => id)).toEqual([
+				mockValidErc20Token.id,
+				ICP_TOKEN.id
+			]);
+
+			balancesStore.reset(ICP_TOKEN.id);
 		});
 
 		it('should initialize modal networks list context', () => {
