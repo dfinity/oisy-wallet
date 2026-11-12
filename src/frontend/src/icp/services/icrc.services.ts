@@ -82,10 +82,16 @@ export const loadCustomTokens = ({
 }: Omit<LoadCustomTokenParams, 'certified'> & {
 	onSuccess?: () => void;
 }): Promise<void> =>
-	queryAndUpdate<IcrcCustomToken[]>({
-		request: (params) =>
-			loadIcrcCustomTokens({ ...params, useCache, round: nextIcrcCustomTokensRound() }),
-		onLoad: (params) => loadIcrcCustomData({ ...params, onSuccess }),
+	queryAndUpdate<{ tokens: IcrcCustomToken[]; round: number }>({
+		request: async (params) => {
+			const round = nextIcrcCustomTokensRound();
+
+			const tokens = await loadIcrcCustomTokens({ ...params, useCache, round });
+
+			return { tokens, round };
+		},
+		onLoad: ({ response: { tokens, round }, certified }) =>
+			loadIcrcCustomData({ response: tokens, certified, round, onSuccess }),
 		onUpdateError: onCustomTokensUpdateError,
 		identity
 	});
@@ -287,7 +293,8 @@ const loadCustomIcrcTokensData = async ({
 	}
 
 	// A certified round that started later already wrote what it found: an older round, query or
-	// certified, must not undo it, neither by dropping a token nor by writing its own token data over it.
+	// certified, must not undo it by dropping a token. `loadIcrcCustomData` checks the same right
+	// before it writes the loaded tokens.
 	const outdated = round < unavailableTokensCertifiedRound;
 
 	return results.reduce<IcrcCustomToken[]>((acc, result, index) => {
@@ -337,10 +344,6 @@ const loadCustomIcrcTokensData = async ({
 			return acc;
 		}
 
-		if (outdated) {
-			return acc;
-		}
-
 		const { value } = result;
 
 		return [...acc, ...(nonNullish(value) ? [value] : [])];
@@ -350,13 +353,21 @@ const loadCustomIcrcTokensData = async ({
 const loadIcrcCustomData = ({
 	response: tokens,
 	certified,
+	round,
 	onSuccess
 }: {
 	certified: boolean;
 	response: IcrcCustomToken[];
+	round: number;
 	onSuccess?: () => void;
 }) => {
 	onSuccess?.();
+
+	// Checked here, right before the write: a certified round that started later can finish while
+	// this round hands its tokens over, and this round must not write its own token data over it.
+	if (round < unavailableTokensCertifiedRound) {
+		return;
+	}
 
 	// A round that read the saved tokens before a delete would otherwise put the deleted token back.
 	icrcCustomTokensStore.setAll(
@@ -392,7 +403,7 @@ export const processCustomTokens = async ({
 	try {
 		const response = await loadIcrcCustomTokens({ ...params, round: icrcRound });
 
-		loadIcrcCustomData({ response, certified: params.certified });
+		loadIcrcCustomData({ response, certified: params.certified, round: icrcRound });
 	} catch (err) {
 		if (params.certified) {
 			onCustomTokensUpdateError({ error: err });
