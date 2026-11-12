@@ -204,8 +204,8 @@ export const needsOnramperIdLookup = (tokens: Token[]): boolean =>
  * built-in one.
  *
  * The list wins, so that a built-in id that OnRamper no longer uses cannot hide the token. The
- * built-in id covers what the list cannot match: native coins, which have no address, tokens the
- * list has without an address or under more than one id, and a list that is late or failed.
+ * built-in id covers what is not matched: native coins, which OISY holds without an address, tokens
+ * the list has without an address or under more than one id, and a list that is late or failed.
  *
  * @param params - The parameters.
  * @param params.token - The token.

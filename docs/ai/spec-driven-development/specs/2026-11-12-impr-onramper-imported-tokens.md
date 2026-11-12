@@ -48,7 +48,8 @@ The live Buy list, saved by Stefan with our key on 2026-11-12:
 - Size: 444 KB, 91 KB gzipped.
 - `address` is the contract address on EVM networks, mostly in lowercase (71 of 1,161 are not),
   and the mint address on Solana (USDC: `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`). Native
-  coins on EVM networks carry a placeholder (`0x0000…0000` for ETH and BNB).
+  coins carry a placeholder: `0x0000…0000` for ETH and BNB, `0x…1010` for POL, and `So111…111` for
+  SOL, one character off the wrapped SOL mint. BTC has none.
 - On ICP the list has ICP only, without an address. It has no ICRC token.
 - 133 tokens on OISY's networks have no address (e.g. `usdt_arbitrum`, `paxg_ethereum`), so they
   can't be matched.
@@ -80,7 +81,8 @@ The live Sell list, saved the same day:
    letter case, and the mint address on Solana, exactly.
 5. An address listed under more than one id takes none of them.
 6. The id from the list wins over a built-in one. A built-in id is the fallback: for a token the
-   list has no single entry for, such as a native coin, and while the list is missing.
+   list has no single entry for, and while the list is missing. Native coins always use their
+   built-in id: OISY holds them without an address, so they are not looked up.
 7. ICRC tokens are not looked up: OnRamper lists none.
 
 ### What Buy and Sell get
@@ -162,9 +164,12 @@ Agreed with Stefan on 2026-11-12:
 
 - **The id from the list wins; a built-in id is the fallback.** Against the live Buy list, 24 of the
   30 curated ERC-20 and SPL ids are what the list gives anyway, and 4 are not in it at all (cbBTC,
-  EURC and WBTC on Solana, OCT on Ethereum). The fallback still covers native coins, which have no
-  address, USDT on Arbitrum, which the list has without an address, wrapped SOL, which OISY maps to
-  SOL, and a list that is late or fails. This replaces "built-in ids win", agreed first.
+  EURC and WBTC on Solana, OCT on Ethereum). The fallback still covers USDT on Arbitrum, which the
+  list has without an address, wrapped SOL, which OISY maps to SOL, and a list that is late or
+  fails. This replaces "built-in ids win", agreed first.
+- **Native coins keep their built-in id.** OISY holds them without an address. Looking them up
+  would need a hand-kept placeholder address per network instead (`0x0000…0000`, `0x…1010` for POL,
+  `So111…111` for SOL), and BTC and ICP have no address in the list at all.
 - **ICRC tokens are not looked up, and SPL tokens match by mint.** On ICP, OnRamper lists ICP only,
   and its Solana addresses are mints.
 - **An address under two ids gets neither.** Offering the wrong one would buy or sell another token
