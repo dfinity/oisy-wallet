@@ -220,12 +220,13 @@ mod tests {
 
     #[test]
     fn clears_token_activity_keyed_in_candid_once() {
-        // Builds `STATE` first, as `post_upgrade` does before the clearing runs.
-        read_state(|s| assert_eq!(s.token_activity.len(), 0));
         let mut candid_map = stored_token_activity();
         candid_map.insert(encode_one(erc20(1)).unwrap(), 1);
         candid_map.insert(encode_one(erc20(2)).unwrap(), 1);
         assert_eq!(stored_token_activity().len(), 2);
+
+        // Builds `STATE` with the Candid keys already stored, as `post_upgrade` does.
+        read_state(|s| assert_eq!(s.token_activity.len(), 2));
 
         clear_stores_with_candid_token_id_keys();
 
