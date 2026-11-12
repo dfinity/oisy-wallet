@@ -10,10 +10,15 @@ use shared::types::delegation::IIDelegationChain;
 
 use crate::state::read_config;
 
-/// The most callers whose passed check [`require_ii_delegation`] keeps at once. Sessions last an
+/// The most callers whose passed checks [`require_ii_delegation`] keeps at once. Sessions last an
 /// hour, so a full cache first drops the expired entries, and starts over if that frees nothing:
 /// the only cost is that the next checks pay their full price again.
 const MAX_VERIFIED_CHAINS: usize = 100_000;
+
+/// The most chains kept per caller. A user signed in on several devices or browsers at once has
+/// one principal but a chain per session; with fewer slots than live sessions, their reads would
+/// evict each other's chain and every one would pay the full check.
+const MAX_VERIFIED_CHAINS_PER_CALLER: usize = 4;
 
 /// A chain that passed [`verify_ii_delegation_chain`] for a caller.
 struct VerifiedChain {
@@ -24,14 +29,15 @@ struct VerifiedChain {
 }
 
 thread_local! {
-    /// The chain each caller last passed [`require_ii_delegation`] with. Verifying Internet
-    /// Identity's canister signature costs about 1.15B cycles, far more than the calls it guards:
-    /// a `btc_get_balance` costs the backend about 54M, and the wallet reads it every 30 seconds. A
-    /// session sends the same chain on every call, so it pays for the signature once.
+    /// The chains each caller passed [`require_ii_delegation`] with, up to
+    /// [`MAX_VERIFIED_CHAINS_PER_CALLER`]. Verifying Internet Identity's canister signature costs
+    /// about 1.15B cycles, far more than the calls it guards: a `btc_get_balance` costs the backend
+    /// about 54M, and the wallet reads it every 30 seconds. A session sends the same chain on every
+    /// call, so it pays for the signature once.
     ///
     /// Heap rather than stable memory on purpose: the II config only changes at install or
     /// upgrade, which clear it, and a cleared cache only costs each caller one check again.
-    static VERIFIED_CHAINS: RefCell<BTreeMap<Principal, VerifiedChain>> =
+    static VERIFIED_CHAINS: RefCell<BTreeMap<Principal, Vec<VerifiedChain>>> =
         const { RefCell::new(BTreeMap::new()) };
 }
 
@@ -70,9 +76,9 @@ pub(crate) fn read_ii_verification_config() -> (Vec<Principal>, Vec<u8>, bool) {
 /// [`verify_ii_delegation_chain`].
 ///
 /// A chain that passed is remembered for its caller until it expires
-/// (`VERIFIED_CHAINS`), so the same caller sending the exact same chain again
-/// skips the signature check. Any other chain, or the same one past its
-/// expiration, is verified in full.
+/// (`VERIFIED_CHAINS`, a few chains per caller), so the same caller sending the
+/// exact same chain again skips the signature check. Any other chain, or the
+/// same one past its expiration, is verified in full.
 pub fn require_ii_delegation(
     chain: Option<&IIDelegationChain>,
     caller_is_controller: bool,
@@ -128,29 +134,46 @@ fn verified_chain_digest(
 
 fn is_verified(caller: Principal, digest: &[u8; 32], now_ns: u64) -> bool {
     VERIFIED_CHAINS.with_borrow(|chains| {
-        chains
-            .get(&caller)
-            .is_some_and(|verified| verified.digest == *digest && verified.expiration_ns >= now_ns)
+        chains.get(&caller).is_some_and(|verified| {
+            verified
+                .iter()
+                .any(|chain| chain.digest == *digest && chain.expiration_ns >= now_ns)
+        })
     })
 }
 
 fn remember_verified(caller: Principal, digest: [u8; 32], expiration_ns: u64, now_ns: u64) {
     VERIFIED_CHAINS.with_borrow_mut(|chains| {
         if chains.len() >= MAX_VERIFIED_CHAINS && !chains.contains_key(&caller) {
-            chains.retain(|_, verified| verified.expiration_ns >= now_ns);
+            chains.retain(|_, verified| {
+                verified.retain(|chain| chain.expiration_ns >= now_ns);
+                !verified.is_empty()
+            });
 
             if chains.len() >= MAX_VERIFIED_CHAINS {
                 chains.clear();
             }
         }
 
-        chains.insert(
-            caller,
-            VerifiedChain {
-                digest,
-                expiration_ns,
-            },
-        );
+        let verified = chains.entry(caller).or_default();
+
+        verified.retain(|chain| chain.expiration_ns >= now_ns && chain.digest != digest);
+
+        if verified.len() >= MAX_VERIFIED_CHAINS_PER_CALLER {
+            if let Some(first_to_expire) = verified
+                .iter()
+                .enumerate()
+                .min_by_key(|(_, chain)| chain.expiration_ns)
+                .map(|(i, _)| i)
+            {
+                verified.swap_remove(first_to_expire);
+            }
+        }
+
+        verified.push(VerifiedChain {
+            digest,
+            expiration_ns,
+        });
     });
 }
 
@@ -240,7 +263,8 @@ mod tests {
 
     use super::{
         is_verified, remember_verified, require_ii_delegation, verified_chain_digest,
-        verify_ii_delegation_chain, MAX_VERIFIED_CHAINS, VERIFIED_CHAINS,
+        verify_ii_delegation_chain, MAX_VERIFIED_CHAINS, MAX_VERIFIED_CHAINS_PER_CALLER,
+        VERIFIED_CHAINS,
     };
 
     const FAR_FUTURE_NS: u64 = 9_999_999_999_000_000_000;
@@ -350,14 +374,37 @@ mod tests {
     }
 
     #[test]
-    fn test_cache_keeps_one_chain_per_caller() {
+    fn test_cache_keeps_a_few_chains_per_caller() {
         let caller = Principal::self_authenticating(b"caller");
+        let kept = || VERIFIED_CHAINS.with_borrow(|chains| chains.get(&caller).map_or(0, Vec::len));
 
-        remember_verified(caller, [1; 32], FAR_FUTURE_NS, 0);
-        remember_verified(caller, [2; 32], FAR_FUTURE_NS, 0);
+        // A session per device, each expiring at a different time.
+        for (digest, expiration_ns) in [(1, 400), (2, 100), (3, 300), (4, 200)] {
+            remember_verified(caller, [digest; 32], expiration_ns, 0);
+        }
 
-        assert!(!is_verified(caller, &[1; 32], 0));
-        assert!(is_verified(caller, &[2; 32], 0));
+        assert_eq!(kept(), MAX_VERIFIED_CHAINS_PER_CALLER);
+        for digest in 1..=4 {
+            assert!(is_verified(caller, &[digest; 32], 0));
+        }
+
+        // One more drops the chain that expires first.
+        remember_verified(caller, [5; 32], 500, 0);
+
+        assert_eq!(kept(), MAX_VERIFIED_CHAINS_PER_CALLER);
+        assert!(!is_verified(caller, &[2; 32], 0));
+        for digest in [1, 3, 4, 5] {
+            assert!(is_verified(caller, &[digest; 32], 0));
+        }
+
+        // The expired ones go when another chain passes, and a chain is never kept twice.
+        remember_verified(caller, [6; 32], 600, 350);
+        remember_verified(caller, [6; 32], 600, 350);
+
+        assert_eq!(kept(), 3);
+        for digest in [1, 5, 6] {
+            assert!(is_verified(caller, &[digest; 32], 350));
+        }
         assert_eq!(
             VERIFIED_CHAINS.with_borrow(std::collections::BTreeMap::len),
             1
@@ -394,7 +441,7 @@ mod tests {
         );
         assert!(is_verified(next, &[0; 32], 20));
 
-        // A caller already in a full cache only replaces its own entry.
+        // A caller already in a full cache only adds to its own entry.
         for i in 0..MAX_VERIFIED_CHAINS - 1 {
             remember_verified(caller(i), [0; 32], FAR_FUTURE_NS, 20);
         }
@@ -404,6 +451,7 @@ mod tests {
             VERIFIED_CHAINS.with_borrow(std::collections::BTreeMap::len),
             MAX_VERIFIED_CHAINS
         );
+        assert!(is_verified(next, &[0; 32], 20));
         assert!(is_verified(next, &[3; 32], 20));
     }
 

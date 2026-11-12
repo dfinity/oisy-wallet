@@ -1033,6 +1033,51 @@ fn test_get_balance_checks_a_sessions_chain_once() {
     );
 }
 
+/// A user signed in on two devices has one principal but a chain per session. Both stay
+/// remembered, so reads that alternate between the sessions skip the check too.
+#[test]
+fn test_get_balance_checks_each_of_a_users_sessions_once() {
+    let (pic_setup, ii) = setup_with_ii();
+
+    let (user_number, device_principal) = ii.register_identity(b"two-sessions-device-key");
+    let session = |session_pubkey: &[u8]| {
+        ii.get_delegation_chain(
+            user_number,
+            device_principal,
+            session_pubkey,
+            "https://oisy.com",
+            None,
+        )
+    };
+    let laptop = session(b"two-sessions-laptop-key");
+    let phone = session(b"two-sessions-phone-key");
+
+    let caller = Principal::self_authenticating(&laptop.public_key);
+    assert_eq!(caller, Principal::self_authenticating(&phone.public_key));
+    assert_ne!(laptop, phone);
+    pic_setup.ensure_user_profile(caller);
+
+    let cycles_spent = |chain: &shared::types::delegation::IIDelegationChain| {
+        let before = pic_setup.pic.cycle_balance(pic_setup.canister_id);
+        call_btc_get_balance(&pic_setup, caller, Some(chain.clone()))
+            .expect("Call failed")
+            .expect("Request was not successful");
+        before - pic_setup.pic.cycle_balance(pic_setup.canister_id)
+    };
+
+    // Each session's first read checks its chain.
+    cycles_spent(&laptop);
+    cycles_spent(&phone);
+
+    for (i, chain) in [&laptop, &phone, &laptop, &phone].into_iter().enumerate() {
+        let spent = cycles_spent(chain);
+        assert!(
+            spent < 100_000_000,
+            "read {i} alternating between the sessions skips the check: {spent}"
+        );
+    }
+}
+
 #[test]
 fn test_get_balance_checks_a_changed_or_expired_chain_again() {
     let (pic_setup, ii) = setup_with_ii();

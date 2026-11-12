@@ -1193,10 +1193,12 @@ Every PR is safe on its own.
       for.
     - **Delegation check, paid once per session:** verifying the chain's canister signature costs
       about 1.15B cycles, so checked on every read it made a read cost about 1.19B, 10 times the
-      `btc_caller_balance` it replaces. `require_ii_delegation` now remembers the chain each caller
-      last passed with, by a SHA-256 of the chain and the II config, until the delegation expires.
+      `btc_caller_balance` it replaces. `require_ii_delegation` now remembers the chains each caller
+      passed with, by a SHA-256 of the chain and the II config, until the delegation expires.
       The same caller sending the same chain skips the signature; any other chain is checked in
-      full. The cache is on the heap, holds at most 100 000 callers, and an upgrade clears it. Every
+      full. It keeps up to 4 chains per caller, one per live session, so a user signed in on two
+      devices does not make every read pay the full check; a fifth drops the one that expires
+      first. The cache is on the heap, holds at most 100 000 callers, and an upgrade clears it. Every
       endpoint that checks the chain benefits, `allow_signing` included, so the read after sign-in
       usually finds the chain already checked.
     - **Rate limit:** 20 calls per caller per minute. The wallet reads the balance every 30 seconds,
