@@ -4,8 +4,9 @@ use serde_bytes::ByteBuf;
 use super::{
     bitcoin::{
         BtcAddPendingTransactionError, BtcBroadcastTransactionError,
-        BtcBroadcastTransactionResponse, BtcGetPendingTransactionsError,
-        BtcGetPendingTransactionsReponse, BtcGetSpendableUtxosError, BtcGetSpendableUtxosResponse,
+        BtcBroadcastTransactionResponse, BtcGetBalanceError, BtcGetBalanceResponse,
+        BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
+        BtcGetSpendableUtxosError, BtcGetSpendableUtxosResponse,
     },
     dapp::AddDappSettingsError,
     notification::AddDismissedNotificationError,
@@ -277,6 +278,22 @@ impl From<Result<BtcGetSpendableUtxosResponse, BtcGetSpendableUtxosError>>
         match result {
             Ok(response) => BtcGetSpendableUtxosResult::Ok(response),
             Err(err) => BtcGetSpendableUtxosResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcGetBalanceResult {
+    /// The balance was retrieved successfully.
+    Ok(BtcGetBalanceResponse),
+    /// The balance was not retrieved due to an error.
+    Err(BtcGetBalanceError),
+}
+impl From<Result<BtcGetBalanceResponse, BtcGetBalanceError>> for BtcGetBalanceResult {
+    fn from(result: Result<BtcGetBalanceResponse, BtcGetBalanceError>) -> Self {
+        match result {
+            Ok(response) => BtcGetBalanceResult::Ok(response),
+            Err(err) => BtcGetBalanceResult::Err(err),
         }
     }
 }
