@@ -349,6 +349,56 @@ describe('icrc.services', () => {
 					expect.any(Object)
 				);
 			});
+
+			it('should tell onSuccess when a certified round that started later has already written', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+
+				const tokenMetadata: IcrcTokenMetadataResponse = [
+					['icrc1:name', { Text: mockName }],
+					['icrc1:symbol', { Text: mockSymbol }],
+					['icrc1:decimals', { Nat: mockDecimals }],
+					['icrc1:fee', { Nat: mockFee }]
+				];
+
+				// The reload after an edit waits for its ledger.
+				const editAnswer = Promise.withResolvers<IcrcTokenMetadataResponse>();
+
+				ledgerCanisterMock.metadata.mockReturnValue(editAnswer.promise);
+
+				// Like the token modal: removes the token so that the round's write restarts its worker.
+				const onSuccess = vi.fn(({ outdated }: { outdated: boolean }) => {
+					if (!outdated) {
+						icrcCustomTokensStore.resetByIdentifier(mockLedgerCanisterId);
+					}
+				});
+
+				const edit = loadCustomTokens({ identity: mockIdentity, onSuccess });
+
+				await vi.waitFor(() => expect(ledgerCanisterMock.metadata).toHaveBeenCalledTimes(2));
+
+				// A load that starts later finishes first.
+				ledgerCanisterMock.metadata.mockResolvedValue(tokenMetadata);
+
+				await processCustomTokens({
+					identity: mockIdentity,
+					certified: true,
+					tokens: [mockCustomToken],
+					icrcRound: nextIcrcCustomTokensRound()
+				});
+
+				editAnswer.resolve(tokenMetadata);
+
+				await edit;
+
+				// query + update
+				await vi.waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(2));
+
+				expect(onSuccess).toHaveBeenNthCalledWith(1, { outdated: true });
+				expect(onSuccess).toHaveBeenNthCalledWith(2, { outdated: true });
+				expect(
+					get(icrcCustomTokensStore)?.map(({ data: { ledgerCanisterId } }) => ledgerCanisterId)
+				).toStrictEqual([mockLedgerCanisterId]);
+			});
 		});
 
 		describe('error', () => {

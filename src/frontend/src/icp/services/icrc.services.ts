@@ -80,7 +80,7 @@ export const loadCustomTokens = ({
 	useCache = false,
 	onSuccess
 }: Omit<LoadCustomTokenParams, 'certified'> & {
-	onSuccess?: () => void;
+	onSuccess?: (params: { outdated: boolean }) => void;
 }): Promise<void> =>
 	queryAndUpdate<{ tokens: IcrcCustomToken[]; round: number }>({
 		request: async (params) => {
@@ -359,13 +359,17 @@ const loadIcrcCustomData = ({
 	certified: boolean;
 	response: IcrcCustomToken[];
 	round: number;
-	onSuccess?: () => void;
+	onSuccess?: (params: { outdated: boolean }) => void;
 }) => {
-	onSuccess?.();
-
 	// Checked here, right before the write: a certified round that started later can finish while
 	// this round hands its tokens over, and this round must not write its own token data over it.
-	if (round < unavailableTokensCertifiedRound) {
+	const outdated = round < unavailableTokensCertifiedRound;
+
+	// The callback learns whether this round writes the tokens, so that it doesn't remove a token
+	// that no write puts back.
+	onSuccess?.({ outdated });
+
+	if (outdated) {
 		return;
 	}
 

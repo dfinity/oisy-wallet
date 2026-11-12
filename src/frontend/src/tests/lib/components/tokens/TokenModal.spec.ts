@@ -225,6 +225,57 @@ describe('TokenModal', () => {
 		expect(loadCustomTokens).toHaveBeenCalledOnce();
 	});
 
+	describe('when the reload after an edit finishes', () => {
+		const token: IcrcCustomToken = { ...mockIcToken, enabled: true };
+
+		const editIndexCanister = async ({ outdated }: { outdated: boolean }) => {
+			icrcCustomTokensStore.resetAll();
+			icrcCustomTokensStore.setAll([{ data: token, certified: true }]);
+
+			vi.mocked(loadCustomTokens).mockImplementation(({ onSuccess }) => {
+				onSuccess?.({ outdated });
+
+				return Promise.resolve();
+			});
+
+			const { getByTestId, getByText } = render(TokenModal, {
+				props: {
+					token,
+					isEditable: true
+				}
+			});
+
+			mockSetCustomToken();
+			mockIcAddCustomTokensService();
+			mockAuthStore();
+			const toasts = mockToastsShow();
+
+			await fireEvent.click(getByText(en.tokens.details.missing_index_canister_id_button));
+
+			await fireEvent.input(getByTestId(TOKEN_MODAL_INDEX_CANISTER_ID_INPUT), {
+				target: { value: MOCK_CANISTER_ID_1 }
+			});
+
+			await fireEvent.click(getByTestId(TOKEN_MODAL_SAVE_BUTTON));
+
+			await waitFor(() => expect(toasts).toHaveBeenCalledOnce());
+		};
+
+		it('resets the edited ICRC token so that the write restarts its worker', async () => {
+			await editIndexCanister({ outdated: false });
+
+			expect(get(icrcCustomTokensStore)).toEqual([]);
+		});
+
+		it('keeps the edited ICRC token when the round is outdated and writes nothing', async () => {
+			await editIndexCanister({ outdated: true });
+
+			expect(
+				get(icrcCustomTokensStore)?.map(({ data: { ledgerCanisterId } }) => ledgerCanisterId)
+			).toStrictEqual([token.ledgerCanisterId]);
+		});
+	});
+
 	it('saves token after all required steps if indexCanisterId was present', async () => {
 		const { getByTestId, getByText } = render(TokenModal, {
 			props: {

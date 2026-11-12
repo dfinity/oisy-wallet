@@ -392,7 +392,7 @@
 				// Similar as on token "save", we reload all custom tokens for simplicity reason.
 				await loadCustomTokens({
 					identity: $authIdentity,
-					onSuccess: () => {
+					onSuccess: ({ outdated }) => {
 						if (!loading) {
 							return;
 						}
@@ -401,8 +401,11 @@
 						progress(ProgressStepsAddToken.DONE);
 						close();
 
-						// the token needs to be reset to restart the worker with indexCanisterId
-						icrcCustomTokensStore.resetByIdentifier(tokenToEdit.ledgerCanisterId);
+						// the token needs to be reset to restart the worker with indexCanisterId; an outdated
+						// round doesn't write the tokens back, so the token would go missing
+						if (!outdated) {
+							icrcCustomTokensStore.resetByIdentifier(tokenToEdit.ledgerCanisterId);
+						}
 
 						trackEvent({
 							name: TRACK_EDIT_TOKEN_SUCCESS,
