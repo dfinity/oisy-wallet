@@ -919,6 +919,10 @@ On local and staging builds, every BTC flow loads the outputs it can spend from 
 
 If the backend cannot answer, the flow reports that pending transactions are unavailable and offers no send, as it already does when only the pending transactions fail to load. Beta and production load as before.
 
+### BTC balance from the backend (local and staging)
+
+On local and staging builds, the wallet's certified BTC balance is read through the backend, which pays the Bitcoin canister itself. It used to come from the Chain Fusion Signer, which the backend paid too, but against the allowance it grants each user for signing at sign-in, so every read used up part of what the user could sign. A balance the backend cannot read is treated as a failed read, never as a balance of zero. Beta and production read it as before.
+
 ### Sending through the backend (local and staging)
 
 On local and staging builds, every BTC send OISY broadcasts itself builds and signs the transaction in OISY, then has the backend broadcast it. That covers Send, Convert, the AI assistant's BTC send, the BTC swaps (Chain Fusion and NEAR Intents), and Liquidium supply and repayment. The backend reserves the inputs in the same step, so no send can pick them up in the meantime. A send there spends at most 38 inputs, the most whose signing a login's approval always covers, and the amount offered as Max stays within that. A wallet spread over more outputs needs more than one send to move everything.

@@ -1,3 +1,4 @@
+import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import { BtcWalletScheduler } from '$btc/schedulers/btc-wallet.scheduler';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
@@ -10,11 +11,14 @@ import * as blockchainRest from '$lib/rest/blockchain.rest';
 import * as blockstreamRest from '$lib/rest/blockstream.rest';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
+import { mapCkBtcBitcoinNetworkToBackendBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockBtcTransaction } from '$tests/mocks/blockchain-transactions.mock';
 import { mockBlockchainResponse } from '$tests/mocks/blockchain.mock';
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIIDelegationChain, mockIIDelegationIdentity } from '$tests/mocks/ii-delegation.mock';
 import type { TestUtil } from '$tests/types/utils';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { jsonReplacer, queryAndUpdate, type QueryAndUpdateParams } from '@dfinity/utils';
 import { BitcoinCanister, type BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import { waitFor } from '@testing-library/svelte';
@@ -423,6 +427,48 @@ describe('btc-wallet.worker', () => {
 
 		afterEach(() => {
 			scheduler.stop();
+		});
+
+		it('should read the certified balance from the Chain Fusion Signer with the flag off', async () => {
+			const spyGetBackendBalance = vi.spyOn(backendApi, 'getBtcBalance');
+
+			await scheduler.start(startData);
+
+			await awaitJobExecution();
+
+			expect(signerCanisterMock.getBtcBalance).toHaveBeenCalled();
+			expect(spyGetBackendBalance).not.toHaveBeenCalled();
+		});
+
+		// The backend pays the Bitcoin canister from its own cycles. It paid for `btc_caller_balance` too,
+		// but against the approval it grants each user for signing.
+		it('should read the certified balance through the backend with BTC_SEND_VIA_BACKEND_ENABLED', async () => {
+			btcSendViaBackend.enabled = true;
+
+			// An Internet Identity session, as in production: the backend turns away a caller that is
+			// not a controller unless the chain comes along.
+			vi.mocked(AuthClientProvider.getInstance().loadIdentity).mockResolvedValue(
+				mockIIDelegationIdentity
+			);
+
+			const spyGetBackendBalance = vi
+				.spyOn(backendApi, 'getBtcBalance')
+				.mockResolvedValue(mockBalance);
+
+			await scheduler.start(startData);
+
+			await awaitJobExecution();
+
+			expect(spyGetBackendBalance).toHaveBeenCalledWith({
+				identity: mockIIDelegationIdentity,
+				network: mapCkBtcBitcoinNetworkToBackendBitcoinNetwork(startData.bitcoinNetwork),
+				minConfirmations: BTC_BALANCE_MIN_CONFIRMATIONS,
+				iiDelegationChain: mockIIDelegationChain
+			});
+			expect(signerCanisterMock.getBtcBalance).not.toHaveBeenCalled();
+			expect(postMessageMock).toHaveBeenCalledWith(
+				mockPostMessage({ certified: true, withTransactions: true, ref })
+			);
 		});
 
 		it('should keep fetching the provider transactions on update-only syncs', async () => {

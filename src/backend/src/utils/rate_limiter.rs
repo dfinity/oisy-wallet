@@ -54,6 +54,14 @@ thread_local! {
     pub(crate) static BTC_GET_SPENDABLE_UTXOS_RATE_LIMITER: RateLimiter =
         RateLimiter::new(15, 60 * 1_000_000_000);
 
+    /// Rate-limits `btc_get_balance`: max 20 calls per caller per minute. The wallet reads the
+    /// balance every 30 seconds for each Bitcoin network it shows, in each open tab. Each call
+    /// costs the backend's own cycles: about 54M with a delegation chain it has already checked
+    /// (`bitcoin_get_balance` is about 10M of that on mainnet), and about 1.19B with a new one,
+    /// whose signature check costs about 1.15B.
+    pub(crate) static BTC_GET_BALANCE_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(20, 60 * 1_000_000_000);
+
     /// Rate-limits `sign_onramper_widget_url`: max 30 calls per caller per minute. The widget
     /// re-signs on reactive input changes, so the limit is generous for legitimate use while still
     /// bounding abuse of the endpoint as a signing oracle for the shared `OnRamper` secret.
