@@ -28,20 +28,8 @@ describe('onramper.rest', () => {
 		address: null
 	};
 
-	const mockResponse = ({
-		body,
-		ok = true,
-		status = 200
-	}: {
-		body: unknown;
-		ok?: boolean;
-		status?: number;
-	}) =>
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok,
-			status,
-			json: () => Promise.resolve(body)
-		} as unknown as Response);
+	const mockResponse = ({ body, status = 200 }: { body: unknown; status?: number }) =>
+		vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify(body), { status }));
 
 	beforeEach(() => {
 		vi.resetAllMocks();
@@ -96,7 +84,7 @@ describe('onramper.rest', () => {
 		});
 
 		it('throws when the request fails', async () => {
-			mockResponse({ body: { message: 'Forbidden' }, ok: false, status: 403 });
+			mockResponse({ body: { message: 'Forbidden' }, status: 403 });
 
 			await expect(fetchOnramperSupportedCryptos({ type: 'buy' })).rejects.toThrow(
 				'Fetching the OnRamper buy list failed with status 403.'
