@@ -982,3 +982,90 @@ fn test_btc_get_balance_rate_limited_after_exceeding_limit() {
         other => panic!("expected BtcGetBalanceError::RateLimited, got {other:?}"),
     }
 }
+
+/// Registers an Internet Identity user with a profile, and returns their principal with a session
+/// chain for it.
+fn ii_session(
+    pic_setup: &crate::utils::pocketic::PicBackend,
+    ii: &crate::utils::ii::IICanister,
+    name: &str,
+) -> (Principal, shared::types::delegation::IIDelegationChain) {
+    let (user_number, device_principal) =
+        ii.register_identity(format!("{name}-device-key").as_bytes());
+    let chain = ii.get_delegation_chain(
+        user_number,
+        device_principal,
+        format!("{name}-session-key").as_bytes(),
+        "https://oisy.com",
+        None,
+    );
+    let caller = Principal::self_authenticating(&chain.public_key);
+    pic_setup.ensure_user_profile(caller);
+    (caller, chain)
+}
+
+/// Verifying Internet Identity's canister signature costs about 1.15B cycles, against about 44M
+/// for the rest of a balance read, and the wallet reads the balance every 30 seconds. The backend
+/// checks a session's chain once and remembers it until it expires.
+#[test]
+fn test_get_balance_checks_a_sessions_chain_once() {
+    let (pic_setup, ii) = setup_with_ii();
+    let (caller, chain) = ii_session(&pic_setup, &ii, "balance-once");
+
+    let cycles_spent = || {
+        let before = pic_setup.pic.cycle_balance(pic_setup.canister_id);
+        call_btc_get_balance(&pic_setup, caller, Some(chain.clone()))
+            .expect("Call failed")
+            .expect("Request was not successful");
+        before - pic_setup.pic.cycle_balance(pic_setup.canister_id)
+    };
+
+    let first = cycles_spent();
+    let second = cycles_spent();
+
+    assert!(
+        first > 1_000_000_000,
+        "the first read checks the signature: {first}"
+    );
+    assert!(
+        second < 100_000_000,
+        "a later read with the same chain skips it: {second}"
+    );
+}
+
+#[test]
+fn test_get_balance_checks_a_changed_or_expired_chain_again() {
+    let (pic_setup, ii) = setup_with_ii();
+    let (caller, chain) = ii_session(&pic_setup, &ii, "balance-again");
+
+    call_btc_get_balance(&pic_setup, caller, Some(chain.clone()))
+        .expect("Call failed")
+        .expect("Request was not successful");
+
+    let mut other_signature = chain.clone();
+    other_signature.delegations[0].signature[0] ^= 1;
+    let response =
+        call_btc_get_balance(&pic_setup, caller, Some(other_signature)).expect("Call failed");
+    assert!(
+        matches!(
+            response,
+            Err(BtcGetBalanceError::InvalidDelegationChain { .. })
+        ),
+        "a changed chain is checked again: {response:?}"
+    );
+
+    let expiration_ns = chain.delegations[0].delegation.expiration;
+    let now_ns = pic_setup.pic.get_time().as_nanos_since_unix_epoch();
+    pic_setup
+        .pic
+        .advance_time(Duration::from_nanos(expiration_ns - now_ns + 1));
+
+    let response = call_btc_get_balance(&pic_setup, caller, Some(chain)).expect("Call failed");
+    assert!(
+        matches!(
+            response,
+            Err(BtcGetBalanceError::InvalidDelegationChain { .. })
+        ),
+        "an expired chain is refused though it passed before: {response:?}"
+    );
+}

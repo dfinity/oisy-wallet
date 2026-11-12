@@ -55,8 +55,10 @@ thread_local! {
         RateLimiter::new(15, 60 * 1_000_000_000);
 
     /// Rate-limits `btc_get_balance`: max 20 calls per caller per minute. The wallet reads the
-    /// balance every 30 seconds for each Bitcoin network it shows, in each open tab, and each call
-    /// pays a `bitcoin_get_balance` from the backend's own cycles (10M on mainnet).
+    /// balance every 30 seconds for each Bitcoin network it shows, in each open tab. Each call
+    /// costs the backend's own cycles: about 54M with a delegation chain it has already checked
+    /// (`bitcoin_get_balance` is about 10M of that on mainnet), and about 1.19B with a new one,
+    /// whose signature check costs about 1.15B.
     pub(crate) static BTC_GET_BALANCE_RATE_LIMITER: RateLimiter =
         RateLimiter::new(20, 60 * 1_000_000_000);
 

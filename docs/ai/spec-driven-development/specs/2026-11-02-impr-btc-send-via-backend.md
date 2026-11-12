@@ -1161,9 +1161,21 @@ Every PR is safe on its own.
     - **`btc_get_balance`** takes the network, `min_confirmations` and the delegation chain. It is an
       update call, so the answer is certified, for registered users with a valid II delegation
       chain. The backend derives the caller's P2WPKH address and pays `bitcoin_get_balance` itself
-      (100M attached on mainnet, about 10M charged).
+      (100M attached on mainnet, about 10M charged). A read costs the backend about 54M in all,
+      the chain's ingress bytes included (measured in PocketIC), once the delegation check is paid
+      for.
+    - **Delegation check, paid once per session:** verifying the chain's canister signature costs
+      about 1.15B cycles, so checked on every read it made a read cost about 1.19B, 10 times the
+      `btc_caller_balance` it replaces. `require_ii_delegation` now remembers the chain each caller
+      last passed with, by a SHA-256 of the chain and the II config, until the delegation expires.
+      The same caller sending the same chain skips the signature; any other chain is checked in
+      full. The cache is on the heap, holds at most 100 000 callers, and an upgrade clears it. Every
+      endpoint that checks the chain benefits, `allow_signing` included, so the read after sign-in
+      usually finds the chain already checked.
     - **Rate limit:** 20 calls per caller per minute. The wallet reads the balance every 30 seconds,
-      for each Bitcoin network it shows, in each open tab.
+      for each Bitcoin network it shows, in each open tab. With its session's chain, one caller can
+      make the backend spend about 1.1B cycles a minute; one that brings a new chain on every call,
+      about 24B.
     - **Errors:** `InternalError` when the address cannot be derived, and `BalanceUnavailable` when
       the Bitcoin canister does not answer. The two are kept apart for a second reason too: with
       the same three variants as `BtcGetPendingTransactionsError` and `BtcGetSpendableUtxosError`,

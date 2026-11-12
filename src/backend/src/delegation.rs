@@ -1,11 +1,39 @@
+use std::{cell::RefCell, collections::BTreeMap};
+
 use candid::Principal;
 use ic_canister_sig_creation::{
     delegation_signature_msg, CanisterSigPublicKey, DELEGATION_SIG_DOMAIN,
 };
 use ic_signature_verification::verify_canister_sig;
+use sha2::{Digest, Sha256};
 use shared::types::delegation::IIDelegationChain;
 
 use crate::state::read_config;
+
+/// The most callers whose passed check [`require_ii_delegation`] keeps at once. Sessions last an
+/// hour, so a full cache first drops the expired entries, and starts over if that frees nothing:
+/// the only cost is that the next checks pay their full price again.
+const MAX_VERIFIED_CHAINS: usize = 100_000;
+
+/// A chain that passed [`verify_ii_delegation_chain`] for a caller.
+struct VerifiedChain {
+    /// [`verified_chain_digest`] of the chain and the II config it passed against.
+    digest: [u8; 32],
+    /// The delegation's expiration, after which the chain no longer passes.
+    expiration_ns: u64,
+}
+
+thread_local! {
+    /// The chain each caller last passed [`require_ii_delegation`] with. Verifying Internet
+    /// Identity's canister signature costs about 1.15B cycles, far more than the calls it guards:
+    /// a `btc_get_balance` costs the backend about 54M, and the wallet reads it every 30 seconds. A
+    /// session sends the same chain on every call, so it pays for the signature once.
+    ///
+    /// Heap rather than stable memory on purpose: the II config only changes at install or
+    /// upgrade, which clear it, and a cleared cache only costs each caller one check again.
+    static VERIFIED_CHAINS: RefCell<BTreeMap<Principal, VerifiedChain>> =
+        const { RefCell::new(BTreeMap::new()) };
+}
 
 /// Reads the II verification parameters (known II canister IDs, IC root key,
 /// and whether the delegation guard is enabled) from the backend configuration.
@@ -40,6 +68,11 @@ pub(crate) fn read_ii_verification_config() -> (Vec<Principal>, Vec<u8>, bool) {
 /// of whether a chain is provided.  For all other callers the chain must be
 /// present and pass full cryptographic verification via
 /// [`verify_ii_delegation_chain`].
+///
+/// A chain that passed is remembered for its caller until it expires
+/// (`VERIFIED_CHAINS`), so the same caller sending the exact same chain again
+/// skips the signature check. Any other chain, or the same one past its
+/// expiration, is verified in full.
 pub fn require_ii_delegation(
     chain: Option<&IIDelegationChain>,
     caller_is_controller: bool,
@@ -59,13 +92,66 @@ pub fn require_ii_delegation(
 
     let chain = chain.ok_or_else(|| "II delegation chain is required".to_string())?;
 
+    let digest = verified_chain_digest(chain, known_ii_canister_ids, ic_root_key_raw);
+
+    if digest.is_some_and(|digest| is_verified(caller, &digest, now_ns)) {
+        return Ok(());
+    }
+
     verify_ii_delegation_chain(
         chain,
         caller,
         known_ii_canister_ids,
         ic_root_key_raw,
         now_ns,
-    )
+    )?;
+
+    // A chain that passed holds exactly one delegation.
+    if let (Some(digest), [signed]) = (digest, chain.delegations.as_slice()) {
+        remember_verified(caller, digest, signed.delegation.expiration, now_ns);
+    }
+
+    Ok(())
+}
+
+/// SHA-256 over everything the check depends on besides the caller and the time: the whole chain,
+/// signature included, and the II config it is checked against. `None` if it cannot be encoded,
+/// in which case the chain is verified in full.
+fn verified_chain_digest(
+    chain: &IIDelegationChain,
+    known_ii_canister_ids: &[Principal],
+    ic_root_key_raw: &[u8],
+) -> Option<[u8; 32]> {
+    let bytes = candid::encode_args((chain, known_ii_canister_ids, ic_root_key_raw)).ok()?;
+    Some(Sha256::digest(bytes).into())
+}
+
+fn is_verified(caller: Principal, digest: &[u8; 32], now_ns: u64) -> bool {
+    VERIFIED_CHAINS.with_borrow(|chains| {
+        chains
+            .get(&caller)
+            .is_some_and(|verified| verified.digest == *digest && verified.expiration_ns >= now_ns)
+    })
+}
+
+fn remember_verified(caller: Principal, digest: [u8; 32], expiration_ns: u64, now_ns: u64) {
+    VERIFIED_CHAINS.with_borrow_mut(|chains| {
+        if chains.len() >= MAX_VERIFIED_CHAINS && !chains.contains_key(&caller) {
+            chains.retain(|_, verified| verified.expiration_ns >= now_ns);
+
+            if chains.len() >= MAX_VERIFIED_CHAINS {
+                chains.clear();
+            }
+        }
+
+        chains.insert(
+            caller,
+            VerifiedChain {
+                digest,
+                expiration_ns,
+            },
+        );
+    });
 }
 
 /// Verifies the provided II delegation chain against the caller's principal.
@@ -152,7 +238,10 @@ mod tests {
     use ic_canister_sig_creation::CanisterSigPublicKey;
     use shared::types::delegation::{Delegation, IIDelegationChain, SignedDelegation};
 
-    use super::{require_ii_delegation, verify_ii_delegation_chain};
+    use super::{
+        is_verified, remember_verified, require_ii_delegation, verified_chain_digest,
+        verify_ii_delegation_chain, MAX_VERIFIED_CHAINS, VERIFIED_CHAINS,
+    };
 
     const FAR_FUTURE_NS: u64 = 9_999_999_999_000_000_000;
 
@@ -216,6 +305,106 @@ mod tests {
     fn test_require_non_controller_missing_chain_guard_disabled() {
         let result = require_ii_delegation(None, false, Principal::anonymous(), &[], &[], 0, false);
         assert!(result.is_ok());
+    }
+
+    // ---- the verified-chain cache ----
+
+    #[test]
+    fn test_require_skips_the_signature_of_a_remembered_chain_only() {
+        // The chain's dummy signature never verifies, so it can only pass from the cache.
+        let pk = make_canister_sig_public_key(test_ii_canister_id());
+        let caller = Principal::self_authenticating(&pk);
+        let chain = make_chain(pk, valid_delegation(b"session"));
+        let ii_ids = [test_ii_canister_id()];
+        let root_key: &[u8] = b"root-key";
+        let require = |chain: &IIDelegationChain,
+                       caller: Principal,
+                       ii_ids: &[Principal],
+                       root_key: &[u8],
+                       now_ns: u64| {
+            require_ii_delegation(Some(chain), false, caller, ii_ids, root_key, now_ns, true)
+        };
+
+        assert!(require(&chain, caller, &ii_ids, root_key, 0).is_err());
+
+        let digest = verified_chain_digest(&chain, &ii_ids, root_key).unwrap();
+        remember_verified(caller, digest, FAR_FUTURE_NS, 0);
+
+        assert!(require(&chain, caller, &ii_ids, root_key, 0).is_ok());
+        assert!(require(&chain, caller, &ii_ids, root_key, FAR_FUTURE_NS).is_ok());
+
+        // Past its expiration, from another caller, against another config, or changed in any
+        // way, the chain is verified in full again.
+        assert!(require(&chain, caller, &ii_ids, root_key, FAR_FUTURE_NS + 1).is_err());
+        assert!(require(&chain, Principal::anonymous(), &ii_ids, root_key, 0).is_err());
+        assert!(require(&chain, caller, &[], root_key, 0).is_err());
+        assert!(require(&chain, caller, &ii_ids, b"another-root-key", 0).is_err());
+
+        let mut other_signature = chain.clone();
+        other_signature.delegations[0].signature = vec![1u8; 32];
+        assert!(require(&other_signature, caller, &ii_ids, root_key, 0).is_err());
+
+        let mut with_targets = chain.clone();
+        with_targets.delegations[0].delegation.targets = Some(vec![Principal::anonymous()]);
+        assert!(require(&with_targets, caller, &ii_ids, root_key, 0).is_err());
+    }
+
+    #[test]
+    fn test_cache_keeps_one_chain_per_caller() {
+        let caller = Principal::self_authenticating(b"caller");
+
+        remember_verified(caller, [1; 32], FAR_FUTURE_NS, 0);
+        remember_verified(caller, [2; 32], FAR_FUTURE_NS, 0);
+
+        assert!(!is_verified(caller, &[1; 32], 0));
+        assert!(is_verified(caller, &[2; 32], 0));
+        assert_eq!(
+            VERIFIED_CHAINS.with_borrow(std::collections::BTreeMap::len),
+            1
+        );
+    }
+
+    #[test]
+    fn test_full_cache_drops_expired_chains_then_starts_over() {
+        let caller = |i: usize| Principal::from_slice(&i.to_be_bytes());
+
+        // The first entry expires at 10, the others never do.
+        for i in 0..MAX_VERIFIED_CHAINS {
+            let expiration_ns = if i == 0 { 10 } else { FAR_FUTURE_NS };
+            remember_verified(caller(i), [0; 32], expiration_ns, 0);
+        }
+
+        let newcomer = caller(MAX_VERIFIED_CHAINS);
+        remember_verified(newcomer, [0; 32], FAR_FUTURE_NS, 20);
+
+        assert_eq!(
+            VERIFIED_CHAINS.with_borrow(std::collections::BTreeMap::len),
+            MAX_VERIFIED_CHAINS
+        );
+        assert!(!is_verified(caller(0), &[0; 32], 0));
+        assert!(is_verified(newcomer, &[0; 32], 20));
+
+        // Nothing left to drop: it starts over with the next newcomer.
+        let next = caller(MAX_VERIFIED_CHAINS + 1);
+        remember_verified(next, [0; 32], FAR_FUTURE_NS, 20);
+
+        assert_eq!(
+            VERIFIED_CHAINS.with_borrow(std::collections::BTreeMap::len),
+            1
+        );
+        assert!(is_verified(next, &[0; 32], 20));
+
+        // A caller already in a full cache only replaces its own entry.
+        for i in 0..MAX_VERIFIED_CHAINS - 1 {
+            remember_verified(caller(i), [0; 32], FAR_FUTURE_NS, 20);
+        }
+        remember_verified(next, [3; 32], FAR_FUTURE_NS, 20);
+
+        assert_eq!(
+            VERIFIED_CHAINS.with_borrow(std::collections::BTreeMap::len),
+            MAX_VERIFIED_CHAINS
+        );
+        assert!(is_verified(next, &[3; 32], 20));
     }
 
     // ---- verify_ii_delegation_chain ----
