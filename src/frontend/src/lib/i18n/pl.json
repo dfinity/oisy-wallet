@@ -1097,6 +1097,7 @@
 			"minimum_ckbtc_amount": "Kwota jest niższa od minimum $amount ckBTC wymaganego do konwersji na BTC.",
 			"minimum_cketh_amount": "Kwota jest niższa od minimalnej kwoty wypłaty wynoszącej $amount $symbol.",
 			"minimum_amount": "Kwota jest niższa od minimalnej kwoty wypłaty wynoszącej $amount $symbol.",
+			"minimum_deposit_amount": "",
 			"minimum_ledger_fees": "Kwota jest niższa od opłat za rejestr $symbol.",
 			"minimum_cketh_balance": "Saldo $symbol jest niższe od szacowanej opłaty w wysokości $amount.",
 			"unknown_cketh": "Nie można pobrać tokena ckETH.",
@@ -1491,7 +1492,12 @@
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
-			"lifi_route_unverified": ""
+			"lifi_route_unverified": "",
+			"cksol_deposit_in_progress": "",
+			"cksol_deposit_terms_changed": "",
+			"cksol_earlier_deposit_quarantined": "",
+			"cksol_minter_unavailable": "",
+			"cksol_deposit_quarantined": ""
 		}
 	},
 	"buy": {
@@ -1828,6 +1834,8 @@
 			"convert_fee": "Opłata za konwersję",
 			"convert_inter_network_fee": "Opłata między sieciami",
 			"convert_btc_network_fee": "Opłata sieciowa Bitcoin",
+			"cksol_sweep_fee": "",
+			"cksol_deposit_address_rent": "",
 			"zero_fee": "Bezpłatnie",
 			"total_fee": "Całkowita opłata",
 			"ata_fee": "Opłata ATA",

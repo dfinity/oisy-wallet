@@ -1,9 +1,13 @@
 import type {
 	ActiveUserTransaction,
 	ActiveUserTransactionRef,
-	ActiveUserTransactionStatus
+	ActiveUserTransactionStatus,
+	ChainFusionDirection
 } from '$declarations/backend/backend.did';
-import type { WithdrawSolStatus } from '$declarations/cksol_minter/cksol_minter.did';
+import type {
+	DepositSolStatus,
+	WithdrawSolStatus
+} from '$declarations/cksol_minter/cksol_minter.did';
 import {
 	CKERC20_HELPER_CONTRACT_SIGNATURE,
 	CKETH_HELPER_CONTRACT_SIGNATURE
@@ -13,6 +17,7 @@ import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { tokenAddressToHex } from '$eth/utils/token.utils';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
 import { SwapProvider } from '$lib/types/swap';
 import {
@@ -22,15 +27,19 @@ import {
 	chainFusionBtcWithdrawalStatusError,
 	chainFusionMintOutcomeError,
 	chainFusionMintOutcomeToStatus,
+	chainFusionSolMintStatusError,
 	chainFusionSolWithdrawalStatusError,
 	chainFusionWithdrawalStatusError,
+	hasChainFusionSolMintInFlight,
 	isChainFusionActiveUserTransaction,
 	isChainFusionBtcMintDirection,
 	isChainFusionBtcWithdrawalDirection,
 	isChainFusionEthWithdrawalDirection,
 	isChainFusionMintDirection,
+	isChainFusionSolMintDirection,
 	isChainFusionSolWithdrawalDirection,
 	isSameUtxoTxid,
+	newerCkSolDepositId,
 	toChainFusionBtcMintOutcome,
 	toChainFusionBtcWithdrawalLearnedRefs,
 	toChainFusionBtcWithdrawalStatus,
@@ -39,6 +48,8 @@ import {
 	toChainFusionDisplayRefs,
 	toChainFusionExternalRefs,
 	toChainFusionExternalRefsMap,
+	toChainFusionSolMintLearnedRefs,
+	toChainFusionSolMintStatus,
 	toChainFusionSolWithdrawalLearnedRefs,
 	toChainFusionSolWithdrawalStatus,
 	toChainFusionWithdrawalLearnedRefs,
@@ -170,6 +181,73 @@ describe('chain-fusion-swap-active-tx.utils', () => {
 			expect(isChainFusionSolWithdrawalDirection({ CkBtcToBtc: null })).toBeFalsy();
 			expect(isChainFusionEthWithdrawalDirection({ CkSolToSol: null })).toBeFalsy();
 			expect(isChainFusionBtcWithdrawalDirection({ CkSolToSol: null })).toBeFalsy();
+		});
+
+		it('should classify the ckSOL mint direction alone', () => {
+			expect(isChainFusionSolMintDirection({ SolToCkSol: null })).toBeTruthy();
+
+			expect(isChainFusionSolMintDirection({ CkSolToSol: null })).toBeFalsy();
+			expect(isChainFusionSolMintDirection({ BtcToCkBtc: null })).toBeFalsy();
+			expect(isChainFusionMintDirection({ SolToCkSol: null })).toBeFalsy();
+			expect(isChainFusionBtcMintDirection({ SolToCkSol: null })).toBeFalsy();
+		});
+	});
+
+	describe('hasChainFusionSolMintInFlight', () => {
+		const row = ({
+			direction,
+			status
+		}: {
+			direction: ChainFusionDirection;
+			status: ActiveUserTransactionStatus;
+		}): ActiveUserTransaction => ({
+			id: 'row',
+			status,
+			data: {
+				ChainFusion: {
+					direction,
+					source_token: { SolNativeMainnet: null },
+					dest_token: { Icrc: mockPrincipal },
+					amount: 1n
+				}
+			},
+			progress_step: [],
+			external_refs: [],
+			created_at_ns: 1n,
+			updated_at_ns: 1n,
+			error: []
+		});
+
+		it('should find a SOL → ckSOL conversion that is pending or executing', () => {
+			expect(
+				hasChainFusionSolMintInFlight([
+					row({ direction: { SolToCkSol: null }, status: { Pending: null } })
+				])
+			).toBeTruthy();
+			expect(
+				hasChainFusionSolMintInFlight([
+					row({ direction: { SolToCkSol: null }, status: { Executing: null } })
+				])
+			).toBeTruthy();
+		});
+
+		it('should not count a finished SOL → ckSOL conversion', () => {
+			expect(
+				hasChainFusionSolMintInFlight([
+					row({ direction: { SolToCkSol: null }, status: { Succeeded: null } }),
+					row({ direction: { SolToCkSol: null }, status: { Failed: null } })
+				])
+			).toBeFalsy();
+		});
+
+		it('should not count another conversion', () => {
+			expect(
+				hasChainFusionSolMintInFlight([
+					row({ direction: { CkSolToSol: null }, status: { Executing: null } }),
+					row({ direction: { BtcToCkBtc: null }, status: { Pending: null } })
+				])
+			).toBeFalsy();
+			expect(hasChainFusionSolMintInFlight([])).toBeFalsy();
 		});
 	});
 
@@ -603,6 +681,93 @@ describe('chain-fusion-swap-active-tx.utils', () => {
 		it('should learn nothing before the minter has sent a transaction', () => {
 			expect(toChainFusionSolWithdrawalLearnedRefs({ Pending: null })).toStrictEqual({});
 			expect(toChainFusionSolWithdrawalLearnedRefs({ NotFound: null })).toStrictEqual({});
+		});
+	});
+
+	describe('ckSOL deposit status', () => {
+		const SIGNATURE =
+			'5LrcE2f6uvydKRquEJ8xp19heGxSvqsVbcqUeFoiWbXe8JNip7ftPQNTAVPyTK7ijVdpkzmKKaAQR7MWMmujAhXD';
+
+		it.each<{ name: string; status: DepositSolStatus; expected: ActiveUserTransactionStatus }>([
+			{
+				name: 'Minted',
+				status: { Minted: { block_index: 1n, minted_amount: 47_104_120n } },
+				expected: { Succeeded: null }
+			},
+			{
+				name: 'Quarantined',
+				status: { Quarantined: { signature: SIGNATURE } },
+				expected: { Failed: null }
+			},
+			{
+				name: 'Queued',
+				status: { Queued: { sweepable_amount: 49_109_120n } },
+				expected: { Executing: null }
+			},
+			{ name: 'Swept', status: { Swept: { signature: SIGNATURE } }, expected: { Executing: null } },
+			{
+				name: 'Finalized',
+				status: { Finalized: { signature: SIGNATURE } },
+				expected: { Executing: null }
+			},
+			// The SOL stays on the deposit address, which the minter watches again.
+			{
+				name: 'Dropped',
+				status: { Dropped: { signature: SIGNATURE } },
+				expected: { Executing: null }
+			}
+		])('should map $name', ({ status, expected }) => {
+			expect(toChainFusionSolMintStatus(status)).toStrictEqual(expected);
+		});
+
+		it('should no-op on NotFound rather than fail', () => {
+			expect(toChainFusionSolMintStatus({ NotFound: null })).toBeUndefined();
+		});
+
+		it('should explain only a quarantined deposit', () => {
+			expect(chainFusionSolMintStatusError({ Quarantined: { signature: SIGNATURE } })).toBe(
+				'The ckSOL minter stopped processing this deposit. It holds the SOL until a minter upgrade resolves the deposit.'
+			);
+
+			expect(chainFusionSolMintStatusError({ Dropped: { signature: SIGNATURE } })).toBeUndefined();
+			expect(
+				chainFusionSolMintStatusError({ Minted: { block_index: 1n, minted_amount: 1n } })
+			).toBeUndefined();
+		});
+
+		it('should learn the minted amount, formatted', () => {
+			expect(
+				toChainFusionSolMintLearnedRefs({
+					Minted: { block_index: 1n, minted_amount: 1_234_567_890n }
+				})
+			).toStrictEqual({ chain_fusion_received_amount: '1.2346' });
+		});
+
+		it('should learn nothing before the mint', () => {
+			expect(toChainFusionSolMintLearnedRefs({ Swept: { signature: SIGNATURE } })).toStrictEqual(
+				{}
+			);
+			expect(toChainFusionSolMintLearnedRefs({ NotFound: null })).toStrictEqual({});
+		});
+	});
+
+	describe('newerCkSolDepositId', () => {
+		it('should take a deposit above the floor', () => {
+			expect(newerCkSolDepositId({ depositId: 42n, floor: 41n })).toBe(42n);
+		});
+
+		it('should not take the floor itself or a deposit below it', () => {
+			expect(newerCkSolDepositId({ depositId: 41n, floor: 41n })).toBeUndefined();
+			expect(newerCkSolDepositId({ depositId: 40n, floor: 41n })).toBeUndefined();
+		});
+
+		it('should take any deposit when the account had none', () => {
+			expect(newerCkSolDepositId({ depositId: ZERO, floor: undefined })).toBe(ZERO);
+		});
+
+		it('should take nothing without a deposit', () => {
+			expect(newerCkSolDepositId({ depositId: undefined, floor: undefined })).toBeUndefined();
+			expect(newerCkSolDepositId({ depositId: undefined, floor: 41n })).toBeUndefined();
 		});
 	});
 
