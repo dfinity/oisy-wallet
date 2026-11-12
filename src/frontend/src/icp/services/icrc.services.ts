@@ -303,8 +303,9 @@ const loadCustomIcrcTokensData = async ({
 
 				icrcCustomTokensStore.resetByIdentifier(ledgerCanisterId);
 
-				// To avoid polluting the screen, we show the toast error only after the update call.
-				if (enabled && certified) {
+				// To avoid polluting the screen, we show the toast error only after the update call, and not
+				// for a token the user deleted while this round was running.
+				if (enabled && certified && !icrcUnavailableCustomTokensStore.isDeleted(ledgerCanisterId)) {
 					const curatedToken = indexedIcrcCustomTokens[ledgerCanisterId];
 
 					toastsShow({

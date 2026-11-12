@@ -834,6 +834,30 @@ describe('icrc.services', () => {
 
 			expect(get(icrcCustomTokensStore)).toStrictEqual([]);
 		});
+
+		it('should not warn about a token deleted while its certified round is running', async () => {
+			const certifiedAnswer = Promise.withResolvers<IcrcTokenMetadataResponse>();
+
+			ledgerCanisterMock.metadata.mockReturnValue(certifiedAnswer.promise);
+
+			const spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
+
+			const certifiedRound = processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken]
+			});
+
+			// The user deletes the token while the round waits for its ledger.
+			icrcCustomTokensStore.resetByIdentifier(mockLedgerCanisterId);
+			icrcUnavailableCustomTokensStore.remove(mockLedgerCanisterId);
+
+			certifiedAnswer.reject(new Error('test'));
+
+			await certifiedRound;
+
+			expect(spyToastsShow).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('loadDisabledIcrcTokensExchanges', () => {
