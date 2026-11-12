@@ -5,8 +5,9 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 ## Goal
 
 Users can buy and sell every enabled token that OnRamper supports, including the tokens they
-imported. When Buy/Sell opens, OISY finds OnRamper's id for each token that has none, in OnRamper's
-own list of supported tokens, by network and contract address.
+imported. When Buy/Sell opens, OISY looks up OnRamper's id for each ERC-20 and SPL token in
+OnRamper's own list of supported tokens, by network and contract address. An id kept by hand is
+only the fallback.
 
 Example: a user imported AAVE on Ethereum and opens Buy/Sell from its page. Today the widget does
 not offer AAVE and opens on a token OnRamper picks. After this change Buy offers AAVE and opens on
@@ -65,27 +66,30 @@ The live Sell list, saved the same day:
 
 ### When OISY looks ids up
 
-1. When Buy/Sell opens, and an enabled ERC-20 or SPL token, or the token to open on, has no
-   built-in id and sits on a network OnRamper covers. Otherwise no request goes to OnRamper's API.
+1. When Buy/Sell opens, and an enabled ERC-20 or SPL token, or the token to open on, sits on a
+   network OnRamper covers. Otherwise (native coins and ICRC tokens only) no request goes to
+   OnRamper's API.
 2. OISY fetches the Buy and the Sell list while the backend signs the widget URL, not after.
 3. Each list is fetched once per page load and kept in memory. A fetch that fails, or that takes
    longer than 30 seconds, is tried again at the next opening.
 
 ### Matching
 
-4. A token without a built-in id takes the id of the list entry on the same network (the OnRamper
-   network of the token's network) with the same address: the contract address on EVM networks, in
-   any letter case, and the mint address on Solana, exactly.
+4. An ERC-20 or SPL token takes the id of the list entry on the same network (the OnRamper network
+   of the token's network) with the same address: the contract address on EVM networks, in any
+   letter case, and the mint address on Solana, exactly.
 5. An address listed under more than one id takes none of them.
-6. Built-in ids always win. The list only fills the gaps.
+6. The id from the list wins over a built-in one. A built-in id is the fallback: for a token the
+   list has no single entry for, such as a native coin, and while the list is missing.
 7. ICRC tokens are not looked up: OnRamper lists none.
 
 ### What Buy and Sell get
 
-8. The Buy tab offers the tokens with a built-in id or an id from the Buy list, and opens on the
-   open token when it has one of them.
+8. The Buy tab offers the tokens with an id from the Buy list or a built-in id, and opens on the
+   open token when it has one.
 9. The Sell tab does the same with the Sell list. A token OnRamper can only buy is offered, and
-   opened on, in the Buy tab only. Tokens with a built-in id go to both tabs, as today.
+   opened on, in the Buy tab only, unless it has a built-in id: that one goes to both tabs, as
+   today.
 10. The selected network narrows the tokens with an id from a list as it narrows the others.
 
 ### Waiting for the lists
@@ -95,8 +99,8 @@ The live Sell list, saved the same day:
 12. A list that arrives before the signing is done adds no wait.
 13. A list still loading when the signing is done gets at most 1 more second. Then Buy/Sell opens
     without it. It keeps loading, and the next opening uses it.
-14. A list that fails or can't be read is left out: Buy/Sell opens with the built-in ids only, as
-    today, and says nothing about it.
+14. A list that fails or can't be read is left out: its tab offers the tokens with a built-in id
+    only, as today, and says nothing about it.
 
 ### Privacy and storage
 
@@ -125,13 +129,14 @@ The live Sell list, saved the same day:
    (`src/frontend/src/lib/schema/onramper.schema.ts`).
 3. **Lists** — `src/frontend/src/lib/services/onramper.services.ts`: load both lists once per page
    load, index them by network and address, never throw.
-4. **Ids** — `src/frontend/src/lib/utils/onramper.utils.ts`: a token's id (built-in, else from the
-   list), and the link built from the signing result and the ids.
+4. **Ids** — `src/frontend/src/lib/utils/onramper.utils.ts`: a token's id (from the list, else
+   built-in), and the link built from the signing result and the ids.
 5. **Widget** — `OnramperWidget.svelte`: start the lists with the signing call and build the URL
    once both are in.
 6. **Tests** — the request, the lists (memory, retry, letter case, an address under two ids), and
    the widget (an imported ERC-20 and SPL token in both tabs, opening on one, a Buy-only token, a
-   failed or slow list, no request when every token has an id).
+   failed or slow list, the list's id winning over a built-in one, no request without an ERC-20 or
+   SPL token).
 7. **Docs** — `docs/ai/PRODUCT.md` (Buy: which tokens Buy/Sell offers and opens on),
    `docs/ai/integrations/onramper.md` and its row in `docs/ai/integrations/README.md`.
 
@@ -144,18 +149,22 @@ The live Sell list, saved the same day:
 4. A token OnRamper can only buy, e.g. PYUSD, is offered in Buy and not in Sell.
 5. Opening Buy/Sell is not slower than before (measured on a deployed test instance).
 6. When the lists fail, Buy/Sell opens as today.
-7. When every enabled ERC-20 and SPL token has a built-in id, no request goes to OnRamper's API.
+7. With no enabled ERC-20 or SPL token, no request goes to OnRamper's API.
 8. Nothing about the user's tokens is stored in the browser or the backend.
 9. OnRamper receives no list of the user's tokens.
-10. A token with a built-in id keeps it.
+10. A token with a built-in id takes the list's id when the list has one for it, and keeps its
+    built-in id otherwise.
 11. A token whose address the list gives under two ids is not offered.
 
 ## Decisions
 
 Agreed with Stefan on 2026-11-12:
 
-- **Built-in ids stay and win; the list fills the gaps.** Some tokens OnRamper sells have no address
-  in its list (USDT on Arbitrum), and a failed list must not drop tokens that work today.
+- **The id from the list wins; a built-in id is the fallback.** Against the live Buy list, 24 of the
+  30 curated ERC-20 and SPL ids are what the list gives anyway, and 4 are not in it at all (cbBTC,
+  EURC and WBTC on Solana, OCT on Ethereum). The fallback still covers native coins, which have no
+  address, USDT on Arbitrum, which the list has without an address, wrapped SOL, which OISY maps to
+  SOL, and a list that is late or fails. This replaces "built-in ids win", agreed first.
 - **ICRC tokens are not looked up, and SPL tokens match by mint.** On ICP, OnRamper lists ICP only,
   and its Solana addresses are mints.
 - **An address under two ids gets neither.** Offering the wrong one would buy or sell another token
@@ -195,4 +204,4 @@ Also settled in this spec:
    at the first opening, because the ICP ERC-20 tokens enabled by default have no built-in id. If
    that is too much, only imported tokens could trigger them, and curated tokens without an id would
    stay as today. Recommended: every token without an id, as specified. _Resolved (Stefan,
-   2026-11-12): every token without an id._
+   2026-11-12): every ERC-20 and SPL token, since the id from the list wins (see Decisions)._

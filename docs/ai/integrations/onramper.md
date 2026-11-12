@@ -31,8 +31,9 @@ with `ONRAMPER_ENABLED = true`.
 ## Lists of supported tokens
 
 When Buy/Sell opens, the frontend fetches OnRamper's lists of the tokens it buys and sells, to find
-the ids of tokens that have no hand-kept `buy.onramperId` (e.g. imported ERC-20 and SPL tokens). The
-behaviour (matching, fallback, privacy) is in [`PRODUCT.md`](../PRODUCT.md#buy-onramper).
+the ids of ERC-20 and SPL tokens, imported ones included. A hand-kept `buy.onramperId` is only the
+fallback. The behaviour (matching, fallback, privacy) is in
+[`PRODUCT.md`](../PRODUCT.md#buy-onramper).
 
 - Request: `GET https://api.onramper.com/supported?type=buy&skipCountryCheck=true`, and
   `type=sell` (`src/frontend/src/lib/rest/onramper.rest.ts`).
