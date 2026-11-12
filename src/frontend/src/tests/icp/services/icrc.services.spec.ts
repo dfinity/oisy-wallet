@@ -772,7 +772,11 @@ describe('icrc.services', () => {
 		it('should not list a token on a query answer alone', async () => {
 			ledgerCanisterMock.metadata.mockRejectedValue(new Error('test'));
 
-			await processCustomTokens({ identity: mockIdentity, certified: false, tokens: [customToken] });
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: false,
+				tokens: [customToken]
+			});
 
 			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([]);
 		});
