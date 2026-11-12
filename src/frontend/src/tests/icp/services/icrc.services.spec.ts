@@ -865,6 +865,62 @@ describe('icrc.services', () => {
 			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([]);
 		});
 
+		it('should keep a token a newer certified round loaded when an older one fails after it', async () => {
+			const olderRound = nextIcrcCustomTokensRound();
+
+			ledgerCanisterMock.metadata
+				.mockResolvedValueOnce(tokenMetadata)
+				.mockRejectedValue(new Error('test'));
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			const spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: olderRound
+			});
+
+			expect(
+				get(icrcCustomTokensStore)?.map(({ data: { ledgerCanisterId } }) => ledgerCanisterId)
+			).toStrictEqual([mockLedgerCanisterId]);
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([]);
+			expect(spyToastsShow).not.toHaveBeenCalled();
+		});
+
+		it('should keep a token the certified round loaded when the query round of the same load fails after it', async () => {
+			const queryRound = nextIcrcCustomTokensRound();
+
+			ledgerCanisterMock.metadata
+				.mockResolvedValueOnce(tokenMetadata)
+				.mockRejectedValue(new Error('test'));
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: false,
+				tokens: [customToken],
+				icrcRound: queryRound
+			});
+
+			expect(
+				get(icrcCustomTokensStore)?.map(({ data: { ledgerCanisterId } }) => ledgerCanisterId)
+			).toStrictEqual([mockLedgerCanisterId]);
+		});
+
 		it('should keep a token deleted while its round is running out of the token list', async () => {
 			const queryAnswer = Promise.withResolvers<IcrcTokenMetadataResponse>();
 

@@ -297,6 +297,12 @@ const loadCustomIcrcTokensData = async ({
 				}
 			});
 
+			// A certified round that started later already wrote what it found, maybe that the token
+			// loads: an older round, query or certified, must not undo it.
+			if (round < unavailableTokensCertifiedRound) {
+				return acc;
+			}
+
 			const { enabled, token } = tokens[index];
 
 			if ('Icrc' in token) {
