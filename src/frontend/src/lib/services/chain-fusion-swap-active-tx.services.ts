@@ -471,6 +471,11 @@ const hasCkBtcMintForDeposit = async ({
  * as minted; that is the one coarse step here, and it is bounded to "the minter
  * took these exact coins off the deposit address", not to a scan position.
  *
+ * The one verdict the minter has no part in is `neverLanded`: on mainnet, a
+ * deposit that neither the minter nor the Bitcoin canister has seen, and that
+ * Blockstream still does not know an hour after the row's last write
+ * (`isBtcTransactionNeverLanded`), fails without `update_balance` being called.
+ *
  * Nothing is ever terminalized on an `update_balance` failure: the row stays
  * pending so the next tick retries, exactly as OneSec leaves an unknown outcome
  * pending rather than dropping the row out of the poll set.

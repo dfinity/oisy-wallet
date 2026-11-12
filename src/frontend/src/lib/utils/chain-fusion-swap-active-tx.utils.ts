@@ -290,9 +290,10 @@ export const toChainFusionBtcWithdrawalLearnedRefs = (
  *
  * `unseen` → `awaitingConfirmations` → `awaitingMint` are the in-flight shapes,
  * in the order a deposit passes through them; `minted` and `rejected` are the
- * verdict, and only the minter itself can produce either.
+ * minter's verdict, and only the minter itself can produce either. `neverLanded`
+ * is the one outcome the Bitcoin network decides, not the minter: an `unseen`
+ * deposit that Blockstream does not know either, so it most likely never went out.
  */
-// `neverLanded` is an `unseen` deposit the network does not know either: it was never broadcast.
 export type ChainFusionBtcMintOutcome =
 	'unseen' | 'neverLanded' | 'awaitingConfirmations' | 'awaitingMint' | 'minted' | 'rejected';
 
@@ -301,8 +302,9 @@ export type ChainFusionBtcMintOutcome =
  *
  * Unlike the Ethereum family's mints, this one is not observed from the deposit
  * side: the minter is the only party that can turn a confirmed UTXO into ckBTC,
- * so the poller's job is to make it, and the verdict is whatever it reports back
- * — see `resolveChainFusionBtcMintOutcome`.
+ * so the poller's job is to make it, and the verdict is whatever it reports back.
+ * The one exception is `neverLanded`, which fails the row on the network's word
+ * alone — see `resolveChainFusionBtcMintOutcome`.
  */
 export const chainFusionBtcMintOutcomeToStatus = (
 	outcome: ChainFusionBtcMintOutcome
