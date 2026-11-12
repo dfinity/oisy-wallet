@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
-	import { SvelteSet } from 'svelte/reactivity';
 	import { get } from 'svelte/store';
 	import { page } from '$app/state';
 	import SwapBtcContexts from '$btc/components/swap/SwapBtcContexts.svelte';
@@ -42,7 +41,7 @@
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
-	import type { Token, TokenId } from '$lib/types/token';
+	import type { Token } from '$lib/types/token';
 	import type { WizardModal, WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { consoleWarn } from '$lib/utils/console.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
@@ -84,7 +83,8 @@
 		destinationToken,
 		receiveSupportedData,
 		getTokenListFilters,
-		setTokenListFilters
+		setTokenListFilters,
+		markTokensPriced
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const {
@@ -106,18 +106,12 @@
 
 	// The exchange worker prices enabled tokens only. Swap can open before every token list has loaded,
 	// so the disabled ERC-20 and SPL tokens it lists are priced as they arrive, each once per opening.
-	const pricedTokenIds = new SvelteSet<TokenId>();
-
 	$effect(() => {
-		const tokens = $allCrossChainSwapTokens.filter(
-			({ id, enabled }) => !enabled && !pricedTokenIds.has(id)
-		);
+		const tokens = markTokensPriced($allCrossChainSwapTokens.filter(({ enabled }) => !enabled));
 
 		if (tokens.length === 0) {
 			return;
 		}
-
-		tokens.forEach(({ id }) => pricedTokenIds.add(id));
 
 		loadDisabledErc20AndSplTokensExchanges({ tokens }).catch((err: unknown) =>
 			consoleWarn('Failed to load the prices of disabled swap tokens:', err)

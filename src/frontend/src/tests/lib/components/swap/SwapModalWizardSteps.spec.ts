@@ -662,6 +662,22 @@ describe('SwapModalWizardSteps', () => {
 			expect(pricedSymbols()).toEqual([[disabledToken.symbol], ['LATE']]);
 		});
 
+		// Get Token renders the wizard in a block keyed by the step, so every step change mounts a new
+		// one on the same swap context.
+		it('should not price the tokens again when it is rebuilt on a step change', async () => {
+			const { unmount } = renderSwapModalWizardSteps(tokensListStep);
+
+			await tick();
+
+			unmount();
+
+			renderSwapModalWizardSteps({ name: WizardStepsSwap.SWAP, title: 'title' });
+
+			await tick();
+
+			expect(pricedSymbols()).toEqual([[disabledToken.symbol]]);
+		});
+
 		it('should warn and carry on when loading the prices fails', async () => {
 			const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 			vi.spyOn(swapServices, 'loadDisabledErc20AndSplTokensExchanges').mockRejectedValue(
