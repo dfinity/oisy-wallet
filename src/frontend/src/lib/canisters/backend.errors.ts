@@ -2,6 +2,7 @@ import type {
 	AllowSigningError,
 	BtcAddPendingTransactionError,
 	BtcBroadcastTransactionError,
+	BtcGetBalanceError,
 	BtcGetFeePercentilesError,
 	BtcGetPendingTransactionsError,
 	BtcGetSpendableUtxosError,
@@ -146,6 +147,28 @@ export const mapBtcGetSpendableUtxosError = (
 	}
 
 	return assertNeverOr(err, new CanisterInternalError('Unknown BtcGetSpendableUtxosError'));
+};
+
+export const mapBtcGetBalanceError = (err: BtcGetBalanceError): CanisterInternalError => {
+	if ('InternalError' in err) {
+		return new CanisterInternalError(err.InternalError.msg);
+	}
+
+	if ('BalanceUnavailable' in err) {
+		return new CanisterInternalError(`Bitcoin balance unavailable: ${err.BalanceUnavailable.msg}`);
+	}
+
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
+	if ('InvalidDelegationChain' in err) {
+		return new CanisterInternalError(
+			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
+		);
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcGetBalanceError'));
 };
 
 export const mapBtcGetFeePercentilesError = (

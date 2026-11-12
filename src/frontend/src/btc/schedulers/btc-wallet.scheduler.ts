@@ -8,11 +8,14 @@ import {
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
-import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
+import { BTC_EXTENSION_FEATURE_FLAG_ENABLED, BTC_SEND_VIA_BACKEND_ENABLED } from '$env/btc.env';
 import { BITCOIN_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
 import { getBtcWalletBalance } from '$icp/utils/btc.utils';
-import { getPendingBtcTransactions } from '$lib/api/backend.api';
+import {
+	getBtcBalance as getBtcBalanceFromBackend,
+	getPendingBtcTransactions
+} from '$lib/api/backend.api';
 import { getBtcBalance } from '$lib/api/signer.api';
 import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { btcAddressData } from '$lib/rest/blockchain.rest';
@@ -225,13 +228,23 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 						})
 					: null;
 		} else {
-			confirmedBalance = await getBtcBalance({
-				identity,
-				network: mapToSignerBitcoinNetwork({
-					network: bitcoinNetwork
-				}),
-				minConfirmations: BTC_BALANCE_MIN_CONFIRMATIONS
-			});
+			// Through the backend, which pays the Bitcoin canister from its own cycles. The backend paid
+			// for the Chain Fusion Signer's `btc_caller_balance` too, but against the approval it grants
+			// each user for signing, so every poll used up part of what the user could sign.
+			confirmedBalance = BTC_SEND_VIA_BACKEND_ENABLED
+				? await getBtcBalanceFromBackend({
+						identity,
+						network: mapCkBtcBitcoinNetworkToBackendBitcoinNetwork(bitcoinNetwork),
+						minConfirmations: BTC_BALANCE_MIN_CONFIRMATIONS,
+						iiDelegationChain: nonNullish(identity) ? extractIIDelegationChain(identity) : []
+					})
+				: await getBtcBalance({
+						identity,
+						network: mapToSignerBitcoinNetwork({
+							network: bitcoinNetwork
+						}),
+						minConfirmations: BTC_BALANCE_MIN_CONFIRMATIONS
+					});
 		}
 
 		// If no confirmed balance available, return null
