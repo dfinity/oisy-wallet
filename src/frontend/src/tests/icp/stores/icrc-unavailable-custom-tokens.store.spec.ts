@@ -47,6 +47,25 @@ describe('icrc-unavailable-custom-tokens.store', () => {
 		expect(get(icrcUnavailableCustomTokensStore)).toEqual([secondToken]);
 	});
 
+	it('should tell which tokens were deleted', () => {
+		icrcUnavailableCustomTokensStore.remove(firstToken.ledgerCanisterId);
+
+		expect(icrcUnavailableCustomTokensStore.isDeleted(firstToken.ledgerCanisterId)).toBeTruthy();
+		expect(icrcUnavailableCustomTokensStore.isDeleted(secondToken.ledgerCanisterId)).toBeFalsy();
+	});
+
+	it('should let a token saved again after a delete back in', () => {
+		icrcUnavailableCustomTokensStore.remove(firstToken.ledgerCanisterId);
+
+		icrcUnavailableCustomTokensStore.forgetDeleted(firstToken.ledgerCanisterId);
+
+		expect(icrcUnavailableCustomTokensStore.isDeleted(firstToken.ledgerCanisterId)).toBeFalsy();
+
+		icrcUnavailableCustomTokensStore.set([firstToken, secondToken]);
+
+		expect(get(icrcUnavailableCustomTokensStore)).toEqual([firstToken, secondToken]);
+	});
+
 	it('should forget the deleted tokens on reset', () => {
 		icrcUnavailableCustomTokensStore.set([firstToken]);
 

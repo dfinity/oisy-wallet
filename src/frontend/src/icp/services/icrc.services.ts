@@ -342,7 +342,14 @@ const loadIcrcCustomData = ({
 }) => {
 	onSuccess?.();
 
-	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+	// A round that read the saved tokens before a delete would otherwise put the deleted token back.
+	icrcCustomTokensStore.setAll(
+		tokens
+			.filter(
+				({ ledgerCanisterId }) => !icrcUnavailableCustomTokensStore.isDeleted(ledgerCanisterId)
+			)
+			.map((token) => ({ data: token, certified }))
+	);
 };
 
 const onCustomTokensUpdateError = ({ error: err }: { error: unknown }) => {

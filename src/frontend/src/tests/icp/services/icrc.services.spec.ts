@@ -786,6 +786,28 @@ describe('icrc.services', () => {
 
 			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([]);
 		});
+
+		it('should keep a token deleted while its round is running out of the token list', async () => {
+			const queryAnswer = Promise.withResolvers<IcrcTokenMetadataResponse>();
+
+			ledgerCanisterMock.metadata.mockReturnValue(queryAnswer.promise);
+
+			const queryRound = processCustomTokens({
+				identity: mockIdentity,
+				certified: false,
+				tokens: [customToken]
+			});
+
+			// The user deletes the token while the round waits for its ledger.
+			icrcCustomTokensStore.resetByIdentifier(mockLedgerCanisterId);
+			icrcUnavailableCustomTokensStore.remove(mockLedgerCanisterId);
+
+			queryAnswer.resolve(tokenMetadata);
+
+			await queryRound;
+
+			expect(get(icrcCustomTokensStore)).toStrictEqual([]);
+		});
 	});
 
 	describe('loadDisabledIcrcTokensExchanges', () => {

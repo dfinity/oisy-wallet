@@ -1,6 +1,7 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 import TipClaimModal from '$lib/components/tip/TipClaimModal.svelte';
 import { TIP_CLAIM_RETRY_BUTTON, TIP_RECEIVED_BUTTON } from '$lib/constants/test-ids.constants';
@@ -543,6 +544,27 @@ describe('TipClaimModal', () => {
 
 			// Not the enable path: there was nothing in the list to enable.
 			expect(autoLoad).not.toHaveBeenCalled();
+		});
+
+		it('lets a token deleted earlier on this page back into the wallet', async () => {
+			vi.spyOn(tokenServices, 'autoLoadSingleToken').mockResolvedValue({ result: 'loaded' });
+
+			const deleted = Principal.fromText('2ouva-viaaa-aaaaq-aaamq-cai');
+
+			icrcUnavailableCustomTokensStore.remove(deleted.toText());
+
+			mockDetailsFor(deleted);
+			mockClaimFor(deleted);
+
+			const { getByTestId } = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() => expect(getByTestId(TIP_RECEIVED_BUTTON)).toBeInTheDocument());
+
+			getByTestId(TIP_RECEIVED_BUTTON).click();
+
+			await waitFor(() => expect(vi.mocked(loadCustomTokens)).toHaveBeenCalled());
+
+			expect(icrcUnavailableCustomTokensStore.isDeleted(deleted.toText())).toBeFalsy();
 		});
 
 		it('carries the existing version for a row the rendered list is hiding', async () => {

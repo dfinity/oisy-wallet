@@ -1,5 +1,6 @@
 import type { Erc20Token } from '$eth/types/erc20';
 import { loadCustomTokens } from '$icp/services/icrc.services';
+import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 import { autoLoadToken, type AutoLoadTokenResult } from '$lib/services/token.services';
@@ -67,8 +68,12 @@ export const setCustomToken = async ({
 	identity: Identity;
 	token: IcrcCustomToken;
 	enabled: boolean;
-}) =>
+}) => {
 	await setCustomTokenApi({
 		identity,
 		token: toCustomToken({ ...token, enabled, networkKey: 'Icrc' })
 	});
+
+	// Saved again, so a delete earlier on this page no longer keeps the token out of the lists.
+	icrcUnavailableCustomTokensStore.forgetDeleted(token.ledgerCanisterId);
+};

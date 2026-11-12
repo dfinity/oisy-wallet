@@ -17,6 +17,7 @@
 	import { icrcCustomTokensInitialized, icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+	import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 	import { setCustomToken } from '$icp-eth/services/icrc-token.services';
 	import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 	import failedTipImg from '$lib/assets/failed-vip-reward.svg';
@@ -207,6 +208,9 @@
 					networkKey: 'Icrc'
 				} as SaveCustomTokenWithKey)
 			});
+
+			// Saved again, so a delete earlier on this page no longer keeps the token out of the lists.
+			icrcUnavailableCustomTokensStore.forgetDeleted(ledgerCanisterId);
 
 			await loadCustomTokens({ identity: $authIdentity });
 		} catch (err: unknown) {
