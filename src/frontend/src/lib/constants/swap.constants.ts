@@ -272,7 +272,7 @@ const CHAIN_FUSION_BTC_NETWORK_IDS: NetworkId[] = CHAIN_FUSION_SWAP_ENABLED
 	? [BTC_MAINNET_NETWORK_ID]
 	: [];
 
-// ckSOL reaches Solana through Chain Fusion, behind its own flag.
+// Solana and ckSOL reach each other through Chain Fusion, behind the ckSOL flag.
 const CHAIN_FUSION_SOL_NETWORK_IDS: NetworkId[] =
 	CHAIN_FUSION_SWAP_ENABLED && CKSOL_ENABLED ? [SOLANA_MAINNET_NETWORK_ID] : [];
 
@@ -321,6 +321,7 @@ export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
 	[BASE_NETWORK_ID]: withIcpIfPaired(BASE_NETWORK_ID),
 	[ROBINHOOD_MAINNET_NETWORK_ID]: withIcpIfPaired(ROBINHOOD_MAINNET_NETWORK_ID),
 	[SOLANA_MAINNET_NETWORK_ID]: [
+		...(CHAIN_FUSION_SOL_NETWORK_IDS.length > 0 ? [ICP_NETWORK_ID] : []),
 		...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
 		...NEAR_INTENTS_BTC_NETWORK_IDS,
 		...NEAR_INTENTS_XRP_NETWORK_IDS
