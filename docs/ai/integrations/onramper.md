@@ -1,4 +1,4 @@
-# OnRamper widget URL signing
+# OnRamper: widget URL signing and lists of supported tokens
 
 OnRamper rejects unsigned widget URLs (`Invalid Signature`) since April 2025. OISY signs the
 sensitive URL parameters with an HMAC-SHA256 secret held **only in the backend canister**, so the
@@ -27,6 +27,26 @@ on the next deploy. The widget also needs the signing secret — see below.
 
 **Until the secret is provisioned on an environment, the buy widget stays unavailable there**, even
 with `ONRAMPER_ENABLED = true`.
+
+## Lists of supported tokens
+
+When Buy/Sell opens, the frontend fetches OnRamper's lists of the tokens it buys and sells, to find
+the ids of ERC-20 and SPL tokens, imported ones included. A hand-kept `buy.onramperId` is only the
+fallback. The behaviour (matching, fallback, privacy) is in
+[`PRODUCT.md`](../PRODUCT.md#buy-onramper).
+
+- Request: `GET https://api.onramper.com/supported?type=buy&skipCountryCheck=true`, and
+  `type=sell` (`src/frontend/src/lib/rest/onramper.rest.ts`).
+- Credential: the public widget API key (`VITE_ONRAMPER_API_KEY_*`) in the `Authorization` header.
+  OnRamper ignores it as a URL parameter, and answers a request without a valid key with empty
+  lists rather than an error.
+- No filter by network or address: the whole list comes back. On 2026-11-12 the Buy list held 1,769
+  tokens (444 KB, 91 KB gzipped) and the Sell list 423 (110 KB, 22 KB gzipped).
+- Fields used: `id`, `network` and `address`: the contract on EVM networks, the mint on Solana, none
+  for ICP and Bitcoin.
+- Each list is fetched once per page load and kept in memory
+  (`src/frontend/src/lib/services/onramper.services.ts`). The CSP needs no entry for it:
+  `connect-src` already allows every https origin.
 
 ## Provisioning the secret
 
