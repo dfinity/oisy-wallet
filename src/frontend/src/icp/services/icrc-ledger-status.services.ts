@@ -8,7 +8,6 @@ import {
 	CertifiedRejectErrorCode,
 	RejectError,
 	ReplicaRejectCode,
-	UncertifiedRejectErrorCode,
 	UncertifiedRejectUpdateErrorCode,
 	type Identity
 } from '@icp-sdk/core/agent';
@@ -43,7 +42,8 @@ const toRejectStatus = ({
 
 /**
  * Asks the ledger canister of a token OISY could not load for its metadata, as loading the token does,
- * and tells from the outcome whether a ledger runs there and whether it answers.
+ * and tells from the outcome whether a ledger runs there and whether it answers. The call is certified:
+ * the answer stands next to the option to delete the token, and a query answer comes from one replica.
  */
 export const checkIcrcLedgerStatus = async ({
 	identity,
@@ -53,7 +53,7 @@ export const checkIcrcLedgerStatus = async ({
 	ledgerCanisterId: LedgerCanisterIdText;
 }): Promise<IcrcLedgerStatus> => {
 	try {
-		const response = await metadata({ identity, ledgerCanisterId, certified: false });
+		const response = await metadata({ identity, ledgerCanisterId, certified: true });
 
 		// An answer without the name, symbol, decimals or fee that a token needs still leaves the token
 		// unavailable, so "responds now" would be wrong for it.
@@ -64,15 +64,13 @@ export const checkIcrcLedgerStatus = async ({
 
 			if (
 				code instanceof CertifiedRejectErrorCode ||
-				code instanceof UncertifiedRejectErrorCode ||
 				code instanceof UncertifiedRejectUpdateErrorCode
 			) {
 				return toRejectStatus(code);
 			}
 		}
 
-		// No replica answered. A canister that no subnet hosts ends up here too, because the
-		// agent cannot verify the signature of a query to it, so its existence tells the two apart.
+		// No replica answered, or no subnet hosts the canister: its existence tells the two apart.
 		const existence = await getCanisterExistence({
 			identity,
 			canisterId: Principal.fromText(ledgerCanisterId)

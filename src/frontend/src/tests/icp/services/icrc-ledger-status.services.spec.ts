@@ -6,12 +6,9 @@ import type { IcrcTokenMetadataResponse } from '@icp-sdk/canisters/ledger/icrc';
 import {
 	CertifiedRejectErrorCode,
 	HttpErrorCode,
-	MissingSignatureErrorCode,
 	ProtocolError,
 	RejectError,
 	ReplicaRejectCode,
-	TrustError,
-	UncertifiedRejectErrorCode,
 	UncertifiedRejectUpdateErrorCode,
 	requestIdOf
 } from '@icp-sdk/core/agent';
@@ -24,9 +21,9 @@ describe('icrc-ledger-status.services', () => {
 
 		const requestId = requestIdOf({ method_name: 'icrc1_metadata' });
 
-		// What the agent throws for a query the replica rejected, as a mainnet ledger without
+		// What the agent throws for a certified call the replica rejected, as a mainnet ledger without
 		// ICRC methods (IC0536) or without code (IC0537) answers.
-		const queryReject = ({
+		const callReject = ({
 			rejectCode = ReplicaRejectCode.CanisterError,
 			rejectErrorCode
 		}: {
@@ -34,7 +31,7 @@ describe('icrc-ledger-status.services', () => {
 			rejectErrorCode?: string;
 		}) =>
 			RejectError.fromCode(
-				new UncertifiedRejectErrorCode(requestId, rejectCode, 'test', rejectErrorCode, undefined)
+				new CertifiedRejectErrorCode(requestId, rejectCode, 'test', rejectErrorCode)
 			);
 
 		// The metadata a token needs to load: name, symbol, decimals and fee.
@@ -57,7 +54,7 @@ describe('icrc-ledger-status.services', () => {
 			existenceSpy = vi.spyOn(canisterStateApi, 'getCanisterExistence').mockResolvedValue('exists');
 		});
 
-		it('should ask the ledger for its metadata with a query', async () => {
+		it('should ask the ledger for its metadata with a certified call', async () => {
 			metadataSpy.mockResolvedValue([]);
 
 			await check();
@@ -65,7 +62,7 @@ describe('icrc-ledger-status.services', () => {
 			expect(metadataSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				ledgerCanisterId,
-				certified: false
+				certified: true
 			});
 		});
 
@@ -90,7 +87,7 @@ describe('icrc-ledger-status.services', () => {
 		it.each(['IC0301', 'IC0537'])(
 			'should report no ledger when the replica rejects with %s',
 			async (rejectErrorCode) => {
-				metadataSpy.mockRejectedValue(queryReject({ rejectErrorCode }));
+				metadataSpy.mockRejectedValue(callReject({ rejectErrorCode }));
 
 				await expect(check()).resolves.toEqual({ status: 'no_ledger' });
 
@@ -101,7 +98,7 @@ describe('icrc-ledger-status.services', () => {
 		it.each(['IC0207', 'IC0508', 'IC0509'])(
 			'should report a ledger that does not respond when the replica rejects with %s',
 			async (rejectErrorCode) => {
-				metadataSpy.mockRejectedValue(queryReject({ rejectErrorCode }));
+				metadataSpy.mockRejectedValue(callReject({ rejectErrorCode }));
 
 				await expect(check()).resolves.toEqual({ status: 'not_responding' });
 			}
@@ -109,33 +106,25 @@ describe('icrc-ledger-status.services', () => {
 
 		it('should report a ledger that does not respond on a transient reject', async () => {
 			metadataSpy.mockRejectedValue(
-				queryReject({ rejectCode: ReplicaRejectCode.SysTransient, rejectErrorCode: 'IC0201' })
+				callReject({ rejectCode: ReplicaRejectCode.SysTransient, rejectErrorCode: 'IC0201' })
 			);
 
 			await expect(check()).resolves.toEqual({ status: 'not_responding' });
 		});
 
 		it('should report an error with the code the replica names', async () => {
-			metadataSpy.mockRejectedValue(queryReject({ rejectErrorCode: 'IC0536' }));
+			metadataSpy.mockRejectedValue(callReject({ rejectErrorCode: 'IC0536' }));
 
 			await expect(check()).resolves.toEqual({ status: 'error', errorCode: 'IC0536' });
 		});
 
 		it('should report an error without a code when the replica names none', async () => {
-			metadataSpy.mockRejectedValue(queryReject({}));
+			metadataSpy.mockRejectedValue(callReject({}));
 
 			await expect(check()).resolves.toEqual({ status: 'error' });
 		});
 
-		it('should read the reject of a certified call and of an update call too', async () => {
-			metadataSpy.mockRejectedValueOnce(
-				RejectError.fromCode(
-					new CertifiedRejectErrorCode(requestId, ReplicaRejectCode.CanisterError, 'test', 'IC0537')
-				)
-			);
-
-			await expect(check()).resolves.toEqual({ status: 'no_ledger' });
-
+		it('should read the reject an update call gets before it runs too', async () => {
 			metadataSpy.mockRejectedValueOnce(
 				RejectError.fromCode(
 					new UncertifiedRejectUpdateErrorCode(
@@ -151,8 +140,10 @@ describe('icrc-ledger-status.services', () => {
 		});
 
 		it('should report no ledger when no replica answers and the canister does not exist', async () => {
-			// A query to a canister that no subnet hosts fails its signature check.
-			metadataSpy.mockRejectedValue(TrustError.fromCode(new MissingSignatureErrorCode()));
+			// The boundary node turns away a call to a canister that no subnet hosts.
+			metadataSpy.mockRejectedValue(
+				ProtocolError.fromCode(new HttpErrorCode(400, 'Bad Request', []))
+			);
 			existenceSpy.mockResolvedValue('not_found');
 
 			await expect(check()).resolves.toEqual({ status: 'no_ledger' });
