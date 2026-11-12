@@ -16,8 +16,8 @@
 	import { BUY_MODAL_ONRAMPER_IFRAME } from '$lib/constants/test-ids.constants';
 	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { routeAutopilotVault } from '$lib/derived/nav.derived';
+	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import {
@@ -27,6 +27,8 @@
 	import { trackOnramperOpen } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
+	import type { OnramperId } from '$lib/types/onramper';
+	import type { Token } from '$lib/types/token';
 	import { consoleError } from '$lib/utils/console.utils';
 	import { getTokenIdentifier } from '$lib/utils/identifier.utils';
 	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
@@ -43,9 +45,20 @@
 	// avoids opening on a token that none of the enabled onramps offers.
 	let defaultCrypto = $derived($token?.buy?.onramperId ?? vaultAssetToken?.buy?.onramperId);
 
-	// List of Cryptocurrencies that are allowed to be bought
+	const toOnramperIds = (tokens: Token[]): OnramperId[] =>
+		tokens.map(({ buy }) => buy?.onramperId).filter(nonNullish);
+
+	// OnRamper ignores `onlyCryptoNetworks` whenever `onlyCryptos` is set, so the selected network
+	// has to narrow the tokens themselves.
+	let selectedNetworkOnlyCryptos = $derived(toOnramperIds($enabledFungibleNetworkTokens));
+
+	// List of Cryptocurrencies that are allowed to be bought. A selected network with no token that
+	// OnRamper sells (e.g. XRP) keeps all enabled tokens: an empty list would drop the parameter, and
+	// OnRamper would then offer every token it has on our networks.
 	let onlyCryptos = $derived(
-		$enabledTokens.map((token) => token.buy?.onramperId).filter(nonNullish)
+		selectedNetworkOnlyCryptos.length > 0
+			? selectedNetworkOnlyCryptos
+			: toOnramperIds($enabledTokens)
 	);
 
 	// List of Cryptocurrency Networks to which the tokens are allowed to be bought
@@ -104,17 +117,18 @@
 		buildOnramperLink({
 			identity: currentIdentity,
 			mode: 'buy,sell',
-			defaultFiat: $currentCurrency,
 			defaultCrypto,
 			onlyCryptos,
 			onlyCryptoNetworks,
-			sell_defaultFiat: $currentCurrency,
 			sell_defaultCrypto: defaultCrypto,
 			sell_onlyCryptos: onlyCryptos,
 			sell_onlyCryptoNetworks: onlyCryptoNetworks,
 			wallets: [],
 			networkWallets,
 			supportRecurringPayments: true,
+			// Without a default, OnRamper may preselect Revolut Pay as recommended even when no onramp
+			// offers it for the selected fiat and token, and the widget opens on "No onramp available".
+			defaultPaymentMethod: 'creditcard',
 			// OnRamper's country selector resets the selected token and fiat to the country's defaults
 			// whenever its menu is opened, so the user would lose the token preselected here.
 			enableCountrySelector: false,
