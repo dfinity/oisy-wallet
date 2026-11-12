@@ -17,7 +17,7 @@ import type { Identity } from '@icp-sdk/core/agent';
 export interface BuildOnramperLinkParams {
 	identity: Identity;
 	mode: OnramperMode;
-	defaultFiat: OnramperFiatId;
+	defaultFiat?: OnramperFiatId;
 	defaultCrypto?: OnramperId;
 	onlyCryptos: OnramperId[];
 	onlyCryptoNetworks: OnramperNetworkId[];
@@ -70,7 +70,7 @@ const toQueryString = (
  * @param params - The parameters to build the link with.
  * @param params.identity - The authenticated identity used to call the backend signing endpoint.
  * @param params.mode - The mode of the widget (buy or sell).
- * @param params.defaultFiat - The default fiat currency.
+ * @param params.defaultFiat - The optional default fiat currency.
  * @param params.defaultCrypto - The optional default cryptocurrency.
  * @param params.onlyCryptos - The list of allowed cryptocurrencies.
  * @param params.onlyCryptoNetworks - The list of allowed cryptocurrency networks.
