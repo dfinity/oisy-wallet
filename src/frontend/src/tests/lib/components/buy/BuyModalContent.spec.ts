@@ -149,6 +149,14 @@ describe('BuyModalContent', () => {
 			expect(params.get('sell_defaultCrypto')).toBe(ICP_TOKEN.buy?.onramperId);
 		});
 
+		it('sends no default fiat', async () => {
+			const { findByTestId } = render(BuyModalContent);
+			const params = await widgetParams(findByTestId);
+
+			expect(params.has('defaultFiat')).toBeFalsy();
+			expect(params.has('sell_defaultFiat')).toBeFalsy();
+		});
+
 		it('turns OnRamper country selector off', async () => {
 			const { findByTestId } = render(BuyModalContent);
 			const params = await widgetParams(findByTestId);

@@ -16,7 +16,6 @@
 	import { BUY_MODAL_ONRAMPER_IFRAME } from '$lib/constants/test-ids.constants';
 	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { routeAutopilotVault } from '$lib/derived/nav.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
@@ -104,11 +103,9 @@
 		buildOnramperLink({
 			identity: currentIdentity,
 			mode: 'buy,sell',
-			defaultFiat: $currentCurrency,
 			defaultCrypto,
 			onlyCryptos,
 			onlyCryptoNetworks,
-			sell_defaultFiat: $currentCurrency,
 			sell_defaultCrypto: defaultCrypto,
 			sell_onlyCryptos: onlyCryptos,
 			sell_onlyCryptoNetworks: onlyCryptoNetworks,
