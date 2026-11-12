@@ -179,7 +179,9 @@ Also settled in this spec:
 
 ## Open questions
 
-1. How fast do both lists load? Measured on a deployed test instance during the build.
+1. How fast do both lists load? Measured on a deployed test instance during the build. _Resolved
+   (Stefan, 2026-11-12, fe3): opening is not slower; OnRamper's content starts to load after about
+   2–3 s._
 2. What does the live list put in `address` on ICP and on Solana? _Resolved (2026-11-12, live Buy
    list): on ICP it has ICP only, without an address, and no ICRC token; on Solana, the mint._
 
