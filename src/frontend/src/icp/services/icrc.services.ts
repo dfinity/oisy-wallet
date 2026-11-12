@@ -83,7 +83,8 @@ export const loadCustomTokens = ({
 	onSuccess?: () => void;
 }): Promise<void> =>
 	queryAndUpdate<IcrcCustomToken[]>({
-		request: (params) => loadIcrcCustomTokens({ ...params, useCache }),
+		request: (params) =>
+			loadIcrcCustomTokens({ ...params, useCache, round: nextIcrcCustomTokensRound() }),
 		onLoad: (params) => loadIcrcCustomData({ ...params, onSuccess }),
 		onUpdateError: onCustomTokensUpdateError,
 		identity
@@ -128,20 +129,24 @@ const loadIcrcData = ({
 	nonNullish(data) && icrcDefaultTokensStore.set({ data, certified });
 };
 
-// The loading rounds of the saved ICRC tokens, numbered in the order they start, and the last
-// certified round that wrote the unavailable tokens.
+// The loading rounds of the saved ICRC tokens, numbered in the order they start to fetch the saved
+// tokens, and the last certified round that wrote the unavailable tokens.
 let customTokensRound = 0;
 let unavailableTokensCertifiedRound = 0;
+
+/**
+ * Numbers a loading round of the saved ICRC tokens. Take it before fetching the saved tokens: the
+ * number then tells which round read the newer list, whatever order the rounds finish in.
+ */
+export const nextIcrcCustomTokensRound = (): number => ++customTokensRound;
 
 const loadIcrcCustomTokens = async ({
 	identity,
 	certified,
 	tokens,
-	useCache = false
-}: LoadCustomTokenParams): Promise<IcrcCustomToken[]> => {
-	// Taken before the saved tokens are fetched, so the number tells when the round started.
-	const round = ++customTokensRound;
-
+	useCache = false,
+	round
+}: LoadCustomTokenParams & { round: number }): Promise<IcrcCustomToken[]> => {
 	const customTokens =
 		tokens ??
 		(await loadNetworkCustomTokens({
@@ -364,9 +369,16 @@ const onCustomTokensUpdateError = ({ error: err }: { error: unknown }) => {
 	});
 };
 
-export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
+/**
+ * `icrcRound` is the number the caller took with `nextIcrcCustomTokensRound` before it fetched
+ * `tokens`.
+ */
+export const processCustomTokens = async ({
+	icrcRound,
+	...params
+}: LoadCustomTokenParams & { icrcRound: number }): Promise<void> => {
 	try {
-		const response = await loadIcrcCustomTokens(params);
+		const response = await loadIcrcCustomTokens({ ...params, round: icrcRound });
 
 		loadIcrcCustomData({ response, certified: params.certified });
 	} catch (err) {

@@ -22,6 +22,7 @@
 	} from '$icp/services/icpunks.services';
 	import {
 		loadDefaultIcrcTokens,
+		nextIcrcCustomTokensRound,
 		processCustomTokens as processIcrcCustomTokens
 	} from '$icp/services/icrc.services';
 	import {
@@ -107,7 +108,7 @@
 	//
 	// Now we fetch once and fan the result out to per-standard processors.
 
-	let loadParams = $state<LoadCustomTokenParams | undefined>();
+	let loadParams = $state<(LoadCustomTokenParams & { icrcRound: number }) | undefined>();
 
 	// Guards against stale callbacks from a previous identity's in-flight `queryAndUpdate`.
 	// When identity changes the effect re-runs and bumps the counter; lingering `onLoad`/`onUpdateError`
@@ -118,14 +119,21 @@
 		const identity = $authIdentity;
 		const generation = ++fetchGeneration;
 
-		await queryAndUpdate<CustomToken[]>({
-			request: ({ certified }) => loadNetworkCustomTokens({ certified, identity, useCache: true }),
-			onLoad: ({ response: tokens, certified }) => {
+		await queryAndUpdate<{ tokens: CustomToken[]; icrcRound: number }>({
+			request: async ({ certified }) => {
+				// Before the fetch, so a later reload of the ICRC tokens counts as newer.
+				const icrcRound = nextIcrcCustomTokensRound();
+
+				const tokens = await loadNetworkCustomTokens({ certified, identity, useCache: true });
+
+				return { tokens, icrcRound };
+			},
+			onLoad: ({ response: { tokens, icrcRound }, certified }) => {
 				if (generation !== fetchGeneration) {
 					return;
 				}
 
-				loadParams = { tokens, certified, identity };
+				loadParams = { tokens, certified, identity, icrcRound };
 			},
 			onUpdateError: ({ error: err }) => {
 				if (generation !== fetchGeneration) {

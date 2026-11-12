@@ -14,6 +14,7 @@ import {
 	loadCustomTokens,
 	loadDisabledIcrcTokensBalances,
 	loadDisabledIcrcTokensExchanges,
+	nextIcrcCustomTokensRound,
 	processCustomTokens
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
@@ -530,6 +531,34 @@ describe('icrc.services', () => {
 				]);
 			});
 
+			it('should keep the unavailable tokens of a reload when an older list arrives after it', async () => {
+				// The sign-in load numbers its round before it fetches the saved tokens.
+				const icrcRound = nextIcrcCustomTokensRound();
+
+				// A reload after a save starts later, and the saved token fails to load.
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+
+				ledgerCanisterMock.metadata.mockRejectedValue(new Error('test'));
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				const unavailableTokens = [
+					{ ledgerCanisterId: mockLedgerCanisterId, customToken: mockCustomToken }
+				];
+
+				expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+
+				// The sign-in load's list, read before the save, arrives last.
+				await processCustomTokens({
+					identity: mockIdentity,
+					certified: true,
+					tokens: [],
+					icrcRound
+				});
+
+				expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+			});
+
 			it('should list a curated token whose ledger fails with its symbol and name', async () => {
 				const [curatedToken] = SNS_BUILTIN_TOKENS;
 
@@ -755,10 +784,16 @@ describe('icrc.services', () => {
 			const queryRound = processCustomTokens({
 				identity: mockIdentity,
 				certified: false,
-				tokens: [customToken]
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
 			});
 
-			await processCustomTokens({ identity: mockIdentity, certified: true, tokens: [customToken] });
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
 
 			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
 
@@ -775,7 +810,8 @@ describe('icrc.services', () => {
 			await processCustomTokens({
 				identity: mockIdentity,
 				certified: false,
-				tokens: [customToken]
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
 			});
 
 			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([]);
@@ -786,14 +822,20 @@ describe('icrc.services', () => {
 				.mockRejectedValueOnce(new Error('test'))
 				.mockResolvedValue(tokenMetadata);
 
-			await processCustomTokens({ identity: mockIdentity, certified: true, tokens: [customToken] });
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
 
 			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
 
 			await processCustomTokens({
 				identity: mockIdentity,
 				certified: false,
-				tokens: [customToken]
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
 			});
 
 			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
@@ -804,11 +846,21 @@ describe('icrc.services', () => {
 				.mockRejectedValueOnce(new Error('test'))
 				.mockResolvedValue(tokenMetadata);
 
-			await processCustomTokens({ identity: mockIdentity, certified: true, tokens: [customToken] });
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
 
 			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
 
-			await processCustomTokens({ identity: mockIdentity, certified: true, tokens: [customToken] });
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
 
 			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([]);
 		});
@@ -821,7 +873,8 @@ describe('icrc.services', () => {
 			const queryRound = processCustomTokens({
 				identity: mockIdentity,
 				certified: false,
-				tokens: [customToken]
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
 			});
 
 			// The user deletes the token while the round waits for its ledger.
@@ -845,7 +898,8 @@ describe('icrc.services', () => {
 			const certifiedRound = processCustomTokens({
 				identity: mockIdentity,
 				certified: true,
-				tokens: [customToken]
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
 			});
 
 			// The user deletes the token while the round waits for its ledger.
