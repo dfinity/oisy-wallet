@@ -523,10 +523,22 @@ describe('onramper.utils', () => {
 			{ id: 'ckbtc_icp', network: 'icp', address: mockValidIcToken.ledgerCanisterId }
 		]);
 
-		it('keeps a built-in id, whatever the list says', () => {
-			const token: Erc20Token = { ...aaveToken, buy: { onramperId: 'built_in' } };
+		it('prefers the id from the list over a built-in one', () => {
+			const token: Erc20Token = { ...aaveToken, buy: { onramperId: 'stale_id' } };
+
+			expect(findOnramperId({ token, ids })).toBe('aave_ethereum');
+		});
+
+		it('falls back to the built-in id when the list has no match or is missing', () => {
+			const token: Erc20Token = { ...mockValidErc20Token, buy: { onramperId: 'built_in' } };
 
 			expect(findOnramperId({ token, ids })).toBe('built_in');
+			expect(findOnramperId({ token: { ...aaveToken, buy: { onramperId: 'built_in' } } })).toBe(
+				'built_in'
+			);
+		});
+
+		it('keeps the built-in id of a native coin', () => {
 			expect(findOnramperId({ token: ETHEREUM_TOKEN, ids })).toBe(ETHEREUM_TOKEN.buy?.onramperId);
 		});
 
@@ -558,13 +570,16 @@ describe('onramper.utils', () => {
 	});
 
 	describe('needsOnramperIdLookup', () => {
-		it('is false when every token has a built-in id', () => {
+		it('is false for native coins', () => {
 			expect(needsOnramperIdLookup([ETHEREUM_TOKEN, ICP_TOKEN])).toBeFalsy();
 		});
 
-		it('is true with an ERC-20 or SPL token without a built-in id', () => {
+		it('is true with an ERC-20 or SPL token, with or without a built-in id', () => {
 			expect(needsOnramperIdLookup([ETHEREUM_TOKEN, aaveToken])).toBeTruthy();
 			expect(needsOnramperIdLookup([pyusdToken])).toBeTruthy();
+			expect(
+				needsOnramperIdLookup([{ ...aaveToken, buy: { onramperId: 'aave_ethereum' } }])
+			).toBeTruthy();
 		});
 
 		it('is false for an ICRC token without a built-in id', () => {

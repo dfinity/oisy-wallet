@@ -190,17 +190,22 @@ const isOnramperLookupToken = (token: Token): token is Erc20Token | SplToken =>
 	(isTokenErc20(token) || isTokenSpl(token)) && nonNullish(token.network.buy);
 
 /**
- * Whether any of the tokens has no built-in OnRamper id but could find one in OnRamper's lists.
+ * Whether any of the tokens could find its id in OnRamper's lists: an ERC-20 or SPL token on a
+ * network OnRamper covers, with or without a built-in id, since the id from the list wins.
  *
  * @param tokens - The tokens to check.
  * @returns True if OnRamper's lists are worth loading for these tokens.
  */
 export const needsOnramperIdLookup = (tokens: Token[]): boolean =>
-	tokens.some((token) => isNullish(token.buy) && isOnramperLookupToken(token));
+	tokens.some(isOnramperLookupToken);
 
 /**
- * The OnRamper id of a token: its built-in one, else the one OnRamper's list gives its network and
- * address.
+ * The OnRamper id of a token: the one OnRamper's list gives its network and address, else its
+ * built-in one.
+ *
+ * The list wins, so that a built-in id that OnRamper no longer uses cannot hide the token. The
+ * built-in id covers what the list cannot match: native coins, which have no address, tokens the
+ * list has without an address or under more than one id, and a list that is late or failed.
  *
  * @param params - The parameters.
  * @param params.token - The token.
@@ -214,17 +219,14 @@ export const findOnramperId = ({
 	token: Token;
 	ids?: OnramperIdsByAddress;
 }): OnramperId | undefined => {
-	if (nonNullish(token.buy)) {
-		return token.buy.onramperId;
-	}
-
+	const builtIn = token.buy?.onramperId;
 	const network = token.network.buy?.onramperId;
 
 	if (isNullish(ids) || isNullish(network) || !isOnramperLookupToken(token)) {
-		return undefined;
+		return builtIn;
 	}
 
-	return ids.get(toOnramperAddressKey({ network, address: token.address }));
+	return ids.get(toOnramperAddressKey({ network, address: token.address })) ?? builtIn;
 };
 
 /**

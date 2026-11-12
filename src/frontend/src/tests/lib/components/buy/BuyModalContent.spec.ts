@@ -325,7 +325,33 @@ describe('BuyModalContent', () => {
 				expect(params.get('onlyCryptos')?.split(',')).toContain(ETHEREUM_TOKEN.buy?.onramperId);
 			});
 
-			it('makes no request to OnRamper when every token has a built-in id', async () => {
+			it("prefers OnRamper's id over a built-in one", async () => {
+				mockLists();
+
+				token.set({ ...aaveToken, buy: { onramperId: 'stale_id' } });
+
+				const { findByTestId } = render(BuyModalContent);
+				const params = await widgetParams(findByTestId);
+
+				expect(params.get('defaultCrypto')).toBe('aave_ethereum');
+				expect(params.get('sell_defaultCrypto')).toBe('aave_ethereum');
+			});
+
+			it('falls back to the built-in id when the lists fail', async () => {
+				vi.spyOn(onramperRest, 'fetchOnramperSupportedCryptos').mockRejectedValue(
+					new Error('Forbidden')
+				);
+
+				token.set({ ...aaveToken, buy: { onramperId: 'built_in_id' } });
+
+				const { findByTestId } = render(BuyModalContent);
+				const params = await widgetParams(findByTestId);
+
+				expect(params.get('defaultCrypto')).toBe('built_in_id');
+				expect(params.get('sell_defaultCrypto')).toBe('built_in_id');
+			});
+
+			it('makes no request to OnRamper without an ERC-20 or SPL token', async () => {
 				const spy = mockLists();
 
 				token.set(ICP_TOKEN);
