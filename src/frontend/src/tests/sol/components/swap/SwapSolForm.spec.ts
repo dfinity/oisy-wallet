@@ -1,3 +1,8 @@
+import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import {
+	IC_CKSOL_LEDGER_CANISTER_ID,
+	IC_CKSOL_MINTER_CANISTER_ID
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
@@ -8,6 +13,7 @@ import {
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
+import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
@@ -18,8 +24,12 @@ import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
 import SwapSolForm from '$sol/components/swap/SwapSolForm.svelte';
 import { SOL_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$sol/stores/sol-fee.store';
+import { mockChainFusionActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
+import { mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import SwapSolFormLifiTest from '$tests/sol/components/swap/SwapSolFormLifiTest.svelte';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -285,6 +295,97 @@ describe('SwapSolForm', () => {
 		const tokenButtons = container.querySelectorAll('button svg');
 
 		expect(tokenButtons.length).toBeGreaterThanOrEqual(2);
+	});
+
+	describe('SOL → ckSOL', () => {
+		const ckSolToken = {
+			...mockValidIcCkToken,
+			symbol: 'ckSOL',
+			ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID,
+			minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID,
+			twinToken: SOLANA_TOKEN,
+			enabled: true
+		};
+
+		const offer: SwapMappedResult = {
+			provider: SwapProvider.CHAIN_FUSION,
+			receiveAmount: 47_104_120n,
+			swapDetails: {
+				sourceFees: [],
+				externalFees: [],
+				minimumAmount: 20_000_000n,
+				solDeposit: { address: mockSolAddress2, automaticDepositFee: 2_000_000n }
+			}
+		};
+
+		const conversionInFlight: ActiveUserTransaction = {
+			...mockChainFusionActiveUserTransaction,
+			status: { Executing: null },
+			data: {
+				ChainFusion: {
+					direction: { SolToCkSol: null },
+					source_token: { SolNativeMainnet: null },
+					dest_token: { Icrc: mockPrincipal },
+					amount: 50_000_000n
+				}
+			}
+		};
+
+		const renderForm = (swaps: SwapMappedResult[]) => {
+			const context = new Map(mockContext);
+
+			context.set(SWAP_CONTEXT_KEY, {
+				...initSwapContext({
+					sourceToken: SOLANA_TOKEN,
+					destinationToken: ckSolToken
+				}),
+				sourceTokenExchangeRate: readable(10),
+				destinationTokenExchangeRate: readable(10)
+			});
+
+			const store = initSwapAmountsStore();
+			store.setSwaps({ swaps, amountForSwap: 1, selectedProvider: swaps[0] });
+			context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store });
+
+			return render(SwapSolForm, { props, context });
+		};
+
+		beforeEach(() => {
+			activeUserTransactionsStore.reset();
+			activeUserTransactionsStore.init(mockPrincipal);
+		});
+
+		// The amounts parse to zero here, below any minimum.
+		it('should name the minimum deposit amount of the offer', async () => {
+			const { getByText } = renderForm([offer]);
+
+			await waitFor(() =>
+				expect(
+					getByText('The amount falls below the minimum deposit amount of 0.02 SOL.')
+				).toBeInTheDocument()
+			);
+		});
+
+		// Acceptance criterion 8.
+		it('should say a conversion is in progress, in place of the generic message, while one is in flight', () => {
+			activeUserTransactionsStore.upsert({ transaction: conversionInFlight });
+
+			const { getByText, queryByText } = renderForm([]);
+
+			expect(getByText(en.swap.error.cksol_deposit_in_progress)).toBeInTheDocument();
+			expect(queryByText(en.swap.text.swap_is_not_offered)).not.toBeInTheDocument();
+		});
+
+		it('should not mention a conversion in progress when none is in flight', () => {
+			activeUserTransactionsStore.upsert({
+				transaction: { ...conversionInFlight, status: { Succeeded: null } }
+			});
+
+			const { getByText, queryByText } = renderForm([]);
+
+			expect(queryByText(en.swap.error.cksol_deposit_in_progress)).not.toBeInTheDocument();
+			expect(getByText(en.swap.text.swap_is_not_offered)).toBeInTheDocument();
+		});
 	});
 
 	describe('a LI.FI offer', () => {

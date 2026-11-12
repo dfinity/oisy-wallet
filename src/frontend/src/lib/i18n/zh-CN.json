@@ -1097,6 +1097,7 @@
 			"minimum_ckbtc_amount": "金额低于将 ckBTC 转换为 BTC 所需的最低 $amount ckBTC。",
 			"minimum_cketh_amount": "金额低于 $amount $symbol 的最低提取金额。",
 			"minimum_amount": "金额低于 $amount $symbol 的最低提取金额。",
+			"minimum_deposit_amount": "",
 			"minimum_ledger_fees": "金额低于账本费用 $symbol。",
 			"minimum_cketh_balance": "$symbol 余额低于预计手续费 $amount。",
 			"unknown_cketh": "无法获取 ckETH 代币。",
@@ -1491,7 +1492,12 @@
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
-			"lifi_route_unverified": ""
+			"lifi_route_unverified": "",
+			"cksol_deposit_in_progress": "",
+			"cksol_deposit_terms_changed": "",
+			"cksol_earlier_deposit_quarantined": "",
+			"cksol_minter_unavailable": "",
+			"cksol_deposit_quarantined": ""
 		}
 	},
 	"buy": {
@@ -1828,6 +1834,8 @@
 			"convert_fee": "转换手续费",
 			"convert_inter_network_fee": "跨网络手续费",
 			"convert_btc_network_fee": "比特币网络手续费",
+			"cksol_sweep_fee": "",
+			"cksol_deposit_address_rent": "",
 			"zero_fee": "免费",
 			"total_fee": "总手续费",
 			"ata_fee": "ATA 手续费",

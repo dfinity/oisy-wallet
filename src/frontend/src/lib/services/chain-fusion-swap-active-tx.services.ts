@@ -4,6 +4,7 @@ import type {
 	ChainFusionData,
 	TokenId
 } from '$declarations/backend/backend.did';
+import type { DepositSolId, DepositSolStatus } from '$declarations/cksol_minter/cksol_minter.did';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { BITCOIN_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
@@ -19,11 +20,17 @@ import {
 	withdrawalStatuses
 } from '$icp/api/ckbtc-minter.api';
 import { retrieveEthStatus } from '$icp/api/cketh-minter.api';
-import { withdrawSolStatus } from '$icp/api/cksol-minter.api';
+import {
+	depositSolStatus,
+	watchDepositAddress,
+	withdrawSolStatus
+} from '$icp/api/cksol-minter.api';
 import { getTransactions } from '$icp/api/icrc-index-ng.api';
+import { CkSolWatchDepositAddressError } from '$icp/canisters/cksol-minter.errors';
 import {
 	CHAIN_FUSION_CKBTC_MINT_LOOKUP_PAGE_SIZE,
-	CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS
+	CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS,
+	CHAIN_FUSION_WATCH_DEPOSIT_ADDRESS_INTERVAL_MILLIS
 } from '$lib/constants/app.constants';
 import {
 	applyActiveUserTransactionPollUpdate,
@@ -40,20 +47,25 @@ import {
 	chainFusionBtcWithdrawalStatusError,
 	chainFusionMintOutcomeError,
 	chainFusionMintOutcomeToStatus,
+	chainFusionSolMintStatusError,
 	chainFusionSolWithdrawalStatusError,
 	chainFusionWithdrawalStatusError,
 	isChainFusionBtcMintDirection,
 	isChainFusionBtcWithdrawalDirection,
 	isChainFusionEthWithdrawalDirection,
 	isChainFusionMintDirection,
+	isChainFusionSolMintDirection,
 	isChainFusionSolWithdrawalDirection,
 	isSameUtxoTxid,
+	newerCkSolDepositId,
 	toChainFusionBtcMintOutcome,
 	toChainFusionBtcWithdrawalLearnedRefs,
 	toChainFusionBtcWithdrawalStatus,
 	toChainFusionDepositLogTopics,
 	toChainFusionExternalRefs,
 	toChainFusionExternalRefsMap,
+	toChainFusionSolMintLearnedRefs,
+	toChainFusionSolMintStatus,
 	toChainFusionSolWithdrawalLearnedRefs,
 	toChainFusionSolWithdrawalStatus,
 	toChainFusionWithdrawalLearnedRefs,
@@ -131,6 +143,31 @@ const shouldCallUpdateBalance = (txId: string): boolean => {
 	}
 
 	lastUpdateBalanceMs.set(txId, now);
+
+	return true;
+};
+
+/**
+ * Tracks when each pending SOL → ckSOL row last called `watch_deposit_address`, an update call,
+ * while the poller ticks every few seconds and the minter scans the address minutes apart at
+ * best. In-memory, like the `update_balance` throttle: a refresh resets it, which at worst costs
+ * one extra call that only reports what the minter already knows.
+ */
+const lastWatchDepositAddressMs = new Map<string, number>();
+
+export const resetChainFusionWatchDepositAddressThrottle = (): void => {
+	lastWatchDepositAddressMs.clear();
+};
+
+const shouldCallWatchDepositAddress = (txId: string): boolean => {
+	const now = Date.now();
+	const last = lastWatchDepositAddressMs.get(txId);
+
+	if (nonNullish(last) && now - last < CHAIN_FUSION_WATCH_DEPOSIT_ADDRESS_INTERVAL_MILLIS) {
+		return false;
+	}
+
+	lastWatchDepositAddressMs.set(txId, now);
 
 	return true;
 };
@@ -338,6 +375,139 @@ const pollChainFusionSolWithdrawal = async ({
 		error: chainFusionSolWithdrawalStatusError(status),
 		learned: toChainFusionSolWithdrawalLearnedRefs(status),
 		refs
+	});
+};
+
+/**
+ * The latest deposit of the account the minter names in its answer to `watch_deposit_address`:
+ * the deposit in flight when it detected one, otherwise the latest one it queued, which after a
+ * mint is the minted deposit. An error answer names one too, except `TemporarilyUnavailable`,
+ * which is rethrown for the next tick to retry.
+ */
+const watchCkSolLatestDepositId = async ({
+	identity,
+	minterCanisterId
+}: {
+	identity: Identity;
+	minterCanisterId: string;
+}): Promise<DepositSolId | undefined> => {
+	try {
+		const { status, latest_deposit_id } = await watchDepositAddress({ identity, minterCanisterId });
+
+		return 'Detected' in status ? status.Detected.deposit_id : fromNullable(latest_deposit_id);
+	} catch (err: unknown) {
+		if (!(err instanceof CkSolWatchDepositAddressError) || 'TemporarilyUnavailable' in err.error) {
+			throw err;
+		}
+
+		// A quarantined deposit of the account blocks every new one, so it is the deposit to
+		// follow; a full watchlist still names the latest deposit, minted or dropped.
+		return 'Quarantined' in err.error
+			? err.error.Quarantined.deposit_id
+			: fromNullable(err.error.TooManyWatchedAddresses.latest_deposit_id);
+	}
+};
+
+/**
+ * SOL → ckSOL. The minter reports the deposit through `watch_deposit_address`, an update call
+ * made about once a minute, and then answers exactly through `deposit_sol_status`, a query asked
+ * on every tick once the row knows the deposit id.
+ *
+ * Only a deposit above the floor is taken for this conversion: the latest deposit id of the
+ * account when the row was opened, or the dropped deposit the row followed before. A `Watching`
+ * answer keeps the row in flight; the same call registers the address again once a window has
+ * ended, so a late transfer is still found. A `Dropped` deposit leaves its SOL on the address,
+ * which the minter detects again under a new id.
+ */
+const pollChainFusionSolMint = async ({
+	tx,
+	identity,
+	refs
+}: {
+	tx: ActiveUserTransaction;
+	identity: Identity;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+}): Promise<void> => {
+	const minterCanisterId = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID];
+
+	// Not pollable without the minter.
+	if (isNullish(minterCanisterId)) {
+		return;
+	}
+
+	const knownDepositIdRef = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID];
+	const knownDepositId = nonNullish(knownDepositIdRef) ? BigInt(knownDepositIdRef) : undefined;
+
+	const applyDepositStatus = async ({
+		depositId,
+		learned
+	}: {
+		depositId: DepositSolId;
+		learned: Partial<Record<ChainFusionExternalRefKey, string>>;
+	}): Promise<DepositSolStatus> => {
+		const status = await depositSolStatus({
+			identity,
+			minterCanisterId,
+			depositId,
+			certified: false
+		});
+
+		const candidate = toChainFusionSolMintStatus(status);
+
+		// A terminal row leaves the pending set, so its throttle entry has no reader left.
+		if (nonNullish(candidate) && !('Executing' in candidate)) {
+			lastWatchDepositAddressMs.delete(tx.id);
+		}
+
+		await applyUpdate({
+			identity,
+			tx,
+			candidate,
+			error: chainFusionSolMintStatusError(status),
+			learned: { ...learned, ...toChainFusionSolMintLearnedRefs(status) },
+			refs
+		});
+
+		return status;
+	};
+
+	if (nonNullish(knownDepositId)) {
+		const status = await applyDepositStatus({ depositId: knownDepositId, learned: {} });
+
+		if (!('Dropped' in status)) {
+			return;
+		}
+	}
+
+	if (!shouldCallWatchDepositAddress(tx.id)) {
+		return;
+	}
+
+	const latestDepositIdRef = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_LATEST_DEPOSIT_ID];
+
+	const depositId = newerCkSolDepositId({
+		depositId: await watchCkSolLatestDepositId({ identity, minterCanisterId }),
+		floor:
+			knownDepositId ?? (nonNullish(latestDepositIdRef) ? BigInt(latestDepositIdRef) : undefined)
+	});
+
+	if (isNullish(depositId)) {
+		// Watched, or a deposit from before this one: the SOL is on the address or about to be.
+		await applyUpdate({
+			identity,
+			tx,
+			candidate: { Executing: null },
+			error: undefined,
+			learned: {},
+			refs
+		});
+
+		return;
+	}
+
+	await applyDepositStatus({
+		depositId,
+		learned: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: `${depositId}` }
 	});
 };
 
@@ -841,10 +1011,11 @@ const pollChainFusionMint = async ({
  * row's immutable `data` — which is why the direction is captured at creation
  * rather than re-derived from the token pair on every tick.
  *
- * The three withdrawal directions ask a minter and get an exact answer. The two
+ * The withdrawal directions ask a minter and get an exact answer. The two
  * Ethereum-family mints are observed from the deposit side, since the ckETH minter
  * has no per-deposit status endpoint. The ckBTC mint is the odd one out: its
- * poller has to make the minting happen, not merely watch it.
+ * poller has to make the minting happen, not merely watch it. The ckSOL mint asks
+ * the minter which deposit is this conversion's, then follows that deposit exactly.
  */
 export const pollChainFusionActiveUserTransactions = async ({
 	identity,
@@ -892,6 +1063,11 @@ export const pollChainFusionActiveUserTransactions = async ({
 
 				if (isChainFusionSolWithdrawalDirection(data.direction)) {
 					await pollChainFusionSolWithdrawal({ tx, identity, refs });
+					return;
+				}
+
+				if (isChainFusionSolMintDirection(data.direction)) {
+					await pollChainFusionSolMint({ tx, identity, refs });
 				}
 			} catch (err: unknown) {
 				// A transient RPC or canister blip must leave the row pending so the next
