@@ -280,7 +280,7 @@
 		},
 		"cksol_minter": {
 			"type": "custom",
-			"candid": "https://raw.githubusercontent.com/dfinity/cksol/bb61dcf2045bca4333a732268c1b6d19e113ba93/minter/cksol_minter.did",
+			"candid": "https://raw.githubusercontent.com/dfinity/cksol/a4d1f032bd81d412c842243e74e6bde8d543f70c/minter/cksol_minter.did",
 			"wasm": "https://github.com/dfinity/cksol/releases/download/cksol_minter-v0.1.0/cksol_minter.wasm.gz",
 			"remote": {
 				"id": {

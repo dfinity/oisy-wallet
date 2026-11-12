@@ -1,6 +1,7 @@
 import ActiveUserTransactionItem from '$lib/components/active-user-transactions/ActiveUserTransactionItem.svelte';
 import { NANO_SECONDS_IN_MILLISECOND, NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import en from '$lib/i18n/en.json';
+import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
 import { LIFI_EXTERNAL_REF_KEYS } from '$lib/types/lifi';
 import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 import {
@@ -96,6 +97,27 @@ describe('ActiveUserTransactionItem', () => {
 		expect(screen.getByText(`${en.swap.text.swap} 1 ckETH → ETH`)).toBeInTheDocument();
 		expect(container).toHaveTextContent('Internet Computer → Ethereum');
 		expect(container).toHaveTextContent('Chain Fusion');
+	});
+
+	// A ckSOL mint credits the whole balance of the deposit address less the minter's fees.
+	it('shows what the minter credited on a Chain Fusion row that learned it', () => {
+		render(ActiveUserTransactionItem, {
+			props: {
+				tx: {
+					...mockChainFusionActiveUserTransaction,
+					status: { Succeeded: null },
+					external_refs: [
+						...mockChainFusionActiveUserTransaction.external_refs,
+						{ key: CHAIN_FUSION_EXTERNAL_REF_KEYS.RECEIVED_AMOUNT, value: '0.9921' }
+					]
+				},
+				isUnseen: false,
+				dismissing: false,
+				onDismiss: vi.fn()
+			}
+		});
+
+		expect(screen.getByText(`${en.swap.text.swap} 1 ckETH → 0.9921 ETH`)).toBeInTheDocument();
 	});
 
 	// A fifth swap provider renders through the shared layout for free, because its
