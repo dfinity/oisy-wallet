@@ -126,6 +126,9 @@
 			wallets: [],
 			networkWallets,
 			supportRecurringPayments: true,
+			// Without a default, OnRamper may preselect Revolut Pay as recommended even when no onramp
+			// offers it for the selected fiat and token, and the widget opens on "No onramp available".
+			defaultPaymentMethod: 'creditcard',
 			// OnRamper's country selector resets the selected token and fiat to the country's defaults
 			// whenever its menu is opened, so the user would lose the token preselected here.
 			enableCountrySelector: false,

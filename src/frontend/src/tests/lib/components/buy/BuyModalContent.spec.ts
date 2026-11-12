@@ -199,5 +199,12 @@ describe('BuyModalContent', () => {
 
 			expect(params.get('enableCountrySelector')).toBe('false');
 		});
+
+		it('preselects credit card as the payment method', async () => {
+			const { findByTestId } = render(BuyModalContent);
+			const params = await widgetParams(findByTestId);
+
+			expect(params.get('defaultPaymentMethod')).toBe('creditcard');
+		});
 	});
 });
