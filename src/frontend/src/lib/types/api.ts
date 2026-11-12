@@ -81,6 +81,10 @@ export interface BtcGetPendingTransactionParams {
 
 export type BtcGetSpendableUtxosParams = BtcGetPendingTransactionParams;
 
+export interface BtcGetBalanceParams extends BtcGetPendingTransactionParams {
+	minConfirmations?: number;
+}
+
 export interface BtcBroadcastTransactionParams extends BtcGetPendingTransactionParams {
 	// Fully signed and consensus-serialized.
 	transaction: Uint8Array;

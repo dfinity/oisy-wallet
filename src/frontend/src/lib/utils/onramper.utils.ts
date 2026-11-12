@@ -8,6 +8,7 @@ import type {
 	OnramperMode,
 	OnramperNetworkId,
 	OnramperNetworkWallet,
+	OnramperPaymentMethodId,
 	OnramperWalletAddress
 } from '$lib/types/onramper';
 import { nonNullish } from '@dfinity/utils';
@@ -17,8 +18,9 @@ import type { Identity } from '@icp-sdk/core/agent';
 export interface BuildOnramperLinkParams {
 	identity: Identity;
 	mode: OnramperMode;
-	defaultFiat: OnramperFiatId;
+	defaultFiat?: OnramperFiatId;
 	defaultCrypto?: OnramperId;
+	defaultPaymentMethod?: OnramperPaymentMethodId;
 	onlyCryptos: OnramperId[];
 	onlyCryptoNetworks: OnramperNetworkId[];
 	// The Sell tab ignores the fields above and reads its own `sell_*` copies of them.
@@ -70,8 +72,9 @@ const toQueryString = (
  * @param params - The parameters to build the link with.
  * @param params.identity - The authenticated identity used to call the backend signing endpoint.
  * @param params.mode - The mode of the widget (buy or sell).
- * @param params.defaultFiat - The default fiat currency.
+ * @param params.defaultFiat - The optional default fiat currency.
  * @param params.defaultCrypto - The optional default cryptocurrency.
+ * @param params.defaultPaymentMethod - The optional default payment method of the Buy tab.
  * @param params.onlyCryptos - The list of allowed cryptocurrencies.
  * @param params.onlyCryptoNetworks - The list of allowed cryptocurrency networks.
  * @param params.wallets - The list of combination of cryptocurrency and wallet addresses.

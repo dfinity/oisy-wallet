@@ -16,6 +16,8 @@ export type OnramperFiatId = Currency;
 // OnRamper's `mode` is a comma-separated list; the order sets the order of the widget's tabs.
 export type OnramperMode = 'buy' | 'buy,sell';
 
+export type OnramperPaymentMethodId = 'creditcard';
+
 // TODO: refine the type for IC/ICRC address to be more clear
 export type OnramperWalletAddress = BtcAddress | EthAddress | string;
 

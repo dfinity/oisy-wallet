@@ -1,4 +1,6 @@
+import { ICP_NETWORK_ID, ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 import * as onramperEnv from '$env/rest/onramper.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as backendApi from '$lib/api/backend.api';
 import { OnramperSecretNotConfiguredError } from '$lib/canisters/errors';
@@ -12,6 +14,7 @@ import * as analyticsServices from '$lib/services/analytics.services';
 import { token } from '$lib/stores/token.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
 describe('BuyModalContent', () => {
@@ -121,6 +124,7 @@ describe('BuyModalContent', () => {
 
 		afterEach(() => {
 			token.reset();
+			mockPage.reset();
 		});
 
 		const widgetParams = async (findByTestId: (id: string) => Promise<HTMLElement>) => {
@@ -128,6 +132,38 @@ describe('BuyModalContent', () => {
 
 			return new URL(iframe.getAttribute('src') ?? '').searchParams;
 		};
+
+		it('offers the tokens of every network when no network is selected', async () => {
+			const { findByTestId } = render(BuyModalContent);
+			const params = await widgetParams(findByTestId);
+
+			const onlyCryptos = params.get('onlyCryptos')?.split(',');
+
+			expect(onlyCryptos).toContain(ETHEREUM_TOKEN.buy?.onramperId);
+			expect(onlyCryptos).toContain(ICP_TOKEN.buy?.onramperId);
+		});
+
+		it('offers only the tokens of the selected network on both tabs', async () => {
+			mockPage.mockNetwork(ICP_NETWORK_ID.description);
+
+			const { findByTestId } = render(BuyModalContent);
+			const params = await widgetParams(findByTestId);
+
+			expect(params.get('onlyCryptos')).toBe(ICP_TOKEN.buy?.onramperId);
+			expect(params.get('sell_onlyCryptos')).toBe(ICP_TOKEN.buy?.onramperId);
+		});
+
+		it('offers the tokens of every network when the selected one has none that OnRamper sells', async () => {
+			mockPage.mockNetwork(ICP_PSEUDO_TESTNET_NETWORK_ID.description);
+
+			const { findByTestId } = render(BuyModalContent);
+			const params = await widgetParams(findByTestId);
+
+			const onlyCryptos = params.get('onlyCryptos')?.split(',');
+
+			expect(onlyCryptos).toContain(ETHEREUM_TOKEN.buy?.onramperId);
+			expect(onlyCryptos).toContain(ICP_TOKEN.buy?.onramperId);
+		});
 
 		it('sends no default token when none is open', async () => {
 			token.reset();
@@ -149,11 +185,26 @@ describe('BuyModalContent', () => {
 			expect(params.get('sell_defaultCrypto')).toBe(ICP_TOKEN.buy?.onramperId);
 		});
 
+		it('sends no default fiat', async () => {
+			const { findByTestId } = render(BuyModalContent);
+			const params = await widgetParams(findByTestId);
+
+			expect(params.has('defaultFiat')).toBeFalsy();
+			expect(params.has('sell_defaultFiat')).toBeFalsy();
+		});
+
 		it('turns OnRamper country selector off', async () => {
 			const { findByTestId } = render(BuyModalContent);
 			const params = await widgetParams(findByTestId);
 
 			expect(params.get('enableCountrySelector')).toBe('false');
+		});
+
+		it('preselects credit card as the payment method', async () => {
+			const { findByTestId } = render(BuyModalContent);
+			const params = await widgetParams(findByTestId);
+
+			expect(params.get('defaultPaymentMethod')).toBe('creditcard');
 		});
 	});
 });
