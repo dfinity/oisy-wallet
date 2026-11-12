@@ -10,6 +10,7 @@
 	import { assertIndexLedgerId } from '$icp/services/ic-add-custom-tokens.service';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+	import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 	import { isTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import { removeCustomToken, setCustomToken } from '$lib/api/backend.api';
 	import { deleteIdbIcToken, deleteIdbSolToken, deleteIdbEthToken } from '$lib/api/idb-tokens.api';
@@ -282,6 +283,8 @@
 				});
 
 				icrcCustomTokensStore.resetByIdentifier(tokenToDelete.ledgerCanisterId);
+				// A token whose query answer mapped while its certified answer did not is on the Help card too.
+				icrcUnavailableCustomTokensStore.remove(tokenToDelete.ledgerCanisterId);
 				await deleteIdbIcToken({ identity: $authIdentity, token: customToken });
 
 				await onTokenDeleteSuccess(tokenToDelete);
