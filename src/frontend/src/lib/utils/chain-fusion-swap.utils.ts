@@ -50,8 +50,7 @@ export const toChainFusionPairs = (ckTokens: IcCkInterface[]): ChainFusionPair[]
  * The networks a twin token must live on for its pair to be offerable: Ethereum mainnet,
  * where the ckETH / ckERC20 helper contracts are deployed, Bitcoin mainnet, where the
  * ckBTC minter takes deposits, and, behind its flag, Solana mainnet, where the ckSOL minter
- * pays out withdrawals. SOL has no Chain Fusion entry among the Solana swap providers, so
- * only ckSOL → SOL is offered.
+ * takes deposits and pays out withdrawals.
  */
 const ENABLED_TWIN_NETWORK_IDS = [
 	ETHEREUM_NETWORK_ID,

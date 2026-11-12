@@ -267,6 +267,24 @@ export const getSolCreateAccountFee = async (network: SolanaNetworkType): Promis
 };
 
 /**
+ * The lamports an address holds, read at the RPC's default commitment and never cached: a caller
+ * reads it to see what has arrived since.
+ */
+export const getSolBalance = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<bigint> => {
+	const { getBalance } = solanaHttpRpc(network);
+
+	const { value } = await getBalance(solAddress(address)).send();
+
+	return value;
+};
+
+/**
  * Calculates the maximum among the most recent prioritisation fees in microlamports.
  *
  * It is useful to have an estimate of how much a transaction could cost to be processed without expiring.

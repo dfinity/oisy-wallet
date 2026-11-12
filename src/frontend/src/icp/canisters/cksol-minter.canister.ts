@@ -6,12 +6,16 @@ import type {
 	Lamport,
 	LedgerBurnIndex,
 	MinterInfo,
+	WatchDepositAddressOk,
 	WithdrawSolOk,
 	WithdrawSolStatus
 } from '$declarations/cksol_minter/cksol_minter.did';
 import { idlFactory as idlCertifiedFactoryCkSolMinter } from '$declarations/cksol_minter/cksol_minter.factory.certified.did';
 import { idlFactory as idlFactoryCkSolMinter } from '$declarations/cksol_minter/cksol_minter.factory.did';
-import { CkSolWithdrawSolError } from '$icp/canisters/cksol-minter.errors';
+import {
+	CkSolWatchDepositAddressError,
+	CkSolWithdrawSolError
+} from '$icp/canisters/cksol-minter.errors';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices, type QueryParams } from '@dfinity/utils';
@@ -51,6 +55,25 @@ export class CkSolMinterCanister extends Canister<CkSolMinterService> {
 		certified
 	}: { depositId: DepositSolId } & QueryParams): Promise<DepositSolStatus> =>
 		this.caller({ certified }).deposit_sol_status(depositId);
+
+	/**
+	 * Registers the caller's deposit address for the default account, so that the minter scans it
+	 * for about 24 hours and mints what arrives, or reports the registration or the deposit in
+	 * flight when there is one. Free, and always for the caller: the minter takes no owner.
+	 *
+	 * @throws {CkSolWatchDepositAddressError} when the minter refuses the registration.
+	 */
+	watchDepositAddress = async (): Promise<WatchDepositAddressOk> => {
+		const { watch_deposit_address } = this.caller({ certified: true });
+
+		const response = await watch_deposit_address({ subaccount: [] });
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw new CkSolWatchDepositAddressError(response.Err);
+	};
 
 	/**
 	 * Burns `amount` lamports of ckSOL from the caller's default account, which the

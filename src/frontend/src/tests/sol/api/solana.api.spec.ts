@@ -19,6 +19,7 @@ import {
 	getMultipleAccountsInfo,
 	getMultipleAccountsInfoWithContext,
 	getSignatureStatus,
+	getSolBalance,
 	getSolCreateAccountFee,
 	getTokenInfo,
 	isBlockhashValid,
@@ -58,6 +59,7 @@ vi.mock('$sol/api/idb-sol-transaction-details.api', () => ({
 describe('solana.api', () => {
 	let mockGetSignaturesForAddress: MockInstance;
 	let mockGetMinimumBalanceForRentExemption: MockInstance;
+	let mockGetBalance: MockInstance;
 	let mockGetRecentPrioritizationFees: MockInstance;
 	let mockGetAccountInfo: MockInstance;
 	let mockGetMultipleAccounts: MockInstance;
@@ -213,6 +215,10 @@ describe('solana.api', () => {
 			send: () => Promise.resolve(mockRecentPriorityFees)
 		});
 
+		mockGetBalance = vi.fn().mockReturnValue({
+			send: () => Promise.resolve({ context: { slot: 100n }, value: lamports(mockBalance) })
+		});
+
 		mockGetAccountInfo = vi.fn().mockReturnValue({
 			send: () => Promise.resolve(mockAccountInfo)
 		});
@@ -233,6 +239,7 @@ describe('solana.api', () => {
 			getSignaturesForAddress: mockGetSignaturesForAddress,
 			getMinimumBalanceForRentExemption: mockGetMinimumBalanceForRentExemption,
 			getRecentPrioritizationFees: mockGetRecentPrioritizationFees,
+			getBalance: mockGetBalance,
 			getAccountInfo: mockGetAccountInfo,
 			getMultipleAccounts: mockGetMultipleAccounts,
 			simulateTransaction: mockSimulateTransaction
@@ -851,6 +858,26 @@ describe('solana.api', () => {
 			});
 
 			await expect(getSolCreateAccountFee(SolanaNetworks.mainnet)).rejects.toThrow(mockError);
+		});
+	});
+
+	describe('getSolBalance', () => {
+		it('should read the lamports the address holds', async () => {
+			await expect(
+				getSolBalance({ address: mockSolAddress, network: SolanaNetworks.mainnet })
+			).resolves.toBe(mockBalance);
+			expect(solRpcProviders.solanaHttpRpc).toHaveBeenCalledExactlyOnceWith(SolanaNetworks.mainnet);
+			expect(mockGetBalance).toHaveBeenCalledExactlyOnceWith(address(mockSolAddress));
+		});
+
+		it('should throw error when RPC call fails', async () => {
+			mockGetBalance.mockReturnValueOnce({
+				send: () => Promise.reject(mockError)
+			});
+
+			await expect(
+				getSolBalance({ address: mockSolAddress, network: SolanaNetworks.mainnet })
+			).rejects.toThrow(mockError);
 		});
 	});
 

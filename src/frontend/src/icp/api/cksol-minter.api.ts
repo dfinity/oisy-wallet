@@ -5,6 +5,7 @@ import type {
 	Lamport,
 	LedgerBurnIndex,
 	MinterInfo,
+	WatchDepositAddressOk,
 	WithdrawSolOk,
 	WithdrawSolStatus
 } from '$declarations/cksol_minter/cksol_minter.did';
@@ -56,6 +57,20 @@ export const depositSolStatus = async ({
 	const { depositSolStatus } = await minterCanister({ identity, minterCanisterId });
 
 	return depositSolStatus(params);
+};
+
+export const watchDepositAddress = async ({
+	identity,
+	minterCanisterId
+}: {
+	identity: NullishIdentity;
+	minterCanisterId: CanisterIdText;
+}): Promise<WatchDepositAddressOk> => {
+	assertNonNullish(identity);
+
+	const { watchDepositAddress } = await minterCanister({ identity, minterCanisterId });
+
+	return watchDepositAddress();
 };
 
 export const withdrawSol = async ({

@@ -1097,6 +1097,7 @@
 			"minimum_ckbtc_amount": "المبلغ أقل من الحد الأدنى $amount ckBTC المطلوب للتحويل إلى BTC.",
 			"minimum_cketh_amount": "المبلغ أقل من الحد الأدنى للسحب $amount $symbol.",
 			"minimum_amount": "المبلغ أقل من الحد الأدنى للسحب $amount $symbol.",
+			"minimum_deposit_amount": "",
 			"minimum_ledger_fees": "المبلغ أقل من رسوم دفتر الأستاذ $symbol.",
 			"minimum_cketh_balance": "رصيد $symbol أقل من الرسوم المقدرة $amount.",
 			"unknown_cketh": "لا يمكن استرداد توكن ckETH.",
@@ -1491,7 +1492,12 @@
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
-			"lifi_route_unverified": ""
+			"lifi_route_unverified": "",
+			"cksol_deposit_in_progress": "",
+			"cksol_deposit_terms_changed": "",
+			"cksol_earlier_deposit_quarantined": "",
+			"cksol_minter_unavailable": "",
+			"cksol_deposit_quarantined": ""
 		}
 	},
 	"buy": {
@@ -1828,6 +1834,8 @@
 			"convert_fee": "رسوم التحويل",
 			"convert_inter_network_fee": "رسوم بين الشبكات",
 			"convert_btc_network_fee": "رسوم شبكة البيتكوين",
+			"cksol_sweep_fee": "",
+			"cksol_deposit_address_rent": "",
 			"zero_fee": "مجاني",
 			"total_fee": "إجمالي الرسوم",
 			"ata_fee": "رسوم ATA",
