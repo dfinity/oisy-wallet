@@ -138,8 +138,7 @@ describe('swap.constants', () => {
 			expect(reachesIcp(BTC_MAINNET_NETWORK_ID)).toBeTruthy();
 		});
 
-		// ckSOL → SOL only: SOL → ckSOL waits for the ckSOL minter's automatic deposits.
-		it('opens Solana to ICP as a destination only, with Chain Fusion and ckSOL on', async () => {
+		it('pairs ICP with Solana in both directions with Chain Fusion and ckSOL on', async () => {
 			const { icpReaches, reachesIcp, SOLANA_MAINNET_NETWORK_ID } = await loadMatrix({
 				oneSec: false,
 				chainFusion: true,
@@ -147,27 +146,29 @@ describe('swap.constants', () => {
 			});
 
 			expect(icpReaches(SOLANA_MAINNET_NETWORK_ID)).toBeTruthy();
-			expect(reachesIcp(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+			expect(reachesIcp(SOLANA_MAINNET_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('does not pair ICP with Solana without the ckSOL flag', async () => {
-			const { icpReaches, SOLANA_MAINNET_NETWORK_ID } = await loadMatrix({
+			const { icpReaches, reachesIcp, SOLANA_MAINNET_NETWORK_ID } = await loadMatrix({
 				oneSec: true,
 				chainFusion: true,
 				ckSol: false
 			});
 
 			expect(icpReaches(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+			expect(reachesIcp(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 
 		it('does not pair ICP with Solana without Chain Fusion', async () => {
-			const { icpReaches, SOLANA_MAINNET_NETWORK_ID } = await loadMatrix({
+			const { icpReaches, reachesIcp, SOLANA_MAINNET_NETWORK_ID } = await loadMatrix({
 				oneSec: true,
 				chainFusion: false,
 				ckSol: true
 			});
 
 			expect(icpReaches(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+			expect(reachesIcp(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 
 		it('does not open Bitcoin to Ethereum without the NEAR Intents BTC flag', async () => {

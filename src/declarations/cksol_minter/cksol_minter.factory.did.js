@@ -15,7 +15,8 @@ export const idlFactory = ({ IDL }) => {
 		nonce_accounts_to_add: IDL.Opt(IDL.Vec(IDL.Text)),
 		sol_rpc_canister_id: IDL.Opt(IDL.Principal),
 		deposit_sol_required_cycles: IDL.Opt(IDL.Nat64),
-		minimum_withdrawal_amount: IDL.Opt(Lamport)
+		minimum_withdrawal_amount: IDL.Opt(Lamport),
+		automatic_deposit_fee: IDL.Opt(Lamport)
 	});
 	const SolanaNetwork = IDL.Variant({
 		Mainnet: IDL.Null,
@@ -37,7 +38,8 @@ export const idlFactory = ({ IDL }) => {
 		nonce_accounts: IDL.Vec(IDL.Text),
 		minimum_withdrawal_amount: Lamport,
 		ledger_canister_id: IDL.Principal,
-		master_key_name: Ed25519KeyName
+		master_key_name: Ed25519KeyName,
+		automatic_deposit_fee: IDL.Opt(Lamport)
 	});
 	const MinterArg = IDL.Variant({ Upgrade: UpgradeArgs, Init: InitArgs });
 	const DepositSolArgs = IDL.Record({
@@ -114,6 +116,18 @@ export const idlFactory = ({ IDL }) => {
 		amount_to_mint: Lamport
 	});
 	const Hash = IDL.Text;
+	const DepositOrigin = IDL.Variant({
+		Manual: IDL.Null,
+		Automatic: IDL.Null
+	});
+	const WatchedDepositAddress = IDL.Record({
+		last_scanned_at: IDL.Opt(IDL.Nat64),
+		valid_until: IDL.Nat64,
+		address: Address,
+		account: Account,
+		scan_count: IDL.Nat32,
+		scheduled_from: IDL.Nat64
+	});
 	const EventType = IDL.Variant({
 		SucceededTransaction: IDL.Record({ signature: Signature }),
 		SubmittedTransaction: IDL.Record({
@@ -143,10 +157,15 @@ export const idlFactory = ({ IDL }) => {
 		QueuedDeposit: IDL.Record({
 			deposit_id: DepositSolId,
 			balance: Lamport,
+			origin: IDL.Opt(DepositOrigin),
 			address: Address,
-			account: Account
+			account: Account,
+			deposit_fee: IDL.Opt(Lamport)
 		}),
 		ExpiredTransaction: IDL.Record({ signature: Signature }),
+		WatchedDepositAddresses: IDL.Record({
+			entries: IDL.Vec(WatchedDepositAddress)
+		}),
 		MintedSweptDeposit: IDL.Record({
 			deposit_id: DepositSolId,
 			mint_block_index: LedgerMintIndex
@@ -165,9 +184,41 @@ export const idlFactory = ({ IDL }) => {
 		withdrawal_fee: Lamport,
 		minimum_deposit_amount: Lamport,
 		deposit_sol_required_cycles: IDL.Nat,
+		collected_automatic_deposit_fees: IDL.Opt(Lamport),
 		nonce_accounts: IDL.Vec(IDL.Text),
 		minimum_withdrawal_amount: Lamport,
-		minter_address: IDL.Opt(IDL.Text)
+		minter_address: IDL.Opt(IDL.Text),
+		automatic_deposit_fee: IDL.Opt(Lamport)
+	});
+	const WatchDepositAddressArgs = IDL.Record({
+		subaccount: IDL.Opt(IDL.Vec(IDL.Nat8))
+	});
+	const WatchDepositAddressStatus = IDL.Variant({
+		Detected: IDL.Record({ deposit_id: DepositSolId }),
+		Watching: IDL.Record({
+			next_scan_at: IDL.Opt(IDL.Nat64),
+			last_scanned_at: IDL.Opt(IDL.Nat64),
+			valid_until: IDL.Nat64,
+			scan_count: IDL.Nat32
+		})
+	});
+	const WatchDepositAddressOk = IDL.Record({
+		status: WatchDepositAddressStatus,
+		latest_deposit_id: IDL.Opt(DepositSolId),
+		minimum_deposit_amount: Lamport,
+		address: Address,
+		automatic_deposit_fee: Lamport
+	});
+	const WatchDepositAddressError = IDL.Variant({
+		TemporarilyUnavailable: IDL.Text,
+		Quarantined: IDL.Record({ deposit_id: DepositSolId }),
+		TooManyWatchedAddresses: IDL.Record({
+			latest_deposit_id: IDL.Opt(DepositSolId)
+		})
+	});
+	const WatchDepositAddressResult = IDL.Variant({
+		Ok: WatchDepositAddressOk,
+		Err: WatchDepositAddressError
 	});
 	const WithdrawSolArgs = IDL.Record({
 		from_subaccount: IDL.Opt(IDL.Vec(IDL.Nat8)),
@@ -209,6 +260,7 @@ export const idlFactory = ({ IDL }) => {
 		get_deposit_address: IDL.Func([GetDepositAddressArgs], [Address], []),
 		get_events: IDL.Func([GetEventsArgs], [GetEventsResult], ['query']),
 		get_minter_info: IDL.Func([], [MinterInfo], ['query']),
+		watch_deposit_address: IDL.Func([WatchDepositAddressArgs], [WatchDepositAddressResult], []),
 		withdraw_sol: IDL.Func([WithdrawSolArgs], [WithdrawSolResult], []),
 		withdraw_sol_status: IDL.Func([WithdrawSolStatusArgs], [WithdrawSolStatus], [])
 	});
@@ -223,7 +275,8 @@ export const init = ({ IDL }) => {
 		nonce_accounts_to_add: IDL.Opt(IDL.Vec(IDL.Text)),
 		sol_rpc_canister_id: IDL.Opt(IDL.Principal),
 		deposit_sol_required_cycles: IDL.Opt(IDL.Nat64),
-		minimum_withdrawal_amount: IDL.Opt(Lamport)
+		minimum_withdrawal_amount: IDL.Opt(Lamport),
+		automatic_deposit_fee: IDL.Opt(Lamport)
 	});
 	const SolanaNetwork = IDL.Variant({
 		Mainnet: IDL.Null,
@@ -245,7 +298,8 @@ export const init = ({ IDL }) => {
 		nonce_accounts: IDL.Vec(IDL.Text),
 		minimum_withdrawal_amount: Lamport,
 		ledger_canister_id: IDL.Principal,
-		master_key_name: Ed25519KeyName
+		master_key_name: Ed25519KeyName,
+		automatic_deposit_fee: IDL.Opt(Lamport)
 	});
 	const MinterArg = IDL.Variant({ Upgrade: UpgradeArgs, Init: InitArgs });
 

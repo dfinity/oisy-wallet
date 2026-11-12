@@ -40,9 +40,23 @@ export const CHAIN_FUSION_EXTERNAL_REF_KEYS = {
 	// Withdrawal poll key: the ckSOL ledger burn index `withdraw_sol` returned. The ckSOL
 	// minter keys `withdraw_sol_status` on it.
 	WITHDRAW_SOL_BLOCK_INDEX: 'chain_fusion_withdraw_sol_index',
-	// The Solana transaction the ckSOL minter sent on the user's behalf, learned from the
-	// withdrawal status.
+	// The Solana transaction the conversion turns on: for a ckSOL mint the user's own transfer to
+	// the deposit address, snapshotted once it is sent; for a ckSOL withdrawal the transaction the
+	// minter sent on the user's behalf, learned from the withdrawal status. The two directions never
+	// share a row, so one key serves both, as `BTC_TXID` does.
 	SOL_TX_SIGNATURE: 'chain_fusion_sol_tx',
+	// The minter's per-user deposit address the SOL was sent to, for the record: the mint poller
+	// asks the minter about the account, not about the address.
+	SOL_DEPOSIT_ADDRESS: 'chain_fusion_sol_deposit',
+	// Mint poll keys. The ckSOL minter numbers deposits in the order it queues them, so the latest
+	// deposit id of the account when the row was opened is the floor every later deposit lies
+	// above: an earlier deposit's mint is never taken for this one. The deposit id itself is learned
+	// once `watch_deposit_address` reports the deposit, and `deposit_sol_status` is keyed on it.
+	CKSOL_LATEST_DEPOSIT_ID: 'chain_fusion_cksol_latest',
+	CKSOL_DEPOSIT_ID: 'chain_fusion_cksol_deposit',
+	// What the minter credited, formatted, learned when it reports the mint. It can differ from
+	// the amount asked: the minter mints the whole balance of the deposit address less its fees.
+	RECEIVED_AMOUNT: 'chain_fusion_received_amount',
 	// Display + analytics metadata snapshotted at creation time. These reuse
 	// OneSec's exact key strings — `ActiveUserTransactionItem` reads *every* row's
 	// refs through `toOneSecExternalRefsMap`, so a fourth swap provider renders

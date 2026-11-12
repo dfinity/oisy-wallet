@@ -5,11 +5,16 @@ import type {
 	ActiveUserTransactionStatus,
 	ChainFusionDirection
 } from '$declarations/backend/backend.did';
-import type { WithdrawSolStatus } from '$declarations/cksol_minter/cksol_minter.did';
+import type {
+	DepositSolId,
+	DepositSolStatus,
+	WithdrawSolStatus
+} from '$declarations/cksol_minter/cksol_minter.did';
 import {
 	CKERC20_HELPER_CONTRACT_SIGNATURE,
 	CKETH_HELPER_CONTRACT_SIGNATURE
 } from '$env/networks/networks.cketh.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { EthAddress } from '$eth/types/address';
 import { tokenAddressToHex } from '$eth/utils/token.utils';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
@@ -21,6 +26,8 @@ import {
 } from '$lib/types/chain-fusion-swap';
 import { SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
 import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
@@ -64,6 +71,23 @@ export const isChainFusionBtcWithdrawalDirection = (direction: ChainFusionDirect
 // ckSOL → SOL: exact, keyed on the ckSOL ledger burn index `withdraw_sol` returned.
 export const isChainFusionSolWithdrawalDirection = (direction: ChainFusionDirection): boolean =>
 	'CkSolToSol' in direction;
+
+// SOL → ckSOL: the minter reports the deposit through `watch_deposit_address`, then answers
+// exactly through `deposit_sol_status`.
+export const isChainFusionSolMintDirection = (direction: ChainFusionDirection): boolean =>
+	'SolToCkSol' in direction;
+
+/**
+ * Whether one of the transactions is a SOL → ckSOL conversion still in flight. The minter takes
+ * one deposit per account at a time, so a second conversion would only wait on the address.
+ */
+export const hasChainFusionSolMintInFlight = (transactions: ActiveUserTransaction[]): boolean =>
+	transactions.some(
+		(tx) =>
+			'ChainFusion' in tx.data &&
+			isChainFusionSolMintDirection(tx.data.ChainFusion.direction) &&
+			!isTerminalActiveUserTransaction(tx)
+	);
 
 /**
  * Builds the `ChainFusion` AUT data variant: the direction discriminant plus the
@@ -338,6 +362,66 @@ export const toChainFusionSolWithdrawalLearnedRefs = (
 		? { [CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_SIGNATURE]: signature }
 		: {};
 };
+
+/**
+ * Maps the ckSOL minter's deposit status to the AUT status enum.
+ *
+ * `Dropped` stays in flight: the sweep failed or expired, so nothing was minted and the SOL is
+ * still on the deposit address, which the minter watches again for a new deposit. `Quarantined`
+ * is final as far as the conversion goes: the minter keeps the SOL until an upgrade resolves the
+ * deposit. `NotFound` leaves the row alone, as for a withdrawal.
+ */
+export const toChainFusionSolMintStatus = (
+	status: DepositSolStatus
+): ActiveUserTransactionStatus | undefined => {
+	if ('Minted' in status) {
+		return { Succeeded: null };
+	}
+
+	if ('Quarantined' in status) {
+		return { Failed: null };
+	}
+
+	if ('Queued' in status || 'Swept' in status || 'Finalized' in status || 'Dropped' in status) {
+		return { Executing: null };
+	}
+
+	if ('NotFound' in status) {
+		return undefined;
+	}
+
+	assertNever(status, 'Unexpected ckSOL deposit status');
+};
+
+export const chainFusionSolMintStatusError = (status: DepositSolStatus): string | undefined =>
+	'Quarantined' in status ? get(i18n).swap.error.cksol_deposit_quarantined : undefined;
+
+// What the minter credited, formatted in ckSOL, whose unit is one lamport like SOL's.
+export const toChainFusionSolMintLearnedRefs = (
+	status: DepositSolStatus
+): Partial<Record<ChainFusionExternalRefKey, string>> =>
+	'Minted' in status
+		? {
+				[CHAIN_FUSION_EXTERNAL_REF_KEYS.RECEIVED_AMOUNT]: formatToken({
+					value: status.Minted.minted_amount,
+					unitName: SOLANA_TOKEN.decimals
+				})
+			}
+		: {};
+
+/**
+ * `depositId` when it lies above `floor`, the latest deposit id of the account before this
+ * conversion, or above none when the account had no deposit. The minter numbers deposits in the
+ * order it queues them, so only a later one can carry this conversion's SOL.
+ */
+export const newerCkSolDepositId = ({
+	depositId,
+	floor
+}: {
+	depositId: DepositSolId | undefined;
+	floor: DepositSolId | undefined;
+}): DepositSolId | undefined =>
+	nonNullish(depositId) && (isNullish(floor) || depositId > floor) ? depositId : undefined;
 
 /**
  * What the Bitcoin side plus the ckBTC minter say about a deposit.

@@ -11,6 +11,7 @@ import {
 	isUnclearBtcBroadcastOutcome
 } from '$btc/utils/btc-send.utils';
 import type { ChainFusionDirection } from '$declarations/backend/backend.did';
+import type { WatchDepositAddressOk } from '$declarations/cksol_minter/cksol_minter.did';
 import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
@@ -33,8 +34,14 @@ import {
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { estimateFee } from '$icp/api/ckbtc-minter.api';
 import { eip1559TransactionPrice } from '$icp/api/cketh-minter.api';
-import { minterInfo as ckSolMinterInfo } from '$icp/api/cksol-minter.api';
+import { minterInfo as ckSolMinterInfo, watchDepositAddress } from '$icp/api/cksol-minter.api';
+import { CkSolWatchDepositAddressError } from '$icp/canisters/cksol-minter.errors';
+import {
+	CKSOL_DEPOSIT_ADDRESS_RENT,
+	CKSOL_DEPOSIT_SWEEP_FEE
+} from '$icp/constants/cksol.constants';
 import { icrcTokens } from '$icp/derived/icrc.derived';
+import { loadCkSolDepositAddress } from '$icp/services/cksol-deposit.services';
 import { sendIc } from '$icp/services/ic-send.services';
 import { btcAddressStore } from '$icp/stores/btc.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
@@ -46,6 +53,9 @@ import {
 	isTokenCkEthLedger,
 	isTokenCkSolLedger
 } from '$icp/utils/ic-send.utils';
+import { ZERO } from '$lib/constants/app.constants';
+import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
+import { authIdentity } from '$lib/derived/auth.derived';
 import {
 	ProgressStepsSend,
 	ProgressStepsSendIc,
@@ -61,6 +71,7 @@ import {
 	CHAIN_FUSION_EXTERNAL_REF_KEYS,
 	type ChainFusionExternalRefKey
 } from '$lib/types/chain-fusion-swap';
+import { ChainFusionSolDepositRefusedError } from '$lib/types/errors';
 import type { Amount } from '$lib/types/send';
 import {
 	SwapProvider,
@@ -69,11 +80,13 @@ import {
 	type ChainFusionSwapDetails,
 	type EvmQuoteParams,
 	type IcpBridgeQuoteParams,
+	type NearIntentsQuoteParams,
 	type SwapMappedResult,
 	type SwapQuoteObserver
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import {
+	hasChainFusionSolMintInFlight,
 	toChainFusionData,
 	toChainFusionDisplayRefs,
 	toChainFusionExternalRefs
@@ -83,7 +96,11 @@ import { consoleError } from '$lib/utils/console.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { parseToken } from '$lib/utils/parse.utils';
-import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import { getSolBalance } from '$sol/api/solana.api';
+import { sendSol } from '$sol/services/sol-send.services';
+import type { SolAddress } from '$sol/types/address';
+import { SolanaNetworks } from '$sol/types/network';
+import { assertNonNullish, fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -249,6 +266,126 @@ const resolveChainFusionBtcQuote = ({
 export const fetchChainFusionBtcQuote = (
 	params: BtcQuoteParams
 ): Promise<SwapMappedResult | undefined> => Promise.resolve(resolveChainFusionBtcQuote(params));
+
+const resolveChainFusionSolQuote = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	onProviderParticipating
+}: NearIntentsQuoteParams): Promise<SwapMappedResult | undefined> => {
+	if (!CHAIN_FUSION_SWAP_ENABLED) {
+		return;
+	}
+
+	const ckDestinationToken = asCkTwinOf({ ckToken: destinationToken, nativeToken: sourceToken });
+
+	if (
+		isNullish(ckDestinationToken) ||
+		!isTokenCkSolLedger(ckDestinationToken) ||
+		sourceToken.network.id !== SOLANA_MAINNET_NETWORK_ID
+	) {
+		return;
+	}
+
+	const { minterCanisterId } = ckDestinationToken;
+
+	// The deposit address is the user's own, so it takes the signed-in identity, which the
+	// Solana quote parameters do not carry.
+	const identity = get(authIdentity);
+
+	// One conversion at a time: the minter queues one deposit per account, so SOL sent while
+	// another deposit is in flight would only wait on the address for a later registration.
+	if (
+		isNullish(minterCanisterId) ||
+		isNullish(identity) ||
+		hasChainFusionSolMintInFlight(get(activeUserTransactionsPending))
+	) {
+		return;
+	}
+
+	onProviderParticipating?.(SwapProvider.CHAIN_FUSION);
+
+	const [{ minimum_deposit_amount, automatic_deposit_fee }, depositAddress] = await Promise.all([
+		ckSolMinterInfo({ identity: new AnonymousIdentity(), minterCanisterId, certified: false }),
+		loadCkSolDepositAddress({ identity, minterCanisterId })
+	]);
+
+	const automaticDepositFee = fromNullable(automatic_deposit_fee);
+
+	// A minter without the automatic deposit flow reports no fee for it, and would never mint
+	// SOL that no one deposits with cycles.
+	if (isNullish(automaticDepositFee)) {
+		return;
+	}
+
+	const depositAddressBalance = await getSolBalance({
+		address: depositAddress,
+		network: SolanaNetworks.mainnet
+	});
+
+	const missingRent =
+		depositAddressBalance < CKSOL_DEPOSIT_ADDRESS_RENT
+			? CKSOL_DEPOSIT_ADDRESS_RENT - depositAddressBalance
+			: ZERO;
+
+	// All three come out of what the minter mints. The Solana network fee of the transfer is paid
+	// on top, and the form's fee section shows it as for any SOL send.
+	const sourceFees: ChainFusionFee[] = [
+		{
+			labelPath: 'fee.text.convert_inter_network_fee',
+			fee: automaticDepositFee,
+			token: sourceToken,
+			deductedFromAmount: true
+		},
+		{
+			labelPath: 'fee.text.cksol_sweep_fee',
+			fee: CKSOL_DEPOSIT_SWEEP_FEE,
+			token: sourceToken,
+			deductedFromAmount: true
+		},
+		...(missingRent > ZERO
+			? [
+					{
+						labelPath: 'fee.text.cksol_deposit_address_rent',
+						fee: missingRent,
+						token: sourceToken,
+						deductedFromAmount: true
+					}
+				]
+			: [])
+	];
+
+	return {
+		provider: SwapProvider.CHAIN_FUSION,
+		receiveAmount: computeChainFusionReceiveAmount({ amount, sourceFees }),
+		swapDetails: {
+			sourceFees,
+			externalFees: [],
+			// Neither the fee nor the minimum is certified: the execution holds the minter's own
+			// answer to `watch_deposit_address` to both before any SOL moves.
+			minimumAmount: minimum_deposit_amount,
+			solDeposit: { address: depositAddress, automaticDepositFee }
+		}
+	};
+};
+
+/**
+ * Quotes a ckSOL mint — SOL → ckSOL.
+ *
+ * The minter mints what the deposit address holds above its rent, less the automatic deposit fee
+ * and the deposit's share of the sweep's Solana fee, so the offer needs the minter's fee and
+ * minimum, the user's deposit address, and how much of the rent that address still lacks. Without
+ * any of them there is no offer, and none while another SOL → ckSOL conversion is in flight.
+ */
+export const fetchChainFusionSolQuote = async (
+	params: NearIntentsQuoteParams
+): Promise<SwapMappedResult | undefined> => {
+	try {
+		return await resolveChainFusionSolQuote(params);
+	} catch (err: unknown) {
+		consoleError(err);
+	}
+};
 
 /**
  * The ckETH the minter burns to cover the Ethereum transaction it sends on the user's
@@ -1032,6 +1169,143 @@ export const fetchChainFusionBtcSwap = async ({
 
 		throw err;
 	}
+
+	await enableDestination(enableDestinationToken);
+};
+
+/**
+ * Registers the user's deposit address with the minter. Every way this can fail stops the
+ * conversion before any SOL moves, so each is rethrown as a refusal the form can name.
+ */
+const registerCkSolDepositAddress = async (params: {
+	identity: Identity;
+	minterCanisterId: CanisterIdText;
+}): Promise<WatchDepositAddressOk> => {
+	try {
+		return await watchDepositAddress(params);
+	} catch (err: unknown) {
+		throw new ChainFusionSolDepositRefusedError(
+			err instanceof CkSolWatchDepositAddressError && 'Quarantined' in err.error
+				? 'quarantined'
+				: 'unavailable',
+			{ cause: err }
+		);
+	}
+};
+
+/**
+ * Whether the minter's `watch_deposit_address` answer takes the deposit the user reviewed: a
+ * registration rather than a deposit already in flight, for the address the offer was priced
+ * with, with a minimum the amount meets and a fee no higher than quoted.
+ *
+ * @throws {ChainFusionSolDepositRefusedError} when it does not.
+ */
+const assertCkSolDepositWatched = ({
+	watched: { status, address, minimum_deposit_amount, automatic_deposit_fee },
+	solDeposit,
+	amount
+}: {
+	watched: WatchDepositAddressOk;
+	solDeposit: NonNullable<ChainFusionSwapDetails['solDeposit']>;
+	amount: bigint;
+}) => {
+	if ('Detected' in status) {
+		throw new ChainFusionSolDepositRefusedError('inFlight');
+	}
+
+	if (
+		address !== solDeposit.address ||
+		amount < minimum_deposit_amount ||
+		automatic_deposit_fee > solDeposit.automaticDepositFee
+	) {
+		throw new ChainFusionSolDepositRefusedError('changed');
+	}
+};
+
+/**
+ * Executes a ckSOL mint — SOL → ckSOL — as a plain Solana transfer to the minter's per-user
+ * deposit address.
+ *
+ * The address is registered with `watch_deposit_address` first, and nothing moves unless the
+ * answer takes the deposit the user reviewed. The registration is what makes the mint
+ * independent of OISY: from that call on, the minter itself scans the address for about 24 hours,
+ * so the ckSOL arrives even if the tab closes before the row exists. A transfer that fails moves
+ * nothing, and the registration simply expires.
+ *
+ * The row is created once the transfer is confirmed, as for the NEAR Intents Solana swap. It
+ * snapshots the latest deposit id of the account from the registration, the floor every deposit
+ * the poller takes for this one has to lie above.
+ */
+export const fetchChainFusionSolSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	destinationToken,
+	swapAmount,
+	userAddress,
+	swapDetails: { solDeposit },
+	swapId,
+	usdSourceValue,
+	enableDestinationToken
+}: {
+	identity: Identity;
+	progress: (step: ProgressStepsSwap) => void;
+	sourceToken: Token;
+	destinationToken: IcCkToken;
+	swapAmount: Amount;
+	userAddress: SolAddress;
+	swapDetails: ChainFusionSwapDetails;
+	swapId: string;
+	usdSourceValue?: string;
+	enableDestinationToken?: () => Promise<void>;
+}): Promise<void> => {
+	const { minterCanisterId } = destinationToken;
+
+	assertNonNullish(minterCanisterId);
+	assertNonNullish(solDeposit);
+
+	const amount = parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals });
+
+	const watched = await registerCkSolDepositAddress({ identity, minterCanisterId });
+
+	assertCkSolDepositWatched({ watched, solDeposit, amount });
+
+	progress(ProgressStepsSwap.SIGN_TRANSFER);
+
+	const signature = await sendSol({
+		identity,
+		token: sourceToken,
+		amount,
+		prioritizationFee: ZERO,
+		destination: watched.address,
+		source: userAddress
+	});
+
+	progress(ProgressStepsSwap.SWAP);
+
+	const latestDepositId = fromNullable(watched.latest_deposit_id);
+
+	await createChainFusionActiveUserTransaction({
+		identity,
+		swapId,
+		direction: { SolToCkSol: null },
+		sourceToken,
+		destinationToken,
+		// The ck destination is the token being minted, so its minter is the one to ask.
+		minterCanisterId,
+		amount,
+		swapAmount,
+		usdSourceValue,
+		extraRefs: {
+			[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_SIGNATURE]: signature,
+			[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_DEPOSIT_ADDRESS]: watched.address,
+			...(nonNullish(latestDepositId) && {
+				[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_LATEST_DEPOSIT_ID]: `${latestDepositId}`
+			})
+		}
+	});
+
+	progress(ProgressStepsSwap.UPDATE_UI);
 
 	await enableDestination(enableDestinationToken);
 };

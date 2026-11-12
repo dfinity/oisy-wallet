@@ -11,6 +11,74 @@ import { assertNonNullish } from '@dfinity/utils';
 import { get, writable } from 'svelte/store';
 
 describe('sol-swap.providers', () => {
+	describe('Chain Fusion entry', () => {
+		const load = async ({
+			ckSolEnabled,
+			chainFusionEnabled = true
+		}: {
+			ckSolEnabled: boolean;
+			chainFusionEnabled?: boolean;
+		}) => {
+			vi.resetModules();
+			vi.doMock('$env/cksol.env', () => ({ CKSOL_ENABLED: ckSolEnabled }));
+			vi.doMock('$env/chain-fusion-swap.env', () => ({
+				CHAIN_FUSION_SWAP_ENABLED: chainFusionEnabled
+			}));
+
+			const { solSwapProviders: providers } = await import('$lib/providers/sol-swap.providers');
+
+			return providers.find(({ key }) => key === SwapProvider.CHAIN_FUSION);
+		};
+
+		afterEach(() => {
+			vi.doUnmock('$env/cksol.env');
+			vi.doUnmock('$env/chain-fusion-swap.env');
+			vi.doUnmock('$lib/services/chain-fusion-swap.services');
+			vi.resetModules();
+		});
+
+		it('should be registered as an enabled provider with ckSOL on', async () => {
+			const entry = await load({ ckSolEnabled: true });
+
+			expect(entry?.isEnabled).toBeTruthy();
+		});
+
+		// Production keeps no Chain Fusion for Solana while ckSOL is off.
+		it('should not be registered with ckSOL off', async () => {
+			await expect(load({ ckSolEnabled: false })).resolves.toBeUndefined();
+		});
+
+		it('should not be registered with the Chain Fusion provider off', async () => {
+			await expect(
+				load({ ckSolEnabled: true, chainFusionEnabled: false })
+			).resolves.toBeUndefined();
+		});
+
+		it('should quote through the SOL → ckSOL quote', async () => {
+			const fetchChainFusionSolQuote = vi.fn().mockResolvedValue(undefined);
+
+			vi.doMock('$lib/services/chain-fusion-swap.services', () => ({ fetchChainFusionSolQuote }));
+
+			const entry = await load({ ckSolEnabled: true });
+
+			assertNonNullish(entry);
+
+			const { SOLANA_TOKEN } = await import('$env/tokens/tokens.sol.env');
+
+			const params = {
+				sourceToken: SOLANA_TOKEN,
+				destinationToken: SOLANA_TOKEN,
+				amount: 1n,
+				userAddress: mockSolAddress,
+				slippage: 0.5
+			};
+
+			await entry.getQuote(params);
+
+			expect(fetchChainFusionSolQuote).toHaveBeenCalledExactlyOnceWith(params);
+		});
+	});
+
 	describe('LI.FI entry', () => {
 		it('should be registered by default', () => {
 			expect(solSwapProviders.find(({ key }) => key === SwapProvider.LIFI)).toBeDefined();

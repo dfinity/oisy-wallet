@@ -2,10 +2,14 @@ import type {
 	_SERVICE as CkSolMinterService,
 	DepositSolStatus,
 	MinterInfo,
+	WatchDepositAddressOk,
 	WithdrawSolStatus
 } from '$declarations/cksol_minter/cksol_minter.did';
 import { CkSolMinterCanister } from '$icp/canisters/cksol-minter.canister';
-import { CkSolWithdrawSolError } from '$icp/canisters/cksol-minter.errors';
+import {
+	CkSolWatchDepositAddressError,
+	CkSolWithdrawSolError
+} from '$icp/canisters/cksol-minter.errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { ActorSubclass } from '@icp-sdk/core/agent';
@@ -37,7 +41,9 @@ describe('cksol-minter.canister', () => {
 			deposit_sol_required_cycles: 1_000_000_000_000n,
 			nonce_accounts: ['G2VedB18ZtzqwwGX6waEGWgXi21GqQ4CLr7JHvhvDGk'],
 			minimum_withdrawal_amount: 2_000_000n,
-			minter_address: ['GXVewvv6HehcLFYCmwpqh5CrMjqN9zJ8rqzGq3HEt9Ax']
+			minter_address: ['GXVewvv6HehcLFYCmwpqh5CrMjqN9zJ8rqzGq3HEt9Ax'],
+			automatic_deposit_fee: [],
+			collected_automatic_deposit_fees: []
 		};
 
 		it('should read the minter info as a query', async () => {
@@ -103,6 +109,48 @@ describe('cksol-minter.canister', () => {
 			await expect(depositSolStatus({ depositId: 42n, certified: true })).resolves.toEqual(status);
 			expect(certifiedService.deposit_sol_status).toHaveBeenCalledExactlyOnceWith(42n);
 			expect(service.deposit_sol_status).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('watchDepositAddress', () => {
+		const watched: WatchDepositAddressOk = {
+			address: 'Br8eRkeya8hy3sHCYqtWqGeNNZ349aPSUKGVYFWKKer1',
+			minimum_deposit_amount: 20_000_000n,
+			automatic_deposit_fee: 2_000_000n,
+			status: {
+				Watching: {
+					valid_until: 1_794_500_000_000_000_000n,
+					scan_count: 0,
+					last_scanned_at: [],
+					next_scan_at: [1_794_413_660_000_000_000n]
+				}
+			},
+			latest_deposit_id: [41n]
+		};
+
+		it('should register the default account of the caller, as an update', async () => {
+			certifiedService.watch_deposit_address.mockResolvedValue({ Ok: watched });
+
+			const { watchDepositAddress } = await createCkSolMinterCanister();
+
+			await expect(watchDepositAddress()).resolves.toEqual(watched);
+			expect(certifiedService.watch_deposit_address).toHaveBeenCalledExactlyOnceWith({
+				subaccount: []
+			});
+			expect(service.watch_deposit_address).not.toHaveBeenCalled();
+		});
+
+		it('should throw the minter refusal with its answer', async () => {
+			const refusal = { Quarantined: { deposit_id: 41n } };
+
+			certifiedService.watch_deposit_address.mockResolvedValue({ Err: refusal });
+
+			const { watchDepositAddress } = await createCkSolMinterCanister();
+
+			const promise = watchDepositAddress();
+
+			await expect(promise).rejects.toBeInstanceOf(CkSolWatchDepositAddressError);
+			await expect(promise).rejects.toMatchObject({ error: refusal });
 		});
 	});
 
