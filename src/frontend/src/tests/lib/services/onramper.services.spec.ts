@@ -15,6 +15,13 @@ describe('onramper.services', () => {
 			sell: [{ id: 'aave_ethereum', network: 'ethereum', address: aaveAddress }]
 		};
 
+		// Each list settles on its own; these specs wait for both.
+		const load = async () => {
+			const { buy, sell } = loadOnramperIds();
+
+			return { buy: await buy, sell: await sell };
+		};
+
 		const mockLists = () =>
 			vi
 				.spyOn(onramperRest, 'fetchOnramperSupportedCryptos')
@@ -32,7 +39,7 @@ describe('onramper.services', () => {
 		it('loads the Buy and the Sell list, indexed by network and address', async () => {
 			mockLists();
 
-			await expect(loadOnramperIds()).resolves.toEqual({
+			await expect(load()).resolves.toEqual({
 				buy: new Map([
 					[`ethereum:${aaveAddress}`, 'aave_ethereum'],
 					[`solana:${pyusdMint}`, 'pyusd_solana']
@@ -41,11 +48,26 @@ describe('onramper.services', () => {
 			});
 		});
 
+		it('settles each list on its own', async () => {
+			vi.spyOn(onramperRest, 'fetchOnramperSupportedCryptos').mockImplementation(({ type }) =>
+				type === 'sell' ? new Promise(() => {}) : Promise.resolve(lists[type])
+			);
+
+			const { buy } = loadOnramperIds();
+
+			await expect(buy).resolves.toEqual(
+				new Map([
+					[`ethereum:${aaveAddress}`, 'aave_ethereum'],
+					[`solana:${pyusdMint}`, 'pyusd_solana']
+				])
+			);
+		});
+
 		it('fetches each list once', async () => {
 			const spy = mockLists();
 
-			await loadOnramperIds();
-			await loadOnramperIds();
+			await load();
+			await load();
 
 			expect(spy).toHaveBeenCalledTimes(2);
 			expect(spy).toHaveBeenCalledWith({ type: 'buy' });
@@ -55,7 +77,7 @@ describe('onramper.services', () => {
 		it('shares a request still in flight', async () => {
 			const spy = mockLists();
 
-			await Promise.all([loadOnramperIds(), loadOnramperIds()]);
+			await Promise.all([load(), load()]);
 
 			expect(spy).toHaveBeenCalledTimes(2);
 		});
@@ -65,7 +87,7 @@ describe('onramper.services', () => {
 				type === 'sell' ? Promise.reject(new Error('Forbidden')) : Promise.resolve(lists[type])
 			);
 
-			const { buy, sell } = await loadOnramperIds();
+			const { buy, sell } = await load();
 
 			expect(buy?.get(`ethereum:${aaveAddress}`)).toBe('aave_ethereum');
 			expect(sell).toBeUndefined();
@@ -78,11 +100,11 @@ describe('onramper.services', () => {
 				.mockRejectedValueOnce(new Error('Network error'))
 				.mockImplementation(({ type }) => Promise.resolve(lists[type]));
 
-			const first = await loadOnramperIds();
+			const first = await load();
 
 			expect(first.buy).toBeUndefined();
 
-			const second = await loadOnramperIds();
+			const second = await load();
 
 			expect(second.buy?.get(`ethereum:${aaveAddress}`)).toBe('aave_ethereum');
 			expect(spy).toHaveBeenCalledTimes(3);

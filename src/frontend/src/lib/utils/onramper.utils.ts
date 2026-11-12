@@ -10,6 +10,7 @@ import type {
 	OnramperId,
 	OnramperIds,
 	OnramperIdsByAddress,
+	OnramperIdsLoading,
 	OnramperMode,
 	OnramperNetworkId,
 	OnramperNetworkWallet,
@@ -46,11 +47,24 @@ export interface BuildOnramperLinkParams {
 	identity: Identity;
 	wallets: OnramperCryptoWallet[];
 	networkWallets: OnramperNetworkWallet[];
-	// OnRamper's ids for the tokens without a built-in one, still loading while the backend signs.
-	// It never rejects: a list that could not be loaded is missing.
-	onramperIds?: Promise<OnramperIds>;
+	// OnRamper's lists for the tokens without a built-in id, still loading while the backend signs.
+	onramperIds?: OnramperIdsLoading;
 	toParams: (onramperIds?: OnramperIds) => OnramperLinkParams;
 }
+
+// Each list gets the grace on its own, so that a list that came in is kept when the other is late.
+const onramperIdsInTime = async ({ buy, sell }: OnramperIdsLoading): Promise<OnramperIds> => {
+	const inTime = (list: Promise<OnramperIdsByAddress | undefined>) =>
+		withDeadline<OnramperIdsByAddress | undefined>({
+			operation: list,
+			fallback: undefined,
+			milliseconds: ONRAMPER_IDS_GRACE_MS
+		});
+
+	const [buyIds, sellIds] = await Promise.all([inTime(buy), inTime(sell)]);
+
+	return { buy: buyIds, sell: sellIds };
+};
 
 const arrayToParam = (array: OnramperId[] | OnramperNetworkId[]) => array.join(',');
 
@@ -81,10 +95,10 @@ const toQueryString = (params: OnramperLinkParams) =>
  * serialization (rather than re-deriving `wallets`/`networkWallets` here) guarantees the signed URL
  * params are byte-identical to what was signed.
  *
- * OnRamper's ids for the tokens without a built-in one are loaded while the backend signs, so they
- * usually add no wait. Ids still loading once the URL is signed get `ONRAMPER_IDS_GRACE_MS` more;
- * then the link is built without them. The token ids are not signed, so they never delay or repeat
- * the signing call.
+ * OnRamper's lists for the tokens without a built-in id are loaded while the backend signs, so they
+ * usually add no wait. A list still loading once the URL is signed gets `ONRAMPER_IDS_GRACE_MS`
+ * more; then the link is built without that list, keeping the other one if it came in. The token
+ * ids are not signed, so they never delay or repeat the signing call.
  *
  * The documentation for the OnRamper widget's parameters can be found here:
  * https://docs.onramper.com/docs/supported-widget-parameters
@@ -112,13 +126,7 @@ export const buildOnramperLink = async ({
 		networkWallets
 	});
 
-	const ids = isNullish(onramperIds)
-		? undefined
-		: await withDeadline<OnramperIds | undefined>({
-				operation: onramperIds,
-				fallback: undefined,
-				milliseconds: ONRAMPER_IDS_GRACE_MS
-			});
+	const ids = isNullish(onramperIds) ? undefined : await onramperIdsInTime(onramperIds);
 
 	const signedParams = signed_query.length > 0 ? `&${signed_query}` : '';
 

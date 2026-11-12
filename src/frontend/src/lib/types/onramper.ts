@@ -22,6 +22,12 @@ export type OnramperIdsByAddress = Map<string, OnramperId>;
 // A list that could not be loaded is missing.
 export type OnramperIds = Record<OnramperTransactionType, OnramperIdsByAddress | undefined>;
 
+// The lists while they load. Each settles on its own and never rejects.
+export type OnramperIdsLoading = Record<
+	OnramperTransactionType,
+	Promise<OnramperIdsByAddress | undefined>
+>;
+
 // The list of fiat currencies that are supported by Onramper can be found here:
 // https://docs.onramper.com/docs/fiat-currency-support
 // Please, cross-reference the OISY supported currencies with the Coingecko API for supported currencies.

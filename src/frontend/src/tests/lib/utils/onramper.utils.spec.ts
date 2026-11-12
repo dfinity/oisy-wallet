@@ -14,8 +14,8 @@ import * as backendApi from '$lib/api/backend.api';
 import { ONRAMPER_IDS_GRACE_MS } from '$lib/constants/onramper.constants';
 import { Currency } from '$lib/enums/currency';
 import type {
-	OnramperIds,
 	OnramperIdsByAddress,
+	OnramperIdsLoading,
 	OnramperNetworkWallet,
 	OnramperWalletAddress
 } from '$lib/types/onramper';
@@ -337,10 +337,13 @@ describe('onramper.utils', () => {
 				themeName: 'dark'
 			};
 
-			const ids: OnramperIds = {
-				buy: new Map([['ethereum:0xaave', 'aave_ethereum']]),
-				sell: undefined
-			};
+			const buyIds: OnramperIdsByAddress = new Map([['ethereum:0xaave', 'aave_ethereum']]);
+			const sellIds: OnramperIdsByAddress = new Map([['ethereum:0xaave', 'aave_ethereum']]);
+
+			const never = new Promise<OnramperIdsByAddress | undefined>(() => {});
+
+			const arriving = ({ ids, after }: { ids: OnramperIdsByAddress; after: number }) =>
+				new Promise<OnramperIdsByAddress>((resolve) => setTimeout(() => resolve(ids), after));
 
 			beforeEach(() => {
 				vi.useFakeTimers();
@@ -352,7 +355,7 @@ describe('onramper.utils', () => {
 				vi.useRealTimers();
 			});
 
-			const build = (onramperIds?: Promise<OnramperIds>) => {
+			const build = (onramperIds?: OnramperIdsLoading) => {
 				const toParams = vi.fn(() => minimalParams);
 
 				const state: { url?: string } = {};
@@ -371,8 +374,11 @@ describe('onramper.utils', () => {
 				return { toParams, state, link };
 			};
 
-			it('passes the ids that came in while the backend signed', async () => {
-				const { toParams, link } = build(Promise.resolve(ids));
+			it('passes the lists that came in while the backend signed', async () => {
+				const { toParams, link } = build({
+					buy: Promise.resolve(buyIds),
+					sell: Promise.resolve(sellIds)
+				});
 
 				await expect(link).resolves.toBe(
 					`${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}` +
@@ -381,7 +387,7 @@ describe('onramper.utils', () => {
 						`&signature=${mockSignature}`
 				);
 
-				expect(toParams).toHaveBeenCalledExactlyOnceWith(ids);
+				expect(toParams).toHaveBeenCalledExactlyOnceWith({ buy: buyIds, sell: sellIds });
 			});
 
 			it('builds the link right away when no list is loading', async () => {
@@ -392,12 +398,11 @@ describe('onramper.utils', () => {
 				expect(toParams).toHaveBeenCalledExactlyOnceWith(undefined);
 			});
 
-			it('uses ids that arrive within the grace after the signing', async () => {
-				const { toParams, state, link } = build(
-					new Promise<OnramperIds>((resolve) =>
-						setTimeout(() => resolve(ids), ONRAMPER_IDS_GRACE_MS - 1)
-					)
-				);
+			it('uses lists that arrive within the grace after the signing', async () => {
+				const { toParams, state, link } = build({
+					buy: arriving({ ids: buyIds, after: ONRAMPER_IDS_GRACE_MS - 1 }),
+					sell: arriving({ ids: sellIds, after: ONRAMPER_IDS_GRACE_MS - 1 })
+				});
 
 				await vi.advanceTimersByTimeAsync(ONRAMPER_IDS_GRACE_MS - 2);
 
@@ -406,11 +411,11 @@ describe('onramper.utils', () => {
 				await vi.advanceTimersByTimeAsync(1);
 				await link;
 
-				expect(toParams).toHaveBeenCalledExactlyOnceWith(ids);
+				expect(toParams).toHaveBeenCalledExactlyOnceWith({ buy: buyIds, sell: sellIds });
 			});
 
-			it('builds the link without the ids once the grace is over', async () => {
-				const { toParams, state, link } = build(new Promise<OnramperIds>(() => {}));
+			it('builds the link without the lists once the grace is over', async () => {
+				const { toParams, state, link } = build({ buy: never, sell: never });
 
 				await vi.advanceTimersByTimeAsync(ONRAMPER_IDS_GRACE_MS - 1);
 
@@ -420,7 +425,20 @@ describe('onramper.utils', () => {
 				await vi.advanceTimersByTimeAsync(1);
 				await link;
 
-				expect(toParams).toHaveBeenCalledExactlyOnceWith(undefined);
+				expect(toParams).toHaveBeenCalledExactlyOnceWith({ buy: undefined, sell: undefined });
+			});
+
+			it('keeps a list that came in when the other is late', async () => {
+				const { toParams, state, link } = build({ buy: Promise.resolve(buyIds), sell: never });
+
+				await vi.advanceTimersByTimeAsync(ONRAMPER_IDS_GRACE_MS - 1);
+
+				expect(state.url).toBeUndefined();
+
+				await vi.advanceTimersByTimeAsync(1);
+				await link;
+
+				expect(toParams).toHaveBeenCalledExactlyOnceWith({ buy: buyIds, sell: undefined });
 			});
 		});
 	});
