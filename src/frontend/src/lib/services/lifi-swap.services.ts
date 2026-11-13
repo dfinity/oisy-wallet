@@ -216,8 +216,8 @@ const fetchTrustedLifiQuote = async ({
  * A Solana source's transaction is read as its binding reads it, which also gives the LI.FI ceiling
  * the form budgets (`loadLifiSolQuoteCeiling`).
  *
- * When an EVM source's best route goes through a bridge in a shape the calldata binding refuses
- * (Across behind a DEX swap, or any bridge followed by another step), LI.FI is asked once more
+ * When an EVM or BTC source's best route goes through a bridge in a shape `isLifiRouteExecutable`
+ * refuses (Across behind a DEX swap, or any bridge followed by another step), LI.FI is asked once more
  * without that bridge, so that another allowed one can serve the pair; that request is the one
  * execution re-quotes with. Both requests share the caller's deadline: the form waits for every
  * provider's answer.
