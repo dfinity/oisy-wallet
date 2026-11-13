@@ -71,6 +71,14 @@ pub fn create(
         }
     }
 
+    // The ckSOL minter takes one deposit per account at a time, and a SOL → ckSOL row takes the
+    // first deposit above the latest one before its transfer, so two open rows would both take the
+    // same deposit. As for XRP, the frontend refuses early too, but a second tab can pass its own
+    // check before the first row exists, and only this call sees the check and the write at once.
+    if is_sol_mint(&request.data) && has_sol_mint_in_flight(map, principal) {
+        return Err(ActiveUserTransactionError::AlreadyInFlight);
+    }
+
     if let ActiveUserTransactionData::Lifi(data) = &request.data {
         // Required here and not only in `validate_data`, which cannot see the
         // refs: the row is opened after the source transaction is broadcast, so
@@ -255,6 +263,24 @@ fn holds_xrp_address(tx: &ActiveUserTransaction) -> bool {
         }
         _ => false,
     }
+}
+
+/// Whether the caller has a SOL → ckSOL conversion that is not terminal yet.
+///
+/// Per user rather than per minter: OISY converts through one ckSOL minter.
+fn has_sol_mint_in_flight(map: &ActiveUserTransactionsMap, principal: Principal) -> bool {
+    scan_principal(map, principal)
+        .any(|(_, Candid(tx))| is_sol_mint(&tx.data) && !tx.status.is_terminal())
+}
+
+fn is_sol_mint(data: &ActiveUserTransactionData) -> bool {
+    matches!(
+        data,
+        ActiveUserTransactionData::ChainFusion(ChainFusionData {
+            direction: ChainFusionDirection::SolToCkSol,
+            ..
+        })
+    )
 }
 
 /// Make room for one more of the caller's records. Below the cap this does
@@ -488,6 +514,7 @@ fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTra
     let is_btc = |t: &TokenId| matches!(t, TokenId::BtcNativeMainnet | TokenId::BtcNativeTestnet);
     let is_eth = |t: &TokenId| matches!(t, TokenId::EvmNative(_));
     let is_erc20 = |t: &TokenId| matches!(t, TokenId::Erc20(..));
+    let is_sol = |t: &TokenId| matches!(t, TokenId::SolNativeMainnet | TokenId::SolNativeDevnet);
     let is_ck = |t: &TokenId| matches!(t, TokenId::Icrc(_));
 
     let ok = match data.direction {
@@ -501,6 +528,8 @@ fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTra
         ChainFusionDirection::CkErc20ToErc20 => {
             is_ck(&data.source_token) && is_erc20(&data.dest_token)
         }
+        ChainFusionDirection::SolToCkSol => is_sol(&data.source_token) && is_ck(&data.dest_token),
+        ChainFusionDirection::CkSolToSol => is_ck(&data.source_token) && is_sol(&data.dest_token),
     };
 
     if ok {
@@ -1329,6 +1358,7 @@ mod tests {
     const CKBTC_LEDGER: &str = "mxzaz-hqaaa-aaaar-qaada-cai";
     const CKETH_LEDGER: &str = "ss2fx-dyaaa-aaaar-qacoq-cai";
     const CKUSDC_LEDGER: &str = "xevnm-gaaaa-aaaar-qafnq-cai";
+    const CKSOL_LEDGER: &str = "ls5lp-lqaaa-aaaar-qb5oa-cai";
     const USDC_ETHEREUM: &str = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
 
     fn icrc(ledger: &str) -> TokenId {
@@ -1355,6 +1385,8 @@ mod tests {
                 icrc(CKUSDC_LEDGER),
                 TokenId::Erc20(ErcTokenId(USDC_ETHEREUM.to_string()), 1),
             ),
+            ChainFusionDirection::SolToCkSol => (TokenId::SolNativeMainnet, icrc(CKSOL_LEDGER)),
+            ChainFusionDirection::CkSolToSol => (icrc(CKSOL_LEDGER), TokenId::SolNativeMainnet),
         };
         ActiveUserTransactionData::ChainFusion(ChainFusionData {
             direction,
@@ -1366,7 +1398,7 @@ mod tests {
 
     #[test]
     fn chain_fusion_create_roundtrip() {
-        // All six directions share one variant, so each must survive create —
+        // All eight directions share one variant, so each must survive create —
         // and the stable-memory read path — unchanged; the direction is what
         // the FE poller routes on.
         for direction in ChainFusionDirection::ALL {
@@ -1412,6 +1444,134 @@ mod tests {
             });
             let err = create(&mut map, principal(), req, 1).unwrap_err();
             assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        }
+    }
+
+    #[test]
+    fn chain_fusion_sol_devnet_accepted() {
+        // Only kinds are checked, so Devnet SOL passes as Bitcoin testnet does.
+        for (direction, source_token, dest_token) in [
+            (
+                ChainFusionDirection::SolToCkSol,
+                TokenId::SolNativeDevnet,
+                icrc(CKSOL_LEDGER),
+            ),
+            (
+                ChainFusionDirection::CkSolToSol,
+                icrc(CKSOL_LEDGER),
+                TokenId::SolNativeDevnet,
+            ),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("ck-1");
+            req.data = ActiveUserTransactionData::ChainFusion(ChainFusionData {
+                direction,
+                source_token,
+                dest_token,
+                amount: Nat::from(1_000u64),
+            });
+            create(&mut map, principal(), req, 1).expect("create");
+        }
+    }
+
+    #[test]
+    fn chain_fusion_spl_token_rejected_as_sol() {
+        // An SPL token is not SOL, so it never stands in for the SOL side.
+        for (direction, source_token, dest_token) in [
+            (
+                ChainFusionDirection::SolToCkSol,
+                spl(USDC_SOLANA),
+                icrc(CKSOL_LEDGER),
+            ),
+            (
+                ChainFusionDirection::CkSolToSol,
+                icrc(CKSOL_LEDGER),
+                spl(USDC_SOLANA),
+            ),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("ck-1");
+            req.data = ActiveUserTransactionData::ChainFusion(ChainFusionData {
+                direction,
+                source_token,
+                dest_token,
+                amount: Nat::from(1_000u64),
+            });
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        }
+    }
+
+    fn sol_mint_req(id: &str) -> CreateActiveUserTransactionRequest {
+        let mut req = create_req(id);
+        req.data = chain_fusion_data(1_000, ChainFusionDirection::SolToCkSol);
+        req
+    }
+
+    // The invariant the SOL → ckSOL guard exists for, enforced here because the frontend's own
+    // check cannot be atomic with this create.
+    #[test]
+    fn chain_fusion_second_sol_mint_rejected_while_the_first_is_open() {
+        for status in [
+            ActiveUserTransactionStatus::Pending,
+            ActiveUserTransactionStatus::Executing,
+        ] {
+            let (mut map, _mm) = setup();
+            create(&mut map, principal(), sol_mint_req("ck-1"), 1).expect("first mint");
+            set_status(&mut map, "ck-1", status);
+
+            let err = create(&mut map, principal(), sol_mint_req("ck-2"), 3).unwrap_err();
+
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+
+    #[test]
+    fn chain_fusion_second_sol_mint_allowed_once_the_first_is_terminal() {
+        for status in [
+            ActiveUserTransactionStatus::Succeeded,
+            ActiveUserTransactionStatus::Failed,
+        ] {
+            let (mut map, _mm) = setup();
+            create(&mut map, principal(), sol_mint_req("ck-1"), 1).expect("first mint");
+            set_status(&mut map, "ck-1", status);
+
+            create(&mut map, principal(), sol_mint_req("ck-2"), 3).expect("second mint");
+        }
+    }
+
+    #[test]
+    fn chain_fusion_second_sol_mint_allowed_once_the_first_is_deleted() {
+        // The frontend deletes the row of a transfer the node refused.
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), sol_mint_req("ck-1"), 1).expect("first mint");
+        delete(&mut map, principal(), "ck-1".to_string()).expect("delete");
+
+        create(&mut map, principal(), sol_mint_req("ck-2"), 2).expect("second mint");
+    }
+
+    #[test]
+    fn chain_fusion_open_sol_mint_does_not_block_another_user() {
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), sol_mint_req("ck-1"), 1).expect("first mint");
+
+        create(&mut map, other_principal(), sol_mint_req("ck-1"), 2).expect("other user");
+    }
+
+    #[test]
+    fn chain_fusion_open_sol_mint_does_not_block_other_conversions() {
+        // Only the deposit side carries the minter's one-deposit limit.
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), sol_mint_req("ck-1"), 1).expect("first mint");
+
+        for (i, direction) in ChainFusionDirection::ALL
+            .into_iter()
+            .filter(|direction| *direction != ChainFusionDirection::SolToCkSol)
+            .enumerate()
+        {
+            let mut req = create_req(&format!("other-{i}"));
+            req.data = chain_fusion_data(1_000, direction);
+            create(&mut map, principal(), req, 2).expect("other conversion");
         }
     }
 
