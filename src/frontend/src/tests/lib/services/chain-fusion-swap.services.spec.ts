@@ -2183,25 +2183,37 @@ describe('chain-fusion-swap.services', () => {
 				expect(enableDestinationToken).not.toHaveBeenCalled();
 			});
 
-			it('should keep the row when the broadcast may have gone out', async () => {
+			it('should go on as sent, row kept and ckSOL enabled, when the broadcast may have gone out', async () => {
+				const consoleErrorSpy = vi.spyOn(console, 'error');
 				const transportError = new Error('fetch failed');
 				mockTransfer({ broadcastError: transportError });
 
-				await expect(solSwap()).rejects.toBe(transportError);
+				await solSwap();
 
 				expect(createActiveUserTransaction).toHaveBeenCalledOnce();
 				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+				expect(enableDestinationToken).toHaveBeenCalledOnce();
+				expect(consoleErrorSpy).toHaveBeenCalledOnce();
+				expect(progress.mock.calls.map(([step]) => step)).toStrictEqual([
+					ProgressStepsSwap.SIGN_TRANSFER,
+					ProgressStepsSwap.SWAP,
+					ProgressStepsSwap.UPDATE_UI
+				]);
 			});
 
-			it('should keep the row when a refusal comes while confirming the broadcast transfer', async () => {
+			it('should go on as sent, row kept and ckSOL enabled, when confirming the broadcast transfer fails', async () => {
+				const consoleErrorSpy = vi.spyOn(console, 'error');
+				// A refusal answered while confirming comes after the broadcast.
 				const nodeUnhealthy = new SolanaError(SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NODE_UNHEALTHY, {
 					numSlotsBehind: 42
 				});
 				mockTransfer({ confirmError: nodeUnhealthy });
 
-				await expect(solSwap()).rejects.toBe(nodeUnhealthy);
+				await solSwap();
 
 				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+				expect(enableDestinationToken).toHaveBeenCalledOnce();
+				expect(consoleErrorSpy).toHaveBeenCalledOnce();
 			});
 		});
 	});
