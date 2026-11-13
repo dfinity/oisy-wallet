@@ -399,6 +399,32 @@ describe('exchange.derived', () => {
 			});
 		});
 
+		it('should return values for disabled ERC20 and SPL tokens', () => {
+			erc20CustomTokensStore.setAll([
+				{ data: { ...mockErc20DefaultToken, enabled: false }, certified: false },
+				{ data: { ...mockEr20CustomToken, enabled: false }, certified: false }
+			]);
+			splCustomTokensStore.setAll([
+				{ data: { ...mockSplDefaultToken, enabled: false }, certified: false },
+				{ data: { ...mockSplCustomToken, enabled: false }, certified: false }
+			]);
+
+			exchangeStore.set([
+				{ [mockErc20DefaultToken.address.toLowerCase()]: mockErc20TokenPrice1 },
+				{ [mockEr20CustomToken.address.toLowerCase()]: mockErc20TokenPrice2 },
+				{ [mockSplDefaultToken.address.toLowerCase()]: mockSplTokenPrice1 },
+				{ [mockSplCustomToken.address.toLowerCase()]: mockSplTokenPrice2 }
+			]);
+
+			expect(get(exchanges)).toStrictEqual({
+				...expectedNullishExchanges,
+				[mockErc20DefaultToken.id]: mockErc20TokenPrice1,
+				[mockEr20CustomToken.id]: mockErc20TokenPrice2,
+				[mockSplDefaultToken.id]: mockSplTokenPrice1,
+				[mockSplCustomToken.id]: mockSplTokenPrice2
+			});
+		});
+
 		it('should return values for ERC4626 tokens', () => {
 			const mockErc4626TokenPrice = { usd: 99.99 };
 

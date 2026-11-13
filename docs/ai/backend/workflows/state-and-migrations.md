@@ -126,6 +126,14 @@ upgraded past this release.` comment so the cleanup is obvious, and
    for the new shape, populate it from the old one in `post_upgrade`,
    read from the new one going forward.
 
+A store whose contents come back on their own (a cache, or data the
+frontend saves again when the backend has none) can be **emptied instead
+of migrated**: `clear_new()` in `post_upgrade`, on the same `MemoryId`. Since
+`post_upgrade` runs on every upgrade, empty it only while the old shape is
+still there, and decide that from the stored bytes, not the new type: see
+[`state/token_id_keys.rs`](../../../../src/backend/src/state/token_id_keys.rs),
+which reads the first key raw.
+
 ## Tests for migrations
 
 A migration without a test is half-done. Cover at least:

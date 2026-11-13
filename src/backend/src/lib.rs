@@ -118,6 +118,10 @@ pub fn post_upgrade(arg: Option<Arg>) {
         }
     }
 
+    // TODO: remove once every canister has been upgraded past the release that ships it; see
+    // `state::token_id_keys`. Runs before the timers that write to these stores are started.
+    state::token_id_keys::clear_stores_with_candid_token_id_keys();
+
     // Attach the personal-notes store eagerly so `stats()` (a query, which
     // cannot run the lazy init) reports the persisted count after an upgrade.
     // Fresh installs (`init`) stay lazy to avoid allocating its memory regions

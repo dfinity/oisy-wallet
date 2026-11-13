@@ -6,6 +6,9 @@ import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
+import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
 import { swapWizardSteps } from '$lib/config/swap.config';
@@ -23,6 +26,7 @@ import * as swapDerived from '$lib/derived/swap.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+import * as swapServices from '$lib/services/swap.services';
 import {
 	MODAL_NETWORKS_LIST_CONTEXT_KEY,
 	initModalNetworksListContext
@@ -39,8 +43,11 @@ import {
 } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { WizardModal, WizardStep } from '$lib/types/wizard';
+import { parseTokenId } from '$lib/validation/token.validation';
 import SwapModalWizardStepsTestHost from '$tests/lib/components/swap/SwapModalWizardStepsTestHost.svelte';
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -50,6 +57,7 @@ import {
 	mockModalNetworksListContextEntry,
 	mockModalTokensListContextEntry
 } from '$tests/utils/misc.context.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get, readable } from 'svelte/store';
@@ -589,6 +597,98 @@ describe('SwapModalWizardSteps', () => {
 
 			expect(networkChip()).toHaveTextContent(en.networks.chain_fusion);
 			expect(assetTypeChip()).toHaveTextContent(en.tokens.text.asset_type_all_short);
+		});
+	});
+
+	describe('prices of disabled tokens', () => {
+		const disabledToken: Erc20CustomToken = { ...mockValidErc20Token, enabled: false };
+		const lateToken: Erc20CustomToken = {
+			...mockValidErc20Token,
+			id: parseTokenId('LateErc20TokenId'),
+			address: mockEthAddress2,
+			enabled: false
+		};
+
+		const tokensListStep: WizardStep<WizardStepsSwap> = {
+			name: WizardStepsSwap.TOKENS_LIST,
+			title: 'title'
+		};
+
+		const pricedSymbols = () =>
+			vi
+				.mocked(swapServices.loadDisabledErc20AndSplTokensExchanges)
+				.mock.calls.map(([{ tokens }]) => tokens.map(({ symbol }) => symbol));
+
+		beforeEach(() => {
+			setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
+			setupModalTokensListContext();
+			setupModalNetworksListContext();
+			setupUserNetworksStore('allEnabled');
+
+			erc20DefaultTokensStore.reset();
+			erc20CustomTokensStore.resetAll();
+			erc20CustomTokensStore.setAll([{ data: disabledToken, certified: false }]);
+
+			vi.spyOn(swapServices, 'loadDisabledErc20AndSplTokensExchanges').mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			erc20CustomTokensStore.resetAll();
+
+			vi.restoreAllMocks();
+		});
+
+		it('should price the disabled tokens when it opens', async () => {
+			renderSwapModalWizardSteps(tokensListStep);
+
+			await tick();
+
+			expect(pricedSymbols()).toEqual([[disabledToken.symbol]]);
+		});
+
+		it('should price a disabled token that arrives later, and only that one', async () => {
+			renderSwapModalWizardSteps(tokensListStep);
+
+			await tick();
+
+			erc20CustomTokensStore.setAll([
+				{ data: disabledToken, certified: false },
+				{ data: { ...lateToken, symbol: 'LATE' }, certified: false }
+			]);
+
+			await tick();
+
+			expect(pricedSymbols()).toEqual([[disabledToken.symbol], ['LATE']]);
+		});
+
+		// Get Token renders the wizard in a block keyed by the step, so every step change mounts a new
+		// one on the same swap context.
+		it('should not price the tokens again when it is rebuilt on a step change', async () => {
+			const { unmount } = renderSwapModalWizardSteps(tokensListStep);
+
+			await tick();
+
+			unmount();
+
+			renderSwapModalWizardSteps({ name: WizardStepsSwap.SWAP, title: 'title' });
+
+			await tick();
+
+			expect(pricedSymbols()).toEqual([[disabledToken.symbol]]);
+		});
+
+		it('should warn and carry on when loading the prices fails', async () => {
+			const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			vi.spyOn(swapServices, 'loadDisabledErc20AndSplTokensExchanges').mockRejectedValue(
+				new Error('down')
+			);
+
+			renderSwapModalWizardSteps(tokensListStep);
+
+			await waitFor(() => expect(warn).toHaveBeenCalled());
+
+			expect(screen.getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument();
 		});
 	});
 });

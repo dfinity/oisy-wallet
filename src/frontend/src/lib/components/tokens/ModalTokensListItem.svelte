@@ -18,9 +18,17 @@
 		showDividers?: boolean;
 		// The token already picked where this list was opened from; unset where a list has no pick.
 		selected?: boolean;
+		disabled?: boolean;
 	}
 
-	let { token, logoSize = 'lg', onClick, showDividers = true, selected }: Props = $props();
+	let {
+		token,
+		logoSize = 'lg',
+		onClick,
+		showDividers = true,
+		selected,
+		disabled = false
+	}: Props = $props();
 
 	const { oisyName, oisySymbol, symbol, network } = $derived(token);
 
@@ -30,6 +38,7 @@
 </script>
 
 <LogoButton
+	{disabled}
 	dividers={showDividers}
 	fullWidth
 	{onClick}
