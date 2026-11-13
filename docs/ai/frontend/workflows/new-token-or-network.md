@@ -115,10 +115,13 @@ A token / network add is naturally cross-cutting. To stay reviewable:
 Removing an entry from `tokens.icrc.json` leaves it in the token list of
 every user who enabled it: OISY then loads it from its ledger, like a
 token the user imported. When that ledger no longer runs an ICRC ledger
-(deleted, uninstalled, or reinstalled with other code), also add its ID
-to `RETIRED_ICRC_LEDGER_CANISTER_IDS` in
-`$env/tokens/tokens-icrc/tokens.icrc.retired.env.ts`, so OISY skips it
-instead of warning on every sign-in.
+(deleted, uninstalled, or reinstalled with other code), also add it to
+`RETIRED_ICRC_TOKENS` in `$env/tokens/tokens-icrc/tokens.icrc.retired.env.ts`,
+with the symbol and name of the removed entry, so OISY skips it instead
+of warning on every sign-in. Like a saved token whose ledger fails to
+load, it is listed under "Unavailable tokens" on the Help page, where the
+user can delete it: the symbol and name are how the user recognises it
+there, since its ledger can no longer tell them.
 
 ## Don'ts
 

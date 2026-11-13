@@ -767,8 +767,10 @@
 			"transaction_price": "Ошибка при загрузке оценки стоимости транзакции.",
 			"icrc_canisters": "Ошибка при загрузке контейнеров ICRC.",
 			"load_token_list": "",
-			"icrc_canister_loading_curated": "Токен $tokenSymbol не отвечает и не может быть загружен прямо сейчас. Попробуйте позже.",
-			"icrc_canister_loading_custom": "Токен с канистером леджера $ledgerCanisterId не отвечает и не может быть загружен прямо сейчас. Попробуйте позже.",
+			"icrc_canister_loading_curated": "Токен $tokenSymbol не отвечает и не может быть загружен прямо сейчас. Попробуйте позже. Если ошибка повторяется, вы можете удалить его на странице «Помощь».",
+			"icrc_canister_loading_custom": "Токен с канистером леджера $ledgerCanisterId не отвечает и не может быть загружен прямо сейчас. Попробуйте позже. Если ошибка повторяется, вы можете удалить его на странице «Помощь».",
+			"icrc_default_token_loading_curated": "Токен $tokenSymbol не отвечает и не может быть загружен прямо сейчас. Попробуйте позже.",
+			"icrc_default_token_loading_custom": "Токен с канистером леджера $ledgerCanisterId не отвечает и не может быть загружен прямо сейчас. Попробуйте позже.",
 			"erc20_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-20.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-721.",
@@ -835,7 +837,14 @@
 			"nothing_to_withdraw": "В этом пуле нечего выводить.",
 			"results_found": "Найдено доступных для вывода балансов: $balances.",
 			"balance_unused": "Неиспользованный баланс",
-			"withdraw": "Вывести"
+			"withdraw": "Вывести",
+			"unavailable_tokens_title": "Недоступные токены",
+			"unavailable_tokens_description": "Эти токены есть в вашем списке токенов, но $oisy_short не может их загрузить.",
+			"unavailable_tokens_checking": "Проверка канистера леджера…",
+			"unavailable_tokens_responding": "Канистер леджера теперь отвечает",
+			"unavailable_tokens_no_ledger": "По этому ID канистера нет леджера",
+			"unavailable_tokens_not_responding": "Канистер леджера не отвечает",
+			"unavailable_tokens_error": "Канистер леджера отвечает ошибкой"
 		},
 		"alt": {
 			"network_explorer_link": "Открыть обозреватель блокчейна $network для вашего адреса",

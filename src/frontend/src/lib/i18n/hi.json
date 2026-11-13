@@ -767,8 +767,10 @@
 			"transaction_price": "लेनदेन की कीमत का अनुमान लोड करते समय त्रुटि।",
 			"icrc_canisters": "ICRC कैनिस्टर लोड करते समय त्रुटि।",
 			"load_token_list": "",
-			"icrc_canister_loading_curated": "",
-			"icrc_canister_loading_custom": "",
+			"icrc_canister_loading_curated": "$tokenSymbol टोकन जवाब नहीं दे रहा है और अभी लोड नहीं हो सकता। बाद में फिर से कोशिश करें। अगर यह समस्या बनी रहती है, तो आप इसे “सहायता” पेज पर मिटा सकते हैं।",
+			"icrc_canister_loading_custom": "लेजर कैनिस्टर $ledgerCanisterId वाला टोकन जवाब नहीं दे रहा है और अभी लोड नहीं हो सकता। बाद में फिर से कोशिश करें। अगर यह समस्या बनी रहती है, तो आप इसे “सहायता” पेज पर मिटा सकते हैं।",
+			"icrc_default_token_loading_curated": "$tokenSymbol टोकन जवाब नहीं दे रहा है और अभी लोड नहीं हो सकता। बाद में फिर से कोशिश करें।",
+			"icrc_default_token_loading_custom": "लेजर कैनिस्टर $ledgerCanisterId वाला टोकन जवाब नहीं दे रहा है और अभी लोड नहीं हो सकता। बाद में फिर से कोशिश करें।",
 			"erc20_custom_tokens": "ERC20 कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "ERC721 कस्टम टोकन लोड करते समय त्रुटि।",
@@ -835,7 +837,14 @@
 			"nothing_to_withdraw": "इस पूल में निकालने के लिए कुछ नहीं है।",
 			"results_found": "निकाले जा सकने वाले शेष मिले: $balances।",
 			"balance_unused": "अप्रयुक्त बैलेंस",
-			"withdraw": "निकालें"
+			"withdraw": "निकालें",
+			"unavailable_tokens_title": "अनुपलब्ध टोकन",
+			"unavailable_tokens_description": "ये टोकन आपकी टोकन सूची में हैं, लेकिन $oisy_short इन्हें लोड नहीं कर पा रहा है।",
+			"unavailable_tokens_checking": "लेजर कैनिस्टर की जाँच हो रही है…",
+			"unavailable_tokens_responding": "लेजर कैनिस्टर अब जवाब दे रहा है",
+			"unavailable_tokens_no_ledger": "इस कैनिस्टर ID पर कोई लेजर नहीं है",
+			"unavailable_tokens_not_responding": "लेजर कैनिस्टर जवाब नहीं दे रहा है",
+			"unavailable_tokens_error": "लेजर कैनिस्टर त्रुटि के साथ जवाब दे रहा है"
 		},
 		"alt": {
 			"network_explorer_link": "अपने पते के लिए $network ब्लॉकचेन एक्सप्लोरर खोलें",

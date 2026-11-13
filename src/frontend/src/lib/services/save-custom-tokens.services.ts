@@ -14,6 +14,7 @@ import { dip721CustomTokensStore } from '$icp/stores/dip721-custom-tokens.store'
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 import { icrc7CustomTokensStore } from '$icp/stores/icrc7-custom-tokens.store';
 import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
@@ -119,6 +120,13 @@ export const saveCustomTokens = async ({
 			identity,
 			tokens: tokens.map(toCustomToken),
 			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+		});
+
+		// Saved again, so a delete earlier on this page no longer keeps the token out of the lists.
+		tokens.forEach((token) => {
+			if (token.networkKey === 'Icrc') {
+				icrcUnavailableCustomTokensStore.forgetDeleted(token.ledgerCanisterId);
+			}
 		});
 
 		progress?.(ProgressStepsAddToken.UPDATE_UI);

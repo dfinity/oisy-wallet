@@ -3,6 +3,9 @@ import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.stor
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import * as icAddCustomTokensService from '$icp/services/ic-add-custom-tokens.service';
 import { loadCustomTokens } from '$icp/services/icrc.services';
+import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as backendApi from '$lib/api/backend.api';
 import TokenModal from '$lib/components/tokens/TokenModal.svelte';
 import {
@@ -144,6 +147,47 @@ describe('TokenModal', () => {
 		);
 	});
 
+	it('deletes an ICRC token from both token lists when it is in both', async () => {
+		const token: IcrcCustomToken = { ...mockValidIcrcToken, enabled: true };
+
+		icrcCustomTokensStore.resetAll();
+		icrcCustomTokensStore.setAll([{ data: token, certified: false }]);
+
+		// Its query answer mapped while its certified answer did not, so the Help card lists it too.
+		icrcUnavailableCustomTokensStore.reset();
+		icrcUnavailableCustomTokensStore.set([
+			{
+				ledgerCanisterId: token.ledgerCanisterId,
+				customToken: toCustomToken({ ...token, networkKey: 'Icrc' })
+			}
+		]);
+
+		const { getByTestId } = render(TokenModal, {
+			props: {
+				token,
+				isDeletable: true
+			}
+		});
+
+		const removeCustomTokenMock = mockRemoveCustomToken();
+		const toasts = mockToastsShow();
+		const gotoReplaceRoot = mockGoToRoot();
+		mockAuthStore();
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
+
+		await waitFor(() => {
+			expect(removeCustomTokenMock).toHaveBeenCalledOnce();
+			expect(toasts).toHaveBeenCalledOnce();
+			expect(gotoReplaceRoot).toHaveBeenCalledOnce();
+		});
+
+		expect(get(icrcCustomTokensStore)).toEqual([]);
+		expect(get(icrcUnavailableCustomTokensStore)).toEqual([]);
+	});
+
 	it('saves token after all required steps if indexCanisterId was missing', async () => {
 		const { getByTestId, getByText } = render(TokenModal, {
 			props: {
@@ -179,6 +223,57 @@ describe('TokenModal', () => {
 			identity: mockIdentity
 		});
 		expect(loadCustomTokens).toHaveBeenCalledOnce();
+	});
+
+	describe('when the reload after an edit finishes', () => {
+		const token: IcrcCustomToken = { ...mockIcToken, enabled: true };
+
+		const editIndexCanister = async ({ outdated }: { outdated: boolean }) => {
+			icrcCustomTokensStore.resetAll();
+			icrcCustomTokensStore.setAll([{ data: token, certified: true }]);
+
+			vi.mocked(loadCustomTokens).mockImplementation(({ onSuccess }) => {
+				onSuccess?.({ outdated });
+
+				return Promise.resolve();
+			});
+
+			const { getByTestId, getByText } = render(TokenModal, {
+				props: {
+					token,
+					isEditable: true
+				}
+			});
+
+			mockSetCustomToken();
+			mockIcAddCustomTokensService();
+			mockAuthStore();
+			const toasts = mockToastsShow();
+
+			await fireEvent.click(getByText(en.tokens.details.missing_index_canister_id_button));
+
+			await fireEvent.input(getByTestId(TOKEN_MODAL_INDEX_CANISTER_ID_INPUT), {
+				target: { value: MOCK_CANISTER_ID_1 }
+			});
+
+			await fireEvent.click(getByTestId(TOKEN_MODAL_SAVE_BUTTON));
+
+			await waitFor(() => expect(toasts).toHaveBeenCalledOnce());
+		};
+
+		it('resets the edited ICRC token so that the write restarts its worker', async () => {
+			await editIndexCanister({ outdated: false });
+
+			expect(get(icrcCustomTokensStore)).toEqual([]);
+		});
+
+		it('keeps the edited ICRC token when the round is outdated and writes nothing', async () => {
+			await editIndexCanister({ outdated: true });
+
+			expect(
+				get(icrcCustomTokensStore)?.map(({ data: { ledgerCanisterId } }) => ledgerCanisterId)
+			).toStrictEqual([token.ledgerCanisterId]);
+		});
 	});
 
 	it('saves token after all required steps if indexCanisterId was present', async () => {

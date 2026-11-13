@@ -769,6 +769,8 @@
 			"load_token_list": "",
 			"icrc_canister_loading_curated": "",
 			"icrc_canister_loading_custom": "",
+			"icrc_default_token_loading_curated": "",
+			"icrc_default_token_loading_custom": "",
 			"erc20_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC20 المخصصة.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC721 المخصصة.",
@@ -835,7 +837,14 @@
 			"nothing_to_withdraw": "",
 			"results_found": "",
 			"balance_unused": "",
-			"withdraw": ""
+			"withdraw": "",
+			"unavailable_tokens_title": "",
+			"unavailable_tokens_description": "",
+			"unavailable_tokens_checking": "",
+			"unavailable_tokens_responding": "",
+			"unavailable_tokens_no_ledger": "",
+			"unavailable_tokens_not_responding": "",
+			"unavailable_tokens_error": ""
 		},
 		"alt": {
 			"network_explorer_link": "",

@@ -767,8 +767,10 @@
 			"transaction_price": "加载交易价格预估时出错。",
 			"icrc_canisters": "加载 ICRC 容器时出错。",
 			"load_token_list": "",
-			"icrc_canister_loading_curated": "$tokenSymbol 代币暂无响应，目前无法加载。请稍后再试。",
-			"icrc_canister_loading_custom": "账本容器 $ledgerCanisterId 的代币暂无响应，目前无法加载。请稍后再试。",
+			"icrc_canister_loading_curated": "$tokenSymbol 代币暂无响应，目前无法加载。请稍后再试。如果问题持续存在，你可以在“帮助”页面中将其删除。",
+			"icrc_canister_loading_custom": "账本容器 $ledgerCanisterId 的代币暂无响应，目前无法加载。请稍后再试。如果问题持续存在，你可以在“帮助”页面中将其删除。",
+			"icrc_default_token_loading_curated": "$tokenSymbol 代币暂无响应，目前无法加载。请稍后再试。",
+			"icrc_default_token_loading_custom": "账本容器 $ledgerCanisterId 的代币暂无响应，目前无法加载。请稍后再试。",
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
@@ -835,7 +837,14 @@
 			"nothing_to_withdraw": "该资金池中没有可提取的余额。",
 			"results_found": "找到可提取余额：$balances 个。",
 			"balance_unused": "未使用余额",
-			"withdraw": "提取"
+			"withdraw": "提取",
+			"unavailable_tokens_title": "不可用的代币",
+			"unavailable_tokens_description": "这些代币在你的代币列表中，但 $oisy_short 无法加载它们。",
+			"unavailable_tokens_checking": "正在检查账本容器…",
+			"unavailable_tokens_responding": "账本容器现在有响应",
+			"unavailable_tokens_no_ledger": "此容器 ID 上没有账本",
+			"unavailable_tokens_not_responding": "账本容器无响应",
+			"unavailable_tokens_error": "账本容器返回错误"
 		},
 		"alt": {
 			"network_explorer_link": "为您的地址打开 $network 区块链浏览器",

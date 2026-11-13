@@ -509,6 +509,8 @@ interface I18nInit {
 		load_token_list: string;
 		icrc_canister_loading_curated: string;
 		icrc_canister_loading_custom: string;
+		icrc_default_token_loading_curated: string;
+		icrc_default_token_loading_custom: string;
 		erc20_custom_tokens: string;
 		erc4626_custom_tokens: string;
 		erc721_custom_tokens: string;
@@ -576,6 +578,13 @@ interface I18nHelp {
 		results_found: string;
 		balance_unused: string;
 		withdraw: string;
+		unavailable_tokens_title: string;
+		unavailable_tokens_description: string;
+		unavailable_tokens_checking: string;
+		unavailable_tokens_responding: string;
+		unavailable_tokens_no_ledger: string;
+		unavailable_tokens_not_responding: string;
+		unavailable_tokens_error: string;
 	};
 	alt: {
 		network_explorer_link: string;

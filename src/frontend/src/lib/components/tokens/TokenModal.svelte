@@ -10,6 +10,7 @@
 	import { assertIndexLedgerId } from '$icp/services/ic-add-custom-tokens.service';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+	import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 	import { isTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import { removeCustomToken, setCustomToken } from '$lib/api/backend.api';
 	import { deleteIdbIcToken, deleteIdbSolToken, deleteIdbEthToken } from '$lib/api/idb-tokens.api';
@@ -282,6 +283,8 @@
 				});
 
 				icrcCustomTokensStore.resetByIdentifier(tokenToDelete.ledgerCanisterId);
+				// A token whose query answer mapped while its certified answer did not is on the Help card too.
+				icrcUnavailableCustomTokensStore.remove(tokenToDelete.ledgerCanisterId);
 				await deleteIdbIcToken({ identity: $authIdentity, token: customToken });
 
 				await onTokenDeleteSuccess(tokenToDelete);
@@ -389,7 +392,7 @@
 				// Similar as on token "save", we reload all custom tokens for simplicity reason.
 				await loadCustomTokens({
 					identity: $authIdentity,
-					onSuccess: () => {
+					onSuccess: ({ outdated }) => {
 						if (!loading) {
 							return;
 						}
@@ -398,8 +401,11 @@
 						progress(ProgressStepsAddToken.DONE);
 						close();
 
-						// the token needs to be reset to restart the worker with indexCanisterId
-						icrcCustomTokensStore.resetByIdentifier(tokenToEdit.ledgerCanisterId);
+						// the token needs to be reset to restart the worker with indexCanisterId; an outdated
+						// round doesn't write the tokens back, so the token would go missing
+						if (!outdated) {
+							icrcCustomTokensStore.resetByIdentifier(tokenToEdit.ledgerCanisterId);
+						}
 
 						trackEvent({
 							name: TRACK_EDIT_TOKEN_SUCCESS,

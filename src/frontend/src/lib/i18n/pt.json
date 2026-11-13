@@ -767,8 +767,10 @@
 			"transaction_price": "Erro ao carregar a estimativa do preço de uma transação.",
 			"icrc_canisters": "Erro ao carregar os canisters ICRC.",
 			"load_token_list": "",
-			"icrc_canister_loading_curated": "O token $tokenSymbol não está respondendo e não pode ser carregado agora. Tente novamente mais tarde.",
-			"icrc_canister_loading_custom": "O token com canister de ledger $ledgerCanisterId não está respondendo e não pode ser carregado agora. Tente novamente mais tarde.",
+			"icrc_canister_loading_curated": "O token $tokenSymbol não está respondendo e não pode ser carregado agora. Tente novamente mais tarde. Se o problema persistir, você pode excluí-lo na página “Ajuda”.",
+			"icrc_canister_loading_custom": "O token com canister de ledger $ledgerCanisterId não está respondendo e não pode ser carregado agora. Tente novamente mais tarde. Se o problema persistir, você pode excluí-lo na página “Ajuda”.",
+			"icrc_default_token_loading_curated": "O token $tokenSymbol não está respondendo e não pode ser carregado agora. Tente novamente mais tarde.",
+			"icrc_default_token_loading_custom": "O token com canister de ledger $ledgerCanisterId não está respondendo e não pode ser carregado agora. Tente novamente mais tarde.",
 			"erc20_custom_tokens": "Erro ao carregar o token personalizado ERC20.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Erro ao carregar o token personalizado ERC721.",
@@ -835,7 +837,14 @@
 			"nothing_to_withdraw": "Nada a sacar neste pool.",
 			"results_found": "Saldos sacáveis encontrados: $balances.",
 			"balance_unused": "Saldo não utilizado",
-			"withdraw": "Sacar"
+			"withdraw": "Sacar",
+			"unavailable_tokens_title": "Tokens indisponíveis",
+			"unavailable_tokens_description": "Estes tokens estão na sua lista de tokens, mas o $oisy_short não consegue carregá-los.",
+			"unavailable_tokens_checking": "Verificando o canister de ledger…",
+			"unavailable_tokens_responding": "O canister de ledger já está respondendo",
+			"unavailable_tokens_no_ledger": "Nenhum ledger neste ID de canister",
+			"unavailable_tokens_not_responding": "O canister de ledger não está respondendo",
+			"unavailable_tokens_error": "O canister de ledger responde com um erro"
 		},
 		"alt": {
 			"network_explorer_link": "Abrir o explorador de blockchain de $network para o seu endereço",

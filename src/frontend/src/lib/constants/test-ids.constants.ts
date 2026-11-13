@@ -158,6 +158,12 @@ export const HELP_ICPSWAP_SCAN_SUMMARY = 'help-icpswap-scan-summary';
 export const HELP_ICPSWAP_POOL_GROUP = 'help-icpswap-pool';
 export const HELP_ICPSWAP_RESULTS_SUMMARY = 'help-icpswap-results-summary';
 export const HELP_ICPSWAP_WITHDRAW_BUTTON = 'help-icpswap-withdraw';
+export const HELP_UNAVAILABLE_TOKENS_CARD = 'help-unavailable-tokens-card';
+export const HELP_UNAVAILABLE_TOKENS_DELETE_BUTTON = 'help-unavailable-tokens-delete';
+export const HELP_UNAVAILABLE_TOKENS_CONFIRM_DELETE_BUTTON =
+	'help-unavailable-tokens-confirm-delete';
+export const HELP_UNAVAILABLE_TOKENS_STATUS = 'help-unavailable-tokens-status';
+export const HELP_UNAVAILABLE_TOKENS_COPY_BUTTON = 'help-unavailable-tokens-copy';
 
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_MORE_MENU_BUTTON = 'navigation-more-menu-button';

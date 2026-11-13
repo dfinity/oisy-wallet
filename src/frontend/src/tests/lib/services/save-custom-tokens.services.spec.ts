@@ -16,6 +16,7 @@ import { dip721CustomTokensStore } from '$icp/stores/dip721-custom-tokens.store'
 import { extCustomTokensStore } from '$icp/stores/ext-custom-tokens.store';
 import { icPunksCustomTokensStore } from '$icp/stores/icpunks-custom-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import type { SaveTokensParams } from '$lib/services/manage-tokens.services';
@@ -232,6 +233,14 @@ describe('save-custom-tokens.services', () => {
 			expect(splCustomTokensStore.resetByIdentifier).toHaveBeenCalledExactlyOnceWith(
 				mockSplAddress
 			);
+		});
+
+		it('should let an ICRC token deleted earlier back into the token lists', async () => {
+			icrcUnavailableCustomTokensStore.remove(mockLedgerCanisterId);
+
+			await saveCustomTokens(mockParams);
+
+			expect(icrcUnavailableCustomTokensStore.isDeleted(mockLedgerCanisterId)).toBeFalsy();
 		});
 
 		it('should reload custom tokens on success', async () => {
