@@ -45,6 +45,8 @@ import {
 } from '$lib/services/chain-fusion-swap-active-tx.services';
 import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
 import { toChainFusionExternalRefs } from '$lib/utils/chain-fusion-swap-active-tx.utils';
+import { readSolSourceTxOutcome } from '$sol/services/sol-source-tx.services';
+import { SolanaNetworks } from '$sol/types/network';
 import { mockUtxo } from '$tests/mocks/btc.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import { mockCkBtcMinterInfo } from '$tests/mocks/ckbtc.mock';
@@ -120,6 +122,10 @@ vi.mock('$eth/providers/infura-cketh.providers', () => ({
 vi.mock('$lib/services/active-user-transactions.services', () => ({
 	applyActiveUserTransactionPollUpdate: vi.fn(),
 	isBtcTransactionNeverLanded: vi.fn()
+}));
+
+vi.mock('$sol/services/sol-source-tx.services', () => ({
+	readSolSourceTxOutcome: vi.fn()
 }));
 
 // Hoisted: the canister-id factories above run before the module body.
@@ -465,6 +471,78 @@ describe('chain-fusion-swap-active-tx.services', () => {
 			});
 			expect(depositSolStatus).not.toHaveBeenCalled();
 			expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+		});
+
+		it('should not read the transfer of a row without its blockhash', async () => {
+			vi.mocked(watchDepositAddress).mockResolvedValue(watching(41n));
+
+			await poll([solMintTx()]);
+
+			expect(readSolSourceTxOutcome).not.toHaveBeenCalled();
+		});
+
+		describe('with the row opened before the transfer was broadcast', () => {
+			const BLOCKHASH = 'EkSnNWid2cvwEVnVx9aBqawnmiCNiDgp3gUdkDPTKN1N';
+
+			const openedBeforeBroadcast = () =>
+				solMintTx({
+					refs: {
+						[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH]: BLOCKHASH,
+						[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH_SLOT]: '345000000'
+					}
+				});
+
+			beforeEach(() => {
+				vi.mocked(watchDepositAddress).mockResolvedValue(watching(41n));
+				vi.mocked(readSolSourceTxOutcome).mockResolvedValue('pending');
+			});
+
+			it('should read the transfer no earlier than the slot its blockhash was valid at', async () => {
+				const tx = openedBeforeBroadcast();
+
+				await poll([tx]);
+
+				expect(readSolSourceTxOutcome).toHaveBeenCalledExactlyOnceWith({
+					rowId: tx.id,
+					signature: SOL_SIGNATURE,
+					blockhash: BLOCKHASH,
+					minContextSlot: 345_000_000n,
+					network: SolanaNetworks.mainnet
+				});
+			});
+
+			it.each(['pending', 'succeeded'] as const)(
+				'should keep the row in flight while the transfer is %s',
+				async (outcome) => {
+					vi.mocked(readSolSourceTxOutcome).mockResolvedValue(outcome);
+
+					await poll([openedBeforeBroadcast()]);
+
+					expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+				}
+			);
+
+			it.each([
+				{ outcome: 'expired' as const, error: en.swap.error.swap_expired },
+				{ outcome: 'reverted' as const, error: en.swap.error.failed_unexpectedly }
+			])('should fail the row when the transfer is $outcome', async ({ outcome, error }) => {
+				vi.mocked(readSolSourceTxOutcome).mockResolvedValue(outcome);
+
+				await poll([openedBeforeBroadcast()]);
+
+				expect(lastUpdate()).toStrictEqual({ status: { Failed: null }, error });
+			});
+
+			it('should not read the transfer once the minter reports a newer deposit', async () => {
+				vi.mocked(watchDepositAddress).mockResolvedValue(detected(42n));
+				vi.mocked(depositSolStatus).mockResolvedValue({
+					Queued: { sweepable_amount: 49_109_120n }
+				});
+
+				await poll([openedBeforeBroadcast()]);
+
+				expect(readSolSourceTxOutcome).not.toHaveBeenCalled();
+			});
 		});
 
 		it('should learn a detected deposit newer than the latest at opening and follow it', async () => {

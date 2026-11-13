@@ -29,6 +29,7 @@ import type { Token } from '$lib/types/token';
 import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
+import type { SolSourceTxOutcome } from '$sol/utils/sol-source-tx.utils';
 import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { encodePrincipalToEthAddress, type CkEthMinterDid } from '@icp-sdk/canisters/cketh';
@@ -395,6 +396,29 @@ export const toChainFusionSolMintStatus = (
 
 export const chainFusionSolMintStatusError = (status: DepositSolStatus): string | undefined =>
 	'Quarantined' in status ? get(i18n).swap.error.cksol_deposit_quarantined : undefined;
+
+/**
+ * The error a ckSOL mint row fails with when its transfer moved no SOL: the transfer can no longer
+ * land, or it landed and failed. `undefined` while it may still land, or once it has.
+ */
+export const chainFusionSolTransferError = (
+	outcome: SolSourceTxOutcome | undefined
+): string | undefined => {
+	if (outcome === 'expired') {
+		return get(i18n).swap.error.swap_expired;
+	}
+
+	if (outcome === 'reverted') {
+		return get(i18n).swap.error.failed_unexpectedly;
+	}
+};
+
+/**
+ * The slot a ckSOL mint row stores where its transfer's blockhash was valid. `undefined` when the row
+ * has none or it is not a `u64`, which the node would refuse as `minContextSlot` on every poll.
+ */
+export const toCkSolBlockhashSlot = (value: string | undefined): bigint | undefined =>
+	nonNullish(value) && /^\d{1,19}$/.test(value) ? BigInt(value) : undefined;
 
 // What the minter credited, formatted in ckSOL, whose unit is one lamport like SOL's.
 export const toChainFusionSolMintLearnedRefs = (

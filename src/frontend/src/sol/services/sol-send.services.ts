@@ -321,7 +321,8 @@ export const sendSol = async ({
 	amount,
 	prioritizationFee,
 	destination,
-	source
+	source,
+	beforeBroadcast
 }: {
 	identity: NullishIdentity;
 	token: Token;
@@ -330,6 +331,9 @@ export const sendSol = async ({
 	destination: SolAddress;
 	source: SolAddress;
 	progress?: (step: ProgressStepsSendSol) => void;
+	// Runs once the transaction is signed and before it is broadcast, so a caller can record what
+	// identifies it on the network first. A rejection broadcasts nothing.
+	beforeBroadcast?: (params: { signature: Signature; blockhash: string }) => Promise<void>;
 }): Promise<Signature> => {
 	progress?.(ProgressStepsSendSol.INITIALIZATION);
 
@@ -372,6 +376,8 @@ export const sendSol = async ({
 	progress?.(ProgressStepsSendSol.SIGN);
 
 	const { signedTransaction, signature } = await signTransaction(transactionMessageToSign);
+
+	await beforeBroadcast?.({ signature, blockhash: signedTransaction.lifetimeConstraint.blockhash });
 
 	progress?.(ProgressStepsSendSol.SEND);
 

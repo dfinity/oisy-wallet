@@ -48,6 +48,7 @@ import {
 	chainFusionMintOutcomeError,
 	chainFusionMintOutcomeToStatus,
 	chainFusionSolMintStatusError,
+	chainFusionSolTransferError,
 	chainFusionSolWithdrawalStatusError,
 	chainFusionWithdrawalStatusError,
 	isChainFusionBtcMintDirection,
@@ -71,10 +72,14 @@ import {
 	toChainFusionWithdrawalLearnedRefs,
 	toChainFusionWithdrawalStatus,
 	toCkBtcMintDepositTxid,
+	toCkSolBlockhashSlot,
 	type ChainFusionBtcMintOutcome,
 	type ChainFusionMintOutcome
 } from '$lib/utils/chain-fusion-swap-active-tx.utils';
 import { consoleError } from '$lib/utils/console.utils';
+import { readSolSourceTxOutcome } from '$sol/services/sol-source-tx.services';
+import { SolanaNetworks } from '$sol/types/network';
+import type { SolSourceTxOutcome } from '$sol/utils/sol-source-tx.utils';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	MinterNoNewUtxosError,
@@ -409,15 +414,46 @@ const watchCkSolLatestDepositId = async ({
 };
 
 /**
+ * What the network says about the user's transfer of a ckSOL mint row, whose row is opened before
+ * the transfer is broadcast. `undefined` for a row without the transfer's blockhash.
+ */
+const readCkSolTransferOutcome = async ({
+	tx,
+	refs
+}: {
+	tx: ActiveUserTransaction;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+}): Promise<SolSourceTxOutcome | undefined> => {
+	const signature = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_SIGNATURE];
+	const blockhash = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH];
+
+	if (isNullish(signature) || isNullish(blockhash)) {
+		return;
+	}
+
+	// SOL → ckSOL is mainnet only.
+	return await readSolSourceTxOutcome({
+		rowId: tx.id,
+		signature,
+		blockhash,
+		minContextSlot: toCkSolBlockhashSlot(
+			refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH_SLOT]
+		),
+		network: SolanaNetworks.mainnet
+	});
+};
+
+/**
  * SOL → ckSOL. The minter reports the deposit through `watch_deposit_address`, an update call
  * made about once a minute, and then answers exactly through `deposit_sol_status`, a query asked
  * on every tick once the row knows the deposit id.
  *
  * Only a deposit above the floor is taken for this conversion: the latest deposit id of the
  * account when the row was opened, or the dropped deposit the row followed before. A `Watching`
- * answer keeps the row in flight; the same call registers the address again once a window has
- * ended, so a late transfer is still found. A `Dropped` deposit leaves its SOL on the address,
- * which the minter detects again under a new id.
+ * answer keeps the row in flight while the transfer can still land or has landed; the same call
+ * registers the address again once a window has ended, so a late transfer is still found. A
+ * transfer that can no longer land, or landed and failed, moved no SOL, and fails the row. A
+ * `Dropped` deposit leaves its SOL on the address, which the minter detects again under a new id.
  */
 const pollChainFusionSolMint = async ({
 	tx,
@@ -492,6 +528,24 @@ const pollChainFusionSolMint = async ({
 	});
 
 	if (isNullish(depositId)) {
+		const transferError = chainFusionSolTransferError(await readCkSolTransferOutcome({ tx, refs }));
+
+		// The row ends, which frees the account for the next conversion.
+		if (nonNullish(transferError)) {
+			lastWatchDepositAddressMs.delete(tx.id);
+
+			await applyUpdate({
+				identity,
+				tx,
+				candidate: { Failed: null },
+				error: transferError,
+				learned: {},
+				refs
+			});
+
+			return;
+		}
+
 		// Watched, or a deposit from before this one: the SOL is on the address or about to be.
 		await applyUpdate({
 			identity,
