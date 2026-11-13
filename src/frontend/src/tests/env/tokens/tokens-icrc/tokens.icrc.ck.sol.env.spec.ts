@@ -40,7 +40,8 @@ describe('tokens.icrc.ck.sol.env', () => {
 			minterCanisterId: 'lh22c-kyaaa-aaaar-qb5nq-cai',
 			exchangeCoinId: 'solana',
 			twinToken: SOLANA_TOKEN,
-			groupData: SOL_TOKEN_GROUP
+			groupData: SOL_TOKEN_GROUP,
+			explorerUrl: 'https://dashboard.internetcomputer.org/tokens/ls5lp-lqaaa-aaaar-qb5oa-cai'
 		});
 		expect(ICRC_CK_SOL_TOKENS).toEqual([CKSOL_IC_DATA]);
 		expect(SOLANA_TOKEN.groupData).toEqual(SOL_TOKEN_GROUP);
