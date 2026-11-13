@@ -1331,10 +1331,11 @@ describe('chain-fusion-swap.services', () => {
 
 		it('should not quote without a minter', async () => {
 			const onProviderParticipating = vi.fn();
+			const sourceToken: IcCkToken = { ...ckSolSource, minterCanisterId: undefined };
 
 			await expect(
 				icpQuote({
-					sourceToken: { ...ckSolSource, minterCanisterId: undefined } as unknown as Token,
+					sourceToken,
 					onProviderParticipating
 				})
 			).resolves.toBeUndefined();
