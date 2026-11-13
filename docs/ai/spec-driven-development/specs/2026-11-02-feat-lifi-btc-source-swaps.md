@@ -48,9 +48,14 @@ Live quotes, 0.01 BTC → ETH on Ethereum, on 2026-11-02 and again on 2026-11-13
   | output 2  | change to `fromAddress`                                                                                                                                                                                                                          |
   | output 3  | 2 500 sats (`LIFI Fixed Fee`, 25 bps = `LIFI_FEE_BPS`) to `bc1qn2cstnjlvhxf60j3ujeyq0h0rqc7kklap8j94g`, the same address for every tool and on both dates                                                                                        |
 
-- `fromAmount` = output 0 + output 3 (1 000 000 = 997 500 + 2 500). The bridge's own fee is taken
-  from the payout, not from a BTC output: `LayerSwap fee` 488–693 sats, Relay's `Relayer Service
-fee` 3 110 sats, NEAR's three fees 1 198 sats together.
+- `fromAmount` = output 0 + LI.FI's quoted fee (1 000 000 = 997 500 + 2 500).
+- **The fee output has a dust floor.** Output 3 is the larger of LI.FI's quoted fee (25 bps of
+  `fromAmount`) and 294 sats, the P2WPKH dust limit. Below 117 600 sats (`⌈294 / 25 bps⌉`), LI.FI
+  raises the output to 294 sats while the quote still lists 25 bps. At 60 000 sats, for example,
+  the deposit is 59 850 sats, the quoted fee 150 and the fee output 294: the extra 144 sats come out
+  of the change. At 120 000 sats the fee output is the quoted 300 again (both 2026-11-13).
+- The bridge's own fee is taken from the payout, not from a BTC output: `LayerSwap fee` 488–693
+  sats, Relay's `Relayer Service fee` 3 110 sats, NEAR's three fees 1 198 sats together.
 - LI.FI sets the miner fee (914–964 sats, about 4.5 sat/vB).
 - LI.FI's documentation allows a self-built transaction only if the output order, the memo and the
   fee output are replicated exactly and the change is above dust (quoted in
@@ -82,6 +87,13 @@ before signing (`lifi-calldata.utils.ts`, `lifi-sol-transaction.utils.ts`), and 
   [Bridge admission](#bridge-admission). It starts empty, so the flag alone quotes nothing until a
   bridge is admitted.
 - Mainnet only, like the rest of LI.FI.
+- If [pending decision 4](#pending-decisions-facts-are-clear--we-just-need-to-decide) is taken as
+  proposed, `near` needs a destination filter. `LIFI_ALLOWED_BRIDGES` is one list per source
+  network, and `buildLifiQuoteRequest` reads it by the source network alone
+  (`src/frontend/src/lib/utils/lifi-swap.utils.ts`). So for a BTC source, `near` is dropped from
+  `allowBridges` when the destination token is one the direct NEAR Intents provider serves
+  (`buildNearIntentsSupportedDestinations('btc')` in
+  `src/frontend/src/lib/utils/near-intents-swap.utils.ts`).
 
 ### Quoting
 
@@ -92,7 +104,22 @@ loaded is not quoted, as for NEAR Intents). `allowBridges` from `LIFI_ALLOWED_BR
 found" on an empty address); map that to the existing insufficient-balance state. `1002` and `1008`
 mean no route from this provider.
 
+No LI.FI quote is requested below **117 600 sats** (`⌈294 / LIFI_FEE_BPS⌉`). Below that, LI.FI's
+fee output exceeds its quoted fee (see [Background](#background--what-a-lifi-btc-source-quote-looks-like)),
+so check 3 would refuse every quote. The other BTC swap providers still quote those amounts.
+
 ### Quote trust checks (before anything is signed)
+
+**Where they run.** Every LI.FI quote goes through `assertLifiQuote`
+(`src/frontend/src/lib/utils/lifi-swap.utils.ts`): when quoted (`fetchTrustedLifiQuote` in
+`lifi-swap.services.ts`) and again at execution (`lifi-swap-execution.services.ts`). Its request
+checks come first: chains, tokens, amount, recipient, the bridge and exchange lists, the estimate.
+Today any source other than Solana then needs a pinned Diamond (`LIFI_DIAMOND_ADDRESSES`), so a BTC
+quote is refused with "the request has no pinned Diamond". For a BTC source, `assertLifiQuote`
+gains a branch in place of the Diamond check, which runs the checks below after the existing
+request checks. `fromAmount` in checks 2 and 3 is therefore the requested amount, which the
+request checks have already confirmed. A quote cannot inflate its own `fromAmount` to get a larger
+deposit past check 2.
 
 Decode `transactionRequest.data` with `Psbt.fromHex` and compare outputs by script, not by address:
 `bitcoinjs-lib` cannot turn a P2TR script into an address without an ECC library (see the
@@ -103,7 +130,8 @@ dependency spec). Refuse the quote unless:
 2. One output to `transactionRequest.to`, value `fromAmount − LI.FI fee`.
 3. One output to LI.FI's fee address (pinned, as `lifi-sol-transaction.utils.ts` pins LI.FI's
    Solana fee wallet) of at most `LIFI_FEE_BPS` of `fromAmount`, equal to the quote's
-   `LIFI Fixed Fee` cost.
+   `LIFI Fixed Fee` cost. This stays strict: below 117 600 sats no quote is requested (see
+   [Quoting](#quoting)), so the review never shows a LI.FI fee smaller than the one paid.
 4. Every other output pays the user's own address (change).
 5. The outputs are in LI.FI's order (deposit, `OP_RETURN`, change, fee), with the change missing
    only where LI.FI dropped it. The rebuild below keeps that order.
@@ -216,7 +244,7 @@ The fix:
 - `require_lifi_pair` accepts `TokenId::BtcNativeMainnet` as a source toward the pinned EVM chains
   and Solana mainnet. BTC destinations and `TokenId::BtcNativeTestnet` stay refused.
 - `require_lifi_refs`, for a BTC source: `lifi_tx_hash` is the BTC txid, 64 hex characters without
-  `0x` (the shape the model already checks for other BTC hashes), and there is no nonce.
+  `0x` (the shape `require_xrp_refs` checks for an XRP hash), and there is no nonce.
 - Unit tests for both, including the BTC destination and the testnet source that stay refused.
 
 No `backend.did` change: `LifiData`'s tokens and the refs are already generic. The release must be
@@ -282,10 +310,12 @@ reaches production before the dependency spec's PR 10 and a production release o
 
 1. `feat(frontend): LI.FI BTC-source groundwork behind a flag` — the flag, gated with
    `BTC_SEND_VIA_BACKEND_ENABLED`, empty `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]`, quote
-   parameters for a BTC source, and the `1002` / `1003` / `1008` mapping. No visible change.
-2. `feat(frontend): LI.FI BTC PSBT trust checks` — decode and checks 1–5, pinned fee address,
-   fixtures from real quotes of `layerswap` and `near` (and the 2026-11-02 `relaydepository` one).
-   Dead code.
+   parameters for a BTC source, no quote below 117 600 sats, the `1002` / `1003` / `1008` mapping,
+   and the `near` destination filter if pending decision 4 calls for it. No visible change.
+2. `feat(frontend): LI.FI BTC PSBT trust checks` — the BTC branch of `assertLifiQuote` in place of
+   the Diamond check, running decode and checks 1–5 after the request checks. Also the pinned fee
+   address, and fixtures from real quotes of `layerswap` and `near` (including a sub-117 600-sat
+   quote whose fee output is raised to 294) and the 2026-11-02 `relaydepository` one. Dead code.
 3. `feat(frontend): rebuild a LI.FI BTC transaction with OISY's UTXO selection` — the fixed-outputs
    builder variant, fee sizing over a list of outputs including an `OP_RETURN`, and
    `validateBtcSend` and `calculateMaxSpendableAmount` taking that list too. Dead code.
@@ -316,7 +346,11 @@ reaches production before the dependency spec's PR 10 and a production release o
 - With LI.FI selected, Max never offers an amount LI.FI's layout cannot fund from the spendable
   UTXOs, before a quote (with the conservative layout) or after it. A quote LI.FI's selection cannot
   fund is never offered.
-- A quote failing any trust check is never offered; no signature is requested for it.
+- A quote failing any trust check is never offered; no signature is requested for it. A BTC quote
+  passes `assertLifiQuote`'s request checks first, so its tokens, amount, recipient and bridge are
+  the ones requested.
+- No LI.FI quote is requested below 117 600 sats, and the LI.FI fee the review shows is the fee
+  output paid.
 - The swap is an active user transaction from before the broadcast. It is deleted only when every
   submission was definitively refused. After an unclear outcome it stays, and the wizard does not
   return to a filled-in form.
@@ -362,7 +396,9 @@ reaches production before the dependency spec's PR 10 and a production release o
    on both dates. Is it LI.FI's stable, documented BTC fee address?
 4. **Status.** Does `/v1/status` resolve a BTC-source swap from the BTC txid alone, and with which
    `bridge` / `fromChain` parameters?
-5. **Minimums.** The smallest `fromAmount` each bridge quotes, for the form's minimum.
+5. **Minimums.** LI.FI's own floor is known: 117 600 sats, below which its fee output exceeds the
+   quoted fee (see [Quoting](#quoting)). Still open: the smallest `fromAmount` each bridge quotes,
+   in case one is higher (`layerswap` quoted 20 000 sats on 2026-11-13).
 6. **Can LI.FI take our UTXOs?** If a quote parameter lets OISY choose the inputs, signing LI.FI's
    PSBT as is becomes an option and the rebuild could go.
 
@@ -378,7 +414,9 @@ reaches production before the dependency spec's PR 10 and a production release o
 4. **LI.FI via NEAR.** OISY's direct NEAR Intents provider already offers BTC swaps through the same
    1Click service, without LI.FI's 25 bps. Admitting `near` would add a second, costlier offer of the
    same routes to the BTC swap fan-out. Proposed: admit `near` only for routes the direct provider
-   does not serve, and admit LayerSwap (or Relay) on its own binding.
+   does not serve, through the destination filter in
+   [Flag and registration](#flag-and-registration), and admit LayerSwap (or Relay) on its own
+   binding.
 
 ---
 
