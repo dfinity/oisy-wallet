@@ -175,6 +175,9 @@ As built (`decodeLifiBtcTransaction` in `lifi-swap.utils.ts`, run by `assertLifi
   also accept `OP_1NEGATE` and `OP_1`…`OP_16`, which the backend refuses.
 - LI.FI's fee is the one `feeCosts` entry named `LIFI Fixed Fee`, in BTC on LI.FI's Bitcoin chain,
   with `included: true`. Without exactly one such entry, the quote is refused.
+- That fee must be at least 294 sats (`LIFI_BTC_MIN_FEE_SATOSHIS`), even when the output matches
+  it: the backend refuses a fee output below the P2WPKH dust limit, so a smaller fee could be
+  signed but not broadcast.
 - The deposit, memo and fee outputs it returns are the ones the rebuild keeps, byte for byte.
 
 The quote's `toAmountMin` is what the review shows as the minimum received, as for other LI.FI

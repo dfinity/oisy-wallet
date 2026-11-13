@@ -1155,6 +1155,38 @@ describe('lifi-swap.utils', () => {
 				).toThrow("LI.FI's fee output is not its quoted fee of at most 25 bps");
 			});
 
+			it('should refuse a quoted fee below the dust limit, even when the outputs match it', () => {
+				expect(() =>
+					assertBtcQuote({
+						quote: withOutputs({
+							quote: withFeeCost('293'),
+							edit: () => [
+								{ ...deposit, value: deposit.value + fee.value - 293 },
+								memo,
+								change,
+								{ ...fee, value: 293 }
+							]
+						})
+					})
+				).toThrow("LI.FI's fee output is below the dust limit");
+			});
+
+			it('should accept a quoted fee at the dust limit', () => {
+				expect(() =>
+					assertBtcQuote({
+						quote: withOutputs({
+							quote: withFeeCost('294'),
+							edit: () => [
+								{ ...deposit, value: deposit.value + fee.value - 294 },
+								memo,
+								change,
+								{ ...fee, value: 294 }
+							]
+						})
+					})
+				).not.toThrow();
+			});
+
 			it.each([
 				{
 					name: 'no LI.FI fee',
