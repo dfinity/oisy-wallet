@@ -1220,6 +1220,12 @@ const assertCkSolDepositWatched = ({
 	) {
 		throw new ChainFusionSolDepositRefusedError('changed');
 	}
+
+	// A call inside an earlier registration's window gets that window, which can end with no scan
+	// left: SOL sent then would wait on the address until a later call registers it again.
+	if (isNullish(fromNullable(status.Watching.next_scan_at))) {
+		throw new ChainFusionSolDepositRefusedError('unavailable');
+	}
 };
 
 /**
@@ -1228,8 +1234,9 @@ const assertCkSolDepositWatched = ({
  *
  * The address is registered with `watch_deposit_address` first, and nothing moves unless the
  * answer takes the deposit the user reviewed. The registration is what makes the mint
- * independent of OISY: from that call on, the minter itself scans the address for about 24 hours,
- * so the ckSOL arrives even if the tab closes before the row exists. A transfer that fails moves
+ * independent of OISY: from that call on, the minter itself scans the address until the window
+ * ends, and nothing is sent unless a scan is still due, so the ckSOL arrives even if the tab
+ * closes before the row exists. A transfer that fails moves
  * nothing, and the registration simply expires.
  *
  * The row is created once the transfer is confirmed, as for the NEAR Intents Solana swap. It
