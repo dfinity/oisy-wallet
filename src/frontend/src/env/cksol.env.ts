@@ -1,5 +1,3 @@
-import { LOCAL, STAGING } from '$lib/constants/app.constants';
-
-// ckSOL and its Chain Fusion conversions, on local and staging builds only until a real
-// conversion in both directions has been verified on staging.
-export const CKSOL_ENABLED = LOCAL || STAGING;
+// ckSOL and its Chain Fusion conversions. Kept as a kill switch: `false` removes the ckSOL
+// token, the Solana token group and the SOL ↔ ckSOL offers everywhere.
+export const CKSOL_ENABLED = true as boolean;
