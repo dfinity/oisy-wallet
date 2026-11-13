@@ -107,6 +107,13 @@ loaded is not quoted, as for NEAR Intents). `allowBridges` from `LIFI_ALLOWED_BR
 found" on an empty address); map that to the existing insufficient-balance state. `1002` and `1008`
 mean no route from this provider.
 
+The three come back as HTTP errors with LI.FI's code in the body: `1002` and `1003` with 404, `1008`
+with 424 (2026-11-13). None is offered. The swap form already explains an insufficient balance from
+its own UTXO selection, so `swap_offer` reports `1003` as `insufficient_funds` and the other two as
+`no_route`, all three without a severity (a 424 from an EVM source stays a failed request). A BTC
+source never gets the second request of the two-swap hint. Bitcoin stays out of `toLifiChainId`, so
+it is never a LI.FI destination.
+
 No LI.FI quote is requested below **117 600 sats** (`⌈294 / LIFI_FEE_BPS⌉`). Below that, LI.FI's
 fee output exceeds its quoted fee (see [Background](#background--what-a-lifi-btc-source-quote-looks-like)),
 so check 3 would refuse every quote. The other BTC swap providers still quote those amounts.
@@ -326,9 +333,9 @@ reaches production before the dependency spec's PR 10 and a production release o
 
 1. `feat(frontend): LI.FI BTC-source groundwork behind a flag` — the flag, gated with
    `BTC_SEND_VIA_BACKEND_ENABLED`, empty `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]`, quote
-   parameters for a BTC source, no quote below 117 600 sats, the `1002` / `1003` / `1008` mapping,
-   and the `near` destination filter if pending decision 4 calls for it (with the NEAR token sets it
-   needs). No visible change.
+   parameters for a BTC source, no quote below 117 600 sats, the `1002` / `1003` / `1008` mapping.
+   No visible change. The `near` destination filter waits for pending decision 4, and lands with the
+   PR that admits `near` if that decision calls for it (with the NEAR token sets it needs).
 2. `feat(frontend): LI.FI BTC PSBT trust checks` — the BTC branch of `assertLifiQuote` in place of
    the Diamond check, running decode and checks 1–5 after the request checks. Also the BTC rule of
    `isLifiRouteExecutable` for the quote path and `requoteAtLeast`, the pinned fee

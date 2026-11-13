@@ -1,5 +1,12 @@
 import {
+	LIFI_BTC_MIN_AMOUNT_SATOSHIS,
+	LIFI_BTC_TOKEN_ADDRESS
+} from '$btc/constants/lifi.constants';
+import { isBitcoinToken } from '$btc/utils/token.utils';
+import { BTC_SEND_VIA_BACKEND_ENABLED } from '$env/btc.env';
+import {
 	LIFI_ALLOWED_BRIDGES,
+	LIFI_BTC_SWAP_ENABLED,
 	LIFI_DENY_BRIDGES,
 	LIFI_DENY_EXCHANGES,
 	LIFI_DIAMOND_ADDRESSES,
@@ -21,7 +28,11 @@ import {
 	type SwapMappedResult
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
-import { isNetworkEthereum, isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
+import {
+	isNetworkEthereum,
+	isNetworkIdBTCMainnet,
+	isNetworkIdSOLMainnet
+} from '$lib/utils/network.utils';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { decodeTransactionMessage } from '$sol/utils/sol-transactions.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
@@ -63,6 +74,17 @@ export const toLifiTokenAddress = (token: Token): string | undefined => {
 };
 
 /**
+ * Whether LI.FI is asked about a swap from this token as a BTC source: native BTC on mainnet, while
+ * `LIFI_BTC_SWAP_ENABLED` and `BTC_SEND_VIA_BACKEND_ENABLED` are both on. Bitcoin is never a LI.FI
+ * destination, so `toLifiChainId` and `toLifiTokenAddress` leave it out.
+ */
+const isLifiBtcSource = (token: Token): boolean =>
+	LIFI_BTC_SWAP_ENABLED &&
+	BTC_SEND_VIA_BACKEND_ENABLED &&
+	isNetworkIdBTCMainnet(token.network.id) &&
+	isBitcoinToken(token);
+
+/**
  * The `getSupportedDestinations` of a LI.FI registry entry. LI.FI keeps no token list — any token on
  * a chain it serves may have a route, and a pair without one simply gets no quote — so an entry
  * answers with a wildcard for the category it quotes into.
@@ -97,6 +119,9 @@ export const buildLifiSupportedDestinations =
  *
  * A Solana source is limited to `LIFI_SOLANA_ALLOWED_EXCHANGES`, the exchanges whose transactions
  * its binding can check.
+ *
+ * A BTC source (`isLifiBtcSource`) is quoted from the user's BTC address, toward the user's address
+ * on the destination network, and only from `LIFI_BTC_MIN_AMOUNT_SATOSHIS`.
  */
 export const buildLifiQuoteRequest = ({
 	sourceToken,
@@ -110,15 +135,20 @@ export const buildLifiQuoteRequest = ({
 		return;
 	}
 
-	const fromChain = toLifiChainId(sourceToken.network);
+	const btcSource = isLifiBtcSource(sourceToken);
+
+	const fromChain = btcSource ? ChainId.BTC : toLifiChainId(sourceToken.network);
 	const toChain = toLifiChainId(destinationToken.network);
-	const fromToken = toLifiTokenAddress(sourceToken);
+	const fromToken = btcSource ? LIFI_BTC_TOKEN_ADDRESS : toLifiTokenAddress(sourceToken);
 	const toToken = toLifiTokenAddress(destinationToken);
 
-	// The source-chain address only stands in for a recipient on another EVM chain: a Solana
-	// destination pays out to the user's Solana address or not at all.
+	// An EVM address only stands in for a recipient on another EVM chain: a Solana destination pays
+	// out to the user's Solana address or not at all, and a BTC address is never a recipient.
 	const toAddress =
-		recipientAddress ?? (isNetworkEthereum(destinationToken.network) ? userAddress : undefined);
+		recipientAddress ??
+		(isNetworkEthereum(sourceToken.network) && isNetworkEthereum(destinationToken.network)
+			? userAddress
+			: undefined);
 
 	// OISY's slippage is a percentage, LI.FI's a fraction.
 	const lifiSlippage = Number(slippage) / 100;
@@ -147,7 +177,8 @@ export const buildLifiQuoteRequest = ({
 		(fromChain !== toChain && allowBridges.length === 0) ||
 		// Solana → EVM is out of scope: nothing binds its EVM recipient yet.
 		(solanaSource && toChain !== ChainId.SOL) ||
-		allowExchanges?.length === 0
+		allowExchanges?.length === 0 ||
+		(btcSource && amount < LIFI_BTC_MIN_AMOUNT_SATOSHIS)
 	) {
 		return;
 	}
@@ -459,7 +490,12 @@ export const findLifiIntermediateToken = ({
 	action: { fromChainId, toChainId, fromToken, toToken },
 	includedSteps
 }: LiFiStep): LifiTokenRef | undefined => {
-	if (fromChainId === toChainId || fromChainId === ChainId.SOL || toChainId === ChainId.SOL) {
+	if (
+		fromChainId === toChainId ||
+		fromChainId === ChainId.SOL ||
+		toChainId === ChainId.SOL ||
+		fromChainId === ChainId.BTC
+	) {
 		return;
 	}
 
