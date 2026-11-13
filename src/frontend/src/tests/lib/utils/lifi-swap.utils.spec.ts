@@ -1091,23 +1091,31 @@ describe('lifi-swap.utils', () => {
 					memo: { script: memoOf(`6a4c51${'ab'.repeat(81)}`), value: 0 }
 				},
 				{ name: 'a memo with an opcode', memo: { script: memoOf('6a0161ac'), value: 0 } },
-				{ name: 'a truncated memo', memo: { script: memoOf('6a04abcd'), value: 0 } }
+				{ name: 'a memo with OP_1', memo: { script: memoOf('6a51'), value: 0 } },
+				{ name: 'a memo ending in OP_16', memo: { script: memoOf('6a016160'), value: 0 } },
+				{ name: 'a memo with OP_1NEGATE', memo: { script: memoOf('6a4f'), value: 0 } },
+				{ name: 'a truncated memo', memo: { script: memoOf('6a04abcd'), value: 0 } },
+				{ name: 'a truncated push length', memo: { script: memoOf('6a4d03'), value: 0 } }
 			])('should refuse $name', ({ memo: badMemo }) => {
 				expect(() =>
 					assertBtcQuote({ quote: withOutputs({ edit: () => [deposit, badMemo, change, fee] }) })
 				).toThrow('the memo is not one the backend broadcasts');
 			});
 
-			it('should accept a memo of 80 bytes', () => {
+			it.each([
+				{ name: 'of 80 bytes', script: `6a4c50${'ab'.repeat(80)}` },
+				{ name: 'with no data', script: '6a' },
+				{ name: 'with an empty push', script: '6a00' },
+				{ name: 'with an explicit one-byte push of 5', script: '6a0105' },
+				{ name: 'with an explicit one-byte push of 0x81', script: '6a0181' },
+				{ name: 'with a non-minimal OP_PUSHDATA1', script: '6a4c03abcdef' },
+				{ name: 'with an OP_PUSHDATA2', script: '6a4d0300abcdef' },
+				{ name: 'with an OP_PUSHDATA4', script: '6a4e03000000abcdef' }
+			])('should accept a memo $name', ({ script }) => {
 				expect(() =>
 					assertBtcQuote({
 						quote: withOutputs({
-							edit: () => [
-								deposit,
-								{ script: memoOf(`6a4c50${'ab'.repeat(80)}`), value: 0 },
-								change,
-								fee
-							]
+							edit: () => [deposit, { script: memoOf(script), value: 0 }, change, fee]
 						})
 					})
 				).not.toThrow();

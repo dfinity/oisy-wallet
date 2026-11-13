@@ -48,7 +48,7 @@ import {
 	type Transaction,
 	type TransactionVersion
 } from '@solana/kit';
-import { script as btcScript, opcodes, Psbt } from 'bitcoinjs-lib';
+import { opcodes, Psbt } from 'bitcoinjs-lib';
 
 /**
  * LI.FI's chain id for a network it may be asked about: an EVM network whose Diamond is pinned, or
@@ -318,17 +318,49 @@ const toLifiBtcScript = (address: string | undefined): Uint8Array | undefined =>
 const isSameBytes = ({ actual, expected }: { actual: Uint8Array; expected: Uint8Array }): boolean =>
 	actual.length === expected.length && actual.every((byte, index) => byte === expected[index]);
 
-// `OP_RETURN` followed only by data pushes, within `LIFI_BTC_MAX_MEMO_SCRIPT_BYTES`: the memo the
-// backend broadcasts, so at most 80 bytes of data.
-const isLifiBtcMemo = (script: Uint8Array): boolean => {
-	if (script.length > LIFI_BTC_MAX_MEMO_SCRIPT_BYTES) {
-		return false;
+const BTC_PUSHDATA_LENGTH_BYTES: Partial<Record<number, number>> = {
+	[opcodes.OP_PUSHDATA1]: 1,
+	[opcodes.OP_PUSHDATA2]: 2,
+	[opcodes.OP_PUSHDATA4]: 4
+};
+
+// Whether `script` is data pushes only, read byte by byte as the backend's parser reads it: direct
+// pushes and `OP_PUSHDATA1/2/4`, minimal or not. bitcoinjs-lib cannot stand in: `isPushOnly` also
+// accepts `OP_1NEGATE` and `OP_1`…`OP_16`, which the backend refuses, and `decompile` turns an
+// explicit one-byte push of 1–16 into those opcodes.
+const isBtcDataPushesOnly = (script: Uint8Array): boolean => {
+	let offset = 0;
+
+	while (offset < script.length) {
+		const opcode = script[offset];
+		offset += 1;
+
+		// A direct push (0x00–0x4b) carries its length in the opcode itself.
+		const lengthBytes = opcode < opcodes.OP_PUSHDATA1 ? 0 : BTC_PUSHDATA_LENGTH_BYTES[opcode];
+
+		if (isNullish(lengthBytes) || offset + lengthBytes > script.length) {
+			return false;
+		}
+
+		const dataLength =
+			lengthBytes === 0
+				? opcode
+				: script
+						.subarray(offset, offset + lengthBytes)
+						.reduceRight((length, byte) => length * 256 + byte, 0);
+
+		offset += lengthBytes + dataLength;
 	}
 
-	const [opcode, ...pushes] = btcScript.decompile(Buffer.from(script)) ?? [];
-
-	return opcode === opcodes.OP_RETURN && btcScript.isPushOnly(pushes);
+	return offset === script.length;
 };
+
+// `OP_RETURN` followed only by data pushes, within `LIFI_BTC_MAX_MEMO_SCRIPT_BYTES`: the memo the
+// backend broadcasts, so at most 80 bytes of data.
+const isLifiBtcMemo = (script: Uint8Array): boolean =>
+	script.length <= LIFI_BTC_MAX_MEMO_SCRIPT_BYTES &&
+	script[0] === opcodes.OP_RETURN &&
+	isBtcDataPushesOnly(script.subarray(1));
 
 // LI.FI's fee as its BTC quote lists it: one `LIFI_BTC_FEE_COST_NAME` cost, in BTC, taken out of the
 // amount rather than charged on top.
