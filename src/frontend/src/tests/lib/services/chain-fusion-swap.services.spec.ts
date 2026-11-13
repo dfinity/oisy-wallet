@@ -2010,6 +2010,14 @@ describe('chain-fusion-swap.services', () => {
 					name: 'the fee rose above the quoted one',
 					answer: { ...watched, automatic_deposit_fee: AUTOMATIC_DEPOSIT_FEE + 1n },
 					reason: 'changed'
+				},
+				{
+					name: 'no scan is due before the window ends',
+					answer: {
+						...watched,
+						status: { Watching: { ...watched.status.Watching, next_scan_at: [] as [] } }
+					},
+					reason: 'unavailable'
 				}
 			])('should send no SOL when $name', async ({ answer, reason }) => {
 				vi.mocked(watchDepositAddress).mockResolvedValue(answer);
