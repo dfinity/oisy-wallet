@@ -80,7 +80,7 @@ The row stays in flight until the minter reports the mint. About once a minute, 
 
 - On every watch response, including `Watching`, inspect the account's latest deposit id. If it is newer than the row's baseline, persist it and follow `deposit_sol_status` as below, so a deposit minted while OISY was closed is still recovered. Otherwise, `Watching` keeps the row in flight. Once the window has ended, the same call registers the address again, so a late transfer is still found.
 - `Detected` gives the deposit id. The row keeps it and from then on follows `deposit_sol_status`: `Queued`, `Swept` and `Finalized` keep it in flight; `Minted` closes it as succeeded, showing the minted amount; `Dropped` keeps it in flight, and the next `watch_deposit_address` call registers the address again if the minter could not; `Quarantined` closes it as failed, saying that the minter holds the SOL until an upgrade resolves the deposit.
-- The row only accepts a deposit id newer than the latest deposit id the minter reported when the row was opened, so an earlier deposit's mint is never taken for this one.
+- The row's baseline is the latest deposit id in the `watch_deposit_address` answer before the transfer (§6.2), kept on the row unchanged. The row only accepts a deposit id newer than its baseline, so an earlier deposit's mint is never taken for this one.
 
 The minted amount can exceed the conversion when the address held more SOL (§3.8). It is shown as minted.
 
@@ -106,7 +106,7 @@ Both directions are rows of the existing `ChainFusion` variant, with two new dir
 
 Each row snapshots the minter and writes the display refs every Chain Fusion row writes, plus:
 
-- SOL → ckSOL: the deposit address, the transfer signature and the latest deposit id at opening; learned later: the deposit id.
+- SOL → ckSOL: the deposit address, the transfer signature and the baseline, the latest deposit id in the `watch_deposit_address` answer before the transfer (§6.3); learned later: the deposit id.
 - ckSOL → SOL: the burn index; learned later: the withdrawal's Solana signature.
 
 The rows show in the Active transactions list like the other Chain Fusion conversions, and report into the swap analytics funnel with Chain Fusion as provider. There are no new analytics events.
@@ -138,7 +138,7 @@ No SDK wraps the ckSOL minter, so OISY adds it the way it added the CMC (#14132)
 - **AC4** The SOL → ckSOL offer shows the receive amount and fee rows of §6.1, with the fee and minimum the minter reports, and refuses an amount below the minimum.
 - **AC5** Confirming calls `watch_deposit_address` before any SOL moves. Unless the answer is `Watching` for the quoted address, minimum and fee, with a scan still due, no SOL moves and the form says why.
 - **AC6** After the transfer, the conversion shows in Active transactions and ckSOL is enabled. The row closes as succeeded with the minted amount once the minter reports `Minted`, across modal close, refresh, tab close and logout.
-- **AC7** A row never takes a deposit whose id is not newer than the latest deposit id at opening.
+- **AC7** A row never takes a deposit whose id is not newer than the latest deposit id in the `watch_deposit_address` answer before its transfer.
 - **AC8** While a SOL → ckSOL conversion is in flight, no new SOL → ckSOL offer appears, and the form explains why.
 - **AC9** `Dropped` keeps the row in flight until a later deposit is minted; `Quarantined` closes it as failed with the explanation of §6.3.
 - **AC10** The ckSOL → SOL offer shows amount − 0.001 SOL received, the approval fee on top, and the 0.002 SOL minimum. Executing approves and calls `withdraw_sol` to the user's own Solana address, and the row follows `withdraw_sol_status` to succeeded or failed.
