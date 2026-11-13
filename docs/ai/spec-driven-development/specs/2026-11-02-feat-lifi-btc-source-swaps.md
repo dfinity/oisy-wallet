@@ -140,13 +140,24 @@ They are found by role, not by index: a quote without change has the fee at inde
   (`BTC_SEND_FEE_TOLERANCE_PERCENTAGE`). LI.FI's layout is larger. With one input, LayerSwap's
   (P2TR deposit, an 18-byte memo, fee output, change) is about 213 vB against the 153 vB the swap
   prices, so +39%. NEAR's (P2WPKH deposit, a 10-byte memo) is about 193 vB, +26%. Each part must
-  therefore work from the validated output list of the current quote:
+  therefore work from LI.FI's layout, the validated output list of the current quote:
   - the fee `SwapBtcFees.svelte` shows, and the selection behind it, are LI.FI's own, not the swap
     loader's. They are recomputed whenever the quote (and so its deposit address and memo)
     changes;
   - `validateBtcSend` takes the same output list and recomputes the expected fee for it. Otherwise
     it refuses a correctly priced LI.FI transaction as `InvalidFeeCalculation`, while the swap
     loader's fee would underprice it, below the backend's 1 sat/vB floor at the lowest rate.
+  - the swap form follows the same layout. `SwapBtcForm.svelte` checks `insufficient-funds-for-fee`
+    with the swap loader's fee, against the wallet balance. That balance is read at one
+    confirmation, so it includes incoming and reserved funds a selection cannot spend. Its Max
+    (`initBtcMaxSendAmount` → `calculateMaxSpendableAmount`) budgets over the spendable UTXOs, but
+    for one 43 vB output plus change, so it can offer an amount LI.FI's layout cannot fund. With
+    LI.FI selected, Max and the fee check use LI.FI's layout. That is the current quote's outputs
+    or, before a validated quote exists, a conservative one: the largest deposit output (43 vB), an
+    `OP_RETURN` at the backend's 83-byte cap (92 vB), a P2WPKH fee output (31 vB) and change;
+  - a LI.FI quote that its own selection cannot fund (`InsufficientBalance`,
+    `InsufficientBalanceForFee`) is not offered. An amount the spendable UTXOs cannot cover under
+    LI.FI's layout then never reaches Review.
 - **Change** between the `OP_RETURN` and the fee output, where LI.FI puts it, whether or not
   LI.FI's own quote had change. Only if `≥ BTC_CHANGE_DUST_THRESHOLD_SATOSHIS` (1 000 sats), else
   it goes to the miner and the transaction is deposit, `OP_RETURN`, fee. Either way the three kept
@@ -277,7 +288,7 @@ reaches production before the dependency spec's PR 10 and a production release o
    Dead code.
 3. `feat(frontend): rebuild a LI.FI BTC transaction with OISY's UTXO selection` — the fixed-outputs
    builder variant, fee sizing over a list of outputs including an `OP_RETURN`, and
-   `validateBtcSend` checking the fee against that list. Dead code.
+   `validateBtcSend` and `calculateMaxSpendableAmount` taking that list too. Dead code.
 4. `feat(backend): accept BTC-source LI.FI active transactions` — `require_lifi_pair` and
    `require_lifi_refs` as in [Backend: BTC-source LI.FI rows](#backend-btc-source-lifi-rows), with
    unit tests. Independent of 1–3.
@@ -286,7 +297,9 @@ reaches production before the dependency spec's PR 10 and a production release o
    BTC source with its never-reached-the-network settle. Unreachable until 6.
 6. `feat(frontend): offer LI.FI from BTC` (needs 5 and one admitted bridge) — the bridge binding,
    tied to output 0, plus provider registration and the wizard. The fee preview comes from LI.FI's
-   own selection, not the swap loader. Also a "(local and staging)" entry in `PRODUCT.md`.
+   own selection, not the swap loader. With LI.FI selected, the form's fee check and Max use its
+   layout (the conservative one before a quote), and a quote its selection cannot fund is not
+   offered. Also a "(local and staging)" entry in `PRODUCT.md`.
 
 ---
 
@@ -300,6 +313,9 @@ reaches production before the dependency spec's PR 10 and a production release o
 - For a LI.FI quote, the fee shown, the selection and the fee `validateBtcSend` expects all come
   from the quote's validated output layout. A correctly priced LI.FI transaction passes the
   pre-send check.
+- With LI.FI selected, Max never offers an amount LI.FI's layout cannot fund from the spendable
+  UTXOs, before a quote (with the conservative layout) or after it. A quote LI.FI's selection cannot
+  fund is never offered.
 - A quote failing any trust check is never offered; no signature is requested for it.
 - The swap is an active user transaction from before the broadcast. It is deleted only when every
   submission was definitively refused. After an unclear outcome it stays, and the wizard does not
