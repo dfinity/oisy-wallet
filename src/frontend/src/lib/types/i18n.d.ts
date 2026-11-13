@@ -509,6 +509,8 @@ interface I18nInit {
 		load_token_list: string;
 		icrc_canister_loading_curated: string;
 		icrc_canister_loading_custom: string;
+		icrc_default_token_loading_curated: string;
+		icrc_default_token_loading_custom: string;
 		erc20_custom_tokens: string;
 		erc4626_custom_tokens: string;
 		erc721_custom_tokens: string;

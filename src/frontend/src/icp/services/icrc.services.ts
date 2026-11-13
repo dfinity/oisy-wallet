@@ -169,6 +169,11 @@ const loadIcrcCustomTokens = async ({
 	});
 };
 
+// A saved entry of a default token only stores whether the user turned the token on or off.
+const ICRC_DEFAULT_LEDGER_CANISTER_IDS = new Set(
+	ICRC_TOKENS.map(({ ledgerCanisterId }) => ledgerCanisterId)
+);
+
 const loadCustomIcrcTokensData = async ({
 	tokens,
 	certified,
@@ -258,6 +263,12 @@ const loadCustomIcrcTokensData = async ({
 
 			const ledgerCanisterId = token.Icrc.ledger_id.toText();
 
+			// Deleting the saved entry of a default token would only turn the token back to its default
+			// on/off setting, so the Help card doesn't offer it.
+			if (ICRC_DEFAULT_LEDGER_CANISTER_IDS.has(ledgerCanisterId)) {
+				return acc;
+			}
+
 			const result = results[index];
 
 			if (
@@ -328,14 +339,23 @@ const loadCustomIcrcTokensData = async ({
 				if (enabled && certified && !icrcUnavailableCustomTokensStore.isDeleted(ledgerCanisterId)) {
 					const curatedToken = indexedIcrcCustomTokens[ledgerCanisterId];
 
+					// The Help card doesn't list a default token, so its warning doesn't point there.
+					const isDefaultToken = ICRC_DEFAULT_LEDGER_CANISTER_IDS.has(ledgerCanisterId);
+
 					toastsShow({
 						text: nonNullish(curatedToken)
-							? replacePlaceholders(get(i18n).init.error.icrc_canister_loading_curated, {
-									$tokenSymbol: curatedToken.symbol
-								})
-							: replacePlaceholders(get(i18n).init.error.icrc_canister_loading_custom, {
-									$ledgerCanisterId: ledgerCanisterId
-								}),
+							? replacePlaceholders(
+									isDefaultToken
+										? get(i18n).init.error.icrc_default_token_loading_curated
+										: get(i18n).init.error.icrc_canister_loading_curated,
+									{ $tokenSymbol: curatedToken.symbol }
+								)
+							: replacePlaceholders(
+									isDefaultToken
+										? get(i18n).init.error.icrc_default_token_loading_custom
+										: get(i18n).init.error.icrc_canister_loading_custom,
+									{ $ledgerCanisterId: ledgerCanisterId }
+								),
 						level: 'warn'
 					});
 				}

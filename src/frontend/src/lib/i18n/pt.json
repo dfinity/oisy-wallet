@@ -769,6 +769,8 @@
 			"load_token_list": "",
 			"icrc_canister_loading_curated": "O token $tokenSymbol não está respondendo e não pode ser carregado agora. Tente novamente mais tarde. Se o problema persistir, você pode excluí-lo na página “Ajuda”.",
 			"icrc_canister_loading_custom": "O token com canister de ledger $ledgerCanisterId não está respondendo e não pode ser carregado agora. Tente novamente mais tarde. Se o problema persistir, você pode excluí-lo na página “Ajuda”.",
+			"icrc_default_token_loading_curated": "O token $tokenSymbol não está respondendo e não pode ser carregado agora. Tente novamente mais tarde.",
+			"icrc_default_token_loading_custom": "O token com canister de ledger $ledgerCanisterId não está respondendo e não pode ser carregado agora. Tente novamente mais tarde.",
 			"erc20_custom_tokens": "Erro ao carregar o token personalizado ERC20.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Erro ao carregar o token personalizado ERC721.",

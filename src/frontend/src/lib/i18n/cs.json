@@ -769,6 +769,8 @@
 			"load_token_list": "",
 			"icrc_canister_loading_curated": "Token $tokenSymbol neodpovídá a momentálně ho nelze načíst. Zkuste to znovu později. Pokud problém přetrvá, můžete ho smazat na stránce „Nápověda“.",
 			"icrc_canister_loading_custom": "Token s Ledger kanystrem $ledgerCanisterId neodpovídá a momentálně ho nelze načíst. Zkuste to znovu později. Pokud problém přetrvá, můžete ho smazat na stránce „Nápověda“.",
+			"icrc_default_token_loading_curated": "Token $tokenSymbol neodpovídá a momentálně ho nelze načíst. Zkuste to znovu později.",
+			"icrc_default_token_loading_custom": "Token s Ledger kanystrem $ledgerCanisterId neodpovídá a momentálně ho nelze načíst. Zkuste to znovu později.",
 			"erc20_custom_tokens": "Chyba při načítání vlastních tokenů ERC20",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Chyba při načítání vlastních tokenů ERC721.",

@@ -769,6 +769,8 @@
 			"load_token_list": "",
 			"icrc_canister_loading_curated": "Token $tokenSymbol không phản hồi và không thể tải lúc này. Vui lòng thử lại sau. Nếu lỗi vẫn tiếp diễn, bạn có thể xóa token này trên trang “Trợ giúp”.",
 			"icrc_canister_loading_custom": "Token với canister ledger $ledgerCanisterId không phản hồi và không thể tải lúc này. Vui lòng thử lại sau. Nếu lỗi vẫn tiếp diễn, bạn có thể xóa token này trên trang “Trợ giúp”.",
+			"icrc_default_token_loading_curated": "Token $tokenSymbol không phản hồi và không thể tải lúc này. Vui lòng thử lại sau.",
+			"icrc_default_token_loading_custom": "Token với canister ledger $ledgerCanisterId không phản hồi và không thể tải lúc này. Vui lòng thử lại sau.",
 			"erc20_custom_tokens": "Lỗi khi tải các token ERC20.",
 			"erc4626_custom_tokens": "",
 			"erc721_custom_tokens": "Lỗi khi tải các token ERC721.",

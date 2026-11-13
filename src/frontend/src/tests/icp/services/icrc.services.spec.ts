@@ -2,6 +2,7 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.env';
 import {
 	RETIRED_ICRC_LEDGER_CANISTER_IDS,
 	RETIRED_ICRC_TOKENS
@@ -579,6 +580,44 @@ describe('icrc.services', () => {
 				expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([
 					{ ledgerCanisterId: mockLedgerCanisterId, customToken: mockCustomToken }
 				]);
+			});
+
+			const [{ ledgerCanisterId: defaultLedgerCanisterId }] = ICRC_TOKENS;
+
+			// It only stores whether the user turned the default token on or off.
+			const defaultCustomToken: CustomToken = {
+				...mockCustomToken,
+				token: {
+					Icrc: {
+						index_id: toNullable(),
+						ledger_id: Principal.fromText(defaultLedgerCanisterId)
+					}
+				}
+			};
+
+			it('should not list the saved entry of a default token as unavailable', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue([defaultCustomToken]);
+
+				ledgerCanisterMock.metadata.mockRejectedValue(new Error('test'));
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([]);
+			});
+
+			it('should warn about a default token without pointing to the Help page', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue([defaultCustomToken]);
+
+				ledgerCanisterMock.metadata.mockRejectedValue(new Error('test'));
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
+					text: replacePlaceholders(get(i18n).init.error.icrc_default_token_loading_custom, {
+						$ledgerCanisterId: defaultLedgerCanisterId
+					}),
+					level: 'warn'
+				});
 			});
 
 			it('should keep the unavailable tokens of a reload when an older list arrives after it', async () => {
