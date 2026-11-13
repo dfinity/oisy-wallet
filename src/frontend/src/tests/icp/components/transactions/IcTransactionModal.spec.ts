@@ -142,6 +142,34 @@ describe('IcTransactionModal', () => {
 		});
 	});
 
+	describe('burn without a recipient address', () => {
+		const ckSolToken = { ...mockValidIcCkToken, twinToken: SOLANA_TOKEN };
+
+		// What the ckSOL mapper makes of a burn whose memo is missing or does not decode.
+		const burn = {
+			...mockIcTransactionUi,
+			type: 'burn' as const,
+			to: undefined,
+			toLabel: 'transaction.label.twin_network'
+		};
+
+		it('should name the twin network as the recipient', () => {
+			const { getByText } = render(IcTransactionModal, { transaction: burn, token: ckSolToken });
+
+			expect(getByText(get(i18n).transaction.text.to)).toBeInTheDocument();
+			expect(getByText('Solana network')).toBeInTheDocument();
+		});
+
+		it('should name no network for a burn to an address', () => {
+			const { queryByText } = render(IcTransactionModal, {
+				transaction: { ...burn, to: mockIcTransactionUi.to },
+				token: ckSolToken
+			});
+
+			expect(queryByText('Solana network')).not.toBeInTheDocument();
+		});
+	});
+
 	it('should display the fee', () => {
 		const { getByText } = render(IcTransactionModal, {
 			transaction: mockIcTransactionUi,
