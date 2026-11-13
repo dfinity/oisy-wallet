@@ -620,6 +620,51 @@ describe('icrc.services', () => {
 				});
 			});
 
+			it('should keep the saved tokens of a newer reload when an older one fails after it', async () => {
+				const olderCertifiedList = Promise.withResolvers<CustomToken[]>();
+
+				// The older reload's query answers, while its certified request is still pending.
+				backendCanisterMock.listCustomTokens
+					.mockResolvedValueOnce([mockCustomToken])
+					.mockReturnValueOnce(olderCertifiedList.promise)
+					.mockResolvedValue([mockCustomToken]);
+
+				const olderReload = loadCustomTokens({ identity: mockIdentity });
+
+				await vi.waitFor(() =>
+					expect(backendCanisterMock.listCustomTokens).toHaveBeenCalledTimes(2)
+				);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				// The newer reload's certified round has written the saved token.
+				await vi.waitFor(() =>
+					expect(
+						get(icrcCustomTokensStore)?.find(
+							({ data: { ledgerCanisterId } }) => ledgerCanisterId === mockLedgerCanisterId
+						)?.certified
+					).toBeTruthy()
+				);
+
+				olderCertifiedList.reject(new Error('test'));
+
+				await olderReload;
+
+				await vi.waitFor(() =>
+					expect(trackEvent).toHaveBeenCalledWith({
+						name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+						metadata: { error: 'test' }
+					})
+				);
+
+				expect(
+					(get(icrcCustomTokensStore) ?? []).map(
+						({ data: { ledgerCanisterId } }) => ledgerCanisterId
+					)
+				).toContain(mockLedgerCanisterId);
+				expect(spyToastsError).not.toHaveBeenCalled();
+			});
+
 			it('should keep the unavailable tokens of a reload when an older list arrives after it', async () => {
 				// The sign-in load numbers its round before it fetches the saved tokens.
 				const icrcRound = nextIcrcCustomTokensRound();

@@ -81,10 +81,17 @@ export const loadCustomTokens = ({
 	onSuccess
 }: Omit<LoadCustomTokenParams, 'certified'> & {
 	onSuccess?: (params: { outdated: boolean }) => void;
-}): Promise<void> =>
-	queryAndUpdate<{ tokens: IcrcCustomToken[]; round: number }>({
+}): Promise<void> => {
+	// The round of the certified request, for its error handler.
+	let certifiedRound = 0;
+
+	return queryAndUpdate<{ tokens: IcrcCustomToken[]; round: number }>({
 		request: async (params) => {
 			const round = nextIcrcCustomTokensRound();
+
+			if (params.certified) {
+				certifiedRound = round;
+			}
 
 			const tokens = await loadIcrcCustomTokens({ ...params, useCache, round });
 
@@ -92,9 +99,10 @@ export const loadCustomTokens = ({
 		},
 		onLoad: ({ response: { tokens, round }, certified }) =>
 			loadIcrcCustomData({ response: tokens, certified, round, onSuccess }),
-		onUpdateError: onCustomTokensUpdateError,
+		onUpdateError: ({ error }) => onCustomTokensUpdateError({ error, round: certifiedRound }),
 		identity
 	});
+};
 
 const loadDefaultIcrc = ({
 	data: { ledgerCanisterId, ...data }
@@ -403,13 +411,19 @@ const loadIcrcCustomData = ({
 	);
 };
 
-const onCustomTokensUpdateError = ({ error: err }: { error: unknown }) => {
-	icrcCustomTokensStore.resetAll();
-
+const onCustomTokensUpdateError = ({ error: err, round }: { error: unknown; round: number }) => {
 	trackEvent({
 		name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
 		metadata: mapIcErrorMetadata(err)
 	});
+
+	// A certified round that started later already wrote what it found: an older round's failure must
+	// not clear it.
+	if (round < unavailableTokensCertifiedRound) {
+		return;
+	}
+
+	icrcCustomTokensStore.resetAll();
 
 	toastsError({
 		msg: { text: get(i18n).init.error.load_token_list }
@@ -430,7 +444,7 @@ export const processCustomTokens = async ({
 		loadIcrcCustomData({ response, certified: params.certified, round: icrcRound });
 	} catch (err) {
 		if (params.certified) {
-			onCustomTokensUpdateError({ error: err });
+			onCustomTokensUpdateError({ error: err, round: icrcRound });
 		}
 	}
 };
