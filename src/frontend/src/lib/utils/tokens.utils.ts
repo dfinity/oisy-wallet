@@ -633,7 +633,7 @@ const normaliseTokenForSave = (token: Token): SaveCustomTokenWithKey | undefined
 	}
 };
 
-const normalizeTokensForSave = (tokens: Token[]): SaveCustomTokenWithKey[] =>
+export const normalizeTokensForSave = (tokens: Token[]): SaveCustomTokenWithKey[] =>
 	tokens.reduce<SaveCustomTokenWithKey[]>((acc, token) => {
 		const normalizedToken = normaliseTokenForSave(token);
 
