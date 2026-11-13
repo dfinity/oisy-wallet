@@ -32,6 +32,7 @@ export const SOLANA_TOKEN: RequiredTokenWithLinkedData = {
 	// Behind the flag rather than always set: the group also names what a token wraps in
 	// the user snapshot, and production must not change before ckSOL ships.
 	...(CKSOL_ENABLED && { groupData: SOL_TOKEN_GROUP }),
+	neverCollapseInTokenGroup: true,
 	buy: {
 		onramperId: 'sol'
 	}
