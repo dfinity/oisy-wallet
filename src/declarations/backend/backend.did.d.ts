@@ -1228,7 +1228,7 @@ export type EthAddress = {
 	Public: string;
 };
 /**
- * EVM / Ethereum-family transaction data.
+ * EVM / Ethereum-family transaction data: what the wallet shows for a transaction.
  */
 export interface EvmTransactionData {
 	/**
@@ -1236,12 +1236,9 @@ export interface EvmTransactionData {
 	 */
 	nft_token_id: [] | [bigint];
 	/**
-	 * Hex-encoded input data.
+	 * Hex-encoded input data, stored cut to `MAX_STORED_USER_TRANSACTION_DATA_LEN`.
 	 */
 	data: [] | [string];
-	chain_id: [] | [bigint];
-	nonce: [] | [bigint];
-	gas_limit: [] | [bigint];
 	gas_used: [] | [bigint];
 	gas_price: [] | [bigint];
 }
@@ -2852,10 +2849,17 @@ export interface UserTransaction {
 export type UserTransactionError =
 	| {
 			/**
+			 * The user already stores transactions for `MAX_USER_TRANSACTION_TOKENS_PER_USER` tokens.
+			 */
+			TooManyTokens: null;
+	  }
+	| {
+			/**
 			 * Reserved — duplicates are currently silently skipped during save.
 			 */
 			DuplicateTransaction: { id: string };
 	  }
+	| { RateLimited: RateLimitError }
 	| { InternalError: { msg: string } }
 	| { TooManyTransactions: null }
 	| {

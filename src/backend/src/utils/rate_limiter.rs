@@ -68,6 +68,12 @@ thread_local! {
     pub(crate) static SIGN_ONRAMPER_WIDGET_URL_RATE_LIMITER: RateLimiter =
         RateLimiter::new(30, 60 * 1_000_000_000);
 
+    /// Rate-limits `save_user_transactions`: max 30 calls per caller per minute. The wallet
+    /// saves only newly finalized transactions, one call per token, and a refused save is
+    /// sent again with the next load.
+    pub(crate) static SAVE_USER_TRANSACTIONS_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
+
     /// Rate-limits `set_personal_note`: max 30 calls per caller per minute.
     /// Generous — a single `set` covers both add and edit — while bounding write
     /// abuse of the encrypted store.
