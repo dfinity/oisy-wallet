@@ -5,6 +5,7 @@ import type {
 	ActiveUserTransactionStatus,
 	ChainFusionDirection
 } from '$declarations/backend/backend.did';
+import type { WithdrawSolStatus } from '$declarations/cksol_minter/cksol_minter.did';
 import {
 	CKERC20_HELPER_CONTRACT_SIGNATURE,
 	CKETH_HELPER_CONTRACT_SIGNATURE
@@ -59,6 +60,10 @@ export const isChainFusionBtcMintDirection = (direction: ChainFusionDirection): 
 // ckBTC → BTC: exact, query-only, keyed on the `retrieve_btc_with_approval` index.
 export const isChainFusionBtcWithdrawalDirection = (direction: ChainFusionDirection): boolean =>
 	'CkBtcToBtc' in direction;
+
+// ckSOL → SOL: exact, keyed on the ckSOL ledger burn index `withdraw_sol` returned.
+export const isChainFusionSolWithdrawalDirection = (direction: ChainFusionDirection): boolean =>
+	'CkSolToSol' in direction;
 
 /**
  * Builds the `ChainFusion` AUT data variant: the direction discriminant plus the
@@ -282,6 +287,55 @@ export const toChainFusionBtcWithdrawalLearnedRefs = (
 
 	return nonNullish(txid)
 		? { [CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_TXID]: utxoTxIdToString(txid) }
+		: {};
+};
+
+/**
+ * Maps the ckSOL minter's withdrawal status to the AUT status enum.
+ *
+ * `NotFound` leaves the row alone, as the ckETH minter's does: the minter answers it until it
+ * has recorded the burn. A `Failure` is final: the minter does not refund the burned ckSOL.
+ */
+export const toChainFusionSolWithdrawalStatus = (
+	status: WithdrawSolStatus
+): ActiveUserTransactionStatus | undefined => {
+	if ('TxFinalized' in status) {
+		return 'Success' in status.TxFinalized ? { Succeeded: null } : { Failed: null };
+	}
+
+	if ('TxSent' in status || 'Pending' in status) {
+		return { Executing: null };
+	}
+
+	if ('NotFound' in status) {
+		return undefined;
+	}
+
+	assertNever(status, 'Unexpected ckSOL withdrawal status');
+};
+
+export const chainFusionSolWithdrawalStatusError = (
+	status: WithdrawSolStatus
+): string | undefined =>
+	'TxFinalized' in status && 'Failure' in status.TxFinalized
+		? get(i18n).swap.error.failed_unexpectedly
+		: undefined;
+
+// The Solana transaction the minter sent, revealed as soon as it is sent.
+export const toChainFusionSolWithdrawalLearnedRefs = (
+	status: WithdrawSolStatus
+): Partial<Record<ChainFusionExternalRefKey, string>> => {
+	const signature =
+		'TxSent' in status
+			? status.TxSent.transaction_id
+			: 'TxFinalized' in status
+				? 'Success' in status.TxFinalized
+					? status.TxFinalized.Success.transaction_id
+					: status.TxFinalized.Failure.transaction_id
+				: undefined;
+
+	return nonNullish(signature)
+		? { [CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_SIGNATURE]: signature }
 		: {};
 };
 

@@ -18,6 +18,7 @@ import {
 	withdrawalStatuses
 } from '$icp/api/ckbtc-minter.api';
 import { retrieveEthStatus } from '$icp/api/cketh-minter.api';
+import { withdrawSolStatus } from '$icp/api/cksol-minter.api';
 import { getTransactions } from '$icp/api/icrc-index-ng.api';
 import type { IcCkInterface } from '$icp/types/ic-token';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
@@ -44,6 +45,10 @@ import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import type { IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 import { Cbor } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
+
+vi.mock('$icp/api/cksol-minter.api', () => ({
+	withdrawSolStatus: vi.fn()
+}));
 
 vi.mock('$icp/api/cketh-minter.api', () => ({
 	retrieveEthStatus: vi.fn()
@@ -199,6 +204,22 @@ const btcWithdrawalTx = (refs?: Partial<Record<string, string>>) =>
 		}
 	});
 
+const CKSOL_LEDGER = 'ls5lp-lqaaa-aaaar-qb5oa-cai';
+const CKSOL_MINTER = 'lh22c-kyaaa-aaaar-qb5nq-cai';
+const SOL_SIGNATURE =
+	'5LrcE2f6uvydKRquEJ8xp19heGxSvqsVbcqUeFoiWbXe8JNip7ftPQNTAVPyTK7ijVdpkzmKKaAQR7MWMmujAhXD';
+
+const solWithdrawalTx = (refs?: Partial<Record<string, string>>) =>
+	toTx({
+		direction: { CkSolToSol: null },
+		source_token: { Icrc: Principal.fromText(CKSOL_LEDGER) },
+		refs: {
+			[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID]: CKSOL_MINTER,
+			[CHAIN_FUSION_EXTERNAL_REF_KEYS.WITHDRAW_SOL_BLOCK_INDEX]: '9',
+			...refs
+		}
+	});
+
 const btcMintTx = ({ id, refs }: { id?: string; refs?: Partial<Record<string, string>> } = {}) =>
 	toTx({
 		id,
@@ -298,6 +319,89 @@ describe('chain-fusion-swap-active-tx.services', () => {
 
 		expect(retrieveEthStatus).not.toHaveBeenCalled();
 		expect(minterInfo).not.toHaveBeenCalled();
+	});
+
+	describe('ckSOL withdrawal', () => {
+		it('should advance a finalized withdrawal to Succeeded and learn its signature', async () => {
+			vi.mocked(withdrawSolStatus).mockResolvedValue({
+				TxFinalized: { Success: { transaction_id: SOL_SIGNATURE } }
+			});
+
+			await poll([solWithdrawalTx()]);
+
+			expect(withdrawSolStatus).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				minterCanisterId: CKSOL_MINTER,
+				blockIndex: 9n
+			});
+			expect(retrieveEthStatus).not.toHaveBeenCalled();
+
+			expect(lastUpdate()).toStrictEqual({
+				status: { Succeeded: null },
+				externalRefs: expect.arrayContaining([{ key: 'chain_fusion_sol_tx', value: SOL_SIGNATURE }])
+			});
+		});
+
+		it('should fail a withdrawal whose Solana transaction failed, with an error message', async () => {
+			vi.mocked(withdrawSolStatus).mockResolvedValue({
+				TxFinalized: { Failure: { transaction_id: SOL_SIGNATURE } }
+			});
+
+			await poll([solWithdrawalTx()]);
+
+			expect(lastUpdate()).toStrictEqual(
+				expect.objectContaining({ status: { Failed: null }, error: expect.any(String) })
+			);
+		});
+
+		it('should leave a NotFound withdrawal untouched', async () => {
+			vi.mocked(withdrawSolStatus).mockResolvedValue({ NotFound: null });
+
+			await poll([solWithdrawalTx()]);
+
+			expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+		});
+
+		it('should move a sent withdrawal to Executing and learn its signature', async () => {
+			vi.mocked(withdrawSolStatus).mockResolvedValue({
+				TxSent: { transaction_id: SOL_SIGNATURE }
+			});
+
+			await poll([solWithdrawalTx()]);
+
+			expect(lastUpdate()).toStrictEqual({
+				status: { Executing: null },
+				externalRefs: expect.arrayContaining([{ key: 'chain_fusion_sol_tx', value: SOL_SIGNATURE }])
+			});
+		});
+
+		it('should skip a row missing its burn index', async () => {
+			await poll([
+				solWithdrawalTx({ [CHAIN_FUSION_EXTERNAL_REF_KEYS.WITHDRAW_SOL_BLOCK_INDEX]: undefined })
+			]);
+
+			expect(withdrawSolStatus).not.toHaveBeenCalled();
+			expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+		});
+
+		it('should leave the row pending when the minter call throws', async () => {
+			vi.mocked(withdrawSolStatus).mockRejectedValue(new Error('replica unavailable'));
+
+			await expect(poll([solWithdrawalTx()])).resolves.toBeUndefined();
+
+			expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+		});
+
+		it('should not route a ckETH withdrawal to the ckSOL minter', async () => {
+			vi.mocked(retrieveEthStatus).mockResolvedValue({ NotFound: null });
+
+			await poll([
+				withdrawalTx({ [CHAIN_FUSION_EXTERNAL_REF_KEYS.WITHDRAW_SOL_BLOCK_INDEX]: '9' })
+			]);
+
+			expect(retrieveEthStatus).toHaveBeenCalledOnce();
+			expect(withdrawSolStatus).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('withdrawal directions', () => {

@@ -19,6 +19,7 @@ import {
 	withdrawalStatuses
 } from '$icp/api/ckbtc-minter.api';
 import { retrieveEthStatus } from '$icp/api/cketh-minter.api';
+import { withdrawSolStatus } from '$icp/api/cksol-minter.api';
 import { getTransactions } from '$icp/api/icrc-index-ng.api';
 import {
 	CHAIN_FUSION_CKBTC_MINT_LOOKUP_PAGE_SIZE,
@@ -39,11 +40,13 @@ import {
 	chainFusionBtcWithdrawalStatusError,
 	chainFusionMintOutcomeError,
 	chainFusionMintOutcomeToStatus,
+	chainFusionSolWithdrawalStatusError,
 	chainFusionWithdrawalStatusError,
 	isChainFusionBtcMintDirection,
 	isChainFusionBtcWithdrawalDirection,
 	isChainFusionEthWithdrawalDirection,
 	isChainFusionMintDirection,
+	isChainFusionSolWithdrawalDirection,
 	isSameUtxoTxid,
 	toChainFusionBtcMintOutcome,
 	toChainFusionBtcWithdrawalLearnedRefs,
@@ -51,6 +54,8 @@ import {
 	toChainFusionDepositLogTopics,
 	toChainFusionExternalRefs,
 	toChainFusionExternalRefsMap,
+	toChainFusionSolWithdrawalLearnedRefs,
+	toChainFusionSolWithdrawalStatus,
 	toChainFusionWithdrawalLearnedRefs,
 	toChainFusionWithdrawalStatus,
 	toCkBtcMintDepositTxid,
@@ -295,6 +300,43 @@ const pollChainFusionBtcWithdrawal = async ({
 		candidate: toChainFusionBtcWithdrawalStatus(status),
 		error: chainFusionBtcWithdrawalStatusError(status),
 		learned: toChainFusionBtcWithdrawalLearnedRefs(status),
+		refs
+	});
+};
+
+/**
+ * ckSOL → SOL. Exact, keyed on the ckSOL ledger burn index `withdraw_sol` returned. The
+ * minter serves the status as an update call only.
+ */
+const pollChainFusionSolWithdrawal = async ({
+	tx,
+	identity,
+	refs
+}: {
+	tx: ActiveUserTransaction;
+	identity: Identity;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+}): Promise<void> => {
+	const minterCanisterId = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID];
+	const blockIndex = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.WITHDRAW_SOL_BLOCK_INDEX];
+
+	// Not pollable without the minter or the burn index.
+	if (isNullish(minterCanisterId) || isNullish(blockIndex)) {
+		return;
+	}
+
+	const status = await withdrawSolStatus({
+		identity,
+		minterCanisterId,
+		blockIndex: BigInt(blockIndex)
+	});
+
+	await applyUpdate({
+		identity,
+		tx,
+		candidate: toChainFusionSolWithdrawalStatus(status),
+		error: chainFusionSolWithdrawalStatusError(status),
+		learned: toChainFusionSolWithdrawalLearnedRefs(status),
 		refs
 	});
 };
@@ -845,6 +887,11 @@ export const pollChainFusionActiveUserTransactions = async ({
 
 				if (isChainFusionEthWithdrawalDirection(data.direction)) {
 					await pollChainFusionEthWithdrawal({ tx, identity, refs });
+					return;
+				}
+
+				if (isChainFusionSolWithdrawalDirection(data.direction)) {
+					await pollChainFusionSolWithdrawal({ tx, identity, refs });
 				}
 			} catch (err: unknown) {
 				// A transient RPC or canister blip must leave the row pending so the next

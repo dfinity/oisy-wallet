@@ -31,3 +31,5 @@ export const CKSOL_IC_DATA: IcCkInterface | undefined =
 		: undefined;
 
 export const ICRC_CK_SOL_TOKENS: IcCkInterface[] = nonNullish(CKSOL_IC_DATA) ? [CKSOL_IC_DATA] : [];
+
+export const CKSOL_LEDGER_CANISTER_IDS: CanisterIdText[] = [IC_CKSOL_LEDGER_CANISTER_ID];

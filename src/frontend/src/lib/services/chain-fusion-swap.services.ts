@@ -15,6 +15,7 @@ import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { send as sendEth } from '$eth/services/send.services';
 import type { EthAddress } from '$eth/types/address';
@@ -32,6 +33,7 @@ import {
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { estimateFee } from '$icp/api/ckbtc-minter.api';
 import { eip1559TransactionPrice } from '$icp/api/cketh-minter.api';
+import { minterInfo as ckSolMinterInfo } from '$icp/api/cksol-minter.api';
 import { icrcTokens } from '$icp/derived/icrc.derived';
 import { sendIc } from '$icp/services/ic-send.services';
 import { btcAddressStore } from '$icp/stores/btc.store';
@@ -41,7 +43,8 @@ import type { IcCkToken } from '$icp/types/ic-token';
 import {
 	isTokenCkBtcLedger,
 	isTokenCkErc20Ledger,
-	isTokenCkEthLedger
+	isTokenCkEthLedger,
+	isTokenCkSolLedger
 } from '$icp/utils/ic-send.utils';
 import {
 	ProgressStepsSend,
@@ -437,7 +440,50 @@ const resolveCkBtcWithdrawalDetails = async ({
 };
 
 /**
- * Quotes a ck withdrawal — ckETH → ETH, ckERC20 → ERC20 or ckBTC → BTC.
+ * The ckSOL minter's withdrawal fee and minimum, read anonymously and uncertified on every
+ * tick. Neither needs certifying: both only shape what the form shows, and the minter applies
+ * its own fee and refuses an amount below its own minimum before it burns anything.
+ */
+const resolveCkSolWithdrawalDetails = async ({
+	sourceToken,
+	destinationToken,
+	onProviderParticipating
+}: SwapQuoteObserver & {
+	sourceToken: IcCkToken;
+	destinationToken: Token;
+}): Promise<ChainFusionSwapDetails | undefined> => {
+	const { minterCanisterId, fee } = sourceToken;
+
+	if (isNullish(minterCanisterId)) {
+		return;
+	}
+
+	onProviderParticipating?.(SwapProvider.CHAIN_FUSION);
+
+	const { withdrawal_fee, minimum_withdrawal_amount } = await ckSolMinterInfo({
+		identity: new AnonymousIdentity(),
+		minterCanisterId,
+		certified: false
+	});
+
+	return {
+		sourceFees: [
+			{ labelPath: 'fee.text.fee', fee, token: sourceToken },
+			{
+				labelPath: 'fee.text.convert_inter_network_fee',
+				fee: withdrawal_fee,
+				// Denominated in SOL, which shares ckSOL's decimals.
+				token: destinationToken,
+				deductedFromAmount: true
+			}
+		],
+		externalFees: [],
+		minimumAmount: minimum_withdrawal_amount
+	};
+};
+
+/**
+ * Quotes a ck withdrawal — ckETH → ETH, ckERC20 → ERC20, ckBTC → BTC or ckSOL → SOL.
  *
  * Unlike the mint side this is not free: the minter charges for the transaction it sends
  * on the user's behalf, so every arm makes a round-trip per tick. Resolves to `undefined`
@@ -486,7 +532,14 @@ export const fetchChainFusionIcpQuote = async ({
 								amount,
 								onProviderParticipating
 							})
-						: undefined;
+						: isTokenCkSolLedger(ckSourceToken) &&
+							  destinationNetworkId === SOLANA_MAINNET_NETWORK_ID
+							? await resolveCkSolWithdrawalDetails({
+									sourceToken: ckSourceToken,
+									destinationToken,
+									onProviderParticipating
+								})
+							: undefined;
 
 		if (isNullish(swapDetails)) {
 			return;
@@ -645,15 +698,16 @@ const toChainFusionWithdrawalDirection = (
 ): ChainFusionDirection =>
 	type === 'ckBtcToBtc'
 		? { CkBtcToBtc: null }
-		: type === 'ckEthToEth'
-			? { CkEthToEth: null }
-			: { CkErc20ToErc20: null };
+		: type === 'ckSolToSol'
+			? { CkSolToSol: null }
+			: type === 'ckEthToEth'
+				? { CkEthToEth: null }
+				: { CkErc20ToErc20: null };
 
 /**
- * Executes a ck withdrawal — ckETH → ETH, ckERC20 → ERC20 or ckBTC → BTC — by delegating
- * to the existing `sendIc`, which already owns the approve/withdraw choreography the
- * Convert flow uses, and picks its minter leg from the target network. Nothing in `$icp`
- * changes for this.
+ * Executes a ck withdrawal — ckETH → ETH, ckERC20 → ERC20, ckBTC → BTC or ckSOL → SOL — by
+ * delegating to the existing `sendIc`, which already owns the approve/withdraw choreography
+ * the Convert flow uses, and picks its minter leg from the target network.
  *
  * Returns the minter block index `sendIc` surfaces — the same index the active user
  * transaction created here is keyed on, so nothing is re-derived.
@@ -674,8 +728,8 @@ export const fetchChainFusionIcpSwap = async ({
 	sourceToken: IcCkToken;
 	destinationToken: Token;
 	swapAmount: Amount;
-	// The user's own address on the destination chain — Ethereum or Bitcoin, depending on
-	// which minter leg `sendIc` takes.
+	// The user's own address on the destination chain — Ethereum, Bitcoin or Solana, depending
+	// on which minter leg `sendIc` takes.
 	destinationAddress: Address;
 	swapId: string;
 	usdSourceValue?: string;
@@ -739,17 +793,21 @@ export const fetchChainFusionIcpSwap = async ({
 								? {
 										[CHAIN_FUSION_EXTERNAL_REF_KEYS.RETRIEVE_BTC_BLOCK_INDEX]: `${sent.blockIndex}`
 									}
-								: {
-										// `retrieve_eth_status` is keyed on the ckETH burn index in both directions — a
-										// ckERC20 withdrawal's `withdrawal_id` *is* its `cketh_block_index`. The ckERC20
-										// index rides along as the only pointer back to that burn.
-										[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKETH_BLOCK_INDEX]: `${
-											sent.type === 'ckEthToEth' ? sent.blockIndex : sent.ckEthBlockIndex
-										}`,
-										...(sent.type === 'ckErc20ToErc20' && {
-											[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKERC20_BLOCK_INDEX]: `${sent.ckErc20BlockIndex}`
-										})
-									}
+								: sent.type === 'ckSolToSol'
+									? {
+											[CHAIN_FUSION_EXTERNAL_REF_KEYS.WITHDRAW_SOL_BLOCK_INDEX]: `${sent.blockIndex}`
+										}
+									: {
+											// `retrieve_eth_status` is keyed on the ckETH burn index in both directions — a
+											// ckERC20 withdrawal's `withdrawal_id` *is* its `cketh_block_index`. The ckERC20
+											// index rides along as the only pointer back to that burn.
+											[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKETH_BLOCK_INDEX]: `${
+												sent.type === 'ckEthToEth' ? sent.blockIndex : sent.ckEthBlockIndex
+											}`,
+											...(sent.type === 'ckErc20ToErc20' && {
+												[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKERC20_BLOCK_INDEX]: `${sent.ckErc20BlockIndex}`
+											})
+										}
 					})
 				: undefined
 	});

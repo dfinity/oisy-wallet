@@ -496,6 +496,7 @@ interface I18nInit {
 		minter_ckbtc_btc: string;
 		minter_cketh_eth: string;
 		minter_ckerc20_erc20: string;
+		minter_cksol_sol: string;
 		ledger_cketh_eth: string;
 		minter_btc: string;
 		minter_ckbtc_info: string;

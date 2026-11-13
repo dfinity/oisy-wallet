@@ -37,6 +37,12 @@ export const CHAIN_FUSION_EXTERNAL_REF_KEYS = {
 	// Withdrawal poll key: the block index `retrieve_btc_with_approval` returned.
 	// The ckBTC minter keys its withdrawal status on it.
 	RETRIEVE_BTC_BLOCK_INDEX: 'chain_fusion_retrieve_btc_index',
+	// Withdrawal poll key: the ckSOL ledger burn index `withdraw_sol` returned. The ckSOL
+	// minter keys `withdraw_sol_status` on it.
+	WITHDRAW_SOL_BLOCK_INDEX: 'chain_fusion_withdraw_sol_index',
+	// The Solana transaction the ckSOL minter sent on the user's behalf, learned from the
+	// withdrawal status.
+	SOL_TX_SIGNATURE: 'chain_fusion_sol_tx',
 	// Display + analytics metadata snapshotted at creation time. These reuse
 	// OneSec's exact key strings — `ActiveUserTransactionItem` reads *every* row's
 	// refs through `toOneSecExternalRefsMap`, so a fourth swap provider renders

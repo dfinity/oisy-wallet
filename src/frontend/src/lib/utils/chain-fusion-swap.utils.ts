@@ -1,6 +1,8 @@
 import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
+import { CKSOL_ENABLED } from '$env/cksol.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import type { IcCkInterface, IcCkToken } from '$icp/types/ic-token';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
@@ -46,10 +48,16 @@ export const toChainFusionPairs = (ckTokens: IcCkInterface[]): ChainFusionPair[]
 
 /**
  * The networks a twin token must live on for its pair to be offerable: Ethereum mainnet,
- * where the ckETH / ckERC20 helper contracts are deployed, and Bitcoin mainnet, where the
- * ckBTC minter takes deposits.
+ * where the ckETH / ckERC20 helper contracts are deployed, Bitcoin mainnet, where the
+ * ckBTC minter takes deposits, and, behind its flag, Solana mainnet, where the ckSOL minter
+ * pays out withdrawals. SOL has no Chain Fusion entry among the Solana swap providers, so
+ * only ckSOL → SOL is offered.
  */
-const ENABLED_TWIN_NETWORK_IDS = [ETHEREUM_NETWORK_ID, BTC_MAINNET_NETWORK_ID];
+const ENABLED_TWIN_NETWORK_IDS = [
+	ETHEREUM_NETWORK_ID,
+	BTC_MAINNET_NETWORK_ID,
+	...(CKSOL_ENABLED ? [SOLANA_MAINNET_NETWORK_ID] : [])
+];
 
 /**
  * The pairs Chain Fusion may currently offer.
