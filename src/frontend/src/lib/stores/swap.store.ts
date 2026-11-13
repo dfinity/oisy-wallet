@@ -53,6 +53,9 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	// pick never moves them; a side with none opens where the wizard starts it. Kept here because the
 	// list's own context is shared by every token picker.
 	const tokenListFilters = new Map<SwapSelectTokenType, SwapTokenListFilters>();
+	// The disabled tokens whose prices the wizard has loaded since the swap modal opened. Kept here
+	// rather than in the wizard, which Get Token rebuilds on every step, so that each one loads once.
+	const pricedTokenIds = new Set<TokenId>();
 
 	const sourceToken = derived(
 		[data, swappableTokens],
@@ -201,6 +204,14 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			tokenListFilters.set(side, filters);
 		},
 
+		markTokensPriced: <T extends Token>(tokens: T[]): T[] => {
+			const unpriced = tokens.filter(({ id }) => !pricedTokenIds.has(id));
+
+			unpriced.forEach(({ id }) => pricedTokenIds.add(id));
+
+			return unpriced;
+		},
+
 		markTwoSwapsHintShown: (hint: TwoSwapsHintShown): boolean => {
 			const shown = twoSwapsHintsShown.some(
 				({ sourceTokenId, destinationTokenId, intermediateTokenId, amount }) =>
@@ -228,6 +239,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			lifiMaxFee.set(undefined);
 			twoSwapsHintsShown.splice(0);
 			tokenListFilters.clear();
+			pricedTokenIds.clear();
 		}
 	};
 };
@@ -302,6 +314,8 @@ export interface SwapContext {
 		side: SwapSelectTokenType;
 		filters: SwapTokenListFilters;
 	}) => void;
+	// Records the tokens as priced and returns those not recorded before since the swap modal opened.
+	markTokensPriced: <T extends Token>(tokens: T[]) => T[];
 	reset: () => void;
 }
 
