@@ -171,6 +171,8 @@ As built (`decodeLifiBtcTransaction` in `lifi-swap.utils.ts`, run by `assertLifi
   since the roles could not be told apart.
 - The memo must be what the backend broadcasts: value 0, a script of at most 83 bytes, and data
   pushes only after `OP_RETURN` (`is_null_data` in `src/backend/src/bitcoin/tx_validator.rs`).
+  The script is read byte by byte as the backend reads it. bitcoinjs-lib's `isPushOnly` would
+  also accept `OP_1NEGATE` and `OP_1`…`OP_16`, which the backend refuses.
 - LI.FI's fee is the one `feeCosts` entry named `LIFI Fixed Fee`, in BTC on LI.FI's Bitcoin chain,
   with `included: true`. Without exactly one such entry, the quote is refused.
 - The deposit, memo and fee outputs it returns are the ones the rebuild keeps, byte for byte.
