@@ -68,11 +68,11 @@ Local builds cannot convert: they carry no mainnet ck tokens, there is no local 
 
 ### 6.2 Execution
 
-1. On confirm, OISY first calls `watch_deposit_address`. It goes on only when the answer is `Watching`, for the quoted deposit address, with a minimum the amount still meets and a fee no higher than quoted. `Detected` (a deposit is already in flight), `TemporarilyUnavailable`, `TooManyWatchedAddresses`, `Quarantined` or a failed call stop the conversion before any SOL moves, and the form says why.
+1. On confirm, OISY first calls `watch_deposit_address`. It goes on only when the answer is `Watching`, for the quoted deposit address, with a scan still due (`next_scan_at`), a minimum the amount still meets and a fee no higher than quoted. `Detected` (a deposit is already in flight), `TemporarilyUnavailable`, `TooManyWatchedAddresses`, `Quarantined` or a failed call stop the conversion before any SOL moves, and the form says why. `Watching` with no scan due comes from an earlier registration whose window ends within half an hour (§3.3): the form asks to try again later, and the first call after that window registers a fresh one.
 2. OISY sends the SOL to the deposit address.
 3. Once the transfer has a signature, OISY opens the active user transaction row (§8) and enables ckSOL.
 
-Registering before the transfer is what makes the mint independent of OISY: from that call on, the minter itself watches the address for 24 hours, so the ckSOL arrives even if the tab closes before the row exists. If the transfer fails, nothing moved, and the registration simply expires.
+Registering before the transfer is what makes the mint independent of OISY: from that call on, the minter itself scans the address until the window ends, and OISY sends only while a scan is still due, so the ckSOL arrives even if the tab closes before the row exists. If the transfer fails, nothing moved, and the registration simply expires.
 
 ### 6.3 Settlement
 
@@ -136,7 +136,7 @@ No SDK wraps the ckSOL minter, so OISY adds it the way it added the CMC (#14132)
 - **AC2** With the flag on, ckSOL is listed but not enabled by default, priced as SOL, with the ckSOL logo, and Manage tokens can enable it.
 - **AC3** SOL on Solana mainnet as pay token gets a Chain Fusion offer for ckSOL, and ckSOL gets one for SOL. No other Solana token or network gets a Chain Fusion offer.
 - **AC4** The SOL → ckSOL offer shows the receive amount and fee rows of §6.1, with the fee and minimum the minter reports, and refuses an amount below the minimum.
-- **AC5** Confirming calls `watch_deposit_address` before any SOL moves. Unless the answer is `Watching` for the quoted address, minimum and fee, no SOL moves and the form says why.
+- **AC5** Confirming calls `watch_deposit_address` before any SOL moves. Unless the answer is `Watching` for the quoted address, minimum and fee, with a scan still due, no SOL moves and the form says why.
 - **AC6** After the transfer, the conversion shows in Active transactions and ckSOL is enabled. The row closes as succeeded with the minted amount once the minter reports `Minted`, across modal close, refresh, tab close and logout.
 - **AC7** A row never takes a deposit whose id is not newer than the latest deposit id at opening.
 - **AC8** While a SOL → ckSOL conversion is in flight, no new SOL → ckSOL offer appears, and the form explains why.
