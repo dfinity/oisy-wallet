@@ -93,7 +93,10 @@ before signing (`lifi-calldata.utils.ts`, `lifi-sol-transaction.utils.ts`), and 
   (`src/frontend/src/lib/utils/lifi-swap.utils.ts`). So for a BTC source, `near` is dropped from
   `allowBridges` when the destination token is one the direct NEAR Intents provider serves
   (`buildNearIntentsSupportedDestinations('btc')` in
-  `src/frontend/src/lib/utils/near-intents-swap.utils.ts`).
+  `src/frontend/src/lib/utils/near-intents-swap.utils.ts`). That function needs the NEAR
+  provider's loaded token sets (`supportedSourceTokens`, `findProviderSourceTokens`), and
+  `buildLifiQuoteRequest` receives only the quote parameters. So either the LI.FI quote is passed
+  those sets, or the filter is applied where the BTC swap fan-out already has them.
 
 ### Quoting
 
@@ -324,7 +327,8 @@ reaches production before the dependency spec's PR 10 and a production release o
 1. `feat(frontend): LI.FI BTC-source groundwork behind a flag` — the flag, gated with
    `BTC_SEND_VIA_BACKEND_ENABLED`, empty `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]`, quote
    parameters for a BTC source, no quote below 117 600 sats, the `1002` / `1003` / `1008` mapping,
-   and the `near` destination filter if pending decision 4 calls for it. No visible change.
+   and the `near` destination filter if pending decision 4 calls for it (with the NEAR token sets it
+   needs). No visible change.
 2. `feat(frontend): LI.FI BTC PSBT trust checks` — the BTC branch of `assertLifiQuote` in place of
    the Diamond check, running decode and checks 1–5 after the request checks. Also the BTC rule of
    `isLifiRouteExecutable` for the quote path and `requoteAtLeast`, the pinned fee
