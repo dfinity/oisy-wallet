@@ -77,7 +77,9 @@
 	// The network and asset type each list opens on are set by `SwapModalWizardSteps`, per side.
 	const tokensListContext = initModalTokensListContext({
 		tokens: [],
-		filterNetworksIds: $crossChainSwapNetworksMainnetsIds
+		filterNetworksIds: $crossChainSwapNetworksMainnetsIds,
+		// `SwapTokensList` sorts the tokens itself, with the inactive ones last.
+		sortByBalance: false
 	});
 
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
