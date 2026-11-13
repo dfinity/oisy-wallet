@@ -121,6 +121,19 @@ request checks. `fromAmount` in checks 2 and 3 is therefore the requested amount
 request checks have already confirmed. A quote cannot inflate its own `fromAmount` to get a larger
 deposit past check 2.
 
+**Route eligibility is source-aware too.** Both the quote path (`fetchExecutableLifiQuote` in
+`lifi-swap.services.ts`) and the execution re-quote (`requoteAtLeast` in
+`lifi-swap-execution.services.ts`) call `isLifiRouteExecutable` (`lifi-calldata.utils.ts`). It
+accepts a cross-chain step only for a bridge in its table of EVM facets (`bridges`: `across` and
+`near`), so an admitted `layerswap` or `relaydepository` route would be dropped after passing every
+check here. For a BTC source, a route is executable when:
+
+- it is a single `cross` step, with no swap before it (the BTC transaction only deposits);
+- that step's tool is in `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]`.
+
+This needs no EVM facet. The same rule applies in both places, so the form never offers a route
+that execution would refuse.
+
 Decode `transactionRequest.data` with `Psbt.fromHex` and compare outputs by script, not by address:
 `bitcoinjs-lib` cannot turn a P2TR script into an address without an ECC library (see the
 dependency spec). Refuse the quote unless:
@@ -313,7 +326,8 @@ reaches production before the dependency spec's PR 10 and a production release o
    parameters for a BTC source, no quote below 117 600 sats, the `1002` / `1003` / `1008` mapping,
    and the `near` destination filter if pending decision 4 calls for it. No visible change.
 2. `feat(frontend): LI.FI BTC PSBT trust checks` — the BTC branch of `assertLifiQuote` in place of
-   the Diamond check, running decode and checks 1–5 after the request checks. Also the pinned fee
+   the Diamond check, running decode and checks 1–5 after the request checks. Also the BTC rule of
+   `isLifiRouteExecutable` for the quote path and `requoteAtLeast`, the pinned fee
    address, and fixtures from real quotes of `layerswap` and `near` (including a sub-117 600-sat
    quote whose fee output is raised to 294) and the 2026-11-02 `relaydepository` one. Dead code.
 3. `feat(frontend): rebuild a LI.FI BTC transaction with OISY's UTXO selection` — the fixed-outputs
@@ -349,6 +363,8 @@ reaches production before the dependency spec's PR 10 and a production release o
 - A quote failing any trust check is never offered; no signature is requested for it. A BTC quote
   passes `assertLifiQuote`'s request checks first, so its tokens, amount, recipient and bridge are
   the ones requested.
+- A route through an admitted BTC bridge passes the route-eligibility check at quote time and at
+  execution, whether or not the bridge has an EVM facet.
 - No LI.FI quote is requested below 117 600 sats, and the LI.FI fee the review shows is the fee
   output paid.
 - The swap is an active user transaction from before the broadcast. It is deleted only when every
