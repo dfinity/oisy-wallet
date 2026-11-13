@@ -29,6 +29,7 @@
 		action?: Snippet;
 		onClick?: MouseEventHandler<HTMLButtonElement>;
 		fullWidth?: boolean;
+		disabled?: boolean;
 	}
 
 	let {
@@ -50,6 +51,7 @@
 		action,
 		onClick,
 		fullWidth = false,
+		disabled = false,
 		titleStyleClass = '',
 		subtitleStyleClass = ''
 	}: Props = $props();
@@ -57,9 +59,10 @@
 
 <div
 	class={`flex transition-[background-color] duration-150 ease-out ${styleClass ?? ''}`}
-	class:child-pressed:bg-brand-subtle-20={nonNullish(onClick)}
-	class:child-pressed:duration-0={nonNullish(onClick)}
-	class:hover:bg-brand-subtle-10={hover}
+	class:child-pressed:bg-brand-subtle-20={nonNullish(onClick) && !disabled}
+	class:child-pressed:duration-0={nonNullish(onClick) && !disabled}
+	class:hover:bg-brand-subtle-10={hover && !disabled}
+	class:opacity-50={disabled}
 	class:rounded-lg={rounded}
 	class:w-full={dividers || fullWidth}
 >
@@ -67,9 +70,11 @@
 		style="--focus-outline-offset: -3px"
 		class="flex w-full rounded-lg border-0 px-2"
 		class:cursor-default={isNullish(onClick)}
+		class:cursor-not-allowed={disabled}
 		aria-expanded={expanded}
 		aria-pressed={selected}
 		data-tid={testId}
+		{disabled}
 		onclick={onClick}
 	>
 		<span

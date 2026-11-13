@@ -207,6 +207,25 @@ describe('swapStore', () => {
 		});
 	});
 
+	describe('markTokensPriced', () => {
+		it('should return only the tokens not recorded before', () => {
+			const { markTokensPriced } = initSwapContext();
+
+			expect(markTokensPriced([mockValidErc20Token])).toEqual([mockValidErc20Token]);
+			expect(markTokensPriced([mockValidErc20Token, PEPE_TOKEN])).toEqual([PEPE_TOKEN]);
+			expect(markTokensPriced([mockValidErc20Token, PEPE_TOKEN])).toEqual([]);
+		});
+
+		it('should return the tokens again once the swap is reset', () => {
+			const { markTokensPriced, reset } = initSwapContext();
+
+			markTokensPriced([mockValidErc20Token]);
+			reset();
+
+			expect(markTokensPriced([mockValidErc20Token])).toEqual([mockValidErc20Token]);
+		});
+	});
+
 	// A held "Max" survives the steps that rebuild the form, but not a new source: the amount is
 	// kept as it is rather than refilled with the new token's max.
 	describe('amountSetToMax', () => {

@@ -33,4 +33,21 @@ describe('LogoButton', () => {
 
 		expect(row(container)).not.toHaveClass('hover:bg-brand-subtle-10');
 	});
+
+	describe('when disabled', () => {
+		// A disabled button takes no click in a browser; jsdom still runs Svelte's delegated handler.
+		it('should disable the button', () => {
+			const { container } = render(LogoButton, { props: { onClick: vi.fn(), disabled: true } });
+
+			expect(container.querySelector('button')).toBeDisabled();
+		});
+
+		it('should dim the row and show no hover or pressed fill', () => {
+			const { container } = render(LogoButton, { props: { onClick: vi.fn(), disabled: true } });
+
+			expect(row(container)).toHaveClass('opacity-50');
+			expect(row(container)).not.toHaveClass('hover:bg-brand-subtle-10');
+			expect(row(container)).not.toHaveClass('child-pressed:bg-brand-subtle-20');
+		});
+	});
 });
