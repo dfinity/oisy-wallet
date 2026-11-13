@@ -78,7 +78,7 @@ Registering before the transfer is what makes the mint independent of OISY: from
 
 The row stays in flight until the minter reports the mint. About once a minute, not on every poll, the poller calls `watch_deposit_address`:
 
-- `Watching` keeps the row in flight. Once the window has ended, the same call registers the address again, so a late transfer is still found.
+- On every watch response, including `Watching`, inspect the account's latest deposit id. If it is newer than the row's baseline, persist it and follow `deposit_sol_status` as below, so a deposit minted while OISY was closed is still recovered. Otherwise, `Watching` keeps the row in flight. Once the window has ended, the same call registers the address again, so a late transfer is still found.
 - `Detected` gives the deposit id. The row keeps it and from then on follows `deposit_sol_status`: `Queued`, `Swept` and `Finalized` keep it in flight; `Minted` closes it as succeeded, showing the minted amount; `Dropped` keeps it in flight, and the next `watch_deposit_address` call registers the address again if the minter could not; `Quarantined` closes it as failed, saying that the minter holds the SOL until an upgrade resolves the deposit.
 - The row only accepts a deposit id newer than the latest deposit id the minter reported when the row was opened, so an earlier deposit's mint is never taken for this one.
 
