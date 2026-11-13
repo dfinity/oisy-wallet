@@ -29,10 +29,11 @@
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { fetchChainFusionSolSwap } from '$lib/services/chain-fusion-swap.services';
 	import { fetchLifiSolSwap } from '$lib/services/lifi-sol-swap.services';
 	import { lifiSolQuoteCallsUnpinnedProgram } from '$lib/services/lifi-sol-transaction.services';
 	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
-	import { fetchNearIntentsSolSwap } from '$lib/services/swap.services';
+	import { enableSwapDestinationToken, fetchNearIntentsSolSwap } from '$lib/services/swap.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -41,11 +42,12 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { LifiSolFeeChangedError } from '$lib/types/errors';
+	import { ChainFusionSolDepositRefusedError, LifiSolFeeChangedError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapProvider } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { asCkTwinOf } from '$lib/utils/chain-fusion-swap.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -315,6 +317,14 @@
 
 		const { selectedProvider } = $swapAmountsStore;
 
+		// Re-resolved through the same pair oracle the quote used, so the row the execution persists
+		// cannot disagree with the offer about which twin this is, and it is where the ckSOL minter
+		// comes from.
+		const ckDestinationToken = asCkTwinOf({
+			ckToken: $destinationToken,
+			nativeToken: $sourceToken
+		});
+
 		try {
 			failedSwapError.set(undefined);
 
@@ -363,6 +373,26 @@
 					offer: selectedProvider,
 					reviewedCeiling: lifiFee
 				});
+			} else if (
+				selectedProvider?.provider === SwapProvider.CHAIN_FUSION &&
+				nonNullish(ckDestinationToken)
+			) {
+				await fetchChainFusionSolSwap({
+					identity: $authIdentity,
+					progress,
+					sourceToken: $sourceToken,
+					destinationToken: ckDestinationToken,
+					swapAmount,
+					userAddress: $solAddressMainnet,
+					swapDetails: selectedProvider.swapDetails,
+					swapId: crypto.randomUUID(),
+					usdSourceValue: sourceTokenUsdValue,
+					enableDestinationToken: () =>
+						enableSwapDestinationToken({
+							destinationToken: $destinationToken,
+							identity: $authIdentity
+						})
+				});
 			} else {
 				toastsError({
 					msg: { text: $i18n.swap.error.unexpected }
@@ -408,7 +438,18 @@
 				}
 			});
 
-			if (err instanceof LifiSolFeeChangedError) {
+			if (err instanceof ChainFusionSolDepositRefusedError) {
+				// The minter stopped the conversion before any SOL moved, so the review says why.
+				failedSwapError.set({
+					message: {
+						inFlight: $i18n.swap.error.cksol_deposit_in_progress,
+						changed: $i18n.swap.error.cksol_deposit_terms_changed,
+						quarantined: $i18n.swap.error.cksol_earlier_deposit_quarantined,
+						unavailable: $i18n.swap.error.cksol_minter_unavailable
+					}[err.reason],
+					variant: 'error'
+				});
+			} else if (err instanceof LifiSolFeeChangedError) {
 				// Carried back to the review, which shows the higher ceiling for the user to confirm.
 				if (nonNullish(lifiInputsKey)) {
 					lifiCarriedFee.set({ key: lifiInputsKey, solCeiling: err.ceiling });

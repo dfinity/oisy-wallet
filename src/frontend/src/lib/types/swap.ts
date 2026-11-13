@@ -414,6 +414,9 @@ export interface ChainFusionSwapDetails {
 	// that consult it (ckETH → ETH). Mirrors Convert's `minter-info-not-certified` gate:
 	// an uncertified read blocks Review until the certified update lands.
 	minterInfoCertified?: boolean;
+	// SOL → ckSOL only: the deposit address and the automatic deposit fee the offer was priced
+	// with, which the minter's `watch_deposit_address` answer has to match before any SOL moves.
+	solDeposit?: { address: SolAddress; automaticDepositFee: bigint };
 }
 
 /**

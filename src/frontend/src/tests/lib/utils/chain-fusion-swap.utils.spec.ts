@@ -349,11 +349,31 @@ describe('chain-fusion-swap.utils', () => {
 			});
 		});
 
+		it('should accept SOL as a sol source', () => {
+			expect(chainFusionSupportedSourceTokens({ category: 'sol', pairs: solPairs })).toStrictEqual(
+				new Set([
+					nativeSwapTokenIdentifier({
+						networkId: SOLANA_TOKEN.network.id,
+						symbol: SOLANA_TOKEN.symbol
+					})
+				])
+			);
+		});
+
+		it('should narrow SOL to ckSOL', () => {
+			expect(
+				chainFusionCompatibleDestinations({ sourceToken: SOLANA_TOKEN, pairs: solPairs })
+			).toStrictEqual({ icp: new Set([IC_CKSOL_LEDGER_CANISTER_ID]) });
+		});
+
 		it('should offer nothing when the flag is off', () => {
 			mockEnabled = false;
 
 			expect(
 				chainFusionCompatibleDestinations({ sourceToken: ckSolToken, pairs: solPairs })
+			).toBeUndefined();
+			expect(
+				chainFusionCompatibleDestinations({ sourceToken: SOLANA_TOKEN, pairs: solPairs })
 			).toBeUndefined();
 		});
 	});

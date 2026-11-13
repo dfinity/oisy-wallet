@@ -1097,6 +1097,7 @@
 			"minimum_ckbtc_amount": "입력 금액이 BTC 전환에 필요한 최소 $amount ckBTC 미만입니다.",
 			"minimum_cketh_amount": "입력 금액이 최소 출금 금액인 $amount $symbol 미만입니다.",
 			"minimum_amount": "입력 금액이 최소 출금 금액인 $amount $symbol 미만입니다.",
+			"minimum_deposit_amount": "",
 			"minimum_ledger_fees": "입력 금액이 레저 수수료 $symbol 미만입니다.",
 			"minimum_cketh_balance": "$symbol 잔액이 예상 수수료 $amount 미만입니다.",
 			"unknown_cketh": "ckETH 토큰을 가져올 수 없습니다.",
@@ -1491,7 +1492,12 @@
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
-			"lifi_route_unverified": ""
+			"lifi_route_unverified": "",
+			"cksol_deposit_in_progress": "",
+			"cksol_deposit_terms_changed": "",
+			"cksol_earlier_deposit_quarantined": "",
+			"cksol_minter_unavailable": "",
+			"cksol_deposit_quarantined": ""
 		}
 	},
 	"buy": {
@@ -1828,6 +1834,8 @@
 			"convert_fee": "전환 수수료",
 			"convert_inter_network_fee": "네트워크 간 수수료",
 			"convert_btc_network_fee": "비트코인 네트워크 수수료",
+			"cksol_sweep_fee": "",
+			"cksol_deposit_address_rent": "",
 			"zero_fee": "무료",
 			"total_fee": "총 수수료",
 			"ata_fee": "ATA 수수료",

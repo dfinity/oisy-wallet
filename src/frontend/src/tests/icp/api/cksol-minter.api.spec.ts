@@ -1,8 +1,12 @@
-import type { MinterInfo } from '$declarations/cksol_minter/cksol_minter.did';
+import type {
+	MinterInfo,
+	WatchDepositAddressOk
+} from '$declarations/cksol_minter/cksol_minter.did';
 import {
 	depositSolStatus,
 	getDepositAddress,
 	minterInfo,
+	watchDepositAddress,
 	withdrawSol,
 	withdrawSolStatus
 } from '$icp/api/cksol-minter.api';
@@ -31,7 +35,9 @@ describe('cksol-minter.api', () => {
 			deposit_sol_required_cycles: 1_000_000_000_000n,
 			nonce_accounts: [],
 			minimum_withdrawal_amount: 2_000_000n,
-			minter_address: []
+			minter_address: [],
+			automatic_deposit_fee: [],
+			collected_automatic_deposit_fees: []
 		};
 
 		it('should read the minter info from the given minter', async () => {
@@ -101,6 +107,35 @@ describe('cksol-minter.api', () => {
 					depositId: 42n,
 					certified: false
 				})
+			).rejects.toThrow();
+		});
+	});
+
+	describe('watchDepositAddress', () => {
+		const watched: WatchDepositAddressOk = {
+			address: 'Br8eRkeya8hy3sHCYqtWqGeNNZ349aPSUKGVYFWKKer1',
+			minimum_deposit_amount: 20_000_000n,
+			automatic_deposit_fee: 2_000_000n,
+			status: { Detected: { deposit_id: 42n } },
+			latest_deposit_id: [42n]
+		};
+
+		it('should register the deposit address with the given minter', async () => {
+			minterCanisterMock.watchDepositAddress.mockResolvedValue(watched);
+
+			await expect(watchDepositAddress({ identity: mockIdentity, minterCanisterId })).resolves.toBe(
+				watched
+			);
+			expect(minterCanisterMock.watchDepositAddress).toHaveBeenCalledExactlyOnceWith();
+			expect(CkSolMinterCanister.create).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				canisterId: Principal.fromText(minterCanisterId)
+			});
+		});
+
+		it('should throw if identity is undefined', async () => {
+			await expect(
+				watchDepositAddress({ identity: undefined, minterCanisterId })
 			).rejects.toThrow();
 		});
 	});
