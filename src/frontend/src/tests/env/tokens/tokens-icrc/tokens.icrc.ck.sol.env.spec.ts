@@ -69,4 +69,10 @@ describe('tokens.icrc.ck.sol.env', () => {
 
 		expect(SOLANA_TOKEN.twinTokenSymbol).toBe('ckSOL');
 	});
+
+	it('should put SOL before ckSOL in their group, as BTC before ckBTC', async () => {
+		const { SOLANA_TOKEN } = await importForFlavour({ STAGING: true });
+
+		expect(SOLANA_TOKEN.neverCollapseInTokenGroup).toBeTruthy();
+	});
 });
