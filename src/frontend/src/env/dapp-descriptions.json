@@ -283,6 +283,18 @@
 		"screenshots": ["/images/dapps/motoko-tokyo-screenshot.webp"]
 	},
 	{
+		"id": "icforums",
+		"name": "dapps.descriptions.icforums.name",
+		"oneLiner": "dapps.descriptions.icforums.one_liner",
+		"website": "https://icforums.xyz/",
+		"tags": ["dapps.categories.social", "dapps.categories.ab_icp", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.icforums.description",
+		"usesInternetIdentity": true,
+		"stats": "",
+		"logo": "/images/dapps/icforums-logo.webp",
+		"screenshots": ["/images/dapps/icforums-screenshot.webp"]
+	},
+	{
 		"id": "icpanda-message",
 		"name": "dapps.descriptions.icpanda_message.name",
 		"oneLiner": "dapps.descriptions.icpanda_message.one_liner",
