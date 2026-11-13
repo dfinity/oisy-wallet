@@ -1246,8 +1246,9 @@ const assertCkSolDepositWatched = ({
  * deposit the poller takes for this one has to lie above. The backend refuses it while another
  * SOL → ckSOL row of the user is open, which holds the minter's one deposit per account across tabs
  * and devices, and the transfer then sends nothing. The row is deleted only when the node refuses
- * the transfer: any other failure may have sent it, and the poller settles the row as minted or,
- * once the transfer can no longer land, as failed.
+ * the transfer. Any other failure may have sent it, so the conversion goes on as sent, ckSOL is
+ * enabled, and the poller settles the row as minted or, once the transfer can no longer land, as
+ * failed.
  */
 export const fetchChainFusionSolSwap = async ({
 	identity,
@@ -1356,16 +1357,26 @@ export const fetchChainFusionSolSwap = async ({
 			}
 		});
 	} catch (err: unknown) {
-		// Only the node refusing the broadcast shows the transfer went nowhere. A refusal answered
-		// while confirming comes after the broadcast, and says nothing about it.
-		if (rowOpened && !broadcast && isSolSendRefusal(err)) {
-			await deleteUnbroadcastActiveUserTransaction({ identity, id: swapId });
+		// Nothing was broadcast without a row.
+		if (!rowOpened) {
+			throw err;
 		}
 
-		throw err;
+		// Only the node refusing the broadcast shows the transfer went nowhere. A refusal answered
+		// while confirming comes after the broadcast, and says nothing about it.
+		if (!broadcast && isSolSendRefusal(err)) {
+			await deleteUnbroadcastActiveUserTransaction({ identity, id: swapId });
+
+			throw err;
+		}
+
+		// Any other end may have sent the SOL, and signing again would send it twice. The conversion
+		// goes on as sent, and its row settles it.
+		consoleError(err);
 	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);
 
+	// Also after an unclear end: the minted ckSOL must not land in a token the user cannot see.
 	await enableDestination(enableDestinationToken);
 };
