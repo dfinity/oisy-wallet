@@ -1521,7 +1521,7 @@ export interface HttpRequest {
 /**
  * # HTTP Request Result
  *
- * Result type of [`http_request`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-http_request).
+ * Result type of [`http_request`](https://docs.internetcomputer.org/references/management-canister/#http_request).
  */
 export interface HttpRequestResult {
 	/**
