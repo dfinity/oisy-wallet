@@ -3,6 +3,7 @@ import {
 	LIFI_BTC_FEE_COST_NAME,
 	LIFI_BTC_MAX_MEMO_SCRIPT_BYTES,
 	LIFI_BTC_MIN_AMOUNT_SATOSHIS,
+	LIFI_BTC_MIN_FEE_SATOSHIS,
 	LIFI_BTC_TOKEN_ADDRESS
 } from '$btc/constants/lifi.constants';
 import { btcAddressToOutputScript } from '$btc/utils/btc-psbt.utils';
@@ -479,6 +480,12 @@ export const decodeLifiBtcTransaction = ({
 
 	if (isNullish(lifiFee) || fee.value !== lifiFee || lifiFee * 10_000n > amount * LIFI_FEE_BPS) {
 		throw rejectedBtcTransaction("LI.FI's fee output is not its quoted fee of at most 25 bps");
+	}
+
+	// The fee output is kept byte for byte, so below the dust limit the signed transaction would not
+	// broadcast.
+	if (lifiFee < LIFI_BTC_MIN_FEE_SATOSHIS) {
+		throw rejectedBtcTransaction("LI.FI's fee output is below the dust limit");
 	}
 
 	if (deposit.value !== amount - lifiFee) {
