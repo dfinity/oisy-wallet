@@ -1,3 +1,4 @@
+import type * as lifiEnv from '$env/rest/lifi.env';
 import {
 	LIFI_ACROSS_V4_ABI,
 	LIFI_APPROVE_TO_ONLY_SELECTOR,
@@ -14,6 +15,7 @@ import {
 	lifiCalldataSwapTargets
 } from '$lib/utils/lifi-calldata.utils';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { mockLifiBtcLayerswapQuote, mockLifiBtcNearQuote } from '$tests/mocks/lifi-btc.mock';
 import {
 	mockLifiCalldataAcrossEvm,
 	mockLifiCalldataNearEvm,
@@ -37,6 +39,20 @@ import { Interface, type ParamType, type Result } from 'ethers/abi';
 import { zeroPadValue } from 'ethers/utils';
 
 type Struct = Record<string, unknown>;
+
+// No bridge is admitted from Bitcoin yet; LayerSwap stands in for the first.
+vi.mock('$env/rest/lifi.env', async (importOriginal) => {
+	const original = await importOriginal<typeof lifiEnv>();
+	const { BTC_MAINNET_NETWORK_ID } = await import('$env/networks/networks.btc.env');
+
+	return {
+		...original,
+		LIFI_ALLOWED_BRIDGES: {
+			...original.LIFI_ALLOWED_BRIDGES,
+			[BTC_MAINNET_NETWORK_ID]: ['layerswap']
+		}
+	};
+});
 
 describe('lifi-calldata.utils', () => {
 	const diamond = '0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE';
@@ -1231,6 +1247,32 @@ describe('lifi-calldata.utils', () => {
 			}
 		])('should refuse $route', ({ steps }) => {
 			expect(isLifiRouteExecutable(routeOf(steps))).toBeFalsy();
+		});
+
+		describe('from Bitcoin', () => {
+			const layerswap = step({ type: 'cross', tool: 'layerswap' });
+
+			const btcRouteOf = (includedSteps: Step[]): LiFiStep => ({
+				...mockLifiBtcLayerswapQuote,
+				includedSteps
+			});
+
+			it('should accept a live route through an admitted bridge without an EVM facet', () => {
+				expect(isLifiRouteExecutable(mockLifiBtcLayerswapQuote)).toBeTruthy();
+			});
+
+			it('should refuse a live route through a bridge not admitted from Bitcoin', () => {
+				expect(isLifiRouteExecutable(mockLifiBtcNearQuote)).toBeFalsy();
+			});
+
+			it.each([
+				{ route: 'no bridge', steps: [feeCollection] },
+				{ route: 'a swap before the bridge', steps: [feeCollection, dexSwap, layerswap] },
+				{ route: 'a swap after the bridge', steps: [feeCollection, layerswap, dexSwap] },
+				{ route: 'a second bridge', steps: [feeCollection, layerswap, layerswap] }
+			])('should refuse $route', ({ steps }) => {
+				expect(isLifiRouteExecutable(btcRouteOf(steps))).toBeFalsy();
+			});
 		});
 	});
 

@@ -1,3 +1,5 @@
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { LIFI_ALLOWED_BRIDGES } from '$env/rest/lifi.env';
 import {
 	LIFI_ACROSS_MAX_FILL_DEADLINE_SECONDS,
 	LIFI_ACROSS_MULTIPLIER_BASE,
@@ -491,9 +493,26 @@ export const lifiCalldataSwapTargets = ({
  * bridge, which would pay out another token than the one asked for, and a bridge the binding knows,
  * after a DEX swap only if it can bound the swap's output (`dexSwaps`). A route that fails is not
  * offered, so the form never shows what execution would refuse.
+ *
+ * A BTC transaction only deposits, and has no calldata: its route is one bridge admitted from
+ * Bitcoin, last, with no swap, whether or not the bridge has an EVM facet.
  */
-export const isLifiRouteExecutable = ({ includedSteps }: LiFiStep): boolean => {
+export const isLifiRouteExecutable = ({
+	action: { fromChainId },
+	includedSteps
+}: LiFiStep): boolean => {
 	const bridgeIndex = includedSteps.findIndex(({ type }) => type === 'cross');
+
+	if (fromChainId === ChainId.BTC) {
+		const bridge = includedSteps[bridgeIndex];
+
+		return (
+			nonNullish(bridge) &&
+			bridgeIndex === includedSteps.length - 1 &&
+			includedSteps.every(({ type }) => type !== 'swap') &&
+			(LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID] ?? []).includes(bridge.tool)
+		);
+	}
 
 	if (bridgeIndex === -1) {
 		return true;
