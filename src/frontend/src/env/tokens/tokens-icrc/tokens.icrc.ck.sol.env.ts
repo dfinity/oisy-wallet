@@ -1,4 +1,5 @@
 import { CKSOL_ENABLED } from '$env/cksol.env';
+import { ICP_EXPLORER_URL } from '$env/explorers.env';
 import { SOL_TOKEN_GROUP } from '$env/tokens/groups/groups.sol.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { IcCkInterface } from '$icp/types/ic-token';
@@ -22,7 +23,10 @@ export const CKSOL_IC_DATA: IcCkInterface | undefined =
 				minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID,
 				exchangeCoinId: 'solana',
 				twinToken: SOLANA_TOKEN,
-				groupData: SOL_TOKEN_GROUP
+				groupData: SOL_TOKEN_GROUP,
+				// The dashboard has no ckSOL page like ckBTC's `/bitcoin`; its token explorer serves
+				// any ICRC ledger.
+				explorerUrl: `${ICP_EXPLORER_URL}/tokens/${IC_CKSOL_LEDGER_CANISTER_ID}`
 			}
 		: undefined;
 
