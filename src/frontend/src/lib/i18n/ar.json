@@ -2305,6 +2305,7 @@
 			"signature_copied": "",
 			"id": "معرف المعاملة",
 			"id_copied": "تم نسخ معرف المعاملة إلى الحافظة.",
+			"twin_transaction": "",
 			"timestamp": "الطابع الزمني",
 			"type": "النوع",
 			"from": "من",

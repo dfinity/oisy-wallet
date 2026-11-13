@@ -2305,6 +2305,7 @@
 			"signature_copied": "Transaction signature $signature copied to clipboard.",
 			"id": "Transaction ID",
 			"id_copied": "Transaction ID copied to clipboard.",
+			"twin_transaction": "$twinNetwork transaction",
 			"timestamp": "Timestamp",
 			"type": "Type",
 			"from": "From",

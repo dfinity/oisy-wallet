@@ -3,6 +3,7 @@
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import { cmcDepositAccountCanisterIds } from '$icp/derived/cycles-top-up.derived';
 	import { isIcrcTokenSupportIcrc3 } from '$icp/services/icrc.services';
+	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
 	import { getTopUpCanisterId } from '$icp/utils/cycles-top-up.utils';
@@ -24,7 +25,12 @@
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
-	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
+	import {
+		formatNanosecondsToDate,
+		formatToken,
+		shortenWithMiddleEllipsis
+	} from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		transaction: IcTransactionUi;
@@ -48,8 +54,11 @@
 		approveSpender,
 		approveSpenderExplorerUrl,
 		approveExpiresAt,
-		typeLabel
+		typeLabel,
+		twinTransaction
 	} = $derived(transaction);
+
+	let twinNetworkName = $derived((token as OptionIcCkToken)?.twinToken?.network.name);
 
 	// ICP's mapper links the spender's account identifier. An ICRC spender is an ICRC-1 account,
 	// which only the ledger's own account page on the dashboard can show.
@@ -220,6 +229,33 @@
 					/>
 				</span>
 			</ListItem>
+
+			{#if type === 'burn' && isNullish(to) && nonNullish(transaction.toLabel) && nonNullish(twinNetworkName)}
+				<ListItem>
+					<span>{$i18n.transaction.text.to}</span>
+					<span><IcTransactionLabel label={transaction.toLabel} {token} /></span>
+				</ListItem>
+			{/if}
+
+			{#if nonNullish(twinTransaction) && nonNullish(twinNetworkName)}
+				<ListItem>
+					<span>
+						{replacePlaceholders($i18n.transaction.text.twin_transaction, {
+							$twinNetwork: twinNetworkName
+						})}
+					</span>
+					<span>
+						<output>{shortenWithMiddleEllipsis({ text: twinTransaction.id })}</output>
+
+						<AddressActions
+							copyAddress={twinTransaction.id}
+							copyAddressText={$i18n.transaction.text.id_copied}
+							externalLink={twinTransaction.explorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_block_explorer}
+						/>
+					</span>
+				</ListItem>
+			{/if}
 
 			{#if nonNullish(fee) && nonNullish(token) && !incoming}
 				<ListItem>

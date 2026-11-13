@@ -26,6 +26,23 @@ export const solAccountExplorerUrl = ({
 		: undefined;
 
 /**
+ * A Solana transaction on its network's block explorer.
+ */
+export const solTransactionExplorerUrl = ({
+	network,
+	signature
+}: {
+	network: Network | undefined;
+	signature: string | undefined;
+}): string | undefined =>
+	nonNullish(network) &&
+	isNetworkSolana(network) &&
+	nonNullish(network.explorerUrl) &&
+	nonNullish(signature)
+		? replacePlaceholders(network.explorerUrl, { $args: `tx/${signature}/` })
+		: undefined;
+
+/**
  * A Solana token's page on its network's block explorer, the same page a listed token's details
  * link to.
  */
