@@ -38,7 +38,9 @@ import { minterInfo as ckSolMinterInfo, watchDepositAddress } from '$icp/api/cks
 import { CkSolWatchDepositAddressError } from '$icp/canisters/cksol-minter.errors';
 import {
 	CKSOL_DEPOSIT_ADDRESS_RENT,
-	CKSOL_DEPOSIT_SWEEP_FEE
+	CKSOL_DEPOSIT_SWEEP_FEE,
+	CKSOL_LAST_SCAN_BEFORE_WINDOW_END_NANOS,
+	CKSOL_TRANSFER_LANDING_NANOS
 } from '$icp/constants/cksol.constants';
 import { icrcTokens } from '$icp/derived/icrc.derived';
 import { loadCkSolDepositAddress } from '$icp/services/cksol-deposit.services';
@@ -53,7 +55,7 @@ import {
 	isTokenCkEthLedger,
 	isTokenCkSolLedger
 } from '$icp/utils/ic-send.utils';
-import { ZERO } from '$lib/constants/app.constants';
+import { NANO_SECONDS_IN_MILLISECOND, ZERO } from '$lib/constants/app.constants';
 import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
 import { authIdentity } from '$lib/derived/auth.derived';
 import {
@@ -1225,8 +1227,20 @@ const assertCkSolDepositWatched = ({
 	}
 
 	// A call inside an earlier registration's window gets that window, which can end with no scan
-	// left: SOL sent then would wait on the address until a later call registers it again.
-	if (isNullish(fromNullable(status.Watching.next_scan_at))) {
+	// left, or with a last one due before the transfer lands: SOL sent then would wait on the address
+	// until a later call registers it again. The next scan has to come after the transfer can land,
+	// unless a later one follows it.
+	const { valid_until: validUntil, next_scan_at } = status.Watching;
+	const nextScanAt = fromNullable(next_scan_at);
+
+	if (isNullish(nextScanAt)) {
+		throw new ChainFusionSolDepositRefusedError('unavailable');
+	}
+
+	const isLastScan = nextScanAt + CKSOL_LAST_SCAN_BEFORE_WINDOW_END_NANOS >= validUntil;
+	const nowNanos = BigInt(Date.now()) * NANO_SECONDS_IN_MILLISECOND;
+
+	if (isLastScan && nextScanAt < nowNanos + CKSOL_TRANSFER_LANDING_NANOS) {
 		throw new ChainFusionSolDepositRefusedError('unavailable');
 	}
 };
@@ -1238,8 +1252,8 @@ const assertCkSolDepositWatched = ({
  * The address is registered with `watch_deposit_address` first, and nothing moves unless the
  * answer takes the deposit the user reviewed. The registration is what makes the mint
  * independent of OISY: from that call on, the minter itself scans the address until the window
- * ends, and nothing is sent unless a scan is still due, so the ckSOL arrives even if the tab
- * closes during the transfer.
+ * ends, and nothing is sent unless a scan is due after the transfer can land, so the ckSOL arrives
+ * even if the tab closes during the transfer.
  *
  * The row is opened once the transfer is signed and before it is broadcast, as for the LI.FI Solana
  * swap. It snapshots the latest deposit id of the account from the registration, the floor every
