@@ -28,6 +28,7 @@ import {
 	chainFusionMintOutcomeError,
 	chainFusionMintOutcomeToStatus,
 	chainFusionSolMintStatusError,
+	chainFusionSolTransferError,
 	chainFusionSolWithdrawalStatusError,
 	chainFusionWithdrawalStatusError,
 	hasChainFusionSolMintInFlight,
@@ -55,6 +56,7 @@ import {
 	toChainFusionWithdrawalLearnedRefs,
 	toChainFusionWithdrawalStatus,
 	toCkBtcMintDepositTxid,
+	toCkSolBlockhashSlot,
 	type ChainFusionBtcMintOutcome,
 	type ChainFusionMintOutcome
 } from '$lib/utils/chain-fusion-swap-active-tx.utils';
@@ -748,6 +750,26 @@ describe('chain-fusion-swap-active-tx.utils', () => {
 				{}
 			);
 			expect(toChainFusionSolMintLearnedRefs({ NotFound: null })).toStrictEqual({});
+		});
+
+		it('should fail a transfer only once it moved no SOL', () => {
+			expect(chainFusionSolTransferError('expired')).toBe(en.swap.error.swap_expired);
+			expect(chainFusionSolTransferError('reverted')).toBe(en.swap.error.failed_unexpectedly);
+
+			expect(chainFusionSolTransferError('pending')).toBeUndefined();
+			expect(chainFusionSolTransferError('succeeded')).toBeUndefined();
+			expect(chainFusionSolTransferError(undefined)).toBeUndefined();
+		});
+
+		it('should read the stored blockhash slot only as a u64', () => {
+			expect(toCkSolBlockhashSlot('345000000')).toBe(345_000_000n);
+			expect(toCkSolBlockhashSlot('9999999999999999999')).toBe(9_999_999_999_999_999_999n);
+
+			expect(toCkSolBlockhashSlot(undefined)).toBeUndefined();
+			expect(toCkSolBlockhashSlot('')).toBeUndefined();
+			expect(toCkSolBlockhashSlot('-1')).toBeUndefined();
+			expect(toCkSolBlockhashSlot('1.5')).toBeUndefined();
+			expect(toCkSolBlockhashSlot('99999999999999999999')).toBeUndefined();
 		});
 	});
 
