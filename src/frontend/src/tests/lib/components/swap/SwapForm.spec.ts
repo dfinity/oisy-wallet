@@ -9,6 +9,7 @@ import {
 	SWAP_SLIPPAGE_VELORA_INVALID_VALUE
 } from '$lib/constants/swap.constants';
 import {
+	SWAP_DESTINATION_TOKEN_BALANCE,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	SWAP_TWO_SWAPS_HINT,
 	SWAP_TWO_SWAPS_HINT_BUTTON,
@@ -492,6 +493,74 @@ describe('SwapForm', () => {
 				expect(destinationInput).toHaveValue('10');
 			}
 		);
+	});
+
+	describe('receive balance', () => {
+		const inactiveToken = { ...mockValidErc20Token, enabled: false };
+		const activeToken = { ...mockValidErc20Token, enabled: true };
+
+		beforeEach(() => {
+			setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
+
+			balancesStore.reset(mockValidErc20Token.id);
+		});
+
+		const sourceToken = { ...mockValidIcToken, enabled: true };
+
+		const renderWithDestination = (destinationToken: Token) => {
+			mockContext.set(SWAP_CONTEXT_KEY, {
+				...initSwapContext({ sourceToken, destinationToken }),
+				sourceTokenExchangeRate: readable(10),
+				destinationTokenExchangeRate: readable(2)
+			});
+
+			return render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					receiveAmount: 2,
+					slippageValue: undefined,
+					isSwapAmountsLoading: false,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+		};
+
+		const setBalance = (balance: bigint) =>
+			balancesStore.set({
+				id: mockValidErc20Token.id,
+				data: { data: balance, certified: true }
+			});
+
+		it('should show no balance for an inactive token whose balance was not loaded', () => {
+			const { queryByTestId } = renderWithDestination(inactiveToken);
+
+			expect(queryByTestId(SWAP_DESTINATION_TOKEN_BALANCE)).not.toBeInTheDocument();
+		});
+
+		it('should show the balance of an inactive token when it was loaded', () => {
+			setBalance(5n * 10n ** BigInt(inactiveToken.decimals));
+
+			const { getByTestId } = renderWithDestination(inactiveToken);
+
+			expect(getByTestId(SWAP_DESTINATION_TOKEN_BALANCE)).toHaveTextContent(
+				`5 ${inactiveToken.symbol}`
+			);
+		});
+
+		it('should show the balance of an active token, zero included', () => {
+			setBalance(ZERO);
+
+			const { getByTestId } = renderWithDestination(activeToken);
+
+			expect(getByTestId(SWAP_DESTINATION_TOKEN_BALANCE)).toHaveTextContent(
+				`0 ${activeToken.symbol}`
+			);
+		});
 	});
 
 	describe('swap not offered error', () => {
