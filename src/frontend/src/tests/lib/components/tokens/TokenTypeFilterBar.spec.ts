@@ -1,11 +1,21 @@
 import TokenTypeFilterBar from '$lib/components/tokens/TokenTypeFilterBar.svelte';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_EVENTS_KEYS,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
 import { TokenCategoryTagValue } from '$lib/enums/token-tag';
+import * as analyticsServices from '$lib/services/analytics.services';
 import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('TokenTypeFilterBar', () => {
+	const trackEventSpy = vi.spyOn(analyticsServices, 'trackEvent').mockImplementation(() => {});
+
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
 	});
 
@@ -98,6 +108,41 @@ describe('TokenTypeFilterBar', () => {
 		expect(spy).toHaveBeenCalledWith({
 			key: 'token-category-filter',
 			value: { value: undefined }
+		});
+	});
+
+	it('should track the asset type when a category is clicked', async () => {
+		const { getByText } = render(TokenTypeFilterBar);
+
+		await fireEvent.click(getByText(en.token_tag.category.stablecoin));
+
+		expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.TYPE,
+				event_value: TokenCategoryTagValue.STABLECOIN
+			}
+		});
+	});
+
+	it('should track "all" when "All" is clicked', async () => {
+		tokenCategoryFilterStore.set({
+			key: 'token-category-filter',
+			value: { value: TokenCategoryTagValue.CRYPTO }
+		});
+
+		const { getByText } = render(TokenTypeFilterBar);
+
+		await fireEvent.click(getByText(en.tokens.text.asset_type_all));
+
+		expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.TYPE,
+				event_value: 'all'
+			}
 		});
 	});
 
