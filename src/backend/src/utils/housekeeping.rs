@@ -27,8 +27,9 @@ const HOUSEKEEPING_TIMEOUT_NS: u64 = 2 * 60 * 60 * 1_000_000_000;
 /// batch.
 ///
 /// A timer message may use 40B instructions. A batch stops after the entry that crosses this
-/// budget, and taking one entry costs under 1M and evicting it about 5M more
-/// (`bench_evict_inactive_tokens_2000`), well inside the headroom above it.
+/// budget, and taking one entry costs under 0.1M and evicting it about 0.2M more
+/// (`bench_evict_inactive_tokens_2000`), well inside the headroom above it. A full
+/// `token_activity` takes under 0.5B, so it fits one batch.
 const TOKEN_EVICTION_BATCH_INSTRUCTION_BUDGET: u64 = 2_000_000_000;
 
 /// Pause between token eviction batches, so that eviction leaves room for other messages.
