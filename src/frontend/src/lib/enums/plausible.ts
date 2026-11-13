@@ -126,6 +126,8 @@ export enum PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES {
 	DEPOSIT_MEMO = 'deposit_memo',
 	// The provider has no route for the pair and amount.
 	NO_ROUTE = 'no_route',
+	// The provider found nothing the source address can spend: LI.FI from a BTC address without UTXOs.
+	INSUFFICIENT_FUNDS = 'insufficient_funds',
 	// The provider refused the request for exceeding its rate limit.
 	RATE_LIMITED = 'rate_limited',
 	// The quote failed OISY's own checks — a target, spender or echoed request that differs from
@@ -147,7 +149,7 @@ export enum PLAUSIBLE_EVENT_SWAP_ERROR_TYPES {
 	// The re-quote failed OISY's own checks, or its route is one OISY cannot execute.
 	QUOTE_REJECTED = PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.QUOTE_REJECTED,
 	// The balance does not cover the swap and its network fee.
-	INSUFFICIENT_FUNDS = 'insufficient_funds',
+	INSUFFICIENT_FUNDS = PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.INSUFFICIENT_FUNDS,
 	// Any other failure.
 	UNKNOWN = 'unknown'
 }
