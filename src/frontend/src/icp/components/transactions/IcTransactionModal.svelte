@@ -230,6 +230,13 @@
 				</span>
 			</ListItem>
 
+			{#if type === 'burn' && isNullish(to) && nonNullish(transaction.toLabel) && nonNullish(twinNetworkName)}
+				<ListItem>
+					<span>{$i18n.transaction.text.to}</span>
+					<span><IcTransactionLabel label={transaction.toLabel} {token} /></span>
+				</ListItem>
+			{/if}
+
 			{#if nonNullish(twinTransaction) && nonNullish(twinNetworkName)}
 				<ListItem>
 					<span>
