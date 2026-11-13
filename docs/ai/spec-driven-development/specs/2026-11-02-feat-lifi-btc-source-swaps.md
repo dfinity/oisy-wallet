@@ -132,6 +132,21 @@ They are found by role, not by index: a quote without change has the fee at inde
   P2WPKH change. LI.FI's layout has three fixed outputs, and the `OP_RETURN` has no address. So the
   sizing takes the fixed outputs' vsizes as a list. A script-based size (8 bytes of value + 1 byte
   of length + the script) covers the `OP_RETURN`. A plain send keeps passing its one recipient.
+- **One layout for the preview, the selection and the pre-send check.** Today every BTC swap gets
+  its fee from the `UtxosFeeLoader` that `SwapBtcContexts.svelte` mounts for every provider. That
+  loader prices one output of the largest size (`BTC_LARGEST_OUTPUT_VSIZE`, 43 vB) plus change.
+  Before dispatching to any provider, `SwapBtcWizard.svelte` calls `validateBtcSend`. It recomputes
+  the expected fee for that same single-recipient layout and accepts ±10%
+  (`BTC_SEND_FEE_TOLERANCE_PERCENTAGE`). LI.FI's layout is larger. With one input, LayerSwap's
+  (P2TR deposit, an 18-byte memo, fee output, change) is about 213 vB against the 153 vB the swap
+  prices, so +39%. NEAR's (P2WPKH deposit, a 10-byte memo) is about 193 vB, +26%. Each part must
+  therefore work from the validated output list of the current quote:
+  - the fee `SwapBtcFees.svelte` shows, and the selection behind it, are LI.FI's own, not the swap
+    loader's. They are recomputed whenever the quote (and so its deposit address and memo)
+    changes;
+  - `validateBtcSend` takes the same output list and recomputes the expected fee for it. Otherwise
+    it refuses a correctly priced LI.FI transaction as `InvalidFeeCalculation`, while the swap
+    loader's fee would underprice it, below the backend's 1 sat/vB floor at the lowest rate.
 - **Change** between the `OP_RETURN` and the fee output, where LI.FI puts it, whether or not
   LI.FI's own quote had change. Only if `≥ BTC_CHANGE_DUST_THRESHOLD_SATOSHIS` (1 000 sats), else
   it goes to the miner and the transaction is deposit, `OP_RETURN`, fee. Either way the three kept
@@ -261,7 +276,8 @@ reaches production before the dependency spec's PR 10 and a production release o
    fixtures from real quotes of `layerswap` and `near` (and the 2026-11-02 `relaydepository` one).
    Dead code.
 3. `feat(frontend): rebuild a LI.FI BTC transaction with OISY's UTXO selection` — the fixed-outputs
-   builder variant, and fee sizing over a list of outputs including an `OP_RETURN`. Dead code.
+   builder variant, fee sizing over a list of outputs including an `OP_RETURN`, and
+   `validateBtcSend` checking the fee against that list. Dead code.
 4. `feat(backend): accept BTC-source LI.FI active transactions` — `require_lifi_pair` and
    `require_lifi_refs` as in [Backend: BTC-source LI.FI rows](#backend-btc-source-lifi-rows), with
    unit tests. Independent of 1–3.
@@ -269,8 +285,8 @@ reaches production before the dependency spec's PR 10 and a production release o
    with fixed outputs, the row in `beforeBroadcast`, deletion by the history rule, and the poller's
    BTC source with its never-reached-the-network settle. Unreachable until 6.
 6. `feat(frontend): offer LI.FI from BTC` (needs 5 and one admitted bridge) — the bridge binding,
-   tied to output 0, plus provider registration, wizard and fees, and a "(local and staging)" entry
-   in `PRODUCT.md`.
+   tied to output 0, plus provider registration and the wizard. The fee preview comes from LI.FI's
+   own selection, not the swap loader. Also a "(local and staging)" entry in `PRODUCT.md`.
 
 ---
 
@@ -281,6 +297,9 @@ reaches production before the dependency spec's PR 10 and a production release o
 - The broadcast transaction has LI.FI's deposit, memo and fee outputs byte for byte, in LI.FI's
   order. It spends only OISY-selected, ≥4-confirmation, unreserved UTXOs, at most
   `BTC_SEND_MAX_INPUTS` of them.
+- For a LI.FI quote, the fee shown, the selection and the fee `validateBtcSend` expects all come
+  from the quote's validated output layout. A correctly priced LI.FI transaction passes the
+  pre-send check.
 - A quote failing any trust check is never offered; no signature is requested for it.
 - The swap is an active user transaction from before the broadcast. It is deleted only when every
   submission was definitively refused. After an unclear outcome it stays, and the wizard does not
