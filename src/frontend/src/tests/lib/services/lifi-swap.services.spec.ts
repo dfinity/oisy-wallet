@@ -33,6 +33,7 @@ import { SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
 import { mockLifiSolSolToUsdc, mockLifiSolUser } from '$tests/mocks/lifi-sol-transaction.mock';
 import {
 	mockLifiBaseUsdcAddress,
@@ -722,6 +723,26 @@ describe('lifi-swap.services', () => {
 						allowBridges: ['layerswap']
 					})
 				);
+			});
+
+			it('should offer a live LayerSwap quote that passes the trust checks', async () => {
+				const { action, estimate } = mockLifiBtcLayerswapQuote;
+
+				vi.mocked(fetchLifiQuote).mockResolvedValue(mockLifiBtcLayerswapQuote);
+
+				await expect(
+					fetchLifiSwapQuote({
+						...btcParams,
+						userAddress: action.fromAddress,
+						recipientAddress: action.toAddress,
+						slippage: 0.5
+					})
+				).resolves.toMatchObject({
+					provider: SwapProvider.LIFI,
+					receiveAmount: BigInt(estimate.toAmount),
+					receiveOutMinimum: BigInt(estimate.toAmountMin),
+					swapDetails: mockLifiBtcLayerswapQuote
+				});
 			});
 
 			it('should not request a quote without sending through the backend', async () => {
