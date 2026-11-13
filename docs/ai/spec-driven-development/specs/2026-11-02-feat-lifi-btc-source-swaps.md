@@ -116,8 +116,9 @@ routes.
 
 ### Building the transaction: rebuild from LI.FI's template
 
-OISY does **not** sign LI.FI's PSBT as is. It keeps outputs 0, 1 and 3 byte for byte, in LI.FI's
-order, and builds its own inputs and change:
+OISY does **not** sign LI.FI's PSBT as is. It keeps the deposit, `OP_RETURN` and fee outputs that
+checks 1–3 identified, byte for byte and in LI.FI's order, and builds its own inputs and change.
+They are found by role, not by index: a quote without change has the fee at index 2.
 
 - **Inputs** from OISY's own selection (`calculateUtxoSelection` in
   `src/frontend/src/btc/utils/btc-utxos.utils.ts`) over the backend's spendable UTXOs
@@ -131,9 +132,10 @@ order, and builds its own inputs and change:
   P2WPKH change. LI.FI's layout has three fixed outputs, and the `OP_RETURN` has no address. So the
   sizing takes the fixed outputs' vsizes as a list. A script-based size (8 bytes of value + 1 byte
   of length + the script) covers the `OP_RETURN`. A plain send keeps passing its one recipient.
-- **Change** at LI.FI's change position (index 2), only if `≥ BTC_CHANGE_DUST_THRESHOLD_SATOSHIS`
-  (1 000 sats), else to the miner. If the change would be dropped, the deposit and fee outputs stay
-  intact.
+- **Change** between the `OP_RETURN` and the fee output, where LI.FI puts it, whether or not
+  LI.FI's own quote had change. Only if `≥ BTC_CHANGE_DUST_THRESHOLD_SATOSHIS` (1 000 sats), else
+  it goes to the miner and the transaction is deposit, `OP_RETURN`, fee. Either way the three kept
+  outputs are unchanged.
 - **Sequence**: keep LI.FI's `0xFFFFFFFD`. The backend's validator accepts it, since the BIP68
   disable bit is set.
 
@@ -154,7 +156,8 @@ reservation stay in one place:
    known.
 2. `beforeBroadcast({ txid })` **creates the LI.FI active user transaction**, as the EVM path does
    (`lifi-evm-swap.services.ts`). A BTC broadcast is irreversible, so it must be tracked even if a
-   later step throws.
+   later step throws. The backend refuses such a row today (see
+   [Backend: BTC-source LI.FI rows](#backend-btc-source-lifi-rows)).
 3. `broadcastBtcTransaction` → `btc_broadcast_transaction` (validates, reserves, broadcasts).
    - The row is deleted only if `isDefinitiveBtcBroadcastRefusal` held for **every** submission of
      the txid (the dependency spec's history rule).
@@ -172,10 +175,38 @@ next to the NEAR Intents one, and `SwapBtcFees.svelte` the LI.FI fee breakdown (
 fee, Bitcoin network fee). The EVM and Solana LI.FI wizards have no terms gate (unlike NEAR Intents'
 `hasAcknowledgedNearIntentsSwap`), so neither does this one.
 
+### Backend: BTC-source LI.FI rows
+
+The backend validates every LI.FI row when it is created
+(`src/backend/src/active_user_transactions/model.rs`), and today it refuses a BTC source:
+
+- `require_lifi_pair` accepts only an EVM source (toward EVM or Solana) and Solana → Solana.
+- `require_lifi_refs` asks every non-Solana source for an EVM `lifi_tx_hash` (`0x` + 64 hex
+  characters) and a `lifi_nonce`.
+
+So the `beforeBroadcast` row of step 2 would fail, and the swap would abort before the broadcast.
+The fix:
+
+- `require_lifi_pair` accepts `TokenId::BtcNativeMainnet` as a source toward the pinned EVM chains
+  and Solana mainnet. BTC destinations and `TokenId::BtcNativeTestnet` stay refused.
+- `require_lifi_refs`, for a BTC source: `lifi_tx_hash` is the BTC txid, 64 hex characters without
+  `0x` (the shape the model already checks for other BTC hashes), and there is no nonce.
+- Unit tests for both, including the BTC destination and the testnet source that stay refused.
+
+No `backend.did` change: `LifiData`'s tokens and the refs are already generic. The release must be
+live on staging before the execution PR is tried there, and in production before LI.FI from BTC is
+turned on there.
+
 ### Bridge admission
 
 A bridge joins `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]` only once OISY can bind, before
-signing, **who receives the payout and how much at least**, for that bridge. Candidates:
+signing, **who receives the payout and how much at least**, for that bridge.
+
+Every binding is **tied to output 0**, the deposit being signed. The bridge's record is found by
+output 0's deposit address, or returns it, and its input amount equals output 0's value. Otherwise
+a substituted quote could keep a genuine record id while sending output 0 (and
+`transactionRequest.to`) elsewhere, and still pass. The record's destination network and asset, its
+recipient and its minimum must then match the review. Candidates:
 
 - **NEAR (`near`)**: output 0 is a 1Click deposit address, unique to the quote. 1Click's keyless
   `GET /v0/status?depositAddress=…` (`fetchNearIntentsStatus` in
@@ -196,12 +227,21 @@ signing, **who receives the payout and how much at least**, for that bridge. Can
   this binding trusts 1Click's API response. That is the service OISY's direct NEAR Intents
   provider already relies on.
 
-- **LayerSwap (`layerswap`)**: the memo starts with a 7-character id. Whether LayerSwap's API
-  returns the swap's destination address and amount for it is open question 1.
-- **Relay (`relaydepository`)**: the memo is the request id; Relay's public API returns the
-  request's recipient and amounts. Binding = fetch the request by the memo's id and check the
-  recipient is the user's destination address and the output at least the reviewed minimum. Relay
-  did not quote on 2026-11-13, so it waits until it does.
+  The lookup is keyed by output 0's address, and `amountIn` is checked against its value, so the
+  record is tied to the deposit.
+
+- **LayerSwap (`layerswap`)**: the memo starts with a 7-character id. Open question 1 asks whether
+  LayerSwap's API returns, for that id, the deposit address and amount (to tie it to output 0) as
+  well as the destination address and payout.
+- **Relay (`relaydepository`)**: the memo is the request id, and Relay's public API returns the
+  request's recipient and amounts. Binding = fetch the request by the memo's id, then check:
+  - its deposit address is output 0's (compared as scripts) and its input amount is output 0's
+    value;
+  - its destination chain and asset are the reviewed ones;
+  - its recipient is the user's destination address, and its output is at least the reviewed
+    minimum.
+
+  Relay did not quote on 2026-11-13, so it waits until it does.
 
 Each binding trusts the bridge's own word instead of on-chain calldata, which is weaker than the
 EVM binding. For NEAR, a verifiable 1Click signature would at least authenticate that word. Whether
@@ -211,8 +251,8 @@ that is acceptable is a pending decision, not a fact to find.
 
 ## Delivery plan
 
-All need the dependency spec's PRs 1–8, which are merged. Nothing is visible until PR 5, and nothing
-reaches production before the dependency spec's PR 10.
+All need the dependency spec's PRs 1–8, which are merged. Nothing is visible until PR 6. Nothing
+reaches production before the dependency spec's PR 10 and a production release of PR 4.
 
 1. `feat(frontend): LI.FI BTC-source groundwork behind a flag` — the flag, gated with
    `BTC_SEND_VIA_BACKEND_ENABLED`, empty `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]`, quote
@@ -222,11 +262,15 @@ reaches production before the dependency spec's PR 10.
    Dead code.
 3. `feat(frontend): rebuild a LI.FI BTC transaction with OISY's UTXO selection` — the fixed-outputs
    builder variant, and fee sizing over a list of outputs including an `OP_RETURN`. Dead code.
-4. `feat(frontend): LI.FI BTC-source execution and active transaction` (needs 2, 3) — `sendBtc`
+4. `feat(backend): accept BTC-source LI.FI active transactions` — `require_lifi_pair` and
+   `require_lifi_refs` as in [Backend: BTC-source LI.FI rows](#backend-btc-source-lifi-rows), with
+   unit tests. Independent of 1–3.
+5. `feat(frontend): LI.FI BTC-source execution and active transaction` (needs 2, 3, 4) — `sendBtc`
    with fixed outputs, the row in `beforeBroadcast`, deletion by the history rule, and the poller's
-   BTC source with its never-reached-the-network settle. Unreachable until 5.
-5. `feat(frontend): offer LI.FI from BTC` (needs 4 and one admitted bridge) — the bridge binding,
-   provider registration, wizard and fees, and a "(local and staging)" entry in `PRODUCT.md`.
+   BTC source with its never-reached-the-network settle. Unreachable until 6.
+6. `feat(frontend): offer LI.FI from BTC` (needs 5 and one admitted bridge) — the bridge binding,
+   tied to output 0, plus provider registration, wizard and fees, and a "(local and staging)" entry
+   in `PRODUCT.md`.
 
 ---
 
@@ -243,7 +287,11 @@ reaches production before the dependency spec's PR 10.
   return to a filled-in form.
 - A row whose transaction never reaches the network is settled as failed, as Chain Fusion and
   Liquidium rows are.
-- No bridge is offered whose payout recipient and minimum OISY cannot bind before signing.
+- No bridge is offered whose payout recipient and minimum OISY cannot bind before signing, and every
+  binding is tied to the deposit output being signed.
+- A quote whose PSBT has no change output is rebuilt with LI.FI's fee output intact.
+- The backend accepts a BTC-source LI.FI row, and still refuses a BTC destination and a testnet
+  source.
 - With either flag off, the BTC swap flow is unchanged.
 
 ---
