@@ -52,7 +52,7 @@ export const initBtcMaxSendAmount = ({
 			return calculateMaxSpendableAmount({
 				utxos,
 				pendingUtxoOutpoints,
-				recipientOutputVSize: btcOutputVSize({ address: destination }),
+				outputVSizes: [btcOutputVSize({ address: destination })],
 				feeRateMiliSatoshisPerVByte,
 				maxInputs: btcSendMaxInputs()
 			});
