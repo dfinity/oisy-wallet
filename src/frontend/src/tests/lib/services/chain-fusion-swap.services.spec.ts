@@ -35,7 +35,11 @@ import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcCkWithdrawalResult } from '$icp/types/ic-send';
 import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
-import { ZERO } from '$lib/constants/app.constants';
+import {
+	NANO_SECONDS_IN_MILLISECOND,
+	NANO_SECONDS_IN_MINUTE,
+	ZERO
+} from '$lib/constants/app.constants';
 import { ProgressStepsSendSol, ProgressStepsSwap } from '$lib/enums/progress-steps';
 import {
 	createActiveUserTransaction,
@@ -1886,20 +1890,39 @@ describe('chain-fusion-swap.services', () => {
 				solDeposit: { address: DEPOSIT_ADDRESS, automaticDepositFee: AUTOMATIC_DEPOSIT_FEE }
 			};
 
+			// The cases below are minutes apart, so the milliseconds the tests take never matter.
+			const NOW_NANOS = BigInt(Date.now()) * NANO_SECONDS_IN_MILLISECOND;
+
+			const inMinutes = (minutes: bigint): bigint => NOW_NANOS + minutes * NANO_SECONDS_IN_MINUTE;
+
+			// A fresh registration: the window ends in 24 hours, and the first scan is a minute away.
 			const watched = {
 				address: DEPOSIT_ADDRESS,
 				minimum_deposit_amount: MINIMUM_DEPOSIT_AMOUNT,
 				automatic_deposit_fee: AUTOMATIC_DEPOSIT_FEE,
 				status: {
 					Watching: {
-						valid_until: 2n,
+						valid_until: inMinutes(24n * 60n),
 						scan_count: 0,
 						last_scanned_at: [] as [],
-						next_scan_at: [1n] as [bigint]
+						next_scan_at: [inMinutes(1n)] as [bigint]
 					}
 				},
 				latest_deposit_id: [41n] as [bigint]
 			};
+
+			// A `Watching` answer of an earlier registration, whose window ends, and whose next scan is
+			// due, the given minutes from now.
+			const watchingWindow = ({ endsIn, nextScanIn }: { endsIn: bigint; nextScanIn: bigint }) => ({
+				...watched,
+				status: {
+					Watching: {
+						...watched.status.Watching,
+						valid_until: inMinutes(endsIn),
+						next_scan_at: [inMinutes(nextScanIn)] as [bigint]
+					}
+				}
+			});
 
 			const solSwap = () =>
 				fetchChainFusionSolSwap({
@@ -2059,6 +2082,17 @@ describe('chain-fusion-swap.services', () => {
 			});
 
 			it.each([
+				{ name: 'its last scan comes after the transfer can land', endsIn: 36n, nextScanIn: 6n },
+				{ name: 'a later scan follows an overdue one', endsIn: 120n, nextScanIn: -1n }
+			])('should send the SOL when the window $name', async ({ endsIn, nextScanIn }) => {
+				vi.mocked(watchDepositAddress).mockResolvedValue(watchingWindow({ endsIn, nextScanIn }));
+
+				await solSwap();
+
+				expect(sendSol).toHaveBeenCalledOnce();
+			});
+
+			it.each([
 				{
 					name: 'a deposit is already in flight',
 					answer: { ...watched, status: { Detected: { deposit_id: 41n } } },
@@ -2085,6 +2119,16 @@ describe('chain-fusion-swap.services', () => {
 						...watched,
 						status: { Watching: { ...watched.status.Watching, next_scan_at: [] as [] } }
 					},
+					reason: 'unavailable'
+				},
+				{
+					name: 'the last scan of the window is due before the transfer can land',
+					answer: watchingWindow({ endsIn: 34n, nextScanIn: 4n }),
+					reason: 'unavailable'
+				},
+				{
+					name: 'the last scan of the window is overdue',
+					answer: watchingWindow({ endsIn: 29n, nextScanIn: -1n }),
 					reason: 'unavailable'
 				}
 			])('should send no SOL when $name', async ({ answer, reason }) => {
