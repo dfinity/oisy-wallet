@@ -69,10 +69,10 @@ Local builds cannot convert: they carry no mainnet ck tokens, there is no local 
 ### 6.2 Execution
 
 1. On confirm, OISY first calls `watch_deposit_address`. It goes on only when the answer is `Watching`, for the quoted deposit address, with a scan still due (`next_scan_at`), a minimum the amount still meets and a fee no higher than quoted. `Detected` (a deposit is already in flight), `TemporarilyUnavailable`, `TooManyWatchedAddresses`, `Quarantined` or a failed call stop the conversion before any SOL moves, and the form says why. `Watching` with no scan due comes from an earlier registration whose window ends within half an hour (§3.3): the form asks to try again later, and the first call after that window registers a fresh one.
-2. OISY sends the SOL to the deposit address.
-3. Once the transfer has a signature, OISY opens the active user transaction row (§8) and enables ckSOL.
+2. OISY signs the transfer of the SOL to the deposit address and, before broadcasting it, opens the active user transaction row (§8). The backend refuses the row while the user has another SOL → ckSOL row open (D3): nothing is sent, and the form says a conversion is already in progress.
+3. OISY broadcasts the transfer, and enables ckSOL once it is confirmed. The row is deleted only when the node refuses the transfer. After any other failure the transfer may have gone out, so the row stays for the poller (§6.3).
 
-Registering before the transfer is what makes the mint independent of OISY: from that call on, the minter itself scans the address until the window ends, and OISY sends only while a scan is still due, so the ckSOL arrives even if the tab closes before the row exists. If the transfer fails, nothing moved, and the registration simply expires.
+Registering before the transfer is what makes the mint independent of OISY: from that call on, the minter itself scans the address until the window ends, and OISY sends only while a scan is still due, so the ckSOL arrives even if the tab closes during the transfer. If the node refuses the transfer, nothing moved, and the registration simply expires.
 
 ### 6.3 Settlement
 
@@ -81,6 +81,7 @@ The row stays in flight until the minter reports the mint. About once a minute, 
 - On every watch response, including `Watching`, inspect the account's latest deposit id. If it is newer than the row's baseline, persist it and follow `deposit_sol_status` as below, so a deposit minted while OISY was closed is still recovered. Otherwise, `Watching` keeps the row in flight. Once the window has ended, the same call registers the address again, so a late transfer is still found.
 - `Detected` gives the deposit id. The row keeps it and from then on follows `deposit_sol_status`: `Queued`, `Swept` and `Finalized` keep it in flight; `Minted` closes it as succeeded, showing the minted amount; `Dropped` keeps it in flight, and the next `watch_deposit_address` call registers the address again if the minter could not; `Quarantined` closes it as failed, saying that the minter holds the SOL until an upgrade resolves the deposit.
 - The row's baseline is the latest deposit id in the `watch_deposit_address` answer before the transfer (§6.2), kept on the row unchanged. The row only accepts a deposit id newer than its baseline, so an earlier deposit's mint is never taken for this one.
+- While no newer deposit id shows, the poller also reads the transfer on Solana. A transfer whose blockhash has expired with no status for its signature, seen on two polls in a row, can never land; one that landed and failed moved no SOL. Either closes the row as failed, which frees the account for the next conversion.
 
 The minted amount can exceed the conversion when the address held more SOL (§3.8). It is shown as minted.
 
@@ -102,11 +103,11 @@ The poller asks `withdraw_sol_status` with the burn index. `NotFound` right afte
 
 ## 8. Settlement across sessions
 
-Both directions are rows of the existing `ChainFusion` variant, with two new directions: **`SolToCkSol`** and **`CkSolToSol`**. The backend accepts them for SOL (native, mainnet or devnet) on one side and an ICRC token on the other, with tests for both. Adding enum values is a breaking candid change and ships alone as `feat(backend)!:` (precedent #13710).
+Both directions are rows of the existing `ChainFusion` variant, with two new directions: **`SolToCkSol`** and **`CkSolToSol`**. The backend accepts them for SOL (native, mainnet or devnet) on one side and an ICRC token on the other, with tests for both. Adding enum values is a breaking candid change and ships alone as `feat(backend)!:` (precedent #13710). The backend also refuses a new `SolToCkSol` row with `AlreadyInFlight` while the user has one that is not terminal, as it does for XRP payments: only the backend sees the check and the write at once (D3).
 
 Each row snapshots the minter and writes the display refs every Chain Fusion row writes, plus:
 
-- SOL → ckSOL: the deposit address, the transfer signature and the baseline, the latest deposit id in the `watch_deposit_address` answer before the transfer (§6.3); learned later: the deposit id.
+- SOL → ckSOL: the deposit address, the transfer signature, its recent blockhash and a slot where that blockhash was valid, and the baseline, the latest deposit id in the `watch_deposit_address` answer before the transfer (§6.3); learned later: the deposit id.
 - ckSOL → SOL: the burn index; learned later: the withdrawal's Solana signature.
 
 The rows show in the Active transactions list like the other Chain Fusion conversions, and report into the swap analytics funnel with Chain Fusion as provider. There are no new analytics events.
@@ -137,9 +138,9 @@ No SDK wraps the ckSOL minter, so OISY adds it the way it added the CMC (#14132)
 - **AC3** SOL on Solana mainnet as pay token gets a Chain Fusion offer for ckSOL, and ckSOL gets one for SOL. No other Solana token or network gets a Chain Fusion offer.
 - **AC4** The SOL → ckSOL offer shows the receive amount and fee rows of §6.1, with the fee and minimum the minter reports, and refuses an amount below the minimum.
 - **AC5** Confirming calls `watch_deposit_address` before any SOL moves. Unless the answer is `Watching` for the quoted address, minimum and fee, with a scan still due, no SOL moves and the form says why.
-- **AC6** After the transfer, the conversion shows in Active transactions and ckSOL is enabled. The row closes as succeeded with the minted amount once the minter reports `Minted`, across modal close, refresh, tab close and logout.
+- **AC6** The row is opened before the transfer is broadcast, and ckSOL is enabled once the transfer is confirmed. The row closes as succeeded with the minted amount once the minter reports `Minted`, across modal close, refresh, tab close and logout, and as failed once the transfer can no longer land.
 - **AC7** A row never takes a deposit whose id is not newer than the latest deposit id in the `watch_deposit_address` answer before its transfer.
-- **AC8** While a SOL → ckSOL conversion is in flight, no new SOL → ckSOL offer appears, and the form explains why.
+- **AC8** While a SOL → ckSOL conversion is in flight, no new SOL → ckSOL offer appears, and the form explains why. Another tab or device that still shows an offer sends nothing: the backend refuses its row, and the form gives the same explanation.
 - **AC9** `Dropped` keeps the row in flight until a later deposit is minted; `Quarantined` closes it as failed with the explanation of §6.3.
 - **AC10** The ckSOL → SOL offer shows amount − 0.001 SOL received, the approval fee on top, and the 0.002 SOL minimum. Executing approves and calls `withdraw_sol` to the user's own Solana address, and the row follows `withdraw_sol_status` to succeeded or failed.
 - **AC11** Activity labels ckSOL mints and burns as in §10.
@@ -173,7 +174,7 @@ None.
 
 - **D1 Deposit trigger:** `watch_deposit_address`, called from the frontend. No backend proxy for `deposit_sol`; the backend only gains the two directions (§8).
 - **D2 Entry point:** Swap, through the Chain Fusion provider, only.
-- **D3 One conversion at a time:** a second SOL → ckSOL waits until the first is minted, because the minter takes one deposit per account at a time (§3.7).
+- **D3 One conversion at a time:** a second SOL → ckSOL waits until the first is minted, because the minter takes one deposit per account at a time (§3.7). The backend holds this across tabs and devices (§8).
 - **D4 Token list:** ckSOL is not enabled by default; the first conversion enables it.
 - **D5 ckDevnetSOL:** left out, since Chain Fusion only offers mainnet pairs.
 - **D6 Deposits from exchanges:** later, in their own spec.
