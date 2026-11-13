@@ -30,7 +30,7 @@ export const SOLANA_TOKEN: RequiredTokenWithLinkedData = {
 	icon: sol,
 	twinTokenSymbol: 'ckSOL',
 	// Behind the flag rather than always set: the group also names what a token wraps in
-	// the user snapshot, and production must not change before ckSOL ships.
+	// the user snapshot, so turning ckSOL off must take it away too.
 	...(CKSOL_ENABLED && { groupData: SOL_TOKEN_GROUP }),
 	neverCollapseInTokenGroup: true,
 	buy: {
