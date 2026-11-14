@@ -2937,8 +2937,8 @@ export interface _SERVICE {
 	 * present.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, the
-	 * batch is too large, or a qualifier is too long.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	 * the batch is too large, or a qualifier is too long.
 	 */
 	add_user_dismissed_notification: ActorMethod<
 		[AddDismissedNotificationRequest],
