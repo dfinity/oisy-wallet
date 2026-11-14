@@ -23,6 +23,7 @@
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
+	import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
@@ -30,6 +31,7 @@
 	import { formatToken, formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
 	import {
 		canPayWithToken,
 		getSwapSlippageInvalidValue,
@@ -172,21 +174,37 @@
 			: undefined
 	);
 
+	// A switch makes the receive token the pay token, so it follows the pay list: only a token that
+	// list offers and lets you pick can become the pay token.
+	let destinationTokenPayable = $derived(
+		nonNullish($destinationToken) &&
+			canPayWithToken({ ...$destinationToken, balance: $destinationTokenBalance }) &&
+			filterSwapTokens({
+				tokens: [{ ...$destinationToken, enabled: true }],
+				supportedData: $swapSupportedTokensStore?.aggregated
+			}).length > 0
+	);
+
 	let isSwitchTokensButtonDisabled = $derived(() => {
-		if (isNullish($destinationToken?.network.id) || isNullish($sourceToken?.network.id)) {
+		// A pay token alone can always move: with no pay token, the receive list offers every token.
+		if (isNullish($destinationToken)) {
+			return isNullish($sourceToken);
+		}
+
+		if (!destinationTokenPayable) {
 			return true;
 		}
+
+		// A receive token alone has no quote or network pair to wait for.
+		if (isNullish($sourceToken)) {
+			return false;
+		}
+
 		const condition1 = (nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading;
 		const condition2 = !SUPPORTED_CROSS_SWAP_NETWORKS[$destinationToken.network.id]?.includes(
 			$sourceToken.network.id
 		);
-		// A switch makes the receive token the pay token, so it follows the pay list: a token that
-		// cannot be picked to pay with there cannot become the pay token here either.
-		const condition3 = !canPayWithToken({
-			...$destinationToken,
-			balance: $destinationTokenBalance
-		});
-		return condition1 || condition2 || condition3;
+		return condition1 || condition2;
 	});
 
 	let maxSlippageInvalidValue = $derived(getSwapSlippageInvalidValue($sourceToken?.network.id));
