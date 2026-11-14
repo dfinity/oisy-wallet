@@ -51,7 +51,7 @@ Local builds cannot convert: they carry no mainnet ck tokens, there is no local 
 ## 5. The ckSOL token
 
 1. ckSOL is a curated Chain Fusion token like ckBTC and ckETH: the mainnet ledger, index and minter, the SOL price (`exchangeCoinId` `solana`), SOL on Solana mainnet as its twin, and the ledger's own logo (`icrc1:logo`), which OISY shows for ck tokens as it does for ckBTC and ckETH, so no icon file is shipped.
-2. It is **not enabled by default** (D4). A conversion to ckSOL enables it, as it does for every Chain Fusion destination, and users can enable it in Manage tokens.
+2. It is a **suggested** token (D4), as ckUSDT is: enabled for every user who has not switched it off in Manage tokens. A conversion to ckSOL also enables it, as it does for every Chain Fusion destination.
 3. SOL and ckSOL appear as one **Solana** token group, as BTC / ckBTC and ETH / ckETH do (D9).
 4. The ckSOL page has the actions of any ICRC token. It gets no Convert button (D2).
 5. The minter's info (minimum deposit, automatic deposit fee, minimum withdrawal, withdrawal fee) is read when a SOL ↔ ckSOL quote needs it.
@@ -134,7 +134,7 @@ No SDK wraps the ckSOL minter, so OISY adds it the way it added the CMC (#14132)
 ## 12. Acceptance criteria
 
 - **AC1** With the flag off, there is no ckSOL token and no SOL ↔ ckSOL offer, and production behaves as today.
-- **AC2** With the flag on, ckSOL is listed but not enabled by default, priced as SOL, with the ckSOL logo, and Manage tokens can enable it.
+- **AC2** With the flag on, ckSOL is listed as a suggested token, priced as SOL, with the ckSOL logo, and Manage tokens can switch it off.
 - **AC3** SOL on Solana mainnet as pay token gets a Chain Fusion offer for ckSOL, and ckSOL gets one for SOL. No other Solana token or network gets a Chain Fusion offer.
 - **AC4** The SOL → ckSOL offer shows the receive amount and fee rows of §6.1, with the fee and minimum the minter reports, and refuses an amount below the minimum.
 - **AC5** Confirming calls `watch_deposit_address` before any SOL moves. Unless the answer is `Watching` for the quoted address, minimum and fee, with a scan due after the transfer can land (§6.2), no SOL moves and the form says why.
@@ -157,6 +157,7 @@ No SDK wraps the ckSOL minter, so OISY adds it the way it added the CMC (#14132)
 7. `feat(frontend): label ckSOL mints and burns in Activity`: §10.
 8. Translations of the new strings, which may trail the PRs that add them.
 9. `feat(frontend): enable ckSOL`: turns the flag on everywhere after a real conversion in both directions on staging.
+10. `feat(frontend): add ckSOL as a suggested token`: §5.2 (D4), stacked on 9.
 
 Every new component, store and service ships with tests (coverage gate).
 
@@ -175,7 +176,7 @@ None.
 - **D1 Deposit trigger:** `watch_deposit_address`, called from the frontend. No backend proxy for `deposit_sol`; the backend only gains the two directions (§8).
 - **D2 Entry point:** Swap, through the Chain Fusion provider, only.
 - **D3 One conversion at a time:** a second SOL → ckSOL waits until the first is minted, because the minter takes one deposit per account at a time (§3.7). The backend holds this across tabs and devices (§8).
-- **D4 Token list:** ckSOL is not enabled by default; the first conversion enables it.
+- **D4 Token list:** ckSOL is a suggested token, as ckUSDT is: enabled for every user who has not switched it off. _Changed 2026-11-10_ from not enabled by default, once the conversions ship; a default token was rejected, since it would save an entry for every user.
 - **D5 ckDevnetSOL:** left out, since Chain Fusion only offers mainnet pairs.
 - **D6 Deposits from exchanges:** later, in their own spec.
 - **D7 Testing:** on the test environments and staging, with real SOL; local builds cannot convert (§4).
