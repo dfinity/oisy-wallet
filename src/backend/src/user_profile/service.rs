@@ -19,6 +19,7 @@ use shared::types::{
 
 use crate::{
     state::{read_state, State},
+    status,
     types::{AgreementHistoryMap, Candid, StoredPrincipal},
     user_profile::model::UserProfileModel,
 };
@@ -48,6 +49,7 @@ pub fn create_profile(
         let now = time();
         let default_profile = StoredUserProfile::from_timestamp(now);
         user_profile_model.store_new(principal, now, &default_profile);
+        status::signups::record(now);
         default_profile
     }
 }
