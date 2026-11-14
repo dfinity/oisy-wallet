@@ -38,6 +38,7 @@ use crate::{
 };
 
 pub(crate) mod memory;
+pub(crate) mod token_id_keys;
 
 pub(crate) struct State {
     pub(crate) config: ConfigCell,

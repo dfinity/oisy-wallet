@@ -887,7 +887,8 @@ Decided in PR 8b:
   the repay max at zero. Only NEAR Intents fails such a row, once its deposit expires
   (`isNearIntentsDepositExpired`). Settling the others safely needs a rule that proves a deposit
   abandoned without failing a slow one, for example its reservation expired and its txid in
-  neither a block nor the mempool, so it is a separate PR, 8d, which lands before PR 10.
+  neither a block nor the mempool, so it is a separate PR, 8d, which lands before PR 10. Done in 8d
+  (see Decided in 8d below).
 
 Decided in PR 8c:
 
@@ -917,6 +918,32 @@ Decided in PR 8c:
 - **Both BTC wizards** show `mapBtcBroadcastErrorToMessage`'s message ahead of "Transaction failed",
   and close after an unclear outcome instead of returning to a form that offers the full amount
   again.
+
+Decided in 8d (rows whose deposit never landed):
+
+- **A row fails once the network does not know its txid.** Bitcoin cannot prove that nothing was
+  broadcast, so the evidence is the txid in neither a block nor Blockstream's mempool: Esplora's
+  `tx/:txid` answers 404. Not `tx/:txid/status`, which answers `{ confirmed: false }` for a txid
+  nobody knows, as for one in the mempool (Copilot; checked against the live API).
+  `isBtcTransactionNeverLanded`, in the AUT services, gives the verdict for both pollers:
+  - only once the row has gone an hour without a write (`BTC_NEVER_LANDED_GRACE_MILLIS`). Not from
+    its creation: a Liquidium repay renews its row while its broadcast, a call with no deadline, is
+    pending (Copilot). Once the renewals stop, the backend frees the reservation within the hour
+    too, so its state has nothing more to tell;
+  - after two "not found" answers in a row, at most one every 5 minutes. A found transaction
+    restarts the run, and a failed request counts for nothing.
+  - A transaction waiting in a mempool is found, so its row keeps waiting however long it takes.
+    One evicted from Blockstream's mempool would fail too, and is unlikely ever to confirm.
+- **Chain Fusion:** an `'unseen'` mainnet deposit, after the minter and ledger checks, asks the
+  network. Never landed is the new `'neverLanded'` outcome, which fails the row.
+- **Liquidium:** a mainnet BTC supply or repay with a txid but no listed activity asks the network.
+  Failing the row releases a repay's hold on the repay max, since a terminal row no longer counts.
+  Not a borrow or withdraw: its txid is Liquidium's own payout, which Liquidium broadcasts and
+  settles (Copilot).
+- **Both** store `send.error.btc_transaction_never_landed` on the row. It says the transaction most
+  likely never went out, and to check the balance before trying again, since one evicted from a
+  mempool could still arrive (Copilot). Mainnet only: the API is Blockstream's mainnet one, and a
+  testnet row stays as before. The CSP already allows it.
 
 Decided in 8e (the limit messages):
 
@@ -1157,6 +1184,36 @@ Every PR is safe on its own.
     - the old UTXO loading in `AllUtxosLoader` and the pending loader;
     - the flag-off row creation in `onBroadcast`.
 12. Optional: `feat(backend,frontend): certified BTC balance from the backend` (`btc_get_balance`).
+    Decided in PR 12:
+    - **`btc_get_balance`** takes the network, `min_confirmations` and the delegation chain. It is an
+      update call, so the answer is certified, for registered users with a valid II delegation
+      chain. The backend derives the caller's P2WPKH address and pays `bitcoin_get_balance` itself
+      (100M attached on mainnet, about 10M charged). A read costs the backend about 54M in all,
+      the chain's ingress bytes included (measured in PocketIC), once the delegation check is paid
+      for.
+    - **Delegation check, paid once per session:** verifying the chain's canister signature costs
+      about 1.15B cycles, so checked on every read it made a read cost about 1.19B, 10 times the
+      `btc_caller_balance` it replaces. `require_ii_delegation` now remembers the chains each caller
+      passed with, by a SHA-256 of the chain and the II config, until the delegation expires.
+      The same caller sending the same chain skips the signature; any other chain is checked in
+      full. It keeps up to 4 chains per caller, one per live session, so a user signed in on two
+      devices does not make every read pay the full check; a fifth drops the one that expires
+      first. The cache is on the heap, holds at most 100 000 callers, and an upgrade clears it. Every
+      endpoint that checks the chain benefits, `allow_signing` included, so the read after sign-in
+      usually finds the chain already checked.
+    - **Rate limit:** 20 calls per caller per minute. The wallet reads the balance every 30 seconds,
+      for each Bitcoin network it shows, in each open tab. With its session's chain, one caller can
+      make the backend spend about 1.1B cycles a minute; one that brings a new chain on every call,
+      about 24B.
+    - **Errors:** `InternalError` when the address cannot be derived, and `BalanceUnavailable` when
+      the Bitcoin canister does not answer. The two are kept apart for a second reason too: with
+      the same three variants as `BtcGetPendingTransactionsError` and `BtcGetSpendableUtxosError`,
+      the release wasm folds the identical candid type functions together, and the extracted
+      `.did` names all three after one of them, renaming types the frontend imports.
+    - **Frontend:** behind `BTC_SEND_VIA_BACKEND_ENABLED`, the wallet scheduler's certified balance
+      read goes through the backend. The query read stays on the Bitcoin canister, and with the flag
+      off `btc_caller_balance` stays. A rate limit or any other error throws, so a balance that
+      could not be read is never taken as zero.
 
 ---
 
@@ -1324,6 +1381,10 @@ Every PR is safe on its own.
      `BtcToCkBtc` row;
    - Liquidium (`src/frontend/src/lib/services/liquidium-active-tx.services.ts`). It matches rows to
      Liquidium activity by txid and today drops only repay rows that never got one.
+
+   **Settled in 8d:** both now fail a mainnet BTC row whose txid the network does not know an hour
+   on (see [Decided in 8d](#frontend-sendbtc)).
+
 6. **Relay fee floor.** Recent Bitcoin Core releases lowered the default `-minrelaytxfee` below
    1 sat/vB. Confirm the current default, and whether the backend's floor (step 8) should stay at
    1 sat/vB, matching the frontend's `MIN_FEE_RATE`, or follow it down. Keep the two in step
@@ -1333,7 +1394,8 @@ Every PR is safe on its own.
 
 1. **Caps.** Proposed `MAX_BROADCAST_TX_OUTPUTS = 4` (LI.FI's layout is deposit, `OP_RETURN`,
    change, fee), `MAX_BROADCAST_TX_INPUTS = 100` (the 2.9T allowance already limits a send to about
-   75 signed inputs), `MAX_BROADCAST_TX_BYTES = 16_000`.
+   75 signed inputs), `MAX_BROADCAST_TX_BYTES = 16_000`. **Decided:** as proposed
+   (`src/shared/src/types/bitcoin.rs`).
 2. **Maximum fee.** The backend could also refuse an absurd fee (e.g. above 10% of the sent value or
    a fixed sat/vB ceiling) to protect users from a frontend bug or a hostile PSBT. Proposed: not in
    v1; the frontend already shows the fee for approval.
@@ -1347,7 +1409,8 @@ Every PR is safe on its own.
 6. **Broadcast state storage and attempt cap.** Proposed: heap memory and
    `MAX_BROADCAST_ATTEMPTS = 3`. The alternative is a state field on `StoredPendingTransaction`. It
    survives upgrades, but it changes stable state, a candid-compatible change only if the field is
-   `Option`.
+   `Option`. **Decided:** as proposed (`BtcBroadcastStates` in heap memory,
+   `MAX_BROADCAST_ATTEMPTS = 3`).
 
 ---
 

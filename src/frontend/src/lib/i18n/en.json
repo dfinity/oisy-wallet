@@ -1155,6 +1155,7 @@
 			"btc_transaction_unconfirmed": "We could not confirm whether the transaction reached the Bitcoin network. It may still go through, so check your activity before you send it again.",
 			"btc_send_rate_limited": "You have tried to send Bitcoin several times in a short while, so this transaction was not sent. Wait about $duration, then try again.",
 			"btc_signing_allowance_spent": "The signing allowance OISY grants when you sign in is used up, so this transaction was not sent. Sign out and back in to renew it, then try again. It renews only a few times an hour, so if this message comes back, wait up to an hour before you sign in again.",
+			"btc_transaction_never_landed": "The Bitcoin network does not know this transaction, so it most likely never went out. It could still arrive later, so check your balance before you try again.",
 			"solana_transaction_expired": "Your transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try again.",
 			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly.",
 			"solana_insufficient_funds": "Your token balance is not sufficient to complete this transaction. Your balance may have changed since it was last displayed.",

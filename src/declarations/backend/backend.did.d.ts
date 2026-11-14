@@ -668,6 +668,59 @@ export type BtcBroadcastTransactionResult =
 			 */
 			Err: BtcBroadcastTransactionError;
 	  };
+export type BtcGetBalanceError =
+	| {
+			/**
+			 * The Bitcoin canister did not answer, which a later call may get past.
+			 */
+			BalanceUnavailable: { msg: string };
+	  }
+	| {
+			/**
+			 * The provided II delegation chain is missing or failed verification.
+			 */
+			InvalidDelegationChain: { msg: string };
+	  }
+	| {
+			/**
+			 * The caller has exceeded the call rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The caller's address could not be derived.
+			 */
+			InternalError: { msg: string };
+	  };
+export interface BtcGetBalanceRequest {
+	ii_delegation_chain: [] | [IIDelegationChain];
+	network: Network;
+	/**
+	 * Counts only the outputs with at least this many confirmations. `None` counts every output
+	 * the Bitcoin canister knows, which is mined ones only.
+	 */
+	min_confirmations: [] | [number];
+}
+export interface BtcGetBalanceResponse {
+	/**
+	 * The balance of the caller's P2WPKH address, in satoshis.
+	 */
+	balance: bigint;
+}
+export type BtcGetBalanceResult =
+	| {
+			/**
+			 * The balance was retrieved successfully.
+			 */
+			Ok: BtcGetBalanceResponse;
+	  }
+	| {
+			/**
+			 * The balance was not retrieved due to an error.
+			 */
+			Err: BtcGetBalanceError;
+	  };
 export type BtcGetFeePercentilesError = {
 	InternalError: { msg: string };
 };
@@ -2962,6 +3015,22 @@ export interface _SERVICE {
 		[BtcBroadcastTransactionRequest],
 		BtcBroadcastTransactionResult
 	>;
+	/**
+	 * Returns the balance of the caller's P2WPKH address, counting only the outputs with at least
+	 * `min_confirmations` confirmations.
+	 *
+	 * An update call, so the answer is certified. The backend pays for the Bitcoin canister call from
+	 * its own cycles. It used to pay the chain fusion signer's `btc_caller_balance` instead, from its
+	 * cycles ledger account and against the approval it grants each caller for signing, so every read
+	 * used up part of what the caller could sign.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `BtcGetBalanceError`.
+	 */
+	btc_get_balance: ActorMethod<[BtcGetBalanceRequest], BtcGetBalanceResult>;
 	/**
 	 * Retrieves the current fee percentiles for Bitcoin transactions from the cache
 	 * for the specified network. Fee percentiles are measured in millisatoshi per byte

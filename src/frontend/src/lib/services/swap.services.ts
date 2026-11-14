@@ -26,6 +26,7 @@ import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isTokenErc } from '$eth/utils/erc.utils';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken, isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
@@ -80,6 +81,7 @@ import {
 	deleteUnbroadcastActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
+import { exchangeRateERC20ToUsd, exchangeRateSPLToUsd } from '$lib/services/exchange.services';
 import { submitNearIntentsDepositTx } from '$lib/services/near-intents.services';
 import {
 	executeOneSecEvmToIcpBridge,
@@ -88,11 +90,13 @@ import {
 import { retryWithDelay } from '$lib/services/rest.services';
 import { throwSwapError } from '$lib/services/swap-errors.services';
 import { autoLoadSingleToken } from '$lib/services/token.services';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import { SwapAmountTooLowError, SwapViaIntermediateTokenError } from '$lib/types/errors';
 import {
@@ -127,9 +131,11 @@ import {
 	type SwapVeloraMarketParams
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { VELORA_EXTERNAL_REF_KEYS, type VeloraExternalRefKey } from '$lib/types/velora-swap';
 import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { buildErc20PriceParams } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import {
@@ -398,6 +404,39 @@ export const loadKongSwapTokens = async ({
 	}, {});
 
 	kongSwapTokensStore.setKongSwapTokens(supportedTokens);
+};
+
+/**
+ * Prices the ERC-20 and SPL tokens the swap pickers list although they are not enabled: the
+ * exchange worker prices enabled tokens only. `loadDisabledIcrcTokensExchanges` does the same for
+ * ICRC tokens.
+ */
+export const loadDisabledErc20AndSplTokensExchanges = async ({
+	tokens
+}: {
+	tokens: TokenToggleable<Token>[];
+}): Promise<void> => {
+	const disabledTokens: Token[] = tokens.filter(({ enabled }) => !enabled);
+
+	const erc20PriceParams = buildErc20PriceParams(
+		disabledTokens.filter(isTokenErc20).map(({ address, network: { exchange, chainId } }) => ({
+			address,
+			coingeckoId: exchange?.coingeckoId ?? 'ethereum',
+			chainId
+		}))
+	);
+
+	const results = await Promise.allSettled([
+		...erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params)),
+		exchangeRateSPLToUsd(disabledTokens.filter(isTokenSpl).map(({ address }) => address))
+	]);
+
+	exchangeStore.set(
+		results.reduce<CoingeckoSimpleTokenPriceResponse[]>(
+			(acc, result) => (result.status === 'fulfilled' ? [...acc, result.value] : acc),
+			[]
+		)
+	);
 };
 
 type SwapRecipientResolution =

@@ -152,13 +152,14 @@ export const initModalTokensListContext = (
 				...state,
 				filterCategoryTag: categoryTag
 			})),
+		// `sortByBalance` is kept: it is how the list's owner wants it sorted, not a filter the person
+		// picks, and a context that outlives its modal would otherwise go back to the balance sort.
 		resetFilters: () => {
 			update((state) => ({
 				...state,
 				filterQuery: undefined,
 				filterNetwork: undefined,
 				filterZeroBalance: undefined,
-				sortByBalance: undefined,
 				filterNetworksIds: undefined,
 				filterNfts: undefined,
 				filterCategoryTag: undefined

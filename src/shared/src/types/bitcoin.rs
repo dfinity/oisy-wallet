@@ -238,3 +238,30 @@ pub enum BtcGetSpendableUtxosError {
     /// The provided II delegation chain is missing or failed verification.
     InvalidDelegationChain { msg: String },
 }
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct BtcGetBalanceRequest {
+    pub network: BitcoinNetwork,
+    /// Counts only the outputs with at least this many confirmations. `None` counts every output
+    /// the Bitcoin canister knows, which is mined ones only.
+    pub min_confirmations: Option<u32>,
+    pub ii_delegation_chain: Option<IIDelegationChain>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct BtcGetBalanceResponse {
+    /// The balance of the caller's P2WPKH address, in satoshis.
+    pub balance: u64,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcGetBalanceError {
+    /// The caller's address could not be derived.
+    InternalError { msg: String },
+    /// The Bitcoin canister did not answer, which a later call may get past.
+    BalanceUnavailable { msg: String },
+    /// The caller has exceeded the call rate limit.
+    RateLimited(RateLimitError),
+    /// The provided II delegation chain is missing or failed verification.
+    InvalidDelegationChain { msg: String },
+}

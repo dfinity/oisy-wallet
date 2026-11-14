@@ -35,8 +35,12 @@ import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcCkWithdrawalResult } from '$icp/types/ic-send';
 import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
-import { ZERO } from '$lib/constants/app.constants';
-import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import {
+	NANO_SECONDS_IN_MILLISECOND,
+	NANO_SECONDS_IN_MINUTE,
+	ZERO
+} from '$lib/constants/app.constants';
+import { ProgressStepsSendSol, ProgressStepsSwap } from '$lib/enums/progress-steps';
 import {
 	createActiveUserTransaction,
 	deleteUnbroadcastActiveUserTransaction
@@ -64,7 +68,7 @@ import {
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { getSolBalance } from '$sol/api/solana.api';
+import { getSolBalance, isBlockhashValid } from '$sol/api/solana.api';
 import { sendSol } from '$sol/services/sol-send.services';
 import { SolanaNetworks } from '$sol/types/network';
 import { mockChainFusionActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
@@ -79,10 +83,16 @@ import {
 	mockValidIcToken
 } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockPreflightContext } from '$tests/mocks/sol-error.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { nonNullish, toNullable } from '@dfinity/utils';
 import { AnonymousIdentity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
+import {
+	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NODE_UNHEALTHY,
+	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
+	SolanaError
+} from '@solana/kit';
 
 let mockEnabled = true;
 
@@ -110,7 +120,8 @@ vi.mock('$icp/services/cksol-deposit.services', () => ({
 }));
 
 vi.mock('$sol/api/solana.api', () => ({
-	getSolBalance: vi.fn()
+	getSolBalance: vi.fn(),
+	isBlockhashValid: vi.fn()
 }));
 
 vi.mock('$sol/services/sol-send.services', () => ({
@@ -1364,10 +1375,11 @@ describe('chain-fusion-swap.services', () => {
 
 		it('should not quote without a minter', async () => {
 			const onProviderParticipating = vi.fn();
+			const sourceToken: IcCkToken = { ...ckSolSource, minterCanisterId: undefined };
 
 			await expect(
 				icpQuote({
-					sourceToken: { ...ckSolSource, minterCanisterId: undefined } as unknown as Token,
+					sourceToken,
 					onProviderParticipating
 				})
 			).resolves.toBeUndefined();
@@ -1878,20 +1890,39 @@ describe('chain-fusion-swap.services', () => {
 				solDeposit: { address: DEPOSIT_ADDRESS, automaticDepositFee: AUTOMATIC_DEPOSIT_FEE }
 			};
 
+			// The cases below are minutes apart, so the milliseconds the tests take never matter.
+			const NOW_NANOS = BigInt(Date.now()) * NANO_SECONDS_IN_MILLISECOND;
+
+			const inMinutes = (minutes: bigint): bigint => NOW_NANOS + minutes * NANO_SECONDS_IN_MINUTE;
+
+			// A fresh registration: the window ends in 24 hours, and the first scan is a minute away.
 			const watched = {
 				address: DEPOSIT_ADDRESS,
 				minimum_deposit_amount: MINIMUM_DEPOSIT_AMOUNT,
 				automatic_deposit_fee: AUTOMATIC_DEPOSIT_FEE,
 				status: {
 					Watching: {
-						valid_until: 2n,
+						valid_until: inMinutes(24n * 60n),
 						scan_count: 0,
 						last_scanned_at: [] as [],
-						next_scan_at: [1n] as [bigint]
+						next_scan_at: [inMinutes(1n)] as [bigint]
 					}
 				},
 				latest_deposit_id: [41n] as [bigint]
 			};
+
+			// A `Watching` answer of an earlier registration, whose window ends, and whose next scan is
+			// due, the given minutes from now.
+			const watchingWindow = ({ endsIn, nextScanIn }: { endsIn: bigint; nextScanIn: bigint }) => ({
+				...watched,
+				status: {
+					Watching: {
+						...watched.status.Watching,
+						valid_until: inMinutes(endsIn),
+						next_scan_at: [inMinutes(nextScanIn)] as [bigint]
+					}
+				}
+			});
 
 			const solSwap = () =>
 				fetchChainFusionSolSwap({
@@ -1907,11 +1938,43 @@ describe('chain-fusion-swap.services', () => {
 					enableDestinationToken
 				});
 
+			const BLOCKHASH = 'EkSnNWid2cvwEVnVx9aBqawnmiCNiDgp3gUdkDPTKN1N';
+			const BLOCKHASH_SLOT = 345_000_000n;
+
+			const broadcastSol = vi.fn();
+
+			// `sendSol` as it runs: it signs, hands the transfer to `beforeBroadcast`, broadcasts it,
+			// then waits for its confirmation.
+			const mockTransfer = ({
+				broadcastError,
+				confirmError
+			}: { broadcastError?: Error; confirmError?: Error } = {}) =>
+				vi.mocked(sendSol).mockImplementation(async ({ beforeBroadcast, progress: step }) => {
+					const signature = TRANSFER_SIGNATURE as Awaited<ReturnType<typeof sendSol>>;
+
+					await beforeBroadcast?.({ signature, blockhash: BLOCKHASH });
+
+					step?.(ProgressStepsSendSol.SEND);
+					broadcastSol();
+
+					if (nonNullish(broadcastError)) {
+						throw broadcastError;
+					}
+
+					step?.(ProgressStepsSendSol.CONFIRM);
+
+					if (nonNullish(confirmError)) {
+						throw confirmError;
+					}
+
+					return signature;
+				});
+
 			beforeEach(() => {
 				vi.mocked(watchDepositAddress).mockResolvedValue(watched);
-				vi.mocked(sendSol).mockResolvedValue(
-					TRANSFER_SIGNATURE as Awaited<ReturnType<typeof sendSol>>
-				);
+				vi.mocked(isBlockhashValid).mockResolvedValue({ slot: BLOCKHASH_SLOT, valid: true });
+				vi.mocked(createActiveUserTransaction).mockResolvedValue(undefined);
+				mockTransfer();
 				enableDestinationToken.mockResolvedValue(undefined);
 			});
 
@@ -1929,11 +1992,40 @@ describe('chain-fusion-swap.services', () => {
 					amount: SOL_AMOUNT,
 					prioritizationFee: ZERO,
 					destination: DEPOSIT_ADDRESS,
-					source: mockSolAddress
+					source: mockSolAddress,
+					progress: expect.any(Function),
+					beforeBroadcast: expect.any(Function)
 				});
 				expect(vi.mocked(watchDepositAddress).mock.invocationCallOrder[0]).toBeLessThan(
 					vi.mocked(sendSol).mock.invocationCallOrder[0]
 				);
+			});
+
+			// Acceptance criterion 6.
+			it('should open the row before the transfer is broadcast', async () => {
+				await solSwap();
+
+				expect(isBlockhashValid).toHaveBeenCalledExactlyOnceWith({
+					blockhash: BLOCKHASH,
+					network: SolanaNetworks.mainnet
+				});
+				expect(vi.mocked(createActiveUserTransaction).mock.invocationCallOrder[0]).toBeLessThan(
+					broadcastSol.mock.invocationCallOrder[0]
+				);
+				expect(refsOfLastCreate()).toMatchObject({
+					chain_fusion_sol_tx: TRANSFER_SIGNATURE,
+					chain_fusion_sol_blockhash: BLOCKHASH,
+					chain_fusion_sol_blockhash_slot: `${BLOCKHASH_SLOT}`
+				});
+			});
+
+			it('should leave out the blockhash slot when the node does not know the blockhash yet', async () => {
+				vi.mocked(isBlockhashValid).mockResolvedValue({ slot: BLOCKHASH_SLOT, valid: false });
+
+				await solSwap();
+
+				expect(refsOfLastCreate()).toHaveProperty('chain_fusion_sol_blockhash', BLOCKHASH);
+				expect(refsOfLastCreate()).not.toHaveProperty('chain_fusion_sol_blockhash_slot');
 			});
 
 			// Acceptance criterion 6.
@@ -1990,6 +2082,17 @@ describe('chain-fusion-swap.services', () => {
 			});
 
 			it.each([
+				{ name: 'its last scan comes after the transfer can land', endsIn: 36n, nextScanIn: 6n },
+				{ name: 'a later scan follows an overdue one', endsIn: 120n, nextScanIn: -1n }
+			])('should send the SOL when the window $name', async ({ endsIn, nextScanIn }) => {
+				vi.mocked(watchDepositAddress).mockResolvedValue(watchingWindow({ endsIn, nextScanIn }));
+
+				await solSwap();
+
+				expect(sendSol).toHaveBeenCalledOnce();
+			});
+
+			it.each([
 				{
 					name: 'a deposit is already in flight',
 					answer: { ...watched, status: { Detected: { deposit_id: 41n } } },
@@ -2009,6 +2112,24 @@ describe('chain-fusion-swap.services', () => {
 					name: 'the fee rose above the quoted one',
 					answer: { ...watched, automatic_deposit_fee: AUTOMATIC_DEPOSIT_FEE + 1n },
 					reason: 'changed'
+				},
+				{
+					name: 'no scan is due before the window ends',
+					answer: {
+						...watched,
+						status: { Watching: { ...watched.status.Watching, next_scan_at: [] as [] } }
+					},
+					reason: 'unavailable'
+				},
+				{
+					name: 'the last scan of the window is due before the transfer can land',
+					answer: watchingWindow({ endsIn: 34n, nextScanIn: 4n }),
+					reason: 'unavailable'
+				},
+				{
+					name: 'the last scan of the window is overdue',
+					answer: watchingWindow({ endsIn: 29n, nextScanIn: -1n }),
+					reason: 'unavailable'
 				}
 			])('should send no SOL when $name', async ({ answer, reason }) => {
 				vi.mocked(watchDepositAddress).mockResolvedValue(answer);
@@ -2051,13 +2172,92 @@ describe('chain-fusion-swap.services', () => {
 				expect(createActiveUserTransaction).not.toHaveBeenCalled();
 			});
 
-			it('should open no row when the transfer fails', async () => {
-				vi.mocked(sendSol).mockRejectedValue(new Error('blockhash expired'));
+			it('should open no row when the transfer fails before it is signed', async () => {
+				vi.mocked(sendSol).mockRejectedValue(new Error('signer unavailable'));
 
-				await expect(solSwap()).rejects.toThrow('blockhash expired');
+				await expect(solSwap()).rejects.toThrow('signer unavailable');
 
 				expect(createActiveUserTransaction).not.toHaveBeenCalled();
 				expect(enableDestinationToken).not.toHaveBeenCalled();
+			});
+
+			it('should send no SOL when another tab or device has a conversion open', async () => {
+				const alreadyInFlight = { AlreadyInFlight: null };
+				vi.mocked(createActiveUserTransaction).mockRejectedValue(alreadyInFlight);
+
+				const promise = solSwap();
+
+				await expect(promise).rejects.toBeInstanceOf(ChainFusionSolDepositRefusedError);
+				await expect(promise).rejects.toMatchObject({ reason: 'inFlight', cause: alreadyInFlight });
+
+				expect(broadcastSol).not.toHaveBeenCalled();
+				expect(enableDestinationToken).not.toHaveBeenCalled();
+			});
+
+			it('should send no SOL when the row cannot be written', async () => {
+				vi.mocked(createActiveUserTransaction).mockRejectedValue(new Error('backend down'));
+
+				await expect(solSwap()).rejects.toThrow('backend down');
+
+				expect(broadcastSol).not.toHaveBeenCalled();
+			});
+
+			it('should send no SOL when the blockhash cannot be read', async () => {
+				vi.mocked(isBlockhashValid).mockRejectedValue(new Error('rpc down'));
+
+				await expect(solSwap()).rejects.toThrow('rpc down');
+
+				expect(createActiveUserTransaction).not.toHaveBeenCalled();
+				expect(broadcastSol).not.toHaveBeenCalled();
+			});
+
+			it('should delete the row when the node refuses the transfer', async () => {
+				const refusal = new SolanaError(
+					SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE,
+					mockPreflightContext()
+				);
+				mockTransfer({ broadcastError: refusal });
+
+				await expect(solSwap()).rejects.toBe(refusal);
+
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: SWAP_ID
+				});
+				expect(enableDestinationToken).not.toHaveBeenCalled();
+			});
+
+			it('should go on as sent, row kept and ckSOL enabled, when the broadcast may have gone out', async () => {
+				const consoleErrorSpy = vi.spyOn(console, 'error');
+				const transportError = new Error('fetch failed');
+				mockTransfer({ broadcastError: transportError });
+
+				await solSwap();
+
+				expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+				expect(enableDestinationToken).toHaveBeenCalledOnce();
+				expect(consoleErrorSpy).toHaveBeenCalledOnce();
+				expect(progress.mock.calls.map(([step]) => step)).toStrictEqual([
+					ProgressStepsSwap.SIGN_TRANSFER,
+					ProgressStepsSwap.SWAP,
+					ProgressStepsSwap.UPDATE_UI
+				]);
+			});
+
+			it('should go on as sent, row kept and ckSOL enabled, when confirming the broadcast transfer fails', async () => {
+				const consoleErrorSpy = vi.spyOn(console, 'error');
+				// A refusal answered while confirming comes after the broadcast.
+				const nodeUnhealthy = new SolanaError(SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NODE_UNHEALTHY, {
+					numSlotsBehind: 42
+				});
+				mockTransfer({ confirmError: nodeUnhealthy });
+
+				await solSwap();
+
+				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+				expect(enableDestinationToken).toHaveBeenCalledOnce();
+				expect(consoleErrorSpy).toHaveBeenCalledOnce();
 			});
 		});
 	});

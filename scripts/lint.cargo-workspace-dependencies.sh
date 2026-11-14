@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Without these, a missing or failing yq gives an empty result, which reads as a pass.
+set -euo pipefail
+
 echo "Checks whether all Cargo dependencies are taken from the workspace"
 
 non_workspace_dependencies() {

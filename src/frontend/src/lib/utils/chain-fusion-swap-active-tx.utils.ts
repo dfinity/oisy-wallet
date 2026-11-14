@@ -29,6 +29,7 @@ import type { Token } from '$lib/types/token';
 import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
+import type { SolSourceTxOutcome } from '$sol/utils/sol-source-tx.utils';
 import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { encodePrincipalToEthAddress, type CkEthMinterDid } from '@icp-sdk/canisters/cketh';
@@ -396,6 +397,29 @@ export const toChainFusionSolMintStatus = (
 export const chainFusionSolMintStatusError = (status: DepositSolStatus): string | undefined =>
 	'Quarantined' in status ? get(i18n).swap.error.cksol_deposit_quarantined : undefined;
 
+/**
+ * The error a ckSOL mint row fails with when its transfer moved no SOL: the transfer can no longer
+ * land, or it landed and failed. `undefined` while it may still land, or once it has.
+ */
+export const chainFusionSolTransferError = (
+	outcome: SolSourceTxOutcome | undefined
+): string | undefined => {
+	if (outcome === 'expired') {
+		return get(i18n).swap.error.swap_expired;
+	}
+
+	if (outcome === 'reverted') {
+		return get(i18n).swap.error.failed_unexpectedly;
+	}
+};
+
+/**
+ * The slot a ckSOL mint row stores where its transfer's blockhash was valid. `undefined` when the row
+ * has none or it is not a `u64`, which the node would refuse as `minContextSlot` on every poll.
+ */
+export const toCkSolBlockhashSlot = (value: string | undefined): bigint | undefined =>
+	nonNullish(value) && /^\d{1,19}$/.test(value) ? BigInt(value) : undefined;
+
 // What the minter credited, formatted in ckSOL, whose unit is one lamport like SOL's.
 export const toChainFusionSolMintLearnedRefs = (
 	status: DepositSolStatus
@@ -428,18 +452,21 @@ export const newerCkSolDepositId = ({
  *
  * `unseen` → `awaitingConfirmations` → `awaitingMint` are the in-flight shapes,
  * in the order a deposit passes through them; `minted` and `rejected` are the
- * verdict, and only the minter itself can produce either.
+ * minter's verdict, and only the minter itself can produce either. `neverLanded`
+ * is the one outcome the Bitcoin network decides, not the minter: an `unseen`
+ * deposit that Blockstream does not know either, so it most likely never went out.
  */
 export type ChainFusionBtcMintOutcome =
-	'unseen' | 'awaitingConfirmations' | 'awaitingMint' | 'minted' | 'rejected';
+	'unseen' | 'neverLanded' | 'awaitingConfirmations' | 'awaitingMint' | 'minted' | 'rejected';
 
 /**
  * Maps a ckBTC deposit's observed state to the AUT status enum.
  *
  * Unlike the Ethereum family's mints, this one is not observed from the deposit
  * side: the minter is the only party that can turn a confirmed UTXO into ckBTC,
- * so the poller's job is to make it, and the verdict is whatever it reports back
- * — see `resolveChainFusionBtcMintOutcome`.
+ * so the poller's job is to make it, and the verdict is whatever it reports back.
+ * The one exception is `neverLanded`, which fails the row on the network's word
+ * alone — see `resolveChainFusionBtcMintOutcome`.
  */
 export const chainFusionBtcMintOutcomeToStatus = (
 	outcome: ChainFusionBtcMintOutcome
@@ -448,6 +475,7 @@ export const chainFusionBtcMintOutcomeToStatus = (
 		case 'minted':
 			return { Succeeded: null };
 		case 'rejected':
+		case 'neverLanded':
 			return { Failed: null };
 		case 'unseen':
 		case 'awaitingConfirmations':
@@ -459,7 +487,11 @@ export const chainFusionBtcMintOutcomeToStatus = (
 export const chainFusionBtcMintOutcomeError = (
 	outcome: ChainFusionBtcMintOutcome
 ): string | undefined =>
-	outcome === 'rejected' ? get(i18n).swap.error.failed_unexpectedly : undefined;
+	outcome === 'rejected'
+		? get(i18n).swap.error.failed_unexpectedly
+		: outcome === 'neverLanded'
+			? get(i18n).send.error.btc_transaction_never_landed
+			: undefined;
 
 /**
  * Reads the verdict for one deposit out of an `update_balance` response, which

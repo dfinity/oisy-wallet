@@ -185,6 +185,22 @@ export const idlFactory = ({ IDL }) => {
 		Ok: BtcBroadcastTransactionResponse,
 		Err: BtcBroadcastTransactionError
 	});
+	const BtcGetBalanceRequest = IDL.Record({
+		ii_delegation_chain: IDL.Opt(IIDelegationChain),
+		network: Network,
+		min_confirmations: IDL.Opt(IDL.Nat32)
+	});
+	const BtcGetBalanceResponse = IDL.Record({ balance: IDL.Nat64 });
+	const BtcGetBalanceError = IDL.Variant({
+		BalanceUnavailable: IDL.Record({ msg: IDL.Text }),
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
+		RateLimited: RateLimitError,
+		InternalError: IDL.Record({ msg: IDL.Text })
+	});
+	const BtcGetBalanceResult = IDL.Variant({
+		Ok: BtcGetBalanceResponse,
+		Err: BtcGetBalanceError
+	});
 	const BtcGetFeePercentilesRequest = IDL.Record({ network: Network });
 	const BtcGetFeePercentilesResponse = IDL.Record({
 		fee_percentiles: IDL.Vec(IDL.Nat64)
@@ -1107,6 +1123,7 @@ export const idlFactory = ({ IDL }) => {
 			[BtcBroadcastTransactionResult],
 			[]
 		),
+		btc_get_balance: IDL.Func([BtcGetBalanceRequest], [BtcGetBalanceResult], []),
 		btc_get_current_fee_percentiles: IDL.Func(
 			[BtcGetFeePercentilesRequest],
 			[BtcGetFeePercentilesResult],

@@ -16,6 +16,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
+	import { SWAP_DESTINATION_TOKEN_BALANCE } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -29,7 +30,12 @@
 	import { formatToken, formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { getSwapSlippageInvalidValue, getSwapSlippageStatus } from '$lib/utils/swap.utils';
+	import {
+		canPayWithToken,
+		getSwapSlippageInvalidValue,
+		getSwapSlippageStatus
+	} from '$lib/utils/swap.utils';
+	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
@@ -106,6 +112,15 @@
 		$quoteActivity?.pending === true && !$quoteActivity.background
 	);
 
+	// Nothing loads the balance of an inactive token, except Swap for ICRC tokens: showing 0 would be
+	// wrong for a token the user may hold.
+	let destinationBalanceUnknown = $derived(
+		nonNullish($destinationToken) &&
+			isTokenToggleable($destinationToken) &&
+			!$destinationToken.enabled &&
+			isNullish($destinationTokenBalance)
+	);
+
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
@@ -165,7 +180,13 @@
 		const condition2 = !SUPPORTED_CROSS_SWAP_NETWORKS[$destinationToken.network.id]?.includes(
 			$sourceToken.network.id
 		);
-		return condition1 || condition2;
+		// A switch makes the receive token the pay token, so it follows the pay list: a token that
+		// cannot be picked to pay with there cannot become the pay token here either.
+		const condition3 = !canPayWithToken({
+			...$destinationToken,
+			balance: $destinationTokenBalance
+		});
+		return condition1 || condition2 || condition3;
 	});
 
 	let maxSlippageInvalidValue = $derived(getSwapSlippageInvalidValue($sourceToken?.network.id));
@@ -325,8 +346,12 @@
 					{/snippet}
 
 					{#snippet balance()}
-						{#if nonNullish($destinationToken)}
-							<TokenInputBalance balance={$destinationTokenBalance} token={$destinationToken} />
+						{#if nonNullish($destinationToken) && !destinationBalanceUnknown}
+							<TokenInputBalance
+								balance={$destinationTokenBalance}
+								testId={SWAP_DESTINATION_TOKEN_BALANCE}
+								token={$destinationToken}
+							/>
 						{/if}
 					{/snippet}
 				</TokenInput>

@@ -2,9 +2,10 @@ use std::{cell::RefCell, collections::HashMap};
 
 use ic_cdk::call::{CallResult, Error as CallError, RejectCode};
 use ic_cdk_bitcoin_canister::{
-    bitcoin_get_current_fee_percentiles, bitcoin_get_utxos, bitcoin_send_transaction,
-    GetCurrentFeePercentilesRequest, GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte,
-    Network as BitcoinNetwork, Page, SendTransactionRequest, Utxo, UtxosFilterInRequest,
+    bitcoin_get_balance, bitcoin_get_current_fee_percentiles, bitcoin_get_utxos,
+    bitcoin_send_transaction, GetBalanceRequest, GetCurrentFeePercentilesRequest, GetUtxosRequest,
+    GetUtxosResponse, MillisatoshiPerByte, Network as BitcoinNetwork, Page, Satoshi,
+    SendTransactionRequest, Utxo, UtxosFilterInRequest,
 };
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::bitcoin::{
@@ -48,6 +49,25 @@ async fn get_utxos(
     .await
     .map_err(|err| err.to_string())
 }
+/// Returns the balance of the given bitcoin address, counting only the outputs with at least
+/// `min_confirmations` confirmations.
+///
+/// NOTE: Relies on the `bitcoin_get_balance` endpoint.
+/// See [IC Interface](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_balance)
+pub async fn get_balance(
+    network: BitcoinNetwork,
+    address: String,
+    min_confirmations: Option<u32>,
+) -> Result<Satoshi, String> {
+    bitcoin_get_balance(&GetBalanceRequest {
+        address,
+        network: network.into(),
+        min_confirmations,
+    })
+    .await
+    .map_err(|err| err.to_string())
+}
+
 /// Returns all the UTXOs of a specific address.
 /// API interface returns a paginated view of the utxos but we need to get them all.
 pub async fn get_all_utxos(

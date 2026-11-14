@@ -427,6 +427,33 @@ type BtcBroadcastTransactionResult = variant {
 	// See the error for whether the transaction may have been broadcast.
 	Err : BtcBroadcastTransactionError
 };
+type BtcGetBalanceError = variant {
+	// The Bitcoin canister did not answer, which a later call may get past.
+	BalanceUnavailable : record { msg : text };
+	// The provided II delegation chain is missing or failed verification.
+	InvalidDelegationChain : record { msg : text };
+	// The caller has exceeded the call rate limit.
+	RateLimited : RateLimitError;
+	// The caller's address could not be derived.
+	InternalError : record { msg : text }
+};
+type BtcGetBalanceRequest = record {
+	ii_delegation_chain : opt IIDelegationChain;
+	network : Network;
+	// Counts only the outputs with at least this many confirmations. `None` counts every output
+	// the Bitcoin canister knows, which is mined ones only.
+	min_confirmations : opt nat32
+};
+type BtcGetBalanceResponse = record {
+	// The balance of the caller's P2WPKH address, in satoshis.
+	balance : nat64
+};
+type BtcGetBalanceResult = variant {
+	// The balance was retrieved successfully.
+	Ok : BtcGetBalanceResponse;
+	// The balance was not retrieved due to an error.
+	Err : BtcGetBalanceError
+};
 type BtcGetFeePercentilesError = variant {
 	InternalError : record { msg : text }
 };
@@ -1878,6 +1905,20 @@ service : (Arg) -> {
 	btc_broadcast_transaction : (BtcBroadcastTransactionRequest) -> (
 		BtcBroadcastTransactionResult
 	);
+	// Returns the balance of the caller's P2WPKH address, counting only the outputs with at least
+	// `min_confirmations` confirmations.
+	//
+	// An update call, so the answer is certified. The backend pays for the Bitcoin canister call from
+	// its own cycles. It used to pay the chain fusion signer's `btc_caller_balance` instead, from its
+	// cycles ledger account and against the approval it grants each caller for signing, so every read
+	// used up part of what the caller could sign.
+	//
+	// Requires a valid II delegation chain to verify the caller authenticated
+	// through Internet Identity. Controllers bypass this check.
+	//
+	// # Errors
+	// Errors are enumerated by: `BtcGetBalanceError`.
+	btc_get_balance : (BtcGetBalanceRequest) -> (BtcGetBalanceResult);
 	// Retrieves the current fee percentiles for Bitcoin transactions from the cache
 	// for the specified network. Fee percentiles are measured in millisatoshi per byte
 	// and are periodically updated in the background.

@@ -38,7 +38,9 @@ import { minterInfo as ckSolMinterInfo, watchDepositAddress } from '$icp/api/cks
 import { CkSolWatchDepositAddressError } from '$icp/canisters/cksol-minter.errors';
 import {
 	CKSOL_DEPOSIT_ADDRESS_RENT,
-	CKSOL_DEPOSIT_SWEEP_FEE
+	CKSOL_DEPOSIT_SWEEP_FEE,
+	CKSOL_LAST_SCAN_BEFORE_WINDOW_END_NANOS,
+	CKSOL_TRANSFER_LANDING_NANOS
 } from '$icp/constants/cksol.constants';
 import { icrcTokens } from '$icp/derived/icrc.derived';
 import { loadCkSolDepositAddress } from '$icp/services/cksol-deposit.services';
@@ -53,12 +55,13 @@ import {
 	isTokenCkEthLedger,
 	isTokenCkSolLedger
 } from '$icp/utils/ic-send.utils';
-import { ZERO } from '$lib/constants/app.constants';
+import { NANO_SECONDS_IN_MILLISECOND, ZERO } from '$lib/constants/app.constants';
 import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
 import { authIdentity } from '$lib/derived/auth.derived';
 import {
 	ProgressStepsSend,
 	ProgressStepsSendIc,
+	ProgressStepsSendSol,
 	ProgressStepsSwap
 } from '$lib/enums/progress-steps';
 import {
@@ -85,6 +88,7 @@ import {
 	type SwapQuoteObserver
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import { isActiveUserTransactionError } from '$lib/utils/active-user-transactions.utils';
 import {
 	hasChainFusionSolMintInFlight,
 	toChainFusionData,
@@ -96,10 +100,11 @@ import { consoleError } from '$lib/utils/console.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { parseToken } from '$lib/utils/parse.utils';
-import { getSolBalance } from '$sol/api/solana.api';
+import { getSolBalance, isBlockhashValid } from '$sol/api/solana.api';
 import { sendSol } from '$sol/services/sol-send.services';
 import type { SolAddress } from '$sol/types/address';
 import { SolanaNetworks } from '$sol/types/network';
+import { isSolSendRefusal } from '$sol/utils/sol-error.utils';
 import { assertNonNullish, fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
@@ -1220,6 +1225,24 @@ const assertCkSolDepositWatched = ({
 	) {
 		throw new ChainFusionSolDepositRefusedError('changed');
 	}
+
+	// A call inside an earlier registration's window gets that window, which can end with no scan
+	// left, or with a last one due before the transfer lands: SOL sent then would wait on the address
+	// until a later call registers it again. The next scan has to come after the transfer can land,
+	// unless a later one follows it.
+	const { valid_until: validUntil, next_scan_at } = status.Watching;
+	const nextScanAt = fromNullable(next_scan_at);
+
+	if (isNullish(nextScanAt)) {
+		throw new ChainFusionSolDepositRefusedError('unavailable');
+	}
+
+	const isLastScan = nextScanAt + CKSOL_LAST_SCAN_BEFORE_WINDOW_END_NANOS >= validUntil;
+	const nowNanos = BigInt(Date.now()) * NANO_SECONDS_IN_MILLISECOND;
+
+	if (isLastScan && nextScanAt < nowNanos + CKSOL_TRANSFER_LANDING_NANOS) {
+		throw new ChainFusionSolDepositRefusedError('unavailable');
+	}
 };
 
 /**
@@ -1228,13 +1251,18 @@ const assertCkSolDepositWatched = ({
  *
  * The address is registered with `watch_deposit_address` first, and nothing moves unless the
  * answer takes the deposit the user reviewed. The registration is what makes the mint
- * independent of OISY: from that call on, the minter itself scans the address for about 24 hours,
- * so the ckSOL arrives even if the tab closes before the row exists. A transfer that fails moves
- * nothing, and the registration simply expires.
+ * independent of OISY: from that call on, the minter itself scans the address until the window
+ * ends, and nothing is sent unless a scan is due after the transfer can land, so the ckSOL arrives
+ * even if the tab closes during the transfer.
  *
- * The row is created once the transfer is confirmed, as for the NEAR Intents Solana swap. It
- * snapshots the latest deposit id of the account from the registration, the floor every deposit
- * the poller takes for this one has to lie above.
+ * The row is opened once the transfer is signed and before it is broadcast, as for the LI.FI Solana
+ * swap. It snapshots the latest deposit id of the account from the registration, the floor every
+ * deposit the poller takes for this one has to lie above. The backend refuses it while another
+ * SOL → ckSOL row of the user is open, which holds the minter's one deposit per account across tabs
+ * and devices, and the transfer then sends nothing. The row is deleted only when the node refuses
+ * the transfer. Any other failure may have sent it, so the conversion goes on as sent, ckSOL is
+ * enabled, and the poller settles the row as minted or, once the transfer can no longer land, as
+ * failed.
  */
 export const fetchChainFusionSolSwap = async ({
 	identity,
@@ -1270,42 +1298,99 @@ export const fetchChainFusionSolSwap = async ({
 
 	assertCkSolDepositWatched({ watched, solDeposit, amount });
 
-	progress(ProgressStepsSwap.SIGN_TRANSFER);
-
-	const signature = await sendSol({
-		identity,
-		token: sourceToken,
-		amount,
-		prioritizationFee: ZERO,
-		destination: watched.address,
-		source: userAddress
-	});
-
-	progress(ProgressStepsSwap.SWAP);
-
 	const latestDepositId = fromNullable(watched.latest_deposit_id);
 
-	await createChainFusionActiveUserTransaction({
-		identity,
-		swapId,
-		direction: { SolToCkSol: null },
-		sourceToken,
-		destinationToken,
-		// The ck destination is the token being minted, so its minter is the one to ask.
-		minterCanisterId,
-		amount,
-		swapAmount,
-		usdSourceValue,
-		extraRefs: {
-			[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_SIGNATURE]: signature,
-			[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_DEPOSIT_ADDRESS]: watched.address,
-			...(nonNullish(latestDepositId) && {
-				[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_LATEST_DEPOSIT_ID]: `${latestDepositId}`
-			})
+	const openRow = async ({
+		signature,
+		blockhash
+	}: {
+		signature: string;
+		blockhash: string;
+	}): Promise<boolean> => {
+		// A slot where the blockhash is valid: the poller reads it no earlier, so a node that has not
+		// seen the blockhash yet never passes for one that calls the transfer expired.
+		const { slot, valid } = await isBlockhashValid({ blockhash, network: SolanaNetworks.mainnet });
+
+		try {
+			return await openChainFusionActiveUserTransaction({
+				identity,
+				swapId,
+				direction: { SolToCkSol: null },
+				sourceToken,
+				destinationToken,
+				// The ck destination is the token being minted, so its minter is the one to ask.
+				minterCanisterId,
+				amount,
+				swapAmount,
+				usdSourceValue,
+				extraRefs: {
+					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_SIGNATURE]: signature,
+					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH]: blockhash,
+					...(valid && { [CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH_SLOT]: `${slot}` }),
+					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_DEPOSIT_ADDRESS]: watched.address,
+					...(nonNullish(latestDepositId) && {
+						[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_LATEST_DEPOSIT_ID]: `${latestDepositId}`
+					})
+				}
+			});
+		} catch (err: unknown) {
+			// Another tab or device opened its conversion first, and the minter would take both
+			// transfers as one deposit.
+			if (isActiveUserTransactionError(err) && 'AlreadyInFlight' in err) {
+				throw new ChainFusionSolDepositRefusedError('inFlight', { cause: err });
+			}
+
+			throw err;
 		}
-	});
+	};
+
+	progress(ProgressStepsSwap.SIGN_TRANSFER);
+
+	let rowOpened = false;
+	let broadcast = false;
+
+	try {
+		await sendSol({
+			identity,
+			token: sourceToken,
+			amount,
+			prioritizationFee: ZERO,
+			destination: watched.address,
+			source: userAddress,
+			progress: (step) => {
+				if (step === ProgressStepsSendSol.SEND) {
+					progress(ProgressStepsSwap.SWAP);
+				}
+
+				if (step === ProgressStepsSendSol.CONFIRM) {
+					broadcast = true;
+				}
+			},
+			beforeBroadcast: async (transfer) => {
+				rowOpened = await openRow(transfer);
+			}
+		});
+	} catch (err: unknown) {
+		// Nothing was broadcast without a row.
+		if (!rowOpened) {
+			throw err;
+		}
+
+		// Only the node refusing the broadcast shows the transfer went nowhere. A refusal answered
+		// while confirming comes after the broadcast, and says nothing about it.
+		if (!broadcast && isSolSendRefusal(err)) {
+			await deleteUnbroadcastActiveUserTransaction({ identity, id: swapId });
+
+			throw err;
+		}
+
+		// Any other end may have sent the SOL, and signing again would send it twice. The conversion
+		// goes on as sent, and its row settles it.
+		consoleError(err);
+	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);
 
+	// Also after an unclear end: the minted ckSOL must not land in a token the user cannot see.
 	await enableDestination(enableDestinationToken);
 };

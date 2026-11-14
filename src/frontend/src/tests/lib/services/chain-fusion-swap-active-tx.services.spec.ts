@@ -33,7 +33,10 @@ import {
 	CHAIN_FUSION_WATCH_DEPOSIT_ADDRESS_INTERVAL_MILLIS,
 	ZERO
 } from '$lib/constants/app.constants';
-import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
+import {
+	applyActiveUserTransactionPollUpdate,
+	isBtcTransactionNeverLanded
+} from '$lib/services/active-user-transactions.services';
 import {
 	pollChainFusionActiveUserTransactions,
 	resetChainFusionMissingDepositLogObservations,
@@ -42,9 +45,12 @@ import {
 } from '$lib/services/chain-fusion-swap-active-tx.services';
 import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
 import { toChainFusionExternalRefs } from '$lib/utils/chain-fusion-swap-active-tx.utils';
+import { readSolSourceTxOutcome } from '$sol/services/sol-source-tx.services';
+import { SolanaNetworks } from '$sol/types/network';
 import { mockUtxo } from '$tests/mocks/btc.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import { mockCkBtcMinterInfo } from '$tests/mocks/ckbtc.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { toNullable } from '@dfinity/utils';
@@ -114,7 +120,12 @@ vi.mock('$eth/providers/infura-cketh.providers', () => ({
 }));
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
-	applyActiveUserTransactionPollUpdate: vi.fn()
+	applyActiveUserTransactionPollUpdate: vi.fn(),
+	isBtcTransactionNeverLanded: vi.fn()
+}));
+
+vi.mock('$sol/services/sol-source-tx.services', () => ({
+	readSolSourceTxOutcome: vi.fn()
 }));
 
 // Hoisted: the canister-id factories above run before the module body.
@@ -351,6 +362,7 @@ describe('chain-fusion-swap-active-tx.services', () => {
 		vi.mocked(ckBtcMinterInfo).mockResolvedValue(mockCkBtcMinterInfo);
 		vi.mocked(getKnownUtxos).mockResolvedValue([]);
 		vi.mocked(updateBalance).mockResolvedValue([]);
+		vi.mocked(isBtcTransactionNeverLanded).mockResolvedValue(false);
 		setDepositUtxos();
 		setLedgerMints([]);
 	});
@@ -459,6 +471,78 @@ describe('chain-fusion-swap-active-tx.services', () => {
 			});
 			expect(depositSolStatus).not.toHaveBeenCalled();
 			expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+		});
+
+		it('should not read the transfer of a row without its blockhash', async () => {
+			vi.mocked(watchDepositAddress).mockResolvedValue(watching(41n));
+
+			await poll([solMintTx()]);
+
+			expect(readSolSourceTxOutcome).not.toHaveBeenCalled();
+		});
+
+		describe('with the row opened before the transfer was broadcast', () => {
+			const BLOCKHASH = 'EkSnNWid2cvwEVnVx9aBqawnmiCNiDgp3gUdkDPTKN1N';
+
+			const openedBeforeBroadcast = () =>
+				solMintTx({
+					refs: {
+						[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH]: BLOCKHASH,
+						[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH_SLOT]: '345000000'
+					}
+				});
+
+			beforeEach(() => {
+				vi.mocked(watchDepositAddress).mockResolvedValue(watching(41n));
+				vi.mocked(readSolSourceTxOutcome).mockResolvedValue('pending');
+			});
+
+			it('should read the transfer no earlier than the slot its blockhash was valid at', async () => {
+				const tx = openedBeforeBroadcast();
+
+				await poll([tx]);
+
+				expect(readSolSourceTxOutcome).toHaveBeenCalledExactlyOnceWith({
+					rowId: tx.id,
+					signature: SOL_SIGNATURE,
+					blockhash: BLOCKHASH,
+					minContextSlot: 345_000_000n,
+					network: SolanaNetworks.mainnet
+				});
+			});
+
+			it.each(['pending', 'succeeded'] as const)(
+				'should keep the row in flight while the transfer is %s',
+				async (outcome) => {
+					vi.mocked(readSolSourceTxOutcome).mockResolvedValue(outcome);
+
+					await poll([openedBeforeBroadcast()]);
+
+					expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+				}
+			);
+
+			it.each([
+				{ outcome: 'expired' as const, error: en.swap.error.swap_expired },
+				{ outcome: 'reverted' as const, error: en.swap.error.failed_unexpectedly }
+			])('should fail the row when the transfer is $outcome', async ({ outcome, error }) => {
+				vi.mocked(readSolSourceTxOutcome).mockResolvedValue(outcome);
+
+				await poll([openedBeforeBroadcast()]);
+
+				expect(lastUpdate()).toStrictEqual({ status: { Failed: null }, error });
+			});
+
+			it('should not read the transfer once the minter reports a newer deposit', async () => {
+				vi.mocked(watchDepositAddress).mockResolvedValue(detected(42n));
+				vi.mocked(depositSolStatus).mockResolvedValue({
+					Queued: { sweepable_amount: 49_109_120n }
+				});
+
+				await poll([openedBeforeBroadcast()]);
+
+				expect(readSolSourceTxOutcome).not.toHaveBeenCalled();
+			});
 		});
 
 		it('should learn a detected deposit newer than the latest at opening and follow it', async () => {
@@ -935,6 +1019,63 @@ describe('chain-fusion-swap-active-tx.services', () => {
 			);
 			expect(updateBalance).not.toHaveBeenCalled();
 			expect(lastUpdate()).toStrictEqual({ status: { Succeeded: null } });
+		});
+
+		// The row is written before the broadcast, whose outcome can be unclear: a deposit the network
+		// does not know either was never broadcast, and must not stay executing for good.
+		it('should fail an unseen deposit the network does not know, with its own message', async () => {
+			setDepositUtxos({ utxos: [OTHER_UTXO] });
+			vi.mocked(isBtcTransactionNeverLanded).mockResolvedValue(true);
+
+			const tx = btcMintTx();
+
+			await poll([tx]);
+
+			expect(isBtcTransactionNeverLanded).toHaveBeenCalledExactlyOnceWith({
+				id: tx.id,
+				txid: DEPOSIT_TXID,
+				updatedAtNs: tx.updated_at_ns
+			});
+			expect(updateBalance).not.toHaveBeenCalled();
+			expect(lastUpdate()).toStrictEqual({
+				status: { Failed: null },
+				error: en.send.error.btc_transaction_never_landed
+			});
+		});
+
+		it('should not ask the network about a deposit the ledger shows as minted', async () => {
+			setDepositUtxos({ utxos: [OTHER_UTXO] });
+			setLedgerMints([mockUtxo]);
+
+			await poll([btcMintTx()]);
+
+			expect(isBtcTransactionNeverLanded).not.toHaveBeenCalled();
+		});
+
+		it('should not ask the network about a deposit the Bitcoin canister has indexed', async () => {
+			await poll([btcMintTx()]);
+
+			expect(isBtcTransactionNeverLanded).not.toHaveBeenCalled();
+		});
+
+		// Blockstream answers for mainnet only.
+		it('should keep an unseen testnet deposit executing without asking the network', async () => {
+			setDepositUtxos({ utxos: [OTHER_UTXO] });
+
+			await poll([
+				toTx({
+					direction: { BtcToCkBtc: null },
+					source_token: { BtcNativeTestnet: null },
+					refs: {
+						[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID]: MINTER_CANISTER_ID,
+						[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_TXID]: DEPOSIT_TXID,
+						[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_DEPOSIT_ADDRESS]: DEPOSIT_ADDRESS
+					}
+				})
+			]);
+
+			expect(isBtcTransactionNeverLanded).not.toHaveBeenCalled();
+			expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
 		});
 
 		it('should keep a deposit executing when the ledger only shows unrelated mints', async () => {

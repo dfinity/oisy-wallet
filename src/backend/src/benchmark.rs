@@ -37,6 +37,7 @@ use shared::{
         tip::{MAX_TIP_MESSAGE_CHARS, TIP_RETENTION_AFTER_TERMINAL_NS},
         token_id::TokenId,
         user_profile::{StoredUserProfile, UserProfile},
+        user_transaction::{EvmTransactionData, NetworkTransactionData, UserTransaction},
         Stats,
     },
 };
@@ -52,6 +53,7 @@ use crate::{
         service::prune_expired_tips,
     },
     token,
+    transactions::model as user_transactions_model,
     types::{
         storable::{TipId, TipSenderKey},
         Candid, StoredPrincipal, StoredTokenId,
@@ -75,6 +77,12 @@ fn bench_principal() -> &'static Principal {
 
 fn bench_stored_principal() -> StoredPrincipal {
     StoredPrincipal(*bench_principal())
+}
+
+/// An ERC-20 token id with a valid, distinct address for each `n`: the longest kind of token id
+/// the stores keep.
+fn erc20_token_id(n: u64) -> TokenId {
+    TokenId::Erc20(ErcTokenId(format!("0x{n:040x}")), 1)
 }
 
 fn ensure_profile_version() -> Option<u64> {
@@ -1072,6 +1080,42 @@ fn bench_get_exchange_rates_50() -> BenchResult {
     })
 }
 
+/// Looks up 1,000 ERC-20 prices in a cache of 2,000, as `get_exchange_rates` does for a caller
+/// with 1,000 custom tokens.
+#[bench(raw)]
+fn bench_lookup_exchange_rates_1000_of_2000() -> BenchResult {
+    const HELD: u64 = 2_000;
+    const LOOKED_UP: u64 = 1_000;
+
+    mutate_state(|s| {
+        for n in 0..HELD {
+            s.exchange_rates.insert(
+                StoredTokenId(erc20_token_id(n)),
+                Candid(ExchangeRate {
+                    usd: ExchangeData {
+                        timestamp_ns: TS0_NS,
+                        price: Some(1.23),
+                        price_24h_change_pct: Some(0.5),
+                        market_cap: Some(1e9),
+                    },
+                }),
+            );
+        }
+    });
+
+    bench_fn(|| {
+        std::hint::black_box(read_state(|s| {
+            (0..LOOKED_UP)
+                .map(|n| {
+                    s.exchange_rates
+                        .get(&StoredTokenId(erc20_token_id(n * 2)))
+                        .map(|c| c.0)
+                })
+                .collect::<Vec<_>>()
+        }));
+    })
+}
+
 // ---------------------------------------------------------------------------
 // Tips
 // ---------------------------------------------------------------------------
@@ -1168,10 +1212,7 @@ fn bench_evict_inactive_tokens_2000() -> BenchResult {
         // Even tokens were last active at 0, odd tokens at `LATER_NS`, so only even tokens are
         // past the retention window at `LATER_NS`, and none is at 0.
         let last_active_ns = if n % 2 == 0 { 0 } else { LATER_NS };
-        token::mark_tokens_active(
-            &[TokenId::Erc20(ErcTokenId(format!("0x{n:040x}")), 1)],
-            last_active_ns,
-        );
+        token::mark_tokens_active(&[erc20_token_id(n)], last_active_ns);
     }
 
     bench_fn(|| {
@@ -1185,6 +1226,101 @@ fn bench_evict_inactive_tokens_2000() -> BenchResult {
             let _scope = bench_scope("read_2000_evict_1000");
             std::hint::black_box(mutate_state(|s| {
                 token::evict_inactive_tokens(s, None, LATER_NS, || true)
+            }));
+        }
+    })
+}
+
+/// Marks 1,000 ERC-20 tokens active in an empty `token_activity`, then marks the same 1,000 again,
+/// as `get_exchange_rates` does for a caller with 1,000 custom tokens. The two scopes give the cost
+/// of adding an entry and of updating one.
+#[bench(raw)]
+fn bench_mark_tokens_active_1000() -> BenchResult {
+    let token_ids: Vec<TokenId> = (0..1_000).map(erc20_token_id).collect();
+
+    bench_fn(|| {
+        {
+            let _scope = bench_scope("add_1000");
+            std::hint::black_box(token::mark_tokens_active(&token_ids, TS0_NS));
+        }
+        {
+            let _scope = bench_scope("update_1000");
+            std::hint::black_box(token::mark_tokens_active(&token_ids, TS1_NS));
+        }
+    })
+}
+
+// ---------------------------------------------------------------------------
+// User transactions
+// ---------------------------------------------------------------------------
+
+fn bench_user_transaction(id: u64) -> UserTransaction {
+    UserTransaction {
+        id: format!("0x{id:064x}"),
+        block_index: id,
+        timestamp: TS0_NS,
+        from: format!("0x{id:040x}"),
+        to: Some(format!("0x{:040x}", id + 1)),
+        value: Nat::from(1_000u64),
+        network_data: NetworkTransactionData::Evm(EvmTransactionData {
+            chain_id: Some(1),
+            nonce: Some(1),
+            gas_limit: Some(Nat::from(21_000u64)),
+            gas_price: Some(Nat::from(20_000_000_000u64)),
+            gas_used: Some(Nat::from(21_000u64)),
+            data: None,
+            nft_token_id: None,
+        }),
+    }
+}
+
+/// Reads one stored history and saves one transaction into it, in a store of 250 users with 20
+/// ERC-20 tokens each. Each history holds one transaction, so the cost is mostly finding the key.
+#[bench(raw)]
+fn bench_user_transactions_in_5000_keys() -> BenchResult {
+    const USERS: u64 = 250;
+    const TOKENS: u64 = 20;
+
+    mutate_state(|s| {
+        for user in 0..USERS {
+            let principal = Principal::from_slice(&user.to_be_bytes());
+            for token in 0..TOKENS {
+                user_transactions_model::save_transactions(
+                    &mut s.user_transactions,
+                    principal,
+                    &erc20_token_id(token),
+                    &[bench_user_transaction(token)],
+                )
+                .expect("bench: seeding user transactions failed");
+            }
+        }
+    });
+
+    let principal = Principal::from_slice(&(USERS / 2).to_be_bytes());
+    let token_id = erc20_token_id(TOKENS / 2);
+
+    bench_fn(|| {
+        {
+            let _scope = bench_scope("get");
+            std::hint::black_box(read_state(|s| {
+                user_transactions_model::get_transactions(
+                    &s.user_transactions,
+                    principal,
+                    &token_id,
+                    None,
+                    10,
+                )
+            }));
+        }
+        {
+            let _scope = bench_scope("save");
+            std::hint::black_box(mutate_state(|s| {
+                user_transactions_model::save_transactions(
+                    &mut s.user_transactions,
+                    principal,
+                    &token_id,
+                    &[bench_user_transaction(TOKENS)],
+                )
             }));
         }
     })

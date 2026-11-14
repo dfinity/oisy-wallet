@@ -41,10 +41,15 @@ export const CHAIN_FUSION_EXTERNAL_REF_KEYS = {
 	// minter keys `withdraw_sol_status` on it.
 	WITHDRAW_SOL_BLOCK_INDEX: 'chain_fusion_withdraw_sol_index',
 	// The Solana transaction the conversion turns on: for a ckSOL mint the user's own transfer to
-	// the deposit address, snapshotted once it is sent; for a ckSOL withdrawal the transaction the
+	// the deposit address, snapshotted once it is signed; for a ckSOL withdrawal the transaction the
 	// minter sent on the user's behalf, learned from the withdrawal status. The two directions never
 	// share a row, so one key serves both, as `BTC_TXID` does.
 	SOL_TX_SIGNATURE: 'chain_fusion_sol_tx',
+	// The ckSOL mint transfer's recent blockhash, and a slot where it was valid. The row is opened
+	// before the transfer is broadcast, so the poller needs both to tell a transfer that can still
+	// land from one that never will.
+	SOL_TX_BLOCKHASH: 'chain_fusion_sol_blockhash',
+	SOL_TX_BLOCKHASH_SLOT: 'chain_fusion_sol_blockhash_slot',
 	// The minter's per-user deposit address the SOL was sent to, for the record: the mint poller
 	// asks the minter about the account, not about the address.
 	SOL_DEPOSIT_ADDRESS: 'chain_fusion_sol_deposit',

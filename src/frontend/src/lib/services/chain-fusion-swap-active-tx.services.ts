@@ -32,7 +32,10 @@ import {
 	CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS,
 	CHAIN_FUSION_WATCH_DEPOSIT_ADDRESS_INTERVAL_MILLIS
 } from '$lib/constants/app.constants';
-import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
+import {
+	applyActiveUserTransactionPollUpdate,
+	isBtcTransactionNeverLanded
+} from '$lib/services/active-user-transactions.services';
 import {
 	CHAIN_FUSION_EXTERNAL_REF_KEYS,
 	type ChainFusionExternalRefKey
@@ -45,6 +48,7 @@ import {
 	chainFusionMintOutcomeError,
 	chainFusionMintOutcomeToStatus,
 	chainFusionSolMintStatusError,
+	chainFusionSolTransferError,
 	chainFusionSolWithdrawalStatusError,
 	chainFusionWithdrawalStatusError,
 	isChainFusionBtcMintDirection,
@@ -68,10 +72,14 @@ import {
 	toChainFusionWithdrawalLearnedRefs,
 	toChainFusionWithdrawalStatus,
 	toCkBtcMintDepositTxid,
+	toCkSolBlockhashSlot,
 	type ChainFusionBtcMintOutcome,
 	type ChainFusionMintOutcome
 } from '$lib/utils/chain-fusion-swap-active-tx.utils';
 import { consoleError } from '$lib/utils/console.utils';
+import { readSolSourceTxOutcome } from '$sol/services/sol-source-tx.services';
+import { SolanaNetworks } from '$sol/types/network';
+import type { SolSourceTxOutcome } from '$sol/utils/sol-source-tx.utils';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	MinterNoNewUtxosError,
@@ -406,15 +414,46 @@ const watchCkSolLatestDepositId = async ({
 };
 
 /**
+ * What the network says about the user's transfer of a ckSOL mint row, whose row is opened before
+ * the transfer is broadcast. `undefined` for a row without the transfer's blockhash.
+ */
+const readCkSolTransferOutcome = async ({
+	tx,
+	refs
+}: {
+	tx: ActiveUserTransaction;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+}): Promise<SolSourceTxOutcome | undefined> => {
+	const signature = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_SIGNATURE];
+	const blockhash = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH];
+
+	if (isNullish(signature) || isNullish(blockhash)) {
+		return;
+	}
+
+	// SOL → ckSOL is mainnet only.
+	return await readSolSourceTxOutcome({
+		rowId: tx.id,
+		signature,
+		blockhash,
+		minContextSlot: toCkSolBlockhashSlot(
+			refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH_SLOT]
+		),
+		network: SolanaNetworks.mainnet
+	});
+};
+
+/**
  * SOL → ckSOL. The minter reports the deposit through `watch_deposit_address`, an update call
  * made about once a minute, and then answers exactly through `deposit_sol_status`, a query asked
  * on every tick once the row knows the deposit id.
  *
  * Only a deposit above the floor is taken for this conversion: the latest deposit id of the
  * account when the row was opened, or the dropped deposit the row followed before. A `Watching`
- * answer keeps the row in flight; the same call registers the address again once a window has
- * ended, so a late transfer is still found. A `Dropped` deposit leaves its SOL on the address,
- * which the minter detects again under a new id.
+ * answer keeps the row in flight while the transfer can still land or has landed; the same call
+ * registers the address again once a window has ended, so a late transfer is still found. A
+ * transfer that can no longer land, or landed and failed, moved no SOL, and fails the row. A
+ * `Dropped` deposit leaves its SOL on the address, which the minter detects again under a new id.
  */
 const pollChainFusionSolMint = async ({
 	tx,
@@ -489,6 +528,24 @@ const pollChainFusionSolMint = async ({
 	});
 
 	if (isNullish(depositId)) {
+		const transferError = chainFusionSolTransferError(await readCkSolTransferOutcome({ tx, refs }));
+
+		// The row ends, which frees the account for the next conversion.
+		if (nonNullish(transferError)) {
+			lastWatchDepositAddressMs.delete(tx.id);
+
+			await applyUpdate({
+				identity,
+				tx,
+				candidate: { Failed: null },
+				error: transferError,
+				learned: {},
+				refs
+			});
+
+			return;
+		}
+
 		// Watched, or a deposit from before this one: the SOL is on the address or about to be.
 		await applyUpdate({
 			identity,
@@ -680,6 +737,11 @@ const hasCkBtcMintForDeposit = async ({
  * as minted; that is the one coarse step here, and it is bounded to "the minter
  * took these exact coins off the deposit address", not to a scan position.
  *
+ * The one verdict the minter has no part in is `neverLanded`: on mainnet, a
+ * deposit that neither the minter nor the Bitcoin canister has seen, and that
+ * Blockstream still does not know an hour after the row's last write
+ * (`isBtcTransactionNeverLanded`), fails without `update_balance` being called.
+ *
  * Nothing is ever terminalized on an `update_balance` failure: the row stays
  * pending so the next tick retries, exactly as OneSec leaves an unknown outcome
  * pending rather than dropping the row out of the poll set.
@@ -688,6 +750,7 @@ const resolveChainFusionBtcMintOutcome = async ({
 	identity,
 	txId,
 	createdAtNs,
+	updatedAtNs,
 	data,
 	refs,
 	caches
@@ -695,6 +758,7 @@ const resolveChainFusionBtcMintOutcome = async ({
 	identity: Identity;
 	txId: string;
 	createdAtNs: bigint;
+	updatedAtNs: bigint;
 	data: ChainFusionData;
 	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
 	caches: ChainFusionPollCaches;
@@ -742,18 +806,27 @@ const resolveChainFusionBtcMintOutcome = async ({
 			// it credited and stays on the account for good.
 			const indexCanisterId = toCkBtcIndexCanisterId(minterCanisterId);
 
-			if (isNullish(indexCanisterId)) {
-				return 'unseen';
+			const minted =
+				nonNullish(indexCanisterId) &&
+				(await hasCkBtcMintForDeposit({
+					identity,
+					indexCanisterId,
+					txid,
+					createdAtNs
+				}));
+
+			if (minted) {
+				return 'minted';
 			}
 
-			const minted = await hasCkBtcMintForDeposit({
-				identity,
-				indexCanisterId,
-				txid,
-				createdAtNs
-			});
+			// The Bitcoin canister only indexes blocks, so an unseen deposit may still be in a mempool,
+			// or may never have been broadcast: the row is written before the broadcast, whose outcome
+			// can be unclear. Only the network tells them apart.
+			const neverLanded =
+				network === 'mainnet' &&
+				(await isBtcTransactionNeverLanded({ id: txId, txid, updatedAtNs }));
 
-			return minted ? 'minted' : 'unseen';
+			return neverLanded ? 'neverLanded' : 'unseen';
 		}
 
 		const { min_confirmations } = await memoize({
@@ -810,6 +883,7 @@ const pollChainFusionBtcMint = async ({
 		identity,
 		txId: tx.id,
 		createdAtNs: tx.created_at_ns,
+		updatedAtNs: tx.updated_at_ns,
 		data,
 		refs,
 		caches
@@ -820,7 +894,7 @@ const pollChainFusionBtcMint = async ({
 	}
 
 	// A terminal row leaves the pending set, so its throttle entry has no reader left.
-	if (outcome === 'minted' || outcome === 'rejected') {
+	if (outcome === 'minted' || outcome === 'rejected' || outcome === 'neverLanded') {
 		lastUpdateBalanceMs.delete(tx.id);
 	}
 

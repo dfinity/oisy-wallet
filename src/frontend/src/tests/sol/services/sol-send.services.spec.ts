@@ -28,10 +28,13 @@ import { getTransferCheckedInstruction, getTransferInstruction } from '@solana-p
 import * as solanaWeb3 from '@solana/kit';
 import {
 	appendTransactionMessageInstructions,
+	getSignatureFromTransaction,
 	pipe,
 	sendTransactionWithoutConfirmingFactory,
+	signTransactionMessageWithSigners,
 	type Rpc,
 	type RpcSubscriptions,
+	type Signature,
 	type SolanaRpcApi,
 	type SolanaRpcSubscriptionsApi
 } from '@solana/kit';
@@ -400,6 +403,48 @@ describe('sol-send.services', () => {
 			});
 
 			expect(estimateComputeUnitLimitFactory).toHaveBeenCalledOnce();
+		});
+
+		describe('with a hook before the broadcast', () => {
+			const mockSignature = 'mock-signature' as Signature;
+
+			const sendTransaction = vi.fn(() => Promise.resolve());
+
+			beforeEach(() => {
+				vi.mocked(sendTransactionWithoutConfirmingFactory).mockReturnValue(sendTransaction);
+				vi.mocked(signTransactionMessageWithSigners).mockResolvedValue({
+					lifetimeConstraint: mockTx
+				} as unknown as Awaited<ReturnType<typeof signTransactionMessageWithSigners>>);
+				vi.mocked(getSignatureFromTransaction).mockReturnValue(mockSignature);
+			});
+
+			it('should hand over the signed transfer before broadcasting it', async () => {
+				const beforeBroadcast = vi.fn(() => Promise.resolve());
+
+				await sendSol({ ...mockParams, token: SOLANA_TOKEN, beforeBroadcast });
+
+				expect(beforeBroadcast).toHaveBeenCalledExactlyOnceWith({
+					signature: mockSignature,
+					blockhash: mockBlockhash
+				});
+				expect(beforeBroadcast.mock.invocationCallOrder[0]).toBeLessThan(
+					sendTransaction.mock.invocationCallOrder[0]
+				);
+			});
+
+			it('should broadcast nothing when the hook rejects', async () => {
+				const err = new Error('row refused');
+
+				await expect(
+					sendSol({
+						...mockParams,
+						token: SOLANA_TOKEN,
+						beforeBroadcast: () => Promise.reject(err)
+					})
+				).rejects.toBe(err);
+
+				expect(sendTransaction).not.toHaveBeenCalled();
+			});
 		});
 
 		it('should throw an error if network is invalid', async () => {

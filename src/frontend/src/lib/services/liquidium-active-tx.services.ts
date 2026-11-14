@@ -6,6 +6,7 @@ import { LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS } from '$lib/constants/liquidiu
 import {
 	applyActiveUserTransactionPollUpdate,
 	deleteActiveUserTransaction,
+	isBtcTransactionNeverLanded,
 	reloadActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -138,6 +139,23 @@ const isRevertedEthRepay = async ({
 	return receipt?.status === 0;
 };
 
+// A BTC supply or repay is written before its broadcast, whose outcome can be unclear. One that never
+// reached the network is never listed by Liquidium, so it would hold its amount for good. Only those
+// two: a borrow or withdraw carries the txid of Liquidium's own payout, which Liquidium broadcasts
+// and settles, so the network not knowing it yet says nothing about the row (Copilot).
+const isNeverLandedBtcTransfer = async ({
+	tx,
+	txid
+}: {
+	tx: ActiveUserTransaction;
+	txid?: string;
+}): Promise<boolean> =>
+	'Liquidium' in tx.data &&
+	('Supply' in tx.data.Liquidium.action || 'Repay' in tx.data.Liquidium.action) &&
+	'BtcNativeMainnet' in tx.data.Liquidium.token &&
+	nonNullish(txid) &&
+	(await isBtcTransactionNeverLanded({ id: tx.id, txid, updatedAtNs: tx.updated_at_ns }));
+
 const pollLiquidiumActiveUserTransaction = async ({
 	tx,
 	identity,
@@ -167,9 +185,11 @@ const pollLiquidiumActiveUserTransaction = async ({
 
 		const activity = await resolveLiquidiumActivity({ client, profileId, txid, outflowId });
 
+		const neverLanded = isNullish(activity) && (await isNeverLandedBtcTransfer({ tx, txid }));
+
 		const candidate = nonNullish(activity)
 			? liquidiumActivityToStatus(activity.status)
-			: (await isRevertedEthRepay({ tx, txid }))
+			: neverLanded || (await isRevertedEthRepay({ tx, txid }))
 				? { Failed: null }
 				: undefined;
 
@@ -183,7 +203,12 @@ const pollLiquidiumActiveUserTransaction = async ({
 			return;
 		}
 
-		const error = 'Failed' in candidate ? get(i18n).liquidium.text.transaction_failed : undefined;
+		const error =
+			'Failed' in candidate
+				? neverLanded
+					? get(i18n).send.error.btc_transaction_never_landed
+					: get(i18n).liquidium.text.transaction_failed
+				: undefined;
 
 		await applyActiveUserTransactionPollUpdate({
 			identity,

@@ -15,7 +15,7 @@ use shared::{
         api_keys::ApiKeys,
         backend_config::{Arg, Config},
         bitcoin::{
-            BtcAddPendingTransactionRequest, BtcBroadcastTransactionRequest,
+            BtcAddPendingTransactionRequest, BtcBroadcastTransactionRequest, BtcGetBalanceRequest,
             BtcGetFeePercentilesRequest, BtcGetPendingTransactionsRequest,
             BtcGetSpendableUtxosRequest,
         },
@@ -32,7 +32,7 @@ use shared::{
         result_types::{
             ActiveUserTransactionResult, AddUserDismissedNotificationResult,
             AddUserHiddenDappIdResult, AllowSigningResult, BtcAddPendingTransactionResult,
-            BtcBroadcastTransactionResult, BtcGetFeePercentilesResult,
+            BtcBroadcastTransactionResult, BtcGetBalanceResult, BtcGetFeePercentilesResult,
             BtcGetPendingTransactionsResult, BtcGetSpendableUtxosResult, CancelTipResult,
             ClaimTipResult, ConsumePersonalNoteShareResult, CreateContactResult,
             CreatePersonalNoteShareResult, CreateTipResult, CreateUserProfileResult,
@@ -117,6 +117,10 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+
+    // TODO: remove once every canister has been upgraded past the release that ships it; see
+    // `state::token_id_keys`. Runs before the timers that write to these stores are started.
+    state::token_id_keys::clear_stores_with_candid_token_id_keys();
 
     // Attach the personal-notes store eagerly so `stats()` (a query, which
     // cannot run the lazy init) reports the persisted count after an upgrade.
