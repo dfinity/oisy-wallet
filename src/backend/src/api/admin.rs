@@ -12,7 +12,7 @@ use crate::{
     state::{read_config, read_state},
     status,
     types::StoredPrincipal,
-    utils::guards::caller_is_allowed,
+    utils::guards::{called_as_query, caller_is_allowed},
 };
 
 /// Gets the canister configuration.
@@ -23,7 +23,7 @@ pub fn config() -> Config {
 }
 
 /// Processes external HTTP requests.
-#[query]
+#[query(guard = "called_as_query")]
 #[must_use]
 pub fn http_request(request: HttpRequest) -> HttpResponse {
     let HttpRequest { url, .. } = request;

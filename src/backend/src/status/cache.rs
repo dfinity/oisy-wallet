@@ -2,7 +2,7 @@
 //!
 //! ICP queries are typically served by a single replica per call, and the `/status` endpoint is a
 //! `#[query]` (so it cannot durably mutate replicated state anyway). A `thread_local!` cache is
-//! sufficient to bound the cost of the underlying scan to roughly once per minute per replica,
+//! sufficient to bound the cost of evaluating the metrics to roughly once per minute per replica,
 //! which is the goal: spam the endpoint as much as you like, the heavy work runs at most 1x/min.
 //!
 //! The cache is intentionally not persisted across upgrades. The first call after an upgrade
