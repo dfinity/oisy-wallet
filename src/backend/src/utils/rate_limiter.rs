@@ -54,6 +54,17 @@ thread_local! {
     pub(crate) static BTC_GET_SPENDABLE_UTXOS_RATE_LIMITER: RateLimiter =
         RateLimiter::new(15, 60 * 1_000_000_000);
 
+    /// Rate-limits the `bitcoin_get_utxos` pages the backend reads for a caller after the first
+    /// page of a call: max 20 per caller per minute, shared by `btc_add_pending_transaction`,
+    /// `btc_broadcast_transaction`, `btc_get_pending_transactions` and `btc_get_spendable_utxos`.
+    /// Each endpoint's own limiter covers the first page of its calls.
+    ///
+    /// A page holds up to 1,000 UTXOs and the backend pays for each one: this budget keeps the
+    /// backend's cost per caller bounded however many UTXOs the address holds. 20 a minute lets
+    /// the wallet read about 10,000 UTXOs twice a minute.
+    pub(crate) static BTC_UTXO_PAGES_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(20, 60 * 1_000_000_000);
+
     /// Rate-limits `btc_get_balance`: max 20 calls per caller per minute. The wallet reads the
     /// balance every 30 seconds for each Bitcoin network it shows, in each open tab. Each call
     /// costs the backend's own cycles: about 54M with a delegation chain it has already checked

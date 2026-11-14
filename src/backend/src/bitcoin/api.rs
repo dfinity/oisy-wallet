@@ -1,5 +1,6 @@
-use std::{cell::RefCell, collections::HashMap};
+use std::{cell::RefCell, collections::HashMap, future::Future};
 
+use candid::Principal;
 use ic_cdk::call::{CallResult, Error as CallError, RejectCode};
 use ic_cdk_bitcoin_canister::{
     bitcoin_get_balance, bitcoin_get_current_fee_percentiles, bitcoin_get_utxos,
@@ -8,11 +9,15 @@ use ic_cdk_bitcoin_canister::{
     SendTransactionRequest, Utxo, UtxosFilterInRequest,
 };
 use ic_cdk_timers::{set_timer, set_timer_interval};
-use shared::types::bitcoin::{
-    FEE_PERCENTILES_INITIAL_DELAY, FEE_PERCENTILES_UPDATE_INTERVAL, FEE_UPDATE_TIMEOUT_NS,
+use shared::types::{
+    bitcoin::{
+        FEE_PERCENTILES_INITIAL_DELAY, FEE_PERCENTILES_UPDATE_INTERVAL, FEE_UPDATE_TIMEOUT_NS,
+    },
+    signer::RateLimitError,
 };
 
 use super::broadcast_state_model::BroadcastOutcome;
+use crate::utils::rate_limiter::BTC_UTXO_PAGES_RATE_LIMITER;
 
 /// The start of the reject message the Bitcoin canister sends when its `send_transaction` returns
 /// an error, which it does only before queueing the transaction (a transaction it cannot decode).
@@ -68,13 +73,25 @@ pub async fn get_balance(
     .map_err(|err| err.to_string())
 }
 
-/// Returns all the UTXOs of a specific address.
-/// API interface returns a paginated view of the utxos but we need to get them all.
+/// Why [`get_all_utxos`] returned no UTXOs.
+pub enum GetAllUtxosError {
+    /// The caller has no further pages left in `BTC_UTXO_PAGES_RATE_LIMITER`.
+    RateLimited(RateLimitError),
+    InternalError(String),
+}
+
+/// Returns all the UTXOs of a specific address, which the Bitcoin canister returns 1,000 per page.
+///
+/// The first page is covered by the calling endpoint's own limiter. Each further page is taken from
+/// the caller's `BTC_UTXO_PAGES_RATE_LIMITER` budget before it is read. When the budget runs out,
+/// the read stops with `RateLimited` and returns none of the UTXOs: a part of the list would make
+/// `prune_pending_transactions` drop reservations whose UTXOs are on a page not read.
 pub async fn get_all_utxos(
     network: BitcoinNetwork,
     address: String,
     min_confirmations: Option<u32>,
-) -> Result<Vec<Utxo>, String> {
+    caller: Principal,
+) -> Result<Vec<Utxo>, GetAllUtxosError> {
     let final_min_confirmations = if network == BitcoinNetwork::Regtest {
         // Tests with Regtest fail if min_confirmations is higher than 1.
         Some(1)
@@ -82,19 +99,43 @@ pub async fn get_all_utxos(
         min_confirmations
     };
     let filter = final_min_confirmations.map(UtxosFilterInRequest::MinConfirmations);
-    let mut utxos_response = get_utxos(network, address.clone(), filter).await?;
+    let first_page = get_utxos(network, address.clone(), filter)
+        .await
+        .map_err(GetAllUtxosError::InternalError)?;
 
-    let mut all_utxos: Vec<Utxo> = utxos_response.utxos;
-    let mut next_page: Option<Page> = utxos_response.next_page;
-    while next_page.is_some() {
-        utxos_response = get_utxos(
-            network,
-            address.clone(),
-            next_page.map(UtxosFilterInRequest::Page),
-        )
-        .await?;
-        all_utxos.extend(utxos_response.utxos);
-        next_page = utxos_response.next_page;
+    read_further_pages(
+        first_page,
+        || BTC_UTXO_PAGES_RATE_LIMITER.with(|limiter| limiter.check_principal(caller)),
+        |page| {
+            get_utxos(
+                network,
+                address.clone(),
+                Some(UtxosFilterInRequest::Page(page)),
+            )
+        },
+    )
+    .await
+}
+
+/// Adds the UTXOs of every page after `first_page`, taking each page from `take_page` before
+/// `fetch_page` reads it. Both are closures so unit tests can drive them.
+async fn read_further_pages<Fut>(
+    first_page: GetUtxosResponse,
+    mut take_page: impl FnMut() -> Result<(), RateLimitError>,
+    mut fetch_page: impl FnMut(Page) -> Fut,
+) -> Result<Vec<Utxo>, GetAllUtxosError>
+where
+    Fut: Future<Output = Result<GetUtxosResponse, String>>,
+{
+    let mut all_utxos = first_page.utxos;
+    let mut next_page = first_page.next_page;
+    while let Some(page) = next_page {
+        take_page().map_err(GetAllUtxosError::RateLimited)?;
+        let response = fetch_page(page)
+            .await
+            .map_err(GetAllUtxosError::InternalError)?;
+        all_utxos.extend(response.utxos);
+        next_page = response.next_page;
     }
 
     Ok(all_utxos)
