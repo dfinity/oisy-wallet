@@ -28,7 +28,8 @@
 	import { formatList, replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		filterUndismissedNotificationQualifiers,
-		isSimpleNotificationDismissed
+		isSimpleNotificationDismissed,
+		toNotificationQualifier
 	} from '$lib/utils/notification.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { solUnreadableTransactionsWarnings } from '$sol/derived/sol-unreadable-transactions.derived';
@@ -113,7 +114,7 @@
 			const notifications: DismissedNotification[] = undismissedNoCanister.map((symbol) => ({
 				Qualified: {
 					kind: { NoIndexCanister: null },
-					qualifier: symbol,
+					qualifier: toNotificationQualifier(symbol),
 					version: NOTIFICATION_VERSIONS.NoIndexCanister
 				}
 			}));

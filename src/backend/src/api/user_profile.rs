@@ -130,8 +130,8 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
 ///   present.
 ///
 /// # Errors
-/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
-///   the batch is too large.
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+///   the batch is too large, or a qualifier is too long.
 #[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn add_user_dismissed_notification(
