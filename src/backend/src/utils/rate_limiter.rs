@@ -564,7 +564,7 @@ mod tests {
         signer::{topup::TopUpCyclesLedgerError, AllowSigningError, GetAllowedCyclesError},
     };
 
-    use super::{RateLimiter, TieredRateLimiter};
+    use super::{RateLimiter, TieredRateLimiter, BTC_UTXO_PAGES_RATE_LIMITER};
 
     fn test_principal(id: u8) -> Principal {
         Principal::from_slice(&[id])
@@ -798,6 +798,25 @@ mod tests {
         assert_eq!(e.max_calls, 1);
         assert_eq!(e.window_ns, 60 * ONE_SEC);
         assert_eq!(e.caller, caller);
+    }
+
+    #[test]
+    fn btc_utxo_pages_allow_20_per_caller_per_minute() {
+        let caller = test_principal(42);
+
+        BTC_UTXO_PAGES_RATE_LIMITER.with(|rl| {
+            for _ in 0..20 {
+                rl.check_at(caller, ONE_SEC).unwrap();
+            }
+
+            let err = rl.check_at(caller, 2 * ONE_SEC).unwrap_err();
+            assert_eq!(err.max_calls, 20);
+            assert_eq!(err.window_ns, 60 * ONE_SEC);
+            assert_eq!(err.caller, caller);
+
+            rl.check_at(test_principal(43), 2 * ONE_SEC).unwrap();
+            rl.check_at(caller, 61 * ONE_SEC).unwrap();
+        });
     }
 
     #[test]

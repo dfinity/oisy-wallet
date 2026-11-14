@@ -386,13 +386,130 @@ fn initialize_default_fee_percentiles(network: BitcoinNetwork) -> Vec<u64> {
 
 #[cfg(test)]
 mod tests {
+    use std::{cell::RefCell, future::ready};
+
+    use candid::Principal;
+    use futures::executor::block_on;
     use ic_cdk::call::{
         CallPerformFailed, CallRejected, Error as CallError, InsufficientLiquidCycleBalance,
         RejectCode,
     };
+    use ic_cdk_bitcoin_canister::{GetUtxosResponse, OutPoint, Txid, Utxo};
     use pretty_assertions::assert_eq;
+    use serde_bytes::ByteBuf;
+    use shared::types::signer::RateLimitError;
 
-    use super::{broadcast_outcome, BroadcastOutcome};
+    use super::{broadcast_outcome, read_further_pages, BroadcastOutcome, GetAllUtxosError};
+
+    fn utxo(id: u8) -> Utxo {
+        Utxo {
+            outpoint: OutPoint {
+                txid: Txid::from([id; 32]),
+                vout: 0,
+            },
+            value: 1_000,
+            height: 100,
+        }
+    }
+
+    /// A page with the UTXO `id`, pointing to the page `next` if any.
+    fn page(id: u8, next: Option<u8>) -> GetUtxosResponse {
+        GetUtxosResponse {
+            utxos: vec![utxo(id)],
+            tip_block_hash: vec![],
+            tip_height: 100,
+            next_page: next.map(|n| ByteBuf::from(vec![n])),
+        }
+    }
+
+    /// Pages 1 to 3, each pointing to the next.
+    fn fetch_from_three_pages(
+        fetched: &RefCell<Vec<u8>>,
+    ) -> impl FnMut(ByteBuf) -> std::future::Ready<Result<GetUtxosResponse, String>> + '_ {
+        move |token| {
+            let id = token[0];
+            fetched.borrow_mut().push(id);
+            ready(Ok(page(id, (id < 3).then_some(id + 1))))
+        }
+    }
+
+    fn rate_limit_error() -> RateLimitError {
+        RateLimitError {
+            max_calls: 20,
+            window_ns: 60_000_000_000,
+            caller: Principal::from_slice(&[1]),
+        }
+    }
+
+    #[test]
+    fn a_single_page_takes_nothing_from_the_budget() {
+        let result = block_on(read_further_pages(
+            page(1, None),
+            || panic!("a single page must not take from the budget"),
+            |_| ready(Err("a single page must not fetch another".to_string())),
+        ));
+
+        assert_eq!(result.ok(), Some(vec![utxo(1)]));
+    }
+
+    #[test]
+    fn every_further_page_is_taken_from_the_budget_before_it_is_read() {
+        let fetched = RefCell::new(vec![]);
+        let taken = RefCell::new(0);
+
+        let result = block_on(read_further_pages(
+            page(1, Some(2)),
+            || {
+                // Taken before the page is read: one more taken than fetched.
+                assert_eq!(*taken.borrow(), fetched.borrow().len());
+                *taken.borrow_mut() += 1;
+                Ok(())
+            },
+            fetch_from_three_pages(&fetched),
+        ));
+
+        assert_eq!(result.ok(), Some(vec![utxo(1), utxo(2), utxo(3)]));
+        assert_eq!(*taken.borrow(), 2);
+        assert_eq!(*fetched.borrow(), vec![2, 3]);
+    }
+
+    #[test]
+    fn a_used_up_budget_stops_before_the_next_page_and_returns_no_utxos() {
+        let fetched = RefCell::new(vec![]);
+        let mut left = 1;
+
+        let result = block_on(read_further_pages(
+            page(1, Some(2)),
+            || {
+                if left == 0 {
+                    return Err(rate_limit_error());
+                }
+                left -= 1;
+                Ok(())
+            },
+            fetch_from_three_pages(&fetched),
+        ));
+
+        assert!(matches!(
+            &result,
+            Err(GetAllUtxosError::RateLimited(e)) if *e == rate_limit_error()
+        ));
+        assert_eq!(*fetched.borrow(), vec![2]);
+    }
+
+    #[test]
+    fn a_failed_page_returns_no_utxos() {
+        let result = block_on(read_further_pages(
+            page(1, Some(2)),
+            || Ok(()),
+            |_| ready(Err("page unavailable".to_string())),
+        ));
+
+        assert!(matches!(
+            &result,
+            Err(GetAllUtxosError::InternalError(msg)) if msg == "page unavailable"
+        ));
+    }
 
     fn rejected(code: RejectCode, message: &str) -> CallError {
         CallError::CallRejected(CallRejected::with_rejection(
