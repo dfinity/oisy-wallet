@@ -245,6 +245,29 @@ fn status_does_not_count_old_profiles_with_recent_updates() {
 }
 
 #[test]
+fn http_request_refuses_update_calls() {
+    let pic_setup = BackendBuilder::default().deploy();
+
+    for path in ["/status", "/metrics", "/does-not-exist"] {
+        let response = pic_setup.update::<HttpResponse>(
+            Principal::anonymous(),
+            "http_request",
+            make_request(path),
+        );
+        assert!(
+            response
+                .as_ref()
+                .is_err_and(|e| e.contains("This method can only be called as a query.")),
+            "an update call to {path} must be refused, got: {response:?}"
+        );
+    }
+
+    // Queries keep working.
+    let (response, _) = fetch_status(&pic_setup);
+    assert_eq!(response.status_code, 200);
+}
+
+#[test]
 fn status_endpoint_returns_404_for_unknown_path() {
     let pic_setup = BackendBuilder::default().deploy();
 
