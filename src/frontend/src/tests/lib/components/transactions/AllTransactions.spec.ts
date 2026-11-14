@@ -13,7 +13,10 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import AllTransactions from '$lib/components/transactions/AllTransactions.svelte';
 import { IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD } from '$lib/constants/app.constants';
-import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
+import {
+	NOTIFICATION_QUALIFIER_MAX_BYTES,
+	NOTIFICATION_VERSIONS
+} from '$lib/constants/notification.constants';
 import { Languages } from '$lib/enums/languages';
 import * as notificationServices from '$lib/services/notification.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
@@ -532,6 +535,48 @@ describe('AllTransactions', () => {
 					]
 				})
 			);
+		});
+
+		it('should dismiss the no-index-canister warning with a long symbol cut to the limit', async () => {
+			const longSymbol = 'N'.repeat(NOTIFICATION_QUALIFIER_MAX_BYTES + 10);
+			icrcCustomTokensStore.setAll([
+				{ data: { ...tokenWithoutIndexCanister, symbol: longSymbol }, certified: true }
+			]);
+
+			const store = get(icrcCustomTokensStore);
+			const tokenId = store?.at(0)?.data.id;
+			assertNonNullish(tokenId);
+			icTransactionsStore.nullify(tokenId);
+
+			const { getByText, queryByText } = render(AllTransactions);
+
+			const expectedText = replacePlaceholders(
+				replaceOisyPlaceholders(en.activity.warning.no_index_canister),
+				{ $token_list: formatList({ items: [longSymbol], language: Languages.ENGLISH }) }
+			);
+
+			const closeButton = getByText(expectedText)
+				.closest('.bg-warning-light')
+				?.querySelector('button');
+			assertNonNullish(closeButton);
+
+			await fireEvent.click(closeButton);
+
+			expect(notificationServices.dismissNotifications).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					notifications: [
+						{
+							Qualified: {
+								kind: { NoIndexCanister: null },
+								qualifier: 'N'.repeat(NOTIFICATION_QUALIFIER_MAX_BYTES),
+								version: NOTIFICATION_VERSIONS.NoIndexCanister
+							}
+						}
+					]
+				})
+			);
+			// The cut qualifier still matches the long symbol, so the warning stays dismissed.
+			expect(queryByText(expectedText)).not.toBeInTheDocument();
 		});
 	});
 
