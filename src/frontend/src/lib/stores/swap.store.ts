@@ -15,6 +15,7 @@ import type { SwapSelectTokenType } from '$lib/types/swap';
 import type { Token, TokenId } from '$lib/types/token';
 import { computeReceiveSupportedTokens } from '$lib/utils/swap-tokens-filter.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 
 export interface SwapError {
@@ -30,10 +31,25 @@ export interface SwapData {
 	destinationToken?: Token;
 }
 
+// `null` is a side a switch left without a token. Unlike `undefined`, it does not fall back to the
+// default token, which can be the very token the switch moved to the other side.
+interface SwapTokensState {
+	sourceToken?: Token | null;
+	destinationToken?: Token | null;
+}
+
+const resolveToken = ({
+	token,
+	fallback
+}: {
+	token: Nullish<Token>;
+	fallback: Token | undefined;
+}): Token | undefined => (token === null ? undefined : (token ?? fallback));
+
 type IsTokensIcrc2Map = Record<string, boolean>;
 
 export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
-	const data = writable<SwapData>(swapData);
+	const data = writable<SwapTokensState>(swapData);
 	const { update, set } = data;
 	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>();
 	const isErc20PermitSupported = writable<IsTokensIcrc2Map | undefined>();
@@ -57,14 +73,13 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	// rather than in the wizard, which Get Token rebuilds on every step, so that each one loads once.
 	const pricedTokenIds = new Set<TokenId>();
 
-	const sourceToken = derived(
-		[data, swappableTokens],
-		([{ sourceToken }, $swappableTokens]) => sourceToken ?? $swappableTokens.sourceToken
+	const sourceToken = derived([data, swappableTokens], ([{ sourceToken }, $swappableTokens]) =>
+		resolveToken({ token: sourceToken, fallback: $swappableTokens.sourceToken })
 	);
 	const destinationToken = derived(
 		[data, swappableTokens],
 		([{ destinationToken }, $swappableTokens]) =>
-			destinationToken ?? $swappableTokens.destinationToken
+			resolveToken({ token: destinationToken, fallback: $swappableTokens.destinationToken })
 	);
 
 	const sourceTokenBalance = derived(
@@ -162,10 +177,20 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			update((state) => {
 				const $swappableTokens = get(swappableTokens);
 
+				const source = resolveToken({
+					token: state.sourceToken,
+					fallback: $swappableTokens.sourceToken
+				});
+				const destination = resolveToken({
+					token: state.destinationToken,
+					fallback: $swappableTokens.destinationToken
+				});
+
+				// A single token moves to the other side and leaves its own side empty.
 				return {
 					...state,
-					sourceToken: state.destinationToken ?? $swappableTokens.destinationToken,
-					destinationToken: state.sourceToken ?? $swappableTokens.sourceToken
+					sourceToken: destination ?? null,
+					destinationToken: source ?? null
 				};
 			});
 		},

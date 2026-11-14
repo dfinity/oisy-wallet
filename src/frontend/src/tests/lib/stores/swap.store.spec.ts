@@ -302,6 +302,79 @@ describe('swapStore', () => {
 		expect(get(destinationToken)).toBe(mockToken2);
 	});
 
+	describe('switchTokens with a single token', () => {
+		it('should move a pay token alone to the receive side', () => {
+			const { sourceToken, destinationToken, switchTokens } = initSwapContext({
+				sourceToken: mockToken1
+			});
+
+			switchTokens();
+
+			expect(get(sourceToken)).toBeUndefined();
+			expect(get(destinationToken)).toBe(mockToken1);
+		});
+
+		it('should move a receive token alone to the pay side', () => {
+			const { sourceToken, destinationToken, switchTokens } = initSwapContext({
+				destinationToken: mockToken1
+			});
+
+			switchTokens();
+
+			expect(get(sourceToken)).toBe(mockToken1);
+			expect(get(destinationToken)).toBeUndefined();
+		});
+
+		// The token a swap opens with (e.g. from its token page) is a default, not a pick.
+		it('should leave the pay side empty when its default token moves to the receive side', () => {
+			mockSwappableTokens.set({ sourceToken: ICP_TOKEN, destinationToken: undefined });
+
+			const { sourceToken, destinationToken, switchTokens } = initSwapContext();
+
+			switchTokens();
+
+			expect(get(sourceToken)).toBeUndefined();
+			expect(get(destinationToken)).toEqual(ICP_TOKEN);
+		});
+
+		it('should leave the pay side empty when a picked pay token moves to the receive side', () => {
+			mockSwappableTokens.set({ sourceToken: ICP_TOKEN, destinationToken: undefined });
+
+			const { sourceToken, destinationToken, switchTokens } = initSwapContext({
+				sourceToken: ETHEREUM_TOKEN
+			});
+
+			switchTokens();
+
+			expect(get(sourceToken)).toBeUndefined();
+			expect(get(destinationToken)).toEqual(ETHEREUM_TOKEN);
+		});
+
+		it('should move the token back on a second switch', () => {
+			mockSwappableTokens.set({ sourceToken: ICP_TOKEN, destinationToken: undefined });
+
+			const { sourceToken, destinationToken, switchTokens } = initSwapContext();
+
+			switchTokens();
+			switchTokens();
+
+			expect(get(sourceToken)).toEqual(ICP_TOKEN);
+			expect(get(destinationToken)).toBeUndefined();
+		});
+
+		it('should take the default tokens again once the swap is reset', () => {
+			mockSwappableTokens.set({ sourceToken: ICP_TOKEN, destinationToken: undefined });
+
+			const { sourceToken, destinationToken, switchTokens, reset } = initSwapContext();
+
+			switchTokens();
+			reset();
+
+			expect(get(sourceToken)).toEqual(ICP_TOKEN);
+			expect(get(destinationToken)).toBeUndefined();
+		});
+	});
+
 	describe('isSourceTokenIcrc2', () => {
 		it('should initialize with empty values', () => {
 			const { isSourceTokenIcrc2 } = initSwapContext({
