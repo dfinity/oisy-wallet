@@ -91,8 +91,9 @@ pub(crate) struct State {
     /// already client-side ciphertext under a per-share key, so there is no
     /// vetKD derivation and no lazy init needed).
     pub(crate) personal_note_shares: PersonalNoteShareMap,
-    /// By-creator index over `personal_note_shares`, used only to enforce the
-    /// per-user active-share cap without scanning the primary map.
+    /// By-creator index over `personal_note_shares`, holding each share's
+    /// expiry: enforces the per-user active-share cap and finds expired shares
+    /// for the hourly prune without scanning the primary map.
     pub(crate) personal_note_shares_by_creator: PersonalNoteSharesByCreatorMap,
     /// Tips: the canister holds no tokens for these, only the record of an
     /// allowance the sender granted under a per-tip subaccount. See `tips`.

@@ -2,6 +2,8 @@
 //! are opaque to the canister; the per-share symmetric key never leaves the
 //! browser (it lives only in the share link's URL fragment).
 
+use std::ops::Bound;
+
 use candid::Principal;
 use ic_cdk::api::{msg_caller, time};
 use shared::types::personal_note_share::{
@@ -188,32 +190,58 @@ pub fn get_personal_note_shares_count() -> Result<u64, PersonalNoteShareError> {
     })
 }
 
-/// Removes every expired share (from both maps) and returns the number
-/// removed. Intended for periodic housekeeping. A full scan is fine for an
-/// hourly sweep — unlike the cap check above, which must avoid scanning the
-/// whole map. Mirrors `token::activity::evict_inactive_tokens`.
-pub fn prune_expired_shares() -> u64 {
-    let now = time();
-    mutate_state(|s| {
-        let expired: Vec<(PersonalNoteShareToken, Principal)> = s
-            .personal_note_shares
-            .iter()
-            .filter(|entry| entry.value().0.is_expired(now))
-            .map(|entry| (entry.key().clone(), entry.value().0.creator))
-            .collect();
+/// Removes the expired shares (from both maps) among the by-creator index
+/// entries that come after `after`, taking them one at a time, for as long as
+/// `within_budget` holds, and always at least one, so that every call makes
+/// progress. Intended for periodic housekeeping, in batches.
+///
+/// Returns the last entry taken while entries remain, or `None` once all of
+/// them are done, together with the number of shares removed.
+///
+/// The index holds each share's expiry, so deciding decodes no record, and
+/// `within_budget` is asked after each entry: one call costs its budget plus
+/// one share, however many shares are stored. Mirrors
+/// `token::activity::evict_inactive_tokens`.
+pub(crate) fn prune_expired_shares(
+    s: &mut State,
+    mut after: Option<PersonalNoteShareCreatorKey>,
+    now_ns: u64,
+    mut within_budget: impl FnMut() -> bool,
+) -> (Option<PersonalNoteShareCreatorKey>, u64) {
+    let mut pruned = 0;
 
-        let removed = expired.len() as u64;
-        for (token, creator) in expired {
-            remove_share(s, &token, creator);
+    loop {
+        let next = match &after {
+            Some(after) => s
+                .personal_note_shares_by_creator
+                .range((Bound::Excluded(after.clone()), Bound::Unbounded))
+                .next(),
+            None => s.personal_note_shares_by_creator.iter().next(),
         }
-        removed
-    })
+        .map(|entry| (entry.key().clone(), entry.value()));
+        let Some((key, expires_at_ns)) = next else {
+            return (None, pruned);
+        };
+
+        // Same test as `PersonalNoteShareRecord::is_expired`.
+        if expires_at_ns <= now_ns {
+            let PersonalNoteShareCreatorKey(StoredPrincipal(creator), token) = &key;
+            remove_share(s, token, *creator);
+            pruned += 1;
+        }
+        after = Some(key);
+
+        if !within_budget() {
+            return (after, pruned);
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use ic_stable_structures::{memory_manager::MemoryManager, DefaultMemoryImpl};
     use pretty_assertions::assert_eq;
+    use serde_bytes::ByteBuf;
 
     use super::*;
     use crate::types::maps::PersonalNoteSharesByCreatorMap;
@@ -307,5 +335,109 @@ mod tests {
         let (bob_active, bob_expired) = partition_creator_shares(&map, bob, now);
         assert_eq!(bob_active, 0);
         assert_eq!(bob_expired.len(), 1);
+    }
+
+    fn creator_key(creator: u8, token: &str) -> PersonalNoteShareCreatorKey {
+        PersonalNoteShareCreatorKey(
+            StoredPrincipal(test_principal(creator)),
+            PersonalNoteShareToken(token.into()),
+        )
+    }
+
+    /// Stores a share in both maps, as `create_personal_note_share` does.
+    fn store_share(creator: u8, token: &str, expires_at_ns: u64) {
+        mutate_state(|s| {
+            s.personal_note_shares.insert(
+                PersonalNoteShareToken(token.into()),
+                Candid(PersonalNoteShareRecord {
+                    creator: test_principal(creator),
+                    ct_content: ByteBuf::from(vec![7u8; 3]),
+                    expires_at_ns,
+                    single_use: false,
+                }),
+            );
+            s.personal_note_shares_by_creator
+                .insert(creator_key(creator, token), expires_at_ns);
+        });
+    }
+
+    fn stored_tokens() -> Vec<String> {
+        read_state(|s| s.personal_note_shares.keys().map(|token| token.0).collect())
+    }
+
+    fn indexed_tokens() -> Vec<String> {
+        read_state(|s| {
+            s.personal_note_shares_by_creator
+                .keys()
+                .map(|key| key.1 .0)
+                .collect()
+        })
+    }
+
+    fn prune(
+        after: Option<PersonalNoteShareCreatorKey>,
+        now_ns: u64,
+        within_budget: impl FnMut() -> bool,
+    ) -> (Option<PersonalNoteShareCreatorKey>, u64) {
+        mutate_state(|s| prune_expired_shares(s, after, now_ns, within_budget))
+    }
+
+    #[test]
+    fn the_prune_removes_only_expired_shares_from_both_maps() {
+        let now = 1_000_000_000u64;
+        store_share(1, "a-live", now + 1);
+        store_share(1, "a-edge", now);
+        store_share(2, "b-live", now + 1);
+        store_share(2, "b-old", now - 5);
+        store_share(3, "c-old", 0);
+
+        assert_eq!(prune(None, now, || true), (None, 3));
+        assert_eq!(stored_tokens(), vec!["a-live", "b-live"]);
+        assert_eq!(
+            indexed_tokens(),
+            vec!["a-live", "b-live"],
+            "the index loses exactly the removed shares"
+        );
+    }
+
+    #[test]
+    fn a_prune_batch_stops_at_its_budget_and_the_next_resumes_after_it() {
+        let now = 1_000_000_000u64;
+        for creator in 1..=5 {
+            store_share(creator, &format!("share-{creator}"), 0);
+        }
+        let two_per_batch = || {
+            let mut taken = 0;
+            move || {
+                taken += 1;
+                taken < 2
+            }
+        };
+
+        let first = prune(None, now, two_per_batch());
+        assert_eq!(first, (Some(creator_key(2, "share-2")), 2));
+        assert_eq!(stored_tokens(), vec!["share-3", "share-4", "share-5"]);
+
+        // The batch resumes after an entry it removed itself.
+        let second = prune(first.0, now, two_per_batch());
+        assert_eq!(second, (Some(creator_key(4, "share-4")), 2));
+
+        assert_eq!(prune(second.0, now, two_per_batch()), (None, 1));
+        assert_eq!(stored_tokens(), Vec::<String>::new());
+        assert_eq!(indexed_tokens(), Vec::<String>::new());
+    }
+
+    #[test]
+    fn a_prune_batch_past_its_budget_still_takes_one_entry() {
+        let now = 1_000_000_000u64;
+        store_share(1, "first", now + 1);
+        store_share(1, "second", 0);
+
+        assert_eq!(
+            prune(None, now, || false),
+            (Some(creator_key(1, "first")), 0),
+            "every batch makes progress, so the prune always ends"
+        );
+        assert_eq!(stored_tokens(), vec!["first", "second"]);
     }
 }

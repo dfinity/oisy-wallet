@@ -224,9 +224,11 @@ one-shot approval, which should preserve their transaction identity.
   `ic_cdk::api::instruction_counter()` passes a budget well below the 40B
   limit, always after at least one item, and schedules the next batch from
   the last key it reached. Take the budget check as a closure so unit tests
-  can drive it. Examples: `contacts::migration::schedule_batch` and the tip
+  can drive it. Examples: `contacts::migration::schedule_batch`, the tip
   sweep (`utils::housekeeping::schedule_tip_sweep_batch` over
-  `tips::service::prune_expired_tips`).
+  `tips::service::prune_expired_tips`) and the share prune
+  (`utils::housekeeping::schedule_share_prune_batch` over
+  `personal_notes::share::service::prune_expired_shares`).
 - **Exchange rates:** Controllers store API keys via `set_api_keys`. Periodic
   refreshes are opt-in: they run only when `coingecko_api_key` is set and
   `exchange_rate_enabled` is `opt true` (`null` / unset is treated as disabled). See
