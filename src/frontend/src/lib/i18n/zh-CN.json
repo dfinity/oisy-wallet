@@ -2426,6 +2426,7 @@
 			"reimbursement": "报销",
 			"twin_token_converted": "从 $twinToken 转换",
 			"ck_token_converted": "从 $ckToken 转换",
+			"converted_to_twin_token": "",
 			"sending_twin_token": "正在发送 $twinToken",
 			"sending_twin_token_failed": "发送 $twinToken 失败",
 			"converting_twin_token": "正在将 $twinToken 转换为 $ckToken",

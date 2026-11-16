@@ -2426,6 +2426,7 @@
 			"reimbursement": "Náhrada",
 			"twin_token_converted": "Převedeno z $twinToken",
 			"ck_token_converted": "Převedeno z $ckToken",
+			"converted_to_twin_token": "",
 			"sending_twin_token": "Odesílání $twinToken",
 			"sending_twin_token_failed": "Odeslání $twinToken selhalo",
 			"converting_twin_token": "Převádění $twinToken na $ckToken",

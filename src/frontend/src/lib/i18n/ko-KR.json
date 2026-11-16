@@ -2426,6 +2426,7 @@
 			"reimbursement": "환불",
 			"twin_token_converted": "$twinToken에서 전환됨",
 			"ck_token_converted": "$ckToken에서 전환됨",
+			"converted_to_twin_token": "",
 			"sending_twin_token": "$twinToken 전송 중",
 			"sending_twin_token_failed": "$twinToken 전송 실패",
 			"converting_twin_token": "$twinToken을 $ckToken으로 전환 중",
