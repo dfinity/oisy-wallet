@@ -388,7 +388,7 @@ Behind `CKSOL_ENABLED` (`src/frontend/src/env/cksol.env.ts`, on for local and st
 
 In ckSOL Activity, a mint reads **Converted from SOL** and a burn reads **Converted to SOL**, where ckBTC and ckETH burns read **Send**. A mint's details add a **Solana transaction** line with the transaction that swept the deposit, and a burn's details name the Solana address the minter pays out to; both come from the memo the minter writes, and both link to the Solana explorer. A burn without such a memo stays **Send**: it may be ckSOL sent straight to the minter, which pays no SOL for it. The list itself names the minter for both, as it does for every mint and burn. A ckSOL added by hand where OISY does not list it keeps plain mint and burn rows.
 
-The Solana side of a conversion reads as one too, in the row and in the transaction details: SOL from the minter's main address reads **Converted from ckSOL**, and SOL sent to the user's own deposit address reads **Converted to ckSOL**. Where ckSOL is enabled, OISY loads both addresses once per session: the main address from the minter's info, and the deposit address with the same call the SOL → ckSOL quote uses.
+The Solana side of a conversion reads as one too, in the row and in the transaction details: SOL from the minter's main address reads **Converted from ckSOL**, and SOL sent to the user's own deposit address reads **Converted to ckSOL**. Where ckSOL is enabled, OISY loads both addresses once per session: the main address from the minter's info, and the deposit address with the same call the SOL → ckSOL quote uses. All four legs show the swap icon in the list, where ckBTC and ckETH mints and burns keep their diagonal arrows.
 
 ---
 

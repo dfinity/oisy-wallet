@@ -1,5 +1,9 @@
 import { IC_CKSOL_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
-import { isCkSolActivityLedger, mapCkSolTransaction } from '$icp/utils/cksol-transactions.utils';
+import {
+	isCkSolActivityLedger,
+	isCkSolConversion,
+	mapCkSolTransaction
+} from '$icp/utils/cksol-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import {
 	mockCkSolBurnMemo,
@@ -44,6 +48,42 @@ describe('cksol-transactions.utils', () => {
 
 		it('should not take another ledger', () => {
 			expect(isCkSolActivityLedger(mockValidIcrcToken)).toBeFalsy();
+		});
+	});
+
+	describe('isCkSolConversion', () => {
+		it('should take every mint as a conversion from SOL', () => {
+			const transaction = createMockIcrcMintTransaction();
+
+			expect(
+				isCkSolConversion(mapCkSolTransaction({ transaction, identity: mockIdentity }))
+			).toBeTruthy();
+		});
+
+		it('should take a burn whose memo names the Solana address as a conversion to SOL', () => {
+			const transaction = createMockIcrcBurnTransaction({
+				memo: mockCkSolBurnMemo(mockSolAddress)
+			});
+
+			expect(
+				isCkSolConversion(mapCkSolTransaction({ transaction, identity: mockIdentity }))
+			).toBeTruthy();
+		});
+
+		it('should not take a burn that stays a send', () => {
+			const transaction = createMockIcrcBurnTransaction();
+
+			expect(
+				isCkSolConversion(mapCkSolTransaction({ transaction, identity: mockIdentity }))
+			).toBeFalsy();
+		});
+
+		it('should not take a transfer', () => {
+			const transaction = createMockIcrcTransferTransaction({ id: 1n, amount: 5n });
+
+			expect(
+				isCkSolConversion(mapCkSolTransaction({ transaction, identity: mockIdentity }))
+			).toBeFalsy();
 		});
 	});
 
