@@ -2425,6 +2425,7 @@
 			"reimbursement": "تعويض",
 			"twin_token_converted": "تم التحويل من $twinToken",
 			"ck_token_converted": "تم التحويل من $ckToken",
+			"converted_to_twin_token": "",
 			"sending_twin_token": "جاري إرسال $twinToken",
 			"sending_twin_token_failed": "فشل إرسال $twinToken",
 			"converting_twin_token": "جاري تحويل $twinToken إلى $ckToken",
