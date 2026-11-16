@@ -661,7 +661,9 @@
 						ref="ck-deposit-account"
 					>
 						<div class="flex flex-col gap-1">
-							<span class="flex flex-wrap items-center gap-2">
+							<!-- In the text flow rather than a flex row: the account runs over more than one line,
+							     and a flex row would wrap the copy icon onto a line of its own. -->
+							<span>
 								{ckDepositAccount}
 
 								<AddressActions
