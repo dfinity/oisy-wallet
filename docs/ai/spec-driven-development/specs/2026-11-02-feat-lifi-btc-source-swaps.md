@@ -282,6 +282,39 @@ reservation stay in one place:
      dfinity/oisy-wallet#14614 added for Chain Fusion and Liquidium rows (the Blockstream lookup in
      `src/frontend/src/lib/rest/blockstream.rest.ts`).
 
+As built (PR 5):
+
+- `sendBtcScriptOutputs` (`btc-send.services.ts`) takes a `BtcScriptOutputsLayout`: the outputs as
+  scripts, the change index and the inputs' sequence. It builds with `buildBtcScriptOutputsPsbt`,
+  then runs the same sign, `beforeBroadcast`, broadcast and after-broadcast steps as `sendBtc`'s
+  backend path, now one shared function. With `BTC_SEND_VIA_BACKEND_ENABLED` off it refuses before
+  building anything.
+- `fetchLifiBtcSwap` (`lifi-btc-swap.services.ts`, params `SwapLifiBtcParams`) executes a swap:
+  1. It refuses an offer whose request is not the reviewed amount and the user's address.
+  2. It re-quotes with `requoteAtLeast`, so the quote signed passes the trust checks and guarantees
+     at least the displayed minimum.
+  3. It reads the deposit, memo and fee outputs with `decodeLifiBtcTransaction`.
+  4. `validateBtcSend` checks the reviewed `utxosFee` against that layout's vsizes. The fee paid is
+     exactly the one reviewed, and a re-quoted layout it no longer prices within ±10% is refused
+     before signing.
+  5. It sends with change index 2 (`LIFI_BTC_CHANGE_INDEX`) and sequence `0xFFFFFFFD`
+     (`LIFI_BTC_SEQUENCE`).
+  6. `beforeBroadcast` creates the row with the txid as `lifi_tx_hash`, with no nonce and no
+     blockhash.
+  7. A definitive refusal deletes the row. After an unclear outcome, the row stays, the destination
+     token is enabled and the error is rethrown for the wizard.
+
+  The bridge binding (PR 6) goes between the decode and the signature.
+
+- The poller maps `BtcNativeMainnet` to `ChainId.BTC` (`lifiChainIdOfTokenId`) and reads a BTC
+  source by its txid on Blockstream:
+  - confirmed: the source is confirmed, and `/v1/status` decides from there;
+  - in a mempool: `Executing`;
+  - unknown: nothing, until `isBtcTransactionNeverLanded` holds, which fails the row with
+    `btc_transaction_never_landed`.
+
+  It needs no EVM address.
+
 The wizard: `SwapBtcWizard.svelte` (`src/frontend/src/btc/components/swap/`) gains the LI.FI case
 next to the NEAR Intents one, and `SwapBtcFees.svelte` the LI.FI fee breakdown (LI.FI fee, bridge
 fee, Bitcoin network fee). The EVM and Solana LI.FI wizards have no terms gate (unlike NEAR Intents'
@@ -463,8 +496,14 @@ reaches production before the dependency spec's PR 10 and a production release o
    the memo only serves LI.FI's tracking.
 3. **Fee address.** `bc1qn2cstnjlvhxf60j3ujeyq0h0rqc7kklap8j94g` was the fee output in every quote
    on both dates. Is it LI.FI's stable, documented BTC fee address?
-4. **Status.** Does `/v1/status` resolve a BTC-source swap from the BTC txid alone, and with which
-   `bridge` / `fromChain` parameters?
+4. **Status.** Answered on 2026-11-16: yes.
+   - **Test:** three completed BTC-source transfers from LI.FI's public
+     `/v2/analytics/transfers?fromChain=20000000000001`, one each through `layerswap` (to Ethereum),
+     `near` (to BNB Chain) and `relaydepository` (to chain 1337).
+   - **Result:** each one's `/v1/status` returned `DONE` / `COMPLETED` with its tool and chains.
+     That held for the bare txid (64 hex digits, no `0x`) alone, and with `fromChain=20000000000001`,
+     `toChain` and `bridge` added.
+   - **Unknown txid:** HTTP 404 with code `1003`, which the poller already reads as `NOT_FOUND`.
 5. **Minimums.** LI.FI's own floor is known: 117 600 sats, below which its fee output exceeds the
    quoted fee (see [Quoting](#quoting)). Still open: the smallest `fromAmount` each bridge quotes,
    in case one is higher (`layerswap` quoted 20 000 sats on 2026-11-13).
