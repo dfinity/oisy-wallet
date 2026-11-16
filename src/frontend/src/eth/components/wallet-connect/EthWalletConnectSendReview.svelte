@@ -152,6 +152,14 @@
 			: undefined
 	);
 
+	// The account in its standard text form: the principal alone for a default account, the
+	// principal and the subaccount for any other. It is the one form wallets and explorers take.
+	let ckDepositAccount = $derived(
+		nonNullish(ckDeposit)
+			? encodeIcrcAccount({ owner: ckDeposit.owner, subaccount: ckDeposit.subaccount })
+			: undefined
+	);
+
 	let swap = $derived(call.type === 'uniswapSwap' ? call.swap : undefined);
 
 	// Each states something the summary rows cannot carry on their own, so several can show at once.
@@ -546,16 +554,22 @@
 					>
 						{ckEthDepositPrincipal.toText()}
 					</WalletConnectModalValue>
-				{:else if nonNullish(ckDeposit)}
-					<!-- The account in its standard text form: the principal alone for a default account,
-					     the principal and the subaccount for any other. -->
+				{:else if nonNullish(ckDeposit) && nonNullish(ckDepositAccount)}
 					<WalletConnectModalValue
 						label={replacePlaceholders($i18n.wallet_connect.text.ck_deposit_recipient, {
 							$ckToken: ckDeposit.ckTokenSymbol
 						})}
 						ref="ck-deposit-account"
 					>
-						{encodeIcrcAccount({ owner: ckDeposit.owner, subaccount: ckDeposit.subaccount })}
+						<span class="flex flex-wrap items-center gap-2">
+							{ckDepositAccount}
+
+							<AddressActions
+								copyAddress={ckDepositAccount}
+								copyAddressText={$i18n.wallet.text.address_copied}
+								inline
+							/>
+						</span>
 					</WalletConnectModalValue>
 				{/if}
 
