@@ -1259,8 +1259,9 @@ const assertCkSolDepositWatched = ({
  * swap. It snapshots the latest deposit id of the account from the registration, the floor every
  * deposit the poller takes for this one has to lie above. The backend refuses it while another
  * SOL → ckSOL row of the user is open, which holds the minter's one deposit per account across tabs
- * and devices, and the transfer then sends nothing. The row is deleted only when the node refuses
- * the transfer. Any other failure may have sent it, so the conversion goes on as sent, ckSOL is
+ * and devices, and the transfer then sends nothing. Once the row is open, the minter is asked again:
+ * a conversion that settled since confirm moved the latest deposit id, and the row is then deleted
+ * with nothing sent. After that, the row is deleted only when the node refuses the transfer. Any other failure may have sent it, so the conversion goes on as sent, ckSOL is
  * enabled, and the poller settles the row as minted or, once the transfer can no longer land, as
  * failed.
  */
@@ -1311,8 +1312,10 @@ export const fetchChainFusionSolSwap = async ({
 		// seen the blockhash yet never passes for one that calls the transfer expired.
 		const { slot, valid } = await isBlockhashValid({ blockhash, network: SolanaNetworks.mainnet });
 
+		let opened: boolean;
+
 		try {
-			return await openChainFusionActiveUserTransaction({
+			opened = await openChainFusionActiveUserTransaction({
 				identity,
 				swapId,
 				direction: { SolToCkSol: null },
@@ -1342,6 +1345,31 @@ export const fetchChainFusionSolSwap = async ({
 
 			throw err;
 		}
+
+		if (!opened) {
+			return false;
+		}
+
+		// With the row open, no other SOL → ckSOL conversion of the user can start. One that settled
+		// while this one waited since confirm moved the latest deposit id: the row's floor would then
+		// take that conversion's mint for this transfer's, and its deposit took the address off the
+		// watchlist. So the minter is asked again, and nothing is sent unless its answer still takes
+		// this deposit above the same floor.
+		try {
+			const rewatched = await registerCkSolDepositAddress({ identity, minterCanisterId });
+
+			assertCkSolDepositWatched({ watched: rewatched, solDeposit, amount });
+
+			if (fromNullable(rewatched.latest_deposit_id) !== latestDepositId) {
+				throw new ChainFusionSolDepositRefusedError('changed');
+			}
+		} catch (err: unknown) {
+			await deleteUnbroadcastActiveUserTransaction({ identity, id: swapId });
+
+			throw err;
+		}
+
+		return true;
 	};
 
 	progress(ProgressStepsSwap.SIGN_TRANSFER);
