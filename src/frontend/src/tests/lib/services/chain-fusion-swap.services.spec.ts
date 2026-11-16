@@ -2172,6 +2172,44 @@ describe('chain-fusion-swap.services', () => {
 				expect(createActiveUserTransaction).not.toHaveBeenCalled();
 			});
 
+			// Acceptance criterion 5: a scan could sweep that balance alone before the transfer lands.
+			it('should send no SOL, once registered, while the deposit address already holds the minimum', async () => {
+				vi.mocked(getSolBalance).mockResolvedValue(MINIMUM_DEPOSIT_AMOUNT);
+
+				await expect(solSwap()).rejects.toMatchObject({ reason: 'inFlight' });
+
+				expect(watchDepositAddress).toHaveBeenCalledOnce();
+				expect(getSolBalance).toHaveBeenCalledExactlyOnceWith({
+					address: DEPOSIT_ADDRESS,
+					network: SolanaNetworks.mainnet
+				});
+				expect(vi.mocked(watchDepositAddress).mock.invocationCallOrder[0]).toBeLessThan(
+					vi.mocked(getSolBalance).mock.invocationCallOrder[0]
+				);
+				expect(sendSol).not.toHaveBeenCalled();
+				expect(createActiveUserTransaction).not.toHaveBeenCalled();
+				expect(enableDestinationToken).not.toHaveBeenCalled();
+			});
+
+			it('should send the SOL while the deposit address holds less than the minimum', async () => {
+				vi.mocked(getSolBalance).mockResolvedValue(MINIMUM_DEPOSIT_AMOUNT - 1n);
+
+				await solSwap();
+
+				expect(sendSol).toHaveBeenCalledOnce();
+			});
+
+			it('should send no SOL when the deposit address balance cannot be read', async () => {
+				const error = new Error('rpc down');
+
+				vi.mocked(getSolBalance).mockRejectedValue(error);
+
+				await expect(solSwap()).rejects.toMatchObject({ reason: 'unavailable', cause: error });
+
+				expect(sendSol).not.toHaveBeenCalled();
+				expect(createActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
 			it('should open no row when the transfer fails before it is signed', async () => {
 				vi.mocked(sendSol).mockRejectedValue(new Error('signer unavailable'));
 
