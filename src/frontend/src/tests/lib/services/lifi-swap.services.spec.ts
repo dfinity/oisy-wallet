@@ -3,6 +3,8 @@ import type * as lifiEnv from '$env/rest/lifi.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { NVDA_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens-erc20/tokens.nvda.env';
 import { USDG_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens-erc20/tokens.usdg.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import {
 	LIFI_QUOTE_REFRESH_INTERVAL_MS,
@@ -30,6 +32,7 @@ import type { LifiTokenRef } from '$lib/types/lifi';
 import { SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockLifiSolSolToUsdc, mockLifiSolUser } from '$tests/mocks/lifi-sol-transaction.mock';
 import {
 	mockLifiBaseUsdcAddress,
@@ -40,6 +43,7 @@ import {
 } from '$tests/mocks/lifi.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { nonNullish } from '@dfinity/utils';
 import {
 	ChainId,
@@ -54,10 +58,20 @@ import {
 } from '@lifi/sdk';
 import type { Writable } from 'svelte/store';
 
-vi.mock('$env/rest/lifi.env', async (importOriginal) => ({
-	...(await importOriginal<typeof lifiEnv>()),
-	LIFI_INTEGRATOR: 'oisy-test'
-}));
+vi.mock('$env/rest/lifi.env', async (importOriginal) => {
+	const original = await importOriginal<typeof lifiEnv>();
+	const { BTC_MAINNET_NETWORK_ID } = await import('$env/networks/networks.btc.env');
+
+	return {
+		...original,
+		LIFI_INTEGRATOR: 'oisy-test',
+		// None is admitted from Bitcoin yet, and without one a BTC source is not quoted.
+		LIFI_ALLOWED_BRIDGES: {
+			...original.LIFI_ALLOWED_BRIDGES,
+			[BTC_MAINNET_NETWORK_ID]: ['layerswap']
+		}
+	};
+});
 
 vi.mock('$lib/derived/tokens.derived', async (importOriginal) => {
 	const { writable } = await import('svelte/store');
@@ -91,6 +105,17 @@ describe('lifi-swap.services', () => {
 
 	const httpFailure = (status: number) =>
 		new SDKError(new HTTPError(new Response('{}', { status }), 'https://li.quest/v1/quote', {}));
+
+	// As the SDK throws it: with LI.FI's own error code read from the body.
+	const lifiFailure = ({ status, code }: { status: number; code: number }) =>
+		new SDKError(
+			Object.assign(
+				new HTTPError(new Response('{}', { status }), 'https://li.quest/v1/quote', {}),
+				{
+					responseBody: { code, message: '' }
+				}
+			)
+		);
 
 	const now = new Date('2026-10-14T10:00:00Z').getTime();
 
@@ -667,6 +692,77 @@ describe('lifi-swap.services', () => {
 			});
 		});
 
+		describe('a BTC source', () => {
+			const btcParams = {
+				...params,
+				sourceToken: BTC_MAINNET_TOKEN,
+				destinationToken: ETHEREUM_TOKEN,
+				amount: 1_000_000n,
+				userAddress: mockBtcAddress,
+				recipientAddress: mockLifiUserAddress
+			};
+
+			beforeEach(() => {
+				btcSendViaBackend.enabled = true;
+			});
+
+			it('should request a quote from the BTC address through the admitted bridges', async () => {
+				vi.mocked(fetchLifiQuote).mockRejectedValue(lifiFailure({ status: 404, code: 1002 }));
+
+				await fetchLifiSwapQuote(btcParams);
+
+				expect(fetchLifiQuote).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						fromChain: ChainId.BTC,
+						toChain: 1,
+						fromToken: 'bitcoin',
+						fromAddress: mockBtcAddress,
+						toAddress: mockLifiUserAddress,
+						fromAmount: '1000000',
+						allowBridges: ['layerswap']
+					})
+				);
+			});
+
+			it('should not request a quote without sending through the backend', async () => {
+				btcSendViaBackend.enabled = false;
+
+				await expect(fetchLifiSwapQuote(btcParams)).resolves.toBeUndefined();
+
+				expect(fetchLifiQuote).not.toHaveBeenCalled();
+			});
+
+			it.each([
+				{
+					status: 404,
+					code: 1003,
+					type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.INSUFFICIENT_FUNDS
+				},
+				{ status: 404, code: 1002, type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE },
+				{ status: 424, code: 1008, type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE }
+			])(
+				'should report LI.FI error $code as $type, with no severity and no second request',
+				async ({ status, code, type }) => {
+					vi.mocked(fetchLifiQuote).mockRejectedValue(lifiFailure({ status, code }));
+
+					await expect(fetchLifiSwapQuote(btcParams)).resolves.toBeUndefined();
+
+					expect(fetchLifiQuote).toHaveBeenCalledOnce();
+
+					const [[{ metadata }]] = vi.mocked(trackEvent).mock.calls;
+
+					expect(metadata).toEqual(
+						expect.objectContaining({
+							result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+							result_error_type: type,
+							result_error_code: String(status)
+						})
+					);
+					expect(metadata).not.toHaveProperty('event_severity');
+				}
+			);
+		});
+
 		describe('cadence', () => {
 			it('should answer unchanged inputs from the cache', async () => {
 				const first = await fetchLifiSwapQuote(params);
@@ -875,6 +971,23 @@ describe('lifi-swap.services', () => {
 						...baseMetadata,
 						result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 						result_error_type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.TIMEOUT,
+						event_severity: PLAUSIBLE_EVENT_SEVERITIES.WARN
+					}
+				});
+			});
+
+			it('should keep reporting a third-party failure from an EVM source as a failed request', async () => {
+				vi.mocked(fetchLifiQuote).mockRejectedValue(lifiFailure({ status: 424, code: 1008 }));
+
+				await expect(fetchLifiSwapQuote(params)).resolves.toBeUndefined();
+
+				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+					metadata: {
+						...baseMetadata,
+						result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+						result_error_type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.REQUEST_FAILED,
+						result_error_code: '424',
 						event_severity: PLAUSIBLE_EVENT_SEVERITIES.WARN
 					}
 				});

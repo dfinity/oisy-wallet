@@ -1,3 +1,4 @@
+import { LIFI_BTC_MIN_AMOUNT_SATOSHIS } from '$btc/constants/lifi.constants';
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import {
 	BASE_NETWORK,
@@ -15,9 +16,11 @@ import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.en
 import { NVDA_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens-erc20/tokens.nvda.env';
 import { USDG_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens-erc20/tokens.usdg.env';
 import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { LIFI_FEE_BPS } from '$eth/constants/lifi.constants';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { LifiQuoteRejectedError } from '$lib/types/errors';
 import type { LifiTokenRef } from '$lib/types/lifi';
@@ -36,6 +39,7 @@ import {
 	toLifiTokenAddress
 } from '$lib/utils/lifi-swap.utils';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import {
 	mockLifiSolSolToUsdc,
@@ -52,6 +56,7 @@ import {
 } from '$tests/mocks/lifi.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { assertNonNullish } from '@dfinity/utils';
 import {
 	ChainId,
@@ -434,6 +439,157 @@ describe('lifi-swap.utils', () => {
 				expect(
 					build({ ...baseParams, sourceToken: baseEthToken, destinationToken: usdcOn(baseNetwork) })
 				).toMatchObject({ denyExchanges: ['someExchange'] });
+			});
+		});
+
+		it('should not quote toward Bitcoin', () => {
+			expect(
+				buildLifiQuoteRequest({
+					...baseParams,
+					destinationToken: BTC_MAINNET_TOKEN,
+					recipientAddress: mockBtcAddress
+				})
+			).toBeUndefined();
+		});
+
+		describe('a BTC source', () => {
+			const recipientAddress = '0x00000000000000000000000000000000000000aa';
+
+			const btcParams = {
+				...baseParams,
+				sourceToken: BTC_MAINNET_TOKEN,
+				destinationToken: ETHEREUM_TOKEN,
+				amount: 1_000_000n,
+				userAddress: mockBtcAddress,
+				recipientAddress
+			};
+
+			beforeEach(() => {
+				btcSendViaBackend.enabled = true;
+			});
+
+			it('should not quote while no bridge is admitted from Bitcoin', () => {
+				expect(buildLifiQuoteRequest(btcParams)).toBeUndefined();
+			});
+
+			it("should set the floor where LI.FI's 294-sat fee output stops exceeding its fee", () => {
+				expect(LIFI_BTC_MIN_AMOUNT_SATOSHIS).toBe(
+					(294n * 10_000n + LIFI_FEE_BPS - 1n) / LIFI_FEE_BPS
+				);
+			});
+
+			describe('with an admitted bridge', () => {
+				beforeEach(() => {
+					vi.resetModules();
+				});
+
+				afterEach(() => {
+					vi.doUnmock('$env/rest/lifi.env');
+					vi.resetModules();
+				});
+
+				const loadWithBtcBridges = async ({
+					bridges = ['layerswap'],
+					denyBridges = [],
+					btcSwapEnabled = true,
+					sendViaBackend = true
+				}: {
+					bridges?: string[];
+					denyBridges?: string[];
+					btcSwapEnabled?: boolean;
+					sendViaBackend?: boolean;
+				} = {}) => {
+					vi.doMock('$env/rest/lifi.env', async (importOriginal) => {
+						const original = await importOriginal<typeof lifiEnv>();
+						const { BTC_MAINNET_NETWORK_ID } = await import('$env/networks/networks.btc.env');
+
+						return {
+							...original,
+							LIFI_BTC_SWAP_ENABLED: btcSwapEnabled,
+							LIFI_DENY_BRIDGES: denyBridges,
+							LIFI_ALLOWED_BRIDGES: {
+								...original.LIFI_ALLOWED_BRIDGES,
+								[BTC_MAINNET_NETWORK_ID]: bridges
+							}
+						};
+					});
+
+					// Network ids are symbols, so the tokens come from the same module graph as the code
+					// under test.
+					const [{ buildLifiQuoteRequest: build }, btcTokens, ethTokens] = await Promise.all([
+						import('$lib/utils/lifi-swap.utils'),
+						import('$env/tokens/tokens.btc.env'),
+						import('$env/tokens/tokens.eth.env')
+					]);
+
+					btcSendViaBackend.enabled = sendViaBackend;
+
+					return {
+						build,
+						params: {
+							...btcParams,
+							sourceToken: btcTokens.BTC_MAINNET_TOKEN,
+							destinationToken: ethTokens.ETHEREUM_TOKEN
+						},
+						btcTestnetToken: btcTokens.BTC_TESTNET_TOKEN
+					};
+				};
+
+				it('should quote from the BTC address toward the recipient on the destination network', async () => {
+					const { build, params } = await loadWithBtcBridges();
+
+					expect(build(params)).toStrictEqual({
+						fromChain: ChainId.BTC,
+						toChain: 1,
+						fromToken: 'bitcoin',
+						toToken: ZERO_ETH_ADDRESS,
+						fromAddress: mockBtcAddress,
+						toAddress: recipientAddress,
+						fromAmount: '1000000',
+						slippage: 0.015,
+						order: 'CHEAPEST',
+						skipSimulation: true,
+						allowDestinationCall: false,
+						allowBridges: ['layerswap']
+					});
+				});
+
+				it('should not quote below 117 600 satoshis', async () => {
+					const { build, params } = await loadWithBtcBridges();
+
+					expect(build({ ...params, amount: 117_599n })).toBeUndefined();
+					expect(build({ ...params, amount: 117_600n })).toMatchObject({ fromAmount: '117600' });
+				});
+
+				it('should not stand the BTC address in for a missing recipient', async () => {
+					const { build, params } = await loadWithBtcBridges();
+
+					expect(build({ ...params, recipientAddress: undefined })).toBeUndefined();
+				});
+
+				it('should not quote without sending through the backend', async () => {
+					const { build, params } = await loadWithBtcBridges({ sendViaBackend: false });
+
+					expect(build(params)).toBeUndefined();
+				});
+
+				it('should not quote with the LI.FI BTC flag off', async () => {
+					const { build, params } = await loadWithBtcBridges({ btcSwapEnabled: false });
+
+					expect(build(params)).toBeUndefined();
+				});
+
+				it('should not quote a BTC testnet source', async () => {
+					const { build, params, btcTestnetToken } = await loadWithBtcBridges();
+
+					expect(build({ ...params, sourceToken: btcTestnetToken })).toBeUndefined();
+				});
+
+				it('should not quote once every admitted bridge is denied', async () => {
+					const { build, params } = await loadWithBtcBridges({ denyBridges: ['layerswap'] });
+
+					expect(build(params)).toBeUndefined();
+				});
 			});
 		});
 	});
@@ -1068,6 +1224,23 @@ describe('lifi-swap.utils', () => {
 						includedSteps: [
 							step({ type: 'cross', tool: 'near', from: baseUsdc, to: solanaUsdc }),
 							step({ type: 'swap', tool: 'jupiter', from: solanaUsdc, to: solanaSol })
+						]
+					})
+				)
+			).toBeUndefined();
+		});
+
+		it('should name none for a route from Bitcoin', () => {
+			const bitcoin = { chainId: ChainId.BTC, address: 'bitcoin' };
+
+			expect(
+				findLifiIntermediateToken(
+					route({
+						from: bitcoin,
+						to: robinhoodNvda,
+						includedSteps: [
+							step({ type: 'cross', tool: 'layerswap', from: bitcoin, to: robinhoodUsdg }),
+							step({ type: 'swap', tool: 'kyberswap', from: robinhoodUsdg, to: robinhoodNvda })
 						]
 					})
 				)
