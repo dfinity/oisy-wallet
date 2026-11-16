@@ -51,13 +51,14 @@ export const filterUndismissedNotificationQualifiers = ({
 	qualifiers: string[];
 	dismissedNotifications: DismissedNotification[];
 }): string[] =>
-	qualifiers.filter(
-		(qualifier) =>
-			!dismissedNotifications.some(
-				(n) =>
-					'Qualified' in n &&
-					kind in n.Qualified.kind &&
-					n.Qualified.qualifier === toNotificationQualifier(qualifier) &&
-					n.Qualified.version === NOTIFICATION_VERSIONS[kind]
-			)
-	);
+	qualifiers.filter((qualifier) => {
+		const storedQualifier = toNotificationQualifier(qualifier);
+
+		return !dismissedNotifications.some(
+			(n) =>
+				'Qualified' in n &&
+				kind in n.Qualified.kind &&
+				n.Qualified.qualifier === storedQualifier &&
+				n.Qualified.version === NOTIFICATION_VERSIONS[kind]
+		);
+	});
