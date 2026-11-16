@@ -83,24 +83,40 @@
 			displayDecimals: change.decimals ?? SOLANA_DEFAULT_DECIMALS
 		});
 
-	// Records from before the redesign carry no summary, and their kind is all the old shape said.
-	let label = $derived(
+	let ckSolConversionLabel = $derived(
 		nonNullish(summary)
-			? (formatSolCkSolConversion({
+			? formatSolCkSolConversion({
 					summary,
 					networkId: token.network.id,
 					...$ckSolConversionAddresses,
 					i18n: $i18n
-				}) ??
-					formatSolTransactionSummary({
+				})
+			: undefined
+	);
+
+	// Records from before the redesign carry no summary, and their kind is all the old shape said.
+	let label = $derived(
+		ckSolConversionLabel ??
+			(nonNullish(summary)
+				? formatSolTransactionSummary({
 						summary,
 						i18n: $i18n,
 						symbolOf,
 						amountOf: swapAmount
-					}))
-			: type === 'send'
-				? $i18n.send.text.send
-				: $i18n.receive.text.receive
+					})
+				: type === 'send'
+					? $i18n.send.text.send
+					: $i18n.receive.text.receive)
+	);
+
+	// A swap, and a leg of a ckSOL conversion like the ckSOL row of the other leg, draw the swap
+	// icon instead of the arrow of the send or receive they are stored as.
+	let iconAriaLabel = $derived(
+		summary?.kind === 'swap'
+			? $i18n.swap.text.swap
+			: nonNullish(ckSolConversionLabel)
+				? $i18n.convert.text.convert_button
+				: undefined
 	);
 
 	// The net change of the token whose page this is: the SOL entry for the native token, the
@@ -147,8 +163,8 @@
 	addresses={showVenues ? venues : undefined}
 	{displayAmount}
 	from={showVenues ? undefined : (fromOwner ?? from)}
-	icon={summary?.kind === 'swap' ? IconConvert : undefined}
-	iconAriaLabel={summary?.kind === 'swap' ? $i18n.swap.text.swap : undefined}
+	icon={nonNullish(iconAriaLabel) ? IconConvert : undefined}
+	{iconAriaLabel}
 	{iconType}
 	onClick={() => modalStore.openSolTransaction({ id: modalId, data: { transaction, token } })}
 	status={transactionStatus}

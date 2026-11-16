@@ -24,6 +24,10 @@ export interface BtcReviewServiceParams {
 	// The recipient's address, which sizes its output in the fee. Before it is known, the fee is
 	// priced for the largest output a send can pay.
 	destination?: OptionString;
+	// The vsizes of every output but the change, for a send with a layout of its own (a LI.FI deposit,
+	// its memo and its fee): they size the fee in place of `destination`, and `amount` is what they
+	// pay together.
+	outputVSizes?: number[];
 	allUtxos: CkBtcMinterDid.Utxo[];
 	feeRateMiliSatoshisPerVByte: bigint;
 }
@@ -37,6 +41,7 @@ export const prepareBtcSend = ({
 	amount,
 	source,
 	destination,
+	outputVSizes,
 	allUtxos,
 	feeRateMiliSatoshisPerVByte
 }: BtcReviewServiceParams): UtxosFee => {
@@ -92,7 +97,7 @@ export const prepareBtcSend = ({
 	const selection = calculateUtxoSelection({
 		availableUtxos: filteredUtxos,
 		amountSatoshis,
-		recipientOutputVSize: btcOutputVSize({ address: destination }),
+		outputVSizes: outputVSizes ?? [btcOutputVSize({ address: destination })],
 		feeRateMiliSatoshisPerVByte,
 		maxInputs: btcSendMaxInputs()
 	});

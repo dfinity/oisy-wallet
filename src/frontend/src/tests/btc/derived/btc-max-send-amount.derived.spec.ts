@@ -77,7 +77,7 @@ describe('initBtcMaxSendAmount', () => {
 			300_000n -
 				calculateFeeSatoshis({
 					numInputs: 2,
-					recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+					outputVSizes: [BTC_LARGEST_OUTPUT_VSIZE],
 					feeRateMiliSatoshisPerVByte
 				})
 		);
@@ -99,7 +99,7 @@ describe('initBtcMaxSendAmount', () => {
 			1_000n -
 				calculateFeeSatoshis({
 					numInputs: 1,
-					recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+					outputVSizes: [BTC_LARGEST_OUTPUT_VSIZE],
 					feeRateMiliSatoshisPerVByte
 				})
 		);
@@ -118,7 +118,7 @@ describe('initBtcMaxSendAmount', () => {
 			100_000n -
 				calculateFeeSatoshis({
 					numInputs: 1,
-					recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+					outputVSizes: [BTC_LARGEST_OUTPUT_VSIZE],
 					feeRateMiliSatoshisPerVByte
 				})
 		);
@@ -165,7 +165,7 @@ describe('initBtcMaxSendAmount', () => {
 		const fee = (numInputs: number) =>
 			calculateFeeSatoshis({
 				numInputs,
-				recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+				outputVSizes: [BTC_LARGEST_OUTPUT_VSIZE],
 				feeRateMiliSatoshisPerVByte
 			});
 

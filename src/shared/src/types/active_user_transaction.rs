@@ -56,12 +56,12 @@ pub const XRP_TX_HASH_LEN: usize = 64;
 
 /// The `external_refs` a LI.FI row is polled with. The row is opened once the
 /// source transaction is broadcast, so all of them are known to the caller and
-/// can be required: the source transaction hash (an EVM tx hash or a Solana
-/// signature) keys both the source-chain check and LI.FI's status endpoint; an
-/// EVM source's nonce is what tells a dropped or replaced transaction from a
-/// pending one; a Solana source's recent blockhash is what tells an expired
-/// transaction from one that can still land. Without them a row could never
-/// reach a terminal status.
+/// can be required: the source transaction hash (an EVM tx hash, a Solana
+/// signature or a BTC txid) keys both the source-chain check and LI.FI's status
+/// endpoint; an EVM source's nonce is what tells a dropped or replaced
+/// transaction from a pending one; a Solana source's recent blockhash is what
+/// tells an expired transaction from one that can still land. Without them a row
+/// could never reach a terminal status.
 pub const LIFI_REF_TX_HASH: &str = "lifi_tx_hash";
 pub const LIFI_REF_NONCE: &str = "lifi_nonce";
 pub const LIFI_REF_BLOCKHASH: &str = "lifi_blockhash";

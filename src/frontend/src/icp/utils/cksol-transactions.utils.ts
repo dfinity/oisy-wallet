@@ -21,6 +21,14 @@ export const isCkSolActivityLedger = (token: Partial<IcToken>): boolean =>
 	CKSOL_ENABLED && isTokenCkSolLedger(token);
 
 /**
+ * Whether a ckSOL transaction, as `mapCkSolTransaction` labels it, is one leg of a conversion:
+ * every mint, and a burn whose memo names the Solana address it pays out to.
+ */
+export const isCkSolConversion = ({ typeLabel }: Pick<IcTransactionUi, 'typeLabel'>): boolean =>
+	typeLabel === 'transaction.label.twin_token_converted' ||
+	typeLabel === 'transaction.label.converted_to_twin_token';
+
+/**
  * ckSOL in Activity: a mint is a conversion from SOL, with the Solana transaction that swept the
  * deposit, and a burn a conversion to SOL, sent to the Solana address in its memo. ckBTC and
  * ckETH call their burns sends.

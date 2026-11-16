@@ -121,6 +121,7 @@ No SDK wraps the ckSOL minter, so OISY adds it the way it added the CMC (#14132)
 - A ckSOL mint reads "Converted from SOL", from the Solana network, with a link to the sweep transaction from its memo.
 - A ckSOL burn reads "Converted to SOL", to the Solana address in its memo, with an explorer link. A burn without that memo stays a send: it may be ckSOL sent straight to the minter, which pays no SOL for it.
 - On Solana, SOL from the minter's main address (`minter_address` of `get_minter_info`) reads "Converted from ckSOL", and SOL sent to the user's deposit address reads "Converted to ckSOL". Where ckSOL is enabled, OISY loads both addresses once per session.
+- All four legs show the swap icon in the list. ckBTC and ckETH keep their arrows until a later PR moves them over.
 
 ## 11. Non-goals
 

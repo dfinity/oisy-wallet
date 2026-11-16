@@ -672,6 +672,40 @@ describe('btc-send.services', () => {
 			});
 		});
 
+		describe('a layout of outputs', () => {
+			// A LI.FI LayerSwap layout: a P2TR deposit, an 18-byte memo and a P2WPKH fee output.
+			// 1 input + 43 + 29 + 31 + change (31) = 213 vB, at 4 sat/vB = 852 sats.
+			const outputVSizes = [43, 29, 31];
+			const feePricedForTheLayout = { ...validUtxosFee, feeSatoshis: 852n };
+
+			it('should check the fee against every output of the layout', async () => {
+				await expect(
+					validateBtcSend({
+						...defaultValidateParams,
+						destination: undefined,
+						outputVSizes,
+						utxosFee: feePricedForTheLayout
+					})
+				).resolves.not.toThrow();
+			});
+
+			it('should refuse the fee of a layout checked against one output', async () => {
+				await expect(
+					validateBtcSend({
+						...defaultValidateParams,
+						destination: undefined,
+						utxosFee: feePricedForTheLayout
+					})
+				).rejects.toMatchObject({ type: BtcSendValidationError.InvalidFeeCalculation });
+			});
+
+			it('should refuse the fee of one output checked against the layout', async () => {
+				await expect(
+					validateBtcSend({ ...defaultValidateParams, destination: undefined, outputVSizes })
+				).rejects.toMatchObject({ type: BtcSendValidationError.InvalidFeeCalculation });
+			});
+		});
+
 		it('should throw InsufficientBalanceForFee error when UTXOs have insufficient funds', async () => {
 			const params = {
 				...defaultValidateParams,
