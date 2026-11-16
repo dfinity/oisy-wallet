@@ -1246,14 +1246,40 @@ const assertCkSolDepositWatched = ({
 };
 
 /**
+ * Whether the deposit address holds less than the minimum deposit amount before the transfer. SOL
+ * already there that reaches the minimum on its own, sent by hand for instance, can be swept alone
+ * by a scan before the transfer lands: the row would take that deposit for the transfer's, and the
+ * address, taken off the watchlist by it, would keep the transfer's SOL unswept. The registration
+ * just made has the minter convert that balance by itself, so a conversion is in progress.
+ *
+ * @throws {ChainFusionSolDepositRefusedError} when it does not, or when the balance cannot be read.
+ */
+const assertCkSolDepositAddressBelowMinimum = async ({
+	address,
+	minimum_deposit_amount
+}: WatchDepositAddressOk) => {
+	let balance: bigint;
+
+	try {
+		balance = await getSolBalance({ address, network: SolanaNetworks.mainnet });
+	} catch (err: unknown) {
+		throw new ChainFusionSolDepositRefusedError('unavailable', { cause: err });
+	}
+
+	if (balance >= minimum_deposit_amount) {
+		throw new ChainFusionSolDepositRefusedError('inFlight');
+	}
+};
+
+/**
  * Executes a ckSOL mint — SOL → ckSOL — as a plain Solana transfer to the minter's per-user
  * deposit address.
  *
  * The address is registered with `watch_deposit_address` first, and nothing moves unless the
- * answer takes the deposit the user reviewed. The registration is what makes the mint
- * independent of OISY: from that call on, the minter itself scans the address until the window
- * ends, and nothing is sent unless a scan is due after the transfer can land, so the ckSOL arrives
- * even if the tab closes during the transfer.
+ * answer takes the deposit the user reviewed and the address holds less than the minimum deposit
+ * amount. The registration is what makes the mint independent of OISY: from that call on, the
+ * minter itself scans the address until the window ends, and nothing is sent unless a scan is due
+ * after the transfer can land, so the ckSOL arrives even if the tab closes during the transfer.
  *
  * The row is opened once the transfer is signed and before it is broadcast, as for the LI.FI Solana
  * swap. It snapshots the latest deposit id of the account from the registration, the floor every
@@ -1261,9 +1287,9 @@ const assertCkSolDepositWatched = ({
  * SOL → ckSOL row of the user is open, which holds the minter's one deposit per account across tabs
  * and devices, and the transfer then sends nothing. Once the row is open, the minter is asked again:
  * a conversion that settled since confirm moved the latest deposit id, and the row is then deleted
- * with nothing sent. After that, the row is deleted only when the node refuses the transfer. Any other failure may have sent it, so the conversion goes on as sent, ckSOL is
- * enabled, and the poller settles the row as minted or, once the transfer can no longer land, as
- * failed.
+ * with nothing sent. After that, the row is deleted only when the node refuses the transfer. Any
+ * other failure may have sent it, so the conversion goes on as sent, ckSOL is enabled, and the
+ * poller settles the row as minted or, once the transfer can no longer land, as failed.
  */
 export const fetchChainFusionSolSwap = async ({
 	identity,
@@ -1298,6 +1324,8 @@ export const fetchChainFusionSolSwap = async ({
 	const watched = await registerCkSolDepositAddress({ identity, minterCanisterId });
 
 	assertCkSolDepositWatched({ watched, solDeposit, amount });
+
+	await assertCkSolDepositAddressBelowMinimum(watched);
 
 	const latestDepositId = fromNullable(watched.latest_deposit_id);
 
