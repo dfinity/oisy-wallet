@@ -600,17 +600,19 @@ const LIFI_EVM_CHAIN_IDS: [u64; 6] = [
 /// The LI.FI poller derives both chains from the token ids, then asks the source
 /// chain and LI.FI's status endpoint about them. A pair LI.FI cannot swap for the
 /// wallet — an EVM chain without a pinned Diamond, a devnet, an NFT, a chain
-/// LI.FI does not serve, or Solana → EVM, which is not executed yet — could never
-/// reach a terminal status, and `data` is immutable after creation, so the row
-/// would occupy one of the user's slots forever. Reject it up front. Unlike the
-/// kind-only checks above, the EVM chains are pinned: they are exactly the
-/// chains LI.FI can be called on.
+/// LI.FI does not serve, Solana → EVM, which is not executed yet, or anything
+/// into BTC or from BTC testnet — could never reach a terminal status, and
+/// `data` is immutable after creation, so the row would occupy one of the user's
+/// slots forever. Reject it up front. Unlike the kind-only checks above, the EVM
+/// chains are pinned: they are exactly the chains LI.FI can be called on. Native
+/// BTC on mainnet is a source only, toward the same destinations as an EVM one.
 fn require_lifi_pair(data: &LifiData) -> Result<(), ActiveUserTransactionError> {
-    let supported = if is_lifi_evm_token(&data.source_token) {
-        is_lifi_evm_token(&data.dest_token) || is_lifi_solana_token(&data.dest_token)
-    } else {
-        is_lifi_solana_token(&data.source_token) && is_lifi_solana_token(&data.dest_token)
-    };
+    let supported =
+        if is_lifi_evm_token(&data.source_token) || is_lifi_btc_token(&data.source_token) {
+            is_lifi_evm_token(&data.dest_token) || is_lifi_solana_token(&data.dest_token)
+        } else {
+            is_lifi_solana_token(&data.source_token) && is_lifi_solana_token(&data.dest_token)
+        };
 
     if !supported {
         return Err(ActiveUserTransactionError::InvalidData(
@@ -655,12 +657,16 @@ fn is_lifi_solana_token(token: &TokenId) -> bool {
     matches!(token, TokenId::SplMainnet(_) | TokenId::SolNativeMainnet)
 }
 
+fn is_lifi_btc_token(token: &TokenId) -> bool {
+    matches!(token, TokenId::BtcNativeMainnet)
+}
+
 /// The poll keys a LI.FI row needs (see `LIFI_REF_TX_HASH`), required because a
 /// row without them could never reach a terminal status and would occupy one of
 /// the user's slots forever. Which keys apply follows from the source chain,
-/// which `require_lifi_pair` has already confined to a pinned EVM chain or
-/// Solana mainnet. Shape checks only: the frontend reads every value from the
-/// transaction it just broadcast.
+/// which `require_lifi_pair` has already confined to a pinned EVM chain, Solana
+/// mainnet or Bitcoin mainnet. Shape checks only: the frontend reads every value
+/// from the transaction it just signed.
 fn require_lifi_refs(
     data: &LifiData,
     refs: &[ActiveUserTransactionRef],
@@ -689,6 +695,14 @@ fn require_lifi_refs(
         if !is_base58_of_len(blockhash, SOLANA_BLOCKHASH_LEN) {
             return invalid(format!("{LIFI_REF_BLOCKHASH} must be a Solana blockhash"));
         }
+    } else if is_lifi_btc_token(&data.source_token) {
+        // A BTC txid as block explorers and LI.FI write it, without `0x`. There is
+        // no nonce: a BTC transaction that never lands is told apart by its txid.
+        if tx_hash.len() != BTC_TXID_LEN || !tx_hash.chars().all(|c| c.is_ascii_hexdigit()) {
+            return invalid(format!(
+                "{LIFI_REF_TX_HASH} must be {BTC_TXID_LEN} hex characters for a BTC source"
+            ));
+        }
     } else {
         let is_evm_tx_hash = tx_hash.len() == EVM_TX_HASH_LEN
             && tx_hash
@@ -715,6 +729,8 @@ fn require_lifi_refs(
 
 /// `0x` plus the 32-byte hash in hex.
 const EVM_TX_HASH_LEN: usize = 66;
+/// A 32-byte BTC txid in hex.
+const BTC_TXID_LEN: usize = 64;
 /// An Ed25519 signature.
 const SOLANA_SIGNATURE_LEN: usize = 64;
 /// A SHA-256 hash.
@@ -1768,6 +1784,8 @@ mod tests {
     const LIFI_SOLANA_SIGNATURE: &str =
         "2Ana1pUpv2ZbMVkwF5FXapYeBEjdxDatLn7nvJkhgTSXbs59SyZSx866bXirPgj8QQVB57uxHJBG1YFvkRbFj4T";
     const LIFI_SOLANA_BLOCKHASH: &str = "7ppk9w8NHnH6ehajvJyU31VcMafwZ3ybRtJWumSyD2wd";
+    // The genesis block's coinbase txid.
+    const LIFI_BTC_TXID: &str = "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b";
 
     fn lifi_ref(key: &str, value: &str) -> ActiveUserTransactionRef {
         ActiveUserTransactionRef {
@@ -1787,6 +1805,8 @@ mod tests {
                 lifi_ref(LIFI_REF_BLOCKHASH, LIFI_SOLANA_BLOCKHASH),
                 lifi_ref(LIFI_REF_TX_HASH, LIFI_SOLANA_SIGNATURE),
             ]
+        } else if *source_token == TokenId::BtcNativeMainnet {
+            vec![lifi_ref(LIFI_REF_TX_HASH, LIFI_BTC_TXID)]
         } else {
             vec![
                 lifi_ref(LIFI_REF_NONCE, "7"),
@@ -1834,6 +1854,10 @@ mod tests {
             (TokenId::EvmNative(4663), spl(USDC_SOLANA)),
             // Solana → Solana.
             (TokenId::SolNativeMainnet, spl(USDC_SOLANA)),
+            // BTC → EVM and BTC → Solana, with a txid and no nonce.
+            (TokenId::BtcNativeMainnet, TokenId::EvmNative(1)),
+            (TokenId::BtcNativeMainnet, erc20(USDC_ETHEREUM, 8453)),
+            (TokenId::BtcNativeMainnet, spl(USDC_SOLANA)),
         ] {
             let (mut map, _mm) = setup();
             let req = lifi_req(source_token.clone(), dest_token.clone());
@@ -1910,11 +1934,37 @@ mod tests {
             TokenId::Erc1155(address(), 1),
             TokenId::IcpNative,
             icrc(CKUSDC_LEDGER),
-            TokenId::BtcNativeMainnet,
+            TokenId::BtcNativeTestnet,
             TokenId::XrpNativeMainnet,
         ] {
             assert_lifi_pair_rejected(token.clone(), TokenId::EvmNative(1), LIFI_PAIR_ERROR);
             assert_lifi_pair_rejected(TokenId::EvmNative(1), token, LIFI_PAIR_ERROR);
+        }
+    }
+
+    #[test]
+    fn lifi_btc_destination_rejected() {
+        // BTC is a LI.FI source only: no swap into it is executed.
+        for source_token in [
+            TokenId::EvmNative(1),
+            erc20(USDC_ETHEREUM, 1),
+            TokenId::SolNativeMainnet,
+            spl(USDC_SOLANA),
+            TokenId::BtcNativeMainnet,
+        ] {
+            assert_lifi_pair_rejected(source_token, TokenId::BtcNativeMainnet, LIFI_PAIR_ERROR);
+        }
+    }
+
+    #[test]
+    fn lifi_btc_source_toward_unsupported_destinations_rejected() {
+        for dest_token in [
+            // A chain without a pinned Diamond, a Solana devnet, and ICP.
+            TokenId::EvmNative(10),
+            TokenId::SolNativeDevnet,
+            TokenId::IcpNative,
+        ] {
+            assert_lifi_pair_rejected(TokenId::BtcNativeMainnet, dest_token, LIFI_PAIR_ERROR);
         }
     }
 
@@ -2031,6 +2081,43 @@ mod tests {
     }
 
     #[test]
+    fn lifi_btc_source_poll_keys() {
+        assert_lifi_refs_rejected(
+            TokenId::BtcNativeMainnet,
+            TokenId::EvmNative(1),
+            vec![lifi_ref(LIFI_REF_NONCE, "7")],
+            "lifi_tx_hash is required",
+        );
+
+        // An EVM hash, `0x` and all, one digit short, a non-hex digit, and a
+        // Solana signature on a BTC row.
+        for tx_hash in [
+            LIFI_EVM_TX_HASH,
+            &LIFI_BTC_TXID[..63],
+            &LIFI_BTC_TXID.replacen('a', "g", 1),
+            LIFI_SOLANA_SIGNATURE,
+        ] {
+            assert_lifi_refs_rejected(
+                TokenId::BtcNativeMainnet,
+                TokenId::EvmNative(1),
+                vec![lifi_ref(LIFI_REF_TX_HASH, tx_hash)],
+                "lifi_tx_hash must be 64 hex characters for a BTC source",
+            );
+        }
+
+        // Upper-case hex is still hex.
+        let (mut map, _mm) = setup();
+        let req = CreateActiveUserTransactionRequest {
+            external_refs: vec![lifi_ref(
+                LIFI_REF_TX_HASH,
+                &LIFI_BTC_TXID.to_ascii_uppercase(),
+            )],
+            ..lifi_req(TokenId::BtcNativeMainnet, TokenId::EvmNative(1))
+        };
+        create(&mut map, principal(), req, 1).expect("create");
+    }
+
+    #[test]
     fn lifi_solana_source_malformed_poll_keys_rejected() {
         // An EVM hash on a Solana row, base58 of the wrong length, and a
         // character outside the base58 alphabet.
@@ -2067,7 +2154,11 @@ mod tests {
     fn lifi_update_cannot_strip_poll_keys() {
         // `external_refs` is replaced wholesale, so an update that drops a poll
         // key would leave the same row `create` refuses.
-        for source_token in [TokenId::EvmNative(1), TokenId::SolNativeMainnet] {
+        for source_token in [
+            TokenId::EvmNative(1),
+            TokenId::SolNativeMainnet,
+            TokenId::BtcNativeMainnet,
+        ] {
             let (mut map, _mm) = setup();
             let req = lifi_req(source_token.clone(), spl(USDC_SOLANA));
             create(&mut map, principal(), req, 1).expect("create");

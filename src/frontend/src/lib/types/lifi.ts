@@ -40,3 +40,18 @@ export interface LifiTokenRef {
 	chainId: number;
 	address: string;
 }
+
+// An output of a LI.FI BTC transaction, as the transaction encodes it.
+export interface LifiBtcOutput {
+	script: Uint8Array;
+	value: bigint;
+}
+
+// The outputs of a LI.FI BTC transaction that OISY keeps, byte for byte, when it builds the
+// transaction around its own inputs and change: the bridge's deposit, LI.FI's memo and LI.FI's fee,
+// in that order. The change, if any, goes between the memo and the fee.
+export interface LifiBtcOutputs {
+	deposit: LifiBtcOutput;
+	memo: LifiBtcOutput;
+	fee: LifiBtcOutput;
+}
