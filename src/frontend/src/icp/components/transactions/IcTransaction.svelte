@@ -4,8 +4,10 @@
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import { cmcDepositAccountCanisterIds } from '$icp/derived/cycles-top-up.derived';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
+	import { isCkSolActivityLedger, isCkSolConversion } from '$icp/utils/cksol-transactions.utils';
 	import { getTopUpCanisterId } from '$icp/utils/cycles-top-up.utils';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
+	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { NANO_SECONDS_IN_SECOND, ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -79,6 +81,12 @@
 		})
 	);
 
+	// Both legs of a ckSOL conversion, here and on Solana, draw the swap icon. ckBTC and ckETH keep
+	// the arrows of their mints and burns.
+	let ckSolConversion = $derived(
+		isIcToken(token) && isCkSolActivityLedger(token) && isCkSolConversion(transaction)
+	);
+
 	const modalId = Symbol();
 </script>
 
@@ -87,6 +95,8 @@
 	{approveSpender}
 	{displayAmount}
 	from={listFrom}
+	icon={ckSolConversion ? IconConvert : undefined}
+	iconAriaLabel={ckSolConversion ? $i18n.convert.text.convert_button : undefined}
 	{iconType}
 	onClick={() => modalStore.openIcTransaction({ id: modalId, data: { transaction, token } })}
 	{status}
