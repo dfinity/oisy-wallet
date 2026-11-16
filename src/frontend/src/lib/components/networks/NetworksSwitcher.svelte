@@ -148,6 +148,7 @@
 	bind:this={dropdown}
 	ariaDescription={$i18n.networks.title}
 	asModalOnMobile
+	buttonHitArea
 	{disabled}
 	testId={NETWORKS_SWITCHER_DROPDOWN}
 	bind:visible

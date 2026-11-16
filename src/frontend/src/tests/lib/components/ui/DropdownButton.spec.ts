@@ -28,6 +28,21 @@ describe('DropdownButton', () => {
 		expect([...button.classList].filter((name) => name.startsWith('border-'))).toEqual([]);
 	});
 
+	it('grows only its tap area on touch screens when asked', () => {
+		const { getByRole } = render(DropdownButton, { props: { ...props, hitArea: true } });
+
+		expect(getByRole('button', { name })).toHaveClass('relative', 'hit-area', 'hit-area-touch');
+	});
+
+	it('grows its box on touch screens by default', () => {
+		const { getByRole } = render(DropdownButton, { props });
+
+		const button = getByRole('button', { name });
+
+		expect(button).not.toHaveClass('hit-area');
+		expect(button).not.toHaveClass('hit-area-touch');
+	});
+
 	it('shows and announces the open state', () => {
 		const { getByRole } = render(DropdownButton, { props: { ...props, opened: true } });
 
