@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import EthFeePriority from '$eth/components/fee/EthFeePriority.svelte';
@@ -133,6 +134,32 @@
 
 	let ckEthHelperUnconfirmed = $derived(call.type === 'ckEthHelperUnconfirmed');
 
+	// A deposit to the minter's helper that deposits to a subaccount mints to whichever account it
+	// names, so the account is stated as the calldata names it and the notice says whether it is the
+	// user's own.
+	let ckDeposit = $derived(call.type === 'ckDeposit' ? call.deposit : undefined);
+
+	let ckDepositRefused = $derived(call.type === 'ckDepositRefused');
+
+	let ckDepositNotice = $derived(
+		nonNullish(ckDeposit)
+			? replacePlaceholders(
+					ckDeposit.ownAccount
+						? $i18n.wallet_connect.text.ck_deposit
+						: $i18n.wallet_connect.text.ck_deposit_other_account,
+					{ $token: ckDeposit.token.symbol, $ckToken: ckDeposit.ckTokenSymbol }
+				)
+			: undefined
+	);
+
+	// The account in its standard text form: the principal alone for a default account, the
+	// principal and the subaccount for any other. It is the one form wallets and explorers take.
+	let ckDepositAccount = $derived(
+		nonNullish(ckDeposit)
+			? encodeIcrcAccount({ owner: ckDeposit.owner, subaccount: ckDeposit.subaccount })
+			: undefined
+	);
+
 	let swap = $derived(call.type === 'uniswapSwap' ? call.swap : undefined);
 
 	// Each states something the summary rows cannot carry on their own, so several can show at once.
@@ -253,13 +280,13 @@
 			: undefined
 	);
 
-	let token = $derived(erc20 ? (listedToken ?? unlistedToken) : $sendToken);
+	let token = $derived(erc20 ? (listedToken ?? unlistedToken) : (ckDeposit?.token ?? $sendToken));
 
 	let tokenExplorerUrl = $derived(
 		`${getExplorerUrl({ network: sourceNetworkProp })}/token/${destination}`
 	);
 
-	let amountDisplay = $derived(erc20 ? decodedErc20Data?.value : amount);
+	let amountDisplay = $derived(erc20 ? decodedErc20Data?.value : (ckDeposit?.amount ?? amount));
 
 	// A transfer moves tokens to the address encoded in the calldata, not to the
 	// contract the transaction is addressed to. Any other token call is addressed to the token
@@ -296,8 +323,11 @@
 	// A call OISY could not read is in the same position: the native value is all the review knows,
 	// and a zero there is not a summary of the request. Printing "0 ETH" as the amount of an
 	// unreviewed contract call is the misstatement this review exists to prevent, so the row is
-	// dropped rather than filled with a figure that describes nothing.
-	let noAmount = $derived((setApprovalForAll || unknownCall) && amount === ZERO);
+	// dropped rather than filled with a figure that describes nothing. A deposit held until OISY can
+	// check it is in the same position: a token deposit sends no native value at all.
+	let noAmount = $derived(
+		(setApprovalForAll || unknownCall || ckEthHelperUnconfirmed) && amount === ZERO
+	);
 
 	let balance = $derived(
 		nonNullish(unlistedToken)
@@ -357,6 +387,20 @@
 	{:else if nonNullish(ckEthDepositPrincipal)}
 		<MessageBox level="info" testId="wallet-connect-cketh-deposit">
 			{$i18n.wallet_connect.text.cketh_deposit}
+		</MessageBox>
+	{:else if ckDepositRefused}
+		<MessageBox level="error" testId="wallet-connect-ck-deposit-refused">
+			{$i18n.wallet_connect.text.ck_deposit_refused}
+		</MessageBox>
+	{:else if nonNullish(ckDeposit)}
+		<!-- A deposit to another account is one OISY signs, so the notice warns rather than refuses. -->
+		<MessageBox
+			level={ckDeposit.ownAccount ? 'info' : 'warning'}
+			testId={ckDeposit.ownAccount
+				? 'wallet-connect-ck-deposit'
+				: 'wallet-connect-ck-deposit-other-account'}
+		>
+			{ckDepositNotice}
 		</MessageBox>
 	{:else if unknownCall}
 		<WalletConnectAcknowledgement
@@ -510,6 +554,23 @@
 					>
 						{ckEthDepositPrincipal.toText()}
 					</WalletConnectModalValue>
+				{:else if nonNullish(ckDeposit) && nonNullish(ckDepositAccount)}
+					<WalletConnectModalValue
+						label={replacePlaceholders($i18n.wallet_connect.text.ck_deposit_recipient, {
+							$ckToken: ckDeposit.ckTokenSymbol
+						})}
+						ref="ck-deposit-account"
+					>
+						<span class="flex flex-wrap items-center gap-2">
+							{ckDepositAccount}
+
+							<AddressActions
+								copyAddress={ckDepositAccount}
+								copyAddressText={$i18n.wallet.text.address_copied}
+								inline
+							/>
+						</span>
+					</WalletConnectModalValue>
 				{/if}
 
 				{@render fee()}
@@ -533,7 +594,8 @@
 				unverifiableErc20 ||
 				unverifiableSetApprovalForAll ||
 				ckEthDepositRefused ||
-				ckEthHelperUnconfirmed}
+				ckEthHelperUnconfirmed ||
+				ckDepositRefused}
 			{onApprove}
 			{onReject}
 		/>
