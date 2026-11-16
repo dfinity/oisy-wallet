@@ -3,6 +3,7 @@ import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.en
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
+import { BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS } from '$lib/constants/swap.constants';
 import en from '$lib/i18n/en.json';
 import { btcTransactionStatus } from '$lib/rest/blockstream.rest';
@@ -125,6 +126,7 @@ describe('lifi-active-tx.services', () => {
 		resetLifiActiveTxState();
 		resetEvmSourceTxObservations();
 		resetSolSourceTxObservations();
+		activeUserTransactionsServices.resetBtcNeverLandedChecks();
 
 		applySpy.mockResolvedValue(true);
 
@@ -571,6 +573,37 @@ describe('lifi-active-tx.services', () => {
 			await poll([btcTx()]);
 
 			expect(fetchLifiStatus).not.toHaveBeenCalled();
+			expect(lastUpdate()).toEqual({
+				status: { Failed: null },
+				error: en.send.error.btc_transaction_never_landed
+			});
+		});
+
+		it('starts the run of "not found" answers over once the network has seen the txid', async () => {
+			neverLandedSpy.mockRestore();
+
+			// Past the grace period of its last write.
+			const tx = { ...btcTx(), updated_at_ns: BigInt(now - 2 * 60 * 60 * 1_000) * 1_000_000n };
+
+			vi.mocked(btcTransactionStatus).mockResolvedValue(undefined);
+
+			await poll([tx]);
+
+			await vi.advanceTimersByTimeAsync(60_000);
+			vi.mocked(btcTransactionStatus).mockResolvedValueOnce({ confirmed: false });
+			await poll([tx]);
+
+			expect(lastUpdate()).toEqual({ status: { Executing: null } });
+
+			// Not found again: the first answer of a new run, not the second of the old one.
+			await vi.advanceTimersByTimeAsync(BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS);
+			await poll([tx]);
+
+			expect(lastUpdate()).toEqual({});
+
+			await vi.advanceTimersByTimeAsync(BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS);
+			await poll([tx]);
+
 			expect(lastUpdate()).toEqual({
 				status: { Failed: null },
 				error: en.send.error.btc_transaction_never_landed

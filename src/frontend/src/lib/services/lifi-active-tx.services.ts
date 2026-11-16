@@ -14,7 +14,8 @@ import { btcTransactionStatus } from '$lib/rest/blockstream.rest';
 import { fetchLifiStatus } from '$lib/rest/lifi.rest';
 import {
 	applyActiveUserTransactionPollUpdate,
-	isBtcTransactionNeverLanded
+	isBtcTransactionNeverLanded,
+	noteBtcTransactionSeen
 } from '$lib/services/active-user-transactions.services';
 import { readEvmSourceTxOutcome } from '$lib/services/evm-source-tx.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -406,6 +407,10 @@ const checkBtcSource = async ({
 	txHash: string;
 }): Promise<boolean> => {
 	const status = await btcTransactionStatus({ txid: txHash });
+
+	if (nonNullish(status)) {
+		noteBtcTransactionSeen(tx.id);
+	}
 
 	if (status?.confirmed === true) {
 		sourceConfirmed.add(tx.id);

@@ -313,7 +313,9 @@ As built (PR 5):
   - unknown: nothing, until `isBtcTransactionNeverLanded` holds, which fails the row with
     `btc_transaction_never_landed`.
 
-  It needs no EVM address.
+  It needs no EVM address. A sighting of the txid ends that helper's run of "not found" answers
+  (`noteBtcTransactionSeen`), so not found, seen, then not found again does not fail the row. The
+  lookup (`btcTransactionStatus`) has a 10 s deadline, since every provider's poller waits on it.
 
 The wizard: `SwapBtcWizard.svelte` (`src/frontend/src/btc/components/swap/`) gains the LI.FI case
 next to the NEAR Intents one, and `SwapBtcFees.svelte` the LI.FI fee breakdown (LI.FI fee, bridge
