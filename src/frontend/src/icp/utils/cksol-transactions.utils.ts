@@ -21,8 +21,9 @@ export const isCkSolActivityLedger = (token: Partial<IcToken>): boolean =>
 	CKSOL_ENABLED && isTokenCkSolLedger(token);
 
 /**
- * ckSOL in Activity, as ckBTC and ckETH: a mint is a conversion from SOL, with the Solana
- * transaction that swept the deposit, and a burn a send to the Solana address in its memo.
+ * ckSOL in Activity: a mint is a conversion from SOL, with the Solana transaction that swept the
+ * deposit, and a burn a conversion to SOL, sent to the Solana address in its memo. ckBTC and
+ * ckETH call their burns sends.
  *
  * A mint needs no memo for its label: only the minter mints ckSOL, and only when it converts a
  * deposit, since it reimburses nothing.
@@ -69,15 +70,18 @@ export const mapCkSolTransaction = ({
 
 	const to = burnMemoAddress(fromNullable(burn.memo));
 
+	// `withdraw_sol` writes the Solana address into the memo of every burn it makes. A burn without
+	// one OISY can read may also be ckSOL sent straight to the minter, which pays no SOL for it, so
+	// it stays a send.
 	return {
 		...tx,
-		typeLabel: 'send.text.send',
 		...(nonNullish(to)
 			? {
+					typeLabel: 'transaction.label.converted_to_twin_token',
 					to,
 					toExplorerUrl: solAccountExplorerUrl({ network: SOLANA_MAINNET_NETWORK, address: to })
 				}
-			: { toLabel: 'transaction.label.twin_network' })
+			: { typeLabel: 'send.text.send', toLabel: 'transaction.label.twin_network' })
 	};
 };
 

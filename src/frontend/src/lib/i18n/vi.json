@@ -2426,6 +2426,7 @@
 			"reimbursement": "Hoàn tiền",
 			"twin_token_converted": "Đã chuyển đổi từ $twinToken",
 			"ck_token_converted": "Đã chuyển đổi từ $ckToken",
+			"converted_to_twin_token": "",
 			"sending_twin_token": "Đang gửi $twinToken",
 			"sending_twin_token_failed": "Gửi $twinToken thất bại",
 			"converting_twin_token": "Đang chuyển đổi $twinToken sang $ckToken",
