@@ -1466,6 +1466,13 @@ describe('EthWalletConnectSendReview', () => {
 				encodeIcrcAccount({ owner: pool, subaccount })
 			);
 
+			// The account is long, so it can be copied whole, as wallets and explorers take it.
+			expect(
+				getByRole('button', {
+					name: `${en.core.text.copy}: ${encodeIcrcAccount({ owner: pool, subaccount })}`
+				})
+			).toBeInTheDocument();
+
 			// OISY signs it once the user approves, as it does a transfer to any address.
 			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 		});
