@@ -2085,6 +2085,7 @@ interface I18nTransaction {
 		reimbursement: string;
 		twin_token_converted: string;
 		ck_token_converted: string;
+		converted_to_twin_token: string;
 		sending_twin_token: string;
 		sending_twin_token_failed: string;
 		converting_twin_token: string;

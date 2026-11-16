@@ -2418,6 +2418,7 @@
 			"reimbursement": "प्रतिपूर्ति",
 			"twin_token_converted": "$twinToken से परिवर्तित",
 			"ck_token_converted": "$ckToken से परिवर्तित",
+			"converted_to_twin_token": "",
 			"sending_twin_token": "$twinToken भेज रहा है",
 			"sending_twin_token_failed": "$twinToken भेजना विफल",
 			"converting_twin_token": "$twinToken को $ckToken में बदल रहा है",

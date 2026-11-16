@@ -85,20 +85,20 @@ describe('cksol-transactions.utils', () => {
 			expect(spyConsoleError).toHaveBeenCalledOnce();
 		});
 
-		it('should read a burn as a send to the Solana address in its memo', () => {
+		it('should read a burn as a conversion to the Solana address in its memo', () => {
 			const transaction = createMockIcrcBurnTransaction({
 				memo: mockCkSolBurnMemo(mockSolAddress)
 			});
 
 			expect(mapCkSolTransaction({ transaction, identity: mockIdentity })).toStrictEqual({
 				...mapIcrcTransaction({ transaction, identity: mockIdentity }),
-				typeLabel: 'send.text.send',
+				typeLabel: 'transaction.label.converted_to_twin_token',
 				to: mockSolAddress,
 				toExplorerUrl: `https://solscan.io/account/${mockSolAddress}/`
 			});
 		});
 
-		it('should name the Solana network for a burn without a memo', () => {
+		it('should keep a burn without a memo a send to the Solana network', () => {
 			const result = mapCkSolTransaction({
 				transaction: createMockIcrcBurnTransaction(),
 				identity: mockIdentity
@@ -110,7 +110,7 @@ describe('cksol-transactions.utils', () => {
 			expect(result.toExplorerUrl).toBeUndefined();
 		});
 
-		it('should name the Solana network for a burn whose memo does not decode', () => {
+		it('should keep a burn whose memo does not decode a send to the Solana network', () => {
 			const spyConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 			const result = mapCkSolTransaction({
@@ -118,6 +118,7 @@ describe('cksol-transactions.utils', () => {
 				identity: mockIdentity
 			});
 
+			expect(result.typeLabel).toBe('send.text.send');
 			expect(result.toLabel).toBe('transaction.label.twin_network');
 			expect(result.to).toBeUndefined();
 			expect(spyConsoleError).toHaveBeenCalledOnce();

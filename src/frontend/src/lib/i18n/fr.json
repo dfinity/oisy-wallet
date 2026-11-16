@@ -2418,6 +2418,7 @@
 			"reimbursement": "Remboursement",
 			"twin_token_converted": "Converti depuis $twinToken",
 			"ck_token_converted": "Converti depuis $ckToken",
+			"converted_to_twin_token": "",
 			"sending_twin_token": "Envoi de $twinToken",
 			"sending_twin_token_failed": "L'envoi de $twinToken a échoué",
 			"converting_twin_token": "Conversion de $twinToken en $ckToken",
