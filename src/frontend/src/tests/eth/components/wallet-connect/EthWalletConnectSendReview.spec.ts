@@ -1576,7 +1576,16 @@ describe('EthWalletConnectSendReview', () => {
 				);
 				expect(queryByTestId(otherAccountTestId)).not.toBeInTheDocument();
 
-				expect(container.querySelector('#ck-deposit-account')).toHaveTextContent(
+				// The account the deposit goes to, and under it the pool OISY read it to be.
+				const account = container.querySelector('#ck-deposit-account');
+
+				expect(account).toHaveTextContent(
+					encodeIcrcAccount({
+						owner: Principal.fromText(mockLiquidiumUsdtPoolId),
+						subaccount: mockLiquidiumSupplySubaccount
+					})
+				);
+				expect(account).toHaveTextContent(
 					replacePlaceholders(en.wallet_connect.text.ck_deposit_liquidium_pool, { $asset: 'USDT' })
 				);
 

@@ -660,20 +660,27 @@
 						})}
 						ref="ck-deposit-account"
 					>
-						<span class="flex flex-wrap items-center gap-2">
-							{nonNullish(liquidiumPool)
-								? replacePlaceholders($i18n.wallet_connect.text.ck_deposit_liquidium_pool, {
-										$asset: liquidiumPool.asset
-									})
-								: ckDepositAccount}
+						<div class="flex flex-col gap-1">
+							<span class="flex flex-wrap items-center gap-2">
+								{ckDepositAccount}
 
-							<!-- Copies the account itself, also where the row names the pool it belongs to. -->
-							<AddressActions
-								copyAddress={ckDepositAccount}
-								copyAddressText={$i18n.wallet.text.address_copied}
-								inline
-							/>
-						</span>
+								<AddressActions
+									copyAddress={ckDepositAccount}
+									copyAddressText={$i18n.wallet.text.address_copied}
+									inline
+								/>
+							</span>
+
+							<!-- Under the account, as the review names a known destination under its address: what is
+							     signed is the account, and the name is what OISY read from Liquidium. -->
+							{#if nonNullish(liquidiumPool)}
+								<span>
+									{replacePlaceholders($i18n.wallet_connect.text.ck_deposit_liquidium_pool, {
+										$asset: liquidiumPool.asset
+									})}
+								</span>
+							{/if}
+						</div>
 					</WalletConnectModalValue>
 				{/if}
 
