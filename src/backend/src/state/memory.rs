@@ -86,6 +86,10 @@ pub(crate) const TIP_SECRETS_ENCRYPTED_MAPS_MEMORY_ID: MemoryId = MemoryId::new(
 // Per-user "seen up to" mark over the active user transactions, keyed by principal.
 pub(crate) const ACTIVE_USER_TRANSACTIONS_SEEN_MEMORY_ID: MemoryId = MemoryId::new(27);
 
+// The private key that signs OnRamper widget URLs with Signature V2. Kept out of the `ApiKeys`
+// cell, whose getter returns every field to controllers.
+pub(crate) const ONRAMPER_SIGNING_KEY_MEMORY_ID: MemoryId = MemoryId::new(28);
+
 thread_local! {
     pub(crate) static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
         MemoryManager::init(DefaultMemoryImpl::default())

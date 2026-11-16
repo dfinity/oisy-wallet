@@ -15,7 +15,7 @@ use crate::{
         ACTIVE_USER_TRANSACTIONS_MEMORY_ID, ACTIVE_USER_TRANSACTIONS_SEEN_MEMORY_ID,
         AGREEMENT_HISTORY_MEMORY_ID, API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID,
         CONFIG_MEMORY_ID, CONTACT_IMAGE_MEMORY_ID, CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID,
-        MEMORY_MANAGER, PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID,
+        MEMORY_MANAGER, ONRAMPER_SIGNING_KEY_MEMORY_ID, PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID,
         PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID,
         PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID, PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID,
         PERSONAL_NOTE_SHARES_MEMORY_ID, TIPS_BY_SENDER_MEMORY_ID, TIPS_MEMORY_ID,
@@ -29,9 +29,9 @@ use crate::{
         maps::{
             ActiveUserTransactionsMap, ActiveUserTransactionsSeenMap, AgreementHistoryMap,
             ApiKeysCell, BtcUserPendingTransactionsMap, ConfigCell, ContactImageMap, ContactMap,
-            CustomTokenMap, ExchangeRateMap, PersonalNoteShareMap, PersonalNoteSharesByCreatorMap,
-            TipMap, TipsBySenderMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap,
-            UserTokenMap, UserTransactionsMap,
+            CustomTokenMap, ExchangeRateMap, OnramperSigningKeyCell, PersonalNoteShareMap,
+            PersonalNoteSharesByCreatorMap, TipMap, TipsBySenderMap, TokenActivityMap,
+            UserProfileMap, UserProfileUpdatedMap, UserTokenMap, UserTransactionsMap,
         },
         storable::Candid,
     },
@@ -43,6 +43,9 @@ pub(crate) mod token_id_keys;
 pub(crate) struct State {
     pub(crate) config: ConfigCell,
     pub(crate) api_keys: ApiKeysCell,
+    /// The Signature V2 key for `OnRamper` widget URLs. Read and written only by
+    /// `onramper::service`, so that no endpoint returns it.
+    pub(crate) onramper_signing_key: OnramperSigningKeyCell,
     /// Initially intended for ERC20 tokens only, this field stores the list of tokens set by the
     /// users.
     pub(crate) user_token: UserTokenMap,
@@ -129,6 +132,10 @@ thread_local! {
         MEMORY_MANAGER.with(|mm| State {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None),
             api_keys: ApiKeysCell::init(mm.borrow().get(API_KEYS_MEMORY_ID), None),
+            onramper_signing_key: OnramperSigningKeyCell::init(
+                mm.borrow().get(ONRAMPER_SIGNING_KEY_MEMORY_ID),
+                None,
+            ),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
             custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
             // Use `UserProfileModel` to access and manage access to these states

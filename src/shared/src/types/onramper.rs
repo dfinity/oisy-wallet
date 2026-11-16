@@ -1,9 +1,12 @@
-//! Types for the `OnRamper` widget URL signing endpoint.
+//! Types for the `OnRamper` widget URL signing endpoints.
 //!
-//! `OnRamper` requires widget URLs to carry an HMAC-SHA256 signature over the three sensitive
+//! V1: `OnRamper` requires widget URLs to carry an HMAC-SHA256 signature over the three sensitive
 //! parameters (`wallets`, `walletAddressTags`, `networkWallets`). The signed string follows
 //! `OnRamper`'s canonicalization rules (alphabetical sort, lowercase crypto / network ids,
 //! no URL encoding). See <https://docs.onramper.com/docs/signing-widget-url>.
+//!
+//! V2: an Ed25519 signature over `apiKey` and the other signed parameters, with a timestamp and a
+//! single-use nonce. See <https://docs.onramper.com/docs/widget-sign-a-url-v2>.
 
 use candid::{CandidType, Deserialize};
 
@@ -12,6 +15,9 @@ use crate::types::signer::RateLimitError;
 /// A `(key, value)` entry of an `OnRamper` signed parameter — e.g. `(btc, <address>)` inside
 /// `wallets`, or `(ethereum, <address>)` inside `networkWallets`. The canister normalizes the
 /// `key` to lowercase before signing.
+///
+/// In `SignOnramperWidgetUrlV2Request::params`, an entry is a whole widget parameter instead: its
+/// name and its value as it goes into the URL before encoding, e.g. `(onlyCryptos, btc,eth)`.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct OnramperSignedEntry {
     pub key: String,
@@ -63,4 +69,74 @@ pub enum SignOnramperWidgetUrlError {
     /// read failed), so the supplied address could not be verified. The request is rejected
     /// rather than signing an unverified address.
     AddressDerivationFailed,
+}
+
+/// Request body for `sign_onramper_widget_url_v2`.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
+pub struct SignOnramperWidgetUrlV2Request {
+    /// The parameters to sign as `(name, value)` entries, `apiKey` included: every parameter of
+    /// the URL except `networkWallets` and display-only ones such as `themeName`. Signed only with
+    /// Signature V2; the V1 fallback signs `network_wallets` alone.
+    pub params: Vec<OnramperSignedEntry>,
+    /// `<networkId>:<address>` pairs for the `networkWallets` parameter. Each address must be the
+    /// one the backend derives for the caller on that network.
+    pub network_wallets: Vec<OnramperSignedEntry>,
+}
+
+/// A widget URL query signed with `OnRamper`'s Signature V2.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct OnramperSignedQueryV2 {
+    /// The signed parameters, then `sigV2`, `sigV2Timestamp`, `sigV2Nonce` and `sigV2Fields`, all
+    /// encoded as `URLSearchParams` does. The frontend puts it after the `?` as it is and adds
+    /// only display parameters. It works once: `OnRamper` uses up the nonce when the URL first
+    /// loads.
+    pub query: String,
+}
+
+/// Successful response of `sign_onramper_widget_url_v2`.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SignOnramperWidgetUrlV2Response {
+    /// The backend holds no V2 key: the V1 signature, as `sign_onramper_widget_url` returns it.
+    V1(SignOnramperWidgetUrlResponse),
+    /// The backend holds a V2 key: the whole query, signed with V2.
+    V2(OnramperSignedQueryV2),
+}
+
+/// Errors returned by `sign_onramper_widget_url_v2`.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SignOnramperWidgetUrlV2Error {
+    /// The backend holds neither a V2 key nor a V1 secret, so the widget cannot open.
+    NotConfigured,
+    /// The caller exceeded the per-principal rate limit, which this endpoint shares with
+    /// `sign_onramper_widget_url`.
+    RateLimited(RateLimitError),
+    /// As for `sign_onramper_widget_url`: a supplied address is not the caller's.
+    AddressMismatch,
+    /// As for `sign_onramper_widget_url`: an address could not be derived, so it could not be
+    /// verified.
+    AddressDerivationFailed,
+    /// A parameter is not one the backend signs, comes twice, or has a value outside its form or
+    /// size, or `apiKey` is missing. Carries the parameter's name. Nothing is signed.
+    InvalidParam(String),
+    /// The backend could not get random bytes for the nonce.
+    NonceUnavailable,
+}
+
+impl From<SignOnramperWidgetUrlError> for SignOnramperWidgetUrlV2Error {
+    fn from(error: SignOnramperWidgetUrlError) -> Self {
+        match error {
+            SignOnramperWidgetUrlError::SecretNotConfigured => Self::NotConfigured,
+            SignOnramperWidgetUrlError::RateLimited(limit) => Self::RateLimited(limit),
+            SignOnramperWidgetUrlError::AddressMismatch => Self::AddressMismatch,
+            SignOnramperWidgetUrlError::AddressDerivationFailed => Self::AddressDerivationFailed,
+        }
+    }
+}
+
+/// Errors returned by `set_onramper_signing_key`.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SetOnramperSigningKeyError {
+    /// The text is not an Ed25519 private key in PKCS#8 PEM, as
+    /// `openssl genpkey -algorithm ED25519` writes it.
+    InvalidKey,
 }

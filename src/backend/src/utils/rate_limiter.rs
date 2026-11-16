@@ -62,9 +62,10 @@ thread_local! {
     pub(crate) static BTC_GET_BALANCE_RATE_LIMITER: RateLimiter =
         RateLimiter::new(20, 60 * 1_000_000_000);
 
-    /// Rate-limits `sign_onramper_widget_url`: max 30 calls per caller per minute. The widget
-    /// re-signs on reactive input changes, so the limit is generous for legitimate use while still
-    /// bounding abuse of the endpoint as a signing oracle for the shared `OnRamper` secret.
+    /// Rate-limits `sign_onramper_widget_url` and `sign_onramper_widget_url_v2` together: max 30
+    /// calls per caller per minute across both. The widget re-signs on reactive input changes, so
+    /// the limit is generous for legitimate use while still bounding abuse of the endpoints as a
+    /// signing oracle for `OnRamper`'s secret or key.
     pub(crate) static SIGN_ONRAMPER_WIDGET_URL_RATE_LIMITER: RateLimiter =
         RateLimiter::new(30, 60 * 1_000_000_000);
 

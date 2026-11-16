@@ -11,6 +11,10 @@
 //! underivable addresses are rejected. The expected BTC and SOL addresses are derived from
 //! `PocketIC`'s master keys along the signer's full path, which checks the backend's derivation
 //! from the signer's root key against `PocketIC`'s own.
+//!
+//! `sign_onramper_widget_url_v2` is checked the same way, plus the Signature V2 key endpoints. Its
+//! signatures are verified as `OnRamper`'s server does: the canonical string is rebuilt from the
+//! returned query's parameters and checked against the public key.
 
 use bitcoin::{Address, CompressedPublicKey, Network};
 use candid::Principal;
@@ -18,12 +22,18 @@ use ic_ledger_types::{AccountIdentifier, DEFAULT_SUBACCOUNT};
 use pretty_assertions::assert_eq;
 use shared::types::{
     api_keys::ApiKeys,
-    onramper::{OnramperSignedEntry, SignOnramperWidgetUrlError, SignOnramperWidgetUrlRequest},
-    result_types::SignOnramperWidgetUrlResult,
+    onramper::{
+        OnramperSignedEntry, SetOnramperSigningKeyError, SignOnramperWidgetUrlError,
+        SignOnramperWidgetUrlRequest, SignOnramperWidgetUrlV2Error, SignOnramperWidgetUrlV2Request,
+        SignOnramperWidgetUrlV2Response,
+    },
+    result_types::{
+        SetOnramperSigningKeyResult, SignOnramperWidgetUrlResult, SignOnramperWidgetUrlV2Result,
+    },
 };
 
 use crate::utils::{
-    mock::{CALLER, SIGNER_CANISTER_ID},
+    mock::{CALLER, SIGNER_CANISTER_ID, USER_1},
     pocketic::{controller, setup, PicBackend, PicCanisterTrait},
 };
 
@@ -402,5 +412,514 @@ fn set_onramper_signing_secret_enables_without_clobbering_other_keys() {
     assert_eq!(
         keys.onramper_signing_secret,
         Some(TEST_SIGNING_SECRET.to_string())
+    );
+}
+
+// Signature V2.
+
+/// RFC 8032, section 7.1, TEST 1: a published test key, never a real one.
+const TEST_SIGNING_KEY_PEM: &str = "-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEIJ1hsZ3v/VpguoRK9JLsLMREScVpezJpGXA7rAMcrn9g
+-----END PRIVATE KEY-----
+";
+
+/// The public key of [`TEST_SIGNING_KEY_PEM`], as `openssl pkey -pubout` writes it.
+const TEST_PUBLIC_KEY_PEM: &str = "-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEA11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo=
+-----END PUBLIC KEY-----
+";
+
+const TEST_API_KEY: &str = "pk_test_01OISYEXAMPLEKEY000000000";
+
+fn set_signing_key(pic_setup: &PicBackend, pem: Option<&str>) -> SetOnramperSigningKeyResult {
+    pic_setup
+        .update::<SetOnramperSigningKeyResult>(
+            controller(),
+            "set_onramper_signing_key",
+            pem.map(str::to_string),
+        )
+        .expect("controller should be allowed to set the signing key")
+}
+
+fn signing_public_key(pic_setup: &PicBackend, caller: Principal) -> Result<Option<String>, String> {
+    pic_setup.query::<Option<String>>(caller, "get_onramper_signing_public_key", ())
+}
+
+fn v2_request(network_wallets: Vec<OnramperSignedEntry>) -> SignOnramperWidgetUrlV2Request {
+    SignOnramperWidgetUrlV2Request {
+        params: vec![
+            entry("apiKey", TEST_API_KEY),
+            entry("mode", "buy,sell"),
+            entry("onlyCryptos", "btc,eth,icp"),
+            entry("supportRecurringPayments", "true"),
+        ],
+        network_wallets,
+    }
+}
+
+fn sign_v2(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    req: SignOnramperWidgetUrlV2Request,
+) -> SignOnramperWidgetUrlV2Result {
+    pic_setup
+        .update::<SignOnramperWidgetUrlV2Result>(caller, "sign_onramper_widget_url_v2", req)
+        .expect("call should reach the handler")
+}
+
+fn signed_query_v2(result: SignOnramperWidgetUrlV2Result) -> String {
+    match result {
+        SignOnramperWidgetUrlV2Result::Ok(SignOnramperWidgetUrlV2Response::V2(signed)) => {
+            signed.query
+        }
+        other => panic!("expected a V2 signature but got {other:?}"),
+    }
+}
+
+/// Decodes `URLSearchParams` encoding: `+` is a space, `%XX` a byte.
+fn form_urldecode(text: &str) -> String {
+    let bytes = text.as_bytes();
+    let mut decoded = Vec::with_capacity(bytes.len());
+    let mut index = 0;
+    while index < bytes.len() {
+        match bytes[index] {
+            b'+' => {
+                decoded.push(b' ');
+                index += 1;
+            }
+            b'%' => {
+                decoded.push(u8::from_str_radix(&text[index + 1..index + 3], 16).unwrap());
+                index += 3;
+            }
+            byte => {
+                decoded.push(byte);
+                index += 1;
+            }
+        }
+    }
+    String::from_utf8(decoded).unwrap()
+}
+
+/// Encodes as `URLSearchParams` does, to rebuild the canonical query the way `OnRamper` does.
+fn form_urlencode(value: &str) -> String {
+    value
+        .bytes()
+        .map(|byte| match byte {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'*' | b'-' | b'.' | b'_' => {
+                char::from(byte).to_string()
+            }
+            b' ' => "+".to_string(),
+            _ => format!("%{byte:02X}"),
+        })
+        .collect()
+}
+
+fn base64_decode(text: &str) -> Vec<u8> {
+    const ALPHABET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    let mut decoded = Vec::new();
+    let mut bits: u32 = 0;
+    let mut bit_count = 0;
+    for byte in text.bytes().filter(|byte| *byte != b'=') {
+        let sextet = ALPHABET
+            .iter()
+            .position(|symbol| *symbol == byte)
+            .expect("base64 symbol");
+        bits = (bits << 6) | u32::try_from(sextet).unwrap();
+        bit_count += 6;
+        if bit_count >= 8 {
+            bit_count -= 8;
+            decoded.push(u8::try_from((bits >> bit_count) & 0xff).unwrap());
+        }
+    }
+    decoded
+}
+
+/// The parameters of a query, decoded.
+fn parse_query(query: &str) -> Vec<(String, String)> {
+    query
+        .split('&')
+        .map(|pair| {
+            let (name, value) = pair.split_once('=').expect("name=value");
+            (form_urldecode(name), form_urldecode(value))
+        })
+        .collect()
+}
+
+fn query_value<'a>(params: &'a [(String, String)], name: &str) -> &'a str {
+    params.iter().find(|(param, _)| param == name).map_or_else(
+        || panic!("the query has no {name}"),
+        |(_, value)| value.as_str(),
+    )
+}
+
+/// Checks the signature of a V2-signed query as `OnRamper`'s server does: the parameters named in
+/// `sigV2Fields`, encoded and sorted as `URLSearchParams` does, go into the 8-line canonical
+/// string, and `sigV2` must verify against the public key. Returns the decoded parameters.
+fn verify_like_onramper(query: &str) -> Vec<(String, String)> {
+    let params = parse_query(query);
+    let fields: Vec<&str> = query_value(&params, "sigV2Fields").split(',').collect();
+
+    let mut signed: Vec<&(String, String)> = params
+        .iter()
+        .filter(|(name, _)| fields.contains(&name.as_str()))
+        .collect();
+    signed.sort_by(|a, b| a.0.cmp(&b.0));
+    let canonical_query = signed
+        .iter()
+        .map(|(name, value)| format!("{}={}", form_urlencode(name), form_urlencode(value)))
+        .collect::<Vec<_>>()
+        .join("&");
+
+    let canonical = [
+        "ONRAMPER-SIG-V2",
+        query_value(&params, "sigV2Timestamp"),
+        query_value(&params, "sigV2Nonce"),
+        "GET",
+        "/",
+        &canonical_query,
+        "",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    ]
+    .join("\n");
+    let signature = base64_decode(
+        query_value(&params, "sigV2")
+            .strip_prefix("v2:")
+            .expect("sigV2 starts with v2:"),
+    );
+
+    ic_ed25519::PublicKey::deserialize_rfc8410_pem(TEST_PUBLIC_KEY_PEM)
+        .unwrap()
+        .verify_signature(canonical.as_bytes(), &signature)
+        .expect("the signature should verify against the public key");
+
+    params
+}
+
+#[test]
+fn set_onramper_signing_key_rejects_non_controller() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+
+    let result = pic_setup.update::<SetOnramperSigningKeyResult>(
+        caller,
+        "set_onramper_signing_key",
+        Some(TEST_SIGNING_KEY_PEM.to_string()),
+    );
+
+    assert!(
+        result.is_err(),
+        "non-controller caller should be rejected by the guard"
+    );
+    assert_eq!(signing_public_key(&pic_setup, controller()), Ok(None));
+}
+
+#[test]
+fn set_onramper_signing_key_rejects_text_that_is_not_an_ed25519_private_key() {
+    let pic_setup = setup();
+
+    for not_a_private_key in ["", "not a key", TEST_PUBLIC_KEY_PEM] {
+        assert_eq!(
+            set_signing_key(&pic_setup, Some(not_a_private_key)),
+            SetOnramperSigningKeyResult::Err(SetOnramperSigningKeyError::InvalidKey),
+            "{not_a_private_key:?} must be refused"
+        );
+    }
+    assert_eq!(signing_public_key(&pic_setup, controller()), Ok(None));
+}
+
+#[test]
+fn get_onramper_signing_public_key_returns_the_set_key_until_cleared() {
+    let pic_setup = setup();
+    // An allowed caller in the test configuration.
+    let allowed = Principal::from_text(CALLER).expect("valid caller principal");
+
+    assert_eq!(signing_public_key(&pic_setup, controller()), Ok(None));
+
+    assert_eq!(
+        set_signing_key(&pic_setup, Some(TEST_SIGNING_KEY_PEM)),
+        SetOnramperSigningKeyResult::Ok(())
+    );
+    assert_eq!(
+        signing_public_key(&pic_setup, controller()),
+        Ok(Some(TEST_PUBLIC_KEY_PEM.to_string()))
+    );
+    assert_eq!(
+        signing_public_key(&pic_setup, allowed),
+        Ok(Some(TEST_PUBLIC_KEY_PEM.to_string()))
+    );
+
+    assert_eq!(
+        set_signing_key(&pic_setup, None),
+        SetOnramperSigningKeyResult::Ok(())
+    );
+    assert_eq!(signing_public_key(&pic_setup, controller()), Ok(None));
+}
+
+#[test]
+fn get_onramper_signing_public_key_rejects_other_callers() {
+    let pic_setup = setup();
+    set_signing_key(&pic_setup, Some(TEST_SIGNING_KEY_PEM));
+    let user = Principal::from_text(USER_1).expect("valid user principal");
+
+    assert!(signing_public_key(&pic_setup, user).is_err());
+    assert!(signing_public_key(&pic_setup, Principal::anonymous()).is_err());
+}
+
+#[test]
+fn onramper_signing_key_is_kept_out_of_the_api_keys() {
+    let pic_setup = setup();
+    set_signing_key(&pic_setup, Some(TEST_SIGNING_KEY_PEM));
+
+    let keys = pic_setup
+        .query::<ApiKeys>(controller(), "get_api_keys", ())
+        .expect("controller should be allowed to read the api keys");
+
+    assert_eq!(keys, ApiKeys::default());
+}
+
+#[test]
+fn onramper_signing_key_survives_an_upgrade() {
+    let pic_setup = setup();
+    set_signing_key(&pic_setup, Some(TEST_SIGNING_KEY_PEM));
+
+    pic_setup
+        .upgrade_latest_wasm(None)
+        .expect("backend upgrade should succeed");
+
+    assert_eq!(
+        signing_public_key(&pic_setup, controller()),
+        Ok(Some(TEST_PUBLIC_KEY_PEM.to_string()))
+    );
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+    verify_like_onramper(&signed_query_v2(sign_v2(
+        &pic_setup,
+        caller,
+        v2_request(vec![]),
+    )));
+}
+
+#[test]
+fn sign_onramper_widget_url_v2_rejects_anonymous_caller() {
+    let pic_setup = setup();
+    set_signing_key(&pic_setup, Some(TEST_SIGNING_KEY_PEM));
+
+    let result = pic_setup.update::<SignOnramperWidgetUrlV2Result>(
+        Principal::anonymous(),
+        "sign_onramper_widget_url_v2",
+        v2_request(vec![]),
+    );
+
+    assert!(
+        result
+            .expect_err("anonymous caller should be rejected by the guard")
+            .contains("Anonymous caller not authorized"),
+        "error message should mention anonymous-caller rejection"
+    );
+}
+
+#[test]
+fn sign_onramper_widget_url_v2_returns_not_configured_without_key_or_secret() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+
+    assert_eq!(
+        sign_v2(&pic_setup, caller, v2_request(vec![])),
+        SignOnramperWidgetUrlV2Result::Err(SignOnramperWidgetUrlV2Error::NotConfigured)
+    );
+}
+
+#[test]
+fn sign_onramper_widget_url_v2_signs_with_v1_without_a_v2_key() {
+    let pic_setup = setup();
+    provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+    let icp_address = caller_icp_account_id(caller);
+    let mut req = v2_request(vec![entry("icp", &icp_address)]);
+    // V1 signs only the network wallets, so a parameter V2 would refuse changes nothing.
+    req.params
+        .push(entry("successRedirectUrl", "https://example.com"));
+
+    let result = sign_v2(&pic_setup, caller, req);
+
+    let response = match result {
+        SignOnramperWidgetUrlV2Result::Ok(SignOnramperWidgetUrlV2Response::V1(response)) => {
+            response
+        }
+        other => panic!("expected a V1 signature but got {other:?}"),
+    };
+    assert_eq!(
+        response.signed_query,
+        format!("networkWallets=icp:{icp_address}")
+    );
+    assert_eq!(response.signature.len(), 64);
+}
+
+#[test]
+fn sign_onramper_widget_url_v2_signs_with_v2_once_a_key_is_set() {
+    let pic_setup = setup();
+    provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
+    set_signing_key(&pic_setup, Some(TEST_SIGNING_KEY_PEM));
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+    let icp_address = caller_icp_account_id(caller);
+
+    let query = signed_query_v2(sign_v2(
+        &pic_setup,
+        caller,
+        v2_request(vec![entry("icp", &icp_address)]),
+    ));
+
+    let params = verify_like_onramper(&query);
+    assert_eq!(
+        params[..5],
+        [
+            ("apiKey".to_string(), TEST_API_KEY.to_string()),
+            ("mode".to_string(), "buy,sell".to_string()),
+            ("networkWallets".to_string(), format!("icp:{icp_address}")),
+            ("onlyCryptos".to_string(), "btc,eth,icp".to_string()),
+            ("supportRecurringPayments".to_string(), "true".to_string()),
+        ]
+    );
+    assert_eq!(
+        query_value(&params, "sigV2Fields"),
+        "apiKey,mode,networkWallets,onlyCryptos,supportRecurringPayments"
+    );
+    let timestamp = query_value(&params, "sigV2Timestamp");
+    assert!(
+        timestamp.len() == 24 && timestamp.ends_with('Z') && timestamp.as_bytes()[10] == b'T',
+        "{timestamp} should be ISO 8601 with milliseconds"
+    );
+    let nonce = query_value(&params, "sigV2Nonce");
+    assert!(
+        nonce.len() == 36 && nonce.as_bytes()[14] == b'4',
+        "{nonce} should be a version 4 UUID"
+    );
+}
+
+#[test]
+fn sign_onramper_widget_url_v2_signs_the_callers_verified_btc_and_sol_addresses() {
+    let pic_setup = setup();
+    set_signing_key(&pic_setup, Some(TEST_SIGNING_KEY_PEM));
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+    let btc_address = caller_btc_address(caller);
+    let sol_address = caller_sol_address(caller);
+    let icp_address = caller_icp_account_id(caller);
+
+    let query = signed_query_v2(sign_v2(
+        &pic_setup,
+        caller,
+        v2_request(vec![
+            entry("Solana", &sol_address),
+            entry("icp", &icp_address),
+            entry("bitcoin", &btc_address),
+        ]),
+    ));
+
+    let params = verify_like_onramper(&query);
+    assert_eq!(
+        query_value(&params, "networkWallets"),
+        format!("bitcoin:{btc_address},icp:{icp_address},solana:{sol_address}")
+    );
+}
+
+#[test]
+fn sign_onramper_widget_url_v2_uses_a_new_nonce_for_each_signature() {
+    let pic_setup = setup();
+    set_signing_key(&pic_setup, Some(TEST_SIGNING_KEY_PEM));
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+
+    let first = verify_like_onramper(&signed_query_v2(sign_v2(
+        &pic_setup,
+        caller,
+        v2_request(vec![]),
+    )));
+    let second = verify_like_onramper(&signed_query_v2(sign_v2(
+        &pic_setup,
+        caller,
+        v2_request(vec![]),
+    )));
+
+    assert_ne!(
+        query_value(&first, "sigV2Nonce"),
+        query_value(&second, "sigV2Nonce")
+    );
+    assert_ne!(query_value(&first, "sigV2"), query_value(&second, "sigV2"));
+}
+
+#[test]
+fn sign_onramper_widget_url_v2_rejects_a_param_outside_the_list() {
+    let pic_setup = setup();
+    set_signing_key(&pic_setup, Some(TEST_SIGNING_KEY_PEM));
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+    let mut req = v2_request(vec![]);
+    req.params
+        .push(entry("successRedirectUrl", "https://example.com"));
+
+    assert_eq!(
+        sign_v2(&pic_setup, caller, req),
+        SignOnramperWidgetUrlV2Result::Err(SignOnramperWidgetUrlV2Error::InvalidParam(
+            "successRedirectUrl".to_string()
+        ))
+    );
+}
+
+#[test]
+fn sign_onramper_widget_url_v2_rejects_address_not_owned_by_caller() {
+    let pic_setup = setup();
+    set_signing_key(&pic_setup, Some(TEST_SIGNING_KEY_PEM));
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+
+    assert_eq!(
+        sign_v2(
+            &pic_setup,
+            caller,
+            v2_request(vec![entry("icp", &"a".repeat(64))])
+        ),
+        SignOnramperWidgetUrlV2Result::Err(SignOnramperWidgetUrlV2Error::AddressMismatch)
+    );
+}
+
+#[test]
+fn sign_onramper_widget_url_v2_rejects_address_for_underivable_network() {
+    let pic_setup = setup();
+    set_signing_key(&pic_setup, Some(TEST_SIGNING_KEY_PEM));
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+
+    assert_eq!(
+        sign_v2(
+            &pic_setup,
+            caller,
+            v2_request(vec![entry("dogecoin", "DOGEaddress")])
+        ),
+        SignOnramperWidgetUrlV2Result::Err(SignOnramperWidgetUrlV2Error::AddressDerivationFailed)
+    );
+}
+
+#[test]
+fn sign_onramper_widget_url_v2_shares_the_rate_limit_with_v1() {
+    let pic_setup = setup();
+    provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
+    set_signing_key(&pic_setup, Some(TEST_SIGNING_KEY_PEM));
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+
+    // 30 calls per caller per minute across both endpoints.
+    for _ in 0..15 {
+        assert!(matches!(
+            sign(&pic_setup, caller, network_wallets_request(vec![])),
+            SignOnramperWidgetUrlResult::Ok(_)
+        ));
+        assert!(matches!(
+            sign_v2(&pic_setup, caller, v2_request(vec![])),
+            SignOnramperWidgetUrlV2Result::Ok(_)
+        ));
+    }
+
+    let limited = sign_v2(&pic_setup, caller, v2_request(vec![]));
+    assert!(
+        matches!(
+            limited,
+            SignOnramperWidgetUrlV2Result::Err(SignOnramperWidgetUrlV2Error::RateLimited(_))
+        ),
+        "the call exceeding the shared limit should be rate limited; got {limited:?}"
     );
 }

@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
+use serde_bytes::ByteBuf;
 use shared::types::{
     active_user_transaction::ActiveUserTransaction,
     agreement::AgreementHistoryEntry,
@@ -33,6 +34,9 @@ pub type VMem = VirtualMemory<DefaultMemoryImpl>;
 pub type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
 
 pub type ApiKeysCell = StableCell<Option<Candid<ApiKeys>>, VMem>;
+
+/// The 32-byte Ed25519 seed that signs `OnRamper` widget URLs with Signature V2.
+pub type OnramperSigningKeyCell = StableCell<Option<Candid<ByteBuf>>, VMem>;
 
 pub type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<UserToken>>, VMem>;
 
