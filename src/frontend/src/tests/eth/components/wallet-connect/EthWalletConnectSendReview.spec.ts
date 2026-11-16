@@ -1377,7 +1377,15 @@ describe('EthWalletConnectSendReview', () => {
 			certified: true
 		};
 
-		const renderDeposit = ({ data, value = ZERO }: { data: string; value?: bigint }) =>
+		const renderDeposit = ({
+			data,
+			value = ZERO,
+			unconfirmed = false
+		}: {
+			data: string;
+			value?: bigint;
+			unconfirmed?: boolean;
+		}) =>
 			render(EthWalletConnectSendReview, {
 				props: {
 					...props,
@@ -1387,7 +1395,7 @@ describe('EthWalletConnectSendReview', () => {
 						to: HELPER,
 						data,
 						networkId: ETHEREUM_NETWORK.id,
-						minterInfo,
+						minterInfo: unconfirmed ? undefined : minterInfo,
 						principal: mockPrincipal,
 						chainId: ETHEREUM_NETWORK.chainId,
 						value,
@@ -1474,6 +1482,35 @@ describe('EthWalletConnectSendReview', () => {
 					$ckToken: 'ckETH'
 				})
 			);
+			expect(getByText(`1 ${ETHEREUM_TOKEN.symbol}`)).toBeInTheDocument();
+		});
+
+		// While held, OISY has not read the deposit, and the native value is all it knows: none, for a
+		// token deposit. A zero there would read as the amount being sent.
+		it('should hold a token deposit without stating a zero native amount', () => {
+			const { getByTestId, queryByText, getByRole } = renderDeposit({
+				data: encodeCkDepositErc20({
+					address: USDT_TOKEN.address,
+					amount: 50_000_000n,
+					owner: mockPrincipal
+				}),
+				unconfirmed: true
+			});
+
+			expect(getByTestId('wallet-connect-cketh-helper-unconfirmed')).toBeInTheDocument();
+			expect(queryByText(`0 ${ETHEREUM_TOKEN.symbol}`)).not.toBeInTheDocument();
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should still state the native value of a held deposit that sends some', () => {
+			const { getByTestId, getByText } = renderDeposit({
+				data: encodeCkDepositEth({ owner: mockPrincipal }),
+				value: 1_000_000_000_000_000_000n,
+				unconfirmed: true
+			});
+
+			expect(getByTestId('wallet-connect-cketh-helper-unconfirmed')).toBeInTheDocument();
 			expect(getByText(`1 ${ETHEREUM_TOKEN.symbol}`)).toBeInTheDocument();
 		});
 
