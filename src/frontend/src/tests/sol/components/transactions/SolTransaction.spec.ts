@@ -457,5 +457,39 @@ describe('SolTransaction', () => {
 
 			expect(getByText(en.receive.text.receive)).toBeInTheDocument();
 		});
+
+		describe('the icon', () => {
+			const iconLabelOf = (transaction: SolTransactionUi): string | null => {
+				const { container } = render(SolTransaction, {
+					props: { transaction, token: SOLANA_TOKEN, iconType: 'token' }
+				});
+
+				return (
+					container
+						.querySelector('[data-tid="icon-badge"]')
+						?.closest('[aria-label]')
+						?.getAttribute('aria-label') ?? null
+				);
+			};
+
+			it('should draw both legs with the swap icon', () => {
+				expect(iconLabelOf(payout(minterAddress))).toBe(en.convert.text.convert_button);
+				expect(
+					iconLabelOf({
+						...mockTrx,
+						type: 'send',
+						summary: {
+							kind: 'send' as const,
+							spent: { delta: -20_000_000n },
+							counterparty: depositAddress
+						}
+					})
+				).toBe(en.convert.text.convert_button);
+			});
+
+			it('should keep the arrow of SOL from any other address', () => {
+				expect(iconLabelOf(payout(mockSolAddress))).toBe('receive');
+			});
+		});
 	});
 });
