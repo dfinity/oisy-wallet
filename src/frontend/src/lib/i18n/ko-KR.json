@@ -1947,6 +1947,8 @@
 			"cketh_helper_unconfirmed": "OISY가 아직 ckETH 전환 컨트랙트를 확인할 수 없어 이 입금을 검사할 수 없습니다. 검사할 수 있을 때까지 승인이 비활성화된 상태로 유지됩니다.",
 			"ck_deposit": "",
 			"ck_deposit_other_account": "",
+			"ck_deposit_liquidium": "",
+			"ck_deposit_liquidium_pool": "",
 			"ck_deposit_recipient": "",
 			"ck_deposit_refused": "",
 			"swap_title": "",

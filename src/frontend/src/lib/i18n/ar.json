@@ -1947,6 +1947,8 @@
 			"cketh_helper_unconfirmed": "",
 			"ck_deposit": "",
 			"ck_deposit_other_account": "",
+			"ck_deposit_liquidium": "",
+			"ck_deposit_liquidium_pool": "",
 			"ck_deposit_recipient": "",
 			"ck_deposit_refused": "",
 			"swap_title": "",

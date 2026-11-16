@@ -1947,6 +1947,8 @@
 			"cketh_helper_unconfirmed": "OISY zatím nedokáže ověřit kontrakt pro převod ckETH, a proto nemůže tento vklad zkontrolovat. Schválení zůstane zakázáno, dokud to nebude možné.",
 			"ck_deposit": "",
 			"ck_deposit_other_account": "",
+			"ck_deposit_liquidium": "",
+			"ck_deposit_liquidium_pool": "",
 			"ck_deposit_recipient": "",
 			"ck_deposit_refused": "",
 			"swap_title": "",

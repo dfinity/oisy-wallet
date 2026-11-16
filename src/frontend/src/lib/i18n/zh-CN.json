@@ -1947,6 +1947,8 @@
 			"cketh_helper_unconfirmed": "OISY 暂时无法确认 ckETH 转换合约，因此无法检查此存入请求。在能够检查之前，批准功能将保持禁用。",
 			"ck_deposit": "",
 			"ck_deposit_other_account": "",
+			"ck_deposit_liquidium": "",
+			"ck_deposit_liquidium_pool": "",
 			"ck_deposit_recipient": "",
 			"ck_deposit_refused": "",
 			"swap_title": "",

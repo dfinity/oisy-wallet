@@ -1947,6 +1947,8 @@
 			"cketh_helper_unconfirmed": "OISY अभी ckETH रूपांतरण कॉन्ट्रैक्ट की पुष्टि नहीं कर सकता, इसलिए वह इस जमा की जाँच नहीं कर सकता। जब तक ऐसा संभव नहीं होता, स्वीकृति अक्षम रहेगी।",
 			"ck_deposit": "",
 			"ck_deposit_other_account": "",
+			"ck_deposit_liquidium": "",
+			"ck_deposit_liquidium_pool": "",
 			"ck_deposit_recipient": "",
 			"ck_deposit_refused": "",
 			"swap_title": "",

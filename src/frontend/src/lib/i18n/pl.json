@@ -1947,6 +1947,8 @@
 			"cketh_helper_unconfirmed": "OISY nie może jeszcze potwierdzić kontraktu konwersji ckETH, więc nie może sprawdzić tej wpłaty. Zatwierdzenie pozostanie wyłączone, dopóki nie będzie to możliwe.",
 			"ck_deposit": "",
 			"ck_deposit_other_account": "",
+			"ck_deposit_liquidium": "",
+			"ck_deposit_liquidium_pool": "",
 			"ck_deposit_recipient": "",
 			"ck_deposit_refused": "",
 			"swap_title": "",
