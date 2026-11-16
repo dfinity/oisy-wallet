@@ -1,10 +1,12 @@
-import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { SOLANA_DEFAULT_DECIMALS, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import type { NetworkId } from '$lib/types/network';
 import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { SPL_TOKEN_MAX_AMOUNT } from '$sol/constants/sol.constants';
-import type { OptionSolAddress } from '$sol/types/address';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type {
 	SolNetBalanceChange,
@@ -698,6 +700,54 @@ export const formatSolTransactionSummary = ({
 	}
 
 	return i18n.transaction.text.kind_other;
+};
+
+/**
+ * The sentence for the Solana leg of a ckSOL conversion, which names the conversion instead of the
+ * send or receive it is: SOL from the minter's main address, which pays out every conversion to
+ * SOL, and SOL to the user's own deposit address, which takes in every conversion from SOL.
+ *
+ * Undefined for any other transaction, and while the addresses are not loaded.
+ */
+export const formatSolCkSolConversion = ({
+	summary: { kind, spent, received, counterparty },
+	networkId,
+	minterAddress,
+	depositAddress,
+	i18n
+}: {
+	summary: SolTransactionSummary;
+	networkId: NetworkId | undefined;
+	minterAddress?: SolAddress;
+	depositAddress?: SolAddress;
+	i18n: I18n;
+}): string | undefined => {
+	// ckSOL converts mainnet SOL only, while the same addresses exist on every cluster.
+	if (networkId !== SOLANA_MAINNET_NETWORK_ID || isNullish(counterparty)) {
+		return undefined;
+	}
+
+	const $ckToken = SOLANA_TOKEN.twinTokenSymbol;
+
+	if (
+		kind === 'receive' &&
+		nonNullish(received) &&
+		isSolNetBalanceChangeSol(received) &&
+		counterparty === minterAddress
+	) {
+		return replacePlaceholders(i18n.transaction.label.ck_token_converted, { $ckToken });
+	}
+
+	if (
+		kind === 'send' &&
+		nonNullish(spent) &&
+		isSolNetBalanceChangeSol(spent) &&
+		counterparty === depositAddress
+	) {
+		return replacePlaceholders(i18n.transaction.label.converted_to_ck_token, { $ckToken });
+	}
+
+	return undefined;
 };
 
 /**
