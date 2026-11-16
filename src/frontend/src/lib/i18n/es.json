@@ -2419,6 +2419,7 @@
 			"twin_token_converted": "Convertido desde $twinToken",
 			"ck_token_converted": "Convertido desde $ckToken",
 			"converted_to_twin_token": "",
+			"converted_to_ck_token": "",
 			"sending_twin_token": "Enviando $twinToken",
 			"sending_twin_token_failed": "Envío de $twinToken fallido",
 			"converting_twin_token": "Convirtiendo $twinToken a $ckToken",
