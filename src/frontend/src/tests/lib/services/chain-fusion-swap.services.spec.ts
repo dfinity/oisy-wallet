@@ -1982,7 +1982,7 @@ describe('chain-fusion-swap.services', () => {
 			it('should register the deposit address with the minter before sending the SOL to it', async () => {
 				await solSwap();
 
-				expect(watchDepositAddress).toHaveBeenCalledExactlyOnceWith({
+				expect(watchDepositAddress).toHaveBeenNthCalledWith(1, {
 					identity: mockIdentity,
 					minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID
 				});
@@ -2192,6 +2192,83 @@ describe('chain-fusion-swap.services', () => {
 
 				expect(broadcastSol).not.toHaveBeenCalled();
 				expect(enableDestinationToken).not.toHaveBeenCalled();
+			});
+
+			// Acceptance criterion 8.
+			it('should ask the minter again once the row is open, before broadcasting', async () => {
+				await solSwap();
+
+				expect(watchDepositAddress).toHaveBeenCalledTimes(2);
+				expect(watchDepositAddress).toHaveBeenNthCalledWith(2, {
+					identity: mockIdentity,
+					minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID
+				});
+				expect(vi.mocked(createActiveUserTransaction).mock.invocationCallOrder[0]).toBeLessThan(
+					vi.mocked(watchDepositAddress).mock.invocationCallOrder[1]
+				);
+				expect(vi.mocked(watchDepositAddress).mock.invocationCallOrder[1]).toBeLessThan(
+					broadcastSol.mock.invocationCallOrder[0]
+				);
+				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			// Acceptance criterion 8: a conversion that settled while this one waited since confirm.
+			it.each([
+				{
+					name: 'the latest deposit id moved',
+					answer: { ...watched, latest_deposit_id: [42n] as [bigint] },
+					reason: 'changed'
+				},
+				{
+					name: 'a first deposit of the account appeared',
+					confirmed: { ...watched, latest_deposit_id: [] as [] },
+					answer: { ...watched, latest_deposit_id: [42n] as [bigint] },
+					reason: 'changed'
+				},
+				{
+					name: 'a deposit is in flight',
+					answer: { ...watched, status: { Detected: { deposit_id: 42n } } },
+					reason: 'inFlight'
+				},
+				{
+					name: 'no scan is due before the window ends',
+					answer: {
+						...watched,
+						status: { Watching: { ...watched.status.Watching, next_scan_at: [] as [] } }
+					},
+					reason: 'unavailable'
+				}
+			])(
+				'should delete the open row and send no SOL when, asked again, $name',
+				async ({ confirmed = watched, answer, reason }) => {
+					vi.mocked(watchDepositAddress)
+						.mockResolvedValueOnce(confirmed)
+						.mockResolvedValueOnce(answer);
+
+					await expect(solSwap()).rejects.toMatchObject({ reason });
+
+					expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+					expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						id: SWAP_ID
+					});
+					expect(broadcastSol).not.toHaveBeenCalled();
+					expect(enableDestinationToken).not.toHaveBeenCalled();
+				}
+			);
+
+			it('should delete the open row and send no SOL when asking the minter again fails', async () => {
+				const error = new Error('replica unavailable');
+
+				vi.mocked(watchDepositAddress).mockResolvedValueOnce(watched).mockRejectedValueOnce(error);
+
+				await expect(solSwap()).rejects.toMatchObject({ reason: 'unavailable', cause: error });
+
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: SWAP_ID
+				});
+				expect(broadcastSol).not.toHaveBeenCalled();
 			});
 
 			it('should send no SOL when the row cannot be written', async () => {
