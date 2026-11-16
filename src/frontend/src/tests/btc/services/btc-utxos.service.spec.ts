@@ -347,7 +347,7 @@ describe('btc-utxos.service', () => {
 					BigInt(BTC_SEND_MAX_INPUTS) * 10_000n -
 						calculateFeeSatoshis({
 							numInputs: BTC_SEND_MAX_INPUTS,
-							recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+							outputVSizes: [BTC_LARGEST_OUTPUT_VSIZE],
 							feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles
 						}) +
 						1n
@@ -447,6 +447,19 @@ describe('btc-utxos.service', () => {
 				expect(result.utxos).toHaveLength(1);
 			}
 		);
+
+		it('should size every output of a layout in the fee, in place of the recipient', () => {
+			// 1 input + a P2TR deposit (43) + an 18-byte memo (29) + a P2WPKH fee (31) + change (31)
+			// = 213 vB, at 5 sat/vB.
+			const result = prepareBtcSend({
+				...defaultParams,
+				destination: mockBtcAddress,
+				outputVSizes: [43, 29, 31]
+			});
+
+			expect(result.feeSatoshis).toBe(213n * 5n);
+			expect(result.utxos).toHaveLength(1);
+		});
 	});
 
 	describe('getFeeRateFromPercentiles', () => {

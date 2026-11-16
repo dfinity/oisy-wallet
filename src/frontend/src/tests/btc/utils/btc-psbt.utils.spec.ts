@@ -5,6 +5,8 @@ import {
 import {
 	btcAddressToOutputScript,
 	btcOutputVSize,
+	btcScriptOutputVSize,
+	buildBtcScriptOutputsPsbt,
 	buildBtcSendPsbt,
 	finalizeSignedBtcPsbt
 } from '$btc/utils/btc-psbt.utils';
@@ -96,6 +98,20 @@ const withoutWitnesses = (hex: string): string => {
 
 const unsignedTransaction = (psbt: Psbt): Transaction =>
 	Transaction.fromBuffer(psbt.data.getTransaction());
+
+const fromHex = (hex: string): Uint8Array => Uint8Array.from(Buffer.from(hex, 'hex'));
+
+// The outputs a live LI.FI LayerSwap quote kept (2026-11-13): a P2TR deposit, an 18-byte memo and
+// LI.FI's fee to its P2WPKH address.
+const LIFI_DEPOSIT = {
+	script: fromHex('5120f9ba507bc8114718a0e16d70a22059162f24a7996ac4d1db1f26330c91c761de'),
+	value: 997_500n
+};
+const LIFI_MEMO = { script: fromHex('6a12313731363366323b3d7c6c6966693df52ece'), value: ZERO };
+const LIFI_FEE = {
+	script: fromHex('00149ab105ce5f65cc9d3e51e4b2403eef1831eb5bfd'),
+	value: 2_500n
+};
 
 describe('btc-psbt.utils', () => {
 	describe('btcAddressToOutputScript', () => {
@@ -262,6 +278,91 @@ describe('btc-psbt.utils', () => {
 				expect(btcOutputVSize({ address })).toBe(BTC_LARGEST_OUTPUT_VSIZE);
 			}
 		);
+	});
+
+	describe('btcScriptOutputVSize', () => {
+		it.each([
+			{ type: 'an 18-byte memo', script: LIFI_MEMO.script, vsize: 29 },
+			{ type: 'a memo at the 83-byte cap', script: new Uint8Array(83), vsize: 92 },
+			{ type: 'a P2TR deposit', script: LIFI_DEPOSIT.script, vsize: 43 },
+			{ type: 'a P2WPKH fee output', script: LIFI_FEE.script, vsize: 31 }
+		])('should size $type at $vsize vbytes', ({ script, vsize }) => {
+			expect(btcScriptOutputVSize(script)).toBe(vsize);
+		});
+	});
+
+	describe('buildBtcScriptOutputsPsbt', () => {
+		const RBF_SEQUENCE = 0xfffffffd;
+
+		const build = ({
+			outputs = [LIFI_DEPOSIT, LIFI_MEMO, LIFI_FEE],
+			changeIndex = 2,
+			feeSatoshis = 200n
+		}: {
+			outputs?: { script: Uint8Array; value: bigint }[];
+			changeIndex?: number;
+			feeSatoshis?: bigint;
+		} = {}) =>
+			buildBtcScriptOutputsPsbt({
+				utxos: [mainnetUtxo({ txid: CFS_TX_1_INPUT_TXID, vout: 0, value: 1_100_000n })],
+				outputs,
+				changeIndex,
+				changeAddress: CFS_WALLET_ADDRESS,
+				feeSatoshis,
+				network: 'mainnet',
+				sequence: RBF_SEQUENCE
+			});
+
+		const outputsOf = (psbt: Psbt) =>
+			psbt.txOutputs.map(({ script, value }) => ({ script: script.toString('hex'), value }));
+
+		const hexOf = ({ script, value }: { script: Uint8Array; value: bigint }) => ({
+			script: Buffer.from(script).toString('hex'),
+			value: Number(value)
+		});
+
+		it('keeps the outputs byte for byte and in order, with the change at its index', () => {
+			const psbt = build();
+
+			expect(outputsOf(psbt)).toEqual([
+				hexOf(LIFI_DEPOSIT),
+				hexOf(LIFI_MEMO),
+				{
+					script: btcAddressLib.toOutputScript(CFS_WALLET_ADDRESS).toString('hex'),
+					value: 1_100_000 - 997_500 - 2_500 - 200
+				},
+				hexOf(LIFI_FEE)
+			]);
+		});
+
+		it('gives every input the sequence asked for, and keeps version 2 and lock time 0', () => {
+			const transaction = unsignedTransaction(build());
+
+			expect(transaction.version).toBe(2);
+			expect(transaction.locktime).toBe(0);
+			expect(transaction.ins.map(({ sequence }) => sequence)).toEqual([RBF_SEQUENCE]);
+		});
+
+		it('drops change below the dust threshold and keeps the other outputs in order', () => {
+			const psbt = build({
+				feeSatoshis: 1_100_000n - 997_500n - 2_500n - (BTC_CHANGE_DUST_THRESHOLD_SATOSHIS - 1n)
+			});
+
+			expect(outputsOf(psbt)).toEqual([hexOf(LIFI_DEPOSIT), hexOf(LIFI_MEMO), hexOf(LIFI_FEE)]);
+		});
+
+		it('puts the change first or last at those indexes', () => {
+			expect(outputsOf(build({ changeIndex: 0 }))[0]?.value).toBe(99_800);
+			expect(outputsOf(build({ changeIndex: 3 }))[3]?.value).toBe(99_800);
+		});
+
+		it.each([-1, 4, 1.5])('throws on the change index %s', (changeIndex) => {
+			expect(() => build({ changeIndex })).toThrow('is outside the 3 outputs');
+		});
+
+		it('throws when the UTXOs do not cover the outputs and the fee', () => {
+			expect(() => build({ feeSatoshis: 100_001n })).toThrow('do not cover the outputs');
+		});
 	});
 
 	describe('buildBtcSendPsbt', () => {
