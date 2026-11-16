@@ -287,6 +287,10 @@ The fix:
   `0x` (the shape `require_xrp_refs` checks for an XRP hash), and there is no nonce.
 - Unit tests for both, including the BTC destination and the testnet source that stay refused.
 
+As built (PR 4): the txid is any 64 hex digits, in either case. A nonce is neither required nor
+checked on a BTC row, as on a Solana one. A BTC source reaches the same destinations as an EVM one:
+the pinned EVM chains and Solana mainnet.
+
 No `backend.did` change: `LifiData`'s tokens and the refs are already generic. The release must be
 live on staging before the execution PR is tried there, and in production before LI.FI from BTC is
 turned on there.
