@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { SOLANA_DEFAULT_DECIMALS, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+	import { ckSolConversionAddresses } from '$icp/derived/cksol.derived';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -18,6 +19,7 @@
 	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
 	import {
 		flattenInstructions,
+		formatSolCkSolConversion,
 		formatSolTransactionSummary
 	} from '$sol/utils/sol-transaction-summary.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
@@ -84,12 +86,18 @@
 	// Records from before the redesign carry no summary, and their kind is all the old shape said.
 	let label = $derived(
 		nonNullish(summary)
-			? formatSolTransactionSummary({
+			? (formatSolCkSolConversion({
 					summary,
-					i18n: $i18n,
-					symbolOf,
-					amountOf: swapAmount
-				})
+					networkId: token.network.id,
+					...$ckSolConversionAddresses,
+					i18n: $i18n
+				}) ??
+					formatSolTransactionSummary({
+						summary,
+						i18n: $i18n,
+						symbolOf,
+						amountOf: swapAmount
+					}))
 			: type === 'send'
 				? $i18n.send.text.send
 				: $i18n.receive.text.receive

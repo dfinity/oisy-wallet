@@ -284,14 +284,14 @@ describe('mapIcTransaction', () => {
 	describe('ckSOL transactions', () => {
 		const withdrawal = createMockIcrcBurnTransaction({ memo: mockCkSolBurnMemo(mockSolAddress) });
 
-		it('should read a ckSOL burn as a send to the Solana address in its memo', () => {
+		it('should read a ckSOL burn as a conversion to the Solana address in its memo', () => {
 			const result = mapIcTransaction({
 				transaction: withdrawal,
 				token: { ...icrcToken, ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID },
 				identity: mockIdentity
 			});
 
-			expect(result.typeLabel).toBe('send.text.send');
+			expect(result.typeLabel).toBe('transaction.label.converted_to_twin_token');
 			expect(result.to).toBe(mockSolAddress);
 		});
 

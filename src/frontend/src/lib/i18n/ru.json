@@ -2418,6 +2418,8 @@
 			"reimbursement": "Возмещение",
 			"twin_token_converted": "Обменяно из $twinToken",
 			"ck_token_converted": "Обменяно из $ckToken",
+			"converted_to_twin_token": "Обменяно на $twinToken",
+			"converted_to_ck_token": "Обменяно на $ckToken",
 			"sending_twin_token": "Отправка $twinToken",
 			"sending_twin_token_failed": "Отправка $twinToken не удалась",
 			"converting_twin_token": "Обмен $twinToken на $ckToken",

@@ -119,7 +119,8 @@ No SDK wraps the ckSOL minter, so OISY adds it the way it added the CMC (#14132)
 ## 10. Activity
 
 - A ckSOL mint reads "Converted from SOL", from the Solana network, with a link to the sweep transaction from its memo.
-- A ckSOL burn is a send to the Solana address in its memo, with an explorer link.
+- A ckSOL burn reads "Converted to SOL", to the Solana address in its memo, with an explorer link. A burn without that memo stays a send: it may be ckSOL sent straight to the minter, which pays no SOL for it.
+- On Solana, SOL from the minter's main address (`minter_address` of `get_minter_info`) reads "Converted from ckSOL", and SOL sent to the user's deposit address reads "Converted to ckSOL". Where ckSOL is enabled, OISY loads both addresses once per session.
 
 ## 11. Non-goals
 
@@ -143,7 +144,7 @@ No SDK wraps the ckSOL minter, so OISY adds it the way it added the CMC (#14132)
 - **AC8** While a SOL → ckSOL conversion is in flight, no new SOL → ckSOL offer appears, and the form explains why. Another tab or device that still shows an offer sends nothing: the backend refuses its row, and the form gives the same explanation.
 - **AC9** `Dropped` keeps the row in flight until a later deposit is minted; `Quarantined` closes it as failed with the explanation of §6.3.
 - **AC10** The ckSOL → SOL offer shows amount − 0.001 SOL received, the approval fee on top, and the 0.002 SOL minimum. Executing approves and calls `withdraw_sol` to the user's own Solana address, and the row follows `withdraw_sol_status` to succeeded or failed.
-- **AC11** Activity labels ckSOL mints and burns as in §10.
+- **AC11** Activity labels both legs of a ckSOL conversion as in §10.
 - **AC12** PRODUCT.md documents ckSOL and the Solana Chain Fusion pairs, including the non-goals.
 
 ## 13. Implementation plan (atomic PRs)
