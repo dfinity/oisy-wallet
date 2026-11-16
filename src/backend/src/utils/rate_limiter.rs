@@ -54,6 +54,17 @@ thread_local! {
     pub(crate) static BTC_GET_SPENDABLE_UTXOS_RATE_LIMITER: RateLimiter =
         RateLimiter::new(15, 60 * 1_000_000_000);
 
+    /// Rate-limits the `bitcoin_get_utxos` pages the backend reads for a caller after the first
+    /// page of a call: max 20 per caller per minute, shared by `btc_add_pending_transaction`,
+    /// `btc_broadcast_transaction`, `btc_get_pending_transactions` and `btc_get_spendable_utxos`.
+    /// Each endpoint's own limiter covers the first page of its calls.
+    ///
+    /// A page holds up to 1,000 UTXOs and the backend pays for each one: this budget keeps the
+    /// backend's cost per caller bounded however many UTXOs the address holds. 20 a minute lets
+    /// the wallet read about 10,000 UTXOs twice a minute.
+    pub(crate) static BTC_UTXO_PAGES_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(20, 60 * 1_000_000_000);
+
     /// Rate-limits `btc_get_balance`: max 20 calls per caller per minute. The wallet reads the
     /// balance every 30 seconds for each Bitcoin network it shows, in each open tab. Each call
     /// costs the backend's own cycles: about 54M with a delegation chain it has already checked
@@ -553,7 +564,7 @@ mod tests {
         signer::{topup::TopUpCyclesLedgerError, AllowSigningError, GetAllowedCyclesError},
     };
 
-    use super::{RateLimiter, TieredRateLimiter};
+    use super::{RateLimiter, TieredRateLimiter, BTC_UTXO_PAGES_RATE_LIMITER};
 
     fn test_principal(id: u8) -> Principal {
         Principal::from_slice(&[id])
@@ -787,6 +798,25 @@ mod tests {
         assert_eq!(e.max_calls, 1);
         assert_eq!(e.window_ns, 60 * ONE_SEC);
         assert_eq!(e.caller, caller);
+    }
+
+    #[test]
+    fn btc_utxo_pages_allow_20_per_caller_per_minute() {
+        let caller = test_principal(42);
+
+        BTC_UTXO_PAGES_RATE_LIMITER.with(|rl| {
+            for _ in 0..20 {
+                rl.check_at(caller, ONE_SEC).unwrap();
+            }
+
+            let err = rl.check_at(caller, 2 * ONE_SEC).unwrap_err();
+            assert_eq!(err.max_calls, 20);
+            assert_eq!(err.window_ns, 60 * ONE_SEC);
+            assert_eq!(err.caller, caller);
+
+            rl.check_at(test_principal(43), 2 * ONE_SEC).unwrap();
+            rl.check_at(caller, 61 * ONE_SEC).unwrap();
+        });
     }
 
     #[test]

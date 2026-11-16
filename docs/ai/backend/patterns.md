@@ -100,6 +100,12 @@ Public update / query handlers should declare the right guard:
 | Authenticated, must have a registered profile | `caller_is_registered_user` | same                              |
 | Controller-only (admin)                       | `caller_is_controller`      | same                              |
 | Allowed-callers list (admin / monitoring)     | `caller_is_allowed`         | same                              |
+| Query that must not run as an update          | `called_as_query`           | same                              |
+
+Anyone can call a `#[query]` as an update: it then runs on every node, the
+canister pays for it, and its heap writes are discarded. Give a public query
+whose work is heavy, or that relies on a heap cache, the `called_as_query`
+guard (as `http_request` has).
 
 Apply with `#[update(guard = "caller_is_X")]` /
 `#[query(guard = "caller_is_X")]`. New guards live in
@@ -224,9 +230,11 @@ one-shot approval, which should preserve their transaction identity.
   `ic_cdk::api::instruction_counter()` passes a budget well below the 40B
   limit, always after at least one item, and schedules the next batch from
   the last key it reached. Take the budget check as a closure so unit tests
-  can drive it. Examples: `contacts::migration::schedule_batch` and the tip
+  can drive it. Examples: `contacts::migration::schedule_batch`, the tip
   sweep (`utils::housekeeping::schedule_tip_sweep_batch` over
-  `tips::service::prune_expired_tips`).
+  `tips::service::prune_expired_tips`) and the share prune
+  (`utils::housekeeping::schedule_share_prune_batch` over
+  `personal_notes::share::service::prune_expired_shares`).
 - **Exchange rates:** Controllers store API keys via `set_api_keys`. Periodic
   refreshes are opt-in: they run only when `coingecko_api_key` is set and
   `exchange_rate_enabled` is `opt true` (`null` / unset is treated as disabled). See

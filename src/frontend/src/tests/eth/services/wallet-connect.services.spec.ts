@@ -753,12 +753,14 @@ describe('eth wallet-connect.services', () => {
 					request: {
 						...params.request,
 						params: {
+							...params.request.params,
+							chainId: 'eip155:1',
 							request: {
 								method: 'eth_sendTransaction',
 								params: [{ from: HOLDER, to: HELPER, data }]
 							}
 						}
-					} as unknown as WalletKitTypes.SessionRequest,
+					},
 					minterInfo,
 					targetNetwork: ICP_NETWORK,
 					tokens: [USDT_TOKEN]
