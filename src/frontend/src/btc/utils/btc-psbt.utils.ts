@@ -25,6 +25,12 @@ export interface BtcSendPsbtOutput {
 	amount: bigint;
 }
 
+// An output given by its script, which is kept byte for byte: an `OP_RETURN` has no address.
+export interface BtcPsbtScriptOutput {
+	script: Uint8Array;
+	value: bigint;
+}
+
 export interface SignedBtcTransaction {
 	txid: string;
 	hex: string;
@@ -116,8 +122,14 @@ export const btcAddressToOutputScript = ({
 };
 
 /**
- * The vsize of the output that pays `address`: 8 bytes of value, 1 of script length and the
- * script, all non-witness.
+ * The vsize of an output with this script: 8 bytes of value, 1 of script length and the script, all
+ * non-witness. Every standard script, an `OP_RETURN` included, is shorter than 253 bytes, so its
+ * length takes 1 byte.
+ */
+export const btcScriptOutputVSize = (script: Uint8Array): number => 9 + script.length;
+
+/**
+ * The vsize of the output that pays `address` (`btcScriptOutputVSize` of its script).
  *
  * The size does not depend on the network, so an address for any network gets its size. A wrong
  * network is refused where the send is validated and built. Without an address, or with one that
@@ -130,7 +142,7 @@ export const btcOutputVSize = ({ address }: { address: OptionString }): number =
 
 	for (const network of Object.keys(BITCOIN_JS_NETWORKS) as BitcoinNetwork[]) {
 		try {
-			return 9 + btcAddressToOutputScript({ address, network }).length;
+			return btcScriptOutputVSize(btcAddressToOutputScript({ address, network }));
 		} catch (_: unknown) {
 			// Not an address for this network; try the next.
 		}
@@ -140,39 +152,47 @@ export const btcOutputVSize = ({ address }: { address: OptionString }): number =
 };
 
 /**
- * Builds the PSBT of a send, in the layout the chain fusion signer's `build_p2wpkh_transaction`
- * builds from the same inputs, outputs and fee, byte for byte:
+ * Builds the PSBT of a send whose outputs are given as scripts, kept byte for byte:
  *
  * - version 2 and lock time 0;
- * - the inputs in the order given, each with sequence `0xFFFFFFFF` and an empty `script_sig`;
+ * - the inputs in the order given, each with `sequence` and an empty `script_sig`;
  * - the outputs in the order given;
- * - then the change to `changeAddress`, last, and only if it is at least
- *   `BTC_CHANGE_DUST_THRESHOLD_SATOSHIS`. Smaller change goes to the miner.
+ * - the change to `changeAddress` at `changeIndex` among them (`outputs.length` puts it last), and
+ *   only if it is at least `BTC_CHANGE_DUST_THRESHOLD_SATOSHIS`. Smaller change goes to the miner,
+ *   and the other outputs keep their order.
  *
  * Every input gets a `witnessUtxo` with the UTXO's value and the change address's script: the
  * UTXOs are the wallet's, at its P2WPKH address, and the change returns there. If `changeAddress`
  * is not the signer's own address, signing refuses every input.
  *
- * Throws if the UTXOs do not cover the outputs and the fee, or if an address is invalid or for
- * another network.
+ * Throws if the UTXOs do not cover the outputs and the fee, if `changeIndex` is outside the
+ * outputs, or if the change address is invalid or for another network.
  */
-export const buildBtcSendPsbt = ({
+export const buildBtcScriptOutputsPsbt = ({
 	utxos,
 	outputs,
+	changeIndex,
 	changeAddress,
 	feeSatoshis,
-	network
+	network,
+	sequence
 }: {
 	utxos: CkBtcMinterDid.Utxo[];
-	outputs: BtcSendPsbtOutput[];
+	outputs: BtcPsbtScriptOutput[];
+	changeIndex: number;
 	changeAddress: string;
 	feeSatoshis: bigint;
 	network: BitcoinNetwork;
+	sequence: number;
 }): Psbt => {
+	if (!Number.isInteger(changeIndex) || changeIndex < 0 || changeIndex > outputs.length) {
+		throw new Error(`The change index ${changeIndex} is outside the ${outputs.length} outputs`);
+	}
+
 	const walletScript = Buffer.from(btcAddressToOutputScript({ address: changeAddress, network }));
 
 	const inputsSatoshis = utxos.reduce((acc, { value }) => acc + value, ZERO);
-	const outputsSatoshis = outputs.reduce((acc, { amount }) => acc + amount, ZERO);
+	const outputsSatoshis = outputs.reduce((acc, { value }) => acc + value, ZERO);
 	const changeSatoshis = inputsSatoshis - outputsSatoshis - feeSatoshis;
 
 	if (changeSatoshis < ZERO) {
@@ -194,24 +214,60 @@ export const buildBtcSendPsbt = ({
 			// The Bitcoin canister's txid bytes are in the order the transaction serializes them.
 			hash: Buffer.from(txid),
 			index: vout,
-			sequence: BTC_SEQUENCE_FINAL,
+			sequence,
 			witnessUtxo: { script: walletScript, value: Number(value) }
 		});
 	}
 
-	for (const { destination, amount } of outputs) {
-		psbt.addOutput({
-			script: Buffer.from(btcAddressToOutputScript({ address: destination, network })),
-			value: Number(amount)
-		});
-	}
+	const change: BtcPsbtScriptOutput[] =
+		changeSatoshis >= BTC_CHANGE_DUST_THRESHOLD_SATOSHIS
+			? [{ script: walletScript, value: changeSatoshis }]
+			: [];
 
-	if (changeSatoshis >= BTC_CHANGE_DUST_THRESHOLD_SATOSHIS) {
-		psbt.addOutput({ script: walletScript, value: Number(changeSatoshis) });
+	for (const { script, value } of [
+		...outputs.slice(0, changeIndex),
+		...change,
+		...outputs.slice(changeIndex)
+	]) {
+		psbt.addOutput({ script: Buffer.from(script), value: Number(value) });
 	}
 
 	return psbt;
 };
+
+/**
+ * Builds the PSBT of a send, in the layout the chain fusion signer's `build_p2wpkh_transaction`
+ * builds from the same inputs, outputs and fee, byte for byte: `buildBtcScriptOutputsPsbt` with
+ * each input's sequence `0xFFFFFFFF` and the change last.
+ *
+ * Throws if the UTXOs do not cover the outputs and the fee, or if an address is invalid or for
+ * another network.
+ */
+export const buildBtcSendPsbt = ({
+	utxos,
+	outputs,
+	changeAddress,
+	feeSatoshis,
+	network
+}: {
+	utxos: CkBtcMinterDid.Utxo[];
+	outputs: BtcSendPsbtOutput[];
+	changeAddress: string;
+	feeSatoshis: bigint;
+	network: BitcoinNetwork;
+}): Psbt =>
+	buildBtcScriptOutputsPsbt({
+		utxos,
+		outputs: outputs.map(({ destination, amount }) => ({
+			script: btcAddressToOutputScript({ address: destination, network }),
+			value: amount
+		})),
+		changeIndex: outputs.length,
+		changeAddress,
+		feeSatoshis,
+		network,
+		sequence: BTC_SEQUENCE_FINAL
+	});
 
 /**
  * Checks every input's signature, then finalizes the PSBT and extracts the signed transaction.

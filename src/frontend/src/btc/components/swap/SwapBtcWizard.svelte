@@ -11,6 +11,7 @@
 	import { BtcValidationError } from '$btc/types/btc-send';
 	import {
 		isUnclearBtcBroadcastOutcome,
+		isBtcSendLimitError,
 		mapBtcBroadcastErrorToMessage
 	} from '$btc/utils/btc-send.utils';
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
@@ -318,8 +319,8 @@
 						$i18n.swap.error.unexpected
 				},
 				// The gate aborted before any funds moved, so there is no underlying failure to
-				// attach; the message above already says everything the user needs.
-				...(isNullish(quoteRejected) ? { err } : {})
+				// attach; the message above already says everything the user needs, as a limit's does.
+				...(isNullish(quoteRejected) && !isBtcSendLimitError(err) ? { err } : {})
 			});
 
 			// The deposit may have gone out, and its row stays for the poller to settle. Its inputs

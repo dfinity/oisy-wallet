@@ -39,6 +39,7 @@ import {
 	calculateSlippage,
 	calculateSwapGainUsd,
 	calculateValueDifference,
+	canPayWithToken,
 	findNearIntentsAsset,
 	findSwapProvider,
 	formatReceiveOutMinimum,
@@ -1381,6 +1382,35 @@ describe('swap utils', () => {
 			const deadlineTime = new Date(result.deadline).getTime();
 
 			expect(deadlineTime).toBeGreaterThanOrEqual(before + 180_000);
+		});
+	});
+
+	describe('canPayWithToken', () => {
+		const enabledToken = { ...mockValidIcToken, enabled: true };
+		const inactiveToken = { ...mockValidIcToken, enabled: false };
+
+		it('should allow an enabled token with a balance', () => {
+			expect(canPayWithToken({ ...enabledToken, balance: 1n })).toBeTruthy();
+		});
+
+		it('should not allow a token with a balance of zero', () => {
+			expect(canPayWithToken({ ...enabledToken, balance: ZERO })).toBeFalsy();
+		});
+
+		it('should allow an enabled token whose balance is not loaded yet', () => {
+			expect(canPayWithToken({ ...enabledToken, balance: undefined })).toBeTruthy();
+			expect(canPayWithToken({ ...enabledToken, balance: null })).toBeTruthy();
+		});
+
+		it('should allow a token that cannot be disabled while its balance loads', () => {
+			expect(canPayWithToken({ ...ICP_TOKEN, balance: undefined })).toBeTruthy();
+		});
+
+		it('should not allow an inactive token, whatever its balance', () => {
+			expect(canPayWithToken({ ...inactiveToken, balance: 1n })).toBeFalsy();
+			expect(canPayWithToken({ ...inactiveToken, balance: ZERO })).toBeFalsy();
+			expect(canPayWithToken({ ...inactiveToken, balance: undefined })).toBeFalsy();
+			expect(canPayWithToken({ ...inactiveToken, balance: null })).toBeFalsy();
 		});
 	});
 });

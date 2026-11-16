@@ -34,6 +34,7 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
@@ -417,6 +418,25 @@ describe('SwapBtcWizard', () => {
 			expect(toasts.toastsError).toHaveBeenCalledWith({
 				msg: { text: en.send.assertion.btc_utxo_locked },
 				err
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		it('goes back, saying how long to wait, without the English detail after a rate limit', async () => {
+			const err = new BtcBroadcastTransactionCanisterError(
+				{ RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } },
+				'Rate limit exceeded. Maximum of 5 calls allowed every 60 seconds.'
+			);
+			vi.mocked(fetchChainFusionBtcSwap).mockRejectedValue(err);
+
+			const { getByText, onBack, onClose } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(toasts.toastsError).toHaveBeenCalledWith({
+				msg: { text: en.send.error.btc_send_rate_limited.replace('$duration', '1 minute') }
 			});
 			expect(onBack).toHaveBeenCalledOnce();
 			expect(onClose).not.toHaveBeenCalled();

@@ -108,6 +108,10 @@ describe('btc-send.services', () => {
 			{
 				type: BtcSendValidationError.MinimumBalance,
 				text: get(i18n).send.assertion.minimum_btc_amount
+			},
+			{
+				type: BtcSendValidationError.PendingTransactionsNotAvailable,
+				text: get(i18n).send.assertion.pending_transactions_not_available
 			}
 		])('should toast the mapped message for $type', ({ type, text }) => {
 			handleBtcValidationError({ err: new BtcValidationError(type) });
@@ -117,11 +121,8 @@ describe('btc-send.services', () => {
 			});
 		});
 
-		it.each([
-			BtcSendValidationError.PendingTransactionsNotAvailable,
-			'unknown_error_type' as BtcSendValidationError
-		])('should toast the unexpected error with err for %s', (type) => {
-			const err = new BtcValidationError(type);
+		it('should toast the unexpected error with err for an unmapped type', () => {
+			const err = new BtcValidationError('unknown_error_type' as BtcSendValidationError);
 
 			handleBtcValidationError({ err });
 
@@ -668,6 +669,40 @@ describe('btc-send.services', () => {
 						utxosFee: feePricedForALargerOutput
 					})
 				).resolves.not.toThrow();
+			});
+		});
+
+		describe('a layout of outputs', () => {
+			// A LI.FI LayerSwap layout: a P2TR deposit, an 18-byte memo and a P2WPKH fee output.
+			// 1 input + 43 + 29 + 31 + change (31) = 213 vB, at 4 sat/vB = 852 sats.
+			const outputVSizes = [43, 29, 31];
+			const feePricedForTheLayout = { ...validUtxosFee, feeSatoshis: 852n };
+
+			it('should check the fee against every output of the layout', async () => {
+				await expect(
+					validateBtcSend({
+						...defaultValidateParams,
+						destination: undefined,
+						outputVSizes,
+						utxosFee: feePricedForTheLayout
+					})
+				).resolves.not.toThrow();
+			});
+
+			it('should refuse the fee of a layout checked against one output', async () => {
+				await expect(
+					validateBtcSend({
+						...defaultValidateParams,
+						destination: undefined,
+						utxosFee: feePricedForTheLayout
+					})
+				).rejects.toMatchObject({ type: BtcSendValidationError.InvalidFeeCalculation });
+			});
+
+			it('should refuse the fee of one output checked against the layout', async () => {
+				await expect(
+					validateBtcSend({ ...defaultValidateParams, destination: undefined, outputVSizes })
+				).rejects.toMatchObject({ type: BtcSendValidationError.InvalidFeeCalculation });
 			});
 		});
 

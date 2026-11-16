@@ -1151,6 +1151,9 @@
 			"ethereum_transaction_not_sent": "Transakcja nie została wysłana: nie udało nam się połączyć z siecią, aby ją przygotować. Możesz bezpiecznie spróbować ponownie.",
 			"ethereum_transaction_unconfirmed": "Nie mogliśmy potwierdzić, czy transakcja dotarła do sieci. Może jeszcze przejść, więc odczekaj minutę lub dwie i przed ponownym wysłaniem sprawdź swoją aktywność.",
 			"btc_transaction_unconfirmed": "",
+			"btc_send_rate_limited": "",
+			"btc_signing_allowance_spent": "",
+			"btc_transaction_never_landed": "",
 			"solana_transaction_expired": "Twoja transakcja nie została przetworzona przez sieć Solana i wygasła, najprawdopodobniej dlatego, że podana opłata priorytetowa była niewystarczająca. Zaktualizowaliśmy ją do najnowszej zalecanej kwoty, więc spróbuj ponownie.",
 			"solana_confirmation_failed": "Nie otrzymaliśmy potwierdzenia dla właśnie utworzonej transakcji. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, czy Twoja transakcja została utworzona poprawnie.",
 			"solana_insufficient_funds": "Saldo Twojego tokena jest niewystarczające do zrealizowania tej transakcji. Twoje saldo mogło się zmienić od ostatniego wyświetlenia.",
@@ -1522,7 +1525,8 @@
 			"data_is_incompleted": "",
 			"amount_does_not_match": "",
 			"recipient_address_is_not_valid": "",
-			"token_address_mismatch": ""
+			"token_address_mismatch": "",
+			"btc_reservation_rate_limited": ""
 		},
 		"alt": {
 			"pay": "",
@@ -3049,7 +3053,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "Asystent AI $oisy_short",
-			"welcome_message": "Cześć! 👋 Jestem estem Twoim osobistym konsjerżem AI. W czym mogę Ci pomóc?",
+			"welcome_message": "Cześć! 👋 Jestem Twoim osobistym konsjerżem AI. W czym mogę Ci pomóc?",
 			"action_button_contacts_title": "Pokaż kontakty",
 			"action_button_contacts_subtitle": "Wyświetl zapisane kontakty",
 			"action_button_contacts_prompt": "Pokaż mi moje kontakty.",
