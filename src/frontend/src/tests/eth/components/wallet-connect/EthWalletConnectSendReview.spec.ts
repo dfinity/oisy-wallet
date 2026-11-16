@@ -1580,6 +1580,16 @@ describe('EthWalletConnectSendReview', () => {
 					replacePlaceholders(en.wallet_connect.text.ck_deposit_liquidium_pool, { $asset: 'USDT' })
 				);
 
+				// The row names the pool; the copy button still copies the account itself.
+				expect(
+					getByRole('button', {
+						name: `${en.core.text.copy}: ${encodeIcrcAccount({
+							owner: Principal.fromText(mockLiquidiumUsdtPoolId),
+							subaccount: mockLiquidiumSupplySubaccount
+						})}`
+					})
+				).toBeInTheDocument();
+
 				expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 
 				expect(loadLiquidiumInflowPool).toHaveBeenCalledExactlyOnceWith({
