@@ -222,6 +222,23 @@ change index: the `OP_RETURN` has no address, and LI.FI's scripts are kept byte 
 stays within the backend's caps: at most 4 outputs (`MAX_BROADCAST_TX_OUTPUTS`), one push-only
 `OP_RETURN` of at most 83 bytes.
 
+As built (PR 3):
+
+- `buildBtcScriptOutputsPsbt` takes the outputs as `{ script, value }`, a change index and the
+  inputs' sequence. `buildBtcSendPsbt` is now that builder with each output's address turned into its
+  script, the change last and the final sequence `0xFFFFFFFF`, so a plain send's bytes do not change.
+  Change below the dust threshold is dropped and the other outputs keep their order. For LI.FI, the
+  change index is 2 (between the memo and the fee).
+- The fee sizing takes `outputVSizes`, the vsizes of every output but the change, in place of the
+  single `recipientOutputVSize`: `estimateTransactionVSize`, `calculateFeeSatoshis`,
+  `calculateUtxoSelection` and `calculateMaxSpendableAmount`. A plain send passes its recipient's
+  size alone. `btcScriptOutputVSize` sizes an output from its script (9 bytes plus the script), which
+  covers the `OP_RETURN`. With one input, LayerSwap's layout prices at 213 vB and NEAR's at 193.
+- `prepareBtcSend` and `validateBtcSend` take an optional `outputVSizes`, which replaces the
+  recipient's size. Their `amount` is then what those outputs pay together: for LI.FI, the deposit
+  plus the fee output, so `fromAmount`. `initBtcMaxSendAmount` still prices one output, until PR 6
+  gives it LI.FI's layout.
+
 ### Execution
 
 Through `sendBtc`'s pipeline (`src/frontend/src/btc/services/btc-send.services.ts`), extended to

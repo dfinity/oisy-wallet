@@ -69,7 +69,7 @@ describe('BtcSendAmount', () => {
 				1_000n -
 				calculateFeeSatoshis({
 					numInputs: 1,
-					recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+					outputVSizes: [BTC_LARGEST_OUTPUT_VSIZE],
 					feeRateMiliSatoshisPerVByte: 1_000n
 				}),
 			unitName: BTC_MAINNET_TOKEN.decimals,
