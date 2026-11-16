@@ -1545,6 +1545,18 @@ describe('swap utils', () => {
 				).toEqual([BASE_ETH_TOKEN.id, ARBITRUM_USDC_TOKEN.id, ETHEREUM_TOKEN.id]);
 			});
 
+			it('should keep to the swap networks before the providers have answered', () => {
+				expect(
+					getReceiveSwapTokens({
+						sourceToken: BASE_USDC_TOKEN,
+						supportedData: undefined,
+						// Ethereum is in the pre-filter, but not a swap network here.
+						networks: [ARBITRUM_MAINNET_NETWORK, BASE_NETWORK],
+						tokens
+					}).map(({ id }) => id)
+				).toEqual([BASE_ETH_TOKEN.id, ARBITRUM_USDC_TOKEN.id]);
+			});
+
 			it('should offer nothing when the providers reach nothing', () => {
 				expect(
 					getReceiveSwapTokens({

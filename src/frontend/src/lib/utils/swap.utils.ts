@@ -601,9 +601,14 @@ export const getReceiveSwapTokens = <T extends Token>({
 }): TokenToggleable<T>[] => {
 	const networkIds = getReceiveNetworkIds({ sourceToken, supportedData, networks, tokens });
 
-	// No network, like no constraint, leaves every swap network, as the networks list reads it.
+	// Only swap networks; among them, the ones the pay token reaches. No network, like no constraint,
+	// leaves every swap network, as the networks list reads it.
+	const swapNetworkIds = networks.map(({ id }) => id);
+
 	const allowedNetworkIds = new Set(
-		nonNullish(networkIds) && networkIds.length > 0 ? networkIds : networks.map(({ id }) => id)
+		nonNullish(networkIds) && networkIds.length > 0
+			? networkIds.filter((id) => swapNetworkIds.includes(id))
+			: swapNetworkIds
 	);
 
 	return filterSwapTokens({ tokens, supportedData }).filter(
