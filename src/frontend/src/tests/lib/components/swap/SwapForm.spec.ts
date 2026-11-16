@@ -10,13 +10,18 @@ import {
 } from '$lib/constants/swap.constants';
 import {
 	SWAP_DESTINATION_TOKEN_BALANCE,
+	SWAP_RECEIVE_SHORTCUTS,
+	SWAP_RECEIVE_SHORTCUT_KEEP,
+	SWAP_RECEIVE_SHORTCUT_SAME_NETWORK,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	SWAP_TWO_SWAPS_HINT,
 	SWAP_TWO_SWAPS_HINT_BUTTON,
 	TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON,
 	TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE,
-	TOKEN_INPUT_CURRENCY_TOKEN
+	TOKEN_INPUT_CURRENCY_TOKEN,
+	TOKEN_INPUT_SELECT_TOKEN_BUTTON
 } from '$lib/constants/test-ids.constants';
+import * as swapDerived from '$lib/derived/swap.derived';
 import { trackSwapTwoSwapsHint } from '$lib/services/swap-two-swaps-hint-analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { COLORED_NETWORK_LOGOS_CONTEXT_KEY } from '$lib/stores/colored-network-logos.store';
@@ -26,6 +31,8 @@ import {
 	type SwapAmountsStoreData
 } from '$lib/stores/swap-amounts.store';
 import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
+import { SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY } from '$lib/stores/swap-receive-shortcuts.store';
+import type { SwapSupportedTokensData } from '$lib/stores/swap-supported-tokens.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { OptionAmount } from '$lib/types/send';
 import { SwapProvider } from '$lib/types/swap';
@@ -1232,6 +1239,147 @@ describe('SwapForm', () => {
 			expect(
 				queryByText(slippageError(SWAP_SLIPPAGE_VELORA_INVALID_VALUE))
 			).not.toBeInTheDocument();
+		});
+	});
+
+	describe('receive shortcuts', () => {
+		const payToken = { ...mockValidIcToken, enabled: true };
+
+		// Another token on Internet Computer that the pay token reaches.
+		const otherIcToken = {
+			...mockValidIcToken,
+			id: parseTokenId('OtherIcToken'),
+			symbol: 'OTHER',
+			ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai',
+			enabled: true
+		};
+
+		const reachOtherIcToken: SwapSupportedTokensData = {
+			icp: { coverage: 'all', supportedTokenIds: new Set([otherIcToken.ledgerCanisterId]) },
+			evm: { coverage: 'all', supportedTokenIds: new Set() },
+			sol: { coverage: 'all', supportedTokenIds: new Set() },
+			btc: { coverage: 'all', supportedTokenIds: new Set() },
+			xrp: { coverage: 'all', supportedTokenIds: new Set() }
+		};
+
+		const navigation = { showReceiveList: vi.fn(), showMoveStep: vi.fn() };
+
+		const setupSwapContext = ({
+			destinationToken,
+			receiveSupportedData
+		}: {
+			destinationToken?: Token;
+			receiveSupportedData?: SwapSupportedTokensData;
+		}) => {
+			const swapContext = {
+				...initSwapContext({ sourceToken: payToken, destinationToken }),
+				receiveSupportedData: readable(receiveSupportedData)
+			};
+
+			mockContext.set(SWAP_CONTEXT_KEY, swapContext);
+
+			return swapContext;
+		};
+
+		const renderForm = (onShowTokensList = vi.fn()) =>
+			render(SwapForm, {
+				props: {
+					swapAmount: undefined,
+					slippageValue: '1',
+					isSwapAmountsLoading: false,
+					onCustomValidate: vi.fn(),
+					onShowTokensList,
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+
+		beforeEach(() => {
+			setupIcTokenFeeStore();
+
+			vi.spyOn(swapDerived, 'allSwapUniverseTokens', 'get').mockReturnValue(
+				readable([payToken, otherIcToken])
+			);
+		});
+
+		afterEach(() => {
+			mockContext.delete(SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY);
+
+			vi.restoreAllMocks();
+		});
+
+		it('should show the shortcuts in place of the empty receive field', () => {
+			mockContext.set(SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY, navigation);
+			setupSwapAmountsStore();
+			setupSwapContext({ receiveSupportedData: reachOtherIcToken });
+
+			const { getByTestId, getAllByTestId } = renderForm();
+
+			expect(getByTestId(SWAP_RECEIVE_SHORTCUTS)).toBeInTheDocument();
+			expect(getByTestId(SWAP_RECEIVE_SHORTCUT_SAME_NETWORK)).toHaveTextContent(
+				replacePlaceholders(en.swap.text.receive_shortcut_same_network, {
+					$network: ICP_NETWORK.name
+				})
+			);
+			// Only the pay field's token button is left.
+			expect(getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)).toHaveLength(1);
+		});
+
+		it('should show the empty receive field without the swap steps behind it', () => {
+			setupSwapAmountsStore();
+			setupSwapContext({ receiveSupportedData: reachOtherIcToken });
+
+			const { queryByTestId, getAllByTestId } = renderForm();
+
+			expect(queryByTestId(SWAP_RECEIVE_SHORTCUTS)).not.toBeInTheDocument();
+			expect(getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)).toHaveLength(2);
+		});
+
+		it('should bring the shortcuts back in place of a tapped receive token, with Keep', async () => {
+			mockContext.set(SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY, navigation);
+			const store = setupSwapAmountsStore(mockSwapAmounts);
+			const { destinationToken, keptDestinationToken } = setupSwapContext({
+				destinationToken: otherIcToken,
+				receiveSupportedData: reachOtherIcToken
+			});
+			const onShowTokensList = vi.fn();
+
+			const { getAllByTestId, getByTestId } = renderForm(onShowTokensList);
+
+			await fireEvent.click(getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]);
+
+			expect(onShowTokensList).not.toHaveBeenCalled();
+			expect(get(destinationToken)).toBeUndefined();
+			expect(get(keptDestinationToken)).toBe(otherIcToken);
+			// The quote goes with it.
+			expect(get(store)).toBeNull();
+
+			expect(getByTestId(SWAP_RECEIVE_SHORTCUT_KEEP)).toHaveTextContent(
+				replacePlaceholders(en.swap.text.keep_destination, {
+					$symbol: otherIcToken.symbol,
+					$network: ICP_NETWORK.name
+				})
+			);
+
+			await fireEvent.click(getByTestId(SWAP_RECEIVE_SHORTCUT_KEEP));
+
+			expect(get(destinationToken)).toBe(otherIcToken);
+			expect(get(keptDestinationToken)).toBeUndefined();
+		});
+
+		it('should open the receive list for a tapped receive token before the providers answer', async () => {
+			mockContext.set(SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY, navigation);
+			setupSwapAmountsStore(mockSwapAmounts);
+			const { destinationToken } = setupSwapContext({ destinationToken: otherIcToken });
+			const onShowTokensList = vi.fn();
+
+			const { getAllByTestId } = renderForm(onShowTokensList);
+
+			await fireEvent.click(getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]);
+
+			expect(onShowTokensList).toHaveBeenCalledExactlyOnceWith('destination');
+			expect(get(destinationToken)).toBe(otherIcToken);
 		});
 	});
 });

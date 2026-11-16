@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 	import SwapBtcContexts from '$btc/components/swap/SwapBtcContexts.svelte';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
+	import SwapReceiveNetworkList from '$lib/components/swap/SwapReceiveNetworkList.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import { allCrossChainSwapTokens } from '$lib/derived/all-tokens.derived';
@@ -31,6 +32,10 @@
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
+	import {
+		SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY,
+		type SwapReceiveShortcutsContext
+	} from '$lib/stores/swap-receive-shortcuts.store';
 	import {
 		SWAP_CONTEXT_KEY,
 		type SwapContext,
@@ -191,25 +196,20 @@
 
 	// A side has its own filters once the person changes one on its list, even back to where it
 	// started; from then on it reopens on them. Until then nothing is kept, so the receive side goes on
-	// following the pay side.
-	const keepTokenListFilters = ({ side, changed }: { side: TokenSide; changed: boolean }) => {
-		if (!changed && isNullish(getTokenListFilters(side))) {
+	// following the pay side. Only a change keeps them: a list a receive shortcut opened starts on the
+	// shortcut's filters, which are not the person's.
+	const onTokenListFiltersChange = () => {
+		if (isNullish(selectTokenType)) {
 			return;
 		}
 
 		setTokenListFilters({
-			side,
+			side: selectTokenType,
 			filters: { network: get(filterNetwork), category: get(filterCategoryTag) }
 		});
 	};
 
-	const onTokenListFiltersChange = () => {
-		if (nonNullish(selectTokenType)) {
-			keepTokenListFilters({ side: selectTokenType, changed: true });
-		}
-	};
-
-	const enterTokenList = (side: TokenSide) => {
+	const enterTokenList = ({ side, start }: { side: TokenSide; start?: SwapTokenListFilters }) => {
 		swapAmountsStore.reset();
 
 		setFilterQuery('');
@@ -222,20 +222,23 @@
 
 		// A pick never moves a side's filters. Kept in the swap context, which outlives this component
 		// (Get Token rebuilds it on every step).
-		const { network, category } = getTokenListFilters(side) ?? getStartFilters(side);
+		const { network, category } = start ?? getTokenListFilters(side) ?? getStartFilters(side);
 
 		setFilterNetwork(network);
 
 		setFilterCategoryTag(category);
 	};
 
-	const showTokensList = (tokenSource: TokenSide) => enterTokenList(tokenSource);
+	const showTokensList = (tokenSource: TokenSide) => enterTokenList({ side: tokenSource });
+
+	// All asset types, so the list matches the shortcut's preview.
+	setContext<SwapReceiveShortcutsContext>(SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY, {
+		showReceiveList: (network) =>
+			enterTokenList({ side: 'destination', start: { network, category: undefined } }),
+		showMoveStep: () => goToStep(WizardStepsSwap.MOVE_TOKEN)
+	});
 
 	const closeTokenList = () => {
-		if (nonNullish(selectTokenType)) {
-			keepTokenListFilters({ side: selectTokenType, changed: false });
-		}
-
 		goToStep(WizardStepsSwap.SWAP);
 
 		resetAllowedNetworkIds();
@@ -318,6 +321,15 @@
 				onCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
 				onSelectProvider={selectProvider}
 				{slippageValue}
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.MOVE_TOKEN}
+			<SwapReceiveNetworkList
+				onClose={() => goToStep(WizardStepsSwap.SWAP)}
+				onSelectToken={(token) => {
+					setDestinationToken(token);
+
+					goToStep(WizardStepsSwap.SWAP);
+				}}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapTokenWizard

@@ -48,11 +48,13 @@ import {
 	type SwapSlippageStatus
 } from '$lib/types/swap';
 import type { Token, TokenToPin } from '$lib/types/token';
+import type { TokenGroupData } from '$lib/types/token-group';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
@@ -636,3 +638,78 @@ export const sortSwapListTokens = <T extends Token>({
 		})
 	];
 };
+
+export interface SwapReceiveShortcuts<T extends Token = Token> {
+	// The tokens on the pay token's network, in the order given.
+	sameNetwork?: { network: Network; tokens: T[] };
+	// The pay token's group on other networks, in chain order: the same asset, moved.
+	otherNetwork?: { group: TokenGroupData; tokens: T[] };
+	// Every token, when the two above leave some out.
+	anyToken?: { tokens: number; networks: number };
+}
+
+/**
+ * The shortcuts on the swap form for what to receive, as views of the receive list: `tokens` is what
+ * the list offers for the pay token (`getReceiveSwapTokens`), in the list's order, and `networks` is
+ * in chain order. A shortcut with nothing behind it is left out.
+ */
+export const getReceiveShortcuts = <T extends Token>({
+	sourceToken,
+	tokens,
+	networks
+}: {
+	sourceToken: Token;
+	tokens: T[];
+	networks: Pick<Network, 'id'>[];
+}): SwapReceiveShortcuts<T> => {
+	const { network: sourceNetwork, groupData } = sourceToken;
+
+	const sameNetworkTokens = tokens.filter(({ network }) => network.id === sourceNetwork.id);
+
+	// A network chain order does not know goes last; the sort is stable, so the list's order stays
+	// within a network.
+	const chainIndex = ({ network }: T): number => {
+		const index = networks.findIndex(({ id }) => id === network.id);
+
+		return index < 0 ? networks.length : index;
+	};
+
+	const otherNetworkTokens = isNullish(groupData)
+		? []
+		: tokens
+				.filter(
+					(token) => token.groupData?.id === groupData.id && token.network.id !== sourceNetwork.id
+				)
+				.sort((a, b) => chainIndex(a) - chainIndex(b));
+
+	// The two above never share a token: one keeps to the pay token's network, the other leaves it.
+	const covered = sameNetworkTokens.length + otherNetworkTokens.length;
+
+	return {
+		...(sameNetworkTokens.length > 0 && {
+			sameNetwork: { network: sourceNetwork, tokens: sameNetworkTokens }
+		}),
+		...(nonNullish(groupData) &&
+			otherNetworkTokens.length > 0 && {
+				otherNetwork: { group: groupData, tokens: otherNetworkTokens }
+			}),
+		...(tokens.length > covered && {
+			anyToken: {
+				tokens: tokens.length,
+				networks: new Set(tokens.map(({ network }) => network.id)).size
+			}
+		})
+	};
+};
+
+// The title of "Move <symbol> to": the pay token's group, which the step lists on other networks.
+export const getSwapMoveTokenTitle = ({
+	i18n,
+	sourceToken
+}: {
+	i18n: I18n;
+	sourceToken: Token | undefined;
+}): string =>
+	replacePlaceholders(i18n.swap.text.move_token_to, {
+		$symbol: sourceToken?.groupData?.symbol ?? sourceToken?.symbol ?? ''
+	});

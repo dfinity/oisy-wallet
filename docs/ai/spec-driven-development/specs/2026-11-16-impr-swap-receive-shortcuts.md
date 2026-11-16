@@ -151,7 +151,8 @@ The card is today's filled You receive card, and everything below it (notices, S
 fee) is unchanged.
 
 Tapping the receive token clears it and shows the shortcuts again, with a **Keep _symbol_ on
-_network_** link under them that puts it back. The link goes once a new receive token is picked
+_network_** link under them that puts it back. Before the receive support data is ready the tap
+opens the receive list, as today, since there would be no shortcuts to show the link under. The link goes once a new receive token is picked
 or the pay token changes. Clearing the receive token drops the current quote, as opening the list
 does today; Keep fetches a new one.
 
@@ -163,18 +164,19 @@ are unchanged.
 New keys under `swap.text` in `src/frontend/src/lib/i18n/en.json`. Lists are joined with
 `formatList` (`src/frontend/src/lib/utils/i18n.utils.ts`). No em dashes (`brand-and-copy.md`).
 
-| Where                               | English                              | Key (proposed)                         |
-| ----------------------------------- | ------------------------------------ | -------------------------------------- |
-| Shortcut 1                          | Another token on $network            | `receive_shortcut_same_network`        |
-| Shortcut 2                          | $symbol on another network           | `receive_shortcut_other_network`       |
-| Shortcut 2, one network, other name | $network, as $symbol                 | `receive_shortcut_one_network_as`      |
-| Shortcut 3                          | Any token                            | `receive_shortcut_any_token`           |
-| Shortcut 3, second line             | $tokens tokens on $networks networks | `receive_shortcut_any_token_count`     |
-| Shortcut 3, second line, 1 network  | $tokens tokens on 1 network          | `receive_shortcut_any_token_count_one` |
-| A preview cut short                 | $count more                          | `receive_shortcut_more`                |
-| Network step title                  | Move $symbol to                      | `move_token_to`                        |
-| Network row, other symbol           | as $symbol                           | `as_token`                             |
-| Restore link                        | Keep $symbol on $network             | `keep_destination`                     |
+| Where                               | English                              | Key (proposed)                            |
+| ----------------------------------- | ------------------------------------ | ----------------------------------------- |
+| Shortcut 1                          | Another token on $network            | `receive_shortcut_same_network`           |
+| Shortcut 2                          | $symbol on another network           | `receive_shortcut_other_network`          |
+| Shortcut 2, one network, other name | $network, as $symbol                 | `receive_shortcut_one_network_as`         |
+| Shortcut 3                          | Any token                            | `receive_shortcut_any_token`              |
+| Shortcut 3, second line             | $tokens tokens on $networks networks | `receive_shortcut_any_token_count`        |
+| Shortcut 3, second line, 1 network  | $tokens tokens on 1 network          | `receive_shortcut_any_token_count_one`    |
+| Shortcut 3, second line, 1 token    | 1 token on 1 network                 | `receive_shortcut_any_token_count_single` |
+| A preview cut short                 | $count more                          | `receive_shortcut_more`                   |
+| Network step title                  | Move $symbol to                      | `move_token_to`                           |
+| Network row, other symbol           | as $symbol                           | `as_token`                                |
+| Restore link                        | Keep $symbol on $network             | `keep_destination`                        |
 
 "Move" matches the cross-network note the form already shows: "You move tokens from **Base** to
 **Solana** network" (`cross_chain_networks_info`).
@@ -186,7 +188,9 @@ One Plausible event, `swap_receive_shortcut`, built like `swap_two_swaps_hint`
 `docs/ai/frontend/analytics.md`):
 
 - `event_modifier`: `same_network`, `other_network`, `any_token` or `keep`, sent when that row or
-  link is tapped.
+  link is tapped. `other_network` is sent when a token is picked through it: on the tap when it sets
+  the token directly, otherwise on the pick in the network step (opening the step and leaving it
+  sends nothing), so every `other_network` event carries the picked token.
 - The pay token in `token_*`. For a network-step pick, or for a shortcut that sets the token
   directly, the picked token goes in `token2_*`.
 - No amount and no USD value.
@@ -213,16 +217,25 @@ Pointers, not prescriptions; the implementer decides the shape.
   the allowed networks inside `SwapModalWizardSteps.svelte` (`computeDestinationAllowedIds`). Move
   what the shortcuts need into `swap-tokens-filter.utils.ts` (or next to it) so the list and the
   shortcuts read one function and cannot drift. The grouping into the three shortcuts is a pure
-  function of that set and the pay token: unit-test it there.
+  function of that set and the pay token: unit-test it there. _Built:_ `getReceiveSwapTokens`,
+  `getReceiveNetworkIds`, `sortSwapListTokens` and `getReceiveShortcuts` in `swap.utils.ts`;
+  `swap-tokens-filter.utils.ts` could not take them, since `swap.constants.ts` imports it through
+  `chain-fusion-swap.utils.ts` at load.
 - **Component.** A new `SwapReceiveShortcuts.svelte` in `lib/components/swap/`, rendered by
   `SwapForm.svelte` in place of the receive `TokenInput` when the pay token is set and the receive
   token is not. Rows from `LogoButton` (`lib/components/ui/`), logos from `TokenLogo` /
   `NetworkLogo` with the swap modal's coloured network logos, and `IconSearch` for Any token.
+  _Built:_ the shortcut rows are styled as the Smart Swap cell (`SwapProviderCell`), since
+  `LogoButton` keeps its title on one line and the longest title must wrap at 375 px; the network
+  step's rows use `LogoButton`, as the token list's do.
 - **Navigation.** `SwapForm`'s `onShowTokensList` is threaded through every network's wizard and
   form (`SwapIcpWizard`, `SwapEthForm`, `SwapSolWizard`/`SwapSolForm`, `SwapBtcWizard`/`SwapBtcForm`,
   `SwapXrpWizard`/`SwapXrpForm`). Either widen it (side plus a starting network) and add one for
   the network step, or let `SwapModalWizardSteps` provide them through context. `enterTokenList`
   needs a way to take an explicit starting network without marking the side's filters as changed.
+  _Built:_ a context (`SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY`); a form without it, rendered on its
+  own, keeps today's field. The list keeps a side's filters only when the person changes one, no
+  longer again on closing, so a shortcut's starting network is never kept.
 - **Network step.** A new `WizardStepsSwap` entry (`lib/enums/wizard-steps.ts`), rendered in
   `SwapModalWizardSteps.svelte` next to `TOKENS_LIST`, with its title wired in `SwapModal.svelte`
   as the list's is.
@@ -286,7 +299,10 @@ Made on 2026-11-16, after the prototype:
 ## Open questions (facts to confirm)
 
 1. Can a group ever have two members on one network (USDC.e has its own group, so likely not)?
-   If it can, "_Symbol_ on another network" needs a rule for which one it offers.
+   If it can, "_Symbol_ on another network" needs a rule for which one it offers. _Answered
+   2026-11-16:_ no static token list has two members of a group on one mainnet network. Should one
+   appear, the network step lists both, each with its symbol, and the preview names the network
+   once.
 2. Is `receiveSupportedData` ready when the form shows, or does it load after the pay token is
    picked? If it loads for long, the empty field shows for a noticeable moment before the
    shortcuts replace it; worth measuring once built.

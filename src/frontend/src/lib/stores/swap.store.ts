@@ -27,7 +27,11 @@ export interface SwapError {
 
 export interface SwapData {
 	sourceToken?: Token;
-	destinationToken?: Token;
+	// `null` once the person clears the receive token, so the one the swap opened with does not come
+	// back.
+	destinationToken?: Token | null;
+	// The receive token the person cleared, until a new one is picked or the pay token changes.
+	keptDestinationToken?: Token;
 }
 
 type IsTokensIcrc2Map = Record<string, boolean>;
@@ -64,7 +68,14 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const destinationToken = derived(
 		[data, swappableTokens],
 		([{ destinationToken }, $swappableTokens]) =>
-			destinationToken ?? $swappableTokens.destinationToken
+			destinationToken === null
+				? undefined
+				: (destinationToken ?? $swappableTokens.destinationToken)
+	);
+
+	const keptDestinationToken = derived(
+		[data],
+		([{ keptDestinationToken }]) => keptDestinationToken
 	);
 
 	const sourceTokenBalance = derived(
@@ -128,6 +139,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	return {
 		sourceToken,
 		destinationToken,
+		keptDestinationToken,
 		sourceTokenBalance,
 		destinationTokenBalance,
 		sourceTokenExchangeRate,
@@ -146,14 +158,26 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 
 			update((state) => ({
 				...state,
-				sourceToken: token
+				sourceToken: token,
+				keptDestinationToken: undefined
 			}));
 		},
 		setDestinationToken: (token: Token | undefined) =>
 			update((state) => ({
 				...state,
-				destinationToken: token
+				destinationToken: token,
+				keptDestinationToken: undefined
 			})),
+		// Read here rather than from `state`: the receive token may be the one the swap opened with.
+		clearDestinationToken: () => {
+			const current = get(destinationToken);
+
+			update((state) => ({
+				...state,
+				destinationToken: null,
+				keptDestinationToken: current ?? state.keptDestinationToken
+			}));
+		},
 		// TODO: Ideally, this function should be used with reactive statements, exported outside the store.
 		switchTokens: () => {
 			amountSetToMax.set(false);
@@ -164,8 +188,12 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 
 				return {
 					...state,
-					sourceToken: state.destinationToken ?? $swappableTokens.destinationToken,
-					destinationToken: state.sourceToken ?? $swappableTokens.sourceToken
+					sourceToken:
+						state.destinationToken === null
+							? undefined
+							: (state.destinationToken ?? $swappableTokens.destinationToken),
+					destinationToken: state.sourceToken ?? $swappableTokens.sourceToken,
+					keptDestinationToken: undefined
 				};
 			});
 		},
@@ -231,7 +259,8 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		reset: () => {
 			set({
 				sourceToken: undefined,
-				destinationToken: undefined
+				destinationToken: undefined,
+				keptDestinationToken: undefined
 			});
 			failedSwapError.set(undefined);
 			lifiCarriedFee.set(undefined);
@@ -282,6 +311,9 @@ export interface SwapTokenListFilters {
 export interface SwapContext {
 	sourceToken: Readable<Token | undefined>;
 	destinationToken: Readable<Token | undefined>;
+	// The receive token the person cleared on the form, offered back until a new one is picked or the
+	// pay token changes.
+	keptDestinationToken: Readable<Token | undefined>;
 	sourceTokenBalance: Readable<Balance | undefined>;
 	destinationTokenBalance: Readable<Balance | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
@@ -306,6 +338,8 @@ export interface SwapContext {
 	}) => void;
 	setSourceToken: (token: Token) => void;
 	setDestinationToken: (token: Token | undefined) => void;
+	// Clears the receive token and keeps it as `keptDestinationToken`.
+	clearDestinationToken: () => void;
 	switchTokens: () => void;
 	// Records a two-swap hint as shown: `true` the first time since the swap modal opened.
 	markTwoSwapsHintShown: (hint: TwoSwapsHintShown) => boolean;
