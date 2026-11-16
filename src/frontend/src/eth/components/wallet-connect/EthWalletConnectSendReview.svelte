@@ -315,8 +315,11 @@
 	// A call OISY could not read is in the same position: the native value is all the review knows,
 	// and a zero there is not a summary of the request. Printing "0 ETH" as the amount of an
 	// unreviewed contract call is the misstatement this review exists to prevent, so the row is
-	// dropped rather than filled with a figure that describes nothing.
-	let noAmount = $derived((setApprovalForAll || unknownCall) && amount === ZERO);
+	// dropped rather than filled with a figure that describes nothing. A deposit held until OISY can
+	// check it is in the same position: a token deposit sends no native value at all.
+	let noAmount = $derived(
+		(setApprovalForAll || unknownCall || ckEthHelperUnconfirmed) && amount === ZERO
+	);
 
 	let balance = $derived(
 		nonNullish(unlistedToken)
