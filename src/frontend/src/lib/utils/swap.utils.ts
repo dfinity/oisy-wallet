@@ -14,6 +14,7 @@ import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	NEAR_INTENTS_BLOCKCHAIN_MAP,
+	SUPPORTED_CROSS_SWAP_NETWORKS,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_ETH_TOKEN_PLACEHOLDER,
 	SWAP_SLIPPAGE_INVALID_VALUE,
@@ -22,6 +23,7 @@ import {
 	swapProvidersDetails
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
+import type { SwapSupportedTokensData } from '$lib/stores/swap-supported-tokens.store';
 import type { AmountString } from '$lib/types/amount';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type {
@@ -29,7 +31,7 @@ import type {
 	NearIntentsQuoteResponse,
 	NearIntentsToken
 } from '$lib/types/near-intents';
-import type { NetworkId } from '$lib/types/network';
+import type { Network, NetworkId } from '$lib/types/network';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import {
 	SwapErrorCodes,
@@ -45,7 +47,8 @@ import {
 	type SwapProvidersConfig,
 	type SwapSlippageStatus
 } from '$lib/types/swap';
-import type { Token } from '$lib/types/token';
+import type { Token, TokenToPin } from '$lib/types/token';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
@@ -53,8 +56,9 @@ import { formatToken } from '$lib/utils/format.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
+import { filterSwapTokens, networksWithSupport } from '$lib/utils/swap-tokens-filter.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
-import { findToken } from '$lib/utils/tokens.utils';
+import { findToken, sortTokens } from '$lib/utils/tokens.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { OptimalRate } from '@velora-dex/sdk';
@@ -544,4 +548,91 @@ export const canPayWithToken = (token: TokenUi): boolean => {
 	const { balance } = token;
 
 	return isNullish(balance) || balance > ZERO;
+};
+
+/**
+ * The networks a pay token reaches: the static cross-swap pre-filter, intersected with the networks
+ * that have a destination the providers supporting it reach. Before the providers' data is in, the
+ * pre-filter alone. `undefined` for no constraint.
+ */
+export const getReceiveNetworkIds = ({
+	sourceToken,
+	supportedData,
+	networks,
+	tokens
+}: {
+	sourceToken: Token;
+	supportedData: SwapSupportedTokensData | undefined;
+	networks: Network[];
+	tokens: TokenToggleable<Token>[];
+}): NetworkId[] | undefined => {
+	const baseAllowedIds = SUPPORTED_CROSS_SWAP_NETWORKS[sourceToken.network.id];
+
+	if (isNullish(supportedData)) {
+		return baseAllowedIds;
+	}
+
+	const reachableIds = networksWithSupport({ networks, tokens, supportedData });
+
+	if (isNullish(baseAllowedIds)) {
+		return reachableIds;
+	}
+
+	const reachableSet = new Set(reachableIds);
+
+	return baseAllowedIds.filter((id) => reachableSet.has(id));
+};
+
+/**
+ * The tokens the receive list offers for a pay token on all networks and all asset types, with no
+ * search: those the providers supporting the pay token reach, on the networks it reaches, the pay
+ * token left out. The list and anything that previews it read this, so they cannot drift apart.
+ */
+export const getReceiveSwapTokens = <T extends Token>({
+	sourceToken,
+	supportedData,
+	networks,
+	tokens
+}: {
+	sourceToken: Token;
+	supportedData: SwapSupportedTokensData | undefined;
+	networks: Network[];
+	tokens: TokenToggleable<T>[];
+}): TokenToggleable<T>[] => {
+	const networkIds = getReceiveNetworkIds({ sourceToken, supportedData, networks, tokens });
+
+	// No network, like no constraint, leaves every swap network, as the networks list reads it.
+	const allowedNetworkIds = new Set(
+		nonNullish(networkIds) && networkIds.length > 0 ? networkIds : networks.map(({ id }) => id)
+	);
+
+	return filterSwapTokens({ tokens, supportedData }).filter(
+		({ id, network }) => id !== sourceToken.id && allowedNetworkIds.has(network.id)
+	);
+};
+
+/**
+ * The order of a swap token list: the active tokens as the token lists sort them, then the inactive
+ * ones by symbol, since their row shows no balance and a balance must not move them up.
+ */
+export const sortSwapListTokens = <T extends Token>({
+	tokens,
+	$tokensToPin,
+	$networksToPin
+}: {
+	tokens: TokenUi<T>[];
+	$tokensToPin: ReadonlyArray<TokenToPin>;
+	$networksToPin: ReadonlyArray<Pick<Network, 'id'>>;
+}): TokenUi<T>[] => {
+	const isActive = (token: TokenUi<T>): boolean => !isTokenToggleable(token) || token.enabled;
+
+	return [
+		...sortTokens({ $tokens: tokens.filter(isActive), $tokensToPin, $networksToPin }),
+		...sortTokens({
+			$tokens: tokens.filter((token) => !isActive(token)),
+			$tokensToPin,
+			$networksToPin,
+			primarySortStrategy: 'symbol'
+		})
+	];
 };
