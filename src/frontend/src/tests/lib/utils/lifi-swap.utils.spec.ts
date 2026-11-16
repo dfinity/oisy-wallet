@@ -1,4 +1,5 @@
 import { LIFI_BTC_MIN_AMOUNT_SATOSHIS } from '$btc/constants/lifi.constants';
+import { btcAddressToOutputScript } from '$btc/utils/btc-psbt.utils';
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import {
 	BASE_NETWORK,
@@ -8,6 +9,7 @@ import {
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
@@ -30,6 +32,7 @@ import {
 	assertLifiQuote,
 	buildLifiQuoteRequest,
 	buildLifiSupportedDestinations,
+	decodeLifiBtcTransaction,
 	findLifiIntermediateToken,
 	findLifiListedToken,
 	lifiFeesUsd,
@@ -41,6 +44,13 @@ import {
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
+import {
+	mockLifiBtcFeeAddress,
+	mockLifiBtcLayerswapQuote,
+	mockLifiBtcLayerswapSmallQuote,
+	mockLifiBtcNearBelowFloorQuote,
+	mockLifiBtcNearQuote
+} from '$tests/mocks/lifi-btc.mock';
 import {
 	mockLifiSolSolToUsdc,
 	mockLifiSolUser,
@@ -77,6 +87,7 @@ import {
 	setTransactionMessageFeePayer,
 	setTransactionMessageLifetimeUsingBlockhash
 } from '@solana/kit';
+import { Psbt } from 'bitcoinjs-lib';
 
 describe('lifi-swap.utils', () => {
 	const baseParams = {
@@ -917,6 +928,387 @@ describe('lifi-swap.utils', () => {
 					assertSolQuote({ quote: { ...solQuote(), transactionRequest: undefined } })
 				).toThrow(LifiQuoteRejectedError);
 			});
+		});
+
+		describe('a BTC source', () => {
+			const btcRequestOf = ({ action, tool }: LiFiStep): QuoteRequestFromAmount => ({
+				fromChain: ChainId.BTC,
+				toChain: action.toChainId,
+				fromToken: 'bitcoin',
+				toToken: action.toToken.address,
+				fromAddress: action.fromAddress ?? '',
+				toAddress: action.toAddress,
+				fromAmount: action.fromAmount,
+				slippage: 0.005,
+				allowBridges: [tool]
+			});
+
+			const assertBtcQuote = ({
+				quote = mockLifiBtcLayerswapQuote,
+				request = btcRequestOf(mockLifiBtcLayerswapQuote)
+			}: {
+				quote?: LiFiStep;
+				request?: QuoteRequestFromAmount;
+			} = {}) => assertLifiQuote({ quote, request, sourceNetworkId: BTC_MAINNET_NETWORK_ID });
+
+			interface Output {
+				script: Buffer;
+				value: number;
+			}
+
+			// The quote with its PSBT's outputs edited, its input kept.
+			const withOutputs = ({
+				quote = mockLifiBtcLayerswapQuote,
+				edit
+			}: {
+				quote?: LiFiStep;
+				edit: (outputs: Output[]) => Output[];
+			}): LiFiStep => {
+				const original = Psbt.fromHex(quote.transactionRequest?.data ?? '');
+				const psbt = new Psbt();
+
+				original.txInputs.forEach(({ hash, index, sequence }, input) =>
+					psbt.addInput({
+						hash,
+						index,
+						sequence,
+						witnessUtxo: original.data.inputs[input]?.witnessUtxo
+					})
+				);
+
+				edit(original.txOutputs.map(({ script, value }) => ({ script, value }))).forEach((output) =>
+					psbt.addOutput(output)
+				);
+
+				return {
+					...quote,
+					transactionRequest: { ...quote.transactionRequest, data: psbt.toHex() }
+				};
+			};
+
+			const withFeeCost = (amount: string): LiFiStep => ({
+				...mockLifiBtcLayerswapQuote,
+				estimate: {
+					...mockLifiBtcLayerswapQuote.estimate,
+					feeCosts: mockLifiBtcLayerswapQuote.estimate.feeCosts?.map((cost) =>
+						cost.name === 'LIFI Fixed Fee' ? { ...cost, amount } : cost
+					)
+				}
+			});
+
+			const scriptOf = (address: string) =>
+				Buffer.from(btcAddressToOutputScript({ address, network: 'mainnet' }));
+
+			const memoOf = (hex: string) => Buffer.from(hex, 'hex');
+
+			const [deposit, memo, change, fee] = Psbt.fromHex(
+				mockLifiBtcLayerswapQuote.transactionRequest?.data ?? ''
+			).txOutputs.map(({ script, value }) => ({ script, value }));
+
+			assertNonNullish(deposit);
+			assertNonNullish(memo);
+			assertNonNullish(change);
+			assertNonNullish(fee);
+
+			it.each([
+				{ name: 'LayerSwap', quote: mockLifiBtcLayerswapQuote },
+				{ name: 'LayerSwap at 120 000 sats', quote: mockLifiBtcLayerswapSmallQuote },
+				{ name: 'NEAR Intents', quote: mockLifiBtcNearQuote }
+			])('should accept a live $name quote, with no Diamond', ({ quote }) => {
+				expect(() => assertBtcQuote({ quote, request: btcRequestOf(quote) })).not.toThrow();
+			});
+
+			it('should refuse a quote below the floor, whose fee output exceeds its quoted fee', () => {
+				expect(() =>
+					assertBtcQuote({
+						quote: mockLifiBtcNearBelowFloorQuote,
+						request: btcRequestOf(mockLifiBtcNearBelowFloorQuote)
+					})
+				).toThrow("LI.FI transaction rejected: LI.FI's fee output is not its quoted fee");
+			});
+
+			it('should run the request checks first', () => {
+				expect(() =>
+					assertBtcQuote({
+						quote: {
+							...mockLifiBtcLayerswapQuote,
+							action: { ...mockLifiBtcLayerswapQuote.action, fromAmount: '2000000' }
+						}
+					})
+				).toThrow('amount differs from the request');
+			});
+
+			it('should accept a quote whose PSBT has no change', () => {
+				expect(() =>
+					assertBtcQuote({ quote: withOutputs({ edit: () => [deposit, memo, fee] }) })
+				).not.toThrow();
+			});
+
+			it.each([
+				{ name: 'a fee before the change', outputs: [deposit, memo, fee, change] },
+				{ name: 'a memo before the deposit', outputs: [memo, deposit, change, fee] },
+				{ name: 'no memo', outputs: [deposit, change, fee] },
+				{ name: 'two memos', outputs: [deposit, memo, memo, fee] },
+				{ name: 'two changes', outputs: [deposit, memo, change, change, fee] },
+				{ name: 'no fee', outputs: [deposit, memo, change] },
+				{
+					name: 'an output to someone else',
+					outputs: [
+						deposit,
+						memo,
+						{ ...change, script: scriptOf(mockLifiBtcNearQuote.transactionRequest?.to ?? '') },
+						fee
+					]
+				},
+				{
+					name: 'a fee to another address',
+					outputs: [deposit, memo, change, { ...fee, script: scriptOf(mockBtcAddress) }]
+				}
+			])('should refuse $name', ({ outputs }) => {
+				expect(() => assertBtcQuote({ quote: withOutputs({ edit: () => outputs }) })).toThrow(
+					'its outputs are not the deposit, the memo, the change and the fee, in that order'
+				);
+			});
+
+			it('should refuse a deposit to another address than the quote names', () => {
+				expect(() =>
+					assertBtcQuote({
+						quote: {
+							...mockLifiBtcLayerswapQuote,
+							transactionRequest: {
+								...mockLifiBtcLayerswapQuote.transactionRequest,
+								to: mockLifiBtcNearQuote.transactionRequest?.to
+							}
+						}
+					})
+				).toThrow('its outputs are not the deposit, the memo, the change and the fee');
+			});
+
+			it.each([
+				{ name: 'a valued memo', memo: { ...memo, value: 1 } },
+				{
+					name: 'a memo of 81 bytes',
+					memo: { script: memoOf(`6a4c51${'ab'.repeat(81)}`), value: 0 }
+				},
+				{ name: 'a memo with an opcode', memo: { script: memoOf('6a0161ac'), value: 0 } },
+				{ name: 'a memo with OP_1', memo: { script: memoOf('6a51'), value: 0 } },
+				{ name: 'a memo ending in OP_16', memo: { script: memoOf('6a016160'), value: 0 } },
+				{ name: 'a memo with OP_1NEGATE', memo: { script: memoOf('6a4f'), value: 0 } },
+				{ name: 'a truncated memo', memo: { script: memoOf('6a04abcd'), value: 0 } },
+				{ name: 'a truncated push length', memo: { script: memoOf('6a4d03'), value: 0 } }
+			])('should refuse $name', ({ memo: badMemo }) => {
+				expect(() =>
+					assertBtcQuote({ quote: withOutputs({ edit: () => [deposit, badMemo, change, fee] }) })
+				).toThrow('the memo is not one the backend broadcasts');
+			});
+
+			it.each([
+				{ name: 'of 80 bytes', script: `6a4c50${'ab'.repeat(80)}` },
+				{ name: 'with no data', script: '6a' },
+				{ name: 'with an empty push', script: '6a00' },
+				{ name: 'with an explicit one-byte push of 5', script: '6a0105' },
+				{ name: 'with an explicit one-byte push of 0x81', script: '6a0181' },
+				{ name: 'with a non-minimal OP_PUSHDATA1', script: '6a4c03abcdef' },
+				{ name: 'with an OP_PUSHDATA2', script: '6a4d0300abcdef' },
+				{ name: 'with an OP_PUSHDATA4', script: '6a4e03000000abcdef' }
+			])('should accept a memo $name', ({ script }) => {
+				expect(() =>
+					assertBtcQuote({
+						quote: withOutputs({
+							edit: () => [deposit, { script: memoOf(script), value: 0 }, change, fee]
+						})
+					})
+				).not.toThrow();
+			});
+
+			it('should refuse a deposit other than the amount less the fee', () => {
+				expect(() =>
+					assertBtcQuote({
+						quote: withOutputs({
+							edit: () => [{ ...deposit, value: deposit.value - 1 }, memo, change, fee]
+						})
+					})
+				).toThrow("the deposit is not the amount less LI.FI's fee");
+			});
+
+			it('should refuse a fee output other than the quoted fee', () => {
+				expect(() =>
+					assertBtcQuote({
+						quote: withOutputs({ edit: () => [deposit, memo, change, { ...fee, value: 2_499 }] })
+					})
+				).toThrow("LI.FI's fee output is not its quoted fee");
+			});
+
+			it('should refuse a quoted fee above 25 bps, even when the outputs match it', () => {
+				expect(() =>
+					assertBtcQuote({
+						quote: withOutputs({
+							quote: withFeeCost('2501'),
+							edit: () => [
+								{ ...deposit, value: deposit.value - 1 },
+								memo,
+								change,
+								{ ...fee, value: 2_501 }
+							]
+						})
+					})
+				).toThrow("LI.FI's fee output is not its quoted fee of at most 25 bps");
+			});
+
+			it('should refuse a quoted fee below the dust limit, even when the outputs match it', () => {
+				expect(() =>
+					assertBtcQuote({
+						quote: withOutputs({
+							quote: withFeeCost('293'),
+							edit: () => [
+								{ ...deposit, value: deposit.value + fee.value - 293 },
+								memo,
+								change,
+								{ ...fee, value: 293 }
+							]
+						})
+					})
+				).toThrow("LI.FI's fee output is below the dust limit");
+			});
+
+			it('should accept a quoted fee at the dust limit', () => {
+				expect(() =>
+					assertBtcQuote({
+						quote: withOutputs({
+							quote: withFeeCost('294'),
+							edit: () => [
+								{ ...deposit, value: deposit.value + fee.value - 294 },
+								memo,
+								change,
+								{ ...fee, value: 294 }
+							]
+						})
+					})
+				).not.toThrow();
+			});
+
+			it.each([
+				{
+					name: 'no LI.FI fee',
+					feeCosts: mockLifiBtcLayerswapQuote.estimate.feeCosts?.filter(
+						({ name }) => name !== 'LIFI Fixed Fee'
+					)
+				},
+				{
+					name: 'two LI.FI fees',
+					feeCosts: [
+						...(mockLifiBtcLayerswapQuote.estimate.feeCosts ?? []),
+						...(mockLifiBtcLayerswapQuote.estimate.feeCosts ?? []).filter(
+							({ name }) => name === 'LIFI Fixed Fee'
+						)
+					]
+				},
+				{
+					name: 'a LI.FI fee charged on top',
+					feeCosts: mockLifiBtcLayerswapQuote.estimate.feeCosts?.map((cost) =>
+						cost.name === 'LIFI Fixed Fee' ? { ...cost, included: false } : cost
+					)
+				}
+			])('should refuse a quote listing $name', ({ feeCosts }) => {
+				expect(() =>
+					assertBtcQuote({
+						quote: {
+							...mockLifiBtcLayerswapQuote,
+							estimate: { ...mockLifiBtcLayerswapQuote.estimate, feeCosts }
+						}
+					})
+				).toThrow("LI.FI's fee output is not its quoted fee");
+			});
+
+			it('should refuse a quote whose user is LI.FI', () => {
+				expect(() =>
+					assertBtcQuote({
+						request: {
+							...btcRequestOf(mockLifiBtcLayerswapQuote),
+							fromAddress: mockLifiBtcFeeAddress
+						}
+					})
+				).toThrow('the deposit, the user and LI.FI share an address');
+			});
+
+			it('should refuse a deposit address that is not a mainnet Bitcoin address', () => {
+				expect(() =>
+					assertBtcQuote({
+						quote: {
+							...mockLifiBtcLayerswapQuote,
+							transactionRequest: {
+								...mockLifiBtcLayerswapQuote.transactionRequest,
+								to: mockLifiUserAddress
+							}
+						}
+					})
+				).toThrow('the deposit or the user address is not a Bitcoin address');
+			});
+
+			it('should refuse a transaction that does not decode', () => {
+				expect(() =>
+					assertBtcQuote({
+						quote: {
+							...mockLifiBtcLayerswapQuote,
+							transactionRequest: {
+								...mockLifiBtcLayerswapQuote.transactionRequest,
+								data: '0xdeadbeef'
+							}
+						}
+					})
+				).toThrow('LI.FI transaction rejected: it does not decode');
+			});
+
+			it('should refuse a bridge outside the requested ones', () => {
+				expect(() =>
+					assertBtcQuote({
+						request: { ...btcRequestOf(mockLifiBtcLayerswapQuote), allowBridges: ['near'] }
+					})
+				).toThrow('route uses a bridge or exchange outside the requested lists');
+			});
+		});
+	});
+
+	describe('decodeLifiBtcTransaction', () => {
+		const decode = (quote: LiFiStep) =>
+			decodeLifiBtcTransaction({
+				quote,
+				amount: BigInt(quote.action.fromAmount),
+				userAddress: quote.action.fromAddress ?? ''
+			});
+
+		const hex = (bytes: Uint8Array) => Buffer.from(bytes).toString('hex');
+
+		it("should return LayerSwap's P2TR deposit, its memo and LI.FI's fee, byte for byte", () => {
+			const { deposit, memo, fee } = decode(mockLifiBtcLayerswapQuote);
+
+			expect({
+				deposit: { script: hex(deposit.script), value: deposit.value },
+				memo: { script: hex(memo.script), value: memo.value },
+				fee: { script: hex(fee.script), value: fee.value }
+			}).toStrictEqual({
+				deposit: {
+					script: '5120f9ba507bc8114718a0e16d70a22059162f24a7996ac4d1db1f26330c91c761de',
+					value: 997_500n
+				},
+				memo: { script: '6a12313731363366323b3d7c6c6966693df52ece', value: ZERO },
+				fee: { script: '00149ab105ce5f65cc9d3e51e4b2403eef1831eb5bfd', value: 2_500n }
+			});
+		});
+
+		it("should return NEAR's P2WPKH deposit and LI.FI's memo", () => {
+			const { deposit, memo } = decode(mockLifiBtcNearQuote);
+
+			expect(hex(deposit.script)).toBe(
+				hex(
+					btcAddressToOutputScript({
+						address: 'bc1qlmjtn55ft9w94ujc8lz8wtyt2fdq40tnfum24l',
+						network: 'mainnet'
+					})
+				)
+			);
+			expect(deposit.value).toBe(997_500n);
+			expect(hex(memo.script)).toBe('6a0a3d7c6c6966692fa4b95a');
 		});
 	});
 

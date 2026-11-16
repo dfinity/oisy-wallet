@@ -1,7 +1,12 @@
 import {
+	LIFI_BTC_FEE_ADDRESS,
+	LIFI_BTC_FEE_COST_NAME,
+	LIFI_BTC_MAX_MEMO_SCRIPT_BYTES,
 	LIFI_BTC_MIN_AMOUNT_SATOSHIS,
+	LIFI_BTC_MIN_FEE_SATOSHIS,
 	LIFI_BTC_TOKEN_ADDRESS
 } from '$btc/constants/lifi.constants';
+import { btcAddressToOutputScript } from '$btc/utils/btc-psbt.utils';
 import { isBitcoinToken } from '$btc/utils/token.utils';
 import { BTC_SEND_VIA_BACKEND_ENABLED } from '$env/btc.env';
 import {
@@ -12,13 +17,13 @@ import {
 	LIFI_DIAMOND_ADDRESSES,
 	LIFI_SOLANA_ALLOWED_EXCHANGES
 } from '$env/rest/lifi.env';
-import { LIFI_ACROSS_WRAPPED_NATIVE } from '$eth/constants/lifi.constants';
+import { LIFI_ACROSS_WRAPPED_NATIVE, LIFI_FEE_BPS } from '$eth/constants/lifi.constants';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { LifiQuoteRejectedError } from '$lib/types/errors';
-import type { LifiTokenRef } from '$lib/types/lifi';
+import type { LifiBtcOutput, LifiBtcOutputs, LifiTokenRef } from '$lib/types/lifi';
 import type { Network, NetworkId } from '$lib/types/network';
 import {
 	SwapProvider,
@@ -38,12 +43,13 @@ import { decodeTransactionMessage } from '$sol/utils/sol-transactions.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isTokenSolanaNative } from '$sol/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { ChainId, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
+import { ChainId, type FeeCost, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
 import {
 	getCompiledTransactionMessageDecoder,
 	type Transaction,
 	type TransactionVersion
 } from '@solana/kit';
+import { opcodes, Psbt } from 'bitcoinjs-lib';
 
 /**
  * LI.FI's chain id for a network it may be asked about: an EVM network whose Diamond is pinned, or
@@ -297,11 +303,205 @@ export const decodeLifiSolTransaction = ({
 	return transaction;
 };
 
+// The script that pays a mainnet Bitcoin address, or `undefined` for anything else.
+const toLifiBtcScript = (address: string | undefined): Uint8Array | undefined => {
+	if (isNullish(address)) {
+		return;
+	}
+
+	try {
+		return btcAddressToOutputScript({ address, network: 'mainnet' });
+	} catch (_: unknown) {
+		// Not a mainnet Bitcoin address.
+	}
+};
+
+const isSameBytes = ({ actual, expected }: { actual: Uint8Array; expected: Uint8Array }): boolean =>
+	actual.length === expected.length && actual.every((byte, index) => byte === expected[index]);
+
+const BTC_PUSHDATA_LENGTH_BYTES: Partial<Record<number, number>> = {
+	[opcodes.OP_PUSHDATA1]: 1,
+	[opcodes.OP_PUSHDATA2]: 2,
+	[opcodes.OP_PUSHDATA4]: 4
+};
+
+// Whether `script` is data pushes only, read byte by byte as the backend's parser reads it: direct
+// pushes and `OP_PUSHDATA1/2/4`, minimal or not. bitcoinjs-lib cannot stand in: `isPushOnly` also
+// accepts `OP_1NEGATE` and `OP_1`…`OP_16`, which the backend refuses, and `decompile` turns an
+// explicit one-byte push of 1–16 into those opcodes.
+const isBtcDataPushesOnly = (script: Uint8Array): boolean => {
+	let offset = 0;
+
+	while (offset < script.length) {
+		const opcode = script[offset];
+		offset += 1;
+
+		// A direct push (0x00–0x4b) carries its length in the opcode itself.
+		const lengthBytes = opcode < opcodes.OP_PUSHDATA1 ? 0 : BTC_PUSHDATA_LENGTH_BYTES[opcode];
+
+		if (isNullish(lengthBytes) || offset + lengthBytes > script.length) {
+			return false;
+		}
+
+		const dataLength =
+			lengthBytes === 0
+				? opcode
+				: script
+						.subarray(offset, offset + lengthBytes)
+						.reduceRight((length, byte) => length * 256 + byte, 0);
+
+		offset += lengthBytes + dataLength;
+	}
+
+	return offset === script.length;
+};
+
+// `OP_RETURN` followed only by data pushes, within `LIFI_BTC_MAX_MEMO_SCRIPT_BYTES`: the memo the
+// backend broadcasts, so at most 80 bytes of data.
+const isLifiBtcMemo = (script: Uint8Array): boolean =>
+	script.length <= LIFI_BTC_MAX_MEMO_SCRIPT_BYTES &&
+	script[0] === opcodes.OP_RETURN &&
+	isBtcDataPushesOnly(script.subarray(1));
+
+// LI.FI's fee as its BTC quote lists it: one `LIFI_BTC_FEE_COST_NAME` cost, in BTC, taken out of the
+// amount rather than charged on top.
+const lifiBtcQuotedFee = (feeCosts: FeeCost[] | undefined): bigint | undefined => {
+	const [fee, ...others] = (feeCosts ?? []).filter(({ name }) => name === LIFI_BTC_FEE_COST_NAME);
+
+	if (
+		isNullish(fee) ||
+		others.length > 0 ||
+		!fee.included ||
+		fee.token.chainId !== ChainId.BTC ||
+		fee.token.address !== LIFI_BTC_TOKEN_ADDRESS
+	) {
+		return;
+	}
+
+	return parseAmount(fee.amount);
+};
+
+type LifiBtcOutputRole = 'deposit' | 'memo' | 'change' | 'fee' | 'other';
+
+// LI.FI's order, the change missing only where LI.FI dropped it.
+const LIFI_BTC_OUTPUT_LAYOUTS = ['deposit,memo,change,fee', 'deposit,memo,fee'];
+
+const rejectedBtcTransaction = (reason: string): LifiQuoteRejectedError =>
+	lifiRejectedError({ subject: 'transaction', reason });
+
+/**
+ * Decodes the PSBT of a LI.FI quote from BTC and returns the outputs OISY keeps byte for byte, found
+ * by their role, not their position. LI.FI's inputs are not read: OISY spends its own.
+ *
+ * Refuses the quote unless its outputs are, in this order:
+ *
+ * 1. one to the bridge's deposit address (`transactionRequest.to`), of `amount` less LI.FI's fee;
+ * 2. one `OP_RETURN` of value 0 that the backend broadcasts: data pushes only, at most 80 bytes;
+ * 3. at most one change, to the user's address;
+ * 4. one to LI.FI's pinned fee address, of exactly the fee its quote lists, at most `LIFI_FEE_BPS`
+ *    of `amount`.
+ *
+ * Outputs are compared by script: without an ECC library, bitcoinjs-lib cannot turn a P2TR script
+ * into an address. Shared by the quote trust checks and the rebuild, so that both read alike.
+ */
+export const decodeLifiBtcTransaction = ({
+	quote: {
+		estimate: { feeCosts },
+		transactionRequest
+	},
+	amount,
+	userAddress
+}: {
+	quote: LiFiStep;
+	amount: bigint;
+	userAddress: string;
+}): LifiBtcOutputs => {
+	let outputs: LifiBtcOutput[];
+
+	try {
+		outputs = Psbt.fromHex(transactionRequest?.data ?? '').txOutputs.map(({ script, value }) => ({
+			script: Uint8Array.from(script),
+			value: BigInt(value)
+		}));
+	} catch (_: unknown) {
+		throw rejectedBtcTransaction('it does not decode');
+	}
+
+	const depositScript = toLifiBtcScript(transactionRequest?.to);
+	const userScript = toLifiBtcScript(userAddress);
+
+	if (isNullish(depositScript) || isNullish(userScript)) {
+		throw rejectedBtcTransaction('the deposit or the user address is not a Bitcoin address');
+	}
+
+	const feeScript = btcAddressToOutputScript({ address: LIFI_BTC_FEE_ADDRESS, network: 'mainnet' });
+
+	// Each kept output is told apart by its script alone.
+	if (
+		isSameBytes({ actual: depositScript, expected: userScript }) ||
+		isSameBytes({ actual: depositScript, expected: feeScript }) ||
+		isSameBytes({ actual: userScript, expected: feeScript })
+	) {
+		throw rejectedBtcTransaction('the deposit, the user and LI.FI share an address');
+	}
+
+	const roleOf = ({ script }: LifiBtcOutput): LifiBtcOutputRole =>
+		isSameBytes({ actual: script, expected: depositScript })
+			? 'deposit'
+			: script[0] === opcodes.OP_RETURN
+				? 'memo'
+				: isSameBytes({ actual: script, expected: userScript })
+					? 'change'
+					: isSameBytes({ actual: script, expected: feeScript })
+						? 'fee'
+						: 'other';
+
+	const roles = outputs.map(roleOf);
+
+	const [deposit, memo] = outputs;
+	const fee = outputs.at(-1);
+
+	if (
+		!LIFI_BTC_OUTPUT_LAYOUTS.includes(roles.join(',')) ||
+		isNullish(deposit) ||
+		isNullish(memo) ||
+		isNullish(fee)
+	) {
+		throw rejectedBtcTransaction(
+			'its outputs are not the deposit, the memo, the change and the fee, in that order'
+		);
+	}
+
+	if (memo.value !== ZERO || !isLifiBtcMemo(memo.script)) {
+		throw rejectedBtcTransaction('the memo is not one the backend broadcasts');
+	}
+
+	const lifiFee = lifiBtcQuotedFee(feeCosts);
+
+	if (isNullish(lifiFee) || fee.value !== lifiFee || lifiFee * 10_000n > amount * LIFI_FEE_BPS) {
+		throw rejectedBtcTransaction("LI.FI's fee output is not its quoted fee of at most 25 bps");
+	}
+
+	// The fee output is kept byte for byte, so below the dust limit the signed transaction would not
+	// broadcast.
+	if (lifiFee < LIFI_BTC_MIN_FEE_SATOSHIS) {
+		throw rejectedBtcTransaction("LI.FI's fee output is below the dust limit");
+	}
+
+	if (deposit.value !== amount - lifiFee) {
+		throw rejectedBtcTransaction("the deposit is not the amount less LI.FI's fee");
+	}
+
+	return { deposit, memo, fee };
+};
+
 /**
  * Refuses a LI.FI quote that OISY did not ask for. Quotes are unsigned, so a compromised or
  * intercepted response could name any call target or spender; every quote, shown or executed, must
  * echo the request it answers. An EVM one must be addressed to the Diamond pinned for its source
- * network; a Solana one must be a version 0 transaction that only the user signs.
+ * network; a Solana one must be a version 0 transaction that only the user signs; a BTC one must pay
+ * the deposit, LI.FI's memo and LI.FI's fee as `decodeLifiBtcTransaction` reads them, and nothing
+ * else but the user's change.
  *
  * This binds where the transaction goes, not what it does: the quote that is signed is additionally
  * checked against the Diamond's own calldata decoder (EVM) or the pinned instructions (Solana).
@@ -385,6 +585,13 @@ export const assertLifiQuote = ({
 
 	if (fromChainId === ChainId.SOL) {
 		decodeLifiSolTransaction({ data, userAddress: fromAddress });
+		return;
+	}
+
+	// The request checks above have confirmed the amount, so a quote cannot inflate its own to pass a
+	// larger deposit.
+	if (fromChainId === ChainId.BTC) {
+		decodeLifiBtcTransaction({ quote, amount, userAddress: fromAddress });
 		return;
 	}
 
