@@ -140,7 +140,9 @@ This replaces "the lists load while the backend signs" from the imported-tokens 
    setter, reading the public key, and the parameter list with its checks. The key is stored outside
    `ApiKeys`, so `get_api_keys` cannot return it. `ic-ed25519`, already a backend dependency, signs
    with a PKCS#8 private key, so no new crate is needed. The Candid changes only add endpoints, so
-   the frontend and backend ship on their own; the V1 endpoint stays until the last PR.
+   the frontend and backend ship on their own; the V1 endpoint stays until the last PR. The new
+   endpoints are `sign_onramper_widget_url_v2`, `set_onramper_signing_key` and
+   `get_onramper_signing_public_key` (see Decisions).
 2. **Nonce and timestamp** — a fresh random UUID v4 per signature, and the canister's time.
 3. **Encoding** — the signed parameters must be encoded exactly as `URLSearchParams` does it (space
    as `+`, `:` as `%3A`, `,` as `%2C`). Ed25519 signatures are deterministic, so unit tests compare
@@ -152,7 +154,8 @@ This replaces "the lists load while the backend signs" from the imported-tokens 
    PR.
 5. **Script** — `scripts/` is restricted (`AGENTS.md`). This spec asks to add a script that sets
    the V2 key, next to `scripts/provision-onramper-signing-secret.sh`. It reads the key from a file
-   or a prompt, never from the command line.
+   or a prompt, never from the command line. Approved by Stefan on 2026-11-16:
+   `scripts/provision-onramper-signing-key.sh`.
 6. **Tests** — the signed text and signature against OnRamper's example, the parameter list and its
    checks, the wallet checks as before, unique nonces, the key never returned, V1 when no V2 key is
    set, and the widget waiting for the lists before signing.
@@ -221,6 +224,30 @@ Proposed in this spec:
   breaks during the switch, and no frontend flag is needed.
 - **Sign every parameter OISY sets except display-only ones**, not just the documented core list,
   so OnRamper never silently drops one.
+
+Made while implementing PR 1, on 2026-11-16:
+
+- **Endpoints.** `sign_onramper_widget_url_v2` takes the parameters as `(name, value)` entries
+  and the network wallets, and returns the V2-signed query, or the V1 signature while the backend
+  holds no V2 key. `set_onramper_signing_key` takes the private key as PEM; `null` clears it.
+  `get_onramper_signing_public_key` returns the public key as PEM to controllers and to allowed
+  callers: on `ic` and `beta` the controller is governance, so nobody could call a
+  controller-only read there.
+- **Parameters are checked only for V2.** The V1 fallback signs only the network wallets, as
+  today, so a parameter V2 refuses cannot break Buy on an environment that V1 still serves.
+- **The forms.** An id (token, network or payment method): 1 to 64 ASCII letters, digits, `_`, `-`
+  or `.`. A list: 1 to 1,000 ids, comma-separated. `apiKey`: `pk_`, then letters, digits and `_`,
+  at most 128 bytes. `mode`: `buy`, `sell` or `buy,sell`. A flag: `true` or `false`. A network
+  given twice in the wallets is refused. The backend writes `networkWallets` itself, networks in
+  lowercase and sorted, as V1 does.
+- **Nonce from `raw_rand`.** 16 fresh bytes per signature. Each signing makes one more call, to
+  the management canister, which answers in the next round.
+- **No `sigV2Expiry` yet.** OnRamper's default window of 15 minutes applies until pending decision
+  2 is settled.
+- **The key is stored as its 32-byte seed**, in a stable cell of its own (memory id 28).
+- **One rate limit for both endpoints**: 30 calls per caller per minute across V1 and V2.
+- **No new crate.** Base64, the `URLSearchParams` encoding, the ISO timestamp and the UUID are a
+  few lines each, tested against RFC 4648, Node's `URLSearchParams` and `toISOString`.
 
 ## Out of scope
 
