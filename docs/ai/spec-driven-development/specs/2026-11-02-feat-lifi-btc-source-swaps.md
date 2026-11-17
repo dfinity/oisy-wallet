@@ -348,7 +348,9 @@ As built (PR 6):
     amount, so they are listed in the provider sheet (`SwapDetailsLifi`), as for EVM and Solana.
 - **Wizard.** It sends with the offer's `btcSelection.utxosFee`, and refuses an offer without one as
   missing data. A LI.FI failure is reported to analytics as `toLifiSwapErrorType`'s category, never
-  its text, which can carry the user's addresses, as from EVM and Solana. It skips the generic one-output `validateBtcSend`: `fetchLifiBtcSwap` checks the
+  its text, which can carry the user's addresses, as from EVM and Solana. A `BtcValidationError` from
+  that check reads as the wizard's own one-output check would: `handleBtcValidationError`'s message,
+  and back to the form. It skips the generic one-output `validateBtcSend`: `fetchLifiBtcSwap` checks the
   selection against the layout of the quote it re-requests.
 - **Binding.** `fetchLifiBtcSwap` runs `bindLifiBtcPayout` (`lifi-btc-binding.services.ts`) between
   decoding the outputs and checking the fee. Each bridge's binding is looked up by tool key in

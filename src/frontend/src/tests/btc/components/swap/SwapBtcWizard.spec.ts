@@ -773,6 +773,23 @@ describe('SwapBtcWizard', () => {
 			);
 		});
 
+		// Its execution checks the selection itself, after the wizard's one-output check is skipped.
+		it('names the reason, and comes back to the form, when its execution refuses the selection', async () => {
+			vi.mocked(fetchLifiBtcSwap).mockRejectedValue(
+				new BtcValidationError(BtcSendValidationError.UtxoLocked)
+			);
+
+			const { getByText, onBack, onClose } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.assertion.btc_utxo_locked }
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
 		// LI.FI's error text can carry the request URL, and with it the user's addresses.
 		it("reports a failure as an allow-listed category, never LI.FI's text", async () => {
 			vi.mocked(fetchLifiBtcSwap).mockRejectedValue(
