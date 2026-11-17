@@ -482,12 +482,23 @@ const pollChainFusionSolMint = async ({
 		depositId: DepositSolId;
 		learned: Partial<Record<ChainFusionExternalRefKey, string>>;
 	}): Promise<DepositSolStatus> => {
-		const status = await depositSolStatus({
+		let status = await depositSolStatus({
 			identity,
 			minterCanisterId,
 			depositId,
 			certified: false
 		});
+
+		// `Minted` and `Quarantined` close the row for good and free the account, so they are taken
+		// only from a certified answer, not from a single replica's.
+		if ('Minted' in status || 'Quarantined' in status) {
+			status = await depositSolStatus({
+				identity,
+				minterCanisterId,
+				depositId,
+				certified: true
+			});
+		}
 
 		const candidate = toChainFusionSolMintStatus(status);
 
