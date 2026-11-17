@@ -1416,6 +1416,7 @@ export const fetchChainFusionSolSwap = async ({
 
 	let rowOpened = false;
 	let broadcast = false;
+	let enabling: Promise<void> | undefined;
 
 	try {
 		await sendSol({
@@ -1432,6 +1433,10 @@ export const fetchChainFusionSolSwap = async ({
 
 				if (step === ProgressStepsSendSol.CONFIRM) {
 					broadcast = true;
+
+					// The SOL is on its way: enabling starts now, not once the transfer is confirmed, so a
+					// tab closed while it confirms still shows the minted ckSOL. It never rejects.
+					enabling = enableDestination(enableDestinationToken);
 				}
 			},
 			beforeBroadcast: async (transfer) => {
@@ -1460,5 +1465,5 @@ export const fetchChainFusionSolSwap = async ({
 	progress(ProgressStepsSwap.UPDATE_UI);
 
 	// Also after an unclear end: the minted ckSOL must not land in a token the user cannot see.
-	await enableDestination(enableDestinationToken);
+	await (enabling ?? enableDestination(enableDestinationToken));
 };
