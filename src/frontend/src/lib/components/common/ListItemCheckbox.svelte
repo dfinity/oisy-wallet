@@ -48,9 +48,12 @@
 		}
 	}
 
-	// A long label truncates; the box keeps its size.
+	// A long label truncates; the box keeps its size. Focus lands on the box, but the ring is
+	// the row's: the scroll margin stretches the box to the row's edges, so keyboard scrolling
+	// brings the whole row in, clear of a `scroll-fade` list's faded edge.
 	li :global(input[type='checkbox']) {
 		flex-shrink: 0;
+		scroll-margin-block: calc((var(--menu-row-min-height) - var(--checkbox-input-size)) / 2);
 	}
 
 	li :global(label) {
