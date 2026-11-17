@@ -1,3 +1,4 @@
+import { btcAddressToOutputScript } from '$btc/utils/btc-psbt.utils';
 import { fetchRelayIntentStatus } from '$lib/rest/relay.rest';
 import { bindLifiRelayPayout } from '$lib/services/lifi-btc-relay-binding.services';
 import { LifiQuoteRejectedError } from '$lib/types/errors';
@@ -14,6 +15,7 @@ import {
 	mockRelayRequestId
 } from '$tests/mocks/lifi-btc.mock';
 import { ChainId, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
+import { Psbt, networks, payments } from 'bitcoinjs-lib';
 
 vi.mock('$lib/rest/relay.rest', () => ({
 	fetchRelayIntentStatus: vi.fn()
@@ -172,6 +174,60 @@ describe('lifi-btc-relay-binding.services', () => {
 			})
 		).rejects.toThrow(
 			new LifiQuoteRejectedError(`LI.FI quote rejected: its Relay quote ${reason}`)
+		);
+
+		expect(fetchRelayIntentStatus).not.toHaveBeenCalled();
+	});
+
+	it("should refuse a deposit named alike everywhere but not to Relay's depository", async () => {
+		const attacker =
+			payments.p2wpkh({ hash: Buffer.alloc(20, 7), network: networks.bitcoin }).address ?? '';
+
+		// LI.FI's PSBT with output 0 paying the attacker, its inputs and other outputs kept.
+		const original = Psbt.fromHex(quote.transactionRequest?.data ?? '');
+		const psbt = new Psbt();
+
+		original.txInputs.forEach(({ hash, index, sequence }, input) =>
+			psbt.addInput({
+				hash,
+				index,
+				sequence,
+				witnessUtxo: original.data.inputs[input]?.witnessUtxo
+			})
+		);
+
+		original.txOutputs.forEach(({ script, value }, output) =>
+			psbt.addOutput({
+				script:
+					output === 0
+						? Buffer.from(btcAddressToOutputScript({ address: attacker, network: 'mainnet' }))
+						: script,
+				value
+			})
+		);
+
+		const tampered: LiFiStep = {
+			...withToolData((data) => {
+				data.protocol.v2.paymentDetails.depository = attacker;
+
+				return data;
+			}),
+			transactionRequest: { ...quote.transactionRequest, to: attacker, data: psbt.toHex() }
+		};
+
+		// The transaction's own checks take it: its deposit, target and Relay quote all agree.
+		const { deposit: tamperedDeposit, memo: tamperedMemo } = decodeLifiBtcTransaction({
+			quote: tampered,
+			amount: BigInt(action.fromAmount),
+			userAddress
+		});
+
+		await expect(
+			bind({ quote: tampered, deposit: tamperedDeposit, memo: tamperedMemo })
+		).rejects.toThrow(
+			new LifiQuoteRejectedError(
+				"LI.FI quote rejected: its Relay quote does not pay Relay's depository"
+			)
 		);
 
 		expect(fetchRelayIntentStatus).not.toHaveBeenCalled();

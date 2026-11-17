@@ -1,3 +1,4 @@
+import { RELAY_BTC_DEPOSITORY_ADDRESS } from '$btc/constants/lifi.constants';
 import { btcAddressToOutputScript } from '$btc/utils/btc-psbt.utils';
 import { fetchRelayIntentStatus } from '$lib/rest/relay.rest';
 import type { LifiBtcPayoutBinding } from '$lib/services/lifi-btc-binding.services';
@@ -33,9 +34,11 @@ const depositoryScript = (address: string): Uint8Array | undefined => {
  * OISY can read before the deposit (`requests/v2` finds nothing until it sees one). So this binds what
  * it can:
  *
- * - LI.FI's copy of Relay's quote (`estimate.toolData`) must name the order the memo carries, pay
- *   exactly output 0 to Relay's depository, and pay out the reviewed asset on the reviewed chain at
- *   least the displayed minimum. That catches a quote whose parts disagree.
+ * - Output 0 must pay Relay's own depository, pinned (`RELAY_BTC_DEPOSITORY_ADDRESS`), not read from
+ *   LI.FI's answer.
+ * - LI.FI's copy of Relay's quote (`estimate.toolData`) must name the order the memo carries, take
+ *   exactly output 0, and pay out the reviewed asset on the reviewed chain at least the displayed
+ *   minimum. That catches a quote whose parts disagree.
  * - Relay must know the request that quote opened, and have seen no deposit for it yet
  *   (`/intents/status/v3`: `waiting`).
  *
@@ -75,6 +78,21 @@ export const bindLifiRelayPayout: LifiBtcPayoutBinding = async ({
 
 	if (memoOrderId?.toLowerCase() !== orderId.toLowerCase()) {
 		throw rejected('names another order than the memo');
+	}
+
+	// Otherwise a tampered answer that names one address of its own in the transaction,
+	// `transactionRequest.to` and its copy of Relay's quote would pass every check below, and the BTC
+	// would never reach Relay.
+	if (
+		!isSameBytes({
+			actual: deposit.script,
+			expected: btcAddressToOutputScript({
+				address: RELAY_BTC_DEPOSITORY_ADDRESS,
+				network: 'mainnet'
+			})
+		})
+	) {
+		throw rejected("does not pay Relay's depository");
 	}
 
 	const depository = depositoryScript(paymentDetails.depository);

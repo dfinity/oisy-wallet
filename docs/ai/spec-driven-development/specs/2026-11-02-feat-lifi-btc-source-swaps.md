@@ -484,6 +484,13 @@ without a record of the payout, with what can be checked. `bindLifiRelayPayout`
   - `protocol.v2.orderId`;
   - `protocol.v2.paymentDetails` (`chainId: 'bitcoin'`, the amount, the depository);
   - `details.currencyOut` (chain, address, `minimumAmount`).
+- **Checked against a pinned address:** output 0 pays Relay's own depository,
+  `RELAY_BTC_DEPOSITORY_ADDRESS` (`btc/constants/lifi.constants.ts`), as Relay's `GET /chains` lists
+  it for Bitcoin (`protocol.v2.depository`). It is pinned, as LI.FI's fee address is, never read
+  from LI.FI's answer. Otherwise a tampered answer could name one address of its own in the
+  transaction, `transactionRequest.to` and its copy of Relay's quote, pass every other check, and
+  the BTC would never reach Relay. If Relay moves its depository, every Relay quote is refused until
+  the constant follows.
 - **Checked against the transaction and the review:**
   - the order id equals the memo's (`lifiBtcMemoText`, the text before `=`);
   - the depository's script and the amount equal output 0;
@@ -574,9 +581,9 @@ reaches production before PR 8.
   Liquidium rows are.
 - No bridge is offered whose payout recipient and minimum OISY cannot bind before signing, and every
   binding is tied to the deposit output being signed. The one exception is Relay's recipient, which
-  is accepted unchecked (pending decision 1). A Relay quote is signed only when it takes that
-  deposit for the memo's order and pays the reviewed asset at least the displayed minimum, and when
-  Relay is waiting for that deposit.
+  is accepted unchecked (pending decision 1). A Relay quote is signed only when the deposit pays
+  Relay's pinned depository, the quote takes that deposit for the memo's order and pays the reviewed
+  asset at least the displayed minimum, and Relay is waiting for that deposit.
 - A quote whose PSBT has no change output is rebuilt with LI.FI's fee output intact.
 - The backend accepts a BTC-source LI.FI row, and still refuses a BTC destination and a testnet
   source.
