@@ -28,8 +28,8 @@ export interface SwapError {
 
 export interface SwapData {
 	sourceToken?: Token;
-	// `null` once the person clears the receive token, so the one the swap opened with does not come
-	// back.
+	// `null` after explicitly clearing or invalidating the receive token, so the initial token does
+	// not come back.
 	destinationToken?: Token | null;
 }
 
@@ -166,7 +166,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		setDestinationToken: (token: Token | undefined) =>
 			update((state) => ({
 				...state,
-				destinationToken: token
+				destinationToken: token ?? null
 			})),
 		clearDestinationToken: () => {
 			// Keep the current pay amount when the quote and its fees are cleared.

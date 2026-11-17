@@ -334,9 +334,10 @@ describe('swapStore', () => {
 
 		it('should not bring back the receive token the swap opened with', () => {
 			mockSwappableTokens.set({ sourceToken: undefined, destinationToken: mockToken1 });
-			const { destinationToken, clearDestinationToken, setDestinationToken } = initSwapContext({
-				sourceToken: mockToken2
-			});
+			const { destinationToken, clearDestinationToken, setDestinationToken, setSourceToken } =
+				initSwapContext({
+					sourceToken: mockToken2
+				});
 
 			expect(get(destinationToken)).toBe(mockToken1);
 
@@ -347,6 +348,29 @@ describe('swapStore', () => {
 			setDestinationToken(mockToken2);
 
 			expect(get(destinationToken)).toBe(mockToken2);
+
+			setSourceToken(ETHEREUM_TOKEN);
+			// SwapContexts invalidates a destination the new pay token cannot reach.
+			setDestinationToken(undefined);
+
+			expect(get(destinationToken)).toBeUndefined();
+
+			mockSwappableTokens.set({ sourceToken: undefined, destinationToken: mockToken2 });
+
+			expect(get(destinationToken)).toBeUndefined();
+		});
+
+		it('should keep an explicitly undefined destination empty until reset', () => {
+			mockSwappableTokens.set({ sourceToken: undefined, destinationToken: mockToken1 });
+			const { destinationToken, setDestinationToken, reset } = initSwapContext();
+
+			setDestinationToken(undefined);
+
+			expect(get(destinationToken)).toBeUndefined();
+
+			reset();
+
+			expect(get(destinationToken)).toBe(mockToken1);
 		});
 	});
 

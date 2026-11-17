@@ -9,6 +9,7 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
 import { allFungibleTokens, allIcrcTokens, allTokens } from '$lib/derived/all-tokens.derived';
 import { allSwapUniverseTokens } from '$lib/derived/swap.derived';
 import type { Token } from '$lib/types/token';
@@ -70,6 +71,7 @@ describe('icrc.derived', () => {
 		{ name: 'allIcrcTokens', store: allIcrcTokens },
 		{ name: 'allTokens', store: allTokens },
 		{ name: 'allFungibleTokens', store: allFungibleTokens },
+		{ name: 'allFungibleNetworkTokens', store: allFungibleNetworkTokens },
 		{ name: 'allSwapUniverseTokens', store: allSwapUniverseTokens }
 	])(
 		'should propagate saved versions and loaded metadata through $name with stable IDs and order',

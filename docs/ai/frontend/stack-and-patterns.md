@@ -43,8 +43,9 @@ Do not invent a second key next to one that already exists.
   Two distinct contracts on the same network can share a ticker, so a ticker is
   not unique and is not a key.
 - Lists carrying loaded token metadata and backend versions must propagate updates even when IDs
-  and `enabled` flags stay the same. Use `derived` for these lists (`icrc.derived` and
-  `all-tokens.derived`); `tokenListEqual` only compares membership, order and enabled state.
+  and `enabled` flags stay the same. Use `derived` for these lists (`icrc.derived`,
+  `all-tokens.derived` and `all-network-tokens.derived`); `tokenListEqual` only compares membership,
+  order and enabled state.
 - No `TokenId` reachable? Key on the stable asset identifier — contract address
   / ledger canister ID / canister ID, e.g. `getTokenIdentifier` from
   [`$lib/utils/identifier.utils.ts`](../../../src/frontend/src/lib/utils/identifier.utils.ts)
