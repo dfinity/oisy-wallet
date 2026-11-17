@@ -387,6 +387,7 @@
 					swapDetails: selectedProvider.swapDetails,
 					swapId: crypto.randomUUID(),
 					usdSourceValue: sourceTokenUsdValue,
+					prioritizationFee: $prioritizationFeeStore ?? ZERO,
 					enableDestinationToken: () =>
 						enableSwapDestinationToken({
 							destinationToken: $destinationToken,

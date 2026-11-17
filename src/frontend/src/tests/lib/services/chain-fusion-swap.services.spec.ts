@@ -1890,6 +1890,8 @@ describe('chain-fusion-swap.services', () => {
 				solDeposit: { address: DEPOSIT_ADDRESS, automaticDepositFee: AUTOMATIC_DEPOSIT_FEE }
 			};
 
+			const PRIORITIZATION_FEE = 4_000n;
+
 			// The cases below are minutes apart, so the milliseconds the tests take never matter.
 			const NOW_NANOS = BigInt(Date.now()) * NANO_SECONDS_IN_MILLISECOND;
 
@@ -1935,6 +1937,7 @@ describe('chain-fusion-swap.services', () => {
 					swapDetails,
 					swapId: SWAP_ID,
 					usdSourceValue: '7.5',
+					prioritizationFee: PRIORITIZATION_FEE,
 					enableDestinationToken
 				});
 
@@ -1990,7 +1993,8 @@ describe('chain-fusion-swap.services', () => {
 					identity: mockIdentity,
 					token: SOLANA_TOKEN,
 					amount: SOL_AMOUNT,
-					prioritizationFee: ZERO,
+					// The priority fee the user reviewed, so the transfer goes out as reviewed.
+					prioritizationFee: PRIORITIZATION_FEE,
 					destination: DEPOSIT_ADDRESS,
 					source: mockSolAddress,
 					progress: expect.any(Function),
