@@ -34,13 +34,17 @@ import {
 } from '$lib/constants/app.constants';
 import {
 	applyActiveUserTransactionPollUpdate,
-	isBtcTransactionNeverLanded
+	isBtcTransactionNeverLanded,
+	reloadActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import {
 	CHAIN_FUSION_EXTERNAL_REF_KEYS,
 	type ChainFusionExternalRefKey
 } from '$lib/types/chain-fusion-swap';
-import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
+import {
+	advanceStatus,
+	isTerminalActiveUserTransaction
+} from '$lib/utils/active-user-transactions.utils';
 import {
 	chainFusionBtcMintOutcomeError,
 	chainFusionBtcMintOutcomeToStatus,
@@ -580,6 +584,28 @@ const pollChainFusionSolMint = async ({
 			refs
 		});
 
+		return;
+	}
+
+	// This tab's copy of the row can be stale: another tab may have settled it and started the next
+	// conversion, whose deposit is newer than this copy's floor. So the deposit is taken only while
+	// the backend's row, read after the minter named the deposit, is still open and has the same
+	// deposit id: the backend holds one open SOL → ckSOL row per account, so the deposit of a row
+	// still open then is no other conversion's. The read also puts the backend's copy in the store.
+	const current = await reloadActiveUserTransaction({ identity, id: tx.id });
+
+	if (nonNullish(current) && isTerminalActiveUserTransaction(current)) {
+		// Settled elsewhere: the row leaves the pending set, so its throttle entry has no reader left.
+		lastWatchDepositAddressMs.delete(tx.id);
+		return;
+	}
+
+	if (
+		isNullish(current) ||
+		toChainFusionExternalRefsMap(current.external_refs)[
+			CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID
+		] !== knownDepositIdRef
+	) {
 		return;
 	}
 
