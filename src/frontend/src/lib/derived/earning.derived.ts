@@ -1,7 +1,25 @@
+import { goto } from '$app/navigation';
 import { EarningCardFields } from '$env/types/env.earning-cards';
+import {
+	enabledHarvestAutopilotsUsdBalance,
+	harvestAutopilots
+} from '$eth/derived/harvest-autopilots.derived';
+import { EARNING_TOP_RATE_MIN_APY } from '$lib/constants/earning.constants';
+import { LIQUIDIUM_PROVIDER_ID } from '$lib/constants/liquidium.constants';
+import { AppPath, VAULT_PARAM } from '$lib/constants/routes.constants';
+import { HARVEST_AUTOPILOT_PROVIDER_ID } from '$lib/derived/harvest-autopilot-earning.derived';
+import {
+	liquidiumAssetNetworkIcons,
+	liquidiumAssetNetworkNames,
+	liquidiumSupplyMarkets
+} from '$lib/derived/liquidium.derived';
+import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
+import { tokens } from '$lib/derived/tokens.derived';
 import { earningProviders } from '$lib/providers/earning.providers';
+import type { EarningTopRate } from '$lib/types/earning';
 import type { EarningData, EarningProviderData } from '$lib/types/earning-provider';
-import { isNullish } from '@dfinity/utils';
+import { liquidiumMarketToken, liquidiumSupplyUrl } from '$lib/utils/liquidium.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const earningData: Readable<EarningData> = derived(
@@ -73,4 +91,98 @@ export const allEarningYearlyAmountUsd = derived([earningData], ([$earningData])
 				: acc + Number(record[EarningCardFields.CURRENT_EARNING]),
 		0
 	)
+);
+
+// The user's balance outside any earning position: the wallet total less the Autopilot vault tokens
+// it counts. A Liquidium supply has already left the wallet, so there is nothing to take off for it.
+export const earningUninvestedUsd: Readable<number> = derived(
+	[enabledMainnetFungibleTokensUsdBalance, enabledHarvestAutopilotsUsdBalance],
+	([$enabledMainnetFungibleTokensUsdBalance, $enabledHarvestAutopilotsUsdBalance]) =>
+		Math.max(0, $enabledMainnetFungibleTokensUsdBalance - $enabledHarvestAutopilotsUsdBalance)
+);
+
+// One entry per Liquidium pool the user can supply, shown by its first rail (native first) with the
+// networks of all its rails: every rail of a pool earns the same rate.
+const liquidiumTopRates: Readable<Omit<EarningTopRate, 'earningPotentialUsd'>[]> = derived(
+	[liquidiumSupplyMarkets, liquidiumAssetNetworkIcons, liquidiumAssetNetworkNames, tokens],
+	([$liquidiumSupplyMarkets, $liquidiumAssetNetworkIcons, $liquidiumAssetNetworkNames, $tokens]) =>
+		$liquidiumSupplyMarkets.reduce<Omit<EarningTopRate, 'earningPotentialUsd'>[]>(
+			(acc, { poolId, asset, chain, supplyApy }) => {
+				const id = `${LIQUIDIUM_PROVIDER_ID}-${poolId}`;
+
+				if (acc.some((topRate) => topRate.id === id)) {
+					return acc;
+				}
+
+				const token = liquidiumMarketToken({ chain, asset, tokens: $tokens });
+
+				if (isNullish(token)) {
+					return acc;
+				}
+
+				return [
+					...acc,
+					{
+						id,
+						providerId: LIQUIDIUM_PROVIDER_ID,
+						token,
+						symbol: asset,
+						networkIcons: $liquidiumAssetNetworkIcons[asset] ?? [],
+						networkNames: $liquidiumAssetNetworkNames[asset] ?? [],
+						apy: supplyApy,
+						action: (source) => goto(liquidiumSupplyUrl({ asset, source }))
+					}
+				];
+			},
+			[]
+		)
+);
+
+const harvestAutopilotTopRates: Readable<Omit<EarningTopRate, 'earningPotentialUsd'>[]> = derived(
+	[harvestAutopilots],
+	([$harvestAutopilots]) =>
+		$harvestAutopilots.reduce<Omit<EarningTopRate, 'earningPotentialUsd'>[]>(
+			(acc, { token, apy }) => {
+				const apyNumber = Number(apy);
+
+				if (isNullish(apy) || !Number.isFinite(apyNumber)) {
+					return acc;
+				}
+
+				const {
+					address,
+					assetSymbol,
+					network: { icon, name }
+				} = token;
+
+				return [
+					...acc,
+					{
+						id: `${HARVEST_AUTOPILOT_PROVIDER_ID}-${address}`,
+						providerId: HARVEST_AUTOPILOT_PROVIDER_ID,
+						token,
+						symbol: assetSymbol,
+						networkIcons: nonNullish(icon) ? [icon] : [],
+						networkNames: [name],
+						apy: apyNumber,
+						action: () => goto(`${AppPath.EarnAutopilot}?${VAULT_PARAM}=${address}`)
+					}
+				];
+			},
+			[]
+		)
+);
+
+// Opportunities at or above the top-rate threshold, best rate first. The earning potential is based
+// on the same uninvested balance for all of them, so they differ only by rate.
+export const earningTopRates: Readable<EarningTopRate[]> = derived(
+	[liquidiumTopRates, harvestAutopilotTopRates, earningUninvestedUsd],
+	([$liquidiumTopRates, $harvestAutopilotTopRates, $earningUninvestedUsd]) =>
+		[...$liquidiumTopRates, ...$harvestAutopilotTopRates]
+			.filter(({ apy }) => apy >= EARNING_TOP_RATE_MIN_APY)
+			.sort((a, b) => b.apy - a.apy)
+			.map((topRate) => ({
+				...topRate,
+				earningPotentialUsd: ($earningUninvestedUsd * topRate.apy) / 100
+			}))
 );
