@@ -1,4 +1,5 @@
 import {
+	LIFI_BTC_BRIDGE_DEPOSITORIES,
 	LIFI_BTC_FEE_ADDRESS,
 	LIFI_BTC_FEE_COST_NAME,
 	LIFI_BTC_MAX_MEMO_SCRIPT_BYTES,
@@ -512,6 +513,33 @@ export const decodeLifiBtcTransaction = ({
 	}
 
 	return { deposit, memo, fee };
+};
+
+/**
+ * Whether a LI.FI BTC deposit through `tool` pays another address than the one OISY pins for that
+ * bridge (`LIFI_BTC_BRIDGE_DEPOSITORIES`). A bridge with none pinned has nothing to compare, and its
+ * payout binding decides alone. `tool` comes from LI.FI's answer, so only the table's own entries
+ * count.
+ */
+export const isLifiBtcDepositUnverified = ({
+	tool,
+	deposit
+}: {
+	tool: string;
+	deposit: LifiBtcOutput;
+}): boolean => {
+	const depository = Object.hasOwn(LIFI_BTC_BRIDGE_DEPOSITORIES, tool)
+		? LIFI_BTC_BRIDGE_DEPOSITORIES[tool]
+		: undefined;
+
+	if (isNullish(depository)) {
+		return false;
+	}
+
+	return !isSameBytes({
+		actual: deposit.script,
+		expected: btcAddressToOutputScript({ address: depository, network: 'mainnet' })
+	});
 };
 
 /**

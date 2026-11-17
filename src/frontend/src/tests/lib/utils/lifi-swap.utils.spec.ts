@@ -35,6 +35,7 @@ import {
 	decodeLifiBtcTransaction,
 	findLifiIntermediateToken,
 	findLifiListedToken,
+	isLifiBtcDepositUnverified,
 	lifiFeesUsd,
 	lifiUserTokenAddresses,
 	mapLifiSwapResult,
@@ -49,7 +50,9 @@ import {
 	mockLifiBtcLayerswapQuote,
 	mockLifiBtcLayerswapSmallQuote,
 	mockLifiBtcNearBelowFloorQuote,
-	mockLifiBtcNearQuote
+	mockLifiBtcNearQuote,
+	mockLifiBtcRelayQuote,
+	mockLifiBtcRelayQuotePaying
 } from '$tests/mocks/lifi-btc.mock';
 import {
 	mockLifiSolSolToUsdc,
@@ -87,7 +90,7 @@ import {
 	setTransactionMessageFeePayer,
 	setTransactionMessageLifetimeUsingBlockhash
 } from '@solana/kit';
-import { Psbt } from 'bitcoinjs-lib';
+import { networks, payments, Psbt } from 'bitcoinjs-lib';
 
 describe('lifi-swap.utils', () => {
 	const baseParams = {
@@ -1267,6 +1270,56 @@ describe('lifi-swap.utils', () => {
 				).toThrow('route uses a bridge or exchange outside the requested lists');
 			});
 		});
+	});
+
+	describe('isLifiBtcDepositUnverified', () => {
+		const depositOf = (quote: LiFiStep) =>
+			decodeLifiBtcTransaction({
+				quote,
+				amount: BigInt(quote.action.fromAmount),
+				userAddress: quote.action.fromAddress ?? ''
+			}).deposit;
+
+		const elsewhere =
+			payments.p2wpkh({ hash: Buffer.alloc(20, 7), network: networks.bitcoin }).address ?? '';
+
+		it("should take a Relay deposit to Relay's pinned depository", () => {
+			expect(
+				isLifiBtcDepositUnverified({
+					tool: 'relaydepository',
+					deposit: depositOf(mockLifiBtcRelayQuote)
+				})
+			).toBeFalsy();
+		});
+
+		it('should flag a Relay deposit to any other address', () => {
+			expect(
+				isLifiBtcDepositUnverified({
+					tool: 'relaydepository',
+					deposit: depositOf(mockLifiBtcRelayQuotePaying(elsewhere))
+				})
+			).toBeTruthy();
+		});
+
+		// Its payout binding decides alone; LayerSwap has none and is not admitted.
+		it('should flag nothing for a bridge with no pinned depository', () => {
+			expect(
+				isLifiBtcDepositUnverified({
+					tool: 'layerswap',
+					deposit: depositOf(mockLifiBtcLayerswapQuote)
+				})
+			).toBeFalsy();
+		});
+
+		// The tool key comes from LI.FI's answer.
+		it.each(['toString', 'constructor', '__proto__'])(
+			'should read no inherited key as a pinned depository (%s)',
+			(tool) => {
+				expect(
+					isLifiBtcDepositUnverified({ tool, deposit: depositOf(mockLifiBtcRelayQuote) })
+				).toBeFalsy();
+			}
+		);
 	});
 
 	describe('decodeLifiBtcTransaction', () => {
