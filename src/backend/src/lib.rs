@@ -138,6 +138,10 @@ pub fn post_upgrade(arg: Option<Arg>) {
     // TODO: remove once every canister has been upgraded past the release that ships it; see
     // `contacts::migration`.
     contacts::start_inline_image_migration();
+
+    // TODO: remove once every canister has been upgraded past the release that ships it; see
+    // `user_profile::migration`.
+    user_profile::start_long_qualifier_cleanup();
 }
 
 export_candid!();
