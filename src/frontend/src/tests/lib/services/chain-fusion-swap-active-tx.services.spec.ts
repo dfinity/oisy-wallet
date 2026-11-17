@@ -533,6 +533,24 @@ describe('chain-fusion-swap-active-tx.services', () => {
 				expect(lastUpdate()).toStrictEqual({ status: { Failed: null }, error });
 			});
 
+			it.each([
+				{ outcome: 'expired' as const, error: en.swap.error.swap_expired },
+				{ outcome: 'reverted' as const, error: en.swap.error.failed_unexpectedly }
+			])(
+				'should fail the row when the transfer is $outcome, even while the minter is unavailable',
+				async ({ outcome, error }) => {
+					vi.mocked(readSolSourceTxOutcome).mockResolvedValue(outcome);
+					vi.mocked(watchDepositAddress).mockRejectedValue(
+						new CkSolWatchDepositAddressError({ TemporarilyUnavailable: 'upgrading' })
+					);
+
+					await poll([openedBeforeBroadcast()]);
+
+					expect(watchDepositAddress).not.toHaveBeenCalled();
+					expect(lastUpdate()).toStrictEqual({ status: { Failed: null }, error });
+				}
+			);
+
 			it('should take a newer deposit once the transfer is on chain', async () => {
 				vi.mocked(watchDepositAddress).mockResolvedValue(detected(42n));
 				vi.mocked(readSolSourceTxOutcome).mockResolvedValue('succeeded');

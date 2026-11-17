@@ -531,18 +531,12 @@ const pollChainFusionSolMint = async ({
 		return;
 	}
 
-	const latestDepositIdRef = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_LATEST_DEPOSIT_ID];
-
-	const depositId = newerCkSolDepositId({
-		depositId: await watchCkSolLatestDepositId({ identity, minterCanisterId }),
-		floor:
-			knownDepositId ?? (nonNullish(latestDepositIdRef) ? BigInt(latestDepositIdRef) : undefined)
-	});
-
 	// A row that followed a deposit before has its transfer on chain. Any other row takes a deposit
 	// only once its transfer is: until then, a newer deposit is another conversion's, settled while
 	// this one waited to be sent, and the row may still be under the check that deletes it unsent. A
-	// row without its transfer's blockhash cannot tell, and takes the deposit as before.
+	// row without its transfer's blockhash cannot tell, and takes the deposit as before. Read before
+	// the minter is asked, so that a minter that does not answer never keeps a row open whose
+	// transfer can no longer land.
 	const outcome = isNullish(knownDepositId)
 		? await readCkSolTransferOutcome({ tx, refs })
 		: undefined;
@@ -564,6 +558,14 @@ const pollChainFusionSolMint = async ({
 
 		return;
 	}
+
+	const latestDepositIdRef = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_LATEST_DEPOSIT_ID];
+
+	const depositId = newerCkSolDepositId({
+		depositId: await watchCkSolLatestDepositId({ identity, minterCanisterId }),
+		floor:
+			knownDepositId ?? (nonNullish(latestDepositIdRef) ? BigInt(latestDepositIdRef) : undefined)
+	});
 
 	if (isNullish(depositId) || (nonNullish(outcome) && outcome !== 'succeeded')) {
 		// Watched, a deposit from before this one, or a transfer not on chain yet: the SOL is on the
