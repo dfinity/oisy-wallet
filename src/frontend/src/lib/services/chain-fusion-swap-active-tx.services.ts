@@ -449,11 +449,12 @@ const readCkSolTransferOutcome = async ({
  * on every tick once the row knows the deposit id.
  *
  * Only a deposit above the floor is taken for this conversion: the latest deposit id of the
- * account when the row was opened, or the dropped deposit the row followed before. A `Watching`
- * answer keeps the row in flight while the transfer can still land or has landed; the same call
- * registers the address again once a window has ended, so a late transfer is still found. A
- * transfer that can no longer land, or landed and failed, moved no SOL, and fails the row. A
- * `Dropped` deposit leaves its SOL on the address, which the minter detects again under a new id.
+ * account when the row was opened, or the dropped deposit the row followed before. And only once
+ * the transfer is on chain, since no deposit can hold its SOL before. A `Watching` answer keeps
+ * the row in flight while the transfer can still land or has landed; the same call registers the
+ * address again once a window has ended, so a late transfer is still found. A transfer that can no
+ * longer land, or landed and failed, moved no SOL, and fails the row. A `Dropped` deposit leaves
+ * its SOL on the address, which the minter detects again under a new id.
  */
 const pollChainFusionSolMint = async ({
 	tx,
@@ -527,26 +528,35 @@ const pollChainFusionSolMint = async ({
 			knownDepositId ?? (nonNullish(latestDepositIdRef) ? BigInt(latestDepositIdRef) : undefined)
 	});
 
-	if (isNullish(depositId)) {
-		const transferError = chainFusionSolTransferError(await readCkSolTransferOutcome({ tx, refs }));
+	// A row that followed a deposit before has its transfer on chain. Any other row takes a deposit
+	// only once its transfer is: until then, a newer deposit is another conversion's, settled while
+	// this one waited to be sent, and the row may still be under the check that deletes it unsent. A
+	// row without its transfer's blockhash cannot tell, and takes the deposit as before.
+	const outcome = isNullish(knownDepositId)
+		? await readCkSolTransferOutcome({ tx, refs })
+		: undefined;
 
-		// The row ends, which frees the account for the next conversion.
-		if (nonNullish(transferError)) {
-			lastWatchDepositAddressMs.delete(tx.id);
+	const transferError = chainFusionSolTransferError(outcome);
 
-			await applyUpdate({
-				identity,
-				tx,
-				candidate: { Failed: null },
-				error: transferError,
-				learned: {},
-				refs
-			});
+	// The row ends, which frees the account for the next conversion.
+	if (nonNullish(transferError)) {
+		lastWatchDepositAddressMs.delete(tx.id);
 
-			return;
-		}
+		await applyUpdate({
+			identity,
+			tx,
+			candidate: { Failed: null },
+			error: transferError,
+			learned: {},
+			refs
+		});
 
-		// Watched, or a deposit from before this one: the SOL is on the address or about to be.
+		return;
+	}
+
+	if (isNullish(depositId) || (nonNullish(outcome) && outcome !== 'succeeded')) {
+		// Watched, a deposit from before this one, or a transfer not on chain yet: the SOL is on the
+		// address or about to be.
 		await applyUpdate({
 			identity,
 			tx,
