@@ -351,7 +351,10 @@ As built (PR 6):
   its text, which can carry the user's addresses, as from EVM and Solana. A `BtcValidationError` from
   that check reads as the wizard's own one-output check would: `handleBtcValidationError`'s message,
   and back to the form. It skips the generic one-output `validateBtcSend`: `fetchLifiBtcSwap` checks the
-  selection against the layout of the quote it re-requests.
+  selection against the layout of the quote it re-requests. A re-quote refused on slippage
+  (`isSlippageExceeded`: a minimum below the one displayed, or no route left) is shown on the review
+  as `swap.error.slippage_exceeded` with the max slippage, as from EVM and Solana, not as an
+  unexpected error.
 - **Binding.** `fetchLifiBtcSwap` runs `bindLifiBtcPayout` (`lifi-btc-binding.services.ts`) between
   decoding the outputs and checking the fee. Each bridge's binding is looked up by tool key in
   `LIFI_BTC_PAYOUT_BINDINGS`, and a tool without one is refused (`LifiRouteUnsupportedError`). The
