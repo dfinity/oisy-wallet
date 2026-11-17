@@ -2387,6 +2387,63 @@ describe('chain-fusion-swap.services', () => {
 				expect(enableDestinationToken).toHaveBeenCalledOnce();
 				expect(consoleErrorSpy).toHaveBeenCalledOnce();
 			});
+
+			// A tab closed while the transfer confirms still shows the minted ckSOL.
+			it('should start enabling ckSOL once the transfer is broadcast, before it is confirmed', async () => {
+				let enabledBeforeConfirmed = false;
+
+				vi.mocked(sendSol).mockImplementation(async ({ beforeBroadcast, progress: step }) => {
+					const signature = TRANSFER_SIGNATURE as Awaited<ReturnType<typeof sendSol>>;
+
+					await beforeBroadcast?.({ signature, blockhash: BLOCKHASH });
+
+					step?.(ProgressStepsSendSol.SEND);
+					broadcastSol();
+					step?.(ProgressStepsSendSol.CONFIRM);
+
+					enabledBeforeConfirmed = enableDestinationToken.mock.calls.length > 0;
+
+					return signature;
+				});
+
+				await solSwap();
+
+				expect(enabledBeforeConfirmed).toBeTruthy();
+				expect(enableDestinationToken).toHaveBeenCalledOnce();
+			});
+
+			it('should not enable ckSOL before the transfer is broadcast', async () => {
+				let enabledBeforeBroadcast = true;
+
+				vi.mocked(sendSol).mockImplementation(async ({ beforeBroadcast, progress: step }) => {
+					const signature = TRANSFER_SIGNATURE as Awaited<ReturnType<typeof sendSol>>;
+
+					await beforeBroadcast?.({ signature, blockhash: BLOCKHASH });
+
+					step?.(ProgressStepsSendSol.SEND);
+					enabledBeforeBroadcast = enableDestinationToken.mock.calls.length > 0;
+					broadcastSol();
+					step?.(ProgressStepsSendSol.CONFIRM);
+
+					return signature;
+				});
+
+				await solSwap();
+
+				expect(enabledBeforeBroadcast).toBeFalsy();
+			});
+
+			it('should finish the conversion when enabling ckSOL fails', async () => {
+				const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+				enableDestinationToken.mockRejectedValue(new Error('backend down'));
+
+				await expect(solSwap()).resolves.toBeUndefined();
+
+				expect(enableDestinationToken).toHaveBeenCalledOnce();
+				expect(consoleErrorSpy).toHaveBeenCalledOnce();
+				expect(progress).toHaveBeenLastCalledWith(ProgressStepsSwap.UPDATE_UI);
+			});
 		});
 	});
 });
