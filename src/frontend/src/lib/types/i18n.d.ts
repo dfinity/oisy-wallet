@@ -1215,6 +1215,7 @@ interface I18nSwap {
 		cksol_earlier_deposit_quarantined: string;
 		cksol_minter_unavailable: string;
 		cksol_deposit_quarantined: string;
+		cksol_deposit_below_minimum: string;
 	};
 }
 
