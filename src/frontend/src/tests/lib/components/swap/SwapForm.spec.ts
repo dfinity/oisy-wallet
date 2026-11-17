@@ -1350,6 +1350,10 @@ describe('SwapForm', () => {
 			await fireEvent.click(getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]);
 
 			expect(onShowTokensList).not.toHaveBeenCalled();
+
+			// Focus moves to the card that took the token's place, not out of the modal.
+			await waitFor(() => expect(getByTestId(SWAP_RECEIVE_SHORTCUT_SAME_NETWORK)).toHaveFocus());
+
 			expect(get(destinationToken)).toBeUndefined();
 			expect(get(keptDestinationToken)).toBe(otherIcToken);
 			// The quote goes with it.
@@ -1366,6 +1370,43 @@ describe('SwapForm', () => {
 
 			expect(get(destinationToken)).toBe(otherIcToken);
 			expect(get(keptDestinationToken)).toBeUndefined();
+
+			await waitFor(() => expect(getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]).toHaveFocus());
+		});
+
+		it('should show the plain receive field without a pay token', () => {
+			mockContext.set(SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY, navigation);
+			setupSwapAmountsStore();
+			mockContext.set(SWAP_CONTEXT_KEY, {
+				...initSwapContext(),
+				receiveSupportedData: readable(reachOtherIcToken)
+			});
+
+			const { queryByTestId, getAllByTestId } = renderForm();
+
+			expect(queryByTestId(SWAP_RECEIVE_SHORTCUTS)).not.toBeInTheDocument();
+			expect(getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)).toHaveLength(2);
+		});
+
+		it('should open the receive list for a tapped receive token the shortcuts cannot keep', async () => {
+			mockContext.set(SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY, navigation);
+			setupSwapAmountsStore(mockSwapAmounts);
+			const { destinationToken } = setupSwapContext({
+				destinationToken: otherIcToken,
+				// The providers reach nothing, so nothing would show the Keep link.
+				receiveSupportedData: {
+					...reachOtherIcToken,
+					icp: { coverage: 'all', supportedTokenIds: new Set() }
+				}
+			});
+			const onShowTokensList = vi.fn();
+
+			const { getAllByTestId } = renderForm(onShowTokensList);
+
+			await fireEvent.click(getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]);
+
+			expect(onShowTokensList).toHaveBeenCalledExactlyOnceWith('destination');
+			expect(get(destinationToken)).toBe(otherIcToken);
 		});
 
 		it('should open the receive list for a tapped receive token before the providers answer', async () => {

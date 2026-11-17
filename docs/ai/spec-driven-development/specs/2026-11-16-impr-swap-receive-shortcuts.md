@@ -152,7 +152,10 @@ fee) is unchanged.
 
 Tapping the receive token clears it and shows the shortcuts again, with a **Keep _symbol_ on
 _network_** link under them that puts it back. Before the receive support data is ready the tap
-opens the receive list, as today, since there would be no shortcuts to show the link under. The link goes once a new receive token is picked
+opens the receive list, as today, since there would be no shortcuts to show the link under.
+_Built:_ the same holds for a receive token the list does not offer, and the link shows only while
+the list still offers the cleared token. Focus moves to the first shortcut after the tap, and to
+the receive token after Keep or a one-tap shortcut. The link goes once a new receive token is picked
 or the pay token changes. Clearing the receive token drops the current quote, as opening the list
 does today; Keep fetches a new one.
 
@@ -163,6 +166,8 @@ are unchanged.
 
 New keys under `swap.text` in `src/frontend/src/lib/i18n/en.json`. Lists are joined with
 `formatList` (`src/frontend/src/lib/utils/i18n.utils.ts`). No em dashes (`brand-and-copy.md`).
+_Built:_ `formatList` writes English lists with a serial comma ("Ethereum, Arbitrum, and 3 more"),
+as the brand's "Bitcoin, Ethereum, Internet Computer, and more" does; the wireframes leave it out.
 
 | Where                               | English                              | Key (proposed)                            |
 | ----------------------------------- | ------------------------------------ | ----------------------------------------- |

@@ -80,6 +80,13 @@
 			currentStep?.name === WizardStepsGetToken.MOVE_TOKEN
 	);
 
+	// "Move <symbol> to" names the pay token's group, which its step config cannot know.
+	let titleString = $derived(
+		currentStep?.name === WizardStepsGetToken.MOVE_TOKEN
+			? getSwapMoveTokenTitle({ i18n: $i18n, sourceToken: $sourceToken })
+			: (currentStep?.title ?? '')
+	);
+
 	const reset = (fullReset = false) => {
 		if (fullReset) {
 			currentStep = undefined;
@@ -129,9 +136,7 @@
 	{steps}
 	bind:currentStep
 >
-	{#snippet title()}{currentStep?.name === WizardStepsGetToken.MOVE_TOKEN
-			? getSwapMoveTokenTitle({ i18n: $i18n, sourceToken: $sourceToken })
-			: (currentStep?.title ?? '')}{/snippet}
+	{#snippet title()}{titleString}{/snippet}
 
 	{#snippet headerRight()}
 		{#if currentStep?.name === WizardStepsGetToken.SWAP}

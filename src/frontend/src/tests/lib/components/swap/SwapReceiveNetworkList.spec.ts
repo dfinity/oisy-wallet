@@ -25,12 +25,14 @@ import * as networksDerived from '$lib/derived/networks.derived';
 import * as swapDerived from '$lib/derived/swap.derived';
 import * as tokensDerived from '$lib/derived/tokens.derived';
 import { trackSwapReceiveShortcut } from '$lib/services/swap-receive-shortcut-analytics.services';
+import { balancesStore } from '$lib/stores/balances.store';
 import type {
 	SwapSupportedTokensData,
 	SwapSupportedTokensInfo
 } from '$lib/stores/swap-supported-tokens.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { Token } from '$lib/types/token';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import en from '$tests/mocks/i18n.mock';
@@ -148,13 +150,9 @@ describe('SwapReceiveNetworkList', () => {
 		});
 
 	const rows = (container: HTMLElement) =>
-		within(container.querySelector(`[data-tid="${SWAP_RECEIVE_NETWORK_LIST}"]`) as HTMLElement)
-			.getAllByRole('button')
-			.map((row) =>
-				[...row.querySelectorAll('.logo-button-title, .text-sm.text-tertiary')]
-					.map(({ textContent }) => textContent?.trim())
-					.filter(Boolean)
-			);
+		within(
+			container.querySelector(`[data-tid="${SWAP_RECEIVE_NETWORK_LIST}"]`) as HTMLElement
+		).getAllByRole('button');
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -189,19 +187,28 @@ describe('SwapReceiveNetworkList', () => {
 	});
 
 	afterEach(() => {
+		balancesStore.reset(SOLANA_USDC_TOKEN.id);
+
 		vi.restoreAllMocks();
 	});
 
 	it('should list the networks USDC on Base reaches, in chain order, without Internet Computer', () => {
 		const { container } = renderList();
 
-		expect(rows(container)).toEqual([
-			['Ethereum', 'USDC'],
-			['Arbitrum', 'USDC'],
-			['BNB Smart Chain', 'USDC'],
-			['Polygon', 'USDC'],
-			['Solana', 'USDC']
-		]);
+		const listed = rows(container);
+
+		expect(listed).toHaveLength(5);
+
+		[
+			ETHEREUM_NETWORK,
+			ARBITRUM_MAINNET_NETWORK,
+			BSC_MAINNET_NETWORK,
+			POLYGON_MAINNET_NETWORK,
+			SOLANA_MAINNET_NETWORK
+		].forEach(({ name }, index) => {
+			expect(listed[index]).toHaveTextContent(name);
+			expect(listed[index]).toHaveTextContent(BASE_USDC_TOKEN.symbol);
+		});
 	});
 
 	it('should name a token that goes by another symbol', () => {
@@ -210,7 +217,34 @@ describe('SwapReceiveNetworkList', () => {
 			receiveSupportedData: fromBtc
 		});
 
-		expect(rows(container)).toEqual([['Internet Computer', 'as ckBTC']]);
+		const [row, ...rest] = rows(container);
+
+		expect(rest).toHaveLength(0);
+		expect(row).toHaveTextContent(ICP_NETWORK.name);
+		expect(row).toHaveTextContent(
+			replacePlaceholders(en.swap.text.as_token, { $symbol: ckBtc.symbol })
+		);
+	});
+
+	it('should show the balance of an enabled token, and none for one that is not', () => {
+		vi.spyOn(swapDerived, 'allSwapUniverseTokens', 'get').mockReturnValue(
+			readable(
+				universe.map((token) =>
+					token.id === POLYGON_USDC_TOKEN.id ? { ...token, enabled: false } : token
+				)
+			)
+		);
+		balancesStore.set({
+			id: SOLANA_USDC_TOKEN.id,
+			data: { data: 45_100_000n, certified: true }
+		});
+
+		const { container } = renderList();
+
+		const listed = rows(container);
+
+		expect(listed[4]).toHaveTextContent('45.1');
+		expect(listed[3]).not.toHaveTextContent(/\d/);
 	});
 
 	it('should set the picked token and track the pick', async () => {

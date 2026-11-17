@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import IconGixCheck from '$lib/components/icons/IconGixCheck.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
@@ -19,6 +20,10 @@
 		// The token already picked where this list was opened from; unset where a list has no pick.
 		selected?: boolean;
 		disabled?: boolean;
+		// A row a caller names itself, the swap's network step: `label` replaces the symbol and the
+		// token's name, `detail` the network under them.
+		label?: Snippet;
+		detail?: Snippet;
 	}
 
 	let {
@@ -27,7 +32,9 @@
 		onClick,
 		showDividers = true,
 		selected,
-		disabled = false
+		disabled = false,
+		label,
+		detail
 	}: Props = $props();
 
 	const { oisyName, oisySymbol, symbol, network } = $derived(token);
@@ -37,6 +44,14 @@
 	let showBalance = $derived(!isTokenToggleable(token) || token.enabled);
 </script>
 
+{#snippet tokenName()}
+	{#if nonNullish(oisyName?.prefix)}
+		{$i18n.tokens.text.chain_key}
+	{/if}
+
+	{getTokenDisplayName(token)}
+{/snippet}
+
 <LogoButton
 	{disabled}
 	dividers={showDividers}
@@ -44,9 +59,12 @@
 	{onClick}
 	{selected}
 	styleClass={selected ? 'bg-brand-subtle-10' : undefined}
+	subtitle={isNullish(label) ? tokenName : undefined}
 >
 	{#snippet title()}
-		{#if selected}
+		{#if nonNullish(label)}
+			{@render label()}
+		{:else if selected}
 			<!-- Beside the symbol rather than in a column of its own, so no other row shifts. Centred
 				 on the line box, then lifted 1px so it sits on the capitals' middle, not the line's. -->
 			<span class="inline-flex items-center gap-1">
@@ -60,16 +78,12 @@
 		{/if}
 	{/snippet}
 
-	{#snippet subtitle()}
-		{#if nonNullish(oisyName?.prefix)}
-			{$i18n.tokens.text.chain_key}
-		{/if}
-
-		{getTokenDisplayName(token)}
-	{/snippet}
-
 	{#snippet description()}
-		{network.name}
+		{#if nonNullish(detail)}
+			{@render detail()}
+		{:else}
+			{network.name}
+		{/if}
 	{/snippet}
 
 	{#snippet logo()}

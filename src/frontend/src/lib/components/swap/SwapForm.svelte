@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, type Snippet } from 'svelte';
-	import { readable } from 'svelte/store';
+	import { getContext, tick, type Snippet } from 'svelte';
+	import { get, readable } from 'svelte/store';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapReceiveShortcuts from '$lib/components/swap/SwapReceiveShortcuts.svelte';
@@ -19,6 +19,8 @@
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
 	import { SWAP_DESTINATION_TOKEN_BALANCE } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { crossChainSwapNetworksMainnets } from '$lib/derived/cross-chain-networks.derived';
+	import { allSwapUniverseTokens } from '$lib/derived/swap.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -37,6 +39,7 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import {
 		canPayWithToken,
+		getListedReceiveTokens,
 		getSwapSlippageInvalidValue,
 		getSwapSlippageStatus
 	} from '$lib/utils/swap.utils';
@@ -231,22 +234,53 @@
 				: undefined;
 	});
 
+	let receiveArea = $state<HTMLDivElement | undefined>();
+
+	// The card in the receive area swaps for another in place, so focus would fall out of the modal:
+	// it goes to the first control of the new one.
+	const focusReceiveArea = async () => {
+		await tick();
+
+		receiveArea
+			?.querySelector<HTMLElement>('button:not([disabled])')
+			?.focus({ preventScroll: true });
+	};
+
+	// A receive token the shortcuts list, so the Keep link under them can put it back.
+	const canKeepDestination = (): boolean => {
+		const destination = $destinationToken;
+
+		if (isNullish(receiveShortcuts) || isNullish(destination) || isNullish($sourceToken)) {
+			return false;
+		}
+
+		const supportedData = $receiveSupportedData;
+
+		return (
+			nonNullish(supportedData) &&
+			getListedReceiveTokens({
+				sourceToken: $sourceToken,
+				supportedData,
+				networks: get(crossChainSwapNetworksMainnets),
+				tokens: get(allSwapUniverseTokens)
+			}).some(({ id }) => id === destination.id)
+		);
+	};
+
 	// Where the shortcuts can show, tapping the receive token brings them back in its place, with a link
 	// that keeps it. The quote goes with it, as when the list opens.
 	const onReceiveTokenClick = () => {
-		if (
-			nonNullish(receiveShortcuts) &&
-			nonNullish($destinationToken) &&
-			nonNullish($receiveSupportedData)
-		) {
-			swapAmountsStore.reset();
-
-			clearDestinationToken();
+		if (!canKeepDestination()) {
+			onShowTokensList('destination');
 
 			return;
 		}
 
-		onShowTokensList('destination');
+		swapAmountsStore.reset();
+
+		clearDestinationToken();
+
+		focusReceiveArea();
 	};
 
 	const onTokensSwitch = () => {
@@ -386,11 +420,12 @@
 
 			<SwapSwitchTokensButton disabled={isSwitchTokensButtonDisabled()} {onTokensSwitch} />
 
-			<div class="mb-2">
+			<div bind:this={receiveArea} class="mb-2">
 				{#if nonNullish(receiveShortcuts) && nonNullish($sourceToken) && isNullish($destinationToken)}
 					<SwapReceiveShortcuts
 						emptyField={receiveTokenInput}
 						navigation={receiveShortcuts}
+						onDestinationSet={focusReceiveArea}
 						sourceToken={$sourceToken}
 					/>
 				{:else}

@@ -37,6 +37,7 @@ import type {
 } from '$lib/stores/swap-supported-tokens.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { Token } from '$lib/types/token';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import en from '$tests/mocks/i18n.mock';
@@ -136,6 +137,7 @@ describe('SwapReceiveShortcuts', () => {
 	const showReceiveList = vi.fn();
 	const showMoveStep = vi.fn();
 	const setDestinationToken = vi.fn();
+	const onDestinationSet = vi.fn();
 
 	const renderShortcuts = ({
 		sourceToken = BASE_USDC_TOKEN,
@@ -151,7 +153,8 @@ describe('SwapReceiveShortcuts', () => {
 			props: {
 				sourceToken,
 				navigation: { showReceiveList, showMoveStep },
-				emptyField: createMockSnippet(emptyFieldTestId)
+				emptyField: createMockSnippet(emptyFieldTestId),
+				onDestinationSet
 			},
 			context: mockContextMap([
 				[
@@ -165,10 +168,21 @@ describe('SwapReceiveShortcuts', () => {
 			])
 		});
 
-	const titleAndDetail = (row: HTMLElement | null) =>
-		[...(row?.querySelectorAll('span.text-base, span.text-sm') ?? [])].map(({ textContent }) =>
-			textContent?.trim()
-		);
+	const more = (count: number) =>
+		replacePlaceholders(en.swap.text.receive_shortcut_more, { $count: `${count}` });
+
+	const expectRow = ({
+		row,
+		title,
+		detail
+	}: {
+		row: HTMLElement;
+		title: string;
+		detail: string;
+	}) => {
+		expect(row).toHaveTextContent(title);
+		expect(row).toHaveTextContent(detail);
+	};
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -219,19 +233,29 @@ describe('SwapReceiveShortcuts', () => {
 			]);
 
 			// No balance and no pin: the list orders these by symbol.
-			expect(titleAndDetail(getByTestId(SWAP_RECEIVE_SHORTCUT_SAME_NETWORK))).toEqual([
-				'Another token on Base',
-				'cbBTC, ETH, and TOSHI'
-			]);
+			expectRow({
+				row: getByTestId(SWAP_RECEIVE_SHORTCUT_SAME_NETWORK),
+				title: replacePlaceholders(en.swap.text.receive_shortcut_same_network, {
+					$network: BASE_NETWORK.name
+				}),
+				detail: 'cbBTC, ETH, and TOSHI'
+			});
 			// Not Internet Computer: USDC on Base cannot reach ckUSDC.
-			expect(titleAndDetail(getByTestId(SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK))).toEqual([
-				'USDC on another network',
-				'Ethereum, Arbitrum, and 3 more'
-			]);
-			expect(titleAndDetail(getByTestId(SWAP_RECEIVE_SHORTCUT_ANY_TOKEN))).toEqual([
-				'Any token',
-				'9 tokens on 6 networks'
-			]);
+			expectRow({
+				row: getByTestId(SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK),
+				title: replacePlaceholders(en.swap.text.receive_shortcut_other_network, {
+					$symbol: 'USDC'
+				}),
+				detail: `${ETHEREUM_NETWORK.name}, ${ARBITRUM_MAINNET_NETWORK.name}, and ${more(3)}`
+			});
+			expectRow({
+				row: getByTestId(SWAP_RECEIVE_SHORTCUT_ANY_TOKEN),
+				title: en.swap.text.receive_shortcut_any_token,
+				detail: replacePlaceholders(en.swap.text.receive_shortcut_any_token_count, {
+					$tokens: '9',
+					$networks: '6'
+				})
+			});
 		});
 
 		it('should open the receive list on Base', async () => {
@@ -280,10 +304,15 @@ describe('SwapReceiveShortcuts', () => {
 
 			expect(queryByTestId(SWAP_RECEIVE_SHORTCUT_SAME_NETWORK)).not.toBeInTheDocument();
 			expect(queryByTestId(SWAP_RECEIVE_SHORTCUT_ANY_TOKEN)).not.toBeInTheDocument();
-			expect(titleAndDetail(getByTestId(SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK))).toEqual([
-				'BTC on another network',
-				'Internet Computer, as ckBTC'
-			]);
+
+			expectRow({
+				row: getByTestId(SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK),
+				title: replacePlaceholders(en.swap.text.receive_shortcut_other_network, { $symbol: 'BTC' }),
+				detail: replacePlaceholders(en.swap.text.receive_shortcut_one_network_as, {
+					$network: ICP_NETWORK.name,
+					$symbol: ckBtc.symbol
+				})
+			});
 		});
 
 		it('should set ckBTC in one tap', async () => {
@@ -298,6 +327,7 @@ describe('SwapReceiveShortcuts', () => {
 			expect(setDestinationToken).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ id: ckBtc.id })
 			);
+			expect(onDestinationSet).toHaveBeenCalledOnce();
 			expect(trackSwapReceiveShortcut).toHaveBeenCalledExactlyOnceWith({
 				action: 'other_network',
 				sourceToken: BTC_MAINNET_TOKEN,
@@ -314,14 +344,14 @@ describe('SwapReceiveShortcuts', () => {
 		expect(getByTestId(SWAP_RECEIVE_SHORTCUT_ANY_TOKEN)).toBeInTheDocument();
 	});
 
-	it("should show today's empty field until the providers have answered", () => {
+	it('should show the plain receive field until the providers have answered', () => {
 		const { getByTestId, queryByTestId } = renderShortcuts({ receiveSupportedData: null });
 
 		expect(getByTestId(emptyFieldTestId)).toBeInTheDocument();
 		expect(queryByTestId(SWAP_RECEIVE_SHORTCUTS)).not.toBeInTheDocument();
 	});
 
-	it("should show today's empty field when the pay token reaches nothing", () => {
+	it('should show the plain receive field when the pay token reaches nothing', () => {
 		const { getByTestId, queryByTestId } = renderShortcuts({
 			receiveSupportedData: { icp: nothing, evm: nothing, sol: nothing, btc: nothing, xrp: nothing }
 		});
@@ -337,16 +367,28 @@ describe('SwapReceiveShortcuts', () => {
 			expect(queryByTestId(SWAP_RECEIVE_SHORTCUT_KEEP)).not.toBeInTheDocument();
 		});
 
+		it('should not offer a cleared receive token the list no longer offers', () => {
+			const { queryByTestId } = renderShortcuts({ keptDestinationToken: ckUsdc });
+
+			expect(queryByTestId(SWAP_RECEIVE_SHORTCUT_KEEP)).not.toBeInTheDocument();
+		});
+
 		it('should put the cleared receive token back', async () => {
 			const { getByTestId } = renderShortcuts({ keptDestinationToken: SOLANA_USDC_TOKEN });
 
 			const keep = getByTestId(SWAP_RECEIVE_SHORTCUT_KEEP);
 
-			expect(keep).toHaveTextContent('Keep USDC on Solana');
+			expect(keep).toHaveTextContent(
+				replacePlaceholders(en.swap.text.keep_destination, {
+					$symbol: SOLANA_USDC_TOKEN.symbol,
+					$network: SOLANA_MAINNET_NETWORK.name
+				})
+			);
 
 			await fireEvent.click(keep);
 
 			expect(setDestinationToken).toHaveBeenCalledExactlyOnceWith(SOLANA_USDC_TOKEN);
+			expect(onDestinationSet).toHaveBeenCalledOnce();
 			expect(trackSwapReceiveShortcut).toHaveBeenCalledExactlyOnceWith({
 				action: 'keep',
 				sourceToken: BASE_USDC_TOKEN,

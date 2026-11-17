@@ -22,10 +22,14 @@ import {
 	SWAP_SLIPPAGE_WARNING_VALUE,
 	swapProvidersDetails
 } from '$lib/constants/swap.constants';
+import type { Languages } from '$lib/enums/languages';
 import { SwapError } from '$lib/services/swap-errors.services';
+import type { BalancesData } from '$lib/stores/balances.store';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { SwapSupportedTokensData } from '$lib/stores/swap-supported-tokens.store';
 import type { AmountString } from '$lib/types/amount';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
+import type { ExchangesData } from '$lib/types/exchange';
 import type {
 	NearIntentsQuoteRequest,
 	NearIntentsQuoteResponse,
@@ -33,6 +37,7 @@ import type {
 } from '$lib/types/near-intents';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Amount, OptionAmount } from '$lib/types/send';
+import type { StakeBalances } from '$lib/types/stake-balance';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -54,12 +59,13 @@ import type { TokenUi } from '$lib/types/token-ui';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { formatList, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
-import { isNetworkIdICP } from '$lib/utils/network.utils';
+import { filterTokensForSelectedNetwork, isNetworkIdICP } from '$lib/utils/network.utils';
 import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 import { filterSwapTokens, networksWithSupport } from '$lib/utils/swap-tokens-filter.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+import { getTokenDisplaySymbol, mapTokenUi } from '$lib/utils/token.utils';
 import { findToken, sortTokens } from '$lib/utils/tokens.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -718,3 +724,138 @@ export const getSwapMoveTokenTitle = ({
 	replacePlaceholders(i18n.swap.text.move_token_to, {
 		$symbol: sourceToken?.groupData?.symbol ?? sourceToken?.symbol ?? ''
 	});
+
+/**
+ * What the receive list shows for a pay token on all networks: its set (`getReceiveSwapTokens`)
+ * without what that view leaves out, the testnet tokens. The shortcuts preview this.
+ */
+export const getListedReceiveTokens = <T extends Token>(
+	params: Parameters<typeof getReceiveSwapTokens<T>>[0]
+): TokenToggleable<T>[] =>
+	filterTokensForSelectedNetwork([getReceiveSwapTokens(params), undefined, true]);
+
+/**
+ * The receive shortcuts for a pay token, with the tokens behind them as the receive list shows them on
+ * all networks: in its order and with balances. `undefined` until the providers have answered, when
+ * the set is still every token.
+ */
+export const getListedReceiveShortcuts = ({
+	sourceToken,
+	supportedData,
+	swapNetworks,
+	chainNetworks,
+	tokens,
+	$balances,
+	$stakeBalances,
+	$exchanges,
+	$tokensToPin
+}: {
+	sourceToken: Token;
+	supportedData: SwapSupportedTokensData | undefined;
+	swapNetworks: Network[];
+	// In chain order.
+	chainNetworks: Network[];
+	tokens: TokenToggleable<Token>[];
+	$balances: CertifiedStoreData<BalancesData>;
+	$stakeBalances: StakeBalances;
+	$exchanges: ExchangesData;
+	$tokensToPin: ReadonlyArray<TokenToPin>;
+}): { tokens: TokenUi[]; shortcuts: SwapReceiveShortcuts<TokenUi> } | undefined => {
+	if (isNullish(supportedData)) {
+		return;
+	}
+
+	const listed = sortSwapListTokens({
+		tokens: getListedReceiveTokens({
+			sourceToken,
+			supportedData,
+			networks: swapNetworks,
+			tokens
+		}).map((token) => mapTokenUi({ token, $balances, $stakeBalances, $exchanges })),
+		$tokensToPin,
+		$networksToPin: chainNetworks
+	});
+
+	return {
+		tokens: listed,
+		shortcuts: getReceiveShortcuts({ sourceToken, tokens: listed, networks: chainNetworks })
+	};
+};
+
+/**
+ * The second line of each receive shortcut: up to three of the tokens on the pay token's network, up
+ * to two of the other networks (or the one network and the name the token goes by there), and the
+ * count of everything. A list cut short ends in "N more".
+ */
+export const getReceiveShortcutDetails = ({
+	shortcuts: { sameNetwork, otherNetwork, anyToken },
+	i18n,
+	language
+}: {
+	shortcuts: SwapReceiveShortcuts;
+	i18n: I18n;
+	language: Languages;
+}): { sameNetwork?: string; otherNetwork?: string; anyToken?: string } => {
+	const preview = ({ items, max }: { items: string[]; max: number }): string =>
+		formatList({
+			items:
+				items.length <= max
+					? items
+					: [
+							...items.slice(0, max),
+							replacePlaceholders(i18n.swap.text.receive_shortcut_more, {
+								$count: `${items.length - max}`
+							})
+						],
+			language
+		});
+
+	const otherNetworkDetail = (): string | undefined => {
+		if (isNullish(otherNetwork)) {
+			return;
+		}
+
+		const {
+			group: { symbol },
+			tokens: [first, ...rest]
+		} = otherNetwork;
+
+		// A single token there that goes by another name, ckBTC for BTC, is named.
+		if (rest.length === 0 && getTokenDisplaySymbol(first) !== symbol) {
+			return replacePlaceholders(i18n.swap.text.receive_shortcut_one_network_as, {
+				$network: first.network.name,
+				$symbol: getTokenDisplaySymbol(first)
+			});
+		}
+
+		// One name per network, should a group ever have two tokens on one.
+		const names = otherNetwork.tokens.map(({ network: { name } }) => name);
+
+		return preview({ items: names.filter((name, index) => names.indexOf(name) === index), max: 2 });
+	};
+
+	const anyTokenDetail = (): string | undefined => {
+		if (isNullish(anyToken)) {
+			return;
+		}
+
+		if (anyToken.tokens === 1) {
+			return i18n.swap.text.receive_shortcut_any_token_count_single;
+		}
+
+		return replacePlaceholders(
+			anyToken.networks === 1
+				? i18n.swap.text.receive_shortcut_any_token_count_one
+				: i18n.swap.text.receive_shortcut_any_token_count,
+			{ $tokens: `${anyToken.tokens}`, $networks: `${anyToken.networks}` }
+		);
+	};
+
+	return {
+		...(nonNullish(sameNetwork) && {
+			sameNetwork: preview({ items: sameNetwork.tokens.map(getTokenDisplaySymbol), max: 3 })
+		}),
+		...(nonNullish(otherNetwork) && { otherNetwork: otherNetworkDetail() }),
+		...(nonNullish(anyToken) && { anyToken: anyTokenDetail() })
+	};
+};
