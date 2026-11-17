@@ -14,7 +14,8 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import {
 	bindLifiBtcPayout,
-	hasLifiBtcPayoutBinding
+	hasLifiBtcPayoutBinding,
+	lifiBtcAdmittedBridges
 } from '$lib/services/lifi-btc-binding.services';
 import {
 	createLifiRow,
@@ -28,12 +29,14 @@ import type { LifiBtcOutput } from '$lib/types/lifi';
 import {
 	SwapProvider,
 	type BtcQuoteParams,
+	type GetSupportedDestinationsFn,
 	type SwapLifiBtcParams,
 	type SwapMappedResult
 } from '$lib/types/swap';
+import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { toLifiCreationRefs, toLifiData } from '$lib/utils/lifi-active-tx.utils';
-import { decodeLifiBtcTransaction } from '$lib/utils/lifi-swap.utils';
+import { decodeLifiBtcTransaction, isLifiBtcSource } from '$lib/utils/lifi-swap.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { resolveSwapTokenLookup } from '$lib/utils/swap-tokens-filter.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -50,6 +53,21 @@ export const lifiBtcSupportedTokens = (): Promise<Set<string>> =>
 	Promise.resolve(
 		new Set([resolveSwapTokenLookup({ token: BTC_MAINNET_TOKEN })?.identifier].filter(nonNullish))
 	);
+
+/**
+ * Whether LI.FI may offer a swap from `token`: native BTC sent through the backend, with at least
+ * one admitted bridge. Without one, nothing about the swap form changes.
+ */
+export const isLifiBtcOffered = (token: Token): boolean =>
+	isLifiBtcSource(token) && lifiBtcAdmittedBridges().length > 0;
+
+/**
+ * The `getSupportedDestinations` of the BTC registry's LI.FI entry: every EVM and Solana token, which
+ * LI.FI quotes toward with no list of its own, once LI.FI may offer a swap from the source; nothing
+ * before, so the destination picker shows no pair that could not get an offer.
+ */
+export const lifiBtcSupportedDestinations: GetSupportedDestinationsFn = ({ sourceToken }) =>
+	isLifiBtcOffered(sourceToken) ? { evm: 'any', sol: 'any' } : undefined;
 
 /**
  * A LI.FI offer for a swap from BTC, with its own UTXO selection: LI.FI's outputs (deposit, memo and

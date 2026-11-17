@@ -48,6 +48,7 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { toLifiSwapErrorType } from '$lib/utils/lifi-swap-error.utils';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 	import { nearIntentsQuoteRejectedMessage } from '$lib/utils/swap.utils';
 
@@ -329,7 +330,11 @@
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
 					...swapTrackingMetadata,
-					error: errorDetailToString(err) ?? ''
+					// LI.FI's error text can carry the user's addresses: only an allow-listed category is
+					// reported, as from EVM and Solana.
+					...(nonNullish(lifiOffer)
+						? { result_error_type: toLifiSwapErrorType(err) }
+						: { error: errorDetailToString(err) ?? '' })
 				}
 			});
 

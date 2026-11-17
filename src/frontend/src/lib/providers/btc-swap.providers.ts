@@ -7,6 +7,7 @@ import { CHAIN_FUSION_PAIRS } from '$lib/constants/swap.constants';
 import { fetchChainFusionBtcQuote } from '$lib/services/chain-fusion-swap.services';
 import {
 	fetchLifiBtcSwapQuote,
+	lifiBtcSupportedDestinations,
 	lifiBtcSupportedTokens
 } from '$lib/services/lifi-btc-swap.services';
 import {
@@ -18,7 +19,6 @@ import {
 	chainFusionCompatibleDestinations,
 	chainFusionSupportedSourceTokens
 } from '$lib/utils/chain-fusion-swap.utils';
-import { buildLifiSupportedDestinations } from '$lib/utils/lifi-swap.utils';
 import { buildNearIntentsSupportedDestinations } from '$lib/utils/near-intents-swap.utils';
 
 // Native BTC through the backend's send path only: LI.FI's outputs (an `OP_RETURN` memo among them)
@@ -70,7 +70,7 @@ export const btcSwapProviders: BtcSwapProviderConfig[] = [
 					getQuote: fetchLifiBtcSwapQuote,
 					isEnabled: LIFI_BTC_PROVIDER_ENABLED,
 					getSupportedTokens: lifiBtcSupportedTokens,
-					getSupportedDestinations: buildLifiSupportedDestinations('btc')
+					getSupportedDestinations: lifiBtcSupportedDestinations
 				} satisfies BtcSwapProviderConfig
 			]
 		: [])

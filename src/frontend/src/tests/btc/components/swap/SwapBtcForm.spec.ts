@@ -1,5 +1,6 @@
 import SwapBtcForm from '$btc/components/swap/SwapBtcForm.svelte';
 import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
+import { LIFI_BTC_CONSERVATIVE_OUTPUT_VSIZES } from '$btc/constants/lifi.constants';
 import * as btcMaxSendAmountDerived from '$btc/derived/btc-max-send-amount.derived';
 import { UTXOS_FEE_CONTEXT_KEY, initUtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
@@ -12,6 +13,7 @@ import {
 	SWAP_PROVIDER_STATUS,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
+import * as lifiBtcSwapServices from '$lib/services/lifi-btc-swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
@@ -307,6 +309,29 @@ describe('SwapBtcForm', () => {
 				source: mockBtcAddress,
 				outputVSizes: lifiOutputVSizes
 			});
+		});
+
+		// At the one-output Max, a pair only LI.FI serves would get a quote LI.FI's own selection
+		// cannot fund, and so no offer to correct Max.
+		it("prices Max for LI.FI's largest layout before any offer, while LI.FI may be asked", () => {
+			vi.spyOn(lifiBtcSwapServices, 'isLifiBtcOffered').mockReturnValue(true);
+			const maxSpy = vi.spyOn(btcMaxSendAmountDerived, 'initBtcMaxSendAmount');
+
+			render(SwapBtcForm, { props, context: createContext({ offered: false }) });
+
+			expect(maxSpy).toHaveBeenCalledWith({
+				source: mockBtcAddress,
+				outputVSizes: LIFI_BTC_CONSERVATIVE_OUTPUT_VSIZES
+			});
+		});
+
+		it('prices Max for one output before any offer, while LI.FI is not asked', () => {
+			vi.spyOn(lifiBtcSwapServices, 'isLifiBtcOffered').mockReturnValue(false);
+			const maxSpy = vi.spyOn(btcMaxSendAmountDerived, 'initBtcMaxSendAmount');
+
+			render(SwapBtcForm, { props, context: createContext({ offered: false }) });
+
+			expect(maxSpy).toHaveBeenCalledWith({ source: mockBtcAddress, outputVSizes: undefined });
 		});
 
 		it('prices Max for one output for any other offer', () => {

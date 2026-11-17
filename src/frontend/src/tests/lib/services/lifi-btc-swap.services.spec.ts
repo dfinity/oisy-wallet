@@ -10,7 +10,7 @@ import {
 	BtcValidationError
 } from '$btc/types/btc-send';
 import type * as lifiEnv from '$env/rest/lifi.env';
-import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -22,19 +22,27 @@ import {
 } from '$lib/services/active-user-transactions.services';
 import {
 	bindLifiBtcPayout,
-	hasLifiBtcPayoutBinding
+	hasLifiBtcPayoutBinding,
+	lifiBtcAdmittedBridges
 } from '$lib/services/lifi-btc-binding.services';
-import { fetchLifiBtcSwap, fetchLifiBtcSwapQuote } from '$lib/services/lifi-btc-swap.services';
+import {
+	fetchLifiBtcSwap,
+	fetchLifiBtcSwapQuote,
+	isLifiBtcOffered,
+	lifiBtcSupportedDestinations
+} from '$lib/services/lifi-btc-swap.services';
 import { fetchLifiSwapQuote } from '$lib/services/lifi-swap.services';
 import { enableSwapDestinationToken } from '$lib/services/swap.services';
 import { LifiQuoteRejectedError, LifiRouteUnsupportedError } from '$lib/types/errors';
 import { LIFI_EXTERNAL_REF_KEYS } from '$lib/types/lifi';
 import { SwapProvider, type BtcQuoteParams, type SwapLifiBtcParams } from '$lib/types/swap';
+import type { Token } from '$lib/types/token';
 import { toLifiExternalRefsMap } from '$lib/utils/lifi-active-tx.utils';
 import { decodeLifiBtcTransaction } from '$lib/utils/lifi-swap.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockLifiBtcFeeAddress, mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { ChainId, type QuoteRequestFromAmount } from '@lifi/sdk';
 
 // No bridge is admitted from Bitcoin yet; LayerSwap stands in for the first.
@@ -63,7 +71,8 @@ vi.mock('$btc/services/btc-utxos.service', () => ({
 
 vi.mock('$lib/services/lifi-btc-binding.services', () => ({
 	bindLifiBtcPayout: vi.fn(),
-	hasLifiBtcPayoutBinding: vi.fn()
+	hasLifiBtcPayoutBinding: vi.fn(),
+	lifiBtcAdmittedBridges: vi.fn()
 }));
 
 vi.mock('$lib/services/lifi-swap.services', () => ({
@@ -397,6 +406,52 @@ describe('lifi-btc-swap.services', () => {
 			await expect(fetchLifiBtcSwapQuote(quoteParams)).resolves.toBeUndefined();
 
 			expect(hasLifiBtcPayoutBinding).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('isLifiBtcOffered and lifiBtcSupportedDestinations', () => {
+		const destinations = (sourceToken: Token) =>
+			lifiBtcSupportedDestinations({
+				sourceToken,
+				supportedSourceTokens: undefined,
+				findProviderSourceTokens: () => undefined
+			});
+
+		beforeEach(() => {
+			btcSendViaBackend.enabled = true;
+			vi.mocked(lifiBtcAdmittedBridges).mockReturnValue(['layerswap']);
+		});
+
+		afterEach(() => {
+			btcSendViaBackend.enabled = false;
+		});
+
+		it('should offer every EVM and Solana destination for native BTC once a bridge is admitted', () => {
+			expect(isLifiBtcOffered(BTC_MAINNET_TOKEN)).toBeTruthy();
+			expect(destinations(BTC_MAINNET_TOKEN)).toStrictEqual({ evm: 'any', sol: 'any' });
+		});
+
+		// Otherwise the destination picker would show pairs that can never get an offer.
+		it('should offer nothing while no bridge is admitted', () => {
+			vi.mocked(lifiBtcAdmittedBridges).mockReturnValue([]);
+
+			expect(isLifiBtcOffered(BTC_MAINNET_TOKEN)).toBeFalsy();
+			expect(destinations(BTC_MAINNET_TOKEN)).toBeUndefined();
+		});
+
+		it.each([
+			{
+				case: 'native BTC sent through the signer',
+				sourceToken: BTC_MAINNET_TOKEN,
+				viaBackend: false
+			},
+			{ case: 'testnet BTC', sourceToken: BTC_TESTNET_TOKEN, viaBackend: true },
+			{ case: 'an EVM token', sourceToken: ETHEREUM_TOKEN, viaBackend: true }
+		])('should offer nothing for $case', ({ sourceToken, viaBackend }) => {
+			btcSendViaBackend.enabled = viaBackend;
+
+			expect(isLifiBtcOffered(sourceToken)).toBeFalsy();
+			expect(destinations(sourceToken)).toBeUndefined();
 		});
 	});
 });

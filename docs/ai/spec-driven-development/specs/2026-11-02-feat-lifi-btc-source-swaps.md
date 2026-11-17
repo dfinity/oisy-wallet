@@ -330,7 +330,9 @@ As built (PR 6):
 - **Registration.** `btcSwapProviders` registers LI.FI after Chain Fusion and NEAR Intents when
   `LIFI_SWAP_ENABLED`, `LIFI_BTC_SWAP_ENABLED` and `BTC_SEND_VIA_BACKEND_ENABLED` are all on.
   - Sources: native BTC on mainnet only (`lifiBtcSupportedTokens`).
-  - Destinations: every EVM and Solana token (`buildLifiSupportedDestinations('btc')`).
+  - Destinations: every EVM and Solana token (`lifiBtcSupportedDestinations`), but only while a
+    bridge is admitted (`isLifiBtcOffered`: allowed, not denied, with a payout binding;
+    `lifiBtcAdmittedBridges`). Before that, the destination picker is unchanged.
 - **Quote.** `fetchLifiBtcSwapQuote` (`lifi-btc-swap.services.ts`) takes LI.FI's checked offer and
   prices LI.FI's own UTXO selection for its deposit, memo and fee outputs, using `prepareBtcSend` over
   the stores the swap loaders fill, as the Chain Fusion quote does. The offer carries it as
@@ -339,12 +341,14 @@ As built (PR 6):
     the selection cannot fund the quote.
 - **Form and fee row with LI.FI selected.** The fee row, the funds check and Max use `btcSelection`.
   `initBtcMaxSendAmount` now takes `outputVSizes`.
-  - No conservative layout is needed: LI.FI is only selected with a quote, and a quote its selection
-    cannot fund is never offered.
+  - Before any offer is selected, while LI.FI may be asked, Max uses the conservative layout
+    (`LIFI_BTC_CONSERVATIVE_OUTPUT_VSIZES`, 43 + 92 + 31 vB). At the one-output Max, a pair only
+    LI.FI serves would get a quote its own selection cannot fund, and so no offer to correct Max.
   - The fee row shows only the Bitcoin network fee. LI.FI's and the bridge's fees come out of the
     amount, so they are listed in the provider sheet (`SwapDetailsLifi`), as for EVM and Solana.
 - **Wizard.** It sends with the offer's `btcSelection.utxosFee`, and refuses an offer without one as
-  missing data. It skips the generic one-output `validateBtcSend`: `fetchLifiBtcSwap` checks the
+  missing data. A LI.FI failure is reported to analytics as `toLifiSwapErrorType`'s category, never
+  its text, which can carry the user's addresses, as from EVM and Solana. It skips the generic one-output `validateBtcSend`: `fetchLifiBtcSwap` checks the
   selection against the layout of the quote it re-requests.
 - **Binding.** `fetchLifiBtcSwap` runs `bindLifiBtcPayout` (`lifi-btc-binding.services.ts`) between
   decoding the outputs and checking the fee. Each bridge's binding is looked up by tool key in
