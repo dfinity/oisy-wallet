@@ -3,7 +3,10 @@ import { bindLifiRelayPayout } from '$lib/services/lifi-btc-relay-binding.servic
 import { LifiQuoteRejectedError } from '$lib/types/errors';
 import { isLifiRouteExecutable } from '$lib/utils/lifi-calldata.utils';
 import { decodeLifiBtcTransaction, lifiBtcMemoText } from '$lib/utils/lifi-swap.utils';
-import type { LifiRelayToolData } from '$lib/validation/lifi-relay.validation';
+import {
+	LifiRelayToolDataSchema,
+	type LifiRelayToolData
+} from '$lib/validation/lifi-relay.validation';
 import {
 	mockLifiBtcFeeAddress,
 	mockLifiBtcRelayQuote,
@@ -41,7 +44,10 @@ describe('lifi-btc-relay-binding.services', () => {
 
 	const displayedToAmountMin = BigInt(quote.estimate.toAmountMin);
 
-	const { toolData } = quote.estimate as unknown as { toolData: LifiRelayToolData };
+	// Parsed, not cast: the fixture must have the shape the binding reads.
+	const toolData = LifiRelayToolDataSchema.parse(
+		(quote.estimate as { toolData?: unknown }).toolData
+	);
 
 	// The quote with its embedded Relay quote replaced by `edit`'s.
 	const withToolData = (edit: (data: LifiRelayToolData) => unknown): LiFiStep => ({
