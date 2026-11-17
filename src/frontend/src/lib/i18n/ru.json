@@ -1442,6 +1442,7 @@
 			"cross_chain_networks_info": "Информация о кросс-чейн сетях",
 			"two_swaps_info": "$oisy_short предлагает только обмены, которые может полностью проверить до вашего подтверждения, а такого прямого обмена $sourceSymbol на $destinationSymbol нет. Но вы можете сначала обменять $sourceSymbol на $intermediateSymbol, а затем $intermediateSymbol на $destinationSymbol.",
 			"two_swaps_first_button": "Сначала обменять на $intermediateSymbol",
+			"two_swaps_deposit_unverified_info": "",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",

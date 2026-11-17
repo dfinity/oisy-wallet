@@ -1159,6 +1159,7 @@ interface I18nSwap {
 		cross_chain_networks_info: string;
 		two_swaps_info: string;
 		two_swaps_first_button: string;
+		two_swaps_deposit_unverified_info: string;
 		near_intents_estimated_time: string;
 		lifi_route_via: string;
 		lifi_route_via_estimated_time: string;

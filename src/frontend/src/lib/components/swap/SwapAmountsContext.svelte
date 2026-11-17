@@ -226,7 +226,8 @@
 					quoteError: {
 						type: 'two-swaps',
 						intermediateToken: err.intermediateToken,
-						provider: err.provider
+						provider: err.provider,
+						...(err.depositUnverified && { depositUnverified: true })
 					}
 				})
 			});

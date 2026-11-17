@@ -3,15 +3,19 @@ import { sendBtcScriptOutputs, validateBtcSend } from '$btc/services/btc-send.se
 import { prepareBtcSend } from '$btc/services/btc-utxos.service';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
-import { btcScriptOutputVSize } from '$btc/utils/btc-psbt.utils';
+import { btcOutputScriptToAddressOrHex, btcScriptOutputVSize } from '$btc/utils/btc-psbt.utils';
 import {
 	isDefinitiveBtcBroadcastRefusal,
 	isInvalidUtxosFee,
 	isUnclearBtcBroadcastOutcome
 } from '$btc/utils/btc-send.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { nativeTokenOf } from '$eth/services/native-balance.services';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { tokens } from '$lib/derived/tokens.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { trackLifiBtcDepositUnverified } from '$lib/services/error-analytics.services';
 import {
 	bindLifiBtcPayout,
 	hasLifiBtcPayoutBinding,
@@ -25,6 +29,7 @@ import {
 import { fetchLifiSwapQuote } from '$lib/services/lifi-swap.services';
 import { enableSwapDestinationToken } from '$lib/services/swap.services';
 import { i18n } from '$lib/stores/i18n.store';
+import { SwapViaIntermediateTokenError } from '$lib/types/errors';
 import type { LifiBtcOutput } from '$lib/types/lifi';
 import {
 	SwapProvider,
@@ -36,7 +41,12 @@ import {
 import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { toLifiCreationRefs, toLifiData } from '$lib/utils/lifi-active-tx.utils';
-import { decodeLifiBtcTransaction, isLifiBtcSource } from '$lib/utils/lifi-swap.utils';
+import {
+	decodeLifiBtcTransaction,
+	isLifiBtcDepositUnverified,
+	isLifiBtcSource
+} from '$lib/utils/lifi-swap.utils';
+import { isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { resolveSwapTokenLookup } from '$lib/utils/swap-tokens-filter.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -70,11 +80,34 @@ export const lifiBtcSupportedDestinations: GetSupportedDestinationsFn = ({ sourc
 	isLifiBtcOffered(sourceToken) ? { evm: 'any', sol: 'any' } : undefined;
 
 /**
+ * The token to suggest two swaps through when LI.FI's offer from BTC is refused for its deposit: the
+ * destination network's own coin (ETH, SOL…), as OISY lists it. The first swap, to it, is quoted like
+ * any swap from BTC; the second, from it, stays on that network, where OISY checks LI.FI's transaction
+ * itself. None when the destination is that coin, or OISY does not list it.
+ */
+export const lifiBtcIntermediateToken = (destinationToken: Token): Token | undefined => {
+	const nativeToken = isNetworkIdSOLMainnet(destinationToken.network.id)
+		? SOLANA_TOKEN
+		: nativeTokenOf(destinationToken.network.id);
+
+	if (isNullish(nativeToken) || nativeToken.id === destinationToken.id) {
+		return;
+	}
+
+	return get(tokens).find(({ id }) => id === nativeToken.id);
+};
+
+/**
  * A LI.FI offer for a swap from BTC, with its own UTXO selection: LI.FI's outputs (deposit, memo and
  * fee) are larger than the one output the swap's fee loader prices, so the fee, the funds check and
  * Max come from this selection. `undefined` when LI.FI has none, when its bridge has no payout binding
  * (execution would refuse it), and when the selection cannot fund it: an offer must not advertise a
  * fee the send then refuses to honour.
+ *
+ * A quote whose deposit pays another address than the one OISY pins for its bridge is no offer
+ * either, and is reported (`trackLifiBtcDepositUnverified`). It rejects with
+ * `SwapViaIntermediateTokenError` when there is a token to suggest two swaps through
+ * (`lifiBtcIntermediateToken`): the form shows that box when no other provider has an offer.
  *
  * The selection reads the stores the swap flow's loaders fill for a Bitcoin source, as the Chain
  * Fusion quote does, and is priced at their fee rate.
@@ -92,20 +125,42 @@ export const fetchLifiBtcSwapQuote = async ({
 		return;
 	}
 
-	const allUtxos = get(allUtxosStore)?.allUtxos;
-	const feeRateMiliSatoshisPerVByte = get(feeRatePercentilesStore)?.feeRateFromPercentiles;
-
-	if (isNullish(allUtxos) || isNullish(feeRateMiliSatoshisPerVByte)) {
-		return;
-	}
-
-	const { sourceToken, amount } = params;
+	const { sourceToken, destinationToken, amount } = params;
+	const { tool } = offer.swapDetails;
 
 	const { deposit, memo, fee } = decodeLifiBtcTransaction({
 		quote: offer.swapDetails,
 		amount,
 		userAddress: userBtcAddress
 	});
+
+	// Execution would refuse it the same way, after the user confirmed. Without another offer, the
+	// form points to two swaps instead.
+	if (isLifiBtcDepositUnverified({ tool, deposit })) {
+		trackLifiBtcDepositUnverified({
+			tool,
+			depositAddress: btcOutputScriptToAddressOrHex({ script: deposit.script, network: 'mainnet' })
+		});
+
+		const intermediateToken = lifiBtcIntermediateToken(destinationToken);
+
+		if (nonNullish(intermediateToken)) {
+			throw new SwapViaIntermediateTokenError({
+				intermediateToken,
+				provider: SwapProvider.LIFI,
+				depositUnverified: true
+			});
+		}
+
+		return;
+	}
+
+	const allUtxos = get(allUtxosStore)?.allUtxos;
+	const feeRateMiliSatoshisPerVByte = get(feeRatePercentilesStore)?.feeRateFromPercentiles;
+
+	if (isNullish(allUtxos) || isNullish(feeRateMiliSatoshisPerVByte)) {
+		return;
+	}
 
 	const outputVSizes = lifiBtcOutputVSizes([deposit, memo, fee]);
 

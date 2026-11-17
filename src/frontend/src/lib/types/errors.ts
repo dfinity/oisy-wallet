@@ -61,22 +61,29 @@ export class SwapAmountTooLowError extends Error {
 /**
  * A swap quote provider has no offer for the pair, but routes it through one token OISY lists in a
  * shape OISY cannot verify, so the user can make it as two separate swaps through that token.
+ *
+ * `depositUnverified` when the offer was refused because its deposit pays another address than the
+ * one OISY pins for the bridge (a LI.FI swap from BTC), not because of its route.
  */
 export class SwapViaIntermediateTokenError extends Error {
 	readonly intermediateToken: Token;
 	readonly provider: SwapProvider;
+	readonly depositUnverified: boolean;
 
 	constructor({
 		intermediateToken,
-		provider
+		provider,
+		depositUnverified = false
 	}: {
 		intermediateToken: Token;
 		provider: SwapProvider;
+		depositUnverified?: boolean;
 	}) {
 		super('The swap can be made as two separate swaps');
 
 		this.intermediateToken = intermediateToken;
 		this.provider = provider;
+		this.depositUnverified = depositUnverified;
 	}
 }
 

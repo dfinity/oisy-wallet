@@ -66,6 +66,33 @@ describe('SwapTwoSwapsHint', () => {
 		);
 	});
 
+	// A LI.FI offer from BTC refused for its deposit address: the box says that, not that no direct
+	// swap exists, and still names the two swaps.
+	it('should say the deposit address could not be verified when that is why there is no offer', () => {
+		const { getByTestId } = render(SwapTwoSwapsHint, {
+			props: { ...props, depositUnverified: true },
+			context
+		});
+
+		expect(getByTestId(SWAP_TWO_SWAPS_HINT)).toHaveTextContent(
+			replacePlaceholders(replaceOisyPlaceholders(en.swap.text.two_swaps_deposit_unverified_info), {
+				$sourceSymbol: 'USDC',
+				$destinationSymbol: 'NVDA',
+				$intermediateSymbol: 'USDG'
+			})
+		);
+		expect(getByTestId(SWAP_TWO_SWAPS_HINT)).not.toHaveTextContent(
+			replacePlaceholders(replaceOisyPlaceholders(en.swap.text.two_swaps_info), {
+				$sourceSymbol: 'USDC',
+				$destinationSymbol: 'NVDA',
+				$intermediateSymbol: 'USDG'
+			})
+		);
+		expect(getByTestId(SWAP_TWO_SWAPS_HINT_BUTTON)).toHaveTextContent(
+			replacePlaceholders(en.swap.text.two_swaps_first_button, { $intermediateSymbol: 'USDG' })
+		);
+	});
+
 	it('should name no amount', () => {
 		const { getByTestId } = render(SwapTwoSwapsHint, { props, context });
 

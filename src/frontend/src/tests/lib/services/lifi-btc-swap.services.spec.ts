@@ -10,9 +10,14 @@ import {
 	BtcValidationError
 } from '$btc/types/btc-send';
 import type * as lifiEnv from '$env/rest/lifi.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
+import type * as tokensDerived from '$lib/derived/tokens.derived';
+import { tokens } from '$lib/derived/tokens.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import en from '$lib/i18n/en.json';
 import { fetchLifiQuote } from '$lib/rest/lifi.rest';
@@ -20,6 +25,7 @@ import {
 	createActiveUserTransaction,
 	deleteActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
+import { trackLifiBtcDepositUnverified } from '$lib/services/error-analytics.services';
 import {
 	bindLifiBtcPayout,
 	hasLifiBtcPayoutBinding,
@@ -29,11 +35,16 @@ import {
 	fetchLifiBtcSwap,
 	fetchLifiBtcSwapQuote,
 	isLifiBtcOffered,
+	lifiBtcIntermediateToken,
 	lifiBtcSupportedDestinations
 } from '$lib/services/lifi-btc-swap.services';
 import { fetchLifiSwapQuote } from '$lib/services/lifi-swap.services';
 import { enableSwapDestinationToken } from '$lib/services/swap.services';
-import { LifiQuoteRejectedError, LifiRouteUnsupportedError } from '$lib/types/errors';
+import {
+	LifiQuoteRejectedError,
+	LifiRouteUnsupportedError,
+	SwapViaIntermediateTokenError
+} from '$lib/types/errors';
 import { LIFI_EXTERNAL_REF_KEYS } from '$lib/types/lifi';
 import { SwapProvider, type BtcQuoteParams, type SwapLifiBtcParams } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
@@ -41,9 +52,17 @@ import { toLifiExternalRefsMap } from '$lib/utils/lifi-active-tx.utils';
 import { decodeLifiBtcTransaction } from '$lib/utils/lifi-swap.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockLifiBtcFeeAddress, mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
+import {
+	mockLifiBtcFeeAddress,
+	mockLifiBtcLayerswapQuote,
+	mockLifiBtcRelayQuote,
+	mockLifiBtcRelayQuotePaying
+} from '$tests/mocks/lifi-btc.mock';
+import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
-import { ChainId, type QuoteRequestFromAmount } from '@lifi/sdk';
+import { ChainId, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
+import { networks, payments } from 'bitcoinjs-lib';
+import type { Writable } from 'svelte/store';
 
 // No bridge is admitted from Bitcoin yet; LayerSwap stands in for the first.
 vi.mock('$env/rest/lifi.env', async (importOriginal) => {
@@ -78,6 +97,19 @@ vi.mock('$lib/services/lifi-btc-binding.services', () => ({
 vi.mock('$lib/services/lifi-swap.services', () => ({
 	fetchLifiSwapQuote: vi.fn()
 }));
+
+vi.mock('$lib/services/error-analytics.services', () => ({
+	trackLifiBtcDepositUnverified: vi.fn()
+}));
+
+vi.mock('$lib/derived/tokens.derived', async (importOriginal) => {
+	const { writable } = await import('svelte/store');
+
+	return {
+		...(await importOriginal<typeof tokensDerived>()),
+		tokens: writable([])
+	};
+});
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
 	createActiveUserTransaction: vi.fn(),
@@ -406,6 +438,102 @@ describe('lifi-btc-swap.services', () => {
 			await expect(fetchLifiBtcSwapQuote(quoteParams)).resolves.toBeUndefined();
 
 			expect(hasLifiBtcPayoutBinding).not.toHaveBeenCalled();
+		});
+
+		describe("a Relay quote whose deposit does not pay Relay's pinned depository", () => {
+			const elsewhere =
+				payments.p2wpkh({ hash: Buffer.alloc(20, 5), network: networks.bitcoin }).address ?? '';
+
+			const relayParams: BtcQuoteParams = {
+				...quoteParams,
+				destinationToken: USDC_TOKEN,
+				amount: BigInt(mockLifiBtcRelayQuote.action.fromAmount),
+				userBtcAddress: mockLifiBtcRelayQuote.action.fromAddress ?? ''
+			};
+
+			const offerOf = (swapDetails: LiFiStep) => ({ ...params.offer, swapDetails });
+
+			beforeEach(() => {
+				vi.mocked(fetchLifiSwapQuote).mockResolvedValue(
+					offerOf(mockLifiBtcRelayQuotePaying(elsewhere))
+				);
+
+				(tokens as Writable<Token[]>).set([ETHEREUM_TOKEN, BASE_ETH_TOKEN, SOLANA_TOKEN]);
+			});
+
+			afterEach(() => {
+				(tokens as Writable<Token[]>).set([]);
+			});
+
+			it("should suggest two swaps through the destination network's own coin, and offer nothing", async () => {
+				const err = await fetchLifiBtcSwapQuote(relayParams).catch((e: unknown) => e);
+
+				expect(err).toBeInstanceOf(SwapViaIntermediateTokenError);
+				expect(err).toMatchObject({
+					intermediateToken: BASE_ETH_TOKEN,
+					provider: SwapProvider.LIFI,
+					depositUnverified: true
+				});
+				expect(prepareBtcSend).not.toHaveBeenCalled();
+			});
+
+			it('should report the address the deposit pays', async () => {
+				await fetchLifiBtcSwapQuote(relayParams).catch(() => undefined);
+
+				expect(trackLifiBtcDepositUnverified).toHaveBeenCalledWith({
+					tool: 'relaydepository',
+					depositAddress: elsewhere
+				});
+			});
+
+			it('should offer nothing, and suggest nothing, when the destination is that coin itself', async () => {
+				await expect(
+					fetchLifiBtcSwapQuote({ ...relayParams, destinationToken: BASE_ETH_TOKEN })
+				).resolves.toBeUndefined();
+
+				expect(trackLifiBtcDepositUnverified).toHaveBeenCalledOnce();
+				expect(prepareBtcSend).not.toHaveBeenCalled();
+			});
+
+			it("should offer a Relay quote whose deposit pays Relay's depository, and report nothing", async () => {
+				vi.mocked(fetchLifiSwapQuote).mockResolvedValue(offerOf(mockLifiBtcRelayQuote));
+
+				await expect(fetchLifiBtcSwapQuote(relayParams)).resolves.toMatchObject({
+					swapDetails: mockLifiBtcRelayQuote
+				});
+
+				expect(trackLifiBtcDepositUnverified).not.toHaveBeenCalled();
+			});
+		});
+	});
+
+	describe('lifiBtcIntermediateToken', () => {
+		beforeEach(() => {
+			(tokens as Writable<Token[]>).set([ETHEREUM_TOKEN, BASE_ETH_TOKEN, SOLANA_TOKEN]);
+		});
+
+		afterEach(() => {
+			(tokens as Writable<Token[]>).set([]);
+		});
+
+		it.each([
+			{ case: 'an ERC-20 on Base', destinationToken: USDC_TOKEN, intermediate: BASE_ETH_TOKEN },
+			{ case: 'an SPL token', destinationToken: mockValidSplToken, intermediate: SOLANA_TOKEN }
+		])("should suggest the network's own coin for $case", ({ destinationToken, intermediate }) => {
+			expect(lifiBtcIntermediateToken(destinationToken)).toBe(intermediate);
+		});
+
+		it.each([
+			{ case: 'ETH on Ethereum', destinationToken: ETHEREUM_TOKEN },
+			{ case: 'SOL', destinationToken: SOLANA_TOKEN }
+		])('should suggest nothing for the coin itself: $case', ({ destinationToken }) => {
+			expect(lifiBtcIntermediateToken(destinationToken)).toBeUndefined();
+		});
+
+		it('should suggest nothing OISY does not list', () => {
+			(tokens as Writable<Token[]>).set([ETHEREUM_TOKEN]);
+
+			expect(lifiBtcIntermediateToken(USDC_TOKEN)).toBeUndefined();
 		});
 	});
 

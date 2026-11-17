@@ -1442,6 +1442,7 @@
 			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
 			"two_swaps_info": "$oisy_short only offers swaps it can fully verify before you approve, and there is no such direct swap from $sourceSymbol to $destinationSymbol. But you can swap from $sourceSymbol to $intermediateSymbol first, and then from $intermediateSymbol to $destinationSymbol.",
 			"two_swaps_first_button": "Swap to $intermediateSymbol first",
+			"two_swaps_deposit_unverified_info": "$oisy_short couldn't verify the address this swap would send your $sourceSymbol to, so it isn't offered right now. You can do it in two swaps instead: $sourceSymbol to $intermediateSymbol first, then $intermediateSymbol to $destinationSymbol.",
 			"near_intents_estimated_time": "NEAR Intents (~$minutes min)",
 			"lifi_route_via": "LI.FI via $tool",
 			"lifi_route_via_estimated_time": "LI.FI via $tool (~$minutes min)",
