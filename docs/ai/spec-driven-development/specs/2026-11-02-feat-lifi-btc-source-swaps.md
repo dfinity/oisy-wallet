@@ -293,8 +293,9 @@ As built (PR 5):
      at least the displayed minimum.
   3. It reads the deposit, memo and fee outputs with `decodeLifiBtcTransaction`.
   4. `validateBtcSend` checks the reviewed `utxosFee` against that layout's vsizes. The fee paid is
-     exactly the one reviewed, and a re-quoted layout it no longer prices within ±10% is refused
-     before signing.
+     the one reviewed, plus any change below 1,000 sats (`BTC_CHANGE_DUST_THRESHOLD_SATOSHIS`),
+     which goes to the miner as in every BTC send. A re-quoted layout it no longer prices within
+     ±10% is refused before signing.
   5. It sends with change index 2 (`LIFI_BTC_CHANGE_INDEX`) and sequence `0xFFFFFFFD`
      (`LIFI_BTC_SEQUENCE`).
   6. `beforeBroadcast` creates the row with the txid as `lifi_tx_hash`, with no nonce and no
@@ -346,7 +347,10 @@ As built (PR 6):
   its text, which can carry the user's addresses, as from EVM and Solana. A `BtcValidationError` from
   that check reads as the wizard's own one-output check would: `handleBtcValidationError`'s message,
   and back to the form. It skips the generic one-output `validateBtcSend`: `fetchLifiBtcSwap` checks the
-  selection against the layout of the quote it re-requests.
+  selection against the layout of the quote it re-requests. A re-quote refused on slippage
+  (`isSlippageExceeded`: a minimum below the one displayed, or no route left) is shown on the review
+  as `swap.error.slippage_exceeded` with the max slippage, as from EVM and Solana, not as an
+  unexpected error.
 - **Binding.** `fetchLifiBtcSwap` runs `bindLifiBtcPayout` (`lifi-btc-binding.services.ts`) between
   decoding the outputs and checking the fee. Each bridge's binding is looked up by tool key in
   `LIFI_BTC_PAYOUT_BINDINGS`, and a tool without one is refused (`LifiRouteUnsupportedError`). The
