@@ -27,6 +27,9 @@
 		description?: Snippet;
 		descriptionEnd?: Snippet;
 		action?: Snippet;
+		// A control of its own beside the title, such as a tag that opens another page. With it, the
+		// row's button lies under the content instead of wrapping it, so the two never nest.
+		titleAction?: Snippet;
 		onClick?: MouseEventHandler<HTMLButtonElement>;
 		fullWidth?: boolean;
 		disabled?: boolean;
@@ -49,13 +52,87 @@
 		description,
 		descriptionEnd,
 		action,
+		titleAction,
 		onClick,
 		fullWidth = false,
 		disabled = false,
 		titleStyleClass = '',
 		subtitleStyleClass = ''
 	}: Props = $props();
+
+	const contentId = $props.id();
 </script>
+
+{#snippet content()}
+	<span
+		class="logo-button-wrapper flex w-full flex-row justify-between rounded-none border-t-0 border-r-0 border-l-0"
+		class:border-b={dividers}
+		class:border-brand-subtle-20={dividers}
+		class:py-1={condensed}
+		class:py-3={!condensed}
+	>
+		<span class="flex min-w-0 items-center">
+			{#if selectable}
+				<span class="mr-3 flex min-w-5 items-center text-brand-primary" in:fade>
+					{#if selected}
+						<IconGixCheck size="20px" />
+					{/if}
+				</span>
+			{/if}
+			{#if nonNullish(logo)}
+				<span class="mr-2 flex">{@render logo()}</span>
+			{/if}
+			<span class="flex min-w-0 flex-col text-left">
+				<span class="flex min-w-0 items-center truncate text-nowrap">
+					{#if nonNullish(title)}
+						<span
+							class={`logo-button-title text-lg font-bold text-nowrap text-primary ${titleStyleClass}`}
+							class:min-w-0={isNullish(subtitle)}
+							class:truncate={isNullish(subtitle)}
+						>
+							{@render title()}
+						</span>
+					{/if}
+					{#if nonNullish(titleAction)}
+						<span class="pointer-events-auto relative ml-2 flex">{@render titleAction()}</span>
+					{/if}
+					{#if nonNullish(subtitle)}
+						{#if dividers}
+							<span class="text-tertiary"><Divider /></span>
+						{/if}
+						<span class={`truncate text-base text-nowrap text-tertiary ${subtitleStyleClass}`}>
+							{@render subtitle()}
+						</span>
+					{/if}
+				</span>
+				{#if nonNullish(description)}
+					<span class="truncate text-sm text-tertiary">
+						{@render description()}
+					</span>
+				{/if}
+			</span>
+		</span>
+
+		<span class="flex items-center text-nowrap">
+			<span class="flex flex-col text-right text-nowrap">
+				{#if nonNullish(titleEnd)}
+					<span class="text-lg font-bold text-nowrap">
+						{@render titleEnd()}
+					</span>
+				{/if}
+				{#if nonNullish(descriptionEnd)}
+					<span class="text-sm text-nowrap text-tertiary">
+						{@render descriptionEnd()}
+					</span>
+				{/if}
+			</span>
+
+			{#if nonNullish(action)}
+				<span class="ml-2 flex text-brand-primary" in:fade>{@render action()}</span>
+			{/if}
+		</span>
+	</span>
+{/snippet}
 
 <div
 	class={`flex transition-[background-color] duration-150 ease-out ${styleClass ?? ''}`}
@@ -63,84 +140,41 @@
 	class:child-pressed:duration-0={nonNullish(onClick) && !disabled}
 	class:hover:bg-brand-subtle-10={hover && !disabled}
 	class:opacity-50={disabled}
+	class:relative={nonNullish(titleAction)}
 	class:rounded-lg={rounded}
 	class:w-full={dividers || fullWidth}
 >
-	<button
-		style="--focus-outline-offset: -3px"
-		class="flex w-full rounded-lg border-0 px-2"
-		class:cursor-default={isNullish(onClick)}
-		class:cursor-not-allowed={disabled}
-		aria-expanded={expanded}
-		aria-pressed={selected}
-		data-tid={testId}
-		{disabled}
-		onclick={onClick}
-	>
-		<span
-			class="logo-button-wrapper flex w-full flex-row justify-between rounded-none border-t-0 border-r-0 border-l-0"
-			class:border-b={dividers}
-			class:border-brand-subtle-20={dividers}
-			class:py-1={condensed}
-			class:py-3={!condensed}
-		>
-			<span class="flex min-w-0 items-center">
-				{#if selectable}
-					<span class="mr-3 flex min-w-5 items-center text-brand-primary" in:fade>
-						{#if selected}
-							<IconGixCheck size="20px" />
-						{/if}
-					</span>
-				{/if}
-				{#if nonNullish(logo)}
-					<span class="mr-2 flex">{@render logo()}</span>
-				{/if}
-				<span class="flex min-w-0 flex-col text-left">
-					<span class="flex min-w-0 items-center truncate text-nowrap">
-						{#if nonNullish(title)}
-							<span
-								class={`logo-button-title text-lg font-bold text-nowrap text-primary ${titleStyleClass}`}
-								class:min-w-0={isNullish(subtitle)}
-								class:truncate={isNullish(subtitle)}
-							>
-								{@render title()}
-							</span>
-						{/if}
-						{#if nonNullish(subtitle)}
-							{#if dividers}
-								<span class="text-tertiary"><Divider /></span>
-							{/if}
-							<span class={`truncate text-base text-nowrap text-tertiary ${subtitleStyleClass}`}>
-								{@render subtitle()}
-							</span>
-						{/if}
-					</span>
-					{#if nonNullish(description)}
-						<span class="truncate text-sm text-tertiary">
-							{@render description()}
-						</span>
-					{/if}
-				</span>
-			</span>
-
-			<span class="flex items-center text-nowrap">
-				<span class="flex flex-col text-right text-nowrap">
-					{#if nonNullish(titleEnd)}
-						<span class="text-lg font-bold text-nowrap">
-							{@render titleEnd()}
-						</span>
-					{/if}
-					{#if nonNullish(descriptionEnd)}
-						<span class="text-sm text-nowrap text-tertiary">
-							{@render descriptionEnd()}
-						</span>
-					{/if}
-				</span>
-
-				{#if nonNullish(action)}
-					<span class="ml-2 flex text-brand-primary" in:fade>{@render action()}</span>
-				{/if}
-			</span>
+	{#if nonNullish(titleAction)}
+		<!-- The button covers the row from underneath and takes its name from the content, which lets
+		     presses through to it everywhere except on the title action. -->
+		<button
+			style="--focus-outline-offset: -3px"
+			class="absolute inset-0 rounded-lg border-0"
+			class:cursor-default={isNullish(onClick)}
+			class:cursor-not-allowed={disabled}
+			aria-expanded={expanded}
+			aria-labelledby={contentId}
+			aria-pressed={selected}
+			data-tid={testId}
+			{disabled}
+			onclick={onClick}
+		></button>
+		<span id={contentId} class="pointer-events-none relative flex w-full px-2">
+			{@render content()}
 		</span>
-	</button>
+	{:else}
+		<button
+			style="--focus-outline-offset: -3px"
+			class="flex w-full rounded-lg border-0 px-2"
+			class:cursor-default={isNullish(onClick)}
+			class:cursor-not-allowed={disabled}
+			aria-expanded={expanded}
+			aria-pressed={selected}
+			data-tid={testId}
+			{disabled}
+			onclick={onClick}
+		>
+			{@render content()}
+		</button>
+	{/if}
 </div>

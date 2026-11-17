@@ -275,6 +275,10 @@ implementing menu-item navigation.
 putting a switch inside a clickable row. Selection buttons expose `aria-pressed`
 through `Button.pressed` or the selectable list primitives.
 
+When a row needs a control of its own beside its title (the top-rate tag on token
+rows), pass it as `LogoButton`'s `titleAction` (through `TokenCard`): the row's
+button then lies under the content and is named by it, so the two buttons never nest.
+
 Token rows and navigation entries use an inset keyboard focus outline so rounded and scrolling list containers cannot clip it. Token-group headers pass their expanded state through `TokenCard` and `LogoButton` to the native button.
 
 ## Consistent app menu surfaces
