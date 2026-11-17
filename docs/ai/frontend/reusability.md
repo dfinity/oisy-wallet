@@ -146,6 +146,9 @@ Add new feature folders only if your concern doesn't fit any of the above.
 | `network.derived`, `networks.derived`                           | `$lib/derived/`                    | Active network + chain predicates.     |
 | `swap-amounts.store`, `swap-quote-activity.store`               | `$lib/stores/`                     | Accepted offers; pricing participants. |
 
+`swap.store` keeps `tokenListReturnFocus` across step remounts: Back restores the originating shortcut,
+picks focus the selected control, and a missing shortcut falls back to the receive area.
+
 ### Constants worth knowing
 
 | File                                              | Where             | Notes                                                       |

@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, onMount, tick } from 'svelte';
+	import { get } from 'svelte/store';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import { TOKEN_INPUT_SELECT_TOKEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { stakeBalances } from '$lib/derived/stake.derived';
@@ -37,8 +39,48 @@
 
 	let { side, onSelectToken, onCloseTokensList, onFiltersChange }: Props = $props();
 
-	const { sourceToken, destinationToken, receiveSupportedData } =
+	const { sourceToken, destinationToken, receiveSupportedData, tokenListReturnFocus } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	let root: HTMLDivElement;
+
+	onMount(() => {
+		// Keep desktop search autofocus; on mobile enter the list without opening the keyboard.
+		if (!root.contains(document.activeElement)) {
+			root.querySelector<HTMLElement>('button:not([disabled])')?.focus({ preventScroll: true });
+		}
+	});
+
+	const returnToForm = async (token?: Token) => {
+		const dialog = root.closest('[role="dialog"]');
+		const destinationSide = side === 'destination';
+		const returnFocus = get(tokenListReturnFocus);
+		tokenListReturnFocus.set(undefined);
+
+		if (nonNullish(token)) {
+			onSelectToken(token);
+		} else {
+			onCloseTokensList();
+		}
+
+		await tick();
+
+		if (dialog?.isConnected) {
+			const trigger =
+				!token && returnFocus
+					? dialog.querySelector<HTMLElement>(`[data-tid="${returnFocus}"]:not([disabled])`)
+					: undefined;
+
+			(
+				trigger ??
+				dialog.querySelector<HTMLElement>(
+					destinationSide
+						? '[data-swap-receive-area] button:not([disabled])'
+						: `[data-tid="${TOKEN_INPUT_SELECT_TOKEN_BUTTON}"]:not([disabled])`
+				)
+			)?.focus({ preventScroll: true });
+		}
+	};
 
 	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
@@ -106,21 +148,23 @@
 	);
 </script>
 
-<ModalTokensList
-	networks={availableNetworks}
-	{onFiltersChange}
-	onTokenButtonClick={onSelectToken}
-	showStakeBalance={false}
->
-	{#snippet tokenListItem(token, onClick)}
-		<ModalTokensListItem
-			disabled={unpayableTokenIds.has(token.id)}
-			{onClick}
-			selected={token.id === selectedToken?.id}
-			{token}
-		/>
-	{/snippet}
-	{#snippet toolbar()}
-		<ButtonBack fullWidth={true} onclick={onCloseTokensList} />
-	{/snippet}
-</ModalTokensList>
+<div bind:this={root}>
+	<ModalTokensList
+		networks={availableNetworks}
+		{onFiltersChange}
+		onTokenButtonClick={(token) => returnToForm(token)}
+		showStakeBalance={false}
+	>
+		{#snippet tokenListItem(token, onClick)}
+			<ModalTokensListItem
+				disabled={unpayableTokenIds.has(token.id)}
+				{onClick}
+				selected={token.id === selectedToken?.id}
+				{token}
+			/>
+		{/snippet}
+		{#snippet toolbar()}
+			<ButtonBack fullWidth={true} onclick={() => returnToForm()} />
+		{/snippet}
+	</ModalTokensList>
+</div>

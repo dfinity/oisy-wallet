@@ -6,7 +6,10 @@
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import { SWAP_RECEIVE_NETWORK_LIST } from '$lib/constants/test-ids.constants';
+	import {
+		SWAP_RECEIVE_NETWORK_LIST,
+		SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK
+	} from '$lib/constants/test-ids.constants';
 	import { crossChainSwapNetworksMainnets } from '$lib/derived/cross-chain-networks.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { networks } from '$lib/derived/networks.derived';
@@ -50,9 +53,16 @@
 		await tick();
 
 		if (dialog?.isConnected) {
-			dialog
-				.querySelector<HTMLElement>('[data-swap-receive-area] button:not([disabled])')
-				?.focus({ preventScroll: true });
+			const shortcut = isNullish(token)
+				? dialog.querySelector<HTMLElement>(
+						`[data-tid="${SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK}"]:not([disabled])`
+					)
+				: undefined;
+
+			(
+				shortcut ??
+				dialog.querySelector<HTMLElement>('[data-swap-receive-area] button:not([disabled])')
+			)?.focus({ preventScroll: true });
 		}
 	};
 

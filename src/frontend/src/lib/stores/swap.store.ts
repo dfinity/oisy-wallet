@@ -60,6 +60,8 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	// The disabled tokens whose prices the wizard has loaded since the swap modal opened. Kept here
 	// rather than in the wizard, which Get Token rebuilds on every step, so that each one loads once.
 	const pricedTokenIds = new Set<TokenId>();
+	// Get Token rebuilds the wizard between steps, so the list's return target lives here.
+	const tokenListReturnFocus = writable<string | undefined>();
 
 	const sourceToken = derived(
 		[data, swappableTokens],
@@ -151,6 +153,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		lifiCarriedFee,
 		amountSetToMax,
 		lifiMaxFee,
+		tokenListReturnFocus,
 		// The amount is kept as it is for another source, not refilled with that token's max.
 		setSourceToken: (token: Token) => {
 			amountSetToMax.set(false);
@@ -269,6 +272,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			twoSwapsHintsShown.splice(0);
 			tokenListFilters.clear();
 			pricedTokenIds.clear();
+			tokenListReturnFocus.set(undefined);
 		}
 	};
 };
@@ -309,6 +313,7 @@ export interface SwapTokenListFilters {
 }
 
 export interface SwapContext {
+	tokenListReturnFocus: Writable<string | undefined>;
 	sourceToken: Readable<Token | undefined>;
 	destinationToken: Readable<Token | undefined>;
 	// The receive token the person cleared on the form, offered back until a new one is picked or the

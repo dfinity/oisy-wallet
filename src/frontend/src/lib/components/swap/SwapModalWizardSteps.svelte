@@ -8,6 +8,10 @@
 	import SwapReceiveNetworkList from '$lib/components/swap/SwapReceiveNetworkList.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
+	import {
+		SWAP_RECEIVE_SHORTCUT_ANY_TOKEN,
+		SWAP_RECEIVE_SHORTCUT_SAME_NETWORK
+	} from '$lib/constants/test-ids.constants';
 	import { allCrossChainSwapTokens } from '$lib/derived/all-tokens.derived';
 	import {
 		crossChainSwapNetworksMainnets,
@@ -88,7 +92,8 @@
 		receiveSupportedData,
 		getTokenListFilters,
 		setTokenListFilters,
-		markTokensPriced
+		markTokensPriced,
+		tokenListReturnFocus
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const {
@@ -209,7 +214,17 @@
 		});
 	};
 
-	const enterTokenList = ({ side, start }: { side: TokenSide; start?: SwapTokenListFilters }) => {
+	const enterTokenList = ({
+		side,
+		start,
+		returnFocus
+	}: {
+		side: TokenSide;
+		start?: SwapTokenListFilters;
+		returnFocus?: string;
+	}) => {
+		tokenListReturnFocus.set(returnFocus);
+
 		swapAmountsStore.reset();
 
 		setFilterQuery('');
@@ -234,7 +249,13 @@
 	// All asset types, so the list matches the shortcut's preview.
 	setContext<SwapReceiveShortcutsContext>(SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY, {
 		showReceiveList: (network) =>
-			enterTokenList({ side: 'destination', start: { network, category: undefined } }),
+			enterTokenList({
+				side: 'destination',
+				start: { network, category: undefined },
+				returnFocus: nonNullish(network)
+					? SWAP_RECEIVE_SHORTCUT_SAME_NETWORK
+					: SWAP_RECEIVE_SHORTCUT_ANY_TOKEN
+			}),
 		showMoveStep: () => goToStep(WizardStepsSwap.MOVE_TOKEN)
 	});
 
