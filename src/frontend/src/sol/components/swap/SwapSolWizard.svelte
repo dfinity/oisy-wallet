@@ -350,7 +350,8 @@
 					swapAmount,
 					userAddress: $solAddressMainnet,
 					swapDetails: selectedProvider.swapDetails,
-					slippageValue
+					slippageValue,
+					computeUnitPrice: $prioritizationFeeStore ?? ZERO
 				});
 			} else if (selectedProvider?.provider === SwapProvider.LIFI && nonNullish(lifiFee)) {
 				await fetchLifiSolSwap({

@@ -219,7 +219,7 @@
 				identity: $authIdentity,
 				token: $sendToken,
 				amount: parsedAmount,
-				prioritizationFee: $prioritizationFeeStore ?? ZERO,
+				computeUnitPrice: $prioritizationFeeStore ?? ZERO,
 				destination,
 				source
 			});

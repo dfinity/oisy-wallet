@@ -3,6 +3,7 @@ import {
 	TRACK_COUNT_SWAP_ERROR,
 	TRACK_COUNT_SWAP_SUBMITTED
 } from '$lib/constants/analytics.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE,
 	SWAP_LIFI_UNVERIFIED_ROUTE,
@@ -21,6 +22,7 @@ import * as toasts from '$lib/stores/toasts.store';
 import { LifiSolFeeChangedError } from '$lib/types/errors';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
+import { estimatePriorityFee } from '$sol/api/solana.api';
 import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -336,6 +338,27 @@ describe('SwapSolWizard', () => {
 			expect(swapServices.fetchNearIntentsSolSwap).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ slippageValue: '0.5' })
 			);
+		});
+
+		describe('the price of the network fee', () => {
+			afterEach(() => {
+				vi.mocked(estimatePriorityFee).mockResolvedValue(ZERO);
+			});
+
+			it('signs the deposit with the price its network fee was quoted at', async () => {
+				vi.mocked(estimatePriorityFee).mockResolvedValue(1_500n);
+
+				const { getByText } = renderExecution();
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				await fireEvent.click(getByText(en.swap.text.swap_button));
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(swapServices.fetchNearIntentsSolSwap).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ computeUnitPrice: 1_500n })
+				);
+			});
 		});
 
 		it('calls onBack when swap fails', async () => {

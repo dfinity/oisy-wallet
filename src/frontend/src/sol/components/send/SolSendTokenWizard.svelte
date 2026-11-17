@@ -192,7 +192,7 @@
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
 				}),
-				prioritizationFee: $prioritizationFeeStore ?? ZERO,
+				computeUnitPrice: $prioritizationFeeStore ?? ZERO,
 				destination,
 				source
 			});

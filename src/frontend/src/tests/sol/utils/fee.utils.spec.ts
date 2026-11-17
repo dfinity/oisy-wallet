@@ -1,11 +1,16 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	MICROLAMPORTS_PER_LAMPORT,
-	SOLANA_MAX_COMPUTE_UNIT_LIMIT
+	SOLANA_MAX_COMPUTE_UNIT_LIMIT,
+	SOLANA_SEND_SOL_COMPUTE_UNIT_LIMIT,
+	SOLANA_SEND_SPL_COMPUTE_UNIT_LIMIT,
+	SOLANA_SEND_SPL_CREATE_ACCOUNT_COMPUTE_UNIT_LIMIT
 } from '$sol/constants/sol.constants';
 import {
 	calculateSolPrioritizationFee,
+	calculateSolSendFee,
 	convertSolComputeUnitPriceToFee,
+	getSolSendComputeUnitLimit,
 	resolveSolComputeUnitLimit
 } from '$sol/utils/fee.utils';
 
@@ -65,6 +70,54 @@ describe('fee.utils', () => {
 					computeUnitLimit: MICROLAMPORTS_PER_LAMPORT
 				})
 			).toBe(1n);
+		});
+	});
+
+	describe('getSolSendComputeUnitLimit', () => {
+		it('should give a SOL transfer its own limit, whatever the token account flag says', () => {
+			expect(getSolSendComputeUnitLimit({ isSpl: false, createsTokenAccount: false })).toBe(
+				SOLANA_SEND_SOL_COMPUTE_UNIT_LIMIT
+			);
+			expect(getSolSendComputeUnitLimit({ isSpl: false, createsTokenAccount: true })).toBe(
+				SOLANA_SEND_SOL_COMPUTE_UNIT_LIMIT
+			);
+		});
+
+		it('should give an SPL transfer the larger limit only when it opens the recipient account', () => {
+			expect(getSolSendComputeUnitLimit({ isSpl: true, createsTokenAccount: false })).toBe(
+				SOLANA_SEND_SPL_COMPUTE_UNIT_LIMIT
+			);
+			expect(getSolSendComputeUnitLimit({ isSpl: true, createsTokenAccount: true })).toBe(
+				SOLANA_SEND_SPL_CREATE_ACCOUNT_COMPUTE_UNIT_LIMIT
+			);
+		});
+	});
+
+	describe('calculateSolSendFee', () => {
+		it('should be the base fee of one signature when there is no price', () => {
+			expect(
+				calculateSolSendFee({
+					computeUnitPrice: ZERO,
+					computeUnitLimit: SOLANA_SEND_SOL_COMPUTE_UNIT_LIMIT
+				})
+			).toBe(5_000n);
+		});
+
+		// The estimate is a price per compute unit: 1,500 micro-lamports over 1,000 units is 1.5
+		// lamports, charged as 2.
+		it('should add the price over the limit, rounded up to the next lamport', () => {
+			expect(calculateSolSendFee({ computeUnitPrice: 1_500n, computeUnitLimit: 1_000n })).toBe(
+				5_002n
+			);
+		});
+
+		it('should charge a price below one lamport per compute unit', () => {
+			expect(
+				calculateSolSendFee({
+					computeUnitPrice: 223_229n,
+					computeUnitLimit: SOLANA_SEND_SPL_COMPUTE_UNIT_LIMIT
+				})
+			).toBe(5_000n + 4_465n);
 		});
 	});
 

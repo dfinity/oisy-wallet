@@ -4,7 +4,9 @@ import type { Token } from '$lib/types/token';
 import * as solanaApi from '$sol/api/solana.api';
 import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 import { initFeeContext, initFeeStore } from '$sol/stores/sol-fee.store';
+import * as solAddressUtils from '$sol/utils/sol-address.utils';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockSolFeeContextEntry } from '$tests/utils/fee.context.test-utils';
@@ -17,17 +19,21 @@ import type { MockInstance } from 'vitest';
 describe('SolFeeContext', () => {
 	let feeStore: ReturnType<typeof initFeeStore>;
 	let prioritizationFeeStore: ReturnType<typeof initFeeStore>;
+	let ataFeeStore: ReturnType<typeof initFeeStore>;
 	let spyEstimatePriorityFee: MockInstance<typeof solanaApi.estimatePriorityFee>;
 
-	const renderContext = (token: Token = SOLANA_TOKEN) =>
+	const renderContext = ({
+		token = SOLANA_TOKEN,
+		destination
+	}: { token?: Token; destination?: string } = {}) =>
 		render(SolFeeContext, {
-			props: { token, observe: true, children: mockSnippet },
+			props: { token, observe: true, children: mockSnippet, destination },
 			context: mockContextMap([
 				mockSolFeeContextEntry(
 					initFeeContext({
 						feeStore,
 						prioritizationFeeStore,
-						ataFeeStore: initFeeStore(),
+						ataFeeStore,
 						feeSymbolStore: writable(SOLANA_TOKEN.symbol),
 						feeDecimalsStore: writable(SOLANA_TOKEN.decimals),
 						feeTokenIdStore: writable(SOLANA_TOKEN.id),
@@ -42,11 +48,11 @@ describe('SolFeeContext', () => {
 
 		feeStore = initFeeStore();
 		prioritizationFeeStore = initFeeStore();
+		ataFeeStore = initFeeStore();
 
-		// Micro-lamports across the whole transaction, so two lamports.
-		spyEstimatePriorityFee = vi
-			.spyOn(solanaApi, 'estimatePriorityFee')
-			.mockResolvedValue(2_000_000n);
+		// A price per compute unit: over a SOL transfer's 1,000 units it comes to 1.5 lamports, which
+		// the network rounds up to 2.
+		spyEstimatePriorityFee = vi.spyOn(solanaApi, 'estimatePriorityFee').mockResolvedValue(1_500n);
 
 		// An SPL token with no destination is quoted the rent of a new token account, which would
 		// otherwise be read from a live RPC.
@@ -54,14 +60,50 @@ describe('SolFeeContext', () => {
 	});
 
 	// A send is signed by the user's key alone, so its base fee is that of a single signature.
-	it('should quote the base fee of the one signature a send requires, plus the priority fee', async () => {
+	it('should quote the base fee of the one signature a send requires, plus the price over its limit', async () => {
 		renderContext();
 
 		await waitFor(() => {
 			expect(get(feeStore)).toBe(5_002n);
 		});
 
-		expect(get(prioritizationFeeStore)).toBe(2_000_000n);
+		expect(get(prioritizationFeeStore)).toBe(1_500n);
+	});
+
+	describe('an SPL send', () => {
+		// 1,500 micro-lamports over 20,000 units is 30 lamports.
+		it('should quote the limit of a transfer to an existing token account', async () => {
+			vi.spyOn(solAddressUtils, 'isAtaAddress').mockResolvedValue(true);
+			vi.spyOn(solanaApi, 'checkIfAccountExists').mockResolvedValue(true);
+
+			renderContext({ token: mockValidSplToken, destination: mockSolAddress2 });
+
+			await waitFor(() => {
+				expect(get(feeStore)).toBe(5_030n);
+			});
+
+			expect(get(ataFeeStore)).toBeUndefined();
+		});
+
+		// 1,500 micro-lamports over 60,000 units is 90 lamports.
+		it('should quote the larger limit once it is known the send opens the recipient token account', async () => {
+			const ataFee = Promise.withResolvers<ReturnType<typeof lamports>>();
+			vi.spyOn(solanaApi, 'getSolCreateAccountFee').mockReturnValueOnce(ataFee.promise);
+
+			renderContext({ token: mockValidSplToken });
+
+			await waitFor(() => {
+				expect(get(feeStore)).toBe(5_030n);
+			});
+
+			ataFee.resolve(lamports(2_039_280n));
+
+			await waitFor(() => {
+				expect(get(feeStore)).toBe(5_090n);
+			});
+
+			expect(spyEstimatePriorityFee).toHaveBeenCalledOnce();
+		});
 	});
 
 	describe('polling', () => {
@@ -88,8 +130,8 @@ describe('SolFeeContext', () => {
 
 			expect(spyEstimatePriorityFee).toHaveBeenCalledTimes(2);
 
-			first.resolve(2_000_000n);
-			second.resolve(2_000_000n);
+			first.resolve(1_500n);
+			second.resolve(1_500n);
 
 			await vi.advanceTimersByTimeAsync(0);
 
@@ -111,14 +153,14 @@ describe('SolFeeContext', () => {
 			await rerender({ token: mockValidSplToken });
 			await vi.advanceTimersByTimeAsync(0);
 
-			expect(get(prioritizationFeeStore)).toBe(2_000_000n);
+			expect(get(prioritizationFeeStore)).toBe(1_500n);
 
 			stale.resolve(9_000_000n);
 
 			await vi.advanceTimersByTimeAsync(0);
 
-			expect(get(feeStore)).toBe(5_002n);
-			expect(get(prioritizationFeeStore)).toBe(2_000_000n);
+			expect(get(feeStore)).toBe(5_090n);
+			expect(get(prioritizationFeeStore)).toBe(1_500n);
 
 			unmount();
 		});
@@ -131,7 +173,7 @@ describe('SolFeeContext', () => {
 
 			unmount();
 
-			pending.resolve(2_000_000n);
+			pending.resolve(1_500n);
 
 			await vi.advanceTimersByTimeAsync(pollIntervalMs * 3);
 

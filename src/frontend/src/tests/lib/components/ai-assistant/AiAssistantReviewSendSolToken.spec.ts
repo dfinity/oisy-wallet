@@ -72,7 +72,7 @@ describe('AiAssistantReviewSendSolToken', () => {
 
 		expect(sendSpy).toHaveBeenCalledExactlyOnceWith({
 			destination: mockSolAddress,
-			prioritizationFee: ZERO,
+			computeUnitPrice: ZERO,
 			source: mockSolAddress2,
 			amount: parseToken({
 				value: `${sendAmount}`,

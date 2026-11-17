@@ -598,6 +598,9 @@ export interface SwapNearIntentsEvmParams
 export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
 	destinationToken: Token;
 	userAddress: SolAddress;
+	// The price per compute unit, in micro-lamports, the network fee the user reviewed was quoted at;
+	// `sendSol` signs exactly this.
+	computeUnitPrice: bigint;
 }
 
 export interface SwapNearIntentsXrpParams extends SwapNearIntentsParams {

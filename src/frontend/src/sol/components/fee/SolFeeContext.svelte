@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, type Snippet, untrack } from 'svelte';
+	import { get } from 'svelte/store';
 	import type { Token } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
@@ -9,12 +10,8 @@
 		getSolCreateAccountFee,
 		loadTokenAccount
 	} from '$sol/api/solana.api';
-	import {
-		MICROLAMPORTS_PER_LAMPORT,
-		SOLANA_LAMPORTS_PER_SIGNATURE,
-		SOLANA_SEND_REQUIRED_SIGNATURES
-	} from '$sol/constants/sol.constants';
 	import { SOL_FEE_CONTEXT_KEY, type FeeContext } from '$sol/stores/sol-fee.store';
+	import { calculateSolSendFee, getSolSendComputeUnitLimit } from '$sol/utils/fee.utils';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 	import { isAtaAddress } from '$sol/utils/sol-address.utils';
@@ -36,6 +33,25 @@
 	// tell that the stores are no longer its to write.
 	let generation = 0;
 
+	// The fee is the price over the limit the transaction is signed with, which is larger when the
+	// send opens the recipient's token account, so it is quoted again whenever either changes.
+	const quoteFee = ({
+		computeUnitPrice,
+		createsTokenAccount
+	}: {
+		computeUnitPrice: bigint;
+		createsTokenAccount: boolean;
+	}) =>
+		feeStore.setFee(
+			calculateSolSendFee({
+				computeUnitPrice,
+				computeUnitLimit: getSolSendComputeUnitLimit({
+					isSpl: isTokenSpl(token),
+					createsTokenAccount
+				})
+			})
+		);
+
 	const estimateFee = async (id: number) => {
 		if (!observe || isNullish(token)) {
 			return;
@@ -51,17 +67,14 @@
 		const addresses = isTokenSpl(token) ? [token.address] : undefined;
 
 		try {
-			const priorityFee = await estimatePriorityFee({ network: solNetwork, addresses });
+			const computeUnitPrice = await estimatePriorityFee({ network: solNetwork, addresses });
 
 			if (id !== generation) {
 				return;
 			}
 
-			const fee =
-				SOLANA_LAMPORTS_PER_SIGNATURE * BigInt(SOLANA_SEND_REQUIRED_SIGNATURES) +
-				priorityFee / MICROLAMPORTS_PER_LAMPORT;
-			feeStore.setFee(fee);
-			prioritizationFeeStore.setFee(priorityFee);
+			quoteFee({ computeUnitPrice, createsTokenAccount: nonNullish(get(ataFeeStore)) });
+			prioritizationFeeStore.setFee(computeUnitPrice);
 		} catch (_: unknown) {
 			// The poller is the retry, so a failed estimate publishes nothing and the last one stands
 			// until a later poll succeeds, rather than surfacing as an unhandled rejection every tick.
@@ -94,9 +107,19 @@
 		clearTimer();
 	});
 
+	const setAtaFee = (ataFee: bigint | undefined) => {
+		ataFeeStore.setFee(ataFee);
+
+		const computeUnitPrice = get(prioritizationFeeStore);
+
+		if (nonNullish(computeUnitPrice)) {
+			quoteFee({ computeUnitPrice, createsTokenAccount: nonNullish(ataFee) });
+		}
+	};
+
 	const updateAtaFee = async () => {
 		if (!isTokenSpl(token)) {
-			ataFeeStore.setFee(undefined);
+			setAtaFee(undefined);
 			return;
 		}
 
@@ -105,7 +128,7 @@
 		if (isNullishOrEmpty(destination)) {
 			const ataFee = await getSolCreateAccountFee(solNetwork);
 
-			ataFeeStore.setFee(ataFee);
+			setAtaFee(ataFee);
 
 			return;
 		}
@@ -115,7 +138,7 @@
 			(await isAtaAddress({ address: destination, network: solNetwork })) &&
 			(await checkIfAccountExists({ address: destination, network: solNetwork }))
 		) {
-			ataFeeStore.setFee(undefined);
+			setAtaFee(undefined);
 			return;
 		}
 
@@ -126,13 +149,13 @@
 		});
 
 		if (nonNullish(tokenAccount)) {
-			ataFeeStore.setFee(undefined);
+			setAtaFee(undefined);
 			return;
 		}
 
 		const ataFee = await getSolCreateAccountFee(solNetwork);
 
-		ataFeeStore.setFee(ataFee);
+		setAtaFee(ataFee);
 	};
 
 	$effect(() => {
