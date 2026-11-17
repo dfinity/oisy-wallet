@@ -9,6 +9,7 @@ import {
 	SWAP_SLIPPAGE_VELORA_INVALID_VALUE
 } from '$lib/constants/swap.constants';
 import {
+	SWAP_DESTINATION_TOKEN_BALANCE,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	SWAP_TWO_SWAPS_HINT,
 	SWAP_TWO_SWAPS_HINT_BUTTON,
@@ -17,6 +18,7 @@ import {
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { trackSwapTwoSwapsHint } from '$lib/services/swap-two-swaps-hint-analytics.services';
+import { balancesStore } from '$lib/stores/balances.store';
 import { COLORED_NETWORK_LOGOS_CONTEXT_KEY } from '$lib/stores/colored-network-logos.store';
 import {
 	SWAP_AMOUNTS_CONTEXT_KEY,
@@ -27,6 +29,8 @@ import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.stor
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { OptionAmount } from '$lib/types/send';
 import { SwapProvider } from '$lib/types/swap';
+import type { Token } from '$lib/types/token';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
@@ -228,6 +232,68 @@ describe('SwapForm', () => {
 
 			expect(resetSpy).toHaveBeenCalled();
 		});
+
+		describe('with a receive token that cannot be picked to pay', () => {
+			const sourceToken = { ...mockValidIcToken, enabled: true };
+			const receiveToken = { ...mockValidIcToken, id: parseTokenId('ReceiveIcTokenId') };
+
+			const renderWithReceiveToken = (destinationToken: TokenToggleable<Token>) => {
+				setupSwapAmountsStore();
+				setupIcTokenFeeStore();
+
+				mockContext.set(SWAP_CONTEXT_KEY, {
+					...initSwapContext({ sourceToken, destinationToken }),
+					sourceTokenExchangeRate: readable(10),
+					destinationTokenExchangeRate: readable(2)
+				});
+
+				return render(SwapForm, {
+					props: {
+						swapAmount: undefined,
+						receiveAmount: undefined,
+						slippageValue: undefined,
+						isSwapAmountsLoading: false,
+						onCustomValidate: vi.fn(),
+						onShowTokensList: vi.fn(),
+						onClose: vi.fn(),
+						onNext: vi.fn()
+					},
+					context: mockContext
+				});
+			};
+
+			afterEach(() => {
+				balancesStore.reset(receiveToken.id);
+			});
+
+			it('should disable it for an inactive receive token', () => {
+				const { getByTestId } = renderWithReceiveToken({ ...receiveToken, enabled: false });
+
+				expect(getByTestId(SWAP_SWITCH_TOKENS_BUTTON)).toBeDisabled();
+			});
+
+			it('should disable it for a receive token with a balance of zero', () => {
+				balancesStore.set({ id: receiveToken.id, data: { data: ZERO, certified: true } });
+
+				const { getByTestId } = renderWithReceiveToken({ ...receiveToken, enabled: true });
+
+				expect(getByTestId(SWAP_SWITCH_TOKENS_BUTTON)).toBeDisabled();
+			});
+
+			it('should enable it for an active receive token with a balance', () => {
+				balancesStore.set({ id: receiveToken.id, data: { data: 5n, certified: true } });
+
+				const { getByTestId } = renderWithReceiveToken({ ...receiveToken, enabled: true });
+
+				expect(getByTestId(SWAP_SWITCH_TOKENS_BUTTON)).toBeEnabled();
+			});
+
+			it('should enable it for an active receive token whose balance is still loading', () => {
+				const { getByTestId } = renderWithReceiveToken({ ...receiveToken, enabled: true });
+
+				expect(getByTestId(SWAP_SWITCH_TOKENS_BUTTON)).toBeEnabled();
+			});
+		});
 	});
 
 	describe('onTokensSwitch amount handling', () => {
@@ -427,6 +493,74 @@ describe('SwapForm', () => {
 				expect(destinationInput).toHaveValue('10');
 			}
 		);
+	});
+
+	describe('receive balance', () => {
+		const inactiveToken = { ...mockValidErc20Token, enabled: false };
+		const activeToken = { ...mockValidErc20Token, enabled: true };
+
+		beforeEach(() => {
+			setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
+
+			balancesStore.reset(mockValidErc20Token.id);
+		});
+
+		const sourceToken = { ...mockValidIcToken, enabled: true };
+
+		const renderWithDestination = (destinationToken: Token) => {
+			mockContext.set(SWAP_CONTEXT_KEY, {
+				...initSwapContext({ sourceToken, destinationToken }),
+				sourceTokenExchangeRate: readable(10),
+				destinationTokenExchangeRate: readable(2)
+			});
+
+			return render(SwapForm, {
+				props: {
+					swapAmount: '1',
+					receiveAmount: 2,
+					slippageValue: undefined,
+					isSwapAmountsLoading: false,
+					onCustomValidate: vi.fn(),
+					onShowTokensList: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn()
+				},
+				context: mockContext
+			});
+		};
+
+		const setBalance = (balance: bigint) =>
+			balancesStore.set({
+				id: mockValidErc20Token.id,
+				data: { data: balance, certified: true }
+			});
+
+		it('should show no balance for an inactive token whose balance was not loaded', () => {
+			const { queryByTestId } = renderWithDestination(inactiveToken);
+
+			expect(queryByTestId(SWAP_DESTINATION_TOKEN_BALANCE)).not.toBeInTheDocument();
+		});
+
+		it('should show the balance of an inactive token when it was loaded', () => {
+			setBalance(5n * 10n ** BigInt(inactiveToken.decimals));
+
+			const { getByTestId } = renderWithDestination(inactiveToken);
+
+			expect(getByTestId(SWAP_DESTINATION_TOKEN_BALANCE)).toHaveTextContent(
+				`5 ${inactiveToken.symbol}`
+			);
+		});
+
+		it('should show the balance of an active token, zero included', () => {
+			setBalance(ZERO);
+
+			const { getByTestId } = renderWithDestination(activeToken);
+
+			expect(getByTestId(SWAP_DESTINATION_TOKEN_BALANCE)).toHaveTextContent(
+				`0 ${activeToken.symbol}`
+			);
+		});
 	});
 
 	describe('swap not offered error', () => {

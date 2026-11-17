@@ -55,6 +55,7 @@ import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
+import * as exchangeServices from '$lib/services/exchange.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
 import * as nearIntentsServices from '$lib/services/near-intents.services';
 import * as oneSecSwapServices from '$lib/services/onesec-swap.services';
@@ -73,6 +74,7 @@ import {
 	fetchSwapAmountsXRP,
 	fetchVeloraDeltaSwap,
 	fetchVeloraMarketSwap,
+	loadDisabledErc20AndSplTokensExchanges,
 	loadKongSwapTokens,
 	performManualWithdraw,
 	withdrawICPSwapAfterFailedSwap,
@@ -3363,6 +3365,91 @@ describe('swap.services', () => {
 			await loadKongSwapTokens({ identity: mockIdentity, allIcrcTokens: [mockIcrcCustomToken] });
 
 			expect(get(kongSwapTokensStore)).toStrictEqual({});
+		});
+	});
+
+	describe('loadDisabledErc20AndSplTokensExchanges', () => {
+		const enabledErc20Token = { ...mockValidErc20Token, enabled: true };
+		const disabledErc20Token = {
+			...mockValidErc20Token,
+			id: parseTokenId('DisabledErc20TokenId'),
+			address: mockEthAddress2,
+			enabled: false
+		};
+		const disabledRobinhoodErc20Token = {
+			...mockValidErc20Token,
+			id: parseTokenId('DisabledRobinhoodErc20TokenId'),
+			network: ROBINHOOD_MAINNET_NETWORK,
+			enabled: false
+		};
+
+		const enabledSplToken = { ...mockValidSplToken, enabled: true };
+		const disabledSplToken = {
+			...mockValidSplToken,
+			id: parseTokenId('DisabledSplTokenId'),
+			address: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+			enabled: false
+		};
+
+		const tokens = [
+			enabledErc20Token,
+			disabledErc20Token,
+			disabledRobinhoodErc20Token,
+			enabledSplToken,
+			disabledSplToken
+		];
+
+		const ethereumExchange = { [mockEthAddress2.toLowerCase()]: { usd: 1, usd_market_cap: 1 } };
+		const robinhoodExchange = { [mockEthAddress.toLowerCase()]: { usd: 2, usd_market_cap: 2 } };
+		const splExchange = { [disabledSplToken.address]: { usd: 3, usd_market_cap: 3 } };
+
+		beforeEach(() => {
+			vi.resetAllMocks();
+
+			exchangeStore.reset();
+
+			vi.spyOn(exchangeServices, 'exchangeRateERC20ToUsd').mockImplementation(
+				({ coingeckoPlatformId }) =>
+					Promise.resolve(
+						coingeckoPlatformId === 'robinhood' ? robinhoodExchange : ethereumExchange
+					)
+			);
+			vi.spyOn(exchangeServices, 'exchangeRateSPLToUsd').mockResolvedValue(splExchange);
+		});
+
+		it('should price only the disabled tokens, per network', async () => {
+			await loadDisabledErc20AndSplTokensExchanges({ tokens });
+
+			expect(exchangeServices.exchangeRateERC20ToUsd).toHaveBeenCalledTimes(2);
+			expect(exchangeServices.exchangeRateERC20ToUsd).toHaveBeenCalledWith({
+				coingeckoPlatformId: 'ethereum',
+				contractAddresses: [{ address: mockEthAddress2, coingeckoId: 'ethereum' }]
+			});
+			expect(exchangeServices.exchangeRateERC20ToUsd).toHaveBeenCalledWith({
+				coingeckoPlatformId: 'robinhood',
+				contractAddresses: [{ address: mockValidErc20Token.address, coingeckoId: 'robinhood' }]
+			});
+			expect(exchangeServices.exchangeRateSPLToUsd).toHaveBeenCalledExactlyOnceWith([
+				disabledSplToken.address
+			]);
+		});
+
+		it('should add the prices to the exchange store', async () => {
+			await loadDisabledErc20AndSplTokensExchanges({ tokens });
+
+			expect(get(exchangeStore)).toStrictEqual({
+				...ethereumExchange,
+				...robinhoodExchange,
+				...splExchange
+			});
+		});
+
+		it('should keep the prices that loaded when another request fails', async () => {
+			vi.spyOn(exchangeServices, 'exchangeRateSPLToUsd').mockRejectedValue(new Error('down'));
+
+			await loadDisabledErc20AndSplTokensExchanges({ tokens });
+
+			expect(get(exchangeStore)).toStrictEqual({ ...ethereumExchange, ...robinhoodExchange });
 		});
 	});
 

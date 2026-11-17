@@ -222,6 +222,14 @@ export const ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES = 256;
 // LI.FI row is (`LIFI_ROW_DELETE_ATTEMPTS`).
 export const UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_ATTEMPTS = 3;
 export const UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_RETRY_DELAY_MILLIS = 1_000;
+// A BTC row whose transaction the network still does not know this long after the row's last write
+// (`updated_at_ns`) never reached it (`isBtcTransactionNeverLanded`). A broadcast reaches the
+// mempools in seconds.
+export const BTC_NEVER_LANDED_GRACE_MILLIS = 60 * SECONDS_IN_MINUTE * 1_000; // 1 hour
+// Each such row asks the network at most this often, and is failed after this many "not found"
+// answers in a row.
+export const BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS = 5 * SECONDS_IN_MINUTE * 1_000; // 5 minutes
+export const BTC_NEVER_LANDED_NOT_FOUND_ANSWERS_REQUIRED = 2;
 // Minimum delay between two `forward_evm_to_icp` re-notifications for the same
 // pending OneSec EVM→ICP row (notifying is an update call, polling is 5s).
 export const ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute

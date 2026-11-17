@@ -43,6 +43,7 @@ import {
 	type ChainFusionMintOutcome
 } from '$lib/utils/chain-fusion-swap-active-tx.utils';
 import { mockUtxo } from '$tests/mocks/btc.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
@@ -532,6 +533,7 @@ describe('chain-fusion-swap-active-tx.utils', () => {
 		it.each<{ outcome: ChainFusionBtcMintOutcome; expected: ActiveUserTransactionStatus }>([
 			{ outcome: 'minted', expected: { Succeeded: null } },
 			{ outcome: 'rejected', expected: { Failed: null } },
+			{ outcome: 'neverLanded', expected: { Failed: null } },
 			{ outcome: 'unseen', expected: { Executing: null } },
 			{ outcome: 'awaitingConfirmations', expected: { Executing: null } },
 			{ outcome: 'awaitingMint', expected: { Executing: null } }
@@ -539,8 +541,11 @@ describe('chain-fusion-swap-active-tx.utils', () => {
 			expect(chainFusionBtcMintOutcomeToStatus(outcome)).toStrictEqual(expected);
 		});
 
-		it('should describe only the failing outcome', () => {
+		it('should describe only the failing outcomes', () => {
 			expect(chainFusionBtcMintOutcomeError('rejected')).toBeDefined();
+			expect(chainFusionBtcMintOutcomeError('neverLanded')).toBe(
+				en.send.error.btc_transaction_never_landed
+			);
 
 			expect(chainFusionBtcMintOutcomeError('minted')).toBeUndefined();
 			expect(chainFusionBtcMintOutcomeError('awaitingMint')).toBeUndefined();

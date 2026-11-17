@@ -14,6 +14,10 @@ export const ONRAMPER_BASE_URL = isOnRamperDev
 	? 'https://buy.onramper.dev'
 	: 'https://buy.onramper.com';
 
+export const ONRAMPER_API_URL = isOnRamperDev
+	? 'https://api-stg.onramper.com'
+	: 'https://api.onramper.com';
+
 export const ONRAMPER_API_KEY = isOnRamperDev
 	? import.meta.env.VITE_ONRAMPER_API_KEY_DEV
 	: import.meta.env.VITE_ONRAMPER_API_KEY_PROD;

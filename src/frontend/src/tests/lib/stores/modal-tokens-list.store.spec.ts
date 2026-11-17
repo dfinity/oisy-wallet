@@ -116,6 +116,17 @@ describe('modalTokensListStore', () => {
 		expect(get(filteredTokens)).toStrictEqual([mockTokenUi2, mockTokenUi1]);
 	});
 
+	it('should keep the sort it was created with when the filters are reset', () => {
+		const { filteredTokens, resetFilters } = initModalTokensListContext({
+			sortByBalance: false,
+			tokens: [mockToken1, mockToken2]
+		});
+
+		resetFilters();
+
+		expect(get(filteredTokens)).toStrictEqual([mockToken1, mockToken2]);
+	});
+
 	it('should update tokens via setTokens', () => {
 		const { filteredTokens, setTokens } = initModalTokensListContext({
 			tokens: [mockToken1, mockToken2]
