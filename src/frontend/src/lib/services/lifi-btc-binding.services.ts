@@ -10,6 +10,9 @@ export interface LifiBtcPayoutBindingParams {
 	// and its input must equal its value. Otherwise a substituted quote could keep a genuine record
 	// while paying the deposit elsewhere.
 	deposit: LifiBtcOutput;
+	// Its `OP_RETURN` memo: a bridge that pays a shared deposit address (LayerSwap, Relay) tells the
+	// swaps apart by the id it carries.
+	memo: LifiBtcOutput;
 	// What the user reviewed: the destination chain, asset and recipient (`toAddress`).
 	request: QuoteRequestFromAmount;
 	// The minimum the review showed, which the record's minimum must reach.
