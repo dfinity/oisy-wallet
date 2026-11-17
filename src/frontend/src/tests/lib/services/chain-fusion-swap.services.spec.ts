@@ -2019,13 +2019,15 @@ describe('chain-fusion-swap.services', () => {
 				});
 			});
 
-			it('should leave out the blockhash slot when the node does not know the blockhash yet', async () => {
+			// Without a slot where the blockhash is valid, a lagging node could fail the row as expired.
+			it('should send no SOL when the node does not know the blockhash yet', async () => {
 				vi.mocked(isBlockhashValid).mockResolvedValue({ slot: BLOCKHASH_SLOT, valid: false });
 
-				await solSwap();
+				await expect(solSwap()).rejects.toMatchObject({ reason: 'unavailable' });
 
-				expect(refsOfLastCreate()).toHaveProperty('chain_fusion_sol_blockhash', BLOCKHASH);
-				expect(refsOfLastCreate()).not.toHaveProperty('chain_fusion_sol_blockhash_slot');
+				expect(createActiveUserTransaction).not.toHaveBeenCalled();
+				expect(broadcastSol).not.toHaveBeenCalled();
+				expect(enableDestinationToken).not.toHaveBeenCalled();
 			});
 
 			// Acceptance criterion 6.
