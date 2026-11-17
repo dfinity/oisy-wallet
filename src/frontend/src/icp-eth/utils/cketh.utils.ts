@@ -10,6 +10,11 @@ export const toCkErc20HelperContractAddress = (
 	minterInfo: OptionCertifiedMinterInfo
 ): OptionEthAddress => fromNullishNullable(minterInfo?.data.erc20_helper_contract_address);
 
+export const toCkDepositHelperContractAddress = (
+	minterInfo: OptionCertifiedMinterInfo
+): OptionEthAddress =>
+	fromNullishNullable(minterInfo?.data.deposit_with_subaccount_helper_contract_address);
+
 export const toCkMinterAddress = (minterInfo: OptionCertifiedMinterInfo): OptionEthAddress =>
 	fromNullishNullable(minterInfo?.data.minter_address);
 

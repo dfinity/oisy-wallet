@@ -107,6 +107,13 @@ loaded is not quoted, as for NEAR Intents). `allowBridges` from `LIFI_ALLOWED_BR
 found" on an empty address); map that to the existing insufficient-balance state. `1002` and `1008`
 mean no route from this provider.
 
+The three come back as HTTP errors with LI.FI's code in the body: `1002` and `1003` with 404, `1008`
+with 424 (2026-11-13). None is offered. The swap form already explains an insufficient balance from
+its own UTXO selection, so `swap_offer` reports `1003` as `insufficient_funds` and the other two as
+`no_route`, all three without a severity (a 424 from an EVM source stays a failed request). A BTC
+source never gets the second request of the two-swap hint. Bitcoin stays out of `toLifiChainId`, so
+it is never a LI.FI destination.
+
 No LI.FI quote is requested below **117 600 sats** (`⌈294 / LIFI_FEE_BPS⌉`). Below that, LI.FI's
 fee output exceeds its quoted fee (see [Background](#background--what-a-lifi-btc-source-quote-looks-like)),
 so check 3 would refuse every quote. The other BTC swap providers still quote those amounts.
@@ -154,6 +161,24 @@ dependency spec). Refuse the quote unless:
 6. The bridge-specific binding of [Bridge admission](#bridge-admission) passes.
 
 LI.FI's inputs are not checked: the rebuild below replaces them.
+
+As built (`decodeLifiBtcTransaction` in `lifi-swap.utils.ts`, run by `assertLifiQuote`):
+
+- Each output is given a role by its script: the deposit, an `OP_RETURN`, the change (the user's
+  address), the fee (LI.FI's pinned address), or anything else. The roles must read deposit, memo,
+  change, fee, or deposit, memo, fee. That one rule covers checks 1, 4 and 5 and the counts in 2
+  and 3. A quote whose deposit, user and fee addresses are not three different scripts is refused,
+  since the roles could not be told apart.
+- The memo must be what the backend broadcasts: value 0, a script of at most 83 bytes, and data
+  pushes only after `OP_RETURN` (`is_null_data` in `src/backend/src/bitcoin/tx_validator.rs`).
+  The script is read byte by byte as the backend reads it. bitcoinjs-lib's `isPushOnly` would
+  also accept `OP_1NEGATE` and `OP_1`…`OP_16`, which the backend refuses.
+- LI.FI's fee is the one `feeCosts` entry named `LIFI Fixed Fee`, in BTC on LI.FI's Bitcoin chain,
+  with `included: true`. Without exactly one such entry, the quote is refused.
+- That fee must be at least 294 sats (`LIFI_BTC_MIN_FEE_SATOSHIS`), even when the output matches
+  it: the backend refuses a fee output below the P2WPKH dust limit, so a smaller fee could be
+  signed but not broadcast.
+- The deposit, memo and fee outputs it returns are the ones the rebuild keeps, byte for byte.
 
 The quote's `toAmountMin` is what the review shows as the minimum received, as for other LI.FI
 routes.
@@ -215,6 +240,23 @@ change index: the `OP_RETURN` has no address, and LI.FI's scripts are kept byte 
 stays within the backend's caps: at most 4 outputs (`MAX_BROADCAST_TX_OUTPUTS`), one push-only
 `OP_RETURN` of at most 83 bytes.
 
+As built (PR 3):
+
+- `buildBtcScriptOutputsPsbt` takes the outputs as `{ script, value }`, a change index and the
+  inputs' sequence. `buildBtcSendPsbt` is now that builder with each output's address turned into its
+  script, the change last and the final sequence `0xFFFFFFFF`, so a plain send's bytes do not change.
+  Change below the dust threshold is dropped and the other outputs keep their order. For LI.FI, the
+  change index is 2 (between the memo and the fee).
+- The fee sizing takes `outputVSizes`, the vsizes of every output but the change, in place of the
+  single `recipientOutputVSize`: `estimateTransactionVSize`, `calculateFeeSatoshis`,
+  `calculateUtxoSelection` and `calculateMaxSpendableAmount`. A plain send passes its recipient's
+  size alone. `btcScriptOutputVSize` sizes an output from its script (9 bytes plus the script), which
+  covers the `OP_RETURN`. With one input, LayerSwap's layout prices at 213 vB and NEAR's at 193.
+- `prepareBtcSend` and `validateBtcSend` take an optional `outputVSizes`, which replaces the
+  recipient's size. Their `amount` is then what those outputs pay together: for LI.FI, the deposit
+  plus the fee output, so `fromAmount`. `initBtcMaxSendAmount` still prices one output, until PR 6
+  gives it LI.FI's layout.
+
 ### Execution
 
 Through `sendBtc`'s pipeline (`src/frontend/src/btc/services/btc-send.services.ts`), extended to
@@ -263,6 +305,10 @@ The fix:
   `0x` (the shape `require_xrp_refs` checks for an XRP hash), and there is no nonce.
 - Unit tests for both, including the BTC destination and the testnet source that stay refused.
 
+As built (PR 4): the txid is any 64 hex digits, in either case. A nonce is neither required nor
+checked on a BTC row, as on a Solana one. A BTC source reaches the same destinations as an EVM one:
+the pinned EVM chains and Solana mainnet.
+
 No `backend.did` change: `LifiData`'s tokens and the refs are already generic. The release must be
 live on staging before the execution PR is tried there, and in production before LI.FI from BTC is
 turned on there.
@@ -292,10 +338,11 @@ recipient and its minimum must then match the review. Candidates:
   Binding = each field matches the review. The recipient is the user's destination address, the
   asset is the reviewed token and `refundTo` is the user's BTC address. `amountIn` equals output 0,
   `minAmountOut` is at least the reviewed minimum, and the quote has not expired
-  (`isNearIntentsQuoteExpired`). The response also carries 1Click's signature, but OISY's
-  `verifyNearIntentsQuoteSignature` currently rejects it (open question 1). Until that is fixed,
-  this binding trusts 1Click's API response. That is the service OISY's direct NEAR Intents
-  provider already relies on.
+  (`isNearIntentsQuoteExpired`). The response also carries the quote 1Click signed for LI.FI, and
+  since dfinity/oisy-wallet#14642 OISY's `verifyNearIntentsQuoteSignature` verifies it (open
+  question 1). So the binding also requires that signature to verify, which authenticates the record
+  as 1Click's. It still trusts 1Click, the service OISY's direct NEAR Intents provider already
+  relies on.
 
   The lookup is keyed by output 0's address, and `amountIn` is checked against its value, so the
   record is tied to the deposit.
@@ -314,8 +361,8 @@ recipient and its minimum must then match the review. Candidates:
   Relay did not quote on 2026-11-13, so it waits until it does.
 
 Each binding trusts the bridge's own word instead of on-chain calldata, which is weaker than the
-EVM binding. For NEAR, a verifiable 1Click signature would at least authenticate that word. Whether
-that is acceptable is a pending decision, not a fact to find.
+EVM binding. For NEAR, 1Click's signature at least authenticates that word. Whether that is
+acceptable is a pending decision, not a fact to find.
 
 ---
 
@@ -326,14 +373,16 @@ reaches production before the dependency spec's PR 10 and a production release o
 
 1. `feat(frontend): LI.FI BTC-source groundwork behind a flag` — the flag, gated with
    `BTC_SEND_VIA_BACKEND_ENABLED`, empty `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]`, quote
-   parameters for a BTC source, no quote below 117 600 sats, the `1002` / `1003` / `1008` mapping,
-   and the `near` destination filter if pending decision 4 calls for it (with the NEAR token sets it
-   needs). No visible change.
+   parameters for a BTC source, no quote below 117 600 sats, the `1002` / `1003` / `1008` mapping.
+   No visible change. The `near` destination filter waits for pending decision 4, and lands with the
+   PR that admits `near` if that decision calls for it (with the NEAR token sets it needs).
 2. `feat(frontend): LI.FI BTC PSBT trust checks` — the BTC branch of `assertLifiQuote` in place of
    the Diamond check, running decode and checks 1–5 after the request checks. Also the BTC rule of
    `isLifiRouteExecutable` for the quote path and `requoteAtLeast`, the pinned fee
    address, and fixtures from real quotes of `layerswap` and `near` (including a sub-117 600-sat
-   quote whose fee output is raised to 294) and the 2026-11-02 `relaydepository` one. Dead code.
+   quote whose fee output is raised to 294). Dead code. No `relaydepository` fixture: no quote of
+   it was kept from 2026-11-02, and on 2026-11-13 it answered `1002` or `1008` from every address
+   tried. It comes with Relay's admission.
 3. `feat(frontend): rebuild a LI.FI BTC transaction with OISY's UTXO selection` — the fixed-outputs
    builder variant, fee sizing over a list of outputs including an `OP_RETURN`, and
    `validateBtcSend` and `calculateMaxSpendableAmount` taking that list too. Dead code.
@@ -396,15 +445,15 @@ reaches production before the dependency spec's PR 10 and a production release o
 ## Open questions (facts to confirm)
 
 1. **Bridge APIs and 1Click's signature.**
-   - **NEAR**: the binding fields are answered (see [Bridge admission](#bridge-admission)). Still
-     open is what 1Click signs today. OISY's `verifyNearIntentsQuoteSignature`
-     (`src/frontend/src/lib/utils/near-intents-quote.utils.ts`) still verifies the 2026-08-27
-     fixture in its spec, but returns `false` for every 1Click quote fetched on 2026-11-13: a
-     direct dry `POST /v0/quote` and both LI.FI-created quotes. Their requests now echo `appFees`,
-     `confidentiality` and `depositMode` (and `insured` on the dry quote). Adding any combination of
-     those to the signed payload still does not verify. OISY's direct NEAR Intents swaps refuse an
-     unverified quote (`near-intents.services.ts`, `swap.services.ts`), so this is tracked as its own
-     fix, outside this spec.
+   - **NEAR**: answered. The binding fields are in [Bridge admission](#bridge-admission). 1Click
+     signs the canonical asset id but echoes the one the request named: a BTC origin is echoed as
+     `nep141:btc.omft.near` and signed as `1cs_v1:btc:native:coin`. dfinity/oisy-wallet#14642 made
+     `verifyNearIntentsQuoteSignature` (`src/frontend/src/lib/utils/near-intents-quote.utils.ts`)
+     try those aliases. On `main` after it (2026-11-13), the quote `/v0/status` returns for a fresh
+     LI.FI `near` quote (1 000 000 sats to ETH, deposit address `bc1qlmjtn5…`) verifies, and so do
+     those of both earlier LI.FI-created quotes (`bc1qcpx606…`, `bc1qhv9xkg…`), read again. The
+     fresh one also matched the binding: `amountIn` 997 500 equal to output 0, and `minAmountOut`
+     equal to LI.FI's `toAmountMin`.
    - **LayerSwap**: does its public API return the recipient and the payout for the memo's id,
      keyless, before the deposit exists?
    - **Relay**: as for LayerSwap, once it quotes again.
@@ -426,7 +475,8 @@ reaches production before the dependency spec's PR 10 and a production release o
 
 1. **Trusting a bridge API for the binding** (see [Bridge admission](#bridge-admission)), or keeping
    BTC as a LI.FI source off until a binding without that trust exists. For NEAR, the trusted party
-   is 1Click, which OISY's direct NEAR Intents provider already relies on.
+   is 1Click, which OISY's direct NEAR Intents provider already relies on, and its signature
+   authenticates the record.
 2. **Rebuild or sign as is.** Proposed: rebuild (above). Signing as is would be simpler but fails
    whenever LI.FI picks a UTXO the backend refuses.
 3. **Miner fee.** Proposed: OISY's own rate. Alternative: keep LI.FI's, if open question 2 says it

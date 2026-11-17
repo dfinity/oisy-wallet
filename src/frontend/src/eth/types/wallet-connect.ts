@@ -1,4 +1,5 @@
 import type { UniswapSwap } from '$eth/types/uniswap';
+import type { Token } from '$lib/types/token';
 import type { Principal } from '@icp-sdk/core/principal';
 import type { TypedDataDomain, TypedDataField } from 'ethers/hash';
 
@@ -42,16 +43,44 @@ export type WalletConnectEthCall =
 	// Calldata addressed to the ckETH helper contract that is not a deposit to the user's own
 	// principal. OISY does not sign it.
 	| { type: 'ckEthDepositRefused' }
-	// A `deposit(bytes32)` on a network with a ckETH helper contract, while OISY has not yet confirmed
-	// the helper's address and so cannot tell whether the deposit converts ETH, or for whom. Held
-	// until it can.
+	// A deposit (`deposit(bytes32)`, or `depositEth` or `depositErc20`) on a network with ckETH helper
+	// contracts, while OISY has not yet confirmed the helper's address and so cannot tell whether the
+	// deposit converts anything, or for whom. Held until it can.
 	| { type: 'ckEthHelperUnconfirmed' }
+	// `depositEth` or `depositErc20` to the ckETH minter's helper contract that deposits to a principal
+	// and a subaccount, of a token the minter converts: what the wallet pays and the account the ck
+	// token is minted to.
+	| { type: 'ckDeposit'; deposit: WalletConnectEthCkDeposit }
+	// A deposit to that helper contract that OISY does not sign: one it cannot read, or one of a token
+	// the minter does not convert.
+	| { type: 'ckDepositRefused' }
 	// `execute` on a Uniswap Universal Router OISY pins for the request's network, every command of
 	// which OISY reads: the swap it makes, stated from what the router enforces.
 	| { type: 'uniswapSwap'; swap: UniswapSwap }
 	// The selector is carried so the review can name the call it could not decode. It is `undefined`
 	// when the calldata is too short to hold one.
 	| { type: 'unknown'; selector: string | undefined };
+
+/**
+ * A deposit to the ckETH minter's helper contract that deposits to a principal and a subaccount.
+ *
+ * The minter mints the ck token of what is deposited to the account the call names, whoever that
+ * is, so the account is stated as the calldata names it and the review tells the user's own account
+ * apart from any other.
+ */
+export interface WalletConnectEthCkDeposit {
+	// What the wallet pays: the network's native token for `depositEth`, the ERC-20 for `depositErc20`.
+	token: Token;
+	amount: bigint;
+	// The ck token the minter mints for it: the twin of the native token, or the ckERC-20 the minter
+	// names for the ERC-20.
+	ckTokenSymbol: string;
+	owner: Principal;
+	// `undefined` for the owner's default account.
+	subaccount?: Uint8Array;
+	// Whether the account is the default account of the signed-in user, the one OISY shows.
+	ownAccount: boolean;
+}
 
 export interface WalletConnectEthSignTypedDataV4 {
 	domain: TypedDataDomain;
