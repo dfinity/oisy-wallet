@@ -883,6 +883,21 @@ describe('solana.api', () => {
 			});
 		});
 
+		it('should read at the given commitment', async () => {
+			await expect(
+				getSolBalance({
+					address: mockSolAddress,
+					network: SolanaNetworks.mainnet,
+					minContextSlot: 345_000_000n,
+					commitment: 'finalized'
+				})
+			).resolves.toBe(mockBalance);
+			expect(mockGetBalance).toHaveBeenCalledExactlyOnceWith(address(mockSolAddress), {
+				commitment: 'finalized',
+				minContextSlot: 345_000_000n
+			});
+		});
+
 		it('should throw error when RPC call fails', async () => {
 			mockGetBalance.mockReturnValueOnce({
 				send: () => Promise.reject(mockError)

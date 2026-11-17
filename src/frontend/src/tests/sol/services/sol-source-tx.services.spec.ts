@@ -221,8 +221,24 @@ describe('sol-source-tx.services', () => {
 				network: SolanaNetworks.mainnet
 			});
 
-		it('should read the balance no earlier than the slot the transaction landed in', async () => {
-			vi.mocked(getSignatureStatus).mockResolvedValue({ slot: 210n, status: confirmedStatus });
+		const finalizedStatus: NonNullable<SolanaSignatureStatus> = {
+			...confirmedStatus,
+			confirmationStatus: 'finalized'
+		};
+
+		const processedStatus: NonNullable<SolanaSignatureStatus> = {
+			...confirmedStatus,
+			confirmationStatus: 'processed'
+		};
+
+		const failedStatus: NonNullable<SolanaSignatureStatus> = {
+			...finalizedStatus,
+			err: 'AccountInUse',
+			status: { Err: 'AccountInUse' }
+		};
+
+		it('should read the balance at finalized commitment, no earlier than the slot of the finalized transaction', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValue({ slot: 210n, status: finalizedStatus });
 			vi.mocked(getSolBalance).mockResolvedValue(20_000_000n);
 
 			await expect(readBalance()).resolves.toBe(20_000_000n);
@@ -234,8 +250,21 @@ describe('sol-source-tx.services', () => {
 			expect(getSolBalance).toHaveBeenCalledExactlyOnceWith({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
-				minContextSlot: confirmedStatus.slot
+				minContextSlot: finalizedStatus.slot,
+				commitment: 'finalized'
 			});
+		});
+
+		it.each([
+			{ name: 'only processed', status: processedStatus },
+			{ name: 'only confirmed', status: confirmedStatus },
+			{ name: 'finalized with an error', status: failedStatus }
+		])('should read no balance for a transaction $name', async ({ status }) => {
+			vi.mocked(getSignatureStatus).mockResolvedValue({ slot: 210n, status });
+
+			await expect(readBalance()).resolves.toBeUndefined();
+
+			expect(getSolBalance).not.toHaveBeenCalled();
 		});
 
 		it('should read no balance while the status read finds no status for the transaction', async () => {
