@@ -386,7 +386,9 @@ turned on there.
 ### Bridge admission
 
 A bridge joins `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]` only once OISY can bind, before
-signing, **who receives the payout and how much at least**, for that bridge.
+signing, **who receives the payout and how much at least**, for that bridge. The one exception is
+Relay, admitted on 2026-11-17 with its recipient unchecked (see the Relay paragraph below, and
+pending decision 1).
 
 Every binding is **tied to output 0**, the deposit being signed. The bridge's record is found by
 output 0's deposit address, or returns it, and its input amount equals output 0's value. Otherwise
@@ -565,7 +567,10 @@ reaches production before the dependency spec's PR 10 and a production release o
 - A row whose transaction never reaches the network is settled as failed, as Chain Fusion and
   Liquidium rows are.
 - No bridge is offered whose payout recipient and minimum OISY cannot bind before signing, and every
-  binding is tied to the deposit output being signed.
+  binding is tied to the deposit output being signed. The one exception is Relay's recipient, which
+  is accepted unchecked (pending decision 1). A Relay quote is signed only when it takes that
+  deposit for the memo's order and pays the reviewed asset at least the displayed minimum, and when
+  Relay is waiting for that deposit.
 - A quote whose PSBT has no change output is rebuilt with LI.FI's fee output intact.
 - The backend accepts a BTC-source LI.FI row, and still refuses a BTC destination and a testnet
   source.
