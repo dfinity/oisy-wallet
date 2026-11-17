@@ -4,14 +4,18 @@
 	import { erc4626CustomTokensLoading } from '$eth/derived/erc4626.derived';
 	import { allVaults } from '$eth/derived/vaults.derived';
 	import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
+	import EarningTopRateCard from '$lib/components/earning/EarningTopRateCard.svelte';
 	import EarningsListSkeletons from '$lib/components/earning/EarningsListSkeletons.svelte';
 	import LiquidiumPositionCard from '$lib/components/liquidium/LiquidiumPositionCard.svelte';
 	import NoStakePlaceholder from '$lib/components/stake/NoStakePlaceholder.svelte';
 	import VaultCard from '$lib/components/vaults/VaultCard.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { AppPath, VAULT_PARAM } from '$lib/constants/routes.constants';
+	import { earningTopRates, earningUninvestedUsd } from '$lib/derived/earning.derived';
 	import { liquidiumPortfolio, liquidiumPortfolioLoading } from '$lib/derived/liquidium.derived';
 	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
@@ -65,6 +69,15 @@
 			: supplyReserves.filter(({ asset }) => asset.toLowerCase().includes(filter.toLowerCase()))
 	);
 
+	// The top rates the user has no position in yet, under their positions; the search filters them
+	// by token like the positions.
+	let topRatesToDisplay = $derived(
+		$earningTopRates.filter(
+			({ hasPosition, symbol }) =>
+				!hasPosition && (filter === '' || symbol.toLowerCase().includes(filter.toLowerCase()))
+		)
+	);
+
 	// One combined list sorted by USD value (highest first), so Autopilot stakes and Liquidium
 	// supplies interleave by size rather than sitting in separate groups.
 	let positionsToDisplay = $derived(
@@ -105,6 +118,20 @@
 					{:else}
 						<LiquidiumPositionCard reserve={position.reserve} />
 					{/if}
+				</div>
+			{/each}
+		{/if}
+
+		{#if topRatesToDisplay.length > 0}
+			<h4 class="mt-3">{$i18n.earning.text.top_rates}</h4>
+
+			{#each topRatesToDisplay as topRate (topRate.id)}
+				<div class="overflow-hidden rounded-xl" transition:fade>
+					<EarningTopRateCard
+						sourceLocation={PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARNING_TAB}
+						{topRate}
+						uninvestedUsd={$earningUninvestedUsd}
+					/>
 				</div>
 			{/each}
 		{/if}

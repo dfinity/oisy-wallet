@@ -1,5 +1,7 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import * as erc4626Derived from '$eth/derived/erc4626.derived';
 import { allVaults } from '$eth/derived/vaults.derived';
 import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
@@ -11,15 +13,19 @@ import {
 	EARNING_CARD_SKELETON,
 	EARNING_NO_POSITION_PLACEHOLDER
 } from '$lib/constants/test-ids.constants';
+import * as earningDerived from '$lib/derived/earning.derived';
 import * as networkDerived from '$lib/derived/network.derived';
 import { userNetworks } from '$lib/derived/user-networks.derived';
+import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 import { liquidiumStore } from '$lib/stores/liquidium.store';
 import { tokenListStore } from '$lib/stores/token-list.store';
+import type { EarningTopRate } from '$lib/types/earning';
 import { LendBorrowProvider } from '$lib/types/lend-borrow';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { Vault } from '$lib/types/vaults';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
-import { render } from '@testing-library/svelte';
+import en from '$tests/mocks/i18n.mock';
+import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 vi.mock(import('$eth/constants/harvest-autopilots.constants'), async (importOriginal) => {
@@ -414,5 +420,99 @@ describe('EarningsList', () => {
 
 		expect(queryByTestId(new RegExp(`^${EARNING_CARD_SKELETON}`))).not.toBeInTheDocument();
 		expect(getByTestId(EARNING_NO_POSITION_PLACEHOLDER)).toBeInTheDocument();
+	});
+
+	describe('top rates', () => {
+		const topRate = (overrides: Partial<EarningTopRate>): EarningTopRate => ({
+			id: 'liquidium-pool-usdt',
+			providerId: 'liquidium',
+			token: USDT_TOKEN,
+			symbol: 'USDT',
+			networkIcons: [],
+			networkNames: [],
+			apy: 6.47,
+			earningPotentialUsd: 64.7,
+			hasPosition: false,
+			action: vi.fn().mockResolvedValue(undefined),
+			...overrides
+		});
+
+		const mockTopRates = (topRates: EarningTopRate[]) => {
+			vi.spyOn(earningDerived, 'earningTopRates', 'get').mockReturnValue(readable(topRates));
+			vi.spyOn(earningDerived, 'earningUninvestedUsd', 'get').mockReturnValue(readable(1_000));
+		};
+
+		const usdc = topRate({
+			id: 'harvest-autopilot-0x0d87',
+			providerId: 'harvest-autopilot',
+			token: USDC_TOKEN,
+			symbol: 'USDC',
+			apy: 5.75
+		});
+
+		it('lists the top rates without a position under the positions', () => {
+			mockAllVaultsStore([toVault({ token: mockAutopilotToken })]);
+			mockTopRates([topRate({}), usdc]);
+
+			const { container, getByText } = render(EarningsList);
+
+			expect(getByText(en.earning.text.top_rates)).toBeInTheDocument();
+			expect(container).toHaveTextContent(
+				new RegExp(`Autopilot Vault.*${en.earning.text.top_rates}.*USDT.*USDC`)
+			);
+		});
+
+		it('leaves out a top rate the user has a position in', () => {
+			mockAllVaultsStore([toVault({ token: mockAutopilotToken })]);
+			mockTopRates([topRate({ hasPosition: true }), usdc]);
+
+			const { container } = render(EarningsList);
+
+			expect(container).toHaveTextContent('USDC');
+			expect(container).not.toHaveTextContent('USDT');
+		});
+
+		it('lists them under the empty-tab message when there are no positions', () => {
+			mockAllVaultsStore([]);
+			mockTopRates([topRate({})]);
+
+			const { container, getByTestId } = render(EarningsList);
+
+			expect(getByTestId(EARNING_NO_POSITION_PLACEHOLDER)).toBeInTheDocument();
+			expect(container).toHaveTextContent(new RegExp(`${en.earning.text.top_rates}.*USDT`));
+		});
+
+		it('hides the heading when no top rate is left', () => {
+			mockAllVaultsStore([]);
+			mockTopRates([topRate({ hasPosition: true })]);
+
+			const { queryByText } = render(EarningsList);
+
+			expect(queryByText(en.earning.text.top_rates)).not.toBeInTheDocument();
+		});
+
+		it('filters the top rates by the search', () => {
+			tokenListStore.set({ filter: 'usdc' });
+			mockAllVaultsStore([]);
+			mockTopRates([topRate({}), usdc]);
+
+			const { container } = render(EarningsList);
+
+			expect(container).toHaveTextContent('USDC');
+			expect(container).not.toHaveTextContent('USDT');
+		});
+
+		it('opens a top rate with the Earning tab as its source', async () => {
+			const action = vi.fn().mockResolvedValue(undefined);
+
+			mockAllVaultsStore([]);
+			mockTopRates([topRate({ action })]);
+
+			const { getByRole } = render(EarningsList);
+
+			await fireEvent.click(getByRole('button'));
+
+			expect(action).toHaveBeenCalledExactlyOnceWith(PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARNING_TAB);
+		});
 	});
 });

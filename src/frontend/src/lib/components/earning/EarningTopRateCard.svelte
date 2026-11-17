@@ -9,7 +9,7 @@
 	import { LIQUIDIUM_PROVIDER_ID } from '$lib/constants/liquidium.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import type { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { EarningTopRate } from '$lib/types/earning';
@@ -20,9 +20,11 @@
 		topRate: EarningTopRate;
 		// The user's balance outside any earning position, which the yearly amount is based on.
 		uninvestedUsd: number;
+		// Where the row is shown, for the analytics of what it opens.
+		sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
 	}
 
-	let { topRate, uninvestedUsd }: Props = $props();
+	let { topRate, uninvestedUsd, sourceLocation }: Props = $props();
 
 	let { token, symbol, providerId, networkIcons, networkNames, apy, earningPotentialUsd } =
 		$derived(topRate);
@@ -38,7 +40,7 @@
 </script>
 
 <div class="flex w-full flex-col">
-	<LogoButton onClick={() => topRate.action(PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN)}>
+	<LogoButton onClick={() => topRate.action(sourceLocation)}>
 		{#snippet logo()}
 			<span class="flex items-end sm:mr-2">
 				<TokenLogo color="white" data={token} logoSize={isMobile() ? 'sm' : 'lg'} />
