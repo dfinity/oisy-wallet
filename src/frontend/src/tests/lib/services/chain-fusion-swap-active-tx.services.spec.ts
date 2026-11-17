@@ -1164,6 +1164,92 @@ describe('chain-fusion-swap-active-tx.services', () => {
 			});
 		});
 
+		// After a mint that left the minimum, another tab may have moved the row on to a newer deposit.
+		describe('settling on the deposit it follows', () => {
+			const knownDeposit = () =>
+				solMintTx({ refs: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42' } });
+
+			beforeEach(() => {
+				// A status a test queued but did not read must not reach the next test.
+				vi.mocked(depositSolStatus).mockReset();
+				vi.mocked(depositSolStatus).mockResolvedValue({
+					Minted: { block_index: 12n, minted_amount: MINTED_AMOUNT }
+				});
+			});
+
+			it('should read the row back before settling it', async () => {
+				const tx = knownDeposit();
+
+				await poll([tx]);
+
+				expect(reloadActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: tx.id
+				});
+				expect(vi.mocked(reloadActiveUserTransaction).mock.invocationCallOrder[0]).toBeLessThan(
+					vi.mocked(applyActiveUserTransactionPollUpdate).mock.invocationCallOrder[0]
+				);
+				expect(lastUpdate()).toStrictEqual(
+					expect.objectContaining({ status: { Succeeded: null } })
+				);
+			});
+
+			it.each([
+				{ name: 'Minted', answer: { Minted: { block_index: 12n, minted_amount: MINTED_AMOUNT } } },
+				{ name: 'Quarantined', answer: { Quarantined: { signature: SOL_SIGNATURE } } }
+			])(
+				'should not settle on $name once the row moved on to a newer deposit',
+				async ({ answer }) => {
+					vi.mocked(depositSolStatus).mockResolvedValue(answer);
+					vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce(
+						solMintTx({ refs: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '43' } })
+					);
+
+					await poll([knownDeposit()]);
+
+					expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+				}
+			);
+
+			it('should not settle a row settled elsewhere', async () => {
+				const tx = knownDeposit();
+
+				vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce({
+					...tx,
+					status: { Succeeded: null }
+				});
+
+				await poll([tx]);
+
+				expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			it('should delete a row the backend no longer holds, without settling it', async () => {
+				const tx = knownDeposit();
+
+				vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce(undefined);
+
+				await poll([tx]);
+
+				expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+				expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: tx.id
+				});
+			});
+
+			it('should not read the row back for an answer that keeps it in flight', async () => {
+				vi.mocked(depositSolStatus).mockResolvedValue({
+					Queued: { sweepable_amount: 49_109_120n }
+				});
+
+				await poll([knownDeposit()]);
+
+				expect(reloadActiveUserTransaction).not.toHaveBeenCalled();
+			});
+		});
+
 		it('should follow the latest deposit a full watchlist still names', async () => {
 			vi.mocked(watchDepositAddress).mockRejectedValue(
 				new CkSolWatchDepositAddressError({

@@ -568,10 +568,14 @@ const pollChainFusionSolMint = async ({
 	 */
 	const applyDepositStatus = async ({
 		depositId,
-		learned
+		learned,
+		onlyWhileFollowed = false
 	}: {
 		depositId: DepositSolId;
 		learned: Partial<Record<ChainFusionExternalRefKey, string>>;
+		// Set for the deposit this tab's copy follows: the row is settled on it only while the
+		// backend's copy still follows it too.
+		onlyWhileFollowed?: boolean;
 	}): Promise<boolean> => {
 		let status = await depositSolStatus({
 			identity,
@@ -612,9 +616,32 @@ const pollChainFusionSolMint = async ({
 		}
 
 		const candidate = toChainFusionSolMintStatus(status);
+		const settles = nonNullish(candidate) && !('Executing' in candidate);
+
+		// After a mint that left the minimum, another tab may have moved the row on to the newer
+		// deposit, whose refs settling on this one would replace. So the row settles only while the
+		// backend's copy, read now, is open and follows this deposit; the read also puts that copy in
+		// the store.
+		if (settles && onlyWhileFollowed) {
+			const current = await reloadCkSolMintRow({ identity, tx });
+
+			if (nonNullish(current) && isTerminalActiveUserTransaction(current)) {
+				lastWatchDepositAddressMs.delete(tx.id);
+			}
+
+			if (
+				isNullish(current) ||
+				isTerminalActiveUserTransaction(current) ||
+				toChainFusionExternalRefsMap(current.external_refs)[
+					CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID
+				] !== `${depositId}`
+			) {
+				return false;
+			}
+		}
 
 		// A terminal row leaves the pending set, so its throttle entry has no reader left.
-		if (nonNullish(candidate) && !('Executing' in candidate)) {
+		if (settles) {
 			lastWatchDepositAddressMs.delete(tx.id);
 		}
 
@@ -634,7 +661,11 @@ const pollChainFusionSolMint = async ({
 	};
 
 	if (nonNullish(knownDepositId)) {
-		const goesOn = await applyDepositStatus({ depositId: knownDepositId, learned: {} });
+		const goesOn = await applyDepositStatus({
+			depositId: knownDepositId,
+			learned: {},
+			onlyWhileFollowed: true
+		});
 
 		if (!goesOn) {
 			return;
