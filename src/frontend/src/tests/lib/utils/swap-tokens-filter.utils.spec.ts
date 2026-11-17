@@ -931,8 +931,7 @@ describe('a ck source does not reach its twin symbol on another EVM network', ()
 	it('offers only the Ethereum network in the destination network filter', () => {
 		const reachable = networksWithSupport({
 			networks: [ETHEREUM_NETWORK, BASE_NETWORK, ARBITRUM_MAINNET_NETWORK],
-			tokens: enabledEthTokens,
-			supportedData
+			supportedTokens: filterSwapTokens({ tokens: enabledEthTokens, supportedData })
 		});
 
 		expect(reachable).toStrictEqual([ETHEREUM_NETWORK.id]);
