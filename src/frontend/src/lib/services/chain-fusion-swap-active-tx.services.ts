@@ -489,9 +489,10 @@ const pollChainFusionSolMint = async ({
 			certified: false
 		});
 
-		// `Minted` and `Quarantined` close the row for good and free the account, so they are taken
-		// only from a certified answer, not from a single replica's.
-		if ('Minted' in status || 'Quarantined' in status) {
+		// `Minted` and `Quarantined` close the row for good and free the account, and `Dropped` moves
+		// the row on to a newer deposit for good, so they are taken only from a certified answer, not
+		// from a single replica's.
+		if ('Minted' in status || 'Quarantined' in status || 'Dropped' in status) {
 			status = await depositSolStatus({
 				identity,
 				minterCanisterId,
