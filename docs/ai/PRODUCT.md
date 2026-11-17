@@ -1185,6 +1185,8 @@ Each top rate shows what the user's balance outside any earning position would e
 
 The Earn page lists them in a **Top rates** box above the earning opportunities, and leaves the box out when there are none. A row shows the token with every network it applies to, the provider and the APY. On the right it shows the yearly amount and, below it, the total not invested that amount is based on. Tapping a Liquidium row opens the Liquidium supply dialog on that token (see the link below); tapping an Autopilot row opens that vault's page.
 
+The Earning tab on Assets lists the top rates the user has no position in yet (no Liquidium supply in the pool, none of the vault's tokens), under a **Top rates** heading below their positions, or below the empty-tab message when they have none. The tab's search filters them by token, as it does the positions. Tapping a row works as on the Earn page, with the Earning tab as the source (`earning_tab`).
+
 ### Liquidium supply link
 
 A link to the Liquidium page can name an asset to supply, such as `/providers/liquidium/?supply=USDT`. Once Liquidium's markets have loaded, the page opens its supply dialog on that asset, on the network where the user holds the most of it. When they hold none of it, the dialog opens on the token picker, showing the asset's networks. An asset the user cannot supply opens the dialog without a token. The page then removes the link from the address, so going back or reloading does not open the dialog again.
