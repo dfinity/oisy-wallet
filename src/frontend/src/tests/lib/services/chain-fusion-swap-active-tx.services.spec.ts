@@ -741,42 +741,106 @@ describe('chain-fusion-swap-active-tx.services', () => {
 					});
 				});
 
-				it('should keep the row in flight and ask the minter to watch again while the address holds the minimum', async () => {
+				// The row moved past the mint of deposit 42, which left the minimum on the address.
+				const movedPast = () =>
+					solMintTx({
+						refs: {
+							[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH]: BLOCKHASH,
+							[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH_SLOT]: '345000000',
+							[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42',
+							[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_LATEST_DEPOSIT_ID]: '42'
+						}
+					});
+
+				it('should raise the floor to a mint that left the minimum, and look for a newer deposit from the next poll on', async () => {
 					vi.mocked(readSolBalanceAfterTx).mockResolvedValue(ckSolInfo.minimum_deposit_amount);
 
 					await poll([followingDeposit()]);
 
-					expect(watchDepositAddress).toHaveBeenCalledExactlyOnceWith({
-						identity: mockIdentity,
-						minterCanisterId: CKSOL_MINTER
-					});
+					expect(watchDepositAddress).not.toHaveBeenCalled();
 					expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalledWith(
 						expect.objectContaining({
 							update: expect.objectContaining({ status: { Succeeded: null } })
 						})
 					);
-					expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
-				});
-
-				it('should take the newer deposit that sweeps what the mint left', async () => {
-					vi.mocked(readSolBalanceAfterTx).mockResolvedValue(ckSolInfo.minimum_deposit_amount);
-					vi.mocked(watchDepositAddress).mockResolvedValue(detected(43n));
-					vi.mocked(depositSolStatus)
-						.mockResolvedValueOnce(minted)
-						.mockResolvedValueOnce(minted)
-						.mockResolvedValueOnce({ Queued: { sweepable_amount: 20_000_000n } });
-
-					await poll([followingDeposit()]);
-
-					expect(depositSolStatus).toHaveBeenNthCalledWith(
-						3,
-						expect.objectContaining({ depositId: 43n })
-					);
 					expect(lastUpdate()).toStrictEqual({
 						status: { Executing: null },
 						externalRefs: expect.arrayContaining([
-							{ key: 'chain_fusion_cksol_deposit', value: '43' }
+							{ key: 'chain_fusion_cksol_deposit', value: '42' },
+							{ key: 'chain_fusion_cksol_latest', value: '42' }
 						])
+					});
+				});
+
+				it('should not raise the floor once another tab moved the row past the mint', async () => {
+					vi.mocked(readSolBalanceAfterTx).mockResolvedValue(ckSolInfo.minimum_deposit_amount);
+					vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce(movedPast());
+
+					await poll([followingDeposit()]);
+
+					expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+				});
+
+				it('should not close the row on the mint once another tab moved it past', async () => {
+					vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce(movedPast());
+
+					await poll([followingDeposit()]);
+
+					expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+				});
+
+				describe('once the row moved past that mint', () => {
+					it('should take a newer deposit, after a reload too, without reading the old mint again', async () => {
+						vi.mocked(watchDepositAddress).mockResolvedValue(detected(43n));
+						vi.mocked(depositSolStatus).mockResolvedValue({
+							Queued: { sweepable_amount: 20_000_000n }
+						});
+
+						await poll([movedPast()]);
+
+						expect(depositSolStatus).toHaveBeenCalledExactlyOnceWith(
+							expect.objectContaining({ depositId: 43n })
+						);
+						expect(lastUpdate()).toStrictEqual({
+							status: { Executing: null },
+							externalRefs: expect.arrayContaining([
+								{ key: 'chain_fusion_cksol_deposit', value: '43' }
+							])
+						});
+					});
+
+					it('should close on the old mint once the minter names no newer deposit and the address holds less than the minimum', async () => {
+						vi.mocked(watchDepositAddress).mockResolvedValue(watching(42n));
+
+						await poll([movedPast()]);
+
+						expect(readSolBalanceAfterTx).toHaveBeenCalledOnce();
+						expect(vi.mocked(readSolBalanceAfterTx).mock.invocationCallOrder[0]).toBeLessThan(
+							vi.mocked(watchDepositAddress).mock.invocationCallOrder[0]
+						);
+						expect(depositSolStatus).toHaveBeenCalledWith(
+							expect.objectContaining({ depositId: 42n, certified: true })
+						);
+						expect(lastUpdate()).toStrictEqual({
+							status: { Succeeded: null },
+							externalRefs: expect.arrayContaining([
+								{ key: 'chain_fusion_received_amount', value: '0.0471' }
+							])
+						});
+					});
+
+					it.each([
+						{ name: 'still holds the minimum', balance: ckSolInfo.minimum_deposit_amount },
+						{ name: 'cannot be read yet', balance: undefined }
+					])('should keep looking while the address $name', async ({ balance }) => {
+						vi.mocked(watchDepositAddress).mockResolvedValue(watching(42n));
+						vi.mocked(readSolBalanceAfterTx).mockResolvedValue(balance);
+
+						await poll([movedPast()]);
+
+						expect(watchDepositAddress).toHaveBeenCalledOnce();
+						expect(depositSolStatus).not.toHaveBeenCalled();
+						expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
 					});
 				});
 
@@ -799,7 +863,8 @@ describe('chain-fusion-swap-active-tx.services', () => {
 					expect(lastUpdate()).toStrictEqual({
 						status: { Executing: null },
 						externalRefs: expect.arrayContaining([
-							{ key: 'chain_fusion_cksol_deposit', value: '42' }
+							{ key: 'chain_fusion_cksol_deposit', value: '42' },
+							{ key: 'chain_fusion_cksol_latest', value: '42' }
 						])
 					});
 					expect(lastUpdate()?.externalRefs).not.toContainEqual(

@@ -2,7 +2,7 @@ import { getSignatureStatus, getSolBalance, isBlockhashValid } from '$sol/api/so
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import { toSolSourceTxOutcome, type SolSourceTxOutcome } from '$sol/utils/sol-source-tx.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * Counts how many consecutive polls have observed a row's source transaction as expired. A single
@@ -93,9 +93,11 @@ export const readSolSourceTxOutcome = async ({
 };
 
 /**
- * The lamports an address holds, read at a slot where a transaction has landed, so the balance
- * counts what that transaction moved. A node not that far yet refuses to answer, and the read
- * throws. `undefined` while the status read finds no status for the transaction.
+ * The lamports an address holds once a transaction is finalized, read at finalized commitment no
+ * earlier than its slot. Finalized blocks are on the one fork that stays, so the balance counts what
+ * that transaction moved, which a processed status or a confirmed read cannot promise. `undefined`
+ * until the status read finds the transaction finalized without an error. A node not that far yet
+ * refuses to answer, and the read throws.
  */
 export const readSolBalanceAfterTx = async ({
 	address,
@@ -108,9 +110,14 @@ export const readSolBalanceAfterTx = async ({
 }): Promise<bigint | undefined> => {
 	const { status } = await getSignatureStatus({ signature, network });
 
-	if (isNullish(status)) {
+	if (isNullish(status) || status.confirmationStatus !== 'finalized' || nonNullish(status.err)) {
 		return;
 	}
 
-	return await getSolBalance({ address, network, minContextSlot: status.slot });
+	return await getSolBalance({
+		address,
+		network,
+		minContextSlot: status.slot,
+		commitment: 'finalized'
+	});
 };
