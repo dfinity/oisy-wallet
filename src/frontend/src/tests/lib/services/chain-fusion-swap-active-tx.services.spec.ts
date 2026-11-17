@@ -723,6 +723,7 @@ describe('chain-fusion-swap-active-tx.services', () => {
 		it('should follow the next deposit once the known one was dropped', async () => {
 			vi.mocked(depositSolStatus)
 				.mockResolvedValueOnce({ Dropped: { signature: SOL_SIGNATURE } })
+				.mockResolvedValueOnce({ Dropped: { signature: SOL_SIGNATURE } })
 				.mockResolvedValueOnce({ Queued: { sweepable_amount: 49_109_120n } });
 			vi.mocked(watchDepositAddress).mockResolvedValue(detected(43n));
 
@@ -731,7 +732,7 @@ describe('chain-fusion-swap-active-tx.services', () => {
 			]);
 
 			expect(depositSolStatus).toHaveBeenNthCalledWith(
-				2,
+				3,
 				expect.objectContaining({ depositId: 43n })
 			);
 			expect(lastUpdate()).toStrictEqual({
@@ -748,8 +749,51 @@ describe('chain-fusion-swap-active-tx.services', () => {
 				solMintTx({ refs: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42' } })
 			]);
 
-			expect(depositSolStatus).toHaveBeenCalledOnce();
+			expect(depositSolStatus).toHaveBeenCalledTimes(2);
 			expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+		});
+
+		it('should look for a newer deposit only once a certified call confirms the drop', async () => {
+			vi.mocked(depositSolStatus).mockResolvedValue({ Dropped: { signature: SOL_SIGNATURE } });
+			vi.mocked(watchDepositAddress).mockResolvedValue(watching(42n));
+
+			await poll([
+				solMintTx({ refs: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42' } })
+			]);
+
+			expect(depositSolStatus).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				minterCanisterId: CKSOL_MINTER,
+				depositId: 42n,
+				certified: false
+			});
+			expect(depositSolStatus).toHaveBeenNthCalledWith(2, {
+				identity: mockIdentity,
+				minterCanisterId: CKSOL_MINTER,
+				depositId: 42n,
+				certified: true
+			});
+			expect(watchDepositAddress).toHaveBeenCalledOnce();
+		});
+
+		it('should keep the known deposit when the certified call answers a drop as minted', async () => {
+			vi.mocked(depositSolStatus)
+				.mockResolvedValueOnce({ Dropped: { signature: SOL_SIGNATURE } })
+				.mockResolvedValueOnce({ Minted: { block_index: 12n, minted_amount: MINTED_AMOUNT } });
+			vi.mocked(watchDepositAddress).mockResolvedValue(detected(43n));
+
+			await poll([
+				solMintTx({ refs: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42' } })
+			]);
+
+			expect(depositSolStatus).toHaveBeenCalledTimes(2);
+			expect(watchDepositAddress).not.toHaveBeenCalled();
+			expect(lastUpdate()).toStrictEqual({
+				status: { Succeeded: null },
+				externalRefs: expect.arrayContaining([
+					{ key: 'chain_fusion_received_amount', value: '0.0471' }
+				])
+			});
 		});
 
 		it('should follow the quarantined deposit the minter names in its refusal', async () => {
