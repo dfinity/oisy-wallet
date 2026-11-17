@@ -8,6 +8,7 @@ import {
 	TRACK_COUNT_SWAP_ERROR,
 	TRACK_COUNT_SWAP_SUBMITTED
 } from '$lib/constants/analytics.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE,
 	SWAP_LIFI_UNVERIFIED_ROUTE,
@@ -31,6 +32,7 @@ import {
 } from '$lib/types/errors';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import { SwapProvider, type ChainFusionSwapDetails, type SwapMappedResult } from '$lib/types/swap';
+import { estimatePriorityFee } from '$sol/api/solana.api';
 import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -511,9 +513,24 @@ describe('SwapSolWizard', () => {
 				swapDetails,
 				swapId: expect.any(String),
 				usdSourceValue: '0.5',
+				prioritizationFee: ZERO,
 				enableDestinationToken: expect.any(Function)
 			});
 			expect(onClose).toHaveBeenCalledOnce();
+		});
+
+		it('should send the transfer with the priority fee the user reviewed', async () => {
+			vi.mocked(estimatePriorityFee).mockResolvedValue(4_000n);
+
+			const { getByText } = renderChainFusion();
+
+			await vi.runOnlyPendingTimersAsync();
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(mockFetchChainFusionSolSwap).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ prioritizationFee: 4_000n })
+			);
 		});
 
 		it.each<{ reason: ChainFusionSolDepositRefusal; message: string }>([

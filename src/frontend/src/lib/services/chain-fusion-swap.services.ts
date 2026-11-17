@@ -1305,6 +1305,7 @@ export const fetchChainFusionSolSwap = async ({
 	swapDetails: { solDeposit },
 	swapId,
 	usdSourceValue,
+	prioritizationFee,
 	enableDestinationToken
 }: {
 	identity: Identity;
@@ -1316,6 +1317,8 @@ export const fetchChainFusionSolSwap = async ({
 	swapDetails: ChainFusionSwapDetails;
 	swapId: string;
 	usdSourceValue?: string;
+	// The priority fee the user reviewed with the network fee, so the transfer goes out as reviewed.
+	prioritizationFee: bigint;
 	enableDestinationToken?: () => Promise<void>;
 }): Promise<void> => {
 	const { minterCanisterId } = destinationToken;
@@ -1419,7 +1422,7 @@ export const fetchChainFusionSolSwap = async ({
 			identity,
 			token: sourceToken,
 			amount,
-			prioritizationFee: ZERO,
+			prioritizationFee,
 			destination: watched.address,
 			source: userAddress,
 			progress: (step) => {
