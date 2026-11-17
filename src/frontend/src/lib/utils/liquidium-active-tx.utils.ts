@@ -6,6 +6,7 @@ import type {
 } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
 import { LIQUIDIUM_PROVIDER_ID } from '$lib/constants/liquidium.constants';
+import type { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 import {
 	LIQUIDIUM_EXTERNAL_REF_KEYS,
 	type LiquidiumActionKey,
@@ -74,18 +75,21 @@ export const liquidiumTrackingMetadata = ({
 	action,
 	token,
 	tokenAmount,
-	error
+	error,
+	sourceLocation
 }: {
 	action: LiquidiumActionKey;
 	token: string;
 	tokenAmount: string;
 	error?: string;
+	sourceLocation?: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
 }): Record<string, string> => ({
 	dApp: LIQUIDIUM_PROVIDER_ID,
 	action,
 	token,
 	tokenAmount,
-	...(nonNullish(error) ? { error } : {})
+	...(nonNullish(error) ? { error } : {}),
+	...(nonNullish(sourceLocation) ? { source_location: sourceLocation } : {})
 });
 
 // Terminal-row metadata, read off the `external_refs`/`data` snapshot so it

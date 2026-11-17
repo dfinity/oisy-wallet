@@ -29,6 +29,7 @@
 	import { ZERO } from '$lib/constants/app.constants';
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import type { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 	import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
 	import { WizardStepsLiquidiumSupply } from '$lib/enums/wizard-steps';
 	import { executeLiquidiumSupply } from '$lib/services/liquidium-supply.services';
@@ -50,6 +51,7 @@
 		inflowFeeUnavailable?: boolean;
 		currentStep?: WizardStep;
 		onSelectToken?: () => void;
+		sourceLocation?: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
@@ -63,6 +65,7 @@
 		inflowFeeUnavailable,
 		currentStep,
 		onSelectToken,
+		sourceLocation,
 		onClose,
 		onNext,
 		onBack
@@ -183,6 +186,7 @@
 				amount: amountBaseUnits,
 				inflowFee,
 				displayAmount: `${amount}`,
+				sourceLocation,
 				progress: (step) => (supplyProgressStep = step),
 				broadcast: async ({ target, amount: transferAmount, beforeBroadcast }) =>
 					await sendBtc({

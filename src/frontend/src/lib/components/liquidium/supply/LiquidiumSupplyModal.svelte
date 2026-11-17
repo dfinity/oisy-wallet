@@ -13,6 +13,7 @@
 	import { liquidiumSupplyWizardSteps } from '$lib/config/lend-borrow.config';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 	import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
 	import { WizardStepsLiquidiumSupply } from '$lib/enums/wizard-steps';
 	import { estimateLiquidiumInflowFee } from '$lib/services/liquidium-supply.services';
@@ -32,9 +33,11 @@
 
 	interface Props {
 		market?: LiquidiumMarket;
+		// Where the user started the supply, for the analytics.
+		sourceLocation?: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
 	}
 
-	let { market }: Props = $props();
+	let { market, sourceLocation = PLAUSIBLE_EVENT_SOURCE_LOCATIONS.LIQUIDIUM }: Props = $props();
 
 	// Seeded from the initial prop only; later switches happen through the picker.
 	// svelte-ignore state_referenced_locally
@@ -162,6 +165,7 @@
 				onClose={close}
 				onNext={modal.next}
 				onSelectToken={enterTokensList}
+				{sourceLocation}
 				bind:amount
 				bind:supplyProgressStep
 			/>
@@ -175,6 +179,7 @@
 				onClose={close}
 				onNext={modal.next}
 				onSelectToken={enterTokensList}
+				{sourceLocation}
 				bind:amount
 				bind:supplyProgressStep
 			/>
@@ -188,6 +193,7 @@
 				onClose={close}
 				onNext={modal.next}
 				onSelectToken={enterTokensList}
+				{sourceLocation}
 				bind:amount
 				bind:supplyProgressStep
 			/>
