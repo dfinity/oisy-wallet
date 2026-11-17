@@ -60,9 +60,9 @@
 	{:else if badge?.type === 'network' && nonNullish(network)}
 		<div
 			class="col-start-1 row-start-1 translate-x-1 place-self-end"
-			class:scale-60={logoSize === 'xs' || logoSize === 'sm'}
-			class:translate-x-2={logoSize === 'xs' || logoSize === 'sm'}
-			class:translate-y-1={logoSize === 'xs' || logoSize === 'sm'}
+			class:scale-60={logoSize === 'xs'}
+			class:translate-x-2={logoSize === 'xs'}
+			class:translate-y-1={logoSize === 'xs'}
 		>
 			<NetworkLogo {color} {network} testId={`network-${badgeTestId}`} />
 		</div>

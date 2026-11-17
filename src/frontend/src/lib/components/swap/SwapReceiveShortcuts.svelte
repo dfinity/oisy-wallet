@@ -250,12 +250,16 @@ that stays on that network. -->
 
 {#snippet otherNetworkIcon()}
 	{#if nonNullish(onlyOtherNetworkToken)}
-		<TokenLogo
-			badge={{ type: 'network' }}
-			color="white"
-			data={onlyOtherNetworkToken}
-			logoSize="sm"
-		/>
+		<!-- The compact badge `TokenLogo` gives its `xs` logos, like the Swap icon's above: at a 36 px
+		logo its full-size badge is too large. -->
+		<span class="grid">
+			<span class="col-start-1 row-start-1">
+				<TokenLogo color="white" data={onlyOtherNetworkToken} logoSize="sm" />
+			</span>
+			<span class="col-start-1 row-start-1 translate-x-2 translate-y-1 scale-60 place-self-end">
+				<NetworkLogo color="white" network={onlyOtherNetworkToken.network} />
+			</span>
+		</span>
 	{:else if nonNullish(otherNetwork?.group.icon)}
 		<Logo color="white" size="sm" src={otherNetwork.group.icon} />
 	{:else}
