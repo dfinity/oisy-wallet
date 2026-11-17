@@ -10,6 +10,7 @@ import {
 	getSendParamsGas,
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash,
+	getWalletConnectEthCkDeposit,
 	getWalletConnectEthCkEthDeposit,
 	hasUnreviewableTypedData,
 	isEthSignTypedDataMethod,
@@ -97,6 +98,7 @@ export const send = ({
 						unknown_destination,
 						cketh_deposit_refused,
 						cketh_helper_unconfirmed,
+						ck_deposit_refused,
 						unexpected_processing_request
 					}
 				}
@@ -150,6 +152,31 @@ export const send = ({
 							err instanceof WalletConnectEthCkEthHelperUnconfirmedError
 								? cketh_helper_unconfirmed
 								: cketh_deposit_refused
+					}
+				});
+				return { success: false };
+			}
+
+			// The same for a deposit to the minter's helper that deposits to a subaccount, which the review
+			// refuses or holds through this check.
+			try {
+				getWalletConnectEthCkDeposit({
+					to: firstParam.to,
+					data: firstParam.data,
+					value: amount,
+					networkId: sourceNetwork.id,
+					minterInfo,
+					principal: identity?.getPrincipal(),
+					nativeToken: token,
+					tokens
+				});
+			} catch (err: unknown) {
+				toastsError({
+					msg: {
+						text:
+							err instanceof WalletConnectEthCkEthHelperUnconfirmedError
+								? cketh_helper_unconfirmed
+								: ck_deposit_refused
 					}
 				});
 				return { success: false };
