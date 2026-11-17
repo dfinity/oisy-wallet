@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, onMount, tick } from 'svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
@@ -31,6 +31,31 @@
 
 	const { sourceToken, receiveSupportedData } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
+	let root: HTMLDivElement;
+
+	onMount(() => {
+		root.querySelector<HTMLElement>('button:not([disabled])')?.focus({ preventScroll: true });
+	});
+
+	const returnToForm = async (token?: Token) => {
+		// The dialog survives step changes, including Get Token rebuilding the swap wizard.
+		const dialog = root.closest('[role="dialog"]');
+
+		if (nonNullish(token)) {
+			onSelectToken(token);
+		} else {
+			onClose();
+		}
+
+		await tick();
+
+		if (dialog?.isConnected) {
+			dialog
+				.querySelector<HTMLElement>('[data-swap-receive-area] button:not([disabled])')
+				?.focus({ preventScroll: true });
+		}
+	};
+
 	// The networks of "<symbol> on another network", read as the shortcut reads them.
 	let otherNetwork = $derived(
 		isNullish($sourceToken)
@@ -57,35 +82,37 @@
 			});
 		}
 
-		onSelectToken(token);
+		void returnToForm(token);
 	};
 </script>
 
-<div
-	class="mb-4 flex flex-col overflow-y-auto overscroll-contain sm:max-h-[26rem]"
-	data-tid={SWAP_RECEIVE_NETWORK_LIST}
->
-	{#if nonNullish(otherNetwork)}
-		{@const { group, tokens } = otherNetwork}
-		<List noPadding>
-			{#each tokens as token (token.id)}
-				{@const symbol = getTokenDisplaySymbol(token)}
-				<ListItem styleClass="first-of-type:border-t-1">
-					<ModalTokensListItem onClick={() => select(token)} {token}>
-						{#snippet label()}{token.network.name}{/snippet}
+<div bind:this={root}>
+	<div
+		class="mb-4 flex flex-col overflow-y-auto overscroll-contain sm:max-h-[26rem]"
+		data-tid={SWAP_RECEIVE_NETWORK_LIST}
+	>
+		{#if nonNullish(otherNetwork)}
+			{@const { group, tokens } = otherNetwork}
+			<List noPadding>
+				{#each tokens as token (token.id)}
+					{@const symbol = getTokenDisplaySymbol(token)}
+					<ListItem styleClass="first-of-type:border-t-1">
+						<ModalTokensListItem onClick={() => select(token)} {token}>
+							{#snippet label()}{token.network.name}{/snippet}
 
-						{#snippet detail()}
-							{symbol === group.symbol
-								? symbol
-								: replacePlaceholders($i18n.swap.text.as_token, { $symbol: symbol })}
-						{/snippet}
-					</ModalTokensListItem>
-				</ListItem>
-			{/each}
-		</List>
-	{/if}
+							{#snippet detail()}
+								{symbol === group.symbol
+									? symbol
+									: replacePlaceholders($i18n.swap.text.as_token, { $symbol: symbol })}
+							{/snippet}
+						</ModalTokensListItem>
+					</ListItem>
+				{/each}
+			</List>
+		{/if}
+	</div>
+
+	<ButtonGroup>
+		<ButtonBack fullWidth onclick={() => returnToForm()} />
+	</ButtonGroup>
 </div>
-
-<ButtonGroup>
-	<ButtonBack fullWidth onclick={onClose} />
-</ButtonGroup>

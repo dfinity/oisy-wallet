@@ -44,11 +44,10 @@ import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
-import { readable, writable } from 'svelte/store';
+import { readable, writable, type Readable } from 'svelte/store';
 
 vi.mock('$lib/services/swap-receive-shortcut-analytics.services', () => ({
 	trackSwapReceiveShortcut: vi.fn()
@@ -145,25 +144,30 @@ describe('SwapReceiveShortcuts', () => {
 	const renderShortcuts = ({
 		sourceToken = BASE_USDC_TOKEN,
 		receiveSupportedData = fromBaseUsdc,
-		keptDestinationToken
+		keptDestinationToken,
+		receiveSupportedDataStore
 	}: {
 		sourceToken?: Token;
 		// `null` for providers that have not answered yet.
 		receiveSupportedData?: SwapSupportedTokensData | null;
 		keptDestinationToken?: Token;
+		receiveSupportedDataStore?: Readable<SwapSupportedTokensData | undefined>;
 	} = {}) =>
 		render(SwapReceiveShortcuts, {
 			props: {
 				sourceToken,
 				navigation: { showReceiveList, showMoveStep },
-				emptyField: createMockSnippet(emptyFieldTestId),
+				emptyField: createRawSnippet(() => ({
+					render: () => `<button data-tid="${emptyFieldTestId}" type="button">Select</button>`
+				})),
 				onDestinationSet
 			},
 			context: mockContextMap([
 				[
 					SWAP_CONTEXT_KEY,
 					{
-						receiveSupportedData: readable(receiveSupportedData ?? undefined),
+						receiveSupportedData:
+							receiveSupportedDataStore ?? readable(receiveSupportedData ?? undefined),
 						keptDestinationToken: readable(keptDestinationToken),
 						setDestinationToken
 					}
@@ -402,6 +406,70 @@ describe('SwapReceiveShortcuts', () => {
 		await waitFor(() => expect(getByTestId(SWAP_RECEIVE_SHORTCUT_SAME_NETWORK)).toHaveFocus());
 	});
 
+	it.each([
+		{ testId: SWAP_RECEIVE_SHORTCUT_SAME_NETWORK, removed: 'same' },
+		{ testId: SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK, removed: 'other' },
+		{ testId: SWAP_RECEIVE_SHORTCUT_ANY_TOKEN, removed: 'any' },
+		{ testId: SWAP_RECEIVE_SHORTCUT_KEEP, removed: 'keep' }
+	])(
+		'should retain focus when $testId disappears while the card stays visible',
+		async ({ testId, removed }) => {
+			const receiveSupportedDataStore = writable(fromBaseUsdc);
+			const { getByTestId, queryByTestId } = renderShortcuts({
+				receiveSupportedDataStore,
+				keptDestinationToken: SOLANA_USDC_TOKEN
+			});
+
+			getByTestId(testId).focus();
+
+			receiveSupportedDataStore.set({
+				...fromBaseUsdc,
+				evm:
+					removed === 'same'
+						? listed([ETHEREUM_USDC_TOKEN.address.toLowerCase(), native(ETHEREUM_TOKEN)])
+						: removed === 'other'
+							? listed([native(BASE_ETH_TOKEN), native(ETHEREUM_TOKEN)])
+							: removed === 'any'
+								? listed([native(BASE_ETH_TOKEN), ETHEREUM_USDC_TOKEN.address.toLowerCase()])
+								: fromBaseUsdc.evm,
+				sol: removed === 'other' || removed === 'keep' ? nothing : fromBaseUsdc.sol
+			});
+
+			await waitFor(() => expect(queryByTestId(testId)).not.toBeInTheDocument());
+
+			expect(getByTestId(SWAP_RECEIVE_SHORTCUTS)).toContainElement(
+				document.activeElement as HTMLElement
+			);
+		}
+	);
+
+	it('should leave focus on a remaining shortcut when provider data changes', async () => {
+		const receiveSupportedDataStore = writable(fromBaseUsdc);
+		const { getByTestId } = renderShortcuts({ receiveSupportedDataStore });
+		const button = getByTestId(SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK);
+		button.focus();
+
+		receiveSupportedDataStore.set({ ...fromBaseUsdc, sol: nothing });
+
+		await waitFor(() => expect(button).toHaveFocus());
+	});
+
+	it('should restore focus to the plain field when no shortcuts remain', async () => {
+		const receiveSupportedDataStore = writable(fromBaseUsdc);
+		const { getByTestId } = renderShortcuts({ receiveSupportedDataStore });
+		getByTestId(SWAP_RECEIVE_SHORTCUT_SAME_NETWORK).focus();
+
+		receiveSupportedDataStore.set({
+			icp: nothing,
+			evm: nothing,
+			sol: nothing,
+			btc: nothing,
+			xrp: nothing
+		});
+
+		await waitFor(() => expect(getByTestId(emptyFieldTestId)).toHaveFocus());
+	});
+
 	it('should show the plain receive field when the pay token reaches nothing', () => {
 		const { getByTestId, queryByTestId } = renderShortcuts({
 			receiveSupportedData: { icp: nothing, evm: nothing, sol: nothing, btc: nothing, xrp: nothing }
@@ -424,6 +492,20 @@ describe('SwapReceiveShortcuts', () => {
 			expect(queryByTestId(SWAP_RECEIVE_SHORTCUT_KEEP)).not.toBeInTheDocument();
 		});
 
+		it('should restore the current listed metadata for a kept token', async () => {
+			const currentToken = { ...SOLANA_USDC_TOKEN, name: 'Updated USDC metadata', enabled: true };
+			vi.spyOn(swapDerived, 'allSwapUniverseTokens', 'get').mockReturnValue(
+				readable(universe.map((token) => (token.id === currentToken.id ? currentToken : token)))
+			);
+
+			const { getByTestId } = renderShortcuts({ keptDestinationToken: SOLANA_USDC_TOKEN });
+			await fireEvent.click(getByTestId(SWAP_RECEIVE_SHORTCUT_KEEP));
+
+			expect(setDestinationToken).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining(currentToken)
+			);
+		});
+
 		it('should put the cleared receive token back', async () => {
 			const { getByTestId } = renderShortcuts({ keptDestinationToken: SOLANA_USDC_TOKEN });
 
@@ -438,7 +520,9 @@ describe('SwapReceiveShortcuts', () => {
 
 			await fireEvent.click(keep);
 
-			expect(setDestinationToken).toHaveBeenCalledExactlyOnceWith(SOLANA_USDC_TOKEN);
+			expect(setDestinationToken).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ id: SOLANA_USDC_TOKEN.id })
+			);
 			expect(onDestinationSet).toHaveBeenCalledOnce();
 			expect(trackSwapReceiveShortcut).toHaveBeenCalledExactlyOnceWith({
 				action: 'keep',

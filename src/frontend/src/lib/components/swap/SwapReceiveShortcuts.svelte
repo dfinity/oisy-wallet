@@ -76,18 +76,25 @@
 		nonNullish(sameNetwork) || nonNullish(otherNetwork) || nonNullish(anyToken)
 	);
 
+	// Only a token the list still offers: the providers may have answered again since it was cleared.
+	let keptToken = $derived(
+		nonNullish($keptDestinationToken)
+			? listed?.tokens.find(({ id }) => id === $keptDestinationToken.id)
+			: undefined
+	);
+
 	let focusWasInside = false;
 
 	// The plain field and the card swap in place when the providers answer: focus on one moves to the
 	// other instead of falling out of the modal. Only focus already here moves, so nothing is taken.
 	$effect.pre(() => {
-		[visible];
+		[visible, sameNetwork, otherNetwork, anyToken, keptToken];
 
 		focusWasInside = root?.contains(document.activeElement) ?? false;
 	});
 
 	$effect(() => {
-		[visible];
+		[visible, sameNetwork, otherNetwork, anyToken, keptToken];
 
 		if (focusWasInside && !(root?.contains(document.activeElement) ?? false)) {
 			root?.querySelector<HTMLElement>('button:not([disabled])')?.focus({ preventScroll: true });
@@ -119,14 +126,6 @@
 					otherNetworkProviders
 				})
 			: {}
-	);
-
-	// Only a token the list still offers: the providers may have answered again since it was cleared.
-	let keptToken = $derived(
-		nonNullish($keptDestinationToken) &&
-			(listed?.tokens ?? []).some(({ id }) => id === $keptDestinationToken.id)
-			? $keptDestinationToken
-			: undefined
 	);
 
 	const track = ({

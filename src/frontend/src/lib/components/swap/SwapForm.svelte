@@ -424,7 +424,7 @@
 				<SwapSwitchTokensButton disabled={isSwitchTokensButtonDisabled()} {onTokensSwitch} />
 			</div>
 
-			<div bind:this={receiveArea} class="mb-2">
+			<div bind:this={receiveArea} class="mb-2" data-swap-receive-area>
 				{#if nonNullish(receiveShortcuts) && nonNullish($sourceToken) && isNullish($destinationToken)}
 					<SwapReceiveShortcuts
 						emptyField={receiveTokenInput}

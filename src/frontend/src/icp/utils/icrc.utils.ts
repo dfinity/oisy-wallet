@@ -6,6 +6,7 @@ import {
 	ICONFUCIUS_LEDGER_CANISTER_ID,
 	TCYCLES_LEDGER_CANISTER_ID
 } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
+import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type {
 	IcCkInterface,
@@ -112,7 +113,10 @@ export const mapIcrcToken = ({
 	const indexCanisterId = rest.indexCanisterId ?? customTokenSymbol?.indexCanisterId;
 
 	return {
-		id: parseTokenId(symbol),
+		// A built-in token can already be selected before its ledger metadata loads.
+		id:
+			IC_BUILTIN_TOKENS.find((token) => token.ledgerCanisterId === ledgerCanisterId)?.id ??
+			parseTokenId(symbol),
 		network: mapIcNetwork(ledgerCanisterId),
 		standard: customTokenSymbol?.standard ?? { code: 'icrc' },
 		symbol,

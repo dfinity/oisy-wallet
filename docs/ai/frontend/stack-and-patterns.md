@@ -30,6 +30,11 @@ Do not invent a second key next to one that already exists.
   It therefore survives a store reload, and is re-created only on a full reset
   — `resetAll()` after a failed certified update, or the page reload on
   sign-out.
+- Built-in ICRC tokens keep the ID from `IC_BUILTIN_TOKENS` when
+  `mapIcrcToken` loads their ledger metadata, matched by ledger canister ID.
+  This preserves picks made before the custom-token store loads. Restoring a
+  kept swap destination uses the current listed entry for that ID, so updated
+  metadata is retained.
 - **Compare the object, never its description.** `TokenId.description` _is_ the
   ticker — it comes from `parseTokenId(symbol)`
   ([`$eth/utils/erc20.utils.ts`](../../../src/frontend/src/eth/utils/erc20.utils.ts),

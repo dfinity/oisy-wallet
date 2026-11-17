@@ -21,11 +21,13 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SwapReceiveNetworkList from '$lib/components/swap/SwapReceiveNetworkList.svelte';
 import { SWAP_RECEIVE_NETWORK_LIST } from '$lib/constants/test-ids.constants';
 import * as crossChainNetworksDerived from '$lib/derived/cross-chain-networks.derived';
+import * as exchangesDerived from '$lib/derived/exchange.derived';
 import * as networksDerived from '$lib/derived/networks.derived';
 import * as swapDerived from '$lib/derived/swap.derived';
 import * as tokensDerived from '$lib/derived/tokens.derived';
 import { trackSwapReceiveShortcut } from '$lib/services/swap-receive-shortcut-analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
+import { privacyModeStore } from '$lib/stores/settings.store';
 import type {
 	SwapSupportedTokensData,
 	SwapSupportedTokensInfo
@@ -38,7 +40,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
-import { fireEvent, render, within } from '@testing-library/svelte';
+import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 vi.mock('$lib/services/swap-receive-shortcut-analytics.services', () => ({
@@ -188,6 +190,7 @@ describe('SwapReceiveNetworkList', () => {
 
 	afterEach(() => {
 		balancesStore.reset(SOLANA_USDC_TOKEN.id);
+		privacyModeStore.reset({ key: 'privacy-mode' });
 
 		vi.restoreAllMocks();
 	});
@@ -245,6 +248,29 @@ describe('SwapReceiveNetworkList', () => {
 
 		expect(listed[4]).toHaveTextContent('45.1');
 		expect(listed[3]).not.toHaveTextContent(/\d/);
+	});
+
+	it('should mask token and fiat balances when privacy mode is enabled', async () => {
+		balancesStore.set({ id: SOLANA_USDC_TOKEN.id, data: { data: 45_100_000n, certified: true } });
+		vi.spyOn(exchangesDerived, 'exchanges', 'get').mockReturnValue(
+			readable({
+				[SOLANA_USDC_TOKEN.id]: { usd: 1 }
+			})
+		);
+
+		vi.spyOn(exchangesDerived, 'exchangeNotInitialized', 'get').mockReturnValue(readable(false));
+		const { getByRole } = renderList();
+		const row = getByRole('button', { name: /Solana/ });
+
+		expect(row).toHaveTextContent('45.1');
+		expect(within(row).getAllByRole('status')).toHaveLength(2);
+
+		privacyModeStore.set({ key: 'privacy-mode', value: { enabled: true } });
+
+		await waitFor(() => expect(row).not.toHaveTextContent('45.1'));
+
+		expect(within(row).getAllByRole('status')).toHaveLength(1);
+		expect(row.querySelector('output svg')).toBeInTheDocument();
 	});
 
 	it('should set the picked token and track the pick', async () => {

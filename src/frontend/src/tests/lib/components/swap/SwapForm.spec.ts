@@ -1,7 +1,9 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import type { IcToken } from '$icp/types/ic-token';
+import { mapIcrcToken } from '$icp/utils/icrc.utils';
 import SwapForm from '$lib/components/swap/SwapForm.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import {
@@ -46,7 +48,7 @@ import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.moc
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { act, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { get, readable } from 'svelte/store';
+import { get, readable, writable } from 'svelte/store';
 
 vi.mock('$lib/services/swap-two-swaps-hint-analytics.services', () => ({
 	trackSwapTwoSwapsHint: vi.fn()
@@ -1368,10 +1370,50 @@ describe('SwapForm', () => {
 
 			await fireEvent.click(getByTestId(SWAP_RECEIVE_SHORTCUT_KEEP));
 
-			expect(get(destinationToken)).toBe(otherIcToken);
+			expect(get(destinationToken)).toEqual(expect.objectContaining(otherIcToken));
 			expect(get(keptDestinationToken)).toBeUndefined();
 
 			await waitFor(() => expect(getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]).toHaveFocus());
+		});
+
+		it('should clear and restore a built-in SNS token after its ledger metadata loads', async () => {
+			const [builtin] = IC_BUILTIN_TOKENS;
+			const universe = writable([{ ...builtin, enabled: false }, payToken]);
+			vi.spyOn(swapDerived, 'allSwapUniverseTokens', 'get').mockReturnValue(universe);
+			mockContext.set(SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY, navigation);
+			setupSwapAmountsStore();
+			const { destinationToken } = setupSwapContext({
+				destinationToken: builtin,
+				receiveSupportedData: {
+					...reachOtherIcToken,
+					icp: { coverage: 'all', supportedTokenIds: new Set([builtin.ledgerCanisterId]) }
+				}
+			});
+			const onShowTokensList = vi.fn();
+			const { getAllByTestId, getByTestId } = renderForm(onShowTokensList);
+			const loaded = mapIcrcToken({
+				ledgerCanisterId: builtin.ledgerCanisterId,
+				category: builtin.category,
+				metadata: [
+					['icrc1:symbol', { Text: builtin.symbol }],
+					['icrc1:name', { Text: `${builtin.name} updated` }],
+					['icrc1:decimals', { Nat: BigInt(builtin.decimals) }],
+					['icrc1:fee', { Nat: builtin.fee }]
+				]
+			});
+			if (loaded === undefined) {
+				throw new Error('Expected valid ledger metadata');
+			}
+			universe.set([{ ...loaded, enabled: true }, payToken]);
+
+			await fireEvent.click(getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]);
+
+			expect(onShowTokensList).not.toHaveBeenCalled();
+			expect(get(destinationToken)).toBeUndefined();
+
+			await fireEvent.click(getByTestId(SWAP_RECEIVE_SHORTCUT_KEEP));
+
+			expect(get(destinationToken)).toEqual(expect.objectContaining(loaded));
 		});
 
 		it('should show the plain receive field without a pay token', () => {

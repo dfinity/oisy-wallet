@@ -2,10 +2,12 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
+	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconGixCheck from '$lib/components/icons/IconGixCheck.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { Token } from '$lib/types/token';
@@ -96,13 +98,15 @@
 	{#snippet titleEnd()}
 		{#if showBalance}
 			<div class="ml-1 min-w-12 text-nowrap">
-				<TokenBalance data={token} />
+				<TokenBalance data={token} hideBalance={$isPrivacyMode}>
+					{#snippet privacyBalance()}<IconDots styleClass="pb-4" />{/snippet}
+				</TokenBalance>
 			</div>
 		{/if}
 	{/snippet}
 
 	{#snippet descriptionEnd()}
-		{#if showBalance}
+		{#if showBalance && !$isPrivacyMode}
 			<ExchangeTokenValue data={token} />
 		{/if}
 	{/snippet}
