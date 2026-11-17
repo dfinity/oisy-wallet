@@ -84,7 +84,7 @@ export const toLifiTokenAddress = (token: Token): string | undefined => {
  * `LIFI_BTC_SWAP_ENABLED` and `BTC_SEND_VIA_BACKEND_ENABLED` are both on. Bitcoin is never a LI.FI
  * destination, so `toLifiChainId` and `toLifiTokenAddress` leave it out.
  */
-const isLifiBtcSource = (token: Token): boolean =>
+export const isLifiBtcSource = (token: Token): boolean =>
 	LIFI_BTC_SWAP_ENABLED &&
 	BTC_SEND_VIA_BACKEND_ENABLED &&
 	isNetworkIdBTCMainnet(token.network.id) &&
@@ -98,10 +98,15 @@ const isLifiBtcSource = (token: Token): boolean =>
  * The routing sends a pair to the Solana registry whenever either side is Solana, so the EVM entry
  * quotes EVM → EVM (`{ evm: 'any' }`) and the Solana entry EVM → Solana and Solana → Solana
  * (`{ sol: 'any' }`). A Solana source gets nothing from the EVM entry: Solana → EVM is not quoted.
+ * The BTC entry quotes native BTC toward both (`isLifiBtcSource`); Bitcoin is never a destination.
  */
 export const buildLifiSupportedDestinations =
-	(registry: 'evm' | 'sol'): GetSupportedDestinationsFn =>
+	(registry: 'evm' | 'sol' | 'btc'): GetSupportedDestinationsFn =>
 	({ sourceToken }) => {
+		if (registry === 'btc') {
+			return isLifiBtcSource(sourceToken) ? { evm: 'any', sol: 'any' } : undefined;
+		}
+
 		// The same tests the quote request applies, so no destination is offered for a source LI.FI
 		// is never asked about.
 		if (

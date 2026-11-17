@@ -23,6 +23,7 @@ import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
 import { fetchChainFusionBtcSwap } from '$lib/services/chain-fusion-swap.services';
+import { fetchLifiBtcSwap } from '$lib/services/lifi-btc-swap.services';
 import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 import { fetchNearIntentsBtcSwap } from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
@@ -35,6 +36,7 @@ import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
@@ -57,6 +59,13 @@ vi.mock('$btc/services/btc-send.services', async (importOriginal) => ({
 vi.mock('$lib/services/swap.services', () => ({
 	enableSwapDestinationToken: vi.fn(),
 	fetchNearIntentsBtcSwap: vi.fn()
+}));
+
+vi.mock('$lib/services/lifi-btc-swap.services', () => ({
+	fetchLifiBtcSwap: vi.fn(),
+	// The BTC provider registry imports these.
+	fetchLifiBtcSwapQuote: vi.fn(),
+	lifiBtcSupportedTokens: vi.fn()
 }));
 
 vi.mock('$lib/services/provider-agreements.services', () => ({
@@ -95,6 +104,28 @@ describe('SwapBtcWizard', () => {
 		receiveAmount: 1_000_000n,
 		swapDetails: mockNearIntentsQuoteResponse,
 		type: undefined
+	};
+
+	// Its own selection, priced for LI.FI's deposit, memo and fee: not the loader's.
+	const lifiSelection = {
+		utxosFee: { ...mockUtxosFee, feeSatoshis: 2_130n },
+		outputVSizes: [43, 29, 31]
+	};
+
+	const lifiOffer: SwapMappedResult = {
+		provider: SwapProvider.LIFI,
+		receiveAmount: 1_000_000n,
+		receiveOutMinimum: 990_000n,
+		swapDetails: mockLifiBtcLayerswapQuote,
+		request: {
+			fromChain: 20000000000001,
+			toChain: 1,
+			fromToken: 'bitcoin',
+			toToken: '0x0000000000000000000000000000000000000000',
+			fromAddress: mockBtcAddress,
+			fromAmount: '1000000'
+		},
+		btcSelection: lifiSelection
 	};
 
 	const baseProps = {
@@ -640,6 +671,119 @@ describe('SwapBtcWizard', () => {
 			);
 			expect(analytics.trackEvent).toHaveBeenCalledWith(
 				expect.objectContaining({ name: TRACK_COUNT_SWAP_ERROR })
+			);
+		});
+	});
+
+	describe('LI.FI execution', () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+			vi.mocked(validateBtcSend).mockResolvedValue(undefined);
+			vi.mocked(fetchLifiBtcSwap).mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		const renderExecution = (offer: SwapMappedResult = lifiOffer) => {
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+
+			const { context } = createContext(offer);
+
+			const result = render(SwapBtcWizard, {
+				props: {
+					...baseProps,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack
+				},
+				context
+			});
+
+			return { ...result, onClose, onBack };
+		};
+
+		const confirm = async (getByText: (text: string) => HTMLElement) => {
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+		};
+
+		it("sends through LI.FI with the offer's own selection, not the loader's", async () => {
+			const { getByText } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(fetchLifiBtcSwap).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					swapAmount: '0.01',
+					userAddress: mockBtcAddress,
+					network: 'mainnet',
+					offer: lifiOffer,
+					utxosFee: lifiSelection.utxosFee,
+					destinationToken: ckBtcToken
+				})
+			);
+			expect(fetchChainFusionBtcSwap).not.toHaveBeenCalled();
+			expect(fetchNearIntentsBtcSwap).not.toHaveBeenCalled();
+		});
+
+		// Its execution checks the selection against the layout of the quote it re-requests, which the
+		// one-output check here would refuse; and LI.FI has no terms gate, as from EVM and Solana.
+		it('leaves the selection check to its execution and asks no agreement', async () => {
+			const { getByText } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(validateBtcSend).not.toHaveBeenCalled();
+			expect(acceptProviderAgreement).not.toHaveBeenCalled();
+		});
+
+		it('refuses to send an offer without its own selection', async () => {
+			const { btcSelection: _, ...withoutSelection } = lifiOffer as Extract<
+				SwapMappedResult,
+				{ provider: SwapProvider.LIFI }
+			>;
+
+			const { getByText } = renderExecution(withoutSelection);
+
+			await confirm(getByText);
+
+			expect(fetchLifiBtcSwap).not.toHaveBeenCalled();
+			expect(toasts.toastsError).toHaveBeenCalledWith({
+				msg: { text: en.swap.error.unexpected_missing_data }
+			});
+		});
+
+		it('closes after the deposit and tracks its submission', async () => {
+			const { getByText, onClose, onBack } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+			expect(analytics.trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: TRACK_COUNT_SWAP_SUBMITTED,
+					metadata: expect.objectContaining({ dApp: SwapProvider.LIFI })
+				})
+			);
+		});
+
+		it('closes, not offering the form again, when the deposit may have gone out', async () => {
+			vi.mocked(fetchLifiBtcSwap).mockRejectedValue(
+				new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') })
+			);
+
+			const { getByText, onClose, onBack } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.send.error.btc_transaction_unconfirmed } })
 			);
 		});
 	});

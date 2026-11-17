@@ -1,7 +1,11 @@
 import { LIFI_BTC_CHANGE_INDEX, LIFI_BTC_SEQUENCE } from '$btc/constants/lifi.constants';
 import { sendBtcScriptOutputs, validateBtcSend } from '$btc/services/btc-send.services';
+import { prepareBtcSend } from '$btc/services/btc-utxos.service';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
 	BtcBroadcastUnconfirmedError,
+	BtcPrepareSendError,
 	BtcSendValidationError,
 	BtcValidationError
 } from '$btc/types/btc-send';
@@ -16,11 +20,16 @@ import {
 	createActiveUserTransaction,
 	deleteActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
-import { fetchLifiBtcSwap } from '$lib/services/lifi-btc-swap.services';
+import {
+	bindLifiBtcPayout,
+	hasLifiBtcPayoutBinding
+} from '$lib/services/lifi-btc-binding.services';
+import { fetchLifiBtcSwap, fetchLifiBtcSwapQuote } from '$lib/services/lifi-btc-swap.services';
+import { fetchLifiSwapQuote } from '$lib/services/lifi-swap.services';
 import { enableSwapDestinationToken } from '$lib/services/swap.services';
-import { LifiQuoteRejectedError } from '$lib/types/errors';
+import { LifiQuoteRejectedError, LifiRouteUnsupportedError } from '$lib/types/errors';
 import { LIFI_EXTERNAL_REF_KEYS } from '$lib/types/lifi';
-import { SwapProvider, type SwapLifiBtcParams } from '$lib/types/swap';
+import { SwapProvider, type BtcQuoteParams, type SwapLifiBtcParams } from '$lib/types/swap';
 import { toLifiExternalRefsMap } from '$lib/utils/lifi-active-tx.utils';
 import { decodeLifiBtcTransaction } from '$lib/utils/lifi-swap.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
@@ -46,6 +55,19 @@ vi.mock('$lib/rest/lifi.rest', () => ({
 vi.mock('$btc/services/btc-send.services', () => ({
 	sendBtcScriptOutputs: vi.fn(),
 	validateBtcSend: vi.fn()
+}));
+
+vi.mock('$btc/services/btc-utxos.service', () => ({
+	prepareBtcSend: vi.fn()
+}));
+
+vi.mock('$lib/services/lifi-btc-binding.services', () => ({
+	bindLifiBtcPayout: vi.fn(),
+	hasLifiBtcPayoutBinding: vi.fn()
+}));
+
+vi.mock('$lib/services/lifi-swap.services', () => ({
+	fetchLifiSwapQuote: vi.fn()
 }));
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
@@ -125,7 +147,33 @@ describe('lifi-btc-swap.services', () => {
 		vi.mocked(validateBtcSend).mockResolvedValue(undefined);
 		vi.mocked(createActiveUserTransaction).mockResolvedValue(undefined);
 		vi.mocked(deleteActiveUserTransaction).mockResolvedValue(undefined);
+		vi.mocked(bindLifiBtcPayout).mockResolvedValue(undefined);
+		vi.mocked(hasLifiBtcPayoutBinding).mockReturnValue(true);
 		sendSigned();
+	});
+
+	it("should bind the re-quoted deposit's payout before checking its fee", async () => {
+		await fetchLifiBtcSwap(params);
+
+		expect(bindLifiBtcPayout).toHaveBeenCalledExactlyOnceWith({
+			quote,
+			deposit,
+			request,
+			displayedToAmountMin: BigInt(quote.estimate.toAmountMin)
+		});
+		expect(vi.mocked(bindLifiBtcPayout).mock.invocationCallOrder[0]).toBeLessThan(
+			vi.mocked(validateBtcSend).mock.invocationCallOrder[0]
+		);
+	});
+
+	it("should sign nothing when the bridge's record does not pay what was reviewed", async () => {
+		const unbound = new LifiRouteUnsupportedError('no payout binding');
+		vi.mocked(bindLifiBtcPayout).mockRejectedValue(unbound);
+
+		await expect(fetchLifiBtcSwap(params)).rejects.toBe(unbound);
+
+		expect(validateBtcSend).not.toHaveBeenCalled();
+		expect(sendBtcScriptOutputs).not.toHaveBeenCalled();
 	});
 
 	it("should rebuild the re-quoted outputs around the reviewed selection, with LI.FI's order and sequence", async () => {
@@ -266,5 +314,88 @@ describe('lifi-btc-swap.services', () => {
 		// The creation's own cleanup, since its answer alone may have been lost.
 		expect(deleteActiveUserTransaction).toHaveBeenCalledOnce();
 		expect(enableSwapDestinationToken).not.toHaveBeenCalled();
+	});
+
+	describe('fetchLifiBtcSwapQuote', () => {
+		const quoteParams: BtcQuoteParams = {
+			sourceToken: BTC_MAINNET_TOKEN,
+			destinationToken: ETHEREUM_TOKEN,
+			amount,
+			userBtcAddress: userAddress,
+			recipientAddress: action.toAddress,
+			slippage: 0.5
+		};
+
+		// LayerSwap's P2TR deposit, its 18-byte memo and LI.FI's P2WPKH fee output.
+		const outputVSizes = [43, 29, 31];
+
+		beforeEach(() => {
+			vi.mocked(fetchLifiSwapQuote).mockResolvedValue(params.offer);
+			vi.mocked(prepareBtcSend).mockReturnValue(mockUtxosFee);
+
+			allUtxosStore.setAllUtxos({ allUtxos: mockUtxosFee.utxos });
+			feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
+		});
+
+		afterEach(() => {
+			allUtxosStore.reset();
+			feeRatePercentilesStore.reset();
+		});
+
+		it("should offer LI.FI's quote with its own selection, priced for its outputs", async () => {
+			const result = await fetchLifiBtcSwapQuote(quoteParams);
+
+			const { userBtcAddress: _, ...rest } = quoteParams;
+
+			expect(fetchLifiSwapQuote).toHaveBeenCalledExactlyOnceWith({ ...rest, userAddress });
+			expect(prepareBtcSend).toHaveBeenCalledExactlyOnceWith({
+				amount: params.swapAmount,
+				source: userAddress,
+				outputVSizes,
+				allUtxos: mockUtxosFee.utxos,
+				feeRateMiliSatoshisPerVByte: 1_000n
+			});
+			expect(result).toStrictEqual({
+				...params.offer,
+				btcSelection: { utxosFee: mockUtxosFee, outputVSizes }
+			});
+		});
+
+		it('should offer nothing through a bridge without a payout binding', async () => {
+			vi.mocked(hasLifiBtcPayoutBinding).mockReturnValue(false);
+
+			await expect(fetchLifiBtcSwapQuote(quoteParams)).resolves.toBeUndefined();
+
+			expect(hasLifiBtcPayoutBinding).toHaveBeenCalledExactlyOnceWith({ tool: 'layerswap' });
+			expect(prepareBtcSend).not.toHaveBeenCalled();
+		});
+
+		it.each([
+			{
+				case: 'cannot fund it',
+				utxosFee: { ...mockUtxosFee, error: BtcPrepareSendError.InsufficientBalanceForFee }
+			},
+			{ case: 'selects nothing', utxosFee: { ...mockUtxosFee, utxos: [] } }
+		])('should offer nothing when its selection $case', async ({ utxosFee }) => {
+			vi.mocked(prepareBtcSend).mockReturnValue(utxosFee);
+
+			await expect(fetchLifiBtcSwapQuote(quoteParams)).resolves.toBeUndefined();
+		});
+
+		it('should offer nothing before the UTXOs and the fee rate are loaded', async () => {
+			allUtxosStore.reset();
+
+			await expect(fetchLifiBtcSwapQuote(quoteParams)).resolves.toBeUndefined();
+
+			expect(prepareBtcSend).not.toHaveBeenCalled();
+		});
+
+		it('should offer nothing when LI.FI has no offer', async () => {
+			vi.mocked(fetchLifiSwapQuote).mockResolvedValue(undefined);
+
+			await expect(fetchLifiBtcSwapQuote(quoteParams)).resolves.toBeUndefined();
+
+			expect(hasLifiBtcPayoutBinding).not.toHaveBeenCalled();
+		});
 	});
 });
