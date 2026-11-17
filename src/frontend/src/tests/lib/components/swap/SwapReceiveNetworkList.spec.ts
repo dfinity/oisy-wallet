@@ -265,7 +265,7 @@ describe('SwapReceiveNetworkList', () => {
 	it('should go back without a pick', async () => {
 		const { getByText } = renderList();
 
-		await fireEvent.click(getByText(en.core.text.cancel));
+		await fireEvent.click(getByText(en.core.text.back));
 
 		expect(onClose).toHaveBeenCalledOnce();
 		expect(onSelectToken).not.toHaveBeenCalled();

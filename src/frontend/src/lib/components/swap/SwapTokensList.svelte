@@ -3,7 +3,7 @@
 	import { getContext } from 'svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { stakeBalances } from '$lib/derived/stake.derived';
@@ -121,6 +121,6 @@
 		/>
 	{/snippet}
 	{#snippet toolbar()}
-		<ButtonCancel fullWidth={true} onclick={onCloseTokensList} />
+		<ButtonBack fullWidth={true} onclick={onCloseTokensList} />
 	{/snippet}
 </ModalTokensList>

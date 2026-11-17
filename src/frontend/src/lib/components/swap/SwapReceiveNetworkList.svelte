@@ -4,7 +4,7 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { SWAP_RECEIVE_NETWORK_LIST } from '$lib/constants/test-ids.constants';
 	import { crossChainSwapNetworksMainnets } from '$lib/derived/cross-chain-networks.derived';
@@ -87,5 +87,5 @@
 </div>
 
 <ButtonGroup>
-	<ButtonCancel fullWidth onclick={onClose} />
+	<ButtonBack fullWidth onclick={onClose} />
 </ButtonGroup>

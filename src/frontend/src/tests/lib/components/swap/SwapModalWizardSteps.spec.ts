@@ -366,7 +366,7 @@ describe('SwapModalWizardSteps', () => {
 		};
 
 		const cancelList = async (rendered: Rendered) => {
-			await fireEvent.click(rendered.getByText(en.core.text.cancel));
+			await fireEvent.click(rendered.getByText(en.core.text.back));
 			await showForm(rendered);
 		};
 
@@ -753,7 +753,7 @@ describe('SwapModalWizardSteps', () => {
 				context: mockContext
 			});
 
-			await fireEvent.click(getByText(en.core.text.cancel));
+			await fireEvent.click(getByText(en.core.text.back));
 
 			expect(get(swapContext.destinationToken)).toBeUndefined();
 			expect(mockModal.set).toHaveBeenCalledExactlyOnceWith(swapStepIndex);
