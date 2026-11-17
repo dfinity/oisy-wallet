@@ -473,6 +473,30 @@ names its payout. That could be the bridge's own, or a quote LI.FI signs or ties
 record (to ask LI.FI). Allowing a bridge without such a record would trust LI.FI's unsigned quote
 as served by its API, which nothing in OISY does today.
 
+**Relay admitted with a best-effort binding on 2026-11-17 (PR 7).** The user chose to admit Relay
+without a record of the payout, with what can be checked. `bindLifiRelayPayout`
+(`lifi-btc-relay-binding.services.ts`) works from LI.FI's copy of Relay's quote:
+
+- **What it reads.** LI.FI embeds Relay's quote in `estimate.toolData` (the SDK's `Estimate` type
+  leaves it out). It is read through `LifiRelayToolDataSchema`, and a missing or malformed one is
+  refused. Fields used:
+  - `steps[0].requestId`;
+  - `protocol.v2.orderId`;
+  - `protocol.v2.paymentDetails` (`chainId: 'bitcoin'`, the amount, the depository);
+  - `details.currencyOut` (chain, address, `minimumAmount`).
+- **Checked against the transaction and the review:**
+  - the order id equals the memo's (`lifiBtcMemoText`, the text before `=`);
+  - the depository's script and the amount equal output 0;
+  - the currency out is the reviewed token on the reviewed chain: Relay's Solana chain id is
+    792703809, an EVM token is compared in any case, a Solana mint exactly;
+  - its minimum is at least the displayed minimum.
+- **Checked with Relay:** `GET /intents/status/v3?requestId=` answers `waiting`, so Relay issued
+  the request and has seen no deposit for it. Any other status, or a failed lookup, aborts.
+  `/intents/status/v3` is not part of the `/requests/v2` retirement.
+- **Not checked: the recipient.** Relay exposes none before the deposit. A response tampered with in
+  transit, or by LI.FI, can name a request of its own that pays someone else, and every check above
+  would pass. This is accepted.
+
 ---
 
 ## Delivery plan
@@ -507,10 +531,11 @@ reaches production before the dependency spec's PR 10 and a production release o
    and a quote its selection cannot fund is not offered. Also a "(local and staging)" entry in
    `PRODUCT.md`. No bridge is admitted: none can be bound yet (see
    [Bridge admission](#bridge-admission)).
-7. `feat(frontend): admit <bridge> from BTC` (needs 6, and a record of the deposit readable before
-   signing; none exists yet, see [Bridge admission](#bridge-admission)): the bridge's payout binding
-   in `LIFI_BTC_PAYOUT_BINDINGS`, tied to output 0, and its tool key in
-   `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]`, with a fixture from a real quote of it.
+7. `feat(frontend): admit Relay from BTC` (needs 6): Relay's best-effort payout binding (see
+   [Bridge admission](#bridge-admission)) in `LIFI_BTC_PAYOUT_BINDINGS`, `relaydepository` in
+   `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]`, the Relay status client (`relay.rest.ts`), and a
+   fixture shaped after a live Relay quote. This is the first PR in which LI.FI from BTC is visible,
+   on local and staging builds.
 
 ---
 
@@ -608,6 +633,10 @@ reaches production before the dependency spec's PR 10 and a production release o
        but OISY never reads 1Click's record of the deposit.
 
      Neither precedent trusts an _unsigned_ answer, which LayerSwap's or Relay's would be.
+
+   - **Relay admitted on 2026-11-17 with a best-effort binding** that does not check the recipient
+     (see [Bridge admission](#bridge-admission)). The user chose this over waiting for LI.FI. NEAR
+     stays out (decision 4), and LayerSwap too, since it offers nothing to check.
 2. **Rebuild or sign as is.** Proposed: rebuild (above). Signing as is would be simpler but fails
    whenever LI.FI picks a UTXO the backend refuses.
 3. **Miner fee.** Proposed: OISY's own rate. Alternative: keep LI.FI's, if open question 2 says it

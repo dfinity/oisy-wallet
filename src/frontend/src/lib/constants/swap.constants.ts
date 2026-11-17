@@ -143,6 +143,9 @@ export const SWAP_BROADCAST_RETRY_DELAY_MILLIS = 1_000;
 // would stall every other provider's rows.
 export const LIFI_STATUS_TIMEOUT_MS = 10_000;
 
+// The deadline of the Relay status lookup the BTC payout binding makes before signing.
+export const RELAY_STATUS_TIMEOUT_MS = 10_000;
+
 // LI.FI's recommended `/status` cadence: every 10 s for the first minute after the row is created,
 // every 30 s until 10 minutes, then every minute.
 export const LIFI_STATUS_POLL_CADENCE: { maxAgeMillis: number; intervalMillis: number }[] = [
