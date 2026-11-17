@@ -1387,6 +1387,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": "Clear receive token and show suggestions"
+		},
 		"text": {
 			"swap": "Swap",
 			"select_destination_token": "Select token to receive",
@@ -1454,7 +1457,6 @@
 			"receive_shortcut_more": "$count more",
 			"move_token_to": "Move $symbol to",
 			"as_token": "as $symbol",
-			"keep_destination": "Keep $symbol on $network",
 			"two_swaps_info": "$oisy_short only offers swaps it can fully verify before you approve, and there is no such direct swap from $sourceSymbol to $destinationSymbol. But you can swap from $sourceSymbol to $intermediateSymbol first, and then from $intermediateSymbol to $destinationSymbol.",
 			"two_swaps_first_button": "Swap to $intermediateSymbol first",
 			"near_intents_estimated_time": "NEAR Intents (~$minutes min)",

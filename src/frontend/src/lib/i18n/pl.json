@@ -1387,6 +1387,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "Wymiana",
 			"select_destination_token": "Wybierz token do otrzymania",
@@ -1454,7 +1457,6 @@
 			"receive_shortcut_more": "",
 			"move_token_to": "",
 			"as_token": "",
-			"keep_destination": "",
 			"two_swaps_info": "$oisy_short oferuje tylko wymiany, które może w pełni zweryfikować przed Twoim zatwierdzeniem, a takiej bezpośredniej wymiany z $sourceSymbol na $destinationSymbol nie ma. Możesz jednak najpierw wymienić $sourceSymbol na $intermediateSymbol, a potem $intermediateSymbol na $destinationSymbol.",
 			"two_swaps_first_button": "Najpierw wymień na $intermediateSymbol",
 			"near_intents_estimated_time": "",

@@ -303,22 +303,19 @@ describe('swapStore', () => {
 	});
 
 	describe('clearing the receive token', () => {
-		it('should clear it and keep it', () => {
-			const { destinationToken, keptDestinationToken, clearDestinationToken } = initSwapContext({
+		it('should clear a selected token', () => {
+			const { destinationToken, clearDestinationToken } = initSwapContext({
 				sourceToken: mockToken2,
 				destinationToken: mockToken1
 			});
-
 			clearDestinationToken();
 
 			expect(get(destinationToken)).toBeUndefined();
-			expect(get(keptDestinationToken)).toBe(mockToken1);
 		});
 
 		it('should not bring back the receive token the swap opened with', () => {
 			mockSwappableTokens.set({ sourceToken: undefined, destinationToken: mockToken1 });
-
-			const { destinationToken, keptDestinationToken, clearDestinationToken } = initSwapContext({
+			const { destinationToken, clearDestinationToken, setDestinationToken } = initSwapContext({
 				sourceToken: mockToken2
 			});
 
@@ -327,42 +324,10 @@ describe('swapStore', () => {
 			clearDestinationToken();
 
 			expect(get(destinationToken)).toBeUndefined();
-			expect(get(keptDestinationToken)).toBe(mockToken1);
-		});
 
-		it('should forget the kept token once another receive token is picked', () => {
-			const { destinationToken, keptDestinationToken, clearDestinationToken, setDestinationToken } =
-				initSwapContext({ sourceToken: mockToken2, destinationToken: mockToken1 });
-
-			clearDestinationToken();
 			setDestinationToken(mockToken2);
 
 			expect(get(destinationToken)).toBe(mockToken2);
-			expect(get(keptDestinationToken)).toBeUndefined();
-		});
-
-		it('should forget the kept token when the pay token changes', () => {
-			const { keptDestinationToken, clearDestinationToken, setSourceToken } = initSwapContext({
-				sourceToken: mockToken2,
-				destinationToken: mockToken1
-			});
-
-			clearDestinationToken();
-			setSourceToken(mockToken1);
-
-			expect(get(keptDestinationToken)).toBeUndefined();
-		});
-
-		it('should forget the kept token when reset', () => {
-			const { keptDestinationToken, clearDestinationToken, reset } = initSwapContext({
-				sourceToken: mockToken2,
-				destinationToken: mockToken1
-			});
-
-			clearDestinationToken();
-			reset();
-
-			expect(get(keptDestinationToken)).toBeUndefined();
 		});
 	});
 

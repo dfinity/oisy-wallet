@@ -60,6 +60,10 @@ does not finish while the children are invisible (see `NftHideButton`).
 
 ### Common building blocks
 
+`TokenInput` and `TokenInputContent` accept an optional `trailingAction` snippet inside the field,
+after the token selector. Use an existing labelled button primitive for a separate field action,
+as Swap does for clearing the receive token.
+
 | Component                               | Where                             | Use it for                                                                                                                                                |
 | --------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `List`, `ListItem`, `ListItemButton`    | `$lib/components/common/`         | Vertical lists of items.                                                                                                                                  |

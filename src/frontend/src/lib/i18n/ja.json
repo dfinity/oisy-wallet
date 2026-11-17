@@ -1387,6 +1387,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "スワップ",
 			"select_destination_token": "受け取るトークンを選択",
@@ -1454,7 +1457,6 @@
 			"receive_shortcut_more": "",
 			"move_token_to": "",
 			"as_token": "",
-			"keep_destination": "",
 			"two_swaps_info": "$oisy_short は、承認の前に完全に検証できるスワップのみを提供しています。$sourceSymbol から $destinationSymbol へのそのような直接のスワップはありません。ただし、まず $sourceSymbol を $intermediateSymbol にスワップし、その後 $intermediateSymbol を $destinationSymbol にスワップすることはできます。",
 			"two_swaps_first_button": "まず $intermediateSymbol にスワップ",
 			"near_intents_estimated_time": "",

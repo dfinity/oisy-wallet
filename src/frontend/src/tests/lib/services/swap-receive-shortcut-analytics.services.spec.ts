@@ -27,7 +27,7 @@ describe('swap-receive-shortcut-analytics.services', () => {
 
 	describe('trackSwapReceiveShortcut', () => {
 		// The exact metadata: the pay token is public chain data, and no amount is sent.
-		it.each(['same_network', 'other_network', 'any_token', 'keep'] as const)(
+		it.each(['same_network', 'other_network', 'any_token'] as const)(
 			'should track the use of %s with the pay token only',
 			(action) => {
 				trackSwapReceiveShortcut({ action, sourceToken: BASE_USDC_TOKEN });

@@ -1387,6 +1387,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "Vyměnit",
 			"select_destination_token": "Vybrat token k přijetí",
@@ -1454,7 +1457,6 @@
 			"receive_shortcut_more": "",
 			"move_token_to": "",
 			"as_token": "",
-			"keep_destination": "",
 			"two_swaps_info": "$oisy_short nabízí jen výměny, které dokáže před vaším schválením plně ověřit, a žádná taková přímá výměna z $sourceSymbol na $destinationSymbol neexistuje. Můžete ale nejdřív vyměnit $sourceSymbol za $intermediateSymbol a potom $intermediateSymbol za $destinationSymbol.",
 			"two_swaps_first_button": "Nejdřív vyměnit za $intermediateSymbol",
 			"near_intents_estimated_time": "",

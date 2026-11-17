@@ -1387,6 +1387,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "Обменять",
 			"select_destination_token": "Выбрать токен для получения",
@@ -1454,7 +1457,6 @@
 			"receive_shortcut_more": "",
 			"move_token_to": "",
 			"as_token": "",
-			"keep_destination": "",
 			"two_swaps_info": "$oisy_short предлагает только обмены, которые может полностью проверить до вашего подтверждения, а такого прямого обмена $sourceSymbol на $destinationSymbol нет. Но вы можете сначала обменять $sourceSymbol на $intermediateSymbol, а затем $intermediateSymbol на $destinationSymbol.",
 			"two_swaps_first_button": "Сначала обменять на $intermediateSymbol",
 			"near_intents_estimated_time": "",

@@ -1,17 +1,15 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import IconChevronRight from '$lib/components/icons/lucide/IconChevronRight.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
 	import {
 		SWAP_RECEIVE_SHORTCUT_ANY_TOKEN,
-		SWAP_RECEIVE_SHORTCUT_KEEP,
 		SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK,
 		SWAP_RECEIVE_SHORTCUT_SAME_NETWORK,
 		SWAP_RECEIVE_SHORTCUTS
@@ -43,14 +41,13 @@
 		navigation: SwapReceiveShortcutsContext;
 		// The plain receive field, shown while there is nothing to offer yet, or nothing at all.
 		emptyField: Snippet;
-		// After a shortcut or Keep sets the receive token, which takes this card's place.
+		// After a shortcut sets the receive token, which takes this card's place.
 		onDestinationSet: () => void;
 	}
 
 	let { sourceToken, navigation, emptyField, onDestinationSet }: Props = $props();
 
-	const { receiveSupportedData, keptDestinationToken, setDestinationToken } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { receiveSupportedData, setDestinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const titleId = $props.id();
 
@@ -76,25 +73,18 @@
 		nonNullish(sameNetwork) || nonNullish(otherNetwork) || nonNullish(anyToken)
 	);
 
-	// Only a token the list still offers: the providers may have answered again since it was cleared.
-	let keptToken = $derived(
-		nonNullish($keptDestinationToken)
-			? listed?.tokens.find(({ id }) => id === $keptDestinationToken.id)
-			: undefined
-	);
-
 	let focusWasInside = false;
 
 	// The plain field and the card swap in place when the providers answer: focus on one moves to the
 	// other instead of falling out of the modal. Only focus already here moves, so nothing is taken.
 	$effect.pre(() => {
-		[visible, sameNetwork, otherNetwork, anyToken, keptToken];
+		[visible, sameNetwork, otherNetwork, anyToken];
 
 		focusWasInside = root?.contains(document.activeElement) ?? false;
 	});
 
 	$effect(() => {
-		[visible, sameNetwork, otherNetwork, anyToken, keptToken];
+		[visible, sameNetwork, otherNetwork, anyToken];
 
 		if (focusWasInside && !(root?.contains(document.activeElement) ?? false)) {
 			root?.querySelector<HTMLElement>('button:not([disabled])')?.focus({ preventScroll: true });
@@ -168,16 +158,6 @@
 		track({ action: 'any_token' });
 
 		navigation.showReceiveList(undefined);
-	};
-
-	const onKeep = () => {
-		if (isNullish(keptToken)) {
-			return;
-		}
-
-		track({ action: 'keep' });
-
-		setDestination(keptToken);
 	};
 </script>
 
@@ -319,26 +299,6 @@ that stays on that network. -->
 					})}
 				{/if}
 			</ul>
-
-			{#if nonNullish(keptToken)}
-				<!-- The inner box keeps the link's tap area and focus ring to its text, not the card's width. -->
-				<div class="mt-3 flex justify-center">
-					<div class="flex">
-						<Button
-							link
-							onclick={onKeep}
-							styleClass="relative hit-area hit-area-touch"
-							testId={SWAP_RECEIVE_SHORTCUT_KEEP}
-							type="button"
-						>
-							{replacePlaceholders($i18n.swap.text.keep_destination, {
-								$symbol: getTokenDisplaySymbol(keptToken),
-								$network: keptToken.network.name
-							})}
-						</Button>
-					</div>
-				</div>
-			{/if}
 		</div>
 	{:else}
 		{@render emptyField()}

@@ -24,7 +24,7 @@ Source: Artem, 2026-11-16. Validated with a static prototype of two directions (
 (open it from a checkout; it loads the logos and font from `src/frontend/`) and screenshots in
 the same folder. Its prices, balances and fees are made up, and it leaves out Robinhood Chain;
 which networks each token reaches follows the code as of 2026-11-16. Only the shortcut rows, the
-"Move _symbol_ to" step and the Keep link are new UI; everything else copies today's form and list.
+"Move _symbol_ to" step and the receive field’s clear button are new UI; everything else copies today's form and list.
 
 ## Background
 
@@ -152,14 +152,15 @@ that one opening; it does not count as the user changing the receive side's filt
 The card is today's filled You receive card, and everything below it (notices, Smart Swap cell,
 fee) is unchanged.
 
-Tapping the receive token clears it and shows the shortcuts again, with a **Keep _symbol_ on
-_network_** link under them that puts it back. Before the receive support data is ready the tap
-opens the receive list, as today, since there would be no shortcuts to show the link under.
-_Built:_ the same holds for a receive token the list does not offer, and the link shows only while
-the list still offers the cleared token. Focus moves to the first shortcut after the tap, and to
-the receive token after Keep or a one-tap shortcut. The link goes once a new receive token is picked
-or the pay token changes. Clearing the receive token drops the current quote, as opening the list
-does today; Keep fetches a new one.
+Tapping the receive token opens the receive picker. Back preserves the selected token.
+A separate **×** button at the right edge inside the filled receive field clears the receive token
+and its quote, keeping the pay token and amount, and restores the shortcuts. It has a 40 px tap
+area and an accessible name, "Clear receive token and show suggestions". It appears when both
+tokens are set and the shortcuts flow is available, including while providers load. Focus moves
+to the first shortcut after clearing, or the empty receive selector while the providers are
+loading or offer nothing, and to the receive token after a one-tap shortcut. There is no Keep
+link or stored token to restore. _Changed 2026-11-17 after prototype review:_ the user chose ×
+to avoid the vertical space of a "Show suggestions" link.
 
 The pay token's selector, the switch button (disabled while there is no receive token) and Review
 are unchanged.
@@ -171,23 +172,23 @@ New keys under `swap.text` in `src/frontend/src/lib/i18n/en.json`. Lists are joi
 _Built:_ `formatList` writes English lists with a serial comma ("Ethereum, Arbitrum, and 3 more"),
 as the brand's "Bitcoin, Ethereum, Internet Computer, and more" does; the wireframes leave it out.
 
-| Where                               | English                              | Key (proposed)                            |
-| ----------------------------------- | ------------------------------------ | ----------------------------------------- |
-| Shortcut 1                          | Another token on $network            | `receive_shortcut_same_network`           |
-| Shortcut 2                          | $symbol on another network           | `receive_shortcut_other_network`          |
-| Shortcut 2, one token, title        | $symbol on $network                  | `receive_shortcut_token_on_network`       |
-| Shortcut 2, one token, Chain Fusion | Convert $from to $to                 | `receive_shortcut_convert`                |
-| Same, from a ck token               | Convert $from back to $to            | `receive_shortcut_convert_back`           |
-| Shortcut 2, one token, 1Sec         | Bridge $symbol back to $network      | `receive_shortcut_bridge_back`            |
-| Shortcut 2, one token, otherwise    | Move $symbol to $network             | `receive_shortcut_move`                   |
-| Shortcut 3                          | Any token                            | `receive_shortcut_any_token`              |
-| Shortcut 3, second line             | $tokens tokens on $networks networks | `receive_shortcut_any_token_count`        |
-| Shortcut 3, second line, 1 network  | $tokens tokens on 1 network          | `receive_shortcut_any_token_count_one`    |
-| Shortcut 3, second line, 1 token    | 1 token on 1 network                 | `receive_shortcut_any_token_count_single` |
-| A preview cut short                 | $count more                          | `receive_shortcut_more`                   |
-| Network step title                  | Move $symbol to                      | `move_token_to`                           |
-| Network row, other symbol           | as $symbol                           | `as_token`                                |
-| Restore link                        | Keep $symbol on $network             | `keep_destination`                        |
+| Where                               | English                                  | Key (proposed)                            |
+| ----------------------------------- | ---------------------------------------- | ----------------------------------------- |
+| Shortcut 1                          | Another token on $network                | `receive_shortcut_same_network`           |
+| Shortcut 2                          | $symbol on another network               | `receive_shortcut_other_network`          |
+| Shortcut 2, one token, title        | $symbol on $network                      | `receive_shortcut_token_on_network`       |
+| Shortcut 2, one token, Chain Fusion | Convert $from to $to                     | `receive_shortcut_convert`                |
+| Same, from a ck token               | Convert $from back to $to                | `receive_shortcut_convert_back`           |
+| Shortcut 2, one token, 1Sec         | Bridge $symbol back to $network          | `receive_shortcut_bridge_back`            |
+| Shortcut 2, one token, otherwise    | Move $symbol to $network                 | `receive_shortcut_move`                   |
+| Shortcut 3                          | Any token                                | `receive_shortcut_any_token`              |
+| Shortcut 3, second line             | $tokens tokens on $networks networks     | `receive_shortcut_any_token_count`        |
+| Shortcut 3, second line, 1 network  | $tokens tokens on 1 network              | `receive_shortcut_any_token_count_one`    |
+| Shortcut 3, second line, 1 token    | 1 token on 1 network                     | `receive_shortcut_any_token_count_single` |
+| A preview cut short                 | $count more                              | `receive_shortcut_more`                   |
+| Network step title                  | Move $symbol to                          | `move_token_to`                           |
+| Network row, other symbol           | as $symbol                               | `as_token`                                |
+| Clear button, accessible name       | Clear receive token and show suggestions | `swap.alt.clear_destination`              |
 
 "Move" matches the cross-network note the form already shows: "You move tokens from **Base** to
 **Solana** network" (`cross_chain_networks_info`).
@@ -198,8 +199,7 @@ One Plausible event, `swap_receive_shortcut`, built like `swap_two_swaps_hint`
 (`src/frontend/src/lib/services/swap-two-swaps-hint-analytics.services.ts`, Pattern B in
 `docs/ai/frontend/analytics.md`):
 
-- `event_modifier`: `same_network`, `other_network`, `any_token` or `keep`, sent when that row or
-  link is tapped. `other_network` is sent when a token is picked through it: on the tap when it sets
+- `event_modifier`: `same_network`, `other_network` or `any_token`, sent when that row is tapped. `other_network` is sent when a token is picked through it: on the tap when it sets
   the token directly, otherwise on the pick in the network step (opening the step and leaving it
   sends nothing), so every `other_network` event carries the picked token.
 - The pay token in `token_*`. For a network-step pick, or for a shortcut that sets the token
@@ -250,8 +250,9 @@ Pointers, not prescriptions; the implementer decides the shape.
 - **Network step.** A new `WizardStepsSwap` entry (`lib/enums/wizard-steps.ts`), rendered in
   `SwapModalWizardSteps.svelte` next to `TOKENS_LIST`, with its title wired in `SwapModal.svelte`
   as the list's is.
-- **Keep.** The cleared receive token is held by whatever owns the form state, and dropped on a new
-  pick or a pay-token change.
+- **Clear.** A trailing action snippet in `TokenInput` / `TokenInputContent` holds the existing
+  `ButtonIcon` with `IconClose`. Clearing uses a null destination so an initial token cannot return.
+  The previous Keep state, link and tracking modifier are removed.
 - **Tests.** Specs for the grouping (the five pay tokens above); `SwapForm.spec.ts` for when each
   shortcut shows; the wizard spec for where each one leads. The per-network form specs may need
   the new context or props. `e2e/swap-modal.spec.ts` takes no screenshots of the empty receive
@@ -273,8 +274,8 @@ Pointers, not prescriptions; the implementer decides the shape.
       keeps.
 - [ ] Until the receive support data is ready, the card shows today's empty field.
 - [ ] "Move _symbol_ to" lists reachable networks only, in chain order, with the user's balance.
-- [ ] Tapping the receive token brings the shortcuts back with "Keep _symbol_ on _network_", which
-      restores it; the link goes after a new pick or a pay-token change.
+- [ ] Tapping the receive token opens the picker; Back preserves it. The separate × clears it and
+      the quote, restores shortcuts and focuses their first row. No Keep link.
 - [ ] `swap_receive_shortcut` fires once per tap with the right modifier, and carries no amount.
 - [ ] Copy matches the table; no em dashes.
 - [ ] Looks right at 375 px and in the desktop modal, in light and dark. The longest title
@@ -290,8 +291,9 @@ Made on 2026-11-16, after the prototype:
   every path before anything is opened, and Any token in A already opens the same list.
 - **The group only.** "The same token on another network" means the token group; wrapped versions
   are other tokens.
-- **The shortcuts come back.** After a pick, tapping the receive token shows them again, with a
-  Keep link, rather than opening the list.
+- **Separate clear control (2026-11-17).** Tapping the receive token opens the picker. The user
+  chose × inside the field to restore shortcuts without adding vertical space. The Keep link is
+  removed; Back from the picker preserves the selection.
 - **One set of names**, written to finish the sentence "You receive …": "Another token on Base",
   "USDC on another network", "Any token".
 - **All asset types.** A list opened by a shortcut starts on All asset types, so it matches the
@@ -323,3 +325,11 @@ Made on 2026-11-16, after the prototype:
 
 None. The three left after the first draft (asset type, loading, feature flag) were decided on
 2026-11-16; see [Decisions](#decisions).
+
+## Implementation notes, 2026-11-17
+
+The reset-control prototypes compared a link below the filled receive field, × inside the field,
+and a link in the picker. The user chose × because the text link took too much vertical space.
+This supersedes the original tap-to-clear and Keep-link wireframes. Only the receive token and
+quote are cleared; the pay amount and token remain. The picker and its filters keep their usual
+behaviour. There is no extra reset tracking event.

@@ -1104,6 +1104,7 @@ interface I18nConvert {
 }
 
 interface I18nSwap {
+	alt: { clear_destination: string };
 	text: {
 		swap: string;
 		select_destination_token: string;
@@ -1171,7 +1172,6 @@ interface I18nSwap {
 		receive_shortcut_more: string;
 		move_token_to: string;
 		as_token: string;
-		keep_destination: string;
 		two_swaps_info: string;
 		two_swaps_first_button: string;
 		near_intents_estimated_time: string;

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, tick, type Snippet } from 'svelte';
-	import { get, readable } from 'svelte/store';
+	import { readable } from 'svelte/store';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
 	import SwapReceiveShortcuts from '$lib/components/swap/SwapReceiveShortcuts.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
@@ -14,13 +15,15 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
-	import { SWAP_DESTINATION_TOKEN_BALANCE } from '$lib/constants/test-ids.constants';
+	import {
+		SWAP_DESTINATION_TOKEN_BALANCE,
+		SWAP_CLEAR_DESTINATION_TOKEN
+	} from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import { crossChainSwapNetworksMainnets } from '$lib/derived/cross-chain-networks.derived';
-	import { allSwapUniverseTokens } from '$lib/derived/swap.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -39,7 +42,6 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import {
 		canPayWithToken,
-		getListedReceiveTokens,
 		getSwapSlippageInvalidValue,
 		getSwapSlippageStatus
 	} from '$lib/utils/swap.utils';
@@ -111,7 +113,6 @@
 		destinationTokenExchangeRate,
 		amountSetToMax,
 		switchTokens,
-		receiveSupportedData,
 		clearDestinationToken
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
@@ -246,40 +247,9 @@
 			?.focus({ preventScroll: true });
 	};
 
-	// Whether the shortcuts list the receive token, so the Keep link under them can put it back.
-	const canKeepDestination = (): boolean => {
-		const destination = $destinationToken;
-
-		if (isNullish(receiveShortcuts) || isNullish(destination) || isNullish($sourceToken)) {
-			return false;
-		}
-
-		const supportedData = $receiveSupportedData;
-
-		return (
-			nonNullish(supportedData) &&
-			getListedReceiveTokens({
-				sourceToken: $sourceToken,
-				supportedData,
-				networks: get(crossChainSwapNetworksMainnets),
-				tokens: get(allSwapUniverseTokens)
-			}).some(({ id }) => id === destination.id)
-		);
-	};
-
-	// Where the shortcuts can show, tapping the receive token brings them back in its place, with a link
-	// that keeps it. The quote goes with it, as when the list opens.
-	const onReceiveTokenClick = () => {
-		if (!canKeepDestination()) {
-			onShowTokensList('destination');
-
-			return;
-		}
-
+	const onClearDestination = () => {
 		swapAmountsStore.reset();
-
 		clearDestinationToken();
-
 		void focusReceiveArea();
 	};
 
@@ -309,11 +279,25 @@
 		displayUnit={inputUnit}
 		exchangeRate={$destinationTokenExchangeRate}
 		loading={swapAmountsLoading}
-		onClick={onReceiveTokenClick}
+		onClick={() => onShowTokensList('destination')}
 		showTokenNetwork
 		token={$destinationToken}
 	>
 		{#snippet title()}{$i18n.tokens.text.destination_token_title}{/snippet}
+
+		{#snippet trailingAction()}
+			{#if nonNullish(receiveShortcuts) && nonNullish($sourceToken) && nonNullish($destinationToken)}
+				<div class="flex h-full shrink-0 items-center border-l border-tertiary">
+					<ButtonIcon
+						ariaLabel={$i18n.swap.alt.clear_destination}
+						onclick={onClearDestination}
+						testId={SWAP_CLEAR_DESTINATION_TOKEN}
+					>
+						{#snippet icon()}<span aria-hidden="true"><IconClose size="16" /></span>{/snippet}
+					</ButtonIcon>
+				</div>
+			{/if}
+		{/snippet}
 
 		{#snippet amountInfo()}
 			{#if nonNullish($destinationToken)}

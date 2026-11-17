@@ -1387,6 +1387,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "Hoán đổi",
 			"select_destination_token": "Chọn token để nhận",
@@ -1454,7 +1457,6 @@
 			"receive_shortcut_more": "",
 			"move_token_to": "",
 			"as_token": "",
-			"keep_destination": "",
 			"two_swaps_info": "$oisy_short chỉ cung cấp các giao dịch hoán đổi mà nó có thể xác minh đầy đủ trước khi bạn chấp thuận, và không có giao dịch hoán đổi trực tiếp như vậy từ $sourceSymbol sang $destinationSymbol. Nhưng bạn có thể hoán đổi $sourceSymbol sang $intermediateSymbol trước, rồi từ $intermediateSymbol sang $destinationSymbol.",
 			"two_swaps_first_button": "Hoán đổi sang $intermediateSymbol trước",
 			"near_intents_estimated_time": "",

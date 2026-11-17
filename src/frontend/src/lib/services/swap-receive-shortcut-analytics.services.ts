@@ -9,7 +9,7 @@ import { nonNullish } from '@dfinity/utils';
 
 // What was used, carried in `event_modifier`: one of the three shortcuts, or the link that puts back
 // the receive token the shortcuts replaced.
-export type SwapReceiveShortcutAction = 'same_network' | 'other_network' | 'any_token' | 'keep';
+export type SwapReceiveShortcutAction = 'same_network' | 'other_network' | 'any_token';
 
 export interface TrackSwapReceiveShortcutParams {
 	action: SwapReceiveShortcutAction;

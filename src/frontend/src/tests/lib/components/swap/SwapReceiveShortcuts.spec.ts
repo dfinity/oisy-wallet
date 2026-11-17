@@ -21,7 +21,6 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SwapReceiveShortcuts from '$lib/components/swap/SwapReceiveShortcuts.svelte';
 import {
 	SWAP_RECEIVE_SHORTCUT_ANY_TOKEN,
-	SWAP_RECEIVE_SHORTCUT_KEEP,
 	SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK,
 	SWAP_RECEIVE_SHORTCUT_SAME_NETWORK,
 	SWAP_RECEIVE_SHORTCUTS
@@ -144,13 +143,11 @@ describe('SwapReceiveShortcuts', () => {
 	const renderShortcuts = ({
 		sourceToken = BASE_USDC_TOKEN,
 		receiveSupportedData = fromBaseUsdc,
-		keptDestinationToken,
 		receiveSupportedDataStore
 	}: {
 		sourceToken?: Token;
 		// `null` for providers that have not answered yet.
 		receiveSupportedData?: SwapSupportedTokensData | null;
-		keptDestinationToken?: Token;
 		receiveSupportedDataStore?: Readable<SwapSupportedTokensData | undefined>;
 	} = {}) =>
 		render(SwapReceiveShortcuts, {
@@ -168,7 +165,6 @@ describe('SwapReceiveShortcuts', () => {
 					{
 						receiveSupportedData:
 							receiveSupportedDataStore ?? readable(receiveSupportedData ?? undefined),
-						keptDestinationToken: readable(keptDestinationToken),
 						setDestinationToken
 					}
 				]
@@ -392,7 +388,6 @@ describe('SwapReceiveShortcuts', () => {
 					SWAP_CONTEXT_KEY,
 					{
 						receiveSupportedData,
-						keptDestinationToken: readable(undefined),
 						setDestinationToken
 					}
 				]
@@ -409,15 +404,13 @@ describe('SwapReceiveShortcuts', () => {
 	it.each([
 		{ testId: SWAP_RECEIVE_SHORTCUT_SAME_NETWORK, removed: 'same' },
 		{ testId: SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK, removed: 'other' },
-		{ testId: SWAP_RECEIVE_SHORTCUT_ANY_TOKEN, removed: 'any' },
-		{ testId: SWAP_RECEIVE_SHORTCUT_KEEP, removed: 'keep' }
+		{ testId: SWAP_RECEIVE_SHORTCUT_ANY_TOKEN, removed: 'any' }
 	])(
 		'should retain focus when $testId disappears while the card stays visible',
 		async ({ testId, removed }) => {
 			const receiveSupportedDataStore = writable(fromBaseUsdc);
 			const { getByTestId, queryByTestId } = renderShortcuts({
-				receiveSupportedDataStore,
-				keptDestinationToken: SOLANA_USDC_TOKEN
+				receiveSupportedDataStore
 			});
 
 			getByTestId(testId).focus();
@@ -432,7 +425,7 @@ describe('SwapReceiveShortcuts', () => {
 							: removed === 'any'
 								? listed([native(BASE_ETH_TOKEN), ETHEREUM_USDC_TOKEN.address.toLowerCase()])
 								: fromBaseUsdc.evm,
-				sol: removed === 'other' || removed === 'keep' ? nothing : fromBaseUsdc.sol
+				sol: removed === 'other' ? nothing : fromBaseUsdc.sol
 			});
 
 			await waitFor(() => expect(queryByTestId(testId)).not.toBeInTheDocument());
@@ -477,59 +470,6 @@ describe('SwapReceiveShortcuts', () => {
 
 		expect(getByTestId(emptyFieldTestId)).toBeInTheDocument();
 		expect(queryByTestId(SWAP_RECEIVE_SHORTCUTS)).not.toBeInTheDocument();
-	});
-
-	describe('Keep', () => {
-		it('should not show without a cleared receive token', () => {
-			const { queryByTestId } = renderShortcuts();
-
-			expect(queryByTestId(SWAP_RECEIVE_SHORTCUT_KEEP)).not.toBeInTheDocument();
-		});
-
-		it('should not offer a cleared receive token the list no longer offers', () => {
-			const { queryByTestId } = renderShortcuts({ keptDestinationToken: ckUsdc });
-
-			expect(queryByTestId(SWAP_RECEIVE_SHORTCUT_KEEP)).not.toBeInTheDocument();
-		});
-
-		it('should restore the current listed metadata for a kept token', async () => {
-			const currentToken = { ...SOLANA_USDC_TOKEN, name: 'Updated USDC metadata', enabled: true };
-			vi.spyOn(swapDerived, 'allSwapUniverseTokens', 'get').mockReturnValue(
-				readable(universe.map((token) => (token.id === currentToken.id ? currentToken : token)))
-			);
-
-			const { getByTestId } = renderShortcuts({ keptDestinationToken: SOLANA_USDC_TOKEN });
-			await fireEvent.click(getByTestId(SWAP_RECEIVE_SHORTCUT_KEEP));
-
-			expect(setDestinationToken).toHaveBeenCalledExactlyOnceWith(
-				expect.objectContaining(currentToken)
-			);
-		});
-
-		it('should put the cleared receive token back', async () => {
-			const { getByTestId } = renderShortcuts({ keptDestinationToken: SOLANA_USDC_TOKEN });
-
-			const keep = getByTestId(SWAP_RECEIVE_SHORTCUT_KEEP);
-
-			expect(keep).toHaveTextContent(
-				replacePlaceholders(en.swap.text.keep_destination, {
-					$symbol: SOLANA_USDC_TOKEN.symbol,
-					$network: SOLANA_MAINNET_NETWORK.name
-				})
-			);
-
-			await fireEvent.click(keep);
-
-			expect(setDestinationToken).toHaveBeenCalledExactlyOnceWith(
-				expect.objectContaining({ id: SOLANA_USDC_TOKEN.id })
-			);
-			expect(onDestinationSet).toHaveBeenCalledOnce();
-			expect(trackSwapReceiveShortcut).toHaveBeenCalledExactlyOnceWith({
-				action: 'keep',
-				sourceToken: BASE_USDC_TOKEN,
-				destinationToken: undefined
-			});
-		});
 	});
 
 	it('should title the card as the receive field', () => {
