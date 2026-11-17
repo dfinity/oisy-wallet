@@ -35,7 +35,8 @@ import {
 } from '$lib/constants/app.constants';
 import {
 	applyActiveUserTransactionPollUpdate,
-	isBtcTransactionNeverLanded
+	isBtcTransactionNeverLanded,
+	reloadActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import {
 	pollChainFusionActiveUserTransactions,
@@ -121,7 +122,8 @@ vi.mock('$eth/providers/infura-cketh.providers', () => ({
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
 	applyActiveUserTransactionPollUpdate: vi.fn(),
-	isBtcTransactionNeverLanded: vi.fn()
+	isBtcTransactionNeverLanded: vi.fn(),
+	reloadActiveUserTransaction: vi.fn()
 }));
 
 vi.mock('$sol/services/sol-source-tx.services', () => ({
@@ -339,8 +341,14 @@ const setLastObservedBlock = (blockNumber: number | undefined) =>
 		)
 	});
 
-const poll = (transactions: ActiveUserTransaction[]) =>
-	pollChainFusionActiveUserTransactions({ identity: mockIdentity, transactions });
+const poll = (transactions: ActiveUserTransaction[]) => {
+	// The backend's copy of a row is this tab's, unless a test queues another one.
+	vi.mocked(reloadActiveUserTransaction).mockImplementation(({ id }) =>
+		Promise.resolve(transactions.find((tx) => tx.id === id))
+	);
+
+	return pollChainFusionActiveUserTransactions({ identity: mockIdentity, transactions });
+};
 
 const lastUpdate = () => vi.mocked(applyActiveUserTransactionPollUpdate).mock.lastCall?.[0].update;
 
@@ -811,6 +819,67 @@ describe('chain-fusion-swap-active-tx.services', () => {
 			expect(lastUpdate()).toStrictEqual(
 				expect.objectContaining({ status: { Failed: null }, error: expect.any(String) })
 			);
+		});
+
+		describe('a deposit the minter names', () => {
+			beforeEach(() => {
+				vi.mocked(watchDepositAddress).mockResolvedValue(detected(43n));
+				vi.mocked(depositSolStatus).mockResolvedValue({
+					Queued: { sweepable_amount: 49_109_120n }
+				});
+			});
+
+			it('should be taken once the backend still holds the row open, read after the minter named it', async () => {
+				const tx = solMintTx();
+
+				await poll([tx]);
+
+				expect(reloadActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: tx.id
+				});
+				expect(vi.mocked(reloadActiveUserTransaction).mock.invocationCallOrder[0]).toBeGreaterThan(
+					vi.mocked(watchDepositAddress).mock.invocationCallOrder[0]
+				);
+				expect(lastUpdate()).toStrictEqual({
+					status: { Executing: null },
+					externalRefs: expect.arrayContaining([{ key: 'chain_fusion_cksol_deposit', value: '43' }])
+				});
+			});
+
+			it('should not be taken for a row settled elsewhere', async () => {
+				const tx = solMintTx();
+
+				vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce({
+					...tx,
+					status: { Succeeded: null }
+				});
+
+				await poll([tx]);
+
+				expect(depositSolStatus).not.toHaveBeenCalled();
+				expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+			});
+
+			it('should not be taken for a row that took a deposit elsewhere', async () => {
+				vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce(
+					solMintTx({ refs: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42' } })
+				);
+
+				await poll([solMintTx()]);
+
+				expect(depositSolStatus).not.toHaveBeenCalled();
+				expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+			});
+
+			it('should not be taken for a row the backend no longer holds', async () => {
+				vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce(undefined);
+
+				await poll([solMintTx()]);
+
+				expect(depositSolStatus).not.toHaveBeenCalled();
+				expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+			});
 		});
 
 		describe('a terminal answer', () => {
