@@ -330,4 +330,25 @@ describe('SwapReceiveNetworkList', () => {
 		expect(onSelectToken).not.toHaveBeenCalled();
 		expect(trackSwapReceiveShortcut).not.toHaveBeenCalled();
 	});
+
+	it('should explain an empty network list and focus Back', async () => {
+		const { getByRole, getByTestId } = renderList({
+			receiveSupportedData: {
+				icp: nothing,
+				evm: nothing,
+				sol: nothing,
+				btc: nothing,
+				xrp: nothing
+			}
+		});
+		const list = getByTestId(SWAP_RECEIVE_NETWORK_LIST);
+		const status = within(list).getByRole('status');
+		const back = getByRole('button', { name: en.core.text.back });
+
+		expect(status).toHaveTextContent(en.swap.text.move_no_networks_title);
+		expect(status).toHaveTextContent(en.swap.text.move_no_networks_description);
+		expect(within(list).queryByRole('button')).not.toBeInTheDocument();
+
+		await waitFor(() => expect(back).toHaveFocus());
+	});
 });

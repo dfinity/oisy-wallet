@@ -6,6 +6,7 @@
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import {
 		SWAP_RECEIVE_NETWORK_LIST,
 		SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK
@@ -146,11 +147,14 @@
 				{/each}
 			</List>
 		{/if}
-		<p class="text-primary" role="status">
+		<div class="text-primary" role="status">
 			{#if isNullish(otherNetwork)}
-				{$i18n.core.text.no_results}
+				<EmptyState
+					description={$i18n.swap.text.move_no_networks_description}
+					title={$i18n.swap.text.move_no_networks_title}
+				/>
 			{/if}
-		</p>
+		</div>
 	</div>
 
 	<ButtonGroup>

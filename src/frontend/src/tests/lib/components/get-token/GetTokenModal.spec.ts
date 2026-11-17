@@ -362,7 +362,10 @@ describe('GetTokenModal', () => {
 						);
 						await waitFor(() => expect(back).toHaveFocus());
 
-						expect(within(list).getByRole('status')).toHaveTextContent(en.core.text.no_results);
+						const status = within(list).getByRole('status');
+
+						expect(status).toHaveTextContent(en.swap.text.move_no_networks_title);
+						expect(status).toHaveTextContent(en.swap.text.move_no_networks_description);
 					}
 					await fireEvent.click(back);
 					await waitFor(() =>

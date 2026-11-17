@@ -1456,6 +1456,8 @@
 			"receive_shortcut_any_token_count_single": "1 token on 1 network",
 			"receive_shortcut_more": "$count more",
 			"move_token_to": "Move $symbol to",
+			"move_no_networks_title": "No networks available for this move",
+			"move_no_networks_description": "Select Back to see other receive options.",
 			"as_token": "as $symbol",
 			"two_swaps_info": "$oisy_short only offers swaps it can fully verify before you approve, and there is no such direct swap from $sourceSymbol to $destinationSymbol. But you can swap from $sourceSymbol to $intermediateSymbol first, and then from $intermediateSymbol to $destinationSymbol.",
 			"two_swaps_first_button": "Swap to $intermediateSymbol first",
