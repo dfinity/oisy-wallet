@@ -185,10 +185,11 @@
 		>
 			<span class="flex shrink-0" aria-hidden="true">{@render icon()}</span>
 			<span class="flex min-w-0 flex-auto flex-col">
-				<!-- Wraps rather than truncates: "Another token on Internet Computer" takes two lines at
-				375 px. -->
-				<span class="text-base font-bold text-primary">{title}</span>
-				<span class="truncate pt-0.5 text-sm text-tertiary">{detail}</span>
+				<!-- Both lines wrap rather than truncate: at 375 px "Another token on Internet Computer"
+				takes two, and a cut preview would lose its "and N more". `text-pretty` keeps a last
+				word from standing alone ("1 / more"). -->
+				<span class="text-base font-bold text-pretty text-primary">{title}</span>
+				<span class="pt-0.5 text-sm text-pretty text-tertiary">{detail}</span>
 			</span>
 			<span class="flex shrink-0 text-tertiary" aria-hidden="true">
 				<IconChevronRight size="20" />
