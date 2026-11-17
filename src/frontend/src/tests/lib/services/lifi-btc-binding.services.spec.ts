@@ -23,7 +23,7 @@ describe('lifi-btc-binding.services', () => {
 		slippage: 0.005
 	};
 
-	const { deposit } = decodeLifiBtcTransaction({
+	const { deposit, memo } = decodeLifiBtcTransaction({
 		quote,
 		amount: BigInt(action.fromAmount),
 		userAddress: action.fromAddress ?? ''
@@ -32,6 +32,7 @@ describe('lifi-btc-binding.services', () => {
 	const params = {
 		quote,
 		deposit,
+		memo,
 		request,
 		displayedToAmountMin: BigInt(quote.estimate.toAmountMin)
 	};

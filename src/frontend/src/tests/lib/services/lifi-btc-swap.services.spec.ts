@@ -158,6 +158,7 @@ describe('lifi-btc-swap.services', () => {
 		expect(bindLifiBtcPayout).toHaveBeenCalledExactlyOnceWith({
 			quote,
 			deposit,
+			memo,
 			request,
 			displayedToAmountMin: BigInt(quote.estimate.toAmountMin)
 		});

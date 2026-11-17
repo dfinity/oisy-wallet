@@ -158,7 +158,7 @@ export const fetchLifiBtcSwap = async ({
 	const { deposit, memo, fee } = decodeLifiBtcTransaction({ quote, amount, userAddress });
 	const outputs = [deposit, memo, fee];
 
-	await bindLifiBtcPayout({ quote, deposit, request, displayedToAmountMin });
+	await bindLifiBtcPayout({ quote, deposit, memo, request, displayedToAmountMin });
 
 	// Together the outputs pay the amount: the deposit is the amount less LI.FI's fee.
 	await validateBtcSend({
