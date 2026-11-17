@@ -533,13 +533,62 @@ describe('chain-fusion-swap-active-tx.services', () => {
 				expect(lastUpdate()).toStrictEqual({ status: { Failed: null }, error });
 			});
 
-			it('should not read the transfer once the minter reports a newer deposit', async () => {
+			it('should take a newer deposit once the transfer is on chain', async () => {
 				vi.mocked(watchDepositAddress).mockResolvedValue(detected(42n));
+				vi.mocked(readSolSourceTxOutcome).mockResolvedValue('succeeded');
 				vi.mocked(depositSolStatus).mockResolvedValue({
 					Queued: { sweepable_amount: 49_109_120n }
 				});
 
 				await poll([openedBeforeBroadcast()]);
+
+				expect(depositSolStatus).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ depositId: 42n })
+				);
+				expect(lastUpdate()).toStrictEqual({
+					status: { Executing: null },
+					externalRefs: expect.arrayContaining([{ key: 'chain_fusion_cksol_deposit', value: '42' }])
+				});
+			});
+
+			// Acceptance criterion 7: another conversion's deposit, minted while this one waited to be
+			// sent, never settles a row whose transfer is not on chain.
+			it('should not take a newer deposit while the transfer is not on chain', async () => {
+				vi.mocked(watchDepositAddress).mockResolvedValue(watching(42n));
+				vi.mocked(depositSolStatus).mockResolvedValue({
+					Minted: { block_index: 12n, minted_amount: MINTED_AMOUNT }
+				});
+
+				await poll([openedBeforeBroadcast()]);
+
+				expect(depositSolStatus).not.toHaveBeenCalled();
+				expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+			});
+
+			it('should fail the row, without taking a newer deposit, once the transfer can no longer land', async () => {
+				vi.mocked(watchDepositAddress).mockResolvedValue(watching(42n));
+				vi.mocked(readSolSourceTxOutcome).mockResolvedValue('expired');
+
+				await poll([openedBeforeBroadcast()]);
+
+				expect(depositSolStatus).not.toHaveBeenCalled();
+				expect(lastUpdate()).toStrictEqual({
+					status: { Failed: null },
+					error: en.swap.error.swap_expired
+				});
+			});
+
+			it('should not read the transfer again once the row follows a deposit', async () => {
+				vi.mocked(depositSolStatus).mockResolvedValue({ Finalized: { signature: SOL_SIGNATURE } });
+
+				await poll([
+					solMintTx({
+						refs: {
+							[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH]: BLOCKHASH,
+							[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42'
+						}
+					})
+				]);
 
 				expect(readSolSourceTxOutcome).not.toHaveBeenCalled();
 			});
