@@ -1,12 +1,29 @@
+import type * as lifiEnv from '$env/rest/lifi.env';
 import {
 	bindLifiBtcPayout,
 	hasLifiBtcPayoutBinding,
+	lifiBtcAdmittedBridges,
 	type LifiBtcPayoutBinding
 } from '$lib/services/lifi-btc-binding.services';
 import { LifiRouteUnsupportedError } from '$lib/types/errors';
 import { decodeLifiBtcTransaction } from '$lib/utils/lifi-swap.utils';
 import { mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
 import { ChainId, type QuoteRequestFromAmount } from '@lifi/sdk';
+
+// All three bridges allowed from Bitcoin, `near` denied.
+vi.mock('$env/rest/lifi.env', async (importOriginal) => {
+	const original = await importOriginal<typeof lifiEnv>();
+	const { BTC_MAINNET_NETWORK_ID: btcNetworkId } = await import('$env/networks/networks.btc.env');
+
+	return {
+		...original,
+		LIFI_ALLOWED_BRIDGES: {
+			...original.LIFI_ALLOWED_BRIDGES,
+			[btcNetworkId]: ['layerswap', 'relaydepository', 'near']
+		},
+		LIFI_DENY_BRIDGES: ['near']
+	};
+});
 
 describe('lifi-btc-binding.services', () => {
 	const quote = mockLifiBtcLayerswapQuote;
@@ -65,6 +82,20 @@ describe('lifi-btc-binding.services', () => {
 				).rejects.toBeInstanceOf(LifiRouteUnsupportedError);
 			}
 		);
+	});
+
+	describe('lifiBtcAdmittedBridges', () => {
+		it('should admit no bridge while none has a binding, however many are allowed', () => {
+			expect(lifiBtcAdmittedBridges()).toEqual([]);
+		});
+
+		it('should admit an allowed bridge with a binding, and no denied one', () => {
+			const binding = vi.fn<LifiBtcPayoutBinding>();
+
+			expect(lifiBtcAdmittedBridges({ bindings: { layerswap: binding, near: binding } })).toEqual([
+				'layerswap'
+			]);
+		});
 	});
 
 	describe("with the bridge's binding", () => {

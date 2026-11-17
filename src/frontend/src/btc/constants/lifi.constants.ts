@@ -27,6 +27,11 @@ export const LIFI_BTC_CHANGE_INDEX = 2;
 // disabled, which the backend's validator accepts.
 export const LIFI_BTC_SEQUENCE = 0xfffffffd;
 
+// LI.FI's largest output layout from BTC, without the change, in vbytes: the largest deposit output
+// (`BTC_LARGEST_OUTPUT_VSIZE`), an `OP_RETURN` at `LIFI_BTC_MAX_MEMO_SCRIPT_BYTES` (9 + 83) and
+// LI.FI's P2WPKH fee output (9 + 22). Max is budgeted for it before a LI.FI quote prices its own.
+export const LIFI_BTC_CONSERVATIVE_OUTPUT_VSIZES = [43, 92, 31];
+
 // The longest `OP_RETURN` script the backend broadcasts: the opcode and 80 bytes of data with their
 // push opcodes (`MAX_OP_RETURN_SCRIPT_BYTES` in `src/backend/src/bitcoin/tx_validator.rs`).
 export const LIFI_BTC_MAX_MEMO_SCRIPT_BYTES = 83;

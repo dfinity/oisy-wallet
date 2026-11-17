@@ -18,7 +18,7 @@ import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.en
 import { NVDA_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens-erc20/tokens.nvda.env';
 import { USDG_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens-erc20/tokens.usdg.env';
 import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
-import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
@@ -1317,7 +1317,7 @@ describe('lifi-swap.utils', () => {
 			registry,
 			sourceToken
 		}: {
-			registry: 'evm' | 'sol' | 'btc';
+			registry: 'evm' | 'sol';
 			sourceToken: Token;
 		}) =>
 			buildLifiSupportedDestinations(registry)({
@@ -1353,35 +1353,6 @@ describe('lifi-swap.utils', () => {
 				expect(destinations({ registry, sourceToken })).toBeUndefined();
 			}
 		);
-
-		describe('the BTC registry', () => {
-			afterEach(() => {
-				btcSendViaBackend.enabled = false;
-			});
-
-			it('should offer every EVM and Solana destination for native BTC sent through the backend', () => {
-				btcSendViaBackend.enabled = true;
-
-				expect(destinations({ registry: 'btc', sourceToken: BTC_MAINNET_TOKEN })).toStrictEqual({
-					evm: 'any',
-					sol: 'any'
-				});
-			});
-
-			it.each([
-				{
-					case: 'native BTC sent through the signer',
-					sourceToken: BTC_MAINNET_TOKEN,
-					viaBackend: false
-				},
-				{ case: 'testnet BTC', sourceToken: BTC_TESTNET_TOKEN, viaBackend: true },
-				{ case: 'an EVM token', sourceToken: BASE_ETH_TOKEN, viaBackend: true }
-			])('should offer nothing for $case', ({ sourceToken, viaBackend }) => {
-				btcSendViaBackend.enabled = viaBackend;
-
-				expect(destinations({ registry: 'btc', sourceToken })).toBeUndefined();
-			});
-		});
 	});
 
 	describe('lifiFeesUsd', () => {

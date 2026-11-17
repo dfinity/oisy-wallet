@@ -1,3 +1,5 @@
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { LIFI_ALLOWED_BRIDGES, LIFI_DENY_BRIDGES } from '$env/rest/lifi.env';
 import { LifiRouteUnsupportedError } from '$lib/types/errors';
 import type { LifiBtcOutput } from '$lib/types/lifi';
 import { isNullish } from '@dfinity/utils';
@@ -56,6 +58,20 @@ export const hasLifiBtcPayoutBinding = ({
 	tool: string;
 	bindings?: Partial<Record<string, LifiBtcPayoutBinding>>;
 }): boolean => payoutBindingOf({ tool, bindings }) !== undefined;
+
+/**
+ * The bridges a quote from BTC may go through: allowed from Bitcoin, not denied, and with a payout
+ * binding. While it is empty, LI.FI from BTC is not offered at all. `bindings` is the registry,
+ * replaced in tests only.
+ */
+export const lifiBtcAdmittedBridges = ({
+	bindings = LIFI_BTC_PAYOUT_BINDINGS
+}: {
+	bindings?: Partial<Record<string, LifiBtcPayoutBinding>>;
+} = {}): string[] =>
+	(LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID] ?? []).filter(
+		(tool) => !LIFI_DENY_BRIDGES.includes(tool) && hasLifiBtcPayoutBinding({ tool, bindings })
+	);
 
 /**
  * Runs the payout binding of the quote's bridge, or rejects when its bridge has none. `bindings` is

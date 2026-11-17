@@ -77,7 +77,8 @@ describe('btc-swap.providers', () => {
 			expect(providers.every(({ isEnabled }) => isEnabled)).toBeTruthy();
 		});
 
-		it('should quote native BTC toward every EVM and Solana destination', async () => {
+		// The destinations themselves are `lifiBtcSupportedDestinations`'s, tested with its service.
+		it('should list native BTC, and no destination while no bridge is admitted', async () => {
 			btcSendViaBackend.enabled = true;
 
 			const lifi = (await loadProviders()).find(({ key }) => key === SwapProvider.LIFI);
@@ -95,7 +96,7 @@ describe('btc-swap.providers', () => {
 					supportedSourceTokens: undefined,
 					findProviderSourceTokens: () => undefined
 				})
-			).toStrictEqual({ evm: 'any', sol: 'any' });
+			).toBeUndefined();
 		});
 	});
 

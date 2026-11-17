@@ -19,6 +19,7 @@ import {
 } from '$lib/constants/analytics.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import * as agreementsDerived from '$lib/derived/user-provider-agreements.derived';
+import { PLAUSIBLE_EVENT_SWAP_ERROR_TYPES } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
@@ -38,6 +39,7 @@ import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
@@ -769,6 +771,34 @@ describe('SwapBtcWizard', () => {
 					metadata: expect.objectContaining({ dApp: SwapProvider.LIFI })
 				})
 			);
+		});
+
+		// LI.FI's error text can carry the request URL, and with it the user's addresses.
+		it("reports a failure as an allow-listed category, never LI.FI's text", async () => {
+			vi.mocked(fetchLifiBtcSwap).mockRejectedValue(
+				new Error(`GET https://li.quest/v1/quote?fromAddress=${mockBtcAddress} failed`)
+			);
+
+			const { getByText } = renderExecution();
+
+			await confirm(getByText);
+
+			const errorEvent = vi
+				.mocked(analytics.trackEvent)
+				.mock.calls.find(([{ name }]) => name === TRACK_COUNT_SWAP_ERROR);
+
+			assertNonNullish(errorEvent);
+
+			const [{ metadata }] = errorEvent;
+
+			expect(metadata).toEqual(
+				expect.objectContaining({
+					dApp: SwapProvider.LIFI,
+					result_error_type: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.UNKNOWN
+				})
+			);
+			expect(metadata).not.toHaveProperty('error');
+			expect(JSON.stringify(metadata)).not.toContain(mockBtcAddress);
 		});
 
 		it('closes, not offering the form again, when the deposit may have gone out', async () => {

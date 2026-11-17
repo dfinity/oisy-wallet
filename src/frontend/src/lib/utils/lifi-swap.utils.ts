@@ -98,15 +98,11 @@ export const isLifiBtcSource = (token: Token): boolean =>
  * The routing sends a pair to the Solana registry whenever either side is Solana, so the EVM entry
  * quotes EVM → EVM (`{ evm: 'any' }`) and the Solana entry EVM → Solana and Solana → Solana
  * (`{ sol: 'any' }`). A Solana source gets nothing from the EVM entry: Solana → EVM is not quoted.
- * The BTC entry quotes native BTC toward both (`isLifiBtcSource`); Bitcoin is never a destination.
+ * The BTC entry has its own (`lifiBtcSupportedDestinations`).
  */
 export const buildLifiSupportedDestinations =
-	(registry: 'evm' | 'sol' | 'btc'): GetSupportedDestinationsFn =>
+	(registry: 'evm' | 'sol'): GetSupportedDestinationsFn =>
 	({ sourceToken }) => {
-		if (registry === 'btc') {
-			return isLifiBtcSource(sourceToken) ? { evm: 'any', sol: 'any' } : undefined;
-		}
-
 		// The same tests the quote request applies, so no destination is offered for a source LI.FI
 		// is never asked about.
 		if (
