@@ -1387,6 +1387,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "Обменять",
 			"select_destination_token": "Выбрать токен для получения",
@@ -1440,6 +1443,20 @@
 			"gasless": "Без комиссии за газ",
 			"swap_fees": "Комиссия за обмен",
 			"cross_chain_networks_info": "Информация о кросс-чейн сетях",
+			"receive_shortcut_same_network": "",
+			"receive_shortcut_other_network": "",
+			"receive_shortcut_token_on_network": "",
+			"receive_shortcut_convert": "",
+			"receive_shortcut_convert_back": "",
+			"receive_shortcut_bridge_back": "",
+			"receive_shortcut_move": "",
+			"receive_shortcut_any_token": "",
+			"receive_shortcut_any_token_count": "",
+			"receive_shortcut_any_token_count_one": "",
+			"receive_shortcut_any_token_count_single": "",
+			"receive_shortcut_more": "",
+			"move_token_to": "",
+			"as_token": "",
 			"two_swaps_info": "$oisy_short предлагает только обмены, которые может полностью проверить до вашего подтверждения, а такого прямого обмена $sourceSymbol на $destinationSymbol нет. Но вы можете сначала обменять $sourceSymbol на $intermediateSymbol, а затем $intermediateSymbol на $destinationSymbol.",
 			"two_swaps_first_button": "Сначала обменять на $intermediateSymbol",
 			"near_intents_estimated_time": "",

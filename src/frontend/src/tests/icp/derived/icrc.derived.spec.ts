@@ -9,6 +9,10 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
+import { allFungibleTokens, allIcrcTokens, allTokens } from '$lib/derived/all-tokens.derived';
+import { allSwapUniverseTokens } from '$lib/derived/swap.derived';
+import type { Token } from '$lib/types/token';
 import {
 	mockValidDip20Token,
 	mockValidIcToken,
@@ -62,6 +66,58 @@ describe('icrc.derived', () => {
 			{ data: mockIcrcCustomToken3, certified: false }
 		]);
 	});
+
+	it.each([
+		{ name: 'allIcrcTokens', store: allIcrcTokens },
+		{ name: 'allTokens', store: allTokens },
+		{ name: 'allFungibleTokens', store: allFungibleTokens },
+		{ name: 'allFungibleNetworkTokens', store: allFungibleNetworkTokens },
+		{ name: 'allSwapUniverseTokens', store: allSwapUniverseTokens }
+	])(
+		'should propagate saved versions and loaded metadata through $name with stable IDs and order',
+		({ store }) => {
+			icrcDefaultTokensStore.resetAll();
+			icrcCustomTokensStore.resetAll();
+			const builtin = mockIcrcDefaultToken1;
+			const envTokens = vi
+				.spyOn(tokensIcEnv, 'IC_BUILTIN_TOKENS', 'get')
+				.mockReturnValue([builtin]);
+			let latest: Token[] = [];
+			const unsubscribe = store.subscribe((tokens) => {
+				latest = tokens;
+			});
+			const ids = latest.map(({ id }) => id);
+
+			try {
+				expect(latest.find(({ id }) => id === builtin.id)).toMatchObject({ enabled: false });
+
+				const saved = { ...builtin, enabled: false, version: 1n, name: 'Loaded metadata' };
+				icrcCustomTokensStore.setAll([{ data: saved, certified: false }]);
+
+				expect(latest.map(({ id }) => id)).toEqual(ids);
+				expect(latest.find(({ id }) => id === builtin.id)).toMatchObject(saved);
+
+				const updated = { ...saved, version: 2n, name: 'Updated metadata' };
+				icrcCustomTokensStore.setAll([{ data: updated, certified: true }]);
+
+				expect(latest.find(({ id }) => id === builtin.id)).toMatchObject(updated);
+
+				icrcDefaultTokensStore.setAll([{ data: builtin, certified: false }]);
+				const metadata = { ...builtin, name: 'Default metadata', fee: 123n };
+				icrcDefaultTokensStore.setAll([{ data: metadata, certified: true }]);
+
+				expect(latest.map(({ id }) => id)).toEqual(ids);
+				expect(latest.find(({ id }) => id === builtin.id)).toMatchObject({
+					...metadata,
+					enabled: false,
+					version: 2n
+				});
+			} finally {
+				unsubscribe();
+				envTokens.mockRestore();
+			}
+		}
+	);
 
 	describe('enabledIcrcTokens', () => {
 		it('should return all enabled ICRC tokens', () => {
@@ -206,14 +262,16 @@ describe('icrc.derived', () => {
 	});
 
 	describe('allKnownIcrcTokensLedgerCanisterIds', () => {
-		vi.spyOn(tokensIcEnv, 'IC_BUILTIN_TOKENS', 'get').mockImplementation(() => [
-			mockValidIcrcToken,
-			mockValidDip20Token
-		]);
-		icrcDefaultTokensStore.setAll([
-			{ data: mockIcrcDefaultToken1, certified: false },
-			{ data: mockIcrcDefaultToken2, certified: false }
-		]);
+		beforeEach(() => {
+			vi.spyOn(tokensIcEnv, 'IC_BUILTIN_TOKENS', 'get').mockImplementation(() => [
+				mockValidIcrcToken,
+				mockValidDip20Token
+			]);
+			icrcDefaultTokensStore.setAll([
+				{ data: mockIcrcDefaultToken1, certified: false },
+				{ data: mockIcrcDefaultToken2, certified: false }
+			]);
+		});
 
 		it('should return correct array of ledger ids', () => {
 			expect(get(allKnownIcrcTokensLedgerCanisterIds)).toEqual([

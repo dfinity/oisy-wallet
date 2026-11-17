@@ -60,6 +60,10 @@ does not finish while the children are invisible (see `NftHideButton`).
 
 ### Common building blocks
 
+`TokenInput` and `TokenInputContent` accept an optional `trailingAction` snippet inside the field,
+after the token selector. Use an existing labelled button primitive for a separate field action,
+as Swap does for clearing the receive token.
+
 | Component                               | Where                             | Use it for                                                                                                                                                |
 | --------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `List`, `ListItem`, `ListItemButton`    | `$lib/components/common/`         | Vertical lists of items.                                                                                                                                  |
@@ -98,6 +102,7 @@ does not finish while the children are invisible (see `NftHideButton`).
 | `SwapProvider`                          | `$lib/components/swap/`           | Review's static provider label; its disclosure shows the offer's `SwapProviderDetails`.                                                                   |
 | `SwapProviderCell`                      | `$lib/components/swap/`           | The swap forms' Smart Swap cell: status, gain vs. lowest quote, opens the provider step.                                                                  |
 | `SwapProviderDetails`                   | `$lib/components/swap/`           | One offer's website and provider details, for `SwapProvider`'s disclosure and the provider step's card (`showWebsite={false}` there).                     |
+| `SwapReceiveShortcuts`                  | `$lib/components/swap/`           | The empty receive card's shortcuts (`getListedReceiveShortcuts`), led by `SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY` from `SwapModalWizardSteps`.                |
 | `BestRateBadge`                         | `$lib/components/ui/`             | Filled best-rate indicator: a star, with the "Best Rate" label from `md`.                                                                                 |
 | `SwapProviderAnimation`                 | `$lib/components/swap/`           | Right-aligned loop of the asked providers, then the `swapProviderPool`; reveals the real winner once; reduced motion built in.                            |
 | `SwapFeeRow`                            | `$lib/components/swap/`           | A swap form's fee row: slides in, shows a "Total fee" skeleton during a foreground comparison, cross-fades to the form's fees.                            |
@@ -144,6 +149,15 @@ Add new feature folders only if your concern doesn't fit any of the above.
 | `tokens.constants`, `*-tokens.derived`                          | `$lib/constants/`, `$lib/derived/` | Default + enabled tokens per chain.    |
 | `network.derived`, `networks.derived`                           | `$lib/derived/`                    | Active network + chain predicates.     |
 | `swap-amounts.store`, `swap-quote-activity.store`               | `$lib/stores/`                     | Accepted offers; pricing participants. |
+
+`swap.store` keeps `tokenListReturnFocus` across step remounts: Back restores the originating shortcut,
+picks focus the selected control, and a missing shortcut falls back to the receive area.
+It also keeps `receiveTokenPickerStep` and token-list filters so the receive selector reopens the
+chosen shortcut view after a pick or Back, including in Get Token. Shortcuts replace that view;
+a new pay token resets the remembered network step, and resetting the swap clears the memory.
+The network view only reopens for a destination in the pay token's group on another network.
+Its `tokenListReturnFocus` marks shortcut entries; reopening a selected token does not count as
+shortcut use.
 
 ### Constants worth knowing
 
