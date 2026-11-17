@@ -33,7 +33,7 @@ ic-signature-verification = "0.3"
 # public keys offline instead of asking the management canister for each one.
 ic-ed25519 = { version = "0.6.0", default-features = false }
 ic-secp256k1 = "0.3.0"
-candid = "0.10.26"
+candid = "0.10.40"
 candid_parser = "0.4"
 serde = "1"
 serde_bytes = "0.11"
