@@ -10,6 +10,7 @@ import {
 import { SwapProvider } from '$lib/types/swap';
 import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { assertNonNullish } from '@dfinity/utils';
 
 vi.mock('$lib/services/near-intents.services', () => ({
@@ -46,6 +47,56 @@ describe('btc-swap.providers', () => {
 			vi.doUnmock('$env/rest/near-intents.env');
 			vi.resetModules();
 		}
+	});
+
+	// The backend send path defaults off in the test env, so LI.FI is left out above.
+	describe('LI.FI entry', () => {
+		const loadProviders = async () => {
+			vi.resetModules();
+
+			const { btcSwapProviders: providers } = await import('$lib/providers/btc-swap.providers');
+
+			return providers;
+		};
+
+		afterEach(() => {
+			btcSendViaBackend.enabled = false;
+			vi.resetModules();
+		});
+
+		it('should register LI.FI last once BTC is sent through the backend', async () => {
+			btcSendViaBackend.enabled = true;
+
+			const providers = await loadProviders();
+
+			expect(providers.map(({ key }) => key)).toEqual([
+				SwapProvider.CHAIN_FUSION,
+				SwapProvider.NEAR_INTENTS,
+				SwapProvider.LIFI
+			]);
+			expect(providers.every(({ isEnabled }) => isEnabled)).toBeTruthy();
+		});
+
+		it('should quote native BTC toward every EVM and Solana destination', async () => {
+			btcSendViaBackend.enabled = true;
+
+			const lifi = (await loadProviders()).find(({ key }) => key === SwapProvider.LIFI);
+			// From the same module graph as the providers: a network id is a symbol of its own module.
+			const { BTC_MAINNET_TOKEN: btcToken } = await import('$env/tokens/tokens.btc.env');
+
+			assertNonNullish(lifi);
+
+			await expect(lifi.getSupportedTokens?.()).resolves.toEqual(
+				new Set([nativeSwapTokenIdentifier({ networkId: BTC_MAINNET_NETWORK_ID, symbol: 'BTC' })])
+			);
+			expect(
+				lifi.getSupportedDestinations({
+					sourceToken: btcToken,
+					supportedSourceTokens: undefined,
+					findProviderSourceTokens: () => undefined
+				})
+			).toStrictEqual({ evm: 'any', sol: 'any' });
+		});
 	});
 
 	it('should not register Chain Fusion when its flag is off', async () => {

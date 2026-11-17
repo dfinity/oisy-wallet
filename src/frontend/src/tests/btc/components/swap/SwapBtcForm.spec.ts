@@ -1,5 +1,6 @@
 import SwapBtcForm from '$btc/components/swap/SwapBtcForm.svelte';
 import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
+import * as btcMaxSendAmountDerived from '$btc/derived/btc-max-send-amount.derived';
 import { UTXOS_FEE_CONTEXT_KEY, initUtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
@@ -21,6 +22,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { mockBtcAddress, mockUtxo, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
@@ -56,6 +58,28 @@ describe('SwapBtcForm', () => {
 				}
 			],
 			externalFees: []
+		}
+	};
+
+	// LI.FI's deposit, memo and fee cost more than the loader's one output: 2 130 sats against 1 000.
+	const lifiOutputVSizes = [43, 29, 31];
+
+	const lifiOffer: SwapMappedResult = {
+		provider: SwapProvider.LIFI,
+		receiveAmount: 1_000_000n,
+		receiveOutMinimum: 990_000n,
+		swapDetails: mockLifiBtcLayerswapQuote,
+		request: {
+			fromChain: 20000000000001,
+			toChain: 1,
+			fromToken: 'bitcoin',
+			toToken: '0x0000000000000000000000000000000000000000',
+			fromAddress: mockBtcAddress,
+			fromAmount: '1000000'
+		},
+		btcSelection: {
+			utxosFee: { ...mockUtxosFee, feeSatoshis: 2_130n },
+			outputVSizes: lifiOutputVSizes
 		}
 	};
 
@@ -241,6 +265,56 @@ describe('SwapBtcForm', () => {
 
 		await waitFor(() => {
 			expect(getByText(en.swap.text.review_button).closest('button')).toBeDisabled();
+		});
+	});
+
+	describe('with a LI.FI offer selected', () => {
+		// Covers the amount and the loader's one-output fee, not LI.FI's own.
+		const balance = 1_001_500n;
+
+		it("checks the funds against the offer's own network fee", async () => {
+			const { container, getByText } = render(SwapBtcForm, {
+				props,
+				context: createContext({ balance, offer: lifiOffer })
+			});
+
+			await enterAmount({ container, value: '0.01' });
+
+			await waitFor(() => {
+				expect(getByText(en.swap.text.review_button).closest('button')).toBeDisabled();
+			});
+		});
+
+		it('leaves the loader fee to any other offer', async () => {
+			const { container, getByText } = render(SwapBtcForm, {
+				props,
+				context: createContext({ balance })
+			});
+
+			await enterAmount({ container, value: '0.01' });
+
+			await waitFor(() => {
+				expect(getByText(en.swap.text.review_button).closest('button')).not.toBeDisabled();
+			});
+		});
+
+		it("prices Max for the offer's outputs", () => {
+			const maxSpy = vi.spyOn(btcMaxSendAmountDerived, 'initBtcMaxSendAmount');
+
+			render(SwapBtcForm, { props, context: createContext({ offer: lifiOffer }) });
+
+			expect(maxSpy).toHaveBeenCalledWith({
+				source: mockBtcAddress,
+				outputVSizes: lifiOutputVSizes
+			});
+		});
+
+		it('prices Max for one output for any other offer', () => {
+			const maxSpy = vi.spyOn(btcMaxSendAmountDerived, 'initBtcMaxSendAmount');
+
+			render(SwapBtcForm, { props, context: createContext() });
+
+			expect(maxSpy).toHaveBeenCalledWith({ source: mockBtcAddress, outputVSizes: undefined });
 		});
 	});
 

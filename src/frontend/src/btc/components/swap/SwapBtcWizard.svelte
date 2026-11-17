@@ -31,6 +31,7 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { fetchChainFusionBtcSwap } from '$lib/services/chain-fusion-swap.services';
+	import { fetchLifiBtcSwap } from '$lib/services/lifi-btc-swap.services';
 	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 	import { enableSwapDestinationToken, fetchNearIntentsBtcSwap } from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -135,7 +136,16 @@
 		swapProgressStep = ProgressStepsSwap.INITIALIZATION;
 
 		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
-		const utxosFee = $utxosFeeStore?.utxosFee;
+
+		// A LI.FI offer carries its own selection, priced for its deposit, memo and fee outputs; every
+		// other provider sends with the loader's.
+		const lifiOffer =
+			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.LIFI
+				? $swapAmountsStore.selectedProvider
+				: undefined;
+		const utxosFee = nonNullish(lifiOffer)
+			? lifiOffer.btcSelection?.utxosFee
+			: $utxosFeeStore?.utxosFee;
 
 		// Re-resolved through the same pair oracle the quote used, so the row the execution
 		// persists cannot disagree with the offer the user accepted about which twin this is —
@@ -173,7 +183,9 @@
 		onNext();
 		onStopTriggerAmount();
 
-		if (BTC_EXTENSION_FEATURE_FLAG_ENABLED) {
+		// LI.FI's execution checks its selection itself, against the layout of the quote it re-requests
+		// and signs, which this one-output check would refuse.
+		if (BTC_EXTENSION_FEATURE_FLAG_ENABLED && isNullish(lifiOffer)) {
 			// Last-line guard against a race: between the quote and the broadcast another tab
 			// may have reserved one of the UTXOs this selection covers. Going back lets the
 			// user refresh the fee preview and retry, exactly as the Convert wizard does.
@@ -244,6 +256,18 @@
 					network,
 					utxosFee
 				});
+			} else if (nonNullish(lifiOffer)) {
+				await fetchLifiBtcSwap({
+					identity: $authIdentity,
+					progress: (step: ProgressStep) => (swapProgressStep = step),
+					sourceToken: $sourceToken,
+					destinationToken: $destinationToken,
+					swapAmount,
+					userAddress: sourceAddress,
+					network,
+					offer: lifiOffer,
+					utxosFee
+				});
 			} else {
 				// The ck twin and the minter's deposit address come from app state rather than
 				// from the offer, so only this branch requires them; a NEAR Intents deposit goes
@@ -282,8 +306,8 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			// The foreground ends once the deposit is broadcast; the settlement (ckBTC minting
-			// or NEAR Intents fulfillment) is tracked by the active-user-transaction row the
+			// The foreground ends once the deposit is broadcast; the settlement (ckBTC minting,
+			// NEAR Intents fulfillment or LI.FI's bridge) is tracked by the active-user-transaction row the
 			// execution just created, which fires the success or failure event when it reaches
 			// a terminal state. Hence `submitted`.
 			trackEvent({
@@ -365,7 +389,7 @@
 			{/snippet}
 		</SwapReview>
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-		<!-- Both providers settle as an active user transaction once the deposit is broadcast,
+		<!-- Every provider settles as an active user transaction once the deposit is broadcast,
 		     so the stepper says the swap starts here and finishes in the background. NEAR
 		     Intents additionally signs a plain BTC transfer, hence the extra signing step. -->
 		<SwapProgress

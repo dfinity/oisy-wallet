@@ -37,14 +37,21 @@
 
 	let totalFee = $derived(fees?.reduce((acc, { fee }) => acc + fee, ZERO));
 
-	// A NEAR Intents quote already prices the provider's fees into the receive amount, so
-	// the only cost paid on top is the Bitcoin network fee of the deposit; same shape as
-	// the network fee the SOL and EVM wizards show for this provider.
-	let satoshisFee = $derived(
-		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.NEAR_INTENTS
-			? $utxosFeeStore?.utxosFee?.feeSatoshis
-			: undefined
-	);
+	// A NEAR Intents or LI.FI quote already prices the provider's fees into the receive amount
+	// (LI.FI's and the bridge's are listed in its provider sheet), so the only cost paid on top is
+	// the Bitcoin network fee of the deposit. LI.FI's is that of its own selection, priced for its
+	// outputs.
+	let satoshisFee = $derived.by(() => {
+		const selectedProvider = $swapAmountsStore?.selectedProvider;
+
+		if (selectedProvider?.provider === SwapProvider.NEAR_INTENTS) {
+			return $utxosFeeStore?.utxosFee?.feeSatoshis;
+		}
+
+		if (selectedProvider?.provider === SwapProvider.LIFI) {
+			return selectedProvider.btcSelection?.utxosFee.feeSatoshis;
+		}
+	});
 </script>
 
 {#snippet feeRow({ labelPath, fee, token }: ChainFusionFee)}
