@@ -1442,7 +1442,7 @@
 			"cross_chain_networks_info": "Přesouváte tokeny ze sítě <b>$sourceNetwork</b> do sítě <b>$destinationNetwork</b>",
 			"two_swaps_info": "$oisy_short nabízí jen výměny, které dokáže před vaším schválením plně ověřit, a žádná taková přímá výměna z $sourceSymbol na $destinationSymbol neexistuje. Můžete ale nejdřív vyměnit $sourceSymbol za $intermediateSymbol a potom $intermediateSymbol za $destinationSymbol.",
 			"two_swaps_first_button": "Nejdřív vyměnit za $intermediateSymbol",
-			"two_swaps_deposit_unverified_info": "",
+			"two_swaps_deposit_unverified_info": "$oisy_short se nepodařilo ověřit adresu, na kterou by tato výměna poslala vaše $sourceSymbol, proto se teď nenabízí. Můžete to místo toho udělat dvěma výměnami: nejdřív $sourceSymbol za $intermediateSymbol, potom $intermediateSymbol za $destinationSymbol.",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
@@ -1492,8 +1492,8 @@
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
 			"lifi_route_unverified": "",
-			"lifi_btc_deposit_unverified": "",
-			"lifi_btc_deposit_unverified_two_swaps": ""
+			"lifi_btc_deposit_unverified": "$oisy_short se nepodařilo ověřit adresu, na kterou by tato výměna poslala vaše $sourceSymbol, proto byla zastavena. Vaše $sourceSymbol zůstaly ve vaší peněžence.",
+			"lifi_btc_deposit_unverified_two_swaps": "$oisy_short se nepodařilo ověřit adresu, na kterou by tato výměna poslala vaše $sourceSymbol, proto byla zastavena. Vaše $sourceSymbol zůstaly ve vaší peněžence. Můžete to místo toho udělat dvěma výměnami: nejdřív $sourceSymbol za $intermediateSymbol, potom $intermediateSymbol za $destinationSymbol."
 		}
 	},
 	"buy": {

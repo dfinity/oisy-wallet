@@ -1442,7 +1442,7 @@
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
 			"two_swaps_info": "$oisy_short は、承認の前に完全に検証できるスワップのみを提供しています。$sourceSymbol から $destinationSymbol へのそのような直接のスワップはありません。ただし、まず $sourceSymbol を $intermediateSymbol にスワップし、その後 $intermediateSymbol を $destinationSymbol にスワップすることはできます。",
 			"two_swaps_first_button": "まず $intermediateSymbol にスワップ",
-			"two_swaps_deposit_unverified_info": "",
+			"two_swaps_deposit_unverified_info": "$oisy_short は、このスワップが $sourceSymbol を送る先のアドレスを検証できなかったため、現在このスワップは提供していません。代わりに 2 回のスワップで行えます：まず $sourceSymbol を $intermediateSymbol に、次に $intermediateSymbol を $destinationSymbol にスワップしてください。",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
@@ -1492,8 +1492,8 @@
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
 			"lifi_route_unverified": "",
-			"lifi_btc_deposit_unverified": "",
-			"lifi_btc_deposit_unverified_two_swaps": ""
+			"lifi_btc_deposit_unverified": "$oisy_short は、このスワップが $sourceSymbol を送る先のアドレスを検証できなかったため、スワップを中止しました。$sourceSymbol はウォレットに残っています。",
+			"lifi_btc_deposit_unverified_two_swaps": "$oisy_short は、このスワップが $sourceSymbol を送る先のアドレスを検証できなかったため、スワップを中止しました。$sourceSymbol はウォレットに残っています。代わりに 2 回のスワップで行えます：まず $sourceSymbol を $intermediateSymbol に、次に $intermediateSymbol を $destinationSymbol にスワップしてください。"
 		}
 	},
 	"buy": {

@@ -1442,7 +1442,7 @@
 			"cross_chain_networks_info": "跨链网络信息",
 			"two_swaps_info": "$oisy_short 只提供在你批准之前能够完全验证的兑换，而从 $sourceSymbol 到 $destinationSymbol 没有这样的直接兑换。不过，你可以先将 $sourceSymbol 兑换为 $intermediateSymbol，再将 $intermediateSymbol 兑换为 $destinationSymbol。",
 			"two_swaps_first_button": "先兑换为 $intermediateSymbol",
-			"two_swaps_deposit_unverified_info": "",
+			"two_swaps_deposit_unverified_info": "$oisy_short 无法验证此兑换会将你的 $sourceSymbol 发送到的地址，因此目前不提供此兑换。你可以改为分两次兑换：先将 $sourceSymbol 兑换为 $intermediateSymbol，再将 $intermediateSymbol 兑换为 $destinationSymbol。",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
@@ -1492,8 +1492,8 @@
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
 			"lifi_route_unverified": "",
-			"lifi_btc_deposit_unverified": "",
-			"lifi_btc_deposit_unverified_two_swaps": ""
+			"lifi_btc_deposit_unverified": "$oisy_short 无法验证此兑换会将你的 $sourceSymbol 发送到的地址，因此已停止此兑换。你的 $sourceSymbol 仍在你的钱包中。",
+			"lifi_btc_deposit_unverified_two_swaps": "$oisy_short 无法验证此兑换会将你的 $sourceSymbol 发送到的地址，因此已停止此兑换。你的 $sourceSymbol 仍在你的钱包中。你可以改为分两次兑换：先将 $sourceSymbol 兑换为 $intermediateSymbol，再将 $intermediateSymbol 兑换为 $destinationSymbol。"
 		}
 	},
 	"buy": {

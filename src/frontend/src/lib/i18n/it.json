@@ -1442,7 +1442,7 @@
 			"cross_chain_networks_info": "",
 			"two_swaps_info": "$oisy_short offre solo scambi che può verificare completamente prima della tua approvazione, e non esiste uno scambio diretto di questo tipo da $sourceSymbol a $destinationSymbol. Però puoi scambiare prima $sourceSymbol con $intermediateSymbol e poi $intermediateSymbol con $destinationSymbol.",
 			"two_swaps_first_button": "Scambia prima con $intermediateSymbol",
-			"two_swaps_deposit_unverified_info": "",
+			"two_swaps_deposit_unverified_info": "$oisy_short non è riuscito a verificare l'indirizzo a cui questo scambio invierebbe i tuoi $sourceSymbol, quindi per ora non viene offerto. Puoi invece farlo con due scambi: prima $sourceSymbol con $intermediateSymbol, poi $intermediateSymbol con $destinationSymbol.",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
@@ -1492,8 +1492,8 @@
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
 			"lifi_route_unverified": "",
-			"lifi_btc_deposit_unverified": "",
-			"lifi_btc_deposit_unverified_two_swaps": ""
+			"lifi_btc_deposit_unverified": "$oisy_short non è riuscito a verificare l'indirizzo a cui questo scambio invierebbe i tuoi $sourceSymbol, quindi l'ha interrotto. I tuoi $sourceSymbol sono rimasti nel tuo wallet.",
+			"lifi_btc_deposit_unverified_two_swaps": "$oisy_short non è riuscito a verificare l'indirizzo a cui questo scambio invierebbe i tuoi $sourceSymbol, quindi l'ha interrotto. I tuoi $sourceSymbol sono rimasti nel tuo wallet. Puoi invece farlo con due scambi: prima $sourceSymbol con $intermediateSymbol, poi $intermediateSymbol con $destinationSymbol."
 		}
 	},
 	"buy": {

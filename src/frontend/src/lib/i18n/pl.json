@@ -1442,7 +1442,7 @@
 			"cross_chain_networks_info": "Przenosisz tokeny z sieci <b>$sourceNetwork</b> do sieci <b>$destinationNetwork</b>",
 			"two_swaps_info": "$oisy_short oferuje tylko wymiany, które może w pełni zweryfikować przed Twoim zatwierdzeniem, a takiej bezpośredniej wymiany z $sourceSymbol na $destinationSymbol nie ma. Możesz jednak najpierw wymienić $sourceSymbol na $intermediateSymbol, a potem $intermediateSymbol na $destinationSymbol.",
 			"two_swaps_first_button": "Najpierw wymień na $intermediateSymbol",
-			"two_swaps_deposit_unverified_info": "",
+			"two_swaps_deposit_unverified_info": "$oisy_short nie mógł zweryfikować adresu, na który ta wymiana wysłałaby Twoje $sourceSymbol, dlatego nie jest teraz oferowana. Zamiast tego możesz zrobić to w dwóch wymianach: najpierw $sourceSymbol na $intermediateSymbol, potem $intermediateSymbol na $destinationSymbol.",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
@@ -1492,8 +1492,8 @@
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
 			"lifi_route_unverified": "",
-			"lifi_btc_deposit_unverified": "",
-			"lifi_btc_deposit_unverified_two_swaps": ""
+			"lifi_btc_deposit_unverified": "$oisy_short nie mógł zweryfikować adresu, na który ta wymiana wysłałaby Twoje $sourceSymbol, dlatego ją zatrzymał. Twoje $sourceSymbol pozostały w Twoim portfelu.",
+			"lifi_btc_deposit_unverified_two_swaps": "$oisy_short nie mógł zweryfikować adresu, na który ta wymiana wysłałaby Twoje $sourceSymbol, dlatego ją zatrzymał. Twoje $sourceSymbol pozostały w Twoim portfelu. Zamiast tego możesz zrobić to w dwóch wymianach: najpierw $sourceSymbol na $intermediateSymbol, potem $intermediateSymbol na $destinationSymbol."
 		}
 	},
 	"buy": {
