@@ -108,6 +108,70 @@ describe('InputBase', () => {
 		expect(element?.value).toBe('1.5');
 	});
 
+	it('should read a comma as the decimal separator of a currency value', async () => {
+		let value: string | number | undefined;
+
+		const { container } = render(InputBase, {
+			props: {
+				...props,
+				inputType: 'currency',
+				// Stands in for `bind:value`, so the test sees the value the input hands back.
+				get value() {
+					return value;
+				},
+				set value(next) {
+					value = next;
+				}
+			}
+		});
+
+		const element = input(container);
+		element && (await fireEvent.input(element, { target: { value: '1,5' } }));
+
+		expect(element?.value).toBe('1.5');
+		expect(value).toBe('1.5');
+	});
+
+	it('should keep the cursor after a comma typed inside a currency value', async () => {
+		const { container } = render(InputBase, {
+			props: { ...props, inputType: 'currency', value: '15' }
+		});
+
+		const element = input(container);
+		// Types "," between "1" and "5", leaving the cursor after it.
+		element?.setRangeText(',', 1, 1, 'end');
+		element && (await fireEvent.input(element));
+
+		expect(element?.value).toBe('1.5');
+		expect(element?.selectionStart).toBe(2);
+	});
+
+	it('should reject a comma value with too many decimals', async () => {
+		const { container } = render(InputBase, {
+			props: { ...props, inputType: 'currency', decimals: 2, value: '1.5' }
+		});
+
+		const element = input(container);
+		element && (await fireEvent.input(element, { target: { value: '1,999' } }));
+
+		expect(element?.value).toBe('1.5');
+	});
+
+	// Both mean 1234.5 in their locale; which mark is the decimal one is refused rather than guessed.
+	it.each(['1,234.5', '1.234,5'])(
+		'should reject the currency value %s with both a comma and a dot',
+		async (text) => {
+			const { container } = render(InputBase, {
+				props: { ...props, inputType: 'currency', value: '1.5' }
+			});
+
+			const element = input(container);
+			element && (await fireEvent.input(element, { target: { value: text } }));
+
+			expect(element?.value).toBe('1.5');
+		}
+	);
+
 	it('should render the label/info row via snippets', () => {
 		const { getByTestId } = render(InputBaseTest, { props });
 

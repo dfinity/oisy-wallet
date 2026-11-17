@@ -179,8 +179,25 @@
 		return regex.test(text);
 	};
 
+	// The decimal keypad shows "," instead of "." on phones set to a comma locale (e.g. German).
+	// A value with both separators (e.g. a pasted "1,234.5") ends up with two dots and is refused.
+	const replaceCommaWithDot = (input: HTMLInputElement) => {
+		if (!input.value.includes(',')) {
+			return;
+		}
+
+		const { selectionStart: cursorStart, selectionEnd: cursorEnd } = input;
+
+		input.value = input.value.replaceAll(',', '.');
+
+		// Same length, so the cursor stays where the user typed.
+		input.setSelectionRange(cursorStart, cursorEnd);
+	};
+
 	const handleInput = ({ currentTarget }: InputEventHandler) => {
 		if (currency) {
+			replaceCommaWithDot(currentTarget);
+
 			const currentValue = exponentToPlainNumberString(currentTarget.value);
 
 			// handle invalid input
