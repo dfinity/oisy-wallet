@@ -555,24 +555,22 @@ export const canPayWithToken = (token: TokenUi): boolean => {
  * that have a destination the providers supporting it reach. Before the providers' data is in, the
  * pre-filter alone. `undefined` for no constraint.
  */
-export const getReceiveNetworkIds = ({
+const getReceiveNetworkIdsFromSupportedTokens = ({
 	sourceToken,
-	supportedData,
 	networks,
-	tokens
+	supportedTokens
 }: {
 	sourceToken: Token;
-	supportedData: SwapSupportedTokensData | undefined;
 	networks: Network[];
-	tokens: TokenToggleable<Token>[];
+	supportedTokens: Token[] | undefined;
 }): NetworkId[] | undefined => {
 	const baseAllowedIds = SUPPORTED_CROSS_SWAP_NETWORKS[sourceToken.network.id];
 
-	if (isNullish(supportedData)) {
+	if (isNullish(supportedTokens)) {
 		return baseAllowedIds;
 	}
 
-	const reachableIds = networksWithSupport({ networks, tokens, supportedData });
+	const reachableIds = networksWithSupport({ networks, supportedTokens });
 
 	if (isNullish(baseAllowedIds)) {
 		return reachableIds;
@@ -583,12 +581,7 @@ export const getReceiveNetworkIds = ({
 	return baseAllowedIds.filter((id) => reachableSet.has(id));
 };
 
-/**
- * The tokens the receive list offers for a pay token on all networks and all asset types, with no
- * search: those the providers supporting the pay token reach, on the networks it reaches, the pay
- * token left out. The list and anything that previews it read this, so they cannot drift apart.
- */
-export const getReceiveSwapTokens = <T extends Token>({
+export const getReceiveNetworkIds = ({
 	sourceToken,
 	supportedData,
 	networks,
@@ -597,22 +590,54 @@ export const getReceiveSwapTokens = <T extends Token>({
 	sourceToken: Token;
 	supportedData: SwapSupportedTokensData | undefined;
 	networks: Network[];
+	tokens: TokenToggleable<Token>[];
+}): NetworkId[] | undefined =>
+	getReceiveNetworkIdsFromSupportedTokens({
+		sourceToken,
+		networks,
+		supportedTokens: nonNullish(supportedData)
+			? filterSwapTokens({ tokens, supportedData })
+			: undefined
+	});
+
+/**
+ * The tokens the receive list offers for a pay token on all networks and all asset types, with no
+ * search: those the providers supporting the pay token reach, on the networks it reaches, the pay
+ * token left out. The picker supplies networks already constrained when it opened. Previews
+ * supply all swap networks so the constraints are computed from the current provider data.
+ */
+export const getReceiveSwapTokens = <T extends Token>({
+	sourceToken,
+	supportedData,
+	networks,
+	tokens,
+	networksAreConstrained = false
+}: {
+	sourceToken: Token;
+	supportedData: SwapSupportedTokensData | undefined;
+	networks: Network[];
 	tokens: TokenToggleable<T>[];
+	networksAreConstrained?: boolean;
 }): TokenToggleable<T>[] => {
-	const networkIds = getReceiveNetworkIds({ sourceToken, supportedData, networks, tokens });
+	const supportedTokens = filterSwapTokens({ tokens, supportedData });
+	const networkIds = networksAreConstrained
+		? undefined
+		: getReceiveNetworkIdsFromSupportedTokens({
+				sourceToken,
+				networks,
+				supportedTokens: nonNullish(supportedData) ? supportedTokens : undefined
+			});
 
 	// Only swap networks; among them, the ones the pay token reaches. No network, like no constraint,
 	// leaves every swap network, as the networks list reads it.
-	const swapNetworkIds = networks.map(({ id }) => id);
+	const allowedNetworkIds = new Set(networkIds);
+	const swapNetworkIds = new Set(networks.map(({ id }) => id));
 
-	const allowedNetworkIds = new Set(
-		nonNullish(networkIds) && networkIds.length > 0
-			? networkIds.filter((id) => swapNetworkIds.includes(id))
-			: swapNetworkIds
-	);
-
-	return filterSwapTokens({ tokens, supportedData }).filter(
-		({ id, network }) => id !== sourceToken.id && allowedNetworkIds.has(network.id)
+	return supportedTokens.filter(
+		({ id, network }) =>
+			id !== sourceToken.id &&
+			swapNetworkIds.has(network.id) &&
+			(allowedNetworkIds.size === 0 || allowedNetworkIds.has(network.id))
 	);
 };
 

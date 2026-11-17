@@ -263,21 +263,16 @@ export const computeReceiveSupportedTokens = ({
 };
 
 /**
- * Returns the subset of `networks` that have at least one token in `tokens`
- * passing `filterSwapTokens` against `supportedData`.
+ * Returns the subset of `networks` that have at least one already supported token.
  */
 export const networksWithSupport = ({
 	networks,
-	tokens,
-	supportedData
+	supportedTokens
 }: {
 	networks: Network[];
-	tokens: TokenToggleable<Token>[];
-	supportedData: SwapSupportedTokensData;
+	supportedTokens: Token[];
 }): NetworkId[] => {
-	const passingNetworkIds = new Set(
-		filterSwapTokens({ tokens, supportedData }).map((t) => t.network.id)
-	);
+	const passingNetworkIds = new Set(supportedTokens.map(({ network }) => network.id));
 
 	return networks.filter(({ id }) => passingNetworkIds.has(id)).map(({ id }) => id);
 };

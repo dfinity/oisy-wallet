@@ -1499,6 +1499,30 @@ describe('swap utils', () => {
 		});
 
 		describe('getReceiveSwapTokens', () => {
+			it.each([[ARBITRUM_USDC_TOKEN.address.toLowerCase()], []].map((ids) => ({ ids })))(
+				'should match the picker given the same network constraint ($ids)',
+				({ ids }) => {
+					const params = {
+						sourceToken: BASE_USDC_TOKEN,
+						supportedData: supportedData(ids),
+						networks,
+						tokens
+					};
+					const constraint = new Set(getReceiveNetworkIds(params));
+					const activeNetworks = networks.filter(
+						({ id }) => constraint.size === 0 || constraint.has(id)
+					);
+
+					expect(
+						getReceiveSwapTokens({
+							...params,
+							networks: activeNetworks,
+							networksAreConstrained: true
+						})
+					).toEqual(getReceiveSwapTokens(params));
+				}
+			);
+
 			it('should offer the tokens the providers reach, the pay token left out', () => {
 				expect(
 					getReceiveSwapTokens({

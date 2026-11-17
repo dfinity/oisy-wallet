@@ -61,7 +61,8 @@
 					sourceToken: $sourceToken,
 					supportedData: $receiveSupportedData,
 					networks: $filteredNetworks,
-					tokens: $allSwapUniverseTokens
+					tokens: $allSwapUniverseTokens,
+					networksAreConstrained: true
 				})
 			: filterSwapTokens({
 					tokens: $allSwapUniverseTokens,
