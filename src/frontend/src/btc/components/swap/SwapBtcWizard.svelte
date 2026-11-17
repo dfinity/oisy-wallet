@@ -32,6 +32,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { fetchChainFusionBtcSwap } from '$lib/services/chain-fusion-swap.services';
 	import { fetchLifiBtcSwap } from '$lib/services/lifi-btc-swap.services';
+	import { isSlippageExceeded } from '$lib/services/lifi-swap-execution.services';
 	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 	import { enableSwapDestinationToken, fetchNearIntentsBtcSwap } from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -47,6 +48,7 @@
 	import { asCkTwinOf } from '$lib/utils/chain-fusion-swap.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toLifiSwapErrorType } from '$lib/utils/lifi-swap-error.utils';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
@@ -84,7 +86,7 @@
 		onBack
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, sourceTokenExchangeRate } =
+	const { sourceToken, destinationToken, sourceTokenExchangeRate, failedSwapError } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -221,6 +223,8 @@
 		const { selectedProvider } = $swapAmountsStore;
 
 		try {
+			failedSwapError.set(undefined);
+
 			if (selectedProvider?.provider === SwapProvider.NEAR_INTENTS) {
 				if (!$hasAcknowledgedNearIntentsSwap) {
 					// To be conservative on the legal side, we only allow the swap if persisting
@@ -343,6 +347,24 @@
 			// sent, so the form comes back.
 			if (err instanceof BtcValidationError) {
 				handleBtcValidationError({ err });
+
+				onBack();
+				onStartTriggerAmount();
+				return;
+			}
+
+			// LI.FI's re-quote guarantees less than the minimum reviewed, or no route is left. Nothing was
+			// signed, and the review says to raise the max slippage, as from EVM and Solana.
+			if (nonNullish(lifiOffer) && isSlippageExceeded(err)) {
+				failedSwapError.set({
+					message: replacePlaceholders(
+						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
+						{
+							$maxSlippage: `${slippageValue ?? ''}`
+						}
+					),
+					variant: 'info'
+				});
 
 				onBack();
 				onStartTriggerAmount();

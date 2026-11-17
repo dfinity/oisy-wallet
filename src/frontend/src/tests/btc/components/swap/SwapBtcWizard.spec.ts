@@ -28,9 +28,10 @@ import { fetchLifiBtcSwap } from '$lib/services/lifi-btc-swap.services';
 import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 import { fetchNearIntentsBtcSwap } from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
-import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import { SWAP_CONTEXT_KEY, type SwapError } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
+import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
@@ -41,7 +42,7 @@ import { mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
-import { readable, writable } from 'svelte/store';
+import { get, readable, writable } from 'svelte/store';
 
 vi.mock('$lib/services/chain-fusion-swap.services', () => ({
 	fetchChainFusionBtcSwap: vi.fn(),
@@ -148,10 +149,12 @@ describe('SwapBtcWizard', () => {
 	const createContext = (offer: SwapMappedResult = chainFusionOffer) => {
 		const context = new Map();
 
+		const failedSwapError = writable<SwapError | undefined>(undefined);
+
 		context.set(SWAP_CONTEXT_KEY, {
 			sourceToken: readable({ ...BTC_MAINNET_TOKEN, enabled: true }),
 			destinationToken: readable(ckBtcToken),
-			failedSwapError: writable(undefined),
+			failedSwapError,
 			amountSetToMax: writable(false),
 			lifiMaxFee: writable(undefined),
 			sourceTokenExchangeRate: readable(60_000),
@@ -178,7 +181,7 @@ describe('SwapBtcWizard', () => {
 		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee, amountForFee: 0.01 });
 		context.set(UTXOS_FEE_CONTEXT_KEY, { store: utxosFeeStore });
 
-		return { context, utxosFeeStore };
+		return { context, utxosFeeStore, failedSwapError };
 	};
 
 	beforeEach(() => {
@@ -692,7 +695,7 @@ describe('SwapBtcWizard', () => {
 			const onClose = vi.fn();
 			const onBack = vi.fn();
 
-			const { context } = createContext(offer);
+			const { context, failedSwapError } = createContext(offer);
 
 			const result = render(SwapBtcWizard, {
 				props: {
@@ -704,7 +707,7 @@ describe('SwapBtcWizard', () => {
 				context
 			});
 
-			return { ...result, onClose, onBack };
+			return { ...result, onClose, onBack, failedSwapError };
 		};
 
 		const confirm = async (getByText: (text: string) => HTMLElement) => {
@@ -788,6 +791,39 @@ describe('SwapBtcWizard', () => {
 			});
 			expect(onBack).toHaveBeenCalledOnce();
 			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		// The re-quote at confirm guarantees less than the minimum reviewed: nothing is signed, and the
+		// review says to raise the max slippage, as from EVM and Solana.
+		it.each([
+			'Slippage exceeded. LI.FI now guarantees 980000, below the 990000 displayed.',
+			'Slippage exceeded. LI.FI no longer has a route for the swap.'
+		])('says to raise the max slippage, and comes back, on "%s"', async (message) => {
+			vi.mocked(fetchLifiBtcSwap).mockRejectedValue(new Error(message));
+
+			const { getByText, onBack, onClose, failedSwapError } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(get(failedSwapError)).toEqual({
+				message: replacePlaceholders(replaceOisyPlaceholders(en.swap.error.slippage_exceeded), {
+					$maxSlippage: baseProps.slippageValue
+				}),
+				variant: 'info'
+			});
+			expect(toasts.toastsError).not.toHaveBeenCalled();
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		it('clears an earlier slippage message when the swap is confirmed again', async () => {
+			const { getByText, failedSwapError } = renderExecution();
+
+			failedSwapError.set({ message: 'earlier', variant: 'info' });
+
+			await confirm(getByText);
+
+			expect(get(failedSwapError)).toBeUndefined();
 		});
 
 		// LI.FI's error text can carry the request URL, and with it the user's addresses.
