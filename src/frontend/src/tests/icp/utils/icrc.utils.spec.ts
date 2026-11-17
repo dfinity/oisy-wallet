@@ -64,9 +64,9 @@ describe('icrc.utils', () => {
 			}
 		};
 
-		it('should preserve the built-in ID when ledger metadata is loaded', () => {
+		it('should preserve a supplied ID when ledger metadata is loaded', () => {
 			const [builtin] = IC_BUILTIN_TOKENS;
-			const token = mapIcrcToken({ ...mockParams, ledgerCanisterId: builtin.ledgerCanisterId });
+			const token = mapIcrcToken({ ...mockParams, id: builtin.id });
 
 			expect(token?.id).toBe(builtin.id);
 			expect(token?.symbol).toBe(mockToken.symbol);

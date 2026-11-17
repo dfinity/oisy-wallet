@@ -6,7 +6,6 @@ import {
 	ICONFUCIUS_LEDGER_CANISTER_ID,
 	TCYCLES_LEDGER_CANISTER_ID
 } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
-import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type {
 	IcCkInterface,
@@ -30,6 +29,7 @@ import { Principal } from '@icp-sdk/core/principal';
 
 export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> &
 	Partial<IcCkMetadata> & {
+		id?: IcToken['id'];
 		metadata: IcrcTokenMetadataResponse;
 		category: TokenCategory;
 		icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutId>;
@@ -76,6 +76,7 @@ const mapIcNetwork = (ledgerCanisterId: LedgerCanisterIdText) =>
 	isTokenIcTestnet({ ledgerCanisterId }) ? ICP_PSEUDO_TESTNET_NETWORK : ICP_NETWORK;
 
 export const mapIcrcToken = ({
+	id,
 	metadata,
 	icrcCustomTokens,
 	ledgerCanisterId,
@@ -113,10 +114,7 @@ export const mapIcrcToken = ({
 	const indexCanisterId = rest.indexCanisterId ?? customTokenSymbol?.indexCanisterId;
 
 	return {
-		// A built-in token can already be selected before its ledger metadata loads.
-		id:
-			IC_BUILTIN_TOKENS.find((token) => token.ledgerCanisterId === ledgerCanisterId)?.id ??
-			parseTokenId(symbol),
+		id: id ?? parseTokenId(symbol),
 		network: mapIcNetwork(ledgerCanisterId),
 		standard: customTokenSymbol?.standard ?? { code: 'icrc' },
 		symbol,

@@ -1392,6 +1392,7 @@ describe('SwapForm', () => {
 			const onShowTokensList = vi.fn();
 			const { getAllByTestId, getByTestId } = renderForm(onShowTokensList);
 			const loaded = mapIcrcToken({
+				id: builtin.id,
 				ledgerCanisterId: builtin.ledgerCanisterId,
 				category: builtin.category,
 				metadata: [
