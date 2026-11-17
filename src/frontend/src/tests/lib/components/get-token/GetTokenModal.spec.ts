@@ -14,6 +14,8 @@ import SwapModal from '$lib/components/swap/SwapModal.svelte';
 import {
 	GET_TOKEN_MODAL_OPEN_SWAP_BUTTON,
 	MODAL_TOKENS_LIST,
+	NETWORK_FILTER,
+	SWAP_CLEAR_DESTINATION_TOKEN,
 	SWAP_RECEIVE_NETWORK_LIST,
 	SWAP_RECEIVE_SHORTCUT_ANY_TOKEN,
 	SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK,
@@ -177,6 +179,92 @@ describe('GetTokenModal', () => {
 			}
 			return { ...rendered, universe };
 		};
+
+		it.each([
+			SWAP_RECEIVE_SHORTCUT_SAME_NETWORK,
+			SWAP_RECEIVE_SHORTCUT_ANY_TOKEN,
+			SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK
+		])('should reopen %s after selecting a receive token', async (shortcut) => {
+			const rendered = await setup();
+			await fireEvent.click(await rendered.findByTestId(shortcut));
+			if (shortcut === SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK) {
+				const list = await rendered.findByTestId(SWAP_RECEIVE_NETWORK_LIST);
+				await fireEvent.click(within(list).getAllByRole('button')[0]);
+			} else {
+				await fireEvent.click(
+					await rendered.findByRole('button', {
+						name: new RegExp(`${BASE_ETH_TOKEN.symbol}.*${BASE_NETWORK.name}`)
+					})
+				);
+			}
+
+			await waitFor(() =>
+				expect(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)).toHaveLength(2)
+			);
+
+			// Reopening and then returning with Back must keep the same receive view.
+			for (let opening = 0; opening < 2; opening++) {
+				await fireEvent.click(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]);
+				if (shortcut === SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK) {
+					await expect(
+						rendered.findByTestId(SWAP_RECEIVE_NETWORK_LIST)
+					).resolves.toBeInTheDocument();
+					expect(rendered.queryByTestId(MODAL_TOKENS_LIST)).not.toBeInTheDocument();
+				} else {
+					await expect(rendered.findByTestId(MODAL_TOKENS_LIST)).resolves.toBeInTheDocument();
+					expect(rendered.getByTestId(NETWORK_FILTER)).toHaveTextContent(
+						shortcut === SWAP_RECEIVE_SHORTCUT_SAME_NETWORK
+							? BASE_NETWORK.name
+							: en.networks.chain_fusion
+					);
+				}
+				await fireEvent.click(rendered.getByRole('button', { name: en.core.text.back }));
+				await waitFor(() =>
+					expect(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)).toHaveLength(2)
+				);
+			}
+		});
+
+		it('should reopen the network list after a one-tap group shortcut', async () => {
+			const rendered = await setup();
+			rendered.universe.update((tokens) =>
+				tokens.filter(({ network }) => network.id !== ETHEREUM_NETWORK.id)
+			);
+			const shortcut = await rendered.findByTestId(SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK);
+			await waitFor(() => expect(shortcut).toHaveTextContent(SOLANA_MAINNET_NETWORK.name));
+			await fireEvent.click(shortcut);
+			await waitFor(() =>
+				expect(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)).toHaveLength(2)
+			);
+
+			expect(rendered.queryByTestId(SWAP_RECEIVE_NETWORK_LIST)).not.toBeInTheDocument();
+
+			await fireEvent.click(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]);
+			const list = await rendered.findByTestId(SWAP_RECEIVE_NETWORK_LIST);
+
+			expect(within(list).getAllByRole('button')).toHaveLength(1);
+		});
+
+		it('should replace the remembered network step when another shortcut is chosen', async () => {
+			const rendered = await setup();
+			await fireEvent.click(await rendered.findByTestId(SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK));
+			const networks = await rendered.findByTestId(SWAP_RECEIVE_NETWORK_LIST);
+			await fireEvent.click(within(networks).getAllByRole('button')[0]);
+			await fireEvent.click(await rendered.findByTestId(SWAP_CLEAR_DESTINATION_TOKEN));
+			await fireEvent.click(await rendered.findByTestId(SWAP_RECEIVE_SHORTCUT_ANY_TOKEN));
+			await fireEvent.click(
+				await rendered.findByRole('button', {
+					name: new RegExp(`${BASE_ETH_TOKEN.symbol}.*${BASE_NETWORK.name}`)
+				})
+			);
+			await waitFor(() =>
+				expect(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)).toHaveLength(2)
+			);
+			await fireEvent.click(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]);
+
+			await expect(rendered.findByTestId(MODAL_TOKENS_LIST)).resolves.toBeInTheDocument();
+			expect(rendered.getByTestId(NETWORK_FILTER)).toHaveTextContent(en.networks.chain_fusion);
+		});
 
 		it.each(['pick', 'back', 'missing shortcut'])(
 			'should focus the first network and restore receive focus after %s',

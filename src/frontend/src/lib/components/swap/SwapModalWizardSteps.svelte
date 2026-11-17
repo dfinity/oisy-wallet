@@ -93,7 +93,8 @@
 		getTokenListFilters,
 		setTokenListFilters,
 		markTokensPriced,
-		tokenListReturnFocus
+		tokenListReturnFocus,
+		receiveTokenPickerStep
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const {
@@ -199,10 +200,7 @@
 		};
 	};
 
-	// A side has its own filters once the person changes one on its list, even back to where it
-	// started; from then on it reopens on them. Until then nothing is kept, so the receive side goes on
-	// following the pay side. Only a change keeps them: a list a receive shortcut opened starts on the
-	// shortcut's filters, which are not the person's.
+	// A chosen shortcut remembers its starting filters; subsequent filter changes replace them.
 	const onTokenListFiltersChange = () => {
 		if (isNullish(selectTokenType)) {
 			return;
@@ -225,6 +223,13 @@
 	}) => {
 		tokenListReturnFocus.set(returnFocus);
 
+		if (side === 'destination') {
+			receiveTokenPickerStep.set(WizardStepsSwap.TOKENS_LIST);
+			if (nonNullish(start)) {
+				setTokenListFilters({ side, filters: start });
+			}
+		}
+
 		swapAmountsStore.reset();
 
 		setFilterQuery('');
@@ -244,7 +249,23 @@
 		setFilterCategoryTag(category);
 	};
 
-	const showTokensList = (tokenSource: TokenSide) => enterTokenList({ side: tokenSource });
+	const showMoveStep = () => {
+		receiveTokenPickerStep.set(WizardStepsSwap.MOVE_TOKEN);
+		swapAmountsStore.reset();
+		goToStep(WizardStepsSwap.MOVE_TOKEN);
+	};
+
+	const showTokensList = (side: TokenSide) => {
+		if (
+			side === 'destination' &&
+			nonNullish($destinationToken) &&
+			$receiveTokenPickerStep === WizardStepsSwap.MOVE_TOKEN
+		) {
+			showMoveStep();
+			return;
+		}
+		enterTokenList({ side });
+	};
 
 	// All asset types, so the list matches the shortcut's preview.
 	setContext<SwapReceiveShortcutsContext>(SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY, {
@@ -256,7 +277,7 @@
 					? SWAP_RECEIVE_SHORTCUT_SAME_NETWORK
 					: SWAP_RECEIVE_SHORTCUT_ANY_TOKEN
 			}),
-		showMoveStep: () => goToStep(WizardStepsSwap.MOVE_TOKEN)
+		showMoveStep
 	});
 
 	const closeTokenList = () => {

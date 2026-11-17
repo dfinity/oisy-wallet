@@ -21,6 +21,7 @@
 	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { allSwapUniverseTokens } from '$lib/derived/swap.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
+	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import {
 		trackSwapReceiveShortcut,
 		type SwapReceiveShortcutAction
@@ -47,7 +48,8 @@
 
 	let { sourceToken, navigation, emptyField, onDestinationSet }: Props = $props();
 
-	const { receiveSupportedData, setDestinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { receiveSupportedData, setDestinationToken, receiveTokenPickerStep } =
+		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const titleId = $props.id();
 
@@ -146,6 +148,8 @@
 
 			return;
 		}
+
+		receiveTokenPickerStep.set(WizardStepsSwap.MOVE_TOKEN);
 
 		const [token] = otherNetwork.tokens;
 

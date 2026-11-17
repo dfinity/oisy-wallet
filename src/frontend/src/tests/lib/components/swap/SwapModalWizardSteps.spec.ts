@@ -638,14 +638,17 @@ describe('SwapModalWizardSteps', () => {
 				expect(assetTypeChip()).toHaveTextContent(en.tokens.text.asset_type_all_short);
 			});
 
-			it("keeps none of the shortcut's filters for the receive side", async () => {
+			it("remembers the shortcut's initial filters for the receive side", async () => {
 				const rendered = renderHost();
 
 				await openSameNetwork(rendered);
 
 				await cancelList(rendered);
 
-				expect(swapContext.getTokenListFilters('destination')).toBeUndefined();
+				expect(swapContext.getTokenListFilters('destination')).toEqual({
+					network: ICP_NETWORK,
+					category: undefined
+				});
 			});
 
 			it('keeps a filter the person changes there', async () => {

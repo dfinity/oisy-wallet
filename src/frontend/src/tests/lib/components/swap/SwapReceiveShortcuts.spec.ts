@@ -29,6 +29,7 @@ import * as crossChainNetworksDerived from '$lib/derived/cross-chain-networks.de
 import * as networksDerived from '$lib/derived/networks.derived';
 import * as swapDerived from '$lib/derived/swap.derived';
 import * as tokensDerived from '$lib/derived/tokens.derived';
+import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import { trackSwapReceiveShortcut } from '$lib/services/swap-receive-shortcut-analytics.services';
 import {
 	swapSupportedTokensStore,
@@ -165,6 +166,7 @@ describe('SwapReceiveShortcuts', () => {
 					{
 						receiveSupportedData:
 							receiveSupportedDataStore ?? readable(receiveSupportedData ?? undefined),
+						receiveTokenPickerStep: writable(WizardStepsSwap.TOKENS_LIST),
 						setDestinationToken
 					}
 				]
@@ -388,6 +390,7 @@ describe('SwapReceiveShortcuts', () => {
 					SWAP_CONTEXT_KEY,
 					{
 						receiveSupportedData,
+						receiveTokenPickerStep: writable(WizardStepsSwap.TOKENS_LIST),
 						setDestinationToken
 					}
 				]

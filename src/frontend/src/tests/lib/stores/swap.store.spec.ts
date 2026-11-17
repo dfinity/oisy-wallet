@@ -8,6 +8,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import * as exchanges from '$lib/derived/exchange.derived';
 import type { SwappableTokens } from '$lib/derived/swap.derived';
 import { TokenCategoryTagValue } from '$lib/enums/token-tag';
+import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import { balancesStore } from '$lib/stores/balances.store';
 import { initSwapContext } from '$lib/stores/swap.store';
 import { bn1Bi, bn2Bi } from '$tests/mocks/balances.mock';
@@ -301,6 +302,21 @@ describe('swapStore', () => {
 		expect(get(sourceToken)).toBe(mockToken1);
 		expect(get(destinationToken)).toBe(mockToken2);
 	});
+
+	it.each(['setSourceToken', 'switchTokens', 'reset'] as const)(
+		'should reset the remembered receive view on %s',
+		(action) => {
+			const context = initSwapContext({ sourceToken: mockToken1, destinationToken: mockToken2 });
+			context.receiveTokenPickerStep.set(WizardStepsSwap.MOVE_TOKEN);
+			if (action === 'setSourceToken') {
+				context.setSourceToken(mockToken2);
+			} else {
+				context[action]();
+			}
+
+			expect(get(context.receiveTokenPickerStep)).toBe(WizardStepsSwap.TOKENS_LIST);
+		}
+	);
 
 	describe('clearing the receive token', () => {
 		it('should clear a selected token', () => {

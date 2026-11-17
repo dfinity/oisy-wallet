@@ -143,9 +143,14 @@ Internet Computer, then the rest A to Z.
 - **Any token** opens the receive list on All networks.
 
 The list opened by a shortcut is today's list: filters, search and selection work as they do now,
-and Back returns to the form with the shortcuts. A shortcut sets the list's starting network for
-that one opening; it does not count as the user changing the receive side's filters
-(`keepTokenListFilters`).
+and Back returns to the form. The swap remembers the receive view chosen through a shortcut:
+the same-network token list, the full token list, or the same-token network list. After picking
+a token, tapping its selector reopens that view, including after Back. The initial shortcut
+filters are remembered, and later filter changes replace them. Choosing another shortcut replaces
+the remembered view. This also applies when the same-token shortcut sets a single destination
+directly: the selector then opens its one-row network list. Get Token keeps the same behaviour
+across its wizard remounts. Changing or switching the pay token resets the remembered network
+step, and closing the swap forgets it.
 
 ### After a pick
 
@@ -243,10 +248,10 @@ Pointers, not prescriptions; the implementer decides the shape.
   form (`SwapIcpWizard`, `SwapEthForm`, `SwapSolWizard`/`SwapSolForm`, `SwapBtcWizard`/`SwapBtcForm`,
   `SwapXrpWizard`/`SwapXrpForm`). Either widen it (side plus a starting network) and add one for
   the network step, or let `SwapModalWizardSteps` provide them through context. `enterTokenList`
-  needs a way to take an explicit starting network without marking the side's filters as changed.
+  takes an explicit starting network from a shortcut and remembers it for reopening.
   _Built:_ a context (`SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY`); a form without it, rendered on its
-  own, keeps today's field. The list keeps a side's filters only when the person changes one, no
-  longer again on closing, so a shortcut's starting network is never kept.
+  own, keeps today's field. Shortcut starting filters and later user filter changes are kept
+  in the swap context, along with the receive step, across Get Token's wizard remounts.
 - **Network step.** A new `WizardStepsSwap` entry (`lib/enums/wizard-steps.ts`), rendered in
   `SwapModalWizardSteps.svelte` next to `TOKENS_LIST`, with its title wired in `SwapModal.svelte`
   as the list's is.
@@ -270,8 +275,8 @@ Pointers, not prescriptions; the implementer decides the shape.
 - [ ] BTC: no "Another token on Bitcoin"; "BTC on another network" sets ckBTC in one tap.
 - [ ] A token in no group shows no "on another network" shortcut.
 - [ ] "Another token on _network_" opens the list on that network; "Any token" opens it on All
-      networks; both start on All asset types, and neither changes the filters the receive side
-      keeps.
+      networks; both start on All asset types. The receive selector reopens the chosen view after
+      a pick or Back.
 - [ ] Until the receive support data is ready, the card shows today's empty field.
 - [ ] "Move _symbol_ to" lists reachable networks only, in chain order, with the user's balance.
 - [ ] Tapping the receive token opens the picker; Back preserves it. The separate × clears it and
@@ -297,7 +302,8 @@ Made on 2026-11-16, after the prototype:
 - **One set of names**, written to finish the sentence "You receive …": "Another token on Base",
   "USDC on another network", "Any token".
 - **All asset types.** A list opened by a shortcut starts on All asset types, so it matches the
-  shortcut's preview. The pay list keeps opening on the asset type it does today.
+  shortcut's preview. The chosen receive view and filters are remembered within the swap.
+  The pay list keeps opening on the asset type it does today.
 - **Today's empty field while loading.** Until the receive support data for the pay token is
   ready, the card shows today's empty field; the shortcuts replace it once they can be counted.
 - **No feature flag.** The change is on one card, and it falls back to today's field whenever
@@ -307,7 +313,7 @@ Made on 2026-11-16, after the prototype:
 
 - The "Move across networks" row in the receive list (direction B).
 - Shortcuts on the pay side.
-- Remembering the last shortcut used.
+- Remembering the receive view between modal openings.
 - Changes to routes, providers or OneSec's direction.
 
 ## Open questions (facts to confirm)
@@ -333,3 +339,11 @@ and a link in the picker. The user chose × because the text link took too much 
 This supersedes the original tap-to-clear and Keep-link wireframes. Only the receive token and
 quote are cleared; the pay amount and token remain. The picker and its filters keep their usual
 behaviour. There is no extra reset tracking event.
+
+### Picker reopening correction, 2026-11-17
+
+The user reported that choosing a receive token through the same-token network list or the full
+token list reopened the default pay-network list instead. The wizard now remembers the receive
+step and the shortcut's starting filters in the swap context. A token pick and Back preserve
+them; a new shortcut replaces them. Tests cover all three views in Swap and Get Token, repeated
+reopening, switching shortcuts after clearing, and one-tap group destinations.

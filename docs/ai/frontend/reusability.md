@@ -152,6 +152,9 @@ Add new feature folders only if your concern doesn't fit any of the above.
 
 `swap.store` keeps `tokenListReturnFocus` across step remounts: Back restores the originating shortcut,
 picks focus the selected control, and a missing shortcut falls back to the receive area.
+It also keeps `receiveTokenPickerStep` and token-list filters so the receive selector reopens the
+chosen shortcut view after a pick or Back, including in Get Token. Shortcuts replace that view;
+a new pay token resets the remembered network step, and resetting the swap clears the memory.
 
 ### Constants worth knowing
 
