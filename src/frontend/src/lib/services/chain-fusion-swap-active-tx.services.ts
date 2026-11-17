@@ -4,7 +4,7 @@ import type {
 	ChainFusionData,
 	TokenId
 } from '$declarations/backend/backend.did';
-import type { DepositSolId, DepositSolStatus } from '$declarations/cksol_minter/cksol_minter.did';
+import type { DepositSolId } from '$declarations/cksol_minter/cksol_minter.did';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { BITCOIN_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
@@ -21,6 +21,7 @@ import {
 } from '$icp/api/ckbtc-minter.api';
 import { retrieveEthStatus } from '$icp/api/cketh-minter.api';
 import {
+	minterInfo as ckSolMinterInfo,
 	depositSolStatus,
 	watchDepositAddress,
 	withdrawSolStatus
@@ -82,7 +83,10 @@ import {
 	type ChainFusionMintOutcome
 } from '$lib/utils/chain-fusion-swap-active-tx.utils';
 import { consoleError } from '$lib/utils/console.utils';
-import { readSolSourceTxOutcome } from '$sol/services/sol-source-tx.services';
+import {
+	readSolBalanceAfterTx,
+	readSolSourceTxOutcome
+} from '$sol/services/sol-source-tx.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolSourceTxOutcome } from '$sol/utils/sol-source-tx.utils';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
@@ -474,6 +478,49 @@ const reloadCkSolMintRow = async ({
 };
 
 /**
+ * Whether the deposit address of a SOL → ckSOL row still holds the minter's minimum deposit amount
+ * once the deposit the row follows is minted, or `undefined` while that cannot be read yet.
+ *
+ * The minter fixes a deposit's amount when a scan reads the balance, and reports neither that time
+ * nor the transfers the balance held. SOL sent to the address outside this conversion can reach the
+ * minimum before the transfer lands, and be queued and swept alone; after that mint, the minter
+ * sweeps again only once `watch_deposit_address` registers the address anew. A sweep takes the
+ * whole balance its scan queued, and the transfer alone meets the minimum, so what is left tells.
+ * It is read at a slot where the transfer has landed, so that the balance counts it: the row takes
+ * a deposit only once its transfer is on chain, so a read without a status for it comes from a node
+ * behind. A row without its transfer's blockhash cannot tell, as for the deposit it takes, and closes
+ * on the mint as before.
+ */
+const ckSolMintLeftMinimum = async ({
+	identity,
+	minterCanisterId,
+	refs
+}: {
+	identity: Identity;
+	minterCanisterId: string;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+}): Promise<boolean | undefined> => {
+	const address = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_DEPOSIT_ADDRESS];
+	const signature = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_SIGNATURE];
+
+	if (
+		isNullish(address) ||
+		isNullish(signature) ||
+		isNullish(refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH])
+	) {
+		return false;
+	}
+
+	// The minimum decides whether the row closes, so it is taken from a certified answer.
+	const [balance, { minimum_deposit_amount }] = await Promise.all([
+		readSolBalanceAfterTx({ address, signature, network: SolanaNetworks.mainnet }),
+		ckSolMinterInfo({ identity, minterCanisterId, certified: true })
+	]);
+
+	return isNullish(balance) ? undefined : balance >= minimum_deposit_amount;
+};
+
+/**
  * SOL → ckSOL. The minter reports the deposit through `watch_deposit_address`, an update call
  * made about once a minute, and then answers exactly through `deposit_sol_status`, a query asked
  * on every tick once the row knows the deposit id.
@@ -484,7 +531,9 @@ const reloadCkSolMintRow = async ({
  * the row in flight while the transfer can still land or has landed; the same call registers the
  * address again once a window has ended, so a late transfer is still found. A transfer that can no
  * longer land, or landed and failed, moved no SOL, and fails the row. A `Dropped` deposit leaves
- * its SOL on the address, which the minter detects again under a new id.
+ * its SOL on the address, which the minter detects again under a new id. A mint that left the
+ * minimum deposit amount on the address did not sweep all of it either: the row goes on as after
+ * `Dropped`, and `watch_deposit_address` registers the address again.
  */
 const pollChainFusionSolMint = async ({
 	tx,
@@ -505,13 +554,17 @@ const pollChainFusionSolMint = async ({
 	const knownDepositIdRef = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID];
 	const knownDepositId = nonNullish(knownDepositIdRef) ? BigInt(knownDepositIdRef) : undefined;
 
+	/**
+	 * Applies the status of a deposit to the row, and says whether the row goes on to a newer
+	 * deposit: after `Dropped`, and after a mint that left the minimum deposit amount on the address.
+	 */
 	const applyDepositStatus = async ({
 		depositId,
 		learned
 	}: {
 		depositId: DepositSolId;
 		learned: Partial<Record<ChainFusionExternalRefKey, string>>;
-	}): Promise<DepositSolStatus> => {
+	}): Promise<boolean> => {
 		let status = await depositSolStatus({
 			identity,
 			minterCanisterId,
@@ -531,6 +584,24 @@ const pollChainFusionSolMint = async ({
 			});
 		}
 
+		const leftMinimum =
+			'Minted' in status ? await ckSolMintLeftMinimum({ identity, minterCanisterId, refs }) : false;
+
+		// A mint that left the minimum, or whose address cannot be read yet, keeps the row in flight
+		// with what it learned; only the first goes on to a newer deposit.
+		if (leftMinimum !== false) {
+			await applyUpdate({
+				identity,
+				tx,
+				candidate: { Executing: null },
+				error: undefined,
+				learned,
+				refs
+			});
+
+			return leftMinimum === true;
+		}
+
 		const candidate = toChainFusionSolMintStatus(status);
 
 		// A terminal row leaves the pending set, so its throttle entry has no reader left.
@@ -547,13 +618,13 @@ const pollChainFusionSolMint = async ({
 			refs
 		});
 
-		return status;
+		return 'Dropped' in status;
 	};
 
 	if (nonNullish(knownDepositId)) {
-		const status = await applyDepositStatus({ depositId: knownDepositId, learned: {} });
+		const goesOn = await applyDepositStatus({ depositId: knownDepositId, learned: {} });
 
-		if (!('Dropped' in status)) {
+		if (!goesOn) {
 			return;
 		}
 	}

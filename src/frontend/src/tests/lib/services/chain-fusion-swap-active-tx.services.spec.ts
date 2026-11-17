@@ -3,7 +3,10 @@ import type {
 	ActiveUserTransactionStatus,
 	ChainFusionDirection
 } from '$declarations/backend/backend.did';
-import type { WatchDepositAddressOk } from '$declarations/cksol_minter/cksol_minter.did';
+import type {
+	MinterInfo,
+	WatchDepositAddressOk
+} from '$declarations/cksol_minter/cksol_minter.did';
 import { CKERC20_HELPER_CONTRACT_SIGNATURE } from '$env/networks/networks.cketh.env';
 import type * as ckBtcEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import type * as ckEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
@@ -20,12 +23,14 @@ import {
 } from '$icp/api/ckbtc-minter.api';
 import { retrieveEthStatus } from '$icp/api/cketh-minter.api';
 import {
+	minterInfo as ckSolMinterInfo,
 	depositSolStatus,
 	watchDepositAddress,
 	withdrawSolStatus
 } from '$icp/api/cksol-minter.api';
 import { getTransactions } from '$icp/api/icrc-index-ng.api';
 import { CkSolWatchDepositAddressError } from '$icp/canisters/cksol-minter.errors';
+import { CKSOL_DEPOSIT_ADDRESS_RENT } from '$icp/constants/cksol.constants';
 import type { IcCkInterface } from '$icp/types/ic-token';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import {
@@ -47,7 +52,10 @@ import {
 } from '$lib/services/chain-fusion-swap-active-tx.services';
 import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
 import { toChainFusionExternalRefs } from '$lib/utils/chain-fusion-swap-active-tx.utils';
-import { readSolSourceTxOutcome } from '$sol/services/sol-source-tx.services';
+import {
+	readSolBalanceAfterTx,
+	readSolSourceTxOutcome
+} from '$sol/services/sol-source-tx.services';
 import { SolanaNetworks } from '$sol/types/network';
 import { mockUtxo } from '$tests/mocks/btc.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
@@ -63,6 +71,7 @@ import { Cbor } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
 vi.mock('$icp/api/cksol-minter.api', () => ({
+	minterInfo: vi.fn(),
 	withdrawSolStatus: vi.fn(),
 	watchDepositAddress: vi.fn(),
 	depositSolStatus: vi.fn()
@@ -129,6 +138,7 @@ vi.mock('$lib/services/active-user-transactions.services', () => ({
 }));
 
 vi.mock('$sol/services/sol-source-tx.services', () => ({
+	readSolBalanceAfterTx: vi.fn(),
 	readSolSourceTxOutcome: vi.fn()
 }));
 
@@ -275,6 +285,19 @@ const detected = (depositId: bigint): WatchDepositAddressOk => ({
 	...watching(depositId),
 	status: { Detected: { deposit_id: depositId } }
 });
+
+const ckSolInfo: MinterInfo = {
+	deposit_sol_fee: 45_000_000_000n,
+	balance: 995_500n,
+	withdrawal_fee: 1_000_000n,
+	minimum_deposit_amount: 20_000_000n,
+	deposit_sol_required_cycles: 1_000_000_000_000n,
+	nonce_accounts: [],
+	minimum_withdrawal_amount: 2_000_000n,
+	minter_address: [],
+	automatic_deposit_fee: [],
+	collected_automatic_deposit_fees: []
+};
 
 const btcMintTx = ({ id, refs }: { id?: string; refs?: Partial<Record<string, string>> } = {}) =>
 	toTx({
@@ -673,6 +696,117 @@ describe('chain-fusion-swap-active-tx.services', () => {
 
 				expect(readSolSourceTxOutcome).not.toHaveBeenCalled();
 			});
+
+			// A deposit queued from SOL that reached the address before this transfer landed passes
+			// every check on ids: what its mint left on the address tells whether it swept the transfer.
+			describe('once the deposit it follows is minted', () => {
+				const followingDeposit = () =>
+					solMintTx({
+						refs: {
+							[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH]: BLOCKHASH,
+							[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH_SLOT]: '345000000',
+							[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42'
+						}
+					});
+
+				const minted = { Minted: { block_index: 12n, minted_amount: MINTED_AMOUNT } };
+
+				beforeEach(() => {
+					// A status a test queued but did not read must not reach the next test.
+					vi.mocked(depositSolStatus).mockReset();
+					vi.mocked(depositSolStatus).mockResolvedValue(minted);
+					vi.mocked(ckSolMinterInfo).mockResolvedValue(ckSolInfo);
+					vi.mocked(readSolBalanceAfterTx).mockResolvedValue(CKSOL_DEPOSIT_ADDRESS_RENT);
+				});
+
+				it('should close the row once the deposit address holds less than the minimum', async () => {
+					await poll([followingDeposit()]);
+
+					expect(readSolBalanceAfterTx).toHaveBeenCalledExactlyOnceWith({
+						address: CKSOL_DEPOSIT_ADDRESS,
+						signature: SOL_SIGNATURE,
+						network: SolanaNetworks.mainnet
+					});
+					expect(ckSolMinterInfo).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						minterCanisterId: CKSOL_MINTER,
+						certified: true
+					});
+					expect(watchDepositAddress).not.toHaveBeenCalled();
+					expect(lastUpdate()).toStrictEqual({
+						status: { Succeeded: null },
+						externalRefs: expect.arrayContaining([
+							{ key: 'chain_fusion_received_amount', value: '0.0471' }
+						])
+					});
+				});
+
+				it('should keep the row in flight and ask the minter to watch again while the address holds the minimum', async () => {
+					vi.mocked(readSolBalanceAfterTx).mockResolvedValue(ckSolInfo.minimum_deposit_amount);
+
+					await poll([followingDeposit()]);
+
+					expect(watchDepositAddress).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						minterCanisterId: CKSOL_MINTER
+					});
+					expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalledWith(
+						expect.objectContaining({
+							update: expect.objectContaining({ status: { Succeeded: null } })
+						})
+					);
+					expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+				});
+
+				it('should take the newer deposit that sweeps what the mint left', async () => {
+					vi.mocked(readSolBalanceAfterTx).mockResolvedValue(ckSolInfo.minimum_deposit_amount);
+					vi.mocked(watchDepositAddress).mockResolvedValue(detected(43n));
+					vi.mocked(depositSolStatus)
+						.mockResolvedValueOnce(minted)
+						.mockResolvedValueOnce(minted)
+						.mockResolvedValueOnce({ Queued: { sweepable_amount: 20_000_000n } });
+
+					await poll([followingDeposit()]);
+
+					expect(depositSolStatus).toHaveBeenNthCalledWith(
+						3,
+						expect.objectContaining({ depositId: 43n })
+					);
+					expect(lastUpdate()).toStrictEqual({
+						status: { Executing: null },
+						externalRefs: expect.arrayContaining([
+							{ key: 'chain_fusion_cksol_deposit', value: '43' }
+						])
+					});
+				});
+
+				it('should keep the row in flight, without asking the minter, while the node has no status for the transfer', async () => {
+					vi.mocked(readSolBalanceAfterTx).mockResolvedValue(undefined);
+
+					await poll([followingDeposit()]);
+
+					expect(watchDepositAddress).not.toHaveBeenCalled();
+					expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+				});
+
+				it('should learn a deposit it takes, without closing on its mint, when the mint left the minimum', async () => {
+					vi.mocked(readSolSourceTxOutcome).mockResolvedValue('succeeded');
+					vi.mocked(watchDepositAddress).mockResolvedValue(watching(42n));
+					vi.mocked(readSolBalanceAfterTx).mockResolvedValue(ckSolInfo.minimum_deposit_amount);
+
+					await poll([openedBeforeBroadcast()]);
+
+					expect(lastUpdate()).toStrictEqual({
+						status: { Executing: null },
+						externalRefs: expect.arrayContaining([
+							{ key: 'chain_fusion_cksol_deposit', value: '42' }
+						])
+					});
+					expect(lastUpdate()?.externalRefs).not.toContainEqual(
+						expect.objectContaining({ key: 'chain_fusion_received_amount' })
+					);
+				});
+			});
 		});
 
 		it('should learn a detected deposit newer than the latest at opening and follow it', async () => {
@@ -765,6 +899,20 @@ describe('chain-fusion-swap-active-tx.services', () => {
 					{ key: 'chain_fusion_received_amount', value: '0.0471' }
 				])
 			});
+		});
+
+		it('should close on the mint without reading the deposit address for a row without its transfer blockhash', async () => {
+			vi.mocked(depositSolStatus).mockResolvedValue({
+				Minted: { block_index: 12n, minted_amount: MINTED_AMOUNT }
+			});
+
+			await poll([
+				solMintTx({ refs: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42' } })
+			]);
+
+			expect(readSolBalanceAfterTx).not.toHaveBeenCalled();
+			expect(ckSolMinterInfo).not.toHaveBeenCalled();
+			expect(lastUpdate()).toStrictEqual(expect.objectContaining({ status: { Succeeded: null } }));
 		});
 
 		// Acceptance criterion 9.
