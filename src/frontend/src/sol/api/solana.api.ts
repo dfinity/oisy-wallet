@@ -268,18 +268,25 @@ export const getSolCreateAccountFee = async (network: SolanaNetworkType): Promis
 
 /**
  * The lamports an address holds, read at the RPC's default commitment and never cached: a caller
- * reads it to see what has arrived since.
+ * reads it to see what has arrived since. With `minContextSlot`, a node not that far yet refuses to
+ * answer, and the read throws.
  */
 export const getSolBalance = async ({
 	address,
-	network
+	network,
+	minContextSlot
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
+	minContextSlot?: bigint;
 }): Promise<bigint> => {
 	const { getBalance } = solanaHttpRpc(network);
 
-	const { value } = await getBalance(solAddress(address)).send();
+	const { value } = await (
+		nonNullish(minContextSlot)
+			? getBalance(solAddress(address), { minContextSlot })
+			: getBalance(solAddress(address))
+	).send();
 
 	return value;
 };

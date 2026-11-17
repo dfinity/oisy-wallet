@@ -1,13 +1,16 @@
-import { getSignatureStatus, isBlockhashValid } from '$sol/api/solana.api';
+import { getSignatureStatus, getSolBalance, isBlockhashValid } from '$sol/api/solana.api';
 import {
+	readSolBalanceAfterTx,
 	readSolSourceTxOutcome,
 	resetSolSourceTxObservations
 } from '$sol/services/sol-source-tx.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolanaSignatureStatus } from '$sol/types/sol-rpc';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 
 vi.mock('$sol/api/solana.api', () => ({
 	getSignatureStatus: vi.fn(),
+	getSolBalance: vi.fn(),
 	isBlockhashValid: vi.fn()
 }));
 
@@ -207,6 +210,38 @@ describe('sol-source-tx.services', () => {
 
 				await expect(read()).resolves.toBe('succeeded');
 			});
+		});
+	});
+
+	describe('readSolBalanceAfterTx', () => {
+		const readBalance = () =>
+			readSolBalanceAfterTx({
+				address: mockSolAddress,
+				signature,
+				network: SolanaNetworks.mainnet
+			});
+
+		it('should read the balance no earlier than the slot the transaction landed in', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValue({ slot: 210n, status: confirmedStatus });
+			vi.mocked(getSolBalance).mockResolvedValue(20_000_000n);
+
+			await expect(readBalance()).resolves.toBe(20_000_000n);
+
+			expect(getSignatureStatus).toHaveBeenCalledExactlyOnceWith({
+				signature,
+				network: SolanaNetworks.mainnet
+			});
+			expect(getSolBalance).toHaveBeenCalledExactlyOnceWith({
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				minContextSlot: confirmedStatus.slot
+			});
+		});
+
+		it('should read no balance while the status read finds no status for the transaction', async () => {
+			await expect(readBalance()).resolves.toBeUndefined();
+
+			expect(getSolBalance).not.toHaveBeenCalled();
 		});
 	});
 });

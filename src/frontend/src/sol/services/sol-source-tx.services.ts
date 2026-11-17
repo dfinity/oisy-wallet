@@ -1,4 +1,5 @@
-import { getSignatureStatus, isBlockhashValid } from '$sol/api/solana.api';
+import { getSignatureStatus, getSolBalance, isBlockhashValid } from '$sol/api/solana.api';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import { toSolSourceTxOutcome, type SolSourceTxOutcome } from '$sol/utils/sol-source-tx.utils';
 import { isNullish } from '@dfinity/utils';
@@ -89,4 +90,27 @@ export const readSolSourceTxOutcome = async ({
 	expiryObservations.delete(rowId);
 
 	return outcome;
+};
+
+/**
+ * The lamports an address holds, read at a slot where a transaction has landed, so the balance
+ * counts what that transaction moved. A node not that far yet refuses to answer, and the read
+ * throws. `undefined` while the status read finds no status for the transaction.
+ */
+export const readSolBalanceAfterTx = async ({
+	address,
+	signature,
+	network
+}: {
+	address: SolAddress;
+	signature: string;
+	network: SolanaNetworkType;
+}): Promise<bigint | undefined> => {
+	const { status } = await getSignatureStatus({ signature, network });
+
+	if (isNullish(status)) {
+		return;
+	}
+
+	return await getSolBalance({ address, network, minContextSlot: status.slot });
 };
