@@ -34,6 +34,7 @@ import {
 } from '$lib/constants/app.constants';
 import {
 	applyActiveUserTransactionPollUpdate,
+	deleteActiveUserTransaction,
 	isBtcTransactionNeverLanded,
 	reloadActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
@@ -448,6 +449,31 @@ const readCkSolTransferOutcome = async ({
 };
 
 /**
+ * The backend's copy of a SOL → ckSOL row, read back with a certified call for a decision this tab's
+ * copy may be too stale for, or `undefined` once the backend no longer holds the row. The tab that
+ * opened such a row deleted it with nothing sent. It is deleted here too, as the Liquidium poller
+ * does, which removes this tab's copy: nothing can settle it, and while it is pending this tab offers
+ * no new conversion.
+ */
+const reloadCkSolMintRow = async ({
+	identity,
+	tx
+}: {
+	identity: Identity;
+	tx: ActiveUserTransaction;
+}): Promise<ActiveUserTransaction | undefined> => {
+	const current = await reloadActiveUserTransaction({ identity, id: tx.id });
+
+	if (isNullish(current)) {
+		lastWatchDepositAddressMs.delete(tx.id);
+
+		await deleteActiveUserTransaction({ identity, id: tx.id });
+	}
+
+	return current;
+};
+
+/**
  * SOL → ckSOL. The minter reports the deposit through `watch_deposit_address`, an update call
  * made about once a minute, and then answers exactly through `deposit_sol_status`, a query asked
  * on every tick once the row knows the deposit id.
@@ -548,9 +574,17 @@ const pollChainFusionSolMint = async ({
 
 	const transferError = chainFusionSolTransferError(outcome);
 
-	// The row ends, which frees the account for the next conversion.
+	// The row ends, which frees the account for the next conversion. This is also where a row ends
+	// that the tab which opened it deleted, its transfer never sent: so the backend's row decides,
+	// and only one still open there is failed.
 	if (nonNullish(transferError)) {
+		const current = await reloadCkSolMintRow({ identity, tx });
+
 		lastWatchDepositAddressMs.delete(tx.id);
+
+		if (isNullish(current) || isTerminalActiveUserTransaction(current)) {
+			return;
+		}
 
 		await applyUpdate({
 			identity,
@@ -592,7 +626,7 @@ const pollChainFusionSolMint = async ({
 	// the backend's row, read after the minter named the deposit, is still open and has the same
 	// deposit id: the backend holds one open SOL → ckSOL row per account, so the deposit of a row
 	// still open then is no other conversion's. The read also puts the backend's copy in the store.
-	const current = await reloadActiveUserTransaction({ identity, id: tx.id });
+	const current = await reloadCkSolMintRow({ identity, tx });
 
 	if (nonNullish(current) && isTerminalActiveUserTransaction(current)) {
 		// Settled elsewhere: the row leaves the pending set, so its throttle entry has no reader left.

@@ -35,6 +35,7 @@ import {
 } from '$lib/constants/app.constants';
 import {
 	applyActiveUserTransactionPollUpdate,
+	deleteActiveUserTransaction,
 	isBtcTransactionNeverLanded,
 	reloadActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
@@ -122,6 +123,7 @@ vi.mock('$eth/providers/infura-cketh.providers', () => ({
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
 	applyActiveUserTransactionPollUpdate: vi.fn(),
+	deleteActiveUserTransaction: vi.fn(),
 	isBtcTransactionNeverLanded: vi.fn(),
 	reloadActiveUserTransaction: vi.fn()
 }));
@@ -355,6 +357,8 @@ const lastUpdate = () => vi.mocked(applyActiveUserTransactionPollUpdate).mock.la
 describe('chain-fusion-swap-active-tx.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		// A copy a test queued but did not read must not reach the next test.
+		vi.mocked(reloadActiveUserTransaction).mockReset();
 		resetChainFusionMissingDepositLogObservations();
 		resetChainFusionUpdateBalanceThrottle();
 		resetChainFusionWatchDepositAddressThrottle();
@@ -539,6 +543,57 @@ describe('chain-fusion-swap-active-tx.services', () => {
 				await poll([openedBeforeBroadcast()]);
 
 				expect(lastUpdate()).toStrictEqual({ status: { Failed: null }, error });
+			});
+
+			// The backend's row decides: this is also where a row ends that the tab which opened it
+			// deleted, its transfer never sent.
+			describe('once the transfer can no longer land', () => {
+				beforeEach(() => {
+					vi.mocked(readSolSourceTxOutcome).mockResolvedValue('expired');
+				});
+
+				it('should read the row back before failing it', async () => {
+					const tx = openedBeforeBroadcast();
+
+					await poll([tx]);
+
+					expect(reloadActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						id: tx.id
+					});
+					expect(vi.mocked(reloadActiveUserTransaction).mock.invocationCallOrder[0]).toBeLessThan(
+						vi.mocked(applyActiveUserTransactionPollUpdate).mock.invocationCallOrder[0]
+					);
+					expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+				});
+
+				it('should delete a row the backend no longer holds, removing the copy in this tab', async () => {
+					const tx = openedBeforeBroadcast();
+
+					vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce(undefined);
+
+					await poll([tx]);
+
+					expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						id: tx.id
+					});
+					expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+				});
+
+				it('should leave a row settled elsewhere as the backend has it', async () => {
+					const tx = openedBeforeBroadcast();
+
+					vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce({
+						...tx,
+						status: { Failed: null }
+					});
+
+					await poll([tx]);
+
+					expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+					expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+				});
 			});
 
 			it.each([
@@ -872,13 +927,19 @@ describe('chain-fusion-swap-active-tx.services', () => {
 				expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
 			});
 
-			it('should not be taken for a row the backend no longer holds', async () => {
+			it('should not be taken for a row the backend no longer holds, which is deleted here too', async () => {
+				const tx = solMintTx();
+
 				vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce(undefined);
 
-				await poll([solMintTx()]);
+				await poll([tx]);
 
 				expect(depositSolStatus).not.toHaveBeenCalled();
 				expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+				expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: tx.id
+				});
 			});
 		});
 
