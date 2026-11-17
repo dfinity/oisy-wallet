@@ -742,12 +742,75 @@ describe('chain-fusion-swap-active-tx.services', () => {
 
 			await poll([solMintTx()]);
 
-			expect(depositSolStatus).toHaveBeenCalledExactlyOnceWith(
+			expect(depositSolStatus).toHaveBeenNthCalledWith(
+				1,
 				expect.objectContaining({ depositId: 42n })
 			);
 			expect(lastUpdate()).toStrictEqual(
 				expect.objectContaining({ status: { Failed: null }, error: expect.any(String) })
 			);
+		});
+
+		describe('a terminal answer', () => {
+			const knownDeposit = () =>
+				solMintTx({ refs: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42' } });
+
+			const minted = { Minted: { block_index: 12n, minted_amount: MINTED_AMOUNT } };
+			const quarantined = { Quarantined: { signature: SOL_SIGNATURE } };
+
+			it.each([
+				{ name: 'Minted', answer: minted, status: { Succeeded: null } },
+				{ name: 'Quarantined', answer: quarantined, status: { Failed: null } }
+			])(
+				'should settle on $name only once a certified call confirms it',
+				async ({ answer, status }) => {
+					vi.mocked(depositSolStatus).mockResolvedValue(answer);
+
+					await poll([knownDeposit()]);
+
+					expect(depositSolStatus).toHaveBeenNthCalledWith(1, {
+						identity: mockIdentity,
+						minterCanisterId: CKSOL_MINTER,
+						depositId: 42n,
+						certified: false
+					});
+					expect(depositSolStatus).toHaveBeenNthCalledWith(2, {
+						identity: mockIdentity,
+						minterCanisterId: CKSOL_MINTER,
+						depositId: 42n,
+						certified: true
+					});
+					expect(lastUpdate()).toStrictEqual(expect.objectContaining({ status }));
+				}
+			);
+
+			it.each([
+				{ name: 'Minted', answer: minted },
+				{ name: 'Quarantined', answer: quarantined }
+			])(
+				'should keep the row in flight when the certified call does not confirm $name',
+				async ({ answer }) => {
+					vi.mocked(depositSolStatus)
+						.mockResolvedValueOnce(answer)
+						.mockResolvedValueOnce({ Finalized: { signature: SOL_SIGNATURE } });
+
+					await poll([knownDeposit()]);
+
+					expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+				}
+			);
+
+			it('should make no certified call for an answer that keeps the row in flight', async () => {
+				vi.mocked(depositSolStatus).mockResolvedValue({
+					Queued: { sweepable_amount: 49_109_120n }
+				});
+
+				await poll([knownDeposit()]);
+
+				expect(depositSolStatus).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ certified: false })
+				);
+			});
 		});
 
 		it('should follow the latest deposit a full watchlist still names', async () => {
