@@ -2308,6 +2308,26 @@ describe('chain-fusion-swap.services', () => {
 				}
 			);
 
+			// A lower minimum in the second answer can make the balance read at confirm sweepable alone.
+			it('should delete the open row and send no SOL when, asked again, the minimum drops to the balance', async () => {
+				const balance = 10_000_000n;
+
+				vi.mocked(getSolBalance).mockResolvedValue(balance);
+				vi.mocked(watchDepositAddress)
+					.mockResolvedValueOnce(watched)
+					.mockResolvedValueOnce({ ...watched, minimum_deposit_amount: balance });
+
+				await expect(solSwap()).rejects.toMatchObject({ reason: 'inFlight' });
+
+				expect(getSolBalance).toHaveBeenCalledTimes(2);
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: SWAP_ID
+				});
+				expect(broadcastSol).not.toHaveBeenCalled();
+				expect(enableDestinationToken).not.toHaveBeenCalled();
+			});
+
 			it('should delete the open row and send no SOL when asking the minter again fails', async () => {
 				const error = new Error('replica unavailable');
 
