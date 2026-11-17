@@ -338,6 +338,17 @@
 				}
 			});
 
+			// LI.FI's execution checks its selection itself, against the quote it re-requests, after the
+			// one-output check above is skipped: its refusal reads as that check's would, and nothing was
+			// sent, so the form comes back.
+			if (err instanceof BtcValidationError) {
+				handleBtcValidationError({ err });
+
+				onBack();
+				onStartTriggerAmount();
+				return;
+			}
+
 			const quoteRejected = nearIntentsQuoteRejectedMessage(err);
 
 			toastsError({
