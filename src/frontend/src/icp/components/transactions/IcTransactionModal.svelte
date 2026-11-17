@@ -5,10 +5,12 @@
 	import { isIcrcTokenSupportIcrc3 } from '$icp/services/icrc.services';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
+	import { isCkSolActivityLedger } from '$icp/utils/cksol-transactions.utils';
 	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
 	import { getTopUpCanisterId } from '$icp/utils/cycles-top-up.utils';
 	import { icrcAccountExplorerUrl, icrcTxExplorerUrl } from '$icp/utils/icrc-transactions.utils';
 	import { isTokenIcp, isTokenIcrc } from '$icp/utils/icrc.utils';
+	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -115,9 +117,14 @@
 	let isIncoming = $derived(type === 'receive' || type === 'mint');
 
 	// A top-up, and a TCYCLES top-up's refund, read as such here too, as they do in the list.
-	// On ICP only a canister top-up has a label.
+	// On ICP only a canister top-up has a label. A ckSOL transaction reads as its row: a conversion
+	// from or to SOL, or a send.
 	let showTypeLabel = $derived(
-		nonNullish(typeLabel) && nonNullish(token) && (isTokenCyclesLedger(token) || isTokenIcp(token))
+		nonNullish(typeLabel) &&
+			nonNullish(token) &&
+			(isTokenCyclesLedger(token) ||
+				isTokenIcp(token) ||
+				(isIcToken(token) && isCkSolActivityLedger(token)))
 	);
 
 	// As in the list: a top-up shows the canister that got the cycles. The CMC deposit account an
