@@ -221,7 +221,9 @@ that stays on that network. -->
 {#snippet sameNetworkIcon()}
 	<span class="grid">
 		<span class="col-start-1 row-start-1">{@render iconDisc(swapIcon)}</span>
-		<span class="col-start-1 row-start-1 translate-x-1 place-self-end">
+		<!-- Smaller than a token logo's badge, as on the smallest token logos: at full size it would
+		hide half of the icon. -->
+		<span class="col-start-1 row-start-1 translate-x-1.5 translate-y-1 scale-75 place-self-end">
 			<NetworkLogo color="white" network={sourceToken.network} />
 		</span>
 	</span>
