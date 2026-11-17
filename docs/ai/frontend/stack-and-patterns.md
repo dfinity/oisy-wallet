@@ -374,7 +374,7 @@ the shared core rule, preserving its deprecated-package and `/dist/` import bans
 - **Scrolling lists (`scroll-fade`):** a list that scrolls inside a modal or
   panel (the token picker, send contacts, activity filters, swap offers) adds
   `scroll-fade` (`global.scss`) to its scrolling element. An edge with more to
-  scroll fades over 48 px, an edge at its end stays sharp, and a list that
+  scroll fades over 16 px, an edge at its end stays sharp, and a list that
   does not scroll shows nothing. The fade follows the scroll position
   (`animation-timeline: scroll(self)`), so reduced motion leaves it as is;
   Firefox, without scroll-driven animations, shows the plain list. It also

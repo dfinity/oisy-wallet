@@ -159,14 +159,14 @@ don't take it: they are the sign that work is happening.
 }
 
 /*
-`scroll-fade` - on a list that scrolls, an edge with more to scroll fades out over 48 px, so it
+`scroll-fade` - on a list that scrolls, an edge with more to scroll fades out over 16 px, so it
 is plain that the list goes on. An edge is sharp while the list sits at that end, and a list
 that does not scroll shows no fade. The fade follows the scroll position, not time
 (`animation-timeline: scroll(self)`), so reduced motion has nothing to stop. Browsers without
 scroll-driven animations (Firefox) show the plain list. Keyboard focus scrolls a row clear of
 the fade (`scroll-padding-block`), so a focused row is never half faded.
 */
-$scroll-fade-size: 3rem;
+$scroll-fade-size: 1rem;
 
 @property --scroll-fade-top {
 	syntax: '<length>';
