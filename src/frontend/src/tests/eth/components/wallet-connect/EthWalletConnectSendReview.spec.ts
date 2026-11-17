@@ -2,6 +2,7 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { USDC_SYMBOL, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { EURC_TOKEN as BASE_EURC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.eurc.env';
 import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
@@ -40,13 +41,26 @@ import {
 	ETH_FEE_PRIORITY_OPTION
 } from '$lib/constants/test-ids.constants';
 import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
+import { loadLiquidiumInflowPool } from '$lib/services/liquidium.services';
+import { ethAddressStore } from '$lib/stores/address.store';
 import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { formatSecondsToDate } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import {
+	encodeCkDepositErc20,
+	encodeCkDepositEth,
+	mockCkDepositHelperContractAddress,
+	mockCkDepositSubaccount
+} from '$tests/mocks/ck-deposit.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+import {
+	mockLiquidiumSupplySubaccount,
+	mockLiquidiumUsdtPoolId
+} from '$tests/mocks/liquidium-inflow.mock';
 import {
 	encodeUniswapCommand,
 	encodeUniswapEurcToUsdc,
@@ -59,13 +73,19 @@ import {
 } from '$tests/mocks/uniswap.mock';
 import { isNullish, toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
+import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
-import { fireEvent, render, within } from '@testing-library/svelte';
+import type { Pool } from '@liquidium/client';
+import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { AbiCoder, Interface } from 'ethers/abi';
 import { writable } from 'svelte/store';
 
 vi.mock('$eth/services/erc20-unlisted.services', () => ({
 	loadUnlistedErc20TokenData: vi.fn()
+}));
+
+vi.mock('$lib/services/liquidium.services', () => ({
+	loadLiquidiumInflowPool: vi.fn()
 }));
 
 describe('EthWalletConnectSendReview', () => {
@@ -1328,6 +1348,325 @@ describe('EthWalletConnectSendReview', () => {
 				expect(getByTestId(conversionTestId)).toBeInTheDocument();
 			}
 		);
+	});
+
+	describe('deposits to the ckETH minter helper that deposits to a subaccount', () => {
+		const HELPER = mockCkDepositHelperContractAddress;
+
+		const ownAccountTestId = 'wallet-connect-ck-deposit';
+		const otherAccountTestId = 'wallet-connect-ck-deposit-other-account';
+		const refusedTestId = 'wallet-connect-ck-deposit-refused';
+		const unknownTestId = 'wallet-connect-unknown-call';
+
+		const pool = Principal.fromText('hnnn4-iyaaa-aaaar-qb4bq-cai');
+
+		const subaccount = mockCkDepositSubaccount;
+
+		const minterInfo = {
+			data: {
+				...mockCkMinterInfo,
+				deposit_with_subaccount_helper_contract_address: toNullable(HELPER),
+				supported_ckerc20_tokens: toNullable([
+					{
+						erc20_contract_address: USDT_TOKEN.address,
+						ledger_canister_id: Principal.fromText('cngnf-vqaaa-aaaar-qag4q-cai'),
+						ckerc20_token_symbol: 'ckUSDT'
+					}
+				])
+			},
+			certified: true
+		};
+
+		const renderDeposit = ({
+			data,
+			value = ZERO,
+			unconfirmed = false
+		}: {
+			data: string;
+			value?: bigint;
+			unconfirmed?: boolean;
+		}) =>
+			render(EthWalletConnectSendReview, {
+				props: {
+					...props,
+					amount: value,
+					// The classifier the modal uses, so every case reaches the branch production reaches.
+					call: classifyWalletConnectEthSendTransaction({
+						to: HELPER,
+						data,
+						networkId: ETHEREUM_NETWORK.id,
+						minterInfo: unconfirmed ? undefined : minterInfo,
+						principal: mockPrincipal,
+						chainId: ETHEREUM_NETWORK.chainId,
+						value,
+						wallet: mockUniswapWallet,
+						nativeToken: ETHEREUM_TOKEN,
+						tokens: [USDT_TOKEN]
+					}),
+					data,
+					destination: HELPER,
+					targetNetwork: ICP_NETWORK
+				},
+				context: mockContext
+			});
+
+		it('should review a deposit to the account of the user as a conversion to it', () => {
+			const { getByTestId, queryByTestId, getByText, container, getByRole } = renderDeposit({
+				data: encodeCkDepositErc20({
+					address: USDT_TOKEN.address,
+					amount: 50_000_000n,
+					owner: mockPrincipal
+				})
+			});
+
+			expect(getByTestId(ownAccountTestId)).toHaveTextContent(
+				replacePlaceholders(en.wallet_connect.text.ck_deposit, {
+					$token: USDT_TOKEN.symbol,
+					$ckToken: 'ckUSDT'
+				})
+			);
+			expect(queryByTestId(otherAccountTestId)).not.toBeInTheDocument();
+			expect(queryByTestId(unknownTestId)).not.toBeInTheDocument();
+
+			expect(getByText(`50 ${USDT_TOKEN.symbol}`)).toBeInTheDocument();
+			expect(container.querySelector('#ck-deposit-account')).toHaveTextContent(
+				mockPrincipal.toText()
+			);
+			expect(
+				getByText(
+					replacePlaceholders(en.wallet_connect.text.ck_deposit_recipient, { $ckToken: 'ckUSDT' })
+				)
+			).toBeInTheDocument();
+			expect(container.querySelector('#destination-network')).toHaveTextContent(ICP_NETWORK.name);
+
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should warn that a deposit to another account goes to an account OISY cannot verify', () => {
+			const { getByTestId, queryByTestId, getByText, container, getByRole } = renderDeposit({
+				data: encodeCkDepositErc20({
+					address: USDT_TOKEN.address,
+					amount: 50_000_000n,
+					owner: pool,
+					subaccount
+				})
+			});
+
+			expect(getByTestId(otherAccountTestId)).toHaveTextContent(
+				replacePlaceholders(en.wallet_connect.text.ck_deposit_other_account, {
+					$token: USDT_TOKEN.symbol,
+					$ckToken: 'ckUSDT'
+				})
+			);
+			expect(queryByTestId(ownAccountTestId)).not.toBeInTheDocument();
+			expect(queryByTestId(unknownTestId)).not.toBeInTheDocument();
+
+			expect(getByText(`50 ${USDT_TOKEN.symbol}`)).toBeInTheDocument();
+			expect(container.querySelector('#ck-deposit-account')).toHaveTextContent(
+				encodeIcrcAccount({ owner: pool, subaccount })
+			);
+
+			// The account is long, so it can be copied whole, as wallets and explorers take it.
+			expect(
+				getByRole('button', {
+					name: `${en.core.text.copy}: ${encodeIcrcAccount({ owner: pool, subaccount })}`
+				})
+			).toBeInTheDocument();
+
+			// OISY signs it once the user approves, as it does a transfer to any address.
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should review a depositEth as the native value converted to ckETH', () => {
+			const { getByTestId, getByText } = renderDeposit({
+				data: encodeCkDepositEth({ owner: mockPrincipal }),
+				value: 1_000_000_000_000_000_000n
+			});
+
+			expect(getByTestId(ownAccountTestId)).toHaveTextContent(
+				replacePlaceholders(en.wallet_connect.text.ck_deposit, {
+					$token: ETHEREUM_TOKEN.symbol,
+					$ckToken: 'ckETH'
+				})
+			);
+			expect(getByText(`1 ${ETHEREUM_TOKEN.symbol}`)).toBeInTheDocument();
+		});
+
+		// While held, OISY has not read the deposit, and the native value is all it knows: none, for a
+		// token deposit. A zero there would read as the amount being sent.
+		it('should hold a token deposit without stating a zero native amount', () => {
+			const { getByTestId, queryByText, getByRole } = renderDeposit({
+				data: encodeCkDepositErc20({
+					address: USDT_TOKEN.address,
+					amount: 50_000_000n,
+					owner: mockPrincipal
+				}),
+				unconfirmed: true
+			});
+
+			expect(getByTestId('wallet-connect-cketh-helper-unconfirmed')).toBeInTheDocument();
+			expect(queryByText(`0 ${ETHEREUM_TOKEN.symbol}`)).not.toBeInTheDocument();
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should still state the native value of a held deposit that sends some', () => {
+			const { getByTestId, getByText } = renderDeposit({
+				data: encodeCkDepositEth({ owner: mockPrincipal }),
+				value: 1_000_000_000_000_000_000n,
+				unconfirmed: true
+			});
+
+			expect(getByTestId('wallet-connect-cketh-helper-unconfirmed')).toBeInTheDocument();
+			expect(getByText(`1 ${ETHEREUM_TOKEN.symbol}`)).toBeInTheDocument();
+		});
+
+		it('should refuse a deposit of a token the minter does not convert and disable approval', () => {
+			const { getByTestId, queryByTestId, container, getByRole } = renderDeposit({
+				data: encodeCkDepositErc20({
+					address: USDC_TOKEN.address,
+					amount: 50_000_000n,
+					owner: mockPrincipal
+				})
+			});
+
+			expect(getByTestId(refusedTestId)).toHaveTextContent(
+				en.wallet_connect.text.ck_deposit_refused
+			);
+			expect(queryByTestId(ownAccountTestId)).not.toBeInTheDocument();
+			expect(container.querySelector('#ck-deposit-account')).toBeNull();
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		describe('a deposit to the account of the user on Liquidium', () => {
+			const liquidiumTestId = 'wallet-connect-ck-deposit-liquidium';
+			const loadingTestId = 'wallet-connect-liquidium-pool-loading';
+
+			const pool = { id: mockLiquidiumUsdtPoolId, asset: 'USDT' } as Pool;
+
+			const liquidiumDeposit = encodeCkDepositErc20({
+				address: USDT_TOKEN.address,
+				amount: 50_000_000n,
+				owner: Principal.fromText(mockLiquidiumUsdtPoolId),
+				subaccount: mockLiquidiumSupplySubaccount
+			});
+
+			beforeEach(() => {
+				mockAuthStore();
+				ethAddressStore.set({ certified: true, data: mockUniswapWallet });
+
+				vi.mocked(loadLiquidiumInflowPool).mockResolvedValue(pool);
+			});
+
+			afterEach(() => {
+				ethAddressStore.reset();
+			});
+
+			it('should name the Liquidium pool and say the deposit is for the account of the user', async () => {
+				const { findByTestId, queryByTestId, container, getByRole } = renderDeposit({
+					data: liquidiumDeposit
+				});
+
+				await expect(findByTestId(liquidiumTestId)).resolves.toHaveTextContent(
+					replacePlaceholders(en.wallet_connect.text.ck_deposit_liquidium, {
+						$token: USDT_TOKEN.symbol,
+						$ckToken: 'ckUSDT'
+					})
+				);
+				expect(queryByTestId(otherAccountTestId)).not.toBeInTheDocument();
+
+				// The account the deposit goes to, and under it the pool OISY read it to be.
+				const account = container.querySelector('#ck-deposit-account');
+
+				expect(account).toHaveTextContent(
+					encodeIcrcAccount({
+						owner: Principal.fromText(mockLiquidiumUsdtPoolId),
+						subaccount: mockLiquidiumSupplySubaccount
+					})
+				);
+				expect(account).toHaveTextContent(
+					replacePlaceholders(en.wallet_connect.text.ck_deposit_liquidium_pool, { $asset: 'USDT' })
+				);
+
+				// The row names the pool; the copy button still copies the account itself.
+				expect(
+					getByRole('button', {
+						name: `${en.core.text.copy}: ${encodeIcrcAccount({
+							owner: Principal.fromText(mockLiquidiumUsdtPoolId),
+							subaccount: mockLiquidiumSupplySubaccount
+						})}`
+					})
+				).toBeInTheDocument();
+
+				expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+
+				expect(loadLiquidiumInflowPool).toHaveBeenCalledExactlyOnceWith({
+					identity: expect.anything(),
+					ethAddress: mockUniswapWallet,
+					owner: Principal.fromText(mockLiquidiumUsdtPoolId),
+					subaccount: mockLiquidiumSupplySubaccount,
+					ckTokenSymbol: 'ckUSDT'
+				});
+			});
+
+			it('should hold approval behind a spinner while Liquidium is read', () => {
+				vi.mocked(loadLiquidiumInflowPool).mockReturnValue(new Promise(() => {}));
+
+				const { getByTestId, queryByTestId, getByRole } = renderDeposit({ data: liquidiumDeposit });
+
+				expect(getByTestId(loadingTestId)).toBeInTheDocument();
+				expect(queryByTestId(liquidiumTestId)).not.toBeInTheDocument();
+				expect(queryByTestId(otherAccountTestId)).not.toBeInTheDocument();
+
+				expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+			});
+
+			it.each([
+				{
+					kind: 'an account Liquidium does not credit to the user',
+					read: () => vi.mocked(loadLiquidiumInflowPool).mockResolvedValue(undefined)
+				},
+				{
+					kind: 'an account while Liquidium does not answer',
+					read: () => vi.mocked(loadLiquidiumInflowPool).mockRejectedValue(new Error('unavailable'))
+				}
+			])('should warn about $kind as about any other account', async ({ read }) => {
+				read();
+
+				const { findByTestId, queryByTestId, container, getByRole } = renderDeposit({
+					data: liquidiumDeposit
+				});
+
+				await expect(findByTestId(otherAccountTestId)).resolves.toBeInTheDocument();
+				expect(queryByTestId(liquidiumTestId)).not.toBeInTheDocument();
+
+				expect(container.querySelector('#ck-deposit-account')).toHaveTextContent(
+					encodeIcrcAccount({
+						owner: Principal.fromText(mockLiquidiumUsdtPoolId),
+						subaccount: mockLiquidiumSupplySubaccount
+					})
+				);
+
+				expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+			});
+
+			it('should not read Liquidium for a deposit to the default account of the user', async () => {
+				const { getByTestId } = renderDeposit({
+					data: encodeCkDepositErc20({
+						address: USDT_TOKEN.address,
+						amount: 50_000_000n,
+						owner: mockPrincipal
+					})
+				});
+
+				expect(getByTestId(ownAccountTestId)).toBeInTheDocument();
+
+				await waitFor(() => {
+					expect(loadLiquidiumInflowPool).not.toHaveBeenCalled();
+				});
+			});
+		});
 	});
 
 	describe('transaction priority', () => {

@@ -42,6 +42,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const AddDismissedNotificationError = IDL.Variant({
 		TooManyNotifications: IDL.Null,
+		QualifierTooLong: IDL.Null,
 		VersionMismatch: IDL.Null,
 		MaxDismissedNotifications: IDL.Null,
 		UserNotFound: IDL.Null

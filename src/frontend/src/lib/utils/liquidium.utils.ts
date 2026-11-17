@@ -9,6 +9,7 @@ import {
 	LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS,
 	LIQUIDIUM_HEALTH_AT_RISK_PERCENT,
 	LIQUIDIUM_HEALTH_CRITICAL_PERCENT,
+	LIQUIDIUM_INFLOW_SUBACCOUNT_PURPOSES,
 	LIQUIDIUM_NETWORK_ORDER,
 	LIQUIDIUM_POOL_ORDER,
 	type LiquidiumHealthLevel
@@ -17,7 +18,7 @@ import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib
 import type { Token } from '$lib/types/token';
 import { parseToken } from '$lib/utils/parse.utils';
 import { findTwinToken } from '$lib/utils/token.utils';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import {
 	Chain,
@@ -474,3 +475,39 @@ export const liquidiumNetInterestUsd = (portfolio: LiquidiumPortfolio | null): n
 			acc + (suppliedUsd * supplyApy - borrowedUsd * borrowApy) / 100,
 		0
 	);
+
+// A subaccount is 32 bytes, and the profile's principal starts at its fourth.
+const LIQUIDIUM_INFLOW_SUBACCOUNT_LENGTH = 32;
+const LIQUIDIUM_INFLOW_PRINCIPAL_OFFSET = 3;
+
+/**
+ * Whether a subaccount of a Liquidium pool is the one that credits what reaches the pool to the
+ * given profile, as a supply or as a repayment.
+ *
+ * The Liquidium client lays it out as what the inflow is for in the first byte, the length of the
+ * profile's principal in the third, the principal from the fourth byte and zeros after it. Any
+ * other subaccount, including one that names the profile with bytes after it, is not.
+ */
+export const isLiquidiumInflowSubaccount = ({
+	subaccount,
+	profileId
+}: {
+	subaccount: Uint8Array;
+	profileId: Principal;
+}): boolean => {
+	const principal = profileId.toUint8Array();
+
+	if (principal.length > LIQUIDIUM_INFLOW_SUBACCOUNT_LENGTH - LIQUIDIUM_INFLOW_PRINCIPAL_OFFSET) {
+		return false;
+	}
+
+	return Object.values(LIQUIDIUM_INFLOW_SUBACCOUNT_PURPOSES).some((purpose) => {
+		const expected = new Uint8Array(LIQUIDIUM_INFLOW_SUBACCOUNT_LENGTH);
+
+		expected[0] = purpose;
+		expected[LIQUIDIUM_INFLOW_PRINCIPAL_OFFSET - 1] = principal.length;
+		expected.set(principal, LIQUIDIUM_INFLOW_PRINCIPAL_OFFSET);
+
+		return uint8ArrayToHexString(expected) === uint8ArrayToHexString(subaccount);
+	});
+};

@@ -1890,6 +1890,8 @@ describe('chain-fusion-swap.services', () => {
 				solDeposit: { address: DEPOSIT_ADDRESS, automaticDepositFee: AUTOMATIC_DEPOSIT_FEE }
 			};
 
+			const PRIORITIZATION_FEE = 4_000n;
+
 			// The cases below are minutes apart, so the milliseconds the tests take never matter.
 			const NOW_NANOS = BigInt(Date.now()) * NANO_SECONDS_IN_MILLISECOND;
 
@@ -1935,6 +1937,7 @@ describe('chain-fusion-swap.services', () => {
 					swapDetails,
 					swapId: SWAP_ID,
 					usdSourceValue: '7.5',
+					prioritizationFee: PRIORITIZATION_FEE,
 					enableDestinationToken
 				});
 
@@ -1982,7 +1985,7 @@ describe('chain-fusion-swap.services', () => {
 			it('should register the deposit address with the minter before sending the SOL to it', async () => {
 				await solSwap();
 
-				expect(watchDepositAddress).toHaveBeenCalledExactlyOnceWith({
+				expect(watchDepositAddress).toHaveBeenNthCalledWith(1, {
 					identity: mockIdentity,
 					minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID
 				});
@@ -1990,7 +1993,8 @@ describe('chain-fusion-swap.services', () => {
 					identity: mockIdentity,
 					token: SOLANA_TOKEN,
 					amount: SOL_AMOUNT,
-					prioritizationFee: ZERO,
+					// The priority fee the user reviewed, so the transfer goes out as reviewed.
+					prioritizationFee: PRIORITIZATION_FEE,
 					destination: DEPOSIT_ADDRESS,
 					source: mockSolAddress,
 					progress: expect.any(Function),
@@ -2019,13 +2023,15 @@ describe('chain-fusion-swap.services', () => {
 				});
 			});
 
-			it('should leave out the blockhash slot when the node does not know the blockhash yet', async () => {
+			// Without a slot where the blockhash is valid, a lagging node could fail the row as expired.
+			it('should send no SOL when the node does not know the blockhash yet', async () => {
 				vi.mocked(isBlockhashValid).mockResolvedValue({ slot: BLOCKHASH_SLOT, valid: false });
 
-				await solSwap();
+				await expect(solSwap()).rejects.toMatchObject({ reason: 'unavailable' });
 
-				expect(refsOfLastCreate()).toHaveProperty('chain_fusion_sol_blockhash', BLOCKHASH);
-				expect(refsOfLastCreate()).not.toHaveProperty('chain_fusion_sol_blockhash_slot');
+				expect(createActiveUserTransaction).not.toHaveBeenCalled();
+				expect(broadcastSol).not.toHaveBeenCalled();
+				expect(enableDestinationToken).not.toHaveBeenCalled();
 			});
 
 			// Acceptance criterion 6.
@@ -2130,6 +2136,13 @@ describe('chain-fusion-swap.services', () => {
 					name: 'the last scan of the window is overdue',
 					answer: watchingWindow({ endsIn: 29n, nextScanIn: -1n }),
 					reason: 'unavailable'
+				},
+				// The next scan does not look like the window's last, but the minter is so far behind
+				// that every slot left in the window has passed.
+				{
+					name: 'every scan left in the window is overdue',
+					answer: watchingWindow({ endsIn: 5n, nextScanIn: -60n }),
+					reason: 'unavailable'
 				}
 			])('should send no SOL when $name', async ({ answer, reason }) => {
 				vi.mocked(watchDepositAddress).mockResolvedValue(answer);
@@ -2172,6 +2185,44 @@ describe('chain-fusion-swap.services', () => {
 				expect(createActiveUserTransaction).not.toHaveBeenCalled();
 			});
 
+			// Acceptance criterion 5: a scan could sweep that balance alone before the transfer lands.
+			it('should send no SOL, once registered, while the deposit address already holds the minimum', async () => {
+				vi.mocked(getSolBalance).mockResolvedValue(MINIMUM_DEPOSIT_AMOUNT);
+
+				await expect(solSwap()).rejects.toMatchObject({ reason: 'inFlight' });
+
+				expect(watchDepositAddress).toHaveBeenCalledOnce();
+				expect(getSolBalance).toHaveBeenCalledExactlyOnceWith({
+					address: DEPOSIT_ADDRESS,
+					network: SolanaNetworks.mainnet
+				});
+				expect(vi.mocked(watchDepositAddress).mock.invocationCallOrder[0]).toBeLessThan(
+					vi.mocked(getSolBalance).mock.invocationCallOrder[0]
+				);
+				expect(sendSol).not.toHaveBeenCalled();
+				expect(createActiveUserTransaction).not.toHaveBeenCalled();
+				expect(enableDestinationToken).not.toHaveBeenCalled();
+			});
+
+			it('should send the SOL while the deposit address holds less than the minimum', async () => {
+				vi.mocked(getSolBalance).mockResolvedValue(MINIMUM_DEPOSIT_AMOUNT - 1n);
+
+				await solSwap();
+
+				expect(sendSol).toHaveBeenCalledOnce();
+			});
+
+			it('should send no SOL when the deposit address balance cannot be read', async () => {
+				const error = new Error('rpc down');
+
+				vi.mocked(getSolBalance).mockRejectedValue(error);
+
+				await expect(solSwap()).rejects.toMatchObject({ reason: 'unavailable', cause: error });
+
+				expect(sendSol).not.toHaveBeenCalled();
+				expect(createActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
 			it('should open no row when the transfer fails before it is signed', async () => {
 				vi.mocked(sendSol).mockRejectedValue(new Error('signer unavailable'));
 
@@ -2192,6 +2243,103 @@ describe('chain-fusion-swap.services', () => {
 
 				expect(broadcastSol).not.toHaveBeenCalled();
 				expect(enableDestinationToken).not.toHaveBeenCalled();
+			});
+
+			// Acceptance criterion 8.
+			it('should ask the minter again once the row is open, before broadcasting', async () => {
+				await solSwap();
+
+				expect(watchDepositAddress).toHaveBeenCalledTimes(2);
+				expect(watchDepositAddress).toHaveBeenNthCalledWith(2, {
+					identity: mockIdentity,
+					minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID
+				});
+				expect(vi.mocked(createActiveUserTransaction).mock.invocationCallOrder[0]).toBeLessThan(
+					vi.mocked(watchDepositAddress).mock.invocationCallOrder[1]
+				);
+				expect(vi.mocked(watchDepositAddress).mock.invocationCallOrder[1]).toBeLessThan(
+					broadcastSol.mock.invocationCallOrder[0]
+				);
+				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			// Acceptance criterion 8: a conversion that settled while this one waited since confirm.
+			it.each([
+				{
+					name: 'the latest deposit id moved',
+					answer: { ...watched, latest_deposit_id: [42n] as [bigint] },
+					reason: 'changed'
+				},
+				{
+					name: 'a first deposit of the account appeared',
+					confirmed: { ...watched, latest_deposit_id: [] as [] },
+					answer: { ...watched, latest_deposit_id: [42n] as [bigint] },
+					reason: 'changed'
+				},
+				{
+					name: 'a deposit is in flight',
+					answer: { ...watched, status: { Detected: { deposit_id: 42n } } },
+					reason: 'inFlight'
+				},
+				{
+					name: 'no scan is due before the window ends',
+					answer: {
+						...watched,
+						status: { Watching: { ...watched.status.Watching, next_scan_at: [] as [] } }
+					},
+					reason: 'unavailable'
+				}
+			])(
+				'should delete the open row and send no SOL when, asked again, $name',
+				async ({ confirmed = watched, answer, reason }) => {
+					vi.mocked(watchDepositAddress)
+						.mockResolvedValueOnce(confirmed)
+						.mockResolvedValueOnce(answer);
+
+					await expect(solSwap()).rejects.toMatchObject({ reason });
+
+					expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+					expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						id: SWAP_ID
+					});
+					expect(broadcastSol).not.toHaveBeenCalled();
+					expect(enableDestinationToken).not.toHaveBeenCalled();
+				}
+			);
+
+			// A lower minimum in the second answer can make the balance read at confirm sweepable alone.
+			it('should delete the open row and send no SOL when, asked again, the minimum drops to the balance', async () => {
+				const balance = 10_000_000n;
+
+				vi.mocked(getSolBalance).mockResolvedValue(balance);
+				vi.mocked(watchDepositAddress)
+					.mockResolvedValueOnce(watched)
+					.mockResolvedValueOnce({ ...watched, minimum_deposit_amount: balance });
+
+				await expect(solSwap()).rejects.toMatchObject({ reason: 'inFlight' });
+
+				expect(getSolBalance).toHaveBeenCalledTimes(2);
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: SWAP_ID
+				});
+				expect(broadcastSol).not.toHaveBeenCalled();
+				expect(enableDestinationToken).not.toHaveBeenCalled();
+			});
+
+			it('should delete the open row and send no SOL when asking the minter again fails', async () => {
+				const error = new Error('replica unavailable');
+
+				vi.mocked(watchDepositAddress).mockResolvedValueOnce(watched).mockRejectedValueOnce(error);
+
+				await expect(solSwap()).rejects.toMatchObject({ reason: 'unavailable', cause: error });
+
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: SWAP_ID
+				});
+				expect(broadcastSol).not.toHaveBeenCalled();
 			});
 
 			it('should send no SOL when the row cannot be written', async () => {
@@ -2258,6 +2406,63 @@ describe('chain-fusion-swap.services', () => {
 				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
 				expect(enableDestinationToken).toHaveBeenCalledOnce();
 				expect(consoleErrorSpy).toHaveBeenCalledOnce();
+			});
+
+			// A tab closed while the transfer confirms still shows the minted ckSOL.
+			it('should start enabling ckSOL once the transfer is broadcast, before it is confirmed', async () => {
+				let enabledBeforeConfirmed = false;
+
+				vi.mocked(sendSol).mockImplementation(async ({ beforeBroadcast, progress: step }) => {
+					const signature = TRANSFER_SIGNATURE as Awaited<ReturnType<typeof sendSol>>;
+
+					await beforeBroadcast?.({ signature, blockhash: BLOCKHASH });
+
+					step?.(ProgressStepsSendSol.SEND);
+					broadcastSol();
+					step?.(ProgressStepsSendSol.CONFIRM);
+
+					enabledBeforeConfirmed = enableDestinationToken.mock.calls.length > 0;
+
+					return signature;
+				});
+
+				await solSwap();
+
+				expect(enabledBeforeConfirmed).toBeTruthy();
+				expect(enableDestinationToken).toHaveBeenCalledOnce();
+			});
+
+			it('should not enable ckSOL before the transfer is broadcast', async () => {
+				let enabledBeforeBroadcast = true;
+
+				vi.mocked(sendSol).mockImplementation(async ({ beforeBroadcast, progress: step }) => {
+					const signature = TRANSFER_SIGNATURE as Awaited<ReturnType<typeof sendSol>>;
+
+					await beforeBroadcast?.({ signature, blockhash: BLOCKHASH });
+
+					step?.(ProgressStepsSendSol.SEND);
+					enabledBeforeBroadcast = enableDestinationToken.mock.calls.length > 0;
+					broadcastSol();
+					step?.(ProgressStepsSendSol.CONFIRM);
+
+					return signature;
+				});
+
+				await solSwap();
+
+				expect(enabledBeforeBroadcast).toBeFalsy();
+			});
+
+			it('should finish the conversion when enabling ckSOL fails', async () => {
+				const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+				enableDestinationToken.mockRejectedValue(new Error('backend down'));
+
+				await expect(solSwap()).resolves.toBeUndefined();
+
+				expect(enableDestinationToken).toHaveBeenCalledOnce();
+				expect(consoleErrorSpy).toHaveBeenCalledOnce();
+				expect(progress).toHaveBeenLastCalledWith(ProgressStepsSwap.UPDATE_UI);
 			});
 		});
 	});

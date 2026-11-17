@@ -35,7 +35,9 @@ import {
 } from '$lib/constants/app.constants';
 import {
 	applyActiveUserTransactionPollUpdate,
-	isBtcTransactionNeverLanded
+	deleteActiveUserTransaction,
+	isBtcTransactionNeverLanded,
+	reloadActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import {
 	pollChainFusionActiveUserTransactions,
@@ -121,7 +123,9 @@ vi.mock('$eth/providers/infura-cketh.providers', () => ({
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
 	applyActiveUserTransactionPollUpdate: vi.fn(),
-	isBtcTransactionNeverLanded: vi.fn()
+	deleteActiveUserTransaction: vi.fn(),
+	isBtcTransactionNeverLanded: vi.fn(),
+	reloadActiveUserTransaction: vi.fn()
 }));
 
 vi.mock('$sol/services/sol-source-tx.services', () => ({
@@ -339,14 +343,22 @@ const setLastObservedBlock = (blockNumber: number | undefined) =>
 		)
 	});
 
-const poll = (transactions: ActiveUserTransaction[]) =>
-	pollChainFusionActiveUserTransactions({ identity: mockIdentity, transactions });
+const poll = (transactions: ActiveUserTransaction[]) => {
+	// The backend's copy of a row is this tab's, unless a test queues another one.
+	vi.mocked(reloadActiveUserTransaction).mockImplementation(({ id }) =>
+		Promise.resolve(transactions.find((tx) => tx.id === id))
+	);
+
+	return pollChainFusionActiveUserTransactions({ identity: mockIdentity, transactions });
+};
 
 const lastUpdate = () => vi.mocked(applyActiveUserTransactionPollUpdate).mock.lastCall?.[0].update;
 
 describe('chain-fusion-swap-active-tx.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		// A copy a test queued but did not read must not reach the next test.
+		vi.mocked(reloadActiveUserTransaction).mockReset();
 		resetChainFusionMissingDepositLogObservations();
 		resetChainFusionUpdateBalanceThrottle();
 		resetChainFusionWatchDepositAddressThrottle();
@@ -533,13 +545,131 @@ describe('chain-fusion-swap-active-tx.services', () => {
 				expect(lastUpdate()).toStrictEqual({ status: { Failed: null }, error });
 			});
 
-			it('should not read the transfer once the minter reports a newer deposit', async () => {
+			// The backend's row decides: this is also where a row ends that the tab which opened it
+			// deleted, its transfer never sent.
+			describe('once the transfer can no longer land', () => {
+				beforeEach(() => {
+					vi.mocked(readSolSourceTxOutcome).mockResolvedValue('expired');
+				});
+
+				it('should read the row back before failing it', async () => {
+					const tx = openedBeforeBroadcast();
+
+					await poll([tx]);
+
+					expect(reloadActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						id: tx.id
+					});
+					expect(vi.mocked(reloadActiveUserTransaction).mock.invocationCallOrder[0]).toBeLessThan(
+						vi.mocked(applyActiveUserTransactionPollUpdate).mock.invocationCallOrder[0]
+					);
+					expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+				});
+
+				it('should delete a row the backend no longer holds, removing the copy in this tab', async () => {
+					const tx = openedBeforeBroadcast();
+
+					vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce(undefined);
+
+					await poll([tx]);
+
+					expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						id: tx.id
+					});
+					expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+				});
+
+				it('should leave a row settled elsewhere as the backend has it', async () => {
+					const tx = openedBeforeBroadcast();
+
+					vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce({
+						...tx,
+						status: { Failed: null }
+					});
+
+					await poll([tx]);
+
+					expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+					expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+				});
+			});
+
+			it.each([
+				{ outcome: 'expired' as const, error: en.swap.error.swap_expired },
+				{ outcome: 'reverted' as const, error: en.swap.error.failed_unexpectedly }
+			])(
+				'should fail the row when the transfer is $outcome, even while the minter is unavailable',
+				async ({ outcome, error }) => {
+					vi.mocked(readSolSourceTxOutcome).mockResolvedValue(outcome);
+					vi.mocked(watchDepositAddress).mockRejectedValue(
+						new CkSolWatchDepositAddressError({ TemporarilyUnavailable: 'upgrading' })
+					);
+
+					await poll([openedBeforeBroadcast()]);
+
+					expect(watchDepositAddress).not.toHaveBeenCalled();
+					expect(lastUpdate()).toStrictEqual({ status: { Failed: null }, error });
+				}
+			);
+
+			it('should take a newer deposit once the transfer is on chain', async () => {
 				vi.mocked(watchDepositAddress).mockResolvedValue(detected(42n));
+				vi.mocked(readSolSourceTxOutcome).mockResolvedValue('succeeded');
 				vi.mocked(depositSolStatus).mockResolvedValue({
 					Queued: { sweepable_amount: 49_109_120n }
 				});
 
 				await poll([openedBeforeBroadcast()]);
+
+				expect(depositSolStatus).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ depositId: 42n })
+				);
+				expect(lastUpdate()).toStrictEqual({
+					status: { Executing: null },
+					externalRefs: expect.arrayContaining([{ key: 'chain_fusion_cksol_deposit', value: '42' }])
+				});
+			});
+
+			// Acceptance criterion 7: another conversion's deposit, minted while this one waited to be
+			// sent, never settles a row whose transfer is not on chain.
+			it('should not take a newer deposit while the transfer is not on chain', async () => {
+				vi.mocked(watchDepositAddress).mockResolvedValue(watching(42n));
+				vi.mocked(depositSolStatus).mockResolvedValue({
+					Minted: { block_index: 12n, minted_amount: MINTED_AMOUNT }
+				});
+
+				await poll([openedBeforeBroadcast()]);
+
+				expect(depositSolStatus).not.toHaveBeenCalled();
+				expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+			});
+
+			it('should fail the row, without taking a newer deposit, once the transfer can no longer land', async () => {
+				vi.mocked(watchDepositAddress).mockResolvedValue(watching(42n));
+				vi.mocked(readSolSourceTxOutcome).mockResolvedValue('expired');
+
+				await poll([openedBeforeBroadcast()]);
+
+				expect(depositSolStatus).not.toHaveBeenCalled();
+				expect(lastUpdate()).toStrictEqual({
+					status: { Failed: null },
+					error: en.swap.error.swap_expired
+				});
+			});
+
+			it('should not read the transfer again once the row follows a deposit', async () => {
+				vi.mocked(depositSolStatus).mockResolvedValue({ Finalized: { signature: SOL_SIGNATURE } });
+
+				await poll([
+					solMintTx({
+						refs: {
+							[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH]: BLOCKHASH,
+							[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42'
+						}
+					})
+				]);
 
 				expect(readSolSourceTxOutcome).not.toHaveBeenCalled();
 			});
@@ -656,6 +786,7 @@ describe('chain-fusion-swap-active-tx.services', () => {
 		it('should follow the next deposit once the known one was dropped', async () => {
 			vi.mocked(depositSolStatus)
 				.mockResolvedValueOnce({ Dropped: { signature: SOL_SIGNATURE } })
+				.mockResolvedValueOnce({ Dropped: { signature: SOL_SIGNATURE } })
 				.mockResolvedValueOnce({ Queued: { sweepable_amount: 49_109_120n } });
 			vi.mocked(watchDepositAddress).mockResolvedValue(detected(43n));
 
@@ -664,7 +795,7 @@ describe('chain-fusion-swap-active-tx.services', () => {
 			]);
 
 			expect(depositSolStatus).toHaveBeenNthCalledWith(
-				2,
+				3,
 				expect.objectContaining({ depositId: 43n })
 			);
 			expect(lastUpdate()).toStrictEqual({
@@ -681,8 +812,51 @@ describe('chain-fusion-swap-active-tx.services', () => {
 				solMintTx({ refs: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42' } })
 			]);
 
-			expect(depositSolStatus).toHaveBeenCalledOnce();
+			expect(depositSolStatus).toHaveBeenCalledTimes(2);
 			expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+		});
+
+		it('should look for a newer deposit only once a certified call confirms the drop', async () => {
+			vi.mocked(depositSolStatus).mockResolvedValue({ Dropped: { signature: SOL_SIGNATURE } });
+			vi.mocked(watchDepositAddress).mockResolvedValue(watching(42n));
+
+			await poll([
+				solMintTx({ refs: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42' } })
+			]);
+
+			expect(depositSolStatus).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				minterCanisterId: CKSOL_MINTER,
+				depositId: 42n,
+				certified: false
+			});
+			expect(depositSolStatus).toHaveBeenNthCalledWith(2, {
+				identity: mockIdentity,
+				minterCanisterId: CKSOL_MINTER,
+				depositId: 42n,
+				certified: true
+			});
+			expect(watchDepositAddress).toHaveBeenCalledOnce();
+		});
+
+		it('should keep the known deposit when the certified call answers a drop as minted', async () => {
+			vi.mocked(depositSolStatus)
+				.mockResolvedValueOnce({ Dropped: { signature: SOL_SIGNATURE } })
+				.mockResolvedValueOnce({ Minted: { block_index: 12n, minted_amount: MINTED_AMOUNT } });
+			vi.mocked(watchDepositAddress).mockResolvedValue(detected(43n));
+
+			await poll([
+				solMintTx({ refs: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42' } })
+			]);
+
+			expect(depositSolStatus).toHaveBeenCalledTimes(2);
+			expect(watchDepositAddress).not.toHaveBeenCalled();
+			expect(lastUpdate()).toStrictEqual({
+				status: { Succeeded: null },
+				externalRefs: expect.arrayContaining([
+					{ key: 'chain_fusion_received_amount', value: '0.0471' }
+				])
+			});
 		});
 
 		it('should follow the quarantined deposit the minter names in its refusal', async () => {
@@ -693,12 +867,142 @@ describe('chain-fusion-swap-active-tx.services', () => {
 
 			await poll([solMintTx()]);
 
-			expect(depositSolStatus).toHaveBeenCalledExactlyOnceWith(
+			expect(depositSolStatus).toHaveBeenNthCalledWith(
+				1,
 				expect.objectContaining({ depositId: 42n })
 			);
 			expect(lastUpdate()).toStrictEqual(
 				expect.objectContaining({ status: { Failed: null }, error: expect.any(String) })
 			);
+		});
+
+		describe('a deposit the minter names', () => {
+			beforeEach(() => {
+				vi.mocked(watchDepositAddress).mockResolvedValue(detected(43n));
+				vi.mocked(depositSolStatus).mockResolvedValue({
+					Queued: { sweepable_amount: 49_109_120n }
+				});
+			});
+
+			it('should be taken once the backend still holds the row open, read after the minter named it', async () => {
+				const tx = solMintTx();
+
+				await poll([tx]);
+
+				expect(reloadActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: tx.id
+				});
+				expect(vi.mocked(reloadActiveUserTransaction).mock.invocationCallOrder[0]).toBeGreaterThan(
+					vi.mocked(watchDepositAddress).mock.invocationCallOrder[0]
+				);
+				expect(lastUpdate()).toStrictEqual({
+					status: { Executing: null },
+					externalRefs: expect.arrayContaining([{ key: 'chain_fusion_cksol_deposit', value: '43' }])
+				});
+			});
+
+			it('should not be taken for a row settled elsewhere', async () => {
+				const tx = solMintTx();
+
+				vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce({
+					...tx,
+					status: { Succeeded: null }
+				});
+
+				await poll([tx]);
+
+				expect(depositSolStatus).not.toHaveBeenCalled();
+				expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+			});
+
+			it('should not be taken for a row that took a deposit elsewhere', async () => {
+				vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce(
+					solMintTx({ refs: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42' } })
+				);
+
+				await poll([solMintTx()]);
+
+				expect(depositSolStatus).not.toHaveBeenCalled();
+				expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+			});
+
+			it('should not be taken for a row the backend no longer holds, which is deleted here too', async () => {
+				const tx = solMintTx();
+
+				vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce(undefined);
+
+				await poll([tx]);
+
+				expect(depositSolStatus).not.toHaveBeenCalled();
+				expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+				expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: tx.id
+				});
+			});
+		});
+
+		describe('a terminal answer', () => {
+			const knownDeposit = () =>
+				solMintTx({ refs: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42' } });
+
+			const minted = { Minted: { block_index: 12n, minted_amount: MINTED_AMOUNT } };
+			const quarantined = { Quarantined: { signature: SOL_SIGNATURE } };
+
+			it.each([
+				{ name: 'Minted', answer: minted, status: { Succeeded: null } },
+				{ name: 'Quarantined', answer: quarantined, status: { Failed: null } }
+			])(
+				'should settle on $name only once a certified call confirms it',
+				async ({ answer, status }) => {
+					vi.mocked(depositSolStatus).mockResolvedValue(answer);
+
+					await poll([knownDeposit()]);
+
+					expect(depositSolStatus).toHaveBeenNthCalledWith(1, {
+						identity: mockIdentity,
+						minterCanisterId: CKSOL_MINTER,
+						depositId: 42n,
+						certified: false
+					});
+					expect(depositSolStatus).toHaveBeenNthCalledWith(2, {
+						identity: mockIdentity,
+						minterCanisterId: CKSOL_MINTER,
+						depositId: 42n,
+						certified: true
+					});
+					expect(lastUpdate()).toStrictEqual(expect.objectContaining({ status }));
+				}
+			);
+
+			it.each([
+				{ name: 'Minted', answer: minted },
+				{ name: 'Quarantined', answer: quarantined }
+			])(
+				'should keep the row in flight when the certified call does not confirm $name',
+				async ({ answer }) => {
+					vi.mocked(depositSolStatus)
+						.mockResolvedValueOnce(answer)
+						.mockResolvedValueOnce({ Finalized: { signature: SOL_SIGNATURE } });
+
+					await poll([knownDeposit()]);
+
+					expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+				}
+			);
+
+			it('should make no certified call for an answer that keeps the row in flight', async () => {
+				vi.mocked(depositSolStatus).mockResolvedValue({
+					Queued: { sweepable_amount: 49_109_120n }
+				});
+
+				await poll([knownDeposit()]);
+
+				expect(depositSolStatus).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ certified: false })
+				);
+			});
 		});
 
 		it('should follow the latest deposit a full watchlist still names', async () => {

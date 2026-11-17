@@ -4,15 +4,17 @@ import {
 	ETHEREUM_NETWORK_ID,
 	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.eth.env';
+import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.eurc.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
-import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { CKETH_ABI, CKETH_DEPOSIT_HASH } from '$eth/constants/cketh.constants';
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
 	ERC20_APPROVE_HASH,
 	ERC20_DECREASE_ALLOWANCE_HASH,
+	ERC20_DEPOSIT_ERC20_HASH,
 	ERC20_INCREASE_ALLOWANCE_HASH,
 	ERC20_TRANSFER_HASH
 } from '$eth/constants/erc20.constants';
@@ -34,6 +36,7 @@ import {
 	getSendParamsGas,
 	getSignedEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
+	getWalletConnectEthCkDeposit,
 	getWalletConnectEthCkEthDeposit,
 	hasInvalidTypedData,
 	hasUnreviewableTypedData,
@@ -41,12 +44,20 @@ import {
 	isWalletConnectEthApproval,
 	isWalletConnectEthTokenCallWithValue,
 	toTypedDataDomainChainId,
+	toWalletConnectCkDepositHelperContractAddress,
 	toWalletConnectCkEthHelperContractAddress,
+	WalletConnectEthCkDepositError,
 	WalletConnectEthCkEthDepositError,
 	WalletConnectEthCkEthHelperUnconfirmedError,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
+import {
+	encodeCkDepositErc20,
+	encodeCkDepositEth,
+	mockCkDepositHelperContractAddress,
+	mockCkDepositSubaccount
+} from '$tests/mocks/ck-deposit.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import {
@@ -957,6 +968,308 @@ describe('wallet-connect.utils', () => {
 						classifyWalletConnectEthSendTransaction({ ...swapParams, tokens: [EURC_TOKEN] })
 					).toEqual({ type: 'unknown', selector: UNISWAP_EXECUTE_HASH });
 				});
+			});
+		});
+	});
+
+	describe('deposits to the ckETH minter helper that deposits to a subaccount', () => {
+		const HELPER = mockCkDepositHelperContractAddress;
+
+		const LIQUIDIUM_USDT_POOL = Principal.fromText('hnnn4-iyaaa-aaaar-qb4bq-cai');
+
+		const subaccount = mockCkDepositSubaccount;
+
+		const amount = 50_000_000n;
+
+		const minterInfoWithHelper = (helper: string) => ({
+			data: {
+				...mockCkMinterInfo,
+				deposit_with_subaccount_helper_contract_address: toNullable(helper),
+				supported_ckerc20_tokens: toNullable([
+					{
+						erc20_contract_address: USDT_TOKEN.address,
+						ledger_canister_id: Principal.fromText('cngnf-vqaaa-aaaar-qag4q-cai'),
+						ckerc20_token_symbol: 'ckUSDT'
+					}
+				])
+			},
+			certified: true
+		});
+
+		const minterInfo = minterInfoWithHelper(HELPER);
+
+		const params = {
+			to: HELPER,
+			data: encodeCkDepositErc20({ address: USDT_TOKEN.address, amount, owner: mockPrincipal }),
+			value: ZERO,
+			networkId: ETHEREUM_NETWORK_ID,
+			minterInfo,
+			principal: mockPrincipal,
+			nativeToken: ETHEREUM_TOKEN,
+			tokens: [USDT_TOKEN]
+		};
+
+		describe('toWalletConnectCkDepositHelperContractAddress', () => {
+			it.each([
+				{ network: 'Ethereum', networkId: ETHEREUM_NETWORK_ID },
+				{ network: 'Sepolia', networkId: SEPOLIA_NETWORK_ID }
+			])(
+				'should read the helper contract off the minter information on $network',
+				({ networkId }) => {
+					expect(toWalletConnectCkDepositHelperContractAddress({ networkId, minterInfo })).toBe(
+						HELPER
+					);
+				}
+			);
+
+			it('should name no helper contract on an EVM network without ckETH', () => {
+				expect(
+					toWalletConnectCkDepositHelperContractAddress({ networkId: BASE_NETWORK_ID, minterInfo })
+				).toBeUndefined();
+			});
+		});
+
+		describe('getWalletConnectEthCkDeposit', () => {
+			it('should describe a depositErc20 to the default account of the user', () => {
+				expect(getWalletConnectEthCkDeposit(params)).toEqual({
+					token: USDT_TOKEN,
+					amount,
+					ckTokenSymbol: 'ckUSDT',
+					owner: mockPrincipal,
+					ownAccount: true
+				});
+			});
+
+			it("should describe a depositErc20 to an account that is not the user's", () => {
+				expect(
+					getWalletConnectEthCkDeposit({
+						...params,
+						data: encodeCkDepositErc20({
+							address: USDT_TOKEN.address,
+							amount,
+							owner: LIQUIDIUM_USDT_POOL,
+							subaccount
+						})
+					})
+				).toEqual({
+					token: USDT_TOKEN,
+					amount,
+					ckTokenSymbol: 'ckUSDT',
+					owner: LIQUIDIUM_USDT_POOL,
+					subaccount,
+					ownAccount: false
+				});
+			});
+
+			// OISY shows the default account only, so a deposit to another subaccount of the user's
+			// principal is not one to the account the user sees.
+			it("should not take a subaccount of the user's principal for the user's account", () => {
+				expect(
+					getWalletConnectEthCkDeposit({
+						...params,
+						data: encodeCkDepositErc20({
+							address: USDT_TOKEN.address,
+							amount,
+							owner: mockPrincipal,
+							subaccount
+						})
+					})?.ownAccount
+				).toBeFalsy();
+			});
+
+			it("should not take any account for the user's when no user is signed in", () => {
+				expect(
+					getWalletConnectEthCkDeposit({ ...params, principal: undefined })?.ownAccount
+				).toBeFalsy();
+			});
+
+			it.each([
+				{
+					network: 'Ethereum',
+					networkId: ETHEREUM_NETWORK_ID,
+					nativeToken: ETHEREUM_TOKEN,
+					ckTokenSymbol: 'ckETH'
+				},
+				{
+					network: 'Sepolia',
+					networkId: SEPOLIA_NETWORK_ID,
+					nativeToken: SEPOLIA_TOKEN,
+					ckTokenSymbol: 'ckSepoliaETH'
+				}
+			])(
+				'should describe a depositEth on $network as the native value converted to $ckTokenSymbol',
+				({ networkId, nativeToken, ckTokenSymbol }) => {
+					expect(
+						getWalletConnectEthCkDeposit({
+							...params,
+							networkId,
+							nativeToken,
+							value: 123n,
+							data: encodeCkDepositEth({ owner: mockPrincipal })
+						})
+					).toEqual({
+						token: nativeToken,
+						amount: 123n,
+						ckTokenSymbol,
+						owner: mockPrincipal,
+						ownAccount: true
+					});
+				}
+			);
+
+			it.each([
+				{ to: HELPER.toLowerCase(), helper: HELPER },
+				{ to: HELPER, helper: HELPER.toLowerCase() }
+			])('should recognise the helper contract however its address is cased', ({ to, helper }) => {
+				expect(
+					getWalletConnectEthCkDeposit({ ...params, to, minterInfo: minterInfoWithHelper(helper) })
+				).toBeDefined();
+			});
+
+			it('should return undefined for a deposit to another contract', () => {
+				expect(getWalletConnectEthCkDeposit({ ...params, to: SPENDER })).toBeUndefined();
+			});
+
+			it('should return undefined for another call to the helper contract', () => {
+				expect(
+					getWalletConnectEthCkDeposit({
+						...params,
+						data: `${ERC20_TRANSFER_HASH}${'de'.repeat(64)}`
+					})
+				).toBeUndefined();
+			});
+
+			it.each([undefined, '0x'])(
+				'should return undefined for a request to the helper carrying no calldata (%s)',
+				(data) => {
+					expect(getWalletConnectEthCkDeposit({ ...params, data })).toBeUndefined();
+				}
+			);
+
+			// Its amount is stated in the token's decimals, which OISY only knows for a token it lists or
+			// the user added.
+			it('should return undefined for a depositErc20 of a token OISY does not know', () => {
+				expect(getWalletConnectEthCkDeposit({ ...params, tokens: [] })).toBeUndefined();
+			});
+
+			it('should not check a deposit on an EVM network without ckETH', () => {
+				expect(
+					getWalletConnectEthCkDeposit({
+						...params,
+						networkId: BASE_NETWORK_ID,
+						minterInfo: undefined
+					})
+				).toBeUndefined();
+			});
+
+			it('should throw for a depositErc20 of a token the minter does not convert', () => {
+				expect(() =>
+					getWalletConnectEthCkDeposit({
+						...params,
+						data: encodeCkDepositErc20({ address: SPENDER, amount, owner: mockPrincipal }),
+						tokens: [USDT_TOKEN, { ...USDT_TOKEN, address: SPENDER }]
+					})
+				).toThrow(WalletConnectEthCkDepositError);
+			});
+
+			it('should throw for a depositErc20 carrying native value', () => {
+				expect(() => getWalletConnectEthCkDeposit({ ...params, value: 1n })).toThrow(
+					WalletConnectEthCkDepositError
+				);
+			});
+
+			it.each([
+				{ kind: 'a deposit followed by more bytes', data: `${params.data}00` },
+				{ kind: 'a truncated deposit', data: params.data.slice(0, -2) },
+				{
+					kind: 'a deposit naming no principal',
+					data: `${ERC20_DEPOSIT_ERC20_HASH}${params.data.slice(10, 138)}${'00'.repeat(64)}`
+				}
+			])('should throw for $kind', ({ data }) => {
+				expect(() => getWalletConnectEthCkDeposit({ ...params, data })).toThrow(
+					WalletConnectEthCkDepositError
+				);
+			});
+
+			describe('while the helper contract is not confirmed', () => {
+				it.each([
+					{ state: 'not loaded', minterInfo: undefined },
+					{ state: 'not loadable', minterInfo: null },
+					{ state: 'not certified', minterInfo: { ...minterInfo, certified: false } }
+				])('should hold a deposit while the minter information is $state', ({ minterInfo }) => {
+					expect(() => getWalletConnectEthCkDeposit({ ...params, minterInfo })).toThrow(
+						WalletConnectEthCkEthHelperUnconfirmedError
+					);
+				});
+
+				it('should hold a deposit addressed to any contract', () => {
+					expect(() =>
+						getWalletConnectEthCkDeposit({ ...params, to: SPENDER, minterInfo: undefined })
+					).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+				});
+
+				it('should hold a depositEth as well', () => {
+					expect(() =>
+						getWalletConnectEthCkDeposit({
+							...params,
+							minterInfo: undefined,
+							data: encodeCkDepositEth({ owner: mockPrincipal })
+						})
+					).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+				});
+
+				it('should not hold calldata that is not a deposit', () => {
+					expect(
+						getWalletConnectEthCkDeposit({
+							...params,
+							minterInfo: undefined,
+							data: `${ERC20_TRANSFER_HASH}${'de'.repeat(64)}`
+						})
+					).toBeUndefined();
+				});
+			});
+		});
+
+		describe('classifyWalletConnectEthSendTransaction', () => {
+			const classifyParams = {
+				...params,
+				chainId: ETHEREUM_NETWORK.chainId,
+				wallet: mockUniswapWallet
+			};
+
+			it('should classify a deposit OISY reads as a ck deposit', () => {
+				const call = classifyWalletConnectEthSendTransaction(classifyParams);
+
+				expect(call.type).toBe('ckDeposit');
+				expect(call.type === 'ckDeposit' && call.deposit.ckTokenSymbol).toBe('ckUSDT');
+			});
+
+			it('should refuse a deposit of a token the minter does not convert', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({
+						...classifyParams,
+						data: encodeCkDepositErc20({ address: SPENDER, amount, owner: mockPrincipal })
+					})
+				).toEqual({ type: 'ckDepositRefused' });
+			});
+
+			it('should hold a deposit while the helper contract is not confirmed', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({ ...classifyParams, minterInfo: undefined })
+				).toEqual({ type: 'ckEthHelperUnconfirmed' });
+			});
+
+			it('should classify a deposit of a token OISY does not know by its calldata alone', () => {
+				expect(classifyWalletConnectEthSendTransaction({ ...classifyParams, tokens: [] })).toEqual({
+					type: 'unknown',
+					selector: ERC20_DEPOSIT_ERC20_HASH
+				});
+			});
+
+			it('should classify the same deposit to another contract by its calldata alone', () => {
+				expect(classifyWalletConnectEthSendTransaction({ ...classifyParams, to: SPENDER })).toEqual(
+					{ type: 'unknown', selector: ERC20_DEPOSIT_ERC20_HASH }
+				);
 			});
 		});
 	});

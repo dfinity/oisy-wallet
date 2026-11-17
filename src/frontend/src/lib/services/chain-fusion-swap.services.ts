@@ -1227,9 +1227,10 @@ const assertCkSolDepositWatched = ({
 	}
 
 	// A call inside an earlier registration's window gets that window, which can end with no scan
-	// left, or with a last one due before the transfer lands: SOL sent then would wait on the address
-	// until a later call registers it again. The next scan has to come after the transfer can land,
-	// unless a later one follows it.
+	// left, or with its scans all due before the transfer lands: SOL sent then would wait on the
+	// address until a later call registers it again. Some scan has to come after the transfer can
+	// land: the next one, or the window's last. A minter far behind its schedule can have both
+	// overdue.
 	const { valid_until: validUntil, next_scan_at } = status.Watching;
 	const nextScanAt = fromNullable(next_scan_at);
 
@@ -1237,11 +1238,40 @@ const assertCkSolDepositWatched = ({
 		throw new ChainFusionSolDepositRefusedError('unavailable');
 	}
 
-	const isLastScan = nextScanAt + CKSOL_LAST_SCAN_BEFORE_WINDOW_END_NANOS >= validUntil;
 	const nowNanos = BigInt(Date.now()) * NANO_SECONDS_IN_MILLISECOND;
+	const lastScanAt = validUntil - CKSOL_LAST_SCAN_BEFORE_WINDOW_END_NANOS;
 
-	if (isLastScan && nextScanAt < nowNanos + CKSOL_TRANSFER_LANDING_NANOS) {
+	if (
+		nextScanAt < nowNanos + CKSOL_TRANSFER_LANDING_NANOS &&
+		lastScanAt < nowNanos + CKSOL_TRANSFER_LANDING_NANOS
+	) {
 		throw new ChainFusionSolDepositRefusedError('unavailable');
+	}
+};
+
+/**
+ * Whether the deposit address holds less than the minimum deposit amount before the transfer. SOL
+ * already there that reaches the minimum on its own, sent by hand for instance, can be swept alone
+ * by a scan before the transfer lands: the row would take that deposit for the transfer's, and the
+ * address, taken off the watchlist by it, would keep the transfer's SOL unswept. The registration
+ * just made has the minter convert that balance by itself, so a conversion is in progress.
+ *
+ * @throws {ChainFusionSolDepositRefusedError} when it does not, or when the balance cannot be read.
+ */
+const assertCkSolDepositAddressBelowMinimum = async ({
+	address,
+	minimum_deposit_amount
+}: WatchDepositAddressOk) => {
+	let balance: bigint;
+
+	try {
+		balance = await getSolBalance({ address, network: SolanaNetworks.mainnet });
+	} catch (err: unknown) {
+		throw new ChainFusionSolDepositRefusedError('unavailable', { cause: err });
+	}
+
+	if (balance >= minimum_deposit_amount) {
+		throw new ChainFusionSolDepositRefusedError('inFlight');
 	}
 };
 
@@ -1250,19 +1280,20 @@ const assertCkSolDepositWatched = ({
  * deposit address.
  *
  * The address is registered with `watch_deposit_address` first, and nothing moves unless the
- * answer takes the deposit the user reviewed. The registration is what makes the mint
- * independent of OISY: from that call on, the minter itself scans the address until the window
- * ends, and nothing is sent unless a scan is due after the transfer can land, so the ckSOL arrives
- * even if the tab closes during the transfer.
+ * answer takes the deposit the user reviewed and the address holds less than the minimum deposit
+ * amount. The registration is what makes the mint independent of OISY: from that call on, the
+ * minter itself scans the address until the window ends, and nothing is sent unless a scan is due
+ * after the transfer can land, so the ckSOL arrives even if the tab closes during the transfer.
  *
  * The row is opened once the transfer is signed and before it is broadcast, as for the LI.FI Solana
  * swap. It snapshots the latest deposit id of the account from the registration, the floor every
  * deposit the poller takes for this one has to lie above. The backend refuses it while another
  * SOL → ckSOL row of the user is open, which holds the minter's one deposit per account across tabs
- * and devices, and the transfer then sends nothing. The row is deleted only when the node refuses
- * the transfer. Any other failure may have sent it, so the conversion goes on as sent, ckSOL is
- * enabled, and the poller settles the row as minted or, once the transfer can no longer land, as
- * failed.
+ * and devices, and the transfer then sends nothing. Once the row is open, the minter is asked again:
+ * a conversion that settled since confirm moved the latest deposit id, and the row is then deleted
+ * with nothing sent. After that, the row is deleted only when the node refuses the transfer. Any
+ * other failure may have sent it, so the conversion goes on as sent, ckSOL is enabled, and the
+ * poller settles the row as minted or, once the transfer can no longer land, as failed.
  */
 export const fetchChainFusionSolSwap = async ({
 	identity,
@@ -1274,6 +1305,7 @@ export const fetchChainFusionSolSwap = async ({
 	swapDetails: { solDeposit },
 	swapId,
 	usdSourceValue,
+	prioritizationFee,
 	enableDestinationToken
 }: {
 	identity: Identity;
@@ -1285,6 +1317,8 @@ export const fetchChainFusionSolSwap = async ({
 	swapDetails: ChainFusionSwapDetails;
 	swapId: string;
 	usdSourceValue?: string;
+	// The priority fee the user reviewed with the network fee, so the transfer goes out as reviewed.
+	prioritizationFee: bigint;
 	enableDestinationToken?: () => Promise<void>;
 }): Promise<void> => {
 	const { minterCanisterId } = destinationToken;
@@ -1298,6 +1332,8 @@ export const fetchChainFusionSolSwap = async ({
 
 	assertCkSolDepositWatched({ watched, solDeposit, amount });
 
+	await assertCkSolDepositAddressBelowMinimum(watched);
+
 	const latestDepositId = fromNullable(watched.latest_deposit_id);
 
 	const openRow = async ({
@@ -1308,11 +1344,18 @@ export const fetchChainFusionSolSwap = async ({
 		blockhash: string;
 	}): Promise<boolean> => {
 		// A slot where the blockhash is valid: the poller reads it no earlier, so a node that has not
-		// seen the blockhash yet never passes for one that calls the transfer expired.
+		// seen the blockhash yet never passes for one that calls the transfer expired. Without such a
+		// slot nothing is sent, since a row tracking the transfer unguarded could end on that verdict.
 		const { slot, valid } = await isBlockhashValid({ blockhash, network: SolanaNetworks.mainnet });
 
+		if (!valid) {
+			throw new ChainFusionSolDepositRefusedError('unavailable');
+		}
+
+		let opened: boolean;
+
 		try {
-			return await openChainFusionActiveUserTransaction({
+			opened = await openChainFusionActiveUserTransaction({
 				identity,
 				swapId,
 				direction: { SolToCkSol: null },
@@ -1326,7 +1369,7 @@ export const fetchChainFusionSolSwap = async ({
 				extraRefs: {
 					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_SIGNATURE]: signature,
 					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH]: blockhash,
-					...(valid && { [CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH_SLOT]: `${slot}` }),
+					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH_SLOT]: `${slot}`,
 					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_DEPOSIT_ADDRESS]: watched.address,
 					...(nonNullish(latestDepositId) && {
 						[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_LATEST_DEPOSIT_ID]: `${latestDepositId}`
@@ -1342,19 +1385,50 @@ export const fetchChainFusionSolSwap = async ({
 
 			throw err;
 		}
+
+		if (!opened) {
+			return false;
+		}
+
+		// With the row open, no other SOL → ckSOL conversion of the user can start. One that settled
+		// while this one waited since confirm moved the latest deposit id: the row's floor would then
+		// take that conversion's mint for this transfer's, and its deposit took the address off the
+		// watchlist. So the minter is asked again, and nothing is sent unless its answer still takes
+		// this deposit above the same floor.
+		try {
+			const rewatched = await registerCkSolDepositAddress({ identity, minterCanisterId });
+
+			assertCkSolDepositWatched({ watched: rewatched, solDeposit, amount });
+
+			// The balance read at confirm was below that answer's minimum: a lower minimum now, or SOL
+			// sent to the address by hand since, can leave a balance that a scan sweeps alone before the
+			// transfer lands.
+			await assertCkSolDepositAddressBelowMinimum(rewatched);
+
+			if (fromNullable(rewatched.latest_deposit_id) !== latestDepositId) {
+				throw new ChainFusionSolDepositRefusedError('changed');
+			}
+		} catch (err: unknown) {
+			await deleteUnbroadcastActiveUserTransaction({ identity, id: swapId });
+
+			throw err;
+		}
+
+		return true;
 	};
 
 	progress(ProgressStepsSwap.SIGN_TRANSFER);
 
 	let rowOpened = false;
 	let broadcast = false;
+	let enabling: Promise<void> | undefined;
 
 	try {
 		await sendSol({
 			identity,
 			token: sourceToken,
 			amount,
-			prioritizationFee: ZERO,
+			prioritizationFee,
 			destination: watched.address,
 			source: userAddress,
 			progress: (step) => {
@@ -1364,6 +1438,10 @@ export const fetchChainFusionSolSwap = async ({
 
 				if (step === ProgressStepsSendSol.CONFIRM) {
 					broadcast = true;
+
+					// The SOL is on its way: enabling starts now, not once the transfer is confirmed, so a
+					// tab closed while it confirms still shows the minted ckSOL. It never rejects.
+					enabling = enableDestination(enableDestinationToken);
 				}
 			},
 			beforeBroadcast: async (transfer) => {
@@ -1392,5 +1470,5 @@ export const fetchChainFusionSolSwap = async ({
 	progress(ProgressStepsSwap.UPDATE_UI);
 
 	// Also after an unclear end: the minted ckSOL must not land in a token the user cannot see.
-	await enableDestination(enableDestinationToken);
+	await (enabling ?? enableDestination(enableDestinationToken));
 };

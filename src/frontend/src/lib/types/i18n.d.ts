@@ -1631,6 +1631,12 @@ interface I18nWallet_connect {
 		cketh_deposit_principal: string;
 		cketh_deposit_refused: string;
 		cketh_helper_unconfirmed: string;
+		ck_deposit: string;
+		ck_deposit_other_account: string;
+		ck_deposit_liquidium: string;
+		ck_deposit_liquidium_pool: string;
+		ck_deposit_recipient: string;
+		ck_deposit_refused: string;
 		swap_title: string;
 		swap_pay: string;
 		swap_pay_at_most: string;
@@ -1721,6 +1727,7 @@ interface I18nWallet_connect {
 		unknown_destination: string;
 		cketh_deposit_refused: string;
 		cketh_helper_unconfirmed: string;
+		ck_deposit_refused: string;
 		token_call_with_value: string;
 		ambiguous_transaction: string;
 		close_pays_others: string;
