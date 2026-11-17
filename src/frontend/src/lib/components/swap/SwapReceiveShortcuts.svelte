@@ -51,6 +51,8 @@
 
 	const titleId = $props.id();
 
+	let root = $state<HTMLDivElement | undefined>();
+
 	let listed = $derived(
 		getListedReceiveShortcuts({
 			sourceToken,
@@ -70,6 +72,24 @@
 	let visible = $derived(
 		nonNullish(sameNetwork) || nonNullish(otherNetwork) || nonNullish(anyToken)
 	);
+
+	let focusWasInside = false;
+
+	// The plain field and the card swap in place when the providers answer: focus on one moves to the
+	// other instead of falling out of the modal. Only focus already here moves, so nothing is taken.
+	$effect.pre(() => {
+		[visible];
+
+		focusWasInside = root?.contains(document.activeElement) ?? false;
+	});
+
+	$effect(() => {
+		[visible];
+
+		if (focusWasInside && !(root?.contains(document.activeElement) ?? false)) {
+			root?.querySelector<HTMLElement>('button:not([disabled])')?.focus({ preventScroll: true });
+		}
+	});
 
 	let details = $derived(
 		nonNullish(listed)
@@ -198,72 +218,74 @@
 	</span>
 {/snippet}
 
-{#if visible}
-	<div
-		class="rounded-lg border border-solid border-tertiary bg-secondary p-5 text-left"
-		data-tid={SWAP_RECEIVE_SHORTCUTS}
-	>
-		<div id={titleId} class="mb-2 text-sm font-bold">
-			{$i18n.tokens.text.destination_token_title}
-		</div>
-
-		<!-- `role="list"`: Safari drops the semantics of a list without bullets. -->
-		<ul class="flex flex-col gap-2" aria-labelledby={titleId} role="list">
-			{#if nonNullish(sameNetwork)}
-				{@render row({
-					testId: SWAP_RECEIVE_SHORTCUT_SAME_NETWORK,
-					title: replacePlaceholders($i18n.swap.text.receive_shortcut_same_network, {
-						$network: sameNetwork.network.name
-					}),
-					detail: details.sameNetwork,
-					icon: sameNetworkIcon,
-					onclick: onSameNetwork
-				})}
-			{/if}
-
-			{#if nonNullish(otherNetwork)}
-				{@render row({
-					testId: SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK,
-					title: replacePlaceholders($i18n.swap.text.receive_shortcut_other_network, {
-						$symbol: otherNetwork.group.symbol
-					}),
-					detail: details.otherNetwork,
-					icon: otherNetworkIcon,
-					onclick: onOtherNetwork
-				})}
-			{/if}
-
-			{#if nonNullish(anyToken)}
-				{@render row({
-					testId: SWAP_RECEIVE_SHORTCUT_ANY_TOKEN,
-					title: $i18n.swap.text.receive_shortcut_any_token,
-					detail: details.anyToken,
-					icon: anyTokenIcon,
-					onclick: onAnyToken
-				})}
-			{/if}
-		</ul>
-
-		{#if nonNullish(keptToken)}
-			<!-- The inner box keeps the link's tap area and focus ring to its text, not the card's width. -->
-			<div class="mt-3 flex justify-center">
-				<div class="flex">
-					<Button
-						link
-						onclick={onKeep}
-						styleClass="relative hit-area hit-area-touch"
-						testId={SWAP_RECEIVE_SHORTCUT_KEEP}
-						type="button"
-					>
-						{replacePlaceholders($i18n.swap.text.keep_destination, {
-							$symbol: getTokenDisplaySymbol(keptToken),
-							$network: keptToken.network.name
-						})}
-					</Button>
-				</div>
+<div bind:this={root}>
+	{#if visible}
+		<div
+			class="rounded-lg border border-solid border-tertiary bg-secondary p-5 text-left"
+			data-tid={SWAP_RECEIVE_SHORTCUTS}
+		>
+			<div id={titleId} class="mb-2 text-sm font-bold">
+				{$i18n.tokens.text.destination_token_title}
 			</div>
-		{/if}
-	</div>
-{:else}
-	{@render emptyField()}
-{/if}
+
+			<!-- `role="list"`: Safari drops the semantics of a list without bullets. -->
+			<ul class="flex flex-col gap-2" aria-labelledby={titleId} role="list">
+				{#if nonNullish(sameNetwork)}
+					{@render row({
+						testId: SWAP_RECEIVE_SHORTCUT_SAME_NETWORK,
+						title: replacePlaceholders($i18n.swap.text.receive_shortcut_same_network, {
+							$network: sameNetwork.network.name
+						}),
+						detail: details.sameNetwork,
+						icon: sameNetworkIcon,
+						onclick: onSameNetwork
+					})}
+				{/if}
+
+				{#if nonNullish(otherNetwork)}
+					{@render row({
+						testId: SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK,
+						title: replacePlaceholders($i18n.swap.text.receive_shortcut_other_network, {
+							$symbol: otherNetwork.group.symbol
+						}),
+						detail: details.otherNetwork,
+						icon: otherNetworkIcon,
+						onclick: onOtherNetwork
+					})}
+				{/if}
+
+				{#if nonNullish(anyToken)}
+					{@render row({
+						testId: SWAP_RECEIVE_SHORTCUT_ANY_TOKEN,
+						title: $i18n.swap.text.receive_shortcut_any_token,
+						detail: details.anyToken,
+						icon: anyTokenIcon,
+						onclick: onAnyToken
+					})}
+				{/if}
+			</ul>
+
+			{#if nonNullish(keptToken)}
+				<!-- The inner box keeps the link's tap area and focus ring to its text, not the card's width. -->
+				<div class="mt-3 flex justify-center">
+					<div class="flex">
+						<Button
+							link
+							onclick={onKeep}
+							styleClass="relative hit-area hit-area-touch"
+							testId={SWAP_RECEIVE_SHORTCUT_KEEP}
+							type="button"
+						>
+							{replacePlaceholders($i18n.swap.text.keep_destination, {
+								$symbol: getTokenDisplaySymbol(keptToken),
+								$network: keptToken.network.name
+							})}
+						</Button>
+					</div>
+				</div>
+			{/if}
+		</div>
+	{:else}
+		{@render emptyField()}
+	{/if}
+</div>

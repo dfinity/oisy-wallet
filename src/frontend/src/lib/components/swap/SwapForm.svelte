@@ -246,7 +246,7 @@
 			?.focus({ preventScroll: true });
 	};
 
-	// A receive token the shortcuts list, so the Keep link under them can put it back.
+	// Whether the shortcuts list the receive token, so the Keep link under them can put it back.
 	const canKeepDestination = (): boolean => {
 		const destination = $destinationToken;
 
@@ -280,7 +280,7 @@
 
 		clearDestinationToken();
 
-		focusReceiveArea();
+		void focusReceiveArea();
 	};
 
 	const onTokensSwitch = () => {

@@ -44,8 +44,9 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
-import { fireEvent, render } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { createRawSnippet } from 'svelte';
+import { readable, writable } from 'svelte/store';
 
 vi.mock('$lib/services/swap-receive-shortcut-analytics.services', () => ({
 	trackSwapReceiveShortcut: vi.fn()
@@ -349,6 +350,37 @@ describe('SwapReceiveShortcuts', () => {
 
 		expect(getByTestId(emptyFieldTestId)).toBeInTheDocument();
 		expect(queryByTestId(SWAP_RECEIVE_SHORTCUTS)).not.toBeInTheDocument();
+	});
+
+	it('should keep focus in the receive card when the providers answer', async () => {
+		const receiveSupportedData = writable<SwapSupportedTokensData | undefined>(undefined);
+
+		const { getByTestId } = render(SwapReceiveShortcuts, {
+			props: {
+				sourceToken: BASE_USDC_TOKEN,
+				navigation: { showReceiveList, showMoveStep },
+				emptyField: createRawSnippet(() => ({
+					render: () => `<button data-tid="${emptyFieldTestId}" type="button">Select</button>`
+				})),
+				onDestinationSet
+			},
+			context: mockContextMap([
+				[
+					SWAP_CONTEXT_KEY,
+					{
+						receiveSupportedData,
+						keptDestinationToken: readable(undefined),
+						setDestinationToken
+					}
+				]
+			])
+		});
+
+		getByTestId(emptyFieldTestId).focus();
+
+		receiveSupportedData.set(fromBaseUsdc);
+
+		await waitFor(() => expect(getByTestId(SWAP_RECEIVE_SHORTCUT_SAME_NETWORK)).toHaveFocus());
 	});
 
 	it('should show the plain receive field when the pay token reaches nothing', () => {

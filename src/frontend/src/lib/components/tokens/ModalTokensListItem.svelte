@@ -21,7 +21,8 @@
 		selected?: boolean;
 		disabled?: boolean;
 		// A row a caller names itself, the swap's network step: `label` replaces the symbol and the
-		// token's name, `detail` the network under them.
+		// token's name, and the check of `selected` with them; `detail` replaces the network under them.
+		// The logo is then left out of the row's name, which the label already says.
 		label?: Snippet;
 		detail?: Snippet;
 	}
@@ -87,7 +88,7 @@
 	{/snippet}
 
 	{#snippet logo()}
-		<div class="mr-2">
+		<div class="mr-2" aria-hidden={nonNullish(label) ? 'true' : undefined}>
 			<TokenLogo badge={{ type: 'network' }} color="white" data={token} {logoSize} />
 		</div>
 	{/snippet}
