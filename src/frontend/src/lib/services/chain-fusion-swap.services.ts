@@ -1337,8 +1337,13 @@ export const fetchChainFusionSolSwap = async ({
 		blockhash: string;
 	}): Promise<boolean> => {
 		// A slot where the blockhash is valid: the poller reads it no earlier, so a node that has not
-		// seen the blockhash yet never passes for one that calls the transfer expired.
+		// seen the blockhash yet never passes for one that calls the transfer expired. Without such a
+		// slot nothing is sent, since a row tracking the transfer unguarded could end on that verdict.
 		const { slot, valid } = await isBlockhashValid({ blockhash, network: SolanaNetworks.mainnet });
+
+		if (!valid) {
+			throw new ChainFusionSolDepositRefusedError('unavailable');
+		}
 
 		let opened: boolean;
 
@@ -1357,7 +1362,7 @@ export const fetchChainFusionSolSwap = async ({
 				extraRefs: {
 					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_SIGNATURE]: signature,
 					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH]: blockhash,
-					...(valid && { [CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH_SLOT]: `${slot}` }),
+					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH_SLOT]: `${slot}`,
 					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_DEPOSIT_ADDRESS]: watched.address,
 					...(nonNullish(latestDepositId) && {
 						[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_LATEST_DEPOSIT_ID]: `${latestDepositId}`
