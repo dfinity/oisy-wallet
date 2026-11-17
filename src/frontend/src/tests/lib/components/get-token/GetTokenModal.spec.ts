@@ -26,6 +26,8 @@ import {
 import * as crossChainNetworksDerived from '$lib/derived/cross-chain-networks.derived';
 import * as networksDerived from '$lib/derived/networks.derived';
 import * as swapDerived from '$lib/derived/swap.derived';
+import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+import * as shortcutAnalytics from '$lib/services/swap-receive-shortcut-analytics.services';
 import {
 	MODAL_NETWORKS_LIST_CONTEXT_KEY,
 	initModalNetworksListContext
@@ -44,7 +46,7 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
-import { readable, writable } from 'svelte/store';
+import { get, readable, writable } from 'svelte/store';
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({
 	icrc1SupportedStandards: () => Promise.resolve([])
@@ -177,7 +179,7 @@ describe('GetTokenModal', () => {
 				);
 				swapContext.clearDestinationToken();
 			}
-			return { ...rendered, universe };
+			return { ...rendered, universe, swapContext };
 		};
 
 		it.each([
@@ -222,6 +224,62 @@ describe('GetTokenModal', () => {
 				await waitFor(() =>
 					expect(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)).toHaveLength(2)
 				);
+			}
+		});
+
+		it.each([BASE_ETH_TOKEN, ETHEREUM_TOKEN])(
+			'should open the ordinary receive list after an intermediate token on $network.name replaces the group pick',
+			async (intermediateToken) => {
+				const rendered = await setup();
+				await fireEvent.click(await rendered.findByTestId(SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK));
+				const list = await rendered.findByTestId(SWAP_RECEIVE_NETWORK_LIST);
+				await fireEvent.click(within(list).getAllByRole('button')[0]);
+				await waitFor(() =>
+					expect(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)).toHaveLength(2)
+				);
+
+				// The two-swaps hint replaces just the destination, leaving the remembered picker intact.
+				rendered.swapContext.setDestinationToken(intermediateToken);
+				await waitFor(() =>
+					expect(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]).toHaveTextContent(
+						intermediateToken.symbol
+					)
+				);
+				await fireEvent.click(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]);
+
+				await expect(rendered.findByTestId(MODAL_TOKENS_LIST)).resolves.toBeInTheDocument();
+				expect(rendered.queryByTestId(SWAP_RECEIVE_NETWORK_LIST)).not.toBeInTheDocument();
+				expect(get(rendered.swapContext.receiveTokenPickerStep)).toBe(WizardStepsSwap.TOKENS_LIST);
+			}
+		);
+
+		it('should count only the shortcut entry when its network list is later reopened', async () => {
+			const rendered = await setup();
+			const track = vi
+				.spyOn(shortcutAnalytics, 'trackSwapReceiveShortcut')
+				.mockImplementation(() => {});
+			await fireEvent.click(await rendered.findByTestId(SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK));
+			const list = await rendered.findByTestId(SWAP_RECEIVE_NETWORK_LIST);
+			await fireEvent.click(within(list).getAllByRole('button')[0]);
+
+			expect(track).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ action: 'other_network' })
+			);
+
+			for (const rowIndex of [0, 1]) {
+				await waitFor(() =>
+					expect(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)).toHaveLength(2)
+				);
+				await fireEvent.click(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]);
+				const reopened = await rendered.findByTestId(SWAP_RECEIVE_NETWORK_LIST);
+
+				expect(within(reopened).getByRole('button', { pressed: true })).toHaveTextContent(
+					ETHEREUM_NETWORK.name
+				);
+
+				await fireEvent.click(within(reopened).getAllByRole('button')[rowIndex]);
+
+				expect(track).toHaveBeenCalledOnce();
 			}
 		});
 

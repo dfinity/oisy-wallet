@@ -23,7 +23,7 @@
 		selected?: boolean;
 		disabled?: boolean;
 		// A row a caller names itself, the swap's network step: `label` replaces the symbol and the
-		// token's name, and the check of `selected` with them; `detail` replaces the network under them.
+		// token's name; `detail` replaces the network under them.
 		// The logo is then left out of the row's name, which the label already says.
 		label?: Snippet;
 		detail?: Snippet;
@@ -65,17 +65,21 @@
 	subtitle={isNullish(label) ? tokenName : undefined}
 >
 	{#snippet title()}
-		{#if nonNullish(label)}
-			{@render label()}
-		{:else if selected}
+		{#if selected}
 			<!-- Beside the symbol rather than in a column of its own, so no other row shifts. Centred
 				 on the line box, then lifted 1px so it sits on the capitals' middle, not the line's. -->
 			<span class="inline-flex items-center gap-1">
-				{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
+				{#if nonNullish(label)}
+					{@render label()}
+				{:else}
+					{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
+				{/if}
 				<span class="flex -translate-y-px text-brand-primary-alt" aria-hidden="true">
 					<IconGixCheck size="18px" />
 				</span>
 			</span>
+		{:else if nonNullish(label)}
+			{@render label()}
 		{:else}
 			{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
 		{/if}

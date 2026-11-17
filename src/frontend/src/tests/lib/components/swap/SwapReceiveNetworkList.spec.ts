@@ -19,7 +19,10 @@ import { USDC_TOKEN as SOLANA_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.u
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SwapReceiveNetworkList from '$lib/components/swap/SwapReceiveNetworkList.svelte';
-import { SWAP_RECEIVE_NETWORK_LIST } from '$lib/constants/test-ids.constants';
+import {
+	SWAP_RECEIVE_NETWORK_LIST,
+	SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK
+} from '$lib/constants/test-ids.constants';
 import * as crossChainNetworksDerived from '$lib/derived/cross-chain-networks.derived';
 import * as exchangesDerived from '$lib/derived/exchange.derived';
 import * as networksDerived from '$lib/derived/networks.derived';
@@ -41,7 +44,7 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import { readable, writable } from 'svelte/store';
 
 vi.mock('$lib/services/swap-receive-shortcut-analytics.services', () => ({
 	trackSwapReceiveShortcut: vi.fn()
@@ -133,10 +136,14 @@ describe('SwapReceiveNetworkList', () => {
 
 	const renderList = ({
 		sourceToken = BASE_USDC_TOKEN,
-		receiveSupportedData = fromBaseUsdc
+		receiveSupportedData = fromBaseUsdc,
+		destinationToken,
+		fromShortcut = false
 	}: {
 		sourceToken?: Token;
 		receiveSupportedData?: SwapSupportedTokensData;
+		destinationToken?: Token;
+		fromShortcut?: boolean;
 	} = {}) =>
 		render(SwapReceiveNetworkList, {
 			props: { onSelectToken, onClose },
@@ -145,7 +152,11 @@ describe('SwapReceiveNetworkList', () => {
 					SWAP_CONTEXT_KEY,
 					{
 						sourceToken: readable(sourceToken),
-						receiveSupportedData: readable(receiveSupportedData)
+						destinationToken: readable(destinationToken),
+						receiveSupportedData: readable(receiveSupportedData),
+						tokenListReturnFocus: writable(
+							fromShortcut ? SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK : undefined
+						)
 					}
 				]
 			])
@@ -274,7 +285,7 @@ describe('SwapReceiveNetworkList', () => {
 	});
 
 	it('should set the picked token and track the pick', async () => {
-		const { getByRole } = renderList();
+		const { getByRole } = renderList({ fromShortcut: true });
 
 		await fireEvent.click(getByRole('button', { name: /Solana/ }));
 
@@ -286,6 +297,28 @@ describe('SwapReceiveNetworkList', () => {
 			sourceToken: BASE_USDC_TOKEN,
 			destinationToken: expect.objectContaining({ id: SOLANA_USDC_TOKEN.id })
 		});
+	});
+
+	it.each([SOLANA_USDC_TOKEN, ETHEREUM_USDC_TOKEN])(
+		'should not track a pick on $network.name when reopening the receive selector',
+		async (token) => {
+			const { getByRole } = renderList({ destinationToken: SOLANA_USDC_TOKEN });
+			await fireEvent.click(getByRole('button', { name: new RegExp(token.network.name) }));
+
+			expect(onSelectToken).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ id: token.id })
+			);
+			expect(trackSwapReceiveShortcut).not.toHaveBeenCalled();
+		}
+	);
+
+	it('should mark the current destination with a check and pressed state beside its network label', () => {
+		const { getByRole } = renderList({ destinationToken: SOLANA_USDC_TOKEN });
+		const selected = getByRole('button', { name: /Solana/, pressed: true });
+		const unselected = getByRole('button', { name: /Ethereum/, pressed: false });
+
+		expect(selected.querySelector('svg[width="18px"]')).toBeInTheDocument();
+		expect(unselected.querySelector('svg[width="18px"]')).not.toBeInTheDocument();
 	});
 
 	it('should go back without a pick', async () => {

@@ -155,6 +155,9 @@ picks focus the selected control, and a missing shortcut falls back to the recei
 It also keeps `receiveTokenPickerStep` and token-list filters so the receive selector reopens the
 chosen shortcut view after a pick or Back, including in Get Token. Shortcuts replace that view;
 a new pay token resets the remembered network step, and resetting the swap clears the memory.
+The network view only reopens for a destination in the pay token's group on another network.
+Its `tokenListReturnFocus` marks shortcut entries; reopening a selected token does not count as
+shortcut use.
 
 ### Constants worth knowing
 

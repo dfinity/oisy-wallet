@@ -10,6 +10,7 @@
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import {
 		SWAP_RECEIVE_SHORTCUT_ANY_TOKEN,
+		SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK,
 		SWAP_RECEIVE_SHORTCUT_SAME_NETWORK
 	} from '$lib/constants/test-ids.constants';
 	import { allCrossChainSwapTokens } from '$lib/derived/all-tokens.derived';
@@ -249,7 +250,8 @@
 		setFilterCategoryTag(category);
 	};
 
-	const showMoveStep = () => {
+	const showMoveStep = ({ fromShortcut }: { fromShortcut: boolean }) => {
+		tokenListReturnFocus.set(fromShortcut ? SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK : undefined);
 		receiveTokenPickerStep.set(WizardStepsSwap.MOVE_TOKEN);
 		swapAmountsStore.reset();
 		goToStep(WizardStepsSwap.MOVE_TOKEN);
@@ -259,9 +261,12 @@
 		if (
 			side === 'destination' &&
 			nonNullish($destinationToken) &&
+			nonNullish($sourceToken?.groupData) &&
+			$destinationToken.groupData?.id === $sourceToken.groupData.id &&
+			$destinationToken.network.id !== $sourceToken.network.id &&
 			$receiveTokenPickerStep === WizardStepsSwap.MOVE_TOKEN
 		) {
-			showMoveStep();
+			showMoveStep({ fromShortcut: false });
 			return;
 		}
 		enterTokenList({ side });
@@ -277,7 +282,7 @@
 					? SWAP_RECEIVE_SHORTCUT_SAME_NETWORK
 					: SWAP_RECEIVE_SHORTCUT_ANY_TOKEN
 			}),
-		showMoveStep
+		showMoveStep: () => showMoveStep({ fromShortcut: true })
 	});
 
 	const closeTokenList = () => {

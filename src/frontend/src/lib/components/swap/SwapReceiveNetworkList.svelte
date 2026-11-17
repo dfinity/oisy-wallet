@@ -32,7 +32,8 @@
 
 	let { onSelectToken, onClose }: Props = $props();
 
-	const { sourceToken, receiveSupportedData } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { sourceToken, destinationToken, receiveSupportedData, tokenListReturnFocus } =
+		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	let root: HTMLDivElement;
 
@@ -43,6 +44,8 @@
 	const returnToForm = async (token?: Token) => {
 		// The dialog survives step changes, including Get Token rebuilding the swap wizard.
 		const dialog = root.closest('[role="dialog"]');
+		const fromShortcut = $tokenListReturnFocus === SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK;
+		tokenListReturnFocus.set(undefined);
 
 		if (nonNullish(token)) {
 			onSelectToken(token);
@@ -53,11 +56,12 @@
 		await tick();
 
 		if (dialog?.isConnected) {
-			const shortcut = isNullish(token)
-				? dialog.querySelector<HTMLElement>(
-						`[data-tid="${SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK}"]:not([disabled])`
-					)
-				: undefined;
+			const shortcut =
+				isNullish(token) && fromShortcut
+					? dialog.querySelector<HTMLElement>(
+							`[data-tid="${SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK}"]:not([disabled])`
+						)
+					: undefined;
 
 			(
 				shortcut ??
@@ -84,7 +88,7 @@
 	);
 
 	const select = (token: Token) => {
-		if (nonNullish($sourceToken)) {
+		if ($tokenListReturnFocus === SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK && nonNullish($sourceToken)) {
 			trackSwapReceiveShortcut({
 				action: 'other_network',
 				sourceToken: $sourceToken,
@@ -107,7 +111,11 @@
 				{#each tokens as token (token.id)}
 					{@const symbol = getTokenDisplaySymbol(token)}
 					<ListItem styleClass="first-of-type:border-t-1">
-						<ModalTokensListItem onClick={() => select(token)} {token}>
+						<ModalTokensListItem
+							onClick={() => select(token)}
+							selected={token.id === $destinationToken?.id}
+							{token}
+						>
 							{#snippet label()}{token.network.name}{/snippet}
 
 							{#snippet detail()}
