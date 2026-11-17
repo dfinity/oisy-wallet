@@ -297,8 +297,9 @@ As built (PR 5):
      at least the displayed minimum.
   3. It reads the deposit, memo and fee outputs with `decodeLifiBtcTransaction`.
   4. `validateBtcSend` checks the reviewed `utxosFee` against that layout's vsizes. The fee paid is
-     exactly the one reviewed, and a re-quoted layout it no longer prices within ±10% is refused
-     before signing.
+     the one reviewed, plus any change below 1,000 sats (`BTC_CHANGE_DUST_THRESHOLD_SATOSHIS`),
+     which goes to the miner as in every BTC send. A re-quoted layout it no longer prices within
+     ±10% is refused before signing.
   5. It sends with change index 2 (`LIFI_BTC_CHANGE_INDEX`) and sequence `0xFFFFFFFD`
      (`LIFI_BTC_SEQUENCE`).
   6. `beforeBroadcast` creates the row with the txid as `lifi_tx_hash`, with no nonce and no
