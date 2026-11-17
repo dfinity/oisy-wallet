@@ -235,7 +235,8 @@ const applyUpdate = async ({
 	candidate,
 	error,
 	learned,
-	refs
+	refs,
+	onlyWhileOpen = false
 }: {
 	identity: Identity;
 	tx: ActiveUserTransaction;
@@ -243,6 +244,10 @@ const applyUpdate = async ({
 	error: string | undefined;
 	learned: Partial<Record<ChainFusionExternalRefKey, string>>;
 	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+	// Refs sent without a status skip the backend's transition check, and replace the stored ones
+	// even on a row another tab settled meanwhile. With this set, refs that do not move the status
+	// go out with `Executing`, which the backend refuses on a settled row.
+	onlyWhileOpen?: boolean;
 }): Promise<void> => {
 	const next = nonNullish(candidate) ? advanceStatus({ current: tx.status, candidate }) : undefined;
 
@@ -253,9 +258,12 @@ const applyUpdate = async ({
 	);
 	const externalRefs = hasNewRefs ? toChainFusionExternalRefs({ ...refs, ...learned }) : undefined;
 
+	const status: ActiveUserTransactionStatus | undefined =
+		next ?? (onlyWhileOpen && nonNullish(externalRefs) ? { Executing: null } : undefined);
+
 	const update = {
-		...(nonNullish(next) ? { status: next } : {}),
-		...(nonNullish(next) && 'Failed' in next && nonNullish(error) ? { error } : {}),
+		...(nonNullish(status) ? { status } : {}),
+		...(nonNullish(status) && 'Failed' in status && nonNullish(error) ? { error } : {}),
 		...(nonNullish(externalRefs) ? { externalRefs } : {})
 	};
 
@@ -596,7 +604,8 @@ const pollChainFusionSolMint = async ({
 				candidate: { Executing: null },
 				error: undefined,
 				learned,
-				refs
+				refs,
+				onlyWhileOpen: true
 			});
 
 			return leftMinimum === true;
@@ -609,13 +618,16 @@ const pollChainFusionSolMint = async ({
 			lastWatchDepositAddressMs.delete(tx.id);
 		}
 
+		// Two tabs can take a deposit at the same time: the one that records it must not overwrite the
+		// refs of the row the other settled meanwhile.
 		await applyUpdate({
 			identity,
 			tx,
 			candidate,
 			error: chainFusionSolMintStatusError(status),
 			learned: { ...learned, ...toChainFusionSolMintLearnedRefs(status) },
-			refs
+			refs,
+			onlyWhileOpen: true
 		});
 
 		return 'Dropped' in status;

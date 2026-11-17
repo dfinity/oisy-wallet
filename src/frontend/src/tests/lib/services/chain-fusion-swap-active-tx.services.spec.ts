@@ -1050,6 +1050,17 @@ describe('chain-fusion-swap-active-tx.services', () => {
 				});
 			});
 
+			it('should be recorded with Executing on a row already in flight, which a row settled meanwhile refuses', async () => {
+				const tx: ActiveUserTransaction = { ...solMintTx(), status: { Executing: null } };
+
+				await poll([tx]);
+
+				expect(lastUpdate()).toStrictEqual({
+					status: { Executing: null },
+					externalRefs: expect.arrayContaining([{ key: 'chain_fusion_cksol_deposit', value: '43' }])
+				});
+			});
+
 			it('should not be taken for a row settled elsewhere', async () => {
 				const tx = solMintTx();
 
