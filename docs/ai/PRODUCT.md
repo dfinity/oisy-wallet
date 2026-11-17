@@ -107,7 +107,10 @@ Where it applies:
 - **Amount forms.** The swap flip button presses like an icon button, and its arrow turns a
   half-turn each time the tokens swap, back the other way on the next swap (with reduced
   motion it flips at once, without the turning animation). **Max** presses, darkens on hover while the amount is valid, and can be hit
-  across 40 px without reaching the amount field above it.
+  across 40 px without reaching the amount field above it. On phones, amount fields open the
+  number keypad. Keypads set to a comma locale show a comma instead of a dot, so a comma
+  counts as the decimal point (1,5 is 1.5); a value with both, such as a pasted 1,234.5, is
+  refused.
 - **Small controls.** Close, clear and help buttons (toasts, banners, info boxes, modals,
   popovers, the search field, the settings, rewards and earning help toggles, the copy and edit
   icons next to addresses and IDs, the dismiss button on active transactions) press like icon
