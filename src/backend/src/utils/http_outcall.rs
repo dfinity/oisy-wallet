@@ -14,11 +14,23 @@ const USER_AGENT: &str = "OisyWalletBackend";
 /// responses must match for consensus. Headers like `Date`, `X-Request-Id`,
 /// `CF-Ray`, etc. differ across replicas, causing consensus failure.
 /// This transform keeps only status + body.
+///
+/// TEST ONLY (be1 measurement, do not merge): keeps `cf-ray`, whose last three letters name the
+/// Cloudflare location that answered, and `age`, the seconds the answer spent in that location's
+/// cache. Replicated outcalls no longer reach consensus with these headers kept.
 #[query]
 fn http_request_transform(args: TransformArgs) -> HttpRequestResult {
     HttpRequestResult {
         status: args.response.status,
-        headers: vec![],
+        headers: args
+            .response
+            .headers
+            .into_iter()
+            .filter(|header| {
+                header.name.eq_ignore_ascii_case("cf-ray")
+                    || header.name.eq_ignore_ascii_case("age")
+            })
+            .collect(),
         body: args.response.body,
     }
 }
