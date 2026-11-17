@@ -33,9 +33,9 @@ Do not invent a second key next to one that already exists.
 - The main-thread ICRC loader supplies the ID from `IC_BUILTIN_TOKENS`, matched
   by ledger canister ID, when mapping built-in metadata. `mapIcrcToken` accepts
   that ID without importing the catalog into worker-shared utilities.
-  This preserves picks made before the custom-token store loads. Restoring a
-  kept swap destination uses the current listed entry for that ID, so updated
-  metadata is retained.
+  This preserves picks made before the custom-token store loads. At the ICRC
+  auto-enable boundary, Swap resolves the current entry by ledger canister ID
+  to use its backend version and effective enabled state.
 - **Compare the object, never its description.** `TokenId.description` _is_ the
   ticker — it comes from `parseTokenId(symbol)`
   ([`$eth/utils/erc20.utils.ts`](../../../src/frontend/src/eth/utils/erc20.utils.ts),

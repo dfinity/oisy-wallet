@@ -248,8 +248,8 @@
 	};
 
 	const onClearDestination = () => {
-		swapAmountsStore.reset();
 		clearDestinationToken();
+		swapAmountsStore.reset();
 		void focusReceiveArea();
 	};
 

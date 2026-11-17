@@ -319,14 +319,17 @@ describe('swapStore', () => {
 	);
 
 	describe('clearing the receive token', () => {
-		it('should clear a selected token', () => {
-			const { destinationToken, clearDestinationToken } = initSwapContext({
-				sourceToken: mockToken2,
-				destinationToken: mockToken1
-			});
+		it('should clear a selected token and stop tracking Max for the pair', () => {
+			const { destinationToken, clearDestinationToken, amountSetToMax, lifiMaxFee } =
+				initSwapContext({ sourceToken: mockToken2, destinationToken: mockToken1 });
+			amountSetToMax.set(true);
+			lifiMaxFee.set({ fee: 1n, destinationTokenId: mockToken1.id });
+
 			clearDestinationToken();
 
 			expect(get(destinationToken)).toBeUndefined();
+			expect(get(amountSetToMax)).toBeFalsy();
+			expect(get(lifiMaxFee)).toBeUndefined();
 		});
 
 		it('should not bring back the receive token the swap opened with', () => {

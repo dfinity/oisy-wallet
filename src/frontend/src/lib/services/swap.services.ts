@@ -30,10 +30,12 @@ import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken, isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
+import { icrcTokens } from '$icp/derived/icrc.derived';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { hasSufficientIcrcAllowance, loadCustomTokens } from '$icp/services/icrc.services';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
@@ -221,6 +223,28 @@ const checkNeedsApproval = async ({
 	}
 };
 
+const enableIcrcSwapDestinationToken = ({
+	destinationToken,
+	identity
+}: {
+	destinationToken: IcTokenToggleable;
+	identity: Identity;
+}) => {
+	// The selected row is a snapshot. Look up the ledger in the current token list for
+	// the backend version and the effective enabled flag, including default-enabled tokens.
+	const currentToken = get(icrcTokens).find(
+		({ ledgerCanisterId }) => ledgerCanisterId === destinationToken.ledgerCanisterId
+	);
+
+	return autoLoadSingleToken({
+		identity,
+		token: currentToken ?? destinationToken,
+		setToken: setCustomIcrcToken,
+		loadTokens: loadCustomTokens,
+		errorMessage: get(i18n).init.error.icrc_custom_token
+	});
+};
+
 export const enableSwapDestinationToken = async ({
 	destinationToken,
 	identity
@@ -228,24 +252,18 @@ export const enableSwapDestinationToken = async ({
 	destinationToken: Token;
 	identity: Identity;
 }): Promise<void> => {
-	if (!isTokenToggleable(destinationToken) || destinationToken.enabled) {
+	if (!isTokenToggleable(destinationToken)) {
 		return;
 	}
 
 	try {
-		// A Chain Fusion mint or a 1Sec bridge lands on an ICRC (ck) token, which neither
-		// the ERC nor the SPL branch below can persist — the swap used to complete with the
-		// destination still hidden and its new balance invisible. Enabled through the same
-		// `autoLoadSingleToken` trio the ICPSwap flow uses for its own destination.
 		if (isTokenIcrc(destinationToken)) {
-			await autoLoadSingleToken({
-				identity,
-				token: destinationToken,
-				setToken: setCustomIcrcToken,
-				loadTokens: loadCustomTokens,
-				errorMessage: get(i18n).init.error.icrc_custom_token
-			});
+			await enableIcrcSwapDestinationToken({ destinationToken, identity });
 
+			return;
+		}
+
+		if (destinationToken.enabled) {
 			return;
 		}
 
@@ -956,15 +974,7 @@ export const fetchIcpSwap = async ({
 
 	progress(ProgressStepsSwap.UPDATE_UI);
 
-	if (!destinationToken.enabled) {
-		await autoLoadSingleToken({
-			identity,
-			token: destinationToken,
-			setToken: setCustomIcrcToken,
-			loadTokens: loadCustomTokens,
-			errorMessage: get(i18n).init.error.icrc_custom_token
-		});
-	}
+	await enableIcrcSwapDestinationToken({ destinationToken, identity });
 
 	await waitAndTriggerWallet();
 };

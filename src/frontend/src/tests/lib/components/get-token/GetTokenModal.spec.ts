@@ -347,12 +347,24 @@ describe('GetTokenModal', () => {
 						expect(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]).toHaveFocus()
 					);
 				} else {
+					const back = rendered.getByRole('button', { name: en.core.text.back });
+
 					if (action === 'missing shortcut') {
+						rendered.universe.update((tokens) =>
+							tokens.filter(({ network }) => network.id !== ETHEREUM_NETWORK.id)
+						);
+						await waitFor(() =>
+							expect(within(list).getByRole('button', { name: /Solana/ })).toHaveFocus()
+						);
+
 						rendered.universe.update((tokens) =>
 							tokens.filter(({ network }) => network.id === BASE_NETWORK.id)
 						);
+						await waitFor(() => expect(back).toHaveFocus());
+
+						expect(within(list).getByRole('status')).toHaveTextContent(en.core.text.no_results);
 					}
-					await fireEvent.click(rendered.getByText(en.core.text.back));
+					await fireEvent.click(back);
 					await waitFor(() =>
 						expect(
 							rendered.getByTestId(

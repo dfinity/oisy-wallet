@@ -204,11 +204,14 @@ One Plausible event, `swap_receive_shortcut`, built like `swap_two_swaps_hint`
 (`src/frontend/src/lib/services/swap-two-swaps-hint-analytics.services.ts`, Pattern B in
 `docs/ai/frontend/analytics.md`):
 
-- `event_modifier`: `same_network`, `other_network` or `any_token`, sent when that row is tapped. `other_network` is sent when a token is picked through it: on the tap when it sets
+- `event_modifier`: `same_network` and `any_token` are sent when their rows are tapped.
+  `other_network` is sent when a token is picked through it: on the tap when it sets
   the token directly, otherwise on the pick in the network step (opening the step and leaving it
   sends nothing), so every `other_network` event carries the picked token.
 - The pay token in `token_*`. For a network-step pick, or for a shortcut that sets the token
   directly, the picked token goes in `token2_*`.
+- For tokens with a public contract address or ledger ID, that identifier goes in
+  `token_address` or `token2_address`. Native tokens are identified by network and symbol.
 - No amount and no USD value.
 
 It answers whether the shortcuts are used, and which one. The event goes in `PRODUCT.md`'s
@@ -241,9 +244,9 @@ Pointers, not prescriptions; the implementer decides the shape.
   `SwapForm.svelte` in place of the receive `TokenInput` when the pay token is set and the receive
   token is not. Rows from `LogoButton` (`lib/components/ui/`), logos from `TokenLogo` /
   `NetworkLogo` with the swap modal's coloured network logos, and `IconSearch` for Any token.
-  _Built:_ the shortcut rows are styled as the Smart Swap cell (`SwapProviderCell`), since
-  `LogoButton` keeps its title on one line and the longest title must wrap at 375 px; the network
-  step's rows use `LogoButton`, as the token list's do.
+  _Built:_ the shortcut rows use the Smart Swap cell layout (`SwapProviderCell`), with a
+  one-line title that truncates at 375 px when needed. The network step reuses the token list's
+  `LogoButton` rows.
 - **Navigation.** `SwapForm`'s `onShowTokensList` is threaded through every network's wizard and
   form (`SwapIcpWizard`, `SwapEthForm`, `SwapSolWizard`/`SwapSolForm`, `SwapBtcWizard`/`SwapBtcForm`,
   `SwapXrpWizard`/`SwapXrpForm`). Either widen it (side plus a starting network) and add one for
@@ -279,9 +282,13 @@ Pointers, not prescriptions; the implementer decides the shape.
       a pick or Back.
 - [ ] Until the receive support data is ready, the card shows today's empty field.
 - [ ] "Move _symbol_ to" lists reachable networks only, in chain order, with the user's balance.
+      If a focused row disappears, focus moves to a remaining row or to Back when the list is
+      empty. An empty list announces "No results".
 - [ ] Tapping the receive token opens the picker; Back preserves it. The separate × clears it and
-      the quote, restores shortcuts and focuses their first row. No Keep link.
-- [ ] `swap_receive_shortcut` fires once per tap with the right modifier, and carries no amount.
+      the quote, keeps the pay amount and restores shortcuts with focus on their first row.
+- [ ] `swap_receive_shortcut` fires once on entry for `same_network` and `any_token`, and once
+      on a destination pick for `other_network`, including a direct pick. Opening Move and
+      pressing Back sends no event. No event carries an amount.
 - [ ] Copy matches the table; no em dashes.
 - [ ] Looks right at 375 px and in the desktop modal, in light and dark. The longest title
       ("Another token on Internet Computer") keeps to one line at 375 px and truncates (changed

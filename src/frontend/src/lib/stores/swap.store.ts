@@ -168,7 +168,13 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				...state,
 				destinationToken: token
 			})),
-		clearDestinationToken: () => update((state) => ({ ...state, destinationToken: null })),
+		clearDestinationToken: () => {
+			// Keep the current pay amount when the quote and its fees are cleared.
+			amountSetToMax.set(false);
+			lifiMaxFee.set(undefined);
+
+			update((state) => ({ ...state, destinationToken: null }));
+		},
 		// TODO: Ideally, this function should be used with reactive statements, exported outside the store.
 		switchTokens: () => {
 			receiveTokenPickerStep.set(WizardStepsSwap.TOKENS_LIST);

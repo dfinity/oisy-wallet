@@ -36,10 +36,11 @@
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	let root: HTMLDivElement;
+	let list: HTMLDivElement;
 
-	onMount(() => {
-		root.querySelector<HTMLElement>('button:not([disabled])')?.focus({ preventScroll: true });
-	});
+	const firstControl = () => root?.querySelector<HTMLButtonElement>('button:not([disabled])');
+
+	onMount(() => firstControl()?.focus({ preventScroll: true }));
 
 	const returnToForm = async (token?: Token) => {
 		// The dialog survives step changes, including Get Token rebuilding the swap wizard.
@@ -87,6 +88,22 @@
 				})?.shortcuts.otherNetwork
 	);
 
+	$effect.pre(() => {
+		// Capture focus before the keyed rows update. Only move it if the focused row disappears.
+		otherNetwork;
+		const focused = document.activeElement;
+
+		if (isNullish(focused) || !list?.contains(focused)) {
+			return;
+		}
+
+		void tick().then(() => {
+			if (!focused.isConnected && root?.isConnected && document.activeElement === document.body) {
+				firstControl()?.focus();
+			}
+		});
+	});
+
 	const select = (token: Token) => {
 		if ($tokenListReturnFocus === SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK && nonNullish($sourceToken)) {
 			trackSwapReceiveShortcut({
@@ -102,6 +119,7 @@
 
 <div bind:this={root}>
 	<div
+		bind:this={list}
 		class="mb-4 flex flex-col overflow-y-auto overscroll-contain sm:max-h-[26rem]"
 		data-tid={SWAP_RECEIVE_NETWORK_LIST}
 	>
@@ -128,6 +146,11 @@
 				{/each}
 			</List>
 		{/if}
+		<p class="text-primary" role="status">
+			{#if isNullish(otherNetwork)}
+				{$i18n.core.text.no_results}
+			{/if}
+		</p>
 	</div>
 
 	<ButtonGroup>
