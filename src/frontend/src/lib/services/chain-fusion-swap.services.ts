@@ -1400,6 +1400,11 @@ export const fetchChainFusionSolSwap = async ({
 
 			assertCkSolDepositWatched({ watched: rewatched, solDeposit, amount });
 
+			// The balance read at confirm was below that answer's minimum: a lower minimum now, or SOL
+			// sent to the address by hand since, can leave a balance that a scan sweeps alone before the
+			// transfer lands.
+			await assertCkSolDepositAddressBelowMinimum(rewatched);
+
 			if (fromNullable(rewatched.latest_deposit_id) !== latestDepositId) {
 				throw new ChainFusionSolDepositRefusedError('changed');
 			}
