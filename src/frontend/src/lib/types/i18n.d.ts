@@ -1209,6 +1209,8 @@ interface I18nSwap {
 		lifi_status_unknown: string;
 		lifi_fee_changed: string;
 		lifi_route_unverified: string;
+		lifi_btc_deposit_unverified: string;
+		lifi_btc_deposit_unverified_two_swaps: string;
 	};
 }
 

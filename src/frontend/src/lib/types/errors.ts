@@ -95,6 +95,12 @@ export class SwapViaIntermediateTokenError extends Error {
 export class LifiQuoteRejectedError extends Error {}
 
 /**
+ * A LI.FI quote from BTC whose deposit pays another address than the one OISY pins for its bridge,
+ * refused before signing. Either the bridge moved its deposit address or the answer was tampered with.
+ */
+export class LifiBtcDepositUnverifiedError extends LifiQuoteRejectedError {}
+
+/**
  * A LI.FI quote passed the trust checks, but its route is one the calldata binding would refuse
  * (see `isLifiRouteExecutable`), even after re-quoting without the bridge it took. There is no route
  * OISY can execute.

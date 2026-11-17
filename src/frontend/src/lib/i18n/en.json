@@ -1491,7 +1491,9 @@
 			"oisy_trade_recovery_failed": "OISY Trade did not accept the order, and your funds could not be returned to your wallet automatically. Please check your balances in the Trading tab to withdraw them.",
 			"lifi_status_unknown": "LI.FI could not report the outcome of this swap. Please check your destination wallet.",
 			"lifi_fee_changed": "The network fee for this swap rose since you reviewed it. Please check the new maximum fee and confirm the swap again.",
-			"lifi_route_unverified": "This LI.FI route goes through an exchange $oisy_short can't verify yet, so it can't be confirmed. Please choose another provider."
+			"lifi_route_unverified": "This LI.FI route goes through an exchange $oisy_short can't verify yet, so it can't be confirmed. Please choose another provider.",
+			"lifi_btc_deposit_unverified": "$oisy_short couldn't verify the address this swap would send your $sourceSymbol to, so it stopped. Your $sourceSymbol stayed in your wallet.",
+			"lifi_btc_deposit_unverified_two_swaps": "$oisy_short couldn't verify the address this swap would send your $sourceSymbol to, so it stopped. Your $sourceSymbol stayed in your wallet. You can do it in two swaps instead: $sourceSymbol to $intermediateSymbol first, then $intermediateSymbol to $destinationSymbol."
 		}
 	},
 	"buy": {

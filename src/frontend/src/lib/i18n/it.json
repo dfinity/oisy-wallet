@@ -1491,7 +1491,9 @@
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
-			"lifi_route_unverified": ""
+			"lifi_route_unverified": "",
+			"lifi_btc_deposit_unverified": "",
+			"lifi_btc_deposit_unverified_two_swaps": ""
 		}
 	},
 	"buy": {

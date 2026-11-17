@@ -8,6 +8,7 @@ import {
 	BtcSendValidationError,
 	BtcValidationError
 } from '$btc/types/btc-send';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { btcAddressStore } from '$icp/stores/btc.store';
@@ -24,12 +25,13 @@ import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
 import { fetchChainFusionBtcSwap } from '$lib/services/chain-fusion-swap.services';
-import { fetchLifiBtcSwap } from '$lib/services/lifi-btc-swap.services';
+import { fetchLifiBtcSwap, lifiBtcIntermediateToken } from '$lib/services/lifi-btc-swap.services';
 import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 import { fetchNearIntentsBtcSwap } from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type SwapError } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
+import { LifiBtcDepositUnverifiedError } from '$lib/types/errors';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -66,6 +68,7 @@ vi.mock('$lib/services/swap.services', () => ({
 
 vi.mock('$lib/services/lifi-btc-swap.services', () => ({
 	fetchLifiBtcSwap: vi.fn(),
+	lifiBtcIntermediateToken: vi.fn(),
 	// The BTC provider registry imports these.
 	fetchLifiBtcSwapQuote: vi.fn(),
 	lifiBtcSupportedTokens: vi.fn()
@@ -815,6 +818,52 @@ describe('SwapBtcWizard', () => {
 			expect(onBack).toHaveBeenCalledOnce();
 			expect(onClose).not.toHaveBeenCalled();
 		});
+
+		// The re-quote at confirm pays its deposit to another address than the one pinned for its bridge:
+		// nothing is signed, and the review says so, with the two swaps when there is a token to go
+		// through.
+		it.each([
+			{
+				case: 'with a token to go through',
+				intermediateToken: BASE_ETH_TOKEN,
+				expected: replacePlaceholders(
+					replaceOisyPlaceholders(en.swap.error.lifi_btc_deposit_unverified_two_swaps),
+					{
+						$sourceSymbol: BTC_MAINNET_TOKEN.symbol,
+						$destinationSymbol: ckBtcToken.symbol,
+						$intermediateSymbol: BASE_ETH_TOKEN.symbol
+					}
+				)
+			},
+			{
+				case: 'without one',
+				intermediateToken: undefined,
+				expected: replacePlaceholders(
+					replaceOisyPlaceholders(en.swap.error.lifi_btc_deposit_unverified),
+					{ $sourceSymbol: BTC_MAINNET_TOKEN.symbol }
+				)
+			}
+		])(
+			'says the deposit address could not be verified, and comes back, $case',
+			async ({ intermediateToken, expected }) => {
+				vi.mocked(lifiBtcIntermediateToken).mockReturnValue(intermediateToken);
+				vi.mocked(fetchLifiBtcSwap).mockRejectedValue(
+					new LifiBtcDepositUnverifiedError(
+						"LI.FI quote rejected: its Relay quote does not pay Relay's depository"
+					)
+				);
+
+				const { getByText, onBack, onClose, failedSwapError } = renderExecution();
+
+				await confirm(getByText);
+
+				expect(lifiBtcIntermediateToken).toHaveBeenCalledExactlyOnceWith(ckBtcToken);
+				expect(get(failedSwapError)).toEqual({ message: expected, variant: 'error' });
+				expect(toasts.toastsError).not.toHaveBeenCalled();
+				expect(onBack).toHaveBeenCalledOnce();
+				expect(onClose).not.toHaveBeenCalled();
+			}
+		);
 
 		it('clears an earlier slippage message when the swap is confirmed again', async () => {
 			const { getByText, failedSwapError } = renderExecution();
