@@ -127,10 +127,10 @@ const SWAP_OFFER_ERROR_SEVERITIES: Partial<
 	[PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.REQUEST_FAILED]: PLAUSIBLE_EVENT_SEVERITIES.WARN
 };
 
-// LI.FI's error codes for a BTC source (2026-11-13): `1003`, no UTXOs on the address (HTTP 404);
-// `1002`, no route (HTTP 404); and `1008`, a bridge that failed to quote or refused the address (HTTP
-// 424).
-const LIFI_BTC_NO_UTXOS_CODE = 1003;
+// LI.FI's error codes for a BTC source: `1003`, no UTXOs on the address (HTTP 404, 2026-11-13);
+// `1004`, UTXOs that do not cover the amount and LI.FI's fees (HTTP 422, 2026-11-17); `1002`, no
+// route (HTTP 404); and `1008`, a bridge that failed to quote or refused the address (HTTP 424).
+const LIFI_BTC_INSUFFICIENT_FUNDS_CODES = [1003, 1004];
 const LIFI_BTC_NO_ROUTE_CODES = [1002, 1008];
 
 // LI.FI's error text can carry the request URL, and with it the user's address, so only an
@@ -166,12 +166,12 @@ const toSwapOfferError = ({
 		err instanceof SDKError && err.cause instanceof HTTPError ? err.cause : undefined;
 	const status = httpError?.status;
 
-	// A BTC address LI.FI finds no UTXOs on is the insufficient balance the swap form already explains
-	// from its own UTXO selection, not a missing route.
+	// A BTC address whose UTXOs LI.FI finds missing or too small is the insufficient balance the swap
+	// form already explains from its own UTXO selection, not a missing route.
 	if (request.fromChain === ChainId.BTC) {
 		const code = httpError?.responseBody?.code;
 
-		if (code === LIFI_BTC_NO_UTXOS_CODE) {
+		if (nonNullish(code) && LIFI_BTC_INSUFFICIENT_FUNDS_CODES.includes(code)) {
 			return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.INSUFFICIENT_FUNDS, status };
 		}
 

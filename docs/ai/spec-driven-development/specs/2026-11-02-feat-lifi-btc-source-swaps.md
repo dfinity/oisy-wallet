@@ -108,9 +108,11 @@ found" on an empty address); map that to the existing insufficient-balance state
 mean no route from this provider.
 
 The three come back as HTTP errors with LI.FI's code in the body: `1002` and `1003` with 404, `1008`
-with 424 (2026-11-13). None is offered. The swap form already explains an insufficient balance from
-its own UTXO selection, so `swap_offer` reports `1003` as `insufficient_funds` and the other two as
-`no_route`, all three without a severity (a 424 from an EVM source stays a failed request). A BTC
+with 424 (2026-11-13). A fourth, `1004` with 422 ("Insufficient UTXOs value to cover tx value (…)
+and fees (…)", seen on fe4 on 2026-11-17), means UTXOs too small for the amount. None is offered.
+The swap form already explains an insufficient balance from its own UTXO selection, so `swap_offer`
+reports `1003` and `1004` as `insufficient_funds` and the other two as `no_route`, all without a
+severity (a 424 from an EVM source stays a failed request). A BTC
 source never gets the second request of the two-swap hint. Bitcoin stays out of `toLifiChainId`, so
 it is never a LI.FI destination.
 
