@@ -23,10 +23,16 @@
 	interface Props {
 		amount: OptionAmount;
 		amountError?: SolAmountAssertionError;
+		amountSetToMax?: boolean;
 		onTokensList: () => void;
 	}
 
-	let { amount = $bindable(), amountError = $bindable(), onTokensList }: Props = $props();
+	let {
+		amount = $bindable(),
+		amountError = $bindable(),
+		amountSetToMax = $bindable(false),
+		onTokensList
+	}: Props = $props();
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 
@@ -83,6 +89,7 @@
 		showTokenNetwork
 		token={$sendToken}
 		bind:amount
+		bind:amountSetToMax
 		bind:error={amountError}
 	>
 		{#snippet title()}{$i18n.core.text.amount}{/snippet}
@@ -108,6 +115,7 @@
 					fee={$fee ?? ZERO}
 					token={$sendToken}
 					bind:amount
+					bind:amountSetToMax
 				/>
 			{/if}
 		{/snippet}

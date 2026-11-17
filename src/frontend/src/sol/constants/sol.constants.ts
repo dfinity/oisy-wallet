@@ -48,6 +48,17 @@ export const SPL_TOKEN_MAX_AMOUNT = (1n << 64n) - 1n;
 export const SOLANA_DEFAULT_COMPUTE_UNIT_LIMIT_PER_INSTRUCTION = 200_000n;
 export const SOLANA_MAX_COMPUTE_UNIT_LIMIT = 1_400_000n;
 
+// The compute unit limit the wallet requests for the messages it builds itself, a send or a swap's
+// deposit. The prioritisation fee is charged on this limit rather than on the units used, so the
+// fee is quoted, held back by "Max" and signed for the very same one. Each leaves a margin over what
+// the message used on mainnet (2026-11-17, both Compute Budget instructions included): 450 for a SOL
+// transfer; about 400 (Token) to 4,550 (Token-2022) for an SPL transfer; up to about 35,600 for
+// one that also opens the recipient's token account, a cost that varies with the account's address.
+// A message that runs out of its limit fails, and is charged all the same.
+export const SOLANA_SEND_SOL_COMPUTE_UNIT_LIMIT = 1_000n;
+export const SOLANA_SEND_SPL_COMPUTE_UNIT_LIMIT = 20_000n;
+export const SOLANA_SEND_SPL_CREATE_ACCOUNT_COMPUTE_UNIT_LIMIT = 60_000n;
+
 // A prioritisation fee is only meaningful next to what the same transaction *should* cost, so the
 // review judges it against a baseline: the larger of this fiat floor and what OISY itself would
 // pay right now. The floor keeps the baseline honest when the network is quiet and its estimate

@@ -4,7 +4,12 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { signWithSchnorr } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import {
+	SOLANA_SEND_SOL_COMPUTE_UNIT_LIMIT,
+	SOLANA_SEND_SPL_COMPUTE_UNIT_LIMIT,
+	SOLANA_SEND_SPL_CREATE_ACCOUNT_COMPUTE_UNIT_LIMIT,
+	TOKEN_2022_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { sendSol } from '$sol/services/sol-send.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
@@ -22,13 +27,17 @@ import {
 	mockSolAddress2,
 	mockSolAddress3
 } from '$tests/mocks/sol.mock';
-import { estimateComputeUnitLimitFactory } from '@solana-program/compute-budget';
+import {
+	getSetComputeUnitLimitInstruction,
+	getSetComputeUnitPriceInstruction
+} from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferCheckedInstruction, getTransferInstruction } from '@solana-program/token';
 import * as solanaWeb3 from '@solana/kit';
 import {
 	appendTransactionMessageInstructions,
 	pipe,
+	prependTransactionMessageInstruction,
 	sendTransactionWithoutConfirmingFactory,
 	type Rpc,
 	type RpcSubscriptions,
@@ -74,7 +83,7 @@ vi.mock(import('@solana/transaction-confirmation'), async (importOriginal) => {
 });
 
 vi.mock('@solana-program/compute-budget', () => ({
-	estimateComputeUnitLimitFactory: vi.fn(),
+	getSetComputeUnitLimitInstruction: vi.fn().mockReturnValue('mock-compute-unit-limit-instruction'),
 	getSetComputeUnitPriceInstruction: vi.fn().mockReturnValue('mock-compute-unit-price-instruction')
 }));
 
@@ -106,11 +115,10 @@ describe('sol-send.services', () => {
 			signTransactions: expect.any(Function)
 		});
 		const mockDestination = mockSolAddress2;
-		const mockPrioritizationFee = ZERO;
 		const mockParams = {
 			identity: mockIdentity,
 			amount: mockAmount,
-			prioritizationFee: mockPrioritizationFee,
+			computeUnitPrice: ZERO,
 			source: mockSource,
 			destination: mockDestination,
 			progress: vi.fn()
@@ -164,8 +172,6 @@ describe('sol-send.services', () => {
 				Promise.resolve()
 			);
 			vi.mocked(waitForRecentTransactionConfirmation).mockResolvedValue();
-
-			vi.mocked(estimateComputeUnitLimitFactory).mockReturnValue(() => Promise.resolve(123));
 
 			spyMapNetworkIdToNetwork = vi.spyOn(networkUtils, 'safeMapNetworkIdToNetwork');
 
@@ -383,23 +389,82 @@ describe('sol-send.services', () => {
 			);
 		});
 
-		it('should not estimate compute units when prioritization fee is zero', async () => {
-			await sendSol({
-				...mockParams,
-				token: SOLANA_TOKEN
+		describe('the compute budget', () => {
+			// Prepended one after the other, so the limit ends up first, as the network reads it.
+			const expectComputeBudget = (units: bigint) => {
+				expect(getSetComputeUnitPriceInstruction).toHaveBeenCalledExactlyOnceWith({
+					microLamports: 1_500n
+				});
+				expect(getSetComputeUnitLimitInstruction).toHaveBeenCalledExactlyOnceWith({
+					units: Number(units)
+				});
+
+				expect(prependTransactionMessageInstruction).toHaveBeenCalledTimes(2);
+				expect(prependTransactionMessageInstruction).toHaveBeenNthCalledWith(
+					1,
+					'mock-compute-unit-price-instruction',
+					undefined
+				);
+				expect(prependTransactionMessageInstruction).toHaveBeenNthCalledWith(
+					2,
+					'mock-compute-unit-limit-instruction',
+					undefined
+				);
+			};
+
+			it('should add no Compute Budget instruction when the price is zero', async () => {
+				await sendSol({
+					...mockParams,
+					token: SOLANA_TOKEN
+				});
+
+				expect(getSetComputeUnitPriceInstruction).not.toHaveBeenCalled();
+				expect(getSetComputeUnitLimitInstruction).not.toHaveBeenCalled();
+				expect(prependTransactionMessageInstruction).not.toHaveBeenCalled();
 			});
 
-			expect(estimateComputeUnitLimitFactory).not.toHaveBeenCalled();
-		});
+			it('should sign a SOL send with the price and the limit of a SOL transfer', async () => {
+				await sendSol({
+					...mockParams,
+					computeUnitPrice: 1_500n,
+					token: SOLANA_TOKEN
+				});
 
-		it('should estimate compute units and set price when prioritization fee is positive', async () => {
-			await sendSol({
-				...mockParams,
-				prioritizationFee: 100_000n,
-				token: SOLANA_TOKEN
+				expectComputeBudget(SOLANA_SEND_SOL_COMPUTE_UNIT_LIMIT);
 			});
 
-			expect(estimateComputeUnitLimitFactory).toHaveBeenCalledOnce();
+			it('should sign an SPL send with the limit of an SPL transfer', async () => {
+				await sendSol({
+					...mockParams,
+					computeUnitPrice: 1_500n,
+					token: DEVNET_USDC_TOKEN
+				});
+
+				expectComputeBudget(SOLANA_SEND_SPL_COMPUTE_UNIT_LIMIT);
+			});
+
+			it('should sign an SPL send that opens the recipient token account with the larger limit', async () => {
+				vi.mocked(solanaHttpRpc).mockReturnValue({
+					...mockRpc,
+					getTokenAccountsByOwner: vi.fn((address: SolAddress) => ({
+						send: vi.fn(() =>
+							Promise.resolve({
+								value: [{ pubkey: address === mockSolAddress ? mockAtaAddress : undefined }]
+							})
+						)
+					}))
+				} as unknown as Rpc<SolanaRpcApi>);
+
+				await sendSol({
+					...mockParams,
+					computeUnitPrice: 1_500n,
+					token: DEVNET_USDC_TOKEN
+				});
+
+				expect(spyCreateAtaInstruction).toHaveBeenCalledOnce();
+
+				expectComputeBudget(SOLANA_SEND_SPL_CREATE_ACCOUNT_COMPUTE_UNIT_LIMIT);
+			});
 		});
 
 		it('should throw an error if network is invalid', async () => {

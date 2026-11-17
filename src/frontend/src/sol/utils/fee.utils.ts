@@ -2,7 +2,12 @@ import { ZERO } from '$lib/constants/app.constants';
 import {
 	MICROLAMPORTS_PER_LAMPORT,
 	SOLANA_DEFAULT_COMPUTE_UNIT_LIMIT_PER_INSTRUCTION,
-	SOLANA_MAX_COMPUTE_UNIT_LIMIT
+	SOLANA_LAMPORTS_PER_SIGNATURE,
+	SOLANA_MAX_COMPUTE_UNIT_LIMIT,
+	SOLANA_SEND_REQUIRED_SIGNATURES,
+	SOLANA_SEND_SOL_COMPUTE_UNIT_LIMIT,
+	SOLANA_SEND_SPL_COMPUTE_UNIT_LIMIT,
+	SOLANA_SEND_SPL_CREATE_ACCOUNT_COMPUTE_UNIT_LIMIT
 } from '$sol/constants/sol.constants';
 import { isNullish } from '@dfinity/utils';
 
@@ -55,6 +60,40 @@ export const convertSolComputeUnitPriceToFee = ({
 		(microLamports % MICROLAMPORTS_PER_LAMPORT > ZERO ? 1n : ZERO)
 	);
 };
+
+/**
+ * The compute unit limit a message the wallet builds itself (a send, or a swap's deposit) is signed
+ * with, by what it does.
+ */
+export const getSolSendComputeUnitLimit = ({
+	isSpl,
+	createsTokenAccount
+}: {
+	isSpl: boolean;
+	createsTokenAccount: boolean;
+}): bigint =>
+	!isSpl
+		? SOLANA_SEND_SOL_COMPUTE_UNIT_LIMIT
+		: createsTokenAccount
+			? SOLANA_SEND_SPL_CREATE_ACCOUNT_COMPUTE_UNIT_LIMIT
+			: SOLANA_SEND_SPL_COMPUTE_UNIT_LIMIT;
+
+/**
+ * The fee a message the wallet builds itself is charged, in lamports: the base fee of its one
+ * signature, plus what its compute unit price comes to over the limit it is signed with.
+ *
+ * @param computeUnitPrice - In micro-lamports per compute unit, as `estimatePriorityFee` reports it.
+ * @param computeUnitLimit - From `getSolSendComputeUnitLimit`.
+ */
+export const calculateSolSendFee = ({
+	computeUnitPrice,
+	computeUnitLimit
+}: {
+	computeUnitPrice: bigint;
+	computeUnitLimit: bigint;
+}): bigint =>
+	SOLANA_LAMPORTS_PER_SIGNATURE * BigInt(SOLANA_SEND_REQUIRED_SIGNATURES) +
+	convertSolComputeUnitPriceToFee({ computeUnitPrice, computeUnitLimit });
 
 /**
  * Compute the prioritisation fee a transaction message will be charged, in lamports.

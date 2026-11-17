@@ -1267,7 +1267,8 @@ export const fetchNearIntentsSolSwap = async ({
 	swapAmount,
 	userAddress,
 	swapDetails,
-	slippageValue
+	slippageValue,
+	computeUnitPrice
 }: SwapNearIntentsSolParams): Promise<void> => {
 	await executeNearIntentsSwap({
 		identity,
@@ -1284,7 +1285,7 @@ export const fetchNearIntentsSolSwap = async ({
 				amount,
 				destination: depositAddress,
 				source: userAddress,
-				prioritizationFee: ZERO
+				computeUnitPrice
 			}),
 		enableDestinationToken: () => enableSwapDestinationToken({ destinationToken, identity })
 	});

@@ -4464,7 +4464,8 @@ describe('swap.services', () => {
 			swapAmount: '1',
 			userAddress: mockSolAddress,
 			slippageValue: '1',
-			swapDetails: mockNearIntentsQuoteResponse
+			swapDetails: mockNearIntentsQuoteResponse,
+			computeUnitPrice: ZERO
 		};
 
 		beforeEach(() => {
@@ -4893,7 +4894,8 @@ describe('swap.services', () => {
 					swapAmount: '1',
 					userAddress: mockSolAddress,
 					slippageValue: '0.5',
-					swapDetails: mockNearIntentsQuoteResponse
+					swapDetails: mockNearIntentsQuoteResponse,
+					computeUnitPrice: ZERO
 				})
 			).rejects.toMatchObject({ code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE });
 
@@ -4910,7 +4912,8 @@ describe('swap.services', () => {
 				swapAmount: '1',
 				userAddress: mockSolAddress,
 				slippageValue: '1',
-				swapDetails: mockNearIntentsQuoteResponse
+				swapDetails: mockNearIntentsQuoteResponse,
+				computeUnitPrice: 1_500n
 			});
 
 			expect(sendSol).toHaveBeenCalledWith(
@@ -4918,7 +4921,7 @@ describe('swap.services', () => {
 					token: sourceToken,
 					destination: depositAddress,
 					source: mockSolAddress,
-					prioritizationFee: ZERO
+					computeUnitPrice: 1_500n
 				})
 			);
 			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledWith({
@@ -4945,7 +4948,8 @@ describe('swap.services', () => {
 				swapAmount: '1',
 				userAddress: mockSolAddress,
 				slippageValue: '1',
-				swapDetails: mockNearIntentsQuoteResponse
+				swapDetails: mockNearIntentsQuoteResponse,
+				computeUnitPrice: ZERO
 			});
 
 			expect(mockProgress).toHaveBeenCalledTimes(3);
@@ -4966,7 +4970,8 @@ describe('swap.services', () => {
 				swapAmount: '1',
 				userAddress: mockSolAddress,
 				slippageValue: '1',
-				swapDetails: mockNearIntentsQuoteResponse
+				swapDetails: mockNearIntentsQuoteResponse,
+				computeUnitPrice: ZERO
 			});
 
 			const [sendOrder] = vi.mocked(sendSol).mock.invocationCallOrder;
@@ -4994,7 +4999,8 @@ describe('swap.services', () => {
 				swapAmount: '1',
 				userAddress: mockSolAddress,
 				slippageValue: '1',
-				swapDetails: quoteWithMemo
+				swapDetails: quoteWithMemo,
+				computeUnitPrice: ZERO
 			});
 
 			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledWith({

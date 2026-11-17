@@ -747,6 +747,10 @@ The base fee is charged **per signature**, at 5,000 lamports each, not once per 
 
 OISY's own sends, and the deposit a swap makes, are signed by the user's key alone, so they pay the base fee for a single signature.
 
+When the network is busy, they also bid a **priority fee**: the highest price per compute unit the network reports for its recent blocks (for a token, the price reported for its mint), read again every five seconds, times a fixed compute limit the message states alongside it: 1,000 units for a SOL transfer, 20,000 for a token transfer, and 60,000 for one that also opens the recipient's token account. The network charges the price for the limit a message requests, not for the units it uses, and a message that runs out of its limit fails and is charged all the same, so each limit leaves room over what such a message uses. The fee the send or the swap shows is the base fee plus that priority fee, rounded up to the next lamport as the network rounds it, and the transaction is signed with the same price and limit, so it is charged exactly what was shown. With no price to bid, which is usual for SOL, the message states neither and pays the base fee alone.
+
+**Max** keeps that fee back from a SOL balance, and holds it: from the moment Max is pressed until an amount is typed, the fee no longer follows the network's price, and the send or swap is signed with the price Max kept back. Amount and fee then add up to the balance exactly. That matters because a Solana account must end either empty or holding at least the rent of an account: a fee that moved by a single lamport after Max would make the network refuse the transaction.
+
 ### Account creations and handovers in a Solana transaction
 
 The review reduces a message to a single source, destination and amount, so an instruction whose effect that single figure cannot carry is **refused outright** rather than shown in part. Two families of System-program instruction fall there, and so does setting up a stake account for somebody else.

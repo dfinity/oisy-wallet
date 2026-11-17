@@ -15,13 +15,14 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
 import type { SplToken } from '$sol/types/spl';
+import { getSolSendComputeUnitLimit } from '$sol/utils/fee.utils';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { isAtaAddress } from '$sol/utils/sol-address.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
-	estimateComputeUnitLimitFactory,
+	getSetComputeUnitLimitInstruction,
 	getSetComputeUnitPriceInstruction
 } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
@@ -138,7 +139,7 @@ const createSplTokenTransactionMessage = async ({
 	amount: bigint;
 	network: SolanaNetworkType;
 	token: SplToken;
-}): Promise<SolTransactionMessage> => {
+}): Promise<{ transactionMessage: SolTransactionMessage; createsTokenAccount: boolean }> => {
 	const {
 		address: tokenAddress,
 		owner: tokenOwnerAddress,
@@ -228,12 +229,14 @@ const createSplTokenTransactionMessage = async ({
 			)
 		: getTransferInstruction(transferParams, config);
 
-	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
+	const transactionMessage = pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
 		appendTransactionMessageInstructions(
 			[...(mustCreateDestinationTokenAccount ? [ataInstruction] : []), transferInstruction],
 			tx
 		)
 	);
+
+	return { transactionMessage, createsTokenAccount: mustCreateDestinationTokenAccount };
 };
 
 export const sendSignedTransaction = async ({
@@ -284,26 +287,29 @@ const confirmSignedTransaction = async ({
 	});
 };
 
-const withComputeUnitPrice = async ({
+// The prioritisation fee is the price times the limit, so the message states both: without a limit,
+// the network would charge the price for its default one, many times what the message uses and
+// what the fee context quoted.
+const withComputeBudget = ({
 	transactionMessage,
-	rpc,
-	prioritizationFee
+	computeUnitPrice,
+	computeUnitLimit
 }: {
 	transactionMessage: SolTransactionMessage;
-	rpc: Rpc<SolanaRpcApi>;
-	prioritizationFee: bigint;
-}): Promise<SolTransactionMessage> => {
-	if (prioritizationFee <= ZERO) {
+	computeUnitPrice: bigint;
+	computeUnitLimit: bigint;
+}): SolTransactionMessage => {
+	// No price, no prioritisation fee: the message then pays the base fee alone, as quoted.
+	if (computeUnitPrice <= ZERO) {
 		return transactionMessage;
 	}
 
-	const computeUnitsEstimate = await estimateComputeUnitLimitFactory({ rpc })(transactionMessage);
-
-	const computeUnitPrice = BigInt(Math.ceil(Number(prioritizationFee) / computeUnitsEstimate));
-
 	return prependTransactionMessageInstruction(
-		getSetComputeUnitPriceInstruction({ microLamports: computeUnitPrice }),
-		transactionMessage
+		getSetComputeUnitLimitInstruction({ units: Number(computeUnitLimit) }),
+		prependTransactionMessageInstruction(
+			getSetComputeUnitPriceInstruction({ microLamports: computeUnitPrice }),
+			transactionMessage
+		)
 	);
 };
 
@@ -313,20 +319,24 @@ const withComputeUnitPrice = async ({
  * This function will sign the transaction with the provided identity and send it to the network.
  * It is based on the Solana web3.js library.
  * https://solana.com/developers/cookbook/transactions/send-sol
+ *
+ * @param computeUnitPrice - The price per compute unit, in micro-lamports, that the fee context
+ *   quoted the fee at. The message is signed with it and with the limit `getSolSendComputeUnitLimit`
+ *   gives for what it does, so it is charged exactly the quoted fee.
  */
 export const sendSol = async ({
 	identity,
 	progress,
 	token,
 	amount,
-	prioritizationFee,
+	computeUnitPrice,
 	destination,
 	source
 }: {
 	identity: NullishIdentity;
 	token: Token;
 	amount: bigint;
-	prioritizationFee: bigint;
+	computeUnitPrice: bigint;
 	destination: SolAddress;
 	source: SolAddress;
 	progress?: (step: ProgressStepsSendSol) => void;
@@ -348,7 +358,9 @@ export const sendSol = async ({
 		network: solNetwork
 	});
 
-	const transactionMessage = isTokenSpl(token)
+	const isSpl = isTokenSpl(token);
+
+	const { transactionMessage, createsTokenAccount } = isSpl
 		? await createSplTokenTransactionMessage({
 				signer,
 				destination,
@@ -356,17 +368,20 @@ export const sendSol = async ({
 				network: solNetwork,
 				token
 			})
-		: await createSolTransactionMessage({
-				signer,
-				destination,
-				amount,
-				network: solNetwork
-			});
+		: {
+				transactionMessage: await createSolTransactionMessage({
+					signer,
+					destination,
+					amount,
+					network: solNetwork
+				}),
+				createsTokenAccount: false
+			};
 
-	const transactionMessageToSign = await withComputeUnitPrice({
+	const transactionMessageToSign = withComputeBudget({
 		transactionMessage,
-		rpc,
-		prioritizationFee
+		computeUnitPrice,
+		computeUnitLimit: getSolSendComputeUnitLimit({ isSpl, createsTokenAccount })
 	});
 
 	progress?.(ProgressStepsSendSol.SIGN);

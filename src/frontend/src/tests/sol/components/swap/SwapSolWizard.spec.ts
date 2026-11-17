@@ -3,6 +3,7 @@ import {
 	TRACK_COUNT_SWAP_ERROR,
 	TRACK_COUNT_SWAP_SUBMITTED
 } from '$lib/constants/analytics.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE,
 	SWAP_LIFI_UNVERIFIED_ROUTE,
@@ -21,6 +22,7 @@ import * as toasts from '$lib/stores/toasts.store';
 import { LifiSolFeeChangedError } from '$lib/types/errors';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
+import { estimatePriorityFee } from '$sol/api/solana.api';
 import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -262,7 +264,7 @@ describe('SwapSolWizard', () => {
 			vi.useRealTimers();
 		});
 
-		const createExecutionContext = () => {
+		const createExecutionContext = ({ amountSetToMax = false } = {}) => {
 			const executionSwapAmountsStore = initSwapAmountsStore();
 			executionSwapAmountsStore.setSwaps({
 				swaps: nearIntentsSwapProviders,
@@ -276,7 +278,7 @@ describe('SwapSolWizard', () => {
 				sourceToken: readable(mockSourceToken),
 				destinationToken: readable(mockDestToken),
 				failedSwapError: writable(undefined),
-				amountSetToMax: writable(false),
+				amountSetToMax: writable(amountSetToMax),
 				lifiMaxFee: writable(undefined),
 				sourceTokenExchangeRate: readable(10),
 				sourceTokenBalance: readable(undefined),
@@ -295,7 +297,7 @@ describe('SwapSolWizard', () => {
 			return ctx;
 		};
 
-		const renderExecution = () => {
+		const renderExecution = ({ amountSetToMax = false } = {}) => {
 			const onClose = vi.fn();
 			const onBack = vi.fn();
 			const onStartTriggerAmount = vi.fn();
@@ -310,7 +312,7 @@ describe('SwapSolWizard', () => {
 					onStartTriggerAmount,
 					onStopTriggerAmount: vi.fn()
 				},
-				context: createExecutionContext()
+				context: createExecutionContext({ amountSetToMax })
 			});
 
 			return { ...result, onClose, onBack, onStartTriggerAmount };
@@ -336,6 +338,46 @@ describe('SwapSolWizard', () => {
 			expect(swapServices.fetchNearIntentsSolSwap).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ slippageValue: '0.5' })
 			);
+		});
+
+		describe('the price of the network fee', () => {
+			afterEach(() => {
+				vi.mocked(estimatePriorityFee).mockResolvedValue(ZERO);
+			});
+
+			it('signs the deposit with the price its network fee was quoted at', async () => {
+				vi.mocked(estimatePriorityFee).mockResolvedValue(1_500n);
+
+				const { getByText } = renderExecution();
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				await fireEvent.click(getByText(en.swap.text.swap_button));
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(swapServices.fetchNearIntentsSolSwap).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ computeUnitPrice: 1_500n })
+				);
+			});
+
+			// "Max" held the fee back at that price, so the amount and the fee add up to the balance.
+			it('keeps signing with the price "Max" held back while the estimate moves', async () => {
+				vi.mocked(estimatePriorityFee).mockResolvedValueOnce(1_500n).mockResolvedValue(9_000n);
+
+				const { getByText } = renderExecution({ amountSetToMax: true });
+
+				await vi.advanceTimersByTimeAsync(0);
+				await vi.advanceTimersByTimeAsync(5_000);
+
+				expect(estimatePriorityFee).toHaveBeenCalledTimes(2);
+
+				await fireEvent.click(getByText(en.swap.text.swap_button));
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(swapServices.fetchNearIntentsSolSwap).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ computeUnitPrice: 1_500n })
+				);
+			});
 		});
 
 		it('calls onBack when swap fails', async () => {

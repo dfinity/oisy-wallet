@@ -350,7 +350,8 @@
 					swapAmount,
 					userAddress: $solAddressMainnet,
 					swapDetails: selectedProvider.swapDetails,
-					slippageValue
+					slippageValue,
+					computeUnitPrice: $prioritizationFeeStore ?? ZERO
 				});
 			} else if (selectedProvider?.provider === SwapProvider.LIFI && nonNullish(lifiFee)) {
 				await fetchLifiSolSwap({
@@ -452,7 +453,11 @@
 </script>
 
 {#if nonNullish($sourceToken)}
-	<SolFeeContext observe={currentStep?.name !== WizardStepsSwap.SWAPPING} token={$sourceToken}>
+	<SolFeeContext
+		holdFee={$amountSetToMax}
+		observe={currentStep?.name !== WizardStepsSwap.SWAPPING}
+		token={$sourceToken}
+	>
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSwap.SWAP}
 				<SwapSolForm
