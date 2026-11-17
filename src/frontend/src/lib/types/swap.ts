@@ -570,8 +570,9 @@ export interface SwapLifiBtcParams {
 	userAddress: BtcAddress;
 	network: BitcoinNetwork;
 	offer: Extract<SwapMappedResult, { provider: SwapProvider.LIFI }>;
-	// The selection and the fee the user reviewed, priced for LI.FI's layout. Execution pays exactly
-	// that fee, and refuses a re-quoted layout it no longer prices.
+	// The selection and the fee the user reviewed, priced for LI.FI's layout. Execution pays that fee,
+	// plus any change below 1,000 sats, which goes to the miner, and refuses a re-quoted layout it no
+	// longer prices.
 	utxosFee: UtxosFee;
 }
 
