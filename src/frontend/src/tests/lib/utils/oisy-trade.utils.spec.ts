@@ -275,6 +275,17 @@ describe('oisy-trade.utils — limit order', () => {
 			expect(limitDecimals({ raw: '1.5', maxDecimals: 0 })).toBe('1');
 			expect(limitDecimals({ raw: '1a.2b', maxDecimals: 1 })).toBe('1.2');
 		});
+
+		it('reads a lone comma as the decimal point', () => {
+			expect(limitDecimals({ raw: '12,5', maxDecimals: 4 })).toBe('12.5');
+			expect(limitDecimals({ raw: '0,00051', maxDecimals: 4 })).toBe('0.0005');
+			expect(limitDecimals({ raw: '1,', maxDecimals: 4 })).toBe('1.');
+		});
+
+		it('drops commas used as thousands separators', () => {
+			expect(limitDecimals({ raw: '1,234,567', maxDecimals: 4 })).toBe('1234567');
+			expect(limitDecimals({ raw: '1,234.5', maxDecimals: 4 })).toBe('1234.5');
+		});
 	});
 
 	describe('deriveQuoteAmount / deriveNotional', () => {
