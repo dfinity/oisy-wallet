@@ -1,17 +1,23 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
+import { ZERO } from '$lib/constants/app.constants';
+import * as earningDerived from '$lib/derived/earning.derived';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { hideTokenCategoryFilterStore, tokenCategoryFilterStore } from '$lib/stores/settings.store';
 import { tokenGroupStore } from '$lib/stores/token-group.store';
 import { tokenListStore } from '$lib/stores/token-list.store';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiGroup } from '$lib/types/token-ui-group';
+import { formatStakeApyNumber } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
+import { readable } from 'svelte/store';
 
 vi.mock('$app/navigation', () => ({
 	goto: vi.fn()
@@ -263,5 +269,55 @@ describe('TokenGroupCard', () => {
 		expect(cryptoCardA).toBeInTheDocument();
 		expect(cryptoCardB).toBeInTheDocument();
 		expect(stableCard).toBeInTheDocument();
+	});
+
+	describe('top-rate tag', () => {
+		const label = `${formatStakeApyNumber(6.47)}% ${en.earning.card_fields.apy}`;
+		const tagName = replacePlaceholders(en.earning.text.top_rate_tag, { $apy: label });
+
+		const heldGroup = (balance: bigint): TokenUiGroup => ({
+			...tokenGroup,
+			tokens: [
+				{ ...cryptoTokenA, balance },
+				{ ...cryptoTokenB, balance }
+			]
+		});
+
+		beforeEach(() => {
+			vi.spyOn(earningDerived, 'earningTopRateApyByTokenId', 'get').mockReturnValue(
+				readable(
+					new Map([
+						[cryptoTokenA.id, 5.75],
+						[cryptoTokenB.id, 6.47]
+					])
+				)
+			);
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it('shows the best top rate among the tokens the user holds', () => {
+			const { getByRole } = render(TokenGroupCard, { props: { tokenGroup: heldGroup(1n) } });
+
+			expect(getByRole('button', { name: tagName })).toHaveTextContent(label);
+		});
+
+		it('shows no tag when the user holds none of them', () => {
+			const { queryByRole } = render(TokenGroupCard, { props: { tokenGroup: heldGroup(ZERO) } });
+
+			expect(queryByRole('button', { name: tagName })).not.toBeInTheDocument();
+		});
+
+		it('still expands the group from the rest of the row', async () => {
+			const { getByTestId } = render(TokenGroupCard, { props: { tokenGroup: heldGroup(1n) } });
+
+			const header = getByTestId(/^token-group-/);
+
+			await fireEvent.click(header);
+
+			expect(header).toHaveAttribute('aria-expanded', 'true');
+		});
 	});
 });
