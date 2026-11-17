@@ -1227,9 +1227,10 @@ const assertCkSolDepositWatched = ({
 	}
 
 	// A call inside an earlier registration's window gets that window, which can end with no scan
-	// left, or with a last one due before the transfer lands: SOL sent then would wait on the address
-	// until a later call registers it again. The next scan has to come after the transfer can land,
-	// unless a later one follows it.
+	// left, or with its scans all due before the transfer lands: SOL sent then would wait on the
+	// address until a later call registers it again. Some scan has to come after the transfer can
+	// land: the next one, or the window's last. A minter far behind its schedule can have both
+	// overdue.
 	const { valid_until: validUntil, next_scan_at } = status.Watching;
 	const nextScanAt = fromNullable(next_scan_at);
 
@@ -1237,10 +1238,13 @@ const assertCkSolDepositWatched = ({
 		throw new ChainFusionSolDepositRefusedError('unavailable');
 	}
 
-	const isLastScan = nextScanAt + CKSOL_LAST_SCAN_BEFORE_WINDOW_END_NANOS >= validUntil;
 	const nowNanos = BigInt(Date.now()) * NANO_SECONDS_IN_MILLISECOND;
+	const lastScanAt = validUntil - CKSOL_LAST_SCAN_BEFORE_WINDOW_END_NANOS;
 
-	if (isLastScan && nextScanAt < nowNanos + CKSOL_TRANSFER_LANDING_NANOS) {
+	if (
+		nextScanAt < nowNanos + CKSOL_TRANSFER_LANDING_NANOS &&
+		lastScanAt < nowNanos + CKSOL_TRANSFER_LANDING_NANOS
+	) {
 		throw new ChainFusionSolDepositRefusedError('unavailable');
 	}
 };
