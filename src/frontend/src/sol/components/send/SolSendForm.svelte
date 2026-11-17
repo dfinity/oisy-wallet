@@ -15,6 +15,7 @@
 
 	interface Props {
 		amount: OptionAmount;
+		amountSetToMax?: boolean;
 		destination?: string;
 		selectedContact?: ContactUi;
 		onBack: () => void;
@@ -25,6 +26,7 @@
 
 	let {
 		amount = $bindable(),
+		amountSetToMax = $bindable(false),
 		destination = $bindable(''),
 		selectedContact,
 		onBack,
@@ -59,7 +61,7 @@
 	{/snippet}
 
 	{#snippet sendAmount()}
-		<SolSendAmount {onTokensList} bind:amount bind:amountError />
+		<SolSendAmount {onTokensList} bind:amount bind:amountError bind:amountSetToMax />
 	{/snippet}
 
 	{#snippet fee()}

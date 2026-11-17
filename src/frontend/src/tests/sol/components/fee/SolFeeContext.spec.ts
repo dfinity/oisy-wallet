@@ -8,11 +8,13 @@ import * as solAddressUtils from '$sol/utils/sol-address.utils';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import SolFeeContextTest from '$tests/sol/components/fee/SolFeeContextTest.svelte';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockSolFeeContextEntry } from '$tests/utils/fee.context.test-utils';
 import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import { lamports } from '@solana/kit';
 import { render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { get, writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -212,6 +214,131 @@ describe('SolFeeContext', () => {
 			} finally {
 				process.off('unhandledRejection', onUnhandledRejection);
 			}
+		});
+
+		describe('while the fee is held', () => {
+			// Holding is driven from a store, as the wizards drive it from the "Max" flag, so that it
+			// starts and ends without the context being handed its token again.
+			const renderHeld = ({ token = SOLANA_TOKEN, held = false } = {}) => {
+				const holdFee = writable(held);
+
+				const result = render(SolFeeContextTest, {
+					props: { token, observe: true, holdFee, children: mockSnippet },
+					context: mockContextMap([
+						mockSolFeeContextEntry(
+							initFeeContext({
+								feeStore,
+								prioritizationFeeStore,
+								ataFeeStore,
+								feeSymbolStore: writable(SOLANA_TOKEN.symbol),
+								feeDecimalsStore: writable(SOLANA_TOKEN.decimals),
+								feeTokenIdStore: writable(SOLANA_TOKEN.id),
+								feeExchangeRateStore: writable(undefined)
+							})
+						)
+					])
+				});
+
+				const setHeld = async (value: boolean) => {
+					holdFee.set(value);
+					await tick();
+				};
+
+				return { ...result, setHeld };
+			};
+
+			it('should keep the price already quoted instead of refreshing it', async () => {
+				const { setHeld, unmount } = renderHeld();
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(get(feeStore)).toBe(5_002n);
+
+				spyEstimatePriorityFee.mockResolvedValue(9_000n);
+
+				await setHeld(true);
+				await vi.advanceTimersByTimeAsync(pollIntervalMs);
+
+				expect(spyEstimatePriorityFee).toHaveBeenCalledTimes(2);
+				expect(get(feeStore)).toBe(5_002n);
+				expect(get(prioritizationFeeStore)).toBe(1_500n);
+
+				await setHeld(false);
+				await vi.advanceTimersByTimeAsync(pollIntervalMs);
+
+				expect(get(feeStore)).toBe(5_009n);
+				expect(get(prioritizationFeeStore)).toBe(9_000n);
+
+				unmount();
+			});
+
+			// "Max" can be pressed while a poll is in flight: the price it brings back must not move the
+			// fee "Max" has just held back.
+			it('should not take a price that arrives once holding has started', async () => {
+				const { setHeld, unmount } = renderHeld();
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				const inFlight = Promise.withResolvers<bigint>();
+				spyEstimatePriorityFee.mockReturnValueOnce(inFlight.promise);
+
+				await vi.advanceTimersByTimeAsync(pollIntervalMs);
+
+				await setHeld(true);
+
+				inFlight.resolve(9_000n);
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(get(feeStore)).toBe(5_002n);
+				expect(get(prioritizationFeeStore)).toBe(1_500n);
+
+				unmount();
+			});
+
+			// The token stores hand the same token back as a new object whenever what they derive from
+			// changes, which restarts the estimate.
+			it('should keep holding when the same token comes back as a new object', async () => {
+				const { rerender, unmount } = renderHeld({ held: true });
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(get(feeStore)).toBe(5_002n);
+
+				spyEstimatePriorityFee.mockResolvedValue(9_000n);
+
+				await rerender({ token: { ...SOLANA_TOKEN } });
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(spyEstimatePriorityFee).toHaveBeenCalledTimes(2);
+				expect(get(feeStore)).toBe(5_002n);
+				expect(get(prioritizationFeeStore)).toBe(1_500n);
+
+				unmount();
+			});
+
+			// Nothing has been held back before a token's first price, so it is taken.
+			it('should still take the first price quoted for another token', async () => {
+				const { rerender, unmount } = renderHeld({ held: true });
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(get(feeStore)).toBe(5_002n);
+
+				spyEstimatePriorityFee.mockResolvedValueOnce(9_000n).mockResolvedValue(12_000n);
+
+				await rerender({ token: mockValidSplToken });
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(get(prioritizationFeeStore)).toBe(9_000n);
+
+				await vi.advanceTimersByTimeAsync(pollIntervalMs);
+
+				expect(spyEstimatePriorityFee).toHaveBeenCalledTimes(3);
+				expect(get(prioritizationFeeStore)).toBe(9_000n);
+
+				unmount();
+			});
 		});
 
 		// A safety net: the swap removes this context before it sees a source token on another chain,

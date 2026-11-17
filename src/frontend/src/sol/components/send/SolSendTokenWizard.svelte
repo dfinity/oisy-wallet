@@ -115,6 +115,9 @@
 		feeExchangeRateStore.set($exchanges?.[solanaNativeToken.id]?.usd);
 	});
 
+	// While "Max" sets the amount, the fee it held back stays the one quoted and signed.
+	let amountSetToMax = $state(false);
+
 	setContext<FeeContextType>(
 		SOL_FEE_CONTEXT_KEY,
 		initFeeContext({
@@ -232,6 +235,7 @@
 
 <SolFeeContext
 	{destination}
+	holdFee={amountSetToMax}
 	observe={currentStep?.name !== WizardStepsSend.SENDING}
 	token={$sendToken}
 >
@@ -241,7 +245,15 @@
 		{:else if currentStep?.name === WizardStepsSend.SENDING}
 			<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 		{:else if currentStep?.name === WizardStepsSend.SEND}
-			<SolSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
+			<SolSendForm
+				{onBack}
+				{onNext}
+				{onTokensList}
+				{selectedContact}
+				bind:destination
+				bind:amount
+				bind:amountSetToMax
+			>
 				{#snippet cancel()}
 					<ButtonBack onclick={back} />
 				{/snippet}

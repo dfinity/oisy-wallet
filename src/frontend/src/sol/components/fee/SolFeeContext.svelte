@@ -2,7 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, type Snippet, untrack } from 'svelte';
 	import { get } from 'svelte/store';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		checkIfAccountExists,
@@ -20,11 +20,14 @@
 	interface Props {
 		token: Token;
 		observe: boolean;
+		// Keeps the price already quoted for this token instead of refreshing it: an amount set by
+		// "Max" holds back exactly the fee it comes to, and the transaction is signed with it.
+		holdFee?: boolean;
 		destination?: string;
 		children: Snippet;
 	}
 
-	let { token, observe, destination = '', children }: Props = $props();
+	let { token, observe, holdFee = false, destination = '', children }: Props = $props();
 
 	const { feeStore, prioritizationFeeStore, ataFeeStore }: FeeContext =
 		getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
@@ -32,6 +35,11 @@
 	// Bumped on every token change and on destroy, so an estimate still in flight from before can
 	// tell that the stores are no longer its to write.
 	let generation = 0;
+
+	// The token the price in `prioritizationFeeStore` was estimated for: holding the fee keeps that
+	// price, but a token that has none of its own yet still takes its first one. Kept by id, since
+	// the same token arriving as a new object starts a new generation.
+	let pricedTokenId: TokenId | undefined;
 
 	// The fee is the price over the limit the transaction is signed with, which is larger when the
 	// send opens the recipient's token account, so it is quoted again whenever either changes.
@@ -69,9 +77,12 @@
 		try {
 			const computeUnitPrice = await estimatePriorityFee({ network: solNetwork, addresses });
 
-			if (id !== generation) {
+			// Read once the estimate is back, since "Max" can be pressed while it is in flight.
+			if (id !== generation || (holdFee && pricedTokenId === token.id)) {
 				return;
 			}
+
+			pricedTokenId = token.id;
 
 			quoteFee({ computeUnitPrice, createsTokenAccount: nonNullish(get(ataFeeStore)) });
 			prioritizationFeeStore.setFee(computeUnitPrice);

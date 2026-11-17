@@ -453,7 +453,11 @@
 </script>
 
 {#if nonNullish($sourceToken)}
-	<SolFeeContext observe={currentStep?.name !== WizardStepsSwap.SWAPPING} token={$sourceToken}>
+	<SolFeeContext
+		holdFee={$amountSetToMax}
+		observe={currentStep?.name !== WizardStepsSwap.SWAPPING}
+		token={$sourceToken}
+	>
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSwap.SWAP}
 				<SwapSolForm

@@ -264,7 +264,7 @@ describe('SwapSolWizard', () => {
 			vi.useRealTimers();
 		});
 
-		const createExecutionContext = () => {
+		const createExecutionContext = ({ amountSetToMax = false } = {}) => {
 			const executionSwapAmountsStore = initSwapAmountsStore();
 			executionSwapAmountsStore.setSwaps({
 				swaps: nearIntentsSwapProviders,
@@ -278,7 +278,7 @@ describe('SwapSolWizard', () => {
 				sourceToken: readable(mockSourceToken),
 				destinationToken: readable(mockDestToken),
 				failedSwapError: writable(undefined),
-				amountSetToMax: writable(false),
+				amountSetToMax: writable(amountSetToMax),
 				lifiMaxFee: writable(undefined),
 				sourceTokenExchangeRate: readable(10),
 				sourceTokenBalance: readable(undefined),
@@ -297,7 +297,7 @@ describe('SwapSolWizard', () => {
 			return ctx;
 		};
 
-		const renderExecution = () => {
+		const renderExecution = ({ amountSetToMax = false } = {}) => {
 			const onClose = vi.fn();
 			const onBack = vi.fn();
 			const onStartTriggerAmount = vi.fn();
@@ -312,7 +312,7 @@ describe('SwapSolWizard', () => {
 					onStartTriggerAmount,
 					onStopTriggerAmount: vi.fn()
 				},
-				context: createExecutionContext()
+				context: createExecutionContext({ amountSetToMax })
 			});
 
 			return { ...result, onClose, onBack, onStartTriggerAmount };
@@ -351,6 +351,25 @@ describe('SwapSolWizard', () => {
 				const { getByText } = renderExecution();
 
 				await vi.advanceTimersByTimeAsync(0);
+
+				await fireEvent.click(getByText(en.swap.text.swap_button));
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(swapServices.fetchNearIntentsSolSwap).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ computeUnitPrice: 1_500n })
+				);
+			});
+
+			// "Max" held the fee back at that price, so the amount and the fee add up to the balance.
+			it('keeps signing with the price "Max" held back while the estimate moves', async () => {
+				vi.mocked(estimatePriorityFee).mockResolvedValueOnce(1_500n).mockResolvedValue(9_000n);
+
+				const { getByText } = renderExecution({ amountSetToMax: true });
+
+				await vi.advanceTimersByTimeAsync(0);
+				await vi.advanceTimersByTimeAsync(5_000);
+
+				expect(estimatePriorityFee).toHaveBeenCalledTimes(2);
 
 				await fireEvent.click(getByText(en.swap.text.swap_button));
 				await vi.runOnlyPendingTimersAsync();
