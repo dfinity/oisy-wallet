@@ -19,6 +19,14 @@ export const LIFI_BTC_FEE_ADDRESS = 'bc1qn2cstnjlvhxf60j3ujeyq0h0rqc7kklap8j94g'
 // The name of LI.FI's own fee among a BTC quote's `feeCosts`, the amount its fee output pays.
 export const LIFI_BTC_FEE_COST_NAME = 'LIFI Fixed Fee';
 
+// Where OISY's rebuild of a LI.FI transaction puts the change: between LI.FI's memo and its fee
+// output, where LI.FI's own PSBT has it.
+export const LIFI_BTC_CHANGE_INDEX = 2;
+
+// Every input's sequence in LI.FI's PSBTs, kept in the rebuild: replaceable, with relative lock-time
+// disabled, which the backend's validator accepts.
+export const LIFI_BTC_SEQUENCE = 0xfffffffd;
+
 // The longest `OP_RETURN` script the backend broadcasts: the opcode and 80 bytes of data with their
 // push opcodes (`MAX_OP_RETURN_SCRIPT_BYTES` in `src/backend/src/bitcoin/tx_validator.rs`).
 export const LIFI_BTC_MAX_MEMO_SCRIPT_BYTES = 83;

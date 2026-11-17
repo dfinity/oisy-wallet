@@ -3,8 +3,10 @@ import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.en
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
+import { BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS } from '$lib/constants/swap.constants';
 import en from '$lib/i18n/en.json';
+import { btcTransactionStatus } from '$lib/rest/blockstream.rest';
 import { fetchLifiStatus } from '$lib/rest/lifi.rest';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import { resetEvmSourceTxObservations } from '$lib/services/evm-source-tx.services';
@@ -40,6 +42,10 @@ vi.mock('$eth/providers/infura.providers', () => ({
 vi.mock('$sol/api/solana.api', () => ({
 	getSignatureStatus: vi.fn(),
 	isBlockhashValid: vi.fn()
+}));
+
+vi.mock('$lib/rest/blockstream.rest', () => ({
+	btcTransactionStatus: vi.fn()
 }));
 
 vi.mock('$lib/rest/lifi.rest', () => ({
@@ -120,6 +126,7 @@ describe('lifi-active-tx.services', () => {
 		resetLifiActiveTxState();
 		resetEvmSourceTxObservations();
 		resetSolSourceTxObservations();
+		activeUserTransactionsServices.resetBtcNeverLandedChecks();
 
 		applySpy.mockResolvedValue(true);
 
@@ -470,6 +477,150 @@ describe('lifi-active-tx.services', () => {
 			await poll([solanaTx()]);
 
 			expect(lastUpdate()).toEqual({ status: { Succeeded: null } });
+		});
+	});
+
+	describe('a BTC source', () => {
+		const txid = 'ab'.repeat(32);
+
+		// BTC → ETH, through NEAR.
+		const btcData: LifiData = {
+			source_token: { BtcNativeMainnet: null },
+			dest_token: { EvmNative: 1n },
+			amount: 1_000_000n
+		};
+
+		const btcTx = () =>
+			buildTx({
+				data: btcData,
+				refs: {
+					[LIFI_EXTERNAL_REF_KEYS.TX_HASH]: txid,
+					[LIFI_EXTERNAL_REF_KEYS.TOOL]: 'near'
+				}
+			});
+
+		let neverLandedSpy: MockInstance;
+
+		beforeEach(() => {
+			vi.mocked(btcTransactionStatus).mockResolvedValue({ confirmed: true });
+			neverLandedSpy = vi
+				.spyOn(activeUserTransactionsServices, 'isBtcTransactionNeverLanded')
+				.mockResolvedValue(false);
+		});
+
+		it('reads its txid on the Bitcoin network, not an EVM receipt, and needs no EVM address', async () => {
+			await pollLifiActiveUserTransactions({
+				identity: mockIdentity,
+				transactions: [btcTx()],
+				userAddress: undefined
+			});
+
+			expect(btcTransactionStatus).toHaveBeenCalledExactlyOnceWith({ txid });
+			expect(infuraProviders).not.toHaveBeenCalled();
+		});
+
+		it('asks LI.FI once the source transaction is confirmed, by its txid and the BTC chain', async () => {
+			await poll([btcTx()]);
+
+			expect(fetchLifiStatus).toHaveBeenCalledExactlyOnceWith({
+				txHash: txid,
+				fromChain: ChainId.BTC,
+				toChain: ChainId.ETH,
+				bridge: 'near'
+			});
+			expect(lastUpdate()).toEqual({ status: { Executing: null } });
+		});
+
+		it('does not read the network again once the source is confirmed', async () => {
+			await poll([btcTx()]);
+			await vi.advanceTimersByTimeAsync(10_000);
+			await poll([btcTx()]);
+
+			expect(btcTransactionStatus).toHaveBeenCalledOnce();
+			expect(fetchLifiStatus).toHaveBeenCalledTimes(2);
+		});
+
+		it('marks a row executing while its transaction is in a mempool, without asking LI.FI', async () => {
+			vi.mocked(btcTransactionStatus).mockResolvedValue({ confirmed: false });
+
+			await poll([btcTx()]);
+
+			expect(fetchLifiStatus).not.toHaveBeenCalled();
+			expect(neverLandedSpy).not.toHaveBeenCalled();
+			expect(lastUpdate()).toEqual({ status: { Executing: null } });
+		});
+
+		it('settles nothing while the network does not know its txid yet', async () => {
+			vi.mocked(btcTransactionStatus).mockResolvedValue(undefined);
+
+			const tx = btcTx();
+
+			await poll([tx]);
+
+			expect(neverLandedSpy).toHaveBeenCalledExactlyOnceWith({
+				id: tx.id,
+				txid,
+				updatedAtNs: tx.updated_at_ns
+			});
+			expect(fetchLifiStatus).not.toHaveBeenCalled();
+			expect(lastUpdate()).toEqual({});
+		});
+
+		it('fails a row whose transaction never reached the network', async () => {
+			vi.mocked(btcTransactionStatus).mockResolvedValue(undefined);
+			neverLandedSpy.mockResolvedValue(true);
+
+			await poll([btcTx()]);
+
+			expect(fetchLifiStatus).not.toHaveBeenCalled();
+			expect(lastUpdate()).toEqual({
+				status: { Failed: null },
+				error: en.send.error.btc_transaction_never_landed
+			});
+		});
+
+		it('starts the run of "not found" answers over once the network has seen the txid', async () => {
+			neverLandedSpy.mockRestore();
+
+			// Past the grace period of its last write.
+			const tx = { ...btcTx(), updated_at_ns: BigInt(now - 2 * 60 * 60 * 1_000) * 1_000_000n };
+
+			vi.mocked(btcTransactionStatus).mockResolvedValue(undefined);
+
+			await poll([tx]);
+
+			await vi.advanceTimersByTimeAsync(60_000);
+			vi.mocked(btcTransactionStatus).mockResolvedValueOnce({ confirmed: false });
+			await poll([tx]);
+
+			expect(lastUpdate()).toEqual({ status: { Executing: null } });
+
+			// Not found again: the first answer of a new run, not the second of the old one.
+			await vi.advanceTimersByTimeAsync(BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS);
+			await poll([tx]);
+
+			expect(lastUpdate()).toEqual({});
+
+			await vi.advanceTimersByTimeAsync(BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS);
+			await poll([tx]);
+
+			expect(lastUpdate()).toEqual({
+				status: { Failed: null },
+				error: en.send.error.btc_transaction_never_landed
+			});
+		});
+
+		it('leaves a row untouched when the lookup fails, and polls it again later', async () => {
+			vi.mocked(btcTransactionStatus).mockRejectedValueOnce(new Error('blockstream down'));
+
+			await poll([btcTx()]);
+
+			expect(applySpy).not.toHaveBeenCalled();
+
+			await vi.advanceTimersByTimeAsync(10_000);
+			await poll([btcTx()]);
+
+			expect(lastUpdate()).toEqual({ status: { Executing: null } });
 		});
 	});
 
