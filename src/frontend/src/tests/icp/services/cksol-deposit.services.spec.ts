@@ -72,7 +72,7 @@ describe('cksol-deposit.services', () => {
 		});
 
 		it('should keep the deposit address of each principal apart', async () => {
-			const otherIdentity = { getPrincipal: () => mockPrincipal2 } as unknown as Identity;
+			const otherIdentity: Identity = { ...mockIdentity, getPrincipal: () => mockPrincipal2 };
 
 			vi.mocked(getDepositAddress).mockResolvedValueOnce(mockSolAddress);
 			vi.mocked(getDepositAddress).mockResolvedValueOnce(mockSolAddress2);
