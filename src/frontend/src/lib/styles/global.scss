@@ -180,6 +180,12 @@ $scroll-fade-size: 1rem;
 	initial-value: 0px;
 }
 
+@property --scroll-fade-active {
+	syntax: '<number>';
+	inherits: false;
+	initial-value: 0;
+}
+
 @keyframes scroll-fade-top {
 	to {
 		--scroll-fade-top: #{$scroll-fade-size};
@@ -190,6 +196,13 @@ $scroll-fade-size: 1rem;
 	from {
 		--scroll-fade-bottom: #{$scroll-fade-size};
 	}
+
+	// Its percentage range becomes inactive without overflow, clearing the mask even when
+	// the top animation retains its last filled value after a list shrinks.
+	from,
+	to {
+		--scroll-fade-active: 1;
+	}
 }
 
 @utility scroll-fade {
@@ -197,8 +210,8 @@ $scroll-fade-size: 1rem;
 		mask-image: linear-gradient(
 			to bottom,
 			transparent,
-			#000 var(--scroll-fade-top),
-			#000 calc(100% - var(--scroll-fade-bottom)),
+			#000 calc(var(--scroll-fade-top) * var(--scroll-fade-active)),
+			#000 calc(100% - var(--scroll-fade-bottom) * var(--scroll-fade-active)),
 			transparent
 		);
 		scroll-padding-block: $scroll-fade-size;

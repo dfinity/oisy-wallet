@@ -377,6 +377,7 @@ the shared core rule, preserving its deprecated-package and `/dist/` import bans
   scroll fades over 16 px, an edge at its end stays sharp, and a list that
   does not scroll shows nothing. The fade follows the scroll position
   (`animation-timeline: scroll(self)`), so reduced motion leaves it as is;
+  the bottom-edge animation enables the mask so it clears when overflow disappears.
   Firefox, without scroll-driven animations, shows the plain list. It also
   sets `scroll-padding-block`, so keyboard focus scrolls a row clear of the
   fade. In the send destination step on phones, the form above the toolbar
