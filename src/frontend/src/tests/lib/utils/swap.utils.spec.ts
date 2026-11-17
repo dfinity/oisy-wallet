@@ -1787,8 +1787,21 @@ describe('swap utils', () => {
 		});
 
 		describe('getReceiveShortcutDetails', () => {
-			const details = (shortcuts: Parameters<typeof getReceiveShortcutDetails>[0]['shortcuts']) =>
-				getReceiveShortcutDetails({ shortcuts, i18n: en, language: Languages.ENGLISH });
+			const details = ({
+				sourceToken = BASE_USDC_TOKEN,
+				otherNetworkProviders,
+				...shortcuts
+			}: Parameters<typeof getReceiveShortcutDetails>[0]['shortcuts'] & {
+				sourceToken?: Token;
+				otherNetworkProviders?: SwapProvider[];
+			}) =>
+				getReceiveShortcutDetails({
+					shortcuts,
+					i18n: en,
+					language: Languages.ENGLISH,
+					sourceToken,
+					otherNetworkProviders
+				});
 
 			const usdcOn = (network: Network): Token => ({
 				...BASE_USDC_TOKEN,
@@ -1839,23 +1852,66 @@ describe('swap utils', () => {
 				);
 			});
 
-			it('should name the one network, and the token there when it goes by another symbol', () => {
+			describe('with one token on another network, what taking it does', () => {
 				const ckBtc = { ...mockValidIcToken, symbol: 'ckBTC', groupData: BTC_TOKEN_GROUP };
+				const ckUsdc = { ...mockValidIcToken, symbol: 'ckUSDC', groupData: USDC_TOKEN_GROUP };
 
-				expect(
-					details({ otherNetwork: { group: BTC_TOKEN_GROUP, tokens: [ckBtc] } }).otherNetwork
-				).toBe(
-					replacePlaceholders(en.swap.text.receive_shortcut_one_network_as, {
-						$network: ICP_NETWORK.name,
-						$symbol: 'ckBTC'
-					})
-				);
+				it('should convert to the ck twin through Chain Fusion', () => {
+					expect(
+						details({
+							otherNetwork: { group: BTC_TOKEN_GROUP, tokens: [ckBtc] },
+							sourceToken: BTC_MAINNET_TOKEN,
+							otherNetworkProviders: [SwapProvider.CHAIN_FUSION]
+						}).otherNetwork
+					).toBe(
+						replacePlaceholders(en.swap.text.receive_shortcut_convert, {
+							$from: 'BTC',
+							$to: 'ckBTC'
+						})
+					);
+				});
 
-				expect(
-					details({
-						otherNetwork: { group: USDC_TOKEN_GROUP, tokens: [usdcOn(SOLANA_MAINNET_NETWORK)] }
-					}).otherNetwork
-				).toBe(SOLANA_MAINNET_NETWORK.name);
+				it('should convert a ck token back to its twin, before 1Sec', () => {
+					expect(
+						details({
+							otherNetwork: { group: USDC_TOKEN_GROUP, tokens: [ETHEREUM_USDC_TOKEN] },
+							sourceToken: ckUsdc,
+							otherNetworkProviders: [SwapProvider.ONE_SEC, SwapProvider.CHAIN_FUSION]
+						}).otherNetwork
+					).toBe(
+						replacePlaceholders(en.swap.text.receive_shortcut_convert_back, {
+							$from: 'ckUSDC',
+							$to: 'USDC'
+						})
+					);
+				});
+
+				it('should bridge back through 1Sec', () => {
+					expect(
+						details({
+							otherNetwork: { group: USDC_TOKEN_GROUP, tokens: [ckUsdc] },
+							otherNetworkProviders: [SwapProvider.ONE_SEC]
+						}).otherNetwork
+					).toBe(
+						replacePlaceholders(en.swap.text.receive_shortcut_bridge_back, {
+							$symbol: 'ckUSDC',
+							$network: ICP_NETWORK.name
+						})
+					);
+				});
+
+				it('should move it otherwise', () => {
+					expect(
+						details({
+							otherNetwork: { group: USDC_TOKEN_GROUP, tokens: [usdcOn(SOLANA_MAINNET_NETWORK)] }
+						}).otherNetwork
+					).toBe(
+						replacePlaceholders(en.swap.text.receive_shortcut_move, {
+							$symbol: 'USDC',
+							$network: SOLANA_MAINNET_NETWORK.name
+						})
+					);
+				});
 			});
 
 			it.each([

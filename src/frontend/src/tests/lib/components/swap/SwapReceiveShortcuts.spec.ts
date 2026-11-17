@@ -31,11 +31,13 @@ import * as networksDerived from '$lib/derived/networks.derived';
 import * as swapDerived from '$lib/derived/swap.derived';
 import * as tokensDerived from '$lib/derived/tokens.derived';
 import { trackSwapReceiveShortcut } from '$lib/services/swap-receive-shortcut-analytics.services';
-import type {
-	SwapSupportedTokensData,
-	SwapSupportedTokensInfo
+import {
+	swapSupportedTokensStore,
+	type SwapSupportedTokensData,
+	type SwapSupportedTokensInfo
 } from '$lib/stores/swap-supported-tokens.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import { SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
@@ -297,7 +299,19 @@ describe('SwapReceiveShortcuts', () => {
 	});
 
 	describe('BTC', () => {
-		it('should offer only BTC on another network, naming ckBTC', () => {
+		it('should name ckBTC on Internet Computer, converted by Chain Fusion', () => {
+			swapSupportedTokensStore.set({
+				aggregated: fromBtc,
+				providers: [
+					{
+						key: SwapProvider.CHAIN_FUSION,
+						sourceCategory: 'btc',
+						supportedSourceTokens: undefined,
+						getSupportedDestinations: () => ({ icp: new Set([ckBtc.ledgerCanisterId]) })
+					}
+				]
+			});
+
 			const { getByTestId, queryByTestId } = renderShortcuts({
 				sourceToken: BTC_MAINNET_TOKEN,
 				receiveSupportedData: fromBtc
@@ -308,12 +322,17 @@ describe('SwapReceiveShortcuts', () => {
 
 			expectRow({
 				row: getByTestId(SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK),
-				title: replacePlaceholders(en.swap.text.receive_shortcut_other_network, { $symbol: 'BTC' }),
-				detail: replacePlaceholders(en.swap.text.receive_shortcut_one_network_as, {
-					$network: ICP_NETWORK.name,
-					$symbol: ckBtc.symbol
+				title: replacePlaceholders(en.swap.text.receive_shortcut_token_on_network, {
+					$symbol: ckBtc.symbol,
+					$network: ICP_NETWORK.name
+				}),
+				detail: replacePlaceholders(en.swap.text.receive_shortcut_convert, {
+					$from: BTC_MAINNET_TOKEN.symbol,
+					$to: ckBtc.symbol
 				})
 			});
+
+			swapSupportedTokensStore.reset();
 		});
 
 		it('should set ckBTC in one tap', async () => {

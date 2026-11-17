@@ -790,11 +790,16 @@ export const getListedReceiveShortcuts = ({
 export const getReceiveShortcutDetails = ({
 	shortcuts: { sameNetwork, otherNetwork, anyToken },
 	i18n,
-	language
+	language,
+	sourceToken,
+	otherNetworkProviders = []
 }: {
 	shortcuts: SwapReceiveShortcuts;
 	i18n: I18n;
 	language: Languages;
+	sourceToken: Token;
+	// The providers that list the one token "<symbol> on another network" reaches, when it reaches one.
+	otherNetworkProviders?: SwapProvider[];
 }): { sameNetwork?: string; otherNetwork?: string; anyToken?: string } => {
 	const preview = ({ items, max }: { items: string[]; max: number }): string =>
 		formatList({
@@ -816,16 +821,30 @@ export const getReceiveShortcutDetails = ({
 		}
 
 		const {
-			group: { symbol },
 			tokens: [first, ...rest]
 		} = otherNetwork;
 
-		// A single token there that goes by another name, ckBTC for BTC, is named.
-		if (rest.length === 0 && getTokenDisplaySymbol(first) !== symbol) {
-			return replacePlaceholders(i18n.swap.text.receive_shortcut_one_network_as, {
-				$network: first.network.name,
-				$symbol: getTokenDisplaySymbol(first)
-			});
+		// The one token there: what taking it does, by the route behind it.
+		if (rest.length === 0) {
+			const symbol = getTokenDisplaySymbol(first);
+			const network = first.network.name;
+
+			if (otherNetworkProviders.includes(SwapProvider.CHAIN_FUSION)) {
+				// From a ck token, its twin is where it came from.
+				return replacePlaceholders(
+					isIcToken(sourceToken)
+						? i18n.swap.text.receive_shortcut_convert_back
+						: i18n.swap.text.receive_shortcut_convert,
+					{ $from: getTokenDisplaySymbol(sourceToken), $to: symbol }
+				);
+			}
+
+			return replacePlaceholders(
+				otherNetworkProviders.includes(SwapProvider.ONE_SEC)
+					? i18n.swap.text.receive_shortcut_bridge_back
+					: i18n.swap.text.receive_shortcut_move,
+				{ $symbol: symbol, $network: network }
+			);
 		}
 
 		// One name per network, should a group ever have two tokens on one.

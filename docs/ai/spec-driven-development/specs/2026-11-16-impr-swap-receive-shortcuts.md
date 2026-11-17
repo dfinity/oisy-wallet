@@ -110,10 +110,12 @@ token it would not.
    own order, then "and _N_ more". Hidden when there are none: Bitcoin and XRP have one token each.
 2. **_Symbol_ on another network**, where _symbol_ is the group's symbol (ckUSDC as pay token reads
    "USDC on another network"). These are the tokens in the set in the pay token's group, on other
-   networks. The second line names up to two networks, in chain order, then "and _N_ more". With a
-   single network it reads "_Network_, as _symbol_" when the token there has another symbol
-   ("Internet Computer, as ckBTC"), or the network name alone. Hidden when the pay token has no
-   group or no group member is in the set.
+   networks. The second line names up to two networks, in chain order, then "and _N_ more".
+   _Changed 2026-11-17 on review:_ with a single token there, the row names it ("ckBTC on Internet
+   Computer", "USDT on Ethereum") with its logo and a network badge, and the second line says the
+   action by the route's provider: "Convert BTC to ckBTC" / "Convert ckUSDT back to USDT" (Chain
+   Fusion, preferred), "Bridge ICP back to Internet Computer" (1Sec), else "Move USDC to Solana".
+   No "1:1": fees apply. Hidden when the pay token has no group or no group member is in the set.
 3. **Any token**. The second line reads "_N_ tokens on _M_ networks". Hidden when the first two
    shortcuts already cover every token in the set (that is the case for BTC with NEAR Intents
    off).
@@ -126,7 +128,7 @@ Internet Computer, then the rest A to Z.
 | -------------------- | ---------------------------------------------------------------------------- |
 | USDC on Base         | Another token on Base · USDC on another network (5 networks) · Any token     |
 | A token only on Base | Another token on Base · Any token                                            |
-| BTC                  | BTC on another network (Internet Computer, as ckBTC) · Any token             |
+| BTC                  | ckBTC on Internet Computer (Convert BTC to ckBTC) · Any token                |
 | ckUSDC               | Another token on Internet Computer · USDC on another network (3) · Any token |
 | ETH on Ethereum      | Another token on Ethereum · ETH on another network (3) · Any token           |
 
@@ -173,7 +175,11 @@ as the brand's "Bitcoin, Ethereum, Internet Computer, and more" does; the wirefr
 | ----------------------------------- | ------------------------------------ | ----------------------------------------- |
 | Shortcut 1                          | Another token on $network            | `receive_shortcut_same_network`           |
 | Shortcut 2                          | $symbol on another network           | `receive_shortcut_other_network`          |
-| Shortcut 2, one network, other name | $network, as $symbol                 | `receive_shortcut_one_network_as`         |
+| Shortcut 2, one token, title        | $symbol on $network                  | `receive_shortcut_token_on_network`       |
+| Shortcut 2, one token, Chain Fusion | Convert $from to $to                 | `receive_shortcut_convert`                |
+| Same, from a ck token               | Convert $from back to $to            | `receive_shortcut_convert_back`           |
+| Shortcut 2, one token, 1Sec         | Bridge $symbol back to $network      | `receive_shortcut_bridge_back`            |
+| Shortcut 2, one token, otherwise    | Move $symbol to $network             | `receive_shortcut_move`                   |
 | Shortcut 3                          | Any token                            | `receive_shortcut_any_token`              |
 | Shortcut 3, second line             | $tokens tokens on $networks networks | `receive_shortcut_any_token_count`        |
 | Shortcut 3, second line, 1 network  | $tokens tokens on 1 network          | `receive_shortcut_any_token_count_one`    |

@@ -1159,7 +1159,11 @@ interface I18nSwap {
 		cross_chain_networks_info: string;
 		receive_shortcut_same_network: string;
 		receive_shortcut_other_network: string;
-		receive_shortcut_one_network_as: string;
+		receive_shortcut_token_on_network: string;
+		receive_shortcut_convert: string;
+		receive_shortcut_convert_back: string;
+		receive_shortcut_bridge_back: string;
+		receive_shortcut_move: string;
 		receive_shortcut_any_token: string;
 		receive_shortcut_any_token_count: string;
 		receive_shortcut_any_token_count_one: string;

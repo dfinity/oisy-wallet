@@ -30,9 +30,11 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SwapReceiveShortcutsContext } from '$lib/stores/swap-receive-shortcuts.store';
+	import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getSwapProvidersListing } from '$lib/utils/swap-tokens-filter.utils';
 	import { getListedReceiveShortcuts, getReceiveShortcutDetails } from '$lib/utils/swap.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
@@ -92,12 +94,29 @@
 		}
 	});
 
+	// With one token on another network, the row names it, and says what the route does.
+	let onlyOtherNetworkToken = $derived(
+		otherNetwork?.tokens.length === 1 ? otherNetwork.tokens[0] : undefined
+	);
+
+	let otherNetworkProviders = $derived(
+		nonNullish(onlyOtherNetworkToken) && nonNullish($swapSupportedTokensStore)
+			? getSwapProvidersListing({
+					sourceToken,
+					destinationToken: onlyOtherNetworkToken,
+					providers: $swapSupportedTokensStore.providers
+				})
+			: []
+	);
+
 	let details = $derived(
 		nonNullish(listed)
 			? getReceiveShortcutDetails({
 					shortcuts: listed.shortcuts,
 					i18n: $i18n,
-					language: $currentLanguage
+					language: $currentLanguage,
+					sourceToken,
+					otherNetworkProviders
 				})
 			: {}
 	);
@@ -230,7 +249,14 @@ that stays on that network. -->
 {/snippet}
 
 {#snippet otherNetworkIcon()}
-	{#if nonNullish(otherNetwork?.group.icon)}
+	{#if nonNullish(onlyOtherNetworkToken)}
+		<TokenLogo
+			badge={{ type: 'network' }}
+			color="white"
+			data={onlyOtherNetworkToken}
+			logoSize="sm"
+		/>
+	{:else if nonNullish(otherNetwork?.group.icon)}
 		<Logo color="white" size="sm" src={otherNetwork.group.icon} />
 	{:else}
 		<TokenLogo color="white" data={sourceToken} logoSize="sm" />
@@ -268,9 +294,14 @@ that stays on that network. -->
 				{#if nonNullish(otherNetwork)}
 					{@render row({
 						testId: SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK,
-						title: replacePlaceholders($i18n.swap.text.receive_shortcut_other_network, {
-							$symbol: otherNetwork.group.symbol
-						}),
+						title: nonNullish(onlyOtherNetworkToken)
+							? replacePlaceholders($i18n.swap.text.receive_shortcut_token_on_network, {
+									$symbol: getTokenDisplaySymbol(onlyOtherNetworkToken),
+									$network: onlyOtherNetworkToken.network.name
+								})
+							: replacePlaceholders($i18n.swap.text.receive_shortcut_other_network, {
+									$symbol: otherNetwork.group.symbol
+								}),
 						detail: details.otherNetwork,
 						icon: otherNetworkIcon,
 						onclick: onOtherNetwork
