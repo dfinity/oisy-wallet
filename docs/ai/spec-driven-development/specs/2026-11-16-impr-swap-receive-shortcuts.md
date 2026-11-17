@@ -278,7 +278,8 @@ Pointers, not prescriptions; the implementer decides the shape.
 - [ ] `swap_receive_shortcut` fires once per tap with the right modifier, and carries no amount.
 - [ ] Copy matches the table; no em dashes.
 - [ ] Looks right at 375 px and in the desktop modal, in light and dark. The longest title
-      ("Another token on Internet Computer") wraps to two lines at 375 px without breaking the row.
+      ("Another token on Internet Computer") keeps to one line at 375 px and truncates (changed
+      2026-11-17 on review; it first wrapped to two lines).
 - [ ] `PRODUCT.md` describes the behaviour, including what it does not do.
 
 ## Decisions

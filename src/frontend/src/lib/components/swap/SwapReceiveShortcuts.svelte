@@ -204,10 +204,10 @@
 		>
 			<span class="flex shrink-0" aria-hidden="true">{@render icon()}</span>
 			<span class="flex min-w-0 flex-auto flex-col">
-				<!-- Both lines wrap rather than truncate: at 375 px "Another token on Internet Computer"
-				takes two, and a cut preview would lose its "and N more". `text-pretty` keeps a last
-				word from standing alone ("1 / more"). -->
-				<span class="text-base font-bold text-pretty text-primary">{title}</span>
+				<!-- The title keeps to one line and truncates ("Another token on Internet Computer" at
+				375 px); the icon's badge still names the network. The second line wraps, so a preview
+				keeps its "and N more"; `text-pretty` keeps a last word from standing alone. -->
+				<span class="truncate text-base font-bold text-primary">{title}</span>
 				<span class="pt-0.5 text-sm text-pretty text-tertiary">{detail}</span>
 			</span>
 			<span class="flex shrink-0 text-tertiary" aria-hidden="true">
