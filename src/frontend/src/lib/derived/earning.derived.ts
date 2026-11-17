@@ -1,9 +1,11 @@
 import { goto } from '$app/navigation';
+import { EARNING_ENABLED } from '$env/earning';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import {
 	enabledHarvestAutopilotsUsdBalance,
 	harvestAutopilots
 } from '$eth/derived/harvest-autopilots.derived';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { EARNING_TOP_RATE_MIN_APY } from '$lib/constants/earning.constants';
 import { LIQUIDIUM_PROVIDER_ID } from '$lib/constants/liquidium.constants';
@@ -20,6 +22,7 @@ import { tokens } from '$lib/derived/tokens.derived';
 import { earningProviders } from '$lib/providers/earning.providers';
 import type { EarningTopRate } from '$lib/types/earning';
 import type { EarningData, EarningProviderData } from '$lib/types/earning-provider';
+import type { TokenId } from '$lib/types/token';
 import { liquidiumMarketToken, liquidiumSupplyUrl } from '$lib/utils/liquidium.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -124,14 +127,17 @@ const liquidiumTopRates: Readable<Omit<EarningTopRate, 'earningPotentialUsd'>[]>
 			(acc, { poolId, asset, chain, supplyApy }) => {
 				const id = `${LIQUIDIUM_PROVIDER_ID}-${poolId}`;
 
-				if (acc.some((topRate) => topRate.id === id)) {
-					return acc;
-				}
-
 				const token = liquidiumMarketToken({ chain, asset, tokens: $tokens });
 
 				if (isNullish(token)) {
 					return acc;
+				}
+
+				// A further rail of a pool already listed only adds the token it is entered with.
+				if (acc.some((topRate) => topRate.id === id)) {
+					return acc.map((topRate) =>
+						topRate.id === id ? { ...topRate, tokenIds: [...topRate.tokenIds, token.id] } : topRate
+					);
 				}
 
 				return [
@@ -140,6 +146,7 @@ const liquidiumTopRates: Readable<Omit<EarningTopRate, 'earningPotentialUsd'>[]>
 						id,
 						providerId: LIQUIDIUM_PROVIDER_ID,
 						token,
+						tokenIds: [token.id],
 						symbol: asset,
 						networkIcons: $liquidiumAssetNetworkIcons[asset] ?? [],
 						networkNames: $liquidiumAssetNetworkNames[asset] ?? [],
@@ -156,8 +163,8 @@ const liquidiumTopRates: Readable<Omit<EarningTopRate, 'earningPotentialUsd'>[]>
 );
 
 const harvestAutopilotTopRates: Readable<Omit<EarningTopRate, 'earningPotentialUsd'>[]> = derived(
-	[harvestAutopilots],
-	([$harvestAutopilots]) =>
+	[harvestAutopilots, tokens],
+	([$harvestAutopilots, $tokens]) =>
 		$harvestAutopilots.reduce<Omit<EarningTopRate, 'earningPotentialUsd'>[]>(
 			(acc, { token, apy }) => {
 				const apyNumber = Number(apy);
@@ -168,10 +175,18 @@ const harvestAutopilotTopRates: Readable<Omit<EarningTopRate, 'earningPotentialU
 
 				const {
 					address,
+					assetAddress,
 					assetSymbol,
 					assetIcon,
-					network: { icon, name }
+					network: { id: networkId, icon, name }
 				} = token;
+
+				const assetToken = $tokens.find(
+					(candidate) =>
+						candidate.network.id === networkId &&
+						isTokenErc20(candidate) &&
+						candidate.address.toLowerCase() === assetAddress.toLowerCase()
+				);
 
 				return [
 					...acc,
@@ -180,6 +195,7 @@ const harvestAutopilotTopRates: Readable<Omit<EarningTopRate, 'earningPotentialU
 						providerId: HARVEST_AUTOPILOT_PROVIDER_ID,
 						// The asset's logo rather than the vault's, as the Earning tab shows it.
 						token: { ...token, icon: assetIcon ?? token.icon },
+						tokenIds: nonNullish(assetToken) ? [assetToken.id] : [],
 						symbol: assetSymbol,
 						networkIcons: nonNullish(icon) ? [icon] : [],
 						networkNames: [name],
@@ -205,4 +221,17 @@ export const earningTopRates: Readable<EarningTopRate[]> = derived(
 				...topRate,
 				earningPotentialUsd: ($earningUninvestedUsd * topRate.apy) / 100
 			}))
+);
+
+// The best top rate for each token it can be entered with, for the tag beside a token in the Tokens
+// list. Empty while the Earn page it opens is turned off.
+export const earningTopRateApyByTokenId: Readable<Map<TokenId, number>> = derived(
+	[earningTopRates],
+	([$earningTopRates]) =>
+		EARNING_ENABLED
+			? $earningTopRates.reduce((acc, { tokenIds, apy }) => {
+					tokenIds.forEach((tokenId) => acc.set(tokenId, Math.max(apy, acc.get(tokenId) ?? 0)));
+					return acc;
+				}, new Map<TokenId, number>())
+			: new Map()
 );
