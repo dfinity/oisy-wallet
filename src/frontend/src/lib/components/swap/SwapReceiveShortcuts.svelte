@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
+	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import IconChevronRight from '$lib/components/icons/lucide/IconChevronRight.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -198,8 +199,32 @@
 	</li>
 {/snippet}
 
+{#snippet iconDisc(icon: Snippet)}
+	<span
+		style={`width: ${logoSizes.sm}; height: ${logoSizes.sm}`}
+		class="flex items-center justify-center rounded-full bg-tertiary text-primary"
+	>
+		{@render icon()}
+	</span>
+{/snippet}
+
+{#snippet swapIcon()}
+	<IconCkConvert size="20" />
+{/snippet}
+
+{#snippet searchIcon()}
+	<IconSearch />
+{/snippet}
+
+<!-- The Swap button's icon, badged with the network as a token logo is, so the row reads as a swap
+that stays on that network. -->
 {#snippet sameNetworkIcon()}
-	<NetworkLogo color="white" network={sourceToken.network} size="sm" transparent />
+	<span class="grid">
+		<span class="col-start-1 row-start-1">{@render iconDisc(swapIcon)}</span>
+		<span class="col-start-1 row-start-1 translate-x-1 place-self-end">
+			<NetworkLogo color="white" network={sourceToken.network} />
+		</span>
+	</span>
 {/snippet}
 
 {#snippet otherNetworkIcon()}
@@ -211,12 +236,7 @@
 {/snippet}
 
 {#snippet anyTokenIcon()}
-	<span
-		style={`width: ${logoSizes.sm}; height: ${logoSizes.sm}`}
-		class="flex items-center justify-center rounded-full bg-tertiary text-primary"
-	>
-		<IconSearch />
-	</span>
+	{@render iconDisc(searchIcon)}
 {/snippet}
 
 <div bind:this={root}>
