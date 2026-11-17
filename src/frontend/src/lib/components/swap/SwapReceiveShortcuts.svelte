@@ -229,7 +229,7 @@
 			</div>
 
 			<!-- `role="list"`: Safari drops the semantics of a list without bullets. -->
-			<ul class="flex flex-col gap-2" aria-labelledby={titleId} role="list">
+			<ul class="flex list-none flex-col gap-2" aria-labelledby={titleId} role="list">
 				{#if nonNullish(sameNetwork)}
 					{@render row({
 						testId: SWAP_RECEIVE_SHORTCUT_SAME_NETWORK,

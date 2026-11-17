@@ -418,7 +418,11 @@
 				</TokenInput>
 			</div>
 
-			<SwapSwitchTokensButton disabled={isSwitchTokensButtonDisabled()} {onTokensSwitch} />
+			<!-- A line at the receive card's top edge, which the button centres on: the shortcuts make
+			that card much taller than the pay card, and the middle of both would put it on them. -->
+			<div class="relative">
+				<SwapSwitchTokensButton disabled={isSwitchTokensButtonDisabled()} {onTokensSwitch} />
+			</div>
 
 			<div bind:this={receiveArea} class="mb-2">
 				{#if nonNullish(receiveShortcuts) && nonNullish($sourceToken) && isNullish($destinationToken)}
