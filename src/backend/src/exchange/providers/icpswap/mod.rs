@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use futures::future::join_all;
 use ic_cdk::api::time;
 use ic_cdk_management_canister_outcalls::HttpHeader;
@@ -6,9 +8,11 @@ use serde_json::from_slice;
 use shared::types::{exchange::ExchangeData, token_id::TokenId};
 
 use crate::{
-    exchange::supplemental::{SupplementalPriceProvider, SupplementalPricesFuture},
+    exchange::{
+        outcall::{get_prices, OutcallMode},
+        supplemental::{SupplementalPriceProvider, SupplementalPricesFuture},
+    },
     types::storable::StoredTokenId,
-    utils::http_outcall,
 };
 
 const DEFAULT_BASE_URL: &str = "https://api.icpswap.com";
@@ -78,22 +82,22 @@ fn parse_icpswap_body(body: &[u8]) -> Option<ExchangeData> {
 #[derive(Debug, Clone)]
 pub(crate) struct IcpSwapProvider {
     base_url: String,
-    replicated: bool,
+    mode: OutcallMode,
 }
 
 impl Default for IcpSwapProvider {
     fn default() -> Self {
         Self {
             base_url: DEFAULT_BASE_URL.to_string(),
-            replicated: false,
+            mode: OutcallMode::OneNode,
         }
     }
 }
 
 impl IcpSwapProvider {
-    pub(crate) fn new(replicated: bool) -> Self {
+    pub(crate) fn new(mode: OutcallMode) -> Self {
         Self {
-            replicated,
+            mode,
             ..Self::default()
         }
     }
@@ -113,18 +117,24 @@ impl IcpSwapProvider {
             self.base_url.trim_end_matches('/')
         );
 
-        let response = http_outcall::get(
+        let mut prices = get_prices(
+            self.mode,
+            "ICPSwap",
             &url,
             vec![HttpHeader {
                 name: "Accept".to_string(),
                 value: "application/json".to_string(),
             }],
             MAX_RESPONSE_BYTES,
-            self.replicated,
+            |body| {
+                Ok(parse_icpswap_body(body)
+                    .map(|data| HashMap::from([(ledger_text.to_string(), data)]))
+                    .unwrap_or_default())
+            },
         )
         .await?;
 
-        Ok(parse_icpswap_body(&response.body))
+        Ok(prices.remove(ledger_text))
     }
 }
 

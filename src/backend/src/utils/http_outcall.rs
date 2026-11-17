@@ -1,8 +1,9 @@
 use candid::Nat;
 use ic_cdk::query;
 use ic_cdk_management_canister_outcalls::{
-    transform_context_from_query, HttpHeader, HttpMethod, HttpRequest, HttpRequestArgs,
-    HttpRequestResult, TransformArgs, TransformContext,
+    transform_context_from_query, FlexibleHttpRequest, FlexibleHttpRequestArgs,
+    FlexibleHttpRequestResult, HttpHeader, HttpMethod, HttpRequest, HttpRequestArgs,
+    HttpRequestResult, ReplicationCounts, TransformArgs, TransformContext,
 };
 
 const USER_AGENT: &str = "OisyWalletBackend";
@@ -69,6 +70,34 @@ fn build_get_request(
     request
 }
 
+/// Builds a flexible GET that `nodes` nodes send, waiting for all of their answers.
+///
+/// The fewest and the most answers are both `nodes`: the subnet hands back the result as soon as
+/// it has the fewest answers asked for, so a lower number could leave answers out.
+fn build_flexible_get_request(
+    url: &str,
+    headers: Vec<HttpHeader>,
+    max_response_bytes: u64,
+    nodes: u32,
+    transform: Option<TransformContext>,
+) -> FlexibleHttpRequestArgs {
+    let request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
+
+    FlexibleHttpRequestArgs {
+        url: request.url,
+        max_response_bytes: request.max_response_bytes,
+        method: request.method,
+        headers: request.headers,
+        body: request.body,
+        transform,
+        replication: Some(ReplicationCounts {
+            min_responses: nodes,
+            max_responses: nodes,
+            total_requests: nodes,
+        }),
+    }
+}
+
 /// Returns the response unchanged if its status is in the 2xx range,
 /// otherwise returns an error containing the status code.
 fn validate_response(response: HttpRequestResult) -> Result<HttpRequestResult, String> {
@@ -128,6 +157,37 @@ pub(crate) async fn get(
         Some(transform),
     ))
     .await
+}
+
+/// Performs an HTTP GET outcall that `nodes` nodes send, and returns every node's answer.
+///
+/// The subnet does not compare the answers; that is the caller's job. The outcall waits for all
+/// `nodes` answers, so a node that does not answer fails the whole outcall. Each answer is checked
+/// like [`get`]'s, so an answer outside the 2xx range comes back as an `Err` next to the others.
+///
+/// `nodes` must be at least 1 and at most the subnet's node count
+/// (`ic_cdk::api::subnet_self_node_count`), or the management canister rejects the outcall.
+/// [`http_request_transform`] runs on each node's answer.
+pub(crate) async fn get_from_nodes(
+    url: &str,
+    headers: Vec<HttpHeader>,
+    max_response_bytes: u64,
+    nodes: u32,
+) -> Result<Vec<Result<HttpRequestResult, String>>, String> {
+    let transform = transform_context_from_query("http_request_transform".to_string(), vec![]);
+    let request =
+        build_flexible_get_request(url, headers, max_response_bytes, nodes, Some(transform));
+
+    match FlexibleHttpRequest::from_args(request).send().await {
+        Ok(FlexibleHttpRequestResult::Ok(responses)) => {
+            Ok(responses.into_iter().map(validate_response).collect())
+        }
+        Ok(FlexibleHttpRequestResult::Err(err)) => Err(format!(
+            "HTTP request to {nodes} nodes failed: {:?} {}",
+            err.global_error, err.message
+        )),
+        Err(err) => Err(format!("HTTP request failed: {err}")),
+    }
 }
 
 /// Performs an HTTP POST outcall with a JSON body.
@@ -199,11 +259,14 @@ pub(crate) async fn post(
 mod tests {
     use candid::{Func, Nat, Principal};
     use ic_cdk_management_canister_outcalls::{
-        HttpHeader, HttpMethod, HttpRequestResult, TransformContext, TransformFunc,
+        HttpHeader, HttpMethod, HttpRequestResult, ReplicationCounts, TransformContext,
+        TransformFunc,
     };
     use pretty_assertions::assert_eq;
 
-    use super::{build_get_request, build_request, validate_response, USER_AGENT};
+    use super::{
+        build_flexible_get_request, build_get_request, build_request, validate_response, USER_AGENT,
+    };
 
     fn mock_transform_context() -> TransformContext {
         TransformContext {
@@ -354,6 +417,47 @@ mod tests {
             extra,
             4096,
             true,
+            Some(transform.clone()),
+        );
+
+        assert_eq!(request.url, "https://example.com/api");
+        assert!(matches!(request.method, HttpMethod::GET));
+        assert_eq!(request.body, None);
+        assert_eq!(request.max_response_bytes, Some(4096));
+        assert_eq!(request.transform, Some(transform));
+        assert_eq!(request.headers.len(), 2);
+        assert_eq!(request.headers[0].name, "User-Agent");
+        assert_eq!(request.headers[0].value, USER_AGENT);
+        assert_eq!(request.headers[1].name, "Authorization");
+        assert_eq!(request.headers[1].value, "Bearer token");
+    }
+
+    #[test]
+    fn test_build_flexible_get_request_waits_for_every_node_asked() {
+        let request = build_flexible_get_request("https://example.com", vec![], 1024, 3, None);
+
+        assert_eq!(
+            request.replication,
+            Some(ReplicationCounts {
+                min_responses: 3,
+                max_responses: 3,
+                total_requests: 3,
+            })
+        );
+    }
+
+    #[test]
+    fn test_build_flexible_get_request_preserves_request_fields() {
+        let extra = vec![HttpHeader {
+            name: "Authorization".to_string(),
+            value: "Bearer token".to_string(),
+        }];
+        let transform = mock_transform_context();
+        let request = build_flexible_get_request(
+            "https://example.com/api",
+            extra,
+            4096,
+            3,
             Some(transform.clone()),
         );
 

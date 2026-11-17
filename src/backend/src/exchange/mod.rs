@@ -1,4 +1,5 @@
 mod composite;
+mod outcall;
 pub(crate) mod provider;
 mod providers;
 mod supplemental;
@@ -21,9 +22,11 @@ use shared::{
     validate::Validate,
 };
 
+pub(crate) use self::outcall::{check_outcall_nodes, check_price_tolerance};
 use crate::{
     exchange::{
         composite::fetch_all_prices,
+        outcall::{outcall_mode, OutcallMode},
         provider::ExchangePriceProvider,
         providers::{
             coingecko::{is_priceable_token_id, CoinGeckoProvider},
@@ -354,21 +357,19 @@ const ICPSWAP_PROVIDER_ENABLED: bool = false;
 /// To add another provider: implement [`SupplementalPriceProvider`] for a new type (any token
 /// variant you support), place it under `exchange/providers/`, and append `Box::new(...)` here in
 /// priority order (first match wins; later providers only see still-missing tokens).
-fn supplemental_price_providers(replicated: bool) -> Vec<Box<dyn SupplementalPriceProvider>> {
+fn supplemental_price_providers(mode: OutcallMode) -> Vec<Box<dyn SupplementalPriceProvider>> {
     if ICPSWAP_PROVIDER_ENABLED {
-        vec![Box::new(IcpSwapProvider::new(replicated))]
+        vec![Box::new(IcpSwapProvider::new(mode))]
     } else {
         Vec::new()
     }
 }
 
-/// Whether exchange-rate HTTP outcalls are sent *replicated* (through consensus, every replica
-/// issues the request) or *non-replicated* (a single replica handles it).
-///
-/// Replicated only when `exchange_rate_replicated` is explicitly `Some(true)`; `None` (the
-/// default) and `Some(false)` both mean non-replicated.
-pub(crate) fn is_exchange_rate_replicated() -> bool {
-    with_api_keys(|keys| keys.exchange_rate_replicated == Some(true))
+/// How exchange-rate HTTP outcalls ask the nodes on this subnet, or why no outcall could reach a
+/// majority here (see [`outcall_mode`]).
+fn exchange_rate_outcall_mode() -> Result<OutcallMode, String> {
+    let subnet_nodes = ic_cdk::api::subnet_self_node_count();
+    with_api_keys(|keys| outcall_mode(keys, subnet_nodes))
 }
 
 /// Returns whether the backend will actually issue exchange-rate refresh outcalls.
@@ -419,7 +420,13 @@ pub(crate) async fn fetch_and_update_prices(
         return Err(ExchangeError::Disabled);
     }
 
-    let replicated = is_exchange_rate_replicated();
+    let mode = match exchange_rate_outcall_mode() {
+        Ok(mode) => mode,
+        Err(reason) => {
+            ic_cdk::println!("Exchange rate refresh skipped, prices kept: {reason}");
+            return Ok(());
+        }
+    };
 
     // The CoinGecko API key is only required when CoinGecko actually runs. When the provider is
     // disabled it is never queried, so we skip the key requirement and build it with a placeholder
@@ -429,8 +436,8 @@ pub(crate) async fn fetch_and_update_prices(
     } else {
         String::new()
     };
-    let provider = CoinGeckoProvider::new(api_key, replicated);
-    let supplementals = supplemental_price_providers(replicated);
+    let provider = CoinGeckoProvider::new(api_key, mode);
+    let supplementals = supplemental_price_providers(mode);
 
     fetch_and_store_prices(
         &provider,
@@ -806,30 +813,6 @@ mod tests {
             ..Default::default()
         };
         assert!(!refresh_enabled_with(&no_key_not_opted_in, false));
-    }
-
-    #[test]
-    fn replicated_only_when_explicitly_opted_in() {
-        // Replicated is opt-in: only an explicit `Some(true)` enables consensus outcalls.
-        crate::state::write_api_keys(shared::types::api_keys::ApiKeys {
-            exchange_rate_replicated: Some(true),
-            ..Default::default()
-        });
-        assert!(is_exchange_rate_replicated());
-
-        // Unset defaults to non-replicated.
-        crate::state::write_api_keys(shared::types::api_keys::ApiKeys {
-            exchange_rate_replicated: None,
-            ..Default::default()
-        });
-        assert!(!is_exchange_rate_replicated());
-
-        // Explicitly non-replicated.
-        crate::state::write_api_keys(shared::types::api_keys::ApiKeys {
-            exchange_rate_replicated: Some(false),
-            ..Default::default()
-        });
-        assert!(!is_exchange_rate_replicated());
     }
 
     fn custom_token(seed: u8) -> StoredTokenId {

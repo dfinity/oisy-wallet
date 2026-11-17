@@ -1,17 +1,21 @@
 use std::collections::BTreeSet;
 
 use ic_cdk::{
-    api::{msg_caller, time},
+    api::{msg_caller, subnet_self_node_count, time},
     query, update,
 };
-use shared::types::{exchange::ExchangeRate, token_id::TokenId};
+use shared::types::{
+    exchange::ExchangeRate,
+    result_types::{SetExchangeRateOutcallNodesResult, SetExchangeRatePriceToleranceResult},
+    token_id::TokenId,
+};
 
 use crate::{
     exchange::{
-        fetch_and_update_prices, is_exchange_rate_refresh_enabled, note_rate_request,
-        priceable_tokens_for_caller, queue_for_next_refresh, record_token_activity,
-        release_refresh_lock, snapshot_and_stale, take_queued_for_refresh,
-        try_acquire_refresh_lock,
+        check_outcall_nodes, check_price_tolerance, fetch_and_update_prices,
+        is_exchange_rate_refresh_enabled, note_rate_request, priceable_tokens_for_caller,
+        queue_for_next_refresh, record_token_activity, release_refresh_lock, snapshot_and_stale,
+        take_queued_for_refresh, try_acquire_refresh_lock,
     },
     state::{mutate_api_keys, read_state},
     types::{StoredPrincipal, StoredTokenId},
@@ -148,11 +152,42 @@ pub fn set_exchange_rate_enabled(enabled: bool) {
 /// keys.
 ///
 /// Sets `exchange_rate_replicated` to `Some(replicated)`. `true` sends the outcalls through
-/// consensus (every replica issues the request); `false` sends them non-replicated (a single
-/// replica). See [`crate::exchange::is_exchange_rate_replicated`].
+/// consensus (every replica issues the request); `false` leaves it to
+/// [`set_exchange_rate_outcall_nodes`] how many replicas ask, one when that is unset.
 ///
 /// Restricted to canister controllers only.
 #[update(guard = "caller_is_controller")]
 pub fn set_exchange_rate_replicated(replicated: bool) {
     mutate_api_keys(|keys| keys.exchange_rate_replicated = Some(replicated));
+}
+
+/// Sets how many nodes exchange-rate HTTP outcalls ask while replication is off, or clears the
+/// setting with `None`, which means one node. See
+/// [`shared::types::api_keys::ApiKeys::exchange_rate_outcall_nodes`].
+///
+/// Rejects 0, and any number above twice the subnet's node count minus one: the backend asks at
+/// most every node of the subnet, so a larger number could never reach a majority.
+///
+/// Restricted to canister controllers only.
+#[update(guard = "caller_is_controller")]
+pub fn set_exchange_rate_outcall_nodes(nodes: Option<u32>) -> SetExchangeRateOutcallNodesResult {
+    check_outcall_nodes(nodes, subnet_self_node_count())
+        .map(|()| mutate_api_keys(|keys| keys.exchange_rate_outcall_nodes = nodes))
+        .into()
+}
+
+/// Sets how far apart, in basis points, several nodes' prices for a token may be and still agree,
+/// or clears the setting with `None`, which means 50 (0.5%). See
+/// [`shared::types::api_keys::ApiKeys::exchange_rate_price_tolerance_bps`].
+///
+/// Rejects values above 1,000 basis points (10%).
+///
+/// Restricted to canister controllers only.
+#[update(guard = "caller_is_controller")]
+pub fn set_exchange_rate_price_tolerance_bps(
+    tolerance_bps: Option<u32>,
+) -> SetExchangeRatePriceToleranceResult {
+    check_price_tolerance(tolerance_bps)
+        .map(|()| mutate_api_keys(|keys| keys.exchange_rate_price_tolerance_bps = tolerance_bps))
+        .into()
 }
