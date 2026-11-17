@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import AllEarningOpportunityCardList from '$lib/components/earning/AllEarningOpportunityCardList.svelte';
 	import EarningHeader from '$lib/components/earning/EarningHeader.svelte';
+	import EarningTopRates from '$lib/components/earning/EarningTopRates.svelte';
 	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import {
@@ -26,6 +27,7 @@
 <RewardsEligibilityContext>
 	<div class="flex flex-col gap-6 pb-6">
 		<EarningHeader />
+		<EarningTopRates />
 		<StakeContentSection>
 			{#snippet title()}
 				<h4>{$i18n.earning.text.earning_opportunities}</h4>
