@@ -14,6 +14,10 @@ import {
 	LIQUIDIUM_POOL_ORDER,
 	type LiquidiumHealthLevel
 } from '$lib/constants/liquidium.constants';
+import { AppPath, SOURCE_PARAM, SUPPLY_PARAM } from '$lib/constants/routes.constants';
+import type { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+import type { BalancesData } from '$lib/stores/balances.store';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { Token } from '$lib/types/token';
 import { parseToken } from '$lib/utils/parse.utils';
@@ -101,6 +105,57 @@ export const liquidiumEnabledRailToken = ({
 
 	return nonNullish(token) && enabledTokens.some(({ id }) => id === token.id) ? token : undefined;
 };
+
+// The supply market of `asset` on the network where the user holds the most of it, among the tokens
+// they enabled; undefined when they hold none of it on any network.
+export const liquidiumHeldSupplyMarket = ({
+	markets,
+	asset,
+	enabledTokens,
+	balances
+}: {
+	markets: LiquidiumMarket[];
+	asset: string;
+	enabledTokens: Token[];
+	balances: CertifiedStoreData<BalancesData>;
+}): LiquidiumMarket | undefined => {
+	const held = markets.reduce<{ market: LiquidiumMarket; amount: number } | undefined>(
+		(acc, market) => {
+			if (market.asset !== asset) {
+				return acc;
+			}
+
+			const token = liquidiumEnabledRailToken({
+				chain: market.chain,
+				asset: market.asset,
+				enabledTokens
+			});
+			const balance = nonNullish(token) ? balances?.[token.id]?.data : undefined;
+
+			if (isNullish(token) || isNullish(balance) || balance <= ZERO) {
+				return acc;
+			}
+
+			// Rails of one asset can differ in decimals, so compare whole tokens.
+			const amount = Number(balance) / 10 ** token.decimals;
+
+			return isNullish(acc) || amount > acc.amount ? { market, amount } : acc;
+		},
+		undefined
+	);
+
+	return held?.market;
+};
+
+// Link to the Liquidium page that opens its supply dialog on `asset`.
+export const liquidiumSupplyUrl = ({
+	asset,
+	source
+}: {
+	asset: string;
+	source: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
+}): string =>
+	`${AppPath.ProvidersLiquidium}?${SUPPLY_PARAM}=${encodeURIComponent(asset)}&${SOURCE_PARAM}=${source}`;
 
 // Scaled protocol rate → percentage.
 const rateToPercent = ({ rate, rateDecimals }: { rate: bigint; rateDecimals: bigint }): number =>

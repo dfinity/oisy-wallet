@@ -4,6 +4,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
+import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { Token } from '$lib/types/token';
 import {
@@ -14,6 +15,7 @@ import {
 	liquidiumFreeCollateralUsd,
 	liquidiumHealthFactorPercent,
 	liquidiumHealthLevel,
+	liquidiumHeldSupplyMarket,
 	liquidiumMarketToken,
 	liquidiumMaxBorrowBaseUnits,
 	liquidiumMaxLtv,
@@ -27,6 +29,7 @@ import {
 	liquidiumReserveRails,
 	liquidiumResultingLtvPercent,
 	liquidiumSupplyInterestUsd,
+	liquidiumSupplyUrl,
 	liquidiumSupportedRails,
 	mapLiquidiumMarket,
 	mapLiquidiumMarketRails,
@@ -41,6 +44,7 @@ import {
 	mockLiquidiumRepaySubaccount,
 	mockLiquidiumSupplySubaccount
 } from '$tests/mocks/liquidium-inflow.mock';
+import { nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import {
 	HEALTH_FACTOR_DECIMALS,
@@ -1092,6 +1096,92 @@ describe('liquidium.utils', () => {
 					enabledTokens: [BTC_MAINNET_TOKEN]
 				})
 			).toBeUndefined();
+		});
+	});
+
+	describe('liquidiumHeldSupplyMarket', () => {
+		const ckUsdtToken = {
+			...mockValidIcCkToken,
+			id: parseTokenId('ckUSDT'),
+			symbol: 'ckUSDT',
+			decimals: 6,
+			network: ICP_TOKEN.network
+		} as Token;
+
+		const usdtMarket = (chain: string): LiquidiumMarket => ({
+			poolId: 'pool-usdt',
+			asset: 'USDT',
+			chain,
+			supplyApy: 6.5,
+			borrowApy: 9,
+			frozen: false,
+			available: true
+		});
+
+		const btcMarket: LiquidiumMarket = { ...usdtMarket('BTC'), poolId: 'pool-btc', asset: 'BTC' };
+
+		const markets = [usdtMarket('ETH'), usdtMarket('ICP'), btcMarket];
+
+		const balances = ({ usdt, ckUsdt }: { usdt?: bigint; ckUsdt?: bigint }) => ({
+			...(nonNullish(usdt) ? { [USDT_TOKEN.id]: { data: usdt, certified: true } } : {}),
+			...(nonNullish(ckUsdt) ? { [ckUsdtToken.id]: { data: ckUsdt, certified: true } } : {}),
+			[BTC_MAINNET_TOKEN.id]: { data: 100_000_000_000n, certified: true }
+		});
+
+		const enabledTokens = [USDT_TOKEN, ckUsdtToken, BTC_MAINNET_TOKEN];
+
+		it('picks the network where the user holds the most of the asset', () => {
+			expect(
+				liquidiumHeldSupplyMarket({
+					markets,
+					asset: 'USDT',
+					enabledTokens,
+					balances: balances({ usdt: 1_000_000n, ckUsdt: 2_000_000n })
+				})
+			).toEqual(usdtMarket('ICP'));
+
+			expect(
+				liquidiumHeldSupplyMarket({
+					markets,
+					asset: 'USDT',
+					enabledTokens,
+					balances: balances({ usdt: 3_000_000n, ckUsdt: 2_000_000n })
+				})
+			).toEqual(usdtMarket('ETH'));
+		});
+
+		it('ignores a network whose token is not enabled', () => {
+			expect(
+				liquidiumHeldSupplyMarket({
+					markets,
+					asset: 'USDT',
+					enabledTokens: [USDT_TOKEN],
+					balances: balances({ usdt: 1_000_000n, ckUsdt: 2_000_000n })
+				})
+			).toEqual(usdtMarket('ETH'));
+		});
+
+		it('returns undefined when the user holds none of the asset', () => {
+			expect(
+				liquidiumHeldSupplyMarket({
+					markets,
+					asset: 'USDT',
+					enabledTokens,
+					balances: balances({ usdt: ZERO })
+				})
+			).toBeUndefined();
+
+			expect(
+				liquidiumHeldSupplyMarket({ markets, asset: 'USDT', enabledTokens, balances: undefined })
+			).toBeUndefined();
+		});
+	});
+
+	describe('liquidiumSupplyUrl', () => {
+		it('links to the Liquidium page with the asset and where the link was followed from', () => {
+			expect(
+				liquidiumSupplyUrl({ asset: 'USDT', source: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN })
+			).toBe('/providers/liquidium/?supply=USDT&source=earn');
 		});
 	});
 
