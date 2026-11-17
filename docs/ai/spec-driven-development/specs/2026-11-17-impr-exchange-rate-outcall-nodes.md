@@ -55,8 +55,9 @@ The answers are compared with a tolerance instead, 0.5% by default.
 1. **Node count** (`exchange_rate_outcall_nodes`): unset or 1 means one node, as today without replication.
 2. **Tolerance** (`exchange_rate_price_tolerance_bps`), in basis points: unset means 50, which is 0.5%.
 3. **Replicated on wins.** With `exchange_rate_replicated` set to `true`, every node is asked and the subnet compares the answers, as today. Node count and tolerance have no effect.
-4. Each new setting has its own setter, for controllers only, which sets or clears it. `set_api_keys` keeps both when its input leaves them out, as it does for the two existing settings. `get_api_keys` returns them.
+4. Each new setting has its own setter, for controllers only, which sets or clears it: `set_exchange_rate_outcall_nodes` and `set_exchange_rate_price_tolerance_bps`. `set_api_keys` keeps both when its input leaves them out, as it does for the two existing settings. `get_api_keys` returns them.
 5. The node-count setter rejects 0, and any number above 2 × the subnet's node count − 1, which could never reach a majority. The tolerance setter rejects values above 1,000 basis points (10%).
+6. `set_api_keys` does not check the two values. A stored node count of 0 counts as 1, and a stored tolerance above 1,000 basis points counts as 1,000.
 
 ### Asking n nodes
 
@@ -95,7 +96,7 @@ For each outcall in n-node mode, the backend logs how many answers came back, an
 2. **Outcall** — `src/backend/src/utils/http_outcall.rs`: a flexible GET with the existing transform, sent to the smaller of n and the subnet's node count, with the fewest and the most answers both set to that same number. The subnet's node count comes from `ic_cdk::api::subnet_self_node_count()`, read by the setter and by each refresh.
 3. **Providers** — `src/backend/src/exchange/providers/coingecko/` and `src/backend/src/exchange/providers/icpswap/` take the outcall mode (one node, all nodes, or n nodes with a tolerance) instead of `replicated: bool`. In n-node mode they read every answer and pass the prices to the comparison.
 4. **Comparison** — a function of its own under `src/backend/src/exchange/`, with no state, so unit tests cover it fully.
-5. **Tests** — unit tests for the comparison: agreement, disagreement, groups of equal size, prices right at the tolerance, rounding steps, a token missing from some answers, an even n. PocketIC goes from 16.0 to 16.1, which can mock flexible outcalls. Integration tests: settings unset behave as today; with 3 nodes, 2 agreeing answers set the price; 3 different answers keep the old price; n above the subnet size asks every node and needs a majority of n; the setters reject wrong values and non-controllers; `set_api_keys` keeps the new settings; an upgrade keeps them.
+5. **Tests** — unit tests for the comparison: agreement, disagreement, groups of equal size, prices right at the tolerance, rounding steps, a token missing from some answers, an even n. PocketIC 16.1, already on `main`, can mock flexible outcalls. Integration tests: settings unset behave as today; with 3 nodes, 2 agreeing answers set the price; 3 different answers keep the old price; n above the subnet size asks every node and needs a majority of n; the setters reject wrong values and non-controllers; `set_api_keys` keeps the new settings; an upgrade keeps them.
 6. **Docs** — `docs/ai/PRODUCT.md`, _Exchange-rate sourcing_: how the backend asks its nodes, and that n-node mode compares prices within a tolerance.
 
 ### PR order
@@ -128,6 +129,7 @@ For each outcall in n-node mode, the backend logs how many answers came back, an
 - **The outcall waits for every node asked**, with no setting for it (Stefan, 2026-11-17, checked with the cdk team). The fewest and the most answers are both the number of nodes asked; a lower fewest would let the subnet return before every answer is in. One node that does not answer fails the outcall.
 - **The middle price of the agreeing group**, so a single outlier inside the tolerance cannot move the price, and every field comes from one real answer.
 - **Both settings live in the API-key record**, next to the two existing price settings.
+- **`set_api_keys` does not check the new values; reading them does.** Its signature stays as it is, and a stored node count of 0 counts as 1, a stored tolerance above 1,000 basis points as 1,000.
 - **PR 1 does not change the transform.** Keeping CoinGecko's location and age headers is for the `test_be_1` measurement only.
 
 ## Out of scope
