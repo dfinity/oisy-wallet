@@ -53,6 +53,7 @@ import {
 	chainFusionBtcWithdrawalStatusError,
 	chainFusionMintOutcomeError,
 	chainFusionMintOutcomeToStatus,
+	chainFusionSolDepositBelowMinimumError,
 	chainFusionSolMintStatusError,
 	chainFusionSolTransferError,
 	chainFusionSolWithdrawalStatusError,
@@ -487,8 +488,8 @@ const reloadCkSolMintRow = async ({
 
 /**
  * Whether the deposit address of a SOL → ckSOL row still holds the minter's minimum deposit amount
- * after the mint of a deposit the row follows or moved past, or `undefined` while that cannot be read
- * yet.
+ * after the mint of a deposit the row follows or moved past, or after a dropped one, or `undefined`
+ * while that cannot be read yet.
  *
  * The minter fixes a deposit's amount when a scan reads the balance, and reports neither that time
  * nor the transfers the balance held. SOL sent to the address outside this conversion can reach the
@@ -558,7 +559,10 @@ const tracksSameCkSolDeposits = ({
  * `Watching` answer keeps the row in flight while the transfer can still land or has landed; the
  * same call registers the address again once a window has ended, so a late transfer is still found.
  * A transfer that can no longer land, or landed and failed, moved no SOL, and fails the row. A
- * `Dropped` deposit leaves its SOL on the address, which the minter detects again under a new id.
+ * `Dropped` deposit leaves its SOL on the address, which the minter detects again under a new id,
+ * unless less than the minimum is left: a sweep that failed on chain still took its fee from the
+ * address, and a minimum can rise. Once the minter then names no newer deposit, no sweep will come,
+ * and the row fails, which lets the next conversion start and take the balance over the minimum.
  * A mint that left the minimum deposit amount on the address did not sweep all of it either: the
  * row raises its floor to that deposit, kept on the row so that a reload does not forget it, and
  * looks for a newer one, which `watch_deposit_address` registers the address for. It closes on that
@@ -730,6 +734,9 @@ const pollChainFusionSolMint = async ({
 		}
 	}
 
+	// Past that call, a deposit the row still follows is a dropped one.
+	const droppedDepositId = followedDepositId;
+
 	if (!shouldCallWatchDepositAddress(tx.id)) {
 		return;
 	}
@@ -771,10 +778,14 @@ const pollChainFusionSolMint = async ({
 	}
 
 	// Read before the minter is asked: a newer deposit that swept the address by then was queued
-	// before that call, which then names it.
-	const leftMinimum = nonNullish(movedPastDepositId)
-		? await ckSolMintLeftMinimum({ identity, minterCanisterId, refs })
-		: undefined;
+	// before that call, which then names it. For a dropped deposit only on a row with its transfer's
+	// blockhash, as for the deposit it takes: without it, the row keeps waiting as before.
+	const leftMinimum =
+		nonNullish(movedPastDepositId) ||
+		(nonNullish(droppedDepositId) &&
+			nonNullish(refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH]))
+			? await ckSolMintLeftMinimum({ identity, minterCanisterId, refs })
+			: undefined;
 
 	const depositId = newerCkSolDepositId({
 		depositId: await watchCkSolLatestDepositId({ identity, minterCanisterId }),
@@ -791,6 +802,28 @@ const pollChainFusionSolMint = async ({
 				learned: {},
 				readBack: true,
 				leftMinimum: false
+			});
+
+			return;
+		}
+
+		// Dropped, the minter names no newer deposit, and less than the minimum is left: the minter will
+		// not sweep it again. The row fails and frees the account for the next conversion, whose
+		// transfer takes the balance over the minimum, so that the rest is converted with it.
+		if (nonNullish(droppedDepositId) && leftMinimum === false) {
+			if (!(await backendTracksSameDeposits())) {
+				return;
+			}
+
+			lastWatchDepositAddressMs.delete(tx.id);
+
+			await applyUpdate({
+				identity,
+				tx,
+				candidate: { Failed: null },
+				error: chainFusionSolDepositBelowMinimumError(),
+				learned: {},
+				refs
 			});
 
 			return;
