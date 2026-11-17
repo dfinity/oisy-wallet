@@ -242,6 +242,7 @@
 				data-1p-ignore={ignore1Password}
 				data-tid={testId}
 				{disabled}
+				inputmode={currency ? 'decimal' : undefined}
 				{max}
 				minlength={minLength}
 				onblur={onBlur}

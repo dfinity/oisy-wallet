@@ -38,6 +38,21 @@ describe('InputBase', () => {
 		expect(input(container)?.getAttribute('type')).toBe('text');
 	});
 
+	it.each(['currency', 'icp'] as const)(
+		'should open the decimal keypad for %s inputs',
+		(inputType) => {
+			const { container } = render(InputBase, { props: { ...props, inputType } });
+
+			expect(input(container)?.getAttribute('inputmode')).toBe('decimal');
+		}
+	);
+
+	it.each(['number', 'text'] as const)('should not set an inputmode for %s inputs', (inputType) => {
+		const { container } = render(InputBase, { props: { ...props, inputType } });
+
+		expect(input(container)?.hasAttribute('inputmode')).toBeFalsy();
+	});
+
 	it('should be required by default and optional when required is false', () => {
 		const { container: required } = render(InputBase, { props });
 
