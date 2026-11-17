@@ -1624,6 +1624,8 @@ interface I18nWallet_connect {
 		cketh_helper_unconfirmed: string;
 		ck_deposit: string;
 		ck_deposit_other_account: string;
+		ck_deposit_liquidium: string;
+		ck_deposit_liquidium_pool: string;
 		ck_deposit_recipient: string;
 		ck_deposit_refused: string;
 		swap_title: string;

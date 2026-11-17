@@ -1947,6 +1947,8 @@
 			"cketh_helper_unconfirmed": "OISY 暂时无法确认 ckETH 转换合约，因此无法检查此存入请求。在能够检查之前，批准功能将保持禁用。",
 			"ck_deposit": "此请求会将 $token 转换为 $ckToken，并存入下方显示的您的 Internet Computer 主标识。",
 			"ck_deposit_other_account": "此请求会将 $token 转换为 $ckToken，并存入下方显示的 Internet Computer 账户，该账户不是您的 OISY 账户。OISY 无法验证谁会收到这笔存款，因此请仅在您信任此应用时批准。",
+			"ck_deposit_liquidium": "此请求会将 $token 转换为 $ckToken，并存入您的 Liquidium 账户。",
+			"ck_deposit_liquidium_pool": "Liquidium $asset 池",
 			"ck_deposit_recipient": "$ckToken 接收方",
 			"ck_deposit_refused": "OISY 无法读取此笔转换到 Internet Computer 的请求，或其代币无法转换。为了您的安全，OISY 不会签署该请求。",
 			"swap_title": "",

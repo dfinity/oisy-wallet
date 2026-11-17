@@ -1947,6 +1947,8 @@
 			"cketh_helper_unconfirmed": "OISY todavía no puede confirmar el contrato de conversión de ckETH, así que no puede comprobar este depósito. La aprobación seguirá deshabilitada hasta que pueda hacerlo.",
 			"ck_deposit": "Esta solicitud convierte $token en $ckToken para tu principal de Internet Computer, que se muestra abajo.",
 			"ck_deposit_other_account": "Esta solicitud convierte $token en $ckToken para la cuenta de Internet Computer que se muestra abajo, que no es tu cuenta de OISY. OISY no puede verificar quién recibe este depósito, así que apruébala solo si confías en esta aplicación.",
+			"ck_deposit_liquidium": "Esta solicitud convierte $token en $ckToken para tu cuenta de Liquidium.",
+			"ck_deposit_liquidium_pool": "Pool de $asset de Liquidium",
 			"ck_deposit_recipient": "Destinatario de $ckToken",
 			"ck_deposit_refused": "OISY no puede leer esta conversión a Internet Computer, o su token no se puede convertir. Por tu seguridad, OISY no la firmará.",
 			"swap_title": "",

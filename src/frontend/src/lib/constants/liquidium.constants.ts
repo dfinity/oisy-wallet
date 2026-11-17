@@ -48,6 +48,14 @@ export const LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS: Record<string, OptionCanisterI
 	ICP: ICP_LEDGER_CANISTER_ID
 };
 
+// The first byte of the subaccount of a pool that Liquidium credits an inflow to a profile with:
+// what the inflow is for. Laid out by the Liquidium client, which OISY's own supply and repay go
+// through.
+export const LIQUIDIUM_INFLOW_SUBACCOUNT_PURPOSES = {
+	supply: 1,
+	repay: 2
+};
+
 // Display bands — Liquidium publishes no discrete cut-offs, so oisy picks its own
 // (spec → Open question #7).
 export const LIQUIDIUM_HEALTH_AT_RISK_PERCENT = 50;

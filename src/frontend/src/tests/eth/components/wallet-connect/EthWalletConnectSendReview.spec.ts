@@ -41,10 +41,13 @@ import {
 	ETH_FEE_PRIORITY_OPTION
 } from '$lib/constants/test-ids.constants';
 import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
+import { loadLiquidiumInflowPool } from '$lib/services/liquidium.services';
+import { ethAddressStore } from '$lib/stores/address.store';
 import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { formatSecondsToDate } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import {
 	encodeCkDepositErc20,
 	encodeCkDepositEth,
@@ -54,6 +57,10 @@ import {
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+import {
+	mockLiquidiumSupplySubaccount,
+	mockLiquidiumUsdtPoolId
+} from '$tests/mocks/liquidium-inflow.mock';
 import {
 	encodeUniswapCommand,
 	encodeUniswapEurcToUsdc,
@@ -68,12 +75,17 @@ import { isNullish, toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
-import { fireEvent, render, within } from '@testing-library/svelte';
+import type { Pool } from '@liquidium/client';
+import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { AbiCoder, Interface } from 'ethers/abi';
 import { writable } from 'svelte/store';
 
 vi.mock('$eth/services/erc20-unlisted.services', () => ({
 	loadUnlistedErc20TokenData: vi.fn()
+}));
+
+vi.mock('$lib/services/liquidium.services', () => ({
+	loadLiquidiumInflowPool: vi.fn()
 }));
 
 describe('EthWalletConnectSendReview', () => {
@@ -1525,6 +1537,135 @@ describe('EthWalletConnectSendReview', () => {
 			expect(container.querySelector('#ck-deposit-account')).toBeNull();
 
 			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		describe('a deposit to the account of the user on Liquidium', () => {
+			const liquidiumTestId = 'wallet-connect-ck-deposit-liquidium';
+			const loadingTestId = 'wallet-connect-liquidium-pool-loading';
+
+			const pool = { id: mockLiquidiumUsdtPoolId, asset: 'USDT' } as Pool;
+
+			const liquidiumDeposit = encodeCkDepositErc20({
+				address: USDT_TOKEN.address,
+				amount: 50_000_000n,
+				owner: Principal.fromText(mockLiquidiumUsdtPoolId),
+				subaccount: mockLiquidiumSupplySubaccount
+			});
+
+			beforeEach(() => {
+				mockAuthStore();
+				ethAddressStore.set({ certified: true, data: mockUniswapWallet });
+
+				vi.mocked(loadLiquidiumInflowPool).mockResolvedValue(pool);
+			});
+
+			afterEach(() => {
+				ethAddressStore.reset();
+			});
+
+			it('should name the Liquidium pool and say the deposit is for the account of the user', async () => {
+				const { findByTestId, queryByTestId, container, getByRole } = renderDeposit({
+					data: liquidiumDeposit
+				});
+
+				await expect(findByTestId(liquidiumTestId)).resolves.toHaveTextContent(
+					replacePlaceholders(en.wallet_connect.text.ck_deposit_liquidium, {
+						$token: USDT_TOKEN.symbol,
+						$ckToken: 'ckUSDT'
+					})
+				);
+				expect(queryByTestId(otherAccountTestId)).not.toBeInTheDocument();
+
+				// The account the deposit goes to, and under it the pool OISY read it to be.
+				const account = container.querySelector('#ck-deposit-account');
+
+				expect(account).toHaveTextContent(
+					encodeIcrcAccount({
+						owner: Principal.fromText(mockLiquidiumUsdtPoolId),
+						subaccount: mockLiquidiumSupplySubaccount
+					})
+				);
+				expect(account).toHaveTextContent(
+					replacePlaceholders(en.wallet_connect.text.ck_deposit_liquidium_pool, { $asset: 'USDT' })
+				);
+
+				// The row names the pool; the copy button still copies the account itself.
+				expect(
+					getByRole('button', {
+						name: `${en.core.text.copy}: ${encodeIcrcAccount({
+							owner: Principal.fromText(mockLiquidiumUsdtPoolId),
+							subaccount: mockLiquidiumSupplySubaccount
+						})}`
+					})
+				).toBeInTheDocument();
+
+				expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+
+				expect(loadLiquidiumInflowPool).toHaveBeenCalledExactlyOnceWith({
+					identity: expect.anything(),
+					ethAddress: mockUniswapWallet,
+					owner: Principal.fromText(mockLiquidiumUsdtPoolId),
+					subaccount: mockLiquidiumSupplySubaccount,
+					ckTokenSymbol: 'ckUSDT'
+				});
+			});
+
+			it('should hold approval behind a spinner while Liquidium is read', () => {
+				vi.mocked(loadLiquidiumInflowPool).mockReturnValue(new Promise(() => {}));
+
+				const { getByTestId, queryByTestId, getByRole } = renderDeposit({ data: liquidiumDeposit });
+
+				expect(getByTestId(loadingTestId)).toBeInTheDocument();
+				expect(queryByTestId(liquidiumTestId)).not.toBeInTheDocument();
+				expect(queryByTestId(otherAccountTestId)).not.toBeInTheDocument();
+
+				expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+			});
+
+			it.each([
+				{
+					kind: 'an account Liquidium does not credit to the user',
+					read: () => vi.mocked(loadLiquidiumInflowPool).mockResolvedValue(undefined)
+				},
+				{
+					kind: 'an account while Liquidium does not answer',
+					read: () => vi.mocked(loadLiquidiumInflowPool).mockRejectedValue(new Error('unavailable'))
+				}
+			])('should warn about $kind as about any other account', async ({ read }) => {
+				read();
+
+				const { findByTestId, queryByTestId, container, getByRole } = renderDeposit({
+					data: liquidiumDeposit
+				});
+
+				await expect(findByTestId(otherAccountTestId)).resolves.toBeInTheDocument();
+				expect(queryByTestId(liquidiumTestId)).not.toBeInTheDocument();
+
+				expect(container.querySelector('#ck-deposit-account')).toHaveTextContent(
+					encodeIcrcAccount({
+						owner: Principal.fromText(mockLiquidiumUsdtPoolId),
+						subaccount: mockLiquidiumSupplySubaccount
+					})
+				);
+
+				expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+			});
+
+			it('should not read Liquidium for a deposit to the default account of the user', async () => {
+				const { getByTestId } = renderDeposit({
+					data: encodeCkDepositErc20({
+						address: USDT_TOKEN.address,
+						amount: 50_000_000n,
+						owner: mockPrincipal
+					})
+				});
+
+				expect(getByTestId(ownAccountTestId)).toBeInTheDocument();
+
+				await waitFor(() => {
+					expect(loadLiquidiumInflowPool).not.toHaveBeenCalled();
+				});
+			});
 		});
 	});
 

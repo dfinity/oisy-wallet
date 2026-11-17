@@ -1947,6 +1947,8 @@
 			"cketh_helper_unconfirmed": "OISY can't confirm the ckETH conversion contract yet, so it can't check this deposit. Approval stays disabled until it can.",
 			"ck_deposit": "This request converts $token to $ckToken for your Internet Computer principal, shown below.",
 			"ck_deposit_other_account": "This request converts $token to $ckToken for the Internet Computer account below, which isn't your OISY account. OISY can't verify who receives this deposit, so approve only if you trust this app.",
+			"ck_deposit_liquidium": "This request converts $token to $ckToken for your Liquidium account.",
+			"ck_deposit_liquidium_pool": "Liquidium $asset pool",
 			"ck_deposit_recipient": "$ckToken recipient",
 			"ck_deposit_refused": "OISY can't read this conversion to the Internet Computer, or its token can't be converted. For your security, OISY won't sign it.",
 			"swap_title": "Swap",
