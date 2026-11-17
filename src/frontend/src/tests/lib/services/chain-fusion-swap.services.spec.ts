@@ -2132,6 +2132,13 @@ describe('chain-fusion-swap.services', () => {
 					name: 'the last scan of the window is overdue',
 					answer: watchingWindow({ endsIn: 29n, nextScanIn: -1n }),
 					reason: 'unavailable'
+				},
+				// The next scan does not look like the window's last, but the minter is so far behind
+				// that every slot left in the window has passed.
+				{
+					name: 'every scan left in the window is overdue',
+					answer: watchingWindow({ endsIn: 5n, nextScanIn: -60n }),
+					reason: 'unavailable'
 				}
 			])('should send no SOL when $name', async ({ answer, reason }) => {
 				vi.mocked(watchDepositAddress).mockResolvedValue(answer);
