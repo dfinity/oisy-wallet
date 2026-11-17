@@ -220,7 +220,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	AI_ASSISTANT = 'ai_assistant',
 	WALLET_CONNECT = 'wallet_connect',
 	CONTACTS = 'contacts',
-	PROVIDERS = 'providers'
+	PROVIDERS = 'providers',
+	SWAP = 'swap'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -278,6 +279,11 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_HELP {
 	NETWORK_EXPLORERS = 'network_explorers',
 	PROVIDER_EXPLORERS = 'provider_explorers',
 	ICPSWAP_WITHDRAWAL = 'icpswap_withdrawal'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_SWAP {
+	// A LI.FI quote from BTC whose deposit pays another address than the one pinned for its bridge.
+	LIFI_BTC_DEPOSIT_UNVERIFIED = 'lifi_btc_deposit_unverified'
 }
 
 // The call an EVM send asked a second provider for, after the first failed it.
@@ -358,7 +364,9 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	// The gas the network estimates the same transaction needs, asked again after it failed.
 	GAS_NEEDED = 'gas_needed',
 	// How long a tip stays claimable, as the label the sender picked.
-	EXPIRY = 'expiry'
+	EXPIRY = 'expiry',
+	// The address a deposit pays, where it is a bridge's or a stranger's, never the user's own.
+	DEPOSIT_ADDRESS = 'deposit_address'
 }
 
 export enum PLAUSIBLE_EVENT_FILTER_MODIFIERS {

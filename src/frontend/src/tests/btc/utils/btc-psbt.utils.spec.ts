@@ -4,6 +4,7 @@ import {
 } from '$btc/constants/btc.constants';
 import {
 	btcAddressToOutputScript,
+	btcOutputScriptToAddressOrHex,
 	btcOutputVSize,
 	btcScriptOutputVSize,
 	buildBtcScriptOutputsPsbt,
@@ -114,6 +115,42 @@ const LIFI_FEE = {
 };
 
 describe('btc-psbt.utils', () => {
+	describe('btcOutputScriptToAddressOrHex', () => {
+		it.each([
+			{
+				case: 'a P2WPKH address',
+				address: payments.p2wpkh({ hash: Buffer.alloc(20, 0x11), network: networks.bitcoin })
+					.address
+			},
+			{
+				case: 'a P2PKH address',
+				address: payments.p2pkh({ hash: Buffer.alloc(20, 0x11), network: networks.bitcoin }).address
+			}
+		])('should name the output paying $case by that address', ({ address }) => {
+			assertNonNullish(address);
+
+			expect(
+				btcOutputScriptToAddressOrHex({
+					script: btcAddressToOutputScript({ address, network: 'mainnet' }),
+					network: 'mainnet'
+				})
+			).toBe(address);
+		});
+
+		// Naming a P2TR script takes `payments.p2tr`, which needs the ECC library the frontend lacks.
+		it.each([
+			{
+				case: 'a P2TR output',
+				script: Uint8Array.from([0x51, 0x20, ...Buffer.alloc(32, 0x22)])
+			},
+			{ case: 'an OP_RETURN', script: Uint8Array.from([0x6a, 0x02, 0x01, 0x02]) }
+		])('should give $case as hex', ({ script }) => {
+			expect(btcOutputScriptToAddressOrHex({ script, network: 'mainnet' })).toBe(
+				Buffer.from(script).toString('hex')
+			);
+		});
+	});
+
 	describe('btcAddressToOutputScript', () => {
 		const hash20 = Buffer.alloc(20, 0x11);
 		const hash32 = Buffer.alloc(32, 0x22);
