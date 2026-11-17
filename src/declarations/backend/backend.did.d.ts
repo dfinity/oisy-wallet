@@ -296,11 +296,24 @@ export interface ApiKeys {
 	 */
 	exchange_rate_enabled: [] | [boolean];
 	alchemy_api_key: [] | [string];
+	/**
+	 * How far apart, in basis points of the lowest price, the answers of several nodes may be
+	 * and still agree on a token's price. `None` (the default) means 50, which is 0.5%.
+	 */
+	exchange_rate_price_tolerance_bps: [] | [number];
 	etherscan_api_key: [] | [string];
 	/**
+	 * How many nodes exchange-rate HTTP outcalls ask while `exchange_rate_replicated` is not
+	 * `Some(true)`. `None` (the default) and `Some(1)` mean one node, whose answer is used as it
+	 * is. A larger number asks that many nodes, or every node of a smaller subnet, and a token's
+	 * price needs more than half of this number of answers to agree.
+	 */
+	exchange_rate_outcall_nodes: [] | [number];
+	/**
 	 * Whether exchange-rate HTTP outcalls are sent *replicated* (through consensus, every replica
-	 * issues the request) or *non-replicated* (a single replica). Replicated only when explicitly
-	 * `Some(true)`; `None` (the default) and `Some(false)` both mean non-replicated.
+	 * issues the request). Replicated only when explicitly `Some(true)`, which wins over
+	 * `exchange_rate_outcall_nodes`; `None` (the default) and `Some(false)` both leave it to
+	 * `exchange_rate_outcall_nodes`.
 	 */
 	exchange_rate_replicated: [] | [boolean];
 	coingecko_api_key: [] | [string];
@@ -2034,6 +2047,31 @@ export interface SaveUserTransactionsRequest {
 	transactions: Array<UserTransaction>;
 }
 export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
+export type SetExchangeRateOutcallNodesError =
+	| {
+			/**
+			 * More than `max` nodes, which is twice the subnet's node count minus one: the backend asks
+			 * at most every node of the subnet, so a larger number could never reach a majority.
+			 */
+			AboveMax: { max: number };
+	  }
+	| {
+			/**
+			 * An outcall needs at least one node.
+			 */
+			Zero: null;
+	  };
+export type SetExchangeRateOutcallNodesResult =
+	{ Ok: null } | { Err: SetExchangeRateOutcallNodesError };
+export type SetExchangeRatePriceToleranceError = {
+	/**
+	 * More than `max_bps` basis points, beyond which comparing answers no longer protects
+	 * against a wrong price.
+	 */
+	AboveMax: { max_bps: number };
+};
+export type SetExchangeRatePriceToleranceResult =
+	{ Ok: null } | { Err: SetExchangeRatePriceToleranceError };
 export type SetPersonalNoteResult =
 	| {
 			/**
@@ -3555,9 +3593,10 @@ export interface _SERVICE {
 	/**
 	 * Overwrites the stored API keys.
 	 *
-	 * If `exchange_rate_enabled` or `exchange_rate_replicated` is omitted, the existing toggle is
-	 * preserved so that routine key rotation does not accidentally pause exchange-rate refreshes or
-	 * change their outcall replication mode.
+	 * If `exchange_rate_enabled`, `exchange_rate_replicated`, `exchange_rate_outcall_nodes` or
+	 * `exchange_rate_price_tolerance_bps` is omitted, the stored setting is preserved so that routine
+	 * key rotation does not accidentally pause exchange-rate refreshes or change how their outcalls
+	 * ask the nodes.
 	 *
 	 * Restricted to canister controllers only.
 	 */
@@ -3578,12 +3617,36 @@ export interface _SERVICE {
 	 */
 	set_exchange_rate_enabled: ActorMethod<[boolean], undefined>;
 	/**
+	 * Sets how many nodes exchange-rate HTTP outcalls ask while replication is off, or clears the
+	 * setting with `None`, which means one node. See
+	 * [`shared::types::api_keys::ApiKeys::exchange_rate_outcall_nodes`].
+	 *
+	 * Rejects 0, and any number above twice the subnet's node count minus one: the backend asks at
+	 * most every node of the subnet, so a larger number could never reach a majority.
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	set_exchange_rate_outcall_nodes: ActorMethod<[[] | [number]], SetExchangeRateOutcallNodesResult>;
+	/**
+	 * Sets how far apart, in basis points, several nodes' prices for a token may be and still agree,
+	 * or clears the setting with `None`, which means 50 (0.5%). See
+	 * [`shared::types::api_keys::ApiKeys::exchange_rate_price_tolerance_bps`].
+	 *
+	 * Rejects values above 1,000 basis points (10%).
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	set_exchange_rate_price_tolerance_bps: ActorMethod<
+		[[] | [number]],
+		SetExchangeRatePriceToleranceResult
+	>;
+	/**
 	 * Sets whether exchange-rate HTTP outcalls are sent replicated, without touching the stored API
 	 * keys.
 	 *
 	 * Sets `exchange_rate_replicated` to `Some(replicated)`. `true` sends the outcalls through
-	 * consensus (every replica issues the request); `false` sends them non-replicated (a single
-	 * replica). See [`crate::exchange::is_exchange_rate_replicated`].
+	 * consensus (every replica issues the request); `false` leaves it to
+	 * [`set_exchange_rate_outcall_nodes`] how many replicas ask, one when that is unset.
 	 *
 	 * Restricted to canister controllers only.
 	 */

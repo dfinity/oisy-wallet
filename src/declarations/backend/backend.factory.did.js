@@ -683,7 +683,9 @@ export const idlFactory = ({ IDL }) => {
 	const ApiKeys = IDL.Record({
 		exchange_rate_enabled: IDL.Opt(IDL.Bool),
 		alchemy_api_key: IDL.Opt(IDL.Text),
+		exchange_rate_price_tolerance_bps: IDL.Opt(IDL.Nat32),
 		etherscan_api_key: IDL.Opt(IDL.Text),
+		exchange_rate_outcall_nodes: IDL.Opt(IDL.Nat32),
 		exchange_rate_replicated: IDL.Opt(IDL.Bool),
 		coingecko_api_key: IDL.Opt(IDL.Text),
 		onramper_signing_secret: IDL.Opt(IDL.Text),
@@ -981,6 +983,21 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: UserTransactionError
 	});
+	const SetExchangeRateOutcallNodesError = IDL.Variant({
+		AboveMax: IDL.Record({ max: IDL.Nat32 }),
+		Zero: IDL.Null
+	});
+	const SetExchangeRateOutcallNodesResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: SetExchangeRateOutcallNodesError
+	});
+	const SetExchangeRatePriceToleranceError = IDL.Variant({
+		AboveMax: IDL.Record({ max_bps: IDL.Nat32 })
+	});
+	const SetExchangeRatePriceToleranceResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: SetExchangeRatePriceToleranceError
+	});
 	const SetPersonalNoteResult = IDL.Variant({
 		Ok: IDL.Null,
 		Err: PersonalNoteError
@@ -1217,6 +1234,16 @@ export const idlFactory = ({ IDL }) => {
 		set_api_keys: IDL.Func([ApiKeys], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_exchange_rate_enabled: IDL.Func([IDL.Bool], [], []),
+		set_exchange_rate_outcall_nodes: IDL.Func(
+			[IDL.Opt(IDL.Nat32)],
+			[SetExchangeRateOutcallNodesResult],
+			[]
+		),
+		set_exchange_rate_price_tolerance_bps: IDL.Func(
+			[IDL.Opt(IDL.Nat32)],
+			[SetExchangeRatePriceToleranceResult],
+			[]
+		),
 		set_exchange_rate_replicated: IDL.Func([IDL.Bool], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_new_user_signups_allowed: IDL.Func([IDL.Bool], [], []),
