@@ -30,8 +30,8 @@ export type LifiBtcPayoutBinding = (params: LifiBtcPayoutBindingParams) => Promi
 /**
  * The payout binding of each bridge admitted from Bitcoin, by LI.FI tool key. A bridge joins
  * `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]` only together with its entry here. None has one yet:
- * LayerSwap keeps LI.FI's swaps out of its keyless API, and Relay's record (by the memo's order id)
- * is not yet known to exist before the deposit.
+ * LayerSwap keeps LI.FI's swaps out of its keyless API, and Relay creates its record (by the memo's
+ * order id) only once it sees the deposit.
  */
 const LIFI_BTC_PAYOUT_BINDINGS: Partial<Record<string, LifiBtcPayoutBinding>> = {};
 

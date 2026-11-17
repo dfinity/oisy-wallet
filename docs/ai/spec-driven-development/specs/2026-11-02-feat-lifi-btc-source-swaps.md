@@ -441,18 +441,31 @@ What each bridge's API offers, checked 2026-11-17:
 
   LI.FI's swaps sit under LI.FI's own LayerSwap account.
 
-- **Relay: a keyless lookup by the memo's id.**
+- **Relay: a keyless lookup by the memo's id, but only after the deposit, so it cannot be bound.**
   - The memo is `0x<32 bytes>=|lifi…`, and that id is Relay's `protocol.orderId`, not its request
     id.
   - `GET api.relay.link/requests/v2?orderId=<id>` returns the request: recipient, `currencyIn`
     (chain 8253038, the deposit amount), `currencyOut` (chain, asset, amount) and status. An unknown
     order id returns no request.
-  - **Unverified:** whether the request exists before the deposit. A completed sample was created at
-    14:06:11, nine minutes before its deposit's block. Relay refuses quotes for the well-known test
-    senders (`1008 This address is blocked`), so a fresh one needs a funded address.
-  - Keyless `requests/v2` is rate-limited (HTTP 429 after a few calls), and `requests/v3` needs an
-    `x-api-key`.
+  - **No record before the deposit.** Checked on fe4 on 2026-11-17, with Relay pinned and the user's
+    own funded address:
+    - LI.FI quoted Relay, and the quote passed the trust checks: a P2WPKH deposit, a 79-byte memo
+      and LI.FI's fee output.
+    - For two fresh quotes, `requests/v2?orderId=` found no request at 0 s and at 27 s, then
+      answered 429.
+
+    Relay creates the request once it sees the deposit, too late to bind before signing.
+
+  - Relay retires `requests/v2` on 2026-11-24, and `requests/v3` needs an `x-api-key`. Keyless v2 is
+    also rate-limited (HTTP 429 after a few calls).
 - **NEAR:** bindable as above, but not admitted from BTC (pending decision 4).
+
+**Parked on 2026-11-17.** NEAR alone can be bound, and from BTC it only duplicates OISY's own NEAR
+Intents provider at a higher cost. So no bridge is admitted, and LI.FI from BTC stays dark with PR 6
+in place. A bridge is admitted once OISY can read, before signing, a record of the deposit that
+names its payout. That could be the bridge's own, or a quote LI.FI signs or ties to the bridge's
+record (to ask LI.FI). Allowing a bridge without such a record would trust LI.FI's unsigned quote
+as served by its API, which nothing in OISY does today.
 
 ---
 
@@ -488,9 +501,10 @@ reaches production before the dependency spec's PR 10 and a production release o
    and a quote its selection cannot fund is not offered. Also a "(local and staging)" entry in
    `PRODUCT.md`. No bridge is admitted: none can be bound yet (see
    [Bridge admission](#bridge-admission)).
-7. `feat(frontend): admit Relay from BTC` (needs 6, and Relay's record confirmed before the deposit)
-   — Relay's payout binding by the memo's order id, tied to output 0, and `relaydepository` in
-   `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]`, with a fixture from a real Relay quote.
+7. `feat(frontend): admit <bridge> from BTC` (needs 6, and a record of the deposit readable before
+   signing; none exists yet, see [Bridge admission](#bridge-admission)): the bridge's payout binding
+   in `LIFI_BTC_PAYOUT_BINDINGS`, tied to output 0, and its tool key in
+   `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]`, with a fixture from a real quote of it.
 
 ---
 
@@ -550,9 +564,9 @@ reaches production before the dependency spec's PR 10 and a production release o
      equal to LI.FI's `toAmountMin`.
    - **LayerSwap**: answered on 2026-11-17: no. Its keyless API does not show LI.FI's swaps, even
      completed ones (see [Bridge admission](#bridge-admission)).
-   - **Relay**: partly answered on 2026-11-17. `requests/v2?orderId=<memo id>` returns the
-     recipient and both amounts keyless, after the deposit at least. Still open: whether it does
-     before the deposit, which needs a fresh Relay quote from a funded address.
+   - **Relay**: answered on 2026-11-17: no. `requests/v2?orderId=<memo id>` returns the recipient
+     and both amounts keyless, but only once the deposit exists; a fresh quote's order id is not
+     found. v2 retires on 2026-11-24.
 2. **Self-built transaction.** Confirm with LI.FI, per bridge, that a rebuilt transaction (other
    inputs, other change, other miner fee) is still credited, and whether the miner fee or the input
    count matters to them. For NEAR, also confirm that 1Click credits the deposit by its address, so
