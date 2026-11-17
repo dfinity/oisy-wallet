@@ -10,7 +10,7 @@ import {
 	type PermissionsPromptPayload
 } from '@dfinity/oisy-wallet-signer';
 import { Signer } from '@dfinity/oisy-wallet-signer/signer';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 import type { Identity } from '@icp-sdk/core/agent';
 import { derived, writable, type Readable } from 'svelte/store';
@@ -109,6 +109,7 @@ export interface SignerContext {
  */
 export const initSignerContext = (): SignerContext => {
 	let signer: Nullish<Signer>;
+	let signerOwner: Nullish<Identity>;
 
 	const accountsPromptPayloadStore = writable<AccountsPromptPayload | undefined | null>(undefined);
 
@@ -154,10 +155,19 @@ export const initSignerContext = (): SignerContext => {
 	);
 
 	const init = ({ owner }: { owner: Identity }) => {
+		// The auth store can emit the same identity again (e.g. when another tab signs in); the running signer stays.
+		if (nonNullish(signer) && signerOwner === owner) {
+			return;
+		}
+
+		// A signer keeps answering messages until it is disconnected, so the previous one and its prompts must not outlive it.
+		reset();
+
 		signer = Signer.init({
 			owner,
 			host: REPLICA_HOST
 		});
+		signerOwner = owner;
 
 		signer.register({
 			method: ICRC25_REQUEST_PERMISSIONS,
@@ -197,6 +207,7 @@ export const initSignerContext = (): SignerContext => {
 
 		signer?.disconnect();
 		signer = null;
+		signerOwner = null;
 	};
 
 	return {
