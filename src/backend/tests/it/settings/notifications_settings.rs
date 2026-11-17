@@ -35,8 +35,7 @@ fn dismissed(profile: &UserProfile) -> BTreeSet<DismissedNotification> {
         .settings
         .clone()
         .and_then(|settings| settings.notifications)
-        .map(|notifications| notifications.dismissed_notifications)
-        .unwrap_or_default()
+        .map_or_default(|notifications| notifications.dismissed_notifications)
 }
 
 fn dismiss(

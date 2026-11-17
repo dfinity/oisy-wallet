@@ -161,8 +161,7 @@ mod tests {
         read_state(|s| {
             s.contact
                 .get(&principal)
-                .map(|stored_contacts| stored_contacts.0.contacts)
-                .unwrap_or_default()
+                .map_or_default(|stored_contacts| stored_contacts.0.contacts)
         })
     }
 

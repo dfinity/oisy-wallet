@@ -500,18 +500,15 @@ pub(crate) fn priceable_tokens_for_caller(caller: StoredPrincipal) -> Vec<Stored
     let mut tokens: Vec<StoredTokenId> = native_token_ids();
 
     let caller_custom_tokens: Vec<StoredTokenId> = read_state(|s| {
-        s.custom_token
-            .get(&caller)
-            .map(|tokens| {
-                tokens
-                    .0
-                    .iter()
-                    .map(|ct| TokenId::from(&ct.token))
-                    .filter(is_priceable_token_id)
-                    .map(StoredTokenId)
-                    .collect()
-            })
-            .unwrap_or_default()
+        s.custom_token.get(&caller).map_or_default(|tokens| {
+            tokens
+                .0
+                .iter()
+                .map(|ct| TokenId::from(&ct.token))
+                .filter(is_priceable_token_id)
+                .map(StoredTokenId)
+                .collect()
+        })
     });
 
     tokens.extend(caller_custom_tokens);
