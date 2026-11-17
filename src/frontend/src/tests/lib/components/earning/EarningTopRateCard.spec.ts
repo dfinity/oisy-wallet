@@ -22,6 +22,7 @@ describe('EarningTopRateCard', () => {
 		networkNames: ['Ethereum', 'Internet Computer'],
 		apy: 6.47,
 		earningPotentialUsd: 64.7,
+		hasPosition: false,
 		action: vi.fn().mockResolvedValue(undefined),
 		...overrides
 	});

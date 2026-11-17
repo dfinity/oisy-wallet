@@ -386,6 +386,7 @@ describe('earning top rates', () => {
 					networkNames: get(liquidiumAssetNetworkNames).USDT,
 					apy: 6.47,
 					earningPotentialUsd: (800 * 6.47) / 100,
+					hasPosition: false,
 					action: expect.any(Function)
 				}
 			]);
@@ -407,6 +408,7 @@ describe('earning top rates', () => {
 					networkNames: [BAUTOPILOT_USDC_TOKEN.network.name],
 					apy: 5.75,
 					earningPotentialUsd: (800 * 5.75) / 100,
+					hasPosition: false,
 					action: expect.any(Function)
 				}
 			]);
@@ -454,6 +456,47 @@ describe('earning top rates', () => {
 			liquidiumStore.set({ markets: [usdtMarket('ETH')], portfolio, assetPrices: {} });
 
 			expect(get(earningTopRates)).toEqual([]);
+		});
+
+		it('marks a Liquidium pool the user supplies to as having a position', () => {
+			const portfolio: LiquidiumPortfolio = {
+				reserves: [
+					{
+						poolId: 'pool-usdt',
+						asset: 'USDT',
+						chain: 'ETH',
+						supplyApy: 6.47,
+						borrowApy: 9,
+						deposited: 1_000_000n,
+						depositedDecimals: 6,
+						borrowed: ZERO,
+						borrowedDecimals: 6,
+						suppliedUsd: 1,
+						borrowedUsd: 0
+					}
+				],
+				totalSuppliedUsd: 1,
+				totalBorrowedUsd: 0,
+				netValueUsd: 1,
+				availableBorrowsUsd: 0,
+				weightedLiquidationThresholdBps: 8000,
+				healthFactorPercent: 100
+			};
+
+			liquidiumStore.set({ markets: [usdtMarket('ETH')], portfolio, assetPrices: {} });
+
+			expect(get(earningTopRates).map(({ hasPosition }) => hasPosition)).toEqual([true]);
+		});
+
+		it('marks an Autopilot vault the user holds as having a position', () => {
+			const held: Vault = {
+				...vault('5.75'),
+				token: { ...vault('5.75').token, balance: 1_000_000n }
+			};
+
+			mockStore({ store: harvestAutopilots, value: [held] });
+
+			expect(get(earningTopRates).map(({ hasPosition }) => hasPosition)).toEqual([true]);
 		});
 
 		it('opens the Liquidium supply link with where the user started it', async () => {
