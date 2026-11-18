@@ -1,6 +1,7 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import * as trustLineTokensEnv from '$env/xrp-trust-line-tokens.env';
 import * as backendApi from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
@@ -1311,7 +1312,12 @@ describe('xrp-send.services', () => {
 				);
 
 		beforeEach(() => {
+			vi.spyOn(trustLineTokensEnv, 'XRP_TRUST_LINE_TOKENS_ENABLED', 'get').mockReturnValue(true);
 			vi.spyOn(xrplRest, 'loadXrpDepositAuthorized').mockResolvedValue(false);
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
 		});
 
 		const expectRefusal = async (refusal: string) => {
@@ -1381,6 +1387,16 @@ describe('xrp-send.services', () => {
 			vi.mocked(xrplRest.loadXrpDepositAuthorized).mockRejectedValue(new Error('tooBusy'));
 
 			await expectRefusal('state_unavailable');
+		});
+
+		// With the trust-line flag off an XRP payment behaves as before, and the method is not asked.
+		it('asks nothing with the trust-line flag off', async () => {
+			vi.spyOn(trustLineTokensEnv, 'XRP_TRUST_LINE_TOKENS_ENABLED', 'get').mockReturnValue(false);
+			destinationWith({ flags: depositAuth, balance: 30_000_000n });
+
+			await expect(sendXrp(params)).resolves.toBeDefined();
+
+			expect(xrplRest.loadXrpDepositAuthorized).not.toHaveBeenCalled();
 		});
 	});
 
@@ -1459,8 +1475,13 @@ describe('xrp-send.services', () => {
 		};
 
 		beforeEach(() => {
+			vi.spyOn(trustLineTokensEnv, 'XRP_TRUST_LINE_TOKENS_ENABLED', 'get').mockReturnValue(true);
 			ledger();
 			vi.spyOn(xrplRest, 'loadXrpDepositAuthorized').mockResolvedValue(true);
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
 		});
 
 		it('pays the token by its currency and issuer, with the fee in drops and no SendMax', async () => {
