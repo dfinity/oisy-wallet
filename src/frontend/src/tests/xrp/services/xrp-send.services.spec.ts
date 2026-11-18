@@ -33,6 +33,7 @@ import {
 	XrpAmountExceedsSendableError,
 	XrpDestinationTagRequiredError,
 	XrpDestinationUnfundedError,
+	XrpPaymentRefusedError,
 	XrpSelfDestinationError,
 	XrpSendAlreadyInFlightError,
 	XrpSendNotGuardedError
@@ -1287,6 +1288,96 @@ describe('xrp-send.services', () => {
 			const { txHash } = await sendXrp(params);
 
 			expect(txHash).toBe(await deriveXrpTransactionHash(signedBlob));
+		});
+	});
+
+	// A recipient with DepositAuth applies a payment from anyone it did not preauthorize as
+	// `tecNO_PERMISSION`, fee claimed — for XRP as for tokens.
+	describe('a recipient with DepositAuth', () => {
+		const depositAuth = 0x01000000;
+
+		const destinationWith = ({ flags, balance }: { flags: number; balance: bigint }) =>
+			vi
+				.mocked(xrplRest.loadXrpAccountInfo)
+				.mockImplementation(({ address }) =>
+					Promise.resolve(
+						address === destination
+							? { balance, sequence: 1, ownerCount: 0, flags }
+							: { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: 0 }
+					)
+				);
+
+		beforeEach(() => {
+			vi.spyOn(xrplRest, 'loadXrpDepositAuthorized').mockResolvedValue(false);
+		});
+
+		const expectRefusal = async (refusal: string) => {
+			const err = await sendXrp(params).catch((e: unknown) => e);
+
+			expect(err).toBeInstanceOf(XrpPaymentRefusedError);
+			expect((err as XrpPaymentRefusedError).refusal).toBe(refusal);
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+		};
+
+		it('asks whether it preauthorized the sender', async () => {
+			destinationWith({ flags: depositAuth, balance: 30_000_000n });
+
+			await expectRefusal('deposit_not_authorized');
+
+			expect(xrplRest.loadXrpDepositAuthorized).toHaveBeenCalledExactlyOnceWith({
+				source,
+				destination,
+				network: XrpNetworks.mainnet
+			});
+		});
+
+		it('sends when it did', async () => {
+			destinationWith({ flags: depositAuth, balance: 30_000_000n });
+			vi.mocked(xrplRest.loadXrpDepositAuthorized).mockResolvedValue(true);
+
+			await expect(sendXrp(params)).resolves.toBeDefined();
+		});
+
+		it('asks nothing of a recipient without it', async () => {
+			destinationWith({ flags: 0, balance: 30_000_000n });
+
+			await expect(sendXrp(params)).resolves.toBeDefined();
+
+			expect(xrplRest.loadXrpDepositAuthorized).not.toHaveBeenCalled();
+		});
+
+		// rippled lets a payment of at most the reserve through to an account holding at most the
+		// reserve, so such an account cannot lock itself out.
+		it('asks nothing when the amount and its balance are both at most the base reserve', async () => {
+			destinationWith({ flags: depositAuth, balance: XRP_BASE_RESERVE_DROPS });
+
+			await expect(sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS })).resolves.toBeDefined();
+
+			expect(xrplRest.loadXrpDepositAuthorized).not.toHaveBeenCalled();
+		});
+
+		it('asks when only one snapshot sets it', async () => {
+			vi.mocked(xrplRest.loadXrpAccountInfo).mockImplementation(({ address, ledgerIndex }) =>
+				Promise.resolve(
+					address === destination
+						? {
+								balance: 30_000_000n,
+								sequence: 1,
+								ownerCount: 0,
+								flags: ledgerIndex === 'current' ? depositAuth : 0
+							}
+						: { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: 0 }
+				)
+			);
+
+			await expectRefusal('deposit_not_authorized');
+		});
+
+		it('refuses when the answer cannot be read', async () => {
+			destinationWith({ flags: depositAuth, balance: 30_000_000n });
+			vi.mocked(xrplRest.loadXrpDepositAuthorized).mockRejectedValue(new Error('tooBusy'));
+
+			await expectRefusal('state_unavailable');
 		});
 	});
 });

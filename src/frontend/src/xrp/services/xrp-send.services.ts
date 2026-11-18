@@ -17,6 +17,7 @@ import { XrpRpcNotConfiguredError } from '$xrp/providers/xrp-rpc.providers';
 import {
 	XrpAccountNotFoundError,
 	loadXrpAccountInfo,
+	loadXrpDepositAuthorized,
 	loadXrpLedgerIndex,
 	submitXrpTransaction
 } from '$xrp/rest/xrpl.rest';
@@ -30,6 +31,7 @@ import {
 	XrpAmountExceedsSendableError,
 	XrpDestinationTagRequiredError,
 	XrpDestinationUnfundedError,
+	XrpPaymentRefusedError,
 	XrpSelfDestinationError,
 	XrpSendAlreadyInFlightError,
 	XrpSendNotGuardedError,
@@ -43,7 +45,11 @@ import {
 	toXrpDisplayRefs,
 	toXrpExternalRefs
 } from '$xrp/utils/xrp-active-tx.utils';
-import { getXrpMaxAmount, getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
+import {
+	getXrpMaxAmount,
+	getXrpReserveDrops,
+	xrpPaymentNeedsDepositPreauth
+} from '$xrp/utils/xrp-send.utils';
 import {
 	buildXrpPayment,
 	deriveXrpLedgerWindow,
@@ -215,6 +221,9 @@ export const sendXrp = async ({
 	interface XrpDestinationFacts {
 		settled: boolean;
 		requiresTag: boolean;
+		// Every flag either snapshot sets, and the higher balance: what the DepositAuth check reads.
+		flags: number;
+		balance: XrpBalance;
 		// Kept rather than thrown, because whether an unanswerable lookup matters depends on the
 		// amount and only the guards know it.
 		unavailable: Error | undefined;
@@ -223,15 +232,20 @@ export const sendXrp = async ({
 	// `flags` is a number on the `exists` branch, not an optional one: `Flags` is a mandatory
 	// AccountRoot field, so a response without it fails the parse and lands on `error` — an
 	// unanswerable lookup — rather than arriving here as a snapshot with nothing to say.
-	type XrpDestinationRead = { exists: true; flags: number } | { exists: false } | { error: Error };
+	type XrpDestinationRead =
+		{ exists: true; flags: number; balance: XrpBalance } | { exists: false } | { error: Error };
 
 	const readDestination = async (
 		ledgerIndex: 'current' | 'validated'
 	): Promise<XrpDestinationRead> => {
 		try {
-			const { flags } = await loadXrpAccountInfo({ address: destination, network, ledgerIndex });
+			const { flags, balance } = await loadXrpAccountInfo({
+				address: destination,
+				network,
+				ledgerIndex
+			});
 
-			return { exists: true, flags };
+			return { exists: true, flags, balance };
 		} catch (err: unknown) {
 			if (err instanceof XrpAccountNotFoundError) {
 				return { exists: false };
@@ -248,6 +262,11 @@ export const sendXrp = async ({
 			settled: reads.every((read) => 'exists' in read && read.exists),
 			requiresTag: reads.some(
 				(read) => 'flags' in read && (read.flags & XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG) !== 0
+			),
+			flags: reads.reduce((flags, read) => ('flags' in read ? flags | read.flags : flags), 0),
+			balance: reads.reduce(
+				(balance, read) => ('balance' in read && read.balance > balance ? read.balance : balance),
+				ZERO
 			),
 			unavailable: reads.find((read): read is { error: Error } => 'error' in read)?.error
 		};
@@ -428,6 +447,38 @@ export const sendXrp = async ({
 	// rather than restated, so the reason reaching the caller is the real one.
 	if (isNullish(destinationTag) && nonNullish(destinationLookup.unavailable)) {
 		throw destinationLookup.unavailable;
+	}
+
+	// A recipient with DepositAuth applies a payment from anyone it did not preauthorize as
+	// `tecNO_PERMISSION`, fee claimed. Asked whenever a snapshot that was read sets the flag. A tagged
+	// XRP payment whose destination could not be read at all goes ahead, as it does for an unknown tag
+	// requirement: a node that cannot answer must not stop every well-funded send.
+	if (
+		xrpPaymentNeedsDepositPreauth({
+			destinationFlags: destinationLookup.flags,
+			destinationBalance: destinationLookup.balance,
+			xrpAmount: amount
+		})
+	) {
+		let authorized: boolean;
+
+		try {
+			authorized = await loadXrpDepositAuthorized({ source, destination, network });
+		} catch (err: unknown) {
+			throw new XrpPaymentRefusedError({
+				refusal: 'state_unavailable',
+				message: `XRP payment refused: whether ${destination} takes deposits from ${source} could not be read. ${
+					err instanceof Error ? err.message : `${err}`
+				}`
+			});
+		}
+
+		if (!authorized) {
+			throw new XrpPaymentRefusedError({
+				refusal: 'deposit_not_authorized',
+				message: `XRP destination ${destination} takes payments only from accounts it preauthorized, and not from ${source}.`
+			});
+		}
 	}
 
 	// After every guard, so a send that was going to be refused does not derive a key first. On a
