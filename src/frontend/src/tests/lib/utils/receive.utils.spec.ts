@@ -79,7 +79,7 @@ describe('receive.utils', () => {
 		id: parseTokenId('ckUSDC'),
 		symbol: 'ckUSDC',
 		name: 'ckUSDC',
-		ledgerCanisterId: IC_CKUSDC_LEDGER_CANISTER_ID,
+		ledgerCanisterId: IC_CKUSDC_LEDGER_CANISTER_ID ?? 'xevnm-gaaaa-aaaar-qafnq-cai',
 		twinToken: USDC_TOKEN,
 		groupData: USDC_TOKEN_GROUP
 	};

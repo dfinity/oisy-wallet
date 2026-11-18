@@ -43,6 +43,7 @@
 		tokenEnabled: boolean;
 		enabling: boolean;
 		enableFailed: boolean;
+		retrying: boolean;
 		// The previous step was a visible choice: the route picker or the token picker.
 		backToPreviousStep: boolean;
 		convertTwinToken?: Token;
@@ -62,6 +63,7 @@
 		tokenEnabled,
 		enabling,
 		enableFailed,
+		retrying,
 		backToPreviousStep,
 		convertTwinToken,
 		onEnable,
@@ -232,6 +234,8 @@
 					<p class="text-error-primary" role="alert">{$i18n.receive.token.text.address_error}</p>
 					<Button
 						colorStyle="secondary-light"
+						disabled={retrying}
+						loading={retrying}
 						onclick={onRetryAddress}
 						paddingSmall
 						testId={RECEIVE_ADDRESS_RETRY_BUTTON}

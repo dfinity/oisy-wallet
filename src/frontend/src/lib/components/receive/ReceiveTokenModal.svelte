@@ -285,12 +285,20 @@
 		untrack(() => loadCkBtcDepositAddress({ ...creditedToken, identity: $authIdentity }));
 	});
 
+	let retrying = $state(false);
+
 	const retryAddress = async () => {
 		if (isNullish(route)) {
 			return;
 		}
 
-		await retryReceiveAddress({ route, identity: $authIdentity });
+		retrying = true;
+
+		try {
+			await retryReceiveAddress({ route, identity: $authIdentity });
+		} finally {
+			retrying = false;
+		}
 	};
 
 	let enabling = $state(false);
@@ -310,14 +318,16 @@
 
 		const enabledToken = { ...creditedToken, enabled: true };
 
-		await saveAllCustomTokens({
-			tokens: [enabledToken],
-			onError: () => (enableFailed = true),
-			$authIdentity,
-			$i18n
-		});
-
-		enabling = false;
+		try {
+			await saveAllCustomTokens({
+				tokens: [enabledToken],
+				onError: () => (enableFailed = true),
+				$authIdentity,
+				$i18n
+			});
+		} finally {
+			enabling = false;
+		}
 	};
 
 	const close = () => closeModal(() => onClose?.());
@@ -480,6 +490,7 @@
 						onHowToConvert={howToConvert}
 						onRetryAddress={retryAddress}
 						onViewActivity={viewActivity}
+						{retrying}
 						{route}
 						{tokenEnabled}
 						bind:icpFormat
