@@ -16,6 +16,7 @@ import {
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import * as addrDerived from '$lib/derived/address.derived';
+import * as authDerived from '$lib/derived/auth.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
@@ -37,17 +38,19 @@ import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { mockLifiSolUsdcToSol } from '$tests/mocks/lifi-sol-transaction.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import type { Identity } from '@icp-sdk/core/agent';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get, readable, writable } from 'svelte/store';
 
 const mockFetchNearIntentsSolSwap = vi.fn();
 
 vi.mock('$lib/services/swap.services', () => ({
+	enableSwapDestinationToken: vi.fn(),
 	fetchNearIntentsSolSwap: (...args: unknown[]) => mockFetchNearIntentsSolSwap(...args)
 }));
 
@@ -531,6 +534,29 @@ describe('SwapSolWizard', () => {
 			expect(mockFetchChainFusionSolSwap).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ prioritizationFee: 4_000n })
 			);
+		});
+
+		// ckSOL is enabled once the transfer is broadcast, which can come after an account switch.
+		it('should enable the ckSOL twin for the identity that converted, not the one signed in by then', async () => {
+			const signedIn = writable<Identity | null>(mockIdentity);
+			vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(signedIn);
+
+			const { getByText } = renderChainFusion();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			signedIn.set({ getPrincipal: () => mockPrincipal2 } as unknown as Identity);
+
+			await mockFetchChainFusionSolSwap.mock.lastCall?.[0].enableDestinationToken();
+
+			expect(swapServices.enableSwapDestinationToken).toHaveBeenCalledExactlyOnceWith({
+				destinationToken: expect.objectContaining({
+					ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID,
+					minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID
+				}),
+				identity: mockIdentity
+			});
 		});
 
 		it.each<{ reason: ChainFusionSolDepositRefusal; message: string }>([

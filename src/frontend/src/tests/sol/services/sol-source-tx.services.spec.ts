@@ -241,6 +241,19 @@ describe('sol-source-tx.services', () => {
 			await expect(readFinalized()).resolves.toBe('succeeded');
 		});
 
+		// A confirmed view past the blockhash can still be replaced by a fork that includes the
+		// transaction: only the finalized chain moving past it means no block can.
+		it('should read the blockhash on the finalized chain when there is no status', async () => {
+			await expect(readFinalized()).resolves.toBe('pending');
+
+			expect(isBlockhashValid).toHaveBeenCalledExactlyOnceWith({
+				blockhash,
+				network: SolanaNetworks.mainnet,
+				minContextSlot: simulationSlot,
+				commitment: 'finalized'
+			});
+		});
+
 		it('should expire a transaction whose confirmation was rolled back, once its blockhash has expired', async () => {
 			vi.mocked(getSignatureStatus).mockResolvedValueOnce({ slot: 210n, status: confirmedStatus });
 

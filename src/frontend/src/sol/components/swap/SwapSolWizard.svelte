@@ -377,8 +377,10 @@
 				selectedProvider?.provider === SwapProvider.CHAIN_FUSION &&
 				nonNullish(ckDestinationToken)
 			) {
+				const identity = $authIdentity;
+
 				await fetchChainFusionSolSwap({
-					identity: $authIdentity,
+					identity,
 					progress,
 					sourceToken: $sourceToken,
 					destinationToken: ckDestinationToken,
@@ -390,8 +392,8 @@
 					prioritizationFee: $prioritizationFeeStore ?? ZERO,
 					enableDestinationToken: () =>
 						enableSwapDestinationToken({
-							destinationToken: $destinationToken,
-							identity: $authIdentity
+							destinationToken: ckDestinationToken,
+							identity
 						})
 				});
 			} else {

@@ -124,8 +124,8 @@ export const getSignatureStatus = async ({
 };
 
 /**
- * Whether a transaction with this recent blockhash can still land, as of the highest confirmed
- * slot, with that slot.
+ * Whether a transaction with this recent blockhash can still land, as of the highest slot at
+ * `commitment` (confirmed unless given), with that slot.
  *
  * A node answers `false` alike for a blockhash that has aged out and for one it has not seen yet,
  * which is what a node running behind answers about a recent one. `minContextSlot` is a slot where
@@ -135,11 +135,13 @@ export const getSignatureStatus = async ({
 export const isBlockhashValid = async ({
 	blockhash,
 	network,
-	minContextSlot
+	minContextSlot,
+	commitment = 'confirmed'
 }: {
 	blockhash: string;
 	network: SolanaNetworkType;
 	minContextSlot?: bigint;
+	commitment?: Commitment;
 }): Promise<{ slot: bigint; valid: boolean }> => {
 	const { isBlockhashValid } = solanaHttpRpc(network);
 
@@ -147,7 +149,7 @@ export const isBlockhashValid = async ({
 		context: { slot },
 		value
 	} = await isBlockhashValid(solBlockhash(blockhash), {
-		commitment: 'confirmed',
+		commitment,
 		...(nonNullish(minContextSlot) && { minContextSlot })
 	}).send();
 

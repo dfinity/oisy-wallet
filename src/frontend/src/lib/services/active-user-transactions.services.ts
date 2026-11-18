@@ -84,13 +84,19 @@ const upsertForIdentity = ({
 	activeUserTransactionsStore.upsert({ transaction });
 };
 
+/**
+ * Creates the row and returns it as the backend stored it, stamped with the backend's time
+ * (`created_at_ns`).
+ */
 export const createActiveUserTransaction = async ({
 	identity,
 	...params
-}: { identity: Identity } & CreateActiveUserTransactionParams): Promise<void> => {
+}: { identity: Identity } & CreateActiveUserTransactionParams): Promise<ActiveUserTransaction> => {
 	const transaction = await createActiveUserTransactionApi({ identity, ...params });
 
 	upsertForIdentity({ identity, transaction });
+
+	return transaction;
 };
 
 export const updateActiveUserTransaction = async ({

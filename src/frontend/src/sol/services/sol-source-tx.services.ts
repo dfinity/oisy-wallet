@@ -44,7 +44,9 @@ const recordExpiryObservation = (rowId: string): number => {
  *
  * `expired` is returned only once two consecutive polls of the same row have seen it; the first
  * reads as `pending`. With `finalized`, a status counts only once it is finalized (see
- * `toSolSourceTxOutcome`).
+ * `toSolSourceTxOutcome`), and the blockhash is read on the finalized chain too: a transfer is
+ * expired only once that chain has moved past its blockhash, which no later block can then include,
+ * not on a confirmed view that a competing fork can still replace.
  */
 export const readSolSourceTxOutcome = async ({
 	rowId,
@@ -68,7 +70,12 @@ export const readSolSourceTxOutcome = async ({
 	// Only a missing status is ambiguous: the transaction may still land, or never will. The
 	// blockhash tells the two apart.
 	if (isNullish(status)) {
-		const blockhashRead = await isBlockhashValid({ blockhash, network, minContextSlot });
+		const blockhashRead = await isBlockhashValid({
+			blockhash,
+			network,
+			minContextSlot,
+			...(finalized && { commitment: 'finalized' as const })
+		});
 
 		if (!blockhashRead.valid) {
 			// The transaction may have landed just before its blockhash aged out, after the status was
