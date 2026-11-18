@@ -11,6 +11,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadXrpTransactionOutcome, loadXrpValidatedLedgerIndex } from '$xrp/rest/xrpl.rest';
 import { XRP_LEDGER_RESULT_EXPIRED } from '$xrp/types/xrp-active-tx';
 import {
+	isXrpTrustLineRemovalActiveUserTransaction,
 	toXrpLedgerResolutionRefs,
 	xrpActiveUserTransactionDisplay,
 	xrpActiveUserTransactionNetwork,
@@ -171,18 +172,24 @@ const xrpFailureSubject = (tx: ActiveUserTransaction): Record<string, string> =>
 };
 
 /**
- * What a row applied and failed says: a `TrustSet` added no token, a payment sent nothing; the fee
- * was charged either way.
+ * What a row applied and failed says: a `TrustSet` added or removed no token, a payment sent nothing;
+ * the fee was charged either way.
  */
 const xrpFailureText = ({ tx, result }: { tx: ActiveUserTransaction; result: string }): string => {
 	const trustSet = xrpTrustSetActiveUserTransactionDisplay(tx);
+	const { error } = get(i18n).tokens.import;
 
 	return nonNullish(trustSet)
-		? replacePlaceholders(get(i18n).tokens.import.error.xrp_trust_set_failed, {
-				$symbol: trustSet.symbol,
-				$network: trustSet.network,
-				$result: result
-			})
+		? replacePlaceholders(
+				isXrpTrustLineRemovalActiveUserTransaction(tx)
+					? error.xrp_trust_set_remove_failed
+					: error.xrp_trust_set_failed,
+				{
+					$symbol: trustSet.symbol,
+					$network: trustSet.network,
+					$result: result
+				}
+			)
 		: replacePlaceholders(get(i18n).send.error.xrp_active_transaction_failed, {
 				...xrpFailureSubject(tx),
 				$result: result
@@ -192,12 +199,15 @@ const xrpFailureText = ({ tx, result }: { tx: ActiveUserTransaction; result: str
 // What a row that expired says: nothing was applied and nothing was charged.
 const xrpExpiryText = (tx: ActiveUserTransaction): string => {
 	const trustSet = xrpTrustSetActiveUserTransactionDisplay(tx);
+	const { error } = get(i18n).tokens.import;
 
 	return nonNullish(trustSet)
-		? replacePlaceholders(get(i18n).tokens.import.error.xrp_trust_set_expired, {
-				$symbol: trustSet.symbol,
-				$network: trustSet.network
-			})
+		? replacePlaceholders(
+				isXrpTrustLineRemovalActiveUserTransaction(tx)
+					? error.xrp_trust_set_remove_expired
+					: error.xrp_trust_set_expired,
+				{ $symbol: trustSet.symbol, $network: trustSet.network }
+			)
 		: replacePlaceholders(get(i18n).send.error.xrp_send_expired, xrpFailureSubject(tx));
 };
 

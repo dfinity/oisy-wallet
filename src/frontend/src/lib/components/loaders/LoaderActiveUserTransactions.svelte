@@ -9,7 +9,9 @@
 		TRACK_COUNT_XRP_SEND_ERROR,
 		TRACK_COUNT_XRP_SEND_SUCCESS,
 		TRACK_COUNT_XRP_TRUST_LINE_ADD_ERROR,
-		TRACK_COUNT_XRP_TRUST_LINE_ADD_SUCCESS
+		TRACK_COUNT_XRP_TRUST_LINE_ADD_SUCCESS,
+		TRACK_COUNT_XRP_TRUST_LINE_REMOVE_ERROR,
+		TRACK_COUNT_XRP_TRUST_LINE_REMOVE_SUCCESS
 	} from '$lib/constants/analytics.constants';
 	import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
@@ -77,11 +79,13 @@
 	} from '$lib/utils/velora-active-tx.utils';
 	import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 	import { pollXrpActiveUserTransactions } from '$xrp/services/xrp-active-tx.services';
+	import { reportRemovedXrpTrustLineToken } from '$xrp/services/xrp-trust-line-tokens.services';
 	import {
 		buildXrpSendTrackingMetadata,
 		buildXrpTrustSetTrackingMetadata,
 		isXrpActiveUserTransaction,
 		isXrpTokenPaymentActiveUserTransaction,
+		isXrpTrustLineRemovalActiveUserTransaction,
 		isXrpTrustSetActiveUserTransaction,
 		xrpActiveUserTransactionDisplay,
 		xrpTrustSetActiveUserTransactionDisplay
@@ -434,16 +438,25 @@
 			) {
 				newlyAppliedIds.push(tx.id);
 
+				const removal = isXrpTrustLineRemovalActiveUserTransaction(tx);
+
 				trackEvent({
-					name: isSucceeded
-						? TRACK_COUNT_XRP_TRUST_LINE_ADD_SUCCESS
-						: TRACK_COUNT_XRP_TRUST_LINE_ADD_ERROR,
+					name: removal
+						? isSucceeded
+							? TRACK_COUNT_XRP_TRUST_LINE_REMOVE_SUCCESS
+							: TRACK_COUNT_XRP_TRUST_LINE_REMOVE_ERROR
+						: isSucceeded
+							? TRACK_COUNT_XRP_TRUST_LINE_ADD_SUCCESS
+							: TRACK_COUNT_XRP_TRUST_LINE_ADD_ERROR,
 					metadata: buildXrpTrustSetTrackingMetadata({ tx })
 				});
 
-				// The one place adding a token is reported, for the reason the send's outcome is: the
-				// review stops at the submit.
-				if (isSucceeded) {
+				// The one place adding or removing a token is reported, for the reason the send's
+				// outcome is: the review stops at the submit. A removal's success reads the line
+				// again first, since the ledger keeps it while the issuer holds settings on it.
+				if (isSucceeded && removal) {
+					reportRemovedXrpTrustLineToken({ identity: $authIdentity, tx }).catch(consoleError);
+				} else if (isSucceeded) {
 					toastsShow({
 						text: replacePlaceholders($i18n.tokens.import.text.xrp_token_added, {
 							$symbol: xrpTrustSetActiveUserTransactionDisplay(tx)?.symbol ?? ''
@@ -455,8 +468,8 @@
 					toastsError({ msg: { text: tx.error[0] ?? $i18n.send.error.unexpected } });
 				}
 
-				// Unconditional, as for a send: a failure claimed the fee, and a success added the line
-				// the wallet now reads, which is what shows the token and saves it to the list.
+				// Unconditional, as for a send: a failure claimed the fee, and a success added or removed
+				// the line the wallet now reads, which is what shows the token or drops it.
 				shouldRefresh = true;
 			}
 		}

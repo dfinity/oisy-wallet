@@ -11,12 +11,26 @@ import * as saveCustomTokensServices from '$lib/services/save-custom-tokens.serv
 import * as toastsStore from '$lib/stores/toasts.store';
 import * as consoleUtils from '$lib/utils/console.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
+import {
+	mockXrpActiveUserTransaction,
+	mockXrpSourceAddress,
+	mockXrpTrustLineRemovalActiveUserTransaction
+} from '$tests/mocks/active-user-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockXrpAddress, mockXrpAddress2 } from '$tests/mocks/xrp.mock';
+import {
+	mockRlusdCurrencyCode,
+	mockRlusdIssuer,
+	mockXrpAddress,
+	mockXrpAddress2,
+	mockXrpTrustLine
+} from '$tests/mocks/xrp.mock';
+import * as xrplRest from '$xrp/rest/xrpl.rest';
+import * as xrpCustomTokensServices from '$xrp/services/xrp-custom-tokens.services';
 import {
 	addXrpTrustLineToken,
 	removeXrpTrustLineToken,
+	reportRemovedXrpTrustLineToken,
 	saveUnsavedXrpTrustLineTokens
 } from '$xrp/services/xrp-trust-line-tokens.services';
 import * as xrpTrustSetServices from '$xrp/services/xrp-trust-set.services';
@@ -406,6 +420,134 @@ describe('xrp-trust-line-tokens.services', () => {
 			});
 			expect(onError).toHaveBeenCalledExactlyOnceWith(err);
 			expect(onSuccess).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('reportRemovedXrpTrustLineToken', () => {
+		const tx = mockXrpTrustLineRemovalActiveUserTransaction;
+		const placeholders = (text: string) =>
+			text.replace('$symbol', 'RLUSD').replace('$amount', '0.2');
+
+		beforeEach(() => {
+			vi.spyOn(xrplRest, 'loadXrpAccountLines').mockResolvedValue([]);
+			vi.spyOn(backendApi, 'removeCustomToken').mockResolvedValue(undefined);
+			vi.spyOn(xrpCustomTokensServices, 'loadCustomTokens').mockResolvedValue(undefined);
+			vi.spyOn(toastsStore, 'toastsShow');
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+		});
+
+		it("reads the record's line again, with the issuer as peer", async () => {
+			await reportRemovedXrpTrustLineToken({ identity: mockIdentity, tx });
+
+			expect(xrplRest.loadXrpAccountLines).toHaveBeenCalledExactlyOnceWith({
+				address: mockXrpSourceAddress,
+				network: XrpNetworks.mainnet,
+				peer: mockRlusdIssuer
+			});
+		});
+
+		describe('once the ledger has deleted the line', () => {
+			it('says the token was removed and its reserve is free', async () => {
+				await reportRemovedXrpTrustLineToken({ identity: mockIdentity, tx });
+
+				expect(toastsStore.toastsShow).toHaveBeenCalledExactlyOnceWith({
+					text: placeholders(en.tokens.import.text.xrp_token_removed),
+					level: 'success',
+					duration: 4000
+				});
+			});
+
+			it('drops the backend entry and reloads the list', async () => {
+				await reportRemovedXrpTrustLineToken({ identity: mockIdentity, tx });
+
+				expect(backendApi.removeCustomToken).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					token: expect.objectContaining({
+						token: {
+							XrpTrustLineMainnet: { currency: mockRlusdCurrencyCode, issuer: mockRlusdIssuer }
+						}
+					})
+				});
+				expect(xrpCustomTokensServices.loadCustomTokens).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity
+				});
+			});
+
+			// An entry without its line is not listed, so a failed write changes nothing the user sees.
+			it('says nothing more when the entry cannot be dropped', async () => {
+				vi.mocked(backendApi.removeCustomToken).mockRejectedValue(new Error('down'));
+
+				await reportRemovedXrpTrustLineToken({ identity: mockIdentity, tx });
+
+				expect(toastsStore.toastsShow).toHaveBeenCalledOnce();
+				expect(consoleUtils.consoleWarn).toHaveBeenCalledOnce();
+			});
+
+			it('writes nothing without an identity', async () => {
+				await reportRemovedXrpTrustLineToken({ identity: undefined, tx });
+
+				expect(toastsStore.toastsShow).toHaveBeenCalledOnce();
+				expect(backendApi.removeCustomToken).not.toHaveBeenCalled();
+			});
+
+			it('treats a line of another token as not this one', async () => {
+				vi.mocked(xrplRest.loadXrpAccountLines).mockResolvedValue([
+					{ ...mockXrpTrustLine, currency: 'USD', balance: '0' }
+				]);
+
+				await reportRemovedXrpTrustLineToken({ identity: mockIdentity, tx });
+
+				expect(backendApi.removeCustomToken).toHaveBeenCalledOnce();
+			});
+		});
+
+		// The issuer holds settings on its side: the account's side, and its reserve, are released all
+		// the same.
+		describe('when the ledger kept the line', () => {
+			beforeEach(() => {
+				vi.mocked(xrplRest.loadXrpAccountLines).mockResolvedValue([
+					{ ...mockXrpTrustLine, balance: '0', limit: '0', freezePeer: true }
+				]);
+			});
+
+			it('says so', async () => {
+				await reportRemovedXrpTrustLineToken({ identity: mockIdentity, tx });
+
+				expect(toastsStore.toastsShow).toHaveBeenCalledExactlyOnceWith({
+					text: placeholders(en.tokens.import.text.xrp_token_kept),
+					level: 'info',
+					duration: 8000
+				});
+			});
+
+			it('keeps the backend entry, since the token stays', async () => {
+				await reportRemovedXrpTrustLineToken({ identity: mockIdentity, tx });
+
+				expect(backendApi.removeCustomToken).not.toHaveBeenCalled();
+			});
+		});
+
+		it('claims no more than the removal when the line cannot be read', async () => {
+			vi.mocked(xrplRest.loadXrpAccountLines).mockRejectedValue(new Error('down'));
+
+			await reportRemovedXrpTrustLineToken({ identity: mockIdentity, tx });
+
+			expect(toastsStore.toastsShow).toHaveBeenCalledExactlyOnceWith({
+				text: placeholders(en.tokens.import.text.xrp_token_remove_settled),
+				level: 'success',
+				duration: 4000
+			});
+			expect(backendApi.removeCustomToken).not.toHaveBeenCalled();
+		});
+
+		it('ignores a row that is not a TrustSet', async () => {
+			await reportRemovedXrpTrustLineToken({
+				identity: mockIdentity,
+				tx: mockXrpActiveUserTransaction
+			});
+
+			expect(xrplRest.loadXrpAccountLines).not.toHaveBeenCalled();
+			expect(toastsStore.toastsShow).not.toHaveBeenCalled();
 		});
 	});
 });
