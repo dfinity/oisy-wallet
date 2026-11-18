@@ -2715,7 +2715,9 @@
 		"text": {
 			"next_slide": "अगली स्लाइड",
 			"prev_slide": "पिछली स्लाइड",
-			"indicator": "स्लाइड $index पर कूदें"
+			"indicator": "स्लाइड $index पर कूदें",
+			"cksol_slide_title": "ckSOL आ गया है: Internet Computer पर SOL",
+			"cksol_slide_cta": "ckSOL खोलें"
 		}
 	},
 	"agreements": {
