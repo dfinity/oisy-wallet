@@ -1,6 +1,7 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.eurc.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
@@ -30,6 +31,12 @@ import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import {
+	encodeCkDepositErc20,
+	encodeCkDepositEth,
+	mockCkDepositHelperContractAddress,
+	mockCkDepositSubaccount
+} from '$tests/mocks/ck-deposit.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
@@ -716,6 +723,99 @@ describe('eth wallet-connect.services', () => {
 					to: CKETH_HELPER,
 					data,
 					sourceNetwork: BASE_NETWORK
+				});
+			});
+		});
+
+		describe('the ckETH minter helper that deposits to a subaccount', () => {
+			const HELPER = mockCkDepositHelperContractAddress;
+
+			const minterInfo = {
+				data: {
+					...mockCkMinterInfo,
+					deposit_with_subaccount_helper_contract_address: toNullable(HELPER),
+					supported_ckerc20_tokens: toNullable([
+						{
+							erc20_contract_address: USDT_TOKEN.address,
+							ledger_canister_id: Principal.fromText('cngnf-vqaaa-aaaar-qag4q-cai'),
+							ckerc20_token_symbol: 'ckUSDT'
+						}
+					])
+				},
+				certified: true
+			};
+
+			const buildDepositParams = (data: string) => {
+				const params = buildParams();
+
+				return {
+					...params,
+					request: {
+						...params.request,
+						params: {
+							...params.request.params,
+							chainId: 'eip155:1',
+							request: {
+								method: 'eth_sendTransaction',
+								params: [{ from: HOLDER, to: HELPER, data }]
+							}
+						}
+					},
+					minterInfo,
+					targetNetwork: ICP_NETWORK,
+					tokens: [USDT_TOKEN]
+				};
+			};
+
+			// A deposit to an account that is not the user's is reviewed with a warning, not refused.
+			it('should sign a deposit to any account as the app sent it, without a confirmation', async () => {
+				const data = encodeCkDepositErc20({
+					address: USDT_TOKEN.address,
+					amount: 50_000_000n,
+					owner: Principal.fromText('hnnn4-iyaaa-aaaar-qb4bq-cai'),
+					subaccount: mockCkDepositSubaccount
+				});
+
+				const { success } = await send(buildDepositParams(data));
+
+				expect(success).toBeTruthy();
+				expect(vi.mocked(executeSend).mock.calls[0][0]).toMatchObject({
+					to: HELPER,
+					data,
+					targetNetwork: ICP_NETWORK
+				});
+			});
+
+			it('should refuse a deposit of a token the minter does not convert, and never sign it', async () => {
+				const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+				const { success } = await send(
+					buildDepositParams(
+						encodeCkDepositErc20({ address: SPENDER, amount: 50_000_000n, owner: mockPrincipal })
+					)
+				);
+
+				expect(success).toBeFalsy();
+				expect(executeSend).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: get(i18n).wallet_connect.error.ck_deposit_refused }
+				});
+			});
+
+			it('should hold a deposit while the helper contract is not confirmed, and never sign it', async () => {
+				const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+				const { success } = await send({
+					...buildDepositParams(encodeCkDepositEth({ owner: mockPrincipal })),
+					minterInfo: undefined,
+					targetNetwork: ETHEREUM_NETWORK
+				});
+
+				expect(success).toBeFalsy();
+				expect(executeSend).not.toHaveBeenCalled();
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: get(i18n).wallet_connect.error.cketh_helper_unconfirmed }
 				});
 			});
 		});

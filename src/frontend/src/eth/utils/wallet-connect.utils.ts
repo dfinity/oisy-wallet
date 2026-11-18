@@ -1,9 +1,13 @@
 import { EIP155_CHAINS } from '$env/eip155-chains.env';
-import { CKETH_DEPOSIT_HASH } from '$eth/constants/cketh.constants';
+import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { CK_DEPOSIT_ETH_HASH, CKETH_DEPOSIT_HASH } from '$eth/constants/cketh.constants';
+import { ERC20_DEPOSIT_ERC20_HASH } from '$eth/constants/erc20.constants';
 import { SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS } from '$eth/constants/wallet-connect.constants';
 import type { OptionEthAddress } from '$eth/types/address';
+import type { ErcFungibleToken } from '$eth/types/erc-fungible';
 import type {
 	WalletConnectEthCall,
+	WalletConnectEthCkDeposit,
 	WalletConnectEthSignTypedDataV4,
 	WalletConnectEthTypedDataAllowance,
 	WalletConnectEthTypedDataApproval
@@ -11,6 +15,7 @@ import type {
 import { isEthAddress } from '$eth/utils/account.utils';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
 import {
+	decodeCkDeposit,
 	decodeCkEthDepositPrincipal,
 	getCalldataSelector,
 	hasCalldata,
@@ -22,12 +27,16 @@ import {
 } from '$eth/utils/transactions.utils';
 import { getUniswapSwap, type GetUniswapSwapParams } from '$eth/utils/uniswap.utils';
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
-import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+import {
+	toCkDepositHelperContractAddress,
+	toCkEthHelperContractAddress
+} from '$icp-eth/utils/cketh.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
+import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
 import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { fromNullishNullable, isNullish, nonNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
 import { TypedDataEncoder, type TypedDataDomain, type TypedDataField } from 'ethers/hash';
 import { isHexString, toUtf8String } from 'ethers/utils';
@@ -208,11 +217,161 @@ export const getWalletConnectEthCkEthDeposit = ({
 };
 
 /**
+ * Thrown when a deposit to the ckETH minter's helper contract that deposits to a principal and a
+ * subaccount is one OISY does not sign.
+ */
+export class WalletConnectEthCkDepositError extends Error {}
+
+/**
+ * The ckETH minter's helper contract that deposits to a principal and a subaccount, on the network a
+ * WalletConnect request is signed for.
+ *
+ * Like the ckETH helper contract, it exists only on Ethereum and Sepolia, at the address their ckETH
+ * minter states.
+ */
+export const toWalletConnectCkDepositHelperContractAddress = ({
+	networkId,
+	minterInfo
+}: {
+	networkId: NetworkId;
+	minterInfo: OptionCertifiedMinterInfo;
+}): OptionEthAddress =>
+	isNetworkIdEthereum(networkId) ? toCkDepositHelperContractAddress(minterInfo) : undefined;
+
+type WalletConnectEthCkDepositParams = WalletConnectEthCkEthDepositParams & {
+	// The native value the transaction carries, which is what `depositEth` deposits.
+	value: bigint;
+	// The network's native token, which is what `depositEth` deposits.
+	nativeToken: Token;
+	// The tokens OISY lists and those the user added, enabled or not. A `depositErc20` is described
+	// only for one of them on the request's network, since its amount is stated in their decimals.
+	tokens: ErcFungibleToken[];
+};
+
+const CK_DEPOSIT_SELECTORS = [CK_DEPOSIT_ETH_HASH, ERC20_DEPOSIT_ERC20_HASH];
+
+/**
+ * A `depositEth` or `depositErc20` request to the ckETH minter's helper contract that deposits to a
+ * principal and a subaccount.
+ *
+ * The minter mints the ck token of the deposit to whichever account the call names, so unlike a
+ * `deposit(bytes32)` to the ckETH helper, a deposit to an account that is not the user's is not
+ * refused: dApps deposit to accounts of their own on the user's behalf, and the review names the
+ * account and says whether it is the user's. What OISY does refuse, by throwing, is a deposit that
+ * converts nothing: calldata it cannot read as a deposit, which the minter could not credit either,
+ * a `depositErc20` of a token the minter does not convert, which would be lost, and a `depositErc20`
+ * carrying native value, which the contract refuses.
+ *
+ * `undefined` for a request that is not such a deposit to the helper, and for a `depositErc20` of a
+ * token OISY knows no decimals for, so that either is classified by its calldata alone.
+ *
+ * Until certified minter information confirms where the helper is, either call on Ethereum or
+ * Sepolia throws instead, whatever it is addressed to, as a `deposit(bytes32)` does: telling the
+ * helper from another contract is what describing the deposit rests on.
+ */
+export const getWalletConnectEthCkDeposit = ({
+	to,
+	data,
+	value,
+	networkId,
+	minterInfo,
+	principal,
+	nativeToken,
+	tokens
+}: WalletConnectEthCkDepositParams): WalletConnectEthCkDeposit | undefined => {
+	const selector = getCalldataSelector(data);
+
+	if (
+		isNullish(selector) ||
+		!CK_DEPOSIT_SELECTORS.includes(selector) ||
+		!isNetworkIdEthereum(networkId)
+	) {
+		return;
+	}
+
+	const helperContractAddress = toWalletConnectCkDepositHelperContractAddress({
+		networkId,
+		minterInfo
+	});
+
+	// Deposits are only described against certified minter information, so an answer that is not
+	// certified yet does not confirm the helper either.
+	if (isNullish(helperContractAddress) || minterInfo?.certified !== true) {
+		throw new WalletConnectEthCkEthHelperUnconfirmedError(
+			'The ckETH deposit helper contract is not confirmed yet, so a deposit cannot be checked against it.'
+		);
+	}
+
+	if (!isDestinationContractAddress({ destination: to, contractAddress: helperContractAddress })) {
+		return;
+	}
+
+	const deposit = decodeCkDeposit(data);
+
+	if (isNullish(deposit)) {
+		throw new WalletConnectEthCkDepositError(
+			'The request calls the ckETH deposit helper contract with calldata that is not a deposit OISY can decode.'
+		);
+	}
+
+	const { erc20, owner, subaccount } = deposit;
+
+	const account = {
+		owner,
+		...(nonNullish(subaccount) && { subaccount }),
+		ownAccount:
+			nonNullish(principal) && owner.toText() === principal.toText() && isNullish(subaccount)
+	};
+
+	if (isNullish(erc20)) {
+		const ckTokenSymbol = [ETHEREUM_TOKEN, SEPOLIA_TOKEN].find(
+			({ network: { id } }) => id === networkId
+		)?.twinTokenSymbol;
+
+		return nonNullish(ckTokenSymbol)
+			? { token: nativeToken, amount: value, ckTokenSymbol, ...account }
+			: undefined;
+	}
+
+	if (value > ZERO) {
+		throw new WalletConnectEthCkDepositError(
+			'The request carries native value to depositErc20, which accepts none.'
+		);
+	}
+
+	const ckErc20Token = fromNullishNullable(minterInfo.data.supported_ckerc20_tokens)?.find(
+		({ erc20_contract_address }) =>
+			erc20_contract_address.toLowerCase() === erc20.address.toLowerCase()
+	);
+
+	if (isNullish(ckErc20Token)) {
+		throw new WalletConnectEthCkDepositError(
+			`The request deposits ${erc20.address}, which the minter does not convert.`
+		);
+	}
+
+	const token = tokens.find(
+		({ address, network: { id } }) =>
+			id === networkId && address.toLowerCase() === erc20.address.toLowerCase()
+	);
+
+	return nonNullish(token)
+		? {
+				token,
+				amount: erc20.amount,
+				ckTokenSymbol: ckErc20Token.ckerc20_token_symbol,
+				...account
+			}
+		: undefined;
+};
+
+/**
  * What an `eth_sendTransaction` request is, read from where it goes as well as from its calldata.
  *
- * A `deposit(bytes32)` means something only at the ckETH helper contract, and the commands of an
- * `execute` only at a Uniswap Universal Router, so the destination is what decides whether either
- * is read. Everything else is classified by its calldata alone, see
+ * A `deposit(bytes32)` means something only at the ckETH helper contract, a `depositEth` or
+ * `depositErc20` only at the minter's helper that deposits to a subaccount, and the commands of an
+ * `execute` only at a Uniswap Universal Router, so the destination is what decides whether any of
+ * them is read. Everything else is classified by its calldata alone, see
  * {@link classifyWalletConnectEthCall}.
  */
 export const classifyWalletConnectEthSendTransaction = ({
@@ -240,6 +399,27 @@ export const classifyWalletConnectEthSendTransaction = ({
 		return err instanceof WalletConnectEthCkEthHelperUnconfirmedError
 			? { type: 'ckEthHelperUnconfirmed' }
 			: { type: 'ckEthDepositRefused' };
+	}
+
+	try {
+		const deposit = getWalletConnectEthCkDeposit({
+			to,
+			data,
+			networkId,
+			minterInfo,
+			principal,
+			value: swap.value,
+			nativeToken: swap.nativeToken,
+			tokens: swap.tokens
+		});
+
+		if (nonNullish(deposit)) {
+			return { type: 'ckDeposit', deposit };
+		}
+	} catch (err: unknown) {
+		return err instanceof WalletConnectEthCkEthHelperUnconfirmedError
+			? { type: 'ckEthHelperUnconfirmed' }
+			: { type: 'ckDepositRefused' };
 	}
 
 	const uniswapSwap = getUniswapSwap({ to, data, networkId, ...swap });

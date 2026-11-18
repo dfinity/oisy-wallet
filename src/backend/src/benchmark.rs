@@ -33,7 +33,10 @@ use shared::{
         exchange::{ExchangeData, ExchangeRate},
         experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
         network::{NetworkSettings, NetworkSettingsFor},
-        personal_note::{DeletePersonalNoteRequest, SetPersonalNoteRequest},
+        personal_note::{
+            DeletePersonalNoteRequest, SetPersonalNoteRequest, MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES,
+        },
+        personal_note_share::MAX_PERSONAL_NOTE_SHARES_PER_USER,
         tip::{MAX_TIP_MESSAGE_CHARS, TIP_RETENTION_AFTER_TERMINAL_NS},
         token_id::TokenId,
         user_profile::{StoredUserProfile, UserProfile},
@@ -46,7 +49,10 @@ use crate::{
     active_user_transactions::model as active_user_transactions_model,
     api::admin::http_request,
     bitcoin::{pending_tx_model::BtcUserPendingTransactionsModel, tx_validator},
-    personal_notes::service as personal_notes_service,
+    personal_notes::{
+        service as personal_notes_service,
+        share::{model::PersonalNoteShareRecord, service::prune_expired_shares},
+    },
     state::{mutate_state, read_config, read_state, State},
     tips::{
         model::{TipRecord, TipState},
@@ -55,7 +61,7 @@ use crate::{
     token,
     transactions::model as user_transactions_model,
     types::{
-        storable::{TipId, TipSenderKey},
+        storable::{PersonalNoteShareCreatorKey, PersonalNoteShareToken, TipId, TipSenderKey},
         Candid, StoredPrincipal, StoredTokenId,
     },
     user_profile::{self, model::UserProfileModel},
@@ -915,6 +921,63 @@ fn bench_delete_personal_note() -> BenchResult {
             note_id: "note-0050".to_string(),
         })
         .expect("bench: delete_personal_note failed");
+    })
+}
+
+// ---------------------------------------------------------------------------
+// Personal note shares
+// ---------------------------------------------------------------------------
+
+/// Stores a share with the largest content and token a create accepts, in both maps, as
+/// `personal_notes::share::service::create_personal_note_share` does: the by-creator index holds
+/// the share's expiry. Each creator holds as many shares as the per-user cap allows.
+fn store_share(n: u64, expires_at_ns: u64) {
+    let creator_n = n / MAX_PERSONAL_NOTE_SHARES_PER_USER as u64;
+    let creator = Principal::from_slice(&creator_n.to_be_bytes());
+    let token = PersonalNoteShareToken(format!("{n:064}"));
+    let record = PersonalNoteShareRecord {
+        creator,
+        ct_content: ByteBuf::from(vec![0xAB; MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES]),
+        expires_at_ns,
+        single_use: false,
+    };
+
+    mutate_state(|s| {
+        s.personal_note_shares_by_creator.insert(
+            PersonalNoteShareCreatorKey(StoredPrincipal(creator), token.clone()),
+            expires_at_ns,
+        );
+        s.personal_note_shares.insert(token, Candid(record));
+    });
+}
+
+/// Prunes 10,000 shares twice: first at a time when none has expired, which reads only the
+/// by-creator index, then once half of them have, which also removes those 5,000 shares. The two
+/// scopes give the cost of reading one entry and of removing one share.
+#[bench(raw)]
+fn bench_prune_expired_shares_10000() -> BenchResult {
+    const COUNT: u64 = 10_000;
+
+    for n in 0..COUNT {
+        // Even shares expire at `TS0_NS`, odd shares at `TS1_NS`, so only even shares have
+        // expired at `TS0_NS`, and none has just before it.
+        let expires_at_ns = if n % 2 == 0 { TS0_NS } else { TS1_NS };
+        store_share(n, expires_at_ns);
+    }
+
+    bench_fn(|| {
+        {
+            let _scope = bench_scope("read_10000");
+            std::hint::black_box(mutate_state(|s| {
+                prune_expired_shares(s, None, TS0_NS - 1, || true)
+            }));
+        }
+        {
+            let _scope = bench_scope("read_10000_remove_5000");
+            std::hint::black_box(mutate_state(|s| {
+                prune_expired_shares(s, None, TS0_NS, || true)
+            }));
+        }
     })
 }
 
