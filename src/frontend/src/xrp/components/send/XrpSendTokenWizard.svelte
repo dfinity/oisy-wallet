@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
@@ -29,11 +29,12 @@
 	import XrpSendForm from '$xrp/components/send/XrpSendForm.svelte';
 	import XrpSendReview from '$xrp/components/send/XrpSendReview.svelte';
 	import { sendSteps } from '$xrp/constants/steps.constants';
-	import { XRP_BASE_RESERVE_DROPS } from '$xrp/constants/xrp.constants';
+	import { XRP_BASE_RESERVE_DROPS, XRP_TRANSFER_RATE_NO_FEE } from '$xrp/constants/xrp.constants';
 	import { sendXrp } from '$xrp/services/xrp-send.services';
 	import {
 		initFeeStore,
 		initReserveStore,
+		initTransferRateStore,
 		initXrpFeeContext,
 		XRP_FEE_CONTEXT_KEY,
 		type XrpFeeContext as XrpFeeContextType
@@ -42,12 +43,19 @@
 		XrpAmountExceedsSendableError,
 		XrpDestinationTagRequiredError,
 		XrpDestinationUnfundedError,
+		XrpPaymentRefusedError,
 		XrpSelfDestinationError,
 		XrpSendAlreadyInFlightError,
-		XrpSendNotGuardedError
+		XrpSendNotGuardedError,
+		type XrpPaymentRefusal
 	} from '$xrp/types/xrp-send';
 	import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
 	import { isXrpAmountSendable } from '$xrp/utils/xrp-send.utils';
+	import {
+		fitsXrpTokenPrecision,
+		getXrpTokenMaxAmount,
+		isTokenXrpTrustLine
+	} from '$xrp/utils/xrp-trust-line.utils';
 
 	interface Props {
 		currentStep?: WizardStep;
@@ -90,6 +98,7 @@
 
 	const feeStore = initFeeStore();
 	const reserveStore = initReserveStore();
+	const transferRateStore = initTransferRateStore();
 
 	const feeSymbolStore = writable<string | undefined>(XRP_TOKEN.symbol);
 	const feeTokenIdStore = writable<TokenId | undefined>(XRP_TOKEN.id);
@@ -105,6 +114,7 @@
 		initXrpFeeContext({
 			feeStore,
 			reserveStore,
+			transferRateStore,
 			feeSymbolStore,
 			feeDecimalsStore,
 			feeTokenIdStore,
@@ -118,6 +128,52 @@
 
 	const close = () => onClose();
 	const back = () => onSendBack();
+
+	// Where each refusal of a token payment, or of an XRP payment to an account with DepositAuth, is
+	// corrected: the amount on the form, the recipient on the destination step, or the review, which
+	// shows a changed transfer fee once it reloads.
+	const refusalCorrection = (
+		refusal: XrpPaymentRefusal
+	): { text: string; step: 'form' | 'destination' | 'review' } => {
+		const withSymbol = (text: string): string =>
+			replacePlaceholders(text, { $symbol: $sendToken?.symbol ?? '' });
+
+		switch (refusal) {
+			case 'imprecise_amount':
+				return { text: $i18n.send.assertion.xrp_token_amount_too_precise, step: 'form' };
+			case 'insufficient_token_balance':
+				return { text: withSymbol($i18n.send.error.xrp_token_insufficient_balance), step: 'form' };
+			case 'insufficient_xrp_for_fee':
+				return { text: $i18n.send.error.xrp_insufficient_xrp_for_fee, step: 'form' };
+			case 'trust_line_limit':
+				return { text: withSymbol($i18n.send.error.xrp_trust_line_limit), step: 'form' };
+			case 'destination_not_found':
+				return { text: $i18n.send.error.xrp_destination_not_found, step: 'destination' };
+			case 'deposit_not_authorized':
+				return { text: $i18n.send.error.xrp_deposit_not_authorized, step: 'destination' };
+			case 'no_trust_line':
+				return { text: withSymbol($i18n.send.error.xrp_no_trust_line), step: 'destination' };
+			case 'destination_frozen':
+				return { text: withSymbol($i18n.send.error.xrp_destination_frozen), step: 'destination' };
+			case 'destination_not_authorized':
+				return {
+					text: withSymbol($i18n.send.error.xrp_destination_not_authorized),
+					step: 'destination'
+				};
+			case 'frozen':
+				return { text: withSymbol($i18n.send.error.xrp_token_frozen), step: 'destination' };
+			case 'deep_frozen':
+				return { text: withSymbol($i18n.send.error.xrp_token_deep_frozen), step: 'destination' };
+			case 'no_rippling':
+				return { text: withSymbol($i18n.send.error.xrp_no_rippling), step: 'destination' };
+			case 'transfer_rate_changed':
+				return { text: withSymbol($i18n.send.error.xrp_transfer_fee_changed), step: 'review' };
+			case 'state_unavailable':
+				return { text: $i18n.send.error.xrp_ledger_state_unavailable, step: 'review' };
+			default:
+				return assertNever(refusal, `Unknown XRP payment refusal: ${refusal}`);
+		}
+	};
 
 	const send = async () => {
 		if (isNullish($authIdentity)) {
@@ -158,7 +214,7 @@
 			return;
 		}
 
-		// Same treatment as its counterpart below, which judges the parsed drops rather than the
+		// Same treatment as its counterpart below, which judges the parsed base units rather than the
 		// string: both report an amount the user has to retype, and only the form can take it.
 		if (invalidAmount(amount) || isNullish(amount)) {
 			toastsError({
@@ -180,17 +236,27 @@
 		// `tryParseToken`, not `parseToken`: this runs outside the try below, and `parseToken` throws
 		// for an amount `invalidAmount` accepts — `1e400` overflows, a sub-drop value has too many
 		// decimals — which would reject out of the click handler instead of showing the error.
-		const amountDrops = tryParseToken({
+		const amountUnits = tryParseToken({
 			value: `${amount}`,
 			unitName: $sendTokenDecimals
 		});
 
+		// A trust-line token is measured in the token, against what its balance can send once the
+		// issuer's transfer fee is paid — none on a payment to the issuer itself.
+		const trustLineToken = isTokenXrpTrustLine($sendToken) ? $sendToken : undefined;
+
+		const transferRate = isNullish(trustLineToken)
+			? undefined
+			: destination === trustLineToken.issuer
+				? XRP_TRANSFER_RATE_NO_FEE
+				: $transferRateStore;
+
 		// One guard for both, because they are the same mistake seen twice: `invalidAmount` and the
 		// review step accept an amount the ledger cannot take, and the form's own rejection of it is
 		// debounced — which leaves a window where Next is still enabled. This is the last point
-		// before signing, and it judges the drops actually being signed rather than the string that
-		// produced them.
-		if (isNullish(amountDrops) || amountDrops === ZERO) {
+		// before signing, and it judges the base units actually being signed rather than the string
+		// that produced them.
+		if (isNullish(amountUnits) || amountUnits === ZERO) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.amount_invalid }
 			});
@@ -219,14 +285,40 @@
 			return;
 		}
 
+		if (nonNullish(trustLineToken)) {
+			if (isNullish(transferRate)) {
+				toastsError({
+					msg: { text: $i18n.send.error.xrp_ledger_state_unavailable }
+				});
+				return;
+			}
+
+			const tokenRefusal = !fitsXrpTokenPrecision(amountUnits)
+				? $i18n.send.assertion.xrp_token_amount_too_precise
+				: amountUnits > getXrpTokenMaxAmount({ balance: $sendBalance, transferRate })
+					? transferRate > XRP_TRANSFER_RATE_NO_FEE
+						? $i18n.send.assertion.xrp_insufficient_funds_for_transfer_fee
+						: $i18n.send.assertion.insufficient_funds
+					: undefined;
+
+			if (nonNullish(tokenRefusal)) {
+				toastsError({ msg: { text: tokenRefusal } });
+
+				onSendForm();
+
+				return;
+			}
+		}
+
 		// The form validated the amount against the fee and reserve as they stood when it was
 		// typed. `TokenInputContent` now reruns that check when they change, but only while the form
 		// is on screen — the review step has no input to revalidate, so the poller can still raise
 		// what the account must retain underneath an amount that was accepted. Re-assert it here,
 		// which is the last point before signing.
 		if (
+			isNullish(trustLineToken) &&
 			!isXrpAmountSendable({
-				amount: amountDrops,
+				amount: amountUnits,
 				balance: $sendBalance,
 				fee: $feeStore,
 				reserve: $reserveStore
@@ -260,10 +352,11 @@
 				network,
 				source,
 				destination,
-				amount: amountDrops,
+				amount: amountUnits,
 				fee: $feeStore,
 				destinationTag: $sendXrpDestinationTag,
-				token: $sendToken
+				token: $sendToken,
+				transferRate
 			});
 
 			// Submitted, not settled — so nothing here claims the payment arrived. The success and
@@ -357,6 +450,22 @@
 
 			if (err instanceof XrpDestinationTagRequiredError) {
 				correctOnForm($i18n.send.error.xrp_destination_tag_required);
+
+				return;
+			}
+
+			if (err instanceof XrpPaymentRefusedError) {
+				const { text, step } = refusalCorrection(err.refusal);
+
+				toastsError({ msg: { text }, err });
+
+				if (step === 'form') {
+					onSendForm();
+				} else if (step === 'destination') {
+					onSendBack();
+				} else {
+					onBack();
+				}
 
 				return;
 			}
