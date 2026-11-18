@@ -14,6 +14,7 @@ import {
 	isNetworkIdXRPMainnet
 } from '$lib/utils/network.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
+import { isTokenXrpTrustLine } from '$xrp/utils/xrp-trust-line.utils';
 import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -95,10 +96,11 @@ export const tokenIdKey = (id: TokenId): string | undefined => {
  *
  * Covers every asset the AUT consumers can swap or send: ERC-20 and ERC-4626
  * vault tokens, native EVM coins, ICRC ledgers, SPL / native Solana on both
- * mainnet and devnet, native Bitcoin on mainnet and testnet, and native XRP on
- * mainnet. Returns `undefined` for anything else — including Bitcoin regtest and
- * XRPL testnet, neither of which has a backend variant — which callers treat as
- * "do not track this operation" rather than as an error.
+ * mainnet and devnet, native Bitcoin on mainnet and testnet, and native XRP and
+ * its trust-line tokens on mainnet. Returns `undefined` for anything else —
+ * including Bitcoin regtest and XRPL testnet, neither of which has a backend
+ * variant — which callers treat as "do not track this operation" rather than as
+ * an error.
  *
  * An Internet Computer token maps to `Icrc` by ledger canister id — including
  * ICP itself, whose dedicated `IcpNative` variant is reserved for the
@@ -140,6 +142,12 @@ export const toBackendTokenId = (token: Token): TokenId | undefined => {
 
 	if (isNetworkIdBTCTestnet(networkId)) {
 		return { BtcNativeTestnet: null };
+	}
+
+	// Before the native XRP match below, which goes by the network alone and would record a token's
+	// operation as native XRP's.
+	if (isTokenXrpTrustLine(token) && isNetworkIdXRPMainnet(networkId)) {
+		return { XrpTrustLineMainnet: [token.currency, token.issuer] };
 	}
 
 	// Mainnet-only, matched on the network rather than assumed: XRPL testnet has
