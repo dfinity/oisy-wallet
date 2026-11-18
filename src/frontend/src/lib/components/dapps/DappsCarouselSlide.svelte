@@ -42,6 +42,18 @@
 		name: dAppName
 	} = $derived(dappsCarouselSlide);
 
+	let callToActionText = $derived(resolveText({ i18n: $i18n, path: callToAction }));
+
+	let dAppNameText = $derived(resolveText({ i18n: $i18n, path: dAppName }));
+
+	// A call to action that names its card ("Open ckSOL") is the button's name as it reads, so voice
+	// control finds the button by what is on screen. A generic one ("Learn more") gets the card's name.
+	let callToActionAriaLabel = $derived(
+		callToActionText.includes(dAppNameText)
+			? undefined
+			: replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppName: dAppNameText })
+	);
+
 	const rewardModalId = Symbol();
 	const dappModalId = Symbol();
 
@@ -99,12 +111,10 @@
 		<div class="mb-1">{resolveText({ i18n: $i18n, path: text })}</div>
 		<button
 			class="text-sm font-semibold text-brand-primary-alt"
-			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, {
-				$dAppName: resolveText({ i18n: $i18n, path: dAppName })
-			})}
+			aria-label={callToActionAriaLabel}
 			onclick={open}
 		>
-			{resolveText({ i18n: $i18n, path: callToAction })} →
+			{callToActionText} <span aria-hidden="true">→</span>
 		</button>
 	</div>
 	<div class="flex h-full items-start">

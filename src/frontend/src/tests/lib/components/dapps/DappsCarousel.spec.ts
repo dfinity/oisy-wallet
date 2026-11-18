@@ -175,11 +175,8 @@ describe('DappsCarousel', () => {
 		it('should open the ckSOL token page', async () => {
 			const { getByRole } = render(DappsCarousel);
 
-			await fireEvent.click(
-				getByRole('button', {
-					name: replacePlaceholders(en.dapps.alt.learn_more, { $dAppName: 'ckSOL' })
-				})
-			);
+			// The button goes by its visible text, which already names ckSOL.
+			await fireEvent.click(getByRole('button', { name: en.carousel.text.cksol_slide_cta }));
 
 			const ckSolToken: IcToken = {
 				...mockValidIcrcToken,
@@ -189,6 +186,19 @@ describe('DappsCarousel', () => {
 
 			// The same link as the ckSOL row in the token list.
 			expect(goto).toHaveBeenCalledExactlyOnceWith(transactionsUrl({ token: ckSolToken }));
+		});
+
+		it('should keep naming a generic call to action after its dApp', () => {
+			const { getByRole } = render(DappsCarousel);
+
+			// "Learn more" does not say which card it belongs to.
+			expect(
+				getByRole('button', {
+					name: replacePlaceholders(en.dapps.alt.learn_more, {
+						$dAppName: en.dapps.descriptions.caffeine.name
+					})
+				})
+			).toHaveTextContent(en.dapps.descriptions.caffeine.carousel.call_to_action);
 		});
 
 		it('should not show the ckSOL card once the user closed it', () => {
