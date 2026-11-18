@@ -39,6 +39,7 @@ import { SwapProvider, type BtcQuoteParams, type SwapLifiBtcParams } from '$lib/
 import type { Token } from '$lib/types/token';
 import { toLifiExternalRefsMap } from '$lib/utils/lifi-active-tx.utils';
 import { decodeLifiBtcTransaction } from '$lib/utils/lifi-swap.utils';
+import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockLifiBtcFeeAddress, mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
@@ -154,7 +155,7 @@ describe('lifi-btc-swap.services', () => {
 
 		vi.mocked(fetchLifiQuote).mockResolvedValue(quote);
 		vi.mocked(validateBtcSend).mockResolvedValue(undefined);
-		vi.mocked(createActiveUserTransaction).mockResolvedValue(undefined);
+		vi.mocked(createActiveUserTransaction).mockResolvedValue(mockActiveUserTransaction);
 		vi.mocked(deleteActiveUserTransaction).mockResolvedValue(undefined);
 		vi.mocked(bindLifiBtcPayout).mockResolvedValue(undefined);
 		vi.mocked(hasLifiBtcPayoutBinding).mockReturnValue(true);

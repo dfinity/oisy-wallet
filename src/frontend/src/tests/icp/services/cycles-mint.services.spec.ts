@@ -38,6 +38,7 @@ import { CYCLES_MINT_EXTERNAL_REF_KEYS } from '$lib/types/cycles-mint-active-tx'
 import * as consoleUtils from '$lib/utils/console.utils';
 import { toCyclesMintExternalRefs } from '$lib/utils/cycles-mint-active-tx.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
+import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { InsufficientFundsError, TxDuplicateError } from '@icp-sdk/canisters/ledger/icp';
@@ -238,7 +239,7 @@ describe('cycles-mint.services', () => {
 
 			vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => undefined);
 
-			vi.mocked(createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(createActiveUserTransaction).mockResolvedValue(mockActiveUserTransaction);
 			vi.mocked(updateActiveUserTransaction).mockResolvedValue();
 			vi.mocked(deleteActiveUserTransaction).mockResolvedValue();
 			vi.mocked(waitForMilliseconds).mockResolvedValue();
@@ -426,7 +427,7 @@ describe('cycles-mint.services', () => {
 			vi.mocked(createActiveUserTransaction).mockImplementation(() => {
 				vi.setSystemTime(NOW_MS + Number(CMC_TRANSFER_START_WINDOW_NS / 1_000_000n) + 1);
 
-				return Promise.resolve();
+				return Promise.resolve(mockActiveUserTransaction);
 			});
 
 		// What bounds when the transfer can still land, so when the poller may close the row.
