@@ -380,7 +380,11 @@ the shared core rule, preserving its deprecated-package and `/dist/` import bans
   the bottom-edge animation enables the mask so it clears when overflow disappears.
   Firefox, without scroll-driven animations, shows the plain list. It also
   sets `scroll-padding-block`, so keyboard focus scrolls a row clear of the
-  fade. Don't add it to dropdown popovers or the AI assistant chat.
+  fade. In the send destination step on phones, the form above the toolbar
+  owns scrolling and the fade; the nested lists stay uncapped, avoiding a
+  second scroll area. Below 24rem viewport height, the modal content owns
+  scrolling and the fade, keeping the action buttons reachable. Desktop keeps
+  the capped lists. Don't add it to dropdown popovers or the AI assistant chat.
 - **Progress steps (`ProgressSteps`):** a step's old marker leaves at once and
   the new one comes in. A finished or failed badge springs in over 440 ms on a
   spring sampled into CSS `linear()`, with an overshooting `cubic-bezier`
