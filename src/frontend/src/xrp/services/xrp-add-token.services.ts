@@ -1,4 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
+import type { NullishIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
 import {
 	XRP_ACCOUNT_FLAG_DISALLOW_INCOMING_TRUST_LINE,
@@ -10,8 +11,10 @@ import {
 	loadXrpOpenLedgerFee,
 	XrpAccountNotFoundError
 } from '$xrp/rest/xrpl.rest';
+import { assertNoXrpPaymentInFlight } from '$xrp/services/xrp-in-flight.services';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
+import { XrpSendAlreadyInFlightError } from '$xrp/types/xrp-send';
 import type { XrpTrustLine } from '$xrp/types/xrp-trust-line';
 import type {
 	RequiredXrpTrustLineToken,
@@ -38,6 +41,8 @@ import type { Nullish } from '@dfinity/zod-schemas';
 const XRP_TRUST_LINE_RESERVE_WAIVER_OWNER_COUNT = 2;
 
 export type XrpAddTokenRefusal =
+	| 'transaction_in_flight'
+	| 'not_guarded'
 	| 'invalid_currency_code'
 	| 'invalid_issuer'
 	| 'issuer_is_own_address'
@@ -72,12 +77,14 @@ const refuse = (refusal: XrpAddTokenRefusal): XrpAddTokenReviewResult => ({ refu
  * reason. A ledger that cannot be read refuses too — the same fail-closed answer as the XRP send.
  */
 export const loadXrpAddTokenReview = async ({
+	identity,
 	currency: currencyInput,
 	issuer: issuerInput,
 	address,
 	lines,
 	network
 }: {
+	identity: NullishIdentity;
 	currency: string;
 	issuer: string;
 	// The user's XRP address on this network.
@@ -118,10 +125,13 @@ export const loadXrpAddTokenReview = async ({
 		return refuse('already_added');
 	}
 
-	const [issuerInfo, accountInfo, feeQuote] = await Promise.allSettled([
+	const [issuerInfo, accountInfo, feeQuote, noneInFlight] = await Promise.allSettled([
 		loadXrpAccountInfo({ address: issuer, network: xrpNetwork, ledgerIndex: 'validated' }),
 		loadXrpAccountInfo({ address, network: xrpNetwork, ledgerIndex: 'validated' }),
-		loadXrpOpenLedgerFee({ network: xrpNetwork, fallbackFee: XRP_DEFAULT_FEE_DROPS })
+		loadXrpOpenLedgerFee({ network: xrpNetwork, fallbackFee: XRP_DEFAULT_FEE_DROPS }),
+		// The gate the `TrustSet` itself passes before signing, asked here too so a token that could
+		// not be added now is not reviewed as if it could.
+		assertNoXrpPaymentInFlight({ identity, source: address })
 	]);
 
 	if (issuerInfo.status === 'rejected') {
@@ -165,6 +175,14 @@ export const loadXrpAddTokenReview = async ({
 	// Against the balance before the fee, as rippled checks it.
 	if (ownerCount >= XRP_TRUST_LINE_RESERVE_WAIVER_OWNER_COUNT && balance < reserveAfter) {
 		return { refusal: 'insufficient_reserve', reserve: reserveAfter };
+	}
+
+	if (noneInFlight.status === 'rejected') {
+		return refuse(
+			noneInFlight.reason instanceof XrpSendAlreadyInFlightError
+				? 'transaction_in_flight'
+				: 'not_guarded'
+		);
 	}
 
 	const lookalike = LISTED_XRP_TRUST_LINE_TOKENS.find(
