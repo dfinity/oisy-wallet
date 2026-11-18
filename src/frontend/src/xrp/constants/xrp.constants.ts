@@ -134,3 +134,7 @@ export const XRP_RPC_TIMEOUT_MS = XRP_LEDGER_CLOSE_SECONDS * 2 * 1000;
 // matters — sending the whole balance, removing a line only at zero — the reader uses the ledger's
 // own decimal string rather than this value.
 export const XRP_TRUST_LINE_TOKEN_DECIMALS = 18;
+
+// The significant digits a token amount can carry: the ledger keeps a 16-digit mantissa, and
+// `ripple-binary-codec` refuses a 17th ("Decimal precision out of range") rather than rounding it.
+export const XRP_TOKEN_MAX_SIGNIFICANT_DIGITS = 16;

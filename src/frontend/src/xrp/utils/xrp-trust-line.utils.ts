@@ -7,6 +7,7 @@ import {
 	XRP_ACCOUNT_FLAG_GLOBAL_FREEZE,
 	XRP_ACCOUNT_FLAG_NO_FREEZE,
 	XRP_ACCOUNT_FLAG_REQUIRE_AUTH,
+	XRP_TOKEN_MAX_SIGNIFICANT_DIGITS,
 	XRP_TRANSFER_RATE_NO_FEE,
 	XRP_TRUST_LINE_TOKEN_DECIMALS
 } from '$xrp/constants/xrp.constants';
@@ -70,14 +71,17 @@ const XRP_TOKEN_VALUE_MAX_EXPONENT = 999;
  * `5800000000000000e13` or `1000000000000000e-3` — in base units of 10^-`decimals`.
  *
  * Exact for every value with at most `decimals` fractional digits; digits beyond are truncated
- * toward zero, never rounded up, so a displayed balance is never more than the ledger holds.
+ * toward zero, so a displayed balance is never more than the ledger holds. `roundUp` rounds the
+ * magnitude up instead, for a figure that must not be understated.
  */
 export const parseXrpTokenValue = ({
 	value,
-	decimals = XRP_TRUST_LINE_TOKEN_DECIMALS
+	decimals = XRP_TRUST_LINE_TOKEN_DECIMALS,
+	roundUp = false
 }: {
 	value: string;
 	decimals?: number;
+	roundUp?: boolean;
 }): bigint => {
 	const match = XRP_TOKEN_VALUE_PATTERN.exec(value);
 
@@ -101,14 +105,121 @@ export const parseXrpTokenValue = ({
 	const digits = `${integer}${fraction}`;
 	const shift = Number(exponent) - fraction.length + decimals;
 
-	const scaled =
-		shift >= 0
-			? BigInt(digits) * 10n ** BigInt(shift)
-			: digits.length + shift > 0
-				? BigInt(digits.slice(0, digits.length + shift))
-				: ZERO;
+	const kept = shift >= 0 ? digits : digits.slice(0, Math.max(digits.length + shift, 0));
+	const dropped = shift >= 0 ? '' : digits.slice(kept.length);
+
+	const truncated =
+		shift >= 0 ? BigInt(digits) * 10n ** BigInt(shift) : kept === '' ? ZERO : BigInt(kept);
+
+	const scaled = roundUp && /[1-9]/.test(dropped) ? truncated + 1n : truncated;
 
 	return sign === '-' ? -scaled : scaled;
+};
+
+/**
+ * A token amount in base units as a transaction states it: plain decimal notation without
+ * trailing zeros, which `ripple-binary-codec` encodes exactly.
+ */
+export const formatXrpTokenValue = ({
+	amount,
+	decimals = XRP_TRUST_LINE_TOKEN_DECIMALS
+}: {
+	amount: bigint;
+	decimals?: number;
+}): string => {
+	const magnitude = (amount < ZERO ? -amount : amount).toString().padStart(decimals + 1, '0');
+
+	const integer = magnitude.slice(0, magnitude.length - decimals);
+	const fraction = magnitude.slice(magnitude.length - decimals).replace(/0+$/, '');
+
+	return `${amount < ZERO ? '-' : ''}${integer}${fraction === '' ? '' : `.${fraction}`}`;
+};
+
+const xrpTokenSignificantDigits = (amount: bigint): number =>
+	(amount < ZERO ? -amount : amount).toString().replace(/0+$/, '').length;
+
+/**
+ * Whether a token amount in base units can be stated in a transaction as it is. One with more
+ * significant digits would have to be rounded, and an amount is never sent other than as entered.
+ */
+export const fitsXrpTokenPrecision = (amount: bigint): boolean =>
+	xrpTokenSignificantDigits(amount) <= XRP_TOKEN_MAX_SIGNIFICANT_DIGITS;
+
+// A non-negative amount at the ledger's precision: its digits past the 16th dropped, or rounded up.
+const toXrpTokenPrecision = ({ amount, roundUp }: { amount: bigint; roundUp: boolean }): bigint => {
+	const excess = amount.toString().length - XRP_TOKEN_MAX_SIGNIFICANT_DIGITS;
+
+	if (excess <= 0) {
+		return amount;
+	}
+
+	const step = 10n ** BigInt(excess);
+	const truncated = (amount / step) * step;
+
+	return roundUp && truncated < amount ? truncated + step : truncated;
+};
+
+const hasTransferFee = (transferRate: number): boolean => transferRate > XRP_TRANSFER_RATE_NO_FEE;
+
+/**
+ * What sending `amount` of a token costs when its issuer charges a transfer fee: the amount times the
+ * rate, rounded up at the ledger's precision, so it is never less than what the ledger takes. It is
+ * the payment's `SendMax`. `undefined` when there is no fee.
+ */
+export const getXrpTokenSendMax = ({
+	amount,
+	transferRate
+}: {
+	amount: bigint;
+	transferRate: number;
+}): bigint | undefined => {
+	if (!hasTransferFee(transferRate)) {
+		return;
+	}
+
+	const rate = BigInt(transferRate);
+	const one = BigInt(XRP_TRANSFER_RATE_NO_FEE);
+
+	return toXrpTokenPrecision({ amount: (amount * rate + one - 1n) / one, roundUp: true });
+};
+
+/**
+ * The most a token balance can send: all of it without a transfer fee, and with one the largest
+ * amount at the ledger's precision whose cost still fits the balance.
+ */
+export const getXrpTokenMaxAmount = ({
+	balance,
+	transferRate
+}: {
+	balance: bigint;
+	transferRate: number;
+}): bigint => {
+	if (balance <= ZERO) {
+		return ZERO;
+	}
+
+	if (!hasTransferFee(transferRate)) {
+		return balance;
+	}
+
+	let amount = toXrpTokenPrecision({
+		amount: (balance * BigInt(XRP_TRANSFER_RATE_NO_FEE)) / BigInt(transferRate),
+		roundUp: false
+	});
+
+	// The cost is rounded up, so the first estimate can be over by one step of its last digit.
+	while (amount > ZERO) {
+		const cost = getXrpTokenSendMax({ amount, transferRate }) ?? amount;
+
+		if (cost <= balance) {
+			return amount;
+		}
+
+		amount -=
+			10n ** BigInt(Math.max(amount.toString().length - XRP_TOKEN_MAX_SIGNIFICANT_DIGITS, 0));
+	}
+
+	return ZERO;
 };
 
 // The backend's rules, so a code accepted here is one the token list can save.
@@ -148,7 +259,10 @@ export const parseXrpCurrencyCode = (input: string): XrpCurrencyCode | undefined
 		.padEnd(NONSTANDARD_CURRENCY_CODE_LENGTH, '0');
 };
 
-const hasFlag = ({ flags, flag }: { flags: number; flag: number }): boolean => (flags & flag) !== 0;
+// Tested with `!== 0`, never compared for equality: the clawback bit is the sign bit of the 32-bit
+// value JavaScript's bitwise operators work on.
+export const hasXrpAccountFlag = ({ flags, flag }: { flags: number; flag: number }): boolean =>
+	(flags & flag) !== 0;
 
 /**
  * What an issuer can do to, or has done to, the holders of its tokens, read from its account: the
@@ -163,19 +277,19 @@ export const xrpIssuerPowers = ({
 }): XrpIssuerPower[] => {
 	const powers: XrpIssuerPower[] = [];
 
-	if (!hasFlag({ flags, flag: XRP_ACCOUNT_FLAG_NO_FREEZE })) {
+	if (!hasXrpAccountFlag({ flags, flag: XRP_ACCOUNT_FLAG_NO_FREEZE })) {
 		powers.push({ type: 'freeze' });
 	}
 
-	if (hasFlag({ flags, flag: XRP_ACCOUNT_FLAG_GLOBAL_FREEZE })) {
+	if (hasXrpAccountFlag({ flags, flag: XRP_ACCOUNT_FLAG_GLOBAL_FREEZE })) {
 		powers.push({ type: 'global_freeze' });
 	}
 
-	if (hasFlag({ flags, flag: XRP_ACCOUNT_FLAG_ALLOW_TRUST_LINE_CLAWBACK })) {
+	if (hasXrpAccountFlag({ flags, flag: XRP_ACCOUNT_FLAG_ALLOW_TRUST_LINE_CLAWBACK })) {
 		powers.push({ type: 'clawback' });
 	}
 
-	if (hasFlag({ flags, flag: XRP_ACCOUNT_FLAG_REQUIRE_AUTH })) {
+	if (hasXrpAccountFlag({ flags, flag: XRP_ACCOUNT_FLAG_REQUIRE_AUTH })) {
 		powers.push({ type: 'approval' });
 	}
 
@@ -187,7 +301,7 @@ export const xrpIssuerPowers = ({
 		});
 	}
 
-	if (!hasFlag({ flags, flag: XRP_ACCOUNT_FLAG_DEFAULT_RIPPLE })) {
+	if (!hasXrpAccountFlag({ flags, flag: XRP_ACCOUNT_FLAG_DEFAULT_RIPPLE })) {
 		powers.push({ type: 'no_rippling' });
 	}
 
