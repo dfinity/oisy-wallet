@@ -1,3 +1,4 @@
+import { XRP_TRUST_LINE_TOKENS_ENABLED } from '$env/xrp-trust-line-tokens.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
@@ -639,7 +640,11 @@ export const sendXrp = async ({
 	// `tecNO_PERMISSION`, fee claimed. Asked whenever a snapshot that was read sets the flag. A tagged
 	// XRP payment whose destination could not be read at all goes ahead, as it does for an unknown tag
 	// requirement: a node that cannot answer must not stop every well-funded send.
+	//
+	// Behind the trust-line flag, XRP payments included: with it off they behave as before, and the
+	// endpoint is not asked a method its whitelist may not carry yet.
 	if (
+		XRP_TRUST_LINE_TOKENS_ENABLED &&
 		xrpPaymentNeedsDepositPreauth({
 			destinationFlags: destinationLookup.flags,
 			destinationBalance: destinationLookup.balance,
