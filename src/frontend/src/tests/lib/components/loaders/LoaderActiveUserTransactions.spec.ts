@@ -11,7 +11,9 @@ import {
 	TRACK_COUNT_XRP_SEND_ERROR,
 	TRACK_COUNT_XRP_SEND_SUCCESS,
 	TRACK_COUNT_XRP_TRUST_LINE_ADD_ERROR,
-	TRACK_COUNT_XRP_TRUST_LINE_ADD_SUCCESS
+	TRACK_COUNT_XRP_TRUST_LINE_ADD_SUCCESS,
+	TRACK_COUNT_XRP_TRUST_LINE_REMOVE_ERROR,
+	TRACK_COUNT_XRP_TRUST_LINE_REMOVE_SUCCESS
 } from '$lib/constants/analytics.constants';
 import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { LIQUIDIUM_PROVIDER_ID } from '$lib/constants/liquidium.constants';
@@ -50,11 +52,13 @@ import {
 	mockXrpActiveUserTransaction,
 	mockXrpSwapActiveUserTransaction,
 	mockXrpTokenPaymentActiveUserTransaction,
+	mockXrpTrustLineRemovalActiveUserTransaction,
 	mockXrpTrustSetActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import * as xrpPoller from '$xrp/services/xrp-active-tx.services';
+import * as xrpTrustLineTokensServices from '$xrp/services/xrp-trust-line-tokens.services';
 import { render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get, readable } from 'svelte/store';
@@ -924,6 +928,85 @@ describe('LoaderActiveUserTransactions', () => {
 				await tick();
 
 				expect(toasts.toastsShow).toHaveBeenCalledOnce();
+				expect(trackEventSpy).toHaveBeenCalledOnce();
+			});
+		});
+
+		// Its success is reported after the line is read again, since the ledger keeps the line while
+		// the issuer holds settings on it.
+		describe('removing a trust-line token reports its outcome here', () => {
+			const removal = mockXrpTrustLineRemovalActiveUserTransaction;
+
+			let reportSpy: ReturnType<typeof vi.spyOn>;
+
+			const resolve = async (resolved: Partial<typeof removal>) => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({ transaction: removal });
+
+				render(LoaderActiveUserTransactions);
+				await tick();
+
+				activeUserTransactionsStore.upsert({ transaction: { ...removal, ...resolved } });
+				await tick();
+			};
+
+			beforeEach(() => {
+				reportSpy = vi
+					.spyOn(xrpTrustLineTokensServices, 'reportRemovedXrpTrustLineToken')
+					.mockResolvedValue();
+			});
+
+			it('hands a success to the removal report, refreshes the wallet and fires its success event', async () => {
+				await resolve({ status: { Succeeded: null } });
+
+				expect(reportSpy).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					tx: expect.objectContaining({ id: removal.id, status: { Succeeded: null } })
+				});
+				expect(refreshSpy).toHaveBeenCalledOnce();
+				expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_COUNT_XRP_TRUST_LINE_REMOVE_SUCCESS,
+					metadata: { token: 'RLUSD', network: 'XRP', fee: '12' }
+				});
+			});
+
+			it('says nothing of adding', async () => {
+				await resolve({ status: { Succeeded: null } });
+
+				expect(toasts.toastsShow).not.toHaveBeenCalled();
+				expect(trackEventSpy).not.toHaveBeenCalledWith(
+					expect.objectContaining({ name: TRACK_COUNT_XRP_TRUST_LINE_ADD_SUCCESS })
+				);
+			});
+
+			it('toasts the recorded failure text, refreshes the wallet and fires its error event', async () => {
+				await resolve({ status: { Failed: null }, error: ['the token was not removed'] });
+
+				expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: 'the token was not removed' }
+				});
+				expect(reportSpy).not.toHaveBeenCalled();
+				expect(refreshSpy).toHaveBeenCalledOnce();
+				expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_COUNT_XRP_TRUST_LINE_REMOVE_ERROR,
+					metadata: {
+						token: 'RLUSD',
+						network: 'XRP',
+						fee: '12',
+						error: 'the token was not removed'
+					}
+				});
+			});
+
+			it('reports once even when the row is written again', async () => {
+				await resolve({ status: { Succeeded: null } });
+
+				activeUserTransactionsStore.upsert({
+					transaction: { ...removal, status: { Succeeded: null }, updated_at_ns: 99n }
+				});
+				await tick();
+
+				expect(reportSpy).toHaveBeenCalledOnce();
 				expect(trackEventSpy).toHaveBeenCalledOnce();
 			});
 		});
