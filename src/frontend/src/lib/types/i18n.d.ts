@@ -1174,6 +1174,8 @@ interface I18nSwap {
 		move_no_networks_title: string;
 		move_no_networks_title_without_symbol: string;
 		move_no_networks_description: string;
+		move_networks_changed_title: string;
+		move_networks_changed_description: string;
 		as_token: string;
 		two_swaps_info: string;
 		two_swaps_first_button: string;

@@ -360,12 +360,12 @@ describe('GetTokenModal', () => {
 
 						const status = within(list).getByRole('status');
 
+						expect(status).toHaveTextContent(en.swap.text.move_networks_changed_title);
 						expect(status).toHaveTextContent(
-							replacePlaceholders(en.swap.text.move_no_networks_title, {
+							replacePlaceholders(en.swap.text.move_networks_changed_description, {
 								$symbol: BASE_USDC_TOKEN.symbol
 							})
 						);
-						expect(status).toHaveTextContent(en.swap.text.move_no_networks_description);
 					}
 					await fireEvent.click(back);
 					await waitFor(() =>
@@ -394,16 +394,21 @@ describe('GetTokenModal', () => {
 			);
 			await fireEvent.click(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]);
 			const list = await rendered.findByTestId(SWAP_RECEIVE_NETWORK_LIST);
+			const status = list.querySelector(':scope > [role="status"]');
 
 			expect(rendered.getByRole('dialog', { name: 'Move USDC to' })).toBeInTheDocument();
+			expect(within(list).getByRole('button', { name: /Ethereum/ })).toBeInTheDocument();
+			expect(status).toBeEmptyDOMElement();
 
 			rendered.universe.set([]);
 
-			await waitFor(() =>
-				expect(within(list).getByRole('status')).toHaveTextContent(
-					"You can't move USDC to another network right now"
-				)
-			);
+			await waitFor(() => {
+				expect(within(list).getByRole('status')).toBe(status);
+				expect(status).toHaveTextContent('The available networks changed');
+				expect(status).toHaveTextContent(
+					'You can no longer receive USDC on another network in this swap. Go back to see what you can receive instead.'
+				);
+			});
 		});
 
 		describe.each([false, true])('token-list focus (desktop: %s)', (desktop) => {

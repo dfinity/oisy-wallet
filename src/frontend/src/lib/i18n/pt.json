@@ -1459,6 +1459,8 @@
 			"move_no_networks_title": "",
 			"move_no_networks_title_without_symbol": "",
 			"move_no_networks_description": "",
+			"move_networks_changed_title": "",
+			"move_networks_changed_description": "",
 			"as_token": "",
 			"two_swaps_info": "$oisy_short só oferece trocas que consegue verificar totalmente antes da sua aprovação, e não existe uma troca direta assim de $sourceSymbol para $destinationSymbol. Mas você pode trocar primeiro $sourceSymbol por $intermediateSymbol e depois $intermediateSymbol por $destinationSymbol.",
 			"two_swaps_first_button": "Trocar primeiro por $intermediateSymbol",

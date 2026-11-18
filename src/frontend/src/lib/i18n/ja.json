@@ -1459,6 +1459,8 @@
 			"move_no_networks_title": "",
 			"move_no_networks_title_without_symbol": "",
 			"move_no_networks_description": "",
+			"move_networks_changed_title": "",
+			"move_networks_changed_description": "",
 			"as_token": "",
 			"two_swaps_info": "$oisy_short は、承認の前に完全に検証できるスワップのみを提供しています。$sourceSymbol から $destinationSymbol へのそのような直接のスワップはありません。ただし、まず $sourceSymbol を $intermediateSymbol にスワップし、その後 $intermediateSymbol を $destinationSymbol にスワップすることはできます。",
 			"two_swaps_first_button": "まず $intermediateSymbol にスワップ",

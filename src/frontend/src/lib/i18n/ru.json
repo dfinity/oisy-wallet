@@ -1459,6 +1459,8 @@
 			"move_no_networks_title": "",
 			"move_no_networks_title_without_symbol": "",
 			"move_no_networks_description": "",
+			"move_networks_changed_title": "",
+			"move_networks_changed_description": "",
 			"as_token": "",
 			"two_swaps_info": "$oisy_short предлагает только обмены, которые может полностью проверить до вашего подтверждения, а такого прямого обмена $sourceSymbol на $destinationSymbol нет. Но вы можете сначала обменять $sourceSymbol на $intermediateSymbol, а затем $intermediateSymbol на $destinationSymbol.",
 			"two_swaps_first_button": "Сначала обменять на $intermediateSymbol",
