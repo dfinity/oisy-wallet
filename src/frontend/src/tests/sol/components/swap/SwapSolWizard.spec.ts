@@ -536,7 +536,8 @@ describe('SwapSolWizard', () => {
 			);
 		});
 
-		// ckSOL is enabled once the transfer is broadcast, which can come after an account switch.
+		// ckSOL is enabled once the transfer is broadcast, with the identity taken at submission, not
+		// read again from `$authIdentity`.
 		it('should enable the ckSOL twin for the identity that converted, not the one signed in by then', async () => {
 			const signedIn = writable<Identity | null>(mockIdentity);
 			vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(signedIn);
