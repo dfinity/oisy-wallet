@@ -6,7 +6,11 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { TokenId } from '$lib/types/token';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { resetXrpHistoryPager } from '$xrp/services/xrp-history-pager.services';
-import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
+import {
+	xrpTransactionsStore,
+	type XrpCertifiedTransaction,
+	type XrpTrustLineCertifiedTransaction
+} from '$xrp/stores/xrp-transactions.store';
 import { xrpTrustLinesStore } from '$xrp/stores/xrp-trust-lines.store';
 import type { XrpPostMessageDataResponseWallet } from '$xrp/types/xrp-post-message';
 import type { XrpTrustLine } from '$xrp/types/xrp-trust-line';
@@ -26,7 +30,8 @@ export const syncWallet = ({
 		wallet: {
 			balance: { certified, data: balance },
 			newTransactions,
-			trustLines
+			trustLines,
+			newTrustLineTransactions
 		}
 	} = data;
 
@@ -44,6 +49,14 @@ export const syncWallet = ({
 
 	if (nonNullish(trustLines)) {
 		syncTrustLines({ tokenId, lines: trustLines });
+	}
+
+	// After the lines, so a token the same message added has its rows filed.
+	if (nonNullish(newTrustLineTransactions)) {
+		syncTrustLineTransactions({
+			tokenId,
+			transactions: JSON.parse(newTrustLineTransactions, jsonReviver)
+		});
 	}
 
 	// Absent means the history could not be read — `loadAndSyncBalance` awaits the request before
@@ -64,12 +77,96 @@ export const syncWallet = ({
 			xrpTransactionsStore.nullify(tokenId);
 		}
 
+		settleTrustLineHistories({ tokenId });
+
 		return;
 	}
 
 	xrpTransactionsStore.prepend({
 		tokenId,
 		transactions: JSON.parse(newTransactions, jsonReviver)
+	});
+
+	settleTrustLineHistories({ tokenId });
+};
+
+// The tokens of the lines the account of `tokenId` holds, by id.
+const heldTrustLineTokenIds = (tokenId: TokenId): Set<TokenId> => {
+	const network = xrpNetworkOf(tokenId);
+
+	if (isNullish(network)) {
+		return new Set();
+	}
+
+	return new Set(
+		(get(xrpTrustLinesStore)[tokenId] ?? []).map(
+			(line) => toXrpTrustLineToken({ identity: line, network }).id
+		)
+	);
+};
+
+/**
+ * Files each trust-line row the worker read for the account of `tokenId` under its token. Only the
+ * tokens the account holds: a row of a line the account no longer has would otherwise wait in the
+ * store, and show — or be exported — should a token of that key be added again after the address
+ * changed.
+ */
+const syncTrustLineTransactions = ({
+	tokenId,
+	transactions
+}: {
+	tokenId: TokenId;
+	transactions: XrpTrustLineCertifiedTransaction[];
+}) => {
+	const network = xrpNetworkOf(tokenId);
+
+	if (isNullish(network)) {
+		return;
+	}
+
+	const held = heldTrustLineTokenIds(tokenId);
+
+	const rowsByToken = transactions.reduce((acc, { transaction, ...identity }) => {
+		const { id } = toXrpTrustLineToken({ identity, network });
+
+		if (held.has(id)) {
+			acc.set(id, [...(acc.get(id) ?? []), transaction]);
+		}
+
+		return acc;
+	}, new Map<TokenId, XrpCertifiedTransaction[]>());
+
+	rowsByToken.forEach((rows, id) =>
+		xrpTransactionsStore.prepend({ tokenId: id, transactions: rows })
+	);
+};
+
+/**
+ * Gives each held token whose history entry is still unwritten the state of the account's own one.
+ * The tokens' rows come from the pages the account's history is read from, so once that history is
+ * read a token without rows has none there — its page shows that rather than loading for good — and
+ * once a read was attempted and failed, the token's entry records the attempt as the account's does.
+ */
+const settleTrustLineHistories = ({ tokenId }: { tokenId: TokenId }) => {
+	const store = get(xrpTransactionsStore);
+	const accountHistory = store?.[tokenId];
+
+	if (accountHistory === undefined) {
+		return;
+	}
+
+	heldTrustLineTokenIds(tokenId).forEach((id) => {
+		if (nonNullish(store?.[id])) {
+			return;
+		}
+
+		if (accountHistory === null) {
+			xrpTransactionsStore.nullify(id);
+
+			return;
+		}
+
+		xrpTransactionsStore.prepend({ tokenId: id, transactions: [] });
 	});
 };
 
@@ -109,11 +206,15 @@ const syncTrustLines = ({ tokenId, lines }: { tokenId: TokenId; lines: XrpTrustL
 		});
 	}
 
+	// A removed line takes its token's balance with it, and its history: rows left behind would come
+	// back should the token be added again, after the address changed.
 	for (const line of previous) {
 		const { id } = toXrpTrustLineToken({ identity: line, network });
 
 		if (!held.has(id)) {
 			balancesStore.reset(id);
+			xrpTransactionsStore.clear(id);
+			resetXrpHistoryPager(id);
 		}
 	}
 };
@@ -134,14 +235,13 @@ export const resetWallet = ({ tokenId }: { tokenId: TokenId }) => {
 	xrpTransactionsStore.clear(tokenId);
 	resetXrpHistoryPager(tokenId);
 
-	// The lines belong to the address being handed over, and so do the balances written from them.
-	const network = xrpNetworkOf(tokenId);
-
-	if (nonNullish(network)) {
-		for (const line of get(xrpTrustLinesStore)[tokenId] ?? []) {
-			balancesStore.reset(toXrpTrustLineToken({ identity: line, network }).id);
-		}
-	}
+	// The lines belong to the address being handed over, and so do the balances and the history
+	// written from them.
+	heldTrustLineTokenIds(tokenId).forEach((id) => {
+		balancesStore.reset(id);
+		xrpTransactionsStore.clear(id);
+		resetXrpHistoryPager(id);
+	});
 
 	xrpTrustLinesStore.clear(tokenId);
 };
@@ -179,6 +279,8 @@ export const syncWalletError = ({
 	if (isNullish(get(xrpTransactionsStore)?.[tokenId])) {
 		xrpTransactionsStore.nullify(tokenId);
 	}
+
+	settleTrustLineHistories({ tokenId });
 
 	if (hideToast) {
 		consoleWarn(`${errorText}:`, err);
