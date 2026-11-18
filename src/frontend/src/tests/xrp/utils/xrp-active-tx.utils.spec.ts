@@ -16,6 +16,8 @@ import {
 	mockXrpSourceAddress,
 	mockXrpSwapActiveUserTransaction,
 	mockXrpSwapData,
+	mockXrpTokenPaymentActiveUserTransaction,
+	mockXrpTokenPaymentData,
 	mockXrpTrustSetActiveUserTransaction,
 	mockXrpTrustSetData,
 	mockXrpTxHash
@@ -27,6 +29,7 @@ import {
 	buildXrpTrustSetTrackingMetadata,
 	isXrpActiveUserTransaction,
 	isXrpAlreadyInFlightError,
+	isXrpTokenPaymentActiveUserTransaction,
 	isXrpTrustSetActiveUserTransaction,
 	toXrpData,
 	toXrpDisplayRefs,
@@ -60,6 +63,22 @@ describe('xrp-active-tx.utils', () => {
 		// "Send XRP".
 		it('does not recognise adding a trust-line token', () => {
 			expect(isXrpActiveUserTransaction(mockXrpTrustSetActiveUserTransaction)).toBeFalsy();
+		});
+	});
+
+	describe('isXrpTokenPaymentActiveUserTransaction', () => {
+		it('recognises a send of a trust-line token', () => {
+			expect(
+				isXrpTokenPaymentActiveUserTransaction(mockXrpTokenPaymentActiveUserTransaction)
+			).toBeTruthy();
+		});
+
+		it.each([
+			['a send of XRP', mockXrpActiveUserTransaction],
+			['adding a trust-line token', mockXrpTrustSetActiveUserTransaction],
+			['a swap from XRP', mockXrpSwapActiveUserTransaction]
+		])('does not recognise %s', (...[, tx]) => {
+			expect(isXrpTokenPaymentActiveUserTransaction(tx)).toBeFalsy();
 		});
 	});
 
@@ -495,6 +514,50 @@ describe('xrp-active-tx.utils', () => {
 		// Its symbol is the trust-line token's, which the fallback to native XRP's would misname.
 		it('is undefined for adding a trust-line token', () => {
 			expect(xrpActiveUserTransactionDisplay(mockXrpTrustSetActiveUserTransaction)).toBeUndefined();
+		});
+
+		describe('a send of a trust-line token', () => {
+			it('reads the snapshot', () => {
+				expect(xrpActiveUserTransactionDisplay(mockXrpTokenPaymentActiveUserTransaction)).toEqual({
+					amount: '25',
+					symbol: 'RLUSD',
+					network: 'XRP Ledger'
+				});
+			});
+
+			// Never as XRP, and in the token's own scale: 25 RLUSD is 25 × 10^18 base units.
+			it("falls back to the row's token when the snapshot is missing", () => {
+				const tx: ActiveUserTransaction = {
+					...mockXrpTokenPaymentActiveUserTransaction,
+					data: { Xrp: { ...mockXrpTokenPaymentData, amount: 1_234_567n * 10n ** 12n } },
+					external_refs: mockXrpTokenPaymentActiveUserTransaction.external_refs.filter(({ key }) =>
+						POLL_KEYS.includes(key as never)
+					)
+				};
+
+				expect(xrpActiveUserTransactionDisplay(tx)).toEqual({
+					amount: '1.234567',
+					symbol: RLUSD_TOKEN.symbol,
+					network: XRP_MAINNET_NETWORK.name
+				});
+			});
+
+			it('falls back to the symbol an unlisted currency code reads as', () => {
+				const tx: ActiveUserTransaction = {
+					...mockXrpTokenPaymentActiveUserTransaction,
+					data: {
+						Xrp: {
+							...mockXrpTokenPaymentData,
+							token: { XrpTrustLineMainnet: ['USD', mockXrpDestinationAddress] }
+						}
+					},
+					external_refs: mockXrpTokenPaymentActiveUserTransaction.external_refs.filter(({ key }) =>
+						POLL_KEYS.includes(key as never)
+					)
+				};
+
+				expect(xrpActiveUserTransactionDisplay(tx)?.symbol).toBe('USD');
+			});
 		});
 	});
 
