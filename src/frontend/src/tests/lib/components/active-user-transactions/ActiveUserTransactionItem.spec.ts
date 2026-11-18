@@ -16,6 +16,7 @@ import {
 	mockXrpActiveUserTransaction,
 	mockXrpData,
 	mockXrpTokenPaymentActiveUserTransaction,
+	mockXrpTrustLineRemovalActiveUserTransaction,
 	mockXrpTrustSetActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
@@ -444,6 +445,31 @@ describe('ActiveUserTransactionItem', () => {
 
 			expect(screen.getByText(`${en.core.text.add} RLUSD`)).toBeInTheDocument();
 			expect(container.querySelector('.text-error-primary')).toBeInTheDocument();
+		});
+	});
+
+	// Removing one is the same `TrustSet` row, saying which of the two it does.
+	describe('rows removing a trust-line token', () => {
+		const renderRow = (tx = mockXrpTrustLineRemovalActiveUserTransaction) =>
+			render(ActiveUserTransactionItem, {
+				props: { tx, isUnseen: false, dismissing: false, onDismiss: vi.fn() }
+			});
+
+		it('renders "Remove" and the token, on its network, with no amount', () => {
+			const { container } = renderRow();
+
+			expect(screen.getByText(`${en.core.text.remove} RLUSD`)).toBeInTheDocument();
+			expect(container).toHaveTextContent('XRP Ledger');
+			expect(container).not.toHaveTextContent(`${en.core.text.add} RLUSD`);
+			expect(container).not.toHaveTextContent('→');
+		});
+
+		it('offers no dismiss while the record is still open', () => {
+			renderRow();
+
+			expect(
+				screen.queryByLabelText(en.active_user_transactions.text.dismiss_aria_label)
+			).not.toBeInTheDocument();
 		});
 	});
 });
