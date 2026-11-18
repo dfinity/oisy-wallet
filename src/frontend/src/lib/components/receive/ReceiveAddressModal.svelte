@@ -1,10 +1,15 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { tick } from 'svelte';
 	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
 	import type ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReceiveTitle from '$lib/components/receive/ReceiveTitle.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
-	import { RECEIVE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
+	import {
+		RECEIVE_TOKENS_MODAL,
+		RECEIVE_TOKENS_MODAL_ADDRESS_LABEL,
+		RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { WizardStepsReceiveAddress } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
@@ -53,6 +58,32 @@
 		({ address, addressLabel, addressToken, copyAriaLabel, networks } = detail);
 
 		modal.next();
+
+		focusContent();
+	};
+
+	// The step's content is replaced on every change, so focus is placed again: on the QR code detail
+	// when it opens, and back on the QR button of the row it came from.
+	let content = $state<HTMLDivElement | undefined>();
+
+	const focusContent = async () => {
+		await tick();
+		content?.focus({ preventScroll: true });
+	};
+
+	const focusQrButtonOf = async (rowAddress: string | undefined) => {
+		await tick();
+
+		const row = Array.from(
+			content?.querySelectorAll<HTMLElement>(
+				`[data-tid="${RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}"]`
+			) ?? []
+		).find(({ textContent }) => textContent?.trim() === rowAddress)?.parentElement;
+
+		(
+			row?.querySelector<HTMLElement>(`[data-tid="${RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON}"]`) ??
+			content
+		)?.focus({ preventScroll: true });
 	};
 
 	const displayAddresses = () => {
@@ -60,7 +91,11 @@
 			return;
 		}
 
+		const rowAddress = address;
+
 		modal.back();
+
+		focusQrButtonOf(rowAddress);
 
 		address = undefined;
 		addressLabel = undefined;
@@ -87,34 +122,36 @@
 		{/if}
 	{/snippet}
 
-	{#key currentStep?.name}
-		{#if currentStep?.name === steps[1].name && nonNullish(addressToken) && nonNullish(networks)}
-			<!-- The shared EVM address keeps the list of the networks it serves beside its QR code. -->
-			<ReceiveAddressQrCode
-				{address}
-				{addressLabel}
-				{addressToken}
-				copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
-				network={addressToken.network}
-				onBack={displayAddresses}
-			>
-				{#snippet text()}
-					{replacePlaceholders($i18n.receive.addresses.text.evm_networks, {
-						$networks: networks?.map(({ name }) => name).join(', ') ?? ''
-					})}
-				{/snippet}
-			</ReceiveAddressQrCode>
-		{:else if currentStep?.name === steps[1].name && nonNullish(addressToken)}
-			<ReceiveAddressQrCode
-				{address}
-				{addressLabel}
-				{addressToken}
-				copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
-				network={addressToken.network}
-				onBack={displayAddresses}
-			/>
-		{:else}
-			<InfoCmp onQRCode={displayQRCode} />
-		{/if}
-	{/key}
+	<div bind:this={content} class="outline-none" tabindex="-1">
+		{#key currentStep?.name}
+			{#if currentStep?.name === steps[1].name && nonNullish(addressToken) && nonNullish(networks)}
+				<!-- The shared EVM address keeps the list of the networks it serves beside its QR code. -->
+				<ReceiveAddressQrCode
+					{address}
+					{addressLabel}
+					{addressToken}
+					copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
+					network={addressToken.network}
+					onBack={displayAddresses}
+				>
+					{#snippet text()}
+						{replacePlaceholders($i18n.receive.addresses.text.evm_networks, {
+							$networks: networks?.map(({ name }) => name).join(', ') ?? ''
+						})}
+					{/snippet}
+				</ReceiveAddressQrCode>
+			{:else if currentStep?.name === steps[1].name && nonNullish(addressToken)}
+				<ReceiveAddressQrCode
+					{address}
+					{addressLabel}
+					{addressToken}
+					copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
+					network={addressToken.network}
+					onBack={displayAddresses}
+				/>
+			{:else}
+				<InfoCmp onQRCode={displayQRCode} />
+			{/if}
+		{/key}
+	</div>
 </WizardModal>

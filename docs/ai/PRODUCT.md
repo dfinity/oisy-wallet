@@ -409,7 +409,7 @@ A route is the asset the sender sends, the network they send it on, the asset OI
 
 - Several routes need a choice. A single direct transfer is picked for the user and named on the address step; a deposit route is always chosen explicitly, even alone.
 - A disabled credited token shows **Enable <token> and show address** in place of any address, QR or Copy, as the step's only primary action (Done turns secondary). It enables that exact token only, through the same save as Manage tokens. The route is kept by network and asset identifier, so it resolves to the token the reload brings in, including an ICRC token whose catalog entry is replaced by a new one on first enable. A failed save keeps the selection and says to try again.
-- Back returns to the previous visible choice and keeps the search. Closing the modal drops the temporary choices; an enabled or imported token stays.
+- Back returns to the previous visible choice and keeps the search. Focus moves with the steps: to the line naming the asset and network on the address step, and back to the route the user left on Back, so Back then Enter reopens the same route. In Your addresses, focus goes to the QR code detail and returns to that row's QR button. Closing the modal drops the temporary choices; an enabled or imported token stays.
 - If the open route stops existing, because its network or token was disabled or removed, its address disappears at once and the user chooses again among what is left, with an info toast.
 
 ### The address

@@ -131,6 +131,9 @@
 	let filter = $state('');
 	let assetKey = $state<string | undefined>();
 	let routeKey = $state<string | undefined>();
+	// The route left with Back or Change token: no address is kept for it, but the picker marks it
+	// and focuses it, so Back then Enter returns to the same route.
+	let previousRouteKey = $state<string | undefined>();
 	// Whether the person saw the token picker, and whether the route was picked for them.
 	let tokenStepVisited = $state(false);
 	let autoRoute = $state(false);
@@ -170,6 +173,7 @@
 		asset: ReceiveAsset;
 		fromTokenStep: boolean;
 	}) => {
+		previousRouteKey = selected.key === assetKey ? previousRouteKey : undefined;
 		assetKey = selected.key;
 		routeKey = undefined;
 		icpFormat = 'principal';
@@ -195,11 +199,13 @@
 	};
 
 	const changeToken = () => {
+		previousRouteKey = routeKey;
 		routeKey = undefined;
 		goToStep(WizardStepsReceiveToken.TOKEN);
 	};
 
 	const back = () => {
+		previousRouteKey = routeKey;
 		routeKey = undefined;
 		goToStep(autoRoute ? WizardStepsReceiveToken.TOKEN : WizardStepsReceiveToken.ROUTE);
 	};
@@ -421,8 +427,9 @@
 		});
 	});
 
-	// Focus follows the step: its first control, so keyboard and screen-reader users land in it. The
-	// first step keeps the modal's own focus, so a phone does not open its keyboard on the search.
+	// Focus follows the step: its heading or choice, so keyboard and screen-reader users land in it.
+	// The token list, when it is the first step, keeps the modal's own focus, so a phone does not open
+	// its keyboard on the search.
 	let content = $state<HTMLDivElement | undefined>();
 	let focusedStep: WizardStepsReceiveToken | undefined;
 
@@ -436,7 +443,7 @@
 		const firstStep = isNullish(focusedStep);
 		focusedStep = step;
 
-		if (firstStep) {
+		if (firstStep && step === WizardStepsReceiveToken.TOKEN) {
 			return;
 		}
 
@@ -474,7 +481,7 @@
 					onChangeToken={changeToken}
 					onSelect={selectRoute}
 					{routes}
-					selectedKey={routeKey}
+					selectedKey={routeKey ?? previousRouteKey}
 					token={asset.token}
 					{tokenStepVisited}
 				/>

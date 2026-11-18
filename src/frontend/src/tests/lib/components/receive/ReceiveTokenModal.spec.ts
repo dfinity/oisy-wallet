@@ -256,6 +256,33 @@ describe('ReceiveTokenModal', () => {
 			).toBeInTheDocument();
 		});
 
+		it('should return focus to the route the person left with Back', async () => {
+			const { container, getByRole } = render(ReceiveTokenModal, {
+				props: { initialToken: ckBtcToken }
+			});
+
+			const [, deposit] = routeKeys(ckBtcToken);
+			const depositSelector = `[data-tid="${RECEIVE_ROUTE_LIST_ITEM}-${deposit}"]`;
+
+			await waitFor(() => {
+				expect(container.querySelector(depositSelector)).toBeInTheDocument();
+			});
+
+			container.querySelector<HTMLElement>(depositSelector)?.click();
+
+			await waitFor(() => {
+				expect(getByRole('button', { name: get(i18n).core.text.back })).toBeInTheDocument();
+			});
+
+			getByRole('button', { name: get(i18n).core.text.back }).click();
+
+			await waitFor(() => {
+				expect(document.activeElement).toBe(container.querySelector(depositSelector));
+			});
+
+			expect(container.querySelector(depositSelector)).toHaveAttribute('aria-pressed', 'true');
+		});
+
 		it('should show unavailable terms with a retry while the direct route stays usable', async () => {
 			ckBtcMinterInfoStore.reset(ckBtcToken.id);
 
