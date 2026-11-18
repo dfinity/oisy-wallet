@@ -2284,7 +2284,13 @@ interface I18nSigner {
 }
 
 interface I18nCarousel {
-	text: { next_slide: string; prev_slide: string; indicator: string };
+	text: {
+		next_slide: string;
+		prev_slide: string;
+		indicator: string;
+		cksol_slide_title: string;
+		cksol_slide_cta: string;
+	};
 }
 
 interface I18nAgreements {
