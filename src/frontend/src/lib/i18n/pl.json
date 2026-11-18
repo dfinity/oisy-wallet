@@ -1498,7 +1498,7 @@
 			"cksol_earlier_deposit_quarantined": "Minter ckSOL wstrzymał przetwarzanie Twojej wcześniejszej wpłaty i nie przyjmie nowej, dopóki sprawa nie zostanie rozwiązana. Nie wysłano żadnych SOL.",
 			"cksol_minter_unavailable": "Minter ckSOL nie może teraz przyjąć wpłaty. Nie wysłano żadnych SOL. Spróbuj ponownie później.",
 			"cksol_deposit_quarantined": "Minter ckSOL wstrzymał przetwarzanie tej wpłaty. Przechowuje SOL, dopóki aktualizacja mintera nie rozwiąże problemu z wpłatą.",
-			"cksol_deposit_below_minimum": ""
+			"cksol_deposit_below_minimum": "Minter ckSOL nie mógł odebrać tej wpłaty, a SOL pozostałe na Twoim adresie wpłaty są poniżej minimalnej kwoty wpłaty. Zostaną przekonwertowane przy Twojej następnej konwersji SOL na ckSOL."
 		}
 	},
 	"buy": {

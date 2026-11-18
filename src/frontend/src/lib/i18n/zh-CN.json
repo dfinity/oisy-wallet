@@ -1498,7 +1498,7 @@
 			"cksol_earlier_deposit_quarantined": "ckSOL 铸币人已停止处理您之前的一笔存入，在此问题解决前不会接受新的存入。未发送任何 SOL。",
 			"cksol_minter_unavailable": "ckSOL 铸币人目前无法接受存入。未发送任何 SOL。请稍后重试。",
 			"cksol_deposit_quarantined": "ckSOL 铸币人已停止处理此笔存入。在铸币人升级解决此笔存入之前，SOL 由其保管。",
-			"cksol_deposit_below_minimum": ""
+			"cksol_deposit_below_minimum": "ckSOL 铸币人无法归集此笔存入，您的存入地址上剩余的 SOL 低于最低存入金额。这些 SOL 将在您下一次从 SOL 到 ckSOL 的转换中一并转换。"
 		}
 	},
 	"buy": {

@@ -1498,7 +1498,7 @@
 			"cksol_earlier_deposit_quarantined": "Minter ckSOL zastavil zpracování jednoho z vašich dřívějších vkladů a dokud nebude vyřešen, nepřijme žádný nový. Žádné SOL nebyly odeslány.",
 			"cksol_minter_unavailable": "Minter ckSOL teď nemůže přijmout vklad. Žádné SOL nebyly odeslány. Zkuste to prosím později znovu.",
 			"cksol_deposit_quarantined": "Minter ckSOL zastavil zpracování tohoto vkladu. SOL drží, dokud vklad nevyřeší aktualizace minteru.",
-			"cksol_deposit_below_minimum": ""
+			"cksol_deposit_below_minimum": "Minter ckSOL nemohl tento vklad vyzvednout a SOL, které zůstaly na vaší vkladové adrese, nedosahují minimální částky vkladu. Převedou se s vaším příštím převodem SOL na ckSOL."
 		}
 	},
 	"buy": {
