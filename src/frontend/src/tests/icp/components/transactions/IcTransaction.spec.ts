@@ -1,5 +1,8 @@
+import { IC_CKSOL_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
+import type { IcToken } from '$icp/types/ic-token';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { getCmcDepositAccountIdentifier } from '$icp/utils/cmc.utils';
 import { mapCyclesLedgerTransaction } from '$icp/utils/cycles-ledger-transactions.utils';
 import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
@@ -20,6 +23,14 @@ import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+
+let mockCkSolEnabled = true;
+
+vi.mock('$env/cksol.env', () => ({
+	get CKSOL_ENABLED() {
+		return mockCkSolEnabled;
+	}
+}));
 
 describe('IcTransaction', () => {
 	const [mockTrx] = createMockIcTransactionsUi(1);
@@ -215,6 +226,69 @@ describe('IcTransaction', () => {
 			expect(container).toHaveTextContent('OISY Prod');
 			expect(container).not.toHaveTextContent(get(i18n).transaction.text.canister_unknown);
 			expect(container).not.toHaveTextContent(shortenWithMiddleEllipsis({ text: depositAccount }));
+		});
+	});
+
+	describe('the icon of a ckSOL conversion', () => {
+		const ckSolToken = { ...mockValidIcToken, ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID };
+
+		const iconLabelOf = ({
+			transaction,
+			token = ckSolToken
+		}: {
+			transaction: IcTransactionUi;
+			token?: IcToken;
+		}): string | null => {
+			const { container } = render(IcTransaction, {
+				props: { transaction, token, iconType: 'token' }
+			});
+
+			return (
+				container
+					.querySelector('[data-tid="icon-badge"]')
+					?.closest('[aria-label]')
+					?.getAttribute('aria-label') ?? null
+			);
+		};
+
+		const mint: IcTransactionUi = {
+			...mockTrx,
+			type: 'mint',
+			incoming: true,
+			typeLabel: 'transaction.label.twin_token_converted'
+		};
+
+		const burn: IcTransactionUi = {
+			...mockTrx,
+			type: 'burn',
+			incoming: false,
+			typeLabel: 'transaction.label.converted_to_twin_token'
+		};
+
+		beforeEach(() => {
+			mockCkSolEnabled = true;
+		});
+
+		it('should draw a conversion from SOL with the swap icon', () => {
+			expect(iconLabelOf({ transaction: mint })).toBe(get(i18n).convert.text.convert_button);
+		});
+
+		it('should draw a conversion to SOL with the swap icon', () => {
+			expect(iconLabelOf({ transaction: burn })).toBe(get(i18n).convert.text.convert_button);
+		});
+
+		it('should keep the arrow of a burn that stays a send', () => {
+			expect(iconLabelOf({ transaction: { ...burn, typeLabel: 'send.text.send' } })).toBe('burn');
+		});
+
+		it('should keep the arrows of another ck token', () => {
+			expect(iconLabelOf({ transaction: mint, token: mockValidIcToken })).toBe('mint');
+		});
+
+		it('should keep the arrows where ckSOL is not enabled', () => {
+			mockCkSolEnabled = false;
+
+			expect(iconLabelOf({ transaction: mint })).toBe('mint');
 		});
 	});
 });

@@ -40,6 +40,7 @@ import { CYCLES_TOP_UP_EXTERNAL_REF_KEYS } from '$lib/types/cycles-top-up-active
 import * as consoleUtils from '$lib/utils/console.utils';
 import { toCyclesTopUpExternalRefs } from '$lib/utils/cycles-top-up-active-tx.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
+import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import {
 	createMockIcrcBurnTransaction,
 	createMockIcrcMintTransaction,
@@ -398,7 +399,7 @@ describe('cycles-top-up.services', () => {
 
 			vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => undefined);
 
-			vi.mocked(createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(createActiveUserTransaction).mockResolvedValue(mockActiveUserTransaction);
 			vi.mocked(updateActiveUserTransaction).mockResolvedValue();
 			vi.mocked(deleteActiveUserTransaction).mockResolvedValue();
 			vi.mocked(waitForMilliseconds).mockResolvedValue();
@@ -609,7 +610,7 @@ describe('cycles-top-up.services', () => {
 			vi.mocked(createActiveUserTransaction).mockImplementation(() => {
 				vi.setSystemTime(NOW_MS + Number(CMC_TRANSFER_START_WINDOW_NS / 1_000_000n) + 1);
 
-				return Promise.resolve();
+				return Promise.resolve(mockActiveUserTransaction);
 			});
 
 		it('abandons a top-up whose tab was suspended before sending', async () => {
