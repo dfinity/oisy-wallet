@@ -1027,7 +1027,6 @@
 			"text": {
 				"select_token": "Select token",
 				"select_network": "Select network",
-				"which_network": "Which network does the sender use?",
 				"networks_count": "$count networks",
 				"test_network": "Test network",
 				"change_token": "Change token",
@@ -1059,7 +1058,8 @@
 				"copy_account_id": "Copy ICP Account ID",
 				"no_match": "No matching tokens. Try a different name or symbol.",
 				"title_direct": "Receive $token on $network",
-				"title_deposit": "Receive $token via $network"
+				"title_deposit": "Receive $token via $network",
+				"receive_token": "Receive $token"
 			}
 		},
 		"ckbtc": {
@@ -1074,7 +1074,10 @@
 				"unavailable": "Unavailable",
 				"terms_error": "OISY couldn't load the current deposit terms.",
 				"small_deposit": "If your deposit is too small to cover the fee, you may receive no ckBTC.",
-				"view_activity": "View ckBTC activity"
+				"view_activity": "View ckBTC activity",
+				"receive_as": "Receive as $token",
+				"benefit": "$count confirmations, then fast and cheap",
+				"benefit_generic": "After confirmations: fast and cheap"
 			}
 		},
 		"addresses": {

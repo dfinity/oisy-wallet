@@ -2,7 +2,10 @@
 	import EthReceiveMetamask from '$eth/components/receive/EthReceiveMetamask.svelte';
 	import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 	import ReceiveCkBtcDepositTerms from '$icp/components/receive/ReceiveCkBtcDepositTerms.svelte';
-	import ReceiveAddressQrCodeContent from '$lib/components/receive/ReceiveAddressQrCodeContent.svelte';
+	import IconWarning from '$lib/components/icons/IconWarning.svelte';
+	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
+	import ReceiveAddressField from '$lib/components/receive/ReceiveAddressField.svelte';
+	import ReceiveQrCode from '$lib/components/receive/ReceiveQrCode.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -208,33 +211,45 @@
 			<div aria-live="polite">
 				{#if addressState.status === 'ready'}
 					{#key addressState.address}
-						<ReceiveAddressQrCodeContent
+						<ReceiveQrCode
 							address={addressState.address}
-							{addressLabel}
 							addressToken={sourceToken}
+							size="compact"
+						/>
+
+						<ReceiveAddressField
+							address={addressState.address}
 							{copiedText}
 							{copyAriaLabel}
 							copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
-							network={sourceNetwork}
-							qrSize="compact"
-						>
-							{#snippet text()}
-								<!-- Right above the address and Copy, so it is in view wherever the address is. -->
-								{#if deposit}
-									<span data-tid={RECEIVE_CKBTC_DEPOSIT_WARNING}>
-										<strong class="text-warning-primary"
-											>{$i18n.receive.ckbtc.text.deposit_warning}</strong
-										>
-										{$i18n.receive.ckbtc.text.deposit_explanation}
-									</span>
-								{:else}
+							label={addressLabel}
+						/>
+
+						<!-- Right under the address and Copy, so it is in view wherever the address is copied. -->
+						{#if deposit}
+							<p
+								class="mt-3 flex items-start gap-2 text-sm text-tertiary"
+								data-tid={RECEIVE_CKBTC_DEPOSIT_WARNING}
+							>
+								<span class="shrink-0 text-warning-primary"><IconWarning /></span>
+								<span>
+									<strong class="text-warning-primary"
+										>{$i18n.receive.ckbtc.text.deposit_warning}</strong
+									>
+									{$i18n.receive.ckbtc.text.deposit_explanation}
+								</span>
+							</p>
+						{:else}
+							<p class="mt-3 flex items-start gap-2 text-sm text-tertiary">
+								<span class="shrink-0"><IconInfo /></span>
+								<span>
 									{replacePlaceholders($i18n.receive.token.text.send_instruction, {
 										$token: sourceSymbol,
 										$network: sourceNetwork.name
 									})}
-								{/if}
-							{/snippet}
-						</ReceiveAddressQrCodeContent>
+								</span>
+							</p>
+						{/if}
 					{/key}
 				{:else if addressState.status === 'error'}
 					<div class="flex flex-col items-center gap-3 py-6 text-center">

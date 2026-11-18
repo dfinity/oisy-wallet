@@ -183,17 +183,37 @@ export const getCkBtcDepositSourceToken = ({
 
 /**
  * The routes of an asset, on the enabled networks only: a direct transfer for each version, and a
- * Bitcoin deposit after ckBTC's direct route. The preferred network's routes come first.
+ * Bitcoin deposit after ckBTC's direct route. Native BTC also offers that deposit after its own
+ * route, when the catalog has the ckBTC it credits: receiving as ckBTC is a choice the user makes.
+ * The preferred network's routes come first.
  */
 export const getReceiveRoutes = ({
 	tokens,
 	enabledNetworkIds,
-	preferredNetworkId
+	preferredNetworkId,
+	catalog = []
 }: {
 	tokens: Token[];
 	enabledNetworkIds: NetworkId[];
 	preferredNetworkId?: NetworkId;
+	// The whole catalog, where Receive finds the ckBTC a Bitcoin deposit credits.
+	catalog?: Token[];
 }): ReceiveRoute[] => {
+	const depositRoute = ({
+		creditedToken,
+		sourceToken
+	}: {
+		creditedToken: Token;
+		sourceToken: Token;
+	}): ReceiveRoute => ({
+		key: `ckbtc-deposit:${getReceiveTokenKey(creditedToken)}`,
+		kind: 'ckbtc-deposit',
+		sourceToken,
+		sourceNetwork: sourceToken.network,
+		creditedToken,
+		addressKind: 'ckbtc-deposit'
+	});
+
 	const routes = tokens.reduce<ReceiveRoute[]>((acc, token) => {
 		const addressKind = getReceiveAddressKind(token);
 
@@ -213,14 +233,20 @@ export const getReceiveRoutes = ({
 		const depositSourceToken = getCkBtcDepositSourceToken({ token, enabledNetworkIds });
 
 		if (nonNullish(depositSourceToken)) {
-			acc.push({
-				key: `ckbtc-deposit:${getReceiveTokenKey(token)}`,
-				kind: 'ckbtc-deposit',
-				sourceToken: depositSourceToken,
-				sourceNetwork: depositSourceToken.network,
-				creditedToken: token,
-				addressKind: 'ckbtc-deposit'
-			});
+			acc.push(depositRoute({ creditedToken: token, sourceToken: depositSourceToken }));
+		}
+
+		const ckBtc =
+			token.standard?.code === 'bitcoin'
+				? catalog.find(
+						(candidate) =>
+							getCkBtcDepositSourceToken({ token: candidate, enabledNetworkIds })?.network.id ===
+							token.network.id
+					)
+				: undefined;
+
+		if (nonNullish(ckBtc)) {
+			acc.push(depositRoute({ creditedToken: ckBtc, sourceToken: token }));
 		}
 
 		return acc;
@@ -237,6 +263,24 @@ export const getReceiveRoutes = ({
 		...routes.filter((route) => onPreferredNetwork(route)),
 		...routes.filter((route) => !onPreferredNetwork(route))
 	];
+};
+
+/**
+ * A route that credits another asset than the one picked, such as BTC deposited as ckBTC: an
+ * alternative way to receive it, rather than another network for the same asset.
+ */
+export const isReceiveConversionOffer = ({
+	route: { kind, creditedToken },
+	assetTokens
+}: {
+	route: ReceiveRoute;
+	assetTokens: Token[];
+}): boolean => {
+	const creditedKey = getReceiveTokenKey(creditedToken);
+
+	return (
+		kind === 'ckbtc-deposit' && !assetTokens.some((t) => getReceiveTokenKey(t) === creditedKey)
+	);
 };
 
 // The route a selection goes to without asking: only a single direct transfer.

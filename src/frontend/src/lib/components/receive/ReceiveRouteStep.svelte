@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -15,11 +17,13 @@
 	import type { ReceiveRoute } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isReceiveTestToken } from '$lib/utils/receive.utils';
+	import { isReceiveConversionOffer, isReceiveTestToken } from '$lib/utils/receive.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		token: Token;
+		// Every version of the picked asset.
+		assetTokens: Token[];
 		routes: ReceiveRoute[];
 		selectedKey?: string;
 		// The token picker was shown before this step, so Back returns to it.
@@ -28,10 +32,48 @@
 		onChangeToken: () => void;
 	}
 
-	let { token, routes, selectedKey, tokenStepVisited, onSelect, onChangeToken }: Props = $props();
+	let {
+		token,
+		assetTokens,
+		routes,
+		selectedKey,
+		tokenStepVisited,
+		onSelect,
+		onChangeToken
+	}: Props = $props();
 
-	const routeDescription = ({ kind, sourceToken, sourceNetwork, creditedToken }: ReceiveRoute) =>
-		kind === 'ckbtc-deposit'
+	// A route that credits another asset than the one picked, such as BTC deposited as ckBTC: its row
+	// reads as an alternative way to receive, and the asset's own route as receiving it as it is.
+	const isOffer = (route: ReceiveRoute): boolean =>
+		isReceiveConversionOffer({ route, assetTokens });
+
+	let offer = $derived(routes.find(isOffer));
+
+	const routeTitle = (route: ReceiveRoute): string =>
+		isOffer(route)
+			? replacePlaceholders($i18n.receive.ckbtc.text.receive_as, {
+					$token: getTokenDisplaySymbol(route.creditedToken)
+				})
+			: offer
+				? replacePlaceholders($i18n.receive.token.text.receive_token, {
+						$token: getTokenDisplaySymbol(route.creditedToken)
+					})
+				: route.sourceNetwork.name;
+
+	const routeDescription = (route: ReceiveRoute): string => {
+		const { kind, sourceToken, sourceNetwork, creditedToken } = route;
+
+		// Honest about the wait: the deposit itself takes the Bitcoin confirmations; ckBTC is fast and
+		// cheap to move once it arrives.
+		if (isOffer(route)) {
+			const confirmations = $ckBtcMinterInfoStore?.[creditedToken.id]?.data.min_confirmations;
+
+			return nonNullish(confirmations)
+				? replacePlaceholders($i18n.receive.ckbtc.text.benefit, { $count: `${confirmations}` })
+				: $i18n.receive.ckbtc.text.benefit_generic;
+		}
+
+		return kind === 'ckbtc-deposit'
 			? replacePlaceholders($i18n.receive.token.text.route_ckbtc_deposit, {
 					$sourceToken: getTokenDisplaySymbol(sourceToken),
 					$creditedToken: getTokenDisplaySymbol(creditedToken)
@@ -40,6 +82,7 @@
 					$token: getTokenDisplaySymbol(sourceToken),
 					$network: sourceNetwork.name
 				});
+	};
 </script>
 
 {#if routes.length === 0}
@@ -49,8 +92,6 @@
 		})}
 	</p>
 {:else}
-	<p class="mb-3 text-tertiary">{$i18n.receive.token.text.which_network}</p>
-
 	<List noPadding>
 		{#each routes as route (route.key)}
 			<ListItem styleClass="first-of-type:border-t-1">
@@ -66,14 +107,14 @@
 							<TokenLogo
 								badge={{ type: 'network' }}
 								color="white"
-								data={route.sourceToken}
+								data={isOffer(route) ? route.creditedToken : route.sourceToken}
 								logoSize="lg"
 							/>
 						</div>
 					{/snippet}
 
 					{#snippet title()}
-						{route.sourceNetwork.name}
+						{routeTitle(route)}
 					{/snippet}
 
 					{#snippet description()}

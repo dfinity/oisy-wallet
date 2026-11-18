@@ -1027,7 +1027,6 @@
 			"text": {
 				"select_token": "",
 				"select_network": "",
-				"which_network": "",
 				"networks_count": "",
 				"test_network": "",
 				"change_token": "",
@@ -1059,7 +1058,8 @@
 				"copy_account_id": "",
 				"no_match": "",
 				"title_direct": "",
-				"title_deposit": ""
+				"title_deposit": "",
+				"receive_token": ""
 			}
 		},
 		"ckbtc": {
@@ -1074,7 +1074,10 @@
 				"unavailable": "",
 				"terms_error": "",
 				"small_deposit": "",
-				"view_activity": ""
+				"view_activity": "",
+				"receive_as": "",
+				"benefit": "",
+				"benefit_generic": ""
 			}
 		},
 		"addresses": {

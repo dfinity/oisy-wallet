@@ -166,10 +166,49 @@ describe('ReceiveTokenModal', () => {
 		expect(titles).toEqual([BASE_NETWORK.name, ETHEREUM_NETWORK.name]);
 	});
 
+	it('should offer BTC as ckBTC, saying what it means in its row', async () => {
+		ckBtcMinterInfoStore.set({
+			id: ckBtcToken.id,
+			data: { data: mockCkBtcMinterInfo, certified: true }
+		});
+
+		const { container } = render(ReceiveTokenModal, { props: { initialToken: BTC_MAINNET_TOKEN } });
+
+		await waitFor(() => {
+			expect(container.querySelectorAll(`[data-tid^="${RECEIVE_ROUTE_LIST_ITEM}"]`)).toHaveLength(
+				2
+			);
+		});
+
+		expect(container.querySelector('[data-tid="modal-title"]')).toHaveTextContent('Receive BTC');
+		expect(container).toHaveTextContent(
+			get(i18n).receive.ckbtc.text.receive_as.replace('$token', 'ckBTC')
+		);
+		expect(container).toHaveTextContent(
+			get(i18n).receive.ckbtc.text.benefit.replace(
+				'$count',
+				`${mockCkBtcMinterInfo.min_confirmations}`
+			)
+		);
+		expect(
+			byTestId({ container, testId: RECEIVE_TOKENS_MODAL_ADDRESS_LABEL })
+		).not.toBeInTheDocument();
+	});
+
 	it('should not show an uncertified Bitcoin address', async () => {
 		btcAddressMainnetStore.set({ data: mockBtcAddress, certified: false });
 
 		const { container } = render(ReceiveTokenModal, { props: { initialToken: BTC_MAINNET_TOKEN } });
+
+		const [direct] = routeKeys(BTC_MAINNET_TOKEN);
+
+		await waitFor(() => {
+			expect(
+				byTestId({ container, testId: `${RECEIVE_ROUTE_LIST_ITEM}-${direct}` })
+			).toBeInTheDocument();
+		});
+
+		byTestId({ container, testId: `${RECEIVE_ROUTE_LIST_ITEM}-${direct}` })?.click();
 
 		await waitFor(() => {
 			expect(byTestId({ container, testId: RECEIVE_ADDRESS_LOADING })).toBeInTheDocument();

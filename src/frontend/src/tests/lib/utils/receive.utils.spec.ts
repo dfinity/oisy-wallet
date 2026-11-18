@@ -39,6 +39,7 @@ import {
 	getReceiveConvertTwinToken,
 	getReceiveRoutes,
 	getReceiveTokenKey,
+	isReceiveConversionOffer,
 	isReceiveTestToken,
 	isReceiveTokenEnabled,
 	resolveReceiveAddress,
@@ -185,6 +186,48 @@ describe('receive.utils', () => {
 			});
 		});
 
+		it('should offer native BTC as ckBTC too, when the catalog has the ckBTC it credits', () => {
+			const routes = getReceiveRoutes({
+				tokens: [BTC_MAINNET_TOKEN],
+				enabledNetworkIds,
+				catalog: [BTC_MAINNET_TOKEN, ckBtcToken]
+			});
+
+			expect(routes.map(({ kind, creditedToken }) => [kind, creditedToken])).toEqual([
+				['direct', BTC_MAINNET_TOKEN],
+				['ckbtc-deposit', ckBtcToken]
+			]);
+
+			// The same route as ckBTC's own deposit, whichever asset the person started from.
+			expect(routes[1].key).toBe(
+				getReceiveRoutes({ tokens: [ckBtcToken], enabledNetworkIds })[1].key
+			);
+		});
+
+		it('should not offer ckBTC for BTC without a ckBTC that OISY can check deposits for', () => {
+			const testVariant: IcCkToken = {
+				...ckBtcToken,
+				ledgerCanisterId: 'mc6ru-gyaaa-aaaar-qaaaq-cai',
+				twinToken: BTC_TESTNET_TOKEN
+			};
+
+			expect(
+				getReceiveRoutes({
+					tokens: [BTC_MAINNET_TOKEN],
+					enabledNetworkIds,
+					catalog: [testVariant]
+				})
+			).toHaveLength(1);
+
+			expect(
+				getReceiveRoutes({
+					tokens: [BTC_TESTNET_TOKEN],
+					enabledNetworkIds: [...enabledNetworkIds, BTC_TESTNET_NETWORK_ID],
+					catalog: [ckBtcToken]
+				})
+			).toHaveLength(1);
+		});
+
 		it('should offer ckBTC directly on Internet Computer and as a Bitcoin deposit', () => {
 			const routes = getReceiveRoutes({ tokens: [ckBtcToken], enabledNetworkIds });
 
@@ -273,6 +316,40 @@ describe('receive.utils', () => {
 					enabledNetworkIds: [BASE_SEPOLIA_NETWORK_ID]
 				})
 			).toHaveLength(1);
+		});
+	});
+
+	describe('isReceiveConversionOffer', () => {
+		it('should flag the ckBTC deposit in the BTC list only', () => {
+			const [btcDirect, btcAsCkBtc] = getReceiveRoutes({
+				tokens: [BTC_MAINNET_TOKEN],
+				enabledNetworkIds,
+				catalog: [ckBtcToken]
+			});
+			const [, ckBtcDeposit] = getReceiveRoutes({ tokens: [ckBtcToken], enabledNetworkIds });
+
+			expect(
+				isReceiveConversionOffer({ route: btcAsCkBtc, assetTokens: [BTC_MAINNET_TOKEN] })
+			).toBeTruthy();
+			expect(
+				isReceiveConversionOffer({ route: btcDirect, assetTokens: [BTC_MAINNET_TOKEN] })
+			).toBeFalsy();
+			expect(
+				isReceiveConversionOffer({ route: ckBtcDeposit, assetTokens: [ckBtcToken] })
+			).toBeFalsy();
+		});
+
+		it('should not flag another version of a grouped asset', () => {
+			const routes = getReceiveRoutes({
+				tokens: [USDC_TOKEN, BASE_USDC_TOKEN],
+				enabledNetworkIds
+			});
+
+			expect(
+				routes.some((route) =>
+					isReceiveConversionOffer({ route, assetTokens: [USDC_TOKEN, BASE_USDC_TOKEN] })
+				)
+			).toBeFalsy();
 		});
 	});
 

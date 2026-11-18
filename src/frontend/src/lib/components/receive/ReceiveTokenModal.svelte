@@ -51,6 +51,7 @@
 		getReceiveConvertTwinToken,
 		getReceiveRoutes,
 		getReceiveTokenKey,
+		isReceiveConversionOffer,
 		isReceiveTokenEnabled,
 		resolveReceiveAddress
 	} from '$lib/utils/receive.utils';
@@ -144,7 +145,12 @@
 	let asset = $derived(assets.find(({ key }) => key === assetKey));
 
 	const routesOf = (target: ReceiveAsset): ReceiveRoute[] =>
-		getReceiveRoutes({ tokens: target.tokens, enabledNetworkIds, preferredNetworkId });
+		getReceiveRoutes({
+			tokens: target.tokens,
+			enabledNetworkIds,
+			preferredNetworkId,
+			catalog
+		});
 
 	let routes = $derived(nonNullish(asset) ? routesOf(asset) : []);
 
@@ -181,6 +187,17 @@
 						$token: getTokenDisplaySymbol(route.sourceToken),
 						$network: route.sourceNetwork.name
 					})
+	);
+
+	// Choosing between BTC and BTC credited as ckBTC is not a choice of network: the title names the
+	// asset instead.
+	let offerTitle = $derived(
+		nonNullish(asset) &&
+			routes.some((route) => isReceiveConversionOffer({ route, assetTokens: asset.tokens }))
+			? replacePlaceholders($i18n.receive.token.text.receive_token, {
+					$token: getTokenDisplaySymbol(asset.token)
+				})
+			: undefined
 	);
 
 	const selectAsset = ({
@@ -490,7 +507,9 @@
 		<span class="line-clamp-2 block whitespace-normal">
 			{currentStep?.name === WizardStepsReceiveToken.ADDRESS && nonNullish(addressTitle)
 				? addressTitle
-				: (currentStep?.title ?? $i18n.receive.text.receive)}
+				: currentStep?.name === WizardStepsReceiveToken.ROUTE && nonNullish(offerTitle)
+					? offerTitle
+					: (currentStep?.title ?? $i18n.receive.text.receive)}
 		</span>
 	{/snippet}
 
@@ -500,6 +519,7 @@
 				<!-- Resolving the token the page preselects. -->
 			{:else if currentStep?.name === WizardStepsReceiveToken.ROUTE && nonNullish(asset)}
 				<ReceiveRouteStep
+					assetTokens={asset.tokens}
 					onChangeToken={changeToken}
 					onSelect={selectRoute}
 					{routes}

@@ -755,7 +755,6 @@ interface I18nReceive {
 		text: {
 			select_token: string;
 			select_network: string;
-			which_network: string;
 			networks_count: string;
 			test_network: string;
 			change_token: string;
@@ -788,6 +787,7 @@ interface I18nReceive {
 			no_match: string;
 			title_direct: string;
 			title_deposit: string;
+			receive_token: string;
 		};
 	};
 	ckbtc: {
@@ -803,6 +803,9 @@ interface I18nReceive {
 			terms_error: string;
 			small_deposit: string;
 			view_activity: string;
+			receive_as: string;
+			benefit: string;
+			benefit_generic: string;
 		};
 	};
 	addresses: { text: { evm_title: string; evm_networks: string; display_evm_qr: string } };
