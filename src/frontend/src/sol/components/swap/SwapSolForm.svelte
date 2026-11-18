@@ -6,22 +6,31 @@
 		SOLANA_LOCAL_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
+	import { isTokenCkSolLedger } from '$icp/utils/ic-send.utils';
 	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProviderCell from '$lib/components/swap/SwapProviderCell.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
+	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { SwapProvider } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
+	import { hasChainFusionSolMintInFlight } from '$lib/utils/chain-fusion-swap-active-tx.utils';
+	import { asCkTwinOf } from '$lib/utils/chain-fusion-swap.utils';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isLifiFeeAffordable, raiseLifiMaxFee } from '$lib/utils/lifi-fee.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import { parseToken, tryParseToken } from '$lib/utils/parse.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 	import SwapSolFees from '$sol/components/swap/SwapSolFees.svelte';
 	import { SOL_FEE_CONTEXT_KEY, type FeeContext } from '$sol/stores/sol-fee.store';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
@@ -74,6 +83,49 @@
 
 	const totalFee = $derived(isLifi ? lifiFee : $feeStore);
 
+	const chainFusionDetails = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.CHAIN_FUSION
+			? $swapAmountsStore.selectedProvider.swapDetails
+			: undefined
+	);
+
+	const isSolToCkSol = $derived.by(() => {
+		if (isNullish($sourceToken) || isNullish($destinationToken)) {
+			return false;
+		}
+
+		const ckToken = asCkTwinOf({ ckToken: $destinationToken, nativeToken: $sourceToken });
+
+		return nonNullish(ckToken) && isTokenCkSolLedger(ckToken);
+	});
+
+	// The minter takes one deposit per account at a time, so while a SOL → ckSOL conversion is in
+	// flight the quote makes no offer, and this says why in place of the generic "not offered".
+	const ckSolDepositInFlight = $derived(
+		isSolToCkSol && hasChainFusionSolMintInFlight($activeUserTransactionsPending)
+	);
+
+	const minimumAmountMessage = $derived.by(() => {
+		const minimumAmount = chainFusionDetails?.minimumAmount;
+
+		if (
+			errorType !== 'minimum-amount-not-reached' ||
+			isNullish(minimumAmount) ||
+			isNullish($sourceToken)
+		) {
+			return;
+		}
+
+		return replacePlaceholders($i18n.send.assertion.minimum_deposit_amount, {
+			$amount: formatToken({
+				value: minimumAmount,
+				unitName: $sourceToken.decimals,
+				displayDecimals: $sourceToken.decimals
+			}),
+			$symbol: $sourceToken.symbol
+		});
+	});
+
 	// While "Max" holds a LI.FI amount, it leaves room for the highest LI.FI fee seen since for the
 	// same destination, so that the amount only steps down, as on EVM (`SwapEthForm`).
 	$effect(() => {
@@ -117,6 +169,12 @@
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {
 		if (isNullish($sourceToken)) {
 			return;
+		}
+
+		const minimumAmount = chainFusionDetails?.minimumAmount;
+
+		if (nonNullish(minimumAmount) && userAmount < minimumAmount) {
+			return 'minimum-amount-not-reached';
 		}
 
 		const parsedSendBalance = nonNullish($sourceTokenBalance)
@@ -203,6 +261,7 @@
 	{errorType}
 	fee={maxFee}
 	{isSwapAmountsLoading}
+	notOfferedExplained={ckSolDepositInFlight}
 	{onClose}
 	onCustomValidate={customValidate}
 	{onMax}
@@ -212,6 +271,18 @@
 	bind:swapAmount
 	bind:receiveAmount
 >
+	{#snippet message()}
+		{#if nonNullish(minimumAmountMessage)}
+			<div class="mb-4" in:fade>
+				<MessageBox level="error">{minimumAmountMessage}</MessageBox>
+			</div>
+		{:else if ckSolDepositInFlight}
+			<div class="mb-4" in:fade>
+				<MessageBox level="info">{$i18n.swap.error.cksol_deposit_in_progress}</MessageBox>
+			</div>
+		{/if}
+	{/snippet}
+
 	{#snippet swapDetails()}
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<div class="mt-4 flex flex-col">
