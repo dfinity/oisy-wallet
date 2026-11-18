@@ -35,6 +35,7 @@ import {
 	decodeLifiBtcTransaction,
 	findLifiIntermediateToken,
 	findLifiListedToken,
+	isLifiBtcInsufficientFundsError,
 	lifiFeesUsd,
 	lifiUserTokenAddresses,
 	mapLifiSwapResult,
@@ -70,6 +71,8 @@ import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { assertNonNullish } from '@dfinity/utils';
 import {
 	ChainId,
+	HTTPError,
+	SDKError,
 	type CrossStep,
 	type LiFiStep,
 	type ProtocolStep,
@@ -1309,6 +1312,53 @@ describe('lifi-swap.utils', () => {
 			);
 			expect(deposit.value).toBe(997_500n);
 			expect(hex(memo.script)).toBe('6a0a3d7c6c6966692fa4b95a');
+		});
+	});
+
+	describe('isLifiBtcInsufficientFundsError', () => {
+		const btcRequest = {
+			fromChain: ChainId.BTC,
+			toChain: ChainId.ETH,
+			fromToken: 'bitcoin',
+			toToken: '0x0000000000000000000000000000000000000000',
+			fromAddress: mockBtcAddress,
+			fromAmount: '200000'
+		};
+
+		// As the SDK throws it: with LI.FI's own error code read from the body.
+		const lifiFailure = ({ status, code }: { status: number; code?: number }) =>
+			new SDKError(
+				Object.assign(
+					new HTTPError(new Response('{}', { status }), 'https://li.quest/v1/quote', {}),
+					{ responseBody: code === undefined ? undefined : { code, message: '' } }
+				)
+			);
+
+		it.each([
+			{ status: 404, code: 1003 },
+			{ status: 422, code: 1004 }
+		])('should read code $code from BTC as the balance', ({ status, code }) => {
+			expect(
+				isLifiBtcInsufficientFundsError({ err: lifiFailure({ status, code }), request: btcRequest })
+			).toBeTruthy();
+		});
+
+		it.each([
+			{ case: 'no route', err: lifiFailure({ status: 404, code: 1002 }) },
+			{ case: 'a refused address', err: lifiFailure({ status: 424, code: 1008 }) },
+			{ case: 'no code', err: lifiFailure({ status: 404 }) },
+			{ case: 'another error', err: new Error('1003') }
+		])('should not read $case from BTC as the balance', ({ err }) => {
+			expect(isLifiBtcInsufficientFundsError({ err, request: btcRequest })).toBeFalsy();
+		});
+
+		it('should not read code 1003 from another chain as the balance', () => {
+			expect(
+				isLifiBtcInsufficientFundsError({
+					err: lifiFailure({ status: 404, code: 1003 }),
+					request: { ...btcRequest, fromChain: ChainId.ETH }
+				})
+			).toBeFalsy();
 		});
 	});
 
