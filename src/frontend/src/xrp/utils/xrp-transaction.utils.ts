@@ -1,8 +1,14 @@
-import { XRP_LEDGER_SEARCH_LOOKBACK, XRP_RIPPLE_EPOCH_OFFSET } from '$xrp/constants/xrp.constants';
+import {
+	XRP_LEDGER_SEARCH_LOOKBACK,
+	XRP_RIPPLE_EPOCH_OFFSET,
+	XRP_TRUST_LINE_MAX_LIMIT,
+	XRP_TRUST_SET_FLAG_SET_NO_RIPPLE
+} from '$xrp/constants/xrp.constants';
 import { XrpAccountTransactionEntrySchema } from '$xrp/schema/xrpl-rpc.schema';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
-import type { XrpPayment, XrpTransactionUi } from '$xrp/types/xrp-transaction';
+import type { XrpPayment, XrpTransactionUi, XrpTrustSet } from '$xrp/types/xrp-transaction';
+import type { XrpTrustLineTokenIdentity } from '$xrp/types/xrp-trust-line-token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { decode } from 'ripple-binary-codec';
 
@@ -16,6 +22,36 @@ const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
  */
 export const isXrpTransactionSuccessful = (transactionResult: string | undefined): boolean =>
 	transactionResult === XRP_SUCCESS_TRANSACTION_RESULT;
+
+/**
+ * A `TrustSet` adding the wallet's side of a trust line for a token: the largest limit, so receiving
+ * is never capped; NoRipple, so nothing ripples through the wallet and the line can be deleted once
+ * it is back at its default state; and no quality settings.
+ */
+export const buildXrpTrustSet = ({
+	account,
+	token: { currency, issuer },
+	fee,
+	sequence,
+	signingPublicKey,
+	lastLedgerSequence
+}: {
+	account: XrpAddress;
+	token: XrpTrustLineTokenIdentity;
+	fee: XrpBalance;
+	sequence: number;
+	signingPublicKey: string;
+	lastLedgerSequence: number;
+}): XrpTrustSet => ({
+	TransactionType: 'TrustSet',
+	Account: account,
+	LimitAmount: { currency, issuer, value: XRP_TRUST_LINE_MAX_LIMIT },
+	Flags: XRP_TRUST_SET_FLAG_SET_NO_RIPPLE,
+	Fee: `${fee}`,
+	Sequence: sequence,
+	SigningPubKey: signingPublicKey,
+	LastLedgerSequence: lastLedgerSequence
+});
 
 /**
  * Assembles an unsigned XRPL Payment for native XRP.

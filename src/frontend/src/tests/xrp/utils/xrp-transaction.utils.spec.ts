@@ -1,18 +1,22 @@
+import { mockRlusdCurrencyCode, mockRlusdIssuer } from '$tests/mocks/xrp.mock';
 import {
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_LEDGER_SEARCH_LOOKBACK,
-	XRP_RIPPLE_EPOCH_OFFSET
+	XRP_RIPPLE_EPOCH_OFFSET,
+	XRP_TRUST_LINE_MAX_LIMIT,
+	XRP_TRUST_SET_FLAG_SET_NO_RIPPLE
 } from '$xrp/constants/xrp.constants';
 import type { XrpAccountTransaction, XrpAccountTransactionEntry } from '$xrp/types/xrp-transaction';
 import {
 	buildXrpPayment,
+	buildXrpTrustSet,
 	deriveXrpLedgerWindow,
 	deriveXrpTransactionHash,
 	isXrpTransactionSuccessful,
 	mapXrpTransaction,
 	xrpLedgerSearchWindow
 } from '$xrp/utils/xrp-transaction.utils';
-import { encode } from 'ripple-binary-codec';
+import { decode, encode } from 'ripple-binary-codec';
 
 describe('xrp-transaction.utils', () => {
 	const base = {
@@ -51,6 +55,63 @@ describe('xrp-transaction.utils', () => {
 
 		it('includes LastLedgerSequence when provided', () => {
 			expect(buildXrpPayment({ ...base, lastLedgerSequence: 100 }).LastLedgerSequence).toBe(100);
+		});
+	});
+
+	describe('buildXrpTrustSet', () => {
+		const params = {
+			account: base.account,
+			token: { currency: mockRlusdCurrencyCode, issuer: mockRlusdIssuer },
+			fee: 12n,
+			sequence: 7,
+			signingPublicKey: base.signingPublicKey,
+			lastLedgerSequence: 1020
+		};
+
+		it('builds a TrustSet for the token, with the fee serialized as drops', () => {
+			expect(buildXrpTrustSet(params)).toEqual({
+				TransactionType: 'TrustSet',
+				Account: base.account,
+				LimitAmount: {
+					currency: mockRlusdCurrencyCode,
+					issuer: mockRlusdIssuer,
+					value: XRP_TRUST_LINE_MAX_LIMIT
+				},
+				Flags: XRP_TRUST_SET_FLAG_SET_NO_RIPPLE,
+				Fee: '12',
+				Sequence: 7,
+				SigningPubKey: base.signingPublicKey,
+				LastLedgerSequence: 1020
+			});
+		});
+
+		// A limit the codec cannot encode would fail only at signing, after the review offered the
+		// token; one it encodes lower than meant would cap what the account can receive.
+		it('encodes the largest token amount the ledger holds as the limit', () => {
+			expect(decode(encode(buildXrpTrustSet(params))).LimitAmount).toEqual({
+				currency: mockRlusdCurrencyCode,
+				issuer: mockRlusdIssuer,
+				value: `9999999999999999${'0'.repeat(80)}`
+			});
+		});
+
+		it.each(['99999999999999999e80', '9999999999999999e81'])(
+			'could not encode a larger limit than that (%s)',
+			(value) => {
+				const trustSet = buildXrpTrustSet(params);
+
+				expect(() =>
+					encode({ ...trustSet, LimitAmount: { ...trustSet.LimitAmount, value } })
+				).toThrow('Decimal precision out of range');
+			}
+		);
+
+		// The poller searches the window the blob carries, so it has to come out of a `TrustSet` as
+		// it does out of a payment.
+		it('carries the ledger window its record is resolved over', () => {
+			expect(deriveXrpLedgerWindow(encode(buildXrpTrustSet(params)))).toEqual(
+				xrpLedgerSearchWindow(1020)
+			);
 		});
 	});
 
