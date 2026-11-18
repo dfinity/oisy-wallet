@@ -3,8 +3,14 @@ pub(crate) mod provider;
 mod providers;
 mod supplemental;
 
-use std::{cell::Cell, time::Duration};
+use std::{
+    cell::{Cell, RefCell},
+    collections::BTreeSet,
+    time::Duration,
+};
 
+use candid::Principal;
+use futures::future::join;
 use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::{
@@ -18,6 +24,7 @@ use shared::{
 use crate::{
     exchange::{
         composite::fetch_all_prices,
+        provider::ExchangePriceProvider,
         providers::{
             coingecko::{is_priceable_token_id, CoinGeckoProvider},
             icpswap::IcpSwapProvider,
@@ -26,10 +33,12 @@ use crate::{
     },
     read_state,
     state::{mutate_state, with_api_keys},
+    token::MAX_TOKEN_ACTIVITY_ENTRIES,
     types::{
         storable::{Candid, StoredTokenId},
         StoredPrincipal,
     },
+    utils::rate_limiter::TOKEN_ACTIVITY_RATE_LIMITER,
 };
 
 /// How often exchange rates are refreshed (1 minute).
@@ -105,7 +114,18 @@ thread_local! {
     /// re-armed on every init / upgrade (see [`start_exchange_rate_timer`]) and
     /// by every `get_exchange_rates` call.
     static LAST_RATE_REQUEST_AT: Cell<Option<u64>> = const { Cell::new(None) };
+
+    /// Stale custom tokens that `get_exchange_rates` found no refresh covering: `token_activity`
+    /// did not take them, so the recurring refresh does not know them, and another refresh held
+    /// the lock. The next refresh, the recurring one or one `get_exchange_rates` starts, fetches
+    /// them and clears the set (see [`take_queued_for_refresh`]).
+    /// Ephemeral like the lock: after an upgrade, the next call queues them again.
+    static QUEUED_FOR_REFRESH: RefCell<BTreeSet<StoredTokenId>> =
+        const { RefCell::new(BTreeSet::new()) };
 }
+
+/// Most tokens [`QUEUED_FOR_REFRESH`] holds: about 10 lookups on top of a refresh.
+const MAX_QUEUED_FOR_REFRESH: usize = 500;
 
 /// Records that a caller requested exchange rates at `now_ns`, re-arming the
 /// native-token refresh performed by [`refresh_exchange_rates`].
@@ -218,6 +238,11 @@ fn staleness_floor_ns(now: u64) -> u64 {
     now.saturating_sub(PRICE_STALENESS_THRESHOLD_SEC * NANOS_PER_SEC)
 }
 
+/// Returns the custom tokens active within [`PRICE_ACTIVITY_THRESHOLD_SEC`] among the first
+/// [`MAX_TOKEN_ACTIVITY_ENTRIES`] entries of `activity`.
+///
+/// Reading only that many keeps a refresh within that bound even while a map written before the
+/// cap existed still holds more: its other entries only wait for eviction.
 fn active_custom_tokens_for_refresh(
     activity: impl IntoIterator<Item = (StoredTokenId, u64)>,
     now: u64,
@@ -226,6 +251,7 @@ fn active_custom_tokens_for_refresh(
 
     activity
         .into_iter()
+        .take(usize::try_from(MAX_TOKEN_ACTIVITY_ENTRIES).unwrap_or(usize::MAX))
         .filter(|(_, last_active_ns)| *last_active_ns > threshold)
         .map(|(token_id, _)| token_id)
         .collect()
@@ -406,7 +432,7 @@ pub(crate) async fn fetch_and_update_prices(
     let provider = CoinGeckoProvider::new(api_key, replicated);
     let supplementals = supplemental_price_providers(replicated);
 
-    let prices = fetch_all_prices(
+    fetch_and_store_prices(
         &provider,
         COINGECKO_PROVIDER_ENABLED,
         &supplementals,
@@ -414,11 +440,48 @@ pub(crate) async fn fetch_and_update_prices(
     )
     .await;
 
+    Ok(())
+}
+
+/// Fetches the prices of the native tokens and of the custom tokens among `token_ids` side by
+/// side, and caches each group as soon as its own lookups return.
+///
+/// The native tokens take one lookup, the custom tokens one per 50, so the native prices are
+/// cached without waiting on any custom-token lookup.
+async fn fetch_and_store_prices<P: ExchangePriceProvider>(
+    primary: &P,
+    primary_enabled: bool,
+    supplementals: &[Box<dyn SupplementalPriceProvider>],
+    token_ids: &[StoredTokenId],
+) {
+    let natives = native_token_ids();
+    let (native_ids, custom_ids): (Vec<StoredTokenId>, Vec<StoredTokenId>) = token_ids
+        .iter()
+        .cloned()
+        .partition(|token_id| natives.contains(token_id));
+
+    join(
+        fetch_and_store_group(primary, primary_enabled, supplementals, &native_ids),
+        fetch_and_store_group(primary, primary_enabled, supplementals, &custom_ids),
+    )
+    .await;
+}
+
+async fn fetch_and_store_group<P: ExchangePriceProvider>(
+    primary: &P,
+    primary_enabled: bool,
+    supplementals: &[Box<dyn SupplementalPriceProvider>],
+    token_ids: &[StoredTokenId],
+) {
+    if token_ids.is_empty() {
+        return;
+    }
+
+    let prices = fetch_all_prices(primary, primary_enabled, supplementals, token_ids).await;
+
     for (token_id, exchange_data) in prices {
         update_price(&token_id, &exchange_data);
     }
-
-    Ok(())
 }
 
 /// Returns the deduplicated set of priceable tokens associated with `caller`,
@@ -457,20 +520,73 @@ pub(crate) fn priceable_tokens_for_caller(caller: StoredPrincipal) -> Vec<Stored
     tokens
 }
 
-/// Filters `tokens` to the non-native subset, as `TokenId`s ready for
-/// [`crate::token::mark_tokens_active`].
+/// Records `token_ids` as active at `now_ns` on behalf of `caller`, so that
+/// [`refresh_exchange_rates`] keeps their prices current.
 ///
-/// The always-on native tokens are deliberately excluded: [`refresh_exchange_rates`]
-/// fetches them unconditionally and never consults `token_activity` for them,
-/// so marking them active only adds a per-call stable write and an entry that
-/// can never be evicted (it would be re-marked on every call forever).
-pub(crate) fn custom_tokens_to_mark(tokens: &[StoredTokenId]) -> Vec<TokenId> {
+/// `token_activity` serves only that refresh, so nothing is recorded while it is off (see
+/// [`is_exchange_rate_refresh_enabled`]) or once `caller` has used up
+/// [`TOKEN_ACTIVITY_RATE_LIMITER`], and only the custom tokens the providers can price are
+/// recorded. The always-on native tokens are left out: the refresh fetches them whenever a caller
+/// has asked for rates (see [`should_refresh_natives`]) and never consults `token_activity` for
+/// them, so an entry for one would only be re-marked on every call and never evicted.
+///
+/// Returns `None` while the refresh is off or `caller` is over its limit, and otherwise the
+/// tokens `token_activity` did not take, so that the caller can queue them for the next refresh
+/// (see [`queue_for_next_refresh`]).
+pub(crate) fn record_token_activity(
+    caller: Principal,
+    token_ids: &[TokenId],
+    now_ns: u64,
+) -> Option<Vec<StoredTokenId>> {
+    if !is_exchange_rate_refresh_enabled() {
+        return None;
+    }
+
+    if TOKEN_ACTIVITY_RATE_LIMITER
+        .with(|limiter| limiter.check_at(caller, now_ns))
+        .is_err()
+    {
+        return None;
+    }
+
     let natives = native_token_ids();
-    tokens
+    let to_record: Vec<TokenId> = token_ids
         .iter()
-        .filter(|&stored| !natives.contains(stored))
-        .map(|stored| stored.0.clone())
-        .collect()
+        .filter(|&token_id| {
+            is_priceable_token_id(token_id) && !natives.iter().any(|native| native.0 == *token_id)
+        })
+        .cloned()
+        .collect();
+
+    if to_record.is_empty() {
+        return Some(Vec::new());
+    }
+
+    Some(crate::token::mark_tokens_active(&to_record, now_ns))
+}
+
+/// Adds `token_ids` to [`QUEUED_FOR_REFRESH`] while it holds fewer than
+/// [`MAX_QUEUED_FOR_REFRESH`] tokens.
+pub(crate) fn queue_for_next_refresh(token_ids: impl IntoIterator<Item = StoredTokenId>) {
+    QUEUED_FOR_REFRESH.with(|queued| {
+        let mut queued = queued.borrow_mut();
+        for token_id in token_ids {
+            if queued.len() >= MAX_QUEUED_FOR_REFRESH {
+                break;
+            }
+            queued.insert(token_id);
+        }
+    });
+}
+
+/// Empties [`QUEUED_FOR_REFRESH`] and returns what it held. Called by whichever refresh holds the
+/// lock: the recurring one and the one `get_exchange_rates` starts.
+pub(crate) fn take_queued_for_refresh() -> Vec<StoredTokenId> {
+    QUEUED_FOR_REFRESH.with(|queued| {
+        std::mem::take(&mut *queued.borrow_mut())
+            .into_iter()
+            .collect()
+    })
 }
 
 /// Single-pass read of the cache for `token_ids`. Returns:
@@ -521,7 +637,12 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
     // Idle gating: only keep the always-on natives warm while a caller has
     // requested rates recently — otherwise skip them to save outcall cycles.
     let include_natives = should_refresh_natives(now, LAST_RATE_REQUEST_AT.with(Cell::get));
-    let tokens_to_fetch = refresh_candidates(active_custom_tokens, include_natives);
+    let tokens_to_fetch = refresh_candidates(
+        active_custom_tokens
+            .into_iter()
+            .chain(take_queued_for_refresh()),
+        include_natives,
+    );
 
     let freshness_floor_ns = now.saturating_sub(PRICE_FRESHNESS_GRACE_NS);
     let tokens_to_fetch = read_state(|s| {
@@ -538,6 +659,7 @@ pub(crate) async fn refresh_exchange_rates() -> Result<(), ExchangeError> {
 #[cfg(test)]
 mod tests {
     use candid::Principal;
+    use futures::FutureExt;
     use pretty_assertions::assert_eq;
     use shared::types::exchange::ExchangeData;
 
@@ -579,22 +701,6 @@ mod tests {
     fn reset_refresh_lock() {
         REFRESH_IN_FLIGHT.with(|cell| cell.set(None));
         REFRESH_LOCK_GENERATION.with(|cell| cell.set(0));
-    }
-
-    #[test]
-    fn custom_tokens_to_mark_excludes_natives_keeps_custom() {
-        let icrc = StoredTokenId(TokenId::Icrc(Principal::anonymous()));
-
-        let mut input = native_token_ids();
-        input.push(icrc.clone());
-
-        // Only the custom (non-native) token is returned for activity marking.
-        assert_eq!(custom_tokens_to_mark(&input), vec![icrc.0]);
-    }
-
-    #[test]
-    fn custom_tokens_to_mark_empty_for_natives_only() {
-        assert_eq!(custom_tokens_to_mark(&native_token_ids()), vec![]);
     }
 
     #[test]
@@ -745,6 +851,150 @@ mod tests {
         read_state(|s| s.exchange_rates.get(token_id).map(|rate| rate.0))
     }
 
+    /// Prices a lookup made of native tokens only, and never answers any other lookup.
+    struct NativesOnlyProvider;
+
+    impl ExchangePriceProvider for NativesOnlyProvider {
+        async fn fetch_prices(
+            &self,
+            token_ids: &[StoredTokenId],
+        ) -> Result<Vec<(StoredTokenId, ExchangeData)>, String> {
+            let natives = native_token_ids();
+            if !token_ids.iter().all(|token_id| natives.contains(token_id)) {
+                std::future::pending::<()>().await;
+            }
+            Ok(token_ids
+                .iter()
+                .map(|token_id| (token_id.clone(), exchange_rate(1_000).usd))
+                .collect())
+        }
+    }
+
+    #[test]
+    fn native_prices_are_cached_while_a_custom_token_lookup_is_still_pending() {
+        let eth = StoredTokenId(TokenId::EvmNative(1));
+        let custom = custom_token(1);
+        let token_ids = [eth.clone(), custom.clone()];
+        let mut refresh = std::pin::pin!(fetch_and_store_prices(
+            &NativesOnlyProvider,
+            true,
+            &[],
+            &token_ids
+        ));
+
+        assert!(
+            refresh.as_mut().now_or_never().is_none(),
+            "the custom-token lookup should still be pending"
+        );
+        assert_eq!(stored_rate(&eth), Some(exchange_rate(1_000)));
+        assert_eq!(stored_rate(&custom), None);
+    }
+
+    fn recorded_activity() -> Vec<(TokenId, u64)> {
+        read_state(|s| {
+            s.token_activity
+                .iter()
+                .map(|entry| (entry.key().0.clone(), entry.value()))
+                .collect()
+        })
+    }
+
+    fn caller(seed: u8) -> Principal {
+        Principal::from_slice(&[seed, 0xca])
+    }
+
+    #[test]
+    fn record_token_activity_records_nothing_while_refresh_is_off() {
+        set_exchange_config(Some("key"), Some(false));
+
+        assert_eq!(
+            record_token_activity(caller(1), &[custom_token(1).0], 1_000),
+            None
+        );
+        assert_eq!(recorded_activity(), Vec::<(TokenId, u64)>::new());
+    }
+
+    #[test]
+    fn record_token_activity_holds_each_caller_to_three_recordings_a_minute() {
+        const MINUTE_NS: u64 = 60 * NANOS_PER_SEC;
+        set_exchange_config(Some("key"), Some(true));
+        let start = 10 * MINUTE_NS;
+
+        for n in 0..3 {
+            assert_eq!(
+                record_token_activity(caller(1), &[custom_token(n).0], start + u64::from(n)),
+                Some(vec![])
+            );
+        }
+        assert_eq!(
+            record_token_activity(caller(1), &[custom_token(3).0], start + 3),
+            None
+        );
+        assert_eq!(
+            recorded_activity().len(),
+            3,
+            "a recording over the limit writes nothing"
+        );
+
+        assert_eq!(
+            record_token_activity(caller(2), &[custom_token(4).0], start + 4),
+            Some(vec![]),
+            "the limit is per caller"
+        );
+        assert_eq!(
+            record_token_activity(caller(1), &[custom_token(5).0], start + MINUTE_NS),
+            Some(vec![]),
+            "the first recording leaves the window a minute later"
+        );
+        assert_eq!(recorded_activity().len(), 5);
+    }
+
+    #[test]
+    fn record_token_activity_returns_the_tokens_a_full_map_did_not_take() {
+        set_exchange_config(Some("key"), Some(true));
+        let held: Vec<TokenId> = (0..MAX_TOKEN_ACTIVITY_ENTRIES)
+            .map(|n| TokenId::Icrc(Principal::from_slice(&n.to_be_bytes())))
+            .collect();
+        crate::token::mark_tokens_active(&held, 1_000);
+        let new = custom_token(1);
+
+        assert_eq!(
+            record_token_activity(caller(1), &[held[0].clone(), new.0.clone()], 2_000),
+            Some(vec![new])
+        );
+    }
+
+    #[test]
+    fn the_refresh_queue_holds_at_most_500_tokens_until_taken() {
+        queue_for_next_refresh(
+            (0..MAX_QUEUED_FOR_REFRESH as u64 + 10)
+                .map(|n| StoredTokenId(TokenId::Icrc(Principal::from_slice(&n.to_be_bytes())))),
+        );
+
+        assert_eq!(take_queued_for_refresh().len(), MAX_QUEUED_FOR_REFRESH);
+        assert_eq!(take_queued_for_refresh(), Vec::<StoredTokenId>::new());
+    }
+
+    #[test]
+    fn record_token_activity_records_only_priceable_custom_tokens() {
+        set_exchange_config(Some("key"), Some(true));
+        let priceable = custom_token(1).0;
+
+        record_token_activity(
+            caller(1),
+            &[
+                TokenId::EvmNative(1),
+                TokenId::XrpNativeMainnet,
+                priceable.clone(),
+                TokenId::SolNativeDevnet,
+                TokenId::BtcNativeTestnet,
+            ],
+            1_000,
+        );
+
+        assert_eq!(recorded_activity(), vec![(priceable, 1_000)]);
+    }
+
     #[test]
     fn update_price_does_not_store_a_zero_timestamp() {
         let token = custom_token(1);
@@ -802,6 +1052,41 @@ mod tests {
         );
 
         assert_eq!(tokens, vec![active]);
+    }
+
+    #[test]
+    fn active_custom_tokens_for_refresh_reads_at_most_the_cap() {
+        let now = 1_000 * NANOS_PER_SEC;
+        let read = std::cell::Cell::new(0u64);
+        // Mostly inactive, as a map written before the cap is once its entries have aged out.
+        let activity = (0..MAX_TOKEN_ACTIVITY_ENTRIES + 10_000).map(|n| {
+            read.set(read.get() + 1);
+            let last_active_ns = if n % 1_000 == 0 { now } else { 0 };
+            (
+                StoredTokenId(TokenId::Icrc(Principal::from_slice(&n.to_be_bytes()))),
+                last_active_ns,
+            )
+        });
+
+        let tokens = active_custom_tokens_for_refresh(activity, now);
+
+        assert_eq!(read.get(), MAX_TOKEN_ACTIVITY_ENTRIES);
+        assert_eq!(tokens.len(), 2, "the active ones among the entries read");
+    }
+
+    #[test]
+    fn active_custom_tokens_for_refresh_takes_at_most_the_cap() {
+        let now = 1_000 * NANOS_PER_SEC;
+        let activity = (0..MAX_TOKEN_ACTIVITY_ENTRIES + 10).map(|n| {
+            (
+                StoredTokenId(TokenId::Icrc(Principal::from_slice(&n.to_be_bytes()))),
+                now,
+            )
+        });
+
+        let tokens = active_custom_tokens_for_refresh(activity, now);
+
+        assert_eq!(tokens.len() as u64, MAX_TOKEN_ACTIVITY_ENTRIES);
     }
 
     #[test]

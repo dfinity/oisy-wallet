@@ -12,6 +12,7 @@ import {
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
+import { EthSubmissionUnconfirmedError } from '$eth/types/send';
 import * as ckEthDerived from '$icp-eth/derived/cketh.derived';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import * as ckEthStores from '$icp-eth/stores/cketh.store';
@@ -324,6 +325,46 @@ describe('EthConvertTokenWizard', () => {
 		await clickConvertButton(container);
 
 		expect(sendSpy).not.toHaveBeenCalled();
+	});
+
+	// The transaction may have reached the network: sent again from the review, it would be signed
+	// with the next nonce, and both could execute.
+	it('should close instead of going back to the review when the outcome of the send is unknown', async () => {
+		const onBack = vi.fn();
+		const onClose = vi.fn();
+
+		sendSpy.mockRejectedValueOnce(new EthSubmissionUnconfirmedError(new Error('Internal error')));
+
+		const { container } = render(EthConvertTokenWizard, {
+			props: { ...props, onBack, onClose },
+			context: mockContext(mockFees)
+		});
+
+		await clickConvertButton(container);
+
+		await vi.waitFor(() => expect(onClose).toHaveBeenCalledOnce());
+
+		expect(onBack).not.toHaveBeenCalled();
+	});
+
+	it('should go back to the review after any other failure', async () => {
+		const onBack = vi.fn();
+		const onClose = vi.fn();
+
+		sendSpy.mockRejectedValueOnce(
+			Object.assign(new Error('insufficient funds'), { code: 'INSUFFICIENT_FUNDS' })
+		);
+
+		const { container } = render(EthConvertTokenWizard, {
+			props: { ...props, onBack, onClose },
+			context: mockContext(mockFees)
+		});
+
+		await clickConvertButton(container);
+
+		await vi.waitFor(() => expect(onBack).toHaveBeenCalledOnce());
+
+		expect(onClose).not.toHaveBeenCalled();
 	});
 
 	it('should render convert form if currentStep is CONVERT', () => {

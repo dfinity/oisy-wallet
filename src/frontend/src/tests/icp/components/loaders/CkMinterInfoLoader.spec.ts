@@ -7,9 +7,15 @@ import {
 	IC_CKETH_LEDGER_CANISTER_ID,
 	IC_CKETH_MINTER_CANISTER_ID
 } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import {
+	IC_CKSOL_LEDGER_CANISTER_ID,
+	IC_CKSOL_MINTER_CANISTER_ID
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import CkMinterInfoLoader from '$icp/components/loaders/CkMinterInfoLoader.svelte';
+import { loadCkSolConversionAddresses } from '$icp/services/cksol-deposit.services';
 import {
 	initCkBTCMinterInfoWorker,
 	initCkETHMinterInfoWorker
@@ -17,14 +23,20 @@ import {
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import * as tokensStore from '$lib/derived/tokens.derived';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCkBtcMinterInfo } from '$tests/mocks/ckbtc.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 vi.mock('$icp/services/worker.ck-minter-info.services', () => ({
 	initCkBTCMinterInfoWorker: vi.fn(),
 	initCkETHMinterInfoWorker: vi.fn()
+}));
+
+vi.mock('$icp/services/cksol-deposit.services', () => ({
+	loadCkSolConversionAddresses: vi.fn()
 }));
 
 describe('CkMinterInfoLoader', () => {
@@ -156,6 +168,77 @@ describe('CkMinterInfoLoader', () => {
 		await waitFor(() => {
 			expect(initCkBTCMinterInfoWorker).toHaveBeenCalledOnce();
 			expect(initCkETHMinterInfoWorker).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('ckSOL conversion addresses', () => {
+		const mockCkSolToken: IcCkToken = {
+			...mockValidIcCkToken,
+			id: SOLANA_TOKEN.id,
+			symbol: 'ckSOL',
+			name: 'ckSOL',
+			network: ICP_NETWORK,
+			ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID,
+			minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID,
+			twinToken: SOLANA_TOKEN
+		};
+
+		beforeEach(() => {
+			mockAuthStore();
+
+			vi.mocked(loadCkSolConversionAddresses).mockResolvedValue(undefined);
+		});
+
+		it('should load them for the signed-in identity when ckSOL is enabled', async () => {
+			mockEnabledIcTokens([mockCkSolToken]);
+
+			render(CkMinterInfoLoader);
+
+			await waitFor(() => {
+				expect(loadCkSolConversionAddresses).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID
+				});
+			});
+		});
+
+		it('should not load them without ckSOL', async () => {
+			mockEnabledIcTokens([mockCkBtcToken, mockCkEthToken]);
+
+			render(CkMinterInfoLoader);
+
+			await waitFor(() => {
+				expect(initCkETHMinterInfoWorker).toHaveBeenCalledOnce();
+			});
+
+			expect(loadCkSolConversionAddresses).not.toHaveBeenCalled();
+		});
+
+		it('should not load them while signed out', async () => {
+			mockAuthStore(null);
+			mockEnabledIcTokens([mockCkSolToken, mockCkEthToken]);
+
+			render(CkMinterInfoLoader);
+
+			await waitFor(() => {
+				expect(initCkETHMinterInfoWorker).toHaveBeenCalledOnce();
+			});
+
+			expect(loadCkSolConversionAddresses).not.toHaveBeenCalled();
+		});
+
+		it('should log a failure to load them', async () => {
+			const spyConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+			vi.mocked(loadCkSolConversionAddresses).mockRejectedValue(new Error('unreachable'));
+
+			mockEnabledIcTokens([mockCkSolToken]);
+
+			render(CkMinterInfoLoader);
+
+			await waitFor(() => {
+				expect(spyConsoleError).toHaveBeenCalledOnce();
+			});
 		});
 	});
 });

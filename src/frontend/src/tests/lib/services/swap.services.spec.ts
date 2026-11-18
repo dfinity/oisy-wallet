@@ -1,4 +1,5 @@
 import { sendBtc } from '$btc/services/btc-send.services';
+import { BtcBroadcastUnconfirmedError } from '$btc/types/btc-send';
 import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
@@ -34,6 +35,7 @@ import * as icpSwapFactory from '$lib/api/icp-swap-factory.api';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { ZERO, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import {
 	LIFI_QUOTE_TIMEOUT_MS,
@@ -53,6 +55,7 @@ import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
+import * as exchangeServices from '$lib/services/exchange.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
 import * as nearIntentsServices from '$lib/services/near-intents.services';
 import * as oneSecSwapServices from '$lib/services/onesec-swap.services';
@@ -71,6 +74,7 @@ import {
 	fetchSwapAmountsXRP,
 	fetchVeloraDeltaSwap,
 	fetchVeloraMarketSwap,
+	loadDisabledErc20AndSplTokensExchanges,
 	loadKongSwapTokens,
 	performManualWithdraw,
 	withdrawICPSwapAfterFailedSwap,
@@ -107,6 +111,7 @@ import { geSwapEthTokenAddress, slippagePercentToBasisPoints } from '$lib/utils/
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
+import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
@@ -138,6 +143,7 @@ import {
 	XrpSendNotGuardedError,
 	type XrpPaymentRecord
 } from '$xrp/types/xrp-send';
+import { nonNullish } from '@dfinity/utils';
 import {
 	constructSimpleSDK,
 	type BuildDeltaOrderParams,
@@ -275,7 +281,8 @@ vi.mock('$lib/services/near-intents.services', () => ({
 }));
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
-	createActiveUserTransaction: vi.fn()
+	createActiveUserTransaction: vi.fn(),
+	deleteUnbroadcastActiveUserTransaction: vi.fn()
 }));
 
 vi.mock('$eth/services/send.services', () => ({
@@ -2411,7 +2418,9 @@ describe('swap.services', () => {
 			mockDeltaContractPostDeltaOrder.mockResolvedValue({ id: 'mock-auction-id' });
 			vi.mocked(geSwapEthTokenAddress).mockImplementation(({ address }) => address);
 
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 
 			vi.mocked(createPermit).mockResolvedValue({
 				nonce: '0',
@@ -2990,7 +2999,9 @@ describe('swap.services', () => {
 			mockSwapBuildTx.mockResolvedValue(mockTransaction());
 			vi.mocked(geSwapEthTokenAddress).mockImplementation(({ address }) => address);
 			vi.mocked(sendEvmSwap).mockResolvedValue({ hash: mockTxHash, nonce: mockTxNonce });
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should execute market swap successfully with non-default token', async () => {
@@ -3359,6 +3370,91 @@ describe('swap.services', () => {
 			await loadKongSwapTokens({ identity: mockIdentity, allIcrcTokens: [mockIcrcCustomToken] });
 
 			expect(get(kongSwapTokensStore)).toStrictEqual({});
+		});
+	});
+
+	describe('loadDisabledErc20AndSplTokensExchanges', () => {
+		const enabledErc20Token = { ...mockValidErc20Token, enabled: true };
+		const disabledErc20Token = {
+			...mockValidErc20Token,
+			id: parseTokenId('DisabledErc20TokenId'),
+			address: mockEthAddress2,
+			enabled: false
+		};
+		const disabledRobinhoodErc20Token = {
+			...mockValidErc20Token,
+			id: parseTokenId('DisabledRobinhoodErc20TokenId'),
+			network: ROBINHOOD_MAINNET_NETWORK,
+			enabled: false
+		};
+
+		const enabledSplToken = { ...mockValidSplToken, enabled: true };
+		const disabledSplToken = {
+			...mockValidSplToken,
+			id: parseTokenId('DisabledSplTokenId'),
+			address: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+			enabled: false
+		};
+
+		const tokens = [
+			enabledErc20Token,
+			disabledErc20Token,
+			disabledRobinhoodErc20Token,
+			enabledSplToken,
+			disabledSplToken
+		];
+
+		const ethereumExchange = { [mockEthAddress2.toLowerCase()]: { usd: 1, usd_market_cap: 1 } };
+		const robinhoodExchange = { [mockEthAddress.toLowerCase()]: { usd: 2, usd_market_cap: 2 } };
+		const splExchange = { [disabledSplToken.address]: { usd: 3, usd_market_cap: 3 } };
+
+		beforeEach(() => {
+			vi.resetAllMocks();
+
+			exchangeStore.reset();
+
+			vi.spyOn(exchangeServices, 'exchangeRateERC20ToUsd').mockImplementation(
+				({ coingeckoPlatformId }) =>
+					Promise.resolve(
+						coingeckoPlatformId === 'robinhood' ? robinhoodExchange : ethereumExchange
+					)
+			);
+			vi.spyOn(exchangeServices, 'exchangeRateSPLToUsd').mockResolvedValue(splExchange);
+		});
+
+		it('should price only the disabled tokens, per network', async () => {
+			await loadDisabledErc20AndSplTokensExchanges({ tokens });
+
+			expect(exchangeServices.exchangeRateERC20ToUsd).toHaveBeenCalledTimes(2);
+			expect(exchangeServices.exchangeRateERC20ToUsd).toHaveBeenCalledWith({
+				coingeckoPlatformId: 'ethereum',
+				contractAddresses: [{ address: mockEthAddress2, coingeckoId: 'ethereum' }]
+			});
+			expect(exchangeServices.exchangeRateERC20ToUsd).toHaveBeenCalledWith({
+				coingeckoPlatformId: 'robinhood',
+				contractAddresses: [{ address: mockValidErc20Token.address, coingeckoId: 'robinhood' }]
+			});
+			expect(exchangeServices.exchangeRateSPLToUsd).toHaveBeenCalledExactlyOnceWith([
+				disabledSplToken.address
+			]);
+		});
+
+		it('should add the prices to the exchange store', async () => {
+			await loadDisabledErc20AndSplTokensExchanges({ tokens });
+
+			expect(get(exchangeStore)).toStrictEqual({
+				...ethereumExchange,
+				...robinhoodExchange,
+				...splExchange
+			});
+		});
+
+		it('should keep the prices that loaded when another request fails', async () => {
+			vi.spyOn(exchangeServices, 'exchangeRateSPLToUsd').mockRejectedValue(new Error('down'));
+
+			await loadDisabledErc20AndSplTokensExchanges({ tokens });
+
+			expect(get(exchangeStore)).toStrictEqual({ ...ethereumExchange, ...robinhoodExchange });
 		});
 	});
 
@@ -4271,7 +4367,9 @@ describe('swap.services', () => {
 
 			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123', nonce: 5 });
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not call setCustomToken when ERC20 destination token is toggleable and already enabled', async () => {
@@ -4381,7 +4479,9 @@ describe('swap.services', () => {
 
 			vi.mocked(sendSol).mockResolvedValue(mockSolSignature());
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not call setCustomToken when SPL destination token is toggleable and already enabled', async () => {
@@ -4459,7 +4559,9 @@ describe('swap.services', () => {
 
 			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123', nonce: 5 });
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not send funds when the quote signature does not verify', async () => {
@@ -4789,7 +4891,9 @@ describe('swap.services', () => {
 
 			vi.mocked(sendSol).mockResolvedValue(solTxSignature);
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not send funds when the quote was requested with another slippage', async () => {
@@ -4952,7 +5056,9 @@ describe('swap.services', () => {
 				return btcTxid;
 			});
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not send funds when the quote was requested with another slippage', async () => {
@@ -5120,6 +5226,130 @@ describe('swap.services', () => {
 			expect(setCustomToken).toHaveBeenCalledOnce();
 			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
 		});
+
+		describe('through the backend', () => {
+			const broadcast = vi.fn();
+
+			// As the real `sendBtc` does on the backend path: `beforeBroadcast` once signed, then the
+			// broadcast, which either goes out or fails with `failure`.
+			const sendThroughBackend = (failure?: unknown) =>
+				vi.mocked(sendBtc).mockImplementation(async ({ beforeBroadcast, onBroadcast }) => {
+					await beforeBroadcast?.({ txid: btcTxid });
+
+					broadcast();
+
+					if (nonNullish(failure)) {
+						throw failure;
+					}
+
+					await onBroadcast?.({ txid: btcTxid });
+
+					return btcTxid;
+				});
+
+			const createdRowId = () =>
+				vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mock.calls[0]?.[0].id;
+
+			beforeEach(() => {
+				broadcast.mockClear();
+				vi.mocked(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).mockResolvedValue(undefined);
+			});
+
+			it('should create the row before the broadcast, and only once', async () => {
+				vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockImplementation(
+					() => {
+						expect(broadcast).not.toHaveBeenCalled();
+
+						return Promise.resolve(mockActiveUserTransaction);
+					}
+				);
+				sendThroughBackend();
+
+				await fetchNearIntentsBtcSwap(baseParams);
+
+				// Without the source address, which only an XRP deposit carries.
+				expect(
+					activeUserTransactionsServices.createActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						data: {
+							NearIntents: expect.objectContaining({ source_address: [] })
+						},
+						externalRefs: expect.arrayContaining([
+							{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: depositAddress }
+						])
+					})
+				);
+				expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledExactlyOnceWith({
+					depositAddress,
+					txHash: btcTxid
+				});
+			});
+
+			it('should broadcast nothing when the row cannot be written, and delete it all the same', async () => {
+				vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockRejectedValue(
+					new Error('backend down')
+				);
+				sendThroughBackend();
+
+				await expect(fetchNearIntentsBtcSwap(baseParams)).rejects.toThrow('backend down');
+
+				expect(broadcast).not.toHaveBeenCalled();
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity, id: createdRowId() });
+			});
+
+			it('should delete the row when the broadcast is refused outright', async () => {
+				const refusal = new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee');
+				sendThroughBackend(refusal);
+
+				await expect(fetchNearIntentsBtcSwap(baseParams)).rejects.toBe(refusal);
+
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity, id: createdRowId() });
+				expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+			});
+
+			it.each([
+				new BtcBroadcastTransactionCanisterError({ BroadcastInProgress: null }, 'in progress'),
+				new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') })
+			])('should keep the row after an unclear outcome: %s', async (unclear) => {
+				sendThroughBackend(unclear);
+
+				await expect(fetchNearIntentsBtcSwap(baseParams)).rejects.toBe(unclear);
+
+				expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).not.toHaveBeenCalled();
+			});
+
+			// The deposit may have gone out, so the swapped asset must not land in a hidden token.
+			it('should enable a disabled destination after an unclear outcome, but not after a refusal', async () => {
+				const disabledDestinationToken = { ...destinationToken, enabled: false };
+
+				sendThroughBackend(new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') }));
+
+				await expect(
+					fetchNearIntentsBtcSwap({ ...baseParams, destinationToken: disabledDestinationToken })
+				).rejects.toBeInstanceOf(BtcBroadcastUnconfirmedError);
+
+				expect(setCustomToken).toHaveBeenCalledOnce();
+
+				vi.mocked(setCustomToken).mockClear();
+				sendThroughBackend(new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee'));
+
+				await expect(
+					fetchNearIntentsBtcSwap({ ...baseParams, destinationToken: disabledDestinationToken })
+				).rejects.toBeInstanceOf(BtcBroadcastTransactionCanisterError);
+
+				expect(setCustomToken).not.toHaveBeenCalled();
+			});
+		});
 	});
 
 	describe('fetchNearIntentsXrpSwap', () => {
@@ -5156,7 +5386,9 @@ describe('swap.services', () => {
 				return Promise.resolve({ txHash: xrpTxHash, submitResult: undefined });
 			});
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not send funds when the quote was requested with another slippage', async () => {

@@ -496,6 +496,7 @@ interface I18nInit {
 		minter_ckbtc_btc: string;
 		minter_cketh_eth: string;
 		minter_ckerc20_erc20: string;
+		minter_cksol_sol: string;
 		ledger_cketh_eth: string;
 		minter_btc: string;
 		minter_ckbtc_info: string;
@@ -825,6 +826,7 @@ interface I18nSend {
 		minimum_ckbtc_amount: string;
 		minimum_cketh_amount: string;
 		minimum_amount: string;
+		minimum_deposit_amount: string;
 		minimum_ledger_fees: string;
 		minimum_cketh_balance: string;
 		unknown_cketh: string;
@@ -879,6 +881,10 @@ interface I18nSend {
 		ethereum_unsigned_transaction: string;
 		ethereum_transaction_not_sent: string;
 		ethereum_transaction_unconfirmed: string;
+		btc_transaction_unconfirmed: string;
+		btc_send_rate_limited: string;
+		btc_signing_allowance_spent: string;
+		btc_transaction_never_landed: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
 		solana_insufficient_funds: string;
@@ -1204,6 +1210,12 @@ interface I18nSwap {
 		lifi_status_unknown: string;
 		lifi_fee_changed: string;
 		lifi_route_unverified: string;
+		cksol_deposit_in_progress: string;
+		cksol_deposit_terms_changed: string;
+		cksol_earlier_deposit_quarantined: string;
+		cksol_minter_unavailable: string;
+		cksol_deposit_quarantined: string;
+		cksol_deposit_below_minimum: string;
 	};
 }
 
@@ -1237,6 +1249,7 @@ interface I18nPay {
 		amount_does_not_match: string;
 		recipient_address_is_not_valid: string;
 		token_address_mismatch: string;
+		btc_reservation_rate_limited: string;
 	};
 	alt: { pay: string; where_you_can_pay: string };
 }
@@ -1506,6 +1519,8 @@ interface I18nFee {
 		convert_fee: string;
 		convert_inter_network_fee: string;
 		convert_btc_network_fee: string;
+		cksol_sweep_fee: string;
+		cksol_deposit_address_rent: string;
 		zero_fee: string;
 		total_fee: string;
 		ata_fee: string;
@@ -1617,6 +1632,12 @@ interface I18nWallet_connect {
 		cketh_deposit_principal: string;
 		cketh_deposit_refused: string;
 		cketh_helper_unconfirmed: string;
+		ck_deposit: string;
+		ck_deposit_other_account: string;
+		ck_deposit_liquidium: string;
+		ck_deposit_liquidium_pool: string;
+		ck_deposit_recipient: string;
+		ck_deposit_refused: string;
 		swap_title: string;
 		swap_pay: string;
 		swap_pay_at_most: string;
@@ -1707,6 +1728,7 @@ interface I18nWallet_connect {
 		unknown_destination: string;
 		cketh_deposit_refused: string;
 		cketh_helper_unconfirmed: string;
+		ck_deposit_refused: string;
 		token_call_with_value: string;
 		ambiguous_transaction: string;
 		close_pays_others: string;
@@ -1958,6 +1980,7 @@ interface I18nTransaction {
 		signature_copied: string;
 		id: string;
 		id_copied: string;
+		twin_transaction: string;
 		timestamp: string;
 		type: string;
 		from: string;
@@ -2070,6 +2093,8 @@ interface I18nTransaction {
 		reimbursement: string;
 		twin_token_converted: string;
 		ck_token_converted: string;
+		converted_to_twin_token: string;
+		converted_to_ck_token: string;
 		sending_twin_token: string;
 		sending_twin_token_failed: string;
 		converting_twin_token: string;
@@ -2600,6 +2625,7 @@ interface I18nAi_assistant {
 		send_token_on_network_message: string;
 		send_token_message: string;
 		send_on_network_message: string;
+		type_send_address_message: string;
 		send_token_succeeded: string;
 		show_total_balance_tool_card_title: string;
 		no_contacts_found_message: string;

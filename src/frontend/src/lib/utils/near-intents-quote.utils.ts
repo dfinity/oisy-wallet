@@ -11,6 +11,62 @@ import { getBase58Decoder, getBase58Encoder } from '@solana/kit';
 
 const ED25519_PREFIX = 'ed25519:';
 
+// 1Click resolves some asset ids to a different id for the same coin, and both signs and
+// echoes them inconsistently: a BTC origin of `nep141:btc.omft.near` used to come back as
+// `1cs_v1:btc:native:coin`, and now comes back unchanged while the signature still covers
+// `1cs_v1:btc:native:coin`. The legacy HOT ids of BNB Chain and Polygon tokens are signed
+// as the Omni ids that replaced them (see the 1Click changelog of 2026-11-09). Each group
+// lists ids that denote the same asset. Only these substitutions are accepted; every other
+// asset must be echoed and signed exactly, otherwise a genuinely signed quote for a
+// different token would pass and the wallet would send its source token to a deposit
+// address opened for another asset.
+const NEAR_INTENTS_ASSET_ALIASES: readonly (readonly string[])[] = [
+	['nep141:btc.omft.near', '1cs_v1:btc:native:coin'],
+	// BNB Chain: BNB, ASTER, USDT, SWEAT, USDC, NEAR, RHEA
+	['nep245:v2_1.omni.hot.tg:56_11111111111111111111', 'nep141:bnb.omdep.near'],
+	[
+		'nep245:v2_1.omni.hot.tg:56_12zbnsg6xndDVj25QyL82YMPudb',
+		'nep141:bnb-0x000ae314e2a2172a039b26378814c252734f556a.omdep.near'
+	],
+	[
+		'nep245:v2_1.omni.hot.tg:56_2CMMyVTGZkeyNZTSvS5sarzfir6g',
+		'nep141:bnb-0x55d398326f99059ff775485246999027b3197955.omdep.near'
+	],
+	[
+		'nep245:v2_1.omni.hot.tg:56_28V9BijGeZDBFEEtkAcnJo4tPRH4',
+		'nep141:bnb-0x510ad22d8c956dcc20f68932861f54a591001283.omdep.near'
+	],
+	[
+		'nep245:v2_1.omni.hot.tg:56_2w93GqMcEmQFDru84j3HZZWt557r',
+		'nep141:bnb-0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d.omdep.near'
+	],
+	[
+		'nep245:v2_1.omni.hot.tg:56_SZzgw3HSudhZcTwPWUTi2RJB19t',
+		'nep141:bnb-0x1fa4a73a3f0133f0025378af00236f3abdee5d63.omdep.near'
+	],
+	[
+		'nep245:v2_1.omni.hot.tg:56_24S22V8GMmQN8t6PbCdRb3mBewAd',
+		'nep141:bnb-0x4c067de26475e1cefee8b8d1f6e2266b33a2372e.omdep.near'
+	],
+	// Polygon: POL, USDC, USDT, WETH
+	['nep245:v2_1.omni.hot.tg:137_11111111111111111111', 'nep141:pol.omdep.near'],
+	[
+		'nep245:v2_1.omni.hot.tg:137_qiStmoQJDQPTebaPjgx5VBxZv6L',
+		'nep141:pol-0x3c499c542cef5e3811e1192ce70d8cc03d5c3359.omdep.near'
+	],
+	[
+		'nep245:v2_1.omni.hot.tg:137_3hpYoaLtt8MP1Z2GH1U473DMRKgr',
+		'nep141:pol-0xc2132d05d31c914a87c6611c10748aeb04b58e8f.omdep.near'
+	],
+	[
+		'nep245:v2_1.omni.hot.tg:137_2jwTGwKRX3AEe7tyzDrxtDjEFgSt',
+		'nep141:pol-0x7ceb23fd6bc0add59e62ac25578270cff1b9f619.omdep.near'
+	]
+];
+
+const nearIntentsAssetAliases = (assetId: string): readonly string[] =>
+	NEAR_INTENTS_ASSET_ALIASES.find((group) => group.includes(assetId)) ?? [assetId];
+
 // Copied into an `ArrayBuffer`-backed array: the codec returns a read-only view that
 // Web Crypto does not accept as a `BufferSource`.
 const decodeEd25519Base58 = (value: string): Uint8Array<ArrayBuffer> => {
@@ -123,13 +179,27 @@ export const nearIntentsQuoteHash = async (response: NearIntentsQuoteResponse): 
 	return getBase58Decoder().decode(new Uint8Array(digest));
 };
 
+// The service signs the asset ids it resolved the request to, which for an aliased asset
+// need not be the ids it echoes, so every alias combination is a candidate. Each candidate
+// names the same assets, so this widens nothing: a quote for any other asset still fails.
+const signedQuoteRequestCandidates = (
+	quoteRequest: NearIntentsQuoteRequest
+): NearIntentsQuoteRequest[] =>
+	nearIntentsAssetAliases(quoteRequest.originAsset).flatMap((originAsset) =>
+		nearIntentsAssetAliases(quoteRequest.destinationAsset).map((destinationAsset) => ({
+			...quoteRequest,
+			originAsset,
+			destinationAsset
+		}))
+	);
+
 /**
  * Verifies that a quote response was issued by the 1Click service.
  *
- * The signature covers the deposit address, both amounts and the recipient/refund
- * addresses, so a response tampered with in transit no longer authenticates. Any failure
- * (missing signature, malformed base58, a runtime without Ed25519) resolves to `false`:
- * an unverifiable quote must never move funds.
+ * The signature covers the deposit address, both amounts, both assets and the
+ * recipient/refund addresses, so a response tampered with in transit no longer
+ * authenticates. Any failure (missing signature, malformed base58, a runtime without
+ * Ed25519) resolves to `false`: an unverifiable quote must never move funds.
  */
 export const verifyNearIntentsQuoteSignature = async (
 	response: NearIntentsQuoteResponse
@@ -143,14 +213,22 @@ export const verifyNearIntentsQuoteSignature = async (
 			['verify']
 		);
 
-		const hash = await nearIntentsQuoteHash(response);
+		const signature = decodeEd25519Base58(response.signature);
 
-		return await crypto.subtle.verify(
-			'Ed25519',
-			publicKey,
-			decodeEd25519Base58(response.signature),
-			new TextEncoder().encode(hash)
+		const results = await Promise.all(
+			signedQuoteRequestCandidates(response.quoteRequest).map(async (quoteRequest) => {
+				const hash = await nearIntentsQuoteHash({ ...response, quoteRequest });
+
+				return await crypto.subtle.verify(
+					'Ed25519',
+					publicKey,
+					signature,
+					new TextEncoder().encode(hash)
+				);
+			})
 		);
+
+		return results.some((verified) => verified);
 	} catch (err: unknown) {
 		consoleError(err);
 
@@ -198,19 +276,8 @@ const ASSET_FIELDS = [
 	'destinationAsset'
 ] as const satisfies readonly (keyof NearIntentsQuoteRequest)[];
 
-// 1Click answers some requests with an internal id for the same underlying coin, so the
-// echoed asset is not always the one we sent: a BTC origin of `nep141:btc.omft.near` comes
-// back as `1cs_v1:btc:native:coin`. Each group lists ids that denote the same asset. Only
-// these substitutions are accepted; every other asset must be echoed exactly, otherwise a
-// genuinely signed quote for a different token would pass and the wallet would send its
-// source token to a deposit address opened for another asset.
-const NEAR_INTENTS_ASSET_ALIASES: readonly (readonly string[])[] = [
-	['nep141:btc.omft.near', '1cs_v1:btc:native:coin']
-];
-
 const isSameNearIntentsAsset = ({ sent, echoed }: { sent: string; echoed: string }): boolean =>
-	sent === echoed ||
-	NEAR_INTENTS_ASSET_ALIASES.some((group) => group.includes(sent) && group.includes(echoed));
+	nearIntentsAssetAliases(sent).includes(echoed);
 
 /**
  * Returns the name of the first field the service echoed back differently from what was

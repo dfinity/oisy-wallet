@@ -184,12 +184,8 @@ fn status_endpoint_caches_within_ttl() {
     );
 }
 
-/// Regression test for the `count_signups_in_window` rewrite.
-///
-/// The metric must count profiles by `created_timestamp`, not by `updated_timestamp`. The
-/// underlying `user_profile` map is keyed by `(updated_timestamp, principal)`, so a profile that
-/// was created long ago but recently updated lives in the same "tail" as fresh signups; the
-/// post-filter must still exclude it.
+/// The metric must count profiles by `created_timestamp`, not by `updated_timestamp`: a profile
+/// that was created long ago but recently updated is not a recent sign-up.
 #[test]
 fn status_does_not_count_old_profiles_with_recent_updates() {
     let pic_setup = BackendBuilder::default().deploy();
@@ -206,8 +202,8 @@ fn status_does_not_count_old_profiles_with_recent_updates() {
         .expect("signups must be open on a fresh canister");
 
     // Age the profile out of the signups window, then bump `updated_timestamp` by toggling a
-    // setting. After this the profile satisfies `updated_timestamp >= cutoff` (so it lies in the
-    // suffix scanned by `range`) but `created_timestamp < cutoff` (so it must be filtered out).
+    // setting. After this the profile satisfies `updated_timestamp >= cutoff` but
+    // `created_timestamp < cutoff`, so it must not count.
     pic_setup.pic().advance_time(Duration::from_mins(31));
     pic_setup.pic().tick();
 
@@ -242,6 +238,29 @@ fn status_does_not_count_old_profiles_with_recent_updates() {
         Value::String("ok".to_string()),
         "top-level status must roll up to ok: {body}"
     );
+}
+
+#[test]
+fn http_request_refuses_update_calls() {
+    let pic_setup = BackendBuilder::default().deploy();
+
+    for path in ["/status", "/metrics", "/does-not-exist"] {
+        let response = pic_setup.update::<HttpResponse>(
+            Principal::anonymous(),
+            "http_request",
+            make_request(path),
+        );
+        assert!(
+            response
+                .as_ref()
+                .is_err_and(|e| e.contains("This method can only be called as a query.")),
+            "an update call to {path} must be refused, got: {response:?}"
+        );
+    }
+
+    // Queries keep working.
+    let (response, _) = fetch_status(&pic_setup);
+    assert_eq!(response.status_code, 200);
 }
 
 #[test]

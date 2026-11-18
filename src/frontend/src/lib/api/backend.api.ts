@@ -1,5 +1,6 @@
 import type {
 	ActiveUserTransaction,
+	BtcBroadcastTransactionResponse,
 	BtcGetFeePercentilesResponse,
 	BtcGetSpendableUtxosResponse,
 	Contact,
@@ -32,6 +33,8 @@ import type {
 	AllowSigningOutcome,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
+	BtcBroadcastTransactionParams,
+	BtcGetBalanceParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcGetSpendableUtxosParams,
@@ -146,6 +149,15 @@ export const addPendingBtcTransaction = async ({
 	return btcAddPendingTransaction(params);
 };
 
+export const broadcastBtcTransaction = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcBroadcastTransactionParams>): Promise<BtcBroadcastTransactionResponse> => {
+	const { btcBroadcastTransaction } = await backendCanister({ identity });
+
+	return btcBroadcastTransaction(params);
+};
+
 export const getPendingBtcTransactions = async ({
 	identity,
 	...params
@@ -153,6 +165,15 @@ export const getPendingBtcTransactions = async ({
 	const { btcGetPendingTransactions } = await backendCanister({ identity });
 
 	return btcGetPendingTransactions(params);
+};
+
+export const getBtcBalance = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcGetBalanceParams>): Promise<bigint> => {
+	const { btcGetBalance } = await backendCanister({ identity });
+
+	return btcGetBalance(params);
 };
 
 export const getSpendableBtcUtxos = async ({

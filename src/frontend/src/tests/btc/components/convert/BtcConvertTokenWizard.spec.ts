@@ -20,6 +20,7 @@ import * as bitcoinApi from '$icp/api/bitcoin.api';
 import { btcAddressStore } from '$icp/stores/btc.store';
 import * as backendApi from '$lib/api/backend.api';
 import * as signerApi from '$lib/api/signer.api';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import * as addressesStore from '$lib/derived/address.derived';
 import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 import { WizardStepsConvert } from '$lib/enums/wizard-steps';
@@ -28,6 +29,7 @@ import {
 	initConvertContext,
 	type ConvertContext
 } from '$lib/stores/convert.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import {
 	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
 	initTokenActionValidationErrorsContext,
@@ -42,7 +44,7 @@ import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('BtcConvertTokenWizard', () => {
@@ -185,6 +187,56 @@ describe('BtcConvertTokenWizard', () => {
 		expect(btcSendServices.validateBtcSend).toHaveBeenCalledExactlyOnceWith(
 			expect.not.objectContaining({ destination: expect.anything() })
 		);
+	});
+
+	describe('when the conversion fails', () => {
+		const convertAndFail = async (err: unknown) => {
+			vi.spyOn(btcSendServices, 'sendBtc').mockRejectedValue(err);
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+			mockAuthStore();
+			mockBtcAddressStore();
+			mockAddressesStore();
+
+			const { container } = render(BtcConvertTokenWizard, {
+				props,
+				context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStore(mockUtxosFee) })
+			});
+
+			await clickConvertButton(container);
+
+			await waitFor(() => expect(toastsErrorSpy).toHaveBeenCalledOnce());
+
+			return toastsErrorSpy;
+		};
+
+		it('should close, not offer the form again, when the conversion may have gone out', async () => {
+			const err = new BtcBroadcastTransactionCanisterError(
+				{ BroadcastOutcomeUnknown: { msg: 'trap' } },
+				'unknown'
+			);
+
+			const toastsErrorSpy = await convertAndFail(err);
+
+			expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.error.btc_transaction_unconfirmed },
+				err
+			});
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+		});
+
+		it('should go back with its own message when nothing was sent', async () => {
+			const err = new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee');
+
+			const toastsErrorSpy = await convertAndFail(err);
+
+			expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.convert.error.unexpected },
+				err
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
 	});
 
 	it('should not call sendBtc if authIdentity is not defined', async () => {

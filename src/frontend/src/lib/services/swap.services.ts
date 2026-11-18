@@ -1,4 +1,8 @@
 import { sendBtc } from '$btc/services/btc-send.services';
+import {
+	isDefinitiveBtcBroadcastRefusal,
+	isUnclearBtcBroadcastOutcome
+} from '$btc/utils/btc-send.utils';
 import type {
 	ActiveUserTransactionData,
 	ActiveUserTransactionRef,
@@ -22,6 +26,7 @@ import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isTokenErc } from '$eth/utils/erc.utils';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken, isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
@@ -71,8 +76,12 @@ import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { xrpSwapProviders } from '$lib/providers/xrp-swap.providers';
-import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
+import {
+	createActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
+import { exchangeRateERC20ToUsd, exchangeRateSPLToUsd } from '$lib/services/exchange.services';
 import { submitNearIntentsDepositTx } from '$lib/services/near-intents.services';
 import {
 	executeOneSecEvmToIcpBridge,
@@ -81,11 +90,13 @@ import {
 import { retryWithDelay } from '$lib/services/rest.services';
 import { throwSwapError } from '$lib/services/swap-errors.services';
 import { autoLoadSingleToken } from '$lib/services/token.services';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import { SwapAmountTooLowError, SwapViaIntermediateTokenError } from '$lib/types/errors';
 import {
@@ -120,9 +131,11 @@ import {
 	type SwapVeloraMarketParams
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { VELORA_EXTERNAL_REF_KEYS, type VeloraExternalRefKey } from '$lib/types/velora-swap';
 import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { buildErc20PriceParams } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import {
@@ -391,6 +404,39 @@ export const loadKongSwapTokens = async ({
 	}, {});
 
 	kongSwapTokensStore.setKongSwapTokens(supportedTokens);
+};
+
+/**
+ * Prices the ERC-20 and SPL tokens the swap pickers list although they are not enabled: the
+ * exchange worker prices enabled tokens only. `loadDisabledIcrcTokensExchanges` does the same for
+ * ICRC tokens.
+ */
+export const loadDisabledErc20AndSplTokensExchanges = async ({
+	tokens
+}: {
+	tokens: TokenToggleable<Token>[];
+}): Promise<void> => {
+	const disabledTokens: Token[] = tokens.filter(({ enabled }) => !enabled);
+
+	const erc20PriceParams = buildErc20PriceParams(
+		disabledTokens.filter(isTokenErc20).map(({ address, network: { exchange, chainId } }) => ({
+			address,
+			coingeckoId: exchange?.coingeckoId ?? 'ethereum',
+			chainId
+		}))
+	);
+
+	const results = await Promise.allSettled([
+		...erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params)),
+		exchangeRateSPLToUsd(disabledTokens.filter(isTokenSpl).map(({ address }) => address))
+	]);
+
+	exchangeStore.set(
+		results.reduce<CoingeckoSimpleTokenPriceResponse[]>(
+			(acc, result) => (result.status === 'fulfilled' ? [...acc, result.value] : acc),
+			[]
+		)
+	);
 };
 
 type SwapRecipientResolution =
@@ -959,10 +1005,17 @@ const executeNearIntentsSwap = async ({
 	// (XRP): it describes the swap's AUT row, with the payment's source address and poll keys
 	// added, for the transport to create at that point. Taking it marks the swap as registered,
 	// so no second row is created after the send.
+	//
+	// `openSwap` is for a transport that knows its transaction once it is signed (BTC through the
+	// backend): it creates the swap's row before the broadcast, rejecting if the write fails, so
+	// nothing goes out untracked, and returns the row's id, for the transport to delete if the
+	// broadcast is refused outright. `undefined` for a swap it cannot track, as `registerSwap`
+	// skips one. It also marks the swap as registered.
 	sendTransaction: (params: {
 		amount: bigint;
 		depositAddress: string;
 		registerSwap: () => Promise<void>;
+		openSwap: () => Promise<string | undefined>;
 		recordPollRefs: (pollRefs: ActiveUserTransactionRef[]) => void;
 		swapRecord: (params: {
 			sourceAddress: string;
@@ -1061,6 +1114,38 @@ const executeNearIntentsSwap = async ({
 		}
 	};
 
+	const openSwap = async (): Promise<string | undefined> => {
+		swapRegistered = true;
+
+		const data = toNearIntentsData({
+			sourceToken,
+			destinationToken,
+			amount: parsedSwapAmount
+		});
+
+		if (isNullish(data)) {
+			return;
+		}
+
+		const id = crypto.randomUUID();
+
+		try {
+			await createActiveUserTransaction({
+				identity,
+				id,
+				data,
+				externalRefs: swapRefsWith([])
+			});
+		} catch (err: unknown) {
+			// The backend may have committed it if only its answer was lost.
+			await deleteUnbroadcastActiveUserTransaction({ identity, id });
+
+			throw err;
+		}
+
+		return id;
+	};
+
 	const swapRecord = ({
 		sourceAddress,
 		pollRefs
@@ -1093,6 +1178,7 @@ const executeNearIntentsSwap = async ({
 		amount: parsedSwapAmount,
 		depositAddress,
 		registerSwap,
+		openSwap,
 		recordPollRefs: (refs) => {
 			broadcastPollRefs = refs;
 		},
@@ -1226,8 +1312,11 @@ export const fetchNearIntentsBtcSwap = async ({
 		slippageValue,
 		// `sendBtc` converts the display amount to satoshis itself, so it takes the raw
 		// `swapAmount` rather than the parsed base-unit amount the core hands over.
-		sendTransaction: async ({ depositAddress, registerSwap }) => {
+		sendTransaction: async ({ depositAddress, registerSwap, openSwap }) => {
 			let broadcastTxid: string | undefined;
+			// Set once `beforeBroadcast`, which `sendBtc` calls only on the backend path, has run.
+			let rowOpened = false;
+			let rowId: string | undefined;
 
 			try {
 				return await sendBtc({
@@ -1237,15 +1326,36 @@ export const fetchNearIntentsBtcSwap = async ({
 					source: userAddress,
 					destination: depositAddress,
 					amount: swapAmount,
-					// A BTC deposit is irreversible the moment it is broadcast, so the AUT row is
-					// registered right there, before the pending-transaction bookkeeping and before
-					// the send resolves; mirrors the ordering of `fetchChainFusionBtcSwap`.
+					// Through the backend the deposit is known once signed, so its row is created
+					// before the broadcast, as `fetchChainFusionBtcSwap`'s is.
+					beforeBroadcast: async () => {
+						rowId = await openSwap();
+						rowOpened = true;
+					},
+					// Through the Chain Fusion Signer the deposit is irreversible the moment it is
+					// broadcast, so the row is registered right there, before the pending-transaction
+					// bookkeeping and before the send resolves.
 					onBroadcast: async ({ txid }) => {
 						broadcastTxid = txid;
-						await registerSwap();
+
+						if (!rowOpened) {
+							await registerSwap();
+						}
 					}
 				});
 			} catch (err: unknown) {
+				// A refusal outright sent nothing. After any other failure the deposit may have gone
+				// out, so the row stays for the poller, which fails it once the deposit expires.
+				if (nonNullish(rowId) && isDefinitiveBtcBroadcastRefusal(err)) {
+					await deleteUnbroadcastActiveUserTransaction({ identity, id: rowId });
+				}
+
+				// The deposit may have gone out, so the destination is enabled as after a sent one:
+				// the swapped asset must not land in a token the user cannot see.
+				if (isUnclearBtcBroadcastOutcome(err)) {
+					await enableSwapDestinationToken({ destinationToken, identity });
+				}
+
 				if (isNullish(broadcastTxid)) {
 					throw err;
 				}

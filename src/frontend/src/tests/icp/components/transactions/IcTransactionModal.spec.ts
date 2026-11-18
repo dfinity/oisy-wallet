@@ -1,7 +1,10 @@
 import { ICP_EXPLORER_URL } from '$env/explorers.env';
+import { IC_CKSOL_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 import { isIcrcTokenSupportIcrc3 } from '$icp/services/icrc.services';
+import type { IcCkToken } from '$icp/types/ic-token';
 import { getCmcDepositAccountIdentifier } from '$icp/utils/cmc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { contactsStore } from '$lib/stores/contacts.store';
@@ -12,8 +15,13 @@ import {
 	shortenWithMiddleEllipsis
 } from '$lib/utils/format.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockCkSolSweepSignature } from '$tests/mocks/cksol.mock';
 import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
-import { mockValidDip20Token, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockValidDip20Token,
+	mockValidIcCkToken,
+	mockValidIcrcToken
+} from '$tests/mocks/ic-tokens.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@icp-sdk/core/principal';
@@ -23,6 +31,14 @@ import { get } from 'svelte/store';
 vi.mock(import('$icp/services/icrc.services'), async (importOriginal) => ({
 	...(await importOriginal()),
 	isIcrcTokenSupportIcrc3: vi.fn()
+}));
+
+let mockCkSolEnabled = true;
+
+vi.mock('$env/cksol.env', () => ({
+	get CKSOL_ENABLED() {
+		return mockCkSolEnabled;
+	}
 }));
 
 const [mockIcTransactionUi] = createMockIcTransactionsUi(1);
@@ -89,6 +105,149 @@ describe('IcTransactionModal', () => {
 
 		expect(getByText(get(i18n).networks.network)).toBeInTheDocument();
 		expect(getByText(ICP_TOKEN.network.name)).toBeInTheDocument();
+	});
+
+	describe('twin network transaction', () => {
+		const ckSolToken = { ...mockValidIcCkToken, twinToken: SOLANA_TOKEN };
+
+		const explorerUrl = `https://solscan.io/tx/${mockCkSolSweepSignature}/`;
+
+		const conversion = {
+			...mockIcTransactionUi,
+			type: 'mint' as const,
+			twinTransaction: { id: mockCkSolSweepSignature, explorerUrl }
+		};
+
+		it('should name the twin network transaction and link it', () => {
+			const { container, getByText } = render(IcTransactionModal, {
+				transaction: conversion,
+				token: ckSolToken
+			});
+
+			expect(getByText('Solana transaction')).toBeInTheDocument();
+			expect(
+				getByText(shortenWithMiddleEllipsis({ text: mockCkSolSweepSignature }))
+			).toBeInTheDocument();
+			expect(container.querySelector(`a[href="${explorerUrl}"]`)).not.toBeNull();
+		});
+
+		it('should leave the line out without a twin network transaction', () => {
+			const { queryByText } = render(IcTransactionModal, {
+				transaction: { ...conversion, twinTransaction: undefined },
+				token: ckSolToken
+			});
+
+			expect(queryByText('Solana transaction')).not.toBeInTheDocument();
+		});
+
+		it('should leave the line out for a token without a twin', () => {
+			const { queryByText } = render(IcTransactionModal, {
+				transaction: conversion,
+				token: mockValidIcrcToken
+			});
+
+			expect(
+				queryByText(shortenWithMiddleEllipsis({ text: mockCkSolSweepSignature }))
+			).not.toBeInTheDocument();
+		});
+	});
+
+	describe('burn without a recipient address', () => {
+		const ckSolToken = { ...mockValidIcCkToken, twinToken: SOLANA_TOKEN };
+
+		// What the ckSOL mapper makes of a burn whose memo is missing or does not decode.
+		const burn = {
+			...mockIcTransactionUi,
+			type: 'burn' as const,
+			to: undefined,
+			toLabel: 'transaction.label.twin_network'
+		};
+
+		it('should name the twin network as the recipient', () => {
+			const { getByText } = render(IcTransactionModal, { transaction: burn, token: ckSolToken });
+
+			expect(getByText(get(i18n).transaction.text.to)).toBeInTheDocument();
+			expect(getByText('Solana network')).toBeInTheDocument();
+		});
+
+		it('should name no network for a burn to an address', () => {
+			const { queryByText } = render(IcTransactionModal, {
+				transaction: { ...burn, to: mockIcTransactionUi.to },
+				token: ckSolToken
+			});
+
+			expect(queryByText('Solana network')).not.toBeInTheDocument();
+		});
+	});
+
+	describe('the title of a ckSOL transaction', () => {
+		// An ICRC ledger like ckSOL's: the ck token mock's own standard is ICP's, whose transactions
+		// show their label anyway.
+		const ckSolToken: IcCkToken = {
+			...mockValidIcCkToken,
+			standard: { code: 'icrc' },
+			ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID,
+			twinToken: SOLANA_TOKEN
+		};
+
+		const otherCkToken: IcCkToken = {
+			...ckSolToken,
+			ledgerCanisterId: mockValidIcCkToken.ledgerCanisterId
+		};
+
+		beforeEach(() => {
+			mockCkSolEnabled = true;
+		});
+
+		it.each([
+			{
+				type: 'mint' as const,
+				typeLabel: 'transaction.label.twin_token_converted',
+				title: 'Converted from SOL'
+			},
+			{
+				type: 'burn' as const,
+				typeLabel: 'transaction.label.converted_to_twin_token',
+				title: 'Converted to SOL'
+			},
+			{ type: 'burn' as const, typeLabel: 'send.text.send', title: 'Send' }
+		])('should read $title, as its row does', ({ type, typeLabel, title }) => {
+			const { container, queryByText } = render(IcTransactionModal, {
+				transaction: { ...mockIcTransactionUi, type, typeLabel },
+				token: ckSolToken
+			});
+
+			expect(container).toHaveTextContent(title);
+			expect(queryByText(type)).not.toBeInTheDocument();
+		});
+
+		it('should keep the type of another ck token', () => {
+			const { getByText } = render(IcTransactionModal, {
+				transaction: {
+					...mockIcTransactionUi,
+					type: 'burn',
+					typeLabel: 'transaction.label.converted_to_twin_token'
+				},
+				token: otherCkToken
+			});
+
+			expect(getByText('burn')).toBeInTheDocument();
+		});
+
+		it('should keep the type where ckSOL is not enabled', () => {
+			mockCkSolEnabled = false;
+
+			const { getByText } = render(IcTransactionModal, {
+				transaction: {
+					...mockIcTransactionUi,
+					type: 'mint',
+					typeLabel: 'transaction.label.twin_token_converted'
+				},
+				token: ckSolToken
+			});
+
+			expect(getByText('mint')).toBeInTheDocument();
+		});
 	});
 
 	it('should display the fee', () => {

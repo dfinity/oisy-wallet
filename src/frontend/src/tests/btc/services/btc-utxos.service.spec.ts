@@ -59,13 +59,16 @@ vi.mock('$btc/services/btc-pending-sent-transactions.services', () => ({
 	loadBtcPendingSentTransactions: vi.fn().mockResolvedValue({ success: true })
 }));
 
+import { BTC_LARGEST_OUTPUT_VSIZE, BTC_SEND_MAX_INPUTS } from '$btc/constants/btc.constants';
 import { getFeeRateFromPercentiles, prepareBtcSend } from '$btc/services/btc-utxos.service';
 import type { BtcAddress } from '$btc/types/address';
 import { BtcPrepareSendError } from '$btc/types/btc-send';
+import { calculateFeeSatoshis } from '$btc/utils/btc-utxos.utils';
 import * as backendApi from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Amount } from '$lib/types/send';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import type { BitcoinNetwork, CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 // Mock environment variables
@@ -329,6 +332,36 @@ describe('btc-utxos.service', () => {
 			});
 		});
 
+		it('should refuse, with the flag on, an amount that needs more inputs than the cap', () => {
+			const utxos: CkBtcMinterDid.Utxo[] = Array.from(
+				{ length: BTC_SEND_MAX_INPUTS + 1 },
+				(_, i) => ({
+					value: 10_000n,
+					height: 100,
+					outpoint: { txid: Uint8Array.from([3, i]), vout: 0 }
+				})
+			);
+			// One satoshi more than the cap's inputs carry, at this rate and for the largest output.
+			const amount =
+				Number(
+					BigInt(BTC_SEND_MAX_INPUTS) * 10_000n -
+						calculateFeeSatoshis({
+							numInputs: BTC_SEND_MAX_INPUTS,
+							outputVSizes: [BTC_LARGEST_OUTPUT_VSIZE],
+							feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles
+						}) +
+						1n
+				) / 100_000_000;
+
+			expect(prepareBtcSend({ ...defaultParams, allUtxos: utxos, amount }).error).toBeUndefined();
+
+			btcSendViaBackend.enabled = true;
+
+			expect(prepareBtcSend({ ...defaultParams, allUtxos: utxos, amount }).error).toBe(
+				BtcPrepareSendError.InsufficientBalanceForFee
+			);
+		});
+
 		it('should return UtxoLocked error when all UTXOs are filtered out by confirmations', () => {
 			const unconfirmedUtxo: CkBtcMinterDid.Utxo = {
 				value: 500000n,
@@ -414,6 +447,19 @@ describe('btc-utxos.service', () => {
 				expect(result.utxos).toHaveLength(1);
 			}
 		);
+
+		it('should size every output of a layout in the fee, in place of the recipient', () => {
+			// 1 input + a P2TR deposit (43) + an 18-byte memo (29) + a P2WPKH fee (31) + change (31)
+			// = 213 vB, at 5 sat/vB.
+			const result = prepareBtcSend({
+				...defaultParams,
+				destination: mockBtcAddress,
+				outputVSizes: [43, 29, 31]
+			});
+
+			expect(result.feeSatoshis).toBe(213n * 5n);
+			expect(result.utxos).toHaveLength(1);
+		});
 	});
 
 	describe('getFeeRateFromPercentiles', () => {

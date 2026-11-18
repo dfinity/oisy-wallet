@@ -42,6 +42,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const AddDismissedNotificationError = IDL.Variant({
 		TooManyNotifications: IDL.Null,
+		QualifierTooLong: IDL.Null,
 		VersionMismatch: IDL.Null,
 		MaxDismissedNotifications: IDL.Null,
 		UserNotFound: IDL.Null
@@ -184,6 +185,22 @@ export const idlFactory = ({ IDL }) => {
 	const BtcBroadcastTransactionResult = IDL.Variant({
 		Ok: BtcBroadcastTransactionResponse,
 		Err: BtcBroadcastTransactionError
+	});
+	const BtcGetBalanceRequest = IDL.Record({
+		ii_delegation_chain: IDL.Opt(IIDelegationChain),
+		network: Network,
+		min_confirmations: IDL.Opt(IDL.Nat32)
+	});
+	const BtcGetBalanceResponse = IDL.Record({ balance: IDL.Nat64 });
+	const BtcGetBalanceError = IDL.Variant({
+		BalanceUnavailable: IDL.Record({ msg: IDL.Text }),
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
+		RateLimited: RateLimitError,
+		InternalError: IDL.Record({ msg: IDL.Text })
+	});
+	const BtcGetBalanceResult = IDL.Variant({
+		Ok: BtcGetBalanceResponse,
+		Err: BtcGetBalanceError
 	});
 	const BtcGetFeePercentilesRequest = IDL.Record({ network: Network });
 	const BtcGetFeePercentilesResponse = IDL.Record({
@@ -369,7 +386,9 @@ export const idlFactory = ({ IDL }) => {
 		CkBtcToBtc: IDL.Null,
 		EthToCkEth: IDL.Null,
 		CkErc20ToErc20: IDL.Null,
+		SolToCkSol: IDL.Null,
 		Erc20ToCkErc20: IDL.Null,
+		CkSolToSol: IDL.Null,
 		CkEthToEth: IDL.Null
 	});
 	const ChainFusionData = IDL.Record({
@@ -975,13 +994,13 @@ export const idlFactory = ({ IDL }) => {
 		current_user_version: IDL.Opt(IDL.Nat64),
 		show_testnets: IDL.Bool
 	});
-	const UpdateAgreementsError = IDL.Variant({
+	const SetTestnetsSettingsError = IDL.Variant({
 		VersionMismatch: IDL.Null,
 		UserNotFound: IDL.Null
 	});
 	const SetUserShowTestnetsResult = IDL.Variant({
 		Ok: IDL.Null,
-		Err: UpdateAgreementsError
+		Err: SetTestnetsSettingsError
 	});
 	const SignOnramperWidgetUrlRequest = IDL.Record({
 		network_wallets: IDL.Vec(OnramperSignedEntry),
@@ -1053,9 +1072,23 @@ export const idlFactory = ({ IDL }) => {
 		current_user_version: IDL.Opt(IDL.Nat64),
 		provider_agreements: IDL.Vec(IDL.Tuple(ProviderAgreementType, UserAgreement))
 	});
+	const UpdateAgreementsError = IDL.Variant({
+		VersionMismatch: IDL.Null,
+		RateLimited: RateLimitError,
+		UserNotFound: IDL.Null,
+		TooManyHistoryEntries: IDL.Null
+	});
+	const UpdateProviderAgreementsResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: UpdateAgreementsError
+	});
 	const UpdateUserAgreementsRequest = IDL.Record({
 		agreements: UserAgreements,
 		current_user_version: IDL.Opt(IDL.Nat64)
+	});
+	const UpdateUserAgreementsResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: UpdateAgreementsError
 	});
 	const UpdateExperimentalFeaturesSettingsRequest = IDL.Record({
 		experimental_features: IDL.Vec(
@@ -1090,6 +1123,7 @@ export const idlFactory = ({ IDL }) => {
 			[BtcBroadcastTransactionResult],
 			[]
 		),
+		btc_get_balance: IDL.Func([BtcGetBalanceRequest], [BtcGetBalanceResult], []),
 		btc_get_current_fee_percentiles: IDL.Func(
 			[BtcGetFeePercentilesRequest],
 			[BtcGetFeePercentilesResult]
@@ -1201,12 +1235,12 @@ export const idlFactory = ({ IDL }) => {
 		update_contact: IDL.Func([Contact], [GetContactResult], []),
 		update_provider_agreements: IDL.Func(
 			[UpdateProviderAgreementsRequest],
-			[SetUserShowTestnetsResult],
+			[UpdateProviderAgreementsResult],
 			[]
 		),
 		update_user_agreements: IDL.Func(
 			[UpdateUserAgreementsRequest],
-			[SetUserShowTestnetsResult],
+			[UpdateUserAgreementsResult],
 			[]
 		),
 		update_user_experimental_feature_settings: IDL.Func(

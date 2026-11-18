@@ -1,6 +1,7 @@
 import type {
 	ActiveUserTransaction,
 	_SERVICE as BackendService,
+	BtcBroadcastTransactionResponse,
 	BtcGetFeePercentilesResponse,
 	BtcGetSpendableUtxosResponse,
 	Contact,
@@ -32,6 +33,8 @@ import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
 	mapBtcAddPendingTransactionError,
+	mapBtcBroadcastTransactionError,
+	mapBtcGetBalanceError,
 	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
 	mapBtcGetSpendableUtxosError,
@@ -53,6 +56,8 @@ import type {
 	AllowSigningOutcome,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
+	BtcBroadcastTransactionParams,
+	BtcGetBalanceParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcGetSpendableUtxosParams,
@@ -275,6 +280,24 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcAddPendingTransactionError(response.Err);
 	};
 
+	btcBroadcastTransaction = async ({
+		iiDelegationChain,
+		...rest
+	}: BtcBroadcastTransactionParams): Promise<BtcBroadcastTransactionResponse> => {
+		const { btc_broadcast_transaction } = this.caller({ certified: true });
+
+		const response = await btc_broadcast_transaction({
+			ii_delegation_chain: iiDelegationChain,
+			...rest
+		});
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapBtcBroadcastTransactionError(response.Err);
+	};
+
 	btcGetPendingTransactions = async ({
 		network,
 		iiDelegationChain
@@ -326,6 +349,27 @@ export class BackendCanister extends Canister<BackendService> {
 		// Unlike `btcGetPendingTransactions`, a rate limit throws too: an empty list would read as a
 		// wallet with nothing to spend.
 		throw mapBtcGetSpendableUtxosError(response.Err);
+	};
+
+	btcGetBalance = async ({
+		network,
+		minConfirmations,
+		iiDelegationChain
+	}: BtcGetBalanceParams): Promise<bigint> => {
+		const { btc_get_balance } = this.caller({ certified: true });
+
+		const response = await btc_get_balance({
+			network,
+			min_confirmations: toNullable(minConfirmations),
+			ii_delegation_chain: iiDelegationChain
+		});
+
+		if ('Ok' in response) {
+			return response.Ok.balance;
+		}
+
+		// A rate limit throws too: a balance that could not be read is not a balance of zero.
+		throw mapBtcGetBalanceError(response.Err);
 	};
 
 	btcGetCurrentFeePercentiles = async ({
@@ -474,10 +518,15 @@ export class BackendCanister extends Canister<BackendService> {
 	}: SaveUserAgreements): Promise<void> => {
 		const { update_user_agreements } = this.caller({ certified: true });
 
-		await update_user_agreements({
+		const response = await update_user_agreements({
 			agreements: mapBackendUserAgreements(agreements),
 			current_user_version: toNullable(currentUserVersion)
 		});
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
 	};
 
 	updateProviderAgreements = async ({
@@ -486,10 +535,15 @@ export class BackendCanister extends Canister<BackendService> {
 	}: SaveProviderAgreements): Promise<void> => {
 		const { update_provider_agreements } = this.caller({ certified: true });
 
-		await update_provider_agreements({
+		const response = await update_provider_agreements({
 			provider_agreements: mapBackendProviderAgreements(providerAgreements),
 			current_user_version: toNullable(currentUserVersion)
 		});
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
 	};
 
 	// Contact addresses can become send destinations, so contacts are always read certified.

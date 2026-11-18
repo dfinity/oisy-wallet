@@ -37,6 +37,7 @@ import {
 	buildLifiQuoteRequest,
 	findLifiIntermediateToken,
 	findLifiListedToken,
+	isLifiBtcInsufficientFundsError,
 	mapLifiSwapResult
 } from '$lib/utils/lifi-swap.utils';
 import { isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
@@ -127,11 +128,20 @@ const SWAP_OFFER_ERROR_SEVERITIES: Partial<
 	[PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.REQUEST_FAILED]: PLAUSIBLE_EVENT_SEVERITIES.WARN
 };
 
+// LI.FI's no-route codes for a BTC source: `1002`, no route (HTTP 404); and `1008`, a bridge that
+// failed to quote or refused the address (HTTP 424). Its balance codes are
+// `isLifiBtcInsufficientFundsError`'s.
+const LIFI_BTC_NO_ROUTE_CODES = [1002, 1008];
+
 // LI.FI's error text can carry the request URL, and with it the user's address, so only an
 // allow-listed category and the HTTP status are reported.
-const toSwapOfferError = (
-	err: unknown
-): { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES; status?: number } => {
+const toSwapOfferError = ({
+	err,
+	request
+}: {
+	err: unknown;
+	request: QuoteRequestFromAmount;
+}): { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES; status?: number } => {
 	if (err instanceof LifiQuoteRejectedError) {
 		return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.QUOTE_REJECTED };
 	}
@@ -140,7 +150,7 @@ const toSwapOfferError = (
 	// a reason of its own.
 	if (err instanceof LifiRouteUnsupportedError) {
 		return nonNullish(err.cause)
-			? toSwapOfferError(err.cause)
+			? toSwapOfferError({ err: err.cause, request })
 			: { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE };
 	}
 
@@ -152,8 +162,23 @@ const toSwapOfferError = (
 		return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.TIMEOUT };
 	}
 
-	const status =
-		err instanceof SDKError && err.cause instanceof HTTPError ? err.cause.status : undefined;
+	const httpError =
+		err instanceof SDKError && err.cause instanceof HTTPError ? err.cause : undefined;
+	const status = httpError?.status;
+
+	// A BTC address whose UTXOs LI.FI finds missing or too small is the insufficient balance the swap
+	// form already explains from its own UTXO selection, not a missing route.
+	if (request.fromChain === ChainId.BTC) {
+		if (isLifiBtcInsufficientFundsError({ err, request })) {
+			return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.INSUFFICIENT_FUNDS, status };
+		}
+
+		const code = httpError?.responseBody?.code;
+
+		if (nonNullish(code) && LIFI_BTC_NO_ROUTE_CODES.includes(code)) {
+			return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE, status };
+		}
+	}
 
 	// 404 is "no available quotes"; 422 is "none of the available routes could generate a
 	// transaction" — both mean there is no route to offer.
@@ -191,8 +216,8 @@ const fetchTrustedLifiQuote = async ({
  * A Solana source's transaction is read as its binding reads it, which also gives the LI.FI ceiling
  * the form budgets (`loadLifiSolQuoteCeiling`).
  *
- * When an EVM source's best route goes through a bridge in a shape the calldata binding refuses
- * (Across behind a DEX swap, or any bridge followed by another step), LI.FI is asked once more
+ * When an EVM or BTC source's best route goes through a bridge in a shape `isLifiRouteExecutable`
+ * refuses (Across behind a DEX swap, or any bridge followed by another step), LI.FI is asked once more
  * without that bridge, so that another allowed one can serve the pair; that request is the one
  * execution re-quotes with. Both requests share the caller's deadline: the form waits for every
  * provider's answer.
@@ -288,7 +313,8 @@ const loadLifiIntermediateToken = async ({
 	if (
 		request.fromChain === request.toChain ||
 		request.toChain === ChainId.SOL ||
-		toSwapOfferError(err).type !== PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE
+		request.fromChain === ChainId.BTC ||
+		toSwapOfferError({ err, request }).type !== PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE
 	) {
 		return;
 	}
@@ -338,7 +364,7 @@ const loadLifiSwapQuote = async ({
 
 		return { offer };
 	} catch (err: unknown) {
-		const { type, status } = toSwapOfferError(err);
+		const { type, status } = toSwapOfferError({ err, request });
 		const severity = SWAP_OFFER_ERROR_SEVERITIES[type];
 
 		trackSwapOffer({

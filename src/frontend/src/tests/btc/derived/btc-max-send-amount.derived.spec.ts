@@ -1,10 +1,11 @@
-import { BTC_LARGEST_OUTPUT_VSIZE } from '$btc/constants/btc.constants';
+import { BTC_LARGEST_OUTPUT_VSIZE, BTC_SEND_MAX_INPUTS } from '$btc/constants/btc.constants';
 import { initBtcMaxSendAmount } from '$btc/derived/btc-max-send-amount.derived';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import { calculateFeeSatoshis } from '$btc/utils/btc-utxos.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
@@ -76,9 +77,25 @@ describe('initBtcMaxSendAmount', () => {
 			300_000n -
 				calculateFeeSatoshis({
 					numInputs: 2,
-					recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+					outputVSizes: [BTC_LARGEST_OUTPUT_VSIZE],
 					feeRateMiliSatoshisPerVByte
 				})
+		);
+	});
+
+	// A LI.FI deposit, its memo and its fee: LayerSwap's layout, 103 vB against the 43 vB of one output.
+	it('should price Max for a layout of several outputs when given one', () => {
+		const outputVSizes = [43, 29, 31];
+
+		allUtxosStore.setAllUtxos({ allUtxos: [createMockUtxo({ value: 300_000 })] });
+		setPendingTransactions();
+		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
+
+		expect(get(initBtcMaxSendAmount({ source: mockAddress, outputVSizes }))).toBe(
+			300_000n - calculateFeeSatoshis({ numInputs: 1, outputVSizes, feeRateMiliSatoshisPerVByte })
+		);
+		expect(get(initBtcMaxSendAmount({ source: mockAddress, outputVSizes }))).toBeLessThan(
+			get(initBtcMaxSendAmount({ source: mockAddress })) ?? ZERO
 		);
 	});
 
@@ -98,7 +115,7 @@ describe('initBtcMaxSendAmount', () => {
 			1_000n -
 				calculateFeeSatoshis({
 					numInputs: 1,
-					recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+					outputVSizes: [BTC_LARGEST_OUTPUT_VSIZE],
 					feeRateMiliSatoshisPerVByte
 				})
 		);
@@ -117,7 +134,7 @@ describe('initBtcMaxSendAmount', () => {
 			100_000n -
 				calculateFeeSatoshis({
 					numInputs: 1,
-					recipientOutputVSize: BTC_LARGEST_OUTPUT_VSIZE,
+					outputVSizes: [BTC_LARGEST_OUTPUT_VSIZE],
 					feeRateMiliSatoshisPerVByte
 				})
 		);
@@ -151,5 +168,31 @@ describe('initBtcMaxSendAmount', () => {
 		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
 
 		expect(get(initBtcMaxSendAmount({ source: mockAddress, destination }))).toBe(10_000n - fee);
+	});
+
+	it('should keep Max within the send input cap with the flag on', () => {
+		const utxos = Array.from({ length: BTC_SEND_MAX_INPUTS + 20 }, (_, i) =>
+			createMockUtxo({ value: 10_000, txid: Uint8Array.from([5, i]) })
+		);
+		allUtxosStore.setAllUtxos({ allUtxos: utxos });
+		setPendingTransactions();
+		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
+
+		const fee = (numInputs: number) =>
+			calculateFeeSatoshis({
+				numInputs,
+				outputVSizes: [BTC_LARGEST_OUTPUT_VSIZE],
+				feeRateMiliSatoshisPerVByte
+			});
+
+		expect(get(initBtcMaxSendAmount({ source: mockAddress }))).toBe(
+			BigInt(utxos.length) * 10_000n - fee(utxos.length)
+		);
+
+		btcSendViaBackend.enabled = true;
+
+		expect(get(initBtcMaxSendAmount({ source: mockAddress }))).toBe(
+			BigInt(BTC_SEND_MAX_INPUTS) * 10_000n - fee(BTC_SEND_MAX_INPUTS)
+		);
 	});
 });

@@ -129,6 +129,10 @@ export interface SolSimulationResult {
 	// Whether the run keeps a token batch whole, which the list states as an instruction nobody read
 	// and none of its steps: a request the review refuses, whatever the message's mapping read of it.
 	keepsBatchWhole?: boolean;
+	// Whether the run makes a token call inside another program's instruction with the wallet among
+	// the keys signing for a multisig: it acts on an account the review does not count as the user's,
+	// so the review refuses it, as it does such a call the message makes itself.
+	signsForMultisig?: boolean;
 	parties: SolTransferParties;
 	// The programs the run calls from inside another program's instruction that are not among the
 	// known ones. Such a call can act on what the user holds in an application, which neither the

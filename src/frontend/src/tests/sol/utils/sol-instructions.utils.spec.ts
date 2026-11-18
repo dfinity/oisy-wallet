@@ -6,6 +6,7 @@ import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	MEMO_LEGACY_PROGRAM_ADDRESS,
 	MEMO_PROGRAM_ADDRESS,
+	SPL_TOKEN_MAX_AMOUNT,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
@@ -39,7 +40,12 @@ import {
 } from '$sol/utils/sol-instructions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolParsedTransactionMessage } from '$tests/mocks/sol-transactions.mock';
-import { mockSolAddress, mockSolAddress2, mockSolAddress3 } from '$tests/mocks/sol.mock';
+import {
+	mockSolAddress,
+	mockSolAddress2,
+	mockSolAddress3,
+	mockSolAddress4
+} from '$tests/mocks/sol.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import {
 	getCloseLookupTableInstruction,
@@ -1887,6 +1893,157 @@ describe('sol-instructions.utils', () => {
 
 				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
 					amount: undefined
+				});
+			});
+		});
+
+		describe('a token instruction signed for a multisig', () => {
+			const multisig = address(mockSolAddress4);
+			const wallet = createNoopSigner(address(mockSolAddress));
+			const other = createNoopSigner(address(mockSolAddress2));
+
+			const approve = ({
+				owner = multisig,
+				delegate = address(mockSolAddress2),
+				multiSigners = [wallet]
+			}: {
+				owner?: typeof multisig;
+				delegate?: typeof multisig;
+				multiSigners?: (typeof wallet)[];
+			} = {}) =>
+				getApproveInstruction({
+					source: address(mockSolAddress3),
+					delegate,
+					owner,
+					amount: SPL_TOKEN_MAX_AMOUNT,
+					multiSigners
+				});
+
+			const closeToWallet = getCloseAccountInstruction({
+				account: address(mockSolAddress3),
+				destination: address(mockSolAddress),
+				owner: multisig,
+				multiSigners: [wallet]
+			});
+
+			const map = (instruction: SolInstruction) =>
+				mapSolInstruction({ instruction, userAddress: mockSolAddress });
+
+			it('should fail closed on an `Approve` the wallet signs for a multisig', () => {
+				expect(map(approve())).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on an `Approve` the wallet signs for a multisig among other keys', () => {
+				expect(map(approve({ multiSigners: [other, wallet] }))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed on an `ApproveChecked` the wallet signs for a multisig', () => {
+				const instruction = getApproveCheckedInstruction({
+					source: address(mockSolAddress3),
+					mint: address(JUP_TOKEN.address),
+					delegate: address(mockSolAddress2),
+					owner: multisig,
+					amount: 1n,
+					decimals: 6,
+					multiSigners: [wallet]
+				});
+
+				expect(map(instruction)).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on a Token-2022 `Approve` the wallet signs for a multisig', () => {
+				const instruction = getToken2022ApproveInstruction({
+					source: address(mockSolAddress3),
+					delegate: address(mockSolAddress2),
+					owner: multisig,
+					amount: 1n,
+					multiSigners: [wallet]
+				});
+
+				expect(map(instruction)).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on a transfer the wallet signs for a multisig', () => {
+				const instruction = getTransferCheckedInstruction({
+					source: address(mockSolAddress3),
+					mint: address(JUP_TOKEN.address),
+					destination: address(mockSolAddress2),
+					authority: multisig,
+					amount: 1n,
+					decimals: 6,
+					multiSigners: [wallet]
+				});
+
+				expect(map(instruction)).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on a batch carrying an `Approve` the wallet signs for a multisig', () => {
+				expect(map(getBatchInstruction([approve()]))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed on an `Approve` naming the wallet as the delegate that it signs for a multisig', () => {
+				expect(map(approve({ delegate: address(mockSolAddress) }))).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
+
+			it('should fail closed on a close paying the wallet that it signs for a multisig', () => {
+				expect(map(closeToWallet)).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on a batch carrying instructions naming the wallet that it signs for a multisig', () => {
+				expect(
+					map(getBatchInstruction([approve({ delegate: address(mockSolAddress) }), closeToWallet]))
+				).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on an `Approve` naming the wallet as the owner and listing it again after the named accounts', () => {
+				expect(
+					map(approve({ owner: address(mockSolAddress), multiSigners: [wallet] }))
+				).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should read an `Approve` for a multisig the wallet does not sign for as before', () => {
+				expect(map(approve({ multiSigners: [other] }))).toStrictEqual({
+					amount: SPL_TOKEN_MAX_AMOUNT,
+					source: mockSolAddress3,
+					destination: mockSolAddress2,
+					isApproval: true
+				});
+			});
+
+			it('should read an `Approve` the wallet signs for as the owner as before', () => {
+				expect(map(approve({ owner: address(mockSolAddress), multiSigners: [] }))).toStrictEqual({
+					amount: SPL_TOKEN_MAX_AMOUNT,
+					source: mockSolAddress3,
+					destination: mockSolAddress2,
+					isApproval: true
+				});
+			});
+
+			it('should read a close paying the wallet as before', () => {
+				const instruction = getCloseAccountInstruction({
+					account: address(mockSolAddress3),
+					destination: address(mockSolAddress),
+					owner: address(mockSolAddress)
+				});
+
+				expect(map(instruction)).toStrictEqual({ amount: undefined });
+			});
+
+			it('should read the instruction as before when the user is not known', () => {
+				expect(mapSolInstruction({ instruction: approve() })).toStrictEqual({
+					amount: SPL_TOKEN_MAX_AMOUNT,
+					source: mockSolAddress3,
+					destination: mockSolAddress2,
+					isApproval: true
 				});
 			});
 		});

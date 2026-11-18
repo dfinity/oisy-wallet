@@ -112,11 +112,11 @@ export type ActiveUserTransactionData =
 	  }
 	| {
 			/**
-			 * Chain Fusion ck conversion (BTC↔ckBTC, ETH↔ckETH, ERC20↔ckERC20). A
-			 * single variant covers all six directions, discriminated by the
-			 * `direction` field; the minter block indices, the BTC txid and deposit
-			 * address, and the Ethereum deposit tx hash and block number ride in
-			 * `external_refs`.
+			 * Chain Fusion ck conversion (BTC↔ckBTC, ETH↔ckETH, ERC20↔ckERC20,
+			 * SOL↔ckSOL). A single variant covers all eight directions, discriminated
+			 * by the `direction` field; the minter block indices, the BTC txid and
+			 * deposit address, and the Ethereum deposit tx hash and block number ride
+			 * in `external_refs`.
 			 */
 			ChainFusion: ChainFusionData;
 	  }
@@ -185,6 +185,7 @@ export type AddDappSettingsError =
 	| { UserNotFound: null };
 export type AddDismissedNotificationError =
 	| { TooManyNotifications: null }
+	| { QualifierTooLong: null }
 	| { VersionMismatch: null }
 	| { MaxDismissedNotifications: null }
 	| { UserNotFound: null };
@@ -668,6 +669,59 @@ export type BtcBroadcastTransactionResult =
 			 */
 			Err: BtcBroadcastTransactionError;
 	  };
+export type BtcGetBalanceError =
+	| {
+			/**
+			 * The Bitcoin canister did not answer, which a later call may get past.
+			 */
+			BalanceUnavailable: { msg: string };
+	  }
+	| {
+			/**
+			 * The provided II delegation chain is missing or failed verification.
+			 */
+			InvalidDelegationChain: { msg: string };
+	  }
+	| {
+			/**
+			 * The caller has exceeded the call rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The caller's address could not be derived.
+			 */
+			InternalError: { msg: string };
+	  };
+export interface BtcGetBalanceRequest {
+	ii_delegation_chain: [] | [IIDelegationChain];
+	network: Network;
+	/**
+	 * Counts only the outputs with at least this many confirmations. `None` counts every output
+	 * the Bitcoin canister knows, which is mined ones only.
+	 */
+	min_confirmations: [] | [number];
+}
+export interface BtcGetBalanceResponse {
+	/**
+	 * The balance of the caller's P2WPKH address, in satoshis.
+	 */
+	balance: bigint;
+}
+export type BtcGetBalanceResult =
+	| {
+			/**
+			 * The balance was retrieved successfully.
+			 */
+			Ok: BtcGetBalanceResponse;
+	  }
+	| {
+			/**
+			 * The balance was not retrieved due to an error.
+			 */
+			Err: BtcGetBalanceError;
+	  };
 export type BtcGetFeePercentilesError = {
 	InternalError: { msg: string };
 };
@@ -825,7 +879,7 @@ export type CanisterStatusType =
  * Chain Fusion ck conversion payload. Every settlement pointer is learned
  * mid-flow — a minter block index, a BTC txid, an Ethereum deposit tx hash — so
  * those live in `external_refs`; only the canonical immutable fields are
- * captured here, which is why all six directions share one variant.
+ * captured here, which is why all eight directions share one variant.
  *
  * `direction` is explicit rather than inferred from the token pair: the poller
  * selects its settlement oracle from it, and re-deriving "is this a mint or a
@@ -843,16 +897,18 @@ export interface ChainFusionData {
 }
 /**
  * Which ck conversion an active transaction tracks. Determines which minter the
- * frontend asks about settlement, and how: the three withdrawal directions have
- * an exact status keyed by the minter's burn block index, while the mint
- * directions are observed from the deposit side.
+ * frontend asks about settlement, and how: the four withdrawal directions have
+ * an exact status keyed by the minter's burn block index, while each mint
+ * direction is followed the way its minter reports deposits.
  */
 export type ChainFusionDirection =
 	| { BtcToCkBtc: null }
 	| { CkBtcToBtc: null }
 	| { EthToCkEth: null }
 	| { CkErc20ToErc20: null }
+	| { SolToCkSol: null }
 	| { Erc20ToCkErc20: null }
+	| { CkSolToSol: null }
 	| { CkEthToEth: null };
 export type ClaimTipResult = { Ok: TipClaim } | { Err: TipError };
 export interface Config {
@@ -2021,7 +2077,7 @@ export type SetUserShowTestnetsResult =
 			/**
 			 * The user's show testnets was not set due to an error.
 			 */
-			Err: UpdateAgreementsError;
+			Err: SetTestnetsSettingsError;
 	  };
 export interface Settings {
 	networks: NetworksSettings;
@@ -2664,7 +2720,17 @@ export interface UpdateActiveUserTransactionRequest {
 	progress_step: [] | [string];
 	error: [] | [string];
 }
-export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: null };
+export type UpdateAgreementsError =
+	| { VersionMismatch: null }
+	| { RateLimited: RateLimitError }
+	| { UserNotFound: null }
+	| {
+			/**
+			 * The change would take the user's agreement history past
+			 * `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
+			 */
+			TooManyHistoryEntries: null;
+	  };
 export interface UpdateExperimentalFeaturesSettingsRequest {
 	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
 	current_user_version: [] | [bigint];
@@ -2673,6 +2739,19 @@ export interface UpdateProviderAgreementsRequest {
 	current_user_version: [] | [bigint];
 	provider_agreements: Array<[ProviderAgreementType, UserAgreement]>;
 }
+export type UpdateProviderAgreementsResult =
+	| {
+			/**
+			 * The user's provider agreements were updated successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The user's provider agreements were not updated due to an error.
+			 */
+			Err: UpdateAgreementsError;
+	  };
 export interface UpdateTransactionFilterSettingsRequest {
 	filter: TransactionFilterSettings;
 	current_user_version: [] | [bigint];
@@ -2681,6 +2760,19 @@ export interface UpdateUserAgreementsRequest {
 	agreements: UserAgreements;
 	current_user_version: [] | [bigint];
 }
+export type UpdateUserAgreementsResult =
+	| {
+			/**
+			 * The user's agreements were updated successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The user's agreements were not updated due to an error.
+			 */
+			Err: UpdateAgreementsError;
+	  };
 /**
  * Per-agreement status/metadata.
  */
@@ -2851,8 +2943,8 @@ export interface _SERVICE {
 	 * present.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
-	 * the batch is too large.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	 * the batch is too large, or a qualifier is too long.
 	 */
 	add_user_dismissed_notification: ActorMethod<
 		[AddDismissedNotificationRequest],
@@ -2928,6 +3020,22 @@ export interface _SERVICE {
 		[BtcBroadcastTransactionRequest],
 		BtcBroadcastTransactionResult
 	>;
+	/**
+	 * Returns the balance of the caller's P2WPKH address, counting only the outputs with at least
+	 * `min_confirmations` confirmations.
+	 *
+	 * An update call, so the answer is certified. The backend pays for the Bitcoin canister call from
+	 * its own cycles. It used to pay the chain fusion signer's `btc_caller_balance` instead, from its
+	 * cycles ledger account and against the approval it grants each caller for signing, so every read
+	 * used up part of what the caller could sign.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `BtcGetBalanceError`.
+	 */
+	btc_get_balance: ActorMethod<[BtcGetBalanceRequest], BtcGetBalanceResult>;
 	/**
 	 * Retrieves the current fee percentiles for Bitcoin transactions from the cache
 	 * for the specified network. Fee percentiles are measured in millisatoshi per byte
@@ -3204,8 +3312,9 @@ export interface _SERVICE {
 	 * - the caller's custom tokens, filtered to variants the configured providers can actually price
 	 * (testnets, NFTs and ERC-4626 vaults are excluded).
 	 *
-	 * The endpoint also re-marks the returned tokens as active so the
-	 * background refresh timer keeps them warm. If any cached price is
+	 * While the backend price refresh is on, the endpoint also records the
+	 * caller's custom tokens as active so the background refresh timer keeps
+	 * them warm (see [`record_token_activity`]). If any cached price is
 	 * missing or older than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`]
 	 * seconds, the endpoint kicks off a refresh for that subset **in the
 	 * background** (via `ic_cdk::futures::spawn_migratory`) and returns the current cache
@@ -3414,7 +3523,7 @@ export interface _SERVICE {
 	 *
 	 * Note: This method was previously exposed as a *query* but is now an *update*
 	 * call. The change is intentional and breaking: `list_custom_tokens` now tracks
-	 * token activity by calling `mark_tokens_active`, which mutates canister state.
+	 * token activity by calling `record_token_activity`, which mutates canister state.
 	 * Because queries must not modify state on the IC, this function must be an
 	 * update, not a query.
 	 *
@@ -3595,11 +3704,13 @@ export interface _SERVICE {
 	 * set to the same value.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	 * the caller made too many calls in the last minute, or the change would take the agreement
+	 * history past `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 	 */
 	update_provider_agreements: ActorMethod<
 		[UpdateProviderAgreementsRequest],
-		SetUserShowTestnetsResult
+		UpdateProviderAgreementsResult
 	>;
 	/**
 	 * Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
@@ -3613,9 +3724,11 @@ export interface _SERVICE {
 	 * same value.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	 * the caller made too many calls in the last minute, or the change would take the agreement
+	 * history past `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 	 */
-	update_user_agreements: ActorMethod<[UpdateUserAgreementsRequest], SetUserShowTestnetsResult>;
+	update_user_agreements: ActorMethod<[UpdateUserAgreementsRequest], UpdateUserAgreementsResult>;
 	/**
 	 * Updates the user's preference to enable (or disable) experimental features in the interface,
 	 * merging with any existing entries.

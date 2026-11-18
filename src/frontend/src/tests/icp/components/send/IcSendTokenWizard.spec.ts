@@ -1,4 +1,5 @@
 import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
+import * as icSendServices from '$icp/services/ic-send.services';
 import * as nftSendServices from '$icp/services/nft-send.services';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { TRACK_NFT_SEND } from '$lib/constants/analytics.constants';
@@ -13,7 +14,9 @@ import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
 import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import * as toasts from '$lib/stores/toasts.store';
+import { parseToken } from '$lib/utils/parse.utils';
 import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import {
 	mockAccountIdentifierText,
 	mockIdentity,
@@ -101,6 +104,95 @@ describe('IcSendTokenWizard', () => {
 					}
 				})
 			);
+		});
+	});
+
+	describe('when a token send fails', () => {
+		const amount = 0.01;
+
+		const renderTokenReview = () =>
+			render(IcSendTokenWizard, {
+				props: {
+					currentStep: { name: WizardStepsSend.REVIEW, title: WizardStepsSend.REVIEW },
+					destination: mockPrincipalText,
+					amount,
+					sendProgressStep: ProgressStepsSendIc.INITIALIZATION,
+					onBack: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn(),
+					onSendBack: vi.fn(),
+					onTokensList: vi.fn()
+				},
+				context: new Map([[SEND_CONTEXT_KEY, initSendContext({ token: mockValidIcrcToken })]])
+			});
+
+		beforeEach(() => {
+			vi.useFakeTimers({ toFake: ['Date'] });
+			vi.setSystemTime(new Date('2026-11-06T10:00:00Z'));
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('sends the same transfer again from the review', async () => {
+			const sendIcSpy = vi
+				.spyOn(icSendServices, 'sendIc')
+				.mockRejectedValueOnce(new Error('Test error'))
+				.mockResolvedValueOnce(undefined);
+
+			const { getByTestId } = renderTokenReview();
+
+			await fireEvent.click(getByTestId(SEND_FIRST_TIME_DESTINATION_CONFIRM));
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+
+			await waitFor(() => expect(toasts.toastsError).toHaveBeenCalledOnce());
+
+			vi.setSystemTime(new Date('2026-11-06T10:01:00Z'));
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+
+			await waitFor(() => expect(sendIcSpy).toHaveBeenCalledTimes(2));
+
+			const [[first], [second]] = sendIcSpy.mock.calls;
+
+			expect(first).toEqual(
+				expect.objectContaining({
+					to: mockPrincipalText,
+					amount: parseToken({ value: `${amount}`, unitName: mockValidIcrcToken.decimals }),
+					createdAt: BigInt(new Date('2026-11-06T10:00:00Z').getTime()) * 1_000_000n
+				})
+			);
+			expect(second.createdAt).toBe(first.createdAt);
+		});
+
+		it('sends a new transfer once the amount changed', async () => {
+			const sendIcSpy = vi
+				.spyOn(icSendServices, 'sendIc')
+				.mockRejectedValueOnce(new Error('Test error'))
+				.mockResolvedValueOnce(undefined);
+
+			const { getByTestId, rerender } = renderTokenReview();
+
+			await fireEvent.click(getByTestId(SEND_FIRST_TIME_DESTINATION_CONFIRM));
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+
+			await waitFor(() => expect(toasts.toastsError).toHaveBeenCalledOnce());
+
+			vi.setSystemTime(new Date('2026-11-06T10:01:00Z'));
+
+			await rerender({ amount: 0.02 });
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+
+			await waitFor(() => expect(sendIcSpy).toHaveBeenCalledTimes(2));
+
+			const [[first], [second]] = sendIcSpy.mock.calls;
+
+			expect(second.createdAt).toBe(
+				BigInt(new Date('2026-11-06T10:01:00Z').getTime()) * 1_000_000n
+			);
+			expect(second.createdAt).not.toBe(first.createdAt);
 		});
 	});
 });

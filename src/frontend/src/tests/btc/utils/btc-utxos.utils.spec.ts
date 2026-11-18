@@ -1,8 +1,17 @@
+import { BTC_SEND_MAX_INPUTS } from '$btc/constants/btc.constants';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
-import { btcOutputVSize, buildBtcSendPsbt, finalizeSignedBtcPsbt } from '$btc/utils/btc-psbt.utils';
 import {
+	btcAddressToOutputScript,
+	btcOutputVSize,
+	btcScriptOutputVSize,
+	buildBtcScriptOutputsPsbt,
+	buildBtcSendPsbt,
+	finalizeSignedBtcPsbt
+} from '$btc/utils/btc-psbt.utils';
+import {
+	btcSendMaxInputs,
 	calculateFeeSatoshis,
 	calculateMaxSpendableAmount,
 	calculateUtxoSelection,
@@ -15,6 +24,7 @@ import {
 } from '$btc/utils/btc-utxos.utils';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { assertNonNullish } from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { getPublicKey, signAsync } from '@noble/secp256k1';
@@ -100,7 +110,7 @@ describe('btc-utxos.utils', () => {
 			// 1 input + 2 outputs = 141 vB, at 4 sat/vByte
 			expect(
 				calculateFeeSatoshis({
-					recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+					outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 					numInputs: 1,
 					feeRateMiliSatoshisPerVByte: 4000n
 				})
@@ -109,7 +119,7 @@ describe('btc-utxos.utils', () => {
 			// 2 inputs + 2 outputs = 209 vB, at 3 sat/vByte
 			expect(
 				calculateFeeSatoshis({
-					recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+					outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 					numInputs: 2,
 					feeRateMiliSatoshisPerVByte: 3000n
 				})
@@ -120,7 +130,7 @@ describe('btc-utxos.utils', () => {
 			// 141 vB at 1.234 sat/vByte = 173.9 satoshis
 			expect(
 				calculateFeeSatoshis({
-					recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+					outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 					numInputs: 1,
 					feeRateMiliSatoshisPerVByte: 1234n
 				})
@@ -130,7 +140,7 @@ describe('btc-utxos.utils', () => {
 		it('should agree with the fee the selection reports', () => {
 			const feeRateMiliSatoshisPerVByte = 2500n;
 			const { selectedUtxos, feeSatoshis } = calculateUtxoSelection({
-				recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+				outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 				availableUtxos: [createMockUtxo({ value: 100_000 })],
 				amountSatoshis: 10_000n,
 				feeRateMiliSatoshisPerVByte
@@ -138,7 +148,7 @@ describe('btc-utxos.utils', () => {
 
 			expect(feeSatoshis).toEqual(
 				calculateFeeSatoshis({
-					recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+					outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 					numInputs: selectedUtxos.length,
 					feeRateMiliSatoshisPerVByte
 				})
@@ -149,31 +159,40 @@ describe('btc-utxos.utils', () => {
 	describe('estimateTransactionVSize', () => {
 		it('should add the recipient output to the inputs and the P2WPKH change output', () => {
 			// Base (11) + inputs (2 * 68) + recipient (31) + change (31) = 209
-			expect(
-				estimateTransactionVSize({ numInputs: 2, recipientOutputVSize: P2WPKH_OUTPUT_VSIZE })
-			).toBe(209);
+			expect(estimateTransactionVSize({ numInputs: 2, outputVSizes: [P2WPKH_OUTPUT_VSIZE] })).toBe(
+				209
+			);
 		});
 
 		it('should size a P2TR recipient output 12 vbytes larger than a P2WPKH one', () => {
 			// Base (11) + input (68) + recipient (43) + change (31) = 153
-			expect(estimateTransactionVSize({ numInputs: 1, recipientOutputVSize: 43 })).toBe(153);
-			expect(
-				estimateTransactionVSize({ numInputs: 1, recipientOutputVSize: P2WPKH_OUTPUT_VSIZE })
-			).toBe(141);
+			expect(estimateTransactionVSize({ numInputs: 1, outputVSizes: [43] })).toBe(153);
+			expect(estimateTransactionVSize({ numInputs: 1, outputVSizes: [P2WPKH_OUTPUT_VSIZE] })).toBe(
+				141
+			);
 		});
 
 		it('should handle no inputs', () => {
 			// Base (11) + recipient (31) + change (31) = 73
-			expect(
-				estimateTransactionVSize({ numInputs: 0, recipientOutputVSize: P2WPKH_OUTPUT_VSIZE })
-			).toBe(73);
+			expect(estimateTransactionVSize({ numInputs: 0, outputVSizes: [P2WPKH_OUTPUT_VSIZE] })).toBe(
+				73
+			);
 		});
 
 		it('should handle a large number of inputs', () => {
 			// Base (11) + inputs (10 * 68) + recipient (31) + change (31) = 753
-			expect(
-				estimateTransactionVSize({ numInputs: 10, recipientOutputVSize: P2WPKH_OUTPUT_VSIZE })
-			).toBe(753);
+			expect(estimateTransactionVSize({ numInputs: 10, outputVSizes: [P2WPKH_OUTPUT_VSIZE] })).toBe(
+				753
+			);
+		});
+
+		it.each([
+			// Base (11) + input (68) + P2TR deposit (43) + 18-byte memo (29) + fee (31) + change (31)
+			{ bridge: 'LayerSwap', outputVSizes: [43, 29, 31], vsize: 213 },
+			// Base (11) + input (68) + P2WPKH deposit (31) + 10-byte memo (21) + fee (31) + change (31)
+			{ bridge: 'NEAR Intents', outputVSizes: [31, 21, 31], vsize: 193 }
+		])('should add every output of a LI.FI $bridge layout', ({ outputVSizes, vsize }) => {
+			expect(estimateTransactionVSize({ numInputs: 1, outputVSizes })).toBe(vsize);
 		});
 	});
 
@@ -186,7 +205,7 @@ describe('btc-utxos.utils', () => {
 
 		it('should select UTXOs considering transaction fees', () => {
 			const result = calculateUtxoSelection({
-				recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+				outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 				availableUtxos: utxos,
 				amountSatoshis: 250_000n,
 				feeRateMiliSatoshisPerVByte: 10000n
@@ -201,7 +220,7 @@ describe('btc-utxos.utils', () => {
 
 		it('should select the smallest UTXO that covers amount + fee', () => {
 			const result = calculateUtxoSelection({
-				recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+				outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 				availableUtxos: utxos,
 				amountSatoshis: 100_000n,
 				feeRateMiliSatoshisPerVByte: 1000n
@@ -217,7 +236,7 @@ describe('btc-utxos.utils', () => {
 
 		it('should calculate correct change amount', () => {
 			const result = calculateUtxoSelection({
-				recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+				outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 				availableUtxos: [createMockUtxo({ value: 500_000 })],
 				amountSatoshis: 100_000n,
 				feeRateMiliSatoshisPerVByte: 1000n
@@ -232,7 +251,7 @@ describe('btc-utxos.utils', () => {
 
 		it('should return empty result when no UTXOs available', () => {
 			const result = calculateUtxoSelection({
-				recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+				outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 				availableUtxos: [],
 				amountSatoshis: 100_000n,
 				feeRateMiliSatoshisPerVByte: 10000n
@@ -249,7 +268,7 @@ describe('btc-utxos.utils', () => {
 			const smallUtxos = [createMockUtxo({ value: 1000 })];
 
 			const result = calculateUtxoSelection({
-				recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+				outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 				availableUtxos: smallUtxos,
 				amountSatoshis: 900n,
 				feeRateMiliSatoshisPerVByte: 100000n // High fee rate will make it insufficient
@@ -264,7 +283,7 @@ describe('btc-utxos.utils', () => {
 
 		it('should handle 0n fee rate', () => {
 			const result = calculateUtxoSelection({
-				recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+				outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 				availableUtxos: [createMockUtxo({ value: 100_000 })],
 				amountSatoshis: 50_000n,
 				feeRateMiliSatoshisPerVByte: ZERO
@@ -303,7 +322,7 @@ describe('btc-utxos.utils', () => {
 				// needed = 1_000_000 + 141 = 1_000_141
 				// Candidates ≥ 1_000_141: 1_200_000, 4_000_000, 4_300_000 → pick 1_200_000
 				const result = calculateUtxoSelection({
-					recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+					outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 					availableUtxos: utxos,
 					amountSatoshis: 1_000_000n,
 					feeRateMiliSatoshisPerVByte: FEE_RATE
@@ -325,7 +344,7 @@ describe('btc-utxos.utils', () => {
 				];
 
 				const result = calculateUtxoSelection({
-					recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+					outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 					availableUtxos: utxos,
 					amountSatoshis: 100_000n,
 					feeRateMiliSatoshisPerVByte: FEE_RATE
@@ -341,7 +360,7 @@ describe('btc-utxos.utils', () => {
 			it('is insufficient when the only UTXO is 1 sat below amount + fee', () => {
 				// 100_000 + 141 = 100_141; UTXO = 100_140 → cannot satisfy
 				const result = calculateUtxoSelection({
-					recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+					outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 					availableUtxos: [createMockUtxo({ value: 100_140 })],
 					amountSatoshis: 100_000n,
 					feeRateMiliSatoshisPerVByte: FEE_RATE
@@ -367,7 +386,7 @@ describe('btc-utxos.utils', () => {
 				// Pass 1: needed = 999_791 + 141 = 999_932 → no single UTXO qualifies → pick largest (700_000)
 				// Pass 2: needed = 999_791 + 209 − 700_000 = 300_000 → candidates ≥ 300_000: {300_000, 600_000} → pick 300_000
 				const result = calculateUtxoSelection({
-					recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+					outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 					availableUtxos: utxos,
 					amountSatoshis: 999_791n,
 					feeRateMiliSatoshisPerVByte: FEE_RATE
@@ -393,7 +412,7 @@ describe('btc-utxos.utils', () => {
 				// Pass 1: needed = 999_791 + 141 = 999_932 → no UTXO qualifies → pick 700_000
 				// Pass 2: needed = 999_791 + 209 − 700_000 = 300_000 → pick 300_000 (not 600_000)
 				const result = calculateUtxoSelection({
-					recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+					outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 					availableUtxos: utxos,
 					amountSatoshis: 999_791n,
 					feeRateMiliSatoshisPerVByte: FEE_RATE
@@ -420,7 +439,7 @@ describe('btc-utxos.utils', () => {
 				// Pass 2: needed = 900_000 + 209 − 400_000 = 500_209 → no UTXO qualifies → pick 350_000
 				// Pass 3: needed = 900_000 + 277 − 750_000 = 150_277 → candidates ≥ 150_277: {300_000, 200_000} → pick 200_000
 				const result = calculateUtxoSelection({
-					recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+					outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 					availableUtxos: utxos,
 					amountSatoshis: 900_000n,
 					feeRateMiliSatoshisPerVByte: FEE_RATE
@@ -446,7 +465,7 @@ describe('btc-utxos.utils', () => {
 				// Pass 1: needed = 500_000 + 141 = 500_141 → no UTXO qualifies → pick 300_000
 				// Pass 2: needed = 500_000 + 209 − 300_000 = 200_209 → 250_000 ≥ 200_209 → pick 250_000
 				const result = calculateUtxoSelection({
-					recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+					outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 					availableUtxos: utxos,
 					amountSatoshis: 500_000n,
 					feeRateMiliSatoshisPerVByte: FEE_RATE
@@ -469,7 +488,7 @@ describe('btc-utxos.utils', () => {
 
 				// needed = 450_000 + 141 = 450_141 → 500_000 qualifies → pick one
 				const result = calculateUtxoSelection({
-					recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+					outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 					availableUtxos: utxos,
 					amountSatoshis: 450_000n,
 					feeRateMiliSatoshisPerVByte: FEE_RATE
@@ -487,7 +506,7 @@ describe('btc-utxos.utils', () => {
 
 				// 100_000 + 50_000 = 150_000 < 200_000 + 141
 				const result = calculateUtxoSelection({
-					recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+					outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 					availableUtxos: utxos,
 					amountSatoshis: 200_000n,
 					feeRateMiliSatoshisPerVByte: FEE_RATE
@@ -506,7 +525,7 @@ describe('btc-utxos.utils', () => {
 				];
 
 				const result = calculateUtxoSelection({
-					recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+					outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 					availableUtxos: utxos,
 					amountSatoshis: 200_000n,
 					feeRateMiliSatoshisPerVByte: FEE_RATE
@@ -712,7 +731,7 @@ describe('btc-utxos.utils', () => {
 			];
 
 			const result = calculateMaxSpendableAmount({
-				recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+				outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 				utxos,
 				pendingUtxoOutpoints: [],
 				feeRateMiliSatoshisPerVByte
@@ -721,7 +740,7 @@ describe('btc-utxos.utils', () => {
 			expect(result).toBe(
 				300_000n -
 					calculateFeeSatoshis({
-						recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+						outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 						numInputs: 2,
 						feeRateMiliSatoshisPerVByte
 					})
@@ -737,7 +756,7 @@ describe('btc-utxos.utils', () => {
 			];
 
 			const result = calculateMaxSpendableAmount({
-				recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+				outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 				utxos,
 				pendingUtxoOutpoints: [],
 				feeRateMiliSatoshisPerVByte
@@ -746,7 +765,7 @@ describe('btc-utxos.utils', () => {
 			expect(result).toBe(
 				1_000n -
 					calculateFeeSatoshis({
-						recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+						outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 						numInputs: 1,
 						feeRateMiliSatoshisPerVByte
 					})
@@ -760,7 +779,7 @@ describe('btc-utxos.utils', () => {
 			];
 
 			const result = calculateMaxSpendableAmount({
-				recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+				outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 				utxos,
 				pendingUtxoOutpoints: ['08070605:0'],
 				feeRateMiliSatoshisPerVByte
@@ -769,7 +788,7 @@ describe('btc-utxos.utils', () => {
 			expect(result).toBe(
 				100_000n -
 					calculateFeeSatoshis({
-						recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+						outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 						numInputs: 1,
 						feeRateMiliSatoshisPerVByte
 					})
@@ -778,7 +797,7 @@ describe('btc-utxos.utils', () => {
 
 		it('should return zero when nothing is available', () => {
 			const result = calculateMaxSpendableAmount({
-				recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+				outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 				utxos: [createMockUtxo({ value: 100_000, height: 0 })],
 				pendingUtxoOutpoints: [],
 				feeRateMiliSatoshisPerVByte
@@ -789,7 +808,7 @@ describe('btc-utxos.utils', () => {
 
 		it('should return zero rather than a negative amount when the fee exceeds the funds', () => {
 			const result = calculateMaxSpendableAmount({
-				recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+				outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 				utxos: [createMockUtxo({ value: 1 })],
 				pendingUtxoOutpoints: [],
 				feeRateMiliSatoshisPerVByte
@@ -936,13 +955,87 @@ describe('btc-utxos.utils', () => {
 
 					const feeSatoshis = calculateFeeSatoshis({
 						numInputs,
-						recipientOutputVSize: btcOutputVSize({ address }),
+						outputVSizes: [btcOutputVSize({ address })],
 						feeRateMiliSatoshisPerVByte: minFeeRate
 					});
 
 					expect(feeSatoshis).toBeGreaterThanOrEqual(BigInt(vsize));
 				}
 			);
+
+			// A live LI.FI LayerSwap quote's kept outputs (2026-11-13): a P2TR deposit, an 18-byte memo
+			// and LI.FI's fee.
+			const lifiOutputs = [
+				{
+					script: btcAddressToOutputScript({
+						address: 'bc1plxa9q77gz9r33g8pd4c2ygzezchjffuedtzdrkclyceseyw8v80qasmquf',
+						network: 'mainnet'
+					}),
+					value: 997_500n
+				},
+				{
+					script: Uint8Array.from(Buffer.from('6a12313731363366323b3d7c6c6966693df52ece', 'hex')),
+					value: ZERO
+				},
+				{
+					script: btcAddressToOutputScript({
+						address: 'bc1qn2cstnjlvhxf60j3ujeyq0h0rqc7kklap8j94g',
+						network: 'mainnet'
+					}),
+					value: 2_500n
+				}
+			];
+
+			const lifiOutputVSizes = lifiOutputs.map(({ script }) => btcScriptOutputVSize(script));
+
+			const builtLifiVSize = async (numInputs: number): Promise<number> => {
+				assertNonNullish(walletAddress);
+
+				const psbt = buildBtcScriptOutputsPsbt({
+					utxos: Array.from({ length: numInputs }, (_, index) =>
+						createMockUtxo({ value: 1_100_000, txid: new Uint8Array(32).fill(index + 1) })
+					),
+					outputs: lifiOutputs,
+					changeIndex: 2,
+					changeAddress: walletAddress,
+					feeSatoshis: 1_000n,
+					network: 'mainnet',
+					sequence: 0xfffffffd
+				});
+
+				await Promise.all(psbt.txInputs.map((_, index) => psbt.signInputAsync(index, signer)));
+
+				const { hex } = finalizeSignedBtcPsbt({ psbt });
+
+				return Transaction.fromHex(hex).virtualSize();
+			};
+
+			it.each([1, 3])(
+				"should cover a built LI.FI layout with %s input(s), from its outputs' scripts",
+				async (numInputs) => {
+					const vsize = await builtLifiVSize(numInputs);
+
+					const feeSatoshis = calculateFeeSatoshis({
+						numInputs,
+						outputVSizes: lifiOutputVSizes,
+						feeRateMiliSatoshisPerVByte: minFeeRate
+					});
+
+					expect(feeSatoshis).toBeGreaterThanOrEqual(BigInt(vsize));
+				}
+			);
+
+			it('should not cover a LI.FI layout priced as one largest output', async () => {
+				const vsize = await builtLifiVSize(1);
+
+				const feeSatoshis = calculateFeeSatoshis({
+					numInputs: 1,
+					outputVSizes: [btcOutputVSize({ address: undefined })],
+					feeRateMiliSatoshisPerVByte: minFeeRate
+				});
+
+				expect(feeSatoshis).toBeLessThan(BigInt(vsize));
+			});
 
 			// Regression: every output was priced as P2WPKH, so a send to a 34-byte script was quoted
 			// below 1 sat/vB, which the backend's fee floor refuses and nodes do not relay.
@@ -953,7 +1046,7 @@ describe('btc-utxos.utils', () => {
 
 					const feeSatoshis = calculateFeeSatoshis({
 						numInputs: 1,
-						recipientOutputVSize: P2WPKH_OUTPUT_VSIZE,
+						outputVSizes: [P2WPKH_OUTPUT_VSIZE],
 						feeRateMiliSatoshisPerVByte: minFeeRate
 					});
 
@@ -969,21 +1062,21 @@ describe('btc-utxos.utils', () => {
 				calculateMaxSpendableAmount({
 					utxos,
 					pendingUtxoOutpoints: [],
-					recipientOutputVSize,
+					outputVSizes: [recipientOutputVSize],
 					feeRateMiliSatoshisPerVByte: minFeeRate
 				});
 
 			const selectable = ({
 				amountSatoshis,
-				recipientOutputVSize
+				outputVSizes
 			}: {
 				amountSatoshis: bigint;
-				recipientOutputVSize: number;
+				outputVSizes: number[];
 			}): boolean =>
 				calculateUtxoSelection({
 					availableUtxos: utxos,
 					amountSatoshis,
-					recipientOutputVSize,
+					outputVSizes,
 					feeRateMiliSatoshisPerVByte: minFeeRate
 				}).sufficientFunds;
 
@@ -993,7 +1086,10 @@ describe('btc-utxos.utils', () => {
 					const recipientOutputVSize = btcOutputVSize({ address });
 
 					expect(
-						selectable({ amountSatoshis: maxFor(recipientOutputVSize), recipientOutputVSize })
+						selectable({
+							amountSatoshis: maxFor(recipientOutputVSize),
+							outputVSizes: [recipientOutputVSize]
+						})
 					).toBeTruthy();
 				}
 			);
@@ -1007,11 +1103,27 @@ describe('btc-utxos.utils', () => {
 					expect(
 						selectable({
 							amountSatoshis: maxWithoutRecipient,
-							recipientOutputVSize: btcOutputVSize({ address })
+							outputVSizes: [btcOutputVSize({ address })]
 						})
 					).toBeTruthy();
 				}
 			);
+
+			it('should offer a Max for a layout of outputs that the selection accepts for it', () => {
+				// A P2TR deposit, an 18-byte memo and a P2WPKH fee: 213 vbytes with change.
+				const outputVSizes = [43, 29, 31];
+
+				const max = calculateMaxSpendableAmount({
+					utxos,
+					pendingUtxoOutpoints: [],
+					outputVSizes,
+					feeRateMiliSatoshisPerVByte: minFeeRate
+				});
+
+				expect(max).toBe(10_000n - 213n);
+				expect(selectable({ amountSatoshis: max, outputVSizes })).toBeTruthy();
+				expect(selectable({ amountSatoshis: max + 1n, outputVSizes })).toBeFalsy();
+			});
 
 			// Regression: with one 10 000-sat UTXO at 1 sat/vB, Max offered 9 859 sats (two P2WPKH
 			// outputs), which a P2TR-aware selection, needing 153 sats of fee, refuses.
@@ -1021,11 +1133,91 @@ describe('btc-utxos.utils', () => {
 				});
 
 				expect(maxFor(P2WPKH_OUTPUT_VSIZE)).toBe(9_859n);
-				expect(
-					selectable({ amountSatoshis: 9_859n, recipientOutputVSize: p2trOutputVSize })
-				).toBeFalsy();
+				expect(selectable({ amountSatoshis: 9_859n, outputVSizes: [p2trOutputVSize] })).toBeFalsy();
 				expect(maxFor(p2trOutputVSize)).toBe(9_847n);
 			});
+		});
+	});
+
+	describe('the send input cap', () => {
+		const rate = 1000n;
+		const outputVSizes = [31];
+		const fee = (numInputs: number) =>
+			calculateFeeSatoshis({ numInputs, outputVSizes, feeRateMiliSatoshisPerVByte: rate });
+		const utxos = ({ count, value, from = 0 }: { count: number; value: number; from?: number }) =>
+			Array.from({ length: count }, (_, i) =>
+				createMockUtxo({ value, txid: Uint8Array.from([7, (from + i) % 256, (from + i) >> 8]) })
+			);
+
+		it('should cap a send only with the flag on', () => {
+			expect(btcSendMaxInputs()).toBeUndefined();
+
+			btcSendViaBackend.enabled = true;
+
+			expect(btcSendMaxInputs()).toBe(BTC_SEND_MAX_INPUTS);
+		});
+
+		it('should select up to the cap, and refuse funds that need one input more', () => {
+			const availableUtxos = utxos({ count: BTC_SEND_MAX_INPUTS + 1, value: 10_000 });
+			const atCap = BigInt(BTC_SEND_MAX_INPUTS) * 10_000n - fee(BTC_SEND_MAX_INPUTS);
+			const select = ({
+				amountSatoshis,
+				maxInputs
+			}: {
+				amountSatoshis: bigint;
+				maxInputs?: number;
+			}) =>
+				calculateUtxoSelection({
+					availableUtxos,
+					amountSatoshis,
+					outputVSizes,
+					feeRateMiliSatoshisPerVByte: rate,
+					maxInputs
+				});
+
+			const fits = select({ amountSatoshis: atCap, maxInputs: BTC_SEND_MAX_INPUTS });
+
+			expect(fits.sufficientFunds).toBeTruthy();
+			expect(fits.selectedUtxos).toHaveLength(BTC_SEND_MAX_INPUTS);
+
+			expect(
+				select({ amountSatoshis: atCap + 1n, maxInputs: BTC_SEND_MAX_INPUTS }).sufficientFunds
+			).toBeFalsy();
+			expect(select({ amountSatoshis: atCap + 1n }).sufficientFunds).toBeTruthy();
+		});
+
+		it('should offer as Max what the largest inputs within the cap carry, and the selection accept it', () => {
+			const large = utxos({ count: BTC_SEND_MAX_INPUTS, value: 10_000 });
+			const small = utxos({ count: 50, value: 1_000, from: BTC_SEND_MAX_INPUTS });
+			const all = [...small, ...large];
+
+			const max = calculateMaxSpendableAmount({
+				utxos: all,
+				pendingUtxoOutpoints: [],
+				outputVSizes,
+				feeRateMiliSatoshisPerVByte: rate,
+				maxInputs: BTC_SEND_MAX_INPUTS
+			});
+
+			expect(max).toBe(BigInt(BTC_SEND_MAX_INPUTS) * 10_000n - fee(BTC_SEND_MAX_INPUTS));
+			expect(
+				calculateUtxoSelection({
+					availableUtxos: all,
+					amountSatoshis: max,
+					outputVSizes,
+					feeRateMiliSatoshisPerVByte: rate,
+					maxInputs: BTC_SEND_MAX_INPUTS
+				}).sufficientFunds
+			).toBeTruthy();
+
+			expect(
+				calculateMaxSpendableAmount({
+					utxos: all,
+					pendingUtxoOutpoints: [],
+					outputVSizes,
+					feeRateMiliSatoshisPerVByte: rate
+				})
+			).toBe(BigInt(BTC_SEND_MAX_INPUTS) * 10_000n + 50n * 1_000n - fee(all.length));
 		});
 	});
 

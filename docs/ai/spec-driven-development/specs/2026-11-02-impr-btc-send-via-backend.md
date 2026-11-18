@@ -822,6 +822,154 @@ CFS path.
   pay the recipient twice. This is the plain-send version of the Liquidium repay gap below. There
   is no automatic retry in v1.
 
+Decided in PR 8a (PR 8 is split in three, see the [Delivery plan](#delivery-plan)):
+
+- **Callers opt in.** `sendBtc` takes the backend path only when the flag is on and the caller
+  passes `viaBackend: true`, which says it handles the backend path's outcomes. PR 8a migrates
+  Send, Convert and the AI assistant. The swaps (8b) and Liquidium (8c) keep the CFS send even
+  with the flag on until theirs are handled. 8c removes `viaBackend` once every caller passes it.
+- **`beforeBroadcast` comes with 8a**, as part of the send's order, though only 8b and 8c use it.
+- **Errors.** `broadcastBtcTransaction` throws `BtcBroadcastTransactionCanisterError`, which
+  carries the variant. A failure of the broadcast call with no typed answer becomes
+  `BtcBroadcastUnconfirmedError`. Beside `isDefinitiveBtcBroadcastRefusal` there is
+  `isUnclearBtcBroadcastOutcome`. An error from before the broadcast, such as a signing failure,
+  is neither: nothing went out, but no answer of the backend's says so.
+- **Nothing after the broadcast fails the send.** `onBroadcast` and the wallet refresh are best
+  effort, so a caller never reads a broadcast transaction as not sent.
+- **The message** is `send.error.btc_transaction_unconfirmed`, beside
+  `send.error.ethereum_transaction_unconfirmed`.
+- **Closing after an unclear outcome.** Send and Convert close. The AI assistant has no flow to
+  close, so its tool result is marked with `sendOutcomeUnknown`, through
+  `aiAssistantStore.setSendToolActionAsOutcomeUnknown`, which #14565 added for EVM sends whose
+  outcome is unknown. The card shows the message instead of the Send button. It is kept in
+  `aiAssistantStore`, so a remounted card offers no second send either.
+- **At most 38 inputs**, fewer than the backend's `MAX_BROADCAST_TX_INPUTS` (100), because signing
+  is now charged per input (Copilot):
+  - `btc_caller_send` charged a whole transaction at once, so CFS refused one the approval could
+    not pay before spending anything. Each `btc_sign_prehash` is charged on its own, 37B plus the
+    1B ledger fee, so a send larger than the approval stops partway through signing. The backend's
+    cycles for the inputs signed so far are spent, nothing is broadcast, and the user's other
+    signing fails until the next top-up.
+  - `allow_signing` runs only at login, and tops the per-user approval up only below 1.458T
+    (`SUFFICIENT_CYCLES_THRESHOLD`). 38 inputs cost 1.444T, so a send within
+    `BTC_SEND_MAX_INPUTS` fits in what a login leaves. A session that has already spent its
+    approval can still run short, as any signing can today.
+  - A top-up before each send was considered and left out: the frontend calls `allow_signing` only
+    at login today. A larger approval, so that a send can never run short, is a backend change.
+  - With the flag on, `prepareBtcSend` and Max stay within the cap. Every pick of the selection but
+    the last is the largest left, so it still finds a set whenever any set of 38 inputs covers the
+    amount. Max spends the 38 largest.
+
+Decided in PR 8b:
+
+- **Each swap passes both hooks and lets `sendBtc` pick.** `sendBtc` calls `beforeBroadcast` only
+  on the backend path, so the row is created there when it runs, and in `onBroadcast` otherwise.
+  Neither swap reads the flag.
+- **Creating the row before the broadcast must succeed**, as `createLifiRow`'s does: a failed write
+  rejects, so nothing is broadcast untracked, and the row is deleted all the same, since the backend
+  may have committed it. On the CFS path the row is still created best effort in `onBroadcast`.
+- **A definitive refusal deletes the row** with the new `deleteUnbroadcastActiveUserTransaction`,
+  in `active-user-transactions.services.ts`: three attempts a second apart, as a LI.FI row's. A
+  delete that keeps failing leaves the row to its poller. After an unclear outcome the row stays.
+- **NEAR Intents gets `openSwap`.** `executeNearIntentsSwap` hands its transports `openSwap()`,
+  which creates the swap's row, rejects if it cannot, and returns the row's id. `registerSwap`
+  swallows failures and keeps the id to itself. `swapRecord` (XRP's) carries the deposit's source
+  address, which the backend counts in its one-XRP-payment-in-flight check, so a BTC row must not
+  set it.
+- **An untrackable swap still proceeds untracked**, as both providers' best-effort paths already
+  do: no row is written, and nothing is deleted.
+- **`SwapBtcWizard`** shows `mapBtcBroadcastErrorToMessage`'s message where it has one, and closes
+  after an unclear outcome instead of returning to the form.
+- **A row whose deposit never lands is left to 8d** (open question 5; Copilot, sbpublic). After an
+  unclear outcome the row stays. If the deposit never reached the network, the Chain Fusion poller
+  reads it as `'unseen'`, which stays `Executing`, since `created_at_ns` only bounds its ledger scan.
+  The Liquidium poller leaves a row with a txid but no activity unchanged (8c), so a repay keeps
+  the repay max at zero. Only NEAR Intents fails such a row, once its deposit expires
+  (`isNearIntentsDepositExpired`). Settling the others safely needs a rule that proves a deposit
+  abandoned without failing a slow one, for example its reservation expired and its txid in
+  neither a block nor the mempool, so it is a separate PR, 8d, which lands before PR 10. Done in 8d
+  (see Decided in 8d below).
+
+Decided in PR 8c:
+
+- **`viaBackend` is gone.** Every caller of `sendBtc` now handles the backend path's outcomes, so
+  `sendBtc` goes through the backend whenever the flag is on.
+- **Liquidium's `broadcast` callbacks take `beforeBroadcast`.** The BTC wizards hand it to
+  `sendBtc`. The ETH and ICRC wizards ignore it, since their transports learn the txid only by
+  broadcasting.
+- **Supply** writes its row, with the txid, in `beforeBroadcast`. The write must succeed: if it
+  fails, nothing is broadcast and the row is deleted all the same. A refusal outright deletes it,
+  with `deleteUnbroadcastActiveUserTransaction`, and after an unclear outcome it stays. On the CFS
+  path the row is still created after the broadcast, best effort.
+- **Repay** still creates its row before the transfer, and `beforeBroadcast` writes the txid into
+  it. A failure then deletes the row only if the txid was never recorded, that is before the
+  broadcast or on the CFS path, or if the broadcast was refused outright. Otherwise the row stays
+  and keeps counting against the repay max until it settles.
+  - Once a txid write has been attempted, the delete retries (`deleteUnbroadcastActiveUserTransaction`):
+    the row may carry the txid, written or committed with its answer lost, and the poller's cleanup
+    of rows without one cannot remove it. This covers a refusal outright and a failed txid write
+    (Copilot).
+  - The txid is written again after the broadcast. A poller in another tab can read the row
+    without it and delete it just after the first write, since `delete_active_user_transaction`
+    takes no condition, and the second write then answers `NotFound` and recreates the row
+    (Copilot). Making the poller's delete conditional on the row it read would need a backend API
+    change.
+- **`flow.submit({ txid })`** still runs only after a successful broadcast, for both.
+- **Both BTC wizards** show `mapBtcBroadcastErrorToMessage`'s message ahead of "Transaction failed",
+  and close after an unclear outcome instead of returning to a form that offers the full amount
+  again.
+
+Decided in 8d (rows whose deposit never landed):
+
+- **A row fails once the network does not know its txid.** Bitcoin cannot prove that nothing was
+  broadcast, so the evidence is the txid in neither a block nor Blockstream's mempool: Esplora's
+  `tx/:txid` answers 404. Not `tx/:txid/status`, which answers `{ confirmed: false }` for a txid
+  nobody knows, as for one in the mempool (Copilot; checked against the live API).
+  `isBtcTransactionNeverLanded`, in the AUT services, gives the verdict for both pollers:
+  - only once the row has gone an hour without a write (`BTC_NEVER_LANDED_GRACE_MILLIS`). Not from
+    its creation: a Liquidium repay renews its row while its broadcast, a call with no deadline, is
+    pending (Copilot). Once the renewals stop, the backend frees the reservation within the hour
+    too, so its state has nothing more to tell;
+  - after two "not found" answers in a row, at most one every 5 minutes. A found transaction
+    restarts the run, and a failed request counts for nothing.
+  - A transaction waiting in a mempool is found, so its row keeps waiting however long it takes.
+    One evicted from Blockstream's mempool would fail too, and is unlikely ever to confirm.
+- **Chain Fusion:** an `'unseen'` mainnet deposit, after the minter and ledger checks, asks the
+  network. Never landed is the new `'neverLanded'` outcome, which fails the row.
+- **Liquidium:** a mainnet BTC supply or repay with a txid but no listed activity asks the network.
+  Failing the row releases a repay's hold on the repay max, since a terminal row no longer counts.
+  Not a borrow or withdraw: its txid is Liquidium's own payout, which Liquidium broadcasts and
+  settles (Copilot).
+- **Both** store `send.error.btc_transaction_never_landed` on the row. It says the transaction most
+  likely never went out, and to check the balance before trying again, since one evicted from a
+  mempool could still arrive (Copilot). Mainnet only: the API is Blockstream's mainnet one, and a
+  testnet row stays as before. The CSP already allows it.
+
+Decided in 8e (the limit messages):
+
+- **A rate-limited broadcast says how long to wait.** `mapBtcBroadcastErrorToMessage` reads the
+  window of the tier that refused it (a minute, an hour or a day) from `RateLimited` and formats it
+  with `secondsToDuration`, as the tips do. The limiter is the endpoint's first check, so failed
+  attempts count too, and the message speaks of attempts, not sends (Copilot).
+- **A spent signing approval says to sign in again.** `SignerCanisterPaymentError` keeps its
+  variant. With the backend paying (`PatronPaysIcrc2Cycles`), a spent approval is
+  `LedgerWithdrawFromError` with `InsufficientAllowance`, which `allow_signing` renews at the next
+  sign-in. The ledger's `InsufficientFunds` is the backend's own balance, so it keeps the flow's
+  own message.
+  - `allow_signing` renews at most three times an hour (`ALLOW_SIGNING_RATE_LIMITER`, checked only
+    when it would top up), and the frontend reads a refusal as `Skipped`. So the message also says
+    to wait up to an hour if it comes back (Copilot).
+  - Only with `BTC_SEND_VIA_BACKEND_ENABLED`. A `btc_sign_prehash` costs 38B, so a refusal means the
+    approval is nearly spent, and a sign-in renews it. `btc_caller_send` charges a whole send
+    upfront, with no input cap, so it can cost more than any renewed approval (2.917T), and its
+    refusal keeps the flow's own message (sbpublic).
+- **These toasts carry no detail.** Nothing was sent and the message says what to do, so
+  `isBtcSendLimitError` leaves out the error's English text, which the toast appends otherwise.
+- **`btc_get_spendable_utxos` keeps a generic message.** Its limit (15 a minute) is out of reach
+  while the broadcast allows 5, and closing the form resets the stores, so the next one reloads.
+  The pre-send check's `PendingTransactionsNotAvailable` now shows
+  `send.assertion.pending_transactions_not_available` instead of the generic failure.
+
 ### Frontend: UTXO loading
 
 `AllUtxosLoader.svelte` and `loadBtcPendingSentTransactions` read from `btc_get_spendable_utxos`
@@ -868,9 +1016,6 @@ Decided in PR 7:
   runs, on both paths. No flow sends with a failed fee (`validateBtcSend` refuses it first), so this
   cannot change a send under way. Pricing again on every UTXO change instead would also do so after
   `validateBtcSend`'s reload, in the middle of a send.
-- **Regtest.** The backend's floor is 1 confirmation there (`get_all_utxos` lowers it; 4
-  elsewhere, as `getUtxosQuery` used). The frontend's filter compares block heights, not
-  confirmations, so it keeps those outputs, and local sends can spend newer ones.
 - **Tests run with the flag off.** Vitest builds as `local`, where the flag is on, so
   `vitest.setup.ts` mocks it with a getter that starts each test off, matching production. Specs for
   the backend path turn it on through `btcSendViaBackend` in `$tests/utils/btc-env.test-utils`.
@@ -896,6 +1041,24 @@ A retry is still possible:
   does not cover the witness. It goes through because `btc_add_pending_transaction` accepts the
   same txid over the same UTXOs (see above).
 - A retry over other UTXOs is an ordinary new reservation.
+
+Decided in PR 9:
+
+- **`payBtc` takes the new path whenever the flag is on.** It builds with `buildBtcSendPsbt`, with
+  the wallet's address (`btcAddressMainnet`) as change, and signs with `signAndFinalizeBtcPsbt`.
+  With the flag off it keeps `btc_caller_sign`, and the best-effort reservation after the hand-off.
+- **The reservation must succeed.** If `btc_add_pending_transaction` fails, nothing is handed off.
+  A rate limit counts as a failure too: `btcAddPendingTransaction` reports it as a success, since
+  the CFS paths record after the broadcast and let the user carry on, but nothing is reserved.
+- **The `PAY` step starts after the reservation.** `OpenCryptoPayWizard` reads an error from `PAY`
+  on as "not confirmed", and an earlier one as "failed". A refused reservation handed nothing off,
+  so it shows as failed and the payment can be tried again.
+- **After a failed hand-off** the payment shows as not confirmed, and its inputs stay reserved until
+  they are spent, or until the backend's one-hour age limit frees them if they never are.
+- **The 38-input cap already applies:** `calculateBtcFee` selects with `prepareBtcSend`.
+- **One new message**, `pay.error.btc_reservation_rate_limited`, for a rate-limited reservation. A
+  missing wallet address reuses `send.assertion.address_unknown`. Every other error keeps its own
+  text, as for the other tokens.
 
 ### What stays in CFS
 
@@ -971,8 +1134,7 @@ Every PR is safe on its own.
      [Decided in PR 5](#frontend-psbt-build-sign-finalize)).
    - `btcAddressToOutputScript` with its network check, moved here from PR 6 because the builder
      needs it. Tests check that a P2TR recipient's script is built without `initEccLib`, and that
-     each address type from the wrong network (mainnet ↔ testnet, testnet ↔ regtest via the Bech32
-     prefix) is refused.
+     each address type from the wrong network is refused.
 6. `fix(frontend): size BTC fee estimates by the recipient's script type` (needs 5 for
    `btcAddressToOutputScript`). Must land before 8. See
    [Fee estimation by output script](#frontend-fee-estimation-by-output-script).
@@ -991,7 +1153,19 @@ Every PR is safe on its own.
      `btc_get_spendable_utxos` call, and `AllUtxosLoader` makes none. With it off, they load as
      today. See [Decided in PR 7](#frontend-utxo-loading).
    - `PRODUCT.md` gains "Spendable outputs from the backend (local and staging)" under `## Bitcoin`.
-8. `feat(frontend): send BTC through the backend behind the flag` (needs 3, 5, 6, 7).
+8. `feat(frontend): send BTC through the backend behind the flag` (needs 3, 5, 6, 7). Split in
+   three, each safe on its own because a flow takes the backend path only once its outcomes are
+   handled (see [Decided in PR 8a](#frontend-sendbtc)):
+   - **8a:** the backend send in `sendBtc`, its typed errors and messages, the 38-input cap, and
+     Send, Convert and the AI assistant.
+   - **8b:** the Chain Fusion and NEAR Intents swaps.
+   - **8c:** Liquidium supply and repay, and removing `viaBackend`.
+   - **8d** (follow-up, before PR 10): settling BTC rows whose deposit never landed, in the Chain
+     Fusion and Liquidium pollers (open question 5).
+   - **8e** (follow-up, before PR 10): a clear message when a send hits a backend limit: a
+     rate-limited broadcast, or a spent signing approval.
+
+   Together they do the following:
    - `beforeBroadcast` and `isDefinitiveBtcBroadcastRefusal` are added. The Chain Fusion and NEAR
      Intents rows are created in `beforeBroadcast` when the flag is on, and in `onBroadcast` when it
      is off.
@@ -999,6 +1173,7 @@ Every PR is safe on its own.
      row only on a definitive refusal, and show "may have gone out" after an unclear outcome. See
      [Liquidium supply and repay](#frontend-sendbtc).
    - Verified on regtest locally and with a small mainnet send on staging.
+
 9. `feat(frontend): OpenCryptoPay signs BTC with btc_sign_prehash behind the flag` (needs 3, 5, 7).
    With the flag off, it keeps `btc_caller_sign`.
 10. `feat(frontend): enable backend BTC send in production`. The flag is turned on, so the UTXO
@@ -1009,6 +1184,36 @@ Every PR is safe on its own.
     - the old UTXO loading in `AllUtxosLoader` and the pending loader;
     - the flag-off row creation in `onBroadcast`.
 12. Optional: `feat(backend,frontend): certified BTC balance from the backend` (`btc_get_balance`).
+    Decided in PR 12:
+    - **`btc_get_balance`** takes the network, `min_confirmations` and the delegation chain. It is an
+      update call, so the answer is certified, for registered users with a valid II delegation
+      chain. The backend derives the caller's P2WPKH address and pays `bitcoin_get_balance` itself
+      (100M attached on mainnet, about 10M charged). A read costs the backend about 54M in all,
+      the chain's ingress bytes included (measured in PocketIC), once the delegation check is paid
+      for.
+    - **Delegation check, paid once per session:** verifying the chain's canister signature costs
+      about 1.15B cycles, so checked on every read it made a read cost about 1.19B, 10 times the
+      `btc_caller_balance` it replaces. `require_ii_delegation` now remembers the chains each caller
+      passed with, by a SHA-256 of the chain and the II config, until the delegation expires.
+      The same caller sending the same chain skips the signature; any other chain is checked in
+      full. It keeps up to 4 chains per caller, one per live session, so a user signed in on two
+      devices does not make every read pay the full check; a fifth drops the one that expires
+      first. The cache is on the heap, holds at most 100 000 callers, and an upgrade clears it. Every
+      endpoint that checks the chain benefits, `allow_signing` included, so the read after sign-in
+      usually finds the chain already checked.
+    - **Rate limit:** 20 calls per caller per minute. The wallet reads the balance every 30 seconds,
+      for each Bitcoin network it shows, in each open tab. With its session's chain, one caller can
+      make the backend spend about 1.1B cycles a minute; one that brings a new chain on every call,
+      about 24B.
+    - **Errors:** `InternalError` when the address cannot be derived, and `BalanceUnavailable` when
+      the Bitcoin canister does not answer. The two are kept apart for a second reason too: with
+      the same three variants as `BtcGetPendingTransactionsError` and `BtcGetSpendableUtxosError`,
+      the release wasm folds the identical candid type functions together, and the extracted
+      `.did` names all three after one of them, renaming types the frontend imports.
+    - **Frontend:** behind `BTC_SEND_VIA_BACKEND_ENABLED`, the wallet scheduler's certified balance
+      read goes through the backend. The query read stays on the Bitcoin canister, and with the flag
+      off `btc_caller_balance` stays. A rate limit or any other error throws, so a balance that
+      could not be read is never taken as zero.
 
 ---
 
@@ -1168,13 +1373,18 @@ Every PR is safe on its own.
 4. **Regtest.** Confirm the local dfx Bitcoin setup accepts transactions broadcast by the backend
    (min confirmations is forced to 1 on regtest in `get_all_utxos`).
 5. **Rows for a deposit that never lands.** Confirm that each poller eventually fails a BTC row
-   whose txid never appears, as NEAR Intents does with an expired deposit. Otherwise PR 8 adds that
-   expiry, since `beforeBroadcast` can create rows for sends that were never broadcast. Two pollers
-   to check:
+   whose txid never appears, as NEAR Intents does with an expired deposit. If not, an expiry is
+   needed, since `beforeBroadcast` can create rows for sends that were never broadcast.
+   **Answered in PR 8b: neither does**, and the expiry is deferred to 8d, before PR 10 (see
+   [Decided in PR 8b](#frontend-sendbtc)). Two pollers checked:
    - Chain Fusion (`src/frontend/src/lib/services/chain-fusion-swap-active-tx.services.ts`), for a
      `BtcToCkBtc` row;
    - Liquidium (`src/frontend/src/lib/services/liquidium-active-tx.services.ts`). It matches rows to
      Liquidium activity by txid and today drops only repay rows that never got one.
+
+   **Settled in 8d:** both now fail a mainnet BTC row whose txid the network does not know an hour
+   on (see [Decided in 8d](#frontend-sendbtc)).
+
 6. **Relay fee floor.** Recent Bitcoin Core releases lowered the default `-minrelaytxfee` below
    1 sat/vB. Confirm the current default, and whether the backend's floor (step 8) should stay at
    1 sat/vB, matching the frontend's `MIN_FEE_RATE`, or follow it down. Keep the two in step
@@ -1184,7 +1394,8 @@ Every PR is safe on its own.
 
 1. **Caps.** Proposed `MAX_BROADCAST_TX_OUTPUTS = 4` (LI.FI's layout is deposit, `OP_RETURN`,
    change, fee), `MAX_BROADCAST_TX_INPUTS = 100` (the 2.9T allowance already limits a send to about
-   75 signed inputs), `MAX_BROADCAST_TX_BYTES = 16_000`.
+   75 signed inputs), `MAX_BROADCAST_TX_BYTES = 16_000`. **Decided:** as proposed
+   (`src/shared/src/types/bitcoin.rs`).
 2. **Maximum fee.** The backend could also refuse an absurd fee (e.g. above 10% of the sent value or
    a fixed sat/vB ceiling) to protect users from a frontend bug or a hostile PSBT. Proposed: not in
    v1; the frontend already shows the fee for approval.
@@ -1198,7 +1409,8 @@ Every PR is safe on its own.
 6. **Broadcast state storage and attempt cap.** Proposed: heap memory and
    `MAX_BROADCAST_ATTEMPTS = 3`. The alternative is a state field on `StoredPendingTransaction`. It
    survives upgrades, but it changes stable state, a candid-compatible change only if the field is
-   `Option`.
+   `Option`. **Decided:** as proposed (`BtcBroadcastStates` in heap memory,
+   `MAX_BROADCAST_ATTEMPTS = 3`).
 
 ---
 

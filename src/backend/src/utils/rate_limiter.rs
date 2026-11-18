@@ -54,6 +54,25 @@ thread_local! {
     pub(crate) static BTC_GET_SPENDABLE_UTXOS_RATE_LIMITER: RateLimiter =
         RateLimiter::new(15, 60 * 1_000_000_000);
 
+    /// Rate-limits the `bitcoin_get_utxos` pages the backend reads for a caller after the first
+    /// page of a call: max 20 per caller per minute, shared by `btc_add_pending_transaction`,
+    /// `btc_broadcast_transaction`, `btc_get_pending_transactions` and `btc_get_spendable_utxos`.
+    /// Each endpoint's own limiter covers the first page of its calls.
+    ///
+    /// A page holds up to 1,000 UTXOs and the backend pays for each one: this budget keeps the
+    /// backend's cost per caller bounded however many UTXOs the address holds. 20 a minute lets
+    /// the wallet read about 10,000 UTXOs twice a minute.
+    pub(crate) static BTC_UTXO_PAGES_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(20, 60 * 1_000_000_000);
+
+    /// Rate-limits `btc_get_balance`: max 20 calls per caller per minute. The wallet reads the
+    /// balance every 30 seconds for each Bitcoin network it shows, in each open tab. Each call
+    /// costs the backend's own cycles: about 54M with a delegation chain it has already checked
+    /// (`bitcoin_get_balance` is about 10M of that on mainnet), and about 1.19B with a new one,
+    /// whose signature check costs about 1.15B.
+    pub(crate) static BTC_GET_BALANCE_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(20, 60 * 1_000_000_000);
+
     /// Rate-limits `sign_onramper_widget_url`: max 30 calls per caller per minute. The widget
     /// re-signs on reactive input changes, so the limit is generous for legitimate use while still
     /// bounding abuse of the endpoint as a signing oracle for the shared `OnRamper` secret.
@@ -174,6 +193,25 @@ thread_local! {
     /// already been paid for.
     pub(crate) static GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER: RateLimiter =
         RateLimiter::new(30, 60 * 1_000_000_000);
+
+    /// Rate-limits `update_user_agreements`: max 10 calls per caller per minute. The wallet
+    /// calls it when the user accepts a new version of the agreements.
+    pub(crate) static UPDATE_USER_AGREEMENTS_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(10, 60 * 1_000_000_000);
+
+    /// Rate-limits `update_provider_agreements`: max 10 calls per caller per minute. The wallet
+    /// calls it when the user accepts a provider's terms before a swap.
+    pub(crate) static UPDATE_PROVIDER_AGREEMENTS_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(10, 60 * 1_000_000_000);
+
+    /// Limits how often a caller records token activity for the backend price refresh: 3 times
+    /// per minute, shared by `get_exchange_rates` and the custom-token endpoints.
+    ///
+    /// A recording writes an entry for each of the caller's custom tokens, up to 1,000, and keeps
+    /// them in the refresh for 10 minutes, so a second one within the minute adds nothing. The
+    /// wallet asks for rates once a minute; 3 leaves room for a reload or a token change.
+    pub(crate) static TOKEN_ACTIVITY_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(3, 60 * 1_000_000_000);
 }
 
 /// Per-caller sliding-window rate limiter for IC canister methods.
@@ -532,7 +570,7 @@ mod tests {
         signer::{topup::TopUpCyclesLedgerError, AllowSigningError, GetAllowedCyclesError},
     };
 
-    use super::{RateLimiter, TieredRateLimiter};
+    use super::{RateLimiter, TieredRateLimiter, BTC_UTXO_PAGES_RATE_LIMITER};
 
     fn test_principal(id: u8) -> Principal {
         Principal::from_slice(&[id])
@@ -766,6 +804,25 @@ mod tests {
         assert_eq!(e.max_calls, 1);
         assert_eq!(e.window_ns, 60 * ONE_SEC);
         assert_eq!(e.caller, caller);
+    }
+
+    #[test]
+    fn btc_utxo_pages_allow_20_per_caller_per_minute() {
+        let caller = test_principal(42);
+
+        BTC_UTXO_PAGES_RATE_LIMITER.with(|rl| {
+            for _ in 0..20 {
+                rl.check_at(caller, ONE_SEC).unwrap();
+            }
+
+            let err = rl.check_at(caller, 2 * ONE_SEC).unwrap_err();
+            assert_eq!(err.max_calls, 20);
+            assert_eq!(err.window_ns, 60 * ONE_SEC);
+            assert_eq!(err.caller, caller);
+
+            rl.check_at(test_principal(43), 2 * ONE_SEC).unwrap();
+            rl.check_at(caller, 61 * ONE_SEC).unwrap();
+        });
     }
 
     #[test]

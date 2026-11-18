@@ -1,3 +1,4 @@
+import { isDefinitiveBtcBroadcastRefusal } from '$btc/utils/btc-send.utils';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
@@ -9,6 +10,7 @@ import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import {
 	createActiveUserTransaction,
 	deleteActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction,
 	updateActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -267,9 +269,14 @@ export const liquidiumRepaySpendable = ({
 
 // Broadcasts `amount` base units (gross = repay + provider fee) to the native target and returns
 // the txid the AUT poller correlates on. Implemented by the wizard (per-chain fee/UTXO machinery).
+//
+// A transport that knows its txid before broadcasting (BTC through the backend) calls
+// `beforeBroadcast` with it, and broadcasts nothing if that rejects. Its failures are then
+// `sendBtc`'s, which say whether anything can have gone out.
 export type LiquidiumRepayBroadcast = (params: {
 	target: SupplyTarget;
 	amount: bigint;
+	beforeBroadcast: (params: { txid: string }) => Promise<void>;
 }) => Promise<string>;
 
 // Repays `amount` (base units) of `asset`'s debt: resolve profile → record an AUT → broadcast the
@@ -377,16 +384,54 @@ export const executeLiquidiumRepay = async ({
 
 	const lease = setInterval(renewLease, LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS);
 
+	// Set by `beforeBroadcast`, which only a transport that knows its txid before broadcasting
+	// calls: the row then carries the txid, so the poller keeps it, and from there the transfer
+	// can go out.
+	let txidRecorded = false;
+	// Set before the write: one that committed but whose answer was lost leaves the txid on the row
+	// all the same.
+	let txidWriteAttempted = false;
+
+	const recordTxid = async ({ txid: signedTxid }: { txid: string }) => {
+		txidWriteAttempted = true;
+
+		await updateActiveUserTransaction({
+			identity,
+			id,
+			externalRefs: toLiquidiumExternalRefs({
+				...refs,
+				[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: signedTxid
+			})
+		});
+
+		txidRecorded = true;
+	};
+
 	let txid: string;
 
 	try {
 		// Gross transfer = net repayment + provider inflow fee (deducted on arrival).
-		txid = await broadcast({ target: flow.target, amount: amount + inflowFee });
+		txid = await broadcast({
+			target: flow.target,
+			amount: amount + inflowFee,
+			beforeBroadcast: recordTxid
+		});
 	} catch (err: unknown) {
 		clearInterval(lease);
 
-		// Taken as not sent, as the wizard reports it.
-		await deleteRow();
+		// Before the broadcast, or through a transport that cannot tell, the failure is taken as not
+		// sent, as the wizard reports it. Once the broadcast began, only a refusal outright proves
+		// nothing went out: otherwise the row stays, and the repay keeps counting against the max
+		// until it settles, so a second full repay cannot follow it.
+		const sentNothing = !txidRecorded || isDefinitiveBtcBroadcastRefusal(err);
+
+		if (sentNothing && txidWriteAttempted) {
+			// The row may carry the txid, written or committed with its answer lost, and the poller's
+			// cleanup of rows without one could not remove it, so the delete is retried.
+			await deleteUnbroadcastActiveUserTransaction({ identity, id });
+		} else if (sentNothing) {
+			await deleteRow();
+		}
 
 		throw err;
 	}
@@ -413,6 +458,10 @@ export const executeLiquidiumRepay = async ({
 	// The txid first: it is what the poller correlates the row on, and a row still without one once
 	// the grace period is over is dropped. `external_refs` is replaced wholesale, so the other refs
 	// go along again.
+	//
+	// Written again when the transport already wrote it before the broadcast: a poller in another
+	// tab may have read the row without it and deleted it just after, its delete not being
+	// conditional on what it read. A row it deleted answers `NotFound` here and is recreated.
 	const sentRefs = { ...refs, [LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid };
 
 	try {

@@ -1,6 +1,8 @@
 import {
 	mapAllowSigningError,
 	mapBtcAddPendingTransactionError,
+	mapBtcBroadcastTransactionError,
+	mapBtcGetBalanceError,
 	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
 	mapBtcGetSpendableUtxosError,
@@ -8,6 +10,7 @@ import {
 	mapSignOnramperWidgetUrlError
 } from '$lib/canisters/backend.errors';
 import {
+	BtcBroadcastTransactionCanisterError,
 	CanisterInternalError,
 	OnramperRateLimitedError,
 	OnramperSecretNotConfiguredError
@@ -89,6 +92,33 @@ describe('backend.errors', () => {
 		});
 	});
 
+	describe('mapBtcBroadcastTransactionError', () => {
+		it.each([
+			{
+				variant: {
+					RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal }
+				},
+				message: 'Rate limit exceeded. Maximum of 5 calls allowed every 60 seconds.'
+			},
+			{
+				variant: { BroadcastOutcomeUnknown: { msg: 'trap' } },
+				message: 'btc_broadcast_transaction: BroadcastOutcomeUnknown: trap'
+			},
+			{
+				variant: { InvalidSignature: { index: 2 } },
+				message: 'btc_broadcast_transaction: InvalidSignature (index 2)'
+			},
+			{ variant: { FeeTooLow: null }, message: 'btc_broadcast_transaction: FeeTooLow' }
+		])('should keep the variant $variant and name it', ({ variant, message }) => {
+			const err = mapBtcBroadcastTransactionError(variant);
+
+			expect(err).toBeInstanceOf(BtcBroadcastTransactionCanisterError);
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.variant).toBe(variant);
+			expect(err.message).toBe(message);
+		});
+	});
+
 	describe('mapBtcGetPendingTransactionsError', () => {
 		it('should map InternalError', () => {
 			const err = mapBtcGetPendingTransactionsError({
@@ -160,6 +190,48 @@ describe('backend.errors', () => {
 
 			expect(err).toBeInstanceOf(CanisterInternalError);
 			expect(err.message).toBe('Unknown BtcGetSpendableUtxosError');
+		});
+	});
+
+	describe('mapBtcGetBalanceError', () => {
+		it('should map InternalError', () => {
+			const err = mapBtcGetBalanceError({ InternalError: { msg: 'no public key' } });
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('no public key');
+		});
+
+		it('should map BalanceUnavailable', () => {
+			const err = mapBtcGetBalanceError({ BalanceUnavailable: { msg: 'canister rejected' } });
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Bitcoin balance unavailable: canister rejected');
+		});
+
+		it('should map RateLimited', () => {
+			const err = mapBtcGetBalanceError({
+				RateLimited: { max_calls: 20, window_ns: 60_000_000_000n, caller: mockPrincipal }
+			});
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe(
+				'Rate limit exceeded. Maximum of 20 calls allowed every 60 seconds.'
+			);
+		});
+
+		it('should map InvalidDelegationChain', () => {
+			const err = mapBtcGetBalanceError({ InvalidDelegationChain: { msg: 'chain expired' } });
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('II delegation chain verification failed: chain expired');
+		});
+
+		it('should return unknown error for unrecognized variant', () => {
+			// @ts-expect-error testing unknown error variant
+			const err = mapBtcGetBalanceError({ SomeOther: null });
+
+			expect(err).toBeInstanceOf(CanisterInternalError);
+			expect(err.message).toBe('Unknown BtcGetBalanceError');
 		});
 	});
 

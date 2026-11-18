@@ -122,6 +122,10 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// Whether the run keeps a token batch whole, stating none of its steps. Only the run can say so,
 	// and the decode already has it, for the same reason.
 	keepsBatchWhole: boolean;
+	// Whether the run makes a token call inside another program's instruction with the wallet among
+	// the keys signing for a multisig. Only the run shows such a call, and the decode already has it,
+	// for the same reason.
+	signsForMultisig: boolean;
 	// Whether the run hands the user's wallet to another program. A program can make that assignment
 	// inside its own call, where only the run shows it, and the review already has the run, so it is
 	// handed on for the same reason the simulated flag is.
@@ -195,7 +199,8 @@ export const decode = async ({
 		parties: simulatedParties,
 		unreadPrograms,
 		opensAccountBeyondRent,
-		keepsBatchWhole
+		keepsBatchWhole,
+		signsForMultisig
 	} = simulation ?? {};
 
 	// Name the mints and the programs the review is about to show. Best effort and awaited, since
@@ -305,6 +310,7 @@ export const decode = async ({
 		...(nonNullish(rentExemptMinimum) && { rentExemptMinimum }),
 		...(opensAccountBeyondRent === true && { opensAccountBeyondRent }),
 		...(keepsBatchWhole === true && { keepsBatchWhole }),
+		...(signsForMultisig === true && { signsForMultisig }),
 		...(feePaidByOthers && { feePaidByOthers }),
 		parties
 	};
@@ -554,6 +560,7 @@ export const sign = ({
 	rentExemptMinimum,
 	opensAccountBeyondRent,
 	keepsBatchWhole,
+	signsForMultisig,
 	reassignsWallet,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
@@ -656,7 +663,17 @@ export const sign = ({
 			// The wallet handed to another program inside a program's call is refused on the same terms
 			// as an assignment the message states: from then on that program, not the wallet's key,
 			// decides what leaves the wallet, and no amount, source or destination says so.
-			if (ambiguous || opensAccountBeyondRent || keepsBatchWhole || reassignsWallet) {
+			//
+			// So is a token call inside a program's instruction with the wallet among the keys signing
+			// for a multisig, on the same terms as one the message states: it acts on an account the
+			// multisig holds, which nothing the review shows counts as the user's.
+			if (
+				ambiguous ||
+				opensAccountBeyondRent ||
+				keepsBatchWhole ||
+				signsForMultisig ||
+				reassignsWallet
+			) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.ambiguous_transaction }
 				});
