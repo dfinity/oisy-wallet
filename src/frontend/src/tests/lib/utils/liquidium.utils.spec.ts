@@ -160,6 +160,10 @@ describe('liquidium.utils', () => {
 		it('offers only the ICP rail for ICP', () => {
 			expect(liquidiumSupportedRails('ICP')).toEqual(['ICP']);
 		});
+
+		it('offers no rails for SOL, which the SDK supports but OISY does not yet', () => {
+			expect(liquidiumSupportedRails('SOL')).toEqual([]);
+		});
 	});
 
 	describe('mapLiquidiumMarketRails', () => {
@@ -182,6 +186,12 @@ describe('liquidium.utils', () => {
 
 			expect(markets).toHaveLength(1);
 			expect(markets[0].chain).toBe('ICP');
+		});
+
+		it('maps no markets for the SOL pool', () => {
+			expect(
+				mapLiquidiumMarketRails(buildPool({ id: 'pool-sol', asset: 'SOL', chain: 'SOL' }))
+			).toEqual([]);
 		});
 	});
 
@@ -240,6 +250,15 @@ describe('liquidium.utils', () => {
 
 			expect(rails).toHaveLength(1);
 			expect(rails[0].chain).toBe('ETH');
+		});
+
+		it('keeps a SOL position on its own chain only', () => {
+			const rails = liquidiumReserveRails(
+				buildReserve({ poolId: 'pool-sol', asset: 'SOL', chain: 'SOL' })
+			);
+
+			expect(rails).toHaveLength(1);
+			expect(rails[0].chain).toBe('SOL');
 		});
 	});
 
