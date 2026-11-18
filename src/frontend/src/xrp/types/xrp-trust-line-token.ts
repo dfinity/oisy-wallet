@@ -16,6 +16,10 @@ export type RequiredXrpTrustLineToken = RequiredToken<XrpTrustLineToken>;
 
 export type XrpTrustLineCustomToken = TokenToggleable<XrpTrustLineToken>;
 
+// What a `TrustSet` does to the wallet's line for a token: open it, or take it back to its default
+// state so the ledger can delete it.
+export type XrpTrustSetChange = 'add' | 'remove';
+
 // A restriction an issuer's account places on the holders of its tokens.
 export type XrpIssuerPower =
 	| { type: 'freeze' | 'global_freeze' | 'clawback' | 'approval' | 'no_rippling' }

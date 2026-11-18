@@ -117,6 +117,24 @@ export const parseXrpTokenValue = ({
 };
 
 /**
+ * Whether a token amount as the ledger writes it is exactly zero. Read from the ledger's string
+ * rather than from a value scaled to the wallet's decimals, which reads dust below that scale as
+ * zero: only an exactly zero balance lets the ledger delete the line.
+ */
+export const isXrpTokenValueZero = (value: string): boolean => {
+	const match = XRP_TOKEN_VALUE_PATTERN.exec(value);
+
+	if (match === null) {
+		return false;
+	}
+
+	const [, , integer = '', fraction = ''] = match;
+	const digits = `${integer}${fraction}`;
+
+	return digits !== '' && !/[1-9]/.test(digits);
+};
+
+/**
  * A token amount in base units as a transaction states it: plain decimal notation without
  * trailing zeros, which `ripple-binary-codec` encodes exactly.
  */

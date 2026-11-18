@@ -8,7 +8,12 @@ import {
 	XRP_MAX_UINT32
 } from '$xrp/constants/xrp.constants';
 import { XrpRpcNotConfiguredError } from '$xrp/providers/xrp-rpc.providers';
-import { loadXrpAccountInfo, loadXrpLedgerIndex, submitXrpTransaction } from '$xrp/rest/xrpl.rest';
+import {
+	loadXrpAccountInfo,
+	loadXrpAccountLines,
+	loadXrpLedgerIndex,
+	submitXrpTransaction
+} from '$xrp/rest/xrpl.rest';
 import { assertNoXrpPaymentInFlight } from '$xrp/services/xrp-in-flight.services';
 import { openXrpPaymentRecord } from '$xrp/services/xrp-send.services';
 import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-sign.services';
@@ -16,9 +21,14 @@ import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
-import { XrpSendNotGuardedError, XrpTrustSetUnfundedError } from '$xrp/types/xrp-send';
+import {
+	XrpSendNotGuardedError,
+	XrpTrustLineBalanceNotZeroError,
+	XrpTrustLineNotHeldError,
+	XrpTrustSetUnfundedError
+} from '$xrp/types/xrp-send';
 import type { XrpSendResult, XrpSubmitResult } from '$xrp/types/xrp-transaction';
-import type { XrpTrustLineCustomToken } from '$xrp/types/xrp-trust-line-token';
+import type { XrpTrustLineCustomToken, XrpTrustSetChange } from '$xrp/types/xrp-trust-line-token';
 import { toXrpExternalRefs, toXrpTrustSetData } from '$xrp/utils/xrp-active-tx.utils';
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import {
@@ -26,6 +36,7 @@ import {
 	deriveXrpLedgerWindow,
 	deriveXrpTransactionHash
 } from '$xrp/utils/xrp-transaction.utils';
+import { isXrpTokenValueZero, xrpTrustLineIdentifier } from '$xrp/utils/xrp-trust-line.utils';
 import { isNullish } from '@dfinity/utils';
 
 // The ledger waives the reserve of a new trust line while the account owns fewer objects than this
@@ -33,22 +44,24 @@ import { isNullish } from '@dfinity/utils';
 const XRP_TRUST_LINE_RESERVE_WAIVER_OWNER_COUNT = 2;
 
 /**
- * Adds a trust-line token to the account: builds and threshold-signs a `TrustSet` for it, records
- * it, and submits it — through the same guard, record and resolution as an XRP send, because a
- * `TrustSet` takes the account's `Sequence` exactly as a payment does.
+ * Adds a trust-line token to the account, or removes it: builds and threshold-signs a `TrustSet` for
+ * it, records it, and submits it — through the same guard, record and resolution as an XRP send,
+ * because a `TrustSet` takes the account's `Sequence` exactly as a payment does.
  *
  * `fee` is the figure the review showed, passed in rather than re-estimated, for the reason
  * `sendXrp` gives: re-fetching it would sign a fee the user never saw. It is still bounded here.
  *
  * Like `sendXrp`, it stops at the submit. The record opened just before the broadcast is what
- * establishes the outcome, and the poller drives it; the token appears once the ledger holds its
- * line, and is saved to the backend list from there.
+ * establishes the outcome, and the poller drives it: an added token appears once the ledger holds
+ * its line, and is saved to the backend list from there; a removed one leaves the list once the line
+ * is gone.
  */
 export const submitXrpTrustSet = async ({
 	identity,
 	network,
 	source,
 	token,
+	change,
 	fee,
 	progress
 }: {
@@ -56,6 +69,7 @@ export const submitXrpTrustSet = async ({
 	network: XrpNetworkType;
 	source: XrpAddress;
 	token: XrpTrustLineCustomToken;
+	change: XrpTrustSetChange;
 	fee: XrpBalance;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
@@ -71,7 +85,7 @@ export const submitXrpTrustSet = async ({
 		throw new Error(`XRP fee must be between 1 and ${XRP_MAX_FEE_DROPS} drops, got ${fee}.`);
 	}
 
-	const data = toXrpTrustSetData({ token, source, fee });
+	const data = toXrpTrustSetData({ token, source, change, fee });
 
 	if (isNullish(data)) {
 		throw new XrpSendNotGuardedError(
@@ -85,11 +99,31 @@ export const submitXrpTrustSet = async ({
 
 	// Both snapshots, each value taken the way that cannot hurt, as `sendXrp` reasons it out: the
 	// higher sequence, the lower balance, the higher owner count.
-	const [openAccount, validatedAccount, ledgerIndex] = await Promise.all([
+	const [openAccount, validatedAccount, ledgerIndex, lines] = await Promise.all([
 		loadXrpAccountInfo({ address: source, network, ledgerIndex: 'current' }),
 		loadXrpAccountInfo({ address: source, network, ledgerIndex: 'validated' }),
-		loadXrpLedgerIndex({ network })
+		loadXrpLedgerIndex({ network }),
+		// A removal's line is read again here: a payment that arrived since the review would leave a
+		// balance the `TrustSet` cannot take back to the line's default state.
+		change === 'remove'
+			? loadXrpAccountLines({ address: source, network, peer: token.issuer })
+			: undefined
 	]);
+
+	if (change === 'remove') {
+		const identifier = xrpTrustLineIdentifier(token);
+		const line = lines?.find((held) => xrpTrustLineIdentifier(held) === identifier);
+
+		if (isNullish(line)) {
+			throw new XrpTrustLineNotHeldError(`XRP account ${source} holds no ${identifier} line.`);
+		}
+
+		if (!isXrpTokenValueZero(line.balance)) {
+			throw new XrpTrustLineBalanceNotZeroError(
+				`XRP ${identifier} balance ${line.balance} is not zero.`
+			);
+		}
+	}
 
 	const sequence = Math.max(openAccount.sequence, validatedAccount.sequence);
 	const balance =
@@ -107,7 +141,12 @@ export const submitXrpTrustSet = async ({
 
 	const reserveAfter = getXrpReserveDrops({ ownerCount: ownerCount + 1 });
 
-	if (ownerCount >= XRP_TRUST_LINE_RESERVE_WAIVER_OWNER_COUNT && balance < reserveAfter) {
+	// Only adding raises the reserve; removing releases it.
+	if (
+		change === 'add' &&
+		ownerCount >= XRP_TRUST_LINE_RESERVE_WAIVER_OWNER_COUNT &&
+		balance < reserveAfter
+	) {
 		throw new XrpTrustSetUnfundedError(
 			`XRP balance ${balance} drops cannot keep the ${reserveAfter} drops reserve of one more trust line.`
 		);
@@ -124,6 +163,7 @@ export const submitXrpTrustSet = async ({
 	const transaction = buildXrpTrustSet({
 		account: source,
 		token,
+		change,
 		fee,
 		sequence,
 		signingPublicKey,

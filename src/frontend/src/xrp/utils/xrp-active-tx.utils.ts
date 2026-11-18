@@ -15,7 +15,7 @@ import type { XrpAddress } from '$xrp/types/address';
 import { XrpNetworks, type XrpNetworkType } from '$xrp/types/network';
 import { XRP_EXTERNAL_REF_KEYS, type XrpExternalRefKey } from '$xrp/types/xrp-active-tx';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
-import type { XrpTrustLineCustomToken } from '$xrp/types/xrp-trust-line-token';
+import type { XrpTrustLineCustomToken, XrpTrustSetChange } from '$xrp/types/xrp-trust-line-token';
 import { toXrpTrustLineToken } from '$xrp/utils/xrp-trust-line-tokens.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
@@ -23,6 +23,10 @@ export const isXrpActiveUserTransaction = (tx: ActiveUserTransaction): boolean =
 
 export const isXrpTrustSetActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
 	'XrpTrustSet' in tx.data;
+
+// A `TrustSet` row that removes its token, as opposed to one that adds it.
+export const isXrpTrustLineRemovalActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
+	'XrpTrustSet' in tx.data && 'Remove' in tx.data.XrpTrustSet.change;
 
 // A send of a trust-line token rather than of XRP.
 export const isXrpTokenPaymentActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
@@ -71,17 +75,19 @@ export const toXrpData = ({
 };
 
 /**
- * Builds the `XrpTrustSet` AUT data variant that adds a trust-line token, from the values fixed at
- * signing time. `undefined` for a token without a backend trust-line `TokenId`, which the caller
- * treats as "this cannot be guarded", not as "sign it anyway".
+ * Builds the `XrpTrustSet` AUT data variant that adds or removes a trust-line token, from the values
+ * fixed at signing time. `undefined` for a token without a backend trust-line `TokenId`, which the
+ * caller treats as "this cannot be guarded", not as "sign it anyway".
  */
 export const toXrpTrustSetData = ({
 	token,
 	source,
+	change,
 	fee
 }: {
 	token: XrpTrustLineCustomToken;
 	source: XrpAddress;
+	change: XrpTrustSetChange;
 	fee: XrpBalance;
 }): ActiveUserTransactionData | undefined => {
 	const backendToken = toBackendTokenId(token);
@@ -94,7 +100,7 @@ export const toXrpTrustSetData = ({
 		XrpTrustSet: {
 			token: backendToken,
 			source_address: source,
-			change: { Add: null },
+			change: change === 'add' ? { Add: null } : { Remove: null },
 			fee
 		}
 	};
