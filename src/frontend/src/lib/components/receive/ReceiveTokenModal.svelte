@@ -39,6 +39,7 @@
 	} from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenIdentifier } from '$lib/utils/identifier.utils';
 	import { closeModal, getSymbol } from '$lib/utils/modal.utils';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
@@ -54,7 +55,7 @@
 		resolveReceiveAddress
 	} from '$lib/utils/receive.utils';
 	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
-	import { mapTokenUi } from '$lib/utils/token.utils';
+	import { getTokenDisplaySymbol, mapTokenUi } from '$lib/utils/token.utils';
 	import { saveAllCustomTokens, sortTokens } from '$lib/utils/tokens.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -164,6 +165,22 @@
 		route?.kind === 'direct'
 			? getReceiveConvertTwinToken({ token: route.creditedToken, enabledNetworkIds })
 			: undefined
+	);
+
+	// On the address step the title says what to send and where: "Receive ETH on Ethereum", or for a
+	// deposit what it credits and through which network: "Receive ckBTC via Bitcoin".
+	let addressTitle = $derived(
+		isNullish(route)
+			? undefined
+			: route.kind === 'ckbtc-deposit'
+				? replacePlaceholders($i18n.receive.token.text.title_deposit, {
+						$token: getTokenDisplaySymbol(route.creditedToken),
+						$network: route.sourceNetwork.name
+					})
+				: replacePlaceholders($i18n.receive.token.text.title_direct, {
+						$token: getTokenDisplaySymbol(route.sourceToken),
+						$network: route.sourceNetwork.name
+					})
 	);
 
 	const selectAsset = ({
@@ -469,7 +486,12 @@
 	bind:currentStep
 >
 	{#snippet title()}
-		{currentStep?.title ?? $i18n.receive.text.receive}
+		<!-- The modal truncates its title to one line; this one wraps, since the network is its point. -->
+		<span class="line-clamp-2 block whitespace-normal">
+			{currentStep?.name === WizardStepsReceiveToken.ADDRESS && nonNullish(addressTitle)
+				? addressTitle
+				: (currentStep?.title ?? $i18n.receive.text.receive)}
+		</span>
 	{/snippet}
 
 	<div bind:this={content}>

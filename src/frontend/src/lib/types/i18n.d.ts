@@ -782,11 +782,12 @@ interface I18nReceive {
 			address_copied: string;
 			how_to_convert: string;
 			how_to_convert_description: string;
-			token_on_network: string;
 			copy_address: string;
 			copy_principal: string;
 			copy_account_id: string;
 			no_match: string;
+			title_direct: string;
+			title_deposit: string;
 		};
 	};
 	ckbtc: {
@@ -794,7 +795,6 @@ interface I18nReceive {
 			deposit_address: string;
 			deposit_warning: string;
 			deposit_explanation: string;
-			arrives_as: string;
 			copy_deposit_address: string;
 			deposit_address_copied: string;
 			confirmations: string;

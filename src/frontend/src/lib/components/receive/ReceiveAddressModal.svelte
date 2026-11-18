@@ -133,6 +133,7 @@
 					copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
 					network={addressToken.network}
 					onBack={displayAddresses}
+					qrSize="compact"
 				>
 					{#snippet text()}
 						{replacePlaceholders($i18n.receive.addresses.text.evm_networks, {
@@ -148,6 +149,7 @@
 					copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
 					network={addressToken.network}
 					onBack={displayAddresses}
+					qrSize="compact"
 				/>
 			{:else}
 				<InfoCmp onQRCode={displayQRCode} />

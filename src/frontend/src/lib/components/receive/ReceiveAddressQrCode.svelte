@@ -16,11 +16,21 @@
 		copyAriaLabel: string;
 		testId?: string;
 		onBack: () => void;
+		qrSize?: 'compact' | 'default';
 		text?: Snippet;
 	}
 
-	let { address, addressLabel, addressToken, network, copyAriaLabel, testId, onBack, text }: Props =
-		$props();
+	let {
+		address,
+		addressLabel,
+		addressToken,
+		network,
+		copyAriaLabel,
+		testId,
+		onBack,
+		qrSize,
+		text
+	}: Props = $props();
 </script>
 
 <ContentWithToolbar styleClass="min-h-50vh" {testId}>
@@ -30,6 +40,7 @@
 		{addressToken}
 		{copyAriaLabel}
 		{network}
+		{qrSize}
 		testId={RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT}
 		{text}
 	/>

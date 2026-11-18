@@ -1054,11 +1054,12 @@
 				"address_copied": "$network address copied to clipboard.",
 				"how_to_convert": "How to convert $token to $ckToken",
 				"how_to_convert_description": "You can also start with $token on $network: it arrives in your wallet on $network, then Convert turns it into $ckToken.",
-				"token_on_network": "$token on $network",
 				"copy_address": "Copy $network address",
 				"copy_principal": "Copy ICP Principal",
 				"copy_account_id": "Copy ICP Account ID",
-				"no_match": "No matching tokens. Try a different name or symbol."
+				"no_match": "No matching tokens. Try a different name or symbol.",
+				"title_direct": "Receive $token on $network",
+				"title_deposit": "Receive $token via $network"
 			}
 		},
 		"ckbtc": {
@@ -1066,7 +1067,6 @@
 				"deposit_address": "Bitcoin deposit address for ckBTC",
 				"deposit_warning": "Send only BTC on the Bitcoin network.",
 				"deposit_explanation": "OISY checks the deposit after the required Bitcoin confirmations and credits eligible deposits as ckBTC on Internet Computer.",
-				"arrives_as": "Arrives as $token on $network",
 				"copy_deposit_address": "Copy Bitcoin deposit address for ckBTC",
 				"deposit_address_copied": "Bitcoin deposit address for ckBTC copied to clipboard.",
 				"confirmations": "Bitcoin confirmations",

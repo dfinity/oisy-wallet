@@ -129,6 +129,10 @@ describe('ReceiveTokenModal', () => {
 			);
 		});
 
+		expect(container.querySelector('[data-tid="modal-title"]')).toHaveTextContent(
+			`Receive ICP on ${ICP_NETWORK.name}`
+		);
+
 		const accountIdButton = byTestId({ container, testId: RECEIVE_ICP_FORMAT_ACCOUNT_ID });
 
 		expect(accountIdButton).toHaveAttribute('aria-checked', 'false');

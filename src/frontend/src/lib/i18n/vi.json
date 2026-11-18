@@ -1054,11 +1054,12 @@
 				"address_copied": "",
 				"how_to_convert": "",
 				"how_to_convert_description": "",
-				"token_on_network": "",
 				"copy_address": "",
 				"copy_principal": "",
 				"copy_account_id": "",
-				"no_match": ""
+				"no_match": "",
+				"title_direct": "",
+				"title_deposit": ""
 			}
 		},
 		"ckbtc": {
@@ -1066,7 +1067,6 @@
 				"deposit_address": "",
 				"deposit_warning": "",
 				"deposit_explanation": "",
-				"arrives_as": "",
 				"copy_deposit_address": "",
 				"deposit_address_copied": "",
 				"confirmations": "",
