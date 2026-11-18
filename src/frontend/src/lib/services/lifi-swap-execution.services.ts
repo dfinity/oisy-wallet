@@ -14,7 +14,7 @@ import type { NetworkId } from '$lib/types/network';
 import { consoleError } from '$lib/utils/console.utils';
 import { toLifiExternalRefs } from '$lib/utils/lifi-active-tx.utils';
 import { isLifiRouteExecutable } from '$lib/utils/lifi-calldata.utils';
-import { assertLifiQuote } from '$lib/utils/lifi-swap.utils';
+import { assertLifiQuote, isLifiBtcInsufficientFundsError } from '$lib/utils/lifi-swap.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { HTTPError, SDKError, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
@@ -34,7 +34,9 @@ export const isSlippageExceeded = (err: unknown): boolean =>
 /**
  * Re-quotes `request` and refuses a quote that fails the trust checks, or whose route the calldata
  * binding would refuse; a Solana route has no bridge, whose shape this judges. When no route comes
- * back, or its minimum is below the one displayed, the swap aborts as a slippage error.
+ * back, or its minimum is below the one displayed, the swap aborts as a slippage error. From BTC,
+ * LI.FI's refusal of the address's balance comes with the same HTTP statuses, and is rethrown as is:
+ * no slippage would change it.
  */
 export const requoteAtLeast = async ({
 	request,
@@ -51,7 +53,7 @@ export const requoteAtLeast = async ({
 		// A copy, because the SDK fills its defaults into the object it is given.
 		quote = await fetchLifiQuote({ ...request });
 	} catch (err: unknown) {
-		if (isNoRouteError(err)) {
+		if (isNoRouteError(err) && !isLifiBtcInsufficientFundsError({ err, request })) {
 			throw new Error(`${SLIPPAGE_EXCEEDED} LI.FI no longer has a route for the swap.`, {
 				cause: err
 			});

@@ -185,6 +185,14 @@ export const resetBtcNeverLandedChecks = (): void => {
 };
 
 /**
+ * Ends a row's run of "not found" answers, for a poller that saw its txid on the network by a lookup
+ * of its own: `isBtcTransactionNeverLanded` counts answers in a row, and that sighting is one too.
+ */
+export const noteBtcTransactionSeen = (id: string): void => {
+	btcNeverLandedChecks.delete(id);
+};
+
+/**
  * Whether a mainnet BTC row's transaction never reached the network, so its poller can fail the row
  * instead of waiting for it for good. A row can be written before its broadcast, which may then
  * have sent nothing, though its outcome was unclear.

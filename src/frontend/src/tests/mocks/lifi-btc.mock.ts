@@ -748,3 +748,170 @@ export const mockLifiBtcNearBelowFloorQuote: LiFiStep = {
 		value: '60000'
 	}
 };
+
+// Relay's shared BTC depository, the deposit of every Relay quote: the same address in live quotes
+// and in completed LI.FI transfers.
+export const mockRelayDepositoryAddress = 'bc1qzmtn0q92ayejt2hpffvlktcpmyy7vvsd06sefu';
+
+// The order id Relay's memo carries, and Relay's own request id for the same quote.
+export const mockRelayOrderId =
+	'0xbf11578a14a3bb218ffb4b9c6c4ff24df9c7480d16ef6bf232cc868ff2f70481';
+export const mockRelayRequestId =
+	'0x1794921950a7a5766ce4e4feab8abc7ea03d5e7847a14a044259a00af8defe6a';
+
+const btcToken = {
+	chainId: 20000000000001,
+	address: 'bitcoin',
+	symbol: 'BTC',
+	name: 'Bitcoin',
+	decimals: 8,
+	priceUSD: '64076.52'
+};
+
+const ethToken = {
+	chainId: 1,
+	address: '0x0000000000000000000000000000000000000000',
+	symbol: 'ETH',
+	name: 'ETH',
+	decimals: 18,
+	priceUSD: '3170.11'
+};
+
+// `toolData` is LI.FI's embedded Relay quote, which the SDK's `Estimate` type leaves out.
+const mockLifiBtcRelayEstimate: LiFiStep['estimate'] & { toolData: unknown } = {
+	tool: 'relaydepository',
+	fromAmount: '120000',
+	toAmount: '42424750128483628',
+	toAmountMin: '41788378876556374',
+	approvalAddress: mockRelayDepositoryAddress,
+	executionDuration: 1260,
+	feeCosts: [
+		{
+			name: 'LIFI Fixed Fee',
+			description: 'Fixed LIFI fee, independent of any other fee',
+			percentage: '0.0025',
+			amount: '300',
+			amountUSD: '0.1922',
+			included: true,
+			token: btcToken,
+			feeSplit: {
+				lifiFee: '300',
+				integratorFee: '0',
+				recipients: [{ name: 'lifi', type: 'FIXED', fee: '300' }]
+			}
+		}
+	],
+	gasCosts: [],
+	toolData: {
+		steps: [{ requestId: mockRelayRequestId, kind: 'transaction', items: [{ data: {} }] }],
+		details: {
+			timeEstimate: 4,
+			currencyOut: {
+				currency: {
+					chainId: 1,
+					address: '0x0000000000000000000000000000000000000000',
+					decimals: 18
+				},
+				amount: '42424750128483628',
+				minimumAmount: '41788378876556374'
+			}
+		},
+		protocol: {
+			v2: {
+				orderId: mockRelayOrderId,
+				paymentDetails: {
+					amount: '119700',
+					currency: 'bc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmql8k8',
+					chainId: 'bitcoin',
+					depository: mockRelayDepositoryAddress
+				}
+			}
+		}
+	}
+};
+
+/**
+ * 120 000 sats to ETH on Ethereum through Relay, shaped after a live quote of 2026-11-17 from a funded
+ * wallet (Relay refuses quotes for the public test addresses). The amounts, Relay's depository, order
+ * and request ids, and LI.FI's embedded Relay quote (`estimate.toolData`) are the live ones; the
+ * sender is the public test address, and the PSBT is rebuilt around it in LI.FI's layout: Relay's
+ * P2WPKH deposit of 119 700 sats, the 76-byte memo (`0x<order id>=|lifi` and LI.FI's transaction id),
+ * change and LI.FI's 300-sat fee.
+ */
+export const mockLifiBtcRelayQuote: LiFiStep = {
+	id: '0f4d2b8e-61c3-4a7a-9b5e-8a1d7c2f3e90:0',
+	type: 'lifi',
+	tool: 'relaydepository',
+	toolDetails: { key: 'relaydepository', name: 'Relay', logoURI: '' },
+	action: {
+		fromChainId: 20000000000001,
+		toChainId: 1,
+		fromAmount: '120000',
+		fromAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+		toAddress: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+		slippage: 0.015,
+		fromToken: btcToken,
+		toToken: ethToken
+	},
+	estimate: mockLifiBtcRelayEstimate,
+	includedSteps: [
+		{
+			id: '9c1f0a3e-4b2d-4e8f-a7c6-1d5e2b3f4a01',
+			type: 'protocol',
+			tool: 'feeCollection',
+			toolDetails: { key: 'feeCollection', name: 'Integrator Fee', logoURI: '' },
+			action: {
+				fromChainId: 20000000000001,
+				toChainId: 20000000000001,
+				fromAmount: '120000',
+				fromAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+				toAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+				slippage: 0.015,
+				fromToken: btcToken,
+				toToken: btcToken
+			},
+			estimate: {
+				tool: 'feeCollection',
+				fromAmount: '120000',
+				toAmount: '119700',
+				toAmountMin: '119700',
+				approvalAddress: '0x0000000000000000000000000000000000000000',
+				executionDuration: 0,
+				feeCosts: [],
+				gasCosts: []
+			}
+		},
+		{
+			id: '2e7b9d14-c6a8-4f3b-8e21-5a9c0d7f6b12',
+			type: 'cross',
+			tool: 'relaydepository',
+			toolDetails: { key: 'relaydepository', name: 'Relay', logoURI: '' },
+			action: {
+				fromChainId: 20000000000001,
+				toChainId: 1,
+				fromAmount: '119700',
+				fromAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+				toAddress: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+				slippage: 0.015,
+				fromToken: btcToken,
+				toToken: ethToken
+			},
+			estimate: {
+				tool: 'relaydepository',
+				fromAmount: '119700',
+				toAmount: '42424750128483628',
+				toAmountMin: '41788378876556374',
+				approvalAddress: mockRelayDepositoryAddress,
+				executionDuration: 1260,
+				feeCosts: [],
+				gasCosts: []
+			}
+		}
+	],
+	transactionRequest: {
+		data: '70736274ff0100e8020000000179b33d16662ca0511564cf9a63dbd3e6207b4bb93ec950fa6702a2e3a83ab27d0000000000fdffffff0494d301000000000016001416d73780aae93325aae14a59fb2f01d909e6320d00000000000000004f6a4c4c3078626631313537386131346133626232313866666234623963366334666632346466396337343830643136656636626632333263633836386666326637303438313d7c6c6966695d2c41e73837010000000000160014311564348890e005880a9bc834aaa5884f1b59322c010000000000001600149ab105ce5f65cc9d3e51e4b2403eef1831eb5bfd000000000001011f400d030000000000160014311564348890e005880a9bc834aaa5884f1b59320000000000',
+		to: mockRelayDepositoryAddress,
+		value: '120000'
+	},
+	transactionId: '0x5d2c41e7'
+};

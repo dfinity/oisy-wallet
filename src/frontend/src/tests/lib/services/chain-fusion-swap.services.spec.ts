@@ -7,14 +7,20 @@ import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import {
+	IC_CKSOL_LEDGER_CANISTER_ID,
+	IC_CKSOL_MINTER_CANISTER_ID
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { send as sendEth } from '$eth/services/send.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { estimateFee } from '$icp/api/ckbtc-minter.api';
 import { eip1559TransactionPrice } from '$icp/api/cketh-minter.api';
+import { minterInfo as ckSolMinterInfo } from '$icp/api/cksol-minter.api';
 import { sendIc } from '$icp/services/ic-send.services';
 import { btcAddressStore } from '$icp/stores/btc.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
@@ -55,7 +61,9 @@ import {
 	mockValidIcToken
 } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { nonNullish, toNullable } from '@dfinity/utils';
+import { AnonymousIdentity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
 let mockEnabled = true;
@@ -72,6 +80,10 @@ vi.mock('$icp/api/cketh-minter.api', () => ({
 
 vi.mock('$icp/api/ckbtc-minter.api', () => ({
 	estimateFee: vi.fn()
+}));
+
+vi.mock('$icp/api/cksol-minter.api', () => ({
+	minterInfo: vi.fn()
 }));
 
 // The quote's UTXO selection is a pure function of three stores; stubbing it keeps these
@@ -709,6 +721,53 @@ describe('chain-fusion-swap.services', () => {
 			expect(refsOfLastCreate()).not.toHaveProperty('chain_fusion_cketh_index');
 		});
 
+		it('should key a ckSOL withdrawal on its withdraw_sol burn index', async () => {
+			mockSendIc({ type: 'ckSolToSol', blockIndex: 9n });
+
+			const ckSolSource = makeCkToken({
+				ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID,
+				twinToken: SOLANA_TOKEN,
+				symbol: 'ckSOL-source'
+			});
+
+			await fetchChainFusionIcpSwap({
+				...swapParams,
+				sourceToken: { ...ckSolSource, minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID },
+				destinationToken: SOLANA_TOKEN,
+				destinationAddress: mockSolAddress
+			});
+
+			expect(sendIc).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					to: mockSolAddress,
+					targetNetworkId: SOLANA_TOKEN.network.id
+				})
+			);
+
+			expect(createActiveUserTransaction).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					data: {
+						ChainFusion: {
+							direction: { CkSolToSol: null },
+							source_token: { Icrc: Principal.fromText(IC_CKSOL_LEDGER_CANISTER_ID) },
+							dest_token: { SolNativeMainnet: null },
+							amount: 10n ** BigInt(ckSolSource.decimals)
+						}
+					}
+				})
+			);
+
+			expect(refsOfLastCreate()).toStrictEqual(
+				expect.objectContaining({
+					chain_fusion_withdraw_sol_index: '9',
+					chain_fusion_minter_id: IC_CKSOL_MINTER_CANISTER_ID
+				})
+			);
+
+			expect(refsOfLastCreate()).not.toHaveProperty('chain_fusion_cketh_index');
+			expect(refsOfLastCreate()).not.toHaveProperty('chain_fusion_retrieve_btc_index');
+		});
+
 		it('should not surface a failed active-user-transaction creation as a swap failure', async () => {
 			const result = { type: 'ckEthToEth', blockIndex: 7n } as const;
 
@@ -1185,6 +1244,135 @@ describe('chain-fusion-swap.services', () => {
 			mockEnabled = false;
 
 			await expect(icpQuote()).resolves.toBeUndefined();
+		});
+	});
+
+	describe('fetchChainFusionIcpQuote for ckSOL', () => {
+		const WITHDRAWAL_FEE = 1_000_000n;
+		const MINIMUM_WITHDRAWAL_AMOUNT = 2_000_000n;
+
+		const ckSolSource: IcCkToken = {
+			...makeCkToken({
+				ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID,
+				twinToken: SOLANA_TOKEN,
+				symbol: 'ckSOL-source'
+			}),
+			minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID
+		};
+
+		const icpQuote = (
+			params: SwapQuoteObserver & Partial<{ sourceToken: Token; destinationToken: Token }> = {}
+		) =>
+			fetchChainFusionIcpQuote({
+				sourceToken: ckSolSource,
+				destinationToken: SOLANA_TOKEN,
+				amount: AMOUNT,
+				userEthAddress: undefined,
+				slippage: 0,
+				...params
+			} as IcpBridgeQuoteParams);
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			mockEnabled = true;
+
+			vi.mocked(ckSolMinterInfo).mockResolvedValue({
+				deposit_sol_fee: 45_000_000_000n,
+				balance: 995_500n,
+				withdrawal_fee: WITHDRAWAL_FEE,
+				minimum_deposit_amount: 20_000_000n,
+				deposit_sol_required_cycles: 1_000_000_000_000n,
+				nonce_accounts: [],
+				minimum_withdrawal_amount: MINIMUM_WITHDRAWAL_AMOUNT,
+				minter_address: []
+			});
+		});
+
+		// The ledger fee for the approval is charged beside the amount; the minter's
+		// withdrawal fee comes out of what reaches the Solana address.
+		it('should deduct the minter withdrawal fee and charge the ledger fee on top', async () => {
+			await expect(icpQuote()).resolves.toStrictEqual({
+				provider: SwapProvider.CHAIN_FUSION,
+				receiveAmount: AMOUNT - WITHDRAWAL_FEE,
+				swapDetails: {
+					sourceFees: [
+						{ labelPath: 'fee.text.fee', fee: CK_LEDGER_FEE, token: ckSolSource },
+						{
+							labelPath: 'fee.text.convert_inter_network_fee',
+							fee: WITHDRAWAL_FEE,
+							token: SOLANA_TOKEN,
+							deductedFromAmount: true
+						}
+					],
+					externalFees: [],
+					minimumAmount: MINIMUM_WITHDRAWAL_AMOUNT
+				}
+			});
+		});
+
+		it('should read the minter info anonymously and uncertified', async () => {
+			await icpQuote();
+
+			expect(ckSolMinterInfo).toHaveBeenCalledExactlyOnceWith({
+				identity: expect.any(AnonymousIdentity),
+				minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID,
+				certified: false
+			});
+		});
+
+		it('should report Chain Fusion as participating', async () => {
+			const onProviderParticipating = vi.fn();
+
+			await icpQuote({ onProviderParticipating });
+
+			expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.CHAIN_FUSION);
+		});
+
+		it('should not quote without a minter', async () => {
+			const onProviderParticipating = vi.fn();
+			const sourceToken: IcCkToken = { ...ckSolSource, minterCanisterId: undefined };
+
+			await expect(
+				icpQuote({
+					sourceToken,
+					onProviderParticipating
+				})
+			).resolves.toBeUndefined();
+
+			expect(ckSolMinterInfo).not.toHaveBeenCalled();
+			expect(onProviderParticipating).not.toHaveBeenCalled();
+		});
+
+		it('should not quote a Solana devnet destination', async () => {
+			await expect(
+				icpQuote({
+					sourceToken: { ...ckSolSource, twinToken: SOLANA_DEVNET_TOKEN } as Token,
+					destinationToken: SOLANA_DEVNET_TOKEN
+				})
+			).resolves.toBeUndefined();
+
+			expect(ckSolMinterInfo).not.toHaveBeenCalled();
+		});
+
+		it('should not quote another destination', async () => {
+			await expect(icpQuote({ destinationToken: ETHEREUM_TOKEN })).resolves.toBeUndefined();
+
+			expect(ckSolMinterInfo).not.toHaveBeenCalled();
+		});
+
+		it('should not quote when the minter info read fails', async () => {
+			vi.mocked(ckSolMinterInfo).mockRejectedValue(new Error('minter unreachable'));
+
+			await expect(icpQuote()).resolves.toBeUndefined();
+		});
+
+		it('should not quote when the flag is off', async () => {
+			mockEnabled = false;
+
+			await expect(icpQuote()).resolves.toBeUndefined();
+
+			expect(ckSolMinterInfo).not.toHaveBeenCalled();
 		});
 	});
 

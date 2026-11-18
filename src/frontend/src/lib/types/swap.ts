@@ -214,6 +214,10 @@ export type SwapMappedResult =
 			// lamports. What the form and the review budget beyond the amount, and execution holds the
 			// re-quote's own ceiling to. An EVM source's is priced in the form from the quote's gas.
 			solFeeCeiling?: bigint;
+			// A BTC-source quote's own UTXO selection, priced for its outputs over the spendable UTXOs:
+			// `outputVSizes` are those of LI.FI's deposit, memo and fee, without the change. What the
+			// form budgets, the review shows and execution pays.
+			btcSelection?: { utxosFee: UtxosFee; outputVSizes: number[] };
 			type?: string;
 	  };
 
@@ -557,6 +561,23 @@ export interface SwapLifiSolParams {
 	// The LI.FI ceiling the user reviewed, in lamports: the transaction's network fee plus the rent of
 	// the accounts it creates. Execution never signs one whose ceiling is above it.
 	reviewedCeiling: bigint;
+}
+
+export interface SwapLifiBtcParams {
+	identity: Identity;
+	progress: (step: ProgressStep) => void;
+	sourceToken: Token;
+	destinationToken: Token;
+	swapAmount: Amount;
+	// The user's Bitcoin address: LI.FI's `fromAddress`, the source of the inputs and where the change
+	// goes.
+	userAddress: BtcAddress;
+	network: BitcoinNetwork;
+	offer: Extract<SwapMappedResult, { provider: SwapProvider.LIFI }>;
+	// The selection and the fee the user reviewed, priced for LI.FI's layout. Execution pays that fee,
+	// plus any change below 1,000 sats, which goes to the miner, and refuses a re-quoted layout it no
+	// longer prices.
+	utxosFee: UtxosFee;
 }
 
 interface SwapNearIntentsParams {
