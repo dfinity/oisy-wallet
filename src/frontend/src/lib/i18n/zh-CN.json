@@ -1029,6 +1029,7 @@
 		"text": {
 			"send": "发送",
 			"xrp_sent": "您的 XRP 付款已完成。",
+			"xrp_token_sent": "",
 			"xrp_submitted": "付款已提交。通常几秒内即可结算——您可以关闭此窗口继续操作。",
 			"send_token": "",
 			"send_unknown_token": "",
@@ -1051,6 +1052,7 @@
 			"source_network": "来源网络",
 			"destination_network": "目标网络",
 			"xrp_destination_tag": "XRP 目标标签",
+			"xrp_transfer_fee": "",
 			"initializing_transaction": "正在初始化交易",
 			"convert_to_native_icp": "转换为原生 ICP",
 			"open_qr_modal": "开始扫描二维码以获取交易详情",
@@ -1107,6 +1109,9 @@
 			"xrp_destination_tag_invalid": "XRP 目标标签必须是 0 到 4294967295 之间的整数。",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "资金不足：金额必须留出足够部分以支付手续费和所需的 XRP 账户储备金。",
+			"xrp_token_amount_too_precise": "",
+			"xrp_insufficient_funds_for_transfer_fee": "",
+			"xrp_insufficient_xrp_for_fee": "",
 			"insufficient_funds_for_gas": "燃料费不足",
 			"insufficient_funds_for_amount": "金额不足",
 			"insufficient_ethereum_funds_to_cover_the_fees": "以太坊余额不足以支付手续费",
@@ -1171,7 +1176,20 @@
 			"xrp_destination_unfunded": "此地址还没有 XRP 账户。创建账户需要至少 $reserve XRP 的首笔付款。尚未发送任何款项——请提高金额，或发送到已激活的地址。",
 			"xrp_destination_tag_required": "此地址需要 XRP 目标标签。尚未发送任何款项——请填入收款服务提供给您的标签，然后重新发送。",
 			"xrp_destination_is_source": "这是您自己的 XRP 地址。尚未发送任何款项——请选择其他收款方。",
-			"xrp_account_state_unavailable": "钱包无法读取您的账户信息，因此无法核对金额。尚未发送任何款项——请稍后重试。"
+			"xrp_account_state_unavailable": "钱包无法读取您的账户信息，因此无法核对金额。尚未发送任何款项——请稍后重试。",
+			"xrp_ledger_state_unavailable": "",
+			"xrp_token_insufficient_balance": "",
+			"xrp_insufficient_xrp_for_fee": "",
+			"xrp_destination_not_found": "",
+			"xrp_deposit_not_authorized": "",
+			"xrp_no_trust_line": "",
+			"xrp_trust_line_limit": "",
+			"xrp_destination_frozen": "",
+			"xrp_destination_not_authorized": "",
+			"xrp_token_frozen": "",
+			"xrp_token_deep_frozen": "",
+			"xrp_no_rippling": "",
+			"xrp_transfer_fee_changed": ""
 		}
 	},
 	"mint": {

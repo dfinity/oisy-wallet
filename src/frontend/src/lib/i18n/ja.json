@@ -1029,6 +1029,7 @@
 		"text": {
 			"send": "送信",
 			"xrp_sent": "XRP の送金が成立しました。",
+			"xrp_token_sent": "",
 			"xrp_submitted": "送金を送信しました。通常は数秒で確定します。これを閉じて続けていただけます。",
 			"send_token": "",
 			"send_unknown_token": "",
@@ -1051,6 +1052,7 @@
 			"source_network": "送信元ネットワーク",
 			"destination_network": "宛先ネットワーク",
 			"xrp_destination_tag": "XRP 宛先タグ",
+			"xrp_transfer_fee": "",
 			"initializing_transaction": "トランザクション初期化中",
 			"convert_to_native_icp": "ネイティブICPに変換",
 			"open_qr_modal": "トランザクション詳細のQRコードをスキャン開始",
@@ -1107,6 +1109,9 @@
 			"xrp_destination_tag_invalid": "XRP 宛先タグは 0 から 4294967295 までの整数である必要があります。",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "残高が不足しています。手数料とXRPアカウントに必要な準備金を賄える分を残す金額にしてください。",
+			"xrp_token_amount_too_precise": "",
+			"xrp_insufficient_funds_for_transfer_fee": "",
+			"xrp_insufficient_xrp_for_fee": "",
 			"insufficient_funds_for_gas": "ガス代に必要な残高が不足しています。",
 			"insufficient_funds_for_amount": "送金額に対して残高が不足しています。",
 			"insufficient_ethereum_funds_to_cover_the_fees": "手数料をカバーするEthereumの資金が不足しています。",
@@ -1171,7 +1176,20 @@
 			"xrp_destination_unfunded": "このアドレスにはまだ XRP アカウントがありません。作成には少なくとも $reserve XRP の最初の送金が必要です。何も送信されていません。金額を増やすか、すでに有効化されたアドレスへ送信してください。",
 			"xrp_destination_tag_required": "このアドレスには XRP 宛先タグが必要です。何も送信されていません。支払先のサービスから受け取ったタグを入力して、もう一度送信してください。",
 			"xrp_destination_is_source": "これはご自身の XRP アドレスです。何も送信されていません。別の送金先を選んでください。",
-			"xrp_account_state_unavailable": "ウォレットがアカウント情報を読み取れなかったため、金額を確認できませんでした。何も送信されていません。しばらくしてからもう一度お試しください。"
+			"xrp_account_state_unavailable": "ウォレットがアカウント情報を読み取れなかったため、金額を確認できませんでした。何も送信されていません。しばらくしてからもう一度お試しください。",
+			"xrp_ledger_state_unavailable": "",
+			"xrp_token_insufficient_balance": "",
+			"xrp_insufficient_xrp_for_fee": "",
+			"xrp_destination_not_found": "",
+			"xrp_deposit_not_authorized": "",
+			"xrp_no_trust_line": "",
+			"xrp_trust_line_limit": "",
+			"xrp_destination_frozen": "",
+			"xrp_destination_not_authorized": "",
+			"xrp_token_frozen": "",
+			"xrp_token_deep_frozen": "",
+			"xrp_no_rippling": "",
+			"xrp_transfer_fee_changed": ""
 		}
 	},
 	"mint": {

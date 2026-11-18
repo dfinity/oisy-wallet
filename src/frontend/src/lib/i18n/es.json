@@ -1029,6 +1029,7 @@
 		"text": {
 			"send": "Enviar",
 			"xrp_sent": "Tu pago de XRP se completó.",
+			"xrp_token_sent": "",
 			"xrp_submitted": "Pago enviado. Normalmente se liquida en segundos — puedes cerrar esto y continuar.",
 			"send_token": "",
 			"send_unknown_token": "",
@@ -1051,6 +1052,7 @@
 			"source_network": "Red de origen",
 			"destination_network": "Red de destino",
 			"xrp_destination_tag": "Etiqueta de destino de XRP",
+			"xrp_transfer_fee": "",
 			"initializing_transaction": "Inicializando transacción",
 			"convert_to_native_icp": "Convertir a ICP nativo",
 			"open_qr_modal": "Iniciar escaneo de código QR para detalles de la transacción",
@@ -1107,6 +1109,9 @@
 			"xrp_destination_tag_invalid": "La etiqueta de destino de XRP debe ser un número entero entre 0 y 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Fondos insuficientes: el importe debe dejar lo suficiente para cubrir la comisión y la reserva de cuenta XRP requerida.",
+			"xrp_token_amount_too_precise": "",
+			"xrp_insufficient_funds_for_transfer_fee": "",
+			"xrp_insufficient_xrp_for_fee": "",
 			"insufficient_funds_for_gas": "Fondos insuficientes para el gas",
 			"insufficient_funds_for_amount": "Fondos insuficientes para la cantidad",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Fondos de Ethereum insuficientes para cubrir las comisiones",
@@ -1171,7 +1176,20 @@
 			"xrp_destination_unfunded": "Esta dirección aún no tiene una cuenta de XRP. Crearla requiere un primer pago de al menos $reserve XRP. No se envió nada: aumenta el importe o envía a una dirección que ya esté financiada.",
 			"xrp_destination_tag_required": "Esta dirección requiere una etiqueta de destino de XRP. No se envió nada: añade la etiqueta que te dio el servicio al que pagas y vuelve a enviar.",
 			"xrp_destination_is_source": "Esta es tu propia dirección XRP. No se envió nada: elige otro destinatario.",
-			"xrp_account_state_unavailable": "La billetera no pudo leer los datos de tu cuenta, por lo que no se pudo comprobar el importe. No se envió nada: vuelve a intentarlo en un momento."
+			"xrp_account_state_unavailable": "La billetera no pudo leer los datos de tu cuenta, por lo que no se pudo comprobar el importe. No se envió nada: vuelve a intentarlo en un momento.",
+			"xrp_ledger_state_unavailable": "",
+			"xrp_token_insufficient_balance": "",
+			"xrp_insufficient_xrp_for_fee": "",
+			"xrp_destination_not_found": "",
+			"xrp_deposit_not_authorized": "",
+			"xrp_no_trust_line": "",
+			"xrp_trust_line_limit": "",
+			"xrp_destination_frozen": "",
+			"xrp_destination_not_authorized": "",
+			"xrp_token_frozen": "",
+			"xrp_token_deep_frozen": "",
+			"xrp_no_rippling": "",
+			"xrp_transfer_fee_changed": ""
 		}
 	},
 	"mint": {

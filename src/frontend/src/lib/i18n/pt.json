@@ -1029,6 +1029,7 @@
 		"text": {
 			"send": "Enviar",
 			"xrp_sent": "Seu pagamento XRP foi concluído.",
+			"xrp_token_sent": "",
 			"xrp_submitted": "Pagamento enviado. Normalmente é liquidado em segundos — você pode fechar isto e continuar.",
 			"send_token": "",
 			"send_unknown_token": "",
@@ -1051,6 +1052,7 @@
 			"source_network": "Rede de origem",
 			"destination_network": "Rede de destino",
 			"xrp_destination_tag": "Tag de destino XRP",
+			"xrp_transfer_fee": "",
 			"initializing_transaction": "Inicializando transação",
 			"convert_to_native_icp": "Converter para ICP nativo",
 			"open_qr_modal": "Iniciar scan de código QR para detalhes da transação",
@@ -1107,6 +1109,9 @@
 			"xrp_destination_tag_invalid": "A tag de destino XRP deve ser um número inteiro entre 0 e 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Fundos insuficientes: o valor deve deixar o suficiente para cobrir a taxa e a reserva de conta XRP exigida.",
+			"xrp_token_amount_too_precise": "",
+			"xrp_insufficient_funds_for_transfer_fee": "",
+			"xrp_insufficient_xrp_for_fee": "",
 			"insufficient_funds_for_gas": "Fundos insuficientes para gás",
 			"insufficient_funds_for_amount": "Fundos insuficientes para o valor",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Fundos Ethereum insuficientes para cobrir as taxas",
@@ -1171,7 +1176,20 @@
 			"xrp_destination_unfunded": "Este endereço ainda não tem uma conta XRP. Criá-la exige um primeiro pagamento de pelo menos $reserve XRP. Nada foi enviado — aumente o valor ou envie para um endereço que já esteja ativado.",
 			"xrp_destination_tag_required": "Este endereço exige uma tag de destino XRP. Nada foi enviado — adicione a tag fornecida pelo serviço que você está pagando e envie novamente.",
 			"xrp_destination_is_source": "Este é o seu próprio endereço XRP. Nada foi enviado — escolha outro destinatário.",
-			"xrp_account_state_unavailable": "A carteira não conseguiu ler os dados da sua conta, portanto o valor não pôde ser verificado. Nada foi enviado — tente novamente em instantes."
+			"xrp_account_state_unavailable": "A carteira não conseguiu ler os dados da sua conta, portanto o valor não pôde ser verificado. Nada foi enviado — tente novamente em instantes.",
+			"xrp_ledger_state_unavailable": "",
+			"xrp_token_insufficient_balance": "",
+			"xrp_insufficient_xrp_for_fee": "",
+			"xrp_destination_not_found": "",
+			"xrp_deposit_not_authorized": "",
+			"xrp_no_trust_line": "",
+			"xrp_trust_line_limit": "",
+			"xrp_destination_frozen": "",
+			"xrp_destination_not_authorized": "",
+			"xrp_token_frozen": "",
+			"xrp_token_deep_frozen": "",
+			"xrp_no_rippling": "",
+			"xrp_transfer_fee_changed": ""
 		}
 	},
 	"mint": {
