@@ -22,6 +22,7 @@ use crate::types::{
     agreement::{AgreementHistoryEntry, GetAgreementHistoryError, UpdateAgreementsError},
     bitcoin::{BtcGetFeePercentilesError, BtcGetFeePercentilesResponse},
     contact::{Contact, ContactError, ContactImageEntry, ContactsPage},
+    exchange::{SetExchangeRateOutcallNodesError, SetExchangeRatePriceToleranceError},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     onramper::{SignOnramperWidgetUrlError, SignOnramperWidgetUrlResponse},
@@ -831,6 +832,34 @@ impl From<Result<Vec<MyTip>, TipError>> for GetMyTipsResult {
         match result {
             Ok(tips) => GetMyTipsResult::Ok(tips),
             Err(err) => GetMyTipsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SetExchangeRateOutcallNodesResult {
+    Ok,
+    Err(SetExchangeRateOutcallNodesError),
+}
+impl From<Result<(), SetExchangeRateOutcallNodesError>> for SetExchangeRateOutcallNodesResult {
+    fn from(result: Result<(), SetExchangeRateOutcallNodesError>) -> Self {
+        match result {
+            Ok(()) => SetExchangeRateOutcallNodesResult::Ok,
+            Err(err) => SetExchangeRateOutcallNodesResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SetExchangeRatePriceToleranceResult {
+    Ok,
+    Err(SetExchangeRatePriceToleranceError),
+}
+impl From<Result<(), SetExchangeRatePriceToleranceError>> for SetExchangeRatePriceToleranceResult {
+    fn from(result: Result<(), SetExchangeRatePriceToleranceError>) -> Self {
+        match result {
+            Ok(()) => SetExchangeRatePriceToleranceResult::Ok,
+            Err(err) => SetExchangeRatePriceToleranceResult::Err(err),
         }
     }
 }

@@ -11,7 +11,10 @@ use self::{
     client::CoinGeckoClient,
     platform::{coingecko_native_coin, coingecko_platform},
 };
-use crate::{exchange::provider::ExchangePriceProvider, types::storable::StoredTokenId};
+use crate::{
+    exchange::{outcall::OutcallMode, provider::ExchangePriceProvider},
+    types::storable::StoredTokenId,
+};
 
 const CHUNK_SIZE: usize = 50;
 
@@ -20,9 +23,9 @@ pub struct CoinGeckoProvider {
 }
 
 impl CoinGeckoProvider {
-    pub fn new(api_key: String, replicated: bool) -> Self {
+    pub fn new(api_key: String, mode: OutcallMode) -> Self {
         Self {
-            client: CoinGeckoClient::new(api_key, replicated),
+            client: CoinGeckoClient::new(api_key, mode),
         }
     }
 

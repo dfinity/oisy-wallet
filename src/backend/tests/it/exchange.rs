@@ -2,13 +2,17 @@ use std::time::Duration;
 
 use candid::Principal;
 use pocket_ic::common::rest::{
-    CanisterHttpPricingVersion, CanisterHttpReply, CanisterHttpResponse, MockCanisterHttpResponse,
+    CanisterHttpPricingVersion, CanisterHttpReplication, CanisterHttpReply, CanisterHttpRequest,
+    CanisterHttpResponse, MockCanisterHttpResponse, MockFlexibleCanisterHttpResponse,
 };
 use pretty_assertions::assert_eq;
 use shared::types::{
     api_keys::ApiKeys,
     custom_token::{CustomToken, ErcToken, ErcTokenId, Token},
-    exchange::ExchangeRate,
+    exchange::{
+        ExchangeRate, SetExchangeRateOutcallNodesError, SetExchangeRatePriceToleranceError,
+    },
+    result_types::{SetExchangeRateOutcallNodesResult, SetExchangeRatePriceToleranceResult},
     token_id::TokenId,
 };
 
@@ -686,4 +690,439 @@ fn a_caller_started_refresh_skips_queued_tokens_another_refresh_has_priced() {
         !urls.iter().any(|url| url.contains(QUEUED_ADDRESS)),
         "The queued token already has a fresh price"
     );
+}
+
+/// Ticks until the canister asks `CoinGecko` for the native prices, and returns that outcall.
+fn pending_simple_price_request(pic_setup: &PicBackend) -> CanisterHttpRequest {
+    for _ in 0..10 {
+        pic_setup.pic.tick();
+        if let Some(request) = pic_setup
+            .pic
+            .get_canister_http()
+            .into_iter()
+            .find(|request| request.url.contains("/simple/price"))
+        {
+            return request;
+        }
+    }
+    panic!("a refresh of the native tokens should request CoinGecko simple/price");
+}
+
+/// A `simple/price` answer with Bitcoin at `btc` USD and a market cap of `market_cap`, and
+/// Ethereum at 3,000 USD.
+fn simple_price_body(pic_setup: &PicBackend, btc: f64, market_cap: f64) -> String {
+    let now_secs = pic_setup.pic.get_time().as_nanos_since_unix_epoch() / 1_000_000_000;
+    format!(
+        r#"{{"bitcoin":{{"usd":{btc},"usd_market_cap":{market_cap},"last_updated_at":{now_secs}}},"ethereum":{{"usd":3000.0,"last_updated_at":{now_secs}}}}}"#
+    )
+}
+
+/// Answers the flexible outcall `request` with one reply per body, one body per node, then lets
+/// the canister process the result.
+fn answer_from_nodes(pic_setup: &PicBackend, request: &CanisterHttpRequest, bodies: &[String]) {
+    pic_setup
+        .pic
+        .mock_flexible_canister_http_response(MockFlexibleCanisterHttpResponse {
+            subnet_id: request.subnet_id,
+            request_id: request.request_id,
+            responses: bodies
+                .iter()
+                .map(|body| {
+                    CanisterHttpResponse::CanisterHttpReply(CanisterHttpReply {
+                        status: 200,
+                        headers: vec![],
+                        body: body.as_bytes().to_vec(),
+                    })
+                })
+                .collect(),
+        });
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+}
+
+fn flexible(nodes: u32) -> CanisterHttpReplication {
+    CanisterHttpReplication::Flexible {
+        total_requests: nodes,
+        min_responses: nodes,
+        max_responses: nodes,
+    }
+}
+
+fn set_outcall_nodes(pic_setup: &PicBackend, nodes: Option<u32>) {
+    assert_eq!(
+        pic_setup.update::<SetExchangeRateOutcallNodesResult>(
+            controller(),
+            "set_exchange_rate_outcall_nodes",
+            nodes
+        ),
+        Ok(SetExchangeRateOutcallNodesResult::Ok)
+    );
+}
+
+/// The backend subnet's node count, read from the highest node count the setter accepts, which
+/// is twice the node count minus one.
+fn subnet_node_count(pic_setup: &PicBackend) -> u32 {
+    let result = pic_setup.update::<SetExchangeRateOutcallNodesResult>(
+        controller(),
+        "set_exchange_rate_outcall_nodes",
+        Some(u32::MAX),
+    );
+    let Ok(SetExchangeRateOutcallNodesResult::Err(SetExchangeRateOutcallNodesError::AboveMax {
+        max,
+    })) = result
+    else {
+        panic!("u32::MAX nodes should be above the highest node count, got {result:?}");
+    };
+    max.div_ceil(2)
+}
+
+fn btc_rate(pic_setup: &PicBackend) -> Option<ExchangeRate> {
+    pic_setup
+        .query::<Option<ExchangeRate>>(controller(), "get_exchange_rate", TokenId::BtcNativeMainnet)
+        .expect("get_exchange_rate should answer for BTC")
+}
+
+/// Starts a refresh of the native tokens on an empty cache, unless one is already in flight.
+///
+/// The refresh the backend schedules at install can run as soon as refresh is enabled, so tests
+/// configure the outcall settings before calling [`enable_exchange_rate_refresh`].
+fn start_native_refresh(pic_setup: &PicBackend, caller: Principal) {
+    pic_setup
+        .update::<Vec<(TokenId, Option<ExchangeRate>)>>(caller, "get_exchange_rates", ())
+        .expect("get_exchange_rates should answer");
+}
+
+#[test]
+fn exchange_rate_outcalls_ask_one_node_while_the_node_count_is_unset() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(USER_1).expect("valid user principal");
+    enable_exchange_rate_refresh(&pic_setup);
+
+    start_native_refresh(&pic_setup, caller);
+
+    assert_eq!(
+        pending_simple_price_request(&pic_setup).replication,
+        CanisterHttpReplication::NonReplicated
+    );
+}
+
+#[test]
+fn replicated_exchange_rate_outcalls_ignore_the_node_count() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(USER_1).expect("valid user principal");
+    set_outcall_nodes(&pic_setup, Some(3));
+    assert_eq!(
+        pic_setup.update::<()>(controller(), "set_exchange_rate_replicated", true),
+        Ok(())
+    );
+    enable_exchange_rate_refresh(&pic_setup);
+
+    start_native_refresh(&pic_setup, caller);
+
+    assert_eq!(
+        pending_simple_price_request(&pic_setup).replication,
+        CanisterHttpReplication::FullyReplicated
+    );
+}
+
+#[test]
+fn two_of_three_agreeing_answers_set_the_price() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(USER_1).expect("valid user principal");
+    set_outcall_nodes(&pic_setup, Some(3));
+    enable_exchange_rate_refresh(&pic_setup);
+
+    start_native_refresh(&pic_setup, caller);
+    let request = pending_simple_price_request(&pic_setup);
+    assert_eq!(request.replication, flexible(3));
+    answer_from_nodes(
+        &pic_setup,
+        &request,
+        &[
+            simple_price_body(&pic_setup, 65_010.0, 2.0),
+            simple_price_body(&pic_setup, 70_000.0, 3.0),
+            simple_price_body(&pic_setup, 65_000.0, 1.0),
+        ],
+    );
+
+    let btc = btc_rate(&pic_setup).expect("two agreeing answers should set the BTC price");
+    assert_eq!(
+        btc.usd.price,
+        Some(65_000.0),
+        "the lower middle of the group"
+    );
+    assert_eq!(btc.usd.market_cap, Some(1.0), "from the same answer");
+}
+
+#[test]
+fn three_answers_too_far_apart_keep_the_previous_price() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(USER_1).expect("valid user principal");
+    set_outcall_nodes(&pic_setup, Some(3));
+    enable_exchange_rate_refresh(&pic_setup);
+
+    start_native_refresh(&pic_setup, caller);
+    let request = pending_simple_price_request(&pic_setup);
+    let agreeing = simple_price_body(&pic_setup, 65_000.0, 1.0);
+    answer_from_nodes(
+        &pic_setup,
+        &request,
+        &[agreeing.clone(), agreeing.clone(), agreeing],
+    );
+    let previous = btc_rate(&pic_setup).expect("three agreeing answers should set the BTC price");
+
+    // The recurring refresh a minute later finds the price stale and asks again.
+    pic_setup.pic.advance_time(Duration::from_secs(61));
+    let request = pending_simple_price_request(&pic_setup);
+    answer_from_nodes(
+        &pic_setup,
+        &request,
+        &[
+            simple_price_body(&pic_setup, 60_000.0, 1.0),
+            simple_price_body(&pic_setup, 65_000.0, 1.0),
+            simple_price_body(&pic_setup, 70_000.0, 1.0),
+        ],
+    );
+
+    assert_eq!(btc_rate(&pic_setup), Some(previous));
+}
+
+#[test]
+fn a_node_that_does_not_answer_fails_the_outcall() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(USER_1).expect("valid user principal");
+    set_outcall_nodes(&pic_setup, Some(3));
+    enable_exchange_rate_refresh(&pic_setup);
+
+    start_native_refresh(&pic_setup, caller);
+    let request = pending_simple_price_request(&pic_setup);
+    let agreeing = simple_price_body(&pic_setup, 65_000.0, 1.0);
+    answer_from_nodes(&pic_setup, &request, &[agreeing.clone(), agreeing]);
+    assert_eq!(
+        btc_rate(&pic_setup),
+        None,
+        "the outcall waits for the third node"
+    );
+
+    // Past the outcall's 60 second timeout.
+    pic_setup.pic.advance_time(Duration::from_secs(61));
+    for _ in 0..5 {
+        pic_setup.pic.tick();
+    }
+
+    assert_eq!(btc_rate(&pic_setup), None);
+}
+
+#[test]
+fn a_node_count_above_the_subnet_asks_every_node_and_needs_a_majority_of_the_count() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(USER_1).expect("valid user principal");
+    let subnet_nodes = subnet_node_count(&pic_setup);
+    // The highest node count: its majority is every node of the subnet.
+    set_outcall_nodes(&pic_setup, Some(2 * subnet_nodes - 1));
+    enable_exchange_rate_refresh(&pic_setup);
+
+    start_native_refresh(&pic_setup, caller);
+    let request = pending_simple_price_request(&pic_setup);
+    assert_eq!(request.replication, flexible(subnet_nodes));
+    let mut bodies =
+        vec![simple_price_body(&pic_setup, 65_000.0, 1.0); usize::try_from(subnet_nodes).unwrap()];
+    bodies[0] = simple_price_body(&pic_setup, 70_000.0, 1.0);
+    answer_from_nodes(&pic_setup, &request, &bodies);
+
+    assert_eq!(
+        btc_rate(&pic_setup),
+        None,
+        "a majority of the subnet's answers is not a majority of the node count"
+    );
+
+    pic_setup.pic.advance_time(Duration::from_secs(61));
+    let request = pending_simple_price_request(&pic_setup);
+    let bodies =
+        vec![simple_price_body(&pic_setup, 65_000.0, 1.0); usize::try_from(subnet_nodes).unwrap()];
+    answer_from_nodes(&pic_setup, &request, &bodies);
+
+    assert_eq!(
+        btc_rate(&pic_setup).and_then(|rate| rate.usd.price),
+        Some(65_000.0)
+    );
+}
+
+#[test]
+fn set_exchange_rate_outcall_nodes_sets_and_clears_without_touching_keys() {
+    let pic_setup = setup();
+    assert_eq!(
+        pic_setup.update::<()>(controller(), "set_api_keys", api_keys_with_coingecko()),
+        Ok(())
+    );
+
+    set_outcall_nodes(&pic_setup, Some(3));
+    let stored = pic_setup
+        .query::<ApiKeys>(controller(), "get_api_keys", ())
+        .expect("controller can read API keys");
+    assert_eq!(stored.exchange_rate_outcall_nodes, Some(3));
+    assert_eq!(stored.coingecko_api_key, Some("test-key".to_string()));
+
+    set_outcall_nodes(&pic_setup, None);
+    let stored = pic_setup
+        .query::<ApiKeys>(controller(), "get_api_keys", ())
+        .expect("controller can read API keys");
+    assert_eq!(stored.exchange_rate_outcall_nodes, None);
+}
+
+#[test]
+fn set_exchange_rate_outcall_nodes_rejects_counts_without_a_reachable_majority() {
+    let pic_setup = setup();
+    let subnet_nodes = subnet_node_count(&pic_setup);
+    let max = 2 * subnet_nodes - 1;
+
+    assert_eq!(
+        pic_setup.update::<SetExchangeRateOutcallNodesResult>(
+            controller(),
+            "set_exchange_rate_outcall_nodes",
+            Some(0u32)
+        ),
+        Ok(SetExchangeRateOutcallNodesResult::Err(
+            SetExchangeRateOutcallNodesError::Zero
+        ))
+    );
+    assert_eq!(
+        pic_setup.update::<SetExchangeRateOutcallNodesResult>(
+            controller(),
+            "set_exchange_rate_outcall_nodes",
+            Some(max + 1)
+        ),
+        Ok(SetExchangeRateOutcallNodesResult::Err(
+            SetExchangeRateOutcallNodesError::AboveMax { max }
+        ))
+    );
+    let stored = pic_setup
+        .query::<ApiKeys>(controller(), "get_api_keys", ())
+        .expect("controller can read API keys");
+    assert_eq!(stored.exchange_rate_outcall_nodes, None);
+
+    set_outcall_nodes(&pic_setup, Some(max));
+}
+
+#[test]
+fn set_exchange_rate_price_tolerance_bps_accepts_up_to_ten_percent() {
+    let pic_setup = setup();
+    let set = |tolerance_bps: Option<u32>| {
+        pic_setup.update::<SetExchangeRatePriceToleranceResult>(
+            controller(),
+            "set_exchange_rate_price_tolerance_bps",
+            tolerance_bps,
+        )
+    };
+    let stored = || {
+        pic_setup
+            .query::<ApiKeys>(controller(), "get_api_keys", ())
+            .expect("controller can read API keys")
+            .exchange_rate_price_tolerance_bps
+    };
+
+    assert_eq!(
+        set(Some(1_001)),
+        Ok(SetExchangeRatePriceToleranceResult::Err(
+            SetExchangeRatePriceToleranceError::AboveMax { max_bps: 1_000 }
+        ))
+    );
+    assert_eq!(stored(), None);
+
+    assert_eq!(
+        set(Some(1_000)),
+        Ok(SetExchangeRatePriceToleranceResult::Ok)
+    );
+    assert_eq!(stored(), Some(1_000));
+
+    assert_eq!(set(None), Ok(SetExchangeRatePriceToleranceResult::Ok));
+    assert_eq!(stored(), None);
+}
+
+#[test]
+fn outcall_node_settings_reject_non_controllers() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(USER_1).expect("valid non-controller principal");
+
+    for (method, value) in [
+        ("set_exchange_rate_outcall_nodes", Some(3u32)),
+        ("set_exchange_rate_price_tolerance_bps", Some(20u32)),
+    ] {
+        assert!(
+            pic_setup
+                .update::<SetExchangeRateOutcallNodesResult>(caller, method, value)
+                .is_err(),
+            "a non-controller must not call {method}"
+        );
+        assert!(
+            pic_setup
+                .update::<SetExchangeRateOutcallNodesResult>(Principal::anonymous(), method, value)
+                .is_err(),
+            "an anonymous caller must not call {method}"
+        );
+    }
+
+    let stored = pic_setup
+        .query::<ApiKeys>(controller(), "get_api_keys", ())
+        .expect("controller can read API keys");
+    assert_eq!(stored.exchange_rate_outcall_nodes, None);
+    assert_eq!(stored.exchange_rate_price_tolerance_bps, None);
+}
+
+#[test]
+fn set_api_keys_preserves_outcall_node_settings_when_omitted() {
+    let pic_setup = setup();
+    let keys = ApiKeys {
+        exchange_rate_outcall_nodes: Some(3),
+        exchange_rate_price_tolerance_bps: Some(20),
+        ..api_keys_with_coingecko()
+    };
+    assert_eq!(
+        pic_setup.update::<()>(controller(), "set_api_keys", keys),
+        Ok(())
+    );
+
+    let rotated_api_keys = ApiKeys {
+        coingecko_api_key: Some("rotated-test-key".to_string()),
+        ..ApiKeys::default()
+    };
+    assert_eq!(
+        pic_setup.update::<()>(controller(), "set_api_keys", rotated_api_keys),
+        Ok(())
+    );
+
+    let stored = pic_setup
+        .query::<ApiKeys>(controller(), "get_api_keys", ())
+        .expect("controller can read API keys");
+    assert_eq!(stored.exchange_rate_outcall_nodes, Some(3));
+    assert_eq!(stored.exchange_rate_price_tolerance_bps, Some(20));
+    assert_eq!(
+        stored.coingecko_api_key,
+        Some("rotated-test-key".to_string())
+    );
+}
+
+#[test]
+fn outcall_node_settings_survive_an_upgrade() {
+    let pic_setup = setup();
+    set_outcall_nodes(&pic_setup, Some(3));
+    assert_eq!(
+        pic_setup.update::<SetExchangeRatePriceToleranceResult>(
+            controller(),
+            "set_exchange_rate_price_tolerance_bps",
+            Some(20u32)
+        ),
+        Ok(SetExchangeRatePriceToleranceResult::Ok)
+    );
+
+    pic_setup
+        .upgrade_latest_wasm(None)
+        .expect("the backend should upgrade");
+
+    let stored = pic_setup
+        .query::<ApiKeys>(controller(), "get_api_keys", ())
+        .expect("controller can read API keys");
+    assert_eq!(stored.exchange_rate_outcall_nodes, Some(3));
+    assert_eq!(stored.exchange_rate_price_tolerance_bps, Some(20));
 }

@@ -5,7 +5,7 @@ use ic_cdk_management_canister_outcalls::HttpHeader;
 use serde::Deserialize;
 use shared::types::exchange::ExchangeData;
 
-use crate::utils::http_outcall::get;
+use crate::exchange::outcall::{get_prices, OutcallMode};
 
 const DEFAULT_BASE_URL: &str = "https://pro-api.coingecko.com/api/v3";
 const SIMPLE_PRICE_PATH: &str = "/simple/price";
@@ -65,18 +65,26 @@ fn timestamp_ns(last_updated_at: Option<u64>, now_ns: u64) -> u64 {
     })
 }
 
+/// Reads the prices of one `CoinGecko` answer, keyed by coin id or contract address.
+fn parse_prices(body: &[u8]) -> Result<HashMap<String, ExchangeData>, String> {
+    let prices: HashMap<String, CoinGeckoPrice> = serde_json::from_slice(body)
+        .map_err(|e| format!("Failed to parse CoinGecko response: {e}"))?;
+
+    Ok(prices.into_iter().map(|(k, v)| (k, v.into())).collect())
+}
+
 pub struct CoinGeckoClient {
     base_url: String,
     api_key: String,
-    replicated: bool,
+    mode: OutcallMode,
 }
 
 impl CoinGeckoClient {
-    pub fn new(api_key: String, replicated: bool) -> Self {
+    pub fn new(api_key: String, mode: OutcallMode) -> Self {
         Self {
             base_url: DEFAULT_BASE_URL.to_string(),
             api_key,
-            replicated,
+            mode,
         }
     }
 
@@ -94,21 +102,19 @@ impl CoinGeckoClient {
 
     async fn fetch_prices(
         &self,
+        label: &str,
         url: &str,
         max_response_bytes: u64,
     ) -> Result<HashMap<String, ExchangeData>, String> {
-        let response = get(
+        get_prices(
+            self.mode,
+            label,
             url,
             vec![self.auth_header()],
             max_response_bytes,
-            self.replicated,
+            parse_prices,
         )
-        .await?;
-
-        let prices: HashMap<String, CoinGeckoPrice> = serde_json::from_slice(&response.body)
-            .map_err(|e| format!("Failed to parse CoinGecko response: {e}"))?;
-
-        Ok(prices.into_iter().map(|(k, v)| (k, v.into())).collect())
+        .await
     }
 
     /// Fetches prices for native coins (e.g. ETH, BTC, SOL) from the `CoinGecko`
@@ -130,8 +136,12 @@ impl CoinGeckoClient {
             self.base_url
         );
 
-        self.fetch_prices(&url, response_bytes_for(coin_ids.len()))
-            .await
+        self.fetch_prices(
+            "CoinGecko simple/price",
+            &url,
+            response_bytes_for(coin_ids.len()),
+        )
+        .await
     }
 
     /// Fetches token prices from the `CoinGecko`
@@ -148,8 +158,12 @@ impl CoinGeckoClient {
             self.base_url
         );
 
-        self.fetch_prices(&url, response_bytes_for(addresses.len()))
-            .await
+        self.fetch_prices(
+            &format!("CoinGecko token_price/{platform}"),
+            &url,
+            response_bytes_for(addresses.len()),
+        )
+        .await
     }
 }
 
