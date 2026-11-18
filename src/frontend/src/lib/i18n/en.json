@@ -1046,7 +1046,6 @@
 				"address_format": "Address format",
 				"principal": "Principal",
 				"account_id": "Account ID",
-				"icp_format_hint": "Choose Account ID if the sending wallet or exchange asks for one.",
 				"principal_label": "ICP Principal",
 				"account_id_label": "ICP Account ID",
 				"address_label": "$network address",

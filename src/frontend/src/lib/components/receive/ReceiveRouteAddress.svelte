@@ -11,6 +11,7 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import SegmentedControl from '$lib/components/ui/SegmentedControl.svelte';
 	import {
 		RECEIVE_ADDRESS_LOADING,
 		RECEIVE_ADDRESS_RETRY_BUTTON,
@@ -120,20 +121,18 @@
 					})
 	);
 
-	const icpFormats: { format: ReceiveIcpAddressFormat; label: string; testId: string }[] = $derived(
-		[
-			{
-				format: 'principal',
-				label: $i18n.receive.token.text.principal,
-				testId: RECEIVE_ICP_FORMAT_PRINCIPAL
-			},
-			{
-				format: 'account-id',
-				label: $i18n.receive.token.text.account_id,
-				testId: RECEIVE_ICP_FORMAT_ACCOUNT_ID
-			}
-		]
-	);
+	const icpFormats: { value: ReceiveIcpAddressFormat; label: string; testId: string }[] = $derived([
+		{
+			value: 'principal',
+			label: $i18n.receive.token.text.principal,
+			testId: RECEIVE_ICP_FORMAT_PRINCIPAL
+		},
+		{
+			value: 'account-id',
+			label: $i18n.receive.token.text.account_id,
+			testId: RECEIVE_ICP_FORMAT_ACCOUNT_ID
+		}
+	]);
 
 	let metamaskNetwork = $derived(
 		isTokenEthereumNative(sourceToken) && isNetworkEthereum(sourceNetwork)
@@ -181,30 +180,11 @@
 		{:else}
 			{#if addressKind === 'icp'}
 				<div class="mb-4">
-					<div
-						class="flex rounded-full bg-brand-subtle-10 p-1"
-						aria-label={$i18n.receive.token.text.address_format}
-						role="radiogroup"
-					>
-						{#each icpFormats as { format, label, testId } (format)}
-							<button
-								class="flex flex-1 items-center justify-center rounded-full border-0 px-3 py-1.5 text-center text-sm font-semibold transition-colors duration-150 ease-out"
-								class:bg-primary={icpFormat === format}
-								class:shadow-sm={icpFormat === format}
-								class:text-primary={icpFormat === format}
-								class:text-tertiary={icpFormat !== format}
-								aria-checked={icpFormat === format}
-								data-tid={testId}
-								onclick={() => (icpFormat = format)}
-								role="radio"
-								type="button"
-							>
-								{label}
-							</button>
-						{/each}
-					</div>
-
-					<p class="mt-2 text-sm text-tertiary">{$i18n.receive.token.text.icp_format_hint}</p>
+					<SegmentedControl
+						ariaLabel={$i18n.receive.token.text.address_format}
+						options={icpFormats}
+						bind:value={icpFormat}
+					/>
 				</div>
 			{/if}
 

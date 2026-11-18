@@ -774,7 +774,6 @@ interface I18nReceive {
 			address_format: string;
 			principal: string;
 			account_id: string;
-			icp_format_hint: string;
 			principal_label: string;
 			account_id_label: string;
 			address_label: string;
