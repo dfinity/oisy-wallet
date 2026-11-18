@@ -15,7 +15,7 @@ import type {
 	XrpTransactionUi,
 	XrpTrustSet
 } from '$xrp/types/xrp-transaction';
-import type { XrpTrustLineTokenIdentity } from '$xrp/types/xrp-trust-line-token';
+import type { XrpTrustLineTokenIdentity, XrpTrustSetChange } from '$xrp/types/xrp-trust-line-token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { decode } from 'ripple-binary-codec';
 
@@ -31,13 +31,19 @@ export const isXrpTransactionSuccessful = (transactionResult: string | undefined
 	transactionResult === XRP_SUCCESS_TRANSACTION_RESULT;
 
 /**
- * A `TrustSet` adding the wallet's side of a trust line for a token: the largest limit, so receiving
- * is never capped; NoRipple, so nothing ripples through the wallet and the line can be deleted once
- * it is back at its default state; and no quality settings.
+ * A `TrustSet` for the wallet's side of a token's trust line, with NoRipple, so nothing ripples
+ * through the wallet and the side is at its default state whenever its limit and balance are zero;
+ * and no quality settings.
+ *
+ * Adding sets the largest limit, so receiving is never capped. Removing sets the limit to zero: at a
+ * zero balance that puts the wallet's side back at its default state, which releases its reserve,
+ * and the ledger deletes the line once the issuer's side is at its default state too (rippled
+ * `TrustSet.cpp`).
  */
 export const buildXrpTrustSet = ({
 	account,
 	token: { currency, issuer },
+	change,
 	fee,
 	sequence,
 	signingPublicKey,
@@ -45,6 +51,7 @@ export const buildXrpTrustSet = ({
 }: {
 	account: XrpAddress;
 	token: XrpTrustLineTokenIdentity;
+	change: XrpTrustSetChange;
 	fee: XrpBalance;
 	sequence: number;
 	signingPublicKey: string;
@@ -52,7 +59,7 @@ export const buildXrpTrustSet = ({
 }): XrpTrustSet => ({
 	TransactionType: 'TrustSet',
 	Account: account,
-	LimitAmount: { currency, issuer, value: XRP_TRUST_LINE_MAX_LIMIT },
+	LimitAmount: { currency, issuer, value: change === 'add' ? XRP_TRUST_LINE_MAX_LIMIT : '0' },
 	Flags: XRP_TRUST_SET_FLAG_SET_NO_RIPPLE,
 	Fee: `${fee}`,
 	Sequence: sequence,

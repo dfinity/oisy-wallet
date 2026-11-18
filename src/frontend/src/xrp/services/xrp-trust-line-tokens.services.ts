@@ -139,6 +139,7 @@ export const addXrpTrustLineToken = async ({
 			network,
 			source,
 			token,
+			change: 'add',
 			fee,
 			progress: (step) => progress?.(toAddTokenStep(step))
 		});

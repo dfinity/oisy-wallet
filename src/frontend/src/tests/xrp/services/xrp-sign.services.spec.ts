@@ -162,6 +162,7 @@ describe('xrp-sign.services', () => {
 			const trustSet = buildXrpTrustSet({
 				account: mockXrpAddress,
 				token: { currency: mockRlusdCurrencyCode, issuer: mockRlusdIssuer },
+				change: 'add',
 				fee: 12n,
 				sequence: 1,
 				signingPublicKey: canonicalPublicKey,

@@ -136,6 +136,7 @@ describe('xrp-trust-line-tokens.services', () => {
 				network: XrpNetworks.mainnet,
 				source: mockXrpAddress,
 				token,
+				change: 'add',
 				fee: 12n,
 				progress: expect.any(Function)
 			});
