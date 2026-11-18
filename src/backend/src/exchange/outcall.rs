@@ -137,6 +137,24 @@ pub(crate) async fn get_prices(
                 http_outcall::get_from_nodes(url, headers, max_response_bytes, asked).await?;
             let answer_count = answers.len();
 
+            // TEST ONLY (be1 measurement, do not merge).
+            for (index, answer) in answers.iter().enumerate() {
+                if let Ok(response) = answer {
+                    let header = |name: &str| {
+                        response
+                            .headers
+                            .iter()
+                            .find(|header| header.name.eq_ignore_ascii_case(name))
+                            .map_or("-", |header| header.value.as_str())
+                    };
+                    ic_cdk::println!(
+                        "{label}: answer {index}: cf-ray {} age {}",
+                        header("cf-ray"),
+                        header("age")
+                    );
+                }
+            }
+
             let readable: Vec<HashMap<String, ExchangeData>> = answers
                 .into_iter()
                 .filter_map(|answer| {
