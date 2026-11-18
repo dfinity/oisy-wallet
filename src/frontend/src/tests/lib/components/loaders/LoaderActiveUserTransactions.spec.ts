@@ -9,7 +9,9 @@ import {
 	TRACK_COUNT_SWAP_ERROR,
 	TRACK_COUNT_SWAP_SUCCESS,
 	TRACK_COUNT_XRP_SEND_ERROR,
-	TRACK_COUNT_XRP_SEND_SUCCESS
+	TRACK_COUNT_XRP_SEND_SUCCESS,
+	TRACK_COUNT_XRP_TRUST_LINE_ADD_ERROR,
+	TRACK_COUNT_XRP_TRUST_LINE_ADD_SUCCESS
 } from '$lib/constants/analytics.constants';
 import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { LIQUIDIUM_PROVIDER_ID } from '$lib/constants/liquidium.constants';
@@ -46,7 +48,8 @@ import {
 	mockOisyTradeActiveUserTransaction,
 	mockVeloraActiveUserTransaction,
 	mockXrpActiveUserTransaction,
-	mockXrpSwapActiveUserTransaction
+	mockXrpSwapActiveUserTransaction,
+	mockXrpTrustSetActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -540,6 +543,23 @@ describe('LoaderActiveUserTransactions', () => {
 			});
 		});
 
+		// Adding a trust-line token is resolved on the XRP ledger like a send.
+		it('polls a row adding a trust-line token against the XRP ledger', async () => {
+			const xrpSpy = vi.spyOn(xrpPoller, 'pollXrpActiveUserTransactions').mockResolvedValue();
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: mockXrpTrustSetActiveUserTransaction });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(xrpSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [mockXrpTrustSetActiveUserTransaction]
+			});
+		});
+
 		// A swap from XRP goes to the XRP ledger resolution while its deposit is `Pending`: 1Click
 		// reports `PENDING_DEPOSIT` at once, which would move the row to `Executing` and release the
 		// address while the deposit can still apply. From `Executing` on, 1Click decides.
@@ -792,6 +812,89 @@ describe('LoaderActiveUserTransactions', () => {
 				expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(
 					expect.objectContaining({ name: TRACK_COUNT_XRP_SEND_SUCCESS })
 				);
+			});
+		});
+
+		// As for a send: the review stops at the submit, so the outcome is reported here or nowhere.
+		describe('adding a trust-line token reports its outcome here', () => {
+			const trustSet = mockXrpTrustSetActiveUserTransaction;
+
+			const resolve = async (resolved: Partial<typeof trustSet>) => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({ transaction: trustSet });
+
+				render(LoaderActiveUserTransactions);
+				await tick();
+
+				activeUserTransactionsStore.upsert({ transaction: { ...trustSet, ...resolved } });
+				await tick();
+			};
+
+			// The refresh is what reads the new line, which shows the token and saves it to the list.
+			it('toasts the added token, refreshes the wallet and fires its success event', async () => {
+				await resolve({ status: { Succeeded: null } });
+
+				expect(toasts.toastsShow).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						text: en.tokens.import.text.xrp_token_added.replace('$symbol', 'RLUSD'),
+						level: 'success'
+					})
+				);
+				expect(refreshSpy).toHaveBeenCalledOnce();
+				expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_COUNT_XRP_TRUST_LINE_ADD_SUCCESS,
+					metadata: { token: 'RLUSD', network: 'XRP', fee: '12' }
+				});
+			});
+
+			it('toasts the recorded failure text, refreshes the wallet and fires its error event', async () => {
+				await resolve({ status: { Failed: null }, error: ['the token was not added'] });
+
+				expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: 'the token was not added' }
+				});
+				// A validated failure claimed the fee, which the balance must show.
+				expect(refreshSpy).toHaveBeenCalledOnce();
+				expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_COUNT_XRP_TRUST_LINE_ADD_ERROR,
+					metadata: {
+						token: 'RLUSD',
+						network: 'XRP',
+						fee: '12',
+						error: 'the token was not added'
+					}
+				});
+			});
+
+			it('falls back to generic copy when the record carries no error text', async () => {
+				await resolve({ status: { Failed: null }, error: [] });
+
+				expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.send.error.unexpected }
+				});
+			});
+
+			it('is not reported as a send', async () => {
+				await resolve({ status: { Succeeded: null } });
+
+				expect(toasts.toastsShow).not.toHaveBeenCalledWith(
+					expect.objectContaining({ text: en.send.text.xrp_sent })
+				);
+				expect(trackEventSpy).not.toHaveBeenCalledWith(
+					expect.objectContaining({ name: TRACK_COUNT_XRP_SEND_SUCCESS })
+				);
+			});
+
+			it('reports once even when the row is written again', async () => {
+				await resolve({ status: { Succeeded: null } });
+
+				activeUserTransactionsStore.upsert({
+					transaction: { ...trustSet, status: { Succeeded: null }, updated_at_ns: 99n }
+				});
+				await tick();
+
+				expect(toasts.toastsShow).toHaveBeenCalledOnce();
+				expect(trackEventSpy).toHaveBeenCalledOnce();
 			});
 		});
 
