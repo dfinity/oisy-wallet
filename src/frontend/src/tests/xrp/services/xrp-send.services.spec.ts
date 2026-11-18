@@ -1,4 +1,5 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import * as backendApi from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -16,6 +17,7 @@ import {
 	mockXrpSwapData
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockRlusdCurrencyCode, mockRlusdIssuer, mockXrpTrustLine } from '$tests/mocks/xrp.mock';
 import {
 	XRP_BASE_RESERVE_DROPS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
@@ -38,7 +40,8 @@ import {
 	XrpSendAlreadyInFlightError,
 	XrpSendNotGuardedError
 } from '$xrp/types/xrp-send';
-import type { XrpAccountInfo } from '$xrp/types/xrp-transaction';
+import type { XrpAccountInfo, XrpPayment } from '$xrp/types/xrp-transaction';
+import type { XrpTrustLine } from '$xrp/types/xrp-trust-line';
 import { deriveXrpTransactionHash } from '$xrp/utils/xrp-transaction.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -1378,6 +1381,349 @@ describe('xrp-send.services', () => {
 			vi.mocked(xrplRest.loadXrpDepositAuthorized).mockRejectedValue(new Error('tooBusy'));
 
 			await expectRefusal('state_unavailable');
+		});
+	});
+
+	describe('a trust-line token', () => {
+		const token = { ...RLUSD_TOKEN, enabled: true };
+
+		// 25 RLUSD out of a 12.5-RLUSD-and-more balance, in base units of 10^-18.
+		const tokenParams = { ...params, token, amount: 25n * 10n ** 18n };
+
+		const line = (overrides: Partial<XrpTrustLine> = {}): XrpTrustLine => ({
+			...mockXrpTrustLine,
+			balance: '100',
+			...overrides
+		});
+
+		// RLUSD's issuer as it was on 2026-09-29: clawback, DepositAuth, DefaultRipple and more, no fee.
+		const issuerInfo: XrpAccountInfo = {
+			balance: 50_000_000n,
+			sequence: 1,
+			ownerCount: 0,
+			flags: 0x80800000
+		};
+
+		// Spread rather than defaulted, so an explicit `undefined` line stays absent.
+		const ledger = (
+			overrides: {
+				senderLine?: XrpTrustLine | undefined;
+				recipientLine?: XrpTrustLine | undefined;
+				issuer?: XrpAccountInfo;
+				destinationFlags?: number;
+			} = {}
+		) => {
+			const { senderLine, recipientLine, issuer, destinationFlags } = {
+				senderLine: line(),
+				recipientLine: line({ balance: '0' }),
+				issuer: issuerInfo,
+				destinationFlags: 0,
+				...overrides
+			};
+
+			vi.mocked(xrplRest.loadXrpAccountInfo).mockImplementation(({ address }) =>
+				Promise.resolve(
+					address === mockRlusdIssuer
+						? issuer
+						: address === destination
+							? { balance: 30_000_000n, sequence: 1, ownerCount: 1, flags: destinationFlags }
+							: { balance: 50_000_000n, sequence: 7, ownerCount: 1, flags: 0 }
+				)
+			);
+
+			vi.spyOn(xrplRest, 'loadXrpAccountLines').mockImplementation(({ address }) =>
+				Promise.resolve(
+					[address === source ? senderLine : recipientLine].filter(
+						(found): found is XrpTrustLine => found !== undefined
+					)
+				)
+			);
+		};
+
+		const signed = (): XrpPayment =>
+			vi.mocked(xrpSignServices.signXrpTransaction).mock.calls[0][0].transaction as XrpPayment;
+
+		const expectRefusal = async ({
+			refusal,
+			send = tokenParams
+		}: {
+			refusal: string;
+			send?: Parameters<typeof sendXrp>[0];
+		}) => {
+			const err = await sendXrp(send).catch((e: unknown) => e);
+
+			expect(err).toBeInstanceOf(XrpPaymentRefusedError);
+			expect((err as XrpPaymentRefusedError).refusal).toBe(refusal);
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		};
+
+		beforeEach(() => {
+			ledger();
+			vi.spyOn(xrplRest, 'loadXrpDepositAuthorized').mockResolvedValue(true);
+		});
+
+		it('pays the token by its currency and issuer, with the fee in drops and no SendMax', async () => {
+			await sendXrp(tokenParams);
+
+			expect(signed()).toEqual({
+				TransactionType: 'Payment',
+				Account: source,
+				Destination: destination,
+				Amount: { currency: mockRlusdCurrencyCode, issuer: mockRlusdIssuer, value: '25' },
+				Fee: '12',
+				Sequence: 7,
+				SigningPubKey: signingPublicKey,
+				DestinationTag: 12345,
+				LastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
+			});
+		});
+
+		it("reads both holders' lines with the issuer, and the issuer", async () => {
+			await sendXrp(tokenParams);
+
+			expect(xrplRest.loadXrpAccountLines).toHaveBeenCalledWith({
+				address: source,
+				network: XrpNetworks.mainnet,
+				peer: mockRlusdIssuer
+			});
+			expect(xrplRest.loadXrpAccountLines).toHaveBeenCalledWith({
+				address: destination,
+				network: XrpNetworks.mainnet,
+				peer: mockRlusdIssuer
+			});
+			expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalledWith({
+				address: mockRlusdIssuer,
+				network: XrpNetworks.mainnet,
+				ledgerIndex: 'validated'
+			});
+		});
+
+		it('records the payment under the token, in its base units', async () => {
+			await sendXrp(tokenParams);
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					data: {
+						Xrp: {
+							token: { XrpTrustLineMainnet: [mockRlusdCurrencyCode, mockRlusdIssuer] },
+							source_address: source,
+							destination_address: destination,
+							destination_tag: [12345],
+							amount: 25n * 10n ** 18n,
+							fee: 12n
+						}
+					},
+					externalRefs: expect.arrayContaining([
+						{ key: XRP_EXTERNAL_REF_KEYS.AMOUNT, value: '25' },
+						{ key: XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL, value: 'RLUSD' }
+					])
+				})
+			);
+		});
+
+		it('sends with an XRP balance below the reserve that still pays the fee', async () => {
+			vi.mocked(xrplRest.loadXrpAccountInfo).mockImplementation(({ address }) =>
+				Promise.resolve(
+					address === mockRlusdIssuer
+						? issuerInfo
+						: address === destination
+							? { balance: 30_000_000n, sequence: 1, ownerCount: 1, flags: 0 }
+							: { balance: 12n, sequence: 7, ownerCount: 1, flags: 0 }
+				)
+			);
+
+			await expect(sendXrp(tokenParams)).resolves.toBeDefined();
+		});
+
+		describe('a transfer fee', () => {
+			beforeEach(() => {
+				ledger({ issuer: { ...issuerInfo, transferRate: 1_005_000_000 } });
+			});
+
+			it('caps the cost with the amount and the reviewed fee', async () => {
+				await sendXrp({ ...tokenParams, transferRate: 1_005_000_000 });
+
+				expect(signed().SendMax).toEqual({
+					currency: mockRlusdCurrencyCode,
+					issuer: mockRlusdIssuer,
+					value: '25.125'
+				});
+			});
+
+			it('refuses a rate above the reviewed one', async () => {
+				await expectRefusal({ refusal: 'transfer_rate_changed' });
+			});
+
+			it('refuses when the balance cannot pay the fee on top', async () => {
+				ledger({
+					issuer: { ...issuerInfo, transferRate: 1_005_000_000 },
+					senderLine: line({ balance: '25.1' })
+				});
+
+				await expectRefusal({
+					refusal: 'insufficient_token_balance',
+					send: { ...tokenParams, transferRate: 1_005_000_000 }
+				});
+			});
+
+			// The issuer charges nothing on a payment to itself.
+			it('adds nothing to a payment to the issuer', async () => {
+				await sendXrp({ ...tokenParams, destination: mockRlusdIssuer });
+
+				expect(signed().SendMax).toBeUndefined();
+			});
+		});
+
+		describe('the whole balance', () => {
+			// 16 significant digits, the last below the wallet's 18-decimal scale.
+			const dust = '0.0001234567890123456';
+
+			it("states the ledger's own figure, leaving nothing behind", async () => {
+				ledger({ senderLine: line({ balance: dust }) });
+
+				await sendXrp({ ...tokenParams, amount: 123_456_789_012_345n });
+
+				expect(signed().Amount).toEqual({
+					currency: mockRlusdCurrencyCode,
+					issuer: mockRlusdIssuer,
+					value: dust
+				});
+			});
+
+			it('states the amount entered for anything less', async () => {
+				ledger({ senderLine: line({ balance: dust }) });
+
+				await sendXrp({ ...tokenParams, amount: 123_456_789_012_344n });
+
+				expect(signed().Amount).toEqual({
+					currency: mockRlusdCurrencyCode,
+					issuer: mockRlusdIssuer,
+					value: '0.000123456789012344'
+				});
+			});
+		});
+
+		describe('a payment to the issuer', () => {
+			const toIssuer = { ...tokenParams, destination: mockRlusdIssuer };
+
+			it('reads no recipient line', async () => {
+				await sendXrp(toIssuer);
+
+				expect(xrplRest.loadXrpAccountLines).toHaveBeenCalledOnce();
+			});
+
+			it('goes through from a frozen holder', async () => {
+				ledger({ senderLine: line({ freezePeer: true, deepFreezePeer: true }) });
+
+				await expect(sendXrp(toIssuer)).resolves.toBeDefined();
+			});
+
+			// RLUSD's issuer has DepositAuth: an ordinary holder cannot send it back.
+			it('is refused by an issuer with DepositAuth that did not preauthorize the sender', async () => {
+				ledger({ issuer: { ...issuerInfo, flags: 0x819a0000 } });
+				vi.mocked(xrplRest.loadXrpDepositAuthorized).mockResolvedValue(false);
+
+				await expectRefusal({ refusal: 'deposit_not_authorized', send: toIssuer });
+			});
+		});
+
+		describe('refused before signing', () => {
+			// Before any read: the amount itself says it.
+			it('refuses a 17th significant digit before reading anything', async () => {
+				await expectRefusal({
+					refusal: 'imprecise_amount',
+					send: { ...tokenParams, amount: 12_345_678_901_234_567n }
+				});
+
+				expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+			});
+
+			it('refuses an XRP balance that cannot pay the fee', async () => {
+				vi.mocked(xrplRest.loadXrpAccountInfo).mockImplementation(({ address }) =>
+					Promise.resolve(
+						address === mockRlusdIssuer
+							? issuerInfo
+							: address === destination
+								? { balance: 30_000_000n, sequence: 1, ownerCount: 1, flags: 0 }
+								: { balance: 11n, sequence: 7, ownerCount: 1, flags: 0 }
+					)
+				);
+
+				await expectRefusal({ refusal: 'insufficient_xrp_for_fee' });
+			});
+
+			// A token payment cannot create an account, at any amount.
+			it('refuses a recipient without an account', async () => {
+				vi.mocked(xrplRest.loadXrpAccountInfo).mockImplementation(({ address }) =>
+					address === destination
+						? Promise.reject(new XrpAccountNotFoundError('XRPL account not found'))
+						: Promise.resolve(
+								address === mockRlusdIssuer
+									? issuerInfo
+									: { balance: 50_000_000n, sequence: 7, ownerCount: 1, flags: 0 }
+							)
+				);
+
+				await expectRefusal({ refusal: 'destination_not_found' });
+			});
+
+			it('refuses when the recipient cannot be read', async () => {
+				vi.mocked(xrplRest.loadXrpAccountInfo).mockImplementation(({ address }) =>
+					address === destination
+						? Promise.reject(new Error('tooBusy'))
+						: Promise.resolve(
+								address === mockRlusdIssuer
+									? issuerInfo
+									: { balance: 50_000_000n, sequence: 7, ownerCount: 1, flags: 0 }
+							)
+				);
+
+				await expectRefusal({ refusal: 'state_unavailable' });
+			});
+
+			it("refuses when the token's lines cannot be read", async () => {
+				vi.mocked(xrplRest.loadXrpAccountLines).mockRejectedValue(new Error('tooBusy'));
+
+				await expectRefusal({ refusal: 'state_unavailable' });
+			});
+
+			it('refuses a recipient without a line for the token', async () => {
+				ledger({ recipientLine: undefined });
+
+				await expectRefusal({ refusal: 'no_trust_line' });
+			});
+
+			it('refuses a frozen sender paying another holder', async () => {
+				ledger({ senderLine: line({ freezePeer: true }) });
+
+				await expectRefusal({ refusal: 'frozen' });
+			});
+
+			// No exception for small amounts, which only XRP payments get.
+			it('refuses a recipient with DepositAuth that did not preauthorize the sender', async () => {
+				ledger({ destinationFlags: 0x01000000 });
+				vi.mocked(xrplRest.loadXrpDepositAuthorized).mockResolvedValue(false);
+
+				await expectRefusal({
+					refusal: 'deposit_not_authorized',
+					send: { ...tokenParams, amount: 1n }
+				});
+			});
+
+			it('still requires the tag a recipient asks for', async () => {
+				ledger({ destinationFlags: 0x00020000 });
+
+				await expect(sendXrp({ ...tokenParams, destinationTag: undefined })).rejects.toThrow(
+					XrpDestinationTagRequiredError
+				);
+			});
+		});
+
+		it('reads no lines for an XRP payment', async () => {
+			await sendXrp(params);
+
+			expect(xrplRest.loadXrpAccountLines).not.toHaveBeenCalled();
 		});
 	});
 });

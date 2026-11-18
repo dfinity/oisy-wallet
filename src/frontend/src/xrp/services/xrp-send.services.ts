@@ -11,12 +11,14 @@ import {
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_DESTINATION_TAG,
 	XRP_MAX_FEE_DROPS,
-	XRP_MAX_UINT32
+	XRP_MAX_UINT32,
+	XRP_TRANSFER_RATE_NO_FEE
 } from '$xrp/constants/xrp.constants';
 import { XrpRpcNotConfiguredError } from '$xrp/providers/xrp-rpc.providers';
 import {
 	XrpAccountNotFoundError,
 	loadXrpAccountInfo,
+	loadXrpAccountLines,
 	loadXrpDepositAuthorized,
 	loadXrpLedgerIndex,
 	submitXrpTransaction
@@ -38,7 +40,9 @@ import {
 	type XrpPaymentRecord,
 	type XrpPaymentRecordBuilder
 } from '$xrp/types/xrp-send';
-import type { XrpSendResult, XrpSubmitResult } from '$xrp/types/xrp-transaction';
+import type { XrpPayment, XrpSendResult, XrpSubmitResult } from '$xrp/types/xrp-transaction';
+import type { XrpTrustLine } from '$xrp/types/xrp-trust-line';
+import type { XrpTrustLineToken } from '$xrp/types/xrp-trust-line-token';
 import {
 	isXrpAlreadyInFlightError,
 	toXrpData,
@@ -48,13 +52,22 @@ import {
 import {
 	getXrpMaxAmount,
 	getXrpReserveDrops,
-	xrpPaymentNeedsDepositPreauth
+	xrpPaymentNeedsDepositPreauth,
+	xrpTokenPaymentRefusal
 } from '$xrp/utils/xrp-send.utils';
 import {
 	buildXrpPayment,
+	buildXrpTokenPayment,
 	deriveXrpLedgerWindow,
 	deriveXrpTransactionHash
 } from '$xrp/utils/xrp-transaction.utils';
+import {
+	fitsXrpTokenPrecision,
+	formatXrpTokenValue,
+	getXrpTokenSendMax,
+	isTokenXrpTrustLine,
+	parseXrpTokenValue
+} from '$xrp/utils/xrp-trust-line.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
@@ -147,9 +160,136 @@ export const openXrpPaymentRecord = async ({
 	}
 };
 
+interface XrpTokenPaymentState {
+	senderLine: XrpTrustLine | undefined;
+	// Not read for a payment to the issuer, which moves along the sender's line only.
+	recipientLine: XrpTrustLine | undefined;
+	issuerFlags: number;
+	transferRate: number;
+}
+
 /**
- * Sends native XRP: fetches the account sequence, whether the destination exists and the current
- * ledger index, builds and threshold-signs a Payment, records it, and submits it.
+ * What a token payment's checks read besides the two accounts: both holders' lines for the token,
+ * and the issuer's flags and transfer rate — all from the validated ledger. A line is only ever
+ * changed by its holder or the issuer, and the sender's own changes go through the in-flight guard.
+ *
+ * Any failure refuses the payment rather than signing it unchecked.
+ */
+const loadXrpTokenPaymentState = async ({
+	network,
+	source,
+	destination,
+	token: { currency, issuer }
+}: {
+	network: XrpNetworkType;
+	source: XrpAddress;
+	destination: XrpAddress;
+	token: XrpTrustLineToken;
+}): Promise<XrpTokenPaymentState> => {
+	const lineFor = (lines: XrpTrustLine[]): XrpTrustLine | undefined =>
+		lines.find((line) => line.currency === currency);
+
+	try {
+		const [senderLines, recipientLines, issuerInfo] = await Promise.all([
+			loadXrpAccountLines({ address: source, network, peer: issuer }),
+			destination === issuer
+				? Promise.resolve([])
+				: loadXrpAccountLines({ address: destination, network, peer: issuer }),
+			loadXrpAccountInfo({ address: issuer, network, ledgerIndex: 'validated' })
+		]);
+
+		return {
+			senderLine: lineFor(senderLines),
+			recipientLine: lineFor(recipientLines),
+			issuerFlags: issuerInfo.flags,
+			transferRate: issuerInfo.transferRate ?? XRP_TRANSFER_RATE_NO_FEE
+		};
+	} catch (err: unknown) {
+		throw new XrpPaymentRefusedError({
+			refusal: 'state_unavailable',
+			message: `XRP token payment refused: the token's lines or issuer could not be read. ${
+				err instanceof Error ? err.message : `${err}`
+			}`
+		});
+	}
+};
+
+/**
+ * A token payment's own checks, and what it states: the amount and, when the issuer charges a
+ * transfer fee, its cost as `SendMax`. Throws the refusal of the first check that fails.
+ */
+const toXrpTokenPaymentAmounts = ({
+	amount,
+	destination,
+	token: { issuer },
+	state,
+	transferRate,
+	destinationFlags
+}: {
+	amount: XrpBalance;
+	destination: XrpAddress;
+	token: XrpTrustLineToken;
+	state: XrpTokenPaymentState | undefined;
+	// The rate the review priced the payment with.
+	transferRate: number | undefined;
+	destinationFlags: number;
+}): { value: string; sendMax?: string } => {
+	if (isNullish(state)) {
+		throw new XrpPaymentRefusedError({
+			refusal: 'state_unavailable',
+			message: "XRP token payment refused: the token's lines and issuer were not read."
+		});
+	}
+
+	const { senderLine, recipientLine, issuerFlags, transferRate: currentRate } = state;
+
+	const toIssuer = destination === issuer;
+	const reviewedRate = transferRate ?? XRP_TRANSFER_RATE_NO_FEE;
+
+	// The fee is charged between holders only, never to or from the issuer.
+	if (!toIssuer && currentRate > reviewedRate) {
+		throw new XrpPaymentRefusedError({
+			refusal: 'transfer_rate_changed',
+			message: `XRP token issuer ${issuer} charges a transfer rate of ${currentRate}, above the ${reviewedRate} the payment was reviewed with.`
+		});
+	}
+
+	const sendMax = toIssuer ? undefined : getXrpTokenSendMax({ amount, transferRate: reviewedRate });
+
+	const refusal = xrpTokenPaymentRefusal({
+		amount,
+		cost: sendMax ?? amount,
+		senderLine,
+		recipientLine,
+		toIssuer,
+		issuerFlags,
+		destinationFlags
+	});
+
+	if (nonNullish(refusal)) {
+		throw new XrpPaymentRefusedError({
+			refusal,
+			message: `XRP token payment of ${amount} to ${destination} refused: ${refusal}.`
+		});
+	}
+
+	// Sending the whole balance states the ledger's own figure, so nothing below the wallet's scale
+	// is left behind and the line can be removed afterwards.
+	const wholeBalance =
+		isNullish(sendMax) &&
+		nonNullish(senderLine) &&
+		parseXrpTokenValue({ value: senderLine.balance }) === amount;
+
+	return {
+		value: wholeBalance ? senderLine.balance : formatXrpTokenValue({ amount }),
+		...(nonNullish(sendMax) && { sendMax: formatXrpTokenValue({ amount: sendMax }) })
+	};
+};
+
+/**
+ * Sends native XRP or a trust-line token: fetches the account sequence, whether the destination
+ * exists and the current ledger index, builds and threshold-signs a Payment, records it, and
+ * submits it.
  *
  * `fee` is a parameter rather than an estimate taken here, and that is the point: it is the figure
  * the amount was priced and reviewed against, so re-fetching it at signing time would sign a fee
@@ -159,8 +299,13 @@ export const openXrpPaymentRecord = async ({
  * The destination read is what declines a payment too small to create an account that does not
  * exist yet — the ledger would apply that as `tecNO_DST_INSUF_XRP` and claim the fee.
  *
- * `amount` is in drops. The caller is responsible for having already reserved the
- * account base and owner reserves out of the max amount (see `getXrpMaxAmount`).
+ * `amount` is in drops for XRP, and in the token's base units for a trust-line token. The caller is
+ * responsible for having already reserved the account base and owner reserves out of the max XRP
+ * amount (see `getXrpMaxAmount`).
+ *
+ * A token payment is refused before signing in every case the ledger would apply as a failure that
+ * keeps the fee and that the lines and accounts involved can tell beforehand. `transferRate` is the
+ * issuer's rate the review priced it with, and caps its cost: a higher rate at signing refuses it.
  *
  * `record` is the AUT the payment is recorded under, built after signing and before submitting —
  * the send's own `Xrp` AUT when it is omitted, or the swap's AUT when the payment is a swap's
@@ -180,6 +325,7 @@ export const sendXrp = async ({
 	fee,
 	destinationTag,
 	token,
+	transferRate,
 	record,
 	progress
 }: {
@@ -191,6 +337,7 @@ export const sendXrp = async ({
 	fee: XrpBalance;
 	destinationTag?: number;
 	token: Token;
+	transferRate?: number;
 	record?: XrpPaymentRecordBuilder;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
@@ -334,6 +481,17 @@ export const sendXrp = async ({
 		throw new Error(`XRP fee ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`);
 	}
 
+	const tokenPayment = isTokenXrpTrustLine(token) ? token : undefined;
+
+	// A token amount is stated as entered or not at all: one with more digits than the ledger keeps
+	// would be rounded.
+	if (nonNullish(tokenPayment) && !fitsXrpTokenPrecision(amount)) {
+		throw new XrpPaymentRefusedError({
+			refusal: 'imprecise_amount',
+			message: `XRP token amount ${amount} has more significant digits than the ledger keeps.`
+		});
+	}
+
 	// After the guards that need nothing but the arguments, and before the first node read — which
 	// also keeps a self-payment or a zero amount from costing a backend round-trip to be told what
 	// the arguments already say.
@@ -353,12 +511,16 @@ export const sendXrp = async ({
 	// broken deployment; an insufficient balance is something the user can act on.
 	// Both snapshots of the sender, because neither is safe alone, and every value below takes the
 	// direction that cannot hurt: the higher sequence, the lower balance, the higher owner count.
-	const [openAccount, validatedAccount, destinationLookup, ledgerIndex] = await Promise.all([
-		loadXrpAccountInfo({ address: source, network, ledgerIndex: 'current' }),
-		loadXrpAccountInfo({ address: source, network, ledgerIndex: 'validated' }),
-		tryDestination(),
-		loadXrpLedgerIndex({ network })
-	]);
+	const [openAccount, validatedAccount, destinationLookup, ledgerIndex, tokenState] =
+		await Promise.all([
+			loadXrpAccountInfo({ address: source, network, ledgerIndex: 'current' }),
+			loadXrpAccountInfo({ address: source, network, ledgerIndex: 'validated' }),
+			tryDestination(),
+			loadXrpLedgerIndex({ network }),
+			nonNullish(tokenPayment)
+				? loadXrpTokenPaymentState({ network, source, destination, token: tokenPayment })
+				: undefined
+		]);
 
 	// The HIGHER sequence, not the open one. The open ledger is ahead of the validated one at any
 	// single instant, but these are two concurrent calls that do not share an instant: if `current`
@@ -388,7 +550,17 @@ export const sendXrp = async ({
 	// sequence is burned, nothing is delivered, and the failure only surfaces after the poll. The
 	// spec makes this client-side check an acceptance criterion, and `getXrpMaxAmount` — which the
 	// caller uses to offer a maximum — had no runtime caller until now.
-	if (amount > getXrpMaxAmount({ balance, fee, ownerCount })) {
+	//
+	// A token payment moves no XRP, so only the fee comes out of the XRP balance, and rippled takes
+	// it even below the reserve.
+	if (nonNullish(tokenPayment)) {
+		if (balance < fee) {
+			throw new XrpPaymentRefusedError({
+				refusal: 'insufficient_xrp_for_fee',
+				message: `XRP balance ${balance} drops cannot pay the ${fee} drops fee.`
+			});
+		}
+	} else if (amount > getXrpMaxAmount({ balance, fee, ownerCount })) {
 		throw new XrpAmountExceedsSendableError(
 			`XRP amount ${amount} drops exceeds the sendable maximum for this account, which must retain ${getXrpReserveDrops({ ownerCount })} drops of reserve plus the ${fee} drops fee.`
 		);
@@ -403,10 +575,24 @@ export const sendXrp = async ({
 	// amount. So the lookup is required exactly here and ignored everywhere else — a node that
 	// could not answer must not block a well-funded send, but must not wave this one through into a
 	// charged failure either.
-	const requiresExistingDestination = amount < XRP_BASE_RESERVE_DROPS;
+	//
+	// A token payment cannot create an account at any amount: the ledger applies it as `tecNO_DST`.
+	const requiresExistingDestination = nonNullish(tokenPayment) || amount < XRP_BASE_RESERVE_DROPS;
 
 	if (requiresExistingDestination && nonNullish(destinationLookup.unavailable)) {
-		throw destinationLookup.unavailable;
+		throw nonNullish(tokenPayment)
+			? new XrpPaymentRefusedError({
+					refusal: 'state_unavailable',
+					message: `XRP token payment refused: the destination ${destination} could not be read. ${destinationLookup.unavailable.message}`
+				})
+			: destinationLookup.unavailable;
+	}
+
+	if (nonNullish(tokenPayment) && !destinationLookup.settled) {
+		throw new XrpPaymentRefusedError({
+			refusal: 'destination_not_found',
+			message: `XRP destination ${destination} does not exist in settled ledger state, and a token payment cannot create it.`
+		});
 	}
 
 	// The destination can still be funded between this read and submission, so the validated result
@@ -457,7 +643,7 @@ export const sendXrp = async ({
 		xrpPaymentNeedsDepositPreauth({
 			destinationFlags: destinationLookup.flags,
 			destinationBalance: destinationLookup.balance,
-			xrpAmount: amount
+			...(isNullish(tokenPayment) && { xrpAmount: amount })
 		})
 	) {
 		let authorized: boolean;
@@ -480,6 +666,23 @@ export const sendXrp = async ({
 			});
 		}
 	}
+
+	// The token and what the payment states for it, together: a token payment is never built as an
+	// XRP one, whose `Amount` would be read as drops.
+	const tokenTransfer = nonNullish(tokenPayment)
+		? {
+				...toXrpTokenPaymentAmounts({
+					amount,
+					destination,
+					token: tokenPayment,
+					state: tokenState,
+					transferRate,
+					destinationFlags: destinationLookup.flags
+				}),
+				currency: tokenPayment.currency,
+				issuer: tokenPayment.issuer
+			}
+		: undefined;
 
 	// After every guard, so a send that was going to be refused does not derive a key first. On a
 	// deployed build that costs only local hashing — `deriveTokenAddress` derives locally whenever
@@ -505,16 +708,38 @@ export const sendXrp = async ({
 
 	const lastLedgerSequence = ledgerIndex + XRP_LAST_LEDGER_SEQUENCE_OFFSET;
 
-	const transaction = buildXrpPayment({
-		account: source,
-		destination,
-		amount,
-		fee,
-		sequence,
-		signingPublicKey,
-		destinationTag,
-		lastLedgerSequence
-	});
+	const transaction: XrpPayment = nonNullish(tokenTransfer)
+		? buildXrpTokenPayment({
+				account: source,
+				destination,
+				amount: {
+					currency: tokenTransfer.currency,
+					issuer: tokenTransfer.issuer,
+					value: tokenTransfer.value
+				},
+				...(nonNullish(tokenTransfer.sendMax) && {
+					sendMax: {
+						currency: tokenTransfer.currency,
+						issuer: tokenTransfer.issuer,
+						value: tokenTransfer.sendMax
+					}
+				}),
+				fee,
+				sequence,
+				signingPublicKey,
+				destinationTag,
+				lastLedgerSequence
+			})
+		: buildXrpPayment({
+				account: source,
+				destination,
+				amount,
+				fee,
+				sequence,
+				signingPublicKey,
+				destinationTag,
+				lastLedgerSequence
+			});
 
 	progress?.(ProgressStepsSendXrp.SIGN);
 	const txBlob = await signXrpTransaction({ identity, network, transaction });
