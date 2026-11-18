@@ -51,7 +51,7 @@
 	{/if}
 {/key}
 
-<div aria-live="polite" class="mt-4 flex flex-col gap-1">
+<div class="mt-4 flex flex-col gap-1" aria-live="polite">
 	<ModalValue>
 		{#snippet label()}{$i18n.receive.ckbtc.text.confirmations}{/snippet}
 		{#snippet mainValue()}

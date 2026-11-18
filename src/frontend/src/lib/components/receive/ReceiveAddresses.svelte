@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
-	import type { OptionBtcAddress } from '$btc/types/address';
 	import {
 		BTC_MAINNET_NETWORK,
 		BTC_REGTEST_NETWORK,
@@ -53,10 +52,6 @@
 		networkBitcoinMainnetEnabled,
 		networkBitcoinRegtestEnabled,
 		networkBitcoinTestnetEnabled,
-		networkEthereumEnabled,
-		networkEvmMainnetEnabled,
-		networkEvmTestnetEnabled,
-		networkSepoliaEnabled,
 		networkSolanaDevnetEnabled,
 		networkSolanaLocalEnabled,
 		networkSolanaMainnetEnabled,
@@ -78,8 +73,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Address } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
-	import type { OptionString } from '$lib/types/string';
 	import type { ReceiveQRCode } from '$lib/types/receive';
+	import type { OptionString } from '$lib/types/string';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isRouteNfts } from '$lib/utils/nav.utils';

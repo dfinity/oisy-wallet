@@ -44,9 +44,7 @@ export interface ReceiveAsset {
 export type ReceiveIcpAddressFormat = 'principal' | 'account-id';
 
 export type ReceiveAddressState =
-	| { status: 'loading' }
-	| { status: 'error' }
-	| { status: 'ready'; address: string };
+	{ status: 'loading' } | { status: 'error' } | { status: 'ready'; address: string };
 
 // What the conversion instructions opened from Receive convert: the exact Ethereum twin into the
 // exact ck token.

@@ -26,10 +26,10 @@
 	import { WizardStepsReceiveToken } from '$lib/enums/wizard-steps';
 	import { retryReceiveAddress } from '$lib/services/receive.services';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import type { ExchangesData } from '$lib/types/exchange';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
+	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type {
 		ReceiveAddressState,
@@ -163,7 +163,13 @@
 			: undefined
 	);
 
-	const selectAsset = (selected: ReceiveAsset, { fromTokenStep }: { fromTokenStep: boolean }) => {
+	const selectAsset = ({
+		asset: selected,
+		fromTokenStep
+	}: {
+		asset: ReceiveAsset;
+		fromTokenStep: boolean;
+	}) => {
 		assetKey = selected.key;
 		routeKey = undefined;
 		icpFormat = 'principal';
@@ -215,7 +221,7 @@
 			const initialAsset = findReceiveAssetByToken({ assets, token: initialToken });
 
 			if (nonNullish(initialAsset)) {
-				selectAsset(initialAsset, { fromTokenStep: false });
+				selectAsset({ asset: initialAsset, fromTokenStep: false });
 			}
 
 			ready = true;
@@ -401,7 +407,7 @@
 				return;
 			}
 
-			selectAsset(importedAsset, { fromTokenStep: true });
+			selectAsset({ asset: importedAsset, fromTokenStep: true });
 		});
 	});
 
@@ -508,7 +514,7 @@
 					{assets}
 					onClose={close}
 					onImport={startImport}
-					onSelect={(selected) => selectAsset(selected, { fromTokenStep: true })}
+					onSelect={(selected) => selectAsset({ asset: selected, fromTokenStep: true })}
 					selectedKey={assetKey}
 					bind:filter
 				/>

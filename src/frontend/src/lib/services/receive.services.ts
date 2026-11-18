@@ -37,40 +37,31 @@ export const retryReceiveAddress = async ({
 }): Promise<void> => {
 	const { id: networkId } = sourceNetwork;
 
-	switch (addressKind) {
-		case 'evm':
-			await loadEthAddress();
-			return;
-		case 'ckbtc-deposit':
-			if (isIcCkToken(creditedToken)) {
-				await loadCkBtcDepositAddress({ ...creditedToken, identity });
-			}
-			return;
-		case 'btc':
-			if (isNetworkIdBTCMainnet(networkId)) {
-				await loadBtcAddressMainnet();
-			} else if (isNetworkIdBTCTestnet(networkId)) {
-				await loadBtcAddressTestnet();
-			} else if (isNetworkIdBTCRegtest(networkId)) {
-				await loadBtcAddressRegtest();
-			}
-			return;
-		case 'sol':
-			if (isNetworkIdSOLMainnet(networkId)) {
-				await loadSolAddressMainnet();
-			} else if (isNetworkIdSOLDevnet(networkId)) {
-				await loadSolAddressDevnet();
-			} else if (isNetworkIdSOLLocal(networkId)) {
-				await loadSolAddressLocal();
-			}
-			return;
-		case 'xrp':
-			if (isNetworkIdXRPMainnet(networkId)) {
-				await loadXrpAddressMainnet();
-			}
-			return;
-		case 'icp':
-		case 'icrc':
-			return;
+	if (addressKind === 'ckbtc-deposit') {
+		if (isIcCkToken(creditedToken)) {
+			await loadCkBtcDepositAddress({ ...creditedToken, identity });
+		}
+		return;
 	}
+
+	const load =
+		addressKind === 'evm'
+			? loadEthAddress
+			: isNetworkIdBTCMainnet(networkId)
+				? loadBtcAddressMainnet
+				: isNetworkIdBTCTestnet(networkId)
+					? loadBtcAddressTestnet
+					: isNetworkIdBTCRegtest(networkId)
+						? loadBtcAddressRegtest
+						: isNetworkIdSOLMainnet(networkId)
+							? loadSolAddressMainnet
+							: isNetworkIdSOLDevnet(networkId)
+								? loadSolAddressDevnet
+								: isNetworkIdSOLLocal(networkId)
+									? loadSolAddressLocal
+									: isNetworkIdXRPMainnet(networkId)
+										? loadXrpAddressMainnet
+										: undefined;
+
+	await load?.();
 };

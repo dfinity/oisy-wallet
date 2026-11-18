@@ -4,12 +4,12 @@ import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc
 import { IC_CKUSDC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
 import type { EthAddress } from '$eth/types/address';
 import type { BtcAddressData } from '$icp/stores/btc.store';
+import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import {
 	isTokenCkBtcLedger,
 	isTokenCkErc20Ledger,
 	isTokenCkEthLedger
 } from '$icp/utils/ic-send.utils';
-import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import { isTokenIc, isTokenIcp } from '$icp/utils/icrc.utils';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import type { AddressStoreData } from '$lib/stores/address.store';

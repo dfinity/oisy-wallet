@@ -1,18 +1,19 @@
-import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import {
 	BASE_NETWORK_ID,
 	BASE_SEPOLIA_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.base.env';
+import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDC_TOKEN as ARBITRUM_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdc.env';
 import { USDCE_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdce.env';
 import {
 	SEPOLIA_USDC_TOKEN as BASE_SEPOLIA_USDC_TOKEN,
 	USDC_TOKEN as BASE_USDC_TOKEN
 } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
-import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import {
 	IC_CKBTC_LEDGER_CANISTER_ID,
 	IC_CKBTC_MINTER_CANISTER_ID
@@ -22,7 +23,6 @@ import {
 	IC_CKETH_LEDGER_CANISTER_ID,
 	IC_CKETH_MINTER_CANISTER_ID
 } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
-import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -167,7 +167,7 @@ describe('receive.utils', () => {
 			[BASE_USDC_TOKEN, 'evm'],
 			[BTC_MAINNET_TOKEN, 'btc'],
 			[SOLANA_TOKEN, 'sol']
-		])('should resolve %s.symbol to %s', (token, kind) => {
+		])('should resolve %s.symbol to %s', (...[token, kind]) => {
 			expect(getReceiveAddressKind(token)).toBe(kind);
 		});
 	});
@@ -328,7 +328,9 @@ describe('receive.utils', () => {
 				})
 			).toBe(SEPOLIA_TOKEN);
 
-			expect(getReceiveConvertTwinToken({ token: ckSepoliaEth, enabledNetworkIds })).toBeUndefined();
+			expect(
+				getReceiveConvertTwinToken({ token: ckSepoliaEth, enabledNetworkIds })
+			).toBeUndefined();
 		});
 
 		it('should offer no conversion for ckBTC or a token without a twin', () => {
@@ -352,11 +354,11 @@ describe('receive.utils', () => {
 			ckBtcDeposit: undefined
 		};
 
-		const routeOf = (token: Token, index = 0): ReceiveRoute =>
+		const routeOf = ({ token, index = 0 }: { token: Token; index?: number }): ReceiveRoute =>
 			getReceiveRoutes({ tokens: [token], enabledNetworkIds })[index];
 
 		it('should open native ICP on the Principal and switch to the Account ID', () => {
-			const route = routeOf(ICP_TOKEN);
+			const route = routeOf({ token: ICP_TOKEN });
 
 			expect(resolveReceiveAddress({ route, icpFormat: 'principal', sources })).toEqual({
 				status: 'ready',
@@ -370,7 +372,11 @@ describe('receive.utils', () => {
 
 		it('should give ICRC tokens the ICRC address whatever the ICP format', () => {
 			expect(
-				resolveReceiveAddress({ route: routeOf(ckBtcToken), icpFormat: 'account-id', sources })
+				resolveReceiveAddress({
+					route: routeOf({ token: ckBtcToken }),
+					icpFormat: 'account-id',
+					sources
+				})
 			).toEqual({ status: 'ready', address: mockPrincipalText });
 		});
 
@@ -385,12 +391,15 @@ describe('receive.utils', () => {
 			const resolve = (route: ReceiveRoute) =>
 				resolveReceiveAddress({ route, icpFormat: 'principal', sources: withDeposit });
 
-			expect(resolve(routeOf(BTC_MAINNET_TOKEN))).toEqual({
+			expect(resolve(routeOf({ token: BTC_MAINNET_TOKEN }))).toEqual({
 				status: 'ready',
 				address: mockBtcAddress
 			});
-			expect(resolve(routeOf(ckBtcToken))).toEqual({ status: 'ready', address: mockPrincipalText });
-			expect(resolve(routeOf(ckBtcToken, 1))).toEqual({
+			expect(resolve(routeOf({ token: ckBtcToken }))).toEqual({
+				status: 'ready',
+				address: mockPrincipalText
+			});
+			expect(resolve(routeOf({ token: ckBtcToken, index: 1 }))).toEqual({
 				status: 'ready',
 				address: depositAddress
 			});
@@ -398,14 +407,18 @@ describe('receive.utils', () => {
 
 		it('should not show an uncertified wallet address', () => {
 			expect(
-				resolveReceiveAddress({ route: routeOf(SOLANA_TOKEN), icpFormat: 'principal', sources })
+				resolveReceiveAddress({
+					route: routeOf({ token: SOLANA_TOKEN }),
+					icpFormat: 'principal',
+					sources
+				})
 			).toEqual({ status: 'loading' });
 		});
 
 		it('should report a failed load as an error', () => {
 			expect(
 				resolveReceiveAddress({
-					route: routeOf(ckBtcToken, 1),
+					route: routeOf({ token: ckBtcToken, index: 1 }),
 					icpFormat: 'principal',
 					sources: { ...sources, ckBtcDeposit: { [ckBtcToken.id]: null } }
 				})
@@ -415,13 +428,21 @@ describe('receive.utils', () => {
 		it('should never answer a route with the address of another one', () => {
 			// The deposit address is still loading while the BTC wallet address is ready.
 			expect(
-				resolveReceiveAddress({ route: routeOf(ckBtcToken, 1), icpFormat: 'principal', sources })
+				resolveReceiveAddress({
+					route: routeOf({ token: ckBtcToken, index: 1 }),
+					icpFormat: 'principal',
+					sources
+				})
 			).toEqual({ status: 'loading' });
 		});
 
 		it('should use the shared EVM address for an EVM token', () => {
 			expect(
-				resolveReceiveAddress({ route: routeOf(BASE_USDC_TOKEN), icpFormat: 'principal', sources })
+				resolveReceiveAddress({
+					route: routeOf({ token: BASE_USDC_TOKEN }),
+					icpFormat: 'principal',
+					sources
+				})
 			).toEqual({ status: 'ready', address: mockEthAddress });
 		});
 	});

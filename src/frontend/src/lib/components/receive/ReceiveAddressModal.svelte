@@ -7,8 +7,8 @@
 	import { RECEIVE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { WizardStepsReceiveAddress } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Network } from '$lib/types/network';
+	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';

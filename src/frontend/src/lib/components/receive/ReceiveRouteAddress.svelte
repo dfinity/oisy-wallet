@@ -155,11 +155,7 @@
 	</div>
 
 	{#if addressKind === 'icp'}
-		<div
-			class="mb-4 flex gap-2"
-			aria-label={$i18n.receive.token.text.address_format}
-			role="group"
-		>
+		<div class="mb-4 flex gap-2" aria-label={$i18n.receive.token.text.address_format} role="group">
 			<Button
 				colorStyle={icpFormat === 'principal' ? 'primary' : 'secondary-light'}
 				fullWidth
@@ -203,9 +199,7 @@
 			onclick={onEnable}
 			testId={RECEIVE_ENABLE_TOKEN_BUTTON}
 		>
-			{enabling
-				? $i18n.receive.token.text.enabling
-				: $i18n.receive.token.text.enable_and_show}
+			{enabling ? $i18n.receive.token.text.enabling : $i18n.receive.token.text.enable_and_show}
 		</Button>
 	{:else}
 		{#if deposit}

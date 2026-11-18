@@ -5,13 +5,13 @@ import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OisyTradeOrderView, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
+import type { ReceiveHowToConvertData } from '$lib/types/receive';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
 import type { SendModalData } from '$lib/types/send';
 import type { PendingTipClaim } from '$lib/types/tip';
 import type { NavigationTarget } from '@sveltejs/kit';
 import { derived, type Readable } from 'svelte/store';
-import type { ReceiveHowToConvertData } from '$lib/types/receive';
 
 export const modalReceive: Readable<boolean> = derived(
 	modalStore,
