@@ -66,6 +66,43 @@ export class XrpSendNotGuardedError extends Error {}
 export class XrpTrustSetUnfundedError extends Error {}
 
 /**
+ * Why a payment is refused before signing: each reason is one the ledger would answer by applying
+ * the payment as a failure that claims the fee, or one where the wallet could not find out.
+ */
+export type XrpPaymentRefusal =
+	// The amount has more significant digits than a token amount can carry.
+	| 'imprecise_amount'
+	| 'insufficient_token_balance'
+	| 'insufficient_xrp_for_fee'
+	// A token payment cannot create the recipient's account.
+	| 'destination_not_found'
+	| 'deposit_not_authorized'
+	| 'no_trust_line'
+	| 'trust_line_limit'
+	| 'destination_frozen'
+	| 'destination_not_authorized'
+	| 'frozen'
+	| 'deep_frozen'
+	| 'no_rippling'
+	// The issuer raised its transfer fee after the review priced the payment.
+	| 'transfer_rate_changed'
+	| 'state_unavailable';
+
+/**
+ * A payment refused before anything is signed. One type with the reason rather than one type per
+ * reason: the caller matches it exhaustively, so a new reason fails to compile until it has a
+ * message.
+ */
+export class XrpPaymentRefusedError extends Error {
+	readonly refusal: XrpPaymentRefusal;
+
+	constructor({ refusal, message }: { refusal: XrpPaymentRefusal; message: string }) {
+		super(message);
+		this.refusal = refusal;
+	}
+}
+
+/**
  * The AUT an XRP payment is recorded under — the record that holds the one-payment-in-flight
  * invariant and that the ledger resolution closes. A send is recorded under its own `Xrp` AUT, and
  * a swap's deposit under the swap's `NearIntents` AUT, since that payment is part of the swap and
