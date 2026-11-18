@@ -14,7 +14,8 @@ import {
 	toXrpLedgerResolutionRefs,
 	xrpActiveUserTransactionDisplay,
 	xrpActiveUserTransactionNetwork,
-	xrpActiveUserTransactionPollKeys
+	xrpActiveUserTransactionPollKeys,
+	xrpTrustSetActiveUserTransactionDisplay
 } from '$xrp/utils/xrp-active-tx.utils';
 import { xrpPaymentSettledStatus } from '$xrp/utils/xrp-in-flight.utils';
 import {
@@ -26,9 +27,10 @@ import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 /**
- * Resolves one open XRP payment record against the ledger, in a single pass: a send's own row, or a
- * swap's row while its deposit is `Pending`. A validated `tesSUCCESS` ends a send, and moves a swap
- * to `Executing`, from where 1Click decides the swap's outcome.
+ * Resolves one open XRP transaction record against the ledger, in a single pass: a send's or a
+ * `TrustSet`'s own row, or a swap's row while its deposit is `Pending`. A validated `tesSUCCESS`
+ * ends a send or a `TrustSet`, and moves a swap to `Executing`, from where 1Click decides the
+ * swap's outcome.
  *
  * This is the **only** thing that resolves an XRP record. The send stops at
  * submit and never writes a terminal status, so there is one confirmation path
@@ -78,12 +80,7 @@ const pollXrpActiveUserTransaction = async ({
 				tx,
 				candidate: succeeded ? xrpPaymentSettledStatus(tx) : { Failed: null },
 				ledgerResult: outcome.transactionResult,
-				error: succeeded
-					? undefined
-					: replacePlaceholders(get(i18n).send.error.xrp_active_transaction_failed, {
-							...xrpFailureSubject(tx),
-							$result: outcome.transactionResult
-						})
+				error: succeeded ? undefined : xrpFailureText({ tx, result: outcome.transactionResult })
 			});
 
 			return;
@@ -125,12 +122,7 @@ const pollXrpActiveUserTransaction = async ({
 				tx,
 				candidate: succeeded ? xrpPaymentSettledStatus(tx) : { Failed: null },
 				ledgerResult: recheck.transactionResult,
-				error: succeeded
-					? undefined
-					: replacePlaceholders(get(i18n).send.error.xrp_active_transaction_failed, {
-							...xrpFailureSubject(tx),
-							$result: recheck.transactionResult
-						})
+				error: succeeded ? undefined : xrpFailureText({ tx, result: recheck.transactionResult })
 			});
 
 			return;
@@ -151,7 +143,7 @@ const pollXrpActiveUserTransaction = async ({
 			tx,
 			candidate: { Failed: null },
 			ledgerResult: XRP_LEDGER_RESULT_EXPIRED,
-			error: replacePlaceholders(get(i18n).send.error.xrp_send_expired, xrpFailureSubject(tx))
+			error: xrpExpiryText(tx)
 		});
 	} catch (err: unknown) {
 		// Every failure lands here as "leave it Pending": a lookup the node could
@@ -176,6 +168,37 @@ const xrpFailureSubject = (tx: ActiveUserTransaction): Record<string, string> =>
 		$symbol: display?.symbol ?? '',
 		$network: display?.network ?? ''
 	};
+};
+
+/**
+ * What a row applied and failed says: a `TrustSet` added no token, a payment sent nothing; the fee
+ * was charged either way.
+ */
+const xrpFailureText = ({ tx, result }: { tx: ActiveUserTransaction; result: string }): string => {
+	const trustSet = xrpTrustSetActiveUserTransactionDisplay(tx);
+
+	return nonNullish(trustSet)
+		? replacePlaceholders(get(i18n).tokens.import.error.xrp_trust_set_failed, {
+				$symbol: trustSet.symbol,
+				$network: trustSet.network,
+				$result: result
+			})
+		: replacePlaceholders(get(i18n).send.error.xrp_active_transaction_failed, {
+				...xrpFailureSubject(tx),
+				$result: result
+			});
+};
+
+// What a row that expired says: nothing was applied and nothing was charged.
+const xrpExpiryText = (tx: ActiveUserTransaction): string => {
+	const trustSet = xrpTrustSetActiveUserTransactionDisplay(tx);
+
+	return nonNullish(trustSet)
+		? replacePlaceholders(get(i18n).tokens.import.error.xrp_trust_set_expired, {
+				$symbol: trustSet.symbol,
+				$network: trustSet.network
+			})
+		: replacePlaceholders(get(i18n).send.error.xrp_send_expired, xrpFailureSubject(tx));
 };
 
 const applyXrpStatus = async ({
