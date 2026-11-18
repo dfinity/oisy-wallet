@@ -5,11 +5,12 @@ type BuildFlavour = Partial<Pick<typeof AppConstants, 'LOCAL' | 'STAGING' | 'BET
 describe('tokens.icrc.ck.sol.env', () => {
 	afterEach(() => {
 		vi.doUnmock('$lib/constants/app.constants');
+		vi.doUnmock('$env/cksol.env');
 		vi.resetModules();
 	});
 
-	// The rollout flag and the token both read the build flavour at import, so the
-	// constants are mocked and the modules imported again for each flavour.
+	// The token reads the build flavour at import, so the constants are mocked and the
+	// modules imported again for each flavour.
 	const importForFlavour = async (flavour: BuildFlavour) => {
 		vi.doMock('$lib/constants/app.constants', async (importOriginal) => ({
 			...(await importOriginal<typeof AppConstants>()),
@@ -30,22 +31,25 @@ describe('tokens.icrc.ck.sol.env', () => {
 		return { CKSOL_IC_DATA, ICRC_CK_SOL_TOKENS, SOLANA_TOKEN, SOL_TOKEN_GROUP };
 	};
 
-	it('should list mainnet ckSOL as the twin of SOL, grouped with it, on staging', async () => {
-		const { CKSOL_IC_DATA, ICRC_CK_SOL_TOKENS, SOLANA_TOKEN, SOL_TOKEN_GROUP } =
-			await importForFlavour({ STAGING: true });
+	it.each<BuildFlavour>([{ STAGING: true }, { BETA: true }, { PROD: true }])(
+		'should list mainnet ckSOL as the twin of SOL, grouped with it: %o',
+		async (flavour) => {
+			const { CKSOL_IC_DATA, ICRC_CK_SOL_TOKENS, SOLANA_TOKEN, SOL_TOKEN_GROUP } =
+				await importForFlavour(flavour);
 
-		expect(CKSOL_IC_DATA).toEqual({
-			ledgerCanisterId: 'ls5lp-lqaaa-aaaar-qb5oa-cai',
-			indexCanisterId: '2ezyf-hqaaa-aaaar-qb6ga-cai',
-			minterCanisterId: 'lh22c-kyaaa-aaaar-qb5nq-cai',
-			exchangeCoinId: 'solana',
-			twinToken: SOLANA_TOKEN,
-			groupData: SOL_TOKEN_GROUP,
-			explorerUrl: 'https://dashboard.internetcomputer.org/tokens/ls5lp-lqaaa-aaaar-qb5oa-cai'
-		});
-		expect(ICRC_CK_SOL_TOKENS).toEqual([CKSOL_IC_DATA]);
-		expect(SOLANA_TOKEN.groupData).toEqual(SOL_TOKEN_GROUP);
-	});
+			expect(CKSOL_IC_DATA).toEqual({
+				ledgerCanisterId: 'ls5lp-lqaaa-aaaar-qb5oa-cai',
+				indexCanisterId: '2ezyf-hqaaa-aaaar-qb6ga-cai',
+				minterCanisterId: 'lh22c-kyaaa-aaaar-qb5nq-cai',
+				exchangeCoinId: 'solana',
+				twinToken: SOLANA_TOKEN,
+				groupData: SOL_TOKEN_GROUP,
+				explorerUrl: 'https://dashboard.internetcomputer.org/tokens/ls5lp-lqaaa-aaaar-qb5oa-cai'
+			});
+			expect(ICRC_CK_SOL_TOKENS).toEqual([CKSOL_IC_DATA]);
+			expect(SOLANA_TOKEN.groupData).toEqual(SOL_TOKEN_GROUP);
+		}
+	);
 
 	it('should list no ckSOL on local builds, which reach no mainnet canister', async () => {
 		const { CKSOL_IC_DATA, ICRC_CK_SOL_TOKENS } = await importForFlavour({ LOCAL: true });
@@ -54,9 +58,11 @@ describe('tokens.icrc.ck.sol.env', () => {
 		expect(ICRC_CK_SOL_TOKENS).toEqual([]);
 	});
 
-	it.each<BuildFlavour>([{ BETA: true }, { PROD: true }])(
-		'should list no ckSOL and leave SOL ungrouped while the flag is off: %o',
+	it.each<BuildFlavour>([{ STAGING: true }, { BETA: true }, { PROD: true }])(
+		'should list no ckSOL and leave SOL ungrouped when the kill switch is off: %o',
 		async (flavour) => {
+			vi.doMock('$env/cksol.env', () => ({ CKSOL_ENABLED: false }));
+
 			const { CKSOL_IC_DATA, ICRC_CK_SOL_TOKENS, SOLANA_TOKEN } = await importForFlavour(flavour);
 
 			expect(CKSOL_IC_DATA).toBeUndefined();
