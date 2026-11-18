@@ -7,14 +7,19 @@ import type { XrpAddress } from '$xrp/types/address';
 import { fromNullable, nonNullish } from '@dfinity/utils';
 
 /**
- * The XRP address a row's payment is sent from, for the rows that make one: an XRP send, and a
- * NEAR Intents swap whose deposit is an XRP payment. With `holdsXrpAddress`, the one place that
- * knows which rows those are — a new kind of row that makes an XRP payment is added here and
- * nowhere else. The backend's `xrp_payment_source` and `holds_xrp_address` make the same call.
+ * The XRP address a row's transaction is signed from, for the rows that sign one: an XRP send or
+ * `TrustSet`, and a NEAR Intents swap whose deposit is an XRP payment. With `holdsXrpAddress`, the
+ * one place that knows which rows those are — a new kind of row that takes the address's `Sequence`
+ * is added here and nowhere else. The backend's `xrp_payment_source` and `holds_xrp_address` make
+ * the same call.
  */
 const xrpPaymentSource = (tx: ActiveUserTransaction): string | undefined => {
 	if ('Xrp' in tx.data) {
 		return tx.data.Xrp.source_address;
+	}
+
+	if ('XrpTrustSet' in tx.data) {
+		return tx.data.XrpTrustSet.source_address;
 	}
 
 	if ('NearIntents' in tx.data) {
@@ -25,13 +30,13 @@ const xrpPaymentSource = (tx: ActiveUserTransaction): string | undefined => {
 };
 
 /**
- * Whether a row's XRP payment can still apply. A send's can until the row is terminal, and
- * terminality comes from `isTerminalActiveUserTransaction` so there is one definition of it. A
- * swap's deposit can only while the row is `Pending`: once the deposit validates the row moves to
- * `Executing`, and the swap goes on at 1Click without holding the address.
+ * Whether a row's XRP transaction can still apply. A send's or a `TrustSet`'s can until the row is
+ * terminal, and terminality comes from `isTerminalActiveUserTransaction` so there is one definition
+ * of it. A swap's deposit can only while the row is `Pending`: once the deposit validates the row
+ * moves to `Executing`, and the swap goes on at 1Click without holding the address.
  */
 const holdsXrpAddress = (tx: ActiveUserTransaction): boolean => {
-	if ('Xrp' in tx.data) {
+	if ('Xrp' in tx.data || 'XrpTrustSet' in tx.data) {
 		return !isTerminalActiveUserTransaction(tx);
 	}
 
@@ -43,8 +48,9 @@ const holdsXrpAddress = (tx: ActiveUserTransaction): boolean => {
 };
 
 /**
- * Whether a row makes an XRP payment, whatever its status: a send, or a swap whose deposit is one.
- * Such a row changes the XRP balance even when it fails on the ledger, which still charges the fee.
+ * Whether a row signs an XRP transaction, whatever its status: a send or a `TrustSet`, or a swap
+ * whose deposit is a payment. Such a row changes the XRP balance even when it fails on the ledger,
+ * which still charges the fee.
  */
 export const makesXrpPayment = (tx: ActiveUserTransaction): boolean =>
 	nonNullish(xrpPaymentSource(tx));
@@ -57,9 +63,9 @@ export const isXrpPaymentInFlight = (tx: ActiveUserTransaction): boolean =>
 	makesXrpPayment(tx) && holdsXrpAddress(tx);
 
 /**
- * The status a row moves to once its XRP payment validates with `tesSUCCESS`. A send is the whole
- * transaction, so it has succeeded. A swap has only paid its deposit: it goes on at 1Click, which
- * decides the swap's outcome from `Executing`.
+ * The status a row moves to once its XRP transaction validates with `tesSUCCESS`. A send or a
+ * `TrustSet` is the whole transaction, so it has succeeded. A swap has only paid its deposit: it
+ * goes on at 1Click, which decides the swap's outcome from `Executing`.
  */
 export const xrpPaymentSettledStatus = (tx: ActiveUserTransaction): ActiveUserTransactionStatus =>
 	'NearIntents' in tx.data ? { Executing: null } : { Succeeded: null };
