@@ -1497,7 +1497,8 @@
 			"cksol_deposit_terms_changed": "Minter ckSOL đã thay đổi điều kiện kể từ báo giá này. Không có SOL nào được gửi. Vui lòng xem báo giá mới.",
 			"cksol_earlier_deposit_quarantined": "Minter ckSOL đã ngừng xử lý một khoản nạp trước đó của bạn và sẽ không nhận khoản nạp mới cho đến khi vấn đề được giải quyết. Không có SOL nào được gửi.",
 			"cksol_minter_unavailable": "Minter ckSOL hiện không thể nhận khoản nạp. Không có SOL nào được gửi. Vui lòng thử lại sau.",
-			"cksol_deposit_quarantined": "Minter ckSOL đã ngừng xử lý khoản nạp này. Minter giữ số SOL cho đến khi một bản nâng cấp minter giải quyết khoản nạp."
+			"cksol_deposit_quarantined": "Minter ckSOL đã ngừng xử lý khoản nạp này. Minter giữ số SOL cho đến khi một bản nâng cấp minter giải quyết khoản nạp.",
+			"cksol_deposit_below_minimum": "Minter ckSOL không thể thu gom khoản nạp này và số SOL còn lại trên địa chỉ nạp của bạn thấp hơn mức nạp tối thiểu. Số SOL này sẽ được chuyển đổi cùng với lần chuyển đổi từ SOL sang ckSOL tiếp theo của bạn."
 		}
 	},
 	"buy": {

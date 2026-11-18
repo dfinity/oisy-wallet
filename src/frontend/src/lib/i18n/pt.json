@@ -1497,7 +1497,8 @@
 			"cksol_deposit_terms_changed": "O minter ckSOL mudou suas condições desde esta oferta. Nenhum SOL foi enviado. Confira a nova oferta.",
 			"cksol_earlier_deposit_quarantined": "O minter ckSOL parou de processar um depósito anterior seu e não aceita um novo até que ele seja resolvido. Nenhum SOL foi enviado.",
 			"cksol_minter_unavailable": "O minter ckSOL não pode receber um depósito agora. Nenhum SOL foi enviado. Tente novamente mais tarde.",
-			"cksol_deposit_quarantined": "O minter ckSOL parou de processar este depósito. Ele mantém os SOL até que uma atualização do minter resolva o depósito."
+			"cksol_deposit_quarantined": "O minter ckSOL parou de processar este depósito. Ele mantém os SOL até que uma atualização do minter resolva o depósito.",
+			"cksol_deposit_below_minimum": "O minter ckSOL não conseguiu recolher este depósito, e os SOL que ficaram no seu endereço de depósito estão abaixo do valor mínimo de depósito. Eles serão convertidos na sua próxima conversão de SOL para ckSOL."
 		}
 	},
 	"buy": {

@@ -29,6 +29,7 @@ import {
 	signature as solSignature,
 	type Address,
 	type Base64EncodedWireTransaction,
+	type Commitment,
 	type Lamports,
 	type ReadonlyUint8Array,
 	type Signature,
@@ -267,19 +268,33 @@ export const getSolCreateAccountFee = async (network: SolanaNetworkType): Promis
 };
 
 /**
- * The lamports an address holds, read at the RPC's default commitment and never cached: a caller
- * reads it to see what has arrived since.
+ * The lamports an address holds, read at the RPC's default commitment unless `commitment` names
+ * another, and never cached: a caller reads it to see what has arrived since. With
+ * `minContextSlot`, a node not that far yet refuses to answer, and the read throws.
  */
 export const getSolBalance = async ({
 	address,
-	network
+	network,
+	minContextSlot,
+	commitment
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
+	minContextSlot?: bigint;
+	commitment?: Commitment;
 }): Promise<bigint> => {
 	const { getBalance } = solanaHttpRpc(network);
 
-	const { value } = await getBalance(solAddress(address)).send();
+	const config = {
+		...(nonNullish(commitment) && { commitment }),
+		...(nonNullish(minContextSlot) && { minContextSlot })
+	};
+
+	const { value } = await (
+		Object.keys(config).length > 0
+			? getBalance(solAddress(address), config)
+			: getBalance(solAddress(address))
+	).send();
 
 	return value;
 };

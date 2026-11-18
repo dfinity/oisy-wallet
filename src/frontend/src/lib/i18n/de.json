@@ -1497,7 +1497,8 @@
 			"cksol_deposit_terms_changed": "Der ckSOL-Minter hat seine Bedingungen seit diesem Angebot geändert. Es wurden keine SOL gesendet. Bitte prüfe das neue Angebot.",
 			"cksol_earlier_deposit_quarantined": "Der ckSOL-Minter hat die Verarbeitung einer deiner früheren Einzahlungen gestoppt und nimmt keine neue an, bis sie geklärt ist. Es wurden keine SOL gesendet.",
 			"cksol_minter_unavailable": "Der ckSOL-Minter kann gerade keine Einzahlung annehmen. Es wurden keine SOL gesendet. Bitte versuche es später erneut.",
-			"cksol_deposit_quarantined": "Der ckSOL-Minter hat die Verarbeitung dieser Einzahlung gestoppt. Er behält die SOL, bis ein Minter-Upgrade die Einzahlung klärt."
+			"cksol_deposit_quarantined": "Der ckSOL-Minter hat die Verarbeitung dieser Einzahlung gestoppt. Er behält die SOL, bis ein Minter-Upgrade die Einzahlung klärt.",
+			"cksol_deposit_below_minimum": "Der ckSOL-Minter konnte diese Einzahlung nicht abholen, und die SOL auf deiner Einzahlungsadresse liegen unter dem Mindesteinzahlungsbetrag. Sie werden mit deiner nächsten Umwandlung von SOL in ckSOL umgewandelt."
 		}
 	},
 	"buy": {

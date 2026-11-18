@@ -398,6 +398,13 @@ export const chainFusionSolMintStatusError = (status: DepositSolStatus): string 
 	'Quarantined' in status ? get(i18n).swap.error.cksol_deposit_quarantined : undefined;
 
 /**
+ * The error a ckSOL mint row fails with when its deposit was dropped and what is left on the deposit
+ * address is below the minimum: no sweep will come, and the next conversion converts the rest.
+ */
+export const chainFusionSolDepositBelowMinimumError = (): string =>
+	get(i18n).swap.error.cksol_deposit_below_minimum;
+
+/**
  * The error a ckSOL mint row fails with when its transfer moved no SOL: the transfer can no longer
  * land, or it landed and failed. `undefined` while it may still land, or once it has.
  */

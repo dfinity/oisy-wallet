@@ -562,6 +562,23 @@ export interface SwapLifiSolParams {
 	reviewedCeiling: bigint;
 }
 
+export interface SwapLifiBtcParams {
+	identity: Identity;
+	progress: (step: ProgressStep) => void;
+	sourceToken: Token;
+	destinationToken: Token;
+	swapAmount: Amount;
+	// The user's Bitcoin address: LI.FI's `fromAddress`, the source of the inputs and where the change
+	// goes.
+	userAddress: BtcAddress;
+	network: BitcoinNetwork;
+	offer: Extract<SwapMappedResult, { provider: SwapProvider.LIFI }>;
+	// The selection and the fee the user reviewed, priced for LI.FI's layout. Execution pays that fee,
+	// plus any change below 1,000 sats, which goes to the miner, and refuses a re-quoted layout it no
+	// longer prices.
+	utxosFee: UtxosFee;
+}
+
 interface SwapNearIntentsParams {
 	identity: Identity;
 	progress: (step: ProgressStep) => void;

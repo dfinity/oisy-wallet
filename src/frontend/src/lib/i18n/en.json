@@ -1497,7 +1497,8 @@
 			"cksol_deposit_terms_changed": "The ckSOL minter changed its terms since this offer. No SOL was sent. Please check the new offer.",
 			"cksol_earlier_deposit_quarantined": "The ckSOL minter stopped processing an earlier deposit of yours and takes no new one until it is resolved. No SOL was sent.",
 			"cksol_minter_unavailable": "The ckSOL minter can't take a deposit right now. No SOL was sent. Please try again later.",
-			"cksol_deposit_quarantined": "The ckSOL minter stopped processing this deposit. It holds the SOL until a minter upgrade resolves the deposit."
+			"cksol_deposit_quarantined": "The ckSOL minter stopped processing this deposit. It holds the SOL until a minter upgrade resolves the deposit.",
+			"cksol_deposit_below_minimum": "The ckSOL minter couldn't sweep this deposit, and the SOL left on your deposit address is below the minimum deposit amount. It is converted with your next conversion from SOL to ckSOL."
 		}
 	},
 	"buy": {
