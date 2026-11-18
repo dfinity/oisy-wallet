@@ -17,7 +17,10 @@ export const mockXrpTrustLine: XrpTrustLine = {
 	limit: '9999999999999999e80',
 	limitPeer: '0',
 	noRipple: true,
+	noRipplePeer: false,
 	peerAuthorized: false,
+	freeze: false,
+	deepFreeze: false,
 	freezePeer: false,
 	deepFreezePeer: false
 };

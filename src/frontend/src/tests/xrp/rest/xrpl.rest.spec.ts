@@ -2127,9 +2127,12 @@ describe('xrpl.rest', () => {
 							currency: 'USD',
 							balance: '5800000000000000e13',
 							peer_authorized: true,
+							freeze: true,
+							deep_freeze: true,
 							freeze_peer: true,
 							deep_freeze_peer: true,
-							no_ripple: true
+							no_ripple: true,
+							no_ripple_peer: true
 						})
 					]
 				})
@@ -2143,7 +2146,10 @@ describe('xrpl.rest', () => {
 					limit: '1000000000',
 					limitPeer: '0',
 					noRipple: false,
+					noRipplePeer: false,
 					peerAuthorized: false,
+					freeze: false,
+					deepFreeze: false,
 					freezePeer: false,
 					deepFreezePeer: false
 				},
@@ -2154,7 +2160,10 @@ describe('xrpl.rest', () => {
 					limit: '1000000000',
 					limitPeer: '0',
 					noRipple: true,
+					noRipplePeer: true,
 					peerAuthorized: true,
+					freeze: true,
+					deepFreeze: true,
 					freezePeer: true,
 					deepFreezePeer: true
 				}
@@ -2294,6 +2303,51 @@ describe('xrpl.rest', () => {
 			await expect(loadXrpAccountLines({ address, network })).rejects.toThrow(
 				'Unexpected XRPL account_lines response: slowDown'
 			);
+		});
+
+		// The send reads one holder's lines with the issuer this way.
+		describe('with a peer', () => {
+			it('asks for the lines with that account only', async () => {
+				const fetchMock = mockFetchPages([page()]);
+
+				await loadXrpAccountLines({ address, network, peer: issuer });
+
+				expect(requestParams({ fetchMock, call: 0 })).toEqual({
+					account: address,
+					ledger_index: 'validated',
+					limit: 400,
+					peer: issuer
+				});
+			});
+
+			// Checked live: the node filters the account's objects page by page, so a page can come
+			// back without the line and with a marker.
+			it('keeps following the marker, with the peer, until the last page', async () => {
+				const fetchMock = mockFetchPages([
+					page({ lines: [], marker: 'NEXT', ledgerIndex: 100 }),
+					page({ ledgerIndex: 100 })
+				]);
+
+				await expect(loadXrpAccountLines({ address, network, peer: issuer })).resolves.toEqual([
+					expect.objectContaining({ currency, issuer })
+				]);
+
+				expect(requestParams({ fetchMock, call: 1 })).toEqual({
+					account: address,
+					ledger_index: 100,
+					limit: 400,
+					peer: issuer,
+					marker: 'NEXT'
+				});
+			});
+
+			it('throws for a line with another account than the peer', async () => {
+				mockFetchPages([page({ lines: [rawLine({ account: address })] })]);
+
+				await expect(loadXrpAccountLines({ address, network, peer: issuer })).rejects.toThrow(
+					`a line with an account other than ${issuer}`
+				);
+			});
 		});
 	});
 
