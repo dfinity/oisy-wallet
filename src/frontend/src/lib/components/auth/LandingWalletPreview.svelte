@@ -121,20 +121,10 @@
 	});
 
 	// Illustrative balances keep the signed-out preview independent of wallet data.
-	const portfolioBalance = 28406.15;
 	const bitcoinBalance = 5249.84;
-	const balanceDelay = 120;
-	const balanceDuration = 420;
-	const characterDuration = 160;
-	const tokenDelay = 175;
-	const tokenStagger = 65;
 	const tokenDuration = 170;
 	const currency = $derived(
 		new Intl.NumberFormat($i18n.lang, { style: 'currency', currency: 'USD' })
-	);
-	const balanceCharacters = $derived(Array.from(currency.format(portfolioBalance)));
-	const characterStagger = $derived(
-		(balanceDuration - characterDuration) / Math.max(1, balanceCharacters.length - 1)
 	);
 	const transactionDate = $derived(
 		new Intl.DateTimeFormat($i18n.lang, { month: 'long', day: 'numeric', timeZone: 'UTC' })
@@ -147,7 +137,8 @@
 			icon: bitcoin,
 			price: 84132,
 			balance: '0.0624',
-			value: bitcoinBalance
+			value: bitcoinBalance,
+			revealAt: 140
 		},
 		{
 			symbol: 'ICP',
@@ -155,7 +146,8 @@
 			icon: internetComputer,
 			price: 3.32,
 			balance: '3,526.6205',
-			value: 11708.38
+			value: 11708.38,
+			revealAt: 300
 		},
 		{
 			symbol: 'ETH',
@@ -163,15 +155,17 @@
 			icon: ether,
 			price: 2734.25,
 			balance: '1.8245',
-			value: 4988.57
+			value: 4988.57,
+			revealAt: 460
 		},
 		{
 			symbol: 'USDC',
 			name: 'USD Coin',
 			icon: usdCoin,
 			price: 1,
-			balance: '3,898.76',
-			value: 3898.76
+			balance: '3,878.76',
+			value: 3878.76,
+			revealAt: 565
 		},
 		{
 			symbol: 'SOL',
@@ -179,14 +173,24 @@
 			icon: solana,
 			price: 120.05,
 			balance: '21.4960',
-			value: 2580.6
+			value: 2580.6,
+			revealAt: 620
 		}
 	];
 
-	const networkMenuDelay = Math.max(
-		balanceDelay + balanceDuration,
-		tokenDelay + (tokens.length - 1) * tokenStagger + tokenDuration
-	);
+	const sumPortfolio = (tokenCount: number): number =>
+		tokens.slice(0, tokenCount).reduce((cents, { value }) => cents + Math.round(value * 100), 0) /
+		100;
+	const portfolioBalance = sumPortfolio(tokens.length);
+	const finalBalanceStart = tokens[tokens.length - 1].revealAt;
+	// The first three rows update the balance individually. The last two share the final update.
+	const balanceStarts = [0, ...tokens.slice(0, 3).map(({ revealAt }) => revealAt)];
+	const balanceSteps = balanceStarts.map((start, index) => ({
+		value: sumPortfolio(index),
+		start,
+		duration: (balanceStarts[index + 1] ?? finalBalanceStart) - start
+	}));
+	const networkMenuDelay = finalBalanceStart + tokenDuration;
 
 	const networks = [
 		{ name: 'Bitcoin', icon: bitcoinNetwork, value: bitcoinBalance },
@@ -307,9 +311,6 @@
 {/snippet}
 
 <svg
-	style:--balance-delay={`${balanceDelay}ms`}
-	style:--balance-duration={`${balanceDuration}ms`}
-	style:--character-duration={`${characterDuration}ms`}
 	style:--frame-stroke-width={frameStrokeWidth}
 	style:--network-menu-delay={`${networkMenuDelay}ms`}
 	style:--token-duration={`${tokenDuration}ms`}
@@ -368,19 +369,20 @@
 		<text class="muted" font-size="12" x="134" y="223">{$i18n.navigation.text.activity}</text>
 
 		<rect fill="url(#{portfolioGradient})" height="166" rx="19" width="388" x="364" y="92" />
-		<!-- Adjacent spans keep the localized amount's original spacing. -->
-		<text
-			class="portfolio-balance on-gradient"
-			font-size="32"
-			font-weight="700"
-			text-anchor="middle"
-			x="558"
-			y="153"
-			>{#each balanceCharacters as character, index (index)}<tspan
-					style:--character-delay={`${index * characterStagger}ms`}
-					class="balance-character">{character}</tspan
-				>{/each}</text
-		>
+		<g class="portfolio-balance on-gradient" font-size="32" font-weight="700" text-anchor="middle">
+			{#each balanceSteps as { value, start, duration } (start)}
+				<text
+					style:--balance-start={`${start}ms`}
+					style:--balance-duration={`${duration}ms`}
+					class="balance-step"
+					x="558"
+					y="153">{currency.format(value)}</text
+				>
+			{/each}
+			<text style:--balance-start={`${finalBalanceStart}ms`} class="balance-total" x="558" y="153"
+				>{currency.format(portfolioBalance)}</text
+			>
+		</g>
 		<text class="on-gradient" font-size="14" text-anchor="middle" x="558" y="176"
 			>{$i18n.hero.text.available_balance}</text
 		>
@@ -408,9 +410,9 @@
 				>
 			</svg>
 		{/each}
-		{#each tokens as { symbol, name, icon, price, balance, value }, index (symbol)}
+		{#each tokens as { symbol, name, icon, price, balance, value, revealAt }, index (symbol)}
 			<g transform="translate(369 {350 + index * 59})">
-				<g style:--token-delay={`${tokenDelay + index * tokenStagger}ms`} class="token-row">
+				<g style:--token-delay={`${revealAt}ms`} class="token-row">
 					<image height="37" href={icon} width="37" />
 					<text font-size="14" font-weight="700" x="46" y="16">{symbol}</text>
 					<text class="muted" font-size="10" x="89" y="16">{currency.format(price)}</text>
@@ -635,6 +637,14 @@
 		}
 	}
 
+	.portfolio-balance {
+		font-variant-numeric: tabular-nums;
+	}
+
+	.balance-step {
+		opacity: 0;
+	}
+
 	@media (prefers-reduced-motion: no-preference) {
 		.phone {
 			transform-box: fill-box;
@@ -642,13 +652,14 @@
 			animation: settle-phone 400ms cubic-bezier(0.23, 1, 0.32, 1) 60ms backwards;
 		}
 
-		.portfolio-balance {
-			animation: lift-balance var(--balance-duration) ease-out var(--balance-delay) backwards;
+		.balance-step {
+			animation: lift-balance var(--balance-duration) ease-out var(--balance-start);
 		}
 
-		.balance-character {
-			animation: reveal-balance-character var(--character-duration) ease-out
-				calc(var(--balance-delay) + var(--character-delay)) backwards;
+		.balance-total {
+			animation:
+				show-balance-total 1ms step-start var(--balance-start) backwards,
+				lift-balance var(--token-duration) ease-out var(--balance-start);
 		}
 
 		.token-row {
@@ -671,13 +682,22 @@
 
 	@keyframes lift-balance {
 		from {
-			transform: translateY(5px);
+			opacity: 0.8;
+			transform: translateY(2px);
+		}
+		40%,
+		to {
+			opacity: 1;
+			transform: none;
 		}
 	}
 
-	@keyframes reveal-balance-character {
+	@keyframes show-balance-total {
 		from {
-			opacity: 0;
+			visibility: hidden;
+		}
+		to {
+			visibility: visible;
 		}
 	}
 
