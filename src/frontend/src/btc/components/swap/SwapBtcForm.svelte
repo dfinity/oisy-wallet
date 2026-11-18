@@ -4,6 +4,7 @@
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
 	import SwapBtcFees from '$btc/components/swap/SwapBtcFees.svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
+	import { LIFI_BTC_CONSERVATIVE_OUTPUT_VSIZES } from '$btc/constants/lifi.constants';
 	import { initBtcMaxSendAmount } from '$btc/derived/btc-max-send-amount.derived';
 	import {
 		BtcPendingSentTransactionsStatus,
@@ -18,6 +19,7 @@
 	import SwapProviderCell from '$lib/components/swap/SwapProviderCell.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { isLifiBtcOffered } from '$lib/services/lifi-btc-swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -25,6 +27,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { SwapProvider } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -66,11 +69,19 @@
 
 	let utxosFee = $derived($utxosFeeStore?.utxosFee);
 
+	// A LI.FI offer's own selection, priced for its deposit, memo and fee outputs: larger than the
+	// one output the loader prices, so with LI.FI selected the fee, the funds check and Max are its.
+	let lifiSelection = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.LIFI
+			? $swapAmountsStore.selectedProvider.btcSelection
+			: undefined
+	);
+
 	// The Bitcoin network fee, which is what `MaxBalanceButton` has to hold back and what
 	// the amount is validated against. It is available before any offer exists — the
 	// loader prices a default amount on mount — so Review is never blocked on a quote just
 	// to learn the fee.
-	let networkFee = $derived(utxosFee?.feeSatoshis);
+	let networkFee = $derived(lifiSelection?.utxosFee.feeSatoshis ?? utxosFee?.feeSatoshis);
 
 	// The quote refuses to price a selection the send would reject, and it has nothing to price
 	// at all until the loaders have filled the three stores it reads. Both surface as "no
@@ -81,8 +92,22 @@
 	);
 
 	// The recipient is unknown here: a NEAR Intents deposit address only comes with the
-	// execution quote. So Max is priced for the largest output a send can pay.
-	let maxSendAmountStore = $derived(initBtcMaxSendAmount({ source }));
+	// execution quote. So Max is priced for the largest output a send can pay, or for LI.FI's
+	// outputs with LI.FI selected. Before any offer is selected, while LI.FI may be asked, it is
+	// priced for LI.FI's largest layout: at the one-output Max, a pair only LI.FI serves would get a
+	// quote its own selection cannot fund, and so no offer to correct Max.
+	let maxOutputVSizes = $derived(
+		lifiSelection?.outputVSizes ??
+			(isNullish($swapAmountsStore?.selectedProvider) &&
+			nonNullish($sourceToken) &&
+			isLifiBtcOffered($sourceToken)
+				? LIFI_BTC_CONSERVATIVE_OUTPUT_VSIZES
+				: undefined)
+	);
+
+	let maxSendAmountStore = $derived(
+		initBtcMaxSendAmount({ source, outputVSizes: maxOutputVSizes })
+	);
 
 	let hasPendingTransactionsStore = $derived(initPendingSentTransactionsStatus(source));
 

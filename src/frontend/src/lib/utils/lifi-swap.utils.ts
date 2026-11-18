@@ -43,7 +43,14 @@ import { decodeTransactionMessage } from '$sol/utils/sol-transactions.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isTokenSolanaNative } from '$sol/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { ChainId, type FeeCost, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
+import {
+	ChainId,
+	HTTPError,
+	SDKError,
+	type FeeCost,
+	type LiFiStep,
+	type QuoteRequestFromAmount
+} from '@lifi/sdk';
 import {
 	getCompiledTransactionMessageDecoder,
 	type Transaction,
@@ -84,11 +91,39 @@ export const toLifiTokenAddress = (token: Token): string | undefined => {
  * `LIFI_BTC_SWAP_ENABLED` and `BTC_SEND_VIA_BACKEND_ENABLED` are both on. Bitcoin is never a LI.FI
  * destination, so `toLifiChainId` and `toLifiTokenAddress` leave it out.
  */
-const isLifiBtcSource = (token: Token): boolean =>
+export const isLifiBtcSource = (token: Token): boolean =>
 	LIFI_BTC_SWAP_ENABLED &&
 	BTC_SEND_VIA_BACKEND_ENABLED &&
 	isNetworkIdBTCMainnet(token.network.id) &&
 	isBitcoinToken(token);
+
+// LI.FI's error codes for a BTC source whose UTXOs it finds missing (`1003`, HTTP 404, 2026-11-13) or
+// too small for the amount and its fees (`1004`, HTTP 422, 2026-11-17).
+const LIFI_BTC_INSUFFICIENT_FUNDS_CODES = [1003, 1004];
+
+/**
+ * Whether LI.FI refused a quote from BTC because of the address's balance, as the SDK throws it. Its
+ * HTTP statuses are those of "no route", so only LI.FI's code tells the two apart. The codes are read
+ * for a BTC request only: from another chain they may mean something else.
+ */
+export const isLifiBtcInsufficientFundsError = ({
+	err,
+	request
+}: {
+	err: unknown;
+	request: QuoteRequestFromAmount;
+}): boolean => {
+	if (request.fromChain !== ChainId.BTC) {
+		return false;
+	}
+
+	const code =
+		err instanceof SDKError && err.cause instanceof HTTPError
+			? err.cause.responseBody?.code
+			: undefined;
+
+	return nonNullish(code) && LIFI_BTC_INSUFFICIENT_FUNDS_CODES.includes(code);
+};
 
 /**
  * The `getSupportedDestinations` of a LI.FI registry entry. LI.FI keeps no token list — any token on
@@ -98,6 +133,7 @@ const isLifiBtcSource = (token: Token): boolean =>
  * The routing sends a pair to the Solana registry whenever either side is Solana, so the EVM entry
  * quotes EVM → EVM (`{ evm: 'any' }`) and the Solana entry EVM → Solana and Solana → Solana
  * (`{ sol: 'any' }`). A Solana source gets nothing from the EVM entry: Solana → EVM is not quoted.
+ * The BTC entry has its own (`lifiBtcSupportedDestinations`).
  */
 export const buildLifiSupportedDestinations =
 	(registry: 'evm' | 'sol'): GetSupportedDestinationsFn =>
@@ -325,11 +361,12 @@ const BTC_PUSHDATA_LENGTH_BYTES: Partial<Record<number, number>> = {
 	[opcodes.OP_PUSHDATA4]: 4
 };
 
-// Whether `script` is data pushes only, read byte by byte as the backend's parser reads it: direct
-// pushes and `OP_PUSHDATA1/2/4`, minimal or not. bitcoinjs-lib cannot stand in: `isPushOnly` also
-// accepts `OP_1NEGATE` and `OP_1`…`OP_16`, which the backend refuses, and `decompile` turns an
-// explicit one-byte push of 1–16 into those opcodes.
-const isBtcDataPushesOnly = (script: Uint8Array): boolean => {
+// The data each push of `script` carries, or `undefined` when it is not data pushes only, read byte by
+// byte as the backend's parser reads it: direct pushes and `OP_PUSHDATA1/2/4`, minimal or not.
+// bitcoinjs-lib cannot stand in: `isPushOnly` also accepts `OP_1NEGATE` and `OP_1`…`OP_16`, which the
+// backend refuses, and `decompile` turns an explicit one-byte push of 1–16 into those opcodes.
+const btcDataPushes = (script: Uint8Array): Uint8Array[] | undefined => {
+	const pushes: Uint8Array[] = [];
 	let offset = 0;
 
 	while (offset < script.length) {
@@ -340,7 +377,7 @@ const isBtcDataPushesOnly = (script: Uint8Array): boolean => {
 		const lengthBytes = opcode < opcodes.OP_PUSHDATA1 ? 0 : BTC_PUSHDATA_LENGTH_BYTES[opcode];
 
 		if (isNullish(lengthBytes) || offset + lengthBytes > script.length) {
-			return false;
+			return;
 		}
 
 		const dataLength =
@@ -350,11 +387,28 @@ const isBtcDataPushesOnly = (script: Uint8Array): boolean => {
 						.subarray(offset, offset + lengthBytes)
 						.reduceRight((length, byte) => length * 256 + byte, 0);
 
-		offset += lengthBytes + dataLength;
+		const dataStart = offset + lengthBytes;
+		offset = dataStart + dataLength;
+
+		if (offset > script.length) {
+			return;
+		}
+
+		pushes.push(script.subarray(dataStart, offset));
 	}
 
-	return offset === script.length;
+	return pushes;
 };
+
+const isBtcDataPushesOnly = (script: Uint8Array): boolean => nonNullish(btcDataPushes(script));
+
+/**
+ * The text a LI.FI BTC memo carries, its pushes' data read as Latin-1: for Relay, `0x<order id>`,
+ * then `=|lifi` and LI.FI's transaction id. For a memo `decodeLifiBtcTransaction` returned, which holds
+ * data pushes only; anything else reads as empty.
+ */
+export const lifiBtcMemoText = ({ script }: LifiBtcOutput): string =>
+	(btcDataPushes(script.subarray(1)) ?? []).map((data) => String.fromCharCode(...data)).join('');
 
 // `OP_RETURN` followed only by data pushes, within `LIFI_BTC_MAX_MEMO_SCRIPT_BYTES`: the memo the
 // backend broadcasts, so at most 80 bytes of data.

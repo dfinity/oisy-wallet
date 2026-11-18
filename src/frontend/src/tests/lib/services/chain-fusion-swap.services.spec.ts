@@ -1452,7 +1452,9 @@ describe('chain-fusion-swap.services', () => {
 				await onBroadcast?.({ txid: 'txid' });
 				return 'txid';
 			});
-			vi.mocked(createActiveUserTransaction).mockResolvedValue(undefined);
+			vi.mocked(createActiveUserTransaction).mockResolvedValue(
+				mockChainFusionActiveUserTransaction
+			);
 		});
 
 		it('should send the deposit to the minter address on the quoted selection', async () => {
@@ -1599,7 +1601,7 @@ describe('chain-fusion-swap.services', () => {
 				vi.mocked(createActiveUserTransaction).mockImplementation(() => {
 					expect(broadcast).not.toHaveBeenCalled();
 
-					return Promise.resolve();
+					return Promise.resolve(mockChainFusionActiveUserTransaction);
 				});
 				sendThroughBackend();
 
@@ -1976,7 +1978,9 @@ describe('chain-fusion-swap.services', () => {
 			beforeEach(() => {
 				vi.mocked(watchDepositAddress).mockResolvedValue(watched);
 				vi.mocked(isBlockhashValid).mockResolvedValue({ slot: BLOCKHASH_SLOT, valid: true });
-				vi.mocked(createActiveUserTransaction).mockResolvedValue(undefined);
+				vi.mocked(createActiveUserTransaction).mockResolvedValue(
+					mockChainFusionActiveUserTransaction
+				);
 				mockTransfer();
 				enableDestinationToken.mockResolvedValue(undefined);
 			});
@@ -2340,6 +2344,53 @@ describe('chain-fusion-swap.services', () => {
 					id: SWAP_ID
 				});
 				expect(broadcastSol).not.toHaveBeenCalled();
+			});
+
+			// The scan times are the Internet Computer's. The last check before the broadcast measures
+			// them from the later of the device clock and the time the backend stamped the row with, so
+			// a device clock behind cannot move a scan due before the transfer lands out of the margin.
+			describe('with the row stamped at the time of the Internet Computer', () => {
+				beforeEach(() => {
+					vi.useFakeTimers({ toFake: ['Date'] });
+					vi.mocked(createActiveUserTransaction).mockResolvedValue({
+						...mockChainFusionActiveUserTransaction,
+						created_at_ns: NOW_NANOS
+					});
+				});
+
+				afterEach(() => {
+					vi.useRealTimers();
+				});
+
+				it.each([
+					{
+						name: 'ten minutes behind',
+						deviceNowIn: -10n,
+						answer: watchingWindow({ endsIn: 34n, nextScanIn: 4n })
+					},
+					{
+						name: 'ten minutes ahead',
+						deviceNowIn: 10n,
+						answer: watchingWindow({ endsIn: 44n, nextScanIn: 14n })
+					}
+				])(
+					'should delete the open row and send no SOL when, asked again, the last scan of the window is due before the transfer can land, with the device clock $name',
+					async ({ deviceNowIn, answer }) => {
+						vi.setSystemTime(Number(inMinutes(deviceNowIn) / NANO_SECONDS_IN_MILLISECOND));
+						vi.mocked(watchDepositAddress)
+							.mockResolvedValueOnce(watched)
+							.mockResolvedValueOnce(answer);
+
+						await expect(solSwap()).rejects.toMatchObject({ reason: 'unavailable' });
+
+						expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+							identity: mockIdentity,
+							id: SWAP_ID
+						});
+						expect(broadcastSol).not.toHaveBeenCalled();
+						expect(enableDestinationToken).not.toHaveBeenCalled();
+					}
+				);
 			});
 
 			it('should send no SOL when the row cannot be written', async () => {

@@ -530,6 +530,54 @@ describe('chain-fusion-swap-active-tx.services', () => {
 			beforeEach(() => {
 				vi.mocked(watchDepositAddress).mockResolvedValue(watching(41n));
 				vi.mocked(readSolSourceTxOutcome).mockResolvedValue('pending');
+				// The transfer's SOL on the address until a scan queues it.
+				vi.mocked(ckSolMinterInfo).mockResolvedValue(ckSolInfo);
+				vi.mocked(readSolBalanceAfterTx).mockResolvedValue(ckSolInfo.minimum_deposit_amount);
+			});
+
+			// A minimum raised between the broadcast and the scan keeps the minter from ever queuing the
+			// transfer, and no deposit id comes.
+			describe('once the transfer is finalized and no deposit took it', () => {
+				beforeEach(() => {
+					vi.mocked(readSolSourceTxOutcome).mockResolvedValue('succeeded');
+				});
+
+				it('should fail the row once the minter names no deposit and the address holds less than the minimum', async () => {
+					vi.mocked(readSolBalanceAfterTx).mockResolvedValue(ckSolInfo.minimum_deposit_amount - 1n);
+
+					const tx = openedBeforeBroadcast();
+
+					await poll([tx]);
+
+					expect(vi.mocked(readSolBalanceAfterTx).mock.invocationCallOrder[0]).toBeLessThan(
+						vi.mocked(watchDepositAddress).mock.invocationCallOrder[0]
+					);
+					expect(reloadActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						id: tx.id
+					});
+					expect(lastUpdate()).toStrictEqual({
+						status: { Failed: null },
+						error: en.swap.error.cksol_deposit_below_minimum
+					});
+				});
+
+				it('should keep the row in flight while the address still holds the minimum, waiting for its scan', async () => {
+					await poll([openedBeforeBroadcast()]);
+
+					expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+				});
+
+				it('should not fail a row the backend moved on meanwhile', async () => {
+					vi.mocked(readSolBalanceAfterTx).mockResolvedValue(ckSolInfo.minimum_deposit_amount - 1n);
+					vi.mocked(reloadActiveUserTransaction).mockResolvedValueOnce(
+						solMintTx({ refs: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: '42' } })
+					);
+
+					await poll([openedBeforeBroadcast()]);
+
+					expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+				});
 			});
 
 			it('should read the transfer at finality, no earlier than the slot its blockhash was valid at', async () => {

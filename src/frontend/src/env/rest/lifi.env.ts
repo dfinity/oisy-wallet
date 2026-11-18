@@ -53,8 +53,9 @@ export const LIFI_DIAMOND_ADDRESSES: Partial<Record<NetworkId, EthAddress>> = {
  * the binding decodes.
  *
  * A BTC deposit carries neither the payout's recipient nor its minimum: the bridge keeps both,
- * keyed by the deposit address or the memo. So a bridge is listed for Bitcoin only once OISY can
- * read them from the bridge for the deposit it signs. None can yet, so nothing is quoted from BTC.
+ * keyed by the deposit address or the memo. So a bridge is listed for Bitcoin only together with its
+ * payout binding (`LIFI_BTC_PAYOUT_BINDINGS`). Relay's is best effort: it cannot check the recipient
+ * (see `bindLifiRelayPayout`).
  */
 export const LIFI_ALLOWED_BRIDGES: Partial<Record<NetworkId, string[]>> = {
 	[ETHEREUM_NETWORK_ID]: ['across', 'near'],
@@ -63,7 +64,7 @@ export const LIFI_ALLOWED_BRIDGES: Partial<Record<NetworkId, string[]>> = {
 	[POLYGON_MAINNET_NETWORK_ID]: ['across', 'near'],
 	[BASE_NETWORK_ID]: ['across', 'near'],
 	[ROBINHOOD_MAINNET_NETWORK_ID]: ['across'],
-	[BTC_MAINNET_NETWORK_ID]: []
+	[BTC_MAINNET_NETWORK_ID]: ['relaydepository']
 };
 
 /**

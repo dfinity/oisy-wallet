@@ -783,11 +783,14 @@ const pollChainFusionSolMint = async ({
 
 	// Read before the minter is asked: a newer deposit that swept the address by then was queued
 	// before that call, which then names it. For a dropped deposit only on a row with its transfer's
-	// blockhash, as for the deposit it takes: without it, the row keeps waiting as before.
+	// blockhash, as for the deposit it takes: without it, the row keeps waiting as before. And for a
+	// finalized transfer that no deposit took yet, which a minimum raised before the scan can keep
+	// the minter from ever queuing.
 	const leftMinimum =
 		nonNullish(movedPastDepositId) ||
 		(nonNullish(droppedDepositId) &&
-			nonNullish(refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH]))
+			nonNullish(refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH])) ||
+		outcome === 'succeeded'
 			? await ckSolMintLeftMinimum({ identity, minterCanisterId, refs })
 			: undefined;
 
@@ -811,10 +814,11 @@ const pollChainFusionSolMint = async ({
 			return;
 		}
 
-		// Dropped, the minter names no newer deposit, and less than the minimum is left: the minter will
-		// not sweep it again. The row fails and frees the account for the next conversion, whose
-		// transfer takes the balance over the minimum, so that the rest is converted with it.
-		if (nonNullish(droppedDepositId) && leftMinimum === false) {
+		// Dropped, or finalized and never queued, the minter names no newer deposit, and less than the
+		// minimum is left: the minter will not sweep it. The row fails and frees the account for the
+		// next conversion, whose transfer takes the balance over the minimum, so that the rest is
+		// converted with it.
+		if ((nonNullish(droppedDepositId) || outcome === 'succeeded') && leftMinimum === false) {
 			if (!(await backendTracksSameDeposits())) {
 				return;
 			}

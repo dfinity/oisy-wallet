@@ -834,6 +834,20 @@ describe('solana.api', () => {
 				});
 			});
 
+			it('should read at the given commitment', async () => {
+				await isBlockhashValid({
+					blockhash,
+					network: SolanaNetworks.mainnet,
+					minContextSlot: 90n,
+					commitment: 'finalized'
+				});
+
+				expect(mockIsBlockhashValid).toHaveBeenCalledExactlyOnceWith(blockhash, {
+					commitment: 'finalized',
+					minContextSlot: 90n
+				});
+			});
+
 			it('should refuse a string that is not a blockhash, without asking the node', async () => {
 				await expect(
 					isBlockhashValid({ blockhash: 'not-a-blockhash', network: SolanaNetworks.mainnet })

@@ -10,7 +10,10 @@ import {
 	isInvalidUtxosFee,
 	isUnclearBtcBroadcastOutcome
 } from '$btc/utils/btc-send.utils';
-import type { ChainFusionDirection } from '$declarations/backend/backend.did';
+import type {
+	ActiveUserTransaction,
+	ChainFusionDirection
+} from '$declarations/backend/backend.did';
 import type { WatchDepositAddressOk } from '$declarations/cksol_minter/cksol_minter.did';
 import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
@@ -746,7 +749,7 @@ interface ChainFusionActiveUserTransactionParams {
 	extraRefs: Partial<Record<ChainFusionExternalRefKey, string>>;
 }
 
-// Creates the row, or returns `false` without one for a conversion it cannot track.
+// Creates the row and returns it, or `undefined` without one for a conversion it cannot track.
 const writeChainFusionActiveUserTransaction = async ({
 	identity,
 	swapId,
@@ -758,15 +761,15 @@ const writeChainFusionActiveUserTransaction = async ({
 	swapAmount,
 	usdSourceValue,
 	extraRefs
-}: ChainFusionActiveUserTransactionParams): Promise<boolean> => {
+}: ChainFusionActiveUserTransactionParams): Promise<ActiveUserTransaction | undefined> => {
 	const data = toChainFusionData({ direction, sourceToken, destinationToken, amount });
 
 	if (isNullish(data) || isNullish(minterCanisterId)) {
 		consoleError('Skipping an untrackable Chain Fusion conversion', { swapId });
-		return false;
+		return;
 	}
 
-	await createActiveUserTransaction({
+	return await createActiveUserTransaction({
 		identity,
 		id: swapId,
 		data,
@@ -781,8 +784,6 @@ const writeChainFusionActiveUserTransaction = async ({
 			...extraRefs
 		})
 	});
-
-	return true;
 };
 
 const createChainFusionActiveUserTransaction = async (
@@ -799,11 +800,11 @@ const createChainFusionActiveUserTransaction = async (
  * Creates the row of a conversion whose deposit is signed and not yet broadcast, so it is tracked
  * whatever the broadcast answers. Unlike `createChainFusionActiveUserTransaction`, a failed write
  * rejects, so nothing is broadcast untracked; its row is deleted all the same, since the backend may
- * have committed it if only its answer was lost. Returns whether a row was created.
+ * have committed it if only its answer was lost. Returns the row it created, if any.
  */
 const openChainFusionActiveUserTransaction = async (
 	params: ChainFusionActiveUserTransactionParams
-): Promise<boolean> => {
+): Promise<ActiveUserTransaction | undefined> => {
 	try {
 		return await writeChainFusionActiveUserTransaction(params);
 	} catch (err: unknown) {
@@ -1151,7 +1152,7 @@ export const fetchChainFusionBtcSwap = async ({
 				signed = true;
 			},
 			beforeBroadcast: async ({ txid }) => {
-				rowOpened = await openChainFusionActiveUserTransaction(rowParams({ txid }));
+				rowOpened = nonNullish(await openChainFusionActiveUserTransaction(rowParams({ txid })));
 			},
 			onBroadcast: async ({ txid }) => {
 				if (!rowOpened) {
@@ -1203,16 +1204,21 @@ const registerCkSolDepositAddress = async (params: {
  * registration rather than a deposit already in flight, for the address the offer was priced
  * with, with a minimum the amount meets and a fee no higher than quoted.
  *
+ * The scan times are the Internet Computer's. `notBeforeNanos`, a time the backend stamped, bounds
+ * how far behind the device clock may place the present: the later of the two is taken.
+ *
  * @throws {ChainFusionSolDepositRefusedError} when it does not.
  */
 const assertCkSolDepositWatched = ({
 	watched: { status, address, minimum_deposit_amount, automatic_deposit_fee },
 	solDeposit,
-	amount
+	amount,
+	notBeforeNanos
 }: {
 	watched: WatchDepositAddressOk;
 	solDeposit: NonNullable<ChainFusionSwapDetails['solDeposit']>;
 	amount: bigint;
+	notBeforeNanos?: bigint;
 }) => {
 	if ('Detected' in status) {
 		throw new ChainFusionSolDepositRefusedError('inFlight');
@@ -1238,7 +1244,9 @@ const assertCkSolDepositWatched = ({
 		throw new ChainFusionSolDepositRefusedError('unavailable');
 	}
 
-	const nowNanos = BigInt(Date.now()) * NANO_SECONDS_IN_MILLISECOND;
+	const deviceNowNanos = BigInt(Date.now()) * NANO_SECONDS_IN_MILLISECOND;
+	const nowNanos =
+		nonNullish(notBeforeNanos) && notBeforeNanos > deviceNowNanos ? notBeforeNanos : deviceNowNanos;
 	const lastScanAt = validUntil - CKSOL_LAST_SCAN_BEFORE_WINDOW_END_NANOS;
 
 	if (
@@ -1352,10 +1360,10 @@ export const fetchChainFusionSolSwap = async ({
 			throw new ChainFusionSolDepositRefusedError('unavailable');
 		}
 
-		let opened: boolean;
+		let row: ActiveUserTransaction | undefined;
 
 		try {
-			opened = await openChainFusionActiveUserTransaction({
+			row = await openChainFusionActiveUserTransaction({
 				identity,
 				swapId,
 				direction: { SolToCkSol: null },
@@ -1386,7 +1394,7 @@ export const fetchChainFusionSolSwap = async ({
 			throw err;
 		}
 
-		if (!opened) {
+		if (isNullish(row)) {
 			return false;
 		}
 
@@ -1398,7 +1406,14 @@ export const fetchChainFusionSolSwap = async ({
 		try {
 			const rewatched = await registerCkSolDepositAddress({ identity, minterCanisterId });
 
-			assertCkSolDepositWatched({ watched: rewatched, solDeposit, amount });
+			// The last check before the broadcast: the scan times are measured against the backend's
+			// clock at which it opened the row, not only the device's, which can run behind.
+			assertCkSolDepositWatched({
+				watched: rewatched,
+				solDeposit,
+				amount,
+				notBeforeNanos: row.created_at_ns
+			});
 
 			// The balance read at confirm was below that answer's minimum: a lower minimum now, or SOL
 			// sent to the address by hand since, can leave a balance that a scan sweeps alone before the
