@@ -1029,6 +1029,7 @@
 		"text": {
 			"send": "Envoyer",
 			"xrp_sent": "Votre paiement XRP a abouti.",
+			"xrp_token_sent": "",
 			"xrp_submitted": "Paiement soumis. Il se règle généralement en quelques secondes — vous pouvez fermer ceci et continuer.",
 			"send_token": "",
 			"send_unknown_token": "",
@@ -1051,6 +1052,7 @@
 			"source_network": "Réseau source",
 			"destination_network": "Réseau de destination",
 			"xrp_destination_tag": "Tag de destination XRP",
+			"xrp_transfer_fee": "",
 			"initializing_transaction": "Initialisation de la transaction",
 			"convert_to_native_icp": "Convertir en ICP natif",
 			"open_qr_modal": "Démarrer le scan du code QR pour les détails de la transaction",
@@ -1107,6 +1109,9 @@
 			"xrp_destination_tag_invalid": "Le tag de destination XRP doit être un nombre entier entre 0 et 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Fonds insuffisants : le montant doit laisser de quoi couvrir les frais et la réserve de compte XRP requise.",
+			"xrp_token_amount_too_precise": "",
+			"xrp_insufficient_funds_for_transfer_fee": "",
+			"xrp_insufficient_xrp_for_fee": "",
 			"insufficient_funds_for_gas": "Fonds insuffisants pour le gaz",
 			"insufficient_funds_for_amount": "Fonds insuffisants pour le montant",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Fonds Ethereum insuffisants pour couvrir les frais",
@@ -1171,7 +1176,20 @@
 			"xrp_destination_unfunded": "Cette adresse n’a pas encore de compte XRP. Sa création exige un premier paiement d’au moins $reserve XRP. Rien n’a été envoyé : augmentez le montant ou envoyez vers une adresse déjà approvisionnée.",
 			"xrp_destination_tag_required": "Cette adresse exige un tag de destination XRP. Rien n’a été envoyé : ajoutez le tag fourni par le service que vous payez, puis renvoyez.",
 			"xrp_destination_is_source": "Il s’agit de votre propre adresse XRP. Rien n’a été envoyé : choisissez un autre destinataire.",
-			"xrp_account_state_unavailable": "Le portefeuille n’a pas pu lire les informations de votre compte, le montant n’a donc pas pu être vérifié. Rien n’a été envoyé : réessayez dans un instant."
+			"xrp_account_state_unavailable": "Le portefeuille n’a pas pu lire les informations de votre compte, le montant n’a donc pas pu être vérifié. Rien n’a été envoyé : réessayez dans un instant.",
+			"xrp_ledger_state_unavailable": "",
+			"xrp_token_insufficient_balance": "",
+			"xrp_insufficient_xrp_for_fee": "",
+			"xrp_destination_not_found": "",
+			"xrp_deposit_not_authorized": "",
+			"xrp_no_trust_line": "",
+			"xrp_trust_line_limit": "",
+			"xrp_destination_frozen": "",
+			"xrp_destination_not_authorized": "",
+			"xrp_token_frozen": "",
+			"xrp_token_deep_frozen": "",
+			"xrp_no_rippling": "",
+			"xrp_transfer_fee_changed": ""
 		}
 	},
 	"mint": {
