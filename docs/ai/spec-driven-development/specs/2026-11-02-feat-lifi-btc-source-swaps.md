@@ -354,7 +354,10 @@ As built (PR 6):
   selection against the layout of the quote it re-requests. A re-quote refused on slippage
   (`isSlippageExceeded`: a minimum below the one displayed, or no route left) is shown on the review
   as `swap.error.slippage_exceeded` with the max slippage, as from EVM and Solana, not as an
-  unexpected error.
+  unexpected error. LI.FI's refusal of the balance (`1003` and `1004`,
+  `isLifiBtcInsufficientFundsError`) comes with the same HTTP statuses as "no route", but is not
+  slippage: `requoteAtLeast` rethrows it as is, and `fetchLifiBtcSwap` refuses with
+  `BtcValidationError(InsufficientBalance)`, which reads as the form's own balance check would.
 - **Binding.** `fetchLifiBtcSwap` runs `bindLifiBtcPayout` (`lifi-btc-binding.services.ts`) between
   decoding the outputs and checking the fee. Each bridge's binding is looked up by tool key in
   `LIFI_BTC_PAYOUT_BINDINGS`, and a tool without one is refused (`LifiRouteUnsupportedError`). The

@@ -43,7 +43,7 @@ import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockLifiBtcFeeAddress, mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
 import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
-import { ChainId, type QuoteRequestFromAmount } from '@lifi/sdk';
+import { ChainId, HTTPError, SDKError, type QuoteRequestFromAmount } from '@lifi/sdk';
 
 // No bridge is admitted from Bitcoin yet; LayerSwap stands in for the first.
 vi.mock('$env/rest/lifi.env', async (importOriginal) => {
@@ -175,6 +175,33 @@ describe('lifi-btc-swap.services', () => {
 			vi.mocked(validateBtcSend).mock.invocationCallOrder[0]
 		);
 	});
+
+	// LI.FI's re-quote at confirm finds the address's UTXOs missing (1003, 404) or too small (1004, 422)
+	// since the review: the balance, not the slippage, as the SDK throws it.
+	it.each([
+		{ case: 'no UTXOs', status: 404, code: 1003 },
+		{ case: 'UTXOs too small', status: 422, code: 1004 }
+	])(
+		'should refuse as an insufficient balance, signing nothing, when LI.FI finds $case',
+		async ({ status, code }) => {
+			vi.mocked(fetchLifiQuote).mockRejectedValue(
+				new SDKError(
+					Object.assign(
+						new HTTPError(new Response('{}', { status }), 'https://li.quest/v1/quote', {}),
+						{ responseBody: { code, message: '' } }
+					)
+				)
+			);
+
+			await expect(fetchLifiBtcSwap(params)).rejects.toThrow(
+				new BtcValidationError(BtcSendValidationError.InsufficientBalance)
+			);
+
+			expect(bindLifiBtcPayout).not.toHaveBeenCalled();
+			expect(sendBtcScriptOutputs).not.toHaveBeenCalled();
+			expect(createActiveUserTransaction).not.toHaveBeenCalled();
+		}
+	);
 
 	it("should sign nothing when the bridge's record does not pay what was reviewed", async () => {
 		const unbound = new LifiRouteUnsupportedError('no payout binding');
