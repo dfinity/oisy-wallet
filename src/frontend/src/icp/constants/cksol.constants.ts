@@ -16,3 +16,7 @@ export const CKSOL_LAST_SCAN_BEFORE_WINDOW_END_NANOS = 30n * NANO_SECONDS_IN_MIN
 // How long after the `watch_deposit_address` answer a SOL transfer may still land: signing, the
 // row write, the broadcast and the lifetime of the transfer's blockhash fit well within it.
 export const CKSOL_TRANSFER_LANDING_NANOS = 5n * NANO_SECONDS_IN_MINUTE;
+
+// Closing the ckSOL card in the dApps carousel saves this id with the user's hidden dApps, so it
+// must never change, or the card comes back for everyone who closed it.
+export const CKSOL_CAROUSEL_SLIDE_ID = 'cksol';
