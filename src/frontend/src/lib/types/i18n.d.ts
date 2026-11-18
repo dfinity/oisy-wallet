@@ -751,6 +751,58 @@ interface I18nReceive {
 			display_xrp_address_qr: string;
 		};
 	};
+	token: {
+		text: {
+			select_token: string;
+			select_network: string;
+			which_network: string;
+			networks_count: string;
+			test_network: string;
+			change_token: string;
+			route_direct: string;
+			route_ckbtc_deposit: string;
+			send_instruction: string;
+			network: string;
+			asset: string;
+			enable_info: string;
+			enable_and_show: string;
+			enabling: string;
+			enable_error: string;
+			address_loading: string;
+			address_error: string;
+			no_routes: string;
+			route_unavailable: string;
+			import_token: string;
+			import_nft: string;
+			address_format: string;
+			principal: string;
+			account_id: string;
+			icp_format_hint: string;
+			principal_label: string;
+			account_id_label: string;
+			address_label: string;
+			address_copied: string;
+			how_to_convert: string;
+			how_to_convert_description: string;
+		};
+	};
+	ckbtc: {
+		text: {
+			deposit_address: string;
+			deposit_warning: string;
+			deposit_address_copied: string;
+			you_send: string;
+			you_receive: string;
+			on_network: string;
+			confirmations: string;
+			estimated_fee: string;
+			unavailable: string;
+			terms_error: string;
+			small_deposit: string;
+			view_activity: string;
+		};
+	};
+	addresses: { text: { evm_title: string; evm_networks: string } };
 }
 
 interface I18nSend {

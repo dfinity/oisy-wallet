@@ -13,6 +13,7 @@
 	import PayDialog from '$lib/components/pay/PayDialog.svelte';
 	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
 	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
+	import ReceiveHowToConvert from '$lib/components/receive/ReceiveHowToConvert.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
 	import ScannerModal from '$lib/components/scanner/ScannerModal.svelte';
 	import SendModal from '$lib/components/send/SendModal.svelte';
@@ -49,12 +50,15 @@
 		modalNftFullscreenDisplayOpen,
 		modalReceive,
 		modalReceiveId,
+		modalHowToConvertToTwinTokenEth,
+		modalHowToConvertToTwinTokenEthData,
 		modalPayDialogOpen,
 		modalSend,
 		modalSendData,
 		modalUniversalScannerOpen,
 		modalWalletConnectSessions
 	} from '$lib/derived/modal.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { getSymbol } from '$lib/utils/modal.utils';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
 
@@ -105,7 +109,10 @@
 	{:else if $modalNftFullscreenDisplayOpen && nonNullish($modalNftFullscreenDisplayData?.imageUrl)}
 		<FullscreenMediaModal mediaSrc={$modalNftFullscreenDisplayData.imageUrl} />
 	{:else if $modalReceive && $modalReceiveId === getSymbol('menu-addresses')}
-		<ReceiveAddressModal infoCmp={ReceiveAddresses} />
+		<ReceiveAddressModal infoCmp={ReceiveAddresses} title={$i18n.wallet.text.your_addresses} />
+	{:else if $modalHowToConvertToTwinTokenEth && $modalReceiveId === getSymbol('receive-how-to-convert') && nonNullish($modalHowToConvertToTwinTokenEthData)}
+		<!-- Opened from Receive, on the ck token's page, with the exact ck token and its twin. -->
+		<ReceiveHowToConvert data={$modalHowToConvertToTwinTokenEthData} />
 	{:else if $modalPayDialogOpen}
 		<PayDialog />
 	{:else if $modalSend && nonNullish($modalSendData)}

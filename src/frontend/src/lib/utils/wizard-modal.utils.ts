@@ -11,6 +11,7 @@ import type {
 	WizardStepsLiquidiumSupply,
 	WizardStepsLiquidiumWithdraw,
 	WizardStepsReceive,
+	WizardStepsReceiveToken,
 	WizardStepsScanner,
 	WizardStepsSend,
 	WizardStepsSwap,
@@ -29,6 +30,7 @@ type StepName =
 	| WizardStepsAuthHelp
 	| WizardStepsHowToConvert
 	| WizardStepsReceive
+	| WizardStepsReceiveToken
 	| AddressBookSteps
 	| TokenModalSteps
 	| WizardStepsGetTokenType

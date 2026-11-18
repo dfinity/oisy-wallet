@@ -139,6 +139,15 @@ export const loadAllCkBtcInfo = async ({
 	busy.stop();
 };
 
+/**
+ * The minter's Bitcoin deposit address for the user, for Receive: no busy overlay and no wait for the
+ * minter info, which Receive loads and shows on its own. A failure resets the entry, so calling it
+ * again retries.
+ */
+export const loadCkBtcDepositAddress = (
+	params: IcCkToken & { identity: NullishIdentity }
+): Promise<void> => loadBtcAddress(params);
+
 const loadBtcAddress = (params: IcCkToken & { identity: NullishIdentity }): Promise<void> =>
 	loadData({
 		...params,

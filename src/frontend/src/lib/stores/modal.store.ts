@@ -7,6 +7,7 @@ import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import type { AddressBookModalParams } from '$lib/types/address-book';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
+import type { ReceiveHowToConvertData } from '$lib/types/receive';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OisyTradeOrderView, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
@@ -24,14 +25,6 @@ import { writable, type Readable } from 'svelte/store';
 
 export interface Modal<T> {
 	type:
-		| 'eth-receive'
-		| 'icp-receive'
-		| 'icrc-receive'
-		| 'ckbtc-receive'
-		| 'cketh-receive'
-		| 'btc-receive'
-		| 'sol-receive'
-		| 'xrp-receive'
 		| 'receive'
 		| 'send'
 		| 'swap'
@@ -115,14 +108,6 @@ export interface OpenTransactionParams<T extends AnyTransactionUi> {
 }
 
 export interface ModalStore<T> extends Readable<ModalData<T>> {
-	openEthReceive: (id: symbol) => void;
-	openIcpReceive: (id: symbol) => void;
-	openIcrcReceive: (id: symbol) => void;
-	openCkBTCReceive: (id: symbol) => void;
-	openCkETHReceive: (id: symbol) => void;
-	openBtcReceive: (id: symbol) => void;
-	openSolReceive: (id: symbol) => void;
-	openXrpReceive: (id: symbol) => void;
 	openReceive: (id: symbol) => void;
 	openSend: (params: SetWithOptionalDataParams<SendModalData>) => void;
 	openBuy: (id: symbol) => void;
@@ -134,7 +119,9 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openConvertBTCToCkBTC: (id: symbol) => void;
 	openConvertToTwinTokenCkEth: (id: symbol) => void;
 	openConvertToTwinTokenEth: (id: symbol) => void;
-	openHowToConvertToTwinTokenEth: (id: symbol) => void;
+	openHowToConvertToTwinTokenEth: (
+		params: SetWithOptionalDataParams<ReceiveHowToConvertData>
+	) => void;
 	openWalletConnectAuth: (id: symbol) => void;
 	openWalletConnectSign: (params: SetWithDataParams<WalletKitTypes.SessionRequest>) => void;
 	openWalletConnectSend: (params: SetWithDataParams<WalletKitTypes.SessionRequest>) => void;
@@ -198,14 +185,6 @@ const initModalStore = <T>(): ModalStore<T> => {
 			set({ type, id, data });
 
 	return {
-		openEthReceive: setType('eth-receive'),
-		openIcpReceive: setType('icp-receive'),
-		openIcrcReceive: setType('icrc-receive'),
-		openCkBTCReceive: setType('ckbtc-receive'),
-		openCkETHReceive: setType('cketh-receive'),
-		openBtcReceive: setType('btc-receive'),
-		openSolReceive: setType('sol-receive'),
-		openXrpReceive: setType('xrp-receive'),
 		openReceive: setType('receive'),
 		openSend: <(params: SetWithOptionalDataParams<SendModalData>) => void>setTypeWithData('send'),
 		openBuy: setType('buy'),
@@ -217,7 +196,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openConvertBTCToCkBTC: setType('convert-btc-ckbtc'),
 		openConvertToTwinTokenCkEth: setType('convert-to-twin-token-cketh'),
 		openConvertToTwinTokenEth: setType('convert-to-twin-token-eth'),
-		openHowToConvertToTwinTokenEth: setType('how-to-convert-to-twin-token-eth'),
+		openHowToConvertToTwinTokenEth: <
+			(params: SetWithOptionalDataParams<ReceiveHowToConvertData>) => void
+		>setTypeWithData('how-to-convert-to-twin-token-eth'),
 		openWalletConnectAuth: setType('wallet-connect-auth'),
 		openWalletConnectSign: <(params: SetWithDataParams<WalletKitTypes.SessionRequest>) => void>(
 			setTypeWithData('wallet-connect-sign')

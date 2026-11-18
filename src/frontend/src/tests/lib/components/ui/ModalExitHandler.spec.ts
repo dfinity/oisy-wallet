@@ -5,9 +5,9 @@ import { get } from 'svelte/store';
 describe('ModalExitHandler', () => {
 	it('closes modal on navigation', () => {
 		const id = Symbol('modalId');
-		modalStore.openIcpReceive(id);
+		modalStore.openReceive(id);
 
-		expect(get(modalStore)).toEqual({ type: 'icp-receive', id });
+		expect(get(modalStore)).toEqual({ type: 'receive', id });
 
 		doPreNavigation({ cancel: () => {}, busy: false });
 
@@ -16,9 +16,9 @@ describe('ModalExitHandler', () => {
 
 	it('closes busy modal on navigation', () => {
 		const id = Symbol('modalId');
-		modalStore.openIcpReceive(id);
+		modalStore.openReceive(id);
 
-		expect(get(modalStore)).toEqual({ type: 'icp-receive', id });
+		expect(get(modalStore)).toEqual({ type: 'receive', id });
 
 		const confirmMessageSpy = vi.spyOn(window, 'confirm').mockImplementation(() => true);
 
@@ -30,9 +30,9 @@ describe('ModalExitHandler', () => {
 
 	it('cancels navigation while navigating away from busy modal', () => {
 		const id = Symbol('modalId');
-		modalStore.openIcpReceive(id);
+		modalStore.openReceive(id);
 
-		expect(get(modalStore)).toEqual({ type: 'icp-receive', id });
+		expect(get(modalStore)).toEqual({ type: 'receive', id });
 
 		const confirmMessageSpy = vi.spyOn(window, 'confirm').mockImplementation(() => false);
 		const cancelSpy = vi.fn();
@@ -40,6 +40,6 @@ describe('ModalExitHandler', () => {
 
 		expect(confirmMessageSpy).toHaveBeenCalled();
 		expect(cancelSpy).toHaveBeenCalled();
-		expect(get(modalStore)).toEqual({ type: 'icp-receive', id });
+		expect(get(modalStore)).toEqual({ type: 'receive', id });
 	});
 });

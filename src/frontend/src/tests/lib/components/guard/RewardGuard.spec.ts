@@ -555,7 +555,7 @@ describe('RewardGuard', () => {
 				last_snapshot_timestamp: [ZERO]
 			});
 
-			modalStore.openIcrcReceive(Symbol());
+			modalStore.openReceive(Symbol());
 
 			render(RewardGuard);
 

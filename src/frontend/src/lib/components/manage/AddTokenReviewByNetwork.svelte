@@ -48,6 +48,8 @@
 		onError: () => void;
 		onBack: () => void;
 		isNftsPage?: boolean;
+		// Opened to add a fungible token (from Receive): a detected NFT collection is not saved.
+		fungibleOnly?: boolean;
 	}
 
 	let {
@@ -58,8 +60,14 @@
 		onSuccess,
 		onError,
 		onBack,
-		isNftsPage = false
+		isNftsPage = false,
+		fungibleOnly = false
 	}: Props = $props();
+
+	const rejectNft = () =>
+		toastsError({
+			msg: { text: $i18n.receive.token.text.import_nft }
+		});
 
 	const addIcrcToken = async () => {
 		if (isNullish(ledgerCanisterId)) {
@@ -159,6 +167,11 @@
 			networkId: network.id
 		});
 
+		if (isErc721 && fungibleOnly) {
+			rejectNft();
+			return;
+		}
+
 		if (isErc721) {
 			await saveTokens([{ ...newToken, networkKey: 'Erc721' }]);
 
@@ -169,6 +182,11 @@
 			address: ethContractAddress,
 			networkId: network.id
 		});
+
+		if (isErc1155 && fungibleOnly) {
+			rejectNft();
+			return;
+		}
 
 		if (isErc1155) {
 			await saveTokens([{ ...newToken, networkKey: 'Erc1155' }]);

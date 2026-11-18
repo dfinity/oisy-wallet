@@ -21,7 +21,7 @@
 
 	const modalId = Symbol();
 
-	const openReceive = () => modalStore.openHowToConvertToTwinTokenEth(modalId);
+	const openReceive = () => modalStore.openHowToConvertToTwinTokenEth({ id: modalId });
 </script>
 
 <div class="pr-2">
@@ -61,7 +61,7 @@
 	>
 </div>
 
-{#if $modalHowToConvertToTwinTokenEth && nonNullish(sourceToken) && nonNullish(destinationToken)}
+{#if $modalHowToConvertToTwinTokenEth && $modalStore?.id === modalId && nonNullish(sourceToken) && nonNullish(destinationToken)}
 	<EthFeeStoreContext token={$nativeEthereumTokenWithFallback}>
 		<HowToConvertEthereumModal {destinationToken} {sourceToken} />
 	</EthFeeStoreContext>

@@ -1022,6 +1022,63 @@
 				"xrp_address_copied": "",
 				"display_xrp_address_qr": ""
 			}
+		},
+		"token": {
+			"text": {
+				"select_token": "",
+				"select_network": "",
+				"which_network": "",
+				"networks_count": "",
+				"test_network": "",
+				"change_token": "",
+				"route_direct": "",
+				"route_ckbtc_deposit": "",
+				"send_instruction": "",
+				"network": "",
+				"asset": "",
+				"enable_info": "",
+				"enable_and_show": "",
+				"enabling": "",
+				"enable_error": "",
+				"address_loading": "",
+				"address_error": "",
+				"no_routes": "",
+				"route_unavailable": "",
+				"import_token": "",
+				"import_nft": "",
+				"address_format": "",
+				"principal": "",
+				"account_id": "",
+				"icp_format_hint": "",
+				"principal_label": "",
+				"account_id_label": "",
+				"address_label": "",
+				"address_copied": "",
+				"how_to_convert": "",
+				"how_to_convert_description": ""
+			}
+		},
+		"ckbtc": {
+			"text": {
+				"deposit_address": "",
+				"deposit_warning": "",
+				"deposit_address_copied": "",
+				"you_send": "",
+				"you_receive": "",
+				"on_network": "",
+				"confirmations": "",
+				"estimated_fee": "",
+				"unavailable": "",
+				"terms_error": "",
+				"small_deposit": "",
+				"view_activity": ""
+			}
+		},
+		"addresses": {
+			"text": {
+				"evm_title": "",
+				"evm_networks": ""
+			}
 		}
 	},
 	"send": {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
 	import type { OptionBtcAddress } from '$btc/types/address';
 	import {
@@ -27,7 +28,8 @@
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
-	import type { OptionEthAddress } from '$eth/types/address';
+	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
+	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
@@ -48,16 +50,6 @@
 		RECEIVE_TOKENS_MODAL_XRP_MAINNET_SECTION
 	} from '$lib/constants/test-ids.constants';
 	import {
-		btcAddressMainnet,
-		btcAddressRegtest,
-		btcAddressTestnet,
-		ethAddress,
-		solAddressDevnet,
-		solAddressLocal,
-		solAddressMainnet,
-		xrpAddressMainnet
-	} from '$lib/derived/address.derived';
-	import {
 		networkBitcoinMainnetEnabled,
 		networkBitcoinRegtestEnabled,
 		networkBitcoinTestnetEnabled,
@@ -71,11 +63,25 @@
 		networkXrpMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
+	import {
+		btcAddressMainnetStore,
+		btcAddressRegtestStore,
+		btcAddressTestnetStore,
+		ethAddressStore,
+		solAddressDevnetStore,
+		solAddressLocalnetStore,
+		solAddressMainnetStore,
+		xrpAddressMainnetStore,
+		type AddressStoreData
+	} from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { Address } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
+	import type { OptionString } from '$lib/types/string';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isRouteNfts } from '$lib/utils/nav.utils';
 
 	interface Props {
@@ -88,9 +94,22 @@
 
 	let isNftsPage = $derived(isRouteNfts(page));
 
+	// Copy and QR only for an address the backend certified, as in Receive.
+	const certified = <T extends Address>(data: AddressStoreData<T>): OptionString =>
+		nonNullish(data) && data.certified ? data.data : undefined;
+
+	// One address serves every EVM network, so it is listed once, with the enabled networks that share it.
+	let evmNetworks = $derived([...$enabledEthereumNetworks, ...$enabledEvmNetworks]);
+
+	let evmNetworksText = $derived(
+		replacePlaceholders($i18n.receive.addresses.text.evm_networks, {
+			$networks: evmNetworks.map(({ name }) => name).join(', ')
+		})
+	);
+
 	interface ReceiveAddressProps {
 		labelRef: string;
-		address: OptionBtcAddress | OptionEthAddress;
+		address: OptionString;
 		network: Network;
 		token: Token;
 		testId: string;
@@ -99,6 +118,7 @@
 		copyAriaLabel: string;
 		qrCodeAriaLabel: string;
 		text?: string;
+		networks?: Network[];
 		condition?: boolean;
 		qrCodeAction: {
 			enabled: true;
@@ -110,31 +130,32 @@
 
 	let receiveAddressCoreList = $derived<Omit<ReceiveAddressProps, 'qrCodeAction' | 'on'>[]>([
 		{
-			labelRef: 'icpTokenAddress',
-			address: $icpAccountIdentifierText,
-			network: ICP_NETWORK,
-			token: ICP_TOKEN,
-			testId: RECEIVE_TOKENS_MODAL_ICP_SECTION,
-			title: $i18n.receive.icp.text.icp_account_title,
-			label: $i18n.receive.icp.text.icp_account,
-			copyAriaLabel: $i18n.receive.icp.text.icp_account_copied,
-			qrCodeAriaLabel: $i18n.receive.icp.text.display_icp_account_qr
-		},
-		{
 			labelRef: 'icrcTokenAddress',
 			address: $icrcAccountIdentifierText,
 			network: ICP_NETWORK,
 			token: ICP_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_ICRC_SECTION,
-			title: $i18n.receive.icp.text.principal_title,
+			title: $i18n.receive.icp.text.principal,
 			label: $i18n.receive.icp.text.principal,
 			copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied,
 			qrCodeAriaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr,
 			text: $i18n.receive.icp.text.use_for_icrc_deposit
 		},
 		{
+			labelRef: 'icpTokenAddress',
+			address: $icpAccountIdentifierText,
+			network: ICP_NETWORK,
+			token: ICP_TOKEN,
+			testId: RECEIVE_TOKENS_MODAL_ICP_SECTION,
+			title: $i18n.receive.icp.text.account_id,
+			label: $i18n.receive.icp.text.account_id,
+			copyAriaLabel: $i18n.receive.icp.text.account_id_copied,
+			qrCodeAriaLabel: $i18n.receive.icp.text.display_account_id_qr,
+			text: $i18n.receive.icp.text.use_for_icp_deposit
+		},
+		{
 			labelRef: 'btcAddressMainnet',
-			address: $btcAddressMainnet,
+			address: certified($btcAddressMainnetStore),
 			network: BTC_MAINNET_NETWORK,
 			token: BTC_MAINNET_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION,
@@ -146,7 +167,7 @@
 		},
 		{
 			labelRef: 'btcAddressTestnet',
-			address: $btcAddressTestnet,
+			address: certified($btcAddressTestnetStore),
 			network: BTC_TESTNET_NETWORK,
 			token: BTC_TESTNET_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
@@ -158,7 +179,7 @@
 		},
 		{
 			labelRef: 'btcAddressRegtest',
-			address: $btcAddressRegtest,
+			address: certified($btcAddressRegtestStore),
 			network: BTC_REGTEST_NETWORK,
 			token: BTC_REGTEST_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION,
@@ -170,24 +191,21 @@
 		},
 		{
 			labelRef: 'ethAddress',
-			address: $ethAddress,
+			address: certified($ethAddressStore),
 			network: ETHEREUM_NETWORK,
 			token: ETHEREUM_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_ETH_SECTION,
-			title: $i18n.receive.ethereum.text.ethereum_title,
-			label: $i18n.receive.ethereum.text.ethereum_address,
+			title: $i18n.receive.addresses.text.evm_title,
+			label: $i18n.receive.addresses.text.evm_title,
 			copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied,
 			qrCodeAriaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr,
-			text: $i18n.receive.icp.text.your_private_eth_address,
-			condition:
-				$networkEthereumEnabled ||
-				$networkSepoliaEnabled ||
-				$networkEvmMainnetEnabled ||
-				$networkEvmTestnetEnabled
+			text: evmNetworksText,
+			networks: evmNetworks,
+			condition: evmNetworks.length > 0
 		},
 		{
 			labelRef: 'solAddressMainnet',
-			address: $solAddressMainnet,
+			address: certified($solAddressMainnetStore),
 			network: SOLANA_MAINNET_NETWORK,
 			token: SOLANA_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION,
@@ -199,7 +217,7 @@
 		},
 		{
 			labelRef: 'solAddressDevnet',
-			address: $solAddressDevnet,
+			address: certified($solAddressDevnetStore),
 			network: SOLANA_DEVNET_NETWORK,
 			token: SOLANA_DEVNET_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION,
@@ -211,7 +229,7 @@
 		},
 		{
 			labelRef: 'solAddressLocal',
-			address: $solAddressLocal,
+			address: certified($solAddressLocalnetStore),
 			network: SOLANA_LOCAL_NETWORK,
 			token: SOLANA_LOCAL_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION,
@@ -223,7 +241,7 @@
 		},
 		{
 			labelRef: 'xrpAddressMainnet',
-			address: $xrpAddressMainnet,
+			address: certified($xrpAddressMainnetStore),
 			network: XRP_MAINNET_NETWORK,
 			token: XRP_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_XRP_MAINNET_SECTION,
@@ -250,6 +268,7 @@
 				testId,
 				title,
 				text,
+				networks,
 				condition
 			}) => ({
 				labelRef,
@@ -269,7 +288,8 @@
 							address: address ?? '',
 							addressLabel,
 							addressToken,
-							copyAriaLabel
+							copyAriaLabel,
+							networks
 						})
 				}
 			})
@@ -283,7 +303,16 @@
 			{@const showAddress =
 				condition !== false && (!isNftsPage || (isNftsPage && network.supportsNft))}
 
-			{#if showAddress}
+			{#if showAddress && nonNullish(_text)}
+				<ReceiveAddress {address} {copyAriaLabel} {labelRef} {network} {qrCodeAction} {testId}>
+					{#snippet title()}
+						{_title}
+					{/snippet}
+					{#snippet text()}
+						{_text}
+					{/snippet}
+				</ReceiveAddress>
+			{:else if showAddress}
 				<ReceiveAddress {address} {copyAriaLabel} {labelRef} {network} {qrCodeAction} {testId}>
 					{#snippet title()}
 						{_title}
