@@ -285,8 +285,12 @@ div.modal {
 	}
 
 	@media (width < theme(--breakpoint-sm)) and (height < 24rem) {
+		div.container > div.content:has(.send-destination-content) {
+			@apply scroll-fade;
+		}
+
 		div.stretch.send-destination-content + div {
-			position: static;
+			position: static !important;
 		}
 	}
 }
