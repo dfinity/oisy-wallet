@@ -6,6 +6,7 @@ import {
 	loadXrpAccountInfo,
 	loadXrpAccountLines,
 	loadXrpBalance,
+	loadXrpDepositAuthorized,
 	loadXrpLedgerIndex,
 	loadXrpOpenLedgerFee,
 	loadXrpTransactionOutcome,
@@ -2348,6 +2349,100 @@ describe('xrpl.rest', () => {
 					`a line with an account other than ${issuer}`
 				);
 			});
+		});
+	});
+
+	describe('loadXrpDepositAuthorized', () => {
+		const destination = 'rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De';
+
+		// As the public Clio node answered on 2026-11-18, for an ordinary holder paying RLUSD's issuer.
+		const answer = (overrides: Record<string, unknown> = {}) => ({
+			result: {
+				deposit_authorized: false,
+				source_account: address,
+				destination_account: destination,
+				ledger_hash: '595106263F810DCEB8F3EBCD20B8699B72C5C258C3AD7CB189F34F545E28102B',
+				ledger_index: 108416228,
+				validated: true,
+				status: 'success',
+				...overrides
+			}
+		});
+
+		const mockAnswer = (body: unknown) => {
+			const fetchMock = vi.fn().mockResolvedValue({
+				ok: true,
+				status: 200,
+				json: () => Promise.resolve(body)
+			});
+
+			vi.stubGlobal('fetch', fetchMock);
+
+			return fetchMock;
+		};
+
+		it('asks about the two accounts on the validated ledger', async () => {
+			const fetchMock = mockAnswer(answer());
+
+			await loadXrpDepositAuthorized({ source: address, destination, network });
+
+			expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+				method: 'deposit_authorized',
+				params: [
+					{ source_account: address, destination_account: destination, ledger_index: 'validated' }
+				]
+			});
+		});
+
+		it.each([true, false])('returns the answer %s', async (authorized) => {
+			mockAnswer(answer({ deposit_authorized: authorized }));
+
+			await expect(
+				loadXrpDepositAuthorized({ source: address, destination, network })
+			).resolves.toBe(authorized);
+		});
+
+		it.each([
+			['source', { source_account: destination }],
+			['destination', { destination_account: address }]
+		])('throws for an answer about another %s', async (...[, overrides]) => {
+			mockAnswer(answer(overrides));
+
+			await expect(
+				loadXrpDepositAuthorized({ source: address, destination, network })
+			).rejects.toThrow('Unexpected XRPL deposit_authorized response: answered for');
+		});
+
+		it('throws for an open-ledger snapshot', async () => {
+			mockAnswer(answer({ validated: false }));
+
+			await expect(
+				loadXrpDepositAuthorized({ source: address, destination, network })
+			).rejects.toThrow('an open-ledger snapshot');
+		});
+
+		it('throws for an answer without its verdict', async () => {
+			mockAnswer(answer({ deposit_authorized: 'no' }));
+
+			await expect(
+				loadXrpDepositAuthorized({ source: address, destination, network })
+			).rejects.toThrow('it does not match the expected shape');
+		});
+
+		// An absent account is no answer: the send asks only about a recipient it just found.
+		it('throws for an absent account', async () => {
+			mockAnswer({
+				result: {
+					error: 'dstActNotFound',
+					error_code: 50,
+					error_message: 'destination_accountNotFound',
+					status: 'error'
+				}
+			});
+
+			await expect(
+				loadXrpDepositAuthorized({ source: address, destination, network })
+			).rejects.toThrow('Unexpected XRPL deposit_authorized response: dstActNotFound');
 		});
 	});
 

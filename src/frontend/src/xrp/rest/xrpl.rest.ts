@@ -8,6 +8,7 @@ import {
 	XrplAccountLinesResultSchema,
 	XrplAccountTxErrorSchema,
 	XrplAccountTxResultSchema,
+	XrplDepositAuthorizedResultSchema,
 	XrplEnvelopeSchema,
 	XrplFeeResultSchema,
 	XrplLedgerCurrentResultSchema,
@@ -497,6 +498,58 @@ export const loadXrpAccountLines = async ({
 	throw new Error(
 		`Unexpected XRPL account_lines response: more than ${XRP_ACCOUNT_LINES_MAX_PAGES} pages`
 	);
+};
+
+/**
+ * Whether `destination` takes payments from `source`, via the XRPL `deposit_authorized` method on
+ * the validated ledger. True for every account without DepositAuth; for one with it, only when it
+ * preauthorized `source`.
+ *
+ * Any failure throws, the absence of either account included: the caller asks only about a
+ * recipient it has just found, and an answer it cannot get must not read as "authorized".
+ */
+export const loadXrpDepositAuthorized = async ({
+	source,
+	destination,
+	network
+}: {
+	source: XrpAddress;
+	destination: XrpAddress;
+	network: XrpNetworkType;
+}): Promise<boolean> => {
+	const result = await xrpJsonRpc({
+		network,
+		method: 'deposit_authorized',
+		params: { source_account: source, destination_account: destination, ledger_index: 'validated' }
+	});
+
+	const parsed = XrplDepositAuthorizedResultSchema.safeParse(result);
+
+	if (!parsed.success) {
+		throw new Error(
+			'Unexpected XRPL deposit_authorized response: it does not match the expected shape'
+		);
+	}
+
+	const {
+		deposit_authorized: authorized,
+		source_account: answeredSource,
+		destination_account: answeredDestination,
+		validated
+	} = parsed.data;
+
+	if (!validated) {
+		throw new Error('Unexpected XRPL deposit_authorized response: an open-ledger snapshot');
+	}
+
+	// Raw comparison: a classic address is base58 over a checksummed payload, so case matters.
+	if (answeredSource !== source || answeredDestination !== destination) {
+		throw new Error(
+			`Unexpected XRPL deposit_authorized response: answered for ${answeredSource} to ${answeredDestination}, asked for ${source} to ${destination}`
+		);
+	}
+
+	return authorized;
 };
 
 /**
