@@ -3,6 +3,7 @@ import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
@@ -1194,6 +1195,35 @@ describe('export-data.utils', () => {
 			expect(row.tx_id).toBe('XRPHASH1');
 			// XRPScan's base URL carries no `$args` placeholder, so the path is appended.
 			expect(row.explorer_url).toBe(`${XRP_TOKEN.network.explorerUrl}/tx/XRPHASH1`);
+		});
+
+		// Two issuers' "USD" are two tokens, so a trust-line token is named by its currency and issuer;
+		// its amount is in the token, its fee in XRP.
+		it('renders a trust-line token payment by currency and issuer, with the fee in XRP', () => {
+			const tokenTx = {
+				id: 'TOKENHASH1',
+				type: 'send',
+				status: 'confirmed',
+				from: 'rSenderAddress',
+				to: 'rReceiverAddress',
+				value: 25n * 10n ** 18n,
+				fee: 12n,
+				timestamp: 1n
+			} satisfies XrpTransactionUi;
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'xrp', transaction: tokenTx, token: RLUSD_TOKEN }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.token_symbol).toBe(RLUSD_TOKEN.symbol);
+			expect(row.token_address_or_ledger_id).toBe(`${RLUSD_TOKEN.currency}.${RLUSD_TOKEN.issuer}`);
+			expect(row.amount).toBe('25.0');
+			expect(row.fee).toBe('0.000012');
+			expect(row.fee_token).toBe('XRP');
 		});
 
 		// XRPL lets an account pay itself to convert an issued currency into XRP. `from === to`, but
