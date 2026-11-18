@@ -1,6 +1,4 @@
 import * as backendApi from '$lib/api/backend.api';
-import mainImageDark from '$lib/assets/main-image-dark.webp';
-import mainImageLight from '$lib/assets/main-image-light.webp';
 import LandingPage from '$lib/components/auth/LandingPage.svelte';
 import { i18n } from '$lib/stores/i18n.store';
 import { themeStore } from '$lib/stores/theme.store';
@@ -11,22 +9,21 @@ import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
 describe('LandingPage', () => {
-	it('switches artwork with the theme while reserving the same layout size', async () => {
+	it('keeps the same accessible vector preview and intrinsic size across theme changes', async () => {
 		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
 		themeStore.select(Theme.LIGHT);
 		const { getByRole } = render(LandingPage);
 		const image = getByRole('img', { name: replaceOisyPlaceholders(get(i18n).auth.alt.preview) });
 
-		expect(image).toHaveAttribute('src', mainImageLight);
-		expect(image).toHaveAttribute('loading', 'eager');
+		expect(image).toHaveAttribute('viewBox', '0 0 1080 752');
 		expect(image).toHaveAttribute('width', '2160');
 		expect(image).toHaveAttribute('height', '1504');
 
 		themeStore.select(Theme.DARK);
 		await tick();
 
-		expect(image).toHaveAttribute('src', mainImageDark);
-		expect(image).toHaveAttribute('width', '2160');
-		expect(image).toHaveAttribute('height', '1504');
+		expect(getByRole('img', { name: replaceOisyPlaceholders(get(i18n).auth.alt.preview) })).toBe(
+			image
+		);
 	});
 });
