@@ -482,8 +482,8 @@ describe('lifi-swap.utils', () => {
 				btcSendViaBackend.enabled = true;
 			});
 
-			it('should not quote while no bridge is admitted from Bitcoin', () => {
-				expect(buildLifiQuoteRequest(btcParams)).toBeUndefined();
+			it('should quote through Relay, the one bridge admitted from Bitcoin', () => {
+				expect(buildLifiQuoteRequest(btcParams)?.allowBridges).toEqual(['relaydepository']);
 			});
 
 			it("should set the floor where LI.FI's 294-sat fee output stops exceeding its fee", () => {

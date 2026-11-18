@@ -55,8 +55,10 @@ describe('lifi-btc-binding.services', () => {
 	};
 
 	describe('without a binding for the bridge', () => {
-		it('should have none for any bridge yet', () => {
-			for (const tool of ['layerswap', 'relaydepository', 'near']) {
+		it('should have one for Relay only', () => {
+			expect(hasLifiBtcPayoutBinding({ tool: 'relaydepository' })).toBeTruthy();
+
+			for (const tool of ['layerswap', 'near']) {
 				expect(hasLifiBtcPayoutBinding({ tool })).toBeFalsy();
 			}
 		});
@@ -85,8 +87,12 @@ describe('lifi-btc-binding.services', () => {
 	});
 
 	describe('lifiBtcAdmittedBridges', () => {
+		it('should admit Relay, the one allowed bridge with a binding', () => {
+			expect(lifiBtcAdmittedBridges()).toEqual(['relaydepository']);
+		});
+
 		it('should admit no bridge while none has a binding, however many are allowed', () => {
-			expect(lifiBtcAdmittedBridges()).toEqual([]);
+			expect(lifiBtcAdmittedBridges({ bindings: {} })).toEqual([]);
 		});
 
 		it('should admit an allowed bridge with a binding, and no denied one', () => {

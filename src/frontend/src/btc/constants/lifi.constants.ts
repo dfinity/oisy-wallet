@@ -16,6 +16,12 @@ export const LIFI_BTC_MIN_AMOUNT_SATOSHIS = 117_600n;
 // refused.
 export const LIFI_BTC_FEE_ADDRESS = 'bc1qn2cstnjlvhxf60j3ujeyq0h0rqc7kklap8j94g';
 
+// Relay's Bitcoin depository: the deposit of every Relay quote, as Relay itself lists it
+// (`protocol.v2.depository` of chain 8253038 in `GET api.relay.link/chains`, 2026-11-17). Pinned,
+// never taken from a quote: a tampered LI.FI answer could name its own address as Relay's in the
+// transaction and in its copy of Relay's quote alike.
+export const RELAY_BTC_DEPOSITORY_ADDRESS = 'bc1qzmtn0q92ayejt2hpffvlktcpmyy7vvsd06sefu';
+
 // The name of LI.FI's own fee among a BTC quote's `feeCosts`, the amount its fee output pays.
 export const LIFI_BTC_FEE_COST_NAME = 'LIFI Fixed Fee';
 

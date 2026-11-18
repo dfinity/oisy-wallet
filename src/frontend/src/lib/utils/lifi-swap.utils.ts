@@ -361,11 +361,12 @@ const BTC_PUSHDATA_LENGTH_BYTES: Partial<Record<number, number>> = {
 	[opcodes.OP_PUSHDATA4]: 4
 };
 
-// Whether `script` is data pushes only, read byte by byte as the backend's parser reads it: direct
-// pushes and `OP_PUSHDATA1/2/4`, minimal or not. bitcoinjs-lib cannot stand in: `isPushOnly` also
-// accepts `OP_1NEGATE` and `OP_1`…`OP_16`, which the backend refuses, and `decompile` turns an
-// explicit one-byte push of 1–16 into those opcodes.
-const isBtcDataPushesOnly = (script: Uint8Array): boolean => {
+// The data each push of `script` carries, or `undefined` when it is not data pushes only, read byte by
+// byte as the backend's parser reads it: direct pushes and `OP_PUSHDATA1/2/4`, minimal or not.
+// bitcoinjs-lib cannot stand in: `isPushOnly` also accepts `OP_1NEGATE` and `OP_1`…`OP_16`, which the
+// backend refuses, and `decompile` turns an explicit one-byte push of 1–16 into those opcodes.
+const btcDataPushes = (script: Uint8Array): Uint8Array[] | undefined => {
+	const pushes: Uint8Array[] = [];
 	let offset = 0;
 
 	while (offset < script.length) {
@@ -376,7 +377,7 @@ const isBtcDataPushesOnly = (script: Uint8Array): boolean => {
 		const lengthBytes = opcode < opcodes.OP_PUSHDATA1 ? 0 : BTC_PUSHDATA_LENGTH_BYTES[opcode];
 
 		if (isNullish(lengthBytes) || offset + lengthBytes > script.length) {
-			return false;
+			return;
 		}
 
 		const dataLength =
@@ -386,11 +387,28 @@ const isBtcDataPushesOnly = (script: Uint8Array): boolean => {
 						.subarray(offset, offset + lengthBytes)
 						.reduceRight((length, byte) => length * 256 + byte, 0);
 
-		offset += lengthBytes + dataLength;
+		const dataStart = offset + lengthBytes;
+		offset = dataStart + dataLength;
+
+		if (offset > script.length) {
+			return;
+		}
+
+		pushes.push(script.subarray(dataStart, offset));
 	}
 
-	return offset === script.length;
+	return pushes;
 };
+
+const isBtcDataPushesOnly = (script: Uint8Array): boolean => nonNullish(btcDataPushes(script));
+
+/**
+ * The text a LI.FI BTC memo carries, its pushes' data read as Latin-1: for Relay, `0x<order id>`,
+ * then `=|lifi` and LI.FI's transaction id. For a memo `decodeLifiBtcTransaction` returned, which holds
+ * data pushes only; anything else reads as empty.
+ */
+export const lifiBtcMemoText = ({ script }: LifiBtcOutput): string =>
+	(btcDataPushes(script.subarray(1)) ?? []).map((data) => String.fromCharCode(...data)).join('');
 
 // `OP_RETURN` followed only by data pushes, within `LIFI_BTC_MAX_MEMO_SCRIPT_BYTES`: the memo the
 // backend broadcasts, so at most 80 bytes of data.

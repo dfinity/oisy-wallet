@@ -1,5 +1,6 @@
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { LIFI_ALLOWED_BRIDGES, LIFI_DENY_BRIDGES } from '$env/rest/lifi.env';
+import { bindLifiRelayPayout } from '$lib/services/lifi-btc-relay-binding.services';
 import { LifiRouteUnsupportedError } from '$lib/types/errors';
 import type { LifiBtcOutput } from '$lib/types/lifi';
 import { isNullish } from '@dfinity/utils';
@@ -31,11 +32,15 @@ export type LifiBtcPayoutBinding = (params: LifiBtcPayoutBindingParams) => Promi
 
 /**
  * The payout binding of each bridge admitted from Bitcoin, by LI.FI tool key. A bridge joins
- * `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]` only together with its entry here. None has one yet:
- * LayerSwap keeps LI.FI's swaps out of its keyless API, and Relay creates its record (by the memo's
- * order id) only once it sees the deposit.
+ * `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]` only together with its entry here.
+ *
+ * Relay's is best effort (`bindLifiRelayPayout`). LayerSwap has none: it keeps LI.FI's swaps out of
+ * its keyless API. NEAR's would be 1Click's signed record, but from BTC it only duplicates OISY's own
+ * NEAR Intents provider at a higher cost.
  */
-const LIFI_BTC_PAYOUT_BINDINGS: Partial<Record<string, LifiBtcPayoutBinding>> = {};
+const LIFI_BTC_PAYOUT_BINDINGS: Partial<Record<string, LifiBtcPayoutBinding>> = {
+	relaydepository: bindLifiRelayPayout
+};
 
 // The table's own entries only: a route's tool key comes from LI.FI's response.
 const payoutBindingOf = ({
