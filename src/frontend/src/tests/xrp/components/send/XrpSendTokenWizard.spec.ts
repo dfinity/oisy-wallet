@@ -1,3 +1,4 @@
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
@@ -17,6 +18,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockSendContextEntry } from '$tests/utils/send.context.test-utils';
+import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import XrpSendTokenWizard from '$xrp/components/send/XrpSendTokenWizard.svelte';
 import { XRP_BASE_RESERVE_DROPS } from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
@@ -26,9 +28,11 @@ import {
 	XrpAmountExceedsSendableError,
 	XrpDestinationTagRequiredError,
 	XrpDestinationUnfundedError,
+	XrpPaymentRefusedError,
 	XrpSelfDestinationError,
 	XrpSendAlreadyInFlightError,
-	XrpSendNotGuardedError
+	XrpSendNotGuardedError,
+	type XrpPaymentRefusal
 } from '$xrp/types/xrp-send';
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import { assertNonNullish } from '@dfinity/utils';
@@ -573,5 +577,193 @@ describe('XrpSendTokenWizard', () => {
 		await clickSend(rendered.container);
 
 		expect(onNext).not.toHaveBeenCalled();
+	});
+
+	describe('a trust-line token', () => {
+		const token = { ...RLUSD_TOKEN, enabled: true };
+
+		// RLUSD's issuer with a 0.5 % transfer fee, to see the rate travel to the send.
+		const issuerInfo = {
+			balance: 50_000_000n,
+			sequence: 1,
+			ownerCount: 0,
+			flags: 0x80800000,
+			transferRate: 1_005_000_000
+		};
+
+		// Settled once the issuer's rate has arrived: the send guard refuses while it is unknown.
+		const renderToken = async ({
+			to = destination,
+			amount = sendAmount
+		}: { to?: string; amount?: number } = {}) => {
+			const rendered = render(XrpSendTokenWizard, {
+				props: { ...props, destination: to, amount },
+				context: mockContext({ token })
+			});
+
+			await waitFor(() => {
+				expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalledWith(
+					expect.objectContaining({ address: token.issuer })
+				);
+			});
+
+			await runResolvedPromises();
+
+			return rendered;
+		};
+
+		beforeEach(() => {
+			balancesStore.reset(token.id);
+			// 100.5 RLUSD, in base units of 10^-18.
+			balancesStore.set({ id: token.id, data: { data: 1005n * 10n ** 17n, certified: true } });
+
+			vi.mocked(xrplRest.loadXrpAccountInfo).mockImplementation(({ address }) =>
+				Promise.resolve(
+					address === token.issuer ? issuerInfo : { balance, sequence: 7, ownerCount, flags: 0 }
+				)
+			);
+		});
+
+		const sendClicked = async ({ to }: { to?: string } = {}) => {
+			const { container: element } = await renderToken({ to });
+
+			await clickSend(element);
+		};
+
+		it('sends the token amount with the transfer rate the review showed', async () => {
+			await sendClicked();
+
+			expect(xrpSendServices.sendXrp).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					token,
+					destination,
+					amount: parseToken({ value: `${sendAmount}`, unitName: token.decimals }),
+					fee: nodeFee,
+					transferRate: 1_005_000_000
+				})
+			);
+		});
+
+		// The issuer charges nothing on a payment to itself.
+		it('sends with no transfer fee to the issuer', async () => {
+			await sendClicked({ to: token.issuer });
+
+			expect(xrpSendServices.sendXrp).toHaveBeenCalledWith(
+				expect.objectContaining({ transferRate: 1_000_000_000 })
+			);
+		});
+
+		it('sends XRP with no transfer rate', async () => {
+			const { container: element } = await renderSettled();
+
+			await clickSend(element);
+
+			expect(xrpSendServices.sendXrp).toHaveBeenCalledWith(
+				expect.objectContaining({ transferRate: undefined })
+			);
+		});
+
+		it('refuses before sending an amount whose transfer fee the balance cannot pay', async () => {
+			const { container: element } = await renderToken({ amount: 100.5 });
+
+			await clickSend(element);
+
+			expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.assertion.xrp_insufficient_funds_for_transfer_fee }
+			});
+			expect(onSendForm).toHaveBeenCalled();
+			expect(xrpSendServices.sendXrp).not.toHaveBeenCalled();
+		});
+
+		it('refuses while the transfer rate is unknown', async () => {
+			vi.mocked(xrplRest.loadXrpAccountInfo).mockImplementation(({ address }) =>
+				address === token.issuer
+					? new Promise(() => {})
+					: Promise.resolve({ balance, sequence: 7, ownerCount, flags: 0 })
+			);
+
+			const { container: element } = await renderToken();
+
+			await clickSend(element);
+
+			expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.error.xrp_ledger_state_unavailable }
+			});
+			expect(xrpSendServices.sendXrp).not.toHaveBeenCalled();
+		});
+
+		// Each refusal names what to change, and lands on the step where it can be changed: the
+		// amount, the recipient, or the review once a changed fee has reloaded.
+		it.each<{ refusal: XrpPaymentRefusal; text: string; step: 'form' | 'destination' | 'review' }>([
+			{
+				refusal: 'imprecise_amount',
+				text: en.send.assertion.xrp_token_amount_too_precise,
+				step: 'form'
+			},
+			{
+				refusal: 'insufficient_token_balance',
+				text: en.send.error.xrp_token_insufficient_balance,
+				step: 'form'
+			},
+			{
+				refusal: 'insufficient_xrp_for_fee',
+				text: en.send.error.xrp_insufficient_xrp_for_fee,
+				step: 'form'
+			},
+			{ refusal: 'trust_line_limit', text: en.send.error.xrp_trust_line_limit, step: 'form' },
+			{
+				refusal: 'destination_not_found',
+				text: en.send.error.xrp_destination_not_found,
+				step: 'destination'
+			},
+			{
+				refusal: 'deposit_not_authorized',
+				text: en.send.error.xrp_deposit_not_authorized,
+				step: 'destination'
+			},
+			{ refusal: 'no_trust_line', text: en.send.error.xrp_no_trust_line, step: 'destination' },
+			{
+				refusal: 'destination_frozen',
+				text: en.send.error.xrp_destination_frozen,
+				step: 'destination'
+			},
+			{
+				refusal: 'destination_not_authorized',
+				text: en.send.error.xrp_destination_not_authorized,
+				step: 'destination'
+			},
+			{ refusal: 'frozen', text: en.send.error.xrp_token_frozen, step: 'destination' },
+			{ refusal: 'deep_frozen', text: en.send.error.xrp_token_deep_frozen, step: 'destination' },
+			{ refusal: 'no_rippling', text: en.send.error.xrp_no_rippling, step: 'destination' },
+			{
+				refusal: 'transfer_rate_changed',
+				text: en.send.error.xrp_transfer_fee_changed,
+				step: 'review'
+			},
+			{
+				refusal: 'state_unavailable',
+				text: en.send.error.xrp_ledger_state_unavailable,
+				step: 'review'
+			}
+		])(
+			'reports $refusal with its own message, on the $step step',
+			async ({ refusal, text, step }) => {
+				vi.spyOn(xrpSendServices, 'sendXrp').mockRejectedValue(
+					new XrpPaymentRefusedError({ refusal, message: refusal })
+				);
+
+				await sendClicked();
+
+				expect(toasts.toastsError).toHaveBeenCalledWith(
+					expect.objectContaining({
+						msg: { text: replacePlaceholders(text, { $symbol: token.symbol }) }
+					})
+				);
+
+				expect(onSendForm).toHaveBeenCalledTimes(step === 'form' ? 1 : 0);
+				expect(onSendBack).toHaveBeenCalledTimes(step === 'destination' ? 1 : 0);
+				expect(onBack).toHaveBeenCalledTimes(step === 'review' ? 1 : 0);
+			}
+		);
 	});
 });
