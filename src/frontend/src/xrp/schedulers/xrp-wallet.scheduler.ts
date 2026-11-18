@@ -10,27 +10,49 @@ import type {
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import { loadXrpAccountLines, loadXrpBalance, loadXrpTransactions } from '$xrp/rest/xrpl.rest';
-import type { XrpCertifiedTransaction } from '$xrp/stores/xrp-transactions.store';
+import type {
+	XrpCertifiedTransaction,
+	XrpTrustLineCertifiedTransaction
+} from '$xrp/stores/xrp-transactions.store';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { XrpPostMessageDataResponseWallet } from '$xrp/types/xrp-post-message';
 import type { XrpTrustLine } from '$xrp/types/xrp-trust-line';
 import { mapXrpTransaction } from '$xrp/utils/xrp-transaction.utils';
+import { mapXrpTrustLineTransactions } from '$xrp/utils/xrp-trust-line-transaction.utils';
+import { xrpTrustLineIdentifier } from '$xrp/utils/xrp-trust-line.utils';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 
 interface XrpWalletStore {
 	balance: CertifiedData<Nullish<XrpBalance>> | undefined;
 	transactions: Record<string, XrpCertifiedTransaction>;
+	// Keyed by token and transaction: one payment can move two of the wallet's lines.
+	trustLineTransactions: Record<string, XrpTrustLineCertifiedTransaction>;
+}
+
+interface XrpHistory {
+	transactions: XrpCertifiedTransaction[];
+	// The trust-line tokens' rows from the same page; absent while trust-line tokens are off.
+	trustLineTransactions?: XrpTrustLineCertifiedTransaction[];
 }
 
 interface XrpWalletData {
 	balance: CertifiedData<XrpBalance | null>;
 	// `undefined` means the history could not be read this round, as distinct from an empty page.
-	transactions: XrpCertifiedTransaction[] | undefined;
+	history: XrpHistory | undefined;
 	// `undefined` means the lines were not read this round — they could not be, or trust-line tokens
 	// are off — as distinct from an account that has none.
 	trustLines: XrpTrustLine[] | undefined;
 }
+
+const trustLineTransactionKey = (row: XrpTrustLineCertifiedTransaction): string =>
+	`${xrpTrustLineIdentifier(row)}#${row.transaction.data.id}`;
+
+const emptyStore = (): XrpWalletStore => ({
+	balance: undefined,
+	transactions: {},
+	trustLineTransactions: {}
+});
 
 export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> {
 	#ref: PostMessageCommon['ref'] | undefined;
@@ -55,10 +77,7 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 
 	private timer = new SchedulerTimer('syncXrpWalletStatus');
 
-	private store: XrpWalletStore = {
-		balance: undefined,
-		transactions: {}
-	};
+	private store: XrpWalletStore = emptyStore();
 
 	stop() {
 		this.timer.stop();
@@ -80,10 +99,7 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		const newRef = nonNullish(data) ? this.refFor(data) : undefined;
 
 		if (this.#ref !== newRef) {
-			this.store = {
-				balance: undefined,
-				transactions: {}
-			};
+			this.store = emptyStore();
 			this.#historyPublished = false;
 			this.#trustLinesPublished = undefined;
 			this.#generation++;
@@ -132,24 +148,41 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 
 	// Returns only transactions not already emitted, so a re-sync posts just the delta.
 	// `account_tx` returns newest-first; the store keeps them keyed by transaction hash.
+	//
+	// The trust-line tokens' rows come from the same page, so they cost no request of their own. Only
+	// the newest page: deeper history is paged on the main thread, per token, as its list asks.
 	private loadTransactions = async ({
 		address,
 		xrpNetwork
 	}: {
 		address: PostMessageDataRequestXrp['address']['data'];
 		xrpNetwork: PostMessageDataRequestXrp['xrpNetwork'];
-	}): Promise<XrpCertifiedTransaction[]> => {
-		const { transactions } = await loadXrpTransactions({
+	}): Promise<XrpHistory> => {
+		const { transactions: entries } = await loadXrpTransactions({
 			address,
 			network: xrpNetwork,
 			limit: Number(WALLET_PAGINATION)
 		});
 
-		return transactions
+		const transactions = entries
 			.map((transaction) => mapXrpTransaction({ transaction, xrpAddress: address }))
 			.filter(nonNullish)
 			.filter(({ id }) => isNullish(this.store.transactions[id]))
 			.map((data) => ({ data, certified: false }));
+
+		if (!XRP_TRUST_LINE_TOKENS_ENABLED) {
+			return { transactions };
+		}
+
+		const trustLineTransactions = entries
+			.flatMap((transaction) => mapXrpTrustLineTransactions({ transaction, xrpAddress: address }))
+			.map(({ transaction, ...identity }) => ({
+				...identity,
+				transaction: { data: transaction, certified: false }
+			}))
+			.filter((row) => isNullish(this.store.trustLineTransactions[trustLineTransactionKey(row)]));
+
+		return { transactions, trustLineTransactions };
 	};
 
 	// The two come from different endpoints and are treated differently on failure. Only the
@@ -165,13 +198,13 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		data,
 		expectedRef,
 		generation,
-		transactions,
+		history,
 		trustLines
 	}: {
 		data: PostMessageDataRequestXrp;
 		expectedRef: string;
 		generation: number;
-		transactions: Promise<XrpCertifiedTransaction[] | undefined>;
+		history: Promise<XrpHistory | undefined>;
 		trustLines: Promise<XrpTrustLine[] | undefined>;
 	}) => {
 		const {
@@ -186,7 +219,7 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		// has no transactions.
 		this.syncWalletData({
 			balance,
-			transactions: await transactions,
+			history: await history,
 			trustLines: await trustLines,
 			expectedRef,
 			generation
@@ -210,7 +243,7 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		// Started once, before the retry loop, and its rejection folded into `undefined` here so a
 		// history outage neither fails the tick nor surfaces as an unhandled rejection when the
 		// balance exhausts its retries.
-		const transactions = this.loadTransactions({ address, xrpNetwork }).then(
+		const history = this.loadTransactions({ address, xrpNetwork }).then(
 			(loaded) => loaded,
 			() => undefined
 		);
@@ -232,7 +265,7 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 						data,
 						expectedRef,
 						generation,
-						transactions,
+						history,
 						trustLines
 					}),
 				maxRetries: 10
@@ -245,21 +278,21 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 			}
 
 			// Mirror the listener-side UI reset; otherwise the next sync only emits deltas and the UI stays empty.
-			this.store = {
-				balance: undefined,
-				transactions: {}
-			};
+			this.store = emptyStore();
 			this.postMessageWalletError({ error });
 		}
 	};
 
 	private syncWalletData = ({
 		balance,
-		transactions,
+		history,
 		trustLines,
 		expectedRef,
 		generation
 	}: XrpWalletData & { expectedRef: string; generation: number }) => {
+		const transactions = history?.transactions;
+		const trustLineTransactions = history?.trustLineTransactions;
+
 		// Discard a result for an address the scheduler has moved on from, or from before a stop,
 		// before it can be merged into the store that `setRef` already cleared.
 		if (this.isStale({ expectedRef, generation })) {
@@ -272,6 +305,8 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 
 		const newBalance = isNullish(this.store.balance) || this.store.balance.data !== balance.data;
 		const newTransactions = nonNullish(transactions) && transactions.length > 0;
+		const newTrustLineTransactions =
+			nonNullish(trustLineTransactions) && trustLineTransactions.length > 0;
 
 		this.store = {
 			...this.store,
@@ -281,6 +316,15 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 					...this.store.transactions,
 					...transactions.reduce(
 						(acc, transaction) => ({ ...acc, [transaction.data.id]: transaction }),
+						{}
+					)
+				}
+			}),
+			...(newTrustLineTransactions && {
+				trustLineTransactions: {
+					...this.store.trustLineTransactions,
+					...trustLineTransactions.reduce(
+						(acc, row) => ({ ...acc, [trustLineTransactionKey(row)]: row }),
 						{}
 					)
 				}
@@ -296,7 +340,13 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		const newTrustLines =
 			nonNullish(serializedTrustLines) && serializedTrustLines !== this.#trustLinesPublished;
 
-		if (!newBalance && !newTransactions && !firstHistory && !newTrustLines) {
+		if (
+			!newBalance &&
+			!newTransactions &&
+			!newTrustLineTransactions &&
+			!firstHistory &&
+			!newTrustLines
+		) {
 			return;
 		}
 
@@ -315,6 +365,9 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 				// rather than writing an empty page over an unknown one.
 				...(nonNullish(transactions) && {
 					newTransactions: JSON.stringify(transactions, jsonReplacer)
+				}),
+				...(nonNullish(trustLineTransactions) && {
+					newTrustLineTransactions: JSON.stringify(trustLineTransactions, jsonReplacer)
 				}),
 				// Omitted when unchanged or not read, so the listener keeps what it holds.
 				...(newTrustLines && { trustLines })
