@@ -756,6 +756,7 @@
 			"minter_ckbtc_btc": "يتطلب محوّل (minter) مُهيّأ لتحويل ckBTC إلى BTC.",
 			"minter_cketh_eth": "يتطلب محوّل (minter) مُهيّأ لتحويل ckETH إلى ETH.",
 			"minter_ckerc20_erc20": "يتطلب محوّل (minter) مُهيّأ لتحويل ckERC20 إلى Erc20.",
+			"minter_cksol_sol": "",
 			"ledger_cketh_eth": "يتطلب دفتر أستاذ ckETH مُهيّأ لتحويل ckErc20 إلى Erc20.",
 			"minter_btc": "يتطلب محوّل (minter) مُهيّأ لاسترداد BTC.",
 			"minter_ckbtc_info": "يتطلب محوّل (minter) مُهيّأ لجلب معلومات ckBTC",
