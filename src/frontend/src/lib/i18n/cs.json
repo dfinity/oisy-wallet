@@ -2715,7 +2715,9 @@
 		"text": {
 			"next_slide": "Další snímek",
 			"prev_slide": "Předchozí snímek",
-			"indicator": "Přejít na snímek $index"
+			"indicator": "Přejít na snímek $index",
+			"cksol_slide_title": "",
+			"cksol_slide_cta": ""
 		}
 	},
 	"agreements": {

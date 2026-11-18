@@ -2715,7 +2715,9 @@
 		"text": {
 			"next_slide": "다음 슬라이드",
 			"prev_slide": "이전 슬라이드",
-			"indicator": "$index번 슬라이드로 이동"
+			"indicator": "$index번 슬라이드로 이동",
+			"cksol_slide_title": "",
+			"cksol_slide_cta": ""
 		}
 	},
 	"agreements": {

@@ -2715,7 +2715,9 @@
 		"text": {
 			"next_slide": "Следующий слайд",
 			"prev_slide": "Предыдущий слайд",
-			"indicator": "Перейти к слайду $index"
+			"indicator": "Перейти к слайду $index",
+			"cksol_slide_title": "",
+			"cksol_slide_cta": ""
 		}
 	},
 	"agreements": {

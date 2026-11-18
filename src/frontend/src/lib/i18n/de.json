@@ -2715,7 +2715,9 @@
 		"text": {
 			"next_slide": "Nächste Folie",
 			"prev_slide": "Vorherige Folie",
-			"indicator": "Zur Folie $index springen"
+			"indicator": "Zur Folie $index springen",
+			"cksol_slide_title": "",
+			"cksol_slide_cta": ""
 		}
 	},
 	"agreements": {

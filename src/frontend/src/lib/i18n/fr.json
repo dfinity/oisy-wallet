@@ -2715,7 +2715,9 @@
 		"text": {
 			"next_slide": "Diapositive suivante",
 			"prev_slide": "Diapositive précédente",
-			"indicator": "Aller à la diapositive $index"
+			"indicator": "Aller à la diapositive $index",
+			"cksol_slide_title": "",
+			"cksol_slide_cta": ""
 		}
 	},
 	"agreements": {

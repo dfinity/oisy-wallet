@@ -1,11 +1,16 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
+	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 	import { rewardCampaigns, FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
+	import { CKSOL_IC_DATA } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
+	import cksolLogo from '$icp/assets/cksol.svg';
+	import { CKSOL_CAROUSEL_SLIDE_ID } from '$icp/constants/cksol.constants';
 	import { addUserHiddenDappId } from '$lib/api/backend.api';
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
+	import { AppPath, TOKEN_PARAM } from '$lib/constants/routes.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		userProfileLoaded,
@@ -21,6 +26,7 @@
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { networkParam } from '$lib/utils/nav.utils';
 
 	interface Props {
 		styleClass?: string;
@@ -57,15 +63,36 @@
 			: undefined
 	);
 
+	// Built from the ledger id rather than from the loaded ckSOL token, so that the card opens the
+	// token page even before the tokens have loaded. The page then waits for them.
+	const ckSolTokenPageUrl = nonNullish(CKSOL_IC_DATA)
+		? `${AppPath.Transactions}?${TOKEN_PARAM}=${CKSOL_IC_DATA.ledgerCanisterId}&${networkParam(ICP_NETWORK_ID)}`
+		: undefined;
+
+	let ckSolSlide = $derived(
+		nonNullish(ckSolTokenPageUrl)
+			? ({
+					id: CKSOL_CAROUSEL_SLIDE_ID,
+					carousel: {
+						text: $i18n.carousel.text.cksol_slide_title,
+						callToAction: $i18n.carousel.text.cksol_slide_cta
+					},
+					logo: cksolLogo,
+					name: 'ckSOL'
+				} as CarouselSlideOisyDappDescription)
+			: undefined
+	);
+
 	/*
 	 TODO: rename and adjust DappsCarousel for different data sources (not only dApps descriptions).
-	 1. The component now displays data from difference sources - featured airdrop and dApps
+	 1. The component now displays data from difference sources - featured airdrop, ckSOL and dApps
 	 2. We need to update all the related namings to something general.
 	 3. Create a single slide data type that can be used for airdrop, dApps, and all further cases.
 	 4. Adjust DappsCarouselSlide accordingly.
 	 */
 	let carouselSlides = $derived([
 		...(nonNullish(featureAirdropSlide) ? [featureAirdropSlide] : []),
+		...(nonNullish(ckSolSlide) ? [ckSolSlide] : []),
 		...dAppDescriptions
 	]);
 
@@ -126,6 +153,9 @@
 						: undefined}
 					{dappsCarouselSlide}
 					onCloseCarouselSlide={closeSlide}
+					pageUrl={dappsCarouselSlide.id === CKSOL_CAROUSEL_SLIDE_ID
+						? ckSolTokenPageUrl
+						: undefined}
 				/>
 			{/each}
 		</Carousel>

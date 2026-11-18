@@ -23,10 +23,11 @@
 		dappsCarouselSlide: CarouselSlideOisyDappDescription;
 		airdrop?: RewardCampaignDescription;
 		pagePath?: AppPath;
+		pageUrl?: string;
 		onCloseCarouselSlide: (dappId: CarouselSlideOisyDappDescription['id']) => void;
 	}
 
-	let { dappsCarouselSlide, airdrop, pagePath, onCloseCarouselSlide }: Props = $props();
+	let { dappsCarouselSlide, airdrop, pagePath, pageUrl, onCloseCarouselSlide }: Props = $props();
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -44,7 +45,7 @@
 	const rewardModalId = Symbol();
 	const dappModalId = Symbol();
 
-	const open = () => {
+	const open = async () => {
 		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_OPEN,
 			metadata: {
@@ -63,6 +64,8 @@
 					fromRoute
 				})
 			);
+		} else if (nonNullish(pageUrl)) {
+			await goto(pageUrl);
 		} else {
 			modalStore.openDappDetails({ id: dappModalId, data: dappsCarouselSlide });
 		}
