@@ -1,8 +1,11 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES } from '$lib/constants/app.constants';
 import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
+import { parseNetworkId } from '$lib/validation/network.validation';
 import {
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
@@ -13,23 +16,30 @@ import {
 	mockXrpSourceAddress,
 	mockXrpSwapActiveUserTransaction,
 	mockXrpSwapData,
+	mockXrpTrustSetActiveUserTransaction,
+	mockXrpTrustSetData,
 	mockXrpTxHash
 } from '$tests/mocks/active-user-transactions.mock';
 import { XrpNetworks } from '$xrp/types/network';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import {
 	buildXrpSendTrackingMetadata,
+	buildXrpTrustSetTrackingMetadata,
 	isXrpActiveUserTransaction,
 	isXrpAlreadyInFlightError,
+	isXrpTrustSetActiveUserTransaction,
 	toXrpData,
 	toXrpDisplayRefs,
 	toXrpExternalRefs,
 	toXrpExternalRefsMap,
 	toXrpLedgerResolutionRefs,
+	toXrpTrustSetData,
 	xrpActiveUserTransactionDisplay,
 	xrpActiveUserTransactionNetwork,
-	xrpActiveUserTransactionPollKeys
+	xrpActiveUserTransactionPollKeys,
+	xrpTrustSetActiveUserTransactionDisplay
 } from '$xrp/utils/xrp-active-tx.utils';
+import { toXrpTrustLineToken } from '$xrp/utils/xrp-trust-line-tokens.utils';
 
 describe('xrp-active-tx.utils', () => {
 	const withRefs = (refs: { key: string; value: string }[]): ActiveUserTransaction => ({
@@ -44,6 +54,65 @@ describe('xrp-active-tx.utils', () => {
 
 		it('does not recognise another flow', () => {
 			expect(isXrpActiveUserTransaction(mockLiquidiumActiveUserTransaction)).toBeFalsy();
+		});
+
+		// A `TrustSet` row has its own outcome texts, events and layout; read as a send it would say
+		// "Send XRP".
+		it('does not recognise adding a trust-line token', () => {
+			expect(isXrpActiveUserTransaction(mockXrpTrustSetActiveUserTransaction)).toBeFalsy();
+		});
+	});
+
+	describe('isXrpTrustSetActiveUserTransaction', () => {
+		it('recognises adding a trust-line token', () => {
+			expect(isXrpTrustSetActiveUserTransaction(mockXrpTrustSetActiveUserTransaction)).toBeTruthy();
+		});
+
+		it.each([
+			['a send', mockXrpActiveUserTransaction],
+			['a swap from XRP', mockXrpSwapActiveUserTransaction],
+			['another flow', mockLiquidiumActiveUserTransaction]
+		])('does not recognise %s', (...[, tx]) => {
+			expect(isXrpTrustSetActiveUserTransaction(tx)).toBeFalsy();
+		});
+	});
+
+	describe('toXrpTrustSetData', () => {
+		it('builds the variant from the signed values', () => {
+			expect(
+				toXrpTrustSetData({
+					token: { ...RLUSD_TOKEN, enabled: true },
+					source: mockXrpSourceAddress,
+					fee: 12n
+				})
+			).toEqual({ XrpTrustSet: mockXrpTrustSetData });
+		});
+
+		it('names a token added by its currency and issuer the same way', () => {
+			const token = toXrpTrustLineToken({
+				identity: { currency: 'USD', issuer: mockXrpDestinationAddress },
+				network: XRP_MAINNET_NETWORK
+			});
+
+			expect(toXrpTrustSetData({ token, source: mockXrpSourceAddress, fee: 12n })).toEqual({
+				XrpTrustSet: {
+					token: { XrpTrustLineMainnet: ['USD', mockXrpDestinationAddress] },
+					source_address: mockXrpSourceAddress,
+					change: { Add: null },
+					fee: 12n
+				}
+			});
+		});
+
+		// The caller refuses on this: a `TrustSet` it cannot record must not be signed.
+		it('returns undefined for a token on a network without a backend trust-line identity', () => {
+			const token = {
+				...RLUSD_TOKEN,
+				network: { ...XRP_MAINNET_NETWORK, id: parseNetworkId('XRP_TESTNET') },
+				enabled: true
+			};
+
+			expect(toXrpTrustSetData({ token, source: mockXrpSourceAddress, fee: 12n })).toBeUndefined();
 		});
 	});
 
@@ -184,6 +253,12 @@ describe('xrp-active-tx.utils', () => {
 
 		it('resolves mainnet from the source token of a swap from XRP', () => {
 			expect(xrpActiveUserTransactionNetwork(mockXrpSwapActiveUserTransaction)).toBe(
+				XrpNetworks.mainnet
+			);
+		});
+
+		it('resolves mainnet from the token a trust line is added for', () => {
+			expect(xrpActiveUserTransactionNetwork(mockXrpTrustSetActiveUserTransaction)).toBe(
 				XrpNetworks.mainnet
 			);
 		});
@@ -416,6 +491,83 @@ describe('xrp-active-tx.utils', () => {
 		it('is undefined for a swap from another chain', () => {
 			expect(xrpActiveUserTransactionDisplay(mockNearIntentsActiveUserTransaction)).toBeUndefined();
 		});
+
+		// Its symbol is the trust-line token's, which the fallback to native XRP's would misname.
+		it('is undefined for adding a trust-line token', () => {
+			expect(xrpActiveUserTransactionDisplay(mockXrpTrustSetActiveUserTransaction)).toBeUndefined();
+		});
+	});
+
+	describe('xrpTrustSetActiveUserTransactionDisplay', () => {
+		const trustSetKeepingRefs = ({
+			token = mockXrpTrustSetData.token,
+			extra = []
+		}: {
+			token?: typeof mockXrpTrustSetData.token;
+			extra?: { key: string; value: string }[];
+		} = {}): ActiveUserTransaction => ({
+			...mockXrpTrustSetActiveUserTransaction,
+			data: { XrpTrustSet: { ...mockXrpTrustSetData, token } },
+			external_refs: [
+				...mockXrpTrustSetActiveUserTransaction.external_refs.filter(({ key }) =>
+					POLL_KEYS.includes(key as never)
+				),
+				...extra
+			]
+		});
+
+		it('reads the display snapshot when the row carries one', () => {
+			expect(
+				xrpTrustSetActiveUserTransactionDisplay(
+					trustSetKeepingRefs({
+						extra: [
+							{ key: XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL, value: 'Snapshot USD' },
+							{ key: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL, value: 'Snapshot Ledger' }
+						]
+					})
+				)
+			).toEqual({ symbol: 'Snapshot USD', network: 'Snapshot Ledger' });
+		});
+
+		// A row written by another client may lack the snapshot. Its token is the one the backend
+		// validated, so the symbol comes from there — never native XRP's.
+		it("falls back to the listed token's symbol when the snapshot is missing", () => {
+			expect(xrpTrustSetActiveUserTransactionDisplay(trustSetKeepingRefs())).toEqual({
+				symbol: RLUSD_TOKEN.symbol,
+				network: XRP_MAINNET_NETWORK.name
+			});
+		});
+
+		it('falls back to the symbol an unlisted currency code reads as', () => {
+			expect(
+				xrpTrustSetActiveUserTransactionDisplay(
+					trustSetKeepingRefs({
+						token: { XrpTrustLineMainnet: ['USD', mockXrpDestinationAddress] }
+					})
+				)?.symbol
+			).toBe('USD');
+		});
+
+		it.each(['', '   '])('treats a blank snapshot value (%j) as absent', (blank) => {
+			expect(
+				xrpTrustSetActiveUserTransactionDisplay(
+					trustSetKeepingRefs({
+						extra: [
+							{ key: XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL, value: blank },
+							{ key: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL, value: blank }
+						]
+					})
+				)
+			).toEqual({ symbol: RLUSD_TOKEN.symbol, network: XRP_MAINNET_NETWORK.name });
+		});
+
+		it.each([
+			['a send', mockXrpActiveUserTransaction],
+			['a swap from XRP', mockXrpSwapActiveUserTransaction],
+			['another flow', mockLiquidiumActiveUserTransaction]
+		])('is undefined for %s', (...[, tx]) => {
+			expect(xrpTrustSetActiveUserTransactionDisplay(tx)).toBeUndefined();
+		});
 	});
 
 	describe('buildXrpSendTrackingMetadata', () => {
@@ -449,6 +601,27 @@ describe('xrp-active-tx.utils', () => {
 			expect(
 				buildXrpSendTrackingMetadata({
 					tx: { ...mockXrpActiveUserTransaction, status: { Failed: null }, error: ['boom'] }
+				})
+			).toEqual(expect.objectContaining({ error: 'boom' }));
+		});
+	});
+
+	describe('buildXrpTrustSetTrackingMetadata', () => {
+		// By id, as the send's events report it.
+		it('reports the token, the network by id and the fee for an open row', () => {
+			expect(
+				buildXrpTrustSetTrackingMetadata({ tx: mockXrpTrustSetActiveUserTransaction })
+			).toEqual({
+				token: 'RLUSD',
+				network: `${XRP_MAINNET_NETWORK.id.description}`,
+				fee: '12'
+			});
+		});
+
+		it('carries the recorded failure text', () => {
+			expect(
+				buildXrpTrustSetTrackingMetadata({
+					tx: { ...mockXrpTrustSetActiveUserTransaction, status: { Failed: null }, error: ['boom'] }
 				})
 			).toEqual(expect.objectContaining({ error: 'boom' }));
 		});

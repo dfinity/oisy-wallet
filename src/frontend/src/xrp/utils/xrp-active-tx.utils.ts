@@ -3,6 +3,7 @@ import type {
 	ActiveUserTransactionData,
 	ActiveUserTransactionRef
 } from '$declarations/backend/backend.did';
+import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES } from '$lib/constants/app.constants';
 import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
@@ -13,9 +14,14 @@ import type { XrpAddress } from '$xrp/types/address';
 import { XrpNetworks, type XrpNetworkType } from '$xrp/types/network';
 import { XRP_EXTERNAL_REF_KEYS, type XrpExternalRefKey } from '$xrp/types/xrp-active-tx';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
+import type { XrpTrustLineCustomToken } from '$xrp/types/xrp-trust-line-token';
+import { toXrpTrustLineToken } from '$xrp/utils/xrp-trust-line-tokens.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const isXrpActiveUserTransaction = (tx: ActiveUserTransaction): boolean => 'Xrp' in tx.data;
+
+export const isXrpTrustSetActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
+	'XrpTrustSet' in tx.data;
 
 /**
  * Builds the `Xrp` AUT data variant from the values fixed at signing time.
@@ -54,6 +60,36 @@ export const toXrpData = ({
 			// the same distinction `buildXrpPayment` keeps.
 			destination_tag: nonNullish(destinationTag) ? [destinationTag] : [],
 			amount,
+			fee
+		}
+	};
+};
+
+/**
+ * Builds the `XrpTrustSet` AUT data variant that adds a trust-line token, from the values fixed at
+ * signing time. `undefined` for a token without a backend trust-line `TokenId`, which the caller
+ * treats as "this cannot be guarded", not as "sign it anyway".
+ */
+export const toXrpTrustSetData = ({
+	token,
+	source,
+	fee
+}: {
+	token: XrpTrustLineCustomToken;
+	source: XrpAddress;
+	fee: XrpBalance;
+}): ActiveUserTransactionData | undefined => {
+	const backendToken = toBackendTokenId(token);
+
+	if (isNullish(backendToken) || !('XrpTrustLineMainnet' in backendToken)) {
+		return undefined;
+	}
+
+	return {
+		XrpTrustSet: {
+			token: backendToken,
+			source_address: source,
+			change: { Add: null },
 			fee
 		}
 	};
@@ -137,11 +173,15 @@ export const xrpActiveUserTransactionNetwork = (
 	const token =
 		'Xrp' in tx.data
 			? tx.data.Xrp.token
-			: 'NearIntents' in tx.data
-				? tx.data.NearIntents.source_token
-				: undefined;
+			: 'XrpTrustSet' in tx.data
+				? tx.data.XrpTrustSet.token
+				: 'NearIntents' in tx.data
+					? tx.data.NearIntents.source_token
+					: undefined;
 
-	return nonNullish(token) && 'XrpNativeMainnet' in token ? XrpNetworks.mainnet : undefined;
+	return nonNullish(token) && ('XrpNativeMainnet' in token || 'XrpTrustLineMainnet' in token)
+		? XrpNetworks.mainnet
+		: undefined;
 };
 
 /**
@@ -258,6 +298,52 @@ export const xrpActiveUserTransactionDisplay = (
 		network: snapshot(payment.keys.network) ?? XRP_TOKEN.network.name
 	};
 };
+
+/**
+ * What a `TrustSet` row adds, and where: the token's symbol and the network, for the row, its
+ * failure message and its analytics event.
+ *
+ * The display snapshot first, and for whatever it lacks, the token the backend validated: its
+ * symbol is the listed token's or the one its currency code reads as — never `XRP`, which a row
+ * written by another client would otherwise fall back to.
+ *
+ * `undefined` for a row that is not a `TrustSet`.
+ */
+export const xrpTrustSetActiveUserTransactionDisplay = (
+	tx: ActiveUserTransaction
+): Omit<XrpActiveUserTransactionDisplay, 'amount'> | undefined => {
+	if (!('XrpTrustSet' in tx.data) || !('XrpTrustLineMainnet' in tx.data.XrpTrustSet.token)) {
+		return undefined;
+	}
+
+	const [currency, issuer] = tx.data.XrpTrustSet.token.XrpTrustLineMainnet;
+
+	const refs = toXrpExternalRefsMap(tx.external_refs);
+
+	const snapshot = (key: XrpExternalRefKey): string | undefined => {
+		const value = refs[key]?.trim();
+
+		return notEmptyString(value) ? value : undefined;
+	};
+
+	return {
+		symbol:
+			snapshot(XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL) ??
+			toXrpTrustLineToken({ identity: { currency, issuer }, network: XRP_MAINNET_NETWORK }).symbol,
+		network: snapshot(XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL) ?? XRP_MAINNET_NETWORK.name
+	};
+};
+
+export const buildXrpTrustSetTrackingMetadata = ({
+	tx
+}: {
+	tx: ActiveUserTransaction;
+}): Record<string, string> => ({
+	token: xrpTrustSetActiveUserTransactionDisplay(tx)?.symbol ?? '',
+	network: `${XRP_MAINNET_NETWORK.id.description}`,
+	...('XrpTrustSet' in tx.data ? { fee: tx.data.XrpTrustSet.fee.toString() } : {}),
+	...(nonNullish(tx.error[0]) ? { error: tx.error[0] } : {})
+});
 
 export const buildXrpSendTrackingMetadata = ({
 	tx
