@@ -1661,7 +1661,9 @@
 				"xrp_issued_by": "Issued by",
 				"xrp_issuer_powers": "What the issuer can do",
 				"xrp_reserve": "$amount XRP of your balance stays reserved until you remove the token.",
-				"xrp_reserve_after": "Your account’s reserve after adding: $amount XRP"
+				"xrp_reserve_after": "Your account’s reserve after adding: $amount XRP",
+				"xrp_add_submitted": "Adding $symbol: the transaction was submitted. It usually settles within seconds — you can close this and carry on.",
+				"xrp_token_added": "$symbol was added to your XRP account."
 			},
 			"error": {
 				"loading_metadata": "The specified address is not a valid token in the selected network.",
@@ -1684,7 +1686,13 @@
 				"xrp_account_not_found": "Your XRP account is not on the ledger yet. Receive at least $amount XRP first.",
 				"xrp_insufficient_fee": "Your XRP balance does not cover the network fee.",
 				"xrp_insufficient_reserve": "Adding this token raises your account’s reserve to $amount XRP, more than your balance. Receive more XRP first.",
-				"xrp_state_unavailable": "The wallet could not read the XRP Ledger, so the token could not be checked. Try again in a moment."
+				"xrp_state_unavailable": "The wallet could not read the XRP Ledger, so the token could not be checked. Try again in a moment.",
+				"xrp_transaction_in_flight": "An earlier transaction from this XRP address has not settled yet. Wait for it to finish, which takes about a minute, then try again.",
+				"xrp_not_guarded": "The wallet could not check whether an earlier transaction from this XRP address is still settling. Try again in a moment.",
+				"xrp_trust_set_unfunded": "Your XRP balance no longer covers the network fee and the reserve this token adds. Nothing was sent — receive more XRP, then try again.",
+				"xrp_add_failed": "The token could not be added, and nothing was sent. Try again in a moment.",
+				"xrp_trust_set_failed": "Adding $symbol on $network was processed by the network but failed ($result), so the token was not added. The network fee was charged.",
+				"xrp_trust_set_expired": "$symbol was not added on $network: the network did not include the transaction in time. Nothing was charged — you can add it again."
 			},
 			"warning": {
 				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab until it's completed.",

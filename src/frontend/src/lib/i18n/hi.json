@@ -1661,7 +1661,9 @@
 				"xrp_issued_by": "",
 				"xrp_issuer_powers": "",
 				"xrp_reserve": "",
-				"xrp_reserve_after": ""
+				"xrp_reserve_after": "",
+				"xrp_add_submitted": "",
+				"xrp_token_added": ""
 			},
 			"error": {
 				"loading_metadata": "चयनित नेटवर्क में निर्दिष्ट पता एक वैध टोकन नहीं है।",
@@ -1684,7 +1686,13 @@
 				"xrp_account_not_found": "",
 				"xrp_insufficient_fee": "",
 				"xrp_insufficient_reserve": "",
-				"xrp_state_unavailable": ""
+				"xrp_state_unavailable": "",
+				"xrp_transaction_in_flight": "",
+				"xrp_not_guarded": "",
+				"xrp_trust_set_unfunded": "",
+				"xrp_add_failed": "",
+				"xrp_trust_set_failed": "",
+				"xrp_trust_set_expired": ""
 			},
 			"warning": {
 				"do_not_close_manage": "$oisy_name नए टोकन तैयार और सुरक्षित कर रहा है। कृपया इसके पूरा होने तक इस टैब को बंद न करें।",

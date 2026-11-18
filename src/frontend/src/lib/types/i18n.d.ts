@@ -1369,6 +1369,8 @@ interface I18nTokens {
 			xrp_issuer_powers: string;
 			xrp_reserve: string;
 			xrp_reserve_after: string;
+			xrp_add_submitted: string;
+			xrp_token_added: string;
 		};
 		error: {
 			loading_metadata: string;
@@ -1392,6 +1394,12 @@ interface I18nTokens {
 			xrp_insufficient_fee: string;
 			xrp_insufficient_reserve: string;
 			xrp_state_unavailable: string;
+			xrp_transaction_in_flight: string;
+			xrp_not_guarded: string;
+			xrp_trust_set_unfunded: string;
+			xrp_add_failed: string;
+			xrp_trust_set_failed: string;
+			xrp_trust_set_expired: string;
 		};
 		warning: { do_not_close_manage: string; xrp_not_listed_token: string };
 		xrp_issuer_power: {
