@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext, onMount, tick } from 'svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import {
 		SWAP_RECEIVE_NETWORK_LIST,
 		SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK
@@ -20,9 +21,10 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
+	import type { TokenGroupId } from '$lib/types/token-group';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { getListedReceiveShortcuts } from '$lib/utils/swap.utils';
+	import { getListedReceiveShortcuts, getSwapMoveTokenSymbol } from '$lib/utils/swap.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
@@ -88,6 +90,27 @@
 				})?.shortcuts.otherNetwork
 	);
 
+	let sourceTokenId = $derived($sourceToken?.id);
+	let sourceGroupId = $derived($sourceToken?.groupData?.id);
+	let shownDestinationsFor = $state<{ tokenId: TokenId; groupId: TokenGroupId }>();
+	let hadDestinations = $derived(
+		nonNullish(shownDestinationsFor) &&
+			shownDestinationsFor.tokenId === sourceTokenId &&
+			shownDestinationsFor.groupId === sourceGroupId
+	);
+
+	$effect(() => {
+		if (hadDestinations) {
+			return;
+		}
+
+		// Record destinations after they render, and forget them when the pay token or group changes.
+		shownDestinationsFor =
+			nonNullish(sourceTokenId) && nonNullish(otherNetwork)
+				? { tokenId: sourceTokenId, groupId: otherNetwork.group.id }
+				: undefined;
+	});
+
 	$effect.pre(() => {
 		// Capture focus before the keyed rows update. Only move it if the focused row disappears.
 		otherNetwork;
@@ -146,11 +169,23 @@
 				{/each}
 			</List>
 		{/if}
-		<p class="text-primary" role="status">
+		<div class="text-primary" role="status">
 			{#if isNullish(otherNetwork)}
-				{$i18n.core.text.no_results}
+				{@const symbol = getSwapMoveTokenSymbol($sourceToken)}
+				<EmptyState
+					description={hadDestinations && notEmptyString(symbol)
+						? replacePlaceholders($i18n.swap.text.move_networks_changed_description, {
+								$symbol: symbol
+							})
+						: $i18n.swap.text.move_no_networks_description}
+					title={hadDestinations
+						? $i18n.swap.text.move_networks_changed_title
+						: notEmptyString(symbol)
+							? replacePlaceholders($i18n.swap.text.move_no_networks_title, { $symbol: symbol })
+							: $i18n.swap.text.move_no_networks_title_without_symbol}
+				/>
 			{/if}
-		</p>
+		</div>
 	</div>
 
 	<ButtonGroup>

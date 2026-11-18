@@ -10,6 +10,7 @@
 <!-- source: DFINITY foundation -->
 <svg
 	class:opacity-50={isDarkMode}
+	aria-hidden="true"
 	fill="none"
 	height="90"
 	width="90"

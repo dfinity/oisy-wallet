@@ -1,6 +1,7 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
 import { USDC_TOKEN as ETHEREUM_USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
@@ -38,6 +39,8 @@ import {
 } from '$lib/stores/modal-tokens-list.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
+import type { Network } from '$lib/types/network';
+import type { Token } from '$lib/types/token';
 import * as deviceUtils from '$lib/utils/device.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
@@ -117,9 +120,13 @@ describe('GetTokenModal', () => {
 	describe.each(['Swap', 'Get Token'])('%s picker focus', (flow) => {
 		afterEach(() => vi.restoreAllMocks());
 
-		const setup = async () => {
+		const setup = async (sourceToken: Token = BASE_USDC_TOKEN) => {
+			const networks: Network[] = [BASE_NETWORK, ETHEREUM_NETWORK, SOLANA_MAINNET_NETWORK];
+			if (!networks.some(({ id }) => id === sourceToken.network.id)) {
+				networks.push(sourceToken.network);
+			}
 			const swapContext = {
-				...initSwapContext({ sourceToken: BASE_USDC_TOKEN }),
+				...initSwapContext({ sourceToken }),
 				receiveSupportedData: readable({
 					icp: { coverage: 'all' as const, supportedTokenIds: new Set<string>() },
 					evm: {
@@ -145,28 +152,17 @@ describe('GetTokenModal', () => {
 				})
 			};
 			mockContext.set(SWAP_CONTEXT_KEY, swapContext);
-			mockContext.set(
-				MODAL_NETWORKS_LIST_CONTEXT_KEY,
-				initModalNetworksListContext({
-					networks: [BASE_NETWORK, ETHEREUM_NETWORK, SOLANA_MAINNET_NETWORK]
-				})
-			);
+			mockContext.set(MODAL_NETWORKS_LIST_CONTEXT_KEY, initModalNetworksListContext({ networks }));
 			const universe = writable(
-				[
-					BASE_USDC_TOKEN,
-					BASE_ETH_TOKEN,
-					ETHEREUM_TOKEN,
-					ETHEREUM_USDC_TOKEN,
-					SOLANA_USDC_TOKEN
-				].map((token) => ({ ...token, enabled: true }))
+				[sourceToken, BASE_ETH_TOKEN, ETHEREUM_TOKEN, ETHEREUM_USDC_TOKEN, SOLANA_USDC_TOKEN].map(
+					(token) => ({ ...token, enabled: true })
+				)
 			);
 			vi.spyOn(swapDerived, 'allSwapUniverseTokens', 'get').mockReturnValue(universe);
 			vi.spyOn(crossChainNetworksDerived, 'crossChainSwapNetworksMainnets', 'get').mockReturnValue(
-				readable([BASE_NETWORK, ETHEREUM_NETWORK, SOLANA_MAINNET_NETWORK])
+				readable(networks)
 			);
-			vi.spyOn(networksDerived, 'networks', 'get').mockReturnValue(
-				readable([BASE_NETWORK, ETHEREUM_NETWORK, SOLANA_MAINNET_NETWORK])
-			);
+			vi.spyOn(networksDerived, 'networks', 'get').mockReturnValue(readable(networks));
 
 			const rendered =
 				flow === 'Swap' ? render(SwapModal, { context: mockContext }) : renderGetTokenModal();
@@ -362,7 +358,14 @@ describe('GetTokenModal', () => {
 						);
 						await waitFor(() => expect(back).toHaveFocus());
 
-						expect(within(list).getByRole('status')).toHaveTextContent(en.core.text.no_results);
+						const status = within(list).getByRole('status');
+
+						expect(status).toHaveTextContent(en.swap.text.move_networks_changed_title);
+						expect(status).toHaveTextContent(
+							replacePlaceholders(en.swap.text.move_networks_changed_description, {
+								$symbol: BASE_USDC_TOKEN.symbol
+							})
+						);
 					}
 					await fireEvent.click(back);
 					await waitFor(() =>
@@ -377,6 +380,36 @@ describe('GetTokenModal', () => {
 				}
 			}
 		);
+
+		it('should use the pay token group ticker in the Move title and empty state', async () => {
+			const rendered = await setup({
+				...mockValidIcToken,
+				symbol: 'ckUSDC',
+				groupData: USDC_TOKEN_GROUP
+			});
+			// The only network is selected directly. Reopen the receive picker to enter Move.
+			await fireEvent.click(await rendered.findByTestId(SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK));
+			await waitFor(() =>
+				expect(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)).toHaveLength(2)
+			);
+			await fireEvent.click(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]);
+			const list = await rendered.findByTestId(SWAP_RECEIVE_NETWORK_LIST);
+			const status = list.querySelector(':scope > [role="status"]');
+
+			expect(rendered.getByRole('dialog', { name: 'Move USDC to' })).toBeInTheDocument();
+			expect(within(list).getByRole('button', { name: /Ethereum/ })).toBeInTheDocument();
+			expect(status).toBeEmptyDOMElement();
+
+			rendered.universe.set([]);
+
+			await waitFor(() => {
+				expect(within(list).getByRole('status')).toBe(status);
+				expect(status).toHaveTextContent('The network list changed');
+				expect(status).toHaveTextContent(
+					'This swap no longer shows any other networks for USDC. Go back to see what you can receive instead.'
+				);
+			});
+		});
 
 		describe.each([false, true])('token-list focus (desktop: %s)', (desktop) => {
 			beforeEach(() => vi.spyOn(deviceUtils, 'isDesktop').mockReturnValue(desktop));
