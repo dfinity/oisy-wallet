@@ -71,6 +71,7 @@
 			"paste": "Vložit",
 			"to": "Do",
 			"add": "Přidat",
+			"remove": "",
 			"more_items": "+$items další",
 			"select": "Vybrat",
 			"language": "Jazyk",
@@ -1681,7 +1682,13 @@
 				"xrp_reserve": "",
 				"xrp_reserve_after": "",
 				"xrp_add_submitted": "",
-				"xrp_token_added": ""
+				"xrp_token_added": "",
+				"xrp_remove_description": "",
+				"xrp_remove_reserve": "",
+				"xrp_remove_submitted": "",
+				"xrp_token_removed": "",
+				"xrp_token_kept": "",
+				"xrp_token_remove_settled": ""
 			},
 			"error": {
 				"loading_metadata": "Zadaná adresa není platným tokenem ve vybrané síti.",
@@ -1710,7 +1717,12 @@
 				"xrp_trust_set_unfunded": "",
 				"xrp_add_failed": "",
 				"xrp_trust_set_failed": "",
-				"xrp_trust_set_expired": ""
+				"xrp_trust_set_expired": "",
+				"xrp_remove_not_held": "",
+				"xrp_remove_balance_not_zero": "",
+				"xrp_remove_failed": "",
+				"xrp_trust_set_remove_failed": "",
+				"xrp_trust_set_remove_expired": ""
 			},
 			"warning": {
 				"do_not_close_manage": "$oisy_name připravuje a zabezpečuje nové tokeny. Prosím, nezavírejte tuto kartu, dokud není dokončeno.",

@@ -71,6 +71,7 @@
 			"paste": "Paste",
 			"to": "To",
 			"add": "Add",
+			"remove": "Remove",
 			"more_items": "+$items more",
 			"select": "Select",
 			"language": "Language",
@@ -1681,7 +1682,13 @@
 				"xrp_reserve": "$amount XRP of your balance stays reserved until you remove the token.",
 				"xrp_reserve_after": "Your account’s reserve after adding: $amount XRP",
 				"xrp_add_submitted": "Adding $symbol: the transaction was submitted. It usually settles within seconds — you can close this and carry on.",
-				"xrp_token_added": "$symbol was added to your XRP account."
+				"xrp_token_added": "$symbol was added to your XRP account.",
+				"xrp_remove_description": "This removes $symbol from your XRP account, with a transaction on the XRP Ledger. You can add it again at any time.",
+				"xrp_remove_reserve": "The $amount XRP reserved for it becomes spendable again.",
+				"xrp_remove_submitted": "Removing $symbol: the transaction was submitted. It usually settles within seconds — you can close this and carry on.",
+				"xrp_token_removed": "$symbol was removed from your XRP account, and its $amount XRP reserve can be spent again.",
+				"xrp_token_kept": "The issuer of $symbol holds settings on its trust line, so the XRP Ledger kept the line and the token stays in your list. Its $amount XRP reserve can be spent again.",
+				"xrp_token_remove_settled": "Removing $symbol went through on the XRP Ledger."
 			},
 			"error": {
 				"loading_metadata": "The specified address is not a valid token in the selected network.",
@@ -1710,7 +1717,12 @@
 				"xrp_trust_set_unfunded": "Your XRP balance no longer covers the network fee and the reserve this token adds. Nothing was sent — receive more XRP, then try again.",
 				"xrp_add_failed": "The token could not be added, and nothing was sent. Try again in a moment.",
 				"xrp_trust_set_failed": "Adding $symbol on $network was processed by the network but failed ($result), so the token was not added. The network fee was charged.",
-				"xrp_trust_set_expired": "$symbol was not added on $network: the network did not include the transaction in time. Nothing was charged — you can add it again."
+				"xrp_trust_set_expired": "$symbol was not added on $network: the network did not include the transaction in time. Nothing was charged — you can add it again.",
+				"xrp_remove_not_held": "Your XRP account no longer holds $symbol, so there is nothing to remove.",
+				"xrp_remove_balance_not_zero": "$symbol can be removed only at a zero balance. You can hide it instead.",
+				"xrp_remove_failed": "The token could not be removed, and nothing was sent. Try again in a moment.",
+				"xrp_trust_set_remove_failed": "Removing $symbol on $network was processed by the network but failed ($result), so the token was not removed. The network fee was charged.",
+				"xrp_trust_set_remove_expired": "$symbol was not removed on $network: the network did not include the transaction in time. Nothing was charged — you can remove it again."
 			},
 			"warning": {
 				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab until it's completed.",

@@ -62,6 +62,7 @@ interface I18nCore {
 		paste: string;
 		to: string;
 		add: string;
+		remove: string;
 		more_items: string;
 		select: string;
 		language: string;
@@ -1389,6 +1390,12 @@ interface I18nTokens {
 			xrp_reserve_after: string;
 			xrp_add_submitted: string;
 			xrp_token_added: string;
+			xrp_remove_description: string;
+			xrp_remove_reserve: string;
+			xrp_remove_submitted: string;
+			xrp_token_removed: string;
+			xrp_token_kept: string;
+			xrp_token_remove_settled: string;
 		};
 		error: {
 			loading_metadata: string;
@@ -1418,6 +1425,11 @@ interface I18nTokens {
 			xrp_add_failed: string;
 			xrp_trust_set_failed: string;
 			xrp_trust_set_expired: string;
+			xrp_remove_not_held: string;
+			xrp_remove_balance_not_zero: string;
+			xrp_remove_failed: string;
+			xrp_trust_set_remove_failed: string;
+			xrp_trust_set_remove_expired: string;
 		};
 		warning: { do_not_close_manage: string; xrp_not_listed_token: string };
 		xrp_issuer_power: {
