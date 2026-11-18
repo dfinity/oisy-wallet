@@ -230,6 +230,9 @@ export const BTC_NEVER_LANDED_GRACE_MILLIS = 60 * SECONDS_IN_MINUTE * 1_000; // 
 // answers in a row.
 export const BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS = 5 * SECONDS_IN_MINUTE * 1_000; // 5 minutes
 export const BTC_NEVER_LANDED_NOT_FOUND_ANSWERS_REQUIRED = 2;
+// The deadline of a BTC row's status lookup (`btcTransactionStatus`), body included. The pollers of
+// every provider run one after another, so a stalled lookup would hold them all.
+export const BTC_TRANSACTION_STATUS_TIMEOUT_MILLIS = 10_000;
 // Minimum delay between two `forward_evm_to_icp` re-notifications for the same
 // pending OneSec EVM→ICP row (notifying is an update call, polling is 5s).
 export const ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute

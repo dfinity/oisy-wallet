@@ -212,6 +212,7 @@ in another one (LI.FI's EVM → Solana). `computeReceiveSupportedTokens` in
 | `blockchain.rest`, `blockstream.rest`                                                        | `$lib/rest/`    | BTC explorer endpoints.   |
 | `kongswap.rest`, `icpswap.rest`, `near-intents.rest`, `harvest.rest`, `open-crypto-pay.rest` | `$lib/rest/`    | Swap providers + harvest. |
 | `lifi.rest`                                                                                  | `$lib/rest/`    | LI.FI quotes (SDK-based). |
+| `relay.rest`                                                                                 | `$lib/rest/`    | Relay request status.     |
 | `exchange.worker`, `auth.worker`                                                             | `$lib/workers/` | Background polling.       |
 
 ### Per-provider swap quote cache
