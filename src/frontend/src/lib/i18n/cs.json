@@ -1457,6 +1457,7 @@
 			"receive_shortcut_more": "",
 			"move_token_to": "",
 			"move_no_networks_title": "",
+			"move_no_networks_title_without_symbol": "",
 			"move_no_networks_description": "",
 			"as_token": "",
 			"two_swaps_info": "$oisy_short nabízí jen výměny, které dokáže před vaším schválením plně ověřit, a žádná taková přímá výměna z $sourceSymbol na $destinationSymbol neexistuje. Můžete ale nejdřív vyměnit $sourceSymbol za $intermediateSymbol a potom $intermediateSymbol za $destinationSymbol.",

@@ -1172,6 +1172,7 @@ interface I18nSwap {
 		receive_shortcut_more: string;
 		move_token_to: string;
 		move_no_networks_title: string;
+		move_no_networks_title_without_symbol: string;
 		move_no_networks_description: string;
 		as_token: string;
 		two_swaps_info: string;

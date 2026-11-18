@@ -1457,6 +1457,7 @@
 			"receive_shortcut_more": "",
 			"move_token_to": "",
 			"move_no_networks_title": "",
+			"move_no_networks_title_without_symbol": "",
 			"move_no_networks_description": "",
 			"as_token": "",
 			"two_swaps_info": "$oisy_short는 승인 전에 완전히 검증할 수 있는 스왑만 제공하며, $sourceSymbol에서 $destinationSymbol(으)로 가는 그런 직접 스왑은 없습니다. 하지만 먼저 $sourceSymbol을(를) $intermediateSymbol(으)로 스왑한 다음, $intermediateSymbol을(를) $destinationSymbol(으)로 스왑할 수 있습니다.",

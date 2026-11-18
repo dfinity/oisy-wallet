@@ -1457,6 +1457,7 @@
 			"receive_shortcut_more": "",
 			"move_token_to": "",
 			"move_no_networks_title": "",
+			"move_no_networks_title_without_symbol": "",
 			"move_no_networks_description": "",
 			"as_token": "",
 			"two_swaps_info": "$oisy_short solo ofrece intercambios que puede verificar por completo antes de tu aprobación, y no hay un intercambio directo así de $sourceSymbol a $destinationSymbol. Pero puedes intercambiar primero $sourceSymbol por $intermediateSymbol y después $intermediateSymbol por $destinationSymbol.",

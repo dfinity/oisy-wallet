@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext, onMount, tick } from 'svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -23,7 +23,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { getListedReceiveShortcuts } from '$lib/utils/swap.utils';
+	import { getListedReceiveShortcuts, getSwapMoveTokenSymbol } from '$lib/utils/swap.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
@@ -149,9 +149,12 @@
 		{/if}
 		<div class="text-primary" role="status">
 			{#if isNullish(otherNetwork)}
+				{@const symbol = getSwapMoveTokenSymbol($sourceToken)}
 				<EmptyState
 					description={$i18n.swap.text.move_no_networks_description}
-					title={$i18n.swap.text.move_no_networks_title}
+					title={notEmptyString(symbol)
+						? replacePlaceholders($i18n.swap.text.move_no_networks_title, { $symbol: symbol })
+						: $i18n.swap.text.move_no_networks_title_without_symbol}
 				/>
 			{/if}
 		</div>

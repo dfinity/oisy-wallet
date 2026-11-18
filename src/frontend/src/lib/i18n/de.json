@@ -1457,6 +1457,7 @@
 			"receive_shortcut_more": "",
 			"move_token_to": "",
 			"move_no_networks_title": "",
+			"move_no_networks_title_without_symbol": "",
 			"move_no_networks_description": "",
 			"as_token": "",
 			"two_swaps_info": "$oisy_short bietet einen Tausch nur an, wenn es ihn vor deiner Bestätigung vollständig prüfen kann, und einen solchen direkten Tausch von $sourceSymbol zu $destinationSymbol gibt es nicht. Du kannst aber zuerst $sourceSymbol in $intermediateSymbol tauschen und danach $intermediateSymbol in $destinationSymbol.",

@@ -1457,6 +1457,7 @@
 			"receive_shortcut_more": "",
 			"move_token_to": "",
 			"move_no_networks_title": "",
+			"move_no_networks_title_without_symbol": "",
 			"move_no_networks_description": "",
 			"as_token": "",
 			"two_swaps_info": "$oisy_short chỉ cung cấp các giao dịch hoán đổi mà nó có thể xác minh đầy đủ trước khi bạn chấp thuận, và không có giao dịch hoán đổi trực tiếp như vậy từ $sourceSymbol sang $destinationSymbol. Nhưng bạn có thể hoán đổi $sourceSymbol sang $intermediateSymbol trước, rồi từ $intermediateSymbol sang $destinationSymbol.",

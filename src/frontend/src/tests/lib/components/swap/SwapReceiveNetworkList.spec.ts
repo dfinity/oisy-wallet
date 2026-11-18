@@ -140,7 +140,7 @@ describe('SwapReceiveNetworkList', () => {
 		destinationToken,
 		fromShortcut = false
 	}: {
-		sourceToken?: Token;
+		sourceToken?: Token | null;
 		receiveSupportedData?: SwapSupportedTokensData;
 		destinationToken?: Token;
 		fromShortcut?: boolean;
@@ -151,7 +151,7 @@ describe('SwapReceiveNetworkList', () => {
 				[
 					SWAP_CONTEXT_KEY,
 					{
-						sourceToken: readable(sourceToken),
+						sourceToken: readable(sourceToken ?? undefined),
 						destinationToken: readable(destinationToken),
 						receiveSupportedData: readable(receiveSupportedData),
 						tokenListReturnFocus: writable(
@@ -331,24 +331,31 @@ describe('SwapReceiveNetworkList', () => {
 		expect(trackSwapReceiveShortcut).not.toHaveBeenCalled();
 	});
 
-	it('should explain an empty network list and focus Back', async () => {
-		const { getByRole, getByTestId } = renderList({
-			receiveSupportedData: {
-				icp: nothing,
-				evm: nothing,
-				sol: nothing,
-				btc: nothing,
-				xrp: nothing
-			}
-		});
-		const list = getByTestId(SWAP_RECEIVE_NETWORK_LIST);
-		const status = within(list).getByRole('status');
-		const back = getByRole('button', { name: en.core.text.back });
+	it.each([
+		{ sourceToken: ckUsdc, title: "You can't move USDC to another network right now" },
+		{ sourceToken: null, title: en.swap.text.move_no_networks_title_without_symbol }
+	])(
+		'should show "$title" and focus Back when the network list opens empty',
+		async ({ sourceToken, title }) => {
+			const { getByRole, getByTestId } = renderList({
+				sourceToken,
+				receiveSupportedData: {
+					icp: nothing,
+					evm: nothing,
+					sol: nothing,
+					btc: nothing,
+					xrp: nothing
+				}
+			});
+			const list = getByTestId(SWAP_RECEIVE_NETWORK_LIST);
+			const status = within(list).getByRole('status');
+			const back = getByRole('button', { name: en.core.text.back });
 
-		expect(status).toHaveTextContent(en.swap.text.move_no_networks_title);
-		expect(status).toHaveTextContent(en.swap.text.move_no_networks_description);
-		expect(within(list).queryByRole('button')).not.toBeInTheDocument();
+			expect(status).toHaveTextContent(title);
+			expect(status).toHaveTextContent(en.swap.text.move_no_networks_description);
+			expect(within(list).queryByRole('button')).not.toBeInTheDocument();
 
-		await waitFor(() => expect(back).toHaveFocus());
-	});
+			await waitFor(() => expect(back).toHaveFocus());
+		}
+	);
 });
