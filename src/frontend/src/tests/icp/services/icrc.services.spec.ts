@@ -10,7 +10,8 @@ import {
 	isIcrcTokenSupportIcrc3,
 	loadCustomTokens,
 	loadDisabledIcrcTokensBalances,
-	loadDisabledIcrcTokensExchanges
+	loadDisabledIcrcTokensExchanges,
+	processCustomTokens
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import * as icrcMetadataUtils from '$icp/utils/icrc-metadata.utils';
@@ -32,16 +33,18 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import type { CanisterIdText } from '$lib/types/canister';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
-import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { fromNullable, nonNullish, nowInBigIntNanoSeconds, toNullable } from '@dfinity/utils';
 import {
 	IcrcLedgerCanister,
 	fromCandidAccount,
 	type IcrcLedgerDid
 } from '@icp-sdk/canisters/ledger/icrc';
+import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
@@ -585,6 +588,104 @@ describe('icrc.services', () => {
 				await loadCustomTokens({ identity: mockIdentity });
 
 				expect(mockOnSuccess).not.toHaveBeenCalled();
+			});
+		});
+
+		// A sign-in to another account in another tab switches this tab's identity in place, so a load
+		// made for the previous account can answer after it.
+		describe('with an account signed in by the time the load answers', () => {
+			const otherIdentity: Identity = { ...mockIdentity, getPrincipal: () => mockPrincipal2 };
+
+			// The signed-in account's own entry for the ledger the load reads.
+			const signedInToken = { ...mockIcrcCustomToken, ledgerCanisterId: mockLedgerCanisterId };
+
+			let signedIn: MockInstance;
+
+			beforeEach(() => {
+				icrcCustomTokensStore.setAll([{ data: signedInToken, certified: true }]);
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+				ledgerCanisterMock.metadata.mockResolvedValue([
+					['icrc1:name', { Text: mockName }],
+					['icrc1:symbol', { Text: mockSymbol }],
+					['icrc1:decimals', { Nat: mockDecimals }],
+					['icrc1:fee', { Nat: mockFee }]
+				]);
+				ledgerCanisterMock.getMintingAccount.mockResolvedValue(
+					toNullable({ owner: mockPrincipal, subaccount: toNullable() })
+				);
+			});
+
+			afterEach(() => {
+				signedIn.mockRestore();
+			});
+
+			it('should write the tokens while the account it was made for is signed in', async () => {
+				signedIn = mockAuthStore(mockIdentity);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(get(icrcCustomTokensStore)).toStrictEqual([
+					{
+						certified: true,
+						data: expect.objectContaining({
+							ledgerCanisterId: mockLedgerCanisterId,
+							name: mockName
+						})
+					}
+				]);
+			});
+
+			describe('once another account is signed in', () => {
+				beforeEach(() => {
+					signedIn = mockAuthStore(otherIdentity);
+				});
+
+				it('should not write the tokens it loaded, though it reports the answer', async () => {
+					const tokens = get(icrcCustomTokensStore);
+
+					await loadCustomTokens({ identity: mockIdentity, onSuccess: mockOnSuccess });
+
+					expect(get(icrcCustomTokensStore)).toBe(tokens);
+					// query + update
+					expect(mockOnSuccess).toHaveBeenCalledTimes(2);
+				});
+
+				it('should neither reset the store nor show an error when the update fails', async () => {
+					const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+					const tokens = get(icrcCustomTokensStore);
+
+					backendCanisterMock.listCustomTokens.mockRejectedValue(new Error('test'));
+
+					await loadCustomTokens({ identity: mockIdentity });
+
+					expect(get(icrcCustomTokensStore)).toBe(tokens);
+					expect(spyToastsError).not.toHaveBeenCalled();
+				});
+
+				it('should neither reset a token nor show a toast when its metadata cannot be read', async () => {
+					const spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
+					const tokens = get(icrcCustomTokensStore);
+
+					ledgerCanisterMock.metadata.mockRejectedValue(new Error('test'));
+
+					await loadCustomTokens({ identity: mockIdentity });
+
+					expect(get(icrcCustomTokensStore)).toBe(tokens);
+					expect(spyToastsShow).not.toHaveBeenCalled();
+				});
+
+				it('should not write the tokens the app loader processed either', async () => {
+					const tokens = get(icrcCustomTokensStore);
+
+					await processCustomTokens({
+						identity: mockIdentity,
+						certified: true,
+						tokens: [mockCustomToken]
+					});
+
+					expect(get(icrcCustomTokensStore)).toBe(tokens);
+				});
 			});
 		});
 	});

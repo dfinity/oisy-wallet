@@ -32,6 +32,7 @@ import {
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
+import { authIdentity } from '$lib/derived/auth.derived';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
@@ -80,10 +81,22 @@ export const loadCustomTokens = ({
 }): Promise<void> =>
 	queryAndUpdate<IcrcCustomToken[]>({
 		request: (params) => loadIcrcCustomTokens({ ...params, useCache }),
-		onLoad: (params) => loadIcrcCustomData({ ...params, onSuccess }),
+		onLoad: (params) => loadIcrcCustomData({ ...params, identity, onSuccess }),
 		onUpdateError: onCustomTokensUpdateError,
 		identity
 	});
+
+// The store holds the signed-in account's tokens. A load made for another account, which can answer
+// after a sign-in to a different account in another tab, must not write it.
+const isAnotherAccountSignedIn = (identity: NullishIdentity): boolean => {
+	const signedIn = get(authIdentity);
+
+	return (
+		nonNullish(signedIn) &&
+		nonNullish(identity) &&
+		signedIn.getPrincipal().toText() !== identity.getPrincipal().toText()
+	);
+};
 
 const loadDefaultIcrc = ({
 	data: { ledgerCanisterId, ...data }
@@ -234,7 +247,7 @@ const loadCustomIcrcTokensData = async ({
 
 			const { enabled, token } = tokens[index];
 
-			if ('Icrc' in token) {
+			if ('Icrc' in token && !isAnotherAccountSignedIn(identity)) {
 				const {
 					Icrc: { ledger_id }
 				} = token;
@@ -272,18 +285,34 @@ const loadCustomIcrcTokensData = async ({
 const loadIcrcCustomData = ({
 	response: tokens,
 	certified,
+	identity,
 	onSuccess
 }: {
 	certified: boolean;
 	response: IcrcCustomToken[];
+	identity: NullishIdentity;
 	onSuccess?: () => void;
 }) => {
 	onSuccess?.();
 
+	if (isAnotherAccountSignedIn(identity)) {
+		return;
+	}
+
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
 
-const onCustomTokensUpdateError = ({ error: err }: { error: unknown }) => {
+const onCustomTokensUpdateError = ({
+	error: err,
+	identity
+}: {
+	error: unknown;
+	identity: NullishIdentity;
+}) => {
+	if (isAnotherAccountSignedIn(identity)) {
+		return;
+	}
+
 	icrcCustomTokensStore.resetAll();
 
 	trackEvent({
@@ -300,10 +329,10 @@ export const processCustomTokens = async (params: LoadCustomTokenParams): Promis
 	try {
 		const response = await loadIcrcCustomTokens(params);
 
-		loadIcrcCustomData({ response, certified: params.certified });
+		loadIcrcCustomData({ response, certified: params.certified, identity: params.identity });
 	} catch (err) {
 		if (params.certified) {
-			onCustomTokensUpdateError({ error: err });
+			onCustomTokensUpdateError({ error: err, identity: params.identity });
 		}
 	}
 };
