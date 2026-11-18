@@ -13,6 +13,7 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { xrpAddressMainnet } from '$lib/derived/address.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -54,6 +55,10 @@
 		reserve?: XrpBalance;
 	}): string => {
 		switch (refusal) {
+			case 'transaction_in_flight':
+				return $i18n.tokens.import.error.xrp_transaction_in_flight;
+			case 'not_guarded':
+				return $i18n.tokens.import.error.xrp_not_guarded;
 			case 'invalid_currency_code':
 				return $i18n.tokens.import.error.xrp_invalid_currency_code;
 			case 'invalid_issuer':
@@ -85,6 +90,7 @@
 		const nativeToken = $enabledXrpTokens.find(({ network: { id } }) => id === network.id);
 
 		const result = await loadXrpAddTokenReview({
+			identity: $authIdentity,
 			currency: currency ?? '',
 			issuer: issuer ?? '',
 			address: $xrpAddressMainnet,
