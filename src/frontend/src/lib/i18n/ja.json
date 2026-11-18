@@ -1498,7 +1498,7 @@
 			"cksol_earlier_deposit_quarantined": "ckSOLミンターが以前の入金の処理を停止しており、その問題が解決されるまで新しい入金を受け付けません。SOLは送信されていません。",
 			"cksol_minter_unavailable": "現在、ckSOLミンターは入金を受け付けられません。SOLは送信されていません。後ほど再試行してください。",
 			"cksol_deposit_quarantined": "ckSOLミンターはこの入金の処理を停止しました。ミンターのアップグレードで入金が解決されるまで、SOLはミンターが保持します。",
-			"cksol_deposit_below_minimum": ""
+			"cksol_deposit_below_minimum": "ckSOLミンターはこの入金を回収できませんでした。入金アドレスに残っているSOLは最小入金額を下回っています。次回のSOLからckSOLへの変換で一緒に変換されます。"
 		}
 	},
 	"buy": {

@@ -1498,7 +1498,7 @@
 			"cksol_earlier_deposit_quarantined": "Il minter ckSOL ha interrotto l'elaborazione di un tuo deposito precedente e non ne accetta di nuovi finché non sarà risolto. Non è stato inviato alcun SOL.",
 			"cksol_minter_unavailable": "Il minter ckSOL non può accettare depositi in questo momento. Non è stato inviato alcun SOL. Riprova più tardi.",
 			"cksol_deposit_quarantined": "Il minter ckSOL ha interrotto l'elaborazione di questo deposito. Trattiene i SOL finché un aggiornamento del minter non risolverà il deposito.",
-			"cksol_deposit_below_minimum": ""
+			"cksol_deposit_below_minimum": "Il minter ckSOL non è riuscito a raccogliere questo deposito e i SOL rimasti sul tuo indirizzo di deposito sono inferiori all'importo minimo di deposito. Verranno convertiti con la tua prossima conversione da SOL a ckSOL."
 		}
 	},
 	"buy": {

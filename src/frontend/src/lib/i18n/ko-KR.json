@@ -1498,7 +1498,7 @@
 			"cksol_earlier_deposit_quarantined": "ckSOL 민터가 이전 입금의 처리를 중단했으며, 해결될 때까지 새 입금을 받지 않습니다. SOL은 전송되지 않았습니다.",
 			"cksol_minter_unavailable": "지금은 ckSOL 민터가 입금을 받을 수 없습니다. SOL은 전송되지 않았습니다. 나중에 다시 시도해 주세요.",
 			"cksol_deposit_quarantined": "ckSOL 민터가 이 입금의 처리를 중단했습니다. 민터 업그레이드로 입금이 해결될 때까지 민터가 SOL을 보관합니다.",
-			"cksol_deposit_below_minimum": ""
+			"cksol_deposit_below_minimum": "ckSOL 민터가 이 입금을 회수하지 못했으며, 입금 주소에 남은 SOL이 최소 입금 금액보다 적습니다. 다음 SOL에서 ckSOL로의 전환 시 함께 전환됩니다."
 		}
 	},
 	"buy": {
