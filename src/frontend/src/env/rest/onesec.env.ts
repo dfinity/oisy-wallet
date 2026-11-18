@@ -1,4 +1,4 @@
-export const ONESEC_SWAP_ENABLED = true;
+export const ONESEC_SWAP_ENABLED = false;
 
 /**
  * Restricts OneSec swaps to the unwrapping direction: a bridged position may be swapped

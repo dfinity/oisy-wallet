@@ -2,8 +2,10 @@ import ActiveUserTransactionItem from '$lib/components/active-user-transactions/
 import { NANO_SECONDS_IN_MILLISECOND, NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import en from '$lib/i18n/en.json';
 import { LIFI_EXTERNAL_REF_KEYS } from '$lib/types/lifi';
+import { ONESEC_EXTERNAL_REF_KEYS } from '$lib/types/onesec-swap';
 import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 import {
+	mockActiveUserTransaction,
 	mockChainFusionActiveUserTransaction,
 	mockCyclesMintActiveUserTransaction,
 	mockCyclesTopUpActiveUserTransaction,
@@ -96,6 +98,31 @@ describe('ActiveUserTransactionItem', () => {
 		expect(screen.getByText(`${en.swap.text.swap} 1 ckETH → ETH`)).toBeInTheDocument();
 		expect(container).toHaveTextContent('Internet Computer → Ethereum');
 		expect(container).toHaveTextContent('Chain Fusion');
+	});
+
+	// The provider entry is unconditional, so a row keeps its name with `ONESEC_SWAP_ENABLED` off.
+	it('renders 1Sec rows as a swap with the provider and the cross-chain networks', () => {
+		const { container } = render(ActiveUserTransactionItem, {
+			props: {
+				tx: {
+					...mockActiveUserTransaction,
+					external_refs: [
+						{ key: ONESEC_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
+						{ key: ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL, value: 'USDC' },
+						{ key: ONESEC_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Internet Computer' },
+						{ key: ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'USDC' },
+						{ key: ONESEC_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Ethereum' }
+					]
+				},
+				isUnseen: false,
+				dismissing: false,
+				onDismiss: vi.fn()
+			}
+		});
+
+		expect(screen.getByText(`${en.swap.text.swap} 1 USDC → USDC`)).toBeInTheDocument();
+		expect(container).toHaveTextContent('Internet Computer → Ethereum');
+		expect(container).toHaveTextContent('1Sec');
 	});
 
 	// A fifth swap provider renders through the shared layout for free, because its

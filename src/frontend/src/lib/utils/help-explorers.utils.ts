@@ -38,8 +38,8 @@ import { isNullish, notEmptyString } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 
 // Display names for the providers this card links to. Deliberately not read from
-// `swapProvidersDetails`, whose NEAR Intents and 1Sec entries only exist while their swap
-// flags are on - this card outlives those flags on purpose (see below). Proper nouns, so
+// `swapProvidersDetails`, whose NEAR Intents entry only exists while its swap flag
+// is on - this card outlives that flag on purpose (see below). Proper nouns, so
 // they stay out of the i18n files.
 export const HELP_EXPLORER_PROVIDER_NAMES: Partial<Record<SwapProvider, string>> = {
 	[SwapProvider.VELORA]: 'Velora',

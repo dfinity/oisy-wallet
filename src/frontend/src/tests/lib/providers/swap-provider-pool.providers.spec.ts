@@ -4,18 +4,13 @@ import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { swapProviderPool } from '$lib/providers/swap-provider-pool.providers';
 import { SwapProvider } from '$lib/types/swap';
 
-// KongSwap is disabled; every other provider, LI.FI included, is enabled everywhere.
+// KongSwap and 1Sec are disabled; every other provider, LI.FI included, is enabled everywhere.
 describe('swapProviderPool', () => {
 	it('starts an ICP pair with the ICP providers and its bridges, then the rest', () => {
 		expect(
 			swapProviderPool({ sourceNetworkId: ICP_NETWORK_ID, destinationNetworkId: ICP_NETWORK_ID })
 		).toEqual({
-			related: [
-				SwapProvider.ICP_SWAP,
-				SwapProvider.OISY_TRADE,
-				SwapProvider.ONE_SEC,
-				SwapProvider.CHAIN_FUSION
-			],
+			related: [SwapProvider.ICP_SWAP, SwapProvider.OISY_TRADE, SwapProvider.CHAIN_FUSION],
 			wider: [SwapProvider.VELORA, SwapProvider.NEAR_INTENTS, SwapProvider.LIFI]
 		});
 	});
@@ -30,7 +25,6 @@ describe('swapProviderPool', () => {
 			related: [
 				SwapProvider.VELORA,
 				SwapProvider.NEAR_INTENTS,
-				SwapProvider.ONE_SEC,
 				SwapProvider.CHAIN_FUSION,
 				SwapProvider.LIFI
 			],
