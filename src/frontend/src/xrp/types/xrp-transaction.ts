@@ -1,5 +1,6 @@
 import type { xrpTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
+import type { XrpTrustLineTokenIdentity } from '$xrp/types/xrp-trust-line-token';
 
 // A token amount as a transaction states it: the token by its currency and issuer, and the value as
 // a decimal string.
@@ -100,6 +101,7 @@ export interface XrpAccountTransaction {
 export interface XrpAccountTransactionMeta {
 	TransactionResult?: string;
 	delivered_amount?: string | Record<string, unknown>;
+	AffectedNodes?: unknown[];
 }
 
 export interface XrpAccountTransactionEntry {
@@ -113,6 +115,12 @@ export interface XrpAccountTransactionEntry {
 	// carries `tx.date` as seconds since the Ripple epoch. Modelled because the rest of the v2
 	// shape already is — without it a v2 response maps to rows with no date at all, silently.
 	close_time_iso?: string;
+}
+
+// A payment's effect on one of the account's trust lines: the row of the token that line holds, with
+// the currency and issuer the token is found by.
+export interface XrpTrustLineTransactionUi extends XrpTrustLineTokenIdentity {
+	transaction: XrpTransactionUi;
 }
 
 export interface XrpTransactionsPage {
