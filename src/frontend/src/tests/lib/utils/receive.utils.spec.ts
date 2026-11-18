@@ -28,26 +28,30 @@ import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { IcCkToken } from '$icp/types/ic-token';
-import type { ReceiveRoute } from '$lib/types/receive';
+import type { ReceiveAddressSources, ReceiveRoute } from '$lib/types/receive';
 import type { Token } from '$lib/types/token';
 import {
 	findReceiveAssetByToken,
 	getAutoReceiveRoute,
+	getCertifiedAddress,
 	getReceiveAddressKind,
+	getReceiveAddressTexts,
+	getReceiveAddressTitle,
 	getReceiveAssetKey,
 	getReceiveAssets,
 	getReceiveConvertTwinToken,
+	getReceiveNetworkAddressSource,
+	getReceiveRouteOptionTexts,
 	getReceiveRoutes,
 	getReceiveTokenKey,
 	isReceiveConversionOffer,
 	isReceiveTestToken,
-	isReceiveTokenEnabled,
-	resolveReceiveAddress,
-	type ReceiveAddressSources
+	resolveReceiveAddress
 } from '$lib/utils/receive.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockAccountIdentifierText, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
@@ -369,17 +373,6 @@ describe('receive.utils', () => {
 		});
 	});
 
-	describe('isReceiveTokenEnabled', () => {
-		it('should treat a token without a toggle as enabled', () => {
-			expect(isReceiveTokenEnabled(BTC_MAINNET_TOKEN)).toBeTruthy();
-		});
-
-		it('should follow the toggle of a toggleable token', () => {
-			expect(isReceiveTokenEnabled({ ...ckBtcToken, enabled: false } as Token)).toBeFalsy();
-			expect(isReceiveTokenEnabled({ ...ckBtcToken, enabled: true } as Token)).toBeTruthy();
-		});
-	});
-
 	describe('isReceiveTestToken', () => {
 		it('should flag test network tokens', () => {
 			expect(isReceiveTestToken(BASE_SEPOLIA_USDC_TOKEN)).toBeTruthy();
@@ -521,6 +514,168 @@ describe('receive.utils', () => {
 					sources
 				})
 			).toEqual({ status: 'ready', address: mockEthAddress });
+		});
+	});
+
+	describe('getCertifiedAddress', () => {
+		it('should return only a certified address', () => {
+			expect(getCertifiedAddress({ data: mockBtcAddress, certified: true })).toBe(mockBtcAddress);
+			expect(getCertifiedAddress({ data: mockBtcAddress, certified: false })).toBeUndefined();
+			expect(getCertifiedAddress(null)).toBeUndefined();
+			expect(getCertifiedAddress(undefined)).toBeUndefined();
+		});
+	});
+
+	describe('getReceiveNetworkAddressSource', () => {
+		const routeOf = ({ token, index = 0 }: { token: Token; index?: number }): ReceiveRoute =>
+			getReceiveRoutes({
+				tokens: [token],
+				enabledNetworkIds: [...enabledNetworkIds, BTC_TESTNET_NETWORK_ID]
+			})[index];
+
+		it('should pick the store of the exact network', () => {
+			expect(getReceiveNetworkAddressSource(routeOf({ token: BTC_MAINNET_TOKEN }))).toBe(
+				'btcMainnet'
+			);
+			expect(getReceiveNetworkAddressSource(routeOf({ token: BTC_TESTNET_TOKEN }))).toBe(
+				'btcTestnet'
+			);
+			expect(getReceiveNetworkAddressSource(routeOf({ token: SOLANA_TOKEN }))).toBe('solMainnet');
+		});
+
+		it('should share one store between the EVM networks', () => {
+			expect(getReceiveNetworkAddressSource(routeOf({ token: ETHEREUM_TOKEN }))).toBe('evm');
+			expect(getReceiveNetworkAddressSource(routeOf({ token: BASE_USDC_TOKEN }))).toBe('evm');
+		});
+
+		it('should have no store for the identity and deposit addresses', () => {
+			expect(getReceiveNetworkAddressSource(routeOf({ token: ICP_TOKEN }))).toBeUndefined();
+			expect(getReceiveNetworkAddressSource(routeOf({ token: ckBtcToken }))).toBeUndefined();
+			expect(
+				getReceiveNetworkAddressSource(routeOf({ token: ckBtcToken, index: 1 }))
+			).toBeUndefined();
+		});
+	});
+
+	describe('address texts', () => {
+		const routeOf = ({ token, index = 0 }: { token: Token; index?: number }): ReceiveRoute =>
+			getReceiveRoutes({ tokens: [token], enabledNetworkIds })[index];
+
+		it('should title a direct route by what to send and where', () => {
+			expect(getReceiveAddressTitle({ route: routeOf({ token: ETHEREUM_TOKEN }), i18n: en })).toBe(
+				'Receive ETH on Ethereum'
+			);
+		});
+
+		it('should title a deposit by what it credits and through which network', () => {
+			expect(
+				getReceiveAddressTitle({ route: routeOf({ token: ckBtcToken, index: 1 }), i18n: en })
+			).toBe('Receive ckBTC via Bitcoin');
+		});
+
+		it('should name a network address after its network', () => {
+			expect(
+				getReceiveAddressTexts({
+					route: routeOf({ token: BTC_MAINNET_TOKEN }),
+					icpFormat: 'principal',
+					i18n: en
+				})
+			).toEqual({
+				label: 'Bitcoin address',
+				copyAriaLabel: 'Copy Bitcoin address',
+				copiedText: 'Bitcoin address copied to clipboard.'
+			});
+		});
+
+		it('should name the ICP address after the chosen format', () => {
+			const route = routeOf({ token: ICP_TOKEN });
+
+			expect(getReceiveAddressTexts({ route, icpFormat: 'principal', i18n: en })).toEqual({
+				label: en.receive.token.text.principal_label,
+				copyAriaLabel: en.receive.token.text.copy_principal,
+				copiedText: en.receive.icp.text.internet_computer_principal_copied
+			});
+			expect(getReceiveAddressTexts({ route, icpFormat: 'account-id', i18n: en })).toEqual({
+				label: en.receive.token.text.account_id_label,
+				copyAriaLabel: en.receive.token.text.copy_account_id,
+				copiedText: en.receive.icp.text.account_id_copied
+			});
+		});
+
+		it('should name the deposit address as such', () => {
+			expect(
+				getReceiveAddressTexts({
+					route: routeOf({ token: ckBtcToken, index: 1 }),
+					icpFormat: 'principal',
+					i18n: en
+				})
+			).toEqual({
+				label: en.receive.ckbtc.text.deposit_address,
+				copyAriaLabel: en.receive.ckbtc.text.copy_deposit_address,
+				copiedText: en.receive.ckbtc.text.deposit_address_copied
+			});
+		});
+	});
+
+	describe('getReceiveRouteOptionTexts', () => {
+		const [direct, offer] = getReceiveRoutes({
+			tokens: [BTC_MAINNET_TOKEN],
+			enabledNetworkIds,
+			catalog: [ckBtcToken]
+		});
+
+		it('should offer ckBTC with the confirmations once known', () => {
+			const texts = (confirmations?: number) =>
+				getReceiveRouteOptionTexts({
+					route: offer,
+					assetTokens: [BTC_MAINNET_TOKEN],
+					withOffer: true,
+					confirmations,
+					i18n: en
+				});
+
+			expect(texts(4)).toEqual({
+				title: 'Receive as ckBTC',
+				description: '4 confirmations, then fast and cheap'
+			});
+			expect(texts().description).toBe(en.receive.ckbtc.text.benefit_generic);
+		});
+
+		it('should name the asset rather than the network next to an offer', () => {
+			expect(
+				getReceiveRouteOptionTexts({
+					route: direct,
+					assetTokens: [BTC_MAINNET_TOKEN],
+					withOffer: true,
+					i18n: en
+				})
+			).toEqual({ title: 'Receive BTC', description: 'Send BTC on Bitcoin' });
+		});
+
+		it('should name the network when the routes differ only by network', () => {
+			const [ethereum] = getReceiveRoutes({ tokens: [USDC_TOKEN], enabledNetworkIds });
+
+			expect(
+				getReceiveRouteOptionTexts({
+					route: ethereum,
+					assetTokens: [USDC_TOKEN, BASE_USDC_TOKEN],
+					withOffer: false,
+					i18n: en
+				}).title
+			).toBe('Ethereum');
+		});
+
+		it('should describe the deposit of the ckBTC asset itself', () => {
+			const [, deposit] = getReceiveRoutes({ tokens: [ckBtcToken], enabledNetworkIds });
+
+			expect(
+				getReceiveRouteOptionTexts({
+					route: deposit,
+					assetTokens: [ckBtcToken],
+					withOffer: false,
+					i18n: en
+				})
+			).toEqual({ title: 'Bitcoin', description: 'Send BTC to receive ckBTC' });
 		});
 	});
 });

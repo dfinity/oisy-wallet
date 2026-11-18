@@ -5,11 +5,7 @@
 	import type ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReceiveTitle from '$lib/components/receive/ReceiveTitle.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
-	import {
-		RECEIVE_TOKENS_MODAL,
-		RECEIVE_TOKENS_MODAL_ADDRESS_LABEL,
-		RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON
-	} from '$lib/constants/test-ids.constants';
+	import { RECEIVE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { WizardStepsReceiveAddress } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
@@ -63,27 +59,13 @@
 	};
 
 	// The step's content is replaced on every change, so focus is placed again: on the QR code detail
-	// when it opens, and back on the QR button of the row it came from.
+	// when it opens, and back on the QR button of the row it came from, which the list focuses itself.
 	let content = $state<HTMLDivElement | undefined>();
+	let returnFocusAddress = $state<string | undefined>();
 
 	const focusContent = async () => {
 		await tick();
 		content?.focus({ preventScroll: true });
-	};
-
-	const focusQrButtonOf = async (rowAddress: string | undefined) => {
-		await tick();
-
-		const row = Array.from(
-			content?.querySelectorAll<HTMLElement>(
-				`[data-tid="${RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}"]`
-			) ?? []
-		).find(({ textContent }) => textContent?.trim() === rowAddress)?.parentElement;
-
-		(
-			row?.querySelector<HTMLElement>(`[data-tid="${RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON}"]`) ??
-			content
-		)?.focus({ preventScroll: true });
 	};
 
 	const displayAddresses = () => {
@@ -91,11 +73,9 @@
 			return;
 		}
 
-		const rowAddress = address;
+		returnFocusAddress = address;
 
 		modal.back();
-
-		focusQrButtonOf(rowAddress);
 
 		address = undefined;
 		addressLabel = undefined;
@@ -152,7 +132,7 @@
 					qrSize="compact"
 				/>
 			{:else}
-				<InfoCmp onQRCode={displayQRCode} />
+				<InfoCmp focusAddress={returnFocusAddress} onQRCode={displayQRCode} />
 			{/if}
 		{/key}
 	</div>

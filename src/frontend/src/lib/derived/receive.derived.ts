@@ -10,7 +10,7 @@ import {
 	solAddressMainnetStore,
 	xrpAddressMainnetStore
 } from '$lib/stores/address.store';
-import type { ReceiveAddressSources } from '$lib/utils/receive.utils';
+import type { ReceiveAddressSources } from '$lib/types/receive';
 import { derived, type Readable } from 'svelte/store';
 
 export const receiveAddressSources: Readable<ReceiveAddressSources> = derived(

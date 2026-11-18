@@ -1,73 +1,64 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import { onMount, tick } from 'svelte';
 	import EthReceiveMetamask from '$eth/components/receive/EthReceiveMetamask.svelte';
 	import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 	import ReceiveCkBtcDepositTerms from '$icp/components/receive/ReceiveCkBtcDepositTerms.svelte';
 	import IconWarning from '$lib/components/icons/IconWarning.svelte';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import ReceiveAddressField from '$lib/components/receive/ReceiveAddressField.svelte';
+	import ReceiveBackButton from '$lib/components/receive/ReceiveBackButton.svelte';
+	import ReceiveEnableToken from '$lib/components/receive/ReceiveEnableToken.svelte';
 	import ReceiveQrCode from '$lib/components/receive/ReceiveQrCode.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
+	import ReceiveTestNetworkBadge from '$lib/components/receive/ReceiveTestNetworkBadge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SegmentedControl from '$lib/components/ui/SegmentedControl.svelte';
 	import {
 		RECEIVE_ADDRESS_LOADING,
 		RECEIVE_ADDRESS_RETRY_BUTTON,
-		RECEIVE_CHANGE_TOKEN_BUTTON,
 		RECEIVE_CKBTC_DEPOSIT_WARNING,
-		RECEIVE_ENABLE_TOKEN_BUTTON,
 		RECEIVE_HOW_TO_CONVERT_BUTTON,
 		RECEIVE_ICP_FORMAT_ACCOUNT_ID,
 		RECEIVE_ICP_FORMAT_PRINCIPAL,
+		RECEIVE_TOKENS_MODAL_ADDRESS_LABEL,
 		RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON,
 		RECEIVE_TOKENS_MODAL_DONE_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { networks } from '$lib/derived/networks.derived';
+	import { receiveAddressSources } from '$lib/derived/receive.derived';
+	import { retryReceiveAddress } from '$lib/services/receive.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type {
-		ReceiveAddressState,
-		ReceiveIcpAddressFormat,
-		ReceiveRoute
-	} from '$lib/types/receive';
+	import type { ReceiveIcpAddressFormat, ReceiveRoute } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkEthereum } from '$lib/utils/network.utils';
-	import { isReceiveTestToken } from '$lib/utils/receive.utils';
+	import {
+		getReceiveAddressTexts,
+		getReceiveConvertTwinToken,
+		isReceiveTestToken,
+		RECEIVE_ADDRESS_LOADING_STATE,
+		resolveReceiveAddress
+	} from '$lib/utils/receive.utils';
+	import { isTokenEnabled } from '$lib/utils/token-toggleable.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		route: ReceiveRoute;
-		addressState: ReceiveAddressState;
-		icpFormat: ReceiveIcpAddressFormat;
-		tokenEnabled: boolean;
-		enabling: boolean;
-		enableFailed: boolean;
-		retrying: boolean;
 		// The previous step was a visible choice: the route picker or the token picker.
 		backToPreviousStep: boolean;
-		convertTwinToken?: Token;
-		onEnable: () => void;
-		onRetryAddress: () => void;
 		onBack: () => void;
 		onChangeToken: () => void;
 		onDone: () => void;
-		onHowToConvert: () => void;
+		onHowToConvert: (twinToken: Token) => void;
 		onViewActivity: () => void;
 	}
 
 	let {
 		route,
-		addressState,
-		icpFormat = $bindable(),
-		tokenEnabled,
-		enabling,
-		enableFailed,
-		retrying,
 		backToPreviousStep,
-		convertTwinToken,
-		onEnable,
-		onRetryAddress,
 		onBack,
 		onChangeToken,
 		onDone,
@@ -83,41 +74,18 @@
 
 	let creditedSymbol = $derived(getTokenDisplaySymbol(creditedToken));
 
-	let addressLabel = $derived(
-		deposit
-			? $i18n.receive.ckbtc.text.deposit_address
-			: addressKind === 'icp'
-				? icpFormat === 'account-id'
-					? $i18n.receive.token.text.account_id_label
-					: $i18n.receive.token.text.principal_label
-				: replacePlaceholders($i18n.receive.token.text.address_label, {
-						$network: sourceNetwork.name
-					})
+	let icpFormat = $state<ReceiveIcpAddressFormat>('principal');
+
+	let tokenEnabled = $derived(isTokenEnabled(creditedToken));
+
+	let addressState = $derived(
+		tokenEnabled
+			? resolveReceiveAddress({ route, icpFormat, sources: $receiveAddressSources })
+			: RECEIVE_ADDRESS_LOADING_STATE
 	);
 
-	// The button is named for what it does; the confirmation says what happened.
-	let copyAriaLabel = $derived(
-		deposit
-			? $i18n.receive.ckbtc.text.copy_deposit_address
-			: addressKind === 'icp'
-				? icpFormat === 'account-id'
-					? $i18n.receive.token.text.copy_account_id
-					: $i18n.receive.token.text.copy_principal
-				: replacePlaceholders($i18n.receive.token.text.copy_address, {
-						$network: sourceNetwork.name
-					})
-	);
-
-	let copiedText = $derived(
-		deposit
-			? $i18n.receive.ckbtc.text.deposit_address_copied
-			: addressKind === 'icp'
-				? icpFormat === 'account-id'
-					? $i18n.receive.icp.text.account_id_copied
-					: $i18n.receive.icp.text.internet_computer_principal_copied
-				: replacePlaceholders($i18n.receive.token.text.address_copied, {
-						$network: sourceNetwork.name
-					})
+	let { label, copyAriaLabel, copiedText } = $derived(
+		getReceiveAddressTexts({ route, icpFormat, i18n: $i18n })
 	);
 
 	const icpFormats: { value: ReceiveIcpAddressFormat; label: string; testId: string }[] = $derived([
@@ -138,44 +106,54 @@
 			? sourceNetwork
 			: undefined
 	);
+
+	let convertTwinToken = $derived(
+		kind === 'direct'
+			? getReceiveConvertTwinToken({
+					token: creditedToken,
+					enabledNetworkIds: $networks.map(({ id }) => id)
+				})
+			: undefined
+	);
+
+	const howToConvert = () => {
+		if (nonNullish(convertTwinToken)) {
+			onHowToConvert(convertTwinToken);
+		}
+	};
+
+	let retrying = $state(false);
+
+	const retry = async () => {
+		retrying = true;
+
+		try {
+			await retryReceiveAddress({ route, identity: $authIdentity });
+		} finally {
+			retrying = false;
+		}
+	};
+
+	// The modal title names what to send and where; the step itself takes focus, so keyboard and
+	// screen-reader users land in it.
+	let content = $state<HTMLDivElement | undefined>();
+
+	onMount(async () => {
+		await tick();
+		content?.focus({ preventScroll: true });
+	});
 </script>
 
 <ContentWithToolbar>
-	<!-- The modal title names what to send and where; this is where focus lands on the step. -->
-	<div class="outline-none" data-receive-focus tabindex="-1">
+	<div bind:this={content} class="outline-none" tabindex="-1">
 		{#if isReceiveTestToken(creditedToken)}
 			<div class="mb-4">
-				<Badge variant="warning" width="w-fit">
-					{$i18n.receive.token.text.test_network}
-				</Badge>
+				<ReceiveTestNetworkBadge />
 			</div>
 		{/if}
 
 		{#if !tokenEnabled}
-			<p class="mb-4 text-primary">
-				{replacePlaceholders($i18n.receive.token.text.enable_info, { $token: creditedSymbol })}
-			</p>
-
-			{#if enableFailed}
-				<p class="mb-4 text-error-primary" role="alert">
-					{replacePlaceholders($i18n.receive.token.text.enable_error, { $token: creditedSymbol })}
-				</p>
-			{/if}
-
-			<Button
-				colorStyle="primary"
-				disabled={enabling}
-				fullWidth
-				loading={enabling}
-				onclick={onEnable}
-				testId={RECEIVE_ENABLE_TOKEN_BUTTON}
-			>
-				{enabling
-					? $i18n.receive.token.text.enabling
-					: replacePlaceholders($i18n.receive.token.text.enable_and_show, {
-							$token: creditedSymbol
-						})}
-			</Button>
+			<ReceiveEnableToken {route} />
 		{:else}
 			{#if addressKind === 'icp'}
 				<div class="mb-4">
@@ -201,7 +179,8 @@
 							{copiedText}
 							{copyAriaLabel}
 							copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
-							label={addressLabel}
+							{label}
+							testId={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
 						/>
 
 						<!-- Right under the address and Copy, so it is in view wherever the address is copied. -->
@@ -232,7 +211,7 @@
 							colorStyle="secondary-light"
 							disabled={retrying}
 							loading={retrying}
-							onclick={onRetryAddress}
+							onclick={retry}
 							paddingSmall
 							testId={RECEIVE_ADDRESS_RETRY_BUTTON}
 						>
@@ -262,7 +241,7 @@
 			{/if}
 		{/if}
 
-		{#if convertTwinToken}
+		{#if nonNullish(convertTwinToken)}
 			<div class="mt-6">
 				<p class="mb-2 text-sm text-tertiary">
 					{replacePlaceholders($i18n.receive.token.text.how_to_convert_description, {
@@ -274,7 +253,7 @@
 				<Button
 					colorStyle="secondary"
 					fullWidth
-					onclick={onHowToConvert}
+					onclick={howToConvert}
 					paddingSmall
 					testId={RECEIVE_HOW_TO_CONVERT_BUTTON}
 				>
@@ -289,18 +268,10 @@
 
 	{#snippet toolbar()}
 		<div class="flex w-full gap-3">
-			{#if backToPreviousStep}
-				<ButtonBack fullWidth onclick={onBack} />
-			{:else}
-				<Button
-					colorStyle="secondary-light"
-					fullWidth
-					onclick={onChangeToken}
-					testId={RECEIVE_CHANGE_TOKEN_BUTTON}
-				>
-					{$i18n.receive.token.text.change_token}
-				</Button>
-			{/if}
+			<ReceiveBackButton
+				back={backToPreviousStep}
+				onclick={backToPreviousStep ? onBack : onChangeToken}
+			/>
 			<!-- Without an address there is nothing to be done with: enabling stays the one primary action. -->
 			<ButtonDone
 				onclick={onDone}

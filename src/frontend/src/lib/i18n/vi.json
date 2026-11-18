@@ -946,31 +946,20 @@
 				"use_for_all_tokens": "Sử dụng cho tất cả các token khi nhận từ ví, người dùng hoặc các ứng dụng khác hỗ trợ định dạng địa chỉ này.",
 				"use_for_icrc_deposit": "Sử dụng để nhận token ICRC-1 trong mạng ICP, chẳng hạn như token SMS, ck, v.v.",
 				"use_for_icp_deposit": "Sử dụng để gửi tiền ICP từ các sàn giao dịch hoặc các ví khác chỉ hỗ trợ Account Id.",
-				"your_private_eth_address": "Địa chỉ riêng tư của bạn cho tất cả các token ERC20.",
 				"display_account_id_qr": "Hiển thị địa chỉ ICP dưới dạng mã QR",
 				"account_id_copied": "Địa chỉ ICP đã được sao chép vào khay nhớ tạm.",
 				"principal": "Địa chỉ principal ICP",
-				"principal_title": "",
 				"internet_computer_principal_copied": "Địa chỉ principal Internet Computer đã được sao chép vào khay nhớ tạm.",
-				"display_internet_computer_principal_qr": "Hiển thị Địa chỉ principal Internet Computer dưới dạng mã QR",
-				"icp_account": "Địa chỉ ICP (dành cho sàn giao dịch)",
-				"icp_account_title": "",
-				"icp_account_copied": "Địa chỉ ICP đã được sao chép vào khay nhớ tạm.",
-				"display_icp_account_qr": "Hiển thị Tài khoản ICP dưới dạng mã QR"
+				"display_internet_computer_principal_qr": "Hiển thị Địa chỉ principal Internet Computer dưới dạng mã QR"
 			}
 		},
 		"ethereum": {
 			"text": {
 				"checking_status": "Đang kiểm tra trạng thái $token...",
-				"from_network": "Nhận từ Mạng $network",
-				"eth_to_cketh_description": "Chuyển đổi $token sang $ckToken cần gọi một hợp đồng thông minh trên $network và truyền địa chỉ principal IC của bạn làm tham số – $oisy_name đơn giản hóa quy trình này bằng cách cho phép bạn thực hiện chuyển đổi trực tiếp trong ví.",
-				"learn_how_to_convert": "Tìm hiểu cách chuyển đổi $token sang $ckToken",
 				"metamask": "Nhận từ Metamask",
 				"ethereum": "Ethereum",
-				"ethereum_title": "",
 				"ethereum_address": "Địa chỉ",
-				"ethereum_address_copied": "Địa chỉ Ethereum đã được sao chép vào khay nhớ tạm.",
-				"display_ethereum_address_qr": "Hiển thị địa chỉ Ethereum dưới dạng mã QR"
+				"ethereum_address_copied": "Địa chỉ Ethereum đã được sao chép vào khay nhớ tạm."
 			},
 			"error": {
 				"no_metamask": "Metamask không khả dụng."
@@ -991,9 +980,7 @@
 				"bitcoin_regtest_address": "Địa chỉ Bitcoin (Regtest)",
 				"bitcoin_regtest_address_title": "",
 				"display_bitcoin_address_qr": "Hiển thị Địa chỉ Bitcoin dưới dạng mã QR",
-				"bitcoin_address_copied": "Địa chỉ Bitcoin đã được sao chép vào khay nhớ tạm.",
-				"from_network": "Chuyển Bitcoin trên mạng BTC đến địa chỉ này để nhận ckBTC.",
-				"fee_applied": "Xin lưu ý rằng một khoản phí liên mạng ước tính là $fee BTC sẽ được áp dụng."
+				"bitcoin_address_copied": "Địa chỉ Bitcoin đã được sao chép vào khay nhớ tạm."
 			},
 			"info": {
 				"no_new_btc": "Không có BTC mới được xác nhận.",
@@ -1415,7 +1402,6 @@
 			"cketh_conversions_may_take": "Các chuyển đổi ckETH có thể mất tới 20 phút",
 			"ckerc20_conversions_may_take": "Các chuyển đổi $ckErc20 có thể mất tới 20 phút",
 			"how_to_convert_eth_to_cketh": "Đây là cách bạn có thể chuyển đổi $token sang $ckToken trên $oisy_name",
-			"send_eth": "Gửi $token đến địa chỉ $oisy_name của bạn",
 			"wait_eth_current_balance": "Đợi $token đến. Số dư hiện tại",
 			"set_amount": "Đặt số lượng để chuyển đổi",
 			"check_balance_for_fees": "Kiểm tra số dư $token để biết phí chuyển đổi",

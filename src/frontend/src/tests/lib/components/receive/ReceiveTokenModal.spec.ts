@@ -1,3 +1,5 @@
+import * as appNavigation from '$app/navigation';
+import * as btcAddressServices from '$btc/services/btc-address.services';
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
@@ -8,7 +10,12 @@ import {
 	IC_CKBTC_LEDGER_CANISTER_ID,
 	IC_CKBTC_MINTER_CANISTER_ID
 } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import {
+	IC_CKETH_LEDGER_CANISTER_ID,
+	IC_CKETH_MINTER_CANISTER_ID
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
 import * as ckBtcServices from '$icp/services/ckbtc.services';
@@ -19,9 +26,13 @@ import type { IcCkToken } from '$icp/types/ic-token';
 import ReceiveTokenModal from '$lib/components/receive/ReceiveTokenModal.svelte';
 import {
 	RECEIVE_ADDRESS_LOADING,
+	RECEIVE_ADDRESS_RETRY_BUTTON,
+	RECEIVE_CHANGE_TOKEN_BUTTON,
 	RECEIVE_CKBTC_DEPOSIT_WARNING,
+	RECEIVE_CKBTC_TERMS_RETRY_BUTTON,
 	RECEIVE_CKBTC_VIEW_ACTIVITY_BUTTON,
 	RECEIVE_ENABLE_TOKEN_BUTTON,
+	RECEIVE_HOW_TO_CONVERT_BUTTON,
 	RECEIVE_ICP_FORMAT_ACCOUNT_ID,
 	RECEIVE_ROUTE_LIST_ITEM,
 	RECEIVE_TOKEN_IMPORT_BUTTON,
@@ -34,8 +45,10 @@ import * as networksDerived from '$lib/derived/networks.derived';
 import { btcAddressMainnetStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
+import { modalStore } from '$lib/stores/modal.store';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
+import { transactionsUrl } from '$lib/utils/nav.utils';
 import { getReceiveAssetKey, getReceiveRoutes } from '$lib/utils/receive.utils';
 import * as tokensUtils from '$lib/utils/tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -326,12 +339,12 @@ describe('ReceiveTokenModal', () => {
 			expect(container.querySelector(depositSelector)).toHaveAttribute('aria-pressed', 'true');
 		});
 
-		it('should show unavailable terms with a retry while the direct route stays usable', async () => {
+		it('should show unavailable deposit terms and load them again on Retry', async () => {
 			ckBtcMinterInfoStore.reset(ckBtcToken.id);
 
 			const { container } = render(ReceiveTokenModal, { props: { initialToken: ckBtcToken } });
 
-			const [direct, deposit] = routeKeys(ckBtcToken);
+			const [, deposit] = routeKeys(ckBtcToken);
 
 			await waitFor(() => {
 				expect(
@@ -345,9 +358,40 @@ describe('ReceiveTokenModal', () => {
 				expect(container).toHaveTextContent(get(i18n).receive.ckbtc.text.terms_error);
 			});
 
-			expect(
-				byTestId({ container, testId: `${RECEIVE_ROUTE_LIST_ITEM}-${direct}` })
-			).not.toBeInTheDocument();
+			const workerStarts = vi.mocked(minterInfoServices.initCkBTCMinterInfoWorker).mock.calls
+				.length;
+
+			byTestId({ container, testId: RECEIVE_CKBTC_TERMS_RETRY_BUTTON })?.click();
+
+			await waitFor(() => {
+				expect(container).not.toHaveTextContent(get(i18n).receive.ckbtc.text.terms_error);
+			});
+
+			await waitFor(() => {
+				expect(
+					vi.mocked(minterInfoServices.initCkBTCMinterInfoWorker).mock.calls.length
+				).toBeGreaterThan(workerStarts);
+			});
+		});
+
+		it('should change the token from a route picker opened on a token page', async () => {
+			const { container } = render(ReceiveTokenModal, { props: { initialToken: ckBtcToken } });
+
+			await waitFor(() => {
+				expect(byTestId({ container, testId: RECEIVE_CHANGE_TOKEN_BUTTON })).toBeInTheDocument();
+			});
+
+			byTestId({ container, testId: RECEIVE_CHANGE_TOKEN_BUTTON })?.click();
+
+			const ckBtcEntry = `${RECEIVE_TOKEN_LIST_ITEM}-${getReceiveAssetKey(ckBtcToken)}`;
+
+			await waitFor(() => {
+				expect(byTestId({ container, testId: ckBtcEntry })).toHaveAttribute('aria-pressed', 'true');
+			});
+
+			await waitFor(() => {
+				expect(document.activeElement).toBe(byTestId({ container, testId: ckBtcEntry }));
+			});
 		});
 
 		it('should ask to enable a disabled ckBTC before showing any address, and enable only it', async () => {
@@ -428,5 +472,70 @@ describe('ReceiveTokenModal', () => {
 		expect(
 			byTestId({ container, testId: RECEIVE_TOKENS_MODAL_ADDRESS_LABEL })
 		).not.toBeInTheDocument();
+	});
+
+	it('should load a failed address again on Retry', async () => {
+		const loadSpy = vi
+			.spyOn(btcAddressServices, 'loadBtcAddressMainnet')
+			.mockResolvedValue({ success: true });
+
+		const { container } = render(ReceiveTokenModal, { props: { initialToken: BTC_MAINNET_TOKEN } });
+
+		const [direct] = routeKeys(BTC_MAINNET_TOKEN);
+
+		await waitFor(() => {
+			expect(
+				byTestId({ container, testId: `${RECEIVE_ROUTE_LIST_ITEM}-${direct}` })
+			).toBeInTheDocument();
+		});
+
+		byTestId({ container, testId: `${RECEIVE_ROUTE_LIST_ITEM}-${direct}` })?.click();
+
+		await waitFor(() => {
+			expect(byTestId({ container, testId: RECEIVE_ADDRESS_RETRY_BUTTON })).toBeInTheDocument();
+		});
+
+		expect(container).toHaveTextContent(get(i18n).receive.token.text.address_error);
+
+		byTestId({ container, testId: RECEIVE_ADDRESS_RETRY_BUTTON })?.click();
+
+		await waitFor(() => {
+			expect(loadSpy).toHaveBeenCalledOnce();
+		});
+	});
+
+	it('should open the conversion instructions for ckETH on its page', async () => {
+		const ckEthToken = {
+			...ckBtcToken,
+			id: parseTokenId('ckETH'),
+			symbol: 'ckETH',
+			name: 'ckETH',
+			ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
+			minterCanisterId: IC_CKETH_MINTER_CANISTER_ID,
+			twinToken: ETHEREUM_TOKEN
+		} as IcCkToken & { enabled: boolean };
+
+		catalog.set([ICP_TOKEN, ETHEREUM_TOKEN, ckEthToken]);
+
+		const gotoSpy = vi.spyOn(appNavigation, 'goto').mockResolvedValue();
+		const openSpy = vi.spyOn(modalStore, 'openHowToConvertToTwinTokenEth');
+
+		const { container } = render(ReceiveTokenModal, { props: { initialToken: ckEthToken } });
+
+		await waitFor(() => {
+			expect(byTestId({ container, testId: RECEIVE_HOW_TO_CONVERT_BUTTON })).toBeInTheDocument();
+		});
+
+		byTestId({ container, testId: RECEIVE_HOW_TO_CONVERT_BUTTON })?.click();
+
+		await waitFor(() => {
+			expect(openSpy).toHaveBeenCalledOnce();
+		});
+
+		expect(gotoSpy).toHaveBeenCalledExactlyOnceWith(transactionsUrl({ token: ckEthToken }));
+		expect(openSpy.mock.calls[0][0].data).toEqual({
+			sourceToken: ETHEREUM_TOKEN,
+			destinationToken: ckEthToken
+		});
 	});
 });

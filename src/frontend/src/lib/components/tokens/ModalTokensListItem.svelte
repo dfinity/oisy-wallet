@@ -8,7 +8,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { Token } from '$lib/types/token';
-	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+	import { isTokenEnabled } from '$lib/utils/token-toggleable.utils';
 	import { getTokenDisplayName } from '$lib/utils/token.utils';
 
 	interface Props {
@@ -34,7 +34,7 @@
 
 	// For disabled tokens, we don't have the balance workers running, so we can't show the balance.
 	// TODO: Instead of hiding balances we should show a toggle or button to enable the token saying "Enable to see balance"
-	let showBalance = $derived(!isTokenToggleable(token) || token.enabled);
+	let showBalance = $derived(isTokenEnabled(token));
 </script>
 
 <LogoButton

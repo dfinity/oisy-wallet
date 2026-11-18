@@ -946,31 +946,20 @@
 				"use_for_all_tokens": "このアドレス形式をサポートするウォレット、ユーザー、または他のアプリから受信する際に、すべてのトークンに使用します。",
 				"use_for_icrc_deposit": "ICPネットワークでICRC-1トークン（SNS、ckトークンなど）を受信する際に使用します。",
 				"use_for_icp_deposit": "アカウントIDのみをサポートする取引所や他のウォレットからICPを入金する際に使用します。",
-				"your_private_eth_address": "ERC20 トークン全般で使用するあなた専用のEthereumアドレスです。",
 				"display_account_id_qr": "ICPアカウントIDをQRコードとして表示",
 				"account_id_copied": "ICPアカウントIDをコピーしました。",
 				"principal": "ICP Principal",
-				"principal_title": "ICPウォレットアドレス - ckBTC, CHAT, ...",
 				"internet_computer_principal_copied": "Internet Computer Principalをコピーしました。",
-				"display_internet_computer_principal_qr": "Internet Computer PrincipalをQRコードとして表示",
-				"icp_account": "ICPアカウント（取引所用）",
-				"icp_account_title": "ICPウォレットアドレス - ICPトークン専用",
-				"icp_account_copied": "ICPアカウントをコピーしました。",
-				"display_icp_account_qr": "ICPアカウントをQRコードとして表示"
+				"display_internet_computer_principal_qr": "Internet Computer PrincipalをQRコードとして表示"
 			}
 		},
 		"ethereum": {
 			"text": {
 				"checking_status": "$tokenステータスを確認中...",
-				"from_network": "$networkネットワークから受け取る",
-				"eth_to_cketh_description": "$tokenを$ckTokenに変換するには、$network上でスマートコントラクトを呼び出し、ICプリンシパルを引数として渡す必要があります。 - $oisy_nameはこの手順をウォレット内で完結できます。",
-				"learn_how_to_convert": "$tokenを$ckTokenに変換する方法を学ぶ",
 				"metamask": "Metamaskから受け取る",
 				"ethereum": "Ethereum",
-				"ethereum_title": "Ethereumウォレットアドレス",
 				"ethereum_address": "アドレス",
-				"ethereum_address_copied": "Ethereumアドレスをコピーしました。",
-				"display_ethereum_address_qr": "EthereumアドレスをQRコードとして表示"
+				"ethereum_address_copied": "Ethereumアドレスをコピーしました。"
 			},
 			"error": {
 				"no_metamask": "Metamaskは利用できません。"
@@ -991,9 +980,7 @@
 				"bitcoin_regtest_address": "Bitcoin（Regtest）",
 				"bitcoin_regtest_address_title": "Bitcoin（Regtest）ウォレットアドレス",
 				"display_bitcoin_address_qr": "BitcoinアドレスをQRコードで表示",
-				"bitcoin_address_copied": "Bitcoinアドレスをコピーしました。",
-				"from_network": "このアドレスに BTC ネットワークから Bitcoin を送信すると ckBTC を受け取れます。",
-				"fee_applied": "ネットワーク間手数料として約 $fee BTC がかかります。"
+				"bitcoin_address_copied": "Bitcoinアドレスをコピーしました。"
 			},
 			"info": {
 				"no_new_btc": "新しい着金は確認されていません。",
@@ -1415,7 +1402,6 @@
 			"cketh_conversions_may_take": "ckETH変換には最大20分かかる場合があります。",
 			"ckerc20_conversions_may_take": "$ckErc20変換には最大20分かかる場合があります。",
 			"how_to_convert_eth_to_cketh": "$oisy_nameで$tokenを$ckTokenに変換する方法はこちら",
-			"send_eth": "$tokenを$oisy_nameアドレスに送信",
 			"wait_eth_current_balance": "$tokenが届くまでお待ちください。現在の残高",
 			"set_amount": "変換する金額を設定",
 			"check_balance_for_fees": "変換手数料のために$tokenの残高を確認してください。",

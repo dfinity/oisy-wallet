@@ -6,37 +6,30 @@
 	import { btcAddressStore } from '$icp/stores/btc.store';
 	import { isIcCkToken } from '$icp/validation/ic-token.validation';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
-	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
-	import AddTokenReviewByNetwork from '$lib/components/manage/AddTokenReviewByNetwork.svelte';
+	import { getAddTokenDataIdentifier } from '$icp-eth/utils/add-token.utils';
+	import AddTokenWizardSteps, {
+		type AddTokenWizardStep
+	} from '$lib/components/manage/AddTokenWizardSteps.svelte';
 	import ReceiveRouteAddress from '$lib/components/receive/ReceiveRouteAddress.svelte';
 	import ReceiveRouteStep from '$lib/components/receive/ReceiveRouteStep.svelte';
 	import ReceiveTokenStep from '$lib/components/receive/ReceiveTokenStep.svelte';
-	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
-	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import { RECEIVE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { allFungibleTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { networks } from '$lib/derived/networks.derived';
-	import { receiveAddressSources } from '$lib/derived/receive.derived';
 	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { WizardStepsReceiveToken } from '$lib/enums/wizard-steps';
-	import { retryReceiveAddress } from '$lib/services/receive.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Network, NetworkId } from '$lib/types/network';
-	import type {
-		ReceiveAddressState,
-		ReceiveAsset,
-		ReceiveIcpAddressFormat,
-		ReceiveRoute
-	} from '$lib/types/receive';
+	import type { ReceiveAsset, ReceiveRoute } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -47,17 +40,15 @@
 		findReceiveAssetByToken,
 		getAutoReceiveRoute,
 		getReceiveAddressKind,
+		getReceiveAddressTitle,
 		getReceiveAssets,
-		getReceiveConvertTwinToken,
 		getReceiveRoutes,
 		getReceiveTokenKey,
-		isReceiveConversionOffer,
-		isReceiveTokenEnabled,
-		resolveReceiveAddress
+		isReceiveConversionOffer
 	} from '$lib/utils/receive.utils';
-	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
-	import { getTokenDisplaySymbol, mapTokenUi } from '$lib/utils/token.utils';
-	import { saveAllCustomTokens, sortTokens } from '$lib/utils/tokens.utils';
+	import { isTokenEnabled } from '$lib/utils/token-toggleable.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { toSortedTokensUi } from '$lib/utils/tokens.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface Props {
@@ -83,8 +74,13 @@
 	let modal = $state<WizardModal<WizardStepsReceiveToken>>();
 	let currentStep = $state<WizardStep<WizardStepsReceiveToken> | undefined>();
 
+	// Whether a step followed the first one: the token list then takes focus itself. As the first step
+	// it leaves focus on the modal, so a phone does not open its keyboard on the search.
+	let navigated = $state(false);
+
 	const goToStep = (stepName: WizardStepsReceiveToken) => {
 		if (nonNullish(modal)) {
+			navigated = true;
 			goToWizardStep({ modal, steps, stepName });
 		}
 	};
@@ -107,26 +103,18 @@
 		)
 	);
 
-	let sortedCatalog = $derived.by(() => {
-		const snapshot = exchangesSnapshot;
-
-		if (isNullish(snapshot)) {
-			return catalog;
-		}
-
-		return sortTokens({
-			$tokens: catalog.map((token) =>
-				mapTokenUi({
-					token,
+	let sortedCatalog = $derived(
+		isNullish(exchangesSnapshot)
+			? catalog
+			: toSortedTokensUi({
+					tokens: catalog,
 					$balances: $balancesStore,
 					$stakeBalances,
-					$exchanges: snapshot
+					$exchanges: exchangesSnapshot,
+					$tokensToPin,
+					$networksToPin: $networks
 				})
-			),
-			$tokensToPin,
-			$networksToPin: $networks
-		});
-	});
+	);
 
 	let assets = $derived(getReceiveAssets({ tokens: sortedCatalog, preferredNetworkId }));
 
@@ -139,8 +127,6 @@
 	// Whether the person saw the token picker, and whether the route was picked for them.
 	let tokenStepVisited = $state(false);
 	let autoRoute = $state(false);
-
-	let icpFormat = $state<ReceiveIcpAddressFormat>('principal');
 
 	let asset = $derived(assets.find(({ key }) => key === assetKey));
 
@@ -157,37 +143,7 @@
 	// Resolved from the current catalog, so a token whose `TokenId` changed on enabling keeps its route.
 	let route = $derived(routes.find(({ key }) => key === routeKey));
 
-	let tokenEnabled = $derived(nonNullish(route) && isReceiveTokenEnabled(route.creditedToken));
-
-	const LOADING: ReceiveAddressState = { status: 'loading' };
-
-	let addressState = $derived(
-		nonNullish(route) && tokenEnabled
-			? resolveReceiveAddress({ route, icpFormat, sources: $receiveAddressSources })
-			: LOADING
-	);
-
-	let convertTwinToken = $derived(
-		route?.kind === 'direct'
-			? getReceiveConvertTwinToken({ token: route.creditedToken, enabledNetworkIds })
-			: undefined
-	);
-
-	// On the address step the title says what to send and where: "Receive ETH on Ethereum", or for a
-	// deposit what it credits and through which network: "Receive ckBTC via Bitcoin".
-	let addressTitle = $derived(
-		isNullish(route)
-			? undefined
-			: route.kind === 'ckbtc-deposit'
-				? replacePlaceholders($i18n.receive.token.text.title_deposit, {
-						$token: getTokenDisplaySymbol(route.creditedToken),
-						$network: route.sourceNetwork.name
-					})
-				: replacePlaceholders($i18n.receive.token.text.title_direct, {
-						$token: getTokenDisplaySymbol(route.sourceToken),
-						$network: route.sourceNetwork.name
-					})
-	);
+	let tokenEnabled = $derived(nonNullish(route) && isTokenEnabled(route.creditedToken));
 
 	// Choosing between BTC and BTC credited as ckBTC is not a choice of network: the title names the
 	// asset instead.
@@ -200,6 +156,20 @@
 			: undefined
 	);
 
+	let modalTitle = $derived.by(() => {
+		const step = currentStep?.name;
+
+		if (step === WizardStepsReceiveToken.ADDRESS && nonNullish(route)) {
+			return getReceiveAddressTitle({ route, i18n: $i18n });
+		}
+
+		if (step === WizardStepsReceiveToken.ROUTE && nonNullish(offerTitle)) {
+			return offerTitle;
+		}
+
+		return currentStep?.title ?? $i18n.receive.text.receive;
+	});
+
 	const selectAsset = ({
 		asset: selected,
 		fromTokenStep
@@ -210,7 +180,6 @@
 		previousRouteKey = selected.key === assetKey ? previousRouteKey : undefined;
 		assetKey = selected.key;
 		routeKey = undefined;
-		icpFormat = 'principal';
 		tokenStepVisited = fromTokenStep;
 
 		const auto = getAutoReceiveRoute(routesOf(selected));
@@ -228,7 +197,6 @@
 
 	const selectRoute = (selected: ReceiveRoute) => {
 		routeKey = selected.key;
-		icpFormat = 'principal';
 		goToStep(WizardStepsReceiveToken.ADDRESS);
 	};
 
@@ -325,51 +293,6 @@
 		untrack(() => loadCkBtcDepositAddress({ ...creditedToken, identity: $authIdentity }));
 	});
 
-	let retrying = $state(false);
-
-	const retryAddress = async () => {
-		if (isNullish(route)) {
-			return;
-		}
-
-		retrying = true;
-
-		try {
-			await retryReceiveAddress({ route, identity: $authIdentity });
-		} finally {
-			retrying = false;
-		}
-	};
-
-	let enabling = $state(false);
-	let enableFailed = $state(false);
-
-	// Only the selected version is enabled. The route is kept by identity, so it resolves to the token
-	// the reload brings in, even under a new `TokenId`.
-	const enableToken = async () => {
-		const creditedToken = route?.creditedToken;
-
-		if (isNullish(creditedToken) || !isTokenToggleable(creditedToken)) {
-			return;
-		}
-
-		enabling = true;
-		enableFailed = false;
-
-		const enabledToken = { ...creditedToken, enabled: true };
-
-		try {
-			await saveAllCustomTokens({
-				tokens: [enabledToken],
-				onError: () => (enableFailed = true),
-				$authIdentity,
-				$i18n
-			});
-		} finally {
-			enabling = false;
-		}
-	};
-
 	const close = () => closeModal(() => onClose?.());
 
 	const viewActivity = async () => {
@@ -385,12 +308,12 @@
 	};
 
 	// The conversion instructions read the ck token from the page, so they open on its page.
-	const howToConvert = async () => {
-		if (isNullish(route) || isNullish(convertTwinToken)) {
+	const howToConvert = async (twinToken: Token) => {
+		if (isNullish(route)) {
 			return;
 		}
 
-		const data = { sourceToken: convertTwinToken, destinationToken: route.creditedToken };
+		const data = { sourceToken: twinToken, destinationToken: route.creditedToken };
 
 		close();
 
@@ -405,6 +328,14 @@
 	let importProgressStep = $state<ProgressStepsAddToken>(ProgressStepsAddToken.INITIALIZATION);
 	let pendingImport = $state<{ networkId: NetworkId; identifier: string } | undefined>();
 
+	const IMPORT_STEPS: Partial<Record<WizardStepsReceiveToken, AddTokenWizardStep>> = {
+		[WizardStepsReceiveToken.IMPORT]: 'import',
+		[WizardStepsReceiveToken.IMPORT_REVIEW]: 'review',
+		[WizardStepsReceiveToken.IMPORT_SAVING]: 'saving'
+	};
+
+	let importStep = $derived(nonNullish(currentStep) ? IMPORT_STEPS[currentStep.name] : undefined);
+
 	const startImport = () => {
 		importNetwork = $networks.find(({ id }) => id === preferredNetworkId);
 		importTokenData = {};
@@ -413,13 +344,8 @@
 
 	const cancelImport = () => goToStep(WizardStepsReceiveToken.TOKEN);
 
-	const importedIdentifier = (): string | undefined =>
-		importTokenData.ledgerCanisterId ??
-		importTokenData.ethContractAddress ??
-		importTokenData.splTokenAddress;
-
 	const onImportSuccess = () => {
-		const identifier = importedIdentifier();
+		const identifier = getAddTokenDataIdentifier(importTokenData);
 
 		if (isNullish(importNetwork) || isNullish(identifier)) {
 			goToStep(WizardStepsReceiveToken.TOKEN);
@@ -461,35 +387,21 @@
 		});
 	});
 
-	// Focus follows the step: its heading or choice, so keyboard and screen-reader users land in it.
-	// The token list, when it is the first step, keeps the modal's own focus, so a phone does not open
-	// its keyboard on the search.
+	// The steps of Receive place focus themselves. The shared import steps do not, so focus goes to
+	// their first control.
 	let content = $state<HTMLDivElement | undefined>();
-	let focusedStep: WizardStepsReceiveToken | undefined;
 
 	$effect(() => {
-		const step = currentStep?.name;
-
-		if (isNullish(step) || isNullish(content) || !ready) {
-			return;
-		}
-
-		const firstStep = isNullish(focusedStep);
-		focusedStep = step;
-
-		if (firstStep && step === WizardStepsReceiveToken.TOKEN) {
+		if (isNullish(importStep) || isNullish(content)) {
 			return;
 		}
 
 		const container = content;
 
-		// The step's heading, else the choice made there before (on Back), else its first control.
 		tick().then(() =>
-			(
-				container.querySelector<HTMLElement>('[data-receive-focus]') ??
-				container.querySelector<HTMLElement>('[aria-pressed="true"]') ??
-				container.querySelector<HTMLElement>('input, button:not([disabled])')
-			)?.focus({ preventScroll: true })
+			container.querySelector<HTMLElement>('input, button:not([disabled])')?.focus({
+				preventScroll: true
+			})
 		);
 	});
 </script>
@@ -504,13 +416,7 @@
 >
 	{#snippet title()}
 		<!-- The modal truncates its title to one line; this one wraps, since the network is its point. -->
-		<span class="line-clamp-2 block whitespace-normal">
-			{currentStep?.name === WizardStepsReceiveToken.ADDRESS && nonNullish(addressTitle)
-				? addressTitle
-				: currentStep?.name === WizardStepsReceiveToken.ROUTE && nonNullish(offerTitle)
-					? offerTitle
-					: (currentStep?.title ?? $i18n.receive.text.receive)}
-		</span>
+		<span class="line-clamp-2 block whitespace-normal">{modalTitle}</span>
 	{/snippet}
 
 	<div bind:this={content}>
@@ -530,51 +436,33 @@
 			{:else if currentStep?.name === WizardStepsReceiveToken.ADDRESS && nonNullish(route)}
 				{#key route.key}
 					<ReceiveRouteAddress
-						{addressState}
 						backToPreviousStep={!autoRoute || tokenStepVisited}
-						{convertTwinToken}
-						{enableFailed}
-						{enabling}
 						onBack={back}
 						onChangeToken={changeToken}
 						onDone={close}
-						onEnable={enableToken}
 						onHowToConvert={howToConvert}
-						onRetryAddress={retryAddress}
 						onViewActivity={viewActivity}
-						{retrying}
 						{route}
-						{tokenEnabled}
-						bind:icpFormat
 					/>
 				{/key}
-			{:else if currentStep?.name === WizardStepsReceiveToken.IMPORT}
-				<AddTokenByNetwork
-					onBack={cancelImport}
-					onNext={() => goToStep(WizardStepsReceiveToken.IMPORT_REVIEW)}
-					bind:network={importNetwork}
-					bind:tokenData={importTokenData}
-				/>
-			{:else if currentStep?.name === WizardStepsReceiveToken.IMPORT_REVIEW}
-				<AddTokenReviewByNetwork
+			{:else if nonNullish(importStep)}
+				<AddTokenWizardSteps
 					fungibleOnly
-					modalNext={() => goToStep(WizardStepsReceiveToken.IMPORT_SAVING)}
-					network={importNetwork}
-					onBack={() => goToStep(WizardStepsReceiveToken.IMPORT)}
+					onBack={cancelImport}
+					onBackToImport={() => goToStep(WizardStepsReceiveToken.IMPORT)}
 					onError={cancelImport}
+					onReview={() => goToStep(WizardStepsReceiveToken.IMPORT_REVIEW)}
+					onSaving={() => goToStep(WizardStepsReceiveToken.IMPORT_SAVING)}
 					onSuccess={onImportSuccess}
-					progress={(step) => (importProgressStep = step)}
-					tokenData={importTokenData}
-				/>
-			{:else if currentStep?.name === WizardStepsReceiveToken.IMPORT_SAVING}
-				<InProgressWizard
-					progressStep={importProgressStep}
-					steps={addTokenSteps($i18n)}
-					warningType="manage"
+					step={importStep}
+					bind:network={importNetwork}
+					bind:progressStep={importProgressStep}
+					bind:tokenData={importTokenData}
 				/>
 			{:else}
 				<ReceiveTokenStep
 					{assets}
+					autofocus={navigated}
 					onClose={close}
 					onImport={startImport}
 					onSelect={(selected) => selectAsset({ asset: selected, fromTokenStep: true })}

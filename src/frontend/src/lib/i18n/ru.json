@@ -946,31 +946,20 @@
 				"use_for_all_tokens": "Используйте для всех токенов при получении с кошельков, пользователей или других приложений, поддерживающих этот формат адреса.",
 				"use_for_icrc_deposit": "Используйте для получения токенов ICRC-1 в сети ICP, таких как SNS, ck токены и т. д.",
 				"use_for_icp_deposit": "Используйте для депозитов ICP с бирж или других кошельков, которые поддерживают только ID аккаунтов.",
-				"your_private_eth_address": "Ваш личный адрес для всех токенов ERC20.",
 				"display_account_id_qr": "Показать ID аккаунта ICP в виде QR-кода",
 				"account_id_copied": "ID аккаунта ICP скопирован в буфер обмена.",
 				"principal": "Принципал ICP",
-				"principal_title": "Адрес кошелька ICP - ckBTC, CHAT, ...",
 				"internet_computer_principal_copied": "Принципал Internet Computer скопирован в буфер обмена.",
-				"display_internet_computer_principal_qr": "Показать Принципал Internet Computer в виде QR-кода",
-				"icp_account": "Аккаунт ICP (для бирж)",
-				"icp_account_title": "Адрес кошелька ICP - только токены ICP",
-				"icp_account_copied": "Аккаунт ICP скопирован в буфер обмена.",
-				"display_icp_account_qr": "Показать аккаунт ICP в виде QR-кода"
+				"display_internet_computer_principal_qr": "Показать Принципал Internet Computer в виде QR-кода"
 			}
 		},
 		"ethereum": {
 			"text": {
 				"checking_status": "Проверка статуса $token...",
-				"from_network": "Получить из сети $network",
-				"eth_to_cketh_description": "Преобразование $token в $ckToken требует вызова смарт-контракта в сети $network и передачи вашего принципала IC в качестве аргумента – $oisy_name упрощает эту процедуру, позволяя вам выполнить преобразование прямо в кошельке.",
-				"learn_how_to_convert": "Узнайте, как конвертировать $token в $ckToken",
 				"metamask": "Получить от Metamask",
 				"ethereum": "Эфириум",
-				"ethereum_title": "Адрес кошелька Ethereum",
 				"ethereum_address": "Адрес",
-				"ethereum_address_copied": "Адрес Ethereum скопирован в буфер обмена.",
-				"display_ethereum_address_qr": "Показать адрес Ethereum в виде QR-кода"
+				"ethereum_address_copied": "Адрес Ethereum скопирован в буфер обмена."
 			},
 			"error": {
 				"no_metamask": "Metamask недоступен."
@@ -991,9 +980,7 @@
 				"bitcoin_regtest_address": "Биткойн (Regtest)",
 				"bitcoin_regtest_address_title": "Адрес кошелька Bitcoin",
 				"display_bitcoin_address_qr": "Показать адрес Биткойна в виде QR-кода",
-				"bitcoin_address_copied": "Адрес Биткойна скопирован в буфер обмена.",
-				"from_network": "Переведите биткойн по сети BTC на этот адрес, чтобы получить ckBTC.",
-				"fee_applied": "Обратите внимание, что будет применена примерная межсетевая комиссия в размере $fee BTC."
+				"bitcoin_address_copied": "Адрес Биткойна скопирован в буфер обмена."
 			},
 			"info": {
 				"no_new_btc": "Нет новых подтвержденных BTC.",
@@ -1415,7 +1402,6 @@
 			"cketh_conversions_may_take": "Обмен ckETH может занять до 20 минут",
 			"ckerc20_conversions_may_take": "Обмен $ckErc20 может занять до 20 минут",
 			"how_to_convert_eth_to_cketh": "Вот как вы можете обменять $token на $ckToken на $oisy_name",
-			"send_eth": "Отправить $token на ваш адрес $oisy_name",
 			"wait_eth_current_balance": "Дождитесь поступления $token. Текущий баланс",
 			"set_amount": "Установить сумму для обмена",
 			"check_balance_for_fees": "Проверить баланс $token на предмет комиссий за обмен",

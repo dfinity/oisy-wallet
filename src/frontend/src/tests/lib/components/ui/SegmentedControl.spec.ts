@@ -1,4 +1,5 @@
 import SegmentedControl from '$lib/components/ui/SegmentedControl.svelte';
+import SegmentedControlTest from '$tests/lib/components/ui/SegmentedControlTest.svelte';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('SegmentedControl', () => {
@@ -67,5 +68,19 @@ describe('SegmentedControl', () => {
 		await fireEvent.keyDown(getByRole('radio', { name: 'Principal' }), { key: 'Enter' });
 
 		expect(getByRole('radio', { name: 'Principal' })).toHaveAttribute('aria-checked', 'true');
+	});
+
+	it('should hand the chosen value to the parent through the binding', async () => {
+		const { getByRole, getByTestId } = render(SegmentedControlTest, { props });
+
+		expect(getByTestId('segmented-control-value')).toHaveTextContent('principal');
+
+		await fireEvent.click(getByRole('radio', { name: 'Account ID' }));
+
+		expect(getByTestId('segmented-control-value')).toHaveTextContent('account-id');
+
+		await fireEvent.keyDown(getByRole('radio', { name: 'Account ID' }), { key: 'End' });
+
+		expect(getByTestId('segmented-control-value')).toHaveTextContent('other');
 	});
 });

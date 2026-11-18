@@ -946,31 +946,20 @@
 				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users, or other apps that support this address format.",
 				"use_for_icrc_deposit": "Use for receiving ICRC-1 tokens in the ICP network, such as SNS, ck tokens, etc.",
 				"use_for_icp_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
-				"your_private_eth_address": "Your private address for all ERC20 tokens.",
 				"display_account_id_qr": "Display ICP Account ID as a QR code",
 				"account_id_copied": "ICP Account ID copied to clipboard.",
 				"principal": "ICP Principal",
-				"principal_title": "ICP wallet address - ckBTC, CHAT, ...",
 				"internet_computer_principal_copied": "Internet Computer Principal copied to clipboard.",
-				"display_internet_computer_principal_qr": "Display Internet Computer Principal as a QR code",
-				"icp_account": "ICP Account (for exchanges)",
-				"icp_account_title": "ICP wallet address - ICP token only",
-				"icp_account_copied": "ICP Account copied to clipboard.",
-				"display_icp_account_qr": "Display ICP Account as a QR code"
+				"display_internet_computer_principal_qr": "Display Internet Computer Principal as a QR code"
 			}
 		},
 		"ethereum": {
 			"text": {
 				"checking_status": "Checking $token status...",
-				"from_network": "Receive from $network Network",
-				"eth_to_cketh_description": "Converting $token into $ckToken requires a call to a smart contract on $network and passing your IC principal as argument – $oisy_name simplifies this procedure by enabling you to perform the conversion directly within the wallet.",
-				"learn_how_to_convert": "Learn how to convert $token to $ckToken",
 				"metamask": "Receive from Metamask",
 				"ethereum": "Ethereum",
-				"ethereum_title": "Ethereum wallet address",
 				"ethereum_address": "Address",
-				"ethereum_address_copied": "Ethereum address copied to clipboard.",
-				"display_ethereum_address_qr": "Display Ethereum address as a QR code"
+				"ethereum_address_copied": "Ethereum address copied to clipboard."
 			},
 			"error": {
 				"no_metamask": "Metamask is not available."
@@ -991,9 +980,7 @@
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
 				"bitcoin_regtest_address_title": "Bitcoin (Regtest) wallet address",
 				"display_bitcoin_address_qr": "Display Bitcoin Address as a QR code",
-				"bitcoin_address_copied": "Bitcoin Address copied to clipboard.",
-				"from_network": "Transfer Bitcoin on the BTC network to this address to receive ckBTC.",
-				"fee_applied": "Please note that an estimated inter-network fee of $fee BTC will be applied."
+				"bitcoin_address_copied": "Bitcoin Address copied to clipboard."
 			},
 			"info": {
 				"no_new_btc": "No new confirmed BTC.",
@@ -1415,7 +1402,6 @@
 			"cketh_conversions_may_take": "ckETH conversions may take up to 20 minutes",
 			"ckerc20_conversions_may_take": "$ckErc20 conversions may take up to 20 minutes",
 			"how_to_convert_eth_to_cketh": "Here is how you can convert $token to $ckToken on $oisy_name",
-			"send_eth": "Send $token to your $oisy_name address",
 			"wait_eth_current_balance": "Wait for $token to arrive. Current balance",
 			"set_amount": "Set amount for conversion",
 			"check_balance_for_fees": "Check $token balance for conversion fees",

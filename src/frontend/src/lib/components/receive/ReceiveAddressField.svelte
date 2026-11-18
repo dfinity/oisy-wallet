@@ -1,39 +1,63 @@
 <script lang="ts">
-	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
-	import { RECEIVE_TOKENS_MODAL_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
+	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import type { ReceiveQRCodeAction } from '$lib/types/receive';
+	import type { OptionString } from '$lib/types/string';
+	import { splitTextEnds } from '$lib/utils/format.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
-		label: string;
-		address: string;
+		// Shown as loading until it is known.
+		address: OptionString;
+		label?: string;
 		copyAriaLabel: string;
 		copiedText?: string;
 		copyButtonTestId?: string;
+		qrCodeAction?: ReceiveQRCodeAction;
+		testId?: string;
+		// Before the address, such as the logo of its network.
+		leading?: Snippet;
 	}
 
-	let { label, address, copyAriaLabel, copiedText, copyButtonTestId }: Props = $props();
+	let {
+		address,
+		label,
+		copyAriaLabel,
+		copiedText,
+		copyButtonTestId,
+		qrCodeAction,
+		testId,
+		leading
+	}: Props = $props();
 
 	// The start and the end are what people compare when they check an address, so those read first.
-	const EMPHASIZED_CHARS = 6;
-
-	let emphasized = $derived(address.length > EMPHASIZED_CHARS * 2 + 4);
-
-	let head = $derived(emphasized ? address.slice(0, EMPHASIZED_CHARS) : address);
-	let middle = $derived(
-		emphasized ? address.slice(EMPHASIZED_CHARS, address.length - EMPHASIZED_CHARS) : ''
-	);
-	let tail = $derived(emphasized ? address.slice(-EMPHASIZED_CHARS) : '');
+	let { start, middle, end } = $derived(splitTextEnds({ text: address ?? '' }));
 </script>
 
 <div class="flex items-center gap-3 rounded-xl bg-brand-subtle-10 px-4 py-3">
-	<div class="flex min-w-0 flex-1 flex-col gap-0.5">
-		<span class="text-sm font-bold text-primary">{label}</span>
+	{@render leading?.()}
 
-		<output class="text-base break-all text-primary" data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
-			><span class="font-bold">{head}</span><span class="text-tertiary">{middle}</span><span
-				class="font-bold">{tail}</span
-			></output
-		>
+	<div class="flex min-w-0 flex-1 flex-col gap-0.5">
+		{#if nonNullish(label)}
+			<span class="text-sm font-bold text-primary">{label}</span>
+		{/if}
+
+		{#if isNullish(address)}
+			<SkeletonText />
+		{:else}
+			<output class="text-base break-all text-primary" data-tid={testId} in:fade
+				><span class="font-bold">{start}</span><span class="text-tertiary">{middle}</span><span
+					class="font-bold">{end}</span
+				></output
+			>
+		{/if}
 	</div>
 
-	<ReceiveCopy {address} {copiedText} {copyAriaLabel} testId={copyButtonTestId} />
+	{#if nonNullish(address)}
+		<div in:fade>
+			<ReceiveActions {address} {copiedText} {copyAriaLabel} {copyButtonTestId} {qrCodeAction} />
+		</div>
+	{/if}
 </div>

@@ -681,31 +681,20 @@ interface I18nReceive {
 			use_for_all_tokens: string;
 			use_for_icrc_deposit: string;
 			use_for_icp_deposit: string;
-			your_private_eth_address: string;
 			display_account_id_qr: string;
 			account_id_copied: string;
 			principal: string;
-			principal_title: string;
 			internet_computer_principal_copied: string;
 			display_internet_computer_principal_qr: string;
-			icp_account: string;
-			icp_account_title: string;
-			icp_account_copied: string;
-			display_icp_account_qr: string;
 		};
 	};
 	ethereum: {
 		text: {
 			checking_status: string;
-			from_network: string;
-			eth_to_cketh_description: string;
-			learn_how_to_convert: string;
 			metamask: string;
 			ethereum: string;
-			ethereum_title: string;
 			ethereum_address: string;
 			ethereum_address_copied: string;
-			display_ethereum_address_qr: string;
 		};
 		error: { no_metamask: string };
 	};
@@ -725,8 +714,6 @@ interface I18nReceive {
 			bitcoin_regtest_address_title: string;
 			display_bitcoin_address_qr: string;
 			bitcoin_address_copied: string;
-			from_network: string;
-			fee_applied: string;
 		};
 		info: { no_new_btc: string; check_btc_progress: string };
 		error: { unexpected_btc: string };
@@ -1133,7 +1120,6 @@ interface I18nConvert {
 		cketh_conversions_may_take: string;
 		ckerc20_conversions_may_take: string;
 		how_to_convert_eth_to_cketh: string;
-		send_eth: string;
 		wait_eth_current_balance: string;
 		set_amount: string;
 		check_balance_for_fees: string;

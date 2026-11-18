@@ -1,5 +1,6 @@
 <script generics="T extends string" lang="ts">
-	import { tick } from 'svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { onDestroy, tick } from 'svelte';
 
 	interface Option {
 		value: T;
@@ -21,7 +22,7 @@
 
 	// The selected pill slides under the chosen segment; it is placed without motion the first time,
 	// so it does not fly in when the control appears.
-	let pill = $state<{ x: number; width: number } | undefined>();
+	let pill = $state<{ x: number; y: number; width: number; height: number } | undefined>();
 	let animated = $state(false);
 
 	let selectedIndex = $derived(
@@ -34,12 +35,37 @@
 	const measure = () => {
 		const button = buttons[selectedIndex];
 
-		if (button === undefined) {
+		if (isNullish(button)) {
 			return;
 		}
 
-		pill = { x: button.offsetLeft, width: button.offsetWidth };
+		pill = {
+			x: button.offsetLeft,
+			y: button.offsetTop,
+			width: button.offsetWidth,
+			height: button.offsetHeight
+		};
 	};
+
+	// Motion starts on the frame after the pill was placed, so placing it never animates.
+	let animationFrame: number | undefined;
+
+	const animateFromNextFrame = () => {
+		if (nonNullish(animationFrame)) {
+			cancelAnimationFrame(animationFrame);
+		}
+
+		animationFrame = requestAnimationFrame(() => {
+			animationFrame = undefined;
+			animated = true;
+		});
+	};
+
+	onDestroy(() => {
+		if (nonNullish(animationFrame)) {
+			cancelAnimationFrame(animationFrame);
+		}
+	});
 
 	$effect(() => {
 		[selectedIndex, options.length];
@@ -47,20 +73,20 @@
 		measure();
 
 		if (!animated) {
-			tick().then(() => requestAnimationFrame(() => (animated = true)));
+			tick().then(animateFromNextFrame);
 		}
 	});
 
 	// A new width (rotation, a resized modal) moves the pill without animating it.
 	$effect(() => {
-		if (container === undefined) {
+		if (isNullish(container)) {
 			return;
 		}
 
 		const observer = new ResizeObserver(() => {
 			animated = false;
 			measure();
-			requestAnimationFrame(() => (animated = true));
+			animateFromNextFrame();
 		});
 
 		observer.observe(container);
@@ -71,7 +97,7 @@
 	const select = (index: number) => {
 		const option = options[index];
 
-		if (option === undefined) {
+		if (isNullish(option)) {
 			return;
 		}
 
@@ -79,46 +105,39 @@
 		buttons[index]?.focus();
 	};
 
-	// Arrow keys move and select, as in a radio group; Home and End jump to either end.
+	// Arrow keys move and select, as in a radio group, and wrap around; Home and End jump to either end.
+	const KEY_TARGETS: Record<string, (params: { index: number; last: number }) => number> = {
+		ArrowRight: ({ index, last }) => (index === last ? 0 : index + 1),
+		ArrowDown: ({ index, last }) => (index === last ? 0 : index + 1),
+		ArrowLeft: ({ index, last }) => (index === 0 ? last : index - 1),
+		ArrowUp: ({ index, last }) => (index === 0 ? last : index - 1),
+		Home: () => 0,
+		End: ({ last }) => last
+	};
+
 	const onKeyDown = ({ event, index }: { event: KeyboardEvent; index: number }) => {
-		const last = options.length - 1;
+		const target = KEY_TARGETS[event.key];
 
-		const next =
-			event.key === 'ArrowRight' || event.key === 'ArrowDown'
-				? index === last
-					? 0
-					: index + 1
-				: event.key === 'ArrowLeft' || event.key === 'ArrowUp'
-					? index === 0
-						? last
-						: index - 1
-					: event.key === 'Home'
-						? 0
-						: event.key === 'End'
-							? last
-							: undefined;
-
-		if (next === undefined) {
+		if (isNullish(target)) {
 			return;
 		}
 
 		event.preventDefault();
-		select(next);
+		select(target({ index, last: options.length - 1 }));
 	};
 </script>
 
 <div
 	bind:this={container}
-	style="isolation: isolate"
-	class="relative flex w-full items-center rounded-full border border-secondary bg-brand-subtle-10 p-[3px] select-none"
+	class="relative isolate flex w-full items-center rounded-full border border-secondary bg-brand-subtle-10 p-[3px] select-none"
 	aria-label={ariaLabel}
 	data-tid={testId}
 	role="radiogroup"
 >
 	{#if pill !== undefined}
 		<span
-			style={`transform: translateX(${pill.x - 3}px); width: ${pill.width}px`}
-			class="pill pointer-events-none absolute top-[3px] bottom-[3px] left-[3px] rounded-full border border-secondary bg-primary shadow-sm"
+			style={`transform: translate(${pill.x}px, ${pill.y}px); width: ${pill.width}px; height: ${pill.height}px`}
+			class="pill pointer-events-none absolute top-0 left-0 rounded-full border border-secondary bg-primary shadow-sm"
 			class:animated
 			aria-hidden="true"
 		></span>

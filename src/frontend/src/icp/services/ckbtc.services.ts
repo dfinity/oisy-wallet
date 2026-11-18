@@ -132,7 +132,7 @@ export const loadAllCkBtcInfo = async ({
 		});
 
 	await Promise.all([
-		addressLoaded ? Promise.resolve() : loadBtcAddress(params),
+		addressLoaded ? Promise.resolve() : loadCkBtcDepositAddress(params),
 		infoLoaded ? Promise.resolve() : waitCkBtcMinterInfoLoaded()
 	]);
 
@@ -140,15 +140,12 @@ export const loadAllCkBtcInfo = async ({
 };
 
 /**
- * The minter's Bitcoin deposit address for the user, for Receive: no busy overlay and no wait for the
- * minter info, which Receive loads and shows on its own. A failure resets the entry, so calling it
- * again retries.
+ * The minter's Bitcoin deposit address for the user, without the busy overlay or the wait for the
+ * minter info that `loadAllCkBtcInfo` adds. A failure resets the entry, so calling it again retries.
  */
 export const loadCkBtcDepositAddress = (
 	params: IcCkToken & { identity: NullishIdentity }
-): Promise<void> => loadBtcAddress(params);
-
-const loadBtcAddress = (params: IcCkToken & { identity: NullishIdentity }): Promise<void> =>
+): Promise<void> =>
 	loadData({
 		...params,
 		store: btcAddressStore,

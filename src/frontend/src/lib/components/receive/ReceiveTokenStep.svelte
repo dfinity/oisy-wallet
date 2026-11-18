@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { notEmptyString } from '@dfinity/utils';
+	import { isNullish, notEmptyString } from '@dfinity/utils';
+	import { onMount, tick } from 'svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
+	import ReceiveTestNetworkBadge from '$lib/components/receive/ReceiveTestNetworkBadge.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -28,12 +29,34 @@
 		assets: ReceiveAsset[];
 		filter: string;
 		selectedKey?: string;
+		// Shown after another step: focus goes to the entry picked before, else to the search. When it
+		// is the first step, the modal keeps focus, so a phone does not open its keyboard on the search.
+		autofocus: boolean;
 		onSelect: (asset: ReceiveAsset) => void;
 		onImport: () => void;
 		onClose: () => void;
 	}
 
-	let { assets, filter = $bindable(), selectedKey, onSelect, onImport, onClose }: Props = $props();
+	let {
+		assets,
+		filter = $bindable(),
+		selectedKey,
+		autofocus,
+		onSelect,
+		onImport,
+		onClose
+	}: Props = $props();
+
+	let buttons = $state<Record<string, HTMLButtonElement | undefined>>({});
+
+	onMount(async () => {
+		if (!autofocus || isNullish(selectedKey)) {
+			return;
+		}
+
+		await tick();
+		buttons[selectedKey]?.focus({ preventScroll: true });
+	});
 
 	// An entry matches when any of its versions does, by name, symbol, or contract, mint or ledger.
 	let displayAssets = $derived(
@@ -63,7 +86,7 @@
 <div data-tid={RECEIVE_TOKEN_LIST}>
 	<div class="input-field condensed mb-3 flex-1">
 		<InputSearch
-			autofocus={isDesktop()}
+			autofocus={isDesktop() || (autofocus && isNullish(selectedKey))}
 			placeholder={$i18n.tokens.placeholder.search_token}
 			showResetButton={notEmptyString(filter)}
 			bind:filter
@@ -99,6 +122,7 @@
 							onClick={() => onSelect(asset)}
 							selected={selectedKey === asset.key ? true : undefined}
 							testId={`${RECEIVE_TOKEN_LIST_ITEM}-${asset.key}`}
+							bind:button={buttons[asset.key]}
 						>
 							{#snippet logo()}
 								<div class="mr-2">
@@ -132,9 +156,7 @@
 
 							{#snippet descriptionEnd()}
 								{#if !grouped && isReceiveTestToken(token)}
-									<Badge variant="warning" width="w-fit">
-										{$i18n.receive.token.text.test_network}
-									</Badge>
+									<ReceiveTestNetworkBadge />
 								{/if}
 							{/snippet}
 						</LogoButton>

@@ -946,31 +946,20 @@
 				"use_for_all_tokens": "استخدم لجميع التوكنات عند الاستلام من المحافظ، المستخدمين، أو التطبيقات الأخرى التي تدعم تنسيق العنوان هذا.",
 				"use_for_icrc_deposit": "استخدم لاستلام توكنات ICRC-1 في شبكة ICP، مثل SNS، توكنات ck، إلخ.",
 				"use_for_icp_deposit": "استخدم لإيداعات ICP من البورصات أو المحافظ الأخرى التي تدعم فقط معرفات الحساب.",
-				"your_private_eth_address": "عنوانك الخاص لجميع توكنات ERC20.",
 				"display_account_id_qr": "عرض معرف حساب ICP كرمز QR",
 				"account_id_copied": "تم نسخ معرف حساب ICP إلى الحافظة.",
 				"principal": "الرئيسي لـ ICP",
-				"principal_title": "",
 				"internet_computer_principal_copied": "تم نسخ الرئيسي لـ Internet Computer إلى الحافظة.",
-				"display_internet_computer_principal_qr": "عرض الرئيسي لـ Internet Computer كرمز QR",
-				"icp_account": "حساب ICP (للبورصات)",
-				"icp_account_title": "",
-				"icp_account_copied": "تم نسخ حساب ICP إلى الحافظة.",
-				"display_icp_account_qr": "عرض حساب ICP كرمز QR"
+				"display_internet_computer_principal_qr": "عرض الرئيسي لـ Internet Computer كرمز QR"
 			}
 		},
 		"ethereum": {
 			"text": {
 				"checking_status": "جاري التحقق من حالة $token...",
-				"from_network": "استلام من شبكة $network",
-				"eth_to_cketh_description": "يتطلب تحويل $token إلى $ckToken استدعاء عقد ذكي على $network وتمرير معرفك الرئيسي لـ IC كوسيط - $oisy_name يبسّط هذا الإجراء من خلال تمكينك من إجراء التحويل مباشرة داخل المحفظة.",
-				"learn_how_to_convert": "تعرف على كيفية تحويل $token إلى $ckToken",
 				"metamask": "استلام من Metamask",
 				"ethereum": "إيثريوم",
-				"ethereum_title": "",
 				"ethereum_address": "العنوان",
-				"ethereum_address_copied": "تم نسخ عنوان إيثريوم إلى الحافظة.",
-				"display_ethereum_address_qr": "عرض عنوان إيثريوم كرمز QR"
+				"ethereum_address_copied": "تم نسخ عنوان إيثريوم إلى الحافظة."
 			},
 			"error": {
 				"no_metamask": "Metamask غير متاح."
@@ -991,9 +980,7 @@
 				"bitcoin_regtest_address": "بيتكوين (Regtest)",
 				"bitcoin_regtest_address_title": "",
 				"display_bitcoin_address_qr": "عرض عنوان بيتكوين كرمز QR",
-				"bitcoin_address_copied": "تم نسخ عنوان بيتكوين إلى الحافظة.",
-				"from_network": "قم بتحويل البيتكوين على شبكة BTC إلى هذا العنوان لاستلام ckBTC.",
-				"fee_applied": "يرجى ملاحظة أنه سيتم تطبيق رسوم تقديرية بين الشبكات بقيمة $fee BTC."
+				"bitcoin_address_copied": "تم نسخ عنوان بيتكوين إلى الحافظة."
 			},
 			"info": {
 				"no_new_btc": "لا توجد عملات BTC جديدة مؤكدة.",
@@ -1415,7 +1402,6 @@
 			"cketh_conversions_may_take": "قد تستغرق تحويلات ckETH ما يصل إلى 20 دقيقة",
 			"ckerc20_conversions_may_take": "قد تستغرق تحويلات $ckErc20 ما يصل إلى 20 دقيقة",
 			"how_to_convert_eth_to_cketh": "إليك كيفية تحويل $token إلى $ckToken على $oisy_name",
-			"send_eth": "أرسل $token إلى عنوان $oisy_name الخاص بك",
 			"wait_eth_current_balance": "انتظر وصول $token. الرصيد الحالي",
 			"set_amount": "تحديد مبلغ التحويل",
 			"check_balance_for_fees": "تحقق من رصيد $token لرسوم التحويل",

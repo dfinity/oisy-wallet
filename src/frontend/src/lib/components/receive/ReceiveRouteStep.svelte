@@ -1,23 +1,23 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { onMount, tick } from 'svelte';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
+	import ReceiveBackButton from '$lib/components/receive/ReceiveBackButton.svelte';
+	import ReceiveTestNetworkBadge from '$lib/components/receive/ReceiveTestNetworkBadge.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import {
-		RECEIVE_CHANGE_TOKEN_BUTTON,
-		RECEIVE_ROUTE_LIST_ITEM
-	} from '$lib/constants/test-ids.constants';
+	import { RECEIVE_ROUTE_LIST_ITEM } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveRoute } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isReceiveConversionOffer, isReceiveTestToken } from '$lib/utils/receive.utils';
+	import {
+		getReceiveRouteOptionTexts,
+		isReceiveConversionOffer,
+		isReceiveTestToken
+	} from '$lib/utils/receive.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
@@ -42,47 +42,31 @@
 		onChangeToken
 	}: Props = $props();
 
-	// A route that credits another asset than the one picked, such as BTC deposited as ckBTC: its row
-	// reads as an alternative way to receive, and the asset's own route as receiving it as it is.
+	// A route that credits another asset than the one picked, such as BTC deposited as ckBTC.
 	const isOffer = (route: ReceiveRoute): boolean =>
 		isReceiveConversionOffer({ route, assetTokens });
 
-	let offer = $derived(routes.find(isOffer));
+	let withOffer = $derived(routes.some(isOffer));
 
-	const routeTitle = (route: ReceiveRoute): string =>
-		isOffer(route)
-			? replacePlaceholders($i18n.receive.ckbtc.text.receive_as, {
-					$token: getTokenDisplaySymbol(route.creditedToken)
-				})
-			: offer
-				? replacePlaceholders($i18n.receive.token.text.receive_token, {
-						$token: getTokenDisplaySymbol(route.creditedToken)
-					})
-				: route.sourceNetwork.name;
+	const optionTexts = (route: ReceiveRoute) =>
+		getReceiveRouteOptionTexts({
+			route,
+			assetTokens,
+			withOffer,
+			confirmations: $ckBtcMinterInfoStore?.[route.creditedToken.id]?.data.min_confirmations,
+			i18n: $i18n
+		});
 
-	const routeDescription = (route: ReceiveRoute): string => {
-		const { kind, sourceToken, sourceNetwork, creditedToken } = route;
+	let buttons = $state<Record<string, HTMLButtonElement | undefined>>({});
 
-		// Honest about the wait: the deposit itself takes the Bitcoin confirmations; ckBTC is fast and
-		// cheap to move once it arrives.
-		if (isOffer(route)) {
-			const confirmations = $ckBtcMinterInfoStore?.[creditedToken.id]?.data.min_confirmations;
+	// The choice made here before (on Back) takes focus, else the first route, so Enter repeats it.
+	onMount(async () => {
+		await tick();
 
-			return nonNullish(confirmations)
-				? replacePlaceholders($i18n.receive.ckbtc.text.benefit, { $count: `${confirmations}` })
-				: $i18n.receive.ckbtc.text.benefit_generic;
-		}
+		const [first] = routes;
 
-		return kind === 'ckbtc-deposit'
-			? replacePlaceholders($i18n.receive.token.text.route_ckbtc_deposit, {
-					$sourceToken: getTokenDisplaySymbol(sourceToken),
-					$creditedToken: getTokenDisplaySymbol(creditedToken)
-				})
-			: replacePlaceholders($i18n.receive.token.text.route_direct, {
-					$token: getTokenDisplaySymbol(sourceToken),
-					$network: sourceNetwork.name
-				});
-	};
+		(buttons[selectedKey ?? ''] ?? buttons[first?.key ?? ''])?.focus({ preventScroll: true });
+	});
 </script>
 
 {#if routes.length === 0}
@@ -94,6 +78,7 @@
 {:else}
 	<List noPadding>
 		{#each routes as route (route.key)}
+			{@const texts = optionTexts(route)}
 			<ListItem styleClass="first-of-type:border-t-1">
 				<LogoButton
 					dividers
@@ -101,6 +86,7 @@
 					onClick={() => onSelect(route)}
 					selected={selectedKey === route.key ? true : undefined}
 					testId={`${RECEIVE_ROUTE_LIST_ITEM}-${route.key}`}
+					bind:button={buttons[route.key]}
 				>
 					{#snippet logo()}
 						<div class="mr-2">
@@ -114,18 +100,16 @@
 					{/snippet}
 
 					{#snippet title()}
-						{routeTitle(route)}
+						{texts.title}
 					{/snippet}
 
 					{#snippet description()}
-						{routeDescription(route)}
+						{texts.description}
 					{/snippet}
 
 					{#snippet descriptionEnd()}
 						{#if isReceiveTestToken(route.creditedToken)}
-							<Badge variant="warning" width="w-fit">
-								{$i18n.receive.token.text.test_network}
-							</Badge>
+							<ReceiveTestNetworkBadge />
 						{/if}
 					{/snippet}
 				</LogoButton>
@@ -136,17 +120,6 @@
 
 <div class="mt-6">
 	<ButtonGroup>
-		{#if tokenStepVisited}
-			<ButtonBack fullWidth onclick={onChangeToken} />
-		{:else}
-			<Button
-				colorStyle="secondary-light"
-				fullWidth
-				onclick={onChangeToken}
-				testId={RECEIVE_CHANGE_TOKEN_BUTTON}
-			>
-				{$i18n.receive.token.text.change_token}
-			</Button>
-		{/if}
+		<ReceiveBackButton back={tokenStepVisited} onclick={onChangeToken} />
 	</ButtonGroup>
 </div>

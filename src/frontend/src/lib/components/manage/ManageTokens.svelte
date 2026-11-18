@@ -29,8 +29,7 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
-	import { mapTokenUi } from '$lib/utils/token.utils';
-	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import { pinEnabledTokensAtTop, toSortedTokensUi } from '$lib/utils/tokens.utils';
 
 	interface Props {
 		network?: Network;
@@ -65,33 +64,19 @@
 		};
 	});
 
-	let allTokensUi: TokenUi<CustomToken<Token>>[] = $derived(
-		$allTokens.reduce<TokenUi<CustomToken<Token>>[]>((acc, token) => {
-			if (isNullish(exchangesStaticData)) {
-				return acc;
-			}
-
-			acc.push(
-				mapTokenUi({
-					token,
-					$balances: $balancesStore,
-					$stakeBalances,
-					$exchanges: exchangesStaticData
-				})
-			);
-
-			return acc;
-		}, [])
-	);
-
 	let allTokensSorted: TokenUi<CustomToken<Token>>[] = $derived(
-		pinEnabledTokensAtTop(
-			sortTokens({
-				$tokens: allTokensUi,
-				$tokensToPin,
-				$networksToPin: $networks
-			})
-		)
+		isNullish(exchangesStaticData)
+			? []
+			: pinEnabledTokensAtTop(
+					toSortedTokensUi({
+						tokens: $allTokens,
+						$balances: $balancesStore,
+						$stakeBalances,
+						$exchanges: exchangesStaticData,
+						$tokensToPin,
+						$networksToPin: $networks
+					})
+				)
 	);
 
 	let tokensInContext: Token[] = $state([]);

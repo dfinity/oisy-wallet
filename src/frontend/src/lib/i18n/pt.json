@@ -946,31 +946,20 @@
 				"use_for_all_tokens": "Use para todos os tokens ao receber de carteiras, usuários ou outros aplicativos que suportam este formato de endereço.",
 				"use_for_icrc_deposit": "Use para receber tokens ICRC-1 na rede ICP, como SNS, ck tokens, etc.",
 				"use_for_icp_deposit": "Use para depósitos ICP de exchanges ou outras carteiras que suportam apenas IDs de Conta.",
-				"your_private_eth_address": "Seu endereço privado para todos os tokens ERC20.",
 				"display_account_id_qr": "Exibir ID da Conta ICP como um código QR",
 				"account_id_copied": "ID da Conta ICP copiado para a área de transferência.",
 				"principal": "Principal ICP",
-				"principal_title": "Endereço da carteira ICP - ckBTC, CHAT, ...",
 				"internet_computer_principal_copied": "Principal Internet Computer copiado para a área de transferência.",
-				"display_internet_computer_principal_qr": "Exibir Principal Internet Computer como um código QR",
-				"icp_account": "Conta ICP (para exchanges)",
-				"icp_account_title": "Endereço da carteira ICP - Apenas por token ICP",
-				"icp_account_copied": "Conta ICP copiada para a área de transferência.",
-				"display_icp_account_qr": "Exibir Conta ICP como um código QR"
+				"display_internet_computer_principal_qr": "Exibir Principal Internet Computer como um código QR"
 			}
 		},
 		"ethereum": {
 			"text": {
 				"checking_status": "Verificando status de $token...",
-				"from_network": "Receber da Rede $network",
-				"eth_to_cketh_description": "Converter $token para $ckToken requer uma chamada para um contrato inteligente na rede $network e passar seu principal IC como argumento – $oisy_name simplifica este procedimento, permitindo que você execute a conversão diretamente na carteira.",
-				"learn_how_to_convert": "Saiba como converter $token para $ckToken",
 				"metamask": "Receber do Metamask",
 				"ethereum": "Ethereum",
-				"ethereum_title": "Endereço da carteira Ethereum",
 				"ethereum_address": "Endereço",
-				"ethereum_address_copied": "Endereço Ethereum copiado para a área de transferência.",
-				"display_ethereum_address_qr": "Exibir endereço Ethereum como um código QR"
+				"ethereum_address_copied": "Endereço Ethereum copiado para a área de transferência."
 			},
 			"error": {
 				"no_metamask": "Metamask não está disponível."
@@ -991,9 +980,7 @@
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
 				"bitcoin_regtest_address_title": "Endereço da carteira Bitcoin (Regtest)",
 				"display_bitcoin_address_qr": "Exibir Endereço Bitcoin como um código QR",
-				"bitcoin_address_copied": "Endereço Bitcoin copiado para a área de transferência.",
-				"from_network": "Transfira Bitcoin na rede BTC para este endereço para receber ckBTC.",
-				"fee_applied": "Observe que uma taxa inter-rede estimada de $fee BTC será aplicada."
+				"bitcoin_address_copied": "Endereço Bitcoin copiado para a área de transferência."
 			},
 			"info": {
 				"no_new_btc": "Nenhum BTC novo confirmado.",
@@ -1415,7 +1402,6 @@
 			"cketh_conversions_may_take": "As conversões de ckETH podem levar até 20 minutos",
 			"ckerc20_conversions_may_take": "As conversões de $ckErc20 podem levar até 20 minutos",
 			"how_to_convert_eth_to_cketh": "Veja como você pode converter $token para $ckToken em $oisy_name",
-			"send_eth": "Envie $token para o seu endereço $oisy_name",
 			"wait_eth_current_balance": "Aguarde a chegada do $token. Saldo atual",
 			"set_amount": "Definir valor para conversão",
 			"check_balance_for_fees": "Verificar saldo de $token para taxas de conversão",

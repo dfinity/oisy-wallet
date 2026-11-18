@@ -66,32 +66,29 @@
 		solAddressDevnetStore,
 		solAddressLocalnetStore,
 		solAddressMainnetStore,
-		xrpAddressMainnetStore,
-		type AddressStoreData
+		xrpAddressMainnetStore
 	} from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Address } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { OptionString } from '$lib/types/string';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isRouteNfts } from '$lib/utils/nav.utils';
+	import { getCertifiedAddress } from '$lib/utils/receive.utils';
 
 	interface Props {
 		onQRCode: (details: ReceiveQRCode) => void;
+		// The address whose QR code was open: its QR button takes focus back.
+		focusAddress?: string;
 	}
 
-	let { onQRCode }: Props = $props();
+	let { onQRCode, focusAddress }: Props = $props();
 
 	const displayQRCode = (details: ReceiveQRCode) => onQRCode(details);
 
 	let isNftsPage = $derived(isRouteNfts(page));
-
-	// Copy and QR only for an address the backend certified, as in Receive.
-	const certified = <T extends Address>(data: AddressStoreData<T>): OptionString =>
-		nonNullish(data) && data.certified ? data.data : undefined;
 
 	// One address serves every EVM network, so it is listed once, with the enabled networks that share it.
 	let evmNetworks = $derived([...$enabledEthereumNetworks, ...$enabledEvmNetworks]);
@@ -120,6 +117,7 @@
 			testId: typeof RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON;
 			ariaLabel: string;
 			onClick: () => void;
+			autofocus: boolean;
 		};
 	}
 
@@ -150,7 +148,7 @@
 		},
 		{
 			labelRef: 'btcAddressMainnet',
-			address: certified($btcAddressMainnetStore),
+			address: getCertifiedAddress($btcAddressMainnetStore),
 			network: BTC_MAINNET_NETWORK,
 			token: BTC_MAINNET_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION,
@@ -162,7 +160,7 @@
 		},
 		{
 			labelRef: 'btcAddressTestnet',
-			address: certified($btcAddressTestnetStore),
+			address: getCertifiedAddress($btcAddressTestnetStore),
 			network: BTC_TESTNET_NETWORK,
 			token: BTC_TESTNET_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
@@ -174,7 +172,7 @@
 		},
 		{
 			labelRef: 'btcAddressRegtest',
-			address: certified($btcAddressRegtestStore),
+			address: getCertifiedAddress($btcAddressRegtestStore),
 			network: BTC_REGTEST_NETWORK,
 			token: BTC_REGTEST_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION,
@@ -186,7 +184,7 @@
 		},
 		{
 			labelRef: 'ethAddress',
-			address: certified($ethAddressStore),
+			address: getCertifiedAddress($ethAddressStore),
 			network: ETHEREUM_NETWORK,
 			token: ETHEREUM_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_ETH_SECTION,
@@ -200,7 +198,7 @@
 		},
 		{
 			labelRef: 'solAddressMainnet',
-			address: certified($solAddressMainnetStore),
+			address: getCertifiedAddress($solAddressMainnetStore),
 			network: SOLANA_MAINNET_NETWORK,
 			token: SOLANA_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION,
@@ -212,7 +210,7 @@
 		},
 		{
 			labelRef: 'solAddressDevnet',
-			address: certified($solAddressDevnetStore),
+			address: getCertifiedAddress($solAddressDevnetStore),
 			network: SOLANA_DEVNET_NETWORK,
 			token: SOLANA_DEVNET_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION,
@@ -224,7 +222,7 @@
 		},
 		{
 			labelRef: 'solAddressLocal',
-			address: certified($solAddressLocalnetStore),
+			address: getCertifiedAddress($solAddressLocalnetStore),
 			network: SOLANA_LOCAL_NETWORK,
 			token: SOLANA_LOCAL_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION,
@@ -236,7 +234,7 @@
 		},
 		{
 			labelRef: 'xrpAddressMainnet',
-			address: certified($xrpAddressMainnetStore),
+			address: getCertifiedAddress($xrpAddressMainnetStore),
 			network: XRP_MAINNET_NETWORK,
 			token: XRP_TOKEN,
 			testId: RECEIVE_TOKENS_MODAL_XRP_MAINNET_SECTION,
@@ -278,6 +276,7 @@
 					enabled: true,
 					testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
 					ariaLabel: qrCodeAriaLabel,
+					autofocus: nonNullish(address) && address === focusAddress,
 					onClick: () =>
 						displayQRCode({
 							address: address ?? '',

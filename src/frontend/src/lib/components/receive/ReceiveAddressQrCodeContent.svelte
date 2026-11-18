@@ -15,7 +15,6 @@
 		copyButtonTestId?: string;
 		network: Network;
 		copyAriaLabel: string;
-		copiedText?: string;
 		qrSize?: 'compact' | 'default';
 		text?: Snippet;
 	}
@@ -28,7 +27,6 @@
 		copyButtonTestId,
 		network,
 		copyAriaLabel,
-		copiedText,
 		qrSize,
 		text
 	}: Props = $props();
@@ -40,7 +38,6 @@
 
 <ReceiveAddress
 	address={address ?? ''}
-	{copiedText}
 	{copyAriaLabel}
 	{copyButtonTestId}
 	labelRef="address"

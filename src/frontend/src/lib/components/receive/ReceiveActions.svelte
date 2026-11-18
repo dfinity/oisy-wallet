@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount, tick } from 'svelte';
 	import IconQrCodeScanner from '$lib/components/icons/IconQrCodeScanner.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
@@ -20,6 +21,17 @@
 		copiedText,
 		copyButtonTestId
 	}: Props = $props();
+
+	let qrCodeButton = $state<HTMLButtonElement | undefined>();
+
+	onMount(async () => {
+		if (!qrCodeAction.enabled || qrCodeAction.autofocus !== true) {
+			return;
+		}
+
+		await tick();
+		qrCodeButton?.focus({ preventScroll: true });
+	});
 </script>
 
 <div class="flex justify-center gap-2">
@@ -29,6 +41,7 @@
 			link={false}
 			onclick={qrCodeAction.onClick}
 			testId={qrCodeAction.testId}
+			bind:button={qrCodeButton}
 		>
 			{#snippet icon()}
 				<IconQrCodeScanner size="24" />

@@ -438,7 +438,7 @@ SOL receives on the Solana wallet address and ckSOL on the ICRC address, as two 
 
 ### Your addresses
 
-The account menu shows **Your addresses** on every signed-in page, including network and token pages, which no longer show a single network's address there. It opens a list titled **Your addresses** with Copy and QR for each regular wallet address that is ready (certified): the ICP **Principal** and the ICP **Account ID**, each with what it is for, one **EVM wallet address** row naming the enabled EVM networks that share it (kept beside its QR code), and the Bitcoin, Solana and XRP addresses with their networks, test and local ones labelled as such. It never lists a conversion deposit address such as the ckBTC minter's. The contact address book is separate.
+The account menu shows **Your addresses** on every signed-in page, including network and token pages, which no longer show a single network's address there. It opens a list titled **Your addresses** with Copy and QR for each regular wallet address that is ready (certified): the ICP **Principal** and the ICP **Account ID**, each with what it is for, one **EVM wallet address** row naming the enabled EVM networks that share it (kept beside its QR code), and the Bitcoin, Solana and XRP addresses with their networks, test and local ones labelled as such. Each address sits in the same field as on the Receive address step, with its network's logo and its first and last six characters in bold. It never lists a conversion deposit address such as the ckBTC minter's. The contact address book is separate.
 
 ---
 

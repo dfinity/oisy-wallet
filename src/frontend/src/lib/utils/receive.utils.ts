@@ -1,8 +1,7 @@
-import type { BtcAddress } from '$btc/types/address';
+import { isBitcoinToken } from '$btc/utils/token.utils';
 import { CK_USDC_CONVERSION_ENABLED } from '$env/convert.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { IC_CKUSDC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
-import type { EthAddress } from '$eth/types/address';
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import {
@@ -16,13 +15,17 @@ import type { AddressStoreData } from '$lib/stores/address.store';
 import type { NetworkId } from '$lib/types/network';
 import type {
 	ReceiveAddressKind,
+	ReceiveAddressSources,
 	ReceiveAddressState,
+	ReceiveAddressTexts,
 	ReceiveAsset,
 	ReceiveIcpAddressFormat,
+	ReceiveNetworkAddressSource,
 	ReceiveRoute
 } from '$lib/types/receive';
 import type { OptionString } from '$lib/types/string';
-import type { Token, TokenId } from '$lib/types/token';
+import type { Token } from '$lib/types/token';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getTokenIdentifier } from '$lib/utils/identifier.utils';
 import {
 	isNetworkIdBitcoin,
@@ -39,9 +42,8 @@ import {
 	isNetworkIdXrp,
 	isNetworkIdXRPMainnet
 } from '$lib/utils/network.utils';
-import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
-import type { SolAddress } from '$sol/types/address';
-import type { XrpAddress } from '$xrp/types/address';
+import { isTokenEnabled } from '$lib/utils/token-toggleable.utils';
+import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const isReceiveTestToken = (token: Token): boolean =>
@@ -96,7 +98,7 @@ export const getReceiveAssets = ({
 		tokens: versions,
 		token:
 			versions.find(({ network: { id } }) => id === preferredNetworkId) ??
-			versions.find((token) => !isTokenToggleable(token) || token.enabled) ??
+			versions.find(isTokenEnabled) ??
 			versions[0]
 	}));
 
@@ -236,14 +238,13 @@ export const getReceiveRoutes = ({
 			acc.push(depositRoute({ creditedToken: token, sourceToken: depositSourceToken }));
 		}
 
-		const ckBtc =
-			token.standard?.code === 'bitcoin'
-				? catalog.find(
-						(candidate) =>
-							getCkBtcDepositSourceToken({ token: candidate, enabledNetworkIds })?.network.id ===
-							token.network.id
-					)
-				: undefined;
+		const ckBtc = isBitcoinToken(token)
+			? catalog.find(
+					(candidate) =>
+						getCkBtcDepositSourceToken({ token: candidate, enabledNetworkIds })?.network.id ===
+						token.network.id
+				)
+			: undefined;
 
 		if (nonNullish(ckBtc)) {
 			acc.push(depositRoute({ creditedToken: ckBtc, sourceToken: token }));
@@ -290,9 +291,6 @@ export const getAutoReceiveRoute = (routes: ReceiveRoute[]): ReceiveRoute | unde
 	return rest.length === 0 && route?.kind === 'direct' ? route : undefined;
 };
 
-export const isReceiveTokenEnabled = (token: Token): boolean =>
-	!isTokenToggleable(token) || token.enabled;
-
 /**
  * The Ethereum twin a ck token converts from, when Convert supports it on an enabled network:
  * ckETH and the ckERC20 tokens, from Ethereum or Sepolia.
@@ -325,58 +323,61 @@ export const getReceiveConvertTwinToken = ({
 	return twinToken;
 };
 
-export interface ReceiveAddressSources {
-	icrcAddress: OptionString;
-	icpAccountId: OptionString;
-	evm: AddressStoreData<EthAddress>;
-	btcMainnet: AddressStoreData<BtcAddress>;
-	btcTestnet: AddressStoreData<BtcAddress>;
-	btcRegtest: AddressStoreData<BtcAddress>;
-	solMainnet: AddressStoreData<SolAddress>;
-	solDevnet: AddressStoreData<SolAddress>;
-	solLocal: AddressStoreData<SolAddress>;
-	xrpMainnet: AddressStoreData<XrpAddress>;
-	// The ckBTC minter's Bitcoin deposit addresses, by ckBTC token.
-	ckBtcDeposit: Record<TokenId, BtcAddressData | null> | undefined;
-}
+export const RECEIVE_ADDRESS_LOADING_STATE: ReceiveAddressState = { status: 'loading' };
 
-const LOADING: ReceiveAddressState = { status: 'loading' };
+// An address counts only once the backend certified it.
+export const getCertifiedAddress = (
+	data: AddressStoreData<string> | BtcAddressData | undefined
+): string | undefined => (nonNullish(data) && data.certified ? data.data : undefined);
 
-// `undefined` is still loading, `null` failed, and an address counts only once it is certified.
+// `undefined` is still loading and `null` failed.
 const fromCertifiedStore = (
 	data: AddressStoreData<string> | BtcAddressData | undefined
-): ReceiveAddressState =>
-	data === null
-		? { status: 'error' }
-		: nonNullish(data) && data.certified
-			? { status: 'ready', address: data.data }
-			: LOADING;
+): ReceiveAddressState => {
+	if (data === null) {
+		return { status: 'error' };
+	}
+
+	const address = getCertifiedAddress(data);
+
+	return nonNullish(address) ? { status: 'ready', address } : RECEIVE_ADDRESS_LOADING_STATE;
+};
 
 const fromText = (address: OptionString): ReceiveAddressState =>
-	nonNullish(address) ? { status: 'ready', address } : LOADING;
+	nonNullish(address) ? { status: 'ready', address } : RECEIVE_ADDRESS_LOADING_STATE;
 
-const networkStore = ({
-	networkId,
-	sources
-}: {
-	networkId: NetworkId;
-	sources: ReceiveAddressSources;
-}): AddressStoreData<string> | undefined =>
-	isNetworkIdBTCMainnet(networkId)
-		? sources.btcMainnet
-		: isNetworkIdBTCTestnet(networkId)
-			? sources.btcTestnet
-			: isNetworkIdBTCRegtest(networkId)
-				? sources.btcRegtest
-				: isNetworkIdSOLMainnet(networkId)
-					? sources.solMainnet
-					: isNetworkIdSOLDevnet(networkId)
-						? sources.solDevnet
-						: isNetworkIdSOLLocal(networkId)
-							? sources.solLocal
-							: isNetworkIdXRPMainnet(networkId)
-								? sources.xrpMainnet
-								: undefined;
+// The exact network picks the store of a Bitcoin, Solana or XRP address.
+const NETWORK_ADDRESS_SOURCES: [(networkId: NetworkId) => boolean, ReceiveNetworkAddressSource][] =
+	[
+		[isNetworkIdBTCMainnet, 'btcMainnet'],
+		[isNetworkIdBTCTestnet, 'btcTestnet'],
+		[isNetworkIdBTCRegtest, 'btcRegtest'],
+		[isNetworkIdSOLMainnet, 'solMainnet'],
+		[isNetworkIdSOLDevnet, 'solDevnet'],
+		[isNetworkIdSOLLocal, 'solLocal'],
+		[isNetworkIdXRPMainnet, 'xrpMainnet']
+	];
+
+/**
+ * The store that holds the address of a route that has one per network: the shared EVM address, or
+ * the Bitcoin, Solana or XRP address of its exact network. The ICP formats come from the identity and
+ * the ckBTC deposit address from the minter, so they have none.
+ */
+export const getReceiveNetworkAddressSource = ({
+	addressKind,
+	sourceNetwork: { id: networkId }
+}: Pick<ReceiveRoute, 'addressKind' | 'sourceNetwork'>):
+	ReceiveNetworkAddressSource | undefined => {
+	if (addressKind === 'evm') {
+		return 'evm';
+	}
+
+	if (addressKind !== 'btc' && addressKind !== 'sol' && addressKind !== 'xrp') {
+		return;
+	}
+
+	return NETWORK_ADDRESS_SOURCES.find(([matches]) => matches(networkId))?.[1];
+};
 
 /**
  * The destination of a route for the signed-in account, from the stores that already hold it. A
@@ -397,13 +398,135 @@ export const resolveReceiveAddress = ({
 			return fromText(icpFormat === 'account-id' ? sources.icpAccountId : sources.icrcAddress);
 		case 'icrc':
 			return fromText(sources.icrcAddress);
-		case 'evm':
-			return fromCertifiedStore(sources.evm);
 		case 'ckbtc-deposit':
 			return fromCertifiedStore(sources.ckBtcDeposit?.[creditedToken.id]);
-		case 'btc':
-		case 'sol':
-		case 'xrp':
-			return fromCertifiedStore(networkStore({ networkId: sourceNetwork.id, sources }));
+		default: {
+			const source = getReceiveNetworkAddressSource({ addressKind, sourceNetwork });
+
+			return fromCertifiedStore(nonNullish(source) ? sources[source] : undefined);
+		}
 	}
+};
+
+/**
+ * The title of the address step: what to send and where, "Receive ETH on Ethereum", or for a deposit
+ * what it credits and through which network, "Receive ckBTC via Bitcoin".
+ */
+export const getReceiveAddressTitle = ({
+	route: { kind, sourceToken, sourceNetwork, creditedToken },
+	i18n
+}: {
+	route: ReceiveRoute;
+	i18n: I18n;
+}): string =>
+	kind === 'ckbtc-deposit'
+		? replacePlaceholders(i18n.receive.token.text.title_deposit, {
+				$token: getTokenDisplaySymbol(creditedToken),
+				$network: sourceNetwork.name
+			})
+		: replacePlaceholders(i18n.receive.token.text.title_direct, {
+				$token: getTokenDisplaySymbol(sourceToken),
+				$network: sourceNetwork.name
+			});
+
+/**
+ * How the address of a route is named: next to it, on its Copy button, and once copied. The button
+ * is named for what it does; the confirmation says what happened.
+ */
+export const getReceiveAddressTexts = ({
+	route: { kind, addressKind, sourceNetwork },
+	icpFormat,
+	i18n
+}: {
+	route: ReceiveRoute;
+	icpFormat: ReceiveIcpAddressFormat;
+	i18n: I18n;
+}): ReceiveAddressTexts => {
+	if (kind === 'ckbtc-deposit') {
+		const { deposit_address, copy_deposit_address, deposit_address_copied } =
+			i18n.receive.ckbtc.text;
+
+		return {
+			label: deposit_address,
+			copyAriaLabel: copy_deposit_address,
+			copiedText: deposit_address_copied
+		};
+	}
+
+	const { text } = i18n.receive.token;
+
+	if (addressKind === 'icp' && icpFormat === 'account-id') {
+		return {
+			label: text.account_id_label,
+			copyAriaLabel: text.copy_account_id,
+			copiedText: i18n.receive.icp.text.account_id_copied
+		};
+	}
+
+	if (addressKind === 'icp') {
+		return {
+			label: text.principal_label,
+			copyAriaLabel: text.copy_principal,
+			copiedText: i18n.receive.icp.text.internet_computer_principal_copied
+		};
+	}
+
+	const network = { $network: sourceNetwork.name };
+
+	return {
+		label: replacePlaceholders(text.address_label, network),
+		copyAriaLabel: replacePlaceholders(text.copy_address, network),
+		copiedText: replacePlaceholders(text.address_copied, network)
+	};
+};
+
+/**
+ * How a route reads in the route picker. Next to an offer such as BTC credited as ckBTC, the rows
+ * name what they credit, since the choice is not one of network; otherwise they name the network.
+ * The offer is honest about the wait: the deposit takes the Bitcoin confirmations, and ckBTC is fast
+ * and cheap to move once it arrives.
+ */
+export const getReceiveRouteOptionTexts = ({
+	route,
+	assetTokens,
+	withOffer,
+	confirmations,
+	i18n
+}: {
+	route: ReceiveRoute;
+	assetTokens: Token[];
+	// The picker lists an offer among the routes.
+	withOffer: boolean;
+	// The deposit confirmations the minter requires, once known.
+	confirmations?: number | bigint;
+	i18n: I18n;
+}): { title: string; description: string } => {
+	const { kind, sourceToken, sourceNetwork, creditedToken } = route;
+	const creditedSymbol = getTokenDisplaySymbol(creditedToken);
+	const sourceSymbol = getTokenDisplaySymbol(sourceToken);
+
+	if (isReceiveConversionOffer({ route, assetTokens })) {
+		return {
+			title: replacePlaceholders(i18n.receive.ckbtc.text.receive_as, { $token: creditedSymbol }),
+			description: nonNullish(confirmations)
+				? replacePlaceholders(i18n.receive.ckbtc.text.benefit, { $count: `${confirmations}` })
+				: i18n.receive.ckbtc.text.benefit_generic
+		};
+	}
+
+	return {
+		title: withOffer
+			? replacePlaceholders(i18n.receive.token.text.receive_token, { $token: creditedSymbol })
+			: sourceNetwork.name,
+		description:
+			kind === 'ckbtc-deposit'
+				? replacePlaceholders(i18n.receive.token.text.route_ckbtc_deposit, {
+						$sourceToken: sourceSymbol,
+						$creditedToken: creditedSymbol
+					})
+				: replacePlaceholders(i18n.receive.token.text.route_direct, {
+						$token: sourceSymbol,
+						$network: sourceNetwork.name
+					})
+	};
 };
