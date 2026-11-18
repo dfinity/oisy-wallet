@@ -37,12 +37,12 @@
 		network: Network;
 		currency?: string;
 		issuer?: string;
+		review?: XrpAddTokenReview;
 		onBack: () => void;
+		onSave: () => void;
 	}
 
-	let { network, currency, issuer, onBack }: Props = $props();
-
-	let review = $state<XrpAddTokenReview | undefined>();
+	let { network, currency, issuer, review = $bindable(), onBack, onSave }: Props = $props();
 
 	const formatXrp = (value: XrpBalance): string =>
 		formatToken({ value, unitName: XRP_TOKEN.decimals });
@@ -242,9 +242,7 @@
 	{#snippet toolbar()}
 		<ButtonGroup>
 			<ButtonBack onclick={() => onBack()} />
-			<!-- Adding sends a `TrustSet`, which is signed through the XRP in-flight guard: until the
-			     guard's frontend is on main the review stops here (spec §7.4, PR 3b). -->
-			<Button disabled>
+			<Button disabled={isNullish(review)} onclick={onSave}>
 				{$i18n.tokens.import.text.add_the_token}
 			</Button>
 		</ButtonGroup>

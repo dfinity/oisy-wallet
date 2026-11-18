@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
+	import { XRP_TRUST_LINE_TOKENS_ENABLED } from '$env/xrp-trust-line-tokens.env';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
 	import AddTokenReviewByNetwork from '$lib/components/manage/AddTokenReviewByNetwork.svelte';
@@ -26,7 +27,9 @@
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isRouteNfts } from '$lib/utils/nav.utils';
+	import { isNetworkIdXrp } from '$lib/utils/network.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
+	import { addXrpTrustLineTokenSteps } from '$xrp/constants/steps.constants';
 	import type { XrpTrustLineCustomToken } from '$xrp/types/xrp-trust-line-token';
 
 	interface Props {
@@ -74,11 +77,23 @@
 	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
 	let initializedInitialStep = false;
 
+	// The saving step shows the steps of whatever reached it: a save of the token list, or adding an
+	// XRP Ledger token, which signs and sends a transaction instead.
+	let savingXrpTrustLine = $state(false);
+
+	const reviewModalNext = () => {
+		savingXrpTrustLine = XRP_TRUST_LINE_TOKENS_ENABLED && isNetworkIdXrp(network?.id);
+		modal?.set(3);
+	};
+
 	const saveTokens = async (tokens: Token[]) => {
 		await saveAllCustomTokens({
 			tokens,
 			progress,
-			modalNext: () => modal?.set(3),
+			modalNext: () => {
+				savingXrpTrustLine = false;
+				modal?.set(3);
+			},
 			onSuccess: close,
 			onError: () => modal?.set(0),
 			$authIdentity,
@@ -202,7 +217,7 @@
 		{#if currentStep?.name === WizardStepsManageTokens.REVIEW}
 			<AddTokenReviewByNetwork
 				{isNftsPage}
-				modalNext={() => modal?.set(3)}
+				modalNext={reviewModalNext}
 				{network}
 				onBack={onReviewBack}
 				onError={() => modal?.set(0)}
@@ -213,7 +228,7 @@
 		{:else if currentStep?.name === WizardStepsManageTokens.SAVING}
 			<InProgressWizard
 				progressStep={saveProgressStep}
-				steps={addTokenSteps($i18n)}
+				steps={savingXrpTrustLine ? addXrpTrustLineTokenSteps($i18n) : addTokenSteps($i18n)}
 				warningType="manage"
 			/>
 		{:else if currentStep?.name === WizardStepsManageTokens.IMPORT}
