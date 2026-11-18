@@ -425,6 +425,16 @@ export const XrplAccountLinesResultSchema = z.object({
 	error: z.never().optional()
 });
 
+// `deposit_authorized`: whether `destination_account` takes payments from `source_account`. Both
+// accounts are echoed, and are what binds the answer to the question asked.
+export const XrplDepositAuthorizedResultSchema = z.object({
+	deposit_authorized: z.boolean(),
+	source_account: z.string(),
+	destination_account: z.string(),
+	validated: z.boolean(),
+	error: z.never().optional()
+});
+
 export const XrplFeeResultSchema = z.object({
 	drops: z
 		.object({
