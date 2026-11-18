@@ -1,7 +1,8 @@
 import type {
 	ActiveUserTransaction,
 	ActiveUserTransactionData,
-	ActiveUserTransactionRef
+	ActiveUserTransactionRef,
+	TokenId as BackendTokenId
 } from '$declarations/backend/backend.did';
 import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
@@ -22,6 +23,10 @@ export const isXrpActiveUserTransaction = (tx: ActiveUserTransaction): boolean =
 
 export const isXrpTrustSetActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
 	'XrpTrustSet' in tx.data;
+
+// A send of a trust-line token rather than of XRP.
+export const isXrpTokenPaymentActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
+	'Xrp' in tx.data && 'XrpTrustLineMainnet' in tx.data.Xrp.token;
 
 /**
  * Builds the `Xrp` AUT data variant from the values fixed at signing time.
@@ -233,14 +238,28 @@ export interface XrpActiveUserTransactionDisplay {
 	network: string;
 }
 
+// The token a row's backend `TokenId` names: native XRP, or a trust-line token by its currency and
+// issuer — with the listed token's symbol, or the one its code reads as. Never `XRP` for a token.
+const xrpRowToken = (token: BackendTokenId): Token =>
+	'XrpTrustLineMainnet' in token
+		? toXrpTrustLineToken({
+				identity: {
+					currency: token.XrpTrustLineMainnet[0],
+					issuer: token.XrpTrustLineMainnet[1]
+				},
+				network: XRP_MAINNET_NETWORK
+			})
+		: XRP_TOKEN;
+
 /**
  * What an XRP row says it sent, and where — for the row itself, its failure message and its
  * analytics event.
  *
  * The display snapshot first, and for any field it lacks, what the backend guarantees every XRP row
- * carries: the amount in drops, and an `XrpNativeMainnet` token, which can only be `XRP_TOKEN`. The
- * backend does not require the snapshot, so a row written by another client may lack it, and empty
- * strings in its place would read "Send" over a blank network line, or "Your send of   on  was …".
+ * carries: the amount in the token's base units, and the token itself — `XrpNativeMainnet`, which
+ * can only be `XRP_TOKEN`, or a trust-line token by its currency and issuer. The backend does not
+ * require the snapshot, so a row written by another client may lack it, and empty strings in its
+ * place would read "Send" over a blank network line, or "Your send of   on  was …".
  *
  * A swap from XRP says the same about its deposit, read from the swap's own snapshot keys — the
  * amount it swaps and its source token and network.
@@ -254,6 +273,7 @@ export const xrpActiveUserTransactionDisplay = (
 		'Xrp' in tx.data
 			? {
 					amount: tx.data.Xrp.amount,
+					token: xrpRowToken(tx.data.Xrp.token),
 					keys: {
 						amount: XRP_EXTERNAL_REF_KEYS.AMOUNT,
 						symbol: XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL,
@@ -263,6 +283,7 @@ export const xrpActiveUserTransactionDisplay = (
 			: 'NearIntents' in tx.data && 'XrpNativeMainnet' in tx.data.NearIntents.source_token
 				? {
 						amount: tx.data.NearIntents.amount,
+						token: XRP_TOKEN,
 						keys: {
 							amount: NEAR_INTENTS_EXTERNAL_REF_KEYS.AMOUNT,
 							symbol: NEAR_INTENTS_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL,
@@ -291,11 +312,11 @@ export const xrpActiveUserTransactionDisplay = (
 			snapshot(payment.keys.amount) ??
 			formatToken({
 				value: payment.amount,
-				unitName: XRP_TOKEN.decimals,
-				displayDecimals: XRP_TOKEN.decimals
+				unitName: payment.token.decimals,
+				displayDecimals: payment.token.decimals
 			}),
-		symbol: snapshot(payment.keys.symbol) ?? XRP_TOKEN.symbol,
-		network: snapshot(payment.keys.network) ?? XRP_TOKEN.network.name
+		symbol: snapshot(payment.keys.symbol) ?? payment.token.symbol,
+		network: snapshot(payment.keys.network) ?? payment.token.network.name
 	};
 };
 
@@ -316,8 +337,6 @@ export const xrpTrustSetActiveUserTransactionDisplay = (
 		return undefined;
 	}
 
-	const [currency, issuer] = tx.data.XrpTrustSet.token.XrpTrustLineMainnet;
-
 	const refs = toXrpExternalRefsMap(tx.external_refs);
 
 	const snapshot = (key: XrpExternalRefKey): string | undefined => {
@@ -328,8 +347,7 @@ export const xrpTrustSetActiveUserTransactionDisplay = (
 
 	return {
 		symbol:
-			snapshot(XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL) ??
-			toXrpTrustLineToken({ identity: { currency, issuer }, network: XRP_MAINNET_NETWORK }).symbol,
+			snapshot(XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL) ?? xrpRowToken(tx.data.XrpTrustSet.token).symbol,
 		network: snapshot(XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL) ?? XRP_MAINNET_NETWORK.name
 	};
 };

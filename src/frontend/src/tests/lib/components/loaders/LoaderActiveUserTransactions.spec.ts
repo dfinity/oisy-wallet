@@ -49,6 +49,7 @@ import {
 	mockVeloraActiveUserTransaction,
 	mockXrpActiveUserTransaction,
 	mockXrpSwapActiveUserTransaction,
+	mockXrpTokenPaymentActiveUserTransaction,
 	mockXrpTrustSetActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -737,6 +738,35 @@ describe('LoaderActiveUserTransactions', () => {
 				expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
 					msg: { text: en.send.error.unexpected }
 				});
+			});
+
+			// "Your XRP payment" would misname a token: the toast names what was sent.
+			it('names the token of a token send', async () => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({
+					transaction: mockXrpTokenPaymentActiveUserTransaction
+				});
+
+				render(LoaderActiveUserTransactions);
+				await tick();
+
+				activeUserTransactionsStore.upsert({
+					transaction: { ...mockXrpTokenPaymentActiveUserTransaction, status: { Succeeded: null } }
+				});
+				await tick();
+
+				expect(toasts.toastsShow).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						text: en.send.text.xrp_token_sent.replace('$symbol', 'RLUSD'),
+						level: 'success'
+					})
+				);
+				expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						name: TRACK_COUNT_XRP_SEND_SUCCESS,
+						metadata: expect.objectContaining({ token: 'RLUSD' })
+					})
+				);
 			});
 
 			// Once per row, not once per store update — the same idempotency the seven other flows
