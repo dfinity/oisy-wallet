@@ -68,6 +68,14 @@ export const XRP_ACCOUNT_FLAG_ALLOW_TRUST_LINE_CLAWBACK = 0x80000000;
 // absent field.
 export const XRP_TRANSFER_RATE_NO_FEE = 1_000_000_000;
 
+// The limit a `TrustSet` adding a token sets: the ledger's largest token amount, so receiving is
+// never capped. Sixteen significant digits is also the most `ripple-binary-codec` encodes.
+export const XRP_TRUST_LINE_MAX_LIMIT = '9999999999999999e80';
+
+// `tfSetNoRipple`: nothing ripples through the wallet's side of the line. For an account without
+// DefaultRipple it is also that side's default state, which is what lets the line be deleted later.
+export const XRP_TRUST_SET_FLAG_SET_NO_RIPPLE = 0x00020000;
+
 // Ledgers added to the current index for a transaction's LastLedgerSequence, bounding how
 // long it can be included before it definitively fails rather than lingering.
 //

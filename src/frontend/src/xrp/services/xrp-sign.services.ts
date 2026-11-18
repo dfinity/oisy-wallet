@@ -5,7 +5,7 @@ import { XRP_DERIVATION_PATH_PREFIX } from '$xrp/constants/xrp.constants';
 import { getXrpPublicKey } from '$xrp/services/xrp-address.services';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
-import type { XrpPayment } from '$xrp/types/xrp-transaction';
+import type { XrpPayment, XrpTrustSet } from '$xrp/types/xrp-transaction';
 import { mapEd25519PublicKeyToClassicAddress } from '$xrp/utils/xrp-address.utils';
 import { encode, encodeForSigning } from 'ripple-binary-codec';
 
@@ -69,7 +69,7 @@ export const getXrpSigningPublicKey = async ({
 };
 
 /**
- * Signs an unsigned XRPL Payment and returns the signed `tx_blob` ready for `submit`.
+ * Signs an unsigned XRPL Payment or TrustSet and returns the signed `tx_blob` ready for `submit`.
  *
  * `encodeForSigning` produces the bytes to sign, already prefixed with XRPL's
  * single-signing hash prefix (`STX`, 0x53545800). Ed25519 hashes the message
@@ -83,7 +83,7 @@ export const signXrpTransaction = async ({
 }: {
 	identity: NullishIdentity;
 	network: XrpNetworkType;
-	transaction: XrpPayment;
+	transaction: XrpPayment | XrpTrustSet;
 }): Promise<string> => {
 	const message = Uint8Array.from(Buffer.from(encodeForSigning(transaction), 'hex'));
 
