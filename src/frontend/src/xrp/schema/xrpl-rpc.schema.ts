@@ -342,7 +342,10 @@ export const XrpAccountTransactionEntrySchema = z.object({
 	meta: z
 		.object({
 			TransactionResult: z.string().optional(),
-			delivered_amount: XrpAmountFieldSchema.optional()
+			delivered_amount: XrpAmountFieldSchema.optional(),
+			// Every ledger object the transaction changed, left `unknown` like the rows: each node is
+			// parsed on its own by whoever reads it, so one the reader does not know skips only itself.
+			AffectedNodes: z.array(z.unknown()).optional()
 		})
 		.optional(),
 	validated: z.boolean().optional(),
@@ -384,6 +387,58 @@ const XrpTokenValueSchema = z.string().regex(/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\
 const XrpCurrencyCodeSchema = z
 	.string()
 	.regex(/^([A-Za-z0-9?!@#$%^&*<>(){}[\]|]{3}|[0-9A-F]{40})$/);
+
+// A trust line in transaction metadata (`RippleState`). Unlike an `account_lines` row it is written
+// from neither side: `Balance` is the low account's, positive when the low account holds the token,
+// and each limit names its account in `issuer` — so which side is the wallet's is read off the
+// limits. `Balance.issuer` is a placeholder account and carries nothing.
+const XrpRippleStateBalanceSchema = z.object({
+	currency: XrpCurrencyCodeSchema,
+	value: XrpTokenValueSchema
+});
+
+const XrpRippleStateLimitSchema = z.object({
+	currency: XrpCurrencyCodeSchema,
+	issuer: z.string(),
+	value: XrpTokenValueSchema
+});
+
+const XrpRippleStateFieldsSchema = z.object({
+	Balance: XrpRippleStateBalanceSchema,
+	HighLimit: XrpRippleStateLimitSchema,
+	LowLimit: XrpRippleStateLimitSchema
+});
+
+// `PreviousFields` lists only what changed, so a line whose balance stayed has no `Balance` here.
+const XrpRippleStatePreviousFieldsSchema = z.object({
+	Balance: XrpRippleStateBalanceSchema.optional()
+});
+
+export const XrpRippleStateNodeSchema = z.union([
+	z.object({
+		ModifiedNode: z.object({
+			LedgerEntryType: z.literal('RippleState'),
+			FinalFields: XrpRippleStateFieldsSchema,
+			PreviousFields: XrpRippleStatePreviousFieldsSchema.optional()
+		})
+	}),
+	z.object({
+		CreatedNode: z.object({
+			LedgerEntryType: z.literal('RippleState'),
+			// A new object's fields omit the ones at their default, and a zero balance is one.
+			NewFields: XrpRippleStateFieldsSchema.extend({
+				Balance: XrpRippleStateBalanceSchema.optional()
+			})
+		})
+	}),
+	z.object({
+		DeletedNode: z.object({
+			LedgerEntryType: z.literal('RippleState'),
+			FinalFields: XrpRippleStateFieldsSchema,
+			PreviousFields: XrpRippleStatePreviousFieldsSchema.optional()
+		})
+	})
+]);
 
 // One trust line as the holder sees it: `account` is the counterparty — the issuer, for a token the
 // wallet holds — and `balance` is positive when the holder holds the token. The ledger omits each
