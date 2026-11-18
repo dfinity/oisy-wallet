@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
+	import { clearCkBtcMinterInfo } from '$icp/services/ckbtc.services';
 	import { initCkBTCMinterInfoWorker } from '$icp/services/worker.ck-minter-info.services';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -36,14 +37,7 @@
 
 	// Dropping the failed entry shows the terms as loading again until the new answer.
 	const retry = () => {
-		ckBtcMinterInfoStore.update((state) => {
-			if (isNullish(state)) {
-				return state;
-			}
-
-			const { [token.id]: _, ...rest } = state;
-			return rest;
-		});
+		clearCkBtcMinterInfo(token.id);
 
 		attempt++;
 	};

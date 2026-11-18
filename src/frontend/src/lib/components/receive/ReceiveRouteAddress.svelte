@@ -185,11 +185,15 @@
 
 						<!-- Right under the address and Copy, so it is in view wherever the address is copied. -->
 						{#if deposit}
+							<!-- The icon carries the warning colour; the sentence stays at the text colour, which
+							     the orange cannot reach on white at this size (WCAG AA). -->
 							<div
-								class="mt-3 flex items-start gap-2 px-4 text-sm leading-5 font-bold text-warning-primary"
+								class="mt-3 flex items-start gap-2 px-4 text-sm leading-5 font-bold text-primary"
 								data-tid={RECEIVE_CKBTC_DEPOSIT_WARNING}
 							>
-								<span class="flex h-5 shrink-0 items-center"><IconWarning /></span>
+								<span class="flex h-5 shrink-0 items-center text-warning-primary"
+									><IconWarning /></span
+								>
 								<span>{$i18n.receive.ckbtc.text.deposit_warning}</span>
 							</div>
 						{:else}

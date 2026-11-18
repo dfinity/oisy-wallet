@@ -297,17 +297,20 @@
 			{@const showAddress =
 				condition !== false && (!isNftsPage || (isNftsPage && network.supportsNft))}
 
-			{#if showAddress && nonNullish(_text)}
-				<ReceiveAddress {address} {copyAriaLabel} {labelRef} {network} {qrCodeAction} {testId}>
-					{#snippet title()}
-						{_title}
-					{/snippet}
-					{#snippet text()}
-						{_text}
-					{/snippet}
-				</ReceiveAddress>
-			{:else if showAddress}
-				<ReceiveAddress {address} {copyAriaLabel} {labelRef} {network} {qrCodeAction} {testId}>
+			{#snippet rowText()}
+				{_text}
+			{/snippet}
+
+			{#if showAddress}
+				<ReceiveAddress
+					{address}
+					{copyAriaLabel}
+					{labelRef}
+					{network}
+					{qrCodeAction}
+					{testId}
+					text={nonNullish(_text) ? rowText : undefined}
+				>
 					{#snippet title()}
 						{_title}
 					{/snippet}

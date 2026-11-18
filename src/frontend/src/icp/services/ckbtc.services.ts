@@ -195,6 +195,20 @@ const loadData: LoadData = async <T>({
 	});
 };
 
+/**
+ * Forgets the minter info of a ckBTC token, so it reads as not loaded yet rather than failed, until
+ * its worker answers again.
+ */
+export const clearCkBtcMinterInfo = (tokenId: TokenId) =>
+	ckBtcMinterInfoStore.update((state) => {
+		if (isNullish(state)) {
+			return state;
+		}
+
+		const { [tokenId]: _, ...rest } = state;
+		return rest;
+	});
+
 export const queryEstimateFee = async ({
 	identity,
 	minterCanisterId,

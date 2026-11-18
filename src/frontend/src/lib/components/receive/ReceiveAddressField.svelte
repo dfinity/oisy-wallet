@@ -19,6 +19,9 @@
 		testId?: string;
 		// Before the address, such as the logo of its network.
 		leading?: Snippet;
+		// For a list of addresses: smaller plain text in a tighter box, so the rows stay calm. A single
+		// address sets its ends apart for checking.
+		compact?: boolean;
 	}
 
 	let {
@@ -29,14 +32,27 @@
 		copyButtonTestId,
 		qrCodeAction,
 		testId,
-		leading
+		leading,
+		compact = false
 	}: Props = $props();
 
 	// The start and the end are what people compare when they check an address, so those read first.
 	let { start, middle, end } = $derived(splitTextEnds({ text: address ?? '' }));
 </script>
 
-<div class="flex items-center gap-3 rounded-xl bg-brand-subtle-10 px-4 py-3">
+<div
+	class="flex items-center"
+	class:bg-brand-subtle-10={!compact}
+	class:bg-brand-subtle-20={compact}
+	class:gap-3={!compact}
+	class:gap-4={compact}
+	class:px-3={compact}
+	class:px-4={!compact}
+	class:py-2={compact}
+	class:py-3={!compact}
+	class:rounded-lg={compact}
+	class:rounded-xl={!compact}
+>
 	{@render leading?.()}
 
 	<div class="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -46,9 +62,12 @@
 
 		{#if isNullish(address)}
 			<SkeletonText />
+		{:else if compact}
+			<output class="text-sm break-all text-primary" data-tid={testId} in:fade>{address}</output>
 		{:else}
+			<!-- The middle stays at the secondary colour: lighter than the ends, still AA on the tint. -->
 			<output class="text-base break-all text-primary" data-tid={testId} in:fade
-				><span class="font-bold">{start}</span><span class="text-tertiary">{middle}</span><span
+				><span class="font-bold">{start}</span><span class="text-secondary">{middle}</span><span
 					class="font-bold">{end}</span
 				></output
 			>

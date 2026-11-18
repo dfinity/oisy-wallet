@@ -6,6 +6,7 @@
 	import EthHideTokenModal from '$eth/components/tokens/EthHideTokenModal.svelte';
 	import CyclesTopUpModal from '$icp/components/cycles-top-up/CyclesTopUpModal.svelte';
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
+	import ReceiveHowToConvert from '$icp-eth/components/receive/ReceiveHowToConvert.svelte';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
 	import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
@@ -13,7 +14,6 @@
 	import PayDialog from '$lib/components/pay/PayDialog.svelte';
 	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
 	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
-	import ReceiveHowToConvert from '$lib/components/receive/ReceiveHowToConvert.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
 	import ScannerModal from '$lib/components/scanner/ScannerModal.svelte';
 	import SendModal from '$lib/components/send/SendModal.svelte';

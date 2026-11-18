@@ -52,6 +52,7 @@
 			<div class:mt-1.5={isNullish(text)} data-tid={testId}>
 				<ReceiveAddressField
 					{address}
+					compact
 					{copyAriaLabel}
 					{copyButtonTestId}
 					{qrCodeAction}

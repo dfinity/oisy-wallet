@@ -85,6 +85,12 @@
 	};
 </script>
 
+{#snippet networksText()}
+	{replacePlaceholders($i18n.receive.addresses.text.evm_networks, {
+		$networks: networks?.map(({ name }) => name).join(', ') ?? ''
+	})}
+{/snippet}
+
 <WizardModal
 	bind:this={modal}
 	onClose={() => closeModal(() => onClose?.())}
@@ -104,7 +110,7 @@
 
 	<div bind:this={content} class="outline-none" tabindex="-1">
 		{#key currentStep?.name}
-			{#if currentStep?.name === steps[1].name && nonNullish(addressToken) && nonNullish(networks)}
+			{#if currentStep?.name === steps[1].name && nonNullish(addressToken)}
 				<!-- The shared EVM address keeps the list of the networks it serves beside its QR code. -->
 				<ReceiveAddressQrCode
 					{address}
@@ -114,22 +120,7 @@
 					network={addressToken.network}
 					onBack={displayAddresses}
 					qrSize="compact"
-				>
-					{#snippet text()}
-						{replacePlaceholders($i18n.receive.addresses.text.evm_networks, {
-							$networks: networks?.map(({ name }) => name).join(', ') ?? ''
-						})}
-					{/snippet}
-				</ReceiveAddressQrCode>
-			{:else if currentStep?.name === steps[1].name && nonNullish(addressToken)}
-				<ReceiveAddressQrCode
-					{address}
-					{addressLabel}
-					{addressToken}
-					copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
-					network={addressToken.network}
-					onBack={displayAddresses}
-					qrSize="compact"
+					text={nonNullish(networks) ? networksText : undefined}
 				/>
 			{:else}
 				<InfoCmp focusAddress={returnFocusAddress} onQRCode={displayQRCode} />
