@@ -1,7 +1,7 @@
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { xrpAddressMainnetStore } from '$lib/stores/address.store';
-import type { TokenId } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import type { LoadOlderTransactions } from '$lib/types/transactions-pagination';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
@@ -10,8 +10,11 @@ import { loadXrpTransactions } from '$xrp/rest/xrpl.rest';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
+import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
 import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
 import { mapXrpTransaction } from '$xrp/utils/xrp-transaction.utils';
+import { mapXrpTrustLineTransactions } from '$xrp/utils/xrp-trust-line-transaction.utils';
+import { isTokenXrpTrustLine } from '$xrp/utils/xrp-trust-line.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -65,19 +68,40 @@ const reachedFloor = ({
 	nonNullish(oldestTimestamp) &&
 	normalizeTimestampToSeconds(oldestTimestamp) <= normalizeTimestampToSeconds(minTimestamp);
 
+// The rows of `token` in a page of the account's history: its payments of native XRP, or, for a
+// trust-line token, what its payments moved on that token's line.
+const toTokenRows = ({
+	token,
+	transactions,
+	xrpAddress
+}: {
+	token: Token;
+	transactions: unknown[];
+	xrpAddress: XrpAddress;
+}): XrpTransactionUi[] =>
+	isTokenXrpTrustLine(token)
+		? transactions
+				.flatMap((transaction) => mapXrpTrustLineTransactions({ transaction, xrpAddress }))
+				.filter(({ currency, issuer }) => currency === token.currency && issuer === token.issuer)
+				.map(({ transaction }) => transaction)
+		: transactions
+				.map((transaction) => mapXrpTransaction({ transaction, xrpAddress }))
+				.filter(nonNullish);
+
 // Resolves to how many rows are new to the store, or to nothing when the pager was replaced while
 // the page was on its way: what it brought was asked for an account the store no longer holds.
 const pageOnce = async ({
 	pager,
-	tokenId,
+	token,
 	network,
 	isCurrent
 }: {
 	pager: XrpPager;
-	tokenId: TokenId;
+	token: Token;
 	network: XrpNetworkType;
 	isCurrent: () => boolean;
 }): Promise<number | undefined> => {
+	const { id: tokenId } = token;
 	const { address } = pager;
 
 	const { transactions, marker } = await loadXrpTransactions({
@@ -91,9 +115,7 @@ const pageOnce = async ({
 		return;
 	}
 
-	const rows = transactions
-		.map((transaction) => mapXrpTransaction({ transaction, xrpAddress: address }))
-		.filter(nonNullish);
+	const rows = toTokenRows({ token, transactions, xrpAddress: address });
 
 	const held = new Set((get(xrpTransactionsStore)?.[tokenId] ?? []).map(({ data: { id } }) => id));
 
@@ -121,24 +143,25 @@ const pageOnce = async ({
 };
 
 // A page can bring nothing new: it can hold only rows the worker already delivered, or only
-// transactions the list does not show. Neither is the end, and returning on it would leave the
-// caller with no progress, so a few more pages are asked for in the same call.
+// transactions the list does not show — for a trust-line token, every payment of another asset.
+// Neither is the end, and returning on it would leave the caller with no progress, so a few more
+// pages are asked for in the same call.
 const pageUntilRows = async ({
 	pager,
-	tokenId,
+	token,
 	network,
 	minTimestamp,
 	isCurrent
 }: {
 	pager: XrpPager;
-	tokenId: TokenId;
+	token: Token;
 	network: XrpNetworkType;
 	minTimestamp?: number;
 	isCurrent: () => boolean;
 }): Promise<ResultSuccess> => {
 	try {
 		for (let page = 0; page <= XRP_MAX_SKIPPED_HISTORY_PAGES; page++) {
-			const written = await pageOnce({ pager, tokenId, network, isCurrent });
+			const written = await pageOnce({ pager, token, network, isCurrent });
 
 			if (
 				isNullish(written) ||
@@ -168,15 +191,20 @@ const pageUntilRows = async ({
  * Pages the XRP history of a token further back, for the Activity list and the token's own page
  * alike. It walks `account_tx` from the newest transaction down with the marker each page hands
  * back, so the first page it asks for is the one the wallet worker already delivered.
+ *
+ * A trust-line token walks the same account history as XRP, with a pager of its own, and keeps the
+ * rows of its own line: its payments can lie far below the account's newest transactions.
  */
 export const loadOlderXrpTransactions: LoadOlderTransactions = async ({
-	token: {
-		id: tokenId,
-		network: { id: networkId }
-	},
+	token,
 	minTimestamp,
 	signalEnd
 }) => {
+	const {
+		id: tokenId,
+		network: { id: networkId }
+	} = token;
+
 	const address = get(xrpAddressMainnetStore)?.data;
 	const network = mapNetworkIdToNetwork(networkId);
 
@@ -204,7 +232,7 @@ export const loadOlderXrpTransactions: LoadOlderTransactions = async ({
 
 		const inFlight = pageUntilRows({
 			pager,
-			tokenId,
+			token,
 			network,
 			minTimestamp,
 			isCurrent: () => pagers.get(tokenId) === pager
