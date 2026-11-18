@@ -114,11 +114,6 @@ describe('SendDestinationWizardStep', () => {
 		expect(
 			getByTestId(`${SEND_DESTINATION_WIZARD_STEP}-${BTC_MAINNET_TOKEN.network.name}`)
 		).toBeInTheDocument();
-		expect(
-			getByTestId(`${SEND_DESTINATION_WIZARD_STEP}-${BTC_MAINNET_TOKEN.network.name}`).closest(
-				'.stretch'
-			)
-		).toHaveClass('send-destination-content', 'max-sm:scroll-fade');
 	});
 
 	it('should display ETH send destination components if sendToken network is ETH', () => {

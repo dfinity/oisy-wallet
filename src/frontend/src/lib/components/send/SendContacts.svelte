@@ -51,7 +51,7 @@
 <div in:fade>
 	{#if nonNullish(networkContacts) && Object.keys(filteredNetworkContacts).length > 0}
 		<div class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]" in:fade>
-			<ul class="scroll-fade list-none overflow-y-auto sm:overscroll-contain">
+			<ul class="scroll-fade list-none overflow-y-auto overscroll-contain">
 				{#each Object.values(filteredNetworkContacts) as { contact, address }, index (index)}
 					<SendContact
 						{address}
