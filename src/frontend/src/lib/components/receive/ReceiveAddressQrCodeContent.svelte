@@ -15,6 +15,7 @@
 		copyButtonTestId?: string;
 		network: Network;
 		copyAriaLabel: string;
+		copiedText?: string;
 		text?: Snippet;
 	}
 
@@ -26,6 +27,7 @@
 		copyButtonTestId,
 		network,
 		copyAriaLabel,
+		copiedText,
 		text
 	}: Props = $props();
 
@@ -36,6 +38,7 @@
 
 <ReceiveAddress
 	address={address ?? ''}
+	{copiedText}
 	{copyAriaLabel}
 	{copyButtonTestId}
 	labelRef="address"

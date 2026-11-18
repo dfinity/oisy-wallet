@@ -131,7 +131,7 @@ describe('ReceiveTokenModal', () => {
 
 		const accountIdButton = byTestId({ container, testId: RECEIVE_ICP_FORMAT_ACCOUNT_ID });
 
-		expect(accountIdButton).toHaveAttribute('aria-pressed', 'false');
+		expect(accountIdButton).toHaveAttribute('aria-checked', 'false');
 
 		accountIdButton?.click();
 
@@ -141,7 +141,7 @@ describe('ReceiveTokenModal', () => {
 			);
 		});
 
-		expect(accountIdButton).toHaveAttribute('aria-pressed', 'true');
+		expect(accountIdButton).toHaveAttribute('aria-checked', 'true');
 	});
 
 	it('should list every network of USDC with the page network first', async () => {
@@ -220,10 +220,13 @@ describe('ReceiveTokenModal', () => {
 			byTestId({ container, testId: `${RECEIVE_ROUTE_LIST_ITEM}-${deposit}` })?.click();
 
 			await waitFor(() => {
-				expect(byTestId({ container, testId: RECEIVE_CKBTC_DEPOSIT_WARNING })).toBeInTheDocument();
+				expect(byTestId({ container, testId: RECEIVE_ADDRESS_LOADING })).toBeInTheDocument();
 			});
 
 			expect(ckBtcServices.loadCkBtcDepositAddress).toHaveBeenCalledOnce();
+			expect(
+				byTestId({ container, testId: RECEIVE_CKBTC_DEPOSIT_WARNING })
+			).not.toBeInTheDocument();
 			expect(
 				byTestId({ container, testId: RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON })
 			).not.toBeInTheDocument();
@@ -244,6 +247,9 @@ describe('ReceiveTokenModal', () => {
 			});
 
 			expect(container).toHaveTextContent(get(i18n).receive.ckbtc.text.deposit_address);
+			expect(byTestId({ container, testId: RECEIVE_CKBTC_DEPOSIT_WARNING })).toHaveTextContent(
+				get(i18n).receive.ckbtc.text.deposit_warning
+			);
 			expect(container).toHaveTextContent(`${mockCkBtcMinterInfo.min_confirmations}`);
 			expect(
 				byTestId({ container, testId: RECEIVE_CKBTC_VIEW_ACTIVITY_BUTTON })
@@ -338,9 +344,7 @@ describe('ReceiveTokenModal', () => {
 		container.querySelector<HTMLElement>(`[data-tid^="${RECEIVE_ROUTE_LIST_ITEM}"]`)?.click();
 
 		await waitFor(() => {
-			expect(container).toHaveTextContent(
-				get(i18n).receive.token.text.send_instruction.slice(0, 9)
-			);
+			expect(byTestId({ container, testId: RECEIVE_ADDRESS_LOADING })).toBeInTheDocument();
 		});
 
 		enabledNetworks.set([ICP_NETWORK, ETHEREUM_NETWORK]);

@@ -193,7 +193,7 @@
 			title: $i18n.receive.addresses.text.evm_title,
 			label: $i18n.receive.addresses.text.evm_title,
 			copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied,
-			qrCodeAriaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr,
+			qrCodeAriaLabel: $i18n.receive.addresses.text.display_evm_qr,
 			text: evmNetworksText,
 			networks: evmNetworks,
 			condition: evmNetworks.length > 0

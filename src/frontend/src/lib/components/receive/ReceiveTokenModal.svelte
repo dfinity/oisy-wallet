@@ -442,10 +442,13 @@
 
 		const container = content;
 
+		// The step's heading, else the choice made there before (on Back), else its first control.
 		tick().then(() =>
-			container
-				.querySelector<HTMLElement>('input, button:not([disabled]), [tabindex="-1"]')
-				?.focus({ preventScroll: true })
+			(
+				container.querySelector<HTMLElement>('[data-receive-focus]') ??
+				container.querySelector<HTMLElement>('[aria-pressed="true"]') ??
+				container.querySelector<HTMLElement>('input, button:not([disabled])')
+			)?.focus({ preventScroll: true })
 		);
 	});
 </script>

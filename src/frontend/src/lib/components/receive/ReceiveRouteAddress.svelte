@@ -3,13 +3,12 @@
 	import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 	import ReceiveCkBtcDepositTerms from '$icp/components/receive/ReceiveCkBtcDepositTerms.svelte';
 	import ReceiveAddressQrCodeContent from '$lib/components/receive/ReceiveAddressQrCodeContent.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import SkeletonQrCode from '$lib/components/ui/SkeletonQrCode.svelte';
 	import {
 		RECEIVE_ADDRESS_LOADING,
@@ -95,7 +94,20 @@
 					})
 	);
 
+	// The button is named for what it does; the confirmation says what happened.
 	let copyAriaLabel = $derived(
+		deposit
+			? $i18n.receive.ckbtc.text.copy_deposit_address
+			: addressKind === 'icp'
+				? icpFormat === 'account-id'
+					? $i18n.receive.token.text.copy_account_id
+					: $i18n.receive.token.text.copy_principal
+				: replacePlaceholders($i18n.receive.token.text.copy_address, {
+						$network: sourceNetwork.name
+					})
+	);
+
+	let copiedText = $derived(
 		deposit
 			? $i18n.receive.ckbtc.text.deposit_address_copied
 			: addressKind === 'icp'
@@ -107,6 +119,21 @@
 					})
 	);
 
+	const icpFormats: { format: ReceiveIcpAddressFormat; label: string; testId: string }[] = $derived(
+		[
+			{
+				format: 'principal',
+				label: $i18n.receive.token.text.principal,
+				testId: RECEIVE_ICP_FORMAT_PRINCIPAL
+			},
+			{
+				format: 'account-id',
+				label: $i18n.receive.token.text.account_id,
+				testId: RECEIVE_ICP_FORMAT_ACCOUNT_ID
+			}
+		]
+	);
+
 	let metamaskNetwork = $derived(
 		isTokenEthereumNative(sourceToken) && isNetworkEthereum(sourceNetwork)
 			? sourceNetwork
@@ -115,72 +142,38 @@
 </script>
 
 <ContentWithToolbar>
-	<div class="mb-4 flex flex-col gap-1">
-		{#if deposit}
-			<ModalValue>
-				{#snippet label()}{$i18n.receive.ckbtc.text.you_send}{/snippet}
-				{#snippet mainValue()}
-					{replacePlaceholders($i18n.receive.ckbtc.text.on_network, {
-						$token: sourceSymbol,
-						$network: sourceNetwork.name
-					})}
-				{/snippet}
-			</ModalValue>
-			<ModalValue>
-				{#snippet label()}{$i18n.receive.ckbtc.text.you_receive}{/snippet}
-				{#snippet mainValue()}
-					{replacePlaceholders($i18n.receive.ckbtc.text.on_network, {
+	<!-- What the sender sends, and on which network: one line, the anchor of the step. -->
+	<div class="mb-4 flex items-center gap-3">
+		<TokenLogo badge={{ type: 'network' }} color="white" data={sourceToken} logoSize="md" />
+
+		<div class="flex min-w-0 flex-1 flex-col">
+			<span
+				class="block text-base leading-tight font-bold text-primary outline-none"
+				data-receive-focus
+				tabindex="-1"
+			>
+				{replacePlaceholders($i18n.receive.token.text.token_on_network, {
+					$token: sourceSymbol,
+					$network: sourceNetwork.name
+				})}
+			</span>
+
+			{#if deposit}
+				<span class="mt-0.5 block text-sm leading-tight text-tertiary">
+					{replacePlaceholders($i18n.receive.ckbtc.text.arrives_as, {
 						$token: creditedSymbol,
 						$network: creditedToken.network.name
 					})}
-				{/snippet}
-			</ModalValue>
-		{:else}
-			<ModalValue>
-				{#snippet label()}{$i18n.receive.token.text.asset}{/snippet}
-				{#snippet mainValue()}{sourceSymbol}{/snippet}
-			</ModalValue>
-			<ModalValue>
-				{#snippet label()}{$i18n.receive.token.text.network}{/snippet}
-				{#snippet mainValue()}
-					<span class="inline-flex items-center gap-2">
-						{sourceNetwork.name}
-						{#if isReceiveTestToken(creditedToken)}
-							<Badge variant="warning" width="w-fit">
-								{$i18n.receive.token.text.test_network}
-							</Badge>
-						{/if}
-					</span>
-				{/snippet}
-			</ModalValue>
+				</span>
+			{/if}
+		</div>
+
+		{#if isReceiveTestToken(creditedToken)}
+			<Badge variant="warning" width="w-fit">
+				{$i18n.receive.token.text.test_network}
+			</Badge>
 		{/if}
 	</div>
-
-	{#if addressKind === 'icp'}
-		<div class="mb-4 flex gap-2" aria-label={$i18n.receive.token.text.address_format} role="group">
-			<Button
-				colorStyle={icpFormat === 'principal' ? 'primary' : 'secondary-light'}
-				fullWidth
-				onclick={() => (icpFormat = 'principal')}
-				paddingSmall
-				pressed={icpFormat === 'principal'}
-				testId={RECEIVE_ICP_FORMAT_PRINCIPAL}
-			>
-				{$i18n.receive.token.text.principal}
-			</Button>
-			<Button
-				colorStyle={icpFormat === 'account-id' ? 'primary' : 'secondary-light'}
-				fullWidth
-				onclick={() => (icpFormat = 'account-id')}
-				paddingSmall
-				pressed={icpFormat === 'account-id'}
-				testId={RECEIVE_ICP_FORMAT_ACCOUNT_ID}
-			>
-				{$i18n.receive.token.text.account_id}
-			</Button>
-		</div>
-		<p class="mb-4 text-sm text-tertiary">{$i18n.receive.token.text.icp_format_hint}</p>
-	{/if}
 
 	{#if !tokenEnabled}
 		<p class="mb-4 text-primary">
@@ -201,20 +194,40 @@
 			onclick={onEnable}
 			testId={RECEIVE_ENABLE_TOKEN_BUTTON}
 		>
-			{enabling ? $i18n.receive.token.text.enabling : $i18n.receive.token.text.enable_and_show}
+			{enabling
+				? $i18n.receive.token.text.enabling
+				: replacePlaceholders($i18n.receive.token.text.enable_and_show, {
+						$token: creditedSymbol
+					})}
 		</Button>
 	{:else}
-		{#if deposit}
-			<MessageBox level="warning" styleClass="mb-4" testId={RECEIVE_CKBTC_DEPOSIT_WARNING}>
-				{$i18n.receive.ckbtc.text.deposit_warning}
-			</MessageBox>
-		{:else}
-			<p class="mb-4 text-sm text-tertiary">
-				{replacePlaceholders($i18n.receive.token.text.send_instruction, {
-					$token: sourceSymbol,
-					$network: sourceNetwork.name
-				})}
-			</p>
+		{#if addressKind === 'icp'}
+			<div class="mb-4">
+				<div
+					class="flex rounded-full bg-brand-subtle-10 p-1"
+					aria-label={$i18n.receive.token.text.address_format}
+					role="radiogroup"
+				>
+					{#each icpFormats as { format, label, testId } (format)}
+						<button
+							class="flex flex-1 items-center justify-center rounded-full border-0 px-3 py-1.5 text-center text-sm font-semibold transition-colors duration-150 ease-out"
+							class:bg-primary={icpFormat === format}
+							class:shadow-sm={icpFormat === format}
+							class:text-primary={icpFormat === format}
+							class:text-tertiary={icpFormat !== format}
+							aria-checked={icpFormat === format}
+							data-tid={testId}
+							onclick={() => (icpFormat = format)}
+							role="radio"
+							type="button"
+						>
+							{label}
+						</button>
+					{/each}
+				</div>
+
+				<p class="mt-2 text-sm text-tertiary">{$i18n.receive.token.text.icp_format_hint}</p>
+			</div>
 		{/if}
 
 		<div aria-live="polite">
@@ -224,10 +237,28 @@
 						address={addressState.address}
 						{addressLabel}
 						addressToken={sourceToken}
+						{copiedText}
 						{copyAriaLabel}
 						copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
 						network={sourceNetwork}
-					/>
+					>
+						{#snippet text()}
+							<!-- Right above the address and Copy, so it is in view wherever the address is. -->
+							{#if deposit}
+								<span data-tid={RECEIVE_CKBTC_DEPOSIT_WARNING}>
+									<strong class="text-warning-primary"
+										>{$i18n.receive.ckbtc.text.deposit_warning}</strong
+									>
+									{$i18n.receive.ckbtc.text.deposit_explanation}
+								</span>
+							{:else}
+								{replacePlaceholders($i18n.receive.token.text.send_instruction, {
+									$token: sourceSymbol,
+									$network: sourceNetwork.name
+								})}
+							{/if}
+						{/snippet}
+					</ReceiveAddressQrCodeContent>
 				{/key}
 			{:else if addressState.status === 'error'}
 				<div class="flex flex-col items-center gap-3 py-6 text-center">
@@ -310,7 +341,12 @@
 					{$i18n.receive.token.text.change_token}
 				</Button>
 			{/if}
-			<ButtonDone onclick={onDone} testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} />
+			<!-- Without an address there is nothing to be done with: enabling stays the one primary action. -->
+			<ButtonDone
+				onclick={onDone}
+				testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON}
+				variant={tokenEnabled ? 'primary' : 'secondary-light'}
+			/>
 		</div>
 	{/snippet}
 </ContentWithToolbar>

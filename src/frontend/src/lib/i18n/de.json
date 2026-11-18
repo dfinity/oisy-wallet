@@ -1034,8 +1034,6 @@
 				"route_direct": "",
 				"route_ckbtc_deposit": "",
 				"send_instruction": "",
-				"network": "",
-				"asset": "",
 				"enable_info": "",
 				"enable_and_show": "",
 				"enabling": "",
@@ -1055,17 +1053,22 @@
 				"address_label": "",
 				"address_copied": "",
 				"how_to_convert": "",
-				"how_to_convert_description": ""
+				"how_to_convert_description": "",
+				"token_on_network": "",
+				"copy_address": "",
+				"copy_principal": "",
+				"copy_account_id": "",
+				"no_match": ""
 			}
 		},
 		"ckbtc": {
 			"text": {
 				"deposit_address": "",
 				"deposit_warning": "",
+				"deposit_explanation": "",
+				"arrives_as": "",
+				"copy_deposit_address": "",
 				"deposit_address_copied": "",
-				"you_send": "",
-				"you_receive": "",
-				"on_network": "",
 				"confirmations": "",
 				"estimated_fee": "",
 				"unavailable": "",
@@ -1077,7 +1080,8 @@
 		"addresses": {
 			"text": {
 				"evm_title": "",
-				"evm_networks": ""
+				"evm_networks": "",
+				"display_evm_qr": ""
 			}
 		}
 	},
@@ -1431,7 +1435,8 @@
 			"unsupported_token_conversion": "Für das ausgewählte Token wird keine Umwandlung unterstützt.",
 			"calculating_max_amount": "Berechne...",
 			"send_to": "Sende konvertierte Assets an",
-			"custom_destination": "Andere Adresse"
+			"custom_destination": "Andere Adresse",
+			"send_token_on_network": ""
 		},
 		"assertion": {
 			"insufficient_funds": "Unzureichendes Guthaben"

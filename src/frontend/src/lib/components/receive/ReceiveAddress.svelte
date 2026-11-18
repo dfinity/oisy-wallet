@@ -20,6 +20,7 @@
 		network: Network;
 		qrCodeAction: ReceiveQRCodeAction;
 		copyAriaLabel: string;
+		copiedText?: string;
 		testId?: string;
 		copyButtonTestId?: string;
 	}
@@ -33,6 +34,7 @@
 		network,
 		qrCodeAction,
 		copyAriaLabel,
+		copiedText,
 		testId,
 		copyButtonTestId
 	}: Props = $props();
@@ -71,7 +73,13 @@
 
 				{#if nonNullish(address)}
 					<div in:fade>
-						<ReceiveActions {address} {copyAriaLabel} {copyButtonTestId} {qrCodeAction} />
+						<ReceiveActions
+							{address}
+							{copiedText}
+							{copyAriaLabel}
+							{copyButtonTestId}
+							{qrCodeAction}
+						/>
 					</div>
 				{:else}
 					<div class="min-w-20">&ZeroWidthSpace;</div>

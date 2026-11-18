@@ -75,7 +75,7 @@
 	<div class="overflow-y-auto overscroll-contain">
 		{#if displayAssets.length === 0}
 			<div class="flex flex-col items-center gap-3 px-4 py-8 text-center">
-				<p class="text-primary">{$i18n.core.text.no_results}</p>
+				<p class="text-primary">{$i18n.receive.token.text.no_match}</p>
 
 				<Button
 					colorStyle="secondary-light"

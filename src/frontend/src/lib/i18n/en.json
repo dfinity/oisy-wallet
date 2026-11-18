@@ -1033,11 +1033,9 @@
 				"change_token": "Change token",
 				"route_direct": "Send $token on $network",
 				"route_ckbtc_deposit": "Send $sourceToken to receive $creditedToken",
-				"send_instruction": "Send only $token to this address, and choose $network as the network in the sending wallet.",
-				"network": "Network",
-				"asset": "Asset",
+				"send_instruction": "Send only $token on $network to this address.",
 				"enable_info": "$token is not enabled in your wallet yet. Enable it to see the address.",
-				"enable_and_show": "Enable token and show address",
+				"enable_and_show": "Enable $token and show address",
 				"enabling": "Enabling token...",
 				"enable_error": "OISY couldn't enable $token. Your selection is kept. Try again.",
 				"address_loading": "Loading your address",
@@ -1049,35 +1047,41 @@
 				"address_format": "Address format",
 				"principal": "Principal",
 				"account_id": "Account ID",
-				"icp_format_hint": "Use the Principal by default. If the sending wallet or exchange asks for an Account ID, switch to Account ID.",
+				"icp_format_hint": "Choose Account ID if the sending wallet or exchange asks for one.",
 				"principal_label": "ICP Principal",
 				"account_id_label": "ICP Account ID",
 				"address_label": "$network address",
 				"address_copied": "$network address copied to clipboard.",
 				"how_to_convert": "How to convert $token to $ckToken",
-				"how_to_convert_description": "You can also start with $token on $network: it arrives in your wallet on $network, then Convert turns it into $ckToken."
+				"how_to_convert_description": "You can also start with $token on $network: it arrives in your wallet on $network, then Convert turns it into $ckToken.",
+				"token_on_network": "$token on $network",
+				"copy_address": "Copy $network address",
+				"copy_principal": "Copy ICP Principal",
+				"copy_account_id": "Copy ICP Account ID",
+				"no_match": "No matching tokens. Try a different name or symbol."
 			}
 		},
 		"ckbtc": {
 			"text": {
 				"deposit_address": "Bitcoin deposit address for ckBTC",
-				"deposit_warning": "Send only BTC on the Bitcoin network to this deposit address. OISY checks the deposit after the required Bitcoin confirmations and credits eligible deposits as ckBTC on Internet Computer.",
+				"deposit_warning": "Send only BTC on the Bitcoin network.",
+				"deposit_explanation": "OISY checks the deposit after the required Bitcoin confirmations and credits eligible deposits as ckBTC on Internet Computer.",
+				"arrives_as": "Arrives as $token on $network",
+				"copy_deposit_address": "Copy Bitcoin deposit address for ckBTC",
 				"deposit_address_copied": "Bitcoin deposit address for ckBTC copied to clipboard.",
-				"you_send": "You send",
-				"you_receive": "You receive",
-				"on_network": "$token on $network",
 				"confirmations": "Bitcoin confirmations",
-				"estimated_fee": "Estimated conversion fee",
+				"estimated_fee": "Estimated deposit fee",
 				"unavailable": "Unavailable",
 				"terms_error": "OISY couldn't load the current deposit terms.",
-				"small_deposit": "A deposit too small to cover the screening fee may yield no ckBTC.",
+				"small_deposit": "If your deposit is too small to cover the fee, you may receive no ckBTC.",
 				"view_activity": "View ckBTC activity"
 			}
 		},
 		"addresses": {
 			"text": {
 				"evm_title": "EVM wallet address",
-				"evm_networks": "One address for $networks."
+				"evm_networks": "One address for $networks.",
+				"display_evm_qr": "Show QR code for the shared EVM wallet address"
 			}
 		}
 	},
@@ -1431,7 +1435,8 @@
 			"unsupported_token_conversion": "Conversion for the selected token is not supported.",
 			"calculating_max_amount": "Calculating...",
 			"send_to": "Send converted assets to",
-			"custom_destination": "Another address"
+			"custom_destination": "Another address",
+			"send_token_on_network": "Send $token on $network to your $oisy_name address"
 		},
 		"assertion": {
 			"insufficient_funds": "Insufficient balance"

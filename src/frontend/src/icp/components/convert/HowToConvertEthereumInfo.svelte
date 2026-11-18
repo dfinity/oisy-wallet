@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 	import {
 		ckEthereumNativeToken,
@@ -90,7 +89,7 @@
 			address={$ethAddress ?? ''}
 			copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 			labelRef="eth-wallet-address"
-			network={ETHEREUM_NETWORK}
+			network={$ckEthereumTwinToken.network}
 			qrCodeAction={{
 				enabled: true,
 				ariaLabel: $i18n.wallet.text.display_wallet_address_qr,
@@ -98,8 +97,9 @@
 			}}
 		>
 			{#snippet title()}
-				{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.send_eth), {
-					$token: $ckEthereumTwinToken.symbol
+				{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.send_token_on_network), {
+					$token: $ckEthereumTwinToken.symbol,
+					$network: $ckEthereumTwinToken.network.name
 				})}
 			{/snippet}
 		</ReceiveAddress>

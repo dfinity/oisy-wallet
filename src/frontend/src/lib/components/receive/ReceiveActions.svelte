@@ -8,6 +8,8 @@
 		address: string;
 		qrCodeAction?: ReceiveQRCodeAction;
 		copyAriaLabel: string;
+		// The confirmation once copied; the button's name otherwise reads it too.
+		copiedText?: string;
 		copyButtonTestId?: string;
 	}
 
@@ -15,6 +17,7 @@
 		address,
 		qrCodeAction = { enabled: false },
 		copyAriaLabel,
+		copiedText,
 		copyButtonTestId
 	}: Props = $props();
 </script>
@@ -33,5 +36,5 @@
 		</ButtonIcon>
 	{/if}
 
-	<ReceiveCopy {address} {copyAriaLabel} testId={copyButtonTestId} />
+	<ReceiveCopy {address} {copiedText} {copyAriaLabel} testId={copyButtonTestId} />
 </div>

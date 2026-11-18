@@ -762,8 +762,6 @@ interface I18nReceive {
 			route_direct: string;
 			route_ckbtc_deposit: string;
 			send_instruction: string;
-			network: string;
-			asset: string;
 			enable_info: string;
 			enable_and_show: string;
 			enabling: string;
@@ -784,16 +782,21 @@ interface I18nReceive {
 			address_copied: string;
 			how_to_convert: string;
 			how_to_convert_description: string;
+			token_on_network: string;
+			copy_address: string;
+			copy_principal: string;
+			copy_account_id: string;
+			no_match: string;
 		};
 	};
 	ckbtc: {
 		text: {
 			deposit_address: string;
 			deposit_warning: string;
+			deposit_explanation: string;
+			arrives_as: string;
+			copy_deposit_address: string;
 			deposit_address_copied: string;
-			you_send: string;
-			you_receive: string;
-			on_network: string;
 			confirmations: string;
 			estimated_fee: string;
 			unavailable: string;
@@ -802,7 +805,7 @@ interface I18nReceive {
 			view_activity: string;
 		};
 	};
-	addresses: { text: { evm_title: string; evm_networks: string } };
+	addresses: { text: { evm_title: string; evm_networks: string; display_evm_qr: string } };
 }
 
 interface I18nSend {
@@ -1151,6 +1154,7 @@ interface I18nConvert {
 		calculating_max_amount: string;
 		send_to: string;
 		custom_destination: string;
+		send_token_on_network: string;
 	};
 	assertion: { insufficient_funds: string };
 	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };
