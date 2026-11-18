@@ -7,7 +7,12 @@ import {
 import { XrpAccountTransactionEntrySchema } from '$xrp/schema/xrpl-rpc.schema';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
-import type { XrpPayment, XrpTransactionUi, XrpTrustSet } from '$xrp/types/xrp-transaction';
+import type {
+	XrpIssuedAmount,
+	XrpPayment,
+	XrpTransactionUi,
+	XrpTrustSet
+} from '$xrp/types/xrp-transaction';
 import type { XrpTrustLineTokenIdentity } from '$xrp/types/xrp-trust-line-token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { decode } from 'ripple-binary-codec';
@@ -88,6 +93,46 @@ export const buildXrpPayment = ({
 	SigningPubKey: signingPublicKey,
 	...(nonNullish(destinationTag) && { DestinationTag: destinationTag }),
 	...(nonNullish(lastLedgerSequence) && { LastLedgerSequence: lastLedgerSequence })
+});
+
+/**
+ * Assembles an unsigned XRPL Payment of a trust-line token.
+ *
+ * `SendMax` only when the issuer charges a transfer fee: without it the ledger takes no more than
+ * the amount, which cannot cover the fee. No `Paths` and no flags, so the payment moves only
+ * through the issuer and delivers the whole amount or fails — never a partial payment.
+ */
+export const buildXrpTokenPayment = ({
+	account,
+	destination,
+	amount,
+	sendMax,
+	fee,
+	sequence,
+	signingPublicKey,
+	destinationTag,
+	lastLedgerSequence
+}: {
+	account: string;
+	destination: string;
+	amount: XrpIssuedAmount;
+	sendMax?: XrpIssuedAmount;
+	fee: XrpBalance;
+	sequence: number;
+	signingPublicKey: string;
+	destinationTag?: number;
+	lastLedgerSequence: number;
+}): XrpPayment => ({
+	TransactionType: 'Payment',
+	Account: account,
+	Destination: destination,
+	Amount: amount,
+	...(nonNullish(sendMax) && { SendMax: sendMax }),
+	Fee: `${fee}`,
+	Sequence: sequence,
+	SigningPubKey: signingPublicKey,
+	...(nonNullish(destinationTag) && { DestinationTag: destinationTag }),
+	LastLedgerSequence: lastLedgerSequence
 });
 
 /**
