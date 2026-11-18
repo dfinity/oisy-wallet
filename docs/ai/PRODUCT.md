@@ -382,6 +382,10 @@ Every token belongs to one asset type, and the token list can be filtered by it:
 
 TCYCLES is a [suggested](#curated-tokens-vs-metadata-only-tokens) token, so Compute lists it for every user who has not switched it off. A user who switched it off sees the empty state instead, which names the supported token they can enable. Other cycles-backed tokens, such as XTC, stay under Crypto.
 
+### ckSOL (local and staging)
+
+Behind `CKSOL_ENABLED` (`src/frontend/src/env/cksol.env.ts`, on for local and staging builds, off in production), OISY lists **ckSOL**, the chain-key twin of SOL on the Internet Computer (ledger `ls5lp-lqaaa-aaaar-qb5oa-cai`), as a curated token. Like ckBTC and ckETH, it is priced as its twin, shows the ledger's own logo, and shares a token group with its twin: **Solana** holds SOL and ckSOL. It is not enabled by default; a user enables it in Manage tokens. Only the mainnet ledger is listed: a local build reaches no mainnet canister and carries no ckSOL, and the Devnet twin, ckDevnetSOL, is not offered. Converting between SOL and ckSOL is not offered yet.
+
 ---
 
 ## Send
