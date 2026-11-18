@@ -17,7 +17,6 @@
 		RECEIVE_ADDRESS_RETRY_BUTTON,
 		RECEIVE_CHANGE_TOKEN_BUTTON,
 		RECEIVE_CKBTC_DEPOSIT_WARNING,
-		RECEIVE_CKBTC_VIEW_ACTIVITY_BUTTON,
 		RECEIVE_ENABLE_TOKEN_BUTTON,
 		RECEIVE_HOW_TO_CONVERT_BUTTON,
 		RECEIVE_ICP_FORMAT_ACCOUNT_ID,
@@ -207,28 +206,23 @@
 
 						<!-- Right under the address and Copy, so it is in view wherever the address is copied. -->
 						{#if deposit}
-							<p
-								class="mt-3 flex items-start gap-2 text-sm text-tertiary"
+							<div
+								class="mt-3 flex items-start gap-2 px-4 text-sm leading-5 font-bold text-warning-primary"
 								data-tid={RECEIVE_CKBTC_DEPOSIT_WARNING}
 							>
-								<span class="shrink-0 text-warning-primary"><IconWarning /></span>
-								<span>
-									<strong class="text-warning-primary"
-										>{$i18n.receive.ckbtc.text.deposit_warning}</strong
-									>
-									{$i18n.receive.ckbtc.text.deposit_explanation}
-								</span>
-							</p>
+								<span class="flex h-5 shrink-0 items-center"><IconWarning /></span>
+								<span>{$i18n.receive.ckbtc.text.deposit_warning}</span>
+							</div>
 						{:else}
-							<p class="mt-3 flex items-start gap-2 text-sm text-tertiary">
-								<span class="shrink-0"><IconInfo /></span>
+							<div class="mt-3 flex items-start gap-2 px-4 text-sm leading-5 text-tertiary">
+								<span class="flex h-5 shrink-0 items-center"><IconInfo /></span>
 								<span>
 									{replacePlaceholders($i18n.receive.token.text.send_instruction, {
 										$token: sourceSymbol,
 										$network: sourceNetwork.name
 									})}
 								</span>
-							</p>
+							</div>
 						{/if}
 					{/key}
 				{:else if addressState.status === 'error'}
@@ -256,19 +250,11 @@
 			</div>
 
 			{#if deposit}
-				<ReceiveCkBtcDepositTerms {sourceToken} token={creditedToken} />
-
-				{#if addressState.status === 'ready'}
-					<Button
-						colorStyle="secondary-light"
-						fullWidth
-						onclick={onViewActivity}
-						styleClass="mt-4"
-						testId={RECEIVE_CKBTC_VIEW_ACTIVITY_BUTTON}
-					>
-						{$i18n.receive.ckbtc.text.view_activity}
-					</Button>
-				{/if}
+				<ReceiveCkBtcDepositTerms
+					onViewActivity={addressState.status === 'ready' ? onViewActivity : undefined}
+					{sourceToken}
+					token={creditedToken}
+				/>
 			{/if}
 
 			{#if addressState.status === 'ready' && metamaskNetwork}

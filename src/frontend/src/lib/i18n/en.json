@@ -1065,18 +1065,17 @@
 			"text": {
 				"deposit_address": "Bitcoin deposit address for ckBTC",
 				"deposit_warning": "Send only BTC on the Bitcoin network.",
-				"deposit_explanation": "OISY checks the deposit after the required Bitcoin confirmations and credits eligible deposits as ckBTC on Internet Computer.",
 				"copy_deposit_address": "Copy Bitcoin deposit address for ckBTC",
 				"deposit_address_copied": "Bitcoin deposit address for ckBTC copied to clipboard.",
 				"confirmations": "Bitcoin confirmations",
 				"estimated_fee": "Estimated deposit fee",
 				"unavailable": "Unavailable",
 				"terms_error": "OISY couldn't load the current deposit terms.",
-				"small_deposit": "If your deposit is too small to cover the fee, you may receive no ckBTC.",
 				"view_activity": "View ckBTC activity",
 				"receive_as": "Receive as $token",
 				"benefit": "$count confirmations, then fast and cheap",
-				"benefit_generic": "After confirmations: fast and cheap"
+				"benefit_generic": "After confirmations: fast and cheap",
+				"credit_note": "OISY credits ckBTC on Internet Computer after these confirmations. A deposit smaller than the fee yields no ckBTC."
 			}
 		},
 		"addresses": {

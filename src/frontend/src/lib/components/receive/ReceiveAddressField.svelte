@@ -26,7 +26,7 @@
 
 <div class="flex items-center gap-3 rounded-xl bg-brand-subtle-10 px-4 py-3">
 	<div class="flex min-w-0 flex-1 flex-col gap-0.5">
-		<span class="text-sm text-tertiary">{label}</span>
+		<span class="text-sm font-bold text-primary">{label}</span>
 
 		<output class="text-base break-all text-primary" data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
 			><span class="font-bold">{head}</span><span class="text-tertiary">{middle}</span><span

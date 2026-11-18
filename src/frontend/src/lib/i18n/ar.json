@@ -1065,18 +1065,17 @@
 			"text": {
 				"deposit_address": "",
 				"deposit_warning": "",
-				"deposit_explanation": "",
 				"copy_deposit_address": "",
 				"deposit_address_copied": "",
 				"confirmations": "",
 				"estimated_fee": "",
 				"unavailable": "",
 				"terms_error": "",
-				"small_deposit": "",
 				"view_activity": "",
 				"receive_as": "",
 				"benefit": "",
-				"benefit_generic": ""
+				"benefit_generic": "",
+				"credit_note": ""
 			}
 		},
 		"addresses": {

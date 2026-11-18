@@ -793,18 +793,17 @@ interface I18nReceive {
 		text: {
 			deposit_address: string;
 			deposit_warning: string;
-			deposit_explanation: string;
 			copy_deposit_address: string;
 			deposit_address_copied: string;
 			confirmations: string;
 			estimated_fee: string;
 			unavailable: string;
 			terms_error: string;
-			small_deposit: string;
 			view_activity: string;
 			receive_as: string;
 			benefit: string;
 			benefit_generic: string;
+			credit_note: string;
 		};
 	};
 	addresses: { text: { evm_title: string; evm_networks: string; display_evm_qr: string } };
