@@ -338,7 +338,7 @@ describe('SwapReceiveNetworkList', () => {
 	});
 
 	it.each([
-		{ sourceToken: ckUsdc, title: 'No other networks for USDC in this swap' },
+		{ sourceToken: ckUsdc, title: 'No other networks listed for USDC' },
 		{ sourceToken: null, title: en.swap.text.move_no_networks_title_without_symbol }
 	])(
 		'should show "$title" and focus Back when the network list opens empty',
@@ -363,9 +363,7 @@ describe('SwapReceiveNetworkList', () => {
 		const rendered = renderList({ receiveSupportedData: null });
 		const list = rendered.getByTestId(SWAP_RECEIVE_NETWORK_LIST);
 
-		expect(within(list).getByRole('status')).toHaveTextContent(
-			'No other networks for USDC in this swap'
-		);
+		expect(within(list).getByRole('status')).toHaveTextContent('No other networks listed for USDC');
 
 		rendered.supportedData.set(fromBaseUsdc);
 		await within(list).findByRole('button', { name: /Ethereum/ });
@@ -382,7 +380,7 @@ describe('SwapReceiveNetworkList', () => {
 
 		expect(
 			within(reopened.getByTestId(SWAP_RECEIVE_NETWORK_LIST)).getByRole('status')
-		).toHaveTextContent('No other networks for USDC in this swap');
+		).toHaveTextContent('No other networks listed for USDC');
 	});
 
 	it.each([
@@ -411,7 +409,7 @@ describe('SwapReceiveNetworkList', () => {
 
 		await waitFor(() =>
 			expect(within(list).getByRole('status')).toHaveTextContent(
-				'No other networks for USDC in this swap'
+				'No other networks listed for USDC'
 			)
 		);
 	});

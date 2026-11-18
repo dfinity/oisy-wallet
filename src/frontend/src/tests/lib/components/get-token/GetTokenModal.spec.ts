@@ -404,9 +404,9 @@ describe('GetTokenModal', () => {
 
 			await waitFor(() => {
 				expect(within(list).getByRole('status')).toBe(status);
-				expect(status).toHaveTextContent('The available networks changed');
+				expect(status).toHaveTextContent('The network list changed');
 				expect(status).toHaveTextContent(
-					'You can no longer receive USDC on another network in this swap. Go back to see what you can receive instead.'
+					'This swap no longer shows any other networks for USDC. Go back to see what you can receive instead.'
 				);
 			});
 		});
