@@ -2715,7 +2715,9 @@
 		"text": {
 			"next_slide": "下一张幻灯片",
 			"prev_slide": "上一张幻灯片",
-			"indicator": "跳转到第 $index 幻灯片"
+			"indicator": "跳转到第 $index 幻灯片",
+			"cksol_slide_title": "ckSOL 来了：Internet Computer 上的 SOL",
+			"cksol_slide_cta": "打开 ckSOL"
 		}
 	},
 	"agreements": {
