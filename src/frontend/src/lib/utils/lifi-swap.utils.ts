@@ -43,7 +43,14 @@ import { decodeTransactionMessage } from '$sol/utils/sol-transactions.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isTokenSolanaNative } from '$sol/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { ChainId, type FeeCost, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
+import {
+	ChainId,
+	HTTPError,
+	SDKError,
+	type FeeCost,
+	type LiFiStep,
+	type QuoteRequestFromAmount
+} from '@lifi/sdk';
 import {
 	getCompiledTransactionMessageDecoder,
 	type Transaction,
@@ -84,11 +91,39 @@ export const toLifiTokenAddress = (token: Token): string | undefined => {
  * `LIFI_BTC_SWAP_ENABLED` and `BTC_SEND_VIA_BACKEND_ENABLED` are both on. Bitcoin is never a LI.FI
  * destination, so `toLifiChainId` and `toLifiTokenAddress` leave it out.
  */
-const isLifiBtcSource = (token: Token): boolean =>
+export const isLifiBtcSource = (token: Token): boolean =>
 	LIFI_BTC_SWAP_ENABLED &&
 	BTC_SEND_VIA_BACKEND_ENABLED &&
 	isNetworkIdBTCMainnet(token.network.id) &&
 	isBitcoinToken(token);
+
+// LI.FI's error codes for a BTC source whose UTXOs it finds missing (`1003`, HTTP 404, 2026-11-13) or
+// too small for the amount and its fees (`1004`, HTTP 422, 2026-11-17).
+const LIFI_BTC_INSUFFICIENT_FUNDS_CODES = [1003, 1004];
+
+/**
+ * Whether LI.FI refused a quote from BTC because of the address's balance, as the SDK throws it. Its
+ * HTTP statuses are those of "no route", so only LI.FI's code tells the two apart. The codes are read
+ * for a BTC request only: from another chain they may mean something else.
+ */
+export const isLifiBtcInsufficientFundsError = ({
+	err,
+	request
+}: {
+	err: unknown;
+	request: QuoteRequestFromAmount;
+}): boolean => {
+	if (request.fromChain !== ChainId.BTC) {
+		return false;
+	}
+
+	const code =
+		err instanceof SDKError && err.cause instanceof HTTPError
+			? err.cause.responseBody?.code
+			: undefined;
+
+	return nonNullish(code) && LIFI_BTC_INSUFFICIENT_FUNDS_CODES.includes(code);
+};
 
 /**
  * The `getSupportedDestinations` of a LI.FI registry entry. LI.FI keeps no token list — any token on
@@ -98,6 +133,7 @@ const isLifiBtcSource = (token: Token): boolean =>
  * The routing sends a pair to the Solana registry whenever either side is Solana, so the EVM entry
  * quotes EVM → EVM (`{ evm: 'any' }`) and the Solana entry EVM → Solana and Solana → Solana
  * (`{ sol: 'any' }`). A Solana source gets nothing from the EVM entry: Solana → EVM is not quoted.
+ * The BTC entry has its own (`lifiBtcSupportedDestinations`).
  */
 export const buildLifiSupportedDestinations =
 	(registry: 'evm' | 'sol'): GetSupportedDestinationsFn =>

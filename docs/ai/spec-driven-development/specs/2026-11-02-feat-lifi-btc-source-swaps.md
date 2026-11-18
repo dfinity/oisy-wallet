@@ -108,9 +108,11 @@ found" on an empty address); map that to the existing insufficient-balance state
 mean no route from this provider.
 
 The three come back as HTTP errors with LI.FI's code in the body: `1002` and `1003` with 404, `1008`
-with 424 (2026-11-13). None is offered. The swap form already explains an insufficient balance from
-its own UTXO selection, so `swap_offer` reports `1003` as `insufficient_funds` and the other two as
-`no_route`, all three without a severity (a 424 from an EVM source stays a failed request). A BTC
+with 424 (2026-11-13). A fourth, `1004` with 422 ("Insufficient UTXOs value to cover tx value (…)
+and fees (…)", seen on fe4 on 2026-11-17), means UTXOs too small for the amount. None is offered.
+The swap form already explains an insufficient balance from its own UTXO selection, so `swap_offer`
+reports `1003` and `1004` as `insufficient_funds` and the other two as `no_route`, all without a
+severity (a 424 from an EVM source stays a failed request). A BTC
 source never gets the second request of the two-swap hint. Bitcoin stays out of `toLifiChainId`, so
 it is never a LI.FI destination.
 
@@ -323,6 +325,45 @@ next to the NEAR Intents one, and `SwapBtcFees.svelte` the LI.FI fee breakdown (
 fee, Bitcoin network fee). The EVM and Solana LI.FI wizards have no terms gate (unlike NEAR Intents'
 `hasAcknowledgedNearIntentsSwap`), so neither does this one.
 
+As built (PR 6):
+
+- **Registration.** `btcSwapProviders` registers LI.FI after Chain Fusion and NEAR Intents when
+  `LIFI_SWAP_ENABLED`, `LIFI_BTC_SWAP_ENABLED` and `BTC_SEND_VIA_BACKEND_ENABLED` are all on.
+  - Sources: native BTC on mainnet only (`lifiBtcSupportedTokens`).
+  - Destinations: every EVM and Solana token (`lifiBtcSupportedDestinations`), but only while a
+    bridge is admitted (`isLifiBtcOffered`: allowed, not denied, with a payout binding;
+    `lifiBtcAdmittedBridges`). Before that, the destination picker is unchanged.
+- **Quote.** `fetchLifiBtcSwapQuote` (`lifi-btc-swap.services.ts`) takes LI.FI's checked offer and
+  prices LI.FI's own UTXO selection for its deposit, memo and fee outputs, using `prepareBtcSend` over
+  the stores the swap loaders fill, as the Chain Fusion quote does. The offer carries it as
+  `btcSelection: { utxosFee, outputVSizes }`.
+  - There is no offer when the bridge has no payout binding, when the stores are not loaded, or when
+    the selection cannot fund the quote.
+- **Form and fee row with LI.FI selected.** The fee row, the funds check and Max use `btcSelection`.
+  `initBtcMaxSendAmount` now takes `outputVSizes`.
+  - Before any offer is selected, while LI.FI may be asked, Max uses the conservative layout
+    (`LIFI_BTC_CONSERVATIVE_OUTPUT_VSIZES`, 43 + 92 + 31 vB). At the one-output Max, a pair only
+    LI.FI serves would get a quote its own selection cannot fund, and so no offer to correct Max.
+  - The fee row shows only the Bitcoin network fee. LI.FI's and the bridge's fees come out of the
+    amount, so they are listed in the provider sheet (`SwapDetailsLifi`), as for EVM and Solana.
+- **Wizard.** It sends with the offer's `btcSelection.utxosFee`, and refuses an offer without one as
+  missing data. A LI.FI failure is reported to analytics as `toLifiSwapErrorType`'s category, never
+  its text, which can carry the user's addresses, as from EVM and Solana. A `BtcValidationError` from
+  that check reads as the wizard's own one-output check would: `handleBtcValidationError`'s message,
+  and back to the form. It skips the generic one-output `validateBtcSend`: `fetchLifiBtcSwap` checks the
+  selection against the layout of the quote it re-requests. A re-quote refused on slippage
+  (`isSlippageExceeded`: a minimum below the one displayed, or no route left) is shown on the review
+  as `swap.error.slippage_exceeded` with the max slippage, as from EVM and Solana, not as an
+  unexpected error. LI.FI's refusal of the balance (`1003` and `1004`,
+  `isLifiBtcInsufficientFundsError`) comes with the same HTTP statuses as "no route", but is not
+  slippage: `requoteAtLeast` rethrows it as is, and `fetchLifiBtcSwap` refuses with
+  `BtcValidationError(InsufficientBalance)`, which reads as the form's own balance check would.
+- **Binding.** `fetchLifiBtcSwap` runs `bindLifiBtcPayout` (`lifi-btc-binding.services.ts`) between
+  decoding the outputs and checking the fee. Each bridge's binding is looked up by tool key in
+  `LIFI_BTC_PAYOUT_BINDINGS`, and a tool without one is refused (`LifiRouteUnsupportedError`). The
+  registry is empty, so with `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]` empty too, nothing is
+  offered from BTC yet (see [Bridge admission](#bridge-admission)).
+
 ### Backend: BTC-source LI.FI rows
 
 The backend validates every LI.FI row when it is created
@@ -397,8 +438,47 @@ recipient and its minimum must then match the review. Candidates:
   Relay did not quote on 2026-11-13, so it waits until it does.
 
 Each binding trusts the bridge's own word instead of on-chain calldata, which is weaker than the
-EVM binding. For NEAR, 1Click's signature at least authenticates that word. Whether that is
-acceptable is a pending decision, not a fact to find.
+EVM binding. For NEAR, 1Click's signature at least authenticates that word. Pending decision 1
+accepted that trust on 2026-11-17.
+
+What each bridge's API offers, checked 2026-11-17:
+
+- **LayerSwap: nothing keyless, so it cannot be bound.**
+  - A LI.FI LayerSwap quote pays LayerSwap's _shared_ deposit address (`bc1plxa9q77…`, P2TR, the
+    same in every quote). The memo's 7-character id (`17dfd8a;=|lifi…`) tells the swaps apart.
+  - `api.layerswap.io/api/v2/swaps/{id}` takes a UUID only.
+  - The keyless `GET /api/v2/swaps?address=` lists neither a fresh LI.FI quote nor two _completed_
+    LI.FI LayerSwap swaps, by sender or by recipient.
+  - `/api/v2/swaps/by_transaction_hash/<txid>` maps the txid to a swap UUID, then answers "not
+    found".
+
+  LI.FI's swaps sit under LI.FI's own LayerSwap account.
+
+- **Relay: a keyless lookup by the memo's id, but only after the deposit, so it cannot be bound.**
+  - The memo is `0x<32 bytes>=|lifi…`, and that id is Relay's `protocol.orderId`, not its request
+    id.
+  - `GET api.relay.link/requests/v2?orderId=<id>` returns the request: recipient, `currencyIn`
+    (chain 8253038, the deposit amount), `currencyOut` (chain, asset, amount) and status. An unknown
+    order id returns no request.
+  - **No record before the deposit.** Checked on fe4 on 2026-11-17, with Relay pinned and the user's
+    own funded address:
+    - LI.FI quoted Relay, and the quote passed the trust checks: a P2WPKH deposit, a 79-byte memo
+      and LI.FI's fee output.
+    - For two fresh quotes, `requests/v2?orderId=` found no request at 0 s and at 27 s, then
+      answered 429.
+
+    Relay creates the request once it sees the deposit, too late to bind before signing.
+
+  - Relay retires `requests/v2` on 2026-11-24, and `requests/v3` needs an `x-api-key`. Keyless v2 is
+    also rate-limited (HTTP 429 after a few calls).
+- **NEAR:** bindable as above, but not admitted from BTC (pending decision 4).
+
+**Parked on 2026-11-17.** NEAR alone can be bound, and from BTC it only duplicates OISY's own NEAR
+Intents provider at a higher cost. So no bridge is admitted, and LI.FI from BTC stays dark with PR 6
+in place. A bridge is admitted once OISY can read, before signing, a record of the deposit that
+names its payout. That could be the bridge's own, or a quote LI.FI signs or ties to the bridge's
+record (to ask LI.FI). Allowing a bridge without such a record would trust LI.FI's unsigned quote
+as served by its API, which nothing in OISY does today.
 
 ---
 
@@ -428,11 +508,16 @@ reaches production before the dependency spec's PR 10 and a production release o
 5. `feat(frontend): LI.FI BTC-source execution and active transaction` (needs 2, 3, 4) — `sendBtc`
    with fixed outputs, the row in `beforeBroadcast`, deletion by the history rule, and the poller's
    BTC source with its never-reached-the-network settle. Unreachable until 6.
-6. `feat(frontend): offer LI.FI from BTC` (needs 5 and one admitted bridge) — the bridge binding,
-   tied to output 0, plus provider registration and the wizard. The fee preview comes from LI.FI's
-   own selection, not the swap loader. With LI.FI selected, the form's fee check and Max use its
-   layout (the conservative one before a quote), and a quote its selection cannot fund is not
-   offered. Also a "(local and staging)" entry in `PRODUCT.md`.
+6. `feat(frontend): offer LI.FI from BTC` (needs 5) — the payout-binding registry and its call
+   before signing, provider registration and the wizard. The fee preview comes from LI.FI's own
+   selection, not the swap loader. With LI.FI selected, the form's fee check and Max use its layout,
+   and a quote its selection cannot fund is not offered. Also a "(local and staging)" entry in
+   `PRODUCT.md`. No bridge is admitted: none can be bound yet (see
+   [Bridge admission](#bridge-admission)).
+7. `feat(frontend): admit <bridge> from BTC` (needs 6, and a record of the deposit readable before
+   signing; none exists yet, see [Bridge admission](#bridge-admission)): the bridge's payout binding
+   in `LIFI_BTC_PAYOUT_BINDINGS`, tied to output 0, and its tool key in
+   `LIFI_ALLOWED_BRIDGES[BTC_MAINNET_NETWORK_ID]`, with a fixture from a real quote of it.
 
 ---
 
@@ -490,9 +575,11 @@ reaches production before the dependency spec's PR 10 and a production release o
      those of both earlier LI.FI-created quotes (`bc1qcpx606…`, `bc1qhv9xkg…`), read again. The
      fresh one also matched the binding: `amountIn` 997 500 equal to output 0, and `minAmountOut`
      equal to LI.FI's `toAmountMin`.
-   - **LayerSwap**: does its public API return the recipient and the payout for the memo's id,
-     keyless, before the deposit exists?
-   - **Relay**: as for LayerSwap, once it quotes again.
+   - **LayerSwap**: answered on 2026-11-17: no. Its keyless API does not show LI.FI's swaps, even
+     completed ones (see [Bridge admission](#bridge-admission)).
+   - **Relay**: answered on 2026-11-17: no. `requests/v2?orderId=<memo id>` returns the recipient
+     and both amounts keyless, but only once the deposit exists; a fresh quote's order id is not
+     found. v2 retires on 2026-11-24.
 2. **Self-built transaction.** Confirm with LI.FI, per bridge, that a rebuilt transaction (other
    inputs, other change, other miner fee) is still credited, and whether the miner fee or the input
    count matters to them. For NEAR, also confirm that 1Click credits the deposit by its address, so
@@ -519,6 +606,15 @@ reaches production before the dependency spec's PR 10 and a production release o
    BTC as a LI.FI source off until a binding without that trust exists. For NEAR, the trusted party
    is 1Click, which OISY's direct NEAR Intents provider already relies on, and its signature
    authenticates the record.
+   - **Decided on 2026-11-17: trust the bridge's API (option B)**, signed or not. A bridge is
+     admitted once its binding works.
+   - **Precedents.** OISY already relies on an off-chain party for a swap's payout in two places:
+     - OISY's own NEAR Intents provider, from BTC too: a deposit to a 1Click address, bound only by
+       1Click's verified signature and its echo of the request (`assertNearIntentsQuoteAuthentic`).
+     - LI.FI's EVM routes through `near`: the LI.FI Diamond checks the LI.FI-signed data on-chain,
+       but OISY never reads 1Click's record of the deposit.
+
+     Neither precedent trusts an _unsigned_ answer, which LayerSwap's or Relay's would be.
 2. **Rebuild or sign as is.** Proposed: rebuild (above). Signing as is would be simpler but fails
    whenever LI.FI picks a UTXO the backend refuses.
 3. **Miner fee.** Proposed: OISY's own rate. Alternative: keep LI.FI's, if open question 2 says it
@@ -529,6 +625,14 @@ reaches production before the dependency spec's PR 10 and a production release o
    does not serve, through the destination filter in
    [Flag and registration](#flag-and-registration), and admit LayerSwap (or Relay) on its own
    binding.
+   - **Settled by measurement on 2026-11-17: `near` is not admitted from BTC.** A BTC route must be
+     one bridge step with no swap after it (check 5), so through `near` it reaches only 1Click's
+     assets. The direct provider already offers all of them from BTC: eth 29, sol 23, base 18,
+     bsc 16, pol 9, arb 7, hood 6. Live quotes agree: BTC → ETH and BTC → Base USDC were single `near`
+     steps, and BTC → MKR (not a 1Click asset) got `1002`. So `near` would only add a costlier copy
+     of offers that already exist.
+   - **LayerSwap reaches more.** It quoted BTC → MKR on Ethereum as a single step, and paid about
+     0.13–0.15 % more than LI.FI's `near` on the same pairs (one sample each).
 
 ---
 

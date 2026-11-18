@@ -759,6 +759,12 @@ describe('lifi-swap.services', () => {
 					code: 1003,
 					type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.INSUFFICIENT_FUNDS
 				},
+				// UTXOs too small for the amount and fees: a 422, which an EVM source reports as no route.
+				{
+					status: 422,
+					code: 1004,
+					type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.INSUFFICIENT_FUNDS
+				},
 				{ status: 404, code: 1002, type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE },
 				{ status: 424, code: 1008, type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE }
 			])(
