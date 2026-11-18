@@ -41,7 +41,6 @@
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
 	import XrpReceive from '$xrp/components/receive/XrpReceive.svelte';
-	import { isTokenXrpTrustLine } from '$xrp/utils/xrp-trust-line.utils';
 
 	let convertEth = $derived($ethToCkETHEnabled && $erc20CustomTokensInitialized);
 
@@ -60,11 +59,7 @@
 		(!isTransactionsPage || $isPageTokenSwappable || isNullish($pageToken)) && !isNftsPage
 	);
 
-	// Not for a trust-line token yet: the XRP send flow moves native XRP only.
-	let sendAction = $derived(
-		(!$allBalancesZero || isTransactionsPage) &&
-			!(nonNullish($pageToken) && isTokenXrpTrustLine($pageToken))
-	);
+	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
 
 	let buyAction = $derived((!$networkICP || nonNullish($pageToken?.buy)) && !isNftsPage);
 
