@@ -433,7 +433,9 @@ const watchCkSolLatestDepositId = async ({
 
 /**
  * What the network says about the user's transfer of a ckSOL mint row, whose row is opened before
- * the transfer is broadcast. `undefined` for a row without the transfer's blockhash.
+ * the transfer is broadcast. `undefined` for a row without the transfer's blockhash. Read at
+ * finality: the row takes a deposit or fails on this verdict for good, and stops reading the
+ * transfer once it follows a deposit, while a confirmed block can still be rolled back.
  */
 const readCkSolTransferOutcome = async ({
 	tx,
@@ -457,7 +459,8 @@ const readCkSolTransferOutcome = async ({
 		minContextSlot: toCkSolBlockhashSlot(
 			refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH_SLOT]
 		),
-		network: SolanaNetworks.mainnet
+		network: SolanaNetworks.mainnet,
+		finalized: true
 	});
 };
 
@@ -741,12 +744,13 @@ const pollChainFusionSolMint = async ({
 		return;
 	}
 
-	// A row that followed a deposit before has its transfer on chain. Any other row takes a deposit
+	// A row that followed a deposit before has its transfer finalized. Any other row takes a deposit
 	// only once its transfer is: until then, a newer deposit is another conversion's, settled while
-	// this one waited to be sent, and the row may still be under the check that deletes it unsent. A
-	// row without its transfer's blockhash cannot tell, and takes the deposit as before. Read before
-	// the minter is asked, so that a minter that does not answer never keeps a row open whose
-	// transfer can no longer land.
+	// this one waited to be sent, and the row may still be under the check that deletes it unsent; a
+	// transfer only confirmed can still be rolled back, and the row reads it until it finalizes or
+	// can no longer land. A row without its transfer's blockhash cannot tell, and takes the deposit as
+	// before. Read before the minter is asked, so that a minter that does not answer never keeps a row
+	// open whose transfer can no longer land.
 	const outcome = isNullish(knownDepositId)
 		? await readCkSolTransferOutcome({ tx, refs })
 		: undefined;

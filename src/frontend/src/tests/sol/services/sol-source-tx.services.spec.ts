@@ -213,6 +213,47 @@ describe('sol-source-tx.services', () => {
 		});
 	});
 
+	describe('readSolSourceTxOutcome read at finality', () => {
+		const readFinalized = () =>
+			readSolSourceTxOutcome({
+				rowId: 'row-1',
+				signature,
+				blockhash,
+				minContextSlot: simulationSlot,
+				network: SolanaNetworks.mainnet,
+				finalized: true
+			});
+
+		it('should keep a confirmed transaction pending without reading its blockhash', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValue({ slot: 210n, status: confirmedStatus });
+
+			await expect(readFinalized()).resolves.toBe('pending');
+
+			expect(isBlockhashValid).not.toHaveBeenCalled();
+		});
+
+		it('should succeed a finalized transaction', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValue({
+				slot: 210n,
+				status: { ...confirmedStatus, confirmationStatus: 'finalized' }
+			});
+
+			await expect(readFinalized()).resolves.toBe('succeeded');
+		});
+
+		it('should expire a transaction whose confirmation was rolled back, once its blockhash has expired', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValueOnce({ slot: 210n, status: confirmedStatus });
+
+			await expect(readFinalized()).resolves.toBe('pending');
+
+			vi.mocked(getSignatureStatus).mockResolvedValue(noStatus);
+			vi.mocked(isBlockhashValid).mockResolvedValue({ slot: 200n, valid: false });
+
+			await expect(readFinalized()).resolves.toBe('pending');
+			await expect(readFinalized()).resolves.toBe('expired');
+		});
+	});
+
 	describe('readSolBalanceAfterTx', () => {
 		const readBalance = () =>
 			readSolBalanceAfterTx({

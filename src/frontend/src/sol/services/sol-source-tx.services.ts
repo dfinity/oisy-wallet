@@ -43,24 +43,27 @@ const recordExpiryObservation = (rowId: string): number => {
  * invalid. Without it, the blockhash read is taken as it comes.
  *
  * `expired` is returned only once two consecutive polls of the same row have seen it; the first
- * reads as `pending`.
+ * reads as `pending`. With `finalized`, a status counts only once it is finalized (see
+ * `toSolSourceTxOutcome`).
  */
 export const readSolSourceTxOutcome = async ({
 	rowId,
 	signature,
 	blockhash,
 	minContextSlot,
-	network
+	network,
+	finalized = false
 }: {
 	rowId: string;
 	signature: string;
 	blockhash: string;
 	minContextSlot?: bigint;
 	network: SolanaNetworkType;
+	finalized?: boolean;
 }): Promise<SolSourceTxOutcome> => {
 	const { status, slot } = await getSignatureStatus({ signature, network });
 
-	let outcome = toSolSourceTxOutcome({ status, statusSlot: slot });
+	let outcome = toSolSourceTxOutcome({ status, statusSlot: slot, finalized });
 
 	// Only a missing status is ambiguous: the transaction may still land, or never will. The
 	// blockhash tells the two apart.
@@ -76,7 +79,8 @@ export const readSolSourceTxOutcome = async ({
 			outcome = toSolSourceTxOutcome({
 				status: recheck.status,
 				statusSlot: recheck.slot,
-				blockhash: blockhashRead
+				blockhash: blockhashRead,
+				finalized
 			});
 		}
 	}

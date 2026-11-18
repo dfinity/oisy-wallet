@@ -532,7 +532,7 @@ describe('chain-fusion-swap-active-tx.services', () => {
 				vi.mocked(readSolSourceTxOutcome).mockResolvedValue('pending');
 			});
 
-			it('should read the transfer no earlier than the slot its blockhash was valid at', async () => {
+			it('should read the transfer at finality, no earlier than the slot its blockhash was valid at', async () => {
 				const tx = openedBeforeBroadcast();
 
 				await poll([tx]);
@@ -542,7 +542,8 @@ describe('chain-fusion-swap-active-tx.services', () => {
 					signature: SOL_SIGNATURE,
 					blockhash: BLOCKHASH,
 					minContextSlot: 345_000_000n,
-					network: SolanaNetworks.mainnet
+					network: SolanaNetworks.mainnet,
+					finalized: true
 				});
 			});
 
