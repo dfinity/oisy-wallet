@@ -1,6 +1,8 @@
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { xrpAddressMainnetStore } from '$lib/stores/address.store';
+import type { Token } from '$lib/types/token';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { runResolvedPromises } from '$tests/utils/timers.test-utils';
@@ -12,6 +14,7 @@ import {
 	XRP_FEE_CONTEXT_KEY,
 	initFeeStore,
 	initReserveStore,
+	initTransferRateStore,
 	initXrpFeeContext
 } from '$xrp/stores/xrp-fee.store';
 import { XrpNetworks } from '$xrp/types/network';
@@ -631,6 +634,123 @@ describe('XrpFeeContext', () => {
 
 			unmount();
 			vi.useRealTimers();
+		});
+	});
+
+	describe('the transfer rate', () => {
+		let transferRateStore: ReturnType<typeof initTransferRateStore>;
+
+		const renderTokenContext = ({
+			token = RLUSD_TOKEN,
+			observe = true
+		}: { token?: Token; observe?: boolean } = {}) => {
+			const context = new Map();
+
+			context.set(
+				XRP_FEE_CONTEXT_KEY,
+				initXrpFeeContext({
+					feeStore,
+					reserveStore,
+					transferRateStore,
+					feeSymbolStore: writable(XRP_TOKEN.symbol),
+					feeDecimalsStore: writable(XRP_TOKEN.decimals),
+					feeTokenIdStore: writable(XRP_TOKEN.id),
+					feeExchangeRateStore: writable(undefined)
+				})
+			);
+
+			return render(XrpFeeContext, {
+				props: { token, observe, children: mockSnippet },
+				context
+			});
+		};
+
+		beforeEach(() => {
+			transferRateStore = initTransferRateStore();
+		});
+
+		it("publishes the issuer's rate, read from the validated ledger", async () => {
+			vi.mocked(xrplRest.loadXrpAccountInfo).mockResolvedValue({
+				balance: 50_000_000n,
+				sequence: 1,
+				ownerCount: 0,
+				flags: 0,
+				transferRate: 1_005_000_000
+			});
+
+			const { unmount } = renderTokenContext();
+
+			await waitFor(() => expect(get(transferRateStore)).toBe(1_005_000_000));
+
+			expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalledWith({
+				address: RLUSD_TOKEN.issuer,
+				network: XrpNetworks.mainnet,
+				ledgerIndex: 'validated'
+			});
+
+			unmount();
+		});
+
+		it('publishes no fee for an issuer that sets no rate', async () => {
+			const { unmount } = renderTokenContext();
+
+			await waitFor(() => expect(get(transferRateStore)).toBe(1_000_000_000));
+
+			unmount();
+		});
+
+		it('reads no issuer for XRP', async () => {
+			const { unmount } = renderTokenContext({ token: XRP_TOKEN });
+
+			await waitFor(() => expect(get(reserveStore)).toBeDefined());
+
+			expect(get(transferRateStore)).toBeUndefined();
+			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalledWith(
+				expect.objectContaining({ address: RLUSD_TOKEN.issuer })
+			);
+
+			unmount();
+		});
+
+		it('leaves the rate unknown after a failure, then asks again', async () => {
+			vi.useFakeTimers();
+
+			vi.mocked(xrplRest.loadXrpAccountInfo).mockImplementation(({ address }) =>
+				address === RLUSD_TOKEN.issuer
+					? Promise.reject(new Error('tooBusy'))
+					: Promise.resolve({ balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: 0 })
+			);
+
+			const { unmount } = renderTokenContext();
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(get(transferRateStore)).toBeUndefined();
+
+			vi.mocked(xrplRest.loadXrpAccountInfo).mockResolvedValue({
+				balance: 50_000_000n,
+				sequence: 1,
+				ownerCount: 0,
+				flags: 0,
+				transferRate: 1_002_000_000
+			});
+
+			await vi.advanceTimersByTimeAsync(10_000);
+
+			expect(get(transferRateStore)).toBe(1_002_000_000);
+
+			unmount();
+			vi.useRealTimers();
+		});
+
+		it('clears the rate while not observing', async () => {
+			const { unmount } = renderTokenContext({ observe: false });
+
+			await runResolvedPromises();
+
+			expect(get(transferRateStore)).toBeUndefined();
+
+			unmount();
 		});
 	});
 });
