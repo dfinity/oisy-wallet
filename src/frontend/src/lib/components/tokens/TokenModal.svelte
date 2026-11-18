@@ -30,6 +30,7 @@
 	} from '$lib/constants/analytics.constants';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import { TOKEN_MODAL_SAVE_BUTTON } from '$lib/constants/test-ids.constants';
+	import { xrpAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		PLAUSIBLE_EVENT_RESULT_STATUSES,
@@ -58,6 +59,11 @@
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 	import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
+	import XrpRemoveTokenConfirmation from '$xrp/components/tokens/XrpRemoveTokenConfirmation.svelte';
+	import { removeXrpTrustLineToken } from '$xrp/services/xrp-trust-line-tokens.services';
+	import type { XrpBalance } from '$xrp/types/xrp-balance';
+	import type { XrpTrustLineCustomToken } from '$xrp/types/xrp-trust-line-token';
+	import { isTokenXrpTrustLineCustomToken } from '$xrp/utils/xrp-trust-line.utils';
 
 	interface BaseTokenModalProps {
 		token: OptionToken;
@@ -323,6 +329,55 @@
 		}
 	};
 
+	// Removing a trust-line token is a transaction on the XRP Ledger, signed with the fee its
+	// confirmation showed. The token leaves the list once the ledger has deleted its line, so the
+	// modal closes at the submit, as the token's add review does.
+	const onXrpTrustLineTokenRemove = async ({
+		tokenToRemove,
+		fee
+	}: {
+		tokenToRemove: XrpTrustLineCustomToken;
+		fee: XrpBalance;
+	}) => {
+		loading = true;
+
+		await removeXrpTrustLineToken({
+			identity: $authIdentity,
+			source: $xrpAddressMainnet,
+			token: tokenToRemove,
+			fee,
+			onSuccess: async () => {
+				trackTokenManageDetails({
+					modifier: 'delete',
+					token: tokenToRemove,
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+				});
+
+				loading = false;
+
+				await handleCloseAndNavigate(fromRoute);
+			},
+			onError: (err) => {
+				trackTokenManageDetails({
+					modifier: 'delete',
+					token: tokenToRemove,
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+					error: errorDetailToString(err)
+				});
+
+				gotoStep(TokenModalSteps.CONTENT);
+				showBottomSheetDeleteConfirmation = false;
+				loading = false;
+			}
+		});
+	};
+
+	// The confirmation already said why the token cannot be removed now.
+	const onXrpTrustLineTokenRemoveRefused = () => {
+		showBottomSheetDeleteConfirmation = false;
+		gotoStep(TokenModalSteps.CONTENT);
+	};
+
 	const onTokenDeleteCancel = (tokenToDelete: OptionToken) => {
 		if (nonNullish(tokenToDelete)) {
 			trackTokenManageDetails({
@@ -491,12 +546,23 @@
 				</TokenModalContent>
 			</Responsive>
 		{:else if currentStepName === TokenModalSteps.DELETE_CONFIRMATION}
-			<TokenModalDeleteConfirmation
-				{loading}
-				onCancel={() => onTokenDeleteCancel(token)}
-				onConfirm={() => onTokenDelete(token)}
-				{token}
-			/>
+			{#if nonNullish(token) && isTokenXrpTrustLineCustomToken(token)}
+				{@const xrpTrustLineToken = token}
+				<XrpRemoveTokenConfirmation
+					{loading}
+					onCancel={() => onTokenDeleteCancel(xrpTrustLineToken)}
+					onConfirm={(fee) => onXrpTrustLineTokenRemove({ tokenToRemove: xrpTrustLineToken, fee })}
+					onRefused={onXrpTrustLineTokenRemoveRefused}
+					token={xrpTrustLineToken}
+				/>
+			{:else}
+				<TokenModalDeleteConfirmation
+					{loading}
+					onCancel={() => onTokenDeleteCancel(token)}
+					onConfirm={() => onTokenDelete(token)}
+					{token}
+				/>
+			{/if}
 		{:else if currentStepName === TokenModalSteps.EDIT && nonNullish(token) && isTokenIcrc(token)}
 			<ContentWithToolbar>
 				<AddTokenByNetworkDropdown
@@ -542,12 +608,23 @@
 		{/snippet}
 
 		{#snippet content()}
-			<TokenModalDeleteConfirmation
-				{loading}
-				onCancel={() => onTokenDeleteCancel(token)}
-				onConfirm={() => onTokenDelete(token)}
-				{token}
-			/>
+			{#if nonNullish(token) && isTokenXrpTrustLineCustomToken(token)}
+				{@const xrpTrustLineToken = token}
+				<XrpRemoveTokenConfirmation
+					{loading}
+					onCancel={() => onTokenDeleteCancel(xrpTrustLineToken)}
+					onConfirm={(fee) => onXrpTrustLineTokenRemove({ tokenToRemove: xrpTrustLineToken, fee })}
+					onRefused={onXrpTrustLineTokenRemoveRefused}
+					token={xrpTrustLineToken}
+				/>
+			{:else}
+				<TokenModalDeleteConfirmation
+					{loading}
+					onCancel={() => onTokenDeleteCancel(token)}
+					onConfirm={() => onTokenDelete(token)}
+					{token}
+				/>
+			{/if}
 		{/snippet}
 	</BottomSheetConfirmationPopup>
 {/if}

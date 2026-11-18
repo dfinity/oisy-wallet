@@ -1,4 +1,7 @@
-import { TRACK_COUNT_XRP_TRUST_LINE_ADD_ERROR } from '$lib/constants/analytics.constants';
+import {
+	TRACK_COUNT_XRP_TRUST_LINE_ADD_ERROR,
+	TRACK_COUNT_XRP_TRUST_LINE_REMOVE_ERROR
+} from '$lib/constants/analytics.constants';
 import { ProgressStepsAddToken, ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
@@ -15,6 +18,8 @@ import type { XrpBalance } from '$xrp/types/xrp-balance';
 import {
 	XrpSendAlreadyInFlightError,
 	XrpSendNotGuardedError,
+	XrpTrustLineBalanceNotZeroError,
+	XrpTrustLineNotHeldError,
 	XrpTrustSetUnfundedError
 } from '$xrp/types/xrp-send';
 import type { XrpTrustLineCustomToken } from '$xrp/types/xrp-trust-line-token';
@@ -171,4 +176,105 @@ export const addXrpTrustLineToken = async ({
 
 		onError?.();
 	}
+};
+
+// Every failure here comes before the broadcast — after it, the record decides — so none of them
+// sent anything.
+const removeXrpTrustLineTokenErrorText = ({
+	err,
+	token: { symbol }
+}: {
+	err: unknown;
+	token: XrpTrustLineCustomToken;
+}): string => {
+	const {
+		tokens: {
+			import: { error }
+		}
+	} = get(i18n);
+
+	if (err instanceof XrpSendAlreadyInFlightError) {
+		return error.xrp_transaction_in_flight;
+	}
+
+	if (err instanceof XrpSendNotGuardedError) {
+		return error.xrp_not_guarded;
+	}
+
+	if (err instanceof XrpTrustSetUnfundedError) {
+		return error.xrp_insufficient_fee;
+	}
+
+	if (err instanceof XrpTrustLineNotHeldError) {
+		return replacePlaceholders(error.xrp_remove_not_held, { $symbol: symbol });
+	}
+
+	if (err instanceof XrpTrustLineBalanceNotZeroError) {
+		return replacePlaceholders(error.xrp_remove_balance_not_zero, { $symbol: symbol });
+	}
+
+	return error.xrp_remove_failed;
+};
+
+/**
+ * Removes a trust-line token the user confirmed removing: sends the `TrustSet` that takes its line
+ * back to the default state, and hands the outcome to the record.
+ *
+ * The backend entry stays for now. The line is on the ledger until the `TrustSet` validates, and a
+ * held line without an entry is saved back to the list; the entry goes once the ledger has deleted
+ * the line.
+ */
+export const removeXrpTrustLineToken = async ({
+	identity,
+	source,
+	token,
+	fee,
+	onSuccess,
+	onError
+}: {
+	identity: NullishIdentity;
+	source: Nullish<XrpAddress>;
+	token: XrpTrustLineCustomToken;
+	fee: XrpBalance;
+	onSuccess?: () => Promise<void> | void;
+	onError?: (err: unknown) => void;
+}): Promise<void> => {
+	const network = mapNetworkIdToNetwork(token.network.id);
+
+	if (isNullish(network) || isNullish(source)) {
+		toastsError({ msg: { text: get(i18n).tokens.import.error.xrp_state_unavailable } });
+
+		onError?.(undefined);
+		return;
+	}
+
+	try {
+		await submitXrpTrustSet({ identity, network, source, token, change: 'remove', fee });
+	} catch (err: unknown) {
+		// Only refusals before the broadcast get here, so this removal did not happen. One that was
+		// sent reports from its record.
+		trackEvent({
+			name: TRACK_COUNT_XRP_TRUST_LINE_REMOVE_ERROR,
+			metadata: {
+				token: token.symbol,
+				network: `${token.network.id.description}`,
+				fee: fee.toString()
+			}
+		});
+
+		toastsError({ msg: { text: removeXrpTrustLineTokenErrorText({ err, token }) }, err });
+
+		onError?.(err);
+		return;
+	}
+
+	toastsShow({
+		text: replacePlaceholders(get(i18n).tokens.import.text.xrp_remove_submitted, {
+			$symbol: token.symbol
+		}),
+		level: 'info',
+		duration: 5000
+	});
+
+	await onSuccess?.();
 };
