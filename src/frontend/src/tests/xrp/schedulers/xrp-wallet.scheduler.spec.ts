@@ -5,7 +5,12 @@ import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessageDataRequestXrp } from '$lib/types/post-message';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockXrpTrustLine } from '$tests/mocks/xrp.mock';
+import {
+	mockRlusdCurrencyCode,
+	mockRlusdIssuer,
+	mockXrpTrustLine,
+	mockXrpTrustLinePaymentEntry
+} from '$tests/mocks/xrp.mock';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { XrpWalletScheduler } from '$xrp/schedulers/xrp-wallet.scheduler';
 import { XrpNetworks } from '$xrp/types/network';
@@ -374,6 +379,21 @@ describe('xrp-wallet.scheduler', () => {
 			scheduler.stop();
 		});
 
+		it('posts no token rows while trust-line tokens are off', async () => {
+			spyLoadTransactions.mockResolvedValue({
+				transactions: [mockXrpTrustLinePaymentEntry({ receiver: startData.address.data })]
+			});
+
+			const scheduler = new XrpWalletScheduler();
+
+			await scheduler.start(startData);
+			await awaitJobExecution();
+
+			expect(walletCalls()[0]?.data.wallet.newTrustLineTransactions).toBeUndefined();
+
+			scheduler.stop();
+		});
+
 		describe('when trust-line tokens are on', () => {
 			beforeEach(() => {
 				vi.spyOn(trustLineTokensEnv, 'XRP_TRUST_LINE_TOKENS_ENABLED', 'get').mockReturnValue(true);
@@ -482,6 +502,98 @@ describe('xrp-wallet.scheduler', () => {
 				expect(spyLoadAccountLines).toHaveBeenCalledOnce();
 
 				scheduler.stop();
+			});
+
+			describe("the tokens' rows", () => {
+				const tokenRows = (call: { data: { wallet: { newTrustLineTransactions?: string } } }) =>
+					JSON.parse(call.data.wallet.newTrustLineTransactions ?? 'null', jsonReviver);
+
+				const received = mockXrpTrustLinePaymentEntry({ receiver: startData.address.data });
+
+				// From the page the native history is read from: no request of their own.
+				it('posts the rows of the newest page, with no further request', async () => {
+					spyLoadTransactions.mockResolvedValue({ transactions: [received] });
+
+					const scheduler = new XrpWalletScheduler();
+
+					await scheduler.start(startData);
+					await awaitJobExecution();
+
+					expect(spyLoadTransactions).toHaveBeenCalledOnce();
+					expect(tokenRows(walletCalls()[0])).toEqual([
+						{
+							currency: mockRlusdCurrencyCode,
+							issuer: mockRlusdIssuer,
+							transaction: {
+								certified: false,
+								data: expect.objectContaining({ type: 'receive', value: 880_000_000_000_000n })
+							}
+						}
+					]);
+
+					scheduler.stop();
+				});
+
+				// The first read is news even when it finds nothing: it is what tells a token's page that
+				// the newest history holds none of its payments.
+				it('posts an empty list on the first read', async () => {
+					const scheduler = new XrpWalletScheduler();
+
+					await scheduler.start(startData);
+					await awaitJobExecution();
+
+					expect(tokenRows(walletCalls()[0])).toEqual([]);
+
+					scheduler.stop();
+				});
+
+				it('posts a row once', async () => {
+					spyLoadTransactions.mockResolvedValue({ transactions: [received] });
+
+					const scheduler = new XrpWalletScheduler();
+
+					await scheduler.start(startData);
+					await awaitJobExecution();
+
+					postMessageMock.mockClear();
+
+					await scheduler.trigger(startData);
+					await awaitJobExecution();
+
+					expect(walletCalls()).toHaveLength(0);
+
+					scheduler.stop();
+				});
+
+				it('posts a new row on its own', async () => {
+					const scheduler = new XrpWalletScheduler();
+
+					await scheduler.start(startData);
+					await awaitJobExecution();
+
+					postMessageMock.mockClear();
+					spyLoadTransactions.mockResolvedValue({ transactions: [received] });
+
+					await scheduler.trigger(startData);
+					await awaitJobExecution();
+
+					expect(tokenRows(walletCalls()[0])).toHaveLength(1);
+
+					scheduler.stop();
+				});
+
+				it('posts none when the history cannot be read', async () => {
+					spyLoadTransactions.mockRejectedValue(new Error('account_tx down'));
+
+					const scheduler = new XrpWalletScheduler();
+
+					await scheduler.start(startData);
+					await awaitJobExecution();
+
+					expect(walletCalls()[0]?.data.wallet.newTrustLineTransactions).toBeUndefined();
+
+					scheduler.stop();
+				});
 			});
 
 			// Stopping hands the account over, and the listener clears what it showed, so a restart on
