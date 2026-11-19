@@ -67,10 +67,13 @@ export const btcSwapProviders: BtcSwapProviderConfig[] = [
 		? [
 				{
 					key: SwapProvider.LIFI,
-					getQuote: fetchLifiBtcSwapQuote,
+					// Read when called, not when this list is built: `lifi-btc-swap.services` imports
+					// `swap.services`, which imports this registry. Loaded first, that service has not run
+					// yet here, and its functions would still be uninitialized.
+					getQuote: (params: BtcQuoteParams) => fetchLifiBtcSwapQuote(params),
 					isEnabled: LIFI_BTC_PROVIDER_ENABLED,
-					getSupportedTokens: lifiBtcSupportedTokens,
-					getSupportedDestinations: lifiBtcSupportedDestinations
+					getSupportedTokens: () => lifiBtcSupportedTokens(),
+					getSupportedDestinations: (params) => lifiBtcSupportedDestinations(params)
 				} satisfies BtcSwapProviderConfig
 			]
 		: [])

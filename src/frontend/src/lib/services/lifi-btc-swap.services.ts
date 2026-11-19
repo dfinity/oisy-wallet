@@ -3,6 +3,7 @@ import { sendBtcScriptOutputs, validateBtcSend } from '$btc/services/btc-send.se
 import { prepareBtcSend } from '$btc/services/btc-utxos.service';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
+import { BtcSendValidationError, BtcValidationError } from '$btc/types/btc-send';
 import { btcOutputScriptToAddressOrHex, btcScriptOutputVSize } from '$btc/utils/btc-psbt.utils';
 import {
 	isDefinitiveBtcBroadcastRefusal,
@@ -44,6 +45,7 @@ import { toLifiCreationRefs, toLifiData } from '$lib/utils/lifi-active-tx.utils'
 import {
 	decodeLifiBtcTransaction,
 	isLifiBtcDepositUnverified,
+	isLifiBtcInsufficientFundsError,
 	isLifiBtcSource
 } from '$lib/utils/lifi-swap.utils';
 import { isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
@@ -226,6 +228,14 @@ export const fetchLifiBtcSwap = async ({
 		request,
 		sourceNetworkId: sourceToken.network.id,
 		displayedToAmountMin
+	}).catch((err: unknown) => {
+		// LI.FI finds the address's UTXOs missing or too small since the review: the insufficient
+		// balance the wizard explains from its own selection, with nothing signed.
+		if (isLifiBtcInsufficientFundsError({ err, request })) {
+			throw new BtcValidationError(BtcSendValidationError.InsufficientBalance);
+		}
+
+		throw err;
 	});
 
 	const { deposit, memo, fee } = decodeLifiBtcTransaction({ quote, amount, userAddress });

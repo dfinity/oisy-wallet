@@ -50,6 +50,7 @@ import { SwapProvider, type BtcQuoteParams, type SwapLifiBtcParams } from '$lib/
 import type { Token } from '$lib/types/token';
 import { toLifiExternalRefsMap } from '$lib/utils/lifi-active-tx.utils';
 import { decodeLifiBtcTransaction } from '$lib/utils/lifi-swap.utils';
+import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
@@ -60,7 +61,13 @@ import {
 } from '$tests/mocks/lifi-btc.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
-import { ChainId, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
+import {
+	ChainId,
+	HTTPError,
+	SDKError,
+	type LiFiStep,
+	type QuoteRequestFromAmount
+} from '@lifi/sdk';
 import { networks, payments } from 'bitcoinjs-lib';
 import type { Writable } from 'svelte/store';
 
@@ -186,7 +193,7 @@ describe('lifi-btc-swap.services', () => {
 
 		vi.mocked(fetchLifiQuote).mockResolvedValue(quote);
 		vi.mocked(validateBtcSend).mockResolvedValue(undefined);
-		vi.mocked(createActiveUserTransaction).mockResolvedValue(undefined);
+		vi.mocked(createActiveUserTransaction).mockResolvedValue(mockActiveUserTransaction);
 		vi.mocked(deleteActiveUserTransaction).mockResolvedValue(undefined);
 		vi.mocked(bindLifiBtcPayout).mockResolvedValue(undefined);
 		vi.mocked(hasLifiBtcPayoutBinding).mockReturnValue(true);
@@ -207,6 +214,33 @@ describe('lifi-btc-swap.services', () => {
 			vi.mocked(validateBtcSend).mock.invocationCallOrder[0]
 		);
 	});
+
+	// LI.FI's re-quote at confirm finds the address's UTXOs missing (1003, 404) or too small (1004, 422)
+	// since the review: the balance, not the slippage, as the SDK throws it.
+	it.each([
+		{ case: 'no UTXOs', status: 404, code: 1003 },
+		{ case: 'UTXOs too small', status: 422, code: 1004 }
+	])(
+		'should refuse as an insufficient balance, signing nothing, when LI.FI finds $case',
+		async ({ status, code }) => {
+			vi.mocked(fetchLifiQuote).mockRejectedValue(
+				new SDKError(
+					Object.assign(
+						new HTTPError(new Response('{}', { status }), 'https://li.quest/v1/quote', {}),
+						{ responseBody: { code, message: '' } }
+					)
+				)
+			);
+
+			await expect(fetchLifiBtcSwap(params)).rejects.toThrow(
+				new BtcValidationError(BtcSendValidationError.InsufficientBalance)
+			);
+
+			expect(bindLifiBtcPayout).not.toHaveBeenCalled();
+			expect(sendBtcScriptOutputs).not.toHaveBeenCalled();
+			expect(createActiveUserTransaction).not.toHaveBeenCalled();
+		}
+	);
 
 	it("should sign nothing when the bridge's record does not pay what was reviewed", async () => {
 		const unbound = new LifiRouteUnsupportedError('no payout binding');

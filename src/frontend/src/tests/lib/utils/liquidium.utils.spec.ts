@@ -7,6 +7,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { Token } from '$lib/types/token';
 import {
+	isLiquidiumInflowSubaccount,
 	liquidiumBorrowingPowerPotentialUsd,
 	liquidiumBorrowInterestUsd,
 	liquidiumEnabledRailToken,
@@ -35,6 +36,12 @@ import {
 } from '$lib/utils/liquidium.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockLiquidiumProfileId,
+	mockLiquidiumRepaySubaccount,
+	mockLiquidiumSupplySubaccount
+} from '$tests/mocks/liquidium-inflow.mock';
+import { Principal } from '@icp-sdk/core/principal';
 import {
 	HEALTH_FACTOR_DECIMALS,
 	HEALTH_FACTOR_SCALE,
@@ -1085,6 +1092,49 @@ describe('liquidium.utils', () => {
 					enabledTokens: [BTC_MAINNET_TOKEN]
 				})
 			).toBeUndefined();
+		});
+	});
+
+	describe('isLiquidiumInflowSubaccount', () => {
+		const withByte = ({ index, value }: { index: number; value: number }): Uint8Array => {
+			const subaccount = Uint8Array.from(mockLiquidiumSupplySubaccount);
+
+			subaccount[index] = value;
+
+			return subaccount;
+		};
+
+		it.each([
+			{ purpose: 'a supply', subaccount: mockLiquidiumSupplySubaccount },
+			{ purpose: 'a repayment', subaccount: mockLiquidiumRepaySubaccount }
+		])('should recognise the subaccount of $purpose to the profile', ({ subaccount }) => {
+			expect(
+				isLiquidiumInflowSubaccount({ subaccount, profileId: mockLiquidiumProfileId })
+			).toBeTruthy();
+		});
+
+		it('should not recognise the subaccount of another profile', () => {
+			expect(
+				isLiquidiumInflowSubaccount({
+					subaccount: mockLiquidiumSupplySubaccount,
+					profileId: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai')
+				})
+			).toBeFalsy();
+		});
+
+		it.each([
+			{ kind: 'another purpose', subaccount: withByte({ index: 0, value: 3 }) },
+			{
+				kind: 'a byte between the purpose and the length',
+				subaccount: withByte({ index: 1, value: 1 })
+			},
+			{ kind: 'another length', subaccount: withByte({ index: 2, value: 16 }) },
+			{ kind: 'a byte after the principal', subaccount: withByte({ index: 31, value: 1 }) },
+			{ kind: 'the default subaccount', subaccount: new Uint8Array(32) }
+		])('should not recognise a subaccount with $kind', ({ subaccount }) => {
+			expect(
+				isLiquidiumInflowSubaccount({ subaccount, profileId: mockLiquidiumProfileId })
+			).toBeFalsy();
 		});
 	});
 });

@@ -1,6 +1,7 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.eurc.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
@@ -21,6 +22,10 @@ import type { Token } from '$lib/types/token';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { observedPriority } from '$tests/eth/components/wallet-connect/eth-fee-context-stub.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import {
+	encodeCkDepositErc20,
+	mockCkDepositHelperContractAddress
+} from '$tests/mocks/ck-deposit.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
@@ -266,6 +271,89 @@ describe('EthWalletConnectSendTokenModal', () => {
 			expect(getByText(en.wallet_connect.text.unknown_call_title)).toBeInTheDocument();
 
 			ckEthMinterInfoStore.reset(BASE_ETH_TOKEN.id);
+		});
+	});
+
+	describe('the ckETH minter helper that deposits to a subaccount', () => {
+		const HELPER = mockCkDepositHelperContractAddress;
+
+		const depositTo = ({
+			owner,
+			address = USDT_TOKEN.address
+		}: {
+			owner: Principal;
+			address?: string;
+		}) => ({
+			from: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+			to: HELPER,
+			data: encodeCkDepositErc20({ address, amount: 50_000_000n, owner })
+		});
+
+		beforeEach(() => {
+			mockAuthStore();
+
+			erc20DefaultTokensStore.reset();
+			erc20DefaultTokensStore.add(USDT_TOKEN);
+
+			ckEthMinterInfoStore.set({
+				id: ETHEREUM_TOKEN.id,
+				data: {
+					data: {
+						...mockCkMinterInfo,
+						deposit_with_subaccount_helper_contract_address: toNullable(HELPER),
+						supported_ckerc20_tokens: toNullable([
+							{
+								erc20_contract_address: USDT_TOKEN.address,
+								ledger_canister_id: Principal.fromText('cngnf-vqaaa-aaaar-qag4q-cai'),
+								ckerc20_token_symbol: 'ckUSDT'
+							}
+						])
+					},
+					certified: true
+				}
+			});
+		});
+
+		afterEach(() => {
+			ckEthMinterInfoStore.reset(ETHEREUM_TOKEN.id);
+			erc20DefaultTokensStore.reset();
+		});
+
+		it.each([
+			{ owner: 'the user', principal: mockPrincipal },
+			{ owner: 'another account', principal: Principal.fromText('hnnn4-iyaaa-aaaar-qb4bq-cai') }
+		])(
+			'should title a deposit to $owner as a send and sign it as a conversion to the Internet Computer',
+			async ({ principal }) => {
+				vi.mocked(sendServices).mockResolvedValue({ success: true });
+
+				const { getByText, getByRole } = setup({
+					firstTransaction: depositTo({ owner: principal })
+				});
+
+				expect(getByText(en.send.text.send)).toBeInTheDocument();
+
+				await fireEvent.click(getByRole('button', { name: en.core.text.approve }));
+
+				await waitFor(() => {
+					expect(sendServices).toHaveBeenCalledOnce();
+				});
+
+				expect(vi.mocked(sendServices).mock.calls[0][0]).toMatchObject({
+					targetNetwork: ICP_NETWORK
+				});
+			}
+		);
+
+		it('should title a deposit OISY refuses as a contract call', () => {
+			const { getByText } = setup({
+				firstTransaction: depositTo({
+					owner: mockPrincipal,
+					address: '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a'
+				})
+			});
+
+			expect(getByText(en.wallet_connect.text.unknown_call_title)).toBeInTheDocument();
 		});
 	});
 
