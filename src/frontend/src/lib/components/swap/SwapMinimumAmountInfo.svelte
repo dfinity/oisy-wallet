@@ -42,8 +42,8 @@
 </script>
 
 {#if nonNullish(formattedLimit) && !quoted}
-	<div class="mt-6">
-		<MessageBox styleClass="sm:text-sm" testId={SWAP_MINIMUM_AMOUNT_INFO}>
+	<div class="mt-4">
+		<MessageBox testId={SWAP_MINIMUM_AMOUNT_INFO}>
 			{replacePlaceholders($i18n.swap.text.swap_minimum_amount_hint, { $amount: formattedLimit })}
 		</MessageBox>
 	</div>
