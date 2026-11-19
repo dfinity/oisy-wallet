@@ -15,6 +15,7 @@
 		testId?: string;
 		currentStep?: WizardStep<T>;
 		title?: Snippet;
+		headerRight?: Snippet;
 		children: Snippet;
 		onClose?: () => void;
 	}
@@ -25,6 +26,7 @@
 		testId,
 		currentStep = $bindable(),
 		title,
+		headerRight,
 		children,
 		onClose
 	}: Props = $props();
@@ -61,7 +63,7 @@
 </script>
 
 {#if visible}
-	<Modal {disablePointerEvents} onClose={close} {testId} {title}>
+	<Modal {disablePointerEvents} {headerRight} onClose={close} {testId} {title}>
 		<WizardTransition {transition}>
 			{@render children()}
 		</WizardTransition>

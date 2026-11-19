@@ -7,6 +7,7 @@
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthWalletConnectSendReview from '$eth/components/wallet-connect/EthWalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
+	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { send as sendServices } from '$eth/services/wallet-connect.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -74,15 +75,23 @@
 		toWalletConnectCkEthHelperContractAddress({ networkId: sourceNetwork.id, minterInfo })
 	);
 
+	let amount = $derived(BigInt(firstTransaction?.value ?? ZERO));
+
 	// Classified from where the request goes as well as from its calldata: a `deposit(bytes32)` is a
-	// ckETH conversion only at the helper contract, and only one to the user's own principal is signed.
+	// ckETH conversion only at the helper contract, and only one to the user's own principal is signed;
+	// an `execute` is a swap only at a Uniswap router pinned for this network.
 	let call = $derived(
 		classifyWalletConnectEthSendTransaction({
 			to: firstTransaction.to,
 			data: firstTransaction.data,
 			networkId: sourceNetwork.id,
 			minterInfo,
-			principal: $authIdentity?.getPrincipal()
+			principal: $authIdentity?.getPrincipal(),
+			chainId: sourceNetwork.chainId,
+			value: amount,
+			wallet: $ethAddress,
+			nativeToken: $sendToken,
+			tokens: $ercFungibleTokens
 		})
 	);
 
@@ -97,7 +106,9 @@
 
 	// A deposit OISY refuses to sign, or holds until it can check it, is not a send either.
 	let ckEthDepositBlocked = $derived(
-		call.type === 'ckEthDepositRefused' || call.type === 'ckEthHelperUnconfirmed'
+		call.type === 'ckEthDepositRefused' ||
+			call.type === 'ckEthHelperUnconfirmed' ||
+			call.type === 'ckDepositRefused'
 	);
 
 	/**
@@ -136,9 +147,11 @@
 	let destination = $derived(firstTransaction.to ?? '');
 
 	// Compared however the address is cased, as the signing path compares it, so that casing cannot
-	// change where the review says the request goes.
+	// change where the review says the request goes. A deposit to the minter's helper that deposits to
+	// a subaccount is only classified as one at that helper, so it converts to the Internet Computer too.
 	let targetNetwork = $derived(
-		isDestinationContractAddress({ destination, contractAddress: ckEthHelperContractAddress })
+		isDestinationContractAddress({ destination, contractAddress: ckEthHelperContractAddress }) ||
+			call.type === 'ckDeposit'
 			? ICP_NETWORK
 			: $sendToken.network
 	);
@@ -191,7 +204,7 @@
 
 	let sendProgressStep = $state<ProgressStep>(ProgressStepsSend.INITIALIZATION);
 
-	let amount = $derived(BigInt(firstTransaction?.value ?? ZERO));
+	let unknownCallAcknowledged = $state(false);
 
 	let requestedGas = $derived(getSendParamsGas(firstTransaction.gas));
 
@@ -212,7 +225,9 @@
 			identity: $authIdentity,
 			minterInfo,
 			sourceNetwork,
-			targetNetwork
+			targetNetwork,
+			unknownCallAcknowledged,
+			tokens: $ercFungibleTokens
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
@@ -228,6 +243,8 @@
 		<WalletConnectModalTitle>
 			{#if approve}
 				{$i18n.core.text.approve}
+			{:else if call.type === 'uniswapSwap'}
+				{$i18n.wallet_connect.text.swap_title}
 			{:else if unknownCall || ckEthDepositBlocked}
 				{$i18n.wallet_connect.text.unknown_call_title}
 			{:else}
@@ -268,6 +285,7 @@
 						{requestedGas}
 						{sourceNetwork}
 						{targetNetwork}
+						bind:unknownCallAcknowledged
 					/>
 				{/if}
 			{/key}

@@ -4,9 +4,10 @@ import type {
 	IcTransactionUi,
 	IcpTransaction
 } from '$icp/types/ic-transaction';
+import { isCmcTopUpMemo } from '$icp/utils/cmc.utils';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import type { NullishIdentity } from '$lib/types/identity';
-import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
+import { fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 
 export const mapTransactionIcpToSelf = (
@@ -132,6 +133,13 @@ export const mapIcpTransaction = ({
 		// account owner did not pick the destination in that case, the spender did.
 		const transferSpender = fromNullable(operation.Transfer.spender);
 
+		// A top-up through the CMC, labelled as a TCYCLES top-up is. The ledger records only a
+		// hash of the deposit account, which only a contact's canister can name (see
+		// `getTopUpCanisterId`). A spender's transfer stays a send: the spender set its memo, and
+		// the label would hide the destination the spender picked.
+		const isCanisterTopUp =
+			source.incoming === false && isNullish(transferSpender) && isCmcTopUpMemo(transaction);
+
 		return {
 			...tx,
 			type: source.incoming === false ? 'send' : 'receive',
@@ -139,7 +147,8 @@ export const mapIcpTransaction = ({
 			...mapTo(operation.Transfer.to),
 			value: operation.Transfer.amount.e8s,
 			...(nonNullish(transferFee) && { fee: transferFee }),
-			...(nonNullish(transferSpender) && { transferSpender })
+			...(nonNullish(transferSpender) && { transferSpender }),
+			...(isCanisterTopUp && { typeLabel: 'transaction.label.top_up' })
 		};
 	}
 

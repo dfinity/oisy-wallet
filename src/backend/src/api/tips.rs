@@ -28,8 +28,9 @@ use crate::{
 ///
 /// # Errors
 /// Errors are enumerated by `TipError` (e.g. `Uncovered` when the allowance does
-/// not cover the amount plus its fee, `TooManyTips`, `AmountTooSmall`,
-/// `InvalidExpiry`, `DuplicateTipId`, `RateLimited`).
+/// not cover the amount plus its fee, or the amount is wider than any allowance
+/// can be, `TooManyTips`, `AmountTooSmall`, `InvalidExpiry`, `DuplicateTipId`,
+/// `RateLimited`).
 #[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub async fn create_tip(request: CreateTipRequest) -> CreateTipResult {

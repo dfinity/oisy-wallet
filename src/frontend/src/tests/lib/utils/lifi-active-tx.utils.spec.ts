@@ -1,6 +1,6 @@
 import type { TokenId } from '$declarations/backend/backend.did';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
-import { BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
+import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
 import {
 	ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES,
 	ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES
@@ -23,6 +23,7 @@ import {
 	toLifiExternalRefs,
 	toLifiExternalRefsMap,
 	toLifiLearnedRefs,
+	toLifiSimulationSlot,
 	toLifiStatusUpdate,
 	type LifiStatusAnswer
 } from '$lib/utils/lifi-active-tx.utils';
@@ -75,7 +76,8 @@ describe('lifi-active-tx.utils', () => {
 			{ kind: 'ERC-20', tokenId: { Erc20: ['0xabc', 42161n] }, chainId: 42161 },
 			{ kind: 'ERC-4626', tokenId: { Erc4626: ['0xabc', 1n] }, chainId: 1 },
 			{ kind: 'SPL', tokenId: { SplMainnet: 'mint' }, chainId: ChainId.SOL },
-			{ kind: 'native SOL', tokenId: { SolNativeMainnet: null }, chainId: ChainId.SOL }
+			{ kind: 'native SOL', tokenId: { SolNativeMainnet: null }, chainId: ChainId.SOL },
+			{ kind: 'native BTC', tokenId: { BtcNativeMainnet: null }, chainId: ChainId.BTC }
 		])('should map a $kind token to its LI.FI chain', ({ tokenId, chainId }) => {
 			expect(lifiChainIdOfTokenId(tokenId)).toBe(chainId);
 		});
@@ -84,7 +86,7 @@ describe('lifi-active-tx.utils', () => {
 			{ kind: 'devnet SPL', tokenId: { SplDevnet: 'mint' } },
 			{ kind: 'devnet SOL', tokenId: { SolNativeDevnet: null } },
 			{ kind: 'ICRC', tokenId: { Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') } },
-			{ kind: 'BTC', tokenId: { BtcNativeMainnet: null } }
+			{ kind: 'testnet BTC', tokenId: { BtcNativeTestnet: null } }
 		])('should not map a $kind token', ({ tokenId }) => {
 			expect(lifiChainIdOfTokenId(tokenId)).toBeUndefined();
 		});
@@ -123,8 +125,47 @@ describe('lifi-active-tx.utils', () => {
 			});
 		});
 
-		it.each(['succeeded', 'unknown'] as const)('should settle nothing on %s', (outcome) => {
-			expect(lifiSourceOutcomeToUpdate(outcome)).toBeUndefined();
+		it('should fail a Solana source whose blockhash expired before it landed', () => {
+			expect(lifiSourceOutcomeToUpdate('expired')).toEqual({
+				status: { Failed: null },
+				error: en.swap.error.swap_expired
+			});
+		});
+
+		it('should fail a BTC source that never reached the network', () => {
+			expect(lifiSourceOutcomeToUpdate('neverLanded')).toEqual({
+				status: { Failed: null },
+				error: en.send.error.btc_transaction_never_landed
+			});
+		});
+
+		it.each(['succeeded', 'unknown', 'unseen'] as const)(
+			'should settle nothing on %s',
+			(outcome) => {
+				expect(lifiSourceOutcomeToUpdate(outcome)).toBeUndefined();
+			}
+		);
+	});
+
+	describe('toLifiSimulationSlot', () => {
+		it('should read a slot', () => {
+			expect(toLifiSimulationSlot('461778178')).toBe(461778178n);
+			expect(toLifiSimulationSlot('18446744073709551615')).toBe(18446744073709551615n);
+		});
+
+		it.each([
+			undefined,
+			'',
+			'-1',
+			'+1',
+			'1.5',
+			'0x10',
+			' 1',
+			'18446744073709551616',
+			'99999999999999999999',
+			'123456789012345678901'
+		])('should read no slot from %s', (value) => {
+			expect(toLifiSimulationSlot(value)).toBeUndefined();
 		});
 	});
 
@@ -469,6 +510,22 @@ describe('lifi-active-tx.utils', () => {
 			});
 		});
 
+		it('should name a native BTC source by its backend id', () => {
+			expect(
+				toLifiData({
+					sourceToken: BTC_MAINNET_TOKEN,
+					destinationToken: mockLifiBaseUsdcToken,
+					amount: 1_000_000n
+				})
+			).toStrictEqual({
+				Lifi: {
+					source_token: { BtcNativeMainnet: null },
+					dest_token: { Erc20: [mockLifiBaseUsdcToken.address, 8453n] },
+					amount: 1_000_000n
+				}
+			});
+		});
+
 		it.each([
 			{ side: 'source', sourceToken: BTC_REGTEST_TOKEN, destinationToken: mockLifiBaseUsdcToken },
 			{ side: 'destination', sourceToken: BASE_ETH_TOKEN, destinationToken: BTC_REGTEST_TOKEN }
@@ -480,7 +537,7 @@ describe('lifi-active-tx.utils', () => {
 	describe('toLifiCreationRefs', () => {
 		const params = {
 			hash: `0x${'ab'.repeat(32)}`,
-			nonce: 7,
+			source: { nonce: 7 },
 			quote: { tool: 'across', transactionId: `0x${'cd'.repeat(32)}` },
 			sourceToken: BASE_ETH_TOKEN,
 			destinationToken: mockLifiBaseUsdcToken,
@@ -552,6 +609,55 @@ describe('lifi-active-tx.utils', () => {
 					LIFI_EXTERNAL_REF_KEYS.USD_SOURCE_VALUE
 				]
 			).toBeUndefined();
+		});
+
+		describe('a Solana source transaction', () => {
+			const signature = '5'.repeat(88);
+			const blockhash = 'HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN';
+
+			it('should carry its blockhash and the slot it was simulated at, and no nonce', () => {
+				const refs = toLifiCreationRefs({
+					...params,
+					hash: signature,
+					source: { blockhash, simulationSlot: 461_778_178n }
+				});
+
+				expect(refs[LIFI_EXTERNAL_REF_KEYS.TX_HASH]).toBe(signature);
+				expect(refs[LIFI_EXTERNAL_REF_KEYS.BLOCKHASH]).toBe(blockhash);
+				expect(refs[LIFI_EXTERNAL_REF_KEYS.SIMULATION_SLOT]).toBe('461778178');
+				expect(refs).not.toHaveProperty(LIFI_EXTERNAL_REF_KEYS.TX_NONCE);
+			});
+
+			it('should leave out a simulation slot it was not given', () => {
+				const refs = toLifiCreationRefs({ ...params, hash: signature, source: { blockhash } });
+
+				expect(refs[LIFI_EXTERNAL_REF_KEYS.BLOCKHASH]).toBe(blockhash);
+				expect(refs).not.toHaveProperty(LIFI_EXTERNAL_REF_KEYS.SIMULATION_SLOT);
+			});
+		});
+
+		it('should carry a BTC source transaction by its txid alone', () => {
+			const txid = 'ab'.repeat(32);
+
+			const refs = toLifiCreationRefs({
+				...params,
+				hash: txid,
+				source: undefined,
+				sourceToken: BTC_MAINNET_TOKEN
+			});
+
+			expect(refs[LIFI_EXTERNAL_REF_KEYS.TX_HASH]).toBe(txid);
+			expect(refs[LIFI_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL]).toBe(
+				BTC_MAINNET_TOKEN.network.name
+			);
+
+			for (const key of [
+				LIFI_EXTERNAL_REF_KEYS.TX_NONCE,
+				LIFI_EXTERNAL_REF_KEYS.BLOCKHASH,
+				LIFI_EXTERNAL_REF_KEYS.SIMULATION_SLOT
+			]) {
+				expect(refs).not.toHaveProperty(key);
+			}
 		});
 	});
 });

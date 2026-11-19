@@ -14,9 +14,14 @@ import type {
 } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import {
+	solRpcBatchMadeCalls,
+	solRpcOrderedBatchedInstructions
+} from '$sol/utils/sol-instruction-summary.utils';
+import {
 	asSolParsedRpcInstruction,
 	mapSolInstruction,
-	mapSolParsedInstruction
+	mapSolParsedInstruction,
+	solUnbatchedInstructions
 } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -198,11 +203,13 @@ const endOf = ({
 };
 
 export const mapSolTransferLegs = (instructions: readonly SolInstruction[]): SolTransferLeg[] =>
-	Array.from(instructions).reduce<SolTransferLeg[]>((acc, instruction) => {
-		const leg = toSolTransferLeg(mapSolInstruction({ instruction }));
+	Array.from(instructions)
+		.flatMap(solUnbatchedInstructions)
+		.reduce<SolTransferLeg[]>((acc, instruction) => {
+			const leg = toSolTransferLeg(mapSolInstruction({ instruction }));
 
-		return nonNullish(leg) ? [...acc, leg] : acc;
-	}, []);
+			return nonNullish(leg) ? [...acc, leg] : acc;
+		}, []);
 
 interface PlacedLeg {
 	leg: SolTransferLeg;
@@ -222,33 +229,45 @@ const mapSolInnerTransferLegs = async ({
 	// How many lifecycle events came before the first of these instructions.
 	from: number;
 }): Promise<{ legs: PlacedLeg[]; events: LifecycleEvent[] }> =>
-	await instructions.reduce<Promise<{ legs: PlacedLeg[]; events: LifecycleEvent[] }>>(
-		async (acc, instruction) => {
-			const { legs, events } = await acc;
+	// A token batch a program runs is returned as the instructions it carries, each of which is
+	// read like any other call the program makes, unless calls made inside it leave its steps in no
+	// order that can be trusted.
+	await instructions
+		.flatMap<SolanaSimulatedInnerInstruction>((instruction, position) =>
+			'parsed' in instruction
+				? solRpcOrderedBatchedInstructions({
+						instruction,
+						madeCalls: solRpcBatchMadeCalls({ inner: instructions, position })
+					})
+				: [instruction]
+		)
+		.reduce<Promise<{ legs: PlacedLeg[]; events: LifecycleEvent[] }>>(
+			async (acc, instruction) => {
+				const { legs, events } = await acc;
 
-			const event = lifecycleEventOf('parsed' in instruction ? instruction : undefined);
-			const after = nonNullish(event) ? [...events, event] : events;
+				const event = lifecycleEventOf('parsed' in instruction ? instruction : undefined);
+				const after = nonNullish(event) ? [...events, event] : events;
 
-			if (!('parsed' in instruction) || !isSolTransferInstruction(instruction)) {
-				return { legs, events: after };
-			}
+				if (!('parsed' in instruction) || !isSolTransferInstruction(instruction)) {
+					return { legs, events: after };
+				}
 
-			const mapped = await mapSolParsedInstruction({
-				identity: undefined,
-				instruction: { ...instruction, programAddress: instruction.programId },
-				network,
-				addressToToken
-			});
+				const mapped = await mapSolParsedInstruction({
+					identity: undefined,
+					instruction: { ...instruction, programAddress: instruction.programId },
+					network,
+					addressToToken
+				});
 
-			return {
-				legs: nonNullish(mapped)
-					? [...legs, { leg: toSolParsedTransferLeg(mapped), at: from + events.length }]
-					: legs,
-				events: after
-			};
-		},
-		Promise.resolve({ legs: [], events: [] })
-	);
+				return {
+					legs: nonNullish(mapped)
+						? [...legs, { leg: toSolParsedTransferLeg(mapped), at: from + events.length }]
+						: legs,
+					events: after
+				};
+			},
+			Promise.resolve({ legs: [], events: [] })
+		);
 
 /**
  * Every leg a message would produce: the transfers it states itself, and the ones a simulation
@@ -283,10 +302,36 @@ export const mapSolSimulatedTransferLegs = async ({
 		async (acc, instruction, index) => {
 			const { legs, events } = await acc;
 
-			const leg = toSolTransferLeg(mapSolInstruction({ instruction }));
-
 			const { instructions: inner } =
 				innerInstructions.find(({ index: parentIndex }) => parentIndex === index) ?? {};
+
+			// A token batch states the instructions it carries, which run in that order, so each
+			// gives its leg and its event in turn. Any other instruction is the only one it carries.
+			// A batch of several steps that made calls of its own stays whole, as in the operation
+			// list: nothing says between which of its steps those calls ran.
+			const unbatched = solUnbatchedInstructions(instruction);
+			const carried =
+				unbatched.length > 1 && solRpcBatchMadeCalls({ inner: inner ?? [] })
+					? [instruction]
+					: unbatched;
+
+			const stated = carried.reduce<{
+				legs: PlacedLeg[];
+				events: LifecycleEvent[];
+			}>(
+				(acc, carried) => {
+					const leg = toSolTransferLeg(mapSolInstruction({ instruction: carried }));
+					const event = lifecycleEventOf(asSolParsedRpcInstruction(carried));
+
+					return {
+						legs: nonNullish(leg)
+							? [...acc.legs, { leg, at: events.length + acc.events.length }]
+							: acc.legs,
+						events: nonNullish(event) ? [...acc.events, event] : acc.events
+					};
+				},
+				{ legs: [], events: [] }
+			);
 
 			const within = await mapSolInnerTransferLegs({
 				instructions: inner ?? [],
@@ -295,11 +340,9 @@ export const mapSolSimulatedTransferLegs = async ({
 				from: events.length
 			});
 
-			const event = lifecycleEventOf(asSolParsedRpcInstruction(instruction));
-
 			return {
-				legs: [...legs, ...(nonNullish(leg) ? [{ leg, at: events.length }] : []), ...within.legs],
-				events: [...events, ...within.events, ...(nonNullish(event) ? [event] : [])]
+				legs: [...legs, ...stated.legs, ...within.legs],
+				events: [...events, ...within.events, ...stated.events]
 			};
 		},
 		Promise.resolve({ legs: [], events: [] })

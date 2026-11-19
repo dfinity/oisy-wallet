@@ -1,4 +1,7 @@
 import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
+import { isIcrcTokenSupportIcrc3 } from '$icp/services/icrc.services';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
+import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { Currency } from '$lib/enums/currency';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES, PLAUSIBLE_EVENT_VALUES } from '$lib/enums/plausible';
@@ -206,6 +209,39 @@ const loadAllTransactionsHistory = async ({
 	}
 };
 
+// The ICRC ledgers whose rows have no mapper link and that serve ICRC-3 blocks. A ledger that
+// cannot be asked counts as not serving them: its rows keep an empty explorer cell.
+const loadIcrc3LedgerCanisterIds = async ({
+	identity,
+	transactions
+}: {
+	identity: Identity;
+	transactions: AllTransactionUiWithCmp[];
+}): Promise<Set<LedgerCanisterIdText>> => {
+	const ledgerCanisterIds = new Set(
+		transactions.flatMap((entry) =>
+			entry.component === 'ic' &&
+			isNullish(entry.transaction.txExplorerUrl) &&
+			isTokenIcrc(entry.token)
+				? [entry.token.ledgerCanisterId]
+				: []
+		)
+	);
+
+	const results = await Promise.allSettled(
+		[...ledgerCanisterIds].map(async (ledgerCanisterId) => ({
+			ledgerCanisterId,
+			supported: await isIcrcTokenSupportIcrc3({ identity, ledgerCanisterId })
+		}))
+	);
+
+	return new Set(
+		results.flatMap((result) =>
+			result.status === 'fulfilled' && result.value.supported ? [result.value.ledgerCanisterId] : []
+		)
+	);
+};
+
 export type TransactionCsvVariant = 'basic' | 'extended';
 
 const TRANSACTION_CSV_COLUMNS_BY_VARIANT = {
@@ -256,6 +292,11 @@ export const exportTransactionsCsv = async ({
 		await loadAllTransactionsHistory({ identity, tokens });
 
 		const transactions = buildTransactions();
+		// Only the Extended variant has an explorer column.
+		const icrc3LedgerCanisterIds =
+			variant === 'extended'
+				? await loadIcrc3LedgerCanisterIds({ identity, transactions })
+				: new Set<LedgerCanisterIdText>();
 		const exportedAt = new Date();
 		// Both transactions variants share the same sort (newest first, tie-breaks on token
 		// and direction) so opening Basic and Extended side by side shows the rows lined
@@ -266,6 +307,7 @@ export const exportTransactionsCsv = async ({
 				userAddresses,
 				nativeSymbolByNetworkId,
 				contacts,
+				icrc3LedgerCanisterIds,
 				exportedAt
 			})
 		);

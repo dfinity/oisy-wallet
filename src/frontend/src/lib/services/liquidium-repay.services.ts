@@ -1,3 +1,6 @@
+import { isDefinitiveBtcBroadcastRefusal } from '$btc/utils/btc-send.utils';
+import { alchemyProviders } from '$eth/providers/alchemy.providers';
+import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import { liquidiumClient } from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
@@ -7,16 +10,25 @@ import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import {
 	createActiveUserTransaction,
 	deleteActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction,
 	updateActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
 import { getOrCreateLiquidiumProfile } from '$lib/services/liquidium.services';
+import { balancesStore, type BalancesData } from '$lib/stores/balances.store';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
+import {
+	liquidiumUnminedRepaysStore,
+	type LiquidiumUnminedRepaysData
+} from '$lib/stores/liquidium-unmined-repays.store';
+import type { OptionBalance } from '$lib/types/balance';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import {
 	LIQUIDIUM_EXTERNAL_REF_KEYS,
 	type LiquidiumExternalRefKey
 } from '$lib/types/liquidium-active-tx';
+import type { Token, TokenId } from '$lib/types/token';
 import { isActiveUserTransactionError } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import {
@@ -30,13 +42,14 @@ import {
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { SupplyAction, type Chain, type SupplyTarget } from '@liquidium/client';
+import { get } from 'svelte/store';
 
 export interface LiquidiumRepayPreview {
 	projectedHealthPercent: number;
 }
 
-// Full outstanding debt (principal + accrued interest + small buffer) in base units, for the
-// "Max (full debt)" shortcut. `null` when the user has no profile yet (should not happen for a
+// Full outstanding debt (accrued interest included) plus the SDK's small buffer, in base units, for
+// the "Max (full debt)" shortcut. `null` when the user has no profile yet (should not happen for a
 // position that already carries debt, but guarded so callers can no-op gracefully).
 export const getLiquidiumMaxRepayAmount = async ({
 	identity,
@@ -64,8 +77,9 @@ export const getLiquidiumMaxRepayAmount = async ({
 	return amount;
 };
 
-// USD value of this position's accrued borrow interest, derived from the reserve's own price basis
-// (interest and principal share the asset price, so this scales consistently with `borrowedUsd`).
+// USD value of this position's lifetime borrow interest, derived from the reserve's own price basis
+// (it shares the asset price with the debt, so this scales consistently with `borrowedUsd`).
+// Informational: it is already part of `borrowedUsd`.
 export const liquidiumDebtInterestUsd = (reserve: LiquidiumReserve): number =>
 	reserve.borrowed > ZERO
 		? (Number(reserve.debtInterest ?? ZERO) / Number(reserve.borrowed)) * reserve.borrowedUsd
@@ -90,8 +104,9 @@ export const computeLiquidiumRepayPreview = ({
 
 // Pending repays already cover the whole debt: nothing is left to repay until they settle. The net
 // cap rarely lands on exactly zero (interest accrued since the pending repay was quoted leaves dust
-// that its own buffer already covers), so the debt itself is checked too. Shared by the form, the
-// Review step and the broadcast guard so every gate agrees on "nothing left to repay".
+// that its own buffer already covers), so the debt itself is checked too (`borrowed` already
+// includes the accrued interest). Shared by the form, the Review step and the broadcast guard so
+// every gate agrees on "nothing left to repay".
 export const liquidiumPendingCoversDebt = ({
 	pendingRepay,
 	maxRepay,
@@ -100,9 +115,7 @@ export const liquidiumPendingCoversDebt = ({
 	pendingRepay: bigint;
 	maxRepay: bigint | undefined;
 	reserve: LiquidiumReserve;
-}): boolean =>
-	pendingRepay > ZERO &&
-	(maxRepay === ZERO || pendingRepay >= reserve.borrowed + (reserve.debtInterest ?? ZERO));
+}): boolean => pendingRepay > ZERO && (maxRepay === ZERO || pendingRepay >= reserve.borrowed);
 
 // Why `amount` can no longer be repaid under the cap, or `undefined` when it can. Review can
 // outlive the cap it was entered under (a repay that settles clears and refetches it; a new pending
@@ -128,11 +141,142 @@ export const liquidiumRepayCapError = ({
 				? new Error(i18n.liquidium.text.repay_exceeds_debt)
 				: undefined;
 
+// The balance the repay form spends from is read at the latest block, so an Ethereum transfer just
+// broadcast is still in it until it is mined and the balance reloaded. A second repay in that
+// window can spend it again, and the chain reverts that one. Its gas is still in the balance of
+// `feeToken`, the network's native token, the same way. The transfer's `amount` and the most its
+// gas can cost (`gasFee`) are held back for that long; a wait that fails (dropped, replaced, timed
+// out) releases them to the balance poll. `unmined` are the balances from before the transfer was
+// sent, to tell a reload that has it from one that does not: by the time the send returns, the
+// transfer can already be mined and the balances reloaded.
+export const holdLiquidiumRepayUntilMined = async ({
+	hash,
+	token,
+	amount,
+	feeToken,
+	gasFee,
+	unmined
+}: {
+	hash: string;
+	token: Token;
+	amount: bigint;
+	feeToken: Token;
+	gasFee: bigint;
+	unmined: CertifiedStoreData<BalancesData>;
+}): Promise<void> => {
+	liquidiumUnminedRepaysStore.add({
+		hash,
+		holds: [
+			{ tokenId: token.id, amount },
+			{ tokenId: feeToken.id, amount: gasFee }
+		]
+	});
+
+	try {
+		const status = await alchemyProviders(token.network.id).wait(hash);
+
+		// A reverted transfer moves no value, only its gas, and a replaced one moves neither, while the
+		// transaction that took its nonce pays gas from the same native balance. The sent token's
+		// balance stays as it was, so only the gas is still held, until the native balance has changed.
+		const transferred = status === 'success';
+
+		if (!transferred) {
+			liquidiumUnminedRepaysStore.add({ hash, holds: [{ tokenId: feeToken.id, amount: gasFee }] });
+		}
+
+		const tokens = !transferred || feeToken.id === token.id ? [feeToken] : [token, feeToken];
+
+		const reloads = await Promise.all(
+			tokens.map(async (reloadToken) => ({
+				tokenId: reloadToken.id,
+				...(await reloadEthereumBalance(reloadToken))
+			}))
+		);
+
+		await balancesChanged({
+			tokenIds: reloads.filter(({ success }) => success).map(({ tokenId }) => tokenId),
+			unmined
+		});
+	} finally {
+		liquidiumUnminedRepaysStore.remove(hash);
+	}
+};
+
+// A reload does not prove the store has the mined balance: `reloadEthereumBalance` stores it through
+// `batchSet`, which only lands on the next animation frame (not at all while the tab is hidden),
+// and it reads Infura, which can still be a block behind the receipt from Alchemy. The transfer
+// always changes the balances it holds, by its value or its gas, so this resolves once every one of
+// `tokenIds` has a balance in the store other than in `unmined`. A reload that still has the old
+// balance leaves the hold to the balance poll.
+const balancesChanged = async ({
+	tokenIds,
+	unmined
+}: {
+	tokenIds: TokenId[];
+	unmined: CertifiedStoreData<BalancesData>;
+}): Promise<void> => {
+	const changed = (balances: CertifiedStoreData<BalancesData>): boolean =>
+		tokenIds.every((tokenId) => balances?.[tokenId]?.data !== unmined?.[tokenId]?.data);
+
+	if (changed(get(balancesStore))) {
+		return;
+	}
+
+	await new Promise<void>((resolve) => {
+		const unsubscribe = balancesStore.subscribe((balances) => {
+			if (changed(balances)) {
+				unsubscribe();
+				resolve();
+			}
+		});
+	});
+};
+
+// What a repay can still spend of `balance` while unmined repays hold some of `tokenId` (value or
+// gas) back: all of it for the balance check (`spendable`), and what is left after the fees the
+// form reserves from it for "Max" (`maxSpendable`). With nothing held `maxSpendable` is
+// `undefined`, since the form's own reservation from the balance is then the same.
+export const liquidiumRepaySpendable = ({
+	balance,
+	tokenId,
+	unminedRepays,
+	reserved
+}: {
+	balance: OptionBalance;
+	tokenId: TokenId;
+	unminedRepays: LiquidiumUnminedRepaysData;
+	reserved?: bigint;
+}): { spendable: OptionBalance; maxSpendable?: bigint } => {
+	const held = Object.values(unminedRepays)
+		.flat()
+		.reduce(
+			(sum, { tokenId: heldTokenId, amount }) => (heldTokenId === tokenId ? sum + amount : sum),
+			ZERO
+		);
+
+	if (isNullish(balance) || held === ZERO) {
+		return { spendable: balance };
+	}
+
+	const spendable = balance > held ? balance - held : ZERO;
+
+	if (isNullish(reserved)) {
+		return { spendable };
+	}
+
+	return { spendable, maxSpendable: spendable > reserved ? spendable - reserved : ZERO };
+};
+
 // Broadcasts `amount` base units (gross = repay + provider fee) to the native target and returns
 // the txid the AUT poller correlates on. Implemented by the wizard (per-chain fee/UTXO machinery).
+//
+// A transport that knows its txid before broadcasting (BTC through the backend) calls
+// `beforeBroadcast` with it, and broadcasts nothing if that rejects. Its failures are then
+// `sendBtc`'s, which say whether anything can have gone out.
 export type LiquidiumRepayBroadcast = (params: {
 	target: SupplyTarget;
 	amount: bigint;
+	beforeBroadcast: (params: { txid: string }) => Promise<void>;
 }) => Promise<string>;
 
 // Repays `amount` (base units) of `asset`'s debt: resolve profile → record an AUT → broadcast the
@@ -240,16 +384,54 @@ export const executeLiquidiumRepay = async ({
 
 	const lease = setInterval(renewLease, LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS);
 
+	// Set by `beforeBroadcast`, which only a transport that knows its txid before broadcasting
+	// calls: the row then carries the txid, so the poller keeps it, and from there the transfer
+	// can go out.
+	let txidRecorded = false;
+	// Set before the write: one that committed but whose answer was lost leaves the txid on the row
+	// all the same.
+	let txidWriteAttempted = false;
+
+	const recordTxid = async ({ txid: signedTxid }: { txid: string }) => {
+		txidWriteAttempted = true;
+
+		await updateActiveUserTransaction({
+			identity,
+			id,
+			externalRefs: toLiquidiumExternalRefs({
+				...refs,
+				[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: signedTxid
+			})
+		});
+
+		txidRecorded = true;
+	};
+
 	let txid: string;
 
 	try {
 		// Gross transfer = net repayment + provider inflow fee (deducted on arrival).
-		txid = await broadcast({ target: flow.target, amount: amount + inflowFee });
+		txid = await broadcast({
+			target: flow.target,
+			amount: amount + inflowFee,
+			beforeBroadcast: recordTxid
+		});
 	} catch (err: unknown) {
 		clearInterval(lease);
 
-		// Taken as not sent, as the wizard reports it.
-		await deleteRow();
+		// Before the broadcast, or through a transport that cannot tell, the failure is taken as not
+		// sent, as the wizard reports it. Once the broadcast began, only a refusal outright proves
+		// nothing went out: otherwise the row stays, and the repay keeps counting against the max
+		// until it settles, so a second full repay cannot follow it.
+		const sentNothing = !txidRecorded || isDefinitiveBtcBroadcastRefusal(err);
+
+		if (sentNothing && txidWriteAttempted) {
+			// The row may carry the txid, written or committed with its answer lost, and the poller's
+			// cleanup of rows without one could not remove it, so the delete is retried.
+			await deleteUnbroadcastActiveUserTransaction({ identity, id });
+		} else if (sentNothing) {
+			await deleteRow();
+		}
 
 		throw err;
 	}
@@ -276,6 +458,10 @@ export const executeLiquidiumRepay = async ({
 	// The txid first: it is what the poller correlates the row on, and a row still without one once
 	// the grace period is over is dropped. `external_refs` is replaced wholesale, so the other refs
 	// go along again.
+	//
+	// Written again when the transport already wrote it before the broadcast: a poller in another
+	// tab may have read the row without it and deleted it just after, its delete not being
+	// conditional on what it read. A row it deleted answers `NotFound` here and is recreated.
 	const sentRefs = { ...refs, [LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid };
 
 	try {

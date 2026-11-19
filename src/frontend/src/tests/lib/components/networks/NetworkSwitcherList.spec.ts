@@ -7,7 +7,6 @@ import { render, waitFor } from '@testing-library/svelte';
 
 describe('NetworkSwitcherList', () => {
 	const props = {
-		allNetworksEnabled: false,
 		showTestnets: false,
 		supportedNetworks: [ETHEREUM_NETWORK, BTC_MAINNET_NETWORK]
 	};

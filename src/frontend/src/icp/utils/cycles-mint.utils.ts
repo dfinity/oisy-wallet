@@ -1,29 +1,10 @@
-import { CMC_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { CYCLES_MINT_MIN_ESTIMATE, CYCLES_MINT_REFUND_FEES } from '$icp/constants/cmc.constants';
 import type { IcToken } from '$icp/types/ic-token';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import type { OptionToken } from '$lib/types/token';
 import { toCyclesMintCredited } from '$lib/utils/cycles-mint-active-tx.utils';
-import { nonNullish, principalToSubAccount } from '@dfinity/utils';
-import { AccountIdentifier, SubAccount } from '@icp-sdk/canisters/ledger/icp';
-import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
-import { Principal } from '@icp-sdk/core/principal';
-
-// The CMC looks for a mint deposit in its own account, under the subaccount
-// derived from the principal that notifies it.
-export const getCyclesMintDepositAccount = (principal: Principal): IcrcAccount => ({
-	owner: Principal.fromText(CMC_CANISTER_ID),
-	subaccount: principalToSubAccount(principal)
-});
-
-// The same account as ICP history names it: the ICP index reports every
-// transfer's destination as an account identifier.
-export const getCyclesMintDepositAccountIdentifier = (principal: Principal): string =>
-	AccountIdentifier.fromPrincipal({
-		principal: Principal.fromText(CMC_CANISTER_ID),
-		subAccount: SubAccount.fromBytes(principalToSubAccount(principal))
-	}).toHex();
+import { nonNullish } from '@dfinity/utils';
 
 // The TCYCLES token the CMC mints into: the mainnet cycles ledger's. No other token has
 // a Mint action.

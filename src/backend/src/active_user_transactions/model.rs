@@ -5,8 +5,8 @@ use shared::types::{
     active_user_transaction::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, LifiData,
-        NearIntentsData, OisyTradeData, UpdateActiveUserTransactionRequest, XrpData,
+        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, CyclesTopUpData,
+        LifiData, NearIntentsData, OisyTradeData, UpdateActiveUserTransactionRequest, XrpData,
         LIFI_REF_BLOCKHASH, LIFI_REF_NONCE, LIFI_REF_TX_HASH,
         MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS,
         MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN, MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
@@ -69,6 +69,14 @@ pub fn create(
         if has_xrp_payment_in_flight(map, principal, source_address) {
             return Err(ActiveUserTransactionError::AlreadyInFlight);
         }
+    }
+
+    // The ckSOL minter takes one deposit per account at a time, and a SOL → ckSOL row takes the
+    // first deposit above the latest one before its transfer, so two open rows would both take the
+    // same deposit. As for XRP, the frontend refuses early too, but a second tab can pass its own
+    // check before the first row exists, and only this call sees the check and the write at once.
+    if is_sol_mint(&request.data) && has_sol_mint_in_flight(map, principal) {
+        return Err(ActiveUserTransactionError::AlreadyInFlight);
     }
 
     if let ActiveUserTransactionData::Lifi(data) = &request.data {
@@ -257,6 +265,24 @@ fn holds_xrp_address(tx: &ActiveUserTransaction) -> bool {
     }
 }
 
+/// Whether the caller has a SOL → ckSOL conversion that is not terminal yet.
+///
+/// Per user rather than per minter: OISY converts through one ckSOL minter.
+fn has_sol_mint_in_flight(map: &ActiveUserTransactionsMap, principal: Principal) -> bool {
+    scan_principal(map, principal)
+        .any(|(_, Candid(tx))| is_sol_mint(&tx.data) && !tx.status.is_terminal())
+}
+
+fn is_sol_mint(data: &ActiveUserTransactionData) -> bool {
+    matches!(
+        data,
+        ActiveUserTransactionData::ChainFusion(ChainFusionData {
+            direction: ChainFusionDirection::SolToCkSol,
+            ..
+        })
+    )
+}
+
 /// Make room for one more of the caller's records. Below the cap this does
 /// nothing. At the cap it deletes as many of the caller's finished rows —
 /// `Succeeded` or `Failed` — as the new record needs, least recently updated
@@ -438,6 +464,10 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             require_valid_amount(&d.amount, "amount")?;
             require_lifi_pair(d)?;
         }
+        ActiveUserTransactionData::CyclesTopUp(d) => {
+            require_valid_amount(&d.amount, "amount")?;
+            require_cycles_top_up(d)?;
+        }
     }
     Ok(())
 }
@@ -484,6 +514,7 @@ fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTra
     let is_btc = |t: &TokenId| matches!(t, TokenId::BtcNativeMainnet | TokenId::BtcNativeTestnet);
     let is_eth = |t: &TokenId| matches!(t, TokenId::EvmNative(_));
     let is_erc20 = |t: &TokenId| matches!(t, TokenId::Erc20(..));
+    let is_sol = |t: &TokenId| matches!(t, TokenId::SolNativeMainnet | TokenId::SolNativeDevnet);
     let is_ck = |t: &TokenId| matches!(t, TokenId::Icrc(_));
 
     let ok = match data.direction {
@@ -497,6 +528,8 @@ fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTra
         ChainFusionDirection::CkErc20ToErc20 => {
             is_ck(&data.source_token) && is_erc20(&data.dest_token)
         }
+        ChainFusionDirection::SolToCkSol => is_sol(&data.source_token) && is_ck(&data.dest_token),
+        ChainFusionDirection::CkSolToSol => is_ck(&data.source_token) && is_sol(&data.dest_token),
     };
 
     if ok {
@@ -508,6 +541,16 @@ fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTra
     }
 }
 
+/// ICP in either of its spellings: the wallet sends it as `Icrc` of its ledger,
+/// while `IcpNative` exists for the exchange-rate path.
+fn is_icp_token(token: &TokenId) -> bool {
+    match token {
+        TokenId::IcpNative => true,
+        TokenId::Icrc(ledger) => *ledger == *ICP_LEDGER,
+        _ => false,
+    }
+}
+
 /// A mint spends ICP, in either of its spellings, and deposits into the cycles
 /// ledger. Unlike the other variants, which check kinds only so that testnets
 /// and new pairs need no change here, a mint has exactly one pair, and both
@@ -515,15 +558,10 @@ fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTra
 /// in `dfx.json`), so both legs are pinned. `data` is immutable after creation,
 /// so a row naming any other token would describe a mint that cannot exist.
 fn require_cycles_mint_pair(data: &CyclesMintData) -> Result<(), ActiveUserTransactionError> {
-    let is_icp = |t: &TokenId| match t {
-        TokenId::IcpNative => true,
-        TokenId::Icrc(ledger) => *ledger == *ICP_LEDGER,
-        _ => false,
-    };
     let is_cycles_ledger =
         |t: &TokenId| matches!(t, TokenId::Icrc(ledger) if *ledger == *CYCLES_LEDGER);
 
-    if is_icp(&data.source_token) && is_cycles_ledger(&data.dest_token) {
+    if is_icp_token(&data.source_token) && is_cycles_ledger(&data.dest_token) {
         Ok(())
     } else {
         Err(ActiveUserTransactionError::InvalidData(
@@ -531,6 +569,30 @@ fn require_cycles_mint_pair(data: &CyclesMintData) -> Result<(), ActiveUserTrans
                 .to_string(),
         ))
     }
+}
+
+/// The class byte that ends an opaque principal, the kind the Internet Computer
+/// assigns to canisters. A user's principal is self-authenticating (`0x02`), and
+/// the anonymous principal is `0x04`.
+const OPAQUE_PRINCIPAL_CLASS: u8 = 0x01;
+
+/// A top-up spends ICP, in either of its spellings, and pays the cycles into a
+/// canister. `data` is immutable after creation, so a row naming another token,
+/// or a principal that is not a canister's, describes a top-up that cannot exist.
+/// The canister is checked by kind only: whether it exists is for the CMC to
+/// find out, and it refunds a deposit it cannot make.
+fn require_cycles_top_up(data: &CyclesTopUpData) -> Result<(), ActiveUserTransactionError> {
+    if !is_icp_token(&data.source_token) {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "cycles-top-up source must be ICP".to_string(),
+        ));
+    }
+    if data.canister_id.as_slice().last() != Some(&OPAQUE_PRINCIPAL_CLASS) {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "canister_id must be a canister id".to_string(),
+        ));
+    }
+    Ok(())
 }
 
 /// An OISY Trade pair is two ledger principals on the Internet Computer, so a
@@ -567,17 +629,19 @@ const LIFI_EVM_CHAIN_IDS: [u64; 6] = [
 /// The LI.FI poller derives both chains from the token ids, then asks the source
 /// chain and LI.FI's status endpoint about them. A pair LI.FI cannot swap for the
 /// wallet — an EVM chain without a pinned Diamond, a devnet, an NFT, a chain
-/// LI.FI does not serve, or Solana → EVM, which is not executed yet — could never
-/// reach a terminal status, and `data` is immutable after creation, so the row
-/// would occupy one of the user's slots forever. Reject it up front. Unlike the
-/// kind-only checks above, the EVM chains are pinned: they are exactly the
-/// chains LI.FI can be called on.
+/// LI.FI does not serve, Solana → EVM, which is not executed yet, or anything
+/// into BTC or from BTC testnet — could never reach a terminal status, and
+/// `data` is immutable after creation, so the row would occupy one of the user's
+/// slots forever. Reject it up front. Unlike the kind-only checks above, the EVM
+/// chains are pinned: they are exactly the chains LI.FI can be called on. Native
+/// BTC on mainnet is a source only, toward the same destinations as an EVM one.
 fn require_lifi_pair(data: &LifiData) -> Result<(), ActiveUserTransactionError> {
-    let supported = if is_lifi_evm_token(&data.source_token) {
-        is_lifi_evm_token(&data.dest_token) || is_lifi_solana_token(&data.dest_token)
-    } else {
-        is_lifi_solana_token(&data.source_token) && is_lifi_solana_token(&data.dest_token)
-    };
+    let supported =
+        if is_lifi_evm_token(&data.source_token) || is_lifi_btc_token(&data.source_token) {
+            is_lifi_evm_token(&data.dest_token) || is_lifi_solana_token(&data.dest_token)
+        } else {
+            is_lifi_solana_token(&data.source_token) && is_lifi_solana_token(&data.dest_token)
+        };
 
     if !supported {
         return Err(ActiveUserTransactionError::InvalidData(
@@ -622,12 +686,16 @@ fn is_lifi_solana_token(token: &TokenId) -> bool {
     matches!(token, TokenId::SplMainnet(_) | TokenId::SolNativeMainnet)
 }
 
+fn is_lifi_btc_token(token: &TokenId) -> bool {
+    matches!(token, TokenId::BtcNativeMainnet)
+}
+
 /// The poll keys a LI.FI row needs (see `LIFI_REF_TX_HASH`), required because a
 /// row without them could never reach a terminal status and would occupy one of
 /// the user's slots forever. Which keys apply follows from the source chain,
-/// which `require_lifi_pair` has already confined to a pinned EVM chain or
-/// Solana mainnet. Shape checks only: the frontend reads every value from the
-/// transaction it just broadcast.
+/// which `require_lifi_pair` has already confined to a pinned EVM chain, Solana
+/// mainnet or Bitcoin mainnet. Shape checks only: the frontend reads every value
+/// from the transaction it just signed.
 fn require_lifi_refs(
     data: &LifiData,
     refs: &[ActiveUserTransactionRef],
@@ -656,6 +724,14 @@ fn require_lifi_refs(
         if !is_base58_of_len(blockhash, SOLANA_BLOCKHASH_LEN) {
             return invalid(format!("{LIFI_REF_BLOCKHASH} must be a Solana blockhash"));
         }
+    } else if is_lifi_btc_token(&data.source_token) {
+        // A BTC txid as block explorers and LI.FI write it, without `0x`. There is
+        // no nonce: a BTC transaction that never lands is told apart by its txid.
+        if tx_hash.len() != BTC_TXID_LEN || !tx_hash.chars().all(|c| c.is_ascii_hexdigit()) {
+            return invalid(format!(
+                "{LIFI_REF_TX_HASH} must be {BTC_TXID_LEN} hex characters for a BTC source"
+            ));
+        }
     } else {
         let is_evm_tx_hash = tx_hash.len() == EVM_TX_HASH_LEN
             && tx_hash
@@ -682,6 +758,8 @@ fn require_lifi_refs(
 
 /// `0x` plus the 32-byte hash in hex.
 const EVM_TX_HASH_LEN: usize = 66;
+/// A 32-byte BTC txid in hex.
+const BTC_TXID_LEN: usize = 64;
 /// An Ed25519 signature.
 const SOLANA_SIGNATURE_LEN: usize = 64;
 /// A SHA-256 hash.
@@ -948,10 +1026,11 @@ mod tests {
         active_user_transaction::{
             ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
             ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-            ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, LifiData,
-            LiquidiumAction, LiquidiumData, NearIntentsData, OisyTradeData, OisyTradeSide,
-            OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
-            VeloraSwapMode, XrpData, LIFI_REF_BLOCKHASH, LIFI_REF_NONCE, LIFI_REF_TX_HASH,
+            ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
+            CyclesTopUpData, LifiData, LiquidiumAction, LiquidiumData, NearIntentsData,
+            OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
+            UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode, XrpData,
+            LIFI_REF_BLOCKHASH, LIFI_REF_NONCE, LIFI_REF_TX_HASH,
             MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
             XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_LEDGER_RESULT, XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
         },
@@ -1295,6 +1374,7 @@ mod tests {
     const CKBTC_LEDGER: &str = "mxzaz-hqaaa-aaaar-qaada-cai";
     const CKETH_LEDGER: &str = "ss2fx-dyaaa-aaaar-qacoq-cai";
     const CKUSDC_LEDGER: &str = "xevnm-gaaaa-aaaar-qafnq-cai";
+    const CKSOL_LEDGER: &str = "ls5lp-lqaaa-aaaar-qb5oa-cai";
     const USDC_ETHEREUM: &str = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
 
     fn icrc(ledger: &str) -> TokenId {
@@ -1321,6 +1401,8 @@ mod tests {
                 icrc(CKUSDC_LEDGER),
                 TokenId::Erc20(ErcTokenId(USDC_ETHEREUM.to_string()), 1),
             ),
+            ChainFusionDirection::SolToCkSol => (TokenId::SolNativeMainnet, icrc(CKSOL_LEDGER)),
+            ChainFusionDirection::CkSolToSol => (icrc(CKSOL_LEDGER), TokenId::SolNativeMainnet),
         };
         ActiveUserTransactionData::ChainFusion(ChainFusionData {
             direction,
@@ -1332,7 +1414,7 @@ mod tests {
 
     #[test]
     fn chain_fusion_create_roundtrip() {
-        // All six directions share one variant, so each must survive create —
+        // All eight directions share one variant, so each must survive create —
         // and the stable-memory read path — unchanged; the direction is what
         // the FE poller routes on.
         for direction in ChainFusionDirection::ALL {
@@ -1378,6 +1460,134 @@ mod tests {
             });
             let err = create(&mut map, principal(), req, 1).unwrap_err();
             assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        }
+    }
+
+    #[test]
+    fn chain_fusion_sol_devnet_accepted() {
+        // Only kinds are checked, so Devnet SOL passes as Bitcoin testnet does.
+        for (direction, source_token, dest_token) in [
+            (
+                ChainFusionDirection::SolToCkSol,
+                TokenId::SolNativeDevnet,
+                icrc(CKSOL_LEDGER),
+            ),
+            (
+                ChainFusionDirection::CkSolToSol,
+                icrc(CKSOL_LEDGER),
+                TokenId::SolNativeDevnet,
+            ),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("ck-1");
+            req.data = ActiveUserTransactionData::ChainFusion(ChainFusionData {
+                direction,
+                source_token,
+                dest_token,
+                amount: Nat::from(1_000u64),
+            });
+            create(&mut map, principal(), req, 1).expect("create");
+        }
+    }
+
+    #[test]
+    fn chain_fusion_spl_token_rejected_as_sol() {
+        // An SPL token is not SOL, so it never stands in for the SOL side.
+        for (direction, source_token, dest_token) in [
+            (
+                ChainFusionDirection::SolToCkSol,
+                spl(USDC_SOLANA),
+                icrc(CKSOL_LEDGER),
+            ),
+            (
+                ChainFusionDirection::CkSolToSol,
+                icrc(CKSOL_LEDGER),
+                spl(USDC_SOLANA),
+            ),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("ck-1");
+            req.data = ActiveUserTransactionData::ChainFusion(ChainFusionData {
+                direction,
+                source_token,
+                dest_token,
+                amount: Nat::from(1_000u64),
+            });
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        }
+    }
+
+    fn sol_mint_req(id: &str) -> CreateActiveUserTransactionRequest {
+        let mut req = create_req(id);
+        req.data = chain_fusion_data(1_000, ChainFusionDirection::SolToCkSol);
+        req
+    }
+
+    // The invariant the SOL → ckSOL guard exists for, enforced here because the frontend's own
+    // check cannot be atomic with this create.
+    #[test]
+    fn chain_fusion_second_sol_mint_rejected_while_the_first_is_open() {
+        for status in [
+            ActiveUserTransactionStatus::Pending,
+            ActiveUserTransactionStatus::Executing,
+        ] {
+            let (mut map, _mm) = setup();
+            create(&mut map, principal(), sol_mint_req("ck-1"), 1).expect("first mint");
+            set_status(&mut map, "ck-1", status);
+
+            let err = create(&mut map, principal(), sol_mint_req("ck-2"), 3).unwrap_err();
+
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+
+    #[test]
+    fn chain_fusion_second_sol_mint_allowed_once_the_first_is_terminal() {
+        for status in [
+            ActiveUserTransactionStatus::Succeeded,
+            ActiveUserTransactionStatus::Failed,
+        ] {
+            let (mut map, _mm) = setup();
+            create(&mut map, principal(), sol_mint_req("ck-1"), 1).expect("first mint");
+            set_status(&mut map, "ck-1", status);
+
+            create(&mut map, principal(), sol_mint_req("ck-2"), 3).expect("second mint");
+        }
+    }
+
+    #[test]
+    fn chain_fusion_second_sol_mint_allowed_once_the_first_is_deleted() {
+        // The frontend deletes the row of a transfer the node refused.
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), sol_mint_req("ck-1"), 1).expect("first mint");
+        delete(&mut map, principal(), "ck-1".to_string()).expect("delete");
+
+        create(&mut map, principal(), sol_mint_req("ck-2"), 2).expect("second mint");
+    }
+
+    #[test]
+    fn chain_fusion_open_sol_mint_does_not_block_another_user() {
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), sol_mint_req("ck-1"), 1).expect("first mint");
+
+        create(&mut map, other_principal(), sol_mint_req("ck-1"), 2).expect("other user");
+    }
+
+    #[test]
+    fn chain_fusion_open_sol_mint_does_not_block_other_conversions() {
+        // Only the deposit side carries the minter's one-deposit limit.
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), sol_mint_req("ck-1"), 1).expect("first mint");
+
+        for (i, direction) in ChainFusionDirection::ALL
+            .into_iter()
+            .filter(|direction| *direction != ChainFusionDirection::SolToCkSol)
+            .enumerate()
+        {
+            let mut req = create_req(&format!("other-{i}"));
+            req.data = chain_fusion_data(1_000, direction);
+            create(&mut map, principal(), req, 2).expect("other conversion");
         }
     }
 
@@ -1499,6 +1709,117 @@ mod tests {
             "cycles-mint tokens must be ICP as the source and the cycles ledger as the destination"
                 .to_string(),
         )
+    }
+
+    const TOP_UP_CANISTER: &str = "ywcsb-maaaa-aaaai-q6k7a-cai";
+
+    fn top_up_canister() -> Principal {
+        Principal::from_text(TOP_UP_CANISTER).unwrap()
+    }
+
+    fn cycles_top_up_data(
+        amount: u64,
+        source_token: TokenId,
+        canister_id: Principal,
+    ) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::CyclesTopUp(CyclesTopUpData {
+            source_token,
+            canister_id,
+            amount: Nat::from(amount),
+            transfer_created_at_ns: 1_790_000_000_000_000_000,
+        })
+    }
+
+    #[test]
+    fn cycles_top_up_create_roundtrip() {
+        // As for a mint, the source is ICP in either spelling, and both must
+        // survive create and the stable-memory read path.
+        for source_token in [icrc(ICP_LEDGER), TokenId::IcpNative] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("top-up-1");
+            req.data = cycles_top_up_data(100_000_000, source_token.clone(), top_up_canister());
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+
+            let listed = list(&map, principal());
+            assert_eq!(listed.len(), 1);
+            assert_eq!(
+                listed[0].data,
+                cycles_top_up_data(100_000_000, source_token, top_up_canister())
+            );
+        }
+    }
+
+    #[test]
+    fn cycles_top_up_zero_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("top-up-1");
+        req.data = cycles_top_up_data(0, icrc(ICP_LEDGER), top_up_canister());
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    /// The width bound the other variants share, checked on this arm too.
+    #[test]
+    fn cycles_top_up_oversized_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("top-up-1");
+        req.data = ActiveUserTransactionData::CyclesTopUp(CyclesTopUpData {
+            source_token: icrc(ICP_LEDGER),
+            canister_id: top_up_canister(),
+            amount: Nat::parse(OVER_WIDTH_AMOUNT).unwrap(),
+            transfer_created_at_ns: 1_790_000_000_000_000_000,
+        });
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(list(&map, principal()).len(), 0);
+    }
+
+    #[test]
+    fn cycles_top_up_source_other_than_icp_rejected() {
+        // The CMC converts only ICP, so any other source, the cycles ledger's own
+        // token included, describes a top-up that cannot exist.
+        for source_token in [
+            TokenId::EvmNative(1),
+            TokenId::Erc20(ErcTokenId(USDC_ETHEREUM.to_string()), 1),
+            TokenId::BtcNativeMainnet,
+            TokenId::SolNativeMainnet,
+            icrc(CKBTC_LEDGER),
+            icrc(CYCLES_LEDGER),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("top-up-1");
+            req.data = cycles_top_up_data(100_000_000, source_token, top_up_canister());
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "cycles-top-up source must be ICP".to_string()
+                )
+            );
+        }
+    }
+
+    #[test]
+    fn cycles_top_up_non_canister_rejected() {
+        // Only a canister can take cycles: a user's principal, the anonymous
+        // principal and the management canister's empty id are refused.
+        for canister_id in [
+            principal(),
+            Principal::anonymous(),
+            Principal::management_canister(),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("top-up-1");
+            req.data = cycles_top_up_data(100_000_000, icrc(ICP_LEDGER), canister_id);
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "canister_id must be a canister id".to_string()
+                )
+            );
+        }
     }
 
     fn oisy_trade_data(
@@ -1623,6 +1944,8 @@ mod tests {
     const LIFI_SOLANA_SIGNATURE: &str =
         "2Ana1pUpv2ZbMVkwF5FXapYeBEjdxDatLn7nvJkhgTSXbs59SyZSx866bXirPgj8QQVB57uxHJBG1YFvkRbFj4T";
     const LIFI_SOLANA_BLOCKHASH: &str = "7ppk9w8NHnH6ehajvJyU31VcMafwZ3ybRtJWumSyD2wd";
+    // The genesis block's coinbase txid.
+    const LIFI_BTC_TXID: &str = "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b";
 
     fn lifi_ref(key: &str, value: &str) -> ActiveUserTransactionRef {
         ActiveUserTransactionRef {
@@ -1642,6 +1965,8 @@ mod tests {
                 lifi_ref(LIFI_REF_BLOCKHASH, LIFI_SOLANA_BLOCKHASH),
                 lifi_ref(LIFI_REF_TX_HASH, LIFI_SOLANA_SIGNATURE),
             ]
+        } else if *source_token == TokenId::BtcNativeMainnet {
+            vec![lifi_ref(LIFI_REF_TX_HASH, LIFI_BTC_TXID)]
         } else {
             vec![
                 lifi_ref(LIFI_REF_NONCE, "7"),
@@ -1689,6 +2014,10 @@ mod tests {
             (TokenId::EvmNative(4663), spl(USDC_SOLANA)),
             // Solana → Solana.
             (TokenId::SolNativeMainnet, spl(USDC_SOLANA)),
+            // BTC → EVM and BTC → Solana, with a txid and no nonce.
+            (TokenId::BtcNativeMainnet, TokenId::EvmNative(1)),
+            (TokenId::BtcNativeMainnet, erc20(USDC_ETHEREUM, 8453)),
+            (TokenId::BtcNativeMainnet, spl(USDC_SOLANA)),
         ] {
             let (mut map, _mm) = setup();
             let req = lifi_req(source_token.clone(), dest_token.clone());
@@ -1765,11 +2094,37 @@ mod tests {
             TokenId::Erc1155(address(), 1),
             TokenId::IcpNative,
             icrc(CKUSDC_LEDGER),
-            TokenId::BtcNativeMainnet,
+            TokenId::BtcNativeTestnet,
             TokenId::XrpNativeMainnet,
         ] {
             assert_lifi_pair_rejected(token.clone(), TokenId::EvmNative(1), LIFI_PAIR_ERROR);
             assert_lifi_pair_rejected(TokenId::EvmNative(1), token, LIFI_PAIR_ERROR);
+        }
+    }
+
+    #[test]
+    fn lifi_btc_destination_rejected() {
+        // BTC is a LI.FI source only: no swap into it is executed.
+        for source_token in [
+            TokenId::EvmNative(1),
+            erc20(USDC_ETHEREUM, 1),
+            TokenId::SolNativeMainnet,
+            spl(USDC_SOLANA),
+            TokenId::BtcNativeMainnet,
+        ] {
+            assert_lifi_pair_rejected(source_token, TokenId::BtcNativeMainnet, LIFI_PAIR_ERROR);
+        }
+    }
+
+    #[test]
+    fn lifi_btc_source_toward_unsupported_destinations_rejected() {
+        for dest_token in [
+            // A chain without a pinned Diamond, a Solana devnet, and ICP.
+            TokenId::EvmNative(10),
+            TokenId::SolNativeDevnet,
+            TokenId::IcpNative,
+        ] {
+            assert_lifi_pair_rejected(TokenId::BtcNativeMainnet, dest_token, LIFI_PAIR_ERROR);
         }
     }
 
@@ -1886,6 +2241,43 @@ mod tests {
     }
 
     #[test]
+    fn lifi_btc_source_poll_keys() {
+        assert_lifi_refs_rejected(
+            TokenId::BtcNativeMainnet,
+            TokenId::EvmNative(1),
+            vec![lifi_ref(LIFI_REF_NONCE, "7")],
+            "lifi_tx_hash is required",
+        );
+
+        // An EVM hash, `0x` and all, one digit short, a non-hex digit, and a
+        // Solana signature on a BTC row.
+        for tx_hash in [
+            LIFI_EVM_TX_HASH,
+            &LIFI_BTC_TXID[..63],
+            &LIFI_BTC_TXID.replacen('a', "g", 1),
+            LIFI_SOLANA_SIGNATURE,
+        ] {
+            assert_lifi_refs_rejected(
+                TokenId::BtcNativeMainnet,
+                TokenId::EvmNative(1),
+                vec![lifi_ref(LIFI_REF_TX_HASH, tx_hash)],
+                "lifi_tx_hash must be 64 hex characters for a BTC source",
+            );
+        }
+
+        // Upper-case hex is still hex.
+        let (mut map, _mm) = setup();
+        let req = CreateActiveUserTransactionRequest {
+            external_refs: vec![lifi_ref(
+                LIFI_REF_TX_HASH,
+                &LIFI_BTC_TXID.to_ascii_uppercase(),
+            )],
+            ..lifi_req(TokenId::BtcNativeMainnet, TokenId::EvmNative(1))
+        };
+        create(&mut map, principal(), req, 1).expect("create");
+    }
+
+    #[test]
     fn lifi_solana_source_malformed_poll_keys_rejected() {
         // An EVM hash on a Solana row, base58 of the wrong length, and a
         // character outside the base58 alphabet.
@@ -1922,7 +2314,11 @@ mod tests {
     fn lifi_update_cannot_strip_poll_keys() {
         // `external_refs` is replaced wholesale, so an update that drops a poll
         // key would leave the same row `create` refuses.
-        for source_token in [TokenId::EvmNative(1), TokenId::SolNativeMainnet] {
+        for source_token in [
+            TokenId::EvmNative(1),
+            TokenId::SolNativeMainnet,
+            TokenId::BtcNativeMainnet,
+        ] {
             let (mut map, _mm) = setup();
             let req = lifi_req(source_token.clone(), spl(USDC_SOLANA));
             create(&mut map, principal(), req, 1).expect("create");

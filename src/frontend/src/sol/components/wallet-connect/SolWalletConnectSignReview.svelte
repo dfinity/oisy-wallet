@@ -24,10 +24,10 @@
 	import SolWalletConnectTransferParties from '$sol/components/wallet-connect/SolWalletConnectTransferParties.svelte';
 	import SolWalletConnectUnreadPrograms from '$sol/components/wallet-connect/SolWalletConnectUnreadPrograms.svelte';
 	import {
+		SOLANA_LAMPORTS_PER_SIGNATURE,
 		SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD,
 		SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER,
-		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER,
-		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
+		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER
 	} from '$sol/constants/sol.constants';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
@@ -55,6 +55,14 @@
 		feeToken: Token;
 		prioritizationFee?: bigint;
 		prioritizationFeeEstimate?: bigint;
+		// How many signatures the message requires, which the base fee is charged on once each. Every
+		// message carries at least its fee payer's, so that is what the review assumes until the
+		// decode settles.
+		requiredSignatures?: number;
+		// Whether the user's wallet pays the base and priority fees, which it does not when the message
+		// names another account to pay them, as a dApp sponsoring the request does. Until the decode
+		// says otherwise it is taken to, as the review has always assumed.
+		walletPaysFees?: boolean;
 		isApproval?: boolean;
 		// Whether the message cannot be stated faithfully, which is what the signing flow refuses on.
 		ambiguous?: boolean;
@@ -82,6 +90,17 @@
 		// user's wallet. Read from the list rather than the message, which cannot see a close made
 		// inside another program.
 		closesPayOthers?: boolean;
+		// Whether the request asks OISY to send a message that names another account to pay its fee.
+		// A send goes out with the wallet as the fee payer, which is not the transaction reviewed here,
+		// so the signing flow refuses it.
+		feePaidByOthers?: boolean;
+		// Whether the request grants an allowance and no simulated run came back to state how much
+		// the spender may spend. The signing flow refuses it.
+		approvalWithoutSimulation?: boolean;
+		// Whether the message carries an instruction OISY cannot read that no simulated run described:
+		// none came back, or the one that did left that instruction unaccounted for. The signing flow
+		// refuses it.
+		unreviewedNotDescribed?: boolean;
 		// The programs the simulated run calls from inside another program's instruction that OISY
 		// does not know. What such a call does to funds the user holds in an application is in
 		// neither the balance changes nor the operations, so the review names them and asks the user
@@ -91,11 +110,6 @@
 		// WalletConnect's Verify API flags the requesting site as a scam: the review says so and
 		// offers Reject only.
 		flaggedAsScam?: boolean;
-		// Whether the message carries an instruction nobody read that no run described, which the
-		// signing flow refuses like the two above, and whether a run came back at all: the refusal says
-		// which of the two it is.
-		unreviewedWithoutSimulation?: boolean;
-		simulationRan?: boolean;
 		// Whether WalletConnect's domain verification flagged the site. No way past a refusal is
 		// offered then, and the review does not point at the Settings switch either.
 		domainFlagged?: boolean;
@@ -122,6 +136,8 @@
 		feeToken,
 		prioritizationFee,
 		prioritizationFeeEstimate,
+		requiredSignatures = 1,
+		walletPaysFees = true,
 		isApproval = false,
 		ambiguous = false,
 		decoded = false,
@@ -132,11 +148,12 @@
 		messageSummary,
 		parties,
 		closesPayOthers = false,
+		feePaidByOthers = false,
+		approvalWithoutSimulation = false,
+		unreviewedNotDescribed = false,
 		unreadPrograms = [],
 		unreadProgramsAcknowledged = $bindable(false),
 		flaggedAsScam = false,
-		unreviewedWithoutSimulation = false,
-		simulationRan = false,
 		domainFlagged = false,
 		reassignsWallet = false,
 		uncheckedSigningOffered = false,
@@ -148,7 +165,11 @@
 		onOpenSettings
 	}: Props = $props();
 
-	let refused = $derived(closesPayOthers || ambiguous || unreviewedWithoutSimulation);
+	// The refusals the Settings switch can sign past. A send another account is set to pay the fee for
+	// is not among them: OISY would send a transaction other than the one reviewed here.
+	let refused = $derived(
+		closesPayOthers || ambiguous || approvalWithoutSimulation || unreviewedNotDescribed
+	);
 
 	let activeTab = $state('summary');
 
@@ -170,11 +191,17 @@
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
-	// What the transaction costs beyond what it moves: every line of the fee section. The simulated
-	// SOL balance carries all of it and the message states none of it, so it is the room the
-	// comparison of the two allows.
+	// Charged for every signature the message requires rather than once per message, so a message a
+	// dApp co-signs pays it twice.
+	let baseFee = $derived(SOLANA_LAMPORTS_PER_SIGNATURE * BigInt(requiredSignatures));
+
+	// What the transaction costs the user beyond what it moves: every line of the fee section the
+	// wallet pays. The simulated SOL balance carries all of it and the message states none of it, so
+	// it is the room the comparison of the two allows. A request the dApp sponsors leaves the base and
+	// priority fees out: the user's balance pays neither, so allowing for them would make room for an
+	// outflow nothing explains.
 	let costs = $derived(
-		SOLANA_TRANSACTION_FEE_IN_LAMPORTS + (prioritizationFee ?? ZERO) + ataFee + appAccountCost
+		(walletPaysFees ? baseFee + (prioritizationFee ?? ZERO) : ZERO) + ataFee + appAccountCost
 	);
 
 	// The message read on its own says a plain send, receive or swap, and the run agrees that this
@@ -193,11 +220,12 @@
 	//
 	// Only the programs that moved something. An instruction the wallet could not read names its
 	// program too, and most transactions carry a couple that change nothing the user holds, so
-	// counting those here would bury the program that did the work among its housekeeping.
+	// counting those here would bury the program that did the work among its housekeeping. A token
+	// batch's heading names the token program, which runs the batch rather than doing the trade.
 	let venues = $derived([
 		...new Set(
 			flattenInstructions(instructions ?? [])
-				.filter(({ kind }) => kind !== 'unknown')
+				.filter(({ kind }) => kind !== 'unknown' && kind !== 'batch')
 				.map(({ program }) => program)
 				.filter(nonNullish)
 		)
@@ -311,9 +339,9 @@
 	     sign makes every caveat below it moot, since they qualify a review nobody is going to act
 	     on. It is the only notice here that is an error rather than a warning, because it describes
 	     what the wallet has already decided rather than something for the user to weigh.
-	     A message OISY could not decode is a warning either way, and
+	     A message OISY could not decode is a warning once a simulated run described it, and
 	     says the review is simulated only when a simulation was in fact obtained, since one can
-	     fail. A message that decoded but does not reduce to a send, a receive or a swap the run
+	     fail; without such a run it is refused. A message that decoded but does not reduce to a send, a receive or a swap the run
 	     agrees with is the case the user has to read the detail for, so it says so; it names the
 	     simulated changes, so it waits for a run to exist and for the decode to settle, and the
 	     absence of a run has a warning of its own. A message that does reduce still shows
@@ -322,11 +350,14 @@
 	     refuses one the message states and so marks the request ambiguous as well: the two would
 	     both be true of the commonest case, and the general sentence would be shown for the
 	     specific thing that is wrong with it. -->
+	<!-- A send another account is named to pay for is asked about before either: it goes out with
+	     the wallet as the fee payer, so everything else here was read from a transaction other than
+	     the one OISY would sign. -->
 	<!-- Above the caveats, because it is the one notice that asks something of the user: approving
 	     waits for the confirmation it carries. A refusal hides it, since there is nothing left to
 	     confirm on a request OISY will not sign, unless the Settings switch lets it be signed after
 	     all. -->
-	{#if (!refused || uncheckedSigningOffered) && unreadPrograms.length > 0}
+	{#if !feePaidByOthers && (!refused || uncheckedSigningOffered) && unreadPrograms.length > 0}
 		<SolWalletConnectUnreadPrograms
 			network={token.network}
 			programs={unreadPrograms}
@@ -334,10 +365,16 @@
 		/>
 	{/if}
 
-	<!-- With the Settings switch on, the review is going to be acted on after all, so it says what is
-	     wrong without saying OISY won't sign it, and gives every reason rather than the first: the
-	     acknowledgement below covers each of them. -->
-	{#if refused && uncheckedSigningOffered}
+	{#if feePaidByOthers}
+		<!-- A live region for the same reason as the refusals below: it is why Approve stays
+		     unusable. -->
+		<div role="alert">
+			<MessageBox level="error">{$i18n.wallet_connect.text.fee_paid_by_others}</MessageBox>
+		</div>
+	{:else if refused && uncheckedSigningOffered}
+		<!-- With the Settings switch on, the review is going to be acted on after all, so it says what is
+		     wrong without saying OISY won't sign it, and gives every reason rather than the first: the
+		     acknowledgement below covers each of them. -->
 		<div role="alert">
 			<MessageBox level="error">
 				<span class="flex flex-col gap-2">
@@ -349,9 +386,13 @@
 						<span>{$i18n.wallet_connect.text.cannot_be_shown_reason}</span>
 					{/if}
 
-					{#if unreviewedWithoutSimulation}
+					{#if approvalWithoutSimulation}
+						<span>{$i18n.wallet_connect.text.approval_without_simulation_reason}</span>
+					{/if}
+
+					{#if unreviewedNotDescribed}
 						<span>
-							{simulationRan
+							{simulatedInstructions
 								? $i18n.wallet_connect.text.unreviewed_not_described_by_simulation_reason
 								: $i18n.wallet_connect.text.unreviewed_without_simulation_reason}
 						</span>
@@ -373,11 +414,17 @@
 		<div role="alert">
 			<MessageBox level="error">{$i18n.wallet_connect.text.cannot_be_shown}</MessageBox>
 		</div>
-	{:else if unreviewedWithoutSimulation}
+	{:else if approvalWithoutSimulation}
 		<!-- Same live region, same reason. -->
 		<div role="alert">
+			<MessageBox level="error">{$i18n.wallet_connect.text.approval_without_simulation}</MessageBox>
+		</div>
+	{:else if unreviewedNotDescribed}
+		<!-- Same live region, same reason. Worded as the signing flow's refusal is, which tells a run
+		     that never came back from one that left the instruction unaccounted for. -->
+		<div role="alert">
 			<MessageBox level="error">
-				{simulationRan
+				{simulatedInstructions
 					? $i18n.wallet_connect.text.unreviewed_not_described_by_simulation
 					: $i18n.wallet_connect.text.unreviewed_without_simulation}
 			</MessageBox>
@@ -394,7 +441,7 @@
 		<MessageBox level="info">{$i18n.wallet_connect.text.simulated_review}</MessageBox>
 	{/if}
 
-	{#if refused && !domainFlagged && !reassignsWallet}
+	{#if refused && !domainFlagged && !reassignsWallet && !feePaidByOthers}
 		<WalletConnectUncheckedSigning
 			acknowledged={uncheckedSigningAcknowledged}
 			offered={uncheckedSigningOffered}
@@ -407,7 +454,7 @@
 	     message the wallet has already decided it will not sign, and the partial-parties notice is
 	     actively wrong there: it tells the user which lists to read on a request that is refused.
 	     With the Settings switch on, a refused message may be signed after all, so it all applies. -->
-	{#if !refused || uncheckedSigningOffered}
+	{#if !feePaidByOthers && (!refused || uncheckedSigningOffered)}
 		<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
 		     theft as nothing happening. It is named first among the fund warnings for that reason. -->
 		{#if nonNullish(preview) && preview.controlChanges.length > 0}
@@ -522,15 +569,15 @@
 					</WalletConnectModalValue>
 				{/if}
 
-				<!-- One heading, and under it what the transaction actually charges: the base fee every
-		     message pays, what it bids on top, and the rent of any account it opens. Three headings
+				<!-- One heading, and under it what the transaction actually charges: the base fee its
+		     signatures cost, what it bids on top, and the rent of any account it opens. Three headings
 		     read as three unrelated costs. -->
 				<WalletConnectModalValue label={$i18n.fee.text.fee} ref="fee">
 					<div class="flex flex-col gap-1">
 						<div data-tid="network-fee">
 							{@render feeValue({
 								kind: $i18n.fee.text.base_kind,
-								feeAmount: SOLANA_TRANSACTION_FEE_IN_LAMPORTS
+								feeAmount: baseFee
 							})}
 						</div>
 
@@ -569,7 +616,7 @@
 				{/snippet}
 			</SendData>
 		{:else}
-			<!-- What the transaction is made of, shown here rather than left to the hex, which nobody
+			<!-- What the transaction is made of, shown here rather than left to the base64, which nobody
 			     can read. A simulated run reveals the calls made inside other programs, which the
 			     message states none of, so the heading says which of the two this is. -->
 			{#if nonNullish(instructions) && instructions.length > 0}
@@ -591,7 +638,7 @@
 				</WalletConnectModalValue>
 			{/if}
 
-			<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
+			<WalletConnectData {data} label={$i18n.wallet_connect.text.base64_data} />
 		{/if}
 	</Tabs>
 

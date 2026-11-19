@@ -254,6 +254,7 @@
 				destinationToken: $destinationToken,
 				swapAmount,
 				swapDetails: selectedProvider.swapDetails as NearIntentsQuoteResponse,
+				slippageValue,
 				userAddress: source,
 				network,
 				fee

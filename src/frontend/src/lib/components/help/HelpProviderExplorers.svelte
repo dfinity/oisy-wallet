@@ -46,6 +46,10 @@
 			return $i18n.help.text.explorers_near_intents_description;
 		}
 
+		if (provider === SwapProvider.LIFI) {
+			return $i18n.help.text.explorers_lifi_description;
+		}
+
 		return $i18n.help.text.explorers_onesec_description;
 	};
 
@@ -71,7 +75,8 @@
 		<SettingsCard>
 			{#snippet title()}{$i18n.help.text.explorers_title}{/snippet}
 
-			<p class="mb-3 text-sm text-tertiary">
+			<!-- Pulled up to the title it explains: the card's title gap is sized for rows. -->
+			<p class="-mt-4 mb-3 text-sm text-tertiary">
 				{replaceOisyPlaceholders($i18n.help.text.explorers_description)}
 			</p>
 

@@ -2,6 +2,7 @@ import type { AccountInfo, ParsedAccount } from '$declarations/sol_rpc/sol_rpc.d
 import type {
 	Address,
 	GetAccountInfoApi,
+	GetSignatureStatusesApi,
 	TransactionForFullMetaInnerInstructionsParsed,
 	TransactionForFullMetaInnerInstructionsUnparsed
 } from '@solana/kit';
@@ -52,3 +53,9 @@ export type SolanaSimulatedInnerInstructions = (
 
 export type SolanaSimulatedInnerInstruction =
 	SolanaSimulatedInnerInstructions[number]['instructions'][number];
+
+// A transaction's status as `getSignatureStatuses` reports it, `null` when the node knows no
+// transaction with that signature.
+export type SolanaSignatureStatus = ReturnType<
+	GetSignatureStatusesApi['getSignatureStatuses']
+>['value'][number];

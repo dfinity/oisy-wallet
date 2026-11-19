@@ -1,7 +1,12 @@
 import { SUPPORTED_BITCOIN_NETWORK_IDS } from '$env/networks/networks.btc.env';
 import { SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
+import {
+	SOLANA_DEVNET_NETWORK_ID,
+	SOLANA_MAINNET_NETWORK_ID
+} from '$env/networks/networks.sol.env';
 import { CKERC20_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import { IC_CKSOL_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import {
 	icrc1Transfer as icrc1TransferIcp,
 	transfer as transferIcp
@@ -11,7 +16,8 @@ import { transfer as transferDip20 } from '$icp/api/xtc-ledger.api';
 import {
 	convertCkBTCToBtc,
 	convertCkETHToEth,
-	convertCkErc20ToErc20
+	convertCkErc20ToErc20,
+	convertCkSolToSol
 } from '$icp/services/ck.services';
 import { sendDip20, sendIc, sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import type { IcTransferParams } from '$icp/types/ic-send';
@@ -28,7 +34,8 @@ import {
 	mockValidIcrcToken
 } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipalText2 } from '$tests/mocks/identity.mock';
-import { decodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
+import { TxDuplicateError, TxTooOldError } from '@icp-sdk/canisters/ledger/icp';
+import { IcrcTransferError, decodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 
 vi.mock('$lib/utils/wallet.utils', () => ({
@@ -38,7 +45,8 @@ vi.mock('$lib/utils/wallet.utils', () => ({
 vi.mock('$icp/services/ck.services', () => ({
 	convertCkBTCToBtc: vi.fn(),
 	convertCkETHToEth: vi.fn(),
-	convertCkErc20ToErc20: vi.fn()
+	convertCkErc20ToErc20: vi.fn(),
+	convertCkSolToSol: vi.fn()
 }));
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({
@@ -58,6 +66,8 @@ describe('ic-send.services', () => {
 	const mockProgress = vi.fn();
 	const mockCkErc20ToErc20MaxCkEthFees = 123n;
 	const mockAmount = 10_000_000n;
+	const mockCreatedAt = 1_700_000_000_000_000_000n;
+	const mockBlockIndex = 42n;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -107,6 +117,14 @@ describe('ic-send.services', () => {
 						to: decodeIcrcAccount(mockPrincipalText2),
 						amount: mockAmount
 					});
+				});
+
+				it('should pass createdAt to the ledger', async () => {
+					await sendIc({ ...mockParams, createdAt: mockCreatedAt });
+
+					expect(transferIcrc).toHaveBeenCalledExactlyOnceWith(
+						expect.objectContaining({ createdAt: mockCreatedAt })
+					);
 				});
 
 				it('should call the auxiliary functions', async () => {
@@ -577,6 +595,101 @@ describe('ic-send.services', () => {
 					});
 				});
 			});
+
+			describe('and it is Solana mainnet', () => {
+				const mockParams = {
+					...baseParams,
+					token: { ...mockValidIcCkToken, ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID },
+					targetNetworkId: SOLANA_MAINNET_NETWORK_ID,
+					sendCompleted: mockSendCompleted
+				};
+
+				beforeEach(() => {
+					vi.clearAllMocks();
+				});
+
+				it('should execute full conversion flow', async () => {
+					await sendIc(mockParams);
+
+					const { sendCompleted: _, targetNetworkId: __, ...expected } = mockParams;
+
+					expect(convertCkSolToSol).toHaveBeenCalledExactlyOnceWith(expected);
+				});
+
+				it('should hand the withdrawal result to onSent', async () => {
+					const result = { type: 'ckSolToSol', blockIndex: 9n } as const;
+
+					vi.mocked(convertCkSolToSol).mockResolvedValueOnce(result);
+
+					const onSent = vi.fn();
+
+					await expect(sendIc({ ...mockParams, onSent })).resolves.toStrictEqual(result);
+
+					expect(onSent).toHaveBeenCalledExactlyOnceWith({ result });
+				});
+
+				it('should call the auxiliary functions', async () => {
+					await sendIc(mockParams);
+
+					expect(mockSendCompleted).toHaveBeenCalledOnce();
+
+					expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSendIc.RELOAD);
+
+					expect(waitAndTriggerWallet).toHaveBeenCalledOnce();
+				});
+
+				it('should not call the other services', async () => {
+					await sendIc(mockParams);
+
+					expect(convertCkBTCToBtc).not.toHaveBeenCalled();
+					expect(convertCkETHToEth).not.toHaveBeenCalled();
+					expect(convertCkErc20ToErc20).not.toHaveBeenCalled();
+					expect(icrc1TransferIcp).not.toHaveBeenCalled();
+					expect(transferIcp).not.toHaveBeenCalled();
+					expect(transferIcrc).not.toHaveBeenCalled();
+					expect(transferDip20).not.toHaveBeenCalled();
+				});
+
+				it('should throw if the service throws', async () => {
+					vi.mocked(convertCkSolToSol).mockRejectedValueOnce(new Error('Test error'));
+
+					await expect(sendIc(mockParams)).rejects.toThrow('Test error');
+
+					expect(mockSendCompleted).not.toHaveBeenCalled();
+					expect(mockProgress).not.toHaveBeenCalled();
+					expect(waitAndTriggerWallet).not.toHaveBeenCalled();
+				});
+
+				it('should not convert another ck token to SOL', async () => {
+					vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValue(false);
+
+					await sendIc({
+						...mockParams,
+						token: { ...mockValidIcCkToken, standard: { code: 'icrc' } }
+					});
+
+					expect(convertCkSolToSol).not.toHaveBeenCalled();
+					expect(transferIcrc).toHaveBeenCalledOnce();
+				});
+			});
+
+			it('should not convert ckSOL for Solana devnet', async () => {
+				vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValue(false);
+
+				await sendIc({
+					...baseParams,
+					token: {
+						...mockValidIcCkToken,
+						standard: { code: 'icrc' },
+						ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID
+					},
+					targetNetworkId: SOLANA_DEVNET_NETWORK_ID,
+					sendCompleted: mockSendCompleted
+				});
+
+				expect(convertCkSolToSol).not.toHaveBeenCalled();
+				expect(transferIcrc).toHaveBeenCalledOnce();
+			});
 		});
 	});
 
@@ -629,6 +742,39 @@ describe('ic-send.services', () => {
 
 			expect(mockProgress).toHaveBeenCalledOnce();
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
+		});
+
+		it('should pass createdAt to the ledger', async () => {
+			await sendIcrc({ ...mockParams, createdAt: mockCreatedAt });
+
+			expect(transferIcrc).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				ledgerCanisterId: mockValidIcrcToken.ledgerCanisterId,
+				to: decodeIcrcAccount(mockPrincipalText2),
+				amount: mockAmount,
+				createdAt: mockCreatedAt
+			});
+		});
+
+		it('should resolve to the block of the transfer the ledger already holds', async () => {
+			vi.mocked(transferIcrc).mockRejectedValueOnce(
+				new IcrcTransferError({
+					msg: 'Failed to transfer',
+					errorType: { Duplicate: { duplicate_of: mockBlockIndex } }
+				})
+			);
+
+			await expect(sendIcrc({ ...mockParams, createdAt: mockCreatedAt })).resolves.toBe(
+				mockBlockIndex
+			);
+		});
+
+		it('should throw any other ledger error', async () => {
+			const err = new IcrcTransferError({ msg: 'Failed to transfer', errorType: { TooOld: null } });
+
+			vi.mocked(transferIcrc).mockRejectedValueOnce(err);
+
+			await expect(sendIcrc({ ...mockParams, createdAt: mockCreatedAt })).rejects.toBe(err);
 		});
 	});
 
@@ -731,6 +877,63 @@ describe('ic-send.services', () => {
 			expect(mockProgress).toHaveBeenCalledOnce();
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 		});
+
+		describe.each([
+			{
+				destination: 'ICRC',
+				invalidIcrc: false,
+				invalidIcp: true,
+				ledgerTransfer: icrc1TransferIcp,
+				otherTransfer: transferIcp,
+				to: decodeIcrcAccount(mockPrincipalText2)
+			},
+			{
+				destination: 'ICP',
+				invalidIcrc: true,
+				invalidIcp: false,
+				ledgerTransfer: transferIcp,
+				otherTransfer: icrc1TransferIcp,
+				to: mockPrincipalText2
+			}
+		])(
+			'to a valid $destination address',
+			({ invalidIcrc, invalidIcp, ledgerTransfer, otherTransfer, to }) => {
+				beforeEach(() => {
+					vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValueOnce(invalidIcrc);
+					vi.spyOn(accountUtils, 'invalidIcpAddress').mockReturnValueOnce(invalidIcp);
+				});
+
+				it('should pass createdAt to the ledger', async () => {
+					await sendIcp({ ...mockParams, createdAt: mockCreatedAt });
+
+					expect(ledgerTransfer).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						to,
+						amount: mockAmount,
+						ledgerCanisterId: mockLedgerCanisterId,
+						createdAt: mockCreatedAt
+					});
+
+					expect(otherTransfer).not.toHaveBeenCalled();
+				});
+
+				it('should resolve to the block of the transfer the ledger already holds', async () => {
+					vi.mocked(ledgerTransfer).mockRejectedValueOnce(new TxDuplicateError(mockBlockIndex));
+
+					await expect(sendIcp({ ...mockParams, createdAt: mockCreatedAt })).resolves.toBe(
+						mockBlockIndex
+					);
+				});
+
+				it('should throw any other ledger error', async () => {
+					const err = new TxTooOldError();
+
+					vi.mocked(ledgerTransfer).mockRejectedValueOnce(err);
+
+					await expect(sendIcp({ ...mockParams, createdAt: mockCreatedAt })).rejects.toBe(err);
+				});
+			}
+		);
 	});
 
 	describe('sendDip20', () => {

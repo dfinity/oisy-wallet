@@ -77,6 +77,7 @@ export enum SwapErrorCodes {
 	ICP_SWAP_WITHDRAW_FAILED = 'ICPSwap_withdraw_failed',
 	NEAR_INTENTS_QUOTE_UNVERIFIED = 'near_intents_quote_unverified',
 	NEAR_INTENTS_QUOTE_EXPIRED = 'near_intents_quote_expired',
+	NEAR_INTENTS_QUOTE_SLIPPAGE = 'near_intents_quote_slippage',
 	NEAR_INTENTS_QUOTE_DEPOSIT_MEMO = 'near_intents_quote_deposit_memo'
 }
 export interface ProviderFee {
@@ -88,7 +89,14 @@ export interface ICPSwapResult {
 	receiveAmount: bigint;
 }
 
-export interface FetchSwapAmountsParams {
+/** Reports participation in pricing, including cached quotes and local calculations.
+ * Not a promise of a fresh network request or of an available offer.
+ */
+export interface SwapQuoteObserver {
+	onProviderParticipating?: (provider: SwapProvider) => void;
+}
+
+export interface FetchSwapAmountsParams extends SwapQuoteObserver {
 	identity: Identity;
 	sourceToken: Token;
 	destinationToken: Token;
@@ -108,16 +116,27 @@ export interface FetchSwapAmountsParams {
 
 export type Slippage = string | number;
 
+export type SwapSlippageStatus = 'valid' | 'warning' | 'invalid';
+
 /**
  * The reason no offer could be quoted, when a provider named one.
  *
  * `minAmount` is the provider's minimum, in the source token's smallest unit,
  * when the provider communicated it.
+ *
+ * `intermediateToken` is the token OISY lists that a provider routes the pair through in a shape
+ * OISY cannot verify: the user can make the swap as two separate swaps through it.
  */
-export interface SwapQuoteError {
-	type: 'amount-too-low';
-	minAmount?: bigint;
-}
+export type SwapQuoteError =
+	| {
+			type: 'amount-too-low';
+			minAmount?: bigint;
+	  }
+	| {
+			type: 'two-swaps';
+			intermediateToken: Token;
+			provider: SwapProvider;
+	  };
 
 export type SwapMappedResult =
 	| {
@@ -190,6 +209,15 @@ export type SwapMappedResult =
 			// The request the quote answers, which execution re-quotes with: it may differ from the
 			// one built for the form's inputs (see `fetchLifiSwapQuote`).
 			request: QuoteRequestFromAmount;
+			// A Solana-source quote's LI.FI ceiling, read off its own transaction: its network fee, with
+			// headroom for the re-quote execution signs, plus the rent of the accounts it creates, in
+			// lamports. What the form and the review budget beyond the amount, and execution holds the
+			// re-quote's own ceiling to. An EVM source's is priced in the form from the quote's gas.
+			solFeeCeiling?: bigint;
+			// A BTC-source quote's own UTXO selection, priced for its outputs over the spendable UTXOs:
+			// `outputVSizes` are those of LI.FI's deposit, memo and fee, without the change. What the
+			// form budgets, the review shows and execution pays.
+			btcSelection?: { utxosFee: UtxosFee; outputVSizes: number[] };
 			type?: string;
 	  };
 
@@ -204,7 +232,7 @@ interface IcpQuoteParams {
 	destToken: IcToken;
 }
 
-interface SwapQuoteParams {
+interface SwapQuoteParams extends SwapQuoteObserver {
 	identity: Identity;
 	sourceToken: IcToken;
 	destinationToken: IcToken;
@@ -317,7 +345,7 @@ export interface GetQuoteParams extends QuoteParams<'all' | 'market'> {
 	destChainId?: number;
 }
 
-export interface EvmQuoteParams {
+export interface EvmQuoteParams extends SwapQuoteObserver {
 	sourceToken: Erc20Token;
 	destinationToken: Erc20Token | IcToken;
 	amount: bigint;
@@ -328,7 +356,7 @@ export interface EvmQuoteParams {
 	slippage: Slippage;
 }
 
-export interface NearIntentsQuoteParams {
+export interface NearIntentsQuoteParams extends SwapQuoteObserver {
 	sourceToken: Token;
 	destinationToken: Token;
 	amount: bigint;
@@ -390,6 +418,9 @@ export interface ChainFusionSwapDetails {
 	// that consult it (ckETH → ETH). Mirrors Convert's `minter-info-not-certified` gate:
 	// an uncertified read blocks Review until the certified update lands.
 	minterInfoCertified?: boolean;
+	// SOL → ckSOL only: the deposit address and the automatic deposit fee the offer was priced
+	// with, which the minter's `watch_deposit_address` answer has to match before any SOL moves.
+	solDeposit?: { address: SolAddress; automaticDepositFee: bigint };
 }
 
 /**
@@ -438,7 +469,7 @@ export interface OneSecEvmToIcpParams extends RequiredTransactionFeeData {
 	swapId: string;
 }
 
-export interface IcpBridgeQuoteParams {
+export interface IcpBridgeQuoteParams extends SwapQuoteObserver {
 	sourceToken: Token;
 	destinationToken: Token;
 	amount: bigint;
@@ -454,7 +485,7 @@ export interface IcpBridgeSwapProviderConfig {
 	getSupportedDestinations: GetSupportedDestinationsFn;
 }
 
-export interface BtcQuoteParams {
+export interface BtcQuoteParams extends SwapQuoteObserver {
 	sourceToken: Token;
 	destinationToken: Token;
 	amount: bigint;
@@ -522,12 +553,44 @@ export interface SwapLifiEvmParams extends RequiredTransactionFeeData {
 	userTokenAddresses: string[];
 }
 
+export interface SwapLifiSolParams {
+	identity: Identity;
+	progress: (step: ProgressStep) => void;
+	sourceToken: Token;
+	destinationToken: Token;
+	swapAmount: Amount;
+	userAddress: SolAddress;
+	offer: Extract<SwapMappedResult, { provider: SwapProvider.LIFI }>;
+	// The LI.FI ceiling the user reviewed, in lamports: the transaction's network fee plus the rent of
+	// the accounts it creates. Execution never signs one whose ceiling is above it.
+	reviewedCeiling: bigint;
+}
+
+export interface SwapLifiBtcParams {
+	identity: Identity;
+	progress: (step: ProgressStep) => void;
+	sourceToken: Token;
+	destinationToken: Token;
+	swapAmount: Amount;
+	// The user's Bitcoin address: LI.FI's `fromAddress`, the source of the inputs and where the change
+	// goes.
+	userAddress: BtcAddress;
+	network: BitcoinNetwork;
+	offer: Extract<SwapMappedResult, { provider: SwapProvider.LIFI }>;
+	// The selection and the fee the user reviewed, priced for LI.FI's layout. Execution pays that fee,
+	// plus any change below 1,000 sats, which goes to the miner, and refuses a re-quoted layout it no
+	// longer prices.
+	utxosFee: UtxosFee;
+}
+
 interface SwapNearIntentsParams {
 	identity: Identity;
 	progress: (step: ProgressStep) => void;
 	sourceToken: Token;
 	swapAmount: Amount;
 	swapDetails: NearIntentsQuoteResponse;
+	// The max slippage the review showed; the quote must have been requested with it.
+	slippageValue: OptionAmount;
 }
 
 export interface SwapNearIntentsEvmParams
@@ -535,7 +598,6 @@ export interface SwapNearIntentsEvmParams
 	sourceToken: ErcFungibleToken;
 	destinationToken: ErcFungibleToken;
 	receiveAmount: bigint;
-	slippageValue: Amount;
 	sourceNetwork: EthereumNetwork;
 	userAddress: EthAddress;
 }

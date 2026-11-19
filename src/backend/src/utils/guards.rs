@@ -1,5 +1,5 @@
 use candid::Principal;
-use ic_cdk::api::{is_controller, msg_caller};
+use ic_cdk::api::{in_replicated_execution, is_controller, msg_caller};
 
 use crate::{state::read_config, types::StoredPrincipal, user_profile::service::has_user_profile};
 
@@ -32,6 +32,18 @@ pub(crate) fn caller_is_registered_user() -> Result<(), String> {
         Ok(())
     } else {
         Err("Update call error. RejectionCode: CanisterReject, Error: Caller has no user profile. Please create a user profile first via `create_user_profile`.".to_string())
+    }
+}
+
+/// Guard for query methods that must only run as queries.
+///
+/// Anyone can call a query method as an update. It then runs on every node of the subnet, the
+/// canister pays for it, and its heap writes (such as a per-replica cache) are discarded.
+pub(crate) fn called_as_query() -> Result<(), String> {
+    if in_replicated_execution() {
+        Err("This method can only be called as a query.".to_string())
+    } else {
+        Ok(())
     }
 }
 

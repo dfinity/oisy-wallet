@@ -61,6 +61,7 @@
 		exchangeRate={$sendTokenExchangeRate}
 		onClick={onTokensList}
 		onCustomErrorValidate={customValidate}
+		showTokenNetwork
 		token={$sendToken}
 		bind:amount
 		bind:error={amountError}

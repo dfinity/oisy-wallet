@@ -1,9 +1,11 @@
 import { LIFI_INTEGRATOR } from '$env/rest/lifi.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import {
 	LIFI_QUOTE_REFRESH_INTERVAL_MS,
 	LIFI_QUOTE_TIMEOUT_MS
 } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { tokens } from '$lib/derived/tokens.derived';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
 	PLAUSIBLE_EVENT_RESULT_STATUSES,
@@ -13,7 +15,13 @@ import {
 } from '$lib/enums/plausible';
 import { fetchLifiQuote } from '$lib/rest/lifi.rest';
 import { trackEvent } from '$lib/services/analytics.services';
-import { LifiQuoteRejectedError, LifiRouteUnsupportedError } from '$lib/types/errors';
+import { loadLifiSolQuoteCeiling } from '$lib/services/lifi-sol-transaction.services';
+import {
+	LifiQuoteRejectedError,
+	LifiRouteUnsupportedError,
+	SwapViaIntermediateTokenError
+} from '$lib/types/errors';
+import type { LifiTokenRef } from '$lib/types/lifi';
 import type { NetworkId } from '$lib/types/network';
 import {
 	SwapProvider,
@@ -27,17 +35,37 @@ import { isLifiRouteExecutable } from '$lib/utils/lifi-calldata.utils';
 import {
 	assertLifiQuote,
 	buildLifiQuoteRequest,
+	findLifiIntermediateToken,
+	findLifiListedToken,
+	isLifiBtcInsufficientFundsError,
 	mapLifiSwapResult
 } from '$lib/utils/lifi-swap.utils';
+import { isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
+import { resolveSwapTokenLookup } from '$lib/utils/swap-tokens-filter.utils';
+import { untilAborted } from '$lib/utils/timeout.utils';
+import { splTokens } from '$sol/derived/spl.derived';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-import { HTTPError, SDKError, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
+import {
+	ChainId,
+	HTTPError,
+	SDKError,
+	type LiFiStep,
+	type QuoteRequestFromAmount
+} from '@lifi/sdk';
 import { get } from 'svelte/store';
 
 type LifiQuoteParams = EvmQuoteParams | NearIntentsQuoteParams;
 
+// What LI.FI answered for the inputs: an offer or, without one, the in-between token of a route OISY
+// could not take, for the two-swap hint.
+interface LifiQuoteOutcome {
+	offer?: SwapMappedResult;
+	intermediateToken?: LifiTokenRef;
+}
+
 interface LifiQuoteCacheEntry {
 	key: string;
-	result: Promise<SwapMappedResult | undefined>;
+	result: Promise<LifiQuoteOutcome>;
 	// Set once `result` settles. The refresh interval runs from the answer, not from the request,
 	// so a request still in flight is always shared, however long it takes.
 	settledAt?: number;
@@ -100,31 +128,57 @@ const SWAP_OFFER_ERROR_SEVERITIES: Partial<
 	[PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.REQUEST_FAILED]: PLAUSIBLE_EVENT_SEVERITIES.WARN
 };
 
+// LI.FI's no-route codes for a BTC source: `1002`, no route (HTTP 404); and `1008`, a bridge that
+// failed to quote or refused the address (HTTP 424). Its balance codes are
+// `isLifiBtcInsufficientFundsError`'s.
+const LIFI_BTC_NO_ROUTE_CODES = [1002, 1008];
+
 // LI.FI's error text can carry the request URL, and with it the user's address, so only an
 // allow-listed category and the HTTP status are reported.
-const toSwapOfferError = (
-	err: unknown
-): { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES; status?: number } => {
+const toSwapOfferError = ({
+	err,
+	request
+}: {
+	err: unknown;
+	request: QuoteRequestFromAmount;
+}): { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES; status?: number } => {
 	if (err instanceof LifiQuoteRejectedError) {
 		return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.QUOTE_REJECTED };
 	}
 
-	// No route OISY can execute is no route at all.
+	// No route OISY can execute is no route at all, unless the re-quote without its bridge failed for
+	// a reason of its own.
 	if (err instanceof LifiRouteUnsupportedError) {
-		return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE };
+		return nonNullish(err.cause)
+			? toSwapOfferError({ err: err.cause, request })
+			: { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE };
 	}
 
-	// `LIFI_QUOTE_TIMEOUT_MS` aborts the fetch, and the SDK wraps that abort as it does any error.
-	if (
-		err instanceof SDKError &&
-		err.cause instanceof DOMException &&
-		err.cause.name === 'TimeoutError'
-	) {
+	// `LIFI_QUOTE_TIMEOUT_MS` aborts the fetch, and the SDK wraps that abort as it does any error; a
+	// Solana ceiling read that outlasts it rejects with the abort unwrapped.
+	const abort = err instanceof SDKError ? err.cause : err;
+
+	if (abort instanceof DOMException && abort.name === 'TimeoutError') {
 		return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.TIMEOUT };
 	}
 
-	const status =
-		err instanceof SDKError && err.cause instanceof HTTPError ? err.cause.status : undefined;
+	const httpError =
+		err instanceof SDKError && err.cause instanceof HTTPError ? err.cause : undefined;
+	const status = httpError?.status;
+
+	// A BTC address whose UTXOs LI.FI finds missing or too small is the insufficient balance the swap
+	// form already explains from its own UTXO selection, not a missing route.
+	if (request.fromChain === ChainId.BTC) {
+		if (isLifiBtcInsufficientFundsError({ err, request })) {
+			return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.INSUFFICIENT_FUNDS, status };
+		}
+
+		const code = httpError?.responseBody?.code;
+
+		if (nonNullish(code) && LIFI_BTC_NO_ROUTE_CODES.includes(code)) {
+			return { type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE, status };
+		}
+	}
 
 	// 404 is "no available quotes"; 422 is "none of the available routes could generate a
 	// transaction" — both mean there is no route to offer.
@@ -157,21 +211,41 @@ const fetchTrustedLifiQuote = async ({
 };
 
 /**
- * A trusted quote whose route the calldata binding could accept, with the request it answers. When
- * LI.FI's best route goes through a bridge in a shape the binding refuses (Across behind a DEX swap,
- * or any bridge followed by another step), LI.FI is asked once more without that bridge, so that
- * another allowed one can serve the pair; that request is the one execution re-quotes with. Both
- * requests share one deadline: the form waits for every provider's answer.
+ * A trusted quote whose route the binding could accept, with the request it answers.
+ *
+ * A Solana source's transaction is read as its binding reads it, which also gives the LI.FI ceiling
+ * the form budgets (`loadLifiSolQuoteCeiling`).
+ *
+ * When an EVM or BTC source's best route goes through a bridge in a shape `isLifiRouteExecutable`
+ * refuses (Across behind a DEX swap, or any bridge followed by another step), LI.FI is asked once more
+ * without that bridge, so that another allowed one can serve the pair; that request is the one
+ * execution re-quotes with. Both requests share the caller's deadline: the form waits for every
+ * provider's answer.
+ *
+ * When there is no such route, the refused one travels with the `LifiRouteUnsupportedError`, for the
+ * two-swap hint.
  */
 const fetchExecutableLifiQuote = async ({
 	request,
-	sourceNetworkId
+	sourceNetworkId,
+	signal
 }: {
 	request: QuoteRequestFromAmount;
 	sourceNetworkId: NetworkId;
-}): Promise<{ quote: LiFiStep; request: QuoteRequestFromAmount }> => {
-	const signal = AbortSignal.timeout(LIFI_QUOTE_TIMEOUT_MS);
+	signal: AbortSignal;
+}): Promise<{ quote: LiFiStep; request: QuoteRequestFromAmount; solFeeCeiling?: bigint }> => {
 	const quote = await fetchTrustedLifiQuote({ request, sourceNetworkId, signal });
+
+	if (request.fromChain === ChainId.SOL) {
+		// The RPC reads behind the ceiling cannot be handed the signal, so it bounds them from here: the
+		// form waits for every provider's answer, and the cache shares one that never settles.
+		const solFeeCeiling = await untilAborted({
+			operation: loadLifiSolQuoteCeiling({ quote, request }),
+			signal
+		});
+
+		return { quote, request, solFeeCeiling };
+	}
 
 	if (isLifiRouteExecutable(quote)) {
 		return { quote, request };
@@ -186,17 +260,76 @@ const fetchExecutableLifiQuote = async ({
 		otherBridges.length === allowBridges.length ||
 		otherBridges.length === 0
 	) {
-		throw new LifiRouteUnsupportedError(`LI.FI route via ${bridge} cannot be executed`);
+		throw new LifiRouteUnsupportedError(`LI.FI route via ${bridge} cannot be executed`, {
+			route: quote
+		});
 	}
 
 	const withoutBridge = { ...request, allowBridges: otherBridges };
-	const fallback = await fetchTrustedLifiQuote({ request: withoutBridge, sourceNetworkId, signal });
+
+	let fallback: LiFiStep;
+
+	try {
+		fallback = await fetchTrustedLifiQuote({ request: withoutBridge, sourceNetworkId, signal });
+	} catch (err: unknown) {
+		throw new LifiRouteUnsupportedError(`LI.FI route without ${bridge} could not be quoted`, {
+			route: quote,
+			cause: err
+		});
+	}
 
 	if (!isLifiRouteExecutable(fallback)) {
-		throw new LifiRouteUnsupportedError(`LI.FI route without ${bridge} cannot be executed`);
+		throw new LifiRouteUnsupportedError(`LI.FI route without ${bridge} cannot be executed`, {
+			route: quote
+		});
 	}
 
 	return { quote: fallback, request: withoutBridge };
+};
+
+/**
+ * The in-between token of LI.FI's route for the pair, for the two-swap hint: read from the route
+ * OISY refused or, when LI.FI answered with no route at all, from the one it has once steps after
+ * the bridge are allowed, asked within the same deadline. Only a quote that passes the trust checks
+ * counts, and only for that token: its route is never shown nor signed.
+ */
+const loadLifiIntermediateToken = async ({
+	err,
+	request,
+	sourceNetworkId,
+	signal
+}: {
+	err: unknown;
+	request: QuoteRequestFromAmount;
+	sourceNetworkId: NetworkId;
+	signal: AbortSignal;
+}): Promise<LifiTokenRef | undefined> => {
+	if (err instanceof LifiRouteUnsupportedError) {
+		return nonNullish(err.route) ? findLifiIntermediateToken(err.route) : undefined;
+	}
+
+	// Only a pair between two EVM networks has an in-between token (see `findLifiIntermediateToken`),
+	// and only a missing route is worth asking about again.
+	if (
+		request.fromChain === request.toChain ||
+		request.toChain === ChainId.SOL ||
+		request.fromChain === ChainId.BTC ||
+		toSwapOfferError({ err, request }).type !== PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.NO_ROUTE
+	) {
+		return;
+	}
+
+	try {
+		const quote = await fetchTrustedLifiQuote({
+			request: { ...request, allowDestinationCall: true },
+			sourceNetworkId,
+			signal
+		});
+
+		return isLifiRouteExecutable(quote) ? undefined : findLifiIntermediateToken(quote);
+	} catch (_: unknown) {
+		// Without an answer, there is only no hint.
+	}
 };
 
 const loadLifiSwapQuote = async ({
@@ -206,10 +339,13 @@ const loadLifiSwapQuote = async ({
 	amount
 }: Pick<LifiQuoteParams, 'sourceToken' | 'destinationToken' | 'amount'> & {
 	request: QuoteRequestFromAmount;
-}): Promise<SwapMappedResult | undefined> => {
+}): Promise<LifiQuoteOutcome> => {
+	const sourceNetworkId = sourceToken.network.id;
+	const signal = AbortSignal.timeout(LIFI_QUOTE_TIMEOUT_MS);
+
 	try {
-		const result = mapLifiSwapResult(
-			await fetchExecutableLifiQuote({ request, sourceNetworkId: sourceToken.network.id })
+		const offer = mapLifiSwapResult(
+			await fetchExecutableLifiQuote({ request, sourceNetworkId, signal })
 		);
 
 		const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
@@ -221,14 +357,14 @@ const loadLifiSwapQuote = async ({
 			metadata: {
 				result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				...(nonNullish(destinationUsdValue) && {
-					token2_usd_value: `${destinationUsdValue * Number(formatToken({ value: result.receiveAmount, unitName: destinationToken.decimals }))}`
+					token2_usd_value: `${destinationUsdValue * Number(formatToken({ value: offer.receiveAmount, unitName: destinationToken.decimals }))}`
 				})
 			}
 		});
 
-		return result;
+		return { offer };
 	} catch (err: unknown) {
-		const { type, status } = toSwapOfferError(err);
+		const { type, status } = toSwapOfferError({ err, request });
 		const severity = SWAP_OFFER_ERROR_SEVERITIES[type];
 
 		trackSwapOffer({
@@ -242,17 +378,52 @@ const loadLifiSwapQuote = async ({
 				...(nonNullish(severity) && { event_severity: severity })
 			}
 		});
+
+		return {
+			intermediateToken: await loadLifiIntermediateToken({
+				err,
+				request,
+				sourceNetworkId,
+				signal
+			})
+		};
+	}
+};
+
+/**
+ * The offer, if LI.FI has one. Without one, a route through a token OISY lists rejects with
+ * `SwapViaIntermediateTokenError`, the reason the swap form gives for the missing offer. The token is
+ * looked up on every answer, cached or not, so that it follows the tokens OISY lists.
+ */
+const toLifiSwapQuoteResult = ({
+	offer,
+	intermediateToken
+}: LifiQuoteOutcome): SwapMappedResult | undefined => {
+	if (nonNullish(offer) || isNullish(intermediateToken)) {
+		return offer;
+	}
+
+	const listedToken = findLifiListedToken({ tokens: get(tokens), token: intermediateToken });
+
+	if (nonNullish(listedToken)) {
+		throw new SwapViaIntermediateTokenError({
+			intermediateToken: listedToken,
+			provider: SwapProvider.LIFI
+		});
 	}
 };
 
 /**
  * A LI.FI offer for the swap form's inputs, or `undefined` when LI.FI has none or is not asked.
+ * Without an offer, it rejects with `SwapViaIntermediateTokenError` when LI.FI's route goes through
+ * one token OISY lists in a shape OISY cannot verify: the user can make the swap as two separate
+ * swaps through that token.
  *
  * Unlike the other providers, LI.FI is not re-quoted on every periodic tick: a request with the same
  * inputs is answered from a single cache entry, while any change of inputs fetches immediately. A
  * request still in flight is shared; once it settles, its answer is reused for
  * `LIFI_QUOTE_REFRESH_INTERVAL_MS`. Every outcome is cached, a missing route or a failure included,
- * so unchanged inputs reach LI.FI at most once per interval. The cached quote is only ever displayed:
+ * so unchanged inputs are quoted at most once per interval. The cached quote is only ever displayed:
  * execution re-quotes through the REST layer directly, never through this cache.
  */
 export const fetchLifiSwapQuote = async (
@@ -268,10 +439,12 @@ export const fetchLifiSwapQuote = async (
 		return;
 	}
 
+	params.onProviderParticipating?.(SwapProvider.LIFI);
+
 	const key = JSON.stringify(request);
 
 	if (nonNullish(quoteCache) && quoteCache.key === key && isFresh(quoteCache)) {
-		return await quoteCache.result;
+		return toLifiSwapQuoteResult(await quoteCache.result);
 	}
 
 	const { sourceToken, destinationToken, amount } = params;
@@ -284,9 +457,25 @@ export const fetchLifiSwapQuote = async (
 	quoteCache = entry;
 
 	// `loadLifiSwapQuote` never rejects, so this always records when the answer arrived.
-	const result = await entry.result;
+	const outcome = await entry.result;
 
 	entry.settledAt = Date.now();
 
-	return result;
+	return toLifiSwapQuoteResult(outcome);
 };
+
+/**
+ * The Solana sources LI.FI may quote, keyed as the swap source filter keys them: native SOL and every
+ * SPL token on Solana mainnet known when the swap modal loads its lists. A list rather than a
+ * wildcard: the Solana category is a chain family, not an environment, so a wildcard would also make
+ * the devnet and local SOL tokens selectable, for which LI.FI is never asked.
+ */
+export const lifiSolSupportedTokens = (): Promise<Set<string>> =>
+	Promise.resolve(
+		new Set(
+			[SOLANA_TOKEN, ...get(splTokens)]
+				.filter(({ network: { id } }) => isNetworkIdSOLMainnet(id))
+				.map((token) => resolveSwapTokenLookup({ token })?.identifier)
+				.filter(nonNullish)
+		)
+	);

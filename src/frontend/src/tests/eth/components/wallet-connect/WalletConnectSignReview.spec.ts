@@ -4,7 +4,7 @@ import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnec
 import { SESSION_REQUEST_ETH_SIGN_V4 } from '$eth/constants/wallet-connect.constants';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 describe('WalletConnectSignReview', () => {
 	const HOLDER = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
@@ -178,6 +178,129 @@ describe('WalletConnectSignReview', () => {
 			}
 		}) as unknown as WalletKitTypes.SessionRequest;
 
+	// Uniswap Permit2: one signature setting an allowance over two tokens for one spender.
+	const permit2BatchRequest = (): WalletKitTypes.SessionRequest =>
+		({
+			id: 4,
+			topic: 'mock-topic',
+			params: {
+				request: {
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: [
+						HOLDER,
+						JSON.stringify({
+							domain: {
+								name: 'Permit2',
+								chainId: '1',
+								verifyingContract: '0x000000000022d473030f116ddee9f6b43ac78ba3'
+							},
+							types: {
+								EIP712Domain: [
+									{ name: 'name', type: 'string' },
+									{ name: 'chainId', type: 'uint256' },
+									{ name: 'verifyingContract', type: 'address' }
+								],
+								PermitBatch: [
+									{ name: 'details', type: 'PermitDetails[]' },
+									{ name: 'spender', type: 'address' },
+									{ name: 'sigDeadline', type: 'uint256' }
+								],
+								PermitDetails: [
+									{ name: 'token', type: 'address' },
+									{ name: 'amount', type: 'uint160' },
+									{ name: 'expiration', type: 'uint48' },
+									{ name: 'nonce', type: 'uint48' }
+								]
+							},
+							primaryType: 'PermitBatch',
+							message: {
+								details: [
+									{ token: DAI, amount: '1000', expiration: '1893456000', nonce: '0' },
+									{
+										token: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+										amount: '2000',
+										expiration: '1893456000',
+										nonce: '0'
+									}
+								],
+								spender: SPENDER,
+								sigDeadline: '1893456000'
+							}
+						})
+					]
+				},
+				chainId: `eip155:${ETHEREUM_NETWORK.chainId}`
+			},
+			verifyContext: {
+				verified: {
+					verifyUrl: 'https://verify.walletconnect.org',
+					validation: 'VALID',
+					origin: 'https://dapp.example',
+					isScam: false
+				}
+			}
+		}) as unknown as WalletKitTypes.SessionRequest;
+
+	// A UniswapX-style order: a Permit2 transfer of the input token, bound to the order as its witness.
+	const permit2WitnessTransferRequest = (): WalletKitTypes.SessionRequest => ({
+		id: 5,
+		topic: 'mock-topic',
+		params: {
+			request: {
+				method: SESSION_REQUEST_ETH_SIGN_V4,
+				params: [
+					HOLDER,
+					JSON.stringify({
+						domain: {
+							name: 'Permit2',
+							chainId: '1',
+							verifyingContract: '0x000000000022d473030f116ddee9f6b43ac78ba3'
+						},
+						types: {
+							EIP712Domain: [
+								{ name: 'name', type: 'string' },
+								{ name: 'chainId', type: 'uint256' },
+								{ name: 'verifyingContract', type: 'address' }
+							],
+							PermitWitnessTransferFrom: [
+								{ name: 'permitted', type: 'TokenPermissions' },
+								{ name: 'spender', type: 'address' },
+								{ name: 'nonce', type: 'uint256' },
+								{ name: 'deadline', type: 'uint256' },
+								{ name: 'witness', type: 'Order' }
+							],
+							TokenPermissions: [
+								{ name: 'token', type: 'address' },
+								{ name: 'amount', type: 'uint256' }
+							],
+							Order: [
+								{ name: 'swapper', type: 'address' },
+								{ name: 'outputAmount', type: 'uint256' }
+							]
+						},
+						primaryType: 'PermitWitnessTransferFrom',
+						message: {
+							permitted: { token: DAI, amount: '1000' },
+							spender: SPENDER,
+							nonce: '7',
+							deadline: '1893456000',
+							witness: { swapper: HOLDER, outputAmount: '1' }
+						}
+					})
+				]
+			},
+			chainId: `eip155:${ETHEREUM_NETWORK.chainId}`
+		},
+		verifyContext: {
+			verified: {
+				verifyUrl: 'https://verify.walletconnect.org',
+				validation: 'VALID',
+				origin: 'https://dapp.example',
+				isScam: false
+			}
+		}
+	});
+
 	const props = { onApprove: vi.fn(), onReject: vi.fn() };
 
 	it('warns and disables approval for a type-invalid permit', () => {
@@ -199,26 +322,72 @@ describe('WalletConnectSignReview', () => {
 	});
 
 	// A Hyperliquid action is signable and benign, and OISY still cannot say what it authorizes. It
-	// is warned about like any other unrecognised schema rather than waved through on the strength
-	// of the dApp it came from, which is the cost of not guessing: an acknowledgement, not a block.
-	it('warns about a Hyperliquid action without blocking it', () => {
-		const { getByText, queryByText, getByRole } = render(WalletConnectSignReview, {
+	// is treated like any other unrecognised schema rather than waved through on the strength of the
+	// dApp it came from, which is the cost of not guessing: an acknowledgement, not a block.
+	it('holds approval of a Hyperliquid action until the user confirms it', async () => {
+		const { getByText, queryByText, getByRole, getByLabelText } = render(WalletConnectSignReview, {
 			props: { ...props, request: hyperliquidAcceptTermsRequest() }
 		});
 
 		expect(queryByText(en.wallet_connect.text.invalid_typed_data)).not.toBeInTheDocument();
 		expect(getByText(en.wallet_connect.text.unreviewable_typed_data)).toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+
+		await fireEvent.click(getByLabelText(en.wallet_connect.text.unread_programs_acknowledge));
+
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 
-	// The report that would have come next: a signature that moves USDC, previewed as an application,
-	// a method name and a collapsed blob, with nothing said and approval enabled.
-	it('warns about an ERC-3009 authorization', () => {
-		const { getByText, getByRole } = render(WalletConnectSignReview, {
-			props: { ...props, request: transferWithAuthorizationRequest() }
+	// A signature that moves USDC is summarized like a permit: the token, the amount and where it goes.
+	it('states what an ERC-3009 authorization sends without asking for a confirmation', () => {
+		const { getByTestId, queryByText, queryByLabelText, getByRole } = render(
+			WalletConnectSignReview,
+			{
+				props: { ...props, request: transferWithAuthorizationRequest() }
+			}
+		);
+
+		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.methods)).not.toBeInTheDocument();
+		expect(
+			queryByLabelText(en.wallet_connect.text.unread_programs_acknowledge)
+		).not.toBeInTheDocument();
+
+		expect(getByTestId('wallet-connect-typed-data-recipient')).toHaveTextContent(SPENDER);
+
+		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+	});
+
+	// The transfer is stated, and the witness bound to it is the part OISY can't describe, so approval
+	// waits for the user's confirmation as it does for any request OISY can't fully describe.
+	it('states the transfer of a Permit2 witness transfer and holds approval until the user confirms it', async () => {
+		const { getByText, queryByText, getByRole, getByLabelText } = render(WalletConnectSignReview, {
+			props: { ...props, request: permit2WitnessTransferRequest() }
 		});
 
-		expect(getByText(en.wallet_connect.text.unreviewable_typed_data)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.unreviewable_typed_data_witness)).toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
+
+		expect(getByText(en.wallet_connect.text.spender)).toBeInTheDocument();
+		expect(getByText(SPENDER)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.methods)).toBeInTheDocument();
+
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+
+		await fireEvent.click(getByLabelText(en.wallet_connect.text.unread_programs_acknowledge));
+
+		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+	});
+
+	// A schema OISY describes asks nothing of the user before approving.
+	it('asks no confirmation for a permit whose schema is recognised', () => {
+		const { queryByLabelText, getByRole } = render(WalletConnectSignReview, {
+			props: { ...props, request: daiPermitRequest(true) }
+		});
+
+		expect(
+			queryByLabelText(en.wallet_connect.text.unread_programs_acknowledge)
+		).not.toBeInTheDocument();
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 
@@ -226,7 +395,7 @@ describe('WalletConnectSignReview', () => {
 	// struct that says what is being signed.
 	it('names the struct an unrecognised signature hashes', () => {
 		const { getByText, getAllByText } = render(WalletConnectSignReview, {
-			props: { ...props, request: transferWithAuthorizationRequest() }
+			props: { ...props, request: hyperliquidAcceptTermsRequest() }
 		});
 
 		expect(getByText(en.wallet_connect.text.methods)).toBeInTheDocument();
@@ -234,7 +403,7 @@ describe('WalletConnectSignReview', () => {
 		// Twice on purpose: the `Type` row states the struct that is hashed, the list below states
 		// the whole type graph it belongs to. The row is not a duplicate of the list's first entry,
 		// it is the labelled version of it.
-		expect(getAllByText('TransferWithAuthorization')).toHaveLength(2);
+		expect(getAllByText('Hyperliquid:AcceptTerms')).toHaveLength(2);
 	});
 
 	it('does not name structs for a schema it can describe', () => {
@@ -253,6 +422,21 @@ describe('WalletConnectSignReview', () => {
 		});
 
 		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
+	});
+
+	// A Permit2 batch is summarized token by token, so there is nothing the review failed to establish.
+	it('states each allowance of a Permit2 batch instead of warning about it', () => {
+		const { getAllByText, getByText, queryByText, getByRole } = render(WalletConnectSignReview, {
+			props: { ...props, request: permit2BatchRequest() }
+		});
+
+		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.methods)).not.toBeInTheDocument();
+
+		expect(getAllByText(en.wallet_connect.text.token)).toHaveLength(2);
+		expect(getByText(SPENDER)).toBeInTheDocument();
+
+		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 
 	// The chain the domain binds to, on a request whose schema says nothing else: the same struct

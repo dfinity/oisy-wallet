@@ -1,5 +1,6 @@
 import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 import BottomSheetTest from '$tests/lib/components/ui/BottomSheetTest.svelte';
+import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -33,6 +34,37 @@ describe('BottomSheet component', () => {
 
 		expect(screen.getByText('Footer content')).toBeInTheDocument();
 		expect(get(bottomSheetOpenStore)).toBeTruthy();
+	});
+
+	it('puts a title on the header row, beside the close button', () => {
+		render(BottomSheetTest, {
+			visible: true,
+			contentTest: 'Main content',
+			title: 'Sheet title'
+		});
+
+		const title = screen.getByText('Sheet title');
+
+		expect(title.nextElementSibling).toHaveAttribute('aria-label', en.core.alt.close_details);
+	});
+
+	it('names the sheet by its title when it has no label of its own', () => {
+		render(BottomSheetTest, {
+			visible: true,
+			contentTest: 'Main content',
+			title: 'Sheet title'
+		});
+
+		expect(screen.getByRole('dialog')).toHaveAccessibleName('Sheet title');
+	});
+
+	it('keeps the header row to the close button without a title', () => {
+		render(BottomSheetTest, {
+			visible: true,
+			contentTest: 'Main content'
+		});
+
+		expect(screen.getByLabelText(en.core.alt.close_details)).toHaveClass('float-right');
 	});
 
 	it('closes when close button is clicked and updates store', async () => {

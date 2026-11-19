@@ -1,4 +1,5 @@
 import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
+import { AAPLON_TOKEN } from '$env/tokens/tokens-spl/tokens.aaplon.env';
 import { AAPLX_TOKEN } from '$env/tokens/tokens-spl/tokens.aaplx.env';
 import { ABBVX_TOKEN } from '$env/tokens/tokens-spl/tokens.abbvx.env';
 import { ABTX_TOKEN } from '$env/tokens/tokens-spl/tokens.abtx.env';
@@ -27,6 +28,7 @@ import { EFAON_TOKEN } from '$env/tokens/tokens-spl/tokens.efaon.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { GLDX_TOKEN } from '$env/tokens/tokens-spl/tokens.gldx.env';
 import { GMEX_TOKEN } from '$env/tokens/tokens-spl/tokens.gmex.env';
+import { GOOGLON_TOKEN } from '$env/tokens/tokens-spl/tokens.googlon.env';
 import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
 import { HDX_TOKEN } from '$env/tokens/tokens-spl/tokens.hdx.env';
 import { HONX_TOKEN } from '$env/tokens/tokens-spl/tokens.honx.env';
@@ -53,10 +55,13 @@ import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { QQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.qqqx.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
 import { SLVON_TOKEN } from '$env/tokens/tokens-spl/tokens.slvon.env';
+import { SPCXON_TOKEN } from '$env/tokens/tokens-spl/tokens.spcxon.env';
 import { SPX_TOKEN } from '$env/tokens/tokens-spl/tokens.spx.env';
+import { SPYON_TOKEN } from '$env/tokens/tokens-spl/tokens.spyon.env';
 import { SPYX_TOKEN } from '$env/tokens/tokens-spl/tokens.spyx.env';
 import { TQQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.tqqqx.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
+import { TSLAON_TOKEN } from '$env/tokens/tokens-spl/tokens.tslaon.env';
 import { TSLAX_TOKEN } from '$env/tokens/tokens-spl/tokens.tslax.env';
 import { UNHX_TOKEN } from '$env/tokens/tokens-spl/tokens.unhx.env';
 import { USD1_TOKEN } from '$env/tokens/tokens-spl/tokens.usd1.env';
@@ -69,6 +74,7 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import type { RequiredSplToken } from '$sol/types/spl';
 
 const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
+	AAPLON_TOKEN,
 	AAPLX_TOKEN,
 	ABBVX_TOKEN,
 	ABTX_TOKEN,
@@ -97,6 +103,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	EURC_TOKEN,
 	GLDX_TOKEN,
 	GMEX_TOKEN,
+	GOOGLON_TOKEN,
 	GOOGLX_TOKEN,
 	HDX_TOKEN,
 	HONX_TOKEN,
@@ -123,10 +130,13 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	QQQX_TOKEN,
 	RAY_TOKEN,
 	SLVON_TOKEN,
+	SPCXON_TOKEN,
 	SPX_TOKEN,
+	SPYON_TOKEN,
 	SPYX_TOKEN,
 	TQQQX_TOKEN,
 	TRUMP_TOKEN,
+	TSLAON_TOKEN,
 	TSLAX_TOKEN,
 	UNHX_TOKEN,
 	USD1_TOKEN,

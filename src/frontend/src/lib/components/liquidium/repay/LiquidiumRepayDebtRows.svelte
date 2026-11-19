@@ -13,8 +13,9 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	// The debt breakdown shared by the repay Form and Review so they always agree:
-	// Current debt (principal) + Interest accrued = total owed;
-	// Debt after repay = total − pending repays − amount.
+	// Current debt is the total owed, accrued interest already included (Interest accrued is shown
+	// for information only and never added on top);
+	// Debt after repay = current debt − pending repays − amount.
 	interface Props {
 		reserve: LiquidiumReserve;
 		amount: OptionAmount;
@@ -33,7 +34,6 @@
 		});
 
 	let debtInterest = $derived(reserve.debtInterest ?? ZERO);
-	let totalDebt = $derived(reserve.borrowed + debtInterest);
 
 	let parsedRepay = $derived(
 		!invalidAmount(amount)
@@ -43,17 +43,17 @@
 
 	let totalRepay = $derived(pendingRepay + parsedRepay);
 
-	let remainingBorrowed = $derived(totalDebt > totalRepay ? totalDebt - totalRepay : ZERO);
+	let remainingBorrowed = $derived(
+		reserve.borrowed > totalRepay ? reserve.borrowed - totalRepay : ZERO
+	);
 
-	// USD on the reserve's price basis (principal, interest and repays share the asset price).
+	// USD on the reserve's price basis (debt, interest and repays share the asset price).
 	const toReserveUsd = (value: bigint): number =>
 		reserve.borrowed > ZERO ? (Number(value) / Number(reserve.borrowed)) * reserve.borrowedUsd : 0;
 
 	let interestUsd = $derived(liquidiumDebtInterestUsd(reserve));
 	let pendingRepayUsd = $derived(toReserveUsd(pendingRepay));
-	let remainingDebtUsd = $derived(
-		Math.max(0, reserve.borrowedUsd + interestUsd - toReserveUsd(totalRepay))
-	);
+	let remainingDebtUsd = $derived(Math.max(0, reserve.borrowedUsd - toReserveUsd(totalRepay)));
 
 	let currentDebt = $derived(
 		`${formatToken({ value: reserve.borrowed, unitName: reserve.borrowedDecimals })} ${reserve.asset}`

@@ -3,15 +3,18 @@ import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.en
 import { BSC_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { POLYGON_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import type { EthAddress } from '$eth/types/address';
-import { LOCAL, STAGING, TEST } from '$lib/constants/app.constants';
+import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
 
-// On for local and staging, where the EVM swap wizard executes a LI.FI offer (Solana sources come
-// later); not on beta nor production yet. Off under test, whose specs switch it on themselves.
-// `STAGING` already covers the test_fe / audit / e2e environments.
-export const LIFI_SWAP_ENABLED = (LOCAL || STAGING) && !TEST;
+export const LIFI_SWAP_ENABLED = true;
+
+// Feature flag: LI.FI also quotes swaps from native BTC. It takes effect only while
+// `BTC_SEND_VIA_BACKEND_ENABLED` is on too: the swap relies on what that flag switches, the backend's
+// spendable UTXOs, the input cap and the broadcast through the backend.
+export const LIFI_BTC_SWAP_ENABLED = LOCAL || STAGING;
 
 // Scoped to an origin allow-list on LI.FI's partner portal, with a separate key per environment, so
 // shipping it in the bundle does not expose another environment's quota.
@@ -48,6 +51,11 @@ export const LIFI_DIAMOND_ADDRESSES: Partial<Record<NetworkId, EthAddress>> = {
  * Mayan is not listed yet: LI.FI serves it under four tool keys (`mayan`, `mayanWH`, `mayanMCTP`,
  * `mayanFastMCTP`), and a key is added only once its calldata is confirmed to go through the facet
  * the binding decodes.
+ *
+ * A BTC deposit carries neither the payout's recipient nor its minimum: the bridge keeps both,
+ * keyed by the deposit address or the memo. So a bridge is listed for Bitcoin only together with its
+ * payout binding (`LIFI_BTC_PAYOUT_BINDINGS`). Relay's is best effort: it cannot check the recipient
+ * (see `bindLifiRelayPayout`).
  */
 export const LIFI_ALLOWED_BRIDGES: Partial<Record<NetworkId, string[]>> = {
 	[ETHEREUM_NETWORK_ID]: ['across', 'near'],
@@ -55,11 +63,21 @@ export const LIFI_ALLOWED_BRIDGES: Partial<Record<NetworkId, string[]>> = {
 	[BSC_MAINNET_NETWORK_ID]: ['across', 'near'],
 	[POLYGON_MAINNET_NETWORK_ID]: ['across', 'near'],
 	[BASE_NETWORK_ID]: ['across', 'near'],
-	[ROBINHOOD_MAINNET_NETWORK_ID]: ['across']
+	[ROBINHOOD_MAINNET_NETWORK_ID]: ['across'],
+	[BTC_MAINNET_NETWORK_ID]: ['relaydepository']
 };
+
+/**
+ * The exchanges a Solana-source quote may route through (LI.FI tool keys from `/v1/tools`): those
+ * whose instructions the Solana binding pins and whose minimum output it decodes. Without the pin,
+ * LI.FI's best Solana → Solana route is often DFlow's, which the binding would refuse at execution.
+ * The list and the binding's pinned instructions change together.
+ */
+export const LIFI_SOLANA_ALLOWED_EXCHANGES: string[] = ['jupiter'];
 
 // Kept so that a misbehaving bridge or exchange can be blocked with a one-line change (LI.FI tool
 // keys from `/v1/tools`). A denied bridge is dropped from `LIFI_ALLOWED_BRIDGES` before a quote is
-// requested; a denied exchange is sent as `denyExchanges`.
+// requested; a denied exchange is dropped from `LIFI_SOLANA_ALLOWED_EXCHANGES` for a Solana source
+// and sent as `denyExchanges` for an EVM one.
 export const LIFI_DENY_BRIDGES: string[] = [];
 export const LIFI_DENY_EXCHANGES: string[] = [];

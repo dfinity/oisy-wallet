@@ -1,13 +1,14 @@
 import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 import type { IcToken } from '$icp/types/ic-token';
 import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
+import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 import * as addressDerived from '$lib/derived/address.derived';
 import * as authStore from '$lib/derived/auth.derived';
 import * as tokensStore from '$lib/derived/tokens.derived';
 import * as swapService from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
-import { SwapAmountTooLowError } from '$lib/types/errors';
+import { SwapAmountTooLowError, SwapViaIntermediateTokenError } from '$lib/types/errors';
 import type { OptionAmount } from '$lib/types/send';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import {
@@ -153,6 +154,7 @@ describe('SwapAmountsContext.svelte', () => {
 
 		expect(get(store)).toEqual({
 			amountForSwap: 15,
+			slippageForSwap: 0.1,
 			selectedProvider: undefined,
 			swaps: []
 		});
@@ -179,6 +181,27 @@ describe('SwapAmountsContext.svelte', () => {
 		expect(value?.swaps).toEqual(mockSwapProviders);
 		expect(value?.selectedProvider).toEqual(mockSwapProviders[0]);
 		expect(value?.amountForSwap).toBe(10);
+		expect(value?.slippageForSwap).toBe(0.3);
+	});
+
+	it('requests the default slippage and records it when none is set', async () => {
+		const fetchMock = vi
+			.spyOn(swapService, 'fetchSwapAmounts')
+			.mockResolvedValue(mockSwapProviders);
+
+		await renderWithContext({
+			amount: '10',
+			sourceToken,
+			destinationToken,
+			slippageValue: undefined
+		});
+
+		await waitForDebounce();
+
+		expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ slippage: SWAP_DEFAULT_SLIPPAGE_VALUE })
+		);
+		expect(get(store)?.slippageForSwap).toBe(SWAP_DEFAULT_SLIPPAGE_VALUE);
 	});
 
 	// The XRP address is the refund address of a swap from XRP and the payout address of a
@@ -248,6 +271,34 @@ describe('SwapAmountsContext.svelte', () => {
 		expect(value?.quoteError).toEqual({ type: 'amount-too-low', minAmount: 8300n });
 	});
 
+	it('sets the quote error when fetchSwapAmounts names an in-between token', async () => {
+		vi.spyOn(swapService, 'fetchSwapAmounts').mockRejectedValue(
+			new SwapViaIntermediateTokenError({
+				intermediateToken: mockValidIcrcToken,
+				provider: SwapProvider.LIFI
+			})
+		);
+
+		await renderWithContext({
+			amount: '20',
+			sourceToken,
+			destinationToken,
+			slippageValue: '0.2'
+		});
+
+		await waitForDebounce();
+
+		const value = get(store);
+
+		expect(value?.swaps).toEqual([]);
+		expect(value?.selectedProvider).toBeUndefined();
+		expect(value?.quoteError).toEqual({
+			type: 'two-swaps',
+			intermediateToken: mockValidIcrcToken,
+			provider: SwapProvider.LIFI
+		});
+	});
+
 	it('debounces fetchSwapAmounts calls', async () => {
 		const fetchMock = vi
 			.spyOn(swapService, 'fetchSwapAmounts')
@@ -269,7 +320,7 @@ describe('SwapAmountsContext.svelte', () => {
 		expect(fetchMock).toHaveBeenCalledOnce();
 	});
 
-	it('does not call fetchSwapAmounts if amount has not changed', async () => {
+	it('does not call fetchSwapAmounts if amount and slippage have not changed', async () => {
 		const fetchMock = vi
 			.spyOn(swapService, 'fetchSwapAmounts')
 			.mockResolvedValue(mockSwapProviders);
@@ -277,6 +328,7 @@ describe('SwapAmountsContext.svelte', () => {
 		store.setSwaps({
 			swaps: mockSwapProviders,
 			amountForSwap: 10,
+			slippageForSwap: 0.3,
 			selectedProvider: mockSwapProviders[0]
 		});
 
@@ -292,6 +344,68 @@ describe('SwapAmountsContext.svelte', () => {
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
+	it('calls fetchSwapAmounts when the offers were requested with another slippage', async () => {
+		const fetchMock = vi
+			.spyOn(swapService, 'fetchSwapAmounts')
+			.mockResolvedValue(mockSwapProviders);
+
+		store.setSwaps({
+			swaps: mockSwapProviders,
+			amountForSwap: 10,
+			slippageForSwap: 3,
+			selectedProvider: mockSwapProviders[0]
+		});
+
+		await renderWithContext({
+			amount: '10',
+			sourceToken,
+			destinationToken,
+			slippageValue: '0.5'
+		});
+
+		await waitForDebounce();
+
+		expect(fetchMock).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ slippage: '0.5' }));
+		expect(get(store)?.slippageForSwap).toBe(0.5);
+	});
+
+	it('calls fetchSwapAmounts again when only the slippage changes', async () => {
+		const fetchMock = vi
+			.spyOn(swapService, 'fetchSwapAmounts')
+			.mockResolvedValue(mockSwapProviders);
+
+		const { rerender } = await renderWithContext({
+			amount: '10',
+			sourceToken,
+			destinationToken,
+			slippageValue: '3'
+		});
+
+		await waitForDebounce();
+
+		expect(fetchMock).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ slippage: '3' }));
+		expect(get(store)?.slippageForSwap).toBe(3);
+
+		await act(() =>
+			rerender({
+				amount: '10',
+				sourceToken,
+				destinationToken,
+				slippageValue: '0.5',
+				children: fakeSnippet,
+				isSwapAmountsLoading: false,
+				isSourceTokenIcrc2: true
+			})
+		);
+
+		await waitForDebounce();
+
+		expect(fetchMock).toHaveBeenCalledTimes(2);
+		expect(fetchMock).toHaveBeenLastCalledWith(expect.objectContaining({ slippage: '0.5' }));
+		expect(get(store)?.slippageForSwap).toBe(0.5);
+		expect(get(store)?.amountForSwap).toBe(10);
+	});
+
 	it('preserves manual provider selection across periodic refresh', async () => {
 		vi.useFakeTimers();
 
@@ -302,6 +416,7 @@ describe('SwapAmountsContext.svelte', () => {
 		store.setSwaps({
 			swaps: mockSwapProviders,
 			amountForSwap: 10,
+			slippageForSwap: 0.3,
 			selectedProvider: mockSwapProviders[0]
 		});
 
@@ -351,6 +466,7 @@ describe('SwapAmountsContext.svelte', () => {
 		store.setSwaps({
 			swaps: mockSwapProviders,
 			amountForSwap: 10,
+			slippageForSwap: 0.3,
 			selectedProvider: mockSwapProviders[0]
 		});
 
@@ -450,6 +566,72 @@ describe('SwapAmountsContext.svelte', () => {
 
 			expect(get(store)?.swaps).toEqual(freshResults);
 			expect(get(store)?.amountForSwap).toBe(10);
+
+			vi.useRealTimers();
+		});
+
+		it('discards stale response when the slippage changes mid-fetch', async () => {
+			vi.useFakeTimers();
+
+			const freshResults = [mockSwapProviders[0]];
+
+			let resolveStale!: (v: SwapMappedResult[]) => void;
+			let resolveFresh!: (v: SwapMappedResult[]) => void;
+
+			const fetchMock = vi
+				.spyOn(swapService, 'fetchSwapAmounts')
+				.mockImplementationOnce(() => new Promise((r) => (resolveStale = r)))
+				.mockImplementationOnce(() => new Promise((r) => (resolveFresh = r)));
+
+			const { rerender } = await act(() =>
+				render(SwapAmountsContext, {
+					props: {
+						amount: '10',
+						sourceToken,
+						destinationToken,
+						slippageValue: '3',
+						children: fakeSnippet,
+						isSwapAmountsLoading: false,
+						isSourceTokenIcrc2: true
+					},
+					context
+				})
+			);
+
+			await vi.advanceTimersByTimeAsync(350);
+			await tick();
+
+			expect(fetchMock).toHaveBeenCalledOnce();
+
+			await act(() =>
+				rerender({
+					amount: '10',
+					sourceToken,
+					destinationToken,
+					slippageValue: '0.5',
+					children: fakeSnippet,
+					isSwapAmountsLoading: false,
+					isSourceTokenIcrc2: true
+				})
+			);
+
+			await vi.advanceTimersByTimeAsync(350);
+			await tick();
+
+			expect(fetchMock).toHaveBeenCalledTimes(2);
+
+			resolveStale(mockSwapProviders);
+			await vi.advanceTimersByTimeAsync(0);
+			await tick();
+
+			expect(get(store)?.swaps).toBeUndefined();
+
+			resolveFresh(freshResults);
+			await vi.advanceTimersByTimeAsync(0);
+			await tick();
+
+			expect(get(store)?.swaps).toEqual(freshResults);
+			expect(get(store)?.slippageForSwap).toBe(0.5);
 
 			vi.useRealTimers();
 		});

@@ -218,6 +218,8 @@ export enum ProgressStepsCyclesMint {
 // Topping up a canister: one cycles-ledger call.
 export enum ProgressStepsCyclesTopUp {
 	INITIALIZATION = 'initialization',
+	// Paid with ICP only: the transfer to the CMC, before the top-up itself.
+	TRANSFER = 'transfer',
 	TOP_UP = 'top_up',
 	DONE = 'done'
 }

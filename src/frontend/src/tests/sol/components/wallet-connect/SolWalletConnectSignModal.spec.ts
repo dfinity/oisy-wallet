@@ -16,7 +16,12 @@ import {
 } from '$sol/constants/wallet-connect.constants';
 import { decode, sign } from '$sol/services/wallet-connect.services';
 import en from '$tests/mocks/i18n.mock';
-import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import {
+	mockAtaAddress,
+	mockSolAddress,
+	mockSolAddress2,
+	mockSplAddress
+} from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { lamports } from '@solana/kit';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -110,7 +115,11 @@ describe('SolWalletConnectSignModal', () => {
 
 		expect(approve).toBeDisabled();
 
-		resolveDecode({ amount: 1n, parties: { sources: [], destinations: [], partial: true } });
+		resolveDecode({
+			amount: 1n,
+			requiredSignatures: 1,
+			parties: { sources: [], destinations: [], partial: true }
+		});
 
 		await waitFor(() => {
 			expect(approve).toBeEnabled();
@@ -123,6 +132,7 @@ describe('SolWalletConnectSignModal', () => {
 		vi.mocked(decode).mockResolvedValueOnce({
 			amount: 1n,
 			ambiguous: true,
+			requiredSignatures: 1,
 			parties: { sources: [], destinations: [], partial: true }
 		});
 
@@ -135,6 +145,105 @@ describe('SolWalletConnectSignModal', () => {
 		});
 
 		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
+	it('should charge the base fee for every signature the decode counted', async () => {
+		vi.mocked(decode).mockResolvedValueOnce({
+			amount: 1n,
+			requiredSignatures: 2,
+			parties: { sources: [], destinations: [], partial: true }
+		});
+
+		const { getByTestId } = render(SolWalletConnectSignModal, {
+			props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+		});
+
+		await waitFor(() => {
+			expect(getByTestId('network-fee')).toHaveTextContent('0.00001 SOL');
+		});
+	});
+
+	// The review allows for the fees only when the wallet pays them, so it has to be told whether it does.
+	describe('whether the wallet pays the fees, as the review is told', () => {
+		// A two-signature send whose run takes both base fees from the wallet.
+		const renderSend = async ({ sponsored }: { sponsored: boolean }) => {
+			vi.mocked(decode).mockResolvedValueOnce({
+				amount: 1n,
+				requiredSignatures: 2,
+				...(sponsored && { feePaidByOthers: true }),
+				messageSummary: {
+					kind: 'send',
+					spent: { delta: -1_000_000n },
+					counterparty: mockSolAddress2
+				},
+				preview: { solDelta: -1_010_000n, tokenDeltas: [], controlChanges: [] },
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			const result = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			// Once the base fee reads two signatures, the decode has reached the review.
+			await waitFor(() => {
+				expect(result.getByTestId('network-fee')).toHaveTextContent('0.00001 SOL');
+			});
+
+			return result;
+		};
+
+		it('should state a send the wallet pays the fees of', async () => {
+			const { getByTestId } = await renderSend({ sponsored: false });
+
+			expect(getByTestId('message-summary')).toHaveTextContent(en.send.text.send);
+		});
+
+		it('should not state a send whose run takes fees the dApp sponsors', async () => {
+			const { queryByTestId } = await renderSend({ sponsored: true });
+
+			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+	});
+
+	// A send goes out with the wallet as the fee payer, so a message that names another payer is
+	// refused when it is to be sent, and only then: signing it alone keeps the payer it names.
+	describe('a message that names another account to pay its fee', () => {
+		const decoded: Awaited<ReturnType<typeof decode>> = {
+			amount: 1n,
+			requiredSignatures: 1,
+			feePaidByOthers: true,
+			parties: { sources: [], destinations: [], partial: true }
+		};
+
+		it('should hold approval when it is to be sent', async () => {
+			vi.mocked(decode).mockResolvedValueOnce(decoded);
+
+			const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.wallet_connect.text.fee_paid_by_others)).toBeInTheDocument();
+			});
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should let it be signed when it is only to be signed', async () => {
+			vi.mocked(decode).mockResolvedValueOnce(decoded);
+
+			const { getByRole, queryByText } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			const approve = getByRole('button', { name: en.core.text.approve });
+
+			await waitFor(() => {
+				expect(approve).toBeEnabled();
+			});
+
+			expect(queryByText(en.wallet_connect.text.fee_paid_by_others)).not.toBeInTheDocument();
+		});
 	});
 
 	// The service tests are handed what the modal passes to signing, so only these cover how the modal
@@ -169,6 +278,7 @@ describe('SolWalletConnectSignModal', () => {
 			// invocations make carry its index, so the run leaves nothing unknown.
 			const args = await approve({
 				amount: 1n,
+				requiredSignatures: 1,
 				simulatedInstructions: true,
 				instructions: [{ kind: 'route' }, { kind: 'send', amount: 1n }],
 				parties: { sources: [], destinations: [], partial: false }
@@ -182,6 +292,7 @@ describe('SolWalletConnectSignModal', () => {
 			// fee so the preview is not empty, and nothing anywhere describes the delegation.
 			const args = await approve({
 				amount: 1n,
+				requiredSignatures: 1,
 				simulatedInstructions: true,
 				instructions: [{ kind: 'unknown' }],
 				preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] },
@@ -194,6 +305,7 @@ describe('SolWalletConnectSignModal', () => {
 		it('should be false when the list came from the message rather than a run', async () => {
 			const args = await approve({
 				amount: 1n,
+				requiredSignatures: 1,
 				simulatedInstructions: false,
 				instructions: [{ kind: 'send', amount: 1n }],
 				parties: { sources: [], destinations: [], partial: true }
@@ -207,6 +319,7 @@ describe('SolWalletConnectSignModal', () => {
 		it('should be false when the run listed nothing', async () => {
 			const args = await approve({
 				amount: 1n,
+				requiredSignatures: 1,
 				simulatedInstructions: true,
 				instructions: [],
 				parties: { sources: [], destinations: [], partial: false }
@@ -218,6 +331,7 @@ describe('SolWalletConnectSignModal', () => {
 		it('should be false when there was no run at all', async () => {
 			const args = await approve({
 				amount: 1n,
+				requiredSignatures: 1,
 				parties: { sources: [], destinations: [], partial: true }
 			});
 
@@ -231,6 +345,7 @@ describe('SolWalletConnectSignModal', () => {
 		it('should be true when a run came back and left an instruction unaccounted for', async () => {
 			const args = await approve({
 				amount: 1n,
+				requiredSignatures: 1,
 				simulatedInstructions: true,
 				instructions: [{ kind: 'unknown' }],
 				parties: { sources: [], destinations: [], partial: false }
@@ -242,10 +357,129 @@ describe('SolWalletConnectSignModal', () => {
 		it('should be false when there was no run at all', async () => {
 			const args = await approve({
 				amount: 1n,
+				requiredSignatures: 1,
 				parties: { sources: [], destinations: [], partial: true }
 			});
 
 			expect(args).toEqual(expect.objectContaining({ simulated: false, simulationRan: false }));
+		});
+	});
+
+	// Signing refuses an approval no run came back for, so the review holds the button. A checked
+	// one too: the amount its line among the operations states is a tab away from the summary.
+	it.each([
+		{ form: 'an unchecked', decoded: {} },
+		{
+			form: 'a checked',
+			decoded: {
+				tokenAddress: mockSplAddress,
+				instructions: [
+					{
+						kind: 'approve' as const,
+						account: mockAtaAddress,
+						amount: 1n,
+						decimals: 6,
+						tokenAddress: mockSplAddress,
+						counterparty: mockSolAddress2
+					}
+				],
+				simulatedInstructions: false
+			}
+		}
+	])('should hold approval on $form approval with no simulation', async ({ decoded }) => {
+		vi.mocked(decode).mockResolvedValueOnce({
+			amount: 1n,
+			requiredSignatures: 1,
+			destination: mockSolAddress2,
+			isApproval: true,
+			parties: { sources: [], destinations: [], partial: true },
+			...decoded
+		});
+
+		const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+			props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+		});
+
+		await waitFor(() => {
+			expect(getByText(en.wallet_connect.text.approval_without_simulation)).toBeInTheDocument();
+		});
+
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
+	it('should let an approval through when a simulation came back', async () => {
+		const args = await approve({
+			amount: 1n,
+			requiredSignatures: 1,
+			destination: mockSolAddress2,
+			isApproval: true,
+			instructions: [
+				{ kind: 'approve', account: mockAtaAddress, amount: 1n, counterparty: mockSolAddress2 }
+			],
+			simulatedInstructions: true,
+			parties: { sources: [], destinations: [], partial: false }
+		});
+
+		expect(args).toEqual(expect.objectContaining({ simulationRan: true }));
+	});
+
+	// Signing refuses an instruction nobody read that no run described, on the same value the modal
+	// hands it, so the review holds the button on exactly that.
+	describe('an instruction nobody read', () => {
+		const renderModal = (decoded: Awaited<ReturnType<typeof decode>>) => {
+			vi.mocked(decode).mockResolvedValueOnce(decoded);
+
+			return render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+		};
+
+		it('should hold approval when no run came back', async () => {
+			const { getByRole, getByText } = renderModal({
+				amount: 1n,
+				requiredSignatures: 1,
+				unreviewed: true,
+				parties: { sources: [], destinations: [], partial: true }
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.wallet_connect.text.unreviewed_without_simulation)).toBeInTheDocument();
+			});
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should hold approval when the run left it unaccounted for', async () => {
+			const { getByRole, getByText } = renderModal({
+				amount: 1n,
+				requiredSignatures: 1,
+				unreviewed: true,
+				simulatedInstructions: true,
+				instructions: [{ kind: 'unknown' }],
+				preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] },
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			await waitFor(() => {
+				expect(
+					getByText(en.wallet_connect.text.unreviewed_not_described_by_simulation)
+				).toBeInTheDocument();
+			});
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should let it through when the run described it', async () => {
+			const args = await approve({
+				amount: 1n,
+				requiredSignatures: 1,
+				unreviewed: true,
+				simulatedInstructions: true,
+				instructions: [{ kind: 'route' }, { kind: 'send', amount: 1n }],
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ simulated: true }));
 		});
 	});
 
@@ -254,6 +488,7 @@ describe('SolWalletConnectSignModal', () => {
 	it('should hold approval when the run opens an account above its rent', async () => {
 		vi.mocked(decode).mockResolvedValueOnce({
 			amount: 1n,
+			requiredSignatures: 1,
 			opensAccountBeyondRent: true,
 			parties: { sources: [], destinations: [], partial: false }
 		});
@@ -272,10 +507,74 @@ describe('SolWalletConnectSignModal', () => {
 	it('should hand signing no over-funded opening when the run found none', async () => {
 		const args = await approve({
 			amount: 1n,
+			requiredSignatures: 1,
 			parties: { sources: [], destinations: [], partial: true }
 		});
 
 		expect(args).toEqual(expect.objectContaining({ opensAccountBeyondRent: false }));
+	});
+
+	// A token batch the run keeps whole has none of its steps listed, and signing refuses it like an
+	// ambiguous message, so the review holds the button the same way.
+	it('should hold approval when the run keeps a token batch whole', async () => {
+		vi.mocked(decode).mockResolvedValueOnce({
+			amount: 1n,
+			requiredSignatures: 1,
+			keepsBatchWhole: true,
+			parties: { sources: [], destinations: [], partial: false }
+		});
+
+		const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+			props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+		});
+
+		await waitFor(() => {
+			expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+		});
+
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
+	it('should hand signing no whole batch when the run kept none', async () => {
+		const args = await approve({
+			amount: 1n,
+			requiredSignatures: 1,
+			parties: { sources: [], destinations: [], partial: true }
+		});
+
+		expect(args).toEqual(expect.objectContaining({ keepsBatchWhole: false }));
+	});
+
+	// A token call the run makes with the wallet among the keys signing for a multisig acts on an
+	// account the review does not count as the user's, and signing refuses it like an ambiguous
+	// message, so the review holds the button the same way.
+	it('should hold approval when the run makes a token call the wallet signs for a multisig', async () => {
+		vi.mocked(decode).mockResolvedValueOnce({
+			amount: 1n,
+			requiredSignatures: 1,
+			signsForMultisig: true,
+			parties: { sources: [], destinations: [], partial: false }
+		});
+
+		const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+			props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+		});
+
+		await waitFor(() => {
+			expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+		});
+
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
+	it('should hand signing no multisig signature when the run made none', async () => {
+		const args = await approve({
+			amount: 1n,
+			requiredSignatures: 1,
+			parties: { sources: [], destinations: [], partial: true }
+		});
+
+		expect(args).toEqual(expect.objectContaining({ signsForMultisig: false }));
 	});
 
 	describe('the wallet handed to another program', () => {
@@ -292,6 +591,7 @@ describe('SolWalletConnectSignModal', () => {
 		it('should hold approval when the run reassigns the wallet', async () => {
 			vi.mocked(decode).mockResolvedValueOnce({
 				amount: 1n,
+				requiredSignatures: 1,
 				preview: {
 					solDelta: -5_000n,
 					tokenDeltas: [],
@@ -314,6 +614,7 @@ describe('SolWalletConnectSignModal', () => {
 		it('should hand signing no reassignment when the run changes another account', async () => {
 			const args = await approve({
 				amount: 1n,
+				requiredSignatures: 1,
 				preview: {
 					solDelta: -5_000n,
 					tokenDeltas: [],
@@ -332,6 +633,7 @@ describe('SolWalletConnectSignModal', () => {
 		it('should be the reserve the decode read', async () => {
 			const args = await approve({
 				amount: 1n,
+				requiredSignatures: 1,
 				rentExemptMinimum: lamports(1_488_440n),
 				parties: { sources: [], destinations: [], partial: true }
 			});
@@ -342,6 +644,7 @@ describe('SolWalletConnectSignModal', () => {
 		it('should be none when the decode read none', async () => {
 			const args = await approve({
 				amount: 1n,
+				requiredSignatures: 1,
 				parties: { sources: [], destinations: [], partial: true }
 			});
 
@@ -352,6 +655,7 @@ describe('SolWalletConnectSignModal', () => {
 	describe('the programs the run calls that OISY cannot read', () => {
 		const decoded = (unreadPrograms: { address: string; name?: string }[]) => ({
 			amount: 1n,
+			requiredSignatures: 1,
 			unreadPrograms,
 			parties: { sources: [], destinations: [], partial: false }
 		});
@@ -420,6 +724,7 @@ describe('SolWalletConnectSignModal', () => {
 	describe('the way past a refusal', () => {
 		const refused = {
 			amount: 1n,
+			requiredSignatures: 1,
 			ambiguous: true,
 			parties: { sources: [], destinations: [], partial: true }
 		};
@@ -557,6 +862,7 @@ describe('SolWalletConnectSignModal', () => {
 
 			vi.mocked(decode).mockResolvedValueOnce({
 				amount: 1n,
+				requiredSignatures: 1,
 				preview: {
 					solDelta: -5_000n,
 					tokenDeltas: [],
@@ -580,9 +886,64 @@ describe('SolWalletConnectSignModal', () => {
 			solAddressMainnetStore.reset();
 		});
 
+		it('should offer the way past an approval no run described, with the switch on', async () => {
+			walletConnectUncheckedSigningStore.enable();
+
+			vi.mocked(decode).mockResolvedValueOnce({
+				amount: 1n,
+				requiredSignatures: 1,
+				isApproval: true,
+				parties: { sources: [], destinations: [], partial: true }
+			});
+
+			const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(
+					getByText(en.wallet_connect.text.approval_without_simulation_reason)
+				).toBeInTheDocument();
+			});
+
+			const approve = getByRole('button', { name: en.core.text.approve });
+
+			expect(approve).toBeDisabled();
+
+			await fireEvent.click(getByText(en.wallet_connect.text.unchecked_signing_acknowledge));
+			await fireEvent.click(approve);
+
+			await waitFor(() => {
+				expect(sign).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ acknowledgedRefusals: ['approval_without_simulation'] })
+				);
+			});
+		});
+
+		// OISY sends with the wallet as the fee payer, so it would send a transaction other than the one
+		// reviewed: never signed past, whatever else the review refuses.
+		it('should offer no way past a send another account pays the fee for, with the switch on', async () => {
+			walletConnectUncheckedSigningStore.enable();
+
+			vi.mocked(decode).mockResolvedValueOnce({ ...refused, feePaidByOthers: true });
+
+			const { getByRole, getByText, queryByTestId } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.wallet_connect.text.fee_paid_by_others)).toBeInTheDocument();
+			});
+
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
 		it('should refuse on the review an instruction nobody read and no run described', async () => {
 			vi.mocked(decode).mockResolvedValueOnce({
 				amount: 1n,
+				requiredSignatures: 1,
 				unreviewed: true,
 				parties: { sources: [], destinations: [], partial: true }
 			});
@@ -628,6 +989,7 @@ describe('SolWalletConnectSignModal', () => {
 
 			vi.mocked(decode).mockResolvedValueOnce({
 				amount: 1n,
+				requiredSignatures: 1,
 				parties: { sources: [], destinations: [], partial: true }
 			});
 

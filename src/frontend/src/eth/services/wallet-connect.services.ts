@@ -2,12 +2,17 @@ import { send as executeSend } from '$eth/services/send.services';
 import type { FeeStoreData } from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
+import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
+import type { GetUniswapSwapParams } from '$eth/utils/uniswap.utils';
 import {
 	classifyWalletConnectEthCall,
+	classifyWalletConnectEthSendTransaction,
 	getSendParamsGas,
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash,
+	getWalletConnectEthCkDeposit,
 	getWalletConnectEthCkEthDeposit,
+	hasUnreviewableTypedData,
 	isEthSignTypedDataMethod,
 	isWalletConnectEthTokenCallWithValue,
 	WalletConnectEthCkEthHelperUnconfirmedError
@@ -19,6 +24,7 @@ import {
 	TRACK_COUNT_WC_ETH_SEND_SUCCESS
 } from '$lib/constants/analytics.constants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
+import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
@@ -34,6 +40,7 @@ import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
+import { Signature } from 'ethers/crypto';
 import { get } from 'svelte/store';
 
 type WalletConnectSendParams = WalletConnectExecuteParams & {
@@ -42,12 +49,18 @@ type WalletConnectSendParams = WalletConnectExecuteParams & {
 	fee: FeeStoreData;
 	modalNext: () => void;
 	amount: bigint;
+	// Whether the user ticked, on the review, that they sign a call OISY can't read.
+	unknownCallAcknowledged: boolean;
+	// The tokens the review read the call with, so signing reads it the same way.
+	tokens: GetUniswapSwapParams['tokens'];
 } & SendParams;
 
 type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	modalNext: () => void;
 	progress: (step: ProgressStepsSign) => void;
+	// Whether the user ticked, on the review, that they sign typed data OISY can't describe.
+	unreviewableTypedDataAcknowledged: boolean;
 };
 
 export const send = ({
@@ -62,6 +75,8 @@ export const send = ({
 	minterInfo,
 	sourceNetwork,
 	targetNetwork,
+	unknownCallAcknowledged,
+	tokens,
 	...params
 }: WalletConnectSendParams): Promise<ResultSuccess> =>
 	execute({
@@ -82,7 +97,9 @@ export const send = ({
 						from_address_not_wallet,
 						unknown_destination,
 						cketh_deposit_refused,
-						cketh_helper_unconfirmed
+						cketh_helper_unconfirmed,
+						ck_deposit_refused,
+						unexpected_processing_request
 					}
 				}
 			} = get(i18n);
@@ -140,6 +157,31 @@ export const send = ({
 				return { success: false };
 			}
 
+			// The same for a deposit to the minter's helper that deposits to a subaccount, which the review
+			// refuses or holds through this check.
+			try {
+				getWalletConnectEthCkDeposit({
+					to: firstParam.to,
+					data: firstParam.data,
+					value: amount,
+					networkId: sourceNetwork.id,
+					minterInfo,
+					principal: identity?.getPrincipal(),
+					nativeToken: token,
+					tokens
+				});
+			} catch (err: unknown) {
+				toastsError({
+					msg: {
+						text:
+							err instanceof WalletConnectEthCkEthHelperUnconfirmedError
+								? cketh_helper_unconfirmed
+								: ck_deposit_refused
+					}
+				});
+				return { success: false };
+			}
+
 			const { valid } = assertCkEthMinterInfoLoaded({
 				minterInfo,
 				network: targetNetwork
@@ -191,6 +233,31 @@ export const send = ({
 				return { success: false };
 			}
 
+			// The review holds Approve on a call OISY can't read until the user confirms they understand
+			// that; this is the same condition, asked where the transaction is signed.
+			const call = classifyWalletConnectEthSendTransaction({
+				to,
+				data,
+				networkId: sourceNetwork.id,
+				minterInfo,
+				principal: identity?.getPrincipal(),
+				chainId: sourceNetwork.chainId,
+				value: amount,
+				wallet: address,
+				nativeToken: token,
+				tokens
+			});
+
+			if (call.type === 'unknown' && !unknownCallAcknowledged) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.unexplained_request_unconfirmed }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
 			modalNext();
 
 			try {
@@ -231,9 +298,18 @@ export const send = ({
 					}
 				});
 
+				// Reported here rather than left to the generic toast of `execute`: a refused broadcast
+				// carries the signed transaction, which stays valid until its nonce is used.
+				toastEthereumTransactionError({
+					err,
+					fallbackMsg: unexpected_processing_request,
+					token,
+					context: PLAUSIBLE_EVENT_CONTEXTS.WALLET_CONNECT
+				});
+
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
 
-				throw err;
+				return { success: false, err };
 			}
 		},
 		toastMsg: replacePlaceholders(get(i18n).wallet_connect.info.transaction_executed, {
@@ -244,6 +320,7 @@ export const send = ({
 export const signMessage = ({
 	modalNext,
 	progress,
+	unreviewableTypedDataAcknowledged,
 	...params
 }: WalletConnectSignMessageParams): Promise<ResultSuccess> =>
 	execute({
@@ -256,9 +333,25 @@ export const signMessage = ({
 				id,
 				topic,
 				params: {
-					request: { params }
+					request: { method, params },
+					chainId
 				}
 			} = request;
+
+			// The review holds Approve on typed data OISY can't describe until the user confirms they
+			// understand that; this is the same condition, asked where the signature is made.
+			if (
+				hasUnreviewableTypedData({ method, params, sessionChainId: chainId }) &&
+				!unreviewableTypedDataAcknowledged
+			) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.unexplained_request_unconfirmed }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
 
 			modalNext();
 
@@ -295,7 +388,11 @@ export const signMessage = ({
 					});
 				};
 
-				const signedMessage = await sign(params);
+				// The signer ends a signature with the bare y-parity (0 or 1) as `v`, the form an
+				// EIP-1559 transaction takes. A signed message goes back to the dApp with `v` as 27 or
+				// 28, the only values a contract verifying it on-chain (e.g. an ERC-2612 `permit`)
+				// accepts.
+				const signedMessage = Signature.from(await sign(params)).serialized;
 
 				progress(ProgressStepsSign.APPROVE_WALLET_CONNECT);
 

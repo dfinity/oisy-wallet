@@ -51,7 +51,10 @@
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
 	import type { SolWalletConnectRefusal } from '$sol/types/wallet-connect';
-	import { solSimulationReassignsWallet } from '$sol/utils/sol-simulation.utils';
+	import {
+		solSimulationReassignsWallet,
+		solUnreviewedNotDescribed
+	} from '$sol/utils/sol-simulation.utils';
 	import { solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
 	import { findSplToken } from '$sol/utils/spl.utils';
 
@@ -104,6 +107,7 @@
 	let unreviewed = $state<boolean | undefined>();
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
+	let requiredSignatures = $state<number | undefined>();
 	let preview = $state<SolSimulationPreview | undefined>();
 	let instructions = $state<SolInstructionSummary[] | undefined>();
 
@@ -121,6 +125,18 @@
 	// An account the run opens inside another program's instruction with more than its size costs.
 	// `sign()` refuses it as it does an ambiguous message, so the review says so the same way.
 	let opensAccountBeyondRent = $state<boolean | undefined>();
+	// A token batch the run keeps whole, which the list states none of the steps of. `sign()` refuses
+	// it as it does an ambiguous message, so the review says so the same way.
+	let keepsBatchWhole = $state<boolean | undefined>();
+	// A token call the run makes inside another program's instruction with the wallet among the keys
+	// signing for a multisig. `sign()` refuses it as it does an ambiguous message, so the review says
+	// so the same way.
+	let signsForMultisig = $state<boolean | undefined>();
+	// Whether the message names an account other than the wallet to pay its fee. A send goes out with
+	// the wallet as the fee payer instead, which the review never ran, so `sign()` refuses to send such
+	// a message and the review says so. Signing it without sending keeps the payer it names.
+	let feePaidByOthers = $state<boolean | undefined>();
+	let sendPaidByOthers = $derived(signWithSending && (feePaidByOthers ?? false));
 	// The decode is asynchronous, so until it settles the review shows an empty summary and no
 	// warning. Approval waits for it: signing on the strength of a review that has not been
 	// computed yet is exactly what the warnings exist to prevent. A failed decode never flips it,
@@ -141,26 +157,33 @@
 			solSimulationReassignsWallet({ preview, userAddress: address })
 	);
 
-	// Whether the run described the instructions nobody read, which neither the run happening nor the
-	// preview's contents can say. The preview attributes nothing to an instruction, and it carries the
-	// user's lamport delta whether or not that delta is anything but the fee, so its presence says
-	// almost nothing.
+	// How much an approval lets the spender spend is stated from a simulated run's allowance, so
+	// with no run the summary names the spender alone. `sign()` refuses it, so the review says so
+	// the same way and holds the button.
+	let approvalWithoutSimulation = $derived(
+		(isApproval ?? false) && !(simulatedInstructions ?? false)
+	);
+	// Whether the run described the instructions nobody read, which neither the run happening
+	// nor the preview's contents can say. The preview attributes nothing to an instruction,
+	// and it carries the user's lamport delta whether or not that delta is anything but the
+	// fee, so its presence says almost nothing.
 	//
-	// The instruction list does attribute. Built from a run, it marks an entry `unknown` only when no
-	// effect - stated by the message or made inside a program - carried that instruction's index, so a
-	// routed swap's router instruction is covered by the transfers its own invocations produced, while
-	// a stake delegation produces no effect anywhere and stays unknown. A list with nothing unknown
-	// left in it is the description; anything else leaves an instruction the review cannot account
-	// for.
+	// The instruction list does attribute. Built from a run, it marks an entry `unknown`
+	// only when no effect - stated by the message or made inside a program - carried that
+	// instruction's index, so a routed swap's router instruction is covered by the transfers
+	// its own invocations produced, while a stake delegation produces no effect anywhere and
+	// stays unknown. A list with nothing unknown left in it is the description; anything
+	// else leaves an instruction the review cannot account for.
 	//
-	// An instruction is marked accounted for as soon as any one of its invocations produced an effect,
-	// so an unread instruction making both a transfer we model and a call we do not leaves no unknown
-	// entry here. That call is what the unread programs below cover: a run reaching a program outside
-	// the known ones names it on the review, and approving waits for the user to confirm it.
+	// An instruction is marked accounted for as soon as any one of its invocations produced an
+	// effect, so an unread instruction making both a transfer we model and a call we do not
+	// leaves no unknown entry here. That call is what the unread programs cover: a run
+	// reaching a program outside the known ones names it on the review, and approving waits
+	// for the user to confirm it.
 	//
-	// And a list with something in it. A run's empty list reaches here now, where before it was
-	// dropped on the way, and whether a run with nothing to list vouches for an instruction nobody read
-	// is its own decision, not one to make by letting an empty list through.
+	// And a list with something in it. A run's empty list reaches here now, where before it
+	// was dropped on the way, and whether a run with nothing to list vouches for an instruction
+	// nobody read is its own decision, not one to make by letting an empty list through.
 	let simulated = $derived(
 		(simulatedInstructions ?? false) &&
 			nonNullish(instructions) &&
@@ -168,17 +191,22 @@
 			!instructions.some(({ kind }) => kind === 'unknown')
 	);
 
-	// `sign()` refuses an instruction nobody read that no run described. Stated on the review like the
-	// other refusals, rather than bounced in a toast after Approve, since the way past it has to be
-	// offered where the reason is.
-	let unreviewedWithoutSimulation = $derived((unreviewed ?? false) && !simulated);
+	// An instruction OISY cannot read that no run described. `sign()` refuses it on the same test and
+	// the same value, so the review says so and holds the button rather than letting the user press
+	// it and bounce.
+	let unreviewedNotDescribed = $derived(solUnreviewedNotDescribed({ unreviewed, simulated }));
 
 	let refusals = $derived<SolWalletConnectRefusal[]>([
 		...(closesPayOthers ? (['close_pays_others'] as const) : []),
-		...((ambiguous ?? false) || reassignsWallet || (opensAccountBeyondRent ?? false)
+		...((ambiguous ?? false) ||
+		reassignsWallet ||
+		(opensAccountBeyondRent ?? false) ||
+		(keepsBatchWhole ?? false) ||
+		(signsForMultisig ?? false)
 			? (['cannot_be_shown'] as const)
 			: []),
-		...(unreviewedWithoutSimulation ? (['unreviewed_without_simulation'] as const) : [])
+		...(approvalWithoutSimulation ? (['approval_without_simulation'] as const) : []),
+		...(unreviewedNotDescribed ? (['unreviewed_without_simulation'] as const) : [])
 	]);
 
 	// WalletConnect's domain verification flagged the site: no way past a refusal is offered, and the
@@ -193,7 +221,11 @@
 		now: Date.now()
 	});
 
-	let uncheckedSigningOffered = $derived(uncheckedSigningOn && !domainFlagged && !reassignsWallet);
+	// Nor is it offered on a send another account is set to pay the fee for: OISY would send a
+	// transaction other than the one reviewed, whatever the user acknowledges.
+	let uncheckedSigningOffered = $derived(
+		uncheckedSigningOn && !domainFlagged && !reassignsWallet && !sendPaidByOthers
+	);
 
 	let uncheckedSigningAcknowledged = $state(false);
 
@@ -208,7 +240,9 @@
 	});
 
 	let approveDisabled = $derived(
-		!decoded || (refusals.length > 0 && !(uncheckedSigningOffered && uncheckedSigningAcknowledged))
+		!decoded ||
+			sendPaidByOthers ||
+			(refusals.length > 0 && !(uncheckedSigningOffered && uncheckedSigningAcknowledged))
 	);
 
 	const updateData = async () => {
@@ -222,6 +256,7 @@
 				unreviewed,
 				prioritizationFee,
 				prioritizationFeeEstimate,
+				requiredSignatures,
 				preview,
 				instructions,
 				simulatedInstructions,
@@ -229,7 +264,10 @@
 				parties,
 				unreadPrograms,
 				rentExemptMinimum,
-				opensAccountBeyondRent
+				opensAccountBeyondRent,
+				keepsBatchWhole,
+				signsForMultisig,
+				feePaidByOthers
 			} = await decodeService({
 				base64EncodedTransactionMessage: data,
 				networkId,
@@ -342,6 +380,8 @@
 			unreadProgramsAcknowledged: !callsUnreadPrograms || unreadProgramsAcknowledged,
 			rentExemptMinimum,
 			opensAccountBeyondRent: opensAccountBeyondRent ?? false,
+			keepsBatchWhole: keepsBatchWhole ?? false,
+			signsForMultisig: signsForMultisig ?? false,
 			acknowledgedRefusals: uncheckedSigningOffered && uncheckedSigningAcknowledged ? refusals : [],
 			reassignsWallet
 		});
@@ -369,14 +409,20 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
-				ambiguous={(ambiguous ?? false) || (opensAccountBeyondRent ?? false) || reassignsWallet}
+				ambiguous={(ambiguous ?? false) ||
+					(opensAccountBeyondRent ?? false) ||
+					(keepsBatchWhole ?? false) ||
+					(signsForMultisig ?? false) ||
+					reassignsWallet}
 				{application}
+				{approvalWithoutSimulation}
 				{approveDisabled}
 				{closesPayOthers}
 				{data}
 				{decoded}
 				destination={destination ?? ''}
 				{domainFlagged}
+				feePaidByOthers={sendPaidByOthers}
 				feeToken={token}
 				flaggedAsScam={!acceptedContext(request.verifyContext)}
 				{instructions}
@@ -392,15 +438,16 @@
 				{prioritizationFee}
 				{prioritizationFeeEstimate}
 				{reassignsWallet}
+				{requiredSignatures}
 				simulatedInstructions={simulatedInstructions ?? false}
-				simulationRan={simulatedInstructions ?? false}
 				source={address ?? ''}
 				token={reviewToken}
 				{uncheckedSigningAcknowledged}
 				{uncheckedSigningOffered}
 				unreadPrograms={unreadPrograms ?? []}
 				unreviewed={unreviewed ?? false}
-				{unreviewedWithoutSimulation}
+				{unreviewedNotDescribed}
+				walletPaysFees={!(feePaidByOthers ?? false)}
 				bind:unreadProgramsAcknowledged
 			/>
 		{/if}

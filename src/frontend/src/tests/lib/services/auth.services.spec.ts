@@ -12,6 +12,7 @@ import {
 	infoSignOut,
 	lockSession,
 	nullishSignOut,
+	signIn,
 	signOut,
 	warnSignOut
 } from '$lib/services/auth.services';
@@ -20,6 +21,7 @@ import { AUTH_LOCK_KEY } from '$lib/stores/locked.store';
 import { Theme } from '$lib/types/theme';
 import * as eventsUtils from '$lib/utils/events.utils';
 import { emit } from '$lib/utils/events.utils';
+import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 import { LOCALSTORAGE_THEME_KEY } from '$lib/utils/theme.utils';
 import * as timeUtils from '$lib/utils/time.utils';
 import { randomWait } from '$lib/utils/time.utils';
@@ -82,9 +84,32 @@ describe('auth.services', () => {
 		mockLocation(rootLocation);
 
 		localStorage.clear();
+		sessionStorage.clear();
 	});
 
-	describe.todo('signIn', () => {});
+	describe('signIn', () => {
+		it('should forget the swap slippage saved before', async () => {
+			vi.spyOn(authStore, 'signIn').mockResolvedValue(undefined);
+
+			saveSwapSlippage('8');
+
+			const { success } = await signIn({});
+
+			expect(success).toBe('ok');
+			expect(loadSwapSlippage()).toBeUndefined();
+		});
+
+		it('should keep the swap slippage when the sign-in is cancelled', async () => {
+			vi.spyOn(authStore, 'signIn').mockRejectedValue('UserInterrupt');
+
+			saveSwapSlippage('8');
+
+			const { success } = await signIn({});
+
+			expect(success).toBe('cancelled');
+			expect(loadSwapSlippage()).toBe(8);
+		});
+	});
 
 	describe('signOut', () => {
 		beforeEach(() => {

@@ -1,7 +1,7 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as cmcApi from '$icp/api/cmc.api';
 import CyclesMintModal from '$icp/components/cycles-mint/CyclesMintModal.svelte';
-import { CYCLES_MINT_RATE_REFRESH_INTERVAL_MILLIS } from '$icp/constants/cmc.constants';
+import { CMC_RATE_REFRESH_INTERVAL_MILLIS } from '$icp/constants/cmc.constants';
 import * as cyclesMintServices from '$icp/services/cycles-mint.services';
 import { CyclesMintError } from '$icp/types/cycles-mint';
 import {
@@ -205,7 +205,7 @@ describe('CyclesMintModal', () => {
 				.mockResolvedValueOnce(50_000n);
 
 			const { getByTestId } = await toReview(() =>
-				vi.advanceTimersByTimeAsync(CYCLES_MINT_RATE_REFRESH_INTERVAL_MILLIS)
+				vi.advanceTimersByTimeAsync(CMC_RATE_REFRESH_INTERVAL_MILLIS)
 			);
 
 			await waitFor(() => {

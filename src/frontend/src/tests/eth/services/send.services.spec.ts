@@ -252,7 +252,7 @@ describe('send.services', () => {
 				lastProgressStep: ProgressStepsSend.DONE
 			});
 
-			expect(result).toEqual({ hash: expect.any(String) });
+			expect(result).toEqual({ hash: expect.any(String), nonce: 5 });
 			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSend.INITIALIZATION);
 			expect(approveServices.approve).toHaveBeenCalledOnce();
 		});
@@ -263,7 +263,7 @@ describe('send.services', () => {
 				nonce: 5
 			});
 
-			await send({
+			const result = await send({
 				progress: mockProgress,
 				token: mockValidErc20Token,
 				identity: mockIdentity,
@@ -280,6 +280,8 @@ describe('send.services', () => {
 			});
 
 			expect(approveServices.approve).toHaveBeenCalledOnce();
+			// The send takes the slot after the approval's, and that is the nonce it returns.
+			expect(result.nonce).toBe(6);
 		});
 
 		it('should call processTransactionSent fire-and-forget', async () => {

@@ -4,12 +4,20 @@ import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const getTokenCategoryTag = (
 	token: Pick<Token, 'tags'>
 ): TokenCategoryTagValue | undefined =>
 	token.tags.find((tag) => tag.type === TokenTagType.CATEGORY)?.value;
+
+// The asset types a list of tokens holds, each once.
+export const getTokensCategories = (tokens: Pick<Token, 'tags'>[]): TokenCategoryTagValue[] =>
+	tokens.reduce<TokenCategoryTagValue[]>((acc, token) => {
+		const category = getTokenCategoryTag(token);
+
+		return nonNullish(category) && !acc.includes(category) ? [...acc, category] : acc;
+	}, []);
 
 const matchesCategory = ({
 	token,

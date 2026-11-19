@@ -2,10 +2,12 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { RETIRED_ICRC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.retired.env';
 import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
 import {
 	hasSufficientIcrcAllowance,
 	isIcrcTokenSupportIcrc2,
+	isIcrcTokenSupportIcrc3,
 	loadCustomTokens,
 	loadDisabledIcrcTokensBalances,
 	loadDisabledIcrcTokensExchanges
@@ -472,6 +474,43 @@ describe('icrc.services', () => {
 				});
 			});
 
+			it.each(RETIRED_ICRC_LEDGER_CANISTER_IDS)(
+				'should skip the retired ledger %s without calling it or showing a toast',
+				async (retiredLedgerCanisterId) => {
+					backendCanisterMock.listCustomTokens.mockResolvedValue([
+						{
+							...mockCustomToken,
+							enabled: true,
+							token: {
+								Icrc: {
+									index_id: toNullable(),
+									ledger_id: Principal.fromText(retiredLedgerCanisterId)
+								}
+							}
+						}
+					]);
+
+					const err = new Error('test');
+					ledgerCanisterMock.metadata.mockRejectedValue(err);
+					ledgerCanisterMock.getMintingAccount.mockRejectedValue(err);
+
+					await loadCustomTokens({ identity: mockIdentity });
+
+					expect(ledgerCanisterMock.metadata).not.toHaveBeenCalled();
+					expect(ledgerCanisterMock.getMintingAccount).not.toHaveBeenCalled();
+
+					expect(spyToastsShow).not.toHaveBeenCalled();
+					expect(spyToastsError).not.toHaveBeenCalled();
+					expect(trackEvent).not.toHaveBeenCalled();
+
+					expect(
+						(get(icrcCustomTokensStore) ?? []).find(
+							({ data: { ledgerCanisterId } }) => ledgerCanisterId === retiredLedgerCanisterId
+						)
+					).toBeUndefined();
+				}
+			);
+
 			it('should not show a toast on metadata error if the token was not enabled', async () => {
 				backendCanisterMock.listCustomTokens.mockResolvedValue([
 					{ ...mockCustomToken, enabled: false }
@@ -875,6 +914,77 @@ describe('icrc.services', () => {
 			expect(ledgerCanisterMock.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith(
 				expectedParams
 			);
+		});
+	});
+
+	describe('isIcrcTokenSupportIcrc3', () => {
+		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
+
+		// The answer is kept per ledger for the session, so every test asks about its own ledger.
+		const params = (ledgerCanisterId: string) => ({ identity: mockIdentity, ledgerCanisterId });
+
+		const expectedParams = { certified: false };
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
+		});
+
+		it('returns true when ICRC-3 standard is supported', async () => {
+			vi.mocked(ledgerCanisterMock.icrc1SupportedStandards).mockResolvedValue([
+				{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' },
+				{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' },
+				{ name: 'ICRC-3', url: 'https://github.com/dfinity/ICRC-3' }
+			]);
+
+			const result = await isIcrcTokenSupportIcrc3(params('2ouva-viaaa-aaaaq-aaamq-cai'));
+
+			expect(result).toBeTruthy();
+			expect(ledgerCanisterMock.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith(
+				expectedParams
+			);
+		});
+
+		it('returns false when ICRC-3 standard is not supported', async () => {
+			vi.mocked(ledgerCanisterMock.icrc1SupportedStandards).mockResolvedValue([
+				{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' },
+				{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' }
+			]);
+
+			const result = await isIcrcTokenSupportIcrc3(params('eig2s-waaaa-aaaam-qbg5a-cai'));
+
+			expect(result).toBeFalsy();
+		});
+
+		it('asks each ledger only once', async () => {
+			vi.mocked(ledgerCanisterMock.icrc1SupportedStandards).mockResolvedValue([
+				{ name: 'ICRC-3', url: 'https://github.com/dfinity/ICRC-3' }
+			]);
+
+			const first = await isIcrcTokenSupportIcrc3(params('um5iw-rqaaa-aaaaq-qaaba-cai'));
+			const second = await isIcrcTokenSupportIcrc3(params('um5iw-rqaaa-aaaaq-qaaba-cai'));
+
+			expect(first).toBeTruthy();
+			expect(second).toBeTruthy();
+			expect(ledgerCanisterMock.icrc1SupportedStandards).toHaveBeenCalledOnce();
+		});
+
+		it('asks the ledger again after a failed call', async () => {
+			const err = new Error('ledger unreachable');
+
+			vi.mocked(ledgerCanisterMock.icrc1SupportedStandards)
+				.mockRejectedValueOnce(err)
+				.mockResolvedValueOnce([{ name: 'ICRC-3', url: 'https://github.com/dfinity/ICRC-3' }]);
+
+			await expect(isIcrcTokenSupportIcrc3(params('rh2pm-ryaaa-aaaan-qeniq-cai'))).rejects.toThrow(
+				err
+			);
+
+			const result = await isIcrcTokenSupportIcrc3(params('rh2pm-ryaaa-aaaan-qeniq-cai'));
+
+			expect(result).toBeTruthy();
+			expect(ledgerCanisterMock.icrc1SupportedStandards).toHaveBeenCalledTimes(2);
 		});
 	});
 });

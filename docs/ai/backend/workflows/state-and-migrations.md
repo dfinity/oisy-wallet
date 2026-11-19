@@ -116,9 +116,23 @@ upgraded past this release.` comment so the cleanup is obvious, and
      drop the module + `post_upgrade` wiring in a follow-up PR once the
      rollout is complete.
 
+   A migration that may not fit in one message can run in timer batches
+   instead: start it from `post_upgrade`, end each batch at an instruction
+   budget, and resume after the last key it migrated. Every upgrade starts
+   it again until it is removed, so it must be idempotent. See
+   [`contacts/migration.rs`](../../../../src/backend/src/contacts/migration.rs).
+
 3. **Bumped `MemoryId` + parallel migration.** Define a new `MemoryId`
    for the new shape, populate it from the old one in `post_upgrade`,
    read from the new one going forward.
+
+A store whose contents come back on their own (a cache, or data the
+frontend saves again when the backend has none) can be **emptied instead
+of migrated**: `clear_new()` in `post_upgrade`, on the same `MemoryId`. Since
+`post_upgrade` runs on every upgrade, empty it only while the old shape is
+still there, and decide that from the stored bytes, not the new type: see
+[`state/token_id_keys.rs`](../../../../src/backend/src/state/token_id_keys.rs),
+which reads the first key raw.
 
 ## Tests for migrations
 
@@ -144,6 +158,12 @@ adding migration tests.
 - Don't change a struct's field name or type "in place" without a
   migration plan — Candid records are name-keyed, and `Storable` decoding
   will fail.
+- Don't add or tighten a `Validate` rule on a stored type without
+  checking the rows already stored. A type that uses
+  `validate_on_deserialize!` runs the current rules every time a row is
+  read, so a row written under the old rules can stop decoding. Migrate
+  those rows first, or decode the affected field leniently, as
+  `Contact::image` does for images stored inline.
 - Don't run the migration outside `post_upgrade`. `init` is for fresh
   installs, not upgrades.
 - Don't assume `Cell::init` writes the value you hand it. It **loads** the

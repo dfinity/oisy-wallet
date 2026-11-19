@@ -9,9 +9,9 @@
 	import { trackTransactionFilter } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
-	import type { TransactionType } from '$lib/types/transaction';
+	import type { TransactionsFilterType } from '$lib/types/transactions-filter';
 
-	const allTypes: TransactionType[] = Array.from(new Set(TransactionTypeSchema.options));
+	const allTypes: TransactionsFilterType[] = [...new Set(TransactionTypeSchema.options), 'top_up'];
 
 	let translated = $derived(
 		allTypes.map((type) => ({ type, label: $i18n.transaction.type[type] }))
@@ -23,9 +23,9 @@
 		)
 	);
 
-	let selectedSet = $derived(new Set<TransactionType>($transactionsFilterStore.types));
+	let selectedSet = $derived(new Set<TransactionsFilterType>($transactionsFilterStore.types));
 
-	const onToggleType = (type: TransactionType) => {
+	const onToggleType = (type: TransactionsFilterType) => {
 		trackTransactionFilter({
 			modifier: selectedSet.has(type)
 				? PLAUSIBLE_EVENT_FILTER_MODIFIERS.UNSET

@@ -1,19 +1,21 @@
 <script lang="ts">
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
+	import { goto } from '$app/navigation';
 	import { AI_ASSISTANT_CONSOLE_ENABLED } from '$env/ai-assistant.env';
 	import EnabledNetworksPreviewIcons from '$lib/components/settings/EnabledNetworksPreviewIcons.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import SettingsExperimentalFeatures from '$lib/components/settings/SettingsExperimentalFeatures.svelte';
-	import SettingsExportData from '$lib/components/settings/SettingsExportData.svelte';
 	import SettingsPreferences from '$lib/components/settings/SettingsPreferences.svelte';
 	import SettingsSecurity from '$lib/components/settings/SettingsSecurity.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON,
-		SETTINGS_ADDRESS_LABEL
+		SETTINGS_ADDRESS_LABEL,
+		SETTINGS_EXPORT_DATA_TOOLS_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
@@ -23,13 +25,26 @@
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { networkUrl } from '$lib/utils/nav.utils';
 
 	const modalId = Symbol();
 
 	const openSettingsModal = (t: SettingsModalType) =>
 		modalStore.openSettings({ id: modalId, data: t });
+
+	const goToTools = async () => {
+		await goto(
+			networkUrl({
+				path: AppPath.Tools,
+				networkId: $userSelectedNetworkStore,
+				usePreviousRoute: false,
+				fromRoute: null
+			})
+		);
+	};
 </script>
 
 <SettingsCard>
@@ -105,7 +120,22 @@
 	</SettingsCardItem>
 </SettingsCard>
 
-<SettingsExportData />
+<!-- Export data moved to the Tools page; the section stays here to point there. -->
+<SettingsCard>
+	{#snippet title()}{$i18n.settings.text.export_data}{/snippet}
+
+	<SettingsCardItem>
+		{#snippet key()}
+			{$i18n.settings.text.export_data_moved}
+		{/snippet}
+
+		{#snippet value()}
+			<Button link onclick={goToTools} testId={SETTINGS_EXPORT_DATA_TOOLS_BUTTON}
+				>{$i18n.settings.text.open_tools} ></Button
+			>
+		{/snippet}
+	</SettingsCardItem>
+</SettingsCard>
 
 {#if AI_ASSISTANT_CONSOLE_ENABLED}
 	<SettingsExperimentalFeatures />
