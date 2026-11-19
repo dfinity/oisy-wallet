@@ -2715,9 +2715,7 @@
 		"text": {
 			"next_slide": "Próximo slide",
 			"prev_slide": "Slide anterior",
-			"indicator": "Ir para o slide $index",
-			"cksol_slide_title": "O ckSOL chegou: SOL no Internet Computer",
-			"cksol_slide_cta": "Abrir ckSOL"
+			"indicator": "Ir para o slide $index"
 		}
 	},
 	"agreements": {
