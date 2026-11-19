@@ -1007,7 +1007,7 @@
 		},
 		"token": {
 			"text": {
-				"select_token": "Select token",
+				"select_token": "Select token to receive",
 				"select_network": "Select network",
 				"networks_count": "$count networks",
 				"test_network": "Test network",
