@@ -13,6 +13,8 @@ import {
 	BNB_MAINNET_TOKEN,
 	BNB_MAINNET_TOKEN_ID
 } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { BONK_TOKEN, BONK_TOKEN_ID } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import {
 	BTC_MAINNET_TOKEN,
@@ -38,6 +40,11 @@ import type { EthTransactionType } from '$eth/types/eth-transaction';
 import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
+import { mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
+import { mapCkEthereumTransaction } from '$icp/utils/cketh-transactions.utils';
+import { mapCyclesLedgerTransaction } from '$icp/utils/cycles-ledger-transactions.utils';
+import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
+import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction-ui';
@@ -62,10 +69,21 @@ import {
 	mockEthTransaction
 } from '$tests/mocks/eth-transactions.mock';
 import { getMockExchanges, mockExchanges } from '$tests/mocks/exchanges.mock';
-import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
-import { mockPrincipalText, mockPrincipalText2 } from '$tests/mocks/identity.mock';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	createMockIcrcBurnTransaction,
+	createMockIcTransactionsUi
+} from '$tests/mocks/ic-transactions.mock';
+import {
+	mockAccountIdentifierText,
+	mockIdentity,
+	mockPrincipalText,
+	mockPrincipalText2
+} from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
+import { Cbor } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 
 describe('transactions.utils', () => {
 	describe('mapAllTransactionsUi', () => {
@@ -1903,6 +1921,78 @@ describe('transactions.utils', () => {
 			}));
 
 			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
+		});
+
+		// A burn has no recipient the user picked, so it is never a known destination, on
+		// any ledger. Each burn below comes from the mapper OISY uses for it, so a mapper that
+		// starts to type a burn otherwise is caught here.
+		describe('burns', () => {
+			const icrcBurn = mapIcrcTransaction({
+				transaction: createMockIcrcBurnTransaction(),
+				identity: mockIdentity
+			});
+
+			const topUp = mapCyclesLedgerTransaction({
+				transaction: createMockIcrcBurnTransaction({
+					memo: Uint8Array.from([
+						0x81,
+						0x4a,
+						...Principal.fromText('ywcsb-maaaa-aaaai-q6k7a-cai').toUint8Array()
+					])
+				}),
+				identity: mockIdentity
+			});
+
+			const ckBtcBurn = mapCkBTCTransaction({
+				transaction: createMockIcrcBurnTransaction({
+					memo: new Uint8Array(Cbor.encode([0, ['bc1qtest123', null, null]]))
+				}),
+				identity: mockIdentity,
+				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+				env: 'mainnet'
+			});
+
+			const ckEthBurn = mapCkEthereumTransaction({
+				transaction: createMockIcrcBurnTransaction({
+					memo: new Uint8Array(Cbor.encode([0, [new Uint8Array(20).fill(0xab)]]))
+				}),
+				identity: mockIdentity,
+				ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
+				env: 'mainnet'
+			});
+
+			const icpBurn = mapIcpTransaction({
+				transaction: {
+					id: 1n,
+					transaction: {
+						memo: ZERO,
+						icrc1_memo: [],
+						operation: {
+							Burn: { from: mockAccountIdentifierText, amount: { e8s: 100n }, spender: [] }
+						},
+						timestamp: [],
+						created_at_time: []
+					}
+				},
+				identity: mockIdentity
+			});
+
+			it('should give a top-up and the ckBTC and ckETH burns a destination', () => {
+				expect(topUp.to).toBeDefined();
+				expect(ckBtcBurn.to).toBeDefined();
+				expect(ckEthBurn.to).toBeDefined();
+			});
+
+			it.each([
+				{ name: 'an ICRC burn', burn: icrcBurn, token: mockValidIcrcToken },
+				{ name: 'a top-up', burn: topUp, token: mockValidIcrcToken },
+				{ name: 'a ckBTC burn', burn: ckBtcBurn, token: mockValidIcrcToken },
+				{ name: 'a ckETH burn', burn: ckEthBurn, token: mockValidIcrcToken },
+				{ name: 'an ICP burn', burn: icpBurn, token: ICP_TOKEN }
+			])('should never list $name', ({ burn, token }) => {
+				expect(burn.type).toBe('burn');
+				expect(getKnownDestinations([{ ...burn, token }])).toEqual({});
+			});
 		});
 	});
 

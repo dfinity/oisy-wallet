@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
-	import { fade, slide } from 'svelte/transition';
 	import { afterNavigate } from '$app/navigation';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
@@ -9,6 +8,7 @@
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { fade, slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		inputValue: string;

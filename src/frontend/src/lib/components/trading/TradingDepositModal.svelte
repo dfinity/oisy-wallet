@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
-	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import TradingDepositForm from '$lib/components/trading/TradingDepositForm.svelte';
@@ -140,7 +139,6 @@
 <WizardModal
 	bind:this={modal}
 	disablePointerEvents={currentStep?.name === WizardStepsTradingDeposit.DEPOSITING ||
-		currentStep?.name === WizardStepsTradingDeposit.FILTER_NETWORKS ||
 		currentStep?.name === WizardStepsTradingDeposit.TOKENS_LIST}
 	onClose={close}
 	{steps}
@@ -170,8 +168,8 @@
 	{:else if currentStep?.name === WizardStepsTradingDeposit.TOKENS_LIST}
 		<ModalTokensList
 			networkSelectorViewOnly={nonNullish($selectedNetwork)}
-			onSelectNetworkFilter={() => goToStep(WizardStepsTradingDeposit.FILTER_NETWORKS)}
 			onTokenButtonClick={onSelectToken}
+			showStakeBalance={false}
 		>
 			{#snippet tokenListItem(token, onClick)}
 				<ModalTokensListItem {onClick} {token} />
@@ -187,11 +185,6 @@
 				</ButtonGroup>
 			{/snippet}
 		</ModalTokensList>
-	{:else if currentStep?.name === WizardStepsTradingDeposit.FILTER_NETWORKS}
-		<ModalNetworksFilter
-			onNetworkFilter={() => goToStep(WizardStepsTradingDeposit.TOKENS_LIST)}
-			showStakeBalance={false}
-		/>
 	{:else if currentStep?.name === WizardStepsTradingDeposit.REVIEW && nonNullish(token)}
 		<TradingDepositReview
 			{amount}

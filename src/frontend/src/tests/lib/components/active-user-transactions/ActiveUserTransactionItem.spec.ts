@@ -1,14 +1,22 @@
 import ActiveUserTransactionItem from '$lib/components/active-user-transactions/ActiveUserTransactionItem.svelte';
 import { NANO_SECONDS_IN_MILLISECOND, NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import en from '$lib/i18n/en.json';
+import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
+import { LIFI_EXTERNAL_REF_KEYS } from '$lib/types/lifi';
 import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 import {
 	mockChainFusionActiveUserTransaction,
+	mockCyclesMintActiveUserTransaction,
+	mockCyclesTopUpActiveUserTransaction,
+	mockLifiActiveUserTransaction,
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
 	mockOisyTradeActiveUserTransaction,
-	mockVeloraActiveUserTransaction
+	mockVeloraActiveUserTransaction,
+	mockXrpActiveUserTransaction,
+	mockXrpData
 } from '$tests/mocks/active-user-transactions.mock';
+import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 
 describe('ActiveUserTransactionItem', () => {
@@ -44,6 +52,36 @@ describe('ActiveUserTransactionItem', () => {
 		expect(container).toHaveTextContent('Ethereum');
 	});
 
+	describe('LI.FI rows', () => {
+		const renderItem = (tx: typeof mockLifiActiveUserTransaction) =>
+			render(ActiveUserTransactionItem, {
+				props: { tx, isUnseen: false, dismissing: false, onDismiss: vi.fn() }
+			});
+
+		// The provider entry is unconditional, so a row keeps its name with `LIFI_SWAP_ENABLED` off.
+		it('renders as a swap with the provider and the cross-chain networks', () => {
+			const { container } = renderItem(mockLifiActiveUserTransaction);
+
+			expect(screen.getByText(`${en.swap.text.swap} 50 USDC → USDC`)).toBeInTheDocument();
+			expect(container).toHaveTextContent('Base → Solana');
+			expect(container).toHaveTextContent('LI.FI');
+		});
+
+		it('shows the token actually received when the route paid out in another one', () => {
+			renderItem({
+				...mockLifiActiveUserTransaction,
+				status: { Succeeded: null },
+				external_refs: [
+					...mockLifiActiveUserTransaction.external_refs,
+					{ key: LIFI_EXTERNAL_REF_KEYS.RECEIVED_SYMBOL, value: 'USDC.e' },
+					{ key: LIFI_EXTERNAL_REF_KEYS.RECEIVED_AMOUNT, value: '49.875' }
+				]
+			});
+
+			expect(screen.getByText(`${en.swap.text.swap} 50 USDC → 49.875 USDC.e`)).toBeInTheDocument();
+		});
+	});
+
 	// A ck conversion joins the swap union and reuses the shared display refs, so it
 	// needs no row layout of its own.
 	it('renders Chain Fusion rows as a swap with the provider and the cross-chain networks', () => {
@@ -59,6 +97,27 @@ describe('ActiveUserTransactionItem', () => {
 		expect(screen.getByText(`${en.swap.text.swap} 1 ckETH → ETH`)).toBeInTheDocument();
 		expect(container).toHaveTextContent('Internet Computer → Ethereum');
 		expect(container).toHaveTextContent('Chain Fusion');
+	});
+
+	// A ckSOL mint credits the whole balance of the deposit address less the minter's fees.
+	it('shows what the minter credited on a Chain Fusion row that learned it', () => {
+		render(ActiveUserTransactionItem, {
+			props: {
+				tx: {
+					...mockChainFusionActiveUserTransaction,
+					status: { Succeeded: null },
+					external_refs: [
+						...mockChainFusionActiveUserTransaction.external_refs,
+						{ key: CHAIN_FUSION_EXTERNAL_REF_KEYS.RECEIVED_AMOUNT, value: '0.9921' }
+					]
+				},
+				isUnseen: false,
+				dismissing: false,
+				onDismiss: vi.fn()
+			}
+		});
+
+		expect(screen.getByText(`${en.swap.text.swap} 1 ckETH → 0.9921 ETH`)).toBeInTheDocument();
 	});
 
 	// A fifth swap provider renders through the shared layout for free, because its
@@ -77,6 +136,41 @@ describe('ActiveUserTransactionItem', () => {
 		expect(screen.getByText(`${en.swap.text.swap} 3 ICP → ckUSDC`)).toBeInTheDocument();
 		expect(container).toHaveTextContent('OISY Trade');
 		expect(container).not.toHaveTextContent('Internet Computer → Internet Computer');
+	});
+
+	// Two tokens on one network, like an OISY Trade swap: the swap layout with its own
+	// label and provider.
+	it('renders cycles-mint rows as a mint with the CMC as provider, collapsing the network', () => {
+		const { container } = render(ActiveUserTransactionItem, {
+			props: {
+				tx: mockCyclesMintActiveUserTransaction,
+				isUnseen: false,
+				dismissing: false,
+				onDismiss: vi.fn()
+			}
+		});
+
+		expect(screen.getByText(`${en.mint.text.mint} 1.5 ICP → TCYCLES`)).toBeInTheDocument();
+		expect(container).toHaveTextContent('Cycles Minting Canister');
+		expect(container).not.toHaveTextContent('Internet Computer → Internet Computer');
+		expect(container).not.toHaveTextContent(en.swap.text.swap);
+	});
+
+	// One token on one network, paid into a canister the row does not name.
+	it('renders a top-up paid with ICP with its amount, its one network and the CMC', () => {
+		const { container } = render(ActiveUserTransactionItem, {
+			props: {
+				tx: mockCyclesTopUpActiveUserTransaction,
+				isUnseen: false,
+				dismissing: false,
+				onDismiss: vi.fn()
+			}
+		});
+
+		expect(screen.getByText(`${en.transaction.label.canister_top_up} 1.5 ICP`)).toBeInTheDocument();
+		expect(container).toHaveTextContent('Internet Computer');
+		expect(container).toHaveTextContent('Cycles Minting Canister');
+		expect(container).not.toHaveTextContent('→');
 	});
 
 	it('renders Liquidium rows with the action, amount, asset and provider', () => {
@@ -170,5 +264,104 @@ describe('ActiveUserTransactionItem', () => {
 		);
 
 		expect(onDismiss).toHaveBeenCalledOnce();
+	});
+
+	// Not a swap and not a provider flow: one token, one network, no "A → B". The
+	// shared swap layout would render this row as a bare arrow with an empty
+	// network line, because an XRP record sets none of the swap display refs.
+	describe('XRP rows', () => {
+		it('renders the amount, the symbol and the network, with no provider and no arrow', () => {
+			const { container } = render(ActiveUserTransactionItem, {
+				props: {
+					tx: mockXrpActiveUserTransaction,
+					isUnseen: false,
+					dismissing: false,
+					onDismiss: vi.fn()
+				}
+			});
+
+			expect(screen.getByText(`${en.send.text.send} 25 XRP`)).toBeInTheDocument();
+			expect(container).toHaveTextContent('XRP Ledger');
+			expect(container).not.toHaveTextContent('→');
+		});
+
+		// The backend requires only the two poll refs, so a row written by another
+		// client can lack the display snapshot. It still has to say what it sent:
+		// the amount from its own drops, and the only token its data can name.
+		it('names the payment from its own data when the display snapshot is missing', () => {
+			const { container } = render(ActiveUserTransactionItem, {
+				props: {
+					tx: {
+						...mockXrpActiveUserTransaction,
+						data: { Xrp: { ...mockXrpData, amount: 1_234_567n } },
+						external_refs: mockXrpActiveUserTransaction.external_refs.filter(({ key }) =>
+							[XRP_EXTERNAL_REF_KEYS.TX_HASH, XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE].includes(
+								key as never
+							)
+						)
+					},
+					isUnseen: false,
+					dismissing: false,
+					onDismiss: vi.fn()
+				}
+			});
+
+			expect(screen.getByText(`${en.send.text.send} 1.234567 XRP`)).toBeInTheDocument();
+			expect(container).toHaveTextContent('XRP Ledger');
+		});
+
+		// A pending row is the address being held. It offers no dismiss, because
+		// deleting it would release the guard on a payment that may still apply.
+		it('offers no dismiss while the record is still open', () => {
+			render(ActiveUserTransactionItem, {
+				props: {
+					tx: mockXrpActiveUserTransaction,
+					isUnseen: false,
+					dismissing: false,
+					onDismiss: vi.fn()
+				}
+			});
+
+			expect(
+				screen.queryByLabelText(en.active_user_transactions.text.dismiss_aria_label)
+			).not.toBeInTheDocument();
+		});
+
+		it('offers a dismiss once the record has resolved', async () => {
+			const onDismiss = vi.fn();
+
+			render(ActiveUserTransactionItem, {
+				props: {
+					tx: { ...mockXrpActiveUserTransaction, status: { Succeeded: null } },
+					isUnseen: false,
+					dismissing: false,
+					onDismiss
+				}
+			});
+
+			await fireEvent.click(
+				screen.getByLabelText(en.active_user_transactions.text.dismiss_aria_label)
+			);
+
+			expect(onDismiss).toHaveBeenCalledOnce();
+		});
+
+		it('renders a failed row with the alert icon rather than the send icon', () => {
+			const { container } = render(ActiveUserTransactionItem, {
+				props: {
+					tx: {
+						...mockXrpActiveUserTransaction,
+						status: { Failed: null },
+						error: ['XRP transaction expired']
+					},
+					isUnseen: false,
+					dismissing: false,
+					onDismiss: vi.fn()
+				}
+			});
+
+			expect(screen.getByText(`${en.send.text.send} 25 XRP`)).toBeInTheDocument();
+			expect(container.querySelector('.text-error-primary')).toBeInTheDocument();
+		});
 	});
 });

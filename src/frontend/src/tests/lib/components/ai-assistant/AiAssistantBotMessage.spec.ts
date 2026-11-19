@@ -16,4 +16,26 @@ describe('AiAssistantBotMessage', () => {
 			expect(getByText(content)).toBeInTheDocument();
 		});
 	});
+
+	it('keeps the markup markdown produces and drops any other', async () => {
+		const content =
+			'**Balance** [details](https://oisy.com)\n\n<div style="position:fixed">Notice</div><style>p{display:none}</style><button>Approve</button>';
+
+		const { container } = render(AiAssistantBotMessage, {
+			props: {
+				content,
+				isLastItem: false,
+				onRetry: vi.fn()
+			}
+		});
+
+		await waitFor(() => {
+			expect(container.querySelector('strong')?.textContent).toBe('Balance');
+		});
+
+		expect(container.querySelector('a')?.getAttribute('href')).toBe('https://oisy.com');
+		expect(container.querySelector('[style]')).toBeNull();
+		expect(container.querySelector('style')).toBeNull();
+		expect(container.querySelector('button')).toBeNull();
+	});
 });

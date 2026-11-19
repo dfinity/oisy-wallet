@@ -114,9 +114,12 @@ describe('LimitOrderForm', () => {
 			`button[aria-label="${en.trading.limit_order.fok_title}"]`
 		) as HTMLButtonElement;
 
+		expect(infoButton).toHaveAttribute('aria-expanded', 'false');
+
 		await fireEvent.click(infoButton);
 
 		expect(getByText(en.trading.limit_order.fok_help)).toBeInTheDocument();
+		expect(infoButton).toHaveAttribute('aria-expanded', 'true');
 	});
 
 	it('updates the bound side when the buy control is clicked', async () => {

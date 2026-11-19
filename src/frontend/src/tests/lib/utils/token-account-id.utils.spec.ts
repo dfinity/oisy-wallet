@@ -7,6 +7,7 @@ import {
 	getNetworksForTokenAccountIdType,
 	getTokenAccountIdAddressString
 } from '$lib/utils/token-account-id.utils';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 
 describe('token-account-id.utils', () => {
 	describe('getTokenAccountIdAddressString', () => {
@@ -36,6 +37,14 @@ describe('token-account-id.utils', () => {
 			const result = getTokenAccountIdAddressString(tokenAccountId);
 
 			expect(result).toEqual(solAddressStr);
+		});
+
+		it('should extract address string from XRP token account ID', () => {
+			const tokenAccountId = TokenAccountIdSchema.parse(mockXrpAddress);
+
+			const result = getTokenAccountIdAddressString(tokenAccountId);
+
+			expect(result).toEqual(mockXrpAddress);
 		});
 
 		it('should extract address string from Icrcv2 token account ID with ICP account identifier', () => {
@@ -102,6 +111,16 @@ describe('token-account-id.utils', () => {
 			expect(result).toEqual(solAddressStr);
 		});
 
+		it('should handle XRP token account ID in a roundtrip conversion', () => {
+			const tokenAccountId = TokenAccountIdSchema.parse(mockXrpAddress);
+
+			expect(tokenAccountId).toStrictEqual({ Xrp: mockXrpAddress });
+
+			const result = getTokenAccountIdAddressString(tokenAccountId);
+
+			expect(result).toEqual(mockXrpAddress);
+		});
+
 		it('should handle Icrcv2 token account ID with ICP account identifier in a roundtrip conversion', () => {
 			const icpAccountId = '6c04faf793b42b156206f805d13ba1b3b697ec18f519e6a11484eed091859d5a';
 			const tokenAccountId = TokenAccountIdSchema.parse(icpAccountId);
@@ -152,6 +171,12 @@ describe('token-account-id.utils', () => {
 			);
 
 			expect(getDiscriminatorForTokenAccountId(tokenAccountId)).toBe('Sol');
+		});
+
+		it('should return Xrp for XRP address', () => {
+			const tokenAccountId = TokenAccountIdSchema.parse(mockXrpAddress);
+
+			expect(getDiscriminatorForTokenAccountId(tokenAccountId)).toBe('Xrp');
 		});
 
 		it('should return Icrcv2 for ICP principal', () => {

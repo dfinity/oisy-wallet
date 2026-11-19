@@ -61,7 +61,7 @@
 	</div>
 {:else}
 	<button
-		class="flex w-full items-center gap-3 rounded-xl px-2 py-3 text-left transition-colors hover:bg-brand-subtle-10"
+		class="flex w-full items-center gap-3 rounded-xl row-feedback px-2 py-3 text-left"
 		data-tid={NOTES_LIST_ITEM}
 		onclick={() => onSelect(note.id)}
 		type="button"

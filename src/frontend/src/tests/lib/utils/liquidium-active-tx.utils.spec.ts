@@ -6,10 +6,12 @@ import {
 	isLiquidiumActiveUserTransaction,
 	liquidiumActionKey,
 	liquidiumActivityToStatus,
+	liquidiumPendingRepayAmount,
 	liquidiumTrackingMetadata,
 	toLiquidiumExternalRefs,
 	toLiquidiumExternalRefsMap
 } from '$lib/utils/liquidium-active-tx.utils';
+import { mockNearIntentsActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import type { Activity, LiquidiumState } from '@liquidium/client';
 
 const activityStatus = (state: LiquidiumState): Activity['status'] => ({
@@ -41,6 +43,78 @@ describe('liquidium-active-tx.utils', () => {
 	describe('isLiquidiumActiveUserTransaction', () => {
 		it('is true for a Liquidium transaction', () => {
 			expect(isLiquidiumActiveUserTransaction(liquidiumTx)).toBeTruthy();
+		});
+	});
+
+	describe('liquidiumPendingRepayAmount', () => {
+		const repayTx = ({
+			id,
+			status = { Pending: null },
+			poolId = 'pool-btc',
+			amount
+		}: {
+			id: string;
+			status?: ActiveUserTransaction['status'];
+			poolId?: string;
+			amount: bigint;
+		}): ActiveUserTransaction => ({
+			...liquidiumTx,
+			id,
+			status,
+			data: {
+				Liquidium: {
+					token: { SolNativeDevnet: null },
+					action: { Repay: null },
+					pool_id: poolId,
+					amount
+				}
+			}
+		});
+
+		it('is zero without transactions', () => {
+			expect(liquidiumPendingRepayAmount({ transactions: [], poolId: 'pool-btc' })).toBe(ZERO);
+		});
+
+		it('sums the pending and executing repays of the pool', () => {
+			expect(
+				liquidiumPendingRepayAmount({
+					transactions: [
+						repayTx({ id: 'a', amount: 100n }),
+						repayTx({ id: 'b', status: { Executing: null }, amount: 50n })
+					],
+					poolId: 'pool-btc'
+				})
+			).toBe(150n);
+		});
+
+		it('ignores settled repays', () => {
+			expect(
+				liquidiumPendingRepayAmount({
+					transactions: [
+						repayTx({ id: 'a', status: { Succeeded: null }, amount: 100n }),
+						repayTx({ id: 'b', status: { Failed: null }, amount: 50n })
+					],
+					poolId: 'pool-btc'
+				})
+			).toBe(ZERO);
+		});
+
+		it('ignores repays of other pools', () => {
+			expect(
+				liquidiumPendingRepayAmount({
+					transactions: [repayTx({ id: 'a', poolId: 'pool-icp', amount: 100n })],
+					poolId: 'pool-btc'
+				})
+			).toBe(ZERO);
+		});
+
+		it('ignores other Liquidium actions and other providers', () => {
+			expect(
+				liquidiumPendingRepayAmount({
+					transactions: [liquidiumTx, mockNearIntentsActiveUserTransaction],
+					poolId: 'pool-btc'
+				})
+			).toBe(ZERO);
 		});
 	});
 

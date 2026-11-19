@@ -1,12 +1,17 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import * as icSendServices from '$icp/services/ic-send.services';
+import * as liquidiumApi from '$lib/api/liquidium.api';
 import LiquidiumRepayIcrcWizard from '$lib/components/liquidium/repay/LiquidiumRepayIcrcWizard.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { STAKE_REVIEW_FORM_BUTTON } from '$lib/constants/test-ids.constants';
 import * as addressesStore from '$lib/derived/address.derived';
 import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import { WizardStepsLiquidiumRepay } from '$lib/enums/wizard-steps';
+import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import * as liquidiumRepayServices from '$lib/services/liquidium-repay.services';
+import * as liquidiumServices from '$lib/services/liquidium.services';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { WizardStep } from '$lib/types/wizard';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -76,6 +81,23 @@ describe('LiquidiumRepayIcrcWizard', () => {
 		expect(container).toBeTruthy();
 	});
 
+	it('projects the health factor net of pending repays', () => {
+		const previewSpy = vi.spyOn(liquidiumRepayServices, 'computeLiquidiumRepayPreview');
+
+		render(LiquidiumRepayIcrcWizard, {
+			props: {
+				...baseProps,
+				amount: 0.25,
+				pendingRepay: 50_000_000n,
+				currentStep: step(WizardStepsLiquidiumRepay.REPAY)
+			},
+			context: context()
+		});
+
+		// (0.25 typed + 0.5 pending) / 1 ICP debt × $12.
+		expect(previewSpy).toHaveBeenLastCalledWith({ portfolio, repayUsd: 9 });
+	});
+
 	it('renders the progress step', () => {
 		const { container } = render(LiquidiumRepayIcrcWizard, {
 			props: { ...baseProps, currentStep: step(WizardStepsLiquidiumRepay.REPAYING) },
@@ -83,6 +105,58 @@ describe('LiquidiumRepayIcrcWizard', () => {
 		});
 
 		expect(container).toHaveTextContent(en.liquidium.text.starting_to_repay);
+	});
+
+	it('does not broadcast an amount over the cap on confirm', async () => {
+		const executeSpy = vi
+			.spyOn(liquidiumRepayServices, 'executeLiquidiumRepay')
+			.mockResolvedValue(undefined);
+
+		const onNext = vi.fn();
+
+		const { getByTestId } = render(LiquidiumRepayIcrcWizard, {
+			// 1 ICP against a 0.5 ICP cap: the cap dropped under an open Review.
+			props: {
+				...baseProps,
+				maxRepay: 50_000_000n,
+				currentStep: step(WizardStepsLiquidiumRepay.REVIEW),
+				onNext
+			},
+			context: context()
+		});
+
+		await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+
+		// The happy path calls `onNext` synchronously before awaiting the broadcast.
+		expect(onNext).not.toHaveBeenCalled();
+		expect(executeSpy).not.toHaveBeenCalled();
+	});
+
+	it('does not broadcast when pending repays cover the debt on confirm', async () => {
+		const executeSpy = vi
+			.spyOn(liquidiumRepayServices, 'executeLiquidiumRepay')
+			.mockResolvedValue(undefined);
+
+		const onNext = vi.fn();
+
+		const { getByTestId } = render(LiquidiumRepayIcrcWizard, {
+			// 1 ICP pending covers the 1 ICP debt; the protocol buffer leaves a dust cap that the
+			// 100-e8s amount fits, so the plain cap check alone would let it through.
+			props: {
+				...baseProps,
+				amount: 0.000001,
+				maxRepay: 150n,
+				pendingRepay: 100_000_000n,
+				currentStep: step(WizardStepsLiquidiumRepay.REVIEW),
+				onNext
+			},
+			context: context()
+		});
+
+		await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+
+		expect(onNext).not.toHaveBeenCalled();
+		expect(executeSpy).not.toHaveBeenCalled();
 	});
 
 	it('repays the ICP pool on confirm', async () => {
@@ -103,6 +177,53 @@ describe('LiquidiumRepayIcrcWizard', () => {
 			expect(onNext).toHaveBeenCalledOnce();
 			expect(executeSpy).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ chain: 'ICP', asset: 'ICP', poolId: 'pool-icp', inflowFee: 50n })
+			);
+		});
+	});
+
+	describe('when the repay cannot be recorded', () => {
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it('toasts the failure and goes back without transferring', async () => {
+			// The real service, so the test covers what reaches the ledger.
+			vi.spyOn(liquidiumRepayServices, 'executeLiquidiumRepay').mockRestore();
+
+			vi.spyOn(liquidiumServices, 'getOrCreateLiquidiumProfile').mockResolvedValue('profile-1');
+			vi.spyOn(liquidiumApi, 'liquidiumClient').mockReturnValue({
+				lending: {
+					supply: vi
+						.fn()
+						.mockResolvedValue({ target: { address: 'repay-target' }, submit: vi.fn() })
+				}
+			} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
+			vi.spyOn(activeUserTransactionsServices, 'createActiveUserTransaction').mockRejectedValue(
+				new Error('TooManyActiveTransactions')
+			);
+			vi.spyOn(activeUserTransactionsServices, 'deleteActiveUserTransaction').mockResolvedValue(
+				undefined
+			);
+
+			const sendIcpSpy = vi.spyOn(icSendServices, 'sendIcp').mockResolvedValue(1n);
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+
+			const onBack = vi.fn();
+
+			const { getByTestId } = render(LiquidiumRepayIcrcWizard, {
+				props: { ...baseProps, currentStep: step(WizardStepsLiquidiumRepay.REVIEW), onBack },
+				context: context()
+			});
+
+			await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+
+			await waitFor(() => {
+				expect(onBack).toHaveBeenCalledOnce();
+			});
+
+			expect(sendIcpSpy).not.toHaveBeenCalled();
+			expect(toastsErrorSpy).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.liquidium.text.transaction_failed } })
 			);
 		});
 	});

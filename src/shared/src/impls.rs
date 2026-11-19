@@ -6,13 +6,14 @@ use serde::{de, Deserializer};
 
 use crate::{
     types::{
-        account::{BtcAddress, EthAddress, SolPrincipal, TokenAccountId},
+        account::{BtcAddress, EthAddress, SolPrincipal, TokenAccountId, XrpAddress},
         agreement::{
             Agreements, ProviderAgreementType, UpdateAgreementsError, UserAgreement, UserAgreements,
         },
         backend_config::{Config, InitArg},
         contact::{
-            Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
+            Contact, ContactAddressData, ContactImage, CreateContactRequest,
+            GetContactImagesRequest, UpdateContactRequest, MAX_CONTACT_IMAGES_PER_CALL,
         },
         custom_token::{
             CustomToken, CustomTokenId, Dip721Token, ErcToken, ErcTokenId, ExtV2Token,
@@ -474,13 +475,22 @@ impl StoredUserProfile {
             return Ok(self.clone());
         }
 
-        if license_updated && matches!(new_agreements.license_agreement.accepted, Some(true)) {
+        // Only an agreement that changes gets a new acceptance time; one sent again unchanged keeps
+        // its stored time. `merge_agreement` carries the stored time over, so a merged agreement
+        // equal to the stored one is unchanged.
+        if new_agreements.license_agreement != current.license_agreement
+            && matches!(new_agreements.license_agreement.accepted, Some(true))
+        {
             new_agreements.license_agreement.last_accepted_at_ns = Some(now);
         }
-        if terms_updated && matches!(new_agreements.terms_of_use.accepted, Some(true)) {
+        if new_agreements.terms_of_use != current.terms_of_use
+            && matches!(new_agreements.terms_of_use.accepted, Some(true))
+        {
             new_agreements.terms_of_use.last_accepted_at_ns = Some(now);
         }
-        if privacy_updated && matches!(new_agreements.privacy_policy.accepted, Some(true)) {
+        if new_agreements.privacy_policy != current.privacy_policy
+            && matches!(new_agreements.privacy_policy.accepted, Some(true))
+        {
             new_agreements.privacy_policy.last_accepted_at_ns = Some(now);
         }
 
@@ -536,9 +546,12 @@ impl StoredUserProfile {
             return Ok(self.clone());
         }
 
+        // As in `with_agreements`: only a provider agreement that changes gets a new acceptance
+        // time.
         for key in &updated_keys {
+            let changed = merged.get(key) != current.get(key);
             if let Some(agreement) = merged.get_mut(key) {
-                if matches!(agreement.accepted, Some(true)) {
+                if changed && matches!(agreement.accepted, Some(true)) {
                     agreement.last_accepted_at_ns = Some(now);
                 }
             }
@@ -890,6 +903,7 @@ impl Validate for TokenAccountId {
         let address = match self {
             TokenAccountId::Icrcv2(_) => return Ok(()),
             TokenAccountId::Sol(SolPrincipal(address))
+            | TokenAccountId::Xrp(XrpAddress(address))
             | TokenAccountId::Eth(EthAddress::Public(address))
             | TokenAccountId::Btc(
                 BtcAddress::P2PKH(address)
@@ -904,7 +918,19 @@ impl Validate for TokenAccountId {
             address,
             TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH,
             "TokenAccountId.address",
-        )
+        )?;
+
+        // XRP is the only variant whose format is checked. The check shipped with the variant, so
+        // no stored contact can hold a malformed XRP address; adding one for an older variant could
+        // make `update_contact` reject a contact that already holds a malformed address. The length
+        // bound runs first because base58 decoding is quadratic in the input length.
+        if let TokenAccountId::Xrp(XrpAddress(address)) = self {
+            address.parse::<XrpAddress>().map_err(|_| {
+                Error::msg("TokenAccountId.address is not a valid XRP Ledger classic address")
+            })?;
+        }
+
+        Ok(())
     }
 }
 
@@ -985,6 +1011,16 @@ impl Validate for UpdateContactRequest {
     }
 }
 
+impl Validate for GetContactImagesRequest {
+    fn validate(&self) -> Result<(), Error> {
+        validate_collection_size(
+            &self.contact_ids,
+            MAX_CONTACT_IMAGES_PER_CALL,
+            "GetContactImagesRequest.contact_ids",
+        )
+    }
+}
+
 impl Validate for ExchangeData {
     fn validate(&self) -> Result<(), Error> {
         if self.timestamp_ns == 0 {
@@ -1019,7 +1055,9 @@ mod address_validation_tests {
     use super::TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH;
     use crate::{
         types::{
-            account::{BtcAddress, EthAddress, Icrcv2AccountId, SolPrincipal, TokenAccountId},
+            account::{
+                BtcAddress, EthAddress, Icrcv2AccountId, SolPrincipal, TokenAccountId, XrpAddress,
+            },
             contact::{ContactAddressData, UpdateContactRequest},
         },
         validate::Validate,
@@ -1053,6 +1091,7 @@ mod address_validation_tests {
             TokenAccountId::Sol(SolPrincipal(
                 "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM".to_string(),
             )),
+            TokenAccountId::Xrp(XrpAddress("rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh".to_string())),
             TokenAccountId::Icrcv2(Icrcv2AccountId::WithPrincipal {
                 owner: Principal::anonymous(),
                 subaccount: None,
@@ -1086,9 +1125,50 @@ mod address_validation_tests {
     }
 
     #[test]
+    fn rejects_an_xrp_x_address() {
+        let address = TokenAccountId::Xrp(XrpAddress(
+            "XVPcpSm47b1CZkf5AkKM9a84dQHe3m4sBhsrA4XtnBECTAc".to_string(),
+        ));
+
+        assert!(address.validate().is_err());
+    }
+
+    #[test]
+    fn rejects_a_malformed_xrp_address() {
+        let address = TokenAccountId::Xrp(XrpAddress("not an xrp address".to_string()));
+
+        assert!(address.validate().is_err());
+    }
+
+    #[test]
+    fn rejects_an_over_long_xrp_address_on_the_length_bound() {
+        let address = TokenAccountId::Xrp(XrpAddress(
+            "r".repeat(TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH + 1),
+        ));
+
+        let error = address
+            .validate()
+            .expect_err("an over-long address is rejected");
+
+        assert!(
+            error.to_string().contains("too long"),
+            "expected the length bound to reject it before parsing, got: {error}"
+        );
+    }
+
+    #[test]
     fn update_request_rejects_an_over_long_address() {
         let request = request_with_address(TokenAccountId::Btc(BtcAddress::P2PKH(
             "1".repeat(TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH + 1),
+        )));
+
+        assert!(request.validate().is_err());
+    }
+
+    #[test]
+    fn update_request_rejects_an_xrp_x_address() {
+        let request = request_with_address(TokenAccountId::Xrp(XrpAddress(
+            "XVPcpSm47b1CZkf5AkKM9a84dQHe3m4sBhsrA4XtnBECTAc".to_string(),
         )));
 
         assert!(request.validate().is_err());
@@ -1576,6 +1656,7 @@ validate_on_deserialize!(Contact);
 validate_on_deserialize!(ContactAddressData);
 validate_on_deserialize!(CreateContactRequest);
 validate_on_deserialize!(UpdateContactRequest);
+validate_on_deserialize!(GetContactImagesRequest);
 validate_on_deserialize!(ContactImage);
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);

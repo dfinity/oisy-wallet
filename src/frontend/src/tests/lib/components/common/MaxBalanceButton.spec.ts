@@ -15,6 +15,26 @@ describe('MaxBalanceButton', () => {
 	const amountTestId = 'max-balance-button-amount';
 	const amountSetToMaxTestId = 'max-balance-button-amount-set-to-max';
 
+	it('presses like an icon-size control and has a 40 px tap area', () => {
+		const { getByTestId } = render(MaxBalanceButton, { props: baseProps });
+
+		expect(getByTestId(MAX_BUTTON)).toHaveClass(
+			'hit-area',
+			'[--hit-area-y:calc(100%+1.125rem)]',
+			'press-icon',
+			'hover:text-brand-hover'
+		);
+	});
+
+	it('shows no hover when the fee uses up the balance, so Max would set 0', () => {
+		const { getByTestId } = render(MaxBalanceButton, {
+			props: { ...baseProps, fee: 200_000_000n }
+		});
+
+		expect(getByTestId(MAX_BUTTON)).toHaveTextContent('0 BTC');
+		expect(getByTestId(MAX_BUTTON)).not.toHaveClass('hover:text-brand-hover');
+	});
+
 	it('shows the affordable balance when no cap is set', () => {
 		const { getByTestId } = render(MaxBalanceButton, { props: baseProps });
 
@@ -73,6 +93,58 @@ describe('MaxBalanceButton', () => {
 
 		expect(getByTestId(amountTestId)).toHaveTextContent('');
 		expect(getByTestId(amountSetToMaxTestId)).toHaveTextContent('false');
+	});
+
+	// Only a press calls it, never a re-application for a new fee.
+	it('calls onMax when pressed, not when re-applying max for a new fee', async () => {
+		vi.useFakeTimers();
+
+		try {
+			const onMax = vi.fn();
+
+			const { getByTestId, rerender } = render(MaxBalanceButtonTestHost, {
+				props: { ...baseProps, fee: 10_000_000n, onMax }
+			});
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+
+			expect(onMax).toHaveBeenCalledOnce();
+
+			await rerender({ ...baseProps, fee: 50_000_000n, onMax });
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('1.5');
+			expect(onMax).toHaveBeenCalledOnce();
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	// One pending re-application, restarted by each change: the fee settles before Max follows it.
+	it('restarts the delay on each fee change', async () => {
+		vi.useFakeTimers();
+
+		try {
+			const { getByTestId, rerender } = render(MaxBalanceButtonTestHost, {
+				props: { ...baseProps, fee: 10_000_000n }
+			});
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+			await vi.advanceTimersByTimeAsync(500);
+
+			await rerender({ ...baseProps, fee: 30_000_000n });
+			await vi.advanceTimersByTimeAsync(300);
+			await rerender({ ...baseProps, fee: 50_000_000n });
+			await vi.advanceTimersByTimeAsync(300);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('1.9');
+
+			await vi.advanceTimersByTimeAsync(200);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('1.5');
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 
 	it('reapplies max after the fee changes when the amount is set to max', async () => {

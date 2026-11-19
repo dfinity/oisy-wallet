@@ -18,6 +18,7 @@ export interface InputProps {
 	autofocus?: boolean;
 	// https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete
 	autocomplete?: 'off' | 'on';
+	ariaDescribedBy?: string;
 	// Explicit toggle for the top info row (the `start` / `label` / `end` snippets). Retained from
 	// the original gix API so consumers can hide that row even when a label/end snippet is provided.
 	showInfo?: boolean;

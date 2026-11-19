@@ -252,10 +252,8 @@ export class WalletConnectClient extends WalletConnectListener {
 		});
 	};
 
-	approveSession = async (proposal: WalletKitTypes.SessionProposal) => {
-		const { params } = proposal;
-
-		const namespaces = buildApprovedNamespaces({
+	approvedNamespaces = ({ params }: WalletKitTypes.SessionProposal): SessionTypes.Namespaces =>
+		buildApprovedNamespaces({
 			proposal: params,
 			supportedNamespaces: {
 				...(nonNullish(this.#ethAddress)
@@ -336,6 +334,9 @@ export class WalletConnectClient extends WalletConnectListener {
 					: {})
 			}
 		});
+
+	approveSession = async (proposal: WalletKitTypes.SessionProposal) => {
+		const namespaces = this.approvedNamespaces(proposal);
 
 		const btcAccountAddresses = this.#btcAccountAddresses();
 

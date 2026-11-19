@@ -24,6 +24,19 @@ describe('NoteListItem', () => {
 		expect(container).toHaveTextContent('Created');
 	});
 
+	it('darkens while pressed instead of shrinking, like other full-width rows', () => {
+		const note: PersonalNoteEntryUi = {
+			id: 'a',
+			note: 'Title',
+			created_at_ns: recentNs,
+			updated_at_ns: recentNs
+		};
+
+		const { getByTestId } = render(NoteListItem, { props: { note, ...baseProps() } });
+
+		expect(getByTestId(NOTES_LIST_ITEM)).toHaveClass('row-feedback');
+	});
+
 	it('shows "Updated" once the note has been edited', () => {
 		const note: PersonalNoteEntryUi = {
 			id: 'a',

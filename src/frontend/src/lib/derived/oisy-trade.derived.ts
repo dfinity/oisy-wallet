@@ -10,11 +10,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { enabledIcTokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
-import type {
-	OisyTradeAsset,
-	OisyTradeOrderView,
-	OisyTradeWithdrawToken
-} from '$lib/types/oisy-trade';
+import type { OisyTradeAsset, OisyTradeOrderView } from '$lib/types/oisy-trade';
 import {
 	isOisyTradeOrderActive,
 	oisyTradeDepositableTokens as mapDepositableTokens,
@@ -22,8 +18,7 @@ import {
 	mapOisyTradeOrders,
 	oisyTradeSupportedTokenSymbols as mapSupportedTokenSymbols,
 	sumOisyTradeAssetsFreeUsd,
-	sumOisyTradeAssetsUsd,
-	toOisyTradeWithdrawTokens
+	sumOisyTradeAssetsUsd
 } from '$lib/utils/oisy-trade.utils';
 import { calculateTokenUsdBalance } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -151,14 +146,6 @@ export const oisyTradeDepositableUsdValue: Readable<number> = derived(
 			(acc, token) => acc + (calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0),
 			0
 		)
-);
-
-// DEX balances joined with the matching OISY token, so the Trading tab can offer
-// a Withdraw entry per holding with the token pre-resolved.
-export const oisyTradeWithdrawTokens: Readable<OisyTradeWithdrawToken[]> = derived(
-	[oisyTradeBalances, enabledIcTokens],
-	([$oisyTradeBalances, $enabledIcTokens]) =>
-		toOisyTradeWithdrawTokens({ balances: $oisyTradeBalances, icrcTokens: $enabledIcTokens })
 );
 
 // The supported trade tokens resolved to their matching app `IcToken` (by ledger

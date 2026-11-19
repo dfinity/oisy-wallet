@@ -1,0 +1,78 @@
+// Row density comes from the `--menu-row-*` properties (global/variables.scss), so a denser host
+// (the dropdown `Popover`) changes the numbers without restating the row selectors.
+.menu-surface {
+	font-size: 1rem;
+	line-height: 1.5;
+
+	// Start-aligned whatever the host: a menu opened from inside a button would inherit its centring.
+	.menu-heading {
+		display: block;
+		text-align: start;
+		margin-bottom: 8px;
+		padding-inline: var(--menu-row-padding-inline);
+		font-size: 0.875rem;
+		font-weight: var(--font-weight-bold);
+	}
+
+	.menu-row,
+	.nav-item,
+	button:has(> .logo-button-wrapper) {
+		--focus-outline-offset: -3px;
+		min-height: var(--menu-row-min-height);
+		padding: var(--menu-row-padding-block) var(--menu-row-padding-inline);
+		border-width: 0;
+		border-radius: 8px;
+		align-items: center;
+		gap: 12px;
+		font-size: 1rem;
+		line-height: 1.5;
+		font-weight: var(--font-weight-normal);
+	}
+
+	.menu-row > span {
+		align-items: center;
+		gap: 12px;
+	}
+
+	.logo-button-wrapper {
+		padding-block: 0;
+		border: 0;
+	}
+
+	.logo-button-title {
+		font-size: inherit;
+		line-height: inherit;
+		font-weight: inherit;
+	}
+
+	.menu-row-label {
+		font-size: 1rem;
+		line-height: 1.5;
+	}
+
+	.menu-divider,
+	.logo-button-list-item:not(:last-child) {
+		border-bottom: 1px solid var(--color-border-brand-subtle-10);
+	}
+
+	.nav-item > svg,
+	.nav-item > span > svg {
+		flex-shrink: 0;
+	}
+
+	.toggle.row label {
+		min-height: var(--menu-row-min-height);
+		font-size: 1rem;
+		line-height: 1.5;
+		border-radius: 8px;
+		--focus-outline-offset: -3px;
+		transition: background-color 150ms ease-out;
+	}
+}
+
+html[data-theme-changing] *,
+html[data-theme-changing] *::before,
+html[data-theme-changing] *::after {
+	// Override both utility layers and unlayered component transitions for this paint.
+	transition: none !important;
+}

@@ -7,6 +7,18 @@ import { nonNullish } from '@dfinity/utils';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 
 describe('DappsExplorerSignedIn', () => {
+	it('presses its dApp cards like text buttons', () => {
+		vi.spyOn(env, 'dAppDescriptions', 'get').mockReturnValue(mockDappsDescriptions);
+
+		render(DappsExplorerSignedIn);
+
+		const button = screen
+			.getAllByRole('button')
+			.find((btn) => btn.getAttribute('aria-label')?.toLowerCase().includes('icpswap'));
+
+		expect(button).toHaveClass('press');
+	});
+
 	it('calls trackEvent when a DappCard is clicked', async () => {
 		vi.spyOn(env, 'dAppDescriptions', 'get').mockReturnValue(mockDappsDescriptions);
 

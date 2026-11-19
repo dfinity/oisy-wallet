@@ -37,6 +37,9 @@ export interface Modal<T> {
 		| 'swap'
 		| 'buy'
 		| 'convert-ckbtc-btc'
+		| 'cycles-mint'
+		| 'cycles-top-up'
+		| 'canister-top-up'
 		| 'convert-btc-ckbtc'
 		| 'convert-to-twin-token-cketh'
 		| 'convert-to-twin-token-eth'
@@ -57,6 +60,7 @@ export interface Modal<T> {
 		| 'btc-token'
 		| 'ic-token'
 		| 'sol-token'
+		| 'xrp-token'
 		| 'receive-bitcoin'
 		| 'about-why-oisy'
 		| 'vip-qr-code'
@@ -124,6 +128,9 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openBuy: (id: symbol) => void;
 	openSwap: (id: symbol) => void;
 	openConvertCkBTCToBTC: (id: symbol) => void;
+	openCyclesMint: (id: symbol) => void;
+	openCyclesTopUp: (id: symbol) => void;
+	openCanisterTopUp: (id: symbol) => void;
 	openConvertBTCToCkBTC: (id: symbol) => void;
 	openConvertToTwinTokenCkEth: (id: symbol) => void;
 	openConvertToTwinTokenEth: (id: symbol) => void;
@@ -144,6 +151,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openBtcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openIcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openSolToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openXrpToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openReceiveBitcoin: (id: symbol) => void;
 	openAboutWhyOisy: (id: symbol) => void;
 	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
@@ -203,6 +211,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openBuy: setType('buy'),
 		openSwap: setType('swap'),
 		openConvertCkBTCToBTC: setType('convert-ckbtc-btc'),
+		openCyclesMint: setType('cycles-mint'),
+		openCyclesTopUp: setType('cycles-top-up'),
+		openCanisterTopUp: setType('canister-top-up'),
 		openConvertBTCToCkBTC: setType('convert-btc-ckbtc'),
 		openConvertToTwinTokenCkEth: setType('convert-to-twin-token-cketh'),
 		openConvertToTwinTokenEth: setType('convert-to-twin-token-eth'),
@@ -252,6 +263,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		),
 		openSolToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
 			setTypeWithData('sol-token')
+		),
+		openXrpToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('xrp-token')
 		),
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),

@@ -2,6 +2,7 @@ import { SUPPORTED_EVM_NETWORK_IDS } from '$env/networks/networks-evm/networks.e
 import { SUPPORTED_BITCOIN_NETWORK_IDS } from '$env/networks/networks.btc.env';
 import { SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
 import { SUPPORTED_SOLANA_NETWORK_IDS } from '$env/networks/networks.sol.env';
+import { SUPPORTED_XRP_NETWORK_IDS } from '$env/networks/networks.xrp.env';
 import { TOKEN_ACCOUNT_ID_TYPES_CASE_SENSITIVE } from '$lib/constants/token-account-id.constants';
 import type { AddressStoreData } from '$lib/stores/address.store';
 import type { Address, OptionAddress } from '$lib/types/address';
@@ -36,6 +37,9 @@ export const mapNetworkIdToAddressType = (
 	}
 	if (SUPPORTED_SOLANA_NETWORK_IDS.includes(networkId)) {
 		return 'Sol';
+	}
+	if (SUPPORTED_XRP_NETWORK_IDS.includes(networkId)) {
+		return 'Xrp';
 	}
 };
 

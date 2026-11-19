@@ -15,7 +15,7 @@ import {
 import { SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import type { LimitOrderSide } from '$lib/utils/oisy-trade.utils';
-import { toBackendTokenId, tokenIdKey } from '$lib/utils/token-id.utils';
+import { findTokenByBackendTokenId, toBackendTokenId } from '$lib/utils/token-id.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const isOisyTradeActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
@@ -164,21 +164,10 @@ export const findOisyTradeRowToken = ({
 	tokenId: TokenId;
 	tokens: Token[];
 }): IcToken | undefined => {
-	const key = tokenIdKey(tokenId);
+	// Only an IC token maps to an ICRC `TokenId`, so the match need not be filtered first.
+	const token = findTokenByBackendTokenId({ tokenId, tokens });
 
-	if (isNullish(key)) {
-		return undefined;
-	}
-
-	return tokens.find((token): token is IcToken => {
-		if (!isIcToken(token)) {
-			return false;
-		}
-
-		const backendId = toBackendTokenId(token);
-
-		return nonNullish(backendId) && tokenIdKey(backendId) === key;
-	});
+	return nonNullish(token) && isIcToken(token) ? token : undefined;
 };
 
 /**

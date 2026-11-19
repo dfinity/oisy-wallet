@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
@@ -10,6 +9,7 @@
 	} from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	// Read-only price rows shared by the limit-order Review and the order-detail
 	// modal: the limit price plus current value, the value difference (neutral while

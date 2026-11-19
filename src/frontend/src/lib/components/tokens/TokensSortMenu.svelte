@@ -37,59 +37,62 @@
 </script>
 
 <ButtonIcon
-	ariaLabel={$i18n.navigation.alt.menu}
+	ariaLabel={$i18n.core.text.sorting}
 	colorStyle="muted"
 	expanded={visible}
 	link={false}
 	onclick={() => (visible = true)}
+	styleClass="relative hit-area hit-area-touch"
 	bind:button
 >
 	{#snippet icon()}
-		<IconArrowUpDown />
+		<IconArrowUpDown size="20" />
 	{/snippet}
 </ButtonIcon>
 
-<ResponsivePopover {button} bind:visible>
+<ResponsivePopover ariaLabel={$i18n.core.text.sorting} {button} dropdown bind:visible>
 	{#snippet content()}
-		<span class="mb-2 flex text-sm font-bold">{$i18n.core.text.sorting}</span>
+		<div class="menu-surface min-w-56">
+			<span class="menu-heading">{$i18n.core.text.sorting}</span>
 
-		<List noPadding>
-			<ListItem>
-				<ListItemButton
-					onclick={() => {
-						trackSortingEvent({ type: 'value' });
-						setSorting({ type: 'value' });
-					}}
-					selectable
-					selected={$tokensSortType === 'value'}
-				>
-					{$i18n.tokens.text.sort_by_value}
-				</ListItemButton>
-			</ListItem>
-			<ListItem>
-				<ListItemButton
-					onclick={() => {
-						trackSortingEvent({ type: 'performance' });
-						setSorting({ type: 'performance' });
-					}}
-					selectable
-					selected={$tokensSortType === 'performance'}
-				>
-					{$i18n.tokens.text.sort_by_performance}
-				</ListItemButton>
-			</ListItem>
-			<ListItem>
-				<ListItemButton
-					onclick={() => {
-						trackSortingEvent({ type: 'symbol' });
-						setSorting({ type: 'symbol' });
-					}}
-					selectable
-					selected={$tokensSortType === 'symbol'}
-				>
-					{$i18n.tokens.text.sort_by_symbol}
-				</ListItemButton>
-			</ListItem>
-		</List>
+			<List noPadding>
+				<ListItem>
+					<ListItemButton
+						onclick={() => {
+							trackSortingEvent({ type: 'value' });
+							setSorting({ type: 'value' });
+						}}
+						selectable
+						selected={$tokensSortType === 'value'}
+					>
+						{$i18n.tokens.text.sort_by_value}
+					</ListItemButton>
+				</ListItem>
+				<ListItem>
+					<ListItemButton
+						onclick={() => {
+							trackSortingEvent({ type: 'performance' });
+							setSorting({ type: 'performance' });
+						}}
+						selectable
+						selected={$tokensSortType === 'performance'}
+					>
+						{$i18n.tokens.text.sort_by_performance}
+					</ListItemButton>
+				</ListItem>
+				<ListItem>
+					<ListItemButton
+						onclick={() => {
+							trackSortingEvent({ type: 'symbol' });
+							setSorting({ type: 'symbol' });
+						}}
+						selectable
+						selected={$tokensSortType === 'symbol'}
+					>
+						{$i18n.tokens.text.sort_by_symbol}
+					</ListItemButton>
+				</ListItem>
+			</List>
+		</div>
 	{/snippet}
 </ResponsivePopover>

@@ -6,6 +6,7 @@ import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.en
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import {
@@ -45,6 +46,7 @@ import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 vi.mock('$env/rest/near-intents.env', () => ({
 	NEAR_INTENTS_SWAP_ENABLED: true,
 	NEAR_INTENTS_BTC_SWAP_ENABLED: true,
+	NEAR_INTENTS_XRP_SWAP_ENABLED: false,
 	NEAR_INTENTS_API_KEY: 'mock-api-key'
 }));
 
@@ -159,6 +161,43 @@ describe('near-intents.services', () => {
 
 		beforeEach(() => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
+		});
+
+		it('reports participation after resolving assets and before requesting the price', async () => {
+			const onProviderParticipating = vi.fn();
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockImplementationOnce(() => {
+				expect(onProviderParticipating).toHaveBeenCalledExactlyOnceWith(SwapProvider.NEAR_INTENTS);
+
+				return Promise.resolve(mockNearIntentsQuoteResponse);
+			});
+			await fetchNearIntentsSwapQuote({
+				sourceToken,
+				destinationToken,
+				amount: 1_000_000n,
+				userAddress: mockEthAddress,
+				slippage,
+				onProviderParticipating
+			});
+
+			expect(onProviderParticipating).toHaveBeenCalledOnce();
+		});
+
+		it('does not report participation when asset resolution finds no pair', async () => {
+			const onProviderParticipating = vi.fn();
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue([]);
+
+			await expect(
+				fetchNearIntentsSwapQuote({
+					sourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockEthAddress,
+					slippage,
+					onProviderParticipating
+				})
+			).resolves.toBeUndefined();
+			expect(onProviderParticipating).not.toHaveBeenCalled();
+			expect(nearIntentsApi.fetchNearIntentsQuote).not.toHaveBeenCalled();
 		});
 
 		it('should reject a quote whose signature does not verify', async () => {
@@ -282,6 +321,33 @@ describe('near-intents.services', () => {
 				})
 			);
 		});
+
+		// The send compares the quote's tolerance with the same conversion of the max slippage, and a
+		// fraction of a basis point is dropped so the quote never allows more than the user set.
+		it.each([
+			{ slippage: '0.5', slippageTolerance: 50 },
+			{ slippage: 3, slippageTolerance: 300 },
+			{ slippage: '1.009', slippageTolerance: 100 }
+		])(
+			'should request $slippage% as $slippageTolerance basis points',
+			async ({ slippage: requestedSlippage, slippageTolerance }) => {
+				vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+					mockNearIntentsQuoteResponse
+				);
+
+				await fetchNearIntentsSwapQuote({
+					sourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockEthAddress,
+					slippage: requestedSlippage
+				});
+
+				expect(nearIntentsApi.fetchNearIntentsQuote).toHaveBeenCalledWith(
+					expect.objectContaining({ slippageTolerance })
+				);
+			}
+		);
 
 		it('should return undefined when userAddress is nullish', async () => {
 			const result = await fetchNearIntentsSwapQuote({
@@ -643,6 +709,49 @@ describe('near-intents.services', () => {
 			expect(
 				result.has(nativeSwapTokenIdentifier({ networkId: BASE_NETWORK_ID, symbol: 'ETH' }))
 			).toBeTruthy();
+		});
+
+		it('should key native XRP by network and symbol when filtering by XRP mainnet', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue([
+				...mockNearIntentsTokens,
+				{
+					assetId: 'nep141:xrp.omft.near',
+					decimals: 6,
+					blockchain: 'xrp',
+					symbol: 'XRP',
+					price: 1.49,
+					priceUpdatedAt: '2026-09-29T05:55:00.730Z',
+					contractAddress: null
+				}
+			]);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [XRP_MAINNET_NETWORK_ID] });
+
+			expect(result).toEqual(
+				new Set([nativeSwapTokenIdentifier({ networkId: XRP_MAINNET_NETWORK_ID, symbol: 'XRP' })])
+			);
+		});
+
+		// XRP Ledger identifiers are Base58 and case-sensitive, so lowercasing one as if it were EVM
+		// hex would name an account that does not exist.
+		it('should keep the case of an xrp contract address', async () => {
+			const issuer = 'rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De';
+
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue([
+				{
+					assetId: `nep141:xrp-${issuer}.omft.near`,
+					decimals: 15,
+					blockchain: 'xrp',
+					symbol: 'RLUSD',
+					price: 1.0,
+					priceUpdatedAt: '2026-09-29T05:55:00.730Z',
+					contractAddress: issuer
+				}
+			]);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [XRP_MAINNET_NETWORK_ID] });
+
+			expect(result).toEqual(new Set([issuer]));
 		});
 
 		it('should lowercase mixed-case EVM contract addresses', async () => {

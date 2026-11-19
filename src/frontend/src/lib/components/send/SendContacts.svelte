@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import SendContact from '$lib/components/send/SendContact.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -9,6 +8,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		destination: string;

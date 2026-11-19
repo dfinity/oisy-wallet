@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { fade, fly } from 'svelte/transition';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { fade, fly } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		visible: boolean;

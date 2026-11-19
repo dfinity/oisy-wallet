@@ -3,6 +3,7 @@
 	import { type Snippet, untrack } from 'svelte';
 	import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 	import { allUtxosStore } from '$btc/stores/all-utxos.store';
+	import { BTC_SEND_VIA_BACKEND_ENABLED } from '$env/btc.env';
 	import {
 		BITCOIN_CANISTER_IDS,
 		IC_CKBTC_MINTER_CANISTER_ID
@@ -44,6 +45,12 @@
 
 	$effect(() => {
 		[source, networkId];
+
+		// With the flag on, `BtcPendingSentTransactionsLoader`, which every flow mounts around this
+		// one, fills the store from the same backend call as the pending transactions.
+		if (BTC_SEND_VIA_BACKEND_ENABLED) {
+			return;
+		}
 
 		untrack(() => nonNullish(source) && isNullish($allUtxosStore?.allUtxos) && loadAllUtxos());
 	});

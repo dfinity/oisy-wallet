@@ -27,7 +27,11 @@ const idbTransactionsStore = (key: string): UseStore =>
 
 const idbBtcTransactionsStore = idbTransactionsStore(BTC_MAINNET_NETWORK_SYMBOL.toLowerCase());
 const idbEthTransactionsStore = idbTransactionsStore(ETHEREUM_NETWORK_SYMBOL.toLowerCase());
-const idbIcTransactionsStore = idbTransactionsStore(ICP_NETWORK_SYMBOL.toLowerCase());
+// Versioned whenever the ICP top-up label changes: records cached before carry an older label, or
+// none and not the memo it is read from, so every IC cache starts over once. v2 brought the label,
+// v3 renamed it `transaction.label.top_up`. The old databases go at the next sign-out, with every
+// other `oisy-` database (`deleteIdbAllOisyRelated`).
+const idbIcTransactionsStore = idbTransactionsStore(`${ICP_NETWORK_SYMBOL.toLowerCase()}-v3`);
 const idbSolTransactionsStore = idbTransactionsStore(SOLANA_MAINNET_NETWORK_SYMBOL.toLowerCase());
 
 const toKey = ({ principal, tokenId, networkId }: GetIdbTransactionsParams): IDBValidKey[] => [

@@ -3,16 +3,20 @@ import {
 	addPendingBtcTransaction,
 	addUserDismissedNotification,
 	allowSigning,
+	broadcastBtcTransaction,
 	createActiveUserTransaction,
 	createUserProfile,
 	deleteActiveUserTransaction,
 	getActiveUserTransactions,
+	getBtcBalance,
 	getExchangeRate,
 	getExchangeRates,
 	getPendingBtcTransactions,
+	getSpendableBtcUtxos,
 	getUserProfile,
 	getUserTransactions,
 	listCustomTokens,
+	markActiveUserTransactionsSeen,
 	newUserSignupsAllowed,
 	removeCustomToken,
 	saveUserTransactions,
@@ -29,6 +33,7 @@ import type {
 	AllowSigningOutcome,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
+	BtcGetBalanceParams,
 	BtcGetPendingTransactionParams,
 	CreateActiveUserTransactionParams,
 	CreateUserProfileResponse,
@@ -404,6 +409,108 @@ describe('backend.api', () => {
 			});
 
 			await expect(getPendingBtcTransactions(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('broadcastBtcTransaction', () => {
+		const mockParams = {
+			...baseParams,
+			network: { mainnet: null },
+			transaction: Uint8Array.from([0, 1]),
+			iiDelegationChain: mockIIDelegationChain
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.btcBroadcastTransaction.mockResolvedValue({
+				txid: Uint8Array.from([1])
+			});
+		});
+
+		it('should call the btcBroadcastTransaction endpoint', async () => {
+			const result = await broadcastBtcTransaction(mockParams);
+
+			expect(result).toEqual({ txid: Uint8Array.from([1]) });
+			expect(backendCanisterMock.btcBroadcastTransaction).toHaveBeenCalledExactlyOnceWith({
+				network: { mainnet: null },
+				transaction: Uint8Array.from([0, 1]),
+				iiDelegationChain: mockIIDelegationChain
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				broadcastBtcTransaction({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
+		});
+	});
+
+	describe('getBtcBalance', () => {
+		const mockParams: CanisterApiFunctionParams<BtcGetBalanceParams> = {
+			...baseParams,
+			network: { mainnet: null },
+			minConfirmations: 1,
+			iiDelegationChain: mockIIDelegationChain
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.btcGetBalance.mockResolvedValue(12_345n);
+		});
+
+		it('should call the btcGetBalance endpoint', async () => {
+			await expect(getBtcBalance(mockParams)).resolves.toBe(12_345n);
+
+			expect(backendCanisterMock.btcGetBalance).toHaveBeenCalledExactlyOnceWith({
+				network: { mainnet: null },
+				minConfirmations: 1,
+				iiDelegationChain: mockIIDelegationChain
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(getBtcBalance({ ...mockParams, identity: undefined })).rejects.toThrow();
+		});
+
+		it('should throw an error if btcGetBalance throws', async () => {
+			backendCanisterMock.btcGetBalance.mockRejectedValue(new Error('mock-error'));
+
+			await expect(getBtcBalance(mockParams)).rejects.toThrow('mock-error');
+		});
+	});
+
+	describe('getSpendableBtcUtxos', () => {
+		const mockParams: CanisterApiFunctionParams<BtcGetPendingTransactionParams> = {
+			...baseParams,
+			network: { mainnet: null },
+			iiDelegationChain: mockIIDelegationChain
+		};
+
+		const mockResponse = {
+			utxos: [mockUtxo],
+			pending_transactions: [{ txid: new Uint8Array([1, 2, 3]), utxos: [mockUtxo] }]
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.btcGetSpendableUtxos.mockResolvedValue(mockResponse);
+		});
+
+		it('should call the btcGetSpendableUtxos endpoint', async () => {
+			const result = await getSpendableBtcUtxos(mockParams);
+
+			expect(result).toEqual(mockResponse);
+			expect(backendCanisterMock.btcGetSpendableUtxos).toHaveBeenCalledExactlyOnceWith({
+				network: { mainnet: null },
+				iiDelegationChain: mockIIDelegationChain
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(getSpendableBtcUtxos({ ...mockParams, identity: undefined })).rejects.toThrow();
+		});
+
+		it('should throw an error if btcGetSpendableUtxos throws', async () => {
+			backendCanisterMock.btcGetSpendableUtxos.mockRejectedValue(new Error('mock-error'));
+
+			await expect(getSpendableBtcUtxos(mockParams)).rejects.toThrow('mock-error');
 		});
 	});
 
@@ -818,15 +925,28 @@ describe('backend.api', () => {
 	describe('getActiveUserTransactions', () => {
 		const mockParams: CanisterApiFunctionParams = baseParams;
 
+		const response = {
+			transactions: [mockActiveUserTransaction],
+			seen_up_to_ns: mockActiveUserTransaction.updated_at_ns
+		};
+
 		beforeEach(() => {
-			backendCanisterMock.getActiveUserTransactions.mockResolvedValue([mockActiveUserTransaction]);
+			backendCanisterMock.getActiveUserTransactions.mockResolvedValue(response);
 		});
 
 		it('should successfully call getActiveUserTransactions endpoint', async () => {
 			const result = await getActiveUserTransactions(mockParams);
 
-			expect(result).toEqual([mockActiveUserTransaction]);
-			expect(backendCanisterMock.getActiveUserTransactions).toHaveBeenCalledExactlyOnceWith();
+			expect(result).toEqual(response);
+			expect(backendCanisterMock.getActiveUserTransactions).toHaveBeenCalledExactlyOnceWith({});
+		});
+
+		it('should forward the certified flag', async () => {
+			await getActiveUserTransactions({ ...mockParams, certified: true });
+
+			expect(backendCanisterMock.getActiveUserTransactions).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
 		});
 
 		it('should throw an error if identity is undefined', async () => {
@@ -841,6 +961,42 @@ describe('backend.api', () => {
 			});
 
 			await expect(getActiveUserTransactions(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('markActiveUserTransactionsSeen', () => {
+		const upToNs = mockActiveUserTransaction.updated_at_ns;
+
+		const mockParams: CanisterApiFunctionParams<{ upToNs: bigint }> = {
+			...baseParams,
+			upToNs
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.markActiveUserTransactionsSeen.mockResolvedValue(upToNs);
+		});
+
+		it('should successfully call markActiveUserTransactionsSeen endpoint', async () => {
+			const result = await markActiveUserTransactionsSeen(mockParams);
+
+			expect(result).toBe(upToNs);
+			expect(backendCanisterMock.markActiveUserTransactionsSeen).toHaveBeenCalledExactlyOnceWith(
+				upToNs
+			);
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				markActiveUserTransactionsSeen({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if markActiveUserTransactionsSeen throws', async () => {
+			backendCanisterMock.markActiveUserTransactionsSeen.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(markActiveUserTransactionsSeen(mockParams)).rejects.toThrow();
 		});
 	});
 });

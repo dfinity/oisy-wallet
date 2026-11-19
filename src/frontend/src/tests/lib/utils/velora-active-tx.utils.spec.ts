@@ -16,7 +16,6 @@ import {
 	toVeloraDisplayRefs,
 	toVeloraExternalRefs,
 	toVeloraExternalRefsMap,
-	toVeloraMarketOutcome,
 	veloraDeltaStatusError,
 	veloraMarketOutcomeError,
 	veloraMarketOutcomeToStatus,
@@ -203,10 +202,13 @@ describe('velora-active-tx.utils', () => {
 							destinationTx: '0xdestination',
 							filledPercent: 100,
 							spentAmount: null,
-							receivedAmount: null
+							receivedAmount: null,
+							originReceivedAmount: null,
+							destinationReceivedAmount: null,
+							timestamp: null
 						}
 					],
-					refunds: [{ tx: '0xrefund', chainId: 1, token: '0xtoken', amount: '1' }]
+					refunds: [{ tx: '0xrefund', chainId: 1, token: '0xtoken', amount: '1', timestamp: null }]
 				})
 			).toEqual({
 				[VELORA_EXTERNAL_REF_KEYS.ORIGIN_TX_HASH]: '0xorigin',
@@ -224,7 +226,10 @@ describe('velora-active-tx.utils', () => {
 							destinationTx: null,
 							filledPercent: 50,
 							spentAmount: null,
-							receivedAmount: null
+							receivedAmount: null,
+							originReceivedAmount: null,
+							destinationReceivedAmount: null,
+							timestamp: null
 						}
 					],
 					refunds: []
@@ -298,36 +303,6 @@ describe('velora-active-tx.utils', () => {
 
 		it('has no error text for a non-terminal status', () => {
 			expect(veloraDeltaStatusError('ACTIVE')).toBeUndefined();
-		});
-	});
-
-	describe('toVeloraMarketOutcome', () => {
-		it('reads a mined, executed transaction as succeeded', () => {
-			expect(toVeloraMarketOutcome({ receipt: { status: 1 }, txNonce: 5 })).toBe('succeeded');
-		});
-
-		it('reads a mined, reverted transaction as reverted', () => {
-			expect(toVeloraMarketOutcome({ receipt: { status: 0 }, txNonce: 5 })).toBe('reverted');
-		});
-
-		it('reads an unexpected receipt shape as unknown', () => {
-			expect(toVeloraMarketOutcome({ receipt: { status: null }, txNonce: 5 })).toBe('unknown');
-		});
-
-		it('reads a missing receipt with an unconsumed nonce as pending', () => {
-			expect(toVeloraMarketOutcome({ receipt: null, confirmedNonce: 5, txNonce: 5 })).toBe(
-				'pending'
-			);
-		});
-
-		it('reads a missing receipt with a consumed nonce as replaced', () => {
-			expect(toVeloraMarketOutcome({ receipt: null, confirmedNonce: 6, txNonce: 5 })).toBe(
-				'replaced'
-			);
-		});
-
-		it('stays pending when the confirmed nonce is unknown', () => {
-			expect(toVeloraMarketOutcome({ receipt: null, txNonce: 5 })).toBe('pending');
 		});
 	});
 

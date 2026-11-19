@@ -15,4 +15,4 @@ export type SplToken = Token & {
 
 export type RequiredSplToken = RequiredToken<SplToken, SplAuthorities>;
 
-export type RequiredSpl2022Token = RequiredToken<SplToken>;
+export type RequiredSpl2022Token = RequiredToken<SplToken, Pick<SplAuthorities, 'freezeAuthority'>>;

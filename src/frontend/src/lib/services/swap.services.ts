@@ -1,16 +1,32 @@
 import { sendBtc } from '$btc/services/btc-send.services';
-import type { VeloraSwapMode } from '$declarations/backend/backend.did';
+import {
+	isDefinitiveBtcBroadcastRefusal,
+	isUnclearBtcBroadcastOutcome
+} from '$btc/utils/btc-send.utils';
+import type {
+	ActiveUserTransactionData,
+	ActiveUserTransactionRef,
+	VeloraSwapMode
+} from '$declarations/backend/backend.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import { VELORA_AUGUSTUS_ADDRESSES, VELORA_DELTA_ADDRESSES } from '$env/rest/velora.env';
+import {
+	VELORA_DELTA_EIP712_DOMAIN,
+	VELORA_DELTA_ORDER_TYPES
+} from '$eth/constants/velora.constants';
+import { infuraProviders } from '$eth/providers/infura.providers';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/approve.services';
 import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { send as sendEvm } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
+import type { EthAddress } from '$eth/types/address';
 import type { ErcFungibleToken } from '$eth/types/erc-fungible';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isTokenErc } from '$eth/utils/erc.utils';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken, isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
@@ -22,7 +38,6 @@ import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import {
-	deposit,
 	depositFrom,
 	getPoolMetadata,
 	getUserUnusedBalance,
@@ -38,17 +53,35 @@ import {
 	ZERO
 } from '$lib/constants/app.constants';
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
-import { ICP_SWAP_POOL_FEE, SWAP_SIDE } from '$lib/constants/swap.constants';
+import {
+	ICP_SWAP_POOL_FEE,
+	SWAP_DEFAULT_SLIPPAGE_VALUE,
+	SWAP_QUOTE_TIMEOUT_MS,
+	SWAP_SIDE,
+	VELORA_GAS_LIMIT_BUFFER_PERCENT
+} from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
-import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
+import { fungibleTokens } from '$lib/derived/tokens.derived';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SEVERITIES,
+	PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES
+} from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { btcSwapProviders } from '$lib/providers/btc-swap.providers';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
-import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
+import { xrpSwapProviders } from '$lib/providers/xrp-swap.providers';
+import {
+	createActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
+import { exchangeRateERC20ToUsd, exchangeRateSPLToUsd } from '$lib/services/exchange.services';
 import { submitNearIntentsDepositTx } from '$lib/services/near-intents.services';
 import {
 	executeOneSecEvmToIcpBridge,
@@ -57,19 +90,22 @@ import {
 import { retryWithDelay } from '$lib/services/rest.services';
 import { throwSwapError } from '$lib/services/swap-errors.services';
 import { autoLoadSingleToken } from '$lib/services/token.services';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
-import { SwapAmountTooLowError } from '$lib/types/errors';
+import { SwapAmountTooLowError, SwapViaIntermediateTokenError } from '$lib/types/errors';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
 } from '$lib/types/near-intents';
+import type { NetworkId } from '$lib/types/network';
 import type { OisyTradeQuote } from '$lib/types/oisy-trade-swap';
-import type { Amount } from '$lib/types/send';
+import type { Amount, OptionAmount } from '$lib/types/send';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -88,15 +124,20 @@ import {
 	type SwapNearIntentsBtcParams,
 	type SwapNearIntentsEvmParams,
 	type SwapNearIntentsSolParams,
+	type SwapNearIntentsXrpParams,
 	type SwapParams,
+	type SwapQuoteObserver,
 	type SwapVeloraDeltaParams,
 	type SwapVeloraMarketParams
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { VELORA_EXTERNAL_REF_KEYS, type VeloraExternalRefKey } from '$lib/types/velora-swap';
 import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { buildErc20PriceParams } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import {
 	toNearIntentsData,
 	toNearIntentsDisplayRefs,
@@ -113,7 +154,9 @@ import {
 	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdSOLDevnet,
-	isNetworkIdSolana
+	isNetworkIdSolana,
+	isNetworkIdXRPMainnet,
+	isNetworkIdXrp
 } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
@@ -129,10 +172,22 @@ import {
 	toVeloraDisplayRefs,
 	toVeloraExternalRefs
 } from '$lib/utils/velora-active-tx.utils';
+import {
+	assertVeloraDeltaOrder,
+	assertVeloraDeltaRoute,
+	assertVeloraMarketTransaction,
+	veloraBridgeableTokenAddresses,
+	veloraMinimumAmount,
+	veloraRejectedError
+} from '$lib/utils/velora-swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { isTokenSpl } from '$sol/utils/spl.utils';
+import { sendXrp } from '$xrp/services/xrp-send.services';
+import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
+import { XrpSendNotGuardedError } from '$xrp/types/xrp-send';
+import { toXrpExternalRefs } from '$xrp/utils/xrp-active-tx.utils';
 import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -351,6 +406,39 @@ export const loadKongSwapTokens = async ({
 	kongSwapTokensStore.setKongSwapTokens(supportedTokens);
 };
 
+/**
+ * Prices the ERC-20 and SPL tokens the swap pickers list although they are not enabled: the
+ * exchange worker prices enabled tokens only. `loadDisabledIcrcTokensExchanges` does the same for
+ * ICRC tokens.
+ */
+export const loadDisabledErc20AndSplTokensExchanges = async ({
+	tokens
+}: {
+	tokens: TokenToggleable<Token>[];
+}): Promise<void> => {
+	const disabledTokens: Token[] = tokens.filter(({ enabled }) => !enabled);
+
+	const erc20PriceParams = buildErc20PriceParams(
+		disabledTokens.filter(isTokenErc20).map(({ address, network: { exchange, chainId } }) => ({
+			address,
+			coingeckoId: exchange?.coingeckoId ?? 'ethereum',
+			chainId
+		}))
+	);
+
+	const results = await Promise.allSettled([
+		...erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params)),
+		exchangeRateSPLToUsd(disabledTokens.filter(isTokenSpl).map(({ address }) => address))
+	]);
+
+	exchangeStore.set(
+		results.reduce<CoingeckoSimpleTokenPriceResponse[]>(
+			(acc, result) => (result.status === 'fulfilled' ? [...acc, result.value] : acc),
+			[]
+		)
+	);
+};
+
 type SwapRecipientResolution =
 	// The destination network has no cross-chain payout address (e.g. ICP, where
 	// providers credit the user's principal); quotes proceed without a recipient.
@@ -371,10 +459,11 @@ const resolveSwapRecipientAddress = ({
 	destinationToken,
 	userEthAddress,
 	userSolAddress,
-	userBtcAddress
+	userBtcAddress,
+	userXrpAddress
 }: Pick<
 	FetchSwapAmountsParams,
-	'destinationToken' | 'userEthAddress' | 'userSolAddress' | 'userBtcAddress'
+	'destinationToken' | 'userEthAddress' | 'userSolAddress' | 'userBtcAddress' | 'userXrpAddress'
 >): SwapRecipientResolution => {
 	const {
 		network: { id: networkId }
@@ -391,6 +480,13 @@ const resolveSwapRecipientAddress = ({
 	if (isNetworkIdBTCMainnet(networkId)) {
 		return nonNullish(userBtcAddress)
 			? { type: 'resolved', recipientAddress: userBtcAddress }
+			: { type: 'missing' };
+	}
+
+	// Mainnet only, for the same reason: XRP has no testnet in the wallet.
+	if (isNetworkIdXRPMainnet(networkId)) {
+		return nonNullish(userXrpAddress)
+			? { type: 'resolved', recipientAddress: userXrpAddress }
 			: { type: 'missing' };
 	}
 
@@ -413,7 +509,9 @@ export const fetchSwapAmounts = async ({
 	isSourceTokenIcrc2,
 	userEthAddress,
 	userSolAddress,
-	userBtcAddress
+	userBtcAddress,
+	userXrpAddress,
+	onProviderParticipating
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
@@ -427,7 +525,8 @@ export const fetchSwapAmounts = async ({
 				destinationToken,
 				amount: sourceAmount,
 				userEthAddress,
-				slippage
+				slippage,
+				...(onProviderParticipating && { onProviderParticipating })
 			});
 		}
 
@@ -438,7 +537,8 @@ export const fetchSwapAmounts = async ({
 			amount: sourceAmount,
 			tokens,
 			slippage,
-			isSourceTokenIcrc2
+			isSourceTokenIcrc2,
+			...(onProviderParticipating && { onProviderParticipating })
 		});
 	}
 
@@ -446,7 +546,8 @@ export const fetchSwapAmounts = async ({
 		destinationToken,
 		userEthAddress,
 		userSolAddress,
-		userBtcAddress
+		userBtcAddress,
+		userXrpAddress
 	});
 
 	if (recipientResolution.type === 'missing') {
@@ -469,7 +570,22 @@ export const fetchSwapAmounts = async ({
 			amount: sourceAmount,
 			userBtcAddress,
 			recipientAddress,
-			slippage
+			slippage,
+			...(onProviderParticipating && { onProviderParticipating })
+		});
+	}
+
+	// Ahead of the EVM fall-through for the same reason as Bitcoin, and of the Solana branch,
+	// which would otherwise take an XRP → SOL pair and quote it with the user's EVM address.
+	if (isNetworkIdXrp(sourceToken.network.id)) {
+		return await fetchSwapAmountsXRP({
+			sourceToken,
+			destinationToken,
+			amount: sourceAmount,
+			userAddress: userXrpAddress,
+			recipientAddress,
+			slippage,
+			...(onProviderParticipating && { onProviderParticipating })
 		});
 	}
 
@@ -489,7 +605,8 @@ export const fetchSwapAmounts = async ({
 			amount: sourceAmount,
 			userAddress: sourceAddress,
 			recipientAddress,
-			slippage
+			slippage,
+			...(onProviderParticipating && { onProviderParticipating })
 		});
 	}
 
@@ -499,7 +616,8 @@ export const fetchSwapAmounts = async ({
 		amount: sourceAmount,
 		userAddress: userEthAddress,
 		recipientAddress,
-		slippage
+		slippage,
+		...(onProviderParticipating && { onProviderParticipating })
 	});
 };
 
@@ -510,25 +628,38 @@ const fetchSwapAmountsICP = async ({
 	amount,
 	tokens,
 	slippage,
-	isSourceTokenIcrc2
+	isSourceTokenIcrc2,
+	onProviderParticipating
 }: Omit<
 	FetchSwapAmountsParams,
-	'userEthAddress' | 'userSolAddress' | 'userBtcAddress' | 'amount'
+	'userEthAddress' | 'userSolAddress' | 'userBtcAddress' | 'userXrpAddress' | 'amount'
 > & {
 	amount: bigint;
 }): Promise<SwapMappedResult[]> => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({
+	const settledResults = await collectSwapQuotes<
+		SwapAmountsReply | ICPSwapResult | OisyTradeQuote | undefined
+	>({
+		requests: enabledProviders.map(({ key, getQuote }) => (observer) => {
+			// Kong has no provider-local eligibility guards. Its quote API must not receive
+			// the observer because it forwards the remaining arguments to the canister.
+			if (key === SwapProvider.KONG_SWAP) {
+				observer.onProviderParticipating?.(key);
+			}
+
+			return getQuote({
 				identity,
 				sourceToken: sourceToken as IcToken,
 				destinationToken: destinationToken as IcToken,
-				sourceAmount: amount
-			})
-		)
-	);
+				sourceAmount: amount,
+				// Preserve quote calls and the existing ICRC-2 offer-mapping gates below,
+				// but do not advertise an ineligible provider as participating.
+				...(key !== SwapProvider.KONG_SWAP && isSourceTokenIcrc2 && observer)
+			});
+		}),
+		onProviderParticipating
+	});
 
 	const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
 	const sourceTokenUsdValue = get(exchanges)?.[sourceToken.id]?.usd;
@@ -654,12 +785,15 @@ export const fetchIcpSwap = async ({
 		fee: destinationTokenFee
 	} = destinationToken;
 
+	// Certified, because this pool canister becomes the spender of the approval and the target of
+	// the deposit below.
 	const pool = await getPoolCanister({
 		identity,
 		token0: { address: sourceLedgerCanisterId, standard: sourceStandard.code },
 		token1: { address: destinationLedgerCanisterId, standard: destinationStandard.code },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity,
-		fee: ICP_SWAP_POOL_FEE
+		fee: ICP_SWAP_POOL_FEE,
+		certified: true
 	});
 
 	if (isNullish(pool)) {
@@ -672,14 +806,6 @@ export const fetchIcpSwap = async ({
 		quoteAmount: receiveAmount + destinationTokenFee,
 		slippagePercentage: Number(slippageValue)
 	});
-
-	const transferParams = {
-		identity,
-		token: sourceToken,
-		amount: parsedSwapAmount,
-		to: poolCanisterId,
-		ledgerCanisterId: sourceLedgerCanisterId
-	};
 
 	// TODO: Revisit this logic once `tryToWithdraw` and `withdrawDestinationTokens` are provided.
 	// Let's keep it like this for now and adjust it later.
@@ -708,46 +834,43 @@ export const fetchIcpSwap = async ({
 	}
 
 	try {
+		// ICPSwap is only offered for ICRC-2 sources - `fetchSwapAmounts` drops its quote otherwise -
+		// and this refuses the rest rather than relying on that. The ICRC-1 alternative, a transfer
+		// followed by `deposit`, leaves the tokens uncredited in the pool if `deposit` fails: invisible
+		// to `getUserUnusedBalance`, and retrievable only by repeating `deposit`.
 		if (!isSourceTokenIcrc2) {
-			await sendIcrc(transferParams);
-			await deposit({
-				identity,
-				canisterId: poolCanisterId,
-				token: sourceLedgerCanisterId,
-				amount: parsedSwapAmount,
-				fee: sourceTokenFee
-			});
-		} else {
-			// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer"
-			const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
+			throw new Error('ICPSwap swaps require an ICRC-2 source token');
+		}
 
-			const isApprovalNeeded = await checkNeedsApproval({
+		// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer"
+		const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
+
+		const isApprovalNeeded = await checkNeedsApproval({
+			identity,
+			ledgerCanisterId: sourceLedgerCanisterId,
+			amount: amountWithFees,
+			spender: pool.canisterId
+		});
+
+		if (isApprovalNeeded) {
+			await approve({
 				identity,
 				ledgerCanisterId: sourceLedgerCanisterId,
-				amount: amountWithFees,
-				spender: pool.canisterId
-			});
-
-			if (isApprovalNeeded) {
-				await approve({
-					identity,
-					ledgerCanisterId: sourceLedgerCanisterId,
-					// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
-					amount: parsedSwapAmount + sourceTokenFee * 2n,
-					// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
-					expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
-					spender: { owner: pool.canisterId }
-				});
-			}
-
-			await depositFrom({
-				identity,
-				canisterId: poolCanisterId,
-				token: sourceLedgerCanisterId,
-				amount: parsedSwapAmount,
-				fee: sourceTokenFee
+				// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
+				amount: parsedSwapAmount + sourceTokenFee * 2n,
+				// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
+				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
+				spender: { owner: pool.canisterId }
 			});
 		}
+
+		await depositFrom({
+			identity,
+			canisterId: poolCanisterId,
+			token: sourceLedgerCanisterId,
+			amount: parsedSwapAmount,
+			fee: sourceTokenFee
+		});
 	} catch (err: unknown) {
 		consoleError(err);
 
@@ -858,6 +981,7 @@ const executeNearIntentsSwap = async ({
 	destinationToken,
 	swapAmount,
 	swapDetails,
+	slippageValue,
 	sendTransaction,
 	enableDestinationToken
 }: {
@@ -867,15 +991,36 @@ const executeNearIntentsSwap = async ({
 	destinationToken: Token;
 	swapAmount: Amount;
 	swapDetails: NearIntentsQuoteResponse;
+	slippageValue: OptionAmount;
 	// `registerSwap` creates the swap's AUT row. A transport whose send is irreversible
 	// the moment it is broadcast (BTC) must invoke it from its broadcast callback, so the
 	// row exists even if any later step of the send throws (the `fetchChainFusionBtcSwap`
 	// guarantee). A transport that ignores it keeps the default ordering below, where the
 	// row is created only after the send has resolved and the deposit been submitted.
+	//
+	// `recordPollRefs` is for a transport on that default ordering that learns its payment's poll
+	// keys when it broadcasts (EVM: the hash and nonce): the row is created with them.
+	//
+	// `swapRecord` is for a transport whose payment has to be recorded before it is broadcast
+	// (XRP): it describes the swap's AUT row, with the payment's source address and poll keys
+	// added, for the transport to create at that point. Taking it marks the swap as registered,
+	// so no second row is created after the send.
+	//
+	// `openSwap` is for a transport that knows its transaction once it is signed (BTC through the
+	// backend): it creates the swap's row before the broadcast, rejecting if the write fails, so
+	// nothing goes out untracked, and returns the row's id, for the transport to delete if the
+	// broadcast is refused outright. `undefined` for a swap it cannot track, as `registerSwap`
+	// skips one. It also marks the swap as registered.
 	sendTransaction: (params: {
 		amount: bigint;
 		depositAddress: string;
 		registerSwap: () => Promise<void>;
+		openSwap: () => Promise<string | undefined>;
+		recordPollRefs: (pollRefs: ActiveUserTransactionRef[]) => void;
+		swapRecord: (params: {
+			sourceAddress: string;
+			pollRefs: ActiveUserTransactionRef[];
+		}) => { data: ActiveUserTransactionData; externalRefs: ActiveUserTransactionRef[] } | undefined;
 	}) => Promise<string>;
 	enableDestinationToken?: () => Promise<void>;
 }): Promise<void> => {
@@ -904,6 +1049,18 @@ const executeNearIntentsSwap = async ({
 		});
 	}
 
+	// 1Click derives the signed minimum from the tolerance the quote was requested with, so the quote
+	// must carry the max slippage the review showed, converted as the request converts it.
+	if (
+		swapDetails.quoteRequest.slippageTolerance !==
+		slippagePercentToBasisPoints(slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE)
+	) {
+		throwSwapError({
+			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE,
+			message: get(i18n).swap.error.near_intents_quote_slippage
+		});
+	}
+
 	const { depositAddress, depositMemo } = swapDetails.quote;
 
 	// Registers the swap as an Active User Transaction so settlement is tracked by
@@ -911,8 +1068,30 @@ const executeNearIntentsSwap = async ({
 	// Best-effort, single attempt: it only ever runs once funds have left the wallet
 	// (point of no return), so a failed create must NOT surface as a swap failure;
 	// mirrors OneSec's `createAutAndDetachCloser`.
+	const swapRefs = (): ActiveUserTransactionRef[] =>
+		toNearIntentsExternalRefs({
+			...toNearIntentsDisplayRefs({ sourceToken, destinationToken, amount: `${swapAmount}` }),
+			[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS]: depositAddress,
+			// 1Click documents the signature as the client's receipt for disputing a
+			// deposit, so it is kept next to the address it authenticates.
+			[NEAR_INTENTS_EXTERNAL_REF_KEYS.SIGNATURE]: swapDetails.signature,
+			...(nonNullish(depositMemo)
+				? { [NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO]: depositMemo }
+				: {})
+		});
+
+	const swapRefsWith = (pollRefs: ActiveUserTransactionRef[]): ActiveUserTransactionRef[] =>
+		[...swapRefs(), ...pollRefs].sort(({ key: a }, { key: b }) => (a < b ? -1 : a > b ? 1 : 0));
+
+	// Registers the swap as an Active User Transaction so settlement is tracked by
+	// the global poller (survives modal close, tab close, refresh, logout).
+	// Best-effort, single attempt: it only ever runs once funds have left the wallet
+	// (point of no return), so a failed create must NOT surface as a swap failure;
+	// mirrors OneSec's `createAutAndDetachCloser`.
 	let swapRegistered = false;
-	const registerSwap = async (): Promise<void> => {
+	const registerSwap = async (
+		{ pollRefs }: { pollRefs: ActiveUserTransactionRef[] } = { pollRefs: [] }
+	): Promise<void> => {
 		swapRegistered = true;
 
 		try {
@@ -927,16 +1106,7 @@ const executeNearIntentsSwap = async ({
 					identity,
 					id: crypto.randomUUID(),
 					data,
-					externalRefs: toNearIntentsExternalRefs({
-						...toNearIntentsDisplayRefs({ sourceToken, destinationToken, amount: `${swapAmount}` }),
-						[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS]: depositAddress,
-						// 1Click documents the signature as the client's receipt for disputing a
-						// deposit, so it is kept next to the address it authenticates.
-						[NEAR_INTENTS_EXTERNAL_REF_KEYS.SIGNATURE]: swapDetails.signature,
-						...(nonNullish(depositMemo)
-							? { [NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO]: depositMemo }
-							: {})
-					})
+					externalRefs: swapRefsWith(pollRefs)
 				});
 			}
 		} catch (err: unknown) {
@@ -944,9 +1114,76 @@ const executeNearIntentsSwap = async ({
 		}
 	};
 
+	const openSwap = async (): Promise<string | undefined> => {
+		swapRegistered = true;
+
+		const data = toNearIntentsData({
+			sourceToken,
+			destinationToken,
+			amount: parsedSwapAmount
+		});
+
+		if (isNullish(data)) {
+			return;
+		}
+
+		const id = crypto.randomUUID();
+
+		try {
+			await createActiveUserTransaction({
+				identity,
+				id,
+				data,
+				externalRefs: swapRefsWith([])
+			});
+		} catch (err: unknown) {
+			// The backend may have committed it if only its answer was lost.
+			await deleteUnbroadcastActiveUserTransaction({ identity, id });
+
+			throw err;
+		}
+
+		return id;
+	};
+
+	const swapRecord = ({
+		sourceAddress,
+		pollRefs
+	}: {
+		sourceAddress: string;
+		pollRefs: ActiveUserTransactionRef[];
+	}): { data: ActiveUserTransactionData; externalRefs: ActiveUserTransactionRef[] } | undefined => {
+		swapRegistered = true;
+
+		const data = toNearIntentsData({
+			sourceToken,
+			destinationToken,
+			amount: parsedSwapAmount,
+			sourceAddress
+		});
+
+		return nonNullish(data)
+			? {
+					data,
+					externalRefs: swapRefsWith(pollRefs)
+				}
+			: undefined;
+	};
+
 	progress(ProgressStepsSwap.SIGN_TRANSFER);
 
-	const txHash = await sendTransaction({ amount: parsedSwapAmount, depositAddress, registerSwap });
+	let broadcastPollRefs: ActiveUserTransactionRef[] = [];
+
+	const txHash = await sendTransaction({
+		amount: parsedSwapAmount,
+		depositAddress,
+		registerSwap,
+		openSwap,
+		recordPollRefs: (refs) => {
+			broadcastPollRefs = refs;
+		},
+		swapRecord
+	});
 
 	progress(ProgressStepsSwap.SWAP);
 
@@ -964,7 +1201,7 @@ const executeNearIntentsSwap = async ({
 	}
 
 	if (!swapRegistered) {
-		await registerSwap();
+		await registerSwap({ pollRefs: broadcastPollRefs });
 	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);
@@ -984,7 +1221,8 @@ export const fetchNearIntentsEvmSwap = async ({
 	gas,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
-	swapDetails
+	swapDetails,
+	slippageValue
 }: SwapNearIntentsEvmParams): Promise<void> => {
 	await executeNearIntentsSwap({
 		identity,
@@ -993,8 +1231,9 @@ export const fetchNearIntentsEvmSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
-		sendTransaction: async ({ amount, depositAddress }) => {
-			const { hash } = await sendEvm({
+		slippageValue,
+		sendTransaction: async ({ amount, depositAddress, recordPollRefs }) => {
+			const { hash, nonce } = await sendEvm({
 				from: userAddress,
 				to: depositAddress,
 				amount,
@@ -1005,6 +1244,15 @@ export const fetchNearIntentsEvmSwap = async ({
 				maxFeePerGas,
 				maxPriorityFeePerGas
 			});
+
+			recordPollRefs(
+				toNearIntentsExternalRefs({
+					[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_TX_HASH]: hash,
+					[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_TX_NONCE]: `${nonce}`,
+					[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_CHAIN_ID]: `${sourceNetwork.chainId}`
+				})
+			);
+
 			return hash;
 		},
 		enableDestinationToken: () => enableSwapDestinationToken({ destinationToken, identity })
@@ -1018,7 +1266,8 @@ export const fetchNearIntentsSolSwap = async ({
 	destinationToken,
 	swapAmount,
 	userAddress,
-	swapDetails
+	swapDetails,
+	slippageValue
 }: SwapNearIntentsSolParams): Promise<void> => {
 	await executeNearIntentsSwap({
 		identity,
@@ -1027,6 +1276,7 @@ export const fetchNearIntentsSolSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
+		slippageValue,
 		sendTransaction: async ({ amount, depositAddress }) =>
 			await sendSol({
 				identity,
@@ -1047,6 +1297,7 @@ export const fetchNearIntentsBtcSwap = async ({
 	destinationToken,
 	swapAmount,
 	swapDetails,
+	slippageValue,
 	userAddress,
 	network,
 	utxosFee
@@ -1058,10 +1309,14 @@ export const fetchNearIntentsBtcSwap = async ({
 		destinationToken,
 		swapAmount,
 		swapDetails,
+		slippageValue,
 		// `sendBtc` converts the display amount to satoshis itself, so it takes the raw
 		// `swapAmount` rather than the parsed base-unit amount the core hands over.
-		sendTransaction: async ({ depositAddress, registerSwap }) => {
+		sendTransaction: async ({ depositAddress, registerSwap, openSwap }) => {
 			let broadcastTxid: string | undefined;
+			// Set once `beforeBroadcast`, which `sendBtc` calls only on the backend path, has run.
+			let rowOpened = false;
+			let rowId: string | undefined;
 
 			try {
 				return await sendBtc({
@@ -1071,15 +1326,36 @@ export const fetchNearIntentsBtcSwap = async ({
 					source: userAddress,
 					destination: depositAddress,
 					amount: swapAmount,
-					// A BTC deposit is irreversible the moment it is broadcast, so the AUT row is
-					// registered right there, before the pending-transaction bookkeeping and before
-					// the send resolves; mirrors the ordering of `fetchChainFusionBtcSwap`.
+					// Through the backend the deposit is known once signed, so its row is created
+					// before the broadcast, as `fetchChainFusionBtcSwap`'s is.
+					beforeBroadcast: async () => {
+						rowId = await openSwap();
+						rowOpened = true;
+					},
+					// Through the Chain Fusion Signer the deposit is irreversible the moment it is
+					// broadcast, so the row is registered right there, before the pending-transaction
+					// bookkeeping and before the send resolves.
 					onBroadcast: async ({ txid }) => {
 						broadcastTxid = txid;
-						await registerSwap();
+
+						if (!rowOpened) {
+							await registerSwap();
+						}
 					}
 				});
 			} catch (err: unknown) {
+				// A refusal outright sent nothing. After any other failure the deposit may have gone
+				// out, so the row stays for the poller, which fails it once the deposit expires.
+				if (nonNullish(rowId) && isDefinitiveBtcBroadcastRefusal(err)) {
+					await deleteUnbroadcastActiveUserTransaction({ identity, id: rowId });
+				}
+
+				// The deposit may have gone out, so the destination is enabled as after a sent one:
+				// the swapped asset must not land in a token the user cannot see.
+				if (isUnclearBtcBroadcastOutcome(err)) {
+					await enableSwapDestinationToken({ destinationToken, identity });
+				}
+
 				if (isNullish(broadcastTxid)) {
 					throw err;
 				}
@@ -1092,6 +1368,74 @@ export const fetchNearIntentsBtcSwap = async ({
 
 				return broadcastTxid;
 			}
+		},
+		enableDestinationToken: () => enableSwapDestinationToken({ destinationToken, identity })
+	});
+};
+
+export const fetchNearIntentsXrpSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	destinationToken,
+	swapAmount,
+	swapDetails,
+	slippageValue,
+	userAddress,
+	network,
+	fee
+}: SwapNearIntentsXrpParams): Promise<void> => {
+	// `fetchSwapAmountsXRP` already leaves out an offer with a deposit memo. Checked again right
+	// before the deposit, like the signature and the expiry, for a quote that reaches the send by
+	// another route: nothing documents how such a memo has to travel with an XRP payment.
+	if (nonNullish(swapDetails.quote.depositMemo)) {
+		throwSwapError({
+			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_DEPOSIT_MEMO,
+			message: replaceOisyPlaceholders(get(i18n).swap.error.near_intents_quote_deposit_memo)
+		});
+	}
+
+	await executeNearIntentsSwap({
+		identity,
+		progress,
+		sourceToken,
+		destinationToken,
+		swapAmount,
+		swapDetails,
+		slippageValue,
+		// The swap is the transaction and the deposit a part of it, so the payment is recorded
+		// under the swap's own row, which `sendXrp` creates after signing and before the submit —
+		// where the in-flight check needs it. `sendXrp` never throws once the payment may be on the
+		// wire, so nothing after the send can leave a broadcast deposit without that row.
+		sendTransaction: async ({ amount, depositAddress, swapRecord }) => {
+			const { txHash } = await sendXrp({
+				identity,
+				network,
+				source: userAddress,
+				destination: depositAddress,
+				amount,
+				fee,
+				token: sourceToken,
+				record: ({ txHash: hash, lastLedgerSequence }) => {
+					const record = swapRecord({
+						sourceAddress: userAddress,
+						pollRefs: toXrpExternalRefs({
+							[XRP_EXTERNAL_REF_KEYS.TX_HASH]: hash,
+							[XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE]: `${lastLedgerSequence}`
+						})
+					});
+
+					if (isNullish(record)) {
+						throw new XrpSendNotGuardedError(
+							`XRP swap refused: ${destinationToken.network.name} has no backend token identity, so the deposit could not be recorded.`
+						);
+					}
+
+					return record;
+				}
+			});
+
+			return txHash;
 		},
 		enableDestinationToken: () => enableSwapDestinationToken({ destinationToken, identity })
 	});
@@ -1154,6 +1498,10 @@ export const swapService = {
 	// which `SwapParams` cannot carry, so `SwapIcpWizard` dispatches it explicitly
 	// and never reaches this entry, exactly as it does for 1Sec and Chain Fusion.
 	[SwapProvider.OISY_TRADE]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
+	},
+	// LI.FI has no ICP side, so no swap from an ICP token can reach this entry.
+	[SwapProvider.LIFI]: () => {
 		throw new Error(get(i18n).swap.error.unexpected);
 	}
 } satisfies Record<SwapProvider, (params: SwapParams) => Promise<void>>;
@@ -1250,6 +1598,68 @@ export const performManualWithdraw = async ({
 	}
 };
 
+// Preserve registry order for the existing reducers, even when providers finish out of order.
+// A deadline abandons pending quotes logically; it cannot abort APIs without signal support.
+const collectSwapQuotes = <T>({
+	requests,
+	onProviderParticipating
+}: {
+	requests: ((observer: SwapQuoteObserver) => Promise<T>)[];
+} & SwapQuoteObserver): Promise<PromiseSettledResult<T>[]> => {
+	if (requests.length === 0) {
+		return Promise.resolve([]);
+	}
+
+	return new Promise((resolve) => {
+		const results: PromiseSettledResult<T>[] = requests.map(() => ({
+			status: 'rejected',
+			reason: new Error('Swap quote collection timed out')
+		}));
+		let pending = requests.length;
+		let collecting = true;
+
+		const finish = () => {
+			collecting = false;
+			clearTimeout(timeout);
+			resolve(results);
+		};
+		const timeout = setTimeout(finish, SWAP_QUOTE_TIMEOUT_MS);
+		requests.forEach((request, index) => {
+			let quotePending = true;
+			const observer: SwapQuoteObserver = onProviderParticipating
+				? {
+						onProviderParticipating: (provider) => {
+							if (collecting && quotePending) {
+								onProviderParticipating(provider);
+							}
+						}
+					}
+				: {};
+			const settle = (result: PromiseSettledResult<T>) => {
+				quotePending = false;
+				if (!collecting) {
+					return;
+				}
+
+				results[index] = result;
+				pending -= 1;
+				if (pending === 0) {
+					finish();
+				}
+			};
+
+			// Contain synchronous throws as well as late rejections, without awaiting
+			// abandoned work or allowing it to mutate the completed round.
+			Promise.resolve()
+				.then(() => request(observer))
+				.then(
+					(value) => settle({ status: 'fulfilled', value }),
+					(reason: unknown) => settle({ status: 'rejected', reason })
+				);
+		});
+	});
+};
+
 // Shared tail of the provider fan-outs: keep the fulfilled quotes, best first. When no
 // provider quoted at all but one refused the amount as below its minimum, rethrow that
 // refusal so the UI can name the reason instead of the generic "swap is not offered".
@@ -1273,6 +1683,16 @@ const reduceSettledSwapResults = (
 		if (nonNullish(amountTooLow)) {
 			throw amountTooLow.reason;
 		}
+
+		// After the minimum, which a larger amount turns into a direct offer.
+		const viaIntermediateToken = settledResults.find(
+			(result): result is PromiseRejectedResult =>
+				result.status === 'rejected' && result.reason instanceof SwapViaIntermediateTokenError
+		);
+
+		if (nonNullish(viaIntermediateToken)) {
+			throw viaIntermediateToken.reason;
+		}
 	}
 
 	return results.sort((a, b) =>
@@ -1285,15 +1705,26 @@ const fetchSwapAmountsICPBridge = async ({
 	destinationToken,
 	amount,
 	userEthAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: IcpBridgeQuoteParams): Promise<SwapMappedResult[]> => {
 	const enabledProviders = icpBridgeProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({ sourceToken, destinationToken, amount, userEthAddress, slippage })
-		)
-	);
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userEthAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
 
 	return reduceSettledSwapResults(settledResults);
 };
@@ -1307,7 +1738,8 @@ export const fetchSwapAmountsEVM = async ({
 	amount,
 	userAddress,
 	recipientAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: EvmQuoteParams): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
 		return [];
@@ -1315,11 +1747,22 @@ export const fetchSwapAmountsEVM = async ({
 
 	const enabledProviders = evmSwapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({ sourceToken, destinationToken, amount, userAddress, recipientAddress, slippage })
-		)
-	);
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userAddress,
+						recipientAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
 
 	return reduceSettledSwapResults(settledResults);
 };
@@ -1332,22 +1775,27 @@ export const fetchSwapAmountsBTC = async ({
 	amount,
 	userBtcAddress,
 	recipientAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: BtcQuoteParams): Promise<SwapMappedResult[]> => {
 	const enabledProviders = btcSwapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({
-				sourceToken,
-				destinationToken,
-				amount,
-				userBtcAddress,
-				recipientAddress,
-				slippage
-			})
-		)
-	);
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userBtcAddress,
+						recipientAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
 
 	return reduceSettledSwapResults(settledResults);
 };
@@ -1361,7 +1809,8 @@ export const fetchSwapAmountsSOL = async ({
 	amount,
 	userAddress,
 	recipientAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: NearIntentsQuoteParams): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
 		return [];
@@ -1369,13 +1818,86 @@ export const fetchSwapAmountsSOL = async ({
 
 	const enabledProviders = solSwapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({ sourceToken, destinationToken, amount, userAddress, recipientAddress, slippage })
-		)
-	);
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userAddress,
+						recipientAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
 
 	return reduceSettledSwapResults(settledResults);
+};
+
+export const fetchSwapAmountsXRP = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	userAddress,
+	recipientAddress,
+	slippage,
+	onProviderParticipating
+}: NearIntentsQuoteParams): Promise<SwapMappedResult[]> => {
+	if (isNullish(userAddress)) {
+		return [];
+	}
+
+	const enabledProviders = xrpSwapProviders.filter(({ isEnabled }) => isEnabled);
+
+	const settledResults = await collectSwapQuotes({
+		requests: enabledProviders.map(
+			({ getQuote }) =>
+				(observer) =>
+					getQuote({
+						sourceToken,
+						destinationToken,
+						amount,
+						userAddress,
+						recipientAddress,
+						slippage,
+						...observer
+					})
+		),
+		onProviderParticipating
+	});
+
+	// An offer whose XRP deposit comes with a deposit memo is left out: nothing documents how such a
+	// memo has to travel with an XRP payment, and a deposit that does not carry it in the expected
+	// form may never be credited. Each one is reported, so a change on the provider's side shows up
+	// in the analytics and not only as a pair that is no longer offered.
+	return reduceSettledSwapResults(settledResults).filter((offer) => {
+		const hasDepositMemo =
+			offer.provider === SwapProvider.NEAR_INTENTS &&
+			nonNullish(offer.swapDetails.quote.depositMemo);
+
+		if (hasDepositMemo) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: offer.provider,
+					event_severity: PLAUSIBLE_EVENT_SEVERITIES.ERROR,
+					result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+					result_error_type: PLAUSIBLE_EVENT_SWAP_OFFER_ERROR_TYPES.DEPOSIT_MEMO,
+					token_symbol: sourceToken.symbol,
+					token_network: sourceToken.network.name,
+					token2_symbol: destinationToken.symbol,
+					token2_network: destinationToken.network.name
+				}
+			});
+		}
+
+		return !hasDepositMemo;
+	});
 };
 
 export const withdrawUserUnusedBalance = async ({
@@ -1529,13 +2051,31 @@ export const fetchVeloraDeltaSwap = async ({
 		fetch: window.fetch
 	});
 
-	const deltaContract = await sdk.delta.getDeltaContract();
+	// The spender and the contract the order is signed for are pinned, never taken from the API.
+	const deltaContract = VELORA_DELTA_ADDRESSES[sourceNetwork.id];
 
 	if (isNullish(deltaContract)) {
-		return;
+		throw veloraRejectedError('no Delta contract is pinned for the network');
 	}
 
+	const destinationChainId = destinationToken.network.chainId;
+
+	assertVeloraDeltaRoute({
+		route: swapDetails.route,
+		sourceTokenAddress: sourceToken.address,
+		sourceChainId: sourceNetwork.chainId,
+		destinationTokenAddress: geSwapEthTokenAddress(destinationToken),
+		destinationChainId,
+		bridgeableTokenAddresses: veloraBridgeableTokenAddresses({
+			tokens: get(fungibleTokens),
+			sourceNetworkId: sourceNetwork.id,
+			destinationToken
+		}),
+		amount: parsedSwapAmount
+	});
+
 	let builtOrder;
+	let permit = '0x';
 
 	const slippageBasisPoints = slippagePercentToBasisPoints(slippageValue);
 
@@ -1559,6 +2099,8 @@ export const fetchVeloraDeltaSwap = async ({
 			value: parsedSwapAmount.toString(),
 			identity
 		});
+
+		permit = encodedPermit;
 
 		progress(ProgressStepsSwap.SWAP);
 
@@ -1593,11 +2135,12 @@ export const fetchVeloraDeltaSwap = async ({
 	}
 
 	// The server derives the signed on-chain minimum (`destAmount`) from the route and the
-	// slippage; re-derive it from the quoted origin output (the leg the on-chain order settles)
-	// and refuse to sign an order that guarantees less than the user accepted.
-	const minDestAmount = calculateSlippage({
-		quoteAmount: BigInt(swapDetails.route.origin.output.amount),
-		slippagePercentage: slippageBasisPoints / 100
+	// slippage; re-derive it from the quoted origin output (the leg the on-chain order settles),
+	// on integers as Velora does, and refuse to sign an order that guarantees less than the user
+	// accepted.
+	const minDestAmount = veloraMinimumAmount({
+		amount: BigInt(swapDetails.route.origin.output.amount),
+		slippageBasisPoints
 	});
 
 	if (BigInt(builtOrder.toSign.value.destAmount) < minDestAmount) {
@@ -1606,7 +2149,26 @@ export const fetchVeloraDeltaSwap = async ({
 		);
 	}
 
-	const hash = getSignParamsEIP712(builtOrder.toSign);
+	assertVeloraDeltaOrder({
+		order: builtOrder.toSign.value,
+		route: swapDetails.route,
+		wallet: userAddress,
+		amount: parsedSwapAmount,
+		permit,
+		feePercent: swapDetails.partner.feePercent,
+		destinationChainId
+	});
+
+	// Hashed with OISY's own domain and types: the API's would let it choose what is signed.
+	const hash = getSignParamsEIP712({
+		domain: {
+			...VELORA_DELTA_EIP712_DOMAIN,
+			chainId: Number(sourceNetwork.chainId),
+			verifyingContract: deltaContract
+		},
+		types: VELORA_DELTA_ORDER_TYPES,
+		value: builtOrder.toSign.value
+	});
 
 	const signature = await signPrehash({
 		hash,
@@ -1642,6 +2204,36 @@ export const fetchVeloraDeltaSwap = async ({
 	await enableSwapDestinationToken({ destinationToken, identity });
 };
 
+/**
+ * Waits until `spender` may spend at least `amount` of `token` for `owner`: an approval just mined
+ * can take a few reads to show. Throws when it still cannot after the retries, so that the swap is
+ * not sent against an allowance it would fail on.
+ */
+export const waitForSwapAllowance = async ({
+	token,
+	owner,
+	spender,
+	networkId,
+	amount
+}: {
+	token: ErcFungibleToken;
+	owner: EthAddress;
+	spender: EthAddress;
+	networkId: NetworkId;
+	amount: bigint;
+}): Promise<void> => {
+	await retryWithDelay({
+		maxRetries: 10,
+		request: async () => {
+			const currentAllowance = await erc20ContractAllowance({ token, owner, spender, networkId });
+
+			if (currentAllowance < amount) {
+				throw new Error(get(i18n).swap.error.unexpected);
+			}
+		}
+	});
+};
+
 export const fetchVeloraMarketSwap = async ({
 	identity,
 	progress,
@@ -1666,13 +2258,22 @@ export const fetchVeloraMarketSwap = async ({
 		fetch: window.fetch
 	});
 
-	const TokenTransferProxy = await sdk.swap.getSpender();
+	if (destinationToken.network.chainId !== sourceNetwork.chainId) {
+		throw veloraRejectedError('a Market swap cannot settle on another network');
+	}
+
+	// The call target and spender are pinned, never taken from the API.
+	const augustusAddress = VELORA_AUGUSTUS_ADDRESSES[sourceNetwork.id];
+
+	if (isNullish(augustusAddress)) {
+		throw veloraRejectedError('no Augustus is pinned for the network');
+	}
 
 	if (isNotDefaultEthereumToken(sourceToken)) {
 		await approveToken({
 			token: sourceToken,
 			from: userAddress,
-			to: TokenTransferProxy,
+			to: augustusAddress,
 			amount: parsedSwapAmount,
 			sourceNetwork,
 			identity,
@@ -1684,33 +2285,61 @@ export const fetchVeloraMarketSwap = async ({
 			progressSteps: ProgressStepsSwap
 		});
 
-		await retryWithDelay({
-			maxRetries: 10,
-			request: async () => {
-				const currentAllowance = await erc20ContractAllowance({
-					token: sourceToken,
-					owner: userAddress,
-					spender: TokenTransferProxy,
-					networkId: sourceNetwork.id
-				});
-				if (currentAllowance < parsedSwapAmount) {
-					throw new Error(get(i18n).swap.error.unexpected);
-				}
-			}
+		await waitForSwapAllowance({
+			token: sourceToken,
+			owner: userAddress,
+			spender: augustusAddress,
+			networkId: sourceNetwork.id,
+			amount: parsedSwapAmount
 		});
 	}
 
 	progress(ProgressStepsSwap.SWAP);
 
+	const srcToken = geSwapEthTokenAddress(sourceToken);
+	const destToken = geSwapEthTokenAddress(destinationToken);
+	const slippageBasisPoints = slippagePercentToBasisPoints(slippageValue);
+
 	const txParams = await sdk.swap.buildTx({
-		srcToken: geSwapEthTokenAddress(sourceToken),
-		destToken: geSwapEthTokenAddress(destinationToken),
+		srcToken,
+		destToken,
 		srcAmount: swapDetails.srcAmount,
-		slippage: slippagePercentToBasisPoints(slippageValue),
+		slippage: slippageBasisPoints,
 		priceRoute: swapDetails,
 		userAddress,
 		partner: OISY_URL_HOSTNAME
 	});
+
+	assertVeloraMarketTransaction({
+		transaction: txParams,
+		augustusAddress,
+		sourceChainId: sourceNetwork.chainId,
+		srcToken,
+		destToken,
+		amount: parsedSwapAmount,
+		isNativeSource: isDefaultEthereumToken(sourceToken),
+		minimum: veloraMinimumAmount({
+			amount: BigInt(swapDetails.destAmount),
+			slippageBasisPoints
+		}),
+		quotedAmount: BigInt(swapDetails.destAmount),
+		feePercent: swapDetails.partnerFee,
+		wallet: userAddress
+	});
+
+	// Velora's gas limit is unsigned, and a failing estimate is a transaction that would revert.
+	let estimatedGas: bigint;
+	try {
+		estimatedGas = await infuraProviders(sourceNetwork.id).estimateGas({
+			from: userAddress,
+			to: augustusAddress,
+			data: txParams.data,
+			value: BigInt(txParams.value)
+		});
+	} catch (_: unknown) {
+		throw veloraRejectedError('the transaction gas could not be estimated');
+	}
+	const swapGas = (estimatedGas * (100n + VELORA_GAS_LIMIT_BUFFER_PERCENT)) / 100n;
 
 	// The transaction is broadcast from here on — the point of no return. `swap`
 	// also kicks off `processTransactionSent`, which populates the pending row in
@@ -1718,8 +2347,9 @@ export const fetchVeloraMarketSwap = async ({
 	// settlement record on top of it.
 	const { hash, nonce } = await swap({
 		from: userAddress,
-		to: txParams.to,
-		transaction: txParams,
+		to: augustusAddress,
+		transaction: { ...txParams, gas: `${swapGas}` },
+		amount: parsedSwapAmount,
 		identity,
 		token: sourceToken,
 		sourceNetwork,

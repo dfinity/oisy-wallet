@@ -4,12 +4,16 @@ import {
 	TIP_SHARE_COPY_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { ProgressStepsTip } from '$lib/enums/progress-steps';
+import * as analytics from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { dirtyWizardState } from '$lib/stores/progressWizardState.store';
+import * as clipboardUtils from '$lib/utils/clipboard.utils';
+import * as shareUtils from '$lib/utils/share.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get, type Writable } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 // Mocked rather than spied on: the component reads a module-level `derived`,
 // which captures its input stores the first time the module is imported.
@@ -68,6 +72,21 @@ describe('TipShare', () => {
 		expect(
 			container.querySelector(`button[data-tid=${TIP_SHARE_COPY_BUTTON}]`)
 		).toBeInTheDocument();
+	});
+
+	it('confirms a copy as done, not with the button label', async () => {
+		// The copy confirmation used to reuse the button label, so it read
+		// "Copy the tip link" after the link had already been copied.
+		vi.spyOn(shareUtils, 'copyText').mockResolvedValue(undefined);
+		const spyCopy = vi.spyOn(clipboardUtils, 'copyToClipboard');
+
+		const { getByTestId } = render(TipShare, { props });
+
+		await fireEvent.click(getByTestId(TIP_SHARE_COPY_BUTTON));
+
+		expect(spyCopy).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ value: link, text: get(i18n).tip.text.link_copied })
+		);
 	});
 
 	describe('opened from History', () => {
@@ -395,6 +414,93 @@ describe('TipShare', () => {
 			expect(queryByText(get(i18n).tip.text.step_reserving)).toBeNull();
 			expect(getByText(get(i18n).tip.text.no_wallet_needed_title)).toBeInTheDocument();
 			expect(getByText(/Claim by/)).toBeInTheDocument();
+		});
+	});
+
+	describe('tracking a share', () => {
+		let share: MockInstance<(data?: ShareData) => Promise<void>>;
+		let track: MockInstance;
+
+		beforeEach(() => {
+			share = vi.fn<(data?: ShareData) => Promise<void>>();
+
+			Object.defineProperty(navigator, 'share', {
+				value: share,
+				configurable: true,
+				writable: true
+			});
+
+			track = vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+		});
+
+		afterEach(() => {
+			Reflect.deleteProperty(navigator, 'share');
+			track.mockRestore();
+		});
+
+		const shareEvents = () =>
+			track.mock.calls
+				.map(([params]) => params)
+				.filter(({ metadata }) => metadata?.event_modifier === 'share');
+
+		const clickShare = () => {
+			const { getByLabelText } = render(TipShare, { props });
+
+			getByLabelText(get(i18n).tip.text.share_link).click();
+		};
+
+		it('counts a share only once the share sheet has answered', async () => {
+			let resolveShare: () => void = () => {};
+
+			share.mockImplementation(
+				() =>
+					new Promise<void>((resolve) => {
+						resolveShare = resolve;
+					})
+			);
+
+			clickShare();
+
+			await tick();
+
+			expect(shareEvents()).toHaveLength(0);
+
+			resolveShare();
+
+			await waitFor(() => expect(shareEvents()).toHaveLength(1));
+
+			const [{ metadata }] = shareEvents();
+
+			expect(metadata?.result_status).toBe('success');
+			expect(share).toHaveBeenCalledExactlyOnceWith({ text: link });
+		});
+
+		it('counts an aborted share as a cancel, not a failure', async () => {
+			// A dismissed sheet and a device with no share target both reject with
+			// `AbortError`, so a cancel covers both.
+			share.mockRejectedValue(new DOMException('Share canceled', 'AbortError'));
+
+			clickShare();
+
+			await waitFor(() => expect(shareEvents()).toHaveLength(1));
+
+			const [{ metadata }] = shareEvents();
+
+			expect(metadata?.result_status).toBe('cancel');
+			expect(metadata).not.toHaveProperty('result_error_type');
+		});
+
+		it('counts a share that failed as an error', async () => {
+			share.mockRejectedValue(new DOMException('Not allowed', 'NotAllowedError'));
+
+			clickShare();
+
+			await waitFor(() => expect(shareEvents()).toHaveLength(1));
+
+			const [{ metadata }] = shareEvents();
+
+			expect(metadata?.result_status).toBe('error');
+			expect(metadata?.result_error_type).toBe('unknown');
 		});
 	});
 });

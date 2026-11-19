@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import ListItemCheckbox from '$lib/components/common/ListItemCheckbox.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import {
@@ -93,7 +93,7 @@
 	};
 </script>
 
-<div class="flex flex-col gap-3">
+<div class="flex flex-col gap-2">
 	<!--
 		Keep the search input out of any scroll container so it stays put
 		when the user scrolls the rows. `MultiSelectDropdown` no longer
@@ -108,39 +108,36 @@
 		bind:filter={searchValue}
 	/>
 
-	<ul class="m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-0">
+	<ul class="m-0 flex max-h-80 list-none flex-col overflow-y-auto p-0">
 		{#each visibleTokens as token (tokenRenderKey(token))}
 			{@const key = tokenRenderKey(token)}
 
 			{#if nonNullish(key)}
-				<li>
-					<Checkbox
-						checked={selectedSet.has(key)}
-						inputId={tokenInputId(token)}
-						onChange={() => onToggleToken({ token, key })}
-						text="inline"
-					>
-						<span class="inline-flex items-center gap-2">
-							<span class="flex shrink-0 items-center">
-								<TokenLogo data={token} logoSize="xxs" />
-							</span>
-							<span class="text-sm">
-								<span class="font-medium">{token.symbol}</span>
-								<span class="text-tertiary"
-									>{replacePlaceholders($i18n.tokens.text.on_network, {
-										$network: token.network.name
-									})}</span
-								>
-							</span>
+				<ListItemCheckbox
+					checked={selectedSet.has(key)}
+					inputId={tokenInputId(token)}
+					onChange={() => onToggleToken({ token, key })}
+				>
+					<span class="inline-flex min-w-0 items-center gap-2">
+						<span class="flex shrink-0 items-center">
+							<TokenLogo data={token} logoSize="xxs" />
 						</span>
-					</Checkbox>
-				</li>
+						<span class="truncate">
+							<span class="font-medium">{token.symbol}</span>
+							<span class="text-tertiary"
+								>{replacePlaceholders($i18n.tokens.text.on_network, {
+									$network: token.network.name
+								})}</span
+							>
+						</span>
+					</span>
+				</ListItemCheckbox>
 			{/if}
 		{/each}
 	</ul>
 
 	{#if isCapped}
-		<p class="text-xs text-tertiary">
+		<p class="px-(--menu-row-padding-inline) text-xs text-tertiary">
 			{replacePlaceholders($i18n.transaction.filter.showing_partial, {
 				$shown: `${VISIBLE_LIMIT}`,
 				$total: `${filteredTokens.length}`
@@ -148,36 +145,3 @@
 		</p>
 	{/if}
 </div>
-
-<style lang="scss">
-	@use '../../../styles/mixins/media';
-
-	li :global(.checkbox) {
-		--checkbox-label-order: 1;
-		--checkbox-padding: 6px 8px;
-		justify-content: flex-start;
-		align-items: center;
-		gap: 8px;
-		min-height: 34px;
-		border-radius: 6px;
-		cursor: pointer;
-	}
-
-	li :global(.checkbox:hover) {
-		background: var(--color-background-brand-subtle-10);
-	}
-
-	li :global(label) {
-		flex: initial;
-		display: inline-flex;
-		align-items: center;
-	}
-
-	// On mobile, give each row a comfortable touch target so checkboxes
-	// are easier to tap. The desktop dropdown keeps its denser layout.
-	@media (max-width: #{media.$breakpoint-medium - 1px}) {
-		li :global(.checkbox) {
-			--checkbox-padding: 12px;
-		}
-	}
-</style>

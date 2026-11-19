@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import LiquidiumActivationFeeInfo from '$lib/components/liquidium/borrow/LiquidiumActivationFeeInfo.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -80,6 +81,8 @@
 		{#snippet label()}{$i18n.liquidium.text.provider}{/snippet}
 		{#snippet mainValue()}{liquidium.name}{/snippet}
 	</ModalValue>
+
+	<LiquidiumActivationFeeInfo {market} />
 
 	{#if healthLevel === 'critical'}
 		<MessageBox level="error" styleClass="mt-4">

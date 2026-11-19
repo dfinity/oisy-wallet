@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import { erc20CustomTokensInitialized } from '$eth/derived/erc20.derived';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
@@ -10,6 +9,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	let explorerUrl = $derived(
 		nonNullish($pageToken)

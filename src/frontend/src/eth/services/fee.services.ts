@@ -46,15 +46,19 @@ const OP_STACK_CHAIN_IDS: EthereumChainId[] = [BASE_NETWORK.chainId, BASE_SEPOLI
 // transaction would never be included. Letting it throw surfaces the problem and retries it, and
 // the call shares a provider with the rest of the fee data, so there is little for it to fail on
 // alone. `undefined` here means the chain has no such fee, never that we failed to read it.
-const getL1DataFee = async ({
+// `unsignedTxSize` bounds the transaction's size: a transfer's by default, larger for one that
+// carries calldata.
+export const getL1DataFee = async ({
 	chainId,
-	provider
+	provider,
+	unsignedTxSize = OP_STACK_UNSIGNED_TX_SIZE
 }: {
 	chainId: EthereumChainId;
 	provider: InfuraProvider;
+	unsignedTxSize?: bigint;
 }): Promise<bigint | undefined> =>
 	OP_STACK_CHAIN_IDS.includes(chainId)
-		? await provider.getL1FeeUpperBound(OP_STACK_UNSIGNED_TX_SIZE)
+		? await provider.getL1FeeUpperBound(unsignedTxSize)
 		: undefined;
 
 const getGasFeeFloor = (

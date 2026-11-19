@@ -1,6 +1,9 @@
 import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 import {
+	ADDRESS_LIST_ITEM_BUTTON,
 	ADDRESS_LIST_ITEM_COPY_BUTTON,
+	ADDRESS_LIST_ITEM_DELETE_BUTTON,
+	ADDRESS_LIST_ITEM_EDIT_BUTTON,
 	ADDRESS_LIST_ITEM_INFO_BUTTON
 } from '$lib/constants/test-ids.constants';
 import type { ContactAddressUi } from '$lib/types/contact';
@@ -19,7 +22,7 @@ describe('AddressListItem', () => {
 	const mockI18n = readable(en);
 
 	// Mock the clipboard utils
-	vi.spyOn(clipboardUtils, 'copyToClipboard').mockResolvedValue(undefined);
+	vi.spyOn(clipboardUtils, 'copyToClipboard').mockResolvedValue(true);
 
 	// Setup the context with the mocked i18n store
 	const mockContext = new Map([['i18n', mockI18n]]);
@@ -44,6 +47,47 @@ describe('AddressListItem', () => {
 		addressType: 'Sol',
 		address: mockSolAddress
 	};
+
+	it('shows no hover or pressed fill when the row itself does nothing', () => {
+		const { getByTestId } = render(AddressListItem, {
+			props: { address: icrcAddress },
+			context: mockContext
+		});
+
+		expect(getByTestId(ADDRESS_LIST_ITEM_BUTTON)).not.toHaveClass('row-feedback');
+	});
+
+	it('should darken while pressed, unless a control inside it is pressed', () => {
+		const { getByTestId } = render(AddressListItem, {
+			props: { address: icrcAddress, onClick: vi.fn() },
+			context: mockContext
+		});
+
+		expect(getByTestId(ADDRESS_LIST_ITEM_BUTTON)).toHaveClass('row-feedback');
+	});
+
+	it.each([
+		{ action: 'edit', testId: ADDRESS_LIST_ITEM_EDIT_BUTTON },
+		{ action: 'delete', testId: ADDRESS_LIST_ITEM_DELETE_BUTTON }
+	])('should not run the row click when $action is pressed', async ({ action, testId }) => {
+		// The row's own click copies the address; Edit and Delete must not trigger it.
+		const onClick = vi.fn();
+		const handler = vi.fn();
+
+		const { getByTestId } = render(AddressListItem, {
+			props: {
+				address: icrcAddress,
+				onClick,
+				addressItemActionsProps: action === 'edit' ? { onEdit: handler } : { onDelete: handler }
+			},
+			context: mockContext
+		});
+
+		await fireEvent.click(getByTestId(testId));
+
+		expect(handler).toHaveBeenCalledOnce();
+		expect(onClick).not.toHaveBeenCalled();
+	});
 
 	it('should render ICRC address correctly', () => {
 		const { container } = render(AddressListItem, {
@@ -179,7 +223,8 @@ describe('AddressListItem', () => {
 		// Check that copyToClipboard was called with the correct arguments
 		expect(clipboardUtils.copyToClipboard).toHaveBeenCalledWith({
 			text: en.wallet.text.address_copied,
-			value: icrcAddress.address
+			value: icrcAddress.address,
+			withToast: false
 		});
 	});
 

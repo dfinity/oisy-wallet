@@ -26,8 +26,9 @@
 	let { note, singleUse, onDone }: Props = $props();
 
 	const onCopy = async () => {
-		await copyToClipboard({ value: note, text: $i18n.notes.share.recipient.note_copied });
-		trackPersonalNoteShare({ step: 'copy', side: 'recipient' });
+		if (await copyToClipboard({ value: note, text: $i18n.notes.share.recipient.note_copied })) {
+			trackPersonalNoteShare({ step: 'copy', side: 'recipient' });
+		}
 	};
 </script>
 
@@ -52,7 +53,6 @@
 		<strong>{`${$i18n.notes.text.encrypted_lead} `}</strong
 		>{`${$i18n.notes.text.encrypted_info.trimEnd()} `}<ExternalLink
 			ariaLabel={$i18n.core.text.learn_more}
-			color="blue"
 			href={OISY_NOTES_DOCS_URL}
 			iconVisible={false}
 		>

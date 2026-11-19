@@ -256,6 +256,50 @@
 				}
 			}
 		},
+		"cmc": {
+			"type": "custom",
+			"candid": "https://raw.githubusercontent.com/dfinity/ic/2c2c7c99bd526d8c3da51df32aeeb977e852292d/rs/nns/cmc/cmc.did",
+			"wasm": "https://download.dfinity.systems/ic/2c2c7c99bd526d8c3da51df32aeeb977e852292d/canisters/cycles-minting-canister.wasm.gz",
+			"remote": {
+				"id": {
+					"ic": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"beta": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"staging": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"audit": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"test_be_1": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"test_fe_1": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"test_fe_2": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"test_fe_3": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"test_fe_4": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"test_fe_5": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"test_fe_6": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"local": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+					"old-backend": "rkp4c-7iaaa-aaaaa-aaaca-cai"
+				}
+			}
+		},
+		"cksol_minter": {
+			"type": "custom",
+			"candid": "https://raw.githubusercontent.com/dfinity/cksol/a4d1f032bd81d412c842243e74e6bde8d543f70c/minter/cksol_minter.did",
+			"wasm": "https://github.com/dfinity/cksol/releases/download/cksol_minter-v0.1.0/cksol_minter.wasm.gz",
+			"remote": {
+				"id": {
+					"ic": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"beta": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"staging": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"audit": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"test_be_1": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"test_fe_1": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"test_fe_2": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"test_fe_3": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"test_fe_4": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"test_fe_5": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"test_fe_6": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"local": "lh22c-kyaaa-aaaar-qb5nq-cai",
+					"old-backend": "lh22c-kyaaa-aaaar-qb5nq-cai"
+				}
+			}
+		},
 		"sol_rpc": {
 			"type": "custom",
 			"build": "scripts/build.sol_rpc.sh",

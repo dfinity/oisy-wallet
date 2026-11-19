@@ -106,14 +106,24 @@ describe('TransactionContactCard', () => {
 		expect(modalStore.openAddressBook).toHaveBeenCalled();
 	});
 
-	// `TokenAccountId` has no XRP variant, so the address book cannot prefill or validate such an
-	// address. Offering the action would walk the user into a form they can never submit.
-	it('hides the save address button for an address no contact can hold', () => {
-		const { queryByRole, getByText } = render(TransactionContactCard, {
+	it('shows save address button for an XRP address', () => {
+		const { getByRole } = render(TransactionContactCard, {
 			props: { type: 'send', to: mockXrpAddress }
 		});
 
-		expect(getByText(mockXrpAddress)).toBeTruthy();
+		expect(getByRole('button', { name: get(i18n).address.save.title })).toBeTruthy();
+	});
+
+	// No `TokenAccountId` variant holds an X-address, so the address book cannot prefill or validate
+	// it. Offering the action would walk the user into a form they can never submit.
+	it('hides the save address button for an address no contact can hold', () => {
+		const xAddress = 'XVPcpSm47b1CZkf5AkKM9a84dQHe3m4sBhsrA4XtnBECTAc';
+
+		const { queryByRole, getByText } = render(TransactionContactCard, {
+			props: { type: 'send', to: xAddress }
+		});
+
+		expect(getByText(xAddress)).toBeTruthy();
 
 		expect(queryByRole('button', { name: get(i18n).address.save.title })).toBeNull();
 	});
@@ -186,5 +196,27 @@ describe('TransactionContactCard', () => {
 		const btn = getByLabelText(get(i18n).transaction.alt.open_for_block_explorer);
 
 		expect(btn).toBeTruthy();
+	});
+
+	it('renders top-up case with "canister" label', () => {
+		const canister = 'ywcsb-maaaa-aaaai-q6k7a-cai';
+
+		const { getByText } = render(TransactionContactCard, {
+			props: { type: 'top_up', to: canister }
+		});
+
+		expect(getByText(`${get(i18n).transaction.text.canister}:`, { exact: false })).toBeTruthy();
+		expect(getByText(canister)).toBeTruthy();
+	});
+
+	it('renders an unknown top-up canister as such, with no skeleton and no actions', () => {
+		const { getByText, queryByTestId, queryByRole } = render(TransactionContactCard, {
+			props: { type: 'top_up' }
+		});
+
+		expect(getByText(`${get(i18n).transaction.text.canister}:`)).toBeTruthy();
+		expect(getByText(get(i18n).transaction.text.canister_unknown)).toBeTruthy();
+		expect(queryByTestId(TOKEN_SKELETON_TEXT)).toBeNull();
+		expect(queryByRole('button')).toBeNull();
 	});
 });

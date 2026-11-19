@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import type { BtcAddress } from '$btc/types/address';
 	import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
 	import IcReceiveWalletAddress from '$icp/components/receive/IcReceiveWalletAddress.svelte';
@@ -21,6 +20,7 @@
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		onQRCode: (details: ReceiveQRCode) => void;

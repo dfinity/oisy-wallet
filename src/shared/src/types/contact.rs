@@ -1,17 +1,31 @@
 use std::collections::BTreeMap;
 
 use candid::{CandidType, Deserialize};
+use serde::Deserializer;
 use serde_bytes::ByteBuf;
 
 use super::account::TokenAccountId;
 // Re-export image size limit used by validation so tests and external modules can reference it
 pub use crate::impls::MAX_IMAGE_SIZE_BYTES;
+use crate::validate::Validate;
 
 /// Maximum number of contacts per principal
 pub const MAX_CONTACTS_PER_USER: usize = 500;
 
 /// Maximum number of images per principal (100)
 pub const MAX_IMAGES_PER_PRINCIPAL: usize = 100;
+
+/// Maximum number of contacts per `get_contact_images` call.
+///
+/// A reply in replicated execution, which a certified call gets, is capped at 2 MiB. 16 images of
+/// at most `MAX_IMAGE_SIZE_BYTES` stay well below that.
+pub const MAX_CONTACT_IMAGES_PER_CALL: usize = 16;
+
+/// Encoded size up to which `get_contacts_page` fills a page (1.5 MiB).
+///
+/// The caps allow an address book far larger than the 2 MiB reply of a certified call; the margin
+/// covers the reply's own encoding around the contacts.
+pub const CONTACTS_PAGE_MAX_BYTES: usize = 1_536 * 1024;
 
 /// Represents the MIME type of image.
 #[derive(CandidType, Deserialize, serde::Serialize, Clone, Debug, Eq, PartialEq)]
@@ -52,7 +66,30 @@ pub struct Contact {
     pub name: String,
     pub addresses: Vec<ContactAddressData>,
     pub update_timestamp_ns: u64,
+    #[serde(default, deserialize_with = "deserialize_inline_image")]
     pub image: Option<ContactImage>,
+}
+
+/// Decodes [`Contact::image`], dropping an image that fails [`Validate`].
+///
+/// A principal's contacts are decoded as one [`StoredContacts`] value, and contacts written before
+/// images moved to their own stable map still hold their image inline. Dropping an inline image
+/// that fails validation keeps the rest of that value readable. Requests and the image map still
+/// decode [`ContactImage`] with its validation.
+fn deserialize_inline_image<'de, D>(deserializer: D) -> Result<Option<ContactImage>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    /// [`ContactImage`] through its `remote = "Self"` derive, which skips the validation that
+    /// `validate_on_deserialize!` adds.
+    #[derive(Deserialize)]
+    #[serde(transparent)]
+    struct UnvalidatedImage(#[serde(with = "ContactImage")] ContactImage);
+
+    let image = Option::<UnvalidatedImage>::deserialize(deserializer)?;
+    Ok(image
+        .map(|UnvalidatedImage(image)| image)
+        .filter(|image| image.validate().is_ok()))
 }
 
 #[derive(CandidType, Deserialize, serde::Serialize, Clone, Debug, Eq, PartialEq)]
@@ -90,6 +127,29 @@ pub struct UpdateContactRequest {
     pub addresses: Vec<ContactAddressData>,
     pub update_timestamp_ns: u64,
     pub image: Option<ContactImage>,
+}
+
+/// A page of the caller's contacts, as returned by `get_contacts_page`.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct ContactsPage {
+    /// Contacts in ID order, without their images; `get_contact_images` returns those.
+    pub contacts: Vec<Contact>,
+    /// What to pass as `after` for the next page; none once this page holds the last contact.
+    pub next: Option<u64>,
+}
+
+/// The caller's contacts whose images `get_contact_images` returns.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[serde(remote = "Self")]
+pub struct GetContactImagesRequest {
+    pub contact_ids: Vec<u64>,
+}
+
+/// A contact's image, as returned by `get_contact_images`.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct ContactImageEntry {
+    pub contact_id: u64,
+    pub image: ContactImage,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

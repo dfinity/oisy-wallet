@@ -1,10 +1,14 @@
 import type { SolAddress } from '$sol/types/address';
+import { SolanaNetworks } from '$sol/types/network';
 import type { SolRpcInstruction } from '$sol/types/sol-instructions';
+import type { SolanaSimulatedInnerInstructions } from '$sol/types/sol-rpc';
 import type { MappedSolTransaction, SolTransferLeg } from '$sol/types/sol-transaction';
 import {
 	deriveSolTransferParties,
 	isSolTransferInstruction,
 	isSolTransferSourcesRedundant,
+	mapSolSimulatedTransferLegs,
+	mapSolTransferLegs,
 	solTransferPartyAddress,
 	toSolTransferLeg
 } from '$sol/utils/sol-transfer-parties.utils';
@@ -17,6 +21,8 @@ import {
 	mockSolAddress3,
 	mockSolAddress4
 } from '$tests/mocks/sol.mock';
+import { getBatchInstruction, getTransferCheckedInstruction } from '@solana-program/token';
+import { address } from '@solana/kit';
 
 describe('sol-transfer-parties.utils', () => {
 	const leg = ({
@@ -178,6 +184,41 @@ describe('sol-transfer-parties.utils', () => {
 			});
 		});
 
+		// Whose an account is, is read at the transfer. The accounts named as the user's are every
+		// account they held at any point of the message, so an address closed and opened for a
+		// different holder would otherwise lend each holder's transfers to the other.
+		it('should not list an account that somebody else held at the transfer', () => {
+			const parties = deriveSolTransferParties({
+				legs: [
+					{
+						...leg({ source: mockAtaAddress, destination: mockAtaAddress3 }),
+						sourceHolder: mockSolAddress2
+					}
+				],
+				ownedAddresses: [mockSolAddress, mockAtaAddress]
+			});
+
+			expect(parties).toEqual({ sources: [], destinations: [] });
+		});
+
+		it('should list an account the user held at the transfer, with that holder', () => {
+			const parties = deriveSolTransferParties({
+				legs: [
+					{
+						...leg({ source: mockAtaAddress, destination: mockAtaAddress3 }),
+						sourceHolder: mockSolAddress
+					}
+				],
+				ownedAddresses: [mockSolAddress],
+				addressToOwner: { [mockAtaAddress]: mockSolAddress2 }
+			});
+
+			expect(parties).toEqual({
+				sources: [{ address: mockAtaAddress, owner: mockSolAddress, own: true }],
+				destinations: [{ address: mockAtaAddress3, own: false }]
+			});
+		});
+
 		it('should match on a token account the user owns, not only on their wallet', () => {
 			const parties = deriveSolTransferParties({
 				legs: [leg({ source: mockAtaAddress, destination: mockAtaAddress3 })],
@@ -224,6 +265,119 @@ describe('sol-transfer-parties.utils', () => {
 					userAddress: mockSolAddress
 				})
 			).toBeFalsy();
+		});
+	});
+
+	describe('the transfers a token batch carries', () => {
+		const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+		const mint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+		const transferTo = ({ destination, amount }: { destination: string; amount: bigint }) =>
+			getTransferCheckedInstruction({
+				source: address(mockAtaAddress),
+				mint: address(mint),
+				destination: address(destination),
+				authority: address(mockSolAddress),
+				amount,
+				decimals: 6
+			});
+
+		const batch = () =>
+			getBatchInstruction([
+				transferTo({ destination: mockAtaAddress2, amount: 1n }),
+				transferTo({ destination: mockAtaAddress3, amount: 2n })
+			]);
+
+		const legs = [
+			{ amount: 1n, source: mockAtaAddress, destination: mockAtaAddress2, tokenAddress: mint },
+			{ amount: 2n, source: mockAtaAddress, destination: mockAtaAddress3, tokenAddress: mint }
+		];
+
+		it('should give a leg for each transfer of a batch the message states', () => {
+			expect(mapSolTransferLegs([batch()])).toStrictEqual(legs);
+		});
+
+		it('should give a leg for each transfer of a batch the message states, with a run', async () => {
+			await expect(
+				mapSolSimulatedTransferLegs({
+					instructions: [batch()],
+					innerInstructions: [],
+					network: SolanaNetworks.mainnet,
+					addressToToken: {}
+				})
+			).resolves.toStrictEqual(legs);
+		});
+
+		it('should give a leg for a transfer of a batch a program runs inside its own call', async () => {
+			const [leg] = await mapSolSimulatedTransferLegs({
+				instructions: [
+					{
+						programAddress: address(mockSolAddress4),
+						accounts: [],
+						data: new Uint8Array([1])
+					}
+				],
+				innerInstructions: [
+					{
+						index: 0,
+						instructions: [
+							{
+								program: 'spl-token',
+								programId: address(TOKEN),
+								parsed: {
+									type: 'batch',
+									info: {
+										instructions: [
+											{
+												type: 'transferChecked',
+												info: {
+													source: mockAtaAddress,
+													destination: mockAtaAddress2,
+													authority: mockSolAddress,
+													mint,
+													tokenAmount: { amount: '5', decimals: 6, uiAmountString: '0.000005' }
+												}
+											}
+										]
+									}
+								},
+								stackHeight: 2
+							}
+						]
+					}
+				],
+				network: SolanaNetworks.mainnet,
+				addressToToken: {}
+			});
+
+			expect(leg).toEqual(
+				expect.objectContaining({
+					source: mockAtaAddress,
+					destination: mockAtaAddress2,
+					amount: 5n
+				})
+			);
+		});
+
+		// The RPC returns the calls made inside a batch after all its steps, and nothing says
+		// between which of them a call ran, so a batch of several steps gives no legs in an order
+		// that cannot be trusted.
+		it('should give no leg for a batch the message states when the run returns calls made inside it', async () => {
+			await expect(
+				mapSolSimulatedTransferLegs({
+					instructions: [batch()],
+					innerInstructions: [
+						{
+							index: 0,
+							instructions: [
+								{ programId: address(mockSolAddress4), accounts: [], data: '', stackHeight: 2 }
+							]
+						}
+					] as unknown as SolanaSimulatedInnerInstructions,
+					network: SolanaNetworks.mainnet,
+					addressToToken: {}
+				})
+			).resolves.toStrictEqual([]);
 		});
 	});
 });

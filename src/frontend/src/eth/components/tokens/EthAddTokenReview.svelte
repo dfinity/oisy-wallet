@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { erc4626Tokens } from '$eth/derived/erc4626.derived';
@@ -25,6 +24,7 @@
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { assertIsNetworkEthereum } from '$lib/utils/network.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		contractAddress?: string;

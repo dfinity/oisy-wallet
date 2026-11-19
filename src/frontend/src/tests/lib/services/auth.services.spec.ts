@@ -12,16 +12,21 @@ import {
 	infoSignOut,
 	lockSession,
 	nullishSignOut,
+	signIn,
 	signOut,
 	warnSignOut
 } from '$lib/services/auth.services';
 import { authStore } from '$lib/stores/auth.store';
 import { AUTH_LOCK_KEY } from '$lib/stores/locked.store';
+import { Theme } from '$lib/types/theme';
 import * as eventsUtils from '$lib/utils/events.utils';
 import { emit } from '$lib/utils/events.utils';
+import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
+import { LOCALSTORAGE_THEME_KEY } from '$lib/utils/theme.utils';
 import * as timeUtils from '$lib/utils/time.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import en from '$tests/mocks/i18n.mock';
+import { mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 import type { MockInstance } from 'vitest';
 
@@ -32,6 +37,22 @@ vi.mock('$lib/utils/time.utils', () => ({
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
 }));
+
+const signerPermissionsKeys = [
+	`oisy_signer_https://hello.com_${mockPrincipal.toText()}`,
+	`oisy_signer_https://world.com_${mockPrincipal2.toText()}`
+];
+
+const mockLocalStorage = () => {
+	signerPermissionsKeys.forEach((key) => localStorage.setItem(key, JSON.stringify({ scopes: [] })));
+	localStorage.setItem(LOCALSTORAGE_THEME_KEY, JSON.stringify(Theme.DARK));
+};
+
+const expectOnlySignerPermissionsRemoved = () => {
+	signerPermissionsKeys.forEach((key) => expect(localStorage.getItem(key)).toBeNull());
+
+	expect(localStorage.getItem(LOCALSTORAGE_THEME_KEY)).toEqual(JSON.stringify(Theme.DARK));
+};
 
 const rootLocation = 'https://oisy.com/';
 const activityLocation = 'https://oisy.com/activity';
@@ -63,9 +84,32 @@ describe('auth.services', () => {
 		mockLocation(rootLocation);
 
 		localStorage.clear();
+		sessionStorage.clear();
 	});
 
-	describe.todo('signIn', () => {});
+	describe('signIn', () => {
+		it('should forget the swap slippage saved before', async () => {
+			vi.spyOn(authStore, 'signIn').mockResolvedValue(undefined);
+
+			saveSwapSlippage('8');
+
+			const { success } = await signIn({});
+
+			expect(success).toBe('ok');
+			expect(loadSwapSlippage()).toBeUndefined();
+		});
+
+		it('should keep the swap slippage when the sign-in is cancelled', async () => {
+			vi.spyOn(authStore, 'signIn').mockRejectedValue('UserInterrupt');
+
+			saveSwapSlippage('8');
+
+			const { success } = await signIn({});
+
+			expect(success).toBe('cancelled');
+			expect(loadSwapSlippage()).toBe(8);
+		});
+	});
 
 	describe('signOut', () => {
 		beforeEach(() => {
@@ -105,6 +149,14 @@ describe('auth.services', () => {
 
 			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 			expect(sessionStorage.getItem('key')).toBeNull();
+		});
+
+		it('should remove the signer permissions and keep the other local storage entries', async () => {
+			mockLocalStorage();
+
+			await signOut({});
+
+			expectOnlySignerPermissionsRemoved();
 		});
 
 		it('should clean the IDB storage for all principals', async () => {
@@ -217,6 +269,14 @@ describe('auth.services', () => {
 
 			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 			expect(sessionStorage.getItem('key')).toBeNull();
+		});
+
+		it('should remove the signer permissions and keep the other local storage entries', async () => {
+			mockLocalStorage();
+
+			await errorSignOut(mockText);
+
+			expectOnlySignerPermissionsRemoved();
 		});
 
 		it('should clean the IDB storage for all principals', async () => {
@@ -333,6 +393,14 @@ describe('auth.services', () => {
 			expect(sessionStorage.getItem('key')).toBeNull();
 		});
 
+		it('should remove the signer permissions and keep the other local storage entries', async () => {
+			mockLocalStorage();
+
+			await warnSignOut(mockText);
+
+			expectOnlySignerPermissionsRemoved();
+		});
+
 		it('should clean the IDB storage for all principals', async () => {
 			await warnSignOut(mockText);
 
@@ -425,6 +493,14 @@ describe('auth.services', () => {
 			vi.clearAllMocks();
 		});
 
+		it('should remove the signer permissions and keep the other local storage entries', async () => {
+			mockLocalStorage();
+
+			await infoSignOut({ text: mockText });
+
+			expectOnlySignerPermissionsRemoved();
+		});
+
 		it('should track the sign out event with the provided source', async () => {
 			await infoSignOut({ text: mockText, source: 'signups-closed' });
 
@@ -481,6 +557,14 @@ describe('auth.services', () => {
 
 			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 			expect(sessionStorage.getItem('key')).toBeNull();
+		});
+
+		it('should remove the signer permissions and keep the other local storage entries', async () => {
+			mockLocalStorage();
+
+			await nullishSignOut();
+
+			expectOnlySignerPermissionsRemoved();
 		});
 
 		it('should clean the IDB storage for all principals', async () => {
@@ -602,6 +686,14 @@ describe('auth.services', () => {
 				expect(sessionStorage.getItem('key')).toBeNull();
 			});
 
+			it('should remove the signer permissions and keep the other local storage entries', async () => {
+				mockLocalStorage();
+
+				await idleSignOut();
+
+				expectOnlySignerPermissionsRemoved();
+			});
+
 			it('should not clean the IDB storage for all principals', async () => {
 				await idleSignOut();
 
@@ -709,6 +801,14 @@ describe('auth.services', () => {
 
 				expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 				expect(sessionStorage.getItem('key')).toBeNull();
+			});
+
+			it('should remove the signer permissions and keep the other local storage entries', async () => {
+				mockLocalStorage();
+
+				await idleSignOut();
+
+				expectOnlySignerPermissionsRemoved();
 			});
 
 			it('should not clean the IDB storage for all principals', async () => {
@@ -830,6 +930,14 @@ describe('auth.services', () => {
 
 			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 			expect(sessionStorage.getItem('key')).toBeNull();
+		});
+
+		it('should remove the signer permissions and keep the other local storage entries', async () => {
+			mockLocalStorage();
+
+			await lockSession({});
+
+			expectOnlySignerPermissionsRemoved();
 		});
 
 		it('should not clean the IDB storage for all principals', async () => {

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import AiAssistantBotMessage from '$lib/components/ai-assistant/AiAssistantBotMessage.svelte';
 	import AiAssistantToolResults from '$lib/components/ai-assistant/AiAssistantToolResults.svelte';
 	import AiAssistantUserMessage from '$lib/components/ai-assistant/AiAssistantUserMessage.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ChatMessage } from '$lib/types/ai-assistant';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		messages: ChatMessage[];
@@ -21,20 +21,23 @@
 	<div in:fade>
 		{#if message.role === 'user' && nonNullish(message.data.text)}
 			<AiAssistantUserMessage content={message.data.text} />
-		{:else if message.role === 'assistant' && nonNullish(message.data.text)}
-			<AiAssistantBotMessage
-				content={message.data.text}
-				isLastItem={messages.length - 1 === index}
-				{onRetry}
-				retryable={message.data.retryable}
-			/>
-		{:else if message.role === 'assistant' && nonNullish(message.data.tool?.results)}
-			<AiAssistantToolResults
-				isLastItem={messages.length - 1 === index}
-				{loading}
-				{onSendMessage}
-				results={message.data.tool.results}
-			/>
+		{:else if message.role === 'assistant'}
+			{#if nonNullish(message.data.tool?.results)}
+				<AiAssistantToolResults
+					isLastItem={messages.length - 1 === index}
+					{loading}
+					{onSendMessage}
+					results={message.data.tool.results}
+				/>
+			{/if}
+			{#if nonNullish(message.data.text)}
+				<AiAssistantBotMessage
+					content={message.data.text}
+					isLastItem={messages.length - 1 === index}
+					{onRetry}
+					retryable={message.data.retryable}
+				/>
+			{/if}
 		{/if}
 	</div>
 {/each}

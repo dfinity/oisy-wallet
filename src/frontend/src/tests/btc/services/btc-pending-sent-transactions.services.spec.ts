@@ -1,10 +1,13 @@
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import * as backendAPI from '$lib/api/backend.api';
+import { mockUtxo } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { get } from 'svelte/store';
 
 describe('BTC Pending Sent Transactions Services', () => {
@@ -17,6 +20,7 @@ describe('BTC Pending Sent Transactions Services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		btcPendingSentTransactionsStore.reset();
+		allUtxosStore.reset();
 	});
 
 	describe('loadBtcPendingSentTransactions', () => {
@@ -96,6 +100,72 @@ describe('BTC Pending Sent Transactions Services', () => {
 
 			expect(result).toEqual({ success: false, err });
 			expect(get(btcPendingSentTransactionsStore)[address].data).toBeNull();
+			expect(get(allUtxosStore)?.allUtxos).toBeUndefined();
+		});
+
+		describe('with BTC_SEND_VIA_BACKEND_ENABLED', () => {
+			const spendableUtxos = {
+				utxos: [mockUtxo],
+				pending_transactions: [mockPendingTransaction]
+			};
+
+			beforeEach(() => {
+				btcSendViaBackend.enabled = true;
+			});
+
+			it('should store the UTXOs and the pending transactions from one backend call', async () => {
+				const getSpendableBtcUtxosSpy = vi
+					.spyOn(backendAPI, 'getSpendableBtcUtxos')
+					.mockResolvedValue(spendableUtxos);
+				const getPendingBtcTransactionsSpy = vi.spyOn(backendAPI, 'getPendingBtcTransactions');
+
+				const result = await loadBtcPendingSentTransactions({
+					address,
+					identity: mockIdentity,
+					networkId: BTC_MAINNET_NETWORK_ID
+				});
+
+				expect(result).toEqual({ success: true });
+				expect(getSpendableBtcUtxosSpy).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					network: { mainnet: null },
+					iiDelegationChain: []
+				});
+				expect(getPendingBtcTransactionsSpy).not.toHaveBeenCalled();
+				expect(get(allUtxosStore)?.allUtxos).toEqual([mockUtxo]);
+				expect(get(btcPendingSentTransactionsStore)[address].data).toEqual([
+					mockPendingTransaction
+				]);
+			});
+
+			it('should store no UTXOs and `null` pending transactions if the first load fails', async () => {
+				const err = new Error('test');
+				vi.spyOn(backendAPI, 'getSpendableBtcUtxos').mockRejectedValue(err);
+
+				const result = await loadBtcPendingSentTransactions({
+					address,
+					identity: mockIdentity,
+					networkId: BTC_MAINNET_NETWORK_ID
+				});
+
+				expect(result).toEqual({ success: false, err });
+				expect(get(btcPendingSentTransactionsStore)[address].data).toBeNull();
+				expect(get(allUtxosStore)?.allUtxos).toEqual([]);
+			});
+
+			it('should keep the UTXOs already loaded if a reload fails', async () => {
+				allUtxosStore.setAllUtxos({ allUtxos: [mockUtxo] });
+				vi.spyOn(backendAPI, 'getSpendableBtcUtxos').mockRejectedValue(new Error('test'));
+
+				await loadBtcPendingSentTransactions({
+					address,
+					identity: mockIdentity,
+					networkId: BTC_MAINNET_NETWORK_ID
+				});
+
+				expect(get(btcPendingSentTransactionsStore)[address].data).toBeNull();
+				expect(get(allUtxosStore)?.allUtxos).toEqual([mockUtxo]);
+			});
 		});
 	});
 });

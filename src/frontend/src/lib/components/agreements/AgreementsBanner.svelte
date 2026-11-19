@@ -45,6 +45,7 @@
 	<WarningBanner testId={AGREEMENTS_WARNING_BANNER}>
 		<span class="w-full px-2"><Html text={warning} /></span>
 		<button
+			class="hit-area relative press-icon"
 			aria-label={$i18n.core.text.close}
 			data-tid={AGREEMENTS_WARNING_BANNER_CLOSE_BUTTON}
 			onclick={close}

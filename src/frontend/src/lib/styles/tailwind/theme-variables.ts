@@ -94,6 +94,7 @@ export const themeVariables = {
 			'subtle-20': 'var(--color-border-brand-subtle-20)',
 			'subtle-30': 'var(--color-border-brand-subtle-30)',
 			primary: 'var(--color-border-brand-primary)',
+			'primary-alt': 'var(--color-border-brand-primary-alt)',
 			secondary: 'var(--color-border-brand-secondary)',
 			tertiary: 'var(--color-border-brand-tertiary)',
 			disabled: 'var(--color-border-brand-disabled)'
@@ -137,7 +138,8 @@ export const themeVariables = {
 			'secondary-alt': 'var(--color-foreground-brand-secondary-alt)',
 			tertiary: 'var(--color-foreground-brand-tertiary)',
 			'tertiary-alt': 'var(--color-foreground-brand-tertiary-alt)',
-			disabled: 'var(--color-foreground-brand-disabled)'
+			disabled: 'var(--color-foreground-brand-disabled)',
+			hover: 'var(--color-foreground-brand-hover)'
 		},
 		'success-primary': 'var(--color-foreground-success-primary)',
 		'success-alt': 'var(--color-foreground-success-alt)',

@@ -13,7 +13,6 @@
 		</span>
 		<ExternalLink
 			ariaLabel={$i18n.trading.text.learn_more}
-			color="blue"
 			href={OISY_TRADE_LEARN_MORE_URL}
 			iconSize="14"
 		>

@@ -6,6 +6,8 @@ import { notEmptyString } from '@dfinity/utils';
 export const THEME_ATTRIBUTE = 'theme';
 export const LOCALSTORAGE_THEME_KEY = 'nnsTheme';
 
+let themeTransitionFrame: number | undefined;
+
 export const initTheme = (): Theme | undefined => {
 	// No DOM therefore cannot guess the theme
 	if (isNode()) {
@@ -29,7 +31,26 @@ export const initTheme = (): Theme | undefined => {
 export const applyTheme = ({ theme, preserve = true }: { theme: Theme; preserve?: boolean }) => {
 	const { documentElement, head } = document;
 
+	const changingTheme = documentElement.getAttribute(THEME_ATTRIBUTE) !== theme;
+	if (changingTheme) {
+		if (themeTransitionFrame !== undefined) {
+			cancelAnimationFrame(themeTransitionFrame);
+		}
+		documentElement.setAttribute('data-theme-changing', '');
+	}
+
 	documentElement.setAttribute(THEME_ATTRIBUTE, theme);
+
+	if (changingTheme) {
+		// Resolve the new colors with transitions suppressed before restoring them.
+		getComputedStyle(documentElement).getPropertyValue('color');
+		themeTransitionFrame = requestAnimationFrame(() => {
+			themeTransitionFrame = requestAnimationFrame(() => {
+				documentElement.removeAttribute('data-theme-changing');
+				themeTransitionFrame = undefined;
+			});
+		});
+	}
 
 	const color: string = getComputedStyle(documentElement).getPropertyValue('--theme-color');
 

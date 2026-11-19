@@ -6,7 +6,8 @@ import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
 import * as currencyStore from '$lib/stores/currency-exchange.store';
 import * as formatUtils from '$lib/utils/format.utils';
-import { render, screen } from '@testing-library/svelte';
+import en from '$tests/mocks/i18n.mock';
+import { fireEvent, render, screen } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 const staticStore = <T>(v: T) => readable<T>(v);
@@ -33,6 +34,23 @@ describe('EarningPotentialCard', () => {
 
 		// Mock formatCurrency
 		vi.spyOn(formatUtils, 'formatCurrency').mockImplementation(({ value }) => `$${value}.00`);
+	});
+
+	it('labels the help toggle and says whether its explanation is open', async () => {
+		vi.spyOn(tokensUiDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
+			staticStore(1_000)
+		);
+
+		render(EarningPotentialCard, { props: { highestEarningPotentialUsd: 100 } });
+
+		const help = screen.getByRole('button', { name: en.core.text.info });
+
+		expect(help).toHaveAttribute('aria-expanded', 'false');
+		expect(help).toHaveClass('hit-area', 'press-icon');
+
+		await fireEvent.click(help);
+
+		expect(help).toHaveAttribute('aria-expanded', 'true');
 	});
 
 	it('renders yearly earning amount with correct values', () => {

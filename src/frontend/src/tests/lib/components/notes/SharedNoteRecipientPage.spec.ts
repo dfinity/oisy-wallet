@@ -32,7 +32,7 @@ vi.mock('$lib/services/personal-notes-analytics.services', () => ({
 // Copying uses the clipboard API, which jsdom does not implement — stub the util
 // so the copy step (and its analytics) runs deterministically.
 vi.mock('$lib/utils/clipboard.utils', () => ({
-	copyToClipboard: vi.fn().mockResolvedValue(undefined)
+	copyToClipboard: vi.fn().mockResolvedValue(true)
 }));
 
 describe('Share recipient page', () => {

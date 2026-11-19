@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
-	import { fade, slide } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
@@ -59,6 +58,7 @@
 		isUSD1Token as isUSD1TokenUtil,
 		mapTokenUi
 	} from '$lib/utils/token.utils';
+	import { fade, slide } from '$lib/utils/transitions.utils';
 	import { isTrumpToken as isTrumpTokenUtil } from '$sol/utils/token.utils';
 
 	let pageTokenUi = $derived(
@@ -144,6 +144,12 @@
 		isRobinhoodGradient ? 'bg-linear-135 from-55% to-[110%]' : ''
 	);
 
+	// Only on the blocks that hold hero text, never on the card: the modals and popovers opened
+	// from Actions and ContextMenu render inside the card, and `selection:` reaches every descendant.
+	let selectionClasses = $derived(
+		isIcpHero ? '' : 'selection:bg-white selection:text-brand-primary'
+	);
+
 	let rateChangeBackground = $derived.by(() => {
 		if (isIcpHero) {
 			return isDarkTheme ? ('dark' as const) : ('light' as const);
@@ -213,7 +219,7 @@
 				<Back color="current" onlyArrow />
 
 				<div
-					class="my-0.5 flex w-full min-w-0 items-center justify-between gap-4 text-xs text-nowrap sm:text-base"
+					class="my-0.5 flex w-full min-w-0 items-center justify-between gap-4 text-xs text-nowrap sm:text-base {selectionClasses}"
 				>
 					{#if nonNullish(pageTokenUi)}
 						<div class="flex min-w-0 items-center justify-start gap-1 sm:gap-2" in:fade>
@@ -259,14 +265,16 @@
 				<ContextMenu />
 			</div>
 
-			<Balance token={pageTokenUi} />
+			<div class="contents {selectionClasses}">
+				<Balance token={pageTokenUi} />
+			</div>
 		</div>
 	{:else if isNftsPage}
-		<div in:slide={SLIDE_PARAMS}>
+		<div class={selectionClasses} in:slide={SLIDE_PARAMS}>
 			<NftHeroBalance />
 		</div>
 	{:else}
-		<div in:slide={SLIDE_PARAMS}>
+		<div class={selectionClasses} in:slide={SLIDE_PARAMS}>
 			<ExchangeBalance hideBalance={$isPrivacyMode} />
 		</div>
 	{/if}
@@ -276,6 +284,8 @@
 	</div>
 
 	{#if isErc20Icp($pageToken)}
-		<Erc20Icp />
+		<div class="contents {selectionClasses}">
+			<Erc20Icp />
+		</div>
 	{/if}
 </div>

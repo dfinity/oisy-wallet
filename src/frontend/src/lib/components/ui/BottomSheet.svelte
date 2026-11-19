@@ -12,16 +12,21 @@
 		visible: boolean;
 		content: Snippet;
 		footer?: Snippet;
+		// Shown on the header row, left of the close button.
+		title?: string;
 		contentClass?: string;
 		testId?: string;
 		onClose?: () => void;
+		ariaLabel?: string;
 	}
 
 	let {
 		visible = $bindable(),
 		content,
 		footer,
+		title,
 		contentClass = 'min-h-[30vh]',
+		ariaLabel,
 		testId,
 		onClose
 	}: Props = $props();
@@ -42,21 +47,29 @@
 	});
 </script>
 
+{#snippet closeButton(styleClass: string)}
+	<ButtonIcon ariaLabel={$i18n.core.alt.close_details} onclick={handleClose} {styleClass}>
+		{#snippet icon()}
+			<IconClose size="24" />
+		{/snippet}
+	</ButtonIcon>
+{/snippet}
+
 {#if visible}
 	<div class="fixed inset-0 z-14" data-tid={testId}>
-		<BottomSheetContainer transition>
+		<BottomSheetContainer ariaLabel={ariaLabel ?? title} onClose={handleClose} transition>
 			{#snippet header()}
-				<div class="w-full p-4">
-					<ButtonIcon
-						ariaLabel={$i18n.core.alt.close_details}
-						onclick={handleClose}
-						styleClass="text-disabled float-right"
-					>
-						{#snippet icon()}
-							<IconClose size="24" />
-						{/snippet}
-					</ButtonIcon>
-				</div>
+				{#if nonNullish(title)}
+					<div class="flex w-full items-center justify-between gap-4 p-4">
+						<span class="text-lg font-bold">{title}</span>
+
+						{@render closeButton('text-disabled')}
+					</div>
+				{:else}
+					<div class="w-full p-4">
+						{@render closeButton('text-disabled float-right')}
+					</div>
+				{/if}
 			{/snippet}
 
 			<div class="w-full p-4 {contentClass}">

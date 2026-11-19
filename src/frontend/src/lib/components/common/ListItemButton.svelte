@@ -1,34 +1,48 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import IconCheck from '$lib/components/icons/IconCheck.svelte';
+	import IconGixCheck from '$lib/components/icons/IconGixCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 
 	interface Props {
 		onclick: () => void;
 		selectable?: boolean;
 		selected?: boolean;
+		// For a label with parts spread across the row, e.g. a name and a symbol.
+		contentFullWidth?: boolean;
 		children: Snippet;
 		testId?: string;
 	}
 
-	const { onclick, selectable, selected, children, testId }: Props = $props();
+	const {
+		onclick,
+		selectable,
+		selected,
+		contentFullWidth = false,
+		children,
+		testId
+	}: Props = $props();
 </script>
 
 <Button
 	alignLeft
 	colorStyle="tertiary-alt"
+	{contentFullWidth}
 	fullWidth
 	{onclick}
-	styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28"
+	pressed={selectable ? selected : undefined}
+	static
+	styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28 row-feedback menu-row [--focus-outline-offset:-3px]"
 	{testId}
 	transparent
 >
 	{#if selectable}
-		<span class="w-[20px] pt-0.75 text-brand-primary">
+		<span class="flex w-5 shrink-0 items-center text-brand-primary">
 			{#if selected}
-				<IconCheck size="20" />
+				<IconGixCheck size="20px" />
 			{/if}
 		</span>
 	{/if}
-	<span class="font-normal">{@render children()}</span>
+	<span class="font-normal" class:flex-1={contentFullWidth} class:min-w-0={contentFullWidth}
+		>{@render children()}</span
+	>
 </Button>

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import AddressItemActions from '$lib/components/contact/AddressItemActions.svelte';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
@@ -20,6 +19,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		contact: ContactUi;

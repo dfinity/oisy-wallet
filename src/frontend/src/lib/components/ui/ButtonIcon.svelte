@@ -20,6 +20,7 @@
 		height?: 'h-6' | 'h-8' | 'h-10';
 		transparent?: boolean;
 		expanded?: boolean;
+		static?: boolean;
 	}
 
 	let {
@@ -38,7 +39,8 @@
 		height = 'h-10',
 		transparent = false,
 		// Left undefined for non-expander buttons so no `aria-expanded` is emitted.
-		expanded
+		expanded,
+		static: isStatic = false // no shrink on press
 	}: Props = $props();
 </script>
 
@@ -51,6 +53,7 @@
 	class:ease-in-out={loading}
 	class:link
 	class:loading
+	class:no-press={isStatic}
 	class:opened={expanded}
 	class:transition={loading}
 	class:transparent

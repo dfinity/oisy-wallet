@@ -8,11 +8,11 @@ import {
 	buildXrpPayment,
 	deriveXrpLedgerWindow,
 	deriveXrpTransactionHash,
-	isXrpSubmitFinalFailure,
 	isXrpTransactionSuccessful,
-	mapXrpTransaction
+	mapXrpTransaction,
+	xrpLedgerSearchWindow
 } from '$xrp/utils/xrp-transaction.utils';
-import { DEFAULT_DEFINITIONS, encode } from 'ripple-binary-codec';
+import { encode } from 'ripple-binary-codec';
 
 describe('xrp-transaction.utils', () => {
 	const base = {
@@ -764,152 +764,6 @@ describe('xrp-transaction.utils', () => {
 		});
 	});
 
-	describe('isXrpSubmitFinalFailure', () => {
-		// The id the blob derives to. Supplied on both sides by default so the existing cases keep
-		// testing the engine result, and varied explicitly in the identity cases below.
-		const ID = 'A'.repeat(64);
-
-		// `txHash` is read with `in` rather than defaulted, so a case can state that the response
-		// named NO transaction — which a default would silently turn back into a match.
-		const finalFailure = (args: {
-			engineResult: string;
-			accepted?: boolean;
-			txHash?: string;
-			transactionId?: string;
-		}) =>
-			isXrpSubmitFinalFailure({
-				submitResult: {
-					engineResult: args.engineResult,
-					accepted: args.accepted ?? false,
-					txHash: 'txHash' in args ? args.txHash : ID
-				},
-				transactionId: args.transactionId ?? ID
-			});
-
-		// Malformed: the XRPL reference calls a `tem` result final, so this is the only class the
-		// send may report as failed without consulting the ledger.
-		it.each(['temBAD_FEE', 'temBAD_AMOUNT', 'temMALFORMED'])('rejects %s', (engineResult) => {
-			expect(finalFailure({ engineResult, accepted: false })).toBeTruthy();
-		});
-
-		// `tef` may be reapplied, `tel` may be cached and retried, `tefALREADY` reports the blob is
-		// already in the open ledger, `tefPAST_SEQ` reports its sequence consumed — which is what a
-		// resubmitted send gets once the original landed — and `tec` WAS applied. None of them is a
-		// failure to report here; the ledger decides by polling.
-		it.each([
-			'tesSUCCESS',
-			'terQUEUED',
-			'tecUNFUNDED_PAYMENT',
-			'tefALREADY',
-			'tefPAST_SEQ',
-			'tefMAX_LEDGER',
-			'telINSUF_FEE_P'
-		])('does not reject %s', (engineResult) => {
-			expect(finalFailure({ engineResult, accepted: false })).toBeFalsy();
-		});
-
-		// Membership, not a `tem`-shaped pattern. `engine_result` is `z.string()` in the submit
-		// schema, so these can arrive — and the decision is made AFTER the blob was broadcast, so
-		// reading one as definitive reports a transaction that may still land as rejected, which is
-		// what invites a second payment. `temFAKE` is the one a pattern accepted: correctly shaped
-		// and not a code the protocol defines.
-		it.each([
-			'temporary',
-			'tem',
-			'temBAD_fee',
-			'tem BAD_FEE extra',
-			'temBAD_FEE ',
-			' temBAD_FEE',
-			'temFAKE',
-			'temNOT_A_REAL_CODE'
-		])('does not reject the malformed %j', (engineResult) => {
-			expect(finalFailure({ engineResult, accepted: false })).toBeFalsy();
-		});
-
-		// Every `tem` code the protocol defines still is final: checked against
-		// `ripple-binary-codec`'s own list, which is where the pattern came from.
-		it.each(['temBAD_SEND_XRP_LIMIT', 'temREDUNDANT', 'temINVALID_FLAG', 'temUNCERTAIN'])(
-			'still rejects the real code %s',
-			(engineResult) => {
-				expect(finalFailure({ engineResult, accepted: false })).toBeTruthy();
-			}
-		);
-
-		// A node's refusal to take the blob is not evidence that no ledger will include it, so
-		// `accepted: false` must never turn a non-final result into a reported failure.
-		it.each(['tesSUCCESS', 'tefPAST_SEQ', 'terQUEUED', 'tecUNFUNDED_PAYMENT'])(
-			'does not reject %s whether or not it was accepted',
-			(engineResult) => {
-				expect(finalFailure({ engineResult, accepted: false })).toBeFalsy();
-				expect(finalFailure({ engineResult, accepted: true })).toBeFalsy();
-			}
-		);
-
-		// Not the mirror of the above. A `tem` transaction is one NO node can take, so a response
-		// claiming both that it is malformed and that this node took it contradicts itself — and a
-		// self-contradicting response is no basis for the only definitive failure declared after
-		// the blob is broadcast. It falls through to the poll instead.
-		it('does not reject a tem that the node claims to have accepted', () => {
-			expect(finalFailure({ engineResult: 'temBAD_FEE', accepted: true })).toBeFalsy();
-		});
-
-		it('still rejects the same code when the node did not accept it', () => {
-			expect(finalFailure({ engineResult: 'temBAD_FEE', accepted: false })).toBeTruthy();
-		});
-
-		// The response has to be about the blob we broadcast. Nothing else on the submit path ties
-		// it to the transaction, and this is the only branch that reports a definitive failure after
-		// the blob is on the wire — the report that tells a caller to rebuild, on a new sequence.
-		it.each([
-			{ name: 'names another transaction', txHash: 'B'.repeat(64) },
-			{ name: 'names no transaction', txHash: undefined }
-		])('does not reject a tem whose response $name', ({ txHash }) => {
-			expect(finalFailure({ engineResult: 'temBAD_FEE', txHash })).toBeFalsy();
-		});
-
-		// Hex, so case is not significant — unlike the base58 addresses bound elsewhere.
-		it('rejects a tem whose response names this transaction in the other case', () => {
-			expect(finalFailure({ engineResult: 'temBAD_FEE', txHash: ID.toLowerCase() })).toBeTruthy();
-		});
-
-		// The set is generated from `ripple-binary-codec`'s `TRANSACTION_RESULTS` and written out by
-		// hand, so this is what stops a typo or a drift from silently shrinking it.
-		describe('the tem set matches the protocol', () => {
-			// Filtered to the name direction: `DEFAULT_DEFINITIONS.transactionResult` is a
-			// `BytesLookup` that stores names and ordinals in the same object so it can decode both
-			// ways, and only the names are codes. That the name direction is an implementation
-			// detail rather than a documented surface is why the source holds a written-out set and
-			// this read lives in a test.
-			const protocolResults = Object.keys(DEFAULT_DEFINITIONS.transactionResult).filter((code) =>
-				/^[a-z]{3}[A-Z0-9_]*$/.test(code)
-			);
-
-			const protocolTem = protocolResults.filter((code) => code.startsWith('tem')).sort();
-
-			it('treats every tem code the protocol defines as final', () => {
-				const notFinal = protocolTem.filter(
-					(engineResult) => !finalFailure({ engineResult, accepted: false })
-				);
-
-				expect(notFinal).toEqual([]);
-			});
-
-			// The other direction: nothing outside the `tem` class may be final, so a drift that pasted
-			// a `tec` or `tef` code into the set fails here.
-			it('treats no code from another class as final', () => {
-				const wronglyFinal = protocolResults
-					.filter((code) => !code.startsWith('tem'))
-					.filter((engineResult) => finalFailure({ engineResult, accepted: false }));
-
-				expect(wronglyFinal).toEqual([]);
-			});
-
-			it('is exactly as large as the protocol class', () => {
-				expect(protocolTem).toHaveLength(51);
-			});
-		});
-	});
-
 	describe('isXrpTransactionSuccessful', () => {
 		it('is true only for tesSUCCESS', () => {
 			expect(isXrpTransactionSuccessful('tesSUCCESS')).toBeTruthy();
@@ -985,6 +839,24 @@ describe('xrp-transaction.utils', () => {
 		it('refuses a blob that carries no LastLedgerSequence', () => {
 			expect(() => deriveXrpLedgerWindow(blobWith())).toThrow('carries no LastLedgerSequence');
 		});
+
+		// An Active User Transaction row stores `LastLedgerSequence` and nothing
+		// else, and its resolver must search exactly the ledgers the blob's own
+		// window covers — otherwise the node's `searched_all` answer describes a
+		// different range than the one the transaction could be in. One definition,
+		// so the two cannot drift apart.
+		it('gives the same window as the blob-free form', () => {
+			expect(xrpLedgerSearchWindow(1020)).toEqual(deriveXrpLedgerWindow(blobWith(1020)));
+		});
+
+		it.each([5, 1020, 987_654])(
+			'clamps and bounds the blob-free form identically at %i',
+			(lastLedgerSequence) => {
+				expect(xrpLedgerSearchWindow(lastLedgerSequence)).toEqual(
+					deriveXrpLedgerWindow(blobWith(lastLedgerSequence))
+				);
+			}
+		);
 	});
 
 	describe('deriveXrpTransactionHash', () => {

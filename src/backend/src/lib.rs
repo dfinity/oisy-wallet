@@ -15,10 +15,11 @@ use shared::{
         api_keys::ApiKeys,
         backend_config::{Arg, Config},
         bitcoin::{
-            BtcAddPendingTransactionRequest, BtcGetFeePercentilesRequest,
-            BtcGetPendingTransactionsRequest,
+            BtcAddPendingTransactionRequest, BtcBroadcastTransactionRequest, BtcGetBalanceRequest,
+            BtcGetFeePercentilesRequest, BtcGetPendingTransactionsRequest,
+            BtcGetSpendableUtxosRequest,
         },
-        contact::{CreateContactRequest, UpdateContactRequest},
+        contact::{CreateContactRequest, GetContactImagesRequest, UpdateContactRequest},
         custom_token::CustomToken,
         dapp::AddHiddenDappIdRequest,
         exchange::ExchangeRate,
@@ -31,20 +32,22 @@ use shared::{
         result_types::{
             ActiveUserTransactionResult, AddUserDismissedNotificationResult,
             AddUserHiddenDappIdResult, AllowSigningResult, BtcAddPendingTransactionResult,
-            BtcGetFeePercentilesResult, BtcGetPendingTransactionsResult, CancelTipResult,
+            BtcBroadcastTransactionResult, BtcGetBalanceResult, BtcGetFeePercentilesResult,
+            BtcGetPendingTransactionsResult, BtcGetSpendableUtxosResult, CancelTipResult,
             ClaimTipResult, ConsumePersonalNoteShareResult, CreateContactResult,
             CreatePersonalNoteShareResult, CreateTipResult, CreateUserProfileResult,
             DeleteActiveUserTransactionResult, DeleteContactResult, DeletePersonalNoteResult,
             GetActiveUserTransactionsResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
-            GetContactResult, GetContactsResult, GetMyTipsResult, GetPersonalNoteShareResult,
-            GetPersonalNoteSharesCountResult, GetPersonalNotesCountResult, GetPersonalNotesResult,
-            GetTipDetailsResult, GetTipResult, GetTipSecretResult, GetUserProfileResult,
-            GetUserTransactionsResult, PersonalNotesVetkeyResult, SaveUserTransactionsResult,
-            SetPersonalNoteResult, SetTipSecretResult, SetUserShowTestnetsResult,
-            SignOnramperWidgetUrlResult, TipVetkeyResult, UpdateContactResult,
-            UpdateExperimentalFeaturesSettingsResult, UpdateProviderAgreementsResult,
-            UpdateTransactionFilterSettingsResult, UpdateUserAgreementsResult,
-            UpdateUserNetworkSettingsResult,
+            GetContactImagesResult, GetContactResult, GetContactsPageResult, GetContactsResult,
+            GetMyTipsResult, GetPersonalNoteShareResult, GetPersonalNoteSharesCountResult,
+            GetPersonalNotesCountResult, GetPersonalNotesResult, GetTipDetailsResult, GetTipResult,
+            GetTipSecretResult, GetUserProfileResult, GetUserTransactionsResult,
+            MarkActiveUserTransactionsSeenResult, PersonalNotesVetkeyResult,
+            SaveUserTransactionsResult, SetPersonalNoteResult, SetTipSecretResult,
+            SetUserShowTestnetsResult, SignOnramperWidgetUrlResult, TipVetkeyResult,
+            UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
+            UpdateProviderAgreementsResult, UpdateTransactionFilterSettingsResult,
+            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -115,6 +118,10 @@ pub fn post_upgrade(arg: Option<Arg>) {
         }
     }
 
+    // TODO: remove once every canister has been upgraded past the release that ships it; see
+    // `state::token_id_keys`. Runs before the timers that write to these stores are started.
+    state::token_id_keys::clear_stores_with_candid_token_id_keys();
+
     // Attach the personal-notes store eagerly so `stats()` (a query, which
     // cannot run the lazy init) reports the persisted count after an upgrade.
     // Fresh installs (`init`) stay lazy to avoid allocating its memory regions
@@ -127,6 +134,14 @@ pub fn post_upgrade(arg: Option<Arg>) {
     utils::housekeeping::start_periodic_housekeeping_timers();
 
     exchange::start_exchange_rate_timer();
+
+    // TODO: remove once every canister has been upgraded past the release that ships it; see
+    // `contacts::migration`.
+    contacts::start_inline_image_migration();
+
+    // TODO: remove once every canister has been upgraded past the release that ships it; see
+    // `user_profile::migration`.
+    user_profile::start_long_qualifier_cleanup();
 }
 
 export_candid!();

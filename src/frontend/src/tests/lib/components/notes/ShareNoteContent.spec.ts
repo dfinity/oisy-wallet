@@ -105,6 +105,30 @@ describe('ShareNoteContent', () => {
 		await waitFor(() => expect(container).toHaveTextContent(en.notes.share.text.link_copied));
 	});
 
+	it('says inline that the copy failed when the browser blocks the clipboard', async () => {
+		vi.spyOn(shareServices, 'getActiveShareCount').mockResolvedValue(0);
+		vi.spyOn(shareServices, 'createNoteShare').mockResolvedValue({
+			link: 'https://oisy.com/notes/share/tok#k=KEY',
+			token: 'tok'
+		});
+		vi.spyOn(shareUtils, 'copyText').mockRejectedValue(
+			new DOMException('Write permission denied.', 'NotAllowedError')
+		);
+
+		const { getByTestId, getByRole, container } = render(ShareNoteContent, {
+			props: baseProps()
+		});
+
+		await fireEvent.click(getByTestId(NOTES_SHARE_CREATE_BUTTON));
+		await waitFor(() => expect(getByTestId(NOTES_SHARE_LINK_COPY)).toBeInTheDocument());
+
+		await fireEvent.click(getByTestId(NOTES_SHARE_LINK_COPY));
+
+		await waitFor(() => expect(getByRole('alert')).toHaveTextContent(en.core.error.copy_failed));
+
+		expect(container).not.toHaveTextContent(en.notes.share.text.link_copied);
+	});
+
 	it('tracks a create failure without leaking the note text', async () => {
 		// A cap race (TooManyShares) is a create failure that reflects in the UI
 		// without toasting — so it exercises error tracking with no console output.

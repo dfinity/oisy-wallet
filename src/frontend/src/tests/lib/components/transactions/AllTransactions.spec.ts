@@ -13,7 +13,10 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import AllTransactions from '$lib/components/transactions/AllTransactions.svelte';
 import { IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD } from '$lib/constants/app.constants';
-import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
+import {
+	NOTIFICATION_QUALIFIER_MAX_BYTES,
+	NOTIFICATION_VERSIONS
+} from '$lib/constants/notification.constants';
 import { Languages } from '$lib/enums/languages';
 import * as notificationServices from '$lib/services/notification.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
@@ -22,12 +25,15 @@ import { formatList, replaceOisyPlaceholders, replacePlaceholders } from '$lib/u
 import * as infoUtils from '$lib/utils/info.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+import { solUnreadableTransactionsWarningStore } from '$sol/stores/sol-unreadable-transactions-warning.store';
+import { solUnreadableTransactionsStore } from '$sol/stores/sol-unreadable-transactions.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import {
 	IntersectionObserverActive,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
+import { mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
@@ -311,6 +317,65 @@ describe('AllTransactions', () => {
 		vi.restoreAllMocks();
 	});
 
+	describe('unsupported Solana transactions warning', () => {
+		const unsupportedText = (symbols: string[]) =>
+			replacePlaceholders(en.activity.warning.unsupported_sol_transactions, {
+				$token_list: formatList({ items: symbols, language: Languages.ENGLISH })
+			});
+
+		const { signature } = mockSolSignatureResponse();
+
+		beforeEach(() => {
+			solUnreadableTransactionsStore.reset(SOLANA_TOKEN_ID);
+			solUnreadableTransactionsWarningStore.reset();
+		});
+
+		it('renders nothing while no history misses a transaction', () => {
+			const { queryByText } = render(AllTransactions);
+
+			expect(queryByText(unsupportedText(['SOL']))).not.toBeInTheDocument();
+		});
+
+		it('names the token whose history misses a transaction', () => {
+			solUnreadableTransactionsStore.add({ tokenId: SOLANA_TOKEN_ID, signatures: [signature] });
+
+			const { queryByText } = render(AllTransactions);
+
+			expect(queryByText(unsupportedText(['SOL']))).toBeInTheDocument();
+		});
+
+		it('remembers the dismissal per transaction, for the session only', async () => {
+			solUnreadableTransactionsStore.add({ tokenId: SOLANA_TOKEN_ID, signatures: [signature] });
+
+			const spyDismiss = vi.spyOn(notificationServices, 'dismissNotifications').mockResolvedValue();
+			const spySave = vi.spyOn(infoUtils, 'saveHideInfoQualifiers').mockImplementation(() => {});
+
+			const { container, queryByText, unmount } = render(AllTransactions);
+
+			await dismissWarning(container);
+
+			expect(spySave).toHaveBeenCalledWith({
+				key: 'oisy_sol_hide_unsupported_transactions',
+				qualifiers: [`${signature}:`]
+			});
+			expect(spyDismiss).not.toHaveBeenCalled();
+
+			await waitFor(() => expect(queryByText(unsupportedText(['SOL']))).not.toBeInTheDocument());
+
+			// Another transaction the token misses raises the box again.
+			solUnreadableTransactionsStore.add({
+				tokenId: SOLANA_TOKEN_ID,
+				signatures: [mockSolSignatureResponse().signature]
+			});
+
+			await waitFor(() => expect(queryByText(unsupportedText(['SOL']))).toBeInTheDocument());
+
+			unmount();
+			spyDismiss.mockRestore();
+			spySave.mockRestore();
+		});
+	});
+
 	it('renders the info box list', () => {
 		const { getByText } = render(AllTransactions);
 
@@ -470,6 +535,48 @@ describe('AllTransactions', () => {
 					]
 				})
 			);
+		});
+
+		it('should dismiss the no-index-canister warning with a long symbol cut to the limit', async () => {
+			const longSymbol = 'N'.repeat(NOTIFICATION_QUALIFIER_MAX_BYTES + 10);
+			icrcCustomTokensStore.setAll([
+				{ data: { ...tokenWithoutIndexCanister, symbol: longSymbol }, certified: true }
+			]);
+
+			const store = get(icrcCustomTokensStore);
+			const tokenId = store?.at(0)?.data.id;
+			assertNonNullish(tokenId);
+			icTransactionsStore.nullify(tokenId);
+
+			const { getByText, queryByText } = render(AllTransactions);
+
+			const expectedText = replacePlaceholders(
+				replaceOisyPlaceholders(en.activity.warning.no_index_canister),
+				{ $token_list: formatList({ items: [longSymbol], language: Languages.ENGLISH }) }
+			);
+
+			const closeButton = getByText(expectedText)
+				.closest('.bg-warning-light')
+				?.querySelector('button');
+			assertNonNullish(closeButton);
+
+			await fireEvent.click(closeButton);
+
+			expect(notificationServices.dismissNotifications).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					notifications: [
+						{
+							Qualified: {
+								kind: { NoIndexCanister: null },
+								qualifier: 'N'.repeat(NOTIFICATION_QUALIFIER_MAX_BYTES),
+								version: NOTIFICATION_VERSIONS.NoIndexCanister
+							}
+						}
+					]
+				})
+			);
+			// The cut qualifier still matches the long symbol, so the warning stays dismissed.
+			expect(queryByText(expectedText)).not.toBeInTheDocument();
 		});
 	});
 

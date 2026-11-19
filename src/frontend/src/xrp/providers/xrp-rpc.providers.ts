@@ -13,8 +13,8 @@ const rpcHttpUrls: Record<XrpNetworkType, string | undefined> = {
  * the url is resolved from a build-time constant, so nothing has been broadcast and nothing can
  * have been. Every other failure a submit can raise — a rejected `fetch`, a non-ok status, a
  * malformed body — follows a request that may already have been processed, and those must stay
- * ambiguous. `submitAndConfirmXrpTransaction` rethrows this one instead of polling a budget
- * against an endpoint it cannot reach and calling the outcome unknown.
+ * ambiguous. `sendXrp` rethrows this one from the submit rather than swallowing it as a lost
+ * response, so the caller reports a send that did not happen instead of one that was submitted.
  */
 export class XrpRpcNotConfiguredError extends Error {}
 

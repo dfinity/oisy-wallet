@@ -23,7 +23,7 @@ describe('export-data-analytics.services', () => {
 				metadata: {
 					event_key: 'type',
 					event_value: 'tokens_basic',
-					source_location: 'settings_page',
+					source_location: 'tools_page',
 					result_status: 'success'
 				}
 			});
@@ -40,7 +40,7 @@ describe('export-data-analytics.services', () => {
 				metadata: {
 					event_key: 'type',
 					event_value: 'transactions_extended',
-					source_location: 'settings_page',
+					source_location: 'tools_page',
 					result_status: 'success'
 				}
 			});
@@ -59,7 +59,7 @@ describe('export-data-analytics.services', () => {
 				metadata: {
 					event_key: 'type',
 					event_value: 'transactions_basic',
-					source_location: 'settings_page',
+					source_location: 'tools_page',
 					result_status: 'error',
 					result_error: 'row build failed',
 					result_error_code: 'build_failed'
@@ -79,7 +79,7 @@ describe('export-data-analytics.services', () => {
 				metadata: {
 					event_key: 'type',
 					event_value: 'tokens_extended',
-					source_location: 'settings_page',
+					source_location: 'tools_page',
 					result_status: 'error',
 					result_error_code: 'fx_rate_unavailable'
 				}

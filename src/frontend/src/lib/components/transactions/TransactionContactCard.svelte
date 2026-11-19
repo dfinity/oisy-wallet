@@ -15,7 +15,10 @@
 	import { getContactForAddress, mapAddressToContactAddressUi } from '$lib/utils/contact.utils';
 
 	interface Props {
-		type: 'send' | 'receive' | 'approve';
+		// With `top_up`, `to` is the canister the top-up went to, which receives cycles rather
+		// than the tokens, or nothing when it cannot be known, as for an ICP top-up to a canister
+		// no contact holds.
+		type: 'send' | 'receive' | 'approve' | 'top_up';
 		to?: string;
 		toExplorerUrl?: string;
 		from?: string;
@@ -37,13 +40,23 @@
 	}: Props = $props();
 
 	let address: string | undefined = $derived(
-		type === 'send' && nonNullish(to)
+		(type === 'send' || type === 'top_up') && nonNullish(to)
 			? to
 			: type === 'receive' && nonNullish(from)
 				? from
 				: type === 'approve' && nonNullish(approveSpender)
 					? approveSpender
 					: undefined
+	);
+
+	let addressLabel: string = $derived(
+		type === 'send'
+			? $i18n.transaction.text.to
+			: type === 'top_up'
+				? $i18n.transaction.text.canister
+				: type === 'approve'
+					? $i18n.transaction.text.for
+					: $i18n.transaction.text.from
 	);
 
 	let contact: ContactUi | undefined = $derived(
@@ -75,13 +88,7 @@
 		{/snippet}
 		{#snippet content()}
 			<span class="mx-1 flex flex-col items-start text-left">
-				<span class="font-bold"
-					>{type === 'send'
-						? $i18n.transaction.text.to
-						: type === 'approve'
-							? $i18n.transaction.text.for
-							: $i18n.transaction.text.from}: {contact?.name}</span
-				>
+				<span class="font-bold">{addressLabel}: {contact?.name}</span>
 				<span class="w-full truncate">{address}</span>
 
 				{#if isNullish(contact) && isSaveable}
@@ -110,20 +117,34 @@
 				copyAddress={address}
 				copyAddressText={type === 'send'
 					? $i18n.transaction.text.to_copied
-					: type === 'approve'
-						? $i18n.transaction.text.for_copied
-						: $i18n.transaction.text.from_copied}
-				externalLink={type === 'send'
+					: type === 'top_up'
+						? $i18n.transaction.text.canister_copied
+						: type === 'approve'
+							? $i18n.transaction.text.for_copied
+							: $i18n.transaction.text.from_copied}
+				externalLink={type === 'send' || type === 'top_up'
 					? toExplorerUrl
 					: type === 'approve'
 						? approveSpenderExplorerUrl
 						: fromExplorerUrl}
-				externalLinkAriaLabel={type === 'send'
+				externalLinkAriaLabel={type === 'send' || type === 'top_up'
 					? $i18n.transaction.alt.open_to_block_explorer
 					: type === 'approve'
 						? $i18n.transaction.alt.open_for_block_explorer
 						: $i18n.transaction.alt.open_from_block_explorer}
 			/>
+		{/snippet}
+	</AddressCard>
+{:else if type === 'top_up'}
+	<AddressCard>
+		{#snippet logo()}
+			<AvatarWithBadge />
+		{/snippet}
+		{#snippet content()}
+			<span class="mx-1 flex flex-col items-start text-left">
+				<span class="font-bold">{addressLabel}:</span>
+				<span class="w-full truncate">{$i18n.transaction.text.canister_unknown}</span>
+			</span>
 		{/snippet}
 	</AddressCard>
 {:else}

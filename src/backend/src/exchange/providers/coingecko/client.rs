@@ -46,14 +46,22 @@ struct CoinGeckoPrice {
 impl From<CoinGeckoPrice> for ExchangeData {
     fn from(p: CoinGeckoPrice) -> Self {
         Self {
-            timestamp_ns: p
-                .last_updated_at
-                .map_or_else(time, |secs| secs * 1_000_000_000),
+            timestamp_ns: timestamp_ns(p.last_updated_at, time()),
             price: p.usd,
             price_24h_change_pct: p.usd_24h_change,
             market_cap: p.usd_market_cap,
         }
     }
+}
+
+/// `last_updated_at` in nanoseconds, capped at `now_ns`, or `now_ns` when it is missing.
+///
+/// A price's freshness window starts at its timestamp, so the cap keeps a timestamp ahead of the
+/// canister clock from making a price look fresh for longer than one received now.
+fn timestamp_ns(last_updated_at: Option<u64>, now_ns: u64) -> u64 {
+    last_updated_at.map_or(now_ns, |secs| {
+        secs.saturating_mul(1_000_000_000).min(now_ns)
+    })
 }
 
 pub struct CoinGeckoClient {
@@ -147,8 +155,32 @@ impl CoinGeckoClient {
 #[cfg(test)]
 mod tests {
     use super::{
-        response_bytes_for, MAX_RESPONSE_BYTES, MIN_RESPONSE_BYTES, PER_ITEM_RESPONSE_BYTES,
+        response_bytes_for, timestamp_ns, MAX_RESPONSE_BYTES, MIN_RESPONSE_BYTES,
+        PER_ITEM_RESPONSE_BYTES,
     };
+
+    const NOW_NS: u64 = 1_700_000_000 * 1_000_000_000;
+
+    #[test]
+    fn timestamp_ns_converts_past_seconds() {
+        assert_eq!(
+            timestamp_ns(Some(1_600_000_000), NOW_NS),
+            1_600_000_000 * 1_000_000_000
+        );
+    }
+
+    #[test]
+    fn timestamp_ns_defaults_to_now() {
+        assert_eq!(timestamp_ns(None, NOW_NS), NOW_NS);
+    }
+
+    #[test]
+    fn timestamp_ns_caps_times_ahead_of_now() {
+        assert_eq!(timestamp_ns(Some(1_700_000_001), NOW_NS), NOW_NS);
+        // 2100-01-01T00:00:00Z.
+        assert_eq!(timestamp_ns(Some(4_102_444_800), NOW_NS), NOW_NS);
+        assert_eq!(timestamp_ns(Some(u64::MAX), NOW_NS), NOW_NS);
+    }
 
     #[test]
     fn response_bytes_zero_and_one_item_hit_floor() {

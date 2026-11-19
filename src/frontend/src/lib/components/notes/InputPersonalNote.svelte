@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import { MAX_PERSONAL_NOTE_LENGTH } from '$lib/constants/app.constants';
 	import { NOTES_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { personalNoteLength } from '$lib/utils/personal-note.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		value: string;

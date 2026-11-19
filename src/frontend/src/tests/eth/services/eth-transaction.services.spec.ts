@@ -1,10 +1,13 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
+import * as alchemyProvidersLib from '$eth/providers/alchemy.providers';
 import * as ethBalanceServices from '$eth/services/eth-balance.services';
 import { processErc20Transaction } from '$eth/services/eth-transaction.services';
 import * as ethTransactionsServices from '$eth/services/eth-transactions.services';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { TransactionNotFoundError } from 'viem';
 
 describe('eth-transaction.services', () => {
 	describe('processErc20Transaction', () => {
@@ -55,6 +58,45 @@ describe('eth-transaction.services', () => {
 				networkId: ETHEREUM_NETWORK.id,
 				chainId: ETHEREUM_NETWORK.chainId,
 				standard: mockValidErc20Token.standard
+			});
+		});
+
+		describe('a pending transaction', () => {
+			const getTransaction = vi.fn();
+			const wait = vi.fn();
+
+			const processPending = () =>
+				processErc20Transaction({
+					identity: mockIdentity,
+					hash,
+					value: 1n,
+					token: mockValidErc20Token,
+					type: 'pending'
+				});
+
+			beforeEach(() => {
+				vi.spyOn(alchemyProvidersLib, 'alchemyProviders').mockReturnValue({
+					getTransaction,
+					wait
+				} as unknown as AlchemyProvider);
+			});
+
+			// Viem throws where the provider's own contract says `null`: Base often does not see a
+			// transaction just broadcast.
+			it('should skip one the provider cannot find yet, rather than reject', async () => {
+				getTransaction.mockRejectedValue(new TransactionNotFoundError({ hash }));
+
+				await expect(processPending()).resolves.toBeUndefined();
+
+				expect(wait).not.toHaveBeenCalled();
+			});
+
+			it('should reject any other failure to read it', async () => {
+				const err = new Error('rpc down');
+
+				getTransaction.mockRejectedValue(err);
+
+				await expect(processPending()).rejects.toThrow(err);
 			});
 		});
 	});

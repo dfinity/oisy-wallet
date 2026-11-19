@@ -1,3 +1,6 @@
+import type { UniswapSwap } from '$eth/types/uniswap';
+import type { Token } from '$lib/types/token';
+import type { Principal } from '@icp-sdk/core/principal';
 import type { TypedDataDomain, TypedDataField } from 'ethers/hash';
 
 export type WalletConnectEthApproveRequestMessage = string;
@@ -34,9 +37,50 @@ export type WalletConnectEthCall =
 	// `increaseAllowance` / `decreaseAllowance`: an allowance granted or reduced by a delta rather
 	// than set to an absolute amount.
 	| { type: 'erc20AllowanceDelta'; increase: boolean }
+	// `deposit(bytes32)` to the ckETH helper contract, converting the native value to ckETH for the
+	// principal it names. That principal is read off the calldata and is always the user's own.
+	| { type: 'ckEthDeposit'; principal: Principal }
+	// Calldata addressed to the ckETH helper contract that is not a deposit to the user's own
+	// principal. OISY does not sign it.
+	| { type: 'ckEthDepositRefused' }
+	// A deposit (`deposit(bytes32)`, or `depositEth` or `depositErc20`) on a network with ckETH helper
+	// contracts, while OISY has not yet confirmed the helper's address and so cannot tell whether the
+	// deposit converts anything, or for whom. Held until it can.
+	| { type: 'ckEthHelperUnconfirmed' }
+	// `depositEth` or `depositErc20` to the ckETH minter's helper contract that deposits to a principal
+	// and a subaccount, of a token the minter converts: what the wallet pays and the account the ck
+	// token is minted to.
+	| { type: 'ckDeposit'; deposit: WalletConnectEthCkDeposit }
+	// A deposit to that helper contract that OISY does not sign: one it cannot read, or one of a token
+	// the minter does not convert.
+	| { type: 'ckDepositRefused' }
+	// `execute` on a Uniswap Universal Router OISY pins for the request's network, every command of
+	// which OISY reads: the swap it makes, stated from what the router enforces.
+	| { type: 'uniswapSwap'; swap: UniswapSwap }
 	// The selector is carried so the review can name the call it could not decode. It is `undefined`
 	// when the calldata is too short to hold one.
 	| { type: 'unknown'; selector: string | undefined };
+
+/**
+ * A deposit to the ckETH minter's helper contract that deposits to a principal and a subaccount.
+ *
+ * The minter mints the ck token of what is deposited to the account the call names, whoever that
+ * is, so the account is stated as the calldata names it and the review tells the user's own account
+ * apart from any other.
+ */
+export interface WalletConnectEthCkDeposit {
+	// What the wallet pays: the network's native token for `depositEth`, the ERC-20 for `depositErc20`.
+	token: Token;
+	amount: bigint;
+	// The ck token the minter mints for it: the twin of the native token, or the ckERC-20 the minter
+	// names for the ERC-20.
+	ckTokenSymbol: string;
+	owner: Principal;
+	// `undefined` for the owner's default account.
+	subaccount?: Uint8Array;
+	// Whether the account is the default account of the signed-in user, the one OISY shows.
+	ownAccount: boolean;
+}
 
 export interface WalletConnectEthSignTypedDataV4 {
 	domain: TypedDataDomain;
@@ -52,12 +96,26 @@ export interface WalletConnectEthSignTypedDataV4 {
  */
 export interface WalletConnectEthTypedDataApproval {
 	spender?: string;
+	// The address an ERC-3009 authorization sends to. That struct names who receives the tokens
+	// rather than who may take them, so it states this in place of a spender.
+	recipient?: string;
+	// One entry per token the signature lets move out of the wallet, in the order the struct lists
+	// them: as an allowance for a permit, as a transfer for an authorization. Most schemas name one;
+	// Permit2's batches name as many as they declare, all for the same spender.
+	allowances: WalletConnectEthTypedDataAllowance[];
+	// `true` when the signature also covers a Permit2 witness: a struct of the dApp's own that the
+	// spender checks when it takes the tokens. The entries above state the transfer, which a witness
+	// cannot widen; nothing here describes the witness itself.
+	hasWitness?: boolean;
+}
+
+export interface WalletConnectEthTypedDataAllowance {
 	token?: string;
 	amount?: bigint;
 	// `true` when the allowance is the largest its schema can express, which is how an unlimited
 	// approval is written. Carried as a fact rather than left to the view to work out, because
-	// each schema says it differently: a saturated `uint160` for Permit2, a saturated `uint256`
-	// for ERC-2612, and a bare `allowed` bool for DAI.
+	// each schema says it differently: a saturated `uint160` for Permit2's allowances, a saturated
+	// `uint256` for ERC-2612 and Permit2's transfers, and a bare `allowed` bool for DAI.
 	unlimited?: boolean;
 	expiration?: number;
 }

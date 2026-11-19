@@ -19,6 +19,7 @@
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 	import SolWalletConnectSignMessageReview from '$sol/components/wallet-connect/SolWalletConnectSignMessageReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
 	import {
@@ -116,6 +117,7 @@
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignMessageReview
 				{application}
+				flaggedAsScam={!acceptedContext(request.verifyContext)}
 				{message}
 				{method}
 				onApprove={approve}

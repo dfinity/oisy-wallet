@@ -44,8 +44,9 @@
 		}) as ProgressSteps;
 	};
 
+	// A step can fail without the run moving on, so a new `failedSteps` alone must redraw too.
 	$effect(() => {
-		[progressStep];
+		[progressStep, failedSteps];
 
 		untrack(() => updateSteps());
 	});

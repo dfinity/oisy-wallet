@@ -40,7 +40,8 @@ vi.mock('$lib/rest/icpswap.rest', () => ({
 vi.mock('$lib/rest/kongswap.rest', () => ({
 	fetchBatchKongSwapPrices: vi.fn()
 }));
-vi.mock('$lib/utils/exchange.utils', () => ({
+vi.mock('$lib/utils/exchange.utils', async (importActual) => ({
+	...(await importActual()),
 	formatIcpSwapToCoingeckoPrices: vi.fn(),
 	formatKongSwapToCoingeckoPrices: vi.fn(),
 	findMissingLedgerCanisterIds: vi.fn()

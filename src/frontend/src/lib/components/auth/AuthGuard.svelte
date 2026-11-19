@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import LandingPage from '$lib/components/auth/LandingPage.svelte';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		children?: Snippet;

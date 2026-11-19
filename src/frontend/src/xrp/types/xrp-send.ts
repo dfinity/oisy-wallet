@@ -1,4 +1,7 @@
-import type { XrpPendingTransaction } from '$xrp/types/xrp-transaction';
+import type {
+	ActiveUserTransactionData,
+	ActiveUserTransactionRef
+} from '$declarations/backend/backend.did';
 
 export class XrpAmountAssertionError extends Error {}
 
@@ -33,39 +36,46 @@ export class XrpDestinationTagRequiredError extends Error {}
 export class XrpSelfDestinationError extends Error {}
 
 /**
- * The transaction reached a validated ledger and failed there — a `tec*` result, which claims the
- * fee. Distinct from an indeterminate confirmation: the outcome is known and final.
+ * A payment from this address has not resolved yet, so this one is refused.
+ *
+ * An XRPL `Sequence` is a nonce, and while the first payment is open there is no safe sequence for
+ * a second: reusing it answers `tefPAST_SEQ` or replaces a queued transaction, and taking the next
+ * one signs into a gap that expires — which reports "nothing was sent" for a payment that can
+ * still apply. There is deliberately no override; the only correct action is to wait. The
+ * preliminary gate fires before reads or signing, while backend atomic enforcement may reject
+ * after signing; both paths reject before broadcast, so nothing left the wallet.
  */
-export class XrpTransactionFailedError extends Error {}
+export class XrpSendAlreadyInFlightError extends Error {}
 
 /**
- * The ledger advanced past the transaction's `LastLedgerSequence` without including it, so it can
- * never be applied. Definitive: sending again is safe, and must build a new transaction because
- * this one is now unusable.
+ * The send was refused because the invariant could not be held at all — the record could not be
+ * read or written.
+ *
+ * Distinct from {@link XrpSendAlreadyInFlightError}: there is no known open payment, and the
+ * correction is to try again rather than to wait for something to settle. It fails closed on
+ * purpose. Proceeding would drop the one-unresolved-payment-per-address guarantee at exactly the
+ * moment a user is most likely to retry, and would leave the payment with no record to resolve it.
  */
-export class XrpSendExpiredError extends Error {}
+export class XrpSendNotGuardedError extends Error {}
 
 /**
- * The send's outcome could not be established — the node stopped answering, or confirmation ran
- * out of attempts before the ledger reached expiry. The payment may or may not have happened.
- *
- * The signed transaction travels with the error so a retry CAN resubmit THIS transaction instead
- * of building a new one — the difference between a retry the ledger refuses on its already-consumed
- * sequence and a second payment.
- *
- * Nothing consumes it yet, so the hazard is NOT closed. `pending` only survives as a field on the
- * rejected promise: nothing in the XRP folder persists it, and the send wizard reports the error
- * and closes, after which it is unreachable. A user who dismisses that and sends again still
- * builds a fresh transaction, which is the second payment this is meant to prevent. Consuming it
- * needs a surface that resolves an unconfirmed send, which belongs with transaction history; the
- * in-repo precedent is BTC, which persists pending send state server-side via
- * `addPendingBtcTransaction` so it survives a reload and reaches other devices.
+ * The AUT an XRP payment is recorded under — the record that holds the one-payment-in-flight
+ * invariant and that the ledger resolution closes. A send is recorded under its own `Xrp` AUT, and
+ * a swap's deposit under the swap's `NearIntents` AUT, since that payment is part of the swap and
+ * not a transaction of its own.
  */
-export class XrpSendIndeterminateError extends Error {
-	readonly pending: XrpPendingTransaction;
-
-	constructor({ message, pending }: { message: string; pending: XrpPendingTransaction }) {
-		super(message);
-		this.pending = pending;
-	}
+export interface XrpPaymentRecord {
+	data: ActiveUserTransactionData;
+	externalRefs: ActiveUserTransactionRef[];
+	progressStep?: string;
 }
+
+/**
+ * Builds the payment's record from the two values it is polled with, both derived from the signed
+ * blob. Throws {@link XrpSendNotGuardedError} when the payment cannot be described as a record,
+ * which refuses it before anything is broadcast.
+ */
+export type XrpPaymentRecordBuilder = (pollKeys: {
+	txHash: string;
+	lastLedgerSequence: number;
+}) => XrpPaymentRecord;
