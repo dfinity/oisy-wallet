@@ -208,7 +208,7 @@
 				href: url(AppPath.Activity),
 				selected: isRouteActivity(page)
 			},
-			// Trade and Borrow are NEW Finance destinations. Trade is gated by the
+			// Trade and Borrow are Finance destinations. Trade is gated by the
 			// trading providers like the Assets Trading tab; Borrow routes to the
 			// dedicated /borrow/ page.
 			...(anyTradingProviderEnabled
@@ -219,9 +219,7 @@
 							testId: prefixedTestId(NAVIGATION_ITEM_TRADE),
 							icon: IconLineChart,
 							href: url(AppPath.ProvidersOisyTrade),
-							selected: isRouteOisyTradeProvider(page),
-							tag: $i18n.core.text.new,
-							tagVariant: 'emphasis'
+							selected: isRouteOisyTradeProvider(page)
 						}
 					}
 				: {}),
@@ -231,9 +229,7 @@
 				testId: prefixedTestId(NAVIGATION_ITEM_BORROW),
 				icon: IconCoins,
 				href: url(AppPath.Borrow),
-				selected: isRouteBorrow(page),
-				tag: $i18n.core.text.new,
-				tagVariant: 'emphasis'
+				selected: isRouteBorrow(page)
 			},
 			// Todo: remove condition once the Earn feature is permanently enabled.
 			...(EARNING_ENABLED
