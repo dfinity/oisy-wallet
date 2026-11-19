@@ -1967,7 +1967,7 @@
 			"allowance_decrease": "Esta solicitação reduz o limite do autorizado abaixo pelo valor mostrado. Ela não movimenta fundos por si só.",
 			"unverifiable_erc20_request": "Esta solicitação envolve um token que a OISY não consegue identificar ou decodificar. O que é exibido pode diferir do que seria realmente assinado, portanto a aprovação está desativada.",
 			"unlisted_erc20_request": "A OISY não lista este token. O símbolo e o valor apresentado são lidos do próprio contrato do token, e qualquer pessoa pode criar um token com qualquer símbolo. Verifique o endereço do token antes de aprovar.",
-			"unverifiable_erc20_reason": "",
+			"unverifiable_erc20_reason": "Esta solicitação envolve um token que a OISY não consegue identificar ou decodificar, por isso o que é exibido pode diferir do que seria realmente assinado.",
 			"token_call_with_value": "Além do valor em tokens mostrado abaixo, esta solicitação envia $amount para o contrato do token. Uma transferência ou aprovação de tokens não envia $symbol, por isso, para a sua segurança, a OISY não a assina.",
 			"unverifiable_approval_for_all_request": "Esta solicitação entregaria a um operador o controle de uma coleção de NFT, e a OISY não consegue decodificar qual operador. O que é exibido pode diferir do que seria realmente assinado, portanto a aprovação está desativada.",
 			"unverifiable_approval_for_all_reason": "Esta solicitação entregaria a um operador o controle de uma coleção de NFT, e a OISY não consegue decodificar qual operador.",
