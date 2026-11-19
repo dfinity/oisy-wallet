@@ -30,6 +30,9 @@
 		onBack: () => void;
 		onNext: () => void;
 		isNftsPage?: boolean;
+		// The network is picked here even on a network page, among those that take custom tokens:
+		// Receive's import is about the token, not the page underneath.
+		networkSelectable?: boolean;
 	}
 
 	let {
@@ -37,7 +40,8 @@
 		tokenData = $bindable(),
 		onBack,
 		onNext,
-		isNftsPage = false
+		isNftsPage = false,
+		networkSelectable = false
 	}: Props = $props();
 
 	let networkName = $state<string | undefined>(network?.name);
@@ -129,13 +133,15 @@
 					: true
 	);
 
-	let enabledNetworkSelector = $derived(isNullish($selectedNetwork));
+	let enabledNetworkSelector = $derived(networkSelectable || isNullish($selectedNetwork));
 
 	// filter out BTC networks - they do not have custom tokens
 	let availableNetworks = $derived(
-		($selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets).filter(
-			({ id, supportsNft }) => !isNetworkIdBitcoin(id) && (!isNftsPage || supportsNft)
-		)
+		networkSelectable
+			? $networks.filter(({ id }) => !isNetworkIdBitcoin(id) && !isNetworkIdXrp(id))
+			: ($selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets).filter(
+					({ id, supportsNft }) => !isNetworkIdBitcoin(id) && (!isNftsPage || supportsNft)
+				)
 	);
 </script>
 

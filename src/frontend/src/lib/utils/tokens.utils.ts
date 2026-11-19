@@ -1,6 +1,6 @@
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc20, isTokenErc20CustomToken } from '$eth/utils/erc20.utils';
-import { isTokenErc4626CustomToken } from '$eth/utils/erc4626.utils';
+import { isTokenErc4626, isTokenErc4626CustomToken } from '$eth/utils/erc4626.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { isTokenDip721CustomToken } from '$icp/utils/dip721.utils';
 import { isTokenExtCustomToken } from '$icp/utils/ext.utils';
@@ -529,7 +529,13 @@ export const doesTokenMatchFilter = ({
 			return true;
 		}
 
-		if (isTokenErc20(token) || isTokenErc721(token) || isTokenErc1155(token) || isTokenSpl(token)) {
+		if (
+			isTokenErc20(token) ||
+			isTokenErc4626(token) ||
+			isTokenErc721(token) ||
+			isTokenErc1155(token) ||
+			isTokenSpl(token)
+		) {
 			return (
 				nonNullish(token.address) &&
 				areAddressesPartiallyEqual({

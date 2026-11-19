@@ -65,9 +65,10 @@
 			: assets
 	);
 
-	// Entries that share a symbol get the network and identifier, so two "USDC" read apart.
+	// Entries that share a symbol get the network and identifier, so two "USDC" read apart. Counted on
+	// the whole list, so a search that leaves one of them never makes it look unique.
 	let ambiguousSymbols = $derived(
-		displayAssets.reduce<Map<string, number>>((acc, { token }) => {
+		assets.reduce<Map<string, number>>((acc, { token }) => {
 			const symbol = getTokenDisplaySymbol(token);
 			acc.set(symbol, (acc.get(symbol) ?? 0) + 1);
 			return acc;

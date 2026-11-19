@@ -14,8 +14,9 @@ export interface ReceiveQRCode {
 	addressToken: Token;
 	qrCodeAriaLabel?: string;
 	copyAriaLabel: string;
-	// The networks that share the address, listed beside its QR code (the shared EVM address).
-	networks?: Network[];
+	// What the address is for, beside its QR code: the networks that share the EVM address, or when
+	// to use the ICP Principal or the Account ID.
+	description?: string;
 }
 
 export type ReceiveQRCodeAction =

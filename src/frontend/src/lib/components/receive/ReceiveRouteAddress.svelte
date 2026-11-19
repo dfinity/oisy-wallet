@@ -34,7 +34,7 @@
 	import type { ReceiveIcpAddressFormat, ReceiveRoute } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNetworkEthereum } from '$lib/utils/network.utils';
+	import { isNetworkEthereum, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import {
 		getReceiveAddressTexts,
 		getReceiveConvertTwinToken,
@@ -102,13 +102,18 @@
 	]);
 
 	let metamaskNetwork = $derived(
-		isTokenEthereumNative(sourceToken) && isNetworkEthereum(sourceNetwork)
+		// MetaMask's network switch takes Ethereum and Sepolia, not the other EVM networks.
+		isTokenEthereumNative(sourceToken) &&
+			isNetworkEthereum(sourceNetwork) &&
+			isNetworkIdEthereum(sourceNetwork.id)
 			? sourceNetwork
 			: undefined
 	);
 
+	// Offered once the ck token is enabled: its page, where the instructions open, lists only enabled
+	// tokens.
 	let convertTwinToken = $derived(
-		kind === 'direct'
+		kind === 'direct' && tokenEnabled
 			? getReceiveConvertTwinToken({
 					token: creditedToken,
 					enabledNetworkIds: $networks.map(({ id }) => id)

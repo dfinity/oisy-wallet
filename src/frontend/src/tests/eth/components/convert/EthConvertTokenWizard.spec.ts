@@ -13,9 +13,9 @@ import {
 } from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import { EthSubmissionUnconfirmedError } from '$eth/types/send';
-import * as ckEthDerived from '$icp-eth/derived/cketh.derived';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import * as ckEthStores from '$icp-eth/stores/cketh.store';
+import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 import { WizardStepsConvert } from '$lib/enums/wizard-steps';
@@ -34,7 +34,7 @@ import {
 import { stringifyJson } from '$lib/utils/json.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
+import { mockCkMinterInfo, mockEthHelperContractAddress } from '$tests/mocks/ck-minter.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -137,11 +137,6 @@ describe('EthConvertTokenWizard', () => {
 		});
 	};
 
-	const mockCkEthHelperContractAddress = (address: OptionEthAddress = mockEthAddress) =>
-		vi
-			.spyOn(ckEthDerived, 'ckEthHelperContractAddress', 'get')
-			.mockImplementation(() => readable(address));
-
 	const mockEthereumToken = (token = ETHEREUM_TOKEN) =>
 		vi
 			.spyOn(tokensDerived, 'nativeEthereumTokenWithFallback', 'get')
@@ -173,7 +168,6 @@ describe('EthConvertTokenWizard', () => {
 		mockEthereumToken();
 		mockEthAddressStore();
 		mockCkEthMinterInfoStore(mockMinterInfo);
-		mockCkEthHelperContractAddress();
 
 		sendSpy = vi.spyOn(sendServices, 'send').mockResolvedValue({ hash: transactionId, nonce: 1 });
 	});
@@ -195,7 +189,8 @@ describe('EthConvertTokenWizard', () => {
 			stringifyJson({
 				value: {
 					from: mockEthAddress,
-					to: mockEthAddress,
+					// The helper contract of the source network's minter, not of the page's.
+					to: mapAddressStartsWith0x(mockEthHelperContractAddress),
 					progress: () => {},
 					token: ETHEREUM_TOKEN,
 					amount: parseToken({
@@ -314,8 +309,8 @@ describe('EthConvertTokenWizard', () => {
 		expect(sendSpy).not.toHaveBeenCalled();
 	});
 
-	it('should not call send if ckEthHelperContractAddress is not defined', async () => {
-		mockCkEthHelperContractAddress(null);
+	it('should not call send if the minter has no ETH helper contract', async () => {
+		mockCkEthMinterInfoStore({ ...mockMinterInfo, eth_helper_contract_address: [] });
 
 		const { container } = render(EthConvertTokenWizard, {
 			props,

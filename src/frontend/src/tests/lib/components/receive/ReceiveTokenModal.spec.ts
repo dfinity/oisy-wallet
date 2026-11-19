@@ -17,6 +17,7 @@ import {
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import * as erc20TokenServices from '$icp-eth/services/erc20-token.services';
 import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
 import * as ckBtcServices from '$icp/services/ckbtc.services';
 import * as minterInfoServices from '$icp/services/worker.ck-minter-info.services';
@@ -41,6 +42,7 @@ import {
 	RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as allTokensDerived from '$lib/derived/all-tokens.derived';
+import * as networkDerived from '$lib/derived/network.derived';
 import * as networksDerived from '$lib/derived/networks.derived';
 import { btcAddressMainnetStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
@@ -57,7 +59,7 @@ import { mockCkBtcMinterInfo } from '$tests/mocks/ckbtc.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { get, writable } from 'svelte/store';
+import { get, readable, writable } from 'svelte/store';
 
 describe('ReceiveTokenModal', () => {
 	const ckBtcToken = {
@@ -504,7 +506,7 @@ describe('ReceiveTokenModal', () => {
 		});
 	});
 
-	it('should open the conversion instructions for ckETH on its page', async () => {
+	describe('How to convert', () => {
 		const ckEthToken = {
 			...ckBtcToken,
 			id: parseTokenId('ckETH'),
@@ -515,27 +517,105 @@ describe('ReceiveTokenModal', () => {
 			twinToken: ETHEREUM_TOKEN
 		} as IcCkToken & { enabled: boolean };
 
-		catalog.set([ICP_TOKEN, ETHEREUM_TOKEN, ckEthToken]);
+		it('should open the conversion instructions for ckETH on its page', async () => {
+			catalog.set([ICP_TOKEN, ETHEREUM_TOKEN, ckEthToken]);
 
-		const gotoSpy = vi.spyOn(appNavigation, 'goto').mockResolvedValue();
-		const openSpy = vi.spyOn(modalStore, 'openHowToConvertToTwinTokenEth');
+			const prepareSpy = vi
+				.spyOn(erc20TokenServices, 'autoLoadErc20Token')
+				.mockResolvedValue({ result: 'skipped' });
+			const gotoSpy = vi.spyOn(appNavigation, 'goto').mockResolvedValue();
+			const openSpy = vi.spyOn(modalStore, 'openHowToConvertToTwinTokenEth');
 
-		const { container } = render(ReceiveTokenModal, { props: { initialToken: ckEthToken } });
+			const { container } = render(ReceiveTokenModal, { props: { initialToken: ckEthToken } });
+
+			await waitFor(() => {
+				expect(byTestId({ container, testId: RECEIVE_HOW_TO_CONVERT_BUTTON })).toBeInTheDocument();
+			});
+
+			byTestId({ container, testId: RECEIVE_HOW_TO_CONVERT_BUTTON })?.click();
+
+			await waitFor(() => {
+				expect(openSpy).toHaveBeenCalledOnce();
+			});
+
+			expect(prepareSpy).toHaveBeenCalledWith(expect.objectContaining({ sendToken: ckEthToken }));
+			expect(gotoSpy).toHaveBeenCalledExactlyOnceWith(transactionsUrl({ token: ckEthToken }));
+			expect(openSpy.mock.calls[0][0].data).toEqual({
+				sourceToken: ETHEREUM_TOKEN,
+				destinationToken: ckEthToken
+			});
+		});
+
+		it('should stay on the address when the Ethereum twin cannot be prepared', async () => {
+			catalog.set([ICP_TOKEN, ETHEREUM_TOKEN, ckEthToken]);
+
+			const prepareSpy = vi
+				.spyOn(erc20TokenServices, 'autoLoadErc20Token')
+				.mockResolvedValue({ result: 'error' });
+			const gotoSpy = vi.spyOn(appNavigation, 'goto').mockResolvedValue();
+
+			const { container } = render(ReceiveTokenModal, { props: { initialToken: ckEthToken } });
+
+			await waitFor(() => {
+				expect(byTestId({ container, testId: RECEIVE_HOW_TO_CONVERT_BUTTON })).toBeInTheDocument();
+			});
+
+			byTestId({ container, testId: RECEIVE_HOW_TO_CONVERT_BUTTON })?.click();
+
+			await waitFor(() => {
+				expect(prepareSpy).toHaveBeenCalledOnce();
+			});
+
+			expect(gotoSpy).not.toHaveBeenCalled();
+			expect(
+				byTestId({ container, testId: RECEIVE_TOKENS_MODAL_ADDRESS_LABEL })
+			).toBeInTheDocument();
+		});
+
+		it('should not offer the conversion before the ck token is enabled', async () => {
+			catalog.set([ICP_TOKEN, ETHEREUM_TOKEN, { ...ckEthToken, enabled: false } as Token]);
+
+			const { container } = render(ReceiveTokenModal, { props: { initialToken: ckEthToken } });
+
+			await waitFor(() => {
+				expect(byTestId({ container, testId: RECEIVE_ENABLE_TOKEN_BUTTON })).toBeInTheDocument();
+			});
+
+			expect(
+				byTestId({ container, testId: RECEIVE_HOW_TO_CONVERT_BUTTON })
+			).not.toBeInTheDocument();
+		});
+	});
+
+	it('should let import pick a network that takes custom tokens on a Bitcoin page', async () => {
+		vi.spyOn(networkDerived, 'selectedNetwork', 'get').mockReturnValue(
+			readable(BTC_MAINNET_NETWORK)
+		);
+
+		const { container, getByPlaceholderText } = render(ReceiveTokenModal, {
+			props: { preferredNetworkId: BTC_MAINNET_NETWORK.id }
+		});
+
+		await fireEvent.input(getByPlaceholderText(get(i18n).tokens.placeholder.search_token), {
+			target: { value: 'nothing-like-this' }
+		});
 
 		await waitFor(() => {
-			expect(byTestId({ container, testId: RECEIVE_HOW_TO_CONVERT_BUTTON })).toBeInTheDocument();
+			expect(byTestId({ container, testId: RECEIVE_TOKEN_IMPORT_BUTTON })).toBeInTheDocument();
 		});
 
-		byTestId({ container, testId: RECEIVE_HOW_TO_CONVERT_BUTTON })?.click();
+		byTestId({ container, testId: RECEIVE_TOKEN_IMPORT_BUTTON })?.click();
 
 		await waitFor(() => {
-			expect(openSpy).toHaveBeenCalledOnce();
+			expect(container.querySelector('select[name="network"]')).toBeInTheDocument();
 		});
 
-		expect(gotoSpy).toHaveBeenCalledExactlyOnceWith(transactionsUrl({ token: ckEthToken }));
-		expect(openSpy.mock.calls[0][0].data).toEqual({
-			sourceToken: ETHEREUM_TOKEN,
-			destinationToken: ckEthToken
-		});
+		const options = Array.from(
+			container.querySelectorAll<HTMLOptionElement>('select[name="network"] option')
+		).map(({ textContent }) => textContent?.trim());
+
+		expect(options).toContain(ETHEREUM_NETWORK.name);
+		expect(options).toContain(ICP_NETWORK.name);
+		expect(options).not.toContain(BTC_MAINNET_NETWORK.name);
 	});
 });

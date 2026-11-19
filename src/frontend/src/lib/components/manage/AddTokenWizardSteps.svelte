@@ -20,6 +20,7 @@
 		progressStep: ProgressStepsAddToken;
 		isNftsPage?: boolean;
 		fungibleOnly?: boolean;
+		networkSelectable?: boolean;
 		// Leaves the import form.
 		onBack: () => void;
 		onReview: () => void;
@@ -36,6 +37,7 @@
 		progressStep = $bindable(),
 		isNftsPage,
 		fungibleOnly,
+		networkSelectable,
 		onBack,
 		onReview,
 		onBackToImport,
@@ -46,7 +48,14 @@
 </script>
 
 {#if step === 'import'}
-	<AddTokenByNetwork {isNftsPage} {onBack} onNext={onReview} bind:network bind:tokenData />
+	<AddTokenByNetwork
+		{isNftsPage}
+		{networkSelectable}
+		{onBack}
+		onNext={onReview}
+		bind:network
+		bind:tokenData
+	/>
 {:else if step === 'review'}
 	<AddTokenReviewByNetwork
 		{fungibleOnly}

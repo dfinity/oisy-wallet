@@ -30,7 +30,7 @@
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
+	import ReceiveAddressListItem from '$lib/components/receive/ReceiveAddressListItem.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
@@ -110,7 +110,6 @@
 		copyAriaLabel: string;
 		qrCodeAriaLabel: string;
 		text?: string;
-		networks?: Network[];
 		condition?: boolean;
 		qrCodeAction: {
 			enabled: true;
@@ -193,7 +192,6 @@
 			copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied,
 			qrCodeAriaLabel: $i18n.receive.addresses.text.display_evm_qr,
 			text: evmNetworksText,
-			networks: evmNetworks,
 			condition: evmNetworks.length > 0
 		},
 		{
@@ -246,9 +244,7 @@
 		}
 	]);
 
-	let receiveAddressList = $derived<
-		Omit<ReceiveAddressProps, 'token' | 'qrCodeAriaLabel' | 'label'>[]
-	>(
+	let receiveAddressList = $derived<Omit<ReceiveAddressProps, 'qrCodeAriaLabel' | 'label'>[]>(
 		receiveAddressCoreList.map(
 			({
 				address,
@@ -261,16 +257,15 @@
 				testId,
 				title,
 				text,
-				networks,
 				condition
 			}) => ({
 				labelRef,
 				address,
 				network,
+				token: addressToken,
 				testId,
 				copyAriaLabel,
 				title,
-				text,
 				condition,
 				qrCodeAction: {
 					enabled: true,
@@ -283,7 +278,7 @@
 							addressLabel,
 							addressToken,
 							copyAriaLabel,
-							networks
+							description: text
 						})
 				}
 			})
@@ -292,29 +287,10 @@
 </script>
 
 <ContentWithToolbar>
-	<div class="flex flex-col gap-2">
-		{#each receiveAddressList as { title: _title, text: _text, condition, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
-			{@const showAddress =
-				condition !== false && (!isNftsPage || (isNftsPage && network.supportsNft))}
-
-			{#snippet rowText()}
-				{_text}
-			{/snippet}
-
-			{#if showAddress}
-				<ReceiveAddress
-					{address}
-					{copyAriaLabel}
-					{labelRef}
-					{network}
-					{qrCodeAction}
-					{testId}
-					text={nonNullish(_text) ? rowText : undefined}
-				>
-					{#snippet title()}
-						{_title}
-					{/snippet}
-				</ReceiveAddress>
+	<div class="flex flex-col gap-1">
+		{#each receiveAddressList as { title, condition, labelRef, address, network, token, testId, copyAriaLabel, qrCodeAction } (labelRef)}
+			{#if condition !== false && (!isNftsPage || network.supportsNft)}
+				<ReceiveAddressListItem {address} {copyAriaLabel} {qrCodeAction} {testId} {title} {token} />
 			{/if}
 		{/each}
 	</div>

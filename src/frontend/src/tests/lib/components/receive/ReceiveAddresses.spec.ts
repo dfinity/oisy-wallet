@@ -15,6 +15,7 @@ import {
 import { btcAddressMainnetStore, ethAddressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -45,25 +46,42 @@ describe('ReceiveAddresses', () => {
 		btcAddressStore.reinitialize();
 	});
 
-	it('should list the ICP Principal and the ICP Account ID separately', () => {
+	const short = (address: string) => shortenWithMiddleEllipsis({ text: address, splitLength: 6 });
+
+	it('should list the ICP Principal and the ICP Account ID separately, each shortened', () => {
 		const { container } = render(ReceiveAddresses, { props: { onQRCode: vi.fn() } });
 
 		expect(section({ container, testId: RECEIVE_TOKENS_MODAL_ICRC_SECTION })).toHaveTextContent(
-			mockPrincipalText
+			short(mockPrincipalText)
 		);
 		expect(section({ container, testId: RECEIVE_TOKENS_MODAL_ICP_SECTION })).toHaveTextContent(
-			get(icpAccountIdentifierText) ?? ''
+			short(get(icpAccountIdentifierText) ?? '')
 		);
-		expect(container).toHaveTextContent(get(i18n).receive.icp.text.use_for_icp_deposit);
 	});
 
-	it('should show the EVM address once with the networks that share it', () => {
+	it('should keep what an ICP address is for with its QR code details', () => {
+		const onQRCode = vi.fn();
+
+		const { container } = render(ReceiveAddresses, { props: { onQRCode } });
+
+		section({ container, testId: RECEIVE_TOKENS_MODAL_ICP_SECTION })
+			?.querySelector<HTMLButtonElement>(`[data-tid="${RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON}"]`)
+			?.click();
+
+		expect(onQRCode).toHaveBeenCalledWith(
+			expect.objectContaining({
+				address: get(icpAccountIdentifierText),
+				description: get(i18n).receive.icp.text.use_for_icp_deposit
+			})
+		);
+	});
+
+	it('should show the EVM address once', () => {
 		const { container } = render(ReceiveAddresses, { props: { onQRCode: vi.fn() } });
 
 		const evm = section({ container, testId: RECEIVE_TOKENS_MODAL_ETH_SECTION });
 
-		expect(evm).toHaveTextContent(mockEthAddress);
-		expect(container).toHaveTextContent(`${ETHEREUM_NETWORK.name}, ${BASE_NETWORK.name}`);
+		expect(evm).toHaveTextContent(short(mockEthAddress));
 		expect(
 			container.querySelectorAll(`[data-tid="${RECEIVE_TOKENS_MODAL_ETH_SECTION}"]`)
 		).toHaveLength(1);
@@ -81,7 +99,7 @@ describe('ReceiveAddresses', () => {
 		expect(onQRCode).toHaveBeenCalledWith(
 			expect.objectContaining({
 				address: mockEthAddress,
-				networks: [ETHEREUM_NETWORK, BASE_NETWORK]
+				description: expect.stringContaining(`${ETHEREUM_NETWORK.name}, ${BASE_NETWORK.name}`)
 			})
 		);
 	});
@@ -93,7 +111,7 @@ describe('ReceiveAddresses', () => {
 
 		const btc = section({ container, testId: RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION });
 
-		expect(btc).not.toHaveTextContent(mockBtcAddress);
+		expect(btc).not.toHaveTextContent(short(mockBtcAddress));
 		expect(btc?.querySelector(`[data-tid="${RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON}"]`)).toBeNull();
 	});
 

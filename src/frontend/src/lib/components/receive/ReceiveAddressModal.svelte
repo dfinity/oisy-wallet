@@ -8,11 +8,9 @@
 	import { RECEIVE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { WizardStepsReceiveAddress } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 
 	interface Props {
@@ -44,14 +42,14 @@
 	let addressLabel = $state<undefined | string>();
 	let addressToken = $state<Token | undefined>();
 	let copyAriaLabel = $state<string | undefined>();
-	let networks = $state<Network[] | undefined>();
+	let description = $state<string | undefined>();
 
 	const displayQRCode = (detail: ReceiveQRCode) => {
 		if (isNullish(modal)) {
 			return;
 		}
 
-		({ address, addressLabel, addressToken, copyAriaLabel, networks } = detail);
+		({ address, addressLabel, addressToken, copyAriaLabel, description } = detail);
 
 		modal.next();
 
@@ -81,14 +79,12 @@
 		addressLabel = undefined;
 		addressToken = undefined;
 		copyAriaLabel = undefined;
-		networks = undefined;
+		description = undefined;
 	};
 </script>
 
-{#snippet networksText()}
-	{replacePlaceholders($i18n.receive.addresses.text.evm_networks, {
-		$networks: networks?.map(({ name }) => name).join(', ') ?? ''
-	})}
+{#snippet descriptionText()}
+	{description}
 {/snippet}
 
 <WizardModal
@@ -111,7 +107,7 @@
 	<div bind:this={content} class="outline-none" tabindex="-1">
 		{#key currentStep?.name}
 			{#if currentStep?.name === steps[1].name && nonNullish(addressToken)}
-				<!-- The shared EVM address keeps the list of the networks it serves beside its QR code. -->
+				<!-- What the address is for stays beside its QR code: the EVM networks, or when to use it. -->
 				<ReceiveAddressQrCode
 					{address}
 					{addressLabel}
@@ -120,7 +116,7 @@
 					network={addressToken.network}
 					onBack={displayAddresses}
 					qrSize="compact"
-					text={nonNullish(networks) ? networksText : undefined}
+					text={nonNullish(description) ? descriptionText : undefined}
 				/>
 			{:else}
 				<InfoCmp focusAddress={returnFocusAddress} onQRCode={displayQRCode} />

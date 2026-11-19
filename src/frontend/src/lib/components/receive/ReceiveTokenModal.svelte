@@ -2,9 +2,11 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, tick, untrack } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { erc20CustomTokens } from '$eth/derived/erc20.derived';
 	import { loadCkBtcDepositAddress } from '$icp/services/ckbtc.services';
 	import { btcAddressStore } from '$icp/stores/btc.store';
 	import { isIcCkToken } from '$icp/validation/ic-token.validation';
+	import { autoLoadErc20Token } from '$icp-eth/services/erc20-token.services';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import { getAddTokenDataIdentifier } from '$icp-eth/utils/add-token.utils';
 	import AddTokenWizardSteps, {
@@ -36,6 +38,7 @@
 	import { getTokenIdentifier } from '$lib/utils/identifier.utils';
 	import { closeModal, getSymbol } from '$lib/utils/modal.utils';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
+	import { isNetworkIdBitcoin, isNetworkIdXrp } from '$lib/utils/network.utils';
 	import {
 		findReceiveAssetByToken,
 		getAutoReceiveRoute,
@@ -307,17 +310,31 @@
 		await goto(transactionsUrl({ token: creditedToken }));
 	};
 
-	// The conversion instructions read the ck token from the page, so they open on its page.
+	// The conversion instructions read the ck token from the page, so they open on its page. A
+	// ckERC20's Ethereum twin is enabled first, so its balance is loaded for the conversion; if that
+	// fails, Receive stays open with its address.
 	const howToConvert = async (twinToken: Token) => {
 		if (isNullish(route)) {
 			return;
 		}
 
-		const data = { sourceToken: twinToken, destinationToken: route.creditedToken };
+		const { creditedToken } = route;
+
+		const { result } = await autoLoadErc20Token({
+			erc20CustomTokens: $erc20CustomTokens,
+			sendToken: creditedToken,
+			identity: $authIdentity
+		});
+
+		if (result === 'error') {
+			return;
+		}
+
+		const data = { sourceToken: twinToken, destinationToken: creditedToken };
 
 		close();
 
-		await goto(transactionsUrl({ token: route.creditedToken }));
+		await goto(transactionsUrl({ token: creditedToken }));
 
 		modalStore.openHowToConvertToTwinTokenEth({ id: getSymbol('receive-how-to-convert'), data });
 	};
@@ -336,8 +353,11 @@
 
 	let importStep = $derived(nonNullish(currentStep) ? IMPORT_STEPS[currentStep.name] : undefined);
 
+	// The page's network starts the form when it takes custom tokens; Bitcoin and XRP do not.
 	const startImport = () => {
-		importNetwork = $networks.find(({ id }) => id === preferredNetworkId);
+		importNetwork = $networks.find(
+			({ id }) => id === preferredNetworkId && !isNetworkIdBitcoin(id) && !isNetworkIdXrp(id)
+		);
 		importTokenData = {};
 		goToStep(WizardStepsReceiveToken.IMPORT);
 	};
@@ -448,6 +468,7 @@
 			{:else if nonNullish(importStep)}
 				<AddTokenWizardSteps
 					fungibleOnly
+					networkSelectable
 					onBack={cancelImport}
 					onBackToImport={() => goToStep(WizardStepsReceiveToken.IMPORT)}
 					onError={cancelImport}
