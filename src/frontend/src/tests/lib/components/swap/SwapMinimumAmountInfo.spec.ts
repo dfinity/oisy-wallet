@@ -1,8 +1,8 @@
 import SwapMinimumAmountInfo from '$lib/components/swap/SwapMinimumAmountInfo.svelte';
 import { SWAP_MINIMUM_AMOUNT_INFO } from '$lib/constants/test-ids.constants';
-import * as currencyDerived from '$lib/derived/currency.derived';
 import { Currency } from '$lib/enums/currency';
-import * as currencyExchangeStoreModule from '$lib/stores/currency-exchange.store';
+import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
+import { currencyStore } from '$lib/stores/currency.store';
 import { nearIntentsSwapLimitStore } from '$lib/stores/near-intents-swap-limit.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import type { SwapMappedResult } from '$lib/types/swap';
@@ -10,7 +10,6 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { render } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
 
 describe('SwapMinimumAmountInfo', () => {
 	let context: Map<symbol, unknown>;
@@ -25,30 +24,26 @@ describe('SwapMinimumAmountInfo', () => {
 
 	const renderInfo = () => render(SwapMinimumAmountInfo, { context });
 
-	const mockCurrency = ({
+	const selectCurrency = ({
 		currency,
 		exchangeRateToUsd
 	}: {
 		currency: Currency;
 		exchangeRateToUsd: number | null;
 	}) => {
-		vi.spyOn(currencyDerived, 'currentCurrency', 'get').mockReturnValue(readable(currency));
-		vi.spyOn(currencyExchangeStoreModule, 'currencyExchangeStore', 'get').mockReturnValue({
-			...readable({ currency, exchangeRateToUsd, exchangeRate24hChangeMultiplier: null }),
-			setExchangeRate: vi.fn(),
-			setExchangeRateCurrency: vi.fn(),
-			setExchangeRate24hChangeMultiplier: vi.fn()
-		});
+		currencyStore.switchCurrency(currency);
+		currencyExchangeStore.setExchangeRate(exchangeRateToUsd);
 	};
 
 	beforeEach(() => {
+		currencyStore.switchCurrency(Currency.USD);
 		nearIntentsSwapLimitStore.reset();
 		setupSwapAmountsStore();
 	});
 
 	afterEach(() => {
+		currencyStore.switchCurrency(Currency.USD);
 		nearIntentsSwapLimitStore.reset();
-		vi.restoreAllMocks();
 	});
 
 	it('should name the limit in the display currency', () => {
@@ -64,7 +59,7 @@ describe('SwapMinimumAmountInfo', () => {
 	});
 
 	it('should convert the limit into the selected currency', () => {
-		mockCurrency({ currency: Currency.EUR, exchangeRateToUsd: 1.25 });
+		selectCurrency({ currency: Currency.EUR, exchangeRateToUsd: 1.25 });
 
 		nearIntentsSwapLimitStore.set(1000);
 
@@ -102,7 +97,7 @@ describe('SwapMinimumAmountInfo', () => {
 
 	// A bare number with no currency on it would be worse than saying nothing.
 	it('should render nothing while no exchange rate is available', () => {
-		mockCurrency({ currency: Currency.EUR, exchangeRateToUsd: null });
+		selectCurrency({ currency: Currency.EUR, exchangeRateToUsd: null });
 
 		nearIntentsSwapLimitStore.set(1000);
 

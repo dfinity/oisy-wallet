@@ -3,16 +3,12 @@
 	import { getContext } from 'svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { SWAP_MINIMUM_AMOUNT_INFO } from '$lib/constants/test-ids.constants';
-	import { currentCurrency } from '$lib/derived/currency.derived';
-	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
+	import { nearIntentsSwapLimitFormatted } from '$lib/derived/near-intents-swap-limit.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { nearIntentsSwapLimitStore } from '$lib/stores/near-intents-swap-limit.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
-	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -25,16 +21,7 @@
 	// Full width beside the other pair-level notices rather than in the pay field's info row:
 	// that row is a justify-between against the balance and Max button, and a longer currency
 	// string (CHF 1'000.00) wraps into the balance on a narrow screen.
-	let formattedLimit = $derived(
-		nonNullish($nearIntentsSwapLimitStore)
-			? formatCurrency({
-					value: $nearIntentsSwapLimitStore,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore,
-					language: $currentLanguage
-				})
-			: undefined
-	);
+	let formattedLimit = $derived($nearIntentsSwapLimitFormatted);
 
 	// An offer answers the question the notice exists to pre-empt, so it steps out of the way
 	// rather than repeating a floor the user has already cleared.
