@@ -14,6 +14,7 @@ import {
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import * as lifiBtcSwapServices from '$lib/services/lifi-btc-swap.services';
+import { nearIntentsSwapLimitStore } from '$lib/stores/near-intents-swap-limit.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
@@ -101,7 +102,8 @@ describe('SwapBtcForm', () => {
 		balance = 100_000_000n,
 		utxosFee = mockUtxosFee,
 		offer = chainFusionOffer,
-		offered = true
+		offered = true,
+		exchangeRate = 60_000
 	}: {
 		balance?: bigint;
 		// `null` — not `undefined`, which would fall back to the default — leaves the context
@@ -111,6 +113,9 @@ describe('SwapBtcForm', () => {
 		// `false` leaves the quote result empty, the state the "swap is not offered" message
 		// exists for.
 		offered?: boolean;
+		// `null` — not `undefined`, which would fall back to the default — is the state before
+		// the price of BTC has loaded.
+		exchangeRate?: number | null;
 	} = {}) => {
 		const context = new Map();
 
@@ -120,7 +125,7 @@ describe('SwapBtcForm', () => {
 			failedSwapError: writable(undefined),
 			amountSetToMax: writable(false),
 			lifiMaxFee: writable(undefined),
-			sourceTokenExchangeRate: readable(60_000),
+			sourceTokenExchangeRate: readable(exchangeRate ?? undefined),
 			sourceTokenBalance: readable(balance),
 			destinationTokenBalance: readable(undefined),
 			destinationTokenExchangeRate: readable(60_000),
@@ -360,6 +365,91 @@ describe('SwapBtcForm', () => {
 					})
 				)
 			).toBeInTheDocument();
+		});
+	});
+
+	// NEAR Intents can hold a pair to a fiat floor far above the dust floor. The notice states
+	// it; naming the dust floor as well would put a second, much smaller target beside it that
+	// still leaves the swap refused.
+	describe('below the dust floor, with a NEAR Intents fiat floor on the pair', () => {
+		const dustMessage = replacePlaceholders(en.send.assertion.minimum_btc_amount, {
+			$amount: convertSatoshisToBtc(BTC_MINIMUM_AMOUNT)
+		});
+
+		const fiatFloorNotice = replacePlaceholders(en.swap.text.swap_minimum_amount_hint, {
+			$amount: '$1,000.00'
+		});
+
+		afterEach(() => {
+			nearIntentsSwapLimitStore.reset();
+		});
+
+		it('states only the fiat floor, and keeps Review disabled', async () => {
+			nearIntentsSwapLimitStore.set(1000);
+
+			const { container, getByText, queryByText } = render(SwapBtcForm, {
+				props,
+				context: createContext({ offered: false })
+			});
+
+			await enterAmount({ container, value: '0.000005' });
+
+			await waitFor(() => {
+				expect(getByText(en.swap.text.review_button).closest('button')).toBeDisabled();
+				expect(getByText(fiatFloorNotice)).toBeInTheDocument();
+				expect(queryByText(dustMessage)).not.toBeInTheDocument();
+			});
+		});
+
+		// Without the price of BTC nothing shows the fiat floor is the higher one, so the dust
+		// floor is stated as before.
+		it('still names the dust floor while the price of BTC is unknown', async () => {
+			nearIntentsSwapLimitStore.set(1000);
+
+			const { container, getByText } = render(SwapBtcForm, {
+				props,
+				context: createContext({ offered: false, exchangeRate: null })
+			});
+
+			await enterAmount({ container, value: '0.000005' });
+
+			await waitFor(() => {
+				expect(getByText(dustMessage)).toBeInTheDocument();
+			});
+		});
+
+		it('still names the dust floor when it is the higher of the two', async () => {
+			// 700 sats at 60,000 USD per BTC is $0.42, above this floor.
+			nearIntentsSwapLimitStore.set(0.1);
+
+			const { container, getByText } = render(SwapBtcForm, {
+				props,
+				context: createContext({ offered: false })
+			});
+
+			await enterAmount({ container, value: '0.000005' });
+
+			await waitFor(() => {
+				expect(getByText(dustMessage)).toBeInTheDocument();
+			});
+		});
+
+		// The notice steps aside once a provider quotes, so the dust floor is the only floor left
+		// on screen and must be named.
+		it('still names the dust floor when a provider quoted', async () => {
+			nearIntentsSwapLimitStore.set(1000);
+
+			const { container, getByText, queryByText } = render(SwapBtcForm, {
+				props,
+				context: createContext({ offered: true })
+			});
+
+			await enterAmount({ container, value: '0.000005' });
+
+			await waitFor(() => {
+				expect(getByText(dustMessage)).toBeInTheDocument();
+				expect(queryByText(fiatFloorNotice)).not.toBeInTheDocument();
+			});
 		});
 	});
 
