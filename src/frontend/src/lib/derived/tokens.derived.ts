@@ -129,20 +129,21 @@ export const enabledTokens: Readable<Token[]> = derivedMemo(
 );
 
 /**
- * All user-enabled unique tokens symbols.
- */
-export const enabledUniqueTokensSymbols: Readable<Token['symbol'][]> = derived(
-	[enabledTokens],
-	([$enabledTokens]) => Array.from(new Set($enabledTokens.map(({ symbol }) => symbol)))
-);
-
-/**
  * All user-enabled fungible tokens.
  */
 export const enabledFungibleTokens: Readable<Token[]> = derivedMemo(
 	[fungibleTokens],
 	filterEnabledTokens,
 	tokenListEqual
+);
+
+/**
+ * All user-enabled unique fungible tokens symbols.
+ */
+export const enabledUniqueFungibleTokensSymbols: Readable<Token['symbol'][]> = derived(
+	[enabledFungibleTokens],
+	([$enabledFungibleTokens]) =>
+		Array.from(new Set($enabledFungibleTokens.map(({ symbol }) => symbol)))
 );
 
 /**

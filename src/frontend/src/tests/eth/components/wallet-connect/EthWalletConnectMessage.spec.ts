@@ -12,7 +12,7 @@ import {
 	getSignParamsMessageTypedDataV4,
 	getSignParamsMessageUtf8
 } from '$eth/utils/wallet-connect.utils';
-import { MAX_UINT_256 } from '$lib/constants/app.constants';
+import { MAX_UINT_160, MAX_UINT_256 } from '$lib/constants/app.constants';
 import { Languages } from '$lib/enums/languages';
 import {
 	formatSecondsToDate,
@@ -23,6 +23,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { fireEvent, render } from '@testing-library/svelte';
+import { hexlify, toUtf8Bytes } from 'ethers/utils';
 
 describe('EthWalletConnectMessage', () => {
 	// The raw message lives on its own tab. Reaching it is a click, not a scroll.
@@ -329,6 +330,32 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText('PermitSingle')).toBeInTheDocument();
 	});
 
+	// The declared `primaryType` is never hashed, so the request cannot rename what it asks for.
+	it('should name the struct the signature hashes, not the one the request declares', () => {
+		const [address, payload] = request.params.request.params;
+
+		const { getByText, queryByText } = render(EthWalletConnectMessage, {
+			props: {
+				request: {
+					...request,
+					params: {
+						...request.params,
+						request: {
+							...request.params.request,
+							params: [
+								address,
+								payload.replace('"primaryType":"PermitSingle"', '"primaryType":"Login"')
+							]
+						}
+					}
+				} as WalletKitTypes.SessionRequest
+			}
+		});
+
+		expect(getByText('PermitSingle')).toBeInTheDocument();
+		expect(queryByText('Login')).not.toBeInTheDocument();
+	});
+
 	it('should say nothing about a type for a request that is not typed data', () => {
 		const { queryByText } = render(EthWalletConnectMessage, {
 			props: {
@@ -403,7 +430,7 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText(expected)).toBeInTheDocument();
 	});
 
-	it('should not summarize keys the signed schema does not declare', async () => {
+	it('should summarize the keys the signed schema declares and none of the others', async () => {
 		// ERC-3009 transfer authorization: `spender` and `details` are absent from
 		// the declared type, so they are absent from the digest. Summarizing them
 		// would describe an approval of 1 USDC while 5,000 USDC is being signed away.
@@ -465,13 +492,25 @@ describe('EthWalletConnectMessage', () => {
 			}
 		});
 
-		expect(queryByText(en.wallet_connect.text.token)).not.toBeInTheDocument();
-		expect(queryByText(en.wallet_connect.text.amount)).not.toBeInTheDocument();
-		expect(queryByText(en.wallet_connect.text.spender)).not.toBeInTheDocument();
-		expect(queryByText(en.wallet_connect.text.expiration)).not.toBeInTheDocument();
+		expect(getByTestId('wallet-connect-typed-data-amount')).toHaveTextContent(
+			`${formatToken({
+				value: 5000000000n,
+				unitName: USDC_TOKEN.decimals,
+				displayDecimals: USDC_TOKEN.decimals
+			})} ${USDC_TOKEN.symbol}`
+		);
+		expect(getByTestId('wallet-connect-typed-data-recipient')).toHaveTextContent(
+			'0x1111111111111111111111111111111111111111'
+		);
+		expect(
+			getByText(formatSecondsToDate({ seconds: 1893456000, language: Languages.ENGLISH }))
+		).toBeInTheDocument();
 
-		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.spender)).not.toBeInTheDocument();
 		expect(queryByText('0x2222222222222222222222222222222222222222')).not.toBeInTheDocument();
+		expect(
+			queryByText(formatSecondsToDate({ seconds: 1800000000, language: Languages.ENGLISH }))
+		).not.toBeInTheDocument();
 
 		// The chain is a domain member, not a message key, so it is unaffected by what the schema
 		// declines to declare.
@@ -815,6 +854,37 @@ describe('EthWalletConnectMessage', () => {
 		).toBeInTheDocument();
 	});
 
+	it('should show a raw message in the order it is signed, with its line breaks', async () => {
+		const newRequest: WalletKitTypes.SessionRequest = {
+			...request,
+			params: {
+				...request.params,
+				request: {
+					method: SESSION_REQUEST_PERSONAL_SIGN,
+					params: [
+						hexlify(toUtf8Bytes('Sign in to Example\nPay \u202E0001\u202C USDC')),
+						'0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95'
+					]
+				}
+			}
+		} as WalletKitTypes.SessionRequest;
+
+		const { getByText, getByRole } = render(EthWalletConnectMessage, {
+			props: {
+				request: newRequest
+			}
+		});
+
+		await openRawTab(getByRole);
+
+		const message = getByText('Sign in to Example Pay 0001 USDC');
+
+		expect(message.textContent).toBe('Sign in to Example\nPay 0001 USDC');
+		expect(message).toHaveClass('whitespace-pre-wrap');
+		expect(message).toHaveAttribute('dir', 'ltr');
+		expect(message).toHaveClass('[unicode-bidi:isolate-override]');
+	});
+
 	// The reported hole: an unlimited ERC-2612 permit rendered as a bare spender over a folded
 	// message, with Approve live. The allowance must be named, and named as unlimited.
 	describe('ERC-2612 permit', () => {
@@ -923,6 +993,319 @@ describe('EthWalletConnectMessage', () => {
 			expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
 			expect(getByTestId('wallet-connect-typed-data-amount')).toHaveTextContent(
 				`1000000 ${en.wallet_connect.text.token_units}`
+			);
+		});
+	});
+
+	describe('Permit2 batch', () => {
+		const UNLISTED_TOKEN = '0x6b175474e89094c44da98b954eedeac495271d0f';
+		const SPENDER = '0x66a9893cc07d91d95644aedd05d03f95e1dba8af';
+
+		// One signature setting an allowance over a listed token and an unlisted one, for one spender.
+		const permitBatchRequest = (secondExpiration = '1893456000'): WalletKitTypes.SessionRequest =>
+			({
+				...request,
+				params: {
+					...request.params,
+					request: {
+						method: SESSION_REQUEST_ETH_SIGN_V4,
+						params: [
+							'0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95',
+							JSON.stringify({
+								types: {
+									EIP712Domain: [
+										{ name: 'name', type: 'string' },
+										{ name: 'chainId', type: 'uint256' },
+										{ name: 'verifyingContract', type: 'address' }
+									],
+									PermitBatch: [
+										{ name: 'details', type: 'PermitDetails[]' },
+										{ name: 'spender', type: 'address' },
+										{ name: 'sigDeadline', type: 'uint256' }
+									],
+									PermitDetails: [
+										{ name: 'token', type: 'address' },
+										{ name: 'amount', type: 'uint160' },
+										{ name: 'expiration', type: 'uint48' },
+										{ name: 'nonce', type: 'uint48' }
+									]
+								},
+								domain: {
+									name: 'Permit2',
+									chainId: '1',
+									verifyingContract: '0x000000000022d473030f116ddee9f6b43ac78ba3'
+								},
+								primaryType: 'PermitBatch',
+								message: {
+									details: [
+										{
+											token: USDC_TOKEN.address,
+											amount: MAX_UINT_160.toString(),
+											expiration: '1761743754',
+											nonce: '0'
+										},
+										{
+											token: UNLISTED_TOKEN,
+											amount: '5000',
+											expiration: secondExpiration,
+											nonce: '0'
+										}
+									],
+									spender: SPENDER,
+									sigDeadline: '1759153554'
+								}
+							})
+						]
+					}
+				}
+			}) as WalletKitTypes.SessionRequest;
+
+		it('should state every allowance in the order the signature lists them', () => {
+			const { getAllByText, getAllByTestId, getByText } = render(EthWalletConnectMessage, {
+				props: { request: permitBatchRequest() }
+			});
+
+			expect(getAllByText(en.wallet_connect.text.token)).toHaveLength(2);
+			expect(getByText(USDC_TOKEN.symbol)).toBeInTheDocument();
+			// Not listed by OISY, so the contract the allowance is over is stated instead.
+			expect(getByText(UNLISTED_TOKEN)).toBeInTheDocument();
+
+			expect(
+				getAllByTestId('wallet-connect-typed-data-amount').map((el) => el.textContent)
+			).toEqual([
+				replacePlaceholders(en.core.text.unlimited, { $items: USDC_TOKEN.symbol }).trim(),
+				`5000 ${en.wallet_connect.text.token_units}`
+			]);
+
+			expect(getAllByText(en.wallet_connect.text.expiration)).toHaveLength(2);
+			expect(
+				getByText(formatSecondsToDate({ seconds: 1761743754, language: Languages.ENGLISH }))
+			).toBeInTheDocument();
+			expect(
+				getByText(formatSecondsToDate({ seconds: 1893456000, language: Languages.ENGLISH }))
+			).toBeInTheDocument();
+		});
+
+		// A saturated `uint48` is past the last second a date can hold, so that row is left out
+		// rather than rendered as an invalid date.
+		it('should leave out an expiration no date can hold', () => {
+			const { getAllByText, queryByText } = render(EthWalletConnectMessage, {
+				props: { request: permitBatchRequest(((1n << 48n) - 1n).toString()) }
+			});
+
+			expect(getAllByText(en.wallet_connect.text.expiration)).toHaveLength(1);
+			expect(queryByText('Invalid Date')).not.toBeInTheDocument();
+		});
+
+		// Every allowance in the batch is for the same spender, so it is stated once.
+		it('should state the spender once', () => {
+			const { getAllByText, getByText } = render(EthWalletConnectMessage, {
+				props: { request: permitBatchRequest() }
+			});
+
+			expect(getAllByText(en.wallet_connect.text.spender)).toHaveLength(1);
+			expect(getByText(SPENDER)).toBeInTheDocument();
+		});
+	});
+
+	describe('transfer signatures', () => {
+		const SPENDER = '0x66a9893cc07d91d95644aedd05d03f95e1dba8af';
+		const RECIPIENT = '0x1111111111111111111111111111111111111111';
+
+		const PERMIT2_DOMAIN = {
+			name: 'Permit2',
+			chainId: '1',
+			verifyingContract: '0x000000000022d473030f116ddee9f6b43ac78ba3'
+		};
+
+		const PERMIT2_TYPES = {
+			EIP712Domain: [
+				{ name: 'name', type: 'string' },
+				{ name: 'chainId', type: 'uint256' },
+				{ name: 'verifyingContract', type: 'address' }
+			],
+			TokenPermissions: [
+				{ name: 'token', type: 'address' },
+				{ name: 'amount', type: 'uint256' }
+			]
+		};
+
+		const PERMIT2_TRANSFER_FROM = [
+			{ name: 'permitted', type: 'TokenPermissions' },
+			{ name: 'spender', type: 'address' },
+			{ name: 'nonce', type: 'uint256' },
+			{ name: 'deadline', type: 'uint256' }
+		];
+
+		const PERMIT2_TRANSFER_MESSAGE = {
+			permitted: { token: USDC_TOKEN.address, amount: '250000000' },
+			spender: SPENDER,
+			nonce: '7',
+			deadline: '1893456000'
+		};
+
+		const toRequest = (typedData: Record<string, unknown>): WalletKitTypes.SessionRequest =>
+			({
+				...request,
+				params: {
+					...request.params,
+					request: {
+						method: SESSION_REQUEST_ETH_SIGN_V4,
+						params: ['0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95', JSON.stringify(typedData)]
+					}
+				}
+			}) as WalletKitTypes.SessionRequest;
+
+		const amountText = `${formatToken({
+			value: 250000000n,
+			unitName: USDC_TOKEN.decimals,
+			displayDecimals: USDC_TOKEN.decimals
+		})} ${USDC_TOKEN.symbol}`;
+
+		it('should state where an ERC-3009 authorization sends the tokens, as the send review labels it', () => {
+			const { getByText, getByTestId, queryByText } = render(EthWalletConnectMessage, {
+				props: {
+					request: toRequest({
+						types: {
+							EIP712Domain: [
+								{ name: 'name', type: 'string' },
+								{ name: 'version', type: 'string' },
+								{ name: 'chainId', type: 'uint256' },
+								{ name: 'verifyingContract', type: 'address' }
+							],
+							ReceiveWithAuthorization: [
+								{ name: 'from', type: 'address' },
+								{ name: 'to', type: 'address' },
+								{ name: 'value', type: 'uint256' },
+								{ name: 'validAfter', type: 'uint256' },
+								{ name: 'validBefore', type: 'uint256' },
+								{ name: 'nonce', type: 'bytes32' }
+							]
+						},
+						domain: {
+							name: 'USD Coin',
+							version: '2',
+							chainId: '1',
+							verifyingContract: USDC_TOKEN.address
+						},
+						primaryType: 'ReceiveWithAuthorization',
+						message: {
+							from: '0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95',
+							to: RECIPIENT,
+							value: '250000000',
+							validAfter: '0',
+							validBefore: '1893456000',
+							nonce: `0x${'ab'.repeat(32)}`
+						}
+					})
+				}
+			});
+
+			expect(getByText(USDC_TOKEN.symbol)).toBeInTheDocument();
+			expect(getByTestId('wallet-connect-typed-data-amount')).toHaveTextContent(amountText);
+
+			expect(getByText(en.send.text.destination)).toBeInTheDocument();
+			expect(getByTestId('wallet-connect-typed-data-recipient')).toHaveTextContent(RECIPIENT);
+
+			expect(queryByText(en.wallet_connect.text.spender)).not.toBeInTheDocument();
+		});
+
+		// The signature names no recipient: the spender picks one when it takes the tokens.
+		it('should state the spender of a Permit2 signature transfer and no destination', () => {
+			const { getByText, getByTestId, queryByText } = render(EthWalletConnectMessage, {
+				props: {
+					request: toRequest({
+						types: { ...PERMIT2_TYPES, PermitTransferFrom: PERMIT2_TRANSFER_FROM },
+						domain: PERMIT2_DOMAIN,
+						primaryType: 'PermitTransferFrom',
+						message: PERMIT2_TRANSFER_MESSAGE
+					})
+				}
+			});
+
+			expect(getByText(USDC_TOKEN.symbol)).toBeInTheDocument();
+			expect(getByTestId('wallet-connect-typed-data-amount')).toHaveTextContent(amountText);
+			expect(
+				getByText(formatSecondsToDate({ seconds: 1893456000, language: Languages.ENGLISH }))
+			).toBeInTheDocument();
+
+			expect(getByText(en.wallet_connect.text.spender)).toBeInTheDocument();
+			expect(getByText(SPENDER)).toBeInTheDocument();
+
+			expect(queryByText(en.send.text.destination)).not.toBeInTheDocument();
+		});
+
+		describe('Permit2 witness transfer', () => {
+			const witnessRequest = toRequest({
+				types: {
+					...PERMIT2_TYPES,
+					PermitWitnessTransferFrom: [...PERMIT2_TRANSFER_FROM, { name: 'witness', type: 'Order' }],
+					Order: [
+						{ name: 'swapper', type: 'address' },
+						{ name: 'outputAmount', type: 'uint256' }
+					]
+				},
+				domain: PERMIT2_DOMAIN,
+				primaryType: 'PermitWitnessTransferFrom',
+				message: {
+					...PERMIT2_TRANSFER_MESSAGE,
+					witness: { swapper: '0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95', outputAmount: '1' }
+				}
+			});
+
+			// The review resolves the witness as something it cannot describe, as it does any struct.
+			it('should say the summary covers the transfer and not the rest of the request', () => {
+				const { getByText, queryByText } = render(EthWalletConnectMessage, {
+					props: { request: witnessRequest, unreviewableTypedData: true }
+				});
+
+				expect(
+					getByText(en.wallet_connect.text.unreviewable_typed_data_witness)
+				).toBeInTheDocument();
+				expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
+			});
+
+			it('should state the transfer and list the structs the signature hashes', () => {
+				const { getByText, getByTestId } = render(EthWalletConnectMessage, {
+					props: { request: witnessRequest, unreviewableTypedData: true }
+				});
+
+				expect(getByTestId('wallet-connect-typed-data-amount')).toHaveTextContent(amountText);
+				expect(getByText(SPENDER)).toBeInTheDocument();
+
+				expect(getByText(en.wallet_connect.text.methods)).toBeInTheDocument();
+				expect(getByText('Order')).toBeInTheDocument();
+				expect(getByText('TokenPermissions')).toBeInTheDocument();
+			});
+
+			// A witness struct declared as anything but a list of members cannot be signed, and the
+			// review resolves it as invalid. It must still render to say so.
+			it.each([
+				{ struct: 'PermitWitnessTransferFrom', shape: 'an object', declared: {} },
+				{ struct: 'PermitBatchWitnessTransferFrom', shape: 'an object', declared: {} },
+				{
+					struct: 'PermitWitnessTransferFrom',
+					shape: 'a list of nulls',
+					declared: [null, null, null, null, null]
+				}
+			])(
+				'should warn about a $struct declared as $shape instead of failing to render',
+				({ struct, declared }) => {
+					const { getByTestId, queryByText } = render(EthWalletConnectMessage, {
+						props: {
+							request: toRequest({
+								types: { ...PERMIT2_TYPES, [struct]: declared },
+								domain: PERMIT2_DOMAIN,
+								primaryType: struct,
+								message: PERMIT2_TRANSFER_MESSAGE
+							}),
+							invalidTypedData: true
+						}
+					});
+
+					expect(getByTestId('wallet-connect-invalid-typed-data-warning')).toBeInTheDocument();
+					expect(queryByText(en.wallet_connect.text.spender)).not.toBeInTheDocument();
+				}
 			);
 		});
 	});

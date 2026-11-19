@@ -7,6 +7,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { Token } from '$lib/types/token';
 import {
+	isLiquidiumInflowSubaccount,
 	liquidiumBorrowingPowerPotentialUsd,
 	liquidiumBorrowInterestUsd,
 	liquidiumEnabledRailToken,
@@ -35,6 +36,12 @@ import {
 } from '$lib/utils/liquidium.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockLiquidiumProfileId,
+	mockLiquidiumRepaySubaccount,
+	mockLiquidiumSupplySubaccount
+} from '$tests/mocks/liquidium-inflow.mock';
+import { Principal } from '@icp-sdk/core/principal';
 import {
 	HEALTH_FACTOR_DECIMALS,
 	HEALTH_FACTOR_SCALE,
@@ -749,7 +756,7 @@ describe('liquidium.utils', () => {
 	describe('mapLiquidiumReserve', () => {
 		it('maps a reserve to oisy units (USD numbers, base-unit amounts kept)', () => {
 			const reserve: UserReserve = {
-				position: buildPosition({ borrowed: 5n, borrowedDecimals: 6n }),
+				position: buildPosition({ borrowed: 5_000n, borrowedDecimals: 6n }),
 				pool: buildPool(),
 				priceUsd: 60_000,
 				suppliedUsd: 6_000_000n,
@@ -765,12 +772,30 @@ describe('liquidium.utils', () => {
 				borrowApy: expect.closeTo(9),
 				deposited: 100_000_000n,
 				depositedDecimals: 8,
-				borrowed: 5n,
+				borrowed: 5_000n,
 				borrowedDecimals: 6,
 				debtInterest: ZERO,
 				suppliedUsd: 60_000,
-				borrowedUsd: 300
+				borrowedUsd: expect.closeTo(300)
 			});
+		});
+
+		it("takes the debt's USD value from the SDK as reported, without adding the interest", () => {
+			const reserve: UserReserve = {
+				position: buildPosition({ borrowed: 5_000n, borrowedDecimals: 6n, debtInterest: 1_000n }),
+				pool: buildPool(),
+				priceUsd: 60_000,
+				suppliedUsd: ZERO,
+				// Deliberately off `borrowed × priceUsd` (300) so the assertion shows the SDK's figure is
+				// mapped as is rather than recomputed; `debtInterest` (0.001 × 60k = 60) is not added.
+				borrowedUsd: 30_012n,
+				usdDecimals: 2n
+			};
+
+			const { borrowedUsd, debtInterest } = mapLiquidiumReserve(reserve);
+
+			expect(borrowedUsd).toBeCloseTo(300.12);
+			expect(debtInterest).toBe(1_000n);
 		});
 	});
 
@@ -1067,6 +1092,49 @@ describe('liquidium.utils', () => {
 					enabledTokens: [BTC_MAINNET_TOKEN]
 				})
 			).toBeUndefined();
+		});
+	});
+
+	describe('isLiquidiumInflowSubaccount', () => {
+		const withByte = ({ index, value }: { index: number; value: number }): Uint8Array => {
+			const subaccount = Uint8Array.from(mockLiquidiumSupplySubaccount);
+
+			subaccount[index] = value;
+
+			return subaccount;
+		};
+
+		it.each([
+			{ purpose: 'a supply', subaccount: mockLiquidiumSupplySubaccount },
+			{ purpose: 'a repayment', subaccount: mockLiquidiumRepaySubaccount }
+		])('should recognise the subaccount of $purpose to the profile', ({ subaccount }) => {
+			expect(
+				isLiquidiumInflowSubaccount({ subaccount, profileId: mockLiquidiumProfileId })
+			).toBeTruthy();
+		});
+
+		it('should not recognise the subaccount of another profile', () => {
+			expect(
+				isLiquidiumInflowSubaccount({
+					subaccount: mockLiquidiumSupplySubaccount,
+					profileId: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai')
+				})
+			).toBeFalsy();
+		});
+
+		it.each([
+			{ kind: 'another purpose', subaccount: withByte({ index: 0, value: 3 }) },
+			{
+				kind: 'a byte between the purpose and the length',
+				subaccount: withByte({ index: 1, value: 1 })
+			},
+			{ kind: 'another length', subaccount: withByte({ index: 2, value: 16 }) },
+			{ kind: 'a byte after the principal', subaccount: withByte({ index: 31, value: 1 }) },
+			{ kind: 'the default subaccount', subaccount: new Uint8Array(32) }
+		])('should not recognise a subaccount with $kind', ({ subaccount }) => {
+			expect(
+				isLiquidiumInflowSubaccount({ subaccount, profileId: mockLiquidiumProfileId })
+			).toBeFalsy();
 		});
 	});
 });

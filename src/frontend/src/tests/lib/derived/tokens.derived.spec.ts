@@ -51,7 +51,7 @@ import {
 	enabledNonFungibleTokensBySectionSpam,
 	enabledNonFungibleTokensWithoutSection,
 	enabledNonFungibleTokensWithoutSpam,
-	enabledUniqueTokensSymbols,
+	enabledUniqueFungibleTokensSymbols,
 	fungibleTokens,
 	tokens,
 	tokensToPin
@@ -402,19 +402,31 @@ describe('tokens.derived', () => {
 		});
 	});
 
-	describe('enabledUniqueTokensSymbols', () => {
-		it('should return all unique enabled tokens symbols', () => {
-			const result = get(enabledUniqueTokensSymbols);
+	describe('enabledUniqueFungibleTokensSymbols', () => {
+		const expected = [
+			ICP_TOKEN.symbol,
+			BTC_MAINNET_TOKEN.symbol,
+			ETHEREUM_TOKEN.symbol,
+			SOLANA_TOKEN.symbol,
+			XRP_TOKEN.symbol,
+			BNB_MAINNET_TOKEN.symbol,
+			POL_MAINNET_TOKEN.symbol
+		];
 
-			expect(result).toEqual([
-				ICP_TOKEN.symbol,
-				BTC_MAINNET_TOKEN.symbol,
-				ETHEREUM_TOKEN.symbol,
-				SOLANA_TOKEN.symbol,
-				XRP_TOKEN.symbol,
-				BNB_MAINNET_TOKEN.symbol,
-				POL_MAINNET_TOKEN.symbol
-			]);
+		it('should return all unique enabled fungible tokens symbols', () => {
+			expect(get(enabledUniqueFungibleTokensSymbols)).toEqual(expected);
+		});
+
+		it('should not include the symbols of enabled non-fungible tokens', () => {
+			erc721CustomTokensStore.setAll([{ data: erc721EnabledNoSection, certified: false }]);
+
+			expect(get(enabledNonFungibleTokensWithoutSpam).map(({ symbol }) => symbol)).toContain(
+				erc721EnabledNoSection.symbol
+			);
+			expect(get(enabledUniqueFungibleTokensSymbols)).toEqual(expected);
+			expect(get(enabledUniqueFungibleTokensSymbols)).not.toContain(erc721EnabledNoSection.symbol);
+
+			erc721CustomTokensStore.resetAll();
 		});
 	});
 

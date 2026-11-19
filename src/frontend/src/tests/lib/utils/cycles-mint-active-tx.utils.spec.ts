@@ -1,13 +1,11 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import { BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { CMC_MINT_CYCLES_MEMO } from '$icp/constants/cmc.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { CYCLES_MINT_EXTERNAL_REF_KEYS } from '$lib/types/cycles-mint-active-tx';
 import {
 	isCyclesMintActiveUserTransaction,
-	isCyclesMintDeposit,
 	toCyclesMintCredited,
 	toCyclesMintData,
 	toCyclesMintDisplayRefs,
@@ -20,11 +18,9 @@ import {
 } from '$lib/utils/cycles-mint-active-tx.utils';
 import {
 	mockCyclesMintActiveUserTransaction,
-	mockCyclesMintData,
 	mockOisyTradeActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
-import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 import { Principal } from '@icp-sdk/core/principal';
 
 const TCYCLES_TOKEN = {
@@ -33,32 +29,6 @@ const TCYCLES_TOKEN = {
 	decimals: 12,
 	ledgerCanisterId: 'um5iw-rqaaa-aaaaq-qaaba-cai'
 };
-
-const DEPOSIT_ACCOUNT_IDENTIFIER = 'a1b2c3';
-const OWN_ACCOUNT_IDENTIFIER = 'd4e5f6';
-
-const deposit = ({
-	overrides = {},
-	transfer = {}
-}: {
-	overrides?: Partial<IcpIndexDid.Transaction>;
-	transfer?: Partial<{ from: string; to: string; e8s: bigint }>;
-} = {}): IcpIndexDid.Transaction => ({
-	memo: ZERO,
-	icrc1_memo: [CMC_MINT_CYCLES_MEMO],
-	operation: {
-		Transfer: {
-			to: transfer.to ?? DEPOSIT_ACCOUNT_IDENTIFIER,
-			fee: { e8s: 10_000n },
-			from: transfer.from ?? OWN_ACCOUNT_IDENTIFIER,
-			amount: { e8s: transfer.e8s ?? mockCyclesMintData.amount },
-			spender: []
-		}
-	},
-	timestamp: [{ timestamp_nanos: mockCyclesMintData.transfer_created_at_ns + 1n }],
-	created_at_time: [{ timestamp_nanos: mockCyclesMintData.transfer_created_at_ns }],
-	...overrides
-});
 
 const withRefs = ({
 	tx,
@@ -272,74 +242,6 @@ describe('cycles-mint-active-tx.utils', () => {
 			const update = toCyclesMintRowUpdate({ status: 'failed', reason: 'x'.repeat(50_000) });
 
 			expect(update?.error).toBe('x'.repeat(512));
-		});
-	});
-
-	describe('isCyclesMintDeposit', () => {
-		const params = {
-			depositAccountIdentifier: DEPOSIT_ACCOUNT_IDENTIFIER,
-			ownAccountIdentifier: OWN_ACCOUNT_IDENTIFIER,
-			data: mockCyclesMintData
-		};
-
-		it('matches the row’s deposit', () => {
-			expect(isCyclesMintDeposit({ ...params, transaction: deposit() })).toBeTruthy();
-		});
-
-		it('compares the accounts in any letter case', () => {
-			expect(
-				isCyclesMintDeposit({
-					...params,
-					transaction: deposit({
-						transfer: {
-							from: OWN_ACCOUNT_IDENTIFIER.toUpperCase(),
-							to: DEPOSIT_ACCOUNT_IDENTIFIER.toUpperCase()
-						}
-					})
-				})
-			).toBeTruthy();
-		});
-
-		it.each([
-			{ label: 'another recipient', transaction: deposit({ transfer: { to: 'ffff' } }) },
-			// Anyone can send to the deposit account, with the same details.
-			{ label: 'another sender', transaction: deposit({ transfer: { from: 'ffff' } }) },
-			{ label: 'another amount', transaction: deposit({ transfer: { e8s: 1n } }) },
-			{
-				label: 'another mint of the same amount',
-				transaction: deposit({
-					overrides: {
-						created_at_time: [{ timestamp_nanos: mockCyclesMintData.transfer_created_at_ns + 1n }]
-					}
-				})
-			},
-			{
-				label: 'no creation timestamp',
-				transaction: deposit({ overrides: { created_at_time: [] } })
-			},
-			{ label: 'no memo', transaction: deposit({ overrides: { icrc1_memo: [] } }) },
-			{
-				label: 'another memo',
-				transaction: deposit({
-					overrides: { icrc1_memo: [new Uint8Array([0x54, 0x50, 0x55, 0x50, 0, 0, 0, 0])] }
-				})
-			},
-			{
-				label: 'a memo that only starts like MINT',
-				transaction: deposit({
-					overrides: { icrc1_memo: [new Uint8Array([0x4d, 0x49, 0x4e, 0x54])] }
-				})
-			},
-			{
-				label: 'another operation',
-				transaction: deposit({
-					overrides: {
-						operation: { Mint: { to: DEPOSIT_ACCOUNT_IDENTIFIER, amount: { e8s: 1n } } }
-					}
-				})
-			}
-		])('does not match $label', ({ transaction }) => {
-			expect(isCyclesMintDeposit({ ...params, transaction })).toBeFalsy();
 		});
 	});
 

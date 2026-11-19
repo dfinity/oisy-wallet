@@ -1,302 +1,108 @@
 import TokenCategoryFilterDropdown from '$lib/components/tokens/TokenCategoryFilterDropdown.svelte';
-import { tokenCategoryFilter } from '$lib/derived/settings.derived';
+import { TOKEN_CATEGORY_FILTER } from '$lib/constants/test-ids.constants';
 import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { i18n } from '$lib/stores/i18n.store';
-import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
-import { assertNonNullish } from '@dfinity/utils';
-import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
+import { openFilterChip } from '$tests/utils/filter-chip.test-utils';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('TokenCategoryFilterDropdown', () => {
-	const tokenCategoryFilterStoreSpy = vi.spyOn(tokenCategoryFilterStore, 'set');
+	const onSelect = vi.fn();
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
 	});
 
-	it('should render the filter button', () => {
-		const { container } = render(TokenCategoryFilterDropdown);
+	const trigger = () => screen.getByTestId(`${TOKEN_CATEGORY_FILTER}-trigger`);
 
-		const button = container.querySelector('button');
+	const optionLabels = (panel: HTMLElement): string[] =>
+		within(panel)
+			.getAllByRole('button')
+			.map((button) => button.textContent?.trim() ?? '');
 
-		expect(button).toBeInTheDocument();
+	it('names the trigger "All types" when no category is selected', () => {
+		render(TokenCategoryFilterDropdown, { props: { onSelect } });
+
+		expect(trigger()).toHaveAccessibleName(get(i18n).tokens.text.asset_type_all_short);
 	});
 
-	it('should render with the correct aria label', () => {
-		const { container } = render(TokenCategoryFilterDropdown);
-
-		const button = container.querySelector(
-			`[aria-label="${get(i18n).tokens.text.asset_type_all}"]`
-		);
-
-		expect(button).toBeInTheDocument();
-	});
-
-	it('should display "All asset types" label when no category is selected', () => {
-		const { getByText } = render(TokenCategoryFilterDropdown);
-
-		expect(getByText(get(i18n).tokens.text.asset_type_all)).toBeInTheDocument();
-	});
-
-	it('should display selected category label when a category is set', () => {
-		tokenCategoryFilterStore.set({
-			key: 'token-category-filter',
-			value: { value: TokenCategoryTagValue.STABLECOIN }
+	it('names the trigger after the selected category', () => {
+		render(TokenCategoryFilterDropdown, {
+			props: { onSelect, selectedCategory: TokenCategoryTagValue.STABLECOIN }
 		});
 
-		const { getByText } = render(TokenCategoryFilterDropdown);
-
-		expect(getByText(get(i18n).token_tag.category.stablecoin)).toBeInTheDocument();
+		expect(trigger()).toHaveAccessibleName(get(i18n).token_tag.category.stablecoin);
 	});
 
-	it('should open the popover when button is clicked', async () => {
-		const { container } = render(TokenCategoryFilterDropdown);
+	it('offers every category after "All asset types", Compute last', async () => {
+		render(TokenCategoryFilterDropdown, { props: { onSelect } });
 
-		const button = container.querySelector('button');
-		assertNonNullish(button);
+		const labels = optionLabels(await openFilterChip(TOKEN_CATEGORY_FILTER));
 
-		await fireEvent.click(button);
-
-		await waitFor(() => {
-			const popover = container.querySelector('[data-tid="popover-content"]');
-
-			expect(popover).toBeInTheDocument();
-		});
+		expect(labels[0]).toBe(get(i18n).tokens.text.asset_type_all);
+		expect(labels.at(-1)).toBe(get(i18n).token_tag.category.compute);
+		expect(labels).toHaveLength(Object.values(TokenCategoryTagValue).length + 1);
 	});
 
-	it('should display all category options in the popover', async () => {
-		const { container, getByText } = render(TokenCategoryFilterDropdown);
-
-		const button = container.querySelector('button');
-		assertNonNullish(button);
-
-		await fireEvent.click(button);
-
-		await waitFor(() => {
-			expect(getByText(get(i18n).token_tag.category.crypto)).toBeInTheDocument();
-			expect(getByText(get(i18n).token_tag.category.stablecoin)).toBeInTheDocument();
-			expect(getByText(get(i18n).token_tag.category.stock)).toBeInTheDocument();
-			expect(getByText(get(i18n).token_tag.category.commodity)).toBeInTheDocument();
-			expect(getByText(get(i18n).token_tag.category.compute)).toBeInTheDocument();
+	it('offers only the given categories', async () => {
+		render(TokenCategoryFilterDropdown, {
+			props: { onSelect, categories: [TokenCategoryTagValue.CRYPTO] }
 		});
+
+		expect(optionLabels(await openFilterChip(TOKEN_CATEGORY_FILTER))).toEqual([
+			get(i18n).tokens.text.asset_type_all,
+			get(i18n).token_tag.category.crypto
+		]);
 	});
 
-	it('should list Compute as the last category option', async () => {
-		const { container } = render(TokenCategoryFilterDropdown);
+	it('reports a picked category and closes', async () => {
+		render(TokenCategoryFilterDropdown, { props: { onSelect } });
 
-		const button = container.querySelector('button');
-		assertNonNullish(button);
+		const panel = await openFilterChip(TOKEN_CATEGORY_FILTER);
 
-		await fireEvent.click(button);
+		await fireEvent.click(within(panel).getByText(get(i18n).token_tag.category.stablecoin));
 
-		await waitFor(() => {
-			const options = container.querySelectorAll('[data-tid="popover-content"] button');
+		expect(onSelect).toHaveBeenCalledExactlyOnceWith(TokenCategoryTagValue.STABLECOIN);
 
-			expect(options[options.length - 1]?.textContent?.trim()).toBe(
-				get(i18n).token_tag.category.compute
-			);
-		});
+		await waitFor(() => expect(trigger()).toHaveAttribute('aria-expanded', 'false'));
 	});
 
-	it('should set the store when a category is selected', async () => {
-		const { container, getByText } = render(TokenCategoryFilterDropdown);
-
-		const button = container.querySelector('button');
-		assertNonNullish(button);
-
-		await fireEvent.click(button);
-
-		await waitFor(() => {
-			expect(getByText(get(i18n).token_tag.category.stablecoin)).toBeInTheDocument();
+	it('reports all asset types when "All asset types" is picked', async () => {
+		render(TokenCategoryFilterDropdown, {
+			props: { onSelect, selectedCategory: TokenCategoryTagValue.STOCK }
 		});
 
-		const option = getByText(get(i18n).token_tag.category.stablecoin);
-		await fireEvent.click(option);
+		const panel = await openFilterChip(TOKEN_CATEGORY_FILTER);
 
-		expect(tokenCategoryFilterStoreSpy).toHaveBeenCalledWith({
-			key: 'token-category-filter',
-			value: { value: TokenCategoryTagValue.STABLECOIN }
-		});
+		await fireEvent.click(within(panel).getByText(get(i18n).tokens.text.asset_type_all));
+
+		expect(onSelect).toHaveBeenCalledExactlyOnceWith(undefined);
 	});
 
-	it('announces the selected category after selecting and reopening', async () => {
-		const { getByRole } = render(TokenCategoryFilterDropdown);
-		await fireEvent.click(getByRole('button', { name: get(i18n).tokens.text.asset_type_all }));
-		let dialog = within(getByRole('dialog'));
+	it('marks the selected category as pressed', async () => {
+		render(TokenCategoryFilterDropdown, {
+			props: { onSelect, selectedCategory: TokenCategoryTagValue.CRYPTO }
+		});
+
+		const panel = await openFilterChip(TOKEN_CATEGORY_FILTER);
 
 		expect(
-			dialog.getByRole('button', { name: get(i18n).tokens.text.asset_type_all })
-		).toHaveAttribute('aria-pressed', 'true');
-
-		await fireEvent.click(
-			dialog.getByRole('button', { name: get(i18n).token_tag.category.crypto })
-		);
-		await waitFor(() => expect(document.querySelector('[role="dialog"]')).not.toBeInTheDocument());
-		await fireEvent.click(getByRole('button', { name: get(i18n).token_tag.category.crypto }));
-		dialog = within(getByRole('dialog'));
-
-		expect(
-			dialog.getByRole('button', { name: get(i18n).token_tag.category.crypto })
+			within(panel).getByRole('button', { name: get(i18n).token_tag.category.crypto })
 		).toHaveAttribute('aria-pressed', 'true');
 		expect(
-			dialog.getByRole('button', { name: get(i18n).tokens.text.asset_type_all })
+			within(panel).getByRole('button', { name: get(i18n).tokens.text.asset_type_all })
 		).toHaveAttribute('aria-pressed', 'false');
 	});
 
-	it('should reset the store when "All" is selected', async () => {
-		tokenCategoryFilterStore.set({
-			key: 'token-category-filter',
-			value: { value: TokenCategoryTagValue.CRYPTO }
+	it('clears the selected category from the chip', async () => {
+		render(TokenCategoryFilterDropdown, {
+			props: { onSelect, selectedCategory: TokenCategoryTagValue.CRYPTO }
 		});
 
-		const { container, getAllByText } = render(TokenCategoryFilterDropdown);
+		await fireEvent.click(
+			screen.getByRole('button', { name: get(i18n).tokens.text.clear_asset_type_filter })
+		);
 
-		const button = container.querySelector('button');
-		assertNonNullish(button);
-
-		await fireEvent.click(button);
-
-		await waitFor(() => {
-			const allOptions = getAllByText(get(i18n).tokens.text.asset_type_all);
-
-			expect(allOptions.length).toBeGreaterThan(0);
-		});
-
-		const allOptions = getAllByText(get(i18n).tokens.text.asset_type_all);
-		const popoverAllOption = allOptions.find((el) => el.closest('ul'));
-		assertNonNullish(popoverAllOption);
-
-		await fireEvent.click(popoverAllOption);
-
-		expect(tokenCategoryFilterStoreSpy).toHaveBeenCalledWith({
-			key: 'token-category-filter',
-			value: { value: undefined }
-		});
-	});
-
-	it('should update the derived store value after selection', async () => {
-		const { container, getByText } = render(TokenCategoryFilterDropdown);
-
-		expect(get(tokenCategoryFilter)).toBeUndefined();
-
-		const button = container.querySelector('button');
-		assertNonNullish(button);
-
-		await fireEvent.click(button);
-
-		await waitFor(() => {
-			expect(getByText(get(i18n).token_tag.category.commodity)).toBeInTheDocument();
-		});
-
-		const option = getByText(get(i18n).token_tag.category.commodity);
-		await fireEvent.click(option);
-
-		expect(get(tokenCategoryFilter)).toBe(TokenCategoryTagValue.COMMODITY);
-	});
-
-	describe('controlled mode', () => {
-		it('should display selectedCategory label instead of store value', () => {
-			const { getByText } = render(TokenCategoryFilterDropdown, {
-				props: {
-					selectedCategory: TokenCategoryTagValue.STABLECOIN,
-					onSelect: vi.fn()
-				}
-			});
-
-			expect(getByText(get(i18n).token_tag.category.stablecoin)).toBeInTheDocument();
-		});
-
-		it('should display "All" when selectedCategory is undefined even if store has a value', () => {
-			tokenCategoryFilterStore.set({
-				key: 'token-category-filter',
-				value: { value: TokenCategoryTagValue.STABLECOIN }
-			});
-
-			const { getByText } = render(TokenCategoryFilterDropdown, {
-				props: {
-					selectedCategory: undefined,
-					onSelect: vi.fn()
-				}
-			});
-
-			expect(getByText(get(i18n).tokens.text.asset_type_all)).toBeInTheDocument();
-		});
-
-		it('should call onSelect instead of updating the store', async () => {
-			const onSelectSpy = vi.fn();
-
-			const { container, getByText } = render(TokenCategoryFilterDropdown, {
-				props: {
-					selectedCategory: undefined,
-					onSelect: onSelectSpy
-				}
-			});
-
-			const button = container.querySelector('button');
-			assertNonNullish(button);
-
-			await fireEvent.click(button);
-
-			await waitFor(() => {
-				expect(getByText(get(i18n).token_tag.category.crypto)).toBeInTheDocument();
-			});
-
-			const option = getByText(get(i18n).token_tag.category.crypto);
-			await fireEvent.click(option);
-
-			expect(onSelectSpy).toHaveBeenCalledWith(TokenCategoryTagValue.CRYPTO);
-			expect(tokenCategoryFilterStoreSpy).not.toHaveBeenCalled();
-		});
-
-		it('should call onSelect with undefined when "All" is selected', async () => {
-			const onSelectSpy = vi.fn();
-
-			const { container, getAllByText } = render(TokenCategoryFilterDropdown, {
-				props: {
-					selectedCategory: TokenCategoryTagValue.STOCK,
-					onSelect: onSelectSpy
-				}
-			});
-
-			const button = container.querySelector('button');
-			assertNonNullish(button);
-
-			await fireEvent.click(button);
-
-			await waitFor(() => {
-				const allOptions = getAllByText(get(i18n).tokens.text.asset_type_all);
-
-				expect(allOptions.length).toBeGreaterThan(0);
-			});
-
-			const allOptions = getAllByText(get(i18n).tokens.text.asset_type_all);
-			const popoverAllOption = allOptions.find((el) => el.closest('ul'));
-			assertNonNullish(popoverAllOption);
-
-			await fireEvent.click(popoverAllOption);
-
-			expect(onSelectSpy).toHaveBeenCalledWith(undefined);
-			expect(tokenCategoryFilterStoreSpy).not.toHaveBeenCalled();
-		});
-	});
-
-	it('shows the open state on its trigger while the options are open', async () => {
-		const { getByRole, getByText } = render(TokenCategoryFilterDropdown);
-
-		const trigger = getByRole('button', { name: get(i18n).tokens.text.asset_type_all });
-
-		expect(trigger).not.toHaveClass('opened');
-
-		await fireEvent.click(trigger);
-
-		await waitFor(() => {
-			expect(trigger).toHaveClass('opened');
-			expect(trigger).toHaveAttribute('aria-expanded', 'true');
-		});
-
-		await fireEvent.click(getByText(get(i18n).token_tag.category.stablecoin));
-
-		await waitFor(() => expect(trigger).not.toHaveClass('opened'));
+		expect(onSelect).toHaveBeenCalledExactlyOnceWith(undefined);
 	});
 });

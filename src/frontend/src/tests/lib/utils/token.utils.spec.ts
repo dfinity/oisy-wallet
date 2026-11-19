@@ -13,6 +13,7 @@ import { USDC_TOKEN as USDC_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/
 import { USDT_TOKEN as USDT_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdt.env';
 import { USDC_TOKEN as USDC_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN as USDT_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdt.env';
+import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import * as tokensIcrcCkEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
@@ -593,7 +594,11 @@ describe('token.utils', () => {
 			{ description: 'Suggested ERC20 token USDC on Polygon', token: USDC_POLYGON_TOKEN },
 			{ description: 'Suggested ERC20 token USDT on Polygon', token: USDT_POLYGON_TOKEN },
 			{ description: 'Suggested SPL token USDC on Solana', token: USDC_SOL_TOKEN },
-			{ description: 'Suggested SPL token USDT on Solana', token: USDT_SOL_TOKEN }
+			{ description: 'Suggested SPL token USDT on Solana', token: USDT_SOL_TOKEN },
+			{
+				description: 'Suggested ICRC token TCYCLES',
+				token: { ...mockValidIcToken, ledgerCanisterId: TCYCLES_LEDGER_CANISTER_ID }
+			}
 		])('$description - Suggested Tokens', ({ token, setupMock }) => {
 			if (setupMock) {
 				beforeEach(() => setupMock(token.ledgerCanisterId));

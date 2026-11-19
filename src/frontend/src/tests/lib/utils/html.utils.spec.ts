@@ -1,4 +1,4 @@
-import { nextElementId, sanitize, sanitizeUntrusted } from '$lib/utils/html.utils';
+import { escapeHtml, nextElementId, sanitize, sanitizeUntrusted } from '$lib/utils/html.utils';
 
 const parseHtml = (html: string): HTMLElement => {
 	const container = document.createElement('div');
@@ -38,6 +38,40 @@ describe('html.utils', () => {
 
 			expect(link?.getAttribute('target')).toBe('_blank');
 			expect(link?.getAttribute('rel')).toBe('noreferrer external');
+		});
+
+		it('should remove style elements and their rules', () => {
+			const result = sanitize(
+				'Move <b>Name<style>button{opacity:0}</style></b> to spam<svg><style>p{display:none}</style></svg>'
+			);
+			const container = parseHtml(result);
+
+			expect(container.querySelector('style')).toBeNull();
+			expect(container.querySelector('b')?.textContent).toBe('Name');
+			expect(result).not.toContain('opacity');
+			expect(result).not.toContain('display:none');
+		});
+
+		it('should keep the formatting markup translated texts use', () => {
+			const result = sanitize(
+				'Remove <span class="font-bold">ICP</span>?<br><b>Note</b>: see <a href="https://oisy.com" target="_blank">OISY</a>'
+			);
+			const container = parseHtml(result);
+
+			expect(container.querySelector('span')?.getAttribute('class')).toBe('font-bold');
+			expect(container.querySelector('br')).not.toBeNull();
+			expect(container.querySelector('b')?.textContent).toBe('Note');
+			expect(container.querySelector('a')?.getAttribute('href')).toBe('https://oisy.com');
+		});
+
+		it('should not carry its configuration into a subsequent untrusted call', () => {
+			sanitize('<p>Fee</p>');
+
+			const result = sanitizeUntrusted('<p style="zoom:99">Fee</p><button>Approve</button>');
+			const container = parseHtml(result);
+
+			expect(container.querySelector('p')?.getAttribute('style')).toBeNull();
+			expect(container.querySelector('button')).toBeNull();
 		});
 	});
 
@@ -98,6 +132,28 @@ describe('html.utils', () => {
 			const result = sanitize('<button>Approve</button>');
 
 			expect(parseHtml(result).querySelector('button')).not.toBeNull();
+		});
+	});
+
+	describe('escapeHtml', () => {
+		it('should escape every character that has a meaning in HTML', () => {
+			expect(escapeHtml(`<a href="x" title='y'>A & B</a>`)).toBe(
+				'&lt;a href=&quot;x&quot; title=&#39;y&#39;&gt;A &amp; B&lt;/a&gt;'
+			);
+		});
+
+		it('should leave a text without such characters unchanged', () => {
+			expect(escapeHtml('Bored Ape Yacht Club')).toBe('Bored Ape Yacht Club');
+		});
+
+		it('should keep a value as plain text once substituted into markup and sanitized', () => {
+			const value =
+				'</b><div style="position:fixed"><h1>Title</h1><img src="https://example.com/a.png"><a href="https://example.com">link</a></div><b>';
+
+			const container = parseHtml(sanitize(`Hide <b>${escapeHtml(value)}</b>?`));
+
+			expect(container.querySelector('b')?.textContent).toBe(value);
+			expect(container.querySelectorAll('*')).toHaveLength(1);
 		});
 	});
 

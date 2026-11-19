@@ -11,8 +11,9 @@
 </script>
 
 {#if nonNullish($destinationToken) && nonNullish($sourceToken) && $sourceToken.network.id !== $destinationToken.network.id}
-	<div class="mt-6">
-		<MessageBox styleClass="sm:text-sm">
+	<div class="mt-4">
+		<!-- Plain and regular weight: the amount cards already name the networks. -->
+		<MessageBox level="plain" styleClass="bg-secondary! font-normal!">
 			<Html
 				text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {
 					$sourceNetwork: $sourceToken.network.name,

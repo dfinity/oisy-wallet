@@ -1,11 +1,19 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	TOKEN_2022_NATIVE_MINT_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolClosedAccount } from '$sol/types/sol-simulation';
 import {
+	findSolProgramsPayingOthers,
 	mapSolInstructionSummaries,
 	solClosingInstructionCandidates,
-	solOpensAccountBeyondRent
+	solOpensAccountBeyondRent,
+	solSignsForMultisig,
+	type SolInstructionGroup
 } from '$sol/utils/sol-instruction-summary.utils';
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import { solClosedAccountsReachWallet } from '$sol/utils/sol-simulation.utils';
@@ -23,9 +31,12 @@ import {
 import {
 	mockAtaAddress,
 	mockAtaAddress2,
+	mockAtaAddress3,
 	mockSolAddress,
 	mockSolAddress2,
-	mockSolAddress3
+	mockSolAddress3,
+	mockSolAddress4,
+	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
 import {
@@ -37,15 +48,23 @@ import {
 	AuthorityType,
 	getApproveCheckedInstruction,
 	getApproveInstruction,
+	getBatchInstruction,
 	getBurnInstruction,
 	getFreezeAccountInstruction,
 	getMintToInstruction,
 	getRevokeInstruction,
 	getSetAuthorityInstruction,
+	getSyncNativeInstruction,
 	getTransferCheckedInstruction
 } from '@solana-program/token';
 import {
+	getSetTransferFeeInstruction,
+	getBatchInstruction as getToken2022BatchInstruction,
+	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction
+} from '@solana-program/token-2022';
+import {
 	AccountRole,
+	createNoopSigner,
 	decompileTransactionMessage,
 	getCompiledTransactionMessageDecoder,
 	address as toAddress
@@ -833,7 +852,7 @@ describe('sol-instruction-summary.utils', () => {
 			});
 
 			it('should read the same opening stated by the message itself', () => {
-				const signer = (address: string) => ({ address }) as never;
+				const signer = (address: string) => createNoopSigner(toAddress(address));
 
 				expect(
 					mapSolInstructionSummaries({
@@ -921,7 +940,7 @@ describe('sol-instruction-summary.utils', () => {
 				});
 
 				it('should read the same opening stated by the message itself', () => {
-					const signer = (address: string) => ({ address }) as never;
+					const signer = (address: string) => createNoopSigner(toAddress(address));
 
 					expect(
 						mapSolInstructionSummaries({
@@ -3217,7 +3236,7 @@ describe('sol-instruction-summary.utils', () => {
 			const them = '9zsjmwXjZzuKfArqhLDpvcvLKUxLZfCzeMcqhAcPr8Jm';
 			const mint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
-			const signer = (address: string) => ({ address }) as never;
+			const signer = (address: string) => createNoopSigner(toAddress(address));
 
 			// A message delivers kit instructions; the review decodes them before the effects are
 			// read. Going straight to the mapper would test a path no caller takes.
@@ -3449,6 +3468,1111 @@ describe('sol-instruction-summary.utils', () => {
 						userAddress: me
 					})
 				).not.toThrow();
+			});
+		});
+
+		describe('a token batch', () => {
+			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+			const APP = 'App1111111111111111111111111111111111111111';
+			const mint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+			const transferTo = ({ destination, amount }: { destination: string; amount: bigint }) =>
+				getTransferCheckedInstruction({
+					source: toAddress(mockAtaAddress),
+					mint: toAddress(mint),
+					destination: toAddress(destination),
+					authority: toAddress(mockSolAddress),
+					amount,
+					decimals: 6
+				});
+
+			const send = ({ counterparty, amount }: { counterparty: string; amount: bigint }) => ({
+				kind: 'send',
+				amount,
+				tokenAddress: mint,
+				decimals: 6,
+				counterparty,
+				own: false
+			});
+
+			// What the RPC returns for a batch a program runs inside its own instruction.
+			const returnedBatch = (instructions: unknown) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: { type: 'batch', info: { instructions } },
+				stackHeight: 2
+			});
+
+			const unreadCall = { programId: APP, accounts: [], data: '' };
+
+			it('should list the instructions of a batch the message states under one line naming it', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						getBatchInstruction([
+							transferTo({ destination: mockSolAddress2, amount: 1n }),
+							transferTo({ destination: mockAtaAddress2, amount: 2n })
+						])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([
+					{
+						kind: 'batch',
+						program: TOKEN,
+						children: [
+							send({ counterparty: mockSolAddress2, amount: 1n }),
+							send({ counterparty: mockAtaAddress2, amount: 2n })
+						]
+					}
+				]);
+			});
+
+			// Stated on its own, the fee change would be an instruction nobody read, and the transfer
+			// beside it in the batch says nothing about it.
+			it('should list a batch the message states as unread when one of its steps has no line', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						getToken2022BatchInstruction([
+							getToken2022TransferCheckedInstruction({
+								source: toAddress(mockAtaAddress),
+								mint: toAddress(mint),
+								destination: toAddress(mockSolAddress2),
+								authority: toAddress(mockSolAddress),
+								amount: 1n,
+								decimals: 6
+							}),
+							getSetTransferFeeInstruction({
+								mint: toAddress(mint),
+								transferFeeConfigAuthority: toAddress(mockSolAddress),
+								transferFeeBasisPoints: 10_000,
+								maximumFee: 1_000_000n
+							})
+						])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([
+					{
+						kind: 'batch',
+						program: TOKEN_2022_PROGRAM_ADDRESS,
+						children: [send({ counterparty: mockSolAddress2, amount: 1n })]
+					},
+					{ kind: 'unknown', program: TOKEN_2022_PROGRAM_ADDRESS }
+				]);
+			});
+
+			// Syncing is plumbing the list reads and leaves out, here as when the message states it.
+			it('should keep a batch the message states read when the step with no line is plumbing', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						getBatchInstruction([
+							getSyncNativeInstruction({ account: toAddress(mockAtaAddress3) }),
+							transferTo({ destination: mockSolAddress2, amount: 1n })
+						])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress, mockAtaAddress3],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([
+					{
+						kind: 'batch',
+						program: TOKEN,
+						children: [send({ counterparty: mockSolAddress2, amount: 1n })]
+					}
+				]);
+			});
+
+			// Nothing but plumbing gets no line at all, as the same steps stated one by one would not.
+			it('should leave out a batch the message states that carries only plumbing', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						transferTo({ destination: mockSolAddress2, amount: 1n }),
+						getBatchInstruction([getSyncNativeInstruction({ account: toAddress(mockAtaAddress3) })])
+					].map(asSolParsedRpcInstructionOrSelf),
+					ownedAddresses: [mockSolAddress, mockAtaAddress, mockAtaAddress3],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([send({ counterparty: mockSolAddress2, amount: 1n })]);
+			});
+
+			it('should list a batch a program runs under that program and under one line naming it', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [unreadCall],
+					innerInstructions: [
+						{
+							index: 0,
+							instructions: [
+								returnedBatch([
+									{
+										type: 'transferChecked',
+										info: {
+											source: mockAtaAddress,
+											destination: mockSolAddress2,
+											authority: mockSolAddress,
+											mint,
+											tokenAmount: { amount: '5', decimals: 6 }
+										}
+									}
+								])
+							]
+						}
+					],
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(views).toStrictEqual([
+					{
+						kind: 'route',
+						program: APP,
+						children: [
+							{
+								kind: 'batch',
+								program: TOKEN,
+								children: [send({ counterparty: mockSolAddress2, amount: 5n })]
+							}
+						]
+					}
+				]);
+			});
+
+			it('should hold a close inside such a batch that pays somebody else to the close refusal', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [unreadCall],
+					innerInstructions: [
+						{
+							index: 0,
+							instructions: [
+								returnedBatch([
+									{
+										type: 'closeAccount',
+										info: {
+											account: mockAtaAddress,
+											destination: mockSolAddress2,
+											owner: mockSolAddress
+										}
+									}
+								])
+							]
+						}
+					],
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					accountLamports: { [mockAtaAddress]: 2_039_280n }
+				});
+
+				expect(
+					solClosesPayOthers({ instructions: views, userAddress: mockSolAddress })
+				).toBeTruthy();
+			});
+
+			it('should leave a batch whose contents it cannot read unrecognised', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [returnedBatch('not a list')],
+					ownedAddresses: [mockSolAddress, mockAtaAddress],
+					userAddress: mockSolAddress,
+					includeUnrecognised: true
+				});
+
+				expect(kinds(views)).toStrictEqual(['unknown']);
+			});
+
+			// The RPC returns the calls made inside a batch after all its steps, and a step can make
+			// them in the middle of it, such as a transfer running its mint's hook.
+			describe('with calls made inside it', () => {
+				const paidIn = {
+					program: 'system',
+					programId: '11111111111111111111111111111111',
+					parsed: {
+						type: 'transfer',
+						info: { source: mockSolAddress3, destination: mockSolAddress, lamports: 5_000 }
+					},
+					stackHeight: 3
+				};
+
+				const received = {
+					kind: 'receive',
+					amount: 5_000n,
+					counterparty: mockSolAddress3,
+					own: false
+				};
+
+				it('should keep a batch of several steps whole and list it as nobody read it', () => {
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							getBatchInstruction([
+								transferTo({ destination: mockSolAddress2, amount: 1n }),
+								transferTo({ destination: mockAtaAddress2, amount: 2n })
+							])
+						].map(asSolParsedRpcInstructionOrSelf),
+						innerInstructions: [{ index: 0, instructions: [paidIn] }],
+						ownedAddresses: [mockSolAddress, mockAtaAddress],
+						userAddress: mockSolAddress,
+						includeUnrecognised: true
+					});
+
+					expect(views).toStrictEqual([received, { kind: 'unknown', program: TOKEN }]);
+				});
+
+				it('should read a batch of one step with the calls made after it', () => {
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							getBatchInstruction([transferTo({ destination: mockSolAddress2, amount: 1n })])
+						].map(asSolParsedRpcInstructionOrSelf),
+						innerInstructions: [{ index: 0, instructions: [paidIn] }],
+						ownedAddresses: [mockSolAddress, mockAtaAddress],
+						userAddress: mockSolAddress,
+						includeUnrecognised: true
+					});
+
+					expect(views).toStrictEqual([
+						{
+							kind: 'batch',
+							program: TOKEN,
+							children: [send({ counterparty: mockSolAddress2, amount: 1n })]
+						},
+						received
+					]);
+				});
+
+				it('should keep a batch a program runs whole when a call one level deeper follows it', () => {
+					const steps = [
+						{
+							type: 'transferChecked',
+							info: {
+								source: mockAtaAddress,
+								destination: mockSolAddress2,
+								authority: mockSolAddress,
+								mint,
+								tokenAmount: { amount: '5', decimals: 6 }
+							}
+						},
+						{
+							type: 'transferChecked',
+							info: {
+								source: mockAtaAddress,
+								destination: mockAtaAddress2,
+								authority: mockSolAddress,
+								mint,
+								tokenAmount: { amount: '6', decimals: 6 }
+							}
+						}
+					];
+
+					const views = mapSolInstructionSummaries({
+						instructions: [unreadCall],
+						innerInstructions: [{ index: 0, instructions: [returnedBatch(steps), paidIn] }],
+						ownedAddresses: [mockSolAddress, mockAtaAddress],
+						userAddress: mockSolAddress,
+						includeUnrecognised: true
+					});
+
+					expect(kinds(views)).not.toContain('batch');
+					expect(views).toContainEqual({ kind: 'unknown', program: APP });
+				});
+			});
+		});
+
+		describe('an unwrap', () => {
+			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+			const wrapped = mockAtaAddress2;
+
+			const unwrap = ({
+				amount,
+				destination = mockSolAddress2
+			}: { amount?: string; destination?: string } = {}) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'unwrapLamports',
+					info: {
+						source: wrapped,
+						destination,
+						authority: mockSolAddress,
+						...(amount !== undefined && { amount })
+					}
+				}
+			});
+
+			const read = ({
+				instructions,
+				accountLamports,
+				accountTokenAmounts,
+				accountUnsynced
+			}: {
+				instructions: unknown[];
+				accountLamports?: Record<string, bigint>;
+				accountTokenAmounts?: Record<string, bigint>;
+				accountUnsynced?: Record<string, bigint>;
+			}) =>
+				mapSolInstructionSummaries({
+					instructions,
+					ownedAddresses: [mockSolAddress, wrapped],
+					userAddress: mockSolAddress,
+					addressToToken: { [wrapped]: WSOL_TOKEN.address },
+					accountLamports,
+					accountTokenAmounts,
+					accountUnsynced
+				});
+
+			it('should state the wrapped SOL leaving the account for its destination', () => {
+				expect(read({ instructions: [unwrap({ amount: '5000' })] })).toStrictEqual([
+					{
+						kind: 'send',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						decimals: WSOL_TOKEN.decimals,
+						counterparty: mockSolAddress2,
+						own: false
+					}
+				]);
+			});
+
+			// What it pays the wallet arrives there as SOL itself, which the wallet's own change counts.
+			it('should mark an unwrap paying the wallet', () => {
+				expect(
+					read({ instructions: [unwrap({ amount: '5000', destination: mockSolAddress })] })
+				).toStrictEqual([
+					{
+						kind: 'send',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						decimals: WSOL_TOKEN.decimals,
+						counterparty: mockSolAddress,
+						own: true,
+						unwrapsToWallet: true
+					}
+				]);
+			});
+
+			it('should mark an unwrap paying the wallet out of somebody else’s account', () => {
+				expect(
+					mapSolInstructionSummaries({
+						instructions: [
+							{
+								program: 'spl-token',
+								programId: TOKEN,
+								parsed: {
+									type: 'unwrapLamports',
+									info: {
+										source: mockSolAddress3,
+										destination: mockSolAddress,
+										authority: mockSolAddress2,
+										amount: '5000'
+									}
+								}
+							}
+						],
+						ownedAddresses: [mockSolAddress],
+						userAddress: mockSolAddress,
+						addressToToken: { [mockSolAddress3]: WSOL_TOKEN.address }
+					})
+				).toStrictEqual([
+					{
+						kind: 'receive',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						decimals: WSOL_TOKEN.decimals,
+						counterparty: mockSolAddress3,
+						own: false,
+						unwrapsToWallet: true
+					}
+				]);
+			});
+
+			// Read from the message alone, nothing names the source's mint, and the program settles it:
+			// it refuses an unwrap out of any account but one of its native mint.
+			it('should name the native mint of the program that runs an unwrap nobody read the source of', () => {
+				const [token, token2022] = mapSolInstructionSummaries({
+					instructions: [
+						unwrap({ amount: '5000' }),
+						{
+							...unwrap({ amount: '5000' }),
+							program: 'spl-token-2022',
+							programId: TOKEN_2022_PROGRAM_ADDRESS
+						}
+					],
+					ownedAddresses: [mockSolAddress, wrapped],
+					userAddress: mockSolAddress
+				});
+
+				expect(token?.tokenAddress).toBe(WSOL_TOKEN.address);
+				expect(token2022?.tokenAddress).toBe(TOKEN_2022_NATIVE_MINT_ADDRESS);
+			});
+
+			it('should state everything the account wraps when it names no amount', () => {
+				const [line] = read({
+					instructions: [unwrap()],
+					accountTokenAmounts: { [wrapped]: 7_000n }
+				});
+
+				expect(line.amount).toBe(7_000n);
+			});
+
+			it('should have a later close of the account hand back what the unwrap left', () => {
+				const views = read({
+					instructions: [
+						unwrap({ amount: '5000' }),
+						{
+							program: 'spl-token',
+							programId: TOKEN,
+							parsed: {
+								type: 'closeAccount',
+								info: { account: wrapped, destination: mockSolAddress, owner: mockSolAddress }
+							}
+						}
+					],
+					accountLamports: { [wrapped]: 2_046_280n },
+					accountTokenAmounts: { [wrapped]: 7_000n }
+				});
+
+				const close = views.find(({ kind }) => kind === 'unwrap');
+
+				expect(close?.returned).toBe(2_041_280n);
+				expect(close?.wrapped).toBe(2_000n);
+			});
+
+			describe('of everything, then a close', () => {
+				const close = {
+					program: 'spl-token',
+					programId: TOKEN,
+					parsed: {
+						type: 'closeAccount',
+						info: { account: wrapped, destination: mockSolAddress, owner: mockSolAddress }
+					}
+				};
+
+				// What it moves is what the account wraps there, as its own line says, so the close
+				// hands back what is left rather than an amount nobody knows.
+				it('should have the close hand back what the unwrap left', () => {
+					const views = read({
+						instructions: [unwrap(), close],
+						accountLamports: { [wrapped]: 2_046_280n },
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					const closing = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+					expect(closing?.returned).toBe(2_039_280n);
+				});
+
+				it('should know nothing of what the close hands back when nobody read what it wraps', () => {
+					const views = read({
+						instructions: [unwrap(), close],
+						accountLamports: { [wrapped]: 2_046_280n }
+					});
+
+					expect(views.at(-1)).not.toHaveProperty('returned');
+				});
+
+				// An account holding Token-2022's native mint keeps what it wraps as lamports too, so a
+				// transfer into it raises what the close hands back as much as what the unwrap moves.
+				it('should count a transfer into a Token-2022 native account toward what the close hands back', () => {
+					const token2022 = { program: 'spl-token-2022', programId: TOKEN_2022_PROGRAM_ADDRESS };
+
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							{
+								...token2022,
+								parsed: {
+									type: 'transferChecked',
+									info: {
+										source: mockSolAddress3,
+										mint: TOKEN_2022_NATIVE_MINT_ADDRESS,
+										destination: wrapped,
+										authority: mockSolAddress2,
+										tokenAmount: { amount: '5000', decimals: 9 }
+									}
+								}
+							},
+							{ ...unwrap({ destination: mockSolAddress }), ...token2022 },
+							{ ...close, ...token2022 }
+						],
+						ownedAddresses: [mockSolAddress, wrapped],
+						userAddress: mockSolAddress,
+						addressToToken: {
+							[wrapped]: TOKEN_2022_NATIVE_MINT_ADDRESS,
+							[mockSolAddress3]: TOKEN_2022_NATIVE_MINT_ADDRESS
+						},
+						accountLamports: { [wrapped]: 2_046_280n },
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					const closing = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+					expect(closing?.returned).toBe(2_039_280n);
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(2_051_280n);
+				});
+			});
+
+			describe('into the account', () => {
+				const into = (amount?: string) => ({
+					program: 'spl-token',
+					programId: TOKEN,
+					parsed: {
+						type: 'unwrapLamports',
+						info: {
+							source: mockSolAddress3,
+							destination: wrapped,
+							authority: mockSolAddress2,
+							...(amount !== undefined && { amount })
+						}
+					}
+				});
+
+				const sync = {
+					program: 'spl-token',
+					programId: TOKEN,
+					parsed: { type: 'syncNative', info: { account: wrapped } }
+				};
+
+				// The lamports raise its balance the way a wrapping does, so an unwrap of everything it
+				// wraps afterwards hands on what arrived.
+				it('should count what arrived toward a later unwrap of everything', () => {
+					const views = read({
+						instructions: [into('5000'), sync, unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: ZERO }
+					});
+
+					expect(views.at(-1)?.amount).toBe(5_000n);
+				});
+
+				// Until a sync counts them, they sit beside the amount, which is all an unwrap of
+				// everything moves.
+				it('should leave what arrived out of a later unwrap of everything without a sync', () => {
+					const views = read({
+						instructions: [into('5000'), unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(7_000n);
+				});
+
+				it('should leave SOL a System transfer paid in out of a later unwrap of everything without a sync', () => {
+					const views = read({
+						instructions: [
+							{
+								program: 'system',
+								programId: '11111111111111111111111111111111',
+								parsed: {
+									type: 'transfer',
+									info: { source: mockSolAddress, destination: wrapped, lamports: 5_000 }
+								}
+							},
+							unwrap({ destination: mockSolAddress })
+						],
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(7_000n);
+				});
+
+				// A close hands back every lamport, synced or not, so for it the account wraps both.
+				it('should have a close state what arrived as wrapped without a sync', () => {
+					const views = read({
+						instructions: [
+							into('5000'),
+							{
+								program: 'spl-token',
+								programId: TOKEN,
+								parsed: {
+									type: 'closeAccount',
+									info: { account: wrapped, destination: mockSolAddress, owner: mockSolAddress }
+								}
+							}
+						],
+						accountLamports: { [wrapped]: 2_046_280n },
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					const closing = views.find(({ kind }) => kind === 'unwrap');
+
+					expect(closing?.wrapped).toBe(12_000n);
+					expect(closing?.returned).toBe(2_051_280n);
+				});
+
+				it('should know nothing of a later unwrap of everything when the first names no amount', () => {
+					const views = read({
+						instructions: [into(), sync, unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: ZERO }
+					});
+
+					expect(views.at(-1)).not.toHaveProperty('amount');
+				});
+
+				// Both token programs lower the balance and leave the lamports where they are.
+				it('should lower the balance for an unwrap into the account itself', () => {
+					const views = read({
+						instructions: [
+							unwrap({ amount: '5000', destination: wrapped }),
+							unwrap({ destination: mockSolAddress })
+						],
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(2_000n);
+				});
+
+				// A close paying into the account hands it every lamport the closed account held, which a
+				// sync counts like any other paid in.
+				describe('after a close paid into it', () => {
+					const closeInto = {
+						program: 'spl-token',
+						programId: TOKEN,
+						parsed: {
+							type: 'closeAccount',
+							info: { account: mockSolAddress3, destination: wrapped, owner: mockSolAddress2 }
+						}
+					};
+
+					it('should count what the close paid in toward a later unwrap of everything once synced', () => {
+						const views = read({
+							instructions: [closeInto, sync, unwrap({ destination: mockSolAddress })],
+							accountLamports: { [wrapped]: 2_046_280n, [mockSolAddress3]: 2_039_280n },
+							accountTokenAmounts: { [wrapped]: 7_000n }
+						});
+
+						expect(views.at(-1)?.amount).toBe(2_046_280n);
+					});
+
+					it('should know nothing of a later unwrap of everything when nobody read what the close paid in', () => {
+						const views = read({
+							instructions: [closeInto, sync, unwrap({ destination: mockSolAddress })],
+							accountLamports: { [wrapped]: 2_046_280n },
+							accountTokenAmounts: { [wrapped]: 7_000n }
+						});
+
+						expect(views.at(-1)).not.toHaveProperty('amount');
+					});
+				});
+
+				// Lamports already in the account beyond its reserve and its amount wait for a sync, like
+				// those the message pays in.
+				it('should count what the account held unsynced going in once a sync does', () => {
+					const views = read({
+						instructions: [sync, unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: 7_000n },
+						accountUnsynced: { [wrapped]: 5_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(12_000n);
+				});
+
+				it('should leave what the account held unsynced going in out of an unwrap of everything without a sync', () => {
+					const views = read({
+						instructions: [unwrap({ destination: mockSolAddress })],
+						accountTokenAmounts: { [wrapped]: 7_000n },
+						accountUnsynced: { [wrapped]: 5_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(7_000n);
+				});
+
+				// The lamports it left in place are counted again once the account is synced.
+				it('should count what an unwrap into the account itself left once a sync does', () => {
+					const views = read({
+						instructions: [
+							unwrap({ amount: '5000', destination: wrapped }),
+							sync,
+							unwrap({ destination: mockSolAddress })
+						],
+						accountTokenAmounts: { [wrapped]: 7_000n }
+					});
+
+					expect(views.at(-1)?.amount).toBe(7_000n);
+				});
+			});
+		});
+
+		// Counted from nothing, an account the walk lost track of would have its close state what
+		// arrived since as all it hands back, or nothing at all.
+		describe('a balance nobody knows', () => {
+			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+			const wrapped = mockAtaAddress2;
+			const other = mockAtaAddress;
+
+			const unwrap = ({
+				source,
+				destination,
+				authority = mockSolAddress,
+				amount
+			}: {
+				source: string;
+				destination: string;
+				authority?: string;
+				amount?: string;
+			}) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'unwrapLamports',
+					info: { source, destination, authority, ...(amount !== undefined && { amount }) }
+				}
+			});
+
+			const close = ({
+				account,
+				destination = mockSolAddress
+			}: {
+				account: string;
+				destination?: string;
+			}) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'closeAccount',
+					info: { account, destination, owner: mockSolAddress }
+				}
+			});
+
+			const read = (instructions: unknown[]) =>
+				mapSolInstructionSummaries({
+					instructions,
+					ownedAddresses: [mockSolAddress, wrapped, other],
+					userAddress: mockSolAddress,
+					addressToToken: {
+						[wrapped]: WSOL_TOKEN.address,
+						[other]: WSOL_TOKEN.address,
+						[mockSolAddress3]: WSOL_TOKEN.address
+					},
+					accountLamports: { [wrapped]: 2_046_280n, [other]: 2_039_280n }
+				});
+
+			it('should know nothing of what a close hands back after a stated unwrap follows one nobody read', () => {
+				const views = read([
+					unwrap({ source: wrapped, destination: mockSolAddress }),
+					unwrap({ source: wrapped, destination: mockSolAddress2, amount: '5000' }),
+					close({ account: wrapped })
+				]);
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+
+			it('should know nothing of what a close hands back once an unwrap nobody read paid into the account', () => {
+				const views = read([
+					unwrap({ source: mockSolAddress3, destination: other, authority: mockSolAddress2 }),
+					unwrap({
+						source: mockSolAddress3,
+						destination: other,
+						authority: mockSolAddress2,
+						amount: '5000'
+					}),
+					close({ account: other })
+				]);
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+
+			it('should know nothing of what a close hands back once a close nobody read paid into the account', () => {
+				const views = read([
+					close({ account: mockSolAddress3, destination: other }),
+					close({ account: other })
+				]);
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+		});
+
+		// SOL paid out of an account no application holds: a seed-derived account, a nonce account, or
+		// a token account handing over its excess lamports. Each pays the wallet as surely as a plain
+		// transfer, and only a line says so.
+		describe('SOL paid out of a System or token account', () => {
+			const TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+			const SYSTEM = '11111111111111111111111111111111';
+			const wrapped = mockAtaAddress2;
+
+			const withSeed = (destination: string) => ({
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'transferWithSeed',
+					info: {
+						source: mockSolAddress3,
+						sourceBase: mockSolAddress2,
+						destination,
+						lamports: 5_000,
+						sourceSeed: 'vault',
+						sourceOwner: SYSTEM
+					}
+				}
+			});
+
+			const fromNonce = (destination: string) => ({
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'withdrawFromNonce',
+					info: {
+						nonceAccount: mockSolAddress3,
+						destination,
+						nonceAuthority: mockSolAddress2,
+						lamports: 5_000
+					}
+				}
+			});
+
+			const excess = ({
+				source = mockSolAddress3,
+				destination
+			}: {
+				source?: string;
+				destination: string;
+			}) => ({
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'withdrawExcessLamports',
+					info: { source, destination, authority: mockSolAddress2 }
+				}
+			});
+
+			const unwrapAll = {
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: {
+					type: 'unwrapLamports',
+					info: { source: wrapped, destination: mockSolAddress, authority: mockSolAddress }
+				}
+			};
+
+			const sync = {
+				program: 'spl-token',
+				programId: TOKEN,
+				parsed: { type: 'syncNative', info: { account: wrapped } }
+			};
+
+			const read = ({
+				instructions,
+				mint = WSOL_TOKEN.address,
+				accountLamports,
+				accountTokenAmounts
+			}: {
+				instructions: unknown[];
+				mint?: string;
+				accountLamports?: Record<string, bigint>;
+				accountTokenAmounts?: Record<string, bigint>;
+			}) =>
+				mapSolInstructionSummaries({
+					instructions,
+					ownedAddresses: [mockSolAddress, wrapped],
+					userAddress: mockSolAddress,
+					addressToToken: { [wrapped]: mint },
+					accountLamports,
+					accountTokenAmounts
+				});
+
+			const plain = (destination: string) => ({
+				program: 'system',
+				programId: SYSTEM,
+				parsed: {
+					type: 'transfer',
+					info: { source: mockSolAddress3, destination, lamports: 5_000 }
+				}
+			});
+
+			const payouts = [
+				{ name: 'a plain transfer', payout: plain },
+				{ name: 'a seed-derived account', payout: withSeed },
+				{ name: 'a nonce account', payout: fromNonce }
+			];
+
+			it.each(payouts)('should state what $name pays the wallet as SOL received', ({ payout }) => {
+				expect(read({ instructions: [payout(mockSolAddress)] })).toStrictEqual([
+					{ kind: 'receive', amount: 5_000n, counterparty: mockSolAddress3, own: false }
+				]);
+			});
+
+			// Paid into a wrapped SOL account, the lamports raise its balance the way a plain transfer
+			// into it does, once the account is synced. They reach the wallet only with the unwrap,
+			// which is what the wallet's change counts them at.
+			it.each(payouts)(
+				'should count what $name pays into a wrapped SOL account toward a later unwrap of everything',
+				({ payout }) => {
+					const views = read({
+						instructions: [payout(wrapped), sync, unwrapAll],
+						accountTokenAmounts: { [wrapped]: ZERO }
+					});
+
+					expect(views[0]).toStrictEqual({
+						kind: 'receive',
+						amount: 5_000n,
+						tokenAddress: WSOL_TOKEN.address,
+						decimals: WSOL_TOKEN.decimals,
+						account: wrapped,
+						counterparty: mockSolAddress3,
+						own: false
+					});
+					expect(views.at(-1)?.amount).toBe(5_000n);
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(5_000n);
+				}
+			);
+
+			// Token-2022 wraps SOL under a native mint of its own, and what is paid into an account
+			// holding it becomes wrapped SOL there just the same.
+			it.each(payouts)(
+				'should count what $name pays into a Token-2022 wrapped SOL account toward a later unwrap of everything',
+				({ payout }) => {
+					const token2022 = { program: 'spl-token-2022', programId: TOKEN_2022_PROGRAM_ADDRESS };
+
+					const views = read({
+						instructions: [
+							payout(wrapped),
+							{ ...sync, ...token2022 },
+							{ ...unwrapAll, ...token2022 }
+						],
+						mint: TOKEN_2022_NATIVE_MINT_ADDRESS,
+						accountTokenAmounts: { [wrapped]: ZERO }
+					});
+
+					expect(views[0]).toStrictEqual({
+						kind: 'receive',
+						amount: 5_000n,
+						tokenAddress: TOKEN_2022_NATIVE_MINT_ADDRESS,
+						decimals: WSOL_TOKEN.decimals,
+						account: wrapped,
+						counterparty: mockSolAddress3,
+						own: false
+					});
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(5_000n);
+				}
+			);
+
+			// In an account of any other token the lamports stay in that account rather than reaching the
+			// wallet, which they do only with its close: the line names the account, and the wallet's
+			// change counts them once, at the close.
+			it.each(payouts)(
+				'should count what $name pays into a token account of another mint once, at its close',
+				({ payout }) => {
+					const tokenAccount = mockAtaAddress3;
+
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							payout(tokenAccount),
+							{
+								program: 'spl-token',
+								programId: TOKEN,
+								parsed: {
+									type: 'closeAccount',
+									info: {
+										account: tokenAccount,
+										destination: mockSolAddress,
+										owner: mockSolAddress
+									}
+								}
+							}
+						],
+						ownedAddresses: [mockSolAddress, tokenAccount],
+						userAddress: mockSolAddress,
+						addressToToken: { [tokenAccount]: mockSplAddress },
+						accountLamports: { [tokenAccount]: 2_039_280n },
+						accountTokenAmounts: { [tokenAccount]: ZERO }
+					});
+
+					expect(views[0]).toStrictEqual({
+						kind: 'receive',
+						amount: 5_000n,
+						account: tokenAccount,
+						counterparty: mockSolAddress3,
+						own: false
+					});
+					expect(views.at(-1)?.returned).toBe(2_044_280n);
+					expect(
+						solWalletLamportsStated({ instructions: views, userAddress: mockSolAddress })
+					).toBe(2_044_280n);
+				}
+			);
+
+			it('should state excess lamports paid to the wallet as SOL received by an amount nobody read', () => {
+				expect(read({ instructions: [excess({ destination: mockSolAddress })] })).toStrictEqual([
+					{ kind: 'receive', withdrawsExcess: true, counterparty: mockSolAddress3, own: false }
+				]);
+			});
+
+			it('should state nothing of excess lamports paid anywhere else', () => {
+				expect(read({ instructions: [excess({ destination: mockSolAddress2 })] })).toStrictEqual(
+					[]
+				);
+			});
+
+			it('should know nothing of what a wrapped SOL account wraps once excess lamports reach it', () => {
+				const views = read({
+					instructions: [excess({ destination: wrapped }), sync, unwrapAll],
+					accountTokenAmounts: { [wrapped]: ZERO }
+				});
+
+				expect(views.at(-1)).not.toHaveProperty('amount');
+			});
+
+			it('should know nothing of what a close hands back once excess lamports left the account', () => {
+				const views = read({
+					instructions: [
+						excess({ source: wrapped, destination: mockSolAddress }),
+						{
+							program: 'spl-token',
+							programId: TOKEN,
+							parsed: {
+								type: 'closeAccount',
+								info: { account: wrapped, destination: mockSolAddress, owner: mockSolAddress }
+							}
+						}
+					],
+					accountLamports: { [wrapped]: 2_046_280n },
+					accountTokenAmounts: { [wrapped]: 7_000n }
+				});
+
+				expect(views.at(-1)).not.toHaveProperty('returned');
+			});
+
+			// Counted from nothing after the withdrawal, a payment in would have the close of either
+			// account state what arrived since as all it hands back.
+			describe('and a payment in after it', () => {
+				const other = mockAtaAddress;
+
+				const close = (account: string) => ({
+					program: 'spl-token',
+					programId: TOKEN,
+					parsed: {
+						type: 'closeAccount',
+						info: { account, destination: mockSolAddress, owner: mockSolAddress }
+					}
+				});
+
+				it.each([
+					{ end: 'source', account: wrapped },
+					{ end: 'destination', account: other }
+				])('should know nothing of what a close of its $end hands back', ({ account }) => {
+					const views = mapSolInstructionSummaries({
+						instructions: [
+							excess({ source: wrapped, destination: other }),
+							plain(account),
+							close(account)
+						],
+						ownedAddresses: [mockSolAddress, wrapped, other],
+						userAddress: mockSolAddress,
+						addressToToken: { [wrapped]: WSOL_TOKEN.address, [other]: WSOL_TOKEN.address },
+						accountLamports: { [wrapped]: 2_046_280n, [other]: 2_039_280n },
+						accountTokenAmounts: { [wrapped]: 7_000n, [other]: ZERO }
+					});
+
+					expect(views.at(-1)).not.toHaveProperty('returned');
+				});
 			});
 		});
 
@@ -3696,6 +4820,1703 @@ describe('sol-instruction-summary.utils', () => {
 					rentExemptMinimum: MOCK_SOL_METEORA_DLMM_OPEN_POSITION.rentExemptMinimum
 				})
 			).toBeFalsy();
+		});
+	});
+
+	describe('findSolProgramsPayingOthers', () => {
+		const WHIRLPOOL = 'whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc';
+		const DLMM = 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo';
+		const JUPITER = 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4';
+		const OKX = 'proVF4pMXVaYqmy4NjniPh4pqKNfMmsihgd4wdkCX3u';
+
+		// The user's token account, a pool's vault, and an account of somebody else's.
+		const userAccount = mockAtaAddress;
+		const vault = mockAtaAddress2;
+		const elsewhere = mockAtaAddress3;
+
+		const calling = ({
+			program,
+			withWallet = true
+		}: {
+			program: string;
+			withWallet?: boolean;
+		}) => ({
+			programAddress: program,
+			accounts: [
+				...(withWallet ? [{ address: mockSolAddress, role: AccountRole.WRITABLE_SIGNER }] : []),
+				{ address: vault, role: AccountRole.WRITABLE }
+			],
+			data: new Uint8Array([1])
+		});
+
+		const call = ({
+			program,
+			withWallet = true,
+			stackHeight
+		}: {
+			program: string;
+			withWallet?: boolean;
+			stackHeight: number;
+		}) => ({
+			programId: program,
+			accounts: [...(withWallet ? [mockSolAddress] : []), vault],
+			data: '',
+			stackHeight
+		});
+
+		const transfer = ({
+			source,
+			destination,
+			amount,
+			authority = mockSolAddress2,
+			stackHeight
+		}: {
+			source: string;
+			destination: string;
+			amount: string;
+			authority?: string;
+			stackHeight: number;
+		}) => ({
+			program: 'spl-token',
+			programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+			parsed: { type: 'transfer', info: { source, destination, amount, authority } },
+			stackHeight
+		});
+
+		const transferWithFee = ({
+			source,
+			destination,
+			amount,
+			fee,
+			authority = mockSolAddress2,
+			stackHeight
+		}: {
+			source: string;
+			destination: string;
+			amount: string;
+			fee: string;
+			authority?: string;
+			stackHeight: number;
+		}) => ({
+			program: 'spl-token-2022',
+			programId: TOKEN_2022_PROGRAM_ADDRESS,
+			parsed: {
+				type: 'transferCheckedWithFee',
+				info: {
+					source,
+					destination,
+					mint: mockSplAddress,
+					tokenAmount: { amount, decimals: 6 },
+					feeAmount: { amount: fee, decimals: 6 },
+					authority
+				}
+			},
+			stackHeight
+		});
+
+		const send = ({
+			source,
+			destination,
+			lamports,
+			stackHeight
+		}: {
+			source: string;
+			destination: string;
+			lamports: number;
+			stackHeight: number;
+		}) => ({
+			program: 'system',
+			programId: '11111111111111111111111111111111',
+			parsed: { type: 'transfer', info: { source, destination, lamports } },
+			stackHeight
+		});
+
+		const create = ({
+			source,
+			newAccount,
+			lamports,
+			space = 0,
+			owner = '11111111111111111111111111111111',
+			seeded = false,
+			stackHeight
+		}: {
+			source: string;
+			newAccount: string;
+			lamports: number;
+			space?: number;
+			owner?: string;
+			seeded?: boolean;
+			stackHeight: number;
+		}) => ({
+			program: 'system',
+			programId: '11111111111111111111111111111111',
+			parsed: {
+				type: seeded ? 'createAccountWithSeed' : 'createAccount',
+				info: {
+					source,
+					newAccount,
+					...(seeded && { base: source, seed: 'position' }),
+					lamports,
+					space,
+					owner
+				}
+			},
+			stackHeight
+		});
+
+		const system = ({
+			type,
+			info,
+			stackHeight
+		}: {
+			type: string;
+			info: object;
+			stackHeight: number;
+		}) => ({
+			program: 'system',
+			programId: '11111111111111111111111111111111',
+			parsed: { type, info },
+			stackHeight
+		});
+
+		const associatedAccount = ({
+			payer,
+			wallet,
+			stackHeight
+		}: {
+			payer: string;
+			wallet: string;
+			stackHeight: number;
+		}) => ({
+			program: 'spl-associated-token-account',
+			programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+			parsed: {
+				type: 'create',
+				info: {
+					source: payer,
+					account: mockSolAddress4,
+					wallet,
+					mint: mockSplAddress,
+					systemProgram: '11111111111111111111111111111111',
+					tokenProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+				}
+			},
+			stackHeight
+		});
+
+		const unwrap = ({
+			source,
+			destination,
+			amount,
+			authority = mockSolAddress2,
+			stackHeight
+		}: {
+			source: string;
+			destination: string;
+			amount?: string;
+			authority?: string;
+			stackHeight: number;
+		}) => ({
+			program: 'spl-token',
+			programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+			parsed: {
+				type: 'unwrapLamports',
+				info: { source, destination, authority, ...(nonNullish(amount) && { amount }) }
+			},
+			stackHeight
+		});
+
+		const token = ({
+			type,
+			info,
+			stackHeight
+		}: {
+			type: string;
+			info: object;
+			stackHeight: number;
+		}) => ({
+			program: 'spl-token',
+			programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+			parsed: { type, info },
+			stackHeight
+		});
+
+		const paying = ({
+			instructions,
+			inner,
+			mints = {},
+			rent
+		}: {
+			instructions: unknown[];
+			inner: unknown[];
+			mints?: Record<string, string>;
+			rent?: bigint;
+		}): string[] =>
+			findSolProgramsPayingOthers({
+				instructions,
+				innerInstructions: [{ index: 0, instructions: inner }],
+				ownedAddresses: [mockSolAddress, userAccount],
+				userAddress: mockSolAddress,
+				accountHolders: {
+					[userAccount]: mockSolAddress,
+					[vault]: mockSolAddress2,
+					[elsewhere]: mockSolAddress3
+				},
+				accountMintsBefore: mints,
+				rentExemptMinimum: rent
+			});
+
+		// What a token account's opening takes as its rent.
+		const RENT = 2_039_280;
+
+		const opening = (mint: string) =>
+			token({
+				type: 'initializeAccount3',
+				info: { account: elsewhere, mint, owner: mockSolAddress3 },
+				stackHeight: 3
+			});
+
+		// A withdrawal from a position the wallet owns, its second payout sent elsewhere: the first,
+		// of nothing, is the line that accounts for the instruction.
+		it("should name a listed pool that pays out of its vault into an account that is not the user's", () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 2 })
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should name a listed pool another program calls with the wallet to pay elsewhere', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: mockSolAddress3 })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 })
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should not name a pool that pays the user', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({ source: vault, destination: userAccount, amount: '1000', stackHeight: 2 })
+					]
+				})
+			).toEqual([]);
+		});
+
+		// A route through shared accounts: the router's own accounts trade with the pools, which
+		// it calls without the wallet.
+		it('should not name a pool called without the wallet', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: JUPITER })],
+					inner: [
+						call({ program: WHIRLPOOL, withWallet: false, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 })
+					]
+				})
+			).toEqual([]);
+		});
+
+		it("should not name a router paying between accounts that are not the user's", () => {
+			expect(
+				paying({
+					instructions: [calling({ program: JUPITER })],
+					inner: [
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 2 })
+					]
+				})
+			).toEqual([]);
+		});
+
+		// A router's account takes the pool's output and pays it on to the next pool.
+		it('should not name a pool whose payout the receiving account passes on in the same instruction', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([]);
+		});
+
+		it('should name a pool whose payout is passed on only in part', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '999',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should name a pool whose payouts into one account a single transfer out does not cover', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// A split route: two pools pay one router account, which pays the total on.
+		it('should not name pools whose payouts into one account a single transfer out passes on together', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '500', stackHeight: 3 }),
+						call({ program: WHIRLPOOL, withWallet: false, stackHeight: 2 }),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1500',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([]);
+		});
+
+		it('should name a pool whose payout the receiving account only transfers to itself', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						transfer({
+							source: elsewhere,
+							destination: elsewhere,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should name a pool whose lamports paid into an account only token units leave', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should not name a pool whose lamports paid into an account leave it as lamports', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						send({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							lamports: 1000,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([]);
+		});
+
+		it.each([
+			{
+				label: 'a transfer',
+				onward: transfer({
+					source: elsewhere,
+					destination: mockSolAddress4,
+					amount: '1000',
+					authority: mockSolAddress3,
+					stackHeight: 3
+				})
+			},
+			{
+				label: 'an unwrap',
+				onward: unwrap({
+					source: elsewhere,
+					destination: mockSolAddress4,
+					amount: '1000',
+					authority: mockSolAddress3,
+					stackHeight: 3
+				})
+			}
+		])(
+			'should not name a pool whose lamports a wrapped SOL account syncs and sends on by $label',
+			({ onward }) => {
+				expect(
+					paying({
+						instructions: [calling({ program: OKX })],
+						inner: [
+							call({ program: WHIRLPOOL, stackHeight: 2 }),
+							send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+							call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+							token({ type: 'syncNative', info: { account: elsewhere }, stackHeight: 3 }),
+							onward
+						],
+						mints: { [elsewhere]: WSOL_TOKEN.address }
+					})
+				).toEqual([]);
+			}
+		);
+
+		// Its opening takes the rent out of what is there and wraps the rest, and its close hands the
+		// rent on.
+		it('should not name a pool whose lamports an account opened for wrapped SOL takes in and sends on', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: RENT + 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						opening(WSOL_TOKEN.address),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						}),
+						token({
+							type: 'closeAccount',
+							info: { account: elsewhere, destination: mockSolAddress, owner: mockSolAddress3 },
+							stackHeight: 3
+						})
+					],
+					rent: BigInt(RENT)
+				})
+			).toEqual([]);
+		});
+
+		it('should name a pool whose lamports pay the rent of an account opened for wrapped SOL, though all it wraps is unwrapped', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						opening(WSOL_TOKEN.address),
+						unwrap({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					],
+					rent: BigInt(RENT)
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should name a pool whose lamports pay the rent of an account opened for another mint, though its excess is withdrawn', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						opening(mockSplAddress),
+						token({
+							type: 'withdrawExcessLamports',
+							info: { source: elsewhere, destination: mockSolAddress4, authority: mockSolAddress3 },
+							stackHeight: 3
+						})
+					],
+					rent: BigInt(RENT)
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should not name a pool whose lamports pay the rent of an account a close then empties', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						opening(mockSplAddress),
+						token({
+							type: 'closeAccount',
+							info: { account: elsewhere, destination: mockSolAddress, owner: mockSolAddress3 },
+							stackHeight: 3
+						})
+					],
+					rent: BigInt(RENT)
+				})
+			).toEqual([]);
+		});
+
+		// An unwrap of everything it wraps would pass on all of it, were any of it wrapped.
+		it('should take all the lamports at an opening as its rent when the minimum is unknown', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: RENT + 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						opening(WSOL_TOKEN.address),
+						unwrap({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// A Token-2022 account's rent grows with its extensions: this one needs 34,800 lamports more
+		// than the minimum the review reads.
+		it('should take all the lamports at an opening by Token-2022 as its rent', () => {
+			const token2022 = ({ type, info }: { type: string; info: object }) => ({
+				program: 'spl-token',
+				programId: TOKEN_2022_PROGRAM_ADDRESS,
+				parsed: { type, info },
+				stackHeight: 3
+			});
+
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: RENT, stackHeight: 3 }),
+						call({ program: DLMM, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 34_800, stackHeight: 3 }),
+						call({ program: WHIRLPOOL, withWallet: false, stackHeight: 2 }),
+						token2022({
+							type: 'initializeAccount3',
+							info: { account: elsewhere, mint: mockSplAddress, owner: mockSolAddress3 }
+						}),
+						token2022({
+							type: 'withdrawExcessLamports',
+							info: { source: elsewhere, destination: mockSolAddress4, authority: mockSolAddress3 }
+						})
+					],
+					rent: BigInt(RENT)
+				})
+			).toEqual([WHIRLPOOL, DLMM]);
+		});
+
+		it('should name a pool whose lamports an account opened for another mint takes in, when its tokens leave', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: RENT + 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						opening(mockSplAddress),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// The last unwrap moves nothing: the first one left the 1,000 in the account as lamports.
+		it('should name a pool whose wrapped SOL the receiving account unwraps into itself', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						unwrap({
+							source: elsewhere,
+							destination: elsewhere,
+							authority: mockSolAddress3,
+							stackHeight: 3
+						}),
+						unwrap({
+							source: elsewhere,
+							destination: mockSolAddress,
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					],
+					mints: { [elsewhere]: WSOL_TOKEN.address }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should turn only what an unwrap into its own account states, oldest payout first', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: WHIRLPOOL, withWallet: false, stackHeight: 2 }),
+						unwrap({
+							source: elsewhere,
+							destination: elsewhere,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						}),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					],
+					mints: { [elsewhere]: WSOL_TOKEN.address }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should split a payout that an unwrap into its own account turns in part', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						unwrap({
+							source: elsewhere,
+							destination: elsewhere,
+							amount: '400',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						}),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '600',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						}),
+						token({ type: 'syncNative', info: { account: elsewhere }, stackHeight: 3 }),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '400',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					],
+					mints: { [elsewhere]: WSOL_TOKEN.address }
+				})
+			).toEqual([]);
+		});
+
+		it.each([
+			{ label: 'a stated amount', amount: '1000' },
+			{ label: 'no amount, everything the vault wraps', amount: undefined }
+		])(
+			'should name a listed pool that unwraps its vault to somebody else, with $label',
+			({ amount }) => {
+				expect(
+					paying({
+						instructions: [calling({ program: WHIRLPOOL })],
+						inner: [
+							transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+							unwrap({ source: vault, destination: mockSolAddress4, amount, stackHeight: 2 })
+						]
+					})
+				).toEqual([WHIRLPOOL]);
+			}
+		);
+
+		it.each([
+			{ label: 'a stated amount', amount: '1000' },
+			{ label: 'no amount, emptying the account', amount: undefined }
+		])(
+			'should not name a pool whose payout the receiving account unwraps on, with $label',
+			({ amount }) => {
+				expect(
+					paying({
+						instructions: [calling({ program: OKX })],
+						inner: [
+							call({ program: WHIRLPOOL, stackHeight: 2 }),
+							transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+							call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+							unwrap({
+								source: elsewhere,
+								destination: mockSolAddress4,
+								amount,
+								authority: mockSolAddress3,
+								stackHeight: 3
+							})
+						]
+					})
+				).toEqual([]);
+			}
+		);
+
+		it('should name a listed pool that pays elsewhere with a transfer that holds back a fee', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+						transferWithFee({
+							source: vault,
+							destination: elsewhere,
+							amount: '1000',
+							fee: '10',
+							stackHeight: 2
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// The receiving account is credited the payout less the fee, and that is all it can pass on.
+		it('should not name a pool whose payout less the fee is passed on in the same instruction', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transferWithFee({
+							source: vault,
+							destination: elsewhere,
+							amount: '1000',
+							fee: '10',
+							stackHeight: 3
+						}),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						transferWithFee({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '990',
+							fee: '10',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([]);
+		});
+
+		it('should name a listed pool whose payout elsewhere the fee takes in full', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+						transferWithFee({
+							source: vault,
+							destination: elsewhere,
+							amount: '1000',
+							fee: '1000',
+							stackHeight: 2
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// The wallet signs for an account it is a delegate of just as it signs for its own, yet what
+		// leaves that account is its holder's.
+		it.each([
+			{
+				label: 'a plain transfer',
+				payout: transfer({
+					source: vault,
+					destination: elsewhere,
+					amount: '1000',
+					authority: mockSolAddress,
+					stackHeight: 2
+				})
+			},
+			{
+				label: 'a transfer that holds back a fee',
+				payout: transferWithFee({
+					source: vault,
+					destination: elsewhere,
+					amount: '1000',
+					fee: '10',
+					authority: mockSolAddress,
+					stackHeight: 2
+				})
+			}
+		])(
+			"should name a listed pool whose vault pays elsewhere by $label the wallet signs as the vault's delegate",
+			({ payout }) => {
+				expect(
+					paying({
+						instructions: [calling({ program: WHIRLPOOL })],
+						inner: [
+							transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+							payout
+						]
+					})
+				).toEqual([WHIRLPOOL]);
+			}
+		);
+
+		it('should not name a pool for what the user pays out of their own account to somebody else', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({
+							source: userAccount,
+							destination: elsewhere,
+							amount: '1000',
+							authority: mockSolAddress,
+							stackHeight: 2
+						})
+					]
+				})
+			).toEqual([]);
+		});
+
+		// Creating an account pays it what the creation funds it with, as a transfer would, its rent
+		// included: whoever holds the new account can close it and keep all of it.
+		it.each([
+			{
+				label: 'a System account it funds with 1 SOL',
+				inner: [
+					create({
+						source: mockSolAddress2,
+						newAccount: mockSolAddress4,
+						lamports: 1_000_000_000,
+						stackHeight: 2
+					})
+				]
+			},
+			{
+				label: 'the same at a seed-derived address',
+				inner: [
+					create({
+						source: mockSolAddress2,
+						newAccount: mockSolAddress4,
+						lamports: 1_000_000_000,
+						seeded: true,
+						stackHeight: 2
+					})
+				]
+			},
+			{
+				label: 'a token account it opens on its rent alone',
+				inner: [
+					create({
+						source: mockSolAddress2,
+						newAccount: mockSolAddress4,
+						lamports: RENT,
+						space: 165,
+						owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						stackHeight: 2
+					}),
+					token({
+						type: 'initializeAccount3',
+						info: { account: mockSolAddress4, mint: mockSplAddress, owner: mockSolAddress3 },
+						stackHeight: 2
+					})
+				]
+			},
+			{
+				label: 'a token account it opens with 1 SOL above its rent',
+				inner: [
+					create({
+						source: mockSolAddress2,
+						newAccount: mockSolAddress4,
+						lamports: RENT + 1_000_000_000,
+						space: 165,
+						owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						stackHeight: 2
+					}),
+					token({
+						type: 'initializeAccount3',
+						info: { account: mockSolAddress4, mint: mockSplAddress, owner: mockSolAddress3 },
+						stackHeight: 2
+					})
+				]
+			}
+		])(
+			'should name a listed pool that creates an account for somebody else: $label',
+			({ inner }) => {
+				expect(
+					paying({
+						instructions: [calling({ program: WHIRLPOOL })],
+						inner,
+						rent: BigInt(RENT)
+					})
+				).toEqual([WHIRLPOOL]);
+			}
+		);
+
+		it('should not name a pool for an account the user funds for somebody else', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						create({
+							source: mockSolAddress,
+							newAccount: mockSolAddress4,
+							lamports: 1_000_000_000,
+							stackHeight: 2
+						})
+					]
+				})
+			).toEqual([]);
+		});
+
+		// The associated token account program and Token-2022 act on what their caller asks, paid by
+		// whoever it names, and the run gives their calls without the accounts they were made with.
+		it.each([
+			{
+				label: 'an account the associated token account program opens for somebody else',
+				inner: [
+					associatedAccount({ payer: mockSolAddress2, wallet: mockSolAddress3, stackHeight: 2 }),
+					create({
+						source: mockSolAddress2,
+						newAccount: mockSolAddress4,
+						lamports: RENT,
+						space: 165,
+						owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						stackHeight: 3
+					}),
+					token({
+						type: 'initializeAccount3',
+						info: { account: mockSolAddress4, mint: mockSplAddress, owner: mockSolAddress3 },
+						stackHeight: 3
+					})
+				]
+			},
+			{
+				label: 'the same at an address already holding lamports',
+				inner: [
+					associatedAccount({ payer: mockSolAddress2, wallet: mockSolAddress3, stackHeight: 2 }),
+					send({
+						source: mockSolAddress2,
+						destination: mockSolAddress4,
+						lamports: 1_039_280,
+						stackHeight: 3
+					}),
+					system({
+						type: 'allocate',
+						info: { account: mockSolAddress4, space: 165 },
+						stackHeight: 3
+					}),
+					system({
+						type: 'assign',
+						info: {
+							account: mockSolAddress4,
+							owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+						},
+						stackHeight: 3
+					}),
+					token({
+						type: 'initializeAccount3',
+						info: { account: mockSolAddress4, mint: mockSplAddress, owner: mockSolAddress3 },
+						stackHeight: 3
+					})
+				]
+			},
+			{
+				label: "the rent of a Token-2022 reallocation of somebody else's account",
+				inner: [
+					{
+						program: 'spl-token-2022',
+						programId: TOKEN_2022_PROGRAM_ADDRESS,
+						parsed: {
+							type: 'reallocate',
+							info: {
+								account: elsewhere,
+								payer: mockSolAddress2,
+								systemProgram: '11111111111111111111111111111111',
+								owner: mockSolAddress3,
+								extensionTypes: ['memoTransfer']
+							}
+						},
+						stackHeight: 2
+					},
+					send({ source: mockSolAddress2, destination: elsewhere, lamports: 6_960, stackHeight: 3 })
+				]
+			}
+		])('should name a listed pool paying through a program it calls: $label', ({ inner }) => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner,
+					rent: BigInt(RENT)
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// A reallocation raises the account's rent by its top-up, which a withdrawal of the excess
+		// cannot move.
+		it('should name a listed pool whose reallocation top-up a withdrawal of the excess cannot pass on', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						{
+							program: 'spl-token-2022',
+							programId: TOKEN_2022_PROGRAM_ADDRESS,
+							parsed: {
+								type: 'reallocate',
+								info: {
+									account: elsewhere,
+									payer: mockSolAddress2,
+									systemProgram: '11111111111111111111111111111111',
+									owner: mockSolAddress3,
+									extensionTypes: ['memoTransfer']
+								}
+							},
+							stackHeight: 2
+						},
+						send({
+							source: mockSolAddress2,
+							destination: elsewhere,
+							lamports: 6_960,
+							stackHeight: 3
+						}),
+						{
+							program: 'spl-token-2022',
+							programId: TOKEN_2022_PROGRAM_ADDRESS,
+							parsed: {
+								type: 'withdrawExcessLamports',
+								info: { source: elsewhere, destination: mockSolAddress, authority: mockSolAddress3 }
+							},
+							stackHeight: 2
+						}
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// A batch read step by step stands in the list as its steps, and what is paid inside it is
+		// still followed back to the program that called it.
+		it('should name a listed pool paying inside a single-step batch it calls', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						{
+							program: 'spl-token-2022',
+							programId: TOKEN_2022_PROGRAM_ADDRESS,
+							parsed: {
+								type: 'batch',
+								info: {
+									instructions: [
+										{
+											type: 'reallocate',
+											info: {
+												account: elsewhere,
+												payer: mockSolAddress2,
+												systemProgram: '11111111111111111111111111111111',
+												owner: mockSolAddress3,
+												extensionTypes: ['memoTransfer']
+											}
+										}
+									]
+								}
+							},
+							stackHeight: 2
+						},
+						send({
+							source: mockSolAddress2,
+							destination: elsewhere,
+							lamports: 6_960,
+							stackHeight: 3
+						})
+					]
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it.each([
+			{ label: 'paid by the user', payer: mockSolAddress, wallet: mockSolAddress3 },
+			{ label: 'opened for the user', payer: mockSolAddress2, wallet: mockSolAddress }
+		])(
+			'should not name a pool for an account the associated token account program opens $label',
+			({ payer, wallet }) => {
+				expect(
+					paying({
+						instructions: [calling({ program: WHIRLPOOL })],
+						inner: [
+							associatedAccount({ payer, wallet, stackHeight: 2 }),
+							create({
+								source: payer,
+								newAccount: mockSolAddress4,
+								lamports: RENT,
+								space: 165,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								stackHeight: 3
+							}),
+							token({
+								type: 'initializeAccount3',
+								info: { account: mockSolAddress4, mint: mockSplAddress, owner: wallet },
+								stackHeight: 3
+							})
+						],
+						rent: BigInt(RENT)
+					})
+				).toEqual([]);
+			}
+		);
+
+		it('should name a listed pool that withdraws the excess lamports of its account to somebody else', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+						token({
+							type: 'withdrawExcessLamports',
+							info: { source: vault, destination: mockSolAddress4, authority: mockSolAddress2 },
+							stackHeight: 2
+						})
+					],
+					mints: { [vault]: mockSplAddress }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should not name a pool whose lamports paid into a token account it withdraws on as its excess', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						token({
+							type: 'withdrawExcessLamports',
+							info: { source: elsewhere, destination: mockSolAddress4, authority: mockSolAddress3 },
+							stackHeight: 3
+						})
+					],
+					mints: { [elsewhere]: mockSplAddress }
+				})
+			).toEqual([]);
+		});
+
+		it("should name a listed pool that closes an account of its own into somebody else's", () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+						token({
+							type: 'closeAccount',
+							info: { account: vault, destination: mockSolAddress4, owner: mockSolAddress2 },
+							stackHeight: 2
+						})
+					],
+					mints: { [vault]: WSOL_TOKEN.address }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// The wallet may close the account, but the account is somebody else's.
+		it("should name a listed pool closing somebody else's account into a stranger's on the wallet's close authority", () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						transfer({ source: vault, destination: userAccount, amount: '0', stackHeight: 2 }),
+						token({
+							type: 'closeAccount',
+							info: { account: elsewhere, destination: mockSolAddress4, owner: mockSolAddress },
+							stackHeight: 2
+						})
+					],
+					mints: { [elsewhere]: WSOL_TOKEN.address }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// A router unwrapping a pool's wrapped SOL to the user by closing the account it took it in.
+		it('should not name a pool whose payout into a wrapped SOL account a close passes on', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						token({
+							type: 'closeAccount',
+							info: { account: elsewhere, destination: mockSolAddress, owner: mockSolAddress3 },
+							stackHeight: 2
+						})
+					],
+					mints: { [elsewhere]: WSOL_TOKEN.address }
+				})
+			).toEqual([]);
+		});
+
+		it('should not name a pool whose lamports paid into a token account a close passes on', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						send({ source: vault, destination: elsewhere, lamports: 1000, stackHeight: 3 }),
+						token({
+							type: 'closeAccount',
+							info: { account: elsewhere, destination: mockSolAddress, owner: mockSolAddress3 },
+							stackHeight: 2
+						})
+					],
+					mints: { [elsewhere]: mockSplAddress }
+				})
+			).toEqual([]);
+		});
+
+		// The tokens had to leave before the account could close, and a burn passes nothing on.
+		it('should name a pool whose tokens leave the receiving account only by a burn before its close', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						token({
+							type: 'burn',
+							info: {
+								account: elsewhere,
+								mint: mockSplAddress,
+								authority: mockSolAddress3,
+								amount: '1000'
+							},
+							stackHeight: 2
+						}),
+						token({
+							type: 'closeAccount',
+							info: { account: elsewhere, destination: mockSolAddress, owner: mockSolAddress3 },
+							stackHeight: 2
+						})
+					],
+					mints: { [elsewhere]: mockSplAddress }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// Whatever took the tokens out before the close, the check did not read it.
+		it('should not let an account opened again at a closed address pass on a payout made before the close', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						token({
+							type: 'closeAccount',
+							info: { account: elsewhere, destination: mockSolAddress4, owner: mockSolAddress3 },
+							stackHeight: 2
+						}),
+						token({
+							type: 'initializeAccount3',
+							info: { account: elsewhere, mint: mockSplAddress, owner: mockSolAddress3 },
+							stackHeight: 2
+						}),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					],
+					mints: { [elsewhere]: mockSplAddress }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it('should name a pool whose payout is burned in full, though the account is refilled and sends as much on', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+						token({
+							type: 'burn',
+							info: {
+								account: elsewhere,
+								mint: mockSplAddress,
+								authority: mockSolAddress3,
+								amount: '1000'
+							},
+							stackHeight: 3
+						}),
+						transfer({
+							source: mockSolAddress4,
+							destination: elsewhere,
+							amount: '1000',
+							authority: mockSolAddress4,
+							stackHeight: 3
+						}),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '1000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					],
+					mints: { [elsewhere]: mockSplAddress }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		// The burn takes the oldest payout's units first; what is left of it and the other payout
+		// pass on.
+		it('should name only the pool whose payout a part burn takes, though the account is refilled', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: OKX })],
+					inner: [
+						call({ program: WHIRLPOOL, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: DLMM, stackHeight: 2 }),
+						transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+						call({ program: WHIRLPOOL, withWallet: false, stackHeight: 2 }),
+						token({
+							type: 'burnChecked',
+							info: {
+								account: elsewhere,
+								mint: mockSplAddress,
+								authority: mockSolAddress3,
+								tokenAmount: { amount: '500', decimals: 6 }
+							},
+							stackHeight: 3
+						}),
+						transfer({
+							source: mockSolAddress4,
+							destination: elsewhere,
+							amount: '500',
+							authority: mockSolAddress4,
+							stackHeight: 3
+						}),
+						transfer({
+							source: elsewhere,
+							destination: mockSolAddress4,
+							amount: '2000',
+							authority: mockSolAddress3,
+							stackHeight: 3
+						})
+					],
+					mints: { [elsewhere]: mockSplAddress }
+				})
+			).toEqual([WHIRLPOOL]);
+		});
+
+		it.each([
+			{
+				label: 'a permissioned burn',
+				type: 'permissionedBurn',
+				info: { permissionedBurnAuthority: mockSolAddress4, amount: '1000' }
+			},
+			{
+				label: 'a checked permissioned burn',
+				type: 'permissionedBurnChecked',
+				info: {
+					permissionedBurnAuthority: mockSolAddress4,
+					tokenAmount: { amount: '1000', decimals: 6 }
+				}
+			},
+			{
+				label: 'a deposit into its confidential balance',
+				type: 'depositConfidentialTransfer',
+				info: { amount: 1000, decimals: 6, owner: mockSolAddress3 }
+			}
+		])(
+			'should name a pool whose payout $label takes, though the account is refilled and sends as much on',
+			({ type, info }) => {
+				expect(
+					paying({
+						instructions: [calling({ program: OKX })],
+						inner: [
+							call({ program: WHIRLPOOL, stackHeight: 2 }),
+							transfer({ source: vault, destination: elsewhere, amount: '1000', stackHeight: 3 }),
+							call({ program: DLMM, withWallet: false, stackHeight: 2 }),
+							{
+								program: 'spl-token-2022',
+								programId: TOKEN_2022_PROGRAM_ADDRESS,
+								parsed: {
+									type,
+									info: {
+										account: elsewhere,
+										mint: mockSplAddress,
+										authority: mockSolAddress3,
+										...info
+									}
+								},
+								stackHeight: 3
+							},
+							transfer({
+								source: mockSolAddress4,
+								destination: elsewhere,
+								amount: '1000',
+								authority: mockSolAddress4,
+								stackHeight: 3
+							}),
+							transfer({
+								source: elsewhere,
+								destination: mockSolAddress4,
+								amount: '1000',
+								authority: mockSolAddress3,
+								stackHeight: 3
+							})
+						],
+						mints: { [elsewhere]: mockSplAddress }
+					})
+				).toEqual([WHIRLPOOL]);
+			}
+		);
+
+		it('should not name a pool paying nothing elsewhere', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [transfer({ source: vault, destination: elsewhere, amount: '0', stackHeight: 2 })]
+				})
+			).toEqual([]);
+		});
+
+		// Without its depth, a call has no caller to name.
+		it('should not name anything for calls the RPC returns without their depth', () => {
+			expect(
+				paying({
+					instructions: [calling({ program: WHIRLPOOL })],
+					inner: [
+						{
+							...transfer({
+								source: vault,
+								destination: elsewhere,
+								amount: '1000',
+								stackHeight: 2
+							}),
+							stackHeight: undefined
+						}
+					]
+				})
+			).toEqual([]);
+		});
+	});
+
+	describe('solSignsForMultisig', () => {
+		const approve = ({
+			program = 'spl-token',
+			programId = TOKEN_PROGRAM_ADDRESS,
+			info
+		}: {
+			program?: string;
+			programId?: string;
+			info: object;
+		}) => [
+			{
+				index: 0,
+				instructions: [
+					{
+						program,
+						programId,
+						parsed: {
+							type: 'approve',
+							info: {
+								source: mockAtaAddress,
+								delegate: mockSolAddress2,
+								amount: '18446744073709551615',
+								...info
+							}
+						}
+					}
+				]
+			}
+		];
+
+		// What the RPC returns for a batch a program runs inside its own instruction: each step with
+		// the keys it names, the batch itself with none.
+		const batch = ({
+			program = 'spl-token',
+			programId = TOKEN_PROGRAM_ADDRESS,
+			info
+		}: {
+			program?: string;
+			programId?: string;
+			info: object;
+		}): SolInstructionGroup[] => [
+			{
+				index: 0,
+				instructions: [
+					{
+						program,
+						programId,
+						parsed: {
+							type: 'batch',
+							info: {
+								instructions: [
+									{
+										type: 'approve',
+										info: {
+											source: mockAtaAddress,
+											delegate: mockSolAddress2,
+											amount: '18446744073709551615',
+											...info
+										}
+									}
+								]
+							}
+						},
+						stackHeight: 2
+					}
+				]
+			}
+		];
+
+		const signs = (innerInstructions: readonly SolInstructionGroup[]) =>
+			solSignsForMultisig({ innerInstructions, userAddress: mockSolAddress });
+
+		it('should flag a token call with the wallet among the keys signing for a multisig', () => {
+			expect(
+				signs(
+					approve({
+						info: { multisigOwner: mockSolAddress4, signers: [mockSolAddress3, mockSolAddress] }
+					})
+				)
+			).toBeTruthy();
+		});
+
+		it('should flag a Token-2022 call with the wallet among the keys signing for a multisig', () => {
+			expect(
+				signs(
+					approve({
+						program: 'spl-token-2022',
+						programId: TOKEN_2022_PROGRAM_ADDRESS,
+						info: { multisigOwner: mockSolAddress4, signers: [mockSolAddress] }
+					})
+				)
+			).toBeTruthy();
+		});
+
+		it('should flag a batch step with the wallet among the keys signing for a multisig', () => {
+			expect(
+				signs(batch({ info: { multisigOwner: mockSolAddress4, signers: [mockSolAddress] } }))
+			).toBeTruthy();
+		});
+
+		it('should flag a Token-2022 batch step with the wallet among the keys signing for a multisig', () => {
+			expect(
+				signs(
+					batch({
+						program: 'spl-token-2022',
+						programId: TOKEN_2022_PROGRAM_ADDRESS,
+						info: { multisigOwner: mockSolAddress4, signers: [mockSolAddress3, mockSolAddress] }
+					})
+				)
+			).toBeTruthy();
+		});
+
+		it('should not flag a multisig the wallet does not sign for', () => {
+			expect(
+				signs(approve({ info: { multisigOwner: mockSolAddress4, signers: [mockSolAddress3] } }))
+			).toBeFalsy();
+		});
+
+		it('should not flag a batch step signed for a multisig by other keys only', () => {
+			expect(
+				signs(batch({ info: { multisigOwner: mockSolAddress4, signers: [mockSolAddress3] } }))
+			).toBeFalsy();
+		});
+
+		it('should not flag a call the wallet signs for as the owner', () => {
+			expect(signs(approve({ info: { owner: mockSolAddress } }))).toBeFalsy();
+		});
+
+		it('should not flag signers named by a program other than the token programs', () => {
+			expect(
+				signs(
+					approve({
+						program: 'unknown',
+						programId: mockSolAddress4,
+						info: { signers: [mockSolAddress] }
+					})
+				)
+			).toBeFalsy();
+		});
+
+		it('should not flag a run without calls inside other programs', () => {
+			expect(signs([])).toBeFalsy();
 		});
 	});
 });

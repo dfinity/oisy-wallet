@@ -9,6 +9,16 @@ describe('PillButton', () => {
 			render: () => `<span>${text}</span>`
 		}));
 
+	it('uses the shared press feedback and includes scale in its transitions', () => {
+		const { getByRole } = render(PillButton, { props: { children: createTextSnippet('Test') } });
+
+		expect(getByRole('button')).toHaveClass(
+			'press',
+			'transition-[color,background-color,border-color,scale]',
+			'duration-150'
+		);
+	});
+
 	it('should render children content', () => {
 		const { getByText } = render(PillButton, {
 			props: { children: createTextSnippet('Crypto') }

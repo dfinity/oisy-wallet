@@ -48,6 +48,10 @@ export const ERC20_DECREASE_ALLOWANCE_HASH = '0xa457c2d7';
 // https://polygonscan.com/tx/0x99358ec7a9b45aec7f9587ae48edc06528d1c600db53329b9c1eebb10ce64640
 export const ERC20_TRANSFER_HASH = '0xa9059cbb';
 
+// The most decimals an amount can be formatted in: ethers' `formatUnits` throws above it. A token
+// contract may report up to 255, since `decimals()` returns a uint8.
+export const ERC20_MAX_DISPLAY_DECIMALS = 80;
+
 // Use when UNPREDICTABLE_GAS_LIMIT error are thrown while fetching the fee data.
 // See: https://docs.ethers.org/v5/troubleshooting/errors/#help-UNPREDICTABLE_GAS_LIMIT
 export const ERC20_FALLBACK_FEE = 500_000n;

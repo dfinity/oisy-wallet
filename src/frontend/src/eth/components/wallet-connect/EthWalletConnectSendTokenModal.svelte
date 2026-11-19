@@ -8,6 +8,7 @@
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthWalletConnectSendReview from '$eth/components/wallet-connect/EthWalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
+	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { send as sendServices } from '$eth/services/wallet-connect.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -17,7 +18,10 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
-	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
+	import type {
+		EthWalletConnectRefusal,
+		WalletConnectEthSendTransactionParams
+	} from '$eth/types/wallet-connect';
 	import { isDestinationContractAddress, shouldSendWithApproval } from '$eth/utils/send.utils';
 	import {
 		classifyWalletConnectEthSendTransaction,
@@ -84,15 +88,23 @@
 		toWalletConnectCkEthHelperContractAddress({ networkId: sourceNetwork.id, minterInfo })
 	);
 
+	let amount = $derived(BigInt(firstTransaction?.value ?? ZERO));
+
 	// Classified from where the request goes as well as from its calldata: a `deposit(bytes32)` is a
-	// ckETH conversion only at the helper contract, and only one to the user's own principal is signed.
+	// ckETH conversion only at the helper contract, and only one to the user's own principal is signed;
+	// an `execute` is a swap only at a Uniswap router pinned for this network.
 	let call = $derived(
 		classifyWalletConnectEthSendTransaction({
 			to: firstTransaction.to,
 			data: firstTransaction.data,
 			networkId: sourceNetwork.id,
 			minterInfo,
-			principal: $authIdentity?.getPrincipal()
+			principal: $authIdentity?.getPrincipal(),
+			chainId: sourceNetwork.chainId,
+			value: amount,
+			wallet: $ethAddress,
+			nativeToken: $sendToken,
+			tokens: $ercFungibleTokens
 		})
 	);
 
@@ -107,12 +119,21 @@
 
 	// A deposit OISY refuses to sign, or holds until it can check it, is not a send either.
 	let ckEthDepositBlocked = $derived(
-		call.type === 'ckEthDepositRefused' || call.type === 'ckEthHelperUnconfirmed'
+		call.type === 'ckEthDepositRefused' ||
+			call.type === 'ckEthHelperUnconfirmed' ||
+			call.type === 'ckDepositRefused'
 	);
 
+	// Set by the review: a token OISY does not list whose contract did not report its decimals.
+	let unidentifiedToken = $state(false);
+
 	// What the Settings switch can sign past, read the way the review and the signing service read
-	// it, so the acknowledgement handed on names exactly what the review showed.
-	let refusals = $derived(walletConnectEthRefusals({ call, data: firstTransaction.data }));
+	// it, so the acknowledgement handed on names exactly what the review showed. A token whose
+	// contract did not answer is one of them, which only the review sees.
+	let refusals = $derived<EthWalletConnectRefusal[]>([
+		...walletConnectEthRefusals({ call, data: firstTransaction.data }),
+		...(unidentifiedToken ? (['unverifiable_erc20'] as const) : [])
+	]);
 
 	// WalletConnect's domain verification flagged the site: no way past a refusal is offered, and the
 	// review does not point at the switch either.
@@ -175,9 +196,11 @@
 	let destination = $derived(firstTransaction.to ?? '');
 
 	// Compared however the address is cased, as the signing path compares it, so that casing cannot
-	// change where the review says the request goes.
+	// change where the review says the request goes. A deposit to the minter's helper that deposits to
+	// a subaccount is only classified as one at that helper, so it converts to the Internet Computer too.
 	let targetNetwork = $derived(
-		isDestinationContractAddress({ destination, contractAddress: ckEthHelperContractAddress })
+		isDestinationContractAddress({ destination, contractAddress: ckEthHelperContractAddress }) ||
+			call.type === 'ckDeposit'
 			? ICP_NETWORK
 			: $sendToken.network
 	);
@@ -245,7 +268,7 @@
 
 	let sendProgressStep = $state<ProgressStep>(ProgressStepsSend.INITIALIZATION);
 
-	let amount = $derived(BigInt(firstTransaction?.value ?? ZERO));
+	let unknownCallAcknowledged = $state(false);
 
 	let requestedGas = $derived(getSendParamsGas(firstTransaction.gas));
 
@@ -267,7 +290,9 @@
 			minterInfo,
 			sourceNetwork,
 			targetNetwork,
-			acknowledgedRefusals: uncheckedSigningOffered && uncheckedSigningAcknowledged ? refusals : []
+			acknowledgedRefusals: uncheckedSigningOffered && uncheckedSigningAcknowledged ? refusals : [],
+			unknownCallAcknowledged,
+			tokens: $ercFungibleTokens
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
@@ -283,6 +308,8 @@
 		<WalletConnectModalTitle>
 			{#if approve}
 				{$i18n.core.text.approve}
+			{:else if call.type === 'uniswapSwap'}
+				{$i18n.wallet_connect.text.swap_title}
 			{:else if unknownCall || ckEthDepositBlocked}
 				{$i18n.wallet_connect.text.unknown_call_title}
 			{:else}
@@ -329,6 +356,8 @@
 						{targetNetwork}
 						{uncheckedSigningAcknowledged}
 						{uncheckedSigningOffered}
+						bind:unidentifiedToken
+						bind:unknownCallAcknowledged
 					/>
 				{/if}
 			{/key}

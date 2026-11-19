@@ -811,7 +811,7 @@ Swap eligibility is derived from the aggregate EVM lists (`SUPPORTED_EVM_MAINNET
 ### Cosmetics (in practice required by review)
 
 - Add the `<network>-0` / `<network>-100` gradient pair in `src/frontend/src/lib/styles/tailwind/theme-variables.ts`. The hero renders **white** text over it, so both stops must clear WCAG AA against white — a bright brand colour cannot go in as-is.
-- Wire the gradient in `src/frontend/src/lib/components/hero/HeroContent.svelte` and `src/frontend/src/lib/components/tokens/TokenInputNetworkWrapper.svelte`, similar to the existing ones.
+- Wire the gradient in `src/frontend/src/lib/components/hero/HeroContent.svelte`, similar to the existing ones.
 - User-facing copy that enumerates supported chains (`src/frontend/src/lib/constants/ai-assistant.constants.ts`, `loader.retrieving_public_keys` in `en.json`) belongs in the PR that **enables** the chain, not before. Non-`en` locales are left to the `auto-update-i18n` workflow.
 - If provided, please add any additional information that might be useful for the new network. For example, a specific faucet to the list in this same document.
 

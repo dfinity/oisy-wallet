@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { CANISTER_TOP_UP_ENABLED } from '$env/canister-top-up.env';
 	import { getCanisterExistence } from '$icp/api/canister-state.api';
+	import CyclesTopUpCanisterTabs from '$icp/components/cycles-top-up/CyclesTopUpCanisterTabs.svelte';
 	import CyclesTopUpRecentCanisters from '$icp/components/cycles-top-up/CyclesTopUpRecentCanisters.svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { parseCanisterId } from '$icp/utils/cycles-top-up.utils';
 	import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
+	import { isTokenIcp } from '$icp/utils/icrc.utils';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
@@ -15,6 +19,7 @@
 	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
 	import {
 		CYCLES_TOP_UP_CANISTER,
+		CYCLES_TOP_UP_CANISTER_BACK_BUTTON,
 		CYCLES_TOP_UP_CANISTER_INPUT,
 		CYCLES_TOP_UP_CANISTER_NEXT_BUTTON
 	} from '$lib/constants/test-ids.constants';
@@ -26,13 +31,28 @@
 
 	interface Props {
 		canisterIdText: string;
-		// The page's TCYCLES token.
+		// What the top-up is paid with: TCYCLES, or ICP.
 		token: IcToken;
+		// The TCYCLES token, whose history lists the canisters topped up before. Absent while
+		// TCYCLES is not enabled.
+		cyclesToken?: IcToken;
 		onCancel: () => void;
+		// Set when an earlier step leads here, which the step then offers to go back to instead
+		// of cancelling.
+		onBack?: () => void;
 		onNext: () => void;
 	}
 
-	let { canisterIdText = $bindable(''), token, onCancel, onNext }: Props = $props();
+	let {
+		canisterIdText = $bindable(''),
+		token,
+		cyclesToken,
+		onCancel,
+		onBack,
+		onNext
+	}: Props = $props();
+
+	let paidWithIcp = $derived(isTokenIcp(token));
 
 	let canisterId = $derived(parseCanisterId(canisterIdText));
 
@@ -107,11 +127,20 @@
 
 		check = { canisterIdText: checkedText, existence };
 	};
+
+	const select = async (selected: string) => {
+		canisterIdText = selected;
+
+		await next();
+	};
 </script>
 
 <ContentWithToolbar testId={CYCLES_TOP_UP_CANISTER}>
 	<p class="mb-4 text-sm text-tertiary">
-		{replacePlaceholders($i18n.cycles_top_up.text.description, { $token: token.symbol })}
+		{replacePlaceholders(
+			paidWithIcp ? $i18n.cycles_top_up.text.description_icp : $i18n.cycles_top_up.text.description,
+			{ $token: token.symbol }
+		)}
 	</p>
 
 	<div class="rounded-lg border border-solid border-secondary bg-secondary p-5 text-left">
@@ -145,18 +174,23 @@
 	{/if}
 
 	<!-- As in the send flow, picking a canister goes on, after the same check as Next. -->
-	<CyclesTopUpRecentCanisters
-		onSelect={async (selected) => {
-			canisterIdText = selected;
-
-			await next();
-		}}
-		{token}
-	/>
+	{#if CANISTER_TOP_UP_ENABLED}
+		<CyclesTopUpCanisterTabs onSelect={select} {paidWithIcp} token={cyclesToken} />
+	{:else if nonNullish(cyclesToken)}
+		<CyclesTopUpRecentCanisters onSelect={select} token={cyclesToken} />
+	{/if}
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonCancel onclick={onCancel} />
+			{#if nonNullish(onBack)}
+				<ButtonBack
+					disabled={checking}
+					onclick={onBack}
+					testId={CYCLES_TOP_UP_CANISTER_BACK_BUTTON}
+				/>
+			{:else}
+				<ButtonCancel onclick={onCancel} />
+			{/if}
 
 			<Button
 				disabled={isNullish(canisterId) || checking || checkFailure === 'not_found'}

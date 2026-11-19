@@ -32,7 +32,7 @@ export const trackExportData = ({
 		metadata: {
 			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.TYPE,
 			event_value: type,
-			source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SETTINGS_PAGE,
+			source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE,
 			result_status: resultStatus,
 			...(nonNullish(error) && { result_error: error }),
 			...(nonNullish(errorCode) && { result_error_code: errorCode })

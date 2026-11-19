@@ -1,3 +1,4 @@
+import { COLORED_NETWORK_LOGOS_CONTEXT_KEY } from '$lib/stores/colored-network-logos.store';
 import { HERO_CONTEXT_KEY, initHeroContext } from '$lib/stores/hero.store';
 import {
 	initModalNetworksListContext,
@@ -34,3 +35,9 @@ export const mockModalTokensListContextEntry = (
 export const mockModalNetworksListContextEntry = (
 	initialData: Parameters<typeof initModalNetworksListContext>[0]
 ): MockContextEntry => [MODAL_NETWORKS_LIST_CONTEXT_KEY, initModalNetworksListContext(initialData)];
+
+// A screen that tells networks apart by colour, as the swap modal is.
+export const mockColoredNetworkLogosContextEntry = (): MockContextEntry => [
+	COLORED_NETWORK_LOGOS_CONTEXT_KEY,
+	true
+];

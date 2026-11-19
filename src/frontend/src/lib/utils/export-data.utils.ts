@@ -1,7 +1,10 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
+import { icrcTxExplorerUrl } from '$icp/utils/icrc-transactions.utils';
+import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Currency } from '$lib/enums/currency';
@@ -543,10 +546,12 @@ const getIcMintingAccount = (token: Token): string | undefined => {
 const toIcRow = ({
 	transaction: tx,
 	token,
+	icrc3LedgerCanisterIds,
 	exportedAt
 }: {
 	transaction: IcTransactionUi;
 	token: Token;
+	icrc3LedgerCanisterIds: ReadonlySet<LedgerCanisterIdText>;
 	exportedAt: string;
 }): TransactionCsvRow => {
 	const direction: string = tx.incoming === true ? 'in' : tx.incoming === false ? 'out' : '';
@@ -593,16 +598,24 @@ const toIcRow = ({
 		effective_token: '',
 		effective_fee_token: '',
 		tx_id: String(tx.id),
-		// ICRC mapper leaves txExplorerUrl undefined (only native ICP pre-populates it).
-		// Fall back to the network template — IC uses `/transaction/` as the path segment,
-		// not `/tx/`, so override the default.
+		// ICP and the ck tokens carry their link from the mapper. Any other ICRC ledger gets the
+		// dashboard block page only when it serves ICRC-3, as in the transaction details modal.
+		// DIP20 keeps the network template, where IC uses `/transaction/` as the path segment.
 		explorer_url:
 			tx.txExplorerUrl ??
-			buildTxExplorerUrl({
-				template: token.network.explorerUrl,
-				txId: String(tx.id),
-				txPath: 'transaction'
-			}),
+			(isTokenIcrc(token)
+				? icrc3LedgerCanisterIds.has(token.ledgerCanisterId)
+					? icrcTxExplorerUrl({
+							ledgerCanisterId: token.ledgerCanisterId,
+							// The receive half of a transfer to self carries a suffix the ledger does not know.
+							blockIndex: String(tx.id).replace('-self', '')
+						})
+					: ''
+				: buildTxExplorerUrl({
+						template: token.network.explorerUrl,
+						txId: String(tx.id),
+						txPath: 'transaction'
+					})),
 		exported_at: exportedAt
 	};
 };
@@ -918,12 +931,15 @@ export const buildTransactionRows = ({
 	userAddresses,
 	nativeSymbolByNetworkId,
 	contacts,
+	icrc3LedgerCanisterIds = new Set(),
 	exportedAt
 }: {
 	transactions: AllTransactionUiWithCmp[];
 	userAddresses: UserAddresses;
 	nativeSymbolByNetworkId: (networkId: NetworkId) => string | undefined;
 	contacts: ContactUi[];
+	// ICRC ledgers known to serve ICRC-3 blocks: only their rows without a mapper link get one.
+	icrc3LedgerCanisterIds?: ReadonlySet<LedgerCanisterIdText>;
 	exportedAt: Date;
 }): TransactionCsvRow[] => {
 	const exportedAtIso = exportedAt.toISOString();
@@ -967,6 +983,7 @@ export const buildTransactionRows = ({
 				row = toIcRow({
 					transaction: entry.transaction,
 					token: entry.token,
+					icrc3LedgerCanisterIds,
 					exportedAt: exportedAtIso
 				});
 				isSelfTransfer = addressesEqual({

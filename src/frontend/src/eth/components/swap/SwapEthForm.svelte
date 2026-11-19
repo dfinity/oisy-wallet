@@ -2,17 +2,18 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, untrack } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-	import SwapEthFeeInfo from '$eth/components/swap/SwapEthFeeInfo.svelte';
 	import SwapLifiFeeDisplay from '$eth/components/swap/SwapLifiFeeDisplay.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
+	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
-	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
+	import SwapProviderCell from '$lib/components/swap/SwapProviderCell.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { SWAP_INSUFFICIENT_FEE_INFO } from '$lib/constants/test-ids.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -24,12 +25,10 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatToken } from '$lib/utils/format.utils';
-	import {
-		isLifiFeeAffordable,
-		raiseLifiMaxFee,
-		withLifiMaxFeeHeadroom
-	} from '$lib/utils/lifi-fee.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { raiseLifiMaxFee, withLifiMaxFeeHeadroom } from '$lib/utils/lifi-fee.utils';
 	import { parseToken, tryParseToken } from '$lib/utils/parse.utils';
+	import { fade, slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -76,8 +75,6 @@
 		feeStore: storeFeeData,
 		minGasFee,
 		maxGasFee,
-		feeSymbolStore,
-		feeDecimalsStore,
 		feeTokenIdStore
 	} = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
@@ -148,74 +145,75 @@
 		);
 	});
 
+	const isNativeSource = $derived(
+		nonNullish($sourceToken) &&
+			(isSupportedEthTokenId($sourceToken.id) || isSupportedEvmNativeTokenId($sourceToken.id))
+	);
+
+	// We should align the $sendBalance and userAmount to avoid issues caused by comparing formatted and unformatted BN
+	const parsedSendBalance = $derived(
+		nonNullish($sourceToken) && nonNullish($sourceTokenBalance)
+			? parseToken({
+					value: formatToken({
+						value: $sourceTokenBalance,
+						unitName: $sourceToken.decimals,
+						displayDecimals: $sourceToken.decimals
+					}),
+					unitName: $sourceToken.decimals
+				})
+			: ZERO
+	);
+
+	// What the network's coin pays for gas, `undefined` while that is not known and for a gasless
+	// swap. LI.FI prices its own offers. A native swap otherwise checks the ceiling, as Send does,
+	// with the tip as fallback: an unknown ceiling must not weaken the check below the tip alone.
+	const gasFee = $derived.by(() => {
+		if (isNullish($storeFeeData) || isGasless) {
+			return;
+		}
+
+		if (isLifi) {
+			return lifiFee;
+		}
+
+		if (isNativeSource) {
+			return $maxGasFee ?? $minGasFee ?? ZERO;
+		}
+
+		return isApproveNeeded && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee;
+	});
+
+	// What the gas is paid from: the amount's own balance for a native swap, the network's coin for
+	// an ERC-20 one.
+	const gasBalance = $derived(
+		isNativeSource ? parsedSendBalance : ($balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO)
+	);
+
+	// The network's coin cannot cover the gas, whatever the amount. No amount fixes that, so it stays
+	// off the pay field, as on Send: the box below the fees reports it and Review is held. Only once
+	// an offer is on screen, since the offer decides whether the swap pays gas at all.
+	const insufficientFundsForFee = $derived(
+		nonNullish($swapAmountsStore?.selectedProvider) && nonNullish(gasFee) && gasBalance < gasFee
+	);
+
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {
 		if (isNullish($storeFeeData) || isNullish($sourceToken?.id)) {
 			return;
 		}
 
-		// We should align the $sendBalance and userAmount to avoid issues caused by comparing formatted and unformatted BN
-		const parsedSendBalance =
-			nonNullish($sourceToken) && nonNullish($sourceTokenBalance)
-				? parseToken({
-						value: formatToken({
-							value: $sourceTokenBalance,
-							unitName: $sourceToken.decimals,
-							displayDecimals: $sourceToken.decimals
-						}),
-						unitName: $sourceToken.decimals
-					})
-				: ZERO;
-
 		if (userAmount > parsedSendBalance) {
 			return 'insufficient-funds';
 		}
 
-		if (isGasless) {
-			return;
-		}
-
-		// Not known yet, the form waits.
-		if (isLifi) {
-			if (isNullish(lifiFee)) {
-				return;
-			}
-
-			const isNativeSource =
-				isSupportedEthTokenId($sourceToken?.id) || isSupportedEvmNativeTokenId($sourceToken?.id);
-
-			const nativeBalance = isNativeSource
-				? parsedSendBalance
-				: ($balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO);
-
-			return isLifiFeeAffordable({
-				fee: lifiFee,
-				amount: userAmount,
-				isNativeSource,
-				nativeBalance
-			})
-				? undefined
-				: 'insufficient-funds-for-fee';
-		}
-
-		// If ETH, the balance should cover the user entered amount plus the min gas fee
-		if (isSupportedEthTokenId($sourceToken?.id) || isSupportedEvmNativeTokenId($sourceToken?.id)) {
-			const total = userAmount + ($minGasFee ?? ZERO);
-
-			if (total > parsedSendBalance) {
-				return 'insufficient-funds-for-fee';
-			}
-		}
-
-		// If ERC20, the balance of the token - e.g. 20 DAI - should cover the amount entered by the user
-		if (userAmount > parsedSendBalance) {
-			return 'insufficient-funds';
-		}
-
-		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
-		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO;
-		const maxFeeToCheck = isApproveNeeded && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee;
-
-		if (nonNullish(maxFeeToCheck) && ethBalance < maxFeeToCheck) {
+		// A native swap pays its gas from the balance the amount is drawn from, so lowering the amount
+		// is the fix and the field shows it. Unless the gas alone exceeds the balance: that is the
+		// shortfall the box reports.
+		if (
+			isNativeSource &&
+			nonNullish(gasFee) &&
+			gasFee <= parsedSendBalance &&
+			userAmount + gasFee > parsedSendBalance
+		) {
 			return 'insufficient-funds-for-fee';
 		}
 	};
@@ -249,6 +247,7 @@
 </script>
 
 <SwapForm
+	disabled={insufficientFundsForFee}
 	{errorType}
 	fee={maxFee}
 	{isSwapAmountsLoading}
@@ -257,47 +256,59 @@
 	{onMax}
 	{onNext}
 	{onShowTokensList}
+	{slippageValue}
 	bind:swapAmount
 	bind:receiveAmount
-	bind:slippageValue
 >
 	{#snippet swapDetails()}
-		{#if nonNullish($destinationToken) && nonNullish($sourceToken) && nonNullish($feeTokenIdStore)}
-			<Hr spacing="md" />
+		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
+			<div class="mt-4 flex flex-col">
+				<SwapProviderCell {onShowProviderList} />
 
-			<div class="flex flex-col gap-3">
-				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
-
-				{#if nonNullish($swapAmountsStore?.selectedProvider)}
-					{#if isGasless}
-						<SwapGaslessFee />
-					{:else if isLifi}
-						<SwapLifiFeeDisplay fee={lifiFee}>
-							{#snippet label()}
-								<Html text={$i18n.fee.text.total_fee} />
-							{/snippet}
-						</SwapLifiFeeDisplay>
-
-						<SwapEthFeeInfo
-							decimals={$feeDecimalsStore}
-							feeSymbol={$feeSymbolStore}
-							feeTokenId={$feeTokenIdStore}
-						/>
-					{:else}
-						<EthFeeDisplay {isApproveNeeded}>
-							{#snippet label()}
-								<Html text={$i18n.fee.text.total_fee} />
-							{/snippet}
-						</EthFeeDisplay>
-
-						<SwapEthFeeInfo
-							decimals={$feeDecimalsStore}
-							feeSymbol={$feeSymbolStore}
-							feeTokenId={$feeTokenIdStore}
-						/>
-					{/if}
-				{/if}
+				<SwapFeeRow
+					show={nonNullish($swapAmountsStore?.selectedProvider) && nonNullish($feeTokenIdStore)}
+				>
+					<!-- One cell for every fee source, so a provider change cross-fades in place. -->
+					<div class="grid">
+						{#if isGasless}
+							<div class="[grid-area:1/1]" transition:fade>
+								<SwapGaslessFee />
+							</div>
+						{:else if isLifi}
+							<div class="[grid-area:1/1]" transition:fade>
+								<SwapLifiFeeDisplay fee={lifiFee}>
+									{#snippet label()}
+										<Html text={$i18n.fee.text.total_fee} />
+									{/snippet}
+								</SwapLifiFeeDisplay>
+							</div>
+						{:else}
+							<div class="[grid-area:1/1]" transition:fade>
+								<EthFeeDisplay {isApproveNeeded}>
+									{#snippet label()}
+										<Html text={$i18n.fee.text.total_fee} />
+									{/snippet}
+								</EthFeeDisplay>
+							</div>
+						{/if}
+					</div>
+				</SwapFeeRow>
 			</div>
+
+			{#if insufficientFundsForFee}
+				<div transition:slide>
+					<MessageBox level="warning" styleClass="mt-4" testId={SWAP_INSUFFICIENT_FEE_INFO}>
+						{replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
+							$symbol: nativeEthereumToken.symbol,
+							$balance: formatToken({
+								value: gasBalance,
+								unitName: nativeEthereumToken.decimals,
+								displayDecimals: nativeEthereumToken.decimals
+							})
+						})}
+					</MessageBox>
+				</div>
+			{/if}
 		{/if}
 	{/snippet}
 </SwapForm>

@@ -386,6 +386,146 @@ it becomes the same capped fade.
 Modal and popover containers use an intro-only 25 ms fade. Their children own the exits;
 a container outro would hide the panel and backdrop before their longer outros finish.
 
+### Programmatic swap comparison
+
+`SwapProviderAnimation` is a quote-state indicator, not a timer that controls quote acceptance.
+Its WAAPI entry/exit reuse the shared 200/150 ms durations with the selected Text Loop's
+reference spring phase (`SWAP_PROVIDER_TURN_EASING`): 33 equally spaced samples up to the
+first target crossing, normalized to each turn budget without overshoot or a long tail.
+The layer transform/opacity and sharp/soft opacity bridge share that curve. Feature-detect
+CSS `linear()` inside the client effect; unsupported or absent `CSS.supports` retains
+`MOTION_EASE_OUT_CSS`. Reduced motion retains its existing 100 ms opacity-only ease-out;
+confirmation timing and segment easing are separate. This feature-specific loop does not
+change the generic transitions' exit policy. Candidate dwell, the minimum comparison and the
+short borderless confirmation are configured in `swap.constants.ts`. The animation itself never
+delays a quote; the coordinator owns the minimum comparison (below).
+The multi-keyframe confirmation eases each segment on a linear effect clock; easing the
+entire clock again would hide the squeeze before the recalled text is readable.
+
+Read participants from `SwapAmountsContext.activity`, not the provider registry. The optional
+`SwapQuoteObserver.onProviderParticipating` runs after eligibility guards at pricing entry;
+cached quotes and local pricing count as participation, not fresh network requests. The
+coordinator owns input invalidation, per-round identity and the foreground/background flag.
+Always reveal the amounts store's accepted selection, preserving manual-provider policy.
+Only a foreground pending round actually observed by the mounted header may confirm: no
+replay from a completed snapshot, review remount, manual selection or periodic refresh. A scroll
+that remounts inherits the confirmation it mounts with, so it does not squeeze again.
+
+While a foreground round compares, the cell's title and status run one `smart-thinking` band and
+its border a `smart-beam`; the confirmation plays only the squeeze. Both are scoped styles in
+`SwapProviderCell`, which owns the timings. Keep: the band never lighter than the plain line; a
+fixed rem tile plus a shared animation start time keeps both lines in step; the beam turns by
+`rotate` behind a mask and pauses, not resets, between rounds. Reduced motion: plain title, grey
+status, a still `border-brand-subtle-20` ring.
+
+Foreground activity starts when the coordinator queues the round, before its 300 ms debounce,
+and keeps one request identity through pricing. Track the source/destination `TokenId` values,
+not token-object emissions: `initSwapContext` re-emits its selected token objects on unrelated
+balance updates, which must not invalidate a quote or restart foreground comparison. Genuine
+pair, amount, slippage and ICRC-2 readiness changes still invalidate the current round; pricing
+reads the latest complete token objects inside the untracked request path.
+The shared form blocks Review throughout that
+queued/pending foreground work; background refresh may retain a usable quote and enabled Review.
+Cancelling queued/pending foreground work discards offers priced for the previous inputs before
+clearing activity, so a same-amount remount cannot accidentally reuse them. Completed quotes and
+background refresh retain the existing Review-remount and manual-provider behavior.
+
+A manual pick holds only at the amount it was made at: refreshes and a return from Review keep
+it; a round at another amount, or a new pair, goes back to the top offer. `SwapContexts` gives
+the store the swap context's `amountSetToMax`, because Max applies its amount again whenever the
+provider-dependent fee changes: a pick made while Max is on follows those amounts, while a pick
+made before Max went on goes back to the top offer on the first Max press, like a typed amount.
+
+Every foreground round with a participant stays pending for at least
+`SWAP_PROVIDER_MIN_COMPARISON_MS` (two scroll turns) from its first participant, so fast or
+cached quotes, and one-provider pairs through the provider pool, still show more than one name
+before the winner. The coordinator holds the whole round, not just the header: the receive
+amount stays a skeleton and Review stays disabled until the winner appears, failures included.
+Background refresh and reduced motion are never held, and slower pricing is not held further. A
+round replaced during the hold commits nothing.
+
+The scroll also shows OISY's provider pool, so a pair with one or two participants still shows
+the range of providers. `swapProviderPool` (`swap-provider-pool.providers.ts`) builds it from the
+provider registries and their flags only, never a hand-written list, so a disabled provider
+never appears: `related` are the enabled providers of the registries that price the pair's
+source or destination network (as `fetchSwapAmounts` routes it), `wider` every other enabled
+one. The turn list is the asked providers first, then `related`, then `wider`, each once per
+pass. The clock starts with an asked provider on screen and the reveal is always the real
+winner, so the pool only ever fills the wait, and on fast quotes (two turns) it rarely gets past
+`related`. This is the one exception to reading participants from the activity store; the status
+copy says "Finding the best rate..." because pool names were not asked. Component specs that
+factory-mock a service the registries import (chain-fusion, OISY Trade) must stub those exports.
+
+All six quote fan-outs use the same collector and `SWAP_QUOTE_TIMEOUT_MS` budget (10 seconds,
+aligned with LI.FI's existing display-quote timeout). Finish early when every provider settles;
+at the deadline, pass completed results to the existing mapping, ordering and minimum-error
+policy, ignoring unfinished providers and late participation/results. This is logical abandonment,
+not universal transport cancellation: nonabortable SDK/canister work may continue underneath.
+Do not apply this quote budget to swap execution, signing, deposit validity or animation timing.
+
+The five swap forms render `SwapProviderCell`; Review's static label is `SwapProvider`. In a form,
+Smart Swap is one `<button>` card under the amount cards, styled as they are (`bg-secondary`,
+`border-tertiary`, `rounded-lg`). It opens the provider step (below), replaces the Select link
+and inline details, and is disabled (no hover or press fill) while a foreground round compares,
+since the details would be stale. Under the title, one line: the status while comparing; then
+`smart_swap_gain` (`calculateSwapGainUsd`, from $0.01) only when the pick is the best rate,
+otherwise the offer count, so a worse manual pick never reads as a gain. One offer gives a
+`compact` row, kept for later rounds of the same pair. No Best Rate badge. The line has a zero
+basis (`w-0 min-w-full`) so it truncates first; while comparing the scroll keeps `min-w-24`,
+capped at `max-w-24` below 390 px.
+
+The provider step (`SwapProviderListModal`, titled "OISY Smart Swap") opens on the selected
+offer: a grey card (`rounded-lg border border-tertiary bg-secondary px-4 py-3`) with the provider
+and its `SwapProviderDetails`, without the website each row already shows, then every offer
+below. The card is the one mark of the pick, so the rows carry no check; with a single offer the
+card is the whole step, with no list and no Best Rate. Tapping the offer in use only goes back:
+`setManualProvider` would pin the automatic pick, and a better offer at the same amount could no
+longer replace it. The step leaves with Back, since nothing is cancelled.
+
+No hard cuts in the section. The Smart Swap row and the fee row (`SwapFeeRow`) open and close
+with `slide` (height, 250 ms) while their content fades up 4 px with `fly`; the fee row follows
+`SWAP_DETAILS_ROW_STAGGER_MS` (60 ms) later. The form's only separator is an `Hr` under the cell,
+inside its sliding row: the cell sits with the amounts it prices and the fees below the line, and
+a form with no offer has no line. The 12 px gaps around it are the card's `mb-3` and `pb-3` inside
+the sliding row, not the forms' flex gap, so they animate with the height. The cell never swaps labels in one frame:
+`comparingLayout` follows `comparing` one `MOTION_SWAP_DURATION` late, so the result line, or the
+status, fades out in place before the cell re-lays out and the incoming one fades in. On Review,
+Best Rate shows whenever the selected provider is the top offer, a single offer
+included; only a manual non-best choice hides it. The provider slot never shows a placeholder. A first round leaves the slot empty
+and fades the first participant up (opacity, 4 px, the soft-layer blur bridge, 200 ms ease-out);
+that fade runs once, and only a turn, which samples the pose first, cuts it short. One turn clock
+runs for the whole comparison: it starts once a name is on screen and never restarts on a
+keystroke. While a new round waits for its participants (the debounce, slow eligibility checks)
+the scroll keeps turning through the previous round's; a shown provider the new round leaves out
+gives way at the next turn. The clock is a single `$derived` boolean, so prop updates that leave
+it unchanged never restart it mid-turn.
+Reduced motion keeps the fades (100 ms at most) and drops the slide, rise and blur.
+
+While a foreground round compares, every form's fee row shows a "Total fee" skeleton instead of
+the last quote's fees, which would describe a provider that may not win; background refreshes
+keep the fees. `SwapFeeRow` owns this for all five forms: the skeleton and the form's fees share
+one grid cell and cross-fade. Its `show` decides the row outside a comparison: ICP, SOL and XRP
+fees do not need an offer, ETH and BTC pass "an offer is selected". The fee components stay
+quote-only, because Review renders them too.
+
+Screen readers hear the section through one `sr-only` `role="status"` region that
+`SwapProviderCell` mounts before any round, outside the cell. Two reasons: the cell is a
+`<button>`, whose children are presentational, and a region inserted with its text already in
+place is not announced. Its text is the status while comparing, then the selected provider's
+name. The visible status is `aria-hidden`, the scroll's name is plain text for the cell's
+accessible name, and cycling names are never announced.
+
+Keep visible layers keyed by provider through interruption. Sample their current poses before
+cancelling/retargeting WAAPI, including when a new round starts mid-reveal, which is no turn: the
+motion effect's cleanup samples the layers its run set moving. An outgoing provider can
+immediately become the winner without being remounted hidden. Only transient exits remain, never
+persistent wheel neighbours.
+A static 2px soft layer crossfades through opacity, so no filter is animated. Reduced motion
+stops rotation and confirmation scale, retains the shared short opacity bridge on an actual
+provider change, and never dims an already-readable winner. Cancel timers/animations on
+invalidation and destruction. Verify real logo sources, clipping and current-pose continuity
+in a compiled-component browser probe: mocked WAAPI unit tests cannot prove those properties.
+
 ## Icons
 
 The codebase uses several icon sources (Lucide, Tabler, Iconly, custom
@@ -401,11 +541,17 @@ component uses. Never re-implement an icon that already exists.
 - Auth flows go through `@icp-sdk/auth` and the helpers in
   `$lib/services/auth.services` and `$lib/providers/auth-client.providers`.
 - Any HTML coming from backend / user input must be sanitized before
-  `{@html …}`.
+  `{@html …}`. `sanitize` (the `Html` default) drops `<style>` elements: a
+  style element applies to the whole page, and no text we render needs one.
 - Text authored by a third party — e.g. a consent message built from data a
   relying party supplies — goes through `sanitizeUntrusted` (`untrusted` prop
   on `Html` / `Markdown`), which keeps only the markup Markdown can produce.
   Never render it inside a `<form>` that drives a sensitive action.
+- A value we do not author — a token symbol, an NFT collection name —
+  substituted into a translated text that `Html` renders is escaped with
+  `escapeHtml` (`$lib/utils/html.utils`) first, so it shows as plain text.
+  Sanitizing the result is not enough: even `sanitizeUntrusted` keeps the
+  headings, paragraphs and links such a value could carry.
 - External links: `target="_blank"` requires `rel="noopener noreferrer"`.
 - Threshold-signature operations are routed through the chain-fusion
   signer canister — not implemented here. See

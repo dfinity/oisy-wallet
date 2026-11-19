@@ -3,6 +3,7 @@ import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthWalletConnectSendTokenModal from '$eth/components/wallet-connect/EthWalletConnectSendTokenModal.svelte';
 import { ERC20_TRANSFER_HASH } from '$eth/constants/erc20.constants';
+import { loadUnlistedErc20TokenData } from '$eth/services/erc20-unlisted.services';
 import { send } from '$eth/services/wallet-connect.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
@@ -34,6 +35,10 @@ vi.mock('$eth/services/wallet-connect.services', () => ({
 	send: vi.fn()
 }));
 
+vi.mock('$eth/services/erc20-unlisted.services', () => ({
+	loadUnlistedErc20TokenData: vi.fn()
+}));
+
 const mockGoto = vi.fn();
 vi.mock('$app/navigation', () => ({
 	goto: (...args: unknown[]) => mockGoto(...args)
@@ -41,6 +46,7 @@ vi.mock('$app/navigation', () => ({
 
 describe('EthWalletConnectSendTokenModal and the way past a refusal', () => {
 	const RECIPIENT = '0x2222222222222222222222222222222222222222';
+	const UNLISTED_CONTRACT = '0x3333333333333333333333333333333333333333';
 
 	const undecodableTransfer = `${ERC20_TRANSFER_HASH}deadbeef`;
 
@@ -50,9 +56,11 @@ describe('EthWalletConnectSendTokenModal and the way past a refusal', () => {
 
 	const renderModal = ({
 		data,
+		to = USDC_TOKEN.address,
 		validation = 'VALID'
 	}: {
 		data: string;
+		to?: string;
 		validation?: 'VALID' | 'INVALID' | 'UNKNOWN';
 	}) =>
 		render(EthWalletConnectSendTokenModal, {
@@ -71,7 +79,7 @@ describe('EthWalletConnectSendTokenModal and the way past a refusal', () => {
 				} as unknown as WalletKitTypes.SessionRequest,
 				firstTransaction: {
 					from: '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a',
-					to: USDC_TOKEN.address,
+					to,
 					data
 				},
 				sourceNetwork: ETHEREUM_NETWORK,
@@ -91,6 +99,9 @@ describe('EthWalletConnectSendTokenModal and the way past a refusal', () => {
 		erc20DefaultTokensStore.reset();
 		erc20CustomTokensStore.resetAll();
 		erc20DefaultTokensStore.add(USDC_TOKEN);
+
+		// A contract that answers nothing, unless a case says otherwise.
+		vi.mocked(loadUnlistedErc20TokenData).mockResolvedValue(undefined);
 
 		walletConnectUncheckedSigningStore.disable();
 	});
@@ -116,6 +127,29 @@ describe('EthWalletConnectSendTokenModal and the way past a refusal', () => {
 
 		expect(approve).toBeEnabled();
 
+		await fireEvent.click(approve);
+
+		await waitFor(() => {
+			expect(send).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ acknowledgedRefusals: ['unverifiable_erc20'] })
+			);
+		});
+	});
+
+	// Only the review sees a token OISY does not list whose contract did not report its decimals (D7),
+	// so it hands that up for the acknowledgement to name it.
+	it('should hand on the acknowledgement of a token whose contract does not answer', async () => {
+		walletConnectUncheckedSigningStore.enable();
+
+		const { getByRole, getByText } = renderModal({ data: transfer, to: UNLISTED_CONTRACT });
+
+		const approve = getByRole('button', { name: en.core.text.approve });
+
+		await waitFor(() => {
+			expect(getByText(en.wallet_connect.text.unchecked_signing_acknowledge)).toBeInTheDocument();
+		});
+
+		await fireEvent.click(getByText(en.wallet_connect.text.unchecked_signing_acknowledge));
 		await fireEvent.click(approve);
 
 		await waitFor(() => {
@@ -154,7 +188,7 @@ describe('EthWalletConnectSendTokenModal and the way past a refusal', () => {
 		});
 
 		await waitFor(() => {
-			expect(getByText(en.wallet_connect.text.undecodable_erc20_request)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.unverifiable_erc20_request)).toBeInTheDocument();
 		});
 
 		expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();

@@ -29,17 +29,23 @@ export interface WalletConnectBtcPsbtInputPrevout {
 	// Undefined when the input states no previous output the signing path would use, or when the
 	// input is ambiguous, in which case no figure may be derived from it.
 	prevout: WalletConnectBtcPsbtPrevout | undefined;
+	// `true` when `prevout` is read from a `nonWitnessUtxo` that is the transaction the input's
+	// outpoint names, so its value and script are those of the output being spent. A `witnessUtxo`
+	// alone is only what the dApp states.
+	proven: boolean;
 	// `true` when the input's previous output cannot be pinned to one reading: either it is stated
 	// twice, in `witnessUtxo` and in `nonWitnessUtxo`, and the two disagree, or a `nonWitnessUtxo`
-	// is present but unreadable (unparsable, or missing the vout the input references). Either way
-	// the review could show a value or an address the signature does not commit to.
+	// is present but unusable (unparsable, missing the vout the input references, or not the
+	// transaction the outpoint names). Either way the review could show a value or an address the
+	// signature does not commit to.
 	ambiguous: boolean;
 }
 
 export interface WalletConnectBtcDecodedPsbtInput {
 	address: string | undefined;
-	// Undefined when the input carries no `witnessUtxo` and its value is therefore unknown; it must
-	// NOT be conflated with a zero-value input in the review.
+	// Undefined when OISY cannot establish what the input is worth: neither the wallet's UTXO set nor
+	// the previous transaction the outpoint names states it. It must NOT be conflated with a
+	// zero-value input in the review.
 	value: bigint | undefined;
 	// Whether this input belongs to the wallet's own P2WPKH address and will be signed.
 	signedByWallet: boolean;
@@ -56,7 +62,7 @@ export interface WalletConnectBtcDecodedPsbt {
 	// Sum of the values of the wallet-owned inputs that will be signed. This is the gross signed input
 	// value, NOT the net spend (it ignores any change returned to the wallet).
 	totalSignedInputs: bigint;
-	// Sum(inputs) - sum(outputs); undefined when an input is missing its UTXO value.
+	// Sum(inputs) - sum(outputs); undefined when the value of any input is unknown.
 	fee: bigint | undefined;
 	broadcast: boolean;
 	// `true` when at least one input's previous output cannot be pinned to one reading, either
@@ -64,6 +70,11 @@ export interface WalletConnectBtcDecodedPsbt {
 	// unreadable. Every figure above would then rest on a guess about what the signer will consume,
 	// so the request must be neither displayed nor signed.
 	ambiguous: boolean;
+	// `true` when an input has a value OISY could check neither against the wallet's UTXO set nor
+	// against the previous transaction its outpoint names. A signature commits to the value of the
+	// input it signs only, so signatures over different stated values of the same transaction can be
+	// combined: the request must be neither displayed nor signed.
+	unverified: boolean;
 }
 
 // Reown bitcoin `signPsbt` response — https://docs.reown.com/advanced/multichain/rpc-reference/bitcoin-rpc

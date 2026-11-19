@@ -1,4 +1,4 @@
-import { ZERO } from '$lib/constants/app.constants';
+import { MAX_UINT_64, ZERO } from '$lib/constants/app.constants';
 import {
 	LIFI_CARRIED_FEE_HEADROOM_PERCENT,
 	LIFI_GAS_LIMIT_BUFFER_PERCENT,
@@ -12,7 +12,7 @@ import type { LiFiStep } from '@lifi/sdk';
 import { dataLength, encodeRlp, toBeArray } from 'ethers/utils';
 
 // The widest nonce an account can sign with, so the widest one RLP encodes.
-const MAX_NONCE = 2n ** 64n - 1n;
+const MAX_NONCE = MAX_UINT_64;
 
 /**
  * The gas units LI.FI estimates the swap transaction at — its `SEND` gas costs, every live quote

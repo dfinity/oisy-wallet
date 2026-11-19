@@ -3,8 +3,10 @@ import {
 	trackEthTransactionSendOutOfGas,
 	type EthTransactionSendContext
 } from '$eth/services/eth-transaction-send-analytics.services';
+import { EthNonceReadError, EthSubmissionUnconfirmedError } from '$eth/types/send';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
+import { SwapBroadcastOutcomeUnknownError } from '$lib/types/errors';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -90,7 +92,10 @@ const isNodeInsufficientBalanceAnswer = ({ code, message }: Record<string, unkno
 	INSUFFICIENT_BALANCE_PATTERN.test(message) &&
 	!EXECUTION_REVERTED_PATTERN.test(message);
 
-const isInsufficientBalanceError = (err: unknown): boolean =>
+/**
+ * Whether the account cannot pay for the transaction, by ethers' own verdict or by the node's answer.
+ */
+export const isInsufficientBalanceError = (err: unknown): boolean =>
 	collectErrorRecords({ err }).some(
 		(record) =>
 			record.code === ETHERS_INSUFFICIENT_FUNDS_CODE || isNodeInsufficientBalanceAnswer(record)
@@ -138,9 +143,12 @@ const requestedSignedTransaction = ({ payload }: Record<string, unknown>): unkno
 		? (payload.params as unknown[])[0]
 		: undefined;
 
+// Ethers carries the signed transaction in one of two places: in the request it attaches to an error
+// it could not classify, and in the `transaction` field of a broadcast failure it recognised, such
+// as `NONCE_EXPIRED` or `REPLACEMENT_UNDERPRICED`.
 const findSignedTransaction = (err: unknown): string | undefined =>
 	collectErrorRecords({ err })
-		.map(requestedSignedTransaction)
+		.flatMap((record) => [requestedSignedTransaction(record), record.transaction])
 		.find(
 			(candidate): candidate is string =>
 				typeof candidate === 'string' && SIGNED_TRANSACTION_PATTERN.test(candidate)
@@ -189,6 +197,91 @@ const estimateGasNeeded = async ({
 	}
 };
 
+// Never the signed transaction itself: it stays valid until its nonce is used, and whoever it is
+// shared with could broadcast it. The hash tells an explorer whether it was mined, and the unsigned
+// transaction carries every field but the signature, so neither can be sent again.
+const transactionLines = (transaction: Transaction | undefined): string[] => {
+	if (isNullish(transaction)) {
+		return [];
+	}
+
+	const {
+		send: { error }
+	} = get(i18n);
+
+	return [
+		...(nonNullish(transaction.hash)
+			? [replacePlaceholders(error.ethereum_transaction_hash, { $hash: transaction.hash })]
+			: []),
+		replacePlaceholders(error.ethereum_unsigned_transaction, {
+			$transaction: transaction.unsignedSerialized
+		})
+	];
+};
+
+// The node's own answer, as opposed to the error ethers wraps around it: the first record in the
+// chain that carries a JSON-RPC code. Ethers' own codes are strings.
+const findNodeMessage = (err: unknown): string | undefined => {
+	const answer = collectErrorRecords({ err }).find(
+		({ code, message }) => typeof code === 'number' && typeof message === 'string'
+	);
+
+	return nonNullish(answer) ? `${answer.message}` : undefined;
+};
+
+// The node's message is free text shown inside an HTML toast, so it is shown as text.
+const escapeHtml = (text: string): string =>
+	text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+// The generic toast appends the error ethers throws, and for a broadcast that error carries the
+// signed transaction. Such an error shows the node's own message instead, followed by the hash and
+// the unsigned transaction; the signed bytes are taken out of the message too, should a node echo
+// them, in any case and with or without their prefix. `findSignedTransaction` only returns hex,
+// which is safe inside the pattern.
+const toastBroadcastError = ({
+	err,
+	fallbackMsg,
+	signedTransaction
+}: {
+	err: unknown;
+	fallbackMsg: string;
+	signedTransaction: string;
+}) => {
+	const nodeMessage = findNodeMessage(err)?.replace(
+		new RegExp(`(?:0x)?${signedTransaction.slice(2)}`, 'gi'),
+		'…'
+	);
+
+	toastsErrorNoTrace({
+		msg: {
+			text: [
+				nonNullish(nodeMessage) ? `${fallbackMsg} / ${escapeHtml(nodeMessage)}` : fallbackMsg,
+				...transactionLines(decodeSignedTransaction(signedTransaction))
+			].join('<br>'),
+			renderAsHtml: true
+		},
+		err
+	});
+};
+
+// A failure we have no explanation for keeps the node's detail on screen, unless that detail
+// carries the signed transaction. Should anything here throw, the toast still shows, with nothing
+// of the error in it: what it carries is then unknown.
+const toastUnexplainedError = ({ err, fallbackMsg }: { err: unknown; fallbackMsg: string }) => {
+	try {
+		const signedTransaction = findSignedTransaction(err);
+
+		if (isNullish(signedTransaction)) {
+			toastsError({ msg: { text: fallbackMsg }, err });
+			return;
+		}
+
+		toastBroadcastError({ err, fallbackMsg, signedTransaction });
+	} catch {
+		toastsErrorNoTrace({ msg: { text: fallbackMsg }, err });
+	}
+};
+
 const toastOutOfGasError = async ({
 	err,
 	answer,
@@ -226,25 +319,12 @@ const toastOutOfGasError = async ({
 			: replacePlaceholders(error.ethereum_out_of_gas_gas_sent, { $gasSent: formatGas(gasSent) })
 		: undefined;
 
-	// Never the signed transaction itself: it stays valid until its nonce is used, and whoever it is
-	// shared with could broadcast it. The hash tells an explorer whether it was mined, and the unsigned
-	// transaction carries every field but the signature, so neither can be sent again.
-	const hashLine = nonNullish(transaction?.hash)
-		? replacePlaceholders(error.ethereum_transaction_hash, { $hash: transaction.hash })
-		: undefined;
-
-	const unsignedTransactionLine = nonNullish(transaction)
-		? replacePlaceholders(error.ethereum_unsigned_transaction, {
-				$transaction: transaction.unsignedSerialized
-			})
-		: undefined;
-
 	// The figures and the transaction are there for the user to screenshot or copy and hand to
 	// support. Each sits on a line of its own, without a blank line before it: in a toast that shows
 	// little more than two lines, a blank one reads as the end of the message.
 	toastsErrorNoTrace({
 		msg: {
-			text: [error.ethereum_out_of_gas, gasLine, hashLine, unsignedTransactionLine]
+			text: [error.ethereum_out_of_gas, gasLine, ...transactionLines(transaction)]
 				.filter(nonNullish)
 				.join('<br>'),
 			renderAsHtml: true
@@ -273,9 +353,11 @@ const DEFINITIVE_REFUSAL_PATTERN =
 /**
  * Whether a broadcast failed because the node refused the transaction outright, so that it was
  * neither taken nor relayed: the account cannot pay for it, or the transaction is invalid. Only the
- * node's own answer to the broadcast counts, never a transport failure, which may have relayed it.
+ * node's own answer to the broadcast counts, never a transport failure, which may have relayed it,
+ * nor a refusal that came after one (`SwapBroadcastOutcomeUnknownError`, whose cause it is).
  */
 export const isDefinitiveTransactionRefusal = (err: unknown): boolean =>
+	!(err instanceof SwapBroadcastOutcomeUnknownError) &&
 	!answersOtherRequest(err) &&
 	(isInsufficientBalanceError(err) ||
 		collectErrorRecords({ err }).some(
@@ -303,7 +385,43 @@ export const isBroadcastRetriable = (err: unknown): boolean =>
 	);
 
 /**
- * Maps an error raised while broadcasting an Ethereum or EVM transaction to a user-friendly message.
+ * Whether the node turned the broadcast down because the transaction runs out of the gas it was
+ * signed with. No outright refusal, since another node can still mine it to revert, but one with an
+ * explanation of its own: the gas sent, the gas needed, and the fee it may have cost.
+ */
+export const isOutOfGasRefusal = (err: unknown): boolean => nonNullish(findNodeOutOfGasAnswer(err));
+
+// Whether the error, or one it wraps, is of the given kind: a caller may wrap a send's error again.
+const isErrorOfKind = ({
+	err,
+	kind
+}: {
+	err: unknown;
+	kind:
+		| typeof EthNonceReadError
+		| typeof EthSubmissionUnconfirmedError
+		| typeof SwapBroadcastOutcomeUnknownError;
+}): boolean => collectErrorRecords({ err }).some((record) => record instanceof kind);
+
+/**
+ * Whether the send failed without settling what became of its transaction: every provider failed
+ * the submission without an answer that settles it, or a swap's broadcast outcome is unknown. The
+ * transaction may still go through, so the flow ends the send rather than offer it again: a second
+ * attempt would be signed with the next nonce, and both could execute.
+ */
+export const isSendOutcomeUnknown = (err: unknown): boolean =>
+	isErrorOfKind({ err, kind: EthSubmissionUnconfirmedError }) ||
+	isErrorOfKind({ err, kind: SwapBroadcastOutcomeUnknownError });
+
+/**
+ * Maps an error raised by an Ethereum or EVM send to a user-friendly message.
+ *
+ * What a message may claim depends on how far the transaction got. One whose nonce could not be read
+ * was never signed, so it was not sent and retrying it is safe. One whose submission every provider
+ * failed without a word may have reached the network all the same, and a retry would be signed with
+ * the next nonce, so the message sends the user to their activity first and never says it was not
+ * sent. A swap whose broadcast outcome is unknown gets the same message, even when its last attempt
+ * was refused: an earlier attempt may have relayed it, and the refusal answers only the last one.
  *
  * Resolves i18n strings imperatively so callers don't need to pass them. Returns `undefined` when
  * the error is not one we can explain, allowing callers to fall through to their own generic
@@ -313,6 +431,14 @@ export const mapEthereumErrorMsg = (err: unknown): string | undefined => {
 	const {
 		send: { error }
 	} = get(i18n);
+
+	if (isErrorOfKind({ err, kind: EthNonceReadError })) {
+		return error.ethereum_transaction_not_sent;
+	}
+
+	if (isSendOutcomeUnknown(err)) {
+		return error.ethereum_transaction_unconfirmed;
+	}
 
 	if (isInsufficientBalanceError(err)) {
 		return error.ethereum_insufficient_funds;
@@ -327,7 +453,8 @@ export const mapEthereumErrorMsg = (err: unknown): string | undefined => {
  * it would bury that under the very string that makes these failures read as something they are
  * not. `toastsErrorNoTrace` still writes the original error to the console, so nothing is lost for
  * whoever has to diagnose it. An unexplained failure keeps the detail on screen, it being the only
- * thing there is to report.
+ * thing there is to report, but never the signed transaction a refused broadcast carries: such a
+ * failure shows the node's own message, the hash and the unsigned transaction instead.
  *
  * A transaction that ran out of gas is explained too, with the gas it was signed with and the gas it
  * needs, and its hash and unsigned form in place of the dump, which carries the signed transaction.
@@ -359,10 +486,10 @@ export const toastEthereumTransactionError = ({
 		// catch their own failures; anything else that throws while composing the explanation falls
 		// back to the generic toast, so the user always learns the send failed.
 		toastOutOfGasError({ err, answer: outOfGasAnswer, token, context }).catch(() =>
-			toastsError({ msg: { text: fallbackMsg }, err })
+			toastUnexplainedError({ err, fallbackMsg })
 		);
 		return;
 	}
 
-	toastsError({ msg: { text: fallbackMsg }, err });
+	toastUnexplainedError({ err, fallbackMsg });
 };

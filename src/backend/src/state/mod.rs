@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 
 use ic_cdk_management_canister::{VetKDCurve, VetKDKeyId};
+use ic_stable_structures::Memory;
 use ic_vetkeys::{encrypted_maps::EncryptedMaps, types::AccessRights};
 use shared::types::{
     api_keys::ApiKeys,
@@ -37,6 +38,7 @@ use crate::{
 };
 
 pub(crate) mod memory;
+pub(crate) mod token_id_keys;
 
 pub(crate) struct State {
     pub(crate) config: ConfigCell,
@@ -89,8 +91,9 @@ pub(crate) struct State {
     /// already client-side ciphertext under a per-share key, so there is no
     /// vetKD derivation and no lazy init needed).
     pub(crate) personal_note_shares: PersonalNoteShareMap,
-    /// By-creator index over `personal_note_shares`, used only to enforce the
-    /// per-user active-share cap without scanning the primary map.
+    /// By-creator index over `personal_note_shares`, holding each share's
+    /// expiry: enforces the per-user active-share cap and finds expired shares
+    /// for the hourly prune without scanning the primary map.
     pub(crate) personal_note_shares_by_creator: PersonalNoteSharesByCreatorMap,
     /// Tips: the canister holds no tokens for these, only the record of an
     /// allowance the sender granted under a per-tip subaccount. See `tips`.
@@ -269,6 +272,21 @@ pub(crate) fn with_tip_secrets_mut<R>(f: impl FnOnce(&mut EncryptedMaps<AccessRi
     })
 }
 
+/// Whether the tip-secrets store was ever created on this canister.
+///
+/// `EncryptedMaps::init` writes its config cell on first use, so from then on
+/// the config region holds pages, and stable memory keeps them across upgrades
+/// while the heap handle in `tip_secrets` does not. Reading a region's size
+/// allocates nothing.
+fn tip_secrets_created() -> bool {
+    MEMORY_MANAGER.with(|mm| {
+        mm.borrow()
+            .get(TIP_SECRETS_KEY_MANAGER_CONFIG_MEMORY_ID)
+            .size()
+            > 0
+    })
+}
+
 /// Runs `f` against the tip-secrets store **only if it already exists**, and
 /// returns `None` when it does not.
 ///
@@ -278,9 +296,16 @@ pub(crate) fn with_tip_secrets_mut<R>(f: impl FnOnce(&mut EncryptedMaps<AccessRi
 /// where nobody ever stored a claim code would allocate 32 MiB purely to discover
 /// there was nothing to delete, and on a canister short of reserved cycles it
 /// would trap instead.
+///
+/// A store that exists is reopened first, though. After an upgrade the heap
+/// handle is `None` until something opens the store again, and a cleanup that
+/// skipped in that window would leave its entry with nothing pointing at it.
 pub(crate) fn with_existing_tip_secrets_mut<R>(
     f: impl FnOnce(&mut EncryptedMaps<AccessRights>) -> R,
 ) -> Option<R> {
+    if read_state(|s| s.tip_secrets.is_none()) && tip_secrets_created() {
+        init_tip_secrets();
+    }
     mutate_state(|s| s.tip_secrets.as_mut().map(f))
 }
 

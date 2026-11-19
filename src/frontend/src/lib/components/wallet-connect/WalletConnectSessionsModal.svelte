@@ -10,6 +10,7 @@
 	import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 	import IconLinkOff from '$lib/components/icons/IconLinkOff.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -17,7 +18,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
-	import OverlappedLogos from '$lib/components/ui/OverlappedLogos.svelte';
+	import { logoSizes } from '$lib/constants/components.constants';
 	import {
 		disconnectListener,
 		disconnectSession,
@@ -27,24 +28,34 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { walletConnectSessionsStore } from '$lib/stores/wallet-connect.store';
+	import type { Network } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 	import { SolanaNetworks } from '$sol/types/network';
 
-	const chainIconMap: Record<string, string> = {
-		...[...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].reduce<Record<string, string>>(
-			(acc, { chainId, icon }) =>
-				nonNullish(icon) ? { ...acc, [`eip155:${chainId}`]: icon } : acc,
+	// Map each chain to its network rather than its icon, so `NetworkLogo` can apply the dark-theme
+	// rule: mainnet icons are inverted, the lighter testnet icons are shown as they are.
+	const chainNetworkMap: Record<string, Network> = {
+		...[...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].reduce<Record<string, Network>>(
+			(acc, network) =>
+				nonNullish(network.icon) ? { ...acc, [`eip155:${network.chainId}`]: network } : acc,
 			{}
 		),
-		...Object.entries(CAIP10_CHAINS).reduce<Record<string, string>>((acc, [key, { network }]) => {
-			const { icon } =
-				network === SolanaNetworks.mainnet ? SOLANA_MAINNET_NETWORK : SOLANA_DEVNET_NETWORK;
-			return nonNullish(icon) ? { ...acc, [key]: icon } : acc;
-		}, {}),
-		...Object.entries(BIP122_CHAINS).reduce<Record<string, string>>((acc, [key, { networkId }]) => {
-			const icon = SUPPORTED_BITCOIN_NETWORKS.find(({ id }) => id === networkId)?.icon;
-			return nonNullish(icon) ? { ...acc, [key]: icon } : acc;
-		}, {})
+		...Object.entries(CAIP10_CHAINS).reduce<Record<string, Network>>(
+			(acc, [key, { network: solanaNetwork }]) => {
+				const network =
+					solanaNetwork === SolanaNetworks.mainnet ? SOLANA_MAINNET_NETWORK : SOLANA_DEVNET_NETWORK;
+				return nonNullish(network.icon) ? { ...acc, [key]: network } : acc;
+			},
+			{}
+		),
+		...Object.entries(BIP122_CHAINS).reduce<Record<string, Network>>(
+			(acc, [key, { networkId }]) => {
+				const network = SUPPORTED_BITCOIN_NETWORKS.find(({ id }) => id === networkId);
+				return nonNullish(network?.icon) ? { ...acc, [key]: network } : acc;
+			},
+			{}
+		)
 	};
 
 	let sessions = $derived($walletConnectSessionsStore);
@@ -82,18 +93,18 @@
 	const getSessionDetails = (session: SessionTypes.Struct) =>
 		Object.values(session.namespaces)
 			.flatMap((ns) => ns.accounts)
-			.reduce<{ networkIcons: string[] }>(
+			.reduce<{ networks: Network[] }>(
 				(acc, account) => {
 					const [namespace, reference] = account.split(':');
 
-					const icon = chainIconMap[`${namespace}:${reference}`];
+					const network = chainNetworkMap[`${namespace}:${reference}`];
 
-					if (nonNullish(icon) && !acc.networkIcons.includes(icon)) {
-						acc.networkIcons.push(icon);
+					if (nonNullish(network) && !acc.networks.some(({ id }) => id === network.id)) {
+						acc.networks.push(network);
 					}
 					return acc;
 				},
-				{ networkIcons: [] }
+				{ networks: [] }
 			);
 </script>
 
@@ -111,7 +122,7 @@
 			<div class="flex flex-col gap-4">
 				{#each sessions as session (session.topic)}
 					{@const { name, url } = session.peer.metadata}
-					{@const { networkIcons } = getSessionDetails(session)}
+					{@const { networks } = getSessionDetails(session)}
 
 					<LogoButton hover={false} styleClass="bg-secondary rounded-xl border border-disabled">
 						{#snippet logo()}
@@ -127,7 +138,19 @@
 						{/snippet}
 
 						{#snippet subtitle()}
-							<OverlappedLogos icons={networkIcons} styleClass="ml-2" />
+							{#if networks.length > 0}
+								<div class="ml-2 flex items-center">
+									{#each networks as network, i (network.id)}
+										<div
+											style={`${i < networks.length - 1 ? `margin-right: calc(-${logoSizes.xxs} / 3);` : ''} z-index: ${i + 1};`}
+											class="relative"
+											in:fade
+										>
+											<NetworkLogo {network} />
+										</div>
+									{/each}
+								</div>
+							{/if}
 						{/snippet}
 
 						{#snippet description()}

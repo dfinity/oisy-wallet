@@ -1,9 +1,9 @@
 use ic_cdk::{query, update};
 use shared::types::{
-    contact::{CreateContactRequest, UpdateContactRequest},
+    contact::{CreateContactRequest, GetContactImagesRequest, UpdateContactRequest},
     result_types::{
-        CreateContactResult, DeleteContactResult, GetContactResult, GetContactsResult,
-        UpdateContactResult,
+        CreateContactResult, DeleteContactResult, GetContactImagesResult, GetContactResult,
+        GetContactsPageResult, GetContactsResult, UpdateContactResult,
     },
 };
 
@@ -75,5 +75,37 @@ pub fn get_contact(contact_id: u64) -> GetContactResult {
 #[must_use]
 pub fn get_contacts() -> GetContactsResult {
     let result = Ok(contacts::get_contacts());
+    result.into()
+}
+
+/// Returns a page of the caller's contacts, without their images.
+///
+/// A page holds contacts in ID order until their encoded size reaches `CONTACTS_PAGE_MAX_BYTES`, so
+/// that the reply stays below the 2 MiB a certified call can return. `get_contact_images` returns
+/// the images.
+/// # Arguments
+/// * `after` - The `next` of the previous page; none for the first page.
+/// # Returns
+/// * `Ok(ContactsPage)` - The page, with `next` set while contacts remain after it.
+#[query(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn get_contacts_page(after: Option<u64>) -> GetContactsPageResult {
+    let result = Ok(contacts::get_contacts_page(after));
+    result.into()
+}
+
+/// Returns the images of the given contacts of the caller.
+///
+/// A call takes at most `MAX_CONTACT_IMAGES_PER_CALL` contact IDs, so that the reply stays below
+/// the 2 MiB a certified call can return.
+/// # Arguments
+/// * `request` - The IDs of the caller's contacts whose images to return.
+/// # Returns
+/// * `Ok(Vec<ContactImageEntry>)` - The images found; contacts the caller does not have, and
+///   contacts without an image, are left out.
+#[query(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn get_contact_images(request: GetContactImagesRequest) -> GetContactImagesResult {
+    let result = Ok(contacts::get_contact_images(request.contact_ids));
     result.into()
 }

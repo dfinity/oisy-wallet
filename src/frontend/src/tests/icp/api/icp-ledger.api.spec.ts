@@ -6,6 +6,7 @@ import {
 	transfer
 } from '$icp/api/icp-ledger.api';
 import { IcpLedgerBlocksCanister } from '$icp/canisters/icp-ledger-blocks.canister';
+import { IcTransferDeadlineError } from '$icp/types/ic-send';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import {
@@ -66,6 +67,25 @@ describe('icp-ledger.api', () => {
 				amount,
 				to: AccountIdentifier.fromHex(mockAccountIdentifierText)
 			});
+		});
+
+		it('passes createdAt through to the ledger', async () => {
+			const createdAt = 1_700_000_000_000_000_000n;
+
+			await transfer({ ...params, createdAt });
+
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				to: AccountIdentifier.fromHex(mockAccountIdentifierText),
+				createdAt
+			});
+		});
+
+		it('leaves createdAt unset when none is given', async () => {
+			await transfer(params);
+
+			expect(ledgerCanisterMock.transfer.mock.calls[0][0].createdAt).toBeUndefined();
+			expect(nowInBigIntNanoSeconds).not.toHaveBeenCalled();
 		});
 
 		it('throws an error if identity is undefined', async () => {
@@ -146,6 +166,25 @@ describe('icp-ledger.api', () => {
 
 		it('throws an error if identity is undefined', async () => {
 			await expect(icrc1Transfer({ ...params, identity: undefined })).rejects.toThrow();
+		});
+
+		// Getting the ledger ready can take arbitrarily long in a suspended tab.
+		it('does not send when the ledger is ready only past the deadline', async () => {
+			vi.mocked(nowInBigIntNanoSeconds).mockReturnValue(createdAt + 61n);
+
+			await expect(icrc1Transfer({ ...params, notAfter: createdAt + 60n })).rejects.toThrow(
+				IcTransferDeadlineError
+			);
+
+			expect(ledgerCanisterMock.icrc1Transfer).not.toHaveBeenCalled();
+		});
+
+		it('sends up to the deadline', async () => {
+			vi.mocked(nowInBigIntNanoSeconds).mockReturnValue(createdAt + 60n);
+
+			await expect(icrc1Transfer({ ...params, notAfter: createdAt + 60n })).resolves.toEqual(
+				mockIndex
+			);
 		});
 	});
 

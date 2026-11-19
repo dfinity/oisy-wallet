@@ -26,6 +26,5 @@ export const MUON_TOKEN: RequiredSpl2022Token = {
 	address: 'Fz9edBpaURPPzpKVRR1A8PENYDEgHqwx5D5th28ondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
-	freezeAuthority: 'Chm9dcASBc9C54FGxcSRGv9qC998TueQqr5XzGZkEVCc',
 	groupData: MUON_TOKEN_GROUP
 };

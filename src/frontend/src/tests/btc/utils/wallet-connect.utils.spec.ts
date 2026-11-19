@@ -210,39 +210,52 @@ describe('btc wallet-connect.utils', () => {
 			network: networks.bitcoin
 		}).output as Buffer;
 
-		const nonWitnessUtxo = ({ script, value }: { script: Buffer; value: number }): Buffer => {
+		const previousTransaction = ({
+			script,
+			value
+		}: {
+			script: Buffer;
+			value: number;
+		}): Transaction => {
 			const tx = new Transaction();
 			tx.addInput(Buffer.alloc(32, 1), 0);
 			tx.addOutput(script, value);
 
-			return tx.toBuffer();
+			return tx;
 		};
 
-		it('reads the witnessUtxo of an input carrying only that field', () => {
+		const previous = previousTransaction({ script, value: 100_000 });
+		const outpoint = { hash: previous.getHash(), index: 0 };
+
+		it('reads the witnessUtxo of an input carrying only that field, as not proven', () => {
 			expect(
-				resolvePsbtInputPrevout({ input: { witnessUtxo: { script, value: 100_000 } }, vout: 0 })
-			).toStrictEqual({ prevout: { script, value: 100_000n }, ambiguous: false });
+				resolvePsbtInputPrevout({ input: { witnessUtxo: { script, value: 100_000 } }, outpoint })
+			).toStrictEqual({ prevout: { script, value: 100_000n }, proven: false, ambiguous: false });
 		});
 
-		it('leaves an input carrying only a nonWitnessUtxo unpriced', () => {
-			expect(
-				resolvePsbtInputPrevout({
-					input: { nonWitnessUtxo: nonWitnessUtxo({ script, value: 100_000 }) },
-					vout: 0
-				})
-			).toStrictEqual({ prevout: undefined, ambiguous: false });
-		});
-
-		it('reads the nonWitnessUtxo the signer consumes when both fields agree', () => {
-			const { prevout, ambiguous } = resolvePsbtInputPrevout({
-				input: {
-					witnessUtxo: { script, value: 100_000 },
-					nonWitnessUtxo: nonWitnessUtxo({ script, value: 100_000 })
-				},
-				vout: 0
+		it('reads the nonWitnessUtxo of an input carrying only that field, as proven', () => {
+			const { prevout, proven, ambiguous } = resolvePsbtInputPrevout({
+				input: { nonWitnessUtxo: previous.toBuffer() },
+				outpoint
 			});
 
 			expect(ambiguous).toBeFalsy();
+			expect(proven).toBeTruthy();
+			expect(prevout?.value).toBe(100_000n);
+			expect(Buffer.from(prevout?.script ?? []).equals(script)).toBeTruthy();
+		});
+
+		it('reads the nonWitnessUtxo the signer consumes when both fields agree', () => {
+			const { prevout, proven, ambiguous } = resolvePsbtInputPrevout({
+				input: {
+					witnessUtxo: { script, value: 100_000 },
+					nonWitnessUtxo: previous.toBuffer()
+				},
+				outpoint
+			});
+
+			expect(ambiguous).toBeFalsy();
+			expect(proven).toBeTruthy();
 			expect(prevout?.value).toBe(100_000n);
 			expect(Buffer.from(prevout?.script ?? []).equals(script)).toBeTruthy();
 		});
@@ -252,23 +265,25 @@ describe('btc wallet-connect.utils', () => {
 				resolvePsbtInputPrevout({
 					input: {
 						witnessUtxo: { script, value: 10_000 },
-						nonWitnessUtxo: nonWitnessUtxo({ script, value: 100_000 })
+						nonWitnessUtxo: previous.toBuffer()
 					},
-					vout: 0
+					outpoint
 				})
-			).toStrictEqual({ prevout: undefined, ambiguous: true });
+			).toStrictEqual({ prevout: undefined, proven: false, ambiguous: true });
 		});
 
 		it('reports an input as ambiguous when the two fields disagree on the script', () => {
+			const other = previousTransaction({ script: otherScript, value: 100_000 });
+
 			expect(
 				resolvePsbtInputPrevout({
 					input: {
 						witnessUtxo: { script, value: 100_000 },
-						nonWitnessUtxo: nonWitnessUtxo({ script: otherScript, value: 100_000 })
+						nonWitnessUtxo: other.toBuffer()
 					},
-					vout: 0
+					outpoint: { hash: other.getHash(), index: 0 }
 				})
-			).toStrictEqual({ prevout: undefined, ambiguous: true });
+			).toStrictEqual({ prevout: undefined, proven: false, ambiguous: true });
 		});
 
 		it('reports an input as ambiguous when its nonWitnessUtxo cannot be read', () => {
@@ -276,12 +291,32 @@ describe('btc wallet-connect.utils', () => {
 				resolvePsbtInputPrevout({
 					input: {
 						witnessUtxo: { script, value: 100_000 },
-						nonWitnessUtxo: nonWitnessUtxo({ script, value: 100_000 })
+						nonWitnessUtxo: previous.toBuffer()
 					},
 					// The previous transaction has no output at this index.
-					vout: 1
+					outpoint: { ...outpoint, index: 1 }
 				})
-			).toStrictEqual({ prevout: undefined, ambiguous: true });
+			).toStrictEqual({ prevout: undefined, proven: false, ambiguous: true });
+		});
+
+		it('flags an input as ambiguous when its nonWitnessUtxo is not the transaction the outpoint names', () => {
+			// The stated previous transaction agrees with the witnessUtxo, but it is not the one the input
+			// spends, so it proves nothing about the value.
+			const unrelated = previousTransaction({ script, value: 1_000 });
+
+			expect(
+				resolvePsbtInputPrevout({ input: { nonWitnessUtxo: unrelated.toBuffer() }, outpoint })
+			).toStrictEqual({ prevout: undefined, proven: false, ambiguous: true });
+
+			expect(
+				resolvePsbtInputPrevout({
+					input: {
+						witnessUtxo: { script, value: 1_000 },
+						nonWitnessUtxo: unrelated.toBuffer()
+					},
+					outpoint
+				})
+			).toStrictEqual({ prevout: undefined, proven: false, ambiguous: true });
 		});
 	});
 });

@@ -1,4 +1,5 @@
 import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { IC_CKSOL_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { btcStatusesStore } from '$icp/stores/btc.store';
 import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
@@ -17,6 +18,7 @@ import {
 import { ZERO } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockCkSolBurnMemo } from '$tests/mocks/cksol.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import {
 	MOCK_CKBTC_TOKEN,
@@ -37,6 +39,7 @@ import {
 	mockPrincipalText,
 	mockPrincipalText2
 } from '$tests/mocks/identity.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
@@ -212,6 +215,40 @@ describe('mapIcTransaction', () => {
 		});
 	});
 
+	describe('ICRC approvals', () => {
+		it('should name the spender and leave its link to the details window', () => {
+			const transfer = createMockIcrcTransferTransaction();
+
+			const result = mapIcTransaction({
+				transaction: {
+					...transfer,
+					transaction: {
+						...transfer.transaction,
+						transfer: [],
+						approve: [
+							{
+								from: { owner: mockPrincipal, subaccount: [] },
+								spender: { owner: mockPrincipal, subaccount: [] },
+								amount: 100n,
+								fee: [],
+								memo: [],
+								created_at_time: [],
+								expected_allowance: [],
+								expires_at: []
+							}
+						]
+					}
+				},
+				token: icrcToken,
+				identity: mockIdentity
+			});
+
+			expect(result.type).toBe('approve');
+			expect(result.approveSpender).toBe(mockPrincipalText);
+			expect(result.approveSpenderExplorerUrl).toBeUndefined();
+		});
+	});
+
 	describe('cycles-ledger transactions', () => {
 		const topUp = createMockIcrcBurnTransaction({
 			memo: Uint8Array.from([
@@ -235,6 +272,32 @@ describe('mapIcTransaction', () => {
 		it('should not label the same burn on another ledger', () => {
 			const result = mapIcTransaction({
 				transaction: topUp,
+				token: icrcToken,
+				identity: mockIdentity
+			});
+
+			expect(result.typeLabel).toBeUndefined();
+			expect(result.to).toBeUndefined();
+		});
+	});
+
+	describe('ckSOL transactions', () => {
+		const withdrawal = createMockIcrcBurnTransaction({ memo: mockCkSolBurnMemo(mockSolAddress) });
+
+		it('should read a ckSOL burn as a conversion to the Solana address in its memo', () => {
+			const result = mapIcTransaction({
+				transaction: withdrawal,
+				token: { ...icrcToken, ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID },
+				identity: mockIdentity
+			});
+
+			expect(result.typeLabel).toBe('transaction.label.converted_to_twin_token');
+			expect(result.to).toBe(mockSolAddress);
+		});
+
+		it('should not read the same burn on another ledger', () => {
+			const result = mapIcTransaction({
+				transaction: withdrawal,
 				token: icrcToken,
 				identity: mockIdentity
 			});

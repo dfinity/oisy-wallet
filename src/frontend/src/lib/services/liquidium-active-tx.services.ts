@@ -1,9 +1,12 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { infuraProviders } from '$eth/providers/infura.providers';
 import { liquidiumClient } from '$lib/api/liquidium.api';
 import { LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS } from '$lib/constants/liquidium.constants';
 import {
 	applyActiveUserTransactionPollUpdate,
 	deleteActiveUserTransaction,
+	isBtcTransactionNeverLanded,
 	reloadActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -17,6 +20,7 @@ import {
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { ActivityFilter, type Activity, type LiquidiumClient } from '@liquidium/client';
+import { isHexString } from 'ethers/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -111,6 +115,47 @@ const resolveLiquidiumActivity = async ({
 	return undefined;
 };
 
+// A repay is matched by the txid of the transfer we broadcast. One that reverted on Ethereum moved
+// nothing, so Liquidium never lists it, and only the receipt can end the row. An ICRC transfer
+// either lands or throws at broadcast, and a BTC transaction cannot revert.
+const isRevertedEthRepay = async ({
+	tx,
+	txid
+}: {
+	tx: ActiveUserTransaction;
+	txid?: string;
+}): Promise<boolean> => {
+	if (
+		!('Liquidium' in tx.data) ||
+		!('Repay' in tx.data.Liquidium.action) ||
+		isNullish(txid) ||
+		!isHexString(txid, 32)
+	) {
+		return false;
+	}
+
+	const receipt = await infuraProviders(ETHEREUM_NETWORK_ID).getTransactionReceipt(txid);
+
+	return receipt?.status === 0;
+};
+
+// A BTC supply or repay is written before its broadcast, whose outcome can be unclear. One that never
+// reached the network is never listed by Liquidium, so it would hold its amount for good. Only those
+// two: a borrow or withdraw carries the txid of Liquidium's own payout, which Liquidium broadcasts
+// and settles, so the network not knowing it yet says nothing about the row (Copilot).
+const isNeverLandedBtcTransfer = async ({
+	tx,
+	txid
+}: {
+	tx: ActiveUserTransaction;
+	txid?: string;
+}): Promise<boolean> =>
+	'Liquidium' in tx.data &&
+	('Supply' in tx.data.Liquidium.action || 'Repay' in tx.data.Liquidium.action) &&
+	'BtcNativeMainnet' in tx.data.Liquidium.token &&
+	nonNullish(txid) &&
+	(await isBtcTransactionNeverLanded({ id: tx.id, txid, updatedAtNs: tx.updated_at_ns }));
+
 const pollLiquidiumActiveUserTransaction = async ({
 	tx,
 	identity,
@@ -140,11 +185,13 @@ const pollLiquidiumActiveUserTransaction = async ({
 
 		const activity = await resolveLiquidiumActivity({ client, profileId, txid, outflowId });
 
-		if (isNullish(activity)) {
-			return;
-		}
+		const neverLanded = isNullish(activity) && (await isNeverLandedBtcTransfer({ tx, txid }));
 
-		const candidate = liquidiumActivityToStatus(activity.status);
+		const candidate = nonNullish(activity)
+			? liquidiumActivityToStatus(activity.status)
+			: neverLanded || (await isRevertedEthRepay({ tx, txid }))
+				? { Failed: null }
+				: undefined;
 
 		if (isNullish(candidate)) {
 			return;
@@ -156,7 +203,12 @@ const pollLiquidiumActiveUserTransaction = async ({
 			return;
 		}
 
-		const error = 'Failed' in candidate ? get(i18n).liquidium.text.transaction_failed : undefined;
+		const error =
+			'Failed' in candidate
+				? neverLanded
+					? get(i18n).send.error.btc_transaction_never_landed
+					: get(i18n).liquidium.text.transaction_failed
+				: undefined;
 
 		await applyActiveUserTransactionPollUpdate({
 			identity,

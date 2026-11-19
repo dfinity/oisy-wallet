@@ -18,6 +18,9 @@
 	import {
 		convertSatoshisToBtc,
 		isInvalidUtxosFee,
+		isUnclearBtcBroadcastOutcome,
+		isBtcSendLimitError,
+		mapBtcBroadcastErrorToMessage,
 		mapUtxosFeeErrorToMessage
 	} from '$btc/utils/btc-send.utils';
 	import LiquidiumSupplyForm from '$lib/components/liquidium/supply/LiquidiumSupplyForm.svelte';
@@ -181,14 +184,15 @@
 				inflowFee,
 				displayAmount: `${amount}`,
 				progress: (step) => (supplyProgressStep = step),
-				broadcast: async ({ target, amount: transferAmount }) =>
+				broadcast: async ({ target, amount: transferAmount, beforeBroadcast }) =>
 					await sendBtc({
 						identity: $authIdentity,
 						network: btcNetwork,
 						utxosFee: preparedUtxosFee,
 						destination: target.address,
 						amount: convertSatoshisToBtc(transferAmount),
-						source
+						source,
+						beforeBroadcast
 					})
 			});
 
@@ -196,7 +200,21 @@
 
 			setTimeout(onClose, 750);
 		} catch (err: unknown) {
-			toastsError({ msg: { text: $i18n.liquidium.text.transaction_failed }, err });
+			toastsError({
+				msg: {
+					text:
+						mapBtcBroadcastErrorToMessage({ err, i18n: $i18n }) ??
+						$i18n.liquidium.text.transaction_failed
+				},
+				...(isBtcSendLimitError(err) ? {} : { err })
+			});
+
+			// The transfer may have gone out, and its row stays until it settles. The form would offer
+			// the full amount again, so the flow closes instead.
+			if (isUnclearBtcBroadcastOutcome(err)) {
+				onClose();
+				return;
+			}
 
 			onBack();
 		}

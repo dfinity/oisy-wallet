@@ -19,6 +19,8 @@
 	import { pollChainFusionActiveUserTransactions } from '$lib/services/chain-fusion-swap-active-tx.services';
 	import { pollCyclesMintActiveUserTransactions } from '$lib/services/cycles-mint-active-tx.services';
 	import { trackCyclesMint } from '$lib/services/cycles-mint-analytics.services';
+	import { pollCyclesTopUpActiveUserTransactions } from '$lib/services/cycles-top-up-active-tx.services';
+	import { trackCyclesTopUp } from '$lib/services/cycles-top-up-analytics.services';
 	import {
 		pollLifiActiveUserTransactions,
 		reloadLifiEvmBalances
@@ -42,6 +44,10 @@
 		isCyclesMintActiveUserTransaction,
 		toCyclesMintTrackingParams
 	} from '$lib/utils/cycles-mint-active-tx.utils';
+	import {
+		isCyclesTopUpActiveUserTransaction,
+		toCyclesTopUpTrackingParams
+	} from '$lib/utils/cycles-top-up-active-tx.utils';
 	import {
 		buildLifiSwapTrackingMetadata,
 		isLifiActiveUserTransaction
@@ -118,14 +124,19 @@
 				(tx) => isNearIntentsActiveUserTransaction(tx) && !isXrpPaymentInFlight(tx)
 			);
 
-			if (nearIntents.length > 0) {
-				await pollNearIntentsActiveUserTransactions({ identity, transactions: nearIntents });
-			}
-
 			// Shared by the EVM pollers of this tick, so rows on one chain cost one nonce read whatever
 			// their provider. They run one after another: a nonce read earlier in the tick can only be
 			// lower, which reads as still pending, never as replaced.
 			const confirmedNonceByChainId = new Map<string, Promise<number>>();
+
+			if (nearIntents.length > 0) {
+				await pollNearIntentsActiveUserTransactions({
+					identity,
+					transactions: nearIntents,
+					userAddress: $ethAddress,
+					confirmedNonceByChainId
+				});
+			}
 
 			const velora = $activeUserTransactionsPending.filter(isVeloraActiveUserTransaction);
 
@@ -165,6 +176,12 @@
 
 			if (cyclesMint.length > 0) {
 				await pollCyclesMintActiveUserTransactions({ identity, transactions: cyclesMint });
+			}
+
+			const cyclesTopUp = $activeUserTransactionsPending.filter(isCyclesTopUpActiveUserTransaction);
+
+			if (cyclesTopUp.length > 0) {
+				await pollCyclesTopUpActiveUserTransactions({ identity, transactions: cyclesTopUp });
 			}
 
 			const xrp = $activeUserTransactionsPending.filter(isXrpPaymentInFlight);
@@ -335,6 +352,18 @@
 				// Unconditional, as for OISY Trade: a mint that failed after its ICP left the
 				// wallet changed the balance (a refund brings most of it back). One closed as never
 				// sent moved nothing, and refreshing for it is only redundant.
+				shouldRefresh = true;
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isCyclesTopUpActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackCyclesTopUp(toCyclesTopUpTrackingParams({ tx }));
+
+				// Unconditional, as for a mint: a top-up that failed after its ICP left the wallet
+				// changed the balance too.
 				shouldRefresh = true;
 			} else if (
 				isTerminalActiveUserTransaction(tx) &&

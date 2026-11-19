@@ -1,6 +1,7 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import HeroContent from '$lib/components/hero/HeroContent.svelte';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
+import { AMOUNT_DATA } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
 import * as pageTokenDerived from '$lib/derived/page-token.derived';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -116,11 +117,28 @@ describe('HeroContent', () => {
 
 	// The global highlight is a light OISY blue tint, which disappears on the coloured heroes.
 	describe('selection highlight', () => {
-		it('turns selected text into a white block with blue text on a coloured hero', () => {
+		const selectionScope = (element: Element | null): Element | null =>
+			element?.closest('[class~="selection:bg-white"][class~="selection:text-brand-primary"]') ??
+			null;
+
+		it('turns selected hero text into a white block with blue text on a coloured hero', () => {
 			const hero = renderHero();
 
-			expect(hero.classList.contains('selection:bg-white')).toBeTruthy();
-			expect(hero.classList.contains('selection:text-brand-primary')).toBeTruthy();
+			expect(selectionScope(hero.querySelector(`[data-tid="${AMOUNT_DATA}"]`))).not.toBeNull();
+		});
+
+		// Modals and popovers render where they are mounted, so a highlight on the card would
+		// reach every modal the hero actions open.
+		it('keeps the highlight off the card and the actions that mount modals', () => {
+			const hero = renderHero();
+
+			expect(hero.classList.contains('selection:bg-white')).toBeFalsy();
+			expect(hero.classList.contains('selection:text-brand-primary')).toBeFalsy();
+
+			const actions = hero.querySelector('[role="toolbar"]');
+
+			expect(actions).not.toBeNull();
+			expect(selectionScope(actions)).toBeNull();
 		});
 
 		it('keeps the global highlight on the light ICP hero', () => {
@@ -129,8 +147,8 @@ describe('HeroContent', () => {
 			const hero = renderHero();
 
 			expect(hero.classList.contains('bg-icp-token-hero-gradient')).toBeTruthy();
-			expect(hero.classList.contains('selection:bg-white')).toBeFalsy();
-			expect(hero.classList.contains('selection:text-brand-primary')).toBeFalsy();
+			expect(hero.querySelector('[class~="selection:bg-white"]')).toBeNull();
+			expect(hero.querySelector('[class~="selection:text-brand-primary"]')).toBeNull();
 		});
 	});
 });

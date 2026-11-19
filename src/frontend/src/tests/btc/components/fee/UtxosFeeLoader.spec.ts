@@ -6,15 +6,24 @@ import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import { initUtxosFeeStore, type UtxosFeeStore } from '$btc/stores/utxos-fee.store';
+import { BtcPrepareSendError } from '$btc/types/btc-send';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
+import * as backendApi from '$lib/api/backend.api';
+import { ZERO } from '$lib/constants/app.constants';
+import type { OptionString } from '$lib/types/string';
+import UtxosFeeLoaderTest from '$tests/btc/components/fee/UtxosFeeLoaderTest.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
+import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
+import { get, writable } from 'svelte/store';
 
 describe('UtxosFeeLoader', () => {
 	const amount = 10;
@@ -86,6 +95,83 @@ describe('UtxosFeeLoader', () => {
 		mockGetUtxosQuery();
 		mockGetFeeRateFromPercentiles();
 		mockLoadBtcPendingSentTransactions();
+	});
+
+	describe('with BTC_SEND_VIA_BACKEND_ENABLED', () => {
+		beforeEach(() => {
+			btcSendViaBackend.enabled = true;
+
+			// The real pending loader and `prepareBtcSend`, with no mock left by an earlier test. That
+			// also undoes the console mute of `vitest.setup.ts`, which a failed load needs.
+			vi.restoreAllMocks();
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+			vi.spyOn(console, 'debug').mockImplementation(() => {});
+			mockGetFeeRateFromPercentiles();
+		});
+
+		it('should price the fee from the UTXOs of one backend call', async () => {
+			const getUtxosQuerySpy = mockGetUtxosQuery();
+			const getPendingBtcTransactionsSpy = vi.spyOn(backendApi, 'getPendingBtcTransactions');
+			const getSpendableBtcUtxosSpy = vi
+				.spyOn(backendApi, 'getSpendableBtcUtxos')
+				.mockResolvedValue({ utxos: mockAllUtxos, pending_transactions: [] });
+			const prepareBtcSendSpy = mockPrepareBtcSend();
+
+			mockAuthStore();
+
+			render(UtxosFeeLoader, {
+				props,
+				context: mockContext({ utxosFeeStore })
+			});
+
+			await waitFor(() => {
+				expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith({
+					amount,
+					source,
+					allUtxos: mockAllUtxos,
+					feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles
+				});
+			});
+
+			expect(getSpendableBtcUtxosSpy).toHaveBeenCalledOnce();
+			expect(getUtxosQuerySpy).not.toHaveBeenCalled();
+			expect(getPendingBtcTransactionsSpy).not.toHaveBeenCalled();
+		});
+
+		// As when Convert's own load at mount and the loader's race and the first one fails: the fee
+		// priced from the failure must not outlive it, though the amount is the same.
+		it('should price the fee again once a failed load is followed by one that succeeds', async () => {
+			const fundedUtxos = [{ ...mockUtxo, value: 2_000_000_000n }];
+
+			vi.spyOn(backendApi, 'getSpendableBtcUtxos')
+				.mockRejectedValueOnce(new Error('test'))
+				.mockResolvedValue({ utxos: fundedUtxos, pending_transactions: [] });
+
+			mockAuthStore();
+
+			render(UtxosFeeLoader, {
+				props,
+				context: mockContext({ utxosFeeStore })
+			});
+
+			await waitFor(() => {
+				expect(get(utxosFeeStore)?.utxosFee?.error).toBe(
+					BtcPrepareSendError.PendingTransactionsNotAvailable
+				);
+			});
+
+			await btcPendingSentTransactionsServices.loadBtcPendingSentTransactions({
+				identity: mockIdentity,
+				networkId,
+				address: source
+			});
+
+			await waitFor(() => {
+				expect(get(utxosFeeStore)?.utxosFee?.utxos).toEqual(fundedUtxos);
+			});
+
+			expect(get(utxosFeeStore)?.utxosFee?.error).toBeUndefined();
+		});
 	});
 
 	it('should call prepareBtcSend with proper params', async () => {
@@ -258,6 +344,34 @@ describe('UtxosFeeLoader', () => {
 		});
 	});
 
+	it.each([
+		{ label: 'the same amount', amount },
+		{ label: 'no amount', amount: undefined }
+	])('should price a failed fee again for $label', async ({ amount: amountProp }) => {
+		const prepareBtcSendSpy = mockPrepareBtcSend();
+		mockAuthStore();
+		setupStoresWithData();
+
+		utxosFeeStore.setUtxosFee({
+			utxosFee: {
+				feeSatoshis: ZERO,
+				feeRateMiliSatoshisPerVByte: 4000n,
+				utxos: [],
+				error: BtcPrepareSendError.PendingTransactionsNotAvailable
+			},
+			amountForFee: amountProp ?? DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE
+		});
+
+		render(UtxosFeeLoader, {
+			props: { ...props, amount: amountProp },
+			context: mockContext({ utxosFeeStore })
+		});
+
+		await waitFor(() => {
+			expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
+		});
+	});
+
 	it('should reset the store and call prepareBtcSend if amount has changed', async () => {
 		const prepareBtcSendSpy = mockPrepareBtcSend();
 		const resetSpy = vi.spyOn(utxosFeeStore, 'reset');
@@ -281,6 +395,94 @@ describe('UtxosFeeLoader', () => {
 		await waitFor(() => {
 			expect(resetSpy).toHaveBeenCalledOnce();
 			expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('recipient', () => {
+		const destination = 'bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0';
+
+		it('should price the fee for the recipient', async () => {
+			const setUtxosFeeSpy = vi.spyOn(utxosFeeStore, 'setUtxosFee');
+			const prepareBtcSendSpy = mockPrepareBtcSend();
+
+			mockAuthStore();
+			setupStoresWithData();
+
+			render(UtxosFeeLoader, {
+				props: { ...props, destination },
+				context: mockContext({ utxosFeeStore })
+			});
+
+			await waitFor(() => {
+				expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith({
+					amount,
+					source,
+					destination,
+					allUtxos: mockAllUtxos,
+					feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles
+				});
+				expect(setUtxosFeeSpy).toHaveBeenCalledExactlyOnceWith({
+					utxosFee: mockBtcReviewResult,
+					amountForFee: amount,
+					destinationForFee: destination
+				});
+			});
+		});
+
+		// Changes only the recipient of a mounted loader. A new mount would price on mount even if the
+		// effect did not track the recipient, and so would `rerender`, which replaces every prop.
+		it('should price the fee again for the same amount when the recipient changes', async () => {
+			const prepareBtcSendSpy = mockPrepareBtcSend();
+
+			mockAuthStore();
+			setupStoresWithData();
+
+			const destinationStore = writable<OptionString>(mockBtcAddress);
+
+			render(UtxosFeeLoaderTest, {
+				props: { source, amount, networkId, destination: destinationStore },
+				context: mockContext({ utxosFeeStore })
+			});
+
+			await waitFor(() => {
+				expect(prepareBtcSendSpy).toHaveBeenCalledWith(
+					expect.objectContaining({ amount, destination: mockBtcAddress })
+				);
+			});
+
+			// Let the mount settle, so the only call left to come is the recipient change's.
+			await runResolvedPromises();
+			prepareBtcSendSpy.mockClear();
+
+			destinationStore.set(destination);
+
+			await waitFor(() => {
+				expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ amount, destination })
+				);
+			});
+		});
+
+		it('should not price the fee again for the same amount and recipient', async () => {
+			const prepareBtcSendSpy = mockPrepareBtcSend();
+
+			mockAuthStore();
+			setupStoresWithData();
+
+			utxosFeeStore.setUtxosFee({
+				utxosFee: mockBtcReviewResult,
+				amountForFee: amount,
+				destinationForFee: destination
+			});
+
+			render(UtxosFeeLoader, {
+				props: { ...props, destination },
+				context: mockContext({ utxosFeeStore })
+			});
+
+			await waitFor(() => {
+				expect(prepareBtcSendSpy).not.toHaveBeenCalled();
+			});
 		});
 	});
 

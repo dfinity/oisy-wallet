@@ -13,6 +13,10 @@ print_help() {
 
 	The output file is always written, and holds a single blank line when the
 	network serves no domain. The validation ignores blank lines.
+
+	It then fails unless .well-known/ic-architecture and ii-derivation-origin are
+	published by the ic frontend build, and by no other network, signer build or
+	build without a network.
 	EOF
 }
 
@@ -23,7 +27,8 @@ fi
 
 NETWORK="${1:?A network is required. See --help.}"
 FILE="${2:-ic-domain.$NETWORK.txt}"
-DOMAINS="build/.well-known/ic-domains"
+WELL_KNOWN="build/.well-known"
+DOMAINS="$WELL_KNOWN/ic-domains"
 BUILD_LOG="dfx-build.$NETWORK.log"
 
 # GitHub renders `::error::` as an annotation; elsewhere it is only noise.
@@ -35,14 +40,124 @@ report_error() {
   fi
 }
 
+FAILED=false
+
+fail() {
+  report_error "$1"
+  FAILED=true
+}
+
+# Agents trust these files to name the mainnet wallet canisters and the origin to
+# request delegations for, so any other build publishing them misdirects agents.
+check_agent_files() {
+  local dir="$1" expected="$2" label="$3"
+  local architecture="$dir/ic-architecture" origin="$dir/ii-derivation-origin"
+  local file frontend backend expected_origin
+
+  if [[ "$expected" == absent ]]; then
+    for file in "$architecture" "$origin"; do
+      if [[ -e "$file" || -e "$file.gz" ]]; then
+        fail "$label must not publish ${file##*/}"
+      fi
+    done
+    return 0
+  fi
+
+  frontend="$(jq -er '.frontend.ic' canister_ids.json)"
+  backend="$(jq -er '.backend.ic' canister_ids.json)"
+  expected_origin="$(jq -er '.frontend.ic' scripts/domains.json)"
+
+  # Slurp the file, so that concatenated documents, which JSON.parse rejects,
+  # fail as well.
+  if [[ ! -f "$architecture" ]]; then
+    fail "$label must publish ic-architecture"
+  elif ! jq -es --arg frontend "$frontend" --arg backend "$backend" \
+    'length == 1 and (.[0] | [.canisters[] | select(.name == "frontend") | .id] == [$frontend] and [.canisters[] | select(.name == "backend") | .id] == [$backend])' \
+    "$architecture" >/dev/null; then
+    fail "$label ic-architecture must be one JSON document naming frontend $frontend and backend $backend"
+  fi
+
+  # Compare bytes: reading the file with `$(<...)` would hide a trailing newline.
+  if [[ ! -f "$origin" ]]; then
+    fail "$label must publish ii-derivation-origin"
+  elif ! cmp -s "$origin" <(printf '%s' "$expected_origin"); then
+    fail "$label ii-derivation-origin must be exactly $expected_origin"
+  fi
+}
+
+# Only the ic wallet build, without a signer target, publishes the files.
+expected_for() {
+  if [[ "$NETWORK" == ic && -z "$1" ]]; then
+    echo present
+  else
+    echo absent
+  fi
+}
+
+# The generator reads its inputs relative to the repo root, where a real build
+# runs it (canister_ids.json, and files that scripts/build.utils.mjs loads on
+# import), so mirror the repo root apart from its build/ output.
+make_sandbox() {
+  local sandbox entry
+
+  sandbox="$(mktemp -d)"
+  for entry in *; do
+    [[ "$entry" == build ]] || ln -s "$PWD/$entry" "$sandbox/$entry"
+  done
+  echo "$sandbox"
+}
+
+# Signer builds differ from the frontend build only by OISY_SIGNER_TARGET (see
+# dfx.json), so run the generator under each target instead of paying for two
+# more full builds, with ENV and DFX_NETWORK set as Dockerfile.frontend sets
+# them. The empty target, which the Docker build exports by default, is the
+# control: it must agree with the frontend build where there is one. A last run
+# without any network variables stands for a plain `npm run build`.
+check_generator() {
+  local generator="$PWD/scripts/build.ic-architecture.mjs"
+  local target sandbox
+
+  for target in "" signer legacy_signer; do
+    sandbox="$(make_sandbox)"
+    if (cd "$sandbox" && ENV="$NETWORK" DFX_NETWORK="$NETWORK" OISY_SIGNER_TARGET="$target" node "$generator"); then
+      check_agent_files "$sandbox/$WELL_KNOWN" "$(expected_for "$target")" "$NETWORK with OISY_SIGNER_TARGET='$target'"
+    else
+      fail "scripts/build.ic-architecture.mjs failed for $NETWORK with OISY_SIGNER_TARGET='$target'"
+    fi
+    rm -rf "$sandbox"
+  done
+
+  sandbox="$(make_sandbox)"
+  if (cd "$sandbox" && env -u ENV -u DFX_NETWORK -u NETWORK -u OISY_SIGNER_TARGET node "$generator"); then
+    check_agent_files "$sandbox/$WELL_KNOWN" absent "A build without a network"
+  else
+    fail "scripts/build.ic-architecture.mjs failed for a build without a network"
+  fi
+  rm -rf "$sandbox"
+}
+
+finish() {
+  if [[ "$FAILED" == true ]]; then
+    exit 1
+  fi
+  echo "OK: ic-architecture and ii-derivation-origin for $NETWORK"
+}
+
 echo "" >"$FILE"
 
 # Some networks (e.g. old-backend) have no frontend canister, so the build cannot
-# run there at all. That is not a failure: leave the placeholder blank line.
+# run there at all. That is not a failure: leave the placeholder blank line. The
+# generator needs no dfx, so still check what it would publish for the network.
 if ! dfx canister id frontend --network "$NETWORK" >/dev/null 2>&1; then
   echo "No frontend canister for $NETWORK; leaving the domain file blank."
+  check_generator
+  finish
   exit 0
 fi
+
+# dfx skips the build of a remote frontend (e.g. test_be_1), so an earlier
+# network's output would otherwise be checked as this one's.
+rm -rf build
 
 # `dfx build` downloads dependency artifacts from GitHub releases, which fails
 # intermittently. Retry before giving up, and keep the output so a genuine build
@@ -68,3 +183,7 @@ if [[ -f "$DOMAINS" ]]; then
 else
   echo "No $DOMAINS for $NETWORK; leaving the domain file blank."
 fi
+
+check_agent_files "$WELL_KNOWN" "$(expected_for "")" "$NETWORK frontend build"
+check_generator
+finish

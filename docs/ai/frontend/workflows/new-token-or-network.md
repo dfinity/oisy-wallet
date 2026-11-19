@@ -59,6 +59,14 @@ run; extend that script first (`scripts/build.*` is a protected path, see
    - **Integrate ckERC20 Tokens** for a new ckETH-twin token.
    - **Bitcoin** for BTC-related setup.
 2. Create or extend the network object under `$env/networks/<chain>/`.
+   `icon` is the monochrome mark from `$lib/assets/networks/` (inverted
+   on dark). Set `iconColored` too when the brand-coloured mark is in the
+   repo, usually the native token's logo: screens that tell networks
+   apart by colour (the Swap and Send modals) set `COLORED_NETWORK_LOGOS_CONTEXT_KEY`,
+   and a network without one keeps its monochrome mark there.
+   A network whose native token belongs to another network (Base pays
+   gas in ETH) has no token logo to reuse: put its brand mark under
+   `$evm/<network>/assets/`, as Base's and Robinhood Chain's are.
 3. Create the native token (and any twin tokens) under
    `$env/tokens/<chain>/`. Place icons under `$<chain>/assets/` (or
    `$icp-eth/assets/` for ck-twins).
@@ -101,6 +109,16 @@ A token / network add is naturally cross-cutting. To stay reviewable:
   [`breaking-interface.md`](../../backend/workflows/breaking-interface.md).
   The `networkIdToKey` / `keyToNetworkId` arms do **not** go in it: they
   need the network id constant, so they land with the frontend PR.
+
+## Removing a curated ICRC token
+
+Removing an entry from `tokens.icrc.json` leaves it in the token list of
+every user who enabled it: OISY then loads it from its ledger, like a
+token the user imported. When that ledger no longer runs an ICRC ledger
+(deleted, uninstalled, or reinstalled with other code), also add its ID
+to `RETIRED_ICRC_LEDGER_CANISTER_IDS` in
+`$env/tokens/tokens-icrc/tokens.icrc.retired.env.ts`, so OISY skips it
+instead of warning on every sign-in.
 
 ## Don'ts
 

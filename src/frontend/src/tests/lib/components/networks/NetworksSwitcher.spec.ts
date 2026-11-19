@@ -51,6 +51,15 @@ describe('NetworksSwitcher', () => {
 		);
 	});
 
+	// It sits beside the header's 40 px icon buttons, so on touch screens it keeps their height.
+	it('grows only its tap area on touch screens', () => {
+		const { getByRole } = render(NetworksSwitcher, { props: { visible: false } });
+
+		expect(getByRole('button', { name: get(i18n).networks.chain_fusion })).toHaveClass(
+			'hit-area-touch'
+		);
+	});
+
 	it('opens enabled-network settings and dismisses the dropdown', async () => {
 		const openSettings = vi.spyOn(modalStore, 'openSettings').mockImplementation(() => {});
 		const { getByRole, queryByRole } = render(NetworksSwitcher, { props: { visible: true } });
