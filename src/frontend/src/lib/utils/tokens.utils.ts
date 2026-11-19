@@ -362,12 +362,6 @@ export function sortTokens<T extends Token>({
 }
 
 /**
- * Calculates total USD balance of the provided UI tokens list.
- *
- * @param tokens - The list of UI tokens for total USD balance calculation.
- * @returns The sum of UI tokens USD balance.
- */
-/**
  * The tokens with their balances and prices, sorted as `sortTokens` does. A list passes a snapshot of
  * the exchange data taken when it opens, so it does not reorder under the pointer when a price updates.
  */
@@ -392,6 +386,12 @@ export const toSortedTokensUi = <T extends Token>({
 		$networksToPin
 	});
 
+/**
+ * Calculates total USD balance of the provided UI tokens list.
+ *
+ * @param tokens - The list of UI tokens for total USD balance calculation.
+ * @returns The sum of UI tokens USD balance.
+ */
 export const sumTokensUiUsdBalance = (tokens: TokenUi[]): number =>
 	tokens.reduce((acc, token) => acc + (token.usdBalance ?? 0), 0);
 

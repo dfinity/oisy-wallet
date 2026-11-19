@@ -1,8 +1,10 @@
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
 import * as tokensDerived from '$eth/derived/token.derived';
+import * as ethTokensDerived from '$eth/derived/tokens.derived';
 import * as sendServices from '$eth/services/send.services';
 import {
 	ETH_FEE_CONTEXT_KEY,
@@ -31,6 +33,7 @@ import {
 	initTokenActionValidationErrorsContext,
 	type TokenActionValidationErrorsContext
 } from '$lib/stores/token-action-validation-errors.store';
+import type { Token } from '$lib/types/token';
 import { stringifyJson } from '$lib/utils/json.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -59,7 +62,10 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 describe('EthConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
-	const mockContext = (fees?: FeeStoreData) => {
+	const mockContext = ({
+		fees,
+		sourceToken = ETHEREUM_TOKEN
+	}: { fees?: FeeStoreData; sourceToken?: Token } = {}) => {
 		const feeStore = initEthFeeStore();
 
 		if (nonNullish(fees)) {
@@ -67,10 +73,7 @@ describe('EthConvertTokenWizard', () => {
 		}
 
 		return new Map<symbol, ConvertContext | TokenActionValidationErrorsContext | EthFeeContext>([
-			[
-				CONVERT_CONTEXT_KEY,
-				initConvertContext({ sourceToken: ETHEREUM_TOKEN, destinationToken: SEPOLIA_TOKEN })
-			],
+			[CONVERT_CONTEXT_KEY, initConvertContext({ sourceToken, destinationToken: SEPOLIA_TOKEN })],
 			[
 				ETH_FEE_CONTEXT_KEY,
 				initEthFeeContext({
@@ -177,7 +180,7 @@ describe('EthConvertTokenWizard', () => {
 
 		const { container } = render(EthConvertTokenWizard, {
 			props,
-			context: mockContext(mockFees)
+			context: mockContext({ fees: mockFees })
 		});
 
 		await clickConvertButton(container);
@@ -207,6 +210,37 @@ describe('EthConvertTokenWizard', () => {
 				}
 			})
 		);
+	});
+
+	it('should take the network, fee token and minter from the source token, not the page', async () => {
+		// An Internet Computer page, as when Receive opens the instructions on a ck token's page: the
+		// page's fallback native token is ICP, and only Sepolia's minter info is loaded.
+		mockPage.reset();
+		mockPage.mockNetwork(ICP_NETWORK.id.description);
+		mockEthereumToken(ICP_TOKEN as unknown as typeof ETHEREUM_TOKEN);
+
+		vi.spyOn(ethTokensDerived, 'enabledEthereumTokens', 'get').mockImplementation(() =>
+			readable([ETHEREUM_TOKEN, SEPOLIA_TOKEN])
+		);
+
+		const store = initCertifiedSetterStore<CkEthMinterInfoData>();
+		store.set({ id: SEPOLIA_TOKEN.id, data: { certified: true, data: mockMinterInfo } });
+		vi.spyOn(ckEthStores, 'ckEthMinterInfoStore', 'get').mockImplementation(() => store);
+
+		const { container } = render(EthConvertTokenWizard, {
+			props,
+			context: mockContext({ fees: mockFees, sourceToken: SEPOLIA_TOKEN })
+		});
+
+		await clickConvertButton(container);
+
+		expect(sendSpy).toHaveBeenCalledOnce();
+
+		const [[{ to, sourceNetwork, minterInfo }]] = sendSpy.mock.calls;
+
+		expect(to).toBe(mapAddressStartsWith0x(mockEthHelperContractAddress));
+		expect(sourceNetwork).toBe(SEPOLIA_TOKEN.network);
+		expect(minterInfo).toEqual(get(store)?.[SEPOLIA_TOKEN.id]);
 	});
 
 	it('should not call send if authIdentity is not defined', async () => {
@@ -277,7 +311,7 @@ describe('EthConvertTokenWizard', () => {
 	it('should not call send if maxFeePerGas is null', async () => {
 		const { container } = render(EthConvertTokenWizard, {
 			props,
-			context: mockContext({ ...mockFees, maxFeePerGas: null })
+			context: mockContext({ fees: { ...mockFees, maxFeePerGas: null } })
 		});
 
 		await clickConvertButton(container);
@@ -288,7 +322,7 @@ describe('EthConvertTokenWizard', () => {
 	it('should not call send if maxPriorityFeePerGas is null', async () => {
 		const { container } = render(EthConvertTokenWizard, {
 			props,
-			context: mockContext({ ...mockFees, maxPriorityFeePerGas: null })
+			context: mockContext({ fees: { ...mockFees, maxPriorityFeePerGas: null } })
 		});
 
 		await clickConvertButton(container);
@@ -332,7 +366,7 @@ describe('EthConvertTokenWizard', () => {
 
 		const { container } = render(EthConvertTokenWizard, {
 			props: { ...props, onBack, onClose },
-			context: mockContext(mockFees)
+			context: mockContext({ fees: mockFees })
 		});
 
 		await clickConvertButton(container);
@@ -352,7 +386,7 @@ describe('EthConvertTokenWizard', () => {
 
 		const { container } = render(EthConvertTokenWizard, {
 			props: { ...props, onBack, onClose },
-			context: mockContext(mockFees)
+			context: mockContext({ fees: mockFees })
 		});
 
 		await clickConvertButton(container);

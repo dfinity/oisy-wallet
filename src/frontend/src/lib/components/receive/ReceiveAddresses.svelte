@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
 	import {
 		BTC_MAINNET_NETWORK,
@@ -80,11 +79,11 @@
 
 	interface Props {
 		onQRCode: (details: ReceiveQRCode) => void;
-		// The address whose QR code was open: its QR button takes focus back.
-		focusAddress?: string;
+		// The row whose QR code was open: its QR button takes focus back.
+		focusKey?: string;
 	}
 
-	let { onQRCode, focusAddress }: Props = $props();
+	let { onQRCode, focusKey }: Props = $props();
 
 	const displayQRCode = (details: ReceiveQRCode) => onQRCode(details);
 
@@ -108,7 +107,6 @@
 		title: string;
 		label: string;
 		copyAriaLabel: string;
-		qrCodeAriaLabel: string;
 		text?: string;
 		tag?: string;
 		condition?: boolean;
@@ -132,7 +130,6 @@
 			title: $i18n.receive.icp.text.principal,
 			label: $i18n.receive.icp.text.principal,
 			copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied,
-			qrCodeAriaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr,
 			text: $i18n.receive.icp.text.use_for_icrc_deposit
 		},
 		{
@@ -145,7 +142,6 @@
 			title: $i18n.receive.icp.text.account_id,
 			label: $i18n.receive.icp.text.account_id,
 			copyAriaLabel: $i18n.receive.icp.text.account_id_copied,
-			qrCodeAriaLabel: $i18n.receive.icp.text.display_account_id_qr,
 			text: $i18n.receive.icp.text.use_for_icp_deposit
 		},
 		{
@@ -157,7 +153,6 @@
 			title: $i18n.receive.bitcoin.text.bitcoin_address_title,
 			label: $i18n.receive.bitcoin.text.bitcoin_address,
 			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
-			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
 			condition: $networkBitcoinMainnetEnabled
 		},
 		{
@@ -169,7 +164,6 @@
 			title: $i18n.receive.bitcoin.text.bitcoin_testnet_address_title,
 			label: $i18n.receive.bitcoin.text.bitcoin_testnet_address,
 			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
-			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
 			condition: $networkBitcoinTestnetEnabled && $testnetsEnabled
 		},
 		{
@@ -181,7 +175,6 @@
 			title: $i18n.receive.bitcoin.text.bitcoin_regtest_address_title,
 			label: $i18n.receive.bitcoin.text.bitcoin_regtest_address,
 			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
-			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
 			condition: $networkBitcoinRegtestEnabled && $testnetsEnabled && LOCAL
 		},
 		{
@@ -193,7 +186,6 @@
 			title: $i18n.receive.addresses.text.evm_title,
 			label: $i18n.receive.addresses.text.evm_title,
 			copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied,
-			qrCodeAriaLabel: $i18n.receive.addresses.text.display_evm_qr,
 			text: evmNetworksText,
 			condition: evmNetworks.length > 0
 		},
@@ -206,7 +198,6 @@
 			title: $i18n.receive.solana.text.solana_address_title,
 			label: $i18n.receive.solana.text.solana_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
-			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
 			condition: $networkSolanaMainnetEnabled
 		},
 		{
@@ -218,7 +209,6 @@
 			title: $i18n.receive.solana.text.solana_devnet_address_title,
 			label: $i18n.receive.solana.text.solana_devnet_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
-			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
 			condition: $networkSolanaDevnetEnabled && $testnetsEnabled
 		},
 		{
@@ -230,7 +220,6 @@
 			title: $i18n.receive.solana.text.solana_local_address_title,
 			label: $i18n.receive.solana.text.solana_local_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
-			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
 			condition: $networkSolanaLocalEnabled && $testnetsEnabled && LOCAL
 		},
 		{
@@ -242,17 +231,15 @@
 			title: $i18n.receive.xrp.text.xrp_address_title,
 			label: $i18n.receive.xrp.text.xrp_address,
 			copyAriaLabel: $i18n.receive.xrp.text.xrp_address_copied,
-			qrCodeAriaLabel: $i18n.receive.xrp.text.display_xrp_address_qr,
 			condition: $networkXrpMainnetEnabled
 		}
 	]);
 
-	let receiveAddressList = $derived<Omit<ReceiveAddressProps, 'qrCodeAriaLabel' | 'label'>[]>(
+	let receiveAddressList = $derived<Omit<ReceiveAddressProps, 'label'>[]>(
 		receiveAddressCoreList.map(
 			({
 				address,
 				token: addressToken,
-				qrCodeAriaLabel,
 				label: addressLabel,
 				copyAriaLabel,
 				labelRef,
@@ -275,15 +262,17 @@
 				qrCodeAction: {
 					enabled: true,
 					testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
-					ariaLabel: qrCodeAriaLabel,
-					autofocus: nonNullish(address) && address === focusAddress,
+					// Named after the row, so rows that share a network (Bitcoin and its testnets) read apart.
+					ariaLabel: replacePlaceholders($i18n.receive.addresses.text.show_qr, { $address: title }),
+					autofocus: labelRef === focusKey,
 					onClick: () =>
 						displayQRCode({
 							address: address ?? '',
 							addressLabel,
 							addressToken,
 							copyAriaLabel,
-							description: text
+							description: text,
+							key: labelRef
 						})
 				}
 			})
@@ -292,12 +281,15 @@
 </script>
 
 <ContentWithToolbar>
-	<div class="flex flex-col gap-1">
+	<div class="flex flex-col gap-1" role="list">
 		{#each receiveAddressList as { title, tag, condition, labelRef, address, network, token, testId, copyAriaLabel, qrCodeAction } (labelRef)}
 			{#if condition !== false && (!isNftsPage || network.supportsNft)}
 				<ReceiveAddressListItem
 					{address}
-					{copyAriaLabel}
+					copiedText={copyAriaLabel}
+					copyAriaLabel={replacePlaceholders($i18n.receive.addresses.text.copy, {
+						$address: title
+					})}
 					{qrCodeAction}
 					{tag}
 					{testId}

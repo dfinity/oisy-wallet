@@ -17,6 +17,7 @@
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isSendOutcomeUnknown, toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
+	import { findNativeEthereumToken } from '$eth/utils/native-token.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { ckUsdcConversionDisabled } from '$icp-eth/derived/cketh.derived';
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
@@ -84,8 +85,10 @@
 	);
 
 	let nativeEthereumToken = $derived(
-		$enabledEthereumTokens.find(({ network: { id } }) => id === sourceNetwork.id) ??
-			$nativeEthereumTokenWithFallback
+		findNativeEthereumToken({
+			nativeTokens: $enabledEthereumTokens,
+			networkId: sourceNetwork.id
+		}) ?? $nativeEthereumTokenWithFallback
 	);
 
 	let minterInfo = $derived($ckEthMinterInfoStore?.[nativeEthereumToken.id]);

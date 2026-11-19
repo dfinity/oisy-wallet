@@ -946,11 +946,9 @@
 				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users, or other apps that support this address format.",
 				"use_for_icrc_deposit": "Use for receiving ICRC-1 tokens in the ICP network, such as SNS, ck tokens, etc.",
 				"use_for_icp_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
-				"display_account_id_qr": "Display ICP Account ID as a QR code",
 				"account_id_copied": "ICP Account ID copied to clipboard.",
 				"principal": "ICP Principal",
-				"internet_computer_principal_copied": "Internet Computer Principal copied to clipboard.",
-				"display_internet_computer_principal_qr": "Display Internet Computer Principal as a QR code"
+				"internet_computer_principal_copied": "Internet Computer Principal copied to clipboard."
 			}
 		},
 		"ethereum": {
@@ -979,7 +977,6 @@
 				"bitcoin_testnet_address_title": "Bitcoin (Testnet) wallet address",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
 				"bitcoin_regtest_address_title": "Bitcoin (Regtest) wallet address",
-				"display_bitcoin_address_qr": "Display Bitcoin Address as a QR code",
 				"bitcoin_address_copied": "Bitcoin Address copied to clipboard."
 			},
 			"info": {
@@ -998,16 +995,14 @@
 				"solana_devnet_address_title": "Solana Devnet wallet address",
 				"solana_local_address": "Solana Local Address",
 				"solana_local_address_title": "Solana Local wallet address",
-				"solana_address_copied": "Solana address copied to clipboard",
-				"display_solana_address_qr": "Display Solana address as QR code"
+				"solana_address_copied": "Solana address copied to clipboard"
 			}
 		},
 		"xrp": {
 			"text": {
 				"xrp_address": "XRP Address",
 				"xrp_address_title": "XRP Ledger wallet address",
-				"xrp_address_copied": "XRP address copied to clipboard",
-				"display_xrp_address_qr": "Display XRP address as QR code"
+				"xrp_address_copied": "XRP address copied to clipboard"
 			}
 		},
 		"token": {
@@ -1071,9 +1066,10 @@
 			"text": {
 				"evm_title": "EVM wallet address",
 				"evm_networks": "One address for $networks.",
-				"display_evm_qr": "Show QR code for the shared EVM wallet address",
 				"principal_tag": "Tokens like ckBTC, CHAT, …",
-				"account_id_tag": "ICP token only"
+				"account_id_tag": "ICP token only",
+				"show_qr": "Show the QR code of $address",
+				"copy": "Copy $address"
 			}
 		}
 	},

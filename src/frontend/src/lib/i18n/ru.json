@@ -946,11 +946,9 @@
 				"use_for_all_tokens": "Используйте для всех токенов при получении с кошельков, пользователей или других приложений, поддерживающих этот формат адреса.",
 				"use_for_icrc_deposit": "Используйте для получения токенов ICRC-1 в сети ICP, таких как SNS, ck токены и т. д.",
 				"use_for_icp_deposit": "Используйте для депозитов ICP с бирж или других кошельков, которые поддерживают только ID аккаунтов.",
-				"display_account_id_qr": "Показать ID аккаунта ICP в виде QR-кода",
 				"account_id_copied": "ID аккаунта ICP скопирован в буфер обмена.",
 				"principal": "Принципал ICP",
-				"internet_computer_principal_copied": "Принципал Internet Computer скопирован в буфер обмена.",
-				"display_internet_computer_principal_qr": "Показать Принципал Internet Computer в виде QR-кода"
+				"internet_computer_principal_copied": "Принципал Internet Computer скопирован в буфер обмена."
 			}
 		},
 		"ethereum": {
@@ -979,7 +977,6 @@
 				"bitcoin_testnet_address_title": "",
 				"bitcoin_regtest_address": "Биткойн (Regtest)",
 				"bitcoin_regtest_address_title": "Адрес кошелька Bitcoin",
-				"display_bitcoin_address_qr": "Показать адрес Биткойна в виде QR-кода",
 				"bitcoin_address_copied": "Адрес Биткойна скопирован в буфер обмена."
 			},
 			"info": {
@@ -998,16 +995,14 @@
 				"solana_devnet_address_title": "Адрес кошелька Solana",
 				"solana_local_address": "Локальный адрес Solana",
 				"solana_local_address_title": "Адрес локального кошелька Solana",
-				"solana_address_copied": "Адрес Solana скопирован в буфер обмена",
-				"display_solana_address_qr": "Показать адрес Solana в виде QR-кода"
+				"solana_address_copied": "Адрес Solana скопирован в буфер обмена"
 			}
 		},
 		"xrp": {
 			"text": {
 				"xrp_address": "",
 				"xrp_address_title": "",
-				"xrp_address_copied": "",
-				"display_xrp_address_qr": ""
+				"xrp_address_copied": ""
 			}
 		},
 		"token": {
@@ -1071,9 +1066,10 @@
 			"text": {
 				"evm_title": "",
 				"evm_networks": "",
-				"display_evm_qr": "",
 				"principal_tag": "",
-				"account_id_tag": ""
+				"account_id_tag": "",
+				"show_qr": "",
+				"copy": ""
 			}
 		}
 	},

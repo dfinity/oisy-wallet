@@ -946,11 +946,9 @@
 				"use_for_all_tokens": "이 주소 형식을 지원하는 지갑, 사용자 또는 기타 앱에서 모든 토큰을 받을 때 사용하세요.",
 				"use_for_icrc_deposit": "SNS, ck 토큰 등 ICP 네트워크의 ICRC-1 토큰을 받을 때 사용하세요.",
 				"use_for_icp_deposit": "계정 ID만 지원하는 거래소 또는 다른 지갑에서 ICP를 입금할 때 사용하세요.",
-				"display_account_id_qr": "ICP 계정 ID를 QR 코드로 표시",
 				"account_id_copied": "ICP 계정 ID가 클립보드에 복사되었습니다.",
 				"principal": "ICP 프린시팔",
-				"internet_computer_principal_copied": "인터넷 컴퓨터 프린시팔이 클립보드에 복사되었습니다.",
-				"display_internet_computer_principal_qr": "인터넷 컴퓨터 프린시팔을 QR 코드로 표시"
+				"internet_computer_principal_copied": "인터넷 컴퓨터 프린시팔이 클립보드에 복사되었습니다."
 			}
 		},
 		"ethereum": {
@@ -979,7 +977,6 @@
 				"bitcoin_testnet_address_title": "비트코인 (테스트넷) 지갑 주소",
 				"bitcoin_regtest_address": "비트코인 (Regtest)",
 				"bitcoin_regtest_address_title": "비트코인 (Regtest) 지갑 주소",
-				"display_bitcoin_address_qr": "비트코인 주소를 QR 코드로 표시",
 				"bitcoin_address_copied": "비트코인 주소가 클립보드에 복사되었습니다."
 			},
 			"info": {
@@ -998,16 +995,14 @@
 				"solana_devnet_address_title": "솔라나 개발넷 지갑 주소",
 				"solana_local_address": "솔라나 로컬 주소",
 				"solana_local_address_title": "솔라나 로컬 지갑 주소",
-				"solana_address_copied": "솔라나 주소가 클립보드에 복사되었습니다",
-				"display_solana_address_qr": "솔라나 주소를 QR 코드로 표시"
+				"solana_address_copied": "솔라나 주소가 클립보드에 복사되었습니다"
 			}
 		},
 		"xrp": {
 			"text": {
 				"xrp_address": "",
 				"xrp_address_title": "",
-				"xrp_address_copied": "",
-				"display_xrp_address_qr": ""
+				"xrp_address_copied": ""
 			}
 		},
 		"token": {
@@ -1071,9 +1066,10 @@
 			"text": {
 				"evm_title": "",
 				"evm_networks": "",
-				"display_evm_qr": "",
 				"principal_tag": "",
-				"account_id_tag": ""
+				"account_id_tag": "",
+				"show_qr": "",
+				"copy": ""
 			}
 		}
 	},

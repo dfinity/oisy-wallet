@@ -2,6 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import EthFeeStoreContext from '$eth/components/fee/EthFeeStoreContext.svelte';
 	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import { findNativeEthereumToken } from '$eth/utils/native-token.utils';
 	import HowToConvertEthereumModal from '$icp/components/convert/HowToConvertEthereumModal.svelte';
 	import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 	import eth from '$icp-eth/assets/eth.svg';
@@ -20,6 +22,14 @@
 	let { sourceToken, destinationToken }: Props = $props();
 
 	const modalId = Symbol();
+
+	// The fees are paid in the native token of the twin's network, not of the page (an ICP page here).
+	let feeToken = $derived(
+		findNativeEthereumToken({
+			nativeTokens: $enabledEthereumTokens,
+			networkId: sourceToken.network.id
+		}) ?? $nativeEthereumTokenWithFallback
+	);
 
 	const openReceive = () => modalStore.openHowToConvertToTwinTokenEth({ id: modalId });
 </script>
@@ -62,7 +72,7 @@
 </div>
 
 {#if $modalHowToConvertToTwinTokenEth && $modalStore?.id === modalId && nonNullish(sourceToken) && nonNullish(destinationToken)}
-	<EthFeeStoreContext token={$nativeEthereumTokenWithFallback}>
+	<EthFeeStoreContext token={feeToken}>
 		<HowToConvertEthereumModal {destinationToken} {sourceToken} />
 	</EthFeeStoreContext>
 {/if}

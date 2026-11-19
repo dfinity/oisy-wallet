@@ -6,6 +6,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import {
 	IC_CKBTC_LEDGER_CANISTER_ID,
 	IC_CKBTC_MINTER_CANISTER_ID
@@ -17,6 +18,7 @@ import {
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import * as metamaskDerived from '$eth/derived/metamask.derived';
 import * as erc20TokenServices from '$icp-eth/services/erc20-token.services';
 import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
 import * as ckBtcServices from '$icp/services/ckbtc.services';
@@ -45,7 +47,7 @@ import {
 import * as allTokensDerived from '$lib/derived/all-tokens.derived';
 import * as networkDerived from '$lib/derived/network.derived';
 import * as networksDerived from '$lib/derived/networks.derived';
-import { btcAddressMainnetStore } from '$lib/stores/address.store';
+import { btcAddressMainnetStore, ethAddressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
@@ -57,9 +59,10 @@ import * as tokensUtils from '$lib/utils/tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockCkBtcMinterInfo } from '$tests/mocks/ckbtc.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
-import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { fireEvent, getByRole, render, waitFor } from '@testing-library/svelte';
 import { get, readable, writable } from 'svelte/store';
 
 describe('ReceiveTokenModal', () => {
@@ -81,6 +84,9 @@ describe('ReceiveTokenModal', () => {
 
 	const byTestId = ({ container, testId }: { container: HTMLElement; testId: string }) =>
 		container.querySelector<HTMLElement>(`[data-tid="${testId}"]`);
+
+	const getByRoleBack = (container: HTMLElement) =>
+		getByRole(container, 'button', { name: get(i18n).core.text.back });
 
 	const routeKeys = (token: Token) =>
 		getReceiveRoutes({
@@ -529,34 +535,39 @@ describe('ReceiveTokenModal', () => {
 			twinToken: ETHEREUM_TOKEN
 		} as IcCkToken & { enabled: boolean };
 
-		it('should open the conversion instructions for ckETH on its page', async () => {
-			catalog.set([ICP_TOKEN, ETHEREUM_TOKEN, ckEthToken]);
+		it.each(['skipped', 'loaded'] as const)(
+			'should open the conversion instructions on the ck token page when the twin is %s',
+			async (result) => {
+				catalog.set([ICP_TOKEN, ETHEREUM_TOKEN, ckEthToken]);
 
-			const prepareSpy = vi
-				.spyOn(erc20TokenServices, 'autoLoadErc20Token')
-				.mockResolvedValue({ result: 'skipped' });
-			const gotoSpy = vi.spyOn(appNavigation, 'goto').mockResolvedValue();
-			const openSpy = vi.spyOn(modalStore, 'openHowToConvertToTwinTokenEth');
+				const prepareSpy = vi
+					.spyOn(erc20TokenServices, 'autoLoadErc20Token')
+					.mockResolvedValue({ result });
+				const gotoSpy = vi.spyOn(appNavigation, 'goto').mockResolvedValue();
+				const openSpy = vi.spyOn(modalStore, 'openHowToConvertToTwinTokenEth');
 
-			const { container } = render(ReceiveTokenModal, { props: { initialToken: ckEthToken } });
+				const { container } = render(ReceiveTokenModal, { props: { initialToken: ckEthToken } });
 
-			await waitFor(() => {
-				expect(byTestId({ container, testId: RECEIVE_HOW_TO_CONVERT_BUTTON })).toBeInTheDocument();
-			});
+				await waitFor(() => {
+					expect(
+						byTestId({ container, testId: RECEIVE_HOW_TO_CONVERT_BUTTON })
+					).toBeInTheDocument();
+				});
 
-			byTestId({ container, testId: RECEIVE_HOW_TO_CONVERT_BUTTON })?.click();
+				byTestId({ container, testId: RECEIVE_HOW_TO_CONVERT_BUTTON })?.click();
 
-			await waitFor(() => {
-				expect(openSpy).toHaveBeenCalledOnce();
-			});
+				await waitFor(() => {
+					expect(openSpy).toHaveBeenCalledOnce();
+				});
 
-			expect(prepareSpy).toHaveBeenCalledWith(expect.objectContaining({ sendToken: ckEthToken }));
-			expect(gotoSpy).toHaveBeenCalledExactlyOnceWith(transactionsUrl({ token: ckEthToken }));
-			expect(openSpy.mock.calls[0][0].data).toEqual({
-				sourceToken: ETHEREUM_TOKEN,
-				destinationToken: ckEthToken
-			});
-		});
+				expect(prepareSpy).toHaveBeenCalledWith(expect.objectContaining({ sendToken: ckEthToken }));
+				expect(gotoSpy).toHaveBeenCalledExactlyOnceWith(transactionsUrl({ token: ckEthToken }));
+				expect(openSpy.mock.calls[0][0].data).toEqual({
+					sourceToken: ETHEREUM_TOKEN,
+					destinationToken: ckEthToken
+				});
+			}
+		);
 
 		it('should stay on the address when the Ethereum twin cannot be prepared', async () => {
 			catalog.set([ICP_TOKEN, ETHEREUM_TOKEN, ckEthToken]);
@@ -629,5 +640,50 @@ describe('ReceiveTokenModal', () => {
 		expect(options).toContain(ETHEREUM_NETWORK.name);
 		expect(options).toContain(ICP_NETWORK.name);
 		expect(options).not.toContain(BTC_MAINNET_NETWORK.name);
+	});
+
+	it('should offer MetaMask for native ETH on Ethereum only, not on Base', async () => {
+		vi.spyOn(metamaskDerived, 'metamaskAvailable', 'get').mockReturnValue(readable(true));
+		// Left set for the tests after this one: the store cannot go back to not loaded, so this test
+		// comes last.
+		ethAddressStore.set({ data: mockEthAddress, certified: true });
+
+		catalog.set([ETHEREUM_TOKEN, BASE_ETH_TOKEN]);
+
+		const { container } = render(ReceiveTokenModal, {
+			props: { initialToken: BASE_ETH_TOKEN, preferredNetworkId: BASE_NETWORK.id }
+		});
+
+		const [base, ethereum] = getReceiveRoutes({
+			tokens: [BASE_ETH_TOKEN, ETHEREUM_TOKEN],
+			enabledNetworkIds: [ETHEREUM_NETWORK.id, BASE_NETWORK.id],
+			preferredNetworkId: BASE_NETWORK.id
+		}).map(({ key }) => key);
+
+		const openRoute = async (key: string) => {
+			await waitFor(() => {
+				expect(
+					byTestId({ container, testId: `${RECEIVE_ROUTE_LIST_ITEM}-${key}` })
+				).toBeInTheDocument();
+			});
+
+			byTestId({ container, testId: `${RECEIVE_ROUTE_LIST_ITEM}-${key}` })?.click();
+
+			await waitFor(() => {
+				expect(
+					byTestId({ container, testId: RECEIVE_TOKENS_MODAL_ADDRESS_LABEL })
+				).toHaveTextContent(mockEthAddress);
+			});
+		};
+
+		await openRoute(base);
+
+		expect(container).not.toHaveTextContent(get(i18n).receive.ethereum.text.metamask);
+
+		getByRoleBack(container).click();
+
+		await openRoute(ethereum);
+
+		expect(container).toHaveTextContent(get(i18n).receive.ethereum.text.metamask);
 	});
 });

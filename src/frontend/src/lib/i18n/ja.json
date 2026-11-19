@@ -946,11 +946,9 @@
 				"use_for_all_tokens": "このアドレス形式をサポートするウォレット、ユーザー、または他のアプリから受信する際に、すべてのトークンに使用します。",
 				"use_for_icrc_deposit": "ICPネットワークでICRC-1トークン（SNS、ckトークンなど）を受信する際に使用します。",
 				"use_for_icp_deposit": "アカウントIDのみをサポートする取引所や他のウォレットからICPを入金する際に使用します。",
-				"display_account_id_qr": "ICPアカウントIDをQRコードとして表示",
 				"account_id_copied": "ICPアカウントIDをコピーしました。",
 				"principal": "ICP Principal",
-				"internet_computer_principal_copied": "Internet Computer Principalをコピーしました。",
-				"display_internet_computer_principal_qr": "Internet Computer PrincipalをQRコードとして表示"
+				"internet_computer_principal_copied": "Internet Computer Principalをコピーしました。"
 			}
 		},
 		"ethereum": {
@@ -979,7 +977,6 @@
 				"bitcoin_testnet_address_title": "Bitcoin（Testnet）ウォレットアドレス",
 				"bitcoin_regtest_address": "Bitcoin（Regtest）",
 				"bitcoin_regtest_address_title": "Bitcoin（Regtest）ウォレットアドレス",
-				"display_bitcoin_address_qr": "BitcoinアドレスをQRコードで表示",
 				"bitcoin_address_copied": "Bitcoinアドレスをコピーしました。"
 			},
 			"info": {
@@ -998,16 +995,14 @@
 				"solana_devnet_address_title": "Solana Devnetウォレットアドレス",
 				"solana_local_address": "Solana Localアドレス",
 				"solana_local_address_title": "Solana Localウォレットアドレス",
-				"solana_address_copied": "Solanaアドレスをコピーしました。",
-				"display_solana_address_qr": "SolanaアドレスをQRコードで表示"
+				"solana_address_copied": "Solanaアドレスをコピーしました。"
 			}
 		},
 		"xrp": {
 			"text": {
 				"xrp_address": "",
 				"xrp_address_title": "",
-				"xrp_address_copied": "",
-				"display_xrp_address_qr": ""
+				"xrp_address_copied": ""
 			}
 		},
 		"token": {
@@ -1071,9 +1066,10 @@
 			"text": {
 				"evm_title": "",
 				"evm_networks": "",
-				"display_evm_qr": "",
 				"principal_tag": "",
-				"account_id_tag": ""
+				"account_id_tag": "",
+				"show_qr": "",
+				"copy": ""
 			}
 		}
 	},

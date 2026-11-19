@@ -946,11 +946,9 @@
 				"use_for_all_tokens": "Utilizzare per tutti i token quando si riceve da wallet, utenti o altre app che supportano questo l'indirizzo in questo formato.",
 				"use_for_icrc_deposit": "Utilizzare per ricevere token ICRC-1 nella rete ICP, come SNS, ck tokens, ecc.",
 				"use_for_icp_deposit": "Utilizzare per depositi ICP da exchange o altri wallet che supportano solo gli Account ID.",
-				"display_account_id_qr": "Visualizza Account ID ICP come codice QR",
 				"account_id_copied": "Account ID ICP copiato negli appunti.",
 				"principal": "Principal ICP",
-				"internet_computer_principal_copied": "Principal Internet Computer copiato negli appunti.",
-				"display_internet_computer_principal_qr": "Visualizza Principal Internet Computer come codice QR"
+				"internet_computer_principal_copied": "Principal Internet Computer copiato negli appunti."
 			}
 		},
 		"ethereum": {
@@ -979,7 +977,6 @@
 				"bitcoin_testnet_address_title": "Indirizzo del wallet Bitcoin (Testnet)",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
 				"bitcoin_regtest_address_title": "Indirizzo del wallet Bitcoin (Regtest)",
-				"display_bitcoin_address_qr": "Visualizza indirizzo Bitcoin come codice QR",
 				"bitcoin_address_copied": "Indirizzo Bitcoin copiato negli appunti."
 			},
 			"info": {
@@ -998,16 +995,14 @@
 				"solana_devnet_address_title": "Indirizzo del wallet Solana Devnet",
 				"solana_local_address": "Indirizzo Solana Locale",
 				"solana_local_address_title": "Indirizzo del wallet Solana Locale",
-				"solana_address_copied": "Indirizzo Solana copiato negli appunti",
-				"display_solana_address_qr": "Visualizza indirizzo Solana come codice QR"
+				"solana_address_copied": "Indirizzo Solana copiato negli appunti"
 			}
 		},
 		"xrp": {
 			"text": {
 				"xrp_address": "",
 				"xrp_address_title": "",
-				"xrp_address_copied": "",
-				"display_xrp_address_qr": ""
+				"xrp_address_copied": ""
 			}
 		},
 		"token": {
@@ -1071,9 +1066,10 @@
 			"text": {
 				"evm_title": "",
 				"evm_networks": "",
-				"display_evm_qr": "",
 				"principal_tag": "",
-				"account_id_tag": ""
+				"account_id_tag": "",
+				"show_qr": "",
+				"copy": ""
 			}
 		}
 	},

@@ -42,6 +42,7 @@
 	let addressLabel = $state<undefined | string>();
 	let addressToken = $state<Token | undefined>();
 	let copyAriaLabel = $state<string | undefined>();
+	let key = $state<string | undefined>();
 	let description = $state<string | undefined>();
 
 	const displayQRCode = (detail: ReceiveQRCode) => {
@@ -49,7 +50,7 @@
 			return;
 		}
 
-		({ address, addressLabel, addressToken, copyAriaLabel, description } = detail);
+		({ address, addressLabel, addressToken, copyAriaLabel, description, key } = detail);
 
 		modal.next();
 
@@ -59,7 +60,7 @@
 	// The step's content is replaced on every change, so focus is placed again: on the QR code detail
 	// when it opens, and back on the QR button of the row it came from, which the list focuses itself.
 	let content = $state<HTMLDivElement | undefined>();
-	let returnFocusAddress = $state<string | undefined>();
+	let returnFocusKey = $state<string | undefined>();
 
 	const focusContent = async () => {
 		await tick();
@@ -71,15 +72,23 @@
 			return;
 		}
 
-		returnFocusAddress = address;
+		returnFocusKey = key;
 
 		modal.back();
+
+		// The row focuses its own QR button once shown; if it is gone, focus stays in the dialog.
+		requestAnimationFrame(() => {
+			if (nonNullish(content) && !content.contains(document.activeElement)) {
+				content.focus({ preventScroll: true });
+			}
+		});
 
 		address = undefined;
 		addressLabel = undefined;
 		addressToken = undefined;
 		copyAriaLabel = undefined;
 		description = undefined;
+		key = undefined;
 	};
 </script>
 
@@ -119,7 +128,7 @@
 					text={nonNullish(description) ? descriptionText : undefined}
 				/>
 			{:else}
-				<InfoCmp focusAddress={returnFocusAddress} onQRCode={displayQRCode} />
+				<InfoCmp focusKey={returnFocusKey} onQRCode={displayQRCode} />
 			{/if}
 		{/key}
 	</div>

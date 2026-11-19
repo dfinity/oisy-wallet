@@ -946,11 +946,9 @@
 				"use_for_all_tokens": "Sử dụng cho tất cả các token khi nhận từ ví, người dùng hoặc các ứng dụng khác hỗ trợ định dạng địa chỉ này.",
 				"use_for_icrc_deposit": "Sử dụng để nhận token ICRC-1 trong mạng ICP, chẳng hạn như token SMS, ck, v.v.",
 				"use_for_icp_deposit": "Sử dụng để gửi tiền ICP từ các sàn giao dịch hoặc các ví khác chỉ hỗ trợ Account Id.",
-				"display_account_id_qr": "Hiển thị địa chỉ ICP dưới dạng mã QR",
 				"account_id_copied": "Địa chỉ ICP đã được sao chép vào khay nhớ tạm.",
 				"principal": "Địa chỉ principal ICP",
-				"internet_computer_principal_copied": "Địa chỉ principal Internet Computer đã được sao chép vào khay nhớ tạm.",
-				"display_internet_computer_principal_qr": "Hiển thị Địa chỉ principal Internet Computer dưới dạng mã QR"
+				"internet_computer_principal_copied": "Địa chỉ principal Internet Computer đã được sao chép vào khay nhớ tạm."
 			}
 		},
 		"ethereum": {
@@ -979,7 +977,6 @@
 				"bitcoin_testnet_address_title": "",
 				"bitcoin_regtest_address": "Địa chỉ Bitcoin (Regtest)",
 				"bitcoin_regtest_address_title": "",
-				"display_bitcoin_address_qr": "Hiển thị Địa chỉ Bitcoin dưới dạng mã QR",
 				"bitcoin_address_copied": "Địa chỉ Bitcoin đã được sao chép vào khay nhớ tạm."
 			},
 			"info": {
@@ -998,16 +995,14 @@
 				"solana_devnet_address_title": "",
 				"solana_local_address": "Địa chỉ Solana Local",
 				"solana_local_address_title": "",
-				"solana_address_copied": "Địa chỉ Solana đã được sao chép vào khay nhớ tạm",
-				"display_solana_address_qr": "Hiển thị địa chỉ Solana dưới dạng mã QR"
+				"solana_address_copied": "Địa chỉ Solana đã được sao chép vào khay nhớ tạm"
 			}
 		},
 		"xrp": {
 			"text": {
 				"xrp_address": "",
 				"xrp_address_title": "",
-				"xrp_address_copied": "",
-				"display_xrp_address_qr": ""
+				"xrp_address_copied": ""
 			}
 		},
 		"token": {
@@ -1071,9 +1066,10 @@
 			"text": {
 				"evm_title": "",
 				"evm_networks": "",
-				"display_evm_qr": "",
 				"principal_tag": "",
-				"account_id_tag": ""
+				"account_id_tag": "",
+				"show_qr": "",
+				"copy": ""
 			}
 		}
 	},

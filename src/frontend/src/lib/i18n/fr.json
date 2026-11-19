@@ -946,11 +946,9 @@
 				"use_for_all_tokens": "Utiliser pour tous les tokens lors de la réception depuis des portefeuilles, utilisateurs ou autres applications prenant en charge ce format d'adresse.",
 				"use_for_icrc_deposit": "Utiliser pour recevoir des tokens ICRC-1 sur le réseau ICP, tels que SNS, tokens ck, etc.",
 				"use_for_icp_deposit": "Utiliser pour les dépôts ICP depuis des échanges ou d'autres portefeuilles qui ne prennent en charge que les ID de compte.",
-				"display_account_id_qr": "Afficher l'ID de compte ICP sous forme de code QR",
 				"account_id_copied": "ID de compte ICP copié dans le presse-papiers.",
 				"principal": "Principal ICP",
-				"internet_computer_principal_copied": "Principal Internet Computer copié dans le presse-papiers.",
-				"display_internet_computer_principal_qr": "Afficher le Principal Internet Computer sous forme de code QR"
+				"internet_computer_principal_copied": "Principal Internet Computer copié dans le presse-papiers."
 			}
 		},
 		"ethereum": {
@@ -979,7 +977,6 @@
 				"bitcoin_testnet_address_title": "Adresse de portefeuille Bitcoin (Testnet)",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
 				"bitcoin_regtest_address_title": "Adresse de portefeuille Bitcoin (Regtest)",
-				"display_bitcoin_address_qr": "Afficher l'adresse Bitcoin sous forme de code QR",
 				"bitcoin_address_copied": "Adresse Bitcoin copiée dans le presse-papiers."
 			},
 			"info": {
@@ -998,16 +995,14 @@
 				"solana_devnet_address_title": "Adresse de portefeuille Solana Devnet",
 				"solana_local_address": "Adresse Solana locale",
 				"solana_local_address_title": "Adresse de portefeuille Solana locale",
-				"solana_address_copied": "Adresse Solana copiée dans le presse-papiers",
-				"display_solana_address_qr": "Afficher l'adresse Solana sous forme de code QR"
+				"solana_address_copied": "Adresse Solana copiée dans le presse-papiers"
 			}
 		},
 		"xrp": {
 			"text": {
 				"xrp_address": "",
 				"xrp_address_title": "",
-				"xrp_address_copied": "",
-				"display_xrp_address_qr": ""
+				"xrp_address_copied": ""
 			}
 		},
 		"token": {
@@ -1071,9 +1066,10 @@
 			"text": {
 				"evm_title": "",
 				"evm_networks": "",
-				"display_evm_qr": "",
 				"principal_tag": "",
-				"account_id_tag": ""
+				"account_id_tag": "",
+				"show_qr": "",
+				"copy": ""
 			}
 		}
 	},

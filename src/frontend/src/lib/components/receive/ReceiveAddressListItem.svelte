@@ -20,14 +20,16 @@
 		token: Token;
 		qrCodeAction: ReceiveQRCodeAction;
 		copyAriaLabel: string;
+		copiedText?: string;
 		testId?: string;
 	}
 
-	let { title, tag, address, token, qrCodeAction, copyAriaLabel, testId }: Props = $props();
+	let { title, tag, address, token, qrCodeAction, copyAriaLabel, copiedText, testId }: Props =
+		$props();
 </script>
 
 <!-- One row of a list of addresses: who it is for at a glance, the full address behind Copy and QR. -->
-<div class="flex items-center gap-3 py-2" data-tid={testId}>
+<div class="flex items-center gap-3 py-2" data-tid={testId} role="listitem">
 	<TokenLogo color="white" data={token} logoSize="md" />
 
 	<div class="flex min-w-0 flex-1 flex-col">
@@ -38,10 +40,10 @@
 		{/if}
 
 		{#if nonNullish(address)}
-			<span
-				class="truncate text-sm text-tertiary"
-				data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
-				in:fade>{shortenWithMiddleEllipsis({ text: address, splitLength: 6 })}</span
+			<!-- Seen shortened; read out (and read by tests) in full. -->
+			<span class="sr-only" data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}>{address}</span>
+			<span class="truncate text-sm text-tertiary" aria-hidden="true" in:fade
+				>{shortenWithMiddleEllipsis({ text: address, splitLength: 6 })}</span
 			>
 		{:else}
 			<span class="block w-32"><SkeletonText /></span>
@@ -50,7 +52,7 @@
 
 	{#if nonNullish(address)}
 		<div in:fade>
-			<ReceiveActions {address} {copyAriaLabel} {qrCodeAction} />
+			<ReceiveActions {address} {copiedText} {copyAriaLabel} {qrCodeAction} />
 		</div>
 	{/if}
 </div>

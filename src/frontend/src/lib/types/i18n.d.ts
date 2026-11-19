@@ -681,11 +681,9 @@ interface I18nReceive {
 			use_for_all_tokens: string;
 			use_for_icrc_deposit: string;
 			use_for_icp_deposit: string;
-			display_account_id_qr: string;
 			account_id_copied: string;
 			principal: string;
 			internet_computer_principal_copied: string;
-			display_internet_computer_principal_qr: string;
 		};
 	};
 	ethereum: {
@@ -712,7 +710,6 @@ interface I18nReceive {
 			bitcoin_testnet_address_title: string;
 			bitcoin_regtest_address: string;
 			bitcoin_regtest_address_title: string;
-			display_bitcoin_address_qr: string;
 			bitcoin_address_copied: string;
 		};
 		info: { no_new_btc: string; check_btc_progress: string };
@@ -727,17 +724,9 @@ interface I18nReceive {
 			solana_local_address: string;
 			solana_local_address_title: string;
 			solana_address_copied: string;
-			display_solana_address_qr: string;
 		};
 	};
-	xrp: {
-		text: {
-			xrp_address: string;
-			xrp_address_title: string;
-			xrp_address_copied: string;
-			display_xrp_address_qr: string;
-		};
-	};
+	xrp: { text: { xrp_address: string; xrp_address_title: string; xrp_address_copied: string } };
 	token: {
 		text: {
 			select_token: string;
@@ -799,9 +788,10 @@ interface I18nReceive {
 		text: {
 			evm_title: string;
 			evm_networks: string;
-			display_evm_qr: string;
 			principal_tag: string;
 			account_id_tag: string;
+			show_qr: string;
+			copy: string;
 		};
 	};
 }

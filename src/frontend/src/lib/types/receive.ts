@@ -17,6 +17,8 @@ export interface ReceiveQRCode {
 	// What the address is for, beside its QR code: the networks that share the EVM address, or when
 	// to use the ICP Principal or the Account ID.
 	description?: string;
+	// The row of the list that opened it, so focus returns to that row's QR button.
+	key?: string;
 }
 
 export type ReceiveQRCodeAction =
