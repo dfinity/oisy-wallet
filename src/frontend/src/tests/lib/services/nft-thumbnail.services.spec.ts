@@ -1,7 +1,4 @@
-import {
-	NFT_THUMBNAIL_DECODE_TIMEOUT_MILLIS,
-	NFT_THUMBNAIL_MAX_SIZE
-} from '$lib/constants/app.constants';
+import { NFT_THUMBNAIL_MAX_SIZE, NFT_THUMBNAIL_TIMEOUT_MILLIS } from '$lib/constants/app.constants';
 import { loadNftThumbnail, resetNftThumbnails } from '$lib/services/nft-thumbnail.services';
 import { isSvgMedia } from '$lib/services/url.services';
 
@@ -227,11 +224,25 @@ describe('nft-thumbnail.services', () => {
 		const first = loadNftThumbnail(`${mockUrl}-first`);
 		const second = loadNftThumbnail(`${mockUrl}-second`);
 
-		await vi.advanceTimersByTimeAsync(NFT_THUMBNAIL_DECODE_TIMEOUT_MILLIS);
+		await vi.advanceTimersByTimeAsync(NFT_THUMBNAIL_TIMEOUT_MILLIS);
 
 		await expect(first).resolves.toBeUndefined();
 		await expect(second).resolves.toBe(mockThumbnail);
 
 		expect(images[0].src).toBe('');
+	});
+
+	it('should give up on a media type check that never answers', async () => {
+		vi.useFakeTimers();
+
+		vi.mocked(isSvgMedia).mockReturnValueOnce(new Promise(() => {}));
+
+		const thumbnail = loadNftThumbnail(mockUrl);
+
+		await vi.advanceTimersByTimeAsync(NFT_THUMBNAIL_TIMEOUT_MILLIS);
+
+		await expect(thumbnail).resolves.toBeUndefined();
+
+		expect(images).toHaveLength(0);
 	});
 });
