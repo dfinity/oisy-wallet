@@ -32,29 +32,44 @@ describe('NavigationMenu', () => {
 		};
 	};
 
-	it('pins Settings and the More menu outside the scrolling area', () => {
+	it('pins the lower slot, Settings and the More menu outside the scrolling area', () => {
 		// The point of the split. Settings and More used to sit in the page footer,
 		// which is `position: fixed` and ignores this column, so in a short window
 		// it landed on top of the sections here. In a block of their own, beneath
-		// the part that scrolls, they cannot overlap anything.
+		// the part that scrolls, they cannot overlap anything. The lower slot (the
+		// dApp card) is pinned with them, so it is never cut off by the scroll.
 		const { scroll, bottom } = renderSidebar();
 
-		for (const testId of [NAVIGATION_ITEM_SETTINGS, NAVIGATION_MORE_MENU_BUTTON]) {
-			const item = bottom.querySelector(`[data-tid="${testId}"]`);
+		for (const selector of [
+			'[data-tid="lower-slot"]',
+			`[data-tid="${NAVIGATION_ITEM_SETTINGS}"]`,
+			`[data-tid="${NAVIGATION_MORE_MENU_BUTTON}"]`
+		]) {
+			const item = bottom.querySelector(selector);
 
 			expect(item).not.toBeNull();
 			expect(scroll.contains(item)).toBeFalsy();
 		}
 	});
 
-	it('keeps the sections and the lower slot inside the scrolling area', () => {
+	it('places the lower slot above Settings', () => {
+		// DOM order is visual order in this flex column.
+		const { bottom, getByTestId } = renderSidebar();
+
+		expect(
+			getByTestId('lower-slot').compareDocumentPosition(getByTestId(NAVIGATION_ITEM_SETTINGS)) &
+				Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
+		expect(bottom.contains(getByTestId('lower-slot'))).toBeTruthy();
+	});
+
+	it('keeps the sections inside the scrolling area', () => {
 		// So they are what gives way when the window is short.
 		const { scroll, bottom } = renderSidebar();
 
 		for (const selector of [
 			`[data-tid="${NAVIGATION_ITEM_TOKENS}"]`,
-			`[data-tid="${NAVIGATION_ITEM_REWARDS}"]`,
-			'[data-tid="lower-slot"]'
+			`[data-tid="${NAVIGATION_ITEM_REWARDS}"]`
 		]) {
 			expect(scroll.querySelector(selector)).not.toBeNull();
 			expect(bottom.querySelector(selector)).toBeNull();
