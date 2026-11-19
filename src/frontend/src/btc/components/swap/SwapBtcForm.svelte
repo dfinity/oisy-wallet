@@ -19,8 +19,10 @@
 	import SwapProviderCell from '$lib/components/swap/SwapProviderCell.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { nearIntentsSwapLimitFormatted } from '$lib/derived/near-intents-swap-limit.derived';
 	import { isLifiBtcOffered } from '$lib/services/lifi-btc-swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { nearIntentsSwapLimitStore } from '$lib/stores/near-intents-swap-limit.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
@@ -58,7 +60,7 @@
 		onNext
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, sourceTokenBalance } =
+	const { sourceToken, destinationToken, sourceTokenBalance, sourceTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: utxosFeeStore } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
@@ -90,6 +92,28 @@
 	let notOfferedExplained = $derived(
 		isNullish(utxosFee) || isInvalidUtxosFee(utxosFee) || nonNullish(errorType)
 	);
+
+	// Below the dust floor, NEAR Intents can also hold the pair to a fiat floor of its own, which
+	// `SwapMinimumAmountInfo` states whenever no provider quoted. That floor is the one the swap
+	// waits on, so naming the dust floor beside it adds a second, far smaller target that would
+	// still leave the swap refused. The dust message steps aside only while that notice is on
+	// screen and its floor is provably the higher one: without the BTC price there is no proof,
+	// and the dust floor is stated as before. The pay field stays marked invalid either way.
+	let fiatLimitSupersedesDust = $derived.by(() => {
+		if (
+			isNullish($nearIntentsSwapLimitFormatted) ||
+			($swapAmountsStore?.swaps.length ?? 0) > 0 ||
+			isNullish($nearIntentsSwapLimitStore) ||
+			isNullish($sourceTokenExchangeRate)
+		) {
+			return false;
+		}
+
+		const dustFloorUsd =
+			Number(convertSatoshisToBtc(BTC_MINIMUM_AMOUNT)) * $sourceTokenExchangeRate;
+
+		return $nearIntentsSwapLimitStore > dustFloorUsd;
+	});
 
 	// The recipient is unknown here: a NEAR Intents deposit address only comes with the
 	// execution quote. So Max is priced for the largest output a send can pay, or for LI.FI's
@@ -201,7 +225,7 @@
 	bind:receiveAmount
 >
 	{#snippet message()}
-		{#if errorType === 'minimum-amount-not-reached'}
+		{#if errorType === 'minimum-amount-not-reached' && !fiatLimitSupersedesDust}
 			<div class="mb-4" in:fade>
 				<MessageBox level="error">
 					{replacePlaceholders($i18n.send.assertion.minimum_btc_amount, {
