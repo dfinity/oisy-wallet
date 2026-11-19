@@ -214,10 +214,16 @@ the one place OISY already puts provider minimums is structurally unavailable ex
 this hint is needed.
 
 **It goes full width beside the other pair-level notices**, as a new
-`SwapMinimumAmountInfo.svelte` rendering a `MessageBox` in a `mt-6` wrapper, placed **after**
+`SwapMinimumAmountInfo.svelte` rendering a `MessageBox` in a `mt-4` wrapper, placed **after**
 `SwapCrossChainInfo` in `SwapForm.svelte` — the established pattern for telling the user
 something about the pair they have chosen. Which networks the swap crosses is the more
 fundamental fact about the pair, so it reads first; the amount constraint follows it.
+
+It follows the `MessageBox` convention in `docs/ai/frontend/reusability.md`: the box keeps its
+own text size (no `sm:text-sm`), and the wrapper carries `mt-4`. Stacked boxes space themselves
+with `MessageBox`'s own `mb-4`, and the adjoining margins collapse, so `mt-4` gives 16px whether
+the notice follows another box or stands alone. Measured in the browser: the earlier `mt-6`
+left 24px after the cross-chain box.
 
 **It disappears once a provider quotes.** An offer answers the question the notice exists to
 pre-empt, so continuing to state a floor the user has visibly cleared is just noise in a form
