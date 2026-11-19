@@ -285,6 +285,34 @@ needed, since only the fiat limit is announced upfront (§3.3).
 Other locales are structurally synced by the existing i18n workflow, which does not
 translate; translations follow the project's usual route and are not part of this change.
 
+### 3.6 Below the Bitcoin dust floor, the fiat floor is the one named
+
+A Bitcoin swap refuses any amount below `BTC_MINIMUM_AMOUNT` (700 sats, the dust floor a send
+will not relay) through `customValidate` in `SwapBtcForm.svelte`, and states it in an error
+`MessageBox` in the form's `message` snippet. That check runs before any quote, so for a sub-dust
+amount on a Polygon or BSC pair the form named two floors at once: 0.000007 BTC in red, and
+$1,000 in the notice. Only the second decides the swap; following the first still leaves the
+swap refused.
+
+So the dust message steps aside while the notice is on screen **and** the fiat floor is shown
+to be the higher one, by comparing it with the dust floor's dollar value at the source token's
+USD price. In every other case the dust floor is named as before: no BTC price, no notice
+(no floor, or a provider quoted), or a fiat floor below the dust floor. A refused amount is never
+left without its reason. The pay field stays marked invalid and Review stays disabled, because
+the amount still is invalid.
+
+"The notice is on screen" is one definition shared with the notice itself:
+`nearIntentsSwapLimitFormatted` (`$lib/derived/near-intents-swap-limit.derived.ts`), the floor
+formatted in the display currency, undefined whenever it cannot be stated, combined with the
+notice's own "no provider quoted". `SwapMinimumAmountInfo` reads the same store, so the dust
+message cannot step aside for a notice that is not rendering.
+
+The per-route bridge minimum is deliberately not handled the same way. Below the dust floor it
+is known only from a quote refusal, and its only place on screen is the receive-field refusal,
+which hides on every quote refresh (`showSwapNotOfferedError` waits on `isSwapAmountsLoading`,
+and the five-second background refresh sets it). Stepping the stable dust message aside for it
+would trade a fixed message for one that blinks. The dust message stays for that case.
+
 ## 4. Non-goals
 
 - **No hardcoded chain list and no hardcoded $1,000.** The API calls the limit "Temporary";
@@ -370,6 +398,9 @@ The `test-coverage` gate enforces whole-project thresholds, so this lands with i
    changes it. **Shipped as #14037.**
 2. `feat(frontend): show the NEAR Intents swap limit before an amount is entered` (needs 1)
    §3.3 to §3.5, extending the `PRODUCT.md` section that PR 1 created.
+3. `fix(frontend): let the fiat swap limit speak for a Bitcoin amount below the dust floor`
+   (needs 2) §3.6. The Bitcoin swap form, which is outside the NEAR Intents layer, so it is
+   its own PR.
 
 ## 8. Open questions (facts to confirm)
 
