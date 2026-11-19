@@ -1,6 +1,7 @@
 import { NFT_THUMBNAIL_MAX_SIZE, NFT_THUMBNAIL_TIMEOUT_MILLIS } from '$lib/constants/app.constants';
 import { loadNftThumbnail, resetNftThumbnails } from '$lib/services/nft-thumbnail.services';
 import { isSvgMedia } from '$lib/services/url.services';
+import { mock } from 'vitest-mock-extended';
 
 vi.unmock('$lib/services/nft-thumbnail.services');
 
@@ -60,9 +61,9 @@ describe('nft-thumbnail.services', () => {
 
 		vi.mocked(isSvgMedia).mockResolvedValue(true);
 
-		vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
-			drawImage: mockDrawImage
-		} as unknown as CanvasRenderingContext2D);
+		vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+			mock<CanvasRenderingContext2D>({ drawImage: mockDrawImage })
+		);
 
 		vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue(mockThumbnail);
 	});
