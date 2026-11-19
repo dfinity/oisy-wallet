@@ -2,6 +2,7 @@ import { send as executeSend } from '$eth/services/send.services';
 import type { FeeStoreData } from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
+import type { EthWalletConnectRefusal } from '$eth/types/wallet-connect';
 import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
 import type { GetUniswapSwapParams } from '$eth/utils/uniswap.utils';
 import {
@@ -15,7 +16,8 @@ import {
 	hasUnreviewableTypedData,
 	isEthSignTypedDataMethod,
 	isWalletConnectEthTokenCallWithValue,
-	WalletConnectEthCkEthHelperUnconfirmedError
+	WalletConnectEthCkEthHelperUnconfirmedError,
+	walletConnectEthRefusals
 } from '$eth/utils/wallet-connect.utils';
 import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
@@ -27,6 +29,7 @@ import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
+import { trackWalletConnectUncheckedSigning } from '$lib/services/wallet-connect-analytics.services';
 import {
 	execute,
 	type WalletConnectCallBackParams,
@@ -39,6 +42,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { isWalletConnectDomainFlagged } from '$lib/utils/wallet-connect.utils';
 import { isNullish } from '@dfinity/utils';
 import { Signature } from 'ethers/crypto';
 import { get } from 'svelte/store';
@@ -49,6 +53,10 @@ type WalletConnectSendParams = WalletConnectExecuteParams & {
 	fee: FeeStoreData;
 	modalNext: () => void;
 	amount: bigint;
+	// The refusals the user signed past on the review, which the Settings switch allows. Empty unless
+	// the review offered it and its box was ticked. A refusal found here that is not in the list still
+	// refuses, so an acknowledgement covers what the review showed and nothing else.
+	acknowledgedRefusals: EthWalletConnectRefusal[];
 	// Whether the user ticked, on the review, that they sign a call OISY can't read.
 	unknownCallAcknowledged: boolean;
 	// The tokens the review read the call with, so signing reads it the same way.
@@ -75,6 +83,7 @@ export const send = ({
 	minterInfo,
 	sourceNetwork,
 	targetNetwork,
+	acknowledgedRefusals,
 	unknownCallAcknowledged,
 	tokens,
 	...params
@@ -99,7 +108,8 @@ export const send = ({
 						cketh_deposit_refused,
 						cketh_helper_unconfirmed,
 						ck_deposit_refused,
-						unexpected_processing_request
+						unexpected_processing_request,
+						unverifiable_request
 					}
 				}
 			} = get(i18n);
@@ -258,6 +268,21 @@ export const send = ({
 				return { success: false };
 			}
 
+			// A site WalletConnect's domain verification flags is never signed past, whatever the review
+			// handed on: the review offers no way out for one, so no acknowledgement for it can be real.
+			const acknowledged = isWalletConnectDomainFlagged(request.verifyContext)
+				? []
+				: acknowledgedRefusals;
+
+			const refusals = walletConnectEthRefusals({ call, data: firstParam.data });
+
+			if (refusals.some((refusal) => !acknowledged.includes(refusal))) {
+				toastsError({
+					msg: { text: unverifiable_request }
+				});
+				return { success: false };
+			}
+
 			modalNext();
 
 			try {
@@ -288,6 +313,18 @@ export const send = ({
 						token: token.symbol
 					}
 				});
+
+				// Only the review sees a token whose contract did not report its decimals, so when signing
+				// finds nothing to refuse, what the user signed past is what they acknowledged there.
+				const signedPast = refusals.length > 0 ? refusals : acknowledged;
+
+				if (signedPast.length > 0) {
+					trackWalletConnectUncheckedSigning({
+						modifier: 'sign',
+						network: sourceNetwork.id.description ?? sourceNetwork.name,
+						reasons: signedPast
+					});
+				}
 
 				return { success: true };
 			} catch (err: unknown) {

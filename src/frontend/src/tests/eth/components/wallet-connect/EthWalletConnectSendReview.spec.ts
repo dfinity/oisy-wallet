@@ -38,7 +38,9 @@ import { MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import {
 	CONVERT_AMOUNT_EXCHANGE_VALUE,
 	ETH_FEE_PRIORITY,
-	ETH_FEE_PRIORITY_OPTION
+	ETH_FEE_PRIORITY_OPTION,
+	WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE,
+	WALLET_CONNECT_UNCHECKED_SIGNING_POINTER
 } from '$lib/constants/test-ids.constants';
 import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
 import { loadLiquidiumInflowPool } from '$lib/services/liquidium.services';
@@ -149,7 +151,9 @@ describe('EthWalletConnectSendReview', () => {
 		call: classifyWalletConnectEthCall(undefined),
 		sourceNetwork: ETHEREUM_NETWORK,
 		onApprove: vi.fn(),
-		onReject: vi.fn()
+		onReject: vi.fn(),
+		onUncheckedSigningAcknowledge: vi.fn(),
+		onOpenSettings: vi.fn()
 	};
 
 	const warningTestId = 'wallet-connect-unverifiable-erc20-warning';
@@ -2018,6 +2022,141 @@ describe('EthWalletConnectSendReview', () => {
 			expect(getByTestId(tokenCallWithValueTestId)).toBeInTheDocument();
 			expect(queryByTestId(unlistedTestId)).not.toBeInTheDocument();
 			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+	});
+
+	describe('the way past a refusal', () => {
+		const undecodableTransfer = `${ERC20_TRANSFER_HASH}deadbeef`;
+
+		const renderRefused = (overrides: Record<string, unknown> = {}) =>
+			render(EthWalletConnectSendReview, {
+				props: {
+					...props,
+					call: classifyWalletConnectEthCall(undecodableTransfer),
+					data: undecodableTransfer,
+					destination: USDC_TOKEN.address,
+					...overrides
+				},
+				context: mockContext
+			});
+
+		it('should say where the Settings switch is when it is off', () => {
+			const { getByTestId, queryByTestId, getByRole } = renderRefused();
+
+			expect(getByTestId(warningTestId)).toHaveTextContent(
+				en.wallet_connect.text.unverifiable_erc20_request
+			);
+			expect(getByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should state the reason and enable approval once acknowledged, with the switch on', () => {
+			const { getByTestId, getByRole } = renderRefused({
+				uncheckedSigningOffered: true,
+				uncheckedSigningAcknowledged: true
+			});
+
+			expect(getByTestId(warningTestId)).toHaveTextContent(
+				en.wallet_connect.text.unverifiable_erc20_reason
+			);
+			expect(getByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeEnabled();
+		});
+
+		it('should hold approval until the acknowledgement is ticked', () => {
+			const { getByRole } = renderRefused({ uncheckedSigningOffered: true });
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should offer nothing, not even the switch, for a site the domain check flagged', () => {
+			const { queryByTestId } = renderRefused({ domainFlagged: true });
+
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).not.toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
+		});
+
+		// A token OISY does not list whose contract did not report its decimals: the review cannot state
+		// the amount, which is what the switch is for (D7).
+		it('should offer the way past a token whose contract does not answer, with the switch on', async () => {
+			const data = encodeCall({ selector: ERC20_TRANSFER_HASH, to: RECIPIENT, value: 1n });
+
+			const { findByTestId, getByTestId, getByRole } = renderRefused({
+				call: classifyWalletConnectEthCall(data),
+				data,
+				destination: UNKNOWN_CONTRACT,
+				uncheckedSigningOffered: true,
+				uncheckedSigningAcknowledged: true
+			});
+
+			await expect(findByTestId(warningTestId)).resolves.toHaveTextContent(
+				en.wallet_connect.text.unverifiable_erc20_reason
+			);
+			expect(getByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeEnabled();
+		});
+
+		// Until the contract answers there is nothing to sign past.
+		it('should offer nothing while the contract has not answered', () => {
+			vi.mocked(loadUnlistedErc20TokenData).mockReturnValue(new Promise(() => {}));
+
+			const data = encodeCall({ selector: ERC20_TRANSFER_HASH, to: RECIPIENT, value: 1n });
+
+			const { queryByTestId, getByRole } = renderRefused({
+				call: classifyWalletConnectEthCall(data),
+				data,
+				destination: UNKNOWN_CONTRACT,
+				uncheckedSigningOffered: true,
+				uncheckedSigningAcknowledged: true
+			});
+
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		// A token call takes no native value, so the switch never signs past one that sends some, even
+		// when its calldata does not decode either.
+		it('should never offer a way past a token call that also sends native value', () => {
+			const { getByTestId, queryByTestId, getByRole } = renderRefused({
+				amount: 5_000_000_000_000_000_000n,
+				uncheckedSigningOffered: true,
+				uncheckedSigningAcknowledged: true
+			});
+
+			expect(getByTestId('wallet-connect-token-call-with-value')).toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should offer the way past an operator grant it cannot decode', () => {
+			const data = `${ERC_SET_APPROVAL_FOR_ALL_HASH}deadbeef`;
+
+			const { getByTestId } = renderRefused({
+				call: classifyWalletConnectEthCall(data),
+				data,
+				destination: UNKNOWN_CONTRACT,
+				uncheckedSigningOffered: true
+			});
+
+			expect(getByTestId('wallet-connect-unverifiable-approval-for-all-warning')).toHaveTextContent(
+				en.wallet_connect.text.unverifiable_approval_for_all_reason
+			);
+			expect(getByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).toBeInTheDocument();
+		});
+
+		it('should offer nothing on a request it would sign anyway', () => {
+			const data = encodeCall({ selector: ERC20_TRANSFER_HASH, to: RECIPIENT, value: 1n });
+
+			const { queryByTestId } = renderRefused({
+				call: classifyWalletConnectEthCall(data),
+				data,
+				uncheckedSigningOffered: true
+			});
+
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).not.toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
 		});
 	});
 

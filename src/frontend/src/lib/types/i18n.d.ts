@@ -1644,8 +1644,10 @@ interface I18nWallet_connect {
 		allowance_decrease: string;
 		unverifiable_erc20_request: string;
 		unlisted_erc20_request: string;
+		unverifiable_erc20_reason: string;
 		token_call_with_value: string;
 		unverifiable_approval_for_all_request: string;
+		unverifiable_approval_for_all_reason: string;
 		approval_for_all_grant: string;
 		approval_for_all_revoke: string;
 		cketh_deposit: string;
@@ -1746,6 +1748,7 @@ interface I18nWallet_connect {
 		btc_psbt_input_unverified: string;
 		from_address_not_wallet: string;
 		unknown_destination: string;
+		unverifiable_request: string;
 		cketh_deposit_refused: string;
 		cketh_helper_unconfirmed: string;
 		ck_deposit_refused: string;

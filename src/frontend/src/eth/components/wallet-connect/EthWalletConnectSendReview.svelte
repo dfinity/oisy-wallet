@@ -30,7 +30,10 @@
 	import { toUnlistedErc20Token, unlistedErc20Name } from '$eth/utils/erc20-unlisted.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import { decodeErc20AbiData, decodeSetApprovalForAllData } from '$eth/utils/transactions.utils';
-	import { isWalletConnectEthTokenCallWithValue } from '$eth/utils/wallet-connect.utils';
+	import {
+		isWalletConnectEthTokenCallWithValue,
+		walletConnectEthRefusals
+	} from '$eth/utils/wallet-connect.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
@@ -44,6 +47,7 @@
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import WalletConnectScamWarning from '$lib/components/wallet-connect/WalletConnectScamWarning.svelte';
+	import WalletConnectUncheckedSigning from '$lib/components/wallet-connect/WalletConnectUncheckedSigning.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -71,6 +75,16 @@
 		requestedGas?: bigint;
 		sourceNetwork: EthereumNetwork;
 		targetNetwork?: Network;
+		// Whether WalletConnect's domain verification flagged the site. No way past a refusal is
+		// offered then, and the review does not point at the Settings switch either.
+		domainFlagged?: boolean;
+		// Whether the Settings switch was on when the review opened, so that a refusal can be signed
+		// past once the user acknowledges it, and whether they have.
+		uncheckedSigningOffered?: boolean;
+		uncheckedSigningAcknowledged?: boolean;
+		// Set by the review when a token OISY does not list did not report its decimals, a refusal only
+		// the review can see, so that the acknowledgement handed to signing names it.
+		unidentifiedToken?: boolean;
 		// WalletConnect's Verify API flags the requesting site as a scam: the review says so and
 		// offers Reject only.
 		flaggedAsScam?: boolean;
@@ -80,6 +94,8 @@
 		unknownCallAcknowledged?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
+		onUncheckedSigningAcknowledge: () => void;
+		onOpenSettings: () => void;
 	}
 
 	let {
@@ -91,11 +107,17 @@
 		requestedGas,
 		sourceNetwork: sourceNetworkProp,
 		targetNetwork,
+		domainFlagged = false,
+		uncheckedSigningOffered = false,
+		uncheckedSigningAcknowledged = false,
+		unidentifiedToken = $bindable(false),
 		flaggedAsScam = false,
 		approveDisabled = false,
 		unknownCallAcknowledged = $bindable(false),
 		onApprove,
-		onReject
+		onReject,
+		onUncheckedSigningAcknowledge,
+		onOpenSettings
 	}: Props = $props();
 
 	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
@@ -403,11 +425,29 @@
 		})
 	);
 
-	// Same reasoning for an operator grant: the operator is the whole of what is being authorized,
-	// and calldata that hides it would otherwise fall through to a native zero-value summary.
-	let unverifiableSetApprovalForAll = $derived(
-		setApprovalForAll && isNullish(decodedSetApprovalForAll)
+	// A token OISY does not list whose contract did not report its decimals: the review cannot state
+	// the amount. Until the contract answers there is nothing to sign past, so the review waits.
+	let unidentifiedErc20 = $derived(unlistedTokenRead?.status === 'failed');
+
+	let unlistedTokenPending = $derived(
+		readsUnlistedToken && isNullish(unlistedToken) && !unidentifiedErc20
 	);
+
+	// Handed up so that signing is told the acknowledgement covers it, which only this review can see.
+	$effect(() => {
+		unidentifiedToken = unidentifiedErc20;
+	});
+
+	// What the Settings switch can sign past: calldata that does not decode, for an ERC-20 call and
+	// for an operator grant, whose operator is the whole of what it authorizes, and a token whose
+	// contract did not report its decimals. The signing service refuses the calldata it cannot decode.
+	let refusals = $derived(walletConnectEthRefusals({ call, data }));
+
+	// A token call that also sends native value is refused for good, so the review offers no way past
+	// it, whatever else it refuses.
+	let refused = $derived((refusals.length > 0 || unidentifiedErc20) && !tokenCallWithValue);
+
+	let unverifiableSetApprovalForAll = $derived(refusals.includes('unverifiable_approval_for_all'));
 
 	// An operator grant authorizes rather than moves, so it has no amount and no balance to spend
 	// against. Native value carried alongside it is still real value leaving the wallet, and hiding
@@ -508,11 +548,15 @@
 		</MessageBox>
 	{:else if unverifiableErc20 && !unlistedTokenLoading}
 		<MessageBox level="warning" testId="wallet-connect-unverifiable-erc20-warning">
-			{$i18n.wallet_connect.text.unverifiable_erc20_request}
+			{uncheckedSigningOffered
+				? $i18n.wallet_connect.text.unverifiable_erc20_reason
+				: $i18n.wallet_connect.text.unverifiable_erc20_request}
 		</MessageBox>
 	{:else if unverifiableSetApprovalForAll}
 		<MessageBox level="warning" testId="wallet-connect-unverifiable-approval-for-all-warning">
-			{$i18n.wallet_connect.text.unverifiable_approval_for_all_request}
+			{uncheckedSigningOffered
+				? $i18n.wallet_connect.text.unverifiable_approval_for_all_reason
+				: $i18n.wallet_connect.text.unverifiable_approval_for_all_request}
 		</MessageBox>
 	{:else if nonNullish(decodedSetApprovalForAll)}
 		<MessageBox
@@ -532,6 +576,15 @@
 				? $i18n.wallet_connect.text.allowance_increase
 				: $i18n.wallet_connect.text.allowance_decrease}
 		</MessageBox>
+	{/if}
+
+	{#if refused && !domainFlagged}
+		<WalletConnectUncheckedSigning
+			acknowledged={uncheckedSigningAcknowledged}
+			offered={uncheckedSigningOffered}
+			onAcknowledge={onUncheckedSigningAcknowledge}
+			{onOpenSettings}
+		/>
 	{/if}
 
 	<!-- Beside the notice about what the call authorizes, not instead of it. A request the review
@@ -704,12 +757,12 @@
 			approveDisabled={approveDisabled ||
 				(unknownCall && !unknownCallAcknowledged) ||
 				tokenCallWithValue ||
-				unverifiableErc20 ||
-				unverifiableSetApprovalForAll ||
+				unlistedTokenPending ||
 				ckEthDepositRefused ||
 				ckEthHelperUnconfirmed ||
 				ckDepositRefused ||
-				liquidiumPoolLoading}
+				liquidiumPoolLoading ||
+				(refused && !(uncheckedSigningOffered && uncheckedSigningAcknowledged))}
 			{onApprove}
 			{onReject}
 		/>

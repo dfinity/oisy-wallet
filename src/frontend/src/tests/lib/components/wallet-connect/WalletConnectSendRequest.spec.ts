@@ -321,6 +321,7 @@ describe('an eth_sendTransaction request reaching the review', () => {
 
 				expect(container).toHaveTextContent(names);
 				expect(container).not.toHaveTextContent(en.wallet_connect.text.unverifiable_erc20_request);
+				expect(container).not.toHaveTextContent(en.wallet_connect.text.unlisted_erc20_request);
 				expect(container).not.toHaveTextContent(
 					en.wallet_connect.text.unverifiable_approval_for_all_request
 				);

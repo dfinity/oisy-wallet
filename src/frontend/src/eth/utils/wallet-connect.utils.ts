@@ -6,6 +6,7 @@ import { SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS } from '$eth/constants/wall
 import type { OptionEthAddress } from '$eth/types/address';
 import type { ErcFungibleToken } from '$eth/types/erc-fungible';
 import type {
+	EthWalletConnectRefusal,
 	WalletConnectEthCall,
 	WalletConnectEthCkDeposit,
 	WalletConnectEthSignTypedDataV4,
@@ -17,6 +18,8 @@ import { isDestinationContractAddress } from '$eth/utils/send.utils';
 import {
 	decodeCkDeposit,
 	decodeCkEthDepositPrincipal,
+	decodeErc20AbiData,
+	decodeSetApprovalForAllData,
 	getCalldataSelector,
 	hasCalldata,
 	isErc20TransactionApprove,
@@ -438,6 +441,47 @@ export const classifyWalletConnectEthSendTransaction = ({
  * native value it carries alongside. An `unknown` call may well be one too, which is precisely why
  * it is not titled a send either.
  */
+/**
+ * Whether a call moves or authorises an ERC-20 token, which the review can only state once it has
+ * both the token and the call's decoded arguments.
+ */
+export const isWalletConnectEthErc20Call = ({ type }: WalletConnectEthCall): boolean =>
+	type === 'erc20Approve' || type === 'erc20Transfer' || type === 'erc20AllowanceDelta';
+
+const decodes = (decode: () => unknown): boolean => {
+	try {
+		decode();
+		return true;
+	} catch (_: unknown) {
+		return false;
+	}
+};
+
+/**
+ * Why OISY refuses an `eth_sendTransaction` it could sign but cannot show faithfully: an ERC-20 call
+ * or an operator grant whose arguments do not decode. Read from the call and its calldata alone, so
+ * the review and the signing service cannot disagree about what was refused.
+ *
+ * A token the wallet does not list is not among them. It is refused too, but adding the token makes
+ * the request reviewable, so the Settings switch never signs past it.
+ */
+export const walletConnectEthRefusals = ({
+	call,
+	data
+}: {
+	call: WalletConnectEthCall;
+	data: string | undefined;
+}): EthWalletConnectRefusal[] => [
+	...(isWalletConnectEthErc20Call(call) &&
+	(isNullish(data) || !decodes(() => decodeErc20AbiData({ data })))
+		? (['unverifiable_erc20'] as const)
+		: []),
+	...(call.type === 'setApprovalForAll' &&
+	(isNullish(data) || !decodes(() => decodeSetApprovalForAllData(data)))
+		? (['unverifiable_approval_for_all'] as const)
+		: [])
+];
+
 export const isWalletConnectEthApproval = ({ type }: WalletConnectEthCall): boolean =>
 	type === 'erc20Approve' || type === 'setApprovalForAll' || type === 'erc20AllowanceDelta';
 

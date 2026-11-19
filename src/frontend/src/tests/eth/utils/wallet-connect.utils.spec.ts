@@ -42,6 +42,7 @@ import {
 	hasUnreviewableTypedData,
 	isEthSignTypedDataMethod,
 	isWalletConnectEthApproval,
+	isWalletConnectEthErc20Call,
 	isWalletConnectEthTokenCallWithValue,
 	toTypedDataDomainChainId,
 	toWalletConnectCkDepositHelperContractAddress,
@@ -49,6 +50,7 @@ import {
 	WalletConnectEthCkDepositError,
 	WalletConnectEthCkEthDepositError,
 	WalletConnectEthCkEthHelperUnconfirmedError,
+	walletConnectEthRefusals,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
@@ -68,7 +70,7 @@ import {
 import { toNullable } from '@dfinity/utils';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
-import { Interface } from 'ethers/abi';
+import { AbiCoder, Interface } from 'ethers/abi';
 import { id, TypedDataEncoder, type TypedDataField } from 'ethers/hash';
 
 // The fixtures below state chain 1 in their domain, so the session allowed to sign them is chain 1
@@ -2390,6 +2392,80 @@ describe('wallet-connect.utils', () => {
 					sessionChainId: SEPOLIA_SESSION
 				})
 			).toBeFalsy();
+		});
+	});
+
+	describe('walletConnectEthRefusals', () => {
+		const ADDRESS = '0x2222222222222222222222222222222222222222';
+
+		const encode = ({
+			selector,
+			types,
+			values
+		}: {
+			selector: string;
+			types: string[];
+			values: unknown[];
+		}) => `${selector}${AbiCoder.defaultAbiCoder().encode(types, values).slice(2)}`;
+
+		const refusalsOf = (data: string | undefined) =>
+			walletConnectEthRefusals({ call: classifyWalletConnectEthCall(data), data });
+
+		it.each([ERC20_APPROVE_HASH, ERC20_TRANSFER_HASH, ERC20_INCREASE_ALLOWANCE_HASH])(
+			'should refuse an ERC-20 call whose arguments do not decode (%s)',
+			(selector) => {
+				expect(refusalsOf(`${selector}deadbeef`)).toEqual(['unverifiable_erc20']);
+			}
+		);
+
+		it('should not refuse an ERC-20 call whose arguments decode', () => {
+			expect(
+				refusalsOf(
+					encode({
+						selector: ERC20_APPROVE_HASH,
+						types: ['address', 'uint256'],
+						values: [ADDRESS, 1n]
+					})
+				)
+			).toEqual([]);
+		});
+
+		it('should refuse an operator grant whose operator does not decode', () => {
+			expect(refusalsOf(`${ERC_SET_APPROVAL_FOR_ALL_HASH}deadbeef`)).toEqual([
+				'unverifiable_approval_for_all'
+			]);
+		});
+
+		it('should not refuse an operator grant whose operator decodes', () => {
+			expect(
+				refusalsOf(
+					encode({
+						selector: ERC_SET_APPROVAL_FOR_ALL_HASH,
+						types: ['address', 'bool'],
+						values: [ADDRESS, true]
+					})
+				)
+			).toEqual([]);
+		});
+
+		// Unreadable calls are warned about, not refused, and a native send has nothing to decode.
+		it('should not refuse a call it could not read, nor a native send', () => {
+			expect(refusalsOf('0x87517c45')).toEqual([]);
+			expect(refusalsOf(undefined)).toEqual([]);
+		});
+	});
+
+	describe('isWalletConnectEthErc20Call', () => {
+		it('should name the calls that move or authorise an ERC-20 token', () => {
+			expect(isWalletConnectEthErc20Call({ type: 'erc20Approve' })).toBeTruthy();
+			expect(isWalletConnectEthErc20Call({ type: 'erc20Transfer' })).toBeTruthy();
+			expect(
+				isWalletConnectEthErc20Call({ type: 'erc20AllowanceDelta', increase: true })
+			).toBeTruthy();
+
+			expect(isWalletConnectEthErc20Call({ type: 'setApprovalForAll' })).toBeFalsy();
+			expect(isWalletConnectEthErc20Call({ type: 'native' })).toBeFalsy();
+			expect(isWalletConnectEthErc20Call({ type: 'unknown', selector: undefined })).toBeFalsy();
 		});
 	});
 });
