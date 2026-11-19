@@ -77,18 +77,19 @@ held. It used to be only a warning there, with the refusal arriving as a toast a
 
 **EVM.**
 
-| Refusal                                                                                                                                                 | Where                                                      | Tier                                                                                                                     |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| ERC-20 approve, transfer or allowance change whose calldata does not decode                                                                             | `unverifiableErc20` in `EthWalletConnectSendReview.svelte` | Unlockable                                                                                                               |
-| ERC-20 approve, transfer or allowance change on a token OISY does not list (not a default token, not one of the user's custom tokens), calldata decoded | `unverifiableErc20` (same flag)                            | Not unlockable: adding the token makes the request reviewable (see below)                                                |
-| `setApprovalForAll` whose calldata does not decode                                                                                                      | `unverifiableSetApprovalForAll` (same file)                | Unlockable                                                                                                               |
-| ERC-20 approve, transfer or allowance change that also sends native value                                                                               | `tokenCallWithValue` (same file), `send()`                 | Never (see D5)                                                                                                           |
-| A deposit to the ckETH helper contract for a principal other than the user's, or with data OISY cannot read as a deposit                                | `ckEthDepositRefused` call type, `send()`                  | Never (see D5)                                                                                                           |
-| A deposit before certified minter information confirms the ckETH helper contract                                                                        | `ckEthHelperUnconfirmed` call type, `send()`               | Never (see D5)                                                                                                           |
-| Typed data that fails to parse, validate or hash                                                                                                        | `invalidTypedData` in `WalletConnectSignReview.svelte`     | Never: nothing well defined to sign                                                                                      |
-| Typed data whose domain names a chain other than the session's                                                                                          | `invalidTypedData` (same flag)                             | Never (see D2)                                                                                                           |
-| `from` is not the wallet's address                                                                                                                      | `send()` in `eth/services/wallet-connect.services.ts`      | Never: another account                                                                                                   |
-| No `to` (contract deployment)                                                                                                                           | `send()`, `unknown_destination`                            | Never: the signer requires a destination (`EthSignTransactionRequest.to : text` in `src/declarations/signer/signer.did`) |
+| Refusal                                                                                                                            | Where                                                      | Tier                                                                                                                     |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| ERC-20 approve, transfer or allowance change whose calldata does not decode                                                        | `unverifiableErc20` in `EthWalletConnectSendReview.svelte` | Unlockable                                                                                                               |
+| ERC-20 approve, transfer or allowance change on a token OISY does not list whose contract does not report usable decimals          | `unverifiableErc20` (same flag)                            | Unlockable (see D7)                                                                                                      |
+| `setApprovalForAll` whose calldata does not decode                                                                                 | `unverifiableSetApprovalForAll` (same file)                | Unlockable                                                                                                               |
+| ERC-20 approve, transfer or allowance change that also sends native value                                                          | `tokenCallWithValue` (same file), `send()`                 | Never (see D5)                                                                                                           |
+| A deposit to the ckETH helper contract for a principal other than the user's, or with data OISY cannot read as a deposit           | `ckEthDepositRefused` call type, `send()`                  | Never (see D5)                                                                                                           |
+| A deposit before certified minter information confirms the ckETH helper contract                                                   | `ckEthHelperUnconfirmed` call type, `send()`               | Never (see D5)                                                                                                           |
+| A deposit to the minter's other helper it cannot credit: unreadable calldata, a token it does not convert, `depositErc20` with ETH | `ckDepositRefused` call type, `send()`                     | Never (see D5)                                                                                                           |
+| Typed data that fails to parse, validate or hash                                                                                   | `invalidTypedData` in `WalletConnectSignReview.svelte`     | Never: nothing well defined to sign                                                                                      |
+| Typed data whose domain names a chain other than the session's                                                                     | `invalidTypedData` (same flag)                             | Never (see D2)                                                                                                           |
+| `from` is not the wallet's address                                                                                                 | `send()` in `eth/services/wallet-connect.services.ts`      | Never: another account                                                                                                   |
+| No `to` (contract deployment)                                                                                                      | `send()`, `unknown_destination`                            | Never: the signer requires a destination (`EthSignTransactionRequest.to : text` in `src/declarations/signer/signer.did`) |
 
 **Bitcoin** (`signPsbt` in `src/frontend/src/btc/services/wallet-connect.services.ts`): every
 refusal is **Never**. Signing off mainnet (OISY uses one key for every Bitcoin network, so a
@@ -207,8 +208,11 @@ fees), since this one may now be signed.
 no way out: the refusal is stated as today, without the pointer to the switch and without the
 checkbox.
 
-**EVM token OISY does not list.** Not unlockable, so the switch changes nothing there. The notice
-tells the user how to proceed instead: add the token to OISY, and the request is reviewed in full.
+**EVM token OISY does not list.** The review reads the token's decimals and symbol from its
+contract. When the contract does not report decimals OISY can use, the review cannot state the
+amount, and the switch covers that like calldata that does not decode (D7). Only the review sees it,
+so it hands it to the modal, which names it in the acknowledgement handed to signing. Until the
+contract answers there is nothing to sign past, and Approve waits.
 
 **Never tier.** Unchanged, whether the switch is on or off, and never pointing to the switch.
 
@@ -267,8 +271,8 @@ No addresses, amounts, transaction data or app domains.
 11. Every Never-tier refusal behaves exactly as today, switch on or off.
 12. `sign()` refuses when it finds a refusal whose checkbox was not ticked on the review, or a
     Never-tier refusal, even with the switch on.
-13. The EVM review of a token OISY does not list tells the user to add the token, and offers no
-    checkbox.
+13. With the switch on, the EVM review of a token whose contract did not report its decimals offers
+    the checkbox, and signing counts the acknowledgement.
 14. Turning the switch on and signing through the way out emit the events in section 7, with no
     other properties.
 
@@ -278,7 +282,6 @@ No addresses, amounts, transaction data or app domains.
 
 - Specific reasons in place of Solana's single "can't all be shown accurately" (burn, authority
   change, several recipients), in the review text and in the analytics reason.
-- An inline "Add token" on the EVM review when the token is not listed.
 - A Retry on a Solana review whose decode or simulation failed.
 
 ---
@@ -313,3 +316,7 @@ No addresses, amounts, transaction data or app domains.
   review cannot state how much the spender may spend, like an instruction no run described. A token
   batch the run keeps whole and a token call signed for a multisig share the "can't be shown"
   refusal, and with it its tier.
+- **D7.** A token call on a token OISY does not list whose contract does not report decimals OISY
+  can use (an NFT contract, whose `approve` shares the ERC-20 selector, a non-standard token, or a
+  read that failed): Unlockable or Never. _Resolved:_ **Unlockable**: the review cannot state the
+  amount, as for calldata that does not decode, and nothing makes the request illegitimate.
