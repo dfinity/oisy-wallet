@@ -201,7 +201,6 @@
 			return;
 		}
 
-		countingBalance = 0;
 		const startsAt = performance.now() + balanceStart;
 		let frame = 0;
 		let active = true;
