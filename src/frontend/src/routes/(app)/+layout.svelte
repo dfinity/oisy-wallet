@@ -123,7 +123,10 @@
 					{#snippet menu()}
 						<NavigationMenu>
 							{#if assetsRoute}
-								<DappsCarousel wrapperStyleClass="hidden xl:flex" />
+								<!-- Pinned above Settings and More, so hidden in windows up to 480px
+								     tall (`h-xs:`), where the three would not fit and More would
+								     end up below the window. -->
+								<DappsCarousel wrapperStyleClass="hidden xl:flex h-xs:hidden" />
 							{/if}
 						</NavigationMenu>
 					{/snippet}
