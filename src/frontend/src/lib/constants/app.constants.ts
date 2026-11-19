@@ -301,8 +301,9 @@ export const NFT_MAX_FILESIZE_LIMIT = 1024 * 1024 * 10;
 // Longest side, in pixels, of the PNG an SVG NFT is drawn into for cards and logos: sharp on a card at 3x pixel density
 export const NFT_THUMBNAIL_MAX_SIZE = 512;
 
-// SVG NFTs are drawn one at a time, so one that never loads must not hold up the others
-export const NFT_THUMBNAIL_DECODE_TIMEOUT_MILLIS = 20_000;
+// Bounds both the media type check and the SVG load: a host that never answers must neither leave its card empty nor
+// hold up the other SVGs, which are drawn one at a time
+export const NFT_THUMBNAIL_TIMEOUT_MILLIS = 20_000;
 
 // ZERO ETH address
 export const ZERO_ETH_ADDRESS = '0x0000000000000000000000000000000000000000';

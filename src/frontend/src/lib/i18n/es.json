@@ -2715,9 +2715,7 @@
 		"text": {
 			"next_slide": "Siguiente diapositiva",
 			"prev_slide": "Diapositiva anterior",
-			"indicator": "Saltar a la diapositiva $index",
-			"cksol_slide_title": "ckSOL ya está aquí: SOL en Internet Computer",
-			"cksol_slide_cta": "Abrir ckSOL"
+			"indicator": "Saltar a la diapositiva $index"
 		}
 	},
 	"agreements": {

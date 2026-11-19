@@ -1,7 +1,4 @@
-import {
-	NFT_THUMBNAIL_DECODE_TIMEOUT_MILLIS,
-	NFT_THUMBNAIL_MAX_SIZE
-} from '$lib/constants/app.constants';
+import { NFT_THUMBNAIL_MAX_SIZE, NFT_THUMBNAIL_TIMEOUT_MILLIS } from '$lib/constants/app.constants';
 import { isSvgMedia } from '$lib/services/url.services';
 import { withTimeout } from '$lib/utils/timeout.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -20,7 +17,7 @@ const drawThumbnail = async (url: string): Promise<string> => {
 	try {
 		await withTimeout({
 			promise: image.decode(),
-			milliseconds: NFT_THUMBNAIL_DECODE_TIMEOUT_MILLIS
+			milliseconds: NFT_THUMBNAIL_TIMEOUT_MILLIS
 		});
 
 		const { naturalWidth, naturalHeight } = image;
@@ -64,7 +61,12 @@ const enqueueDrawThumbnail = (url: string): Promise<string> => {
 
 const createThumbnail = async (url: string): Promise<string | undefined> => {
 	try {
-		if (!(await isSvgMedia(url))) {
+		if (
+			!(await withTimeout({
+				promise: isSvgMedia(url),
+				milliseconds: NFT_THUMBNAIL_TIMEOUT_MILLIS
+			}))
+		) {
 			return;
 		}
 
