@@ -2,7 +2,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import FeatureCards from '$lib/components/auth/FeatureCards.svelte';
-	import LandingWalletPreview from '$lib/components/auth/LandingWalletPreview.svelte';
 	import SignupsClosedBanner from '$lib/components/auth/SignupsClosedBanner.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import { MOTION_REDUCED_FADE_DURATION } from '$lib/constants/transition.constants';
@@ -19,8 +18,14 @@
 		<HeroSignIn />
 	</div>
 
-	<div class="flex w-full justify-center">
-		<LandingWalletPreview />
+	<div class="landing-enter artwork flex w-full justify-center">
+		<div class="aspect-[1080/752] w-[90%]">
+			{#await import('$lib/components/auth/LandingWalletPreview.svelte') then { default: LandingWalletPreview }}
+				<LandingWalletPreview />
+			{:catch}
+				<!-- Keep the reserved space if the decorative artwork fails to load. -->
+			{/await}
+		</div>
 	</div>
 
 	<div class="landing-enter features w-full sm:-mt-48">
@@ -47,10 +52,20 @@
 		}
 	}
 
+	.artwork {
+		animation-name: none;
+	}
+
 	.features {
 		// Opacity/filter on an ancestor prevent Chrome from blurring the cards' backdrop.
 		animation-name: landing-rise;
 		animation-delay: 200ms;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.artwork:has(:global(svg)) {
+			animation-name: landing-rise;
+		}
 	}
 
 	@keyframes landing-enter {
@@ -88,6 +103,7 @@
 		.landing-enter {
 			animation: landing-fade var(--landing-reduced-duration) ease-out backwards;
 		}
+		.artwork,
 		.features {
 			animation: none;
 		}

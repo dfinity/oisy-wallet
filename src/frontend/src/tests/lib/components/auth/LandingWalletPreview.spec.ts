@@ -6,25 +6,65 @@ import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
 describe('LandingWalletPreview', () => {
-	it('increases the balance four times as the example token rows appear', () => {
+	it('shows the exact final balance immediately when motion is disabled', () => {
 		const { container } = render(LandingWalletPreview);
-		const amounts = Array.from(
-			container.querySelectorAll<SVGTextElement>('.portfolio-balance text')
-		);
-		const rows = Array.from(container.querySelectorAll<SVGGElement>('.token-row'));
 
-		expect(amounts.map(({ textContent }) => textContent)).toEqual([
-			'$0.00',
-			'$5,249.84',
-			'$16,958.22',
-			'$21,946.79',
-			'$28,406.15'
-		]);
-		expect(amounts.slice(1).map(({ style }) => style.getPropertyValue('--balance-start'))).toEqual(
-			[rows[0], rows[1], rows[2], rows[4]].map(({ style }) =>
-				style.getPropertyValue('--token-delay')
-			)
-		);
+		expect(
+			container.querySelector('.portfolio-balance text[visibility="visible"]')
+		).toHaveTextContent('$28,406.15');
+	});
+
+	it('counts up at a fixed right edge and settles on the exact amount', async () => {
+		const query = window.matchMedia('(prefers-reduced-motion: no-preference)');
+		vi.mocked(window.matchMedia).mockReturnValueOnce({ ...query, matches: true });
+		const clock = vi.spyOn(performance, 'now').mockReturnValue(1_000);
+		let runFrame: FrameRequestCallback = () => {};
+		const raf = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+			runFrame = callback;
+			return 1;
+		});
+		const ready = Promise.resolve();
+		Object.defineProperty(document, 'fonts', { configurable: true, value: { ready } });
+
+		try {
+			const { container, getByText, unmount } = render(LandingWalletPreview);
+			const finalAmount = container.querySelector('.portfolio-balance text');
+
+			expect(finalAmount).toHaveAttribute('visibility', 'hidden');
+
+			Object.defineProperty(finalAmount, 'getComputedTextLength', { value: () => 160 });
+			await ready;
+			await tick();
+
+			const counter = getByText('$0.00');
+
+			expect(counter).toHaveAttribute('x', '638');
+			expect(counter).toHaveAttribute('text-anchor', 'end');
+
+			runFrame(1_300);
+			await tick();
+
+			expect(counter).toHaveTextContent('$12,263.00');
+
+			runFrame(1_600);
+			await tick();
+
+			expect(counter).toHaveTextContent('$25,979.00');
+			expect(counter).toHaveAttribute('x', '638');
+
+			runFrame(1_790);
+			await tick();
+
+			expect(counter).not.toBeInTheDocument();
+			expect(finalAmount).toHaveAttribute('visibility', 'visible');
+			expect(finalAmount).toHaveTextContent('$28,406.15');
+
+			unmount();
+		} finally {
+			Reflect.deleteProperty(document, 'fonts');
+			raf.mockRestore();
+			clock.mockRestore();
+		}
 	});
 
 	describe('localized labels', () => {

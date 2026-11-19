@@ -1,4 +1,8 @@
+<!-- Ship the scoped styles in the lazy module so the app shell cannot link them eagerly. -->
+<svelte:options css="injected" />
+
 <script lang="ts">
+	import { quadOut } from 'svelte/easing';
 	import bitcoin from '$btc/assets/bitcoin.svg?inline';
 	import usdCoin from '$eth/assets/usdc.svg?inline';
 	import internetComputer from '$icp/assets/icp-light.svg?inline';
@@ -178,19 +182,62 @@
 		}
 	];
 
-	const sumPortfolio = (tokenCount: number): number =>
-		tokens.slice(0, tokenCount).reduce((cents, { value }) => cents + Math.round(value * 100), 0) /
-		100;
-	const portfolioBalance = sumPortfolio(tokens.length);
-	const finalBalanceStart = tokens[tokens.length - 1].revealAt;
-	// The first three rows update the balance individually. The last two share the final update.
-	const balanceStarts = [0, ...tokens.slice(0, 3).map(({ revealAt }) => revealAt)];
-	const balanceSteps = balanceStarts.map((start, index) => ({
-		value: sumPortfolio(index),
-		start,
-		duration: (balanceStarts[index + 1] ?? finalBalanceStart) - start
-	}));
-	const networkMenuDelay = finalBalanceStart + tokenDuration;
+	const portfolioBalance =
+		tokens.reduce((cents, { value }) => cents + Math.round(value * 100), 0) / 100;
+	const balanceStart = tokens[0].revealAt;
+	const tokenRowsEnd = tokens[tokens.length - 1].revealAt + tokenDuration;
+	const balanceDuration = tokenRowsEnd - balanceStart;
+	// Give the final animation frame time to paint before the menu opens.
+	const networkMenuDelay = tokenRowsEnd + 32;
+	const balanceCenter = 558;
+	let countingBalance = $state<number>();
+	let balanceRight = $state<number>();
+
+	const countPortfolioBalance = (reference: SVGTextElement) => {
+		const motion = window.matchMedia('(prefers-reduced-motion: no-preference)');
+		const { fonts } = reference.ownerDocument;
+
+		if (!motion.matches || !fonts) {
+			return;
+		}
+
+		countingBalance = 0;
+		const startsAt = performance.now() + balanceStart;
+		let frame = 0;
+		let active = true;
+
+		const finish = () => {
+			active = false;
+			cancelAnimationFrame(frame);
+			motion.removeEventListener('change', finish);
+			countingBalance = undefined;
+		};
+
+		const update = (now: number) => {
+			const progress = Math.max(0, (now - startsAt) / balanceDuration);
+
+			if (progress >= 1) {
+				finish();
+				return;
+			}
+
+			countingBalance = Math.floor(portfolioBalance * quadOut(progress));
+			frame = requestAnimationFrame(update);
+		};
+
+		motion.addEventListener('change', finish);
+		void fonts.ready.then(() => {
+			if (!active) {
+				return;
+			}
+
+			// Reserve the final amount's right edge once, so new digits grow leftward.
+			balanceRight = balanceCenter + reference.getComputedTextLength() / 2;
+			frame = requestAnimationFrame(update);
+		});
+
+		return finish;
+	};
 
 	const networks = [
 		{ name: 'Bitcoin', icon: bitcoinNetwork, value: bitcoinBalance },
@@ -314,7 +361,7 @@
 	style:--frame-stroke-width={frameStrokeWidth}
 	style:--network-menu-delay={`${networkMenuDelay}ms`}
 	style:--token-duration={`${tokenDuration}ms`}
-	class="preview block h-auto w-[90%] decorative-motion"
+	class="preview block h-auto w-full decorative-motion"
 	{@attach fitLocalizedLabels}
 	aria-label={replaceOisyPlaceholders($i18n.auth.alt.preview)}
 	height="1504"
@@ -368,25 +415,25 @@
 		<g class="muted" transform="translate(108 211)"><IconClock size="16" /></g>
 		<text class="muted" font-size="12" x="134" y="223">{$i18n.navigation.text.activity}</text>
 
-		<rect fill="url(#{portfolioGradient})" height="166" rx="19" width="388" x="364" y="92" />
-		<g class="portfolio-balance on-gradient" font-size="32" font-weight="700" text-anchor="middle">
-			{#each balanceSteps as { value, start, duration } (start)}
+		<g class="desktop-entrance">
+			<rect fill="url(#{portfolioGradient})" height="166" rx="19" width="388" x="364" y="92" />
+			<g class="portfolio-balance on-gradient" font-size="32" font-weight="700">
 				<text
-					style:--balance-start={`${start}ms`}
-					style:--balance-duration={`${duration}ms`}
-					class="balance-step"
-					x="558"
-					y="153">{currency.format(value)}</text
+					{@attach countPortfolioBalance}
+					text-anchor="middle"
+					visibility={countingBalance === undefined ? 'visible' : 'hidden'}
+					x={balanceCenter}
+					y="153">{currency.format(portfolioBalance)}</text
 				>
-			{/each}
-			<text style:--balance-start={`${finalBalanceStart}ms`} class="balance-total" x="558" y="153"
-				>{currency.format(portfolioBalance)}</text
+				{#if countingBalance !== undefined && balanceRight !== undefined}
+					<text text-anchor="end" x={balanceRight} y="153">{currency.format(countingBalance)}</text>
+				{/if}
+			</g>
+			<text class="on-gradient" font-size="14" text-anchor="middle" x="558" y="176"
+				>{$i18n.hero.text.available_balance}</text
 			>
+			<g transform="translate(378 205)">{@render balanceActions(desktopActions, 86)}</g>
 		</g>
-		<text class="on-gradient" font-size="14" text-anchor="middle" x="558" y="176"
-			>{$i18n.hero.text.available_balance}</text
-		>
-		<g transform="translate(378 205)">{@render balanceActions(desktopActions, 86)}</g>
 
 		<svg height="22" overflow="hidden" width="303" x="366" y="275">
 			<text font-size="12" font-weight="700" y="16">
@@ -425,35 +472,37 @@
 			</g>
 		{/each}
 
-		<rect
-			class="network-trigger-fill"
-			height="27"
-			rx="9"
-			width={networkTriggerWidth}
-			x={networkTriggerX}
-			y="93"
-		/>
-		<image
-			class="invert-on-dark-theme"
-			height="17"
-			href={allNetworks}
-			width="17"
-			x={networkTriggerX + 10}
-			y="98"
-		/>
-		<svg
-			height="27"
-			overflow="hidden"
-			width={networkTriggerWidth - 59}
-			x={networkTriggerX + 32}
-			y="93"
-		>
-			<text font-size="11" y="17">{$i18n.networks.chain_fusion}</text>
-		</svg>
-		<g transform="translate(889 100)">
-			<g class="network-chevron"><IconExpandMore size="13" /></g>
+		<g class="desktop-entrance">
+			<rect
+				class="network-trigger-fill"
+				height="27"
+				rx="9"
+				width={networkTriggerWidth}
+				x={networkTriggerX}
+				y="93"
+			/>
+			<image
+				class="invert-on-dark-theme"
+				height="17"
+				href={allNetworks}
+				width="17"
+				x={networkTriggerX + 10}
+				y="98"
+			/>
+			<svg
+				height="27"
+				overflow="hidden"
+				width={networkTriggerWidth - 59}
+				x={networkTriggerX + 32}
+				y="93"
+			>
+				<text font-size="11" y="17">{$i18n.networks.chain_fusion}</text>
+			</svg>
+			<g transform="translate(889 100)">
+				<g class="network-chevron"><IconExpandMore size="13" /></g>
+			</g>
+			{@render headerControls(921, 93)}
 		</g>
-		{@render headerControls(921, 93)}
 
 		<g transform="translate(700 123)">
 			<g class="network-menu">
@@ -637,29 +686,15 @@
 		}
 	}
 
-	.portfolio-balance {
-		font-variant-numeric: tabular-nums;
-	}
-
-	.balance-step {
-		opacity: 0;
-	}
-
 	@media (prefers-reduced-motion: no-preference) {
+		.desktop-entrance {
+			animation: reveal-wallet-detail 220ms ease-out backwards;
+		}
+
 		.phone {
 			transform-box: fill-box;
 			transform-origin: bottom center;
 			animation: settle-phone 400ms cubic-bezier(0.23, 1, 0.32, 1) 60ms backwards;
-		}
-
-		.balance-step {
-			animation: lift-balance var(--balance-duration) ease-out var(--balance-start);
-		}
-
-		.balance-total {
-			animation:
-				show-balance-total 1ms step-start var(--balance-start) backwards,
-				lift-balance var(--token-duration) ease-out var(--balance-start);
 		}
 
 		.token-row {
@@ -677,27 +712,6 @@
 
 		.network-menu {
 			animation: reveal-menu 240ms ease-out var(--network-menu-delay) backwards;
-		}
-	}
-
-	@keyframes lift-balance {
-		from {
-			opacity: 0.8;
-			transform: translateY(2px);
-		}
-		40%,
-		to {
-			opacity: 1;
-			transform: none;
-		}
-	}
-
-	@keyframes show-balance-total {
-		from {
-			visibility: hidden;
-		}
-		to {
-			visibility: visible;
 		}
 	}
 

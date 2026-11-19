@@ -12,8 +12,10 @@ describe('LandingPage', () => {
 	it('keeps the same accessible vector preview and intrinsic size across theme changes', async () => {
 		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
 		themeStore.select(Theme.LIGHT);
-		const { getByRole } = render(LandingPage);
-		const image = getByRole('img', { name: replaceOisyPlaceholders(get(i18n).auth.alt.preview) });
+		const { findByRole, getByRole } = render(LandingPage);
+		const image = await findByRole('img', {
+			name: replaceOisyPlaceholders(get(i18n).auth.alt.preview)
+		});
 
 		expect(image).toHaveAttribute('viewBox', '0 0 1080 752');
 		expect(image).toHaveAttribute('width', '2160');
