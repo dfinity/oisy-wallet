@@ -23,7 +23,9 @@
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
 	import IconQr from '$lib/components/icons/IconQr.svelte';
+	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
+	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import IconUser from '$lib/components/icons/IconUser.svelte';
 	import IconAstronautHelmet from '$lib/components/icons/icon-astronaut/IconAstronautHelmet.svelte';
 	import IconlyBuy from '$lib/components/icons/iconly/IconlyBuy.svelte';
@@ -131,8 +133,41 @@
 		new Intl.NumberFormat($i18n.lang, { style: 'currency', currency: 'USD' })
 	);
 	const transactionDate = $derived(
-		new Intl.DateTimeFormat($i18n.lang, { month: 'long', day: 'numeric', timeZone: 'UTC' })
+		new Intl.DateTimeFormat($i18n.lang, {
+			month: 'long',
+			day: 'numeric',
+			year: 'numeric',
+			timeZone: 'UTC'
+		})
 	);
+	const transactionTime = $derived(
+		new Intl.DateTimeFormat($i18n.lang, {
+			hour: '2-digit',
+			minute: '2-digit',
+			hourCycle: 'h23',
+			timeZone: 'UTC'
+		})
+	);
+	const phoneTransactions = [
+		{
+			direction: 'send',
+			address: 'bc1qwm5...93rtylq',
+			amount: '-0.05 BTC',
+			timestamp: Date.UTC(2025, 1, 27, 15, 32)
+		},
+		{
+			direction: 'receive',
+			address: 'bc1qc6g...kjh5n9z',
+			amount: '+0.01 BTC',
+			timestamp: Date.UTC(2025, 0, 15, 13, 27)
+		},
+		{
+			direction: 'send',
+			address: 'bc1qc6g...kjh5n9z',
+			amount: '-0.02 BTC',
+			timestamp: Date.UTC(2024, 10, 21, 14, 18)
+		}
+	] as const;
 
 	const tokens = [
 		{
@@ -347,13 +382,33 @@
 	>
 {/snippet}
 
-{#snippet transaction(y: number, title: string, amount: string, time: string)}
-	<image height="25" href={bitcoin} width="25" x="39" {y} />
-	<svg height="25" overflow="hidden" width="128" x="75" {y}>
-		<text font-size="11" font-weight="700" y="10">{title}</text>
+{#snippet transaction(y: number, row: (typeof phoneTransactions)[number])}
+	{@const incoming = row.direction === 'receive'}
+	{@const DirectionIcon = incoming ? IconReceive : IconSend}
+	<image height="27" href={bitcoin} width="27" x="39" {y} />
+	<g transform="translate(62 {y + 22})">
+		<circle
+			fill="var(--color-background-primary)"
+			r="7"
+			stroke="var(--color-border-brand-subtle-20)"
+		/>
+		<g transform="translate(-5 -5)"><DirectionIcon size="10" /></g>
+	</g>
+	<svg height="28" overflow="hidden" width="130" x="76" {y}>
+		<text font-size="11" font-weight="700" y="10">
+			{incoming ? $i18n.receive.text.receive : $i18n.send.text.send}<tspan dx="4">₿</tspan>
+		</text>
+		<text font-size="10" y="24">
+			{incoming ? $i18n.transaction.text.from : $i18n.transaction.text.to}
+			{row.address}
+		</text>
 	</svg>
-	<text font-size="10" font-weight="700" text-anchor="end" x="267" y={y + 10}>{amount}</text>
-	<text class="muted" font-size="8" text-anchor="end" x="267" y={y + 24}>{time}</text>
+	<text class:incoming font-size="10" font-weight="700" text-anchor="end" x="267" y={y + 10}
+		>{row.amount}</text
+	>
+	<text class="muted" font-size="8" text-anchor="end" x="267" y={y + 24}
+		>{transactionTime.format(row.timestamp)}</text
+	>
 {/snippet}
 
 <svg
@@ -556,15 +611,11 @@
 			<g transform="translate(43 394)">{@render balanceActions(phoneActions, 51)}</g>
 
 			<text font-size="12" font-weight="700" x="35" y="468">{$i18n.transactions.text.title}</text>
-			<text class="muted" font-size="11" x="37" y="494"
-				>{transactionDate.format(Date.UTC(2026, 8, 15))}</text
-			>
-			{@render transaction(507, $i18n.convert.text.convert_to_ckbtc, '-0.05 BTC', '15:32')}
-			{@render transaction(548, $i18n.receive.text.receive, '+0.01 BTC', '13:27')}
-			<text class="muted" font-size="11" x="37" y="605"
-				>{transactionDate.format(Date.UTC(2026, 8, 14))}</text
-			>
-			{@render transaction(620, $i18n.receive.text.receive, '+0.1 BTC', '14:18')}
+			{#each phoneTransactions as row, index (row.timestamp)}
+				{@const y = 489 + index * 68}
+				<text class="muted" font-size="12" x="37" {y}>{transactionDate.format(row.timestamp)}</text>
+				{@render transaction(y + 11, row)}
+			{/each}
 
 			<rect class="panel" height="67" width="252" x="27" y="678" />
 			{#each phoneTabs as { label, Icon }, index (label)}
@@ -623,6 +674,10 @@
 	.muted {
 		fill: var(--color-foreground-tertiary);
 		color: var(--color-foreground-tertiary);
+	}
+
+	.incoming {
+		fill: var(--color-foreground-success-primary);
 	}
 
 	.accent,
