@@ -2715,9 +2715,7 @@
 		"text": {
 			"next_slide": "Следующий слайд",
 			"prev_slide": "Предыдущий слайд",
-			"indicator": "Перейти к слайду $index",
-			"cksol_slide_title": "ckSOL уже здесь: SOL в сети Internet Computer",
-			"cksol_slide_cta": "Открыть ckSOL"
+			"indicator": "Перейти к слайду $index"
 		}
 	},
 	"agreements": {
