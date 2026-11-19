@@ -134,6 +134,28 @@ describe('NftHideButton', () => {
 		});
 	});
 
+	it('shows the collection name as plain text in the confirmation', async () => {
+		const name =
+			'</b><h1>Title</h1><img src="https://example.com/a.png"><a href="https://example.com">link</a><b>';
+
+		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId('123') }]);
+
+		const { getByTestId } = render(NftHideButton, {
+			props: { token: { ...mockToken, name }, source: 'gallery' }
+		});
+
+		await fireEvent.click(getByTestId(NFT_COLLECTION_ACTION_HIDE));
+
+		await waitFor(() => {
+			const modal = getByTestId(CONFIRMATION_MODAL);
+
+			expect(modal.querySelector('b')?.textContent).toBe(name);
+			expect(modal.querySelector('h1')).toBeNull();
+			expect(modal.querySelector('img')).toBeNull();
+			expect(modal.querySelector('a')).toBeNull();
+		});
+	});
+
 	it('renders plain Hide button when collection has just one NFT', async () => {
 		nftStore.addAll([mockNft]);
 

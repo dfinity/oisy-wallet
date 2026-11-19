@@ -1,13 +1,18 @@
 <script lang="ts">
-	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 	import { setContext } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import { CYCLES_SEND_OR_TOP_UP_ENABLED } from '$env/cycles-top-up.env';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledErc4626Tokens } from '$eth/derived/erc4626.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
+	import CyclesSendOrTopUp from '$icp/components/cycles-top-up/CyclesSendOrTopUp.svelte';
+	import CyclesTopUpWizard from '$icp/components/cycles-top-up/CyclesTopUpWizard.svelte';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
+	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
 	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
 	import SendNftsList from '$lib/components/send/SendNftsList.svelte';
@@ -15,7 +20,6 @@
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
-	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import {
 		allSendNftsWizardSteps,
@@ -39,11 +43,13 @@
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { pageCollectionNfts, pageNft } from '$lib/derived/page-nft.derived';
+	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { enabledTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
-	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { WizardStepsCyclesTopUp, WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { loadTokenAndRun } from '$lib/services/token.services';
+	import { COLORED_NETWORK_LOGOS_CONTEXT_KEY } from '$lib/stores/colored-network-logos.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
@@ -60,6 +66,7 @@
 	import type { OptionToken, Token, TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import {
 		isNetworkIdBTCMainnet,
 		isNetworkIdBTCTestnet,
@@ -131,18 +138,44 @@
 	// Pinned by the "steps derivation reactivity" describe block in `SendModal.spec.ts`.
 	let hasPageNft = $derived(nonNullish($pageNft));
 
+	// Sending TCYCLES starts with a choice between sending them and topping up a canister, unless
+	// the send started from a scanned address, which is where the user wants to send to.
+	const isSendOrTopUp = (token: OptionToken): boolean =>
+		CYCLES_SEND_OR_TOP_UP_ENABLED && isNullish(initialModalData) && isTokenCyclesLedger(token);
+
+	let sendOrTopUp = $derived(isSendOrTopUp($token));
+
 	let steps = $derived(
 		isTransactionsPage
-			? sendWizardStepsWithQrCodeScan({ i18n: $i18n, minting: $isIcMintingAccount, burning })
+			? sendWizardStepsWithQrCodeScan({
+					i18n: $i18n,
+					minting: $isIcMintingAccount,
+					burning,
+					sendOrTopUp
+				})
 			: isNftsPage
 				? hasPageNft
 					? sendNftsWizardStepsWithQrCodeScan({ i18n: $i18n })
 					: allSendNftsWizardSteps({ i18n: $i18n })
-				: allSendWizardSteps({ i18n: $i18n, minting: $isIcMintingAccount, burning })
+				: allSendWizardSteps({
+						i18n: $i18n,
+						minting: $isIcMintingAccount,
+						burning,
+						// Whatever token is picked: picking one must not change the steps, which would
+						// send the wizard back to the list.
+						sendOrTopUp: CYCLES_SEND_OR_TOP_UP_ENABLED && isNullish(initialModalData)
+					})
 	);
 
-	let currentStep = $state<WizardStep<WizardStepsSend> | undefined>();
-	let modal = $state<WizardModal<WizardStepsSend>>();
+	let currentStep = $state<WizardStep<WizardStepsSend | WizardStepsCyclesTopUp> | undefined>();
+	let modal = $state<WizardModal<WizardStepsSend | WizardStepsCyclesTopUp>>();
+
+	let showCyclesTopUpWizard = $derived(
+		currentStep?.name === WizardStepsCyclesTopUp.CANISTER ||
+			currentStep?.name === WizardStepsCyclesTopUp.AMOUNT ||
+			currentStep?.name === WizardStepsCyclesTopUp.REVIEW ||
+			currentStep?.name === WizardStepsCyclesTopUp.TOPPING_UP
+	);
 	let selectedNft = $state.raw<Nft | undefined>($pageNft);
 
 	// `$pageNft` can be undefined during NFT store refreshes; do not clear a manual list selection.
@@ -161,11 +194,17 @@
 			filterZeroBalance: true,
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore
 			// svelte-ignore state_referenced_locally -- the modal-tokens-list context is initialized once at mount; the reactive `lockedNetwork` (a $derived) is consumed downstream by `SendTokensList`'s view-only lock.
-			filterNetwork: lockedNetwork ?? $selectedNetwork
+			filterNetwork: lockedNetwork ?? $selectedNetwork,
+			// The asset type filter applies on the assets page only, like the hero's balance.
+			filterCategoryTag: isRouteTokens(page) ? $tokenCategoryFilter : undefined
 		})
 	);
 
 	setContext<boolean>(SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY, nonNullish(initialModalData));
+
+	// The same token can be held on several networks, and the amount field names the one it is
+	// sent on, so network logos here are in their brand colour, as in the swap modal.
+	setContext(COLORED_NETWORK_LOGOS_CONTEXT_KEY, true);
 
 	const reset = () => {
 		destination = '';
@@ -245,15 +284,23 @@
 
 		const skip = shouldSkipDestinationStep({ destination, token });
 
+		// TCYCLES starts over at the choice even with an address that would skip its step, such as
+		// one entered for another token: Send then asks for it again, filled in.
 		// eslint-disable-next-line require-await
 		const callback = async () => {
-			goToStep(skip ? WizardStepsSend.SEND : WizardStepsSend.DESTINATION);
+			goToStep(
+				isSendOrTopUp(token)
+					? WizardStepsSend.SEND_OR_TOP_UP
+					: skip
+						? WizardStepsSend.SEND
+						: WizardStepsSend.DESTINATION
+			);
 		};
 
 		await loadTokenAndRun({ token, callback });
 	};
 
-	const goToStep = (stepName: WizardStepsSend) => {
+	const goToStep = (stepName: WizardStepsSend | WizardStepsCyclesTopUp) => {
 		if (nonNullish(modal)) {
 			goToWizardStep({
 				modal,
@@ -261,6 +308,15 @@
 				stepName
 			});
 		}
+	};
+
+	// A top-up starts without the address Send had, as it starts without its own canister ID, so
+	// that Send after it asks for a new one: the address entered before is easily sent to unnoticed.
+	const startTopUp = () => {
+		destination = '';
+		selectedContact = undefined;
+
+		goToStep(WizardStepsCyclesTopUp.CANISTER);
 	};
 
 	const onDecodeQrCode = ({
@@ -306,7 +362,7 @@
 	<WizardModal
 		bind:this={modal}
 		disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
-			currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
+			currentStep?.name === WizardStepsCyclesTopUp.TOPPING_UP}
 		onClose={close}
 		{steps}
 		testId={SEND_TOKENS_MODAL}
@@ -333,30 +389,39 @@
 				bind:amount
 				bind:sendProgressStep
 			/>
+		{:else if showCyclesTopUpWizard && isTokenCyclesLedger($token)}
+			<!-- Its steps share one wizard too, which holds the top-up while it is on its way. -->
+			<CyclesTopUpWizard
+				{currentStep}
+				{modal}
+				onBack={() => goToStep(WizardStepsSend.SEND_OR_TOP_UP)}
+				onClose={close}
+				{steps}
+				token={$token}
+			/>
 		{:else}
 			{#key currentStep?.name}
 				{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
-					<SendTokensList
-						{lockedNetwork}
-						onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
-						{onSendToken}
+					<SendTokensList {lockedNetwork} {onSendToken} />
+				{:else if currentStep?.name === WizardStepsSend.SEND_OR_TOP_UP && isTokenCyclesLedger($token)}
+					<CyclesSendOrTopUp
+						formCancelAction={isTransactionsPage ? 'close' : 'back'}
+						onBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+						onClose={close}
+						onSend={() => goToStep(WizardStepsSend.DESTINATION)}
+						onTopUp={startTopUp}
+						token={$token}
 					/>
 				{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
-					<SendNftsList
-						onSelect={selectNft}
-						onSelectNetwork={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
-					/>
-				{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
-					<ModalNetworksFilter
-						onNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-						showStakeBalance={false}
-					/>
+					<SendNftsList onSelect={selectNft} />
 				{:else if currentStep?.name === WizardStepsSend.DESTINATION}
 					<SendDestinationWizardStep
-						formCancelAction={isTransactionsPage || (isNftsPage && nonNullish($pageNft))
+						formCancelAction={!sendOrTopUp &&
+						(isTransactionsPage || (isNftsPage && nonNullish($pageNft)))
 							? 'close'
 							: 'back'}
-						onBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+						onBack={() =>
+							goToStep(sendOrTopUp ? WizardStepsSend.SEND_OR_TOP_UP : WizardStepsSend.TOKENS_LIST)}
 						onClose={close}
 						onNext={modal.next}
 						onQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}

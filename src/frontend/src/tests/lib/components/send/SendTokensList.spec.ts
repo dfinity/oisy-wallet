@@ -12,8 +12,7 @@ import { render } from '@testing-library/svelte';
 const renderSendTokensList = ({ scannerDriven = false }: { scannerDriven?: boolean } = {}) =>
 	render(SendTokensList, {
 		props: {
-			onSendToken: vi.fn(),
-			onSelectNetworkFilter: vi.fn()
+			onSendToken: vi.fn()
 		},
 		context: new Map<symbol, unknown>([
 			[

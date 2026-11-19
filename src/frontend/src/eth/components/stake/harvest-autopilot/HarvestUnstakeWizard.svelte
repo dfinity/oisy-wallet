@@ -19,6 +19,8 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { isSendOutcomeUnknown } from '$eth/utils/eth-error.utils';
+	import { findEthersError } from '$eth/utils/eth.utils';
 	import { getHarvestAutopilotBaseTrackingMetadata } from '$eth/utils/harvest-autopilots.utils';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import UnstakeProgress from '$lib/components/stake/UnstakeProgress.svelte';
@@ -32,7 +34,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
 	import type { Vault } from '$lib/types/vaults';
@@ -246,7 +248,8 @@
 			const errorMessage =
 				errorDetailToString(error) ?? $i18n.stake.error.unexpected_error_on_unstake;
 			const errorName = error instanceof Error ? error.name : undefined;
-			const errorCode = (error as { code?: string }).code;
+			// The withdrawal may have wrapped the ethers error to say what became of its transaction.
+			const errorCode = findEthersError(error)?.code ?? (error as { code?: string }).code;
 
 			trackEvent({
 				name: PLAUSIBLE_EVENTS.UNSTAKE,
@@ -260,6 +263,19 @@
 					...(nonNullish(errorCode) ? { result_error_code: errorCode } : {})
 				}
 			});
+
+			// A withdrawal that may have reached the network is not offered again from the review: sent
+			// again, it would be signed with the next nonce, and both could execute.
+			if (isSendOutcomeUnknown(error)) {
+				toastsErrorNoTrace({
+					msg: { text: $i18n.send.error.ethereum_transaction_unconfirmed },
+					err: error
+				});
+
+				onClose();
+
+				return;
+			}
 
 			toastsError({
 				msg: { text: $i18n.stake.error.unexpected_error_on_unstake },

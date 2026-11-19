@@ -1,4 +1,5 @@
 import { ICP_EXPLORER_URL } from '$env/explorers.env';
+import icpIconColored from '$icp/assets/icp-light.svg';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import icpIcon from '$lib/assets/networks/icp.svg';
 import { LOCAL } from '$lib/constants/app.constants';
@@ -46,6 +47,7 @@ export const ICP_NETWORK: Network = {
 	env: 'mainnet',
 	name: 'Internet Computer',
 	icon: icpIcon,
+	iconColored: icpIconColored,
 	explorerUrl: ICP_EXPLORER_URL,
 	supportsNft: true,
 	buy: { onramperId: 'icp' },

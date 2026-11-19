@@ -31,10 +31,13 @@ export interface LiquidiumReserve {
 	borrowApy: number; // percent
 	deposited: bigint; // base units
 	depositedDecimals: number;
-	borrowed: bigint; // base units (principal, excludes accrued interest)
+	// Base units: the whole outstanding debt (scaled debt × current borrow index), accrued interest
+	// included.
+	borrowed: bigint;
 	borrowedDecimals: number;
-	// Accrued borrow interest, base units. Always populated by `mapLiquidiumReserve`;
-	// optional only so existing reserve fixtures need not set it.
+	// Lifetime borrow interest, base units. Informational only: it is already part of `borrowed`,
+	// so it must never be added to it. Always populated by `mapLiquidiumReserve`; optional only so
+	// existing reserve fixtures need not set it.
 	debtInterest?: bigint;
 	suppliedUsd: number;
 	borrowedUsd: number;

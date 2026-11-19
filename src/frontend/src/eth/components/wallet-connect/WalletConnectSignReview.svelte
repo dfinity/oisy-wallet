@@ -9,11 +9,17 @@
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
+		unreviewableTypedDataAcknowledged?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
 	}
 
-	let { request, onApprove, onReject }: Props = $props();
+	let {
+		request,
+		unreviewableTypedDataAcknowledged = $bindable(false),
+		onApprove,
+		onReject
+	}: Props = $props();
 
 	let flaggedAsScam = $derived(!acceptedContext(request.verifyContext));
 
@@ -44,12 +50,18 @@
 		<WalletConnectScamWarning />
 	{/if}
 
-	<EthWalletConnectMessage {invalidTypedData} {request} {unreviewableTypedData} />
+	<EthWalletConnectMessage
+		{invalidTypedData}
+		{request}
+		{unreviewableTypedData}
+		bind:unreviewableTypedDataAcknowledged
+	/>
 
 	{#snippet toolbar()}
 		<WalletConnectActions
 			approve={!flaggedAsScam}
-			approveDisabled={invalidTypedData}
+			approveDisabled={invalidTypedData ||
+				(unreviewableTypedData && !unreviewableTypedDataAcknowledged)}
 			{onApprove}
 			{onReject}
 		/>

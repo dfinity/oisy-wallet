@@ -1,5 +1,6 @@
 import { retrieveBtc } from '$icp/api/ckbtc-minter.api';
 import { withdrawErc20, withdrawEth } from '$icp/api/cketh-minter.api';
+import { withdrawSol } from '$icp/api/cksol-minter.api';
 import { approve } from '$icp/api/icrc-ledger.api';
 import type { IcCkWithdrawalResult, IcTransferParams } from '$icp/types/ic-send';
 import type { IcCanisters, IcCkMetadata, IcCkToken } from '$icp/types/ic-token';
@@ -40,6 +41,41 @@ export const convertCkBTCToBtc = async ({
 	});
 
 	return { type: 'ckBtcToBtc', blockIndex };
+};
+
+/**
+ * Withdrawal ckSOL to SOL: the minter burns the approved ckSOL and sends the amount, minus its
+ * withdrawal fee, to `to`. A refusal arrives before the burn, so nothing has moved then.
+ */
+export const convertCkSolToSol = async ({
+	token: { ledgerCanisterId, minterCanisterId },
+	progress,
+	amount,
+	identity,
+	to
+}: IcTransferParams & {
+	token: IcCkToken;
+}): Promise<IcCkWithdrawalResult> => {
+	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_cksol_sol);
+
+	await approveTransfer({
+		canisters: { ledgerCanisterId, minterCanisterId },
+		identity,
+		progress,
+		amount,
+		to
+	});
+
+	progress?.(ProgressStepsSendIc.SEND);
+
+	const { block_index: blockIndex } = await withdrawSol({
+		identity,
+		minterCanisterId,
+		address: to,
+		amount
+	});
+
+	return { type: 'ckSolToSol', blockIndex };
 };
 
 /**

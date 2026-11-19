@@ -1,3 +1,5 @@
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
@@ -5,6 +7,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
 import * as exchanges from '$lib/derived/exchange.derived';
 import type { SwappableTokens } from '$lib/derived/swap.derived';
+import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { balancesStore } from '$lib/stores/balances.store';
 import { initSwapContext } from '$lib/stores/swap.store';
 import { bn1Bi, bn2Bi } from '$tests/mocks/balances.mock';
@@ -94,6 +97,27 @@ describe('swapStore', () => {
 		expect(get(destinationTokenExchangeRate)).toStrictEqual(ckBtcExchangeValue);
 	});
 
+	it('should forget the filters each side was set on when reset', () => {
+		const { getTokenListFilters, setTokenListFilters, reset } = initSwapContext();
+
+		const sourceFilters = { network: ICP_NETWORK, category: TokenCategoryTagValue.CRYPTO };
+		const destinationFilters = {
+			network: ETHEREUM_NETWORK,
+			category: TokenCategoryTagValue.STABLECOIN
+		};
+
+		setTokenListFilters({ side: 'source', filters: sourceFilters });
+		setTokenListFilters({ side: 'destination', filters: destinationFilters });
+
+		expect(getTokenListFilters('source')).toStrictEqual(sourceFilters);
+		expect(getTokenListFilters('destination')).toStrictEqual(destinationFilters);
+
+		reset();
+
+		expect(getTokenListFilters('source')).toBeUndefined();
+		expect(getTokenListFilters('destination')).toBeUndefined();
+	});
+
 	it('should reset all values', () => {
 		const {
 			sourceToken,
@@ -143,6 +167,63 @@ describe('swapStore', () => {
 		expect(get(lifiCarriedFee)).toBe(undefined);
 		expect(get(amountSetToMax)).toBeFalsy();
 		expect(get(lifiMaxFee)).toBeUndefined();
+	});
+
+	describe('markTwoSwapsHintShown', () => {
+		const hint = {
+			sourceTokenId: mockToken1.id,
+			destinationTokenId: mockToken2.id,
+			intermediateTokenId: mockValidErc20Token.id,
+			amount: 1
+		};
+
+		it('should count a hint once', () => {
+			const { markTwoSwapsHintShown } = initSwapContext();
+
+			expect(markTwoSwapsHintShown(hint)).toBeTruthy();
+			expect(markTwoSwapsHintShown({ ...hint })).toBeFalsy();
+		});
+
+		it.each([
+			{ field: 'source', change: { sourceTokenId: ETHEREUM_TOKEN.id } },
+			{ field: 'destination', change: { destinationTokenId: ETHEREUM_TOKEN.id } },
+			{ field: 'in-between token', change: { intermediateTokenId: ETHEREUM_TOKEN.id } },
+			{ field: 'amount', change: { amount: 2 } }
+		])('should count a hint with another $field', ({ change }) => {
+			const { markTwoSwapsHintShown } = initSwapContext();
+
+			markTwoSwapsHintShown(hint);
+
+			expect(markTwoSwapsHintShown({ ...hint, ...change })).toBeTruthy();
+		});
+
+		it('should count a hint again once the swap is reset', () => {
+			const { markTwoSwapsHintShown, reset } = initSwapContext();
+
+			markTwoSwapsHintShown(hint);
+			reset();
+
+			expect(markTwoSwapsHintShown(hint)).toBeTruthy();
+		});
+	});
+
+	describe('markTokensPriced', () => {
+		it('should return only the tokens not recorded before', () => {
+			const { markTokensPriced } = initSwapContext();
+
+			expect(markTokensPriced([mockValidErc20Token])).toEqual([mockValidErc20Token]);
+			expect(markTokensPriced([mockValidErc20Token, PEPE_TOKEN])).toEqual([PEPE_TOKEN]);
+			expect(markTokensPriced([mockValidErc20Token, PEPE_TOKEN])).toEqual([]);
+		});
+
+		it('should return the tokens again once the swap is reset', () => {
+			const { markTokensPriced, reset } = initSwapContext();
+
+			markTokensPriced([mockValidErc20Token]);
+			reset();
+
+			expect(markTokensPriced([mockValidErc20Token])).toEqual([mockValidErc20Token]);
+		});
 	});
 
 	// A held "Max" survives the steps that rebuild the form, but not a new source: the amount is

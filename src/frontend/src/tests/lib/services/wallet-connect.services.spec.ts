@@ -27,6 +27,7 @@ describe('wallet-connect.services', () => {
 	const mockListener = {
 		pair: vi.fn(),
 		approveSession: vi.fn(),
+		approvedNamespaces: vi.fn(),
 		rejectSession: vi.fn(),
 		attachHandlers: vi.fn(),
 		detachHandlers: vi.fn(),

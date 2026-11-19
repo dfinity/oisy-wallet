@@ -4,12 +4,22 @@ import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import type { BtcAddress } from '$btc/types/address';
 import type { UtxosFee } from '$btc/types/btc-send';
-import { convertNumberToSatoshis, isInvalidUtxosFee } from '$btc/utils/btc-send.utils';
-import type { ChainFusionDirection } from '$declarations/backend/backend.did';
+import {
+	convertNumberToSatoshis,
+	isDefinitiveBtcBroadcastRefusal,
+	isInvalidUtxosFee,
+	isUnclearBtcBroadcastOutcome
+} from '$btc/utils/btc-send.utils';
+import type {
+	ActiveUserTransaction,
+	ChainFusionDirection
+} from '$declarations/backend/backend.did';
+import type { WatchDepositAddressOk } from '$declarations/cksol_minter/cksol_minter.did';
 import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { send as sendEth } from '$eth/services/send.services';
 import type { EthAddress } from '$eth/types/address';
@@ -27,7 +37,16 @@ import {
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { estimateFee } from '$icp/api/ckbtc-minter.api';
 import { eip1559TransactionPrice } from '$icp/api/cketh-minter.api';
+import { minterInfo as ckSolMinterInfo, watchDepositAddress } from '$icp/api/cksol-minter.api';
+import { CkSolWatchDepositAddressError } from '$icp/canisters/cksol-minter.errors';
+import {
+	CKSOL_DEPOSIT_ADDRESS_RENT,
+	CKSOL_DEPOSIT_SWEEP_FEE,
+	CKSOL_LAST_SCAN_BEFORE_WINDOW_END_NANOS,
+	CKSOL_TRANSFER_LANDING_NANOS
+} from '$icp/constants/cksol.constants';
 import { icrcTokens } from '$icp/derived/icrc.derived';
+import { loadCkSolDepositAddress } from '$icp/services/cksol-deposit.services';
 import { sendIc } from '$icp/services/ic-send.services';
 import { btcAddressStore } from '$icp/stores/btc.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
@@ -36,20 +55,29 @@ import type { IcCkToken } from '$icp/types/ic-token';
 import {
 	isTokenCkBtcLedger,
 	isTokenCkErc20Ledger,
-	isTokenCkEthLedger
+	isTokenCkEthLedger,
+	isTokenCkSolLedger
 } from '$icp/utils/ic-send.utils';
+import { NANO_SECONDS_IN_MILLISECOND, ZERO } from '$lib/constants/app.constants';
+import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
+import { authIdentity } from '$lib/derived/auth.derived';
 import {
 	ProgressStepsSend,
 	ProgressStepsSendIc,
+	ProgressStepsSendSol,
 	ProgressStepsSwap
 } from '$lib/enums/progress-steps';
-import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
+import {
+	createActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import type { Address } from '$lib/types/address';
 import type { CanisterIdText } from '$lib/types/canister';
 import {
 	CHAIN_FUSION_EXTERNAL_REF_KEYS,
 	type ChainFusionExternalRefKey
 } from '$lib/types/chain-fusion-swap';
+import { ChainFusionSolDepositRefusedError } from '$lib/types/errors';
 import type { Amount } from '$lib/types/send';
 import {
 	SwapProvider,
@@ -58,10 +86,14 @@ import {
 	type ChainFusionSwapDetails,
 	type EvmQuoteParams,
 	type IcpBridgeQuoteParams,
-	type SwapMappedResult
+	type NearIntentsQuoteParams,
+	type SwapMappedResult,
+	type SwapQuoteObserver
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import { isActiveUserTransactionError } from '$lib/utils/active-user-transactions.utils';
 import {
+	hasChainFusionSolMintInFlight,
 	toChainFusionData,
 	toChainFusionDisplayRefs,
 	toChainFusionExternalRefs
@@ -71,7 +103,12 @@ import { consoleError } from '$lib/utils/console.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { parseToken } from '$lib/utils/parse.utils';
-import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import { getSolBalance, isBlockhashValid } from '$sol/api/solana.api';
+import { sendSol } from '$sol/services/sol-send.services';
+import type { SolAddress } from '$sol/types/address';
+import { SolanaNetworks } from '$sol/types/network';
+import { isSolSendRefusal } from '$sol/utils/sol-error.utils';
+import { assertNonNullish, fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -80,7 +117,8 @@ import { get } from 'svelte/store';
 const resolveChainFusionEvmQuote = ({
 	sourceToken,
 	destinationToken,
-	amount
+	amount,
+	onProviderParticipating
 }: EvmQuoteParams): SwapMappedResult | undefined => {
 	if (!CHAIN_FUSION_SWAP_ENABLED) {
 		return;
@@ -103,6 +141,8 @@ const resolveChainFusionEvmQuote = ({
 	if (isNullish(helperContractAddress)) {
 		return;
 	}
+
+	onProviderParticipating?.(SwapProvider.CHAIN_FUSION);
 
 	const sourceFees: ChainFusionFee[] = [];
 
@@ -132,7 +172,8 @@ const resolveChainFusionBtcQuote = ({
 	sourceToken,
 	destinationToken,
 	amount,
-	userBtcAddress
+	userBtcAddress,
+	onProviderParticipating
 }: BtcQuoteParams): SwapMappedResult | undefined => {
 	if (!CHAIN_FUSION_SWAP_ENABLED) {
 		return;
@@ -167,6 +208,8 @@ const resolveChainFusionBtcQuote = ({
 	// UTXOs another send has already reserved, and errors when that store holds nothing
 	// for this address. All three stores are filled by the loaders the swap flow mounts
 	// for a Bitcoin source.
+	onProviderParticipating?.(SwapProvider.CHAIN_FUSION);
+
 	const utxosFee = prepareBtcSend({
 		amount: formatToken({
 			value: amount,
@@ -174,6 +217,9 @@ const resolveChainFusionBtcQuote = ({
 			displayDecimals: sourceToken.decimals
 		}),
 		source: userBtcAddress,
+		// No recipient, although the deposit address is known: the swap is sent with the fee of the
+		// loader `SwapBtcContexts` mounts for every provider, which cannot know it. So this prices
+		// the largest output too, and the offer quotes the inputs and the fee the swap then sends.
 		allUtxos,
 		feeRateMiliSatoshisPerVByte
 	});
@@ -229,6 +275,126 @@ export const fetchChainFusionBtcQuote = (
 	params: BtcQuoteParams
 ): Promise<SwapMappedResult | undefined> => Promise.resolve(resolveChainFusionBtcQuote(params));
 
+const resolveChainFusionSolQuote = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	onProviderParticipating
+}: NearIntentsQuoteParams): Promise<SwapMappedResult | undefined> => {
+	if (!CHAIN_FUSION_SWAP_ENABLED) {
+		return;
+	}
+
+	const ckDestinationToken = asCkTwinOf({ ckToken: destinationToken, nativeToken: sourceToken });
+
+	if (
+		isNullish(ckDestinationToken) ||
+		!isTokenCkSolLedger(ckDestinationToken) ||
+		sourceToken.network.id !== SOLANA_MAINNET_NETWORK_ID
+	) {
+		return;
+	}
+
+	const { minterCanisterId } = ckDestinationToken;
+
+	// The deposit address is the user's own, so it takes the signed-in identity, which the
+	// Solana quote parameters do not carry.
+	const identity = get(authIdentity);
+
+	// One conversion at a time: the minter queues one deposit per account, so SOL sent while
+	// another deposit is in flight would only wait on the address for a later registration.
+	if (
+		isNullish(minterCanisterId) ||
+		isNullish(identity) ||
+		hasChainFusionSolMintInFlight(get(activeUserTransactionsPending))
+	) {
+		return;
+	}
+
+	onProviderParticipating?.(SwapProvider.CHAIN_FUSION);
+
+	const [{ minimum_deposit_amount, automatic_deposit_fee }, depositAddress] = await Promise.all([
+		ckSolMinterInfo({ identity: new AnonymousIdentity(), minterCanisterId, certified: false }),
+		loadCkSolDepositAddress({ identity, minterCanisterId })
+	]);
+
+	const automaticDepositFee = fromNullable(automatic_deposit_fee);
+
+	// A minter without the automatic deposit flow reports no fee for it, and would never mint
+	// SOL that no one deposits with cycles.
+	if (isNullish(automaticDepositFee)) {
+		return;
+	}
+
+	const depositAddressBalance = await getSolBalance({
+		address: depositAddress,
+		network: SolanaNetworks.mainnet
+	});
+
+	const missingRent =
+		depositAddressBalance < CKSOL_DEPOSIT_ADDRESS_RENT
+			? CKSOL_DEPOSIT_ADDRESS_RENT - depositAddressBalance
+			: ZERO;
+
+	// All three come out of what the minter mints. The Solana network fee of the transfer is paid
+	// on top, and the form's fee section shows it as for any SOL send.
+	const sourceFees: ChainFusionFee[] = [
+		{
+			labelPath: 'fee.text.convert_inter_network_fee',
+			fee: automaticDepositFee,
+			token: sourceToken,
+			deductedFromAmount: true
+		},
+		{
+			labelPath: 'fee.text.cksol_sweep_fee',
+			fee: CKSOL_DEPOSIT_SWEEP_FEE,
+			token: sourceToken,
+			deductedFromAmount: true
+		},
+		...(missingRent > ZERO
+			? [
+					{
+						labelPath: 'fee.text.cksol_deposit_address_rent',
+						fee: missingRent,
+						token: sourceToken,
+						deductedFromAmount: true
+					}
+				]
+			: [])
+	];
+
+	return {
+		provider: SwapProvider.CHAIN_FUSION,
+		receiveAmount: computeChainFusionReceiveAmount({ amount, sourceFees }),
+		swapDetails: {
+			sourceFees,
+			externalFees: [],
+			// Neither the fee nor the minimum is certified: the execution holds the minter's own
+			// answer to `watch_deposit_address` to both before any SOL moves.
+			minimumAmount: minimum_deposit_amount,
+			solDeposit: { address: depositAddress, automaticDepositFee }
+		}
+	};
+};
+
+/**
+ * Quotes a ckSOL mint — SOL → ckSOL.
+ *
+ * The minter mints what the deposit address holds above its rent, less the automatic deposit fee
+ * and the deposit's share of the sweep's Solana fee, so the offer needs the minter's fee and
+ * minimum, the user's deposit address, and how much of the rent that address still lacks. Without
+ * any of them there is no offer, and none while another SOL → ckSOL conversion is in flight.
+ */
+export const fetchChainFusionSolQuote = async (
+	params: NearIntentsQuoteParams
+): Promise<SwapMappedResult | undefined> => {
+	try {
+		return await resolveChainFusionSolQuote(params);
+	} catch (err: unknown) {
+		consoleError(err);
+	}
+};
+
 /**
  * The ckETH the minter burns to cover the Ethereum transaction it sends on the user's
  * behalf, read straight from the minter's `eip_1559_transaction_price`.
@@ -263,9 +429,10 @@ const queryMaxTransactionFee = async ({
  * belong in `sourceFees`: the ledger fee for the `icrc2_approve` leg, and the minter's
  * gas estimate.
  */
-const resolveCkEthWithdrawalDetails = async (
-	sourceToken: IcCkToken
-): Promise<ChainFusionSwapDetails | undefined> => {
+const resolveCkEthWithdrawalDetails = async ({
+	sourceToken,
+	onProviderParticipating
+}: SwapQuoteObserver & { sourceToken: IcCkToken }): Promise<ChainFusionSwapDetails | undefined> => {
 	const { minterCanisterId, fee } = sourceToken;
 
 	if (isNullish(minterCanisterId)) {
@@ -277,6 +444,8 @@ const resolveCkEthWithdrawalDetails = async (
 	if (isNullish(minterInfo)) {
 		return;
 	}
+
+	onProviderParticipating?.(SwapProvider.CHAIN_FUSION);
 
 	const maxTransactionFee = await queryMaxTransactionFee({ minterCanisterId });
 
@@ -303,9 +472,10 @@ const resolveCkEthWithdrawalDetails = async (
  * No minimum: validation dispatches ckERC20 to `assertCkErc20Amount`, which never reads
  * minter info, so no minter floor applies.
  */
-const resolveCkErc20WithdrawalDetails = async (
-	sourceToken: IcCkToken
-): Promise<ChainFusionSwapDetails | undefined> => {
+const resolveCkErc20WithdrawalDetails = async ({
+	sourceToken,
+	onProviderParticipating
+}: SwapQuoteObserver & { sourceToken: IcCkToken }): Promise<ChainFusionSwapDetails | undefined> => {
 	const { minterCanisterId, ledgerCanisterId, feeLedgerCanisterId, fee } = sourceToken;
 
 	if (isNullish(minterCanisterId) || isNullish(feeLedgerCanisterId)) {
@@ -317,6 +487,8 @@ const resolveCkErc20WithdrawalDetails = async (
 	if (isNullish(ckEthToken)) {
 		return;
 	}
+
+	onProviderParticipating?.(SwapProvider.CHAIN_FUSION);
 
 	const maxTransactionFee = await queryMaxTransactionFee({
 		minterCanisterId,
@@ -363,8 +535,9 @@ const resolveCkErc20WithdrawalDetails = async (
 const resolveCkBtcWithdrawalDetails = async ({
 	sourceToken,
 	destinationToken,
-	amount
-}: {
+	amount,
+	onProviderParticipating
+}: SwapQuoteObserver & {
 	sourceToken: IcCkToken;
 	destinationToken: Token;
 	amount: bigint;
@@ -384,6 +557,8 @@ const resolveCkBtcWithdrawalDetails = async ({
 	// The raw api wrapper rather than `queryEstimateFee`, which toasts on failure — a
 	// toast on every quote tick would be noise. Served anonymously and uncertified, like
 	// the ckETH gas price read above: a quote wants the fast path.
+	onProviderParticipating?.(SwapProvider.CHAIN_FUSION);
+
 	const { bitcoin_fee, minter_fee } = await estimateFee({
 		identity: new AnonymousIdentity(),
 		minterCanisterId,
@@ -410,7 +585,50 @@ const resolveCkBtcWithdrawalDetails = async ({
 };
 
 /**
- * Quotes a ck withdrawal — ckETH → ETH, ckERC20 → ERC20 or ckBTC → BTC.
+ * The ckSOL minter's withdrawal fee and minimum, read anonymously and uncertified on every
+ * tick. Neither needs certifying: both only shape what the form shows, and the minter applies
+ * its own fee and refuses an amount below its own minimum before it burns anything.
+ */
+const resolveCkSolWithdrawalDetails = async ({
+	sourceToken,
+	destinationToken,
+	onProviderParticipating
+}: SwapQuoteObserver & {
+	sourceToken: IcCkToken;
+	destinationToken: Token;
+}): Promise<ChainFusionSwapDetails | undefined> => {
+	const { minterCanisterId, fee } = sourceToken;
+
+	if (isNullish(minterCanisterId)) {
+		return;
+	}
+
+	onProviderParticipating?.(SwapProvider.CHAIN_FUSION);
+
+	const { withdrawal_fee, minimum_withdrawal_amount } = await ckSolMinterInfo({
+		identity: new AnonymousIdentity(),
+		minterCanisterId,
+		certified: false
+	});
+
+	return {
+		sourceFees: [
+			{ labelPath: 'fee.text.fee', fee, token: sourceToken },
+			{
+				labelPath: 'fee.text.convert_inter_network_fee',
+				fee: withdrawal_fee,
+				// Denominated in SOL, which shares ckSOL's decimals.
+				token: destinationToken,
+				deductedFromAmount: true
+			}
+		],
+		externalFees: [],
+		minimumAmount: minimum_withdrawal_amount
+	};
+};
+
+/**
+ * Quotes a ck withdrawal — ckETH → ETH, ckERC20 → ERC20, ckBTC → BTC or ckSOL → SOL.
  *
  * Unlike the mint side this is not free: the minter charges for the transaction it sends
  * on the user's behalf, so every arm makes a round-trip per tick. Resolves to `undefined`
@@ -419,7 +637,8 @@ const resolveCkBtcWithdrawalDetails = async ({
 export const fetchChainFusionIcpQuote = async ({
 	sourceToken,
 	destinationToken,
-	amount
+	amount,
+	onProviderParticipating
 }: IcpBridgeQuoteParams): Promise<SwapMappedResult | undefined> => {
 	if (!CHAIN_FUSION_SWAP_ENABLED) {
 		return;
@@ -442,16 +661,30 @@ export const fetchChainFusionIcpQuote = async ({
 	try {
 		const swapDetails =
 			isTokenCkEthLedger(ckSourceToken) && destinationNetworkId === ETHEREUM_NETWORK_ID
-				? await resolveCkEthWithdrawalDetails(ckSourceToken)
+				? await resolveCkEthWithdrawalDetails({
+						sourceToken: ckSourceToken,
+						onProviderParticipating
+					})
 				: isTokenCkErc20Ledger(ckSourceToken) && destinationNetworkId === ETHEREUM_NETWORK_ID
-					? await resolveCkErc20WithdrawalDetails(ckSourceToken)
+					? await resolveCkErc20WithdrawalDetails({
+							sourceToken: ckSourceToken,
+							onProviderParticipating
+						})
 					: isTokenCkBtcLedger(ckSourceToken) && destinationNetworkId === BTC_MAINNET_NETWORK_ID
 						? await resolveCkBtcWithdrawalDetails({
 								sourceToken: ckSourceToken,
 								destinationToken,
-								amount
+								amount,
+								onProviderParticipating
 							})
-						: undefined;
+						: isTokenCkSolLedger(ckSourceToken) &&
+							  destinationNetworkId === SOLANA_MAINNET_NETWORK_ID
+							? await resolveCkSolWithdrawalDetails({
+									sourceToken: ckSourceToken,
+									destinationToken,
+									onProviderParticipating
+								})
+							: undefined;
 
 		if (isNullish(swapDetails)) {
 			return;
@@ -503,18 +736,7 @@ const toSwapProgressStep = (step: ProgressStepsSendIc): ProgressStepsSwap =>
  * Either way the conversion degrades to untracked, which is the Convert flow's
  * behaviour today, rather than to aborted.
  */
-const createChainFusionActiveUserTransaction = async ({
-	identity,
-	swapId,
-	direction,
-	sourceToken,
-	destinationToken,
-	minterCanisterId,
-	amount,
-	swapAmount,
-	usdSourceValue,
-	extraRefs
-}: {
+interface ChainFusionActiveUserTransactionParams {
 	identity: Identity;
 	swapId: string;
 	direction: ChainFusionDirection;
@@ -525,32 +747,73 @@ const createChainFusionActiveUserTransaction = async ({
 	swapAmount: Amount;
 	usdSourceValue?: string;
 	extraRefs: Partial<Record<ChainFusionExternalRefKey, string>>;
-}): Promise<void> => {
+}
+
+// Creates the row and returns it, or `undefined` without one for a conversion it cannot track.
+const writeChainFusionActiveUserTransaction = async ({
+	identity,
+	swapId,
+	direction,
+	sourceToken,
+	destinationToken,
+	minterCanisterId,
+	amount,
+	swapAmount,
+	usdSourceValue,
+	extraRefs
+}: ChainFusionActiveUserTransactionParams): Promise<ActiveUserTransaction | undefined> => {
+	const data = toChainFusionData({ direction, sourceToken, destinationToken, amount });
+
+	if (isNullish(data) || isNullish(minterCanisterId)) {
+		consoleError('Skipping an untrackable Chain Fusion conversion', { swapId });
+		return;
+	}
+
+	return await createActiveUserTransaction({
+		identity,
+		id: swapId,
+		data,
+		externalRefs: toChainFusionExternalRefs({
+			...toChainFusionDisplayRefs({
+				sourceToken,
+				destinationToken,
+				amount: `${swapAmount}`,
+				usdSourceValue
+			}),
+			[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID]: minterCanisterId,
+			...extraRefs
+		})
+	});
+};
+
+const createChainFusionActiveUserTransaction = async (
+	params: ChainFusionActiveUserTransactionParams
+): Promise<void> => {
 	try {
-		const data = toChainFusionData({ direction, sourceToken, destinationToken, amount });
-
-		if (isNullish(data) || isNullish(minterCanisterId)) {
-			consoleError('Skipping an untrackable Chain Fusion conversion', { swapId });
-			return;
-		}
-
-		await createActiveUserTransaction({
-			identity,
-			id: swapId,
-			data,
-			externalRefs: toChainFusionExternalRefs({
-				...toChainFusionDisplayRefs({
-					sourceToken,
-					destinationToken,
-					amount: `${swapAmount}`,
-					usdSourceValue
-				}),
-				[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID]: minterCanisterId,
-				...extraRefs
-			})
-		});
+		await writeChainFusionActiveUserTransaction(params);
 	} catch (err: unknown) {
 		consoleError(err);
+	}
+};
+
+/**
+ * Creates the row of a conversion whose deposit is signed and not yet broadcast, so it is tracked
+ * whatever the broadcast answers. Unlike `createChainFusionActiveUserTransaction`, a failed write
+ * rejects, so nothing is broadcast untracked; its row is deleted all the same, since the backend may
+ * have committed it if only its answer was lost. Returns the row it created, if any.
+ */
+const openChainFusionActiveUserTransaction = async (
+	params: ChainFusionActiveUserTransactionParams
+): Promise<ActiveUserTransaction | undefined> => {
+	try {
+		return await writeChainFusionActiveUserTransaction(params);
+	} catch (err: unknown) {
+		await deleteUnbroadcastActiveUserTransaction({
+			identity: params.identity,
+			id: params.swapId
+		});
+
+		throw err;
 	}
 };
 
@@ -578,15 +841,16 @@ const toChainFusionWithdrawalDirection = (
 ): ChainFusionDirection =>
 	type === 'ckBtcToBtc'
 		? { CkBtcToBtc: null }
-		: type === 'ckEthToEth'
-			? { CkEthToEth: null }
-			: { CkErc20ToErc20: null };
+		: type === 'ckSolToSol'
+			? { CkSolToSol: null }
+			: type === 'ckEthToEth'
+				? { CkEthToEth: null }
+				: { CkErc20ToErc20: null };
 
 /**
- * Executes a ck withdrawal — ckETH → ETH, ckERC20 → ERC20 or ckBTC → BTC — by delegating
- * to the existing `sendIc`, which already owns the approve/withdraw choreography the
- * Convert flow uses, and picks its minter leg from the target network. Nothing in `$icp`
- * changes for this.
+ * Executes a ck withdrawal — ckETH → ETH, ckERC20 → ERC20, ckBTC → BTC or ckSOL → SOL — by
+ * delegating to the existing `sendIc`, which already owns the approve/withdraw choreography
+ * the Convert flow uses, and picks its minter leg from the target network.
  *
  * Returns the minter block index `sendIc` surfaces — the same index the active user
  * transaction created here is keyed on, so nothing is re-derived.
@@ -607,8 +871,8 @@ export const fetchChainFusionIcpSwap = async ({
 	sourceToken: IcCkToken;
 	destinationToken: Token;
 	swapAmount: Amount;
-	// The user's own address on the destination chain — Ethereum or Bitcoin, depending on
-	// which minter leg `sendIc` takes.
+	// The user's own address on the destination chain — Ethereum, Bitcoin or Solana, depending
+	// on which minter leg `sendIc` takes.
 	destinationAddress: Address;
 	swapId: string;
 	usdSourceValue?: string;
@@ -632,7 +896,7 @@ export const fetchChainFusionIcpSwap = async ({
 	// shape. `undefined` on a missing prerequisite; `sendIc` then fails its own assertion
 	// before any approval is made.
 	const ckErc20ToErc20MaxCkEthFees = isTokenCkErc20Ledger(sourceToken)
-		? (await resolveCkErc20WithdrawalDetails(sourceToken))?.externalFees[0]?.fee
+		? (await resolveCkErc20WithdrawalDetails({ sourceToken }))?.externalFees[0]?.fee
 		: undefined;
 
 	const amount = parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals });
@@ -672,17 +936,21 @@ export const fetchChainFusionIcpSwap = async ({
 								? {
 										[CHAIN_FUSION_EXTERNAL_REF_KEYS.RETRIEVE_BTC_BLOCK_INDEX]: `${sent.blockIndex}`
 									}
-								: {
-										// `retrieve_eth_status` is keyed on the ckETH burn index in both directions — a
-										// ckERC20 withdrawal's `withdrawal_id` *is* its `cketh_block_index`. The ckERC20
-										// index rides along as the only pointer back to that burn.
-										[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKETH_BLOCK_INDEX]: `${
-											sent.type === 'ckEthToEth' ? sent.blockIndex : sent.ckEthBlockIndex
-										}`,
-										...(sent.type === 'ckErc20ToErc20' && {
-											[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKERC20_BLOCK_INDEX]: `${sent.ckErc20BlockIndex}`
-										})
-									}
+								: sent.type === 'ckSolToSol'
+									? {
+											[CHAIN_FUSION_EXTERNAL_REF_KEYS.WITHDRAW_SOL_BLOCK_INDEX]: `${sent.blockIndex}`
+										}
+									: {
+											// `retrieve_eth_status` is keyed on the ckETH burn index in both directions — a
+											// ckERC20 withdrawal's `withdrawal_id` *is* its `cketh_block_index`. The ckERC20
+											// index rides along as the only pointer back to that burn.
+											[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKETH_BLOCK_INDEX]: `${
+												sent.type === 'ckEthToEth' ? sent.blockIndex : sent.ckEthBlockIndex
+											}`,
+											...(sent.type === 'ckErc20ToErc20' && {
+												[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKERC20_BLOCK_INDEX]: `${sent.ckErc20BlockIndex}`
+											})
+										}
 					})
 				: undefined
 	});
@@ -814,11 +1082,15 @@ export const fetchChainFusionEvmSwap = async ({
  * already-quoted UTXO selection, so no fee is recomputed at the point of no return.
  *
  * `sendBtc` records the pending transaction and refreshes the wallet itself, and hands
- * over the broadcast transaction id — the row's poll key: the minter is asked whether it
- * has taken *these* coins, and told to mint them once they are confirmed. The row is
- * created from `onBroadcast`, not from `sendBtc`'s resolution: the steps between the two
- * are best-effort bookkeeping whose failure must not leave an irreversible deposit
- * untracked.
+ * over the transaction id — the row's poll key: the minter is asked whether it has taken
+ * *these* coins, and told to mint them once they are confirmed.
+ *
+ * Through the backend, the txid is known once the deposit is signed, so the row is created
+ * in `beforeBroadcast`: a refusal outright deletes it, and after an unclear outcome it stays
+ * for the poller. Through the Chain Fusion Signer, the txid exists only once it has broadcast,
+ * so the row is created from `onBroadcast`, not from `sendBtc`'s resolution: the steps
+ * between the two are best-effort bookkeeping whose failure must not leave an irreversible
+ * deposit untracked.
  */
 export const fetchChainFusionBtcSwap = async ({
 	identity,
@@ -848,35 +1120,370 @@ export const fetchChainFusionBtcSwap = async ({
 	// before it asks the signer, once after the transaction is recorded as pending.
 	let signed = false;
 
-	await sendBtc({
-		...rest,
+	// The row carries what the poller needs without any store: the transaction to look for,
+	// the address it was sent to, and the minter to ask to mint it.
+	const rowParams = ({ txid }: { txid: string }): ChainFusionActiveUserTransactionParams => ({
 		identity,
-		destination: depositAddress,
-		onProgress: () => {
-			progress(signed ? ProgressStepsSwap.UPDATE_UI : ProgressStepsSwap.SWAP);
-			signed = true;
-		},
-		// The deposit is irreversible the moment it is broadcast, so the row is created
-		// right there. It carries what the poller needs without any store: the transaction
-		// to look for, the address it was sent to, and the minter to ask to mint it.
-		onBroadcast: ({ txid }) =>
-			createChainFusionActiveUserTransaction({
+		swapId,
+		direction: { BtcToCkBtc: null },
+		sourceToken,
+		destinationToken,
+		// The ck destination is the token being minted, so its minter is the one to ask.
+		minterCanisterId: destinationToken.minterCanisterId,
+		amount: convertNumberToSatoshis({ amount: rest.amount }),
+		swapAmount: rest.amount,
+		usdSourceValue,
+		extraRefs: {
+			[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_TXID]: txid,
+			[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_DEPOSIT_ADDRESS]: depositAddress
+		}
+	});
+
+	// Whether `beforeBroadcast`, which `sendBtc` calls only on the backend path, wrote the row.
+	let rowOpened = false;
+
+	try {
+		await sendBtc({
+			...rest,
+			identity,
+			destination: depositAddress,
+			onProgress: () => {
+				progress(signed ? ProgressStepsSwap.UPDATE_UI : ProgressStepsSwap.SWAP);
+				signed = true;
+			},
+			beforeBroadcast: async ({ txid }) => {
+				rowOpened = nonNullish(await openChainFusionActiveUserTransaction(rowParams({ txid })));
+			},
+			onBroadcast: async ({ txid }) => {
+				if (!rowOpened) {
+					await createChainFusionActiveUserTransaction(rowParams({ txid }));
+				}
+			}
+		});
+	} catch (err: unknown) {
+		// A refusal outright sent nothing. Any other failure after the row was written may have
+		// sent the deposit, so the row stays for the poller to settle.
+		if (rowOpened && isDefinitiveBtcBroadcastRefusal(err)) {
+			await deleteUnbroadcastActiveUserTransaction({ identity, id: swapId });
+		}
+
+		// The deposit may have gone out, so the destination is enabled as after a sent one: the
+		// minted ckBTC must not land in a token the user cannot see.
+		if (isUnclearBtcBroadcastOutcome(err)) {
+			await enableDestination(enableDestinationToken);
+		}
+
+		throw err;
+	}
+
+	await enableDestination(enableDestinationToken);
+};
+
+/**
+ * Registers the user's deposit address with the minter. Every way this can fail stops the
+ * conversion before any SOL moves, so each is rethrown as a refusal the form can name.
+ */
+const registerCkSolDepositAddress = async (params: {
+	identity: Identity;
+	minterCanisterId: CanisterIdText;
+}): Promise<WatchDepositAddressOk> => {
+	try {
+		return await watchDepositAddress(params);
+	} catch (err: unknown) {
+		throw new ChainFusionSolDepositRefusedError(
+			err instanceof CkSolWatchDepositAddressError && 'Quarantined' in err.error
+				? 'quarantined'
+				: 'unavailable',
+			{ cause: err }
+		);
+	}
+};
+
+/**
+ * Whether the minter's `watch_deposit_address` answer takes the deposit the user reviewed: a
+ * registration rather than a deposit already in flight, for the address the offer was priced
+ * with, with a minimum the amount meets and a fee no higher than quoted.
+ *
+ * The scan times are the Internet Computer's. `notBeforeNanos`, a time the backend stamped, bounds
+ * how far behind the device clock may place the present: the later of the two is taken.
+ *
+ * @throws {ChainFusionSolDepositRefusedError} when it does not.
+ */
+const assertCkSolDepositWatched = ({
+	watched: { status, address, minimum_deposit_amount, automatic_deposit_fee },
+	solDeposit,
+	amount,
+	notBeforeNanos
+}: {
+	watched: WatchDepositAddressOk;
+	solDeposit: NonNullable<ChainFusionSwapDetails['solDeposit']>;
+	amount: bigint;
+	notBeforeNanos?: bigint;
+}) => {
+	if ('Detected' in status) {
+		throw new ChainFusionSolDepositRefusedError('inFlight');
+	}
+
+	if (
+		address !== solDeposit.address ||
+		amount < minimum_deposit_amount ||
+		automatic_deposit_fee > solDeposit.automaticDepositFee
+	) {
+		throw new ChainFusionSolDepositRefusedError('changed');
+	}
+
+	// A call inside an earlier registration's window gets that window, which can end with no scan
+	// left, or with its scans all due before the transfer lands: SOL sent then would wait on the
+	// address until a later call registers it again. Some scan has to come after the transfer can
+	// land: the next one, or the window's last. A minter far behind its schedule can have both
+	// overdue.
+	const { valid_until: validUntil, next_scan_at } = status.Watching;
+	const nextScanAt = fromNullable(next_scan_at);
+
+	if (isNullish(nextScanAt)) {
+		throw new ChainFusionSolDepositRefusedError('unavailable');
+	}
+
+	const deviceNowNanos = BigInt(Date.now()) * NANO_SECONDS_IN_MILLISECOND;
+	const nowNanos =
+		nonNullish(notBeforeNanos) && notBeforeNanos > deviceNowNanos ? notBeforeNanos : deviceNowNanos;
+	const lastScanAt = validUntil - CKSOL_LAST_SCAN_BEFORE_WINDOW_END_NANOS;
+
+	if (
+		nextScanAt < nowNanos + CKSOL_TRANSFER_LANDING_NANOS &&
+		lastScanAt < nowNanos + CKSOL_TRANSFER_LANDING_NANOS
+	) {
+		throw new ChainFusionSolDepositRefusedError('unavailable');
+	}
+};
+
+/**
+ * Whether the deposit address holds less than the minimum deposit amount before the transfer. SOL
+ * already there that reaches the minimum on its own, sent by hand for instance, can be swept alone
+ * by a scan before the transfer lands: the row would take that deposit for the transfer's, and the
+ * address, taken off the watchlist by it, would keep the transfer's SOL unswept. The registration
+ * just made has the minter convert that balance by itself, so a conversion is in progress.
+ *
+ * @throws {ChainFusionSolDepositRefusedError} when it does not, or when the balance cannot be read.
+ */
+const assertCkSolDepositAddressBelowMinimum = async ({
+	address,
+	minimum_deposit_amount
+}: WatchDepositAddressOk) => {
+	let balance: bigint;
+
+	try {
+		balance = await getSolBalance({ address, network: SolanaNetworks.mainnet });
+	} catch (err: unknown) {
+		throw new ChainFusionSolDepositRefusedError('unavailable', { cause: err });
+	}
+
+	if (balance >= minimum_deposit_amount) {
+		throw new ChainFusionSolDepositRefusedError('inFlight');
+	}
+};
+
+/**
+ * Executes a ckSOL mint — SOL → ckSOL — as a plain Solana transfer to the minter's per-user
+ * deposit address.
+ *
+ * The address is registered with `watch_deposit_address` first, and nothing moves unless the
+ * answer takes the deposit the user reviewed and the address holds less than the minimum deposit
+ * amount. The registration is what makes the mint independent of OISY: from that call on, the
+ * minter itself scans the address until the window ends, and nothing is sent unless a scan is due
+ * after the transfer can land, so the ckSOL arrives even if the tab closes during the transfer.
+ *
+ * The row is opened once the transfer is signed and before it is broadcast, as for the LI.FI Solana
+ * swap. It snapshots the latest deposit id of the account from the registration, the floor every
+ * deposit the poller takes for this one has to lie above. The backend refuses it while another
+ * SOL → ckSOL row of the user is open, which holds the minter's one deposit per account across tabs
+ * and devices, and the transfer then sends nothing. Once the row is open, the minter is asked again:
+ * a conversion that settled since confirm moved the latest deposit id, and the row is then deleted
+ * with nothing sent. After that, the row is deleted only when the node refuses the transfer. Any
+ * other failure may have sent it, so the conversion goes on as sent, ckSOL is enabled, and the
+ * poller settles the row as minted or, once the transfer can no longer land, as failed.
+ */
+export const fetchChainFusionSolSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	destinationToken,
+	swapAmount,
+	userAddress,
+	swapDetails: { solDeposit },
+	swapId,
+	usdSourceValue,
+	prioritizationFee,
+	enableDestinationToken
+}: {
+	identity: Identity;
+	progress: (step: ProgressStepsSwap) => void;
+	sourceToken: Token;
+	destinationToken: IcCkToken;
+	swapAmount: Amount;
+	userAddress: SolAddress;
+	swapDetails: ChainFusionSwapDetails;
+	swapId: string;
+	usdSourceValue?: string;
+	// The priority fee the user reviewed with the network fee, so the transfer goes out as reviewed.
+	prioritizationFee: bigint;
+	enableDestinationToken?: () => Promise<void>;
+}): Promise<void> => {
+	const { minterCanisterId } = destinationToken;
+
+	assertNonNullish(minterCanisterId);
+	assertNonNullish(solDeposit);
+
+	const amount = parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals });
+
+	const watched = await registerCkSolDepositAddress({ identity, minterCanisterId });
+
+	assertCkSolDepositWatched({ watched, solDeposit, amount });
+
+	await assertCkSolDepositAddressBelowMinimum(watched);
+
+	const latestDepositId = fromNullable(watched.latest_deposit_id);
+
+	const openRow = async ({
+		signature,
+		blockhash
+	}: {
+		signature: string;
+		blockhash: string;
+	}): Promise<boolean> => {
+		// A slot where the blockhash is valid: the poller reads it no earlier, so a node that has not
+		// seen the blockhash yet never passes for one that calls the transfer expired. Without such a
+		// slot nothing is sent, since a row tracking the transfer unguarded could end on that verdict.
+		const { slot, valid } = await isBlockhashValid({ blockhash, network: SolanaNetworks.mainnet });
+
+		if (!valid) {
+			throw new ChainFusionSolDepositRefusedError('unavailable');
+		}
+
+		let row: ActiveUserTransaction | undefined;
+
+		try {
+			row = await openChainFusionActiveUserTransaction({
 				identity,
 				swapId,
-				direction: { BtcToCkBtc: null },
+				direction: { SolToCkSol: null },
 				sourceToken,
 				destinationToken,
 				// The ck destination is the token being minted, so its minter is the one to ask.
-				minterCanisterId: destinationToken.minterCanisterId,
-				amount: convertNumberToSatoshis({ amount: rest.amount }),
-				swapAmount: rest.amount,
+				minterCanisterId,
+				amount,
+				swapAmount,
 				usdSourceValue,
 				extraRefs: {
-					[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_TXID]: txid,
-					[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_DEPOSIT_ADDRESS]: depositAddress
+					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_SIGNATURE]: signature,
+					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH]: blockhash,
+					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH_SLOT]: `${slot}`,
+					[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_DEPOSIT_ADDRESS]: watched.address,
+					...(nonNullish(latestDepositId) && {
+						[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_LATEST_DEPOSIT_ID]: `${latestDepositId}`
+					})
 				}
-			})
-	});
+			});
+		} catch (err: unknown) {
+			// Another tab or device opened its conversion first, and the minter would take both
+			// transfers as one deposit.
+			if (isActiveUserTransactionError(err) && 'AlreadyInFlight' in err) {
+				throw new ChainFusionSolDepositRefusedError('inFlight', { cause: err });
+			}
 
-	await enableDestination(enableDestinationToken);
+			throw err;
+		}
+
+		if (isNullish(row)) {
+			return false;
+		}
+
+		// With the row open, no other SOL → ckSOL conversion of the user can start. One that settled
+		// while this one waited since confirm moved the latest deposit id: the row's floor would then
+		// take that conversion's mint for this transfer's, and its deposit took the address off the
+		// watchlist. So the minter is asked again, and nothing is sent unless its answer still takes
+		// this deposit above the same floor.
+		try {
+			const rewatched = await registerCkSolDepositAddress({ identity, minterCanisterId });
+
+			// The last check before the broadcast: the scan times are measured against the backend's
+			// clock at which it opened the row, not only the device's, which can run behind.
+			assertCkSolDepositWatched({
+				watched: rewatched,
+				solDeposit,
+				amount,
+				notBeforeNanos: row.created_at_ns
+			});
+
+			// The balance read at confirm was below that answer's minimum: a lower minimum now, or SOL
+			// sent to the address by hand since, can leave a balance that a scan sweeps alone before the
+			// transfer lands.
+			await assertCkSolDepositAddressBelowMinimum(rewatched);
+
+			if (fromNullable(rewatched.latest_deposit_id) !== latestDepositId) {
+				throw new ChainFusionSolDepositRefusedError('changed');
+			}
+		} catch (err: unknown) {
+			await deleteUnbroadcastActiveUserTransaction({ identity, id: swapId });
+
+			throw err;
+		}
+
+		return true;
+	};
+
+	progress(ProgressStepsSwap.SIGN_TRANSFER);
+
+	let rowOpened = false;
+	let broadcast = false;
+	let enabling: Promise<void> | undefined;
+
+	try {
+		await sendSol({
+			identity,
+			token: sourceToken,
+			amount,
+			prioritizationFee,
+			destination: watched.address,
+			source: userAddress,
+			progress: (step) => {
+				if (step === ProgressStepsSendSol.SEND) {
+					progress(ProgressStepsSwap.SWAP);
+				}
+
+				if (step === ProgressStepsSendSol.CONFIRM) {
+					broadcast = true;
+
+					// The SOL is on its way: enabling starts now, not once the transfer is confirmed, so a
+					// tab closed while it confirms still shows the minted ckSOL. It never rejects.
+					enabling = enableDestination(enableDestinationToken);
+				}
+			},
+			beforeBroadcast: async (transfer) => {
+				rowOpened = await openRow(transfer);
+			}
+		});
+	} catch (err: unknown) {
+		// Nothing was broadcast without a row.
+		if (!rowOpened) {
+			throw err;
+		}
+
+		// Only the node refusing the broadcast shows the transfer went nowhere. A refusal answered
+		// while confirming comes after the broadcast, and says nothing about it.
+		if (!broadcast && isSolSendRefusal(err)) {
+			await deleteUnbroadcastActiveUserTransaction({ identity, id: swapId });
+
+			throw err;
+		}
+
+		// Any other end may have sent the SOL, and signing again would send it twice. The conversion
+		// goes on as sent, and its row settles it.
+		consoleError(err);
+	}
+
+	progress(ProgressStepsSwap.UPDATE_UI);
+
+	// Also after an unclear end: the minted ckSOL must not land in a token the user cannot see.
+	await (enabling ?? enableDestination(enableDestinationToken));
 };

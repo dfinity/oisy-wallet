@@ -37,6 +37,7 @@ import { emit } from '$lib/utils/events.utils';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
 import { delByPrefix, get as getStorage } from '$lib/utils/storage.utils';
+import { forgetSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { clearIdbSolTransactionDetails } from '$sol/api/idb-sol-transaction-details.api';
 import { nonNullish } from '@dfinity/utils';
@@ -66,6 +67,9 @@ export const signIn = async (
 
 		// We clean previous messages in case the user was signed out automatically before signing-in again.
 		toastsClean();
+
+		// A restored tab brings its session storage back, and a new session starts at the default.
+		forgetSwapSlippage();
 
 		authLoggedInAnotherTabStore.set(false);
 

@@ -142,9 +142,10 @@ pub fn get_tip_secret(tip_id: String) -> Result<Option<ByteBuf>, TipError> {
 /// earlier caller-scoped version is why nothing but an explicit cancel ever
 /// released a secret.
 ///
-/// Never initialises the store — see [`with_existing_tip_secrets_mut`]. A
-/// canister with no stored codes has nothing to clean up, and `Ok(())` is the
-/// honest answer rather than a reason to allocate its memory.
+/// Never creates the store, only reopens one that exists — see
+/// [`with_existing_tip_secrets_mut`]. A canister with no stored codes has
+/// nothing to clean up, and `Ok(())` is the honest answer rather than a reason
+/// to allocate its memory.
 pub fn remove_tip_secret_for(owner: Principal, tip_id: String) -> Result<(), TipError> {
     let map_key = tip_id_to_map_key(tip_id)?;
     let key_id = (owner, tip_secrets_map_name());

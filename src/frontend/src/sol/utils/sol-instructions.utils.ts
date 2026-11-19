@@ -63,6 +63,42 @@ const unfaithfulInstruction = (): MappedSolTransaction => ({
 	ambiguous: true
 });
 
+/**
+ * Whether the wallet signs a token instruction as one of a multisig's keys.
+ *
+ * A token account can be held by a multisig rather than by a key, and an instruction acting on it
+ * carries the keys signing for the multisig after the accounts it names. The wallet among them
+ * acts on an account it does not hold, and every reading of the user's accounts, simulated or not,
+ * counts only the ones the wallet holds itself: nothing the review shows would say what that
+ * signature grants or moves.
+ *
+ * The wallet can fill a named role as well, such as the delegate or the close destination, so what
+ * counts is whether it is listed more often than named; a parser leaves an absent optional account
+ * out without taking a position, so positions would not tell. The token program reads the keys
+ * after the named accounts only when the authority is a multisig, so a well-formed request never
+ * lists the wallet there, as the owner or otherwise.
+ */
+const signsForMultisig = ({
+	instruction: { accounts },
+	parsedInstruction,
+	userAddress
+}: {
+	instruction: SolInstruction;
+	parsedInstruction: SolParsedInstruction;
+	userAddress?: OptionSolAddress;
+}): boolean => {
+	if (isNullish(userAddress) || !('accounts' in parsedInstruction)) {
+		return false;
+	}
+
+	const listed = (accounts ?? []).filter(({ address }) => address === userAddress).length;
+	const named = Object.values(parsedInstruction.accounts).filter(
+		(meta) => meta?.address === userAddress
+	).length;
+
+	return listed > named;
+};
+
 const mapSystemParsedInstruction = ({
 	type,
 	info
@@ -771,8 +807,8 @@ const mapSolTokenInstruction = ({
 	}
 
 	// Unwrapping pays lamports out of a wrapped SOL account to the destination the instruction names,
-	// which is the question a close answers too, and it is refused on the same terms when the answer
-	// is not the user's wallet. Paid to the wallet it stays an instruction the review does not read.
+	// which is the question a close answers too, and it is read on the same terms: paid to the
+	// user's wallet it states nothing the summary needs to carry, paid anywhere else it is refused.
 	if (instructionType === TokenInstruction.UnwrapLamports) {
 		const {
 			accounts: {
@@ -780,9 +816,7 @@ const mapSolTokenInstruction = ({
 			}
 		} = instruction;
 
-		if (destination !== userAddress) {
-			return unfaithfulInstruction();
-		}
+		return destination === userAddress ? ignoredInstruction() : unfaithfulInstruction();
 	}
 
 	if (
@@ -897,9 +931,7 @@ const mapSolToken2022Instruction = ({
 			}
 		} = instruction;
 
-		if (destination !== userAddress) {
-			return unfaithfulInstruction();
-		}
+		return destination === userAddress ? ignoredInstruction() : unfaithfulInstruction();
 	}
 
 	if (
@@ -1155,9 +1187,15 @@ const vocabularyOf = (programId: SolAddress): ProgramVocabulary | undefined => {
 			program: 'system',
 			names: SystemInstruction,
 			// The RPC calls a SOL transfer `transfer` and its amount `lamports`, and the effects
-			// below are written against those.
-			types: { transferSol: 'transfer' },
-			fields: { amount: 'lamports' }
+			// below are written against those. It calls the seed-derived one `transferWithSeed`, and
+			// a withdrawal from a nonce account `withdrawFromNonce`, paying `lamports` to `destination`.
+			types: {
+				transferSol: 'transfer',
+				transferSolWithSeed: 'transferWithSeed',
+				withdrawNonceAccount: 'withdrawFromNonce'
+			},
+			accounts: { recipientAccount: 'destination' },
+			fields: { amount: 'lamports', withdrawAmount: 'lamports' }
 		};
 	}
 
@@ -1278,6 +1316,25 @@ export const asSolParsedRpcInstruction = (
 		return;
 	}
 
+	// Read the way the RPC returns a batch, as the instructions it carries, each read on its own: a
+	// batch the message states is then read exactly like one a program runs inside its own call. One
+	// that does not hold together, or nests another, stays unread.
+	if (isSolTokenBatch(instruction)) {
+		const batched = solBatchedInstructions(instruction);
+
+		const carried = (batched ?? []).map((inner) =>
+			isSolTokenBatch(inner) ? undefined : asSolParsedRpcInstruction(inner)
+		);
+
+		return nonNullish(batched) && carried.every(nonNullish)
+			? {
+					program: vocabulary.program,
+					programId,
+					parsed: { type: 'batch', info: { instructions: carried.map(({ parsed }) => parsed) } }
+				}
+			: undefined;
+	}
+
 	try {
 		const decoded = parseSolInstruction(instruction);
 
@@ -1381,6 +1438,22 @@ const solBatchedInstructions = ({
 	} catch (_err: unknown) {
 		// A batch the decoder cannot read is one nothing can say anything about.
 	}
+};
+
+/**
+ * The instructions a message runs, with a token batch read as the instructions it carries.
+ *
+ * A batch that does not hold together, or that nests another, stays whole: neither program runs one,
+ * and mapped as it is, it is refused.
+ */
+export const solUnbatchedInstructions = (instruction: SolInstruction): SolInstruction[] => {
+	if (!isSolTokenBatch(instruction)) {
+		return [instruction];
+	}
+
+	const batched = solBatchedInstructions(instruction);
+
+	return nonNullish(batched) && !batched.some(isSolTokenBatch) ? batched : [instruction];
 };
 
 const INITIALIZE_ACCOUNT_TYPES = ['initializeAccount', 'initializeAccount2', 'initializeAccount3'];
@@ -1509,7 +1582,8 @@ export const mapSolInstruction = ({
 	// names, so it does what they would do stated one by one. Each is held to the reading it would
 	// get on its own, and one refused there is refused here too, with the whole message. A batch
 	// nested in a batch, which neither token program runs, and one that does not hold together are
-	// refused as well. A batch that passes stays an instruction the review does not read.
+	// refused as well. Mapped on its own, a batch that passes stays an instruction the review does
+	// not read; a message's mapping reads it as the instructions it carries instead.
 	if (isSolTokenBatch(instruction)) {
 		const batched = solBatchedInstructions(instruction);
 
@@ -1548,6 +1622,15 @@ export const mapSolInstruction = ({
 	}
 
 	const { programAddress } = parsedInstruction;
+
+	// Asked before the readings below, which state what a token instruction does without asking
+	// whose account it acts on.
+	if (
+		(programAddress === TOKEN_PROGRAM_ADDRESS || programAddress === TOKEN_2022_PROGRAM_ADDRESS) &&
+		signsForMultisig({ instruction, parsedInstruction, userAddress })
+	) {
+		return unfaithfulInstruction();
+	}
 
 	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
 		return mapSolSystemInstruction({

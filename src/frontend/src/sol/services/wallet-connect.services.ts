@@ -54,7 +54,9 @@ import {
 	signTransaction,
 	type CreateSignerParams
 } from '$sol/utils/sol-sign.utils';
+import { solUnreviewedNotDescribed } from '$sol/utils/sol-simulation.utils';
 import {
+	countSolRequiredSignatures,
 	decodeTransactionMessage,
 	isSolCompiledTransactionMessage,
 	mapSolTransactionMessage,
@@ -117,6 +119,13 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// costs. Only the run shows such an opening, and the decode already has it, so it is handed on
 	// for the same reason the simulated flag is.
 	opensAccountBeyondRent: boolean;
+	// Whether the run keeps a token batch whole, stating none of its steps. Only the run can say so,
+	// and the decode already has it, for the same reason.
+	keepsBatchWhole: boolean;
+	// Whether the run makes a token call inside another program's instruction with the wallet among
+	// the keys signing for a multisig. Only the run shows such a call, and the decode already has it,
+	// for the same reason.
+	signsForMultisig: boolean;
 	// Whether the run hands the user's wallet to another program. A program can make that assignment
 	// inside its own call, where only the run shows it, and the review already has the run, so it is
 	// handed on for the same reason the simulated flag is.
@@ -144,6 +153,14 @@ export const decode = async ({
 		transactionMessage: base64EncodedTransactionMessage,
 		rpc: solanaHttpRpc(solNetwork)
 	});
+
+	// A send goes out with the wallet as its fee payer, which makes the wallet a signer. A message
+	// that names another account to pay is reviewed with the wallet as an account that does not
+	// sign, and a program can tell the two apart, so the run below would describe a different
+	// transaction from the one sent. Signing without sending keeps the fee payer the message names,
+	// so whether this refuses the request is decided where the method is known.
+	const feePaidByOthers =
+		nonNullish(address) && parsedTransactionMessage.feePayer.address !== address;
 
 	// The review is synchronous, so both the estimate the requested fee is judged against and the
 	// simulation are fetched here, where the request is already being decoded before the modal
@@ -181,7 +198,9 @@ export const decode = async ({
 		messageSummary,
 		parties: simulatedParties,
 		unreadPrograms,
-		opensAccountBeyondRent
+		opensAccountBeyondRent,
+		keepsBatchWhole,
+		signsForMultisig
 	} = simulation ?? {};
 
 	// Name the mints and the programs the review is about to show. Best effort and awaited, since
@@ -211,6 +230,7 @@ export const decode = async ({
 
 	const mapped = {
 		...mappedTransaction,
+		requiredSignatures: countSolRequiredSignatures(base64EncodedTransactionMessage),
 		...(nonNullish(prioritizationFeeEstimate) && { prioritizationFeeEstimate }),
 		...(nonNullish(preview) && { preview }),
 		...(nonNullish(messageSummary) && { messageSummary })
@@ -289,6 +309,9 @@ export const decode = async ({
 		// Handed on to signing, which holds the message to the line this review was computed with.
 		...(nonNullish(rentExemptMinimum) && { rentExemptMinimum }),
 		...(opensAccountBeyondRent === true && { opensAccountBeyondRent }),
+		...(keepsBatchWhole === true && { keepsBatchWhole }),
+		...(signsForMultisig === true && { signsForMultisig }),
+		...(feePaidByOthers && { feePaidByOthers }),
 		parties
 	};
 };
@@ -536,6 +559,8 @@ export const sign = ({
 	unreadProgramsAcknowledged,
 	rentExemptMinimum,
 	opensAccountBeyondRent,
+	keepsBatchWhole,
+	signsForMultisig,
 	reassignsWallet,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
@@ -579,7 +604,26 @@ export const sign = ({
 				rpc: solanaHttpRpc(solNetwork)
 			});
 
-			const { amount, destination, ambiguous, unreviewed } = mapSolTransactionMessage({
+			// A send goes out with the wallet as its fee payer, and the fee payer signs. A message that
+			// names another account to pay was reviewed with the wallet as an account that does not
+			// sign, so sending it would sign a transaction the review never ran. Only a message the
+			// wallet already pays for is sent: setting the fee payer then changes no account's role.
+			// Asked first, as the review asks it, since every check below read the message as the dApp
+			// sent it.
+			if (
+				method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION &&
+				parsedTransactionMessage.feePayer.address !== address
+			) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.fee_paid_by_others }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			const { amount, destination, ambiguous, unreviewed, isApproval } = mapSolTransactionMessage({
 				transactionMessage: parsedTransactionMessage,
 				userAddress: address,
 				rentExemptMinimum
@@ -613,12 +657,43 @@ export const sign = ({
 			// refused on the same terms as an over-funded opening the message states itself: what
 			// sits above the rent is a payment with no destination, which no line can show.
 			//
+			// So is a token batch the run keeps whole. The review states none of its steps, so what
+			// they pay the wallet goes unstated, however fully the mapper read each of them.
+			//
 			// The wallet handed to another program inside a program's call is refused on the same terms
 			// as an assignment the message states: from then on that program, not the wallet's key,
 			// decides what leaves the wallet, and no amount, source or destination says so.
-			if (ambiguous || opensAccountBeyondRent || reassignsWallet) {
+			//
+			// So is a token call inside a program's instruction with the wallet among the keys signing
+			// for a multisig, on the same terms as one the message states: it acts on an account the
+			// multisig holds, which nothing the review shows counts as the user's.
+			if (
+				ambiguous ||
+				opensAccountBeyondRent ||
+				keepsBatchWhole ||
+				signsForMultisig ||
+				reassignsWallet
+			) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.ambiguous_transaction }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			// What an approval grants is how much the spender may spend, and a one-unit approval and an
+			// unlimited one name the same spender. The review states that amount from a simulated
+			// run's allowance: an unchecked approval names neither the token nor its decimals, and a
+			// checked one states its amount only on its line among the operations, a tab away from the
+			// spender the summary names. Without a run the summary names the spender alone, and whether
+			// a run is made depends on the message too, since one naming more writable accounts than a
+			// run reads gets none. So every approval waits for a run: the exception to a simulation
+			// being best effort.
+			if ((isApproval ?? false) && !simulationRan) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.approval_without_simulation }
 				});
 
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
@@ -633,8 +708,8 @@ export const sign = ({
 			// something in here could not be read, and approving it is approving an effect nobody
 			// described. The simulation is best effort by design and stays that way: it is not
 			// required of a message OISY did read, and a provider that times out on a transaction
-			// the wallet understands still signs.
-			if ((unreviewed ?? false) && !simulated) {
+			// the wallet understands still signs, an approval aside (above).
+			if (solUnreviewedNotDescribed({ unreviewed, simulated })) {
 				toastsError({
 					msg: {
 						text: simulationRan

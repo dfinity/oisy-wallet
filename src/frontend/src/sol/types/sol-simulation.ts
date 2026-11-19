@@ -44,16 +44,44 @@ export interface SolSimulationControlChange {
 }
 
 /**
+ * A token account of the user's that the run creates, with who controls it once the run is
+ * through. Control changes cannot say this: there is no state before to diff against.
+ */
+export interface SolSimulationCreatedAccount {
+	account: SolAddress;
+	owner: SolAddress;
+	delegate?: SolAddress;
+	closeAuthority?: SolAddress;
+}
+
+/**
+ * An account of the user's that existed before the run and that the run closes, with the lamports
+ * it held before the run: wherever the close sends them, they are not part of what the run moved
+ * out of the wallet itself.
+ */
+export interface SolSimulationClosedAccount {
+	account: SolAddress;
+	lamports: bigint;
+}
+
+/**
  * What a simulation says this message would do to the accounts the user owns.
  *
  * A control change carries no amount, which is the whole reason it is reported separately: an
  * account handed to someone else keeps the exact balance it had, so a diff of amounts alone
  * would describe the theft as nothing happening.
+ *
+ * The accounts the run creates and closes are listed apart, for a caller that must hold them to
+ * rules of its own: neither has two states to diff, so neither shows among the control changes,
+ * and an empty account closed shows no token delta either. Absent when there are none. They do
+ * not make a preview non-empty.
  */
 export interface SolSimulationPreview {
 	solDelta?: bigint;
 	tokenDeltas: SolSimulationTokenDelta[];
 	controlChanges: SolSimulationControlChange[];
+	createdAccounts?: SolSimulationCreatedAccount[];
+	closedAccounts?: SolSimulationClosedAccount[];
 }
 
 /**
@@ -98,9 +126,19 @@ export interface SolSimulationResult {
 	// Whether the run opens an account inside another program's instruction with more than its size
 	// costs: a payment the review refuses rather than states, as it does for the message's own.
 	opensAccountBeyondRent?: boolean;
+	// Whether the run keeps a token batch whole, which the list states as an instruction nobody read
+	// and none of its steps: a request the review refuses, whatever the message's mapping read of it.
+	keepsBatchWhole?: boolean;
+	// Whether the run makes a token call inside another program's instruction with the wallet among
+	// the keys signing for a multisig: it acts on an account the review does not count as the user's,
+	// so the review refuses it, as it does such a call the message makes itself.
+	signsForMultisig?: boolean;
 	parties: SolTransferParties;
 	// The programs the run calls from inside another program's instruction that are not among the
 	// known ones. Such a call can act on what the user holds in an application, which neither the
 	// preview nor the instructions describe. Empty when every nested call reaches a known program.
 	unreadPrograms: SolAddress[];
+	// The slot the run read the chain at: where a transaction simulated with its own blockhash found
+	// that blockhash valid.
+	slot?: bigint;
 }

@@ -1,10 +1,19 @@
-import { ToolResultType, type ChatMessage } from '$lib/types/ai-assistant';
+import type { IcSendRequest } from '$icp/types/ic-send';
+import {
+	ToolResultType,
+	type ChatMessage,
+	type ReviewSendTokensToolResult
+} from '$lib/types/ai-assistant';
 import { nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export interface AiAssistant {
 	isOpen: boolean;
 	chatHistory: ChatMessage[];
+	// The transfer each IC send review last sent, by its tool result `id`. The review unmounts
+	// whenever the assistant closes while the chat keeps it, so sending again from it, before or
+	// after reopening, sends that same transfer (see `toIcSendRequest`).
+	icSendRequests: Record<string, IcSendRequest>;
 }
 
 export interface AiAssistantStore extends Readable<AiAssistant | undefined> {
@@ -15,12 +24,53 @@ export interface AiAssistantStore extends Readable<AiAssistant | undefined> {
 	appendMessage: (message: ChatMessage) => void;
 	removeLastMessage: () => void;
 	setSendToolActionAsCompleted: (id: string) => void;
+	setSendToolActionAsOutcomeUnknown: (id: string) => void;
+	setIcSendRequest: (params: { id: string; request: IcSendRequest }) => void;
 }
 
 const initialState = {
 	isOpen: false,
-	chatHistory: []
+	chatHistory: [],
+	icSendRequests: {}
 } as AiAssistant;
+
+const updateSendToolResult = ({
+	chatHistory,
+	id,
+	change
+}: {
+	chatHistory: ChatMessage[];
+	id: string;
+	change: Partial<Pick<ReviewSendTokensToolResult, 'sendCompleted' | 'sendOutcomeUnknown'>>;
+}): ChatMessage[] =>
+	chatHistory.map((message) =>
+		message.role === 'assistant' && message.data.tool?.results
+			? {
+					...message,
+					data: {
+						...message.data,
+						tool: {
+							...message.data.tool,
+							results: message.data.tool.results.map((toolResult) => {
+								if (
+									toolResult.type === ToolResultType.REVIEW_SEND_TOKENS &&
+									nonNullish(toolResult.result) &&
+									'id' in toolResult.result &&
+									toolResult.result.id === id
+								) {
+									return {
+										...toolResult,
+										result: { ...toolResult.result, ...change }
+									};
+								}
+
+								return toolResult;
+							})
+						}
+					}
+				}
+			: message
+	);
 
 const initAiAssistantStore = (): AiAssistantStore => {
 	const { subscribe, update, set } = writable<AiAssistant>(initialState);
@@ -41,7 +91,11 @@ const initAiAssistantStore = (): AiAssistantStore => {
 		},
 
 		resetChatHistory: () => {
-			update((state) => ({ ...state, chatHistory: initialState.chatHistory }));
+			update((state) => ({
+				...state,
+				chatHistory: initialState.chatHistory,
+				icSendRequests: initialState.icSendRequests
+			}));
 		},
 
 		appendMessage: (message: ChatMessage) => {
@@ -55,34 +109,29 @@ const initAiAssistantStore = (): AiAssistantStore => {
 		setSendToolActionAsCompleted: (id: string) => {
 			update((state) => ({
 				...state,
-				chatHistory: state.chatHistory.map((message) =>
-					message.role === 'assistant' && message.data.tool?.results
-						? {
-								...message,
-								data: {
-									...message.data,
-									tool: {
-										...message.data.tool,
-										results: message.data.tool.results.map((toolResult) => {
-											if (
-												toolResult.type === ToolResultType.REVIEW_SEND_TOKENS &&
-												nonNullish(toolResult.result) &&
-												'id' in toolResult.result &&
-												toolResult.result.id === id
-											) {
-												return {
-													...toolResult,
-													result: { ...toolResult.result, sendCompleted: true }
-												};
-											}
+				chatHistory: updateSendToolResult({
+					chatHistory: state.chatHistory,
+					id,
+					change: { sendCompleted: true }
+				})
+			}));
+		},
 
-											return toolResult;
-										})
-									}
-								}
-							}
-						: message
-				)
+		setSendToolActionAsOutcomeUnknown: (id: string) => {
+			update((state) => ({
+				...state,
+				chatHistory: updateSendToolResult({
+					chatHistory: state.chatHistory,
+					id,
+					change: { sendOutcomeUnknown: true }
+				})
+			}));
+		},
+
+		setIcSendRequest: ({ id, request }) => {
+			update((state) => ({
+				...state,
+				icSendRequests: { ...state.icSendRequests, [id]: request }
 			}));
 		}
 	};

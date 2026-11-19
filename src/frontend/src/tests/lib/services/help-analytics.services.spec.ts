@@ -2,6 +2,7 @@ import { CanisterInternalError } from '$lib/canisters/errors';
 import {
 	PLAUSIBLE_EVENT_HELP_ERROR_TYPES,
 	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
 	PLAUSIBLE_EVENT_SUBCONTEXT_HELP
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -269,6 +270,18 @@ describe('help-analytics.services', () => {
 					event_value: 'icp'
 				}
 			});
+		});
+
+		it('reports the page the card is on when it is not Help', () => {
+			const { metadata } = buildHelpEvent({
+				action: 'explorer',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.NETWORK_EXPLORERS,
+				network: 'eth',
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE
+			});
+
+			expect(metadata?.source_location).toBe('tools_page');
 		});
 
 		it('omits the provider and the chain when they are not given', () => {

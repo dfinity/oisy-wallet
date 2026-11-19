@@ -16,14 +16,21 @@ import {
 	fetchTransactionDetailForSignature,
 	getAccountInfo,
 	getAccountOwner,
+	getMultipleAccountsInfo,
+	getMultipleAccountsInfoWithContext,
+	getSignatureStatus,
+	getSolBalance,
 	getSolCreateAccountFee,
 	getTokenInfo,
-	loadTokenAccount
+	isBlockhashValid,
+	loadTokenAccount,
+	simulateTransactionAccounts
 } from '$sol/api/solana.api';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import * as solRpcProviders from '$sol/providers/sol-rpc.providers';
 import { SolanaNetworks } from '$sol/types/network';
+import type { SolanaSignatureStatus } from '$sol/types/sol-rpc';
 import {
 	mockSolSignature,
 	mockSolSignatureResponse,
@@ -39,8 +46,8 @@ import {
 	mockSolAddress4,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
-import { address, lamports } from '@solana/kit';
-import type { MockInstance } from 'vitest';
+import { address, lamports, type SolanaRpcResponse } from '@solana/kit';
+import type { Mock, MockInstance } from 'vitest';
 
 vi.mock('$sol/providers/sol-rpc.providers');
 
@@ -52,8 +59,11 @@ vi.mock('$sol/api/idb-sol-transaction-details.api', () => ({
 describe('solana.api', () => {
 	let mockGetSignaturesForAddress: MockInstance;
 	let mockGetMinimumBalanceForRentExemption: MockInstance;
+	let mockGetBalance: MockInstance;
 	let mockGetRecentPrioritizationFees: MockInstance;
 	let mockGetAccountInfo: MockInstance;
+	let mockGetMultipleAccounts: MockInstance;
+	let mockSimulateTransaction: MockInstance;
 
 	let originalMapGet = Map.prototype.get;
 
@@ -205,15 +215,34 @@ describe('solana.api', () => {
 			send: () => Promise.resolve(mockRecentPriorityFees)
 		});
 
+		mockGetBalance = vi.fn().mockReturnValue({
+			send: () => Promise.resolve({ context: { slot: 100n }, value: lamports(mockBalance) })
+		});
+
 		mockGetAccountInfo = vi.fn().mockReturnValue({
 			send: () => Promise.resolve(mockAccountInfo)
+		});
+
+		mockGetMultipleAccounts = vi.fn().mockReturnValue({
+			send: () => Promise.resolve({ context: { slot: 100n }, value: [mockOwnerInfo.value, null] })
+		});
+
+		mockSimulateTransaction = vi.fn().mockReturnValue({
+			send: () =>
+				Promise.resolve({
+					context: { slot: 101n },
+					value: { err: null, accounts: [null], innerInstructions: [], fee: null }
+				})
 		});
 
 		const mockSolanaHttpRpc = vi.fn().mockReturnValue({
 			getSignaturesForAddress: mockGetSignaturesForAddress,
 			getMinimumBalanceForRentExemption: mockGetMinimumBalanceForRentExemption,
 			getRecentPrioritizationFees: mockGetRecentPrioritizationFees,
-			getAccountInfo: mockGetAccountInfo
+			getBalance: mockGetBalance,
+			getAccountInfo: mockGetAccountInfo,
+			getMultipleAccounts: mockGetMultipleAccounts,
+			simulateTransaction: mockSimulateTransaction
 		});
 		vi.mocked(solRpcProviders.solanaHttpRpc).mockImplementation(mockSolanaHttpRpc);
 
@@ -626,6 +655,209 @@ describe('solana.api', () => {
 		});
 	});
 
+	describe('getMultipleAccountsInfoWithContext', () => {
+		it('should return the accounts with the slot the node read them at', async () => {
+			await expect(
+				getMultipleAccountsInfoWithContext({
+					addresses: mockAddresses,
+					network: SolanaNetworks.mainnet
+				})
+			).resolves.toEqual({ slot: 100n, value: [mockOwnerInfo.value, null] });
+
+			expect(mockGetMultipleAccounts).toHaveBeenCalledExactlyOnceWith(mockAddresses, {
+				encoding: 'jsonParsed'
+			});
+		});
+	});
+
+	describe('getMultipleAccountsInfo', () => {
+		it('should return the accounts alone', async () => {
+			await expect(
+				getMultipleAccountsInfo({ addresses: mockAddresses, network: SolanaNetworks.mainnet })
+			).resolves.toEqual([mockOwnerInfo.value, null]);
+		});
+	});
+
+	describe('simulateTransactionAccounts', () => {
+		const simulate = (
+			options: { replaceRecentBlockhash?: boolean; minContextSlot?: bigint } = {}
+		) =>
+			simulateTransactionAccounts({
+				base64EncodedTransactionMessage: 'mockBase64Transaction',
+				addresses: [mockSolAddress],
+				network: SolanaNetworks.mainnet,
+				...options
+			});
+
+		it('should replace the blockhash and set no slot by default, as the WalletConnect review needs', async () => {
+			await simulate();
+
+			expect(mockSimulateTransaction).toHaveBeenCalledExactlyOnceWith('mockBase64Transaction', {
+				encoding: 'base64',
+				innerInstructions: true,
+				replaceRecentBlockhash: true,
+				accounts: { encoding: 'jsonParsed', addresses: [mockSolAddress] }
+			});
+		});
+
+		it('should keep the blockhash and ask for no earlier slot when told to', async () => {
+			await simulate({ replaceRecentBlockhash: false, minContextSlot: 100n });
+
+			expect(mockSimulateTransaction).toHaveBeenCalledExactlyOnceWith(
+				'mockBase64Transaction',
+				expect.objectContaining({ replaceRecentBlockhash: false, minContextSlot: 100n })
+			);
+		});
+
+		it('should return the slot the run used', async () => {
+			await expect(simulate()).resolves.toEqual({
+				err: null,
+				accounts: [null],
+				innerInstructions: [],
+				fee: undefined,
+				slot: 101n
+			});
+		});
+	});
+
+	describe('the source-transaction reads', () => {
+		const signature = mockSolSignature();
+		const blockhash = 'HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN';
+
+		const confirmedStatus: NonNullable<SolanaSignatureStatus> = {
+			confirmationStatus: 'confirmed',
+			confirmations: 3n,
+			err: null,
+			slot: 100n,
+			status: { Ok: null }
+		};
+
+		// The node's answers, typed as the kit types them, so that a change of shape fails here.
+		const statusesAnswer = ({
+			slot = 100n,
+			value
+		}: {
+			slot?: bigint;
+			value: readonly SolanaSignatureStatus[];
+		}) => ({
+			send: (): Promise<SolanaRpcResponse<readonly SolanaSignatureStatus[]>> =>
+				Promise.resolve({ context: { slot }, value })
+		});
+
+		const validityAnswer = ({ slot = 100n, value }: { slot?: bigint; value: boolean }) => ({
+			send: (): Promise<SolanaRpcResponse<boolean>> => Promise.resolve({ context: { slot }, value })
+		});
+
+		let mockGetSignatureStatuses: Mock;
+		let mockIsBlockhashValid: Mock;
+
+		beforeEach(() => {
+			mockGetSignatureStatuses = vi
+				.fn()
+				.mockReturnValue(statusesAnswer({ value: [confirmedStatus] }));
+			mockIsBlockhashValid = vi.fn().mockReturnValue(validityAnswer({ value: false }));
+
+			// A partial mock: only the two reads under test are stubbed.
+			vi.mocked(solRpcProviders.solanaHttpRpc, { partial: true }).mockReturnValue({
+				getSignatureStatuses: mockGetSignatureStatuses,
+				isBlockhashValid: mockIsBlockhashValid
+			});
+		});
+
+		describe('getSignatureStatus', () => {
+			it('should return the status of the signature with the slot it was read at, searching the history', async () => {
+				await expect(
+					getSignatureStatus({ signature, network: SolanaNetworks.mainnet })
+				).resolves.toEqual({ slot: 100n, status: confirmedStatus });
+
+				expect(solRpcProviders.solanaHttpRpc).toHaveBeenCalledExactlyOnceWith(
+					SolanaNetworks.mainnet
+				);
+				expect(mockGetSignatureStatuses).toHaveBeenCalledExactlyOnceWith([signature], {
+					searchTransactionHistory: true
+				});
+			});
+
+			it('should return null for a signature the node does not know', async () => {
+				mockGetSignatureStatuses.mockReturnValue(statusesAnswer({ value: [null] }));
+
+				await expect(
+					getSignatureStatus({ signature, network: SolanaNetworks.mainnet })
+				).resolves.toEqual({ slot: 100n, status: null });
+			});
+
+			it('should return null when the node answers with no entry at all', async () => {
+				mockGetSignatureStatuses.mockReturnValue(statusesAnswer({ value: [] }));
+
+				await expect(
+					getSignatureStatus({ signature, network: SolanaNetworks.mainnet })
+				).resolves.toEqual({ slot: 100n, status: null });
+			});
+
+			it('should refuse a string that is not a signature, without asking the node', async () => {
+				await expect(
+					getSignatureStatus({ signature: 'not-a-signature', network: SolanaNetworks.mainnet })
+				).rejects.toThrow();
+
+				expect(mockGetSignatureStatuses).not.toHaveBeenCalled();
+			});
+		});
+
+		describe('isBlockhashValid', () => {
+			it('should return whether the blockhash is valid as of the confirmed slot, with that slot', async () => {
+				await expect(
+					isBlockhashValid({ blockhash, network: SolanaNetworks.mainnet })
+				).resolves.toEqual({ slot: 100n, valid: false });
+
+				expect(solRpcProviders.solanaHttpRpc).toHaveBeenCalledExactlyOnceWith(
+					SolanaNetworks.mainnet
+				);
+				expect(mockIsBlockhashValid).toHaveBeenCalledExactlyOnceWith(blockhash, {
+					commitment: 'confirmed'
+				});
+			});
+
+			it('should return true for a blockhash still valid', async () => {
+				mockIsBlockhashValid.mockReturnValue(validityAnswer({ slot: 101n, value: true }));
+
+				await expect(
+					isBlockhashValid({ blockhash, network: SolanaNetworks.mainnet })
+				).resolves.toEqual({ slot: 101n, valid: true });
+			});
+
+			it('should ask for no earlier slot than the one given', async () => {
+				await isBlockhashValid({ blockhash, network: SolanaNetworks.mainnet, minContextSlot: 90n });
+
+				expect(mockIsBlockhashValid).toHaveBeenCalledExactlyOnceWith(blockhash, {
+					commitment: 'confirmed',
+					minContextSlot: 90n
+				});
+			});
+
+			it('should read at the given commitment', async () => {
+				await isBlockhashValid({
+					blockhash,
+					network: SolanaNetworks.mainnet,
+					minContextSlot: 90n,
+					commitment: 'finalized'
+				});
+
+				expect(mockIsBlockhashValid).toHaveBeenCalledExactlyOnceWith(blockhash, {
+					commitment: 'finalized',
+					minContextSlot: 90n
+				});
+			});
+
+			it('should refuse a string that is not a blockhash, without asking the node', async () => {
+				await expect(
+					isBlockhashValid({ blockhash: 'not-a-blockhash', network: SolanaNetworks.mainnet })
+				).rejects.toThrow();
+
+				expect(mockIsBlockhashValid).not.toHaveBeenCalled();
+			});
+		});
+	});
+
 	describe('getSolCreateAccountFee', () => {
 		it('should get the fee to create a new account', async () => {
 			const fee = await getSolCreateAccountFee(SolanaNetworks.mainnet);
@@ -640,6 +872,54 @@ describe('solana.api', () => {
 			});
 
 			await expect(getSolCreateAccountFee(SolanaNetworks.mainnet)).rejects.toThrow(mockError);
+		});
+	});
+
+	describe('getSolBalance', () => {
+		it('should read the lamports the address holds', async () => {
+			await expect(
+				getSolBalance({ address: mockSolAddress, network: SolanaNetworks.mainnet })
+			).resolves.toBe(mockBalance);
+			expect(solRpcProviders.solanaHttpRpc).toHaveBeenCalledExactlyOnceWith(SolanaNetworks.mainnet);
+			expect(mockGetBalance).toHaveBeenCalledExactlyOnceWith(address(mockSolAddress));
+		});
+
+		it('should read no earlier than the given slot', async () => {
+			await expect(
+				getSolBalance({
+					address: mockSolAddress,
+					network: SolanaNetworks.mainnet,
+					minContextSlot: 345_000_000n
+				})
+			).resolves.toBe(mockBalance);
+			expect(mockGetBalance).toHaveBeenCalledExactlyOnceWith(address(mockSolAddress), {
+				minContextSlot: 345_000_000n
+			});
+		});
+
+		it('should read at the given commitment', async () => {
+			await expect(
+				getSolBalance({
+					address: mockSolAddress,
+					network: SolanaNetworks.mainnet,
+					minContextSlot: 345_000_000n,
+					commitment: 'finalized'
+				})
+			).resolves.toBe(mockBalance);
+			expect(mockGetBalance).toHaveBeenCalledExactlyOnceWith(address(mockSolAddress), {
+				commitment: 'finalized',
+				minContextSlot: 345_000_000n
+			});
+		});
+
+		it('should throw error when RPC call fails', async () => {
+			mockGetBalance.mockReturnValueOnce({
+				send: () => Promise.reject(mockError)
+			});
+
+			await expect(
+				getSolBalance({ address: mockSolAddress, network: SolanaNetworks.mainnet })
+			).rejects.toThrow(mockError);
 		});
 	});
 

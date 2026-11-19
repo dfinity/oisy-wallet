@@ -1,25 +1,40 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, untrack } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
+	import { isTokenCkSolLedger } from '$icp/utils/ic-send.utils';
+	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
-	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
+	import SwapProviderCell from '$lib/components/swap/SwapProviderCell.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		SWAP_AMOUNTS_CONTEXT_KEY,
+		type SwapAmountsContext
+	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { SwapProvider } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
+	import { hasChainFusionSolMintInFlight } from '$lib/utils/chain-fusion-swap-active-tx.utils';
+	import { asCkTwinOf } from '$lib/utils/chain-fusion-swap.utils';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isLifiFeeAffordable, raiseLifiMaxFee } from '$lib/utils/lifi-fee.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import { parseToken, tryParseToken } from '$lib/utils/parse.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 	import SwapSolFees from '$sol/components/swap/SwapSolFees.svelte';
 	import { SOL_FEE_CONTEXT_KEY, type FeeContext } from '$sol/stores/sol-fee.store';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
+	import { isTokenSolanaNative } from '$sol/utils/token.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -30,6 +45,10 @@
 		onShowProviderList: () => void;
 		onClose: () => void;
 		onNext: () => void;
+		// A LI.FI offer is priced by the wizard: its transaction's own LI.FI ceiling, `undefined` until
+		// it is known.
+		isLifi?: boolean;
+		lifiFee?: bigint;
 	}
 
 	let {
@@ -40,11 +59,15 @@
 		onShowTokensList,
 		onShowProviderList,
 		onClose,
-		onNext
+		onNext,
+		isLifi = false,
+		lifiFee
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, sourceTokenBalance } =
+	const { sourceToken, destinationToken, sourceTokenBalance, amountSetToMax, lifiMaxFee } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	const { feeStore, ataFeeStore }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
@@ -58,9 +81,100 @@
 				: SOLANA_TOKEN
 	);
 
+	const totalFee = $derived(isLifi ? lifiFee : $feeStore);
+
+	const chainFusionDetails = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.CHAIN_FUSION
+			? $swapAmountsStore.selectedProvider.swapDetails
+			: undefined
+	);
+
+	const isSolToCkSol = $derived.by(() => {
+		if (isNullish($sourceToken) || isNullish($destinationToken)) {
+			return false;
+		}
+
+		const ckToken = asCkTwinOf({ ckToken: $destinationToken, nativeToken: $sourceToken });
+
+		return nonNullish(ckToken) && isTokenCkSolLedger(ckToken);
+	});
+
+	// The minter takes one deposit per account at a time, so while a SOL → ckSOL conversion is in
+	// flight the quote makes no offer, and this says why in place of the generic "not offered".
+	const ckSolDepositInFlight = $derived(
+		isSolToCkSol && hasChainFusionSolMintInFlight($activeUserTransactionsPending)
+	);
+
+	const minimumAmountMessage = $derived.by(() => {
+		const minimumAmount = chainFusionDetails?.minimumAmount;
+
+		if (
+			errorType !== 'minimum-amount-not-reached' ||
+			isNullish(minimumAmount) ||
+			isNullish($sourceToken)
+		) {
+			return;
+		}
+
+		return replacePlaceholders($i18n.send.assertion.minimum_deposit_amount, {
+			$amount: formatToken({
+				value: minimumAmount,
+				unitName: $sourceToken.decimals,
+				displayDecimals: $sourceToken.decimals
+			}),
+			$symbol: $sourceToken.symbol
+		});
+	});
+
+	// While "Max" holds a LI.FI amount, it leaves room for the highest LI.FI fee seen since for the
+	// same destination, so that the amount only steps down, as on EVM (`SwapEthForm`).
+	$effect(() => {
+		const fee = lifiFee;
+		const destinationTokenId = $destinationToken?.id;
+
+		if (!$amountSetToMax || (nonNullish($swapAmountsStore?.selectedProvider) && !isLifi)) {
+			lifiMaxFee.set(undefined);
+			return;
+		}
+
+		if (isLifi && nonNullish(fee) && nonNullish(destinationTokenId)) {
+			untrack(() => {
+				const reserved = raiseLifiMaxFee({ reserved: $lifiMaxFee, fee, destinationTokenId });
+
+				if (reserved !== $lifiMaxFee) {
+					lifiMaxFee.set(reserved);
+				}
+			});
+		}
+	});
+
+	// Pressing "Max" again starts from the fee of the moment.
+	const onMax = () => {
+		if (isLifi) {
+			lifiMaxFee.set(
+				nonNullish(lifiFee) && nonNullish($destinationToken)
+					? { fee: lifiFee, destinationTokenId: $destinationToken.id }
+					: undefined
+			);
+		}
+	};
+
+	// The fee "Max" leaves room for; `undefined` while the fee is, which holds the form.
+	const maxFee = $derived(
+		nonNullish(totalFee) && nonNullish($lifiMaxFee) && $lifiMaxFee.fee > totalFee
+			? $lifiMaxFee.fee
+			: totalFee
+	);
+
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {
 		if (isNullish($sourceToken)) {
 			return;
+		}
+
+		const minimumAmount = chainFusionDetails?.minimumAmount;
+
+		if (nonNullish(minimumAmount) && userAmount < minimumAmount) {
+			return 'minimum-amount-not-reached';
 		}
 
 		const parsedSendBalance = nonNullish($sourceTokenBalance)
@@ -76,6 +190,26 @@
 
 		if (userAmount > parsedSendBalance) {
 			return 'insufficient-funds';
+		}
+
+		// Not known yet, the form waits.
+		if (isLifi) {
+			if (isNullish(lifiFee)) {
+				return;
+			}
+
+			const isNativeSource = isTokenSolanaNative($sourceToken);
+
+			return isLifiFeeAffordable({
+				fee: lifiFee,
+				amount: userAmount,
+				isNativeSource,
+				nativeBalance: isNativeSource
+					? parsedSendBalance
+					: ($balancesStore?.[solanaNativeToken.id]?.data ?? ZERO)
+			})
+				? undefined
+				: 'insufficient-funds-for-fee';
 		}
 
 		if (!isTokenSpl($sourceToken) && nonNullish($feeStore)) {
@@ -125,24 +259,38 @@
 
 <SwapForm
 	{errorType}
-	fee={$feeStore}
+	fee={maxFee}
 	{isSwapAmountsLoading}
+	notOfferedExplained={ckSolDepositInFlight}
 	{onClose}
 	onCustomValidate={customValidate}
+	{onMax}
 	{onNext}
 	{onShowTokensList}
+	{slippageValue}
 	bind:swapAmount
 	bind:receiveAmount
-	bind:slippageValue
 >
+	{#snippet message()}
+		{#if nonNullish(minimumAmountMessage)}
+			<div class="mb-4" in:fade>
+				<MessageBox level="error">{minimumAmountMessage}</MessageBox>
+			</div>
+		{:else if ckSolDepositInFlight}
+			<div class="mb-4" in:fade>
+				<MessageBox level="info">{$i18n.swap.error.cksol_deposit_in_progress}</MessageBox>
+			</div>
+		{/if}
+	{/snippet}
+
 	{#snippet swapDetails()}
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
-			<Hr spacing="md" />
+			<div class="mt-4 flex flex-col">
+				<SwapProviderCell {onShowProviderList} />
 
-			<div class="flex flex-col gap-3">
-				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
-
-				<SwapSolFees />
+				<SwapFeeRow>
+					<SwapSolFees {isLifi} {lifiFee} />
+				</SwapFeeRow>
 			</div>
 		{/if}
 	{/snippet}

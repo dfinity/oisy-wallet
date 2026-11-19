@@ -82,6 +82,11 @@ export const NEAR_INTENTS_EXTERNAL_REF_KEYS = {
 	// The 1Click quote signature. The service documents it as the client's receipt for
 	// resolving disputes over a deposit, so it is retained alongside the address it signs.
 	SIGNATURE: 'near_intents_signature',
+	// The EVM deposit transaction, recorded when it is broadcast. Its nonce is what tells a
+	// deposit still in the mempool from one that was replaced or dropped and can never arrive.
+	DEPOSIT_TX_HASH: 'near_intents_deposit_tx_hash',
+	DEPOSIT_TX_NONCE: 'near_intents_deposit_tx_nonce',
+	DEPOSIT_CHAIN_ID: 'near_intents_deposit_chain_id',
 	// Optional debug/traceability, learned mid-flow from `/status` swapDetails.
 	ORIGIN_TX_HASH: 'near_intents_origin_tx_hash',
 	DESTINATION_TX_HASH: 'near_intents_destination_tx_hash',

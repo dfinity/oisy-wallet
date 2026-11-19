@@ -156,7 +156,7 @@ keep diffs reviewable.
 | `frontend-checks.yml`                                        | `check`                  | `npm run check` + `npm run check:tests`.                                                                                                                                                                             |
 | `frontend-checks.yml`                                        | `test` (20 shards)       | `npm run test:coverage --shard=N/20`.                                                                                                                                                                                |
 | `frontend-checks.yml`                                        | `test-coverage`          | Merges shard reports.                                                                                                                                                                                                |
-| `frontend-checks.yml`                                        | `config`                 | IC-domain validation across networks.                                                                                                                                                                                |
+| `frontend-checks.yml`                                        | `config`                 | IC-domain validation across networks; the `config-build` legs also check that only the `ic` wallet build publishes `.well-known/ic-architecture` and `ii-derivation-origin`.                                         |
 | `frontend-checks.yml`                                        | `lockfile`               | `npm run lint:lockfile`.                                                                                                                                                                                             |
 | `backend-checks.yml`                                         | `lint`                   | `./scripts/lint.rust.sh` + `./scripts/lint.did.sh` (only when Rust changed).                                                                                                                                         |
 | `backend-checks.yml`                                         | `workspace-dependencies` | All deps go through the workspace.                                                                                                                                                                                   |
@@ -196,6 +196,10 @@ job — that's expected.
 - **`config`** → IC domain validation; usually means a CSP / domain change
   was missed. See
   [`scripts/build.csp.mjs`](../../scripts/build.csp.mjs).
+- **`config-build`** naming `ic-architecture` or `ii-derivation-origin` → a
+  build other than the `ic` wallet build published them, or the `ic` build
+  stopped publishing them. See the gate in
+  [`scripts/build.ic-architecture.mjs`](../../scripts/build.ic-architecture.mjs).
 
 ## 7. Updating an existing PR
 

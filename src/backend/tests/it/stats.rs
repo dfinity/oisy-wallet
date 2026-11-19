@@ -60,7 +60,8 @@ fn stats_returns_correct_number_of_users() {
         user_timestamps_count: expected_users.len() as u64,
         user_token_count: 0,
         custom_token_count: NUM_USERS_WITH_TOKENS as u64,
-        token_activity_count: user_tokens.len() as u64,
+        // Recorded only while the backend price refresh is on, which it is not here.
+        token_activity_count: 0,
         exchange_rates_count: 0,
         user_transactions_count: 0,
         agreement_history_count: 0,

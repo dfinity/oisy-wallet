@@ -8,6 +8,7 @@
 	import { TOKEN_MODAL_DELETE_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionToken } from '$lib/types/token';
+	import { escapeHtml } from '$lib/utils/html.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -29,7 +30,7 @@
 				text={replacePlaceholders(
 					replaceOisyPlaceholders($i18n.tokens.details.confirm_deletion_description),
 					{
-						$token: getTokenDisplaySymbol(token)
+						$token: escapeHtml(getTokenDisplaySymbol(token))
 					}
 				)}
 			/>

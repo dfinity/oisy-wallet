@@ -2,6 +2,7 @@ import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.en
 import type { InfuraProvider } from '$eth/providers/infura.providers';
 import * as infuraProviders from '$eth/providers/infura.providers';
 import { getNonce } from '$eth/services/nonce.services';
+import { EthNonceReadError } from '$eth/types/send';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 
 describe('nonce.services', () => {
@@ -36,11 +37,16 @@ describe('nonce.services', () => {
 			});
 		});
 
-		it('should raise an error when the provider fails', async () => {
+		it('should raise an error saying the nonce could not be read when the provider fails', async () => {
+			// Nothing is signed without its nonce, which is what lets the send say it was not sent.
 			const mockError = new Error('Mock error');
 			getTransactionCountSpy.mockRejectedValueOnce(mockError);
 
-			await expect(getNonce(mockParams)).rejects.toThrow(mockError);
+			const outcome = await getNonce(mockParams).catch((err: unknown) => err);
+
+			expect(outcome).toBeInstanceOf(EthNonceReadError);
+			expect(outcome).toHaveProperty('cause', mockError);
+			expect(outcome).toHaveProperty('message', mockError.message);
 		});
 
 		it('should accept an empty string as address', async () => {

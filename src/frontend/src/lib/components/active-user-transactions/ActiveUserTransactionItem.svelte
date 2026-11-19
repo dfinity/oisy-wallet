@@ -4,6 +4,7 @@
 	import { CMC_NAME } from '$icp/constants/cmc.constants';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
+	import IconFuelPump from '$lib/components/icons/IconFuelPump.svelte';
 	import IconPickaxe from '$lib/components/icons/IconPickaxe.svelte';
 	import IconAlertTriangle from '$lib/components/icons/lucide/IconAlertTriangle.svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
@@ -14,14 +15,19 @@
 	import { swapProvidersDetails } from '$lib/constants/swap.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
 	import { LendBorrowProvider } from '$lib/types/lend-borrow';
 	import { LIFI_EXTERNAL_REF_KEYS } from '$lib/types/lifi';
 	import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 	import { ONESEC_EXTERNAL_REF_KEYS } from '$lib/types/onesec-swap';
 	import { SwapProvider } from '$lib/types/swap';
 	import { activeUserTransactionTimestampNs } from '$lib/utils/active-user-transactions.utils';
-	import { isChainFusionActiveUserTransaction } from '$lib/utils/chain-fusion-swap-active-tx.utils';
+	import {
+		isChainFusionActiveUserTransaction,
+		toChainFusionExternalRefsMap
+	} from '$lib/utils/chain-fusion-swap-active-tx.utils';
 	import { isCyclesMintActiveUserTransaction } from '$lib/utils/cycles-mint-active-tx.utils';
+	import { isCyclesTopUpActiveUserTransaction } from '$lib/utils/cycles-top-up-active-tx.utils';
 	import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 	import {
 		isLifiActiveUserTransaction,
@@ -75,6 +81,9 @@
 	// A mint writes the swap providers' display refs and keeps their layout: two tokens on
 	// one network. Only its label, provider and icon differ.
 	const isCyclesMint = $derived(isCyclesMintActiveUserTransaction(tx));
+	// A top-up paid with ICP writes the swap providers' source refs only: one token on one
+	// network, paid into a canister the row does not name.
+	const isCyclesTopUp = $derived(isCyclesTopUpActiveUserTransaction(tx));
 	const refs = $derived(toOneSecExternalRefsMap(tx.external_refs));
 	const liquidiumRefs = $derived(toLiquidiumExternalRefsMap(tx.external_refs));
 	const xrpDisplay = $derived(xrpActiveUserTransactionDisplay(tx));
@@ -91,6 +100,22 @@
 
 		return nonNullish(symbol)
 			? [lifiRefs[LIFI_EXTERNAL_REF_KEYS.RECEIVED_AMOUNT], symbol]
+			: undefined;
+	});
+
+	// A ckSOL mint shows what the minter credited, once it has: the whole balance of the deposit
+	// address less the minter's fees, which can differ from the amount asked.
+	const chainFusionReceived = $derived.by(() => {
+		if (!isChainFusion) {
+			return;
+		}
+
+		const amount = toChainFusionExternalRefsMap(tx.external_refs)[
+			CHAIN_FUSION_EXTERNAL_REF_KEYS.RECEIVED_AMOUNT
+		];
+
+		return nonNullish(amount)
+			? [amount, refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]]
 			: undefined;
 	});
 
@@ -139,7 +164,7 @@
 									? // Unconditional like Chain Fusion's, so a row outliving a rollback of
 										// `LIFI_SWAP_ENABLED` keeps its provider name.
 										(swapProvidersDetails[SwapProvider.LIFI]?.name ?? '')
-									: isCyclesMint
+									: isCyclesMint || isCyclesTopUp
 										? CMC_NAME
 										: undefined
 	);
@@ -157,15 +182,24 @@
 				? [$i18n.send.text.send, xrpDisplay?.amount, xrpDisplay?.symbol]
 						.filter(nonNullish)
 						.join(' ')
-				: [
-						isCyclesMint ? $i18n.mint.text.mint : isSwap ? $i18n.swap.text.swap : undefined,
-						refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
-						refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
-						'→',
-						...(lifiReceived ?? [refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]])
-					]
-						.filter(nonNullish)
-						.join(' ')
+				: isCyclesTopUp
+					? [
+							$i18n.transaction.label.canister_top_up,
+							refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
+							refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL]
+						]
+							.filter(nonNullish)
+							.join(' ')
+					: [
+							isCyclesMint ? $i18n.mint.text.mint : isSwap ? $i18n.swap.text.swap : undefined,
+							refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
+							refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
+							'→',
+							...(lifiReceived ??
+								chainFusionReceived ?? [refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]])
+						]
+							.filter(nonNullish)
+							.join(' ')
 	);
 
 	const sourceNetwork = $derived(refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL] ?? '');
@@ -179,7 +213,7 @@
 	const networkText = $derived(
 		isXrp
 			? (xrpDisplay?.network ?? '')
-			: sourceNetwork === destinationNetwork
+			: isCyclesTopUp || sourceNetwork === destinationNetwork
 				? sourceNetwork
 				: `${sourceNetwork} → ${destinationNetwork}`
 	);
@@ -235,6 +269,8 @@
 						<IconSend size="20" />
 					{:else if isCyclesMint}
 						<IconPickaxe size="20" />
+					{:else if isCyclesTopUp}
+						<IconFuelPump size="20" />
 					{:else}
 						<IconCkConvert size="20" />
 					{/if}

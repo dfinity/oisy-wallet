@@ -1,9 +1,11 @@
 use std::collections::BTreeMap;
 
+use candid::encode_one;
 use ic_cdk::api::{msg_caller, time};
 use shared::types::contact::{
     count_contacts_with_inline_images, validate_principal_memory_limit, Contact, ContactError,
-    CreateContactRequest, StoredContacts, UpdateContactRequest, MAX_CONTACTS_PER_USER,
+    ContactImageEntry, ContactsPage, CreateContactRequest, StoredContacts, UpdateContactRequest,
+    CONTACTS_PAGE_MAX_BYTES, MAX_CONTACTS_PER_USER,
 };
 
 use crate::{
@@ -92,6 +94,69 @@ pub(crate) fn get_contacts() -> Vec<Contact> {
         .contacts
         .into_values()
         .map(|contact| attach_image(&stored_principal, contact))
+        .collect()
+}
+
+/// Returns the caller's contacts after `after`, in ID order and without their images, until their
+/// encoded size reaches `CONTACTS_PAGE_MAX_BYTES`.
+///
+/// A page always holds at least one contact, so that every call makes progress.
+pub(crate) fn get_contacts_page(after: Option<u64>) -> ContactsPage {
+    let stored_principal = StoredPrincipal(msg_caller());
+
+    let stored_contacts = get_stored_contacts(&stored_principal);
+
+    let mut contacts: Vec<Contact> = Vec::new();
+    let mut page_size: usize = 0;
+
+    for (_, contact) in stored_contacts
+        .contacts
+        .into_iter()
+        .skip_while(|(id, _)| after.is_some_and(|after| *id <= after))
+    {
+        // A contact written before the image split may still hold its image inline.
+        let contact = Contact {
+            image: None,
+            ..contact
+        };
+        // A size that cannot be computed counts as a full page, so the contact gets a page of its
+        // own.
+        let contact_size =
+            encode_one(&contact).map_or(CONTACTS_PAGE_MAX_BYTES, |bytes| bytes.len());
+
+        if !contacts.is_empty() && page_size.saturating_add(contact_size) > CONTACTS_PAGE_MAX_BYTES
+        {
+            let next = contacts.last().map(|contact| contact.id);
+            return ContactsPage { contacts, next };
+        }
+
+        page_size = page_size.saturating_add(contact_size);
+        contacts.push(contact);
+    }
+
+    ContactsPage {
+        contacts,
+        next: None,
+    }
+}
+
+/// Returns the images of the given contacts of the caller.
+///
+/// Contacts the caller does not have, and contacts without an image, are left out.
+pub(crate) fn get_contact_images(contact_ids: Vec<u64>) -> Vec<ContactImageEntry> {
+    let stored_principal = StoredPrincipal(msg_caller());
+
+    let mut stored_contacts = get_stored_contacts(&stored_principal);
+
+    contact_ids
+        .into_iter()
+        .filter_map(|contact_id| stored_contacts.contacts.remove(&contact_id))
+        .filter_map(|contact| {
+            let contact_id = contact.id;
+            attach_image(&stored_principal, contact)
+                .image
+                .map(|image| ContactImageEntry { contact_id, image })
+        })
         .collect()
 }
 

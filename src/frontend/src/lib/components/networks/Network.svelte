@@ -1,7 +1,6 @@
 <script lang="ts">
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import { NETWORKS_SWITCHER_SELECTOR } from '$lib/constants/test-ids.constants';
-	import type { LabelSize } from '$lib/types/components';
 	import type { Network, NetworkId, OptionNetworkId } from '$lib/types/network';
 
 	interface Props {
@@ -9,7 +8,6 @@
 		selectedNetworkId?: NetworkId;
 		usdBalance?: number;
 		testIdPrefix?: string;
-		labelsSize?: LabelSize;
 		onSelected?: (networkId: OptionNetworkId) => void;
 	}
 
@@ -18,14 +16,12 @@
 		selectedNetworkId,
 		usdBalance,
 		testIdPrefix = NETWORKS_SWITCHER_SELECTOR,
-		labelsSize = 'md',
 		onSelected
 	}: Props = $props();
 </script>
 
 <NetworkButton
 	isTestnet={network.env === 'testnet'}
-	{labelsSize}
 	{network}
 	{onSelected}
 	{selectedNetworkId}

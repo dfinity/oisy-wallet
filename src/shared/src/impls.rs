@@ -12,7 +12,8 @@ use crate::{
         },
         backend_config::{Config, InitArg},
         contact::{
-            Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
+            Contact, ContactAddressData, ContactImage, CreateContactRequest,
+            GetContactImagesRequest, UpdateContactRequest, MAX_CONTACT_IMAGES_PER_CALL,
         },
         custom_token::{
             CustomToken, CustomTokenId, Dip721Token, ErcToken, ErcTokenId, ExtV2Token,
@@ -474,13 +475,22 @@ impl StoredUserProfile {
             return Ok(self.clone());
         }
 
-        if license_updated && matches!(new_agreements.license_agreement.accepted, Some(true)) {
+        // Only an agreement that changes gets a new acceptance time; one sent again unchanged keeps
+        // its stored time. `merge_agreement` carries the stored time over, so a merged agreement
+        // equal to the stored one is unchanged.
+        if new_agreements.license_agreement != current.license_agreement
+            && matches!(new_agreements.license_agreement.accepted, Some(true))
+        {
             new_agreements.license_agreement.last_accepted_at_ns = Some(now);
         }
-        if terms_updated && matches!(new_agreements.terms_of_use.accepted, Some(true)) {
+        if new_agreements.terms_of_use != current.terms_of_use
+            && matches!(new_agreements.terms_of_use.accepted, Some(true))
+        {
             new_agreements.terms_of_use.last_accepted_at_ns = Some(now);
         }
-        if privacy_updated && matches!(new_agreements.privacy_policy.accepted, Some(true)) {
+        if new_agreements.privacy_policy != current.privacy_policy
+            && matches!(new_agreements.privacy_policy.accepted, Some(true))
+        {
             new_agreements.privacy_policy.last_accepted_at_ns = Some(now);
         }
 
@@ -536,9 +546,12 @@ impl StoredUserProfile {
             return Ok(self.clone());
         }
 
+        // As in `with_agreements`: only a provider agreement that changes gets a new acceptance
+        // time.
         for key in &updated_keys {
+            let changed = merged.get(key) != current.get(key);
             if let Some(agreement) = merged.get_mut(key) {
-                if matches!(agreement.accepted, Some(true)) {
+                if changed && matches!(agreement.accepted, Some(true)) {
                     agreement.last_accepted_at_ns = Some(now);
                 }
             }
@@ -995,6 +1008,16 @@ impl Validate for UpdateContactRequest {
         }
 
         Ok(())
+    }
+}
+
+impl Validate for GetContactImagesRequest {
+    fn validate(&self) -> Result<(), Error> {
+        validate_collection_size(
+            &self.contact_ids,
+            MAX_CONTACT_IMAGES_PER_CALL,
+            "GetContactImagesRequest.contact_ids",
+        )
     }
 }
 
@@ -1633,6 +1656,7 @@ validate_on_deserialize!(Contact);
 validate_on_deserialize!(ContactAddressData);
 validate_on_deserialize!(CreateContactRequest);
 validate_on_deserialize!(UpdateContactRequest);
+validate_on_deserialize!(GetContactImagesRequest);
 validate_on_deserialize!(ContactImage);
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);

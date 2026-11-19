@@ -1,5 +1,6 @@
 import { ETHEREUM_EXPLORER_URL, SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
+import ethereumIconColored from '$icp-eth/assets/eth.svg';
 import ethereumIcon from '$lib/assets/networks/ethereum-mainnet.svg';
 import sepoliaIcon from '$lib/assets/networks/ethereum-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
@@ -25,6 +26,7 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	name: 'Ethereum',
 	chainId: 1n,
 	icon: ethereumIcon,
+	iconColored: ethereumIconColored,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
 	supportsNft: true,
 	providers: {

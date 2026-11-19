@@ -1,14 +1,23 @@
 import type { GetActiveUserTransactionsResponse } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
-import { ZERO } from '$lib/constants/app.constants';
+import {
+	BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS,
+	BTC_NEVER_LANDED_GRACE_MILLIS,
+	NANO_SECONDS_IN_MILLISECOND,
+	ZERO
+} from '$lib/constants/app.constants';
 import { activeUserTransactionsList } from '$lib/derived/active-user-transactions.derived';
+import { btcTransactionStatus } from '$lib/rest/blockstream.rest';
 import {
 	applyActiveUserTransactionPollUpdate,
 	createActiveUserTransaction,
 	deleteActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction,
+	isBtcTransactionNeverLanded,
 	loadActiveUserTransactions,
 	markActiveUserTransactionsSeen,
 	reloadActiveUserTransaction,
+	resetBtcNeverLandedChecks,
 	updateActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
@@ -21,6 +30,10 @@ import {
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
+
+vi.mock('$lib/rest/blockstream.rest', () => ({
+	btcTransactionStatus: vi.fn()
+}));
 
 vi.mock('$lib/api/backend.api', () => ({
 	createActiveUserTransaction: vi.fn(),
@@ -218,6 +231,20 @@ describe('active-user-transactions.services', () => {
 				...mockCreateActiveUserTransactionParams
 			});
 			expect(get(activeUserTransactionsList)).toEqual([mockActiveUserTransaction]);
+		});
+
+		// With the backend's time on it, which the caller can measure against.
+		it('should return the row as the backend stored it', async () => {
+			vi.spyOn(backendApi, 'createActiveUserTransaction').mockResolvedValue(
+				mockActiveUserTransaction
+			);
+
+			await expect(
+				createActiveUserTransaction({
+					identity: mockIdentity,
+					...mockCreateActiveUserTransactionParams
+				})
+			).resolves.toBe(mockActiveUserTransaction);
 		});
 
 		// The account switched while the call was in flight: the row is not this account's.
@@ -465,6 +492,139 @@ describe('active-user-transactions.services', () => {
 				})
 			).rejects.toEqual(mockActiveUserTransactionErrorNotFound);
 			expect(get(activeUserTransactionsList)).toEqual([mockActiveUserTransaction]);
+		});
+	});
+
+	describe('deleteUnbroadcastActiveUserTransaction', () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('should delete the row on the first attempt that succeeds', async () => {
+			vi.spyOn(backendApi, 'deleteActiveUserTransaction')
+				.mockRejectedValueOnce(new Error('transport'))
+				.mockResolvedValueOnce(undefined);
+
+			const deleted = deleteUnbroadcastActiveUserTransaction({
+				identity: mockIdentity,
+				id: mockActiveUserTransactionId
+			});
+			await vi.runAllTimersAsync();
+			await deleted;
+
+			expect(backendApi.deleteActiveUserTransaction).toHaveBeenCalledTimes(2);
+		});
+
+		it('should give up after three attempts, leaving the row to its poller', async () => {
+			vi.spyOn(backendApi, 'deleteActiveUserTransaction').mockRejectedValue(new Error('transport'));
+
+			const deleted = deleteUnbroadcastActiveUserTransaction({
+				identity: mockIdentity,
+				id: mockActiveUserTransactionId
+			});
+			await vi.runAllTimersAsync();
+
+			await expect(deleted).resolves.toBeUndefined();
+			expect(backendApi.deleteActiveUserTransaction).toHaveBeenCalledTimes(3);
+		});
+	});
+
+	describe('isBtcTransactionNeverLanded', () => {
+		const txid = 'a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90';
+		const now = 1_800_000_000_000;
+		// Written long enough ago for the check to run.
+		const updatedAtNs = BigInt(now - BTC_NEVER_LANDED_GRACE_MILLIS) * NANO_SECONDS_IN_MILLISECOND;
+
+		const check = (params: { txid?: string; updatedAtNs?: bigint } = {}) =>
+			isBtcTransactionNeverLanded({ id: 'row', txid, updatedAtNs, ...params });
+
+		// One check per interval, the first at `now`.
+		const checkAfter = async (intervals: number) => {
+			vi.setSystemTime(now + intervals * BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS);
+
+			return await check();
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+			vi.setSystemTime(now);
+			resetBtcNeverLandedChecks();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('should fail a row the network does not know, after two answers a check apart', async () => {
+			vi.mocked(btcTransactionStatus).mockResolvedValue(undefined);
+
+			await expect(checkAfter(0)).resolves.toBeFalsy();
+			await expect(checkAfter(1)).resolves.toBeTruthy();
+
+			expect(btcTransactionStatus).toHaveBeenCalledWith({ txid });
+			expect(btcTransactionStatus).toHaveBeenCalledTimes(2);
+		});
+
+		it('should keep a transaction in a mempool waiting, however long', async () => {
+			vi.mocked(btcTransactionStatus).mockResolvedValue({ confirmed: false });
+
+			for (const intervals of [0, 1, 2, 100]) {
+				await expect(checkAfter(intervals)).resolves.toBeFalsy();
+			}
+		});
+
+		it('should start the run again once the network knows the transaction', async () => {
+			vi.mocked(btcTransactionStatus)
+				.mockResolvedValueOnce(undefined)
+				.mockResolvedValueOnce({ confirmed: false })
+				.mockResolvedValueOnce(undefined);
+
+			await expect(checkAfter(0)).resolves.toBeFalsy();
+			await expect(checkAfter(1)).resolves.toBeFalsy();
+			await expect(checkAfter(2)).resolves.toBeFalsy();
+		});
+
+		it('should count a failed request for nothing', async () => {
+			vi.mocked(btcTransactionStatus)
+				.mockResolvedValueOnce(undefined)
+				.mockRejectedValueOnce(new Error('Blockstream API response not ok.'))
+				.mockResolvedValueOnce(undefined);
+
+			await expect(checkAfter(0)).resolves.toBeFalsy();
+			await expect(checkAfter(1)).resolves.toBeFalsy();
+			await expect(checkAfter(2)).resolves.toBeTruthy();
+		});
+
+		it('should ask at most once per interval', async () => {
+			vi.mocked(btcTransactionStatus).mockResolvedValue(undefined);
+
+			await expect(checkAfter(0)).resolves.toBeFalsy();
+
+			vi.setSystemTime(now + BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS - 1);
+
+			await expect(check()).resolves.toBeFalsy();
+
+			expect(btcTransactionStatus).toHaveBeenCalledOnce();
+		});
+
+		// A Liquidium repay renews its row while its broadcast is pending, and that call has no deadline.
+		it('should not ask until the row has gone the grace period without a write', async () => {
+			await expect(
+				check({ updatedAtNs: BigInt(now - 60_000) * NANO_SECONDS_IN_MILLISECOND })
+			).resolves.toBeFalsy();
+
+			expect(btcTransactionStatus).not.toHaveBeenCalled();
+		});
+
+		it('should not ask about anything but a txid', async () => {
+			await expect(check({ txid: 'not-a-txid' })).resolves.toBeFalsy();
+
+			expect(btcTransactionStatus).not.toHaveBeenCalled();
 		});
 	});
 

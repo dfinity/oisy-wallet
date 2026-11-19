@@ -20,7 +20,7 @@
 
 <!-- API-key gate only matters while OnRamper is enabled; with the flag off, the modal shows the notice and doesn't need the key. -->
 <ButtonHero
-	ariaLabel={$i18n.buy.text.buy}
+	ariaLabel={$i18n.buy.text.buy_sell}
 	disabled={$isBusy ||
 		(ONRAMPER_ENABLED && isNullishOrEmpty(ONRAMPER_API_KEY)) ||
 		$inflowActionsDisabled}
@@ -31,6 +31,6 @@
 		<IconlyBuy size="24" />
 	{/snippet}
 	{#snippet label()}
-		{$i18n.buy.text.buy}
+		{$i18n.buy.text.buy_sell}
 	{/snippet}
 </ButtonHero>

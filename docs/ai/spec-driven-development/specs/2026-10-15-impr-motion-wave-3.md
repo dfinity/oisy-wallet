@@ -138,7 +138,7 @@ included, is a 100 ms fade.
 ### 6. Pills, tabs and the toggle
 
 - **Pills** shrink slightly while pressed, like text buttons.
-- **Tabs** show their label one step darker while pressed, without shrinking.
+- **Tabs** show their label in the theme's stronger link/press colour while pressed, without shrinking.
 - **The toggle** animates only what changes (its knob position and colours) over 150 ms, and
   its hover shows only on devices that can hover. Under reduced motion the knob jumps to its
   new side; the colours still change over 150 ms.
@@ -225,8 +225,8 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 
 ### 4. The bottom sheet has a shadow
 
-- Define `--bottom-sheet-box-shadow` in the theme (light and dark), from the existing shadow
-  tokens if one fits; `ui/BottomSheetContainer.svelte:72` already uses it.
+- Define `--bottom-sheet-box-shadow` in the shared theme layer as an alias of the existing
+  `--overlay-box-shadow`, available in light and dark; `ui/BottomSheetContainer.svelte:72` already uses it.
 
 ### 5. Icon state changes cross-fade
 
@@ -249,7 +249,9 @@ One PR per area, in order. Area 1 lands first; areas 2 to 6 depend only on it.
 ### 6. Pills, tabs and the toggle
 
 - `ui/PillButton.svelte`: `press` (0.98), `transition-[color,background-color,border-color,scale]`.
-- `ui/Tabs.svelte:56-70`: `active:` label colour one step past hover, 150 ms; no scale.
+- `ui/Tabs.svelte:56-70`: `active:text-brand-hover` label colour, 150 ms; no scale. Menu tabs already hover
+  in the primary text colour, so their pressed label uses the same themed emphasis as links
+  rather than trying to darken pure black.
 - `ui/Toggle.svelte:44-130`: the track's and the knob's `transition: all ease-in-out 0.3s`
   become explicit properties at 150 ms ease-out: the track's `background-color`, and the
   knob's `transform` (it moves with `translateX`) and `background`. The wrapper's static
@@ -313,8 +315,8 @@ jsdom does not run transitions or CSS animations; tests assert the inputs that p
 3. ~~**The `a0_mo` … `a4c_mo` keyframes.**~~ Settled while building: they animate
    `icons/animated/AnimatedScanIcon` (the Scan QR icon), which is decorative and stops under
    reduced motion. `AnimatedIconLoader` turns to show progress and keeps running.
-4. **A shadow token for the bottom sheet.** Check whether the theme already has a raised-
-   surface shadow to reuse, or whether area 4 needs a new token.
+4. ~~**A shadow token for the bottom sheet.**~~ Settled in area 4: the existing
+   `--overlay-box-shadow` is reused through the missing bottom-sheet variable in both themes.
 
 ## Pending decisions (facts are clear, a call is needed)
 

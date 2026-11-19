@@ -5,6 +5,7 @@ import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
+	BtcBroadcastUnconfirmedError,
 	BtcPrepareSendError,
 	BtcSendValidationError,
 	BtcValidationError
@@ -12,6 +13,7 @@ import {
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as liquidiumApi from '$lib/api/liquidium.api';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import LiquidiumRepayBtcWizard from '$lib/components/liquidium/repay/LiquidiumRepayBtcWizard.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { STAKE_REVIEW_FORM_BUTTON } from '$lib/constants/test-ids.constants';
@@ -149,13 +151,14 @@ describe('LiquidiumRepayBtcWizard', () => {
 			vi.spyOn(liquidiumRepayServices, 'executeLiquidiumRepay').mockResolvedValue(undefined);
 		});
 
-		const renderReview = ({ onNext = () => {}, onBack = () => {} } = {}) =>
+		const renderReview = ({ onNext = () => {}, onBack = () => {}, onClose = () => {} } = {}) =>
 			render(LiquidiumRepayBtcWizard, {
 				props: {
 					...baseProps,
 					currentStep: step(WizardStepsLiquidiumRepay.REVIEW),
 					onNext,
-					onBack
+					onBack,
+					onClose
 				},
 				context: context()
 			});
@@ -186,6 +189,61 @@ describe('LiquidiumRepayBtcWizard', () => {
 
 			expect(onNext).not.toHaveBeenCalled();
 			expect(liquidiumRepayServices.executeLiquidiumRepay).not.toHaveBeenCalled();
+		});
+
+		it('hands the repay beforeBroadcast to sendBtc', async () => {
+			const sendBtcSpy = vi.spyOn(btcSendServices, 'sendBtc').mockResolvedValue('txid');
+			const { getByTestId } = renderReview();
+
+			await clickConfirm(getByTestId);
+
+			await waitFor(() => {
+				expect(liquidiumRepayServices.executeLiquidiumRepay).toHaveBeenCalledOnce();
+			});
+
+			const [[{ broadcast }]] = vi.mocked(liquidiumRepayServices.executeLiquidiumRepay).mock.calls;
+			const beforeBroadcast = vi.fn();
+
+			await broadcast({
+				target: { address: 'bc1qtarget' } as Parameters<typeof broadcast>[0]['target'],
+				amount: 1_000n,
+				beforeBroadcast
+			});
+
+			expect(sendBtcSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ destination: 'bc1qtarget', beforeBroadcast })
+			);
+		});
+
+		it.each([
+			{
+				label: 'closes with "may have been sent" when the transfer may have gone out',
+				err: new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') }),
+				text: en.send.error.btc_transaction_unconfirmed,
+				closes: true
+			},
+			{
+				label: 'goes back with "transaction failed" when the broadcast is refused',
+				err: new BtcBroadcastTransactionCanisterError({ FeeTooLow: null }, 'fee'),
+				text: en.liquidium.text.transaction_failed,
+				closes: false
+			}
+		])('$label', async ({ err, text, closes }) => {
+			vi.spyOn(liquidiumRepayServices, 'executeLiquidiumRepay').mockRejectedValue(err);
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError').mockReturnValue(Symbol('toast'));
+			const onBack = vi.fn();
+			const onClose = vi.fn();
+
+			const { getByTestId } = renderReview({ onBack, onClose });
+
+			await clickConfirm(getByTestId);
+
+			await waitFor(() => {
+				expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({ msg: { text }, err });
+			});
+
+			expect(onClose).toHaveBeenCalledTimes(closes ? 1 : 0);
+			expect(onBack).toHaveBeenCalledTimes(closes ? 0 : 1);
 		});
 
 		it('validates the prepared UTXOs before repaying', async () => {

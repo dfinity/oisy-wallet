@@ -184,7 +184,7 @@ export const send = async ({
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> & {
 	customNonce?: number;
 } & SendParams &
-	RequiredTransactionFeeData): Promise<{ hash: string }> => {
+	RequiredTransactionFeeData): Promise<{ hash: string; nonce: number }> => {
 	progress?.(ProgressStepsSend.INITIALIZATION);
 
 	const { transactionNeededApproval, nonce } = await approve({
@@ -212,7 +212,9 @@ export const send = async ({
 
 	progress?.(lastProgressStep);
 
-	return { hash: transactionSent.hash };
+	// The nonce is returned so callers can persist it: it is what later tells a
+	// transaction that is merely unmined from one that was replaced or dropped.
+	return { hash: transactionSent.hash, nonce: nonceTransaction };
 };
 
 const sendTransaction = async ({

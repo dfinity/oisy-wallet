@@ -145,7 +145,12 @@ Baseline rules; ESLint a11y rules and `svelte-check` catch some violations.
 
 ### Focus & keyboard
 
-- Don't kill focus outlines.
+- Don't kill focus outlines. The one exception is an overlay panel with
+  `tabindex="-1"` (Modal, Popover, Busy, confirmation popup, bottom sheet):
+  it takes `outline-none`. It holds focus only to keep it inside the overlay
+  and is not a control. Without the class, Chrome draws its own ring around
+  the whole panel after a click on empty space and any key press. The
+  controls inside keep the brand ring.
 - Modals / drawers / popovers — use the existing `$lib/components/ui/`
   primitives. They handle focus trap, escape, click-outside. Do not roll
   your own.
