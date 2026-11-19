@@ -392,7 +392,7 @@
 	     Same condensed rows and 24px icons as the sections above, so the two read
 	     as one navigation rather than a second, smaller one. -->
 	<div
-		class="flex flex-col gap-0.5 [&_.nav-item]:items-center [&_.nav-item]:py-2 h-sm:[&_.nav-item]:py-1.5 [&_.nav-item_svg]:h-6 [&_.nav-item_svg]:w-6"
+		class="flex flex-col gap-0.5 [&_.nav-item]:items-center [&_.nav-item]:py-2 h-sm:pointer-fine:[&_.nav-item]:py-1.5 [&_.nav-item_svg]:h-6 [&_.nav-item_svg]:w-6"
 	>
 		{#each DESKTOP_NAVIGATION_BOTTOM_ITEMS as id (id)}
 			{@render navItem(id)}

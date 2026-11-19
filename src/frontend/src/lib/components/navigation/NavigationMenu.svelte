@@ -35,9 +35,11 @@
 		     components have differing size defaults (e.g. IconLineChart defaults to
 		     16), and items-center keeps the icon vertically centred against the
 		     label regardless of the icon's own intrinsic height. In windows up to
-		     950px tall (`h-sm:`) rows and gaps tighten, so the scrollbar comes later. -->
+		     950px tall (`h-sm:`) gaps tighten, and rows shrink to 36px for a mouse
+		     (`pointer-fine:`), so the scrollbar comes later. Touch screens keep 40px
+		     rows, the minimum tap target. -->
 		<div
-			class="mb-6 flex flex-col gap-0.5 h-sm:mb-3 [&_.nav-item]:items-center [&_.nav-item]:py-2 h-sm:[&_.nav-item]:py-1.5 [&_.nav-item_svg]:h-6 [&_.nav-item_svg]:w-6"
+			class="mb-6 flex flex-col gap-0.5 h-sm:mb-3 [&_.nav-item]:items-center [&_.nav-item]:py-2 h-sm:pointer-fine:[&_.nav-item]:py-1.5 [&_.nav-item_svg]:h-6 [&_.nav-item_svg]:w-6"
 		>
 			<NavigationMenuMainItems />
 		</div>
