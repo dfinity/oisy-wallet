@@ -131,6 +131,21 @@ reading; one chatty call site turns the whole event into noise, so dedupe at the
 source when the caller can fire repeatedly (e.g. a Svelte `derived` that
 recomputes).
 
+### `ui_click` — the one event for navigation clicks
+
+`PLAUSIBLE_EVENTS.UI_CLICK` is generic on purpose too: **one** event name for a
+click on any navigation control, so one breakdown compares every surface.
+
+- `source_location` / `source_sublocation` say _where_ the click was
+  (`navigation` / `main_menu`, `navigation` / `assets_tabs`).
+- `event_value` says _what_ was clicked (the menu item id, the tab id).
+- Build it with `buildUiClickEvent` in `analytics.services.ts` and hand it to the
+  control (return-vs-fire, §5).
+
+It counts clicks, not visits: a page visit stays `page_open`, which also fires for
+direct URLs and back/forward. A new surface adds `PLAUSIBLE_EVENT_SOURCE_LOCATIONS`
+members, not a new event.
+
 ---
 
 ## 4. Metadata vocabulary (reuse the enums)
