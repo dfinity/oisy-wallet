@@ -128,6 +128,16 @@ export const SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER =
 	'settings-networks-modal-testnets-container';
 export const SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE = 'settings-networks-modal-testnet-toggle';
 export const SETTINGS_NETWORKS_MODAL_SAVE_BUTTON = 'settings-networks-modal-save-button';
+export const SETTINGS_UNCHECKED_SIGNING_TOGGLE = 'settings-unchecked-signing-toggle';
+export const SETTINGS_UNCHECKED_SIGNING_TIME_LEFT = 'settings-unchecked-signing-time-left';
+export const SETTINGS_UNCHECKED_SIGNING_CONFIRM_BUTTON =
+	'settings-unchecked-signing-confirm-button';
+
+export const WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE =
+	'wallet-connect-unchecked-signing-acknowledge';
+export const WALLET_CONNECT_UNCHECKED_SIGNING_POINTER = 'wallet-connect-unchecked-signing-pointer';
+export const WALLET_CONNECT_UNCHECKED_SIGNING_OPEN_SETTINGS =
+	'wallet-connect-unchecked-signing-open-settings';
 
 export const NAVIGATION_ITEM_TOKENS = 'navigation-item-tokens';
 export const NAVIGATION_ITEM_NFTS = 'navigation-item-nfts';

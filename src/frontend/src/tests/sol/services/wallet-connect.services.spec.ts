@@ -8,6 +8,7 @@ import {
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
+import { trackWalletConnectUncheckedSigning } from '$lib/services/wallet-connect-analytics.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -120,6 +121,10 @@ vi.mock('$sol/api/solana.api', () => ({
 	getSolCreateAccountFee: vi.fn(),
 	getSplTokenMetadata: vi.fn(),
 	simulateTransactionAccounts: vi.fn()
+}));
+
+vi.mock('$lib/services/wallet-connect-analytics.services', () => ({
+	trackWalletConnectUncheckedSigning: vi.fn()
 }));
 
 vi.mock('$lib/services/analytics.services', () => ({
@@ -969,6 +974,7 @@ describe('wallet-connect.services', () => {
 			opensAccountBeyondRent: false,
 			keepsBatchWhole: false,
 			signsForMultisig: false,
+			acknowledgedRefusals: [],
 			reassignsWallet: false
 		};
 
@@ -997,6 +1003,7 @@ describe('wallet-connect.services', () => {
 				opensAccountBeyondRent: false,
 				keepsBatchWhole: false,
 				signsForMultisig: false,
+				acknowledgedRefusals: [],
 				reassignsWallet: false
 			};
 
@@ -1148,6 +1155,7 @@ describe('wallet-connect.services', () => {
 				opensAccountBeyondRent: false,
 				keepsBatchWhole: false,
 				signsForMultisig: false,
+				acknowledgedRefusals: [],
 				reassignsWallet: false
 			};
 
@@ -1960,6 +1968,223 @@ describe('wallet-connect.services', () => {
 					id: mockRequest.id,
 					error: UNEXPECTED_ERROR
 				});
+			});
+		});
+
+		describe('with refusals the user signed past', () => {
+			const flaggedRequest = {
+				...mockRequest,
+				verifyContext: {
+					verified: {
+						verifyUrl: 'https://verify.walletconnect.org',
+						validation: 'VALID',
+						origin: 'https://dapp.example',
+						isScam: true
+					}
+				}
+			} as WalletKitTypes.SessionRequest;
+
+			beforeEach(() => {
+				vi.mocked(trackWalletConnectUncheckedSigning).mockClear();
+			});
+
+			it('should sign a message it cannot show once that was acknowledged', async () => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					ambiguous: true
+				});
+
+				const result = await sign({ ...mockParams, acknowledgedRefusals: ['cannot_be_shown'] });
+
+				expect(result).toEqual(expect.objectContaining({ success: true }));
+
+				expect(spyToastsError).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).toHaveBeenCalledOnce();
+
+				expect(trackWalletConnectUncheckedSigning).toHaveBeenCalledExactlyOnceWith({
+					modifier: 'sign',
+					network: 'SOL',
+					reasons: ['cannot_be_shown']
+				});
+			});
+
+			it('should sign a close paying somebody else and an unread instruction once both were acknowledged', async () => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					unreviewed: true
+				});
+
+				const result = await sign({
+					...mockParams,
+					closesPayOthers: true,
+					simulated: false,
+					acknowledgedRefusals: ['close_pays_others', 'unreviewed_without_simulation']
+				});
+
+				expect(result).toEqual(expect.objectContaining({ success: true }));
+
+				expect(trackWalletConnectUncheckedSigning).toHaveBeenCalledExactlyOnceWith({
+					modifier: 'sign',
+					network: 'SOL',
+					reasons: ['close_pays_others', 'unreviewed_without_simulation']
+				});
+			});
+
+			// An acknowledgement covers what the review showed and nothing else.
+			it('should still refuse a refusal that was not acknowledged', async () => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					ambiguous: true
+				});
+
+				const result = await sign({
+					...mockParams,
+					closesPayOthers: true,
+					acknowledgedRefusals: ['close_pays_others']
+				});
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.rejectRequest).toHaveBeenCalledOnce();
+				expect(trackWalletConnectUncheckedSigning).not.toHaveBeenCalled();
+			});
+
+			it('should refuse a site the domain check flagged, acknowledged or not', async () => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					ambiguous: true
+				});
+
+				const result = await sign({
+					...mockParams,
+					request: flaggedRequest,
+					acknowledgedRefusals: ['cannot_be_shown']
+				});
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+				expect(executeSign).not.toHaveBeenCalled();
+			});
+
+			// The wallet itself handed to another program is never signed past: no app needs it.
+			it('should refuse handing over the wallet the message states, acknowledged or not', async () => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					ambiguous: true,
+					reassignsWallet: true
+				});
+
+				const result = await sign({ ...mockParams, acknowledgedRefusals: ['cannot_be_shown'] });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+				expect(trackWalletConnectUncheckedSigning).not.toHaveBeenCalled();
+			});
+
+			it('should refuse handing over the wallet the run shows, acknowledged or not', async () => {
+				const result = await sign({
+					...mockParams,
+					reassignsWallet: true,
+					acknowledgedRefusals: ['cannot_be_shown']
+				});
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+				expect(trackWalletConnectUncheckedSigning).not.toHaveBeenCalled();
+			});
+
+			it('should sign an approval no run described once that was acknowledged', async () => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					isApproval: true
+				});
+
+				const result = await sign({
+					...mockParams,
+					simulated: false,
+					simulationRan: false,
+					acknowledgedRefusals: ['approval_without_simulation']
+				});
+
+				expect(result).toEqual(expect.objectContaining({ success: true }));
+
+				expect(trackWalletConnectUncheckedSigning).toHaveBeenCalledExactlyOnceWith({
+					modifier: 'sign',
+					network: 'SOL',
+					reasons: ['approval_without_simulation']
+				});
+			});
+
+			it('should sign a batch the run keeps whole and a multisig call once that was acknowledged', async () => {
+				const result = await sign({
+					...mockParams,
+					keepsBatchWhole: true,
+					signsForMultisig: true,
+					acknowledgedRefusals: ['cannot_be_shown']
+				});
+
+				expect(result).toEqual(expect.objectContaining({ success: true }));
+
+				expect(trackWalletConnectUncheckedSigning).toHaveBeenCalledExactlyOnceWith({
+					modifier: 'sign',
+					network: 'SOL',
+					reasons: ['cannot_be_shown']
+				});
+			});
+
+			// OISY sends with the wallet as the fee payer, so it would send a transaction other than the one
+			// reviewed: never signed past.
+			it('should refuse a send another account pays the fee for, acknowledged or not', async () => {
+				vi.spyOn(solTransactionsUtils, 'parseSolBase64TransactionMessage').mockResolvedValue({
+					...mockSolParsedTransactionMessage,
+					feePayer: { address: address(mockSolAddress2) }
+				});
+
+				const result = await sign({
+					...mockParams,
+					acknowledgedRefusals: [
+						'close_pays_others',
+						'cannot_be_shown',
+						'approval_without_simulation',
+						'unreviewed_without_simulation'
+					]
+				});
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.wallet_connect.error.fee_paid_by_others }
+				});
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(trackWalletConnectUncheckedSigning).not.toHaveBeenCalled();
+			});
+
+			it('should not count a request that needed no acknowledgement', async () => {
+				const result = await sign({
+					...mockParams,
+					acknowledgedRefusals: ['cannot_be_shown']
+				});
+
+				expect(result).toEqual(expect.objectContaining({ success: true }));
+
+				expect(trackWalletConnectUncheckedSigning).not.toHaveBeenCalled();
 			});
 		});
 

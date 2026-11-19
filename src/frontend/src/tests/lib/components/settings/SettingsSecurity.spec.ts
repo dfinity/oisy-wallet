@@ -12,7 +12,7 @@ import {
 	mockUserProfileVersion,
 	mockUserSettings
 } from '$tests/mocks/user-profile.mock';
-import { toNullable } from '@dfinity/utils';
+import { assertNonNullish, toNullable } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -44,6 +44,19 @@ describe('SettingsSecurity', () => {
 		expect(getByText(en.settings.text.hide_micro_transactions)).toBeInTheDocument();
 	});
 
+	it('renders the WalletConnect switch under Expert features, below the filter', () => {
+		const { getByText } = render(SettingsSecurity);
+
+		const filter = getByText(en.settings.text.hide_micro_transactions);
+		const heading = getByText(en.settings.text.expert_features);
+		const unchecked = getByText(en.settings.text.allow_unchecked_signing);
+
+		expect(filter.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+		expect(
+			heading.compareDocumentPosition(unchecked) & Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
+	});
+
 	it.each([true, false])(
 		'shows the saved small transactions filter setting (%s)',
 		(hideMicroTransactions) => {
@@ -51,14 +64,13 @@ describe('SettingsSecurity', () => {
 
 			const { getByRole } = render(SettingsSecurity);
 
-			const toggle = getByRole('checkbox') as HTMLInputElement;
-
-			expect(toggle.checked).toBe(hideMicroTransactions);
-			expect(toggle).toHaveAccessibleName(
-				hideMicroTransactions
+			const toggle = getByRole('checkbox', {
+				name: hideMicroTransactions
 					? en.settings.text.disable_hide_micro_transactions
 					: en.settings.text.enable_hide_micro_transactions
-			);
+			}) as HTMLInputElement;
+
+			expect(toggle.checked).toBe(hideMicroTransactions);
 		}
 	);
 
@@ -70,7 +82,9 @@ describe('SettingsSecurity', () => {
 
 		const { getByRole } = render(SettingsSecurity);
 
-		await fireEvent.input(getByRole('checkbox'));
+		await fireEvent.input(
+			getByRole('checkbox', { name: en.settings.text.disable_hide_micro_transactions })
+		);
 
 		await waitFor(() => {
 			expect(updateSpy).toHaveBeenCalledExactlyOnceWith({
@@ -96,7 +110,9 @@ describe('SettingsSecurity', () => {
 
 		const { getByRole } = render(SettingsSecurity);
 
-		await fireEvent.input(getByRole('checkbox'));
+		await fireEvent.input(
+			getByRole('checkbox', { name: en.settings.text.disable_hide_micro_transactions })
+		);
 
 		expect(updateSpy).not.toHaveBeenCalled();
 	});
@@ -108,7 +124,13 @@ describe('SettingsSecurity', () => {
 
 		const { getByRole, getByText } = render(SettingsSecurity);
 
-		await fireEvent.click(getByRole('button'));
+		const help = getByText(en.settings.text.hide_micro_transactions).parentElement?.querySelector(
+			'button'
+		);
+
+		assertNonNullish(help);
+
+		await fireEvent.click(help);
 
 		expect(getByText(en.settings.text.hide_micro_transactions_description)).toBeInTheDocument();
 		expect(getByRole('link', { name: en.settings.text.learn_more })).toHaveAttribute(

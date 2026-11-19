@@ -2,6 +2,8 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy, untrack } from 'svelte';
+	import { get } from 'svelte/store';
+	import { goto } from '$app/navigation';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
@@ -10,6 +12,7 @@
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -21,11 +24,18 @@
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
+	import { walletConnectUncheckedSigningStore } from '$lib/stores/wallet-connect-unchecked-signing.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { consoleError } from '$lib/utils/console.utils';
+	import { networkUrl } from '$lib/utils/nav.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
-	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
+	import {
+		acceptedContext,
+		isWalletConnectDomainFlagged,
+		isWalletConnectUncheckedSigningActive
+	} from '$lib/utils/wallet-connect.utils';
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
 	import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
@@ -40,6 +50,7 @@
 	import type { SolSimulationPreview, SolUnreadProgram } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
+	import type { SolWalletConnectRefusal } from '$sol/types/wallet-connect';
 	import {
 		solSimulationReassignsWallet,
 		solUnreviewedNotDescribed
@@ -90,6 +101,9 @@
 	// is decoded and still cannot be stated. `sign()` refuses such a message, so the review says so
 	// and holds the button rather than letting the user press it and bounce.
 	let ambiguous = $state<boolean | undefined>();
+	// Set when the message hands the connected wallet itself to another program, which it also refuses
+	// as ambiguous.
+	let messageReassignsWallet = $state<boolean | undefined>();
 	let unreviewed = $state<boolean | undefined>();
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
@@ -135,9 +149,14 @@
 	let closesPayOthers = $derived(
 		solClosesPayOthers({ instructions: instructions ?? [], userAddress: address })
 	);
-	// The run hands the wallet itself to another program. `sign()` refuses it as it does an
-	// assignment the message states, so the review says so the same way.
-	let reassignsWallet = $derived(solSimulationReassignsWallet({ preview, userAddress: address }));
+	// The wallet itself handed to another program, whether the message states it or a program does it
+	// inside its own call, where only the run shows it. Refused like an ambiguous message and never
+	// offered past: no app needs it, and the wallet cannot pay a fee afterwards.
+	let reassignsWallet = $derived(
+		(messageReassignsWallet ?? false) ||
+			solSimulationReassignsWallet({ preview, userAddress: address })
+	);
+
 	// How much an approval lets the spender spend is stated from a simulated run's allowance, so
 	// with no run the summary names the spender alone. `sign()` refuses it, so the review says so
 	// the same way and holds the button.
@@ -171,15 +190,66 @@
 			instructions.length > 0 &&
 			!instructions.some(({ kind }) => kind === 'unknown')
 	);
+
 	// An instruction OISY cannot read that no run described. `sign()` refuses it on the same test and
 	// the same value, so the review says so and holds the button rather than letting the user press
 	// it and bounce.
 	let unreviewedNotDescribed = $derived(solUnreviewedNotDescribed({ unreviewed, simulated }));
 
+	let refusals = $derived<SolWalletConnectRefusal[]>([
+		...(closesPayOthers ? (['close_pays_others'] as const) : []),
+		...((ambiguous ?? false) ||
+		reassignsWallet ||
+		(opensAccountBeyondRent ?? false) ||
+		(keepsBatchWhole ?? false) ||
+		(signsForMultisig ?? false)
+			? (['cannot_be_shown'] as const)
+			: []),
+		...(approvalWithoutSimulation ? (['approval_without_simulation'] as const) : []),
+		...(unreviewedNotDescribed ? (['unreviewed_without_simulation'] as const) : [])
+	]);
+
+	// WalletConnect's domain verification flagged the site: no way past a refusal is offered, and the
+	// review does not point at the switch either.
+	let domainFlagged = $derived(isWalletConnectDomainFlagged(request.verifyContext));
+
+	// Read once, when the review opens: one that opened while the Settings switch was on keeps the
+	// offer until it closes, so reading carefully is not penalised by the clock, and one that opened
+	// after it turned off never gains it.
+	const uncheckedSigningOn = isWalletConnectUncheckedSigningActive({
+		expiresAt: get(walletConnectUncheckedSigningStore),
+		now: Date.now()
+	});
+
+	// Nor is it offered on a send another account is set to pay the fee for: OISY would send a
+	// transaction other than the one reviewed, whatever the user acknowledges.
+	let uncheckedSigningOffered = $derived(
+		uncheckedSigningOn && !domainFlagged && !reassignsWallet && !sendPaidByOthers
+	);
+
+	let uncheckedSigningAcknowledged = $state(false);
+
+	// A tick agrees to the refusals the review showed when it was given. Should the decode settle on
+	// different ones, the box starts over rather than carrying the agreement across.
+	let refusalsKey = $derived(refusals.join());
+
+	$effect(() => {
+		[refusalsKey];
+
+		untrack(() => (uncheckedSigningAcknowledged = false));
+	});
+
+	let approveDisabled = $derived(
+		!decoded ||
+			sendPaidByOthers ||
+			(refusals.length > 0 && !(uncheckedSigningOffered && uncheckedSigningAcknowledged))
+	);
+
 	const updateData = async () => {
 		try {
 			({
 				ambiguous,
+				reassignsWallet: messageReassignsWallet,
 				destination,
 				tokenAddress,
 				isApproval,
@@ -272,6 +342,21 @@
 		close();
 	};
 
+	// Leaving the review rejects the request, as closing it does: the user turns the switch on and the
+	// app sends the request again.
+	const openSettings = async () => {
+		await reject();
+
+		await goto(
+			networkUrl({
+				path: AppPath.Settings,
+				networkId: $userSelectedNetworkStore,
+				usePreviousRoute: false,
+				fromRoute: null
+			})
+		);
+	};
+
 	/**
 	 * Sign
 	 */
@@ -297,6 +382,7 @@
 			opensAccountBeyondRent: opensAccountBeyondRent ?? false,
 			keepsBatchWhole: keepsBatchWhole ?? false,
 			signsForMultisig: signsForMultisig ?? false,
+			acknowledgedRefusals: uncheckedSigningOffered && uncheckedSigningAcknowledged ? refusals : [],
 			reassignsWallet
 		});
 
@@ -330,20 +416,12 @@
 					reassignsWallet}
 				{application}
 				{approvalWithoutSimulation}
-				approveDisabled={!decoded ||
-					sendPaidByOthers ||
-					(ambiguous ?? false) ||
-					(opensAccountBeyondRent ?? false) ||
-					(keepsBatchWhole ?? false) ||
-					(signsForMultisig ?? false) ||
-					reassignsWallet ||
-					closesPayOthers ||
-					approvalWithoutSimulation ||
-					unreviewedNotDescribed}
+				{approveDisabled}
 				{closesPayOthers}
 				{data}
 				{decoded}
 				destination={destination ?? ''}
+				{domainFlagged}
 				feePaidByOthers={sendPaidByOthers}
 				feeToken={token}
 				flaggedAsScam={!acceptedContext(request.verifyContext)}
@@ -351,15 +429,21 @@
 				isApproval={isApproval ?? false}
 				{messageSummary}
 				onApprove={sign}
+				onOpenSettings={openSettings}
 				onReject={reject}
+				onUncheckedSigningAcknowledge={() =>
+					(uncheckedSigningAcknowledged = !uncheckedSigningAcknowledged)}
 				{parties}
 				{preview}
 				{prioritizationFee}
 				{prioritizationFeeEstimate}
+				{reassignsWallet}
 				{requiredSignatures}
 				simulatedInstructions={simulatedInstructions ?? false}
 				source={address ?? ''}
 				token={reviewToken}
+				{uncheckedSigningAcknowledged}
+				{uncheckedSigningOffered}
 				unreadPrograms={unreadPrograms ?? []}
 				unreviewed={unreviewed ?? false}
 				{unreviewedNotDescribed}
