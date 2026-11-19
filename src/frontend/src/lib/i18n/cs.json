@@ -1920,7 +1920,7 @@
 			"close_pays_others": "Tato transakce zavírá jeden z vašich tokenových účtů a vyplácí jeho zůstatek na adresu, která není vaše peněženka. Pro vaši bezpečnost ji OISY nepodepíše.",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
-			"approval_without_simulation_reason": "",
+			"approval_without_simulation_reason": "Tato transakce schvaluje příjemce pro jeden z vašich tokenových účtů a OISY ji nedokázala simulovat, aby ukázala, kolik smí příjemce utratit.",
 			"unreviewed_without_simulation": "OISY nedokázala přečíst část této transakce a síť k ní nevrátila ani simulaci, takže nic nepopisuje, co by tato část udělala. Z důvodu vaší bezpečnosti ji OISY nepodepíše.",
 			"unreviewed_not_described_by_simulation": "OISY nedokázala přečíst část této transakce a ani její simulace neukázala, co by tato část udělala. Z důvodu vaší bezpečnosti ji OISY nepodepíše.",
 			"cannot_be_shown_reason": "Tato transakce obsahuje akce, které nelze všechny přesně zobrazit ke kontrole.",

@@ -1920,7 +1920,7 @@
 			"close_pays_others": "Giao dịch này đóng một trong các tài khoản token của bạn và trả số dư của nó cho một địa chỉ không phải ví của bạn. Vì sự an toàn của bạn, OISY sẽ không ký giao dịch này.",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
-			"approval_without_simulation_reason": "",
+			"approval_without_simulation_reason": "Giao dịch này phê duyệt một người chi tiêu cho một trong các tài khoản token của bạn, và OISY không thể mô phỏng nó để cho thấy người chi tiêu đó được chi bao nhiêu.",
 			"unreviewed_without_simulation": "OISY không thể đọc một phần của giao dịch này và mạng cũng không trả về bản mô phỏng, nên không có gì mô tả phần đó sẽ làm gì. Vì sự an toàn của bạn, OISY sẽ không ký giao dịch này.",
 			"unreviewed_not_described_by_simulation": "OISY không thể đọc một phần của giao dịch này và bản mô phỏng của nó cũng không cho thấy phần đó sẽ làm gì. Vì sự an toàn của bạn, OISY sẽ không ký giao dịch này.",
 			"cannot_be_shown_reason": "Giao dịch này bao gồm các hành động không thể hiển thị đầy đủ và chính xác để xem xét.",

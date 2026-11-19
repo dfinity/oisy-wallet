@@ -1920,7 +1920,7 @@
 			"close_pays_others": "此交易会关闭您的一个代币账户，并将其余额支付到不属于您钱包的地址。为了您的安全，OISY 不会签署该交易。",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
-			"approval_without_simulation_reason": "",
+			"approval_without_simulation_reason": "此交易会为您的一个代币账户批准一个支出方，而 OISY 无法模拟它，因此无法显示该支出方可以支出多少。",
 			"unreviewed_without_simulation": "OISY 无法读取此交易的一部分，网络也未返回其模拟结果，因此没有任何信息说明该部分会做什么。为了您的安全，OISY 不会签署该交易。",
 			"unreviewed_not_described_by_simulation": "OISY 无法读取此交易的一部分，其模拟结果也未显示该部分会做什么。为了您的安全，OISY 不会签署该交易。",
 			"cannot_be_shown_reason": "此交易包含无法全部准确显示以供审核的操作。",

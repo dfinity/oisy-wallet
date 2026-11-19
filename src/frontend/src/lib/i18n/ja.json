@@ -1920,7 +1920,7 @@
 			"close_pays_others": "このトランザクションはあなたのトークンアカウントの一つを閉じ、その残高をあなたのウォレット以外のアドレスに支払います。安全のため、OISY はこれに署名しません。",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
-			"approval_without_simulation_reason": "",
+			"approval_without_simulation_reason": "このトランザクションはあなたのトークンアカウントの一つに承認先を設定しますが、OISY はこれをシミュレーションできず、承認先が使える金額を示せませんでした。",
 			"unreviewed_without_simulation": "OISY はこのトランザクションの一部を読み取れず、ネットワークからシミュレーションも返されなかったため、その部分が何を行うのかを示すものがありません。安全のため、OISY は署名しません。",
 			"unreviewed_not_described_by_simulation": "OISY はこのトランザクションの一部を読み取れず、シミュレーションでもその部分が何を行うのかは示されませんでした。安全のため、OISY は署名しません。",
 			"cannot_be_shown_reason": "このトランザクションには、確認用に正確に表示しきれない操作が含まれています。",

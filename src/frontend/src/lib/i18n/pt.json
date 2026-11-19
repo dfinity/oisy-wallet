@@ -1920,7 +1920,7 @@
 			"close_pays_others": "Esta transação encerra uma das suas contas de tokens e envia o saldo dela para um endereço que não é a sua carteira. Para a sua segurança, a OISY não a assina.",
 			"fee_paid_by_others": "",
 			"approval_without_simulation": "",
-			"approval_without_simulation_reason": "",
+			"approval_without_simulation_reason": "Esta transação aprova um autorizado para uma das suas contas de tokens, e a OISY não conseguiu simulá-la para mostrar quanto o autorizado pode gastar.",
 			"unreviewed_without_simulation": "A OISY não conseguiu ler parte desta transação e a rede também não devolveu uma simulação, por isso nada descreve o que essa parte faria. Para a sua segurança, a OISY não a irá assinar.",
 			"unreviewed_not_described_by_simulation": "A OISY não conseguiu ler parte desta transação e a simulação também não mostrou o que essa parte faria. Para a sua segurança, a OISY não a irá assinar.",
 			"cannot_be_shown_reason": "Esta transação inclui ações que não podem ser todas mostradas com precisão para revisão.",
