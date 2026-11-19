@@ -5,6 +5,11 @@ import {
 	HELP_NETWORK_EXPLORERS_LINK,
 	TOOLS_CANISTER_TOP_UP_BUTTON
 } from '$lib/constants/test-ids.constants';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_VALUES,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { modalStore } from '$lib/stores/modal.store';
@@ -64,6 +69,9 @@ describe('Tools', () => {
 		it('reports its link clicks from Tools', async () => {
 			const { getByTestId } = render(Tools);
 
+			// Leave out the page_open sent on mount.
+			vi.mocked(trackEvent).mockClear();
+
 			await fireEvent.click(getByTestId(`${HELP_NETWORK_EXPLORERS_LINK}-eth`));
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
@@ -109,6 +117,18 @@ describe('Tools', () => {
 
 			expect(queryByTestId(TOOLS_CANISTER_TOP_UP_BUTTON)).toBeNull();
 			expect(container).not.toHaveTextContent(en.cycles_top_up.text.canister_top_up);
+		});
+	});
+
+	it('tracks the page open once', () => {
+		render(Tools);
+
+		expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.TOOLS,
+				event_value: PLAUSIBLE_EVENT_VALUES.TOOLS_PAGE
+			}
 		});
 	});
 
