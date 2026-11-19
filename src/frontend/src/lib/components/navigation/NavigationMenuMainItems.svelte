@@ -392,7 +392,7 @@
 	     Same condensed rows and 24px icons as the sections above, so the two read
 	     as one navigation rather than a second, smaller one. -->
 	<div
-		class="flex flex-col gap-0.5 [&_.nav-item]:items-center [&_.nav-item]:py-2 [&_.nav-item_svg]:h-6 [&_.nav-item_svg]:w-6"
+		class="flex flex-col gap-0.5 [&_.nav-item]:items-center [&_.nav-item]:py-2 h-sm:[&_.nav-item]:py-1.5 [&_.nav-item_svg]:h-6 [&_.nav-item_svg]:w-6"
 	>
 		{#each DESKTOP_NAVIGATION_BOTTOM_ITEMS as id (id)}
 			{@render navItem(id)}
@@ -406,9 +406,13 @@
 		{#if items.length > 0}
 			<!-- Each group is its own box so the heading hugs its items (small gap);
 			     the separation between groups (mt-3) is clearly larger. -->
-			<div class="flex flex-col gap-0.5" class:mt-3={sectionIndex > 0}>
+			<div
+				class="flex flex-col gap-0.5"
+				class:mt-3={sectionIndex > 0}
+				class:h-sm:mt-2={sectionIndex > 0}
+			>
 				<p
-					class="mb-1 px-3 text-[0.625rem] font-bold tracking-widest text-tertiary uppercase"
+					class="mb-1 px-3 text-[0.625rem] font-bold tracking-widest text-tertiary uppercase h-sm:mb-0.5"
 					data-tid={prefixedTestId(SECTION_META[section.id].testId)}
 				>
 					{SECTION_META[section.id].label()}

@@ -34,9 +34,10 @@
 		     Icons are forced to a uniform 24px box ([&_.nav-item_svg]) since icon
 		     components have differing size defaults (e.g. IconLineChart defaults to
 		     16), and items-center keeps the icon vertically centred against the
-		     label regardless of the icon's own intrinsic height. -->
+		     label regardless of the icon's own intrinsic height. In windows up to
+		     950px tall (`h-sm:`) rows and gaps tighten, so the scrollbar comes later. -->
 		<div
-			class="mb-6 flex flex-col gap-0.5 [&_.nav-item]:items-center [&_.nav-item]:py-2 [&_.nav-item_svg]:h-6 [&_.nav-item_svg]:w-6"
+			class="mb-6 flex flex-col gap-0.5 h-sm:mb-3 [&_.nav-item]:items-center [&_.nav-item]:py-2 h-sm:[&_.nav-item]:py-1.5 [&_.nav-item_svg]:h-6 [&_.nav-item_svg]:w-6"
 		>
 			<NavigationMenuMainItems />
 		</div>
@@ -46,7 +47,10 @@
 	     The lower slot renders straight into this flex column, so `gap-4` only
 	     opens up when the card is there. No test-id prefix, so Settings keeps
 	     `navigation-item-settings`, the id both e2e page objects navigate by. -->
-	<div class="flex shrink-0 flex-col gap-4 pt-3" data-tid={SIDEBAR_NAVIGATION_MENU_BOTTOM}>
+	<div
+		class="flex shrink-0 flex-col gap-4 pt-3 h-sm:gap-3"
+		data-tid={SIDEBAR_NAVIGATION_MENU_BOTTOM}
+	>
 		{@render children()}
 
 		<NavigationMenuMainItems layout="bottom" />
