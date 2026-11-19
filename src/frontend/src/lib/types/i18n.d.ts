@@ -774,6 +774,8 @@ interface I18nReceive {
 			title_direct: string;
 			title_deposit: string;
 			receive_token: string;
+			principal_description: string;
+			account_id_description: string;
 		};
 	};
 	ckbtc: {
@@ -793,7 +795,15 @@ interface I18nReceive {
 			credit_note: string;
 		};
 	};
-	addresses: { text: { evm_title: string; evm_networks: string; display_evm_qr: string } };
+	addresses: {
+		text: {
+			evm_title: string;
+			evm_networks: string;
+			display_evm_qr: string;
+			principal_tag: string;
+			account_id_tag: string;
+		};
+	};
 }
 
 interface I18nSend {

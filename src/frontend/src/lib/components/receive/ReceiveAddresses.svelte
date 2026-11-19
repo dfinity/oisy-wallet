@@ -110,6 +110,7 @@
 		copyAriaLabel: string;
 		qrCodeAriaLabel: string;
 		text?: string;
+		tag?: string;
 		condition?: boolean;
 		qrCodeAction: {
 			enabled: true;
@@ -123,6 +124,7 @@
 	let receiveAddressCoreList = $derived<Omit<ReceiveAddressProps, 'qrCodeAction' | 'on'>[]>([
 		{
 			labelRef: 'icrcTokenAddress',
+			tag: $i18n.receive.addresses.text.principal_tag,
 			address: $icrcAccountIdentifierText,
 			network: ICP_NETWORK,
 			token: ICP_TOKEN,
@@ -135,6 +137,7 @@
 		},
 		{
 			labelRef: 'icpTokenAddress',
+			tag: $i18n.receive.addresses.text.account_id_tag,
 			address: $icpAccountIdentifierText,
 			network: ICP_NETWORK,
 			token: ICP_TOKEN,
@@ -257,8 +260,10 @@
 				testId,
 				title,
 				text,
+				tag,
 				condition
 			}) => ({
+				tag,
 				labelRef,
 				address,
 				network,
@@ -288,9 +293,17 @@
 
 <ContentWithToolbar>
 	<div class="flex flex-col gap-1">
-		{#each receiveAddressList as { title, condition, labelRef, address, network, token, testId, copyAriaLabel, qrCodeAction } (labelRef)}
+		{#each receiveAddressList as { title, tag, condition, labelRef, address, network, token, testId, copyAriaLabel, qrCodeAction } (labelRef)}
 			{#if condition !== false && (!isNftsPage || network.supportsNft)}
-				<ReceiveAddressListItem {address} {copyAriaLabel} {qrCodeAction} {testId} {title} {token} />
+				<ReceiveAddressListItem
+					{address}
+					{copyAriaLabel}
+					{qrCodeAction}
+					{tag}
+					{testId}
+					{title}
+					{token}
+				/>
 			{/if}
 		{/each}
 	</div>

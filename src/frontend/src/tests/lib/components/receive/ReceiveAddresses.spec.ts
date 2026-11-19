@@ -59,6 +59,17 @@ describe('ReceiveAddresses', () => {
 		);
 	});
 
+	it('should say which tokens each ICP address takes', () => {
+		const { container } = render(ReceiveAddresses, { props: { onQRCode: vi.fn() } });
+
+		expect(section({ container, testId: RECEIVE_TOKENS_MODAL_ICRC_SECTION })).toHaveTextContent(
+			get(i18n).receive.addresses.text.principal_tag
+		);
+		expect(section({ container, testId: RECEIVE_TOKENS_MODAL_ICP_SECTION })).toHaveTextContent(
+			get(i18n).receive.addresses.text.account_id_tag
+		);
+	});
+
 	it('should keep what an ICP address is for with its QR code details', () => {
 		const onQRCode = vi.fn();
 

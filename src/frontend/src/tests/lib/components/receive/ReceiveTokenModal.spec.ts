@@ -35,6 +35,7 @@ import {
 	RECEIVE_ENABLE_TOKEN_BUTTON,
 	RECEIVE_HOW_TO_CONVERT_BUTTON,
 	RECEIVE_ICP_FORMAT_ACCOUNT_ID,
+	RECEIVE_ICP_FORMAT_DESCRIPTION,
 	RECEIVE_ROUTE_LIST_ITEM,
 	RECEIVE_TOKEN_IMPORT_BUTTON,
 	RECEIVE_TOKEN_LIST_ITEM,
@@ -148,6 +149,16 @@ describe('ReceiveTokenModal', () => {
 			`Receive ICP on ${ICP_NETWORK.name}`
 		);
 
+		const description = () => byTestId({ container, testId: RECEIVE_ICP_FORMAT_DESCRIPTION });
+
+		expect(description()).toHaveTextContent(get(i18n).receive.token.text.principal_description);
+		// The line under the switch says what the address takes, so the send instruction is left out.
+		expect(container).not.toHaveTextContent(
+			get(i18n)
+				.receive.token.text.send_instruction.replace('$token', 'ICP')
+				.replace('$network', ICP_NETWORK.name)
+		);
+
 		const accountIdButton = byTestId({ container, testId: RECEIVE_ICP_FORMAT_ACCOUNT_ID });
 
 		expect(accountIdButton).toHaveAttribute('aria-checked', 'false');
@@ -161,6 +172,7 @@ describe('ReceiveTokenModal', () => {
 		});
 
 		expect(accountIdButton).toHaveAttribute('aria-checked', 'true');
+		expect(description()).toHaveTextContent(get(i18n).receive.token.text.account_id_description);
 	});
 
 	it('should list every network of USDC with the page network first', async () => {

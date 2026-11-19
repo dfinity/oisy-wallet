@@ -1045,7 +1045,9 @@
 				"no_match": "No matching tokens. Try a different name or symbol.",
 				"title_direct": "Receive $token on $network",
 				"title_deposit": "Receive $token via $network",
-				"receive_token": "Receive $token"
+				"receive_token": "Receive $token",
+				"principal_description": "Receives ICP and every Internet Computer token, like ckBTC and CHAT.",
+				"account_id_description": "ICP token only. Use it when an exchange asks for an Account ID."
 			}
 		},
 		"ckbtc": {
@@ -1069,7 +1071,9 @@
 			"text": {
 				"evm_title": "EVM wallet address",
 				"evm_networks": "One address for $networks.",
-				"display_evm_qr": "Show QR code for the shared EVM wallet address"
+				"display_evm_qr": "Show QR code for the shared EVM wallet address",
+				"principal_tag": "Tokens like ckBTC, CHAT, …",
+				"account_id_tag": "ICP token only"
 			}
 		}
 	},

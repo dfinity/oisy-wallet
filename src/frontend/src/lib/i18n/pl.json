@@ -1045,7 +1045,9 @@
 				"no_match": "",
 				"title_direct": "",
 				"title_deposit": "",
-				"receive_token": ""
+				"receive_token": "",
+				"principal_description": "",
+				"account_id_description": ""
 			}
 		},
 		"ckbtc": {
@@ -1069,7 +1071,9 @@
 			"text": {
 				"evm_title": "",
 				"evm_networks": "",
-				"display_evm_qr": ""
+				"display_evm_qr": "",
+				"principal_tag": "",
+				"account_id_tag": ""
 			}
 		}
 	},

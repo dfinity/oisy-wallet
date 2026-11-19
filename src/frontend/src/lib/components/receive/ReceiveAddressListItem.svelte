@@ -12,6 +12,8 @@
 
 	interface Props {
 		title: string;
+		// What the address takes, when its name alone does not say: shown before the address.
+		tag?: string;
 		// Shown as loading until it is known.
 		address: OptionString;
 		// Its native token: the coloured mark that tells the rows apart at a glance.
@@ -21,7 +23,7 @@
 		testId?: string;
 	}
 
-	let { title, address, token, qrCodeAction, copyAriaLabel, testId }: Props = $props();
+	let { title, tag, address, token, qrCodeAction, copyAriaLabel, testId }: Props = $props();
 </script>
 
 <!-- One row of a list of addresses: who it is for at a glance, the full address behind Copy and QR. -->
@@ -30,6 +32,10 @@
 
 	<div class="flex min-w-0 flex-1 flex-col">
 		<span class="truncate font-bold text-primary">{title}</span>
+
+		{#if nonNullish(tag)}
+			<span class="truncate text-sm font-semibold text-secondary">{tag}</span>
+		{/if}
 
 		{#if nonNullish(address)}
 			<span

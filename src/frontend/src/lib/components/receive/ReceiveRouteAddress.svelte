@@ -21,6 +21,7 @@
 		RECEIVE_CKBTC_DEPOSIT_WARNING,
 		RECEIVE_HOW_TO_CONVERT_BUTTON,
 		RECEIVE_ICP_FORMAT_ACCOUNT_ID,
+		RECEIVE_ICP_FORMAT_DESCRIPTION,
 		RECEIVE_ICP_FORMAT_PRINCIPAL,
 		RECEIVE_TOKENS_MODAL_ADDRESS_LABEL,
 		RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON,
@@ -167,6 +168,18 @@
 						options={icpFormats}
 						bind:value={icpFormat}
 					/>
+
+					<!-- What the chosen format receives; it changes with the switch and stands in for the
+					     send instruction, which would say less. -->
+					<div
+						class="mt-2 px-4 text-sm leading-5 text-tertiary"
+						aria-live="polite"
+						data-tid={RECEIVE_ICP_FORMAT_DESCRIPTION}
+					>
+						{icpFormat === 'account-id'
+							? $i18n.receive.token.text.account_id_description
+							: $i18n.receive.token.text.principal_description}
+					</div>
 				</div>
 			{/if}
 
@@ -201,7 +214,7 @@
 								>
 								<span>{$i18n.receive.ckbtc.text.deposit_warning}</span>
 							</div>
-						{:else}
+						{:else if addressKind !== 'icp'}
 							<div class="mt-3 flex items-start gap-2 px-4 text-sm leading-5 text-tertiary">
 								<span class="flex h-5 shrink-0 items-center"><IconInfo /></span>
 								<span>

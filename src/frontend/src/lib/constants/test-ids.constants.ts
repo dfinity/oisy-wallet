@@ -92,6 +92,7 @@ export const RECEIVE_ENABLE_TOKEN_BUTTON = 'receive-enable-token-button';
 export const RECEIVE_ADDRESS_RETRY_BUTTON = 'receive-address-retry-button';
 export const RECEIVE_ADDRESS_LOADING = 'receive-address-loading';
 export const RECEIVE_ICP_FORMAT_PRINCIPAL = 'receive-icp-format-principal';
+export const RECEIVE_ICP_FORMAT_DESCRIPTION = 'receive-icp-format-description';
 export const RECEIVE_ICP_FORMAT_ACCOUNT_ID = 'receive-icp-format-account-id';
 export const RECEIVE_CKBTC_DEPOSIT_WARNING = 'receive-ckbtc-deposit-warning';
 export const RECEIVE_CKBTC_TERMS_RETRY_BUTTON = 'receive-ckbtc-terms-retry-button';
