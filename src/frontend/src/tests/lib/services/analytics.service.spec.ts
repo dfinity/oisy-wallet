@@ -624,6 +624,21 @@ describe('plausible analytics service', () => {
 		});
 	});
 
+	describe('buildMainMenuClickEvent', () => {
+		it('builds the ui_click payload of a main navigation item', async () => {
+			const { buildMainMenuClickEvent } = await import('$lib/services/analytics.services');
+
+			expect(buildMainMenuClickEvent('help')).toEqual({
+				name: 'ui_click',
+				metadata: {
+					source_location: 'navigation',
+					source_sublocation: 'main_menu',
+					event_value: 'help'
+				}
+			});
+		});
+	});
+
 	it('should console.debug the error in STAGING when tracker.track throws', async () => {
 		mockStaging = true;
 

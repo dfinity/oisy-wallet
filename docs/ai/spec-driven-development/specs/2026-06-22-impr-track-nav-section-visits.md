@@ -143,7 +143,7 @@ Per-tab view counts = count of `view_open` grouped by `event_value`. Split by `e
 
 Scope for this change:
 
-- **Main navigation**: every item, in every layout — desktop sidebar, the pinned bottom block (Settings), the mobile bar, and the cards in the mobile Finance and More sheets. `event_value` is the item's `NavigationItemId`, Notes included. The mobile Finance and More buttons only open a sheet and send nothing. The desktop More menu (links out to docs, FAQ, source code, X, and Help) keeps its own events.
+- **Main navigation**: every item, in every layout — desktop sidebar, the pinned bottom block (Settings), the mobile bar, and the cards in the mobile Finance and More sheets. `event_value` is the item's `NavigationItemId`, Notes included. The mobile Finance and More buttons only open a sheet and send nothing. On desktop, Help is not in the sidebar but a row of the More menu: that row sends the same click (`help`) while it opens the in-app Help page; the menu's links out (docs, FAQ, source code, X, and the support page when the Help page is off) keep their own events.
 - **Assets tab bar**: every tab click.
 
 Other navigation surfaces — user menu, back buttons, dApp cards, settings sub-nav — can adopt the same event later by adding `source_location` / `source_sublocation` values; out of scope here.
@@ -352,12 +352,16 @@ export const buildUiClickEvent = ({
 
 **`NavigationItem.svelte`**: add an optional `trackEvent?: TrackEventParams` prop, fired from the link's `onclick` exactly as `ExternalLink.svelte` does (`isNullish(trackEvent)` → return; else `trackEventServices(trackEvent)`). An item without `href` (Notes) renders a `<button>`: it fires the event first, then its own `onclick`.
 
-**`NavigationMenuMainItems.svelte`**: one helper builds the event from the item id (`source_location = navigation`, `source_sublocation = main_menu`, `event_value` = the `NavigationItemId`):
+**`buildMainMenuClickEvent(id)`** in `analytics.services.ts` builds the event from the item id (`source_location = navigation`, `source_sublocation = main_menu`, `event_value` = the `NavigationItemId`), so every control that shows a menu item sends the same payload.
+
+**`NavigationMenuMainItems.svelte`**:
 
 - the `navItem` snippet passes it to `NavigationItem` as `trackEvent`;
 - the `navCard` snippet (mobile sheets) fires it from the card's `<a>` `onclick`, and first thing in the `<button>` `onclick` of a card that opens a modal.
 
 The group buttons (Finance cradle, More) are not items and send nothing.
+
+**`NavigationMoreMenu.svelte`** (desktop): the Help row carries `buildMainMenuClickEvent('help')` while it opens the in-app Help page (`HELP_ENABLED`), and fires it before navigating. When the flag is off the row links out to the support page instead, which is not the Help item, so it sends nothing new.
 
 **`Tabs.svelte`**: in the same `nonNullish(trackEventName)` block that fires the `view_open`, additionally fire a `ui_click` (`source_sublocation = assets_tabs`, `event_value = id`). Keep the `view_open` (with `event_trigger = click`) as-is — the two events are complementary.
 
@@ -375,9 +379,10 @@ Follow the existing `PAGE_OPEN` test precedent in `src/frontend/src/tests/lib/co
   - Entering NFTs (initial load, an Assets tab, Activity) fires only `page_open` (`nfts-page`); moving within NFTs fires nothing.
   - Drive `afterNavigate` via the SvelteKit navigation mocks already used in the suite.
 - **`Tabs`** (`src/frontend/src/tests/lib/components/ui/Tabs.spec.ts`): clicking a tab fires the `view_open` (`event_trigger = click`, clicked tab's `event_value`) **and** the `ui_click` (`source_location = navigation`, `source_sublocation = assets_tabs`, `event_value` = tab).
-- **`analytics.services` / helpers:** unit-test `buildAssetsTabViewEvent` for both `auto` and `click`, and `buildUiClickEvent` (with and without `source_sublocation` / `event_value`) — asserting full payloads, mirroring the `buildLearnMoreEvent` tests in `analytics.service.spec.ts`.
+- **`analytics.services` / helpers:** unit-test `buildAssetsTabViewEvent` for both `auto` and `click`, `buildUiClickEvent` (with and without `source_sublocation` / `event_value`) and `buildMainMenuClickEvent` — asserting full payloads, mirroring the `buildLearnMoreEvent` tests in `analytics.service.spec.ts`.
 - **`NavigationItem`** (`src/frontend/src/tests/lib/components/navigation/NavigationItem.spec.ts`): clicking a link fires the provided `trackEvent`; clicking an item without `href` fires it and then `onclick`; no event when the prop is absent.
 - **`NavigationMainMenuItems`** (`src/frontend/src/tests/lib/components/navigation/NavigationMainMenuItems.spec.ts`): `ui_click` with the right `event_value` from each desktop sidebar item, the pinned Settings item, a mobile bar item, a card in a mobile sheet (and nothing from the button that opens the sheet), and the Notes item that opens a modal.
+- **`NavigationMoreMenu`** (`src/frontend/src/tests/lib/components/navigation/NavigationMoreMenu.spec.ts`): the Help row sends `ui_click` (`help`) when it opens the Help page, and nothing when it links out to the support page.
 - **`nav.utils.spec.ts`:** `isAssetsRouteId` is true for the Tokens / Trading / Earning / Borrowing route ids, false for NFTs, Activity, Explore, Settings, Earn, Rewards and `null`.
 - Do not add assertions to the Trade / Earn / Borrow / NFT detail / Harvest tests — they are unchanged.
 
@@ -387,7 +392,7 @@ Follow the existing `PAGE_OPEN` test precedent in `src/frontend/src/tests/lib/co
 
 - The existing `PAGE_OPEN` on Trade, Earn, Borrow, NFT detail, NFT collection and Harvest pages — unchanged.
 - Replacing `page_open` with click tracking: `page_open` remains the complete "visits however reached" metric (it must catch direct URLs, back/forward, redirects). The `ui_click` event is an _additional, orthogonal_ signal for how users navigate, not a substitute — and it deliberately does **not** add `event_trigger` to `page_open`.
-- `ui_click` on navigation surfaces beyond the main navigation and the Assets tab bar (desktop More menu, user menu, back buttons, dApp cards, settings sub-nav, …) — same event, added later via new `source_location` / `source_sublocation` values.
+- `ui_click` on navigation surfaces beyond the main navigation and the Assets tab bar (the desktop More menu's links out, user menu, back buttons, dApp cards, settings sub-nav, …) — same event, added later via new `source_location` / `source_sublocation` values.
 - One name per place across all events (drop the `-page` suffix, migrate the legacy `location_source` key to `source_location`) — separate follow-up.
 - Generalising the `Tabs` `view_open` payload for non-Assets consumers (none exist today).
 - Sub-navigation within Settings, Explore, or Activity (e.g. individual settings panels, dApp detail opens, transaction filters) — those have or can get their own events separately.
@@ -408,10 +413,10 @@ Back/forward navigation _between_ Assets tabs (e.g. Earning → Tokens → back 
 - [ ] Visiting **Activity**, **Explore**, **Help**, **Settings**, **Rewards** and **Tools** fires `page_open` with the context and value in the schema table.
 - [ ] **Trade**, **Earn** and **Borrow** continue to fire their existing `page_open` with no change.
 - [ ] Each `page_open` fires on _any_ entry to the page (nav click, direct URL, back/forward, redirect), not only on nav-menu clicks.
-- [ ] Clicking any **main navigation** item, in any layout, fires `ui_click` with `source_location = navigation`, `source_sublocation = main_menu`, and `event_value` = the item's `NavigationItemId`; Notes included; the Finance and More group buttons fire nothing; `page_open` stays trigger-less.
+- [ ] Clicking any **main navigation** item, in any layout, fires `ui_click` with `source_location = navigation`, `source_sublocation = main_menu`, and `event_value` = the item's `NavigationItemId`; Notes included, and Help in the desktop More menu; the Finance and More group buttons fire nothing; `page_open` stays trigger-less.
 - [ ] Clicking an **Assets tab** fires both `ui_click` (`source_location = navigation`, `source_sublocation = assets_tabs`, `event_value` = tab) and the existing `view_open` (`event_trigger = click`); `view_open`'s `event_trigger` is retained.
 - [ ] `ui_click` uses the standard `source_location` key; the legacy `location_source` on `view_open` is left unchanged.
-- [ ] No inline string literals for event metadata: `UI_CLICK`, and `NAVIGATION` / `MAIN_MENU` / `ASSETS_TABS` in `PLAUSIBLE_EVENT_SOURCE_LOCATIONS`, are enum members; `ui_click` payloads are produced by the shared `buildUiClickEvent` helper.
+- [ ] No inline string literals for event metadata: `UI_CLICK`, and `NAVIGATION` / `MAIN_MENU` / `ASSETS_TABS` in `PLAUSIBLE_EVENT_SOURCE_LOCATIONS`, are enum members; `ui_click` payloads are produced by the shared `buildUiClickEvent` helper (`buildMainMenuClickEvent` for a menu item).
 - [ ] New `PLAUSIBLE_EVENT_VALUES`, `PLAUSIBLE_EVENT_CONTEXTS`, and `PLAUSIBLE_EVENT_TRIGGERS` members added; no new path constants introduced; `isAssetsRouteId` reuses existing path predicates.
 - [ ] Analytics never throws — tracking failures are swallowed and never affect the user flow (guaranteed by `trackEvent`).
 - [ ] Quality gates pass: `npm run format`, `npm run lint -- --max-warnings 0`, `npm run check`, `npm run test`.

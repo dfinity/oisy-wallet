@@ -49,14 +49,12 @@
 		NAVIGATION_ITEM_TOOLS,
 		NAVIGATION_ITEM_TRADE
 	} from '$lib/constants/test-ids.constants';
-	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
-	import { buildUiClickEvent, trackEvent } from '$lib/services/analytics.services';
+	import { buildMainMenuClickEvent, trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { activeAssetsTabStore } from '$lib/stores/settings.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
-	import type { TrackEventParams } from '$lib/types/analytics';
 	import type {
 		NavigationGroupId,
 		NavigationItemDescriptor,
@@ -318,15 +316,6 @@
 		})
 	);
 
-	// The same click event from every layout (sidebar, bottom bar, group sheet); the item id is
-	// what was clicked.
-	const navClickEvent = (id: NavigationItemId): TrackEventParams =>
-		buildUiClickEvent({
-			sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION,
-			sourceSublocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MAIN_MENU,
-			eventValue: id
-		});
-
 	// A group "owns" the current page when one of its children is the active page;
 	// that drives the cradle/More blue (owns) vs grey (open over another page).
 	const groupOwnsCurrentPage = (items: NavigationItemId[]): boolean =>
@@ -345,7 +334,7 @@
 			tag={descriptor.tag}
 			tagVariant={descriptor.tagVariant}
 			testId={descriptor.testId}
-			trackEvent={navClickEvent(id)}
+			trackEvent={buildMainMenuClickEvent(id)}
 		>
 			{#snippet icon()}
 				<Icon />
@@ -377,7 +366,7 @@
 				aria-label={descriptor.ariaLabel}
 				data-tid={descriptor.testId}
 				href={descriptor.href}
-				onclick={() => trackEvent(navClickEvent(id))}
+				onclick={() => trackEvent(buildMainMenuClickEvent(id))}
 			>
 				{@render cardInner()}
 			</a>
@@ -389,7 +378,7 @@
 				aria-label={descriptor.ariaLabel}
 				data-tid={descriptor.testId}
 				onclick={() => {
-					trackEvent(navClickEvent(id));
+					trackEvent(buildMainMenuClickEvent(id));
 					closeSheetInstantly = true;
 					openSheet = null;
 					descriptor.onclick?.();

@@ -19,6 +19,7 @@ import en from '$lib/i18n/en.json';
 import { loadPlausibleTracker } from '$lib/services/analytics-wrapper';
 import type { TrackEventParams } from '$lib/types/analytics';
 import type { RateLimitInfo } from '$lib/types/api';
+import type { NavigationItemId } from '$lib/types/navigation';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -311,3 +312,14 @@ export const buildUiClickEvent = ({
 		...(nonNullish(eventValue) && { event_value: eventValue })
 	}
 });
+
+/**
+ * Build the `ui_click` payload for a main navigation item, whichever control shows it (the
+ * sidebar, the mobile bar or sheets, the desktop More menu), so one item counts alike everywhere.
+ */
+export const buildMainMenuClickEvent = (id: NavigationItemId): TrackEventParams =>
+	buildUiClickEvent({
+		sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION,
+		sourceSublocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MAIN_MENU,
+		eventValue: id
+	});
