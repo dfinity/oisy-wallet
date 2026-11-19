@@ -12,7 +12,7 @@
 
 	interface Props {
 		title: string;
-		// What the address takes, when its name alone does not say: shown before the address.
+		// What the address takes, when its name alone does not say: shown after the address.
 		tag?: string;
 		// Shown as loading until it is known.
 		address: OptionString;
@@ -35,16 +35,18 @@
 	<div class="flex min-w-0 flex-1 flex-col">
 		<span class="truncate font-bold text-primary">{title}</span>
 
-		{#if nonNullish(tag)}
-			<span class="truncate text-sm font-semibold text-secondary">{tag}</span>
-		{/if}
-
 		{#if nonNullish(address)}
-			<!-- Seen shortened; read out (and read by tests) in full. -->
+			<!-- Seen shortened; read out (and read by tests) in full. The tag follows the address on
+			     its line and gives way first, so the address itself is never cut. -->
 			<span class="sr-only" data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}>{address}</span>
-			<span class="truncate text-sm text-tertiary" aria-hidden="true" in:fade
-				>{shortenWithMiddleEllipsis({ text: address, splitLength: 6 })}</span
-			>
+			<span class="flex min-w-0 text-sm text-tertiary" in:fade>
+				<span class="shrink-0" aria-hidden="true"
+					>{shortenWithMiddleEllipsis({ text: address, splitLength: 6 })}</span
+				>
+				{#if nonNullish(tag)}
+					<span class="truncate"><span aria-hidden="true">&nbsp;·&nbsp;</span>{tag}</span>
+				{/if}
+			</span>
 		{:else}
 			<span class="block w-32"><SkeletonText /></span>
 		{/if}
