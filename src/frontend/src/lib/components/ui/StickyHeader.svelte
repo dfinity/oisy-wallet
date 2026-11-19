@@ -34,9 +34,11 @@
 <svelte:window onscroll={handleScroll} />
 
 <div bind:this={rootElement}>
+	<!-- Where the app header's band covers the top of the window (`header-band:`), pin just
+	     below it instead, and let the band stand in for the top padding. -->
 	<div
 		style:z-index={zIndex}
-		class="sticky top-0 px-1 whitespace-nowrap"
+		class="sticky top-0 px-1 whitespace-nowrap header-band:top-20 header-band:pt-0"
 		class:bg-page={scrolledSoon}
 		class:pt-6={scrolledSoon}
 	>

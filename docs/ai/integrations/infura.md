@@ -6,11 +6,17 @@ broadcasting signed transactions on every EVM chain. It is reached via the
 **ethers.js `InfuraProvider`** (`src/frontend/src/eth/providers/infura.providers.ts`),
 with a separate **Gas REST API** for fee suggestions
 (`src/frontend/src/eth/rest/infura.rest.ts`). One provider instance is created per
-EVM network from each network's `providers.infura` config.
+EVM network by the `ethersProvider` factory
+(`src/frontend/src/eth/providers/ethers.providers.ts`): a network with a
+`providers.infura` name gets an `InfuraProvider`; a network without one (a chain
+Infura does not host) gets a plain ethers `JsonRpcProvider` on its
+`providers.alchemyJsonRpcUrl`. Every currently supported network has an `infura`
+name, so today all traffic below goes to Infura.
 
 This is a distinct role from [Alchemy](./alchemy.md): Infura does the standard RPC
 and transaction-broadcast work, while Alchemy fills the gaps Infura cannot (indexed
-NFT ownership/metadata, real-time WebSocket subscriptions, Solana). Both `infura`
+NFT ownership/metadata, real-time WebSocket subscriptions, Solana), and answers in
+Infura's place when a call an EVM send depends on fails. Both `infura`
 and `alchemy` endpoints are configured on each EVM network — see the comparison at
 the end.
 
@@ -35,6 +41,8 @@ the end.
 ## Fees & gas
 
 - **Fee data** — `getFeeData` (base / max / priority fee) via the base provider.
+  When Infura does not answer it within 10 s, it goes to Alchemy — see
+  [Alchemy → EVM — fallback for Infura](./alchemy.md#evm--fallback-for-infura).
 - **Gas estimation** — `estimateGas` for transfers, approvals, burns and deposits
   (the various `infura-*.providers.ts`).
 - **Suggested gas fees (REST, not RPC)** — `InfuraGasRest.getSuggestedFeeData`
@@ -46,11 +54,16 @@ the end.
 ## Transaction lifecycle
 
 - **Nonce** — `getTransactionCount` with `latest` / `pending` tags, exposed as
-  `getTransactionCountLatest` / `getTransactionCountPending`.
+  `getTransactionCountLatest` / `getTransactionCountPending`. When Infura does not
+  answer the `pending` read within 10 s, it goes to Alchemy — see
+  [Alchemy → EVM — fallback for Infura](./alchemy.md#evm--fallback-for-infura).
 - **Block number** — `getBlockNumber`, used for transaction finality tracking
   (`src/frontend/src/eth/services/eth-transactions.services.ts`).
 - **Broadcast signed transactions** — `sendTransaction` wraps ethers'
   `broadcastTransaction`; used by the send, swap, approve and NFT-transfer services.
+  When Infura does not accept a signed transaction within 30 s, without refusing it
+  outright, the same bytes go to Alchemy — see
+  [Alchemy → EVM — fallback for Infura](./alchemy.md#evm--fallback-for-infura).
 - **Populate unsigned transactions** — `populateTransaction` / `populateApprove`
   build the payloads for ERC-20, ckETH (`infura-cketh.providers.ts`), ckERC20
   (`infura-ckerc20.providers.ts`) and ICP-burn (`infura-erc20-icp.providers.ts`)
@@ -88,15 +101,17 @@ Infura reads NFT data directly from contracts (unlike Alchemy's indexed NFT API)
 EVM network endpoints are configured per network in
 `src/frontend/src/env/networks/networks.eth.env.ts` and
 `src/frontend/src/env/networks/networks-evm/*.env.ts` (Arbitrum, Base, Polygon,
-BSC), each carrying both an `infura` and an `alchemy` provider entry.
+BSC), each carrying an `alchemy` provider entry and — when Infura hosts the chain —
+an `infura` one.
 
 ## Infura vs. Alchemy
 
-|           | Infura                                                                                                      | Alchemy                                                                                      |
-| --------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Transport | ethers.js `InfuraProvider` + Gas REST                                                                       | viem `PublicClient` + NFT API v3 + WebSocket                                                 |
-| Role      | Primary EVM JSON-RPC: balances, fees, nonces, blocks, contract reads, **transaction broadcast**, ckETH logs | NFT indexing (ownership/metadata), real-time mined/pending WS subscriptions, Solana HTTP RPC |
-| NFTs      | On-chain reads via contract calls (`tokenURI` / `uri`)                                                      | Indexed ownership + enriched metadata                                                        |
-| Chains    | All EVM (Ethereum, Arbitrum, Base, Polygon, BSC + testnets)                                                 | Same EVM set + Solana                                                                        |
+|           | Infura                                                                                                      | Alchemy                                                                                                                     |
+| --------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Transport | ethers.js `InfuraProvider` + Gas REST                                                                       | viem `PublicClient` + NFT API v3 + WebSocket                                                                                |
+| Role      | Primary EVM JSON-RPC: balances, fees, nonces, blocks, contract reads, **transaction broadcast**, ckETH logs | NFT indexing (ownership/metadata), real-time mined/pending WS subscriptions, Solana HTTP RPC, fallback on the EVM send path |
+| NFTs      | On-chain reads via contract calls (`tokenURI` / `uri`)                                                      | Indexed ownership + enriched metadata                                                                                       |
+| Chains    | All EVM (Ethereum, Arbitrum, Base, Polygon, BSC + testnets)                                                 | Same EVM set + Solana                                                                                                       |
 
-They are complementary, not redundant.
+They are complementary. On the EVM send path Alchemy also backs Infura up, asked
+only when Infura fails.

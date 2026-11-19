@@ -24,6 +24,5 @@ export const VTIX_TOKEN: RequiredSpl2022Token = {
 	icon: vtix,
 	address: 'XsssYEQjzxBCFgvYFFNuhJFBeHNdLWYeUSP8F45cDr9',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
-	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
-	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
+	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
 };

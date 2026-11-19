@@ -1,13 +1,19 @@
+import { goto } from '$app/navigation';
 import LiquidiumPositionCard from '$lib/components/liquidium/LiquidiumPositionCard.svelte';
+import { lendBorrowProvidersConfig } from '$lib/config/lend-borrow.config';
 import { ZERO } from '$lib/constants/app.constants';
-import { modalLiquidiumWithdraw } from '$lib/derived/modal.derived';
-import { modalStore } from '$lib/stores/modal.store';
+import { AppPath } from '$lib/constants/routes.constants';
+import { LendBorrowProvider } from '$lib/types/lend-borrow';
 import type { LiquidiumReserve } from '$lib/types/liquidium';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { get } from 'svelte/store';
 
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn()
+}));
+
+// Assets → Earning tab holdings row: no action, clicks through to the provider page.
 describe('LiquidiumPositionCard', () => {
 	const reserve = (overrides: Partial<LiquidiumReserve> = {}): LiquidiumReserve => ({
 		poolId: 'pool-btc',
@@ -25,10 +31,9 @@ describe('LiquidiumPositionCard', () => {
 		...overrides
 	});
 
-	it('renders the supplied asset, APY and amount', () => {
+	it('renders the supplied asset and APY', () => {
 		const { container } = render(LiquidiumPositionCard, { props: { reserve: reserve() } });
 
-		// The "Supplied" label lives on the section header now, not the card.
 		expect(container).toHaveTextContent('BTC');
 		expect(container).toHaveTextContent(en.liquidium.text.apy_suffix);
 		expect(container).toHaveTextContent(`${formatStakeApyNumber(5)}%`);
@@ -39,26 +44,28 @@ describe('LiquidiumPositionCard', () => {
 			props: { reserve: reserve({ suppliedUsd: 0 }) }
 		});
 
-		expect(container).not.toHaveTextContent('/year');
+		expect(container).not.toHaveTextContent('/yr');
 	});
 
-	it('renders a zero APY position (default badge variant)', () => {
-		const { container } = render(LiquidiumPositionCard, {
-			props: { reserve: reserve({ supplyApy: 0 }) }
-		});
+	it('renders the Liquidium provider tag', () => {
+		const { container } = render(LiquidiumPositionCard, { props: { reserve: reserve() } });
 
-		expect(container).toHaveTextContent(`${formatStakeApyNumber(0)}%`);
+		expect(container).toHaveTextContent(
+			lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name
+		);
 	});
 
-	it('opens the withdraw modal from the Withdraw button', async () => {
-		modalStore.close();
+	it('does not render a Withdraw action button', () => {
+		const { queryByText } = render(LiquidiumPositionCard, { props: { reserve: reserve() } });
 
+		expect(queryByText(en.liquidium.text.action_withdraw)).not.toBeInTheDocument();
+	});
+
+	it('navigates to the Liquidium provider page when clicked', async () => {
 		const { getByRole } = render(LiquidiumPositionCard, { props: { reserve: reserve() } });
 
-		await fireEvent.click(getByRole('button', { name: en.liquidium.text.action_withdraw }));
+		await fireEvent.click(getByRole('button'));
 
-		expect(get(modalLiquidiumWithdraw)).toBeTruthy();
-
-		modalStore.close();
+		expect(goto).toHaveBeenCalledWith(AppPath.ProvidersLiquidium);
 	});
 });

@@ -10,9 +10,8 @@ vi.mock('$app/navigation', () => ({
 	afterNavigate: vi.fn()
 }));
 
-// Force the feature flags on (off by default outside staging) so the page renders.
+// Force the provider flags on (off by default outside staging) so the page renders.
 vi.mock('$env/lend-borrow', () => ({
-	LEND_BORROW_ENABLED: true,
 	anyLendBorrowProviderEnabled: true
 }));
 vi.mock('$env/liquidium', () => ({ LIQUIDIUM_ENABLED: true }));
@@ -66,7 +65,7 @@ describe('LiquidiumProvider', () => {
 
 		const { container } = render(LiquidiumProvider);
 
-		expect(container).toHaveTextContent(en.liquidium.text.health_factor);
+		expect(container).toHaveTextContent(en.liquidium.text.total_supplied);
 		expect(container).toHaveTextContent(en.liquidium.text.supplied);
 		expect(container).toHaveTextContent(en.liquidium.text.markets);
 		expect(container).toHaveTextContent('BTC');

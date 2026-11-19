@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 

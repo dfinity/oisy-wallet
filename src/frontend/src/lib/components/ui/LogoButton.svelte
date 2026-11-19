@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { IconCheck } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import type { MouseEventHandler } from 'svelte/elements';
-	import { fade } from 'svelte/transition';
 	import Divider from '$lib/components/common/Divider.svelte';
+	import IconGixCheck from '$lib/components/icons/IconGixCheck.svelte';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		selectable?: boolean;
+		expanded?: boolean;
+		// Announced as pressed or not; unset for a row that is not a choice. `selectable` adds a check
+		// column for it.
 		selected?: boolean;
 		dividers?: boolean;
 		hover?: boolean;
@@ -26,11 +29,13 @@
 		action?: Snippet;
 		onClick?: MouseEventHandler<HTMLButtonElement>;
 		fullWidth?: boolean;
+		disabled?: boolean;
 	}
 
 	let {
 		selectable = false,
-		selected = false,
+		expanded,
+		selected,
 		dividers = false,
 		hover = true,
 		rounded = true,
@@ -46,21 +51,30 @@
 		action,
 		onClick,
 		fullWidth = false,
+		disabled = false,
 		titleStyleClass = '',
 		subtitleStyleClass = ''
 	}: Props = $props();
 </script>
 
 <div
-	class={`flex ${styleClass ?? ''}`}
-	class:hover:bg-brand-subtle-10={hover}
+	class={`flex transition-[background-color] duration-150 ease-out ${styleClass ?? ''}`}
+	class:child-pressed:bg-brand-subtle-20={nonNullish(onClick) && !disabled}
+	class:child-pressed:duration-0={nonNullish(onClick) && !disabled}
+	class:hover:bg-brand-subtle-10={hover && !disabled}
+	class:opacity-50={disabled}
 	class:rounded-lg={rounded}
 	class:w-full={dividers || fullWidth}
 >
 	<button
-		class="flex w-full border-0 px-2"
+		style="--focus-outline-offset: -3px"
+		class="flex w-full rounded-lg border-0 px-2"
 		class:cursor-default={isNullish(onClick)}
+		class:cursor-not-allowed={disabled}
+		aria-expanded={expanded}
+		aria-pressed={selected}
 		data-tid={testId}
+		{disabled}
 		onclick={onClick}
 	>
 		<span
@@ -72,9 +86,9 @@
 		>
 			<span class="flex min-w-0 items-center">
 				{#if selectable}
-					<span class="mr-2 flex min-w-4 text-brand-primary" in:fade>
+					<span class="mr-3 flex min-w-5 items-center text-brand-primary" in:fade>
 						{#if selected}
-							<IconCheck size="16px" />
+							<IconGixCheck size="20px" />
 						{/if}
 					</span>
 				{/if}
@@ -85,7 +99,7 @@
 					<span class="flex min-w-0 items-center truncate text-nowrap">
 						{#if nonNullish(title)}
 							<span
-								class={`text-lg font-bold text-nowrap text-primary ${titleStyleClass}`}
+								class={`logo-button-title text-lg font-bold text-nowrap text-primary ${titleStyleClass}`}
 								class:min-w-0={isNullish(subtitle)}
 								class:truncate={isNullish(subtitle)}
 							>

@@ -6,11 +6,10 @@ describe('trading.config', () => {
 	describe('tradingDepositWizardSteps', () => {
 		const steps = tradingDepositWizardSteps({ i18n: en });
 
-		it('builds the five deposit wizard steps in order', () => {
+		it('builds the four deposit wizard steps in order', () => {
 			expect(steps.map(({ name }) => name)).toEqual([
 				WizardStepsTradingDeposit.DEPOSIT,
 				WizardStepsTradingDeposit.TOKENS_LIST,
-				WizardStepsTradingDeposit.FILTER_NETWORKS,
 				WizardStepsTradingDeposit.REVIEW,
 				WizardStepsTradingDeposit.DEPOSITING
 			]);
@@ -19,8 +18,7 @@ describe('trading.config', () => {
 		it('uses the matching i18n titles', () => {
 			expect(steps.map(({ title }) => title)).toEqual([
 				en.trading.deposit.title,
-				en.send.text.select_token,
-				en.send.text.select_network_filter,
+				en.trading.deposit.title,
 				en.trading.deposit.review_title,
 				en.trading.deposit.progress_title
 			]);

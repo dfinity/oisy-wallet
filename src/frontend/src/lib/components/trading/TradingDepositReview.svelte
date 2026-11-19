@@ -3,7 +3,9 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import { getTokenFee } from '$icp/utils/token.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import SwapFee from '$lib/components/swap/SwapFee.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
+	import OisyTradeMark from '$lib/components/trading/OisyTradeMark.svelte';
 	import TradingDepositInfoBox from '$lib/components/trading/TradingDepositInfoBox.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -34,15 +36,19 @@
 
 	let ledgerFee = $derived(getTokenFee(token));
 
-	const formatFeeToken = (value: bigint): string =>
-		`${formatToken({ value, unitName: token.decimals, displayDecimals: token.decimals })} ${getTokenDisplaySymbol(token)}`;
+	let symbol = $derived(getTokenDisplaySymbol(token));
 
-	// Fees are shown in fiat to match the rest of the app (hero, My-assets, the
-	// canonical `TokenFeeValue`). Falls back to the token amount when the token has
-	// no exchange rate, so the breakdown is never blank.
-	const formatFee = (value: bigint): string => {
+	// Bare token amount (no symbol) for the per-line breakdown, which renders the
+	// symbol separately via the shared `SwapFee` component.
+	const feeTokenAmount = (value: bigint): string =>
+		formatToken({ value, unitName: token.decimals, displayDecimals: token.decimals });
+
+	// Matches the canonical swap fees layout: the total is shown in fiat (with a
+	// token fallback when the token has no exchange rate) while the breakdown rows
+	// stay in token units.
+	const formatTotalFee = (value: bigint): string => {
 		if (isNullish(exchangeRate)) {
-			return formatFeeToken(value);
+			return `${feeTokenAmount(value)} ${symbol}`;
 		}
 
 		const feeUsd = (Number(value) / 10 ** token.decimals) * exchangeRate;
@@ -54,7 +60,7 @@
 				exchangeRate: $currencyExchangeStore,
 				language: $currentLanguage,
 				notBelowThreshold: true
-			}) ?? formatFeeToken(value)
+			}) ?? `${feeTokenAmount(value)} ${symbol}`
 		);
 	};
 </script>
@@ -72,7 +78,14 @@
 
 		<ModalValue>
 			{#snippet label()}{$i18n.trading.deposit.to}{/snippet}
-			{#snippet mainValue()}{$i18n.trading.text.provider_name}{/snippet}
+			{#snippet mainValue()}
+				<span class="inline-flex items-center gap-2">
+					<span class="flex" aria-hidden="true">
+						<OisyTradeMark size="22" />
+					</span>
+					{$i18n.trading.text.provider_name}
+				</span>
+			{/snippet}
 		</ModalValue>
 
 		{#if nonNullish(ledgerFee)}
@@ -80,19 +93,21 @@
 				{#snippet listHeader()}
 					<ModalValue>
 						{#snippet label()}{$i18n.trading.deposit.transaction_fee}{/snippet}
-						{#snippet mainValue()}{formatFee(ledgerFee * 2n)}{/snippet}
+						{#snippet mainValue()}{formatTotalFee(ledgerFee * 2n)}{/snippet}
 					</ModalValue>
 				{/snippet}
 
 				{#snippet listItems()}
-					<ModalValue>
-						{#snippet label()}{$i18n.trading.deposit.approval_fee}{/snippet}
-						{#snippet mainValue()}{formatFee(ledgerFee)}{/snippet}
-					</ModalValue>
-					<ModalValue>
-						{#snippet label()}{$i18n.trading.deposit.transfer_fee}{/snippet}
-						{#snippet mainValue()}{formatFee(ledgerFee)}{/snippet}
-					</ModalValue>
+					<SwapFee
+						fee={feeTokenAmount(ledgerFee)}
+						feeLabel={$i18n.trading.deposit.approval_fee}
+						{symbol}
+					/>
+					<SwapFee
+						fee={feeTokenAmount(ledgerFee)}
+						feeLabel={$i18n.trading.deposit.transfer_fee}
+						{symbol}
+					/>
 				{/snippet}
 			</ModalExpandableValues>
 		{/if}

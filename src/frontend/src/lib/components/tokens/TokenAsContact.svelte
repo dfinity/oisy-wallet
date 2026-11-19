@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import type { Token } from '$lib/types/token';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		token: Token;

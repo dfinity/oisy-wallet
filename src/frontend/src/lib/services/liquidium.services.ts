@@ -4,10 +4,15 @@ import { liquidiumWalletAdapter } from '$lib/services/liquidium-wallet-adapter.s
 import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import { consoleError } from '$lib/utils/console.utils';
-import { mapLiquidiumMarket, mapLiquidiumPortfolio } from '$lib/utils/liquidium.utils';
+import {
+	isLiquidiumInflowSubaccount,
+	mapLiquidiumMarketRails,
+	mapLiquidiumPortfolio
+} from '$lib/utils/liquidium.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
-import { Chain, type AssetPrices } from '@liquidium/client';
+import { Principal } from '@icp-sdk/core/principal';
+import { Chain, type AssetPrices, type Pool } from '@liquidium/client';
 
 // Resolves the (single, ETH-owned) Liquidium profile, creating one if absent.
 // Creation is signature-gated via the wallet adapter's `signMessage`.
@@ -60,7 +65,7 @@ export const loadLiquidium = async ({
 				return {};
 			})
 		]);
-		const markets = pools.map(mapLiquidiumMarket);
+		const markets = pools.flatMap(mapLiquidiumMarketRails);
 
 		const profileId = nonNullish(ethAddress) ? await accounts.getProfileId(ethAddress) : null;
 
@@ -74,5 +79,50 @@ export const loadLiquidium = async ({
 		liquidiumStore.set({ markets, portfolio, assetPrices });
 	} catch (err: unknown) {
 		consoleError(err);
+	} finally {
+		liquidiumStore.setLoaded(true);
 	}
+};
+
+/**
+ * The Liquidium pool a deposit of a ck token to an account reaches, when the account is the one that
+ * credits it to the user's own Liquidium profile.
+ *
+ * Read from Liquidium the way OISY's own supply reads the pool and the profile it supplies to: the
+ * pools Liquidium lists and the profile linked to the user's Ethereum address. `undefined` when the
+ * owner is not the Liquidium pool of that ck token's asset (a pool holds the ck token of its own
+ * asset, as ckUSDT for USDT), the address has no profile, or the subaccount credits another.
+ */
+export const loadLiquidiumInflowPool = async ({
+	identity,
+	ethAddress,
+	owner,
+	subaccount,
+	ckTokenSymbol
+}: {
+	identity: Identity;
+	ethAddress: EthAddress;
+	owner: Principal;
+	subaccount: Uint8Array;
+	ckTokenSymbol: string;
+}): Promise<Pool | undefined> => {
+	const { market, accounts } = liquidiumClient({ identity });
+
+	const pool = (await market.listPools()).find(
+		({ id, asset }) => id === owner.toText() && `ck${asset}` === ckTokenSymbol
+	);
+
+	if (isNullish(pool)) {
+		return;
+	}
+
+	const profileId = await accounts.getProfileId(ethAddress);
+
+	if (isNullish(profileId)) {
+		return;
+	}
+
+	return isLiquidiumInflowSubaccount({ subaccount, profileId: Principal.fromText(profileId) })
+		? pool
+		: undefined;
 };

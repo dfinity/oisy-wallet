@@ -20,7 +20,7 @@ import type {
 	BtcTxOutput,
 	EcdsaKeyId,
 	SchnorrKeyId,
-	BitcoinNetwork as SignerBitcoinNetwork,
+	Network as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
 } from '$declarations/signer/signer.did';
 import type { IcToken } from '$icp/types/ic-token';
@@ -77,6 +77,17 @@ export interface AllowSigningOutcome {
 export interface BtcGetPendingTransactionParams {
 	network: BitcoinNetwork;
 	iiDelegationChain: Nullable<IIDelegationChain>;
+}
+
+export type BtcGetSpendableUtxosParams = BtcGetPendingTransactionParams;
+
+export interface BtcGetBalanceParams extends BtcGetPendingTransactionParams {
+	minConfirmations?: number;
+}
+
+export interface BtcBroadcastTransactionParams extends BtcGetPendingTransactionParams {
+	// Fully signed and consensus-serialized.
+	transaction: Uint8Array;
 }
 
 export interface BtcAddPendingTransactionParams extends BtcGetPendingTransactionParams {
@@ -200,6 +211,16 @@ export interface BtcGetFeePercentilesParams {
 export interface GetContactParams {
 	identity: Identity;
 	contactId: bigint;
+}
+
+export interface GetContactsPageParams {
+	identity: Identity;
+	after?: bigint;
+}
+
+export interface GetContactImagesParams {
+	identity: Identity;
+	contactIds: bigint[];
 }
 
 export interface CreateContactParams {

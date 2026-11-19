@@ -1,5 +1,7 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
+import type * as lifiEnv from '$env/rest/lifi.env';
+import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import {
 	ARBITRUM_ETH_TOKEN,
 	ARBITRUM_SEPOLIA_ETH_TOKEN
@@ -16,6 +18,7 @@ import {
 	POL_AMOY_TOKEN,
 	POL_MAINNET_TOKEN
 } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
+import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
@@ -25,6 +28,7 @@ import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import * as tokensIcEnv from '$env/tokens/tokens.ic.env';
 import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
@@ -184,10 +188,12 @@ describe('all-tokens.derived', () => {
 				BTC_MAINNET_TOKEN.id.description,
 				ETHEREUM_TOKEN.id.description,
 				SOLANA_TOKEN.id.description,
+				XRP_TOKEN.id.description,
 				BASE_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
 				POL_MAINNET_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
+				ROBINHOOD_ETH_TOKEN.id.description,
 				mockErc20Token.id.description,
 				mockErc4626Token.id.description,
 				mockIcrcToken.id.description,
@@ -271,6 +277,7 @@ describe('all-tokens.derived', () => {
 				SEPOLIA_TOKEN.id.description,
 				SOLANA_TOKEN.id.description,
 				SOLANA_DEVNET_TOKEN.id.description,
+				XRP_TOKEN.id.description,
 				BASE_ETH_TOKEN.id.description,
 				BASE_SEPOLIA_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
@@ -278,7 +285,8 @@ describe('all-tokens.derived', () => {
 				POL_MAINNET_TOKEN.id.description,
 				POL_AMOY_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
-				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description
+				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description,
+				ROBINHOOD_ETH_TOKEN.id.description
 			]);
 		});
 
@@ -302,6 +310,7 @@ describe('all-tokens.derived', () => {
 				SOLANA_TOKEN.id.description,
 				SOLANA_DEVNET_TOKEN.id.description,
 				SOLANA_LOCAL_TOKEN.id.description,
+				XRP_TOKEN.id.description,
 				BASE_ETH_TOKEN.id.description,
 				BASE_SEPOLIA_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
@@ -309,7 +318,8 @@ describe('all-tokens.derived', () => {
 				POL_MAINNET_TOKEN.id.description,
 				POL_AMOY_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
-				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description
+				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description,
+				ROBINHOOD_ETH_TOKEN.id.description
 			]);
 		});
 	});
@@ -354,10 +364,12 @@ describe('all-tokens.derived', () => {
 				BTC_MAINNET_TOKEN.id.description,
 				ETHEREUM_TOKEN.id.description,
 				SOLANA_TOKEN.id.description,
+				XRP_TOKEN.id.description,
 				BASE_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
 				POL_MAINNET_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
+				ROBINHOOD_ETH_TOKEN.id.description,
 				mockErc20Token.id.description,
 				mockErc4626Token.id.description,
 				mockIcrcToken.id.description,
@@ -584,5 +596,47 @@ describe('all-tokens.derived', () => {
 				{ ...SOLANA_DEVNET_TOKEN, enabled: true }
 			]);
 		});
+
+		// Solana's providers are NEAR Intents and LI.FI: either flag keeps its tokens.
+		it.each([
+			{ nearIntents: false, lifi: true, included: true },
+			{ nearIntents: false, lifi: false, included: false }
+		])(
+			'should include Solana tokens: $included with NEAR Intents $nearIntents and LI.FI $lifi',
+			async ({ nearIntents, lifi, included }) => {
+				vi.resetModules();
+				vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
+					...(await importOriginal<typeof nearIntentsEnv>()),
+					NEAR_INTENTS_SWAP_ENABLED: nearIntents
+				}));
+				vi.doMock('$env/rest/lifi.env', async (importOriginal) => ({
+					...(await importOriginal<typeof lifiEnv>()),
+					LIFI_SWAP_ENABLED: lifi
+				}));
+
+				try {
+					const [
+						{ allCrossChainSwapTokens: tokens },
+						{ enabledSolanaTokens: solanaTokens },
+						{ SOLANA_TOKEN: solanaToken }
+					] = await Promise.all([
+						import('$lib/derived/all-tokens.derived'),
+						import('$sol/derived/tokens.derived'),
+						import('$env/tokens/tokens.sol.env')
+					]);
+
+					vi.spyOn(solanaTokens, 'subscribe').mockImplementation((fn) => {
+						fn([solanaToken]);
+						return () => {};
+					});
+
+					expect(get(tokens).some(({ id }) => id === solanaToken.id)).toBe(included);
+				} finally {
+					vi.doUnmock('$env/rest/lifi.env');
+					vi.doUnmock('$env/rest/near-intents.env');
+					vi.resetModules();
+				}
+			}
+		);
 	});
 });

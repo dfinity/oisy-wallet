@@ -8,13 +8,14 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { lendBorrowProvidersConfig } from '$lib/config/lend-borrow.config';
-	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import type { LiquidiumWithdrawPreview } from '$lib/services/liquidium-withdraw.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { LendBorrowProvider } from '$lib/types/lend-borrow';
 	import type { LiquidiumReserve } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
 
 	interface Props {
 		reserve: LiquidiumReserve;
@@ -29,7 +30,9 @@
 
 	const liquidium = lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM];
 
-	let withdrawToken = $derived(LIQUIDIUM_ASSET_TOKENS[reserve.asset]);
+	let withdrawToken = $derived(
+		liquidiumMarketToken({ chain: reserve.chain, asset: reserve.asset, tokens: $tokens })
+	);
 	let healthLevel = $derived(preview.healthLevel);
 </script>
 

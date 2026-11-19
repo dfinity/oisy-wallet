@@ -1,22 +1,22 @@
 <script lang="ts">
-	import type { WizardModal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import OpenCryptoPay from '$lib/components/open-crypto-pay/OpenCryptoPay.svelte';
 	import OpenCryptoPayProgress from '$lib/components/open-crypto-pay/OpenCryptoPayProgress.svelte';
 	import OpenCryptoPayTokensList from '$lib/components/open-crypto-pay/OpenCryptoPayTokensList.svelte';
 	import PaymentFailed from '$lib/components/open-crypto-pay/PaymentFailed.svelte';
+	import PaymentNotConfirmed from '$lib/components/open-crypto-pay/PaymentNotConfirmed.svelte';
 	import PaymentSucceeded from '$lib/components/open-crypto-pay/PaymentSucceeded.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
-	import type { ProgressStepsPayment } from '$lib/enums/progress-steps';
+	import { ProgressStepsPayment } from '$lib/enums/progress-steps';
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { pay as payApi } from '$lib/services/open-crypto-pay.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
-	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import type { WizardModal, WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { getOpenCryptoPayBaseTrackingParams } from '$lib/utils/open-crypto-pay.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -108,7 +108,13 @@
 
 			failedPaymentError.set(errorMessage);
 
-			goToStep(WizardStepsScanner.PAYMENT_FAILED);
+			// From the PAY step on, the payment is approved or signed and goes to the provider, so an
+			// error no longer tells whether the provider collected it.
+			goToStep(
+				payProgressStep === ProgressStepsPayment.PAY
+					? WizardStepsScanner.PAYMENT_NOT_CONFIRMED
+					: WizardStepsScanner.PAYMENT_FAILED
+			);
 		}
 	};
 
@@ -133,6 +139,8 @@
 				goToStep(WizardStepsScanner.SCAN);
 			}}
 		/>
+	{:else if currentStep?.name === WizardStepsScanner.PAYMENT_NOT_CONFIRMED}
+		<PaymentNotConfirmed {onClose} />
 	{:else if currentStep?.name === WizardStepsScanner.PAYMENT_CONFIRMED}
 		<PaymentSucceeded {onClose} />
 	{/if}

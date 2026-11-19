@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconClose } from '@dfinity/gix-components';
+	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import InfoBanner from '$lib/components/ui/InfoBanner.svelte';
 	import {
@@ -25,11 +25,12 @@
 				<Html text={replaceOisyPlaceholders($i18n.core.warning.standalone_mode)} />
 			</span>
 			<button
+				class="hit-area relative press-icon"
 				aria-label={$i18n.core.text.close}
 				data-tid={PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID}
 				onclick={closePwaBanner}
 			>
-				<IconClose />
+				<IconCloseThin />
 			</button>
 		</InfoBanner>
 	</div>

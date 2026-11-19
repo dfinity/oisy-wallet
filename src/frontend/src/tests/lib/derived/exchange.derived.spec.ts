@@ -17,6 +17,7 @@ import {
 	POL_AMOY_TOKEN_ID,
 	POL_MAINNET_TOKEN_ID
 } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
+import { ROBINHOOD_ETH_TOKEN_ID } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import {
@@ -33,6 +34,7 @@ import {
 	SOLANA_LOCAL_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
 import { ERC20_ICP_ADDRESS, ERC20_ICP_SYMBOL } from '$eth/constants/erc20-icp.constants';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
@@ -164,6 +166,7 @@ describe('exchange.derived', () => {
 		const btcPrice = { usd: 123_456 };
 		const icpPrice = { usd: 123_456_789 };
 		const solPrice = { usd: 987 };
+		const xrpPrice = { usd: 987 };
 		const bnbPrice = { usd: 987_654 };
 		const polPrice = { usd: 987_654_321 };
 
@@ -185,6 +188,7 @@ describe('exchange.derived', () => {
 			[SOLANA_TOKEN_ID]: undefined,
 			[SOLANA_DEVNET_TOKEN_ID]: undefined,
 			[SOLANA_LOCAL_TOKEN_ID]: undefined,
+			[XRP_TOKEN_ID]: undefined,
 			[BASE_ETH_TOKEN_ID]: undefined,
 			[BASE_SEPOLIA_ETH_TOKEN_ID]: undefined,
 			[BNB_MAINNET_TOKEN_ID]: undefined,
@@ -192,7 +196,8 @@ describe('exchange.derived', () => {
 			[POL_MAINNET_TOKEN_ID]: undefined,
 			[POL_AMOY_TOKEN_ID]: undefined,
 			[ARBITRUM_ETH_TOKEN_ID]: undefined,
-			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: undefined
+			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: undefined,
+			[ROBINHOOD_ETH_TOKEN_ID]: undefined
 		};
 
 		const expectedNullishExchangesIcrc = IC_BUILTIN_TOKENS.sort((a, b) =>
@@ -218,6 +223,7 @@ describe('exchange.derived', () => {
 			[SOLANA_TOKEN_ID]: solPrice,
 			[SOLANA_DEVNET_TOKEN_ID]: solPrice,
 			[SOLANA_LOCAL_TOKEN_ID]: solPrice,
+			[XRP_TOKEN_ID]: xrpPrice,
 			[BASE_ETH_TOKEN_ID]: ethPrice,
 			[BASE_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
 			[BNB_MAINNET_TOKEN_ID]: bnbPrice,
@@ -225,7 +231,8 @@ describe('exchange.derived', () => {
 			[POL_MAINNET_TOKEN_ID]: polPrice,
 			[POL_AMOY_TOKEN_ID]: polPrice,
 			[ARBITRUM_ETH_TOKEN_ID]: ethPrice,
-			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: ethPrice
+			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
+			[ROBINHOOD_ETH_TOKEN_ID]: ethPrice
 		};
 
 		beforeEach(() => {
@@ -304,7 +311,8 @@ describe('exchange.derived', () => {
 				[BASE_ETH_TOKEN_ID]: ethPrice,
 				[BASE_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
 				[ARBITRUM_ETH_TOKEN_ID]: ethPrice,
-				[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: ethPrice
+				[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
+				[ROBINHOOD_ETH_TOKEN_ID]: ethPrice
 			});
 		});
 
@@ -313,7 +321,7 @@ describe('exchange.derived', () => {
 				{ ethereum: ethPrice },
 				{ bitcoin: btcPrice },
 				{ 'internet-computer': icpPrice },
-				{ solana: solPrice },
+				{ solana: solPrice, ripple: xrpPrice },
 				{ binancecoin: bnbPrice },
 				{ 'polygon-ecosystem-token': polPrice }
 			]);
@@ -326,7 +334,7 @@ describe('exchange.derived', () => {
 				{ ethereum: ethPrice },
 				{ bitcoin: btcPrice },
 				{ 'internet-computer': icpPrice },
-				{ solana: solPrice },
+				{ solana: solPrice, ripple: xrpPrice },
 				{ binancecoin: bnbPrice },
 				{ 'polygon-ecosystem-token': polPrice }
 			]);
@@ -344,7 +352,8 @@ describe('exchange.derived', () => {
 				[BASE_ETH_TOKEN_ID]: newEthPrice,
 				[BASE_SEPOLIA_ETH_TOKEN_ID]: newEthPrice,
 				[ARBITRUM_ETH_TOKEN_ID]: newEthPrice,
-				[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: newEthPrice
+				[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: newEthPrice,
+				[ROBINHOOD_ETH_TOKEN_ID]: newEthPrice
 			});
 		});
 
@@ -374,6 +383,32 @@ describe('exchange.derived', () => {
 		});
 
 		it('should return values for ERC20 and SPL tokens', () => {
+			exchangeStore.set([
+				{ [mockErc20DefaultToken.address.toLowerCase()]: mockErc20TokenPrice1 },
+				{ [mockEr20CustomToken.address.toLowerCase()]: mockErc20TokenPrice2 },
+				{ [mockSplDefaultToken.address.toLowerCase()]: mockSplTokenPrice1 },
+				{ [mockSplCustomToken.address.toLowerCase()]: mockSplTokenPrice2 }
+			]);
+
+			expect(get(exchanges)).toStrictEqual({
+				...expectedNullishExchanges,
+				[mockErc20DefaultToken.id]: mockErc20TokenPrice1,
+				[mockEr20CustomToken.id]: mockErc20TokenPrice2,
+				[mockSplDefaultToken.id]: mockSplTokenPrice1,
+				[mockSplCustomToken.id]: mockSplTokenPrice2
+			});
+		});
+
+		it('should return values for disabled ERC20 and SPL tokens', () => {
+			erc20CustomTokensStore.setAll([
+				{ data: { ...mockErc20DefaultToken, enabled: false }, certified: false },
+				{ data: { ...mockEr20CustomToken, enabled: false }, certified: false }
+			]);
+			splCustomTokensStore.setAll([
+				{ data: { ...mockSplDefaultToken, enabled: false }, certified: false },
+				{ data: { ...mockSplCustomToken, enabled: false }, certified: false }
+			]);
+
 			exchangeStore.set([
 				{ [mockErc20DefaultToken.address.toLowerCase()]: mockErc20TokenPrice1 },
 				{ [mockEr20CustomToken.address.toLowerCase()]: mockErc20TokenPrice2 },
@@ -423,7 +458,7 @@ describe('exchange.derived', () => {
 				{ ethereum: ethPrice },
 				{ bitcoin: btcPrice },
 				{ 'internet-computer': icpPrice },
-				{ solana: solPrice },
+				{ solana: solPrice, ripple: xrpPrice },
 				{ binancecoin: bnbPrice },
 				{ 'polygon-ecosystem-token': polPrice }
 			]);
@@ -467,7 +502,7 @@ describe('exchange.derived', () => {
 				{ ethereum: ethPrice },
 				{ bitcoin: btcPrice },
 				{ 'internet-computer': icpPrice },
-				{ solana: solPrice },
+				{ solana: solPrice, ripple: xrpPrice },
 				{ binancecoin: bnbPrice },
 				{ 'polygon-ecosystem-token': polPrice }
 			]);
@@ -492,7 +527,7 @@ describe('exchange.derived', () => {
 				{ data: { ...mockSolToken, enabled: true }, certified: false }
 			]);
 
-			exchangeStore.set([{ solana: solPrice }]);
+			exchangeStore.set([{ solana: solPrice, ripple: xrpPrice }]);
 
 			expect(get(exchanges)?.[mockSolToken.id]).toEqual(solPrice);
 		});
@@ -582,7 +617,7 @@ describe('exchange.derived', () => {
 				{ ethereum: ethPrice },
 				{ bitcoin: btcPrice },
 				{ 'internet-computer': icpPrice },
-				{ solana: solPrice },
+				{ solana: solPrice, ripple: xrpPrice },
 				{ binancecoin: bnbPrice },
 				{ 'polygon-ecosystem-token': polPrice }
 			]);
@@ -619,7 +654,7 @@ describe('exchange.derived', () => {
 				{ ethereum: ethPrice },
 				{ bitcoin: btcPrice },
 				{ 'internet-computer': icpPrice },
-				{ solana: solPrice },
+				{ solana: solPrice, ripple: xrpPrice },
 				{ binancecoin: bnbPrice },
 				{ 'polygon-ecosystem-token': polPrice },
 				{ [mockTwinTokenAddress]: mockErc20TokenPrice1 }
@@ -636,7 +671,7 @@ describe('exchange.derived', () => {
 				{ ethereum: ethPrice },
 				{ bitcoin: btcPrice },
 				{ 'internet-computer': icpPrice },
-				{ solana: solPrice },
+				{ solana: solPrice, ripple: xrpPrice },
 				{ binancecoin: bnbPrice },
 				{ 'polygon-ecosystem-token': polPrice },
 				{ [mockTwinTokenAddress.toLowerCase()]: mockErc20TokenPrice1 }

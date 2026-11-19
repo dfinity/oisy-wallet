@@ -1,7 +1,8 @@
 use ic_cdk::{api::msg_caller, query, update};
 use shared::types::{
     agreement::{
-        GetAgreementHistoryError, UpdateProviderAgreementsRequest, UpdateUserAgreementsRequest,
+        GetAgreementHistoryError, UpdateAgreementsError, UpdateProviderAgreementsRequest,
+        UpdateUserAgreementsRequest,
     },
     dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
     experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
@@ -24,7 +25,9 @@ use crate::{
     user_profile::{model::UserProfileModel, service},
     utils::{
         guards::{caller_is_controller, caller_is_not_anonymous, caller_is_registered_user},
-        housekeeping::spawn_allow_signing_if_below_limit,
+        rate_limiter::{
+            self, UPDATE_PROVIDER_AGREEMENTS_RATE_LIMITER, UPDATE_USER_AGREEMENTS_RATE_LIMITER,
+        },
     },
 };
 
@@ -127,8 +130,8 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
 ///   present.
 ///
 /// # Errors
-/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
-///   the batch is too large.
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+///   the batch is too large, or a qualifier is too long.
 #[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn add_user_dismissed_notification(
@@ -166,10 +169,18 @@ pub fn add_user_dismissed_notification(
 ///   same value.
 ///
 /// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+///   the caller made too many calls in the last minute, or the change would take the agreement
+///   history past `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 #[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUserAgreementsResult {
+    if let Err(e) =
+        UPDATE_USER_AGREEMENTS_RATE_LIMITER.with(rate_limiter::RateLimiter::check_caller)
+    {
+        return Err(UpdateAgreementsError::RateLimited(e)).into();
+    }
+
     let UpdateUserAgreementsRequest {
         current_user_version,
         agreements,
@@ -201,12 +212,20 @@ pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUse
 ///   set to the same value.
 ///
 /// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+///   the caller made too many calls in the last minute, or the change would take the agreement
+///   history past `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 #[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn update_provider_agreements(
     request: UpdateProviderAgreementsRequest,
 ) -> UpdateProviderAgreementsResult {
+    if let Err(e) =
+        UPDATE_PROVIDER_AGREEMENTS_RATE_LIMITER.with(rate_limiter::RateLimiter::check_caller)
+    {
+        return Err(UpdateAgreementsError::RateLimited(e)).into();
+    }
+
     let UpdateProviderAgreementsRequest {
         current_user_version,
         provider_agreements,
@@ -333,12 +352,6 @@ pub fn create_user_profile() -> CreateUserProfileResult {
 
         UserProfile::from(&stored_user)
     });
-
-    // TODO convert create_user_profile(..) to an asynchronous function and remove spawning the
-    // async task. Upon initial user login, we ensure allow_signing is called to handle cases
-    // where users lack the cycles required for signer operations. create_user_profile(..) must
-    // be invoked before any signer-related calls (e.g., get_eth_address).
-    spawn_allow_signing_if_below_limit(stored_principal);
 
     Ok::<UserProfile, CreateUserProfileError>(user_profile).into()
 }

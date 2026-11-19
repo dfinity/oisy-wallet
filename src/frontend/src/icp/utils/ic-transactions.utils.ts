@@ -22,6 +22,11 @@ import {
 	getCkEthPendingTransactions,
 	mapCkEthereumTransaction
 } from '$icp/utils/cketh-transactions.utils';
+import { isCkSolActivityLedger, mapCkSolTransaction } from '$icp/utils/cksol-transactions.utils';
+import {
+	isCyclesLedger,
+	mapCyclesLedgerTransaction
+} from '$icp/utils/cycles-ledger-transactions.utils';
 import {
 	isTokenCkBtcLedger,
 	isTokenCkErc20Ledger,
@@ -68,6 +73,14 @@ export const mapIcTransaction = ({
 			env,
 			...rest
 		});
+	}
+
+	if (isCkSolActivityLedger(token)) {
+		return mapCkSolTransaction({ transaction: transaction as IcrcTransaction, ...rest });
+	}
+
+	if (isCyclesLedger(token)) {
+		return mapCyclesLedgerTransaction({ transaction: transaction as IcrcTransaction, ...rest });
 	}
 
 	return mapIcrcTransaction({ transaction: transaction as IcrcTransaction, ...rest });

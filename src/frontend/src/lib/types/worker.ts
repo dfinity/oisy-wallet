@@ -6,7 +6,9 @@ import type {
 
 export interface WorkerData {
 	worker: Worker;
-	isSingleton: boolean;
+	// Index into the shared worker pool when this wrapper is attached to a pooled (shared) worker.
+	// Undefined for a dedicated worker owned solely by this wrapper.
+	poolIndex?: number;
 }
 
 export type WorkerId = string;

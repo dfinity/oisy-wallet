@@ -9,8 +9,7 @@
 		"test_fe_6": "https://fe6.oisy.com",
 		"staging": "https://staging.oisy.com",
 		"beta": "https://beta.oisy.com",
-		"audit": "https://audit.oisy.com",
-		"e2e": "https://e2e.oisy.com"
+		"audit": "https://audit.oisy.com"
 	},
 	"signer_frontend": {
 		"ic": "https://signer.oisy.com",

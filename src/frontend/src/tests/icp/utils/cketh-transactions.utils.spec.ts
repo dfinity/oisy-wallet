@@ -1,7 +1,8 @@
 import {
 	CKETH_EXPLORER_URL,
 	CKETH_SEPOLIA_EXPLORER_URL,
-	ETHEREUM_EXPLORER_URL
+	ETHEREUM_EXPLORER_URL,
+	ICP_EXPLORER_URL
 } from '$env/explorers.env';
 import {
 	IC_CKETH_LEDGER_CANISTER_ID,
@@ -44,7 +45,10 @@ describe('cketh-transactions.utils', () => {
 				env: 'mainnet'
 			});
 
-			expect(result.txExplorerUrl).toMatch(new RegExp(`^${CKETH_EXPLORER_URL}`));
+			expect(result.txExplorerUrl).toBe(
+				`${ICP_EXPLORER_URL}/tokens/${IC_CKETH_LEDGER_CANISTER_ID}/tx/123456`
+			);
+			expect(result.toExplorerUrl).toMatch(new RegExp(`^${CKETH_EXPLORER_URL}`));
 		});
 
 		it('should return correct explorer URLs for ckSepoliaETH', () => {
@@ -57,7 +61,27 @@ describe('cketh-transactions.utils', () => {
 				env: 'mainnet'
 			});
 
-			expect(result.txExplorerUrl).toMatch(new RegExp(`^${CKETH_SEPOLIA_EXPLORER_URL}`));
+			expect(result.txExplorerUrl).toBe(
+				`${ICP_EXPLORER_URL}/tokens/${STAGING_CKETH_LEDGER_CANISTER_ID}/tx/123456`
+			);
+			expect(result.toExplorerUrl).toMatch(new RegExp(`^${CKETH_SEPOLIA_EXPLORER_URL}`));
+		});
+
+		it('should link the block index for the receive half of a transfer to self', () => {
+			const result = mapCkEthereumTransaction({
+				transaction: {
+					...mockTransaction,
+					transaction: { ...mockTransaction.transaction, transferToSelf: 'receive' }
+				},
+				identity: undefined,
+				ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
+				env: 'mainnet'
+			});
+
+			expect(result.id).toBe('123456-self');
+			expect(result.txExplorerUrl).toBe(
+				`${ICP_EXPLORER_URL}/tokens/${IC_CKETH_LEDGER_CANISTER_ID}/tx/123456`
+			);
 		});
 
 		describe('mint transactions', () => {
@@ -139,7 +163,7 @@ describe('cketh-transactions.utils', () => {
 				expect(result.status).toBe('executed');
 			});
 
-			it('should use Sepolia explorer for testnet ledger IDs', () => {
+			it('should link the block on the dashboard for testnet ledger IDs', () => {
 				const [testnetLedgerId] = ICRC_LEDGER_CANISTER_TESTNET_IDS;
 
 				if (!testnetLedgerId) {
@@ -153,7 +177,7 @@ describe('cketh-transactions.utils', () => {
 					env: 'mainnet'
 				});
 
-				expect(result.txExplorerUrl).toContain(CKETH_SEPOLIA_EXPLORER_URL);
+				expect(result.txExplorerUrl).toBe(`${ICP_EXPLORER_URL}/tokens/${testnetLedgerId}/tx/505`);
 			});
 		});
 

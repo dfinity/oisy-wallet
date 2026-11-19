@@ -33,6 +33,10 @@ pub enum NetworkSettingsFor {
     PolygonAmoy,
     ArbitrumMainnet,
     ArbitrumSepolia,
+    XrpMainnet,
+    RobinhoodMainnet,
+    // Appended last on purpose: the derived `Ord` orders `NetworkSettingsMap` by declaration
+    // order, so inserting earlier would reorder the keys of already-stored settings.
 }
 
 /// A list of logical networks grouped by type.
@@ -85,6 +89,7 @@ pub enum EthereumNetworkId {
     Sepolia = 11_155_111,
     ArbitrumMainnet = 42_161,
     ArbitrumSepolia = 421_614,
+    RobinhoodMainnet = 4_663,
 }
 impl Network for EthereumNetworkId {}
 /// Solana networks, or "clusters".
@@ -189,4 +194,9 @@ pub mod marker_trait {
     #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
     pub struct EthereumSepolia {}
     impl Network for EthereumSepolia {}
+
+    /// A marker trait, used to indicate that a type is to be used with the XRP Ledger mainnet.
+    #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+    pub struct XrpMainnet {}
+    impl Network for XrpMainnet {}
 }

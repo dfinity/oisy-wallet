@@ -14,15 +14,22 @@ import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import { mockCkBtcMinterInfo, mockPendingUtxo } from '$tests/mocks/ckbtc.mock';
 import { mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
-import { toNullable } from '@dfinity/utils';
+import type { Principal } from '@dfinity/principal';
+import { nonNullish, toNullable } from '@dfinity/utils';
 
 const mockTimestamp = 1_700_000_000_000_000_000n;
 
 export const createMockIcrcTransferTransaction = ({
 	id = 100n,
 	amount = 50_000n,
-	memo
-}: { id?: bigint; amount?: bigint; memo?: Uint8Array } = {}): IcrcTransaction => ({
+	memo,
+	spender
+}: {
+	id?: bigint;
+	amount?: bigint;
+	memo?: Uint8Array;
+	spender?: Principal;
+} = {}): IcrcTransaction => ({
 	id,
 	transaction: {
 		kind: 'transfer',
@@ -37,7 +44,7 @@ export const createMockIcrcTransferTransaction = ({
 				from: { owner: mockPrincipal, subaccount: [] },
 				to: { owner: mockPrincipal2, subaccount: [] },
 				memo: memo ? [memo] : [],
-				spender: []
+				spender: toNullable(nonNullish(spender) ? { owner: spender, subaccount: [] } : undefined)
 			}
 		],
 		fee_collector: [],

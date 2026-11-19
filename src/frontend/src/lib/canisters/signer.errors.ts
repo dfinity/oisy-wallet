@@ -1,4 +1,5 @@
 import type {
+	BtcSignPrehashError,
 	EthAddressError,
 	PaymentError,
 	GetAddressError as SignerCanisterBtcError,
@@ -7,23 +8,29 @@ import type {
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { jsonReplacer } from '@dfinity/utils';
 
+const mapPaymentErrorToMessage = (err: PaymentError): string => {
+	if ('UnsupportedPaymentType' in err) {
+		return 'Unsupported payment type';
+	}
+	if ('LedgerWithdrawFromError' in err) {
+		return `Ledger error: ${JSON.stringify(err.LedgerWithdrawFromError.error, jsonReplacer)}`;
+	}
+	if ('LedgerUnreachable' in err) {
+		return `Ledger unreachable: ${JSON.stringify(err.LedgerUnreachable, jsonReplacer)}`;
+	}
+	if ('LedgerTransferFromError' in err) {
+		return `Ledger error: ${JSON.stringify(err.LedgerTransferFromError, jsonReplacer)}`;
+	}
+	if ('InsufficientFunds' in err) {
+		return `Insufficient funds needed ${err.InsufficientFunds.needed} but available ${err.InsufficientFunds.available}`;
+	}
+	return 'Unknown PaymentError';
+};
+
+// Keeps the variant, so a flow can tell why the signer refused to be paid.
 export class SignerCanisterPaymentError extends CanisterInternalError {
-	constructor(err: PaymentError) {
-		if ('UnsupportedPaymentType' in err) {
-			super('Unsupported payment type');
-		} else if ('LedgerWithdrawFromError' in err) {
-			super(`Ledger error: ${JSON.stringify(err.LedgerWithdrawFromError.error, jsonReplacer)}`);
-		} else if ('LedgerUnreachable' in err) {
-			super(`Ledger unreachable: ${JSON.stringify(err.LedgerUnreachable, jsonReplacer)}`);
-		} else if ('LedgerTransferFromError' in err) {
-			super(`Ledger error: ${JSON.stringify(err.LedgerTransferFromError, jsonReplacer)}`);
-		} else if ('InsufficientFunds' in err) {
-			super(
-				`Insufficient funds needed ${err.InsufficientFunds.needed} but available ${err.InsufficientFunds.available}`
-			);
-		} else {
-			super('Unknown PaymentError');
-		}
+	constructor(readonly paymentError: PaymentError) {
+		super(mapPaymentErrorToMessage(paymentError));
 	}
 }
 
@@ -52,14 +59,26 @@ export const mapSignerCanisterSendBtcError = (
 	return new CanisterInternalError('Unknown SignerCanisterSendBtcError');
 };
 
+export const mapSignerCanisterBtcSignPrehashError = (
+	err: BtcSignPrehashError
+): CanisterInternalError => {
+	if ('InvalidHash' in err) {
+		return new CanisterInternalError(err.InvalidHash.msg);
+	}
+	if ('SigningError' in err) {
+		return new CanisterInternalError(`Signing error: ${err.SigningError}`);
+	}
+	if ('PaymentError' in err) {
+		return new SignerCanisterPaymentError(err.PaymentError);
+	}
+	return new CanisterInternalError('Unknown BtcSignPrehashError');
+};
+
 export const mapSignerCanisterGetEthAddressError = (
 	err: EthAddressError
 ): CanisterInternalError => {
 	if ('SigningError' in err) {
-		const [code, addOns] = err.SigningError;
-		return new CanisterInternalError(
-			`Signing error: ${JSON.stringify(code, jsonReplacer)} ${addOns}`
-		);
+		return new CanisterInternalError(`Signing error: ${err.SigningError}`);
 	}
 
 	if ('PaymentError' in err) {

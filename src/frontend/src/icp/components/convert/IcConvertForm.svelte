@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { fromNullable, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import IcTokenFees from '$icp/components/fee/IcTokenFees.svelte';
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
@@ -27,6 +26,7 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		sendAmount: OptionAmount;
@@ -162,7 +162,7 @@
 	{#snippet destination()}
 		<DestinationValue destination={destinationProp} {isDestinationCustom} token={$destinationToken}>
 			<button
-				class="text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
+				class="text-brand-primary transition-colors duration-150 ease-out hover:text-brand-hover active:text-brand-hover"
 				aria-label={$i18n.core.text.change}
 				onclick={onDestination}
 			>

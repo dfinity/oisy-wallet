@@ -48,9 +48,86 @@ export interface ActiveUserTransaction {
  */
 export type ActiveUserTransactionData =
 	| {
-			OneSecEvmToIcp: OneSecEvmToIcpData;
+			/**
+			 * Native XRP payment. Unlike every other variant this one does not track a
+			 * provider — it exists to hold an invariant: an XRPL `Sequence` is a nonce,
+			 * so a second payment from the same address while the first is unresolved
+			 * is unsafe whichever sequence it picks. The row is what refuses it, and it
+			 * has to outlive the tab to do that. The locally derived transaction id and
+			 * the signed `LastLedgerSequence` ride in `external_refs`.
+			 */
+			Xrp: XrpData;
 	  }
+	| { OneSecEvmToIcp: OneSecEvmToIcpData }
 	| { OneSecIcpToEvm: OneSecIcpToEvmData }
+	| {
+			/**
+			 * LI.FI swap or bridge. A single variant covers every source chain (EVM,
+			 * Solana) and every route; the source tx hash, the route tool, LI.FI's
+			 * transaction id and the learned destination tx hash ride in
+			 * `external_refs`. The two chains are those of `source_token` /
+			 * `dest_token`.
+			 */
+			Lifi: LifiData;
+	  }
+	| {
+			/**
+			 * OISY Trade order-book swap. Both legs are Internet Computer ledgers, and
+			 * the row is opened *before* the deposit — it is the record that tells a
+			 * later session which token to pull back out of the DEX's custody: the
+			 * destination token on a fill, the source token on a kill.
+			 */
+			OisyTrade: OisyTradeData;
+	  }
+	| {
+			/**
+			 * Topping up a canister with ICP through the NNS Cycles Minting Canister:
+			 * an ICP transfer to the CMC's deposit account for the canister, then
+			 * `notify_top_up`. The ledger records that account only as a hash, so the
+			 * row, opened before the transfer, is the one place that keeps the canister,
+			 * and what lets a later session finish a top-up whose tab closed between the
+			 * two calls. The ICP block index, learned once the transfer returns, rides
+			 * in `external_refs`.
+			 */
+			CyclesTopUp: CyclesTopUpData;
+	  }
+	| {
+			/**
+			 * NEAR Intents (1Click) cross-chain swap. A single variant covers every
+			 * source/destination leg (EVM and Solana); the deposit address, its
+			 * optional memo, and origin/destination tx hashes ride in `external_refs`.
+			 */
+			NearIntents: NearIntentsData;
+	  }
+	| {
+			/**
+			 * Minting TCYCLES from ICP through the NNS Cycles Minting Canister: an ICP
+			 * transfer to the CMC's deposit account for the caller, then
+			 * `notify_mint_cycles`. Only the caller's own principal can notify its
+			 * deposit, so the row, opened before the transfer, is what lets a later
+			 * session finish a mint whose tab closed between the two calls. The ICP
+			 * block index, learned once the transfer returns, rides in `external_refs`.
+			 */
+			CyclesMint: CyclesMintData;
+	  }
+	| {
+			/**
+			 * Chain Fusion ck conversion (BTC↔ckBTC, ETH↔ckETH, ERC20↔ckERC20,
+			 * SOL↔ckSOL). A single variant covers all eight directions, discriminated
+			 * by the `direction` field; the minter block indices, the BTC txid and
+			 * deposit address, and the Ethereum deposit tx hash and block number ride
+			 * in `external_refs`.
+			 */
+			ChainFusion: ChainFusionData;
+	  }
+	| {
+			/**
+			 * Velora (`ParaSwap`) EVM swap. A single variant covers both execution
+			 * modes, discriminated by the `mode` field; the auction id, order hash,
+			 * transaction hash and nonce ride in `external_refs`.
+			 */
+			Velora: VeloraData;
+	  }
 	| {
 			/**
 			 * Liquidium lend/borrow flow. A single variant covers all four actions
@@ -60,6 +137,14 @@ export type ActiveUserTransactionData =
 	  };
 export type ActiveUserTransactionError =
 	| { InvalidId: null }
+	| {
+			/**
+			 * A non-terminal record already tracks the same subject, and the flow only
+			 * allows one at a time. Distinct from `AlreadyExists`, which is about the
+			 * record's own id: this one is about what the record is *for*.
+			 */
+			AlreadyInFlight: null;
+	  }
 	| { NotFound: null }
 	| { TooManyActiveTransactions: null }
 	| { InvalidData: string }
@@ -82,8 +167,7 @@ export interface ActiveUserTransactionRef {
  * dedupe twin variants anyway.
  */
 export type ActiveUserTransactionResult =
-	| { Ok: ActiveUserTransaction }
-	| { Err: ActiveUserTransactionError };
+	{ Ok: ActiveUserTransaction } | { Err: ActiveUserTransactionError };
 /**
  * Lifecycle status of an active user transaction.
  *
@@ -93,10 +177,7 @@ export type ActiveUserTransactionResult =
  * terminal states are immutable (idempotent no-op).
  */
 export type ActiveUserTransactionStatus =
-	| { Failed: null }
-	| { Executing: null }
-	| { Succeeded: null }
-	| { Pending: null };
+	{ Failed: null } | { Executing: null } | { Succeeded: null } | { Pending: null };
 export type AddDappSettingsError =
 	| { MaxHiddenDappIds: null }
 	| { VersionMismatch: null }
@@ -104,6 +185,7 @@ export type AddDappSettingsError =
 	| { UserNotFound: null };
 export type AddDismissedNotificationError =
 	| { TooManyNotifications: null }
+	| { QualifierTooLong: null }
 	| { VersionMismatch: null }
 	| { MaxDismissedNotifications: null }
 	| { UserNotFound: null };
@@ -116,8 +198,7 @@ export interface AddHiddenDappIdRequest {
 	dapp_id: string;
 }
 export type AddUserDismissedNotificationResult =
-	| { Ok: null }
-	| { Err: AddDismissedNotificationError };
+	{ Ok: null } | { Err: AddDismissedNotificationError };
 export type AddUserHiddenDappIdResult =
 	| {
 			/**
@@ -284,7 +365,8 @@ export type BtcAddPendingTransactionError =
 	  }
 	| {
 			/**
-			 * Intersects with caller's existing pending reservations
+			 * One of the UTXOs, or the txid with other UTXOs or at another address, is already reserved
+			 * by the caller, or a broadcast of this transaction is in flight.
 			 */
 			UtxosAlreadyReserved: null;
 	  };
@@ -440,6 +522,206 @@ export type BtcAddress =
 			 */
 			P2TR: string;
 	  };
+/**
+ * Each error describes this call only. `BroadcastOutcomeUnknown` and `BroadcastInProgress` leave
+ * open whether the transaction was broadcast. Any other error means this call broadcast nothing
+ * and reserved nothing, but says nothing about an earlier submission of the same transaction,
+ * whose reservation stays until it is pruned. After an unclear outcome, a later error is no
+ * reason to build a new transaction.
+ */
+export type BtcBroadcastTransactionError =
+	| {
+			/**
+			 * More than `MAX_BROADCAST_TX_INPUTS`.
+			 */
+			TooManyInputs: null;
+	  }
+	| {
+			/**
+			 * Two inputs spend the same outpoint.
+			 */
+			DuplicateInputs: null;
+	  }
+	| {
+			/**
+			 * An input is not one of the caller's UTXOs with enough confirmations.
+			 */
+			InvalidUtxos: null;
+	  }
+	| {
+			/**
+			 * A non-empty `script_sig`, or a sequence with a BIP68 relative lock.
+			 */
+			InvalidInput: { index: number };
+	  }
+	| {
+			/**
+			 * A non-standard script, dust, or a malformed or second `OP_RETURN`.
+			 */
+			InvalidOutput: { index: number };
+	  }
+	| {
+			/**
+			 * The lock time is not 0.
+			 */
+			UnsupportedLockTime: null;
+	  }
+	| {
+			/**
+			 * The witness is not a valid `SIGHASH_ALL` signature by the caller's key.
+			 */
+			InvalidSignature: { index: number };
+	  }
+	| {
+			/**
+			 * Another broadcast of the same transaction is still in flight.
+			 */
+			BroadcastInProgress: null;
+	  }
+	| {
+			/**
+			 * The fee is below 1 sat/vB.
+			 */
+			FeeTooLow: null;
+	  }
+	| {
+			/**
+			 * The transaction may have been broadcast. Its inputs stay reserved, and the same bytes may
+			 * be sent again.
+			 */
+			BroadcastOutcomeUnknown: { msg: string };
+	  }
+	| {
+			/**
+			 * The provided II delegation chain is missing or failed verification.
+			 */
+			InvalidDelegationChain: { msg: string };
+	  }
+	| {
+			/**
+			 * More than `MAX_BROADCAST_TX_BYTES`.
+			 */
+			TransactionTooLarge: null;
+	  }
+	| {
+			/**
+			 * More than `MAX_BROADCAST_TX_OUTPUTS`.
+			 */
+			TooManyOutputs: null;
+	  }
+	| {
+			/**
+			 * Not exactly one consensus-encoded transaction, no inputs or no outputs, a version other
+			 * than 1 or 2, or fewer than 65 bytes without the witnesses.
+			 */
+			MalformedTransaction: null;
+	  }
+	| {
+			/**
+			 * The caller has exceeded the call rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * Nothing was broadcast, and the inputs this call reserved are free again.
+			 */
+			BroadcastRejected: { msg: string };
+	  }
+	| {
+			/**
+			 * Server-side / unexpected
+			 */
+			InternalError: { msg: string };
+	  }
+	| {
+			/**
+			 * One of the inputs, or the txid with other inputs or at another address, is already
+			 * reserved by the caller.
+			 */
+			UtxosAlreadyReserved: null;
+	  };
+export interface BtcBroadcastTransactionRequest {
+	/**
+	 * The fully signed, consensus-serialized transaction, at most `MAX_BROADCAST_TX_BYTES`.
+	 */
+	transaction: Uint8Array;
+	ii_delegation_chain: [] | [IIDelegationChain];
+	network: Network;
+}
+export interface BtcBroadcastTransactionResponse {
+	/**
+	 * In internal byte order, as `StoredPendingTransaction::txid`: the reverse of the hex a
+	 * block explorer shows.
+	 */
+	txid: Uint8Array;
+}
+export type BtcBroadcastTransactionResult =
+	| {
+			/**
+			 * The transaction was broadcast, now or by an earlier call.
+			 */
+			Ok: BtcBroadcastTransactionResponse;
+	  }
+	| {
+			/**
+			 * See the error for whether the transaction may have been broadcast.
+			 */
+			Err: BtcBroadcastTransactionError;
+	  };
+export type BtcGetBalanceError =
+	| {
+			/**
+			 * The Bitcoin canister did not answer, which a later call may get past.
+			 */
+			BalanceUnavailable: { msg: string };
+	  }
+	| {
+			/**
+			 * The provided II delegation chain is missing or failed verification.
+			 */
+			InvalidDelegationChain: { msg: string };
+	  }
+	| {
+			/**
+			 * The caller has exceeded the call rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The caller's address could not be derived.
+			 */
+			InternalError: { msg: string };
+	  };
+export interface BtcGetBalanceRequest {
+	ii_delegation_chain: [] | [IIDelegationChain];
+	network: Network;
+	/**
+	 * Counts only the outputs with at least this many confirmations. `None` counts every output
+	 * the Bitcoin canister knows, which is mined ones only.
+	 */
+	min_confirmations: [] | [number];
+}
+export interface BtcGetBalanceResponse {
+	/**
+	 * The balance of the caller's P2WPKH address, in satoshis.
+	 */
+	balance: bigint;
+}
+export type BtcGetBalanceResult =
+	| {
+			/**
+			 * The balance was retrieved successfully.
+			 */
+			Ok: BtcGetBalanceResponse;
+	  }
+	| {
+			/**
+			 * The balance was not retrieved due to an error.
+			 */
+			Err: BtcGetBalanceError;
+	  };
 export type BtcGetFeePercentilesError = {
 	InternalError: { msg: string };
 };
@@ -496,12 +778,63 @@ export type BtcGetPendingTransactionsResult =
 			 */
 			Err: BtcGetPendingTransactionsError;
 	  };
+export type BtcGetSpendableUtxosError =
+	| {
+			/**
+			 * The provided II delegation chain is missing or failed verification.
+			 */
+			InvalidDelegationChain: { msg: string };
+	  }
+	| {
+			/**
+			 * The caller has exceeded the call rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * Server-side / unexpected
+			 */
+			InternalError: { msg: string };
+	  };
+export interface BtcGetSpendableUtxosRequest {
+	ii_delegation_chain: [] | [IIDelegationChain];
+	network: Network;
+}
+export interface BtcGetSpendableUtxosResponse {
+	/**
+	 * The caller's pending transactions at the address these UTXOs belong to, as
+	 * `btc_get_pending_transactions` returns them.
+	 */
+	pending_transactions: Array<PendingTransaction>;
+	/**
+	 * The caller's UTXOs with at least 4 confirmations (1 on regtest), from all pages, that no
+	 * pending transaction of the caller reserves: the largest by value, largest first. At most
+	 * `MAX_SPENDABLE_UTXOS` (10 000), and fewer if the pending transactions leave less room in
+	 * the reply.
+	 */
+	utxos: Array<Utxo>;
+}
+export type BtcGetSpendableUtxosResult =
+	| {
+			/**
+			 * The spendable UTXOs and pending transactions were retrieved successfully.
+			 */
+			Ok: BtcGetSpendableUtxosResponse;
+	  }
+	| {
+			/**
+			 * The spendable UTXOs were not retrieved due to an error.
+			 */
+			Err: BtcGetSpendableUtxosError;
+	  };
 /**
  * Bitcoin transaction data.
  */
 export interface BtcTransactionData {
 	fee: [] | [bigint];
 }
+export type CancelTipResult = { Ok: null } | { Err: TipError };
 /**
  * Copy of the synonymous Rosetta type.
  */
@@ -542,6 +875,42 @@ export type CanisterStatusType =
 			 */
 			running: null;
 	  };
+/**
+ * Chain Fusion ck conversion payload. Every settlement pointer is learned
+ * mid-flow — a minter block index, a BTC txid, an Ethereum deposit tx hash — so
+ * those live in `external_refs`; only the canonical immutable fields are
+ * captured here, which is why all eight directions share one variant.
+ *
+ * `direction` is explicit rather than inferred from the token pair: the poller
+ * selects its settlement oracle from it, and re-deriving "is this a mint or a
+ * withdrawal?" from two token ids on every tick would rediscover something
+ * known for certain at creation.
+ */
+export interface ChainFusionData {
+	direction: ChainFusionDirection;
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
+}
+/**
+ * Which ck conversion an active transaction tracks. Determines which minter the
+ * frontend asks about settlement, and how: the four withdrawal directions have
+ * an exact status keyed by the minter's burn block index, while each mint
+ * direction is followed the way its minter reports deposits.
+ */
+export type ChainFusionDirection =
+	| { BtcToCkBtc: null }
+	| { CkBtcToBtc: null }
+	| { EthToCkEth: null }
+	| { CkErc20ToErc20: null }
+	| { SolToCkSol: null }
+	| { Erc20ToCkErc20: null }
+	| { CkSolToSol: null }
+	| { CkEthToEth: null };
+export type ClaimTipResult = { Ok: TipClaim } | { Err: TipError };
 export interface Config {
 	/**
 	 * The derivation origin used for II authentication, ensuring users get a
@@ -575,6 +944,11 @@ export interface Config {
 	 */
 	new_user_signups_allowed: [] | [boolean];
 }
+export type ConsumePersonalNoteShareResult =
+	| {
+			Ok: PersonalNoteShareContent;
+	  }
+	| { Err: PersonalNoteShareError };
 export interface Contact {
 	id: bigint;
 	name: string;
@@ -601,6 +975,26 @@ export interface ContactImage {
 	data: Uint8Array;
 	mime_type: ImageMimeType;
 }
+/**
+ * A contact's image, as returned by `get_contact_images`.
+ */
+export interface ContactImageEntry {
+	contact_id: bigint;
+	image: ContactImage;
+}
+/**
+ * A page of the caller's contacts, as returned by `get_contacts_page`.
+ */
+export interface ContactsPage {
+	/**
+	 * Contacts in ID order, without their images; `get_contact_images` returns those.
+	 */
+	contacts: Array<Contact>;
+	/**
+	 * What to pass as `after` for the next page; none once this page holds the last contact.
+	 */
+	next: [] | [bigint];
+}
 export interface CreateActiveUserTransactionRequest {
 	id: string;
 	external_refs: Array<ActiveUserTransactionRef>;
@@ -624,6 +1018,57 @@ export type CreateContactResult =
 			 */
 			Err: ContactError;
 	  };
+/**
+ * Create-share request. `token` and `ct_content` are opaque ciphertext/ids to
+ * the canister — it enforces only their sizes and the expiry/flag fields,
+ * never the note content.
+ */
+export interface CreatePersonalNoteShareRequest {
+	/**
+	 * Opaque, client-generated random id; also the map key.
+	 */
+	token: string;
+	/**
+	 * AES-GCM ciphertext of `{ v, note }`, keyed by the per-share key held
+	 * only in the link fragment.
+	 */
+	ct_content: Uint8Array;
+	single_use: boolean;
+	expires_at_ns: bigint;
+}
+export type CreatePersonalNoteShareResult = { Ok: null } | { Err: PersonalNoteShareError };
+/**
+ * Create-tip request. The canister stores the tip and verifies the sender's
+ * allowance covers it; it never takes custody.
+ */
+export interface CreateTipRequest {
+	/**
+	 * Opaque, client-generated random id; also the map key and the `<id>` in
+	 * the share link.
+	 */
+	tip_id: string;
+	/**
+	 * SHA-256 of the claim code held in the link fragment.
+	 */
+	claim_code_hash: Uint8Array;
+	/**
+	 * Optional note shown to the claimer *after* they sign in — never in the
+	 * anonymous preview.
+	 */
+	message: [] | [string];
+	/**
+	 * Ledger the tip is denominated in. Must be ICRC-2 capable — the sender's
+	 * allowance is what makes the tip claimable.
+	 */
+	ledger_canister_id: Principal;
+	/**
+	 * What the claimer receives, in the ledger's base units. The sender's
+	 * allowance must additionally cover one ledger fee, which the ledger
+	 * draws from the allowance at claim rather than from this amount.
+	 */
+	amount: bigint;
+	expires_at_ns: bigint;
+}
 export type CreateUserProfileError = {
 	/**
 	 * Sign-ups of new users are currently disabled on the backend. Callers that already have a
@@ -655,6 +1100,51 @@ export interface CustomToken {
 	version: [] | [bigint];
 	enabled: boolean;
 	allowed_external_content_source_urls: [] | [Array<string>];
+}
+/**
+ * Cycles mint payload: the values fixed when the mint starts. The row opens
+ * before the ICP transfer, so the transfer's creation timestamp is one of them;
+ * only the block index is learned later, in `external_refs`.
+ */
+export interface CyclesMintData {
+	/**
+	 * `created_at_time` of the ICP transfer. Reusing it on a retry lets the
+	 * ledger deduplicate the transfer, and it is what finds the block again
+	 * when the tab died before the transfer returned.
+	 */
+	transfer_created_at_ns: bigint;
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units: the ICP sent to the CMC, without the
+	 * ledger fee.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
+}
+/**
+ * Cycles top-up payload: the values fixed when the top-up starts. The row opens
+ * before the ICP transfer, so the transfer's creation timestamp is one of them;
+ * only the block index is learned later, in `external_refs`.
+ */
+export interface CyclesTopUpData {
+	/**
+	 * `created_at_time` of the ICP transfer. Reusing it on a retry lets the
+	 * ledger deduplicate the transfer, and it is what finds the block again
+	 * when the tab died before the transfer returned.
+	 */
+	transfer_created_at_ns: bigint;
+	/**
+	 * The canister the cycles go to. The CMC's deposit account is derived from
+	 * it, and the ICP ledger keeps only that account's hash, so neither the
+	 * ledger nor its index can give the canister back.
+	 */
+	canister_id: Principal;
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units: the ICP sent to the CMC, without the
+	 * ledger fee.
+	 */
+	amount: bigint;
 }
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;
@@ -693,6 +1183,22 @@ export type DeleteContactResult =
 			 * The contact was not deleted due to an error.
 			 */
 			Err: ContactError;
+	  };
+export interface DeletePersonalNoteRequest {
+	note_id: string;
+}
+export type DeletePersonalNoteResult =
+	| {
+			/**
+			 * The note was deleted (idempotent — also `Ok` when it did not exist).
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The note could not be deleted due to an error.
+			 */
+			Err: PersonalNoteError;
 	  };
 export type DismissedNotification =
 	| {
@@ -768,6 +1274,12 @@ export interface ExtV2Token {
 	canister_id: Principal;
 }
 export interface GetActiveUserTransactionsResponse {
+	/**
+	 * The user has seen every record updated at or before this time, on whichever device they
+	 * saw it, so a record reads as unread only once it changes after this. Zero until the user
+	 * first marks their records seen.
+	 */
+	seen_up_to_ns: bigint;
 	transactions: Array<ActiveUserTransaction>;
 }
 export type GetActiveUserTransactionsResult =
@@ -809,6 +1321,25 @@ export type GetAllowedCyclesResult =
 			 */
 			Err: GetAllowedCyclesError;
 	  };
+/**
+ * The caller's contacts whose images `get_contact_images` returns.
+ */
+export interface GetContactImagesRequest {
+	contact_ids: BigUint64Array;
+}
+export type GetContactImagesResult =
+	| {
+			/**
+			 * The images were retrieved successfully.
+			 */
+			Ok: Array<ContactImageEntry>;
+	  }
+	| {
+			/**
+			 * The images were not retrieved due to an error.
+			 */
+			Err: ContactError;
+	  };
 export type GetContactResult =
 	| {
 			/**
@@ -819,6 +1350,19 @@ export type GetContactResult =
 	| {
 			/**
 			 * The contacts were not retrieved due to an error.
+			 */
+			Err: ContactError;
+	  };
+export type GetContactsPageResult =
+	| {
+			/**
+			 * The page was retrieved successfully.
+			 */
+			Ok: ContactsPage;
+	  }
+	| {
+			/**
+			 * The page was not retrieved due to an error.
 			 */
 			Err: ContactError;
 	  };
@@ -835,6 +1379,43 @@ export type GetContactsResult =
 			 */
 			Err: ContactError;
 	  };
+export type GetMyTipsResult = { Ok: Array<MyTip> } | { Err: TipError };
+export type GetPersonalNoteShareResult =
+	{ Ok: PersonalNoteShareContent } | { Err: PersonalNoteShareError };
+export type GetPersonalNoteSharesCountResult = { Ok: bigint } | { Err: PersonalNoteShareError };
+export type GetPersonalNotesCountResult =
+	| {
+			/**
+			 * The caller's total note count.
+			 */
+			Ok: bigint;
+	  }
+	| {
+			/**
+			 * The count could not be retrieved due to an error.
+			 */
+			Err: PersonalNoteError;
+	  };
+export type GetPersonalNotesResult =
+	| {
+			/**
+			 * All of the caller's (encrypted) notes.
+			 */
+			Ok: Array<PersonalNoteEntry>;
+	  }
+	| {
+			/**
+			 * The notes could not be retrieved due to an error.
+			 */
+			Err: PersonalNoteError;
+	  };
+export type GetTipDetailsResult = { Ok: TipDetails } | { Err: TipError };
+export type GetTipResult = { Ok: PublicTip } | { Err: TipError };
+/**
+ * The caller's encrypted claim code for one tip. `Ok(None)` means no secret is
+ * stored — a tip from before the store existed, or one already cleaned up.
+ */
+export type GetTipSecretResult = { Ok: [] | [Uint8Array] } | { Err: TipError };
 export type GetUserProfileError = { NotFound: null };
 export type GetUserProfileResult =
 	| {
@@ -899,8 +1480,7 @@ export interface GetUserTransactionsResponse {
 	transactions: Array<UserTransaction>;
 }
 export type GetUserTransactionsResult =
-	| { Ok: GetUserTransactionsResponse }
-	| { Err: UserTransactionError };
+	{ Ok: GetUserTransactionsResponse } | { Err: UserTransactionError };
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
@@ -994,10 +1574,7 @@ export interface IcrcTransactionData {
  * The kind of ICRC ledger operation.
  */
 export type IcrcTransactionType =
-	| { Approve: { spender: string } }
-	| { Burn: null }
-	| { Mint: null }
-	| { Transfer: null };
+	{ Approve: { spender: string } } | { Burn: null } | { Mint: null } | { Transfer: null };
 /**
  * An account identifier for Internet Computer tokens.
  */
@@ -1023,10 +1600,7 @@ export type Icrcv2AccountId =
  * Represents the MIME type of image.
  */
 export type ImageMimeType =
-	| { 'image/gif': null }
-	| { 'image/png': null }
-	| { 'image/jpeg': null }
-	| { 'image/webp': null };
+	{ 'image/gif': null } | { 'image/png': null } | { 'image/jpeg': null } | { 'image/webp': null };
 export interface InitArg {
 	/**
 	 * The derivation origin used for II authentication, ensuring users get a
@@ -1064,13 +1638,25 @@ export interface InitArg {
 	new_user_signups_allowed: [] | [boolean];
 }
 /**
+ * LI.FI swap payload. Settlement is tracked off-chain — first on the source
+ * chain, by transaction hash, then by LI.FI's status endpoint — so those
+ * pointers, and the learned destination tx hash, live in `external_refs`; only
+ * the values fixed at creation are captured here. No chain id is stored: the
+ * token ids already carry both chains.
+ */
+export interface LifiData {
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
+}
+/**
  * Which Liquidium lend/borrow action an active transaction tracks.
  */
 export type LiquidiumAction =
-	| { Withdraw: null }
-	| { Repay: null }
-	| { Borrow: null }
-	| { Supply: null };
+	{ Withdraw: null } | { Repay: null } | { Borrow: null } | { Supply: null };
 export interface LiquidiumData {
 	/**
 	 * The asset moved by this action (supplied, borrowed, repaid, withdrawn).
@@ -1086,25 +1672,76 @@ export interface LiquidiumData {
 	 */
 	amount: bigint;
 }
+export type MarkActiveUserTransactionsSeenResult =
+	| {
+			/**
+			 * The mark now stored, which is later than the one requested when another device has
+			 * already marked further.
+			 */
+			Ok: bigint;
+	  }
+	| { Err: ActiveUserTransactionError };
 /**
- * Bitcoin Network.
+ * One of the caller's own tips, as returned by `get_my_tips`.
  */
+export interface MyTip {
+	status: TipStatus;
+	/**
+	 * Set once claimed. The sender learns who claimed their tip; the claim
+	 * screen discloses this before the claimer commits.
+	 */
+	claimed_by: [] | [Principal];
+	tip_id: string;
+	/**
+	 * The most recent claim that did not pay out, if any. Present alongside
+	 * `status = Failed` for a live tip, and kept afterwards so a tip that
+	 * eventually succeeded can still show it was not first time lucky.
+	 */
+	last_claim_failure: [] | [TipClaimFailure];
+	created_at_ns: bigint;
+	message: [] | [string];
+	ledger_canister_id: Principal;
+	amount: bigint;
+	expires_at_ns: bigint;
+}
+/**
+ * NEAR Intents (1Click) cross-chain swap payload. Settlement is tracked
+ * off-chain by polling the 1Click status endpoint keyed by the deposit
+ * address, so that address (and its optional memo, plus learned-mid-flow tx
+ * hashes) lives in `external_refs`; only the values fixed at creation are
+ * captured here.
+ */
+export interface NearIntentsData {
+	/**
+	 * The XRP address the deposit is sent from, set exactly when `source_token`
+	 * is native XRP. That deposit is an XRP payment, so this is the field the
+	 * one-payment-in-flight check reads, as it reads `XrpData::source_address`
+	 * for a send. Optional and last, so rows stored before it decode as `None`.
+	 */
+	source_address: [] | [string];
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
+}
 export type Network =
 	| {
 			/**
-			 * The Bitcoin mainnet.
+			 * Bitcoin Mainnet.
 			 */
 			mainnet: null;
 	  }
 	| {
 			/**
-			 * The Bitcoin regtest, used for local testing purposes.
+			 * Bitcoin Regtest.
 			 */
 			regtest: null;
 	  }
 	| {
 			/**
-			 * The Bitcoin testnet.
+			 * Bitcoin Testnet4.
 			 */
 			testnet: null;
 	  };
@@ -1119,11 +1756,13 @@ export type NetworkSettingsFor =
 	| { ArbitrumMainnet: null }
 	| { InternetComputer: null }
 	| { BaseSepolia: null }
+	| { XrpMainnet: null }
 	| { PolygonMainnet: null }
 	| { BitcoinRegtest: null }
 	| { SolanaDevnet: null }
 	| { PolygonAmoy: null }
 	| { EthereumSepolia: null }
+	| { RobinhoodMainnet: null }
 	| { BitcoinTestnet: null }
 	| { BaseMainnet: null }
 	| { BscMainnet: null }
@@ -1148,6 +1787,33 @@ export interface NetworksSettings {
 export interface NotificationSettings {
 	dismissed_notifications: Array<DismissedNotification>;
 }
+/**
+ * OISY Trade order-book swap payload. The order id, the deposit and withdrawal
+ * block indices and the submitted price/quantity all ride in `external_refs`;
+ * only the fields fixed at creation are captured here.
+ *
+ * `side` is explicit rather than left to the poll. `get_my_orders` does return
+ * the side and the pair, but only once an order exists — and the two recovery
+ * paths this row is opened early for (a deposit that landed with no order, and
+ * a row abandoned before either) have no order to read, while still needing to
+ * know which token to pull back out. It also fixes the base/quote orientation,
+ * which `source_token` / `dest_token` alone cannot express.
+ */
+export interface OisyTradeData {
+	side: OisyTradeSide;
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
+}
+/**
+ * Which side of the pair a swap-placed order takes. Equivalently, which leg of
+ * the pair the source token is: `Sell` spends the base token, `Buy` spends the
+ * quote token.
+ */
+export type OisyTradeSide = { Buy: null } | { Sell: null };
 export interface OneSecEvmToIcpData {
 	recipient_principal: Principal;
 	source_token: TokenId;
@@ -1170,19 +1836,16 @@ export interface OnramperSignedEntry {
 	value: string;
 }
 /**
- * Outpoint.
+ * A reference to a transaction output.
  */
-export interface Outpoint {
+export interface OutPoint {
 	/**
-	 * Transaction ID (TxID).
-	 *
-	 * The hash of the transaction that created the UTXO.
+	 * A cryptographic hash of the transaction.
+	 * A transaction can output multiple UTXOs.
 	 */
 	txid: Uint8Array;
 	/**
-	 * Output Index (vout).
-	 *
-	 * The index of the specific output within that transaction (since a transaction can have multiple outputs).
+	 * The index of the output within the transaction.
 	 */
 	vout: number;
 }
@@ -1190,6 +1853,131 @@ export interface PendingTransaction {
 	txid: Uint8Array;
 	utxos: Array<Utxo>;
 }
+/**
+ * A single stored entry returned by `get_personal_notes`, and the upsert
+ * payload for `set_personal_note` (aliased as [`SetPersonalNoteRequest`]).
+ */
+export interface PersonalNoteEntry {
+	/**
+	 * The encrypted note envelope. Opaque ciphertext to the canister; decrypted
+	 * client-side.
+	 */
+	encrypted_note: Uint8Array;
+	/**
+	 * Stable, client-generated id (≤ [`MAX_PERSONAL_NOTE_ID_BYTES`] UTF-8 bytes).
+	 */
+	note_id: string;
+}
+export type PersonalNoteError =
+	| {
+			/**
+			 * The ciphertext exceeds [`MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES`].
+			 */
+			NoteCiphertextTooLarge: null;
+	  }
+	| {
+			/**
+			 * The caller is already at [`MAX_PERSONAL_NOTES_PER_USER`] and tried to add
+			 * a *new* note. No existing note is evicted.
+			 */
+			TooManyNotes: null;
+	  }
+	| {
+			/**
+			 * The caller exceeded the per-caller write rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The `note_id` exceeds [`MAX_PERSONAL_NOTE_ID_BYTES`].
+			 */
+			NoteIdTooLong: null;
+	  }
+	| {
+			/**
+			 * An unexpected internal error (e.g. a vetKeys access/derivation failure).
+			 * The message never contains note cleartext (the canister cannot read it).
+			 */
+			InternalError: { msg: string };
+	  };
+/**
+ * Returned by `get_personal_note_share` / `consume_personal_note_share`.
+ */
+export interface PersonalNoteShareContent {
+	ct_content: Uint8Array;
+	expires_at_ns: bigint;
+}
+export type PersonalNoteShareError =
+	| {
+			/**
+			 * `expires_at_ns` is not strictly in the future of IC time, or is
+			 * further out than [`MAX_PERSONAL_NOTE_SHARE_EXPIRY_NS`].
+			 */
+			InvalidExpiry: null;
+	  }
+	| {
+			/**
+			 * No unexpired entry for this token. Also returned for an
+			 * already-consumed single-use share and a reusable/single-use mismatch
+			 * (e.g. calling the reusable getter on a single-use share) — collapsing
+			 * every case into one response so a reader can never distinguish
+			 * "expired" from "used" from "never existed".
+			 */
+			NotFound: null;
+	  }
+	| {
+			/**
+			 * `ct_content` exceeds `personal_note::MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES`.
+			 */
+			ContentCiphertextTooLarge: null;
+	  }
+	| {
+			/**
+			 * The caller is already at [`MAX_PERSONAL_NOTE_SHARES_PER_USER`] active
+			 * shares.
+			 */
+			TooManyShares: null;
+	  }
+	| {
+			/**
+			 * The caller (create) or the shared anonymous bucket (consume) exceeded
+			 * the rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The `token` already identifies an existing share; the client should
+			 * generate a fresh random token and retry.
+			 */
+			DuplicateToken: null;
+	  }
+	| {
+			/**
+			 * The `token` exceeds [`MAX_PERSONAL_NOTE_SHARE_TOKEN_BYTES`] or is empty.
+			 */
+			TokenTooLong: null;
+	  }
+	| { InternalError: { msg: string } };
+/**
+ * Shared result for the two vetKey-derivation endpoints (the caller's encrypted
+ * vetKey and the store's public verification key). Both return opaque bytes on
+ * success; the wire shape is identical, so one enum serves both.
+ */
+export type PersonalNotesVetkeyResult =
+	| {
+			/**
+			 * vetKey bytes, opaque to the canister.
+			 */
+			Ok: Uint8Array;
+	  }
+	| {
+			/**
+			 * The vetKey could not be derived due to an error.
+			 */
+			Err: PersonalNoteError;
+	  };
 /**
  * Which external provider the agreement belongs to.
  *
@@ -1210,9 +1998,18 @@ export interface ProviderAgreementType {
 	provider: ProviderAgreementProvider;
 	scope: ProviderAgreementScope;
 }
+/**
+ * What an **anonymous** reader of a tip link sees. Deliberately excludes the
+ * message, the sender, and the claimer: enough to decide whether to sign in,
+ * nothing that identifies anyone.
+ */
+export interface PublicTip {
+	ledger_canister_id: Principal;
+	amount: bigint;
+	expires_at_ns: bigint;
+}
 export type QualifiedNotificationKind =
-	| { NoIndexCanister: null }
-	| { UnavailableIndexCanister: null };
+	{ NoIndexCanister: null } | { UnavailableIndexCanister: null };
 /**
  * Error returned when a caller exceeds the allowed call rate.
  */
@@ -1239,11 +2036,39 @@ export interface SaveUserTransactionsRequest {
 	transactions: Array<UserTransaction>;
 }
 export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
+export type SetPersonalNoteResult =
+	| {
+			/**
+			 * The note was created or updated successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The note could not be stored due to an error.
+			 */
+			Err: PersonalNoteError;
+	  };
 export interface SetShowTestnetsRequest {
 	current_user_version: [] | [bigint];
 	show_testnets: boolean;
 }
 export type SetTestnetsSettingsError = { VersionMismatch: null } | { UserNotFound: null };
+/**
+ * Stores the sender's own encrypted claim code so they can recover the link.
+ *
+ * A single request struct rather than two arguments, matching
+ * `SetPersonalNoteRequest`: it keeps the candid signature stable if the store
+ * ever needs another field.
+ */
+export interface SetTipSecretRequest {
+	tip_id: string;
+	/**
+	 * AES-GCM ciphertext of the claim code, opaque to the canister. Bounded by
+	 * [`MAX_TIP_SECRET_CIPHERTEXT_BYTES`].
+	 */
+	encrypted_claim_code: Uint8Array;
+}
 export type SetUserShowTestnetsResult =
 	| {
 			/**
@@ -1255,7 +2080,7 @@ export type SetUserShowTestnetsResult =
 			/**
 			 * The user's show testnets was not set due to an error.
 			 */
-			Err: UpdateAgreementsError;
+			Err: SetTestnetsSettingsError;
 	  };
 export interface Settings {
 	networks: NetworksSettings;
@@ -1381,13 +2206,273 @@ export interface Stats {
 	custom_token_count: bigint;
 	exchange_rates_count: bigint;
 	token_activity_count: bigint;
+	/**
+	 * Total number of stored personal-note shares across all users (active or
+	 * not yet pruned).
+	 */
+	personal_note_shares_count: bigint;
 	agreement_history_count: bigint;
+	/**
+	 * Total number of tips ever created and not yet pruned, across all users
+	 * and every status. Aggregate only, deliberately: the negative guarantee
+	 * that no endpoint enumerates another principal's tips holds for this one
+	 * too, so there is a count here and never a row.
+	 */
+	tips_count: bigint;
+	/**
+	 * Total number of stored (encrypted) personal-note entries across all users.
+	 */
+	personal_notes_count: bigint;
 	user_timestamps_count: bigint;
 	user_token_count: bigint;
 }
 export interface TestnetsSettings {
 	show_testnets: boolean;
 }
+/**
+ * Outcome of a successful claim.
+ */
+export interface TipClaim {
+	/**
+	 * Ledger block index of the payout, so the client can link to it.
+	 */
+	block_index: bigint;
+	ledger_canister_id: Principal;
+	/**
+	 * What was transferred to the claimer, in base units.
+	 */
+	amount: bigint;
+}
+/**
+ * The most recent failed claim on a tip. Returned only to the tip's own sender.
+ *
+ * Deliberately not the ledger's error text: that is written for an operator, it
+ * can name balances, and it has no business being rendered to a user.
+ */
+export interface TipClaimFailure {
+	at_ns: bigint;
+	reason: TipClaimFailureReason;
+}
+/**
+ * Why a claim attempt did not pay out.
+ *
+ * Three outcomes, and the split is by what the sender can do about it.
+ * `Uncovered` is the reservation having been reduced or revoked, so the link is
+ * dead and only a new tip fixes it. `InsufficientFunds` is the reservation
+ * standing but the money not being there, so the same link works again once
+ * they top up. `TransferFailed` is everything else — the ledger refusing or
+ * failing to answer — where retrying is the whole advice.
+ */
+export type TipClaimFailureReason =
+	| { Uncovered: null }
+	| { TransferFailed: null }
+	| {
+			/**
+			 * The sender's account no longer holds the amount. Distinct from
+			 * `Uncovered`: the reservation is still granted, the money is simply not
+			 * there, so topping up makes the same link work again.
+			 */
+			InsufficientFunds: null;
+	  };
+/**
+ * Identifies a tip **and** proves the caller holds its link.
+ *
+ * One type for both `get_tip_details` and `claim_tip` on purpose: reading the
+ * claim review and claiming are the same claim of authority, differing only in
+ * whether they move money. Two structurally identical records would also
+ * collapse into one name in the generated candid anyway — better to say so than
+ * to have the interface say it for us.
+ */
+export interface TipClaimRequest {
+	tip_id: string;
+	/**
+	 * The plaintext code from the link fragment. Only ever compared against the
+	 * stored hash; never persisted, never returned.
+	 */
+	claim_code: string;
+}
+/**
+ * What an authenticated claimer sees before claiming: the preview plus the
+ * sender's message. The payout fee is not included — the client reads it from
+ * the ledger directly (`icrc1_fee`), which is also the value the ledger will
+ * actually charge.
+ */
+export interface TipDetails {
+	message: [] | [string];
+	ledger_canister_id: Principal;
+	amount: bigint;
+	expires_at_ns: bigint;
+}
+export type TipError =
+	| {
+			/**
+			 * `expires_at_ns` is not strictly in the future of IC time, or is further
+			 * out than [`MAX_TIP_EXPIRY_NS`].
+			 */
+			InvalidExpiry: null;
+	  }
+	| {
+			/**
+			 * A claim is already in flight for this tip. Resolves on its own: either
+			 * it completes, or [`TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS`] passes and a retry
+			 * may take it over.
+			 */
+			ClaimInProgress: null;
+	  }
+	| {
+			/**
+			 * The encrypted claim code exceeds [`MAX_TIP_SECRET_CIPHERTEXT_BYTES`].
+			 */
+			SecretCiphertextTooLarge: null;
+	  }
+	| {
+			/**
+			 * The tip exists and the claim code is right, but the sender's allowance
+			 * no longer covers it — they spent, reduced or revoked it. The one
+			 * deliberately distinguishable failure, reachable only with a valid link,
+			 * because telling the claimer "come back later" is useless.
+			 *
+			 * At creation: the allowance does not cover the amount plus its fee, or
+			 * the amount is wider than [`MAX_TIP_AMOUNT_BITS`], which no allowance
+			 * can cover.
+			 */
+			Uncovered: null;
+	  }
+	| {
+			/**
+			 * No claimable tip for this id. Also returned for an expired, cancelled or
+			 * already-claimed tip, and for a wrong claim code — every case collapsed
+			 * into one response so a prober can never distinguish them.
+			 */
+			NotFound: null;
+	  }
+	| {
+			/**
+			 * The caller is not the sender of this tip.
+			 */
+			NotYourTip: null;
+	  }
+	| {
+			/**
+			 * The `claim_code_hash` is not exactly [`TIP_CLAIM_CODE_HASH_BYTES`] long.
+			 */
+			InvalidClaimCodeHash: null;
+	  }
+	| {
+			/**
+			 * The `tip_id` is empty or exceeds [`MAX_TIP_ID_BYTES`].
+			 */
+			InvalidTipId: null;
+	  }
+	| { RateLimited: RateLimitError }
+	| {
+			/**
+			 * The `tip_id` already exists; the client should generate a fresh random
+			 * id and retry.
+			 */
+			DuplicateTipId: null;
+	  }
+	| {
+			/**
+			 * Only a `Reserved` tip can be cancelled.
+			 */
+			NotCancellable: null;
+	  }
+	| {
+			/**
+			 * The ledger rejected or failed to answer the payout. The tip stays
+			 * claimable — nothing was transferred.
+			 */
+			TransferFailed: { msg: string };
+	  }
+	| { InternalError: { msg: string } }
+	| {
+			/**
+			 * `message` exceeds [`MAX_TIP_MESSAGE_CHARS`] characters.
+			 */
+			MessageTooLong: null;
+	  }
+	| {
+			/**
+			 * The caller already holds [`MAX_TIPS_PER_USER`] active tips, or
+			 * [`MAX_STORED_TIPS_PER_USER`] stored ones that cannot make room for
+			 * another because the finished ones are still `Claiming`.
+			 */
+			TooManyTips: null;
+	  }
+	| {
+			/**
+			 * The sender's account no longer holds the amount. The reservation is still
+			 * granted and the claim code is still valid, so the same link works again
+			 * once they top up — which is why this is not folded into `TransferFailed`.
+			 */
+			InsufficientFunds: null;
+	  }
+	| {
+			/**
+			 * The amount is zero, or below one ledger fee — a tip that cannot cover
+			 * its own payout is not a tip.
+			 */
+			AmountTooSmall: null;
+	  };
+/**
+ * Lifecycle as the **sender** sees it in History.
+ *
+ * `Uncovered` is deliberately absent: it is not a stored state but the
+ * outcome of a claim attempt against an allowance the sender has since spent,
+ * reduced or revoked. Reporting it here would mean querying every tip's
+ * allowance on every History read; it surfaces on the claim path instead, as
+ * [`TipError::Uncovered`].
+ */
+export type TipStatus =
+	| {
+			/**
+			 * Somebody tried to claim and the payout did not go through, and the tip is
+			 * still live. The code stays valid, so this is the one status the sender can
+			 * act on — typically by topping up the account the tip draws from.
+			 *
+			 * Distinct from `Reserved` precisely because it is actionable: without it a
+			 * tip nobody has touched and a tip that has already failed a claimer look
+			 * identical in History.
+			 */
+			Failed: null;
+	  }
+	| {
+			/**
+			 * Funds are authorised in the sender's own account, waiting for a claimer.
+			 */
+			Reserved: null;
+	  }
+	| {
+			/**
+			 * A claimer moved the tokens.
+			 */
+			Claimed: null;
+	  }
+	| {
+			/**
+			 * The sender revoked it before anyone claimed.
+			 */
+			Cancelled: null;
+	  }
+	| {
+			/**
+			 * The deadline passed unclaimed. Nothing was ever transferred, so nothing
+			 * is returned — the allowance simply lapsed on the ledger.
+			 */
+			Expired: null;
+	  };
+/**
+ * vetKey material for the tip-secrets store, or why it could not be derived.
+ */
+export type TipVetkeyResult =
+	| {
+			/**
+			 * vetKey bytes, opaque to the canister.
+			 */
+			Ok: Uint8Array;
+	  }
+	| { Err: TipError };
 /**
  * A variant describing any token
  */
@@ -1407,6 +2492,7 @@ export type TokenAccountId =
 	| { Btc: BtcAddress }
 	| { Eth: EthAddress }
 	| { Sol: string }
+	| { Xrp: string }
 	| { Icrcv2: Icrcv2AccountId };
 /**
  * A unified token identifier covering both native and custom tokens for the main supported chains.
@@ -1439,6 +2525,12 @@ export type TokenId =
 			 * ICRC token on ICP
 			 */
 			Icrc: Principal;
+	  }
+	| {
+			/**
+			 * Native XRP on mainnet
+			 */
+			XrpNativeMainnet: null;
 	  }
 	| {
 			/**
@@ -1631,7 +2723,17 @@ export interface UpdateActiveUserTransactionRequest {
 	progress_step: [] | [string];
 	error: [] | [string];
 }
-export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: null };
+export type UpdateAgreementsError =
+	| { VersionMismatch: null }
+	| { RateLimited: RateLimitError }
+	| { UserNotFound: null }
+	| {
+			/**
+			 * The change would take the user's agreement history past
+			 * `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
+			 */
+			TooManyHistoryEntries: null;
+	  };
 export interface UpdateExperimentalFeaturesSettingsRequest {
 	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
 	current_user_version: [] | [bigint];
@@ -1640,6 +2742,19 @@ export interface UpdateProviderAgreementsRequest {
 	current_user_version: [] | [bigint];
 	provider_agreements: Array<[ProviderAgreementType, UserAgreement]>;
 }
+export type UpdateProviderAgreementsResult =
+	| {
+			/**
+			 * The user's provider agreements were updated successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The user's provider agreements were not updated due to an error.
+			 */
+			Err: UpdateAgreementsError;
+	  };
 export interface UpdateTransactionFilterSettingsRequest {
 	filter: TransactionFilterSettings;
 	current_user_version: [] | [bigint];
@@ -1648,6 +2763,19 @@ export interface UpdateUserAgreementsRequest {
 	agreements: UserAgreements;
 	current_user_version: [] | [bigint];
 }
+export type UpdateUserAgreementsResult =
+	| {
+			/**
+			 * The user's agreements were updated successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The user's agreements were not updated due to an error.
+			 */
+			Err: UpdateAgreementsError;
+	  };
 /**
  * Per-agreement status/metadata.
  */
@@ -1740,21 +2868,64 @@ export type UserTransactionError =
 			UserNotFound: null;
 	  };
 /**
- * Unspent Transaction Output (UTXO).
+ * An unspent transaction output.
  */
 export interface Utxo {
-	/**
-	 * The block height at which the UTXO was created.
-	 */
 	height: number;
-	/**
-	 * The value of the UTXO in satoshis.
-	 */
 	value: bigint;
+	outpoint: OutPoint;
+}
+/**
+ * Velora (`ParaSwap`) swap payload. Settlement is tracked off-chain — by auction
+ * id (`Delta`) or by transaction hash plus nonce (`Market`) — so those
+ * pointers, and the learned-mid-flow settlement / refund tx hashes, live in
+ * `external_refs`; only the canonical immutable fields are captured here.
+ */
+export interface VeloraData {
+	mode: VeloraSwapMode;
+	source_token: TokenId;
 	/**
-	 * The outpoint of the UTXO.
+	 * Source-token amount in base units.
 	 */
-	outpoint: Outpoint;
+	amount: bigint;
+	dest_token: TokenId;
+}
+/**
+ * Which Velora execution mode an active transaction tracks. Determines how the
+ * frontend polls for settlement: `Delta` by auction id against Velora's Delta
+ * API, `Market` by transaction receipt on the source chain.
+ */
+export type VeloraSwapMode = { Delta: null } | { Market: null };
+/**
+ * Native XRP payment payload — the values fixed when the transaction was
+ * signed. The transaction id and its `LastLedgerSequence` are learned from the
+ * signed blob and ride in `external_refs`, so they are not here.
+ *
+ * `source_address` is the field the guard reads: the invariant is one
+ * unresolved payment per *address*, not per user, because a row for a
+ * different address says nothing about this one's sequence.
+ */
+export interface XrpData {
+	destination_address: string;
+	/**
+	 * Transaction cost in drops.
+	 */
+	fee: bigint;
+	/**
+	 * Native XRP, which also fixes the network the payment was signed for.
+	 */
+	token: TokenId;
+	/**
+	 * The XRPL `DestinationTag`, when the payment carries one. `0` is a real
+	 * tag rather than an absent one, which is why this is an `Option` and not
+	 * a sentinel.
+	 */
+	destination_tag: [] | [number];
+	source_address: string;
+	/**
+	 * Amount in drops.
+	 */
+	amount: bigint;
 }
 export interface _SERVICE {
 	/**
@@ -1768,8 +2939,8 @@ export interface _SERVICE {
 	 * present.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
-	 * the batch is too large.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	 * the batch is too large, or a qualifier is too long.
 	 */
 	add_user_dismissed_notification: ActorMethod<
 		[AddDismissedNotificationRequest],
@@ -1825,6 +2996,43 @@ export interface _SERVICE {
 		BtcAddPendingTransactionResult
 	>;
 	/**
+	 * Validates a signed transaction of the caller, reserves its inputs and broadcasts it, paying the
+	 * Bitcoin canister from the backend's own cycles.
+	 *
+	 * The checks that need no paid call run first, so a bad request costs no Bitcoin canister call.
+	 * The inputs are reserved in the same synchronous block that checks them against the caller's
+	 * other pending transactions, before the broadcast. Sending the same bytes again is safe: after
+	 * a success it returns the txid without a second broadcast for as long as the inputs stay
+	 * reserved, and after an unclear outcome it broadcasts again, at most `MAX_BROADCAST_ATTEMPTS`
+	 * times in all. Once the reservation is pruned, the same bytes are handled as a new request.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated through Internet
+	 * Identity. Controllers bypass this check.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `BtcBroadcastTransactionError`.
+	 */
+	btc_broadcast_transaction: ActorMethod<
+		[BtcBroadcastTransactionRequest],
+		BtcBroadcastTransactionResult
+	>;
+	/**
+	 * Returns the balance of the caller's P2WPKH address, counting only the outputs with at least
+	 * `min_confirmations` confirmations.
+	 *
+	 * An update call, so the answer is certified. The backend pays for the Bitcoin canister call from
+	 * its own cycles. It used to pay the chain fusion signer's `btc_caller_balance` instead, from its
+	 * cycles ledger account and against the approval it grants each caller for signing, so every read
+	 * used up part of what the caller could sign.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `BtcGetBalanceError`.
+	 */
+	btc_get_balance: ActorMethod<[BtcGetBalanceRequest], BtcGetBalanceResult>;
+	/**
 	 * Retrieves the current fee percentiles for Bitcoin transactions from the cache
 	 * for the specified network. Fee percentiles are measured in millisatoshi per byte
 	 * and are periodically updated in the background.
@@ -1858,9 +3066,62 @@ export interface _SERVICE {
 		BtcGetPendingTransactionsResult
 	>;
 	/**
+	 * Returns the caller's spendable UTXOs and pending transactions on the given network.
+	 *
+	 * The UTXOs are those at the caller's address with at least 4 confirmations (1 on regtest), from
+	 * all pages, that no pending transaction of the caller reserves on any of its addresses: the
+	 * largest by value, largest first, at most 10 000 and fewer if the pending transactions leave less
+	 * room in the reply. The pending transactions are those at that address, as
+	 * `btc_get_pending_transactions` returns them.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `BtcGetSpendableUtxosError`. `InternalError` also covers pending
+	 * transactions too large for a reply, which only the caller's own reservations can cause, until
+	 * they are pruned.
+	 */
+	btc_get_spendable_utxos: ActorMethod<[BtcGetSpendableUtxosRequest], BtcGetSpendableUtxosResult>;
+	/**
+	 * Stops an unclaimed tip of the caller's from being claimable. The allowance
+	 * itself is the caller's to revoke — the client pairs this with an
+	 * `icrc2_approve` of zero.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError` (`NotFound`, `NotYourTip`,
+	 * `NotCancellable`, `ClaimInProgress`, `RateLimited`).
+	 */
+	cancel_tip: ActorMethod<[string], CancelTipResult>;
+	/**
+	 * Pays the tip out to the caller, exactly once.
+	 *
+	 * Guarded on a non-anonymous caller rather than a registered one: the claimer
+	 * may be an identity that has never used OISY before — that is the point of the
+	 * feature — so requiring a user profile would defeat it. A principal is still
+	 * required, since the payout needs somewhere to land.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError` (`NotFound` for an unclaimable tip or a
+	 * wrong code, `Uncovered` when the sender's allowance no longer covers it,
+	 * `ClaimInProgress`, `TransferFailed`, `RateLimited`).
+	 */
+	claim_tip: ActorMethod<[TipClaimRequest], ClaimTipResult>;
+	/**
 	 * Gets the canister configuration.
 	 */
 	config: ActorMethod<[], Config>;
+	/**
+	 * Returns a **single-use** share's content exactly once, atomically deleting
+	 * it on success. Callable anonymously; guarded only by a coarse global rate
+	 * limiter, since an anonymous update call has no distinguishing principal to
+	 * rate-limit per-caller — every anonymous caller shares one bucket.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteShareError` (`NotFound` for expired,
+	 * unknown, already-consumed, or reusable; `RateLimited` at the global cap).
+	 */
+	consume_personal_note_share: ActorMethod<[string], ConsumePersonalNoteShareResult>;
 	/**
 	 * Creates a new active user transaction record for the caller.
 	 *
@@ -1881,6 +3142,33 @@ export interface _SERVICE {
 	 * The created contact on success.
 	 */
 	create_contact: ActorMethod<[CreateContactRequest], CreateContactResult>;
+	/**
+	 * Creates a share for one of the caller's notes. The note text and the share
+	 * key never reach the canister — only opaque ciphertext, the expiry, and the
+	 * single-use flag.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteShareError` (e.g. `TooManyShares`,
+	 * `ContentCiphertextTooLarge`, `InvalidExpiry`, `DuplicateToken`, `RateLimited`).
+	 */
+	create_personal_note_share: ActorMethod<
+		[CreatePersonalNoteShareRequest],
+		CreatePersonalNoteShareResult
+	>;
+	/**
+	 * Records a tip against an ICRC-2 allowance the caller has already granted to
+	 * this canister under the tip's own spender subaccount.
+	 *
+	 * No tokens move here, and none are held: the amount stays in the caller's
+	 * account until someone claims it, and lapses in place if nobody does.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError` (e.g. `Uncovered` when the allowance does
+	 * not cover the amount plus its fee, or the amount is wider than any allowance
+	 * can be, `TooManyTips`, `AmountTooSmall`, `InvalidExpiry`, `DuplicateTipId`,
+	 * `RateLimited`).
+	 */
+	create_tip: ActorMethod<[CreateTipRequest], CancelTipResult>;
 	/**
 	 * It creates a new user profile for the caller.
 	 * If the user has already a profile, it will return that profile.
@@ -1910,6 +3198,14 @@ export interface _SERVICE {
 	 * This operation is idempotent - it will return OK if the contact has already been deleted.
 	 */
 	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
+	/**
+	 * Deletes one of the caller's personal notes. Idempotent — deleting a missing
+	 * note returns `Ok`.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError` (e.g. `RateLimited`).
+	 */
+	delete_personal_note: ActorMethod<[DeletePersonalNoteRequest], DeletePersonalNoteResult>;
 	/**
 	 * Returns whether the backend is currently fetching and caching exchange rates.
 	 *
@@ -1944,6 +3240,13 @@ export interface _SERVICE {
 	 */
 	get_allowed_cycles: ActorMethod<[], GetAllowedCyclesResult>;
 	/**
+	 * Returns usage guidance for AI agents and other API clients.
+	 *
+	 * The Candid interface remains the source of truth for method signatures and
+	 * exact error variants.
+	 */
+	get_api_doc: ActorMethod<[], string>;
+	/**
 	 * Returns the currently stored API keys.
 	 *
 	 * Restricted to canister controllers only.
@@ -1965,6 +3268,18 @@ export interface _SERVICE {
 	 */
 	get_contact: ActorMethod<[bigint], GetContactResult>;
 	/**
+	 * Returns the images of the given contacts of the caller.
+	 *
+	 * A call takes at most `MAX_CONTACT_IMAGES_PER_CALL` contact IDs, so that the reply stays below
+	 * the 2 MiB a certified call can return.
+	 * # Arguments
+	 * * `request` - The IDs of the caller's contacts whose images to return.
+	 * # Returns
+	 * * `Ok(Vec<ContactImageEntry>)` - The images found; contacts the caller does not have, and
+	 * contacts without an image, are left out.
+	 */
+	get_contact_images: ActorMethod<[GetContactImagesRequest], GetContactImagesResult>;
+	/**
 	 * Returns all contacts for the caller
 	 *
 	 * This query function returns a list of the user's contacts.
@@ -1972,6 +3287,18 @@ export interface _SERVICE {
 	 * * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	 */
 	get_contacts: ActorMethod<[], GetContactsResult>;
+	/**
+	 * Returns a page of the caller's contacts, without their images.
+	 *
+	 * A page holds contacts in ID order until their encoded size reaches `CONTACTS_PAGE_MAX_BYTES`, so
+	 * that the reply stays below the 2 MiB a certified call can return. `get_contact_images` returns
+	 * the images.
+	 * # Arguments
+	 * * `after` - The `next` of the previous page; none for the first page.
+	 * # Returns
+	 * * `Ok(ContactsPage)` - The page, with `next` set while contacts remain after it.
+	 */
+	get_contacts_page: ActorMethod<[[] | [bigint]], GetContactsPageResult>;
 	get_exchange_rate: ActorMethod<[TokenId], [] | [ExchangeRate]>;
 	/**
 	 * Returns the latest USD prices for the caller's priceable tokens.
@@ -1981,8 +3308,9 @@ export interface _SERVICE {
 	 * - the caller's custom tokens, filtered to variants the configured providers can actually price
 	 * (testnets, NFTs and ERC-4626 vaults are excluded).
 	 *
-	 * The endpoint also re-marks the returned tokens as active so the
-	 * background refresh timer keeps them warm. If any cached price is
+	 * While the backend price refresh is on, the endpoint also records the
+	 * caller's custom tokens as active so the background refresh timer keeps
+	 * them warm (see [`record_token_activity`]). If any cached price is
 	 * missing or older than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`]
 	 * seconds, the endpoint kicks off a refresh for that subset **in the
 	 * background** (via `ic_cdk::futures::spawn_migratory`) and returns the current cache
@@ -2002,6 +3330,137 @@ export interface _SERVICE {
 	 * background fetch.
 	 */
 	get_exchange_rates: ActorMethod<[], Array<[TokenId, [] | [ExchangeRate]]>>;
+	/**
+	 * Returns the caller's own tips, newest first, for History. Bounded by
+	 * `MAX_TIPS_RETURNED`.
+	 *
+	 * Not rate-limited, for the same reason as [`get_tip`]: a stateful limiter is
+	 * a no-op on the non-certified query path. The row cap is what bounds the work
+	 * here, and a caller can only ever read their own tips.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError`.
+	 */
+	get_my_tips: ActorMethod<[], GetMyTipsResult>;
+	/**
+	 * Returns the note ciphertext for a **reusable** (non-single-use), unexpired
+	 * share. A single-use share's content is only ever returned by
+	 * `consume_personal_note_share`. Callable anonymously — a deliberate,
+	 * narrowly-scoped exception to notes endpoints normally requiring an
+	 * authenticated caller, since the recipient of a share link has no OISY
+	 * identity.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteShareError` (`NotFound` for expired,
+	 * unknown, or single-use).
+	 */
+	get_personal_note_share: ActorMethod<[string], GetPersonalNoteShareResult>;
+	/**
+	 * Returns the caller's active-share count (drives the client-side "at cap"
+	 * gate). Mirrors `get_personal_notes_count`.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteShareError`.
+	 */
+	get_personal_note_shares_count: ActorMethod<[], GetPersonalNoteSharesCountResult>;
+	/**
+	 * Returns all of the caller's (encrypted) personal notes, decrypted client-side.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError`.
+	 */
+	get_personal_notes: ActorMethod<[], GetPersonalNotesResult>;
+	/**
+	 * Returns the caller's total note count (drives the client-side capacity gate).
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError`.
+	 */
+	get_personal_notes_count: ActorMethod<[], GetPersonalNotesCountResult>;
+	/**
+	 * Derives the caller's encrypted vetKey for the supplied transport public key.
+	 * The browser decrypts it and derives the per-user symmetric key.
+	 *
+	 * This is an `update` because it makes an inter-canister call to the vetKD
+	 * system API.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError`.
+	 */
+	get_personal_notes_encrypted_vetkey: ActorMethod<[Uint8Array], PersonalNotesVetkeyResult>;
+	/**
+	 * Returns the personal-notes vetKey verification (public) key. The browser uses
+	 * it to verify the derived vetKey. Same value for every user.
+	 *
+	 * This is an `update` because it makes an inter-canister call to the vetKD
+	 * system API.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError`.
+	 */
+	get_personal_notes_vetkey_public_key: ActorMethod<[], PersonalNotesVetkeyResult>;
+	/**
+	 * Returns what an anonymous holder of a tip link may see: amount, token and
+	 * deadline — never the message, the sender, or the claimer.
+	 *
+	 * Callable without an identity, deliberately: the recipient of a tip link has
+	 * no OISY account yet, and the whole feature exists so they don't need one
+	 * first. Same narrowly-scoped exception as `get_personal_note_share`.
+	 *
+	 * Not rate-limited, for the same reason that endpoint isn't: state changes
+	 * during a query are not persisted, so a stateful limiter would be a no-op on
+	 * the non-certified query path. The abuse surface is a cheap O(log n) lookup
+	 * against a 128-bit id space.
+	 *
+	 * # Errors
+	 * `TipError::NotFound` for anything not currently claimable — unknown,
+	 * expired, cancelled and already-claimed are indistinguishable.
+	 */
+	get_tip: ActorMethod<[string], GetTipResult>;
+	/**
+	 * Returns the claim review for a signed-in claimer: the public preview plus
+	 * the sender's message. Requires the claim code, so the message is visible only
+	 * to someone holding the full link.
+	 *
+	 * Not rate-limited, for the same reason as [`get_tip`]: a stateful limiter is
+	 * a no-op on the non-certified query path, because state changes during a
+	 * query are not persisted. The abuse surface is one O(log n) lookup that also
+	 * has to guess a 128-bit claim code.
+	 *
+	 * # Errors
+	 * `TipError::NotFound` for an unclaimable tip or a wrong claim code.
+	 */
+	get_tip_details: ActorMethod<[TipClaimRequest], GetTipDetailsResult>;
+	/**
+	 * Derives the caller's vetKey for the tip-secrets store, secured to a
+	 * browser-supplied transport public key.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError` (`RateLimited`, `InternalError`).
+	 */
+	get_tip_encrypted_vetkey: ActorMethod<[Uint8Array], TipVetkeyResult>;
+	/**
+	 * The caller's encrypted claim code for one of their own tips, if stored.
+	 *
+	 * `EncryptedMaps` keys every map by its owner, so this can only ever return
+	 * the caller's own ciphertext.
+	 *
+	 * Not rate-limited, for the same reason as [`get_tip`]: a stateful limiter is
+	 * a no-op on the non-certified query path. The work is one keyed lookup
+	 * scoped to the caller.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError` (`InvalidTipId`, `InternalError`).
+	 */
+	get_tip_secret: ActorMethod<[string], GetTipSecretResult>;
+	/**
+	 * The vetKey verification key for the tip-secrets store. Identical for every
+	 * caller; the browser needs it to verify its derived vetKey.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError` (`RateLimited`, `InternalError`).
+	 */
+	get_tip_vetkey_public_key: ActorMethod<[], TipVetkeyResult>;
 	/**
 	 * Returns the full agreement consent/rejection history for the caller.
 	 *
@@ -2060,7 +3519,7 @@ export interface _SERVICE {
 	 *
 	 * Note: This method was previously exposed as a *query* but is now an *update*
 	 * call. The change is intentional and breaking: `list_custom_tokens` now tracks
-	 * token activity by calling `mark_tokens_active`, which mutates canister state.
+	 * token activity by calling `record_token_activity`, which mutates canister state.
 	 * Because queries must not modify state on the IC, this function must be an
 	 * update, not a query.
 	 *
@@ -2071,6 +3530,12 @@ export interface _SERVICE {
 	 * update method.
 	 */
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
+	/**
+	 * Marks every one of the caller's active user transactions updated at or before
+	 * `up_to_ns` as seen, on every device the caller signs in on. Returns the mark
+	 * now stored.
+	 */
+	mark_active_user_transactions_seen: ActorMethod<[bigint], MarkActiveUserTransactionsSeenResult>;
 	/**
 	 * Returns whether sign-ups of new users are currently allowed.
 	 *
@@ -2143,6 +3608,28 @@ export interface _SERVICE {
 	 */
 	set_onramper_signing_secret: ActorMethod<[[] | [string]], undefined>;
 	/**
+	 * Creates or updates one of the caller's personal notes (add and edit share the
+	 * same upsert, keyed by `note_id`). The value is opaque ciphertext.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError` (e.g. `TooManyNotes`,
+	 * `NoteCiphertextTooLarge`, `RateLimited`).
+	 */
+	set_personal_note: ActorMethod<[PersonalNoteEntry], SetPersonalNoteResult>;
+	/**
+	 * Stores the caller's encrypted claim code for one of their own tips, so they
+	 * can recover the link after closing the share screen.
+	 *
+	 * The value is ciphertext the canister cannot read: the browser encrypts it
+	 * under a vetKey only this principal can derive. Storing it changes nothing
+	 * about who can claim the tip — the canister still only holds the code's hash.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError` (`RateLimited`, `InvalidTipId`,
+	 * `SecretCiphertextTooLarge`, `InternalError`).
+	 */
+	set_tip_secret: ActorMethod<[SetTipSecretRequest], CancelTipResult>;
+	/**
 	 * Sets the user's preference to show (or hide) testnets in the interface.
 	 *
 	 * # Returns
@@ -2213,11 +3700,13 @@ export interface _SERVICE {
 	 * set to the same value.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	 * the caller made too many calls in the last minute, or the change would take the agreement
+	 * history past `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 	 */
 	update_provider_agreements: ActorMethod<
 		[UpdateProviderAgreementsRequest],
-		SetUserShowTestnetsResult
+		UpdateProviderAgreementsResult
 	>;
 	/**
 	 * Updates the user's agreements, merging with any existing ones, and records an audit-trail entry
@@ -2231,9 +3720,11 @@ export interface _SERVICE {
 	 * same value.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	 * the caller made too many calls in the last minute, or the change would take the agreement
+	 * history past `MAX_AGREEMENT_HISTORY_ENTRIES_PER_USER` entries.
 	 */
-	update_user_agreements: ActorMethod<[UpdateUserAgreementsRequest], SetUserShowTestnetsResult>;
+	update_user_agreements: ActorMethod<[UpdateUserAgreementsRequest], UpdateUserAgreementsResult>;
 	/**
 	 * Updates the user's preference to enable (or disable) experimental features in the interface,
 	 * merging with any existing entries.

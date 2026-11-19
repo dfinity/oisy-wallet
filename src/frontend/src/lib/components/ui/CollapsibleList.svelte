@@ -33,7 +33,7 @@
 				innerStyleClass="items-center"
 				onclick={() => (expanded = !expanded)}
 				paddingSmall
-				styleClass="text-brand-primary hover:bg-transparent hover:text-brand-secondary"
+				styleClass="text-brand-primary hover:bg-transparent hover:text-brand-hover"
 				transparent
 			>
 				{expanded ? $i18n.core.text.less : $i18n.core.text.more}

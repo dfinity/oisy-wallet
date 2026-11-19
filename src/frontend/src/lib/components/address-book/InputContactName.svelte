@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import InputText from '$lib/components/ui/InputText.svelte';
 	import { CONTACT_MAX_NAME_LENGTH } from '$lib/constants/app.constants';
 	import { ADDRESS_BOOK_CONTACT_NAME_INPUT } from '$lib/constants/test-ids.constants';
@@ -8,6 +7,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		contact: Partial<ContactUi>;

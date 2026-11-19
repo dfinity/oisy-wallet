@@ -23,4 +23,16 @@ describe('LiquidiumSupplyAgreement', () => {
 
 		expect(checkbox?.checked).toBeTruthy();
 	});
+
+	it('toggles the checkbox when clicking the agreement text', async () => {
+		const { container, getByText } = render(LiquidiumSupplyAgreement, {
+			props: { checked: false }
+		});
+
+		const checkbox = container.querySelector<HTMLInputElement>('input[type="checkbox"]');
+
+		await fireEvent.click(getByText(en.liquidium.text.supply_agreement));
+
+		expect(checkbox?.checked).toBeTruthy();
+	});
 });

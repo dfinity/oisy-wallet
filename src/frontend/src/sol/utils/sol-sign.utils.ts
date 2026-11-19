@@ -71,3 +71,26 @@ export const createSigner = ({
 
 	return signer;
 };
+
+// Ed25519 signs the raw message directly (no hashing, no recovery id), so — unlike a
+// transaction — we feed the message bytes straight to the signer and return the signature
+// unchanged. The key is selected solely by the network derivation path, matching the address
+// derived from the same path.
+export const signMessage = async ({
+	identity,
+	network,
+	message
+}: Pick<CreateSignerParams, 'identity' | 'network'> & {
+	message: Uint8Array;
+}): Promise<Uint8Array> => {
+	const derivationPath = [SOLANA_DERIVATION_PATH_PREFIX, network];
+
+	const signedBytes = await signWithSchnorr({
+		identity,
+		derivationPath,
+		keyId: SOLANA_KEY_ID,
+		message
+	});
+
+	return Uint8Array.from(signedBytes);
+};

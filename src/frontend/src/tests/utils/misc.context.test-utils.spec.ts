@@ -1,4 +1,5 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { COLORED_NETWORK_LOGOS_CONTEXT_KEY } from '$lib/stores/colored-network-logos.store';
 import { HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
 import { MODAL_NETWORKS_LIST_CONTEXT_KEY } from '$lib/stores/modal-networks-list.store';
 import { MODAL_TOKENS_LIST_CONTEXT_KEY } from '$lib/stores/modal-tokens-list.store';
@@ -6,6 +7,7 @@ import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
 import { REWARD_ELIGIBILITY_CONTEXT_KEY } from '$lib/stores/reward.store';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import {
+	mockColoredNetworkLogosContextEntry,
 	mockHeroContextEntry,
 	mockModalNetworksListContextEntry,
 	mockModalTokensListContextEntry,
@@ -63,6 +65,15 @@ describe('misc.context.test-utils', () => {
 			expect(
 				get((value as { filteredNetworks: Readable<unknown> }).filteredNetworks)
 			).toStrictEqual([ICP_NETWORK]);
+		});
+	});
+
+	describe('mockColoredNetworkLogosContextEntry', () => {
+		it('returns an entry that turns the coloured network logos on', () => {
+			expect(mockColoredNetworkLogosContextEntry()).toStrictEqual([
+				COLORED_NETWORK_LOGOS_CONTEXT_KEY,
+				true
+			]);
 		});
 	});
 });

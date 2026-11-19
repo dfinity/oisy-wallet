@@ -3,13 +3,21 @@ import type {
 	AllowSigningResult,
 	_SERVICE as BackendService,
 	BtcAddPendingTransactionResult,
+	BtcBroadcastTransactionResult,
 	BtcGetPendingTransactionsResult,
+	BtcGetSpendableUtxosResult,
 	CustomToken,
 	IcrcToken,
+	SignOnramperWidgetUrlResult,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
-import { CanisterInternalError } from '$lib/canisters/errors';
+import {
+	BtcBroadcastTransactionCanisterError,
+	CanisterInternalError,
+	OnramperRateLimitedError,
+	OnramperSecretNotConfiguredError
+} from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BtcAddPendingTransactionParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -59,12 +67,16 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 
 describe('backend.canister', () => {
 	const createBackendCanister = ({
-		serviceOverride
-	}: Pick<CreateCanisterOptions<BackendService>, 'serviceOverride'>): Promise<BackendCanister> =>
+		serviceOverride,
+		certifiedServiceOverride = serviceOverride
+	}: Pick<
+		CreateCanisterOptions<BackendService>,
+		'serviceOverride' | 'certifiedServiceOverride'
+	>): Promise<BackendCanister> =>
 		BackendCanister.create({
 			canisterId: Principal.fromText('d3nvo-aaaaa-aaaar-qagzq-cai'),
 			identity: mockIdentity,
-			certifiedServiceOverride: serviceOverride,
+			certifiedServiceOverride,
 			serviceOverride
 		});
 	const service = mock<ActorSubclass<BackendService>>();
@@ -219,6 +231,43 @@ describe('backend.canister', () => {
 		const res = await createUserProfile();
 
 		expect(res).toEqual(response);
+	});
+
+	// `create_user_profile` is idempotent: an existing user gets their stored profile back, and it
+	// goes into the store exactly as a read would. So it needs the same key normalisation — a
+	// hashed key reaching the store unresolved is the settings loss this decode exists to prevent.
+	it('resolves hashed network settings keys returned by create user profile', async () => {
+		service.create_user_profile.mockResolvedValue({
+			Ok: {
+				...mockedUserProfile,
+				settings: [
+					{
+						networks: {
+							// @ts-expect-error A key the generated bindings cannot name — exactly what the
+							// tolerant decode yields before it is resolved
+							networks: [[{ _2986158464_: null }, { enabled: true, is_testnet: false }]],
+							testnets: { show_testnets: false }
+						},
+						notifications: [],
+						dapp: { dapp_carousel: { hidden_dapp_ids: [] } },
+						experimental_features: { experimental_features: [] },
+						transactions: []
+					}
+				]
+			}
+		});
+
+		const { createUserProfile } = await createBackendCanister({
+			serviceOverride: service
+		});
+
+		const res = await createUserProfile();
+
+		const [settings] = 'Ok' in res ? res.Ok.settings : [];
+
+		expect(settings?.networks.networks).toEqual([
+			[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
+		]);
 	});
 
 	it('should throw SignupsClosedError when backend returns SignupsClosed', async () => {
@@ -410,6 +459,73 @@ describe('backend.canister', () => {
 		});
 	});
 
+	describe('btc_get_balance', () => {
+		const params = { ...btcGetPendingTransactionParams, minConfirmations: 1 };
+
+		it('should return the balance, asked with the confirmation floor and delegation chain', async () => {
+			service.btc_get_balance.mockResolvedValue({ Ok: { balance: 12_345n } });
+
+			const { btcGetBalance } = await createBackendCanister({ serviceOverride: service });
+
+			await expect(btcGetBalance(params)).resolves.toBe(12_345n);
+
+			expect(service.btc_get_balance).toHaveBeenCalledExactlyOnceWith({
+				...btcGetPendingTransactionEndpointParams,
+				min_confirmations: [1]
+			});
+		});
+
+		it('should leave the confirmation floor to the Bitcoin canister when none is given', async () => {
+			service.btc_get_balance.mockResolvedValue({ Ok: { balance: ZERO } });
+
+			const { btcGetBalance } = await createBackendCanister({ serviceOverride: service });
+
+			await btcGetBalance(btcGetPendingTransactionParams);
+
+			expect(service.btc_get_balance).toHaveBeenCalledExactlyOnceWith({
+				...btcGetPendingTransactionEndpointParams,
+				min_confirmations: []
+			});
+		});
+
+		// A balance that could not be read is not a balance of zero.
+		it('should throw on a rate limit', async () => {
+			service.btc_get_balance.mockResolvedValue({
+				Err: {
+					RateLimited: { max_calls: 20, window_ns: 60_000_000_000n, caller: mockPrincipal }
+				}
+			});
+
+			const { btcGetBalance } = await createBackendCanister({ serviceOverride: service });
+
+			await expect(btcGetBalance(params)).rejects.toThrow(
+				new CanisterInternalError(
+					'Rate limit exceeded. Maximum of 20 calls allowed every 60 seconds.'
+				)
+			);
+		});
+
+		it('should throw when the Bitcoin canister does not answer', async () => {
+			service.btc_get_balance.mockResolvedValue({
+				Err: { BalanceUnavailable: { msg: 'canister rejected' } }
+			});
+
+			const { btcGetBalance } = await createBackendCanister({ serviceOverride: service });
+
+			await expect(btcGetBalance(params)).rejects.toThrow(
+				new CanisterInternalError('Bitcoin balance unavailable: canister rejected')
+			);
+		});
+
+		it('should throw if btc_get_balance throws', async () => {
+			service.btc_get_balance.mockRejectedValue(mockResponseError);
+
+			const { btcGetBalance } = await createBackendCanister({ serviceOverride: service });
+
+			await expect(btcGetBalance(params)).rejects.toThrow(mockResponseError);
+		});
+	});
+
 	describe('btc_get_pending_transactions', () => {
 		it('should return pending btc transactions with success response', async () => {
 			const response = {
@@ -525,6 +641,127 @@ describe('backend.canister', () => {
 		});
 	});
 
+	describe('btc_broadcast_transaction', () => {
+		const params = {
+			network: btcAddPendingTransactionParams.network,
+			transaction: Uint8Array.from([0, 1, 2]),
+			iiDelegationChain: mockIIDelegationChain
+		};
+
+		it('should broadcast and return the txid', async () => {
+			const response = { Ok: { txid: Uint8Array.from([9, 8, 7]) } };
+			service.btc_broadcast_transaction.mockResolvedValue(response);
+
+			const { btcBroadcastTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcBroadcastTransaction(params);
+
+			expect(service.btc_broadcast_transaction).toHaveBeenCalledExactlyOnceWith({
+				network: params.network,
+				transaction: params.transaction,
+				ii_delegation_chain: params.iiDelegationChain
+			});
+			expect(res).toEqual(response.Ok);
+		});
+
+		// Unlike `btc_add_pending_transaction`'s, a rate limit is not swallowed: nothing was sent.
+		it.each([
+			{ RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } },
+			{ BroadcastOutcomeUnknown: { msg: 'trap' } },
+			{ UtxosAlreadyReserved: null }
+		])('should throw the typed answer %o', async (variant) => {
+			service.btc_broadcast_transaction.mockResolvedValue({
+				Err: variant
+			} as BtcBroadcastTransactionResult);
+
+			const { btcBroadcastTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcBroadcastTransaction(params);
+
+			await expect(res).rejects.toBeInstanceOf(BtcBroadcastTransactionCanisterError);
+			await expect(res).rejects.toHaveProperty('variant', variant);
+		});
+
+		it('should rethrow a failed call as it is', async () => {
+			service.btc_broadcast_transaction.mockRejectedValue(mockResponseError);
+
+			const { btcBroadcastTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(btcBroadcastTransaction(params)).rejects.toBe(mockResponseError);
+		});
+	});
+
+	describe('btc_get_spendable_utxos', () => {
+		const spendableUtxos = {
+			utxos: btcAddPendingTransactionParams.utxos,
+			pending_transactions: [
+				{
+					utxos: btcAddPendingTransactionParams.utxos,
+					txid: btcAddPendingTransactionParams.txId
+				}
+			]
+		};
+
+		it('should return the spendable UTXOs and the pending transactions', async () => {
+			service.btc_get_spendable_utxos.mockResolvedValue({ Ok: spendableUtxos });
+
+			const { btcGetSpendableUtxos } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcGetSpendableUtxos(btcGetPendingTransactionParams);
+
+			expect(service.btc_get_spendable_utxos).toHaveBeenCalledExactlyOnceWith(
+				btcGetPendingTransactionEndpointParams
+			);
+			expect(res).toEqual(spendableUtxos);
+		});
+
+		it.each([
+			{
+				Err: { InternalError: { msg: 'reply too large' } },
+				error: new CanisterInternalError('reply too large')
+			},
+			{
+				Err: { InvalidDelegationChain: { msg: 'chain expired' } },
+				error: new CanisterInternalError('II delegation chain verification failed: chain expired')
+			},
+			// Unlike the pending transactions, there is nothing to fall back on.
+			{
+				Err: { RateLimited: { max_calls: 15, window_ns: 60_000_000_000n, caller: mockPrincipal } },
+				error: new CanisterInternalError(
+					'Rate limit exceeded. Maximum of 15 calls allowed every 60 seconds.'
+				)
+			}
+		])('should throw on $Err', async ({ Err, error }) => {
+			service.btc_get_spendable_utxos.mockResolvedValue({ Err } as BtcGetSpendableUtxosResult);
+
+			const { btcGetSpendableUtxos } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(btcGetSpendableUtxos(btcGetPendingTransactionParams)).rejects.toThrow(error);
+		});
+
+		it('should throw if btc_get_spendable_utxos throws', async () => {
+			service.btc_get_spendable_utxos.mockRejectedValue(mockResponseError);
+
+			const { btcGetSpendableUtxos } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(btcGetSpendableUtxos(btcGetPendingTransactionParams)).rejects.toThrow(
+				mockResponseError
+			);
+		});
+	});
+
 	describe('getAllowedCycles', () => {
 		it('should return allowed cycles when response is successful', async () => {
 			const mockAllowedCycles = 1000000n;
@@ -608,6 +845,70 @@ describe('backend.canister', () => {
 			});
 
 			await expect(getAllowedCycles()).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('signOnramperWidgetUrl', () => {
+		const signOnramperWidgetUrlParams = {
+			wallets: [{ cryptoId: 'btc' as const, wallet: 'bc1q-user' }],
+			networkWallets: [{ networkId: 'bitcoin' as const, wallet: 'bc1q-user' }],
+			walletAddressTags: [{ cryptoId: 'xrp' as const, tag: 'destination-tag' }]
+		};
+
+		it('should sign Onramper widget URL parameters', async () => {
+			const okResponse = {
+				signature: 'a'.repeat(64),
+				signed_query:
+					'networkWallets=bitcoin:bc1q-user&walletAddressTags=xrp:destination-tag&wallets=btc:bc1q-user'
+			};
+			const result: SignOnramperWidgetUrlResult = { Ok: okResponse };
+
+			service.sign_onramper_widget_url.mockResolvedValue(result);
+
+			const { signOnramperWidgetUrl } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await signOnramperWidgetUrl(signOnramperWidgetUrlParams);
+
+			expect(service.sign_onramper_widget_url).toHaveBeenCalledExactlyOnceWith({
+				wallets: [{ key: 'btc', value: 'bc1q-user' }],
+				network_wallets: [{ key: 'bitcoin', value: 'bc1q-user' }],
+				wallet_address_tags: [{ key: 'xrp', value: 'destination-tag' }]
+			});
+			expect(res).toStrictEqual(okResponse);
+		});
+
+		it('should throw an OnramperSecretNotConfiguredError if the signing secret is missing', async () => {
+			service.sign_onramper_widget_url.mockResolvedValue({
+				Err: { SecretNotConfigured: null }
+			});
+
+			const { signOnramperWidgetUrl } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(signOnramperWidgetUrl(signOnramperWidgetUrlParams)).rejects.toThrow(
+				new OnramperSecretNotConfiguredError(
+					'OnRamper signing secret is not configured on the backend canister.'
+				)
+			);
+		});
+
+		it('should throw an OnramperRateLimitedError if the signing endpoint rate-limits', async () => {
+			service.sign_onramper_widget_url.mockResolvedValue({
+				Err: { RateLimited: { max_calls: 30, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			});
+
+			const { signOnramperWidgetUrl } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(signOnramperWidgetUrl(signOnramperWidgetUrlParams)).rejects.toThrow(
+				new OnramperRateLimitedError(
+					'Rate limit exceeded. Maximum of 30 calls allowed every 60 seconds.'
+				)
+			);
 		});
 	});
 
@@ -1132,6 +1433,22 @@ describe('backend.canister', () => {
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
+
+		it.each([
+			{
+				name: 'RateLimited',
+				err: { RateLimited: { max_calls: 10, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			},
+			{ name: 'VersionMismatch', err: { VersionMismatch: null } }
+		])('should throw the error if update_user_agreements returns $name', async ({ err }) => {
+			service.update_user_agreements.mockResolvedValue({ Err: err });
+
+			const { updateUserAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(updateUserAgreements({ agreements: mockUserAgreements })).rejects.toEqual(err);
+		});
 	});
 
 	describe('updateProviderAgreements', () => {
@@ -1192,6 +1509,24 @@ describe('backend.canister', () => {
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
+
+		it.each([
+			{
+				name: 'RateLimited',
+				err: { RateLimited: { max_calls: 10, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			},
+			{ name: 'VersionMismatch', err: { VersionMismatch: null } }
+		])('should throw the error if update_provider_agreements returns $name', async ({ err }) => {
+			service.update_provider_agreements.mockResolvedValue({ Err: err });
+
+			const { updateProviderAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(
+				updateProviderAgreements({ providerAgreements: mockUserProviderAgreements })
+			).rejects.toEqual(err);
+		});
 	});
 
 	describe('getContact', () => {
@@ -1211,6 +1546,24 @@ describe('backend.canister', () => {
 			expect(res).toEqual(mockContact);
 		});
 
+		it('should read the contact through the certified service', async () => {
+			const [mockContact] = getMockContacts({ n: 1 });
+			const queryService = mock<ActorSubclass<BackendService>>();
+			const certifiedService = mock<ActorSubclass<BackendService>>();
+
+			certifiedService.get_contact.mockResolvedValue({ Ok: mockContact });
+
+			const { getContact } = await createBackendCanister({
+				serviceOverride: queryService,
+				certifiedServiceOverride: certifiedService
+			});
+
+			await expect(getContact(1n)).resolves.toEqual(mockContact);
+
+			expect(certifiedService.get_contact).toHaveBeenCalledExactlyOnceWith(1n);
+			expect(queryService.get_contact).not.toHaveBeenCalled();
+		});
+
 		it('should throw an error if get_contact throws', async () => {
 			service.get_contact.mockImplementation(async () => {
 				await Promise.resolve();
@@ -1227,36 +1580,91 @@ describe('backend.canister', () => {
 		});
 	});
 
-	describe('getContacts', () => {
-		it('should call get_contacts service', async () => {
+	describe('getContactsPage', () => {
+		it('should read the first page through the certified service', async () => {
 			const mockContacts = getMockContacts({ n: 4 });
-			const response = { Ok: mockContacts };
+			const page = { contacts: mockContacts, next: toNullable<bigint>() };
+			const queryService = mock<ActorSubclass<BackendService>>();
+			const certifiedService = mock<ActorSubclass<BackendService>>();
 
-			service.get_contacts.mockResolvedValue(response);
+			certifiedService.get_contacts_page.mockResolvedValue({ Ok: page });
 
-			const { getContacts } = await createBackendCanister({
+			const { getContactsPage } = await createBackendCanister({
+				serviceOverride: queryService,
+				certifiedServiceOverride: certifiedService
+			});
+
+			await expect(getContactsPage()).resolves.toEqual(page);
+
+			expect(certifiedService.get_contacts_page).toHaveBeenCalledExactlyOnceWith([]);
+			expect(queryService.get_contacts_page).not.toHaveBeenCalled();
+		});
+
+		it('should pass the cursor of the previous page', async () => {
+			const page = { contacts: getMockContacts({ n: 1 }), next: toNullable(7n) };
+
+			service.get_contacts_page.mockResolvedValue({ Ok: page });
+
+			const { getContactsPage } = await createBackendCanister({
 				serviceOverride: service
 			});
 
-			const res = await getContacts();
+			await expect(getContactsPage(3n)).resolves.toEqual(page);
 
-			expect(service.get_contacts).toHaveBeenCalledOnce();
-			expect(res).toEqual(mockContacts);
+			expect(service.get_contacts_page).toHaveBeenCalledWith([3n]);
 		});
 
-		it('should throw an error if get_contact throws', async () => {
-			service.get_contacts.mockImplementation(async () => {
+		it('should throw an error if get_contacts_page throws', async () => {
+			service.get_contacts_page.mockImplementation(async () => {
 				await Promise.resolve();
 				throw mockResponseError;
 			});
 
-			const { getContacts } = await createBackendCanister({
+			const { getContactsPage } = await createBackendCanister({
 				serviceOverride: service
 			});
 
-			const res = getContacts();
+			await expect(getContactsPage()).rejects.toThrow(mockResponseError);
+		});
+	});
 
-			await expect(res).rejects.toThrow(mockResponseError);
+	describe('getContactImages', () => {
+		it('should read the images through the certified service', async () => {
+			const entries = [
+				{
+					contact_id: 1n,
+					image: { data: new Uint8Array([1, 2, 3]), mime_type: { 'image/png': null } }
+				}
+			];
+			const queryService = mock<ActorSubclass<BackendService>>();
+			const certifiedService = mock<ActorSubclass<BackendService>>();
+
+			certifiedService.get_contact_images.mockResolvedValue({ Ok: entries });
+
+			const { getContactImages } = await createBackendCanister({
+				serviceOverride: queryService,
+				certifiedServiceOverride: certifiedService
+			});
+
+			await expect(getContactImages([1n, 2n])).resolves.toEqual(entries);
+
+			expect(certifiedService.get_contact_images).toHaveBeenCalledExactlyOnceWith({
+				contact_ids: BigUint64Array.from([1n, 2n])
+			});
+			expect(queryService.get_contact_images).not.toHaveBeenCalled();
+		});
+
+		it('should throw an error if get_contact_images throws', async () => {
+			service.get_contact_images.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getContactImages } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getContactImages([1n])).rejects.toThrow(mockResponseError);
 		});
 	});
 
@@ -1504,6 +1912,31 @@ describe('backend.canister', () => {
 				max_results: 10n
 			});
 			expect(res).toEqual(mockGetUserTransactionsResponse);
+		});
+
+		it('should read the stored transactions through the certified service', async () => {
+			const queryService = mock<ActorSubclass<BackendService>>();
+			const certifiedService = mock<ActorSubclass<BackendService>>();
+
+			certifiedService.get_user_transactions.mockResolvedValue({
+				Ok: mockCandidGetUserTransactionsResponse
+			});
+
+			const { getUserTransactions } = await createBackendCanister({
+				serviceOverride: queryService,
+				certifiedServiceOverride: certifiedService
+			});
+
+			await expect(getUserTransactions(getUserTransactionsParams)).resolves.toEqual(
+				mockGetUserTransactionsResponse
+			);
+
+			expect(certifiedService.get_user_transactions).toHaveBeenCalledExactlyOnceWith({
+				token_id: mockUserTransactionTokenId,
+				start: [5n],
+				max_results: 10n
+			});
+			expect(queryService.get_user_transactions).not.toHaveBeenCalled();
 		});
 
 		it('should pass empty array for start when undefined', async () => {
@@ -1912,10 +2345,12 @@ describe('backend.canister', () => {
 	describe('getActiveUserTransactions', () => {
 		const errorResponse = { Err: mockActiveUserTransactionErrorNotFound };
 
-		it('should return the unwrapped list of transactions', async () => {
-			service.get_active_user_transactions.mockResolvedValue({
-				Ok: { transactions: [mockActiveUserTransaction] }
-			});
+		it('should return the unwrapped transactions and seen mark', async () => {
+			const response = {
+				transactions: [mockActiveUserTransaction],
+				seen_up_to_ns: mockActiveUserTransaction.updated_at_ns
+			};
+			service.get_active_user_transactions.mockResolvedValue({ Ok: response });
 
 			const { getActiveUserTransactions } = await createBackendCanister({
 				serviceOverride: service
@@ -1924,12 +2359,26 @@ describe('backend.canister', () => {
 			const res = await getActiveUserTransactions();
 
 			expect(service.get_active_user_transactions).toHaveBeenCalledExactlyOnceWith();
-			expect(res).toEqual([mockActiveUserTransaction]);
+			expect(res).toEqual(response);
 		});
 
-		it('should return an empty array when the user has no records', async () => {
+		it('should return the unwrapped transactions and seen mark from a certified call', async () => {
+			const response = { transactions: [mockActiveUserTransaction], seen_up_to_ns: ZERO };
+			service.get_active_user_transactions.mockResolvedValue({ Ok: response });
+
+			const { getActiveUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await getActiveUserTransactions({ certified: true });
+
+			expect(service.get_active_user_transactions).toHaveBeenCalledExactlyOnceWith();
+			expect(res).toEqual(response);
+		});
+
+		it('should return no transactions when the user has no records', async () => {
 			service.get_active_user_transactions.mockResolvedValue({
-				Ok: { transactions: [] }
+				Ok: { transactions: [], seen_up_to_ns: ZERO }
 			});
 
 			const { getActiveUserTransactions } = await createBackendCanister({
@@ -1938,7 +2387,7 @@ describe('backend.canister', () => {
 
 			const res = await getActiveUserTransactions();
 
-			expect(res).toEqual([]);
+			expect(res).toEqual({ transactions: [], seen_up_to_ns: ZERO });
 		});
 
 		it('should throw if the canister returns Err', async () => {
@@ -1949,6 +2398,34 @@ describe('backend.canister', () => {
 			});
 
 			await expect(getActiveUserTransactions()).rejects.toEqual(errorResponse.Err);
+		});
+	});
+
+	describe('markActiveUserTransactionsSeen', () => {
+		const upToNs = mockActiveUserTransaction.updated_at_ns;
+
+		it('should return the mark the backend stored', async () => {
+			service.mark_active_user_transactions_seen.mockResolvedValue({ Ok: upToNs });
+
+			const { markActiveUserTransactionsSeen } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await markActiveUserTransactionsSeen(upToNs);
+
+			expect(service.mark_active_user_transactions_seen).toHaveBeenCalledExactlyOnceWith(upToNs);
+			expect(res).toBe(upToNs);
+		});
+
+		it('should throw if the canister returns Err', async () => {
+			const errorResponse = { Err: mockActiveUserTransactionErrorNotFound };
+			service.mark_active_user_transactions_seen.mockResolvedValue(errorResponse);
+
+			const { markActiveUserTransactionsSeen } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(markActiveUserTransactionsSeen(upToNs)).rejects.toEqual(errorResponse.Err);
 		});
 	});
 });

@@ -1,8 +1,9 @@
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import * as sendServices from '$eth/services/send.services';
 import * as ethFeeStore from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
+import { EthSubmissionUnconfirmedError } from '$eth/types/send';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import AiAssistantReviewSendEthToken from '$lib/components/ai-assistant/AiAssistantReviewSendEthToken.svelte';
 import {
@@ -12,14 +13,17 @@ import {
 import { ethAddressStore } from '$lib/stores/address.store';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import * as toasts from '$lib/stores/toasts.store';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { isNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
+import { writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
@@ -37,11 +41,22 @@ describe('AiAssistantReviewSendEthToken', () => {
 	};
 
 	const mockContext = () =>
-		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token: SEPOLIA_TOKEN })]]);
+		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token: ETHEREUM_TOKEN })]]);
 
 	const mockEthFeeStore = () => {
-		const store = ethFeeStore.initEthFeeStore();
-		store.setFee(mockFees);
+		// Build the store directly rather than through the (possibly spied) factory, so it is
+		// guaranteed to hold the fee regardless of test order.
+		const { subscribe } = writable<ethFeeStore.FeeStoreData>(mockFees);
+		const store: ethFeeStore.EthFeeStore = { subscribe, setFee: vi.fn() };
+
+		vi.spyOn(ethFeeStore, 'initEthFeeStore').mockImplementation(() => store);
+	};
+
+	const mockEmptyEthFeeStore = () => {
+		// Build an empty store directly rather than through the (possibly spied) factory, so it is
+		// guaranteed to hold no fee regardless of test order.
+		const { subscribe } = writable<ethFeeStore.FeeStoreData>(undefined);
+		const store: ethFeeStore.EthFeeStore = { subscribe, setFee: vi.fn() };
 
 		vi.spyOn(ethFeeStore, 'initEthFeeStore').mockImplementation(() => store);
 	};
@@ -67,7 +82,7 @@ describe('AiAssistantReviewSendEthToken', () => {
 
 	const mockBalance = () => {
 		balancesStore.set({
-			id: SEPOLIA_TOKEN.id,
+			id: ETHEREUM_TOKEN.id,
 			data: { data: 9900000000000000n, certified: true }
 		});
 	};
@@ -79,7 +94,8 @@ describe('AiAssistantReviewSendEthToken', () => {
 		sendCompleted: false,
 		sourceNetwork: ETHEREUM_NETWORK,
 		sendEnabled: true,
-		onSendCompleted: vi.fn()
+		onSendCompleted: vi.fn(),
+		onSendOutcomeUnknown: vi.fn()
 	};
 	let sendSpy: MockInstance;
 
@@ -88,7 +104,7 @@ describe('AiAssistantReviewSendEthToken', () => {
 
 		mockPage.reset();
 
-		sendSpy = vi.spyOn(sendServices, 'send').mockResolvedValue({ hash: 'test' });
+		sendSpy = vi.spyOn(sendServices, 'send').mockResolvedValue({ hash: 'test', nonce: 1 });
 	});
 
 	it('should render the success message instead of button if sendCompleted is true', () => {
@@ -102,6 +118,81 @@ describe('AiAssistantReviewSendEthToken', () => {
 
 		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrow();
 		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE)).toBeInTheDocument();
+	});
+
+	it('should render the could-not-confirm text instead of the button if the outcome of the send is unknown', () => {
+		const { getByTestId, getByText } = render(AiAssistantReviewSendEthToken, {
+			props: {
+				...props,
+				sendOutcomeUnknown: true
+			},
+			context: mockContext()
+		});
+
+		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toThrow();
+		expect(() => getByTestId(AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE)).toThrow();
+		expect(getByText(en.send.error.ethereum_transaction_unconfirmed)).toBeInTheDocument();
+	});
+
+	// The transaction may have reached the network: sent again, it would be signed with the next
+	// nonce, and both could execute.
+	it('should stop offering the send when its outcome is unknown', async () => {
+		mockAuthStore();
+		mockCkEthMinterInfoStore();
+		mockEthAddressStore();
+		mockBalance();
+		mockEthFeeStore();
+
+		vi.spyOn(toasts, 'toastsErrorNoTrace').mockImplementation(() => Symbol('toast'));
+		sendSpy.mockRejectedValueOnce(new EthSubmissionUnconfirmedError(new Error('Internal error')));
+
+		const onSendCompleted = vi.fn();
+		const onSendOutcomeUnknown = vi.fn();
+
+		const { getByTestId } = render(AiAssistantReviewSendEthToken, {
+			props: { ...props, onSendCompleted, onSendOutcomeUnknown },
+			context: mockContext()
+		});
+
+		await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+		await vi.waitFor(() => expect(onSendOutcomeUnknown).toHaveBeenCalledOnce());
+
+		expect(onSendCompleted).not.toHaveBeenCalled();
+		expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ msg: { text: en.send.error.ethereum_transaction_unconfirmed } })
+		);
+	});
+
+	it('should keep offering the send after any other failure', async () => {
+		mockAuthStore();
+		mockCkEthMinterInfoStore();
+		mockEthAddressStore();
+		mockBalance();
+		mockEthFeeStore();
+
+		vi.spyOn(toasts, 'toastsErrorNoTrace').mockImplementation(() => Symbol('toast'));
+		sendSpy.mockRejectedValueOnce(
+			Object.assign(new Error('insufficient funds'), { code: 'INSUFFICIENT_FUNDS' })
+		);
+
+		const onSendOutcomeUnknown = vi.fn();
+
+		const { getByTestId } = render(AiAssistantReviewSendEthToken, {
+			props: { ...props, onSendOutcomeUnknown },
+			context: mockContext()
+		});
+
+		await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+		await vi.waitFor(() =>
+			expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ msg: { text: en.send.error.ethereum_insufficient_funds } })
+			)
+		);
+
+		expect(onSendOutcomeUnknown).not.toHaveBeenCalled();
+		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toBeInTheDocument();
 	});
 
 	it('should call send if all requirements are met', async () => {
@@ -123,10 +214,10 @@ describe('AiAssistantReviewSendEthToken', () => {
 		expect(sendSpy).toHaveBeenCalledExactlyOnceWith({
 			from: mockEthAddress,
 			to: mockEthAddress3,
-			token: SEPOLIA_TOKEN,
+			token: ETHEREUM_TOKEN,
 			amount: parseToken({
 				value: `${sendAmount}`,
-				unitName: SEPOLIA_TOKEN.decimals
+				unitName: ETHEREUM_TOKEN.decimals
 			}),
 			maxFeePerGas: mockFees.maxFeePerGas,
 			maxPriorityFeePerGas: mockFees.maxPriorityFeePerGas,
@@ -213,6 +304,51 @@ describe('AiAssistantReviewSendEthToken', () => {
 		});
 
 		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
+
+		await fireEvent.click(button);
+
+		expect(sendSpy).not.toHaveBeenCalled();
+	});
+
+	it('should disable the send button and not send when the gas fee is not defined', async () => {
+		mockAuthStore();
+		mockCkEthMinterInfoStore();
+		mockEthAddressStore();
+		mockBalance();
+		mockEmptyEthFeeStore();
+
+		const { getByTestId } = render(AiAssistantReviewSendEthToken, {
+			props,
+			context: mockContext()
+		});
+
+		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
+
+		expect(button).toBeDisabled();
+
+		await fireEvent.click(button);
+
+		expect(sendSpy).not.toHaveBeenCalled();
+	});
+
+	it('should disable the send button and not send when the source network is not the token network', async () => {
+		mockAuthStore();
+		mockCkEthMinterInfoStore();
+		mockEthAddressStore();
+		mockBalance();
+		mockEthFeeStore();
+
+		const { getByTestId } = render(AiAssistantReviewSendEthToken, {
+			props: {
+				...props,
+				sourceNetwork: SEPOLIA_NETWORK
+			},
+			context: mockContext()
+		});
+
+		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
+
+		expect(button).toBeDisabled();
 
 		await fireEvent.click(button);
 

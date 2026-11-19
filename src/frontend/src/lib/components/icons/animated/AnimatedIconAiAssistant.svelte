@@ -8,7 +8,13 @@
 	let { size = '80', styleClass }: Props = $props();
 </script>
 
-<svg class={styleClass} fill="none" height={size} width={size} xmlns="http://www.w3.org/2000/svg">
+<svg
+	class={`${styleClass ?? ''} decorative-motion`}
+	fill="none"
+	height={size}
+	width={size}
+	xmlns="http://www.w3.org/2000/svg"
+>
 	<!-- Back layer - appears last -->
 	<g class="layer-back" filter="url(#a)">
 		<path

@@ -33,6 +33,19 @@ describe('NavigationItem', () => {
 		expect(trackEvent).toHaveBeenCalledExactlyOnceWith(event);
 	});
 
+	it('should fire the provided trackEvent and then the onclick of an item without href', async () => {
+		const onclick = vi.fn();
+
+		const { getByTestId } = render(NavigationItem, {
+			props: { ariaLabel: 'Notes', testId, onclick, trackEvent: event }
+		});
+
+		await fireEvent.click(getByTestId(testId));
+
+		expect(trackEvent).toHaveBeenCalledExactlyOnceWith(event);
+		expect(onclick).toHaveBeenCalledOnce();
+	});
+
 	it('should not fire trackEvent when the prop is absent', async () => {
 		const { getByTestId } = render(NavigationItem, {
 			props: { href: '/', ariaLabel: 'Assets', testId }

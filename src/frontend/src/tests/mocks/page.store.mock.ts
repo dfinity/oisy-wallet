@@ -1,4 +1,5 @@
 import { page } from '$app/state';
+import { NFT_PARAM } from '$lib/constants/routes.constants';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
@@ -65,7 +66,11 @@ const initPageStoreMock = () => {
 				network: { id: networkId }
 			}
 		}: Nft) => {
-			const data = { nft: id, collection: address, network: networkId.description };
+			const data = {
+				[NFT_PARAM]: id,
+				collection: address,
+				network: networkId.description
+			};
 			set({ ...page, data });
 			page.data = data;
 		},

@@ -1,8 +1,12 @@
+import { isDefinitiveBtcBroadcastRefusal } from '$btc/utils/btc-send.utils';
 import type { EthAddress } from '$eth/types/address';
 import { liquidiumClient } from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
 import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
-import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
+import {
+	createActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
 import { getOrCreateLiquidiumProfile } from '$lib/services/liquidium.services';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
@@ -12,13 +16,14 @@ import {
 	toLiquidiumExternalRefs
 } from '$lib/utils/liquidium-active-tx.utils';
 import { liquidiumAssetTokenId } from '$lib/utils/liquidium.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import {
 	SupplyAction,
 	type Asset,
+	type AssetIdentifier,
 	type Chain,
-	type NativeAddressSupplyTarget
+	type SupplyTarget
 } from '@liquidium/client';
 
 // Liquidium's per-inflow processing fee (base units of `asset`), deducted by the
@@ -32,10 +37,12 @@ export const estimateLiquidiumInflowFee = async ({
 	asset: Asset;
 	chain: Chain;
 }): Promise<bigint> => {
+	// `asset`/`chain` reach us as the SDK's wide enums; the protocol only ships supported pairs.
+	// We type-assert to the correlated `AssetIdentifier` shape at this boundary to satisfy the SDK's typing.
 	const { totalFee } = await liquidiumClient({ identity }).lending.estimateInflowFee({
 		asset,
 		chain
-	});
+	} as AssetIdentifier);
 
 	return totalFee;
 };
@@ -43,9 +50,14 @@ export const estimateLiquidiumInflowFee = async ({
 // Broadcasts `amount` base units (gross = supply + provider fee) to the native
 // target and returns the txid the AUT poller correlates on. Implemented by the
 // wizard, which owns oisy's per-chain fee/UTXO machinery.
+//
+// A transport that knows its txid before broadcasting (BTC through the backend) calls
+// `beforeBroadcast` with it, and broadcasts nothing if that rejects. Its failures are
+// then `sendBtc`'s, which say whether anything can have gone out.
 export type LiquidiumSupplyBroadcast = (params: {
-	target: NativeAddressSupplyTarget;
+	target: SupplyTarget;
 	amount: bigint;
+	beforeBroadcast: (params: { txid: string }) => Promise<void>;
 }) => Promise<string>;
 
 // Supplies `amount` (base units) of `asset`: resolve/create profile → broadcast the
@@ -53,12 +65,13 @@ export type LiquidiumSupplyBroadcast = (params: {
 //
 // The protocol deducts its inflow fee from the inflow, so we transfer
 // `amount + inflowFee` to credit the user's `amount` (the recorded position stays net).
-// Only the `nativeAddress` rail is supported (the only one v1 assets return via the
-// SDK's `resolveSupplyTarget`); `icrcAccount` would need contract-interaction, which we don't request.
+// We only drive the transfer rail (`lending.supply` without a wallet adapter), which
+// returns the flat `SupplyTarget` address oisy broadcasts to.
 export const executeLiquidiumSupply = async ({
 	identity,
 	ethAddress,
 	poolId,
+	chain,
 	asset,
 	amount,
 	inflowFee,
@@ -70,6 +83,7 @@ export const executeLiquidiumSupply = async ({
 	identity: Identity;
 	ethAddress: EthAddress;
 	poolId: string;
+	chain: Chain;
 	asset: string;
 	amount: bigint;
 	inflowFee: bigint;
@@ -85,19 +99,72 @@ export const executeLiquidiumSupply = async ({
 	const flow = await liquidiumClient({ identity }).lending.supply({
 		profileId,
 		poolId,
+		chain,
 		action: SupplyAction.deposit
 	});
 
-	if (flow.target.type !== 'nativeAddress') {
-		throw new Error(
-			`Liquidium supply: unsupported "${flow.target.type}" target for ${asset} (only nativeAddress is supported)`
-		);
-	}
-
 	progress?.(ProgressStepsLiquidiumSupply.TRANSFER);
 
-	// Gross transfer = net supply + provider inflow fee (deducted on arrival).
-	const txid = await broadcast({ target: flow.target, amount: amount + inflowFee });
+	const rowData = {
+		Liquidium: {
+			token: liquidiumAssetTokenId(asset),
+			action: { Supply: null },
+			pool_id: poolId,
+			amount
+		}
+	};
+
+	const rowRefs = ({ txid }: { txid: string }) =>
+		toLiquidiumExternalRefs({
+			[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+			[LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT]: displayAmount,
+			[LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL]: asset,
+			[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid
+		});
+
+	// Written by `beforeBroadcast`, which only a transport that knows its txid before
+	// broadcasting calls: the supply is then tracked whatever the broadcast answers.
+	let rowId: string | undefined;
+
+	const openRow = async ({ txid }: { txid: string }) => {
+		const id = crypto.randomUUID();
+
+		try {
+			await createActiveUserTransaction({
+				identity,
+				id,
+				data: rowData,
+				...(nonNullish(progressStep) ? { progressStep } : {}),
+				externalRefs: rowRefs({ txid })
+			});
+		} catch (err: unknown) {
+			// Not broadcast untracked. The backend may have committed the row all the same.
+			await deleteUnbroadcastActiveUserTransaction({ identity, id });
+
+			throw err;
+		}
+
+		rowId = id;
+	};
+
+	let txid: string;
+
+	try {
+		// Gross transfer = net supply + provider inflow fee (deducted on arrival).
+		txid = await broadcast({
+			target: flow.target,
+			amount: amount + inflowFee,
+			beforeBroadcast: openRow
+		});
+	} catch (err: unknown) {
+		// A refusal outright sent nothing. After any other failure the transfer may have gone
+		// out, so its row stays until the poller settles it, and a retry cannot supply twice.
+		if (nonNullish(rowId) && isDefinitiveBtcBroadcastRefusal(err)) {
+			await deleteUnbroadcastActiveUserTransaction({ identity, id: rowId });
+		}
+
+		throw err;
+	}
 
 	// Submitted on-chain; success/error events fire from the AUT poller once it settles.
 	trackEvent({
@@ -123,28 +190,19 @@ export const executeLiquidiumSupply = async ({
 		consoleError(err);
 	}
 
-	try {
-		await createActiveUserTransaction({
-			identity,
-			id: crypto.randomUUID(),
-			data: {
-				Liquidium: {
-					token: liquidiumAssetTokenId(asset),
-					action: { Supply: null },
-					pool_id: poolId,
-					amount
-				}
-			},
-			...(nonNullish(progressStep) ? { progressStep } : {}),
-			externalRefs: toLiquidiumExternalRefs({
-				[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
-				[LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT]: displayAmount,
-				[LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL]: asset,
-				[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid
-			})
-		});
-	} catch (err: unknown) {
-		consoleError(err);
+	// Written before the broadcast when the transport could, else now.
+	if (isNullish(rowId)) {
+		try {
+			await createActiveUserTransaction({
+				identity,
+				id: crypto.randomUUID(),
+				data: rowData,
+				...(nonNullish(progressStep) ? { progressStep } : {}),
+				externalRefs: rowRefs({ txid })
+			});
+		} catch (err: unknown) {
+			consoleError(err);
+		}
 	}
 
 	progress?.(ProgressStepsLiquidiumSupply.DONE);

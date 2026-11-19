@@ -28,7 +28,14 @@ import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type { Listener } from 'ethers/utils';
 import { SvelteMap } from 'svelte/reactivity';
 import { get } from 'svelte/store';
-import { createPublicClient, http, isHash, type Chain, type PublicClient } from 'viem';
+import {
+	createPublicClient,
+	http,
+	isHash,
+	type Chain,
+	type PublicClient,
+	type TransactionReceipt
+} from 'viem';
 
 interface AlchemyConfig {
 	wssUrl: string;
@@ -36,6 +43,13 @@ interface AlchemyConfig {
 
 const ALCHEMY_SUBSCRIPTION_MINED_TRANSACTIONS = 'alchemy_minedTransactions';
 const ALCHEMY_SUBSCRIPTION_PENDING_TRANSACTIONS = 'alchemy_pendingTransactions';
+
+// Exponential-backoff reconnect schedule for the subscription WebSocket when it drops
+// unexpectedly (e.g. a mobile OS suspending a backgrounded tab). An intentional disconnect()
+// never reconnects. Kept local to this provider to stay decoupled from the fee-context retry.
+const ALCHEMY_WS_RECONNECT_BASE_DELAY = 1_000;
+const ALCHEMY_WS_RECONNECT_MAX_DELAY = 30_000;
+const ALCHEMY_WS_RECONNECT_MAX_ATTEMPTS = 5;
 
 const configs: Record<NetworkId, AlchemyConfig> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
@@ -82,9 +96,7 @@ interface MinedTxEvent {
 }
 
 type PendingTxEvent =
-	| string
-	| { removed?: boolean; transaction: { hash: string } }
-	| { hash: string };
+	string | { removed?: boolean; transaction: { hash: string } } | { hash: string };
 
 /**
  * Generic eth_subscribe wrapper for Alchemy (and other WS JSON-RPC providers).
@@ -99,10 +111,14 @@ const subscribeAlchemyWs = <T>({
 	params: object;
 	onEvent: (event: T) => void | Promise<void>;
 }): WebSocketListener => {
-	const ws = new WebSocket(wssUrl);
-
+	let ws: WebSocket;
 	let subscriptionId: string | null = null;
 	let requestId = 1;
+
+	// Reconnect state. `closedByCaller` guarantees an intentional disconnect() never reconnects.
+	let closedByCaller = false;
+	let reconnectAttempts = 0;
+	let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
 
 	const send = (payload: object) => {
 		if (ws.readyState === WebSocket.OPEN) {
@@ -111,6 +127,9 @@ const subscribeAlchemyWs = <T>({
 	};
 
 	const onOpen = () => {
+		// A successful (re)connection clears the backoff.
+		reconnectAttempts = 0;
+
 		send({
 			jsonrpc: '2.0',
 			id: requestId++,
@@ -136,13 +155,47 @@ const subscribeAlchemyWs = <T>({
 		}
 	};
 
+	const scheduleReconnect = () => {
+		if (closedByCaller || reconnectAttempts >= ALCHEMY_WS_RECONNECT_MAX_ATTEMPTS) {
+			return;
+		}
+
+		const delay = Math.min(
+			ALCHEMY_WS_RECONNECT_BASE_DELAY * 2 ** reconnectAttempts,
+			ALCHEMY_WS_RECONNECT_MAX_DELAY
+		);
+		reconnectAttempts++;
+
+		clearTimeout(reconnectTimer);
+		reconnectTimer = setTimeout(connect, delay);
+	};
+
+	// A drop we did not initiate (e.g. the OS suspending a backgrounded tab) triggers a reconnect.
+	// The WebSocket spec guarantees a `close` event even after a failed connection, so listening to
+	// `close` alone is sufficient.
+	const onClose = () => {
+		if (!closedByCaller) {
+			scheduleReconnect();
+		}
+	};
+
 	// use addEventListener so removeEventListener works
-	ws.addEventListener('open', onOpen);
-	ws.addEventListener('message', onMessage);
+	const connect = () => {
+		subscriptionId = null;
+		ws = new WebSocket(wssUrl);
+		ws.addEventListener('open', onOpen);
+		ws.addEventListener('message', onMessage);
+		ws.addEventListener('close', onClose);
+	};
+
+	connect();
 
 	return {
 		// eslint-disable-next-line require-await
 		disconnect: async () => {
+			closedByCaller = true;
+			clearTimeout(reconnectTimer);
+
 			if (subscriptionId && ws.readyState === WebSocket.OPEN) {
 				send({
 					jsonrpc: '2.0',
@@ -153,6 +206,7 @@ const subscribeAlchemyWs = <T>({
 			}
 			ws.removeEventListener('message', onMessage);
 			ws.removeEventListener('open', onOpen);
+			ws.removeEventListener('close', onClose);
 			ws.close();
 			subscriptionId = null;
 		}
@@ -344,12 +398,24 @@ export class AlchemyProvider {
 		return response.json();
 	};
 
-	wait = async (hash: string) => {
+	// Resolves with the receipt's `status` once the transaction is mined: a reverted one is mined too.
+	// When another transaction took its nonce, viem resolves with that one's receipt, so this resolves
+	// `'replaced'` instead, unless the other one only repriced the same transfer.
+	wait = async (hash: string): Promise<TransactionReceipt['status'] | 'replaced'> => {
 		if (!isHash(hash)) {
 			throw new Error(`Invalid transaction hash while waiting for transaction receipt: ${hash}`);
 		}
 
-		await this.provider.waitForTransactionReceipt({ hash });
+		let replaced = false;
+
+		const { status } = await this.provider.waitForTransactionReceipt({
+			hash,
+			onReplaced: ({ reason }) => {
+				replaced = reason !== 'repriced';
+			}
+		});
+
+		return replaced ? 'replaced' : status;
 	};
 
 	private mapNftFromRpc = async ({

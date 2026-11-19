@@ -7,6 +7,7 @@ import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import {
 	exchangeRateICRCToUsd,
 	exchangeRateUsdToCurrency,
+	exchangeRateXRPToUsd,
 	fetchExchangeRatesFromBackend,
 	fillIcrcPricesFromFallbackProviders,
 	syncExchange
@@ -39,7 +40,8 @@ vi.mock('$lib/rest/icpswap.rest', () => ({
 vi.mock('$lib/rest/kongswap.rest', () => ({
 	fetchBatchKongSwapPrices: vi.fn()
 }));
-vi.mock('$lib/utils/exchange.utils', () => ({
+vi.mock('$lib/utils/exchange.utils', async (importActual) => ({
+	...(await importActual()),
 	formatIcpSwapToCoingeckoPrices: vi.fn(),
 	formatKongSwapToCoingeckoPrices: vi.fn(),
 	findMissingLedgerCanisterIds: vi.fn()
@@ -88,6 +90,19 @@ describe('exchange.services', () => {
 			expect(simplePrice).toHaveBeenCalledExactlyOnceWith({
 				ids: 'bitcoin',
 				vs_currencies: `${Currency.USD},${Currency.CHF}`,
+				include_24hr_change: true
+			});
+		});
+
+		it('should query XRP under its CoinGecko coin id `ripple`', async () => {
+			vi.mocked(simplePrice).mockResolvedValue({ ripple: { usd: 2 } });
+
+			await expect(exchangeRateXRPToUsd()).resolves.toEqual({ ripple: { usd: 2 } });
+
+			// XRP's CoinGecko id is `ripple`, not `xrp` — querying `xrp` returns nothing.
+			expect(simplePrice).toHaveBeenCalledExactlyOnceWith({
+				ids: 'ripple',
+				vs_currencies: Currency.USD,
 				include_24hr_change: true
 			});
 		});
@@ -584,6 +599,7 @@ describe('exchange.services', () => {
 			await expect(services.exchangeRateBTCToUsd()).resolves.toEqual({});
 			await expect(services.exchangeRateICPToUsd()).resolves.toEqual({});
 			await expect(services.exchangeRateSOLToUsd()).resolves.toEqual({});
+			await expect(services.exchangeRateXRPToUsd()).resolves.toEqual({});
 			await expect(services.exchangeRateBNBToUsd()).resolves.toEqual({});
 			await expect(services.exchangeRatePOLToUsd()).resolves.toEqual({});
 

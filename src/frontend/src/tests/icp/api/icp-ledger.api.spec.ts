@@ -1,4 +1,13 @@
-import { icrc1Transfer, transfer } from '$icp/api/icp-ledger.api';
+import { ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
+import {
+	accountBalance,
+	getIcpLedgerBlockTimestamp,
+	icrc1Transfer,
+	transfer
+} from '$icp/api/icp-ledger.api';
+import { IcpLedgerBlocksCanister } from '$icp/canisters/icp-ledger-blocks.canister';
+import { IcTransferDeadlineError } from '$icp/types/ic-send';
+import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import {
 	mockAccountIdentifierText,
@@ -13,6 +22,7 @@ import {
 	type BlockHeight
 } from '@icp-sdk/canisters/ledger/icp';
 import type { IcrcAccount, IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock('@dfinity/utils', async () => {
@@ -57,6 +67,25 @@ describe('icp-ledger.api', () => {
 				amount,
 				to: AccountIdentifier.fromHex(mockAccountIdentifierText)
 			});
+		});
+
+		it('passes createdAt through to the ledger', async () => {
+			const createdAt = 1_700_000_000_000_000_000n;
+
+			await transfer({ ...params, createdAt });
+
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				to: AccountIdentifier.fromHex(mockAccountIdentifierText),
+				createdAt
+			});
+		});
+
+		it('leaves createdAt unset when none is given', async () => {
+			await transfer(params);
+
+			expect(ledgerCanisterMock.transfer.mock.calls[0][0].createdAt).toBeUndefined();
+			expect(nowInBigIntNanoSeconds).not.toHaveBeenCalled();
 		});
 
 		it('throws an error if identity is undefined', async () => {
@@ -122,8 +151,115 @@ describe('icp-ledger.api', () => {
 			});
 		});
 
+		it('passes a memo through as the icrc1 memo', async () => {
+			const memo = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
+
+			await icrc1Transfer({ ...params, memo });
+
+			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				to: toAccount,
+				createdAt,
+				icrc1Memo: memo
+			});
+		});
+
 		it('throws an error if identity is undefined', async () => {
 			await expect(icrc1Transfer({ ...params, identity: undefined })).rejects.toThrow();
+		});
+
+		// Getting the ledger ready can take arbitrarily long in a suspended tab.
+		it('does not send when the ledger is ready only past the deadline', async () => {
+			vi.mocked(nowInBigIntNanoSeconds).mockReturnValue(createdAt + 61n);
+
+			await expect(icrc1Transfer({ ...params, notAfter: createdAt + 60n })).rejects.toThrow(
+				IcTransferDeadlineError
+			);
+
+			expect(ledgerCanisterMock.icrc1Transfer).not.toHaveBeenCalled();
+		});
+
+		it('sends up to the deadline', async () => {
+			vi.mocked(nowInBigIntNanoSeconds).mockReturnValue(createdAt + 60n);
+
+			await expect(icrc1Transfer({ ...params, notAfter: createdAt + 60n })).resolves.toEqual(
+				mockIndex
+			);
+		});
+	});
+
+	describe('accountBalance', () => {
+		const params = {
+			owner: mockPrincipal2,
+			identity: mockIdentity,
+			certified: true,
+			ledgerCanisterId: mockLedgerCanisterId
+		};
+
+		const mockBalance = 1_000_000n;
+
+		beforeEach(() => {
+			ledgerCanisterMock.accountBalance.mockResolvedValue(mockBalance);
+		});
+
+		it('successfully calls accountBalance endpoint with the owner account identifier', async () => {
+			const result = await accountBalance(params);
+
+			expect(result).toEqual(mockBalance);
+
+			expect(ledgerCanisterMock.accountBalance).toHaveBeenCalledExactlyOnceWith({
+				certified: true,
+				accountIdentifier: getAccountIdentifier(mockPrincipal2)
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(accountBalance({ ...params, identity: undefined })).rejects.toThrow();
+		});
+	});
+
+	describe('getIcpLedgerBlockTimestamp', () => {
+		const blocksCanisterMock = mock<IcpLedgerBlocksCanister>();
+
+		const params = {
+			identity: mockIdentity,
+			ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
+			index: 42n
+		};
+
+		beforeEach(() => {
+			vi.spyOn(IcpLedgerBlocksCanister, 'create').mockResolvedValue(blocksCanisterMock);
+			blocksCanisterMock.blockTimestamp.mockResolvedValue(1_790_000_000_000_000_000n);
+		});
+
+		it('reads the block’s time, certified by default', async () => {
+			await expect(getIcpLedgerBlockTimestamp(params)).resolves.toBe(1_790_000_000_000_000_000n);
+
+			expect(IcpLedgerBlocksCanister.create).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				canisterId: Principal.fromText(ICP_LEDGER_CANISTER_ID)
+			});
+			expect(blocksCanisterMock.blockTimestamp).toHaveBeenCalledExactlyOnceWith({
+				index: 42n,
+				certified: true
+			});
+		});
+
+		it('passes a query', async () => {
+			await getIcpLedgerBlockTimestamp({ ...params, certified: false });
+
+			expect(blocksCanisterMock.blockTimestamp).toHaveBeenCalledExactlyOnceWith({
+				index: 42n,
+				certified: false
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(
+				getIcpLedgerBlockTimestamp({ ...params, identity: undefined })
+			).rejects.toThrow();
+
+			expect(blocksCanisterMock.blockTimestamp).not.toHaveBeenCalled();
 		});
 	});
 });

@@ -9,7 +9,8 @@ export const CoingeckoCoinsIdSchema = z.enum([
 	'solana',
 	'binancecoin',
 	'polygon-ecosystem-token',
-	'arbitrum-one'
+	'arbitrum-one',
+	'ripple'
 ]);
 
 // We are interested only in the ERC20 <> USD on Ethereum and in the ICRC <> USD on Internet Computer, therefore not an exhaustive list.
@@ -21,5 +22,6 @@ export const CoingeckoPlatformIdSchema = z.enum([
 	'base',
 	'binance-smart-chain',
 	'polygon-pos',
-	'arbitrum-one'
+	'arbitrum-one',
+	'robinhood'
 ]);

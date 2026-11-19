@@ -256,7 +256,8 @@ describe('btc-open-crypto-pay.utils', () => {
 				satoshisAmount: mockAmount,
 				utxosFee: {
 					utxos: mockUtxosFee.utxos,
-					feeSatoshis: mockUtxosFee.feeSatoshis
+					feeSatoshis: mockUtxosFee.feeSatoshis,
+					feeRateMiliSatoshisPerVByte: mockUtxosFee.feeRateMiliSatoshisPerVByte
 				}
 			});
 		});

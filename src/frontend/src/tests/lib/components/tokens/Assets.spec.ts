@@ -100,8 +100,9 @@ describe('Assets', () => {
 
 	it.each([
 		{ label: 'Tokens tab', routeId: `${ROUTE_ID_GROUP_APP}` },
-		{ label: 'NFTs tab', routeId: `${ROUTE_ID_GROUP_APP}/nfts` },
-		{ label: 'Earning tab', routeId: `${ROUTE_ID_GROUP_APP}/earning` }
+		{ label: 'Trading tab', routeId: `${ROUTE_ID_GROUP_APP}/trading` },
+		{ label: 'Earning tab', routeId: `${ROUTE_ID_GROUP_APP}/earning` },
+		{ label: 'Borrowing tab', routeId: `${ROUTE_ID_GROUP_APP}/borrowings` }
 	])('should fire neither event when switching in from $label (intra-Assets)', ({ routeId }) => {
 		render(Assets, { props: { tab: TokenTypes.TOKENS } });
 
@@ -110,15 +111,57 @@ describe('Assets', () => {
 		expect(trackEventSpy).not.toHaveBeenCalled();
 	});
 
-	it.each([{ tab: TokenTypes.TOKENS }, { tab: TokenTypes.NFTS }, { tab: TokenTypes.EARNING }])(
-		'should tag the auto view_open with the landing tab "$tab"',
-		({ tab }) => {
-			render(Assets, { props: { tab } });
+	it('should count entering Assets from NFTs as a visit', () => {
+		render(Assets, { props: { tab: TokenTypes.TOKENS } });
 
-			simulateNavigationFrom(null);
+		simulateNavigationFrom(`${ROUTE_ID_GROUP_APP}/collectibles`);
 
-			expect(trackEventSpy).toHaveBeenCalledTimes(2);
-			expect(trackEventSpy).toHaveBeenNthCalledWith(2, autoViewEvent(tab));
-		}
-	);
+		expect(trackEventSpy).toHaveBeenCalledTimes(2);
+		expect(trackEventSpy).toHaveBeenNthCalledWith(1, pageOpenEvent);
+		expect(trackEventSpy).toHaveBeenNthCalledWith(2, autoViewEvent(TokenTypes.TOKENS));
+	});
+
+	it.each([
+		{ tab: TokenTypes.TOKENS },
+		{ tab: TokenTypes.TRADING },
+		{ tab: TokenTypes.EARNING },
+		{ tab: TokenTypes.BORROWINGS }
+	])('should tag the auto view_open with the landing tab "$tab"', ({ tab }) => {
+		render(Assets, { props: { tab } });
+
+		simulateNavigationFrom(null);
+
+		expect(trackEventSpy).toHaveBeenCalledTimes(2);
+		expect(trackEventSpy).toHaveBeenNthCalledWith(2, autoViewEvent(tab));
+	});
+
+	describe('NFTs', () => {
+		const nftsPageOpenEvent = {
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_value: PLAUSIBLE_EVENT_VALUES.NFTS_PAGE
+			}
+		};
+
+		it.each([
+			{ label: 'initial load', routeId: null },
+			{ label: 'an Assets tab', routeId: `${ROUTE_ID_GROUP_APP}` },
+			{ label: 'Activity', routeId: `${ROUTE_ID_GROUP_APP}/activity` }
+		])('should fire only its own page_open when entered from $label', ({ routeId }) => {
+			render(Assets, { props: { tab: TokenTypes.NFTS } });
+
+			simulateNavigationFrom(routeId);
+
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(nftsPageOpenEvent);
+		});
+
+		it('should fire nothing when moving within NFTs (list, collection, NFT)', () => {
+			render(Assets, { props: { tab: TokenTypes.NFTS } });
+
+			simulateNavigationFrom(`${ROUTE_ID_GROUP_APP}/collectibles`);
+
+			expect(trackEventSpy).not.toHaveBeenCalled();
+		});
+	});
 });

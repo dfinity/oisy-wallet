@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import CoverPayDialog from '$lib/assets/cover-pay-dialog.webp';
 	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
 	import PayDialogContent from '$lib/components/pay/PayDialogContent.svelte';
@@ -7,6 +6,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import {
 		PAY_DIALOG,

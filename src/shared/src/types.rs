@@ -20,10 +20,13 @@ pub mod network;
 pub mod notification;
 pub mod number;
 pub mod onramper;
+pub mod personal_note;
+pub mod personal_note_share;
 pub mod pow;
 pub mod result_types;
 pub mod settings;
 pub mod signer;
+pub mod tip;
 pub mod token;
 pub mod token_id;
 pub mod token_standard;
@@ -64,4 +67,14 @@ pub struct Stats {
     pub user_transactions_count: u64,
     pub agreement_history_count: u64,
     pub active_user_transactions_count: u64,
+    /// Total number of stored (encrypted) personal-note entries across all users.
+    pub personal_notes_count: u64,
+    /// Total number of stored personal-note shares across all users (active or
+    /// not yet pruned).
+    pub personal_note_shares_count: u64,
+    /// Total number of tips ever created and not yet pruned, across all users
+    /// and every status. Aggregate only, deliberately: the negative guarantee
+    /// that no endpoint enumerates another principal's tips holds for this one
+    /// too, so there is a count here and never a row.
+    pub tips_count: u64,
 }

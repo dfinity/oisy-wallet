@@ -1,24 +1,35 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { goto } from '$app/navigation';
+	import LiquidiumProviderTag from '$lib/components/liquidium/LiquidiumProviderTag.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LiquidiumReserve } from '$lib/types/liquidium';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { formatCurrency, formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
+	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
 
 	interface Props {
+		// Assets → Borrowings tab row; no action, clicks through to the provider page.
 		reserve: LiquidiumReserve;
 	}
 
 	let { reserve }: Props = $props();
 
-	let token = $derived(LIQUIDIUM_ASSET_TOKENS[reserve.asset]);
+	const goToProvider = () => {
+		void goto(AppPath.ProvidersLiquidium);
+	};
+
+	let token = $derived(
+		liquidiumMarketToken({ chain: reserve.chain, asset: reserve.asset, tokens: $tokens })
+	);
 
 	let borrowedAmount = $derived(
 		formatToken({ value: reserve.borrowed, unitName: reserve.borrowedDecimals })
@@ -34,8 +45,12 @@
 	);
 </script>
 
+{#snippet providerTag()}
+	<LiquidiumProviderTag />
+{/snippet}
+
 <div class="flex w-full flex-col">
-	<LogoButton hover={false}>
+	<LogoButton onClick={goToProvider} subtitle={providerTag}>
 		{#snippet logo()}
 			<span class="mr-2 flex">
 				{#if nonNullish(token)}

@@ -45,7 +45,7 @@ describe('infura-erc721.providers', () => {
 		});
 
 		it('should initialise the provider with the correct network and API key', () => {
-			const provider = new InfuraErc721Provider(infura);
+			const provider = new InfuraErc721Provider(ETHEREUM_NETWORK);
 
 			expect(provider).toBeDefined();
 			expect(InfuraProviderLib).toHaveBeenCalledWith(infura, INFURA_API_KEY);
@@ -71,7 +71,7 @@ describe('infura-erc721.providers', () => {
 			});
 
 			it('should return the fetched metadata', async () => {
-				const provider = new InfuraErc721Provider(infura);
+				const provider = new InfuraErc721Provider(ETHEREUM_NETWORK);
 
 				const result = await provider.metadata(mockParams);
 
@@ -83,7 +83,7 @@ describe('infura-erc721.providers', () => {
 			});
 
 			it('should call the metadata methods of the contract', async () => {
-				const provider = new InfuraErc721Provider(infura);
+				const provider = new InfuraErc721Provider(ETHEREUM_NETWORK);
 
 				await provider.metadata(mockParams);
 
@@ -105,7 +105,7 @@ describe('infura-erc721.providers', () => {
 				const errorMessage = 'Error fetching metadata';
 				mockName.mockRejectedValue(new Error(errorMessage));
 
-				const provider = new InfuraErc721Provider(infura);
+				const provider = new InfuraErc721Provider(ETHEREUM_NETWORK);
 
 				await expect(provider.metadata(mockParams)).rejects.toThrow(errorMessage);
 			});
@@ -154,7 +154,7 @@ describe('infura-erc721.providers', () => {
 			});
 
 			it('should return nft metadata for token id', async () => {
-				const provider = new InfuraErc721Provider(infura);
+				const provider = new InfuraErc721Provider(ETHEREUM_NETWORK);
 
 				const metadata = await provider.getNftMetadata(mockParams);
 
@@ -167,7 +167,7 @@ describe('infura-erc721.providers', () => {
 				const errorMessage = 'Error fetching metadata';
 				mockTokenUri.mockRejectedValue(new Error(errorMessage));
 
-				const provider = new InfuraErc721Provider(infura);
+				const provider = new InfuraErc721Provider(ETHEREUM_NETWORK);
 
 				await expect(provider.getNftMetadata(mockParams)).rejects.toThrow(errorMessage);
 
@@ -175,7 +175,7 @@ describe('infura-erc721.providers', () => {
 			});
 
 			it('should call the tokenURI method of the contract', async () => {
-				const provider = new InfuraErc721Provider(infura);
+				const provider = new InfuraErc721Provider(ETHEREUM_NETWORK);
 
 				await provider.getNftMetadata(mockParams);
 
@@ -198,7 +198,7 @@ describe('infura-erc721.providers', () => {
 				// Svelte map already has cached value from previous test runs
 				vi.spyOn(SvelteMap.prototype, 'get').mockRestore();
 
-				const provider = new InfuraErc721Provider(infura);
+				const provider = new InfuraErc721Provider(ETHEREUM_NETWORK);
 
 				const result = await provider.getNftMetadata(mockParams);
 

@@ -348,6 +348,59 @@ describe('nft.services', () => {
 				});
 			});
 
+			it('retries on-chain media after a transient contract lookup failure', async () => {
+				const mockError = new Error('tokenURI failed');
+
+				vi.mocked(mockAlchemyProvider.getNftsByOwner)
+					.mockResolvedValueOnce([mockErc721NftWithoutImage])
+					.mockResolvedValueOnce([mockErc721NftWithoutImage]);
+				vi.mocked(mockInfuraErc721Provider.getNftMetadata)
+					.mockRejectedValueOnce(mockError)
+					.mockResolvedValueOnce({
+						id: mockErc721NftWithoutImage.id,
+						imageUrl: 'https://arweave.net/recovered-on-chain-image'
+					});
+
+				const params = {
+					...mockParams,
+					tokens: [erc721AzukiToken],
+					networkId: erc721AzukiToken.network.id
+				};
+
+				const first = await loadNftsByNetwork(params);
+				const second = await loadNftsByNetwork(params);
+
+				expect(mockInfuraErc721Provider.getNftMetadata).toHaveBeenCalledTimes(2);
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+						result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+						token_network: mockErc721NftWithoutImage.collection.network.name,
+						token_address: mockErc721NftWithoutImage.collection.address,
+						token_standard: mockErc721NftWithoutImage.collection.standard.code,
+						token_symbol: mockErc721NftWithoutImage.collection.symbol,
+						token_name: mockErc721NftWithoutImage.collection.name,
+						token_id: `${mockErc721NftWithoutImage.id}`
+					}
+				});
+				expect(trackEvent).toHaveBeenNthCalledWith(2, {
+					name: TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+						result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+						token_network: mockErc721NftWithoutImage.collection.network.name,
+						token_address: mockErc721NftWithoutImage.collection.address,
+						token_standard: mockErc721NftWithoutImage.collection.standard.code,
+						token_symbol: mockErc721NftWithoutImage.collection.symbol,
+						token_name: mockErc721NftWithoutImage.collection.name,
+						token_id: `${mockErc721NftWithoutImage.id}`
+					}
+				});
+				expect(first[0].imageUrl).toBeUndefined();
+				expect(second[0].imageUrl).toBe('https://arweave.net/recovered-on-chain-image');
+			});
+
 			it('resolves on-chain media only once across repeated polls', async () => {
 				vi.mocked(mockAlchemyProvider.getNftsByOwner)
 					.mockResolvedValueOnce([mockErc721NftWithoutImage])

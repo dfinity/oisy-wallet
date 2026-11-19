@@ -2,26 +2,40 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import * as erc4626Derived from '$eth/derived/erc4626.derived';
 import { allVaults } from '$eth/derived/vaults.derived';
+import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import EarningsList from '$lib/components/earning/EarningsList.svelte';
+import { lendBorrowProvidersConfig } from '$lib/config/lend-borrow.config';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	EARNING_CARD_SKELETON,
 	EARNING_NO_POSITION_PLACEHOLDER
 } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
+import { userNetworks } from '$lib/derived/user-networks.derived';
+import { liquidiumStore } from '$lib/stores/liquidium.store';
 import { tokenListStore } from '$lib/stores/token-list.store';
+import { LendBorrowProvider } from '$lib/types/lend-borrow';
+import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { Vault } from '$lib/types/vaults';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
-vi.mock('$eth/constants/harvest-autopilots.constants', () => ({
-	HARVEST_AUTOPILOT_ADDRESSES: ['0xautopilotaddress']
-}));
+vi.mock(import('$eth/constants/harvest-autopilots.constants'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		HARVEST_AUTOPILOT_ADDRESSES: ['0xautopilotaddress']
+	};
+});
 
 vi.mock('$app/navigation', () => ({
 	goto: vi.fn()
+}));
+
+vi.mock('$env/lend-borrow', () => ({
+	anyLendBorrowProviderEnabled: true
 }));
 
 describe('EarningsList', () => {
@@ -72,22 +86,46 @@ describe('EarningsList', () => {
 		});
 	};
 
-	const mockCustomTokensInitialized = () => {
-		vi.spyOn(erc4626Derived, 'erc4626CustomTokensNotInitialized', 'get').mockReturnValue(
-			readable(false)
-		);
+	const mockNotLoading = () => {
+		vi.spyOn(erc4626Derived, 'erc4626CustomTokensLoading', 'get').mockReturnValue(readable(false));
 	};
 
-	const mockCustomTokensNotInitialized = () => {
-		vi.spyOn(erc4626Derived, 'erc4626CustomTokensNotInitialized', 'get').mockReturnValue(
-			readable(true)
-		);
+	const mockLoading = () => {
+		vi.spyOn(erc4626Derived, 'erc4626CustomTokensLoading', 'get').mockReturnValue(readable(true));
 	};
+
+	const supplyReserve: LiquidiumReserve = {
+		poolId: 'pool-btc',
+		asset: 'BTC',
+		chain: 'BTC',
+		supplyApy: 5,
+		borrowApy: 0,
+		deposited: 100_000_000n,
+		depositedDecimals: 8,
+		borrowed: ZERO,
+		borrowedDecimals: 8,
+		suppliedUsd: 1000,
+		borrowedUsd: 0
+	};
+
+	const portfolioWith = (reserves: LiquidiumReserve[]): LiquidiumPortfolio => ({
+		reserves,
+		totalSuppliedUsd: 0,
+		totalBorrowedUsd: 0,
+		netValueUsd: 0,
+		availableBorrowsUsd: 0,
+		weightedLiquidationThresholdBps: 8000,
+		healthFactorPercent: 100
+	});
 
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		tokenListStore.set({ filter: '' });
-		mockCustomTokensInitialized();
+		liquidiumStore.reset();
+		// Liquidium gates the skeleton too, so every case below starts from a settled-but-empty
+		// portfolio unless it says otherwise.
+		liquidiumStore.setLoaded(true);
+		mockNotLoading();
 	});
 
 	it('should render the placeholder when there are no vaults', () => {
@@ -263,8 +301,66 @@ describe('EarningsList', () => {
 		expect(getByText('Base Vault')).toBeInTheDocument();
 	});
 
-	it('should show skeletons when custom tokens are not initialized', () => {
-		mockCustomTokensNotInitialized();
+	it('should render Liquidium supply positions with a provider tag alongside vaults', () => {
+		mockAllVaultsStore([toVault({ token: mockAutopilotToken })]);
+		liquidiumStore.set({ markets: [], portfolio: portfolioWith([supplyReserve]), assetPrices: {} });
+
+		const { getByText, queryByTestId } = render(EarningsList);
+
+		expect(queryByTestId(EARNING_NO_POSITION_PLACEHOLDER)).not.toBeInTheDocument();
+		expect(getByText('Autopilot Vault')).toBeInTheDocument();
+		expect(
+			getByText(lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name)
+		).toBeInTheDocument();
+	});
+
+	it('should render Liquidium supply positions even when there are no vaults', () => {
+		mockAllVaultsStore([]);
+		liquidiumStore.set({ markets: [], portfolio: portfolioWith([supplyReserve]), assetPrices: {} });
+
+		const { getByText, queryByTestId } = render(EarningsList);
+
+		expect(queryByTestId(EARNING_NO_POSITION_PLACEHOLDER)).not.toBeInTheDocument();
+		expect(
+			getByText(lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name)
+		).toBeInTheDocument();
+	});
+
+	it('sorts vaults and Liquidium supplies together by USD value (highest first)', () => {
+		const providerName = lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name;
+
+		mockAllVaultsStore([toVault({ token: mockAutopilotToken, overrides: { usdBalance: 100 } })]);
+		liquidiumStore.set({
+			markets: [],
+			portfolio: portfolioWith([{ ...supplyReserve, suppliedUsd: 5000 }]),
+			assetPrices: {}
+		});
+
+		const { container } = render(EarningsList);
+		const text = container.textContent ?? '';
+
+		// Liquidium supply ($5000) outranks the Autopilot vault ($100), so it renders first.
+		expect(text.indexOf(providerName)).toBeLessThan(text.indexOf('Autopilot Vault'));
+	});
+
+	it('sorts a higher-value vault above a lower-value Liquidium supply', () => {
+		const providerName = lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name;
+
+		mockAllVaultsStore([toVault({ token: mockAutopilotToken, overrides: { usdBalance: 9000 } })]);
+		liquidiumStore.set({
+			markets: [],
+			portfolio: portfolioWith([{ ...supplyReserve, suppliedUsd: 100 }]),
+			assetPrices: {}
+		});
+
+		const { container } = render(EarningsList);
+		const text = container.textContent ?? '';
+
+		expect(text.indexOf('Autopilot Vault')).toBeLessThan(text.indexOf(providerName));
+	});
+
+	it('should show skeletons while custom tokens are loading', () => {
+		mockLoading();
 		mockAllVaultsStore([]);
 
 		const { getAllByTestId, queryByTestId } = render(EarningsList);
@@ -275,7 +371,43 @@ describe('EarningsList', () => {
 		expect(queryByTestId(EARNING_NO_POSITION_PLACEHOLDER)).not.toBeInTheDocument();
 	});
 
-	it('should not show skeletons when custom tokens are initialized', () => {
+	it('should show skeletons while the Liquidium portfolio is still loading', () => {
+		// ERC-4626 is settled via beforeEach, so this pins the other half of the union gate: a source
+		// that can still contribute positions must hold the skeleton on its own.
+		liquidiumStore.reset();
+		mockAllVaultsStore([]);
+
+		const { getAllByTestId, queryByTestId } = render(EarningsList);
+
+		const skeletons = getAllByTestId(new RegExp(`^${EARNING_CARD_SKELETON}`));
+
+		expect(skeletons.length).toBeGreaterThan(0);
+		expect(queryByTestId(EARNING_NO_POSITION_PLACEHOLDER)).not.toBeInTheDocument();
+	});
+
+	it('should not show skeletons once custom tokens have loaded', () => {
+		mockAllVaultsStore([]);
+
+		const { getByTestId, queryByTestId } = render(EarningsList);
+
+		expect(queryByTestId(new RegExp(`^${EARNING_CARD_SKELETON}`))).not.toBeInTheDocument();
+		expect(getByTestId(EARNING_NO_POSITION_PLACEHOLDER)).toBeInTheDocument();
+	});
+
+	it('should not show skeletons when no Ethereum or EVM network is enabled', () => {
+		// Runs against the real derived, unlike the two cases above: with every Ethereum/EVM network
+		// off, LoaderTokens never fetches the ERC-4626 custom tokens, so the store stays uninitialized
+		// and the tab has to settle rather than wait for it.
+		vi.restoreAllMocks();
+
+		vi.spyOn(erc4626CustomTokensStore, 'subscribe').mockImplementation((fn) => {
+			fn(undefined);
+			return () => {};
+		});
+		vi.spyOn(userNetworks, 'subscribe').mockImplementation((fn) => {
+			fn({});
+			return () => {};
+		});
 		mockAllVaultsStore([]);
 
 		const { getByTestId, queryByTestId } = render(EarningsList);

@@ -6,6 +6,7 @@
 		onclick: () => void;
 		selected?: boolean;
 		selectable?: boolean;
+		contentFullWidth?: boolean;
 		testId?: string;
 	}
 

@@ -6,11 +6,20 @@ import {
 	isLiquidiumActiveUserTransaction,
 	liquidiumActionKey,
 	liquidiumActivityToStatus,
+	liquidiumPendingRepayAmount,
 	liquidiumTrackingMetadata,
 	toLiquidiumExternalRefs,
 	toLiquidiumExternalRefsMap
 } from '$lib/utils/liquidium-active-tx.utils';
-import { ActivityStatus } from '@liquidium/client';
+import { mockNearIntentsActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
+import type { Activity, LiquidiumState } from '@liquidium/client';
+
+const activityStatus = (state: LiquidiumState): Activity['status'] => ({
+	operation: 'deposit',
+	state,
+	confirmations: null,
+	requiredConfirmations: null
+});
 
 const liquidiumTx: ActiveUserTransaction = {
 	id: 'tx-1',
@@ -34,6 +43,78 @@ describe('liquidium-active-tx.utils', () => {
 	describe('isLiquidiumActiveUserTransaction', () => {
 		it('is true for a Liquidium transaction', () => {
 			expect(isLiquidiumActiveUserTransaction(liquidiumTx)).toBeTruthy();
+		});
+	});
+
+	describe('liquidiumPendingRepayAmount', () => {
+		const repayTx = ({
+			id,
+			status = { Pending: null },
+			poolId = 'pool-btc',
+			amount
+		}: {
+			id: string;
+			status?: ActiveUserTransaction['status'];
+			poolId?: string;
+			amount: bigint;
+		}): ActiveUserTransaction => ({
+			...liquidiumTx,
+			id,
+			status,
+			data: {
+				Liquidium: {
+					token: { SolNativeDevnet: null },
+					action: { Repay: null },
+					pool_id: poolId,
+					amount
+				}
+			}
+		});
+
+		it('is zero without transactions', () => {
+			expect(liquidiumPendingRepayAmount({ transactions: [], poolId: 'pool-btc' })).toBe(ZERO);
+		});
+
+		it('sums the pending and executing repays of the pool', () => {
+			expect(
+				liquidiumPendingRepayAmount({
+					transactions: [
+						repayTx({ id: 'a', amount: 100n }),
+						repayTx({ id: 'b', status: { Executing: null }, amount: 50n })
+					],
+					poolId: 'pool-btc'
+				})
+			).toBe(150n);
+		});
+
+		it('ignores settled repays', () => {
+			expect(
+				liquidiumPendingRepayAmount({
+					transactions: [
+						repayTx({ id: 'a', status: { Succeeded: null }, amount: 100n }),
+						repayTx({ id: 'b', status: { Failed: null }, amount: 50n })
+					],
+					poolId: 'pool-btc'
+				})
+			).toBe(ZERO);
+		});
+
+		it('ignores repays of other pools', () => {
+			expect(
+				liquidiumPendingRepayAmount({
+					transactions: [repayTx({ id: 'a', poolId: 'pool-icp', amount: 100n })],
+					poolId: 'pool-btc'
+				})
+			).toBe(ZERO);
+		});
+
+		it('ignores other Liquidium actions and other providers', () => {
+			expect(
+				liquidiumPendingRepayAmount({
+					transactions: [liquidiumTx, mockNearIntentsActiveUserTransaction],
+					poolId: 'pool-btc'
+				})
+			).toBe(ZERO);
 		});
 	});
 
@@ -73,18 +154,18 @@ describe('liquidium-active-tx.utils', () => {
 
 	describe('liquidiumActivityToStatus', () => {
 		it.each([
-			{ status: ActivityStatus.confirmed, expected: { Succeeded: null } },
-			{ status: ActivityStatus.failed, expected: { Failed: null } },
-			{ status: ActivityStatus.pending, expected: { Executing: null } },
-			{ status: ActivityStatus.detected, expected: { Executing: null } },
-			{ status: ActivityStatus.processing, expected: { Executing: null } },
-			{ status: ActivityStatus.sent, expected: { Executing: null } }
-		])('maps $status', ({ status, expected }) => {
-			expect(liquidiumActivityToStatus(status)).toEqual(expected);
+			{ state: 'completed', expected: { Succeeded: null } },
+			{ state: 'active', expected: { Succeeded: null } },
+			{ state: 'failed', expected: { Failed: null } },
+			{ state: 'expired', expected: { Failed: null } },
+			{ state: 'confirming', expected: { Executing: null } },
+			{ state: 'processing', expected: { Executing: null } }
+		] as const)('maps $state', ({ state, expected }) => {
+			expect(liquidiumActivityToStatus(activityStatus(state))).toEqual(expected);
 		});
 
-		it('does not advance on requested', () => {
-			expect(liquidiumActivityToStatus(ActivityStatus.requested)).toBeUndefined();
+		it('does not advance on action_required', () => {
+			expect(liquidiumActivityToStatus(activityStatus('action_required'))).toBeUndefined();
 		});
 	});
 

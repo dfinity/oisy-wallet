@@ -6,6 +6,19 @@ const ZERO_BIGINT_RESTRICTION = {
 	message: 'Use the shared constant `ZERO` instead of `0n`.'
 };
 
+// `!nonNullish(x)` and `!isNullish(x)` are double negatives that read backwards;
+// each has a direct, positive counterpart in `@dfinity/utils`.
+const NULLISH_NEGATION_RESTRICTIONS = [
+	{
+		selector: "UnaryExpression[operator='!'] > CallExpression[callee.name='nonNullish']",
+		message: 'Use `isNullish(x)` instead of `!nonNullish(x)`.'
+	},
+	{
+		selector: "UnaryExpression[operator='!'] > CallExpression[callee.name='isNullish']",
+		message: 'Use `nonNullish(x)` instead of `!isNullish(x)`.'
+	}
+];
+
 export default [
 	...vitestConfig,
 	...svelteConfig,
@@ -39,9 +52,85 @@ export default [
 		}
 	},
 
+	// Svelte's transitions run at a 400 ms default and ignore the reduced-motion setting. The
+	// shared module wraps them with OISY's timings and that setting, so nothing else imports
+	// them directly. Use the TypeScript rule separately so the shared config
+	// retains its core import restrictions (deprecated packages and /dist/ paths).
+	{
+		files: ['src/frontend/src/**/*'],
+		ignores: [
+			'src/frontend/src/lib/utils/transitions.utils.ts',
+			'src/frontend/src/lib/constants/transition.constants.ts'
+		],
+		rules: {
+			'@typescript-eslint/no-restricted-imports': [
+				'error',
+				{
+					paths: [
+						{
+							name: 'svelte/transition',
+							message:
+								'Import transitions and their types from `$lib/utils/transitions.utils`, which applies the shared timings and reduced motion.'
+						}
+					]
+				}
+			]
+		}
+	},
+
+	// `$lib/oisy-trade/` implements what belongs in the oisy_trade canister and is
+	// hosted here only until that canister can answer it. Keeping the dependency
+	// arrow one-way is what makes the eventual migration a deletion rather than an
+	// extraction, so the boundary is a build failure, not a convention. Only two
+	// things are conceded beyond the venue's own types: the module's own files, and
+	// the shared `ZERO` (the repo bans the `0n` literal, so it is the only way to
+	// write zero). See src/frontend/src/lib/oisy-trade/README.md.
+	//
+	// Written as an allow-list — deny everything, then re-admit that set — because
+	// the README states the boundary as one. Enumerating the wallet's aliases
+	// instead leaves everything outside them unmatched: `$declarations/backend`,
+	// `svelte`, and any npm package would import cleanly, so the boundary would
+	// erode in silence rather than fail. Measured before this was changed: of
+	// `$lib/types/token`, `$declarations/backend/backend.did`, `svelte/store` and
+	// `ethers/utils`, only the first was refused.
+	//
+	// The patterns follow gitignore semantics, where a path cannot be re-included
+	// once an ancestor is excluded, so every ancestor is negated alongside the leaf
+	// it exists to admit. Verified by probe both ways: the five specifiers the
+	// module actually imports pass, and those same four intruders are now refused.
+	{
+		files: ['src/frontend/src/lib/oisy-trade/**/*'],
+		rules: {
+			'no-restricted-imports': [
+				'error',
+				{
+					patterns: [
+						{
+							group: [
+								'**',
+								'!$declarations',
+								'!$declarations/oisy_trade',
+								'!$declarations/oisy_trade/**',
+								'!@dfinity',
+								'!@dfinity/**',
+								'!$lib',
+								'!$lib/oisy-trade',
+								'!$lib/oisy-trade/**',
+								'!$lib/constants',
+								'!$lib/constants/app.constants'
+							],
+							message:
+								'$lib/oisy-trade must not depend on wallet code — it speaks only the oisy_trade declarations. Allowed: $declarations/oisy_trade/*, @dfinity/*, ZERO from $lib/constants/app.constants, and the module’s own files.'
+						}
+					]
+				}
+			]
+		}
+	},
+
 	{
 		rules: {
-			'no-restricted-syntax': ['error', ZERO_BIGINT_RESTRICTION]
+			'no-restricted-syntax': ['error', ZERO_BIGINT_RESTRICTION, ...NULLISH_NEGATION_RESTRICTIONS]
 		}
 	},
 
@@ -52,6 +141,7 @@ export default [
 			'no-restricted-syntax': [
 				'error',
 				ZERO_BIGINT_RESTRICTION,
+				...NULLISH_NEGATION_RESTRICTIONS,
 				{
 					selector: "MemberExpression[object.name='console'][property.name='error']",
 					message:
@@ -80,6 +170,7 @@ export default [
 		ignores: [
 			'**/.DS_Store',
 			'**/node_modules',
+			'.claude',
 			'build',
 			'.dfx',
 			'.svelte-kit',

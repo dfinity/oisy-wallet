@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { IconWallet } from '@dfinity/gix-components';
 	import { ICRC25_PERMISSION_GRANTED, ICRC27_ACCOUNTS } from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import IconGixWallet from '$lib/components/icons/IconGixWallet.svelte';
 	import IconShield from '$lib/components/icons/IconShield.svelte';
 	import IconAstronautHelmet from '$lib/components/icons/icon-astronaut/IconAstronautHelmet.svelte';
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
@@ -24,6 +23,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { mapSignerOriginHost } from '$lib/utils/signer.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	const {
 		permissionsPrompt: { payload, reset: resetPrompt }
@@ -105,7 +105,7 @@
 
 	let listItems = $derived({
 		icrc27_accounts: {
-			icon: IconWallet,
+			icon: IconGixWallet,
 			label: replaceOisyPlaceholders($i18n.signer.permissions.text.icrc27_accounts)
 		},
 		icrc49_call_canister: {

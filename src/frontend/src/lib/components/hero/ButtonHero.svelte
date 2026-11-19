@@ -8,20 +8,30 @@
 		label: Snippet;
 		onclick: () => void;
 		disabled?: boolean;
+		loading?: boolean;
 		ariaLabel: string;
 		testId?: string;
 	}
 
-	let { icon, label, onclick, disabled = false, testId, ariaLabel }: Props = $props();
+	let {
+		icon,
+		label,
+		onclick,
+		disabled = false,
+		loading = false,
+		testId,
+		ariaLabel
+	}: Props = $props();
 
-	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
+	const { loading: heroLoading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
 <Button
 	{ariaLabel}
 	colorStyle="tertiary-main-card"
 	{disabled}
-	initialising={$loading}
+	initialising={$heroLoading}
+	{loading}
 	{onclick}
 	paddingSmall
 	styleClass="py-1 min-w-0"

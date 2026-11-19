@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
+	import { nonNullish } from '@dfinity/utils';
+	import { cubicIn, cubicOut } from 'svelte/easing';
+	import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
 	import { handleKeyPress } from '$lib/utils/keyboard.utils';
+	import { backdrop } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		disablePointerEvents?: boolean;
@@ -20,22 +23,31 @@
 
 	const close = () => onClose?.();
 
+	// A backdrop that cannot close is hidden from assistive technology, so screen readers don't
+	// offer a Close button that does nothing.
+	let closeSemantics = $derived(
+		nonNullish(onClose)
+			? { role: 'button', tabindex: -1, 'aria-label': $i18n.core.text.close }
+			: { 'aria-hidden': true }
+	);
+
 	const FADE_IN_DURATION = 75 as const;
-	const FADE_OUT_DURATION = 250 as const;
 </script>
 
 <div
 	class="backdrop"
 	class:disablePointerEvents
 	class:visible={!invisible}
-	aria-label={$i18n.core.text.close}
 	data-tid={testId}
 	onclick={stopPropagation(close)}
 	onkeypress={($event) => handleKeyPress({ $event, callback: close })}
-	role="button"
-	tabindex="-1"
-	in:fade|global={{ duration: FADE_IN_DURATION }}
-	out:fade|global={{ duration: FADE_OUT_DURATION }}
+	{...closeSemantics}
+	in:backdrop|global={{ duration: FADE_IN_DURATION, easing: cubicOut, blur: invisible ? 0 : 4 }}
+	out:backdrop|global={{
+		duration: BACKDROP_FADE_OUT_DURATION,
+		easing: cubicIn,
+		blur: invisible ? 0 : 4
+	}}
 ></div>
 
 <style lang="scss">

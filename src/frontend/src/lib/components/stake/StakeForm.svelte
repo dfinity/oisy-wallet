@@ -23,6 +23,9 @@
 	interface Props {
 		amount: OptionAmount;
 		amountSetToMax?: boolean;
+		// Focus the amount input on mount. Callers gate this on `isDesktop()` so
+		// mobile keyboards don't pop open over the form.
+		autofocus?: boolean;
 		disabled?: boolean;
 		destination?: Address;
 		totalFee?: bigint;
@@ -30,28 +33,42 @@
 		// reserved from the Max balance regardless of token standard — unlike
 		// `totalFee`, which `getMaxTransactionAmount` only subtracts for native tokens.
 		providerFee?: bigint;
+		// Optional hard cap (base units) forwarded to "Max" — e.g. full debt for repay.
+		maxAmount?: bigint;
 		errorType?: TokenActionErrorType;
 		error?: Error;
+		// Makes the token logo a clickable selector; when set, `onClick` fires on click.
+		// Defaults to a static (non-selectable) token display.
+		isSelectable?: boolean;
+		onClick?: () => void;
 		onCustomValidate?: (userAmount: bigint) => TokenActionErrorType;
 		onCustomErrorValidate?: (userAmount: bigint) => Error | undefined;
 		onClose: () => void;
 		onNext: () => void;
+		// Label for the primary action. Defaults to "Review", which is right when the
+		// next step is a review — not every flow's is.
+		nextLabel?: string;
 		content?: Snippet;
 	}
 
 	let {
 		amount = $bindable(),
 		amountSetToMax = $bindable(false),
+		autofocus = false,
 		disabled,
 		destination,
 		totalFee,
 		providerFee = ZERO,
+		maxAmount,
 		errorType = $bindable(),
 		error = $bindable(),
+		isSelectable = false,
+		onClick,
 		onCustomValidate,
 		onCustomErrorValidate,
 		onClose,
 		onNext,
+		nextLabel,
 		content
 	}: Props = $props();
 
@@ -82,9 +99,11 @@
 <ContentWithToolbar>
 	<div class="mb-8">
 		<TokenInput
+			{autofocus}
 			displayUnit={inputUnit}
 			exchangeRate={$sendTokenExchangeRate}
-			isSelectable={false}
+			{isSelectable}
+			{onClick}
 			{onCustomErrorValidate}
 			{onCustomValidate}
 			showTokenNetwork
@@ -112,6 +131,7 @@
 					balance={maxBalance}
 					error={nonNullish(errorType)}
 					fee={totalFee}
+					{maxAmount}
 					token={$sendToken}
 					bind:amountSetToMax
 					bind:amount
@@ -137,7 +157,7 @@
 			<ButtonCancel onclick={onClose} />
 
 			<Button disabled={invalid} onclick={onNext} testId={STAKE_FORM_REVIEW_BUTTON}>
-				{$i18n.send.text.review}
+				{nextLabel ?? $i18n.send.text.review}
 			</Button>
 		</ButtonGroup>
 	{/snippet}

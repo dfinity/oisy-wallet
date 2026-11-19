@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { getHarvestAutopilotBaseTrackingMetadata } from '$eth/utils/harvest-autopilots.utils';
-	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
+	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import UnstakeWizard from '$lib/components/stake/UnstakeWizard.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { unstakeWizardSteps } from '$lib/config/stake.config';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { ProgressStepsUnstake } from '$lib/enums/progress-steps';
@@ -44,9 +44,13 @@
 		currentStep = undefined;
 	};
 
-	const close = () =>
+	const close = () => {
+		// The unstaking step disables every close the user has (`disablePointerEvents`), so a close
+		// there comes from the wizard: a send that ended, which it tracks itself, never a cancellation.
+		const cancelled = currentStep?.name !== WizardStepsUnstake.UNSTAKING;
+
 		closeModal(() => {
-			if (unstakeProgressStep !== ProgressStepsUnstake.DONE && nonNullish(vault)) {
+			if (cancelled && unstakeProgressStep !== ProgressStepsUnstake.DONE && nonNullish(vault)) {
 				trackEvent({
 					name: PLAUSIBLE_EVENTS.UNSTAKE,
 					metadata: {
@@ -62,9 +66,10 @@
 
 			reset();
 		});
+	};
 </script>
 
-<SendTokenContext customSendBalance={totalStaked} {token}>
+<TokenActionContext customSendBalance={totalStaked} {token}>
 	<WizardModal
 		bind:this={modal}
 		disablePointerEvents={currentStep?.name === WizardStepsUnstake.UNSTAKING}
@@ -84,4 +89,4 @@
 			bind:unstakeProgressStep
 		/>
 	</WizardModal>
-</SendTokenContext>
+</TokenActionContext>

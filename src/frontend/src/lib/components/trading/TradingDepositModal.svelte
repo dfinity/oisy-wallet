@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
-	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import TradingDepositForm from '$lib/components/trading/TradingDepositForm.svelte';
@@ -14,13 +12,11 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { tradingDepositWizardSteps } from '$lib/config/trading.config';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import {
-		oisyTradeDepositableTokens,
-		oisyTradeSupportedTokenSymbols
-	} from '$lib/derived/oisy-trade.derived';
+	import { oisyTradeDepositableTokens } from '$lib/derived/oisy-trade.derived';
 	import { ProgressStepsTradingDeposit } from '$lib/enums/progress-steps';
 	import { WizardStepsTradingDeposit } from '$lib/enums/wizard-steps';
 	import { depositOisyTrade } from '$lib/services/oisy-trade.deposit.services';
@@ -44,7 +40,6 @@
 	let token = $state<IcToken | undefined>();
 	let amount = $state<OptionAmount>();
 	let amountSetToMax = $state(false);
-	let consent = $state(false);
 
 	const steps: WizardSteps<WizardStepsTradingDeposit> = $derived(
 		tradingDepositWizardSteps({ i18n: $i18n })
@@ -76,7 +71,6 @@
 		token = undefined;
 		amount = undefined;
 		amountSetToMax = false;
-		consent = false;
 		depositProgressStep = ProgressStepsTradingDeposit.INITIALIZATION;
 		currentStep = undefined;
 		tokensListContext.resetFilters();
@@ -145,7 +139,7 @@
 <WizardModal
 	bind:this={modal}
 	disablePointerEvents={currentStep?.name === WizardStepsTradingDeposit.DEPOSITING ||
-		currentStep?.name === WizardStepsTradingDeposit.FILTER_NETWORKS}
+		currentStep?.name === WizardStepsTradingDeposit.TOKENS_LIST}
 	onClose={close}
 	{steps}
 	bind:currentStep
@@ -160,9 +154,9 @@
 			/>
 
 			<div class="mt-4 flex flex-wrap justify-center gap-2">
-				{#each $oisyTradeSupportedTokenSymbols as symbol (symbol)}
+				{#each $oisyTradeDepositableTokens as token (token.id)}
 					<span class="rounded-full border-1 border-tertiary bg-primary px-3 py-1 text-sm">
-						{symbol}
+						{token.symbol}
 					</span>
 				{/each}
 			</div>
@@ -174,8 +168,8 @@
 	{:else if currentStep?.name === WizardStepsTradingDeposit.TOKENS_LIST}
 		<ModalTokensList
 			networkSelectorViewOnly={nonNullish($selectedNetwork)}
-			onSelectNetworkFilter={() => goToStep(WizardStepsTradingDeposit.FILTER_NETWORKS)}
 			onTokenButtonClick={onSelectToken}
+			showStakeBalance={false}
 		>
 			{#snippet tokenListItem(token, onClick)}
 				<ModalTokensListItem {onClick} {token} />
@@ -191,11 +185,6 @@
 				</ButtonGroup>
 			{/snippet}
 		</ModalTokensList>
-	{:else if currentStep?.name === WizardStepsTradingDeposit.FILTER_NETWORKS}
-		<ModalNetworksFilter
-			onNetworkFilter={() => goToStep(WizardStepsTradingDeposit.TOKENS_LIST)}
-			showStakeBalance={false}
-		/>
 	{:else if currentStep?.name === WizardStepsTradingDeposit.REVIEW && nonNullish(token)}
 		<TradingDepositReview
 			{amount}
@@ -213,7 +202,6 @@
 			{token}
 			bind:amount
 			bind:amountSetToMax
-			bind:consent
 		/>
 	{/if}
 </WizardModal>

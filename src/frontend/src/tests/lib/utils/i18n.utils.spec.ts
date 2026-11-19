@@ -8,6 +8,7 @@ import {
 } from '$lib/constants/oisy.constants';
 import { Languages } from '$lib/enums/languages';
 import {
+	formatList,
 	getDefaultLang,
 	mergeWithFallback,
 	replaceOisyPlaceholders,
@@ -60,6 +61,43 @@ describe('i18n-utils', () => {
 			).toBe('The quick brown fox jumps over the lazy dog');
 		});
 
+		it('should insert regexp replacement patterns in the value literally', () => {
+			const template = 'Move $collection to spam?';
+
+			expect(replacePlaceholders(template, { $collection: '$&' })).toBe('Move $& to spam?');
+
+			expect(replacePlaceholders(template, { $collection: '$`' })).toBe('Move $` to spam?');
+
+			expect(replacePlaceholders(template, { $collection: "$'" })).toBe("Move $' to spam?");
+
+			expect(replacePlaceholders(template, { $collection: '$$' })).toBe('Move $$ to spam?');
+
+			expect(replacePlaceholders(template, { $collection: '$1' })).toBe('Move $1 to spam?');
+		});
+
+		it('should not substitute a placeholder key carried by another value', () => {
+			expect(
+				replacePlaceholders('Send $amount of $token to $to', {
+					$token: 'X$amount Y',
+					$amount: '5.00',
+					$to: 'the address'
+				})
+			).toBe('Send 5.00 of X$amount Y to the address');
+		});
+
+		it('should prefer the longest key when one key is a prefix of another', () => {
+			expect(
+				replacePlaceholders('$token_symbol on $token', {
+					$token: 'Ethereum',
+					$token_symbol: 'ETH'
+				})
+			).toBe('ETH on Ethereum');
+		});
+
+		it('should return the original text when there is nothing to substitute', () => {
+			expect(replacePlaceholders('Lorem Ipsum!', {})).toBe('Lorem Ipsum!');
+		});
+
 		it('should replace Oisy placeholders', () => {
 			expect(
 				replaceOisyPlaceholders(
@@ -70,6 +108,45 @@ describe('i18n-utils', () => {
 			expect(replaceOisyPlaceholders('Url: $oisy_url')).toBe(`Url: ${OISY_URL}`);
 
 			expect(replaceOisyPlaceholders('Url: $oisy_repo_url')).toBe(`Url: ${OISY_REPO_URL}`);
+		});
+	});
+
+	describe('formatList', () => {
+		it('should return the single item on its own', () => {
+			expect(formatList({ items: ['ICP'], language: Languages.ENGLISH })).toBe('ICP');
+		});
+
+		it('should join two items with a conjunction, not a comma', () => {
+			expect(formatList({ items: ['ICP', 'GLDT'], language: Languages.ENGLISH })).toBe(
+				'ICP and GLDT'
+			);
+		});
+
+		it('should use the conjunction only before the last item', () => {
+			// Note the serial comma: that is what `en` prescribes, and following the locale is the point.
+			expect(formatList({ items: ['ICP', 'GLDT', 'PANDA'], language: Languages.ENGLISH })).toBe(
+				'ICP, GLDT, and PANDA'
+			);
+		});
+
+		it('should be empty for no items', () => {
+			expect(formatList({ items: [], language: Languages.ENGLISH })).toBe('');
+		});
+
+		it.each([
+			{ language: Languages.GERMAN, expected: 'ICP, GLDT und PANDA' },
+			{ language: Languages.FRENCH, expected: 'ICP, GLDT et PANDA' },
+			{ language: Languages.SPANISH, expected: 'ICP, GLDT y PANDA' },
+			{ language: Languages.ITALIAN, expected: 'ICP, GLDT e PANDA' }
+		])('should use the conjunction of $language', ({ language, expected }) => {
+			expect(formatList({ items: ['ICP', 'GLDT', 'PANDA'], language })).toBe(expected);
+		});
+
+		it('should follow the locale rather than inserting a Latin comma', () => {
+			// Japanese separates with an ideographic comma and no trailing conjunction word.
+			expect(formatList({ items: ['ICP', 'GLDT', 'PANDA'], language: Languages.JAPANESE })).toBe(
+				'ICP、GLDT、PANDA'
+			);
 		});
 	});
 

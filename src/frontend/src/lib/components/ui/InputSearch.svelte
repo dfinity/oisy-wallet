@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconClose } from '@dfinity/gix-components';
+	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -31,8 +31,12 @@
 >
 	{#snippet innerEnd()}
 		{#if showResetButton}
-			<button aria-label={$i18n.core.text.clear_filter} onclick={() => (filter = '')}>
-				<IconClose />
+			<button
+				class="hit-area relative press-icon"
+				aria-label={$i18n.core.text.clear_filter}
+				onclick={() => (filter = '')}
+			>
+				<IconCloseThin />
 			</button>
 		{:else}
 			<IconSearch />

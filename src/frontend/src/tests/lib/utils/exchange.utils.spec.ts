@@ -1,6 +1,8 @@
+import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import { Currency } from '$lib/enums/currency';
 import type {
+	CoingeckoSimplePrice,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPrice,
 	CoingeckoSimpleTokenPriceResponse
@@ -9,15 +11,20 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import {
+	btcCrossExchangeRate,
 	buildErc20PriceParams,
+	currencyExchangeRateFromBtc,
 	exchangesDataEqual,
 	findMissingErc20ContractAddresses,
 	findMissingLedgerCanisterIds,
 	findMissingSplTokenAddresses,
 	formatIcpSwapToCoingeckoPrices,
 	formatKongSwapToCoingeckoPrices,
+	isTcyclesLedgerCanisterId,
 	mergeExchangePrices,
-	type ProviderFallbackPrices
+	type ProviderFallbackPrices,
+	xdrBasketStatus,
+	xdrUsdPrice
 } from '$lib/utils/exchange.utils';
 import { MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2 } from '$tests/mocks/exchanges.mock';
 import { createMockIcpSwapToken } from '$tests/mocks/icpswap.mock';
@@ -504,6 +511,23 @@ describe('exchange.utils', () => {
 			]);
 		});
 
+		// The gate in `buildErc20PriceParams` re-hardcodes the platform list that
+		// `CoingeckoPlatformIdSchema` already encodes, and a platform missing from it is dropped
+		// with no error — so a new EVM chain looks wired up and silently has no ERC-20 prices.
+		// Robinhood Chain is pinned here because adding the schema entry alone is not enough.
+		it('keeps addresses on Robinhood Chain', () => {
+			const result = buildErc20PriceParams([
+				{ address: '0x789', coingeckoId: 'robinhood', chainId: 4663n }
+			]);
+
+			expect(result).toEqual([
+				{
+					coingeckoPlatformId: 'robinhood',
+					contractAddresses: [{ address: '0x789', coingeckoId: 'robinhood' }]
+				}
+			]);
+		});
+
 		it('drops addresses with an unsupported coingecko platform id', () => {
 			const result = buildErc20PriceParams([
 				{ address: '0x123', coingeckoId: 'ethereum', chainId: 1n },
@@ -688,6 +712,193 @@ describe('exchange.utils', () => {
 			}
 
 			expect(erc4626Spy).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('btcCrossExchangeRate', () => {
+		it('gives the USD value of one unit, with its 24h change multiplier', () => {
+			expect(
+				btcCrossExchangeRate({
+					btcPrice: { usd: 100_000, eur: 80_000, usd_24h_change: 2, eur_24h_change: 1 },
+					currency: Currency.EUR
+				})
+			).toEqual({ rate: 1.25, fx24hChangeMultiplier: 1.02 / 1.01 });
+		});
+
+		it('leaves out the multiplier when a 24h change is missing', () => {
+			expect(
+				btcCrossExchangeRate({
+					btcPrice: { usd: 100_000, eur: 80_000, usd_24h_change: 2 },
+					currency: Currency.EUR
+				})
+			).toEqual({ rate: 1.25 });
+		});
+
+		it.each([
+			{ btcPrice: undefined },
+			{ btcPrice: { usd: 100_000 } },
+			{ btcPrice: { usd: 0, eur: 80_000 } },
+			{ btcPrice: { usd: 100_000, eur: NaN } },
+			{ btcPrice: { usd: Infinity, eur: 80_000 } }
+		])('returns undefined for $btcPrice', ({ btcPrice }) => {
+			expect(btcCrossExchangeRate({ btcPrice, currency: Currency.EUR })).toBeUndefined();
+		});
+	});
+
+	describe('currencyExchangeRateFromBtc', () => {
+		it('is 1 for USD, without any price', () => {
+			expect(currencyExchangeRateFromBtc({ btcPrice: undefined, currency: Currency.USD })).toEqual({
+				rate: 1,
+				fx24hChangeMultiplier: 1
+			});
+		});
+
+		it('is the BTC cross for another currency', () => {
+			expect(
+				currencyExchangeRateFromBtc({
+					btcPrice: { usd: 100_000, jpy: 15_000_000, usd_24h_change: 3, jpy_24h_change: 5 },
+					currency: Currency.JPY
+				})
+			).toEqual({ rate: 100_000 / 15_000_000, fx24hChangeMultiplier: 1.03 / 1.05 });
+		});
+
+		it('returns undefined without the 24h changes, which the display needs', () => {
+			expect(
+				currencyExchangeRateFromBtc({
+					btcPrice: { usd: 100_000, jpy: 15_000_000 },
+					currency: Currency.JPY
+				})
+			).toBeUndefined();
+		});
+	});
+
+	describe('xdrUsdPrice', () => {
+		// BTC on 2026-09-25 at 11:00 UTC, from CoinGecko's hourly history.
+		const btcPrice: CoingeckoSimplePrice = {
+			usd: 84705.76,
+			eur: 74319.22,
+			cny: 568494.22,
+			jpy: 13369872.07,
+			gbp: 63957.51
+		};
+
+		// The IMF's published USD value of one XDR for 2026-09-25.
+		const imfXdrUsd = 1.36008;
+
+		const basket = ({
+			usd,
+			eur,
+			cny,
+			jpy,
+			gbp
+		}: Required<Pick<CoingeckoSimplePrice, 'usd' | 'eur' | 'cny' | 'jpy' | 'gbp'>>): number =>
+			0.57813 +
+			0.37379 * (usd / eur) +
+			1.0993 * (usd / cny) +
+			13.452 * (usd / jpy) +
+			0.08087 * (usd / gbp);
+
+		it('values the IMF basket at BTC’s price in each of its currencies', () => {
+			const result = xdrUsdPrice(btcPrice);
+
+			expect(result?.usd).toBeCloseTo(1.36029, 5);
+			expect(Math.abs((result?.usd ?? 0) / imfXdrUsd - 1)).toBeLessThan(0.0002);
+		});
+
+		it('sets no market cap and no 24h change without the changes', () => {
+			expect(xdrUsdPrice(btcPrice)).toEqual({ usd: expect.any(Number), usd_market_cap: 0 });
+		});
+
+		it('has no 24h change when every currency moved like USD against BTC', () => {
+			const result = xdrUsdPrice({
+				...btcPrice,
+				usd_24h_change: -2.13,
+				eur_24h_change: -2.13,
+				cny_24h_change: -2.13,
+				jpy_24h_change: -2.13,
+				gbp_24h_change: -2.13
+			});
+
+			expect(result?.usd_24h_change).toBeCloseTo(0, 10);
+		});
+
+		it('values the basket at the rates of 24 hours earlier for its 24h change', () => {
+			const changes = {
+				usd_24h_change: 1.5,
+				eur_24h_change: 0.9,
+				cny_24h_change: 1.4,
+				jpy_24h_change: 2.2,
+				gbp_24h_change: 1.1
+			};
+
+			const result = xdrUsdPrice({ ...btcPrice, ...changes });
+
+			const before = basket({
+				usd: btcPrice.usd / (1 + changes.usd_24h_change / 100),
+				eur: (btcPrice.eur ?? 0) / (1 + changes.eur_24h_change / 100),
+				cny: (btcPrice.cny ?? 0) / (1 + changes.cny_24h_change / 100),
+				jpy: (btcPrice.jpy ?? 0) / (1 + changes.jpy_24h_change / 100),
+				gbp: (btcPrice.gbp ?? 0) / (1 + changes.gbp_24h_change / 100)
+			});
+
+			expect(result?.usd_24h_change).toBeCloseTo(((result?.usd ?? 0) / before - 1) * 100, 10);
+		});
+
+		it('leaves out the 24h change when one of the changes is missing', () => {
+			const result = xdrUsdPrice({
+				...btcPrice,
+				usd_24h_change: -2.13,
+				eur_24h_change: -2.13,
+				cny_24h_change: -2.13,
+				jpy_24h_change: -2.13
+			});
+
+			expect(result).toEqual({ usd: expect.any(Number), usd_market_cap: 0 });
+		});
+
+		it('returns undefined without a BTC price', () => {
+			expect(xdrUsdPrice(undefined)).toBeUndefined();
+		});
+
+		it.each([
+			{ currency: 'usd', value: undefined },
+			{ currency: 'usd', value: 0 },
+			{ currency: 'usd', value: -1 },
+			{ currency: 'usd', value: NaN },
+			{ currency: 'usd', value: Infinity },
+			{ currency: 'eur', value: undefined },
+			{ currency: 'cny', value: 0 },
+			{ currency: 'jpy', value: NaN },
+			{ currency: 'gbp', value: Infinity }
+		])('returns undefined when BTC’s $currency price is $value', ({ currency, value }) => {
+			expect(
+				xdrUsdPrice({ ...btcPrice, [currency]: value } as CoingeckoSimplePrice)
+			).toBeUndefined();
+		});
+	});
+
+	describe('isTcyclesLedgerCanisterId', () => {
+		it('recognises the TCYCLES ledger', () => {
+			expect(isTcyclesLedgerCanisterId(TCYCLES_LEDGER_CANISTER_ID)).toBeTruthy();
+		});
+
+		it('does not take another ledger for it', () => {
+			expect(isTcyclesLedgerCanisterId(MOCK_CANISTER_ID_1)).toBeFalsy();
+		});
+	});
+
+	describe('xdrBasketStatus', () => {
+		it.each([
+			{ date: '2026-09-28T10:00:00.000Z', expected: undefined },
+			{ date: '2027-07-24T23:59:59.999Z', expected: undefined },
+			{ date: '2027-07-25T00:00:00.000Z', expected: { phase: 'expiring_soon', daysLeft: 7 } },
+			{ date: '2027-07-31T23:00:00.000Z', expected: { phase: 'expiring_soon', daysLeft: 1 } },
+			{ date: '2027-08-01T00:00:00.000Z', expected: { phase: 'grace', daysLeft: 61 } },
+			{ date: '2027-09-30T23:00:00.000Z', expected: { phase: 'grace', daysLeft: 1 } },
+			{ date: '2027-10-01T00:00:00.000Z', expected: { phase: 'expired', daysLeft: 0 } },
+			{ date: '2030-01-01T00:00:00.000Z', expected: { phase: 'expired', daysLeft: 0 } }
+		])('at $date is $expected', ({ date, expected }) => {
+			expect(xdrBasketStatus(new Date(date).getTime())).toEqual(expected);
 		});
 	});
 });

@@ -39,6 +39,7 @@ describe('liquidium-withdraw.services', () => {
 			identity: mockIdentity,
 			ethAddress,
 			poolId,
+			chain: 'BTC',
 			asset: 'BTC',
 			amount: 50_000_000n,
 			receiverAddress,
@@ -64,7 +65,8 @@ describe('liquidium-withdraw.services', () => {
 				profileId,
 				poolId,
 				amount: 50_000_000n,
-				receiverAddress,
+				chain: 'BTC',
+				receiver: receiverAddress,
 				signerWalletAddress: ethAddress,
 				signerChain: 'ETH'
 			})

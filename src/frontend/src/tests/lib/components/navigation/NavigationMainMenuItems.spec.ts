@@ -1,19 +1,58 @@
+import * as canisterTopUpEnv from '$env/canister-top-up.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import NavigationMainMenuItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
 import { AppPath } from '$lib/constants/routes.constants';
 import {
+	NAVIGATION_GROUP_FINANCE,
+	NAVIGATION_GROUP_MORE,
+	NAVIGATION_GROUP_PORTFOLIO,
 	NAVIGATION_ITEM_ACTIVITY,
+	NAVIGATION_ITEM_BORROW,
 	NAVIGATION_ITEM_EXPLORER,
+	NAVIGATION_ITEM_HELP,
+	NAVIGATION_ITEM_NFTS,
+	NAVIGATION_ITEM_NOTES,
 	NAVIGATION_ITEM_REWARDS,
 	NAVIGATION_ITEM_SETTINGS,
-	NAVIGATION_ITEM_TOKENS
+	NAVIGATION_ITEM_TOKENS,
+	NAVIGATION_ITEM_TOOLS,
+	NAVIGATION_ITEM_TRADE,
+	NAVIGATION_MORE_MENU_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
+import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 import { TokenTypes } from '$lib/enums/token-types';
+import * as analyticsServices from '$lib/services/analytics.services';
 import { activeAssetsTabStore } from '$lib/stores/settings.store';
+import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
-import { render } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import en from '$tests/mocks/i18n.mock';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { get, readable } from 'svelte/store';
+import type { MockInstance } from 'vitest';
+
+const featureFlags = vi.hoisted(() => ({ helpEnabled: true }));
+
+vi.mock('$env/help.env', () => ({
+	get HELP_ENABLED() {
+		return featureFlags.helpEnabled;
+	}
+}));
+
+const navigationMocks = vi.hoisted(() => ({
+	beforeNavigateCallback: undefined as undefined | (() => void),
+	afterNavigateCallback: undefined as undefined | ((navigation: { from: null }) => void)
+}));
+
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn(),
+	beforeNavigate: (callback: () => void) => {
+		navigationMocks.beforeNavigateCallback = callback;
+	},
+	afterNavigate: (callback: (navigation: { from: null }) => void) => {
+		navigationMocks.afterNavigateCallback = callback;
+	}
+}));
 
 vi.spyOn(networkDerived, 'networkId', 'get').mockReturnValue(readable(ETHEREUM_NETWORK_ID));
 
@@ -21,8 +60,10 @@ describe('NavigationMainMenuItems', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		featureFlags.helpEnabled = true;
 		activeAssetsTabStore.reset({ key: 'active-assets-tab' });
 		userSelectedNetworkStore.set(undefined);
+		bottomSheetOpenStore.set(false);
 	});
 
 	it('renders all basic navigation items', () => {
@@ -31,20 +72,218 @@ describe('NavigationMainMenuItems', () => {
 		const { getByTestId } = render(NavigationMainMenuItems);
 
 		expect(getByTestId(NAVIGATION_ITEM_TOKENS)).toBeInTheDocument();
+		expect(getByTestId(NAVIGATION_ITEM_NFTS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_ACTIVITY)).toBeInTheDocument();
+		expect(getByTestId(NAVIGATION_ITEM_TRADE)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
-		expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
+		expect(getByTestId(NAVIGATION_ITEM_NOTES)).toBeInTheDocument();
+		// Earn (EARNING_ENABLED) is feature-flagged off in tests, so it is not
+		// asserted here.
+		//
+		// Settings is not here either: it renders in the page footer now, which is
+		// the `footer` layout below.
 	});
 
-	it('builds assets link with NFTs path when assetsTab = NFTS', () => {
+	describe('the utility items', () => {
+		it('keeps Settings out of the sidebar', () => {
+			// It is pinned to the bottom of the sidebar, in its own block. Asserted
+			// rather than merely dropped from the list above, because a stray entry in
+			// a desktop section would put it in both places at once.
+			const { queryByTestId } = render(NavigationMainMenuItems);
+
+			expect(queryByTestId(NAVIGATION_ITEM_SETTINGS)).toBeNull();
+		});
+
+		it('stacks Settings above the More menu in the bottom layout', () => {
+			const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'bottom' } });
+
+			const settings = getByTestId(NAVIGATION_ITEM_SETTINGS);
+			const more = getByTestId(NAVIGATION_MORE_MENU_BUTTON);
+
+			// DOM order is visual order in a flex column with no `order` utilities.
+			expect(
+				settings.compareDocumentPosition(more) & Node.DOCUMENT_POSITION_FOLLOWING
+			).toBeTruthy();
+		});
+
+		it('renders nothing but the pinned items in that layout', () => {
+			// The pinned block keeps its height while the sections above scroll, so
+			// it takes the named list and not whatever else the descriptors hold.
+			const { queryByTestId } = render(NavigationMainMenuItems, { props: { layout: 'bottom' } });
+
+			expect(queryByTestId(NAVIGATION_ITEM_TOKENS)).toBeNull();
+			expect(queryByTestId(NAVIGATION_ITEM_REWARDS)).toBeNull();
+		});
+
+		it('leaves the sidebar More group as notes, explore and rewards', () => {
+			// The social links went into the pinned More menu, not here: the first
+			// version of this change put them in this group, which would have listed
+			// them twice once the menu existed.
+			const { getByTestId, queryByTestId } = render(NavigationMainMenuItems);
+
+			expect(getByTestId(NAVIGATION_ITEM_NOTES)).toBeInTheDocument();
+			expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
+			expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
+			expect(queryByTestId(NAVIGATION_MORE_MENU_BUTTON)).toBeNull();
+		});
+	});
+
+	it('renders the desktop section headings', () => {
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		expect(getByTestId(NAVIGATION_GROUP_PORTFOLIO)).toBeInTheDocument();
+		expect(getByTestId(NAVIGATION_GROUP_FINANCE)).toBeInTheDocument();
+		expect(getByTestId(NAVIGATION_GROUP_MORE)).toBeInTheDocument();
+	});
+
+	it('renders the Finance cradle and More group buttons on the mobile layout', () => {
+		const { getByTestId, queryByTestId } = render(NavigationMainMenuItems, {
+			props: { layout: 'mobile' }
+		});
+
+		expect(getByTestId(NAVIGATION_GROUP_FINANCE)).toBeInTheDocument();
+		expect(getByTestId(NAVIGATION_GROUP_MORE)).toBeInTheDocument();
+		// Portfolio is a desktop-only section, not a mobile bar slot.
+		expect(queryByTestId(NAVIGATION_GROUP_PORTFOLIO)).toBeNull();
+	});
+
+	it('opens the Finance sheet on cradle click without hiding the bar', async () => {
+		const { getByTestId, queryByTestId } = render(NavigationMainMenuItems, {
+			props: { layout: 'mobile' }
+		});
+
+		// Sheet closed: a Finance child (Borrow) is not in the bar.
+		expect(queryByTestId(NAVIGATION_ITEM_BORROW)).toBeNull();
+		expect(get(bottomSheetOpenStore)).toBeFalsy();
+
+		await fireEvent.click(getByTestId(NAVIGATION_GROUP_FINANCE));
+
+		// The sheet now shows the Finance children, and the bar stays (store untouched).
+		expect(getByTestId(NAVIGATION_ITEM_BORROW)).toBeInTheDocument();
+		expect(get(bottomSheetOpenStore)).toBeFalsy();
+	});
+
+	it('shrinks the Finance circle on press, not the cradle button that anchors it', () => {
+		const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'mobile' } });
+
+		const cradle = getByTestId(NAVIGATION_GROUP_FINANCE);
+		const circle = cradle.querySelector('span');
+
+		// Scaling the button would make it the circle's containing block and move the circle.
+		expect(cradle).toHaveClass('group');
+		expect(cradle).not.toHaveClass('press-icon');
+		expect(circle).toHaveClass('press-icon-in-group');
+	});
+
+	it('presses the sheet cards to 0.98', async () => {
+		const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'mobile' } });
+
+		await fireEvent.click(getByTestId(NAVIGATION_GROUP_FINANCE));
+
+		expect(getByTestId(NAVIGATION_ITEM_BORROW)).toHaveClass('press');
+	});
+
+	it('closes the open group sheet when a navigation completes', async () => {
+		const { getByTestId, queryByTestId } = render(NavigationMainMenuItems, {
+			props: { layout: 'mobile' }
+		});
+
+		await fireEvent.click(getByTestId(NAVIGATION_GROUP_FINANCE));
+
+		expect(getByTestId(NAVIGATION_ITEM_BORROW)).toBeInTheDocument();
+
+		// Picking a sheet item starts a navigation: the sheet closes without its exit
+		// animation so its scrim never lingers over the freshly-rendered page.
+		navigationMocks.beforeNavigateCallback?.();
+		navigationMocks.afterNavigateCallback?.({ from: null });
+
+		await waitFor(() => expect(queryByTestId(NAVIGATION_ITEM_BORROW)).toBeNull());
+	});
+
+	it('surfaces Borrow in Finance linking to the Borrow page', () => {
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const borrowLink = getByTestId(NAVIGATION_ITEM_BORROW);
+
+		expect(borrowLink.getAttribute('href')).toContain(AppPath.Borrow);
+	});
+
+	// Desktop has no Help item in the sidebar: it is a row of the footer's More
+	// menu, tested in `NavigationMoreMenu.spec.ts`. On mobile it lives in the More
+	// sheet, which is what these cover.
+	const openMobileMore = async () => {
+		const result = render(NavigationMainMenuItems, {
+			props: { layout: 'mobile', testIdPrefix: 'mobile' }
+		});
+
+		await fireEvent.click(result.getByTestId(`mobile-${NAVIGATION_GROUP_MORE}`));
+
+		return result;
+	};
+
+	it('keeps Help out of the desktop sidebar', () => {
+		const { queryByTestId } = render(NavigationMainMenuItems);
+
+		expect(queryByTestId(NAVIGATION_ITEM_HELP)).toBeNull();
+	});
+
+	it('hides Help from the mobile More sheet when the feature flag is off', async () => {
+		featureFlags.helpEnabled = false;
+
+		const { getByTestId, queryByTestId } = await openMobileMore();
+
+		expect(queryByTestId(`mobile-${NAVIGATION_ITEM_HELP}`)).toBeNull();
+		// Its neighbour still renders, so the More sheet itself is intact.
+		expect(getByTestId(`mobile-${NAVIGATION_ITEM_SETTINGS}`)).toBeInTheDocument();
+	});
+
+	it('links Help in the mobile More sheet to the Help page', async () => {
+		const { getByTestId } = await openMobileMore();
+
+		expect(getByTestId(`mobile-${NAVIGATION_ITEM_HELP}`).getAttribute('href')).toContain(
+			AppPath.Help
+		);
+	});
+
+	it('places Help directly before Settings in the mobile More sheet', async () => {
+		const { getByTestId } = await openMobileMore();
+
+		const help = getByTestId(`mobile-${NAVIGATION_ITEM_HELP}`);
+		const settings = getByTestId(`mobile-${NAVIGATION_ITEM_SETTINGS}`);
+
+		expect(help.compareDocumentPosition(settings) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+	});
+
+	it('surfaces Help inside the mobile More sheet', async () => {
+		const { getByTestId, queryByTestId } = render(NavigationMainMenuItems, {
+			props: { layout: 'mobile' }
+		});
+
+		expect(queryByTestId(NAVIGATION_ITEM_HELP)).toBeNull();
+
+		await fireEvent.click(getByTestId(NAVIGATION_GROUP_MORE));
+
+		expect(getByTestId(NAVIGATION_ITEM_HELP)).toBeInTheDocument();
+	});
+
+	it('surfaces NFTs as its own nav item linking to the NFTs page', () => {
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const nftsLink = getByTestId(NAVIGATION_ITEM_NFTS);
+
+		expect(nftsLink.getAttribute('href')).toContain(AppPath.Nfts);
+	});
+
+	it('keeps the assets link on the Tokens list when a stale NFTS tab is persisted', () => {
 		activeAssetsTabStore.set({ key: 'active-assets-tab', value: TokenTypes.NFTS });
 
 		const { getByTestId } = render(NavigationMainMenuItems);
 
 		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
 
-		expect(tokenLink.getAttribute('href')).toContain(AppPath.Nfts);
+		expect(tokenLink.getAttribute('href')).not.toContain(AppPath.Nfts);
+		expect(tokenLink.getAttribute('href')).toContain(AppPath.Tokens);
 	});
 
 	it('builds assets link with Earning path when assetsTab = EARNING', () => {
@@ -83,5 +322,116 @@ describe('NavigationMainMenuItems', () => {
 		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
 
 		expect(tokenLink.getAttribute('href')).not.toContain(ETHEREUM_NETWORK_ID.description);
+	});
+
+	describe('ui_click', () => {
+		const uiClick = (id: string) => ({
+			name: PLAUSIBLE_EVENTS.UI_CLICK,
+			metadata: {
+				source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION,
+				source_sublocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MAIN_MENU,
+				event_value: id
+			}
+		});
+
+		let trackEventSpy: MockInstance;
+
+		beforeEach(() => {
+			trackEventSpy = vi.spyOn(analyticsServices, 'trackEvent').mockImplementation(() => {});
+		});
+
+		it.each([
+			{ id: 'assets', testId: NAVIGATION_ITEM_TOKENS },
+			{ id: 'nfts', testId: NAVIGATION_ITEM_NFTS },
+			{ id: 'activity', testId: NAVIGATION_ITEM_ACTIVITY },
+			{ id: 'trade', testId: NAVIGATION_ITEM_TRADE },
+			{ id: 'borrow', testId: NAVIGATION_ITEM_BORROW },
+			{ id: 'explore', testId: NAVIGATION_ITEM_EXPLORER },
+			{ id: 'notes', testId: NAVIGATION_ITEM_NOTES },
+			{ id: 'rewards', testId: NAVIGATION_ITEM_REWARDS },
+			{ id: 'tools', testId: NAVIGATION_ITEM_TOOLS }
+		])('fires ui_click "$id" from the desktop sidebar', async ({ id, testId }) => {
+			const { getByTestId } = render(NavigationMainMenuItems);
+
+			await fireEvent.click(getByTestId(testId));
+
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(uiClick(id));
+		});
+
+		it('fires ui_click "settings" from the pinned bottom block', async () => {
+			const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'bottom' } });
+
+			await fireEvent.click(getByTestId(NAVIGATION_ITEM_SETTINGS));
+
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(uiClick('settings'));
+		});
+
+		it('fires ui_click for a mobile bar item', async () => {
+			const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'mobile' } });
+
+			await fireEvent.click(getByTestId(NAVIGATION_ITEM_ACTIVITY));
+
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(uiClick('activity'));
+		});
+
+		it('fires ui_click for a card in a mobile sheet, but not for the button that opens it', async () => {
+			const { getByTestId } = await openMobileMore();
+
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			await fireEvent.click(getByTestId(`mobile-${NAVIGATION_ITEM_HELP}`));
+
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(uiClick('help'));
+		});
+
+		it('fires ui_click for the mobile Notes item, which opens a modal', async () => {
+			const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'mobile' } });
+
+			await fireEvent.click(getByTestId(NAVIGATION_ITEM_NOTES));
+
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(uiClick('notes'));
+		});
+	});
+
+	describe('Tools', () => {
+		const follows = ({ first, second }: { first: HTMLElement; second: HTMLElement }): boolean =>
+			(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+
+		it('ends the sidebar More group, after Rewards, and links to the Tools page', () => {
+			const { getByTestId } = render(NavigationMainMenuItems);
+
+			const item = getByTestId(NAVIGATION_ITEM_TOOLS);
+
+			expect(item).toHaveTextContent(en.navigation.text.tools);
+			expect(item).toHaveAttribute('aria-label', en.navigation.alt.tools);
+			expect(item.getAttribute('href')).toContain(AppPath.Tools);
+			expect(follows({ first: getByTestId(NAVIGATION_ITEM_REWARDS), second: item })).toBeTruthy();
+		});
+
+		it('shows while the Canister top-up flag is off', () => {
+			const flag = vi
+				.spyOn(canisterTopUpEnv, 'CANISTER_TOP_UP_ENABLED', 'get')
+				.mockReturnValue(false);
+
+			const { getByTestId } = render(NavigationMainMenuItems);
+
+			expect(getByTestId(NAVIGATION_ITEM_TOOLS)).toBeInTheDocument();
+
+			flag.mockRestore();
+		});
+
+		it('sits between Rewards and Help in the mobile More sheet', async () => {
+			const { getByTestId } = await openMobileMore();
+
+			const card = getByTestId(`mobile-${NAVIGATION_ITEM_TOOLS}`);
+
+			expect(card.getAttribute('href')).toContain(AppPath.Tools);
+			expect(
+				follows({ first: getByTestId(`mobile-${NAVIGATION_ITEM_REWARDS}`), second: card })
+			).toBeTruthy();
+			expect(
+				follows({ first: card, second: getByTestId(`mobile-${NAVIGATION_ITEM_HELP}`) })
+			).toBeTruthy();
+		});
 	});
 });

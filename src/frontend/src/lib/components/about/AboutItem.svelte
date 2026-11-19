@@ -22,7 +22,7 @@
 
 <button
 	class:font-bold={!asMenuItem}
-	class:hover:text-brand-secondary={!asMenuItem}
+	class:hover:text-brand-hover={!asMenuItem}
 	class:nav-item={asMenuItem}
 	class:nav-item-condensed={asMenuItemCondensed}
 	class:text={asMenuItem}
@@ -32,7 +32,7 @@
 	data-tid={testId}
 	onclick={onClick}
 >
-	<div class="flex items-center gap-2">
+	<div class="flex items-center gap-3">
 		{#if asMenuItem}
 			{@render icon?.()}
 		{/if}

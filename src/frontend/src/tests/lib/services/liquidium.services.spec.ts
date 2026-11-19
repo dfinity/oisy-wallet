@@ -1,18 +1,30 @@
 import type { EthAddress } from '$eth/types/address';
 import * as liquidiumApi from '$lib/api/liquidium.api';
-import { getOrCreateLiquidiumProfile, loadLiquidium } from '$lib/services/liquidium.services';
+import {
+	getOrCreateLiquidiumProfile,
+	loadLiquidium,
+	loadLiquidiumInflowPool
+} from '$lib/services/liquidium.services';
 import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { LiquidiumMarket, LiquidiumPortfolio } from '$lib/types/liquidium';
 import * as liquidiumUtils from '$lib/utils/liquidium.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import {
+	mockLiquidiumProfileId,
+	mockLiquidiumSupplySubaccount,
+	mockLiquidiumUsdtPoolId
+} from '$tests/mocks/liquidium-inflow.mock';
+import { Principal } from '@icp-sdk/core/principal';
+import type { Pool } from '@liquidium/client';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/api/liquidium.api', () => ({
 	liquidiumClient: vi.fn()
 }));
 
-vi.mock('$lib/utils/liquidium.utils', () => ({
-	mapLiquidiumMarket: vi.fn(),
+vi.mock(import('$lib/utils/liquidium.utils'), async (importOriginal) => ({
+	...(await importOriginal()),
+	mapLiquidiumMarketRails: vi.fn(),
 	mapLiquidiumPortfolio: vi.fn()
 }));
 
@@ -46,7 +58,7 @@ describe('liquidium.services', () => {
 			market: { listPools, getAssetPrices },
 			positions: { getUserReserves, getUserPositionSummary }
 		} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
-		vi.mocked(liquidiumUtils.mapLiquidiumMarket).mockReturnValue(market);
+		vi.mocked(liquidiumUtils.mapLiquidiumMarketRails).mockReturnValue([market]);
 		vi.mocked(liquidiumUtils.mapLiquidiumPortfolio).mockReturnValue(portfolio);
 		getAssetPrices.mockResolvedValue({});
 	});
@@ -84,7 +96,8 @@ describe('liquidium.services', () => {
 			expect(get(liquidiumStore)).toEqual({
 				markets: [],
 				portfolio: null,
-				assetPrices: {}
+				assetPrices: {},
+				loaded: false
 			});
 			expect(liquidiumApi.liquidiumClient).not.toHaveBeenCalled();
 		});
@@ -98,7 +111,8 @@ describe('liquidium.services', () => {
 			expect(get(liquidiumStore)).toEqual({
 				markets: [market],
 				portfolio: null,
-				assetPrices: {}
+				assetPrices: {},
+				loaded: true
 			});
 			expect(getUserReserves).not.toHaveBeenCalled();
 			expect(getUserPositionSummary).not.toHaveBeenCalled();
@@ -126,7 +140,8 @@ describe('liquidium.services', () => {
 			expect(get(liquidiumStore)).toEqual({
 				markets: [market],
 				portfolio,
-				assetPrices: {}
+				assetPrices: {},
+				loaded: true
 			});
 		});
 
@@ -142,11 +157,12 @@ describe('liquidium.services', () => {
 			expect(get(liquidiumStore)).toEqual({
 				markets: [market],
 				portfolio,
-				assetPrices: {}
+				assetPrices: {},
+				loaded: true
 			});
 		});
 
-		it('swallows SDK errors and leaves the store unchanged', async () => {
+		it('swallows SDK errors and leaves the data unchanged, but settles the loaded flag', async () => {
 			listPools.mockRejectedValue(new Error('rpc down'));
 
 			await expect(loadLiquidium({ identity: mockIdentity, ethAddress })).resolves.toBeUndefined();
@@ -154,8 +170,89 @@ describe('liquidium.services', () => {
 			expect(get(liquidiumStore)).toEqual({
 				markets: [],
 				portfolio: null,
-				assetPrices: {}
+				assetPrices: {},
+				loaded: true
 			});
+		});
+
+		it('keeps already-loaded positions when a refresh fails', async () => {
+			listPools.mockResolvedValue([{ id: 'pool-btc' }]);
+			getProfileId.mockResolvedValue(profileId);
+			getUserReserves.mockResolvedValue([]);
+			getUserPositionSummary.mockResolvedValue({});
+
+			await loadLiquidium({ identity: mockIdentity, ethAddress });
+
+			listPools.mockRejectedValue(new Error('rpc down'));
+
+			await loadLiquidium({ identity: mockIdentity, ethAddress });
+
+			expect(get(liquidiumStore)).toEqual({
+				markets: [market],
+				portfolio,
+				assetPrices: {},
+				loaded: true
+			});
+		});
+	});
+
+	describe('loadLiquidiumInflowPool', () => {
+		const pool = { id: mockLiquidiumUsdtPoolId, asset: 'USDT' } as Pool;
+
+		const params = {
+			identity: mockIdentity,
+			ethAddress,
+			owner: Principal.fromText(mockLiquidiumUsdtPoolId),
+			subaccount: mockLiquidiumSupplySubaccount,
+			ckTokenSymbol: 'ckUSDT'
+		};
+
+		beforeEach(() => {
+			listPools.mockResolvedValue([pool]);
+			getProfileId.mockResolvedValue(mockLiquidiumProfileId.toText());
+		});
+
+		it('returns the pool for the subaccount that credits the profile of the user', async () => {
+			await expect(loadLiquidiumInflowPool(params)).resolves.toEqual(pool);
+
+			expect(getProfileId).toHaveBeenCalledExactlyOnceWith(ethAddress);
+		});
+
+		it('returns undefined for an account that is not a Liquidium pool, without reading the profile', async () => {
+			await expect(
+				loadLiquidiumInflowPool({
+					...params,
+					owner: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai')
+				})
+			).resolves.toBeUndefined();
+
+			expect(getProfileId).not.toHaveBeenCalled();
+		});
+
+		it('returns undefined for a deposit of another ck token than the pool holds', async () => {
+			await expect(
+				loadLiquidiumInflowPool({ ...params, ckTokenSymbol: 'ckUSDC' })
+			).resolves.toBeUndefined();
+
+			expect(getProfileId).not.toHaveBeenCalled();
+		});
+
+		it('returns undefined when the address has no Liquidium profile', async () => {
+			getProfileId.mockResolvedValue(null);
+
+			await expect(loadLiquidiumInflowPool(params)).resolves.toBeUndefined();
+		});
+
+		it('returns undefined for the subaccount of another profile', async () => {
+			getProfileId.mockResolvedValue('ryjl3-tyaaa-aaaaa-aaaba-cai');
+
+			await expect(loadLiquidiumInflowPool(params)).resolves.toBeUndefined();
+		});
+
+		it('rejects when Liquidium does not answer', async () => {
+			listPools.mockRejectedValue(new Error('unavailable'));
+
+			await expect(loadLiquidiumInflowPool(params)).rejects.toThrow('unavailable');
 		});
 	});
 });

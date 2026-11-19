@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { IconReimbursed, Modal } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@icp-sdk/canisters/ckbtc';
-	import { blur } from 'svelte/transition';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusProgress.svelte';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { updateBalance } from '$icp/services/ckbtc.services';
+	import IconReimbursed from '$lib/components/icons/IconReimbursed.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
 	import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
@@ -15,6 +15,7 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OisySyncStatusEvent } from '$lib/types/custom-events';
 	import type { SyncState } from '$lib/types/sync';
+	import { blur } from '$lib/utils/transitions.utils';
 
 	let receiveProgressStep = $state<string | undefined>();
 
@@ -89,7 +90,7 @@
 			<span in:blur>{$i18n.receive.bitcoin.text.checking_status}</span>
 		</div>{:else}
 		<button
-			class="text flex gap-2 border-0 text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
+			class="text flex gap-2 border-0 text-brand-primary transition-colors duration-150 ease-out hover:text-brand-hover active:text-brand-hover"
 			onclick={async () => await receive()}
 			in:blur><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
 		>

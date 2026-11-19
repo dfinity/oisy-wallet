@@ -6,9 +6,11 @@
 		networkEthereum,
 		networkEvm,
 		networkICP,
-		networkSolana
+		networkSolana,
+		networkXrp
 	} from '$lib/derived/network.derived';
 	import SolTokenMenu from '$sol/components/tokens/SolTokenMenu.svelte';
+	import XrpTokenMenu from '$xrp/components/tokens/XrpTokenMenu.svelte';
 </script>
 
 {#if $networkICP}
@@ -17,6 +19,8 @@
 	<EthTokenMenu />
 {:else if $networkSolana}
 	<SolTokenMenu />
+{:else if $networkXrp}
+	<XrpTokenMenu />
 {:else}
 	<BtcTokenMenu />
 {/if}

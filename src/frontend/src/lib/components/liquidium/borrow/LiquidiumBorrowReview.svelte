@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import LiquidiumActivationFeeInfo from '$lib/components/liquidium/borrow/LiquidiumActivationFeeInfo.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -8,7 +9,7 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { lendBorrowProvidersConfig } from '$lib/config/lend-borrow.config';
-	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import type { LiquidiumBorrowPreview } from '$lib/services/liquidium-borrow.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { LendBorrowProvider } from '$lib/types/lend-borrow';
@@ -16,6 +17,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { formatStakeApyNumber } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
 
 	interface Props {
 		market: LiquidiumMarket;
@@ -30,7 +32,9 @@
 
 	const liquidium = lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM];
 
-	let borrowToken = $derived(LIQUIDIUM_ASSET_TOKENS[market.asset]);
+	let borrowToken = $derived(
+		liquidiumMarketToken({ chain: market.chain, asset: market.asset, tokens: $tokens })
+	);
 	let healthLevel = $derived(preview.healthLevel);
 </script>
 
@@ -77,6 +81,8 @@
 		{#snippet label()}{$i18n.liquidium.text.provider}{/snippet}
 		{#snippet mainValue()}{liquidium.name}{/snippet}
 	</ModalValue>
+
+	<LiquidiumActivationFeeInfo {market} />
 
 	{#if healthLevel === 'critical'}
 		<MessageBox level="error" styleClass="mt-4">

@@ -16,6 +16,7 @@ import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
+import type { SessionTypes } from '@walletconnect/types';
 import type * as WalletConnectUtils from '@walletconnect/utils';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 
@@ -27,14 +28,6 @@ vi.mock('@walletconnect/utils', async (importOriginal) => {
 		buildApprovedNamespaces: vi.fn()
 	};
 });
-
-const mockBtcWalletConnectEnabled = vi.hoisted(() => ({ value: true }));
-
-vi.mock('$env/btc-wallet-connect.env', () => ({
-	get BTC_WALLET_CONNECT_ENABLED() {
-		return mockBtcWalletConnectEnabled.value;
-	}
-}));
 
 describe('wallet-connect.providers', () => {
 	describe('WalletConnectClient', () => {
@@ -96,8 +89,6 @@ describe('wallet-connect.providers', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
-
-			mockBtcWalletConnectEnabled.value = true;
 
 			vi.spyOn(WalletKit, 'init').mockResolvedValue(walletKitSpy);
 
@@ -230,14 +221,6 @@ describe('wallet-connect.providers', () => {
 				});
 			});
 
-			it('should not advertise a bip122 namespace when the BTC WalletConnect feature is disabled', async () => {
-				mockBtcWalletConnectEnabled.value = false;
-
-				const supportedNamespaces = await approveAndGetSupportedNamespaces(mockParams);
-
-				expect(supportedNamespaces.bip122).toBeUndefined();
-			});
-
 			// Temporary security workaround: OISY derives a single ECDSA key for all BTC networks, so a
 			// signature obtained on a testnet/regtest request could be reused to spend mainnet UTXOs.
 			// Until BTC keys are network-segregated, only mainnet is advertised over WalletConnect.
@@ -293,6 +276,35 @@ describe('wallet-connect.providers', () => {
 				expect(JSON.parse(sessionProperties.bip122_getAccountAddresses)).toEqual([
 					expect.objectContaining({ address: mockBtcAddress, intention: 'payment' })
 				]);
+			});
+
+			// The review states these before the user approves, so they must be what approving sends.
+			it('should approve the session with the namespaces it states before approving', async () => {
+				const granted: SessionTypes.Namespaces = {
+					eip155: {
+						chains: ['eip155:1'],
+						methods: ['eth_signTypedData_v4'],
+						events: ['chainChanged'],
+						accounts: ['eip155:1:0x0000000000000000000000000000000000000001']
+					}
+				};
+
+				buildApprovedNamespacesMock.mockReturnValue(granted);
+
+				const listener = await WalletConnectClient.init(mockParams);
+
+				expect(listener.approvedNamespaces(mockProposal)).toEqual(granted);
+
+				await listener.approveSession(mockProposal);
+
+				const [[{ namespaces }]] = mockApproveSession.mock.calls;
+
+				expect(namespaces).toEqual(granted);
+
+				expect(buildApprovedNamespacesMock).toHaveBeenCalledTimes(2);
+				expect(buildApprovedNamespacesMock.mock.calls[0]).toEqual(
+					buildApprovedNamespacesMock.mock.calls[1]
+				);
 			});
 
 			it('should not expose bip122_getAccountAddresses when only testnet/regtest addresses are present', async () => {

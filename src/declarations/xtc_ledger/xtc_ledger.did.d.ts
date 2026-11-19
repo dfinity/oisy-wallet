@@ -11,9 +11,7 @@ import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
 export type BurnError =
-	| { InsufficientBalance: null }
-	| { InvalidTokenContract: null }
-	| { NotSufficientLiquidity: null };
+	{ InsufficientBalance: null } | { InvalidTokenContract: null } | { NotSufficientLiquidity: null };
 export type BurnResult = { Ok: TransactionId } | { Err: BurnError };
 export type CreateResult = { Ok: { canister_id: Principal } } | { Err: string };
 export interface Event {

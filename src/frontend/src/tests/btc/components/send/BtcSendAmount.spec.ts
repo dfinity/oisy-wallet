@@ -1,10 +1,16 @@
 import BtcSendAmount from '$btc/components/send/BtcSendAmount.svelte';
-import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
+import { BTC_LARGEST_OUTPUT_VSIZE, BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
+import { calculateFeeSatoshis } from '$btc/utils/btc-utxos.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
-import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
+import { MAX_BUTTON, TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
+import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
@@ -22,6 +28,7 @@ describe('BtcSendAmount', () => {
 	const props = {
 		amount: 1000,
 		amountError: undefined,
+		source: mockBtcAddress,
 		onTokensList: vi.fn()
 	};
 	const belowMinimumAmountInBtc = '0.000005'; // 500 satoshis in BTC terms (below 700 satoshis minimum)
@@ -31,6 +38,84 @@ describe('BtcSendAmount', () => {
 	beforeEach(() => {
 		// Reset balance store
 		balancesStore.reset(BTC_MAINNET_TOKEN.id);
+
+		allUtxosStore.reset();
+		btcPendingSentTransactionsStore.reset();
+		feeRatePercentilesStore.reset();
+	});
+
+	// Regression: the balance counts incoming UTXOs at one confirmation, a send selects at six.
+	// Offering the balance as "Max" quoted an amount the selection then rejected for want of funds.
+	it('should offer a Max the send can honour, not the whole balance', async () => {
+		balancesStore.set({
+			id: BTC_MAINNET_TOKEN.id,
+			data: { data: 41_000n, certified: true }
+		});
+
+		allUtxosStore.setAllUtxos({
+			allUtxos: [
+				{ value: 1_000n, height: 10, outpoint: { txid: new Uint8Array([1]), vout: 0 } },
+				{ value: 40_000n, height: 3, outpoint: { txid: new Uint8Array([2]), vout: 0 } }
+			]
+		});
+		btcPendingSentTransactionsStore.setPendingTransactions({
+			address: mockBtcAddress,
+			pendingTransactions: []
+		});
+		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
+
+		const expectedMax = formatToken({
+			value:
+				1_000n -
+				calculateFeeSatoshis({
+					numInputs: 1,
+					outputVSizes: [BTC_LARGEST_OUTPUT_VSIZE],
+					feeRateMiliSatoshisPerVByte: 1_000n
+				}),
+			unitName: BTC_MAINNET_TOKEN.decimals,
+			displayDecimals: BTC_MAINNET_TOKEN.decimals
+		});
+
+		const { getByTestId } = render(BtcSendAmount, {
+			props,
+			context: createMockContext()
+		});
+
+		await waitFor(() => {
+			expect(getByTestId(MAX_BUTTON)).toHaveTextContent(expectedMax);
+		});
+	});
+
+	it('should price Max for the recipient once it is known', async () => {
+		balancesStore.set({
+			id: BTC_MAINNET_TOKEN.id,
+			data: { data: 10_000n, certified: true }
+		});
+
+		allUtxosStore.setAllUtxos({
+			allUtxos: [{ value: 10_000n, height: 10, outpoint: { txid: new Uint8Array([1]), vout: 0 } }]
+		});
+		btcPendingSentTransactionsStore.setPendingTransactions({
+			address: mockBtcAddress,
+			pendingTransactions: []
+		});
+		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
+
+		// 1 input + a P2WPKH recipient + change = 141 vB at 1 sat/vB.
+		const expectedMax = formatToken({
+			value: 10_000n - 141n,
+			unitName: BTC_MAINNET_TOKEN.decimals,
+			displayDecimals: BTC_MAINNET_TOKEN.decimals
+		});
+
+		const { getByTestId } = render(BtcSendAmount, {
+			props: { ...props, destination: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq' },
+			context: createMockContext()
+		});
+
+		await waitFor(() => {
+			expect(getByTestId(MAX_BUTTON)).toHaveTextContent(expectedMax);
+		});
 	});
 
 	it('should render input with the proper value', () => {
@@ -101,5 +186,20 @@ describe('BtcSendAmount', () => {
 			expect(input?.value).toBe('0');
 			expect(getByText(en.send.assertion.amount_invalid)).toBeInTheDocument();
 		});
+	});
+
+	it('names the network the token is sent on', () => {
+		const { getByText } = render(BtcSendAmount, {
+			props,
+			context: createMockContext()
+		});
+
+		expect(
+			getByText(
+				replacePlaceholders(en.tokens.text.on_network_label, {
+					$network: BTC_MAINNET_TOKEN.network.name
+				})
+			)
+		).toBeInTheDocument();
 	});
 });

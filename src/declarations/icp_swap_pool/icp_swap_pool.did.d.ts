@@ -115,10 +115,7 @@ export interface DepositInfo {
 	transfer: Transfer;
 }
 export type DepositStatus =
-	| { Failed: null }
-	| { TransferCompleted: null }
-	| { Created: null }
-	| { Completed: null };
+	{ Failed: null } | { TransferCompleted: null } | { Created: null } | { Completed: null };
 export type Error =
 	| { CommonError: null }
 	| { InternalError: string }
@@ -321,10 +318,7 @@ export interface RefundInfo {
 	transfer: Transfer;
 }
 export type RefundStatus =
-	| { Failed: null }
-	| { CreditCompleted: null }
-	| { Created: null }
-	| { Completed: null };
+	{ Failed: null } | { CreditCompleted: null } | { Created: null } | { Completed: null };
 export interface RemoveLimitOrderInfo {
 	err: [] | [Error__1];
 	status: RemoveLimitOrderStatus;
@@ -338,10 +332,7 @@ export interface RemoveLimitOrderInfo {
 	tickLimit: bigint;
 }
 export type RemoveLimitOrderStatus =
-	| { Failed: null }
-	| { LimitOrderDeleted: null }
-	| { Created: null }
-	| { Completed: null };
+	{ Failed: null } | { LimitOrderDeleted: null } | { Created: null } | { Completed: null };
 export type Result = { ok: bigint } | { err: Error };
 export type Result_1 = { ok: string } | { err: Error };
 export type Result_10 = { ok: Page } | { err: Error };
@@ -646,10 +637,7 @@ export interface WithdrawInfo {
 	transfer: Transfer;
 }
 export type WithdrawStatus =
-	| { Failed: null }
-	| { CreditCompleted: null }
-	| { Created: null }
-	| { Completed: null };
+	{ Failed: null } | { CreditCompleted: null } | { Created: null } | { Completed: null };
 export interface WithdrawToSubaccountArgs {
 	fee: bigint;
 	token: string;

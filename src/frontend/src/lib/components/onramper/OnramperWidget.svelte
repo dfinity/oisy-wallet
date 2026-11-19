@@ -1,13 +1,10 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { untrack } from 'svelte';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 	import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 	import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
-	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
-	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { harvestAutopilots } from '$eth/derived/harvest-autopilots.derived';
 	import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -20,9 +17,8 @@
 	import { BUY_MODAL_ONRAMPER_IFRAME } from '$lib/constants/test-ids.constants';
 	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { routeAutopilotVault } from '$lib/derived/nav.derived';
-	import { networkBitcoin, networkEthereum, networkSolana } from '$lib/derived/network.derived';
+	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import {
@@ -30,11 +26,17 @@
 		PLAUSIBLE_EVENT_RESULT_STATUSES
 	} from '$lib/enums/plausible';
 	import { trackOnramperOpen } from '$lib/services/analytics.services';
+	import { loadOnramperIds } from '$lib/services/onramper.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import { consoleError } from '$lib/utils/console.utils';
 	import { getTokenIdentifier } from '$lib/utils/identifier.utils';
-	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
+	import {
+		buildOnramperLink,
+		mapOnramperNetworkWallets,
+		needsOnramperIdLookup,
+		toOnramperTokenParams
+	} from '$lib/utils/onramper.utils';
 
 	let vault = $derived(
 		$harvestAutopilots.find(({ token: { address } }) => address === $routeAutopilotVault)
@@ -44,24 +46,10 @@
 		$erc20Tokens.find(({ address }) => address === vault?.token.assetAddress)
 	);
 
-	let defaultCrypto = $derived(
-		$token?.buy?.onramperId ??
-			vaultAssetToken?.buy?.onramperId ??
-			($networkEthereum
-				? ETHEREUM_TOKEN.buy?.onramperId
-				: $networkBitcoin
-					? BTC_MAINNET_TOKEN.buy?.onramperId
-					: $networkSolana
-						? SOLANA_TOKEN.buy?.onramperId
-						: ICP_TOKEN.buy?.onramperId) ??
-			ICP_TOKEN.buy?.onramperId ??
-			undefined
-	);
-
-	// List of Cryptocurrencies that are allowed to be bought
-	let onlyCryptos = $derived(
-		$enabledTokens.map((token) => token.buy?.onramperId).filter(nonNullish)
-	);
+	// The widget opens on the open token, else on the asset of the open vault. Only their ids are
+	// tracked: the token store also re-emits the same token, which must not sign the URL again.
+	let openTokenId = $derived($token?.id);
+	let vaultAssetTokenId = $derived(vaultAssetToken?.id);
 
 	// List of Cryptocurrency Networks to which the tokens are allowed to be bought
 	let onlyCryptoNetworks = $derived(
@@ -106,11 +94,21 @@
 	// guard against late resolutions overwriting newer state via a cancellation token.
 	$effect(() => {
 		const currentIdentity = $authIdentity;
-		if (!nonNullish(currentIdentity)) {
+		if (isNullish(currentIdentity)) {
 			src = undefined;
 			signingFailed = false;
 			return;
 		}
+
+		// Read before anything async, so that the effect tracks them: OnRamper's ids arrive later, in
+		// this same run, and never trigger another signing call.
+		const selectedNetworkTokens = $enabledFungibleNetworkTokens;
+		const allEnabledTokens = $enabledTokens;
+		const cryptoNetworks = onlyCryptoNetworks;
+		const openTokenIds = [openTokenId, vaultAssetTokenId];
+		const openTokens = openTokenIds.some(nonNullish)
+			? untrack(() => [$token, vaultAssetToken].filter(nonNullish))
+			: [];
 
 		let cancelled = false;
 		src = undefined;
@@ -118,16 +116,47 @@
 
 		buildOnramperLink({
 			identity: currentIdentity,
-			mode: 'buy',
-			defaultFiat: $currentCurrency,
-			defaultCrypto,
-			onlyCryptos,
-			onlyCryptoNetworks,
 			wallets: [],
 			networkWallets,
-			supportRecurringPayments: true,
-			enableCountrySelector: true,
-			themeName: 'dark' // we always pass dark, as some card elements aren't styled correctly (white text on white background) in light theme / onramper bug?
+			// Started before the signing call, so that the lists load while the backend signs.
+			onramperIds: needsOnramperIdLookup([...allEnabledTokens, ...openTokens])
+				? loadOnramperIds()
+				: undefined,
+			toParams: (ids) => {
+				const buy = toOnramperTokenParams({
+					selectedNetworkTokens,
+					enabledTokens: allEnabledTokens,
+					openTokens,
+					ids: ids?.buy
+				});
+
+				const sell = toOnramperTokenParams({
+					selectedNetworkTokens,
+					enabledTokens: allEnabledTokens,
+					openTokens,
+					ids: ids?.sell
+				});
+
+				return {
+					mode: 'buy,sell',
+					defaultCrypto: buy.defaultCrypto,
+					onlyCryptos: buy.onlyCryptos,
+					onlyCryptoNetworks: cryptoNetworks,
+					sell_defaultCrypto: sell.defaultCrypto,
+					sell_onlyCryptos: sell.onlyCryptos,
+					sell_onlyCryptoNetworks: cryptoNetworks,
+					supportRecurringPayments: true,
+					// Without a default, OnRamper may preselect Revolut Pay as recommended even when no
+					// onramp offers it for the selected fiat and token, and the widget opens on "No onramp
+					// available".
+					defaultPaymentMethod: 'creditcard',
+					// OnRamper's country selector resets the selected token and fiat to the country's
+					// defaults whenever its menu is opened, so the user would lose the token preselected
+					// here.
+					enableCountrySelector: false,
+					themeName: 'dark' // we always pass dark, as some card elements aren't styled correctly (white text on white background) in light theme / onramper bug?
+				};
+			}
 		})
 			.then((url) => {
 				if (!cancelled) {
@@ -201,9 +230,9 @@
 		class="absolute top-0 right-0 bottom-0 left-0 bg-surface text-brand-primary transition-all duration-500 ease-in-out"
 		class:invisible={themeLoaded && nonNullish(src)}
 		class:opacity-0={themeLoaded && nonNullish(src)}
-		class:opacity-100={!themeLoaded || !nonNullish(src)}
+		class:opacity-100={!themeLoaded || isNullish(src)}
 	>
-		<LoaderSpinner inline />
+		<LoaderSpinner />
 	</div>
 
 	{#if nonNullish(src)}

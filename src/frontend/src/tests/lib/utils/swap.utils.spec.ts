@@ -3,8 +3,11 @@ import type {
 	SwapAmountsTxReply
 } from '$declarations/kong_backend/kong_backend.did';
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
@@ -16,7 +19,10 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
-	SWAP_ETH_TOKEN_PLACEHOLDER
+	SWAP_ETH_TOKEN_PLACEHOLDER,
+	SWAP_SLIPPAGE_INVALID_VALUE,
+	SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
+	SWAP_SLIPPAGE_WARNING_VALUE
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
 import {
@@ -27,27 +33,36 @@ import {
 	type ICPSwapResult
 } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
+import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 import {
 	buildNearIntentsQuoteRequest,
 	calculateSlippage,
+	calculateSwapGainUsd,
 	calculateValueDifference,
+	canPayWithToken,
 	findNearIntentsAsset,
 	findSwapProvider,
 	formatReceiveOutMinimum,
+	formatSwapSlippageShort,
 	geSwapEthTokenAddress,
 	getKongIcTokenIdentifier,
 	getLiquidityFees,
 	getNetworkFee,
 	getSwapRoute,
+	getSwapSlippageInvalidValue,
+	getSwapSlippageStatus,
 	getWithdrawableToken,
 	isSwapError,
+	keepSwapSlippage,
 	mapIcpSwapResult,
 	mapKongSwapResult,
 	mapNearIntentsQuoteResult,
 	mapVeloraMarketSwapResult,
 	mapVeloraSwapResult,
+	nearIntentsQuoteRejectedMessage,
 	resolveNearIntentsBlockchain,
-	resolveNearIntentsSwapAssets
+	resolveNearIntentsSwapAssets,
+	slippagePercentToBasisPoints
 } from '$lib/utils/swap.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { SplToken } from '$sol/types/spl';
@@ -58,9 +73,10 @@ import {
 	mockNearIntentsQuoteResponse,
 	mockNearIntentsTokens
 } from '$tests/mocks/near-intents.mock';
+import { mockSwapProviders, mockVeloraMarketProvider } from '$tests/mocks/swap.mocks';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import {
-	mockVeloraBridgeSwapResponse,
+	mockVeloraCrossChainSwapResponse,
 	mockVeloraDeltaSwapResponse
 } from '$tests/mocks/velora.mock';
 import type { OptimalRate, SwapSide } from '@velora-dex/sdk';
@@ -341,6 +357,136 @@ describe('swap utils', () => {
 		});
 	});
 
+	describe('getSwapSlippageInvalidValue', () => {
+		it('allows the wider ICP limit for an ICP source', () => {
+			expect(getSwapSlippageInvalidValue(ICP_NETWORK_ID)).toBe(SWAP_SLIPPAGE_INVALID_VALUE);
+		});
+
+		it.each([ETHEREUM_NETWORK.id, SOLANA_MAINNET_NETWORK.id, BTC_MAINNET_TOKEN.network.id])(
+			'applies the Velora limit to %s',
+			(networkId) => {
+				expect(getSwapSlippageInvalidValue(networkId)).toBe(SWAP_SLIPPAGE_VELORA_INVALID_VALUE);
+			}
+		);
+
+		it('applies the Velora limit before a source is chosen', () => {
+			expect(getSwapSlippageInvalidValue(undefined)).toBe(SWAP_SLIPPAGE_VELORA_INVALID_VALUE);
+		});
+	});
+
+	describe('getSwapSlippageStatus', () => {
+		const maxSlippageInvalidValue = SWAP_SLIPPAGE_VELORA_INVALID_VALUE;
+
+		it.each(['0.5', '1.5', 3, '6.9999'])('accepts %s', (slippageValue) => {
+			expect(getSwapSlippageStatus({ slippageValue, maxSlippageInvalidValue })).toBe('valid');
+		});
+
+		it.each([`${SWAP_SLIPPAGE_WARNING_VALUE}`, SWAP_SLIPPAGE_WARNING_VALUE, '14.9999'])(
+			'warns about %s',
+			(slippageValue) => {
+				expect(getSwapSlippageStatus({ slippageValue, maxSlippageInvalidValue })).toBe('warning');
+			}
+		);
+
+		it.each([
+			undefined,
+			'',
+			'0',
+			0,
+			'-1',
+			`${SWAP_SLIPPAGE_VELORA_INVALID_VALUE}`,
+			SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
+			`${SWAP_SLIPPAGE_INVALID_VALUE}`,
+			'abc'
+		])('refuses %s', (slippageValue) => {
+			expect(getSwapSlippageStatus({ slippageValue, maxSlippageInvalidValue })).toBe('invalid');
+		});
+	});
+
+	describe('formatSwapSlippageShort', () => {
+		it.each([
+			{ value: 1.5, expected: '1.5' },
+			{ value: 3, expected: '3' },
+			{ value: 12.3456, expected: '12.34' },
+			{ value: 0.29, expected: '0.29' },
+			{ value: 49.996, expected: '49.99' },
+			{ value: 14.9999, expected: '14.99' }
+		])('cuts $value to $expected', ({ value, expected }) => {
+			expect(formatSwapSlippageShort(value)).toBe(expected);
+		});
+
+		it('keeps a value below 0.01 rather than showing 0', () => {
+			expect(formatSwapSlippageShort(0.004)).toBe('0.004');
+		});
+
+		it('shows 0 as 0', () => {
+			expect(formatSwapSlippageShort(0)).toBe('0');
+		});
+	});
+
+	describe('keepSwapSlippage', () => {
+		beforeEach(() => {
+			sessionStorage.clear();
+		});
+
+		it('keeps a value every source network accepts', () => {
+			keepSwapSlippage('8');
+
+			expect(loadSwapSlippage()).toBe(8);
+		});
+
+		// The next swap may start from Ethereum, where 30 % is refused.
+		it('does not keep a value that only an ICP source accepts', () => {
+			saveSwapSlippage('8');
+
+			keepSwapSlippage('30');
+
+			expect(loadSwapSlippage()).toBe(8);
+		});
+
+		it('keeps the last accepted value when the new one is refused', () => {
+			saveSwapSlippage('8');
+
+			keepSwapSlippage('60');
+
+			expect(loadSwapSlippage()).toBe(8);
+		});
+	});
+
+	describe('slippagePercentToBasisPoints', () => {
+		it('converts whole and fractional percentages to basis points', () => {
+			expect(slippagePercentToBasisPoints(1)).toBe(100);
+			expect(slippagePercentToBasisPoints('0.5')).toBe(50);
+			expect(slippagePercentToBasisPoints(1.5)).toBe(150);
+		});
+
+		it('floors fractional basis points instead of rounding them up', () => {
+			expect(slippagePercentToBasisPoints(1.005)).toBe(100);
+			expect(slippagePercentToBasisPoints('1.0099')).toBe(100);
+		});
+
+		it('floors values finer than the slippage input allows instead of rounding them up', () => {
+			// The invariant must hold even for a value that bypassed the input's decimal limit
+			expect(slippagePercentToBasisPoints('1.0051')).toBe(100);
+			expect(slippagePercentToBasisPoints(0.123456)).toBe(12);
+		});
+
+		it('survives IEEE-754 noise in the percent conversion', () => {
+			// 0.29 * 100 === 28.999999999999996 — a bare floor would drop a whole basis point
+			expect(slippagePercentToBasisPoints('0.29')).toBe(29);
+			expect(slippagePercentToBasisPoints(0.29)).toBe(29);
+		});
+
+		it('takes the absolute value of a negative slippage', () => {
+			expect(slippagePercentToBasisPoints(-1.005)).toBe(100);
+			expect(slippagePercentToBasisPoints('-0.29')).toBe(29);
+		});
+
+		it('returns 0 for zero slippage', () => {
+			expect(slippagePercentToBasisPoints(0)).toBe(0);
+		});
+	});
+
 	describe('formatReceiveOutMinimum', () => {
 		it('formats valid number slippage', () => {
 			const result = formatReceiveOutMinimum({
@@ -406,7 +552,7 @@ describe('swap utils', () => {
 	});
 
 	describe('mapVeloraSwapResult', () => {
-		it('should map DeltaPrice swap result correctly (without bridgeInfo)', () => {
+		it('should map a same-chain DeltaPrice result correctly', () => {
 			const mockDeltaSwap: DeltaSwapResponse = {
 				...mockVeloraDeltaSwapResponse
 			};
@@ -414,21 +560,22 @@ describe('swap utils', () => {
 			const result = mapVeloraSwapResult(mockDeltaSwap);
 
 			expect(result.provider).toBe(SwapProvider.VELORA);
-			expect(result.receiveAmount).toBe(900n);
+			expect(result.receiveAmount).toBe(900000000n);
 			expect(result.swapDetails).toBe(mockDeltaSwap.delta);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
 		});
 
-		it('should map BridgePrice swap result correctly (with bridgeInfo)', () => {
-			const mockBridgeSwap: DeltaSwapResponse = {
-				...mockVeloraBridgeSwapResponse
+		it('should read the destination step of a cross-chain route, not the origin one', () => {
+			const mockCrossChainSwap: DeltaSwapResponse = {
+				...mockVeloraCrossChainSwapResponse
 			};
 
-			const result = mapVeloraSwapResult(mockBridgeSwap);
+			const result = mapVeloraSwapResult(mockCrossChainSwap);
 
-			expect(result.provider).toBe(SwapProvider.VELORA);
-			expect(result.receiveAmount).toBe(800n);
-			expect(result.swapDetails).toBe(mockBridgeSwap.delta);
+			// The origin step is denominated in the 18-decimal source token; only the destination
+			// step carries the amount in the 6-decimal destination token.
+			expect(result.receiveAmount).toBe(99976241n);
+			expect(result.swapDetails).toBe(mockCrossChainSwap.delta);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
 		});
 	});
@@ -516,6 +663,31 @@ describe('swap utils', () => {
 			expect(isSwapError(undefined)).toBeFalsy();
 			expect(isSwapError('string')).toBeFalsy();
 			expect(isSwapError({ code: 'deposit_error' })).toBeFalsy();
+		});
+	});
+
+	describe('nearIntentsQuoteRejectedMessage', () => {
+		it.each([
+			SwapErrorCodes.NEAR_INTENTS_QUOTE_UNVERIFIED,
+			SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED,
+			SwapErrorCodes.NEAR_INTENTS_QUOTE_SLIPPAGE,
+			SwapErrorCodes.NEAR_INTENTS_QUOTE_DEPOSIT_MEMO
+		])('should return the message of a %s error', (code) => {
+			const error = new SwapError(code, 'No funds were sent.');
+
+			expect(nearIntentsQuoteRejectedMessage(error)).toBe('No funds were sent.');
+		});
+
+		it('should return undefined for another swap error', () => {
+			const error = new SwapError(SwapErrorCodes.DEPOSIT_FAILED, 'Deposit failed');
+
+			expect(nearIntentsQuoteRejectedMessage(error)).toBeUndefined();
+		});
+
+		it('should return undefined if error is not instance of SwapError', () => {
+			const error = new Error('No funds were sent.');
+
+			expect(nearIntentsQuoteRejectedMessage(error)).toBeUndefined();
 		});
 	});
 
@@ -744,6 +916,63 @@ describe('swap utils', () => {
 		});
 	});
 
+	describe('calculateSwapGainUsd', () => {
+		const [icpSwap, kongSwap] = mockSwapProviders;
+
+		it('values the gain of the selected offer over the lowest one', () => {
+			expect(
+				calculateSwapGainUsd({
+					swaps: [kongSwap, icpSwap],
+					selectedProvider: kongSwap,
+					decimals: 8,
+					exchangeRate: 2
+				})
+			).toBe(20);
+		});
+
+		it('measures against the lowest of all offers, not the next best', () => {
+			expect(
+				calculateSwapGainUsd({
+					swaps: [kongSwap, icpSwap, mockVeloraMarketProvider],
+					selectedProvider: kongSwap,
+					decimals: 8,
+					exchangeRate: 2
+				})
+			).toBe(22);
+		});
+
+		it('values a manually selected offer that is not the best', () => {
+			expect(
+				calculateSwapGainUsd({
+					swaps: [kongSwap, icpSwap, mockVeloraMarketProvider],
+					selectedProvider: icpSwap,
+					decimals: 8,
+					exchangeRate: 2
+				})
+			).toBe(2);
+		});
+
+		it.each([
+			{ case: 'a single offer', swaps: [kongSwap], selectedProvider: kongSwap, exchangeRate: 2 },
+			{
+				case: 'no exchange rate',
+				swaps: [kongSwap, icpSwap],
+				selectedProvider: kongSwap,
+				exchangeRate: undefined
+			},
+			{
+				case: 'the lowest offer selected',
+				swaps: [kongSwap, icpSwap],
+				selectedProvider: icpSwap,
+				exchangeRate: 2
+			}
+		])('returns undefined for $case', ({ swaps, selectedProvider, exchangeRate }) => {
+			expect(
+				calculateSwapGainUsd({ swaps, selectedProvider, decimals: 8, exchangeRate })
+			).toBeUndefined();
+		});
+	});
+
 	describe('mapNearIntentsQuoteResult', () => {
 		it('should map quote response to SwapMappedResult', () => {
 			const result = mapNearIntentsQuoteResult(mockNearIntentsQuoteResponse);
@@ -793,6 +1022,46 @@ describe('swap utils', () => {
 				swapDetails: quoteWithDecimals
 			});
 		});
+
+		it('should keep amounts above Number.MAX_SAFE_INTEGER exact', () => {
+			const quoteWithLargeAmounts = {
+				...mockNearIntentsQuoteResponse,
+				quote: {
+					...mockNearIntentsQuoteResponse.quote,
+					amountOut: '900000000000000099',
+					minAmountOut: '891000000000000099'
+				}
+			};
+
+			const result = mapNearIntentsQuoteResult(quoteWithLargeAmounts);
+
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: 900000000000000099n,
+				receiveOutMinimum: 891000000000000099n,
+				swapDetails: quoteWithLargeAmounts
+			});
+		});
+
+		it('should floor decimal amounts above Number.MAX_SAFE_INTEGER exactly', () => {
+			const quoteWithLargeDecimals = {
+				...mockNearIntentsQuoteResponse,
+				quote: {
+					...mockNearIntentsQuoteResponse.quote,
+					amountOut: '900000000000000099.7',
+					minAmountOut: '891000000000000099.9'
+				}
+			};
+
+			const result = mapNearIntentsQuoteResult(quoteWithLargeDecimals);
+
+			expect(result).toStrictEqual({
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: 900000000000000099n,
+				receiveOutMinimum: 891000000000000099n,
+				swapDetails: quoteWithLargeDecimals
+			});
+		});
 	});
 
 	describe('resolveNearIntentsBlockchain', () => {
@@ -806,6 +1075,10 @@ describe('swap utils', () => {
 
 		it('should resolve Solana mainnet network to sol', () => {
 			expect(resolveNearIntentsBlockchain(SOLANA_MAINNET_NETWORK.id)).toBe('sol');
+		});
+
+		it('should resolve Robinhood Chain to hood', () => {
+			expect(resolveNearIntentsBlockchain(ROBINHOOD_MAINNET_NETWORK.id)).toBe('hood');
 		});
 
 		it('should return undefined for unsupported network', () => {
@@ -843,6 +1116,31 @@ describe('swap utils', () => {
 			});
 
 			expect(result).toStrictEqual(mockNearIntentsTokens[1]);
+		});
+
+		// Robinhood's native asset and Ethereum's are both `ETH` with no contract address, so the
+		// blockchain code is the only thing separating them. A wrong code in
+		// `NEAR_INTENTS_BLOCKCHAIN_MAP` would not fail loudly — it would resolve to the other
+		// chain's asset and quote a swap from the wrong chain entirely.
+		it('should find the Robinhood native token rather than the identically named Ethereum one', () => {
+			const result = findNearIntentsAsset({
+				tokens: mockNearIntentsTokens,
+				token: ROBINHOOD_ETH_TOKEN,
+				blockchain: 'hood'
+			});
+
+			expect(result?.assetId).toBe('nep141:hood.omft.near');
+			expect(result?.blockchain).toBe('hood');
+		});
+
+		it('should not match the Robinhood token against another chain', () => {
+			const result = findNearIntentsAsset({
+				tokens: mockNearIntentsTokens,
+				token: ROBINHOOD_ETH_TOKEN,
+				blockchain: 'arb'
+			});
+
+			expect(result).toBeUndefined();
 		});
 
 		it('should return undefined when no matching token is found', () => {
@@ -1044,6 +1342,31 @@ describe('swap utils', () => {
 			expect(result.refundTo).toBe(mockEthAddress);
 		});
 
+		// Regression: threading a recipient equal to the user's own address is a no-op at
+		// the request level, so pre-existing same-address-space pairs keep their exact
+		// payload now that the fan-out always resolves a recipient.
+		it('should build the same request whether the user address is passed as recipient or omitted', () => {
+			const params = {
+				slippageTolerance: 150,
+				srcAsset,
+				destAsset,
+				amount: 1_000_000n,
+				userAddress: mockEthAddress,
+				deadlineMs: 180_000
+			};
+
+			const withoutRecipient = buildNearIntentsQuoteRequest(params);
+			const withRecipient = buildNearIntentsQuoteRequest({
+				...params,
+				recipientAddress: mockEthAddress
+			});
+
+			// The deadline is clock-dependent, so it is pinned before comparing.
+			expect({ ...withRecipient, deadline: withoutRecipient.deadline }).toStrictEqual(
+				withoutRecipient
+			);
+		});
+
 		it('should set deadline as ISO string in the future', () => {
 			const before = Date.now();
 
@@ -1059,6 +1382,35 @@ describe('swap utils', () => {
 			const deadlineTime = new Date(result.deadline).getTime();
 
 			expect(deadlineTime).toBeGreaterThanOrEqual(before + 180_000);
+		});
+	});
+
+	describe('canPayWithToken', () => {
+		const enabledToken = { ...mockValidIcToken, enabled: true };
+		const inactiveToken = { ...mockValidIcToken, enabled: false };
+
+		it('should allow an enabled token with a balance', () => {
+			expect(canPayWithToken({ ...enabledToken, balance: 1n })).toBeTruthy();
+		});
+
+		it('should not allow a token with a balance of zero', () => {
+			expect(canPayWithToken({ ...enabledToken, balance: ZERO })).toBeFalsy();
+		});
+
+		it('should allow an enabled token whose balance is not loaded yet', () => {
+			expect(canPayWithToken({ ...enabledToken, balance: undefined })).toBeTruthy();
+			expect(canPayWithToken({ ...enabledToken, balance: null })).toBeTruthy();
+		});
+
+		it('should allow a token that cannot be disabled while its balance loads', () => {
+			expect(canPayWithToken({ ...ICP_TOKEN, balance: undefined })).toBeTruthy();
+		});
+
+		it('should not allow an inactive token, whatever its balance', () => {
+			expect(canPayWithToken({ ...inactiveToken, balance: 1n })).toBeFalsy();
+			expect(canPayWithToken({ ...inactiveToken, balance: ZERO })).toBeFalsy();
+			expect(canPayWithToken({ ...inactiveToken, balance: undefined })).toBeFalsy();
+			expect(canPayWithToken({ ...inactiveToken, balance: null })).toBeFalsy();
 		});
 	});
 });

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { liquidiumHealthLevel } from '$lib/utils/liquidium.utils';
 
@@ -6,9 +7,10 @@
 		percent: number;
 		label?: string;
 		showBar?: boolean;
+		badge?: Snippet;
 	}
 
-	let { percent, label, showBar = true }: Props = $props();
+	let { percent, label, showBar = true, badge }: Props = $props();
 
 	let level = $derived(liquidiumHealthLevel(percent));
 
@@ -17,7 +19,10 @@
 
 <div class="flex w-full flex-col gap-2">
 	<div class="flex items-center justify-between text-sm">
-		<span class="text-tertiary">{label ?? $i18n.liquidium.text.projected_health_factor}</span>
+		<span class="flex items-center gap-2">
+			<span class="text-tertiary">{label ?? $i18n.liquidium.text.projected_health_factor}</span>
+			{@render badge?.()}
+		</span>
 		<span
 			class="font-bold"
 			class:text-error-primary={level === 'critical'}

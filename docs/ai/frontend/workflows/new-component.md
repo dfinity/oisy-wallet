@@ -8,7 +8,7 @@ covers the use case.
 
 1. **Decide the layer.** Use the
    [decision tree](../structure.md#where-to-put-new-files-decision-tree):
-   - Generic primitive missing from `$lib/components/ui/` and `@dfinity/gix-components`
+   - Generic primitive missing from `$lib/components/ui/`
      → `$lib/components/ui/<Name>.svelte`.
    - Cross-feature presentational → `$lib/components/common/<Name>.svelte`.
    - Cross-chain feature component → `$lib/components/<feature>/<Name>.svelte`.
@@ -35,8 +35,8 @@ covers the use case.
    - Two-way binding via `$bindable()` on the destructure side, never
      legacy `bind:` on the parent.
 
-4. **Compose, don't reinvent.** Build on `$lib/components/{ui,common,core}/`
-   and `@dfinity/gix-components`. Pull existing icons before adding new
+4. **Compose, don't reinvent.** Build on `$lib/components/{ui,common,core}/`.
+   Pull existing icons before adding new
    ones. Use snippets (`{#snippet}`) for repeating intra-component markup.
 5. **Style with the project's tokens / utilities.** Look at the closest
    neighbour's classes. Tailwind v4, no raw hex. See

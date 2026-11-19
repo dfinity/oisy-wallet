@@ -2,6 +2,14 @@ import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 export class BtcAmountAssertionError extends Error {}
 
+// `btc_broadcast_transaction` gave no typed answer, as after a transport failure, so the
+// transaction may have gone out.
+export class BtcBroadcastUnconfirmedError extends Error {
+	constructor({ cause }: { cause: unknown }) {
+		super('The BTC transaction may have been sent: its broadcast got no answer.', { cause });
+	}
+}
+
 export enum BtcPrepareSendError {
 	InsufficientBalance = 'insufficient_balance',
 	InsufficientBalanceForFee = 'insufficient_balance_for_fee',
@@ -35,6 +43,10 @@ export enum BtcSendValidationError {
 
 export interface UtxosFee {
 	feeSatoshis: bigint;
+	// The rate `feeSatoshis` was priced at. Carried with the fee rather than re-sampled by
+	// the consumer: the median percentile it comes from moves between the preview and the
+	// confirmation, so a second sample cannot be used to check the first.
+	feeRateMiliSatoshisPerVByte: bigint;
 	utxos: CkBtcMinterDid.Utxo[];
 	error?: BtcPrepareSendError | BtcSendValidationError;
 }

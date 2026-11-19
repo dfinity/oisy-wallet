@@ -40,7 +40,9 @@ export default {
 				'vchf-token-hero-image':
 					'url(/images/vchf-token-hero-image.webp), radial-gradient(#DA291C, #AD1207)',
 				'veur-token-hero-image':
-					'url(/images/veur-token-hero-image.webp), linear-gradient(180deg, #00319E, #00319E)'
+					'url(/images/veur-token-hero-image.webp), linear-gradient(180deg, #00319E, #00319E)',
+				'usd1-token-hero-image':
+					'url(/images/usd1-token-hero-image.webp), linear-gradient(160deg, #0F1A30, #05070E)'
 			},
 			backgroundSize: {
 				'size-200': '200% 200%'

@@ -114,6 +114,10 @@ npm run lint -- --max-warnings 0
 npm run check        # svelte-check, fail-on-warnings
 npm run test         # vitest (single shard locally)
 
+# Build (only if you touched $env/networks, $env/tokens or $eth/providers)
+npm run build        # the eager provider registries are evaluated only here (SSR
+                     # prerender), never under vitest, which mocks ethers/providers
+
 # i18n (only if you edited en.json)
 npm run i18n
 
@@ -152,7 +156,7 @@ keep diffs reviewable.
 | `frontend-checks.yml`                                        | `check`                  | `npm run check` + `npm run check:tests`.                                                                                                                                                                             |
 | `frontend-checks.yml`                                        | `test` (20 shards)       | `npm run test:coverage --shard=N/20`.                                                                                                                                                                                |
 | `frontend-checks.yml`                                        | `test-coverage`          | Merges shard reports.                                                                                                                                                                                                |
-| `frontend-checks.yml`                                        | `config`                 | IC-domain validation across networks.                                                                                                                                                                                |
+| `frontend-checks.yml`                                        | `config`                 | IC-domain validation across networks; the `config-build` legs also check that only the `ic` wallet build publishes `.well-known/ic-architecture` and `ii-derivation-origin`.                                         |
 | `frontend-checks.yml`                                        | `lockfile`               | `npm run lint:lockfile`.                                                                                                                                                                                             |
 | `backend-checks.yml`                                         | `lint`                   | `./scripts/lint.rust.sh` + `./scripts/lint.did.sh` (only when Rust changed).                                                                                                                                         |
 | `backend-checks.yml`                                         | `workspace-dependencies` | All deps go through the workspace.                                                                                                                                                                                   |
@@ -192,6 +196,10 @@ job — that's expected.
 - **`config`** → IC domain validation; usually means a CSP / domain change
   was missed. See
   [`scripts/build.csp.mjs`](../../scripts/build.csp.mjs).
+- **`config-build`** naming `ic-architecture` or `ii-derivation-origin` → a
+  build other than the `ic` wallet build published them, or the `ic` build
+  stopped publishing them. See the gate in
+  [`scripts/build.ic-architecture.mjs`](../../scripts/build.ic-architecture.mjs).
 
 ## 7. Updating an existing PR
 
@@ -236,4 +244,7 @@ reviewers — the file does it.
 Releases are tagged via the `tag-release.yml` and `bump-version.yml`
 workflows; the legacy signer has its own `bump-legacy-signer-version.yml`
 and `tag-legacy-signer-release.yml`. Don't bump versions or edit
-`signer-versions.json` manually.
+`signer-versions.json` manually. `bump-version.yml` keeps the legacy
+signer version in lockstep with the wallet, because the legacy signer is
+still rebuilt from `main` on every release. See
+[Versioning](../../SIGNER_DOMAINS.md#versioning).

@@ -1,7 +1,9 @@
 import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
+import type { Address } from '$lib/types/address';
 import type {
 	AiAssistantContactUiMap,
 	AiAssistantToken,
+	ChatMessage,
 	ReviewSendTokensToolResult,
 	ShowBalanceToolResult,
 	ShowContactsToolResult,
@@ -192,14 +194,60 @@ export const parseReviewSendTokensToolArguments = ({
 	};
 };
 
+const ADDRESS_CHARACTER = /[a-z0-9-]/i;
+
+const includesAddress = ({ text, address }: { text: string; address: string }): boolean => {
+	let index = text.indexOf(address);
+
+	while (index !== -1) {
+		// The address has to stand on its own, so that a part of a longer address does not count.
+		const before = text.charAt(index - 1);
+		const after = text.charAt(index + address.length);
+
+		if (before !== '.' && !ADDRESS_CHARACTER.test(before) && !ADDRESS_CHARACTER.test(after)) {
+			return true;
+		}
+
+		index = text.indexOf(address, index + 1);
+	}
+
+	return false;
+};
+
+export const isAddressTypedByUser = ({
+	address,
+	messages
+}: {
+	address: Address | undefined;
+	messages: ChatMessage[];
+}): boolean => {
+	if (!notEmptyString(address)) {
+		return false;
+	}
+
+	return messages.some(
+		({ role, data: { text, typedByUser } }) =>
+			role === 'user' &&
+			typedByUser === true &&
+			notEmptyString(text) &&
+			includesAddress({ text, address })
+	);
+};
+
 export const parseShowBalanceToolArguments = ({
 	filterParams,
 	tokensUi,
-	networks
+	networks,
+	totalUsdBalance
 }: {
 	filterParams: ToolCallArgument[];
 	tokensUi: TokenUi[];
 	networks: Network[];
+	// The unfiltered net worth, from the same store the hero reads, so the assistant cannot
+	// quote a different total than the one on screen. Only the unfiltered branch can use it:
+	// the provider-held value it carries is portfolio-wide, so folding it into a per-token or
+	// per-network answer would overstate that answer.
+	totalUsdBalance: number;
 }): ShowBalanceToolResult => {
 	const { tokenSymbolFilter, networkIdFilter } = filterParams.reduce<{
 		tokenSymbolFilter?: string;
@@ -280,7 +328,7 @@ export const parseShowBalanceToolArguments = ({
 
 	return {
 		mainCard: {
-			totalUsdBalance: sumTokensUiUsdBalance(tokensUi)
+			totalUsdBalance
 		}
 	};
 };

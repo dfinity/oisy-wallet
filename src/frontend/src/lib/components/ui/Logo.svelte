@@ -8,21 +8,25 @@
 
 	interface Props {
 		src?: string;
+		loading?: 'eager' | 'lazy';
 		alt?: string;
 		size?: LogoSize;
 		color?: 'off-white' | 'white';
 		ring?: boolean;
 		circle?: boolean;
+		animateReadiness?: boolean;
 		testId?: string;
 	}
 
 	let {
 		src,
+		loading = 'lazy',
 		alt = '',
 		size = 'xxs',
 		color = 'off-white',
 		ring = false,
 		circle = true,
+		animateReadiness = true,
 		testId
 	}: Props = $props();
 
@@ -39,12 +43,12 @@
 	class="flex items-center justify-center overflow-hidden ring-primary"
 	class:bg-off-white={color === 'off-white' && !isReady}
 	class:bg-white={color === 'white' && !isReady}
-	class:ease-in={!ios}
-	class:opacity-10={!isReady}
+	class:ease-in={animateReadiness && !ios}
+	class:opacity-10={animateReadiness && !isReady}
 	class:ring-2={ring}
 	class:rounded-full={circle}
 	class:rounded-lg={!circle}
-	class:transition-opacity={!ios}
+	class:transition-opacity={animateReadiness && !ios}
 	data-tid={testId}
 >
 	{#if nonNullish(src) && !loadingError}
@@ -52,6 +56,7 @@
 			{alt}
 			fitHeight
 			height={sizePx}
+			{loading}
 			onError={() => (loadingError = true)}
 			onLoad={() => (loadingError = false)}
 			{src}

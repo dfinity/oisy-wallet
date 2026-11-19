@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
@@ -11,6 +10,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';

@@ -3,6 +3,7 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { hideTokenCategoryFilterStore, tokenCategoryFilterStore } from '$lib/stores/settings.store';
+import { tokenGroupStore } from '$lib/stores/token-group.store';
 import { tokenListStore } from '$lib/stores/token-list.store';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiGroup } from '$lib/types/token-ui-group';
@@ -81,10 +82,50 @@ describe('TokenGroupCard', () => {
 		hideTokenCategoryFilterStore.reset({ key: 'hide-token-category-filter' });
 		tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
 		tokenListStore.set({ filter: '' });
+		tokenGroupStore.reset(groupId);
 	});
 
 	const getTokenCountBadge = (container: HTMLElement): HTMLElement | null =>
 		container.querySelector('[data-tid^="token-count"]');
+
+	it('announces expanded state on the keyboard-focusable group header', async () => {
+		const { container } = render(TokenGroupCard, { tokenGroup });
+		const header = container.querySelector('button');
+
+		assertNonNullish(header);
+
+		expect(header.tabIndex).toBe(0);
+		expect(header).toHaveAttribute('aria-expanded', 'false');
+
+		await fireEvent.click(header);
+
+		expect(header).toHaveAttribute('aria-expanded', 'true');
+	});
+
+	describe('header hover', () => {
+		const card = (container: HTMLElement): Element | null =>
+			container.querySelector(':scope > div');
+
+		it('should hover the header with the page background while collapsed', () => {
+			const { container } = render(TokenGroupCard, { props: { tokenGroup } });
+
+			expect(card(container)?.firstElementChild).toHaveClass('hover:bg-primary');
+			expect(card(container)).not.toHaveClass('expanded');
+		});
+
+		it('should mark the whole card for the hover outline once expanded', async () => {
+			const { container } = render(TokenGroupCard, { props: { tokenGroup } });
+
+			const header = container.querySelector('button');
+			assertNonNullish(header);
+
+			await fireEvent.click(header);
+
+			// The outline itself is CSS (:has(> .group-header:hover)); the card opts in by class.
+			expect(card(container)).toHaveClass('expanded');
+			expect(card(container)?.firstElementChild).not.toHaveClass('hover:bg-primary');
+		});
+	});
 
 	it('should show total token count when no category filter is active', () => {
 		const { container } = render(TokenGroupCard, { props: { tokenGroup } });
@@ -194,6 +235,14 @@ describe('TokenGroupCard', () => {
 		expect(cryptoCardA).toBeInTheDocument();
 		expect(cryptoCardB).toBeInTheDocument();
 		expect(stableCard).not.toBeInTheDocument();
+	});
+
+	it('should show the group name in the collapsed header without listing member networks', () => {
+		const { container } = render(TokenGroupCard, { props: { tokenGroup } });
+
+		expect(container).toHaveTextContent(tokenGroup.groupData.name);
+		expect(container).not.toHaveTextContent(ICP_NETWORK.name);
+		expect(container).not.toHaveTextContent(ETHEREUM_NETWORK.name);
 	});
 
 	it('should render all tokens when expanded without category filter', async () => {

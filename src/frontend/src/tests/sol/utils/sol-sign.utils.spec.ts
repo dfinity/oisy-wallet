@@ -2,7 +2,7 @@ import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
 import * as signerApi from '$lib/api/signer.api';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import type { SolanaNetworkType } from '$sol/types/network';
-import { createSigner } from '$sol/utils/sol-sign.utils';
+import { createSigner, signMessage } from '$sol/utils/sol-sign.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import type { Transaction, TransactionWithinSizeLimit, TransactionWithLifetime } from '@solana/kit';
@@ -92,6 +92,46 @@ describe('sol-sign.utils', () => {
 			});
 
 			await expect(signer.signTransactions([mockTransaction])).rejects.toThrow('Mock Error');
+		});
+	});
+
+	describe('signMessage', () => {
+		let spySignWithSchnorr: MockInstance;
+
+		const mockSignedBytes = Uint8Array.from([7, 8, 9]);
+		const mockNetwork: SolanaNetworkType = 'mainnet';
+		const mockMessage = Uint8Array.from([1, 2, 3, 4]);
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			spySignWithSchnorr = vi
+				.spyOn(signerApi, 'signWithSchnorr')
+				.mockResolvedValue(mockSignedBytes);
+		});
+
+		it('should sign the raw message bytes with the network derivation path and Solana key', async () => {
+			const signature = await signMessage({
+				identity: mockIdentity,
+				network: mockNetwork,
+				message: mockMessage
+			});
+
+			expect(spySignWithSchnorr).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, mockNetwork],
+				keyId: SOLANA_KEY_ID,
+				message: mockMessage
+			});
+			expect(signature).toEqual(Uint8Array.from(mockSignedBytes));
+		});
+
+		it('should throw an error if signWithSchnorr fails', async () => {
+			spySignWithSchnorr.mockRejectedValueOnce(new Error('Mock Error'));
+
+			await expect(
+				signMessage({ identity: mockIdentity, network: mockNetwork, message: mockMessage })
+			).rejects.toThrow('Mock Error');
 		});
 	});
 });

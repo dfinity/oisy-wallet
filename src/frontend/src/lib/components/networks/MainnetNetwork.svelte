@@ -4,24 +4,16 @@
 		enabledMainnetTokensUsdBalancesPerNetwork,
 		enabledMainnetTokensUsdStakeBalancesPerNetwork
 	} from '$lib/derived/network-balances.derived';
-	import type { LabelSize } from '$lib/types/components';
 	import type { Network, NetworkId, OptionNetworkId } from '$lib/types/network';
 
 	interface Props {
 		network: Network;
 		selectedNetworkId?: NetworkId;
-		labelsSize?: LabelSize;
 		showStakeBalance?: boolean;
 		onSelected?: (networkId: OptionNetworkId) => void;
 	}
 
-	let {
-		network,
-		selectedNetworkId,
-		labelsSize = 'md',
-		showStakeBalance = true,
-		onSelected
-	}: Props = $props();
+	let { network, selectedNetworkId, showStakeBalance = true, onSelected }: Props = $props();
 
 	let usdStakeBalance = $derived($enabledMainnetTokensUsdStakeBalancesPerNetwork[network.id] ?? 0);
 
@@ -29,7 +21,6 @@
 </script>
 
 <NetworkComponent
-	{labelsSize}
 	{network}
 	{onSelected}
 	{selectedNetworkId}

@@ -15,6 +15,12 @@
 		destinationTokenFee?: bigint;
 		minFee?: bigint;
 		ethereumEstimateFee?: bigint;
+		/**
+		 * Hard cap (base units) for "Max", for a source token whose spendable amount is lower
+		 * than its balance — BTC, where the balance also counts UTXOs a send cannot select yet.
+		 * Left unset, "Max" is the balance minus the fee as before.
+		 */
+		maxAmount?: bigint;
 		disabled: boolean;
 		testId?: string;
 		onNext: () => void;
@@ -32,6 +38,7 @@
 		destinationTokenFee,
 		minFee,
 		ethereumEstimateFee,
+		maxAmount,
 		disabled,
 		testId,
 		onNext,
@@ -51,6 +58,7 @@
 	<ConvertAmount
 		{destinationTokenFee}
 		{ethereumEstimateFee}
+		{maxAmount}
 		{minFee}
 		{totalFee}
 		bind:sendAmount

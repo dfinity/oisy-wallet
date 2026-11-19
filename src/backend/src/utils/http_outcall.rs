@@ -1,10 +1,8 @@
 use candid::Nat;
-use ic_cdk::{
-    management_canister::{
-        http_request, transform_context_from_query, HttpHeader, HttpMethod, HttpRequestArgs,
-        HttpRequestResult, TransformArgs, TransformContext,
-    },
-    query,
+use ic_cdk::query;
+use ic_cdk_management_canister::{
+    http_request, transform_context_from_query, HttpHeader, HttpMethod, HttpRequestArgs,
+    HttpRequestResult, TransformArgs, TransformContext,
 };
 
 const USER_AGENT: &str = "OisyWalletBackend";
@@ -195,7 +193,7 @@ pub(crate) async fn post(
 #[cfg(test)]
 mod tests {
     use candid::{Func, Nat, Principal};
-    use ic_cdk::management_canister::{
+    use ic_cdk_management_canister::{
         HttpHeader, HttpMethod, HttpRequestResult, TransformContext, TransformFunc,
     };
     use pretty_assertions::assert_eq;

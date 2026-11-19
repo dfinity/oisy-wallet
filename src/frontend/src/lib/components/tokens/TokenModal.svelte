@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { assertNonNullish, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 	import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
+	import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
+	import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 	import IcAddIcrcTokenForm from '$icp/components/tokens/IcAddIcrcTokenForm.svelte';
 	import { assertIndexLedgerId } from '$icp/services/ic-add-custom-tokens.service';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
@@ -22,6 +23,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import {
 		TRACK_DELETE_TOKEN_SUCCESS,
 		TRACK_EDIT_TOKEN_SUCCESS
@@ -243,6 +245,25 @@
 				});
 
 				erc20CustomTokensStore.reset(tokenToDelete.id);
+				await deleteIdbEthToken({ identity: $authIdentity, token: customToken });
+
+				await onTokenDeleteSuccess(tokenToDelete);
+			} else if (isTokenErc4626(tokenToDelete)) {
+				loading = true;
+
+				const customToken = toCustomToken({
+					...tokenToDelete,
+					chainId: tokenToDelete.network.chainId,
+					enabled: true,
+					networkKey: 'Erc4626'
+				});
+
+				await removeCustomToken({
+					identity: $authIdentity,
+					token: customToken
+				});
+
+				erc4626CustomTokensStore.reset(tokenToDelete.id);
 				await deleteIdbEthToken({ identity: $authIdentity, token: customToken });
 
 				await onTokenDeleteSuccess(tokenToDelete);
@@ -511,7 +532,11 @@
 </WizardModal>
 
 {#if currentStepName === TokenModalSteps.CONTENT && showBottomSheetDeleteConfirmation}
-	<BottomSheetConfirmationPopup disabled={loading} onCancel={() => onTokenDeleteCancel(token)}>
+	<BottomSheetConfirmationPopup
+		disabled={loading}
+		onCancel={() => onTokenDeleteCancel(token)}
+		showCloseButton={false}
+	>
 		{#snippet title()}
 			{$i18n.tokens.text.delete_token}
 		{/snippet}

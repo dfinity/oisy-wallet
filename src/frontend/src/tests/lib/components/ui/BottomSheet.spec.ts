@@ -1,5 +1,6 @@
 import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 import BottomSheetTest from '$tests/lib/components/ui/BottomSheetTest.svelte';
+import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -35,6 +36,37 @@ describe('BottomSheet component', () => {
 		expect(get(bottomSheetOpenStore)).toBeTruthy();
 	});
 
+	it('puts a title on the header row, beside the close button', () => {
+		render(BottomSheetTest, {
+			visible: true,
+			contentTest: 'Main content',
+			title: 'Sheet title'
+		});
+
+		const title = screen.getByText('Sheet title');
+
+		expect(title.nextElementSibling).toHaveAttribute('aria-label', en.core.alt.close_details);
+	});
+
+	it('names the sheet by its title when it has no label of its own', () => {
+		render(BottomSheetTest, {
+			visible: true,
+			contentTest: 'Main content',
+			title: 'Sheet title'
+		});
+
+		expect(screen.getByRole('dialog')).toHaveAccessibleName('Sheet title');
+	});
+
+	it('keeps the header row to the close button without a title', () => {
+		render(BottomSheetTest, {
+			visible: true,
+			contentTest: 'Main content'
+		});
+
+		expect(screen.getByLabelText(en.core.alt.close_details)).toHaveClass('float-right');
+	});
+
 	it('closes when close button is clicked and updates store', async () => {
 		const { component } = render(BottomSheetTest, {
 			visible: true,
@@ -64,6 +96,22 @@ describe('BottomSheet component', () => {
 		await fireEvent.click(backdrop);
 
 		expect(component.visible).toBeFalsy();
+		expect(get(bottomSheetOpenStore)).toBeFalsy();
+	});
+
+	it('resets store when unmounted while visible', () => {
+		const { unmount } = render(BottomSheetTest, {
+			visible: true,
+			contentTest: 'Modal-driven content'
+		});
+
+		expect(get(bottomSheetOpenStore)).toBeTruthy();
+
+		// Modal-driven sheets (e.g. PayDialog) are unmounted on close rather than
+		// toggled via visible; the store must still reset so the mobile nav bar
+		// reappears.
+		unmount();
+
 		expect(get(bottomSheetOpenStore)).toBeFalsy();
 	});
 

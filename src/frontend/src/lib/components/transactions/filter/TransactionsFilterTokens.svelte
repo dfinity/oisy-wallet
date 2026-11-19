@@ -24,7 +24,7 @@
 </script>
 
 <MultiSelectDropdown
-	ariaLabel={$i18n.transaction.filter.tokens_aria_label}
+	ariaDescription={$i18n.transaction.filter.tokens_aria_label}
 	count={selectedSet.size}
 	{onToggle}
 	panelWidthClass="w-full sm:w-80"

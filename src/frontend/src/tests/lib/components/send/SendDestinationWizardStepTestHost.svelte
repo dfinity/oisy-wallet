@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import type { Writable } from 'svelte/store';
 	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { allSendWizardSteps } from '$lib/config/send.config';
 	import { SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';

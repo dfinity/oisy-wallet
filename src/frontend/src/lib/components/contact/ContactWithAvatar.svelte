@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		contact: ContactUi;

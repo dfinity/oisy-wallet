@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { Chain } from '@liquidium/client';
 	import { getContext, setContext, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
@@ -14,6 +14,7 @@
 		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { isSendOutcomeUnknown } from '$eth/utils/eth-error.utils';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -30,10 +31,11 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 	import type { LiquidiumMarket } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -42,7 +44,9 @@
 		amount: OptionAmount;
 		supplyProgressStep: string;
 		inflowFee?: bigint;
+		inflowFeeUnavailable?: boolean;
 		currentStep?: WizardStep;
+		onSelectToken?: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
@@ -53,7 +57,9 @@
 		amount = $bindable(),
 		supplyProgressStep = $bindable(),
 		inflowFee,
+		inflowFeeUnavailable,
 		currentStep,
+		onSelectToken,
 		onClose,
 		onNext,
 		onBack
@@ -178,6 +184,7 @@
 				identity: $authIdentity,
 				ethAddress: $ethAddress,
 				poolId: market.poolId,
+				chain: Chain.ETH,
 				asset: market.asset,
 				amount: amountBaseUnits,
 				inflowFee,
@@ -204,6 +211,19 @@
 
 			setTimeout(onClose, 750);
 		} catch (err: unknown) {
+			// A supply that may have reached the network is not offered again from the review: sent
+			// again, it would be signed with the next nonce, and both could execute.
+			if (isSendOutcomeUnknown(err)) {
+				toastsErrorNoTrace({
+					msg: { text: $i18n.send.error.ethereum_transaction_unconfirmed },
+					err
+				});
+
+				onClose();
+
+				return;
+			}
+
 			toastsError({ msg: { text: $i18n.liquidium.text.transaction_failed }, err });
 
 			onBack();
@@ -213,7 +233,7 @@
 
 {#snippet feeDisplay()}
 	<EthFeeDisplay>
-		{#snippet label()}{$i18n.fee.text.network_fee}{/snippet}
+		{#snippet label()}{$i18n.liquidium.text.transaction_fee}{/snippet}
 	</EthFeeDisplay>
 {/snippet}
 
@@ -243,10 +263,12 @@
 			<LiquidiumSupplyForm
 				{feeDisplay}
 				{inflowFee}
+				{inflowFeeUnavailable}
 				{market}
 				{onClose}
 				onCustomErrorValidate={validateSupplyAmount}
 				{onNext}
+				{onSelectToken}
 				totalFee={$maxGasFee}
 				bind:amount
 			/>

@@ -15,6 +15,8 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { preventDefault } from '$lib/utils/event-modifiers.utils';
+	import { formatToken } from '$lib/utils/format.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
@@ -23,8 +25,13 @@
 		totalFee?: bigint;
 		minFee?: bigint;
 		ethereumEstimateFee?: bigint;
+		// Optional hard cap (base units), same contract as `MaxBalanceButton`: when set, "Max"
+		// never exceeds it even if the balance would afford more.
+		maxAmount?: bigint;
 		exchangeValueUnit?: DisplayUnit;
 		inputUnit?: DisplayUnit;
+		// Focuses the amount field when the form opens, as the send forms do.
+		autofocus?: boolean;
 	}
 
 	let {
@@ -32,8 +39,10 @@
 		totalFee,
 		minFee,
 		ethereumEstimateFee,
+		maxAmount,
 		exchangeValueUnit = $bindable('usd'),
-		inputUnit = 'token'
+		inputUnit = 'token',
+		autofocus = false
 	}: Props = $props();
 
 	let errorType = $state<TokenActionErrorType | undefined>();
@@ -64,7 +73,7 @@
 
 	let isZeroBalance = $derived(isNullish($sourceTokenBalance) || $sourceTokenBalance === ZERO);
 
-	let maxAmount = $derived(
+	let maxBalanceAmount = $derived(
 		nonNullish(totalFee)
 			? getMaxTransactionAmount({
 					balance: $sourceTokenBalance,
@@ -75,12 +84,35 @@
 			: undefined
 	);
 
+	// Clamp the affordable max to the optional base-units cap.
+	let cappedMaxAmount = $derived.by(() => {
+		if (isNullish(maxBalanceAmount) || isNullish(maxAmount)) {
+			return maxBalanceAmount;
+		}
+
+		const affordable = parseToken({ value: maxBalanceAmount, unitName: $sourceToken.decimals });
+		const capped = affordable < maxAmount ? affordable : maxAmount;
+
+		return formatToken({
+			value: capped,
+			unitName: $sourceToken.decimals,
+			displayDecimals: $sourceToken.decimals
+		});
+	});
+
+	// A balance the fee uses up computes to a max of 0: Max would set nothing worth having, so it
+	// shows no hover.
+	let hasPositiveMax = $derived(
+		nonNullish(cappedMaxAmount) &&
+			parseToken({ value: cappedMaxAmount, unitName: $sourceToken.decimals }) > ZERO
+	);
+
 	let amountSetToMax = $state(false);
 	const setMax = () => {
-		if (!isZeroBalance && nonNullish(maxAmount)) {
+		if (!isZeroBalance && nonNullish(cappedMaxAmount)) {
 			amountSetToMax = true;
 
-			sendAmount = maxAmount;
+			sendAmount = cappedMaxAmount;
 		}
 	};
 
@@ -92,17 +124,29 @@
 			return;
 		}
 
-		debounce(() => setMax(), 500)();
+		debounce(() => {
+			// Rechecked because the flag can be cleared during the delay: typing into the input
+			// clears it, and this callback would otherwise overwrite what the user just typed —
+			// and re-arm the flag, so the next fee change would do it again.
+			if (!amountSetToMax) {
+				return;
+			}
+
+			setMax();
+		}, 500)();
 	};
 
 	$effect(() => {
-		[totalFee];
+		// Same reason as `MaxBalanceButton`: the cap arrives asynchronously and can shrink
+		// afterwards, so a "Max" chosen before it landed has to be reapplied.
+		[totalFee, maxAmount];
 
 		untrack(() => debounceSetMax());
 	});
 </script>
 
 <TokenInput
+	{autofocus}
 	displayUnit={inputUnit}
 	exchangeRate={$sourceTokenExchangeRate}
 	isSelectable={false}
@@ -124,18 +168,22 @@
 	{/snippet}
 
 	{#snippet balance()}
+		<!-- The amount field sits 9 px above, so the tap area grows at most 9 px up and down. -->
 		<button
-			class="font-semibold transition-all"
-			class:animate-pulse={isNullish(maxAmount)}
-			class:text-brand-primary={!isZeroBalance && isNullish(errorType) && nonNullish(maxAmount)}
+			class="hit-area relative font-semibold transition-[color,scale] duration-150 ease-out [--hit-area-y:calc(100%+1.125rem)] press-icon"
+			class:animate-pulse={isNullish(cappedMaxAmount)}
+			class:hover:text-brand-hover={!isZeroBalance && isNullish(errorType) && hasPositiveMax}
+			class:text-brand-primary={!isZeroBalance &&
+				isNullish(errorType) &&
+				nonNullish(cappedMaxAmount)}
 			class:text-error-primary={isZeroBalance || nonNullish(errorType)}
-			class:text-tertiary={isNullish(maxAmount)}
+			class:text-tertiary={isNullish(cappedMaxAmount)}
 			data-tid="convert-amount-source-balance"
 			onclick={preventDefault(setMax)}
 		>
 			{$i18n.convert.text.max_balance}:
-			{nonNullish(maxAmount)
-				? `${maxAmount} ${$sourceToken.symbol}`
+			{nonNullish(cappedMaxAmount)
+				? `${cappedMaxAmount} ${$sourceToken.symbol}`
 				: $i18n.convert.text.calculating_max_amount}
 		</button>
 	{/snippet}

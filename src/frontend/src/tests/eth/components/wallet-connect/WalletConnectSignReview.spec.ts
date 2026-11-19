@@ -1,0 +1,494 @@
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
+import { SESSION_REQUEST_ETH_SIGN_V4 } from '$eth/constants/wallet-connect.constants';
+import en from '$tests/mocks/i18n.mock';
+import type { WalletKitTypes } from '@reown/walletkit';
+import { fireEvent, render } from '@testing-library/svelte';
+
+describe('WalletConnectSignReview', () => {
+	const HOLDER = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
+	const SPENDER = '0xcA11bde05977b3631167028862bE2a173976CA11';
+	const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f';
+
+	const daiPermitRequest = (allowed: unknown): WalletKitTypes.SessionRequest =>
+		({
+			id: 1,
+			topic: 'mock-topic',
+			params: {
+				request: {
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: [
+						HOLDER,
+						JSON.stringify({
+							domain: {
+								name: 'Dai Stablecoin',
+								version: '1',
+								chainId: '1',
+								verifyingContract: DAI
+							},
+							types: {
+								EIP712Domain: [
+									{ name: 'name', type: 'string' },
+									{ name: 'version', type: 'string' },
+									{ name: 'chainId', type: 'uint256' },
+									{ name: 'verifyingContract', type: 'address' }
+								],
+								Permit: [
+									{ name: 'holder', type: 'address' },
+									{ name: 'spender', type: 'address' },
+									{ name: 'nonce', type: 'uint256' },
+									{ name: 'expiry', type: 'uint256' },
+									{ name: 'allowed', type: 'bool' }
+								]
+							},
+							primaryType: 'Permit',
+							message: {
+								holder: HOLDER,
+								spender: SPENDER,
+								nonce: '0',
+								expiry: '1893456000',
+								allowed
+							}
+						})
+					]
+				},
+				// CAIP-2, as a WalletConnect envelope states it, and as the chain binding reads it.
+				chainId: `eip155:${ETHEREUM_NETWORK.chainId}`
+			},
+			verifyContext: {
+				verified: {
+					verifyUrl: 'https://verify.walletconnect.org',
+					validation: 'VALID',
+					origin: 'https://dapp.example',
+					isScam: false
+				}
+			}
+		}) as unknown as WalletKitTypes.SessionRequest;
+
+	// Hyperliquid asks its actions to be signed with routing fields its schema does not declare.
+	// They are absent from the digest, so the request signs like any other.
+	const hyperliquidAcceptTermsRequest = (): WalletKitTypes.SessionRequest =>
+		({
+			id: 2,
+			topic: 'mock-topic',
+			params: {
+				request: {
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: [
+						HOLDER,
+						JSON.stringify({
+							domain: {
+								name: 'HyperliquidSignTransaction',
+								version: '1',
+								chainId: 42161,
+								verifyingContract: '0x0000000000000000000000000000000000000000'
+							},
+							types: {
+								EIP712Domain: [
+									{ name: 'name', type: 'string' },
+									{ name: 'version', type: 'string' },
+									{ name: 'chainId', type: 'uint256' },
+									{ name: 'verifyingContract', type: 'address' }
+								],
+								'Hyperliquid:AcceptTerms': [
+									{ name: 'hyperliquidChain', type: 'string' },
+									{ name: 'time', type: 'uint64' }
+								]
+							},
+							primaryType: 'Hyperliquid:AcceptTerms',
+							message: {
+								type: 'acceptTerms',
+								time: 1787170393018,
+								signatureChainId: '0xa4b1',
+								hyperliquidChain: 'Mainnet'
+							}
+						})
+					]
+				},
+				// Hyperliquid signs its actions under an Arbitrum domain, so that is the chain its
+				// session connects for and the one the domain is held to.
+				chainId: `eip155:${ARBITRUM_MAINNET_NETWORK.chainId}`
+			},
+			verifyContext: {
+				verified: {
+					verifyUrl: 'https://verify.walletconnect.org',
+					validation: 'VALID',
+					origin: 'https://app.hyperliquid.xyz',
+					isScam: false
+				}
+			}
+		}) as unknown as WalletKitTypes.SessionRequest;
+
+	// USDC's gasless transfer. Whoever holds the signature can pull the stated value out of the
+	// wallet by submitting it to the token contract, with no allowance granted beforehand.
+	const transferWithAuthorizationRequest = (): WalletKitTypes.SessionRequest =>
+		({
+			id: 3,
+			topic: 'mock-topic',
+			params: {
+				request: {
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: [
+						HOLDER,
+						JSON.stringify({
+							domain: {
+								name: 'USD Coin',
+								version: '2',
+								chainId: '1',
+								verifyingContract: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+							},
+							types: {
+								EIP712Domain: [
+									{ name: 'name', type: 'string' },
+									{ name: 'version', type: 'string' },
+									{ name: 'chainId', type: 'uint256' },
+									{ name: 'verifyingContract', type: 'address' }
+								],
+								TransferWithAuthorization: [
+									{ name: 'from', type: 'address' },
+									{ name: 'to', type: 'address' },
+									{ name: 'value', type: 'uint256' },
+									{ name: 'validAfter', type: 'uint256' },
+									{ name: 'validBefore', type: 'uint256' },
+									{ name: 'nonce', type: 'bytes32' }
+								]
+							},
+							primaryType: 'TransferWithAuthorization',
+							message: {
+								from: HOLDER,
+								to: SPENDER,
+								value: '5000000000',
+								validAfter: '0',
+								validBefore: '1893456000',
+								nonce: `0x${'ab'.repeat(32)}`
+							}
+						})
+					]
+				},
+				chainId: `eip155:${ETHEREUM_NETWORK.chainId}`
+			},
+			verifyContext: {
+				verified: {
+					verifyUrl: 'https://verify.walletconnect.org',
+					validation: 'VALID',
+					origin: 'https://dapp.example',
+					isScam: false
+				}
+			}
+		}) as unknown as WalletKitTypes.SessionRequest;
+
+	// Uniswap Permit2: one signature setting an allowance over two tokens for one spender.
+	const permit2BatchRequest = (): WalletKitTypes.SessionRequest =>
+		({
+			id: 4,
+			topic: 'mock-topic',
+			params: {
+				request: {
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: [
+						HOLDER,
+						JSON.stringify({
+							domain: {
+								name: 'Permit2',
+								chainId: '1',
+								verifyingContract: '0x000000000022d473030f116ddee9f6b43ac78ba3'
+							},
+							types: {
+								EIP712Domain: [
+									{ name: 'name', type: 'string' },
+									{ name: 'chainId', type: 'uint256' },
+									{ name: 'verifyingContract', type: 'address' }
+								],
+								PermitBatch: [
+									{ name: 'details', type: 'PermitDetails[]' },
+									{ name: 'spender', type: 'address' },
+									{ name: 'sigDeadline', type: 'uint256' }
+								],
+								PermitDetails: [
+									{ name: 'token', type: 'address' },
+									{ name: 'amount', type: 'uint160' },
+									{ name: 'expiration', type: 'uint48' },
+									{ name: 'nonce', type: 'uint48' }
+								]
+							},
+							primaryType: 'PermitBatch',
+							message: {
+								details: [
+									{ token: DAI, amount: '1000', expiration: '1893456000', nonce: '0' },
+									{
+										token: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+										amount: '2000',
+										expiration: '1893456000',
+										nonce: '0'
+									}
+								],
+								spender: SPENDER,
+								sigDeadline: '1893456000'
+							}
+						})
+					]
+				},
+				chainId: `eip155:${ETHEREUM_NETWORK.chainId}`
+			},
+			verifyContext: {
+				verified: {
+					verifyUrl: 'https://verify.walletconnect.org',
+					validation: 'VALID',
+					origin: 'https://dapp.example',
+					isScam: false
+				}
+			}
+		}) as unknown as WalletKitTypes.SessionRequest;
+
+	// A UniswapX-style order: a Permit2 transfer of the input token, bound to the order as its witness.
+	const permit2WitnessTransferRequest = (): WalletKitTypes.SessionRequest => ({
+		id: 5,
+		topic: 'mock-topic',
+		params: {
+			request: {
+				method: SESSION_REQUEST_ETH_SIGN_V4,
+				params: [
+					HOLDER,
+					JSON.stringify({
+						domain: {
+							name: 'Permit2',
+							chainId: '1',
+							verifyingContract: '0x000000000022d473030f116ddee9f6b43ac78ba3'
+						},
+						types: {
+							EIP712Domain: [
+								{ name: 'name', type: 'string' },
+								{ name: 'chainId', type: 'uint256' },
+								{ name: 'verifyingContract', type: 'address' }
+							],
+							PermitWitnessTransferFrom: [
+								{ name: 'permitted', type: 'TokenPermissions' },
+								{ name: 'spender', type: 'address' },
+								{ name: 'nonce', type: 'uint256' },
+								{ name: 'deadline', type: 'uint256' },
+								{ name: 'witness', type: 'Order' }
+							],
+							TokenPermissions: [
+								{ name: 'token', type: 'address' },
+								{ name: 'amount', type: 'uint256' }
+							],
+							Order: [
+								{ name: 'swapper', type: 'address' },
+								{ name: 'outputAmount', type: 'uint256' }
+							]
+						},
+						primaryType: 'PermitWitnessTransferFrom',
+						message: {
+							permitted: { token: DAI, amount: '1000' },
+							spender: SPENDER,
+							nonce: '7',
+							deadline: '1893456000',
+							witness: { swapper: HOLDER, outputAmount: '1' }
+						}
+					})
+				]
+			},
+			chainId: `eip155:${ETHEREUM_NETWORK.chainId}`
+		},
+		verifyContext: {
+			verified: {
+				verifyUrl: 'https://verify.walletconnect.org',
+				validation: 'VALID',
+				origin: 'https://dapp.example',
+				isScam: false
+			}
+		}
+	});
+
+	const props = { onApprove: vi.fn(), onReject: vi.fn() };
+
+	it('warns and disables approval for a type-invalid permit', () => {
+		const { getByText, getByRole } = render(WalletConnectSignReview, {
+			props: { ...props, request: daiPermitRequest('false') }
+		});
+
+		expect(getByText(en.wallet_connect.text.invalid_typed_data)).toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
+	it('does not warn and keeps approval enabled for a valid permit', () => {
+		const { queryByText, getByRole } = render(WalletConnectSignReview, {
+			props: { ...props, request: daiPermitRequest(true) }
+		});
+
+		expect(queryByText(en.wallet_connect.text.invalid_typed_data)).not.toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+	});
+
+	// A Hyperliquid action is signable and benign, and OISY still cannot say what it authorizes. It
+	// is treated like any other unrecognised schema rather than waved through on the strength of the
+	// dApp it came from, which is the cost of not guessing: an acknowledgement, not a block.
+	it('holds approval of a Hyperliquid action until the user confirms it', async () => {
+		const { getByText, queryByText, getByRole, getByLabelText } = render(WalletConnectSignReview, {
+			props: { ...props, request: hyperliquidAcceptTermsRequest() }
+		});
+
+		expect(queryByText(en.wallet_connect.text.invalid_typed_data)).not.toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.unreviewable_typed_data)).toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+
+		await fireEvent.click(getByLabelText(en.wallet_connect.text.unread_programs_acknowledge));
+
+		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+	});
+
+	// A signature that moves USDC is summarized like a permit: the token, the amount and where it goes.
+	it('states what an ERC-3009 authorization sends without asking for a confirmation', () => {
+		const { getByTestId, queryByText, queryByLabelText, getByRole } = render(
+			WalletConnectSignReview,
+			{
+				props: { ...props, request: transferWithAuthorizationRequest() }
+			}
+		);
+
+		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.methods)).not.toBeInTheDocument();
+		expect(
+			queryByLabelText(en.wallet_connect.text.unread_programs_acknowledge)
+		).not.toBeInTheDocument();
+
+		expect(getByTestId('wallet-connect-typed-data-recipient')).toHaveTextContent(SPENDER);
+
+		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+	});
+
+	// The transfer is stated, and the witness bound to it is the part OISY can't describe, so approval
+	// waits for the user's confirmation as it does for any request OISY can't fully describe.
+	it('states the transfer of a Permit2 witness transfer and holds approval until the user confirms it', async () => {
+		const { getByText, queryByText, getByRole, getByLabelText } = render(WalletConnectSignReview, {
+			props: { ...props, request: permit2WitnessTransferRequest() }
+		});
+
+		expect(getByText(en.wallet_connect.text.unreviewable_typed_data_witness)).toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
+
+		expect(getByText(en.wallet_connect.text.spender)).toBeInTheDocument();
+		expect(getByText(SPENDER)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.methods)).toBeInTheDocument();
+
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+
+		await fireEvent.click(getByLabelText(en.wallet_connect.text.unread_programs_acknowledge));
+
+		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+	});
+
+	// A schema OISY describes asks nothing of the user before approving.
+	it('asks no confirmation for a permit whose schema is recognised', () => {
+		const { queryByLabelText, getByRole } = render(WalletConnectSignReview, {
+			props: { ...props, request: daiPermitRequest(true) }
+		});
+
+		expect(
+			queryByLabelText(en.wallet_connect.text.unread_programs_acknowledge)
+		).not.toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+	});
+
+	// The RPC method is `eth_signTypedData_v4` for a permit and for a drainer alike, so it is the
+	// struct that says what is being signed.
+	it('names the struct an unrecognised signature hashes', () => {
+		const { getByText, getAllByText } = render(WalletConnectSignReview, {
+			props: { ...props, request: hyperliquidAcceptTermsRequest() }
+		});
+
+		expect(getByText(en.wallet_connect.text.methods)).toBeInTheDocument();
+
+		// Twice on purpose: the `Type` row states the struct that is hashed, the list below states
+		// the whole type graph it belongs to. The row is not a duplicate of the list's first entry,
+		// it is the labelled version of it.
+		expect(getAllByText('Hyperliquid:AcceptTerms')).toHaveLength(2);
+	});
+
+	it('does not name structs for a schema it can describe', () => {
+		const { queryByText } = render(WalletConnectSignReview, {
+			props: { ...props, request: daiPermitRequest(true) }
+		});
+
+		expect(queryByText(en.wallet_connect.text.methods)).not.toBeInTheDocument();
+	});
+
+	// A schema OISY summarizes is not warned about: the review states the spender, the amount and
+	// the expiry, so there is nothing it failed to establish.
+	it('does not warn about a permit whose schema is recognised', () => {
+		const { queryByText } = render(WalletConnectSignReview, {
+			props: { ...props, request: daiPermitRequest(true) }
+		});
+
+		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
+	});
+
+	// A Permit2 batch is summarized token by token, so there is nothing the review failed to establish.
+	it('states each allowance of a Permit2 batch instead of warning about it', () => {
+		const { getAllByText, getByText, queryByText, getByRole } = render(WalletConnectSignReview, {
+			props: { ...props, request: permit2BatchRequest() }
+		});
+
+		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.methods)).not.toBeInTheDocument();
+
+		expect(getAllByText(en.wallet_connect.text.token)).toHaveLength(2);
+		expect(getByText(SPENDER)).toBeInTheDocument();
+
+		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+	});
+
+	// The chain the domain binds to, on a request whose schema says nothing else: the same struct
+	// signed for Arbitrum is not the signature it would be for Ethereum, and that much is knowable
+	// even where the contents are not.
+	it('states the network of a schema it cannot describe', () => {
+		const { getByText, getByTestId } = render(WalletConnectSignReview, {
+			props: { ...props, request: hyperliquidAcceptTermsRequest() }
+		});
+
+		expect(getByText(en.wallet_connect.text.network)).toBeInTheDocument();
+		expect(getByTestId('wallet-connect-domain-network')).toHaveTextContent(
+			ARBITRUM_MAINNET_NETWORK.name
+		);
+	});
+
+	// Stated once, from the domain. The token is matched on that same chain id, so a row per source
+	// would print the same network twice under one label.
+	it('states the network once for a schema it can describe', () => {
+		const { getAllByText, getByTestId } = render(WalletConnectSignReview, {
+			props: { ...props, request: daiPermitRequest(true) }
+		});
+
+		expect(getAllByText(en.wallet_connect.text.network)).toHaveLength(1);
+		expect(getByTestId('wallet-connect-domain-network')).toHaveTextContent(ETHEREUM_NETWORK.name);
+	});
+
+	it('does not warn about a request Verify does not flag', () => {
+		const { getByRole, queryByTestId } = render(WalletConnectSignReview, {
+			props: { ...props, request: daiPermitRequest(true) }
+		});
+
+		expect(queryByTestId('wallet-connect-scam-warning')).not.toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.approve })).toBeInTheDocument();
+	});
+
+	// Verify states its verdict on every request, so a site flagged after it connected is caught here.
+	it('only offers to reject a request Verify flags as a scam, and says why', () => {
+		const request = daiPermitRequest(true);
+
+		const { getByRole, getByTestId, queryByRole } = render(WalletConnectSignReview, {
+			props: {
+				...props,
+				request: {
+					...request,
+					verifyContext: { verified: { ...request.verifyContext.verified, isScam: true } }
+				}
+			}
+		});
+
+		expect(getByTestId('wallet-connect-scam-warning')).toBeInTheDocument();
+		expect(queryByRole('button', { name: en.core.text.approve })).not.toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.reject })).toBeInTheDocument();
+	});
+});

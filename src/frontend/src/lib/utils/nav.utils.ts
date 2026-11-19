@@ -28,6 +28,10 @@ export const isTransactionsPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`;
 export const isSettingsPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Settings}`;
+export const isHelpPath = (path: string | null) =>
+	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Help}`;
+export const isToolsPath = (path: string | null) =>
+	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Tools}`;
 export const isDappExplorerPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Explore}`;
 export const isActivityPath = (path: string | null) =>
@@ -39,16 +43,25 @@ export const isNftsPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}`) ?? false;
 export const isEarningPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earning}`) ?? false;
+export const isTradingPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Trading}`) ?? false;
+export const isBorrowPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Borrow}`) ?? false;
+export const isOisyTradeProviderPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.ProvidersOisyTrade}`) ?? false;
+export const isBorrowingsPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Borrowings}`) ?? false;
 export const isRewardsPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
 export const isEarnPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earn}`) ?? false;
 
-// The Assets section spans three sub-routes (Tokens / NFTs / Earning), all rendered by
-// the same `Assets.svelte`. Used to tell "entering the section" from an intra-section
-// sub-tab switch so section-entry analytics fire once per visit, not once per sub-tab.
+// The Assets section spans one route per tab (Tokens / Trading / Earning / Borrowing), all
+// rendered by the same `Assets.svelte`. Used to tell "entering the section" from a tab
+// switch so section-entry analytics fire once per visit, not once per tab. NFTs is its own
+// section, although `Assets.svelte` renders it too.
 export const isAssetsRouteId = (id: string | null): boolean =>
-	isTokensPath(id) || isNftsPath(id) || isEarningPath(id);
+	isTokensPath(id) || isTradingPath(id) || isEarningPath(id) || isBorrowingsPath(id);
 
 export const transactionsUrl = ({ token }: { token: Token }): string =>
 	tokenUrl({ path: AppPath.Transactions, token });
@@ -56,6 +69,10 @@ export const transactionsUrl = ({ token }: { token: Token }): string =>
 export const isRouteTransactions = ({ route: { id } }: Page): boolean => isTransactionsPath(id);
 
 export const isRouteSettings = ({ route: { id } }: Page): boolean => isSettingsPath(id);
+
+export const isRouteHelp = ({ route: { id } }: Page): boolean => isHelpPath(id);
+
+export const isRouteTools = ({ route: { id } }: Page): boolean => isToolsPath(id);
 
 export const isRouteDappExplorer = ({ route: { id } }: Page): boolean => isDappExplorerPath(id);
 
@@ -67,6 +84,12 @@ export const isRouteTokens = ({ route: { id } }: Page): boolean => isTokensPath(
 export const isRouteNfts = ({ route: { id } }: Page): boolean => isNftsPath(id);
 
 export const isRouteEarning = ({ route: { id } }: Page): boolean => isEarningPath(id);
+
+export const isRouteTrading = ({ route: { id } }: Page): boolean => isTradingPath(id);
+export const isRouteBorrow = ({ route: { id } }: Page): boolean => isBorrowPath(id);
+export const isRouteOisyTradeProvider = ({ route: { id } }: Page): boolean =>
+	isOisyTradeProviderPath(id);
+export const isRouteBorrowings = ({ route: { id } }: Page): boolean => isBorrowingsPath(id);
 
 export const isRouteRewards = ({ route: { id } }: Page): boolean => isRewardsPath(id);
 
