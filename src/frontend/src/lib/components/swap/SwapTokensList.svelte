@@ -25,7 +25,7 @@
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
 	import { canPayWithToken } from '$lib/utils/swap.utils';
-	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+	import { isTokenEnabled } from '$lib/utils/token-toggleable.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { sortTokens } from '$lib/utils/tokens.utils';
 
@@ -86,7 +86,7 @@
 			)
 	);
 
-	const isActive = (token: TokenUi): boolean => !isTokenToggleable(token) || token.enabled;
+	const isActive = (token: TokenUi): boolean => isTokenEnabled(token);
 
 	// Inactive tokens come last, by symbol: their row shows no balance, so a balance must not move
 	// them up the list.

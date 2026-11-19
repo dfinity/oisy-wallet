@@ -30,6 +30,7 @@
 		onClick?: MouseEventHandler<HTMLButtonElement>;
 		fullWidth?: boolean;
 		disabled?: boolean;
+		button?: HTMLButtonElement;
 	}
 
 	let {
@@ -53,7 +54,8 @@
 		fullWidth = false,
 		disabled = false,
 		titleStyleClass = '',
-		subtitleStyleClass = ''
+		subtitleStyleClass = '',
+		button = $bindable()
 	}: Props = $props();
 </script>
 
@@ -67,6 +69,7 @@
 	class:w-full={dividers || fullWidth}
 >
 	<button
+		bind:this={button}
 		style="--focus-outline-offset: -3px"
 		class="flex w-full rounded-lg border-0 px-2"
 		class:cursor-default={isNullish(onClick)}

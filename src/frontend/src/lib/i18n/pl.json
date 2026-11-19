@@ -946,31 +946,18 @@
 				"use_for_all_tokens": "Użyj dla wszystkich tokenów podczas odbierania z portfeli, od użytkowników lub z innych aplikacji obsługujących ten format adresu.",
 				"use_for_icrc_deposit": "Użyj do odbierania tokenów ICRC-1 w sieci ICP, takich jak SNS, tokeny ck itp.",
 				"use_for_icp_deposit": "Użyj do wpłat ICP z giełd lub innych portfeli obsługujących tylko identyfikatory kont.",
-				"your_private_eth_address": "Twój prywatny adres dla wszystkich tokenów ERC20.",
-				"display_account_id_qr": "Wyświetl identyfikator konta ICP jako kod QR",
 				"account_id_copied": "Identyfikator konta ICP skopiowany do schowka.",
 				"principal": "Principal ICP",
-				"principal_title": "",
-				"internet_computer_principal_copied": "Principal Internet Computer skopiowany do schowka.",
-				"display_internet_computer_principal_qr": "Wyświetl Principal Internet Computer jako kod QR",
-				"icp_account": "Konto ICP (dla giełd)",
-				"icp_account_title": "",
-				"icp_account_copied": "Konto ICP skopiowane do schowka.",
-				"display_icp_account_qr": "Wyświetl konto ICP jako kod QR"
+				"internet_computer_principal_copied": "Principal Internet Computer skopiowany do schowka."
 			}
 		},
 		"ethereum": {
 			"text": {
 				"checking_status": "Sprawdzanie statusu $token...",
-				"from_network": "Odbierz z sieci $network",
-				"eth_to_cketh_description": "Konwersja $token na $ckToken wymaga wywołania inteligentnego kontraktu w sieci $network i przekazania Twojego głównego IC jako argumentu – $oisy_name upraszcza tę procedurę, umożliwiając wykonanie konwersji bezpośrednio w portfelu.",
-				"learn_how_to_convert": "Dowiedz się, jak przekonwertować $token na $ckToken",
 				"metamask": "Odbierz z Metamask",
 				"ethereum": "Ethereum",
-				"ethereum_title": "",
 				"ethereum_address": "Adres",
-				"ethereum_address_copied": "Adres Ethereum skopiowany do schowka.",
-				"display_ethereum_address_qr": "Wyświetl adres Ethereum jako kod QR"
+				"ethereum_address_copied": "Adres Ethereum skopiowany do schowka."
 			},
 			"error": {
 				"no_metamask": "Metamask nie jest dostępny."
@@ -990,10 +977,7 @@
 				"bitcoin_testnet_address_title": "",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
 				"bitcoin_regtest_address_title": "",
-				"display_bitcoin_address_qr": "Wyświetl adres Bitcoin jako kod QR",
-				"bitcoin_address_copied": "Adres Bitcoin skopiowany do schowka.",
-				"from_network": "Przelej Bitcoin w sieci BTC na ten adres, aby otrzymać ckBTC.",
-				"fee_applied": "Należy pamiętać, że zostanie naliczona szacunkowa opłata między sieciami w wysokości $fee BTC."
+				"bitcoin_address_copied": "Adres Bitcoin skopiowany do schowka."
 			},
 			"info": {
 				"no_new_btc": "Brak nowych potwierdzonych BTC.",
@@ -1011,16 +995,81 @@
 				"solana_devnet_address_title": "",
 				"solana_local_address": "Lokalny adres Solana",
 				"solana_local_address_title": "",
-				"solana_address_copied": "Adres Solana skopiowany do schowka",
-				"display_solana_address_qr": "Wyświetl adres Solana jako kod QR"
+				"solana_address_copied": "Adres Solana skopiowany do schowka"
 			}
 		},
 		"xrp": {
 			"text": {
 				"xrp_address": "",
 				"xrp_address_title": "",
-				"xrp_address_copied": "",
-				"display_xrp_address_qr": ""
+				"xrp_address_copied": ""
+			}
+		},
+		"token": {
+			"text": {
+				"select_token": "",
+				"networks_count": "",
+				"test_network": "",
+				"change_token": "",
+				"route_native": "",
+				"route_native_description": "",
+				"send_instruction": "",
+				"enable_info": "",
+				"enable_token": "",
+				"enabling_token": "",
+				"enable_error": "",
+				"address_loading": "",
+				"address_error": "",
+				"no_routes": "",
+				"route_unavailable": "",
+				"import_token": "",
+				"import_nft": "",
+				"address_format": "",
+				"principal": "",
+				"account_id": "",
+				"principal_label": "",
+				"account_id_label": "",
+				"address_label": "",
+				"address_copied": "",
+				"how_to_convert": "",
+				"how_to_convert_description": "",
+				"copy_address": "",
+				"copy_principal": "",
+				"copy_account_id": "",
+				"no_match": "",
+				"title_direct": "",
+				"title_as": "",
+				"route_title": "",
+				"ck_twin_benefit": "",
+				"convert_hint": "",
+				"principal_description": "",
+				"account_id_description": ""
+			}
+		},
+		"ckbtc": {
+			"text": {
+				"deposit_address": "",
+				"copy_deposit_address": "",
+				"deposit_address_copied": "",
+				"confirmations": "",
+				"estimated_fee": "",
+				"unavailable": "",
+				"terms_error": "",
+				"view_activity": "",
+				"receive_as": "",
+				"benefit": "",
+				"benefit_generic": "",
+				"credit_note": ""
+			}
+		},
+		"addresses": {
+			"text": {
+				"evm_title": "",
+				"evm_networks": "",
+				"principal_tag": "",
+				"account_id_tag": "",
+				"show_qr": "",
+				"copy": ""
 			}
 		}
 	},
@@ -1353,7 +1402,6 @@
 			"cketh_conversions_may_take": "Konwersje ckETH mogą potrwać do 20 minut",
 			"ckerc20_conversions_may_take": "Konwersje $ckErc20 mogą potrwać do 20 minut",
 			"how_to_convert_eth_to_cketh": "Oto, jak możesz przekonwertować $token na $ckToken na $oisy_name",
-			"send_eth": "Wyślij $token na swój adres $oisy_name",
 			"wait_eth_current_balance": "Poczekaj na przybycie $token. Bieżące saldo",
 			"set_amount": "Ustaw kwotę do konwersji",
 			"check_balance_for_fees": "Sprawdź saldo $token pod kątem opłat za konwersję",
@@ -1374,7 +1422,8 @@
 			"unsupported_token_conversion": "Konwersja dla wybranego tokena nie jest obsługiwana.",
 			"calculating_max_amount": "Obliczanie...",
 			"send_to": "Wyślij przekonwertowane aktywa do",
-			"custom_destination": "Inny adres"
+			"custom_destination": "Inny adres",
+			"send_token_on_network": ""
 		},
 		"assertion": {
 			"insufficient_funds": "Niewystarczające saldo"

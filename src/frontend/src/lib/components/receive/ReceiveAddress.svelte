@@ -2,14 +2,12 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
-	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import ReceiveAddressField from '$lib/components/receive/ReceiveAddressField.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { RECEIVE_TOKENS_MODAL_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import type { OptionString } from '$lib/types/string';
-	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		text?: Snippet;
@@ -51,31 +49,19 @@
 				</p>
 			{/if}
 
-			<div
-				class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2"
-				class:mt-1.5={isNullish(text)}
-				data-tid={testId}
-			>
-				<NetworkLogo color="white" {network} size="sm" />
-
-				{#if nonNullish(address)}
-					<output
-						id="ic-wallet-address"
-						class="flex-1 text-sm break-all"
-						data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
-						in:fade>{address}</output
-					>
-				{:else}
-					<span class="w-full"><SkeletonText /></span>
-				{/if}
-
-				{#if nonNullish(address)}
-					<div in:fade>
-						<ReceiveActions {address} {copyAriaLabel} {copyButtonTestId} {qrCodeAction} />
-					</div>
-				{:else}
-					<div class="min-w-20">&ZeroWidthSpace;</div>
-				{/if}
+			<div class:mt-1.5={isNullish(text)} data-tid={testId}>
+				<ReceiveAddressField
+					{address}
+					compact
+					{copyAriaLabel}
+					{copyButtonTestId}
+					{qrCodeAction}
+					testId={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
+				>
+					{#snippet leading()}
+						<NetworkLogo color="white" {network} size="sm" />
+					{/snippet}
+				</ReceiveAddressField>
 			</div>
 
 			{@render children?.()}

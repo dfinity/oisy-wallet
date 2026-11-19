@@ -5,6 +5,7 @@ import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OisyTradeOrderView, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
+import type { ReceiveHowToConvertData } from '$lib/types/receive';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
 import type { SendModalData } from '$lib/types/send';
@@ -12,38 +13,6 @@ import type { PendingTipClaim } from '$lib/types/tip';
 import type { NavigationTarget } from '@sveltejs/kit';
 import { derived, type Readable } from 'svelte/store';
 
-export const modalEthReceive: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'eth-receive'
-);
-export const modalIcpReceive: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'icp-receive'
-);
-export const modalIcrcReceive: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'icrc-receive'
-);
-export const modalCkBTCReceive: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'ckbtc-receive'
-);
-export const modalCkETHReceive: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'cketh-receive'
-);
-export const modalBtcReceive: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'btc-receive'
-);
-export const modalSolReceive: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'sol-receive'
-);
-export const modalXrpReceive: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'xrp-receive'
-);
 export const modalReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive'
@@ -159,6 +128,12 @@ export const modalHowToConvertToTwinTokenEth: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'how-to-convert-to-twin-token-eth'
 );
+export const modalHowToConvertToTwinTokenEthData: Readable<ReceiveHowToConvertData | undefined> =
+	derived(modalStore, ($modalStore) =>
+		$modalStore?.type === 'how-to-convert-to-twin-token-eth'
+			? ($modalStore?.data as ReceiveHowToConvertData | undefined)
+			: undefined
+	);
 export const modalWalletConnectAuth: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'wallet-connect-auth'

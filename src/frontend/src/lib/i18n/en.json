@@ -946,31 +946,18 @@
 				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users, or other apps that support this address format.",
 				"use_for_icrc_deposit": "Use for receiving ICRC-1 tokens in the ICP network, such as SNS, ck tokens, etc.",
 				"use_for_icp_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
-				"your_private_eth_address": "Your private address for all ERC20 tokens.",
-				"display_account_id_qr": "Display ICP Account ID as a QR code",
 				"account_id_copied": "ICP Account ID copied to clipboard.",
 				"principal": "ICP Principal",
-				"principal_title": "ICP wallet address - ckBTC, CHAT, ...",
-				"internet_computer_principal_copied": "Internet Computer Principal copied to clipboard.",
-				"display_internet_computer_principal_qr": "Display Internet Computer Principal as a QR code",
-				"icp_account": "ICP Account (for exchanges)",
-				"icp_account_title": "ICP wallet address - ICP token only",
-				"icp_account_copied": "ICP Account copied to clipboard.",
-				"display_icp_account_qr": "Display ICP Account as a QR code"
+				"internet_computer_principal_copied": "Internet Computer Principal copied to clipboard."
 			}
 		},
 		"ethereum": {
 			"text": {
 				"checking_status": "Checking $token status...",
-				"from_network": "Receive from $network Network",
-				"eth_to_cketh_description": "Converting $token into $ckToken requires a call to a smart contract on $network and passing your IC principal as argument – $oisy_name simplifies this procedure by enabling you to perform the conversion directly within the wallet.",
-				"learn_how_to_convert": "Learn how to convert $token to $ckToken",
 				"metamask": "Receive from Metamask",
 				"ethereum": "Ethereum",
-				"ethereum_title": "Ethereum wallet address",
 				"ethereum_address": "Address",
-				"ethereum_address_copied": "Ethereum address copied to clipboard.",
-				"display_ethereum_address_qr": "Display Ethereum address as a QR code"
+				"ethereum_address_copied": "Ethereum address copied to clipboard."
 			},
 			"error": {
 				"no_metamask": "Metamask is not available."
@@ -990,10 +977,7 @@
 				"bitcoin_testnet_address_title": "Bitcoin (Testnet) wallet address",
 				"bitcoin_regtest_address": "Bitcoin (Regtest)",
 				"bitcoin_regtest_address_title": "Bitcoin (Regtest) wallet address",
-				"display_bitcoin_address_qr": "Display Bitcoin Address as a QR code",
-				"bitcoin_address_copied": "Bitcoin Address copied to clipboard.",
-				"from_network": "Transfer Bitcoin on the BTC network to this address to receive ckBTC.",
-				"fee_applied": "Please note that an estimated inter-network fee of $fee BTC will be applied."
+				"bitcoin_address_copied": "Bitcoin Address copied to clipboard."
 			},
 			"info": {
 				"no_new_btc": "No new confirmed BTC.",
@@ -1011,16 +995,81 @@
 				"solana_devnet_address_title": "Solana Devnet wallet address",
 				"solana_local_address": "Solana Local Address",
 				"solana_local_address_title": "Solana Local wallet address",
-				"solana_address_copied": "Solana address copied to clipboard",
-				"display_solana_address_qr": "Display Solana address as QR code"
+				"solana_address_copied": "Solana address copied to clipboard"
 			}
 		},
 		"xrp": {
 			"text": {
 				"xrp_address": "XRP Address",
 				"xrp_address_title": "XRP Ledger wallet address",
-				"xrp_address_copied": "XRP address copied to clipboard",
-				"display_xrp_address_qr": "Display XRP address as QR code"
+				"xrp_address_copied": "XRP address copied to clipboard"
+			}
+		},
+		"token": {
+			"text": {
+				"select_token": "Select token to receive",
+				"networks_count": "$count networks",
+				"test_network": "Test network",
+				"change_token": "Change token",
+				"route_native": "Native $network",
+				"route_native_description": "Stays $token on the $network network",
+				"send_instruction": "Send only $token on $network to this address.",
+				"enable_info": "$token is not enabled in your wallet yet. Enable it to see the address.",
+				"enable_token": "Enable $token",
+				"enabling_token": "Enabling $token…",
+				"enable_error": "OISY couldn't enable $token. Your selection is kept. Try again.",
+				"address_loading": "Loading your address",
+				"address_error": "OISY couldn't load this address. Try again.",
+				"no_routes": "$token can't be received on the networks you have enabled.",
+				"route_unavailable": "The option you chose is no longer available. Choose again.",
+				"import_token": "Import token",
+				"import_nft": "This is an NFT collection. Receive it from the NFT section instead.",
+				"address_format": "Address format",
+				"principal": "Principal",
+				"account_id": "Account ID",
+				"principal_label": "ICP Principal",
+				"account_id_label": "ICP Account ID",
+				"address_label": "$network address",
+				"address_copied": "$network address copied to clipboard.",
+				"how_to_convert": "How to convert $token to $ckToken",
+				"how_to_convert_description": "You can also start with $token on $network: it arrives in your wallet on $network, then Convert turns it into $ckToken.",
+				"copy_address": "Copy $network address",
+				"copy_principal": "Copy ICP Principal",
+				"copy_account_id": "Copy ICP Account ID",
+				"no_match": "No matching tokens. Try a different name or symbol.",
+				"title_direct": "Receive $token on $network",
+				"title_as": "Receive $token as $creditedToken",
+				"route_title": "Networks for $token",
+				"ck_twin_benefit": "As $token: fast and cheap",
+				"convert_hint": "Convert to $ckToken after it arrives for fast, cheap transfers.",
+				"principal_description": "Receives ICP and every Internet Computer token, like ckBTC and CHAT.",
+				"account_id_description": "ICP token only. Use it when an exchange asks for an Account ID."
+			}
+		},
+		"ckbtc": {
+			"text": {
+				"deposit_address": "Bitcoin deposit address for ckBTC",
+				"copy_deposit_address": "Copy Bitcoin deposit address for ckBTC",
+				"deposit_address_copied": "Bitcoin deposit address for ckBTC copied to clipboard.",
+				"confirmations": "Bitcoin confirmations",
+				"estimated_fee": "Estimated deposit fee",
+				"unavailable": "Unavailable",
+				"terms_error": "OISY couldn't load the current deposit terms.",
+				"view_activity": "View ckBTC activity",
+				"receive_as": "Receive as $token",
+				"benefit": "$count confirmations, then fast and cheap",
+				"benefit_generic": "After confirmations: fast and cheap",
+				"credit_note": "OISY credits ckBTC on Internet Computer after these confirmations. A deposit smaller than the fee yields no ckBTC."
+			}
+		},
+		"addresses": {
+			"text": {
+				"evm_title": "EVM wallet address",
+				"evm_networks": "One address for $networks.",
+				"principal_tag": "Tokens like ckBTC, CHAT, …",
+				"account_id_tag": "ICP token only",
+				"show_qr": "Show the QR code of $address",
+				"copy": "Copy $address"
 			}
 		}
 	},
@@ -1353,7 +1402,6 @@
 			"cketh_conversions_may_take": "ckETH conversions may take up to 20 minutes",
 			"ckerc20_conversions_may_take": "$ckErc20 conversions may take up to 20 minutes",
 			"how_to_convert_eth_to_cketh": "Here is how you can convert $token to $ckToken on $oisy_name",
-			"send_eth": "Send $token to your $oisy_name address",
 			"wait_eth_current_balance": "Wait for $token to arrive. Current balance",
 			"set_amount": "Set amount for conversion",
 			"check_balance_for_fees": "Check $token balance for conversion fees",
@@ -1374,7 +1422,8 @@
 			"unsupported_token_conversion": "Conversion for the selected token is not supported.",
 			"calculating_max_amount": "Calculating...",
 			"send_to": "Send converted assets to",
-			"custom_destination": "Another address"
+			"custom_destination": "Another address",
+			"send_token_on_network": "Send $token on $network to your $oisy_name address"
 		},
 		"assertion": {
 			"insufficient_funds": "Insufficient balance"

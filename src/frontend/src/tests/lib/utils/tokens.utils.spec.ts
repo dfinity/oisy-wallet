@@ -1270,6 +1270,15 @@ describe('tokens.utils', () => {
 			mockValidSplToken
 		];
 
+		it('should find an ERC-4626 vault by its contract address', () => {
+			expect(
+				filterTokens({
+					tokens: [...tokens, mockValidErc4626Token],
+					filter: mockValidErc4626Token.address.toUpperCase()
+				})
+			).toStrictEqual([mockValidErc4626Token]);
+		});
+
 		it('should filter tokens by symbol correctly when filter is provided', () => {
 			expect(filterTokens({ tokens, filter: 'BTC' })).toStrictEqual([BTC_MAINNET_TOKEN]);
 			expect(filterTokens({ tokens, filter: 'PEPE' })).toStrictEqual([]);

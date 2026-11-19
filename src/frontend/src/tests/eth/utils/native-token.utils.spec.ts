@@ -2,11 +2,15 @@ import { EVM_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens.erc20.env';
 import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
 import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
 import { ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
-import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
+import {
+	ETHEREUM_TOKEN,
+	SEPOLIA_TOKEN,
+	SUPPORTED_ETHEREUM_TOKENS
+} from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
+import { findNativeEthereumToken, isTokenEthereumNative } from '$eth/utils/native-token.utils';
 
 describe('native-token.utils', () => {
 	describe('isTokenEthereumNative', () => {
@@ -30,5 +34,27 @@ describe('native-token.utils', () => {
 				expect(isTokenEthereumNative(token)).toBeFalsy();
 			}
 		);
+	});
+
+	describe('findNativeEthereumToken', () => {
+		it('should find the native token of the given network', () => {
+			const nativeTokens = [ETHEREUM_TOKEN, SEPOLIA_TOKEN];
+
+			expect(findNativeEthereumToken({ nativeTokens, networkId: SEPOLIA_TOKEN.network.id })).toBe(
+				SEPOLIA_TOKEN
+			);
+			expect(findNativeEthereumToken({ nativeTokens, networkId: ETHEREUM_TOKEN.network.id })).toBe(
+				ETHEREUM_TOKEN
+			);
+		});
+
+		it('should find nothing when that network is not enabled', () => {
+			expect(
+				findNativeEthereumToken({
+					nativeTokens: [ETHEREUM_TOKEN],
+					networkId: SEPOLIA_TOKEN.network.id
+				})
+			).toBeUndefined();
+		});
 	});
 });

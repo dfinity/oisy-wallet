@@ -217,9 +217,8 @@ describe('Actions', () => {
 			expect(container.querySelector(receiveButtonSelector)).toBeInTheDocument();
 		});
 
-		// The chain-fusion fallback renders a receive button with the same test id, so
-		// asserting on the button alone would not prove that the XRP branch was taken.
-		it('should open the XRP receive modal on the XRP network', async () => {
+		// Every page opens the same token-first Receive modal.
+		it('should open the receive modal on the XRP network', async () => {
 			setTransactionsPage();
 			mockPage.mockToken(XRP_TOKEN);
 
@@ -240,7 +239,7 @@ describe('Actions', () => {
 			button.click();
 
 			await waitFor(() => {
-				expect(get(modalStore)?.type).toBe('xrp-receive');
+				expect(get(modalStore)?.type).toBe('receive');
 			});
 		});
 	});

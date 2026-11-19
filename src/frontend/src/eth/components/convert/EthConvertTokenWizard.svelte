@@ -8,6 +8,7 @@
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { send as executeSend } from '$eth/services/send.services';
 	import {
 		type EthFeeContext as EthFeeContextType,
@@ -16,14 +17,15 @@
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isSendOutcomeUnknown, toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
+	import { findNativeEthereumToken } from '$eth/utils/native-token.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
-	import {
-		ckErc20HelperContractAddress,
-		ckEthHelperContractAddress,
-		ckUsdcConversionDisabled
-	} from '$icp-eth/derived/cketh.derived';
+	import { ckUsdcConversionDisabled } from '$icp-eth/derived/cketh.derived';
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import {
+		toCkErc20HelperContractAddress,
+		toCkEthHelperContractAddress
+	} from '$icp-eth/utils/cketh.utils';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -43,6 +45,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep } from '$lib/types/wizard';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { isNetworkEthereum, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
@@ -73,13 +76,30 @@
 
 	const { feeStore } = getContext<EthFeeContextType>(ETH_FEE_CONTEXT_KEY);
 
-	let destination = $derived(
-		isTokenErc20($sourceToken)
-			? ($ckErc20HelperContractAddress ?? '')
-			: ($ckEthHelperContractAddress ?? '')
+	// The network, native token and minter come from the token being converted, not from the page:
+	// the conversion also opens from a ck token's page on the Internet Computer (Receive's How to convert).
+	let sourceNetwork = $derived(
+		isNetworkEthereum($sourceToken.network) && isNetworkIdEthereum($sourceToken.network.id)
+			? $sourceToken.network
+			: ($selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK)
 	);
 
-	let sourceNetwork = $derived($selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK);
+	let nativeEthereumToken = $derived(
+		findNativeEthereumToken({
+			nativeTokens: $enabledEthereumTokens,
+			networkId: sourceNetwork.id
+		}) ?? $nativeEthereumTokenWithFallback
+	);
+
+	let minterInfo = $derived($ckEthMinterInfoStore?.[nativeEthereumToken.id]);
+
+	let ckEthHelperContractAddress = $derived(toCkEthHelperContractAddress(minterInfo));
+
+	let destination = $derived(
+		isTokenErc20($sourceToken)
+			? (toCkErc20HelperContractAddress(minterInfo) ?? '')
+			: (ckEthHelperContractAddress ?? '')
+	);
 
 	const convert = async () => {
 		if (isNullishOrEmpty(destination)) {
@@ -108,7 +128,7 @@
 		}
 
 		const { valid } = assertCkEthMinterInfoLoaded({
-			minterInfo: $ckEthMinterInfoStore?.[$nativeEthereumTokenWithFallback.id],
+			minterInfo,
 			network: ICP_NETWORK
 		});
 
@@ -129,7 +149,7 @@
 		}
 
 		// Unexpected errors
-		if (isNullish($ethAddress) || isNullish($ckEthHelperContractAddress)) {
+		if (isNullish($ethAddress) || isNullish(ckEthHelperContractAddress)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.address_unknown }
 			});
@@ -154,7 +174,7 @@
 				sourceNetwork,
 				targetNetwork: ICP_NETWORK,
 				identity: $authIdentity,
-				minterInfo: $ckEthMinterInfoStore?.[$nativeEthereumTokenWithFallback.id]
+				minterInfo
 			});
 
 			trackEvent({
@@ -192,7 +212,7 @@
 <EthFeeContext
 	amount={sendAmount}
 	{destination}
-	nativeEthereumToken={$nativeEthereumTokenWithFallback}
+	{nativeEthereumToken}
 	observe={currentStep?.name !== WizardStepsConvert.CONVERTING &&
 		currentStep?.name !== WizardStepsConvert.REVIEW}
 	sendToken={$sourceToken}
@@ -221,7 +241,7 @@
 			<EthConvertProgress
 				{convertProgressStep}
 				{destination}
-				nativeEthereumToken={$nativeEthereumTokenWithFallback}
+				{nativeEthereumToken}
 				sourceTokenId={$sourceToken.id}
 			/>
 		{:else}
