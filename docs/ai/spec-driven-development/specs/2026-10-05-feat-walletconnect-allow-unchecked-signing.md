@@ -42,7 +42,7 @@ Each refusal below is placed in one of two tiers:
 **Solana** (`solana_signTransaction`, `solana_signAndSendTransaction`). Refused in `sign()` in
 `src/frontend/src/sol/services/wallet-connect.services.ts`; the review
 (`src/frontend/src/sol/components/wallet-connect/SolWalletConnectSignReview.svelte`) states the
-first two and holds Approve (`SolWalletConnectSignModal.svelte`).
+each of them and holds Approve (`SolWalletConnectSignModal.svelte`).
 
 | Refusal                                                                                                                 | Copy today                                                                          | Tier                          |
 | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------- |
@@ -50,6 +50,8 @@ first two and holds Approve (`SolWalletConnectSignModal.svelte`).
 | Actions that can't be shown accurately (`ambiguous`, listed below)                                                      | `wallet_connect.text.cannot_be_shown`, `wallet_connect.error.ambiguous_transaction` | Unlockable                    |
 | The connected wallet handed to another program: an `Assign` naming it, or a run that leaves it owned by another program | `wallet_connect.text.cannot_be_shown`, `wallet_connect.error.ambiguous_transaction` | Never (see D4)                |
 | An instruction OISY cannot read, with no simulated run accounting for it                                                | `wallet_connect.error.unreviewed_without_simulation`                                | Unlockable                    |
+| A send whose message names another account to pay its fee (`solana_signAndSendTransaction`)                             | `wallet_connect.text.fee_paid_by_others`, `wallet_connect.error.fee_paid_by_others` | Never (see D6)                |
+| An approval, checked or unchecked, with no simulated run to state how much the spender may spend                        | `wallet_connect.*.approval_without_simulation`                                      | Unlockable (see D6)           |
 | The review could not be computed (decode failed)                                                                        | Approve held, no notice                                                             | Never: nothing to check       |
 | `signAndSendTransaction` that still needs other signers                                                                 | none                                                                                | Never: the network rejects it |
 
@@ -63,10 +65,12 @@ batches that carry a refused instruction, nest a batch or do not hold together, 
 over-funded or prefunded account creations, unclassified System instructions, closing a lookup
 table, Compute Budget directives OISY cannot price, and instructions of known programs that fail to
 parse. The same refusal covers an account a program opens inside its own instruction with more than
-its rent, which only the simulated run shows.
+its rent, which only the simulated run shows. So do a token batch the run keeps whole
+(`keepsBatchWhole`) and a token call signed for a multisig with the wallet among its signers, stated
+by the message or made inside a program (`signsForMultisig`).
 
-The no-simulation refusal (`unreviewed && !simulated`) is the odd one out: the review only warns,
-Approve stays usable, and the refusal arrives as a toast afterwards.
+The no-simulation refusal (`solUnreviewedNotDescribed`) is stated on the review too, with Approve
+held. It used to be only a warning there, with the refusal arriving as a toast after Approve.
 
 **Solana** `solana_signMessage` over the bytes of a transaction (`sol_transaction_as_message`):
 **Never**. A dApp that needs a transaction signed asks for a transaction.
@@ -174,10 +178,8 @@ It is asked every time the switch is turned on. There is no "don't ask again".
 
 Applies to the Solana and EVM refusals in the Unlockable tier.
 
-**The no-simulation refusal moves onto the review.** Today a Solana request with an instruction
-nothing accounts for shows a warning, lets the user press Approve, and is refused in a toast
-afterwards. It is stated on the review as a refusal instead, like the other two Solana refusals,
-because the way out has to be offered where the refusal is.
+**The no-simulation refusal is stated on the review**, like the other Solana refusals, because the
+way out has to be offered where the refusal is.
 
 **Switch off.** The refusal is stated as today, followed by one sentence pointing to the switch,
 for example: "If you trust this app, you can allow such transactions for 5 minutes in Settings,
@@ -227,8 +229,8 @@ No addresses, amounts, transaction data or app domains.
 ### What it does not do
 
 - Unlock any refusal in the Never tier.
-- Change anything while the switch is off, apart from the pointer to the switch, the token-listing
-  hint, and the no-simulation refusal being stated on the review instead of after Approve.
+- Change anything while the switch is off, apart from the pointer to the switch and the
+  token-listing hint.
 - Remember anything per app, last longer than 5 minutes, live on the backend or reach another
   device.
 - Add support for anything OISY does not implement: contract deployment, Bitcoin broadcast,
@@ -295,3 +297,10 @@ No addresses, amounts, transaction data or app domains.
 - **D4.** The connected wallet handed to another program, whether the message states the assignment
   or a program makes it inside its own call: Unlockable or Never. _Resolved:_ **Never**: no app
   needs the wallet itself handed over, and the wallet cannot pay a fee afterwards.
+- **D6.** Main's later Solana refusals with a reason of their own: a send whose message names
+  another account to pay its fee, and an approval no simulated run came back for: Unlockable or
+  Never. _Resolved:_ the send is **Never**, since OISY sends with the wallet as the fee payer and
+  would send a transaction other than the one reviewed; the approval is **Unlockable**, as the
+  review cannot state how much the spender may spend, like an instruction no run described. A token
+  batch the run keeps whole and a token call signed for a multisig share the "can't be shown"
+  refusal, and with it its tier.
