@@ -408,8 +408,8 @@
 			     the separation between groups (mt-3) is clearly larger. -->
 			<div
 				class="flex flex-col gap-0.5"
-				class:mt-3={sectionIndex > 0}
 				class:h-sm:mt-2={sectionIndex > 0}
+				class:mt-3={sectionIndex > 0}
 			>
 				<p
 					class="mb-1 px-3 text-[0.625rem] font-bold tracking-widest text-tertiary uppercase h-sm:mb-0.5"
