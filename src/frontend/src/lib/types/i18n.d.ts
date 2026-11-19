@@ -730,16 +730,15 @@ interface I18nReceive {
 	token: {
 		text: {
 			select_token: string;
-			select_network: string;
 			networks_count: string;
 			test_network: string;
 			change_token: string;
-			route_direct: string;
-			route_ckbtc_deposit: string;
+			route_native: string;
+			route_native_description: string;
 			send_instruction: string;
 			enable_info: string;
-			enable_and_show: string;
-			enabling: string;
+			enable_token: string;
+			enabling_token: string;
 			enable_error: string;
 			address_loading: string;
 			address_error: string;
@@ -761,7 +760,7 @@ interface I18nReceive {
 			copy_account_id: string;
 			no_match: string;
 			title_direct: string;
-			title_deposit: string;
+			title_as: string;
 			receive_token: string;
 			principal_description: string;
 			account_id_description: string;
@@ -770,7 +769,6 @@ interface I18nReceive {
 	ckbtc: {
 		text: {
 			deposit_address: string;
-			deposit_warning: string;
 			copy_deposit_address: string;
 			deposit_address_copied: string;
 			confirmations: string;

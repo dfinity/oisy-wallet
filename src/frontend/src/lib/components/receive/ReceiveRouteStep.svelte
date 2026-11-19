@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { onMount, tick } from 'svelte';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import List from '$lib/components/common/List.svelte';
@@ -79,8 +80,12 @@
 	<List noPadding>
 		{#each routes as route (route.key)}
 			{@const texts = optionTexts(route)}
+			{#snippet routeDescription()}
+				{texts.description}
+			{/snippet}
 			<ListItem styleClass="first-of-type:border-t-1">
 				<LogoButton
+					description={nonNullish(texts.description) ? routeDescription : undefined}
 					dividers
 					fullWidth
 					onClick={() => onSelect(route)}
@@ -101,10 +106,6 @@
 
 					{#snippet title()}
 						{texts.title}
-					{/snippet}
-
-					{#snippet description()}
-						{texts.description}
 					{/snippet}
 
 					{#snippet descriptionEnd()}

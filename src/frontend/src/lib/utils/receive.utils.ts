@@ -409,8 +409,8 @@ export const resolveReceiveAddress = ({
 };
 
 /**
- * The title of the address step: what to send and where, "Receive ETH on Ethereum", or for a deposit
- * what it credits and through which network, "Receive ckBTC via Bitcoin".
+ * The title of the address step restates the option picked before it: "Receive ETH on Ethereum", or
+ * for a deposit what arrives as what, "Receive BTC as ckBTC".
  */
 export const getReceiveAddressTitle = ({
 	route: { kind, sourceToken, sourceNetwork, creditedToken },
@@ -420,9 +420,9 @@ export const getReceiveAddressTitle = ({
 	i18n: I18n;
 }): string =>
 	kind === 'ckbtc-deposit'
-		? replacePlaceholders(i18n.receive.token.text.title_deposit, {
-				$token: getTokenDisplaySymbol(creditedToken),
-				$network: sourceNetwork.name
+		? replacePlaceholders(i18n.receive.token.text.title_as, {
+				$token: getTokenDisplaySymbol(sourceToken),
+				$creditedToken: getTokenDisplaySymbol(creditedToken)
 			})
 		: replacePlaceholders(i18n.receive.token.text.title_direct, {
 				$token: getTokenDisplaySymbol(sourceToken),
@@ -481,10 +481,11 @@ export const getReceiveAddressTexts = ({
 };
 
 /**
- * How a route reads in the route picker. Next to an offer such as BTC credited as ckBTC, the rows
- * name what they credit, since the choice is not one of network; otherwise they name the network.
- * The offer is honest about the wait: the deposit takes the Bitcoin confirmations, and ckBTC is fast
- * and cheap to move once it arrives.
+ * How a route reads in the route picker. The modal title already says "Receive BTC", so the rows name
+ * a choice, never what the sender does. Next to an offer such as BTC credited as ckBTC the choice is
+ * not one of network: the plain route reads "Native Bitcoin". Otherwise a row is its network, and
+ * only a deposit says more: the wait for the Bitcoin confirmations, after which ckBTC is fast and
+ * cheap to move.
  */
 export const getReceiveRouteOptionTexts = ({
 	route,
@@ -500,33 +501,36 @@ export const getReceiveRouteOptionTexts = ({
 	// The deposit confirmations the minter requires, once known.
 	confirmations?: number | bigint;
 	i18n: I18n;
-}): { title: string; description: string } => {
+}): { title: string; description?: string } => {
 	const { kind, sourceToken, sourceNetwork, creditedToken } = route;
-	const creditedSymbol = getTokenDisplaySymbol(creditedToken);
-	const sourceSymbol = getTokenDisplaySymbol(sourceToken);
+
+	const depositBenefit = nonNullish(confirmations)
+		? replacePlaceholders(i18n.receive.ckbtc.text.benefit, { $count: `${confirmations}` })
+		: i18n.receive.ckbtc.text.benefit_generic;
 
 	if (isReceiveConversionOffer({ route, assetTokens })) {
 		return {
-			title: replacePlaceholders(i18n.receive.ckbtc.text.receive_as, { $token: creditedSymbol }),
-			description: nonNullish(confirmations)
-				? replacePlaceholders(i18n.receive.ckbtc.text.benefit, { $count: `${confirmations}` })
-				: i18n.receive.ckbtc.text.benefit_generic
+			title: replacePlaceholders(i18n.receive.ckbtc.text.receive_as, {
+				$token: getTokenDisplaySymbol(creditedToken)
+			}),
+			description: depositBenefit
+		};
+	}
+
+	if (withOffer) {
+		const network = { $network: sourceNetwork.name };
+
+		return {
+			title: replacePlaceholders(i18n.receive.token.text.route_native, network),
+			description: replacePlaceholders(i18n.receive.token.text.route_native_description, {
+				...network,
+				$token: getTokenDisplaySymbol(sourceToken)
+			})
 		};
 	}
 
 	return {
-		title: withOffer
-			? replacePlaceholders(i18n.receive.token.text.receive_token, { $token: creditedSymbol })
-			: sourceNetwork.name,
-		description:
-			kind === 'ckbtc-deposit'
-				? replacePlaceholders(i18n.receive.token.text.route_ckbtc_deposit, {
-						$sourceToken: sourceSymbol,
-						$creditedToken: creditedSymbol
-					})
-				: replacePlaceholders(i18n.receive.token.text.route_direct, {
-						$token: sourceSymbol,
-						$network: sourceNetwork.name
-					})
+		title: sourceNetwork.name,
+		...(kind === 'ckbtc-deposit' && { description: depositBenefit })
 	};
 };

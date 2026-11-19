@@ -1008,16 +1008,15 @@
 		"token": {
 			"text": {
 				"select_token": "Select token to receive",
-				"select_network": "Select network",
 				"networks_count": "$count networks",
 				"test_network": "Test network",
 				"change_token": "Change token",
-				"route_direct": "Send $token on $network",
-				"route_ckbtc_deposit": "Send $sourceToken to receive $creditedToken",
+				"route_native": "Native $network",
+				"route_native_description": "Stays $token on the $network network",
 				"send_instruction": "Send only $token on $network to this address.",
 				"enable_info": "$token is not enabled in your wallet yet. Enable it to see the address.",
-				"enable_and_show": "Enable $token and show address",
-				"enabling": "Enabling token...",
+				"enable_token": "Enable $token",
+				"enabling_token": "Enabling $token…",
 				"enable_error": "OISY couldn't enable $token. Your selection is kept. Try again.",
 				"address_loading": "Loading your address",
 				"address_error": "OISY couldn't load this address. Try again.",
@@ -1039,7 +1038,7 @@
 				"copy_account_id": "Copy ICP Account ID",
 				"no_match": "No matching tokens. Try a different name or symbol.",
 				"title_direct": "Receive $token on $network",
-				"title_deposit": "Receive $token via $network",
+				"title_as": "Receive $token as $creditedToken",
 				"receive_token": "Receive $token",
 				"principal_description": "Receives ICP and every Internet Computer token, like ckBTC and CHAT.",
 				"account_id_description": "ICP token only. Use it when an exchange asks for an Account ID."
@@ -1048,7 +1047,6 @@
 		"ckbtc": {
 			"text": {
 				"deposit_address": "Bitcoin deposit address for ckBTC",
-				"deposit_warning": "Send only BTC on the Bitcoin network.",
 				"copy_deposit_address": "Copy Bitcoin deposit address for ckBTC",
 				"deposit_address_copied": "Bitcoin deposit address for ckBTC copied to clipboard.",
 				"confirmations": "Bitcoin confirmations",

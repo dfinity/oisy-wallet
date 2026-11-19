@@ -56,6 +56,6 @@
 	testId={RECEIVE_ENABLE_TOKEN_BUTTON}
 >
 	{enabling
-		? $i18n.receive.token.text.enabling
-		: replacePlaceholders($i18n.receive.token.text.enable_and_show, { $token: symbol })}
+		? replacePlaceholders($i18n.receive.token.text.enabling_token, { $token: symbol })
+		: replacePlaceholders($i18n.receive.token.text.enable_token, { $token: symbol })}
 </Button>

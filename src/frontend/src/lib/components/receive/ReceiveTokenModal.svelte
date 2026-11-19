@@ -46,8 +46,7 @@
 		getReceiveAddressTitle,
 		getReceiveAssets,
 		getReceiveRoutes,
-		getReceiveTokenKey,
-		isReceiveConversionOffer
+		getReceiveTokenKey
 	} from '$lib/utils/receive.utils';
 	import { isTokenEnabled } from '$lib/utils/token-toggleable.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -67,7 +66,7 @@
 
 	const steps: WizardSteps<WizardStepsReceiveToken> = [
 		{ name: WizardStepsReceiveToken.TOKEN, title: $i18n.receive.token.text.select_token },
-		{ name: WizardStepsReceiveToken.ROUTE, title: $i18n.receive.token.text.select_network },
+		{ name: WizardStepsReceiveToken.ROUTE, title: $i18n.receive.text.receive },
 		{ name: WizardStepsReceiveToken.ADDRESS, title: $i18n.receive.text.receive },
 		{ name: WizardStepsReceiveToken.IMPORT, title: $i18n.tokens.import.text.title },
 		{ name: WizardStepsReceiveToken.IMPORT_REVIEW, title: $i18n.tokens.import.text.review },
@@ -148,11 +147,9 @@
 
 	let tokenEnabled = $derived(nonNullish(route) && isTokenEnabled(route.creditedToken));
 
-	// Choosing between BTC and BTC credited as ckBTC is not a choice of network: the title names the
-	// asset instead.
-	let offerTitle = $derived(
-		nonNullish(asset) &&
-			routes.some((route) => isReceiveConversionOffer({ route, assetTokens: asset.tokens }))
+	// The route step names the asset, "Receive BTC"; its rows name the choice, a network or ckBTC.
+	let routeTitle = $derived(
+		nonNullish(asset)
 			? replacePlaceholders($i18n.receive.token.text.receive_token, {
 					$token: getTokenDisplaySymbol(asset.token)
 				})
@@ -166,8 +163,8 @@
 			return getReceiveAddressTitle({ route, i18n: $i18n });
 		}
 
-		if (step === WizardStepsReceiveToken.ROUTE && nonNullish(offerTitle)) {
-			return offerTitle;
+		if (step === WizardStepsReceiveToken.ROUTE && nonNullish(routeTitle)) {
+			return routeTitle;
 		}
 
 		return currentStep?.title ?? $i18n.receive.text.receive;

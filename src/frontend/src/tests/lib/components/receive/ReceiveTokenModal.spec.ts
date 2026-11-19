@@ -197,6 +197,10 @@ describe('ReceiveTokenModal', () => {
 		].map((el) => el.textContent?.trim());
 
 		expect(titles).toEqual([BASE_NETWORK.name, ETHEREUM_NETWORK.name]);
+		expect(container.querySelector('[data-tid="modal-title"]')).toHaveTextContent('Receive USDC');
+		expect(
+			container.querySelector(`[data-tid^="${RECEIVE_ROUTE_LIST_ITEM}"]`)
+		).not.toHaveTextContent('Send');
 	});
 
 	it('should offer BTC as ckBTC, saying what it means in its row', async () => {
@@ -214,6 +218,8 @@ describe('ReceiveTokenModal', () => {
 		});
 
 		expect(container.querySelector('[data-tid="modal-title"]')).toHaveTextContent('Receive BTC');
+		expect(container).toHaveTextContent('Native Bitcoin');
+		expect(container).toHaveTextContent('Stays BTC on the Bitcoin network');
 		expect(container).toHaveTextContent(
 			get(i18n).receive.ckbtc.text.receive_as.replace('$token', 'ckBTC')
 		);
@@ -272,11 +278,7 @@ describe('ReceiveTokenModal', () => {
 				).toBeInTheDocument();
 				expect(
 					byTestId({ container, testId: `${RECEIVE_ROUTE_LIST_ITEM}-${deposit}` })
-				).toHaveTextContent(
-					get(i18n)
-						.receive.token.text.route_ckbtc_deposit.replace('$sourceToken', 'BTC')
-						.replace('$creditedToken', 'ckBTC')
-				);
+				).toHaveTextContent(get(i18n).receive.ckbtc.text.benefit_generic);
 			});
 		});
 
@@ -323,8 +325,11 @@ describe('ReceiveTokenModal', () => {
 			});
 
 			expect(container).toHaveTextContent(get(i18n).receive.ckbtc.text.deposit_address);
+			expect(container.querySelector('[data-tid="modal-title"]')).toHaveTextContent(
+				'Receive BTC as ckBTC'
+			);
 			expect(byTestId({ container, testId: RECEIVE_CKBTC_DEPOSIT_WARNING })).toHaveTextContent(
-				get(i18n).receive.ckbtc.text.deposit_warning
+				'Send only BTC on Bitcoin to this address.'
 			);
 			expect(container).toHaveTextContent(`${mockCkBtcMinterInfo.min_confirmations}`);
 			expect(

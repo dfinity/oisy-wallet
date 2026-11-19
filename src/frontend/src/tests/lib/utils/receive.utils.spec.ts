@@ -567,10 +567,10 @@ describe('receive.utils', () => {
 			);
 		});
 
-		it('should title a deposit by what it credits and through which network', () => {
+		it('should title a deposit by what is sent and what it arrives as', () => {
 			expect(
 				getReceiveAddressTitle({ route: routeOf({ token: ckBtcToken, index: 1 }), i18n: en })
-			).toBe('Receive ckBTC via Bitcoin');
+			).toBe('Receive BTC as ckBTC');
 		});
 
 		it('should name a network address after its network', () => {
@@ -641,7 +641,7 @@ describe('receive.utils', () => {
 			expect(texts().description).toBe(en.receive.ckbtc.text.benefit_generic);
 		});
 
-		it('should name the asset rather than the network next to an offer', () => {
+		it('should name the plain route native next to an offer', () => {
 			expect(
 				getReceiveRouteOptionTexts({
 					route: direct,
@@ -649,10 +649,10 @@ describe('receive.utils', () => {
 					withOffer: true,
 					i18n: en
 				})
-			).toEqual({ title: 'Receive BTC', description: 'Send BTC on Bitcoin' });
+			).toEqual({ title: 'Native Bitcoin', description: 'Stays BTC on the Bitcoin network' });
 		});
 
-		it('should name the network when the routes differ only by network', () => {
+		it('should name only the network when the routes differ only by network', () => {
 			const [ethereum] = getReceiveRoutes({ tokens: [USDC_TOKEN], enabledNetworkIds });
 
 			expect(
@@ -661,11 +661,11 @@ describe('receive.utils', () => {
 					assetTokens: [USDC_TOKEN, BASE_USDC_TOKEN],
 					withOffer: false,
 					i18n: en
-				}).title
-			).toBe('Ethereum');
+				})
+			).toEqual({ title: 'Ethereum' });
 		});
 
-		it('should describe the deposit of the ckBTC asset itself', () => {
+		it('should give the deposit of the ckBTC asset its wait', () => {
 			const [, deposit] = getReceiveRoutes({ tokens: [ckBtcToken], enabledNetworkIds });
 
 			expect(
@@ -673,9 +673,10 @@ describe('receive.utils', () => {
 					route: deposit,
 					assetTokens: [ckBtcToken],
 					withOffer: false,
+					confirmations: 4,
 					i18n: en
 				})
-			).toEqual({ title: 'Bitcoin', description: 'Send BTC to receive ckBTC' });
+			).toEqual({ title: 'Bitcoin', description: '4 confirmations, then fast and cheap' });
 		});
 	});
 });

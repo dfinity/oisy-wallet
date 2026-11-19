@@ -71,7 +71,13 @@
 
 	let deposit = $derived(kind === 'ckbtc-deposit');
 
-	let sourceSymbol = $derived(getTokenDisplaySymbol(sourceToken));
+	// One sentence for a direct address and a deposit address alike; the deposit only stresses it.
+	let sendInstruction = $derived(
+		replacePlaceholders($i18n.receive.token.text.send_instruction, {
+			$token: getTokenDisplaySymbol(sourceToken),
+			$network: sourceNetwork.name
+		})
+	);
 
 	let creditedSymbol = $derived(getTokenDisplaySymbol(creditedToken));
 
@@ -212,16 +218,13 @@
 								<span class="flex h-5 shrink-0 items-center text-warning-primary"
 									><IconWarning /></span
 								>
-								<span>{$i18n.receive.ckbtc.text.deposit_warning}</span>
+								<span>{sendInstruction}</span>
 							</div>
 						{:else if addressKind !== 'icp'}
 							<div class="mt-3 flex items-start gap-2 px-4 text-sm leading-5 text-tertiary">
 								<span class="flex h-5 shrink-0 items-center"><IconInfo /></span>
 								<span>
-									{replacePlaceholders($i18n.receive.token.text.send_instruction, {
-										$token: sourceSymbol,
-										$network: sourceNetwork.name
-									})}
+									{sendInstruction}
 								</span>
 							</div>
 						{/if}

@@ -1008,16 +1008,15 @@
 		"token": {
 			"text": {
 				"select_token": "",
-				"select_network": "",
 				"networks_count": "",
 				"test_network": "",
 				"change_token": "",
-				"route_direct": "",
-				"route_ckbtc_deposit": "",
+				"route_native": "",
+				"route_native_description": "",
 				"send_instruction": "",
 				"enable_info": "",
-				"enable_and_show": "",
-				"enabling": "",
+				"enable_token": "",
+				"enabling_token": "",
 				"enable_error": "",
 				"address_loading": "",
 				"address_error": "",
@@ -1039,7 +1038,7 @@
 				"copy_account_id": "",
 				"no_match": "",
 				"title_direct": "",
-				"title_deposit": "",
+				"title_as": "",
 				"receive_token": "",
 				"principal_description": "",
 				"account_id_description": ""
@@ -1048,7 +1047,6 @@
 		"ckbtc": {
 			"text": {
 				"deposit_address": "",
-				"deposit_warning": "",
 				"copy_deposit_address": "",
 				"deposit_address_copied": "",
 				"confirmations": "",
