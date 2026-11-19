@@ -27,7 +27,7 @@ import {
 } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { AUTH_LOCK_KEY } from '$lib/stores/locked.store';
+import { AUTH_LOCK_KEY, authLocked, type AuthLockStoreData } from '$lib/stores/locked.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import { InternetIdentityDomain } from '$lib/types/auth';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
@@ -179,28 +179,32 @@ export const nullishSignOut = (): Promise<void> =>
 	warnSignOut(get(i18n).auth.warning.not_signed_in);
 
 export const idleSignOut = (): Promise<void> => {
-	const locked = getStorage({ key: AUTH_LOCK_KEY });
+	const locked = getStorage<AuthLockStoreData>({ key: AUTH_LOCK_KEY });
 
-	const level: ToastLevel = locked ? 'info' : 'warn';
+	// Locked by hand in another tab.
+	if (nonNullish(locked) && locked !== false && locked !== 'expired') {
+		const level: ToastLevel = 'info';
 
-	const text = locked
-		? get(i18n).auth.message.session_locked
-		: get(i18n).auth.warning.session_expired;
+		const text = get(i18n).auth.message.session_locked;
 
-	const reason = locked ? 'session_locked' : 'session_expired';
+		trackEvent({
+			name: TRACK_SIGN_OUT_WITH_WARNING,
+			metadata: { level, text, reason: 'session_locked', clearStorages: 'false' }
+		});
 
-	trackEvent({
-		name: TRACK_SIGN_OUT_WITH_WARNING,
-		metadata: { level, text, reason, clearStorages: 'false' }
-	});
+		return logout({
+			msg: {
+				text,
+				level
+			},
+			clearIdbStorages: false
+		});
+	}
 
-	return logout({
-		msg: {
-			text,
-			level
-		},
-		clearIdbStorages: false
-	});
+	// The cache is kept, so the session ends on the lock page: it says so and offers to log out.
+	authLocked.lock({ source: 'session expired', reason: 'expired' });
+
+	return logout({ clearIdbStorages: false });
 };
 
 export const lockSession = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> =>

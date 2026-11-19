@@ -197,7 +197,7 @@ interface I18nAuth {
 	message: { session_locked: string };
 	info: { signups_closed: string };
 	banner: { signups_closed: string };
-	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
+	warning: { not_signed_in: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
 		error_while_signing_in: string;
@@ -232,6 +232,7 @@ interface I18nLock {
 	text: {
 		title_part_1: string;
 		title_part_2: string;
+		title_part_2_session_expired: string;
 		unlock: string;
 		logout: string;
 		logout_clear_cash_message: string;
