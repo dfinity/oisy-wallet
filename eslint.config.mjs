@@ -52,6 +52,32 @@ export default [
 		}
 	},
 
+	// Svelte's transitions run at a 400 ms default and ignore the reduced-motion setting. The
+	// shared module wraps them with OISY's timings and that setting, so nothing else imports
+	// them directly. Use the TypeScript rule separately so the shared config
+	// retains its core import restrictions (deprecated packages and /dist/ paths).
+	{
+		files: ['src/frontend/src/**/*'],
+		ignores: [
+			'src/frontend/src/lib/utils/transitions.utils.ts',
+			'src/frontend/src/lib/constants/transition.constants.ts'
+		],
+		rules: {
+			'@typescript-eslint/no-restricted-imports': [
+				'error',
+				{
+					paths: [
+						{
+							name: 'svelte/transition',
+							message:
+								'Import transitions and their types from `$lib/utils/transitions.utils`, which applies the shared timings and reduced motion.'
+						}
+					]
+				}
+			]
+		}
+	},
+
 	// `$lib/oisy-trade/` implements what belongs in the oisy_trade canister and is
 	// hosted here only until that canister can answer it. Keeping the dependency
 	// arrow one-way is what makes the eventual migration a deletion rather than an

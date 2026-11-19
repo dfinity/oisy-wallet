@@ -1,10 +1,13 @@
+import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
+import { isIcrcTokenSupportIcrc3 } from '$icp/services/icrc.services';
 import { Currency } from '$lib/enums/currency';
 import { trackExportData } from '$lib/services/export-data-analytics.services';
 import { exportTokensCsv, exportTransactionsCsv } from '$lib/services/export-data.services';
 import { toastsShow } from '$lib/stores/toasts.store';
+import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import { consoleError } from '$lib/utils/console.utils';
 import { downloadCsv } from '$lib/utils/csv.utils';
 import {
@@ -16,11 +19,19 @@ import {
 	type TransactionCsvRow
 } from '$lib/utils/export-data.utils';
 import { loadOlderSolTransactions } from '$sol/services/sol-history-pagers.services';
+import { solUnreadableTransactionsStore } from '$sol/stores/sol-unreadable-transactions.store';
 import en from '$tests/mocks/i18n.mock';
+import { mockValidDip20Token, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 
 vi.mock('$icp/services/ic-transactions.services', () => ({
 	loadNextIcTransactionsByOldest: vi.fn()
+}));
+
+vi.mock('$icp/services/icrc.services', () => ({
+	isIcrcTokenSupportIcrc3: vi.fn()
 }));
 
 vi.mock('$sol/services/sol-history-pagers.services', () => ({
@@ -139,6 +150,10 @@ describe('export-data.services', () => {
 		mockSortTokenRows.mockImplementation((rows) => rows);
 		mockBuildTransactionRows.mockReturnValue([transactionRow]);
 		mockSortTransactionRows.mockImplementation((rows) => rows);
+
+		[SOLANA_TOKEN.id, USDC_TOKEN.id].forEach((tokenId) =>
+			solUnreadableTransactionsStore.reset(tokenId)
+		);
 	});
 
 	afterEach(() => {
@@ -352,6 +367,150 @@ describe('export-data.services', () => {
 			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
 				type: 'transactions_extended',
 				resultStatus: 'success'
+			});
+		});
+
+		describe('with a Solana transaction the history left out', () => {
+			const { signature } = mockSolSignatureResponse();
+
+			const endSolanaHistory = () =>
+				mockLoadOlderSolTransactions.mockImplementationOnce(({ signalEnd }) => {
+					signalEnd();
+
+					return Promise.resolve({ success: false });
+				});
+
+			// The pager resolves a page that leaves a transaction out, so only the store tells the export
+			// that its history stops short.
+			it('fails the export when the walk leaves a transaction of an exported token out', async () => {
+				mockLoadOlderSolTransactions.mockImplementationOnce(({ signalEnd }) => {
+					solUnreadableTransactionsStore.add({ tokenId: SOLANA_TOKEN.id, signatures: [signature] });
+					signalEnd();
+
+					return Promise.resolve({ success: true });
+				});
+
+				const result = await exportTransactionsCsv({
+					...defaultTransactionParams(),
+					tokens: [SOLANA_TOKEN]
+				});
+
+				expect(result).toBeFalsy();
+				expect(mockDownloadCsv).not.toHaveBeenCalled();
+				expect(mockToastsShow).toHaveBeenCalledExactlyOnceWith({
+					text: en.settings.error.export_failed,
+					level: 'error',
+					duration: 4000
+				});
+				expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+					type: 'transactions_extended',
+					resultStatus: 'error',
+					errorCode: 'build_failed',
+					error: 'Transactions left out of the history of 1 token(s)'
+				});
+			});
+
+			it('fails the export for a transaction an earlier pass left out', async () => {
+				solUnreadableTransactionsStore.add({ tokenId: SOLANA_TOKEN.id, signatures: [signature] });
+				endSolanaHistory();
+
+				const result = await exportTransactionsCsv({
+					...defaultTransactionParams(),
+					tokens: [SOLANA_TOKEN]
+				});
+
+				expect(result).toBeFalsy();
+				expect(mockDownloadCsv).not.toHaveBeenCalled();
+			});
+
+			it('exports when only a token it does not export left a transaction out', async () => {
+				solUnreadableTransactionsStore.add({ tokenId: USDC_TOKEN.id, signatures: [signature] });
+				endSolanaHistory();
+
+				const result = await exportTransactionsCsv({
+					...defaultTransactionParams(),
+					tokens: [SOLANA_TOKEN]
+				});
+
+				expect(result).toBeTruthy();
+				expect(mockDownloadCsv).toHaveBeenCalledOnce();
+			});
+		});
+
+		describe('ICRC explorer links', () => {
+			const icrc3Token = { ...mockValidIcrcToken, ledgerCanisterId: '2ouva-viaaa-aaaaq-aaamq-cai' };
+			const otherIcrcToken = {
+				...mockValidIcrcToken,
+				ledgerCanisterId: 'eig2s-waaaa-aaaam-qbg5a-cai'
+			};
+			const unreachableIcrcToken = {
+				...mockValidIcrcToken,
+				ledgerCanisterId: 'qroj6-lyaaa-aaaam-qeqta-cai'
+			};
+
+			const [icTx] = createMockIcTransactionsUi(1);
+
+			const transactions: AllTransactionUiWithCmp[] = [
+				{ component: 'ic', transaction: icTx, token: icrc3Token },
+				{ component: 'ic', transaction: { ...icTx, id: '7' }, token: icrc3Token },
+				{ component: 'ic', transaction: icTx, token: otherIcrcToken },
+				{ component: 'ic', transaction: icTx, token: unreachableIcrcToken },
+				{
+					component: 'ic',
+					transaction: { ...icTx, txExplorerUrl: 'https://dashboard.internetcomputer.org/x' },
+					token: { ...mockValidIcrcToken, ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai' }
+				},
+				{ component: 'ic', transaction: icTx, token: mockValidDip20Token }
+			];
+
+			beforeEach(() => {
+				vi.mocked(isIcrcTokenSupportIcrc3).mockImplementation(({ ledgerCanisterId }) =>
+					ledgerCanisterId === unreachableIcrcToken.ledgerCanisterId
+						? Promise.reject(new Error('ledger unreachable'))
+						: Promise.resolve(ledgerCanisterId === icrc3Token.ledgerCanisterId)
+				);
+			});
+
+			it('asks each ICRC ledger without a mapper link once and links only ICRC-3 ledgers', async () => {
+				const result = await exportTransactionsCsv({
+					...defaultTransactionParams(),
+					buildTransactions: () => transactions
+				});
+
+				expect(result).toBeTruthy();
+				expect(isIcrcTokenSupportIcrc3).toHaveBeenCalledTimes(3);
+				expect(isIcrcTokenSupportIcrc3).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					ledgerCanisterId: icrc3Token.ledgerCanisterId
+				});
+				expect(isIcrcTokenSupportIcrc3).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					ledgerCanisterId: otherIcrcToken.ledgerCanisterId
+				});
+				expect(isIcrcTokenSupportIcrc3).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					ledgerCanisterId: unreachableIcrcToken.ledgerCanisterId
+				});
+				expect(mockBuildTransactionRows).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						transactions,
+						icrc3LedgerCanisterIds: new Set([icrc3Token.ledgerCanisterId])
+					})
+				);
+			});
+
+			it('does not ask any ledger for the Basic export', async () => {
+				const result = await exportTransactionsCsv({
+					...defaultTransactionParams(),
+					buildTransactions: () => transactions,
+					variant: 'basic'
+				});
+
+				expect(result).toBeTruthy();
+				expect(isIcrcTokenSupportIcrc3).not.toHaveBeenCalled();
+				expect(mockBuildTransactionRows).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ icrc3LedgerCanisterIds: new Set() })
+				);
 			});
 		});
 

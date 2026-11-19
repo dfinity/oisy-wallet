@@ -101,7 +101,7 @@
 
 {#if variant === 'holdings'}
 	<button
-		class="flex w-full items-center gap-4 rounded-lg px-2 py-3 text-left transition-colors hover:bg-brand-subtle-10"
+		class="flex w-full items-center gap-4 rounded-lg row-feedback px-2 py-3 text-left"
 		onclick={goToProvider}
 		type="button"
 	>

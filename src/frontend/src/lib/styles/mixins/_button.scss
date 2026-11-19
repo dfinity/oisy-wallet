@@ -1,3 +1,20 @@
+// Shrinks the button slightly while it is held. A transition rather than a keyframe,
+// so letting go mid-press eases back instead of snapping. The opt-out class is not
+// `static` because Tailwind already owns that name (`position: static`).
+//
+// The two scales every press uses. Text and whole-card buttons get the smaller press: they
+// are often full width, where the same scale takes far more pixels off than on an icon.
+$press-scale-text: 0.98;
+$press-scale-icon: 0.96;
+
+@mixin press($scale: $press-scale-icon) {
+	@media (prefers-reduced-motion: no-preference) {
+		&:active:not([disabled]):not(.disabled):not(.loading):not(.no-press) {
+			scale: $scale;
+		}
+	}
+}
+
 @mixin icon {
 	span {
 		/*

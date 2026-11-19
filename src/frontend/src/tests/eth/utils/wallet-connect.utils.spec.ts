@@ -1,10 +1,24 @@
+import { BASE_NETWORK, BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	ETHEREUM_NETWORK,
+	ETHEREUM_NETWORK_ID,
+	SEPOLIA_NETWORK_ID
+} from '$env/networks/networks.eth.env';
+import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { EURC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.eurc.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { CKETH_ABI, CKETH_DEPOSIT_HASH } from '$eth/constants/cketh.constants';
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
 	ERC20_APPROVE_HASH,
 	ERC20_DECREASE_ALLOWANCE_HASH,
+	ERC20_DEPOSIT_ERC20_HASH,
 	ERC20_INCREASE_ALLOWANCE_HASH,
 	ERC20_TRANSFER_HASH
 } from '$eth/constants/erc20.constants';
+import { UNISWAP_EXECUTE_HASH } from '$eth/constants/uniswap.constants';
 import {
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_LEGACY,
@@ -15,20 +29,47 @@ import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect'
 import {
 	assertValidEthTypedData,
 	classifyWalletConnectEthCall,
+	classifyWalletConnectEthSendTransaction,
 	getEthTypedDataApproval,
 	getEthTypedDataMethods,
+	getEthTypedDataPrimaryType,
 	getSendParamsGas,
 	getSignedEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
+	getWalletConnectEthCkDeposit,
+	getWalletConnectEthCkEthDeposit,
 	hasInvalidTypedData,
 	hasUnreviewableTypedData,
 	isEthSignTypedDataMethod,
 	isWalletConnectEthApproval,
+	isWalletConnectEthTokenCallWithValue,
 	toTypedDataDomainChainId,
+	toWalletConnectCkDepositHelperContractAddress,
+	toWalletConnectCkEthHelperContractAddress,
+	WalletConnectEthCkDepositError,
+	WalletConnectEthCkEthDepositError,
+	WalletConnectEthCkEthHelperUnconfirmedError,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
-import { TypedDataEncoder, type TypedDataField } from 'ethers/hash';
+import {
+	encodeCkDepositErc20,
+	encodeCkDepositEth,
+	mockCkDepositHelperContractAddress,
+	mockCkDepositSubaccount
+} from '$tests/mocks/ck-deposit.mock';
+import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
+import {
+	encodeUniswapEurcToUsdc,
+	mockUniswapRouter,
+	mockUniswapWallet
+} from '$tests/mocks/uniswap.mock';
+import { toNullable } from '@dfinity/utils';
+import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
+import { Principal } from '@icp-sdk/core/principal';
+import { Interface } from 'ethers/abi';
+import { id, TypedDataEncoder, type TypedDataField } from 'ethers/hash';
 
 // The fixtures below state chain 1 in their domain, so the session allowed to sign them is chain 1
 // — bar the Hyperliquid one, which states Arbitrum.
@@ -113,6 +154,29 @@ const permit2: WalletConnectEthSignTypedDataV4 = {
 	}
 };
 
+// Uniswap Permit2, one signature setting an allowance over several tokens for one spender.
+const permit2Batch: WalletConnectEthSignTypedDataV4 = {
+	domain: permit2.domain,
+	types: {
+		EIP712Domain: permit2.types.EIP712Domain,
+		PermitBatch: [
+			{ name: 'details', type: 'PermitDetails[]' },
+			{ name: 'spender', type: 'address' },
+			{ name: 'sigDeadline', type: 'uint256' }
+		],
+		PermitDetails: permit2.types.PermitDetails
+	},
+	primaryType: 'PermitBatch',
+	message: {
+		details: [
+			{ token: DAI, amount: '123456789', expiration: '1761743754', nonce: '0' },
+			{ token: USDC, amount: MAX_UINT_160.toString(), expiration: '1761743755', nonce: '1' }
+		],
+		spender: SPENDER,
+		sigDeadline: '1759153554'
+	}
+};
+
 // ERC-3009: a relayer submits such an authorization straight to the token
 // contract, with no prior allowance, so the declared `to` and `value` are the
 // whole of what the user gives away.
@@ -142,6 +206,113 @@ const transferWithAuthorization = (
 		...extra
 	}
 });
+
+// ERC-3009's other authorization: the same transfer, which only its recipient may submit.
+const receiveWithAuthorization: WalletConnectEthSignTypedDataV4 = {
+	domain: transferWithAuthorization().domain,
+	types: {
+		EIP712Domain: EIP712_DOMAIN,
+		ReceiveWithAuthorization: transferWithAuthorization().types.TransferWithAuthorization
+	},
+	primaryType: 'ReceiveWithAuthorization',
+	message: transferWithAuthorization().message
+};
+
+const PERMIT2_TOKEN_PERMISSIONS: Array<TypedDataField> = [
+	{ name: 'token', type: 'address' },
+	{ name: 'amount', type: 'uint256' }
+];
+
+// Uniswap Permit2 signature transfer: the spender may move up to the permitted amount once, to an
+// address it picks when it does.
+const permit2Transfer: WalletConnectEthSignTypedDataV4 = {
+	domain: permit2.domain,
+	types: {
+		EIP712Domain: permit2.types.EIP712Domain,
+		PermitTransferFrom: [
+			{ name: 'permitted', type: 'TokenPermissions' },
+			{ name: 'spender', type: 'address' },
+			{ name: 'nonce', type: 'uint256' },
+			{ name: 'deadline', type: 'uint256' }
+		],
+		TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+	},
+	primaryType: 'PermitTransferFrom',
+	message: {
+		permitted: { token: USDC, amount: '250000000' },
+		spender: SPENDER,
+		nonce: '7',
+		deadline: '1893456000'
+	}
+};
+
+const permit2BatchTransfer: WalletConnectEthSignTypedDataV4 = {
+	domain: permit2.domain,
+	types: {
+		EIP712Domain: permit2.types.EIP712Domain,
+		PermitBatchTransferFrom: [
+			{ name: 'permitted', type: 'TokenPermissions[]' },
+			{ name: 'spender', type: 'address' },
+			{ name: 'nonce', type: 'uint256' },
+			{ name: 'deadline', type: 'uint256' }
+		],
+		TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+	},
+	primaryType: 'PermitBatchTransferFrom',
+	message: {
+		permitted: [
+			{ token: USDC, amount: '250000000' },
+			{ token: DAI, amount: MAX_UINT_256.toString() }
+		],
+		spender: SPENDER,
+		nonce: '7',
+		deadline: '1893456000'
+	}
+};
+
+// The witness a dApp binds a Permit2 transfer to, shaped like an order: its own structs, nested.
+const WITNESS_TYPES: Record<string, Array<TypedDataField>> = {
+	Order: [
+		{ name: 'info', type: 'OrderInfo' },
+		{ name: 'outputAmount', type: 'uint256' }
+	],
+	OrderInfo: [
+		{ name: 'swapper', type: 'address' },
+		{ name: 'deadline', type: 'uint256' }
+	]
+};
+
+const WITNESS = { info: { swapper: HOLDER, deadline: '1893456000' }, outputAmount: '1' };
+
+const permit2WitnessTransfer: WalletConnectEthSignTypedDataV4 = {
+	domain: permit2.domain,
+	types: {
+		EIP712Domain: permit2.types.EIP712Domain,
+		PermitWitnessTransferFrom: [
+			...permit2Transfer.types.PermitTransferFrom,
+			{ name: 'witness', type: 'Order' }
+		],
+		TokenPermissions: PERMIT2_TOKEN_PERMISSIONS,
+		...WITNESS_TYPES
+	},
+	primaryType: 'PermitWitnessTransferFrom',
+	message: { ...permit2Transfer.message, witness: WITNESS }
+};
+
+const permit2BatchWitnessTransfer: WalletConnectEthSignTypedDataV4 = {
+	domain: permit2.domain,
+	types: {
+		EIP712Domain: permit2.types.EIP712Domain,
+		PermitBatchWitnessTransferFrom: [
+			...permit2BatchTransfer.types.PermitBatchTransferFrom,
+			{ name: 'witness', type: 'Order' }
+		],
+		TokenPermissions: PERMIT2_TOKEN_PERMISSIONS,
+		...WITNESS_TYPES
+	},
+	primaryType: 'PermitBatchWitnessTransferFrom',
+	message: { ...permit2BatchTransfer.message, witness: WITNESS }
+};
 
 // Hyperliquid asks every action to be signed with routing fields (`type`, `signatureChainId`) that
 // its schema does not declare, so the request is only signable if such keys are tolerated.
@@ -446,6 +617,663 @@ describe('wallet-connect.utils', () => {
 		});
 	});
 
+	describe('ckETH helper contract deposits', () => {
+		// The ckETH helper contract on Ethereum mainnet, as the minter returns it.
+		const CKETH_HELPER = '0x7574eB42cA208A4f6960ECCAfDF186D627dCC175';
+
+		const OTHER_PRINCIPAL = Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai');
+
+		const encodeDeposit = (principal: Principal): string =>
+			new Interface(CKETH_ABI).encodeFunctionData('deposit', [
+				encodePrincipalToEthAddress(principal)
+			]);
+
+		const ownDeposit = encodeDeposit(mockPrincipal);
+
+		const minterInfoWithHelper = (helper: string) => ({
+			data: { ...mockCkMinterInfo, eth_helper_contract_address: toNullable(helper) },
+			certified: true
+		});
+
+		const minterInfo = minterInfoWithHelper(CKETH_HELPER);
+
+		const params = {
+			to: CKETH_HELPER,
+			data: ownDeposit,
+			networkId: ETHEREUM_NETWORK_ID,
+			minterInfo,
+			principal: mockPrincipal
+		};
+
+		// What the classifier also reads a swap against. No token is listed, so none of these
+		// requests is one.
+		const classifyParams = {
+			...params,
+			chainId: ETHEREUM_NETWORK.chainId,
+			value: ZERO,
+			wallet: mockUniswapWallet,
+			nativeToken: ETHEREUM_TOKEN,
+			tokens: []
+		};
+
+		describe('toWalletConnectCkEthHelperContractAddress', () => {
+			it.each([
+				{ network: 'Ethereum', networkId: ETHEREUM_NETWORK_ID },
+				{ network: 'Sepolia', networkId: SEPOLIA_NETWORK_ID }
+			])(
+				'should read the helper contract off the minter information on $network',
+				({ networkId }) => {
+					expect(toWalletConnectCkEthHelperContractAddress({ networkId, minterInfo })).toBe(
+						CKETH_HELPER
+					);
+				}
+			);
+
+			it('should name no helper contract on an EVM network without ckETH', () => {
+				expect(
+					toWalletConnectCkEthHelperContractAddress({ networkId: BASE_NETWORK_ID, minterInfo })
+				).toBeUndefined();
+			});
+
+			it.each([undefined, null])(
+				'should name no helper contract without minter information (%s)',
+				(missing) => {
+					expect(
+						toWalletConnectCkEthHelperContractAddress({
+							networkId: ETHEREUM_NETWORK_ID,
+							minterInfo: missing
+						})
+					).toBeUndefined();
+				}
+			);
+		});
+
+		describe('getWalletConnectEthCkEthDeposit', () => {
+			it('should return the principal of the user for a deposit to it', () => {
+				expect(getWalletConnectEthCkEthDeposit(params)?.toText()).toBe(mockPrincipal.toText());
+			});
+
+			it.each([
+				{ to: CKETH_HELPER.toLowerCase(), helper: CKETH_HELPER },
+				{ to: CKETH_HELPER, helper: CKETH_HELPER.toLowerCase() },
+				{ to: `0x${CKETH_HELPER.slice(2).toUpperCase()}`, helper: CKETH_HELPER }
+			])(
+				'should hold $to to the helper contract however its address is cased',
+				({ to, helper }) => {
+					const casedParams = { ...params, to, minterInfo: minterInfoWithHelper(helper) };
+
+					expect(() =>
+						getWalletConnectEthCkEthDeposit({
+							...casedParams,
+							data: encodeDeposit(OTHER_PRINCIPAL)
+						})
+					).toThrow(WalletConnectEthCkEthDepositError);
+
+					expect(getWalletConnectEthCkEthDeposit(casedParams)?.toText()).toBe(
+						mockPrincipal.toText()
+					);
+				}
+			);
+
+			it('should hold a deposit on Sepolia to its helper contract as well', () => {
+				expect(() =>
+					getWalletConnectEthCkEthDeposit({
+						...params,
+						networkId: SEPOLIA_NETWORK_ID,
+						data: encodeDeposit(OTHER_PRINCIPAL)
+					})
+				).toThrow(WalletConnectEthCkEthDepositError);
+			});
+
+			// The minter information in the store for another chain's token is still Ethereum's, so the
+			// address it names is not the ckETH helper there.
+			it('should not check a deposit on an EVM network without ckETH', () => {
+				expect(
+					getWalletConnectEthCkEthDeposit({
+						...params,
+						networkId: BASE_NETWORK_ID,
+						data: encodeDeposit(OTHER_PRINCIPAL)
+					})
+				).toBeUndefined();
+			});
+
+			it('should throw for a deposit to another principal', () => {
+				expect(() =>
+					getWalletConnectEthCkEthDeposit({ ...params, data: encodeDeposit(OTHER_PRINCIPAL) })
+				).toThrow(WalletConnectEthCkEthDepositError);
+			});
+
+			it('should throw for a deposit when no user is signed in', () => {
+				expect(() => getWalletConnectEthCkEthDeposit({ ...params, principal: undefined })).toThrow(
+					WalletConnectEthCkEthDepositError
+				);
+			});
+
+			it.each([
+				{ kind: 'a deposit followed by more bytes', data: `${ownDeposit}00` },
+				{ kind: 'a truncated deposit', data: ownDeposit.slice(0, -2) },
+				{ kind: 'a deposit naming no principal', data: `${CKETH_DEPOSIT_HASH}${'00'.repeat(32)}` },
+				// `getMinterAddress()`
+				{ kind: 'another function of the helper', data: '0x93e5d42a' },
+				{ kind: 'calldata too short to carry a selector', data: '0xab' }
+			])('should throw for $kind', ({ data }) => {
+				expect(() => getWalletConnectEthCkEthDeposit({ ...params, data })).toThrow(
+					WalletConnectEthCkEthDepositError
+				);
+			});
+
+			it.each([undefined, '', '0x'])(
+				'should return undefined for a request to the helper carrying no calldata (%s)',
+				(data) => {
+					expect(getWalletConnectEthCkEthDeposit({ ...params, data })).toBeUndefined();
+				}
+			);
+
+			it('should return undefined for a deposit to another contract', () => {
+				expect(
+					getWalletConnectEthCkEthDeposit({
+						...params,
+						to: SPENDER,
+						data: encodeDeposit(OTHER_PRINCIPAL)
+					})
+				).toBeUndefined();
+			});
+
+			describe('while the helper contract is not confirmed', () => {
+				const unconfirmed = [
+					{ state: 'not loaded', minterInfo: undefined },
+					{ state: 'not loadable', minterInfo: null },
+					{ state: 'not certified', minterInfo: { ...minterInfo, certified: false } }
+				];
+
+				it.each(unconfirmed)(
+					'should hold a deposit to another principal while the minter information is $state',
+					({ minterInfo }) => {
+						expect(() =>
+							getWalletConnectEthCkEthDeposit({
+								...params,
+								minterInfo,
+								data: encodeDeposit(OTHER_PRINCIPAL)
+							})
+						).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+					}
+				);
+
+				it.each(unconfirmed)(
+					'should hold a deposit to the principal of the user while the minter information is $state',
+					({ minterInfo }) => {
+						expect(() => getWalletConnectEthCkEthDeposit({ ...params, minterInfo })).toThrow(
+							WalletConnectEthCkEthHelperUnconfirmedError
+						);
+					}
+				);
+
+				// Without the helper's address, a contract that is not the helper cannot be told apart from
+				// one that is.
+				it('should hold a deposit addressed to any contract', () => {
+					expect(() =>
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							to: SPENDER,
+							minterInfo: undefined,
+							data: encodeDeposit(OTHER_PRINCIPAL)
+						})
+					).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+				});
+
+				it('should hold a deposit on Sepolia as well', () => {
+					expect(() =>
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							networkId: SEPOLIA_NETWORK_ID,
+							minterInfo: undefined
+						})
+					).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+				});
+
+				it('should hold a deposit whatever the case of its selector', () => {
+					expect(() =>
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							minterInfo: undefined,
+							data: `0x${ownDeposit.slice(2).toUpperCase()}`
+						})
+					).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+				});
+
+				it('should not hold calldata that is not a deposit', () => {
+					expect(
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							minterInfo: undefined,
+							data: `${ERC20_TRANSFER_HASH}${'de'.repeat(64)}`
+						})
+					).toBeUndefined();
+				});
+
+				it.each([undefined, '0x'])(
+					'should not hold a request carrying no calldata (%s)',
+					(data) => {
+						expect(
+							getWalletConnectEthCkEthDeposit({ ...params, minterInfo: undefined, data })
+						).toBeUndefined();
+					}
+				);
+
+				it('should not hold a deposit on an EVM network without ckETH', () => {
+					expect(
+						getWalletConnectEthCkEthDeposit({
+							...params,
+							networkId: BASE_NETWORK_ID,
+							minterInfo: undefined,
+							data: encodeDeposit(OTHER_PRINCIPAL)
+						})
+					).toBeUndefined();
+				});
+			});
+		});
+
+		describe('classifyWalletConnectEthSendTransaction', () => {
+			it('should classify a deposit to the principal of the user as a ckETH deposit', () => {
+				const call = classifyWalletConnectEthSendTransaction(classifyParams);
+
+				expect(call.type).toBe('ckEthDeposit');
+				expect(call.type === 'ckEthDeposit' && call.principal.toText()).toBe(
+					mockPrincipal.toText()
+				);
+			});
+
+			it('should refuse a deposit to another principal', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({
+						...classifyParams,
+						data: encodeDeposit(OTHER_PRINCIPAL)
+					})
+				).toEqual({ type: 'ckEthDepositRefused' });
+			});
+
+			it('should refuse calldata to the helper that is not a deposit', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({
+						...classifyParams,
+						data: `${ERC20_TRANSFER_HASH}00`
+					})
+				).toEqual({ type: 'ckEthDepositRefused' });
+			});
+
+			it('should classify a request to the helper carrying no calldata as native', () => {
+				expect(classifyWalletConnectEthSendTransaction({ ...classifyParams, data: '0x' })).toEqual({
+					type: 'native'
+				});
+			});
+
+			it('should classify a request to another contract by its calldata alone', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({
+						...classifyParams,
+						to: SPENDER,
+						data: encodeDeposit(OTHER_PRINCIPAL)
+					})
+				).toEqual({ type: 'unknown', selector: CKETH_DEPOSIT_HASH });
+
+				expect(
+					classifyWalletConnectEthSendTransaction({
+						...classifyParams,
+						to: SPENDER,
+						data: `${ERC20_TRANSFER_HASH}${'de'.repeat(64)}`
+					})
+				).toEqual({ type: 'erc20Transfer' });
+			});
+
+			it('should hold a deposit while the helper contract is not confirmed', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({ ...classifyParams, minterInfo: undefined })
+				).toEqual({ type: 'ckEthHelperUnconfirmed' });
+			});
+
+			it('should classify a deposit on an EVM network without ckETH by its calldata alone', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({ ...classifyParams, networkId: BASE_NETWORK_ID })
+				).toEqual({ type: 'unknown', selector: CKETH_DEPOSIT_HASH });
+			});
+
+			describe('Uniswap swaps', () => {
+				const swapParams = {
+					...classifyParams,
+					to: mockUniswapRouter,
+					data: encodeUniswapEurcToUsdc(),
+					networkId: BASE_NETWORK_ID,
+					chainId: BASE_NETWORK.chainId,
+					nativeToken: BASE_ETH_TOKEN,
+					tokens: [EURC_TOKEN, USDC_TOKEN]
+				};
+
+				it('should classify an execute on a pinned router as the swap it makes', () => {
+					const call = classifyWalletConnectEthSendTransaction(swapParams);
+
+					expect(call.type).toBe('uniswapSwap');
+					expect(call.type === 'uniswapSwap' && call.swap.paid.token).toEqual(EURC_TOKEN);
+					expect(call.type === 'uniswapSwap' && call.swap.received.token).toEqual(USDC_TOKEN);
+				});
+
+				it('should classify the same execute to another contract by its calldata alone', () => {
+					expect(classifyWalletConnectEthSendTransaction({ ...swapParams, to: SPENDER })).toEqual({
+						type: 'unknown',
+						selector: UNISWAP_EXECUTE_HASH
+					});
+				});
+
+				it('should classify a swap OISY cannot describe by its calldata alone', () => {
+					expect(
+						classifyWalletConnectEthSendTransaction({ ...swapParams, tokens: [EURC_TOKEN] })
+					).toEqual({ type: 'unknown', selector: UNISWAP_EXECUTE_HASH });
+				});
+			});
+		});
+	});
+
+	describe('deposits to the ckETH minter helper that deposits to a subaccount', () => {
+		const HELPER = mockCkDepositHelperContractAddress;
+
+		const LIQUIDIUM_USDT_POOL = Principal.fromText('hnnn4-iyaaa-aaaar-qb4bq-cai');
+
+		const subaccount = mockCkDepositSubaccount;
+
+		const amount = 50_000_000n;
+
+		const minterInfoWithHelper = (helper: string) => ({
+			data: {
+				...mockCkMinterInfo,
+				deposit_with_subaccount_helper_contract_address: toNullable(helper),
+				supported_ckerc20_tokens: toNullable([
+					{
+						erc20_contract_address: USDT_TOKEN.address,
+						ledger_canister_id: Principal.fromText('cngnf-vqaaa-aaaar-qag4q-cai'),
+						ckerc20_token_symbol: 'ckUSDT'
+					}
+				])
+			},
+			certified: true
+		});
+
+		const minterInfo = minterInfoWithHelper(HELPER);
+
+		const params = {
+			to: HELPER,
+			data: encodeCkDepositErc20({ address: USDT_TOKEN.address, amount, owner: mockPrincipal }),
+			value: ZERO,
+			networkId: ETHEREUM_NETWORK_ID,
+			minterInfo,
+			principal: mockPrincipal,
+			nativeToken: ETHEREUM_TOKEN,
+			tokens: [USDT_TOKEN]
+		};
+
+		describe('toWalletConnectCkDepositHelperContractAddress', () => {
+			it.each([
+				{ network: 'Ethereum', networkId: ETHEREUM_NETWORK_ID },
+				{ network: 'Sepolia', networkId: SEPOLIA_NETWORK_ID }
+			])(
+				'should read the helper contract off the minter information on $network',
+				({ networkId }) => {
+					expect(toWalletConnectCkDepositHelperContractAddress({ networkId, minterInfo })).toBe(
+						HELPER
+					);
+				}
+			);
+
+			it('should name no helper contract on an EVM network without ckETH', () => {
+				expect(
+					toWalletConnectCkDepositHelperContractAddress({ networkId: BASE_NETWORK_ID, minterInfo })
+				).toBeUndefined();
+			});
+		});
+
+		describe('getWalletConnectEthCkDeposit', () => {
+			it('should describe a depositErc20 to the default account of the user', () => {
+				expect(getWalletConnectEthCkDeposit(params)).toEqual({
+					token: USDT_TOKEN,
+					amount,
+					ckTokenSymbol: 'ckUSDT',
+					owner: mockPrincipal,
+					ownAccount: true
+				});
+			});
+
+			it("should describe a depositErc20 to an account that is not the user's", () => {
+				expect(
+					getWalletConnectEthCkDeposit({
+						...params,
+						data: encodeCkDepositErc20({
+							address: USDT_TOKEN.address,
+							amount,
+							owner: LIQUIDIUM_USDT_POOL,
+							subaccount
+						})
+					})
+				).toEqual({
+					token: USDT_TOKEN,
+					amount,
+					ckTokenSymbol: 'ckUSDT',
+					owner: LIQUIDIUM_USDT_POOL,
+					subaccount,
+					ownAccount: false
+				});
+			});
+
+			// OISY shows the default account only, so a deposit to another subaccount of the user's
+			// principal is not one to the account the user sees.
+			it("should not take a subaccount of the user's principal for the user's account", () => {
+				expect(
+					getWalletConnectEthCkDeposit({
+						...params,
+						data: encodeCkDepositErc20({
+							address: USDT_TOKEN.address,
+							amount,
+							owner: mockPrincipal,
+							subaccount
+						})
+					})?.ownAccount
+				).toBeFalsy();
+			});
+
+			it("should not take any account for the user's when no user is signed in", () => {
+				expect(
+					getWalletConnectEthCkDeposit({ ...params, principal: undefined })?.ownAccount
+				).toBeFalsy();
+			});
+
+			it.each([
+				{
+					network: 'Ethereum',
+					networkId: ETHEREUM_NETWORK_ID,
+					nativeToken: ETHEREUM_TOKEN,
+					ckTokenSymbol: 'ckETH'
+				},
+				{
+					network: 'Sepolia',
+					networkId: SEPOLIA_NETWORK_ID,
+					nativeToken: SEPOLIA_TOKEN,
+					ckTokenSymbol: 'ckSepoliaETH'
+				}
+			])(
+				'should describe a depositEth on $network as the native value converted to $ckTokenSymbol',
+				({ networkId, nativeToken, ckTokenSymbol }) => {
+					expect(
+						getWalletConnectEthCkDeposit({
+							...params,
+							networkId,
+							nativeToken,
+							value: 123n,
+							data: encodeCkDepositEth({ owner: mockPrincipal })
+						})
+					).toEqual({
+						token: nativeToken,
+						amount: 123n,
+						ckTokenSymbol,
+						owner: mockPrincipal,
+						ownAccount: true
+					});
+				}
+			);
+
+			it.each([
+				{ to: HELPER.toLowerCase(), helper: HELPER },
+				{ to: HELPER, helper: HELPER.toLowerCase() }
+			])('should recognise the helper contract however its address is cased', ({ to, helper }) => {
+				expect(
+					getWalletConnectEthCkDeposit({ ...params, to, minterInfo: minterInfoWithHelper(helper) })
+				).toBeDefined();
+			});
+
+			it('should return undefined for a deposit to another contract', () => {
+				expect(getWalletConnectEthCkDeposit({ ...params, to: SPENDER })).toBeUndefined();
+			});
+
+			it('should return undefined for another call to the helper contract', () => {
+				expect(
+					getWalletConnectEthCkDeposit({
+						...params,
+						data: `${ERC20_TRANSFER_HASH}${'de'.repeat(64)}`
+					})
+				).toBeUndefined();
+			});
+
+			it.each([undefined, '0x'])(
+				'should return undefined for a request to the helper carrying no calldata (%s)',
+				(data) => {
+					expect(getWalletConnectEthCkDeposit({ ...params, data })).toBeUndefined();
+				}
+			);
+
+			// Its amount is stated in the token's decimals, which OISY only knows for a token it lists or
+			// the user added.
+			it('should return undefined for a depositErc20 of a token OISY does not know', () => {
+				expect(getWalletConnectEthCkDeposit({ ...params, tokens: [] })).toBeUndefined();
+			});
+
+			it('should not check a deposit on an EVM network without ckETH', () => {
+				expect(
+					getWalletConnectEthCkDeposit({
+						...params,
+						networkId: BASE_NETWORK_ID,
+						minterInfo: undefined
+					})
+				).toBeUndefined();
+			});
+
+			it('should throw for a depositErc20 of a token the minter does not convert', () => {
+				expect(() =>
+					getWalletConnectEthCkDeposit({
+						...params,
+						data: encodeCkDepositErc20({ address: SPENDER, amount, owner: mockPrincipal }),
+						tokens: [USDT_TOKEN, { ...USDT_TOKEN, address: SPENDER }]
+					})
+				).toThrow(WalletConnectEthCkDepositError);
+			});
+
+			it('should throw for a depositErc20 carrying native value', () => {
+				expect(() => getWalletConnectEthCkDeposit({ ...params, value: 1n })).toThrow(
+					WalletConnectEthCkDepositError
+				);
+			});
+
+			it.each([
+				{ kind: 'a deposit followed by more bytes', data: `${params.data}00` },
+				{ kind: 'a truncated deposit', data: params.data.slice(0, -2) },
+				{
+					kind: 'a deposit naming no principal',
+					data: `${ERC20_DEPOSIT_ERC20_HASH}${params.data.slice(10, 138)}${'00'.repeat(64)}`
+				}
+			])('should throw for $kind', ({ data }) => {
+				expect(() => getWalletConnectEthCkDeposit({ ...params, data })).toThrow(
+					WalletConnectEthCkDepositError
+				);
+			});
+
+			describe('while the helper contract is not confirmed', () => {
+				it.each([
+					{ state: 'not loaded', minterInfo: undefined },
+					{ state: 'not loadable', minterInfo: null },
+					{ state: 'not certified', minterInfo: { ...minterInfo, certified: false } }
+				])('should hold a deposit while the minter information is $state', ({ minterInfo }) => {
+					expect(() => getWalletConnectEthCkDeposit({ ...params, minterInfo })).toThrow(
+						WalletConnectEthCkEthHelperUnconfirmedError
+					);
+				});
+
+				it('should hold a deposit addressed to any contract', () => {
+					expect(() =>
+						getWalletConnectEthCkDeposit({ ...params, to: SPENDER, minterInfo: undefined })
+					).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+				});
+
+				it('should hold a depositEth as well', () => {
+					expect(() =>
+						getWalletConnectEthCkDeposit({
+							...params,
+							minterInfo: undefined,
+							data: encodeCkDepositEth({ owner: mockPrincipal })
+						})
+					).toThrow(WalletConnectEthCkEthHelperUnconfirmedError);
+				});
+
+				it('should not hold calldata that is not a deposit', () => {
+					expect(
+						getWalletConnectEthCkDeposit({
+							...params,
+							minterInfo: undefined,
+							data: `${ERC20_TRANSFER_HASH}${'de'.repeat(64)}`
+						})
+					).toBeUndefined();
+				});
+			});
+		});
+
+		describe('classifyWalletConnectEthSendTransaction', () => {
+			const classifyParams = {
+				...params,
+				chainId: ETHEREUM_NETWORK.chainId,
+				wallet: mockUniswapWallet
+			};
+
+			it('should classify a deposit OISY reads as a ck deposit', () => {
+				const call = classifyWalletConnectEthSendTransaction(classifyParams);
+
+				expect(call.type).toBe('ckDeposit');
+				expect(call.type === 'ckDeposit' && call.deposit.ckTokenSymbol).toBe('ckUSDT');
+			});
+
+			it('should refuse a deposit of a token the minter does not convert', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({
+						...classifyParams,
+						data: encodeCkDepositErc20({ address: SPENDER, amount, owner: mockPrincipal })
+					})
+				).toEqual({ type: 'ckDepositRefused' });
+			});
+
+			it('should hold a deposit while the helper contract is not confirmed', () => {
+				expect(
+					classifyWalletConnectEthSendTransaction({ ...classifyParams, minterInfo: undefined })
+				).toEqual({ type: 'ckEthHelperUnconfirmed' });
+			});
+
+			it('should classify a deposit of a token OISY does not know by its calldata alone', () => {
+				expect(classifyWalletConnectEthSendTransaction({ ...classifyParams, tokens: [] })).toEqual({
+					type: 'unknown',
+					selector: ERC20_DEPOSIT_ERC20_HASH
+				});
+			});
+
+			it('should classify the same deposit to another contract by its calldata alone', () => {
+				expect(classifyWalletConnectEthSendTransaction({ ...classifyParams, to: SPENDER })).toEqual(
+					{ type: 'unknown', selector: ERC20_DEPOSIT_ERC20_HASH }
+				);
+			});
+		});
+	});
+
 	describe('isWalletConnectEthApproval', () => {
 		it.each([
 			{ type: 'erc20Approve' as const },
@@ -460,9 +1288,38 @@ describe('wallet-connect.utils', () => {
 		it.each([
 			{ type: 'native' as const },
 			{ type: 'erc20Transfer' as const },
-			{ type: 'unknown' as const, selector: '0xdeadbeef' }
+			{ type: 'unknown' as const, selector: '0xdeadbeef' },
+			{ type: 'ckEthDeposit' as const, principal: mockPrincipal },
+			{ type: 'ckEthDepositRefused' as const },
+			{ type: 'ckEthHelperUnconfirmed' as const }
 		])('should not treat $type as an approval', (call) => {
 			expect(isWalletConnectEthApproval(call)).toBeFalsy();
+		});
+	});
+
+	describe('isWalletConnectEthTokenCallWithValue', () => {
+		const tokenCalls = [
+			{ type: 'erc20Transfer' as const },
+			{ type: 'erc20Approve' as const },
+			{ type: 'erc20AllowanceDelta' as const, increase: true },
+			{ type: 'erc20AllowanceDelta' as const, increase: false }
+		];
+
+		it.each(tokenCalls)('should flag $type carrying native value', (call) => {
+			expect(isWalletConnectEthTokenCallWithValue({ call, value: 1n })).toBeTruthy();
+		});
+
+		it.each(tokenCalls)('should not flag $type carrying no native value', (call) => {
+			expect(isWalletConnectEthTokenCallWithValue({ call, value: ZERO })).toBeFalsy();
+		});
+
+		// Their review states the native value itself, so it has a line for it.
+		it.each([
+			{ type: 'native' as const },
+			{ type: 'setApprovalForAll' as const },
+			{ type: 'unknown' as const, selector: '0xdeadbeef' }
+		])('should not flag $type carrying native value', (call) => {
+			expect(isWalletConnectEthTokenCallWithValue({ call, value: 1n })).toBeFalsy();
 		});
 	});
 
@@ -478,7 +1335,7 @@ describe('wallet-connect.utils', () => {
 			]);
 		});
 
-		it('should name the ERC-3009 authorization the review could not describe', () => {
+		it('should name the struct an ERC-3009 authorization hashes', () => {
 			expect(getEthTypedDataMethods(transferWithAuthorization())).toEqual([
 				{ name: 'TransferWithAuthorization', depth: 0 }
 			]);
@@ -579,6 +1436,48 @@ describe('wallet-connect.utils', () => {
 		});
 	});
 
+	describe('getEthTypedDataPrimaryType', () => {
+		it('names the struct the digest is rooted at', () => {
+			expect(getEthTypedDataPrimaryType(permit2)).toBe('PermitSingle');
+		});
+
+		// The declared field is the request's label for itself: the digest is the same whatever it says,
+		// so naming the request after it would let an allowance pass for anything.
+		it('names the hashed struct rather than the one the payload declares', () => {
+			const mislabelled = { ...permit2, primaryType: 'Login' };
+
+			expect(getEthTypedDataPrimaryType(mislabelled)).toBe('PermitSingle');
+
+			expect(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(mislabelled),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toBe(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(permit2),
+					sessionChainId: MAINNET_SESSION
+				})
+			);
+		});
+
+		it('names nothing for a type graph with no single root', () => {
+			expect(
+				getEthTypedDataPrimaryType({
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Login: [{ name: 'user', type: 'address' }],
+						Order: [{ name: 'price', type: 'uint256' }]
+					}
+				})
+			).toBeUndefined();
+		});
+
+		it('names nothing for a payload that declares no types', () => {
+			expect(getEthTypedDataPrimaryType(JSON.parse('{}'))).toBeUndefined();
+		});
+	});
+
 	describe('hasUnreviewableTypedData', () => {
 		const call = (typedData: WalletConnectEthSignTypedDataV4) =>
 			hasUnreviewableTypedData({
@@ -590,16 +1489,33 @@ describe('wallet-connect.utils', () => {
 		// The schemas OISY can summarize. These are the only ones that must not reach the warning.
 		it.each([
 			{ name: 'Permit2 PermitSingle', typedData: permit2 },
+			{ name: 'Permit2 PermitBatch', typedData: permit2Batch },
 			{ name: 'ERC-2612 Permit', typedData: erc2612Permit },
-			{ name: 'DAI Permit', typedData: daiPermit(true) }
+			{ name: 'DAI Permit', typedData: daiPermit(true) },
+			{ name: 'ERC-3009 TransferWithAuthorization', typedData: transferWithAuthorization() },
+			{ name: 'ERC-3009 ReceiveWithAuthorization', typedData: receiveWithAuthorization },
+			{ name: 'Permit2 PermitTransferFrom', typedData: permit2Transfer },
+			{ name: 'Permit2 PermitBatchTransferFrom', typedData: permit2BatchTransfer }
 		])('should not warn about a recognised $name', ({ typedData }) => {
 			expect(call(typedData)).toBeFalsy();
 		});
 
-		// The report that would have come next. An ERC-3009 authorization lets whoever holds the
-		// signature pull the stated value out of the wallet, and the review said nothing about it.
-		it('should warn about an ERC-3009 authorization', () => {
-			expect(call(transferWithAuthorization())).toBeTruthy();
+		// The summary states the transfer, and the witness the signature also covers is the dApp's
+		// own struct, which nothing describes.
+		it.each([
+			{ name: 'Permit2 PermitWitnessTransferFrom', typedData: permit2WitnessTransfer },
+			{ name: 'Permit2 PermitBatchWitnessTransferFrom', typedData: permit2BatchWitnessTransfer }
+		])('should warn about a $name', ({ typedData }) => {
+			expect(call(typedData)).toBeTruthy();
+		});
+
+		// Signable, but as the wrapper: the transfer it carries is not the struct being hashed.
+		it('should warn about a struct that wraps a Permit2 witness transfer', () => {
+			const typedData = structuredClone(permit2WitnessTransfer);
+			typedData.types.Wrapper = [{ name: 'transfer', type: 'PermitWitnessTransferFrom' }];
+			typedData.message.transfer = permit2WitnessTransfer.message;
+
+			expect(call(typedData)).toBeTruthy();
 		});
 
 		it('should warn about a struct that is nothing OISY knows', () => {
@@ -963,14 +1879,73 @@ describe('wallet-connect.utils', () => {
 		);
 	});
 
+	// The transfer schemas are matched member for member, so each fixture summarized below is held
+	// to what its contract hashes: Circle's FiatToken for ERC-3009, Uniswap's `PermitHash` for Permit2.
+	describe('type strings of the summarized transfer schemas', () => {
+		const encodeType = ({ types, primaryType }: WalletConnectEthSignTypedDataV4): string => {
+			const { EIP712Domain: _EIP712Domain, ...rest } = types;
+			return TypedDataEncoder.from(rest).encodeType(primaryType);
+		};
+
+		it.each([
+			{
+				name: 'TransferWithAuthorization',
+				typedData: transferWithAuthorization(),
+				typeHash: '0x7c7c6cdb67a18743f49ec6fa9b35f50d52ed05cbed4cc592e13b44501c1a2267'
+			},
+			{
+				name: 'ReceiveWithAuthorization',
+				typedData: receiveWithAuthorization,
+				typeHash: '0xd099cc98ef71107a616c4f0f941f04c322d8e254fe26b3c6668db87aae413de8'
+			}
+		])('hashes $name under the type hash the token checks', ({ typedData, typeHash }) => {
+			expect(getEthTypedDataApproval(typedData)).toBeDefined();
+			expect(id(encodeType(typedData))).toBe(typeHash);
+		});
+
+		it.each([
+			{
+				name: 'PermitTransferFrom',
+				typedData: permit2Transfer,
+				typeString:
+					'PermitTransferFrom(TokenPermissions permitted,address spender,uint256 nonce,uint256 deadline)TokenPermissions(address token,uint256 amount)'
+			},
+			{
+				name: 'PermitBatchTransferFrom',
+				typedData: permit2BatchTransfer,
+				typeString:
+					'PermitBatchTransferFrom(TokenPermissions[] permitted,address spender,uint256 nonce,uint256 deadline)TokenPermissions(address token,uint256 amount)'
+			}
+		])('hashes $name under the type string Permit2 checks', ({ typedData, typeString }) => {
+			expect(getEthTypedDataApproval(typedData)).toBeDefined();
+			expect(encodeType(typedData)).toBe(typeString);
+		});
+
+		// Permit2 hashes its own stub followed by the witness type string the spender passes it.
+		it.each([
+			{
+				name: 'PermitWitnessTransferFrom',
+				typedData: permit2WitnessTransfer,
+				stub: 'PermitWitnessTransferFrom(TokenPermissions permitted,address spender,uint256 nonce,uint256 deadline,'
+			},
+			{
+				name: 'PermitBatchWitnessTransferFrom',
+				typedData: permit2BatchWitnessTransfer,
+				stub: 'PermitBatchWitnessTransferFrom(TokenPermissions[] permitted,address spender,uint256 nonce,uint256 deadline,'
+			}
+		])('hashes $name under the stub Permit2 appends the witness to', ({ typedData, stub }) => {
+			expect(getEthTypedDataApproval(typedData)).toBeDefined();
+			expect(encodeType(typedData)).toBe(
+				`${stub}Order witness)Order(OrderInfo info,uint256 outputAmount)OrderInfo(address swapper,uint256 deadline)TokenPermissions(address token,uint256 amount)`
+			);
+		});
+	});
+
 	describe('getEthTypedDataApproval', () => {
 		it('summarizes a Permit2 request from its declared members', () => {
 			expect(getEthTypedDataApproval(permit2)).toEqual({
 				spender: SPENDER,
-				token: DAI,
-				amount: 123456789n,
-				unlimited: false,
-				expiration: 1761743754
+				allowances: [{ token: DAI, amount: 123456789n, unlimited: false, expiration: 1761743754 }]
 			});
 		});
 
@@ -979,17 +1954,55 @@ describe('wallet-connect.utils', () => {
 			const typedData = structuredClone(permit2);
 			(typedData.message.details as Record<string, unknown>).amount = MAX_UINT_160.toString();
 
-			expect(getEthTypedDataApproval(typedData)?.unlimited).toBeTruthy();
+			expect(getEthTypedDataApproval(typedData)?.allowances[0].unlimited).toBeTruthy();
+		});
+
+		it('summarizes every allowance of a Permit2 batch, in order, for its one spender', () => {
+			expect(getEthTypedDataApproval(permit2Batch)).toEqual({
+				spender: SPENDER,
+				allowances: [
+					{ token: DAI, amount: 123456789n, unlimited: false, expiration: 1761743754 },
+					{ token: USDC, amount: MAX_UINT_160, unlimited: true, expiration: 1761743755 }
+				]
+			});
+		});
+
+		it('summarizes a Permit2 batch that lists no token as no allowance', () => {
+			const typedData = structuredClone(permit2Batch);
+			typedData.message.details = [];
+
+			expect(getEthTypedDataApproval(typedData)).toEqual({ spender: SPENDER, allowances: [] });
+		});
+
+		it('summarizes nothing when one entry of a Permit2 batch carries a non-conforming value', () => {
+			const typedData = structuredClone(permit2Batch);
+			(typedData.message.details as Record<string, unknown>[])[1].token = 'not-an-address';
+
+			expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+		});
+
+		// The batch is matched on its declared list, so a struct calling itself `PermitBatch` around a
+		// single entry is no Permit2 schema at all.
+		it('summarizes nothing for a batch struct whose details are not a list', () => {
+			const typedData = structuredClone(permit2Batch);
+			typedData.types.PermitBatch[0] = { name: 'details', type: 'PermitDetails' };
+			[typedData.message.details] = typedData.message.details as Record<string, unknown>[];
+
+			expect(getEthTypedDataApproval(typedData)).toBeUndefined();
 		});
 
 		it('summarizes an ERC-2612 permit from its value, deadline and verifying contract', () => {
 			expect(getEthTypedDataApproval(erc2612Permit)).toEqual({
 				spender: SPENDER,
-				// ERC-2612 names no token: the contract that verifies the permit is the token.
-				token: DAI,
-				amount: 1000000n,
-				unlimited: false,
-				expiration: 1893456000
+				allowances: [
+					{
+						// ERC-2612 names no token: the contract that verifies the permit is the token.
+						token: DAI,
+						amount: 1000000n,
+						unlimited: false,
+						expiration: 1893456000
+					}
+				]
 			});
 		});
 
@@ -1000,10 +2013,7 @@ describe('wallet-connect.utils', () => {
 
 			expect(getEthTypedDataApproval(typedData)).toEqual({
 				spender: SPENDER,
-				token: DAI,
-				amount: MAX_UINT_256,
-				unlimited: true,
-				expiration: 1893456000
+				allowances: [{ token: DAI, amount: MAX_UINT_256, unlimited: true, expiration: 1893456000 }]
 			});
 		});
 
@@ -1012,38 +2022,246 @@ describe('wallet-connect.utils', () => {
 			const typedData = structuredClone(erc2612Permit);
 			typedData.message.deadline = MAX_UINT_256.toString();
 
-			expect(getEthTypedDataApproval(typedData)?.expiration).toBeUndefined();
+			expect(getEthTypedDataApproval(typedData)?.allowances).toEqual([
+				expect.objectContaining({ expiration: undefined })
+			]);
+		});
+
+		// A saturated `uint48` is a safe integer, and still past the last second a `Date` holds.
+		it('states no expiration for a Permit2 expiration at the uint48 maximum', () => {
+			const maxUint48 = ((1n << 48n) - 1n).toString();
+
+			const single = structuredClone(permit2);
+			(single.message.details as Record<string, unknown>).expiration = maxUint48;
+
+			const batch = structuredClone(permit2Batch);
+			(batch.message.details as Record<string, unknown>[])[1].expiration = maxUint48;
+
+			expect(getEthTypedDataApproval(single)?.allowances[0].expiration).toBeUndefined();
+			expect(
+				getEthTypedDataApproval(batch)?.allowances.map(({ expiration }) => expiration)
+			).toEqual([1761743754, undefined]);
+		});
+
+		it('states an expiration up to the last second a date can hold', () => {
+			const typedData = structuredClone(erc2612Permit);
+
+			typedData.message.deadline = '8640000000000';
+
+			expect(getEthTypedDataApproval(typedData)?.allowances[0].expiration).toBe(8_640_000_000_000);
+
+			typedData.message.deadline = '8640000000001';
+
+			expect(getEthTypedDataApproval(typedData)?.allowances[0].expiration).toBeUndefined();
 		});
 
 		// DAI carries no amount: `allowed` is the allowance, and it is an unlimited one.
 		it('summarizes an allowed DAI permit as unlimited', () => {
 			expect(getEthTypedDataApproval(daiPermit(true))).toEqual({
 				spender: SPENDER,
-				token: DAI,
-				amount: undefined,
-				unlimited: true,
-				expiration: 1893456000
+				allowances: [{ token: DAI, amount: undefined, unlimited: true, expiration: 1893456000 }]
 			});
 		});
 
 		it('summarizes a cleared DAI permit as a revocation', () => {
 			expect(getEthTypedDataApproval(daiPermit(false))).toEqual({
 				spender: SPENDER,
-				token: DAI,
-				amount: ZERO,
-				unlimited: false,
-				expiration: 1893456000
+				allowances: [{ token: DAI, amount: ZERO, unlimited: false, expiration: 1893456000 }]
 			});
 		});
 
-		it('summarizes nothing for an ERC-3009 authorization carrying undeclared summary keys', () => {
-			expect(
-				getEthTypedDataApproval(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))
-			).toBeUndefined();
+		describe('ERC-3009 authorizations', () => {
+			const erc3009Approval = {
+				recipient: RECIPIENT,
+				allowances: [
+					{
+						// Like ERC-2612, ERC-3009 names no token: the contract that verifies it is the token.
+						token: USDC,
+						amount: 5000000000n,
+						expiration: 1893456000
+					}
+				]
+			};
+
+			it('summarizes a transfer from its value, recipient, deadline and verifying contract', () => {
+				expect(getEthTypedDataApproval(transferWithAuthorization())).toEqual(erc3009Approval);
+			});
+
+			it('summarizes a receive like the transfer it authorizes', () => {
+				expect(getEthTypedDataApproval(receiveWithAuthorization)).toEqual(erc3009Approval);
+			});
+
+			it('summarizes the declared members only, whatever undeclared keys ride along', () => {
+				expect(getEthTypedDataApproval(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))).toEqual(
+					erc3009Approval
+				);
+			});
+
+			// A transfer moves its value or nothing, so its largest figure is still that figure.
+			it('does not call a saturated value unlimited', () => {
+				expect(
+					getEthTypedDataApproval(transferWithAuthorization({ value: MAX_UINT_256.toString() }))
+				).toEqual({
+					...erc3009Approval,
+					allowances: [{ token: USDC, amount: MAX_UINT_256, expiration: 1893456000 }]
+				});
+			});
+
+			it('summarizes nothing for a struct of that name with another member', () => {
+				const typedData = transferWithAuthorization();
+				typedData.types.TransferWithAuthorization = [
+					...typedData.types.TransferWithAuthorization,
+					{ name: 'memo', type: 'string' }
+				];
+				typedData.message.memo = 'gm';
+
+				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+			});
 		});
 
-		it('summarizes nothing for a canonical ERC-3009 authorization', () => {
-			expect(getEthTypedDataApproval(transferWithAuthorization())).toBeUndefined();
+		describe('Permit2 signature transfers', () => {
+			it('summarizes a transfer from its permitted token and amount, spender and deadline', () => {
+				expect(getEthTypedDataApproval(permit2Transfer)).toEqual({
+					spender: SPENDER,
+					allowances: [
+						{ token: USDC, amount: 250000000n, unlimited: false, expiration: 1893456000 }
+					]
+				});
+			});
+
+			it('summarizes every transfer of a batch, in order, under its one deadline', () => {
+				expect(getEthTypedDataApproval(permit2BatchTransfer)).toEqual({
+					spender: SPENDER,
+					allowances: [
+						{ token: USDC, amount: 250000000n, unlimited: false, expiration: 1893456000 },
+						{ token: DAI, amount: MAX_UINT_256, unlimited: true, expiration: 1893456000 }
+					]
+				});
+			});
+
+			// The amount is a uint256, so it saturates where ERC-2612 does, not where Permit2's allowances do.
+			it('does not call a transfer of the Permit2 allowance maximum unlimited', () => {
+				const typedData = structuredClone(permit2Transfer);
+				(typedData.message.permitted as Record<string, unknown>).amount = MAX_UINT_160.toString();
+
+				expect(getEthTypedDataApproval(typedData)?.allowances).toEqual([
+					{ token: USDC, amount: MAX_UINT_160, unlimited: false, expiration: 1893456000 }
+				]);
+			});
+
+			it('summarizes nothing when one entry of a batch carries a non-conforming value', () => {
+				const typedData = structuredClone(permit2BatchTransfer);
+				(typedData.message.permitted as Record<string, unknown>[])[1].amount = '-1';
+
+				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+			});
+
+			it.each([
+				{
+					name: 'PermitWitnessTransferFrom',
+					typedData: permit2WitnessTransfer,
+					transfer: permit2Transfer
+				},
+				{
+					name: 'PermitBatchWitnessTransferFrom',
+					typedData: permit2BatchWitnessTransfer,
+					transfer: permit2BatchTransfer
+				}
+			])('summarizes the transfer of a $name and flags its witness', ({ typedData, transfer }) => {
+				expect(getEthTypedDataApproval(typedData)).toEqual({
+					...getEthTypedDataApproval(transfer),
+					hasWitness: true
+				});
+			});
+
+			// The witness is the dApp's to type, and Permit2 hashes a bare value as readily as a struct.
+			it('flags a witness that is not a struct', () => {
+				const typedData = structuredClone(permit2WitnessTransfer);
+				typedData.types = {
+					EIP712Domain: typedData.types.EIP712Domain,
+					PermitWitnessTransferFrom: [
+						...permit2Transfer.types.PermitTransferFrom,
+						{ name: 'witness', type: 'bytes32' }
+					],
+					TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+				};
+				typedData.message.witness = `0x${'cd'.repeat(32)}`;
+
+				expect(getEthTypedDataApproval(typedData)?.hasWitness).toBeTruthy();
+			});
+
+			it('summarizes nothing for a witness transfer that declares no witness', () => {
+				const typedData: WalletConnectEthSignTypedDataV4 = {
+					...permit2Transfer,
+					types: {
+						EIP712Domain: permit2Transfer.types.EIP712Domain,
+						PermitWitnessTransferFrom: permit2Transfer.types.PermitTransferFrom,
+						TokenPermissions: PERMIT2_TOKEN_PERMISSIONS
+					},
+					primaryType: 'PermitWitnessTransferFrom'
+				};
+
+				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+			});
+
+			it('summarizes nothing for a witness transfer that declares a member past its witness', () => {
+				const typedData = structuredClone(permit2WitnessTransfer);
+				typedData.types.PermitWitnessTransferFrom.push({ name: 'memo', type: 'string' });
+				typedData.message.memo = 'gm';
+
+				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+			});
+
+			it('summarizes nothing for a witness transfer whose TokenPermissions is not the one Permit2 declares', () => {
+				const typedData = structuredClone(permit2WitnessTransfer);
+				typedData.types.TokenPermissions = [
+					{ name: 'token', type: 'address' },
+					{ name: 'amount', type: 'uint160' }
+				];
+
+				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+			});
+
+			// Accepting structs the schema does not list must not let one of them become the root, since
+			// the root is what is hashed: here the transfer at the top is no member of the signed struct.
+			it('summarizes nothing for a struct that wraps a witness transfer', () => {
+				const typedData = structuredClone(permit2WitnessTransfer);
+				typedData.types.Wrapper = [{ name: 'transfer', type: 'PermitWitnessTransferFrom' }];
+				typedData.message.transfer = { ...permit2WitnessTransfer.message, spender: RECIPIENT };
+
+				expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+			});
+
+			// The types are the dApp's own, parsed from JSON. A struct declared as anything but a list
+			// of members is typed data that cannot be signed, and comparing it must not throw.
+			it.each([
+				{ transfer: permit2WitnessTransfer, shape: 'an object', declared: {} },
+				{ transfer: permit2BatchWitnessTransfer, shape: 'an object', declared: {} },
+				{
+					transfer: permit2WitnessTransfer,
+					shape: 'a list of nulls',
+					declared: [null, null, null, null, null]
+				}
+			])(
+				'summarizes nothing for a $transfer.primaryType declared as $shape',
+				({ transfer, declared }) => {
+					const typedData: WalletConnectEthSignTypedDataV4 = JSON.parse(
+						JSON.stringify({
+							...transfer,
+							types: { ...transfer.types, [transfer.primaryType]: declared }
+						})
+					);
+
+					expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+					expect(
+						hasInvalidTypedData({
+							method: SESSION_REQUEST_ETH_SIGN_V4,
+							params: toParams(typedData),
+							sessionChainId: MAINNET_SESSION
+						})
+					).toBeTruthy();
+				}
+			);
 		});
 
 		it('summarizes nothing for an unrelated struct that declares spender and details', () => {

@@ -3,6 +3,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { TokenId } from '$lib/types/token';
 import { consoleWarn } from '$lib/utils/console.utils';
+import { resetXrpHistoryPager } from '$xrp/services/xrp-history-pager.services';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import type { XrpPostMessageDataResponseWallet } from '$xrp/types/xrp-post-message';
 import { isNullish, jsonReviver, nonNullish } from '@dfinity/utils';
@@ -75,6 +76,7 @@ export const syncWallet = ({
 export const resetWallet = ({ tokenId }: { tokenId: TokenId }) => {
 	balancesStore.reset(tokenId);
 	xrpTransactionsStore.clear(tokenId);
+	resetXrpHistoryPager(tokenId);
 };
 
 export const syncWalletError = ({

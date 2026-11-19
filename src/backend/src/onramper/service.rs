@@ -65,13 +65,13 @@ async fn verify_caller_network_wallets(
     provided: &[OnramperSignedEntry],
 ) -> Result<Vec<OnramperSignedEntry>, SignOnramperWidgetUrlError> {
     // Memoize each network's derivation for the duration of the request. `provided` is an
-    // unbounded, un-deduplicated caller-supplied vector, and deriving BTC/ETH/SOL addresses makes
-    // management-canister public-key reads. Without this cache an authenticated caller could repeat
+    // unbounded, un-deduplicated caller-supplied vector, and deriving a BTC/ETH/SOL address costs
+    // an elliptic-curve key derivation. Without this cache an authenticated caller could repeat
     // the same network thousands of times in one rate-limited request and amplify it into that many
-    // inter-canister reads (cycle drain). Distinct networks are bounded — only four are recognized
-    // and any other resolves to `None` and fails fast — so caching by normalized id caps the reads
-    // at one per supported network regardless of vector length, while preserving the exact
-    // per-entry signed output (duplicates are still emitted as supplied).
+    // derivations (cycle drain). Distinct networks are bounded — only four are recognized and any
+    // other resolves to `None` and fails fast — so caching by normalized id caps the derivations at
+    // one per supported network regardless of vector length, while preserving the exact per-entry
+    // signed output (duplicates are still emitted as supplied).
     let mut derived_cache: HashMap<String, Option<String>> = HashMap::new();
     let mut verified = Vec::with_capacity(provided.len());
     for entry in provided {

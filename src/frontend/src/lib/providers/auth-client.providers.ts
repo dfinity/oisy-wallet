@@ -4,6 +4,10 @@
 // `ReferenceError: localStorage is not defined` when this provider is used
 // from a worker. No-op in the main thread.
 import '$lib/utils/worker-local-storage.polyfill';
+// Side-effect import: installs `Promise.withResolvers` when missing (e.g.
+// Safari < 17.4), because `@icp-sdk/signer` calls it on every sign-in request.
+// No-op where it is supported natively.
+import '$lib/utils/promise-with-resolvers.polyfill';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	AuthClient,

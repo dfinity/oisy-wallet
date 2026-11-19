@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 
 use ic_cdk_management_canister::{VetKDCurve, VetKDKeyId};
+use ic_stable_structures::Memory;
 use ic_vetkeys::{encrypted_maps::EncryptedMaps, types::AccessRights};
 use shared::types::{
     api_keys::ApiKeys,
@@ -11,32 +12,33 @@ use shared::types::{
 use crate::{
     personal_notes::PERSONAL_NOTES_DOMAIN_SEPARATOR,
     state::memory::{
-        ACTIVE_USER_TRANSACTIONS_MEMORY_ID, AGREEMENT_HISTORY_MEMORY_ID, API_KEYS_MEMORY_ID,
-        BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID, CONTACT_IMAGE_MEMORY_ID,
-        CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER,
-        PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID,
-        PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID,
-        PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID, PERSONAL_NOTE_SHARES_MEMORY_ID,
-        TIPS_BY_SENDER_MEMORY_ID, TIPS_MEMORY_ID, TIP_SECRETS_ENCRYPTED_MAPS_MEMORY_ID,
-        TIP_SECRETS_KEY_MANAGER_ACCESS_MEMORY_ID, TIP_SECRETS_KEY_MANAGER_CONFIG_MEMORY_ID,
-        TIP_SECRETS_KEY_MANAGER_SHARED_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID,
-        USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID,
-        USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
+        ACTIVE_USER_TRANSACTIONS_MEMORY_ID, ACTIVE_USER_TRANSACTIONS_SEEN_MEMORY_ID,
+        AGREEMENT_HISTORY_MEMORY_ID, API_KEYS_MEMORY_ID, BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID,
+        CONFIG_MEMORY_ID, CONTACT_IMAGE_MEMORY_ID, CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID,
+        MEMORY_MANAGER, PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID,
+        PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID,
+        PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID, PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID,
+        PERSONAL_NOTE_SHARES_MEMORY_ID, TIPS_BY_SENDER_MEMORY_ID, TIPS_MEMORY_ID,
+        TIP_SECRETS_ENCRYPTED_MAPS_MEMORY_ID, TIP_SECRETS_KEY_MANAGER_ACCESS_MEMORY_ID,
+        TIP_SECRETS_KEY_MANAGER_CONFIG_MEMORY_ID, TIP_SECRETS_KEY_MANAGER_SHARED_MEMORY_ID,
+        TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID,
+        USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
     tips::secrets::TIP_SECRETS_DOMAIN_SEPARATOR,
     types::{
         maps::{
-            ActiveUserTransactionsMap, AgreementHistoryMap, ApiKeysCell,
-            BtcUserPendingTransactionsMap, ConfigCell, ContactImageMap, ContactMap, CustomTokenMap,
-            ExchangeRateMap, PersonalNoteShareMap, PersonalNoteSharesByCreatorMap, TipMap,
-            TipsBySenderMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
-            UserTransactionsMap,
+            ActiveUserTransactionsMap, ActiveUserTransactionsSeenMap, AgreementHistoryMap,
+            ApiKeysCell, BtcUserPendingTransactionsMap, ConfigCell, ContactImageMap, ContactMap,
+            CustomTokenMap, ExchangeRateMap, PersonalNoteShareMap, PersonalNoteSharesByCreatorMap,
+            TipMap, TipsBySenderMap, TokenActivityMap, UserProfileMap, UserProfileUpdatedMap,
+            UserTokenMap, UserTransactionsMap,
         },
         storable::Candid,
     },
 };
 
 pub(crate) mod memory;
+pub(crate) mod token_id_keys;
 
 pub(crate) struct State {
     pub(crate) config: ConfigCell,
@@ -65,6 +67,9 @@ pub(crate) struct State {
     /// Per-user in-flight high-level operations (swaps, converts, …). Survives
     /// canister upgrades; the FE polls and updates these records.
     pub(crate) active_user_transactions: ActiveUserTransactionsMap,
+    /// Per-user time up to which the user has seen their active user transactions, so a record
+    /// reads as unread on every device only once it changes after that.
+    pub(crate) active_user_transactions_seen: ActiveUserTransactionsSeenMap,
     /// Per-user end-to-end-encrypted personal notes (vetKeys `EncryptedMaps`).
     ///
     /// `None` until the store is first accessed (see [`with_personal_notes`] /
@@ -86,8 +91,9 @@ pub(crate) struct State {
     /// already client-side ciphertext under a per-share key, so there is no
     /// vetKD derivation and no lazy init needed).
     pub(crate) personal_note_shares: PersonalNoteShareMap,
-    /// By-creator index over `personal_note_shares`, used only to enforce the
-    /// per-user active-share cap without scanning the primary map.
+    /// By-creator index over `personal_note_shares`, holding each share's
+    /// expiry: enforces the per-user active-share cap and finds expired shares
+    /// for the hourly prune without scanning the primary map.
     pub(crate) personal_note_shares_by_creator: PersonalNoteSharesByCreatorMap,
     /// Tips: the canister holds no tokens for these, only the record of an
     /// allowance the sender granted under a per-tip subaccount. See `tips`.
@@ -139,6 +145,7 @@ thread_local! {
             user_transactions: UserTransactionsMap::init(mm.borrow().get(USER_TRANSACTIONS_MEMORY_ID)),
             agreement_history: AgreementHistoryMap::init(mm.borrow().get(AGREEMENT_HISTORY_MEMORY_ID)),
             active_user_transactions: ActiveUserTransactionsMap::init(mm.borrow().get(ACTIVE_USER_TRANSACTIONS_MEMORY_ID)),
+            active_user_transactions_seen: ActiveUserTransactionsSeenMap::init(mm.borrow().get(ACTIVE_USER_TRANSACTIONS_SEEN_MEMORY_ID)),
             // Initialised lazily on first access (see `ensure_personal_notes`).
             personal_notes: None,
             // Initialised lazily on first access (see `ensure_tip_secrets`).
@@ -265,6 +272,21 @@ pub(crate) fn with_tip_secrets_mut<R>(f: impl FnOnce(&mut EncryptedMaps<AccessRi
     })
 }
 
+/// Whether the tip-secrets store was ever created on this canister.
+///
+/// `EncryptedMaps::init` writes its config cell on first use, so from then on
+/// the config region holds pages, and stable memory keeps them across upgrades
+/// while the heap handle in `tip_secrets` does not. Reading a region's size
+/// allocates nothing.
+fn tip_secrets_created() -> bool {
+    MEMORY_MANAGER.with(|mm| {
+        mm.borrow()
+            .get(TIP_SECRETS_KEY_MANAGER_CONFIG_MEMORY_ID)
+            .size()
+            > 0
+    })
+}
+
 /// Runs `f` against the tip-secrets store **only if it already exists**, and
 /// returns `None` when it does not.
 ///
@@ -274,9 +296,16 @@ pub(crate) fn with_tip_secrets_mut<R>(f: impl FnOnce(&mut EncryptedMaps<AccessRi
 /// where nobody ever stored a claim code would allocate 32 MiB purely to discover
 /// there was nothing to delete, and on a canister short of reserved cycles it
 /// would trap instead.
+///
+/// A store that exists is reopened first, though. After an upgrade the heap
+/// handle is `None` until something opens the store again, and a cleanup that
+/// skipped in that window would leave its entry with nothing pointing at it.
 pub(crate) fn with_existing_tip_secrets_mut<R>(
     f: impl FnOnce(&mut EncryptedMaps<AccessRights>) -> R,
 ) -> Option<R> {
+    if read_state(|s| s.tip_secrets.is_none()) && tip_secrets_created() {
+        init_tip_secrets();
+    }
     mutate_state(|s| s.tip_secrets.as_mut().map(f))
 }
 

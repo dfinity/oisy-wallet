@@ -6,9 +6,10 @@
 	import { modalStore } from '$lib/stores/modal.store';
 </script>
 
-<Modal onClose={modalStore.close}>
+<!-- A stray click outside must not end a sign-up or KYC step inside the OnRamper widget. -->
+<Modal closeOnBackdropClick={false} onClose={modalStore.close}>
 	{#snippet title()}
-		{isOnRamperDev ? $i18n.buy.text.buy_dev : $i18n.buy.text.buy}
+		{isOnRamperDev ? $i18n.buy.text.buy_sell_dev : $i18n.buy.text.buy_sell}
 	{/snippet}
 
 	<BuyModalContent />

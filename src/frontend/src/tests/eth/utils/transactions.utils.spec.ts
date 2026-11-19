@@ -1,10 +1,12 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { CK_DEPOSIT_ETH_HASH, CKETH_ABI, CKETH_DEPOSIT_HASH } from '$eth/constants/cketh.constants';
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
 	ERC20_APPROVE_HASH,
 	ERC20_DECREASE_ALLOWANCE_HASH,
+	ERC20_DEPOSIT_ERC20_HASH,
 	ERC20_INCREASE_ALLOWANCE_HASH,
 	ERC20_TRANSFER_HASH
 } from '$eth/constants/erc20.constants';
@@ -17,6 +19,8 @@ import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { ErcTransfer } from '$eth/types/eth-transaction';
 import {
+	decodeCkDeposit,
+	decodeCkEthDepositPrincipal,
 	decodeErc20AbiData,
 	decodeErc20AbiDataValue,
 	decodeErc20TransferRecipient,
@@ -48,6 +52,11 @@ import type { Transaction } from '$lib/types/transaction';
 import { formatToken } from '$lib/utils/format.utils';
 import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import {
+	encodeCkDepositErc20,
+	encodeCkDepositEth,
+	mockCkDepositSubaccount
+} from '$tests/mocks/ck-deposit.mock';
+import {
 	mockCkEthereumMinterAddress,
 	mockCkMinterInfo,
 	mockErc20HelperContractAddress,
@@ -55,8 +64,10 @@ import {
 } from '$tests/mocks/ck-minter.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
-import { AbiCoder } from 'ethers/abi';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
+import { encodePrincipalToEthAddress, type CkEthMinterDid } from '@icp-sdk/canisters/cketh';
+import { Principal } from '@icp-sdk/core/principal';
+import { AbiCoder, Interface } from 'ethers/abi';
 
 const transaction: Transaction = {
 	blockNumber: 123456,
@@ -737,6 +748,164 @@ describe('transactions.utils', () => {
 
 		it('should throw on truncated calldata rather than inventing an operator', () => {
 			expect(() => decodeSetApprovalForAllData(`${ERC_SET_APPROVAL_FOR_ALL_HASH}00`)).toThrow();
+		});
+	});
+
+	describe('decodeCkEthDepositPrincipal', () => {
+		const encodeDeposit = (principal: Principal): string =>
+			new Interface(CKETH_ABI).encodeFunctionData('deposit', [
+				encodePrincipalToEthAddress(principal)
+			]);
+
+		const data = encodeDeposit(mockPrincipal);
+
+		it.each([
+			{ kind: 'a user principal', principal: mockPrincipal },
+			{
+				kind: 'a canister principal',
+				principal: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai')
+			},
+			{ kind: 'the anonymous principal', principal: Principal.anonymous() }
+		])('should decode $kind from a deposit encoded the way OISY encodes one', ({ principal }) => {
+			expect(decodeCkEthDepositPrincipal(encodeDeposit(principal))?.toText()).toBe(
+				principal.toText()
+			);
+		});
+
+		it('should decode the selector and the argument regardless of the case of their hex digits', () => {
+			expect(decodeCkEthDepositPrincipal(`0x${data.slice(2).toUpperCase()}`)?.toText()).toBe(
+				mockPrincipal.toText()
+			);
+		});
+
+		it('should name the selector the helper contract ABI encodes `deposit` with', () => {
+			expect(data.startsWith(CKETH_DEPOSIT_HASH)).toBeTruthy();
+		});
+
+		it('should return undefined for nullish or empty calldata', () => {
+			expect(decodeCkEthDepositPrincipal(undefined)).toBeUndefined();
+			expect(decodeCkEthDepositPrincipal('0x')).toBeUndefined();
+		});
+
+		it('should return undefined for the same argument behind another selector', () => {
+			expect(decodeCkEthDepositPrincipal(`${ERC20_APPROVE_HASH}${data.slice(10)}`)).toBeUndefined();
+		});
+
+		it('should return undefined for a deposit followed by bytes the call does not take', () => {
+			expect(decodeCkEthDepositPrincipal(`${data}00`)).toBeUndefined();
+			expect(decodeCkEthDepositPrincipal(`${data}${'00'.repeat(32)}`)).toBeUndefined();
+		});
+
+		it('should return undefined for a truncated deposit', () => {
+			expect(decodeCkEthDepositPrincipal(data.slice(0, -2))).toBeUndefined();
+			expect(decodeCkEthDepositPrincipal(CKETH_DEPOSIT_HASH)).toBeUndefined();
+		});
+
+		it('should return undefined when the length byte names no principal', () => {
+			expect(
+				decodeCkEthDepositPrincipal(`${CKETH_DEPOSIT_HASH}${'00'.repeat(32)}`)
+			).toBeUndefined();
+		});
+
+		it('should return undefined when the length byte names more bytes than a principal has', () => {
+			expect(
+				decodeCkEthDepositPrincipal(`${CKETH_DEPOSIT_HASH}1e${'01'.repeat(30)}00`)
+			).toBeUndefined();
+		});
+
+		it('should return undefined when the bytes past the principal are not zero', () => {
+			expect(decodeCkEthDepositPrincipal(`${data.slice(0, -2)}01`)).toBeUndefined();
+		});
+
+		it('should return undefined for an argument that is not hex', () => {
+			expect(decodeCkEthDepositPrincipal(`${data.slice(0, -2)}zz`)).toBeUndefined();
+		});
+	});
+
+	describe('decodeCkDeposit', () => {
+		const owner = Principal.fromText('hnnn4-iyaaa-aaaar-qb4bq-cai');
+
+		const subaccount = mockCkDepositSubaccount;
+
+		const amount = 7_359_822_927n;
+
+		const depositEth = encodeCkDepositEth({ owner: mockPrincipal });
+
+		const depositErc20 = encodeCkDepositErc20({
+			address: USDC_TOKEN.address,
+			amount,
+			owner,
+			subaccount
+		});
+
+		it('should decode a depositEth to a default account', () => {
+			expect(decodeCkDeposit(depositEth)).toEqual({ owner: mockPrincipal });
+		});
+
+		it('should decode a depositEth to a subaccount', () => {
+			expect(decodeCkDeposit(encodeCkDepositEth({ owner, subaccount }))).toEqual({
+				owner,
+				subaccount
+			});
+		});
+
+		it('should decode a depositErc20 with its token, amount and account', () => {
+			expect(decodeCkDeposit(depositErc20)).toEqual({
+				erc20: { address: USDC_TOKEN.address, amount },
+				owner,
+				subaccount
+			});
+		});
+
+		it('should state the token address checksummed, however the calldata cases it', () => {
+			expect(decodeCkDeposit(`0x${depositErc20.slice(2).toUpperCase()}`)?.erc20?.address).toBe(
+				USDC_TOKEN.address
+			);
+		});
+
+		it('should name the selectors the helper contract ABI encodes the deposits with', () => {
+			expect(depositEth.startsWith(CK_DEPOSIT_ETH_HASH)).toBeTruthy();
+			expect(depositErc20.startsWith(ERC20_DEPOSIT_ERC20_HASH)).toBeTruthy();
+		});
+
+		it.each([
+			{ kind: 'no calldata', data: undefined },
+			{ kind: 'empty calldata', data: '0x' },
+			{ kind: 'a depositEth followed by more bytes', data: `${depositEth}00` },
+			{ kind: 'a truncated depositEth', data: depositEth.slice(0, -2) },
+			{ kind: 'a depositErc20 followed by more bytes', data: `${depositErc20}${'00'.repeat(32)}` },
+			{ kind: 'a truncated depositErc20', data: depositErc20.slice(0, -2) },
+			{
+				kind: 'the arguments of a depositErc20 behind the depositEth selector',
+				data: `${CK_DEPOSIT_ETH_HASH}${depositErc20.slice(10)}`
+			},
+			{
+				kind: 'the arguments of a depositEth behind another selector',
+				data: `${CKETH_DEPOSIT_HASH}${depositEth.slice(10)}`
+			},
+			{ kind: 'arguments that are not hex', data: `${depositEth.slice(0, -2)}zz` },
+			{
+				kind: 'a principal whose length byte names none',
+				data: `${CK_DEPOSIT_ETH_HASH}${'00'.repeat(64)}`
+			},
+			{
+				kind: 'a principal followed by bytes that are not zero',
+				data: `${CK_DEPOSIT_ETH_HASH}${depositEth.slice(10, 74 - 2)}01${'00'.repeat(32)}`
+			},
+			{
+				kind: 'an address with bytes in its padding',
+				data: `${ERC20_DEPOSIT_ERC20_HASH}01${depositErc20.slice(12)}`
+			},
+			{
+				kind: 'a deposit of the zero address',
+				data: encodeCkDepositErc20({
+					address: '0x0000000000000000000000000000000000000000',
+					amount,
+					owner
+				})
+			}
+		])('should return undefined for $kind', ({ data }) => {
+			expect(decodeCkDeposit(data)).toBeUndefined();
 		});
 	});
 

@@ -5,10 +5,16 @@ import type {
 	ActiveUserTransactionStatus,
 	ChainFusionDirection
 } from '$declarations/backend/backend.did';
+import type {
+	DepositSolId,
+	DepositSolStatus,
+	WithdrawSolStatus
+} from '$declarations/cksol_minter/cksol_minter.did';
 import {
 	CKERC20_HELPER_CONTRACT_SIGNATURE,
 	CKETH_HELPER_CONTRACT_SIGNATURE
 } from '$env/networks/networks.cketh.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { EthAddress } from '$eth/types/address';
 import { tokenAddressToHex } from '$eth/utils/token.utils';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
@@ -20,7 +26,10 @@ import {
 } from '$lib/types/chain-fusion-swap';
 import { SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
+import type { SolSourceTxOutcome } from '$sol/utils/sol-source-tx.utils';
 import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { encodePrincipalToEthAddress, type CkEthMinterDid } from '@icp-sdk/canisters/cketh';
@@ -59,6 +68,27 @@ export const isChainFusionBtcMintDirection = (direction: ChainFusionDirection): 
 // ckBTC → BTC: exact, query-only, keyed on the `retrieve_btc_with_approval` index.
 export const isChainFusionBtcWithdrawalDirection = (direction: ChainFusionDirection): boolean =>
 	'CkBtcToBtc' in direction;
+
+// ckSOL → SOL: exact, keyed on the ckSOL ledger burn index `withdraw_sol` returned.
+export const isChainFusionSolWithdrawalDirection = (direction: ChainFusionDirection): boolean =>
+	'CkSolToSol' in direction;
+
+// SOL → ckSOL: the minter reports the deposit through `watch_deposit_address`, then answers
+// exactly through `deposit_sol_status`.
+export const isChainFusionSolMintDirection = (direction: ChainFusionDirection): boolean =>
+	'SolToCkSol' in direction;
+
+/**
+ * Whether one of the transactions is a SOL → ckSOL conversion still in flight. The minter takes
+ * one deposit per account at a time, so a second conversion would only wait on the address.
+ */
+export const hasChainFusionSolMintInFlight = (transactions: ActiveUserTransaction[]): boolean =>
+	transactions.some(
+		(tx) =>
+			'ChainFusion' in tx.data &&
+			isChainFusionSolMintDirection(tx.data.ChainFusion.direction) &&
+			!isTerminalActiveUserTransaction(tx)
+	);
 
 /**
  * Builds the `ChainFusion` AUT data variant: the direction discriminant plus the
@@ -286,22 +316,164 @@ export const toChainFusionBtcWithdrawalLearnedRefs = (
 };
 
 /**
+ * Maps the ckSOL minter's withdrawal status to the AUT status enum.
+ *
+ * `NotFound` leaves the row alone, as the ckETH minter's does: the minter answers it until it
+ * has recorded the burn. A `Failure` is final: the minter does not refund the burned ckSOL.
+ */
+export const toChainFusionSolWithdrawalStatus = (
+	status: WithdrawSolStatus
+): ActiveUserTransactionStatus | undefined => {
+	if ('TxFinalized' in status) {
+		return 'Success' in status.TxFinalized ? { Succeeded: null } : { Failed: null };
+	}
+
+	if ('TxSent' in status || 'Pending' in status) {
+		return { Executing: null };
+	}
+
+	if ('NotFound' in status) {
+		return undefined;
+	}
+
+	assertNever(status, 'Unexpected ckSOL withdrawal status');
+};
+
+export const chainFusionSolWithdrawalStatusError = (
+	status: WithdrawSolStatus
+): string | undefined =>
+	'TxFinalized' in status && 'Failure' in status.TxFinalized
+		? get(i18n).swap.error.failed_unexpectedly
+		: undefined;
+
+// The Solana transaction the minter sent, revealed as soon as it is sent.
+export const toChainFusionSolWithdrawalLearnedRefs = (
+	status: WithdrawSolStatus
+): Partial<Record<ChainFusionExternalRefKey, string>> => {
+	const signature =
+		'TxSent' in status
+			? status.TxSent.transaction_id
+			: 'TxFinalized' in status
+				? 'Success' in status.TxFinalized
+					? status.TxFinalized.Success.transaction_id
+					: status.TxFinalized.Failure.transaction_id
+				: undefined;
+
+	return nonNullish(signature)
+		? { [CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_SIGNATURE]: signature }
+		: {};
+};
+
+/**
+ * Maps the ckSOL minter's deposit status to the AUT status enum.
+ *
+ * `Dropped` stays in flight: the sweep failed or expired, so nothing was minted and the SOL is
+ * still on the deposit address, which the minter watches again for a new deposit. `Quarantined`
+ * is final as far as the conversion goes: the minter keeps the SOL until an upgrade resolves the
+ * deposit. `NotFound` leaves the row alone, as for a withdrawal.
+ */
+export const toChainFusionSolMintStatus = (
+	status: DepositSolStatus
+): ActiveUserTransactionStatus | undefined => {
+	if ('Minted' in status) {
+		return { Succeeded: null };
+	}
+
+	if ('Quarantined' in status) {
+		return { Failed: null };
+	}
+
+	if ('Queued' in status || 'Swept' in status || 'Finalized' in status || 'Dropped' in status) {
+		return { Executing: null };
+	}
+
+	if ('NotFound' in status) {
+		return undefined;
+	}
+
+	assertNever(status, 'Unexpected ckSOL deposit status');
+};
+
+export const chainFusionSolMintStatusError = (status: DepositSolStatus): string | undefined =>
+	'Quarantined' in status ? get(i18n).swap.error.cksol_deposit_quarantined : undefined;
+
+/**
+ * The error a ckSOL mint row fails with when its deposit was dropped and what is left on the deposit
+ * address is below the minimum: no sweep will come, and the next conversion converts the rest.
+ */
+export const chainFusionSolDepositBelowMinimumError = (): string =>
+	get(i18n).swap.error.cksol_deposit_below_minimum;
+
+/**
+ * The error a ckSOL mint row fails with when its transfer moved no SOL: the transfer can no longer
+ * land, or it landed and failed. `undefined` while it may still land, or once it has.
+ */
+export const chainFusionSolTransferError = (
+	outcome: SolSourceTxOutcome | undefined
+): string | undefined => {
+	if (outcome === 'expired') {
+		return get(i18n).swap.error.swap_expired;
+	}
+
+	if (outcome === 'reverted') {
+		return get(i18n).swap.error.failed_unexpectedly;
+	}
+};
+
+/**
+ * The slot a ckSOL mint row stores where its transfer's blockhash was valid. `undefined` when the row
+ * has none or it is not a `u64`, which the node would refuse as `minContextSlot` on every poll.
+ */
+export const toCkSolBlockhashSlot = (value: string | undefined): bigint | undefined =>
+	nonNullish(value) && /^\d{1,19}$/.test(value) ? BigInt(value) : undefined;
+
+// What the minter credited, formatted in ckSOL, whose unit is one lamport like SOL's.
+export const toChainFusionSolMintLearnedRefs = (
+	status: DepositSolStatus
+): Partial<Record<ChainFusionExternalRefKey, string>> =>
+	'Minted' in status
+		? {
+				[CHAIN_FUSION_EXTERNAL_REF_KEYS.RECEIVED_AMOUNT]: formatToken({
+					value: status.Minted.minted_amount,
+					unitName: SOLANA_TOKEN.decimals
+				})
+			}
+		: {};
+
+/**
+ * `depositId` when it lies above `floor`, the latest deposit id of the account before this
+ * conversion, or above none when the account had no deposit. The minter numbers deposits in the
+ * order it queues them, so only a later one can carry this conversion's SOL.
+ */
+export const newerCkSolDepositId = ({
+	depositId,
+	floor
+}: {
+	depositId: DepositSolId | undefined;
+	floor: DepositSolId | undefined;
+}): DepositSolId | undefined =>
+	nonNullish(depositId) && (isNullish(floor) || depositId > floor) ? depositId : undefined;
+
+/**
  * What the Bitcoin side plus the ckBTC minter say about a deposit.
  *
  * `unseen` → `awaitingConfirmations` → `awaitingMint` are the in-flight shapes,
  * in the order a deposit passes through them; `minted` and `rejected` are the
- * verdict, and only the minter itself can produce either.
+ * minter's verdict, and only the minter itself can produce either. `neverLanded`
+ * is the one outcome the Bitcoin network decides, not the minter: an `unseen`
+ * deposit that Blockstream does not know either, so it most likely never went out.
  */
 export type ChainFusionBtcMintOutcome =
-	'unseen' | 'awaitingConfirmations' | 'awaitingMint' | 'minted' | 'rejected';
+	'unseen' | 'neverLanded' | 'awaitingConfirmations' | 'awaitingMint' | 'minted' | 'rejected';
 
 /**
  * Maps a ckBTC deposit's observed state to the AUT status enum.
  *
  * Unlike the Ethereum family's mints, this one is not observed from the deposit
  * side: the minter is the only party that can turn a confirmed UTXO into ckBTC,
- * so the poller's job is to make it, and the verdict is whatever it reports back
- * — see `resolveChainFusionBtcMintOutcome`.
+ * so the poller's job is to make it, and the verdict is whatever it reports back.
+ * The one exception is `neverLanded`, which fails the row on the network's word
+ * alone — see `resolveChainFusionBtcMintOutcome`.
  */
 export const chainFusionBtcMintOutcomeToStatus = (
 	outcome: ChainFusionBtcMintOutcome
@@ -310,6 +482,7 @@ export const chainFusionBtcMintOutcomeToStatus = (
 		case 'minted':
 			return { Succeeded: null };
 		case 'rejected':
+		case 'neverLanded':
 			return { Failed: null };
 		case 'unseen':
 		case 'awaitingConfirmations':
@@ -321,7 +494,11 @@ export const chainFusionBtcMintOutcomeToStatus = (
 export const chainFusionBtcMintOutcomeError = (
 	outcome: ChainFusionBtcMintOutcome
 ): string | undefined =>
-	outcome === 'rejected' ? get(i18n).swap.error.failed_unexpectedly : undefined;
+	outcome === 'rejected'
+		? get(i18n).swap.error.failed_unexpectedly
+		: outcome === 'neverLanded'
+			? get(i18n).send.error.btc_transaction_never_landed
+			: undefined;
 
 /**
  * Reads the verdict for one deposit out of an `update_balance` response, which

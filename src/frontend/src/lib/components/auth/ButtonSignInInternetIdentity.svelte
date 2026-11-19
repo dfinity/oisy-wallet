@@ -14,8 +14,8 @@
 
 	const variantClasses = $derived(
 		variant === 'lock'
-			? 'bg-brand-primary text-primary-inverted hover:bg-brand-secondary focus-visible:outline-brand-primary'
-			: 'bg-primary text-brand-primary-alt border border-brand-subtle-20 hover:border-brand-primary-alt focus-visible:outline-brand-primary-alt'
+			? 'bg-brand-primary text-primary-inverted hover:bg-brand-secondary active:bg-brand-tertiary focus-visible:outline-brand-primary'
+			: 'bg-primary text-brand-primary-alt border border-brand-subtle-20 hover:border-brand-primary-alt hover:bg-brand-subtle-10 active:bg-brand-subtle-30 focus-visible:outline-brand-primary-alt'
 	);
 
 	const widthClasses = $derived(
@@ -24,7 +24,7 @@
 </script>
 
 <button
-	class={`flex h-14 w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-base leading-[22px] font-semibold whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${variantClasses} ${widthClasses}`}
+	class={`flex h-14 w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-base leading-snug font-bold whitespace-nowrap transition-[color,background-color,border-color,scale] duration-150 ease-out press focus-visible:outline-2 focus-visible:outline-offset-2 ${variantClasses} ${widthClasses}`}
 	data-tid={LOGIN_BUTTON}
 	{onclick}
 	type="button"

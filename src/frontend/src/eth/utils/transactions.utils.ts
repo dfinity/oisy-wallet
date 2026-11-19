@@ -1,3 +1,4 @@
+import { CK_DEPOSIT_ETH_HASH, CKETH_DEPOSIT_HASH } from '$eth/constants/cketh.constants';
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
 	ERC20_APPROVE_HASH,
@@ -15,7 +16,7 @@ import {
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { ErcTransfer, EthTransactionUi } from '$eth/types/eth-transaction';
-import { MAX_UINT_256 } from '$lib/constants/app.constants';
+import { MAX_UINT_256, ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import type { ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
@@ -28,8 +29,10 @@ import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
+import { Principal } from '@icp-sdk/core/principal';
 import { AbiCoder } from 'ethers/abi';
-import { dataSlice } from 'ethers/utils';
+import { getAddress } from 'ethers/address';
+import { dataSlice, getBytes, hexlify, isHexString, toBigInt } from 'ethers/utils';
 
 export const isTransactionPending = ({ blockNumber }: EthTransactionUi): boolean =>
 	isNullish(blockNumber);
@@ -231,6 +234,147 @@ export const decodeSetApprovalForAllData = (
 	const [operator, approved] = abiCoder.decode(['address', 'bool'], dataSlice(data, 4));
 
 	return { operator, approved };
+};
+
+// `0x`, the four bytes of the selector and the one 32-byte argument `deposit(bytes32)` takes, as hex.
+const CKETH_DEPOSIT_DATA_LENGTH = SELECTOR_LENGTH + 64;
+
+// The longest a principal is, in bytes, which is what leaves room for its length byte in a `bytes32`.
+const PRINCIPAL_MAX_LENGTH = 29;
+
+/**
+ * Decodes a principal from the `bytes32` the ckETH helper contracts take it as.
+ *
+ * The `bytes32` carries the principal's length in its first byte, the principal after it and zeros
+ * for the rest, which is the layout `encodePrincipalToEthAddress` writes. Any other content
+ * decodes to `undefined`.
+ */
+const decodeBytes32Principal = (bytes32: Uint8Array): Principal | undefined => {
+	const [length, ...bytes] = bytes32;
+
+	if (length === 0 || length > PRINCIPAL_MAX_LENGTH) {
+		return;
+	}
+
+	if (bytes.slice(length).some((byte) => byte !== 0)) {
+		return;
+	}
+
+	return Principal.fromUint8Array(Uint8Array.from(bytes.slice(0, length)));
+};
+
+/**
+ * Decodes the principal a ckETH helper contract `deposit(bytes32)` call converts ETH for.
+ *
+ * Calldata in any shape other than the call's, including a deposit followed by bytes the call does
+ * not take, decodes to `undefined` rather than to a principal, so a principal returned here is the
+ * only one the calldata can name.
+ */
+export const decodeCkEthDepositPrincipal = (data: string | undefined): Principal | undefined => {
+	if (
+		isNullish(data) ||
+		data.length !== CKETH_DEPOSIT_DATA_LENGTH ||
+		!isHexString(data) ||
+		!hasSelector({ data, selector: CKETH_DEPOSIT_HASH })
+	) {
+		return;
+	}
+
+	return decodeBytes32Principal(getBytes(dataSlice(data, 4)));
+};
+
+// `0x`, the four bytes of the selector and the two 32-byte arguments `depositEth(bytes32,bytes32)`
+// takes, as hex.
+const CK_DEPOSIT_ETH_DATA_LENGTH = SELECTOR_LENGTH + 2 * 64;
+
+// `0x`, the four bytes of the selector and the four 32-byte arguments
+// `depositErc20(address,uint256,bytes32,bytes32)` takes, as hex.
+const CK_DEPOSIT_ERC20_DATA_LENGTH = SELECTOR_LENGTH + 4 * 64;
+
+// The bytes an ABI-encoded `address` pads with zeros before its 20 bytes.
+const ADDRESS_PADDING_LENGTH = 12;
+
+/**
+ * A deposit to the ckETH minter's helper contract that deposits to a principal and a subaccount.
+ */
+export interface CkDepositCalldata {
+	// What `depositErc20` takes from the wallet. `undefined` for `depositEth`, which deposits the
+	// native value the transaction carries.
+	erc20?: { address: EthAddress; amount: bigint };
+	// The account the minter mints the ck token to.
+	owner: Principal;
+	// `undefined` for the owner's default account, which is what a subaccount of zeros names.
+	subaccount?: Uint8Array;
+}
+
+/**
+ * Decodes a `depositEth(bytes32,bytes32)` or `depositErc20(address,uint256,bytes32,bytes32)` call
+ * to the ckETH minter's helper contract that deposits to a principal and a subaccount.
+ *
+ * Calldata in any other shape decodes to `undefined`: a call followed by bytes it does not take, a
+ * principal not laid out as `decodeBytes32Principal` reads it, or an `address` with anything but
+ * zeros in its padding. So does a deposit of the zero address, which the contract refuses. What is
+ * returned is therefore the only deposit the calldata can name.
+ */
+export const decodeCkDeposit = (data: string | undefined): CkDepositCalldata | undefined => {
+	if (isNullish(data) || !isHexString(data)) {
+		return;
+	}
+
+	const decode = ({
+		account,
+		erc20
+	}: {
+		account: Uint8Array;
+		erc20?: CkDepositCalldata['erc20'];
+	}): CkDepositCalldata | undefined => {
+		const owner = decodeBytes32Principal(account.slice(0, 32));
+
+		if (isNullish(owner)) {
+			return;
+		}
+
+		const subaccount = account.slice(32, 64);
+
+		return {
+			...(nonNullish(erc20) && { erc20 }),
+			owner,
+			...(subaccount.some((byte) => byte !== 0) && { subaccount })
+		};
+	};
+
+	if (
+		data.length === CK_DEPOSIT_ETH_DATA_LENGTH &&
+		hasSelector({ data, selector: CK_DEPOSIT_ETH_HASH })
+	) {
+		return decode({ account: getBytes(dataSlice(data, 4)) });
+	}
+
+	if (
+		data.length !== CK_DEPOSIT_ERC20_DATA_LENGTH ||
+		!hasSelector({ data, selector: ERC20_DEPOSIT_ERC20_HASH })
+	) {
+		return;
+	}
+
+	const args = getBytes(dataSlice(data, 4));
+
+	const addressWord = args.slice(0, 32);
+
+	if (addressWord.slice(0, ADDRESS_PADDING_LENGTH).some((byte) => byte !== 0)) {
+		return;
+	}
+
+	const address = getAddress(hexlify(addressWord.slice(ADDRESS_PADDING_LENGTH)));
+
+	if (address === ZERO_ETH_ADDRESS) {
+		return;
+	}
+
+	return decode({
+		account: args.slice(64),
+		erc20: { address, amount: toBigInt(args.slice(32, 64)) }
+	});
 };
 
 /**

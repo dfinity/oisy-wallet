@@ -49,3 +49,33 @@ export const {
 	ARBITRUM_SEPOLIA: ARBITRUM_SEPOLIA_EXPLORER_URL,
 	ROBINHOOD: ROBINHOOD_EXPLORER_URL
 } = EXPLORER_URLS;
+
+// Explorers run by the third-party providers OISY routes swaps and bridge transfers
+// through. Unlike the chain explorers above, these show provider-internal settlement
+// state - the phase a cross-chain transfer is in before either chain shows anything.
+// Kept here so every explorer host the frontend knows about lives in one file.
+const PROVIDER_EXPLORER_URLS = {
+	VELORA: 'https://explorer.velora.xyz',
+	NEAR_INTENTS: 'https://explorer.near-intents.org',
+	LIFI: 'https://scan.li.fi',
+	ONESEC: 'https://1sec.to'
+};
+
+export const {
+	VELORA: VELORA_EXPLORER_URL,
+	NEAR_INTENTS: NEAR_INTENTS_EXPLORER_URL,
+	LIFI: LIFI_EXPLORER_URL,
+	ONESEC: ONESEC_EXPLORER_URL
+} = PROVIDER_EXPLORER_URLS;
+
+// Address explorers used by Help-page whole-address links when a different host than
+// the network's own `explorerUrl` is intentionally preferred. Everything else reuses
+// the network URL.
+//
+// BTC: blockstream would work; mempool.space is the one this wallet points a user at
+// for their own address.
+const ADDRESS_EXPLORER_URLS = {
+	BTC_MAINNET: 'https://mempool.space'
+};
+
+export const { BTC_MAINNET: BTC_MAINNET_ADDRESS_EXPLORER_URL } = ADDRESS_EXPLORER_URLS;

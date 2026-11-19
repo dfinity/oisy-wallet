@@ -26,6 +26,5 @@ export const PBRON_TOKEN: RequiredSpl2022Token = {
 	address: 'GRciFCqJ5y2hbiD6U5mGkohY65BZTXGuGUrCqf7ondo',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: '9foMHsSDq7nMg4WPusSz9eY7tyxyukqborA8GyU5cUxD',
-	freezeAuthority: 'Chm9dcASBc9C54FGxcSRGv9qC998TueQqr5XzGZkEVCc',
 	groupData: PBRON_TOKEN_GROUP
 };

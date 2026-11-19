@@ -2,6 +2,7 @@ import type { Network } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNetworkSolana } from '$lib/utils/network.utils';
 import type { SolAddress } from '$sol/types/address';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { nonNullish } from '@dfinity/utils';
 
 /**
@@ -22,4 +23,39 @@ export const solAccountExplorerUrl = ({
 	nonNullish(network.explorerUrl) &&
 	nonNullish(address)
 		? replacePlaceholders(network.explorerUrl, { $args: `account/${address}/` })
+		: undefined;
+
+/**
+ * A Solana transaction on its network's block explorer.
+ */
+export const solTransactionExplorerUrl = ({
+	network,
+	signature
+}: {
+	network: Network | undefined;
+	signature: string | undefined;
+}): string | undefined =>
+	nonNullish(network) &&
+	isNetworkSolana(network) &&
+	nonNullish(network.explorerUrl) &&
+	nonNullish(signature)
+		? replacePlaceholders(network.explorerUrl, { $args: `tx/${signature}/` })
+		: undefined;
+
+/**
+ * A Solana token's page on its network's block explorer, the same page a listed token's details
+ * link to.
+ */
+export const solTokenExplorerUrl = ({
+	network,
+	tokenAddress
+}: {
+	network: Network | undefined;
+	tokenAddress: SplTokenAddress | undefined;
+}): string | undefined =>
+	nonNullish(network) &&
+	isNetworkSolana(network) &&
+	nonNullish(network.explorerUrl) &&
+	nonNullish(tokenAddress)
+		? replacePlaceholders(network.explorerUrl, { $args: `token/${tokenAddress}/` })
 		: undefined;

@@ -10,8 +10,14 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep } from '$lib/types/wizard';
-	import { isNetworkIdBitcoin, isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdBitcoin,
+		isNetworkIdICP,
+		isNetworkIdSolana,
+		isNetworkIdXrp
+	} from '$lib/utils/network.utils';
 	import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
+	import SwapXrpWizard from '$xrp/components/swap/SwapXrpWizard.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -107,6 +113,22 @@
 		/>
 	{:else if isBitcoinSource}
 		<SwapBtcWizard
+			{currentStep}
+			{isSwapAmountsLoading}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onShowProviderList}
+			{onShowTokensList}
+			{onStartTriggerAmount}
+			{onStopTriggerAmount}
+			bind:swapAmount
+			bind:receiveAmount
+			bind:slippageValue
+			bind:swapProgressStep
+		/>
+	{:else if isNetworkIdXrp($sourceToken.network.id)}
+		<SwapXrpWizard
 			{currentStep}
 			{isSwapAmountsLoading}
 			{onBack}

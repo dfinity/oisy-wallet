@@ -4,11 +4,12 @@ use ic_cdk::{
 };
 use shared::types::{
     active_user_transaction::{
-        CreateActiveUserTransactionRequest, UpdateActiveUserTransactionRequest,
+        CreateActiveUserTransactionRequest, GetActiveUserTransactionsResponse,
+        UpdateActiveUserTransactionRequest,
     },
     result_types::{
         ActiveUserTransactionResult, DeleteActiveUserTransactionResult,
-        GetActiveUserTransactionsResult,
+        GetActiveUserTransactionsResult, MarkActiveUserTransactionsSeenResult,
     },
 };
 
@@ -77,6 +78,25 @@ pub fn delete_active_user_transaction(id: String) -> DeleteActiveUserTransaction
     result.into()
 }
 
+/// Marks every one of the caller's active user transactions updated at or before
+/// `up_to_ns` as seen, on every device the caller signs in on. Returns the mark
+/// now stored.
+#[update(guard = "caller_is_registered_user")]
+#[must_use]
+pub fn mark_active_user_transactions_seen(up_to_ns: u64) -> MarkActiveUserTransactionsSeenResult {
+    let principal = msg_caller();
+    let now_ns = time();
+    let seen_up_to_ns = mutate_state(|state| {
+        model::mark_seen(
+            &mut state.active_user_transactions_seen,
+            principal,
+            up_to_ns,
+            now_ns,
+        )
+    });
+    MarkActiveUserTransactionsSeenResult::Ok(seen_up_to_ns)
+}
+
 /// Returns all of the caller's active user transactions (Pending, Executing,
 /// Succeeded, Failed). Records are retained until the FE deletes them on user
 /// acknowledgement, so terminal entries remain in the list until dismissed.
@@ -84,6 +104,9 @@ pub fn delete_active_user_transaction(id: String) -> DeleteActiveUserTransaction
 #[must_use]
 pub fn get_active_user_transactions() -> GetActiveUserTransactionsResult {
     let principal = msg_caller();
-    let response = read_state(|state| model::list(&state.active_user_transactions, principal));
+    let response = read_state(|state| GetActiveUserTransactionsResponse {
+        transactions: model::list(&state.active_user_transactions, principal),
+        seen_up_to_ns: model::seen_up_to(&state.active_user_transactions_seen, principal),
+    });
     GetActiveUserTransactionsResult::Ok(response)
 }

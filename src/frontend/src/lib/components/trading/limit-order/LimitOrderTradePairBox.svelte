@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import type { IcToken } from '$icp/types/ic-token';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import TokenInputContent from '$lib/components/tokens/TokenInputContent.svelte';
@@ -17,6 +16,7 @@
 		type LimitOrderSide,
 		validateAmount
 	} from '$lib/utils/oisy-trade.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		side: LimitOrderSide;

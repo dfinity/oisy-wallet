@@ -2,7 +2,6 @@
 	import { ICRC25_PERMISSION_GRANTED, ICRC27_ACCOUNTS } from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IconGixWallet from '$lib/components/icons/IconGixWallet.svelte';
 	import IconShield from '$lib/components/icons/IconShield.svelte';
@@ -24,6 +23,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { mapSignerOriginHost } from '$lib/utils/signer.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	const {
 		permissionsPrompt: { payload, reset: resetPrompt }

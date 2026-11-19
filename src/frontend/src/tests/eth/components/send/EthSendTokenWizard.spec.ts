@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
+import { InfuraProvider } from '$eth/providers/infura.providers';
 import * as ethBalanceServices from '$eth/services/eth-balance.services';
 import * as feeServices from '$eth/services/fee.services';
 import * as nftSendServices from '$eth/services/nft-send.services';
@@ -11,9 +12,14 @@ import {
 	type EthFeeStore,
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
+import { EthSubmissionUnconfirmedError } from '$eth/types/send';
 import * as tokenUtils from '$eth/utils/token.utils';
 import * as ckethServices from '$icp-eth/services/cketh.services';
-import { MAX_BUTTON, REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
+import {
+	MAX_BUTTON,
+	REVIEW_FORM_SEND_BUTTON,
+	SEND_FORM_NEXT_BUTTON
+} from '$lib/constants/test-ids.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import * as idDerived from '$lib/derived/auth.derived';
 import * as exchDerived from '$lib/derived/exchange.derived';
@@ -35,6 +41,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { TransactionResponse } from 'ethers/providers';
+import { makeError } from 'ethers/utils';
 import { readable, writable, type Writable } from 'svelte/store';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
@@ -118,7 +125,9 @@ describe('EthSendTokenWizard.spec', () => {
 		amount,
 		nativeEthereumToken,
 		sendToken,
-		sendTokenDecimals
+		sendTokenDecimals,
+		onBack = vi.fn(),
+		onClose = vi.fn()
 	}: {
 		currentStep: WizardStep;
 		sendProgressStep: string;
@@ -129,6 +138,8 @@ describe('EthSendTokenWizard.spec', () => {
 		nativeEthereumToken: Token;
 		sendToken: Token | NonFungibleToken;
 		sendTokenDecimals: number;
+		onBack?: () => void;
+		onClose?: () => void;
 	}) =>
 		render(EthSendTokenWizard, {
 			props: {
@@ -139,8 +150,8 @@ describe('EthSendTokenWizard.spec', () => {
 				sourceNetwork,
 				amount: amount ?? 1,
 				nativeEthereumToken,
-				onBack: vi.fn(),
-				onClose: vi.fn(),
+				onBack,
+				onClose,
 				onNext: vi.fn(),
 				onSendBack: vi.fn(),
 				onTokensList: vi.fn()
@@ -247,6 +258,119 @@ describe('EthSendTokenWizard.spec', () => {
 		expect(onCloseStep).toHaveBeenCalledExactlyOnceWith(ProgressStepsSend.DONE);
 	});
 
+	describe('when the NFT broadcast fails', () => {
+		const nft: Nft = mockValidErc721Nft;
+		const collectionToken: NonFungibleToken = mockValidErc721Token;
+
+		// An EIP-1559 transfer as the signer returns it, cut short: it carries the wallet and the
+		// recipient.
+		const signedTransaction = `0x02f8b10107843b9aca00${fromAddr.slice(2)}${destination.slice(2)}`;
+
+		it.each([
+			{
+				answer: 'an answer ethers passes on',
+				// The request ethers sent, signed transaction included, is part of the message.
+				err: makeError('could not coalesce error', 'UNKNOWN_ERROR', {
+					error: { code: -32000, message: 'already known' },
+					payload: {
+						id: 9,
+						jsonrpc: '2.0',
+						method: 'eth_sendRawTransaction',
+						params: [signedTransaction]
+					}
+				}),
+				tracked: { error: 'UNKNOWN_ERROR' }
+			},
+			{
+				answer: 'an answer ethers maps to a code of its own',
+				// The node's answer names the wallet, its balance and the cost of the transfer.
+				err: makeError('insufficient funds for intrinsic transaction cost', 'INSUFFICIENT_FUNDS', {
+					transaction: { from: fromAddr, to: destination },
+					info: {
+						error: {
+							code: -32000,
+							message: `insufficient funds for gas * price + value: address ${fromAddr} have 1234567890123 want 9876543210987`
+						}
+					}
+				}),
+				tracked: { error: 'INSUFFICIENT_FUNDS' }
+			},
+			{
+				answer: 'an error that does not come from ethers',
+				err: new Error(`Signing failed for ${fromAddr}`),
+				tracked: {}
+			}
+		])('tracks only the ethers code for $answer', async ({ err, tracked }) => {
+			vi.spyOn(toasts, 'toastsErrorNoTrace').mockImplementation(() => Symbol('toast'));
+			vi.mocked(nftSendServices.sendNft).mockRejectedValueOnce(err);
+
+			const { getByTestId } = renderHost({
+				currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+				sendProgressStep: ProgressStepsSend.INITIALIZATION,
+				nft,
+				destination,
+				sourceNetwork: ETHEREUM_NETWORK,
+				nativeEthereumToken: ETHEREUM_TOKEN,
+				sendToken: collectionToken,
+				sendTokenDecimals: 0
+			});
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(analytics.trackEvent).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					metadata: {
+						resultStatus: 'error',
+						token: collectionToken.symbol,
+						collection: nft.collection.name,
+						address: nft.collection.address,
+						tokenId: String(nft.id),
+						network: ETHEREUM_NETWORK.name,
+						...tracked
+					}
+				})
+			);
+		});
+
+		it('tracks the ethers code behind a broadcast it cannot confirm, and says it could not', async () => {
+			const spyToastsErrorNoTrace = vi
+				.spyOn(toasts, 'toastsErrorNoTrace')
+				.mockImplementation(() => Symbol('toast'));
+
+			const err = new EthSubmissionUnconfirmedError(
+				makeError('could not coalesce error', 'UNKNOWN_ERROR', {
+					error: { code: -32603, message: 'Internal error' }
+				})
+			);
+			vi.mocked(nftSendServices.sendNft).mockRejectedValueOnce(err);
+
+			const { getByTestId } = renderHost({
+				currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+				sendProgressStep: ProgressStepsSend.INITIALIZATION,
+				nft,
+				destination,
+				sourceNetwork: ETHEREUM_NETWORK,
+				nativeEthereumToken: ETHEREUM_TOKEN,
+				sendToken: collectionToken,
+				sendTokenDecimals: 0
+			});
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(analytics.trackEvent).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					metadata: expect.objectContaining({ resultStatus: 'error', error: 'UNKNOWN_ERROR' })
+				})
+			);
+			expect(spyToastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.error.ethereum_transaction_unconfirmed },
+				err
+			});
+		});
+	});
+
 	describe('fee observation', () => {
 		// The amount step needs the whole send context (balance, exchange rate, priority), so the
 		// real one stands in for the minimal mock the send assertions above get by with.
@@ -291,6 +415,174 @@ describe('EthSendTokenWizard.spec', () => {
 			// The amount shown for review was priced against the fee in hand; a fresh sample would
 			// move the fee underneath it, and a spike right before "Send" would be signed as is.
 			expect(feeServices.getEthFeeDataWithProvider).not.toHaveBeenCalled();
+		});
+
+		describe('when the inputs change', () => {
+			const otherDestination = '0x2222222222222222222222222222222222222222';
+
+			beforeEach(() => {
+				// Never settles: a failed sample schedules a retry, and a retry reads the current inputs
+				// too, so it would stand in for the re-estimate under test.
+				vi.mocked(feeServices.getEthFeeDataWithProvider).mockImplementation(
+					() => new Promise(() => {})
+				);
+			});
+
+			const renderSettled = async (name: WizardStepsSend) => {
+				const result = renderStep(name);
+
+				await vi.runOnlyPendingTimersAsync();
+
+				vi.mocked(feeServices.getEthFeeDataWithProvider).mockClear();
+
+				return result;
+			};
+
+			it('re-estimates the fee for a new recipient', async () => {
+				const { rerender } = await renderSettled(WizardStepsSend.SEND);
+
+				await rerender({ destination: otherDestination });
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(feeServices.getEthFeeDataWithProvider).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ to: otherDestination })
+				);
+			});
+
+			it('re-estimates the fee for a new amount', async () => {
+				const { rerender } = await renderSettled(WizardStepsSend.SEND);
+
+				await rerender({ amount: 2 });
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(feeServices.getEthFeeDataWithProvider).toHaveBeenCalledOnce();
+			});
+
+			it('keeps the fee frozen on the review step', async () => {
+				const { rerender } = await renderSettled(WizardStepsSend.REVIEW);
+
+				await rerender({ destination: otherDestination, amount: 2 });
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(feeServices.getEthFeeDataWithProvider).not.toHaveBeenCalled();
+			});
+		});
+
+		describe('when the amount changes on the amount step', () => {
+			// One fetch per sample, each released by the test with the gas its estimate came back with.
+			const releases: ((gas: bigint) => void)[] = [];
+
+			const sample = (
+				gas: bigint
+			): Awaited<ReturnType<typeof feeServices.getEthFeeDataWithProvider>> => {
+				const provider = new InfuraProvider(ETHEREUM_NETWORK);
+
+				vi.spyOn(provider, 'safeEstimateGas').mockResolvedValue(gas);
+
+				return {
+					feeData: { maxFeePerGas: 2_000_000n, maxPriorityFeePerGas: 1_000_000n },
+					priorities: undefined,
+					provider,
+					params: { from: fromAddr, to: destination }
+				};
+			};
+
+			beforeEach(() => {
+				releases.length = 0;
+
+				vi.mocked(feeServices.getEthFeeDataWithProvider).mockImplementation(
+					() => new Promise((resolve) => releases.push((gas) => resolve(sample(gas))))
+				);
+			});
+
+			// A balance that covers every amount below, so the fee is all that can hold "Next" back.
+			const renderAmountStep = async () => {
+				const result = render(EthSendTokenWizard, {
+					props: {
+						currentStep: { name: WizardStepsSend.SEND, title: WizardStepsSend.SEND },
+						sendProgressStep: ProgressStepsSend.INITIALIZATION,
+						destination,
+						sourceNetwork: ETHEREUM_NETWORK,
+						amount: 1,
+						nativeEthereumToken: ETHEREUM_TOKEN,
+						onBack: vi.fn(),
+						onClose: vi.fn(),
+						onNext: vi.fn(),
+						onSendBack: vi.fn(),
+						onTokensList: vi.fn()
+					},
+					context: new Map<unknown, unknown>([
+						[ETH_FEE_CONTEXT_KEY, { feeStore }],
+						[
+							SEND_CONTEXT_KEY,
+							initSendContext({ token: ETHEREUM_TOKEN, customSendBalance: 10n ** 19n })
+						]
+					])
+				});
+
+				await vi.advanceTimersByTimeAsync(1000);
+
+				releases[0](25_000n);
+				await vi.advanceTimersByTimeAsync(0);
+
+				return result;
+			};
+
+			const changeAmount = async (rerender: (props: { amount: number }) => Promise<void>) => {
+				await rerender({ amount: 2 });
+
+				// The re-estimate is in flight.
+				await vi.advanceTimersByTimeAsync(1000);
+
+				expect(releases).toHaveLength(2);
+			};
+
+			it('holds "Next" until the fee for the new amount has landed', async () => {
+				const { getByTestId, rerender } = await renderAmountStep();
+
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeEnabled();
+
+				await changeAmount(rerender);
+
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+
+				releases[1](30_000n);
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeEnabled();
+			});
+
+			it('keeps holding "Next" while the fee for the new amount cannot be fetched', async () => {
+				const { getByTestId, rerender } = await renderAmountStep();
+
+				vi.mocked(feeServices.getEthFeeDataWithProvider).mockRejectedValue(new Error('offline'));
+
+				await rerender({ amount: 2 });
+				await vi.advanceTimersByTimeAsync(1000);
+
+				// The sample in hand was estimated for the previous amount, so it does not count.
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+			});
+
+			it('signs the fee estimated for the amount under review', async () => {
+				const { getByTestId, rerender } = await renderAmountStep();
+
+				await changeAmount(rerender);
+
+				releases[1](30_000n);
+				await vi.advanceTimersByTimeAsync(0);
+
+				await rerender({
+					currentStep: { name: WizardStepsSend.REVIEW, title: WizardStepsSend.REVIEW }
+				});
+
+				await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(sendServices.send).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ amount: 2_000_000_000_000_000_000n, gas: 30_000n })
+				);
+			});
 		});
 	});
 
@@ -456,6 +748,99 @@ describe('EthSendTokenWizard.spec', () => {
 		});
 
 		expect(toasts.toastsError).not.toHaveBeenCalled();
+	});
+
+	// The transaction may have reached the network: sent again from the review, it would be signed
+	// with the next nonce, and both could execute.
+	describe('when the outcome of the send is unknown', () => {
+		const unconfirmed = () => new EthSubmissionUnconfirmedError(new Error('Internal error'));
+
+		beforeEach(() => {
+			vi.spyOn(toasts, 'toastsErrorNoTrace').mockImplementation(() => Symbol('toast'));
+		});
+
+		it('closes a token send instead of going back to the review', async () => {
+			const onBack = vi.fn();
+			const onClose = vi.fn();
+
+			vi.mocked(sendServices.send).mockRejectedValueOnce(unconfirmed());
+
+			const { getByTestId } = renderHost({
+				currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+				sendProgressStep: ProgressStepsSend.INITIALIZATION,
+				nft: undefined,
+				destination,
+				sourceNetwork: ETHEREUM_NETWORK,
+				nativeEthereumToken: ETHEREUM_TOKEN,
+				sendToken: ETHEREUM_TOKEN,
+				sendTokenDecimals: ETHEREUM_TOKEN.decimals,
+				onBack,
+				onClose
+			});
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+			expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ msg: { text: en.send.error.ethereum_transaction_unconfirmed } })
+			);
+		});
+
+		it('closes an NFT send instead of going back to the review', async () => {
+			const onBack = vi.fn();
+			const onClose = vi.fn();
+
+			vi.mocked(nftSendServices.sendNft).mockRejectedValueOnce(unconfirmed());
+
+			const { getByTestId } = renderHost({
+				currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+				sendProgressStep: ProgressStepsSend.INITIALIZATION,
+				nft: mockValidErc721Nft,
+				destination,
+				sourceNetwork: ETHEREUM_NETWORK,
+				nativeEthereumToken: ETHEREUM_TOKEN,
+				sendToken: mockValidErc721Token,
+				sendTokenDecimals: 0,
+				onBack,
+				onClose
+			});
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+		});
+
+		it('goes back to the review after any other failure', async () => {
+			const onBack = vi.fn();
+			const onClose = vi.fn();
+
+			vi.mocked(sendServices.send).mockRejectedValueOnce(
+				Object.assign(new Error('insufficient funds'), { code: 'INSUFFICIENT_FUNDS' })
+			);
+
+			const { getByTestId } = renderHost({
+				currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+				sendProgressStep: ProgressStepsSend.INITIALIZATION,
+				nft: undefined,
+				destination,
+				sourceNetwork: ETHEREUM_NETWORK,
+				nativeEthereumToken: ETHEREUM_TOKEN,
+				sendToken: ETHEREUM_TOKEN,
+				sendTokenDecimals: ETHEREUM_TOKEN.decimals,
+				onBack,
+				onClose
+			});
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
 	});
 
 	it('shows a toast and aborts when destination is empty', async () => {

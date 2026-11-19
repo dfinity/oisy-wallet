@@ -12,7 +12,6 @@
 
 	<ExternalLink
 		ariaLabel={$i18n.rewards.text.learn_more}
-		color="blue"
 		href={OISY_REWARDS_URL}
 		iconVisible={false}
 		styleClass="ml-auto font-semibold"

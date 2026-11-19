@@ -23,6 +23,8 @@
 	--color-foreground-brand-primary-alt: #{$oisy-blue-500};
 	--color-foreground-brand-primary-inverted: #{$base-white};
 	--color-foreground-brand-secondary: #{$oisy-blue-800};
+	// Link hover and press: one step lighter, since blue-800 on the dark card is 2.3:1.
+	--color-foreground-brand-hover: #{$oisy-blue-300};
 	--color-foreground-brand-subtle-10: #{$a-oisy-blue-20};
 	--color-foreground-brand-subtle-20: #{$a-oisy-blue-30};
 	--color-foreground-brand-subtle-30: #{$a-oisy-blue-40};

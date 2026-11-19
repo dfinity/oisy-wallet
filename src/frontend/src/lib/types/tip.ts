@@ -12,3 +12,10 @@ export interface PendingTipClaim {
 	tipId: string;
 	claimCode: string;
 }
+
+/**
+ * Why a claim did not pay out. A dead link and a live tip that could not be paid
+ * mean very different things about whether the sender needs telling, and
+ * `shortBalance` is the one the sender can actually fix.
+ */
+export type TipClaimOutcome = 'unavailable' | 'uncovered' | 'shortBalance' | 'failed';

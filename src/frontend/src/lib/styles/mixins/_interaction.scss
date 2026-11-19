@@ -1,3 +1,23 @@
+// Hover styles only for pointers that can hover, like Tailwind's `hover:` variant.
+// On a touch screen a tap would otherwise leave the hover colour on until the next
+// tap somewhere else.
+@mixin hover {
+	@media (hover: hover) {
+		&:hover {
+			@content;
+		}
+	}
+}
+
+// Sizes for a touch screen as the main input. Not a width breakpoint: a tablet and a narrow
+// laptop window can be the same width, and only the tablet needs 44px targets. A laptop with a
+// touchscreen still reports its trackpad here and keeps the compact sizes.
+@mixin coarse {
+	@media (pointer: coarse) {
+		@content;
+	}
+}
+
 @mixin tappable {
 	touch-action: manipulation;
 	cursor: pointer;

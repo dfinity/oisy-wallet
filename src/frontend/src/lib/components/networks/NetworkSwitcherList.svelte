@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
@@ -12,14 +11,12 @@
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { LabelSize } from '$lib/types/components';
 	import type { NetworkId, Network as NetworkType, OptionNetworkId } from '$lib/types/network';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		selectedNetworkId?: NetworkId;
-		labelsSize?: LabelSize;
 		supportedNetworks?: NetworkType[];
-		allNetworksEnabled?: boolean;
 		showTestnets?: boolean;
 		showStakeBalance?: boolean;
 		onSelected?: (networkId: OptionNetworkId) => void;
@@ -27,9 +24,7 @@
 
 	let {
 		selectedNetworkId,
-		labelsSize = 'md',
 		supportedNetworks,
-		allNetworksEnabled = true,
 		showTestnets = true,
 		showStakeBalance = true,
 		onSelected
@@ -48,32 +43,28 @@
 	);
 </script>
 
-{#if allNetworksEnabled}
-	<NetworkButton
-		{labelsSize}
-		{onSelected}
-		{selectedNetworkId}
-		usdBalance={mainnetTokensUsdBalance}
-	/>
-{/if}
+<div class="menu-divider">
+	<NetworkButton {onSelected} {selectedNetworkId} usdBalance={mainnetTokensUsdBalance} />
+</div>
 
 <ul class="flex list-none flex-col">
 	{#each enabledNetworks as network (network.id)}
 		<li class="logo-button-list-item" transition:slide={SLIDE_PARAMS}>
-			<MainnetNetwork {labelsSize} {network} {onSelected} {selectedNetworkId} {showStakeBalance} />
+			<MainnetNetwork {network} {onSelected} {selectedNetworkId} {showStakeBalance} />
 		</li>
 	{/each}
 </ul>
 
 {#if showTestnets && $testnetsEnabled && $networksTestnets.length && isNullish(supportedNetworks)}
-	<span class="mt-6 mb-3 flex px-3 font-bold" transition:slide={SLIDE_PARAMS}
-		>{$i18n.networks.test_networks}</span
+	<span
+		class="mt-6 mb-3 flex px-(--menu-row-padding-inline) font-bold"
+		transition:slide={SLIDE_PARAMS}>{$i18n.networks.test_networks}</span
 	>
 
 	<ul class="flex list-none flex-col" transition:slide={SLIDE_PARAMS}>
 		{#each $networksTestnets as network (network.id)}
 			<li class="logo-button-list-item" transition:slide={SLIDE_PARAMS}
-				><Network {labelsSize} {network} {onSelected} {selectedNetworkId} /></li
+				><Network {network} {onSelected} {selectedNetworkId} /></li
 			>
 		{/each}
 	</ul>

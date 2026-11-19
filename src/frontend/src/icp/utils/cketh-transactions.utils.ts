@@ -18,7 +18,7 @@ import {
 } from '$icp/utils/cketh-memo.utils';
 import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
-import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
+import { icrcTxExplorerUrl, mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
@@ -57,8 +57,8 @@ export const mapCkEthereumTransaction = ({
 		id,
 		from,
 		to,
+		txExplorerUrl: icrcTxExplorerUrl({ ledgerCanisterId, blockIndex: transaction.id }),
 		...(notEmptyString(ckETHExplorerUrl) && {
-			txExplorerUrl: `${ckETHExplorerUrl}/transaction/${id}`,
 			...(notEmptyString(from) && { fromExplorerUrl: `${ckETHExplorerUrl}/account/${from}` }),
 			...(notEmptyString(to) && { toExplorerUrl: `${ckETHExplorerUrl}/account/${to}` })
 		}),

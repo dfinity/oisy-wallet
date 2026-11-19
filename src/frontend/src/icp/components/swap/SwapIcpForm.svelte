@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, untrack } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { oisyTradeSwapEnabled } from '$env/oisy-trade-swap';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
+	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
-	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
+	import SwapProviderCell from '$lib/components/swap/SwapProviderCell.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { oisyTradeSwapPairTable } from '$lib/services/oisy-trade-swap.services';
@@ -30,6 +29,7 @@
 	import { findOisyTradePair, oisyTradeAmountObjection } from '$lib/utils/oisy-trade-swap.utils';
 	import { formatTradeAmount, toPairView } from '$lib/utils/oisy-trade.utils';
 	import { tryParseToken } from '$lib/utils/parse.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
 	interface Props {
@@ -329,9 +329,9 @@
 	onCustomValidate={customValidate}
 	{onNext}
 	{onShowTokensList}
+	{slippageValue}
 	bind:swapAmount
 	bind:receiveAmount
-	bind:slippageValue
 	bind:errorType
 >
 	{#snippet message()}
@@ -346,11 +346,11 @@
 
 	{#snippet swapDetails()}
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
-			<Hr spacing="md" />
-
-			<div class="flex flex-col gap-3">
-				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
-				<SwapFees />
+			<div class="mt-4 flex flex-col">
+				<SwapProviderCell {onShowProviderList} />
+				<SwapFeeRow displayExchangeRate={false}>
+					<SwapFees />
+				</SwapFeeRow>
 			</div>
 		{/if}
 	{/snippet}

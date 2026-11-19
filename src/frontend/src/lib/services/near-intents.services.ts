@@ -17,7 +17,7 @@ import type {
 	NearIntentsToken
 } from '$lib/types/near-intents';
 import type { NetworkId } from '$lib/types/network';
-import type { NearIntentsQuoteParams, SwapMappedResult } from '$lib/types/swap';
+import { SwapProvider, type NearIntentsQuoteParams, type SwapMappedResult } from '$lib/types/swap';
 import {
 	findNearIntentsQuoteRequestMismatch,
 	isNearIntentsQuoteExpired,
@@ -27,7 +27,8 @@ import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import {
 	buildNearIntentsQuoteRequest,
 	mapNearIntentsQuoteResult,
-	resolveNearIntentsSwapAssets
+	resolveNearIntentsSwapAssets,
+	slippagePercentToBasisPoints
 } from '$lib/utils/swap.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -151,11 +152,11 @@ export const fetchNearIntentsSwapLimit = async ({
 	}
 };
 
-// Blockchains whose addresses are not EVM hex: Solana (Base58, case-sensitive) and
+// Blockchains whose addresses are not EVM hex: Solana (Base58, case-sensitive),
 // Bitcoin (1Click may list btc assets with a contractAddress, and those identifiers
-// are not case-insensitive hex). Only the remaining chains may have their contract
-// addresses lowercased.
-const NON_EVM_BLOCKCHAINS = new Set(['sol', 'btc']);
+// are not case-insensitive hex) and the XRP Ledger (Base58, case-sensitive). Only the
+// remaining chains may have their contract addresses lowercased.
+const NON_EVM_BLOCKCHAINS = new Set(['sol', 'btc', 'xrp']);
 
 const EVM_BLOCKCHAINS = new Set(
 	Object.getOwnPropertySymbols(NEAR_INTENTS_BLOCKCHAIN_MAP)
@@ -242,7 +243,8 @@ export const fetchNearIntentsSwapQuote = async ({
 	amount,
 	userAddress,
 	recipientAddress,
-	slippage
+	slippage,
+	onProviderParticipating
 }: NearIntentsQuoteParams): Promise<SwapMappedResult | undefined> => {
 	if (!NEAR_INTENTS_SWAP_ENABLED || isNullish(userAddress)) {
 		return;
@@ -264,13 +266,15 @@ export const fetchNearIntentsSwapQuote = async ({
 			: NEAR_INTENTS_QUOTE_DEADLINE_MS;
 
 	const quoteRequest = buildNearIntentsQuoteRequest({
-		slippageTolerance: Math.round(Number(slippage) * 100),
+		slippageTolerance: slippagePercentToBasisPoints(slippage),
 		...assets,
 		amount,
 		userAddress,
 		recipientAddress,
 		deadlineMs
 	});
+
+	onProviderParticipating?.(SwapProvider.NEAR_INTENTS);
 
 	const quoteResponse = await fetchNearIntentsQuote(quoteRequest);
 

@@ -1,7 +1,4 @@
-import {
-	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
-	ICRC_CK_TOKENS_LEDGER_CANISTER_IDS
-} from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
+import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { SUPPORTED_ICP_LEDGER_CANISTER_IDS } from '$env/tokens/tokens.icp.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
@@ -17,7 +14,6 @@ import { primitiveArrayEqual } from '$lib/utils/array.utils';
 import { derivedMemo } from '$lib/utils/derived-memo.utils';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
 import { tokenListEqual } from '$lib/utils/tokens.utils';
-import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -30,22 +26,6 @@ const icrcDefaultTokens: Readable<IcToken[]> = derivedMemo(
 			(token) => $testnetsEnabled || !isTokenIcTestnet(token)
 		),
 	tokenListEqual
-);
-
-/**
- * The list of ICRC tokens that are default for Chain Fusion, in the order provided by the static list.
- */
-export const icrcChainFusionDefaultTokens: Readable<IcToken[]> = derived(
-	[icrcDefaultTokens],
-	([$icrcDefaultTokens]) => {
-		const tokenByLedgerCanisterId = new Map(
-			$icrcDefaultTokens.map((token) => [token.ledgerCanisterId, token])
-		);
-
-		return ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.map((canisterId) =>
-			tokenByLedgerCanisterId.get(canisterId)
-		).filter(nonNullish);
-	}
 );
 
 /**
@@ -183,9 +163,4 @@ export const allKnownIcrcTokensLedgerCanisterIds: Readable<LedgerCanisterIdText[
 export const icrcCustomTokensInitialized: Readable<boolean> = derived(
 	[icrcCustomTokensStore],
 	([$icrcCustomTokensStore]) => $icrcCustomTokensStore !== undefined
-);
-
-export const icrcCustomTokensNotInitialized: Readable<boolean> = derived(
-	[icrcCustomTokensInitialized],
-	([$icrcCustomTokensInitialized]) => !$icrcCustomTokensInitialized
 );

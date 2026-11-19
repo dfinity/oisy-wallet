@@ -16,6 +16,7 @@ import type {
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
+import type { XdrBasketStatus } from '$lib/types/exchange';
 import type { CertifiedData } from '$lib/types/store';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
@@ -195,7 +196,9 @@ export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSche
 	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentPolPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentArbitrumEthPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
-	currentBaseEthPrice: z.custom<CoingeckoSimplePriceResponse>().optional()
+	currentBaseEthPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
+	// Set by a refresh that includes TCYCLES once the countdown to the XDR basket's expiry has begun.
+	currentXdrBasketStatus: z.custom<XdrBasketStatus>().optional()
 });
 
 export const PostMessageDataResponseExchangeErrorSchema = PostMessageDataResponseSchema.extend({

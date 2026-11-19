@@ -26,7 +26,8 @@ import type {
 	SolResolvedTransaction,
 	SolSignature,
 	SolSignatureWithSources,
-	SolTransactionUi
+	SolTransactionUi,
+	SolUnreadableTransaction
 } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { solBackendTokenId } from '$sol/utils/user-transactions.utils';
@@ -40,6 +41,10 @@ interface LoadSolWalletParams {
 
 interface SolWalletStore {
 	balances: SolNetworkBalances | undefined;
+	// Whether a message with the history has been posted. The balances posted on their own leave every
+	// transaction list unset, so the first head check that succeeds posts, even when it brings nothing
+	// new.
+	historyPosted: boolean;
 	// The newest slot the head check has resolved, and the signatures it has resolved at that slot and
 	// at the slot each catch-up walk ends on. Only a signature above that slot, or in it and not
 	// resolved yet, is new, unless a catch-up walk that began below it returns it: anything older
@@ -77,11 +82,14 @@ interface SolWalletHead {
 	// Every new signature the head check collected, including those that derive to no record.
 	signatures: SolSignatureWithSources[];
 	transactions: SolResolvedTransaction[];
+	// Held like the others once committed: the RPC gives the same answer on every tick.
+	unreadable: SolUnreadableTransaction[];
 	catchUp: SolWalletCatchUp[];
 }
 
 const initialStore = (): SolWalletStore => ({
 	balances: undefined,
+	historyPosted: false,
 	newestSlot: undefined,
 	signatures: new Map(),
 	catchUp: []
@@ -272,20 +280,18 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		];
 
 		if (newSignatures.length === 0) {
-			return { signatures: [], transactions: [], catchUp: resumed.catchUp };
+			return { signatures: [], transactions: [], unreadable: [], catchUp: resumed.catchUp };
 		}
 
-		return {
+		const { transactions, unreadable } = await resolveSolSignatures({
+			address,
+			network,
+			tokens,
 			signatures: newSignatures,
-			catchUp: resumed.catchUp,
-			transactions: await resolveSolSignatures({
-				address,
-				network,
-				tokens,
-				signatures: newSignatures,
-				known: new Set(known.keys())
-			})
-		};
+			known: new Set(known.keys())
+		});
+
+		return { signatures: newSignatures, catchUp: resumed.catchUp, transactions, unreadable };
 	};
 
 	// The backend cache stays per token: each token's records under its own key, one save per token.
@@ -334,10 +340,32 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 		const params: LoadSolWalletParams = { address, network, tokens };
 
-		const [balances, head] = await Promise.all([
+		const [balancesResult, headResult] = await Promise.allSettled([
 			loadSolNetworkBalances(params),
 			this.loadHead(params)
 		]);
+
+		// Without the balances there is nothing worth showing: the tick fails, is retried, and in the
+		// end reports a sync error.
+		if (balancesResult.status === 'rejected') {
+			throw balancesResult.reason;
+		}
+
+		const { value: balances } = balancesResult;
+
+		// The history only feeds the transaction lists, and a single transaction the network will not
+		// return fails it for as long as it stays in the newest page. Rather than hold back every
+		// balance of the network that long, the balances are posted on their own and the history is
+		// asked for again on the next tick, not retried within this one.
+		if (headResult.status === 'rejected') {
+			consoleError('Loading the newest Solana history failed:', headResult.reason);
+
+			this.syncBalances(balances);
+
+			return;
+		}
+
+		const { value: head } = headResult;
 
 		// Committed only once both loads succeeded: a retry after a failure must see the same
 		// signatures as new again.
@@ -358,7 +386,8 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		this.postMessageWallet({
 			wallet: {
 				balances,
-				newTransactions: JSON.stringify(head.transactions, jsonReplacer)
+				newTransactions: JSON.stringify(head.transactions, jsonReplacer),
+				...(head.unreadable.length > 0 && { unreadableTransactions: head.unreadable })
 			}
 		});
 	};
@@ -378,16 +407,40 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		}
 	};
 
+	private hasNewBalances = (balances: SolNetworkBalances): boolean =>
+		isNullish(this.store.balances) ||
+		!balancesEqual({ current: this.store.balances, next: balances });
+
+	// Commits the balances alone: what the head check holds stays as it was, so the next tick sees
+	// the same signatures as new.
+	private syncBalances = (balances: SolNetworkBalances) => {
+		const newBalances = this.hasNewBalances(balances);
+
+		this.store = { ...this.store, balances };
+
+		if (!newBalances) {
+			return;
+		}
+
+		this.postMessageWallet({
+			wallet: {
+				balances,
+				newTransactions: JSON.stringify([]),
+				transactionsUnavailable: true
+			}
+		});
+	};
+
 	private syncWalletData = ({
 		balances,
-		head: { signatures, transactions, catchUp }
+		head: { signatures, transactions, unreadable, catchUp }
 	}: {
 		balances: SolNetworkBalances;
 		head: SolWalletHead;
 	}): { hasChanges: boolean } => {
-		const newBalances =
-			isNullish(this.store.balances) ||
-			!balancesEqual({ current: this.store.balances, next: balances });
+		const newBalances = this.hasNewBalances(balances);
+
+		const { historyPosted } = this.store;
 
 		const newestSlot = signatures.reduce<SolSignature['slot'] | undefined>(
 			(acc, { slot }) => (isNullish(acc) || slot > acc ? slot : acc),
@@ -399,6 +452,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 		this.store = {
 			balances,
+			historyPosted: true,
 			newestSlot,
 			signatures: new Map(
 				[
@@ -409,7 +463,9 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			catchUp
 		};
 
-		return { hasChanges: newBalances || transactions.length > 0 };
+		return {
+			hasChanges: newBalances || !historyPosted || transactions.length > 0 || unreadable.length > 0
+		};
 	};
 
 	private postMessageWallet(data: SolPostMessageDataResponseWallet) {

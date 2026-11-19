@@ -1,11 +1,15 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import SendNftsList from '$lib/components/send/SendNftsList.svelte';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
 import { nftStore } from '$lib/stores/nft.store';
 import { nftSortStore } from '$lib/stores/settings.store';
+import type { Network } from '$lib/types/network';
+import type { Nft } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
-import SendNftsListTestHost from '$tests/lib/components/send/SendNftsListTestHost.svelte';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { mockContextMap } from '$tests/utils/context.test-utils';
+import { mockModalTokensListContextEntry } from '$tests/utils/misc.context.test-utils';
 import { fireEvent, render, within } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -16,6 +20,18 @@ const mockNfts = [
 ];
 
 describe('SendNftsList.spec', () => {
+	const renderList = ({
+		onSelect,
+		filterNetwork
+	}: {
+		onSelect: (nft: Nft) => void;
+		filterNetwork?: Network;
+	}) =>
+		render(SendNftsList, {
+			props: { onSelect },
+			context: mockContextMap([mockModalTokensListContextEntry({ tokens: [], filterNetwork })])
+		});
+
 	beforeEach(() => {
 		nftStore.resetAll();
 		nftSortStore.reset({ key: 'nft-sort' });
@@ -23,11 +39,7 @@ describe('SendNftsList.spec', () => {
 
 	it('renders NFTs from the store', () => {
 		nftStore.addAll(mockNfts);
-		const { getByText, getByRole } = render(SendNftsListTestHost, {
-			onSelect: vi.fn(),
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
-		});
+		const { getByText, getByRole } = renderList({ onSelect: vi.fn(), filterNetwork: undefined });
 
 		for (const nft of mockNfts) {
 			expect(getByText(`#${nft.id} – ${nft.name}`)).toBeInTheDocument();
@@ -40,10 +52,9 @@ describe('SendNftsList.spec', () => {
 
 	it('filters by search input (bind:filter)', async () => {
 		nftStore.addAll(mockNfts);
-		const { getByText, queryByText, getByPlaceholderText } = render(SendNftsListTestHost, {
+		const { getByText, queryByText, getByPlaceholderText } = renderList({
 			onSelect: vi.fn(),
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
+			filterNetwork: undefined
 		});
 
 		const input = getByPlaceholderText(get(i18n).send.placeholder.search_nfts) as HTMLInputElement;
@@ -57,10 +68,9 @@ describe('SendNftsList.spec', () => {
 
 	it('shows empty-state when no matches', async () => {
 		nftStore.addAll(mockNfts);
-		const { getByPlaceholderText, getByText, queryByText } = render(SendNftsListTestHost, {
+		const { getByPlaceholderText, getByText, queryByText } = renderList({
 			onSelect: vi.fn(),
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
+			filterNetwork: undefined
 		});
 
 		const input = getByPlaceholderText(get(i18n).send.placeholder.search_nfts) as HTMLInputElement;
@@ -75,12 +85,7 @@ describe('SendNftsList.spec', () => {
 
 	it('shows filtered network name when set', async () => {
 		nftStore.addAll(mockNfts);
-		const onSelectNetwork = vi.fn();
-		const { getByRole } = render(SendNftsListTestHost, {
-			onSelect: vi.fn(),
-			onSelectNetwork,
-			filterNetwork: POLYGON_AMOY_NETWORK
-		});
+		const { getByRole } = renderList({ onSelect: vi.fn(), filterNetwork: POLYGON_AMOY_NETWORK });
 
 		const btn = getByRole('button', { name: POLYGON_AMOY_NETWORK.name });
 
@@ -89,7 +94,23 @@ describe('SendNftsList.spec', () => {
 
 		await fireEvent.click(btn);
 
-		expect(onSelectNetwork).toHaveBeenCalledOnce();
+		expect(btn).toHaveAttribute('aria-expanded', 'true');
+	});
+
+	it('clears the network filter from the chip', async () => {
+		nftStore.addAll(mockNfts);
+		const { getByRole, findByRole } = renderList({
+			onSelect: vi.fn(),
+			filterNetwork: POLYGON_AMOY_NETWORK
+		});
+
+		await fireEvent.click(
+			getByRole('button', { name: get(i18n).tokens.text.clear_network_filter })
+		);
+
+		await expect(
+			findByRole('button', { name: get(i18n).networks.chain_fusion })
+		).resolves.toBeInTheDocument();
 	});
 
 	it('renders NFTs that have no name', () => {
@@ -103,11 +124,7 @@ describe('SendNftsList.spec', () => {
 		];
 
 		nftStore.addAll(namelessNfts);
-		const { getByText } = render(SendNftsListTestHost, {
-			onSelect: vi.fn(),
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
-		});
+		const { getByText } = renderList({ onSelect: vi.fn(), filterNetwork: undefined });
 
 		expect(getByText('NamelessOnes')).toBeInTheDocument();
 		expect(getByText('#42')).toBeInTheDocument();
@@ -154,11 +171,7 @@ describe('SendNftsList.spec', () => {
 		];
 
 		nftStore.addAll(unsorted);
-		const { container } = render(SendNftsListTestHost, {
-			onSelect: vi.fn(),
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
-		});
+		const { container } = renderList({ onSelect: vi.fn(), filterNetwork: undefined });
 
 		expect(orderOf({ container, labels: ['#11 – B', '#12 – C', '#10 – A'] })).toEqual([
 			'#11 – B',
@@ -189,11 +202,7 @@ describe('SendNftsList.spec', () => {
 			value: { order: 'desc', type: 'collection-name' }
 		});
 
-		const { container } = render(SendNftsListTestHost, {
-			onSelect: vi.fn(),
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
-		});
+		const { container } = renderList({ onSelect: vi.fn(), filterNetwork: undefined });
 
 		expect(orderOf({ container, labels: ['#10 – A', '#11 – B'] })).toEqual(['#11 – B', '#10 – A']);
 	});
@@ -201,11 +210,7 @@ describe('SendNftsList.spec', () => {
 	it('calls onSelect when an NFT card is clicked', async () => {
 		nftStore.addAll(mockNfts);
 		const onSelect = vi.fn();
-		const { getByText } = render(SendNftsListTestHost, {
-			onSelect,
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
-		});
+		const { getByText } = renderList({ onSelect, filterNetwork: undefined });
 
 		const nftCard = getByText('#1 – Eins');
 
@@ -237,10 +242,9 @@ describe('SendNftsList.spec', () => {
 		];
 
 		nftStore.addAll(sectionMockNfts);
-		const { getByPlaceholderText, getByText, queryByText } = render(SendNftsListTestHost, {
+		const { getByPlaceholderText, getByText, queryByText } = renderList({
 			onSelect: vi.fn(),
-			filterNetwork: undefined,
-			onSelectNetwork: vi.fn()
+			filterNetwork: undefined
 		});
 
 		const input = getByPlaceholderText(get(i18n).send.placeholder.search_nfts) as HTMLInputElement;

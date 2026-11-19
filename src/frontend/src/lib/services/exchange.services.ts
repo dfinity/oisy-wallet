@@ -10,6 +10,7 @@ import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { getExchangeRates } from '$lib/api/backend.api';
 import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import { XDR_BASKET_CURRENCIES } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchIcpSwapPrices } from '$lib/rest/icpswap.rest';
@@ -26,6 +27,7 @@ import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import {
+	currencyExchangeRateFromBtc,
 	findMissingLedgerCanisterIds,
 	formatIcpSwapToCoingeckoPrices,
 	formatKongSwapToCoingeckoPrices
@@ -62,15 +64,13 @@ const fetchIcrcPricesFromKongSwap = async (
 	return formatKongSwapToCoingeckoPrices(tokens);
 };
 
-// To calculate an FX rate for a currency vs USD, we cross-reference a very liquid asset (BTC) with the currency and with the USD.
-// In this way, we can easily calculate the cross USDXXX rate as BTCUSD / BTCXXX.
-// We will use it to convert the USD amounts to the currency amounts in the frontend.
-// Until we find a proper IC solution (like the exchange canister, for example), we use this workaround.
+// The display currency's rate on its own request (see `currencyExchangeRateFromBtc`), for backend
+// mode: the provider path takes it from the BTC request of `exchangeRateBTCToUsd` instead.
 export const exchangeRateUsdToCurrency = async (
 	currency: Currency
 ): Promise<{ rate: number; fx24hChangeMultiplier: number } | undefined> => {
 	if (currency === Currency.USD) {
-		return { rate: 1, fx24hChangeMultiplier: 1 };
+		return currencyExchangeRateFromBtc({ btcPrice: undefined, currency });
 	}
 
 	if (!COINGECKO_PROVIDER_ENABLED) {
@@ -83,28 +83,7 @@ export const exchangeRateUsdToCurrency = async (
 		include_24hr_change: true
 	});
 
-	const btcToUsd = prices?.bitcoin?.usd;
-	const btcToCurrency = prices?.bitcoin?.[currency];
-
-	const btcToUsdChangePct = prices?.bitcoin?.usd_24h_change;
-	const btcToCurrencyChangePct = prices?.bitcoin?.[`${currency}_24h_change`];
-
-	if (
-		isNullish(btcToUsd) ||
-		isNullish(btcToCurrency) ||
-		isNullish(btcToUsdChangePct) ||
-		isNullish(btcToCurrencyChangePct)
-	) {
-		return;
-	}
-
-	const rate = btcToUsd / btcToCurrency;
-
-	const a = btcToUsdChangePct / 100;
-	const b = btcToCurrencyChangePct / 100;
-	const fx24hChangeMultiplier = (1 + a) / (1 + b);
-
-	return { rate, fx24hChangeMultiplier };
+	return currencyExchangeRateFromBtc({ btcPrice: prices?.bitcoin, currency });
 };
 
 export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
@@ -116,11 +95,16 @@ export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 			})
 		: Promise.resolve({});
 
-export const exchangeRateBTCToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
+// BTC's price in the display currency and in the XDR basket's currencies also gives the display
+// currency's rate (`currencyExchangeRateFromBtc`) and TCYCLES's price (`xdrUsdPrice`), so that
+// neither needs a request of its own.
+export const exchangeRateBTCToUsd = (
+	currency: Currency = Currency.USD
+): Promise<CoingeckoSimplePriceResponse> =>
 	COINGECKO_PROVIDER_ENABLED
 		? simplePrice({
 				ids: 'bitcoin',
-				vs_currencies: Currency.USD,
+				vs_currencies: [...new Set<Currency>([...XDR_BASKET_CURRENCIES, currency])],
 				include_24hr_change: true
 			})
 		: Promise.resolve({});

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { assertNever, debounce, isEmptyString, isNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import { detectNftCanisterStandard } from '$icp/services/ic-standard.services';
 	import InputText from '$lib/components/ui/InputText.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
@@ -10,6 +9,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CanisterIdText } from '$lib/types/canister';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		extCanisterId?: string;

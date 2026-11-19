@@ -4,17 +4,38 @@ import type {
 	ActiveUserTransactionStatus,
 	LiquidiumAction
 } from '$declarations/backend/backend.did';
+import { ZERO } from '$lib/constants/app.constants';
 import { LIQUIDIUM_PROVIDER_ID } from '$lib/constants/liquidium.constants';
 import {
 	LIQUIDIUM_EXTERNAL_REF_KEYS,
 	type LiquidiumActionKey,
 	type LiquidiumExternalRefKey
 } from '$lib/types/liquidium-active-tx';
+import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { Activity } from '@liquidium/client';
 
 export const isLiquidiumActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
 	'Liquidium' in tx.data;
+
+// Net amount (base units) of `poolId` repays sent but not settled yet. Keyed by pool, not rail:
+// every rail of a position repays the same pool, and the AUT does not record the rail.
+export const liquidiumPendingRepayAmount = ({
+	transactions,
+	poolId
+}: {
+	transactions: ActiveUserTransaction[];
+	poolId: string;
+}): bigint =>
+	transactions.reduce((acc, tx) => {
+		if (!('Liquidium' in tx.data) || isTerminalActiveUserTransaction(tx)) {
+			return acc;
+		}
+
+		const { action, pool_id, amount } = tx.data.Liquidium;
+
+		return 'Repay' in action && pool_id === poolId ? acc + amount : acc;
+	}, ZERO);
 
 // Wire-format `(key, value)` array → keyed lookup.
 export const toLiquidiumExternalRefsMap = (

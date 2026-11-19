@@ -45,6 +45,24 @@ describe('ConvertAmountSource', () => {
 
 	const balanceTestId = 'convert-amount-source-balance';
 
+	it('should focus the amount field only when asked', () => {
+		const { getByTestId, unmount } = render(ConvertAmountSource, {
+			props,
+			context: mockContext()
+		});
+
+		expect(getByTestId(TOKEN_INPUT_CURRENCY_TOKEN)).not.toHaveFocus();
+
+		unmount();
+
+		const focused = render(ConvertAmountSource, {
+			props: { ...props, autofocus: true },
+			context: mockContext()
+		});
+
+		expect(focused.getByTestId(TOKEN_INPUT_CURRENCY_TOKEN)).toHaveFocus();
+	});
+
 	it('should display values correctly without error if insufficientFundsForFee is false', () => {
 		const { getByTestId } = render(ConvertAmountSource, {
 			props,
@@ -75,6 +93,44 @@ describe('ConvertAmountSource', () => {
 
 		expect(getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE)).toHaveTextContent('$0.20');
 		expect(getByTestId(balanceTestId)).toHaveTextContent(maxButtonText);
+	});
+
+	it('presses Max like an icon-size control, with a 40 px tap area', () => {
+		const { getByTestId } = render(ConvertAmountSource, {
+			props,
+			context: mockContext()
+		});
+
+		expect(getByTestId(balanceTestId)).toHaveClass(
+			'hit-area',
+			'[--hit-area-y:calc(100%+1.125rem)]',
+			'press-icon'
+		);
+	});
+
+	it('darkens Max on hover while the max amount is valid', () => {
+		const { getByTestId } = render(ConvertAmountSource, {
+			props,
+			context: mockContext()
+		});
+
+		expect(getByTestId(balanceTestId)).toHaveClass('hover:text-brand-hover');
+	});
+
+	it.each([
+		{ case: 'the balance is zero', testProps: props, balance: ZERO },
+		{ case: 'the max amount is still loading', testProps: { ...props, totalFee: undefined } },
+		{
+			case: 'the fee uses up the balance, so Max would set 0',
+			testProps: { ...props, totalFee: defaultBalance }
+		}
+	])('does not darken Max on hover when $case', ({ testProps, balance }) => {
+		const { getByTestId } = render(ConvertAmountSource, {
+			props: testProps,
+			context: mockContext(balance)
+		});
+
+		expect(getByTestId(balanceTestId)).not.toHaveClass('hover:text-brand-hover');
 	});
 
 	it('should display loading text if total fee is not available yet', () => {

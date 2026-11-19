@@ -1,9 +1,16 @@
 <!-- source: ISC Lucide - please visit https://lucide.dev/license -->
+<script lang="ts">
+	interface Props {
+		size?: string;
+	}
+	let { size = '24' }: Props = $props();
+</script>
+
 <svg
 	fill="currentColor"
-	height="24"
+	height={size}
 	viewBox="0 0 24 24"
-	width="24"
+	width={size}
 	xmlns="http://www.w3.org/2000/svg"
 >
 	<path

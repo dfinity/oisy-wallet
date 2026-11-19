@@ -9,8 +9,8 @@ print_help() {
 	Provisions (or rotates) the OnRamper widget signing secret on the backend canister.
 
 	The secret is held only in canister state and used by 'sign_onramper_widget_url' to sign
-	OnRamper widget URLs — it never reaches the frontend bundle. Until it is set, the buy widget
-	reports itself unavailable (see 'onramper_enabled').
+	OnRamper widget URLs — it never reaches the frontend bundle. Until it is set, the buy flow
+	shows the "buy unavailable" notice instead of the widget.
 
 	This calls the dedicated 'set_onramper_signing_secret' endpoint, which mutates a single field
 	and therefore does NOT clobber the other configured API keys (e.g. the CoinGecko key), unlike
@@ -70,6 +70,3 @@ else
   echo "Setting the OnRamper signing secret on network '$NETWORK'..."
   dfx canister call --identity "$IDENTITY" --network "$NETWORK" backend set_onramper_signing_secret "(opt \"$ESCAPED\")"
 fi
-
-echo -n "onramper_enabled now reports: "
-dfx canister call --identity "$IDENTITY" --network "$NETWORK" backend onramper_enabled

@@ -1,11 +1,16 @@
 import type {
 	ActiveUserTransaction,
+	BtcBroadcastTransactionResponse,
 	BtcGetFeePercentilesResponse,
+	BtcGetSpendableUtxosResponse,
 	Contact,
+	ContactImageEntry,
+	ContactsPage,
 	CreatePersonalNoteShareRequest,
 	CreateTipRequest,
 	CustomToken,
 	DeletePersonalNoteRequest,
+	GetActiveUserTransactionsResponse,
 	GetAllowedCyclesResponse,
 	MyTip,
 	PersonalNoteEntry,
@@ -28,13 +33,18 @@ import type {
 	AllowSigningOutcome,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
+	BtcBroadcastTransactionParams,
+	BtcGetBalanceParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
+	BtcGetSpendableUtxosParams,
 	CreateActiveUserTransactionParams,
 	CreateContactParams,
 	CreateUserProfileResponse,
 	DeleteContactParams,
+	GetContactImagesParams,
 	GetContactParams,
+	GetContactsPageParams,
 	GetPendingTransactionsOutcome,
 	GetUserProfileResponse,
 	GetUserTransactionsParams,
@@ -139,6 +149,15 @@ export const addPendingBtcTransaction = async ({
 	return btcAddPendingTransaction(params);
 };
 
+export const broadcastBtcTransaction = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcBroadcastTransactionParams>): Promise<BtcBroadcastTransactionResponse> => {
+	const { btcBroadcastTransaction } = await backendCanister({ identity });
+
+	return btcBroadcastTransaction(params);
+};
+
 export const getPendingBtcTransactions = async ({
 	identity,
 	...params
@@ -146,6 +165,24 @@ export const getPendingBtcTransactions = async ({
 	const { btcGetPendingTransactions } = await backendCanister({ identity });
 
 	return btcGetPendingTransactions(params);
+};
+
+export const getBtcBalance = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcGetBalanceParams>): Promise<bigint> => {
+	const { btcGetBalance } = await backendCanister({ identity });
+
+	return btcGetBalance(params);
+};
+
+export const getSpendableBtcUtxos = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcGetSpendableUtxosParams>): Promise<BtcGetSpendableUtxosResponse> => {
+	const { btcGetSpendableUtxos } = await backendCanister({ identity });
+
+	return btcGetSpendableUtxos(params);
 };
 
 export const getCurrentBtcFeePercentiles = async ({
@@ -245,11 +282,20 @@ export const getContact = async ({
 	return getContact(contactId);
 };
 
-export const getContacts = async ({
+export const getContactsPage = async ({
+	after,
 	identity
-}: CanisterApiFunctionParams<QueryParams>): Promise<Contact[]> => {
-	const { getContacts } = await backendCanister({ identity });
-	return getContacts();
+}: CanisterApiFunctionParams<GetContactsPageParams>): Promise<ContactsPage> => {
+	const { getContactsPage } = await backendCanister({ identity });
+	return getContactsPage(after);
+};
+
+export const getContactImages = async ({
+	contactIds,
+	identity
+}: CanisterApiFunctionParams<GetContactImagesParams>): Promise<ContactImageEntry[]> => {
+	const { getContactImages } = await backendCanister({ identity });
+	return getContactImages(contactIds);
 };
 
 export const createContact = async ({
@@ -360,11 +406,21 @@ export const deleteActiveUserTransaction = async ({
 };
 
 export const getActiveUserTransactions = async ({
-	identity
-}: CanisterApiFunctionParams): Promise<ActiveUserTransaction[]> => {
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<GetActiveUserTransactionsResponse> => {
 	const { getActiveUserTransactions } = await backendCanister({ identity });
 
-	return getActiveUserTransactions();
+	return getActiveUserTransactions({ certified });
+};
+
+export const markActiveUserTransactionsSeen = async ({
+	identity,
+	upToNs
+}: CanisterApiFunctionParams<{ upToNs: bigint }>): Promise<bigint> => {
+	const { markActiveUserTransactionsSeen } = await backendCanister({ identity });
+
+	return markActiveUserTransactionsSeen(upToNs);
 };
 
 export const setPersonalNote = async ({

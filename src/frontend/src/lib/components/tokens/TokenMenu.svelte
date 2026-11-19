@@ -11,7 +11,8 @@
 		networkEthereum,
 		networkEvm,
 		networkICP,
-		networkSolana
+		networkSolana,
+		networkXrp
 	} from '$lib/derived/network.derived';
 	import { pageToken, pageTokenToggleable } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -60,7 +61,9 @@
 					? modalStore.openBtcToken
 					: $networkSolana
 						? modalStore.openSolToken
-						: () => {};
+						: $networkXrp
+							? modalStore.openXrpToken
+							: () => {};
 		fn({
 			id: openModalId,
 			data: fromRoute
@@ -78,7 +81,8 @@
 
 <button
 	bind:this={button}
-	class="pointer-events-auto ml-auto flex gap-0.5 font-bold"
+	class="pointer-events-auto hit-area relative ml-auto flex gap-0.5 font-bold hit-area-touch press-icon"
+	aria-expanded={visible}
 	aria-label={$i18n.tokens.alt.context_menu}
 	data-tid={`${testId}-button`}
 	onclick={() => (visible = true)}
@@ -86,8 +90,8 @@
 	<IconMoreVertical />
 </button>
 
-<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
-	<div class="flex flex-col gap-1">
+<Popover anchor={button} direction="rtl" dropdown invisibleBackdrop bind:visible>
+	<div class="menu-surface flex flex-col">
 		{#if $pageTokenToggleable}
 			<ButtonMenu ariaLabel={hideTokenLabel} onclick={hideToken}>
 				{hideTokenLabel}

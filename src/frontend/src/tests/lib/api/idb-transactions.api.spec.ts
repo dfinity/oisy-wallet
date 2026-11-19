@@ -355,6 +355,27 @@ describe('idb-transactions.api', () => {
 		});
 	});
 
+	it('keeps IC transactions in a versioned database, so caches with an older top-up label are not read', async () => {
+		vi.resetModules();
+
+		const { createStore: createStoreOnImport } = await import('idb-keyval');
+
+		await import('$lib/api/idb-transactions.api');
+
+		expect(createStoreOnImport).toHaveBeenCalledWith(
+			'oisy-icp-v3-transactions',
+			'icp-v3-transactions'
+		);
+		expect(createStoreOnImport).not.toHaveBeenCalledWith(
+			'oisy-icp-v2-transactions',
+			'icp-v2-transactions'
+		);
+		expect(createStoreOnImport).not.toHaveBeenCalledWith(
+			'oisy-icp-transactions',
+			'icp-transactions'
+		);
+	});
+
 	describe('setIdbIcTransactions', () => {
 		const mockIcTransactions = createMockIcTransactionsUi(4);
 

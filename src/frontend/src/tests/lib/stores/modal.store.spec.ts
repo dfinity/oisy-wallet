@@ -37,6 +37,20 @@ describe('modal.store', () => {
 		expect(get(modalStore)).toEqual({ id, type: 'convert-ckbtc-btc' });
 	});
 
+	it('should open the cycles-mint modal', () => {
+		const id = Symbol('modalId');
+		modalStore.openCyclesMint(id);
+
+		expect(get(modalStore)).toEqual({ id, type: 'cycles-mint' });
+	});
+
+	it('should open the canister-top-up modal', () => {
+		const id = Symbol('modalId');
+		modalStore.openCanisterTopUp(id);
+
+		expect(get(modalStore)).toEqual({ id, type: 'canister-top-up' });
+	});
+
 	it('should open harvest-stake modal with modalId', () => {
 		const id = Symbol('modalId');
 		modalStore.openHarvestStake(id);

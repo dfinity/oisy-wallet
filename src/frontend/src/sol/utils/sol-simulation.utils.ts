@@ -1,8 +1,21 @@
 import { ZERO } from '$lib/constants/app.constants';
-import type { SolAddress } from '$sol/types/address';
-import type { SolanaParsedAccountInfo } from '$sol/types/sol-rpc';
+import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
+import {
+	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
+	MEMO_LEGACY_PROGRAM_ADDRESS,
+	STAKE_PROGRAM_ADDRESS,
+	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
+import type { SolanaParsedAccountInfo, SolanaSimulatedInnerInstructions } from '$sol/types/sol-rpc';
 import type {
+	SolClosedAccount,
+	SolSimulationAllowance,
+	SolSimulationClosedAccount,
 	SolSimulationControlChange,
+	SolSimulationCreatedAccount,
 	SolSimulationPreview,
 	SolSimulationTokenDelta
 } from '$sol/types/sol-simulation';
@@ -15,9 +28,14 @@ interface SolTokenAccountState {
 	tokenAddress: SplTokenAddress;
 	owner: SolAddress;
 	delegate?: SolAddress;
+	// What the delegate may still spend. Present whenever a delegate is.
+	delegatedAmount?: bigint;
 	closeAuthority?: SolAddress;
 	amount: bigint;
 	decimals: number;
+	// The rent-exempt reserve a wrapped SOL account states for itself. Every lamport above it and the
+	// amount is one no sync has counted yet.
+	nativeReserve?: bigint;
 }
 
 interface SolAccountState {
@@ -61,14 +79,16 @@ export const parseTokenAccountState = (
 		return undefined;
 	}
 
-	const { mint, owner, delegate, closeAuthority, tokenAmount } = (data.parsed.info ??
-		{}) as Partial<{
-		mint: SplTokenAddress;
-		owner: SolAddress;
-		delegate: SolAddress;
-		closeAuthority: SolAddress;
-		tokenAmount: { amount: string; decimals: number };
-	}>;
+	const { mint, owner, delegate, delegatedAmount, closeAuthority, tokenAmount, rentExemptReserve } =
+		(data.parsed.info ?? {}) as Partial<{
+			mint: SplTokenAddress;
+			owner: SolAddress;
+			delegate: SolAddress;
+			delegatedAmount: { amount: string };
+			closeAuthority: SolAddress;
+			tokenAmount: { amount: string; decimals: number };
+			rentExemptReserve: { amount: string };
+		}>;
 
 	if (isNullish(mint) || isNullish(owner) || isNullish(tokenAmount)) {
 		return undefined;
@@ -78,9 +98,11 @@ export const parseTokenAccountState = (
 		tokenAddress: mint,
 		owner,
 		...(nonNullish(delegate) && { delegate }),
+		...(nonNullish(delegatedAmount) && { delegatedAmount: BigInt(delegatedAmount.amount) }),
 		...(nonNullish(closeAuthority) && { closeAuthority }),
 		amount: BigInt(tokenAmount.amount),
-		decimals: tokenAmount.decimals
+		decimals: tokenAmount.decimals,
+		...(nonNullish(rentExemptReserve) && { nativeReserve: BigInt(rentExemptReserve.amount) })
 	};
 };
 
@@ -97,6 +119,11 @@ const parseAccountState = (account: SolanaParsedAccountInfo): SolAccountState | 
 		...(nonNullish(token) && { token })
 	};
 };
+
+// Emptied by a run: no account after it, or one holding no lamports, which the run may report in
+// place of a missing one. An account the run did not report on says nothing.
+const isEmptiedAccount = (post: SolanaParsedAccountInfo | undefined): boolean =>
+	post === null || (nonNullish(post) && BigInt(post.lamports) === ZERO);
 
 /**
  * Whether an account is the user's own.
@@ -172,20 +199,63 @@ export const mapSolSimulationAccountOwners = ({
 		{ ownedAddresses: [], addressToOwner: {}, addressToToken: {} }
 	);
 
+/**
+ * The state a token account the run opens starts from: held by the owner and the program it ends
+ * with, holding nothing, and with no delegate and no close authority.
+ *
+ * Its owner and program are what it was opened for, so neither reads as a change. A delegate or a
+ * close authority it ends up with was granted by this very message, and an account opened empty
+ * shows no balance that would reveal the grant.
+ */
+const openedTokenAccountState = ({
+	program,
+	token
+}: SolAccountState): SolAccountState | undefined =>
+	nonNullish(token)
+		? {
+				program,
+				lamports: ZERO,
+				token: {
+					tokenAddress: token.tokenAddress,
+					owner: token.owner,
+					amount: ZERO,
+					decimals: token.decimals
+				}
+			}
+		: undefined;
+
 const controlChanges = ({
 	account,
-	pre,
+	pre: preState,
 	post
 }: {
 	account: SolAddress;
 	pre?: SolAccountState;
 	post?: SolAccountState;
 }): SolSimulationControlChange[] => {
-	// An account that did not exist beforehand cannot have been taken over; it was created by
-	// this very message, and whatever it ends up holding is reported as a balance instead.
-	if (isNullish(pre) || isNullish(post)) {
+	if (isNullish(post)) {
 		return [];
 	}
+
+	// An account that did not exist beforehand is compared with the one it was opened as. One that
+	// is not a token account has nothing to grant, and whatever it ends up holding is stated as a
+	// balance instead.
+	const pre = preState ?? openedTokenAccountState(post);
+
+	if (isNullish(pre)) {
+		return [];
+	}
+
+	// What a delegate left in place may spend, stated with every change that leaves one: a
+	// one-unit approval and an unlimited one name the same delegate.
+	const allowance: SolSimulationAllowance | undefined =
+		nonNullish(post.token?.delegate) && nonNullish(post.token.delegatedAmount)
+			? {
+					tokenAddress: post.token.tokenAddress,
+					decimals: post.token.decimals,
+					amount: post.token.delegatedAmount
+				}
+			: undefined;
 
 	const changed: [
 		SolSimulationControlChange['field'],
@@ -198,13 +268,42 @@ const controlChanges = ({
 		['closeAuthority', pre.token?.closeAuthority, post.token?.closeAuthority]
 	];
 
-	return changed.reduce<SolSimulationControlChange[]>(
-		(acc, [field, from, to]) => [
-			...acc,
-			...(from !== to ? [{ account, field, ...(nonNullish(to) && { to }) }] : [])
-		],
-		[]
-	);
+	// The same delegate with a different limit. Comparing the delegate alone reads an approval that
+	// raises an existing allowance as no change at all.
+	const delegate = post.token?.delegate;
+	const allowanceChanged =
+		nonNullish(delegate) &&
+		pre.token?.delegate === delegate &&
+		pre.token.delegatedAmount !== post.token?.delegatedAmount;
+
+	return [
+		...changed.reduce<SolSimulationControlChange[]>(
+			(acc, [field, from, to]) => [
+				...acc,
+				...(from !== to
+					? [
+							{
+								account,
+								field,
+								...(nonNullish(to) && { to }),
+								...(field === 'delegate' && nonNullish(allowance) && { allowance })
+							}
+						]
+					: [])
+			],
+			[]
+		),
+		...(allowanceChanged
+			? [
+					{
+						account,
+						field: 'allowance' as const,
+						to: delegate,
+						...(nonNullish(allowance) && { allowance })
+					}
+				]
+			: [])
+	];
 };
 
 /**
@@ -225,10 +324,12 @@ export const mapSolSimulationPreview = ({
 	postAccounts: readonly SolanaParsedAccountInfo[];
 	userAddress: SolAddress;
 }): SolSimulationPreview => {
-	const { solDelta, tokenDeltas, changes } = addresses.reduce<{
+	const { solDelta, tokenDeltas, changes, created, closed } = addresses.reduce<{
 		solDelta: bigint | undefined;
 		tokenDeltas: SolSimulationTokenDelta[];
 		changes: SolSimulationControlChange[];
+		created: SolSimulationCreatedAccount[];
+		closed: SolSimulationClosedAccount[];
 	}>(
 		(acc, address, index) => {
 			const pre = parseAccountState(preAccounts[index]);
@@ -242,6 +343,24 @@ export const mapSolSimulationPreview = ({
 			const token = post?.token ?? pre?.token;
 
 			return {
+				created:
+					isNullish(pre) && nonNullish(post?.token)
+						? [
+								...acc.created,
+								{
+									account: address,
+									owner: post.token.owner,
+									...(nonNullish(post.token.delegate) && { delegate: post.token.delegate }),
+									...(nonNullish(post.token.closeAuthority) && {
+										closeAuthority: post.token.closeAuthority
+									})
+								}
+							]
+						: acc.created,
+				closed:
+					nonNullish(pre) && isEmptiedAccount(postAccounts[index])
+						? [...acc.closed, { account: address, lamports: pre.lamports }]
+						: acc.closed,
 				solDelta:
 					address === userAddress
 						? (post?.lamports ?? ZERO) - (pre?.lamports ?? ZERO)
@@ -262,13 +381,15 @@ export const mapSolSimulationPreview = ({
 				changes: [...acc.changes, ...controlChanges({ account: address, pre, post })]
 			};
 		},
-		{ solDelta: undefined, tokenDeltas: [], changes: [] }
+		{ solDelta: undefined, tokenDeltas: [], changes: [], created: [], closed: [] }
 	);
 
 	return {
 		...(nonNullish(solDelta) && solDelta !== ZERO && { solDelta }),
 		tokenDeltas,
-		controlChanges: changes
+		controlChanges: changes,
+		...(created.length > 0 && { createdAccounts: created }),
+		...(closed.length > 0 && { closedAccounts: closed })
 	};
 };
 
@@ -278,3 +399,233 @@ export const isEmptySolSimulationPreview = ({
 	controlChanges
 }: SolSimulationPreview): boolean =>
 	isNullish(solDelta) && tokenDeltas.length === 0 && controlChanges.length === 0;
+
+/**
+ * Whether the run hands the user's wallet to a program other than the one that owned it.
+ *
+ * Once assigned, that program and no longer the wallet's key decides what leaves the wallet, and
+ * the wallet can no longer pay a fee. The message need not state the assignment: a program can
+ * make it inside its own call, where only the run sees it, as a change of the wallet's owning
+ * program.
+ */
+export const solSimulationReassignsWallet = ({
+	preview,
+	userAddress
+}: {
+	preview: SolSimulationPreview | undefined;
+	userAddress: OptionSolAddress;
+}): boolean =>
+	(preview?.controlChanges ?? []).some(
+		({ account, field }) => field === 'program' && account === userAddress
+	);
+
+/**
+ * Whether the message carries an instruction OISY cannot read that no simulated run described.
+ *
+ * What makes such an instruction a warning rather than a refusal is the run, which states what the
+ * message would do to the user's own accounts whether or not any decoder read it. Without a run
+ * that described it, approving it is approving an effect nobody stated. The review and the signing
+ * flow both ask this, so the review holds the button on exactly what signing refuses.
+ */
+export const solUnreviewedNotDescribed = ({
+	unreviewed,
+	simulated
+}: {
+	unreviewed: boolean | undefined;
+	// Whether a simulated run described every instruction of the message.
+	simulated: boolean;
+}): boolean => (unreviewed ?? false) && !simulated;
+
+// Programs the review decodes when the message calls them itself, besides the known ones: it states
+// what their instructions do from the message alone.
+const SOLANA_DECODED_PROGRAM_ADDRESSES: SolAddress[] = [
+	STAKE_PROGRAM_ADDRESS,
+	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
+	MEMO_LEGACY_PROGRAM_ADDRESS
+];
+
+/**
+ * The programs a simulated run reaches that OISY can't read, each named once, in the order the run
+ * first reaches them: one the message calls itself that is neither among the known ones nor one
+ * the review decodes, and one called from inside another program's instruction that is not among
+ * the known ones.
+ *
+ * The message's own instructions as well. One the review cannot read is listed as such only while
+ * no line came from it: a single transfer it makes inside itself, one lamport out of the wallet
+ * say, accounts for the whole instruction, and the program then runs with the wallet's signature
+ * unnamed, while the same program called from inside a router would be named.
+ *
+ * Nothing at all when a nested call does not name its program. The RPC names it for every call a
+ * simulation reports, parsed or not, but the type also admits one that only points into the
+ * account list, and an empty list for a run containing it would say it calls only known programs.
+ */
+export const findSolUnreadPrograms = ({
+	instructions,
+	innerInstructions
+}: {
+	instructions: CompilableTransactionMessage['instructions'];
+	innerInstructions: SolanaSimulatedInnerInstructions;
+}): SolAddress[] | undefined => {
+	const groups = [...innerInstructions].map(({ index, instructions: nested }) => ({
+		parent: Number(index),
+		programs: [...nested].map((instruction) =>
+			'programId' in instruction ? instruction.programId : undefined
+		)
+	}));
+
+	if (groups.some(({ programs }) => programs.some(isNullish))) {
+		return undefined;
+	}
+
+	const known = new Set<SolAddress>(SOLANA_KNOWN_PROGRAM_ADDRESSES);
+	const decoded = new Set<SolAddress>([...known, ...SOLANA_DECODED_PROGRAM_ADDRESSES]);
+
+	const reached = [...instructions].flatMap(({ programAddress }, index) => [
+		...(decoded.has(programAddress) ? [] : [programAddress]),
+		...groups
+			.filter(({ parent }) => parent === index)
+			.flatMap(({ programs }) => programs.filter(nonNullish))
+			.filter((program) => !known.has(program))
+	]);
+
+	return [...new Set(reached)];
+};
+
+/**
+ * Programs, each once, in the order a simulated run first reaches them: the message's own
+ * instructions in turn, each followed by the calls made inside it. The review names the programs it
+ * cannot read and the listed ones paying others in one notice, so both go by this order, whichever
+ * check found them.
+ */
+export const sortSolProgramsByRun = ({
+	programs,
+	instructions,
+	innerInstructions
+}: {
+	programs: SolAddress[];
+	instructions: CompilableTransactionMessage['instructions'];
+	innerInstructions: SolanaSimulatedInnerInstructions;
+}): SolAddress[] => {
+	const run: SolAddress[] = [...instructions].flatMap(({ programAddress }, index) => [
+		programAddress,
+		...[...innerInstructions]
+			.filter(({ index: parent }) => Number(parent) === index)
+			.flatMap(({ instructions: nested }) =>
+				[...nested].map((instruction) =>
+					'programId' in instruction ? instruction.programId : undefined
+				)
+			)
+			.filter(nonNullish)
+	]);
+
+	// Neither check names a program the run does not reach; one would go last.
+	const reachedAt = (program: SolAddress): number => {
+		const at = run.indexOf(program);
+
+		return at === -1 ? run.length : at;
+	};
+
+	return [...new Set(programs)].sort((first, second) => reachedAt(first) - reachedAt(second));
+};
+
+// The programs whose accounts a run's lines already account for: what leaves a wallet does so by a
+// transfer the run states, and a token account is closed by an instruction that names where its
+// balance goes.
+const NON_APPLICATION_PROGRAMS: SolAddress[] = [
+	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS
+];
+
+/**
+ * The accounts an application's program held before a run and emptied in it.
+ *
+ * A program closing an account of its own moves the lamports itself, and no call in the run states
+ * it: only the account's state before and after says it happened. The System program and the token
+ * programs are left out. What leaves a wallet does so by a transfer the run states, and a token
+ * account is closed by an instruction that names where its balance goes.
+ *
+ * Emptied means no lamports after the run, or no account at all. An account the run did not report
+ * on says nothing, and is not counted as closed.
+ */
+export const findSolClosedAppAccounts = ({
+	addresses,
+	preAccounts,
+	postAccounts
+}: {
+	addresses: SolAddress[];
+	preAccounts: readonly SolanaParsedAccountInfo[];
+	postAccounts: readonly SolanaParsedAccountInfo[];
+}): SolClosedAccount[] =>
+	addresses.reduce<SolClosedAccount[]>((acc, account, index) => {
+		const pre = parseAccountState(preAccounts[index]);
+		const post = postAccounts[index];
+
+		if (isNullish(pre) || NON_APPLICATION_PROGRAMS.includes(pre.program) || pre.lamports === ZERO) {
+			return acc;
+		}
+
+		return isEmptiedAccount(post)
+			? [...acc, { account, program: pre.program, lamports: pre.lamports }]
+			: acc;
+	}, []);
+
+/**
+ * Whether an application's account that stays open lost lamports in a run.
+ *
+ * Its program can pay the wallet straight from it, which no line states, and that inflow could stand
+ * in for a close paid somewhere else. Only writable accounts can change, and the run reports every
+ * one of them, so each such account that ends with less is found. One that is topped up from
+ * elsewhere and then drained by as much ends as it started, which no end balance can tell from a
+ * genuine close next to a payment between two other accounts; in both, the wallet receives what the
+ * lines state.
+ */
+export const solOpenAppAccountsLostLamports = ({
+	addresses,
+	preAccounts,
+	postAccounts
+}: {
+	addresses: SolAddress[];
+	preAccounts: readonly SolanaParsedAccountInfo[];
+	postAccounts: readonly SolanaParsedAccountInfo[];
+}): boolean =>
+	addresses.some((_, index) => {
+		const pre = parseAccountState(preAccounts[index]);
+		const post = parseAccountState(postAccounts[index]);
+
+		return (
+			nonNullish(pre) &&
+			nonNullish(post) &&
+			!NON_APPLICATION_PROGRAMS.includes(pre.program) &&
+			post.lamports > ZERO &&
+			post.lamports < pre.lamports
+		);
+	});
+
+/**
+ * Whether every lamport the closed accounts held reached the wallet.
+ *
+ * Nothing states where a program sends what it closes, so the wallet's own change is the witness:
+ * once the lines that state what moved the wallet's SOL and the fee are taken out, what is left
+ * must be exactly what the closed accounts held. Anything else - a part paid elsewhere, a movement
+ * no line accounts for - and none of them is said to have come home.
+ */
+export const solClosedAccountsReachWallet = ({
+	closedAccounts,
+	walletChange,
+	statedChange,
+	fee
+}: {
+	closedAccounts: SolClosedAccount[];
+	// The wallet's lamports after the run, less those before it.
+	walletChange: bigint | undefined;
+	// What the lines say the transaction does to the wallet's SOL.
+	statedChange: bigint | undefined;
+	// What the run charged the wallet as the transaction's fee.
+	fee: bigint;
+}): boolean =>
+	closedAccounts.length > 0 &&
+	nonNullish(walletChange) &&
+	nonNullish(statedChange) &&
+	walletChange ===
+		statedChange - fee + closedAccounts.reduce((acc, { lamports }) => acc + lamports, ZERO);

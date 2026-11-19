@@ -1,16 +1,27 @@
 import { USDC_DECIMALS, USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { ckSolDepositAddressesStore, ckSolMinterAddressStore } from '$icp/stores/cksol.store';
 import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+import { authStore } from '$lib/stores/auth.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
+import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+import { SolanaNetworks } from '$sol/types/network';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 import { deriveSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
 import en from '$tests/mocks/i18n.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
-import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
+import {
+	mockAtaAddress,
+	mockSolAddress,
+	mockSolAddress2,
+	mockSolAddress3
+} from '$tests/mocks/sol.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
@@ -97,6 +108,48 @@ describe('SolTransaction', () => {
 
 		expect(labelOf('send')).toBe(en.swap.text.swap);
 		expect(labelOf('receive')).toBe(en.swap.text.swap);
+	});
+
+	describe('a swap into a token the wallet does not list', () => {
+		beforeEach(() => {
+			splTokenMetadataStore.set({
+				network: SolanaNetworks.mainnet,
+				metadata: { 'unlisted-mint': { name: 'Ping', symbol: 'PING' } }
+			});
+		});
+
+		afterEach(() => {
+			splTokenMetadataStore.reset();
+		});
+
+		// The symbol a mint carries is its creator's choice, so the row keeps it inside the
+		// placeholder, where it cannot read as a token the wallet lists.
+		it('should name the mint by the placeholder carrying its own symbol', () => {
+			const { getByText } = render(SolTransaction, {
+				props: {
+					transaction: {
+						...mockTrx,
+						summary: {
+							kind: 'swap' as const,
+							spent: { delta: -100n },
+							received: { delta: 7n, tokenAddress: 'unlisted-mint', decimals: 6 }
+						}
+					},
+					token: SOLANA_TOKEN
+				}
+			});
+
+			expect(
+				getByText(
+					replacePlaceholders(en.transaction.text.summary_swap, {
+						$spent_symbol: SOLANA_TOKEN.symbol,
+						$received_symbol: replacePlaceholders(en.transaction.text.unknown_token_named, {
+							$symbol: 'PING'
+						})
+					})
+				)
+			).toBeInTheDocument();
+		});
 	});
 
 	// Stefan: an unreduced transaction should read like a swap does, with the programs it ran
@@ -249,7 +302,11 @@ describe('SolTransaction', () => {
 			{ kind: 'unwrap', account: mockAtaAddress, returned: 502_039_280n }
 		];
 
-		const summary = deriveSolTransactionSummary({ netChanges, instructions });
+		const summary = deriveSolTransactionSummary({
+			netChanges,
+			instructions,
+			userAddress: mockSolAddress
+		});
 
 		// Shaped as the service shapes a swap: typed by its outgoing half, valued by the SOL spent.
 		const derived: SolTransactionUi = {
@@ -338,5 +395,101 @@ describe('SolTransaction', () => {
 		const amount = container.querySelector('div.leading-5>span.justify-end');
 
 		expect(amount?.textContent).not.toContain('-2');
+	});
+
+	describe('the Solana legs of a ckSOL conversion', () => {
+		const minterAddress = mockSolAddress2;
+		const depositAddress = mockSolAddress3;
+
+		const payout = (counterparty: string) => ({
+			...mockTrx,
+			type: 'receive' as const,
+			summary: {
+				kind: 'receive' as const,
+				received: { delta: 1_000_000n },
+				counterparty
+			}
+		});
+
+		beforeEach(() => {
+			authStore.setForTesting(mockIdentity);
+
+			ckSolMinterAddressStore.set(minterAddress);
+			ckSolDepositAddressesStore.set({ [mockIdentity.getPrincipal().toText()]: depositAddress });
+		});
+
+		afterEach(() => {
+			ckSolMinterAddressStore.set(undefined);
+			ckSolDepositAddressesStore.set({});
+		});
+
+		it('should name SOL from the minter a conversion from ckSOL', () => {
+			const { getByText } = render(SolTransaction, {
+				props: { transaction: payout(minterAddress), token: SOLANA_TOKEN }
+			});
+
+			expect(getByText('Converted from ckSOL')).toBeInTheDocument();
+		});
+
+		it('should name SOL sent to the deposit address a conversion to ckSOL', () => {
+			const { getByText } = render(SolTransaction, {
+				props: {
+					transaction: {
+						...mockTrx,
+						type: 'send',
+						summary: {
+							kind: 'send' as const,
+							spent: { delta: -20_000_000n },
+							counterparty: depositAddress
+						}
+					},
+					token: SOLANA_TOKEN
+				}
+			});
+
+			expect(getByText('Converted to ckSOL')).toBeInTheDocument();
+		});
+
+		it('should keep SOL from any other address a receive', () => {
+			const { getByText } = render(SolTransaction, {
+				props: { transaction: payout(mockSolAddress), token: SOLANA_TOKEN }
+			});
+
+			expect(getByText(en.receive.text.receive)).toBeInTheDocument();
+		});
+
+		describe('the icon', () => {
+			const iconLabelOf = (transaction: SolTransactionUi): string | null => {
+				const { container } = render(SolTransaction, {
+					props: { transaction, token: SOLANA_TOKEN, iconType: 'token' }
+				});
+
+				return (
+					container
+						.querySelector('[data-tid="icon-badge"]')
+						?.closest('[aria-label]')
+						?.getAttribute('aria-label') ?? null
+				);
+			};
+
+			it('should draw both legs with the swap icon', () => {
+				expect(iconLabelOf(payout(minterAddress))).toBe(en.convert.text.convert_button);
+				expect(
+					iconLabelOf({
+						...mockTrx,
+						type: 'send',
+						summary: {
+							kind: 'send' as const,
+							spent: { delta: -20_000_000n },
+							counterparty: depositAddress
+						}
+					})
+				).toBe(en.convert.text.convert_button);
+			});
+
+			it('should keep the arrow of SOL from any other address', () => {
+				expect(iconLabelOf(payout(mockSolAddress))).toBe('receive');
+			});
+		});
 	});
 });

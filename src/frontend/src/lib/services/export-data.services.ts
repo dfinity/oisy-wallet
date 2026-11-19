@@ -1,4 +1,7 @@
 import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
+import { isIcrcTokenSupportIcrc3 } from '$icp/services/icrc.services';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
+import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { Currency } from '$lib/enums/currency';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES, PLAUSIBLE_EVENT_VALUES } from '$lib/enums/plausible';
@@ -24,6 +27,7 @@ import {
 } from '$lib/utils/export-data.utils';
 import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
 import { loadOlderSolTransactions } from '$sol/services/sol-history-pagers.services';
+import { solUnreadableTransactionsStore } from '$sol/stores/sol-unreadable-transactions.store';
 import type { Identity } from '@dfinity/agent';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
@@ -189,6 +193,53 @@ const loadAllTransactionsHistory = async ({
 	if (pageFailures.length > 0) {
 		throw pageFailures[0];
 	}
+
+	// The Solana pager resolves a page that holds a transaction it cannot load and leaves that
+	// transaction out, so the CSV would stop short of it just as after a failed page. The wallet worker
+	// or an earlier scroll may have met it before this walk did, so the store is read, not this walk's
+	// pages.
+	const unreadable = get(solUnreadableTransactionsStore);
+
+	const tokensMissingTransactions = tokens.filter(({ id }) => (unreadable[id] ?? []).length > 0);
+
+	if (tokensMissingTransactions.length > 0) {
+		throw new Error(
+			`Transactions left out of the history of ${tokensMissingTransactions.length} token(s)`
+		);
+	}
+};
+
+// The ICRC ledgers whose rows have no mapper link and that serve ICRC-3 blocks. A ledger that
+// cannot be asked counts as not serving them: its rows keep an empty explorer cell.
+const loadIcrc3LedgerCanisterIds = async ({
+	identity,
+	transactions
+}: {
+	identity: Identity;
+	transactions: AllTransactionUiWithCmp[];
+}): Promise<Set<LedgerCanisterIdText>> => {
+	const ledgerCanisterIds = new Set(
+		transactions.flatMap((entry) =>
+			entry.component === 'ic' &&
+			isNullish(entry.transaction.txExplorerUrl) &&
+			isTokenIcrc(entry.token)
+				? [entry.token.ledgerCanisterId]
+				: []
+		)
+	);
+
+	const results = await Promise.allSettled(
+		[...ledgerCanisterIds].map(async (ledgerCanisterId) => ({
+			ledgerCanisterId,
+			supported: await isIcrcTokenSupportIcrc3({ identity, ledgerCanisterId })
+		}))
+	);
+
+	return new Set(
+		results.flatMap((result) =>
+			result.status === 'fulfilled' && result.value.supported ? [result.value.ledgerCanisterId] : []
+		)
+	);
 };
 
 export type TransactionCsvVariant = 'basic' | 'extended';
@@ -241,6 +292,11 @@ export const exportTransactionsCsv = async ({
 		await loadAllTransactionsHistory({ identity, tokens });
 
 		const transactions = buildTransactions();
+		// Only the Extended variant has an explorer column.
+		const icrc3LedgerCanisterIds =
+			variant === 'extended'
+				? await loadIcrc3LedgerCanisterIds({ identity, transactions })
+				: new Set<LedgerCanisterIdText>();
 		const exportedAt = new Date();
 		// Both transactions variants share the same sort (newest first, tie-breaks on token
 		// and direction) so opening Basic and Extended side by side shows the rows lined
@@ -251,6 +307,7 @@ export const exportTransactionsCsv = async ({
 				userAddresses,
 				nativeSymbolByNetworkId,
 				contacts,
+				icrc3LedgerCanisterIds,
 				exportedAt
 			})
 		);

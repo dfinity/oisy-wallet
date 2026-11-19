@@ -15,10 +15,6 @@ vi.mock('$btc/services/btc-pending-sent-transactions.services', () => ({
 	loadBtcPendingSentTransactions: vi.fn().mockResolvedValue(undefined)
 }));
 
-vi.mock('$btc/utils/btc-address.services', () => ({
-	getBtcSourceAddress: vi.fn().mockReturnValue('test-btc-address')
-}));
-
 vi.mock('$icp/utils/btc.utils', () => ({
 	getBtcWalletBalance: vi.fn().mockReturnValue({ confirmed: 1000n, total: 1000n }),
 	mapTokenIdToNetworkId: vi.fn().mockReturnValue('test-network-id')
@@ -150,6 +146,22 @@ describe('btc-listener', () => {
 			syncWallet({ data: mockPostMessage({ transactions: [], certified: true }), tokenId });
 
 			expect(get(btcTransactionsStore)?.[tokenId]).toBe(before);
+		});
+
+		it('should record an empty history when a wallet without transactions first syncs', () => {
+			btcTransactionsStore.clear(tokenId);
+
+			syncWallet({ data: mockPostMessage({ transactions: [] }), tokenId });
+
+			expect(get(btcTransactionsStore)?.[tokenId]).toEqual([]);
+		});
+
+		it('should record an empty history when the first sync after an error has no transactions', () => {
+			btcTransactionsStore.reset(tokenId);
+
+			syncWallet({ data: mockPostMessage({ transactions: [], certified: true }), tokenId });
+
+			expect(get(btcTransactionsStore)?.[tokenId]).toEqual([]);
 		});
 	});
 

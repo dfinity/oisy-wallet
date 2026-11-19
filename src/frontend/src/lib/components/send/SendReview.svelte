@@ -25,9 +25,11 @@
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
 		isNetworkIdICP,
-		isNetworkIdSolana
+		isNetworkIdSolana,
+		isNetworkIdXrp
 	} from '$lib/utils/network.utils';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
+	import { xrpKnownDestinations } from '$xrp/derived/xrp-transactions.derived';
 
 	interface BaseProps {
 		destination?: string;
@@ -80,7 +82,9 @@
 					? $btcKnownDestinations
 					: isNetworkIdSolana(networkId)
 						? $solKnownDestinations
-						: undefined
+						: isNetworkIdXrp(networkId)
+							? $xrpKnownDestinations
+							: undefined
 	);
 
 	// Minting is the minter sending out: a first-time counterparty is the norm there, and the

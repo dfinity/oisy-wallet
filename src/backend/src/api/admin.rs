@@ -12,7 +12,7 @@ use crate::{
     state::{read_config, read_state},
     status,
     types::StoredPrincipal,
-    utils::guards::caller_is_allowed,
+    utils::guards::{called_as_query, caller_is_allowed},
 };
 
 /// Gets the canister configuration.
@@ -23,7 +23,7 @@ pub fn config() -> Config {
 }
 
 /// Processes external HTTP requests.
-#[query]
+#[query(guard = "called_as_query")]
 #[must_use]
 pub fn http_request(request: HttpRequest) -> HttpResponse {
     let HttpRequest { url, .. } = request;
@@ -45,7 +45,7 @@ pub fn http_request(request: HttpRequest) -> HttpResponse {
 }
 
 /// API method to get cycle balance and burn rate.
-#[update]
+#[update(guard = "caller_is_allowed")]
 pub async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
     std_canister_status::get_canister_status_v2().await
 }

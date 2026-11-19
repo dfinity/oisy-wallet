@@ -6,7 +6,11 @@
 	import LiquidiumProviderFee from '$lib/components/liquidium/supply/LiquidiumProviderFee.svelte';
 	import StakeForm from '$lib/components/stake/StakeForm.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import type { LiquidiumRepayPreview } from '$lib/services/liquidium-repay.services';
+	import { ZERO } from '$lib/constants/app.constants';
+	import {
+		liquidiumPendingCoversDebt,
+		type LiquidiumRepayPreview
+	} from '$lib/services/liquidium-repay.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { LiquidiumReserve } from '$lib/types/liquidium';
@@ -19,8 +23,16 @@
 		reserve: LiquidiumReserve;
 		preview: LiquidiumRepayPreview;
 		amount: OptionAmount;
-		// Full outstanding debt (base units) — caps the "Max" shortcut.
+		// Outstanding debt net of pending repays (base units) — caps the "Max" shortcut.
 		maxRepay?: bigint;
+		// The debt request failed, so there is no cap: surfaces a retry message (stays disabled).
+		maxRepayUnavailable?: boolean;
+		// What the balance can still repay (base units) when it holds transfers not yet out of it.
+		// Caps the "Max" shortcut alongside `maxRepay`; unlike it, not an error above it, which is
+		// the rail's balance check.
+		maxSpendable?: bigint;
+		// Net amount of this pool's repays still settling.
+		pendingRepay?: bigint;
 		// Network (gas/UTXO) fee, for the Max shortcut + disabled gate.
 		totalFee?: bigint;
 		// Provider fee (base units); shown as a row and reserved from Max.
@@ -43,6 +55,9 @@
 		preview,
 		amount = $bindable(),
 		maxRepay,
+		maxRepayUnavailable = false,
+		maxSpendable,
+		pendingRepay = ZERO,
 		totalFee,
 		inflowFee,
 		inflowFeeUnavailable = false,
@@ -59,6 +74,16 @@
 
 	// Both fees must be resolved before the form can submit.
 	let feeMissing = $derived(isNullish(totalFee) || isNullish(inflowFee));
+	// So must the cap: without it nothing stops a repay above the debt, pending repays included.
+	let maxRepayMissing = $derived(isNullish(maxRepay));
+
+	let pendingCoversDebt = $derived(liquidiumPendingCoversDebt({ pendingRepay, maxRepay, reserve }));
+
+	let maxAmount = $derived(
+		nonNullish(maxRepay) && nonNullish(maxSpendable) && maxSpendable < maxRepay
+			? maxSpendable
+			: maxRepay
+	);
 
 	// Repaying more than the outstanding debt is rejected before the rail-specific affordability
 	// check, so the user sees the relevant cap (mirrors Borrow's "exceeds power" / Withdraw's
@@ -89,9 +114,9 @@
 
 <StakeForm
 	autofocus={isDesktop()}
-	disabled={feeMissing || inflowFeeUnavailable}
+	disabled={feeMissing || maxRepayMissing || inflowFeeUnavailable || pendingCoversDebt}
 	isSelectable={nonNullish(onSelectToken)}
-	maxAmount={maxRepay}
+	{maxAmount}
 	onClick={onSelectToken}
 	{onClose}
 	onCustomErrorValidate={validateAmount}
@@ -102,11 +127,23 @@
 	bind:error={amountError}
 >
 	{#snippet content()}
-		<LiquidiumRepayDebtRows {amount} {reserve} />
+		<LiquidiumRepayDebtRows {amount} {pendingRepay} {reserve} />
 
 		<LiquidiumProviderFee {inflowFee} />
 
 		{@render feeDisplay()}
+
+		{#if pendingCoversDebt}
+			<MessageBox level="info" styleClass="mt-3">
+				{$i18n.liquidium.text.repay_pending_covers_debt}
+			</MessageBox>
+		{/if}
+
+		{#if maxRepayUnavailable}
+			<MessageBox level="warning" styleClass="mt-3">
+				{$i18n.liquidium.text.repay_debt_unavailable}
+			</MessageBox>
+		{/if}
 
 		{#if inflowFeeUnavailable}
 			<MessageBox level="warning" styleClass="mt-3">

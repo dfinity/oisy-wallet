@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, setContext } from 'svelte';
+	import { getContext, setContext, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
@@ -17,8 +17,8 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
-	import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
-	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import { isSendOutcomeUnknown, toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
+	import { findEthersError, isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { capSendAmountToFee, shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -37,6 +37,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -160,6 +161,21 @@
 		})
 	);
 
+	// The gas an ERC-20 transfer needs depends on what is sent and to whom: a first transfer to an
+	// address pays for the storage of its balance. Without this, the fee is re-estimated only on a
+	// mined block or a return to the foreground, and the review step freezes whatever sample is in
+	// hand, possibly one taken for a previous amount or recipient.
+	$effect(() => {
+		[amount, destination];
+
+		untrack(() => evaluateFee());
+	});
+
+	// Set from an amount or recipient change until the fee estimated for the new values has landed.
+	// "Next" waits for it: the review step freezes the fee in hand, and a sample taken for the previous
+	// values can fall short of the gas this transfer needs.
+	let feeOutdated = $state(false);
+
 	/**
 	 * Send
 	 */
@@ -237,6 +253,8 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
+			const ethersErr = findEthersError(err);
+
 			trackEvent({
 				name: TRACK_NFT_SEND,
 				metadata: {
@@ -246,13 +264,19 @@
 					address: nft.collection.address,
 					tokenId: String(nft.id),
 					network: sourceNetwork.name,
-					error: (err as Error).message
+					// Only the code: ethers' message holds the signed transaction and the node's answer.
+					...(nonNullish(ethersErr) && { error: ethersErr.code })
 				}
 			});
 
-			toastEthereumTransactionError({ err, fallbackMsg: $i18n.send.error.unexpected });
+			toastEthereumTransactionError({
+				err,
+				fallbackMsg: $i18n.send.error.unexpected,
+				token: $sendToken,
+				context: PLAUSIBLE_EVENT_CONTEXTS.SEND
+			});
 
-			onBack();
+			leaveFailedSend(err);
 		}
 	};
 
@@ -407,14 +431,30 @@
 				metadata: sendTrackingEventMetadata
 			});
 
-			toastEthereumTransactionError({ err, fallbackMsg: $i18n.send.error.unexpected });
+			toastEthereumTransactionError({
+				err,
+				fallbackMsg: $i18n.send.error.unexpected,
+				token: $sendToken,
+				context: PLAUSIBLE_EVENT_CONTEXTS.SEND
+			});
 
-			onBack();
+			leaveFailedSend(err);
 		}
 	};
 
 	const close = () => onClose();
 	const back = () => onSendBack();
+
+	// A transaction that may have reached the network is not offered again from the review: sent
+	// again, it would be signed with the next nonce, and both could execute.
+	const leaveFailedSend = (err: unknown) => {
+		if (isSendOutcomeUnknown(err)) {
+			close();
+			return;
+		}
+
+		onBack();
+	};
 </script>
 
 <EthFeeContext
@@ -429,6 +469,7 @@
 	sendToken={$sendToken}
 	sendTokenId={$sendTokenId}
 	{sourceNetwork}
+	bind:outdated={feeOutdated}
 >
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsSend.REVIEW}
@@ -447,6 +488,7 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSend.SEND}
 			<EthSendForm
+				{feeOutdated}
 				{nativeEthereumToken}
 				{onBack}
 				{onNext}

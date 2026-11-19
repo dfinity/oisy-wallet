@@ -52,9 +52,6 @@ jobs:
       - name: Check if backend files changed
         id: changes
         uses: ./.github/actions/check-backend-changes
-      - name: Install yq
-        if: steps.changes.outputs.backend == 'true'
-        run: sudo snap install yq
       - name: Dependencies are defined in the workspace
         if: steps.changes.outputs.backend == 'true'
         run: ./scripts/lint.cargo-workspace-dependencies.sh

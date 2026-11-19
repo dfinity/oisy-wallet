@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { slide } from 'svelte/transition';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		icon?: Snippet;

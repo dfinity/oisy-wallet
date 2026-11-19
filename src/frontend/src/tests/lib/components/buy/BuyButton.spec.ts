@@ -52,7 +52,7 @@ describe('BuyButton', () => {
 			context: mockContext(mockContextStore)
 		});
 
-		expect(getByRole('button', { name: en.buy.text.buy })).toBeInTheDocument();
+		expect(getByRole('button', { name: en.buy.text.buy_sell })).toBeInTheDocument();
 	});
 
 	it('should be enabled if not busy and inflow actions enabled', async () => {

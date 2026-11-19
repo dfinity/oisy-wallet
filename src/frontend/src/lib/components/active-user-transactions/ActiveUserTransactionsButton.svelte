@@ -10,8 +10,10 @@
 		activeUserTransactionsList,
 		activeUserTransactionsPending
 	} from '$lib/derived/active-user-transactions.derived';
-	import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { markActiveUserTransactionsSeen } from '$lib/services/active-user-transactions.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { consoleError } from '$lib/utils/console.utils';
 
 	interface Props {
 		visible?: boolean;
@@ -25,7 +27,7 @@
 	// Mark seen on close, not open, so dots stay visible while the user reads.
 	$effect(() => {
 		if (wasVisible && !visible) {
-			activeUserTransactionsStore.markAllSeen();
+			markActiveUserTransactionsSeen({ identity: $authIdentity }).catch(consoleError);
 		}
 		wasVisible = visible;
 	});

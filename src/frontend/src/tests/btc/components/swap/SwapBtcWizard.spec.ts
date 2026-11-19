@@ -3,6 +3,7 @@ import type * as btcSendServices from '$btc/services/btc-send.services';
 import { validateBtcSend } from '$btc/services/btc-send.services';
 import { UTXOS_FEE_CONTEXT_KEY, initUtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import {
+	BtcBroadcastUnconfirmedError,
 	BtcPrepareSendError,
 	BtcSendValidationError,
 	BtcValidationError
@@ -10,6 +11,7 @@ import {
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { btcAddressStore } from '$icp/stores/btc.store';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import {
 	TRACK_COUNT_SWAP_ERROR,
 	TRACK_COUNT_SWAP_SUBMITTED,
@@ -17,27 +19,38 @@ import {
 } from '$lib/constants/analytics.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import * as agreementsDerived from '$lib/derived/user-provider-agreements.derived';
+import { PLAUSIBLE_EVENT_SWAP_ERROR_TYPES } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
 import { fetchChainFusionBtcSwap } from '$lib/services/chain-fusion-swap.services';
+import { fetchLifiBtcSwap } from '$lib/services/lifi-btc-swap.services';
 import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 import { fetchNearIntentsBtcSwap } from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
-import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import { SWAP_CONTEXT_KEY, type SwapError } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
+import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
-import { readable, writable } from 'svelte/store';
+import { get, readable, writable } from 'svelte/store';
 
 vi.mock('$lib/services/chain-fusion-swap.services', () => ({
-	fetchChainFusionBtcSwap: vi.fn()
+	fetchChainFusionBtcSwap: vi.fn(),
+	// The provider registries import these; the Smart Swap provider pool loads them with SwapProvider.
+	fetchChainFusionBtcQuote: vi.fn(),
+	fetchChainFusionEvmQuote: vi.fn(),
+	fetchChainFusionIcpQuote: vi.fn(),
+	fetchChainFusionSolQuote: vi.fn()
 }));
 
 // `handleBtcValidationError` is left real: the point of these cases is that the mapping
@@ -50,6 +63,13 @@ vi.mock('$btc/services/btc-send.services', async (importOriginal) => ({
 vi.mock('$lib/services/swap.services', () => ({
 	enableSwapDestinationToken: vi.fn(),
 	fetchNearIntentsBtcSwap: vi.fn()
+}));
+
+vi.mock('$lib/services/lifi-btc-swap.services', () => ({
+	fetchLifiBtcSwap: vi.fn(),
+	// The BTC provider registry imports these.
+	fetchLifiBtcSwapQuote: vi.fn(),
+	lifiBtcSupportedTokens: vi.fn()
 }));
 
 vi.mock('$lib/services/provider-agreements.services', () => ({
@@ -90,6 +110,28 @@ describe('SwapBtcWizard', () => {
 		type: undefined
 	};
 
+	// Its own selection, priced for LI.FI's deposit, memo and fee: not the loader's.
+	const lifiSelection = {
+		utxosFee: { ...mockUtxosFee, feeSatoshis: 2_130n },
+		outputVSizes: [43, 29, 31]
+	};
+
+	const lifiOffer: SwapMappedResult = {
+		provider: SwapProvider.LIFI,
+		receiveAmount: 1_000_000n,
+		receiveOutMinimum: 990_000n,
+		swapDetails: mockLifiBtcLayerswapQuote,
+		request: {
+			fromChain: 20000000000001,
+			toChain: 1,
+			fromToken: 'bitcoin',
+			toToken: '0x0000000000000000000000000000000000000000',
+			fromAddress: mockBtcAddress,
+			fromAmount: '1000000'
+		},
+		btcSelection: lifiSelection
+	};
+
 	const baseProps = {
 		swapAmount: '0.01',
 		receiveAmount: 0.01,
@@ -108,10 +150,14 @@ describe('SwapBtcWizard', () => {
 	const createContext = (offer: SwapMappedResult = chainFusionOffer) => {
 		const context = new Map();
 
+		const failedSwapError = writable<SwapError | undefined>(undefined);
+
 		context.set(SWAP_CONTEXT_KEY, {
 			sourceToken: readable({ ...BTC_MAINNET_TOKEN, enabled: true }),
 			destinationToken: readable(ckBtcToken),
-			failedSwapError: writable(undefined),
+			failedSwapError,
+			amountSetToMax: writable(false),
+			lifiMaxFee: writable(undefined),
 			sourceTokenExchangeRate: readable(60_000),
 			sourceTokenBalance: readable(100_000_000n),
 			destinationTokenBalance: readable(undefined),
@@ -136,7 +182,7 @@ describe('SwapBtcWizard', () => {
 		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee, amountForFee: 0.01 });
 		context.set(UTXOS_FEE_CONTEXT_KEY, { store: utxosFeeStore });
 
-		return { context, utxosFeeStore };
+		return { context, utxosFeeStore, failedSwapError };
 	};
 
 	beforeEach(() => {
@@ -374,6 +420,65 @@ describe('SwapBtcWizard', () => {
 			);
 		});
 
+		// The inputs stay reserved and the row stays for the poller, so another swap would spend
+		// other coins and could deposit twice.
+		it('closes, not offering the form again, when the deposit may have gone out', async () => {
+			const err = new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') });
+			vi.mocked(fetchChainFusionBtcSwap).mockRejectedValue(err);
+
+			const { getByText, onBack, onClose, onStartTriggerAmount } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(toasts.toastsError).toHaveBeenCalledWith({
+				msg: { text: en.send.error.btc_transaction_unconfirmed },
+				err
+			});
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+			expect(onStartTriggerAmount).not.toHaveBeenCalled();
+		});
+
+		it('goes back with the locked-funds message when the inputs are already reserved', async () => {
+			const err = new BtcBroadcastTransactionCanisterError(
+				{ UtxosAlreadyReserved: null },
+				'reserved'
+			);
+			vi.mocked(fetchChainFusionBtcSwap).mockRejectedValue(err);
+
+			const { getByText, onBack, onClose } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(toasts.toastsError).toHaveBeenCalledWith({
+				msg: { text: en.send.assertion.btc_utxo_locked },
+				err
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		it('goes back, saying how long to wait, without the English detail after a rate limit', async () => {
+			const err = new BtcBroadcastTransactionCanisterError(
+				{ RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } },
+				'Rate limit exceeded. Maximum of 5 calls allowed every 60 seconds.'
+			);
+			vi.mocked(fetchChainFusionBtcSwap).mockRejectedValue(err);
+
+			const { getByText, onBack, onClose } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(toasts.toastsError).toHaveBeenCalledWith({
+				msg: { text: en.send.error.btc_send_rate_limited.replace('$duration', '1 minute') }
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
 		it('refuses to send when the minter deposit address is unknown', async () => {
 			btcAddressStore.reset(ckBtcToken.id);
 
@@ -492,6 +597,7 @@ describe('SwapBtcWizard', () => {
 			expect(fetchNearIntentsBtcSwap).toHaveBeenCalledWith(
 				expect.objectContaining({
 					swapAmount: '0.01',
+					slippageValue: '0.5',
 					userAddress: mockBtcAddress,
 					network: 'mainnet',
 					utxosFee: mockUtxosFee,
@@ -571,6 +677,197 @@ describe('SwapBtcWizard', () => {
 			);
 			expect(analytics.trackEvent).toHaveBeenCalledWith(
 				expect.objectContaining({ name: TRACK_COUNT_SWAP_ERROR })
+			);
+		});
+	});
+
+	describe('LI.FI execution', () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+			vi.mocked(validateBtcSend).mockResolvedValue(undefined);
+			vi.mocked(fetchLifiBtcSwap).mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		const renderExecution = (offer: SwapMappedResult = lifiOffer) => {
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+
+			const { context, failedSwapError } = createContext(offer);
+
+			const result = render(SwapBtcWizard, {
+				props: {
+					...baseProps,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack
+				},
+				context
+			});
+
+			return { ...result, onClose, onBack, failedSwapError };
+		};
+
+		const confirm = async (getByText: (text: string) => HTMLElement) => {
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+		};
+
+		it("sends through LI.FI with the offer's own selection, not the loader's", async () => {
+			const { getByText } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(fetchLifiBtcSwap).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					swapAmount: '0.01',
+					userAddress: mockBtcAddress,
+					network: 'mainnet',
+					offer: lifiOffer,
+					utxosFee: lifiSelection.utxosFee,
+					destinationToken: ckBtcToken
+				})
+			);
+			expect(fetchChainFusionBtcSwap).not.toHaveBeenCalled();
+			expect(fetchNearIntentsBtcSwap).not.toHaveBeenCalled();
+		});
+
+		// Its execution checks the selection against the layout of the quote it re-requests, which the
+		// one-output check here would refuse; and LI.FI has no terms gate, as from EVM and Solana.
+		it('leaves the selection check to its execution and asks no agreement', async () => {
+			const { getByText } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(validateBtcSend).not.toHaveBeenCalled();
+			expect(acceptProviderAgreement).not.toHaveBeenCalled();
+		});
+
+		it('refuses to send an offer without its own selection', async () => {
+			const { btcSelection: _, ...withoutSelection } = lifiOffer as Extract<
+				SwapMappedResult,
+				{ provider: SwapProvider.LIFI }
+			>;
+
+			const { getByText } = renderExecution(withoutSelection);
+
+			await confirm(getByText);
+
+			expect(fetchLifiBtcSwap).not.toHaveBeenCalled();
+			expect(toasts.toastsError).toHaveBeenCalledWith({
+				msg: { text: en.swap.error.unexpected_missing_data }
+			});
+		});
+
+		it('closes after the deposit and tracks its submission', async () => {
+			const { getByText, onClose, onBack } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+			expect(analytics.trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: TRACK_COUNT_SWAP_SUBMITTED,
+					metadata: expect.objectContaining({ dApp: SwapProvider.LIFI })
+				})
+			);
+		});
+
+		// Its execution checks the selection itself, after the wizard's one-output check is skipped.
+		it('names the reason, and comes back to the form, when its execution refuses the selection', async () => {
+			vi.mocked(fetchLifiBtcSwap).mockRejectedValue(
+				new BtcValidationError(BtcSendValidationError.UtxoLocked)
+			);
+
+			const { getByText, onBack, onClose } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.assertion.btc_utxo_locked }
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		// The re-quote at confirm guarantees less than the minimum reviewed: nothing is signed, and the
+		// review says to raise the max slippage, as from EVM and Solana.
+		it.each([
+			'Slippage exceeded. LI.FI now guarantees 980000, below the 990000 displayed.',
+			'Slippage exceeded. LI.FI no longer has a route for the swap.'
+		])('says to raise the max slippage, and comes back, on "%s"', async (message) => {
+			vi.mocked(fetchLifiBtcSwap).mockRejectedValue(new Error(message));
+
+			const { getByText, onBack, onClose, failedSwapError } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(get(failedSwapError)).toEqual({
+				message: replacePlaceholders(replaceOisyPlaceholders(en.swap.error.slippage_exceeded), {
+					$maxSlippage: baseProps.slippageValue
+				}),
+				variant: 'info'
+			});
+			expect(toasts.toastsError).not.toHaveBeenCalled();
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		it('clears an earlier slippage message when the swap is confirmed again', async () => {
+			const { getByText, failedSwapError } = renderExecution();
+
+			failedSwapError.set({ message: 'earlier', variant: 'info' });
+
+			await confirm(getByText);
+
+			expect(get(failedSwapError)).toBeUndefined();
+		});
+
+		// LI.FI's error text can carry the request URL, and with it the user's addresses.
+		it("reports a failure as an allow-listed category, never LI.FI's text", async () => {
+			vi.mocked(fetchLifiBtcSwap).mockRejectedValue(
+				new Error(`GET https://li.quest/v1/quote?fromAddress=${mockBtcAddress} failed`)
+			);
+
+			const { getByText } = renderExecution();
+
+			await confirm(getByText);
+
+			const errorEvent = vi
+				.mocked(analytics.trackEvent)
+				.mock.calls.find(([{ name }]) => name === TRACK_COUNT_SWAP_ERROR);
+
+			assertNonNullish(errorEvent);
+
+			const [{ metadata }] = errorEvent;
+
+			expect(metadata).toEqual(
+				expect.objectContaining({
+					dApp: SwapProvider.LIFI,
+					result_error_type: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.UNKNOWN
+				})
+			);
+			expect(metadata).not.toHaveProperty('error');
+			expect(JSON.stringify(metadata)).not.toContain(mockBtcAddress);
+		});
+
+		it('closes, not offering the form again, when the deposit may have gone out', async () => {
+			vi.mocked(fetchLifiBtcSwap).mockRejectedValue(
+				new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') })
+			);
+
+			const { getByText, onClose, onBack } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.send.error.btc_transaction_unconfirmed } })
 			);
 		});
 	});

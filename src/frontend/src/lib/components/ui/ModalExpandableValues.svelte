@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import Collapsible from '$lib/components/ui/Collapsible.svelte';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		listHeader: Snippet;

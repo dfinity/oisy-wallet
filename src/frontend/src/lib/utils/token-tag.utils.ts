@@ -1,14 +1,23 @@
+import type { Languages } from '$lib/enums/languages';
 import { TokenTagType, type TokenCategoryTagValue } from '$lib/enums/token-tag';
 import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const getTokenCategoryTag = (
 	token: Pick<Token, 'tags'>
 ): TokenCategoryTagValue | undefined =>
 	token.tags.find((tag) => tag.type === TokenTagType.CATEGORY)?.value;
+
+// The asset types a list of tokens holds, each once.
+export const getTokensCategories = (tokens: Pick<Token, 'tags'>[]): TokenCategoryTagValue[] =>
+	tokens.reduce<TokenCategoryTagValue[]>((acc, token) => {
+		const category = getTokenCategoryTag(token);
+
+		return nonNullish(category) && !acc.includes(category) ? [...acc, category] : acc;
+	}, []);
 
 const matchesCategory = ({
 	token,
@@ -48,4 +57,23 @@ export const filterTokensUiByCategory = ({
 	}
 
 	return tokens.filter((token) => matchesCategory({ token, category }));
+};
+
+// Most asset-type labels read inside a sentence once lowercased ("There are no
+// stablecoins…"). A label that does not ("compute") carries its own in-sentence
+// form, which is used as translated: lowercasing it would break languages that
+// capitalise nouns.
+export const getTokenCategorySentenceLabel = ({
+	category,
+	i18n,
+	language
+}: {
+	category: TokenCategoryTagValue;
+	i18n: I18n;
+	language: Languages;
+}): string => {
+	const inSentence: Partial<Record<TokenCategoryTagValue, string>> =
+		i18n.token_tag.category_in_sentence;
+
+	return inSentence[category] ?? i18n.token_tag.category[category].toLocaleLowerCase(language);
 };

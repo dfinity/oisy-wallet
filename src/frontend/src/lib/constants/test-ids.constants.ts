@@ -50,7 +50,6 @@ export const TOKEN_GROUP = 'token-group';
 export const TOKEN_BALANCE = 'token-balance';
 export const TOKEN_SKELETON_TEXT = 'token-skeleton-text';
 
-export const NFT_CARD = 'nft-card';
 export const NFT_HIDDEN_BADGE = 'nft-hidden-badge';
 export const NFT_SPAM_BADGE = 'nft-hidden-badge';
 export const NFT_COLLECTION_ACTION_SPAM = 'nft-collection-action-spam';
@@ -121,6 +120,7 @@ export const BUY_TOKENS_MODAL_OPEN_BUTTON = 'buy-tokens-modal-open-button';
 
 export const SETTINGS_ADDRESS_LABEL = 'settings-address-label';
 export const SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON = 'settings-active-networks-edit-button';
+export const SETTINGS_EXPORT_DATA_TOOLS_BUTTON = 'settings-export-data-tools-button';
 
 export const SETTINGS_NETWORKS_MODAL = 'settings-networks-modal';
 export const SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX = 'settings-networks-modal-testnet-checkbox';
@@ -137,15 +137,49 @@ export const NAVIGATION_ITEM_BORROW = 'navigation-item-borrow';
 export const NAVIGATION_ITEM_EARN = 'navigation-item-earn';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_NOTES = 'navigation-item-notes';
+export const NAVIGATION_ITEM_HELP = 'navigation-item-help';
+
+export const HELP_SUPPORT_CARD = 'help-support-card';
+export const HELP_SUPPORT_LINK = 'help-support-link';
+export const HELP_NETWORK_EXPLORERS_CARD = 'help-network-explorers-card';
+export const HELP_NETWORK_EXPLORERS_LINK = 'help-network-explorers-link';
+export const HELP_EXPLORERS_CARD = 'help-explorers-card';
+export const HELP_EXPLORERS_GROUP = 'help-explorers-group';
+export const HELP_EXPLORERS_LINK = 'help-explorers-link';
+export const HELP_ICPSWAP_CARD = 'help-icpswap-card';
+export const HELP_ICPSWAP_TOKEN_A = 'help-icpswap-token-a';
+export const HELP_ICPSWAP_TOKEN_B = 'help-icpswap-token-b';
+export const HELP_ICPSWAP_LOADING = 'help-icpswap-loading';
+export const HELP_ICPSWAP_NO_TOKENS = 'help-icpswap-no-tokens';
+export const HELP_ICPSWAP_ERROR = 'help-icpswap-error';
+export const HELP_ICPSWAP_EMPTY = 'help-icpswap-empty';
+export const HELP_ICPSWAP_SCAN_BUTTON = 'help-icpswap-scan';
+export const HELP_ICPSWAP_SCAN_SUMMARY = 'help-icpswap-scan-summary';
+export const HELP_ICPSWAP_POOL_GROUP = 'help-icpswap-pool';
+export const HELP_ICPSWAP_RESULTS_SUMMARY = 'help-icpswap-results-summary';
+export const HELP_ICPSWAP_WITHDRAW_BUTTON = 'help-icpswap-withdraw';
+
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
+export const NAVIGATION_MORE_MENU_BUTTON = 'navigation-more-menu-button';
+export const NAVIGATION_MORE_MENU = 'navigation-more-menu';
+export const NAVIGATION_MORE_MENU_HELP = 'navigation-more-menu-help';
+export const NAVIGATION_MORE_MENU_DOCUMENTATION = 'navigation-more-menu-documentation';
+export const NAVIGATION_MORE_MENU_FAQ = 'navigation-more-menu-faq';
+export const NAVIGATION_MORE_MENU_SOURCE_CODE = 'navigation-more-menu-source-code';
+export const NAVIGATION_MORE_MENU_X = 'navigation-more-menu-x';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
+export const NAVIGATION_ITEM_TOOLS = 'navigation-item-tools';
+
+export const TOOLS_CANISTER_TOP_UP_BUTTON = 'tools-canister-top-up-button';
 
 export const NAVIGATION_GROUP_PORTFOLIO = 'navigation-group-portfolio';
 export const NAVIGATION_GROUP_FINANCE = 'navigation-group-finance';
 export const NAVIGATION_GROUP_MORE = 'navigation-group-more';
 
 export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
+export const SIDEBAR_NAVIGATION_MENU_SCROLL = 'sidebar-navigation-menu-scroll';
+export const SIDEBAR_NAVIGATION_MENU_BOTTOM = 'sidebar-navigation-menu-bottom';
 
 export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
 
@@ -171,6 +205,9 @@ export const TOKEN_MENU_BTC_BUTTON = 'token-menu-btc-button';
 export const TOKEN_MENU_SOL = 'token-menu-sol';
 export const TOKEN_MENU_SOL_BUTTON = 'token-menu-sol-button';
 export const TOKEN_MENU_SOL_EXPLORER_LINK = 'sol-explorer-link';
+export const TOKEN_MENU_XRP = 'token-menu-xrp';
+export const TOKEN_MENU_XRP_BUTTON = 'token-menu-xrp-button';
+export const TOKEN_MENU_XRP_EXPLORER_LINK = 'xrp-explorer-link';
 
 export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
@@ -199,11 +236,20 @@ export const TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-una
 
 export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
 export const SWAP_MINIMUM_AMOUNT_INFO = 'swap-minimum-amount-info';
+export const SWAP_DESTINATION_TOKEN_BALANCE = 'swap-destination-token-balance';
 export const SWAP_TOKENS_MODAL_OPEN_BUTTON = 'swap-tokens-modal-open-button';
 export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
 export const SWAP_MODAL_SELECT_PROVIDER_STEP = 'swap-modal-select-provider-step';
-
-export const MODAL_FILTER_NETWORKS = 'MODAL_FILTER_NETWORKS';
+export const SWAP_PROVIDER_ANIMATION = 'swap-provider-animation';
+export const SWAP_PROVIDER_STATUS = 'swap-provider-status';
+export const SWAP_PROVIDER_CELL = 'swap-provider-cell';
+export const SWAP_SELECTED_PROVIDER_DETAILS = 'swap-selected-provider-details';
+export const SWAP_FEE_ROW = 'swap-fee-row';
+export const SWAP_INSUFFICIENT_FEE_INFO = 'swap-insufficient-fee-info';
+export const SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE = 'swap-lifi-insufficient-funds-for-fee';
+export const SWAP_LIFI_UNVERIFIED_ROUTE = 'swap-lifi-unverified-route';
+export const SWAP_TWO_SWAPS_HINT = 'swap-two-swaps-hint';
+export const SWAP_TWO_SWAPS_HINT_BUTTON = 'swap-two-swaps-hint-button';
 
 export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
@@ -233,7 +279,6 @@ export const REWARDS_EARNINGS_CARD = 'reward-earnings-card';
 export const REWARDS_EARNINGS_ACTIVITY_BUTTON = 'reward-earnings-activity-button';
 export const REWARDS_NETWORK_MULTIPLIER_IMAGE = 'reward-network-multiplier-image';
 
-export const EARNING_CARD = 'earning-card';
 export const EARNING_CARD_SKELETON = 'earning-card-skeleton';
 export const EARNING_NO_POSITION_PLACEHOLDER = 'earning-no-position-placeholder';
 export const EARNING_GOTO_BUTTON = 'earning-goto-button';
@@ -241,9 +286,6 @@ export const EARNING_GOTO_BUTTON = 'earning-goto-button';
 export const WELCOME_MODAL_IMAGE_BANNER = 'welcome-modal-image-banner';
 export const WELCOME_MODAL_LEARN_MORE_ANCHOR = 'welcome-modal-learn-more-anchor';
 export const WELCOME_MODAL_SHARE_ANCHOR = 'welcome-modal-share-anchor';
-
-export const REFERRAL_STATE_MODAL_IMAGE_BANNER = 'referral-state-modal-image-banner';
-export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anchor';
 
 export const NO_TRANSACTIONS_PLACEHOLDER = 'no-transactions-placeholder';
 
@@ -257,6 +299,8 @@ export const TRANSACTIONS_FILTER_TOOLBAR = 'transactions-filter-toolbar';
 export const TRANSACTIONS_FILTER_TYPES_DROPDOWN = 'transactions-filter-types-dropdown';
 export const TRANSACTIONS_FILTER_TOKENS_DROPDOWN = 'transactions-filter-tokens-dropdown';
 export const TRANSACTIONS_FILTER_CONTACTS_DROPDOWN = 'transactions-filter-contacts-dropdown';
+export const TRANSACTIONS_FILTER_TYPE_LABEL = 'transactions-filter-type-label';
+export const TRANSACTIONS_FILTER_CONTACT_NAME = 'transactions-filter-contact-name';
 export const TRANSACTIONS_FILTER_CONTACTS_EMPTY_CTA = 'transactions-filter-contacts-empty-cta';
 export const TRANSACTIONS_FILTER_CLEAR_BUTTON = 'transactions-filter-clear-button';
 
@@ -264,13 +308,42 @@ export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 
+export const CYCLES_MINT_BUTTON = 'cycles-mint-button';
+export const CYCLES_MINT_FORM = 'cycles-mint-form';
+export const CYCLES_MINT_FORM_REVIEW_BUTTON = 'cycles-mint-form-review-button';
+export const CYCLES_MINT_REVIEW = 'cycles-mint-review';
+export const CYCLES_MINT_REVIEW_BACK_BUTTON = 'cycles-mint-review-back-button';
+export const CYCLES_MINT_REVIEW_MINT_BUTTON = 'cycles-mint-review-mint-button';
+export const CYCLES_MINT_RATE = 'cycles-mint-rate';
+export const CYCLES_TOP_UP_BUTTON = 'cycles-top-up-button';
+export const CYCLES_TOP_UP_TOKEN = 'cycles-top-up-token';
+export const CYCLES_TOP_UP_TOKEN_OPTION = 'cycles-top-up-token-option';
+export const CYCLES_TOP_UP_TOKEN_ENABLE_BUTTON = 'cycles-top-up-token-enable-button';
+export const CYCLES_TOP_UP_CANISTER = 'cycles-top-up-canister';
+export const CYCLES_TOP_UP_CANISTER_INPUT = 'cycles-top-up-canister-input';
+export const CYCLES_TOP_UP_CANISTER_NEXT_BUTTON = 'cycles-top-up-canister-next-button';
+export const CYCLES_TOP_UP_CANISTER_BACK_BUTTON = 'cycles-top-up-canister-back-button';
+export const CYCLES_TOP_UP_RECENT_CANISTER = 'cycles-top-up-recent-canister';
+export const CYCLES_TOP_UP_CONTACT = 'cycles-top-up-contact';
+export const CYCLES_TOP_UP_ICP_HINT = 'cycles-top-up-icp-hint';
+export const CYCLES_TOP_UP_AMOUNT = 'cycles-top-up-amount';
+export const CYCLES_TOP_UP_AMOUNT_NEXT_BUTTON = 'cycles-top-up-amount-next-button';
+export const CYCLES_TOP_UP_ESTIMATE = 'cycles-top-up-estimate';
+export const CYCLES_TOP_UP_RATE = 'cycles-top-up-rate';
+export const CYCLES_TOP_UP_REVIEW = 'cycles-top-up-review';
+export const CYCLES_TOP_UP_REVIEW_BACK_BUTTON = 'cycles-top-up-review-back-button';
+export const CYCLES_TOP_UP_REVIEW_TOP_UP_BUTTON = 'cycles-top-up-review-top-up-button';
+export const CYCLES_SENT_TO_CANISTER_WARNING = 'cycles-sent-to-canister-warning';
+export const CYCLES_SEND_OR_TOP_UP = 'cycles-send-or-top-up';
+export const CYCLES_SEND_OR_TOP_UP_SEND_BUTTON = 'cycles-send-or-top-up-send-button';
+export const CYCLES_SEND_OR_TOP_UP_TOP_UP_BUTTON = 'cycles-send-or-top-up-top-up-button';
+
 export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
 export const HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON = 'help-auth-new-identity-version-button';
 export const HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON = 'help-auth-user-identity-number-button';
 export const HELP_AUTH_IDENTITY_IMAGE_BANNER = 'help-auth-identity-image-banner';
 export const HELP_AUTH_BACK_BUTTON = 'help-auth-back-button';
 export const HELP_AUTH_DONE_BUTTON = 'help-auth-done-button';
-export const HELP_AUTH_LEARN_MORE_LINK = 'help-auth-learn-more-link';
 export const HELP_AUTH_SWITCH_TO_NEW_INTERNET_IDENTITY_LINK =
 	'help-auth-switch-to-new-internet-identity-link';
 export const HELP_AUTH_INTRODUCTION_LINK = 'help-auth-introduction-link';
@@ -288,21 +361,22 @@ export const HOW_TO_CONVERT_ETHEREUM_INFO = 'how-to-convert-ethereum-info';
 export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code';
 
 export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
+export const MODAL_TOKEN_LIST_NO_MATCH = 'modal-token-list-no-match';
+export const MODAL_TOKEN_LIST_CLEAR_FILTERS = 'modal-token-list-clear-filters';
 export const MODAL_TOKENS_LIST = 'modal-tokens-list';
+export const NETWORK_FILTER = 'network-filter';
+export const TOKEN_CATEGORY_FILTER = 'token-category-filter';
 
 export const ADDRESS_BOOK_MODAL = 'address-book-modal';
 export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';
-export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
 export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
 export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
-export const ADDRESS_BOOK_BACK_BUTTON = 'address-book-back-button';
 export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
 export const ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT = 'address-book-address-address-input';
 export const ADDRESS_BOOK_ADDRESS_ALIAS_INPUT = 'address-book-address-alisas-input';
 export const ADDRESS_BOOK_QR_CODE_SCAN = 'address-book-qr-code-scan';
 export const ADDRESS_BOOK_SEARCH_CONTACT_INPUT = 'address-book-search-contact-input';
 export const ADDRESS_EDIT_CANCEL_BUTTON = 'address-edit-cancel-button';
-export const ADDRESS_EDIT_SAVE_BUTTON = 'address-edit-save-button';
 export const ADDRESS_BOOK_FALLBACK_MESSAGE = 'address-book-fallback-message';
 
 export const NOTES_MODAL = 'notes-modal';
@@ -372,7 +446,6 @@ export const ETH_FEE_PRIORITY = 'eth-fee-priority';
 export const ETH_FEE_PRIORITY_OPTION = 'eth-fee-priority-option';
 export const ETH_FEE_PRIORITY_OPTION_AMOUNT = 'eth-fee-priority-option-amount';
 export const ETH_FEE_PRIORITY_TRIGGER = 'eth-fee-priority-trigger';
-export const SWAP_FEE_INFO = 'swap-fee-info';
 
 // Avatar
 export const AVATAR_IMAGE = 'avatar-image';
@@ -406,6 +479,8 @@ export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistant-console-button';
 export const AI_ASSISTANT_SEND_MESSAGE_BUTTON = 'ai-assistant-send-message-button';
 export const AI_ASSISTANT_SEND_TOKENS_BUTTON = 'ai-assistant-send-tokens-button';
 export const AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE = 'ai-assistant-send-tokens-success-message';
+export const AI_ASSISTANT_SEND_TOKENS_OUTCOME_UNKNOWN_MESSAGE =
+	'ai-assistant-send-tokens-outcome-unknown-message';
 
 // Agreements
 export const AGREEMENTS_WARNING_BANNER = 'agreements-warning-banner';
@@ -422,14 +497,12 @@ export const STAKE_REVIEW_FORM_BUTTON = 'stake-review-form-button';
 export const STAKE_FORM_REVIEW_BUTTON = 'stake-form-next-button';
 export const STAKE_PROVIDER_LOGO = 'stake-provider-logo';
 export const STAKE_PROVIDER_EXTERNAL_URL = 'stake-provider-external-url';
-export const STAKE_DISSOLVE_EVENTS_WITHDRAW_BUTTON = 'stake-dissolve-events-withdraw-button';
 
 // Trading
 export const TRADING_LIST_SKELETON = 'trading-list-skeleton';
 export const TRADING_GOTO_BUTTON = 'trading-goto-button';
 export const TRADING_DEPOSIT_FORM_REVIEW_BUTTON = 'trading-deposit-form-review-button';
 export const TRADING_DEPOSIT_REVIEW_CONFIRM_BUTTON = 'trading-deposit-review-confirm-button';
-export const TRADING_WITHDRAW_OPEN_BUTTON = 'trading-withdraw-open-button';
 export const TRADING_WITHDRAW_FORM_REVIEW_BUTTON = 'trading-withdraw-form-review-button';
 export const TRADING_WITHDRAW_REVIEW_BUTTON = 'trading-withdraw-review-button';
 export const TRADING_ORDER_DETAIL_CANCEL_BUTTON = 'trading-order-detail-cancel-button';

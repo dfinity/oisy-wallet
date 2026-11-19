@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
 	import AiAssistantChat from '$lib/components/ai-assistant/AiAssistantChat.svelte';
 	import AiAssistantResetButton from '$lib/components/ai-assistant/AiAssistantResetButton.svelte';
 	import IconAiAssistant from '$lib/components/icons/IconAiAssistant.svelte';
@@ -8,6 +7,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	let loading = $state(false);
 

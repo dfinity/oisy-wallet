@@ -3,7 +3,9 @@
 	import type { WalletConnectBtcDecodedPsbt } from '$btc/types/wallet-connect';
 	import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
+	import WalletConnectScamWarning from '$lib/components/wallet-connect/WalletConnectScamWarning.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatToken } from '$lib/utils/format.utils';
 
@@ -12,30 +14,57 @@
 		source: string;
 		decoded: WalletConnectBtcDecodedPsbt | undefined;
 		decodeError: boolean;
+		// WalletConnect's Verify API flags the requesting site as a scam: the review says so and
+		// offers Reject only.
+		flaggedAsScam?: boolean;
+		// The wallet's UTXO set the input values are checked against is still loading.
+		loading?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
 	}
 
-	let { application, source, decoded, decodeError, onApprove, onReject }: Props = $props();
+	let {
+		application,
+		source,
+		decoded,
+		decodeError,
+		flaggedAsScam = false,
+		loading = false,
+		onApprove,
+		onReject
+	}: Props = $props();
 
 	const formatBtc = (value: bigint): string =>
 		`${formatToken({ value, unitName: BTC_DECIMALS, displayDecimals: BTC_DECIMALS })} ${$i18n.wallet_connect.text.btc_symbol}`;
 </script>
 
 <ContentWithToolbar>
+	{#if flaggedAsScam}
+		<WalletConnectScamWarning />
+	{/if}
+
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.application}</p>
 	<p class="mb-4 font-normal">{application}</p>
 
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.signing_address}</p>
 	<p class="mb-4 font-normal"><output class="break-all">{source}</output></p>
 
-	{#if decodeError || isNullish(decoded)}
+	{#if loading}
+		<div class="mb-4" data-tid="btc-wallet-connect-sign-psbt-loading" role="status">
+			<LoaderSpinner inline size="small" />
+			<span class="sr-only">{$i18n.init.info.hold_loading}</span>
+		</div>
+	{:else if decodeError || isNullish(decoded)}
 		<p class="mb-4 font-normal text-error-primary">
 			{$i18n.wallet_connect.error.btc_psbt_decode}
 		</p>
 	{:else if decoded.ambiguous}
 		<p class="mb-4 font-normal text-error-primary">
 			{$i18n.wallet_connect.error.btc_psbt_input_ambiguous}
+		</p>
+	{:else if decoded.unverified}
+		<p class="mb-4 font-normal text-error-primary">
+			{$i18n.wallet_connect.error.btc_psbt_input_unverified}
 		</p>
 	{:else}
 		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.psbt_inputs}</p>
@@ -89,7 +118,13 @@
 
 	{#snippet toolbar()}
 		<WalletConnectActions
-			approve={!decodeError && nonNullish(decoded) && !decoded.ambiguous && !decoded.broadcast}
+			approve={!flaggedAsScam &&
+				!loading &&
+				!decodeError &&
+				nonNullish(decoded) &&
+				!decoded.ambiguous &&
+				!decoded.unverified &&
+				!decoded.broadcast}
 			{onApprove}
 			{onReject}
 		/>

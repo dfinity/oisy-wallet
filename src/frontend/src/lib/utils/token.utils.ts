@@ -7,7 +7,8 @@ import {
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import { SPL_SUGGESTED_TOKENS } from '$env/tokens/tokens.spl.env';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
-import type { IcCkToken } from '$icp/types/ic-token';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
+import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
@@ -22,7 +23,7 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
-import { formatToken } from '$lib/utils/format.utils';
+import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -309,3 +310,53 @@ export const filterEnabledToken = <T extends Token>(token: T): boolean =>
  */
 export const standardLabel = (standard: TokenStandard | undefined): string =>
 	nonNullish(standard) ? `${standard.code} ${standard.version ?? ''}`.trim().toLowerCase() : '';
+
+/**
+ * One display label per ledger, unambiguous within the given set.
+ *
+ * A custom ledger is free to claim any symbol, so a symbol alone cannot identify a ledger. Each
+ * token is labelled with its display symbol, and where a *different* ledger in the set shares
+ * that symbol, the label is suffixed with the shortened ledger id - the one field an impersonating
+ * token cannot copy. A symbol that spells out another token's suffixed label - `XYZ (qaa6y-...)`
+ * as literal text - is suffixed too, so a label can never be forged from symbol text: an
+ * unsuffixed label then matches no other symbol and no suffixed label, and suffixed labels differ
+ * by ledger id. A ledger listed twice (a default that is also an enabled custom token) is
+ * labelled once, from its first entry: the default, which carries the `oisySymbol` a custom
+ * duplicate lacks and which the rest of the app treats as authoritative.
+ *
+ * Callers that show a token in several places must build the labels once, over the whole set the
+ * user can encounter, and pass them down: computed per surface, a filtered list can lose the twin
+ * and label an impostor as though it were unique.
+ */
+export const buildIcTokenLabels = (tokens: IcToken[]): Map<LedgerCanisterIdText, string> => {
+	const uniqueTokens = [
+		...tokens
+			.reduce<Map<LedgerCanisterIdText, IcToken>>(
+				(acc, token) =>
+					acc.has(token.ledgerCanisterId) ? acc : acc.set(token.ledgerCanisterId, token),
+				new Map()
+			)
+			.values()
+	];
+
+	const ledgersBySymbol = uniqueTokens.reduce<Map<string, Set<LedgerCanisterIdText>>>(
+		(acc, token) => {
+			const symbol = getTokenDisplaySymbol(token);
+
+			return acc.set(symbol, (acc.get(symbol) ?? new Set()).add(token.ledgerCanisterId));
+		},
+		new Map()
+	);
+
+	const suffixedLabel = (token: IcToken): string =>
+		`${getTokenDisplaySymbol(token)} (${shortenWithMiddleEllipsis({ text: token.ledgerCanisterId })})`;
+
+	const suffixedLabels = new Set(uniqueTokens.map(suffixedLabel));
+
+	return uniqueTokens.reduce<Map<LedgerCanisterIdText, string>>((acc, token) => {
+		const symbol = getTokenDisplaySymbol(token);
+		const ambiguous = (ledgersBySymbol.get(symbol)?.size ?? 0) > 1 || suffixedLabels.has(symbol);
+
+		return acc.set(token.ledgerCanisterId, ambiguous ? suffixedLabel(token) : symbol);
+	}, new Map());
+};

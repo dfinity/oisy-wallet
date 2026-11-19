@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		hideInfo: boolean;
@@ -20,7 +20,7 @@
 		transition:slide={SLIDE_PARAMS}
 	>
 		<button
-			class="absolute top-2 right-2 text-tertiary"
+			class="hit-area absolute top-2 right-2 text-tertiary press-icon"
 			aria-label={$i18n.core.text.close}
 			onclick={onClick}><IconCloseThin /></button
 		>

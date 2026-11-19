@@ -9,6 +9,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 import type { Token as AppToken } from '$lib/types/token';
 import { VELORA_EXTERNAL_REF_KEYS, type VeloraExternalRefKey } from '$lib/types/velora-swap';
+import type { EvmSourceTxOutcome } from '$lib/utils/evm-source-tx.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
 import { nonNullish } from '@dfinity/utils';
 import { OrderHelpers, type DeltaAuction, type DeltaOrderStatus } from '@velora-dex/sdk';
@@ -183,54 +184,9 @@ export const veloraDeltaStatusError = (status: DeltaOrderStatus): string | undef
 	return undefined;
 };
 
-/**
- * What the source chain says about a Market swap transaction.
- *
- * `replaced` is a *candidate* verdict, not a conclusion: the receipt read and
- * the nonce read are not atomic, so a successful swap can momentarily look
- * replaced. The poller only terminalizes it after seeing it twice in a row.
- */
-export type VeloraMarketOutcome = 'succeeded' | 'reverted' | 'pending' | 'replaced' | 'unknown';
-
-/**
- * Reads a Market swap's outcome off the source chain.
- *
- * `getNonce` signs with the *pending* count, so the transaction owns nonce `N`,
- * while `confirmedNonce` is the sender's next unused *confirmed* nonce. A null
- * receipt with a confirmed count already past `N` means some other transaction
- * consumed slot `N` — a speed-up, a cancel, or a re-broadcast — so ours can
- * never mine.
- */
-export const toVeloraMarketOutcome = ({
-	receipt,
-	confirmedNonce,
-	txNonce
-}: {
-	receipt: { status: number | null } | null;
-	confirmedNonce?: number;
-	txNonce: number;
-}): VeloraMarketOutcome => {
-	if (nonNullish(receipt)) {
-		if (receipt.status === 1) {
-			return 'succeeded';
-		}
-
-		if (receipt.status === 0) {
-			return 'reverted';
-		}
-
-		return 'unknown';
-	}
-
-	if (nonNullish(confirmedNonce) && confirmedNonce > txNonce) {
-		return 'replaced';
-	}
-
-	return 'pending';
-};
-
+// A Market swap settles in its own source transaction, so the source chain's verdict is the swap's.
 export const veloraMarketOutcomeToStatus = (
-	outcome: VeloraMarketOutcome
+	outcome: EvmSourceTxOutcome
 ): ActiveUserTransactionStatus | undefined => {
 	switch (outcome) {
 		case 'succeeded':
@@ -245,7 +201,7 @@ export const veloraMarketOutcomeToStatus = (
 	}
 };
 
-export const veloraMarketOutcomeError = (outcome: VeloraMarketOutcome): string | undefined => {
+export const veloraMarketOutcomeError = (outcome: EvmSourceTxOutcome): string | undefined => {
 	if (outcome === 'reverted') {
 		return get(i18n).swap.error.failed_unexpectedly;
 	}

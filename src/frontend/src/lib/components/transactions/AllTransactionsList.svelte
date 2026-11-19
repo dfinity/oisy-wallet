@@ -7,6 +7,7 @@
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
+	import { cmcDepositAccountCanisterIds } from '$icp/derived/cycles-top-up.derived';
 	import { btcStatusesStore } from '$icp/stores/btc.store';
 	import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
@@ -123,7 +124,8 @@
 		applyTransactionsFilter({
 			transactions: microFilteredTransactions,
 			filter: $transactionsFilterStore,
-			contacts: $allContacts
+			contacts: $allContacts,
+			cmcDepositAccountCanisterIds: $cmcDepositAccountCanisterIds
 		})
 	);
 
@@ -177,9 +179,10 @@
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	<AllTransactionsLoader transactions={allTransactions}>
-		{#snippet children({ loadMore, exhausted })}
+		{#snippet children({ loadMore, exhausted, floor })}
 			<AllTransactionsScroll
 				{exhausted}
+				{floor}
 				onLoadMore={loadMore}
 				{sortedTransactions}
 				bind:transactionsToDisplay

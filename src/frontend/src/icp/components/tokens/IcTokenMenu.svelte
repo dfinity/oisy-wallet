@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { TOKEN_MENU_IC } from '$lib/constants/test-ids.constants';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	let explorerUrl = $derived(($pageToken as OptionIcCkToken)?.explorerUrl);
 

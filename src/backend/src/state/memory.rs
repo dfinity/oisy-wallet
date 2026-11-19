@@ -83,6 +83,9 @@ pub(crate) const TIP_SECRETS_KEY_MANAGER_ACCESS_MEMORY_ID: MemoryId = MemoryId::
 pub(crate) const TIP_SECRETS_KEY_MANAGER_SHARED_MEMORY_ID: MemoryId = MemoryId::new(25);
 pub(crate) const TIP_SECRETS_ENCRYPTED_MAPS_MEMORY_ID: MemoryId = MemoryId::new(26);
 
+// Per-user "seen up to" mark over the active user transactions, keyed by principal.
+pub(crate) const ACTIVE_USER_TRANSACTIONS_SEEN_MEMORY_ID: MemoryId = MemoryId::new(27);
+
 thread_local! {
     pub(crate) static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
         MemoryManager::init(DefaultMemoryImpl::default())

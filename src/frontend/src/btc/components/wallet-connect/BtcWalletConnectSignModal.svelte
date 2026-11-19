@@ -17,6 +17,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 
 	interface Props {
 		listener: OptionWalletConnectListener;
@@ -95,6 +96,7 @@
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<BtcWalletConnectSignReview
 				{application}
+				flaggedAsScam={!acceptedContext(request.verifyContext)}
 				{message}
 				{method}
 				onApprove={approve}
