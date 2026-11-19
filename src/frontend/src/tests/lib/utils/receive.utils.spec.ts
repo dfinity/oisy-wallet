@@ -18,7 +18,10 @@ import {
 	IC_CKBTC_LEDGER_CANISTER_ID,
 	IC_CKBTC_MINTER_CANISTER_ID
 } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
-import { IC_CKUSDC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
+import {
+	CKERC20_LEDGER_CANISTER_IDS,
+	IC_CKUSDC_LEDGER_CANISTER_ID
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
 import {
 	IC_CKETH_LEDGER_CANISTER_ID,
 	IC_CKETH_MINTER_CANISTER_ID
@@ -39,6 +42,7 @@ import {
 	getReceiveAddressTitle,
 	getReceiveAssetKey,
 	getReceiveAssets,
+	getReceiveConvertTarget,
 	getReceiveConvertTwinToken,
 	getReceiveNetworkAddressSource,
 	getReceiveRouteOptionTexts,
@@ -320,6 +324,124 @@ describe('receive.utils', () => {
 					enabledNetworkIds: [BASE_SEPOLIA_NETWORK_ID]
 				})
 			).toHaveLength(1);
+		});
+	});
+
+	describe('ck twin routes', () => {
+		const keysOf = (routes: ReceiveRoute[]) => routes.map(({ key }) => key);
+
+		it('should offer the ck twin of an asset last, on Internet Computer', () => {
+			const routes = getReceiveRoutes({
+				tokens: [USDC_TOKEN, BASE_USDC_TOKEN],
+				enabledNetworkIds,
+				preferredNetworkId: BASE_NETWORK_ID,
+				catalog: [ckEthToken, ckUsdcToken]
+			});
+
+			expect(keysOf(routes)).toEqual([
+				`direct:${getReceiveTokenKey(BASE_USDC_TOKEN)}`,
+				`direct:${getReceiveTokenKey(USDC_TOKEN)}`,
+				`direct:${getReceiveTokenKey(ckUsdcToken)}`
+			]);
+			expect(routes[2]).toEqual(
+				expect.objectContaining({
+					kind: 'direct',
+					sourceNetwork: ICP_NETWORK,
+					creditedToken: ckUsdcToken,
+					addressKind: 'icrc'
+				})
+			);
+		});
+
+		it('should offer ckETH under ETH', () => {
+			const routes = getReceiveRoutes({
+				tokens: [ETHEREUM_TOKEN],
+				enabledNetworkIds,
+				catalog: [ckEthToken, ckUsdcToken]
+			});
+
+			expect(keysOf(routes)).toEqual([
+				`direct:${getReceiveTokenKey(ETHEREUM_TOKEN)}`,
+				`direct:${getReceiveTokenKey(ckEthToken)}`
+			]);
+		});
+
+		it('should leave ckBTC to the Bitcoin deposit', () => {
+			const routes = getReceiveRoutes({
+				tokens: [BTC_MAINNET_TOKEN],
+				enabledNetworkIds,
+				catalog: [ckBtcToken]
+			});
+
+			expect(routes.map(({ kind }) => kind)).toEqual(['direct', 'ckbtc-deposit']);
+		});
+
+		it('should not offer a twin without Internet Computer enabled', () => {
+			const routes = getReceiveRoutes({
+				tokens: [USDC_TOKEN],
+				enabledNetworkIds: [ETHEREUM_NETWORK_ID],
+				catalog: [ckUsdcToken]
+			});
+
+			expect(keysOf(routes)).toEqual([`direct:${getReceiveTokenKey(USDC_TOKEN)}`]);
+		});
+
+		it('should flag the twin as an offer', () => {
+			const [, twin] = getReceiveRoutes({
+				tokens: [USDC_TOKEN],
+				enabledNetworkIds,
+				catalog: [ckUsdcToken]
+			});
+
+			expect(isReceiveConversionOffer({ route: twin, assetTokens: [USDC_TOKEN] })).toBeTruthy();
+		});
+
+		it('should name the twin row by its network and what it arrives as', () => {
+			const [, twin] = getReceiveRoutes({
+				tokens: [USDC_TOKEN],
+				enabledNetworkIds,
+				catalog: [ckUsdcToken]
+			});
+
+			expect(
+				getReceiveRouteOptionTexts({
+					route: twin,
+					assetTokens: [USDC_TOKEN],
+					withDepositOffer: false,
+					i18n: en
+				})
+			).toEqual({ title: ICP_NETWORK.name, description: 'As ckUSDC: fast and cheap' });
+		});
+	});
+
+	describe('getReceiveConvertTarget', () => {
+		const routeOf = (token: Token): ReceiveRoute =>
+			getReceiveRoutes({ tokens: [token], enabledNetworkIds })[0];
+
+		// A ledger Convert knows as ckERC20 in this environment.
+		const ckErc20Usdc: IcCkToken = {
+			...ckUsdcToken,
+			ledgerCanisterId: CKERC20_LEDGER_CANISTER_IDS[0]
+		};
+
+		const catalog = [ckEthToken, ckErc20Usdc];
+
+		it('should point a direct Ethereum transfer to the ck token it converts into', () => {
+			expect(
+				getReceiveConvertTarget({ route: routeOf(USDC_TOKEN), catalog, enabledNetworkIds })
+			).toEqual(ckErc20Usdc);
+			expect(
+				getReceiveConvertTarget({ route: routeOf(ETHEREUM_TOKEN), catalog, enabledNetworkIds })
+			).toEqual(ckEthToken);
+		});
+
+		it('should not point a token Convert does not support', () => {
+			expect(
+				getReceiveConvertTarget({ route: routeOf(BASE_USDC_TOKEN), catalog, enabledNetworkIds })
+			).toBeUndefined();
+			expect(
+				getReceiveConvertTarget({ route: routeOf(ckErc20Usdc), catalog, enabledNetworkIds })
+			).toBeUndefined();
 		});
 	});
 
@@ -629,7 +751,7 @@ describe('receive.utils', () => {
 				getReceiveRouteOptionTexts({
 					route: offer,
 					assetTokens: [BTC_MAINNET_TOKEN],
-					withOffer: true,
+					withDepositOffer: true,
 					confirmations,
 					i18n: en
 				});
@@ -646,7 +768,7 @@ describe('receive.utils', () => {
 				getReceiveRouteOptionTexts({
 					route: direct,
 					assetTokens: [BTC_MAINNET_TOKEN],
-					withOffer: true,
+					withDepositOffer: true,
 					i18n: en
 				})
 			).toEqual({ title: 'Native Bitcoin', description: 'Stays BTC on the Bitcoin network' });
@@ -659,7 +781,7 @@ describe('receive.utils', () => {
 				getReceiveRouteOptionTexts({
 					route: ethereum,
 					assetTokens: [USDC_TOKEN, BASE_USDC_TOKEN],
-					withOffer: false,
+					withDepositOffer: false,
 					i18n: en
 				})
 			).toEqual({ title: 'Ethereum' });
@@ -672,7 +794,7 @@ describe('receive.utils', () => {
 				getReceiveRouteOptionTexts({
 					route: deposit,
 					assetTokens: [ckBtcToken],
-					withOffer: false,
+					withDepositOffer: false,
 					confirmations: 4,
 					i18n: en
 				})

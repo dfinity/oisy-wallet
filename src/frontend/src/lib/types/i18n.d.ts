@@ -761,7 +761,9 @@ interface I18nReceive {
 			no_match: string;
 			title_direct: string;
 			title_as: string;
-			receive_token: string;
+			route_title: string;
+			ck_twin_benefit: string;
+			convert_hint: string;
 			principal_description: string;
 			account_id_description: string;
 		};

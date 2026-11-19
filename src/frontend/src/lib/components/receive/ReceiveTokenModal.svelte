@@ -45,6 +45,7 @@
 		getReceiveAddressKind,
 		getReceiveAddressTitle,
 		getReceiveAssets,
+		getReceiveConvertTarget,
 		getReceiveRoutes,
 		getReceiveTokenKey
 	} from '$lib/utils/receive.utils';
@@ -147,10 +148,10 @@
 
 	let tokenEnabled = $derived(nonNullish(route) && isTokenEnabled(route.creditedToken));
 
-	// The route step names the asset, "Receive BTC"; its rows name the choice, a network or ckBTC.
+	// The route step names the asset, "Networks for BTC"; its rows name the choice, a network or ckBTC.
 	let routeTitle = $derived(
 		nonNullish(asset)
-			? replacePlaceholders($i18n.receive.token.text.receive_token, {
+			? replacePlaceholders($i18n.receive.token.text.route_title, {
 					$token: getTokenDisplaySymbol(asset.token)
 				})
 			: undefined
@@ -454,6 +455,7 @@
 				{#key route.key}
 					<ReceiveRouteAddress
 						backToPreviousStep={!autoRoute || tokenStepVisited}
+						convertTarget={getReceiveConvertTarget({ route, catalog, enabledNetworkIds })}
 						onBack={back}
 						onChangeToken={changeToken}
 						onDone={close}

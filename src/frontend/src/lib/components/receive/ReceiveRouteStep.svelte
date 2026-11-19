@@ -47,13 +47,15 @@
 	const isOffer = (route: ReceiveRoute): boolean =>
 		isReceiveConversionOffer({ route, assetTokens });
 
-	let withOffer = $derived(routes.some(isOffer));
+	let withDepositOffer = $derived(
+		routes.some((route) => route.kind === 'ckbtc-deposit' && isOffer(route))
+	);
 
 	const optionTexts = (route: ReceiveRoute) =>
 		getReceiveRouteOptionTexts({
 			route,
 			assetTokens,
-			withOffer,
+			withDepositOffer,
 			confirmations: $ckBtcMinterInfoStore?.[route.creditedToken.id]?.data.min_confirmations,
 			i18n: $i18n
 		});

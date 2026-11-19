@@ -184,10 +184,27 @@ export const getCkBtcDepositSourceToken = ({
 };
 
 /**
+ * The ck tokens of the catalog that are the Internet Computer twin of a token, such as ckUSDC for
+ * USDC on Ethereum. ckBTC is left out: Bitcoin offers it as a deposit instead.
+ */
+const getCkTwinsOf = ({ token, catalog }: { token: Token; catalog: Token[] }): Token[] => {
+	const key = getReceiveTokenKey(token);
+
+	return catalog.filter(
+		(candidate) =>
+			isIcCkToken(candidate) &&
+			!isTokenCkBtcLedger(candidate) &&
+			nonNullish(candidate.twinToken) &&
+			getReceiveTokenKey(candidate.twinToken) === key
+	);
+};
+
+/**
  * The routes of an asset, on the enabled networks only: a direct transfer for each version, and a
  * Bitcoin deposit after ckBTC's direct route. Native BTC also offers that deposit after its own
  * route, when the catalog has the ckBTC it credits: receiving as ckBTC is a choice the user makes.
- * The preferred network's routes come first.
+ * The preferred network's routes come first. Last come the ck twins of the asset, such as ckUSDC
+ * under USDC, received directly on Internet Computer: OISY offers them as the faster, cheaper way.
  */
 export const getReceiveRoutes = ({
 	tokens,
@@ -253,8 +270,34 @@ export const getReceiveRoutes = ({
 		return acc;
 	}, []);
 
+	const twinRoutes = tokens
+		.flatMap((token) => getCkTwinsOf({ token, catalog }))
+		.reduce<ReceiveRoute[]>((acc, twin) => {
+			const addressKind = getReceiveAddressKind(twin);
+			const key = `direct:${getReceiveTokenKey(twin)}`;
+
+			if (
+				isNullish(addressKind) ||
+				!enabledNetworkIds.includes(twin.network.id) ||
+				acc.some((route) => route.key === key)
+			) {
+				return acc;
+			}
+
+			acc.push({
+				key,
+				kind: 'direct',
+				sourceToken: twin,
+				sourceNetwork: twin.network,
+				creditedToken: twin,
+				addressKind
+			});
+
+			return acc;
+		}, []);
+
 	if (isNullish(preferredNetworkId)) {
-		return routes;
+		return [...routes, ...twinRoutes];
 	}
 
 	const onPreferredNetwork = ({ sourceNetwork: { id } }: ReceiveRoute): boolean =>
@@ -262,16 +305,18 @@ export const getReceiveRoutes = ({
 
 	return [
 		...routes.filter((route) => onPreferredNetwork(route)),
-		...routes.filter((route) => !onPreferredNetwork(route))
+		...routes.filter((route) => !onPreferredNetwork(route)),
+		...twinRoutes
 	];
 };
 
 /**
- * A route that credits another asset than the one picked, such as BTC deposited as ckBTC: an
- * alternative way to receive it, rather than another network for the same asset.
+ * A route that credits another asset than the one picked, such as BTC deposited as ckBTC or ckUSDC
+ * offered under USDC: an alternative way to receive it, rather than another network for the same
+ * asset.
  */
 export const isReceiveConversionOffer = ({
-	route: { kind, creditedToken },
+	route: { creditedToken },
 	assetTokens
 }: {
 	route: ReceiveRoute;
@@ -279,9 +324,7 @@ export const isReceiveConversionOffer = ({
 }): boolean => {
 	const creditedKey = getReceiveTokenKey(creditedToken);
 
-	return (
-		kind === 'ckbtc-deposit' && !assetTokens.some((t) => getReceiveTokenKey(t) === creditedKey)
-	);
+	return !assetTokens.some((t) => getReceiveTokenKey(t) === creditedKey);
 };
 
 // The route a selection goes to without asking: only a single direct transfer.
@@ -321,6 +364,32 @@ export const getReceiveConvertTwinToken = ({
 	}
 
 	return twinToken;
+};
+
+/**
+ * The ck token a direct transfer can be converted into once it arrives, such as ckUSDC for USDC on
+ * Ethereum, when the catalog has it and Convert supports the pair on an enabled network.
+ */
+export const getReceiveConvertTarget = ({
+	route: { kind, sourceToken },
+	catalog,
+	enabledNetworkIds
+}: {
+	route: ReceiveRoute;
+	catalog: Token[];
+	enabledNetworkIds: NetworkId[];
+}): Token | undefined => {
+	if (kind !== 'direct') {
+		return;
+	}
+
+	const key = getReceiveTokenKey(sourceToken);
+
+	return catalog.find((candidate) => {
+		const twin = getReceiveConvertTwinToken({ token: candidate, enabledNetworkIds });
+
+		return nonNullish(twin) && getReceiveTokenKey(twin) === key;
+	});
 };
 
 export const RECEIVE_ADDRESS_LOADING_STATE: ReceiveAddressState = { status: 'loading' };
@@ -481,23 +550,24 @@ export const getReceiveAddressTexts = ({
 };
 
 /**
- * How a route reads in the route picker. The modal title already says "Receive BTC", so the rows name
- * a choice, never what the sender does. Next to an offer such as BTC credited as ckBTC the choice is
- * not one of network: the plain route reads "Native Bitcoin". Otherwise a row is its network, and
- * only a deposit says more: the wait for the Bitcoin confirmations, after which ckBTC is fast and
- * cheap to move.
+ * How a route reads in the route picker. The modal title already says "Networks for BTC", so the rows
+ * name a choice, never what the sender does. Next to a deposit offer such as BTC credited as ckBTC
+ * the choice is not one of network: the plain route reads "Native Bitcoin". Otherwise a row is its
+ * network, and says more only for a deposit, the wait for the Bitcoin confirmations after which
+ * ckBTC is fast and cheap to move, or for a ck twin offered under its asset, "As ckUSDC: fast and
+ * cheap".
  */
 export const getReceiveRouteOptionTexts = ({
 	route,
 	assetTokens,
-	withOffer,
+	withDepositOffer,
 	confirmations,
 	i18n
 }: {
 	route: ReceiveRoute;
 	assetTokens: Token[];
-	// The picker lists an offer among the routes.
-	withOffer: boolean;
+	// The picker lists a deposit offer among the routes, such as BTC credited as ckBTC.
+	withDepositOffer: boolean;
 	// The deposit confirmations the minter requires, once known.
 	confirmations?: number | bigint;
 	i18n: I18n;
@@ -509,15 +579,20 @@ export const getReceiveRouteOptionTexts = ({
 		: i18n.receive.ckbtc.text.benefit_generic;
 
 	if (isReceiveConversionOffer({ route, assetTokens })) {
-		return {
-			title: replacePlaceholders(i18n.receive.ckbtc.text.receive_as, {
-				$token: getTokenDisplaySymbol(creditedToken)
-			}),
-			description: depositBenefit
-		};
+		const credited = { $token: getTokenDisplaySymbol(creditedToken) };
+
+		return kind === 'ckbtc-deposit'
+			? {
+					title: replacePlaceholders(i18n.receive.ckbtc.text.receive_as, credited),
+					description: depositBenefit
+				}
+			: {
+					title: sourceNetwork.name,
+					description: replacePlaceholders(i18n.receive.token.text.ck_twin_benefit, credited)
+				};
 	}
 
-	if (withOffer) {
+	if (withDepositOffer) {
 		const network = { $network: sourceNetwork.name };
 
 		return {

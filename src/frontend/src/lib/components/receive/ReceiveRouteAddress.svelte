@@ -19,6 +19,7 @@
 		RECEIVE_ADDRESS_LOADING,
 		RECEIVE_ADDRESS_RETRY_BUTTON,
 		RECEIVE_CKBTC_DEPOSIT_WARNING,
+		RECEIVE_CONVERT_HINT,
 		RECEIVE_HOW_TO_CONVERT_BUTTON,
 		RECEIVE_ICP_FORMAT_ACCOUNT_ID,
 		RECEIVE_ICP_FORMAT_DESCRIPTION,
@@ -55,6 +56,8 @@
 		onDone: () => void;
 		onHowToConvert: (twinToken: Token) => void;
 		onViewActivity: () => void;
+		// The ck token this transfer can be converted into once it arrives, such as ckUSDC.
+		convertTarget?: Token;
 	}
 
 	let {
@@ -64,7 +67,8 @@
 		onChangeToken,
 		onDone,
 		onHowToConvert,
-		onViewActivity
+		onViewActivity,
+		convertTarget
 	}: Props = $props();
 
 	let { kind, addressKind, sourceToken, sourceNetwork, creditedToken } = $derived(route);
@@ -223,8 +227,15 @@
 						{:else if addressKind !== 'icp'}
 							<div class="mt-3 flex items-start gap-2 px-4 text-sm leading-5 text-tertiary">
 								<span class="flex h-5 shrink-0 items-center"><IconInfo /></span>
-								<span>
-									{sendInstruction}
+								<span class="flex flex-col gap-1">
+									<span>{sendInstruction}</span>
+									{#if nonNullish(convertTarget)}
+										<span data-tid={RECEIVE_CONVERT_HINT}>
+											{replacePlaceholders($i18n.receive.token.text.convert_hint, {
+												$ckToken: getTokenDisplaySymbol(convertTarget)
+											})}
+										</span>
+									{/if}
 								</span>
 							</div>
 						{/if}

@@ -34,6 +34,7 @@ import {
 	RECEIVE_CKBTC_DEPOSIT_WARNING,
 	RECEIVE_CKBTC_TERMS_RETRY_BUTTON,
 	RECEIVE_CKBTC_VIEW_ACTIVITY_BUTTON,
+	RECEIVE_CONVERT_HINT,
 	RECEIVE_ENABLE_TOKEN_BUTTON,
 	RECEIVE_HOW_TO_CONVERT_BUTTON,
 	RECEIVE_ICP_FORMAT_ACCOUNT_ID,
@@ -197,7 +198,9 @@ describe('ReceiveTokenModal', () => {
 		].map((el) => el.textContent?.trim());
 
 		expect(titles).toEqual([BASE_NETWORK.name, ETHEREUM_NETWORK.name]);
-		expect(container.querySelector('[data-tid="modal-title"]')).toHaveTextContent('Receive USDC');
+		expect(container.querySelector('[data-tid="modal-title"]')).toHaveTextContent(
+			'Networks for USDC'
+		);
 		expect(
 			container.querySelector(`[data-tid^="${RECEIVE_ROUTE_LIST_ITEM}"]`)
 		).not.toHaveTextContent('Send');
@@ -217,7 +220,9 @@ describe('ReceiveTokenModal', () => {
 			);
 		});
 
-		expect(container.querySelector('[data-tid="modal-title"]')).toHaveTextContent('Receive BTC');
+		expect(container.querySelector('[data-tid="modal-title"]')).toHaveTextContent(
+			'Networks for BTC'
+		);
 		expect(container).toHaveTextContent('Native Bitcoin');
 		expect(container).toHaveTextContent('Stays BTC on the Bitcoin network');
 		expect(container).toHaveTextContent(
@@ -690,5 +695,46 @@ describe('ReceiveTokenModal', () => {
 		await openRoute(ethereum);
 
 		expect(container).toHaveTextContent(get(i18n).receive.ethereum.text.metamask);
+	});
+
+	// After the MetaMask test: it needs the Ethereum address that test leaves loaded.
+	it('should offer ckETH under ETH and hint the conversion on the Ethereum address', async () => {
+		const ckEthToken = {
+			...ckBtcToken,
+			id: parseTokenId('ckETH'),
+			symbol: 'ckETH',
+			name: 'ckETH',
+			ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
+			minterCanisterId: IC_CKETH_MINTER_CANISTER_ID,
+			twinToken: ETHEREUM_TOKEN
+		} as IcCkToken & { enabled: boolean };
+
+		catalog.set([ICP_TOKEN, ETHEREUM_TOKEN, ckEthToken]);
+
+		const { container } = render(ReceiveTokenModal, { props: { initialToken: ETHEREUM_TOKEN } });
+
+		const [ethereum, twin] = getReceiveRoutes({
+			tokens: [ETHEREUM_TOKEN],
+			enabledNetworkIds: [ETHEREUM_NETWORK.id, ICP_NETWORK.id],
+			catalog: [ckEthToken]
+		}).map(({ key }) => key);
+
+		await waitFor(() => {
+			expect(
+				byTestId({ container, testId: `${RECEIVE_ROUTE_LIST_ITEM}-${twin}` })
+			).toHaveTextContent('As ckETH: fast and cheap');
+		});
+
+		expect(container.querySelector('[data-tid="modal-title"]')).toHaveTextContent(
+			'Networks for ETH'
+		);
+
+		byTestId({ container, testId: `${RECEIVE_ROUTE_LIST_ITEM}-${ethereum}` })?.click();
+
+		await waitFor(() => {
+			expect(byTestId({ container, testId: RECEIVE_CONVERT_HINT })).toHaveTextContent(
+				'Convert to ckETH after it arrives for fast, cheap transfers.'
+			);
+		});
 	});
 });
