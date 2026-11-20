@@ -1,13 +1,36 @@
+import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { BAUTOPILOT_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc4626/tokens.bautopilot_usdc.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
+import {
+	enabledHarvestAutopilotsUsdBalance,
+	harvestAutopilots
+} from '$eth/derived/harvest-autopilots.derived';
+import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	allEarningPositionsUsd,
 	allEarningYearlyAmountUsd,
 	earningData,
+	earningTopRates,
+	earningUninvestedUsd,
 	highestApyEarning,
 	highestApyEarningData,
 	highestEarningPotentialUsd
 } from '$lib/derived/earning.derived';
-import { get } from 'svelte/store';
+import {
+	liquidiumAssetNetworkIcons,
+	liquidiumAssetNetworkNames
+} from '$lib/derived/liquidium.derived';
+import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
+import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+import { liquidiumStore } from '$lib/stores/liquidium.store';
+import type { LiquidiumMarket, LiquidiumPortfolio } from '$lib/types/liquidium';
+import type { TokenUi } from '$lib/types/token-ui';
+import type { Vault } from '$lib/types/vaults';
+import { get, type Readable } from 'svelte/store';
+
+const mockGoto = vi.fn();
+vi.mock('$app/navigation', () => ({ goto: (...args: unknown[]) => mockGoto(...args) }));
 
 describe('earning.derived', () => {
 	beforeEach(() => {
@@ -287,6 +310,171 @@ describe('earning.derived', () => {
 			});
 
 			expect(get(allEarningYearlyAmountUsd)).toBe(120);
+		});
+	});
+});
+
+describe('earning top rates', () => {
+	const mockStore = <T>({ store, value }: { store: Readable<T>; value: T }) =>
+		vi.spyOn(store, 'subscribe').mockImplementation((fn) => {
+			fn(value);
+			return () => {};
+		});
+
+	const usdtMarket = (chain: string): LiquidiumMarket => ({
+		poolId: 'pool-usdt',
+		asset: 'USDT',
+		chain,
+		supplyApy: 6.47,
+		borrowApy: 9,
+		frozen: false,
+		available: true
+	});
+
+	const btcMarket: LiquidiumMarket = {
+		poolId: 'pool-btc',
+		asset: 'BTC',
+		chain: 'BTC',
+		supplyApy: 1,
+		borrowApy: 3,
+		frozen: false,
+		available: true
+	};
+
+	const vault = (apy: string | undefined): Vault => ({
+		token: { ...BAUTOPILOT_USDC_TOKEN, enabled: true } as TokenUi<Erc4626CustomToken>,
+		apy
+	});
+
+	beforeEach(() => {
+		vi.restoreAllMocks();
+		mockGoto.mockClear();
+		liquidiumStore.reset();
+
+		mockStore({ store: enabledMainnetFungibleTokensUsdBalance, value: 1_000 });
+		mockStore({ store: enabledHarvestAutopilotsUsdBalance, value: 200 });
+		mockStore({ store: harvestAutopilots, value: [] });
+	});
+
+	describe('earningUninvestedUsd', () => {
+		it('takes the Autopilot vault tokens off the wallet total', () => {
+			expect(get(earningUninvestedUsd)).toBe(800);
+		});
+
+		it('never goes below 0', () => {
+			mockStore({ store: enabledHarvestAutopilotsUsdBalance, value: 2_000 });
+
+			expect(get(earningUninvestedUsd)).toBe(0);
+		});
+	});
+
+	describe('earningTopRates', () => {
+		it('lists one entry per Liquidium pool, with the networks of all its rails', () => {
+			liquidiumStore.set({
+				markets: [usdtMarket('ETH'), usdtMarket('ICP')],
+				portfolio: null,
+				assetPrices: {}
+			});
+
+			expect(get(earningTopRates)).toEqual([
+				{
+					id: 'liquidium-pool-usdt',
+					providerId: 'liquidium',
+					token: USDT_TOKEN,
+					symbol: 'USDT',
+					networkIcons: get(liquidiumAssetNetworkIcons).USDT,
+					networkNames: get(liquidiumAssetNetworkNames).USDT,
+					apy: 6.47,
+					earningPotentialUsd: (800 * 6.47) / 100,
+					action: expect.any(Function)
+				}
+			]);
+		});
+
+		it('lists Autopilot vaults by their underlying asset and network', () => {
+			mockStore({ store: harvestAutopilots, value: [vault('5.75')] });
+
+			expect(get(earningTopRates)).toEqual([
+				{
+					id: `harvest-autopilot-${BAUTOPILOT_USDC_TOKEN.address}`,
+					providerId: 'harvest-autopilot',
+					token: expect.objectContaining({ address: BAUTOPILOT_USDC_TOKEN.address }),
+					symbol: 'USDC',
+					networkIcons: [BAUTOPILOT_USDC_TOKEN.network.icon],
+					networkNames: [BAUTOPILOT_USDC_TOKEN.network.name],
+					apy: 5.75,
+					earningPotentialUsd: (800 * 5.75) / 100,
+					action: expect.any(Function)
+				}
+			]);
+		});
+
+		it('keeps only rates at or above the threshold, best rate first', () => {
+			liquidiumStore.set({
+				markets: [btcMarket, usdtMarket('ETH')],
+				portfolio: null,
+				assetPrices: {}
+			});
+			mockStore({ store: harvestAutopilots, value: [vault('5.75'), vault(undefined)] });
+
+			expect(get(earningTopRates).map(({ symbol, apy }) => ({ symbol, apy }))).toEqual([
+				{ symbol: 'USDT', apy: 6.47 },
+				{ symbol: 'USDC', apy: 5.75 }
+			]);
+		});
+
+		it('leaves out a pool the user borrows from, since it cannot be supplied', () => {
+			const portfolio: LiquidiumPortfolio = {
+				reserves: [
+					{
+						poolId: 'pool-usdt',
+						asset: 'USDT',
+						chain: 'ETH',
+						supplyApy: 6.47,
+						borrowApy: 9,
+						deposited: ZERO,
+						depositedDecimals: 6,
+						borrowed: 1_000_000n,
+						borrowedDecimals: 6,
+						suppliedUsd: 0,
+						borrowedUsd: 1
+					}
+				],
+				totalSuppliedUsd: 0,
+				totalBorrowedUsd: 1,
+				netValueUsd: -1,
+				availableBorrowsUsd: 0,
+				weightedLiquidationThresholdBps: 8000,
+				healthFactorPercent: 100
+			};
+
+			liquidiumStore.set({ markets: [usdtMarket('ETH')], portfolio, assetPrices: {} });
+
+			expect(get(earningTopRates)).toEqual([]);
+		});
+
+		it('opens the Liquidium supply link with where the user started it', async () => {
+			liquidiumStore.set({ markets: [usdtMarket('ETH')], portfolio: null, assetPrices: {} });
+
+			const [topRate] = get(earningTopRates);
+
+			await topRate.action(PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN);
+
+			expect(mockGoto).toHaveBeenCalledExactlyOnceWith(
+				'/providers/liquidium/?supply=USDT&source=earn'
+			);
+		});
+
+		it('opens the Autopilot vault page', async () => {
+			mockStore({ store: harvestAutopilots, value: [vault('5.75')] });
+
+			const [topRate] = get(earningTopRates);
+
+			await topRate.action(PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN);
+
+			expect(mockGoto).toHaveBeenCalledExactlyOnceWith(
+				`/earn/autopilot/?vault=${BAUTOPILOT_USDC_TOKEN.address}`
+			);
 		});
 	});
 });

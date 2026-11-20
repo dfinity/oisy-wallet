@@ -1175,6 +1175,22 @@ When a row reaches a terminal state it refreshes the wallet and reports into the
 
 ---
 
+## Earn
+
+### Top rates
+
+A top rate is an earning opportunity with an APY of at least 5%. Each Liquidium pool the user can supply counts once, with all the networks it can be supplied from, because they share one rate; a pool the user borrows from is left out, since it cannot be supplied. Each Autopilot vault counts on its own network. The best rate comes first.
+
+Each top rate shows what the user's balance outside any earning position would earn in a year at that rate. That balance is the same for every top rate, so they differ only by rate: the wallet total less the Autopilot vault tokens the wallet counts. A Liquidium supply has already left the wallet, so nothing is taken off for it.
+
+### Liquidium supply link
+
+A link to the Liquidium page can name an asset to supply, such as `/providers/liquidium/?supply=USDT`. Once Liquidium's markets have loaded, the page opens its supply dialog on that asset, on the network where the user holds the most of it. When they hold none of it, the dialog opens on the token picker, showing the asset's networks. An asset the user cannot supply opens the dialog without a token. The page then removes the link from the address, so going back or reloading does not open the dialog again.
+
+The link also says where it was followed from (`&source=earn`), and the supply's analytics record that place. A supply started on the Liquidium page itself records the Liquidium page.
+
+---
+
 ## Trade (OISY Trade)
 
 ### Price warnings on a limit order

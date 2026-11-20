@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Asset, Chain } from '@liquidium/client';
-	import { setContext } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumSupplyBtcWizard from '$lib/components/liquidium/supply/LiquidiumSupplyBtcWizard.svelte';
 	import LiquidiumSupplyEthWizard from '$lib/components/liquidium/supply/LiquidiumSupplyEthWizard.svelte';
@@ -13,6 +13,7 @@
 	import { liquidiumSupplyWizardSteps } from '$lib/config/lend-borrow.config';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 	import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
 	import { WizardStepsLiquidiumSupply } from '$lib/enums/wizard-steps';
 	import { estimateLiquidiumInflowFee } from '$lib/services/liquidium-supply.services';
@@ -32,9 +33,17 @@
 
 	interface Props {
 		market?: LiquidiumMarket;
+		// Without a market, opens the dialog on the picker showing this asset's networks.
+		asset?: string;
+		// Where the user started the supply, for the analytics.
+		sourceLocation?: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
 	}
 
-	let { market }: Props = $props();
+	let {
+		market,
+		asset,
+		sourceLocation = PLAUSIBLE_EVENT_SOURCE_LOCATIONS.LIQUIDIUM
+	}: Props = $props();
 
 	// Seeded from the initial prop only; later switches happen through the picker.
 	// svelte-ignore state_referenced_locally
@@ -128,6 +137,13 @@
 	};
 
 	const close = () => closeModal(reset);
+
+	onMount(() => {
+		if (nonNullish(asset) && isNullish(market)) {
+			tokensListContext.setFilterQuery(asset);
+			goToStep(WizardStepsLiquidiumSupply.TOKENS_LIST);
+		}
+	});
 </script>
 
 <TokenActionContext {token}>
@@ -162,6 +178,7 @@
 				onClose={close}
 				onNext={modal.next}
 				onSelectToken={enterTokensList}
+				{sourceLocation}
 				bind:amount
 				bind:supplyProgressStep
 			/>
@@ -175,6 +192,7 @@
 				onClose={close}
 				onNext={modal.next}
 				onSelectToken={enterTokensList}
+				{sourceLocation}
 				bind:amount
 				bind:supplyProgressStep
 			/>
@@ -188,6 +206,7 @@
 				onClose={close}
 				onNext={modal.next}
 				onSelectToken={enterTokensList}
+				{sourceLocation}
 				bind:amount
 				bind:supplyProgressStep
 			/>

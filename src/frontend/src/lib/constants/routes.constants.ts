@@ -32,6 +32,9 @@ export const COLLECTION_PARAM = 'collection';
 export const NFT_PARAM = 'collectible';
 export const URI_PARAM = 'uri';
 export const VAULT_PARAM = 'vault';
+// Liquidium page link: the asset to open the supply dialog on, and where the link was followed from.
+export const SUPPLY_PARAM = 'supply';
+export const SOURCE_PARAM = 'source';
 
 export const PARAM_MSG = 'msg';
 export const PARAM_LEVEL = 'level';

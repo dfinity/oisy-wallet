@@ -3,6 +3,7 @@ import type { EthAddress } from '$eth/types/address';
 import * as liquidiumApi from '$lib/api/liquidium.api';
 import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
+import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import * as analyticsServices from '$lib/services/analytics.services';
 import { executeLiquidiumSupply } from '$lib/services/liquidium-supply.services';
@@ -74,6 +75,35 @@ describe('liquidium-supply.services', () => {
 			lending: { supply }
 		} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
 		submit.mockResolvedValue({ success: true, txid: '0xhash' });
+	});
+
+	it('records where the user started the supply in the submitted event', async () => {
+		supply.mockResolvedValue(buildFlow(nativeTarget));
+		broadcast.mockResolvedValue('0xhash');
+
+		await executeLiquidiumSupply({
+			identity: mockIdentity,
+			ethAddress,
+			poolId,
+			chain: 'BTC',
+			asset: 'BTC',
+			amount: 100_000_000n,
+			inflowFee: 50n,
+			displayAmount: '1',
+			sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN,
+			broadcast
+		});
+
+		expect(analyticsServices.trackEvent).toHaveBeenCalledWith({
+			name: TRACK_COUNT_LIQUIDIUM_SUBMITTED,
+			metadata: {
+				dApp: 'liquidium',
+				action: 'supply',
+				token: 'BTC',
+				tokenAmount: '1',
+				source_location: 'earn'
+			}
+		});
 	});
 
 	it('broadcasts on the native rail, submits the txid and registers the transaction', async () => {

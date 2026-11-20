@@ -2,6 +2,7 @@ import { isDefinitiveBtcBroadcastRefusal } from '$btc/utils/btc-send.utils';
 import type { EthAddress } from '$eth/types/address';
 import { liquidiumClient } from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
+import type { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
 import {
 	createActiveUserTransaction,
@@ -76,6 +77,7 @@ export const executeLiquidiumSupply = async ({
 	amount,
 	inflowFee,
 	displayAmount,
+	sourceLocation,
 	progressStep,
 	broadcast,
 	progress
@@ -88,6 +90,8 @@ export const executeLiquidiumSupply = async ({
 	amount: bigint;
 	inflowFee: bigint;
 	displayAmount: string;
+	// Where the user started the supply, for the analytics.
+	sourceLocation?: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
 	progressStep?: string;
 	broadcast: LiquidiumSupplyBroadcast;
 	progress?: (step: ProgressStepsLiquidiumSupply) => void;
@@ -173,7 +177,8 @@ export const executeLiquidiumSupply = async ({
 		metadata: liquidiumTrackingMetadata({
 			action: 'supply',
 			token: asset,
-			tokenAmount: displayAmount
+			tokenAmount: displayAmount,
+			sourceLocation
 		})
 	});
 

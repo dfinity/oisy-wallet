@@ -1,5 +1,6 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
+import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import {
 	buildLiquidiumTrackingMetadata,
@@ -190,6 +191,23 @@ describe('liquidium-active-tx.utils', () => {
 				token: 'BTC',
 				tokenAmount: '1',
 				error: 'boom'
+			});
+		});
+
+		it('includes where the user started the action when provided', () => {
+			expect(
+				liquidiumTrackingMetadata({
+					action: 'supply',
+					token: 'USDT',
+					tokenAmount: '1',
+					sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN
+				})
+			).toEqual({
+				dApp: 'liquidium',
+				action: 'supply',
+				token: 'USDT',
+				tokenAmount: '1',
+				source_location: 'earn'
 			});
 		});
 	});

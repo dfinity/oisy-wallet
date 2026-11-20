@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
+	import { isNullish } from '@dfinity/utils';
+	import { onMount, untrack } from 'svelte';
+	import { goto, replaceState } from '$app/navigation';
+	import { page } from '$app/state';
 	import { anyLendBorrowProviderEnabled } from '$env/lend-borrow';
 	import { LIQUIDIUM_ENABLED } from '$env/liquidium';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
@@ -10,28 +12,52 @@
 	import LiquidiumProviderHero from '$lib/components/liquidium/LiquidiumProviderHero.svelte';
 	import LiquidiumSuppliedRow from '$lib/components/liquidium/LiquidiumSuppliedRow.svelte';
 	import LiquidiumRepayModal from '$lib/components/liquidium/repay/LiquidiumRepayModal.svelte';
+	import LiquidiumSupplyModal from '$lib/components/liquidium/supply/LiquidiumSupplyModal.svelte';
 	import LiquidiumWithdrawModal from '$lib/components/liquidium/withdraw/LiquidiumWithdrawModal.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { lendBorrowProvidersConfig } from '$lib/config/lend-borrow.config';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { LIQUIDIUM_POLL_INTERVAL_MILLIS } from '$lib/constants/liquidium.constants';
-	import { AppPath } from '$lib/constants/routes.constants';
+	import { AppPath, SOURCE_PARAM, SUPPLY_PARAM } from '$lib/constants/routes.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { liquidiumMarkets, liquidiumPortfolio } from '$lib/derived/liquidium.derived';
-	import { modalLiquidiumRepay, modalLiquidiumWithdraw } from '$lib/derived/modal.derived';
+	import {
+		liquidiumMarkets,
+		liquidiumPortfolio,
+		liquidiumPortfolioLoading,
+		liquidiumSupplyMarkets
+	} from '$lib/derived/liquidium.derived';
+	import {
+		modalLiquidiumRepay,
+		modalLiquidiumSupply,
+		modalLiquidiumWithdraw
+	} from '$lib/derived/modal.derived';
+	import { enabledFungibleTokens } from '$lib/derived/tokens.derived';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 	import { loadLiquidium } from '$lib/services/liquidium.services';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { LendBorrowProvider } from '$lib/types/lend-borrow';
+	import type { LiquidiumMarket } from '$lib/types/liquidium';
+	import { enumFromStringExists } from '$lib/utils/enum.utils';
 	import { replaceOisyPlaceholders, resolveText } from '$lib/utils/i18n.utils';
+	import { liquidiumHeldSupplyMarket } from '$lib/utils/liquidium.utils';
 
 	const liquidium = lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM];
 
 	// Section-header actions launch neutral (token-less) modals that open on their picker.
 	const withdrawModalId = Symbol();
 	const repayModalId = Symbol();
+	const linkSupplyModalId = Symbol();
+
+	let linkSupply = $state<{
+		asset?: string;
+		market?: LiquidiumMarket;
+		sourceLocation?: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
+	}>({});
 
 	let infoBoxRef = $state<HTMLElement | undefined>();
 
@@ -48,6 +74,53 @@
 		if (!anyLendBorrowProviderEnabled) {
 			goto(AppPath.Earn);
 		}
+	});
+
+	// A link to this page can name an asset to supply (`?supply=USDT`). The dialog opens on the
+	// network where the user holds the most of it, or, when they hold none, on the picker showing the
+	// asset's networks. An asset the user can't supply opens it without a token.
+	const openLinkSupply = (asset: string) => {
+		const source = page.url.searchParams.get(SOURCE_PARAM);
+		const supplyable = $liquidiumSupplyMarkets.some((market) => market.asset === asset);
+
+		linkSupply = {
+			asset: supplyable ? asset : undefined,
+			market: supplyable
+				? liquidiumHeldSupplyMarket({
+						markets: $liquidiumSupplyMarkets,
+						asset,
+						enabledTokens: $enabledFungibleTokens,
+						balances: $balancesStore
+					})
+				: undefined,
+			sourceLocation: enumFromStringExists({ obj: PLAUSIBLE_EVENT_SOURCE_LOCATIONS, value: source })
+				? (source as PLAUSIBLE_EVENT_SOURCE_LOCATIONS)
+				: undefined
+		};
+
+		// Replaced rather than pushed, so going back or reloading doesn't open the dialog again.
+		const url = new URL(page.url);
+		url.searchParams.delete(SUPPLY_PARAM);
+		url.searchParams.delete(SOURCE_PARAM);
+		replaceState(url, {});
+
+		modalStore.openLiquidiumSupply(linkSupplyModalId);
+	};
+
+	$effect(() => {
+		const asset = page.url.searchParams.get(SUPPLY_PARAM);
+
+		if (
+			!anyLendBorrowProviderEnabled ||
+			!LIQUIDIUM_ENABLED ||
+			isNullish(asset) ||
+			$liquidiumPortfolioLoading ||
+			$initialLoading
+		) {
+			return;
+		}
+
+		untrack(() => openLinkSupply(asset));
 	});
 </script>
 
@@ -150,4 +223,12 @@
 			<LiquidiumInfoBox />
 		</div>
 	</div>
+
+	{#if $modalLiquidiumSupply && $modalStore?.id === linkSupplyModalId}
+		<LiquidiumSupplyModal
+			asset={linkSupply.asset}
+			market={linkSupply.market}
+			sourceLocation={linkSupply.sourceLocation}
+		/>
+	{/if}
 {/if}

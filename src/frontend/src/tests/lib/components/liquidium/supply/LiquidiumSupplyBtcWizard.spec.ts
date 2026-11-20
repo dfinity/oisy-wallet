@@ -18,6 +18,7 @@ import LiquidiumSupplyBtcWizard from '$lib/components/liquidium/supply/Liquidium
 import { ZERO } from '$lib/constants/app.constants';
 import { STAKE_REVIEW_FORM_BUTTON } from '$lib/constants/test-ids.constants';
 import * as addressesStore from '$lib/derived/address.derived';
+import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
 import { WizardStepsLiquidiumSupply } from '$lib/enums/wizard-steps';
 import * as liquidiumSupplyServices from '$lib/services/liquidium-supply.services';
@@ -174,6 +175,25 @@ describe('LiquidiumSupplyBtcWizard', () => {
 
 			expect(onNext).not.toHaveBeenCalled();
 			expect(liquidiumSupplyServices.executeLiquidiumSupply).not.toHaveBeenCalled();
+		});
+
+		it('passes where the user started the supply on to the service', async () => {
+			const { getByTestId } = render(LiquidiumSupplyBtcWizard, {
+				props: {
+					...baseProps,
+					currentStep: step(WizardStepsLiquidiumSupply.REVIEW),
+					sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN
+				},
+				context: context()
+			});
+
+			await clickConfirm(getByTestId);
+
+			await waitFor(() => {
+				expect(liquidiumSupplyServices.executeLiquidiumSupply).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN })
+				);
+			});
 		});
 
 		it('hands the supply beforeBroadcast to sendBtc', async () => {

@@ -2,6 +2,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import LiquidiumSupplyIcrcWizard from '$lib/components/liquidium/supply/LiquidiumSupplyIcrcWizard.svelte';
 import { STAKE_REVIEW_FORM_BUTTON } from '$lib/constants/test-ids.constants';
 import * as addressesStore from '$lib/derived/address.derived';
+import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
 import { WizardStepsLiquidiumSupply } from '$lib/enums/wizard-steps';
 import * as liquidiumSupplyServices from '$lib/services/liquidium-supply.services';
@@ -84,7 +85,12 @@ describe('LiquidiumSupplyIcrcWizard', () => {
 		const onNext = vi.fn();
 
 		const { getByTestId } = render(LiquidiumSupplyIcrcWizard, {
-			props: { ...baseProps, currentStep: step(WizardStepsLiquidiumSupply.REVIEW), onNext },
+			props: {
+				...baseProps,
+				currentStep: step(WizardStepsLiquidiumSupply.REVIEW),
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN,
+				onNext
+			},
 			context: context()
 		});
 
@@ -93,7 +99,13 @@ describe('LiquidiumSupplyIcrcWizard', () => {
 		await waitFor(() => {
 			expect(onNext).toHaveBeenCalledOnce();
 			expect(executeSpy).toHaveBeenCalledExactlyOnceWith(
-				expect.objectContaining({ chain: 'ICP', asset: 'ICP', poolId: 'pool-icp', inflowFee: 50n })
+				expect.objectContaining({
+					chain: 'ICP',
+					asset: 'ICP',
+					poolId: 'pool-icp',
+					inflowFee: 50n,
+					sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN
+				})
 			);
 		});
 	});
