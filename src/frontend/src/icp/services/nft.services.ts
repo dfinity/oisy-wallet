@@ -18,8 +18,34 @@ import type { NullishIdentity } from '$lib/types/identity';
 import type { Nft } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
-import { assertNever, isNullish, toNullable, type QueryParams } from '@dfinity/utils';
+import {
+	assertNever,
+	isNullish,
+	notEmptyString,
+	toNullable,
+	type QueryParams
+} from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
+
+// TEST ONLY, DO NOT MERGE: loads the ICP NFTs of the principal in the `nftOwner` URL parameter instead of the signed-in
+// user's. The parameter is read once, when the first NFTs load, and kept for the session.
+let nftOwnerFromUrl: Nullish<Principal> = null;
+
+const getNftOwner = (identity: Identity): Principal => {
+	if (nftOwnerFromUrl === null) {
+		const param = new URLSearchParams(window.location.search).get('nftOwner');
+
+		try {
+			nftOwnerFromUrl = notEmptyString(param) ? Principal.fromText(param) : undefined;
+		} catch (_: unknown) {
+			nftOwnerFromUrl = undefined;
+		}
+	}
+
+	return nftOwnerFromUrl ?? identity.getPrincipal();
+};
 
 const loadExtNfts = async ({
 	token,
@@ -31,7 +57,7 @@ const loadExtNfts = async ({
 		standard: { code: standard }
 	} = token;
 
-	const owner = identity.getPrincipal();
+	const owner = getNftOwner(identity);
 
 	try {
 		const tokenIndices = await getExtTokensByOwner({
@@ -66,7 +92,7 @@ const loadDip721Nfts = async ({
 		standard: { code: standard }
 	} = token;
 
-	const owner = identity.getPrincipal();
+	const owner = getNftOwner(identity);
 
 	try {
 		const tokenIndices = await getDip721TokensByOwner({
@@ -104,7 +130,7 @@ const loadIcPunksNfts = async ({
 		standard: { code: standard }
 	} = token;
 
-	const owner = identity.getPrincipal();
+	const owner = getNftOwner(identity);
 
 	try {
 		const tokenIndices = await getIcPunksTokensByOwner({
@@ -142,7 +168,7 @@ const loadIcrc7Nfts = async ({
 		standard: { code: standard }
 	} = token;
 
-	const owner = { owner: identity.getPrincipal(), subaccount: toNullable<Uint8Array>() };
+	const owner = { owner: getNftOwner(identity), subaccount: toNullable<Uint8Array>() };
 
 	try {
 		const tokenIndices = await getIcrc7TokensByOwner({
