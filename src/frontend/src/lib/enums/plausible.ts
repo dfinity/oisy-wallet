@@ -325,6 +325,7 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	SCANNER = 'scanner',
 	WELCOME = 'welcome',
 	EARN = 'earn',
+	EARNING_TAB = 'earning_tab',
 	SIGNER = 'signer',
 	REWARDS = 'rewards',
 	TRANSACTIONS = 'transactions',

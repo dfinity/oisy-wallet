@@ -4,6 +4,7 @@ import {
 	enabledHarvestAutopilotsUsdBalance,
 	harvestAutopilots
 } from '$eth/derived/harvest-autopilots.derived';
+import { ZERO } from '$lib/constants/app.constants';
 import { EARNING_TOP_RATE_MIN_APY } from '$lib/constants/earning.constants';
 import { LIQUIDIUM_PROVIDER_ID } from '$lib/constants/liquidium.constants';
 import { AppPath, VAULT_PARAM } from '$lib/constants/routes.constants';
@@ -11,6 +12,7 @@ import { HARVEST_AUTOPILOT_PROVIDER_ID } from '$lib/derived/harvest-autopilot-ea
 import {
 	liquidiumAssetNetworkIcons,
 	liquidiumAssetNetworkNames,
+	liquidiumPortfolio,
 	liquidiumSupplyMarkets
 } from '$lib/derived/liquidium.derived';
 import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
@@ -104,8 +106,20 @@ export const earningUninvestedUsd: Readable<number> = derived(
 // One entry per Liquidium pool the user can supply, shown by its first rail (native first) with the
 // networks of all its rails: every rail of a pool earns the same rate.
 const liquidiumTopRates: Readable<Omit<EarningTopRate, 'earningPotentialUsd'>[]> = derived(
-	[liquidiumSupplyMarkets, liquidiumAssetNetworkIcons, liquidiumAssetNetworkNames, tokens],
-	([$liquidiumSupplyMarkets, $liquidiumAssetNetworkIcons, $liquidiumAssetNetworkNames, $tokens]) =>
+	[
+		liquidiumSupplyMarkets,
+		liquidiumAssetNetworkIcons,
+		liquidiumAssetNetworkNames,
+		liquidiumPortfolio,
+		tokens
+	],
+	([
+		$liquidiumSupplyMarkets,
+		$liquidiumAssetNetworkIcons,
+		$liquidiumAssetNetworkNames,
+		$liquidiumPortfolio,
+		$tokens
+	]) =>
 		$liquidiumSupplyMarkets.reduce<Omit<EarningTopRate, 'earningPotentialUsd'>[]>(
 			(acc, { poolId, asset, chain, supplyApy }) => {
 				const id = `${LIQUIDIUM_PROVIDER_ID}-${poolId}`;
@@ -130,6 +144,9 @@ const liquidiumTopRates: Readable<Omit<EarningTopRate, 'earningPotentialUsd'>[]>
 						networkIcons: $liquidiumAssetNetworkIcons[asset] ?? [],
 						networkNames: $liquidiumAssetNetworkNames[asset] ?? [],
 						apy: supplyApy,
+						hasPosition: ($liquidiumPortfolio?.reserves ?? []).some(
+							(reserve) => reserve.poolId === poolId && reserve.deposited > ZERO
+						),
 						action: (source) => goto(liquidiumSupplyUrl({ asset, source }))
 					}
 				];
@@ -167,6 +184,7 @@ const harvestAutopilotTopRates: Readable<Omit<EarningTopRate, 'earningPotentialU
 						networkIcons: nonNullish(icon) ? [icon] : [],
 						networkNames: [name],
 						apy: apyNumber,
+						hasPosition: nonNullish(token.balance) && token.balance > ZERO,
 						action: () => goto(`${AppPath.EarnAutopilot}?${VAULT_PARAM}=${address}`)
 					}
 				];

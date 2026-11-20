@@ -2,6 +2,7 @@
 	import EarningTopRateCard from '$lib/components/earning/EarningTopRateCard.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import { earningTopRates, earningUninvestedUsd } from '$lib/derived/earning.derived';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
@@ -14,7 +15,11 @@
 		{#snippet content()}
 			<div class="flex w-full flex-col">
 				{#each $earningTopRates as topRate (topRate.id)}
-					<EarningTopRateCard {topRate} uninvestedUsd={$earningUninvestedUsd} />
+					<EarningTopRateCard
+						sourceLocation={PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN}
+						{topRate}
+						uninvestedUsd={$earningUninvestedUsd}
+					/>
 				{/each}
 			</div>
 		{/snippet}

@@ -19,6 +19,8 @@ export interface EarningTopRate {
 	apy: number;
 	// What the user's balance outside any earning position would earn in a year at this rate, in USD.
 	earningPotentialUsd: number;
+	// Whether the user already has a position in it: a Liquidium supply in the pool, or the vault's tokens.
+	hasPosition: boolean;
 	// Opens the opportunity; `source` is where the user started it, for the analytics.
 	action: (source: PLAUSIBLE_EVENT_SOURCE_LOCATIONS) => Promise<void>;
 }

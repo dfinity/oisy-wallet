@@ -22,6 +22,7 @@ describe('EarningTopRateCard', () => {
 		networkNames: ['Ethereum', 'Internet Computer'],
 		apy: 6.47,
 		earningPotentialUsd: 64.7,
+		hasPosition: false,
 		action: vi.fn().mockResolvedValue(undefined),
 		...overrides
 	});
@@ -36,7 +37,11 @@ describe('EarningTopRateCard', () => {
 
 	it('shows the token, its APY and the Liquidium tag', () => {
 		const { container } = render(EarningTopRateCard, {
-			props: { topRate: topRate(), uninvestedUsd: 1_000 }
+			props: {
+				topRate: topRate(),
+				uninvestedUsd: 1_000,
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN
+			}
 		});
 
 		expect(container).toHaveTextContent('USDT');
@@ -50,7 +55,11 @@ describe('EarningTopRateCard', () => {
 
 	it('shows the Autopilot tag for an Autopilot vault', () => {
 		const { container } = render(EarningTopRateCard, {
-			props: { topRate: topRate({ providerId: 'harvest-autopilot' }), uninvestedUsd: 1_000 }
+			props: {
+				topRate: topRate({ providerId: 'harvest-autopilot' }),
+				uninvestedUsd: 1_000,
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN
+			}
 		});
 
 		expect(container).toHaveTextContent(en.vaults.text.autopilot);
@@ -58,7 +67,11 @@ describe('EarningTopRateCard', () => {
 
 	it('names every network the rate applies to', () => {
 		const { getByRole } = render(EarningTopRateCard, {
-			props: { topRate: topRate(), uninvestedUsd: 1_000 }
+			props: {
+				topRate: topRate(),
+				uninvestedUsd: 1_000,
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN
+			}
 		});
 
 		expect(getByRole('img', { name: 'Ethereum, Internet Computer' })).toBeInTheDocument();
@@ -66,22 +79,30 @@ describe('EarningTopRateCard', () => {
 
 	it('shows the yearly amount and the total not invested it is based on', () => {
 		const { container } = render(EarningTopRateCard, {
-			props: { topRate: topRate(), uninvestedUsd: 1_000 }
+			props: {
+				topRate: topRate(),
+				uninvestedUsd: 1_000,
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN
+			}
 		});
 
 		expect(container).toHaveTextContent(`+${usd(64.7)}/yr`);
 		expect(container).toHaveTextContent(usd(1_000));
 	});
 
-	it('opens the opportunity from the Earn page when clicked', async () => {
+	it('opens the opportunity with where the row is shown when clicked', async () => {
 		const action = vi.fn().mockResolvedValue(undefined);
 
 		const { getByRole } = render(EarningTopRateCard, {
-			props: { topRate: topRate({ action }), uninvestedUsd: 1_000 }
+			props: {
+				topRate: topRate({ action }),
+				uninvestedUsd: 1_000,
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARNING_TAB
+			}
 		});
 
 		await fireEvent.click(getByRole('button'));
 
-		expect(action).toHaveBeenCalledExactlyOnceWith(PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARN);
+		expect(action).toHaveBeenCalledExactlyOnceWith(PLAUSIBLE_EVENT_SOURCE_LOCATIONS.EARNING_TAB);
 	});
 });
