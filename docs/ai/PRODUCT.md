@@ -361,7 +361,7 @@ The event carries no address, no transaction hash and no amount: each would tie 
 
 ### Curated tokens vs. metadata-only tokens
 
-OISY ships a curated set of token definitions. Most are **curated tokens**: they appear in the manage-tokens list (so a user can enable them), a subset is enabled by default for new users, and they are selectable elsewhere in the wallet (including as swap destinations).
+OISY ships a curated set of token definitions. Most are **curated tokens**: they appear in the manage-tokens list (so a user can enable them), a subset starts out enabled (see [Fixed and suggested tokens](#fixed-and-suggested-tokens)), and they are selectable elsewhere in the wallet (including as swap destinations).
 
 A definition can instead be marked **metadata-only** (`metadataOnly: true`). A metadata-only token is **not** surfaced by default — it is absent from the manage-tokens list, is never enabled by default, and is not offered as a swap destination. Its curated metadata (name, symbol, decimals, icon, tags, token-group membership) is still used to **enrich a token the user imports manually**: importing that exact ledger / contract address resolves the curated details and places the token in its group, exactly as a curated token would. In short: known to OISY, but surfaced only if the user explicitly adds it.
 
@@ -373,6 +373,13 @@ The tokens added for the 1Sec (OneSec) swap integration are metadata-only:
 A new user does not see any of these in the wallet; a user who wants one imports it by its ledger canister ID / contract address, after which it appears with full metadata and inside its token group.
 
 ICP on the same EVM chains is intentionally **not** metadata-only: some users may already hold a balance in it, and marking it metadata-only would remove it from the default curated token set (potentially hiding that balance unless they explicitly import it). ICP stays curated and suggested there.
+
+### Fixed and suggested tokens
+
+Two sets of curated tokens are enabled without the user switching them on. They differ in whether the user can switch them off and in when OISY stores them in the user's token list:
+
+- **Fixed** tokens are always enabled; Manage tokens does not let the user switch them off. On ICP these are ICP, ckBTC, ckETH and ckUSDC.
+- **Suggested** tokens are enabled unless the user has switched them off, and OISY saves one as enabled to the user's token list once the wallet shows a balance in it and the list has no entry for it. A choice the user already made stays, and once saved, the token stays enabled for that user even after it leaves the set. Taking a token out of the suggested set hides it again only from users it was never saved for, such as those who held no balance in it while it was suggested and never switched it on or off.
 
 ### Asset types
 
