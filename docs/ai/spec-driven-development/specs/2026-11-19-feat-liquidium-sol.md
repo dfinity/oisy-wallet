@@ -161,7 +161,7 @@ Each code PR updates `docs/ai/PRODUCT.md` with what it shipped.
 
 `isNeverLandedBtcTransfer` (`src/frontend/src/lib/services/liquidium-active-tx.services.ts`) only runs for rows whose token is `BtcNativeMainnet`. Every Liquidium row is written with `liquidiumAssetTokenId`, which always returns the ckBTC ledger, so the check never fires in production. Its spec builds the `BtcNativeMainnet` row by hand, which hides this. A BTC supply or repay that never reached the network is therefore never failed, contrary to what `PRODUCT.md` describes. Introduced by [dfinity/oisy-wallet#14614](https://github.com/dfinity/oisy-wallet/pull/14614).
 
-The fix uses the same transfer-chain external ref as this spec (Decision 4), so whichever lands first adds the ref and the other reuses it. The fix is being worked on separately.
+The fix uses the same transfer-chain external ref as this spec (Decision 4), so whichever lands first adds the ref and the other reuses it. The fix is [dfinity/oisy-wallet#14722](https://github.com/dfinity/oisy-wallet/pull/14722).
 
 ---
 
