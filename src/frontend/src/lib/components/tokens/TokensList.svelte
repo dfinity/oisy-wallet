@@ -3,6 +3,7 @@
 	import { untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { goto } from '$app/navigation';
+	import EarningTopRateTag from '$lib/components/earning/EarningTopRateTag.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
@@ -15,6 +16,7 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { allFungibleNetworkTokens } from '$lib/derived/all-network-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { earningTopRateApyByTokenId } from '$lib/derived/earning.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
@@ -24,6 +26,7 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
+	import { heldTopRateApy } from '$lib/utils/earning.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
@@ -168,12 +171,23 @@
 						<TokenGroupCard {tokenGroup} />
 					{:else}
 						{@const { token } = tokenOrGroup}
+						{@const topRateApy = heldTopRateApy({
+							tokens: [token],
+							apyByTokenId: $earningTopRateApyByTokenId
+						})}
+
+						{#snippet topRateTag()}
+							{#if nonNullish(topRateApy)}
+								<EarningTopRateTag apy={topRateApy} />
+							{/if}
+						{/snippet}
 
 						<div class="transition-colors duration-150 ease-out hover:bg-primary">
 							<TokenCard
 								data={token}
 								onClick={() => goto(transactionsUrl({ token }))}
 								showNetwork={false}
+								titleAction={nonNullish(topRateApy) ? topRateTag : undefined}
 							/>
 						</div>
 					{/if}

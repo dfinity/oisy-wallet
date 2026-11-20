@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { goto } from '$app/navigation';
+	import EarningTopRateTag from '$lib/components/earning/EarningTopRateTag.svelte';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import { earningTopRateApyByTokenId } from '$lib/derived/earning.derived';
 	import { showTokenCategoryFilter, tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenGroupStore } from '$lib/stores/token-group.store';
@@ -13,6 +15,7 @@
 	import type { CardData } from '$lib/types/token-card';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import type { TokenUiGroup } from '$lib/types/token-ui-group';
+	import { heldTopRateApy } from '$lib/utils/earning.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
@@ -63,6 +66,11 @@
 
 	const totalUsdBalance: number = $derived(sumTokensUiUsdBalance(filteredTokens));
 
+	// The best top rate among the group's tokens the user holds.
+	const topRateApy: number | undefined = $derived(
+		heldTopRateApy({ tokens: filteredTokens, apyByTokenId: $earningTopRateApyByTokenId })
+	);
+
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
 	const compareTokens = (a: TokenUi, b: TokenUi): number => {
 		// Highest balance first
@@ -102,6 +110,12 @@
 	const notDisplayedCount: number = $derived(sortedFilteredTokens.length - tokensToShow.length);
 </script>
 
+{#snippet topRateTag()}
+	{#if nonNullish(topRateApy)}
+		<EarningTopRateTag apy={topRateApy} />
+	{/if}
+{/snippet}
+
 <div class="group-card flex flex-col" class:bg-primary={isExpanded} class:expanded={isExpanded}>
 	<div
 		class="group-header transition-colors duration-150 ease-out"
@@ -116,6 +130,7 @@
 			expanded={isExpanded}
 			onClick={() => toggleIsExpanded(!isExpanded)}
 			testIdPrefix={TOKEN_GROUP}
+			titleAction={nonNullish(topRateApy) ? topRateTag : undefined}
 		/>
 	</div>
 

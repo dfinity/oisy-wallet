@@ -1,5 +1,7 @@
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BAUTOPILOT_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc4626/tokens.bautopilot_usdc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import {
 	enabledHarvestAutopilotsUsdBalance,
@@ -11,6 +13,7 @@ import {
 	allEarningPositionsUsd,
 	allEarningYearlyAmountUsd,
 	earningData,
+	earningTopRateApyByTokenId,
 	earningTopRates,
 	earningUninvestedUsd,
 	highestApyEarning,
@@ -22,15 +25,27 @@ import {
 	liquidiumAssetNetworkNames
 } from '$lib/derived/liquidium.derived';
 import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
+import { tokens } from '$lib/derived/tokens.derived';
 import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 import { liquidiumStore } from '$lib/stores/liquidium.store';
+import type { EarningTopRate } from '$lib/types/earning';
 import type { LiquidiumMarket, LiquidiumPortfolio } from '$lib/types/liquidium';
+import type { Token } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { Vault } from '$lib/types/vaults';
+import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { get, type Readable } from 'svelte/store';
 
 const mockGoto = vi.fn();
 vi.mock('$app/navigation', () => ({ goto: (...args: unknown[]) => mockGoto(...args) }));
+
+const earningEnv = vi.hoisted(() => ({ enabled: true }));
+vi.mock('$env/earning', () => ({
+	get EARNING_ENABLED() {
+		return earningEnv.enabled;
+	}
+}));
 
 describe('earning.derived', () => {
 	beforeEach(() => {
@@ -381,6 +396,7 @@ describe('earning top rates', () => {
 					id: 'liquidium-pool-usdt',
 					providerId: 'liquidium',
 					token: USDT_TOKEN,
+					tokenIds: [USDT_TOKEN.id],
 					symbol: 'USDT',
 					networkIcons: get(liquidiumAssetNetworkIcons).USDT,
 					networkNames: get(liquidiumAssetNetworkNames).USDT,
@@ -399,6 +415,7 @@ describe('earning top rates', () => {
 				{
 					id: `harvest-autopilot-${BAUTOPILOT_USDC_TOKEN.address}`,
 					providerId: 'harvest-autopilot',
+					tokenIds: expect.any(Array),
 					token: expect.objectContaining({
 						address: BAUTOPILOT_USDC_TOKEN.address,
 						icon: BAUTOPILOT_USDC_TOKEN.assetIcon
@@ -521,6 +538,85 @@ describe('earning top rates', () => {
 			expect(mockGoto).toHaveBeenCalledExactlyOnceWith(
 				`/earn/autopilot/?vault=${BAUTOPILOT_USDC_TOKEN.address}`
 			);
+		});
+	});
+
+	describe('tokens a top rate can be entered with', () => {
+		const ckUsdtToken = {
+			...mockValidIcCkToken,
+			id: parseTokenId('ckUSDT'),
+			symbol: 'ckUSDT',
+			network: ICP_TOKEN.network
+		} as Token;
+
+		it('lists the token of every network of a Liquidium pool', () => {
+			mockStore({ store: tokens, value: [USDT_TOKEN, ckUsdtToken] });
+			liquidiumStore.set({
+				markets: [usdtMarket('ETH'), usdtMarket('ICP')],
+				portfolio: null,
+				assetPrices: {}
+			});
+
+			expect(get(earningTopRates).map(({ tokenIds }) => tokenIds)).toEqual([
+				[USDT_TOKEN.id, ckUsdtToken.id]
+			]);
+		});
+
+		it("gives an Autopilot vault its asset's token on the vault's network", () => {
+			mockStore({ store: tokens, value: [USDT_TOKEN, BASE_USDC_TOKEN] });
+			mockStore({ store: harvestAutopilots, value: [vault('5.75')] });
+
+			expect(get(earningTopRates).map(({ tokenIds }) => tokenIds)).toEqual([[BASE_USDC_TOKEN.id]]);
+		});
+	});
+
+	describe('earningTopRateApyByTokenId', () => {
+		const topRate = ({
+			apy,
+			tokenIds
+		}: Pick<EarningTopRate, 'apy' | 'tokenIds'>): EarningTopRate => ({
+			id: `top-rate-${apy}`,
+			providerId: 'liquidium',
+			token: USDT_TOKEN,
+			symbol: 'USDT',
+			networkIcons: [],
+			networkNames: [],
+			apy,
+			earningPotentialUsd: 0,
+			hasPosition: false,
+			tokenIds,
+			action: vi.fn()
+		});
+
+		afterEach(() => {
+			earningEnv.enabled = true;
+		});
+
+		it('gives each token the best top rate it can enter', () => {
+			mockStore({
+				store: earningTopRates,
+				value: [
+					topRate({ apy: 5.75, tokenIds: [USDT_TOKEN.id] }),
+					topRate({ apy: 6.47, tokenIds: [USDT_TOKEN.id, BASE_USDC_TOKEN.id] })
+				]
+			});
+
+			expect(get(earningTopRateApyByTokenId)).toEqual(
+				new Map([
+					[USDT_TOKEN.id, 6.47],
+					[BASE_USDC_TOKEN.id, 6.47]
+				])
+			);
+		});
+
+		it('is empty while the Earn page is turned off', () => {
+			earningEnv.enabled = false;
+			mockStore({
+				store: earningTopRates,
+				value: [topRate({ apy: 6.47, tokenIds: [USDT_TOKEN.id] })]
+			});
+
+			expect(get(earningTopRateApyByTokenId).size).toBe(0);
 		});
 	});
 });

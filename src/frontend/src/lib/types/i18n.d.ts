@@ -2340,6 +2340,7 @@ interface I18nEarning {
 		tab_title_short: string;
 		earning_opportunities: string;
 		top_rates: string;
+		top_rate_tag: string;
 		header_title: string;
 		header_description: string;
 		go_to_earn: string;

@@ -433,6 +433,7 @@ describe('EarningsList', () => {
 			apy: 6.47,
 			earningPotentialUsd: 64.7,
 			hasPosition: false,
+			tokenIds: [],
 			action: vi.fn().mockResolvedValue(undefined),
 			...overrides
 		});

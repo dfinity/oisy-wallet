@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import ExchangeRateChange from '$lib/components/exchange/ExchangeRateChange.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -31,6 +32,8 @@
 		showNetwork?: boolean;
 		onClick?: () => void;
 		onToggle?: (t: Token) => void;
+		// A control of its own beside the symbol, such as the top-rate tag.
+		titleAction?: Snippet;
 	}
 
 	let {
@@ -41,7 +44,8 @@
 		hover = false,
 		showNetwork = true,
 		onClick,
-		onToggle
+		onToggle,
+		titleAction
 	}: Props = $props();
 
 	let testId = $derived(
@@ -75,6 +79,7 @@
 		{onClick}
 		rounded={false}
 		{testId}
+		{titleAction}
 	>
 		{#snippet logo()}
 			<span class="flex" class:mr-2={!asNetwork}>
