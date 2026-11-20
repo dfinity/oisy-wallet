@@ -99,7 +99,7 @@ The supply and repay modals quote the provider fee when a rail is picked (`estim
 - **Native SOL** gets a new `LiquidiumSupplySolWizard.svelte`, next to the BTC, ETH and ICRC wizards. It:
   - estimates the Solana network fee with `SolFeeContext`, like the Send form;
   - sends `amount + provider fee` to the minter deposit address with `sendSol` from `solAddressMainnet` on mainnet, and returns the signature as the txid;
-  - opens the active-transaction row in `beforeBroadcast`, keeping the blockhash (see Active transactions);
+  - opens the active-transaction row in `beforeBroadcast`, keeping the blockhash and a slot where it is valid, and sends nothing without that slot (see Active transactions);
   - treats a failure as "nothing sent" only for `isSolSendRefusal(err)` before the confirm step. Any later failure closes the modal with the existing "outcome unknown" message.
 - `LiquidiumSupplyModal.svelte` currently renders the ETH wizard for any chain that isn't BTC or ICP. It must dispatch `SOL` explicitly, and the ETH branch should become explicit too.
 - **Minimum:** the transfer (`amount + provider fee`) must be at least the quote's `minimumSendAmount`. For native SOL that is 0.02 SOL today. Sending less leaves the funds at the deposit address waiting for a top-up. The form blocks such an amount. The existing "Minimum supply" row shows the **net** minimum (`minimumSendAmount − totalFee`, about 0.0181 SOL today), so it compares directly with the amount the user types. For ckSOL the minimum is negligible (501 lamports) but uses the same rule.
@@ -125,7 +125,8 @@ The supply and repay modals quote the provider fee when a rail is picked (`estim
 - Rows keep today's shape (`Liquidium` data with `token`, `action`, `pool_id`, `amount`; status from Liquidium's activities matched by txid).
 - `liquidiumAssetTokenId('SOL')` returns the ckSOL ledger, so every SOL action can write its row. Today it throws for SOL: before the broadcast in supply and repay, and silently (row skipped) after a borrow or withdraw.
 - **A row records its rail** in the `liquidium_chain` external ref (`LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN` in `src/frontend/src/lib/types/liquidium-active-tx.ts`), which the BTC fix adds and supply and repay write. Borrow and withdraw rows don't need it: their payout is Liquidium's own transaction. Native SOL needs a "did it land" check, and the token alone can't tell native SOL from ckSOL (both map to the ckSOL ledger). `token` keeps its meaning, and the backend doesn't change. The BTC fix uses the same ref (see Related bug).
-- **Native SOL supply and repay rows** also store the transaction's blockhash in a new external ref, and the poller fails a row that `readSolSourceTxOutcome` reports `reverted` or `expired`. Without that, a SOL repay that never lands holds its amount against the repay maximum indefinitely. This mirrors the ETH revert check (`isRevertedEthRepay`) and the BTC "never landed" check.
+- **Native SOL supply and repay rows** also store the transaction's blockhash and a slot where that blockhash is valid, in new external refs. In `beforeBroadcast`, `isBlockhashValid` provides the slot; if the blockhash isn't valid, or the read fails, nothing is sent. The poller calls `readSolSourceTxOutcome` with that slot as `minContextSlot` and `finalized: true`, and fails a row it reports `reverted` or `expired`. A lagging node or a fork that can still be replaced then can't fail a row whose transfer may still land, which for a repay would release its amount from the repay maximum too early. This follows the SOL → ckSOL flow (`fetchChainFusionSolSwap` and its poller in `chain-fusion-swap-active-tx.services.ts`).
+- Without that check, a SOL repay that never lands holds its amount against the repay maximum indefinitely. It mirrors the ETH revert check (`isRevertedEthRepay`) and the BTC "never landed" check.
 - Txid matching already works for base58 signatures: matching lowercases both sides, and the stored ref keeps the original case. Pass the stored value, never the normalised one, to Solana RPC calls.
 
 ### Copy and cards
@@ -147,7 +148,7 @@ Every code PR lands behind `LIQUIDIUM_SOL_ENABLED`, and within it a rail is only
    - Fee quote with profile id and action.
    - Supply and repay through the ICRC wizards, borrow and withdraw to the ICRC account.
    - `liquidiumAssetTokenId('SOL')`, the transfer-chain ref (unless the BTC fix has added it already), explicit wizard dispatch and explicit ETH receiver branch.
-3. **Native SOL supply.** New supply wizard, minimum, blockhash ref and SOL outcome check. The native rail stays hidden.
+3. **Native SOL supply.** New supply wizard, minimum, blockhash and slot refs, and SOL outcome check. The native rail stays hidden.
 4. **Native SOL repay.** New repay wizard, SOL refusal rule and small-repay handling. The native rail stays hidden.
 5. **Native SOL borrow and withdraw.** SOL receiver and native outflow minimum, then **switch on the native rail**, so it appears in the market and every picker at once.
 6. **Copy and cards.** Advertised tokens and i18n. Can ride with PR 2.
@@ -175,10 +176,10 @@ The fix uses the same transfer-chain external ref as this spec (Decision 4), so 
 - [ ] Native SOL supply sends `amount + fee` to the minter deposit address from the user's mainnet Solana address and submits the signature to Liquidium.
 - [ ] ckSOL supply and repay go through the existing ICRC wizards.
 - [ ] A native SOL supply or repay refused before broadcast deletes its row; any later failure keeps it and closes the modal with the unknown-outcome message.
-- [ ] A native SOL row whose transaction reverted or expired fails and stops counting against the repay maximum.
+- [ ] A native SOL row whose transaction reverted, or whose blockhash expired on the finalized chain, fails and stops counting against the repay maximum; no native SOL transfer is sent without a slot where its blockhash is valid.
 - [ ] Borrow and withdraw deliver native SOL to `solAddressMainnet` and ckSOL to the ICRC account; no rail can fall through to the ETH address.
 - [ ] Native SOL borrow and withdraw forms enforce the ckSOL minter's minimum.
-- [ ] Every SOL action writes its active-transaction row, with its transfer chain recorded.
+- [ ] Every SOL action writes its active-transaction row; supply and repay rows record their transfer chain.
 - [ ] SOL positions count in My positions, the Earning and Liabilities tabs, health and net worth.
 - [ ] `PRODUCT.md` describes the SOL behaviour.
 
