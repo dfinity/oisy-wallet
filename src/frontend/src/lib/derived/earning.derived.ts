@@ -152,6 +152,7 @@ const harvestAutopilotTopRates: Readable<Omit<EarningTopRate, 'earningPotentialU
 				const {
 					address,
 					assetSymbol,
+					assetIcon,
 					network: { icon, name }
 				} = token;
 
@@ -160,7 +161,8 @@ const harvestAutopilotTopRates: Readable<Omit<EarningTopRate, 'earningPotentialU
 					{
 						id: `${HARVEST_AUTOPILOT_PROVIDER_ID}-${address}`,
 						providerId: HARVEST_AUTOPILOT_PROVIDER_ID,
-						token,
+						// The asset's logo rather than the vault's, as the Earning tab shows it.
+						token: { ...token, icon: assetIcon ?? token.icon },
 						symbol: assetSymbol,
 						networkIcons: nonNullish(icon) ? [icon] : [],
 						networkNames: [name],

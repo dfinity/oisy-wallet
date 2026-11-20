@@ -391,14 +391,17 @@ describe('earning top rates', () => {
 			]);
 		});
 
-		it('lists Autopilot vaults by their underlying asset and network', () => {
+		it('lists Autopilot vaults by their underlying asset, its logo and the network', () => {
 			mockStore({ store: harvestAutopilots, value: [vault('5.75')] });
 
 			expect(get(earningTopRates)).toEqual([
 				{
 					id: `harvest-autopilot-${BAUTOPILOT_USDC_TOKEN.address}`,
 					providerId: 'harvest-autopilot',
-					token: expect.objectContaining({ address: BAUTOPILOT_USDC_TOKEN.address }),
+					token: expect.objectContaining({
+						address: BAUTOPILOT_USDC_TOKEN.address,
+						icon: BAUTOPILOT_USDC_TOKEN.assetIcon
+					}),
 					symbol: 'USDC',
 					networkIcons: [BAUTOPILOT_USDC_TOKEN.network.icon],
 					networkNames: [BAUTOPILOT_USDC_TOKEN.network.name],

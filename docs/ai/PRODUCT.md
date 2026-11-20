@@ -1183,6 +1183,8 @@ A top rate is an earning opportunity with an APY of at least 5%. Each Liquidium 
 
 Each top rate shows what the user's balance outside any earning position would earn in a year at that rate. That balance is the same for every top rate, so they differ only by rate: the wallet total less the Autopilot vault tokens the wallet counts. A Liquidium supply has already left the wallet, so nothing is taken off for it.
 
+The Earn page lists them in a **Top rates** box above the earning opportunities, and leaves the box out when there are none. A row shows the token with every network it applies to, the provider and the APY. On the right it shows the yearly amount and, below it, the total not invested that amount is based on. Tapping a Liquidium row opens the Liquidium supply dialog on that token (see the link below); tapping an Autopilot row opens that vault's page.
+
 ### Liquidium supply link
 
 A link to the Liquidium page can name an asset to supply, such as `/providers/liquidium/?supply=USDT`. Once Liquidium's markets have loaded, the page opens its supply dialog on that asset, on the network where the user holds the most of it. When they hold none of it, the dialog opens on the token picker, showing the asset's networks. An asset the user cannot supply opens the dialog without a token. The page then removes the link from the address, so going back or reloading does not open the dialog again.
