@@ -298,6 +298,36 @@ export const mockXrpActiveUserTransaction: ActiveUserTransaction = {
 	error: []
 };
 
+/** A send of 25 RLUSD: the `Xrp` variant with the trust-line token, in its base units of 10^-18. */
+export const mockXrpTokenPaymentData: XrpData = {
+	token: { XrpTrustLineMainnet: [mockRlusdCurrencyCode, mockRlusdIssuer] },
+	source_address: mockXrpSourceAddress,
+	destination_address: mockXrpDestinationAddress,
+	destination_tag: [],
+	amount: 25n * 10n ** 18n,
+	fee: 12n
+};
+
+export const mockXrpTokenPaymentActiveUserTransaction: ActiveUserTransaction = {
+	id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+	status: { Pending: null },
+	data: { Xrp: mockXrpTokenPaymentData },
+	progress_step: ['send'],
+	external_refs: [
+		{ key: XRP_EXTERNAL_REF_KEYS.TX_HASH, value: mockXrpTxHash },
+		{
+			key: XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE,
+			value: `${mockXrpLastLedgerSequence}`
+		},
+		{ key: XRP_EXTERNAL_REF_KEYS.AMOUNT, value: '25' },
+		{ key: XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL, value: 'RLUSD' },
+		{ key: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL, value: 'XRP Ledger' }
+	],
+	created_at_ns: ZERO,
+	updated_at_ns: ZERO,
+	error: []
+};
+
 /** Adding RLUSD: a `TrustSet` from the source address, which takes its sequence as a send does. */
 export const mockXrpTrustSetData: XrpTrustSetData = {
 	token: { XrpTrustLineMainnet: [mockRlusdCurrencyCode, mockRlusdIssuer] },

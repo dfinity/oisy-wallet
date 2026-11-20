@@ -5,21 +5,35 @@
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import { XRP_TRANSFER_RATE_NO_FEE } from '$xrp/constants/xrp.constants';
+	import { enabledXrpTokens } from '$xrp/derived/tokens.derived';
 	import { XRP_FEE_CONTEXT_KEY, type XrpFeeContext } from '$xrp/stores/xrp-fee.store';
 	import { XrpAmountAssertionError } from '$xrp/types/xrp-send';
+	import {
+		fitsXrpTokenPrecision,
+		getXrpTokenMaxAmount,
+		isTokenXrpTrustLine
+	} from '$xrp/utils/xrp-trust-line.utils';
 
 	interface Props {
 		amount: OptionAmount;
 		amountError?: XrpAmountAssertionError;
+		destination?: string;
 		onTokensList: () => void;
 	}
 
-	let { amount = $bindable(), amountError = $bindable(), onTokensList }: Props = $props();
+	let {
+		amount = $bindable(),
+		amountError = $bindable(),
+		destination,
+		onTokensList
+	}: Props = $props();
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 
@@ -35,8 +49,40 @@
 	const { sendToken, sendBalance, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const { feeStore: fee, reserveStore: reserve }: XrpFeeContext =
-		getContext<XrpFeeContext>(XRP_FEE_CONTEXT_KEY);
+	const {
+		feeStore: fee,
+		reserveStore: reserve,
+		transferRateStore
+	}: XrpFeeContext = getContext<XrpFeeContext>(XRP_FEE_CONTEXT_KEY);
+
+	// A trust-line token's amount is in the token; only the network fee comes out of XRP, and the
+	// reserve does not limit it.
+	let trustLineToken = $derived(
+		nonNullish($sendToken) && isTokenXrpTrustLine($sendToken) ? $sendToken : undefined
+	);
+
+	// The issuer charges no transfer fee on a payment to itself.
+	let transferRate = $derived(
+		isNullish(trustLineToken)
+			? undefined
+			: destination === trustLineToken.issuer
+				? XRP_TRANSFER_RATE_NO_FEE
+				: $transferRateStore
+	);
+
+	let tokenMax = $derived(
+		nonNullish(trustLineToken) && nonNullish($sendBalance) && nonNullish(transferRate)
+			? getXrpTokenMaxAmount({ balance: $sendBalance, transferRate })
+			: undefined
+	);
+
+	let xrpBalance = $derived.by(() => {
+		const nativeToken = $enabledXrpTokens.find(
+			({ network: { id } }) => id === trustLineToken?.network.id
+		);
+
+		return nonNullish(nativeToken) ? $balancesStore?.[nativeToken.id]?.data : undefined;
+	});
 
 	// An XRPL account must retain its reserve — the base plus the owner reserve for every
 	// ledger object it owns. Neither that nor the fee is available to send, so both are
@@ -61,11 +107,37 @@
 	// edited, with nothing on screen saying why.
 	//
 	// A string rather than the values, so an unchanged set compares equal and nothing reruns.
-	let revalidateKey = $derived(`${$fee}:${$reserve}:${$sendBalance}`);
+	let revalidateKey = $derived(
+		`${$fee}:${$reserve}:${$sendBalance}:${transferRate}:${tokenMax}:${xrpBalance}`
+	);
+
+	// Each figure is judged only once known, as for XRP below: the form blocks Next while the transfer
+	// rate is unknown, and `sendXrp` reads every one of them again before signing.
+	const validateTokenAmount = (userAmount: bigint): Error | undefined => {
+		if (!fitsXrpTokenPrecision(userAmount)) {
+			return new XrpAmountAssertionError($i18n.send.assertion.xrp_token_amount_too_precise);
+		}
+
+		if (nonNullish(tokenMax) && userAmount > tokenMax) {
+			return new InsufficientFundsError(
+				nonNullish(transferRate) && transferRate > XRP_TRANSFER_RATE_NO_FEE
+					? $i18n.send.assertion.xrp_insufficient_funds_for_transfer_fee
+					: $i18n.send.assertion.insufficient_funds
+			);
+		}
+
+		if (nonNullish(xrpBalance) && nonNullish($fee) && xrpBalance < $fee) {
+			return new InsufficientFundsError($i18n.send.assertion.xrp_insufficient_xrp_for_fee);
+		}
+	};
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
 			return new XrpAmountAssertionError($i18n.send.assertion.amount_invalid);
+		}
+
+		if (nonNullish(trustLineToken)) {
+			return validateTokenAmount(userAmount);
 		}
 
 		// Skipped while either requirement is unknown. `unavailable` is then the whole balance, a
@@ -118,10 +190,13 @@
 
 		{#snippet balance()}
 			{#if nonNullish($sendToken)}
+				<!-- For a token nothing is offered while the transfer rate is unknown, as nothing is for XRP
+				     while the fee or reserve is. -->
 				<MaxBalanceButton
 					balance={$sendBalance}
 					error={nonNullish(amountError)}
-					fee={unavailable}
+					fee={nonNullish(trustLineToken) ? ZERO : unavailable}
+					maxAmount={nonNullish(trustLineToken) ? (tokenMax ?? ZERO) : undefined}
 					token={$sendToken}
 					bind:amount
 					bind:amountSetToMax

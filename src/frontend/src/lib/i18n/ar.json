@@ -1029,6 +1029,7 @@
 		"text": {
 			"send": "إرسال",
 			"xrp_sent": "",
+			"xrp_token_sent": "",
 			"xrp_submitted": "",
 			"send_token": "",
 			"send_unknown_token": "",
@@ -1051,6 +1052,7 @@
 			"source_network": "شبكة المصدر",
 			"destination_network": "شبكة الوجهة",
 			"xrp_destination_tag": "",
+			"xrp_transfer_fee": "",
 			"initializing_transaction": "جاري تهيئة المعاملة",
 			"convert_to_native_icp": "تحويل إلى ICP الأصلي",
 			"open_qr_modal": "بدء مسح رمز الاستجابة السريعة لتفاصيل المعاملة",
@@ -1107,6 +1109,9 @@
 			"xrp_destination_tag_invalid": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "",
+			"xrp_token_amount_too_precise": "",
+			"xrp_insufficient_funds_for_transfer_fee": "",
+			"xrp_insufficient_xrp_for_fee": "",
 			"insufficient_funds_for_gas": "أموال غير كافية للغاز",
 			"insufficient_funds_for_amount": "أموال غير كافية للمبلغ",
 			"insufficient_ethereum_funds_to_cover_the_fees": "أموال إيثريوم غير كافية لتغطية الرسوم",
@@ -1171,7 +1176,20 @@
 			"xrp_destination_unfunded": "",
 			"xrp_destination_tag_required": "",
 			"xrp_destination_is_source": "",
-			"xrp_account_state_unavailable": ""
+			"xrp_account_state_unavailable": "",
+			"xrp_ledger_state_unavailable": "",
+			"xrp_token_insufficient_balance": "",
+			"xrp_insufficient_xrp_for_fee": "",
+			"xrp_destination_not_found": "",
+			"xrp_deposit_not_authorized": "",
+			"xrp_no_trust_line": "",
+			"xrp_trust_line_limit": "",
+			"xrp_destination_frozen": "",
+			"xrp_destination_not_authorized": "",
+			"xrp_token_frozen": "",
+			"xrp_token_deep_frozen": "",
+			"xrp_no_rippling": "",
+			"xrp_transfer_fee_changed": ""
 		}
 	},
 	"mint": {

@@ -407,7 +407,7 @@ describe('Actions', () => {
 		});
 	});
 
-	// The XRP send flow moves native XRP only; offered for a trust-line token it would send XRP.
+	// The XRP send flow moves trust-line tokens too, so their pages offer Send like XRP's.
 	describe('send on an XRP Ledger trust-line token page', () => {
 		const setTokenPage = (token: typeof RLUSD_TOKEN | typeof XRP_TOKEN) => {
 			setTransactionsPage();
@@ -415,12 +415,12 @@ describe('Actions', () => {
 			vi.spyOn(pageTokenDerived, 'pageToken', 'get').mockReturnValue(readable(token));
 		};
 
-		it('should hide Send on a trust-line token page', () => {
+		it('should offer Send on a trust-line token page', () => {
 			setTokenPage(RLUSD_TOKEN);
 
 			const { container } = renderActions();
 
-			expect(container.querySelector(sendButtonSelector)).not.toBeInTheDocument();
+			expect(container.querySelector(sendButtonSelector)).toBeInTheDocument();
 		});
 
 		it('should keep Send on the XRP page', () => {

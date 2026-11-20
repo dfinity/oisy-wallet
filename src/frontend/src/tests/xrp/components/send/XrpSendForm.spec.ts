@@ -1,3 +1,4 @@
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
@@ -7,6 +8,7 @@ import {
 	XRP_FEE_CONTEXT_KEY,
 	initFeeStore,
 	initReserveStore,
+	initTransferRateStore,
 	initXrpFeeContext
 } from '$xrp/stores/xrp-fee.store';
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
@@ -382,6 +384,103 @@ describe('XrpSendForm', () => {
 			await fireEvent.input(tagInput(container), { target: { value: '12345' } });
 
 			expect(nextButton(container)?.disabled).toBeFalsy();
+		});
+	});
+
+	describe('a trust-line token', () => {
+		const token = { ...RLUSD_TOKEN, enabled: true };
+		const transferRateStore = initTransferRateStore();
+
+		const amountInput = (container: HTMLElement): HTMLInputElement =>
+			container.querySelector('input') as HTMLInputElement;
+
+		const nextBtn = (container: HTMLElement): HTMLButtonElement | null =>
+			container.querySelector<HTMLButtonElement>('button[data-tid="send-form-next-button"]');
+
+		const renderTokenForm = (destination = props.destination) => {
+			const context = new Map();
+
+			context.set(SEND_CONTEXT_KEY, initSendContext({ token }));
+			context.set(
+				XRP_FEE_CONTEXT_KEY,
+				initXrpFeeContext({
+					reserveStore,
+					feeStore,
+					transferRateStore,
+					feeSymbolStore: writable(XRP_TOKEN.symbol),
+					feeDecimalsStore: writable(XRP_TOKEN.decimals),
+					feeTokenIdStore: writable(XRP_TOKEN.id),
+					feeExchangeRateStore: writable(0.5)
+				})
+			);
+
+			return render(XrpSendForm, { props: { ...props, destination }, context });
+		};
+
+		const typed = async ({
+			value,
+			destination
+		}: {
+			value: string;
+			destination?: string;
+		}): Promise<HTMLButtonElement | null> => {
+			vi.useFakeTimers();
+
+			const { container } = renderTokenForm(destination);
+
+			await fireEvent.input(amountInput(container), { target: { value } });
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			const next = nextBtn(container);
+
+			vi.useRealTimers();
+
+			return next;
+		};
+
+		beforeEach(() => {
+			balancesStore.reset(token.id);
+			// 100.5 RLUSD, in base units of 10^-18.
+			balancesStore.set({ id: token.id, data: { data: 1005n * 10n ** 17n, certified: true } });
+
+			transferRateStore.setTransferRate(1_000_000_000);
+		});
+
+		it('enables next for an amount the balance covers', async () => {
+			expect((await typed({ value: '100.5' }))?.disabled).toBeFalsy();
+		});
+
+		it('disables next while the transfer rate is unknown', async () => {
+			transferRateStore.setTransferRate(undefined);
+
+			expect((await typed({ value: '1' }))?.disabled).toBeTruthy();
+		});
+
+		it('disables next for an amount whose transfer fee the balance cannot pay', async () => {
+			transferRateStore.setTransferRate(1_005_000_000);
+
+			expect((await typed({ value: '100.1' }))?.disabled).toBeTruthy();
+		});
+
+		it('enables next for the whole balance to the issuer, which charges no fee', async () => {
+			transferRateStore.setTransferRate(1_005_000_000);
+
+			expect((await typed({ value: '100.5', destination: token.issuer }))?.disabled).toBeFalsy();
+		});
+
+		it('enables next for an amount with as many digits as the ledger keeps', async () => {
+			expect((await typed({ value: '1.234567890123456' }))?.disabled).toBeFalsy();
+		});
+
+		it('disables next for an amount with more digits than the ledger keeps', async () => {
+			expect((await typed({ value: '1.2345678901234567' }))?.disabled).toBeTruthy();
+		});
+
+		it('disables next when the XRP balance cannot pay the network fee', async () => {
+			balancesStore.set({ id: XRP_TOKEN.id, data: { data: 11n, certified: true } });
+
+			expect((await typed({ value: '1' }))?.disabled).toBeTruthy();
 		});
 	});
 });

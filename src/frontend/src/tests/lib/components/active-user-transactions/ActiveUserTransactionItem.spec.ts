@@ -15,6 +15,7 @@ import {
 	mockVeloraActiveUserTransaction,
 	mockXrpActiveUserTransaction,
 	mockXrpData,
+	mockXrpTokenPaymentActiveUserTransaction,
 	mockXrpTrustSetActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
@@ -363,6 +364,34 @@ describe('ActiveUserTransactionItem', () => {
 
 			expect(screen.getByText(`${en.send.text.send} 25 XRP`)).toBeInTheDocument();
 			expect(container.querySelector('.text-error-primary')).toBeInTheDocument();
+		});
+	});
+
+	// "Send 25 RLUSD": a token send names the token, with or without its display snapshot.
+	describe('rows sending a trust-line token', () => {
+		const renderRow = (tx = mockXrpTokenPaymentActiveUserTransaction) =>
+			render(ActiveUserTransactionItem, {
+				props: { tx, isUnseen: false, dismissing: false, onDismiss: vi.fn() }
+			});
+
+		it('renders the amount, the token and the network', () => {
+			const { container } = renderRow();
+
+			expect(screen.getByText(`${en.send.text.send} 25 RLUSD`)).toBeInTheDocument();
+			expect(container).toHaveTextContent('XRP Ledger');
+		});
+
+		it('names the token from its own data when the display snapshot is missing', () => {
+			renderRow({
+				...mockXrpTokenPaymentActiveUserTransaction,
+				external_refs: mockXrpTokenPaymentActiveUserTransaction.external_refs.filter(({ key }) =>
+					[XRP_EXTERNAL_REF_KEYS.TX_HASH, XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE].includes(
+						key as never
+					)
+				)
+			});
+
+			expect(screen.getByText(`${en.send.text.send} 25 RLUSD`)).toBeInTheDocument();
 		});
 	});
 

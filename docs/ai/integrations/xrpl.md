@@ -11,17 +11,18 @@ with `VITE_XRP_MAINNET_DISABLED`.
 
 ## What we use it for
 
-| Area     | Method           | Purpose                                                            |
-| -------- | ---------------- | ------------------------------------------------------------------ |
-| Balance  | `account_info`   | Native XRP balance (in drops), sequence and owner count            |
-| Fee      | `fee`            | Open-ledger fee estimate for a transaction                         |
-| Send     | `submit`         | Broadcast a signed transaction blob to the network                 |
-| Finality | `tx`             | Whether a submitted transaction is in a validated ledger           |
-| Expiry   | `ledger`         | Latest **validated** ledger index, to decide that a send expired   |
-| Signing  | `ledger_current` | Current **open** ledger index, to pick a `LastLedgerSequence`      |
-| History  | `account_tx`     | Native XRP transaction history, paginated with an opaque `marker`  |
-| Tokens   | `account_lines`  | The account's trust lines: which tokens it holds, and how many     |
-| Import   | `account_info`   | A token issuer's flags and `TransferRate`, before adding its token |
+| Area     | Method               | Purpose                                                             |
+| -------- | -------------------- | ------------------------------------------------------------------- |
+| Balance  | `account_info`       | Native XRP balance (in drops), sequence and owner count             |
+| Fee      | `fee`                | Open-ledger fee estimate for a transaction                          |
+| Send     | `submit`             | Broadcast a signed transaction blob to the network                  |
+| Finality | `tx`                 | Whether a submitted transaction is in a validated ledger            |
+| Expiry   | `ledger`             | Latest **validated** ledger index, to decide that a send expired    |
+| Signing  | `ledger_current`     | Current **open** ledger index, to pick a `LastLedgerSequence`       |
+| History  | `account_tx`         | Native XRP transaction history, paginated with an opaque `marker`   |
+| Tokens   | `account_lines`      | The account's trust lines: which tokens it holds, and how many      |
+| Import   | `account_info`       | A token issuer's flags and `TransferRate`, before adding its token  |
+| Send     | `deposit_authorized` | Whether a recipient with DepositAuth takes payments from the sender |
 
 History comes from `account_tx`, read by `loadXrpTransactions` — see the table below, and the
 [XRP integration spec](../spec-driven-development/specs/2026-07-24-feat-xrp-ledger-integration.md)
@@ -113,16 +114,18 @@ The rule therefore belongs to the helper, not to the method: the same method can
 different rules depending on what its caller needs from the response, so look up your
 helper rather than your method.
 
-| Helper                        | Method           | Expected errors                             |
-| ----------------------------- | ---------------- | ------------------------------------------- |
-| `loadXrpBalance`              | `account_info`   | `actNotFound` → zero balance                |
-| `loadXrpAccountInfo`          | `account_info`   | `actNotFound` → `XrpAccountNotFoundError`   |
-| `loadXrpOpenLedgerFee`        | `fee`            | none                                        |
-| `loadXrpLedgerIndex`          | `ledger_current` | none                                        |
-| `loadXrpValidatedLedgerIndex` | `ledger`         | none                                        |
-| `loadXrpTransactionOutcome`   | `tx`             | `txnNotFound`, and only with `searched_all` |
-| `submitXrpTransaction`        | `submit`         | none                                        |
-| `loadXrpTransactions`         | `account_tx`     | `actNotFound` → empty history               |
+| Helper                        | Method               | Expected errors                             |
+| ----------------------------- | -------------------- | ------------------------------------------- |
+| `loadXrpBalance`              | `account_info`       | `actNotFound` → zero balance                |
+| `loadXrpAccountInfo`          | `account_info`       | `actNotFound` → `XrpAccountNotFoundError`   |
+| `loadXrpOpenLedgerFee`        | `fee`                | none                                        |
+| `loadXrpLedgerIndex`          | `ledger_current`     | none                                        |
+| `loadXrpValidatedLedgerIndex` | `ledger`             | none                                        |
+| `loadXrpTransactionOutcome`   | `tx`                 | `txnNotFound`, and only with `searched_all` |
+| `submitXrpTransaction`        | `submit`             | none                                        |
+| `loadXrpTransactions`         | `account_tx`         | `actNotFound` → empty history               |
+| `loadXrpAccountLines`         | `account_lines`      | `actNotFound` → no lines                    |
+| `loadXrpDepositAuthorized`    | `deposit_authorized` | none                                        |
 
 Declaring nothing is the safe default, and `fee` shows why the check cannot be skipped:
 every field of its result is optional, so an error response would otherwise parse with no
@@ -213,8 +216,33 @@ omitted when false. Every page after the first is pinned to the first page's `le
 never-funded account answers `actNotFound`, which is an empty list, bound to the address like the
 other absences; on a Clio node the echo is `{ "method": "account_lines", "params": [{ ... }] }`.
 
+With `peer`, the send reads one holder's lines with a token's issuer. The node still pages: it
+filters the account's objects page by page, so a page can come back without the line and with a
+`marker` (checked on the public Clio node, 2026-11-18). A line is only absent once the last page
+is read, and a line naming another counterparty than the peer is refused.
+
 The QuickNode endpoint's method whitelist must include `account_lines` before a build that reads it
 reaches an environment using that endpoint: a method outside the whitelist answers HTTP 401.
+
+## Deposit authorization (`deposit_authorized`)
+
+`loadXrpDepositAuthorized` asks whether a recipient with DepositAuth takes payments from the sender,
+on the validated ledger:
+
+```json
+{
+	"method": "deposit_authorized",
+	"params": [
+		{ "source_account": "r...", "destination_account": "r...", "ledger_index": "validated" }
+	]
+}
+```
+
+The answer echoes both accounts, which bind it to the question, and `deposit_authorized` is `true`
+for every recipient without DepositAuth. An absent account answers `srcActNotFound` or
+`dstActNotFound`, which the send treats as no answer. It is asked only when the recipient's flags
+set DepositAuth, so the whitelist must include it before a build that sends reaches an environment
+using that endpoint.
 
 ## Send (`submit`)
 

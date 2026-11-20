@@ -63,6 +63,9 @@ export const XRP_ACCOUNT_FLAG_DEFAULT_RIPPLE = 0x00800000;
 export const XRP_ACCOUNT_FLAG_DISALLOW_INCOMING_TRUST_LINE = 0x20000000;
 // `lsfAllowTrustLineClawback`: the issuer can take its tokens back from any holder.
 export const XRP_ACCOUNT_FLAG_ALLOW_TRUST_LINE_CLAWBACK = 0x80000000;
+// `lsfDepositAuth`: the account takes payments only from accounts it preauthorized. A payment from
+// any other is applied as `tecNO_PERMISSION`, which claims the fee.
+export const XRP_ACCOUNT_FLAG_DEPOSIT_AUTH = 0x01000000;
 
 // A `TransferRate` is scaled by 10^9: this value is a rate of 1, i.e. no transfer fee, as is an
 // absent field.
@@ -134,3 +137,7 @@ export const XRP_RPC_TIMEOUT_MS = XRP_LEDGER_CLOSE_SECONDS * 2 * 1000;
 // matters — sending the whole balance, removing a line only at zero — the reader uses the ledger's
 // own decimal string rather than this value.
 export const XRP_TRUST_LINE_TOKEN_DECIMALS = 18;
+
+// The significant digits a token amount can carry: the ledger keeps a 16-digit mantissa, and
+// `ripple-binary-codec` refuses a 17th ("Decimal precision out of range") rather than rounding it.
+export const XRP_TOKEN_MAX_SIGNIFICANT_DIGITS = 16;

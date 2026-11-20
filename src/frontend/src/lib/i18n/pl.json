@@ -1029,6 +1029,7 @@
 		"text": {
 			"send": "Wyślij",
 			"xrp_sent": "Twoja płatność XRP przeszła.",
+			"xrp_token_sent": "",
 			"xrp_submitted": "Płatność wysłana. Zwykle rozlicza się w ciągu kilku sekund — możesz to zamknąć i kontynuować.",
 			"send_token": "",
 			"send_unknown_token": "",
@@ -1051,6 +1052,7 @@
 			"source_network": "Sieć źródłowa",
 			"destination_network": "Sieć docelowa",
 			"xrp_destination_tag": "Tag docelowy XRP",
+			"xrp_transfer_fee": "",
 			"initializing_transaction": "Inicjowanie transakcji",
 			"convert_to_native_icp": "Konwertuj na natywny ICP",
 			"open_qr_modal": "Rozpocznij skanowanie kodu QR w celu uzyskania szczegółów transakcji",
@@ -1107,6 +1109,9 @@
 			"xrp_destination_tag_invalid": "Tag docelowy XRP musi być liczbą całkowitą od 0 do 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Niewystarczające środki: kwota musi pozostawić dość na pokrycie opłaty i wymaganej rezerwy konta XRP.",
+			"xrp_token_amount_too_precise": "",
+			"xrp_insufficient_funds_for_transfer_fee": "",
+			"xrp_insufficient_xrp_for_fee": "",
 			"insufficient_funds_for_gas": "Niewystarczające środki na gaz",
 			"insufficient_funds_for_amount": "Niewystarczające środki na kwotę",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Niewystarczające środki Ethereum na pokrycie opłat",
@@ -1171,7 +1176,20 @@
 			"xrp_destination_unfunded": "Ten adres nie ma jeszcze konta XRP. Jego utworzenie wymaga pierwszej płatności co najmniej $reserve XRP. Nic nie zostało wysłane — zwiększ kwotę lub wyślij na adres, który jest już zasilony.",
 			"xrp_destination_tag_required": "Ten adres wymaga tagu docelowego XRP. Nic nie zostało wysłane — dodaj tag otrzymany od serwisu, któremu płacisz, i wyślij ponownie.",
 			"xrp_destination_is_source": "To Twój własny adres XRP. Nic nie zostało wysłane — wybierz innego odbiorcę.",
-			"xrp_account_state_unavailable": "Portfel nie mógł odczytać danych Twojego konta, więc kwota nie została sprawdzona. Nic nie zostało wysłane — spróbuj ponownie za chwilę."
+			"xrp_account_state_unavailable": "Portfel nie mógł odczytać danych Twojego konta, więc kwota nie została sprawdzona. Nic nie zostało wysłane — spróbuj ponownie za chwilę.",
+			"xrp_ledger_state_unavailable": "",
+			"xrp_token_insufficient_balance": "",
+			"xrp_insufficient_xrp_for_fee": "",
+			"xrp_destination_not_found": "",
+			"xrp_deposit_not_authorized": "",
+			"xrp_no_trust_line": "",
+			"xrp_trust_line_limit": "",
+			"xrp_destination_frozen": "",
+			"xrp_destination_not_authorized": "",
+			"xrp_token_frozen": "",
+			"xrp_token_deep_frozen": "",
+			"xrp_no_rippling": "",
+			"xrp_transfer_fee_changed": ""
 		}
 	},
 	"mint": {

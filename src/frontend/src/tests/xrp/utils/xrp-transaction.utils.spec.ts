@@ -9,6 +9,7 @@ import {
 import type { XrpAccountTransaction, XrpAccountTransactionEntry } from '$xrp/types/xrp-transaction';
 import {
 	buildXrpPayment,
+	buildXrpTokenPayment,
 	buildXrpTrustSet,
 	deriveXrpLedgerWindow,
 	deriveXrpTransactionHash,
@@ -55,6 +56,65 @@ describe('xrp-transaction.utils', () => {
 
 		it('includes LastLedgerSequence when provided', () => {
 			expect(buildXrpPayment({ ...base, lastLedgerSequence: 100 }).LastLedgerSequence).toBe(100);
+		});
+	});
+
+	describe('buildXrpTokenPayment', () => {
+		const params = {
+			account: base.account,
+			destination: base.destination,
+			amount: { currency: mockRlusdCurrencyCode, issuer: mockRlusdIssuer, value: '25' },
+			fee: 12n,
+			sequence: 7,
+			signingPublicKey: base.signingPublicKey,
+			lastLedgerSequence: 1020
+		};
+
+		it('pays the token by its currency and issuer, with no SendMax without a fee', () => {
+			expect(buildXrpTokenPayment(params)).toEqual({
+				TransactionType: 'Payment',
+				Account: base.account,
+				Destination: base.destination,
+				Amount: { currency: mockRlusdCurrencyCode, issuer: mockRlusdIssuer, value: '25' },
+				Fee: '12',
+				Sequence: 7,
+				SigningPubKey: base.signingPublicKey,
+				LastLedgerSequence: 1020
+			});
+		});
+
+		it('caps the cost with SendMax when there is a fee', () => {
+			const sendMax = { currency: mockRlusdCurrencyCode, issuer: mockRlusdIssuer, value: '25.125' };
+
+			expect(buildXrpTokenPayment({ ...params, sendMax }).SendMax).toEqual(sendMax);
+		});
+
+		it('keeps a destination tag, zero included', () => {
+			expect(buildXrpTokenPayment({ ...params, destinationTag: 0 }).DestinationTag).toBe(0);
+		});
+
+		// A partial payment could deliver less than the amount entered, and paths could route it
+		// through other currencies.
+		it('sets no flags and no paths', () => {
+			const payment = buildXrpTokenPayment(params);
+
+			expect('Flags' in payment).toBeFalsy();
+			expect('Paths' in payment).toBeFalsy();
+		});
+
+		it('encodes and carries the window its record is resolved over', () => {
+			const blob = encode(
+				buildXrpTokenPayment({
+					...params,
+					sendMax: { ...params.amount, value: '25.125' }
+				})
+			);
+
+			expect(decode(blob)).toMatchObject({
+				Amount: { currency: mockRlusdCurrencyCode, issuer: mockRlusdIssuer, value: '25' },
+				SendMax: { currency: mockRlusdCurrencyCode, issuer: mockRlusdIssuer, value: '25.125' }
+			});
+			expect(deriveXrpLedgerWindow(blob)).toEqual(xrpLedgerSearchWindow(1020));
 		});
 	});
 

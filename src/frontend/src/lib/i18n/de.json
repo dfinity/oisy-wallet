@@ -1029,6 +1029,7 @@
 		"text": {
 			"send": "Senden",
 			"xrp_sent": "Ihre XRP-Zahlung ist durchgegangen.",
+			"xrp_token_sent": "",
 			"xrp_submitted": "Zahlung übermittelt. Sie wird meist innerhalb von Sekunden abgeschlossen — Sie können dies schließen und weitermachen.",
 			"send_token": "",
 			"send_unknown_token": "",
@@ -1051,6 +1052,7 @@
 			"source_network": "Quellnetzwerk",
 			"destination_network": "Zielnetzwerk",
 			"xrp_destination_tag": "XRP-Ziel-Tag",
+			"xrp_transfer_fee": "",
 			"initializing_transaction": "Transaktion initialisieren",
 			"convert_to_native_icp": "In natives ICP umwandeln",
 			"open_qr_modal": "QR-Code-Scan für Transaktionsdetails starten",
@@ -1107,6 +1109,9 @@
 			"xrp_destination_tag_invalid": "Das XRP-Ziel-Tag muss eine ganze Zahl zwischen 0 und 4294967295 sein.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Unzureichende Mittel: Der Betrag muss genug übrig lassen, um die Gebühr und die erforderliche XRP-Kontoreserve zu decken.",
+			"xrp_token_amount_too_precise": "",
+			"xrp_insufficient_funds_for_transfer_fee": "",
+			"xrp_insufficient_xrp_for_fee": "",
 			"insufficient_funds_for_gas": "Unzureichende Mittel für Gas.",
 			"insufficient_funds_for_amount": "Unzureichende Mittel für den Betrag.",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Unzureichende Ethereum-Mittel, um die Gebühren zu decken.",
@@ -1171,7 +1176,20 @@
 			"xrp_destination_unfunded": "Diese Adresse hat noch kein XRP-Konto. Dessen Erstellung erfordert eine erste Zahlung von mindestens $reserve XRP. Es wurde nichts gesendet – erhöhen Sie den Betrag oder senden Sie an eine bereits finanzierte Adresse.",
 			"xrp_destination_tag_required": "Diese Adresse erfordert ein XRP-Ziel-Tag. Es wurde nichts gesendet – fügen Sie das Tag hinzu, das Sie vom Dienst erhalten haben, an den Sie zahlen, und senden Sie erneut.",
 			"xrp_destination_is_source": "Das ist Ihre eigene XRP-Adresse. Es wurde nichts gesendet – wählen Sie einen anderen Empfänger.",
-			"xrp_account_state_unavailable": "Die Wallet konnte Ihre Kontodaten nicht lesen, daher ließ sich der Betrag nicht prüfen. Es wurde nichts gesendet – versuchen Sie es in einem Moment erneut."
+			"xrp_account_state_unavailable": "Die Wallet konnte Ihre Kontodaten nicht lesen, daher ließ sich der Betrag nicht prüfen. Es wurde nichts gesendet – versuchen Sie es in einem Moment erneut.",
+			"xrp_ledger_state_unavailable": "",
+			"xrp_token_insufficient_balance": "",
+			"xrp_insufficient_xrp_for_fee": "",
+			"xrp_destination_not_found": "",
+			"xrp_deposit_not_authorized": "",
+			"xrp_no_trust_line": "",
+			"xrp_trust_line_limit": "",
+			"xrp_destination_frozen": "",
+			"xrp_destination_not_authorized": "",
+			"xrp_token_frozen": "",
+			"xrp_token_deep_frozen": "",
+			"xrp_no_rippling": "",
+			"xrp_transfer_fee_changed": ""
 		}
 	},
 	"mint": {

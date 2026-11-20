@@ -8,6 +8,7 @@ import {
 	XrplAccountLinesResultSchema,
 	XrplAccountTxErrorSchema,
 	XrplAccountTxResultSchema,
+	XrplDepositAuthorizedResultSchema,
 	XrplEnvelopeSchema,
 	XrplFeeResultSchema,
 	XrplLedgerCurrentResultSchema,
@@ -356,19 +357,24 @@ const XRP_ACCOUNT_LINES_MAX_PAGES = 10;
 
 /**
  * The account's trust lines via the XRPL `account_lines` method, every page, all from one
- * validated ledger.
+ * validated ledger — or, with `peer`, only its lines with that account, for every currency.
  *
  * The first page is read at `validated` and every later page is pinned to the ledger index it
  * reported, so a marker is never followed into a different ledger and the list describes a single
  * state of the account. A never-funded account owns no lines, which is not a failure: `actNotFound`
  * is an empty list, bound to the address like the other absences in this file.
+ *
+ * With `peer` the node can still answer a page without the line and a marker: it filters the
+ * account's objects page by page. So the line is only absent once the last page is read.
  */
 export const loadXrpAccountLines = async ({
 	address,
-	network
+	network,
+	peer
 }: {
 	address: XrpAddress;
 	network: XrpNetworkType;
+	peer?: XrpAddress;
 }): Promise<XrpTrustLine[]> => {
 	const lines: XrpTrustLine[] = [];
 
@@ -383,6 +389,7 @@ export const loadXrpAccountLines = async ({
 				account: address,
 				ledger_index: ledgerIndex ?? 'validated',
 				limit: XRP_ACCOUNT_LINES_PAGE_LIMIT,
+				...(nonNullish(peer) && { peer }),
 				...(nonNullish(marker) && { marker })
 			},
 			expectedErrors: ['actNotFound']
@@ -442,6 +449,13 @@ export const loadXrpAccountLines = async ({
 
 		ledgerIndex = ledger_index;
 
+		// A line with another account than the peer asked for answers a different question.
+		if (nonNullish(peer) && pageLines.some(({ account: counterparty }) => counterparty !== peer)) {
+			throw new Error(
+				`Unexpected XRPL account_lines response: a line with an account other than ${peer}`
+			);
+		}
+
 		lines.push(
 			...pageLines.map(
 				({
@@ -451,7 +465,10 @@ export const loadXrpAccountLines = async ({
 					limit,
 					limit_peer,
 					no_ripple,
+					no_ripple_peer,
 					peer_authorized,
+					freeze,
+					deep_freeze,
 					freeze_peer,
 					deep_freeze_peer
 				}) => ({
@@ -461,7 +478,10 @@ export const loadXrpAccountLines = async ({
 					limit,
 					limitPeer: limit_peer,
 					noRipple: no_ripple ?? false,
+					noRipplePeer: no_ripple_peer ?? false,
 					peerAuthorized: peer_authorized ?? false,
+					freeze: freeze ?? false,
+					deepFreeze: deep_freeze ?? false,
 					freezePeer: freeze_peer ?? false,
 					deepFreezePeer: deep_freeze_peer ?? false
 				})
@@ -478,6 +498,58 @@ export const loadXrpAccountLines = async ({
 	throw new Error(
 		`Unexpected XRPL account_lines response: more than ${XRP_ACCOUNT_LINES_MAX_PAGES} pages`
 	);
+};
+
+/**
+ * Whether `destination` takes payments from `source`, via the XRPL `deposit_authorized` method on
+ * the validated ledger. True for every account without DepositAuth; for one with it, only when it
+ * preauthorized `source`.
+ *
+ * Any failure throws, the absence of either account included: the caller asks only about a
+ * recipient it has just found, and an answer it cannot get must not read as "authorized".
+ */
+export const loadXrpDepositAuthorized = async ({
+	source,
+	destination,
+	network
+}: {
+	source: XrpAddress;
+	destination: XrpAddress;
+	network: XrpNetworkType;
+}): Promise<boolean> => {
+	const result = await xrpJsonRpc({
+		network,
+		method: 'deposit_authorized',
+		params: { source_account: source, destination_account: destination, ledger_index: 'validated' }
+	});
+
+	const parsed = XrplDepositAuthorizedResultSchema.safeParse(result);
+
+	if (!parsed.success) {
+		throw new Error(
+			'Unexpected XRPL deposit_authorized response: it does not match the expected shape'
+		);
+	}
+
+	const {
+		deposit_authorized: authorized,
+		source_account: answeredSource,
+		destination_account: answeredDestination,
+		validated
+	} = parsed.data;
+
+	if (!validated) {
+		throw new Error('Unexpected XRPL deposit_authorized response: an open-ledger snapshot');
+	}
+
+	// Raw comparison: a classic address is base58 over a checksummed payload, so case matters.
+	if (answeredSource !== source || answeredDestination !== destination) {
+		throw new Error(
+			`Unexpected XRPL deposit_authorized response: answered for ${answeredSource} to ${answeredDestination}, asked for ${source} to ${destination}`
+		);
+	}
+
+	return authorized;
 };
 
 /**

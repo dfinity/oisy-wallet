@@ -1,13 +1,23 @@
 import type { xrpTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 
-// Minimal XRPL Payment transaction shape (native XRP only). Amount and Fee are
-// strings of drops (1 XRP = 1,000,000 drops); TxnSignature is set after signing.
+// A token amount as a transaction states it: the token by its currency and issuer, and the value as
+// a decimal string.
+export interface XrpIssuedAmount {
+	currency: string;
+	issuer: string;
+	value: string;
+}
+
+// Minimal XRPL Payment transaction shape. `Amount` is a string of drops (1 XRP = 1,000,000 drops)
+// for XRP and an issued amount for a token; `SendMax` caps what a token payment costs the sender
+// when the issuer charges a transfer fee. Fee is drops; TxnSignature is set after signing.
 export interface XrpPayment {
 	TransactionType: 'Payment';
 	Account: string;
 	Destination: string;
-	Amount: string;
+	Amount: string | XrpIssuedAmount;
+	SendMax?: XrpIssuedAmount;
 	Fee: string;
 	Sequence: number;
 	SigningPubKey: string;

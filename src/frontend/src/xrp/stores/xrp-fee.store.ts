@@ -44,9 +44,33 @@ export const initReserveStore = (): ReserveStore => {
 	};
 };
 
+export type TransferRateStoreData = number | undefined;
+
+export interface TransferRateStore extends Readable<TransferRateStoreData> {
+	setTransferRate: (data: TransferRateStoreData) => void;
+}
+
+/**
+ * The transfer rate of a trust-line token's issuer, scaled by 10^9: the fee it charges on every
+ * transfer between holders, which the sender pays on top of the amount. `undefined` while it is
+ * unknown, which blocks a token send as an unknown fee does.
+ */
+export const initTransferRateStore = (): TransferRateStore => {
+	const { subscribe, set } = writable<TransferRateStoreData>(undefined);
+
+	return {
+		subscribe,
+		setTransferRate: (data: TransferRateStoreData) => {
+			set(data);
+		}
+	};
+};
+
 export interface XrpFeeContext {
 	feeStore: FeeStore;
 	reserveStore: ReserveStore;
+	// Only a send of a trust-line token reads it.
+	transferRateStore?: TransferRateStore;
 	feeSymbolStore: Writable<string | undefined>;
 	feeDecimalsStore: Writable<number | undefined>;
 	feeTokenIdStore: Writable<TokenId | undefined>;
