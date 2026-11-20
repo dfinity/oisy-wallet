@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import type { Component } from 'svelte';
 	import type { Action } from 'svelte/action';
 	import { goto } from '$app/navigation';
@@ -36,6 +37,10 @@
 		NAVIGATION_MORE_MENU_X
 	} from '$lib/constants/test-ids.constants';
 	import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
+	import {
+		buildMainMenuClickEvent,
+		trackEvent as trackEventServices
+	} from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import type { TrackEventParams } from '$lib/types/analytics';
@@ -67,12 +72,17 @@
 	// page in the documentation everywhere else. Same row, label and position
 	// either way; only where it goes changes, so production keeps today's link
 	// until the page ships there.
+	//
+	// Only the in-app Help page is the Help item of the main navigation, so only
+	// then does the row count as a click on it, as the mobile More sheet does.
 	const groups = $derived<MoreMenuRow[][]>([
 		[
 			{
 				label: $i18n.navigation.text.help,
 				ariaLabel: replaceOisyPlaceholders($i18n.navigation.alt.support),
-				...(HELP_ENABLED ? { route: AppPath.Help } : { href: OISY_SUPPORT_URL }),
+				...(HELP_ENABLED
+					? { route: AppPath.Help, trackEvent: buildMainMenuClickEvent('help') }
+					: { href: OISY_SUPPORT_URL }),
 				icon: IconHelp,
 				testId: NAVIGATION_MORE_MENU_HELP
 			},
@@ -134,7 +144,17 @@
 	// Mirrors the account menu's Settings row: close first, and let the backdrop
 	// finish fading before the route changes, or the blur lingers over the page
 	// that just rendered and reads as a flicker.
-	const goToRoute = async (route: AppPath) => {
+	const goToRoute = async ({
+		route,
+		trackEvent
+	}: {
+		route: AppPath;
+		trackEvent?: TrackEventParams;
+	}) => {
+		if (nonNullish(trackEvent)) {
+			trackEventServices(trackEvent);
+		}
+
 		close();
 		await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION);
 		await goto(
@@ -185,7 +205,7 @@
 
 				{#each rows as { label, ariaLabel, href, route, icon: Icon, testId, trackEvent } (testId)}
 					{#if route}
-						<ButtonMenu {ariaLabel} onclick={() => goToRoute(route)} {testId}>
+						<ButtonMenu {ariaLabel} onclick={() => goToRoute({ route, trackEvent })} {testId}>
 							<Icon />
 							{label}
 						</ButtonMenu>

@@ -50,6 +50,7 @@
 		NAVIGATION_ITEM_TRADE
 	} from '$lib/constants/test-ids.constants';
 	import { TokenTypes } from '$lib/enums/token-types';
+	import { buildMainMenuClickEvent, trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { activeAssetsTabStore } from '$lib/stores/settings.store';
@@ -329,6 +330,7 @@
 			tag={descriptor.tag}
 			tagVariant={descriptor.tagVariant}
 			testId={descriptor.testId}
+			trackEvent={buildMainMenuClickEvent(id)}
 		>
 			{#snippet icon()}
 				<Icon />
@@ -360,6 +362,7 @@
 				aria-label={descriptor.ariaLabel}
 				data-tid={descriptor.testId}
 				href={descriptor.href}
+				onclick={() => trackEvent(buildMainMenuClickEvent(id))}
 			>
 				{@render cardInner()}
 			</a>
@@ -371,6 +374,7 @@
 				aria-label={descriptor.ariaLabel}
 				data-tid={descriptor.testId}
 				onclick={() => {
+					trackEvent(buildMainMenuClickEvent(id));
 					closeSheetInstantly = true;
 					openSheet = null;
 					descriptor.onclick?.();

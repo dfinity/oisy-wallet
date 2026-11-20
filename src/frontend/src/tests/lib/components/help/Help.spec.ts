@@ -7,6 +7,12 @@ import {
 	HELP_NETWORK_EXPLORERS_CARD,
 	HELP_SUPPORT_CARD
 } from '$lib/constants/test-ids.constants';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_VALUES,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
+import { trackEvent } from '$lib/services/analytics.services';
 import { trackHelp } from '$lib/services/help-analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -16,6 +22,11 @@ import { render } from '@testing-library/svelte';
 vi.mock('$lib/services/help-analytics.services', async (importOriginal) => ({
 	...(await importOriginal<Record<string, unknown>>()),
 	trackHelp: vi.fn()
+}));
+
+vi.mock('$lib/services/analytics.services', async (importOriginal) => ({
+	...(await importOriginal<Record<string, unknown>>()),
+	trackEvent: vi.fn()
 }));
 
 describe('Help', () => {
@@ -81,6 +92,18 @@ describe('Help', () => {
 		expect(trackHelp).toHaveBeenCalledExactlyOnceWith({
 			action: 'open',
 			resultStatus: 'success'
+		});
+	});
+
+	it('sends page_open once, like every page in the navigation', () => {
+		render(Help);
+
+		expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.HELP,
+				event_value: PLAUSIBLE_EVENT_VALUES.HELP_PAGE
+			}
 		});
 	});
 });

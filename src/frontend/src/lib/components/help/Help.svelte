@@ -5,10 +5,24 @@
 	import HelpProviderExplorers from '$lib/components/help/HelpProviderExplorers.svelte';
 	import HelpSupport from '$lib/components/help/HelpSupport.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
-	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_VALUES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { trackHelp } from '$lib/services/help-analytics.services';
 
 	onMount(() => {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.HELP,
+				event_value: PLAUSIBLE_EVENT_VALUES.HELP_PAGE
+			}
+		});
+
 		trackHelp({
 			action: 'open',
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS

@@ -56,6 +56,13 @@ export const isRewardsPath = (path: string | null) =>
 export const isEarnPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earn}`) ?? false;
 
+// The Assets section spans one route per tab (Tokens / Trading / Earning / Borrowing), all
+// rendered by the same `Assets.svelte`. Used to tell "entering the section" from a tab
+// switch so section-entry analytics fire once per visit, not once per tab. NFTs is its own
+// section, although `Assets.svelte` renders it too.
+export const isAssetsRouteId = (id: string | null): boolean =>
+	isTokensPath(id) || isTradingPath(id) || isEarningPath(id) || isBorrowingsPath(id);
+
 export const transactionsUrl = ({ token }: { token: Token }): string =>
 	tokenUrl({ path: AppPath.Transactions, token });
 

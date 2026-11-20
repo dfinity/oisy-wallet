@@ -228,6 +228,41 @@ The event payload is built via the `buildLearnMoreEvent()` factory helper in `sr
 - `Erc20Icp` — uses a custom `IconInfo` and a scoped white-text style block that `ExternalLink` cannot represent without a custom-icon slot.
 - "Learn more" / "Read more" links embedded as raw `<a>` tags inside i18n strings rendered via `<Html text={...}>` / `{@html}` — they cannot be wired through `ExternalLink.trackEvent` without an i18n refactor (split the string at a placeholder and render the link separately) or a delegated click handler. Known cases: `activity.info.hidden_micro_transactions`, `core.warning.standalone_mode`, `tokens.warning.trust_token`.
 
+### Navigation section visits
+
+Every page in the main navigation fires a `page_open` Plausible event when the user **enters** it, however they got there: a menu click, a direct URL, the browser back/forward button, or an in-app redirect. The page's feature component sends it on mount (Assets and NFTs on their first navigation, see below).
+
+| Page     | `event_context` | `event_value`     |
+| -------- | --------------- | ----------------- |
+| Assets   | `assets`        | `assets-page`     |
+| NFTs     | `nft`           | `nfts-page`       |
+| Activity | `activity`      | `activity-page`   |
+| Trade    | `trading`       | `oisy-trade-page` |
+| Earn     | `earn`          | `earn-page`       |
+| Borrow   | `borrow`        | `borrow-page`     |
+| Explore  | `explore`       | `explore-page`    |
+| Help     | `help`          | `help-page`       |
+| Settings | `settings`      | `settings-page`   |
+| Rewards  | `rewards`       | `rewards-page`    |
+| Tools    | `tools`         | `tools-page`      |
+
+Notes opens a modal, not a page, so it sends no `page_open`; its menu click is still a `ui_click`, and the modal itself is tracked by `personal_note` (`open`).
+
+Assets has one route per tab (Tokens, Trading, Earning, Borrowing), so moving between its tabs is not a new visit. NFTs is its own section, although the same component draws it: moving between its list, a collection and an NFT is not a new visit, but going from Assets to NFTs is.
+
+### Assets sub-tab views
+
+Within Assets, the Tokens / Trading / Earning / Borrowing tabs each emit a `view_open` event (`event_context = assets_tab`, `event_value` = the tab id, `location_source = assets_page`) **per appearance**, with an `event_trigger` property recording the cause: `click` when the user clicked the tab, `auto` when the view was shown without a click (the landing tab on section entry, a direct URL to a tab route, or a back/forward landing). The landing fire is entry-guarded so a tab click — which already emits one `click` event and then remounts the page — is not double-counted by an additional `auto` fire. Both the click and the landing payloads are produced by the shared `buildAssetsTabViewEvent()` helper so they stay identical apart from `event_value` and `event_trigger`. (Known gap: back/forward navigation _between_ Assets tabs does not emit a `view_open`, as the guard treats it as intra-section.)
+
+### Navigation clicks
+
+Clicking a navigation control fires a generic `ui_click` event — a complementary "how users navigate" signal, distinct from the "which pages get visited" `page_open` count. It carries `source_location = navigation`, a `source_sublocation` for the surface, and `event_value` for what was clicked:
+
+- `main_menu` — every item of the main navigation, in every layout (desktop sidebar, mobile bottom bar, mobile group sheets). `event_value` is the item id: `assets`, `nfts`, `activity`, `trade`, `earn`, `borrow`, `explore`, `notes`, `help`, `settings`, `rewards`, `tools`. On desktop, Help sits in the More menu, whose Help row sends the same click (`help`) while it opens the in-app Help page; the menu's links out keep their own events. The mobile Finance and More buttons, which only open a sheet, send nothing.
+- `assets_tabs` — the Assets tab bar. `event_value` is the tab id.
+
+A single generic event with these properties — rather than per-surface event names — keeps every navigation surface comparable in one Plausible breakdown and lets new surfaces adopt it by adding property values, not events. Payloads are built by the shared `buildUiClickEvent()` helper. `ui_click` is orthogonal to the appearance events: a menu click to Assets emits `ui_click` **and** `page_open` **and** the landing `view_open`, while a direct-URL/back-forward entry emits only the latter two — so `page_open` remains the complete visit metric. `ui_click` uses the standard `source_location` key; the older `location_source` on `view_open` is legacy and migrated separately.
+
 ### Personal notes tracking
 
 The [Personal notes](#personal-notes) feature emits two structured Plausible events, both under `event_context: personal_notes` and content-free — no event ever carries the note text, a note id, the share token, the share key, or PII. Both follow the domain-service pattern (the action in `event_modifier`, the outcome in `result_status`) described in [`analytics.md`](frontend/analytics.md).

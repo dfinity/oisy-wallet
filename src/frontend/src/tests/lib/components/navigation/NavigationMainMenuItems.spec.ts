@@ -20,13 +20,16 @@ import {
 	NAVIGATION_MORE_MENU_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
+import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 import { TokenTypes } from '$lib/enums/token-types';
+import * as analyticsServices from '$lib/services/analytics.services';
 import { activeAssetsTabStore } from '$lib/stores/settings.store';
 import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 const featureFlags = vi.hoisted(() => ({ helpEnabled: true }));
 
@@ -319,6 +322,75 @@ describe('NavigationMainMenuItems', () => {
 		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
 
 		expect(tokenLink.getAttribute('href')).not.toContain(ETHEREUM_NETWORK_ID.description);
+	});
+
+	describe('ui_click', () => {
+		const uiClick = (id: string) => ({
+			name: PLAUSIBLE_EVENTS.UI_CLICK,
+			metadata: {
+				source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION,
+				source_sublocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MAIN_MENU,
+				event_value: id
+			}
+		});
+
+		let trackEventSpy: MockInstance;
+
+		beforeEach(() => {
+			trackEventSpy = vi.spyOn(analyticsServices, 'trackEvent').mockImplementation(() => {});
+		});
+
+		it.each([
+			{ id: 'assets', testId: NAVIGATION_ITEM_TOKENS },
+			{ id: 'nfts', testId: NAVIGATION_ITEM_NFTS },
+			{ id: 'activity', testId: NAVIGATION_ITEM_ACTIVITY },
+			{ id: 'trade', testId: NAVIGATION_ITEM_TRADE },
+			{ id: 'borrow', testId: NAVIGATION_ITEM_BORROW },
+			{ id: 'explore', testId: NAVIGATION_ITEM_EXPLORER },
+			{ id: 'notes', testId: NAVIGATION_ITEM_NOTES },
+			{ id: 'rewards', testId: NAVIGATION_ITEM_REWARDS },
+			{ id: 'tools', testId: NAVIGATION_ITEM_TOOLS }
+		])('fires ui_click "$id" from the desktop sidebar', async ({ id, testId }) => {
+			const { getByTestId } = render(NavigationMainMenuItems);
+
+			await fireEvent.click(getByTestId(testId));
+
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(uiClick(id));
+		});
+
+		it('fires ui_click "settings" from the pinned bottom block', async () => {
+			const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'bottom' } });
+
+			await fireEvent.click(getByTestId(NAVIGATION_ITEM_SETTINGS));
+
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(uiClick('settings'));
+		});
+
+		it('fires ui_click for a mobile bar item', async () => {
+			const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'mobile' } });
+
+			await fireEvent.click(getByTestId(NAVIGATION_ITEM_ACTIVITY));
+
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(uiClick('activity'));
+		});
+
+		it('fires ui_click for a card in a mobile sheet, but not for the button that opens it', async () => {
+			const { getByTestId } = await openMobileMore();
+
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			await fireEvent.click(getByTestId(`mobile-${NAVIGATION_ITEM_HELP}`));
+
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(uiClick('help'));
+		});
+
+		it('fires ui_click for the mobile Notes item, which opens a modal', async () => {
+			const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'mobile' } });
+
+			await fireEvent.click(getByTestId(NAVIGATION_ITEM_NOTES));
+
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(uiClick('notes'));
+		});
 	});
 
 	describe('Tools', () => {

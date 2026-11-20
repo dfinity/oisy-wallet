@@ -45,7 +45,10 @@ export enum PLAUSIBLE_EVENTS {
 	PROVIDER_FALLBACK = 'provider_fallback',
 	// An invariant we believed unreachable was reached. Not for flows that can legitimately
 	// fail — those keep their own event and report the outcome via `result_status`.
-	ERROR = 'error'
+	ERROR = 'error',
+	// A user click on a navigation control; where it was is in `source_location` /
+	// `source_sublocation`, what was clicked in `event_value`.
+	UI_CLICK = 'ui_click'
 }
 
 // How serious any event is, from low to high, in `event_severity`: OpenTelemetry's level names,
@@ -206,6 +209,12 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	OPEN_CRYPTOPAY = 'open_cryptopay',
 	EARN = 'earn',
 	BORROW = 'borrow',
+	ASSETS = 'assets',
+	ACTIVITY = 'activity',
+	EXPLORE = 'explore',
+	SETTINGS = 'settings',
+	REWARDS = 'rewards',
+	TOOLS = 'tools',
 	TRANSACTIONS = 'transactions',
 	SIGNER = 'signer',
 	NETWORKS = 'networks',
@@ -294,6 +303,14 @@ export enum PLAUSIBLE_EVENT_VALUES {
 	EARN_PAGE = 'earn-page',
 	BORROW_PAGE = 'borrow-page',
 	OISY_TRADE_PAGE = 'oisy-trade-page',
+	ASSETS_PAGE = 'assets-page',
+	NFTS_PAGE = 'nfts-page',
+	ACTIVITY_PAGE = 'activity-page',
+	EXPLORE_PAGE = 'explore-page',
+	HELP_PAGE = 'help-page',
+	SETTINGS_PAGE = 'settings-page',
+	REWARDS_PAGE = 'rewards-page',
+	TOOLS_PAGE = 'tools-page',
 	HARVEST_AUTOPILOTS_PAGE = 'harvest-autopilots-page',
 	HARVEST_AUTOPILOT_DETAIL_PAGE = 'harvest-autopilot-detail-page',
 	TOKENS_BASIC = 'tokens_basic',
@@ -336,7 +353,11 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	HELP_PAGE = 'help_page',
 	TOOLS_PAGE = 'tools_page',
 	TIP_SENDER = 'tip_sender',
-	TIP_CLAIMER = 'tip_claimer'
+	TIP_CLAIMER = 'tip_claimer',
+	NAVIGATION = 'navigation',
+	// Sublocations of NAVIGATION.
+	MAIN_MENU = 'main_menu',
+	ASSETS_TABS = 'assets_tabs'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
@@ -379,4 +400,9 @@ export enum PLAUSIBLE_EVENT_RESULT_STATUSES {
 export enum PLAUSIBLE_EVENT_TYPES_SIGNER {
 	REQUESTED = 'requested',
 	PRESENTED = 'presented'
+}
+
+export enum PLAUSIBLE_EVENT_TRIGGERS {
+	AUTO = 'auto',
+	CLICK = 'click'
 }
