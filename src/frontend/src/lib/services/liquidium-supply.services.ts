@@ -117,6 +117,7 @@ export const executeLiquidiumSupply = async ({
 	const rowRefs = ({ txid }: { txid: string }) =>
 		toLiquidiumExternalRefs({
 			[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+			[LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN]: chain,
 			[LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT]: displayAmount,
 			[LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL]: asset,
 			[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid

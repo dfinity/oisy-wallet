@@ -1,3 +1,4 @@
+import { BTC_TXID_REGEX } from '$btc/constants/btc.constants';
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { infuraProviders } from '$eth/providers/infura.providers';
@@ -10,7 +11,10 @@ import {
 	reloadActiveUserTransaction
 } from '$lib/services/active-user-transactions.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
+import {
+	LIQUIDIUM_EXTERNAL_REF_KEYS,
+	type LiquidiumExternalRefKey
+} from '$lib/types/liquidium-active-tx';
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import {
@@ -19,7 +23,13 @@ import {
 } from '$lib/utils/liquidium-active-tx.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
-import { ActivityFilter, type Activity, type LiquidiumClient } from '@liquidium/client';
+import {
+	ActivityFilter,
+	Asset,
+	Chain,
+	type Activity,
+	type LiquidiumClient
+} from '@liquidium/client';
 import { isHexString } from 'ethers/utils';
 import { get } from 'svelte/store';
 
@@ -139,21 +149,43 @@ const isRevertedEthRepay = async ({
 	return receipt?.status === 0;
 };
 
+// The rail is read off the chain ref, since `token` is the ckBTC ledger on both rails of the BTC pool.
+// Rows written before that ref still get the check, or a repay among them would lower the repay max
+// for good: in the BTC pool only the native rail's txid is a Bitcoin one, the ckBTC rail's being a
+// ledger block index.
+const isNativeBtcTransfer = ({
+	refs,
+	txid
+}: {
+	refs: Partial<Record<LiquidiumExternalRefKey, string>>;
+	txid: string;
+}): boolean => {
+	const chain = refs[LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN];
+
+	if (nonNullish(chain)) {
+		return chain === Chain.BTC;
+	}
+
+	return refs[LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL] === Asset.BTC && BTC_TXID_REGEX.test(txid);
+};
+
 // A BTC supply or repay is written before its broadcast, whose outcome can be unclear. One that never
 // reached the network is never listed by Liquidium, so it would hold its amount for good. Only those
 // two: a borrow or withdraw carries the txid of Liquidium's own payout, which Liquidium broadcasts
 // and settles, so the network not knowing it yet says nothing about the row (Copilot).
 const isNeverLandedBtcTransfer = async ({
 	tx,
+	refs,
 	txid
 }: {
 	tx: ActiveUserTransaction;
+	refs: Partial<Record<LiquidiumExternalRefKey, string>>;
 	txid?: string;
 }): Promise<boolean> =>
 	'Liquidium' in tx.data &&
 	('Supply' in tx.data.Liquidium.action || 'Repay' in tx.data.Liquidium.action) &&
-	'BtcNativeMainnet' in tx.data.Liquidium.token &&
 	nonNullish(txid) &&
+	isNativeBtcTransfer({ refs, txid }) &&
 	(await isBtcTransactionNeverLanded({ id: tx.id, txid, updatedAtNs: tx.updated_at_ns }));
 
 const pollLiquidiumActiveUserTransaction = async ({
@@ -185,7 +217,7 @@ const pollLiquidiumActiveUserTransaction = async ({
 
 		const activity = await resolveLiquidiumActivity({ client, profileId, txid, outflowId });
 
-		const neverLanded = isNullish(activity) && (await isNeverLandedBtcTransfer({ tx, txid }));
+		const neverLanded = isNullish(activity) && (await isNeverLandedBtcTransfer({ tx, refs, txid }));
 
 		const candidate = nonNullish(activity)
 			? liquidiumActivityToStatus(activity.status)
