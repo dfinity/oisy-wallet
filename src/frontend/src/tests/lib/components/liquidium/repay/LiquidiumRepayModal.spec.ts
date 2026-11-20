@@ -1,4 +1,5 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import LiquidiumRepayModal from '$lib/components/liquidium/repay/LiquidiumRepayModal.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import {
@@ -21,7 +22,7 @@ import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import { readable, writable, type Writable } from 'svelte/store';
 
 describe('LiquidiumRepayModal', () => {
 	const reserve: LiquidiumReserve = {
@@ -103,6 +104,74 @@ describe('LiquidiumRepayModal', () => {
 				action: 'repayment'
 			})
 		);
+	});
+
+	describe('a superseded fee quote', () => {
+		// The quote reruns whenever its inputs change: a rail picked from the list, or, as here, the
+		// Ethereum address that owns the profile. Either way the earlier quote is superseded.
+		const otherEthAddress = '0x2222222222222222222222222222222222222222' as EthAddress;
+		const currentFee = 50_000n;
+		const staleFee = 7_000_000n;
+
+		let address: Writable<OptionEthAddress>;
+		let settleStale: {
+			resolve?: (fee: bigint) => void;
+			reject?: (err: unknown) => void;
+		};
+
+		beforeEach(() => {
+			address = writable<OptionEthAddress>(mockEthAddress);
+			vi.spyOn(addressesStore, 'ethAddress', 'get').mockImplementation(() => address);
+
+			settleStale = {};
+
+			vi.mocked(liquidiumSupplyServices.estimateLiquidiumInflowFee)
+				.mockReturnValueOnce(
+					new Promise((resolve, reject) => {
+						settleStale = { resolve, reject };
+					})
+				)
+				.mockResolvedValue(currentFee);
+		});
+
+		const renderWithCurrentQuote = async (): Promise<HTMLElement> => {
+			const { container } = render(LiquidiumRepayModal, { props: { reserve } });
+
+			await waitFor(() =>
+				expect(liquidiumSupplyServices.estimateLiquidiumInflowFee).toHaveBeenCalledOnce()
+			);
+
+			address.set(otherEthAddress);
+
+			await waitFor(() =>
+				expect(liquidiumSupplyServices.estimateLiquidiumInflowFee).toHaveBeenCalledTimes(2)
+			);
+			await waitFor(() => expect(container).toHaveTextContent('0.0005'));
+
+			return container;
+		};
+
+		it('does not overwrite the current fee when it answers late', async () => {
+			const container = await renderWithCurrentQuote();
+
+			settleStale.resolve?.(staleFee);
+			await runResolvedPromises();
+			await runResolvedPromises();
+
+			expect(container).toHaveTextContent('0.0005');
+			expect(container).not.toHaveTextContent('0.07');
+		});
+
+		it('does not mark the current fee unavailable when it fails late', async () => {
+			const container = await renderWithCurrentQuote();
+
+			settleStale.reject?.(new Error('stale oracle price'));
+			await runResolvedPromises();
+			await runResolvedPromises();
+
+			expect(container).toHaveTextContent('0.0005');
+			expect(container).not.toHaveTextContent(en.liquidium.text.repay_prices_unavailable);
+		});
 	});
 
 	it('refetches the protocol max once a pending repay settles', async () => {
