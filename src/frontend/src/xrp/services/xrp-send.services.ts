@@ -100,13 +100,13 @@ const xrpSendRecord =
 	};
 
 /**
- * Creates the record that holds the invariant.
+ * Creates the record that holds the invariant — a payment's, or a `TrustSet`'s.
  *
  * Refuses the payment if it cannot be created — at the per-user cap, or with the backend
  * unreachable. Sending anyway would drop the guarantee at exactly the moment a retry is most
  * likely, and would leave the payment with nothing to resolve it.
  */
-const openXrpPaymentRecord = async ({
+export const openXrpPaymentRecord = async ({
 	identity,
 	source,
 	record: { data, externalRefs, progressStep }

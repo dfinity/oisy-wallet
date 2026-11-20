@@ -16,6 +16,20 @@ export interface XrpPayment {
 	TxnSignature?: string;
 }
 
+// Minimal XRPL TrustSet: the wallet's side of a trust line, for one token. Fee in drops, as for a
+// payment; `LimitAmount` names the token by its currency and issuer.
+export interface XrpTrustSet {
+	TransactionType: 'TrustSet';
+	Account: string;
+	LimitAmount: { currency: string; issuer: string; value: string };
+	Flags: number;
+	Fee: string;
+	Sequence: number;
+	SigningPubKey: string;
+	LastLedgerSequence?: number;
+	TxnSignature?: string;
+}
+
 export interface XrpSubmitResult {
 	engineResult: string;
 	engineResultMessage?: string;

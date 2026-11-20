@@ -12,7 +12,8 @@ import type {
 	OisyTradeData,
 	OneSecIcpToEvmData,
 	VeloraData,
-	XrpData
+	XrpData,
+	XrpTrustSetData
 } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
 import type {
@@ -28,6 +29,7 @@ import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
 import { OISY_TRADE_EXTERNAL_REF_KEYS } from '$lib/types/oisy-trade-swap';
 import { VELORA_EXTERNAL_REF_KEYS } from '$lib/types/velora-swap';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockRlusdCurrencyCode, mockRlusdIssuer } from '$tests/mocks/xrp.mock';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -289,6 +291,33 @@ export const mockXrpActiveUserTransaction: ActiveUserTransaction = {
 		},
 		{ key: XRP_EXTERNAL_REF_KEYS.AMOUNT, value: '25' },
 		{ key: XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL, value: 'XRP' },
+		{ key: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL, value: 'XRP Ledger' }
+	],
+	created_at_ns: ZERO,
+	updated_at_ns: ZERO,
+	error: []
+};
+
+/** Adding RLUSD: a `TrustSet` from the source address, which takes its sequence as a send does. */
+export const mockXrpTrustSetData: XrpTrustSetData = {
+	token: { XrpTrustLineMainnet: [mockRlusdCurrencyCode, mockRlusdIssuer] },
+	source_address: mockXrpSourceAddress,
+	change: { Add: null },
+	fee: 12n
+};
+
+export const mockXrpTrustSetActiveUserTransaction: ActiveUserTransaction = {
+	id: '99999999-9999-4999-8999-999999999999',
+	status: { Pending: null },
+	data: { XrpTrustSet: mockXrpTrustSetData },
+	progress_step: ['send'],
+	external_refs: [
+		{ key: XRP_EXTERNAL_REF_KEYS.TX_HASH, value: mockXrpTxHash },
+		{
+			key: XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE,
+			value: `${mockXrpLastLedgerSequence}`
+		},
+		{ key: XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL, value: 'RLUSD' },
 		{ key: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL, value: 'XRP Ledger' }
 	],
 	created_at_ns: ZERO,

@@ -10,6 +10,7 @@ import {
 	mockXrpData,
 	mockXrpLastLedgerSequence,
 	mockXrpSwapActiveUserTransaction,
+	mockXrpTrustSetActiveUserTransaction,
 	mockXrpTxHash
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -592,6 +593,137 @@ describe('xrp-active-tx.services', () => {
 
 			expectNoUpdate();
 		});
+	});
+
+	// A `TrustSet` is resolved as a send is — it is the whole transaction — but what a failed one did
+	// not do is add a token, so its texts say that instead of naming an amount.
+	describe('adding a trust-line token', () => {
+		const trustSet = mockXrpTrustSetActiveUserTransaction;
+
+		const expectTrustSetStatus = ({ status, error }: { status: object; error?: string }) =>
+			expect(applySpy).toHaveBeenCalledWith({
+				identity,
+				tx: trustSet,
+				update: { status, ...(error !== undefined ? { error } : {}) }
+			});
+
+		const expired = () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+				mockXrpLastLedgerSequence + 1
+			);
+		};
+
+		it('polls it over the window the row was signed against', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'pending' });
+
+			await poll([trustSet]);
+
+			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith(expectedWindow);
+
+			expectNoUpdate();
+		});
+
+		it('resolves a validated tesSUCCESS as Succeeded', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				state: 'validated',
+				transactionResult: 'tesSUCCESS'
+			});
+
+			await poll([trustSet]);
+
+			expectTrustSetStatus({ status: { Succeeded: null } });
+		});
+
+		it('fails on a validated tec result, naming the token, the network and the result', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				state: 'validated',
+				transactionResult: 'tecNO_LINE_INSUF_RESERVE'
+			});
+
+			await poll([trustSet]);
+
+			expectTrustSetStatus({
+				status: { Failed: null },
+				error: replacePlaceholders(get(i18n).tokens.import.error.xrp_trust_set_failed, {
+					$symbol: 'RLUSD',
+					$network: 'XRP Ledger',
+					$result: 'tecNO_LINE_INSUF_RESERVE'
+				})
+			});
+		});
+
+		it('fails on expiry, naming the token and the network', async () => {
+			expired();
+
+			await poll([trustSet]);
+
+			expectTrustSetStatus({
+				status: { Failed: null },
+				error: replacePlaceholders(get(i18n).tokens.import.error.xrp_trust_set_expired, {
+					$symbol: 'RLUSD',
+					$network: 'XRP Ledger'
+				})
+			});
+		});
+
+		// The backend requires only the two poll refs. The token it validated still names the row —
+		// as itself, never as the native XRP a send's fallback would name.
+		it('names the token from the row itself when the snapshot is missing', async () => {
+			expired();
+
+			const withoutSnapshot: ActiveUserTransaction = {
+				...trustSet,
+				external_refs: trustSet.external_refs.filter(({ key }) =>
+					[XRP_EXTERNAL_REF_KEYS.TX_HASH, XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE].includes(
+						key as never
+					)
+				)
+			};
+
+			await poll([withoutSnapshot]);
+
+			expect(applySpy).toHaveBeenCalledWith({
+				identity,
+				tx: withoutSnapshot,
+				update: {
+					status: { Failed: null },
+					error: replacePlaceholders(get(i18n).tokens.import.error.xrp_trust_set_expired, {
+						$symbol: 'RLUSD',
+						$network: 'XRP Ledger'
+					})
+				}
+			});
+		});
+
+		// As for a payment: what keeps the byte guard for malformed input only. The longest symbol a
+		// currency code reads as is its 20 bytes of ASCII.
+		it.each(Object.values(Languages))(
+			'fits the failure texts of adding a token in %s',
+			async (language) => {
+				const { tokens } = (await import(`$lib/i18n/${language}.json`)).default;
+
+				const longestResult = Object.keys(DEFAULT_DEFINITIONS.transactionResult)
+					.filter((code) => /^tec[A-Z0-9_]+$/.test(code))
+					.reduce((longest, code) => (code.length > longest.length ? code : longest));
+
+				const bytes = (text: string) => new TextEncoder().encode(text).length;
+
+				const subject = { $symbol: 'X'.repeat(20), $network: 'XRP Ledger' };
+
+				expect(
+					bytes(
+						replacePlaceholders(tokens.import.error.xrp_trust_set_failed, {
+							...subject,
+							$result: longestResult
+						})
+					)
+				).toBeLessThanOrEqual(ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES);
+				expect(
+					bytes(replacePlaceholders(tokens.import.error.xrp_trust_set_expired, subject))
+				).toBeLessThanOrEqual(ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES);
+			}
+		);
 	});
 
 	it('reads the hash from the row rather than assuming one', async () => {

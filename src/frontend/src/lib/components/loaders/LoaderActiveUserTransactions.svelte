@@ -7,7 +7,9 @@
 		TRACK_COUNT_SWAP_ERROR,
 		TRACK_COUNT_SWAP_SUCCESS,
 		TRACK_COUNT_XRP_SEND_ERROR,
-		TRACK_COUNT_XRP_SEND_SUCCESS
+		TRACK_COUNT_XRP_SEND_SUCCESS,
+		TRACK_COUNT_XRP_TRUST_LINE_ADD_ERROR,
+		TRACK_COUNT_XRP_TRUST_LINE_ADD_SUCCESS
 	} from '$lib/constants/analytics.constants';
 	import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
@@ -48,6 +50,7 @@
 		isCyclesTopUpActiveUserTransaction,
 		toCyclesTopUpTrackingParams
 	} from '$lib/utils/cycles-top-up-active-tx.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		buildLifiSwapTrackingMetadata,
 		isLifiActiveUserTransaction
@@ -76,7 +79,10 @@
 	import { pollXrpActiveUserTransactions } from '$xrp/services/xrp-active-tx.services';
 	import {
 		buildXrpSendTrackingMetadata,
-		isXrpActiveUserTransaction
+		buildXrpTrustSetTrackingMetadata,
+		isXrpActiveUserTransaction,
+		isXrpTrustSetActiveUserTransaction,
+		xrpTrustSetActiveUserTransactionDisplay
 	} from '$xrp/utils/xrp-active-tx.utils';
 	import { isXrpPaymentInFlight, makesXrpPayment } from '$xrp/utils/xrp-in-flight.utils';
 
@@ -410,6 +416,37 @@
 
 				// Unconditional: a validated failure claimed the fee, so the balance moved, and an
 				// expiry costs only a refresh that finds nothing new.
+				shouldRefresh = true;
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isXrpTrustSetActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackEvent({
+					name: isSucceeded
+						? TRACK_COUNT_XRP_TRUST_LINE_ADD_SUCCESS
+						: TRACK_COUNT_XRP_TRUST_LINE_ADD_ERROR,
+					metadata: buildXrpTrustSetTrackingMetadata({ tx })
+				});
+
+				// The one place adding a token is reported, for the reason the send's outcome is: the
+				// review stops at the submit.
+				if (isSucceeded) {
+					toastsShow({
+						text: replacePlaceholders($i18n.tokens.import.text.xrp_token_added, {
+							$symbol: xrpTrustSetActiveUserTransactionDisplay(tx)?.symbol ?? ''
+						}),
+						level: 'success',
+						duration: 4000
+					});
+				} else {
+					toastsError({ msg: { text: tx.error[0] ?? $i18n.send.error.unexpected } });
+				}
+
+				// Unconditional, as for a send: a failure claimed the fee, and a success added the line
+				// the wallet now reads, which is what shows the token and saves it to the list.
 				shouldRefresh = true;
 			}
 		}

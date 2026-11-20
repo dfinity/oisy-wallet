@@ -18,6 +18,7 @@
 	import type { ValidateTokenData as ValidateIcrc7TokenData } from '$icp/services/icrc7-add-custom-tokens.service';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import { TRACK_UNRECOGNISED_ERC_INTERFACE } from '$lib/constants/analytics.constants';
+	import { xrpAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -39,6 +40,8 @@
 	} from '$lib/utils/network.utils';
 	import SolAddTokenReview from '$sol/components/tokens/SolAddTokenReview.svelte';
 	import XrpAddTokenReview from '$xrp/components/tokens/XrpAddTokenReview.svelte';
+	import type { XrpAddTokenReview as XrpAddTokenReviewData } from '$xrp/services/xrp-add-token.services';
+	import { addXrpTrustLineToken } from '$xrp/services/xrp-trust-line-tokens.services';
 
 	interface Props {
 		network?: Network;
@@ -240,6 +243,24 @@
 		]);
 	};
 
+	const addXrpToken = async () => {
+		// Present whenever the button is enabled; the review does not enable it before.
+		if (isNullish(xrpReview)) {
+			return;
+		}
+
+		await addXrpTrustLineToken({
+			identity: $authIdentity,
+			source: $xrpAddressMainnet,
+			token: xrpReview.token,
+			fee: xrpReview.fee,
+			progress,
+			modalNext,
+			onSuccess,
+			onError
+		});
+	};
+
 	const saveTokens = (tokens: SaveCustomTokenWithKey[]): Promise<void> =>
 		saveCustomTokensWithKey({
 			tokens,
@@ -262,6 +283,8 @@
 	let ethMetadata: Erc20Metadata | Erc721Metadata | undefined = $state();
 
 	let splMetadata: TokenMetadata | undefined = $state();
+
+	let xrpReview: XrpAddTokenReviewData | undefined = $state();
 
 	let {
 		ledgerCanisterId,
@@ -326,5 +349,12 @@
 		bind:metadata={splMetadata}
 	/>
 {:else if XRP_TRUST_LINE_TOKENS_ENABLED && nonNullish(network) && isNetworkIdXrp(network?.id)}
-	<XrpAddTokenReview currency={xrpCurrency} issuer={xrpIssuer} {network} {onBack} />
+	<XrpAddTokenReview
+		currency={xrpCurrency}
+		issuer={xrpIssuer}
+		{network}
+		{onBack}
+		onSave={addXrpToken}
+		bind:review={xrpReview}
+	/>
 {/if}

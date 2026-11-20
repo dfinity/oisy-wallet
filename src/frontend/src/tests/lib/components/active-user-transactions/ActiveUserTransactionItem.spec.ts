@@ -14,7 +14,8 @@ import {
 	mockOisyTradeActiveUserTransaction,
 	mockVeloraActiveUserTransaction,
 	mockXrpActiveUserTransaction,
-	mockXrpData
+	mockXrpData,
+	mockXrpTrustSetActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import { fireEvent, render, screen } from '@testing-library/svelte';
@@ -361,6 +362,58 @@ describe('ActiveUserTransactionItem', () => {
 			});
 
 			expect(screen.getByText(`${en.send.text.send} 25 XRP`)).toBeInTheDocument();
+			expect(container.querySelector('.text-error-primary')).toBeInTheDocument();
+		});
+	});
+
+	// Adding a trust-line token moves no amount: the row says which token, and where.
+	describe('rows adding a trust-line token', () => {
+		const renderRow = (tx = mockXrpTrustSetActiveUserTransaction) =>
+			render(ActiveUserTransactionItem, {
+				props: { tx, isUnseen: false, dismissing: false, onDismiss: vi.fn() }
+			});
+
+		it('renders the token and the network, with no amount, provider or arrow', () => {
+			const { container } = renderRow();
+
+			expect(screen.getByText(`${en.core.text.add} RLUSD`)).toBeInTheDocument();
+			expect(container).toHaveTextContent('XRP Ledger');
+			expect(container).not.toHaveTextContent(en.send.text.send);
+			expect(container).not.toHaveTextContent('→');
+		});
+
+		it('names the token from its own data when the display snapshot is missing', () => {
+			const { container } = renderRow({
+				...mockXrpTrustSetActiveUserTransaction,
+				external_refs: mockXrpTrustSetActiveUserTransaction.external_refs.filter(({ key }) =>
+					[XRP_EXTERNAL_REF_KEYS.TX_HASH, XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE].includes(
+						key as never
+					)
+				)
+			});
+
+			expect(screen.getByText(`${en.core.text.add} RLUSD`)).toBeInTheDocument();
+			expect(container).toHaveTextContent('XRP Ledger');
+		});
+
+		// Open, it holds the address: deleting it would release the guard on a `TrustSet` that may
+		// still apply.
+		it('offers no dismiss while the record is still open', () => {
+			renderRow();
+
+			expect(
+				screen.queryByLabelText(en.active_user_transactions.text.dismiss_aria_label)
+			).not.toBeInTheDocument();
+		});
+
+		it('renders a failed row with the alert icon', () => {
+			const { container } = renderRow({
+				...mockXrpTrustSetActiveUserTransaction,
+				status: { Failed: null },
+				error: ['not added']
+			});
+
+			expect(screen.getByText(`${en.core.text.add} RLUSD`)).toBeInTheDocument();
 			expect(container.querySelector('.text-error-primary')).toBeInTheDocument();
 		});
 	});

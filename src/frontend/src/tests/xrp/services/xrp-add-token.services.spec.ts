@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
 import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { ZERO } from '$lib/constants/app.constants';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	mockRlusdCurrencyCode,
 	mockRlusdIssuer,
@@ -12,7 +13,13 @@ import {
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { XrpAccountNotFoundError } from '$xrp/rest/xrpl.rest';
 import { loadXrpAddTokenReview } from '$xrp/services/xrp-add-token.services';
+import * as xrpInFlightServices from '$xrp/services/xrp-in-flight.services';
+import { XrpSendAlreadyInFlightError, XrpSendNotGuardedError } from '$xrp/types/xrp-send';
 import type { XrpAccountInfo } from '$xrp/types/xrp-transaction';
+
+vi.mock('$xrp/services/xrp-in-flight.services', () => ({
+	assertNoXrpPaymentInFlight: vi.fn()
+}));
 
 vi.mock(import('$xrp/rest/xrpl.rest'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -61,6 +68,7 @@ describe('xrp-add-token.services', () => {
 	};
 
 	const params = {
+		identity: mockIdentity,
 		currency: 'RLUSD',
 		issuer: mockRlusdIssuer,
 		address: mockXrpAddress,
@@ -71,6 +79,7 @@ describe('xrp-add-token.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockReads();
+		vi.mocked(xrpInFlightServices.assertNoXrpPaymentInFlight).mockResolvedValue(mockIdentity);
 	});
 
 	it('reviews RLUSD with exactly its two issuer powers, its fee and the reserve after adding', async () => {
@@ -199,6 +208,32 @@ describe('xrp-add-token.services', () => {
 		mockReads({ account: { ...accountInfo, balance: 1_000_020n, ownerCount: 1 } });
 
 		expect((await loadXrpAddTokenReview(params)).refusal).toBeUndefined();
+	});
+
+	it('asks the guard about the user’s own address', async () => {
+		await loadXrpAddTokenReview(params);
+
+		expect(xrpInFlightServices.assertNoXrpPaymentInFlight).toHaveBeenCalledExactlyOnceWith({
+			identity: mockIdentity,
+			source: mockXrpAddress
+		});
+	});
+
+	it.each([
+		{
+			name: 'an earlier transaction from the address that has not resolved',
+			error: new XrpSendAlreadyInFlightError('open'),
+			refusal: 'transaction_in_flight'
+		},
+		{
+			name: 'a guard that could not be asked',
+			error: new XrpSendNotGuardedError('down'),
+			refusal: 'not_guarded'
+		}
+	])('refuses $name', async ({ error, refusal }) => {
+		vi.mocked(xrpInFlightServices.assertNoXrpPaymentInFlight).mockRejectedValue(error);
+
+		await expect(loadXrpAddTokenReview(params)).resolves.toEqual({ refusal });
 	});
 
 	it('reads both accounts on the validated ledger', async () => {
