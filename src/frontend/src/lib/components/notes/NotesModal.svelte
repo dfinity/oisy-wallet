@@ -238,8 +238,11 @@
 		modalStore.close();
 	};
 
+	// Guarded here (not just via the buttons' `disabled`) so every caller — including
+	// the Cmd/Ctrl+Enter shortcut — shares one source of truth for "can save now",
+	// rather than each call site re-checking `saveDisabled` itself.
 	const handleSave = async () => {
-		if (isNullish($authIdentity)) {
+		if (saveDisabled || isNullish($authIdentity)) {
 			return;
 		}
 		busy = true;
@@ -314,7 +317,12 @@
 	{#if step === 'editor'}
 		<ContentWithToolbar styleClass="flex min-h-0 flex-col gap-4 items-stretch overflow-y-auto">
 			{#key editorInstance}
-				<InputPersonalNote disabled={busy} bind:isValid bind:value={noteText} />
+				<InputPersonalNote
+					disabled={busy}
+					onSubmit={handleSave}
+					bind:isValid
+					bind:value={noteText}
+				/>
 			{/key}
 
 			{#if nonNullish(editorMetadata)}
