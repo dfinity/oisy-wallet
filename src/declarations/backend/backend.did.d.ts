@@ -1830,10 +1830,19 @@ export interface OneSecIcpToEvmData {
  * A `(key, value)` entry of an `OnRamper` signed parameter — e.g. `(btc, <address>)` inside
  * `wallets`, or `(ethereum, <address>)` inside `networkWallets`. The canister normalizes the
  * `key` to lowercase before signing.
+ *
+ * In `SignOnramperWidgetUrlV2Request::params`, an entry is a whole widget parameter instead: its
+ * name and its value as it goes into the URL before encoding, e.g. `(onlyCryptos, btc,eth)`.
  */
 export interface OnramperSignedEntry {
 	key: string;
 	value: string;
+}
+/**
+ * A widget URL query signed with `OnRamper`'s Signature V2.
+ */
+export interface OnramperSignedQueryV2 {
+	query: string;
 }
 /**
  * A reference to a transaction output.
@@ -2036,6 +2045,24 @@ export interface SaveUserTransactionsRequest {
 	transactions: Array<UserTransaction>;
 }
 export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
+/**
+ * Errors returned by `set_onramper_signing_key`.
+ */
+export type SetOnramperSigningKeyError = {
+	/**
+	 * The text is not an Ed25519 private key in PKCS#8 PEM, as
+	 * `openssl genpkey -algorithm ED25519` writes it.
+	 */
+	InvalidKey: null;
+};
+export type SetOnramperSigningKeyResult =
+	| {
+			/**
+			 * The key was set, replaced or cleared.
+			 */
+			Ok: null;
+	  }
+	| { Err: SetOnramperSigningKeyError };
 export type SetPersonalNoteResult =
 	| {
 			/**
@@ -2169,6 +2196,89 @@ export type SignOnramperWidgetUrlResult =
 			Ok: SignOnramperWidgetUrlResponse;
 	  }
 	| { Err: SignOnramperWidgetUrlError };
+/**
+ * Errors returned by `sign_onramper_widget_url_v2`.
+ */
+export type SignOnramperWidgetUrlV2Error =
+	| {
+			/**
+			 * A parameter is not one the backend signs, comes twice, or has a value outside its form or
+			 * size, or `apiKey` is missing. Carries the parameter's name. Nothing is signed.
+			 */
+			InvalidParam: string;
+	  }
+	| {
+			/**
+			 * As for `sign_onramper_widget_url`: a supplied address is not the caller's.
+			 */
+			AddressMismatch: null;
+	  }
+	| {
+			/**
+			 * The caller exceeded the per-principal rate limit, which this endpoint shares with
+			 * `sign_onramper_widget_url`.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The backend holds neither a V2 key nor a V1 secret, so the widget cannot open.
+			 */
+			NotConfigured: null;
+	  }
+	| {
+			/**
+			 * The backend could not get random bytes for the nonce.
+			 */
+			NonceUnavailable: null;
+	  }
+	| {
+			/**
+			 * As for `sign_onramper_widget_url`: an address could not be derived, so it could not be
+			 * verified.
+			 */
+			AddressDerivationFailed: null;
+	  };
+/**
+ * Request body for `sign_onramper_widget_url_v2`.
+ */
+export interface SignOnramperWidgetUrlV2Request {
+	/**
+	 * `<networkId>:<address>` pairs for the `networkWallets` parameter. Each address must be the
+	 * one the backend derives for the caller on that network.
+	 */
+	network_wallets: Array<OnramperSignedEntry>;
+	/**
+	 * The parameters to sign as `(name, value)` entries, `apiKey` included: every parameter of
+	 * the URL except `networkWallets` and display-only ones such as `themeName`. Signed only with
+	 * Signature V2; the V1 fallback signs `network_wallets` alone.
+	 */
+	params: Array<OnramperSignedEntry>;
+}
+/**
+ * Successful response of `sign_onramper_widget_url_v2`.
+ */
+export type SignOnramperWidgetUrlV2Response =
+	| {
+			/**
+			 * The backend holds no V2 key: the V1 signature, as `sign_onramper_widget_url` returns it.
+			 */
+			V1: SignOnramperWidgetUrlResponse;
+	  }
+	| {
+			/**
+			 * The backend holds a V2 key: the whole query, signed with V2.
+			 */
+			V2: OnramperSignedQueryV2;
+	  };
+export type SignOnramperWidgetUrlV2Result =
+	| {
+			/**
+			 * The query signed with V2, or the V1 signature while the backend holds no V2 key.
+			 */
+			Ok: SignOnramperWidgetUrlV2Response;
+	  }
+	| { Err: SignOnramperWidgetUrlV2Error };
 /**
  * A signed delegation from the delegation chain.
  */
@@ -3343,6 +3453,14 @@ export interface _SERVICE {
 	 */
 	get_my_tips: ActorMethod<[], GetMyTipsResult>;
 	/**
+	 * The public key of the Signature V2 private key as PEM, as `openssl pkey -pubout` writes it,
+	 * or `null` when no key is set. To send it to `OnRamper` and to check which key an environment
+	 * holds.
+	 *
+	 * Restricted to controllers and allowed callers.
+	 */
+	get_onramper_signing_public_key: ActorMethod<[], [] | [string]>;
+	/**
 	 * Returns the note ciphertext for a **reusable** (non-single-use), unexpired
 	 * share. A single-use share's content is only ever returned by
 	 * `consume_personal_note_share`. Callable anonymously — a deliberate,
@@ -3600,6 +3718,15 @@ export interface _SERVICE {
 	 */
 	set_new_user_signups_allowed: ActorMethod<[boolean], undefined>;
 	/**
+	 * Sets, replaces or clears (with `null`) the private key for Signature V2: an Ed25519 key in
+	 * PKCS#8 PEM, as `openssl genpkey -algorithm ED25519` writes it. While a key is set,
+	 * [`sign_onramper_widget_url_v2`] signs with V2.
+	 *
+	 * Restricted to canister controllers. No endpoint returns the key; `get_api_keys` cannot either,
+	 * since the key is stored outside the API keys.
+	 */
+	set_onramper_signing_key: ActorMethod<[[] | [string]], SetOnramperSigningKeyResult>;
+	/**
 	 * Sets or clears the `OnRamper` signing secret used by [`sign_onramper_widget_url`].
 	 *
 	 * Restricted to canister controllers. Uses a single-field mutation, so it never overwrites the
@@ -3656,6 +3783,21 @@ export interface _SERVICE {
 	sign_onramper_widget_url: ActorMethod<
 		[SignOnramperWidgetUrlRequest],
 		SignOnramperWidgetUrlResult
+	>;
+	/**
+	 * Sign the `OnRamper` widget URL with Signature V2 when this backend holds a V2 key
+	 * (`set_onramper_signing_key`), and with V1 until then, exactly as [`sign_onramper_widget_url`].
+	 *
+	 * With V2, the backend signs `apiKey`, the caller's verified network wallets and the other
+	 * widget parameters, but only parameters on its fixed list, with values in the form OISY sends
+	 * them. Each call gets a fresh nonce and timestamp, so a signed URL works once.
+	 *
+	 * Same guard and rate limit as [`sign_onramper_widget_url`]: both endpoints count against
+	 * [`SIGN_ONRAMPER_WIDGET_URL_RATE_LIMITER`].
+	 */
+	sign_onramper_widget_url_v2: ActorMethod<
+		[SignOnramperWidgetUrlV2Request],
+		SignOnramperWidgetUrlV2Result
 	>;
 	/**
 	 * Gets statistics about the canister.

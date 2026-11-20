@@ -48,9 +48,9 @@ Use the Candid method list for the current endpoints and their exact behavior.
 
 This is not a general-purpose wallet execution API. In particular, it does not
 provide a generic method to transfer tokens or sign arbitrary transactions on
-the caller's behalf. Methods such as `allow_signing` and
-`sign_onramper_widget_url` serve specific OISY flows and must not be treated as
-general authorization or transaction-signing methods. The tip methods move
+the caller's behalf. Methods such as `allow_signing`, `sign_onramper_widget_url`
+and `sign_onramper_widget_url_v2` serve specific OISY flows and must not be
+treated as general authorization or transaction-signing methods. The tip methods move
 tokens only within their own flow: `create_tip` records a tip against an ICRC-2
 allowance the tipper has already granted to this canister, and `claim_tip` pays
 it out to the claimer once, from that allowance. `btc_broadcast_transaction`
