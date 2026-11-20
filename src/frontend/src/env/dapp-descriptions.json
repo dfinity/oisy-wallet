@@ -283,6 +283,19 @@
 		"screenshots": ["/images/dapps/motoko-tokyo-screenshot.webp"]
 	},
 	{
+		"id": "blitzgrid",
+		"name": "dapps.descriptions.blitzgrid.name",
+		"oneLiner": "dapps.descriptions.blitzgrid.one_liner",
+		"website": "https://blitzgrid.xyz",
+		"twitter": "https://x.com/Quokkatmmhub",
+		"tags": ["dapps.categories.game", "dapps.categories.ab_icp", "dapps.categories.aa_new"],
+		"description": "dapps.descriptions.blitzgrid.description",
+		"usesInternetIdentity": true,
+		"stats": "",
+		"logo": "/images/dapps/blitzgrid-logo.webp",
+		"screenshots": ["/images/dapps/blitzgrid-screenshot.webp"]
+	},
+	{
 		"id": "icpanda-message",
 		"name": "dapps.descriptions.icpanda_message.name",
 		"oneLiner": "dapps.descriptions.icpanda_message.one_liner",
