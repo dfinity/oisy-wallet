@@ -188,3 +188,13 @@ export class LiquidiumSolTransferRefusedError extends Error {
 		super('The SOL transfer to Liquidium was not sent', options);
 	}
 }
+
+/**
+ * The blockhash of a native SOL transfer to Liquidium was no longer valid just before its broadcast,
+ * so nothing was sent. The blockhash is in the message for the logs only.
+ */
+export class LiquidiumSolBlockhashExpiredError extends Error {
+	constructor(blockhash: string) {
+		super(`The blockhash ${blockhash} of the SOL transfer is no longer valid`);
+	}
+}

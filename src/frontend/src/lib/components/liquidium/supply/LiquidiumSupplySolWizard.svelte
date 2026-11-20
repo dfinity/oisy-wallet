@@ -19,7 +19,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
-	import { LiquidiumSolTransferRefusedError } from '$lib/types/errors';
+	import {
+		LiquidiumSolBlockhashExpiredError,
+		LiquidiumSolTransferRefusedError
+	} from '$lib/types/errors';
 	import type { LiquidiumMarket } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
@@ -175,14 +178,25 @@
 				return;
 			}
 
-			// The refusal's own message is not for the user: the toast shows the failure it wraps, as the
-			// SOL send does.
-			const cause = err instanceof LiquidiumSolTransferRefusedError ? err.cause : err;
+			// A transfer that was never sent shows only a translated message: the refusal and what it wraps
+			// (a Solana error, the expired blockhash) go to the console.
+			if (err instanceof LiquidiumSolTransferRefusedError) {
+				toastsErrorNoTrace({
+					msg: {
+						text:
+							err.cause instanceof LiquidiumSolBlockhashExpiredError
+								? $i18n.send.error.solana_transaction_expired
+								: (mapSolanaErrorMsg(err.cause) ?? $i18n.liquidium.text.transaction_failed)
+					},
+					err
+				});
 
-			toastsError({
-				msg: { text: mapSolanaErrorMsg(cause) ?? $i18n.liquidium.text.transaction_failed },
-				err: cause
-			});
+				onBack();
+
+				return;
+			}
+
+			toastsError({ msg: { text: $i18n.liquidium.text.transaction_failed }, err });
 
 			onBack();
 		}

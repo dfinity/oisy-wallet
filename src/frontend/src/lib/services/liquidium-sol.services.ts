@@ -1,6 +1,9 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
-import { LiquidiumSolTransferRefusedError } from '$lib/types/errors';
+import {
+	LiquidiumSolBlockhashExpiredError,
+	LiquidiumSolTransferRefusedError
+} from '$lib/types/errors';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { LiquidiumSolBlockhash } from '$lib/types/liquidium-active-tx';
 import { isBlockhashValid } from '$sol/api/solana.api';
@@ -63,7 +66,7 @@ export const sendLiquidiumSol = async ({
 				});
 
 				if (!valid) {
-					throw new Error(`The blockhash ${blockhash} of the SOL transfer is no longer valid`);
+					throw new LiquidiumSolBlockhashExpiredError(blockhash);
 				}
 
 				await beforeBroadcast({ txid: signature, solBlockhash: { blockhash, slot } });

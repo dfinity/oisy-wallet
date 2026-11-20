@@ -1,7 +1,10 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 import { sendLiquidiumSol } from '$lib/services/liquidium-sol.services';
-import { LiquidiumSolTransferRefusedError } from '$lib/types/errors';
+import {
+	LiquidiumSolBlockhashExpiredError,
+	LiquidiumSolTransferRefusedError
+} from '$lib/types/errors';
 import { isBlockhashValid } from '$sol/api/solana.api';
 import { sendSol } from '$sol/services/sol-send.services';
 import { SolanaNetworks } from '$sol/types/network';
@@ -106,12 +109,16 @@ describe('liquidium-sol.services', () => {
 			});
 		});
 
-		it('sends nothing when the blockhash is no longer valid', async () => {
+		it('sends nothing when the blockhash is no longer valid, and says so', async () => {
 			vi.mocked(isBlockhashValid).mockResolvedValue({ slot: 42n, valid: false });
 			mockSendSol();
 
-			await expect(send()).rejects.toBeInstanceOf(LiquidiumSolTransferRefusedError);
+			const refused = await send().catch((e: unknown) => e);
 
+			expect(refused).toBeInstanceOf(LiquidiumSolTransferRefusedError);
+			expect((refused as LiquidiumSolTransferRefusedError).cause).toBeInstanceOf(
+				LiquidiumSolBlockhashExpiredError
+			);
 			expect(beforeBroadcast).not.toHaveBeenCalled();
 		});
 
