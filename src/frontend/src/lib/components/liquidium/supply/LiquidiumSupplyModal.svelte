@@ -6,6 +6,7 @@
 	import LiquidiumSupplyBtcWizard from '$lib/components/liquidium/supply/LiquidiumSupplyBtcWizard.svelte';
 	import LiquidiumSupplyEthWizard from '$lib/components/liquidium/supply/LiquidiumSupplyEthWizard.svelte';
 	import LiquidiumSupplyIcrcWizard from '$lib/components/liquidium/supply/LiquidiumSupplyIcrcWizard.svelte';
+	import LiquidiumSupplySolWizard from '$lib/components/liquidium/supply/LiquidiumSupplySolWizard.svelte';
 	import LiquidiumSupplyTokensList from '$lib/components/liquidium/supply/LiquidiumSupplyTokensList.svelte';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
@@ -55,6 +56,8 @@
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
 
 	let inflowFee = $state<bigint | undefined>();
+	// SOL only: the least gross transfer Liquidium credits, which the native SOL form enforces.
+	let minimumSendAmount = $state<bigint | undefined>();
 	// The estimate failed (e.g. stale oracle price): surface a retry message and block submit.
 	let inflowFeeUnavailable = $state(false);
 
@@ -68,6 +71,7 @@
 		const { asset, chain, poolId } = selectedMarket;
 
 		inflowFee = undefined;
+		minimumSendAmount = undefined;
 		inflowFeeUnavailable = false;
 
 		// A SOL quote may first create the profile, so a quote for a rail picked before can answer
@@ -82,9 +86,10 @@
 			poolId,
 			action: SupplyAction.deposit
 		})
-			.then((fee) => {
+			.then(({ totalFee, minimumSendAmount: minimum }) => {
 				if (!cancelled) {
-					inflowFee = fee;
+					inflowFee = totalFee;
+					minimumSendAmount = minimum;
 				}
 			})
 			.catch((err: unknown) => {
@@ -145,6 +150,7 @@
 		selectedMarket = market;
 		amount = undefined;
 		inflowFee = undefined;
+		minimumSendAmount = undefined;
 		inflowFeeUnavailable = false;
 		supplyProgressStep = ProgressStepsLiquidiumSupply.INITIALIZATION;
 		currentStep = undefined;
@@ -195,6 +201,20 @@
 				{inflowFee}
 				{inflowFeeUnavailable}
 				market={selectedMarket}
+				onBack={modal.back}
+				onClose={close}
+				onNext={modal.next}
+				onSelectToken={enterTokensList}
+				bind:amount
+				bind:supplyProgressStep
+			/>
+		{:else if selectedMarket.chain === 'SOL'}
+			<LiquidiumSupplySolWizard
+				{currentStep}
+				{inflowFee}
+				{inflowFeeUnavailable}
+				market={selectedMarket}
+				{minimumSendAmount}
 				onBack={modal.back}
 				onClose={close}
 				onNext={modal.next}

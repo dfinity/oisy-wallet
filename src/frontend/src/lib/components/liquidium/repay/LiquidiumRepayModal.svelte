@@ -116,9 +116,9 @@
 			poolId,
 			action: SupplyAction.repayment
 		})
-			.then((fee) => {
+			.then(({ totalFee }) => {
 				if (!cancelled) {
-					inflowFee = fee;
+					inflowFee = totalFee;
 				}
 			})
 			.catch((err: unknown) => {

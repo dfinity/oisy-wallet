@@ -27,6 +27,9 @@
 		// The provider-fee estimate failed (e.g. stale oracle price). Unlike repay, supply does not
 		// guess a fee — it surfaces a retry message and stays disabled until prices refresh.
 		inflowFeeUnavailable?: boolean;
+		// Least gross transfer (amount + provider fee) Liquidium credits, from a per-account quote
+		// (native SOL). Less would wait at the deposit address for a top-up.
+		minimumSendAmount?: bigint;
 		// Rail-specific balance check (gas/provider-fee coverage); owned by the wizard,
 		// which holds the per-chain fee context.
 		onCustomErrorValidate?: (userAmount: bigint) => Error | undefined;
@@ -44,6 +47,7 @@
 		totalFee,
 		inflowFee,
 		inflowFeeUnavailable = false,
+		minimumSendAmount,
 		onCustomErrorValidate,
 		feeDisplay,
 		onSelectToken,
@@ -57,8 +61,17 @@
 	let amountError = $state<Error | undefined>();
 
 	// The SDK only enforces the protocol deposit minimum on its wallet-executed path; this
-	// transfer rail bypasses it, so a below-minimum inflow must be rejected here.
-	let minimumSupply = $derived(getMinimumDepositAmount(market.asset));
+	// transfer rail bypasses it, so a below-minimum inflow must be rejected here. A quoted minimum is
+	// gross while the typed amount is net of the provider fee, so it is compared net.
+	let quotedMinimumSupply = $derived(
+		nonNullish(minimumSendAmount) && nonNullish(inflowFee) ? minimumSendAmount - inflowFee : ZERO
+	);
+
+	let minimumSupply = $derived.by(() => {
+		const protocolMinimum = getMinimumDepositAmount(market.asset);
+
+		return quotedMinimumSupply > protocolMinimum ? quotedMinimumSupply : protocolMinimum;
+	});
 
 	let minSupplyFormatted = $derived(
 		`${formatToken({ value: minimumSupply, unitName: $sendTokenDecimals })} ${market.asset}`
