@@ -1,3 +1,4 @@
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
@@ -12,6 +13,7 @@ import {
 	TOKEN_MODAL_INDEX_CANISTER_ID_INPUT,
 	TOKEN_MODAL_SAVE_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { xrpAddressMainnetStore } from '$lib/stores/address.store';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
@@ -25,6 +27,9 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
+import * as xrpRemoveTokenServices from '$xrp/services/xrp-remove-token.services';
+import * as xrpTrustLineTokensServices from '$xrp/services/xrp-trust-line-tokens.services';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
@@ -341,5 +346,112 @@ describe('TokenModal', () => {
 		expect(removeCustomTokenMock).toHaveBeenCalledOnce();
 		expect(toastsError).toHaveBeenCalledOnce();
 		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
+	});
+
+	// Removing one is a transaction on the XRP Ledger: its confirmation shows the fee, and the backend
+	// entry goes once the ledger has deleted the line, not here.
+	describe('an XRP Ledger trust-line token', () => {
+		const token = { ...RLUSD_TOKEN, enabled: true };
+
+		const openConfirmation = async () => {
+			const rendered = render(TokenModal, { props: { token, isDeletable: true } });
+
+			await fireEvent.click(rendered.getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
+
+			await waitFor(() =>
+				expect(rendered.getByTestId(TOKEN_MODAL_DELETE_BUTTON)).not.toBeDisabled()
+			);
+
+			return rendered;
+		};
+
+		beforeEach(() => {
+			mockAuthStore();
+			xrpAddressMainnetStore.set({ certified: true, data: mockXrpAddress });
+
+			vi.spyOn(xrpRemoveTokenServices, 'loadXrpRemoveTokenReview').mockResolvedValue({
+				review: { fee: 12n }
+			});
+		});
+
+		afterEach(() => {
+			xrpAddressMainnetStore.reset();
+		});
+
+		it('confirms the removal with what it costs and releases', async () => {
+			vi.spyOn(xrpTrustLineTokensServices, 'removeXrpTrustLineToken').mockResolvedValue();
+
+			const { getByText } = await openConfirmation();
+
+			expect(
+				getByText(en.tokens.import.text.xrp_remove_description.replace('$symbol', 'RLUSD'))
+			).toBeInTheDocument();
+			expect(
+				getByText(en.tokens.import.text.xrp_remove_reserve.replace('$amount', '0.2'))
+			).toBeInTheDocument();
+		});
+
+		it('removes it with the fee its confirmation showed, then closes', async () => {
+			const remove = vi
+				.spyOn(xrpTrustLineTokensServices, 'removeXrpTrustLineToken')
+				.mockImplementation(async ({ onSuccess }) => {
+					await onSuccess?.();
+				});
+			const removeCustomTokenMock = mockRemoveCustomToken();
+			const gotoReplaceRoot = mockGoToRoot();
+
+			const { getByTestId } = await openConfirmation();
+
+			await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
+
+			await waitFor(() => expect(gotoReplaceRoot).toHaveBeenCalledOnce());
+
+			expect(remove).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				source: mockXrpAddress,
+				token,
+				fee: 12n,
+				onSuccess: expect.any(Function),
+				onError: expect.any(Function)
+			});
+			expect(removeCustomTokenMock).not.toHaveBeenCalled();
+		});
+
+		it('goes back to the token when the removal is refused', async () => {
+			vi.spyOn(xrpTrustLineTokensServices, 'removeXrpTrustLineToken').mockImplementation(
+				({ onError }) => {
+					onError?.(new Error('refused'));
+					return Promise.resolve();
+				}
+			);
+			const gotoReplaceRoot = mockGoToRoot();
+
+			const { getByTestId, getByText } = await openConfirmation();
+
+			await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
+
+			await waitFor(() => expect(getByText(en.tokens.details.title)).toBeInTheDocument());
+
+			expect(gotoReplaceRoot).not.toHaveBeenCalled();
+		});
+
+		// The confirmation said why already; there is nothing to send.
+		it('goes back to the token when the removal cannot be reviewed', async () => {
+			vi.spyOn(xrpRemoveTokenServices, 'loadXrpRemoveTokenReview').mockResolvedValue({
+				refusal: 'balance_not_zero'
+			});
+			const remove = vi.spyOn(xrpTrustLineTokensServices, 'removeXrpTrustLineToken');
+			mockToastsError();
+
+			const { getByTestId, getByText } = render(TokenModal, {
+				props: { token, isDeletable: true }
+			});
+
+			await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
+
+			await waitFor(() => expect(getByText(en.tokens.details.title)).toBeInTheDocument());
+
+			expect(remove).not.toHaveBeenCalled();
+		});
 	});
 });

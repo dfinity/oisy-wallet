@@ -355,6 +355,13 @@ export const mockXrpTrustSetActiveUserTransaction: ActiveUserTransaction = {
 	error: []
 };
 
+/** Removing RLUSD: the same `TrustSet` row, taking the line back to its default state. */
+export const mockXrpTrustLineRemovalActiveUserTransaction: ActiveUserTransaction = {
+	...mockXrpTrustSetActiveUserTransaction,
+	id: '88888888-8888-4888-8888-888888888888',
+	data: { XrpTrustSet: { ...mockXrpTrustSetData, change: { Remove: null } } }
+};
+
 export const mockXrpSwapDepositAddress = 'rGMQ81w5aEoUeBeaCPbmLB9vmNdD41J4bN';
 
 /** A NEAR Intents swap from native XRP: its deposit is an XRP payment from the source address. */

@@ -15,7 +15,7 @@ import {
 	mockXrpTrustSetData
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockXrpAddress, mockXrpAddress2 } from '$tests/mocks/xrp.mock';
+import { mockXrpAddress, mockXrpAddress2, mockXrpTrustLine } from '$tests/mocks/xrp.mock';
 import {
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_FEE_DROPS,
@@ -30,6 +30,8 @@ import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import {
 	XrpSendAlreadyInFlightError,
 	XrpSendNotGuardedError,
+	XrpTrustLineBalanceNotZeroError,
+	XrpTrustLineNotHeldError,
 	XrpTrustSetUnfundedError
 } from '$xrp/types/xrp-send';
 import type { XrpAccountInfo } from '$xrp/types/xrp-transaction';
@@ -57,6 +59,7 @@ describe('xrp-trust-set.services', () => {
 		...buildXrpTrustSet({
 			account: source,
 			token,
+			change: 'add',
 			fee: 12n,
 			sequence: 7,
 			signingPublicKey,
@@ -72,6 +75,7 @@ describe('xrp-trust-set.services', () => {
 		network: XrpNetworks.mainnet,
 		source,
 		token,
+		change: 'add' as const,
 		fee: 12n
 	};
 
@@ -110,6 +114,7 @@ describe('xrp-trust-set.services', () => {
 			transaction: buildXrpTrustSet({
 				account: source,
 				token,
+				change: 'add',
 				fee: 12n,
 				sequence: 7,
 				signingPublicKey,
@@ -479,6 +484,121 @@ describe('xrp-trust-set.services', () => {
 
 			expect(update).not.toHaveBeenCalled();
 			expect(outcome).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('removing a token', () => {
+		const removal = { ...params, change: 'remove' as const };
+		const heldAtZero = { ...mockXrpTrustLine, balance: '0' };
+
+		beforeEach(() => {
+			vi.spyOn(xrplRest, 'loadXrpAccountLines').mockResolvedValue([heldAtZero]);
+		});
+
+		it('signs a TrustSet that takes the limit to zero', async () => {
+			await submitXrpTrustSet(removal);
+
+			expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				network: XrpNetworks.mainnet,
+				transaction: buildXrpTrustSet({
+					account: source,
+					token,
+					change: 'remove',
+					fee: 12n,
+					sequence: 7,
+					signingPublicKey,
+					lastLedgerSequence
+				})
+			});
+		});
+
+		it('records the change as a removal', async () => {
+			await submitXrpTrustSet(removal);
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					data: { XrpTrustSet: { ...mockXrpTrustSetData, change: { Remove: null } } }
+				})
+			);
+		});
+
+		// The review's reading may be stale by the time the user confirms.
+		it('reads the line with its issuer again before signing', async () => {
+			await submitXrpTrustSet(removal);
+
+			expect(xrplRest.loadXrpAccountLines).toHaveBeenCalledExactlyOnceWith({
+				address: source,
+				network: XrpNetworks.mainnet,
+				peer: token.issuer
+			});
+		});
+
+		it('does not read the line when adding', async () => {
+			vi.mocked(xrplRest.loadXrpAccountLines).mockClear();
+
+			await submitXrpTrustSet(params);
+
+			expect(xrplRest.loadXrpAccountLines).not.toHaveBeenCalled();
+		});
+
+		// The ledger would fail it as redundant and claim the fee.
+		it.each([
+			['no line', []],
+			['only a line of another token', [{ ...heldAtZero, currency: 'USD' }]]
+		])('refuses when the account holds %s', async (...[, lines]) => {
+			vi.mocked(xrplRest.loadXrpAccountLines).mockResolvedValue(lines);
+
+			await expect(submitXrpTrustSet(removal)).rejects.toThrow(XrpTrustLineNotHeldError);
+
+			expectNothingSigned();
+		});
+
+		// Dust below the wallet's 18 decimals reads as zero once scaled; the ledger's string does not.
+		it.each(['12.5', '1e-20', '-0.5'])('refuses a balance of %s', async (balance) => {
+			vi.mocked(xrplRest.loadXrpAccountLines).mockResolvedValue([{ ...heldAtZero, balance }]);
+
+			await expect(submitXrpTrustSet(removal)).rejects.toThrow(XrpTrustLineBalanceNotZeroError);
+
+			expectNothingSigned();
+		});
+
+		it.each(['0', '0.0', '-0', '0e-15'])('removes at a balance written %s', async (balance) => {
+			vi.mocked(xrplRest.loadXrpAccountLines).mockResolvedValue([{ ...heldAtZero, balance }]);
+
+			await expect(submitXrpTrustSet(removal)).resolves.toBeDefined();
+		});
+
+		it('refuses a balance that cannot pay the fee', async () => {
+			vi.mocked(xrplRest.loadXrpAccountInfo).mockResolvedValue({ ...account, balance: 11n });
+
+			await expect(submitXrpTrustSet(removal)).rejects.toThrow(XrpTrustSetUnfundedError);
+
+			expectNothingSigned();
+		});
+
+		// Removing releases a reserve rather than adding one, so a balance below the reserve after
+		// one more line is no reason to refuse.
+		it('needs only the fee, whatever the account owns', async () => {
+			vi.mocked(xrplRest.loadXrpAccountInfo).mockResolvedValue({
+				...account,
+				balance: 12n,
+				ownerCount: 5
+			});
+
+			await expect(submitXrpTrustSet(removal)).resolves.toBeDefined();
+		});
+
+		it('refuses while another transaction from the address is unresolved', async () => {
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue(
+				recordsResponse([mockXrpActiveUserTransaction])
+			);
+
+			await expect(submitXrpTrustSet(removal)).rejects.toThrow(XrpSendAlreadyInFlightError);
+
+			expect(xrplRest.loadXrpAccountLines).not.toHaveBeenCalled();
+
+			expectNothingSigned();
 		});
 	});
 });

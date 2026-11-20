@@ -10,6 +10,7 @@ import {
 	getXrpTokenSendMax,
 	isTokenXrpTrustLine,
 	isTokenXrpTrustLineCustomToken,
+	isXrpTokenValueZero,
 	parseXrpCurrencyCode,
 	parseXrpTokenValue,
 	xrpCurrencyCodeToSymbol,
@@ -108,6 +109,27 @@ describe('xrp-trust-line.utils', () => {
 
 		it('throws for an exponent far outside the ledger range', () => {
 			expect(() => parseXrpTokenValue({ value: '1e1000' })).toThrow('out of range');
+		});
+	});
+
+	describe('isXrpTokenValueZero', () => {
+		it.each(['0', '0.0', '-0', '+0', '.0', '0.', '0e-15', '0000e5'])(
+			'reads %s as zero',
+			(value) => {
+				expect(isXrpTokenValueZero(value)).toBeTruthy();
+			}
+		);
+
+		// Dust below the wallet's 18 decimals is not zero for the ledger, which keeps the line.
+		it.each(['1', '-0.5', '1e-20', '0.000000000000000000001', '5800000000000000e13'])(
+			'reads %s as not zero',
+			(value) => {
+				expect(isXrpTokenValueZero(value)).toBeFalsy();
+			}
+		);
+
+		it.each(['', '-', '.', 'e5', 'abc', '0x0'])('reads the malformed %s as not zero', (value) => {
+			expect(isXrpTokenValueZero(value)).toBeFalsy();
 		});
 	});
 

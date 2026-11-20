@@ -7,6 +7,7 @@
 	import IconFuelPump from '$lib/components/icons/IconFuelPump.svelte';
 	import IconPickaxe from '$lib/components/icons/IconPickaxe.svelte';
 	import IconAlertTriangle from '$lib/components/icons/lucide/IconAlertTriangle.svelte';
+	import IconCircleMinus from '$lib/components/icons/lucide/IconCircleMinus.svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import IconSend from '$lib/components/icons/lucide/IconSend.svelte';
@@ -48,6 +49,7 @@
 	import { isVeloraActiveUserTransaction } from '$lib/utils/velora-active-tx.utils';
 	import {
 		isXrpActiveUserTransaction,
+		isXrpTrustLineRemovalActiveUserTransaction,
 		isXrpTrustSetActiveUserTransaction,
 		xrpActiveUserTransactionDisplay,
 		xrpTrustSetActiveUserTransactionDisplay
@@ -80,8 +82,10 @@
 	// to hold the one-unresolved-payment-per-address invariant. It has one token
 	// and one network, so the swap layout's "A → B" reads wrong for it.
 	const isXrp = $derived(isXrpActiveUserTransaction(tx));
-	// Adding a trust-line token: one token, one network, and no amount — the row says which token.
+	// Adding or removing a trust-line token: one token, one network, and no amount — the row says
+	// which token, and which of the two.
 	const isXrpTrustSet = $derived(isXrpTrustSetActiveUserTransaction(tx));
+	const isXrpTrustLineRemoval = $derived(isXrpTrustLineRemovalActiveUserTransaction(tx));
 
 	// A mint writes the swap providers' display refs and keeps their layout: two tokens on
 	// one network. Only its label, provider and icon differ.
@@ -185,7 +189,12 @@
 					.filter(nonNullish)
 					.join(' ')
 			: isXrpTrustSet
-				? [$i18n.core.text.add, xrpTrustSetDisplay?.symbol].filter(nonNullish).join(' ')
+				? [
+						isXrpTrustLineRemoval ? $i18n.core.text.remove : $i18n.core.text.add,
+						xrpTrustSetDisplay?.symbol
+					]
+						.filter(nonNullish)
+						.join(' ')
 				: isXrp
 					? [$i18n.send.text.send, xrpDisplay?.amount, xrpDisplay?.symbol]
 							.filter(nonNullish)
@@ -277,6 +286,8 @@
 						<IconAlertTriangle size="20" />
 					{:else if isXrp}
 						<IconSend size="20" />
+					{:else if isXrpTrustLineRemoval}
+						<IconCircleMinus size="20" />
 					{:else if isXrpTrustSet}
 						<IconPlus size="20" />
 					{:else if isCyclesMint}

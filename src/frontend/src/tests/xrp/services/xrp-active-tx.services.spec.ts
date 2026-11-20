@@ -10,6 +10,7 @@ import {
 	mockXrpData,
 	mockXrpLastLedgerSequence,
 	mockXrpSwapActiveUserTransaction,
+	mockXrpTrustLineRemovalActiveUserTransaction,
 	mockXrpTrustSetActiveUserTransaction,
 	mockXrpTxHash
 } from '$tests/mocks/active-user-transactions.mock';
@@ -721,6 +722,91 @@ describe('xrp-active-tx.services', () => {
 				).toBeLessThanOrEqual(ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES);
 				expect(
 					bytes(replacePlaceholders(tokens.import.error.xrp_trust_set_expired, subject))
+				).toBeLessThanOrEqual(ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES);
+			}
+		);
+	});
+
+	// Resolved as adding is; what a failed one did not do is remove the token.
+	describe('removing a trust-line token', () => {
+		const removal = mockXrpTrustLineRemovalActiveUserTransaction;
+
+		const expectRemovalStatus = ({ status, error }: { status: object; error?: string }) =>
+			expect(applySpy).toHaveBeenCalledWith({
+				identity,
+				tx: removal,
+				update: { status, ...(error !== undefined ? { error } : {}) }
+			});
+
+		it('resolves a validated tesSUCCESS as Succeeded', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				state: 'validated',
+				transactionResult: 'tesSUCCESS'
+			});
+
+			await poll([removal]);
+
+			expectRemovalStatus({ status: { Succeeded: null } });
+		});
+
+		it('fails on a validated tec result, saying the token was not removed', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				state: 'validated',
+				transactionResult: 'tecNO_LINE_REDUNDANT'
+			});
+
+			await poll([removal]);
+
+			expectRemovalStatus({
+				status: { Failed: null },
+				error: replacePlaceholders(get(i18n).tokens.import.error.xrp_trust_set_remove_failed, {
+					$symbol: 'RLUSD',
+					$network: 'XRP Ledger',
+					$result: 'tecNO_LINE_REDUNDANT'
+				})
+			});
+		});
+
+		it('fails on expiry, saying nothing was charged', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+				mockXrpLastLedgerSequence + 1
+			);
+
+			await poll([removal]);
+
+			expectRemovalStatus({
+				status: { Failed: null },
+				error: replacePlaceholders(get(i18n).tokens.import.error.xrp_trust_set_remove_expired, {
+					$symbol: 'RLUSD',
+					$network: 'XRP Ledger'
+				})
+			});
+		});
+
+		it.each(Object.values(Languages))(
+			'fits the failure texts of removing a token in %s',
+			async (language) => {
+				const { tokens } = (await import(`$lib/i18n/${language}.json`)).default;
+
+				const longestResult = Object.keys(DEFAULT_DEFINITIONS.transactionResult)
+					.filter((code) => /^tec[A-Z0-9_]+$/.test(code))
+					.reduce((longest, code) => (code.length > longest.length ? code : longest));
+
+				const bytes = (text: string) => new TextEncoder().encode(text).length;
+
+				const subject = { $symbol: 'X'.repeat(20), $network: 'XRP Ledger' };
+
+				expect(
+					bytes(
+						replacePlaceholders(tokens.import.error.xrp_trust_set_remove_failed, {
+							...subject,
+							$result: longestResult
+						})
+					)
+				).toBeLessThanOrEqual(ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES);
+				expect(
+					bytes(replacePlaceholders(tokens.import.error.xrp_trust_set_remove_expired, subject))
 				).toBeLessThanOrEqual(ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES);
 			}
 		);
