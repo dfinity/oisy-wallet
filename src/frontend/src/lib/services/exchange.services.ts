@@ -236,6 +236,27 @@ export const exchangeRateICRCToUsd = async (
 	return fillIcrcPricesFromFallbackProviders({ ledgerCanisterIds, initialPrices: coingeckoPrices });
 };
 
+/**
+ * Prices XRP Ledger trust-line tokens on CoinGecko's `xrp` platform, which keys each by
+ * `<currency>.<issuer>` — the 40-hex or the 3-character code as the ledger writes it, and the
+ * issuer's classic address. A token CoinGecko lists under another spelling of its key gets no price.
+ */
+export const exchangeRateXrpTrustLineToUsd = async (
+	keys: string[]
+): Promise<CoingeckoSimpleTokenPriceResponse> => {
+	if (!COINGECKO_PROVIDER_ENABLED || keys.length === 0) {
+		return {};
+	}
+
+	return await simpleTokenPrice({
+		id: 'xrp',
+		vs_currencies: Currency.USD,
+		contract_addresses: keys,
+		include_market_cap: true,
+		include_24hr_change: true
+	});
+};
+
 export const exchangeRateSPLToUsd = async (
 	tokenAddresses: SplTokenAddress[]
 ): Promise<CoingeckoSimpleTokenPriceResponse> => {
@@ -351,6 +372,7 @@ export const fetchExchangeRatesFromBackend = async ({
 	currentErc20Prices: CoingeckoSimpleTokenPriceResponse;
 	currentIcrcPrices: CoingeckoSimpleTokenPriceResponse;
 	currentSplPrices: CoingeckoSimpleTokenPriceResponse;
+	currentXrpTrustLinePrices: CoingeckoSimpleTokenPriceResponse;
 }> => {
 	const rates = await getExchangeRates({ identity });
 
@@ -358,6 +380,7 @@ export const fetchExchangeRatesFromBackend = async ({
 	const currentErc20Prices: CoingeckoSimpleTokenPriceResponse = {};
 	const currentIcrcPrices: CoingeckoSimpleTokenPriceResponse = {};
 	const currentSplPrices: CoingeckoSimpleTokenPriceResponse = {};
+	const currentXrpTrustLinePrices: CoingeckoSimpleTokenPriceResponse = {};
 
 	for (const [tokenId, rate] of rates) {
 		const mapped = mapExchangeRateToCoingecko(rate);
@@ -374,6 +397,9 @@ export const fetchExchangeRatesFromBackend = async ({
 				currentIcrcPrices[tokenId.Icrc.toText().toLowerCase()] = mapped;
 			} else if ('SplMainnet' in tokenId) {
 				currentSplPrices[tokenId.SplMainnet] = mapped;
+			} else if ('XrpTrustLineMainnet' in tokenId) {
+				const [currency, issuer] = tokenId.XrpTrustLineMainnet;
+				currentXrpTrustLinePrices[`${currency}.${issuer}`] = mapped;
 			}
 		}
 	}
@@ -390,7 +416,8 @@ export const fetchExchangeRatesFromBackend = async ({
 		currentBaseEthPrice: nativePrice({ ...BASE_ETH_NATIVE_ENTRY, coingeckoRates }),
 		currentErc20Prices,
 		currentIcrcPrices,
-		currentSplPrices
+		currentSplPrices,
+		currentXrpTrustLinePrices
 	};
 };
 
@@ -410,6 +437,7 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 				data.currentErc20Prices,
 				data.currentIcrcPrices,
 				data.currentSplPrices,
+				data.currentXrpTrustLinePrices,
 				data.currentErc4626Prices
 			].filter(nonNullish)
 		);

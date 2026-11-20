@@ -20,6 +20,7 @@ import {
 	exchangeRateSPLToUsd,
 	exchangeRateUsdToCurrency,
 	exchangeRateXRPToUsd,
+	exchangeRateXrpTrustLineToUsd,
 	fetchExchangeRatesFromBackend,
 	fillIcrcPricesFromFallbackProviders
 } from '$lib/services/exchange.services';
@@ -40,6 +41,7 @@ import {
 	findMissingErc20ContractAddresses,
 	findMissingLedgerCanisterIds,
 	findMissingSplTokenAddresses,
+	findMissingXrpTrustLineKeys,
 	isTcyclesLedgerCanisterId,
 	mergeExchangePrices,
 	type ProviderFallbackPrices,
@@ -123,6 +125,7 @@ interface SyncExchangeParams {
 	erc20ContractAddresses: Erc20ContractAddressWithNetwork[];
 	icrcLedgerCanisterIds: LedgerCanisterIdText[];
 	splTokenAddresses: SplTokenAddress[];
+	xrpTrustLineKeys: string[];
 	erc4626TokensExchangeData: Erc4626TokensExchangeData[];
 }
 
@@ -152,6 +155,7 @@ const syncExchangeFromBackend = async ({
 			currentSolPrice: undefined,
 			currentXrpPrice: undefined,
 			currentSplPrices: {},
+			currentXrpTrustLinePrices: {},
 			currentErc4626Prices: {},
 			currentBnbPrice: undefined,
 			currentPolPrice: undefined
@@ -190,7 +194,8 @@ const syncExchangeFromBackend = async ({
 		currentBaseEthPrice,
 		currentErc20Prices,
 		currentIcrcPrices,
-		currentSplPrices
+		currentSplPrices,
+		currentXrpTrustLinePrices
 	} =
 		backendPricesResult.status === 'fulfilled'
 			? backendPricesResult.value
@@ -206,7 +211,8 @@ const syncExchangeFromBackend = async ({
 					currentBaseEthPrice: undefined,
 					currentErc20Prices: {},
 					currentIcrcPrices: {},
-					currentSplPrices: {}
+					currentSplPrices: {},
+					currentXrpTrustLinePrices: {}
 				};
 
 	const currentErc4626Prices = await calculateErc4626Prices({
@@ -228,6 +234,7 @@ const syncExchangeFromBackend = async ({
 		currentSolPrice,
 		currentXrpPrice,
 		currentSplPrices,
+		currentXrpTrustLinePrices,
 		currentErc4626Prices,
 		currentBnbPrice,
 		currentPolPrice,
@@ -241,6 +248,7 @@ const syncExchangeFromProviders = async ({
 	erc20ContractAddresses,
 	icrcLedgerCanisterIds,
 	splTokenAddresses,
+	xrpTrustLineKeys,
 	erc4626TokensExchangeData
 }: SyncExchangeParams): Promise<PostMessageDataResponseExchange> => {
 	const erc20PriceParams = buildErc20PriceParams(erc20ContractAddresses);
@@ -268,7 +276,8 @@ const syncExchangeFromProviders = async ({
 		exchangeRateXRPToUsd(),
 		exchangeRateSPLToUsd(splTokenAddresses),
 		exchangeRateBNBToUsd(),
-		exchangeRatePOLToUsd()
+		exchangeRatePOLToUsd(),
+		exchangeRateXrpTrustLineToUsd(xrpTrustLineKeys)
 	]);
 
 	results.forEach((result) => {
@@ -286,7 +295,8 @@ const syncExchangeFromProviders = async ({
 		currentXrpPriceResult,
 		currentSplPricesResult,
 		currentBnbPriceResult,
-		currentPolPriceResult
+		currentPolPriceResult,
+		currentXrpTrustLinePricesResult
 	] = results;
 
 	const currentEthPrice =
@@ -312,6 +322,10 @@ const syncExchangeFromProviders = async ({
 		currentBnbPriceResult.status === 'fulfilled' ? currentBnbPriceResult.value : undefined;
 	const currentPolPrice =
 		currentPolPriceResult.status === 'fulfilled' ? currentPolPriceResult.value : undefined;
+	const currentXrpTrustLinePrices =
+		currentXrpTrustLinePricesResult.status === 'fulfilled'
+			? currentXrpTrustLinePricesResult.value
+			: undefined;
 
 	const currentErc4626Prices = await calculateErc4626Prices({
 		erc20Prices: currentErc20Prices,
@@ -345,6 +359,7 @@ const syncExchangeFromProviders = async ({
 		currentSolPrice,
 		currentXrpPrice,
 		currentSplPrices: currentSplPrices ?? {},
+		currentXrpTrustLinePrices: currentXrpTrustLinePrices ?? {},
 		currentErc4626Prices,
 		currentBnbPrice,
 		currentPolPrice,
@@ -380,6 +395,10 @@ const fetchProviderFallbackPrices = async ({
 		allSplTokenAddresses: params.splTokenAddresses,
 		coingeckoResponse: backendData.currentSplPrices ?? {}
 	});
+	const missingXrpTrustLine = findMissingXrpTrustLineKeys({
+		allXrpTrustLineKeys: params.xrpTrustLineKeys,
+		coingeckoResponse: backendData.currentXrpTrustLinePrices ?? {}
+	});
 
 	const missingEth = isNullish(backendData.currentEthPrice);
 	const missingBtc = isNullish(backendData.currentBtcPrice);
@@ -401,6 +420,7 @@ const fetchProviderFallbackPrices = async ({
 		? buildErc20PriceParams(missingErc20)
 		: [];
 	const splToFill = COINGECKO_FALLBACK_PROVIDER_ENABLED ? missingSpl : [];
+	const xrpTrustLineToFill = COINGECKO_FALLBACK_PROVIDER_ENABLED ? missingXrpTrustLine : [];
 	const fillEth = COINGECKO_FALLBACK_PROVIDER_ENABLED && needsEth;
 	const fillBtc = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingBtc;
 	const fillIcp = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingIcp;
@@ -413,6 +433,7 @@ const fetchProviderFallbackPrices = async ({
 		erc20PriceParams.length === 0 &&
 		missingIcrc.length === 0 &&
 		splToFill.length === 0 &&
+		xrpTrustLineToFill.length === 0 &&
 		!fillEth &&
 		!fillBtc &&
 		!fillIcp &&
@@ -447,7 +468,8 @@ const fetchProviderFallbackPrices = async ({
 		solPriceResult,
 		xrpPriceResult,
 		bnbPriceResult,
-		polPriceResult
+		polPriceResult,
+		xrpTrustLinePricesResult
 	] = await Promise.all([
 		erc20PricesPromise,
 		missingIcrc.length > 0
@@ -465,7 +487,10 @@ const fetchProviderFallbackPrices = async ({
 		fillSol ? exchangeRateSOLToUsd().catch(logFallbackError) : Promise.resolve(undefined),
 		fillXrp ? exchangeRateXRPToUsd().catch(logFallbackError) : Promise.resolve(undefined),
 		fillBnb ? exchangeRateBNBToUsd().catch(logFallbackError) : Promise.resolve(undefined),
-		fillPol ? exchangeRatePOLToUsd().catch(logFallbackError) : Promise.resolve(undefined)
+		fillPol ? exchangeRatePOLToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		xrpTrustLineToFill.length > 0
+			? exchangeRateXrpTrustLineToUsd(xrpTrustLineToFill).catch(logFallbackError)
+			: Promise.resolve(undefined)
 	]);
 
 	const erc20Prices =
@@ -489,6 +514,7 @@ const fetchProviderFallbackPrices = async ({
 		erc20Prices,
 		icrcPrices: icrcPricesResult,
 		splPrices: splPricesResult,
+		xrpTrustLinePrices: xrpTrustLinePricesResult,
 		ethPrice: missingEth ? ethPrice : undefined,
 		btcPrice: btcPriceResult,
 		icpPrice: icpPriceResult,
@@ -530,6 +556,7 @@ const paramsFromTimerData = (
 	erc20ContractAddresses: data?.erc20Addresses ?? [],
 	icrcLedgerCanisterIds: data?.icrcCanisterIds ?? [],
 	splTokenAddresses: data?.splAddresses ?? [],
+	xrpTrustLineKeys: data?.xrpTrustLineKeys ?? [],
 	erc4626TokensExchangeData: data?.erc4626TokensExchangeData ?? []
 });
 

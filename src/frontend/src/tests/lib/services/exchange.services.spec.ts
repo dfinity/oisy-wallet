@@ -8,6 +8,7 @@ import {
 	exchangeRateICRCToUsd,
 	exchangeRateUsdToCurrency,
 	exchangeRateXRPToUsd,
+	exchangeRateXrpTrustLineToUsd,
 	fetchExchangeRatesFromBackend,
 	fillIcrcPricesFromFallbackProviders,
 	syncExchange
@@ -407,11 +408,15 @@ describe('exchange.services', () => {
 				Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai')
 			};
 			const splTokenId: TokenId = { SplMainnet: 'SoLaddr1' };
+			const xrpTrustLineTokenId: TokenId = {
+				XrpTrustLineMainnet: ['USD', 'rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De']
+			};
 
 			vi.mocked(getExchangeRates).mockResolvedValue([
 				[erc20TokenId, mockExchangeRate],
 				[icrcTokenId, mockExchangeRate],
-				[splTokenId, mockExchangeRate]
+				[splTokenId, mockExchangeRate],
+				[xrpTrustLineTokenId, mockExchangeRate]
 			]);
 
 			const result = await fetchExchangeRatesFromBackend({ identity: mockIdentity });
@@ -421,6 +426,10 @@ describe('exchange.services', () => {
 				'ryjl3-tyaaa-aaaaa-aaaba-cai': expectedPrice
 			});
 			expect(result.currentSplPrices).toEqual({ SoLaddr1: expectedPrice });
+			// Keyed as CoinGecko keys XRP Ledger tokens, case preserved: the issuer is base58.
+			expect(result.currentXrpTrustLinePrices).toEqual({
+				'USD.rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De': expectedPrice
+			});
 		});
 
 		it('should return undefined native prices and empty maps when the backend returns nothing', async () => {
@@ -486,10 +495,57 @@ describe('exchange.services', () => {
 		});
 	});
 
+	describe('exchangeRateXrpTrustLineToUsd', () => {
+		const keys = [
+			'524C555344000000000000000000000000000000.rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De',
+			'CTF.r9Xzi4KsSF1Xtr8WHyBmUcvfP9FzTyG5wp'
+		];
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it("asks CoinGecko's xrp platform for the keys", async () => {
+			const prices = { [keys[0]]: { usd: 1, usd_market_cap: 0 } };
+			vi.mocked(simpleTokenPrice).mockResolvedValue(prices);
+
+			await expect(exchangeRateXrpTrustLineToUsd(keys)).resolves.toEqual(prices);
+
+			expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith({
+				id: 'xrp',
+				vs_currencies: Currency.USD,
+				contract_addresses: keys,
+				include_market_cap: true,
+				include_24hr_change: true
+			});
+		});
+
+		it('asks for nothing when no trust-line token is held', async () => {
+			await expect(exchangeRateXrpTrustLineToUsd([])).resolves.toEqual({});
+
+			expect(simpleTokenPrice).not.toHaveBeenCalled();
+		});
+	});
+
 	describe('syncExchange', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 			exchangeStore.reset();
+		});
+
+		it('should put XRP Ledger trust-line prices in the exchange store', () => {
+			const exchangeSetSpy = vi.spyOn(exchangeStore, 'set');
+			const xrpTrustLinePrices = {
+				'USD.rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De': { usd: 1, usd_market_cap: 0 }
+			};
+
+			syncExchange({
+				currentErc20Prices: {},
+				currentIcrcPrices: {},
+				currentXrpTrustLinePrices: xrpTrustLinePrices
+			});
+
+			expect(exchangeSetSpy).toHaveBeenCalledExactlyOnceWith([{}, {}, xrpTrustLinePrices]);
 		});
 
 		it('should not update stores when data is undefined', () => {
@@ -624,6 +680,18 @@ describe('exchange.services', () => {
 			const coingeckoRest = await import('$lib/rest/coingecko.rest');
 
 			const result = await services.exchangeRateSPLToUsd(['SoLaddr1']);
+
+			expect(result).toEqual({});
+			expect(coingeckoRest.simpleTokenPrice).not.toHaveBeenCalled();
+		});
+
+		it('should short-circuit the XRP Ledger trust-line helper without calling Coingecko', async () => {
+			const services = await import('$lib/services/exchange.services');
+			const coingeckoRest = await import('$lib/rest/coingecko.rest');
+
+			const result = await services.exchangeRateXrpTrustLineToUsd([
+				'USD.rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De'
+			]);
 
 			expect(result).toEqual({});
 			expect(coingeckoRest.simpleTokenPrice).not.toHaveBeenCalled();
