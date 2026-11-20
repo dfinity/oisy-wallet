@@ -1,3 +1,4 @@
+import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 import Help from '$lib/components/help/Help.svelte';
 import { APP_VERSION } from '$lib/constants/app.constants';
 import { OISY_NAME } from '$lib/constants/oisy.constants';
@@ -5,12 +6,15 @@ import {
 	HELP_EXPLORERS_CARD,
 	HELP_ICPSWAP_CARD,
 	HELP_NETWORK_EXPLORERS_CARD,
-	HELP_SUPPORT_CARD
+	HELP_SUPPORT_CARD,
+	HELP_UNAVAILABLE_TOKENS_CARD
 } from '$lib/constants/test-ids.constants';
 import { trackHelp } from '$lib/services/help-analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import { render } from '@testing-library/svelte';
 
 vi.mock('$lib/services/help-analytics.services', async (importOriginal) => ({
@@ -18,12 +22,63 @@ vi.mock('$lib/services/help-analytics.services', async (importOriginal) => ({
 	trackHelp: vi.fn()
 }));
 
+// The unavailable tokens card checks each listed ledger; here it only matters where the card is.
+vi.mock('$icp/services/icrc-ledger-status.services', () => ({
+	checkIcrcLedgerStatus: vi.fn(() => new Promise(() => {}))
+}));
+
 describe('Help', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
 		ethAddressStore.reset();
+		icrcUnavailableCustomTokensStore.set([]);
 		mockAuthStore();
+	});
+
+	it('puts the unavailable tokens card right after Support while a saved token cannot be loaded', () => {
+		const ledgerCanisterId = 'aiw2p-tyaaa-aaaam-aebyq-cai';
+
+		// Both explorer cards hide themselves while every address is still nullish.
+		ethAddressStore.set({ data: mockEthAddress, certified: false });
+
+		icrcUnavailableCustomTokensStore.set([
+			{
+				ledgerCanisterId,
+				customToken: {
+					token: {
+						Icrc: { ledger_id: Principal.fromText(ledgerCanisterId), index_id: toNullable() }
+					},
+					version: toNullable(1n),
+					enabled: true,
+					section: toNullable(),
+					allow_external_content_source: toNullable(),
+					allowed_external_content_source_urls: toNullable()
+				}
+			}
+		]);
+
+		const { getByTestId } = render(Help);
+
+		const cards = [
+			getByTestId(HELP_SUPPORT_CARD),
+			getByTestId(HELP_UNAVAILABLE_TOKENS_CARD),
+			getByTestId(HELP_NETWORK_EXPLORERS_CARD),
+			getByTestId(HELP_EXPLORERS_CARD),
+			getByTestId(HELP_ICPSWAP_CARD)
+		];
+
+		cards.slice(0, -1).forEach((card, index) => {
+			expect(
+				card.compareDocumentPosition(cards[index + 1]) & Node.DOCUMENT_POSITION_FOLLOWING
+			).toBeTruthy();
+		});
+	});
+
+	it('shows no unavailable tokens card while every saved token loads', () => {
+		const { queryByTestId } = render(Help);
+
+		expect(queryByTestId(HELP_UNAVAILABLE_TOKENS_CARD)).not.toBeInTheDocument();
 	});
 
 	it('renders the four cards in order: Support, networks, providers, ICPSwap', () => {

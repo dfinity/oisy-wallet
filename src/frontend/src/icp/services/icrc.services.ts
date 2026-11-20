@@ -2,7 +2,10 @@ import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ADDITIONAL_ICRC_TOKENS_INDEXED } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { ICRC_TOKENS, ICRC_TOKENS_METADATA } from '$env/tokens/tokens-icrc/tokens.icrc.env';
-import { RETIRED_ICRC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.retired.env';
+import {
+	RETIRED_ICRC_LEDGER_CANISTER_IDS,
+	RETIRED_ICRC_TOKENS
+} from '$env/tokens/tokens-icrc/tokens.icrc.retired.env';
 import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
 import { SUPPORTED_ICP_TOKENS_INDEXED } from '$env/tokens/tokens.icp.env';
 import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
@@ -16,6 +19,7 @@ import {
 } from '$icp/api/icrc-ledger.api';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
+import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import {
 	IcTokenStandards,
@@ -23,7 +27,7 @@ import {
 	type IcInterface,
 	type IcToken
 } from '$icp/types/ic-token';
-import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import type { IcrcCustomToken, IcrcUnavailableCustomToken } from '$icp/types/icrc-custom-token';
 import { buildIcrcCustomTokenMetadataPseudoResponse } from '$icp/utils/icrc-metadata.utils';
 import {
 	mapIcrcToken,
@@ -76,14 +80,29 @@ export const loadCustomTokens = ({
 	useCache = false,
 	onSuccess
 }: Omit<LoadCustomTokenParams, 'certified'> & {
-	onSuccess?: () => void;
-}): Promise<void> =>
-	queryAndUpdate<IcrcCustomToken[]>({
-		request: (params) => loadIcrcCustomTokens({ ...params, useCache }),
-		onLoad: (params) => loadIcrcCustomData({ ...params, onSuccess }),
-		onUpdateError: onCustomTokensUpdateError,
+	onSuccess?: (params: { outdated: boolean }) => void;
+}): Promise<void> => {
+	// The round of the certified request, for its error handler.
+	let certifiedRound = 0;
+
+	return queryAndUpdate<{ tokens: IcrcCustomToken[]; round: number }>({
+		request: async (params) => {
+			const round = nextIcrcCustomTokensRound();
+
+			if (params.certified) {
+				certifiedRound = round;
+			}
+
+			const tokens = await loadIcrcCustomTokens({ ...params, useCache, round });
+
+			return { tokens, round };
+		},
+		onLoad: ({ response: { tokens, round }, certified }) =>
+			loadIcrcCustomData({ response: tokens, certified, round, onSuccess }),
+		onUpdateError: ({ error }) => onCustomTokensUpdateError({ error, round: certifiedRound }),
 		identity
 	});
+};
 
 const loadDefaultIcrc = ({
 	data: { ledgerCanisterId, ...data }
@@ -124,12 +143,24 @@ const loadIcrcData = ({
 	nonNullish(data) && icrcDefaultTokensStore.set({ data, certified });
 };
 
+// The loading rounds of the saved ICRC tokens, numbered in the order they start to fetch the saved
+// tokens, and the last certified round that wrote the unavailable tokens.
+let customTokensRound = 0;
+let unavailableTokensCertifiedRound = 0;
+
+/**
+ * Numbers a loading round of the saved ICRC tokens. Take it before fetching the saved tokens: the
+ * number then tells which round read the newer list, whatever order the rounds finish in.
+ */
+export const nextIcrcCustomTokensRound = (): number => ++customTokensRound;
+
 const loadIcrcCustomTokens = async ({
 	identity,
 	certified,
 	tokens,
-	useCache = false
-}: LoadCustomTokenParams): Promise<IcrcCustomToken[]> => {
+	useCache = false,
+	round
+}: LoadCustomTokenParams & { round: number }): Promise<IcrcCustomToken[]> => {
 	const customTokens =
 		tokens ??
 		(await loadNetworkCustomTokens({
@@ -141,18 +172,26 @@ const loadIcrcCustomTokens = async ({
 	return await loadCustomIcrcTokensData({
 		tokens: customTokens,
 		identity,
-		certified
+		certified,
+		round
 	});
 };
+
+// A saved entry of a default token only stores whether the user turned the token on or off.
+const ICRC_DEFAULT_LEDGER_CANISTER_IDS = new Set(
+	ICRC_TOKENS.map(({ ledgerCanisterId }) => ledgerCanisterId)
+);
 
 const loadCustomIcrcTokensData = async ({
 	tokens,
 	certified,
-	identity
+	identity,
+	round
 }: {
 	tokens: CustomToken[];
 	certified: boolean;
 	identity: NullishIdentity;
+	round: number;
 }): Promise<IcrcCustomToken[]> => {
 	const indexedIcrcCustomTokens = {
 		...SUPPORTED_ICP_TOKENS_INDEXED,
@@ -221,6 +260,62 @@ const loadCustomIcrcTokensData = async ({
 
 	const results = await Promise.allSettled(tokens.map(requestIcrcCustomTokenMetadata));
 
+	// A saved token that is skipped or fails to load never reaches the token list, so it is kept here for the user to delete.
+	const unavailableTokens = tokens.reduce<IcrcUnavailableCustomToken[]>(
+		(acc, customToken, index) => {
+			const { token } = customToken;
+
+			if (!('Icrc' in token)) {
+				return acc;
+			}
+
+			const ledgerCanisterId = token.Icrc.ledger_id.toText();
+
+			// Deleting the saved entry of a default token would only turn the token back to its default
+			// on/off setting, so the Help card doesn't offer it.
+			if (ICRC_DEFAULT_LEDGER_CANISTER_IDS.has(ledgerCanisterId)) {
+				return acc;
+			}
+
+			const result = results[index];
+
+			if (
+				!RETIRED_ICRC_LEDGER_CANISTER_IDS.includes(ledgerCanisterId) &&
+				result.status === 'fulfilled' &&
+				nonNullish(result.value)
+			) {
+				return acc;
+			}
+
+			const knownToken =
+				indexedIcrcCustomTokens[ledgerCanisterId] ??
+				RETIRED_ICRC_TOKENS.find(({ ledgerCanisterId: id }) => id === ledgerCanisterId);
+
+			return [
+				...acc,
+				{
+					ledgerCanisterId,
+					...(nonNullish(knownToken) && { symbol: knownToken.symbol, name: knownToken.name }),
+					customToken
+				}
+			];
+		},
+		[]
+	);
+
+	// Only a certified answer may offer a token for deletion: a query answer only shows the tokens
+	// sooner. A certified round of an older load can finish after a newer one and must not replace it.
+	if (certified && round > unavailableTokensCertifiedRound) {
+		unavailableTokensCertifiedRound = round;
+
+		icrcUnavailableCustomTokensStore.set(unavailableTokens);
+	}
+
+	// A certified round that started later already wrote what it found: an older round, query or
+	// certified, must not undo it by dropping a token. `loadIcrcCustomData` checks the same right
+	// before it writes the loaded tokens.
+	const outdated = round < unavailableTokensCertifiedRound;
+
 	return results.reduce<IcrcCustomToken[]>((acc, result, index) => {
 		if (result.status !== 'fulfilled') {
 			trackEvent({
@@ -231,6 +326,10 @@ const loadCustomIcrcTokensData = async ({
 					...(mapIcErrorMetadata(result.reason) ?? {})
 				}
 			});
+
+			if (outdated) {
+				return acc;
+			}
 
 			const { enabled, token } = tokens[index];
 
@@ -243,18 +342,28 @@ const loadCustomIcrcTokensData = async ({
 
 				icrcCustomTokensStore.resetByIdentifier(ledgerCanisterId);
 
-				// To avoid polluting the screen, we show the toast error only after the update call.
-				if (enabled && certified) {
+				// To avoid polluting the screen, we show the toast error only after the update call, and not
+				// for a token the user deleted while this round was running.
+				if (enabled && certified && !icrcUnavailableCustomTokensStore.isDeleted(ledgerCanisterId)) {
 					const curatedToken = indexedIcrcCustomTokens[ledgerCanisterId];
+
+					// The Help card doesn't list a default token, so its warning doesn't point there.
+					const isDefaultToken = ICRC_DEFAULT_LEDGER_CANISTER_IDS.has(ledgerCanisterId);
 
 					toastsShow({
 						text: nonNullish(curatedToken)
-							? replacePlaceholders(get(i18n).init.error.icrc_canister_loading_curated, {
-									$tokenSymbol: curatedToken.symbol
-								})
-							: replacePlaceholders(get(i18n).init.error.icrc_canister_loading_custom, {
-									$ledgerCanisterId: ledgerCanisterId
-								}),
+							? replacePlaceholders(
+									isDefaultToken
+										? get(i18n).init.error.icrc_default_token_loading_curated
+										: get(i18n).init.error.icrc_canister_loading_curated,
+									{ $tokenSymbol: curatedToken.symbol }
+								)
+							: replacePlaceholders(
+									isDefaultToken
+										? get(i18n).init.error.icrc_default_token_loading_custom
+										: get(i18n).init.error.icrc_canister_loading_custom,
+									{ $ledgerCanisterId: ledgerCanisterId }
+								),
 						level: 'warn'
 					});
 				}
@@ -272,38 +381,70 @@ const loadCustomIcrcTokensData = async ({
 const loadIcrcCustomData = ({
 	response: tokens,
 	certified,
+	round,
 	onSuccess
 }: {
 	certified: boolean;
 	response: IcrcCustomToken[];
-	onSuccess?: () => void;
+	round: number;
+	onSuccess?: (params: { outdated: boolean }) => void;
 }) => {
-	onSuccess?.();
+	// Checked here, right before the write: a certified round that started later can finish while
+	// this round hands its tokens over, and this round must not write its own token data over it.
+	const outdated = round < unavailableTokensCertifiedRound;
 
-	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+	// The callback learns whether this round writes the tokens, so that it doesn't remove a token
+	// that no write puts back.
+	onSuccess?.({ outdated });
+
+	if (outdated) {
+		return;
+	}
+
+	// A round that read the saved tokens before a delete would otherwise put the deleted token back.
+	icrcCustomTokensStore.setAll(
+		tokens
+			.filter(
+				({ ledgerCanisterId }) => !icrcUnavailableCustomTokensStore.isDeleted(ledgerCanisterId)
+			)
+			.map((token) => ({ data: token, certified }))
+	);
 };
 
-const onCustomTokensUpdateError = ({ error: err }: { error: unknown }) => {
-	icrcCustomTokensStore.resetAll();
-
+const onCustomTokensUpdateError = ({ error: err, round }: { error: unknown; round: number }) => {
 	trackEvent({
 		name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
 		metadata: mapIcErrorMetadata(err)
 	});
+
+	// A certified round that started later already wrote what it found: an older round's failure must
+	// not clear it.
+	if (round < unavailableTokensCertifiedRound) {
+		return;
+	}
+
+	icrcCustomTokensStore.resetAll();
 
 	toastsError({
 		msg: { text: get(i18n).init.error.load_token_list }
 	});
 };
 
-export const processCustomTokens = async (params: LoadCustomTokenParams): Promise<void> => {
+/**
+ * `icrcRound` is the number the caller took with `nextIcrcCustomTokensRound` before it fetched
+ * `tokens`.
+ */
+export const processCustomTokens = async ({
+	icrcRound,
+	...params
+}: LoadCustomTokenParams & { icrcRound: number }): Promise<void> => {
 	try {
-		const response = await loadIcrcCustomTokens(params);
+		const response = await loadIcrcCustomTokens({ ...params, round: icrcRound });
 
-		loadIcrcCustomData({ response, certified: params.certified });
+		loadIcrcCustomData({ response, certified: params.certified, round: icrcRound });
 	} catch (err) {
 		if (params.certified) {
-			onCustomTokensUpdateError({ error: err });
+			onCustomTokensUpdateError({ error: err, round: icrcRound });
 		}
 	}
 };

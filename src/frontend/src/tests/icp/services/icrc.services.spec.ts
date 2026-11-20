@@ -2,7 +2,11 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
-import { RETIRED_ICRC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.retired.env';
+import { ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.env';
+import {
+	RETIRED_ICRC_LEDGER_CANISTER_IDS,
+	RETIRED_ICRC_TOKENS
+} from '$env/tokens/tokens-icrc/tokens.icrc.retired.env';
 import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
 import {
 	hasSufficientIcrcAllowance,
@@ -10,9 +14,12 @@ import {
 	isIcrcTokenSupportIcrc3,
 	loadCustomTokens,
 	loadDisabledIcrcTokensBalances,
-	loadDisabledIcrcTokensExchanges
+	loadDisabledIcrcTokensExchanges,
+	nextIcrcCustomTokensRound,
+	processCustomTokens
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 import * as icrcMetadataUtils from '$icp/utils/icrc-metadata.utils';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
@@ -32,6 +39,7 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import type { CanisterIdText } from '$lib/types/canister';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockCustomTokensErc20 } from '$tests/mocks/custom-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -40,7 +48,8 @@ import { fromNullable, nonNullish, nowInBigIntNanoSeconds, toNullable } from '@d
 import {
 	IcrcLedgerCanister,
 	fromCandidAccount,
-	type IcrcLedgerDid
+	type IcrcLedgerDid,
+	type IcrcTokenMetadataResponse
 } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import * as idbKeyval from 'idb-keyval';
@@ -104,6 +113,8 @@ describe('icrc.services', () => {
 			vi.spyOn(BackendCanister, 'create').mockImplementation(async () => backendCanisterMock);
 
 			icrcCustomTokensStore.resetAll();
+
+			icrcUnavailableCustomTokensStore.set([]);
 		});
 
 		describe('success', () => {
@@ -168,6 +179,26 @@ describe('icrc.services', () => {
 				// query + update
 				expect(mockOnSuccess).toHaveBeenCalledTimes(2);
 			};
+
+			it('should not list a loaded token as unavailable', async () => {
+				icrcUnavailableCustomTokensStore.set([
+					{ ledgerCanisterId: mockLedgerCanisterId, customToken: mockCustomToken }
+				]);
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(get(icrcUnavailableCustomTokensStore)).toEqual([]);
+			});
+
+			it('should not list a saved token of another standard as unavailable', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue(mockCustomTokensErc20);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(get(icrcUnavailableCustomTokensStore)).toEqual([]);
+			});
 
 			it('should load custom tokens with index canister', async () => {
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
@@ -318,6 +349,56 @@ describe('icrc.services', () => {
 					mockIdentity.getPrincipal().toText(),
 					expect.any(Object)
 				);
+			});
+
+			it('should tell onSuccess when a certified round that started later has already written', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+
+				const tokenMetadata: IcrcTokenMetadataResponse = [
+					['icrc1:name', { Text: mockName }],
+					['icrc1:symbol', { Text: mockSymbol }],
+					['icrc1:decimals', { Nat: mockDecimals }],
+					['icrc1:fee', { Nat: mockFee }]
+				];
+
+				// The reload after an edit waits for its ledger.
+				const editAnswer = Promise.withResolvers<IcrcTokenMetadataResponse>();
+
+				ledgerCanisterMock.metadata.mockReturnValue(editAnswer.promise);
+
+				// Like the token modal: removes the token so that the round's write restarts its worker.
+				const onSuccess = vi.fn(({ outdated }: { outdated: boolean }) => {
+					if (!outdated) {
+						icrcCustomTokensStore.resetByIdentifier(mockLedgerCanisterId);
+					}
+				});
+
+				const edit = loadCustomTokens({ identity: mockIdentity, onSuccess });
+
+				await vi.waitFor(() => expect(ledgerCanisterMock.metadata).toHaveBeenCalledTimes(2));
+
+				// A load that starts later finishes first.
+				ledgerCanisterMock.metadata.mockResolvedValue(tokenMetadata);
+
+				await processCustomTokens({
+					identity: mockIdentity,
+					certified: true,
+					tokens: [mockCustomToken],
+					icrcRound: nextIcrcCustomTokensRound()
+				});
+
+				editAnswer.resolve(tokenMetadata);
+
+				await edit;
+
+				// query + update
+				await vi.waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(2));
+
+				expect(onSuccess).toHaveBeenNthCalledWith(1, { outdated: true });
+				expect(onSuccess).toHaveBeenNthCalledWith(2, { outdated: true });
+				expect(
+					get(icrcCustomTokensStore)?.map(({ data: { ledgerCanisterId } }) => ledgerCanisterId)
+				).toStrictEqual([mockLedgerCanisterId]);
 			});
 		});
 
@@ -474,6 +555,261 @@ describe('icrc.services', () => {
 				});
 			});
 
+			it('should list a token whose ledger fails as unavailable, also when it is not enabled', async () => {
+				const disabledCustomToken: CustomToken = { ...mockCustomToken, enabled: false };
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([disabledCustomToken]);
+
+				ledgerCanisterMock.metadata.mockRejectedValue(new Error('test'));
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([
+					{ ledgerCanisterId: mockLedgerCanisterId, customToken: disabledCustomToken }
+				]);
+			});
+
+			it('should list a token whose metadata cannot be mapped as unavailable', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+
+				// The ledger answers, but without the symbol, decimals and fee a token needs.
+				ledgerCanisterMock.metadata.mockResolvedValue([['icrc1:name', { Text: mockName }]]);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([
+					{ ledgerCanisterId: mockLedgerCanisterId, customToken: mockCustomToken }
+				]);
+			});
+
+			const [{ ledgerCanisterId: defaultLedgerCanisterId }] = ICRC_TOKENS;
+
+			// It only stores whether the user turned the default token on or off.
+			const defaultCustomToken: CustomToken = {
+				...mockCustomToken,
+				token: {
+					Icrc: {
+						index_id: toNullable(),
+						ledger_id: Principal.fromText(defaultLedgerCanisterId)
+					}
+				}
+			};
+
+			it('should not list the saved entry of a default token as unavailable', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue([defaultCustomToken]);
+
+				ledgerCanisterMock.metadata.mockRejectedValue(new Error('test'));
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([]);
+			});
+
+			it('should warn about a default token without pointing to the Help page', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue([defaultCustomToken]);
+
+				ledgerCanisterMock.metadata.mockRejectedValue(new Error('test'));
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
+					text: replacePlaceholders(get(i18n).init.error.icrc_default_token_loading_custom, {
+						$ledgerCanisterId: defaultLedgerCanisterId
+					}),
+					level: 'warn'
+				});
+			});
+
+			it('should keep the saved tokens of a newer reload when an older one fails after it', async () => {
+				const olderCertifiedList = Promise.withResolvers<CustomToken[]>();
+
+				// The older reload's query answers, while its certified request is still pending.
+				backendCanisterMock.listCustomTokens
+					.mockResolvedValueOnce([mockCustomToken])
+					.mockReturnValueOnce(olderCertifiedList.promise)
+					.mockResolvedValue([mockCustomToken]);
+
+				const olderReload = loadCustomTokens({ identity: mockIdentity });
+
+				await vi.waitFor(() =>
+					expect(backendCanisterMock.listCustomTokens).toHaveBeenCalledTimes(2)
+				);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				// The newer reload's certified round has written the saved token.
+				await vi.waitFor(() =>
+					expect(
+						get(icrcCustomTokensStore)?.find(
+							({ data: { ledgerCanisterId } }) => ledgerCanisterId === mockLedgerCanisterId
+						)?.certified
+					).toBeTruthy()
+				);
+
+				olderCertifiedList.reject(new Error('test'));
+
+				await olderReload;
+
+				await vi.waitFor(() =>
+					expect(trackEvent).toHaveBeenCalledWith({
+						name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+						metadata: { error: 'test' }
+					})
+				);
+
+				expect(
+					(get(icrcCustomTokensStore) ?? []).map(
+						({ data: { ledgerCanisterId } }) => ledgerCanisterId
+					)
+				).toContain(mockLedgerCanisterId);
+				expect(spyToastsError).not.toHaveBeenCalled();
+			});
+
+			it('should keep the unavailable tokens of a reload when an older list arrives after it', async () => {
+				// The sign-in load numbers its round before it fetches the saved tokens.
+				const icrcRound = nextIcrcCustomTokensRound();
+
+				// A reload after a save starts later, and the saved token fails to load.
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+
+				ledgerCanisterMock.metadata.mockRejectedValue(new Error('test'));
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				const unavailableTokens = [
+					{ ledgerCanisterId: mockLedgerCanisterId, customToken: mockCustomToken }
+				];
+
+				expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+
+				// The sign-in load's list, read before the save, arrives last.
+				await processCustomTokens({
+					identity: mockIdentity,
+					certified: true,
+					tokens: [],
+					icrcRound
+				});
+
+				expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+			});
+
+			it('should not put a token the certified round could not load back into the token list when the query round finishes at the same moment', async () => {
+				const otherLedgerCanisterId = 'br5f7-7uaaa-aaaaa-qaaca-cai';
+
+				const otherCustomToken: CustomToken = {
+					...mockCustomToken,
+					token: {
+						Icrc: { index_id: toNullable(), ledger_id: Principal.fromText(otherLedgerCanisterId) }
+					}
+				};
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken, otherCustomToken]);
+
+				const otherLedgerCanisterMock = mock<IcrcLedgerCanister>();
+
+				vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(({ canisterId }) =>
+					canisterId.toText() === otherLedgerCanisterId
+						? otherLedgerCanisterMock
+						: ledgerCanisterMock
+				);
+
+				const tokenMetadata: IcrcTokenMetadataResponse = [
+					['icrc1:name', { Text: mockName }],
+					['icrc1:symbol', { Text: mockSymbol }],
+					['icrc1:decimals', { Nat: mockDecimals }],
+					['icrc1:fee', { Nat: mockFee }]
+				];
+
+				// The first token's ledger fails only for the certified round.
+				ledgerCanisterMock.metadata.mockImplementation(({ certified }) =>
+					certified ? Promise.reject(new Error('test')) : Promise.resolve(tokenMetadata)
+				);
+
+				// The other ledger answers both rounds at the same moment, once both have asked.
+				const otherAnswer = Promise.withResolvers<IcrcTokenMetadataResponse>();
+
+				otherLedgerCanisterMock.metadata.mockReturnValue(otherAnswer.promise);
+
+				const load = loadCustomTokens({ identity: mockIdentity, onSuccess: mockOnSuccess });
+
+				await vi.waitFor(() => expect(otherLedgerCanisterMock.metadata).toHaveBeenCalledTimes(2));
+
+				otherAnswer.resolve(tokenMetadata);
+
+				await load;
+
+				// query + update
+				await vi.waitFor(() => expect(mockOnSuccess).toHaveBeenCalledTimes(2));
+
+				expect(
+					get(icrcCustomTokensStore)?.map(({ data: { ledgerCanisterId } }) => ledgerCanisterId)
+				).toStrictEqual([mockIcrcCustomToken.ledgerCanisterId, otherLedgerCanisterId]);
+				expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([
+					{ ledgerCanisterId: mockLedgerCanisterId, customToken: mockCustomToken }
+				]);
+			});
+
+			it('should list a curated token whose ledger fails with its symbol and name', async () => {
+				const [curatedToken] = SNS_BUILTIN_TOKENS;
+
+				const curatedCustomToken: CustomToken = {
+					...mockCustomToken,
+					token: {
+						Icrc: {
+							index_id: toNullable(),
+							ledger_id: Principal.fromText(curatedToken.ledgerCanisterId)
+						}
+					}
+				};
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([curatedCustomToken]);
+
+				vi.spyOn(icrcMetadataUtils, 'buildIcrcCustomTokenMetadataPseudoResponse').mockReturnValue(
+					undefined
+				);
+
+				ledgerCanisterMock.metadata.mockRejectedValue(new Error('test'));
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([
+					{
+						ledgerCanisterId: curatedToken.ledgerCanisterId,
+						symbol: curatedToken.symbol,
+						name: curatedToken.name,
+						customToken: curatedCustomToken
+					}
+				]);
+			});
+
+			it.each(RETIRED_ICRC_TOKENS)(
+				'should list the retired ledger $ledgerCanisterId as unavailable, with its symbol and name',
+				async ({ ledgerCanisterId: retiredLedgerCanisterId, symbol, name }) => {
+					const retiredCustomToken: CustomToken = {
+						...mockCustomToken,
+						token: {
+							Icrc: {
+								index_id: toNullable(),
+								ledger_id: Principal.fromText(retiredLedgerCanisterId)
+							}
+						}
+					};
+
+					backendCanisterMock.listCustomTokens.mockResolvedValue([retiredCustomToken]);
+
+					await loadCustomTokens({ identity: mockIdentity });
+
+					expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([
+						{
+							ledgerCanisterId: retiredLedgerCanisterId,
+							symbol,
+							name,
+							customToken: retiredCustomToken
+						}
+					]);
+				}
+			);
+
 			it.each(RETIRED_ICRC_LEDGER_CANISTER_IDS)(
 				'should skip the retired ledger %s without calling it or showing a toast',
 				async (retiredLedgerCanisterId) => {
@@ -586,6 +922,344 @@ describe('icrc.services', () => {
 
 				expect(mockOnSuccess).not.toHaveBeenCalled();
 			});
+		});
+	});
+
+	describe('processCustomTokens', () => {
+		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
+
+		const customToken: CustomToken = {
+			token: {
+				Icrc: {
+					index_id: toNullable(),
+					ledger_id: Principal.fromText(mockLedgerCanisterId)
+				}
+			},
+			version: [1n],
+			enabled: true,
+			section: toNullable(),
+			allow_external_content_source: toNullable(),
+			allowed_external_content_source_urls: toNullable()
+		};
+
+		const tokenMetadata: IcrcTokenMetadataResponse = [
+			['icrc1:name', { Text: 'Test' }],
+			['icrc1:symbol', { Text: 'TST' }],
+			['icrc1:decimals', { Nat: 8n }],
+			['icrc1:fee', { Nat: 10_000n }]
+		];
+
+		const unavailableTokens = [{ ledgerCanisterId: mockLedgerCanisterId, customToken }];
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
+
+			ledgerCanisterMock.getMintingAccount.mockResolvedValue(
+				toNullable({ owner: mockPrincipal, subaccount: toNullable() })
+			);
+
+			icrcCustomTokensStore.resetAll();
+			icrcUnavailableCustomTokensStore.reset();
+		});
+
+		it('should keep the unavailable tokens of a certified round when the query round finishes after it', async () => {
+			const queryAnswer = Promise.withResolvers<IcrcTokenMetadataResponse>();
+
+			ledgerCanisterMock.metadata.mockImplementation(({ certified }) =>
+				certified ? Promise.reject(new Error('test')) : queryAnswer.promise
+			);
+
+			const queryRound = processCustomTokens({
+				identity: mockIdentity,
+				certified: false,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+
+			queryAnswer.resolve(tokenMetadata);
+
+			await queryRound;
+
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+		});
+
+		it('should not list a token on a query answer alone', async () => {
+			ledgerCanisterMock.metadata.mockRejectedValue(new Error('test'));
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: false,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([]);
+		});
+
+		it('should not drop a listed token on a query answer that comes later', async () => {
+			ledgerCanisterMock.metadata
+				.mockRejectedValueOnce(new Error('test'))
+				.mockResolvedValue(tokenMetadata);
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: false,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+		});
+
+		it('should let a certified round that starts later replace the unavailable tokens', async () => {
+			ledgerCanisterMock.metadata
+				.mockRejectedValueOnce(new Error('test'))
+				.mockResolvedValue(tokenMetadata);
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([]);
+		});
+
+		it('should keep a token a newer certified round loaded when an older one fails after it', async () => {
+			const olderRound = nextIcrcCustomTokensRound();
+
+			ledgerCanisterMock.metadata
+				.mockResolvedValueOnce(tokenMetadata)
+				.mockRejectedValue(new Error('test'));
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			const spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: olderRound
+			});
+
+			expect(
+				get(icrcCustomTokensStore)?.map(({ data: { ledgerCanisterId } }) => ledgerCanisterId)
+			).toStrictEqual([mockLedgerCanisterId]);
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual([]);
+			expect(spyToastsShow).not.toHaveBeenCalled();
+		});
+
+		it('should keep a token the certified round loaded when the query round of the same load fails after it', async () => {
+			const queryRound = nextIcrcCustomTokensRound();
+
+			ledgerCanisterMock.metadata
+				.mockResolvedValueOnce(tokenMetadata)
+				.mockRejectedValue(new Error('test'));
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: false,
+				tokens: [customToken],
+				icrcRound: queryRound
+			});
+
+			expect(
+				get(icrcCustomTokensStore)?.map(({ data: { ledgerCanisterId } }) => ledgerCanisterId)
+			).toStrictEqual([mockLedgerCanisterId]);
+		});
+
+		it('should keep what a newer certified round saved about a token when an older one loads it after', async () => {
+			// The older round read the saved tokens before the user turned the token on.
+			const olderRound = nextIcrcCustomTokensRound();
+
+			ledgerCanisterMock.metadata.mockResolvedValue(tokenMetadata);
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [{ ...customToken, enabled: false }],
+				icrcRound: olderRound
+			});
+
+			expect(get(icrcCustomTokensStore)?.map(({ data: { enabled } }) => enabled)).toStrictEqual([
+				true
+			]);
+		});
+
+		it('should not put a token the certified round could not load back into the token list when the query round loads it after', async () => {
+			const queryRound = nextIcrcCustomTokensRound();
+
+			ledgerCanisterMock.metadata
+				.mockRejectedValueOnce(new Error('test'))
+				.mockResolvedValue(tokenMetadata);
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			await processCustomTokens({
+				identity: mockIdentity,
+				certified: false,
+				tokens: [customToken],
+				icrcRound: queryRound
+			});
+
+			expect(get(icrcCustomTokensStore)).toStrictEqual([]);
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+		});
+
+		it('should not put a token the certified round could not load back into the token list when both rounds finish at the same moment', async () => {
+			const otherLedgerCanisterId = 'br5f7-7uaaa-aaaaa-qaaca-cai';
+
+			const otherCustomToken: CustomToken = {
+				...customToken,
+				token: {
+					Icrc: { index_id: toNullable(), ledger_id: Principal.fromText(otherLedgerCanisterId) }
+				}
+			};
+
+			const otherLedgerCanisterMock = mock<IcrcLedgerCanister>();
+
+			vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(({ canisterId }) =>
+				canisterId.toText() === otherLedgerCanisterId ? otherLedgerCanisterMock : ledgerCanisterMock
+			);
+
+			// The first token's ledger fails only for the certified round.
+			ledgerCanisterMock.metadata.mockImplementation(({ certified }) =>
+				certified ? Promise.reject(new Error('test')) : Promise.resolve(tokenMetadata)
+			);
+
+			// The other ledger answers both rounds at the same moment.
+			const otherAnswer = Promise.withResolvers<IcrcTokenMetadataResponse>();
+
+			otherLedgerCanisterMock.metadata.mockReturnValue(otherAnswer.promise);
+			otherLedgerCanisterMock.getMintingAccount.mockResolvedValue(
+				toNullable({ owner: mockPrincipal, subaccount: toNullable() })
+			);
+
+			const queryRound = processCustomTokens({
+				identity: mockIdentity,
+				certified: false,
+				tokens: [customToken, otherCustomToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			const certifiedRound = processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken, otherCustomToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			otherAnswer.resolve(tokenMetadata);
+
+			await Promise.all([queryRound, certifiedRound]);
+
+			expect(
+				get(icrcCustomTokensStore)?.map(({ data: { ledgerCanisterId } }) => ledgerCanisterId)
+			).toStrictEqual([otherLedgerCanisterId]);
+			expect(get(icrcUnavailableCustomTokensStore)).toStrictEqual(unavailableTokens);
+		});
+
+		it('should keep a token deleted while its round is running out of the token list', async () => {
+			const queryAnswer = Promise.withResolvers<IcrcTokenMetadataResponse>();
+
+			ledgerCanisterMock.metadata.mockReturnValue(queryAnswer.promise);
+
+			const queryRound = processCustomTokens({
+				identity: mockIdentity,
+				certified: false,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			// The user deletes the token while the round waits for its ledger.
+			icrcCustomTokensStore.resetByIdentifier(mockLedgerCanisterId);
+			icrcUnavailableCustomTokensStore.remove(mockLedgerCanisterId);
+
+			queryAnswer.resolve(tokenMetadata);
+
+			await queryRound;
+
+			expect(get(icrcCustomTokensStore)).toStrictEqual([]);
+		});
+
+		it('should not warn about a token deleted while its certified round is running', async () => {
+			const certifiedAnswer = Promise.withResolvers<IcrcTokenMetadataResponse>();
+
+			ledgerCanisterMock.metadata.mockReturnValue(certifiedAnswer.promise);
+
+			const spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
+
+			const certifiedRound = processCustomTokens({
+				identity: mockIdentity,
+				certified: true,
+				tokens: [customToken],
+				icrcRound: nextIcrcCustomTokensRound()
+			});
+
+			// The user deletes the token while the round waits for its ledger.
+			icrcCustomTokensStore.resetByIdentifier(mockLedgerCanisterId);
+			icrcUnavailableCustomTokensStore.remove(mockLedgerCanisterId);
+
+			certifiedAnswer.reject(new Error('test'));
+
+			await certifiedRound;
+
+			expect(spyToastsShow).not.toHaveBeenCalled();
 		});
 	});
 

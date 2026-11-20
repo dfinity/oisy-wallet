@@ -4,6 +4,7 @@
 	import HelpNetworkExplorers from '$lib/components/help/HelpNetworkExplorers.svelte';
 	import HelpProviderExplorers from '$lib/components/help/HelpProviderExplorers.svelte';
 	import HelpSupport from '$lib/components/help/HelpSupport.svelte';
+	import HelpUnavailableTokens from '$lib/components/help/HelpUnavailableTokens.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { trackHelp } from '$lib/services/help-analytics.services';
@@ -21,6 +22,10 @@
      only) div of its type and its own margin never applies - hence the gap on the container. -->
 <div class="flex flex-col gap-5">
 	<HelpSupport />
+
+	<!-- Near the top, so a user sent here by the "not responding" warning sees it right away. It
+	     only shows while a saved token can't be loaded. -->
+	<HelpUnavailableTokens />
 
 	<HelpNetworkExplorers />
 

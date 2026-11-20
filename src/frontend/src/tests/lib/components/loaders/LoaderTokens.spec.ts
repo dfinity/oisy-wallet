@@ -18,6 +18,7 @@ import {
 } from '$icp/services/icpunks.services';
 import {
 	loadDefaultIcrcTokens,
+	nextIcrcCustomTokensRound,
 	processCustomTokens as processIcrcCustomTokens
 } from '$icp/services/icrc.services';
 import {
@@ -89,6 +90,7 @@ vi.mock('$eth/services/erc4626.services', () => ({
 
 vi.mock('$icp/services/icrc.services', () => ({
 	loadDefaultIcrcTokens: vi.fn().mockResolvedValue(undefined),
+	nextIcrcCustomTokensRound: vi.fn(),
 	processCustomTokens: vi.fn().mockResolvedValue(undefined)
 }));
 
@@ -235,6 +237,25 @@ describe('LoaderTokens', () => {
 			const uniqueIdentities = new Set(calls.map(([{ certified }]) => certified));
 
 			expect(uniqueIdentities.size).toBeLessThanOrEqual(2);
+		});
+
+		it('should number the ICRC round before it fetches the saved tokens', async () => {
+			vi.mocked(nextIcrcCustomTokensRound).mockReturnValueOnce(1).mockReturnValueOnce(2);
+
+			render(LoaderTokens);
+
+			await waitFor(() => {
+				expect(processIcrcCustomTokens).toHaveBeenCalledWith(
+					expect.objectContaining({ certified: true, icrcRound: 2 })
+				);
+			});
+
+			const [queryRound, updateRound] =
+				vi.mocked(nextIcrcCustomTokensRound).mock.invocationCallOrder;
+			const [queryFetch, updateFetch] = vi.mocked(loadNetworkCustomTokens).mock.invocationCallOrder;
+
+			expect(queryRound).toBeLessThan(queryFetch);
+			expect(updateRound).toBeLessThan(updateFetch);
 		});
 
 		it('should always process ICRC, EXT, ICPunks and Icrc7 custom tokens', async () => {
