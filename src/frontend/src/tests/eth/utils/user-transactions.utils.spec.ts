@@ -6,6 +6,7 @@ import {
 	mapUserTransactionToTransaction
 } from '$eth/utils/user-transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { MAX_STORED_USER_TRANSACTION_DATA_LEN } from '$lib/constants/user-transactions.constants';
 import type { Transaction } from '$lib/types/transaction';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import {
@@ -50,20 +51,40 @@ describe('user-transactions.utils', () => {
 			expect(result.to).toEqual(toNullable());
 		});
 
-		it('should map optional chainId, nonce, and tokenId as empty when undefined', () => {
-			const transaction = {
-				...mockEthTransaction,
-				chainId: undefined,
-				nonce: undefined,
-				tokenId: undefined
-			} as unknown as Transaction;
+		it('should map an optional tokenId as empty when undefined', () => {
+			const transaction: Transaction = { ...mockEthTransaction, tokenId: undefined };
 
 			const result = mapTransactionToUserTransaction(transaction);
 			const evm = extractMockEvmTransactionData(result.network_data);
 
-			expect(evm.chain_id).toEqual(toNullable());
-			expect(evm.nonce).toEqual(toNullable());
 			expect(evm.nft_token_id).toEqual(toNullable());
+		});
+
+		it('should not send chainId, nonce or gasLimit', () => {
+			const result = mapTransactionToUserTransaction(mockEthTransaction);
+			const evm = extractMockEvmTransactionData(result.network_data);
+
+			expect(evm).not.toHaveProperty('chain_id');
+			expect(evm).not.toHaveProperty('nonce');
+			expect(evm).not.toHaveProperty('gas_limit');
+		});
+
+		it('should cut data to the selector and its first two arguments', () => {
+			const call = `0xa9059cbb${'1'.repeat(64)}${'2'.repeat(64)}`;
+			const transaction: Transaction = { ...mockEthTransaction, data: `${call}${'3'.repeat(64)}` };
+
+			const result = mapTransactionToUserTransaction(transaction);
+			const evm = extractMockEvmTransactionData(result.network_data);
+
+			expect(call).toHaveLength(MAX_STORED_USER_TRANSACTION_DATA_LEN);
+			expect(evm.data).toEqual(toNullable(call));
+		});
+
+		it('should keep data within the cut as it is', () => {
+			const result = mapTransactionToUserTransaction(mockEthTransaction);
+			const evm = extractMockEvmTransactionData(result.network_data);
+
+			expect(evm.data).toEqual(toNullable(mockEthTransaction.data));
 		});
 
 		it('should map gasPrice and gasUsed as empty when undefined', () => {
@@ -108,7 +129,7 @@ describe('user-transactions.utils', () => {
 		it('should correctly map a UserTransaction to Transaction', () => {
 			const result = mapUserTransactionToTransaction(mockEthMappedUserTransaction);
 
-			expect(result).toEqual(mockEthTransaction);
+			expect(result).toEqual({ ...mockEthTransaction, chainId: ZERO, nonce: 0, gasLimit: ZERO });
 		});
 
 		it('should throw when network_data is not Evm', () => {
@@ -130,42 +151,11 @@ describe('user-transactions.utils', () => {
 			expect(result.to).toBeUndefined();
 		});
 
-		it('should default chainId to ZERO when empty', () => {
-			const transaction: UserTransaction = {
-				...mockEthMappedUserTransaction,
-				network_data: {
-					Evm: { ...mockEthMappedEvmTransactionData, chain_id: toNullable() }
-				}
-			};
-
-			const result = mapUserTransactionToTransaction(transaction);
+		it('should set chainId, nonce and gasLimit to zero, since they are not stored', () => {
+			const result = mapUserTransactionToTransaction(mockEthMappedUserTransaction);
 
 			expect(result.chainId).toBe(ZERO);
-		});
-
-		it('should default nonce to 0 when empty', () => {
-			const transaction: UserTransaction = {
-				...mockEthMappedUserTransaction,
-				network_data: {
-					Evm: { ...mockEthMappedEvmTransactionData, nonce: toNullable() }
-				}
-			};
-
-			const result = mapUserTransactionToTransaction(transaction);
-
 			expect(result.nonce).toBe(0);
-		});
-
-		it('should default gasLimit to ZERO when empty', () => {
-			const transaction: UserTransaction = {
-				...mockEthMappedUserTransaction,
-				network_data: {
-					Evm: { ...mockEthMappedEvmTransactionData, gas_limit: toNullable() }
-				}
-			};
-
-			const result = mapUserTransactionToTransaction(transaction);
-
 			expect(result.gasLimit).toBe(ZERO);
 		});
 
@@ -228,9 +218,6 @@ describe('user-transactions.utils', () => {
 			expect(result.from).toBe(mockEthTransaction.from);
 			expect(result.to).toBe(mockEthTransaction.to);
 			expect(result.value).toBe(mockEthTransaction.value);
-			expect(result.chainId).toBe(mockEthTransaction.chainId);
-			expect(result.nonce).toBe(mockEthTransaction.nonce);
-			expect(result.gasLimit).toBe(mockEthTransaction.gasLimit);
 			expect(result.data).toBe(mockEthTransaction.data);
 		});
 
