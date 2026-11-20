@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { Asset, Chain } from '@liquidium/client';
+	import { SupplyAction, type Asset, type Chain } from '@liquidium/client';
 	import { setContext } from 'svelte';
 	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumSupplyBtcWizard from '$lib/components/liquidium/supply/LiquidiumSupplyBtcWizard.svelte';
@@ -11,6 +11,7 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumSupplyWizardSteps } from '$lib/config/lend-borrow.config';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
@@ -60,20 +61,43 @@
 	$effect(() => {
 		const identity = $authIdentity;
 
-		if (nonNullish(identity) && nonNullish(selectedMarket)) {
-			const asset = selectedMarket.asset as Asset;
-			const chain = selectedMarket.chain as Chain;
-
-			inflowFee = undefined;
-			inflowFeeUnavailable = false;
-
-			estimateLiquidiumInflowFee({ identity, asset, chain })
-				.then((fee) => (inflowFee = fee))
-				.catch((err: unknown) => {
-					consoleError(err);
-					inflowFeeUnavailable = true;
-				});
+		if (isNullish(identity) || isNullish(selectedMarket)) {
+			return;
 		}
+
+		const { asset, chain, poolId } = selectedMarket;
+
+		inflowFee = undefined;
+		inflowFeeUnavailable = false;
+
+		// A SOL quote may first create the profile, so a quote for a rail picked before can answer
+		// after the current one's: it must not overwrite it.
+		let cancelled = false;
+
+		estimateLiquidiumInflowFee({
+			identity,
+			ethAddress: $ethAddress,
+			asset: asset as Asset,
+			chain: chain as Chain,
+			poolId,
+			action: SupplyAction.deposit
+		})
+			.then((fee) => {
+				if (!cancelled) {
+					inflowFee = fee;
+				}
+			})
+			.catch((err: unknown) => {
+				consoleError(err);
+
+				if (!cancelled) {
+					inflowFeeUnavailable = true;
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
 	});
 
 	let modal: WizardModal<WizardStepsLiquidiumSupply> | undefined = $state();
@@ -178,7 +202,7 @@
 				bind:amount
 				bind:supplyProgressStep
 			/>
-		{:else}
+		{:else if selectedMarket.chain === 'ETH'}
 			<LiquidiumSupplyEthWizard
 				{currentStep}
 				{inflowFee}

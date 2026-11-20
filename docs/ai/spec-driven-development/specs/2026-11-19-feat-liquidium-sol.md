@@ -81,17 +81,19 @@ The fee API accepted a well-formed principal that is not a profile, so it checks
 
 - The SOL pool's two rails show as **SOL** (Solana network badge) and **ckSOL** (ICP network badge), native rail first, using the existing tokens: `SOLANA_TOKEN`, and ckSOL found with `findTwinToken({ tokenToPair: SOLANA_TOKEN, tokens })`.
 - Pool order: last, after USDT (`LIQUIDIUM_POOL_ORDER` becomes BTC, ETH, ICP, USDC, USDT, SOL).
-- A rail appears in a picker only when its token is usable, as today (`liquidiumEnabledRailToken`). So the native SOL rail needs the Solana network enabled. The ckSOL rail needs ckSOL to exist and be enabled.
-- **Flag:** the whole SOL pool is behind a new `LIQUIDIUM_SOL_ENABLED` flag in `src/frontend/src/env/liquidium.ts`. It is `LOCAL || STAGING` while the PRs land, like `BTC_SEND_VIA_BACKEND_ENABLED`, and becomes `true` at launch. Specs run as local, so the flag is on in tests unless mocked.
+- A rail appears in a picker only when OISY transacts on it and its token is usable (`liquidiumEnabledRailToken` checks `liquidiumSupportedRails` as well as the enabled tokens). So the native SOL rail needs the Solana network enabled. The ckSOL rail needs ckSOL to exist and be enabled.
+- Until PR 5 the native rail is listed in `LIQUIDIUM_PENDING_RAILS`, so the pool is offered through ckSOL alone. A SOL position still shows with `SOLANA_TOKEN`: it carries its pool's chain, `SOL`, whichever rail funded it. The picker check keeps that display token from offering the native rail.
+- **Flag:** the whole SOL pool is behind a new `LIQUIDIUM_SOL_ENABLED` flag in `src/frontend/src/env/liquidium.ts`. It is `LOCAL || STAGING` while the PRs land, like `BTC_SEND_VIA_BACKEND_ENABLED`, and becomes `true` at launch. SOL also needs ckSOL in the build (`CKSOL_IC_DATA`): local builds have none, so they offer no SOL whatever the flag says. Specs run as a local build, so the specs that need SOL switch ckSOL on.
 - With `CKSOL_ENABLED` off, the whole SOL pool is hidden too. Native SOL deposits mint ckSOL through the minter, so neither rail works without it.
 
 ### Fee quote and profile
 
 The supply and repay modals quote the provider fee when a rail is picked (`estimateLiquidiumInflowFee`). For SOL and ckSOL the quote needs the profile id and the action, and returns a minimum and a sender fee as well.
 
-- `estimateLiquidiumInflowFee` passes `poolId`, `profileId` and `action` for SOL, and returns the whole estimate (`totalFee`, and for SOL `minimumSendAmount` and `walletTransferFee`) instead of only `totalFee`.
+- `estimateLiquidiumInflowFee` passes `poolId`, `profileId` and `action` for SOL. PR 2 still returns only `totalFee`; PR 3 makes it return the whole estimate (`totalFee`, and for SOL `minimumSendAmount` and `walletTransferFee`), which the native SOL minimum needs.
 - **Repay** always has a profile (there is debt), so nothing changes there.
 - **Supply** may have no profile yet (today it is created in the first action's Progress step). When the user picks a SOL or ckSOL rail and has no profile, the modal creates it first with `getOrCreateLiquidiumProfile` (OISY's ETH key signs, with no prompt), then quotes. Meanwhile the fee shows as loading; a failure shows the existing "fee unavailable" state. A user who opens a SOL supply and leaves keeps the profile, which is harmless. The other assets keep creating the profile at submit.
+- Since a SOL quote can take a profile creation's time, a quote for a rail picked before never overwrites the current rail's fee.
 
 ### Supply
 
@@ -103,7 +105,7 @@ The supply and repay modals quote the provider fee when a rail is picked (`estim
   - treats a failure as "nothing sent" only for `isSolSendRefusal(err)` before the confirm step. Any later failure closes the modal with the existing "outcome unknown" message.
 - The supply service's refusal rule is BTC-only too: `executeLiquidiumSupply` deletes the row only on `isDefinitiveBtcBroadcastRefusal`. Native SOL needs its own there: delete the row only on `isSolSendRefusal` before the confirm step. Otherwise a refused SOL supply, which sent nothing, shows as pending until its blockhash expires and then as failed.
 - `LiquidiumSupplyModal.svelte` currently renders the ETH wizard for any chain that isn't BTC or ICP. It must dispatch `SOL` explicitly, and the ETH branch should become explicit too.
-- **Minimum:** the transfer (`amount + provider fee`) must be at least the quote's `minimumSendAmount`. For native SOL that is 0.02 SOL today. Sending less leaves the funds at the deposit address waiting for a top-up. The form blocks such an amount. The existing "Minimum supply" row shows the **net** minimum (`minimumSendAmount − totalFee`, about 0.0181 SOL today), so it compares directly with the amount the user types. For ckSOL the minimum is negligible (501 lamports) but uses the same rule.
+- **Minimum:** the transfer (`amount + provider fee`) must be at least the quote's `minimumSendAmount`. For native SOL that is 0.02 SOL today. Sending less leaves the funds at the deposit address waiting for a top-up. The form blocks such an amount. The existing "Minimum supply" row shows the **net** minimum (`minimumSendAmount − totalFee`, about 0.0181 SOL today), so it compares directly with the amount the user types. For ckSOL the minimum is negligible (501 lamports, met by any positive amount), so the check lands with native SOL in PR 3.
 - **Balance:** the balance must cover `amount + provider fee + Solana network fee`. Max reserves both, as today.
 
 ### Repay
@@ -152,7 +154,7 @@ Every code PR lands behind `LIQUIDIUM_SOL_ENABLED`, and within it a rail is only
    - `liquidiumAssetTokenId('SOL')`, the transfer-chain ref (unless the BTC fix has added it already), explicit wizard dispatch and explicit ETH receiver branch.
 3. **Native SOL supply.** New supply wizard, minimum, SOL refusal rule in the supply service, blockhash and slot refs, and SOL outcome check. The native rail stays hidden.
 4. **Native SOL repay.** New repay wizard, SOL refusal rule and small-repay handling. The native rail stays hidden.
-5. **Native SOL borrow and withdraw.** SOL receiver and native outflow minimum, then **switch on the native rail**, so it appears in the market and every picker at once.
+5. **Native SOL borrow and withdraw.** SOL receiver and native outflow minimum, then **switch on the native rail** (remove it from `LIQUIDIUM_PENDING_RAILS`), so it appears in the market and every picker at once.
 6. **Copy and cards.** Advertised tokens and i18n. Ships with the launch (step 7), not before, since none of it is behind the flag.
 7. **Launch.** Once both rails are verified on staging, set `LIQUIDIUM_SOL_ENABLED` to `true`.
 

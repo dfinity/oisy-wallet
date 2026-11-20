@@ -90,6 +90,21 @@ describe('LiquidiumRepayModal', () => {
 		await waitFor(() => expect(container).toHaveTextContent(en.liquidium.text.pending_repays));
 	});
 
+	it("quotes the provider fee for the reserve's pool as a repayment", async () => {
+		render(LiquidiumRepayModal, { props: { reserve } });
+
+		await waitFor(() =>
+			expect(liquidiumSupplyServices.estimateLiquidiumInflowFee).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				ethAddress: mockEthAddress,
+				asset: reserve.asset,
+				chain: reserve.chain,
+				poolId: reserve.poolId,
+				action: 'repayment'
+			})
+		);
+	});
+
 	it('refetches the protocol max once a pending repay settles', async () => {
 		render(LiquidiumRepayModal, { props: { reserve } });
 

@@ -1,5 +1,5 @@
 import { isDefinitiveBtcBroadcastRefusal } from '$btc/utils/btc-send.utils';
-import type { EthAddress } from '$eth/types/address';
+import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import { liquidiumClient } from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
 import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
@@ -16,33 +16,52 @@ import {
 	toLiquidiumExternalRefs
 } from '$lib/utils/liquidium-active-tx.utils';
 import { liquidiumAssetTokenId } from '$lib/utils/liquidium.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import {
 	SupplyAction,
 	type Asset,
-	type AssetIdentifier,
 	type Chain,
+	type EstimateInflowFeeRequest,
 	type SupplyTarget
 } from '@liquidium/client';
 
 // Liquidium's per-inflow processing fee (base units of `asset`), deducted by the
 // protocol from each inflow.
+//
+// Liquidium quotes SOL and ckSOL per account: the quote needs the profile, the pool and what the
+// inflow is for. A first supply of SOL therefore creates the profile here, when the rail is picked,
+// rather than at submit as the other assets do.
 export const estimateLiquidiumInflowFee = async ({
 	identity,
+	ethAddress,
 	asset,
-	chain
+	chain,
+	poolId,
+	action
 }: {
 	identity: Identity;
+	ethAddress: OptionEthAddress;
 	asset: Asset;
 	chain: Chain;
+	poolId: string;
+	action: SupplyAction;
 }): Promise<bigint> => {
+	const profileId = async (): Promise<string> => {
+		assertNonNullish(ethAddress, 'A SOL quote needs the Liquidium profile of the Ethereum address');
+
+		return await getOrCreateLiquidiumProfile({ identity, ethAddress });
+	};
+
+	const accountQuote = asset === 'SOL' ? { poolId, action, profileId: await profileId() } : {};
+
 	// `asset`/`chain` reach us as the SDK's wide enums; the protocol only ships supported pairs.
-	// We type-assert to the correlated `AssetIdentifier` shape at this boundary to satisfy the SDK's typing.
+	// We type-assert to the correlated request shape at this boundary to satisfy the SDK's typing.
 	const { totalFee } = await liquidiumClient({ identity }).lending.estimateInflowFee({
 		asset,
-		chain
-	} as AssetIdentifier);
+		chain,
+		...accountQuote
+	} as EstimateInflowFeeRequest);
 
 	return totalFee;
 };

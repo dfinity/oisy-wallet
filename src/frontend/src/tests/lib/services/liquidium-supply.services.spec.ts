@@ -5,7 +5,10 @@ import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import * as analyticsServices from '$lib/services/analytics.services';
-import { executeLiquidiumSupply } from '$lib/services/liquidium-supply.services';
+import {
+	estimateLiquidiumInflowFee,
+	executeLiquidiumSupply
+} from '$lib/services/liquidium-supply.services';
 import * as liquidiumServices from '$lib/services/liquidium.services';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
@@ -257,6 +260,75 @@ describe('liquidium-supply.services', () => {
 			expect(createActiveUserTransaction).toHaveBeenCalledOnce();
 			expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
 			expect(submit).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('estimateLiquidiumInflowFee', () => {
+		const estimateInflowFee = vi.fn();
+		const getOrCreateLiquidiumProfile = vi.mocked(liquidiumServices.getOrCreateLiquidiumProfile);
+
+		beforeEach(() => {
+			vi.mocked(liquidiumApi.liquidiumClient).mockReturnValue({
+				lending: { estimateInflowFee }
+			} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
+			estimateInflowFee.mockResolvedValue({ totalFee: 500n });
+		});
+
+		it('quotes other assets by asset and chain alone, without the profile', async () => {
+			await expect(
+				estimateLiquidiumInflowFee({
+					identity: mockIdentity,
+					ethAddress,
+					asset: 'BTC',
+					chain: 'ICP',
+					poolId,
+					action: 'deposit'
+				})
+			).resolves.toBe(500n);
+
+			expect(estimateInflowFee).toHaveBeenCalledExactlyOnceWith({ asset: 'BTC', chain: 'ICP' });
+			expect(getOrCreateLiquidiumProfile).not.toHaveBeenCalled();
+		});
+
+		it('quotes SOL with the profile, the pool and what the inflow is for', async () => {
+			await expect(
+				estimateLiquidiumInflowFee({
+					identity: mockIdentity,
+					ethAddress,
+					asset: 'SOL',
+					chain: 'ICP',
+					poolId: 'pool-sol',
+					action: 'repayment'
+				})
+			).resolves.toBe(500n);
+
+			expect(getOrCreateLiquidiumProfile).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				ethAddress
+			});
+			expect(estimateInflowFee).toHaveBeenCalledExactlyOnceWith({
+				asset: 'SOL',
+				chain: 'ICP',
+				poolId: 'pool-sol',
+				action: 'repayment',
+				profileId
+			});
+		});
+
+		it('does not quote SOL without the Ethereum address that owns the profile', async () => {
+			await expect(
+				estimateLiquidiumInflowFee({
+					identity: mockIdentity,
+					ethAddress: undefined,
+					asset: 'SOL',
+					chain: 'ICP',
+					poolId: 'pool-sol',
+					action: 'deposit'
+				})
+			).rejects.toThrow();
+
+			expect(getOrCreateLiquidiumProfile).not.toHaveBeenCalled();
+			expect(estimateInflowFee).not.toHaveBeenCalled();
 		});
 	});
 });
