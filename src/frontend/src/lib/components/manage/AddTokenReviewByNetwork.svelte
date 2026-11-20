@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+	import { XRP_TRUST_LINE_TOKENS_ENABLED } from '$env/xrp-trust-line-tokens.env';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
@@ -33,9 +34,11 @@
 		isNetworkIdEvm,
 		isNetworkIdICP,
 		isNetworkIdSolana,
-		isNetworkIdSOLDevnet
+		isNetworkIdSOLDevnet,
+		isNetworkIdXrp
 	} from '$lib/utils/network.utils';
 	import SolAddTokenReview from '$sol/components/tokens/SolAddTokenReview.svelte';
+	import XrpAddTokenReview from '$xrp/components/tokens/XrpAddTokenReview.svelte';
 
 	interface Props {
 		network?: Network;
@@ -267,7 +270,9 @@
 		icPunksCanisterId,
 		icrc7CanisterId,
 		ethContractAddress,
-		splTokenAddress
+		splTokenAddress,
+		xrpCurrency,
+		xrpIssuer
 	} = $derived(tokenData);
 </script>
 
@@ -320,4 +325,6 @@
 		tokenAddress={splTokenAddress}
 		bind:metadata={splMetadata}
 	/>
+{:else if XRP_TRUST_LINE_TOKENS_ENABLED && nonNullish(network) && isNetworkIdXrp(network?.id)}
+	<XrpAddTokenReview currency={xrpCurrency} issuer={xrpIssuer} {network} {onBack} />
 {/if}

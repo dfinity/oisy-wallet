@@ -11,16 +11,17 @@ with `VITE_XRP_MAINNET_DISABLED`.
 
 ## What we use it for
 
-| Area     | Method           | Purpose                                                           |
-| -------- | ---------------- | ----------------------------------------------------------------- |
-| Balance  | `account_info`   | Native XRP balance (in drops), sequence and owner count           |
-| Fee      | `fee`            | Open-ledger fee estimate for a transaction                        |
-| Send     | `submit`         | Broadcast a signed transaction blob to the network                |
-| Finality | `tx`             | Whether a submitted transaction is in a validated ledger          |
-| Expiry   | `ledger`         | Latest **validated** ledger index, to decide that a send expired  |
-| Signing  | `ledger_current` | Current **open** ledger index, to pick a `LastLedgerSequence`     |
-| History  | `account_tx`     | Native XRP transaction history, paginated with an opaque `marker` |
-| Tokens   | `account_lines`  | The account's trust lines: which tokens it holds, and how many    |
+| Area     | Method           | Purpose                                                            |
+| -------- | ---------------- | ------------------------------------------------------------------ |
+| Balance  | `account_info`   | Native XRP balance (in drops), sequence and owner count            |
+| Fee      | `fee`            | Open-ledger fee estimate for a transaction                         |
+| Send     | `submit`         | Broadcast a signed transaction blob to the network                 |
+| Finality | `tx`             | Whether a submitted transaction is in a validated ledger           |
+| Expiry   | `ledger`         | Latest **validated** ledger index, to decide that a send expired   |
+| Signing  | `ledger_current` | Current **open** ledger index, to pick a `LastLedgerSequence`      |
+| History  | `account_tx`     | Native XRP transaction history, paginated with an opaque `marker`  |
+| Tokens   | `account_lines`  | The account's trust lines: which tokens it holds, and how many     |
+| Import   | `account_info`   | A token issuer's flags and `TransferRate`, before adding its token |
 
 History comes from `account_tx`, read by `loadXrpTransactions` — see the table below, and the
 [XRP integration spec](../spec-driven-development/specs/2026-07-24-feat-xrp-ledger-integration.md)
