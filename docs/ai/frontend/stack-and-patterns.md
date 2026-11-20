@@ -396,6 +396,16 @@ the shared core rule, preserving its deprecated-package and `/dist/` import bans
   progress cues, not decorative motion. The pre-hydration loader in `app.html`
   follows the same rule, retaining its 30-second animation cap. Keep the owning
   controls' loading states, translated labels and accessibility semantics intact.
+- **Scrolling lists (`scroll-fade`):** a list that scrolls inside a modal or
+  panel (the token picker, send contacts, activity filters, swap offers) adds
+  `scroll-fade` (`global.scss`) to its scrolling element. An edge with more to
+  scroll fades over 16 px, an edge at its end stays sharp, and a list that
+  does not scroll shows nothing. The fade follows the scroll position
+  (`animation-timeline: scroll(self)`), so reduced motion leaves it as is;
+  the bottom-edge animation enables the mask so it clears when overflow disappears.
+  Firefox, without scroll-driven animations, shows the plain list. It also
+  sets `scroll-padding-block`, so keyboard focus scrolls a row clear of the
+  fade. Don't add it to dropdown popovers or the AI assistant chat.
 - **Progress steps (`ProgressSteps`):** a step's old marker leaves at once and
   the new one comes in. A finished or failed badge springs in over 440 ms on a
   spring sampled into CSS `linear()`, with an overshooting `cubic-bezier`

@@ -75,7 +75,10 @@
 	};
 </script>
 
-<div class=" mb-4 overflow-y-auto overscroll-contain" data-tid={SWAP_MODAL_SELECT_PROVIDER_STEP}>
+<div
+	class="mb-4 scroll-fade overflow-y-auto overscroll-contain"
+	data-tid={SWAP_MODAL_SELECT_PROVIDER_STEP}
+>
 	{#if nonNullish(selectedProvider) && nonNullish(selectedDApp)}
 		<!-- The offer in use first, then all offers below.
 		The card is the one mark of the pick, so the rows carry no check, and it leaves out what each

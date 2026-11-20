@@ -50,6 +50,20 @@ describe('ModalTokensList', () => {
 		}
 	});
 
+	it('fades the edges of the scrolling token list', async () => {
+		const { findByTestId } = render(ModalTokensListHost, {
+			props: {
+				...baseProps,
+				tokens: mockTokens,
+				renderNoResults: false
+			}
+		});
+
+		const row = await findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}${BTC_MAINNET_TOKEN.symbol}`);
+
+		expect(row.closest('.scroll-fade')).not.toBeNull();
+	});
+
 	it('renders toolbar snippet', async () => {
 		const { findByTestId } = render(ModalTokensListHost, {
 			props: {
