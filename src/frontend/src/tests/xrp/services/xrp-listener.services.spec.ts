@@ -5,7 +5,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenId } from '$lib/types/token';
 import { areTransactionsStoresLoaded } from '$lib/utils/transactions.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockXrpTrustLine } from '$tests/mocks/xrp.mock';
+import { mockRlusdCurrencyCode, mockRlusdIssuer, mockXrpTrustLine } from '$tests/mocks/xrp.mock';
 import * as xrpHistoryPager from '$xrp/services/xrp-history-pager.services';
 import { resetWallet, syncWallet, syncWalletError } from '$xrp/services/xrp-listener.services';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
@@ -319,6 +319,155 @@ describe('xrp-listener.services', () => {
 
 			expect(get(xrpTrustLinesStore)[nativeTokenId]).toBeUndefined();
 			expect(balanceOf(RLUSD_TOKEN_ID)).toBeNull();
+		});
+
+		// The tokens' history comes from the pages the account's is read from.
+		describe("the tokens' history", () => {
+			const tokenRow: XrpTransactionUi = { ...mockTransaction, id: 'TOKEN_HASH' };
+
+			const withHistory = ({
+				trustLines,
+				transactions = [],
+				tokenRows
+			}: {
+				trustLines?: XrpTrustLine[];
+				transactions?: XrpTransactionUi[] | null;
+				tokenRows?: { currency: string; issuer: string; transaction: XrpTransactionUi }[];
+			}): XrpPostMessageDataResponseWallet => ({
+				wallet: {
+					balance: { certified: false, data: mockBalance },
+					...(trustLines !== undefined && { trustLines }),
+					...(transactions !== null && {
+						newTransactions: JSON.stringify(
+							transactions.map((data) => ({ data, certified: false })),
+							jsonReplacer
+						)
+					}),
+					...(tokenRows !== undefined && {
+						newTrustLineTransactions: JSON.stringify(
+							tokenRows.map(({ transaction, ...identity }) => ({
+								...identity,
+								transaction: { data: transaction, certified: false }
+							})),
+							jsonReplacer
+						)
+					})
+				}
+			});
+
+			const rlusdRow = {
+				currency: mockRlusdCurrencyCode,
+				issuer: mockRlusdIssuer,
+				transaction: tokenRow
+			};
+
+			const historyOf = (id: TokenId) => get(xrpTransactionsStore)?.[id];
+
+			beforeEach(() => {
+				xrpTransactionsStore.clear(nativeTokenId);
+				xrpTransactionsStore.clear(RLUSD_TOKEN_ID);
+			});
+
+			it("files a row under its token, not under XRP's", () => {
+				syncWallet({
+					data: withHistory({ trustLines: [mockXrpTrustLine], tokenRows: [rlusdRow] }),
+					tokenId: nativeTokenId
+				});
+
+				expect(historyOf(RLUSD_TOKEN_ID)).toEqual([{ data: tokenRow, certified: false }]);
+				expect(historyOf(nativeTokenId)).toEqual([]);
+			});
+
+			// A row of a line the account no longer has would otherwise wait in the store.
+			it('drops a row of a token the account does not hold', () => {
+				syncWallet({
+					data: withHistory({ trustLines: [], tokenRows: [rlusdRow] }),
+					tokenId: nativeTokenId
+				});
+
+				expect(historyOf(RLUSD_TOKEN_ID)).toBeUndefined();
+			});
+
+			// Read, and none of its payments found: its page shows that rather than loading for good.
+			it("settles a held token's history once the account's is read", () => {
+				syncWallet({
+					data: withHistory({ trustLines: [mockXrpTrustLine], tokenRows: [] }),
+					tokenId: nativeTokenId
+				});
+
+				expect(historyOf(RLUSD_TOKEN_ID)).toEqual([]);
+			});
+
+			it('settles a token added after the history was read', () => {
+				syncWallet({ data: withHistory({ trustLines: [] }), tokenId: nativeTokenId });
+
+				syncWallet({
+					data: withHistory({ trustLines: [mockXrpTrustLine], transactions: null }),
+					tokenId: nativeTokenId
+				});
+
+				expect(historyOf(RLUSD_TOKEN_ID)).toEqual([]);
+			});
+
+			it("records a failed first read for a held token as the account's", () => {
+				syncWallet({
+					data: withHistory({ trustLines: [mockXrpTrustLine], transactions: null }),
+					tokenId: nativeTokenId
+				});
+
+				expect(historyOf(nativeTokenId)).toBeNull();
+				expect(historyOf(RLUSD_TOKEN_ID)).toBeNull();
+			});
+
+			it('records the failure on a balance error too', () => {
+				syncWallet({ data: withLines([mockXrpTrustLine]), tokenId: nativeTokenId });
+
+				xrpTransactionsStore.clear(nativeTokenId);
+				xrpTransactionsStore.clear(RLUSD_TOKEN_ID);
+
+				syncWalletError({ tokenId: nativeTokenId, error: new Error('down'), hideToast: true });
+
+				expect(historyOf(RLUSD_TOKEN_ID)).toBeNull();
+			});
+
+			it('keeps the rows a held token has', () => {
+				syncWallet({
+					data: withHistory({ trustLines: [mockXrpTrustLine], tokenRows: [rlusdRow] }),
+					tokenId: nativeTokenId
+				});
+
+				syncWallet({ data: withHistory({ tokenRows: [] }), tokenId: nativeTokenId });
+
+				expect(historyOf(RLUSD_TOKEN_ID)).toEqual([{ data: tokenRow, certified: false }]);
+			});
+
+			it("drops a token's history and pager with its line", () => {
+				const reset = vi.spyOn(xrpHistoryPager, 'resetXrpHistoryPager');
+
+				syncWallet({
+					data: withHistory({ trustLines: [mockXrpTrustLine], tokenRows: [rlusdRow] }),
+					tokenId: nativeTokenId
+				});
+
+				syncWallet({ data: withHistory({ trustLines: [] }), tokenId: nativeTokenId });
+
+				expect(historyOf(RLUSD_TOKEN_ID)).toBeUndefined();
+				expect(reset).toHaveBeenCalledWith(RLUSD_TOKEN_ID);
+			});
+
+			it("drops the held tokens' history and pagers on a handover", () => {
+				const reset = vi.spyOn(xrpHistoryPager, 'resetXrpHistoryPager');
+
+				syncWallet({
+					data: withHistory({ trustLines: [mockXrpTrustLine], tokenRows: [rlusdRow] }),
+					tokenId: nativeTokenId
+				});
+
+				resetWallet({ tokenId: nativeTokenId });
+
+				expect(historyOf(RLUSD_TOKEN_ID)).toBeUndefined();
+				expect(reset).toHaveBeenCalledWith(RLUSD_TOKEN_ID);
+			});
 		});
 	});
 });

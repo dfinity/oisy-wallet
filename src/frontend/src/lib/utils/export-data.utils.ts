@@ -18,6 +18,7 @@ import type { CsvColumn, CsvRow } from '$lib/utils/csv.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
+import { isTokenXrpTrustLine, xrpTrustLineIdentifier } from '$xrp/utils/xrp-trust-line.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
@@ -209,13 +210,18 @@ export interface UserAddresses {
 }
 
 // Tokens model the on-chain identifier under different field names depending on the standard
-// (ICRC ledgers, ERC20 contracts, SPL mints). For a flat CSV we surface whichever is present;
-// native tokens have neither and the column is left empty.
+// (ICRC ledgers, ERC20 contracts, SPL mints, XRP Ledger currency and issuer). For a flat CSV we
+// surface whichever is present; native tokens have none and the column is left empty.
 const getAddressOrLedgerId = (token: Token | TokenUi): string => {
 	const candidate = token as (Token | TokenUi) & {
 		ledgerCanisterId?: unknown;
 		address?: unknown;
 	};
+
+	// The pair together: two issuers' "USD" are two tokens.
+	if (isTokenXrpTrustLine(token)) {
+		return xrpTrustLineIdentifier(token);
+	}
 
 	if (typeof candidate.ledgerCanisterId === 'string') {
 		return candidate.ledgerCanisterId;

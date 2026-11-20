@@ -1,3 +1,4 @@
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { contactsStore } from '$lib/stores/contacts.store';
 import { i18n } from '$lib/stores/i18n.store';
@@ -52,6 +53,19 @@ describe('XrpTransactionModal', () => {
 		expect(getByText(get(i18n).fee.text.fee)).toBeTruthy();
 
 		expect(container.textContent).toContain('0.000012');
+	});
+
+	// The network fee is paid in XRP whatever the payment moved, so a token's row states it in XRP.
+	it('renders the fee of a trust-line token payment in XRP', () => {
+		const { container } = render(XrpTransactionModal, {
+			props: {
+				transaction: { ...transaction, type: 'send', value: 25n * 10n ** 18n, fee: 12n },
+				token: RLUSD_TOKEN
+			}
+		});
+
+		expect(container.textContent).toMatch(/0\.000012\s+XRP/);
+		expect(container.textContent).not.toMatch(/0\.000012\s+RLUSD/);
 	});
 
 	it('does not render a fee row for a received payment', () => {

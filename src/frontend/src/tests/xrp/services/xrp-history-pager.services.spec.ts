@@ -1,8 +1,13 @@
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { xrpAddressMainnetStore } from '$lib/stores/address.store';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockXrpAddress, mockXrpAddress2 } from '$tests/mocks/xrp.mock';
+import {
+	mockXrpAddress,
+	mockXrpAddress2,
+	mockXrpTrustLinePaymentEntry
+} from '$tests/mocks/xrp.mock';
 import {
 	XRP_MAX_SKIPPED_HISTORY_PAGES,
 	XRP_RIPPLE_EPOCH_OFFSET
@@ -243,5 +248,95 @@ describe('xrp-history-pager.services', () => {
 		await expect(load()).resolves.toEqual({ success: false });
 
 		expect(loadXrpTransactions).not.toHaveBeenCalled();
+	});
+
+	// A trust-line token walks the same account history with a pager of its own, and keeps what its
+	// payments moved on its line.
+	describe('a trust-line token', () => {
+		const token = { ...RLUSD_TOKEN, enabled: true };
+
+		const tokenPayment = (n: number) =>
+			mockXrpTrustLinePaymentEntry({
+				hash: `TOKEN${n}`,
+				receiver: mockXrpAddress
+			});
+
+		const tokenIds = (id = token.id) =>
+			(get(xrpTransactionsStore)?.[id] ?? []).map(({ data: { id: rowId } }) => rowId).sort();
+
+		const loadToken = (signalEnd = vi.fn()) =>
+			loadOlderXrpTransactions({ token, identity: mockIdentity, signalEnd });
+
+		beforeEach(() => {
+			resetXrpHistoryPager(token.id);
+			xrpTransactionsStore.reset(token.id);
+		});
+
+		it("keeps its own rows, and leaves XRP's payments to XRP", async () => {
+			vi.mocked(loadXrpTransactions).mockResolvedValueOnce({
+				transactions: [payment(1), tokenPayment(2)],
+				marker: 'marker-1'
+			});
+
+			await loadToken();
+
+			expect(tokenIds()).toEqual(['TOKEN2']);
+			expect(heldIds()).toEqual([]);
+		});
+
+		it("records what moved on its line, in the token's base units", async () => {
+			vi.mocked(loadXrpTransactions).mockResolvedValueOnce({
+				transactions: [tokenPayment(1)]
+			});
+
+			await loadToken();
+
+			expect(get(xrpTransactionsStore)?.[token.id]?.[0]?.data).toEqual(
+				expect.objectContaining({ type: 'receive', value: 880_000_000_000_000n })
+			);
+		});
+
+		it('leaves out the rows of another token', async () => {
+			vi.mocked(loadXrpTransactions).mockResolvedValueOnce({
+				transactions: [
+					mockXrpTrustLinePaymentEntry({
+						hash: 'OTHER',
+						receiver: mockXrpAddress,
+						currency: 'USD'
+					})
+				]
+			});
+
+			await loadToken();
+
+			expect(tokenIds()).toEqual([]);
+		});
+
+		// Its payments can lie far below the account's newest transactions, which hold none of them.
+		it('steps over pages of other assets within the same call', async () => {
+			vi.mocked(loadXrpTransactions)
+				.mockResolvedValueOnce({ transactions: [payment(1)], marker: 'marker-1' })
+				.mockResolvedValueOnce({ transactions: [payment(2)], marker: 'marker-2' })
+				.mockResolvedValueOnce({ transactions: [tokenPayment(3)], marker: 'marker-3' });
+
+			await loadToken();
+
+			expect(loadXrpTransactions).toHaveBeenCalledTimes(3);
+			expect(tokenIds()).toEqual(['TOKEN3']);
+		});
+
+		it("walks with a pager of its own, apart from XRP's", async () => {
+			vi.mocked(loadXrpTransactions)
+				.mockResolvedValueOnce({ transactions: [payment(1)], marker: 'xrp-marker' })
+				.mockResolvedValueOnce({ transactions: [tokenPayment(1)], marker: 'token-marker' });
+
+			await load();
+			await loadToken();
+
+			expect(loadXrpTransactions).toHaveBeenNthCalledWith(
+				2,
+				expect.not.objectContaining({ marker: 'xrp-marker' })
+			);
+		});
 	});
 });

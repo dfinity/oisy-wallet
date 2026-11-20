@@ -8,6 +8,8 @@ import { XrpAccountTransactionEntrySchema } from '$xrp/schema/xrpl-rpc.schema';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type {
+	XrpAccountTransaction,
+	XrpAccountTransactionEntry,
 	XrpIssuedAmount,
 	XrpPayment,
 	XrpTransactionUi,
@@ -57,6 +59,34 @@ export const buildXrpTrustSet = ({
 	SigningPubKey: signingPublicKey,
 	LastLedgerSequence: lastLedgerSequence
 });
+
+/**
+ * When an `account_tx` entry's ledger closed, in Unix seconds, or `undefined` when it does not say.
+ *
+ * api_version 1 carries `tx.date`, seconds since the Ripple epoch; version 2 carries an ISO string on
+ * the entry. Whichever the node speaks, the row gets a timestamp — a v2 response used to map without
+ * one and land under "no date", with nothing saying why.
+ *
+ * An unparseable ISO string is dropped rather than skipping the row: the time is the one field here
+ * that is presentational, and a payment is worth showing undated.
+ */
+export const toXrpTransactionTimestamp = ({
+	entry: { close_time_iso: closeTimeIso },
+	tx: { date }
+}: {
+	entry: Pick<XrpAccountTransactionEntry, 'close_time_iso'>;
+	tx: Pick<XrpAccountTransaction, 'date'>;
+}): bigint | undefined => {
+	const isoSeconds = nonNullish(closeTimeIso)
+		? Math.floor(Date.parse(closeTimeIso) / 1000)
+		: undefined;
+
+	return nonNullish(date)
+		? BigInt(date + XRP_RIPPLE_EPOCH_OFFSET)
+		: nonNullish(isoSeconds) && Number.isFinite(isoSeconds)
+			? BigInt(isoSeconds)
+			: undefined;
+};
 
 /**
  * Assembles an unsigned XRPL Payment for native XRP.
@@ -244,21 +274,7 @@ export const mapXrpTransaction = ({
 	//
 	// A self-CONVERSION stays a receive: `crossCurrency` says the delivered XRP was funded by
 	// something else, so it genuinely arrived.
-	// api_version 1 carries `tx.date`, seconds since the Ripple epoch; version 2 carries an ISO
-	// string on the entry. Whichever the node speaks, the row gets a timestamp — a v2 response used
-	// to map without one and land under "no date", with nothing saying why.
-	//
-	// An unparseable ISO string is dropped rather than skipping the row: the time is the one field
-	// here that is presentational, and a payment is worth showing undated.
-	const isoSeconds = nonNullish(entry.close_time_iso)
-		? Math.floor(Date.parse(entry.close_time_iso) / 1000)
-		: undefined;
-
-	const timestamp = nonNullish(tx.date)
-		? BigInt(tx.date + XRP_RIPPLE_EPOCH_OFFSET)
-		: nonNullish(isoSeconds) && Number.isFinite(isoSeconds)
-			? BigInt(isoSeconds)
-			: undefined;
+	const timestamp = toXrpTransactionTimestamp({ entry, tx });
 
 	const isRoundTrip = isSender && isReceive && !crossCurrency;
 
