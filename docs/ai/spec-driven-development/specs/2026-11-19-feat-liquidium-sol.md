@@ -101,6 +101,7 @@ The supply and repay modals quote the provider fee when a rail is picked (`estim
   - sends `amount + provider fee` to the minter deposit address with `sendSol` from `solAddressMainnet` on mainnet, and returns the signature as the txid;
   - opens the active-transaction row in `beforeBroadcast`, keeping the blockhash and a slot where it is valid, and sends nothing without that slot (see Active transactions);
   - treats a failure as "nothing sent" only for `isSolSendRefusal(err)` before the confirm step. Any later failure closes the modal with the existing "outcome unknown" message.
+- The supply service's refusal rule is BTC-only too: `executeLiquidiumSupply` deletes the row only on `isDefinitiveBtcBroadcastRefusal`. Native SOL needs its own there: delete the row only on `isSolSendRefusal` before the confirm step. Otherwise a refused SOL supply, which sent nothing, shows as pending until its blockhash expires and then as failed.
 - `LiquidiumSupplyModal.svelte` currently renders the ETH wizard for any chain that isn't BTC or ICP. It must dispatch `SOL` explicitly, and the ETH branch should become explicit too.
 - **Minimum:** the transfer (`amount + provider fee`) must be at least the quote's `minimumSendAmount`. For native SOL that is 0.02 SOL today. Sending less leaves the funds at the deposit address waiting for a top-up. The form blocks such an amount. The existing "Minimum supply" row shows the **net** minimum (`minimumSendAmount − totalFee`, about 0.0181 SOL today), so it compares directly with the amount the user types. For ckSOL the minimum is negligible (501 lamports) but uses the same rule.
 - **Balance:** the balance must cover `amount + provider fee + Solana network fee`. Max reserves both, as today.
@@ -133,6 +134,7 @@ The supply and repay modals quote the provider fee when a rail is picked (`estim
 
 - The Earn and Borrow cards' asset and network icons come from `LIQUIDIUM_ADVERTISED_TOKENS`. Add SOL.
 - Several strings list Liquidium's assets and need SOL (all locales): `borrow.text.header_description`, `borrow.cards.liquidium.description`, `dapps.descriptions.liquidium.one_liner`, `dapps.descriptions.liquidium.description` (which still says Solana support is "coming soon"), `liquidium.text.description`, `liquidium.info.fact_1_*`. The exact wording is product's call.
+- Neither the strings nor the card icons are behind `LIQUIDIUM_SOL_ENABLED`, while Liquidium itself is on in production. They therefore ship with the launch, not before, so production never advertises SOL while the pool is still hidden.
 
 ---
 
@@ -148,10 +150,10 @@ Every code PR lands behind `LIQUIDIUM_SOL_ENABLED`, and within it a rail is only
    - Fee quote with profile id and action.
    - Supply and repay through the ICRC wizards, borrow and withdraw to the ICRC account.
    - `liquidiumAssetTokenId('SOL')`, the transfer-chain ref (unless the BTC fix has added it already), explicit wizard dispatch and explicit ETH receiver branch.
-3. **Native SOL supply.** New supply wizard, minimum, blockhash and slot refs, and SOL outcome check. The native rail stays hidden.
+3. **Native SOL supply.** New supply wizard, minimum, SOL refusal rule in the supply service, blockhash and slot refs, and SOL outcome check. The native rail stays hidden.
 4. **Native SOL repay.** New repay wizard, SOL refusal rule and small-repay handling. The native rail stays hidden.
 5. **Native SOL borrow and withdraw.** SOL receiver and native outflow minimum, then **switch on the native rail**, so it appears in the market and every picker at once.
-6. **Copy and cards.** Advertised tokens and i18n. Can ride with PR 2.
+6. **Copy and cards.** Advertised tokens and i18n. Ships with the launch (step 7), not before, since none of it is behind the flag.
 7. **Launch.** Once both rails are verified on staging, set `LIQUIDIUM_SOL_ENABLED` to `true`.
 
 Each code PR updates `docs/ai/PRODUCT.md` with what it shipped.
@@ -188,7 +190,7 @@ The fix uses the same transfer-chain external ref as this spec (Decision 4), so 
 ## Open questions (facts to confirm)
 
 1. **What the native SOL fee covers.** The quote for a never-funded address is a 1,884,122-lamport fee and a 0.02 SOL minimum. Is the credited amount exactly `transfer − totalFee`? Does the quote (minimum or fee) drop for an address that was funded before, because its rent is retained? **Resolve by measuring on staging:** quote, make a first native SOL deposit, then quote again and compare. The form re-quotes per account either way, so the answer documents the behaviour rather than changing it.
-2. **Native SOL repay excess.** The SDK documents for Simple Loans that a native SOL repayment above the debt is kept as a pool fee unless the pool sets a refund threshold. Does the same apply to account repayments (the path OISY uses), or is the excess credited to the profile? **Resolve by testing on staging:** repay slightly more than a small SOL debt and watch where the excess goes. Blocking small native repays (Decision 3) already avoids the case.
+2. **Native SOL repay excess.** The SDK documents for Simple Loans that a native SOL repayment above the debt is kept as a pool fee unless the pool sets a refund threshold. Does the same apply to account repayments (the path OISY uses), or is the excess credited to the profile? **Resolve by testing on staging before PR 5 switches the native rail on:** repay slightly more than a small SOL debt and watch where the excess goes. Blocking small native repays (Decision 3) does not avoid the case: "Max (full debt)" is the debt plus the SDK's default 0.1% buffer (`positions.getMaxRepayAmount`, `bufferBps` 10), so every full native SOL repay sends more than the debt. If the excess is kept, a 10 SOL debt loses about 0.01 SOL per full native repay.
 3. **Activity txids for native SOL.** Does Liquidium's activity list a native SOL inflow with the exact base58 signature OISY broadcast (in `txid` or `txids`)? **Resolve on staging before the native rail is switched on** (PR 5), with a real native SOL supply. A test deploy of PR 3's branch can check it earlier.
 4. **Top-ups.** If a native SOL deposit lands below the required balance (the quote changed between quote and arrival), how does the activity report it (`topUp.required`?), and how does the user complete or recover it? **Out of v1:** OISY enforces the quoted minimum, so this should be rare. Such a row stays pending; revisit if it happens.
 
