@@ -318,6 +318,7 @@
 			class="h-full w-full min-w-0 border-none bg-transparent px-3 font-bold text-primary outline-none disabled:cursor-not-allowed disabled:text-tertiary"
 			aria-labelledby={labelId}
 			disabled={!active}
+			inputmode="decimal"
 			onblur={() => (focused = false)}
 			onfocus={() => (focused = true)}
 			oninput={(e) => onPriceInput(e.currentTarget.value)}
