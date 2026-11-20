@@ -1,6 +1,9 @@
 // Live `li.quest/v1/quote` answers for a BTC source, trimmed to the fields OISY reads. Each PSBT is
 // LI.FI's own: one input LI.FI chose, then the deposit, the memo, the change and LI.FI's fee.
+import { btcAddressToOutputScript } from '$btc/utils/btc-psbt.utils';
+import { LifiRelayToolDataSchema } from '$lib/validation/lifi-relay.validation';
 import type { LiFiStep } from '@lifi/sdk';
+import { Psbt } from 'bitcoinjs-lib';
 
 // LI.FI's BTC fee address, the fee output of every quote.
 export const mockLifiBtcFeeAddress = 'bc1qn2cstnjlvhxf60j3ujeyq0h0rqc7kklap8j94g';
@@ -914,4 +917,60 @@ export const mockLifiBtcRelayQuote: LiFiStep = {
 		value: '120000'
 	},
 	transactionId: '0x5d2c41e7'
+};
+
+/**
+ * `mockLifiBtcRelayQuote` with its deposit paying `address` instead of Relay's depository, alike in
+ * the PSBT's output 0, `transactionRequest.to` and the embedded Relay quote: what LI.FI answers once
+ * Relay moved its depository, or what a tampered answer looks like. Its inputs and other outputs are
+ * LI.FI's own, so it passes the transaction's own checks. The embedded Relay quote keeps the fields
+ * OISY reads (`LifiRelayToolDataSchema`).
+ */
+export const mockLifiBtcRelayQuotePaying = (address: string): LiFiStep => {
+	const original = Psbt.fromHex(mockLifiBtcRelayQuote.transactionRequest?.data ?? '');
+	const psbt = new Psbt();
+
+	original.txInputs.forEach(({ hash, index, sequence }, input) =>
+		psbt.addInput({
+			hash,
+			index,
+			sequence,
+			witnessUtxo: original.data.inputs[input]?.witnessUtxo
+		})
+	);
+
+	original.txOutputs.forEach(({ script, value }, output) =>
+		psbt.addOutput({
+			script:
+				output === 0
+					? Buffer.from(btcAddressToOutputScript({ address, network: 'mainnet' }))
+					: script,
+			value
+		})
+	);
+
+	const toolData = LifiRelayToolDataSchema.parse(
+		(mockLifiBtcRelayQuote.estimate as { toolData?: unknown }).toolData
+	);
+
+	return {
+		...mockLifiBtcRelayQuote,
+		estimate: {
+			...mockLifiBtcRelayQuote.estimate,
+			toolData: {
+				...toolData,
+				protocol: {
+					v2: {
+						...toolData.protocol.v2,
+						paymentDetails: { ...toolData.protocol.v2.paymentDetails, depository: address }
+					}
+				}
+			}
+		} as LiFiStep['estimate'],
+		transactionRequest: {
+			...mockLifiBtcRelayQuote.transactionRequest,
+			to: address,
+			data: psbt.toHex()
+		}
+	};
 };

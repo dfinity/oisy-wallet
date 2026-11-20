@@ -1444,6 +1444,7 @@
 			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं",
 			"two_swaps_info": "$oisy_short केवल ऐसे स्वैप ऑफ़र करता है जिन्हें वह आपकी स्वीकृति से पहले पूरी तरह सत्यापित कर सके, और $sourceSymbol से $destinationSymbol तक ऐसा कोई सीधा स्वैप नहीं है। लेकिन आप पहले $sourceSymbol को $intermediateSymbol में और फिर $intermediateSymbol को $destinationSymbol में स्वैप कर सकते हैं।",
 			"two_swaps_first_button": "पहले $intermediateSymbol में स्वैप करें",
+			"two_swaps_deposit_unverified_info": "$oisy_short उस पते को सत्यापित नहीं कर सका जिस पर यह स्वैप आपका $sourceSymbol भेजेगा, इसलिए यह अभी ऑफ़र नहीं किया जा रहा है। इसके बजाय आप इसे दो स्वैप में कर सकते हैं: पहले $sourceSymbol को $intermediateSymbol में, फिर $intermediateSymbol को $destinationSymbol में।",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
@@ -1498,7 +1499,9 @@
 			"cksol_earlier_deposit_quarantined": "ckSOL मिन्टर ने आपकी एक पिछली जमा की प्रोसेसिंग रोक दी है और उसके हल होने तक कोई नई जमा नहीं लेगा। कोई SOL नहीं भेजा गया।",
 			"cksol_minter_unavailable": "ckSOL मिन्टर अभी कोई जमा नहीं ले सकता। कोई SOL नहीं भेजा गया। कृपया बाद में पुनः प्रयास करें।",
 			"cksol_deposit_quarantined": "ckSOL मिन्टर ने इस जमा की प्रोसेसिंग रोक दी है। जब तक मिन्टर का अपग्रेड इस जमा को हल नहीं करता, तब तक वह SOL को अपने पास रखता है।",
-			"cksol_deposit_below_minimum": "ckSOL मिन्टर इस जमा को एकत्र नहीं कर सका, और आपके जमा पते पर बचे SOL न्यूनतम जमा राशि से कम हैं। इन्हें SOL से ckSOL में आपके अगले रूपांतरण के साथ बदल दिया जाएगा।"
+			"cksol_deposit_below_minimum": "ckSOL मिन्टर इस जमा को एकत्र नहीं कर सका, और आपके जमा पते पर बचे SOL न्यूनतम जमा राशि से कम हैं। इन्हें SOL से ckSOL में आपके अगले रूपांतरण के साथ बदल दिया जाएगा।",
+			"lifi_btc_deposit_unverified": "$oisy_short उस पते को सत्यापित नहीं कर सका जिस पर यह स्वैप आपका $sourceSymbol भेजेगा, इसलिए स्वैप रोक दिया गया। आपका $sourceSymbol आपके वॉलेट में ही है।",
+			"lifi_btc_deposit_unverified_two_swaps": "$oisy_short उस पते को सत्यापित नहीं कर सका जिस पर यह स्वैप आपका $sourceSymbol भेजेगा, इसलिए स्वैप रोक दिया गया। आपका $sourceSymbol आपके वॉलेट में ही है। इसके बजाय आप इसे दो स्वैप में कर सकते हैं: पहले $sourceSymbol को $intermediateSymbol में, फिर $intermediateSymbol को $destinationSymbol में।"
 		}
 	},
 	"buy": {

@@ -1444,6 +1444,7 @@
 			"cross_chain_networks_info": "Информация о кросс-чейн сетях",
 			"two_swaps_info": "$oisy_short предлагает только обмены, которые может полностью проверить до вашего подтверждения, а такого прямого обмена $sourceSymbol на $destinationSymbol нет. Но вы можете сначала обменять $sourceSymbol на $intermediateSymbol, а затем $intermediateSymbol на $destinationSymbol.",
 			"two_swaps_first_button": "Сначала обменять на $intermediateSymbol",
+			"two_swaps_deposit_unverified_info": "$oisy_short не смог проверить адрес, на который этот обмен отправил бы ваши $sourceSymbol, поэтому сейчас он не предлагается. Вместо этого можно сделать два обмена: сначала $sourceSymbol на $intermediateSymbol, затем $intermediateSymbol на $destinationSymbol.",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
@@ -1498,7 +1499,9 @@
 			"cksol_earlier_deposit_quarantined": "Минтер ckSOL приостановил обработку одного из ваших предыдущих депозитов и не примет новый, пока этот вопрос не будет решён. SOL не отправлены.",
 			"cksol_minter_unavailable": "Минтер ckSOL сейчас не может принять депозит. SOL не отправлены. Попробуйте позже.",
 			"cksol_deposit_quarantined": "Минтер ckSOL приостановил обработку этого депозита. Он удерживает SOL, пока обновление минтера не решит вопрос с депозитом.",
-			"cksol_deposit_below_minimum": "Минтер ckSOL не смог забрать этот депозит, а SOL, оставшиеся на вашем адресе для депозита, меньше минимальной суммы депозита. Они будут конвертированы при вашей следующей конвертации SOL в ckSOL."
+			"cksol_deposit_below_minimum": "Минтер ckSOL не смог забрать этот депозит, а SOL, оставшиеся на вашем адресе для депозита, меньше минимальной суммы депозита. Они будут конвертированы при вашей следующей конвертации SOL в ckSOL.",
+			"lifi_btc_deposit_unverified": "$oisy_short не смог проверить адрес, на который этот обмен отправил бы ваши $sourceSymbol, поэтому остановил его. Ваши $sourceSymbol остались в кошельке.",
+			"lifi_btc_deposit_unverified_two_swaps": "$oisy_short не смог проверить адрес, на который этот обмен отправил бы ваши $sourceSymbol, поэтому остановил его. Ваши $sourceSymbol остались в кошельке. Вместо этого можно сделать два обмена: сначала $sourceSymbol на $intermediateSymbol, затем $intermediateSymbol на $destinationSymbol."
 		}
 	},
 	"buy": {

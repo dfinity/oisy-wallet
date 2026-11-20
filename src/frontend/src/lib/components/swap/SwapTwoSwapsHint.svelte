@@ -21,9 +21,11 @@
 	interface Props {
 		intermediateToken: Token;
 		provider: SwapProvider;
+		// The offer was refused for its deposit address, not its route, so the box says that instead.
+		depositUnverified?: boolean;
 	}
 
-	let { intermediateToken, provider }: Props = $props();
+	let { intermediateToken, provider, depositUnverified = false }: Props = $props();
 
 	const { sourceToken, destinationToken, setDestinationToken, markTwoSwapsHintShown } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
@@ -83,11 +85,18 @@
 	<div class="mt-4">
 		<MessageBox testId={SWAP_TWO_SWAPS_HINT}>
 			<p>
-				{replacePlaceholders(replaceOisyPlaceholders($i18n.swap.text.two_swaps_info), {
-					$sourceSymbol: $sourceToken.symbol,
-					$destinationSymbol: $destinationToken.symbol,
-					$intermediateSymbol: intermediateToken.symbol
-				})}
+				{replacePlaceholders(
+					replaceOisyPlaceholders(
+						depositUnverified
+							? $i18n.swap.text.two_swaps_deposit_unverified_info
+							: $i18n.swap.text.two_swaps_info
+					),
+					{
+						$sourceSymbol: $sourceToken.symbol,
+						$destinationSymbol: $destinationToken.symbol,
+						$intermediateSymbol: intermediateToken.symbol
+					}
+				)}
 			</p>
 
 			<Button

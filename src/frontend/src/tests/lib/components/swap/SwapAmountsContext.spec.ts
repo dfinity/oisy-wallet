@@ -299,6 +299,32 @@ describe('SwapAmountsContext.svelte', () => {
 		});
 	});
 
+	it('says so in the quote error when the in-between token comes from an unverified deposit', async () => {
+		vi.spyOn(swapService, 'fetchSwapAmounts').mockRejectedValue(
+			new SwapViaIntermediateTokenError({
+				intermediateToken: mockValidIcrcToken,
+				provider: SwapProvider.LIFI,
+				depositUnverified: true
+			})
+		);
+
+		await renderWithContext({
+			amount: '20',
+			sourceToken,
+			destinationToken,
+			slippageValue: '0.2'
+		});
+
+		await waitForDebounce();
+
+		expect(get(store)?.quoteError).toEqual({
+			type: 'two-swaps',
+			intermediateToken: mockValidIcrcToken,
+			provider: SwapProvider.LIFI,
+			depositUnverified: true
+		});
+	});
+
 	it('debounces fetchSwapAmounts calls', async () => {
 		const fetchMock = vi
 			.spyOn(swapService, 'fetchSwapAmounts')

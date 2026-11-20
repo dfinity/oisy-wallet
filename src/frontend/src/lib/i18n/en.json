@@ -1444,6 +1444,7 @@
 			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
 			"two_swaps_info": "$oisy_short only offers swaps it can fully verify before you approve, and there is no such direct swap from $sourceSymbol to $destinationSymbol. But you can swap from $sourceSymbol to $intermediateSymbol first, and then from $intermediateSymbol to $destinationSymbol.",
 			"two_swaps_first_button": "Swap to $intermediateSymbol first",
+			"two_swaps_deposit_unverified_info": "$oisy_short couldn't verify the address this swap would send your $sourceSymbol to, so it isn't offered right now. You can do it in two swaps instead: $sourceSymbol to $intermediateSymbol first, then $intermediateSymbol to $destinationSymbol.",
 			"near_intents_estimated_time": "NEAR Intents (~$minutes min)",
 			"lifi_route_via": "LI.FI via $tool",
 			"lifi_route_via_estimated_time": "LI.FI via $tool (~$minutes min)",
@@ -1498,7 +1499,9 @@
 			"cksol_earlier_deposit_quarantined": "The ckSOL minter stopped processing an earlier deposit of yours and takes no new one until it is resolved. No SOL was sent.",
 			"cksol_minter_unavailable": "The ckSOL minter can't take a deposit right now. No SOL was sent. Please try again later.",
 			"cksol_deposit_quarantined": "The ckSOL minter stopped processing this deposit. It holds the SOL until a minter upgrade resolves the deposit.",
-			"cksol_deposit_below_minimum": "The ckSOL minter couldn't sweep this deposit, and the SOL left on your deposit address is below the minimum deposit amount. It is converted with your next conversion from SOL to ckSOL."
+			"cksol_deposit_below_minimum": "The ckSOL minter couldn't sweep this deposit, and the SOL left on your deposit address is below the minimum deposit amount. It is converted with your next conversion from SOL to ckSOL.",
+			"lifi_btc_deposit_unverified": "$oisy_short couldn't verify the address this swap would send your $sourceSymbol to, so it stopped. Your $sourceSymbol stayed in your wallet.",
+			"lifi_btc_deposit_unverified_two_swaps": "$oisy_short couldn't verify the address this swap would send your $sourceSymbol to, so it stopped. Your $sourceSymbol stayed in your wallet. You can do it in two swaps instead: $sourceSymbol to $intermediateSymbol first, then $intermediateSymbol to $destinationSymbol."
 		}
 	},
 	"buy": {

@@ -22,6 +22,13 @@ export const LIFI_BTC_FEE_ADDRESS = 'bc1qn2cstnjlvhxf60j3ujeyq0h0rqc7kklap8j94g'
 // transaction and in its copy of Relay's quote alike.
 export const RELAY_BTC_DEPOSITORY_ADDRESS = 'bc1qzmtn0q92ayejt2hpffvlktcpmyy7vvsd06sefu';
 
+// The deposit address OISY pins for a bridge admitted from Bitcoin, by LI.FI tool key. A quote
+// through that bridge whose deposit pays any other address is refused: not offered, and not signed
+// should its re-quote name another.
+export const LIFI_BTC_BRIDGE_DEPOSITORIES: Partial<Record<string, string>> = {
+	relaydepository: RELAY_BTC_DEPOSITORY_ADDRESS
+};
+
 // The name of LI.FI's own fee among a BTC quote's `feeCosts`, the amount its fee output pays.
 export const LIFI_BTC_FEE_COST_NAME = 'LIFI Fixed Fee';
 

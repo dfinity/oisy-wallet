@@ -1444,6 +1444,7 @@
 			"cross_chain_networks_info": "Přesouváte tokeny ze sítě <b>$sourceNetwork</b> do sítě <b>$destinationNetwork</b>",
 			"two_swaps_info": "$oisy_short nabízí jen výměny, které dokáže před vaším schválením plně ověřit, a žádná taková přímá výměna z $sourceSymbol na $destinationSymbol neexistuje. Můžete ale nejdřív vyměnit $sourceSymbol za $intermediateSymbol a potom $intermediateSymbol za $destinationSymbol.",
 			"two_swaps_first_button": "Nejdřív vyměnit za $intermediateSymbol",
+			"two_swaps_deposit_unverified_info": "$oisy_short se nepodařilo ověřit adresu, na kterou by tato výměna poslala vaše $sourceSymbol, proto se teď nenabízí. Můžete to místo toho udělat dvěma výměnami: nejdřív $sourceSymbol za $intermediateSymbol, potom $intermediateSymbol za $destinationSymbol.",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
@@ -1498,7 +1499,9 @@
 			"cksol_earlier_deposit_quarantined": "Minter ckSOL zastavil zpracování jednoho z vašich dřívějších vkladů a dokud nebude vyřešen, nepřijme žádný nový. Žádné SOL nebyly odeslány.",
 			"cksol_minter_unavailable": "Minter ckSOL teď nemůže přijmout vklad. Žádné SOL nebyly odeslány. Zkuste to prosím později znovu.",
 			"cksol_deposit_quarantined": "Minter ckSOL zastavil zpracování tohoto vkladu. SOL drží, dokud vklad nevyřeší aktualizace minteru.",
-			"cksol_deposit_below_minimum": "Minter ckSOL nemohl tento vklad vyzvednout a SOL, které zůstaly na vaší vkladové adrese, nedosahují minimální částky vkladu. Převedou se s vaším příštím převodem SOL na ckSOL."
+			"cksol_deposit_below_minimum": "Minter ckSOL nemohl tento vklad vyzvednout a SOL, které zůstaly na vaší vkladové adrese, nedosahují minimální částky vkladu. Převedou se s vaším příštím převodem SOL na ckSOL.",
+			"lifi_btc_deposit_unverified": "$oisy_short se nepodařilo ověřit adresu, na kterou by tato výměna poslala vaše $sourceSymbol, proto byla zastavena. Vaše $sourceSymbol zůstaly ve vaší peněžence.",
+			"lifi_btc_deposit_unverified_two_swaps": "$oisy_short se nepodařilo ověřit adresu, na kterou by tato výměna poslala vaše $sourceSymbol, proto byla zastavena. Vaše $sourceSymbol zůstaly ve vaší peněžence. Můžete to místo toho udělat dvěma výměnami: nejdřív $sourceSymbol za $intermediateSymbol, potom $intermediateSymbol za $destinationSymbol."
 		}
 	},
 	"buy": {

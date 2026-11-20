@@ -1444,6 +1444,7 @@
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>에서 <b>$destinationNetwork</b> 네트워크로 토큰을 이동합니다",
 			"two_swaps_info": "$oisy_short는 승인 전에 완전히 검증할 수 있는 스왑만 제공하며, $sourceSymbol에서 $destinationSymbol(으)로 가는 그런 직접 스왑은 없습니다. 하지만 먼저 $sourceSymbol을(를) $intermediateSymbol(으)로 스왑한 다음, $intermediateSymbol을(를) $destinationSymbol(으)로 스왑할 수 있습니다.",
 			"two_swaps_first_button": "먼저 $intermediateSymbol(으)로 스왑",
+			"two_swaps_deposit_unverified_info": "$oisy_short는 이 스왑이 $sourceSymbol을(를) 보낼 주소를 검증할 수 없어 지금은 이 스왑을 제공하지 않습니다. 대신 두 번의 스왑으로 진행할 수 있습니다: 먼저 $sourceSymbol을(를) $intermediateSymbol(으)로, 그다음 $intermediateSymbol을(를) $destinationSymbol(으)로 스왑하세요.",
 			"near_intents_estimated_time": "",
 			"lifi_route_via": "",
 			"lifi_route_via_estimated_time": "",
@@ -1498,7 +1499,9 @@
 			"cksol_earlier_deposit_quarantined": "ckSOL 민터가 이전 입금의 처리를 중단했으며, 해결될 때까지 새 입금을 받지 않습니다. SOL은 전송되지 않았습니다.",
 			"cksol_minter_unavailable": "지금은 ckSOL 민터가 입금을 받을 수 없습니다. SOL은 전송되지 않았습니다. 나중에 다시 시도해 주세요.",
 			"cksol_deposit_quarantined": "ckSOL 민터가 이 입금의 처리를 중단했습니다. 민터 업그레이드로 입금이 해결될 때까지 민터가 SOL을 보관합니다.",
-			"cksol_deposit_below_minimum": "ckSOL 민터가 이 입금을 회수하지 못했으며, 입금 주소에 남은 SOL이 최소 입금 금액보다 적습니다. 다음 SOL에서 ckSOL로의 전환 시 함께 전환됩니다."
+			"cksol_deposit_below_minimum": "ckSOL 민터가 이 입금을 회수하지 못했으며, 입금 주소에 남은 SOL이 최소 입금 금액보다 적습니다. 다음 SOL에서 ckSOL로의 전환 시 함께 전환됩니다.",
+			"lifi_btc_deposit_unverified": "$oisy_short는 이 스왑이 $sourceSymbol을(를) 보낼 주소를 검증할 수 없어 스왑을 중단했습니다. $sourceSymbol은(는) 지갑에 그대로 남아 있습니다.",
+			"lifi_btc_deposit_unverified_two_swaps": "$oisy_short는 이 스왑이 $sourceSymbol을(를) 보낼 주소를 검증할 수 없어 스왑을 중단했습니다. $sourceSymbol은(는) 지갑에 그대로 남아 있습니다. 대신 두 번의 스왑으로 진행할 수 있습니다: 먼저 $sourceSymbol을(를) $intermediateSymbol(으)로, 그다음 $intermediateSymbol을(를) $destinationSymbol(으)로 스왑하세요."
 		}
 	},
 	"buy": {

@@ -1,5 +1,8 @@
 import { trackEvent } from '$lib/services/analytics.services';
-import { trackUnmappedNetworkSettingsKey } from '$lib/services/error-analytics.services';
+import {
+	trackLifiBtcDepositUnverified,
+	trackUnmappedNetworkSettingsKey
+} from '$lib/services/error-analytics.services';
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
@@ -56,6 +59,62 @@ describe('error-analytics.services', () => {
 			trackUnmappedNetworkSettingsKey({ key: 'SecondMainnet' });
 
 			expect(trackEvent).toHaveBeenCalledTimes(2);
+		});
+	});
+
+	describe('trackLifiBtcDepositUnverified', () => {
+		it('tracks the bridge and the address the deposit pays as a critical error', () => {
+			trackLifiBtcDepositUnverified({
+				tool: 'relaydepository',
+				depositAddress: 'bc1qwelltrackedaddress'
+			});
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: 'error',
+				metadata: {
+					event_context: 'swap',
+					event_subcontext: 'lifi_btc_deposit_unverified',
+					event_provider: 'relaydepository',
+					event_key: 'deposit_address',
+					event_value: 'bc1qwelltrackedaddress',
+					result_error_severity: 'critical'
+				}
+			});
+		});
+
+		// The address is the bridge's or a stranger's, never the user's: nothing else may ride along.
+		it('carries no property beyond the documented set', () => {
+			trackLifiBtcDepositUnverified({
+				tool: 'relaydepository',
+				depositAddress: 'bc1qpropertycheck'
+			});
+
+			const [[{ metadata }]] = vi.mocked(trackEvent).mock.calls;
+
+			expect(Object.keys(metadata ?? {}).sort()).toEqual([
+				'event_context',
+				'event_key',
+				'event_provider',
+				'event_subcontext',
+				'event_value',
+				'result_error_severity'
+			]);
+		});
+
+		// The swap form re-quotes every few seconds, and execution checks the re-quote again.
+		it('reports the same bridge and address only once per session', () => {
+			trackLifiBtcDepositUnverified({ tool: 'relaydepository', depositAddress: 'bc1qrepeated' });
+			trackLifiBtcDepositUnverified({ tool: 'relaydepository', depositAddress: 'bc1qrepeated' });
+
+			expect(trackEvent).toHaveBeenCalledOnce();
+		});
+
+		it('still reports another address, or the same one through another bridge', () => {
+			trackLifiBtcDepositUnverified({ tool: 'relaydepository', depositAddress: 'bc1qfirst' });
+			trackLifiBtcDepositUnverified({ tool: 'relaydepository', depositAddress: 'bc1qsecond' });
+			trackLifiBtcDepositUnverified({ tool: 'otherbridge', depositAddress: 'bc1qfirst' });
+
+			expect(trackEvent).toHaveBeenCalledTimes(3);
 		});
 	});
 });
