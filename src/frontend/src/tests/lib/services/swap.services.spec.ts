@@ -1753,7 +1753,7 @@ describe('swap.services', () => {
 		});
 
 		it('preserves the typed minimum refusal at the deadline when no competitor quoted', async () => {
-			const error = new SwapAmountTooLowError('Amount is too low', 8300n);
+			const error = new SwapAmountTooLowError('Amount is too low', { type: 'token', value: 8300n });
 			mockVeloraGetQuote.mockReturnValueOnce(new Promise(() => {}));
 			mockEvmNearIntentsGetQuote.mockRejectedValueOnce(error);
 			const rejected = vi.fn();
@@ -1810,7 +1810,9 @@ describe('swap.services', () => {
 
 				await expect(round).resolves.toEqual([]);
 
-				late.reject(new SwapAmountTooLowError('Amount is too low', 8300n));
+				late.reject(
+					new SwapAmountTooLowError('Amount is too low', { type: 'token', value: 8300n })
+				);
 				await vi.advanceTimersByTimeAsync(0);
 
 				await expect(round).resolves.toEqual([]);
@@ -1899,7 +1901,7 @@ describe('swap.services', () => {
 		});
 
 		it('clears the deadline timer before propagating an early typed minimum refusal', async () => {
-			const error = new SwapAmountTooLowError('Amount is too low', 8300n);
+			const error = new SwapAmountTooLowError('Amount is too low', { type: 'token', value: 8300n });
 			mockEvmNearIntentsGetQuote.mockRejectedValueOnce(error);
 
 			await expect(fetchSwapAmountsEVM(params)).rejects.toBe(error);
@@ -2047,7 +2049,10 @@ describe('swap.services', () => {
 		it('rethrows an amount-too-low refusal when no provider quoted', async () => {
 			mockVeloraGetQuote.mockResolvedValueOnce(undefined);
 			mockEvmNearIntentsGetQuote.mockRejectedValueOnce(
-				new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', 8300n)
+				new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', {
+					type: 'token',
+					value: 8300n
+				})
 			);
 
 			await expect(
@@ -2069,7 +2074,10 @@ describe('swap.services', () => {
 				type: 'delta'
 			});
 			mockEvmNearIntentsGetQuote.mockRejectedValueOnce(
-				new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', 8300n)
+				new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', {
+					type: 'token',
+					value: 8300n
+				})
 			);
 
 			const result = await fetchSwapAmountsEVM({
@@ -2102,7 +2110,10 @@ describe('swap.services', () => {
 			it('rethrows an amount-too-low refusal in its place', async () => {
 				mockVeloraGetQuote.mockRejectedValueOnce(viaIntermediateToken);
 				mockEvmNearIntentsGetQuote.mockRejectedValueOnce(
-					new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', 8300n)
+					new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', {
+						type: 'token',
+						value: 8300n
+					})
 				);
 
 				await expect(
@@ -2220,7 +2231,10 @@ describe('swap.services', () => {
 
 		it('should rethrow an amount-too-low refusal when no provider quoted', async () => {
 			mockSolGetQuote.mockRejectedValueOnce(
-				new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', 8300n)
+				new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', {
+					type: 'token',
+					value: 8300n
+				})
 			);
 
 			await expect(

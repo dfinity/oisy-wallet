@@ -18,6 +18,9 @@
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
 	import { SWAP_DESTINATION_TOKEN_BALANCE } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -27,7 +30,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
-	import { formatToken, formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { formatCurrency, formatToken, formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import {
@@ -148,6 +151,10 @@
 			: undefined
 	);
 
+	let quoteErrorMinimum = $derived(
+		quoteError?.type === 'amount-too-low' ? quoteError.minimum : undefined
+	);
+
 	// No offer, but two separate swaps through a token OISY lists reach the destination. Unlike the
 	// "not offered" line, the hint stays up while the offers refresh, and goes with a new amount.
 	let twoSwapsQuoteError = $derived(
@@ -160,17 +167,32 @@
 			: undefined
 	);
 
-	let quoteErrorMinAmount = $derived(
-		quoteError?.type === 'amount-too-low' &&
-			nonNullish(quoteError.minAmount) &&
-			nonNullish($sourceToken)
-			? formatToken({
-					value: quoteError.minAmount,
-					unitName: $sourceToken.decimals,
-					displayDecimals: $sourceToken.decimals
-				})
-			: undefined
-	);
+	// The token minimum is in the source token's own units; the fiat one is enforced in USD
+	// and shown in the user's display currency. `formatCurrency` returns undefined while the
+	// exchange rate still belongs to the previously selected currency, in which case the
+	// minimum is treated as unknown rather than rendered as a number with no currency on it.
+	let quoteErrorMinAmount = $derived.by(() => {
+		if (isNullish(quoteErrorMinimum)) {
+			return undefined;
+		}
+
+		if (quoteErrorMinimum.type === 'token') {
+			return nonNullish($sourceToken)
+				? formatToken({
+						value: quoteErrorMinimum.value,
+						unitName: $sourceToken.decimals,
+						displayDecimals: $sourceToken.decimals
+					})
+				: undefined;
+		}
+
+		return formatCurrency({
+			value: quoteErrorMinimum.value,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
+		});
+	});
 
 	let isSwitchTokensButtonDisabled = $derived(() => {
 		if (isNullish($destinationToken?.network.id) || isNullish($sourceToken?.network.id)) {
@@ -312,10 +334,14 @@
 							{#if showSwapNotOfferedError}
 								<div class="text-error-primary" transition:slide={SLIDE_DURATION}
 									>{#if quoteError?.type === 'amount-too-low'}
-										{#if nonNullish(quoteErrorMinAmount) && nonNullish($sourceToken)}
+										{#if nonNullish(quoteErrorMinAmount) && quoteErrorMinimum?.type === 'token' && nonNullish($sourceToken)}
 											{replacePlaceholders($i18n.swap.text.swap_amount_too_low_minimum, {
 												$amount: quoteErrorMinAmount,
 												$symbol: $sourceToken.symbol
+											})}
+										{:else if nonNullish(quoteErrorMinAmount) && quoteErrorMinimum?.type === 'usd'}
+											{replacePlaceholders($i18n.swap.text.swap_amount_too_low_minimum_fiat, {
+												$amount: quoteErrorMinAmount
 											})}
 										{:else}
 											{$i18n.swap.text.swap_amount_too_low}
