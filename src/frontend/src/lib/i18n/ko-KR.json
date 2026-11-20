@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "로그인되어 있지 않습니다. 계속하려면 로그인해 주세요.",
-			"session_expired": "세션이 만료되어 로그아웃되었습니다.",
 			"reload_and_retry": "로그인 중 문제가 발생했습니다. 페이지를 새로고침하고 다시 시도해 주세요. 문제가 지속되면 지원팀에 문의하세요."
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "계속하려면 잠금 해제하세요",
 			"title_part_2": "지갑을 안전하게 보호하기 위해 잠금 설정되었습니다. 이전에 하던 작업을 계속하거나 로그아웃하세요.",
+			"title_part_2_session_expired": "",
 			"unlock": "잠금 해제",
 			"logout": "로그아웃",
 			"logout_clear_cash_message": "로그아웃하면 모든 캐시 데이터가 삭제됩니다",

@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "Você não está logado. Por favor, faça login para continuar.",
-			"session_expired": "Você foi desconectado porque sua sessão expirou.",
 			"reload_and_retry": ""
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "Desbloqueie para continuar",
 			"title_part_2": "Você bloqueou sua carteira anteriormente para mantê-la segura. Continue de onde parou ou saia.",
+			"title_part_2_session_expired": "",
 			"unlock": "Desbloquear",
 			"logout": "Sair",
 			"logout_clear_cash_message": "Saída limpa, mensagem de cache",

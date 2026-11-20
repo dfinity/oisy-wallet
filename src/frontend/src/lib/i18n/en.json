@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "You are not signed in. Please sign in to continue.",
-			"session_expired": "You have been logged out because your session has expired.",
 			"reload_and_retry": "Something went wrong when signing in. Please reload the page and try again. If this error persists, please contact support."
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "Unlock to continue",
 			"title_part_2": "You previously locked your wallet to keep it safe. Resume where you left off or log out.",
+			"title_part_2_session_expired": "Your session expired and your wallet was locked to keep you safe. Resume where you left off or log out.",
 			"unlock": "Unlock",
 			"logout": "Log out",
 			"logout_clear_cash_message": "Logging out will clear all cached data",

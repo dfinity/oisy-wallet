@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "أنت غير مسجل الدخول. يرجى تسجيل الدخول للمتابعة.",
-			"session_expired": "تم تسجيل خروجك لانتهاء صلاحية جلستك.",
 			"reload_and_retry": ""
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "",
 			"title_part_2": "",
+			"title_part_2_session_expired": "",
 			"unlock": "",
 			"logout": "",
 			"logout_clear_cash_message": "",

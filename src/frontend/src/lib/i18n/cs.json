@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "Nejste přihlášeni. Pro pokračování se prosím přihlaste.",
-			"session_expired": "Byli jste odhlášeni, protože vaše relace vypršela.",
 			"reload_and_retry": "Při přihlašování došlo k chybě. Zkuste stránku znovu načíst a zkuste to znovu. Pokud chyba přetrvává, kontaktujte podporu."
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "Chcete-li pokračovat, odemkněte",
 			"title_part_2": "Předtím jste si pro bezpečnost zamkli peněženku. Pokračujte tam, kde jste skončili, nebo se odhlaste.",
+			"title_part_2_session_expired": "",
 			"unlock": "Odemknout",
 			"logout": "Odhlásit se",
 			"logout_clear_cash_message": "Odhlášením se vymažou všechna data v mezipaměti",

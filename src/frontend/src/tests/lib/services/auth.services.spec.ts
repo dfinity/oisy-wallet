@@ -1,5 +1,6 @@
 import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 import {
+	TRACK_LOCK_MODE_ACTIVATED,
 	TRACK_SIGN_OUT_ERROR,
 	TRACK_SIGN_OUT_SUCCESS,
 	TRACK_SIGN_OUT_WITH_WARNING
@@ -658,8 +659,6 @@ describe('auth.services', () => {
 		});
 
 		describe('when the session is not locked', () => {
-			const expectedText = en.auth.warning.session_expired;
-
 			beforeEach(() => {
 				localStorage.setItem(AUTH_LOCK_KEY, 'false');
 			});
@@ -749,36 +748,64 @@ describe('auth.services', () => {
 				});
 			});
 
-			it('should track the sign out event', async () => {
+			it('should lock the wallet because the session expired', async () => {
+				await idleSignOut();
+
+				expect(localStorage.getItem(AUTH_LOCK_KEY)).toEqual(JSON.stringify('expired'));
+			});
+
+			it('should track the lock event', async () => {
 				await idleSignOut();
 
 				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-					name: TRACK_SIGN_OUT_WITH_WARNING,
+					name: TRACK_LOCK_MODE_ACTIVATED,
 					metadata: {
-						reason: 'session_expired',
-						level: 'warn',
-						text: expectedText,
-						clearStorages: 'false'
+						locked: 'true',
+						source: 'session expired'
 					}
 				});
 			});
 
-			it('should append a message to the reload URL', async () => {
+			it('should not append a message to the reload URL', async () => {
 				await idleSignOut();
 
-				expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
-					{},
-					'',
-					new URL(`${rootLocation}?msg=${encodeURI(encodeURI(expectedText))}&level=warn`)
-				);
+				expect(window.history.replaceState).not.toHaveBeenCalled();
 			});
 		});
 
-		describe('when the session is locked', () => {
+		describe('when the session already expired in another tab', () => {
+			beforeEach(() => {
+				localStorage.setItem(AUTH_LOCK_KEY, JSON.stringify('expired'));
+			});
+
+			it('should keep the wallet locked because the session expired', async () => {
+				await idleSignOut();
+
+				expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+				expect(localStorage.getItem(AUTH_LOCK_KEY)).toEqual(JSON.stringify('expired'));
+			});
+
+			it('should not append a message to the reload URL', async () => {
+				await idleSignOut();
+
+				expect(window.history.replaceState).not.toHaveBeenCalled();
+			});
+		});
+
+		describe.each([
+			{ stored: 'before the lock reason', storedLock: 'true' },
+			{ stored: 'with the lock reason', storedLock: JSON.stringify('lock') }
+		])('when the session is locked (stored $stored)', ({ storedLock }) => {
 			const expectedText = en.auth.message.session_locked;
 
 			beforeEach(() => {
-				localStorage.setItem(AUTH_LOCK_KEY, 'true');
+				localStorage.setItem(AUTH_LOCK_KEY, storedLock);
+			});
+
+			it('should keep the lock as stored', async () => {
+				await idleSignOut();
+
+				expect(localStorage.getItem(AUTH_LOCK_KEY)).toEqual(storedLock);
 			});
 
 			it('should call the signOut function of the authStore without resetting the url', async () => {
