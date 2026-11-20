@@ -14,7 +14,8 @@ import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { nonNullish } from '@dfinity/utils';
-import type { SupplyFlow, SupplyTarget } from '@liquidium/client';
+import type { LiquidiumClient, SupplyFlow, SupplyTarget } from '@liquidium/client';
+import { mockDeep } from 'vitest-mock-extended';
 
 vi.mock('$lib/api/liquidium.api', () => ({ liquidiumClient: vi.fn() }));
 vi.mock('$lib/services/liquidium.services', () => ({ getOrCreateLiquidiumProfile: vi.fn() }));
@@ -264,13 +265,12 @@ describe('liquidium-supply.services', () => {
 	});
 
 	describe('estimateLiquidiumInflowFee', () => {
-		const estimateInflowFee = vi.fn();
+		const client = mockDeep<LiquidiumClient>();
+		const { estimateInflowFee } = client.lending;
 		const getOrCreateLiquidiumProfile = vi.mocked(liquidiumServices.getOrCreateLiquidiumProfile);
 
 		beforeEach(() => {
-			vi.mocked(liquidiumApi.liquidiumClient).mockReturnValue({
-				lending: { estimateInflowFee }
-			} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
+			vi.mocked(liquidiumApi.liquidiumClient).mockReturnValue(client);
 			estimateInflowFee.mockResolvedValue({ totalFee: 500n });
 		});
 
