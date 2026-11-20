@@ -10,7 +10,11 @@ import {
 	executeLiquidiumSupply
 } from '$lib/services/liquidium-supply.services';
 import * as liquidiumServices from '$lib/services/liquidium.services';
-import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
+import { LiquidiumSolTransferRefusedError } from '$lib/types/errors';
+import {
+	LIQUIDIUM_EXTERNAL_REF_KEYS,
+	type LiquidiumSolBlockhash
+} from '$lib/types/liquidium-active-tx';
 import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { nonNullish } from '@dfinity/utils';
@@ -264,6 +268,109 @@ describe('liquidium-supply.services', () => {
 		});
 	});
 
+	describe('a native SOL transfer', () => {
+		const solBlockhash: LiquidiumSolBlockhash = { blockhash: 'blockhash-1', slot: 42n };
+		const signature = 'sol-signature';
+		const deleteUnbroadcastActiveUserTransaction = vi.mocked(
+			activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+		);
+
+		// As `sendLiquidiumSol` does: `beforeBroadcast` with the blockhash and its valid slot, then the
+		// broadcast, which either goes out or fails with `failure`.
+		const broadcastSol = (failure?: unknown) =>
+			broadcast.mockImplementation(
+				async ({
+					beforeBroadcast
+				}: {
+					beforeBroadcast: (params: {
+						txid: string;
+						solBlockhash?: LiquidiumSolBlockhash;
+					}) => Promise<void>;
+				}) => {
+					await beforeBroadcast({ txid: signature, solBlockhash });
+
+					if (nonNullish(failure)) {
+						throw failure;
+					}
+
+					return signature;
+				}
+			);
+
+		const runSol = () =>
+			executeLiquidiumSupply({
+				identity: mockIdentity,
+				ethAddress,
+				poolId: 'pool-sol',
+				chain: 'SOL',
+				asset: 'SOL',
+				amount: 30_000_000n,
+				inflowFee: 1_884_122n,
+				displayAmount: '0.03',
+				progressStep: 'supplying',
+				broadcast
+			});
+
+		const rowId = () => createActiveUserTransaction.mock.calls[0]?.[0].id;
+
+		beforeEach(() => {
+			supply.mockResolvedValue(
+				buildFlow({
+					poolId: 'pool-sol',
+					asset: 'SOL',
+					chain: 'SOL',
+					action: 'deposit',
+					address: 'GXVewvv6HehcLFYCmwpqh5CrMjqN9zJ8rqzGq3HEt9Ax'
+				})
+			);
+			deleteUnbroadcastActiveUserTransaction.mockResolvedValue(undefined);
+		});
+
+		it('records the chain, the signature, the blockhash and its valid slot before the broadcast', async () => {
+			broadcastSol();
+
+			await runSol();
+
+			expect(broadcast).toHaveBeenCalledWith(
+				expect.objectContaining({ amount: 30_000_000n + 1_884_122n })
+			);
+			expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+			expect(createActiveUserTransaction.mock.calls[0][0].externalRefs).toEqual(
+				expect.arrayContaining([
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'SOL' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: signature },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.SOL_BLOCKHASH, value: 'blockhash-1' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.SOL_BLOCKHASH_SLOT, value: '42' }
+				])
+			);
+			expect(submit).toHaveBeenCalledExactlyOnceWith({ txid: signature });
+		});
+
+		it('deletes the row of a transfer that was never sent', async () => {
+			const refused = new LiquidiumSolTransferRefusedError({ cause: new Error('preflight') });
+			broadcastSol(refused);
+
+			await expect(runSol()).rejects.toBe(refused);
+
+			expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				id: rowId()
+			});
+			expect(submit).not.toHaveBeenCalled();
+		});
+
+		it('keeps the row when the SOL may have left', async () => {
+			const unclear = new Error('confirmation timed out');
+			broadcastSol(unclear);
+
+			await expect(runSol()).rejects.toBe(unclear);
+
+			expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+			expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+			expect(submit).not.toHaveBeenCalled();
+		});
+	});
+
 	describe('estimateLiquidiumInflowFee', () => {
 		const client = mockDeep<LiquidiumClient>();
 		const { estimateInflowFee } = client.lending;
@@ -284,7 +391,7 @@ describe('liquidium-supply.services', () => {
 					poolId,
 					action: 'deposit'
 				})
-			).resolves.toBe(500n);
+			).resolves.toEqual({ totalFee: 500n });
 
 			expect(estimateInflowFee).toHaveBeenCalledExactlyOnceWith({ asset: 'BTC', chain: 'ICP' });
 			expect(getOrCreateLiquidiumProfile).not.toHaveBeenCalled();
@@ -300,7 +407,7 @@ describe('liquidium-supply.services', () => {
 					poolId: 'pool-sol',
 					action: 'repayment'
 				})
-			).resolves.toBe(500n);
+			).resolves.toEqual({ totalFee: 500n });
 
 			expect(getOrCreateLiquidiumProfile).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
