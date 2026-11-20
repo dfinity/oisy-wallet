@@ -174,6 +174,28 @@ describe('LiquidiumSupplyForm', () => {
 			expect(container).not.toHaveTextContent(en.liquidium.text.supply_below_minimum);
 		});
 
+		// Liquidium's quote today: a 1,884,122-lamport fee, so the minimum is not a round number.
+		it('shows a non-round minimum at full precision, which the check then accepts', () => {
+			const quote = { ...solProps, inflowFee: 1_884_122n };
+
+			const { container } = render(LiquidiumSupplyForm, {
+				props: { ...quote, amount: 0.018115878 },
+				context: solContext()
+			});
+
+			expect(container).toHaveTextContent('0.018115878 SOL');
+			expect(container).not.toHaveTextContent(en.liquidium.text.supply_below_minimum);
+		});
+
+		it('rejects an amount one lamport below a non-round minimum', () => {
+			const { container } = render(LiquidiumSupplyForm, {
+				props: { ...solProps, inflowFee: 1_884_122n, amount: 0.018115877 },
+				context: solContext()
+			});
+
+			expect(container).toHaveTextContent(en.liquidium.text.supply_below_minimum);
+		});
+
 		it('shows no minimum before the quote', () => {
 			const { container } = render(LiquidiumSupplyForm, {
 				props: { ...solProps, inflowFee: undefined, minimumSendAmount: undefined },

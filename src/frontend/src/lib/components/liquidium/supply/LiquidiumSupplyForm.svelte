@@ -73,8 +73,14 @@
 		return quotedMinimumSupply > protocolMinimum ? quotedMinimumSupply : protocolMinimum;
 	});
 
+	// At full precision: rounded, a quoted minimum (to the lamport) could read below what the check
+	// takes, and typing it would be rejected.
 	let minSupplyFormatted = $derived(
-		`${formatToken({ value: minimumSupply, unitName: $sendTokenDecimals })} ${market.asset}`
+		`${formatToken({
+			value: minimumSupply,
+			unitName: $sendTokenDecimals,
+			displayDecimals: $sendTokenDecimals
+		})} ${market.asset}`
 	);
 
 	let validateSupplyAmount = $derived.by(() => {
