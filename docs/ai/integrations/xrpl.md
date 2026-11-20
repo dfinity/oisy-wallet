@@ -20,6 +20,7 @@ with `VITE_XRP_MAINNET_DISABLED`.
 | Expiry   | `ledger`         | Latest **validated** ledger index, to decide that a send expired  |
 | Signing  | `ledger_current` | Current **open** ledger index, to pick a `LastLedgerSequence`     |
 | History  | `account_tx`     | Native XRP transaction history, paginated with an opaque `marker` |
+| Tokens   | `account_lines`  | The account's trust lines: which tokens it holds, and how many    |
 
 History comes from `account_tx`, read by `loadXrpTransactions` — see the table below, and the
 [XRP integration spec](../spec-driven-development/specs/2026-07-24-feat-xrp-ledger-integration.md)
@@ -190,6 +191,29 @@ and reads `result.account_data.Balance` — a string of **drops**
 (1 XRP = 1,000,000 drops), returned as a `bigint`. An account that has never
 been funded is not on-ledger and the node returns the `actNotFound` error; OISY
 treats that as a **zero** balance (a valid state, not an error).
+
+## Trust lines (`account_lines`)
+
+`loadXrpAccountLines` (`src/frontend/src/xrp/rest/xrpl.rest.ts`) reads the account's trust lines for
+the balances of XRP Ledger tokens, behind `XRP_TRUST_LINE_TOKENS_ENABLED`:
+
+```json
+{
+	"method": "account_lines",
+	"params": [{ "account": "r...", "ledger_index": "validated", "limit": 400 }]
+}
+```
+
+Each line names the counterparty — the issuer, for a token the wallet holds — in `account`, and
+its `balance` from the account's side, as a decimal string that can be in exponent notation
+(`5800000000000000e13`). The flags (`peer_authorized`, `freeze_peer`, `deep_freeze_peer`, …) are
+omitted when false. Every page after the first is pinned to the first page's `ledger_index`, so a
+`marker` is never followed into another ledger, and the read gives up after ten pages. A
+never-funded account answers `actNotFound`, which is an empty list, bound to the address like the
+other absences; on a Clio node the echo is `{ "method": "account_lines", "params": [{ ... }] }`.
+
+The QuickNode endpoint's method whitelist must include `account_lines` before a build that reads it
+reaches an environment using that endpoint: a method outside the whitelist answers HTTP 401.
 
 ## Send (`submit`)
 

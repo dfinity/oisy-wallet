@@ -1,9 +1,11 @@
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import * as trustLineTokensEnv from '$env/xrp-trust-line-tokens.env';
 import { XRP_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessageDataRequestXrp } from '$lib/types/post-message';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockXrpTrustLine } from '$tests/mocks/xrp.mock';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { XrpWalletScheduler } from '$xrp/schedulers/xrp-wallet.scheduler';
 import { XrpNetworks } from '$xrp/types/network';
@@ -346,6 +348,163 @@ describe('xrp-wallet.scheduler', () => {
 	// A job snapshots the address it was scheduled with. If the scheduler is re-keyed to another
 	// address while that job is in flight, its result belongs to the previous account and must not
 	// be merged into or posted against the new one.
+	describe('trust lines', () => {
+		let spyLoadAccountLines: MockInstance;
+
+		const walletCalls = () =>
+			postMessageMock.mock.calls
+				.map(([message]) => message)
+				.filter((message) => message?.msg === 'syncXrpWallet');
+
+		beforeEach(() => {
+			spyLoadAccountLines = vi
+				.spyOn(xrplRest, 'loadXrpAccountLines')
+				.mockResolvedValue([mockXrpTrustLine]);
+		});
+
+		it('does not read them while trust-line tokens are off', async () => {
+			const scheduler = new XrpWalletScheduler();
+
+			await scheduler.start(startData);
+			await awaitJobExecution();
+
+			expect(spyLoadAccountLines).not.toHaveBeenCalled();
+			expect(walletCalls()[0]?.data.wallet.trustLines).toBeUndefined();
+
+			scheduler.stop();
+		});
+
+		describe('when trust-line tokens are on', () => {
+			beforeEach(() => {
+				vi.spyOn(trustLineTokensEnv, 'XRP_TRUST_LINE_TOKENS_ENABLED', 'get').mockReturnValue(true);
+			});
+
+			it('posts the lines with the balance on the first read', async () => {
+				const scheduler = new XrpWalletScheduler();
+
+				await scheduler.start(startData);
+				await awaitJobExecution();
+
+				expect(spyLoadAccountLines).toHaveBeenCalledExactlyOnceWith({
+					address: startData.address.data,
+					network: XrpNetworks.mainnet
+				});
+				expect(walletCalls()[0]?.data.wallet).toEqual(
+					expect.objectContaining({
+						balance: { certified: false, data: mockBalance },
+						trustLines: [mockXrpTrustLine]
+					})
+				);
+
+				scheduler.stop();
+			});
+
+			// An account without lines is an answer: the listener has to learn it, or a removed last
+			// line would keep its token on screen.
+			it('posts an empty list on the first read', async () => {
+				spyLoadAccountLines.mockResolvedValue([]);
+
+				const scheduler = new XrpWalletScheduler();
+
+				await scheduler.start(startData);
+				await awaitJobExecution();
+
+				expect(walletCalls()[0]?.data.wallet.trustLines).toEqual([]);
+
+				scheduler.stop();
+			});
+
+			it('posts nothing when neither the balance nor the lines changed', async () => {
+				const scheduler = new XrpWalletScheduler();
+
+				await scheduler.start(startData);
+				await awaitJobExecution();
+
+				postMessageMock.mockClear();
+
+				await scheduler.trigger(startData);
+				await awaitJobExecution();
+
+				expect(walletCalls()).toHaveLength(0);
+
+				scheduler.stop();
+			});
+
+			it('posts the lines again once they change', async () => {
+				const scheduler = new XrpWalletScheduler();
+
+				await scheduler.start(startData);
+				await awaitJobExecution();
+
+				postMessageMock.mockClear();
+
+				const changed = { ...mockXrpTrustLine, balance: '20' };
+				spyLoadAccountLines.mockResolvedValue([changed]);
+
+				await scheduler.trigger(startData);
+				await awaitJobExecution();
+
+				expect(walletCalls()[0]?.data.wallet.trustLines).toEqual([changed]);
+
+				scheduler.stop();
+			});
+
+			// A different endpoint from the balance, so its outage must leave the balance alone and
+			// must not be reported as "no lines".
+			it('posts the balance without lines when the lines cannot be read', async () => {
+				spyLoadAccountLines.mockRejectedValue(new Error('account_lines down'));
+
+				const scheduler = new XrpWalletScheduler();
+
+				await scheduler.start(startData);
+				await awaitJobExecution();
+
+				const [walletCall] = walletCalls();
+
+				expect(walletCall?.data.wallet.balance.data).toBe(mockBalance);
+				expect(walletCall?.data.wallet.trustLines).toBeUndefined();
+				expect(postMessageMock).not.toHaveBeenCalledWith(
+					expect.objectContaining({ msg: 'syncXrpWalletError' })
+				);
+
+				scheduler.stop();
+			});
+
+			it('reads the lines once even while the balance is retried', async () => {
+				spyLoadBalance.mockRejectedValue(new Error('account_info down'));
+
+				const scheduler = new XrpWalletScheduler();
+
+				await scheduler.start(startData);
+				await awaitJobExecution();
+
+				expect(vi.mocked(spyLoadBalance).mock.calls.length).toBeGreaterThan(1);
+				expect(spyLoadAccountLines).toHaveBeenCalledOnce();
+
+				scheduler.stop();
+			});
+
+			// Stopping hands the account over, and the listener clears what it showed, so a restart on
+			// the same address has to report the lines again or they would never reappear.
+			it('posts the lines again after a stop and a same-address restart', async () => {
+				const scheduler = new XrpWalletScheduler();
+
+				await scheduler.start(startData);
+				await awaitJobExecution();
+
+				scheduler.stop();
+				postMessageMock.mockClear();
+
+				await scheduler.start(startData);
+				await awaitJobExecution();
+
+				expect(walletCalls()[0]?.data.wallet.trustLines).toEqual([mockXrpTrustLine]);
+
+				scheduler.stop();
+			});
+		});
+	});
+
 	describe('when the address changes mid-flight', () => {
 		const otherData: PostMessageDataRequestXrp = {
 			address: { data: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe', certified: false },

@@ -23,7 +23,8 @@ export const TokenStandardCodeSchema = z.enum([
 	'bitcoin',
 	'solana',
 	'spl',
-	'xrp'
+	'xrp',
+	'xrp-trust-line'
 ]);
 
 export const TokenStandardSchema = z.object({
