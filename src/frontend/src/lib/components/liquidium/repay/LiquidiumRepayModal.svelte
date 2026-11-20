@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { Asset, Chain } from '@liquidium/client';
+	import { SupplyAction, type Asset, type Chain } from '@liquidium/client';
 	import { setContext } from 'svelte';
 	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumRepayBtcWizard from '$lib/components/liquidium/repay/LiquidiumRepayBtcWizard.svelte';
@@ -95,24 +95,43 @@
 	$effect(() => {
 		const identity = $authIdentity;
 
-		if (nonNullish(identity) && nonNullish(selectedReserve)) {
-			const { asset, chain } = selectedReserve;
-
-			inflowFee = undefined;
-			inflowFeeUnavailable = false;
-
-			// Reserve data widens asset/chain to open strings; narrow to the SDK's strict types here.
-			estimateLiquidiumInflowFee({
-				identity,
-				asset: asset as Asset,
-				chain: chain as Chain
-			})
-				.then((fee) => (inflowFee = fee))
-				.catch((err: unknown) => {
-					consoleError(err);
-					inflowFeeUnavailable = true;
-				});
+		if (isNullish(identity) || isNullish(selectedReserve)) {
+			return;
 		}
+
+		const { asset, chain, poolId } = selectedReserve;
+
+		inflowFee = undefined;
+		inflowFeeUnavailable = false;
+
+		// A quote for a rail picked before must not overwrite the current one's.
+		let cancelled = false;
+
+		// Reserve data widens asset/chain to open strings; narrow to the SDK's strict types here.
+		estimateLiquidiumInflowFee({
+			identity,
+			ethAddress: $ethAddress,
+			asset: asset as Asset,
+			chain: chain as Chain,
+			poolId,
+			action: SupplyAction.repayment
+		})
+			.then((fee) => {
+				if (!cancelled) {
+					inflowFee = fee;
+				}
+			})
+			.catch((err: unknown) => {
+				consoleError(err);
+
+				if (!cancelled) {
+					inflowFeeUnavailable = true;
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
 	});
 
 	$effect(() => {
@@ -263,7 +282,7 @@
 					bind:amount
 					bind:repayProgressStep
 				/>
-			{:else}
+			{:else if selectedReserve.chain === 'ETH'}
 				<LiquidiumRepayEthWizard
 					{currentStep}
 					{inflowFee}
