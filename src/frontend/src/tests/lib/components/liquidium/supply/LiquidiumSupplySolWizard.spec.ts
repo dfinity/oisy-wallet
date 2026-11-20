@@ -157,11 +157,13 @@ describe('LiquidiumSupplySolWizard', () => {
 		);
 	});
 
-	it('goes back to the form when the transfer was never sent', async () => {
+	it('goes back to the review when the transfer was never sent, showing what refused it', async () => {
+		const cause = new Error('preflight failure');
 		broadcastThroughService(executeSpy());
 		vi.spyOn(liquidiumSolServices, 'sendLiquidiumSol').mockRejectedValue(
-			new LiquidiumSolTransferRefusedError({ cause: new Error('preflight failure') })
+			new LiquidiumSolTransferRefusedError({ cause })
 		);
+		const toastsError = vi.spyOn(toastsStore, 'toastsError');
 		const onBack = vi.fn();
 		const onClose = vi.fn();
 
@@ -172,6 +174,10 @@ describe('LiquidiumSupplySolWizard', () => {
 		await waitFor(() => expect(onBack).toHaveBeenCalledOnce());
 
 		expect(onClose).not.toHaveBeenCalled();
+		expect(toastsError).toHaveBeenCalledExactlyOnceWith({
+			msg: { text: en.liquidium.text.transaction_failed },
+			err: cause
+		});
 	});
 
 	it('closes with the unconfirmed message when the SOL may have left', async () => {
@@ -195,7 +201,7 @@ describe('LiquidiumSupplySolWizard', () => {
 		);
 	});
 
-	it('goes back to the form on a failure before the transfer', async () => {
+	it('goes back to the review on a failure before the transfer', async () => {
 		executeSpy().mockRejectedValue(new Error('profile unavailable'));
 		const onBack = vi.fn();
 		const onClose = vi.fn();

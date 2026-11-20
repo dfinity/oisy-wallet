@@ -175,11 +175,13 @@
 				return;
 			}
 
+			// The refusal's own message is not for the user: the toast shows the failure it wraps, as the
+			// SOL send does.
 			const cause = err instanceof LiquidiumSolTransferRefusedError ? err.cause : err;
 
 			toastsError({
 				msg: { text: mapSolanaErrorMsg(cause) ?? $i18n.liquidium.text.transaction_failed },
-				err
+				err: cause
 			});
 
 			onBack();
