@@ -7,6 +7,7 @@
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import FirstTimeDestinationWarning from '$lib/components/send/FirstTimeDestinationWarning.svelte';
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
+	import SendTokenDetails from '$lib/components/send/SendTokenDetails.svelte';
 	import SendNftReview from '$lib/components/tokens/SendNftReview.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -133,6 +134,10 @@
 	</div>
 
 	{@render network?.()}
+
+	{#if isNullish(nft)}
+		<SendTokenDetails token={$sendToken} />
+	{/if}
 
 	{@render fee?.()}
 
