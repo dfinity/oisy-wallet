@@ -1,7 +1,7 @@
 use candid::Nat;
 use ic_cdk::query;
-use ic_cdk_management_canister::{
-    http_request, transform_context_from_query, HttpHeader, HttpMethod, HttpRequestArgs,
+use ic_cdk_management_canister_outcalls::{
+    transform_context_from_query, HttpHeader, HttpMethod, HttpRequest, HttpRequestArgs,
     HttpRequestResult, TransformArgs, TransformContext,
 };
 
@@ -49,6 +49,8 @@ fn build_request(
         transform: None,
         headers,
         is_replicated: None,
+        // `execute` sends every request with pricing version 2 (pay-as-you-go).
+        pricing_version: None,
     }
 }
 
@@ -84,8 +86,11 @@ fn validate_response(response: HttpRequestResult) -> Result<HttpRequestResult, S
 }
 
 /// Sends the request via the management canister and validates the response.
+///
+/// The request is priced pay-as-you-go: the canister attaches a reservation sized for the most
+/// the call could use, is charged for what it actually uses, and gets the rest refunded.
 async fn execute(request: HttpRequestArgs) -> Result<HttpRequestResult, String> {
-    match http_request(&request).await {
+    match HttpRequest::from_args(request).send().await {
         Ok(response) => validate_response(response),
         Err(err) => Err(format!("HTTP request failed: {err}")),
     }
@@ -102,8 +107,8 @@ async fn execute(request: HttpRequestArgs) -> Result<HttpRequestResult, String> 
 /// # Arguments
 /// * `url` - The URL to fetch.
 /// * `headers` - Additional headers appended after `User-Agent`.
-/// * `max_response_bytes` - Upper bound on the response size in bytes. Keep this as low as possible
-///   to minimise cycle costs.
+/// * `max_response_bytes` - Upper bound on the response size in bytes. It also sizes the cycles
+///   held while the call runs, so keep it as low as the response allows.
 /// * `replicated` - When `true`, every replica issues the request and they reach consensus on the
 ///   response; when `false`, a single replica handles it (cheaper, but unverified). The
 ///   [`http_request_transform`] is attached regardless so the response is normalised the same way.
@@ -158,8 +163,8 @@ pub(crate) async fn get(
 /// * `url` - The endpoint to call.
 /// * `body` - The JSON request body as raw bytes.
 /// * `headers` - Additional headers appended after `User-Agent` and `Content-Type`.
-/// * `max_response_bytes` - Upper bound on the response size in bytes. Keep this as low as possible
-///   to minimise cycle costs.
+/// * `max_response_bytes` - Upper bound on the response size in bytes. It also sizes the cycles
+///   held while the call runs, so keep it as low as the response allows.
 #[expect(dead_code)]
 pub(crate) async fn post(
     url: &str,
@@ -193,7 +198,7 @@ pub(crate) async fn post(
 #[cfg(test)]
 mod tests {
     use candid::{Func, Nat, Principal};
-    use ic_cdk_management_canister::{
+    use ic_cdk_management_canister_outcalls::{
         HttpHeader, HttpMethod, HttpRequestResult, TransformContext, TransformFunc,
     };
     use pretty_assertions::assert_eq;

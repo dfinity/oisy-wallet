@@ -10,11 +10,14 @@ resolver = "2"
 
 [workspace.dependencies]
 bs58 = "0.5"
-ic-cdk = "0.20.2"
+ic-cdk = "0.20.3"
 # ic-cdk 0.20 split the management- and Bitcoin-canister bindings out of the main
 # crate; these two are the same code, just relocated.
 ic-cdk-bitcoin-canister = "0.2.0"
 ic-cdk-management-canister = "0.1.1"
+# HTTP outcalls only: 0.2+ prices them pay-as-you-go. ic-vetkeys still needs 0.1, and the vetKD key
+# types we hand it must come from that version, so both versions stay until ic-vetkeys moves on.
+ic-cdk-management-canister-outcalls = { package = "ic-cdk-management-canister", version = "0.3.0" }
 ic-cdk-timers = "1.0.0"
 canbench-rs = { version = "0.7.0" }
 ic-cycles-ledger-client = { path = "src/cycles_ledger/client" }
