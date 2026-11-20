@@ -6,15 +6,16 @@ import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/network
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import type { EthAddress } from '$eth/types/address';
-import { LOCAL, STAGING } from '$lib/constants/app.constants';
+import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
 
 export const LIFI_SWAP_ENABLED = true;
 
-// Feature flag: LI.FI also quotes swaps from native BTC. It takes effect only while
+// Feature flag: LI.FI also quotes swaps from native BTC, in every build. It takes effect only while
 // `BTC_SEND_VIA_BACKEND_ENABLED` is on too: the swap relies on what that flag switches, the backend's
-// spendable UTXOs, the input cap and the broadcast through the backend.
-export const LIFI_BTC_SWAP_ENABLED = LOCAL || STAGING;
+// spendable UTXOs, the input cap and the broadcast through the backend. Kept as the four terms rather
+// than `true`, like `ONRAMPER_ENABLED`: dropping `PROD` (or `BETA`) is the kill-switch.
+export const LIFI_BTC_SWAP_ENABLED = LOCAL || STAGING || BETA || PROD;
 
 // Scoped to an origin allow-list on LI.FI's partner portal, with a separate key per environment, so
 // shipping it in the bundle does not expose another environment's quota.
