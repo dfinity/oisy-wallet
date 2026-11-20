@@ -26,15 +26,14 @@ describe('Help', () => {
 		mockAuthStore();
 	});
 
-	it('renders the four cards in order: Support, networks, providers, ICPSwap', () => {
-		// Both explorer cards hide themselves while every address is still nullish.
+	it('renders the three cards in order: Support, providers, ICPSwap', () => {
+		// The providers card hides itself while every address is still nullish.
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 
 		const { getByTestId } = render(Help);
 
 		const cards = [
 			getByTestId(HELP_SUPPORT_CARD),
-			getByTestId(HELP_NETWORK_EXPLORERS_CARD),
 			getByTestId(HELP_EXPLORERS_CARD),
 			getByTestId(HELP_ICPSWAP_CARD)
 		];
@@ -46,6 +45,15 @@ describe('Help', () => {
 				card.compareDocumentPosition(cards[index + 1]) & Node.DOCUMENT_POSITION_FOLLOWING
 			).toBeTruthy();
 		});
+	});
+
+	it('leaves the Blockchain explorers card to the Tools page', () => {
+		// With an address the card would show, so its absence is the page's choice.
+		ethAddressStore.set({ data: mockEthAddress, certified: false });
+
+		const { queryByTestId } = render(Help);
+
+		expect(queryByTestId(HELP_NETWORK_EXPLORERS_CARD)).not.toBeInTheDocument();
 	});
 
 	it('separates the cards instead of letting them touch', () => {
