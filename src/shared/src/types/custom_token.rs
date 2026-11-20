@@ -1,7 +1,7 @@
 //! Extendable custom user defined tokens
 use candid::{CandidType, Deserialize, Principal};
 
-use crate::types::Version;
+use crate::types::{account::XrpAddress, Version};
 
 pub type CanisterId = Principal;
 pub type LedgerId = CanisterId;
@@ -88,6 +88,41 @@ pub struct ErcToken {
     pub chain_id: ChainId,
 }
 
+/// An XRP Ledger currency code.
+///
+/// # Format
+/// Either exactly 3 ASCII characters, a standard code, or 40 uppercase hex characters, a
+/// nonstandard 160-bit code. Standard codes are case-sensitive, and `XRP` is reserved for the
+/// native asset. A nonstandard code must not start with a zero byte, which the ledger reads as
+/// the standard format. Hex is kept uppercase, as the ledger reports it, so that a token has a
+/// single spelling.
+///
+/// # Examples
+/// - `USD`
+/// - `524C555344000000000000000000000000000000` (RLUSD)
+///
+/// # Reference
+/// - <https://xrpl.org/docs/references/protocol/data-types/currency-formats>
+#[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug, PartialOrd, Ord)]
+#[serde(remote = "Self")]
+pub struct XrpCurrencyCode(pub String);
+impl XrpCurrencyCode {
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+/// A token held through a trust line on the XRP Ledger: a currency code and the account that
+/// issues it. The code alone does not identify a token, since any account can issue under any
+/// code.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
+pub struct XrpTrustLineToken {
+    pub currency: XrpCurrencyCode,
+    pub issuer: XrpAddress,
+}
+
 /// A variant describing any token
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 #[repr(u8)]
@@ -103,6 +138,7 @@ pub enum Token {
     IcPunks(IcPunksToken) = 8,
     Erc4626(ErcToken) = 9,
     Icrc7(Icrc7Token) = 10,
+    XrpTrustLineMainnet(XrpTrustLineToken) = 11,
 }
 
 /// User preferences for any token
@@ -144,4 +180,6 @@ pub enum CustomTokenId {
     IcPunks(CanisterId) = 6,
     /// An ICRC-7 compliant non-fungible token collection on the Internet Computer mainnet.
     Icrc7(CanisterId) = 7,
+    /// A token held through a trust line on the XRP Ledger mainnet: currency code and issuer.
+    XrpTrustLineMainnet(XrpCurrencyCode, XrpAddress) = 8,
 }

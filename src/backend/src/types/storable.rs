@@ -3,7 +3,8 @@ use std::{borrow::Cow, ops::Deref};
 use candid::{CandidType, Deserialize, Principal};
 use ic_stable_structures::storable::{Blob, Bound, Storable};
 use shared::types::{
-    custom_token::{ErcTokenId, SplTokenId},
+    account::XrpAddress,
+    custom_token::{ErcTokenId, SplTokenId, XrpCurrencyCode},
     personal_note_share::MAX_PERSONAL_NOTE_SHARE_TOKEN_BYTES,
     tip::MAX_TIP_ID_BYTES,
     token_id::TokenId,
@@ -79,12 +80,16 @@ impl Storable for StoredPrincipal {
 /// No kind byte is `b'D'`, the first byte of every Candid encoding, which is how
 /// `state::token_id_keys` tells the two apart.
 ///
+/// A trust-line token has two strings: its currency code, after one byte with the code's length,
+/// then its issuer.
+///
 /// Keys sort by `TokenId`, as they did in the Candid encoding.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct StoredTokenId(pub TokenId);
 
 impl StoredTokenId {
     fn encode(&self) -> Vec<u8> {
+        let trust_line;
         let (kind, chain_id, fields): (u8, Option<u64>, &[u8]) = match &self.0 {
             TokenId::EvmNative(chain_id) => (0, Some(*chain_id), &[]),
             TokenId::Erc20(address, chain_id) => (1, Some(*chain_id), address.as_str().as_bytes()),
@@ -108,6 +113,18 @@ impl StoredTokenId {
             TokenId::IcPunks(canister_id) => (15, None, canister_id.as_slice()),
             TokenId::Icrc7(canister_id) => (16, None, canister_id.as_slice()),
             TokenId::XrpNativeMainnet => (17, None, &[]),
+            TokenId::XrpTrustLineMainnet(currency, issuer) => {
+                // A validated code is 3 or 40 bytes long.
+                let currency_len = u8::try_from(currency.as_str().len())
+                    .expect("an XRP Ledger currency code should fit a one-byte length");
+                trust_line = [
+                    &[currency_len][..],
+                    currency.as_str().as_bytes(),
+                    issuer.0.as_bytes(),
+                ]
+                .concat();
+                (18, None, trust_line.as_slice())
+            }
         };
 
         let mut buf = Vec::with_capacity(1 + 8 + fields.len());
@@ -136,6 +153,18 @@ impl StoredTokenId {
         };
         let erc_address = || ErcTokenId(address(8));
         let principal = || Principal::from_slice(fields);
+        let trust_line = || {
+            let (&currency_len, _) = fields
+                .split_first()
+                .expect("a stored trust-line token should hold its currency code's length");
+            let issuer_from = 1 + usize::from(currency_len);
+            let currency = String::from_utf8(fields[1..issuer_from].to_vec())
+                .expect("a stored currency code should be valid UTF-8");
+            TokenId::XrpTrustLineMainnet(
+                XrpCurrencyCode(currency),
+                XrpAddress(address(issuer_from)),
+            )
+        };
 
         match kind {
             0 => TokenId::EvmNative(chain_id()),
@@ -156,6 +185,7 @@ impl StoredTokenId {
             15 => TokenId::IcPunks(principal()),
             16 => TokenId::Icrc7(principal()),
             17 => TokenId::XrpNativeMainnet,
+            18 => trust_line(),
             _ => panic!("a stored token id has an unknown kind: {kind}"),
         }
     }
@@ -223,7 +253,8 @@ mod stored_token_id_tests {
     use ic_stable_structures::{storable::Storable, DefaultMemoryImpl, StableBTreeMap};
     use pretty_assertions::assert_eq;
     use shared::types::{
-        custom_token::{ErcTokenId, SplTokenId},
+        account::XrpAddress,
+        custom_token::{ErcTokenId, SplTokenId, XrpCurrencyCode},
         token_id::TokenId,
     };
 
@@ -231,6 +262,8 @@ mod stored_token_id_tests {
 
     const ERC_ADDRESS: &str = "0x0000000000000000000000000000000000000abc";
     const SPL_ADDRESS: &str = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+    const RLUSD_CODE: &str = "524C555344000000000000000000000000000000";
+    const RLUSD_ISSUER: &str = "rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De";
 
     /// One token id of every kind. The match stops compiling when a kind is added, so that the new
     /// kind gets a case here too.
@@ -257,6 +290,10 @@ mod stored_token_id_tests {
             TokenId::IcPunks(ledger),
             TokenId::Icrc7(Principal::from_slice(&[7; 29])),
             TokenId::XrpNativeMainnet,
+            TokenId::XrpTrustLineMainnet(
+                XrpCurrencyCode(RLUSD_CODE.to_string()),
+                XrpAddress(RLUSD_ISSUER.to_string()),
+            ),
         ];
         for token_id in &all {
             match token_id {
@@ -277,7 +314,8 @@ mod stored_token_id_tests {
                 | TokenId::Dip721(_)
                 | TokenId::IcPunks(_)
                 | TokenId::Icrc7(_)
-                | TokenId::XrpNativeMainnet => {}
+                | TokenId::XrpNativeMainnet
+                | TokenId::XrpTrustLineMainnet(..) => {}
             }
         }
         all
@@ -299,7 +337,7 @@ mod stored_token_id_tests {
             .map(|token_id| StoredTokenId(token_id).to_bytes()[0])
             .collect();
 
-        assert_eq!(first_bytes, (0..=17).collect::<Vec<u8>>());
+        assert_eq!(first_bytes, (0..=18).collect::<Vec<u8>>());
     }
 
     #[test]
