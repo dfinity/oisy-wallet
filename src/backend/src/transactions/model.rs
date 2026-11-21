@@ -34,7 +34,7 @@ pub fn get_transactions(
 ) -> GetUserTransactionsResponse {
     let key = make_key(principal, token_id);
 
-    let transactions = map.get(&key).map(|c| c.0).unwrap_or_default();
+    let transactions = map.get(&key).map_or_default(|c| c.0);
 
     let max_results = usize::try_from(max_results.min(MAX_GET_USER_TRANSACTIONS_RESULTS))
         .expect("max_results should fit in usize");
@@ -179,7 +179,7 @@ pub fn save_transactions(
 
     let key = make_key(principal, token_id);
 
-    let mut existing = map.get(&key).map(|c| c.0).unwrap_or_default();
+    let mut existing = map.get(&key).map_or_default(|c| c.0);
 
     let mut known_ids: HashSet<String> = existing.iter().map(|e| e.id.clone()).collect();
 

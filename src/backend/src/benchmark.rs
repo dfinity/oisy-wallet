@@ -574,8 +574,7 @@ fn bench_get_contacts_with_count(count: u64) -> BenchResult {
         std::hint::black_box(read_state(|s| {
             s.contact
                 .get(&sp)
-                .map(|c| c.contacts.values().cloned().collect::<Vec<_>>())
-                .unwrap_or_default()
+                .map_or_default(|c| c.contacts.values().cloned().collect::<Vec<_>>())
         }));
     })
 }
