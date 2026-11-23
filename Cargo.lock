@@ -167,7 +167,7 @@ dependencies = [
  "serde",
  "serde_bytes",
  "serde_json",
- "sha2 0.11.0",
+ "sha2 0.11.1",
  "shared",
  "tiny-keccak",
 ]
@@ -419,9 +419,9 @@ dependencies = [
 
 [[package]]
 name = "candid"
-version = "0.10.39"
+version = "0.10.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3cf88a2a95ce5fcb4c93a19946313a1877d36894d9f14c82ba0a38ab9f1ff682"
+checksum = "eabf7c87ac020b0d9e07b02b63e6a109224044a524ce5b7ce98307bc5ea4d7e1"
 dependencies = [
  "anyhow",
  "binrw",
@@ -442,9 +442,9 @@ dependencies = [
 
 [[package]]
 name = "candid_derive"
-version = "0.10.39"
+version = "0.10.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6eb9a3167753c161391537cf2c0f7262b008011b338d0cabac2a365a80be89fd"
+checksum = "b6d61cd9491fc0ef12a5d2106b742e0e166026afc9e20cadd82d3f1e695cf7fc"
 dependencies = [
  "lazy_static",
  "proc-macro2",
@@ -3370,9 +3370,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.11.0"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "446ba717509524cb3f22f17ecc096f10f4822d76ab5c0b9822c5f9c284e825f4"
+checksum = "47d7069beb7d6ac7b9acd1039986e73443f24234f41074da099d6f994ac9ad19"
 dependencies = [
  "cfg-if",
  "cpufeatures 0.3.0",
@@ -3416,7 +3416,7 @@ dependencies = [
  "pretty_assertions",
  "serde",
  "serde_bytes",
- "sha2 0.11.0",
+ "sha2 0.11.1",
 ]
 
 [[package]]

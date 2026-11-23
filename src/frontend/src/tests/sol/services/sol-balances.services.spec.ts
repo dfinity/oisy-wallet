@@ -99,8 +99,12 @@ describe('sol-balances.services', () => {
 
 			accounts = new Map();
 
+			// The seeds also accept a signer-like `{ address }`; the service passes the mint address.
 			vi.mocked(findAssociatedTokenPda).mockImplementation(({ mint }) =>
-				Promise.resolve([address(ataOf(mint)), 0 as ProgramDerivedAddressBump])
+				Promise.resolve([
+					address(ataOf(typeof mint === 'string' ? mint : mint.address)),
+					0 as ProgramDerivedAddressBump
+				])
 			);
 
 			spyGetMultipleAccountsInfo = vi

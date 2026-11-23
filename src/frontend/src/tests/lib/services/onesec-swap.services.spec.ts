@@ -454,7 +454,7 @@ describe('onesec-swap.services', () => {
 
 				createSpy = vi
 					.spyOn(activeUserTransactionsServices, 'createActiveUserTransaction')
-					.mockResolvedValue();
+					.mockResolvedValue(mockActiveUserTransaction);
 				updateSpy = vi
 					.spyOn(activeUserTransactionsServices, 'updateActiveUserTransaction')
 					.mockResolvedValue();
@@ -681,7 +681,7 @@ describe('onesec-swap.services', () => {
 
 				createSpy = vi
 					.spyOn(activeUserTransactionsServices, 'createActiveUserTransaction')
-					.mockResolvedValue();
+					.mockResolvedValue(mockActiveUserTransaction);
 				updateSpy = vi
 					.spyOn(activeUserTransactionsServices, 'updateActiveUserTransaction')
 					.mockResolvedValue();

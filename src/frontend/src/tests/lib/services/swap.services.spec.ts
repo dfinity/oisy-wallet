@@ -113,6 +113,7 @@ import { geSwapEthTokenAddress, slippagePercentToBasisPoints } from '$lib/utils/
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
+import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
@@ -2419,7 +2420,9 @@ describe('swap.services', () => {
 			mockDeltaContractPostDeltaOrder.mockResolvedValue({ id: 'mock-auction-id' });
 			vi.mocked(geSwapEthTokenAddress).mockImplementation(({ address }) => address);
 
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 
 			vi.mocked(createPermit).mockResolvedValue({
 				nonce: '0',
@@ -2998,7 +3001,9 @@ describe('swap.services', () => {
 			mockSwapBuildTx.mockResolvedValue(mockTransaction());
 			vi.mocked(geSwapEthTokenAddress).mockImplementation(({ address }) => address);
 			vi.mocked(sendEvmSwap).mockResolvedValue({ hash: mockTxHash, nonce: mockTxNonce });
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should execute market swap successfully with non-default token', async () => {
@@ -4412,7 +4417,9 @@ describe('swap.services', () => {
 
 			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123', nonce: 5 });
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not call setCustomToken when ERC20 destination token is toggleable and already enabled', async () => {
@@ -4522,7 +4529,9 @@ describe('swap.services', () => {
 
 			vi.mocked(sendSol).mockResolvedValue(mockSolSignature());
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not call setCustomToken when SPL destination token is toggleable and already enabled', async () => {
@@ -4600,7 +4609,9 @@ describe('swap.services', () => {
 
 			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123', nonce: 5 });
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not send funds when the quote signature does not verify', async () => {
@@ -4930,7 +4941,9 @@ describe('swap.services', () => {
 
 			vi.mocked(sendSol).mockResolvedValue(solTxSignature);
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not send funds when the quote was requested with another slippage', async () => {
@@ -5093,7 +5106,9 @@ describe('swap.services', () => {
 				return btcTxid;
 			});
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not send funds when the quote was requested with another slippage', async () => {
@@ -5297,7 +5312,7 @@ describe('swap.services', () => {
 					() => {
 						expect(broadcast).not.toHaveBeenCalled();
 
-						return Promise.resolve();
+						return Promise.resolve(mockActiveUserTransaction);
 					}
 				);
 				sendThroughBackend();
@@ -5421,7 +5436,9 @@ describe('swap.services', () => {
 				return Promise.resolve({ txHash: xrpTxHash, submitResult: undefined });
 			});
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not send funds when the quote was requested with another slippage', async () => {

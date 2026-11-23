@@ -1,4 +1,5 @@
 import { BLOCKSTREAM_API_URL } from '$env/rest/blockstream.env';
+import { BTC_TRANSACTION_STATUS_TIMEOUT_MILLIS } from '$lib/constants/app.constants';
 
 /**
  * Get latest mined BTC block height. Used for calculating the number of confirmations for a BTC transaction.
@@ -28,7 +29,10 @@ export const btcTransactionStatus = async ({
 }: {
 	txid: string;
 }): Promise<{ confirmed: boolean } | undefined> => {
-	const response = await fetch(`${BLOCKSTREAM_API_URL}/tx/${txid}`);
+	// The signal also bounds reading the body.
+	const response = await fetch(`${BLOCKSTREAM_API_URL}/tx/${txid}`, {
+		signal: AbortSignal.timeout(BTC_TRANSACTION_STATUS_TIMEOUT_MILLIS)
+	});
 
 	if (response.status === 404) {
 		return undefined;

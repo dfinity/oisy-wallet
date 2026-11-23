@@ -51,6 +51,31 @@ Do not invent a second key next to one that already exists.
   [`$lib/utils/identifier.utils.ts`](../../../src/frontend/src/lib/utils/identifier.utils.ts)
   — combined with the network. Never the ticker.
 
+## Liquidium rows — the rail is in `liquidium_chain`
+
+A Liquidium `ActiveUserTransaction` stores the asset's ck ledger as
+`data.Liquidium.token` on every rail, native BTC included
+([`liquidiumAssetTokenId`](../../../src/frontend/src/lib/utils/liquidium.utils.ts)).
+So `token` names the pool's asset, not how the funds moved. Code that needs the
+rail reads the `liquidium_chain` external ref
+(`LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN` in
+[`$lib/types/liquidium-active-tx.ts`](../../../src/frontend/src/lib/types/liquidium-active-tx.ts)),
+which holds the SDK `Chain` (`BTC`, `ETH`, `ICP`, `SOL`).
+
+- Only supply and repay write it (`executeLiquidiumSupply`,
+  `executeLiquidiumRepay`). A rail check on borrow or withdraw rows has to add
+  it to those services first.
+- The ref wins when present. Rows written before it have none: for those,
+  `isNativeBtcTransfer` in
+  [`liquidium-active-tx.services.ts`](../../../src/frontend/src/lib/services/liquidium-active-tx.services.ts)
+  takes a row as native BTC when its `asset_symbol` is `BTC` and its txid
+  matches `BTC_TXID_REGEX` (64 hex), since a ckBTC row's txid is a ledger block
+  index. A new rail has no such rows and needs no fallback.
+- Don't switch `token` to a native token id to tell rails apart: stored rows
+  carry the ck ledger, and it names the asset the same way on every rail.
+- Test a rail check with rows the real services wrote (`writeRow` in
+  `liquidium-active-tx.services.spec.ts`), not hand-built ones.
+
 ## Svelte — runes for new code
 
 The repo is **Svelte 5**. For new code, default to runes (`$state`,
