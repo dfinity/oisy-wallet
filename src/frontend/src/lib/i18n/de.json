@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "Willkommen bei Ausleihen!",
-			"header_description": "Erhalte Liquidität, ohne zu verkaufen. Leihe dir Stablecoins gegen deine BTC, ICP und mehr.",
+			"header_description": "",
 			"borrowing_options": "Kreditoptionen",
 			"borrowing_potential": "Kreditpotenzial",
 			"borrowing_power_hint": "Eine Schätzung, wie viel du leihen könntest, wenn du deine Assets als Sicherheit hinterlegst – zum besten verfügbaren Zinssatz.",
@@ -2827,7 +2827,7 @@
 	},
 	"liquidium": {
 		"text": {
-			"description": "Bitcoin bereitstellen. Stablecoins leihen. Nativ bleiben.",
+			"description": "",
 			"health_factor": "Gesundheitsfaktor",
 			"health_no_debt": "",
 			"health_healthy": "",
@@ -2925,8 +2925,8 @@
 		"info": {
 			"title": "Was ist Liquidium",
 			"description": "Liquidium ist ein dezentrales, non-custodial Lending-Protokoll, mit dem du netzwerkübergreifend Assets bereitstellen oder leihen kannst. Es basiert auf dem Internet Computer und ermöglicht Cross-Chain-Lending ohne zentrale Bridges oder Wrapped Token.",
-			"fact_1_title": "Verdiene mit deinem BTC",
-			"fact_1_description": "Verleihe deinen Bitcoin und erziele Rendite aus übersicherten Krediten.",
+			"fact_1_title": "",
+			"fact_1_description": "",
 			"fact_2_title": "Non-Custodial",
 			"fact_2_description": "Einzahlungen sind durch Onchain-Smart-Contracts gesichert, ohne zentrale Kontrolle.",
 			"fact_3_title": "Nativ, Cross-Chain",

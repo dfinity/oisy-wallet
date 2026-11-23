@@ -2,12 +2,14 @@ import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { ZERO } from '$lib/constants/app.constants';
 import { AppPath } from '$lib/constants/routes.constants';
 import {
+	liquidiumAssetIcons,
 	liquidiumAssetNetworkIcons,
 	liquidiumAssetNetworkNames,
 	liquidiumBorrowData,
@@ -21,6 +23,7 @@ import {
 	liquidiumMaxSupplyApy,
 	liquidiumMinBorrowApy,
 	liquidiumNetValueUsd,
+	liquidiumNetworkIcons,
 	liquidiumPortfolio,
 	liquidiumPortfolioLoading,
 	liquidiumRepayReserves,
@@ -277,6 +280,17 @@ describe('liquidium derived stores', () => {
 				'USDC-ETH',
 				'USDC-ICP'
 			]);
+		});
+	});
+
+	// The cards advertise the assets Liquidium offers in OISY, SOL among them.
+	describe('liquidium card icons', () => {
+		it('advertise Solana among the networks', () => {
+			expect(liquidiumNetworkIcons).toContain(SOLANA_TOKEN.network.icon);
+		});
+
+		it('advertise SOL among the assets', () => {
+			expect(liquidiumAssetIcons).toContain(SOLANA_TOKEN.icon);
 		});
 	});
 

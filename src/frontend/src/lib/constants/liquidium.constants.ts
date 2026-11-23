@@ -11,6 +11,7 @@ import { IC_CKSOL_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { Token } from '$lib/types/token';
@@ -26,7 +27,8 @@ export const LIQUIDIUM_ADVERTISED_TOKENS: Token[] = [
 	ETHEREUM_TOKEN,
 	USDC_TOKEN,
 	USDT_TOKEN,
-	ICP_TOKEN
+	ICP_TOKEN,
+	SOLANA_TOKEN
 ];
 
 // Pool assets OISY offers rails for. Other pools Liquidium lists stay out of the Markets list and

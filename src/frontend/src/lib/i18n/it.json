@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "Benvenuto nei Prestiti!",
-			"header_description": "Accedi a liquidità senza vendere. Prendi in prestito stablecoin contro i tuoi BTC, ICP e altro.",
+			"header_description": "",
 			"borrowing_options": "Opzioni di prestito",
 			"borrowing_potential": "Potenziale di prestito",
 			"borrowing_power_hint": "Una stima di quanto potresti prendere in prestito se fornissi i tuoi asset come garanzia, al miglior tasso disponibile.",
@@ -2827,7 +2827,7 @@
 	},
 	"liquidium": {
 		"text": {
-			"description": "Fornisci Bitcoin. Prendi in prestito stablecoin. Resta nativo.",
+			"description": "",
 			"health_factor": "Fattore di salute",
 			"health_no_debt": "",
 			"health_healthy": "",
@@ -2925,8 +2925,8 @@
 		"info": {
 			"title": "Cos'è Liquidium",
 			"description": "Liquidium è un protocollo di prestito decentralizzato e non-custodial in cui puoi fornire o prendere in prestito su più reti blockchain. Costruito su Internet Computer, consente prestiti cross-chain senza bridge centralizzati o token wrapped.",
-			"fact_1_title": "Guadagna sul tuo BTC",
-			"fact_1_description": "Presta il tuo Bitcoin per ottenere rendimento da prestiti sovracollateralizzati.",
+			"fact_1_title": "",
+			"fact_1_description": "",
 			"fact_2_title": "Non-Custodial",
 			"fact_2_description": "I depositi sono protetti da smart contract onchain, senza controllo centralizzato.",
 			"fact_3_title": "Nativo, Cross-Chain",

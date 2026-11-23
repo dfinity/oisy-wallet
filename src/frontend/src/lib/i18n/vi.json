@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "Chào mừng đến với Vay!",
-			"header_description": "Tiếp cận thanh khoản mà không cần bán. Vay stablecoin bằng cách thế chấp BTC, ICP và nhiều tài sản khác của bạn.",
+			"header_description": "",
 			"borrowing_options": "Tùy chọn vay",
 			"borrowing_potential": "Tiềm năng vay",
 			"borrowing_power_hint": "Ước tính số tiền bạn có thể vay nếu thế chấp tài sản của mình, theo mức lãi suất tốt nhất hiện có.",
@@ -2827,7 +2827,7 @@
 	},
 	"liquidium": {
 		"text": {
-			"description": "Cung cấp Bitcoin. Vay stablecoin. Giữ nguyên bản địa.",
+			"description": "",
 			"health_factor": "Hệ số sức khỏe",
 			"health_no_debt": "",
 			"health_healthy": "",
@@ -2925,8 +2925,8 @@
 		"info": {
 			"title": "Liquidium là gì",
 			"description": "Liquidium là một giao thức cho vay phi tập trung, không lưu ký, cho phép bạn cung cấp hoặc vay trên nhiều mạng blockchain. Được xây dựng trên Internet Computer, nó cho phép cho vay xuyên chuỗi mà không cần cầu nối tập trung hay token bọc (wrapped).",
-			"fact_1_title": "Kiếm lời từ BTC của bạn",
-			"fact_1_description": "Cho vay Bitcoin của bạn để kiếm lợi suất từ các khoản vay có thế chấp vượt mức.",
+			"fact_1_title": "",
+			"fact_1_description": "",
 			"fact_2_title": "Không lưu ký",
 			"fact_2_description": "Khoản tiền gửi được bảo vệ bởi hợp đồng thông minh on-chain, không có sự kiểm soát tập trung.",
 			"fact_3_title": "Bản địa, xuyên chuỗi",
