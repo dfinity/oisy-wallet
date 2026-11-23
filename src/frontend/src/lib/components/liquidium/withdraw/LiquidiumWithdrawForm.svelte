@@ -165,6 +165,7 @@
 			isSelectable={nonNullish(onSelectToken)}
 			onClick={onSelectToken}
 			onCustomErrorValidate={validateWithdrawAmount}
+			revalidateKey={railMinimum}
 			showTokenNetwork
 			token={withdrawToken}
 			bind:amount

@@ -159,6 +159,7 @@
 			isSelectable={nonNullish(onSelectToken)}
 			onClick={onSelectToken}
 			onCustomErrorValidate={validateBorrowAmount}
+			revalidateKey={minimumBorrow}
 			showTokenNetwork
 			token={borrowToken}
 			bind:amount

@@ -66,6 +66,47 @@ describe('LiquidiumWithdrawModal', () => {
 		expect(container).toHaveTextContent('0.002001 SOL');
 	});
 
+	// The amount can be checked before the minter answers: the arriving minimum has to check it again,
+	// or Review is disabled with no reason shown.
+	describe('a minimum that arrives after the amount was checked', () => {
+		// The input validates on a 300ms debounce.
+		const VALIDATION_DEBOUNCE_MS = 300;
+
+		let resolveMinimum: (minimum: bigint) => void;
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+
+			vi.mocked(liquidiumSolServices.getLiquidiumSolNativeOutflowMinimum).mockReturnValue(
+				new Promise((resolve) => {
+					resolveMinimum = resolve;
+				})
+			);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('shows the below-minimum error', async () => {
+			const { container, getByPlaceholderText } = render(LiquidiumWithdrawModal, {
+				props: { reserve }
+			});
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			await fireEvent.input(getByPlaceholderText('0'), { target: { value: '0.002' } });
+			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
+
+			expect(container).not.toHaveTextContent(en.liquidium.text.withdraw_below_minimum);
+
+			resolveMinimum(2_001_000n);
+			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
+
+			expect(container).toHaveTextContent(en.liquidium.text.withdraw_below_minimum);
+		});
+	});
+
 	it('reads no minter minimum for the ckSOL rail', async () => {
 		const { container } = render(LiquidiumWithdrawModal, {
 			props: { reserve: { ...reserve, chain: 'ICP' } }
