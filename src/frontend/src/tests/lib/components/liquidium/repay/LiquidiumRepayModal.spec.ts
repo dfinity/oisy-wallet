@@ -12,6 +12,7 @@ import * as liquidiumSupplyServices from '$lib/services/liquidium-supply.service
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import {
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction
@@ -20,10 +21,15 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import type { InflowFeeEstimate } from '@liquidium/client';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { readable, writable, type Writable } from 'svelte/store';
+
+vi.mock('$sol/api/solana.api', () => ({
+	estimatePriorityFee: vi.fn().mockResolvedValue(1_000_000n)
+}));
 
 describe('LiquidiumRepayModal', () => {
 	const reserve: LiquidiumReserve = {
@@ -106,6 +112,44 @@ describe('LiquidiumRepayModal', () => {
 				poolId: reserve.poolId,
 				action: 'repayment'
 			})
+		);
+	});
+
+	// Without the quote's minimum the SOL wizard runs no small-repay check, and a native repay below
+	// what Liquidium credits would wait at the deposit address while the debt stays.
+	it("blocks a native SOL repay below the quote's minimum", async () => {
+		vi.spyOn(addressesStore, 'solAddressMainnet', 'get').mockImplementation(() =>
+			readable(mockSolAddress)
+		);
+		vi.mocked(liquidiumSupplyServices.estimateLiquidiumInflowFee).mockResolvedValue({
+			totalFee: 1_884_122n,
+			minimumSendAmount: 20_000_000n
+		});
+
+		const { container, getByPlaceholderText } = render(LiquidiumRepayModal, {
+			props: {
+				reserve: {
+					...reserve,
+					poolId: 'pool-sol',
+					asset: 'SOL',
+					chain: 'SOL',
+					borrowed: 1_000_000_000n,
+					borrowedDecimals: 9,
+					borrowedUsd: 150
+				}
+			}
+		});
+
+		await waitFor(() => expect(maxRepaySpy).toHaveBeenCalledOnce());
+
+		await fireEvent.input(getByPlaceholderText('0'), { target: { value: '0.01' } });
+
+		await waitFor(() =>
+			expect(container).toHaveTextContent(
+				replacePlaceholders(en.liquidium.text.repay_below_native_minimum, {
+					$amount: '0.018115878 SOL'
+				})
+			)
 		);
 	});
 
