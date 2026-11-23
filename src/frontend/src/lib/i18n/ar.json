@@ -782,7 +782,6 @@
 			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "تتطلب محفظتك بعض البيانات الأولية التي لم يتم تحميلها بعد. يرجى المحاولة مرة أخرى.",
-			"allow_signing": "حدثت مشكلة أثناء إعداد محفظتك للتوقيع. تم تسجيل خروجك. إذا استمرت المشكلة، يرجى الاتصال بالدعم.",
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "خطأ أثناء تحميل معلومات محفظة BTC.",
 			"sol_wallet_error": "خطأ أثناء تحميل معلومات محفظة SOL.",

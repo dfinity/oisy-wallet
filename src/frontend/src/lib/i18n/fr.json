@@ -782,7 +782,6 @@
 			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "Votre portefeuille nécessite des données initiales qui n'ont pas encore été chargées. Veuillez réessayer.",
-			"allow_signing": "Un problème est survenu lors de la configuration de votre portefeuille pour la signature. Vous avez été déconnecté. Si le problème persiste, contactez le support.",
 			"waiting_for_allowed_cycles_aborted": "Préparation du ledger de cycles abandonnée. Veuillez essayer de vous connecter plus tard",
 			"btc_wallet_error": "Erreur lors du chargement des informations du portefeuille BTC.",
 			"sol_wallet_error": "Erreur lors du chargement des informations du portefeuille SOL.",
