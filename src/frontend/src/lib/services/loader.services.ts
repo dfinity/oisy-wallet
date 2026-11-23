@@ -13,13 +13,12 @@ import {
 } from '$lib/derived/networks.derived';
 import { loadAddresses } from '$lib/services/addresses.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
-import { errorSignOut, infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
+import { infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
-import type { ResultSuccess } from '$lib/types/utils';
 import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -32,15 +31,13 @@ import { get } from 'svelte/store';
  * A "reasonable" number is currently defined as 30 calls, allowing the user to retrieve their ETH and BTC addresses
  * and perform up to 28 additional transactions.
  *
- * If an error occurs during the `allow_signing` call, the user will be signed out,
- * as the Oisy Wallet cannot function without ETH or Bitcoin addresses.
+ * It never fails: if the `allow_signing` call fails, the user stays signed in and the app carries on.
  *
  * @async
  * @function initSignerAllowance
- * @returns {Promise<ResultSuccess>} Returns an object indicating success or failure of the operation.
- * @throws Will trigger a sign-out if `allow_signing` fails.
+ * @returns {Promise<void>} Resolves once the call has been answered or has failed.
  */
-export const initSignerAllowance = async (): Promise<ResultSuccess> => {
+export const initSignerAllowance = async (): Promise<void> => {
 	try {
 		const { identity } = get(authStore);
 
@@ -53,12 +50,9 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 			trackRateLimited(rateLimitInfo);
 		}
 	} catch (_err: unknown) {
-		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
-		await errorSignOut(get(i18n).init.error.allow_signing);
-
-		return { success: false };
+		// A failed request is no reason to stop: the backend tops the allowance up only once it runs low,
+		// so the user may still have enough left to sign.
 	}
-	return { success: true };
 };
 
 /**
@@ -117,12 +111,7 @@ export const initLoader = async ({
 		// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
 		initSignerAllowance();
 	} else {
-		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
-
-		if (!initSignerAllowanceSuccess) {
-			// Sign-out is handled within the service.
-			return;
-		}
+		await initSignerAllowance();
 	}
 
 	// We can fetch these values imperatively because these stores were just updated at the beginning of this same function, when loading the user profile.

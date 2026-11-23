@@ -72,12 +72,12 @@ describe('loader.services', () => {
 			vi.spyOn(window.history, 'replaceState').mockImplementation(() => {});
 		});
 
-		it('should work correctly', async () => {
+		it('should request the allowance', async () => {
 			apiMock.mockResolvedValueOnce(mockExecutedOutcome);
 
-			const result = await initSignerAllowance();
+			await initSignerAllowance();
 
-			expect(result.success).toBeTruthy();
+			expect(apiMock).toHaveBeenCalledOnce();
 		});
 
 		it('should not track event when not rate limited', async () => {
@@ -98,17 +98,15 @@ describe('loader.services', () => {
 			);
 		});
 
-		it('should handle errors', async () => {
+		it('should resolve when the request fails', async () => {
 			apiMock.mockImplementation(() => {
 				throw new CanisterInternalError('Test');
 			});
 
-			const result = await initSignerAllowance();
-
-			expect(result.success).toBeFalsy();
+			await expect(initSignerAllowance()).resolves.toBeUndefined();
 		});
 
-		it('should sign out and ultimately reload the window', async () => {
+		it('should not sign out when the request fails', async () => {
 			apiMock.mockImplementation(() => {
 				throw new CanisterInternalError('Test');
 			});
@@ -119,8 +117,8 @@ describe('loader.services', () => {
 
 			await initSignerAllowance();
 
-			expect(spySignOut).toHaveBeenCalledOnce();
-			expect(spy).toHaveBeenCalledOnce();
+			expect(spySignOut).not.toHaveBeenCalled();
+			expect(spy).not.toHaveBeenCalled();
 		});
 	});
 
@@ -192,7 +190,29 @@ describe('loader.services', () => {
 
 		it('should await the signer allowance when the profile was just created', async () => {
 			vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockReturnValue(true);
-			vi.spyOn(authServices, 'errorSignOut').mockImplementation(vi.fn());
+			vi.mocked(loadUserProfile).mockResolvedValueOnce({
+				success: true,
+				profileCreated: true
+			});
+			const pending = Promise.withResolvers<AllowSigningOutcome>();
+			vi.spyOn(api, 'allowSigning').mockReturnValueOnce(pending.promise);
+
+			const loading = initLoader(mockParams);
+
+			await vi.waitFor(() => expect(allowSigning).toHaveBeenCalledOnce());
+
+			// Awaited: the wallet workers do not start before the allowance request is answered.
+			expect(loadAddresses).not.toHaveBeenCalled();
+
+			pending.resolve(mockExecutedOutcome);
+			await loading;
+
+			expect(loadAddresses).toHaveBeenCalledOnce();
+		});
+
+		it('should carry on without signing out when the signer allowance fails for a just-created profile', async () => {
+			vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockReturnValue(true);
+			const spyErrorSignOut = vi.spyOn(authServices, 'errorSignOut').mockImplementation(vi.fn());
 			vi.mocked(loadUserProfile).mockResolvedValueOnce({
 				success: true,
 				profileCreated: true
@@ -201,22 +221,25 @@ describe('loader.services', () => {
 
 			await initLoader(mockParams);
 
-			// Awaited: the failure short-circuits `initLoader` before the wallet workers start.
-			expect(loadAddresses).not.toHaveBeenCalled();
+			expect(spyErrorSignOut).not.toHaveBeenCalled();
+			expect(signOut).not.toHaveBeenCalled();
+			expect(loadAddresses).toHaveBeenCalledOnce();
 		});
 
 		it('should not await the signer allowance for a returning user', async () => {
 			vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockReturnValue(true);
-			vi.spyOn(authServices, 'errorSignOut').mockImplementation(vi.fn());
 			vi.mocked(loadUserProfile).mockResolvedValueOnce({
 				success: true,
 				profileCreated: false
 			});
-			vi.spyOn(api, 'allowSigning').mockRejectedValueOnce(new Error('no allowance'));
+			const pending = Promise.withResolvers<AllowSigningOutcome>();
+			vi.spyOn(api, 'allowSigning').mockReturnValueOnce(pending.promise);
 
 			await initLoader(mockParams);
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
+
+			pending.resolve(mockExecutedOutcome);
 		});
 
 		it('should load addresses from the backend', async () => {
