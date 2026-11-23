@@ -422,6 +422,36 @@ describe('liquidium-supply.services', () => {
 			});
 		});
 
+		// The quote's minimum is native SOL's only deposit-minimum guard (the SDK's static one is zero),
+		// so the service must hand the whole quote on, not just the fee.
+		it('returns the whole native SOL quote, with its minimum send and wallet transfer fee', async () => {
+			const quote = {
+				totalFee: 1_884_122n,
+				minimumSendAmount: 20_000_000n,
+				walletTransferFee: 5_000n
+			};
+			estimateInflowFee.mockResolvedValue(quote);
+
+			await expect(
+				estimateLiquidiumInflowFee({
+					identity: mockIdentity,
+					ethAddress,
+					asset: 'SOL',
+					chain: 'SOL',
+					poolId: 'pool-sol',
+					action: 'deposit'
+				})
+			).resolves.toEqual(quote);
+
+			expect(estimateInflowFee).toHaveBeenCalledExactlyOnceWith({
+				asset: 'SOL',
+				chain: 'SOL',
+				poolId: 'pool-sol',
+				action: 'deposit',
+				profileId
+			});
+		});
+
 		it('does not quote SOL without the Ethereum address that owns the profile', async () => {
 			await expect(
 				estimateLiquidiumInflowFee({
