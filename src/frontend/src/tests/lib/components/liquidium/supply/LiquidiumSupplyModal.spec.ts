@@ -7,9 +7,15 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { runResolvedPromises } from '$tests/utils/timers.test-utils';
+import type { InflowFeeEstimate } from '@liquidium/client';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable, writable, type Writable } from 'svelte/store';
+
+vi.mock('$sol/api/solana.api', () => ({
+	estimatePriorityFee: vi.fn().mockResolvedValue(1_000_000n)
+}));
 
 describe('LiquidiumSupplyModal', () => {
 	const market: LiquidiumMarket = {
@@ -30,7 +36,9 @@ describe('LiquidiumSupplyModal', () => {
 			readable(mockEthAddress)
 		);
 
-		vi.spyOn(liquidiumSupplyServices, 'estimateLiquidiumInflowFee').mockResolvedValue(50_000n);
+		vi.spyOn(liquidiumSupplyServices, 'estimateLiquidiumInflowFee').mockResolvedValue({
+			totalFee: 50_000n
+		});
 	});
 
 	it("quotes the provider fee for the market's pool as a deposit", async () => {
@@ -48,6 +56,28 @@ describe('LiquidiumSupplyModal', () => {
 		);
 	});
 
+	// The quote's minimum is the only guard on a native SOL supply: the SDK's static SOL minimum is
+	// zero, so without it the form would accept an amount Liquidium never credits.
+	it("shows the SOL quote's minimum, net of its fee, on a native SOL market", async () => {
+		vi.spyOn(addressesStore, 'solAddressMainnet', 'get').mockImplementation(() =>
+			readable(mockSolAddress)
+		);
+		vi.mocked(liquidiumSupplyServices.estimateLiquidiumInflowFee).mockResolvedValue({
+			totalFee: 1_884_122n,
+			minimumSendAmount: 20_000_000n
+		});
+
+		const { container } = render(LiquidiumSupplyModal, {
+			props: {
+				market: { ...market, poolId: 'pool-sol', asset: 'SOL', chain: 'SOL' }
+			}
+		});
+
+		await waitFor(() => expect(container).toHaveTextContent(en.liquidium.text.minimum_supply));
+
+		expect(container).toHaveTextContent('0.018115878 SOL');
+	});
+
 	describe('a superseded fee quote', () => {
 		// The quote reruns whenever its inputs change: a rail picked from the list, or, as here, the
 		// Ethereum address that owns the profile. Either way the earlier quote is superseded.
@@ -57,7 +87,7 @@ describe('LiquidiumSupplyModal', () => {
 
 		let address: Writable<OptionEthAddress>;
 		let settleStale: {
-			resolve?: (fee: bigint) => void;
+			resolve?: (estimate: InflowFeeEstimate) => void;
 			reject?: (err: unknown) => void;
 		};
 
@@ -73,7 +103,7 @@ describe('LiquidiumSupplyModal', () => {
 						settleStale = { resolve, reject };
 					})
 				)
-				.mockResolvedValue(currentFee);
+				.mockResolvedValue({ totalFee: currentFee });
 		});
 
 		const renderWithCurrentQuote = async (): Promise<HTMLElement> => {
@@ -96,7 +126,7 @@ describe('LiquidiumSupplyModal', () => {
 		it('does not overwrite the current fee when it answers late', async () => {
 			const container = await renderWithCurrentQuote();
 
-			settleStale.resolve?.(staleFee);
+			settleStale.resolve?.({ totalFee: staleFee });
 			await runResolvedPromises();
 			await runResolvedPromises();
 

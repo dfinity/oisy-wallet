@@ -16,11 +16,14 @@ import {
 	type LiquidiumExternalRefKey
 } from '$lib/types/liquidium-active-tx';
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
+import { toCkSolBlockhashSlot } from '$lib/utils/chain-fusion-swap-active-tx.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import {
 	liquidiumActivityToStatus,
 	toLiquidiumExternalRefsMap
 } from '$lib/utils/liquidium-active-tx.utils';
+import { readSolSourceTxOutcome } from '$sol/services/sol-source-tx.services';
+import { SolanaNetworks } from '$sol/types/network';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import {
@@ -188,6 +191,48 @@ const isNeverLandedBtcTransfer = async ({
 	isNativeBtcTransfer({ refs, txid }) &&
 	(await isBtcTransactionNeverLanded({ id: tx.id, txid, updatedAtNs: tx.updated_at_ns }));
 
+// A native SOL supply or repay is written before its broadcast too. One whose transaction reverted, or
+// whose blockhash expired before it landed, is never listed by Liquidium. Its outcome is read on the
+// finalized chain, no earlier than the slot its blockhash was valid at when the row was written, so a
+// lagging node or a fork that can still be replaced never fails a transfer that may still land. A row
+// without that slot is left to Liquidium.
+const isFailedSolTransfer = async ({
+	tx,
+	refs,
+	txid
+}: {
+	tx: ActiveUserTransaction;
+	refs: Partial<Record<LiquidiumExternalRefKey, string>>;
+	txid?: string;
+}): Promise<boolean> => {
+	if (
+		!('Liquidium' in tx.data) ||
+		!('Supply' in tx.data.Liquidium.action || 'Repay' in tx.data.Liquidium.action) ||
+		isNullish(txid) ||
+		refs[LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN] !== Chain.SOL
+	) {
+		return false;
+	}
+
+	const blockhash = refs[LIQUIDIUM_EXTERNAL_REF_KEYS.SOL_BLOCKHASH];
+	const minContextSlot = toCkSolBlockhashSlot(refs[LIQUIDIUM_EXTERNAL_REF_KEYS.SOL_BLOCKHASH_SLOT]);
+
+	if (isNullish(blockhash) || isNullish(minContextSlot)) {
+		return false;
+	}
+
+	const outcome = await readSolSourceTxOutcome({
+		rowId: tx.id,
+		signature: txid,
+		blockhash,
+		minContextSlot,
+		network: SolanaNetworks.mainnet,
+		finalized: true
+	});
+
+	return outcome === 'reverted' || outcome === 'expired';
+};
+
 const pollLiquidiumActiveUserTransaction = async ({
 	tx,
 	identity,
@@ -221,7 +266,9 @@ const pollLiquidiumActiveUserTransaction = async ({
 
 		const candidate = nonNullish(activity)
 			? liquidiumActivityToStatus(activity.status)
-			: neverLanded || (await isRevertedEthRepay({ tx, txid }))
+			: neverLanded ||
+				  (await isFailedSolTransfer({ tx, refs, txid })) ||
+				  (await isRevertedEthRepay({ tx, txid }))
 				? { Failed: null }
 				: undefined;
 

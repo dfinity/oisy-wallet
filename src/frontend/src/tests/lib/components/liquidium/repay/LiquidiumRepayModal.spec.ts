@@ -21,6 +21,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { runResolvedPromises } from '$tests/utils/timers.test-utils';
+import type { InflowFeeEstimate } from '@liquidium/client';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { readable, writable, type Writable } from 'svelte/store';
 
@@ -79,7 +80,9 @@ describe('LiquidiumRepayModal', () => {
 		activeUserTransactionsStore.init(mockIdentity.getPrincipal());
 		activeUserTransactionsStore.upsert({ transaction: pendingRepay });
 
-		vi.spyOn(liquidiumSupplyServices, 'estimateLiquidiumInflowFee').mockResolvedValue(50n);
+		vi.spyOn(liquidiumSupplyServices, 'estimateLiquidiumInflowFee').mockResolvedValue({
+			totalFee: 50n
+		});
 		maxRepaySpy = vi
 			.spyOn(liquidiumRepayServices, 'getLiquidiumMaxRepayAmount')
 			.mockResolvedValue(100_000_000n);
@@ -115,7 +118,7 @@ describe('LiquidiumRepayModal', () => {
 
 		let address: Writable<OptionEthAddress>;
 		let settleStale: {
-			resolve?: (fee: bigint) => void;
+			resolve?: (estimate: InflowFeeEstimate) => void;
 			reject?: (err: unknown) => void;
 		};
 
@@ -131,7 +134,7 @@ describe('LiquidiumRepayModal', () => {
 						settleStale = { resolve, reject };
 					})
 				)
-				.mockResolvedValue(currentFee);
+				.mockResolvedValue({ totalFee: currentFee });
 		});
 
 		const renderWithCurrentQuote = async (): Promise<HTMLElement> => {
@@ -154,7 +157,7 @@ describe('LiquidiumRepayModal', () => {
 		it('does not overwrite the current fee when it answers late', async () => {
 			const container = await renderWithCurrentQuote();
 
-			settleStale.resolve?.(staleFee);
+			settleStale.resolve?.({ totalFee: staleFee });
 			await runResolvedPromises();
 			await runResolvedPromises();
 
