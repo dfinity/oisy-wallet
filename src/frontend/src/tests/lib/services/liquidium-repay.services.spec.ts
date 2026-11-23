@@ -28,6 +28,7 @@ import { liquidiumUnminedRepaysStore } from '$lib/stores/liquidium-unmined-repay
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import type { Token, TokenId } from '$lib/types/token';
+import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { nonNullish } from '@dfinity/utils';
@@ -345,6 +346,7 @@ describe('liquidium-repay.services', () => {
 			expect(externalRefs).toEqual([
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'BTC' },
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId }
 			]);
 
@@ -355,6 +357,7 @@ describe('liquidium-repay.services', () => {
 				externalRefs: [
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'BTC' },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
 				]
@@ -517,6 +520,7 @@ describe('liquidium-repay.services', () => {
 				externalRefs: [
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'BTC' },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
 				]
@@ -539,7 +543,7 @@ describe('liquidium-repay.services', () => {
 			broadcast.mockResolvedValue('0xhash');
 			updateActiveUserTransaction.mockRejectedValueOnce({ NotFound: null });
 			createActiveUserTransaction
-				.mockResolvedValueOnce(undefined)
+				.mockResolvedValueOnce(mockActiveUserTransaction)
 				.mockRejectedValueOnce({ TooManyActiveTransactions: null });
 
 			await expect(run()).resolves.toBeUndefined();

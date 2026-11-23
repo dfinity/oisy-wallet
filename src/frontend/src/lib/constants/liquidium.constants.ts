@@ -28,6 +28,11 @@ export const LIQUIDIUM_ADVERTISED_TOKENS: Token[] = [
 	ICP_TOKEN
 ];
 
+// Pool assets OISY offers rails for. Liquidium also lists pools OISY can't transact on yet (SOL,
+// whose native SOL and ckSOL rails need their own transfer and signing support); those stay out
+// of the Markets list and the pickers until OISY supports them.
+export const LIQUIDIUM_SUPPORTED_ASSETS: string[] = ['BTC', 'ETH', 'ICP', 'USDC', 'USDT'];
+
 // Display order for the Markets list and the withdraw/repay pickers, applied as a stable sort on
 // top of the order Liquidium returns (see `orderLiquidiumRails`). Primary key: the lending pool,
 // by asset symbol. Assets not listed keep their received order, after the listed ones.

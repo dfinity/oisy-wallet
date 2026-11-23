@@ -241,6 +241,9 @@ export const ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_00
 // 5s — and it is the outer bound on top of the query gate that skips the call
 // entirely while the deposit is still gathering confirmations.
 export const CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
+// Minimum delay between two `watch_deposit_address` calls for the same pending SOL → ckSOL
+// row: an update call, while the minter scans the address minutes apart at best.
+export const CHAIN_FUSION_WATCH_DEPOSIT_ADDRESS_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
 
 // Page size for a pending ckBTC deposit's walk over the account's ledger history looking
 // for its own mint. The walk itself is bounded by the row's creation time, not by a page
@@ -294,6 +297,13 @@ export const NETWORK_BONUS_MULTIPLIER_DEFAULT = 1;
 
 // NFT max filesize limit (10MB)
 export const NFT_MAX_FILESIZE_LIMIT = 1024 * 1024 * 10;
+
+// Longest side, in pixels, of the PNG an SVG NFT is drawn into for cards and logos: sharp on a card at 3x pixel density
+export const NFT_THUMBNAIL_MAX_SIZE = 512;
+
+// Bounds both the media type check and the SVG load: a host that never answers must neither leave its card empty nor
+// hold up the other SVGs, which are drawn one at a time
+export const NFT_THUMBNAIL_TIMEOUT_MILLIS = 20_000;
 
 // ZERO ETH address
 export const ZERO_ETH_ADDRESS = '0x0000000000000000000000000000000000000000';

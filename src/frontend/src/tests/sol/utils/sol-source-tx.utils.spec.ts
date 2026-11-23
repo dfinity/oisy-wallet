@@ -102,5 +102,52 @@ describe('sol-source-tx.utils', () => {
 				})
 			).toBe('succeeded');
 		});
+
+		describe('read at finality', () => {
+			it('should keep a confirmed transaction pending, whatever its error, since its block may still be rolled back', () => {
+				expect(
+					toSolSourceTxOutcome({
+						status: statusAt({ confirmationStatus: 'confirmed' }),
+						statusSlot: 200n,
+						finalized: true
+					})
+				).toBe('pending');
+				expect(
+					toSolSourceTxOutcome({
+						status: statusAt({ confirmationStatus: 'confirmed', err: instructionError }),
+						statusSlot: 200n,
+						finalized: true
+					})
+				).toBe('pending');
+			});
+
+			it('should succeed or revert a finalized transaction', () => {
+				expect(
+					toSolSourceTxOutcome({
+						status: statusAt({ confirmationStatus: 'finalized' }),
+						statusSlot: 200n,
+						finalized: true
+					})
+				).toBe('succeeded');
+				expect(
+					toSolSourceTxOutcome({
+						status: statusAt({ confirmationStatus: 'finalized', err: instructionError }),
+						statusSlot: 200n,
+						finalized: true
+					})
+				).toBe('reverted');
+			});
+
+			it('should still expire a transaction without a status once its blockhash has expired', () => {
+				expect(
+					toSolSourceTxOutcome({
+						status: null,
+						statusSlot: 200n,
+						blockhash: { valid: false, slot: 200n },
+						finalized: true
+					})
+				).toBe('expired');
+			});
+		});
 	});
 });

@@ -88,6 +88,13 @@ vi.mock('$lib/services/analytics-wrapper', () => ({
 	}))
 }));
 
+// The real service sends HEAD requests and draws on a canvas, which specs must not reach. Specs rendering NFT media
+// get the original URL; the service's own spec unmocks it.
+vi.mock('$lib/services/nft-thumbnail.services', () => ({
+	loadNftThumbnail: vi.fn(() => Promise.resolve(undefined)),
+	resetNftThumbnails: vi.fn()
+}));
+
 vi.mock('ethers/providers', () => {
 	const MockProvider = vi.fn(class {});
 

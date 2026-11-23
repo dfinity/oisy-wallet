@@ -12,6 +12,7 @@ import {
 	LIQUIDIUM_INFLOW_SUBACCOUNT_PURPOSES,
 	LIQUIDIUM_NETWORK_ORDER,
 	LIQUIDIUM_POOL_ORDER,
+	LIQUIDIUM_SUPPORTED_ASSETS,
 	type LiquidiumHealthLevel
 } from '$lib/constants/liquidium.constants';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
@@ -306,9 +307,11 @@ export const mapLiquidiumMarket = (pool: Pool): LiquidiumMarket => ({
 // rail where the protocol offers one. A single lending pool is shared across rails (e.g.
 // ETH/USDC and ICP/ckUSDC settle in the same USDC pool), so this is a per-asset transfer
 // choice, not separate pools. Derived from the SDK's own identifier guard so it stays
-// correct if the protocol adds pairs.
+// correct if the protocol adds pairs; none for an asset outside LIQUIDIUM_SUPPORTED_ASSETS.
 export const liquidiumSupportedRails = (asset: string): string[] =>
-	Object.values(Chain).filter((chain) => isAssetIdentifier({ chain, asset }));
+	LIQUIDIUM_SUPPORTED_ASSETS.includes(asset)
+		? Object.values(Chain).filter((chain) => isAssetIdentifier({ chain, asset }))
+		: [];
 
 // Expands one pool into a market per supported transfer rail (`market.chain` is the rail,
 // not the pool's backing chain). Both rails of an asset carry identical pool economics

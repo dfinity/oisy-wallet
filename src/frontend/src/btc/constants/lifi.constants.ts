@@ -16,6 +16,12 @@ export const LIFI_BTC_MIN_AMOUNT_SATOSHIS = 117_600n;
 // refused.
 export const LIFI_BTC_FEE_ADDRESS = 'bc1qn2cstnjlvhxf60j3ujeyq0h0rqc7kklap8j94g';
 
+// Relay's Bitcoin depository: the deposit of every Relay quote, as Relay itself lists it
+// (`protocol.v2.depository` of chain 8253038 in `GET api.relay.link/chains`, 2026-11-17). Pinned,
+// never taken from a quote: a tampered LI.FI answer could name its own address as Relay's in the
+// transaction and in its copy of Relay's quote alike.
+export const RELAY_BTC_DEPOSITORY_ADDRESS = 'bc1qzmtn0q92ayejt2hpffvlktcpmyy7vvsd06sefu';
+
 // The name of LI.FI's own fee among a BTC quote's `feeCosts`, the amount its fee output pays.
 export const LIFI_BTC_FEE_COST_NAME = 'LIFI Fixed Fee';
 
@@ -26,6 +32,11 @@ export const LIFI_BTC_CHANGE_INDEX = 2;
 // Every input's sequence in LI.FI's PSBTs, kept in the rebuild: replaceable, with relative lock-time
 // disabled, which the backend's validator accepts.
 export const LIFI_BTC_SEQUENCE = 0xfffffffd;
+
+// LI.FI's largest output layout from BTC, without the change, in vbytes: the largest deposit output
+// (`BTC_LARGEST_OUTPUT_VSIZE`), an `OP_RETURN` at `LIFI_BTC_MAX_MEMO_SCRIPT_BYTES` (9 + 83) and
+// LI.FI's P2WPKH fee output (9 + 22). Max is budgeted for it before a LI.FI quote prices its own.
+export const LIFI_BTC_CONSERVATIVE_OUTPUT_VSIZES = [43, 92, 31];
 
 // The longest `OP_RETURN` script the backend broadcasts: the opcode and 80 bytes of data with their
 // push opcodes (`MAX_OP_RETURN_SCRIPT_BYTES` in `src/backend/src/bitcoin/tx_validator.rs`).

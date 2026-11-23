@@ -31,6 +31,8 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { fetchChainFusionBtcSwap } from '$lib/services/chain-fusion-swap.services';
+	import { fetchLifiBtcSwap } from '$lib/services/lifi-btc-swap.services';
+	import { isSlippageExceeded } from '$lib/services/lifi-swap-execution.services';
 	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 	import { enableSwapDestinationToken, fetchNearIntentsBtcSwap } from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -46,7 +48,9 @@
 	import { asCkTwinOf } from '$lib/utils/chain-fusion-swap.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { toLifiSwapErrorType } from '$lib/utils/lifi-swap-error.utils';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 	import { nearIntentsQuoteRejectedMessage } from '$lib/utils/swap.utils';
 
@@ -82,7 +86,7 @@
 		onBack
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, sourceTokenExchangeRate } =
+	const { sourceToken, destinationToken, sourceTokenExchangeRate, failedSwapError } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -135,7 +139,16 @@
 		swapProgressStep = ProgressStepsSwap.INITIALIZATION;
 
 		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
-		const utxosFee = $utxosFeeStore?.utxosFee;
+
+		// A LI.FI offer carries its own selection, priced for its deposit, memo and fee outputs; every
+		// other provider sends with the loader's.
+		const lifiOffer =
+			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.LIFI
+				? $swapAmountsStore.selectedProvider
+				: undefined;
+		const utxosFee = nonNullish(lifiOffer)
+			? lifiOffer.btcSelection?.utxosFee
+			: $utxosFeeStore?.utxosFee;
 
 		// Re-resolved through the same pair oracle the quote used, so the row the execution
 		// persists cannot disagree with the offer the user accepted about which twin this is —
@@ -173,7 +186,9 @@
 		onNext();
 		onStopTriggerAmount();
 
-		if (BTC_EXTENSION_FEATURE_FLAG_ENABLED) {
+		// LI.FI's execution checks its selection itself, against the layout of the quote it re-requests
+		// and signs, which this one-output check would refuse.
+		if (BTC_EXTENSION_FEATURE_FLAG_ENABLED && isNullish(lifiOffer)) {
 			// Last-line guard against a race: between the quote and the broadcast another tab
 			// may have reserved one of the UTXOs this selection covers. Going back lets the
 			// user refresh the fee preview and retry, exactly as the Convert wizard does.
@@ -208,6 +223,8 @@
 		const { selectedProvider } = $swapAmountsStore;
 
 		try {
+			failedSwapError.set(undefined);
+
 			if (selectedProvider?.provider === SwapProvider.NEAR_INTENTS) {
 				if (!$hasAcknowledgedNearIntentsSwap) {
 					// To be conservative on the legal side, we only allow the swap if persisting
@@ -242,6 +259,18 @@
 					slippageValue,
 					userAddress: sourceAddress,
 					network,
+					utxosFee
+				});
+			} else if (nonNullish(lifiOffer)) {
+				await fetchLifiBtcSwap({
+					identity: $authIdentity,
+					progress: (step: ProgressStep) => (swapProgressStep = step),
+					sourceToken: $sourceToken,
+					destinationToken: $destinationToken,
+					swapAmount,
+					userAddress: sourceAddress,
+					network,
+					offer: lifiOffer,
 					utxosFee
 				});
 			} else {
@@ -282,8 +311,8 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			// The foreground ends once the deposit is broadcast; the settlement (ckBTC minting
-			// or NEAR Intents fulfillment) is tracked by the active-user-transaction row the
+			// The foreground ends once the deposit is broadcast; the settlement (ckBTC minting,
+			// NEAR Intents fulfillment or LI.FI's bridge) is tracked by the active-user-transaction row the
 			// execution just created, which fires the success or failure event when it reaches
 			// a terminal state. Hence `submitted`.
 			trackEvent({
@@ -305,9 +334,42 @@
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
 					...swapTrackingMetadata,
-					error: errorDetailToString(err) ?? ''
+					// LI.FI's error text can carry the user's addresses: only an allow-listed category is
+					// reported, as from EVM and Solana.
+					...(nonNullish(lifiOffer)
+						? { result_error_type: toLifiSwapErrorType(err) }
+						: { error: errorDetailToString(err) ?? '' })
 				}
 			});
+
+			// LI.FI's execution checks its selection itself, against the quote it re-requests, after the
+			// one-output check above is skipped: its refusal reads as that check's would, and nothing was
+			// sent, so the form comes back.
+			if (err instanceof BtcValidationError) {
+				handleBtcValidationError({ err });
+
+				onBack();
+				onStartTriggerAmount();
+				return;
+			}
+
+			// LI.FI's re-quote guarantees less than the minimum reviewed, or no route is left. Nothing was
+			// signed, and the review says to raise the max slippage, as from EVM and Solana.
+			if (nonNullish(lifiOffer) && isSlippageExceeded(err)) {
+				failedSwapError.set({
+					message: replacePlaceholders(
+						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
+						{
+							$maxSlippage: `${slippageValue ?? ''}`
+						}
+					),
+					variant: 'info'
+				});
+
+				onBack();
+				onStartTriggerAmount();
+				return;
+			}
 
 			const quoteRejected = nearIntentsQuoteRejectedMessage(err);
 
@@ -365,7 +427,7 @@
 			{/snippet}
 		</SwapReview>
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-		<!-- Both providers settle as an active user transaction once the deposit is broadcast,
+		<!-- Every provider settles as an active user transaction once the deposit is broadcast,
 		     so the stepper says the swap starts here and finishes in the background. NEAR
 		     Intents additionally signs a plain BTC transfer, hence the extra signing step. -->
 		<SwapProgress

@@ -214,6 +214,10 @@ export type SwapMappedResult =
 			// lamports. What the form and the review budget beyond the amount, and execution holds the
 			// re-quote's own ceiling to. An EVM source's is priced in the form from the quote's gas.
 			solFeeCeiling?: bigint;
+			// A BTC-source quote's own UTXO selection, priced for its outputs over the spendable UTXOs:
+			// `outputVSizes` are those of LI.FI's deposit, memo and fee, without the change. What the
+			// form budgets, the review shows and execution pays.
+			btcSelection?: { utxosFee: UtxosFee; outputVSizes: number[] };
 			type?: string;
 	  };
 
@@ -414,6 +418,9 @@ export interface ChainFusionSwapDetails {
 	// that consult it (ckETH → ETH). Mirrors Convert's `minter-info-not-certified` gate:
 	// an uncertified read blocks Review until the certified update lands.
 	minterInfoCertified?: boolean;
+	// SOL → ckSOL only: the deposit address and the automatic deposit fee the offer was priced
+	// with, which the minter's `watch_deposit_address` answer has to match before any SOL moves.
+	solDeposit?: { address: SolAddress; automaticDepositFee: bigint };
 }
 
 /**

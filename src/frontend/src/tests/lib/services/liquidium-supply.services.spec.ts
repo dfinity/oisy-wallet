@@ -8,6 +8,7 @@ import * as analyticsServices from '$lib/services/analytics.services';
 import { executeLiquidiumSupply } from '$lib/services/liquidium-supply.services';
 import * as liquidiumServices from '$lib/services/liquidium.services';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
+import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { nonNullish } from '@dfinity/utils';
 import type { SupplyFlow, SupplyTarget } from '@liquidium/client';
@@ -116,6 +117,7 @@ describe('liquidium-supply.services', () => {
 		expect(externalRefs).toEqual(
 			expect.arrayContaining([
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
+				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'BTC' },
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
 			])
@@ -206,7 +208,7 @@ describe('liquidium-supply.services', () => {
 			createActiveUserTransaction.mockImplementation(() => {
 				expect(sent).not.toHaveBeenCalled();
 
-				return Promise.resolve();
+				return Promise.resolve(mockActiveUserTransaction);
 			});
 			broadcastThroughBackend();
 

@@ -64,14 +64,13 @@
 	 3. Create a single slide data type that can be used for airdrop, dApps, and all further cases.
 	 4. Adjust DappsCarouselSlide accordingly.
 	 */
+	let carouselSlides = $derived([
+		...(nonNullish(featureAirdropSlide) ? [featureAirdropSlide] : []),
+		...dAppDescriptions
+	]);
+
 	let dappsCarouselSlides = $derived(
-		filterCarouselDapps({
-			dAppDescriptions: [
-				...(nonNullish(featureAirdropSlide) ? [featureAirdropSlide] : []),
-				...dAppDescriptions
-			],
-			hiddenDappsIds
-		})
+		filterCarouselDapps({ dAppDescriptions: carouselSlides, hiddenDappsIds })
 	);
 
 	let carousel = $state<Carousel>();
@@ -86,7 +85,9 @@
 		temporaryHiddenDappsIds = [...temporaryHiddenDappsIds, dappId];
 		hiddenDappsIds = [...hiddenDappsIds, dappId];
 
-		dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
+		// All the slides, not only the dApps: a card left out here would lose its element while the
+		// carousel keeps showing its (then empty) place.
+		dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions: carouselSlides, hiddenDappsIds });
 
 		if (idx !== -1) {
 			carousel.removeSlide(idx);

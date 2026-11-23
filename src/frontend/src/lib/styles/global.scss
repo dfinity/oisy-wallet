@@ -20,6 +20,12 @@ which breaks raw media queries like `(max-height: 68rem)`.
 @custom-variant h-md (@media (max-height: 68rem)); /* ~1090px */
 
 /*
+`h-sm:` - windows up to 950px tall, where the desktop sidebar's sections no longer fit
+without scrolling; it tightens their spacing (`navigation/NavigationMenu.svelte`).
+*/
+@custom-variant h-sm (@media (max-height: 59.375rem)); /* 950px */
+
+/*
 `header-band:` - from 768 px up to 68rem (1088 px), where the pinned app header's controls sit
 over the content column and a band in the page colour covers what scrolls under them once
 the page is scrolled (`hero/Header.svelte`). Anything else pinned to the top of the window
