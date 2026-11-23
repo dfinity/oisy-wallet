@@ -562,6 +562,14 @@ OISY prices tokens against USD (and, for non-USD display currencies, derives an 
 
 ---
 
+## OISY allowance
+
+OISY pays the cycles for each user's signing through the Chain Fusion Signer from a per-user grant, the OISY allowance: an approval on the cycles ledger from the backend's account, which the signer draws on for that user. Every app load, at sign-in or on a page reload, asks the backend for a new grant. The backend tops it up only once less than about $2 is left, to about $4, and at most three times an hour per user.
+
+When that request fails, for any reason, the user stays signed in and the app loads as usual. The request only tops up an allowance that is running low, so a failed request does not mean the user cannot sign: a signing call the allowance cannot cover fails on its own. A failure other than the hourly limit used to sign the user out. A just-created profile, which has no allowance before this first request, still waits for its answer before the wallet starts loading balances.
+
+---
+
 ## User Preferences
 
 ### Language and currency selectors
