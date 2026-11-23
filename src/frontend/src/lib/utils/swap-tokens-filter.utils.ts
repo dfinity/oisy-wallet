@@ -219,21 +219,8 @@ export const computeReceiveSupportedTokens = ({
 		xrp: { total: 0, withList: 0, ids: new Set() }
 	};
 
-	const findProviderSourceTokens = ({
-		key,
-		category
-	}: {
-		key: SwapProvider;
-		category: SwapTokenCategory;
-	}): Set<string> | undefined =>
-		providers.find((p) => p.key === key && p.sourceCategory === category)?.supportedSourceTokens;
-
 	for (const provider of providers) {
-		const dests = provider.getSupportedDestinations({
-			sourceToken,
-			supportedSourceTokens: provider.supportedSourceTokens,
-			findProviderSourceTokens
-		});
+		const dests = getProviderDestinations({ provider, providers, sourceToken });
 
 		if (nonNullish(dests)) {
 			const entries = Object.entries(dests) as [SwapTokenCategory, Set<string> | 'any'][];
@@ -275,4 +262,54 @@ export const networksWithSupport = ({
 	const passingNetworkIds = new Set(supportedTokens.map(({ network }) => network.id));
 
 	return networks.filter(({ id }) => passingNetworkIds.has(id)).map(({ id }) => id);
+};
+
+const getProviderDestinations = ({
+	provider,
+	providers,
+	sourceToken
+}: {
+	provider: SwapProviderSupport;
+	providers: SwapProviderSupport[];
+	sourceToken: Token;
+}) =>
+	provider.getSupportedDestinations({
+		sourceToken,
+		supportedSourceTokens: provider.supportedSourceTokens,
+		findProviderSourceTokens: ({
+			key,
+			category
+		}: {
+			key: SwapProvider;
+			category: SwapTokenCategory;
+		}): Set<string> | undefined =>
+			providers.find((p) => p.key === key && p.sourceCategory === category)?.supportedSourceTokens
+	});
+
+/**
+ * The providers that list `destinationToken` among the destinations of `sourceToken`. A provider
+ * without a list (a wildcard contributor) is not counted: it names no route.
+ */
+export const getSwapProvidersListing = ({
+	sourceToken,
+	destinationToken,
+	providers
+}: {
+	sourceToken: Token;
+	destinationToken: Token;
+	providers: SwapProviderSupport[];
+}): SwapProvider[] => {
+	const lookup = resolveSwapTokenLookup({ token: destinationToken });
+
+	if (isNullish(lookup)) {
+		return [];
+	}
+
+	return providers
+		.filter((provider) => {
+			const ids = getProviderDestinations({ provider, providers, sourceToken })?.[lookup.category];
+
+			return ids instanceof Set && ids.has(lookup.identifier);
+		})
+		.map(({ key }) => key);
 };

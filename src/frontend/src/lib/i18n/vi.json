@@ -1389,6 +1389,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "Hoán đổi",
 			"select_destination_token": "Chọn token để nhận",
@@ -1442,6 +1445,20 @@
 			"gasless": "Không phí gas",
 			"swap_fees": "Phí giao dịch",
 			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>",
+			"receive_shortcut_same_network": "",
+			"receive_shortcut_other_network": "",
+			"receive_shortcut_token_on_network": "",
+			"receive_shortcut_convert": "",
+			"receive_shortcut_convert_back": "",
+			"receive_shortcut_bridge_back": "",
+			"receive_shortcut_move": "",
+			"receive_shortcut_any_token": "",
+			"receive_shortcut_any_token_count": "",
+			"receive_shortcut_any_token_count_one": "",
+			"receive_shortcut_any_token_count_single": "",
+			"receive_shortcut_more": "",
+			"move_token_to": "",
+			"as_token": "",
 			"two_swaps_info": "$oisy_short chỉ cung cấp các giao dịch hoán đổi mà nó có thể xác minh đầy đủ trước khi bạn chấp thuận, và không có giao dịch hoán đổi trực tiếp như vậy từ $sourceSymbol sang $destinationSymbol. Nhưng bạn có thể hoán đổi $sourceSymbol sang $intermediateSymbol trước, rồi từ $intermediateSymbol sang $destinationSymbol.",
 			"two_swaps_first_button": "Hoán đổi sang $intermediateSymbol trước",
 			"near_intents_estimated_time": "",

@@ -1389,6 +1389,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "Tauschen",
 			"select_destination_token": "Token zum Empfangen auswählen",
@@ -1442,6 +1445,20 @@
 			"gasless": "Gasless",
 			"swap_fees": "Swap Gebühren",
 			"cross_chain_networks_info": "Du tauschst deine Token vom Netzwerk <b>$sourceNetwork</b> ins <b>$destinationNetwork</b> Netzwerk",
+			"receive_shortcut_same_network": "",
+			"receive_shortcut_other_network": "",
+			"receive_shortcut_token_on_network": "",
+			"receive_shortcut_convert": "",
+			"receive_shortcut_convert_back": "",
+			"receive_shortcut_bridge_back": "",
+			"receive_shortcut_move": "",
+			"receive_shortcut_any_token": "",
+			"receive_shortcut_any_token_count": "",
+			"receive_shortcut_any_token_count_one": "",
+			"receive_shortcut_any_token_count_single": "",
+			"receive_shortcut_more": "",
+			"move_token_to": "",
+			"as_token": "",
 			"two_swaps_info": "$oisy_short bietet einen Tausch nur an, wenn es ihn vor deiner Bestätigung vollständig prüfen kann, und einen solchen direkten Tausch von $sourceSymbol zu $destinationSymbol gibt es nicht. Du kannst aber zuerst $sourceSymbol in $intermediateSymbol tauschen und danach $intermediateSymbol in $destinationSymbol.",
 			"two_swaps_first_button": "Zuerst in $intermediateSymbol tauschen",
 			"near_intents_estimated_time": "",

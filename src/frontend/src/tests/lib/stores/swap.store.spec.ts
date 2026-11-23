@@ -8,6 +8,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import * as exchanges from '$lib/derived/exchange.derived';
 import type { SwappableTokens } from '$lib/derived/swap.derived';
 import { TokenCategoryTagValue } from '$lib/enums/token-tag';
+import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import { balancesStore } from '$lib/stores/balances.store';
 import { initSwapContext } from '$lib/stores/swap.store';
 import { bn1Bi, bn2Bi } from '$tests/mocks/balances.mock';
@@ -300,6 +301,77 @@ describe('swapStore', () => {
 
 		expect(get(sourceToken)).toBe(mockToken1);
 		expect(get(destinationToken)).toBe(mockToken2);
+	});
+
+	it.each(['setSourceToken', 'switchTokens', 'reset'] as const)(
+		'should reset the remembered receive view on %s',
+		(action) => {
+			const context = initSwapContext({ sourceToken: mockToken1, destinationToken: mockToken2 });
+			context.receiveTokenPickerStep.set(WizardStepsSwap.MOVE_TOKEN);
+			if (action === 'setSourceToken') {
+				context.setSourceToken(mockToken2);
+			} else {
+				context[action]();
+			}
+
+			expect(get(context.receiveTokenPickerStep)).toBe(WizardStepsSwap.TOKENS_LIST);
+		}
+	);
+
+	describe('clearing the receive token', () => {
+		it('should clear a selected token and stop tracking Max for the pair', () => {
+			const { destinationToken, clearDestinationToken, amountSetToMax, lifiMaxFee } =
+				initSwapContext({ sourceToken: mockToken2, destinationToken: mockToken1 });
+			amountSetToMax.set(true);
+			lifiMaxFee.set({ fee: 1n, destinationTokenId: mockToken1.id });
+
+			clearDestinationToken();
+
+			expect(get(destinationToken)).toBeUndefined();
+			expect(get(amountSetToMax)).toBeFalsy();
+			expect(get(lifiMaxFee)).toBeUndefined();
+		});
+
+		it('should not bring back the receive token the swap opened with', () => {
+			mockSwappableTokens.set({ sourceToken: undefined, destinationToken: mockToken1 });
+			const { destinationToken, clearDestinationToken, setDestinationToken, setSourceToken } =
+				initSwapContext({
+					sourceToken: mockToken2
+				});
+
+			expect(get(destinationToken)).toBe(mockToken1);
+
+			clearDestinationToken();
+
+			expect(get(destinationToken)).toBeUndefined();
+
+			setDestinationToken(mockToken2);
+
+			expect(get(destinationToken)).toBe(mockToken2);
+
+			setSourceToken(ETHEREUM_TOKEN);
+			// SwapContexts invalidates a destination the new pay token cannot reach.
+			setDestinationToken(undefined);
+
+			expect(get(destinationToken)).toBeUndefined();
+
+			mockSwappableTokens.set({ sourceToken: undefined, destinationToken: mockToken2 });
+
+			expect(get(destinationToken)).toBeUndefined();
+		});
+
+		it('should keep an explicitly undefined destination empty until reset', () => {
+			mockSwappableTokens.set({ sourceToken: undefined, destinationToken: mockToken1 });
+			const { destinationToken, setDestinationToken, reset } = initSwapContext();
+
+			setDestinationToken(undefined);
+
+			expect(get(destinationToken)).toBeUndefined();
+
+			reset();
+
+			expect(get(destinationToken)).toBe(mockToken1);
+		});
 	});
 
 	describe('isSourceTokenIcrc2', () => {

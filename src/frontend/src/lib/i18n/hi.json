@@ -1389,6 +1389,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "स्वैप करें",
 			"select_destination_token": "प्राप्त करने के लिए टोकन चुनें",
@@ -1442,6 +1445,20 @@
 			"gasless": "गैस रहित",
 			"swap_fees": "स्वैप शुल्क",
 			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं",
+			"receive_shortcut_same_network": "",
+			"receive_shortcut_other_network": "",
+			"receive_shortcut_token_on_network": "",
+			"receive_shortcut_convert": "",
+			"receive_shortcut_convert_back": "",
+			"receive_shortcut_bridge_back": "",
+			"receive_shortcut_move": "",
+			"receive_shortcut_any_token": "",
+			"receive_shortcut_any_token_count": "",
+			"receive_shortcut_any_token_count_one": "",
+			"receive_shortcut_any_token_count_single": "",
+			"receive_shortcut_more": "",
+			"move_token_to": "",
+			"as_token": "",
 			"two_swaps_info": "$oisy_short केवल ऐसे स्वैप ऑफ़र करता है जिन्हें वह आपकी स्वीकृति से पहले पूरी तरह सत्यापित कर सके, और $sourceSymbol से $destinationSymbol तक ऐसा कोई सीधा स्वैप नहीं है। लेकिन आप पहले $sourceSymbol को $intermediateSymbol में और फिर $intermediateSymbol को $destinationSymbol में स्वैप कर सकते हैं।",
 			"two_swaps_first_button": "पहले $intermediateSymbol में स्वैप करें",
 			"near_intents_estimated_time": "",

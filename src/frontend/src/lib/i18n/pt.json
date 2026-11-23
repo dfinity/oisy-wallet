@@ -1389,6 +1389,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "Trocar",
 			"select_destination_token": "Selecionar token para receber",
@@ -1442,6 +1445,20 @@
 			"gasless": "",
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
+			"receive_shortcut_same_network": "",
+			"receive_shortcut_other_network": "",
+			"receive_shortcut_token_on_network": "",
+			"receive_shortcut_convert": "",
+			"receive_shortcut_convert_back": "",
+			"receive_shortcut_bridge_back": "",
+			"receive_shortcut_move": "",
+			"receive_shortcut_any_token": "",
+			"receive_shortcut_any_token_count": "",
+			"receive_shortcut_any_token_count_one": "",
+			"receive_shortcut_any_token_count_single": "",
+			"receive_shortcut_more": "",
+			"move_token_to": "",
+			"as_token": "",
 			"two_swaps_info": "$oisy_short só oferece trocas que consegue verificar totalmente antes da sua aprovação, e não existe uma troca direta assim de $sourceSymbol para $destinationSymbol. Mas você pode trocar primeiro $sourceSymbol por $intermediateSymbol e depois $intermediateSymbol por $destinationSymbol.",
 			"two_swaps_first_button": "Trocar primeiro por $intermediateSymbol",
 			"near_intents_estimated_time": "",
