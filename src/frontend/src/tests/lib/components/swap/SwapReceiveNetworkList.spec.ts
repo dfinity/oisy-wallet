@@ -140,20 +140,24 @@ describe('SwapReceiveNetworkList', () => {
 		destinationToken,
 		fromShortcut = false
 	}: {
-		sourceToken?: Token;
-		receiveSupportedData?: SwapSupportedTokensData;
+		sourceToken?: Token | null;
+		receiveSupportedData?: SwapSupportedTokensData | null;
 		destinationToken?: Token;
 		fromShortcut?: boolean;
-	} = {}) =>
-		render(SwapReceiveNetworkList, {
+	} = {}) => {
+		const payToken = writable(sourceToken ?? undefined);
+		const supportedData = writable<SwapSupportedTokensData | undefined>(
+			receiveSupportedData ?? undefined
+		);
+		const rendered = render(SwapReceiveNetworkList, {
 			props: { onSelectToken, onClose },
 			context: mockContextMap([
 				[
 					SWAP_CONTEXT_KEY,
 					{
-						sourceToken: readable(sourceToken),
+						sourceToken: payToken,
 						destinationToken: readable(destinationToken),
-						receiveSupportedData: readable(receiveSupportedData),
+						receiveSupportedData: supportedData,
 						tokenListReturnFocus: writable(
 							fromShortcut ? SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK : undefined
 						)
@@ -161,6 +165,8 @@ describe('SwapReceiveNetworkList', () => {
 				]
 			])
 		});
+		return { ...rendered, payToken, supportedData };
+	};
 
 	const rows = (container: HTMLElement) =>
 		within(
@@ -329,5 +335,82 @@ describe('SwapReceiveNetworkList', () => {
 		expect(onClose).toHaveBeenCalledOnce();
 		expect(onSelectToken).not.toHaveBeenCalled();
 		expect(trackSwapReceiveShortcut).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		{ sourceToken: ckUsdc, title: 'No other networks listed for USDC' },
+		{ sourceToken: null, title: en.swap.text.move_no_networks_title_without_symbol }
+	])(
+		'should show "$title" and focus Back when the network list opens empty',
+		async ({ sourceToken, title }) => {
+			const { getByRole, getByTestId } = renderList({
+				sourceToken,
+				receiveSupportedData: null
+			});
+			const list = getByTestId(SWAP_RECEIVE_NETWORK_LIST);
+			const status = within(list).getByRole('status');
+			const back = getByRole('button', { name: en.core.text.back });
+
+			expect(status).toHaveTextContent(title);
+			expect(status).toHaveTextContent(en.swap.text.move_no_networks_description);
+			expect(within(list).queryByRole('button')).not.toBeInTheDocument();
+
+			await waitFor(() => expect(back).toHaveFocus());
+		}
+	);
+
+	it('should remember destinations that load after entry and reset their history on a new entry', async () => {
+		const rendered = renderList({ receiveSupportedData: null });
+		const list = rendered.getByTestId(SWAP_RECEIVE_NETWORK_LIST);
+
+		expect(within(list).getByRole('status')).toHaveTextContent('No other networks listed for USDC');
+
+		rendered.supportedData.set(fromBaseUsdc);
+		await within(list).findByRole('button', { name: /Ethereum/ });
+		rendered.supportedData.set(undefined);
+
+		await waitFor(() =>
+			expect(within(list).getByRole('status')).toHaveTextContent(
+				en.swap.text.move_networks_changed_title
+			)
+		);
+
+		rendered.unmount();
+		const reopened = renderList({ receiveSupportedData: null });
+
+		expect(
+			within(reopened.getByTestId(SWAP_RECEIVE_NETWORK_LIST)).getByRole('status')
+		).toHaveTextContent('No other networks listed for USDC');
+	});
+
+	it.each([
+		{ change: 'token', nextToken: ETHEREUM_USDC_TOKEN, symbol: 'USDC' },
+		{
+			change: 'group',
+			nextToken: { ...BASE_USDC_TOKEN, groupData: BTC_TOKEN_GROUP },
+			symbol: 'BTC'
+		}
+	])('should forget destinations after changing the pay $change', async ({ nextToken, symbol }) => {
+		const rendered = renderList();
+		const list = rendered.getByTestId(SWAP_RECEIVE_NETWORK_LIST);
+
+		expect(within(list).getByRole('button', { name: /Ethereum/ })).toBeInTheDocument();
+
+		rendered.payToken.set(nextToken);
+		rendered.supportedData.set(undefined);
+
+		await waitFor(() =>
+			expect(within(list).getByRole('status')).toHaveTextContent(
+				replacePlaceholders(en.swap.text.move_no_networks_title, { $symbol: symbol })
+			)
+		);
+
+		rendered.payToken.set(BASE_USDC_TOKEN);
+
+		await waitFor(() =>
+			expect(within(list).getByRole('status')).toHaveTextContent(
+				'No other networks listed for USDC'
+			)
+		);
 	});
 });

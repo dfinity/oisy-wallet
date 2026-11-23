@@ -738,7 +738,10 @@ export const getReceiveShortcuts = <T extends Token>({
 	};
 };
 
-// The title of "Move <symbol> to": the pay token's group, which the step lists on other networks.
+// Move lists the pay token's group on other networks.
+export const getSwapMoveTokenSymbol = (sourceToken: Token | undefined): string | undefined =>
+	sourceToken?.groupData?.symbol ?? sourceToken?.symbol;
+
 export const getSwapMoveTokenTitle = ({
 	i18n,
 	sourceToken
@@ -747,7 +750,7 @@ export const getSwapMoveTokenTitle = ({
 	sourceToken: Token | undefined;
 }): string =>
 	replacePlaceholders(i18n.swap.text.move_token_to, {
-		$symbol: sourceToken?.groupData?.symbol ?? sourceToken?.symbol ?? ''
+		$symbol: getSwapMoveTokenSymbol(sourceToken) ?? ''
 	});
 
 /**
