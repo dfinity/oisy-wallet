@@ -564,9 +564,11 @@ OISY prices tokens against USD (and, for non-USD display currencies, derives an 
 
 ## OISY allowance
 
-OISY pays the cycles for each user's signing through the Chain Fusion Signer from a per-user grant, the OISY allowance: an approval on the cycles ledger from the backend's account, which the signer draws on for that user. Every app load, at sign-in or on a page reload, asks the backend for a new grant. The backend tops it up only once less than about $2 is left, to about $4, and at most three times an hour per user.
+The **OISY allowance** is the amount of cycles from OISY's account that a user can still spend. Every **charged call** (CC) is charged to it: today, every Chain Fusion Signer call, including the certified BTC balance. It is an approval on the cycles ledger from the backend's account, which the signer draws on for that user. These terms are defined in `docs/ai/spec-driven-development/specs/2026-11-23-feat-oisy-allowance.md`.
 
-When that request fails, for any reason, the user stays signed in and the app loads as usual. The request only tops up an allowance that is running low, so a failed request does not mean the user cannot sign: a signing call the allowance cannot cover fails on its own. A failure other than the hourly limit used to sign the user out. A just-created profile, which has no allowance before this first request, still waits for its answer before the wallet starts loading balances.
+Every app load, at sign-in or on a page reload, sends an **allowance request** (AR) to the backend. The backend sets a new OISY allowance only while the OISY allowance is below the **OISY allowance threshold**, and at most three times an hour per user.
+
+When the backend refuses the AR at load (it returns an error), the user stays signed in and the app loads as usual. A refused AR does not mean the next CC fails: the OISY allowance may still cover it, and a CC it cannot cover fails on its own. A refused AR used to sign the user out, unless the hourly or the per-minute limit stopped it. A just-created profile, which has no OISY allowance before this first AR, still waits for its answer before the wallet starts loading balances.
 
 ---
 
