@@ -259,7 +259,7 @@
 		"text": {
 			"title_part_1": "Deine Wallet ist gesichert",
 			"title_part_2": "Du hast deine Wallet gesperrt. Entsperre sie um fortzufahren, oder logge dich aus.",
-			"title_part_2_session_expired": "",
+			"title_part_2_session_expired": "Deine Sitzung ist abgelaufen und deine Wallet wurde zu deiner Sicherheit gesperrt. Mach dort weiter, wo du aufgehört hast, oder logge dich aus.",
 			"unlock": "Entsperren",
 			"logout": "Ausloggen",
 			"logout_clear_cash_message": "Ausloggen wird alle lokal gecachten Daten löschen",

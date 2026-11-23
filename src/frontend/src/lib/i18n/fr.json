@@ -259,7 +259,7 @@
 		"text": {
 			"title_part_1": "Déverrouillez pour continuer",
 			"title_part_2": "Vous avez précédemment verrouillé votre portefeuille pour le protéger. Reprenez là où vous vous étiez arrêté ou déconnectez-vous.",
-			"title_part_2_session_expired": "",
+			"title_part_2_session_expired": "Votre session a expiré et votre portefeuille a été verrouillé pour votre sécurité. Reprenez là où vous vous étiez arrêté ou déconnectez-vous.",
 			"unlock": "Ouvrir",
 			"logout": "Se déconnecter",
 			"logout_clear_cash_message": "La déconnexion effacera toutes les données mises en cache",

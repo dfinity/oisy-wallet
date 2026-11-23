@@ -259,7 +259,7 @@
 		"text": {
 			"title_part_1": "Odblokuj, aby kontynuować",
 			"title_part_2": "Wcześniej zablokowałeś swój portfel, aby go zabezpieczyć. Wznów od miejsca, w którym skończyłeś, lub wyloguj się.",
-			"title_part_2_session_expired": "",
+			"title_part_2_session_expired": "Twoja sesja wygasła, a portfel został zablokowany dla Twojego bezpieczeństwa. Wznów od miejsca, w którym skończyłeś, lub wyloguj się.",
 			"unlock": "Odblokuj",
 			"logout": "Wyloguj",
 			"logout_clear_cash_message": "Wylogowanie usunie wszystkie dane z pamięci podręcznej",

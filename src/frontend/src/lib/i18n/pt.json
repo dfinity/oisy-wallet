@@ -259,7 +259,7 @@
 		"text": {
 			"title_part_1": "Desbloqueie para continuar",
 			"title_part_2": "Você bloqueou sua carteira anteriormente para mantê-la segura. Continue de onde parou ou saia.",
-			"title_part_2_session_expired": "",
+			"title_part_2_session_expired": "Sua sessão expirou e sua carteira foi bloqueada para sua segurança. Continue de onde parou ou saia.",
 			"unlock": "Desbloquear",
 			"logout": "Sair",
 			"logout_clear_cash_message": "Saída limpa, mensagem de cache",
