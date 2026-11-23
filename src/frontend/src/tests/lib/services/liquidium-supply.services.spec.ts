@@ -117,6 +117,7 @@ describe('liquidium-supply.services', () => {
 		expect(externalRefs).toEqual(
 			expect.arrayContaining([
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
+				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'BTC' },
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
 			])

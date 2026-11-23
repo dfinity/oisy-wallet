@@ -2715,9 +2715,7 @@
 		"text": {
 			"next_slide": "Nächste Folie",
 			"prev_slide": "Vorherige Folie",
-			"indicator": "Zur Folie $index springen",
-			"cksol_slide_title": "ckSOL ist da: SOL auf dem Internet Computer",
-			"cksol_slide_cta": "ckSOL öffnen"
+			"indicator": "Zur Folie $index springen"
 		}
 	},
 	"agreements": {

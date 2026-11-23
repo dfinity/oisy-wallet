@@ -23,11 +23,10 @@
 		dappsCarouselSlide: CarouselSlideOisyDappDescription;
 		airdrop?: RewardCampaignDescription;
 		pagePath?: AppPath;
-		pageUrl?: string;
 		onCloseCarouselSlide: (dappId: CarouselSlideOisyDappDescription['id']) => void;
 	}
 
-	let { dappsCarouselSlide, airdrop, pagePath, pageUrl, onCloseCarouselSlide }: Props = $props();
+	let { dappsCarouselSlide, airdrop, pagePath, onCloseCarouselSlide }: Props = $props();
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -42,22 +41,10 @@
 		name: dAppName
 	} = $derived(dappsCarouselSlide);
 
-	let callToActionText = $derived(resolveText({ i18n: $i18n, path: callToAction }));
-
-	let dAppNameText = $derived(resolveText({ i18n: $i18n, path: dAppName }));
-
-	// A call to action that names its card ("Open ckSOL") is the button's name as it reads, so voice
-	// control finds the button by what is on screen. A generic one ("Learn more") gets the card's name.
-	let callToActionAriaLabel = $derived(
-		callToActionText.includes(dAppNameText)
-			? undefined
-			: replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppName: dAppNameText })
-	);
-
 	const rewardModalId = Symbol();
 	const dappModalId = Symbol();
 
-	const open = async () => {
+	const open = () => {
 		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_OPEN,
 			metadata: {
@@ -76,8 +63,6 @@
 					fromRoute
 				})
 			);
-		} else if (nonNullish(pageUrl)) {
-			await goto(pageUrl);
 		} else {
 			modalStore.openDappDetails({ id: dappModalId, data: dappsCarouselSlide });
 		}
@@ -111,10 +96,12 @@
 		<div class="mb-1">{resolveText({ i18n: $i18n, path: text })}</div>
 		<button
 			class="text-sm font-semibold text-brand-primary-alt"
-			aria-label={callToActionAriaLabel}
+			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, {
+				$dAppName: resolveText({ i18n: $i18n, path: dAppName })
+			})}
 			onclick={open}
 		>
-			{callToActionText} <span aria-hidden="true">→</span>
+			{resolveText({ i18n: $i18n, path: callToAction })} →
 		</button>
 	</div>
 	<div class="flex h-full items-start">

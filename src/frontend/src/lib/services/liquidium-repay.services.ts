@@ -327,6 +327,7 @@ export const executeLiquidiumRepay = async ({
 
 	const refs: Partial<Record<LiquidiumExternalRefKey, string>> = {
 		[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+		[LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN]: chain,
 		[LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT]: displayAmount,
 		[LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL]: asset
 	};

@@ -346,6 +346,7 @@ describe('liquidium-repay.services', () => {
 			expect(externalRefs).toEqual([
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'BTC' },
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId }
 			]);
 
@@ -356,6 +357,7 @@ describe('liquidium-repay.services', () => {
 				externalRefs: [
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'BTC' },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
 				]
@@ -518,6 +520,7 @@ describe('liquidium-repay.services', () => {
 				externalRefs: [
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'BTC' },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
 				]
