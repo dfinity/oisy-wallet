@@ -26,6 +26,7 @@ import {
 	type SwapAmountsStoreData
 } from '$lib/stores/swap-amounts.store';
 import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
+import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { OptionAmount } from '$lib/types/send';
 import { SwapProvider } from '$lib/types/swap';
@@ -292,6 +293,141 @@ describe('SwapForm', () => {
 				const { getByTestId } = renderWithReceiveToken({ ...receiveToken, enabled: true });
 
 				expect(getByTestId(SWAP_SWITCH_TOKENS_BUTTON)).toBeEnabled();
+			});
+		});
+
+		describe('with a single token', () => {
+			const payToken = { ...mockValidIcToken, enabled: true };
+			const receiveToken = { ...mockValidIcToken, id: parseTokenId('ReceiveIcTokenId') };
+
+			const renderWithTokens = ({
+				sourceToken,
+				destinationToken,
+				swapAmount
+			}: {
+				sourceToken?: TokenToggleable<Token>;
+				destinationToken?: TokenToggleable<Token>;
+				swapAmount?: OptionAmount;
+			}) => {
+				setupSwapAmountsStore();
+				setupIcTokenFeeStore();
+
+				const swapContext = initSwapContext({ sourceToken, destinationToken });
+
+				mockContext.set(SWAP_CONTEXT_KEY, {
+					...swapContext,
+					sourceTokenExchangeRate: readable(10),
+					destinationTokenExchangeRate: readable(2)
+				});
+
+				return {
+					swapContext,
+					...render(SwapForm, {
+						props: {
+							swapAmount,
+							receiveAmount: undefined,
+							slippageValue: undefined,
+							isSwapAmountsLoading: false,
+							onCustomValidate: vi.fn(),
+							onShowTokensList: vi.fn(),
+							onClose: vi.fn(),
+							onNext: vi.fn()
+						},
+						context: mockContext
+					})
+				};
+			};
+
+			afterEach(() => {
+				balancesStore.reset(receiveToken.id);
+				swapSupportedTokensStore.reset();
+			});
+
+			it('should disable it with no token', () => {
+				const { getByTestId } = renderWithTokens({});
+
+				expect(getByTestId(SWAP_SWITCH_TOKENS_BUTTON)).toBeDisabled();
+			});
+
+			it('should enable it for a pay token alone, with an amount and no quote', () => {
+				const { getByTestId } = renderWithTokens({ sourceToken: payToken, swapAmount: '1' });
+
+				expect(getByTestId(SWAP_SWITCH_TOKENS_BUTTON)).toBeEnabled();
+			});
+
+			it('should move a pay token alone to the receive side', async () => {
+				const { getByTestId, swapContext } = renderWithTokens({
+					sourceToken: payToken,
+					swapAmount: '1'
+				});
+
+				await fireEvent.click(getByTestId(SWAP_SWITCH_TOKENS_BUTTON));
+
+				expect(get(swapContext.sourceToken)).toBeUndefined();
+				expect(get(swapContext.destinationToken)).toEqual(payToken);
+			});
+
+			it('should enable it for a receive token alone that can pay', () => {
+				balancesStore.set({ id: receiveToken.id, data: { data: 5n, certified: true } });
+
+				const { getByTestId } = renderWithTokens({
+					destinationToken: { ...receiveToken, enabled: true }
+				});
+
+				expect(getByTestId(SWAP_SWITCH_TOKENS_BUTTON)).toBeEnabled();
+			});
+
+			it('should move a receive token alone to the pay side', async () => {
+				balancesStore.set({ id: receiveToken.id, data: { data: 5n, certified: true } });
+
+				const destinationToken = { ...receiveToken, enabled: true };
+
+				const { getByTestId, swapContext } = renderWithTokens({ destinationToken });
+
+				await fireEvent.click(getByTestId(SWAP_SWITCH_TOKENS_BUTTON));
+
+				expect(get(swapContext.sourceToken)).toEqual(destinationToken);
+				expect(get(swapContext.destinationToken)).toBeUndefined();
+			});
+
+			it('should disable it for a receive token alone with a balance of zero', () => {
+				balancesStore.set({ id: receiveToken.id, data: { data: ZERO, certified: true } });
+
+				const { getByTestId } = renderWithTokens({
+					destinationToken: { ...receiveToken, enabled: true }
+				});
+
+				expect(getByTestId(SWAP_SWITCH_TOKENS_BUTTON)).toBeDisabled();
+			});
+
+			it('should disable it for an inactive receive token alone', () => {
+				const { getByTestId } = renderWithTokens({
+					destinationToken: { ...receiveToken, enabled: false }
+				});
+
+				expect(getByTestId(SWAP_SWITCH_TOKENS_BUTTON)).toBeDisabled();
+			});
+
+			it('should disable it for a receive token alone that the pay list does not offer', () => {
+				balancesStore.set({ id: receiveToken.id, data: { data: 5n, certified: true } });
+
+				// Every ICP provider has a token list, and none lists the token.
+				swapSupportedTokensStore.set({
+					aggregated: {
+						icp: { coverage: 'all', supportedTokenIds: new Set() },
+						evm: { coverage: 'none', supportedTokenIds: new Set() },
+						sol: { coverage: 'none', supportedTokenIds: new Set() },
+						btc: { coverage: 'none', supportedTokenIds: new Set() },
+						xrp: { coverage: 'none', supportedTokenIds: new Set() }
+					},
+					providers: []
+				});
+
+				const { getByTestId } = renderWithTokens({
+					destinationToken: { ...receiveToken, enabled: true }
+				});
+
+				expect(getByTestId(SWAP_SWITCH_TOKENS_BUTTON)).toBeDisabled();
 			});
 		});
 	});
