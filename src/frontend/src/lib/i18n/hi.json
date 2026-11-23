@@ -2885,6 +2885,8 @@
 			"borrow_at_risk_warning": "यह उधार आपके स्वास्थ्य कारक को काफी कम कर देता है।",
 			"borrow_exceeds_power": "राशि आपकी उधार क्षमता से अधिक है।",
 			"borrow_below_minimum": "राशि न्यूनतम उधार से कम है।",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "कीमतें अस्थायी रूप से अनुपलब्ध हैं। लोड होने तक उधार लेना अक्षम है।",
 			"borrow_high_risk_warning": "यह उधार आपकी पोजीशन को लिक्विडेशन के करीब ले जाता है।",
 			"borrow_risk_confirm": "मैं समझता/समझती हूं कि यह उधार मेरे लिक्विडेशन जोखिम को बढ़ाता है।",

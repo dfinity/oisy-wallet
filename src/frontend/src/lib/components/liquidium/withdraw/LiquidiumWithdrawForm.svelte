@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { getMinimumWithdrawAmount } from '@liquidium/client';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import LiquidiumHealthFactor from '$lib/components/liquidium/LiquidiumHealthFactor.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
@@ -92,12 +93,23 @@
 		hasAmount && nonNullish(parsedAmount) && parsedAmount > maxWithdrawBaseUnits
 	);
 
+	// The SDK refuses a smaller withdrawal when it prepares it, even of the whole supply.
+	let minimumWithdraw = $derived(getMinimumWithdrawAmount(reserve.asset));
+
+	let belowMinimum = $derived(
+		hasAmount && nonNullish(parsedAmount) && parsedAmount < minimumWithdraw
+	);
+
 	// With debt the cap needs a price to size it; without debt it doesn't.
 	let pricesUnavailable = $derived(hasDebt && withdrawPrice <= 0);
 
 	// Prices unavailable → the cap can't be computed (it collapses to 0); the dedicated
 	// MessageBox explains why, so skip the misleading "exceeds free collateral" inline.
 	const validateWithdrawAmount = (userAmount: bigint): Error | undefined => {
+		if (userAmount < minimumWithdraw) {
+			return new Error($i18n.liquidium.text.withdraw_below_minimum);
+		}
+
 		if (pricesUnavailable || userAmount <= maxWithdrawBaseUnits) {
 			return undefined;
 		}
@@ -109,10 +121,25 @@
 		);
 	};
 
-	let needsConfirm = $derived(hasAmount && !exceedsCap && preview.healthLevel !== 'healthy');
+	let needsConfirm = $derived(
+		hasAmount && !exceedsCap && !belowMinimum && preview.healthLevel !== 'healthy'
+	);
 
 	let canReview = $derived(
-		hasAmount && !exceedsCap && !pricesUnavailable && (!needsConfirm || confirmChecked)
+		hasAmount &&
+			!exceedsCap &&
+			!belowMinimum &&
+			!pricesUnavailable &&
+			(!needsConfirm || confirmChecked)
+	);
+
+	// At full precision: rounded, a minimum could read below what the check enforces.
+	let minWithdrawFormatted = $derived(
+		`${formatToken({
+			value: minimumWithdraw,
+			unitName: reserve.depositedDecimals,
+			displayDecimals: reserve.depositedDecimals
+		})} ${reserve.asset}`
 	);
 
 	let suppliedFormatted = $derived(
@@ -164,6 +191,13 @@
 			{/snippet}
 		</TokenInput>
 	</div>
+
+	{#if minimumWithdraw > ZERO}
+		<ModalValue>
+			{#snippet label()}{$i18n.liquidium.text.minimum_withdraw}{/snippet}
+			{#snippet mainValue()}{minWithdrawFormatted}{/snippet}
+		</ModalValue>
+	{/if}
 
 	<ModalValue>
 		{#snippet label()}{$i18n.liquidium.text.supplied_label}{/snippet}

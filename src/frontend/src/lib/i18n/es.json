@@ -2885,6 +2885,8 @@
 			"borrow_at_risk_warning": "Este préstamo reduce notablemente tu factor de salud.",
 			"borrow_exceeds_power": "El importe supera tu capacidad de préstamo.",
 			"borrow_below_minimum": "El importe está por debajo del préstamo mínimo.",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "Los precios no están disponibles temporalmente. Pedir prestado está deshabilitado hasta que se carguen.",
 			"borrow_high_risk_warning": "Este préstamo acerca tu posición a la liquidación.",
 			"borrow_risk_confirm": "Entiendo que este préstamo aumenta mi riesgo de liquidación.",

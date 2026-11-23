@@ -1,4 +1,5 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import LiquidiumWithdrawForm from '$lib/components/liquidium/withdraw/LiquidiumWithdrawForm.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import type { LiquidiumWithdrawPreview } from '$lib/services/liquidium-withdraw.services';
@@ -126,5 +127,61 @@ describe('LiquidiumWithdrawForm', () => {
 		expect(reviewButton(getByRole)).toBeDisabled();
 		// The dedicated warning explains the blocker; the cap-based error must not be shown.
 		expect(container).not.toHaveTextContent(en.liquidium.text.withdraw_exceeds_free_collateral);
+	});
+
+	// The SDK refuses a withdrawal below its per-asset minimum: 5000 sats for BTC.
+	describe('with the protocol minimum', () => {
+		// The input validates on a 300ms debounce.
+		const VALIDATION_DEBOUNCE_MS = 300;
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('shows it at full precision', () => {
+			const { container } = render(LiquidiumWithdrawForm, { props: baseProps });
+
+			expect(container).toHaveTextContent(en.liquidium.text.minimum_withdraw);
+			expect(container).toHaveTextContent('0.00005 BTC');
+		});
+
+		it('blocks an amount below it', async () => {
+			const { container, getByRole } = render(LiquidiumWithdrawForm, {
+				props: { ...baseProps, amount: 0.00004999 }
+			});
+
+			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
+
+			expect(container).toHaveTextContent(en.liquidium.text.withdraw_below_minimum);
+			expect(reviewButton(getByRole)).toBeDisabled();
+		});
+
+		it('accepts the minimum itself', async () => {
+			const { container, getByRole } = render(LiquidiumWithdrawForm, {
+				props: { ...baseProps, amount: 0.00005 }
+			});
+
+			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
+
+			expect(container).not.toHaveTextContent(en.liquidium.text.withdraw_below_minimum);
+			expect(reviewButton(getByRole)).toBeEnabled();
+		});
+
+		it('shows no minimum for ICP, which has none', () => {
+			const { container } = render(LiquidiumWithdrawForm, {
+				props: {
+					...baseProps,
+					reserve: { ...reserve, poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' },
+					withdrawToken: ICP_TOKEN,
+					withdrawPrice: 5
+				}
+			});
+
+			expect(container).not.toHaveTextContent(en.liquidium.text.minimum_withdraw);
+		});
 	});
 });

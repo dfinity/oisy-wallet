@@ -1203,6 +1203,8 @@ Liquidium quotes SOL's provider fee per account, so picking SOL to supply create
 
 A borrow or withdrawal goes only to the user's own address on the chain it pays out on: BTC, Ethereum or the Internet Computer. Any other chain has no address, so the form can't be submitted rather than paying out to an address of another chain.
 
+Liquidium refuses a withdrawal below its minimum for the asset, even of everything supplied: 5000 sats of BTC, 0.005 ETH, 1 USDC or USDT, and 0.001 SOL today. The withdraw form shows that minimum as "Minimum withdrawal" and blocks less, as the borrow form does with Liquidium's minimum borrow, so a supply smaller than the minimum can't be withdrawn from OISY. ICP has no minimum, and its form shows none.
+
 ## Buy (OnRamper)
 
 Users can buy crypto with fiat through an embedded OnRamper widget. OnRamper requires the destination wallet addresses in the widget URL to be HMAC-signed so they cannot be tampered with in transit; OISY holds the signing secret in the backend canister (it never reaches the browser) and the frontend asks the backend to sign the URL before loading the widget.
