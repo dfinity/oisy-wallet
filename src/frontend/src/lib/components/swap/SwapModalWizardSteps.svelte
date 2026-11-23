@@ -7,7 +7,6 @@
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
-	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
 	import { allCrossChainSwapTokens } from '$lib/derived/all-tokens.derived';
 	import {
 		crossChainSwapNetworksMainnets,
@@ -47,7 +46,7 @@
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { tryParseToken } from '$lib/utils/parse.utils';
-	import { networksWithSupport } from '$lib/utils/swap-tokens-filter.utils';
+	import { getReceiveNetworkIds } from '$lib/utils/swap.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface Props {
@@ -122,36 +121,17 @@
 
 	type TokenSide = 'source' | 'destination';
 
-	const computeDestinationAllowedIds = (source: Token): NetworkId[] | undefined => {
-		const baseAllowedIds = SUPPORTED_CROSS_SWAP_NETWORKS[source.network.id];
-
-		const supportedData = get(receiveSupportedData);
-		if (isNullish(supportedData)) {
-			return baseAllowedIds;
-		}
-
-		const reachableIds = networksWithSupport({
-			networks: get(crossChainSwapNetworksMainnets),
-			tokens: get(allSwapUniverseTokens),
-			supportedData
-		});
-
-		const reachableSet = new Set(reachableIds);
-
-		if (isNullish(baseAllowedIds)) {
-			return reachableIds;
-		}
-
-		return baseAllowedIds.filter((id) => reachableSet.has(id));
-	};
-
 	// The networks a side's list may offer: every swap network to pay with; to receive, the ones the
-	// pay token reaches (the static cross-swap pre-filter, intersected with the networks that have a
-	// destination the providers supporting the pay token reach). `undefined` for no constraint.
+	// pay token reaches. `undefined` for no constraint.
 	const getAllowedNetworkIds = (side: TokenSide): NetworkId[] | undefined =>
 		side === 'source' || isNullish($sourceToken)
 			? undefined
-			: computeDestinationAllowedIds($sourceToken);
+			: getReceiveNetworkIds({
+					sourceToken: $sourceToken,
+					supportedData: get(receiveSupportedData),
+					networks: get(crossChainSwapNetworksMainnets),
+					tokens: get(allSwapUniverseTokens)
+				});
 
 	const applyNetworkConstraints = (side: TokenSide) => {
 		const allowedIds = getAllowedNetworkIds(side);
