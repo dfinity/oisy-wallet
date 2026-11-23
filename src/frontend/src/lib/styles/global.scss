@@ -164,6 +164,34 @@ don't take it: they are the sign that work is happening.
 	}
 }
 
+/*
+`reveal` - a section fades in as it first appears, `--reveal-step` x 60 ms after the first one,
+over 200 ms on a spring sampled into `linear()`. Only opacity changes, so nothing moves or
+reflows. Under reduced motion it is a 100 ms fade with no stagger. A section that takes keyboard
+focus shows at once, so focus never lands on something still invisible. The signed-in app
+layout applies it once per page load.
+*/
+@keyframes reveal {
+	from {
+		opacity: 0;
+	}
+}
+
+@utility reveal {
+	animation: reveal 200ms linear(0, 0.5729, 0.8966, 0.9789, 0.996, 1, 1) both;
+	animation-delay: calc(var(--reveal-step, 0) * 60ms);
+
+	@media (prefers-reduced-motion: reduce) {
+		animation-duration: 100ms;
+		animation-timing-function: ease-out;
+		animation-delay: 0s;
+	}
+
+	&:focus-within {
+		opacity: 1 !important;
+	}
+}
+
 @layer base {
 	/*
 	Pulsing loading placeholders hold still under reduced motion: the shape stays, the pulse

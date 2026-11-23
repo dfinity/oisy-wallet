@@ -396,6 +396,15 @@ the shared core rule, preserving its deprecated-package and `/dist/` import bans
   progress cues, not decorative motion. The pre-hydration loader in `app.html`
   follows the same rule, retaining its 30-second animation cap. Keep the owning
   controls' loading states, translated labels and accessibility semantics intact.
+- **First load (`reveal`):** the signed-in app layout fades the hero in, then
+  the page 60 ms later, the first time they show after a page load, and never
+  again: route changes and a hero that comes back appear at once. The
+  `reveal` utility (`global.scss`) only changes opacity, over 200 ms on a
+  spring sampled into `linear()`; `--reveal-step` sets its place in the
+  stagger. Under reduced motion it is a 100 ms fade with no stagger, and a
+  section that takes keyboard focus shows at once. The landing page keeps its
+  own `.landing-enter`. Don't add `reveal` to rows, cards or anything that
+  mounts as data arrives: it would fade in again each time.
 - **Progress steps (`ProgressSteps`):** a step's old marker leaves at once and
   the new one comes in. A finished or failed badge springs in over 440 ms on a
   spring sampled into CSS `linear()`, with an overshooting `cubic-bezier`
