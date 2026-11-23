@@ -1,8 +1,14 @@
+import {
+	IC_CKSOL_LEDGER_CANISTER_ID,
+	IC_CKSOL_MINTER_CANISTER_ID
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import type { IcCkToken } from '$icp/types/ic-token';
 import {
 	TRACK_COUNT_SWAP_ERROR,
 	TRACK_COUNT_SWAP_SUBMITTED
 } from '$lib/constants/analytics.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	SWAP_LIFI_INSUFFICIENT_FUNDS_FOR_FEE,
 	SWAP_LIFI_UNVERIFIED_ROUTE,
@@ -10,31 +16,49 @@ import {
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import * as addrDerived from '$lib/derived/address.derived';
+import * as authDerived from '$lib/derived/auth.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
+import type * as chainFusionSwapServices from '$lib/services/chain-fusion-swap.services';
 import * as swapServices from '$lib/services/swap.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type LifiCarriedFee, type SwapError } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
-import { LifiSolFeeChangedError } from '$lib/types/errors';
+import {
+	ChainFusionSolDepositRefusedError,
+	LifiSolFeeChangedError,
+	type ChainFusionSolDepositRefusal
+} from '$lib/types/errors';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
-import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
+import { SwapProvider, type ChainFusionSwapDetails, type SwapMappedResult } from '$lib/types/swap';
+import { estimatePriorityFee } from '$sol/api/solana.api';
 import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIdentity, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { mockLifiSolUsdcToSol } from '$tests/mocks/lifi-sol-transaction.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
-import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import type { Identity } from '@icp-sdk/core/agent';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get, readable, writable } from 'svelte/store';
 
 const mockFetchNearIntentsSolSwap = vi.fn();
 
 vi.mock('$lib/services/swap.services', () => ({
+	enableSwapDestinationToken: vi.fn(),
 	fetchNearIntentsSolSwap: (...args: unknown[]) => mockFetchNearIntentsSolSwap(...args)
+}));
+
+const mockFetchChainFusionSolSwap = vi.fn();
+
+vi.mock('$lib/services/chain-fusion-swap.services', async (importOriginal) => ({
+	...(await importOriginal<typeof chainFusionSwapServices>()),
+	fetchChainFusionSolSwap: (...args: unknown[]) => mockFetchChainFusionSolSwap(...args)
 }));
 
 const mockFetchLifiSolSwap = vi.fn();
@@ -389,6 +413,176 @@ describe('SwapSolWizard', () => {
 				})
 			);
 		});
+	});
+
+	describe('a Chain Fusion offer', () => {
+		const ckSolToken: IcCkToken = {
+			...mockValidIcCkToken,
+			symbol: 'ckSOL',
+			ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID,
+			minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID,
+			twinToken: SOLANA_TOKEN
+		};
+
+		const swapDetails: ChainFusionSwapDetails = {
+			sourceFees: [],
+			externalFees: [],
+			minimumAmount: 20_000_000n,
+			solDeposit: { address: mockSolAddress2, automaticDepositFee: 2_000_000n }
+		};
+
+		const offer: SwapMappedResult = {
+			provider: SwapProvider.CHAIN_FUSION,
+			receiveAmount: 47_104_120n,
+			swapDetails
+		};
+
+		const renderChainFusion = () => {
+			const failedSwapError = writable<SwapError | undefined>(undefined);
+
+			const swapAmountsStore = initSwapAmountsStore();
+			swapAmountsStore.setSwaps({ swaps: [offer], amountForSwap: 0.05, selectedProvider: offer });
+
+			const context = new Map();
+
+			context.set(SWAP_CONTEXT_KEY, {
+				sourceToken: readable({ ...SOLANA_TOKEN, enabled: true }),
+				destinationToken: readable({ ...ckSolToken, enabled: true }),
+				failedSwapError,
+				amountSetToMax: writable(false),
+				lifiMaxFee: writable(undefined),
+				lifiCarriedFee: writable(undefined),
+				sourceTokenExchangeRate: readable(10),
+				sourceTokenBalance: readable(undefined),
+				destinationTokenBalance: readable(undefined),
+				destinationTokenExchangeRate: readable(10),
+				isSourceTokenIcrc2: readable(false),
+				isSourceTokenPermitSupported: readable(undefined),
+				setSourceToken: () => {},
+				setDestinationToken: () => {},
+				setIsTokenPermitSupported: () => {},
+				switchTokens: () => {}
+			});
+
+			context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
+
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+
+			const result = render(SwapSolWizard, {
+				props: {
+					...baseProps,
+					swapAmount: '0.05',
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack
+				},
+				context
+			});
+
+			return { ...result, onClose, onBack, failedSwapError };
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+
+			vi.spyOn(addrDerived, 'solAddressMainnet', 'get').mockReturnValue(readable(mockSolAddress));
+			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+			vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
+
+			mockFetchChainFusionSolSwap.mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('should convert through Chain Fusion to the ckSOL twin, with the reviewed offer', async () => {
+			const { getByText, onClose } = renderChainFusion();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(mockFetchChainFusionSolSwap).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				progress: expect.any(Function),
+				sourceToken: expect.objectContaining({ id: SOLANA_TOKEN.id }),
+				destinationToken: expect.objectContaining({
+					ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID,
+					minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID
+				}),
+				swapAmount: '0.05',
+				userAddress: mockSolAddress,
+				swapDetails,
+				swapId: expect.any(String),
+				usdSourceValue: '0.5',
+				prioritizationFee: ZERO,
+				enableDestinationToken: expect.any(Function)
+			});
+			expect(onClose).toHaveBeenCalledOnce();
+		});
+
+		it('should send the transfer with the priority fee the user reviewed', async () => {
+			vi.mocked(estimatePriorityFee).mockResolvedValue(4_000n);
+
+			const { getByText } = renderChainFusion();
+
+			await vi.runOnlyPendingTimersAsync();
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(mockFetchChainFusionSolSwap).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ prioritizationFee: 4_000n })
+			);
+		});
+
+		// ckSOL is enabled once the transfer is broadcast, with the identity taken at submission, not
+		// read again from `$authIdentity`.
+		it('should enable the ckSOL twin for the identity that converted, not the one signed in by then', async () => {
+			const signedIn = writable<Identity | null>(mockIdentity);
+			vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(signedIn);
+
+			const { getByText } = renderChainFusion();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			signedIn.set({ getPrincipal: () => mockPrincipal2 } as unknown as Identity);
+
+			await mockFetchChainFusionSolSwap.mock.lastCall?.[0].enableDestinationToken();
+
+			expect(swapServices.enableSwapDestinationToken).toHaveBeenCalledExactlyOnceWith({
+				destinationToken: expect.objectContaining({
+					ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID,
+					minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID
+				}),
+				identity: mockIdentity
+			});
+		});
+
+		it.each<{ reason: ChainFusionSolDepositRefusal; message: string }>([
+			{ reason: 'inFlight', message: en.swap.error.cksol_deposit_in_progress },
+			{ reason: 'changed', message: en.swap.error.cksol_deposit_terms_changed },
+			{ reason: 'quarantined', message: en.swap.error.cksol_earlier_deposit_quarantined },
+			{ reason: 'unavailable', message: en.swap.error.cksol_minter_unavailable }
+		])(
+			'should say on the review why the minter stopped the conversion ($reason)',
+			async ({ reason, message }) => {
+				mockFetchChainFusionSolSwap.mockRejectedValue(
+					new ChainFusionSolDepositRefusedError(reason)
+				);
+
+				const { getByText, onBack, onClose, failedSwapError } = renderChainFusion();
+
+				await fireEvent.click(getByText(en.swap.text.swap_button));
+				await vi.runOnlyPendingTimersAsync();
+
+				expect(get(failedSwapError)).toStrictEqual({ message, variant: 'error' });
+				expect(onBack).toHaveBeenCalledOnce();
+				expect(onClose).not.toHaveBeenCalled();
+				expect(toasts.toastsError).not.toHaveBeenCalled();
+			}
+		);
 	});
 
 	describe('provider agreement on swap', () => {

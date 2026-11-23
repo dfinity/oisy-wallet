@@ -33,6 +33,7 @@ import { lifiUnsignedTxSize } from '$lib/utils/lifi-fee.utils';
 import { buildLifiQuoteRequest } from '$lib/utils/lifi-swap.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	mockLifiBaseUsdcToken,
@@ -227,7 +228,7 @@ describe('lifi-evm-swap.services', () => {
 		vi.mocked(fetchLifiQuote).mockResolvedValue(mockLifiQuote);
 		vi.mocked(assertLifiEvmCalldata).mockResolvedValue();
 		vi.mocked(getL1DataFee).mockResolvedValue(l1Fee);
-		vi.mocked(createActiveUserTransaction).mockResolvedValue();
+		vi.mocked(createActiveUserTransaction).mockResolvedValue(mockActiveUserTransaction);
 		vi.mocked(deleteActiveUserTransaction).mockResolvedValue();
 
 		estimateGas.mockResolvedValue(estimatedGas);

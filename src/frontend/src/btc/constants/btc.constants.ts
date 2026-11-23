@@ -19,6 +19,8 @@ export const UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS = 1;
 // the backend re-checks the selected UTXOs at its own floor when the send registers as pending.
 export const CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS = 4;
 
+export const BTC_TXID_REGEX = /^[0-9a-f]{64}$/i;
+
 export const BTC_CONVERT_FEE = ZERO;
 
 export const DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE = 0.00001;

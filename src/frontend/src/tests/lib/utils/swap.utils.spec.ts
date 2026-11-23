@@ -3,10 +3,14 @@ import type {
 	SwapAmountsTxReply
 } from '$declarations/kong_backend/kong_backend.did';
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { USDC_TOKEN as ARBITRUM_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdc.env';
+import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -18,6 +22,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	SUPPORTED_CROSS_SWAP_NETWORKS,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_ETH_TOKEN_PLACEHOLDER,
 	SWAP_SLIPPAGE_INVALID_VALUE,
@@ -25,6 +30,10 @@ import {
 	SWAP_SLIPPAGE_WARNING_VALUE
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
+import type {
+	SwapSupportedTokensData,
+	SwapSupportedTokensInfo
+} from '$lib/stores/swap-supported-tokens.store';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -34,6 +43,7 @@ import {
 } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
 import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
+import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import {
 	buildNearIntentsQuoteRequest,
 	calculateSlippage,
@@ -48,6 +58,8 @@ import {
 	getKongIcTokenIdentifier,
 	getLiquidityFees,
 	getNetworkFee,
+	getReceiveNetworkIds,
+	getReceiveSwapTokens,
 	getSwapRoute,
 	getSwapSlippageInvalidValue,
 	getSwapSlippageStatus,
@@ -62,7 +74,8 @@ import {
 	nearIntentsQuoteRejectedMessage,
 	resolveNearIntentsBlockchain,
 	resolveNearIntentsSwapAssets,
-	slippagePercentToBasisPoints
+	slippagePercentToBasisPoints,
+	sortSwapListTokens
 } from '$lib/utils/swap.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { SplToken } from '$sol/types/spl';
@@ -1411,6 +1424,195 @@ describe('swap utils', () => {
 			expect(canPayWithToken({ ...inactiveToken, balance: ZERO })).toBeFalsy();
 			expect(canPayWithToken({ ...inactiveToken, balance: undefined })).toBeFalsy();
 			expect(canPayWithToken({ ...inactiveToken, balance: null })).toBeFalsy();
+		});
+	});
+
+	describe('the receive list', () => {
+		// The providers' reach, per category: `all` with a list keeps exactly the listed tokens.
+		const listed = (ids: string[]): SwapSupportedTokensInfo => ({
+			coverage: 'all',
+			supportedTokenIds: new Set(ids)
+		});
+
+		const nothing = listed([]);
+
+		const supportedData = (evmIds: string[]): SwapSupportedTokensData => ({
+			icp: nothing,
+			evm: listed(evmIds),
+			sol: nothing,
+			btc: nothing,
+			xrp: nothing
+		});
+
+		const baseEthIdentifier = nativeSwapTokenIdentifier({
+			networkId: BASE_ETH_TOKEN.network.id,
+			symbol: BASE_ETH_TOKEN.symbol
+		});
+
+		const networks = [ETHEREUM_NETWORK, ARBITRUM_MAINNET_NETWORK, BASE_NETWORK];
+
+		const tokens = [BASE_USDC_TOKEN, BASE_ETH_TOKEN, ARBITRUM_USDC_TOKEN, ETHEREUM_TOKEN].map(
+			(token) => ({ ...token, enabled: true })
+		);
+
+		describe('getReceiveNetworkIds', () => {
+			it('should keep to the static pre-filter while the providers have not answered', () => {
+				expect(
+					getReceiveNetworkIds({
+						sourceToken: BASE_USDC_TOKEN,
+						supportedData: undefined,
+						networks,
+						tokens
+					})
+				).toEqual(SUPPORTED_CROSS_SWAP_NETWORKS[BASE_NETWORK.id]);
+			});
+
+			it('should keep the networks with a token the providers reach', () => {
+				expect(
+					getReceiveNetworkIds({
+						sourceToken: BASE_USDC_TOKEN,
+						supportedData: supportedData([ARBITRUM_USDC_TOKEN.address.toLowerCase()]),
+						networks,
+						tokens
+					})
+				).toEqual([ARBITRUM_MAINNET_NETWORK.id]);
+			});
+
+			it('should keep every reached network for a pay network with no pre-filter', () => {
+				const sourceToken = {
+					...BASE_USDC_TOKEN,
+					network: { ...BASE_NETWORK, id: parseNetworkId('NotPreFiltered') }
+				};
+
+				expect(
+					getReceiveNetworkIds({
+						sourceToken,
+						supportedData: supportedData([
+							ARBITRUM_USDC_TOKEN.address.toLowerCase(),
+							baseEthIdentifier
+						]),
+						networks,
+						tokens
+					})
+				).toEqual([ARBITRUM_MAINNET_NETWORK.id, BASE_NETWORK.id]);
+			});
+		});
+
+		describe('getReceiveSwapTokens', () => {
+			it.each([[ARBITRUM_USDC_TOKEN.address.toLowerCase()], []].map((ids) => ({ ids })))(
+				'should match the picker given the same network constraint ($ids)',
+				({ ids }) => {
+					const params = {
+						sourceToken: BASE_USDC_TOKEN,
+						supportedData: supportedData(ids),
+						networks,
+						tokens
+					};
+					const constraint = new Set(getReceiveNetworkIds(params));
+					const activeNetworks = networks.filter(
+						({ id }) => constraint.size === 0 || constraint.has(id)
+					);
+
+					expect(
+						getReceiveSwapTokens({
+							...params,
+							networks: activeNetworks,
+							networksAreConstrained: true
+						})
+					).toEqual(getReceiveSwapTokens(params));
+				}
+			);
+
+			it('should offer the tokens the providers reach, the pay token left out', () => {
+				expect(
+					getReceiveSwapTokens({
+						sourceToken: BASE_USDC_TOKEN,
+						supportedData: supportedData([
+							BASE_USDC_TOKEN.address.toLowerCase(),
+							baseEthIdentifier,
+							ARBITRUM_USDC_TOKEN.address.toLowerCase()
+						]),
+						networks,
+						tokens
+					}).map(({ id }) => id)
+				).toEqual([BASE_ETH_TOKEN.id, ARBITRUM_USDC_TOKEN.id]);
+			});
+
+			it('should leave out a reached token on a network that is not a swap network', () => {
+				const sourceToken = {
+					...BASE_USDC_TOKEN,
+					network: { ...BASE_NETWORK, id: ARBITRUM_MAINNET_NETWORK.id }
+				};
+
+				expect(
+					getReceiveSwapTokens({
+						sourceToken,
+						supportedData: supportedData([
+							ARBITRUM_USDC_TOKEN.address.toLowerCase(),
+							baseEthIdentifier
+						]),
+						// Base is not a swap network here, so nothing on it can be received.
+						networks: [ETHEREUM_NETWORK, ARBITRUM_MAINNET_NETWORK],
+						tokens
+					}).map(({ id }) => id)
+				).toEqual([ARBITRUM_USDC_TOKEN.id]);
+			});
+
+			it('should offer every token before the providers have answered, the pay token left out', () => {
+				expect(
+					getReceiveSwapTokens({
+						sourceToken: BASE_USDC_TOKEN,
+						supportedData: undefined,
+						networks,
+						tokens
+					}).map(({ id }) => id)
+				).toEqual([BASE_ETH_TOKEN.id, ARBITRUM_USDC_TOKEN.id, ETHEREUM_TOKEN.id]);
+			});
+
+			it('should keep to the swap networks before the providers have answered', () => {
+				expect(
+					getReceiveSwapTokens({
+						sourceToken: BASE_USDC_TOKEN,
+						supportedData: undefined,
+						// Ethereum is in the pre-filter, but not a swap network here.
+						networks: [ARBITRUM_MAINNET_NETWORK, BASE_NETWORK],
+						tokens
+					}).map(({ id }) => id)
+				).toEqual([BASE_ETH_TOKEN.id, ARBITRUM_USDC_TOKEN.id]);
+			});
+
+			it('should offer nothing when the providers reach nothing', () => {
+				expect(
+					getReceiveSwapTokens({
+						sourceToken: BASE_USDC_TOKEN,
+						supportedData: supportedData([]),
+						networks,
+						tokens
+					})
+				).toEqual([]);
+			});
+		});
+
+		describe('sortSwapListTokens', () => {
+			it('should put the active tokens first, by value, then the inactive ones by symbol', () => {
+				const sorted = sortSwapListTokens({
+					tokens: [
+						{ ...ETHEREUM_TOKEN, enabled: false },
+						{ ...BASE_USDC_TOKEN, enabled: true, usdBalance: 1 },
+						{ ...ARBITRUM_USDC_TOKEN, enabled: false },
+						{ ...BASE_ETH_TOKEN, enabled: true, usdBalance: 10 }
+					],
+					$tokensToPin: [],
+					$networksToPin: []
+				});
+
+				expect(sorted.map(({ id }) => id)).toEqual([
+					BASE_ETH_TOKEN.id,
+					BASE_USDC_TOKEN.id,
+					ETHEREUM_TOKEN.id,
+					ARBITRUM_USDC_TOKEN.id
+				]);
+			});
 		});
 	});
 });

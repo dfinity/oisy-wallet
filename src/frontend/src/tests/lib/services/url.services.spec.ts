@@ -1,6 +1,6 @@
 import * as appEnvironment from '$app/environment';
 import { MediaType } from '$lib/enums/media-type';
-import { extractMediaTypeAndSize, extractMediaUrls } from '$lib/services/url.services';
+import { extractMediaTypeAndSize, extractMediaUrls, isSvgMedia } from '$lib/services/url.services';
 import type { MockInstance } from 'vitest';
 
 describe('url.services', () => {
@@ -213,6 +213,81 @@ describe('url.services', () => {
 				type: MediaType.Img,
 				size: null
 			});
+		});
+	});
+
+	describe('isSvgMedia', () => {
+		const mockUrl = 'https://example.com/media?tokenid=1';
+
+		const mockFetchWithContentType = (contentType: string | null) =>
+			vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) => (h === 'Content-Type' ? contentType : null)
+				}
+			});
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should return true for an SVG content type', async () => {
+			global.fetch = mockFetchWithContentType('image/svg+xml; charset=utf-8');
+
+			await expect(isSvgMedia(mockUrl)).resolves.toBeTruthy();
+
+			expect(global.fetch).toHaveBeenCalledExactlyOnceWith(mockUrl, { method: 'HEAD' });
+		});
+
+		it('should return false for other image content types', async () => {
+			global.fetch = mockFetchWithContentType('image/webp');
+
+			await expect(isSvgMedia(mockUrl)).resolves.toBeFalsy();
+		});
+
+		it('should return true without a content type if the path ends with .svg', async () => {
+			global.fetch = mockFetchWithContentType(null);
+
+			await expect(isSvgMedia('https://example.com/media.svg')).resolves.toBeTruthy();
+		});
+
+		it('should return false without a content type if the path does not end with .svg', async () => {
+			global.fetch = mockFetchWithContentType(null);
+
+			await expect(isSvgMedia(mockUrl)).resolves.toBeFalsy();
+		});
+
+		it('should return false if fetching fails', async () => {
+			global.fetch = vi.fn().mockRejectedValueOnce(new Error('network error'));
+
+			await expect(isSvgMedia(mockUrl)).resolves.toBeFalsy();
+		});
+
+		it('should return false for an invalid URL without fetching', async () => {
+			global.fetch = vi.fn();
+
+			await expect(isSvgMedia('not a url')).resolves.toBeFalsy();
+
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
+		it.each([
+			'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=',
+			'data:image/svg+xml,%3Csvg%3E%3C%2Fsvg%3E',
+			'data:IMAGE/SVG+XML;charset=utf-8,%3Csvg%3E%3C%2Fsvg%3E'
+		])('should return true for the SVG data URL %s without fetching', async (url) => {
+			global.fetch = vi.fn();
+
+			await expect(isSvgMedia(url)).resolves.toBeTruthy();
+
+			expect(global.fetch).not.toHaveBeenCalled();
+		});
+
+		it('should return false for a non-SVG data URL without fetching', async () => {
+			global.fetch = vi.fn();
+
+			await expect(isSvgMedia('data:image/png;base64,iVBORw0KGgo=')).resolves.toBeFalsy();
+
+			expect(global.fetch).not.toHaveBeenCalled();
 		});
 	});
 });
