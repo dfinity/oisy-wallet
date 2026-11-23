@@ -63,6 +63,7 @@
 		onCustomErrorValidate={customValidate}
 		showTokenNetwork
 		token={$sendToken}
+		truncateSymbol
 		bind:amount
 		bind:error={amountError}
 	>

@@ -251,6 +251,7 @@
 		onCustomErrorValidate={customValidate}
 		showTokenNetwork
 		token={$sendToken}
+		truncateSymbol
 		bind:amount
 		bind:amountSetToMax
 		bind:error={insufficientFundsError}

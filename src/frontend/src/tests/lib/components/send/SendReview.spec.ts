@@ -10,9 +10,13 @@ import { contactsStore } from '$lib/stores/contacts.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { Token } from '$lib/types/token';
 import { getMockContactsUi, mockContactEthAddressUi } from '$tests/mocks/contacts.mock';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcAccount } from '$tests/mocks/identity.mock';
+import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { mockXrpAddress, mockXrpAddress2 } from '$tests/mocks/xrp.mock';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
@@ -173,6 +177,50 @@ describe('SendReview', () => {
 
 			expect(queryByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).not.toBeInTheDocument();
 			expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).toBeEnabled();
+		});
+	});
+
+	describe('token lines', () => {
+		const networkTestId = 'network-snippet';
+		const feeTestId = 'fee-snippet';
+
+		const linesProps = {
+			...props,
+			network: createMockSnippet(networkTestId),
+			fee: createMockSnippet(feeTestId)
+		};
+
+		const expectInDocumentOrder = (elements: Element[]) =>
+			elements
+				.slice(1)
+				.forEach((element, i) =>
+					expect(
+						elements[i].compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING
+					).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+				);
+
+		it('shows the token and its address between the network and the fee', () => {
+			const { getByTestId, getByText } = render(SendReview, {
+				props: linesProps,
+				context: mockContext(mockValidErc20Token)
+			});
+
+			const network = getByTestId(networkTestId);
+			const token = getByText(en.tokens.details.token);
+			const address = getByText(en.tokens.text.token_address);
+			const fee = getByTestId(feeTestId);
+
+			expectInDocumentOrder([network, token, address, fee]);
+		});
+
+		it('shows no token lines when sending an NFT', () => {
+			const { queryByText } = render(SendReview, {
+				props: { ...linesProps, nft: mockValidErc721Nft },
+				context: mockContext(mockValidErc20Token)
+			});
+
+			expect(queryByText(en.tokens.details.token)).not.toBeInTheDocument();
+			expect(queryByText(en.tokens.text.token_address)).not.toBeInTheDocument();
 		});
 	});
 });
