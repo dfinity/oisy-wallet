@@ -91,14 +91,17 @@
 			: undefined
 	);
 
-	// Withdrawn asset is delivered to the user's own oisy address on the pool's chain:
-	// native BTC address for a BTC pool, ICRC account for an ICP-chain pool, else ETH.
+	// Withdrawn asset is delivered to the user's own oisy address on the rail's chain: native BTC
+	// address, ICRC account for an ICP rail, ETH address. Any other chain has no receiver yet, so
+	// it can never fall through to an address of another chain.
 	let receiverAddress = $derived(
 		selectedReserve?.chain === 'BTC'
 			? $btcAddressMainnet
 			: selectedReserve?.chain === 'ICP'
 				? $icrcAccountIdentifierText
-				: $ethAddress
+				: selectedReserve?.chain === 'ETH'
+					? $ethAddress
+					: undefined
 	);
 
 	const goToStep = (stepName: WizardStepsLiquidiumWithdraw) => {

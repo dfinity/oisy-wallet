@@ -21,13 +21,17 @@ import { derived, type Readable } from 'svelte/store';
  *
  * The fee is priced for `destination`'s output, as the selection prices it. Without one, it is
  * priced for the largest output a send can pay, so the cap is fundable whoever the recipient is.
+ * `outputVSizes`, for a send with a layout of its own (a LI.FI deposit, its memo and its fee),
+ * replaces both: the cap is then what those outputs can pay together.
  */
 export const initBtcMaxSendAmount = ({
 	source,
-	destination
+	destination,
+	outputVSizes
 }: {
 	source: string;
 	destination?: OptionString;
+	outputVSizes?: number[];
 }): Readable<bigint | undefined> =>
 	derived(
 		[allUtxosStore, btcPendingSentTransactionsStore, feeRatePercentilesStore],
@@ -52,7 +56,7 @@ export const initBtcMaxSendAmount = ({
 			return calculateMaxSpendableAmount({
 				utxos,
 				pendingUtxoOutpoints,
-				outputVSizes: [btcOutputVSize({ address: destination })],
+				outputVSizes: outputVSizes ?? [btcOutputVSize({ address: destination })],
 				feeRateMiliSatoshisPerVByte,
 				maxInputs: btcSendMaxInputs()
 			});

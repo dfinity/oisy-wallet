@@ -10,6 +10,7 @@ import {
 import { SwapProvider } from '$lib/types/swap';
 import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { assertNonNullish } from '@dfinity/utils';
 
 vi.mock('$lib/services/near-intents.services', () => ({
@@ -46,6 +47,102 @@ describe('btc-swap.providers', () => {
 			vi.doUnmock('$env/rest/near-intents.env');
 			vi.resetModules();
 		}
+	});
+
+	// The backend send path defaults off in the test env, so LI.FI is left out above.
+	describe('LI.FI entry', () => {
+		const loadProviders = async () => {
+			vi.resetModules();
+
+			const { btcSwapProviders: providers } = await import('$lib/providers/btc-swap.providers');
+
+			return providers;
+		};
+
+		afterEach(() => {
+			btcSendViaBackend.enabled = false;
+			vi.resetModules();
+		});
+
+		it('should register LI.FI last once BTC is sent through the backend', async () => {
+			btcSendViaBackend.enabled = true;
+
+			const providers = await loadProviders();
+
+			expect(providers.map(({ key }) => key)).toEqual([
+				SwapProvider.CHAIN_FUSION,
+				SwapProvider.NEAR_INTENTS,
+				SwapProvider.LIFI
+			]);
+			expect(providers.every(({ isEnabled }) => isEnabled)).toBeTruthy();
+		});
+
+		// The destinations themselves are `lifiBtcSupportedDestinations`'s, tested with its service.
+		it('should list native BTC, and every EVM and Solana destination now that Relay is admitted', async () => {
+			btcSendViaBackend.enabled = true;
+
+			const lifi = (await loadProviders()).find(({ key }) => key === SwapProvider.LIFI);
+			// From the same module graph as the providers: a network id is a symbol of its own module.
+			const { BTC_MAINNET_TOKEN: btcToken } = await import('$env/tokens/tokens.btc.env');
+
+			assertNonNullish(lifi);
+
+			await expect(lifi.getSupportedTokens?.()).resolves.toEqual(
+				new Set([nativeSwapTokenIdentifier({ networkId: BTC_MAINNET_NETWORK_ID, symbol: 'BTC' })])
+			);
+			expect(
+				lifi.getSupportedDestinations({
+					sourceToken: btcToken,
+					supportedSourceTokens: undefined,
+					findProviderSourceTokens: () => undefined
+				})
+			).toStrictEqual({ evm: 'any', sol: 'any' });
+		});
+
+		// `lifi-btc-swap.services` → `swap.services` → this registry → `lifi-btc-swap.services`: loaded
+		// first, the service has not run yet when the registry is built, so the entry reads its
+		// functions when called.
+		it('should delegate to the LI.FI BTC service when that module loads first', async () => {
+			btcSendViaBackend.enabled = true;
+			vi.resetModules();
+
+			const service = await import('$lib/services/lifi-btc-swap.services');
+			const { btcSwapProviders: providers } = await import('$lib/providers/btc-swap.providers');
+			const { BTC_MAINNET_TOKEN: btcToken } = await import('$env/tokens/tokens.btc.env');
+
+			const lifi = providers.find(({ key }) => key === SwapProvider.LIFI);
+
+			assertNonNullish(lifi);
+
+			const quoteSpy = vi.spyOn(service, 'fetchLifiBtcSwapQuote').mockResolvedValue(undefined);
+
+			const quoteParams = {
+				sourceToken: btcToken,
+				destinationToken: ETHEREUM_TOKEN,
+				amount: 200_000n,
+				userBtcAddress: mockBtcAddress,
+				recipientAddress: '0x1234567890abcdef1234567890abcdef12345678',
+				slippage: 0.5
+			};
+
+			await lifi.getQuote(quoteParams);
+
+			expect(quoteSpy).toHaveBeenCalledExactlyOnceWith(quoteParams);
+
+			await expect(lifi.getSupportedTokens?.()).resolves.toEqual(
+				await service.lifiBtcSupportedTokens()
+			);
+
+			const destinationParams = {
+				sourceToken: btcToken,
+				supportedSourceTokens: undefined,
+				findProviderSourceTokens: () => undefined
+			};
+
+			expect(lifi.getSupportedDestinations(destinationParams)).toEqual(
+				service.lifiBtcSupportedDestinations(destinationParams)
+			);
+		});
 	});
 
 	it('should not register Chain Fusion when its flag is off', async () => {

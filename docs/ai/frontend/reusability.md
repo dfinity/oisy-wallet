@@ -96,6 +96,7 @@ as Swap does for clearing the receive token.
 | `FirstTimeDestinationWarning`           | `$lib/components/send/`           | Warning that no send to an address is on record; gates its consumer's action when given an `onConfirm` callback.                                          |
 | `WalletConnectAcknowledgement`          | `$lib/components/wallet-connect/` | Orange notice with an "I understand" checkbox for a request OISY can't describe; the review holds Approve until it is ticked.                             |
 | `WalletConnectScamWarning`              | `$lib/components/wallet-connect/` | The security-risk notice on a WalletConnect sign or send review whose request Verify flags as a scam (`acceptedContext`); that review offers Reject only. |
+| `NftThumbnail`                          | `$lib/components/nfts/`           | NFT image in a card, list or logo, inside `NftDisplayGuard`. Shows an SVG as a small PNG copy: embedded full-size bitmaps can crash iOS Safari.           |
 | `Loader*` and `loaders/`                | `$lib/components/loaders/`        | Loaders, suspense boundaries, skeletons.                                                                                                                  |
 | `icons/`                                | `$lib/components/icons/`          | Project's icon set.                                                                                                                                       |
 | `Collapsible`, `CollapsibleBottomSheet` | `$lib/components/ui/`             | Shared disclosure. `CollapsibleBottomSheet` expands in place from `md` and opens a bottom sheet below it; `trigger` replaces its info button.             |
@@ -227,6 +228,7 @@ in another one (LI.FI's EVM → Solana). `computeReceiveSupportedTokens` in
 | `blockchain.rest`, `blockstream.rest`                                                        | `$lib/rest/`    | BTC explorer endpoints.   |
 | `kongswap.rest`, `icpswap.rest`, `near-intents.rest`, `harvest.rest`, `open-crypto-pay.rest` | `$lib/rest/`    | Swap providers + harvest. |
 | `lifi.rest`                                                                                  | `$lib/rest/`    | LI.FI quotes (SDK-based). |
+| `relay.rest`                                                                                 | `$lib/rest/`    | Relay request status.     |
 | `exchange.worker`, `auth.worker`                                                             | `$lib/workers/` | Background polling.       |
 
 ### Per-provider swap quote cache
@@ -269,7 +271,7 @@ in the PR description and ask the human owner before doing it.
 
 ## Landing artwork
 
-`Img` defaults to lazy loading; above-the-fold artwork can explicitly opt into `loading="eager"`. Supply intrinsic dimensions to reserve layout space. The landing uses static asset URLs and a deliberately slower, one-time 300ms entrance (12px upward movement, 4px blur, opacity), staggered by 100ms per section. It starts on mount without waiting for artwork; keyboard focus reveals controls immediately. Feature-card wrappers animate only translation to preserve descendant backdrop blur. Reduced motion uses `MOTION_REDUCED_FADE_DURATION` (100ms) without stagger; feature cards stay still. Reveal focused controls with visual overrides, preserving the animation timeline so it cannot replay on blur.
+`LandingWalletPreview` renders the signed-out wallet illustration as an inline SVG with intrinsic dimensions, app theme tokens, existing icons and sample balances. The landing page imports it only when the signed-out view renders and reserves its aspect ratio while the chunk loads. Keep its presentation independent of authenticated wallet state. The device outlines and screen clips use the same continuous corner curves, with the outer radius derived from the screen radius, bezel padding and border width. The device screens are visible as soon as the artwork mounts. When motion is enabled, the whole artwork rises together and the desktop balance card and top-right controls rise into place within it. The phone lifts into place and the token rows enter one by one. The portfolio counts up in whole dollars as the rows enter, using the final localized amount’s right edge to keep the digits aligned. It shows the exact balance as the rows settle. The network menu opens once the balance and rows have settled. The sign-in block keeps its one-time 300ms entrance (12px upward movement, 4px blur, opacity). Keyboard focus reveals controls immediately and preserves the animation timeline. Feature-card wrappers animate translation to preserve descendant backdrop blur. Under reduced motion, the sign-in block uses `MOTION_REDUCED_FADE_DURATION` (100ms), and the artwork and feature cards stay still.
 
 ## Overlay keyboard behavior
 

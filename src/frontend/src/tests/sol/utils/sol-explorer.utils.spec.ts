@@ -1,9 +1,50 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
-import { solAccountExplorerUrl, solTokenExplorerUrl } from '$sol/utils/sol-explorer.utils';
+import {
+	solAccountExplorerUrl,
+	solTokenExplorerUrl,
+	solTransactionExplorerUrl
+} from '$sol/utils/sol-explorer.utils';
+import { mockCkSolSweepSignature } from '$tests/mocks/cksol.mock';
 import { mockSolAddress, mockSplAddress } from '$tests/mocks/sol.mock';
 
 describe('sol-explorer.utils', () => {
+	describe('solTransactionExplorerUrl', () => {
+		it('should substitute the signature into the explorer template', () => {
+			expect(
+				solTransactionExplorerUrl({
+					network: SOLANA_MAINNET_NETWORK,
+					signature: mockCkSolSweepSignature
+				})
+			).toBe(`https://solscan.io/tx/${mockCkSolSweepSignature}/`);
+		});
+
+		it('should keep the cluster query of a non-mainnet explorer', () => {
+			const url = solTransactionExplorerUrl({
+				network: SOLANA_DEVNET_NETWORK,
+				signature: mockCkSolSweepSignature
+			});
+
+			expect(url).toContain(`tx/${mockCkSolSweepSignature}/`);
+			expect(url).toContain('cluster=devnet');
+		});
+
+		it('should give no link for a network that is not Solana', () => {
+			expect(
+				solTransactionExplorerUrl({ network: ETHEREUM_NETWORK, signature: mockCkSolSweepSignature })
+			).toBeUndefined();
+		});
+
+		it('should give no link without a network or a signature', () => {
+			expect(
+				solTransactionExplorerUrl({ network: undefined, signature: mockCkSolSweepSignature })
+			).toBeUndefined();
+			expect(
+				solTransactionExplorerUrl({ network: SOLANA_MAINNET_NETWORK, signature: undefined })
+			).toBeUndefined();
+		});
+	});
+
 	describe('solAccountExplorerUrl', () => {
 		it('should substitute the account into the explorer template', () => {
 			expect(

@@ -179,3 +179,32 @@ export const extractMediaTypeAndSize = async (
 
 	return { type: null, size: null };
 };
+
+/**
+ * Whether a media URL points to an SVG document.
+ *
+ * A data URL is checked by its declared media type. Any other URL is checked with a HEAD request; when the request
+ * fails (network error, CORS, DNS, …), the media is treated as not being an SVG.
+ *
+ * @param url - The absolute URL of the media resource
+ */
+export const isSvgMedia = async (url: string): Promise<boolean> => {
+	try {
+		const parsedUrl = new URL(url);
+
+		if (parsedUrl.protocol === 'data:') {
+			const [mediaType] = parsedUrl.pathname.split(/[;,]/, 1);
+
+			return mediaType.trim().toLowerCase() === 'image/svg+xml';
+		}
+
+		const response = await fetch(parsedUrl.href, { method: 'HEAD' });
+
+		return isProbablySvg({
+			contentType: response.headers.get('Content-Type') ?? '',
+			url: parsedUrl.href
+		});
+	} catch (_: unknown) {
+		return false;
+	}
+};
