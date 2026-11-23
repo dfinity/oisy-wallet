@@ -30,12 +30,22 @@ Do not invent a second key next to one that already exists.
   It therefore survives a store reload, and is re-created only on a full reset
   — `resetAll()` after a failed certified update, or the page reload on
   sign-out.
+- The main-thread ICRC loader supplies the ID from `IC_BUILTIN_TOKENS`, matched
+  by ledger canister ID, when mapping built-in metadata. `mapIcrcToken` accepts
+  that ID without importing the catalog into worker-shared utilities.
+  This preserves picks made before the custom-token store loads. At the ICRC
+  auto-enable boundary, Swap resolves the current entry by ledger canister ID
+  to use its backend version and effective enabled state.
 - **Compare the object, never its description.** `TokenId.description` _is_ the
   ticker — it comes from `parseTokenId(symbol)`
   ([`$eth/utils/erc20.utils.ts`](../../../src/frontend/src/eth/utils/erc20.utils.ts),
   [`$icp/utils/icrc.utils.ts`](../../../src/frontend/src/icp/utils/icrc.utils.ts)).
   Two distinct contracts on the same network can share a ticker, so a ticker is
   not unique and is not a key.
+- Lists carrying loaded token metadata and backend versions must propagate updates even when IDs
+  and `enabled` flags stay the same. Use `derived` for these lists (`icrc.derived`,
+  `all-tokens.derived` and `all-network-tokens.derived`); `tokenListEqual` only compares membership,
+  order and enabled state.
 - No `TokenId` reachable? Key on the stable asset identifier — contract address
   / ledger canister ID / canister ID, e.g. `getTokenIdentifier` from
   [`$lib/utils/identifier.utils.ts`](../../../src/frontend/src/lib/utils/identifier.utils.ts)

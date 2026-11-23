@@ -355,6 +355,10 @@ Every call an EVM send hands to Alchemy after Infura failed it emits one structu
 
 The event carries no address, no transaction hash and no amount: each would tie it to one wallet, which invariant 3 in [`analytics.md`](frontend/analytics.md) forbids, and the question it answers — how often a provider fails a send, on which call and network — needs none of them.
 
+### Swap receive shortcut tracking
+
+The [shortcuts for what to receive](#choosing-what-to-receive) emit one `swap_receive_shortcut` event under `event_context: tokens`, with what was used in `event_modifier`: `same_network` or `any_token` when that shortcut is tapped, and `other_network` when a token is picked through "_Symbol_ on another network". That is on the tap itself when it reaches one network and sets the token directly, and otherwise on the pick in "Move _symbol_ to"; opening that step and leaving it sends nothing. The pay token goes in `token_*`, and for `other_network` the picked token in `token2_*`. The event carries no amount and no USD value: it answers whether the shortcuts are used, and which one.
+
 ---
 
 ## Tokens
@@ -447,6 +451,20 @@ Once the payment is approved or signed and on its way to the provider, an error 
 ---
 
 ## Swap
+
+### Choosing what to receive
+
+Once a pay token is picked, and until something is picked to receive, the empty **You receive** card offers shortcuts to where the money usually goes, in place of the blank field. Each is a view of the receive list for that pay token as it shows on all networks and all asset types: the tokens the providers supporting it reach, on the networks it reaches, without the pay token itself and without the testnet tokens that view leaves out. A shortcut can never offer a token the list would not.
+
+- **Another token on _network_**, the pay token's network. Its second line names up to three of the tokens there, in the list's order, then "and _N_ more". It opens the receive list on that network.
+- **_Symbol_ on another network**, the pay token's token group (USDC, ETH, BTC, ICP, or any other group OISY lists) on the other networks the pay token reaches. ckUSDC as the pay token reads "USDC on another network". Wrapped tokens such as WETH, cbBTC and WBTC are groups of their own: from ETH, WETH is another token, never "ETH on another network"; from WETH, "WETH on another network" offers WETH elsewhere. The second line names up to two networks in chain order (Bitcoin, Ethereum, Internet Computer, then A to Z). It opens **Move _symbol_ to**: one row per network, with the token's symbol (or "as ckBTC" when it differs) and the user's balance of it (none for a token the user has not enabled, whose balance OISY does not load, as in the list); a row sets the receive token and goes back to the form. When it reaches a single token there is no step and the row names that token: "ckBTC on Internet Computer" from BTC, "USDT on Ethereum" from ckUSDT, with the token's logo and a network badge, and one tap sets it. Its second line says what that does, by the provider behind the route: "Convert BTC to ckBTC" or "Convert ckUSDT back to USDT" through Chain Fusion (preferred when 1Sec also lists it), "Bridge ICP back to Internet Computer" through 1Sec, otherwise "Move USDC to Solana". It says no rate: fees apply. USDC on Base does not list Internet Computer, because 1Sec only takes a token back to its own network and Chain Fusion links ckUSDC to Ethereum only.
+- **Any token**, "_N_ tokens on _M_ networks". It opens the receive list on all networks. It is left out when the two above already cover every token: BTC with NEAR Intents off has nothing else.
+
+A shortcut with nothing behind it is left out, never shown disabled; Bitcoin and XRP have one token each, so neither offers "Another token on" its network. Until OISY has the providers' token lists, and when the pay token reaches nothing, the card is the empty field it always was. A list a shortcut opens starts on all asset types. The swap remembers that receive view and any filters changed in it: reopening after a pick or Back returns to the same-network list, the full token list, or the same-token network list that was chosen. A different shortcut replaces the remembered view. Changing or switching the pay token resets the same-token network view; closing the swap forgets it.
+
+Tapping a picked receive token opens the receive picker; returning with Back keeps the selection. A separate **×** button inside the receive field clears the receive token and its quote, keeping the pay token and amount, and brings the shortcuts back. Focus moves to the first shortcut, or to the empty receive selector while the providers are loading or offer nothing; after a one-tap shortcut, it moves to the receive token. The clear button is shown only with both tokens selected in the shortcuts flow. The same holds in Get Token's swap. There is no Keep link.
+
+The shortcuts do not change what can be received (no route, provider or token is added), ask for no quote before a receive token is picked, add nothing to the pay side, and remember nothing between openings of the swap modal. Review, Swapping and the receive list itself are unchanged. Their use is counted by `swap_receive_shortcut` (see [Swap receive shortcut tracking](#swap-receive-shortcut-tracking)).
 
 ### Velora
 

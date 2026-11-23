@@ -4,13 +4,24 @@ import type {
 } from '$declarations/kong_backend/kong_backend.did';
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
+import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
+import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
+import { USDC_TOKEN as ETHEREUM_USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDC_TOKEN as ARBITRUM_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdc.env';
+import { ARBITRUM_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
+import { CBBTC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.cbbtc.env';
 import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import { USDC_TOKEN as BSC_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdc.env';
+import { USDC_TOKEN as POLYGON_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
 import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -29,11 +40,13 @@ import {
 	SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
 	SWAP_SLIPPAGE_WARNING_VALUE
 } from '$lib/constants/swap.constants';
+import { Languages } from '$lib/enums/languages';
 import { SwapError } from '$lib/services/swap-errors.services';
 import type {
 	SwapSupportedTokensData,
 	SwapSupportedTokensInfo
 } from '$lib/stores/swap-supported-tokens.store';
+import type { Network } from '$lib/types/network';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -41,7 +54,9 @@ import {
 	type DeltaSwapResponse,
 	type ICPSwapResult
 } from '$lib/types/swap';
+import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadSwapSlippage, saveSwapSlippage } from '$lib/utils/swap-slippage-storage.utils';
 import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import {
@@ -57,9 +72,14 @@ import {
 	geSwapEthTokenAddress,
 	getKongIcTokenIdentifier,
 	getLiquidityFees,
+	getListedReceiveShortcuts,
+	getListedReceiveTokens,
 	getNetworkFee,
 	getReceiveNetworkIds,
+	getReceiveShortcutDetails,
+	getReceiveShortcuts,
 	getReceiveSwapTokens,
+	getSwapMoveTokenTitle,
 	getSwapRoute,
 	getSwapSlippageInvalidValue,
 	getSwapSlippageStatus,
@@ -78,9 +98,11 @@ import {
 	sortSwapListTokens
 } from '$lib/utils/swap.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
+import { parseTokenId } from '$lib/validation/token.validation';
 import type { SplToken } from '$sol/types/spl';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import {
 	mockNearIntentsQuoteResponse,
@@ -1590,6 +1612,359 @@ describe('swap utils', () => {
 						tokens
 					})
 				).toEqual([]);
+			});
+		});
+
+		describe('getReceiveShortcuts', () => {
+			// Chain order: Bitcoin, Ethereum, Internet Computer, then A to Z.
+			const chainOrder = [
+				BTC_MAINNET_NETWORK,
+				ETHEREUM_NETWORK,
+				ICP_NETWORK,
+				ARBITRUM_MAINNET_NETWORK,
+				BASE_NETWORK,
+				BSC_MAINNET_NETWORK,
+				POLYGON_MAINNET_NETWORK,
+				SOLANA_MAINNET_NETWORK
+			];
+
+			const icToken = ({ symbol, groupData }: Pick<Token, 'symbol' | 'groupData'>): Token => ({
+				...mockValidIcToken,
+				id: parseTokenId(symbol),
+				symbol,
+				groupData
+			});
+
+			const ckBtc = icToken({ symbol: 'ckBTC', groupData: BTC_TOKEN_GROUP });
+			const ckEth = icToken({ symbol: 'ckETH', groupData: ETH_TOKEN_GROUP });
+			const ckUsdc = icToken({ symbol: 'ckUSDC', groupData: USDC_TOKEN_GROUP });
+			const toshi = {
+				...CBBTC_TOKEN,
+				id: parseTokenId('TOSHI'),
+				symbol: 'TOSHI',
+				groupData: undefined
+			};
+
+			const SOLANA_USDC_TOKEN = USDC_TOKEN;
+
+			const ids = (tokens: Token[] | undefined) => tokens?.map(({ id }) => id);
+
+			it('should offer all three for USDC on Base, its other networks in chain order', () => {
+				const { sameNetwork, otherNetwork, anyToken } = getReceiveShortcuts({
+					sourceToken: BASE_USDC_TOKEN,
+					// In the list's order, not chain order.
+					tokens: [
+						BASE_ETH_TOKEN,
+						SOLANA_USDC_TOKEN,
+						CBBTC_TOKEN,
+						POLYGON_USDC_TOKEN,
+						ETHEREUM_TOKEN,
+						BSC_USDC_TOKEN,
+						ETHEREUM_USDC_TOKEN,
+						ARBITRUM_USDC_TOKEN
+					],
+					networks: chainOrder
+				});
+
+				expect(sameNetwork?.network).toBe(BASE_NETWORK);
+				expect(ids(sameNetwork?.tokens)).toEqual([BASE_ETH_TOKEN.id, CBBTC_TOKEN.id]);
+
+				expect(otherNetwork?.group).toBe(USDC_TOKEN_GROUP);
+				expect(ids(otherNetwork?.tokens)).toEqual([
+					ETHEREUM_USDC_TOKEN.id,
+					ARBITRUM_USDC_TOKEN.id,
+					BSC_USDC_TOKEN.id,
+					POLYGON_USDC_TOKEN.id,
+					SOLANA_USDC_TOKEN.id
+				]);
+
+				expect(anyToken).toEqual({ tokens: 8, networks: 6 });
+			});
+
+			it('should offer no other network for a token in no group', () => {
+				const { sameNetwork, otherNetwork, anyToken } = getReceiveShortcuts({
+					sourceToken: toshi,
+					tokens: [BASE_USDC_TOKEN, ETHEREUM_TOKEN],
+					networks: chainOrder
+				});
+
+				expect(ids(sameNetwork?.tokens)).toEqual([BASE_USDC_TOKEN.id]);
+				expect(otherNetwork).toBeUndefined();
+				expect(anyToken).toEqual({ tokens: 2, networks: 2 });
+			});
+
+			it('should offer only BTC on another network when ckBTC is all BTC reaches', () => {
+				const shortcuts = getReceiveShortcuts({
+					sourceToken: BTC_MAINNET_TOKEN,
+					tokens: [ckBtc],
+					networks: chainOrder
+				});
+
+				expect(shortcuts).toEqual({ otherNetwork: { group: BTC_TOKEN_GROUP, tokens: [ckBtc] } });
+			});
+
+			it('should name the group for ckUSDC and leave out Any token when the two cover all', () => {
+				const shortcuts = getReceiveShortcuts({
+					sourceToken: ckUsdc,
+					tokens: [ckBtc, ckEth, BASE_USDC_TOKEN, ETHEREUM_USDC_TOKEN, ARBITRUM_USDC_TOKEN],
+					networks: chainOrder
+				});
+
+				expect(ids(shortcuts.sameNetwork?.tokens)).toEqual([ckBtc.id, ckEth.id]);
+				expect(shortcuts.otherNetwork?.group).toBe(USDC_TOKEN_GROUP);
+				expect(ids(shortcuts.otherNetwork?.tokens)).toEqual([
+					ETHEREUM_USDC_TOKEN.id,
+					ARBITRUM_USDC_TOKEN.id,
+					BASE_USDC_TOKEN.id
+				]);
+				expect(shortcuts.anyToken).toBeUndefined();
+			});
+
+			it('should count a wrapped token as another token, not as ETH on another network', () => {
+				const weth = {
+					...CBBTC_TOKEN,
+					id: parseTokenId('WETH'),
+					symbol: 'WETH',
+					groupData: undefined
+				};
+
+				const { otherNetwork, anyToken } = getReceiveShortcuts({
+					sourceToken: ETHEREUM_TOKEN,
+					tokens: [BASE_ETH_TOKEN, weth, ckEth, ARBITRUM_ETH_TOKEN, ETHEREUM_USDC_TOKEN],
+					networks: chainOrder
+				});
+
+				expect(ids(otherNetwork?.tokens)).toEqual([
+					ckEth.id,
+					ARBITRUM_ETH_TOKEN.id,
+					BASE_ETH_TOKEN.id
+				]);
+				expect(anyToken).toEqual({ tokens: 5, networks: 4 });
+			});
+
+			it('should offer nothing when the list offers nothing', () => {
+				expect(
+					getReceiveShortcuts({ sourceToken: BASE_USDC_TOKEN, tokens: [], networks: chainOrder })
+				).toEqual({});
+			});
+
+			it('should put a network chain order does not know last', () => {
+				const { otherNetwork } = getReceiveShortcuts({
+					sourceToken: BASE_USDC_TOKEN,
+					tokens: [SOLANA_USDC_TOKEN, ARBITRUM_USDC_TOKEN],
+					networks: [ARBITRUM_MAINNET_NETWORK]
+				});
+
+				expect(ids(otherNetwork?.tokens)).toEqual([ARBITRUM_USDC_TOKEN.id, SOLANA_USDC_TOKEN.id]);
+			});
+		});
+
+		describe('getSwapMoveTokenTitle', () => {
+			it("should name the pay token's group", () => {
+				expect(
+					getSwapMoveTokenTitle({
+						i18n: en,
+						sourceToken: { ...mockValidIcToken, symbol: 'ckUSDC', groupData: USDC_TOKEN_GROUP }
+					})
+				).toBe('Move USDC to');
+			});
+		});
+
+		const SOLANA_USDC_TOKEN_FOR_LIST = USDC_TOKEN;
+
+		describe('getListedReceiveTokens', () => {
+			it('should leave out what the list hides on all networks: testnet tokens', () => {
+				const devnetUsdc = {
+					...SOLANA_USDC_TOKEN_FOR_LIST,
+					id: parseTokenId('DevnetUSDC'),
+					network: SOLANA_DEVNET_NETWORK,
+					enabled: true
+				};
+
+				expect(
+					getListedReceiveTokens({
+						sourceToken: BASE_USDC_TOKEN,
+						supportedData: undefined,
+						networks: [BASE_NETWORK, SOLANA_MAINNET_NETWORK, SOLANA_DEVNET_NETWORK],
+						tokens: [...tokens, devnetUsdc]
+					}).map(({ id }) => id)
+				).toEqual([BASE_ETH_TOKEN.id]);
+			});
+		});
+
+		describe('getListedReceiveShortcuts', () => {
+			it('should offer nothing until the providers have answered', () => {
+				expect(
+					getListedReceiveShortcuts({
+						sourceToken: BASE_USDC_TOKEN,
+						supportedData: undefined,
+						swapNetworks: networks,
+						chainNetworks: networks,
+						tokens,
+						$balances: {},
+						$stakeBalances: {},
+						$exchanges: {},
+						$tokensToPin: []
+					})
+				).toBeUndefined();
+			});
+		});
+
+		describe('getReceiveShortcutDetails', () => {
+			const details = ({
+				sourceToken = BASE_USDC_TOKEN,
+				otherNetworkProviders,
+				...shortcuts
+			}: Parameters<typeof getReceiveShortcutDetails>[0]['shortcuts'] & {
+				sourceToken?: Token;
+				otherNetworkProviders?: SwapProvider[];
+			}) =>
+				getReceiveShortcutDetails({
+					shortcuts,
+					i18n: en,
+					language: Languages.ENGLISH,
+					sourceToken,
+					otherNetworkProviders
+				});
+
+			const usdcOn = (network: Network): Token => ({
+				...BASE_USDC_TOKEN,
+				id: parseTokenId(`USDC-${String(network.id.description)}`),
+				network
+			});
+
+			it('should name up to three tokens on the network, then how many more', () => {
+				expect(
+					details({
+						sameNetwork: {
+							network: BASE_NETWORK,
+							tokens: [
+								BASE_ETH_TOKEN,
+								CBBTC_TOKEN,
+								BASE_USDC_TOKEN,
+								ETHEREUM_TOKEN,
+								ETHEREUM_USDC_TOKEN
+							]
+						}
+					}).sameNetwork
+				).toBe(
+					`ETH, cbBTC, USDC, and ${replacePlaceholders(en.swap.text.receive_shortcut_more, { $count: '2' })}`
+				);
+
+				expect(
+					details({ sameNetwork: { network: BASE_NETWORK, tokens: [BASE_ETH_TOKEN, CBBTC_TOKEN] } })
+						.sameNetwork
+				).toBe('ETH and cbBTC');
+			});
+
+			it('should name up to two networks, each once, then how many more', () => {
+				expect(
+					details({
+						otherNetwork: {
+							group: USDC_TOKEN_GROUP,
+							tokens: [
+								usdcOn(ETHEREUM_NETWORK),
+								// A second token on one network still counts the network once.
+								{ ...usdcOn(ETHEREUM_NETWORK), id: parseTokenId('USDC-ETH-2') },
+								usdcOn(ARBITRUM_MAINNET_NETWORK),
+								usdcOn(BSC_MAINNET_NETWORK)
+							]
+						}
+					}).otherNetwork
+				).toBe(
+					`Ethereum, Arbitrum, and ${replacePlaceholders(en.swap.text.receive_shortcut_more, { $count: '1' })}`
+				);
+			});
+
+			describe('with one token on another network, what taking it does', () => {
+				const ckBtc = { ...mockValidIcToken, symbol: 'ckBTC', groupData: BTC_TOKEN_GROUP };
+				const ckUsdc = { ...mockValidIcToken, symbol: 'ckUSDC', groupData: USDC_TOKEN_GROUP };
+
+				it('should convert to the ck twin through Chain Fusion', () => {
+					expect(
+						details({
+							otherNetwork: { group: BTC_TOKEN_GROUP, tokens: [ckBtc] },
+							sourceToken: BTC_MAINNET_TOKEN,
+							otherNetworkProviders: [SwapProvider.CHAIN_FUSION]
+						}).otherNetwork
+					).toBe(
+						replacePlaceholders(en.swap.text.receive_shortcut_convert, {
+							$from: 'BTC',
+							$to: 'ckBTC'
+						})
+					);
+				});
+
+				it('should convert a ck token back to its twin, before 1Sec', () => {
+					expect(
+						details({
+							otherNetwork: { group: USDC_TOKEN_GROUP, tokens: [ETHEREUM_USDC_TOKEN] },
+							sourceToken: ckUsdc,
+							otherNetworkProviders: [SwapProvider.ONE_SEC, SwapProvider.CHAIN_FUSION]
+						}).otherNetwork
+					).toBe(
+						replacePlaceholders(en.swap.text.receive_shortcut_convert_back, {
+							$from: 'ckUSDC',
+							$to: 'USDC'
+						})
+					);
+				});
+
+				it('should bridge back through 1Sec', () => {
+					expect(
+						details({
+							otherNetwork: { group: USDC_TOKEN_GROUP, tokens: [ckUsdc] },
+							otherNetworkProviders: [SwapProvider.ONE_SEC]
+						}).otherNetwork
+					).toBe(
+						replacePlaceholders(en.swap.text.receive_shortcut_bridge_back, {
+							$symbol: 'ckUSDC',
+							$network: ICP_NETWORK.name
+						})
+					);
+				});
+
+				it('should move it otherwise', () => {
+					expect(
+						details({
+							otherNetwork: { group: USDC_TOKEN_GROUP, tokens: [usdcOn(SOLANA_MAINNET_NETWORK)] }
+						}).otherNetwork
+					).toBe(
+						replacePlaceholders(en.swap.text.receive_shortcut_move, {
+							$symbol: 'USDC',
+							$network: SOLANA_MAINNET_NETWORK.name
+						})
+					);
+				});
+			});
+
+			it.each([
+				{
+					anyToken: { tokens: 9, networks: 6 },
+					expected: replacePlaceholders(en.swap.text.receive_shortcut_any_token_count, {
+						$tokens: '9',
+						$networks: '6'
+					})
+				},
+				{
+					anyToken: { tokens: 3, networks: 1 },
+					expected: replacePlaceholders(en.swap.text.receive_shortcut_any_token_count_one, {
+						$tokens: '3'
+					})
+				},
+				{
+					anyToken: { tokens: 1, networks: 1 },
+					expected: en.swap.text.receive_shortcut_any_token_count_single
+				}
+			])(
+				'should count $anyToken.tokens tokens on $anyToken.networks networks',
+				({ anyToken, expected }) => {
+					expect(details({ anyToken }).anyToken).toBe(expected);
+				}
+			);
+
+			it('should leave out the lines of shortcuts that are not offered', () => {
+				expect(details({})).toEqual({});
 			});
 		});
 

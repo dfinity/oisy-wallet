@@ -1389,6 +1389,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "Échanger",
 			"select_destination_token": "Sélectionner le token à recevoir",
@@ -1442,6 +1445,25 @@
 			"gasless": "Sans gaz",
 			"swap_fees": "Frais d'échange",
 			"cross_chain_networks_info": "Vous déplacez des tokens du réseau <b>$sourceNetwork</b> vers le réseau <b>$destinationNetwork</b>",
+			"receive_shortcut_same_network": "",
+			"receive_shortcut_other_network": "",
+			"receive_shortcut_token_on_network": "",
+			"receive_shortcut_convert": "",
+			"receive_shortcut_convert_back": "",
+			"receive_shortcut_bridge_back": "",
+			"receive_shortcut_move": "",
+			"receive_shortcut_any_token": "",
+			"receive_shortcut_any_token_count": "",
+			"receive_shortcut_any_token_count_one": "",
+			"receive_shortcut_any_token_count_single": "",
+			"receive_shortcut_more": "",
+			"move_token_to": "",
+			"move_no_networks_title": "",
+			"move_no_networks_title_without_symbol": "",
+			"move_no_networks_description": "",
+			"move_networks_changed_title": "",
+			"move_networks_changed_description": "",
+			"as_token": "",
 			"two_swaps_info": "$oisy_short ne propose que des échanges qu'il peut entièrement vérifier avant votre approbation, et il n'existe pas d'échange direct de ce type de $sourceSymbol vers $destinationSymbol. Mais vous pouvez d'abord échanger $sourceSymbol contre $intermediateSymbol, puis $intermediateSymbol contre $destinationSymbol.",
 			"two_swaps_first_button": "Échanger d'abord contre $intermediateSymbol",
 			"near_intents_estimated_time": "",

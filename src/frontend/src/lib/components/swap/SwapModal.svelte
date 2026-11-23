@@ -25,9 +25,9 @@
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { getInitialSwapSlippage } from '$lib/utils/swap.utils';
+	import { getInitialSwapSlippage, getSwapMoveTokenTitle } from '$lib/utils/swap.utils';
 
-	const { reset: resetSwapStore } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { reset: resetSwapStore, sourceToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { resetFilters: resetTokensListFilters } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
@@ -56,7 +56,9 @@
 			? $i18n.swap.text.select_source_token
 			: selectTokenType === 'destination'
 				? $i18n.swap.text.select_destination_token
-				: (currentStep?.title ?? '')
+				: currentStep?.name === WizardStepsSwap.MOVE_TOKEN
+					? getSwapMoveTokenTitle({ i18n: $i18n, sourceToken: $sourceToken })
+					: (currentStep?.title ?? '')
 	);
 
 	const close = () =>
@@ -80,7 +82,8 @@
 
 	let disablePointerEvents = $derived(
 		currentStep?.name === WizardStepsSwap.SWAPPING ||
-			currentStep?.name === WizardStepsSwap.TOKENS_LIST
+			currentStep?.name === WizardStepsSwap.TOKENS_LIST ||
+			currentStep?.name === WizardStepsSwap.MOVE_TOKEN
 	);
 </script>
 
