@@ -30,16 +30,51 @@ Do not invent a second key next to one that already exists.
   It therefore survives a store reload, and is re-created only on a full reset
   — `resetAll()` after a failed certified update, or the page reload on
   sign-out.
+- The main-thread ICRC loader supplies the ID from `IC_BUILTIN_TOKENS`, matched
+  by ledger canister ID, when mapping built-in metadata. `mapIcrcToken` accepts
+  that ID without importing the catalog into worker-shared utilities.
+  This preserves picks made before the custom-token store loads. At the ICRC
+  auto-enable boundary, Swap resolves the current entry by ledger canister ID
+  to use its backend version and effective enabled state.
 - **Compare the object, never its description.** `TokenId.description` _is_ the
   ticker — it comes from `parseTokenId(symbol)`
   ([`$eth/utils/erc20.utils.ts`](../../../src/frontend/src/eth/utils/erc20.utils.ts),
   [`$icp/utils/icrc.utils.ts`](../../../src/frontend/src/icp/utils/icrc.utils.ts)).
   Two distinct contracts on the same network can share a ticker, so a ticker is
   not unique and is not a key.
+- Lists carrying loaded token metadata and backend versions must propagate updates even when IDs
+  and `enabled` flags stay the same. Use `derived` for these lists (`icrc.derived`,
+  `all-tokens.derived` and `all-network-tokens.derived`); `tokenListEqual` only compares membership,
+  order and enabled state.
 - No `TokenId` reachable? Key on the stable asset identifier — contract address
   / ledger canister ID / canister ID, e.g. `getTokenIdentifier` from
   [`$lib/utils/identifier.utils.ts`](../../../src/frontend/src/lib/utils/identifier.utils.ts)
   — combined with the network. Never the ticker.
+
+## Liquidium rows — the rail is in `liquidium_chain`
+
+A Liquidium `ActiveUserTransaction` stores the asset's ck ledger as
+`data.Liquidium.token` on every rail, native BTC included
+([`liquidiumAssetTokenId`](../../../src/frontend/src/lib/utils/liquidium.utils.ts)).
+So `token` names the pool's asset, not how the funds moved. Code that needs the
+rail reads the `liquidium_chain` external ref
+(`LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN` in
+[`$lib/types/liquidium-active-tx.ts`](../../../src/frontend/src/lib/types/liquidium-active-tx.ts)),
+which holds the SDK `Chain` (`BTC`, `ETH`, `ICP`, `SOL`).
+
+- Only supply and repay write it (`executeLiquidiumSupply`,
+  `executeLiquidiumRepay`). A rail check on borrow or withdraw rows has to add
+  it to those services first.
+- The ref wins when present. Rows written before it have none: for those,
+  `isNativeBtcTransfer` in
+  [`liquidium-active-tx.services.ts`](../../../src/frontend/src/lib/services/liquidium-active-tx.services.ts)
+  takes a row as native BTC when its `asset_symbol` is `BTC` and its txid
+  matches `BTC_TXID_REGEX` (64 hex), since a ckBTC row's txid is a ledger block
+  index. A new rail has no such rows and needs no fallback.
+- Don't switch `token` to a native token id to tell rails apart: stored rows
+  carry the ck ledger, and it names the asset the same way on every rail.
+- Test a rail check with rows the real services wrote (`writeRow` in
+  `liquidium-active-tx.services.spec.ts`), not hand-built ones.
 
 ## Svelte — runes for new code
 
@@ -371,6 +406,15 @@ the shared core rule, preserving its deprecated-package and `/dist/` import bans
   progress cues, not decorative motion. The pre-hydration loader in `app.html`
   follows the same rule, retaining its 30-second animation cap. Keep the owning
   controls' loading states, translated labels and accessibility semantics intact.
+- **First load (`reveal`):** the signed-in app layout fades the hero in, then
+  the page 60 ms later, the first time they show after a page load, and never
+  again: route changes and a hero that comes back appear at once. The
+  `reveal` utility (`global.scss`) only changes opacity, over 200 ms on a
+  spring sampled into `linear()`; `--reveal-step` sets its place in the
+  stagger. Under reduced motion it is a 100 ms fade with no stagger, and a
+  section that takes keyboard focus shows at once. The landing page keeps its
+  own `.landing-enter`. Don't add `reveal` to rows, cards or anything that
+  mounts as data arrives: it would fade in again each time.
 - **Progress steps (`ProgressSteps`):** a step's old marker leaves at once and
   the new one comes in. A finished or failed badge springs in over 440 ms on a
   spring sampled into CSS `linear()`, with an overshooting `cubic-bezier`

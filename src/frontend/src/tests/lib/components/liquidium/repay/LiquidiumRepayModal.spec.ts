@@ -1,4 +1,5 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import LiquidiumRepayModal from '$lib/components/liquidium/repay/LiquidiumRepayModal.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import {
@@ -11,6 +12,7 @@ import * as liquidiumSupplyServices from '$lib/services/liquidium-supply.service
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import {
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction
@@ -19,9 +21,15 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { runResolvedPromises } from '$tests/utils/timers.test-utils';
+import type { InflowFeeEstimate } from '@liquidium/client';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import { readable, writable, type Writable } from 'svelte/store';
+
+vi.mock('$sol/api/solana.api', () => ({
+	estimatePriorityFee: vi.fn().mockResolvedValue(1_000_000n)
+}));
 
 describe('LiquidiumRepayModal', () => {
 	const reserve: LiquidiumReserve = {
@@ -78,7 +86,9 @@ describe('LiquidiumRepayModal', () => {
 		activeUserTransactionsStore.init(mockIdentity.getPrincipal());
 		activeUserTransactionsStore.upsert({ transaction: pendingRepay });
 
-		vi.spyOn(liquidiumSupplyServices, 'estimateLiquidiumInflowFee').mockResolvedValue(50n);
+		vi.spyOn(liquidiumSupplyServices, 'estimateLiquidiumInflowFee').mockResolvedValue({
+			totalFee: 50n
+		});
 		maxRepaySpy = vi
 			.spyOn(liquidiumRepayServices, 'getLiquidiumMaxRepayAmount')
 			.mockResolvedValue(100_000_000n);
@@ -88,6 +98,127 @@ describe('LiquidiumRepayModal', () => {
 		const { container } = render(LiquidiumRepayModal, { props: { reserve } });
 
 		await waitFor(() => expect(container).toHaveTextContent(en.liquidium.text.pending_repays));
+	});
+
+	it("quotes the provider fee for the reserve's pool as a repayment", async () => {
+		render(LiquidiumRepayModal, { props: { reserve } });
+
+		await waitFor(() =>
+			expect(liquidiumSupplyServices.estimateLiquidiumInflowFee).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				ethAddress: mockEthAddress,
+				asset: reserve.asset,
+				chain: reserve.chain,
+				poolId: reserve.poolId,
+				action: 'repayment'
+			})
+		);
+	});
+
+	// Without the quote's minimum the SOL wizard runs no small-repay check, and a native repay below
+	// what Liquidium credits would wait at the deposit address while the debt stays.
+	it("blocks a native SOL repay below the quote's minimum", async () => {
+		vi.spyOn(addressesStore, 'solAddressMainnet', 'get').mockImplementation(() =>
+			readable(mockSolAddress)
+		);
+		vi.mocked(liquidiumSupplyServices.estimateLiquidiumInflowFee).mockResolvedValue({
+			totalFee: 1_884_122n,
+			minimumSendAmount: 20_000_000n
+		});
+
+		const { container, getByPlaceholderText } = render(LiquidiumRepayModal, {
+			props: {
+				reserve: {
+					...reserve,
+					poolId: 'pool-sol',
+					asset: 'SOL',
+					chain: 'SOL',
+					borrowed: 1_000_000_000n,
+					borrowedDecimals: 9,
+					borrowedUsd: 150
+				}
+			}
+		});
+
+		await waitFor(() => expect(maxRepaySpy).toHaveBeenCalledOnce());
+
+		await fireEvent.input(getByPlaceholderText('0'), { target: { value: '0.01' } });
+
+		await waitFor(() =>
+			expect(container).toHaveTextContent(
+				replacePlaceholders(en.liquidium.text.repay_below_native_minimum, {
+					$amount: '0.018115878 SOL'
+				})
+			)
+		);
+	});
+
+	describe('a superseded fee quote', () => {
+		// The quote reruns whenever its inputs change: a rail picked from the list, or, as here, the
+		// Ethereum address that owns the profile. Either way the earlier quote is superseded.
+		const otherEthAddress = '0x2222222222222222222222222222222222222222' as EthAddress;
+		const currentFee = 50_000n;
+		const staleFee = 7_000_000n;
+
+		let address: Writable<OptionEthAddress>;
+		let settleStale: {
+			resolve?: (estimate: InflowFeeEstimate) => void;
+			reject?: (err: unknown) => void;
+		};
+
+		beforeEach(() => {
+			address = writable<OptionEthAddress>(mockEthAddress);
+			vi.spyOn(addressesStore, 'ethAddress', 'get').mockImplementation(() => address);
+
+			settleStale = {};
+
+			vi.mocked(liquidiumSupplyServices.estimateLiquidiumInflowFee)
+				.mockReturnValueOnce(
+					new Promise((resolve, reject) => {
+						settleStale = { resolve, reject };
+					})
+				)
+				.mockResolvedValue({ totalFee: currentFee });
+		});
+
+		const renderWithCurrentQuote = async (): Promise<HTMLElement> => {
+			const { container } = render(LiquidiumRepayModal, { props: { reserve } });
+
+			await waitFor(() =>
+				expect(liquidiumSupplyServices.estimateLiquidiumInflowFee).toHaveBeenCalledOnce()
+			);
+
+			address.set(otherEthAddress);
+
+			await waitFor(() =>
+				expect(liquidiumSupplyServices.estimateLiquidiumInflowFee).toHaveBeenCalledTimes(2)
+			);
+			await waitFor(() => expect(container).toHaveTextContent('0.0005'));
+
+			return container;
+		};
+
+		it('does not overwrite the current fee when it answers late', async () => {
+			const container = await renderWithCurrentQuote();
+
+			settleStale.resolve?.({ totalFee: staleFee });
+			await runResolvedPromises();
+			await runResolvedPromises();
+
+			expect(container).toHaveTextContent('0.0005');
+			expect(container).not.toHaveTextContent('0.07');
+		});
+
+		it('does not mark the current fee unavailable when it fails late', async () => {
+			const container = await renderWithCurrentQuote();
+
+			settleStale.reject?.(new Error('stale oracle price'));
+			await runResolvedPromises();
+			await runResolvedPromises();
+
+			expect(container).toHaveTextContent('0.0005');
+			expect(container).not.toHaveTextContent(en.liquidium.text.repay_prices_unavailable);
+		});
 	});
 
 	it('refetches the protocol max once a pending repay settles', async () => {

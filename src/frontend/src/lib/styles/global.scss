@@ -20,6 +20,12 @@ which breaks raw media queries like `(max-height: 68rem)`.
 @custom-variant h-md (@media (max-height: 68rem)); /* ~1090px */
 
 /*
+`h-sm:` - windows up to 950px tall, where the desktop sidebar's sections no longer fit
+without scrolling; it tightens their spacing (`navigation/NavigationMenu.svelte`).
+*/
+@custom-variant h-sm (@media (max-height: 59.375rem)); /* 950px */
+
+/*
 `header-band:` - from 768 px up to 68rem (1088 px), where the pinned app header's controls sit
 over the content column and a band in the page colour covers what scrolls under them once
 the page is scrolled (`hero/Header.svelte`). Anything else pinned to the top of the window
@@ -155,6 +161,34 @@ don't take it: they are the sign that work is happening.
 		& * {
 			animation: none !important;
 		}
+	}
+}
+
+/*
+`reveal` - a section fades in as it first appears, `--reveal-step` x 60 ms after the first one,
+over 200 ms on a spring sampled into `linear()`. Only opacity changes, so nothing moves or
+reflows. Under reduced motion it is a 100 ms fade with no stagger. A section that takes keyboard
+focus shows at once, so focus never lands on something still invisible. The signed-in app
+layout applies it once per page load.
+*/
+@keyframes reveal {
+	from {
+		opacity: 0;
+	}
+}
+
+@utility reveal {
+	animation: reveal 200ms linear(0, 0.5729, 0.8966, 0.9789, 0.996, 1, 1) both;
+	animation-delay: calc(var(--reveal-step, 0) * 60ms);
+
+	@media (prefers-reduced-motion: reduce) {
+		animation-duration: 100ms;
+		animation-timing-function: ease-out;
+		animation-delay: 0s;
+	}
+
+	&:focus-within {
+		opacity: 1 !important;
 	}
 }
 

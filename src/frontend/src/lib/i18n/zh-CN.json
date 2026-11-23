@@ -1438,6 +1438,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "兑换",
 			"select_destination_token": "选择接收的代币",
@@ -1491,6 +1494,25 @@
 			"gasless": "无需气费",
 			"swap_fees": "交易费",
 			"cross_chain_networks_info": "跨链网络信息",
+			"receive_shortcut_same_network": "",
+			"receive_shortcut_other_network": "",
+			"receive_shortcut_token_on_network": "",
+			"receive_shortcut_convert": "",
+			"receive_shortcut_convert_back": "",
+			"receive_shortcut_bridge_back": "",
+			"receive_shortcut_move": "",
+			"receive_shortcut_any_token": "",
+			"receive_shortcut_any_token_count": "",
+			"receive_shortcut_any_token_count_one": "",
+			"receive_shortcut_any_token_count_single": "",
+			"receive_shortcut_more": "",
+			"move_token_to": "",
+			"move_no_networks_title": "",
+			"move_no_networks_title_without_symbol": "",
+			"move_no_networks_description": "",
+			"move_networks_changed_title": "",
+			"move_networks_changed_description": "",
+			"as_token": "",
 			"two_swaps_info": "$oisy_short 只提供在你批准之前能够完全验证的兑换，而从 $sourceSymbol 到 $destinationSymbol 没有这样的直接兑换。不过，你可以先将 $sourceSymbol 兑换为 $intermediateSymbol，再将 $intermediateSymbol 兑换为 $destinationSymbol。",
 			"two_swaps_first_button": "先兑换为 $intermediateSymbol",
 			"near_intents_estimated_time": "",
@@ -2964,6 +2986,7 @@
 			"interest_accrued": "累计利息",
 			"debt_after_repay": "还款后债务",
 			"repay_exceeds_debt": "金额超过您的未偿债务。",
+			"repay_below_native_minimum": "",
 			"repay_prices_unavailable": "价格暂时不可用。加载完成前，还款功能已禁用。",
 			"repay_debt_unavailable": "您的未偿债务暂时不可用。加载完成前，还款功能已禁用。",
 			"repay_pending_covers_debt": "此仓位的一笔还款仍在处理中。完成后您可以继续还款。"

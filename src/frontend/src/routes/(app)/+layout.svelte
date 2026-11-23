@@ -60,6 +60,17 @@
 
 	let showHero = $derived((assetsRoute || transactionsRoute) && !nftsCollectionRoute);
 
+	// The hero and the page fade in the first time they show after a page load, and never again:
+	// the layout outlives route changes, so once the page's own fade ends, sections that mount
+	// later (the hero coming back, the next route) appear at once.
+	let revealing = $state(true);
+
+	const endReveal = ({ target, currentTarget }: AnimationEvent) => {
+		if (target === currentTarget) {
+			revealing = false;
+		}
+	};
+
 	$effect(() => {
 		token.set(nftsCollectionRoute ? ($pageNonFungibleToken ?? $pageToken) : $pageToken); // we could be on the nfts page without a pageNonFungibleToken set
 	});
@@ -129,15 +140,23 @@
 					{/snippet}
 
 					{#if showHero}
-						<Hero />
+						<div class:reveal={revealing}>
+							<Hero />
+						</div>
 					{/if}
 
 					<Loaders>
-						{#if assetsRoute}
-							<DappsCarousel wrapperStyleClass="mb-6 flex justify-center xl:hidden" />
-						{/if}
+						<div
+							style:--reveal-step={showHero ? 1 : 0}
+							class:reveal={revealing}
+							onanimationend={endReveal}
+						>
+							{#if assetsRoute}
+								<DappsCarousel wrapperStyleClass="mb-6 flex justify-center xl:hidden" />
+							{/if}
 
-						{@render children()}
+							{@render children()}
+						</div>
 					</Loaders>
 				</SplitPane>
 

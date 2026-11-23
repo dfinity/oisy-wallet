@@ -25,8 +25,12 @@ import {
 import * as liquidiumServices from '$lib/services/liquidium.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { liquidiumUnminedRepaysStore } from '$lib/stores/liquidium-unmined-repays.store';
+import { LiquidiumSolTransferRefusedError } from '$lib/types/errors';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
-import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
+import {
+	LIQUIDIUM_EXTERNAL_REF_KEYS,
+	type LiquidiumSolBlockhash
+} from '$lib/types/liquidium-active-tx';
 import type { Token, TokenId } from '$lib/types/token';
 import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -346,6 +350,7 @@ describe('liquidium-repay.services', () => {
 			expect(externalRefs).toEqual([
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'BTC' },
 				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId }
 			]);
 
@@ -356,6 +361,7 @@ describe('liquidium-repay.services', () => {
 				externalRefs: [
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'BTC' },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
 				]
@@ -518,6 +524,7 @@ describe('liquidium-repay.services', () => {
 				externalRefs: [
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'BTC' },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
 				]
@@ -725,6 +732,109 @@ describe('liquidium-repay.services', () => {
 					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
 				).not.toHaveBeenCalled();
 				expect(submit).not.toHaveBeenCalled();
+			});
+		});
+
+		describe('a native SOL transfer', () => {
+			const signature = 'sol-signature';
+			const solBlockhash: LiquidiumSolBlockhash = { blockhash: 'blockhash-1', slot: 42n };
+
+			// As `sendLiquidiumSol` does: `beforeBroadcast` with the blockhash and its valid slot, then
+			// the broadcast, which either goes out or fails with `failure`.
+			const broadcastSol = (failure?: unknown) =>
+				broadcast.mockImplementation(
+					async ({
+						beforeBroadcast
+					}: {
+						beforeBroadcast: (params: {
+							txid: string;
+							solBlockhash?: LiquidiumSolBlockhash;
+						}) => Promise<void>;
+					}) => {
+						await beforeBroadcast({ txid: signature, solBlockhash });
+
+						if (nonNullish(failure)) {
+							throw failure;
+						}
+
+						return signature;
+					}
+				);
+
+			const runSol = () =>
+				executeLiquidiumRepay({
+					identity: mockIdentity,
+					ethAddress,
+					poolId: 'pool-sol',
+					chain: 'SOL',
+					asset: 'SOL',
+					amount: 30_000_000n,
+					inflowFee: 1_884_122n,
+					displayAmount: '0.03',
+					progressStep: 'repaying',
+					broadcast
+				});
+
+			const rowId = () => createActiveUserTransaction.mock.calls[0]?.[0].id;
+
+			beforeEach(() => {
+				supply.mockResolvedValue(
+					buildFlow({
+						poolId: 'pool-sol',
+						asset: 'SOL',
+						chain: 'SOL',
+						action: 'repayment',
+						address: 'GXVewvv6HehcLFYCmwpqh5CrMjqN9zJ8rqzGq3HEt9Ax'
+					})
+				);
+			});
+
+			// Each write replaces the refs, so the poller would lose the blockhash if the one after the
+			// broadcast left it out.
+			it('records the blockhash and its valid slot with the txid, before the broadcast and after it', async () => {
+				broadcastSol();
+
+				await runSol();
+
+				const write = {
+					identity: mockIdentity,
+					id: rowId(),
+					externalRefs: expect.arrayContaining([
+						{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'SOL' },
+						{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: signature },
+						{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.SOL_BLOCKHASH, value: 'blockhash-1' },
+						{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.SOL_BLOCKHASH_SLOT, value: '42' }
+					])
+				};
+
+				expect(updateActiveUserTransaction).toHaveBeenCalledTimes(2);
+				expect(updateActiveUserTransaction).toHaveBeenNthCalledWith(1, write);
+				expect(updateActiveUserTransaction).toHaveBeenNthCalledWith(2, write);
+				expect(submit).toHaveBeenCalledExactlyOnceWith({ txid: signature });
+			});
+
+			it('deletes the row, with retries, when the transfer was never sent', async () => {
+				const refused = new LiquidiumSolTransferRefusedError({ cause: new Error('preflight') });
+				broadcastSol(refused);
+
+				await expect(runSol()).rejects.toBe(refused);
+
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity, id: rowId() });
+				expect(submit).not.toHaveBeenCalled();
+			});
+
+			it('keeps the row when the SOL may have left', async () => {
+				const unclear = new Error('confirmation timed out');
+				broadcastSol(unclear);
+
+				await expect(runSol()).rejects.toBe(unclear);
+
+				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).not.toHaveBeenCalled();
 			});
 		});
 	});
