@@ -117,7 +117,9 @@ Because the re-request is automatic, **Use my own cycles** only appears once OIS
 
 ## 8. Delivery plan
 
-1. **Phase 1:** one PR with this spec, the frontend changes and `docs/ai/PRODUCT.md`. Translations may follow in their own PR.
+This spec lands in its own PR, at the bottom of a GitHub stack. The phases follow in PRs on top of it.
+
+1. **Phase 1:** one or more frontend PRs, each with its `docs/ai/PRODUCT.md` update. Translations may follow in their own PR.
 2. **Phase 2:** the backend charges its costly calls to the OISY allowance, the frontend handles its allowance errors, and `PRODUCT.md` is updated.
 3. **Phase 3:** the approval step, the Tools card, the payment-type switch, banner states a) and b), the backend accepting the user's cycles for its own calls, and `PRODUCT.md`.
 4. **Phase 4:** the cap, the smaller default grant and the new-user pool, with `PRODUCT.md`.
