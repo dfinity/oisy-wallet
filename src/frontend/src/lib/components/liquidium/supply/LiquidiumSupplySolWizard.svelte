@@ -19,15 +19,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
-	import {
-		LiquidiumSolBlockhashExpiredError,
-		LiquidiumSolTransferRefusedError
-	} from '$lib/types/errors';
+	import { LiquidiumSolTransferRefusedError } from '$lib/types/errors';
 	import type { LiquidiumMarket } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import { liquidiumSolRefusalMessage } from '$lib/utils/liquidium-sol.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 	import {
@@ -36,7 +34,6 @@
 		initFeeContext,
 		initFeeStore
 	} from '$sol/stores/sol-fee.store';
-	import { mapSolanaErrorMsg } from '$sol/utils/sol-error.utils';
 
 	interface Props {
 		market: LiquidiumMarket;
@@ -182,12 +179,7 @@
 			// (a Solana error, the expired blockhash) go to the console.
 			if (err instanceof LiquidiumSolTransferRefusedError) {
 				toastsErrorNoTrace({
-					msg: {
-						text:
-							err.cause instanceof LiquidiumSolBlockhashExpiredError
-								? $i18n.send.error.solana_transaction_expired
-								: (mapSolanaErrorMsg(err.cause) ?? $i18n.liquidium.text.transaction_failed)
-					},
+					msg: { text: liquidiumSolRefusalMessage({ cause: err.cause, i18n: $i18n }) },
 					err
 				});
 
