@@ -83,6 +83,10 @@ export const lifiChainIdOfTokenId = (tokenId: TokenId): number | undefined => {
 	if ('SplMainnet' in tokenId || 'SolNativeMainnet' in tokenId) {
 		return ChainId.SOL;
 	}
+
+	if ('BtcNativeMainnet' in tokenId) {
+		return ChainId.BTC;
+	}
 };
 
 /**
@@ -100,16 +104,24 @@ export interface LifiStatusUpdate {
 }
 
 /**
+ * What the Bitcoin network says of a BTC source transaction: confirmed, in a mempool, not known yet,
+ * or never reached the network (`isBtcTransactionNeverLanded`).
+ */
+export type LifiBtcSourceTxOutcome = 'succeeded' | 'pending' | 'unseen' | 'neverLanded';
+
+/**
  * The row's status while its source transaction is not confirmed yet, from the source chain's
- * verdict (EVM or Solana). A confirmed source settles a same-chain swap, which the poller writes,
- * and nothing else: from there, `/status` decides.
+ * verdict (EVM, Solana or Bitcoin). A confirmed source settles a same-chain swap, which the poller
+ * writes, and nothing else: from there, `/status` decides.
  */
 export const lifiSourceOutcomeToUpdate = (
-	outcome: EvmSourceTxOutcome | SolSourceTxOutcome
+	outcome: EvmSourceTxOutcome | SolSourceTxOutcome | LifiBtcSourceTxOutcome
 ): LifiStatusUpdate | undefined => {
 	switch (outcome) {
 		case 'pending':
 			return { status: { Executing: null } };
+		case 'neverLanded':
+			return { status: { Failed: null }, error: get(i18n).send.error.btc_transaction_never_landed };
 		case 'reverted':
 			return { status: { Failed: null }, error: get(i18n).swap.error.failed_unexpectedly };
 		case 'replaced':
@@ -377,7 +389,8 @@ const LIFI_TRANSACTION_ID_PATTERN = /^0x[0-9a-fA-F]{1,128}$/;
  *
  * Besides its hash or signature, an EVM source transaction is polled by the nonce it was signed with,
  * a Solana one by its recent blockhash and the slot OISY simulated it at, where that blockhash was
- * valid. A Solana row without that slot is polled all the same, its blockhash read unanchored.
+ * valid. A Solana row without that slot is polled all the same, its blockhash read unanchored. A BTC
+ * one is polled by its txid alone, so it has no `source`.
  */
 export const toLifiCreationRefs = ({
 	hash,
@@ -389,7 +402,7 @@ export const toLifiCreationRefs = ({
 	usdSourceValue
 }: {
 	hash: string;
-	source: { nonce: number } | { blockhash: string; simulationSlot?: bigint };
+	source?: { nonce: number } | { blockhash: string; simulationSlot?: bigint };
 	quote: Pick<LiFiStep, 'tool' | 'transactionId'>;
 	sourceToken: Token;
 	destinationToken: Token;
@@ -397,14 +410,16 @@ export const toLifiCreationRefs = ({
 	usdSourceValue?: string;
 }): Partial<Record<LifiExternalRefKey, string>> => ({
 	[LIFI_EXTERNAL_REF_KEYS.TX_HASH]: hash,
-	...('nonce' in source
-		? { [LIFI_EXTERNAL_REF_KEYS.TX_NONCE]: `${source.nonce}` }
-		: {
-				[LIFI_EXTERNAL_REF_KEYS.BLOCKHASH]: source.blockhash,
-				...(nonNullish(source.simulationSlot) && {
-					[LIFI_EXTERNAL_REF_KEYS.SIMULATION_SLOT]: `${source.simulationSlot}`
-				})
-			}),
+	...(isNullish(source)
+		? {}
+		: 'nonce' in source
+			? { [LIFI_EXTERNAL_REF_KEYS.TX_NONCE]: `${source.nonce}` }
+			: {
+					[LIFI_EXTERNAL_REF_KEYS.BLOCKHASH]: source.blockhash,
+					...(nonNullish(source.simulationSlot) && {
+						[LIFI_EXTERNAL_REF_KEYS.SIMULATION_SLOT]: `${source.simulationSlot}`
+					})
+				}),
 	...(LIFI_TOOL_PATTERN.test(tool) && { [LIFI_EXTERNAL_REF_KEYS.TOOL]: tool }),
 	...(nonNullish(transactionId) &&
 		LIFI_TRANSACTION_ID_PATTERN.test(transactionId) && {

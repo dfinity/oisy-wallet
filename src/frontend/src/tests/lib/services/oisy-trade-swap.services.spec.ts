@@ -40,6 +40,7 @@ import { SwapProvider, type SwapQuoteObserver } from '$lib/types/swap';
 import * as consoleUtils from '$lib/utils/console.utils';
 import { toOisyTradeExternalRefsMap } from '$lib/utils/oisy-trade-active-tx.utils';
 import * as walletUtils from '$lib/utils/wallet.utils';
+import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -1253,7 +1254,7 @@ describe('oisy-trade-swap.services', () => {
 			vi.mocked(createActiveUserTransaction).mockImplementation(() => {
 				calls.push('createRow');
 
-				return Promise.resolve();
+				return Promise.resolve(mockActiveUserTransaction);
 			});
 			approveSpy.mockImplementation(() => {
 				calls.push('approve');

@@ -124,7 +124,7 @@
 			return;
 		}
 
-		// ICP-chain assets (ICP / ckBTC / ckUSDC / ckUSDT) settle on their ICRC ledger.
+		// ICP-chain assets (ICP / ckBTC / ckETH / ckUSDC / ckUSDT / ckSOL) settle on their ICRC ledger.
 		const ledgerCanisterId = LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS[reserve.asset];
 
 		if (isNullish(ledgerCanisterId)) {

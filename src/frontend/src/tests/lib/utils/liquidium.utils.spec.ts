@@ -1,13 +1,16 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { IC_CKSOL_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { Token } from '$lib/types/token';
 import {
 	isLiquidiumInflowSubaccount,
+	liquidiumAssetTokenId,
 	liquidiumBorrowingPowerPotentialUsd,
 	liquidiumBorrowInterestUsd,
 	liquidiumEnabledRailToken,
@@ -50,6 +53,44 @@ import {
 	type UserPositionSummary,
 	type UserReserve
 } from '@liquidium/client';
+
+// SOL needs its flag and ckSOL in the build. Specs run as a local build, which has no ckSOL, so
+// the specs that need SOL switch ckSOL on.
+const solSupport = vi.hoisted(() => ({ flag: true, cksol: false }));
+
+vi.mock(import('$env/liquidium'), async (importOriginal) => ({
+	...(await importOriginal()),
+	get LIQUIDIUM_SOL_ENABLED() {
+		return solSupport.flag;
+	}
+}));
+
+vi.mock(import('$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env'), async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...actual,
+		get CKSOL_IC_DATA() {
+			return solSupport.cksol
+				? {
+						ledgerCanisterId: actual.IC_CKSOL_LEDGER_CANISTER_ID,
+						minterCanisterId: actual.IC_CKSOL_MINTER_CANISTER_ID
+					}
+				: undefined;
+		}
+	};
+});
+
+const withSol = () => {
+	solSupport.cksol = true;
+};
+
+const ckSolToken = {
+	...mockValidIcCkToken,
+	id: parseTokenId('ckSOL'),
+	symbol: 'ckSOL',
+	network: ICP_TOKEN.network
+} as Token;
 
 // rateDecimals = 2 keeps the scaled rate fixtures readable (5n → 5%).
 const buildPool = (overrides: Partial<Pool> = {}): Pool => ({
@@ -102,6 +143,19 @@ const buildPosition = (overrides: Partial<Position> = {}): Position => ({
 const scaledHealth = (percent: bigint): bigint => (percent * HEALTH_FACTOR_SCALE) / 100n;
 
 describe('liquidium.utils', () => {
+	beforeEach(() => {
+		solSupport.flag = true;
+		solSupport.cksol = false;
+	});
+
+	describe('liquidiumAssetTokenId', () => {
+		it('keys a SOL row by the ckSOL ledger, whichever rail funded it', () => {
+			expect(liquidiumAssetTokenId('SOL')).toEqual({
+				Icrc: Principal.fromText(IC_CKSOL_LEDGER_CANISTER_ID)
+			});
+		});
+	});
+
 	describe('mapLiquidiumMarket', () => {
 		it('maps rates to percentages and reports availability', () => {
 			expect(mapLiquidiumMarket(buildPool())).toEqual({
@@ -160,6 +214,23 @@ describe('liquidium.utils', () => {
 		it('offers only the ICP rail for ICP', () => {
 			expect(liquidiumSupportedRails('ICP')).toEqual(['ICP']);
 		});
+
+		it('offers no rails for SOL without ckSOL in the build', () => {
+			expect(liquidiumSupportedRails('SOL')).toEqual([]);
+		});
+
+		it('offers only the ckSOL rail for SOL, native SOL being pending', () => {
+			withSol();
+
+			expect(liquidiumSupportedRails('SOL')).toEqual(['ICP']);
+		});
+
+		it('offers no rails for SOL with its flag off', () => {
+			withSol();
+			solSupport.flag = false;
+
+			expect(liquidiumSupportedRails('SOL')).toEqual([]);
+		});
 	});
 
 	describe('mapLiquidiumMarketRails', () => {
@@ -182,6 +253,23 @@ describe('liquidium.utils', () => {
 
 			expect(markets).toHaveLength(1);
 			expect(markets[0].chain).toBe('ICP');
+		});
+
+		it('maps no markets for the SOL pool without ckSOL in the build', () => {
+			expect(
+				mapLiquidiumMarketRails(buildPool({ id: 'pool-sol', asset: 'SOL', chain: 'SOL' }))
+			).toEqual([]);
+		});
+
+		it('maps the SOL pool to its ckSOL market alone', () => {
+			withSol();
+
+			const markets = mapLiquidiumMarketRails(
+				buildPool({ id: 'pool-sol', asset: 'SOL', chain: 'SOL' })
+			);
+
+			expect(markets).toHaveLength(1);
+			expect(markets[0]).toMatchObject({ poolId: 'pool-sol', asset: 'SOL', chain: 'ICP' });
 		});
 	});
 
@@ -240,6 +328,25 @@ describe('liquidium.utils', () => {
 
 			expect(rails).toHaveLength(1);
 			expect(rails[0].chain).toBe('ETH');
+		});
+
+		it('keeps a SOL position on its own chain only without ckSOL in the build', () => {
+			const rails = liquidiumReserveRails(
+				buildReserve({ poolId: 'pool-sol', asset: 'SOL', chain: 'SOL' })
+			);
+
+			expect(rails).toHaveLength(1);
+			expect(rails[0].chain).toBe('SOL');
+		});
+
+		it('offers a SOL position on its ckSOL rail alone', () => {
+			withSol();
+
+			const rails = liquidiumReserveRails(
+				buildReserve({ poolId: 'pool-sol', asset: 'SOL', chain: 'SOL' })
+			);
+
+			expect(rails.map(({ chain }) => chain)).toEqual(['ICP']);
 		});
 	});
 
@@ -1008,7 +1115,18 @@ describe('liquidium.utils', () => {
 
 		it('returns undefined for an unsupported (chain, asset) pair', () => {
 			expect(liquidiumMarketToken({ chain: 'BTC', asset: 'USDC', tokens: [] })).toBeUndefined();
-			expect(liquidiumMarketToken({ chain: 'SOL', asset: 'SOL', tokens: [] })).toBeUndefined();
+			expect(liquidiumMarketToken({ chain: 'SOL', asset: 'USDC', tokens: [] })).toBeUndefined();
+		});
+
+		it('resolves native SOL on the SOL chain, which a SOL position carries', () => {
+			expect(liquidiumMarketToken({ chain: 'SOL', asset: 'SOL', tokens: [] })).toBe(SOLANA_TOKEN);
+		});
+
+		it('resolves ckSOL on the ICP chain from its twin in the list', () => {
+			expect(liquidiumMarketToken({ chain: 'ICP', asset: 'SOL', tokens: [ckSolToken] })).toBe(
+				ckSolToken
+			);
+			expect(liquidiumMarketToken({ chain: 'ICP', asset: 'SOL', tokens: [] })).toBeUndefined();
 		});
 	});
 
@@ -1091,6 +1209,28 @@ describe('liquidium.utils', () => {
 					asset: 'SOL',
 					enabledTokens: [BTC_MAINNET_TOKEN]
 				})
+			).toBeUndefined();
+		});
+
+		it('resolves the ckSOL rail from the enabled twin when SOL is supported', () => {
+			withSol();
+
+			expect(
+				liquidiumEnabledRailToken({ chain: 'ICP', asset: 'SOL', enabledTokens: [ckSolToken] })
+			).toBe(ckSolToken);
+		});
+
+		it('rejects the ckSOL rail without ckSOL in the build', () => {
+			expect(
+				liquidiumEnabledRailToken({ chain: 'ICP', asset: 'SOL', enabledTokens: [ckSolToken] })
+			).toBeUndefined();
+		});
+
+		it('rejects the pending native SOL rail even with SOL enabled', () => {
+			withSol();
+
+			expect(
+				liquidiumEnabledRailToken({ chain: 'SOL', asset: 'SOL', enabledTokens: [SOLANA_TOKEN] })
 			).toBeUndefined();
 		});
 	});
