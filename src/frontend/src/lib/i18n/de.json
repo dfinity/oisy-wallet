@@ -2885,6 +2885,8 @@
 			"borrow_at_risk_warning": "Diese Kreditaufnahme senkt deinen Gesundheitsfaktor spürbar.",
 			"borrow_exceeds_power": "Der Betrag übersteigt deinen Kreditrahmen.",
 			"borrow_below_minimum": "Der Betrag liegt unter dem Mindestkreditbetrag.",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "Preise sind vorübergehend nicht verfügbar. Ausleihen ist deaktiviert, bis sie geladen sind.",
 			"borrow_high_risk_warning": "Diese Kreditaufnahme bringt deine Position nahe an die Liquidation.",
 			"borrow_risk_confirm": "Mir ist bewusst, dass diese Kreditaufnahme mein Liquidationsrisiko erhöht.",

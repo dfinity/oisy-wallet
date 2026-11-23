@@ -2885,6 +2885,8 @@
 			"borrow_at_risk_warning": "Ta pożyczka wyraźnie obniża twój wskaźnik zdrowia.",
 			"borrow_exceeds_power": "Kwota przekracza twoją zdolność pożyczkową.",
 			"borrow_below_minimum": "Kwota jest niższa niż minimalna pożyczka.",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "Ceny są tymczasowo niedostępne. Pożyczanie jest wyłączone do czasu ich wczytania.",
 			"borrow_high_risk_warning": "Ta pożyczka zbliża twoją pozycję do likwidacji.",
 			"borrow_risk_confirm": "Rozumiem, że ta pożyczka zwiększa moje ryzyko likwidacji.",

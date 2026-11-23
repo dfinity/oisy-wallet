@@ -219,10 +219,10 @@ describe('liquidium.utils', () => {
 			expect(liquidiumSupportedRails('SOL')).toEqual([]);
 		});
 
-		it('offers only the ckSOL rail for SOL, native SOL being pending', () => {
+		it('offers the native + ICP (ck) rails for SOL', () => {
 			withSol();
 
-			expect(liquidiumSupportedRails('SOL')).toEqual(['ICP']);
+			expect(liquidiumSupportedRails('SOL')).toEqual(['SOL', 'ICP']);
 		});
 
 		it('offers no rails for SOL with its flag off', () => {
@@ -261,15 +261,16 @@ describe('liquidium.utils', () => {
 			).toEqual([]);
 		});
 
-		it('maps the SOL pool to its ckSOL market alone', () => {
+		it('maps the SOL pool to a native SOL and a ckSOL market', () => {
 			withSol();
 
 			const markets = mapLiquidiumMarketRails(
 				buildPool({ id: 'pool-sol', asset: 'SOL', chain: 'SOL' })
 			);
 
-			expect(markets).toHaveLength(1);
-			expect(markets[0]).toMatchObject({ poolId: 'pool-sol', asset: 'SOL', chain: 'ICP' });
+			expect(markets).toHaveLength(2);
+			expect(markets[0]).toMatchObject({ poolId: 'pool-sol', asset: 'SOL', chain: 'SOL' });
+			expect(markets[1]).toMatchObject({ poolId: 'pool-sol', asset: 'SOL', chain: 'ICP' });
 		});
 	});
 
@@ -339,14 +340,14 @@ describe('liquidium.utils', () => {
 			expect(rails[0].chain).toBe('SOL');
 		});
 
-		it('offers a SOL position on its ckSOL rail alone', () => {
+		it('offers a SOL position on its native and ckSOL rails', () => {
 			withSol();
 
 			const rails = liquidiumReserveRails(
 				buildReserve({ poolId: 'pool-sol', asset: 'SOL', chain: 'SOL' })
 			);
 
-			expect(rails.map(({ chain }) => chain)).toEqual(['ICP']);
+			expect(rails.map(({ chain }) => chain)).toEqual(['SOL', 'ICP']);
 		});
 	});
 
@@ -1226,11 +1227,19 @@ describe('liquidium.utils', () => {
 			).toBeUndefined();
 		});
 
-		it('rejects the pending native SOL rail even with SOL enabled', () => {
+		it('resolves the native SOL rail when SOL is supported and Solana enabled', () => {
 			withSol();
 
 			expect(
 				liquidiumEnabledRailToken({ chain: 'SOL', asset: 'SOL', enabledTokens: [SOLANA_TOKEN] })
+			).toBe(SOLANA_TOKEN);
+		});
+
+		it('rejects the native SOL rail with Solana disabled', () => {
+			withSol();
+
+			expect(
+				liquidiumEnabledRailToken({ chain: 'SOL', asset: 'SOL', enabledTokens: [ckSolToken] })
 			).toBeUndefined();
 		});
 	});

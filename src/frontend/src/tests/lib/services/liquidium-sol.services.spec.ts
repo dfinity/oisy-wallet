@@ -1,6 +1,15 @@
+import {
+	IC_CKSOL_LEDGER_CANISTER_ID,
+	IC_CKSOL_MINTER_CANISTER_ID
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { minterInfo } from '$icp/api/cksol-minter.api';
+import { transactionFee } from '$icp/api/icrc-ledger.api';
 import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
-import { sendLiquidiumSol } from '$lib/services/liquidium-sol.services';
+import {
+	getLiquidiumSolNativeOutflowMinimum,
+	sendLiquidiumSol
+} from '$lib/services/liquidium-sol.services';
 import {
 	LiquidiumSolBlockhashExpiredError,
 	LiquidiumSolTransferRefusedError
@@ -14,6 +23,11 @@ import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 
 vi.mock('$sol/services/sol-send.services', () => ({ sendSol: vi.fn() }));
+vi.mock('$icp/api/cksol-minter.api', () => ({ minterInfo: vi.fn() }));
+vi.mock(import('$icp/api/icrc-ledger.api'), async (importOriginal) => ({
+	...(await importOriginal()),
+	transactionFee: vi.fn()
+}));
 vi.mock('$sol/api/solana.api', () => ({ isBlockhashValid: vi.fn() }));
 vi.mock(import('$sol/utils/sol-error.utils'), async (importOriginal) => ({
 	...(await importOriginal()),
@@ -21,6 +35,55 @@ vi.mock(import('$sol/utils/sol-error.utils'), async (importOriginal) => ({
 }));
 
 describe('liquidium-sol.services', () => {
+	describe('getLiquidiumSolNativeOutflowMinimum', () => {
+		// Mainnet today: a 0.002 SOL minimum withdrawal and a 500-lamport ckSOL ledger fee.
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.mocked(minterInfo).mockResolvedValue({
+				deposit_sol_fee: 45_000_000_000n,
+				balance: 995_500n,
+				withdrawal_fee: 1_000_000n,
+				minimum_deposit_amount: 20_000_000n,
+				deposit_sol_required_cycles: 1_000_000_000_000n,
+				nonce_accounts: [],
+				minimum_withdrawal_amount: 2_000_000n,
+				minter_address: [],
+				automatic_deposit_fee: [],
+				collected_automatic_deposit_fees: []
+			});
+			vi.mocked(transactionFee).mockResolvedValue(500n);
+		});
+
+		it("is the minter's minimum withdrawal plus two ckSOL ledger fees", async () => {
+			await expect(getLiquidiumSolNativeOutflowMinimum()).resolves.toBe(2_001_000n);
+		});
+
+		it('reads the ckSOL minter and ledger uncertified', async () => {
+			await getLiquidiumSolNativeOutflowMinimum();
+
+			expect(minterInfo).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID,
+					certified: false
+				})
+			);
+			expect(transactionFee).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID,
+					certified: false
+				})
+			);
+		});
+
+		it('fails when the minter cannot be read', async () => {
+			const err = new Error('minter unreachable');
+			vi.mocked(minterInfo).mockRejectedValue(err);
+
+			await expect(getLiquidiumSolNativeOutflowMinimum()).rejects.toBe(err);
+		});
+	});
+
 	describe('sendLiquidiumSol', () => {
 		const signature = mockSolSignature();
 		const blockhash = 'EkSnNWid2cvwEVnVx9aBqawnmiCNiDgp3gUdkDPTKN1N';

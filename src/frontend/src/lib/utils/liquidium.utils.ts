@@ -14,7 +14,6 @@ import {
 	LIQUIDIUM_HEALTH_CRITICAL_PERCENT,
 	LIQUIDIUM_INFLOW_SUBACCOUNT_PURPOSES,
 	LIQUIDIUM_NETWORK_ORDER,
-	LIQUIDIUM_PENDING_RAILS,
 	LIQUIDIUM_POOL_ORDER,
 	LIQUIDIUM_SUPPORTED_ASSETS,
 	type LiquidiumHealthLevel
@@ -100,8 +99,7 @@ export const liquidiumMarketToken = ({
 };
 
 // Display token for a rail the user can actually transact on, for the modal pickers. A rail OISY
-// doesn't transact on gets none, even when its token resolves for display (native SOL, which a
-// position shows with but no wizard sends yet).
+// doesn't transact on gets none, even when its token resolves for display.
 export const liquidiumEnabledRailToken = ({
 	chain,
 	asset,
@@ -324,15 +322,10 @@ export const mapLiquidiumMarket = (pool: Pool): LiquidiumMarket => ({
 // rail where the protocol offers one. A single lending pool is shared across rails (e.g.
 // ETH/USDC and ICP/ckUSDC settle in the same USDC pool), so this is a per-asset transfer
 // choice, not separate pools. Derived from the SDK's own identifier guard so it stays
-// correct if the protocol adds pairs; none for an unsupported asset, and never a pending rail
-// (LIQUIDIUM_PENDING_RAILS).
+// correct if the protocol adds pairs; none for an unsupported asset.
 export const liquidiumSupportedRails = (asset: string): string[] =>
 	isLiquidiumAssetSupported(asset)
-		? Object.values(Chain).filter(
-				(chain) =>
-					isAssetIdentifier({ chain, asset }) &&
-					!LIQUIDIUM_PENDING_RAILS.some((rail) => rail.asset === asset && rail.chain === chain)
-			)
+		? Object.values(Chain).filter((chain) => isAssetIdentifier({ chain, asset }))
 		: [];
 
 // SOL needs ckSOL in the build as well as its flag: ckSOL exists on staging, beta and production
