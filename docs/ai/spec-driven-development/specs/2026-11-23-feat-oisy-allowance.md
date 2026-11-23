@@ -14,7 +14,7 @@ The rest of the spec uses these terms with exactly this meaning.
   - **Granted:** the backend sets a new OISY allowance.
   - **Skipped:** the backend sets no new OISY allowance because the OISY allowance is at or above the OISY allowance threshold.
   - **Refused:** the backend returns an error and sets no new OISY allowance.
-- **Allowance issue:** a global state. It's set when the AR that follows an Insufficient allowance is Refused, and cleared when an AR is Granted.
+- **Allowance issue:** a global state. It's set when the AR that follows an Insufficient allowance is Refused, and cleared when an AR is Granted or Skipped.
 - **AR cooldown:** while Allowance issue is set, the minute after each Refused AR. During it, OISY sends no AR.
 
 ## 2. Goal
@@ -70,7 +70,7 @@ The phases ship one by one, in this order. Each is useful on its own.
 
 - While Allowance issue is set, a global banner says the OISY allowance is limited and some transactions may fail. It can't be closed.
 - The banner has a **Retry** button that sends an AR. It's disabled during the AR cooldown.
-- Any Granted AR clears Allowance issue: from **Retry**, from an AR after Insufficient allowance, or at app load.
+- Any Granted or Skipped AR clears Allowance issue: from **Retry**, from an AR after Insufficient allowance, or at app load. A Skipped AR means the OISY allowance is at or above the OISY allowance threshold, for example after another tab or device got a Granted AR.
 - **No global blocking.** Allowance issue disables no feature, since no CC's price is known. Only the form whose CC just failed disables its main button.
 
 ### 4.6 CCs without a form
@@ -149,7 +149,7 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 7. Refused: the form shows the warning, disables its main button and sets Allowance issue.
 8. Skipped with no larger OISY allowance: the form shows the warning that the transaction costs more than the OISY allowance covers and disables its main button, without setting Allowance issue.
 9. While Allowance issue is set, the banner shows, can't be closed and offers **Retry**, which is disabled during the AR cooldown.
-10. Any Granted AR clears Allowance issue.
+10. Any Granted or Skipped AR clears Allowance issue.
 11. Allowance issue alone disables no feature.
 12. Every flow that makes CCs reaches these outcomes instead of a generic or technical error. That covers send, swap, approve, permit, ERC-4626, NFT transfer, OpenCryptoPay, WalletConnect and Liquidium, on BTC, ETH/EVM, SOL and XRP. The BTC backend send's "sign out and back in" message is replaced too.
 13. Every other CC result, `InsufficientFunds` included, keeps today's handling, and ICP and ICRC sends are unaffected.
@@ -165,21 +165,20 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 
 1. **Phase 2 calls.** Which user-triggered backend calls cost cycles beyond their execution, and how much each?
 2. **BTC balance route.** Will the certified BTC balance through the backend, on local and staging today, reach production before phase 1 ships?
-3. **Phase 3, backend CCs.** How does a user pay the backend's CCs with their own cycles: a second approval, with the backend as spender, or another way? This depends on pending decision 2.
+3. **Phase 3, backend CCs.** How does a user pay the backend's CCs with their own cycles: a second approval, with the backend as spender, or another way? This depends on pending decision 3.
 
 ## 11. Pending decisions (facts are clear — we just need to decide)
 
+Numbers stay fixed: a resolved decision keeps its number, and a new one gets the next free number.
+
 1. **BTC balance fallback: phase 1 or phase 2?** In production, the certified BTC balance is a CC today, so it can return Insufficient allowance in phase 1. If the backend route reaches production first (open question 2), it becomes a phase 2 CC.
-2. **Phase 2 mechanics.** How does the backend charge a CC to the one OISY allowance? Lowering the approval costs a ledger fee per change, often more than the call itself. A counter kept by the backend avoids that fee.
-3. **The disabled main button.** After a Refused AR, does the form's main button enable again when Allowance issue is cleared, for example by a Granted AR after a CC without a form?
-4. **Skipped while Allowance issue is set.** When another tab or device got a new OISY allowance, an AR from **Retry** is Skipped, not Granted, so Allowance issue stays set. Should a Skipped AR clear it too?
-5. **Phase 3 with an active approval.** After a Refused AR, the form would disable its main button although the next try would be charged to the user's own cycles. Should the button stay enabled then, with a note that the next try uses the user's own cycles?
-6. **Phase 4.** The cap size and period, the OISY allowance per Granted AR and the new-user pool.
-
-### Resolved
-
-- _Resolved:_ an AR that is Skipped after Insufficient allowance. The form compares the OISY allowance before and after (see 4.4).
-- _Resolved:_ ARs while Allowance issue is set. None during the AR cooldown (see 1 and 4.3).
+2. _Resolved:_ **Skipped after Insufficient allowance.** The form compares the OISY allowance stated before and after (see 4.4).
+3. **Phase 2 mechanics.** How does the backend charge a CC to the one OISY allowance? Lowering the approval costs a ledger fee per change, often more than the call itself. A counter kept by the backend avoids that fee.
+4. _Resolved:_ **ARs while Allowance issue is set.** None during the AR cooldown (see 1 and 4.3).
+5. **The disabled main button.** After a Refused AR, does the form's main button enable again when Allowance issue is cleared, for example by a Granted AR after a CC without a form?
+6. **Phase 3 with an active approval.** After a Refused AR, the form would disable its main button although the next try would be charged to the user's own cycles. Should the button stay enabled then, with a note that the next try uses the user's own cycles?
+7. **Phase 4.** The cap size and period, the OISY allowance per Granted AR and the new-user pool.
+8. _Resolved:_ **Skipped while Allowance issue is set.** A Skipped AR clears Allowance issue too, since the OISY allowance is then at or above the OISY allowance threshold (see 1 and 4.5).
 
 ## 12. Non-goals
 
