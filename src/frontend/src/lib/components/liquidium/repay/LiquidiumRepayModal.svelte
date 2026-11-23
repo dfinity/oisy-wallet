@@ -6,6 +6,7 @@
 	import LiquidiumRepayBtcWizard from '$lib/components/liquidium/repay/LiquidiumRepayBtcWizard.svelte';
 	import LiquidiumRepayEthWizard from '$lib/components/liquidium/repay/LiquidiumRepayEthWizard.svelte';
 	import LiquidiumRepayIcrcWizard from '$lib/components/liquidium/repay/LiquidiumRepayIcrcWizard.svelte';
+	import LiquidiumRepaySolWizard from '$lib/components/liquidium/repay/LiquidiumRepaySolWizard.svelte';
 	import LiquidiumRepayTokensList from '$lib/components/liquidium/repay/LiquidiumRepayTokensList.svelte';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
@@ -61,6 +62,8 @@
 
 	// Provider inflow fee for this asset (repayment is an inflow), passed to the wizard.
 	let inflowFee = $state<bigint | undefined>();
+	// SOL only: the least gross transfer Liquidium credits, which the native SOL form enforces.
+	let minimumSendAmount = $state<bigint | undefined>();
 	// The estimate failed (e.g. stale oracle price): surface a retry message and block submit.
 	// Account-based repay has no SDK-sanctioned fee fallback (that exists only for instant loans),
 	// so it degrades gracefully like Supply rather than guessing a fee.
@@ -102,6 +105,7 @@
 		const { asset, chain, poolId } = selectedReserve;
 
 		inflowFee = undefined;
+		minimumSendAmount = undefined;
 		inflowFeeUnavailable = false;
 
 		// A quote for a rail picked before must not overwrite the current one's.
@@ -116,9 +120,10 @@
 			poolId,
 			action: SupplyAction.repayment
 		})
-			.then(({ totalFee }) => {
+			.then(({ totalFee, minimumSendAmount: minimum }) => {
 				if (!cancelled) {
 					inflowFee = totalFee;
+					minimumSendAmount = minimum;
 				}
 			})
 			.catch((err: unknown) => {
@@ -218,6 +223,7 @@
 		selectedReserve = reserve;
 		amount = undefined;
 		inflowFee = undefined;
+		minimumSendAmount = undefined;
 		inflowFeeUnavailable = false;
 		maxRepay = undefined;
 		maxRepayUnavailable = false;
@@ -272,6 +278,24 @@
 					{inflowFeeUnavailable}
 					maxRepay={netMaxRepay}
 					{maxRepayUnavailable}
+					onBack={modal.back}
+					onClose={close}
+					onNext={modal.next}
+					onSelectToken={enterTokensList}
+					{pendingRepay}
+					portfolio={$liquidiumPortfolio}
+					reserve={liveReserve(selectedReserve)}
+					bind:amount
+					bind:repayProgressStep
+				/>
+			{:else if selectedReserve.chain === 'SOL'}
+				<LiquidiumRepaySolWizard
+					{currentStep}
+					{inflowFee}
+					{inflowFeeUnavailable}
+					maxRepay={netMaxRepay}
+					{maxRepayUnavailable}
+					{minimumSendAmount}
 					onBack={modal.back}
 					onClose={close}
 					onNext={modal.next}

@@ -2915,6 +2915,7 @@
 			"interest_accrued": "Interés acumulado",
 			"debt_after_repay": "Deuda después del reembolso",
 			"repay_exceeds_debt": "El importe supera tu deuda pendiente.",
+			"repay_below_native_minimum": "",
 			"repay_prices_unavailable": "Los precios no están disponibles temporalmente. El reembolso está deshabilitado hasta que se carguen.",
 			"repay_debt_unavailable": "Tu deuda pendiente no está disponible temporalmente. El reembolso está deshabilitado hasta que se cargue.",
 			"repay_pending_covers_debt": "Un reembolso de esta posición todavía se está procesando. Podrás reembolsar más cuando se complete."

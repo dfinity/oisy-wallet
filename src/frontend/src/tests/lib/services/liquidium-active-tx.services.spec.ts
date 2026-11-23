@@ -984,6 +984,62 @@ describe('liquidium-active-tx.services', () => {
 			expect(apply).not.toHaveBeenCalled();
 		});
 
+		// The row as the repay service leaves it: its last write, after the broadcast, replaces the refs,
+		// and must keep the blockhash and its slot for this check.
+		it('fails a repay whose transaction expired, from the refs of its last write', async () => {
+			readSolOutcome.mockResolvedValue('expired');
+
+			await executeLiquidiumRepay({
+				identity: mockIdentity,
+				ethAddress,
+				poolId: 'pool-sol',
+				chain: Chain.SOL,
+				asset: Asset.SOL,
+				amount: 30_000_000n,
+				inflowFee: 1_884_122n,
+				displayAmount: '0.03',
+				broadcast: async ({ beforeBroadcast }) => {
+					await beforeBroadcast({ txid: signature, solBlockhash });
+
+					return signature;
+				}
+			});
+
+			const [[{ id, data }]] = createTx.mock.calls;
+			const updateTx = vi.mocked(activeUserTransactionsServices.updateActiveUserTransaction);
+			const lastRefs = updateTx.mock.calls
+				.map(([params]) => params.externalRefs)
+				.filter(nonNullish)
+				.at(-1);
+
+			const tx: ActiveUserTransaction = {
+				id,
+				status: { Pending: null },
+				external_refs: lastRefs ?? [],
+				progress_step: [],
+				data,
+				updated_at_ns: ZERO,
+				error: [],
+				created_at_ns: ZERO
+			};
+
+			await poll(tx);
+
+			expect(readSolOutcome).toHaveBeenCalledExactlyOnceWith({
+				rowId: id,
+				signature,
+				blockhash: solBlockhash.blockhash,
+				minContextSlot: solBlockhash.slot,
+				network: SolanaNetworks.mainnet,
+				finalized: true
+			});
+			expect(apply).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					update: { status: { Failed: null }, error: en.liquidium.text.transaction_failed }
+				})
+			);
+		});
+
 		it('does not ask Solana about a ckSOL supply', async () => {
 			await poll(await writeSupplyRow(Chain.ICP));
 

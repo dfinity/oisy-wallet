@@ -114,7 +114,8 @@ The supply and repay modals quote the provider fee when a rail is picked (`estim
 - **ckSOL** through the existing ICRC repay wizard (`LiquidiumRepayIcrcWizard.svelte`).
 - **Native SOL** through a new `LiquidiumRepaySolWizard.svelte`, built like the supply wizard, using the repay service's existing lease and "record the txid before the broadcast" steps (`executeLiquidiumRepay` in `src/frontend/src/lib/services/liquidium-repay.services.ts`).
 - The repay service's refusal rule is BTC-only (`isDefinitiveBtcBroadcastRefusal`). Native SOL needs its own: nothing was sent only on `isSolSendRefusal` before the confirm step. Otherwise a refused SOL repay would keep counting against the repay maximum.
-- **Small native SOL repays:** the 0.02 SOL minimum applies to repayments too, so a debt smaller than that cannot be repaid exactly on the native rail. When the repayment plus fee would be below the minimum send, the form blocks the native repay and tells the user to repay with ckSOL, whose minimum is negligible. (Where the excess would go is Open question 2.)
+- The wizard sends through `sendLiquidiumSol` and toasts a refusal with the same translated messages as supply (`liquidiumSolRefusalMessage`). The repay service replaces a row's refs with each write, so it carries the SOL blockhash and slot on every write after `beforeBroadcast`, not only the first.
+- **Small native SOL repays:** the 0.02 SOL minimum applies to repayments too, so a debt smaller than that cannot be repaid exactly on the native rail. When the repayment plus fee would be below the minimum send, the form blocks the native repay and tells the user to repay with ckSOL, whose minimum is negligible (`liquidium.text.repay_below_native_minimum`, which names the net minimum at full precision). (Where the excess would go is Open question 2.)
 - `LiquidiumRepayModal.svelte` has the same ETH fall-through as supply and must dispatch `SOL` explicitly.
 
 ### Borrow and withdraw

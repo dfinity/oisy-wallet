@@ -2452,6 +2452,7 @@ interface I18nLiquidium {
 		interest_accrued: string;
 		debt_after_repay: string;
 		repay_exceeds_debt: string;
+		repay_below_native_minimum: string;
 		repay_prices_unavailable: string;
 		repay_debt_unavailable: string;
 		repay_pending_covers_debt: string;
