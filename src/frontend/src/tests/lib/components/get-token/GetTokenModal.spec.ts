@@ -387,17 +387,14 @@ describe('GetTokenModal', () => {
 				symbol: 'ckUSDC',
 				groupData: USDC_TOKEN_GROUP
 			});
-			// The only network is selected directly. Reopen the receive picker to enter Move.
+			// ICP reaches both Ethereum and Solana, so the shortcut opens Move rather than picking one.
 			await fireEvent.click(await rendered.findByTestId(SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK));
-			await waitFor(() =>
-				expect(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)).toHaveLength(2)
-			);
-			await fireEvent.click(rendered.getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON)[1]);
 			const list = await rendered.findByTestId(SWAP_RECEIVE_NETWORK_LIST);
 			const status = list.querySelector(':scope > [role="status"]');
 
 			expect(rendered.getByRole('dialog', { name: 'Move USDC to' })).toBeInTheDocument();
 			expect(within(list).getByRole('button', { name: /Ethereum/ })).toBeInTheDocument();
+			expect(within(list).getByRole('button', { name: /Solana/ })).toBeInTheDocument();
 			expect(status).toBeEmptyDOMElement();
 
 			rendered.universe.set([]);
