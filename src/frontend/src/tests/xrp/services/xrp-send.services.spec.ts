@@ -8,6 +8,7 @@ import * as activeUserTransactionsServices from '$lib/services/active-user-trans
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import { randomWait } from '$lib/utils/time.utils';
 import {
+	mockActiveUserTransaction,
 	mockLiquidiumActiveUserTransaction,
 	mockXrpActiveUserTransaction,
 	mockXrpData,
@@ -106,7 +107,9 @@ describe('xrp-send.services', () => {
 		// one between signing and submitting. Nothing open by default, so only the tests that care
 		// set a record.
 		vi.spyOn(backendApi, 'getActiveUserTransactions').mockResolvedValue(recordsResponse([]));
-		vi.spyOn(activeUserTransactionsServices, 'createActiveUserTransaction').mockResolvedValue();
+		vi.spyOn(activeUserTransactionsServices, 'createActiveUserTransaction').mockResolvedValue(
+			mockActiveUserTransaction
+		);
 	});
 
 	it('builds the payment from the reviewed fee and fetched sequence/ledger, then signs it', async () => {
@@ -1109,7 +1112,7 @@ describe('xrp-send.services', () => {
 			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockImplementation(
 				() => {
 					order.push('create');
-					return Promise.resolve();
+					return Promise.resolve(mockActiveUserTransaction);
 				}
 			);
 			vi.mocked(xrplRest.submitXrpTransaction).mockImplementation(() => {

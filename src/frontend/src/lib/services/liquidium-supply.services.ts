@@ -1,5 +1,5 @@
 import { isDefinitiveBtcBroadcastRefusal } from '$btc/utils/btc-send.utils';
-import type { EthAddress } from '$eth/types/address';
+import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import { liquidiumClient } from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
 import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
@@ -9,42 +9,65 @@ import {
 } from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
 import { getOrCreateLiquidiumProfile } from '$lib/services/liquidium.services';
-import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
+import { LiquidiumSolTransferRefusedError } from '$lib/types/errors';
+import {
+	LIQUIDIUM_EXTERNAL_REF_KEYS,
+	type LiquidiumSolBlockhash
+} from '$lib/types/liquidium-active-tx';
 import { consoleError } from '$lib/utils/console.utils';
 import {
 	liquidiumTrackingMetadata,
 	toLiquidiumExternalRefs
 } from '$lib/utils/liquidium-active-tx.utils';
 import { liquidiumAssetTokenId } from '$lib/utils/liquidium.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import {
 	SupplyAction,
 	type Asset,
-	type AssetIdentifier,
 	type Chain,
+	type EstimateInflowFeeRequest,
+	type InflowFeeEstimate,
 	type SupplyTarget
 } from '@liquidium/client';
 
-// Liquidium's per-inflow processing fee (base units of `asset`), deducted by the
-// protocol from each inflow.
+// Liquidium's per-inflow processing fee (`totalFee`, base units of `asset`), deducted by the
+// protocol from each inflow. For SOL and ckSOL the estimate also has `minimumSendAmount`, the least
+// gross transfer (amount + fee) that Liquidium credits.
+//
+// Liquidium quotes SOL and ckSOL per account: the quote needs the profile, the pool and what the
+// inflow is for. A first supply of SOL therefore creates the profile here, when the rail is picked,
+// rather than at submit as the other assets do.
 export const estimateLiquidiumInflowFee = async ({
 	identity,
+	ethAddress,
 	asset,
-	chain
+	chain,
+	poolId,
+	action
 }: {
 	identity: Identity;
+	ethAddress: OptionEthAddress;
 	asset: Asset;
 	chain: Chain;
-}): Promise<bigint> => {
-	// `asset`/`chain` reach us as the SDK's wide enums; the protocol only ships supported pairs.
-	// We type-assert to the correlated `AssetIdentifier` shape at this boundary to satisfy the SDK's typing.
-	const { totalFee } = await liquidiumClient({ identity }).lending.estimateInflowFee({
-		asset,
-		chain
-	} as AssetIdentifier);
+	poolId: string;
+	action: SupplyAction;
+}): Promise<InflowFeeEstimate> => {
+	const profileId = async (): Promise<string> => {
+		assertNonNullish(ethAddress, 'A SOL quote needs the Liquidium profile of the Ethereum address');
 
-	return totalFee;
+		return await getOrCreateLiquidiumProfile({ identity, ethAddress });
+	};
+
+	const accountQuote = asset === 'SOL' ? { poolId, action, profileId: await profileId() } : {};
+
+	// `asset`/`chain` reach us as the SDK's wide enums; the protocol only ships supported pairs.
+	// We type-assert to the correlated request shape at this boundary to satisfy the SDK's typing.
+	return await liquidiumClient({ identity }).lending.estimateInflowFee({
+		asset,
+		chain,
+		...accountQuote
+	} as EstimateInflowFeeRequest);
 };
 
 // Broadcasts `amount` base units (gross = supply + provider fee) to the native
@@ -57,7 +80,10 @@ export const estimateLiquidiumInflowFee = async ({
 export type LiquidiumSupplyBroadcast = (params: {
 	target: SupplyTarget;
 	amount: bigint;
-	beforeBroadcast: (params: { txid: string }) => Promise<void>;
+	beforeBroadcast: (params: {
+		txid: string;
+		solBlockhash?: LiquidiumSolBlockhash;
+	}) => Promise<void>;
 }) => Promise<string>;
 
 // Supplies `amount` (base units) of `asset`: resolve/create profile → broadcast the
@@ -114,19 +140,36 @@ export const executeLiquidiumSupply = async ({
 		}
 	};
 
-	const rowRefs = ({ txid }: { txid: string }) =>
+	const rowRefs = ({
+		txid,
+		solBlockhash
+	}: {
+		txid: string;
+		solBlockhash?: LiquidiumSolBlockhash;
+	}) =>
 		toLiquidiumExternalRefs({
 			[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+			[LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN]: chain,
 			[LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT]: displayAmount,
 			[LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL]: asset,
-			[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid
+			[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid,
+			...(nonNullish(solBlockhash) && {
+				[LIQUIDIUM_EXTERNAL_REF_KEYS.SOL_BLOCKHASH]: solBlockhash.blockhash,
+				[LIQUIDIUM_EXTERNAL_REF_KEYS.SOL_BLOCKHASH_SLOT]: `${solBlockhash.slot}`
+			})
 		});
 
 	// Written by `beforeBroadcast`, which only a transport that knows its txid before
 	// broadcasting calls: the supply is then tracked whatever the broadcast answers.
 	let rowId: string | undefined;
 
-	const openRow = async ({ txid }: { txid: string }) => {
+	const openRow = async ({
+		txid,
+		solBlockhash
+	}: {
+		txid: string;
+		solBlockhash?: LiquidiumSolBlockhash;
+	}) => {
 		const id = crypto.randomUUID();
 
 		try {
@@ -135,7 +178,7 @@ export const executeLiquidiumSupply = async ({
 				id,
 				data: rowData,
 				...(nonNullish(progressStep) ? { progressStep } : {}),
-				externalRefs: rowRefs({ txid })
+				externalRefs: rowRefs({ txid, solBlockhash })
 			});
 		} catch (err: unknown) {
 			// Not broadcast untracked. The backend may have committed the row all the same.
@@ -159,7 +202,10 @@ export const executeLiquidiumSupply = async ({
 	} catch (err: unknown) {
 		// A refusal outright sent nothing. After any other failure the transfer may have gone
 		// out, so its row stays until the poller settles it, and a retry cannot supply twice.
-		if (nonNullish(rowId) && isDefinitiveBtcBroadcastRefusal(err)) {
+		if (
+			nonNullish(rowId) &&
+			(isDefinitiveBtcBroadcastRefusal(err) || err instanceof LiquidiumSolTransferRefusedError)
+		) {
 			await deleteUnbroadcastActiveUserTransaction({ identity, id: rowId });
 		}
 

@@ -1,5 +1,6 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import { infuraProviders } from '$eth/providers/infura.providers';
+import type { EthAddress } from '$eth/types/address';
 import * as liquidiumApi from '$lib/api/liquidium.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS } from '$lib/constants/liquidium.constants';
@@ -8,19 +9,42 @@ import {
 	pollLiquidiumActiveUserTransactions,
 	resetLiquidiumRepayTxidObservations
 } from '$lib/services/liquidium-active-tx.services';
+import { executeLiquidiumRepay } from '$lib/services/liquidium-repay.services';
+import {
+	executeLiquidiumSupply,
+	type LiquidiumSupplyBroadcast
+} from '$lib/services/liquidium-supply.services';
+import * as liquidiumServices from '$lib/services/liquidium.services';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
+import { liquidiumAssetTokenId } from '$lib/utils/liquidium.utils';
+import { readSolSourceTxOutcome } from '$sol/services/sol-source-tx.services';
+import { SolanaNetworks } from '$sol/types/network';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { Activity, InflowActivity, LiquidiumState, OutflowActivity } from '@liquidium/client';
+import { nonNullish } from '@dfinity/utils';
+import {
+	Asset,
+	Chain,
+	type Activity,
+	type InflowActivity,
+	type LiquidiumState,
+	type OutflowActivity
+} from '@liquidium/client';
 
 vi.mock('$eth/providers/infura.providers', () => ({ infuraProviders: vi.fn() }));
 vi.mock('$lib/api/liquidium.api', () => ({ liquidiumClient: vi.fn() }));
 vi.mock('$lib/services/active-user-transactions.services', () => ({
 	applyActiveUserTransactionPollUpdate: vi.fn(),
+	createActiveUserTransaction: vi.fn(),
 	deleteActiveUserTransaction: vi.fn(),
+	deleteUnbroadcastActiveUserTransaction: vi.fn(),
 	isBtcTransactionNeverLanded: vi.fn(),
-	reloadActiveUserTransaction: vi.fn()
+	reloadActiveUserTransaction: vi.fn(),
+	updateActiveUserTransaction: vi.fn()
 }));
+vi.mock('$lib/services/liquidium.services', () => ({ getOrCreateLiquidiumProfile: vi.fn() }));
+vi.mock('$lib/services/analytics.services', () => ({ trackEvent: vi.fn() }));
+vi.mock('$sol/services/sol-source-tx.services', () => ({ readSolSourceTxOutcome: vi.fn() }));
 
 describe('liquidium-active-tx.services', () => {
 	const profileId = 'profile-1';
@@ -29,6 +53,7 @@ describe('liquidium-active-tx.services', () => {
 
 	const list = vi.fn();
 	const getStatus = vi.fn();
+	const supply = vi.fn();
 	const getTransactionReceipt = vi.fn();
 	const apply = vi.mocked(activeUserTransactionsServices.applyActiveUserTransactionPollUpdate);
 	const deleteTx = vi.mocked(activeUserTransactionsServices.deleteActiveUserTransaction);
@@ -44,7 +69,7 @@ describe('liquidium-active-tx.services', () => {
 		progress_step: [],
 		data: {
 			Liquidium: {
-				token: { SolNativeDevnet: null },
+				token: liquidiumAssetTokenId(Asset.BTC),
 				action: { Supply: null },
 				pool_id: poolId,
 				amount: 100n
@@ -110,7 +135,8 @@ describe('liquidium-active-tx.services', () => {
 		vi.clearAllMocks();
 		resetLiquidiumRepayTxidObservations();
 		vi.mocked(liquidiumApi.liquidiumClient).mockReturnValue({
-			activities: { list, getStatus }
+			activities: { list, getStatus },
+			lending: { supply }
 		} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
 		vi.mocked(infuraProviders, { partial: true }).mockReturnValue({
 			getTransactionReceipt
@@ -617,32 +643,80 @@ describe('liquidium-active-tx.services', () => {
 	// network is never listed, and would hold its amount for good.
 	describe('BTC rows whose transfer Liquidium does not list', () => {
 		const btcTxid = 'cd'.repeat(32);
+		const ckBtcBlockIndex = '39851427';
+		const ethAddress = '0x1111111111111111111111111111111111111111' as EthAddress;
 
-		const asBtc = (tx: ActiveUserTransaction): ActiveUserTransaction =>
-			'Liquidium' in tx.data
-				? {
-						...tx,
-						data: { Liquidium: { ...tx.data.Liquidium, token: { BtcNativeMainnet: null } } }
-					}
-				: tx;
+		const createTx = vi.mocked(activeUserTransactionsServices.createActiveUserTransaction);
+		const updateTx = vi.mocked(activeUserTransactionsServices.updateActiveUserTransaction);
 
-		const refs = {
-			[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
-			[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: btcTxid
+		type Action = 'supply' | 'repay';
+
+		// The row as the supply or repay service left it, which is what the backend hands the poller.
+		// Taken from the services' own writes, since a row built by hand hid that the check could never
+		// match one of them.
+		const writeRow = async ({
+			action,
+			chain,
+			asset = Asset.BTC,
+			txid,
+			unclearOutcome = false
+		}: {
+			action: Action;
+			chain: Chain;
+			asset?: Asset;
+			txid: string;
+			unclearOutcome?: boolean;
+		}): Promise<ActiveUserTransaction> => {
+			// A BTC transfer knows its txid before it goes out, and has the row record it first.
+			const broadcast: LiquidiumSupplyBroadcast = async ({ beforeBroadcast }) => {
+				if (chain === Chain.BTC) {
+					await beforeBroadcast({ txid });
+				}
+
+				if (unclearOutcome) {
+					throw new Error('No answer from the broadcast');
+				}
+
+				return txid;
+			};
+
+			const execute = action === 'supply' ? executeLiquidiumSupply : executeLiquidiumRepay;
+
+			const run = execute({
+				identity: mockIdentity,
+				ethAddress,
+				poolId,
+				chain,
+				asset,
+				amount: 100n,
+				inflowFee: 1n,
+				displayAmount: '0.000001',
+				broadcast
+			});
+
+			await (unclearOutcome ? expect(run).rejects.toThrow() : run);
+
+			const [[{ id, data, externalRefs }]] = createTx.mock.calls;
+
+			// A repay records its txid with a later write, which replaces the refs.
+			const latestRefs = updateTx.mock.calls
+				.map(([params]) => params.externalRefs)
+				.filter(nonNullish)
+				.at(-1);
+
+			return {
+				id,
+				status: { Pending: null },
+				external_refs: latestRefs ?? externalRefs,
+				progress_step: [],
+				data,
+				updated_at_ns: ZERO,
+				error: [],
+				created_at_ns: ZERO
+			};
 		};
 
-		beforeEach(() => {
-			list.mockResolvedValue([]);
-		});
-
-		it.each([
-			{ action: 'supply', tx: asBtc(buildTx(refs)) },
-			{ action: 'repay', tx: asBtc(buildRepayTx(refs)) }
-		])('fails a $action the network does not know, with its own message', async ({ tx }) => {
-			isNeverLanded.mockResolvedValue(true);
-
-			await poll(tx);
-
+		const expectFailedAsNeverLanded = (tx: ActiveUserTransaction) => {
 			expect(isNeverLanded).toHaveBeenCalledExactlyOnceWith({
 				id: tx.id,
 				txid: btcTxid,
@@ -653,21 +727,47 @@ describe('liquidium-active-tx.services', () => {
 					update: { status: { Failed: null }, error: en.send.error.btc_transaction_never_landed }
 				})
 			);
+		};
+
+		beforeEach(() => {
+			list.mockResolvedValue([]);
+			supply.mockResolvedValue({ target: { address: 'bc1qexample' }, submit: vi.fn() });
+			vi.mocked(liquidiumServices.getOrCreateLiquidiumProfile).mockResolvedValue(profileId);
 		});
 
+		it.each<{ action: Action; unclearOutcome: boolean }>([
+			{ action: 'supply', unclearOutcome: true },
+			{ action: 'repay', unclearOutcome: true },
+			{ action: 'supply', unclearOutcome: false },
+			{ action: 'repay', unclearOutcome: false }
+		])(
+			'fails a $action the network does not know (unclear outcome: $unclearOutcome), with its own message',
+			async ({ action, unclearOutcome }) => {
+				const tx = await writeRow({ action, chain: Chain.BTC, txid: btcTxid, unclearOutcome });
+
+				isNeverLanded.mockResolvedValue(true);
+
+				await poll(tx);
+
+				expectFailedAsNeverLanded(tx);
+			}
+		);
+
 		it('keeps a transfer the network knows', async () => {
-			await poll(asBtc(buildTx(refs)));
+			await poll(await writeRow({ action: 'supply', chain: Chain.BTC, txid: btcTxid }));
 
 			expect(isNeverLanded).toHaveBeenCalledOnce();
 			expect(apply).not.toHaveBeenCalled();
 		});
 
 		it('follows the activity once Liquidium lists the transfer, without asking the network', async () => {
+			const tx = await writeRow({ action: 'supply', chain: Chain.BTC, txid: btcTxid });
+
 			list.mockResolvedValue([
 				buildActivity({ txids: [btcTxid], status: inflowStatus('completed') })
 			]);
 
-			await poll(asBtc(buildTx(refs)));
+			await poll(tx);
 
 			expect(isNeverLanded).not.toHaveBeenCalled();
 			expect(apply).toHaveBeenCalledWith(
@@ -675,13 +775,20 @@ describe('liquidium-active-tx.services', () => {
 			);
 		});
 
-		// Liquidium broadcasts and settles its own payout, whose txid a borrow or withdraw carries.
+		// Liquidium broadcasts and settles its own payout, whose txid a borrow or withdraw carries. The
+		// refs are the ones those services write, with no chain, so the txid alone looks native.
 		it.each([{ Borrow: null }, { Withdraw: null }])(
 			'does not ask the network about a %o Liquidium has not found yet',
 			async (action) => {
 				getStatus.mockResolvedValue({ found: false });
 
-				const tx = asBtc(buildTx({ ...refs, [LIQUIDIUM_EXTERNAL_REF_KEYS.OUTFLOW_ID]: outflowId }));
+				const tx = buildTx({
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.OUTFLOW_ID]: outflowId,
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT]: '0.000001',
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL]: Asset.BTC,
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: btcTxid
+				});
 
 				await poll(
 					'Liquidium' in tx.data
@@ -695,10 +802,248 @@ describe('liquidium-active-tx.services', () => {
 			}
 		);
 
-		it('does not ask the network about a row in another token', async () => {
-			await poll(buildTx(refs));
+		it.each<Action>(['supply', 'repay'])(
+			'does not ask the network about a %s on the ckBTC rail',
+			async (action) => {
+				await poll(await writeRow({ action, chain: Chain.ICP, txid: ckBtcBlockIndex }));
+
+				expect(isNeverLanded).not.toHaveBeenCalled();
+				expect(apply).not.toHaveBeenCalled();
+			}
+		);
+
+		it('goes by the recorded chain rather than the txid', async () => {
+			await poll(await writeRow({ action: 'supply', chain: Chain.ICP, txid: btcTxid }));
 
 			expect(isNeverLanded).not.toHaveBeenCalled();
+		});
+
+		// Rows the services wrote before they recorded the chain.
+		describe('without a chain ref', () => {
+			const withoutChainRef = (tx: ActiveUserTransaction): ActiveUserTransaction => ({
+				...tx,
+				external_refs: tx.external_refs.filter(
+					({ key }) => key !== LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN
+				)
+			});
+
+			it.each<Action>(['supply', 'repay'])(
+				'fails a %s whose Bitcoin txid the network does not know',
+				async (action) => {
+					const tx = withoutChainRef(
+						await writeRow({ action, chain: Chain.BTC, txid: btcTxid, unclearOutcome: true })
+					);
+
+					isNeverLanded.mockResolvedValue(true);
+
+					await poll(tx);
+
+					expectFailedAsNeverLanded(tx);
+				}
+			);
+
+			it.each<Action>(['supply', 'repay'])(
+				'does not ask the network about a ckBTC %s',
+				async (action) => {
+					await poll(
+						withoutChainRef(await writeRow({ action, chain: Chain.ICP, txid: ckBtcBlockIndex }))
+					);
+
+					expect(isNeverLanded).not.toHaveBeenCalled();
+				}
+			);
+
+			it('does not ask the network about a row of another asset', async () => {
+				await poll(
+					withoutChainRef(
+						await writeRow({ action: 'supply', chain: Chain.ICP, asset: Asset.ETH, txid: btcTxid })
+					)
+				);
+
+				expect(isNeverLanded).not.toHaveBeenCalled();
+			});
+		});
+	});
+
+	describe('native SOL rows whose transfer Liquidium does not list', () => {
+		const signature =
+			'5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW';
+		const solBlockhash = { blockhash: 'EkSnNWid2cvwEVnVx9aBqawnmiCNiDgp3gUdkDPTKN1N', slot: 42n };
+		const ethAddress = '0x1111111111111111111111111111111111111111' as EthAddress;
+		const readSolOutcome = vi.mocked(readSolSourceTxOutcome);
+		const createTx = vi.mocked(activeUserTransactionsServices.createActiveUserTransaction);
+
+		// The row as the supply service leaves it after a SOL transfer, which records its blockhash
+		// and its valid slot before the broadcast, as `sendLiquidiumSol` does.
+		const writeSupplyRow = async (chain: Chain = Chain.SOL): Promise<ActiveUserTransaction> => {
+			await executeLiquidiumSupply({
+				identity: mockIdentity,
+				ethAddress,
+				poolId: 'pool-sol',
+				chain,
+				asset: Asset.SOL,
+				amount: 30_000_000n,
+				inflowFee: 1_884_122n,
+				displayAmount: '0.03',
+				broadcast: async ({ beforeBroadcast }) => {
+					if (chain === Chain.SOL) {
+						await beforeBroadcast({ txid: signature, solBlockhash });
+					}
+
+					return signature;
+				}
+			});
+
+			const [[{ id, data, externalRefs }]] = createTx.mock.calls;
+
+			return {
+				id,
+				status: { Pending: null },
+				external_refs: externalRefs,
+				progress_step: [],
+				data,
+				updated_at_ns: ZERO,
+				error: [],
+				created_at_ns: ZERO
+			};
+		};
+
+		beforeEach(() => {
+			list.mockResolvedValue([]);
+			supply.mockResolvedValue({
+				target: { address: 'GXVewvv6HehcLFYCmwpqh5CrMjqN9zJ8rqzGq3HEt9Ax' },
+				submit: vi.fn()
+			});
+			vi.mocked(liquidiumServices.getOrCreateLiquidiumProfile).mockResolvedValue(profileId);
+			readSolOutcome.mockResolvedValue('pending');
+		});
+
+		it.each(['reverted', 'expired'] as const)(
+			'fails a supply whose transaction %s, read on the finalized chain from its valid slot',
+			async (outcome) => {
+				readSolOutcome.mockResolvedValue(outcome);
+
+				const tx = await writeSupplyRow();
+
+				await poll(tx);
+
+				expect(readSolOutcome).toHaveBeenCalledExactlyOnceWith({
+					rowId: tx.id,
+					signature,
+					blockhash: solBlockhash.blockhash,
+					minContextSlot: solBlockhash.slot,
+					network: SolanaNetworks.mainnet,
+					finalized: true
+				});
+				expect(apply).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						update: { status: { Failed: null }, error: en.liquidium.text.transaction_failed }
+					})
+				);
+			}
+		);
+
+		it.each(['pending', 'succeeded'] as const)(
+			'keeps a supply whose transaction is %s until Liquidium lists it',
+			async (outcome) => {
+				readSolOutcome.mockResolvedValue(outcome);
+
+				await poll(await writeSupplyRow());
+
+				expect(readSolOutcome).toHaveBeenCalledOnce();
+				expect(apply).not.toHaveBeenCalled();
+			}
+		);
+
+		it('follows the activity once Liquidium lists the transfer, without asking Solana', async () => {
+			const tx = await writeSupplyRow();
+
+			list.mockResolvedValue([
+				buildActivity({ txids: [signature], status: inflowStatus('completed') })
+			]);
+
+			await poll(tx);
+
+			expect(readSolOutcome).not.toHaveBeenCalled();
+			expect(apply).toHaveBeenCalledWith(
+				expect.objectContaining({ update: { status: { Succeeded: null } } })
+			);
+		});
+
+		it('leaves a row without the slot of its blockhash to Liquidium', async () => {
+			const tx = await writeSupplyRow();
+
+			await poll({
+				...tx,
+				external_refs: tx.external_refs.filter(
+					({ key }) => key !== LIQUIDIUM_EXTERNAL_REF_KEYS.SOL_BLOCKHASH_SLOT
+				)
+			});
+
+			expect(readSolOutcome).not.toHaveBeenCalled();
+			expect(apply).not.toHaveBeenCalled();
+		});
+
+		// The row as the repay service leaves it: its last write, after the broadcast, replaces the refs,
+		// and must keep the blockhash and its slot for this check.
+		it('fails a repay whose transaction expired, from the refs of its last write', async () => {
+			readSolOutcome.mockResolvedValue('expired');
+
+			await executeLiquidiumRepay({
+				identity: mockIdentity,
+				ethAddress,
+				poolId: 'pool-sol',
+				chain: Chain.SOL,
+				asset: Asset.SOL,
+				amount: 30_000_000n,
+				inflowFee: 1_884_122n,
+				displayAmount: '0.03',
+				broadcast: async ({ beforeBroadcast }) => {
+					await beforeBroadcast({ txid: signature, solBlockhash });
+
+					return signature;
+				}
+			});
+
+			const [[{ id, data }]] = createTx.mock.calls;
+			const updateTx = vi.mocked(activeUserTransactionsServices.updateActiveUserTransaction);
+			const lastRefs = updateTx.mock.calls
+				.map(([params]) => params.externalRefs)
+				.filter(nonNullish)
+				.at(-1);
+
+			const tx: ActiveUserTransaction = {
+				id,
+				status: { Pending: null },
+				external_refs: lastRefs ?? [],
+				progress_step: [],
+				data,
+				updated_at_ns: ZERO,
+				error: [],
+				created_at_ns: ZERO
+			};
+
+			await poll(tx);
+
+			expect(readSolOutcome).toHaveBeenCalledExactlyOnceWith({
+				rowId: id,
+				signature,
+				blockhash: solBlockhash.blockhash,
+				minContextSlot: solBlockhash.slot,
+				network: SolanaNetworks.mainnet,
+				finalized: true
+			});
+			expect(apply).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					update: { status: { Failed: null }, error: en.liquidium.text.transaction_failed }
+				})
+			);
+		});
+
+		it('does not ask Solana about a ckSOL supply', async () => {
+			await poll(await writeSupplyRow(Chain.ICP));
+
+			expect(readSolOutcome).not.toHaveBeenCalled();
 			expect(apply).not.toHaveBeenCalled();
 		});
 	});

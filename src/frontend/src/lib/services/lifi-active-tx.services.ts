@@ -10,8 +10,13 @@ import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS } from '$lib/constants/swap.constants';
+import { btcTransactionStatus } from '$lib/rest/blockstream.rest';
 import { fetchLifiStatus } from '$lib/rest/lifi.rest';
-import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
+import {
+	applyActiveUserTransactionPollUpdate,
+	isBtcTransactionNeverLanded,
+	noteBtcTransactionSeen
+} from '$lib/services/active-user-transactions.services';
 import { readEvmSourceTxOutcome } from '$lib/services/evm-source-tx.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { LIFI_EXTERNAL_REF_KEYS, type LifiExternalRefKey } from '$lib/types/lifi';
@@ -33,6 +38,7 @@ import {
 	toLifiLearnedRefs,
 	toLifiSimulationSlot,
 	toLifiStatusUpdate,
+	type LifiBtcSourceTxOutcome,
 	type LifiStatusAnswer,
 	type LifiStatusUpdate,
 	type LifiStoredUnresolvedWindow,
@@ -383,6 +389,55 @@ const checkSolSource = async ({
 	return false;
 };
 
+/**
+ * Whether the row's BTC source transaction is confirmed. Until it is, the network's verdict is
+ * written: in a mempool, or never reached it. The row is written before the broadcast, whose outcome
+ * can be unclear, so a txid the network does not know may never have gone out
+ * (`isBtcTransactionNeverLanded`). LI.FI's BTC rows are mainnet only, as Blockstream's lookup is.
+ */
+const checkBtcSource = async ({
+	tx,
+	identity,
+	refs,
+	txHash
+}: {
+	tx: ActiveUserTransaction;
+	identity: Identity;
+	refs: Partial<Record<LifiExternalRefKey, string>>;
+	txHash: string;
+}): Promise<boolean> => {
+	const status = await btcTransactionStatus({ txid: txHash });
+
+	if (nonNullish(status)) {
+		noteBtcTransactionSeen(tx.id);
+	}
+
+	if (status?.confirmed === true) {
+		sourceConfirmed.add(tx.id);
+		return true;
+	}
+
+	const outcome: LifiBtcSourceTxOutcome = nonNullish(status)
+		? 'pending'
+		: (await isBtcTransactionNeverLanded({
+					id: tx.id,
+					txid: txHash,
+					updatedAtNs: tx.updated_at_ns
+			  }))
+			? 'neverLanded'
+			: 'unseen';
+
+	await applyUpdate({
+		identity,
+		tx,
+		refs,
+		update: lifiSourceOutcomeToUpdate(outcome),
+		learned: {}
+	});
+
+	return false;
+};
+
 const pollLifiActiveUserTransaction = async ({
 	tx,
 	identity,
@@ -414,11 +469,13 @@ const pollLifiActiveUserTransaction = async ({
 		return;
 	}
 
-	// A Solana source is read by its signature and blockhash alone. An EVM source is read with the
-	// address that signed it, so its row waits while that address is unavailable.
+	// A Solana source is read by its signature and blockhash alone, a BTC one by its txid. An EVM source
+	// is read with the address that signed it, so its row waits while that address is unavailable.
 	let checkSource: () => Promise<boolean>;
 
-	if (fromChain === ChainId.SOL) {
+	if (fromChain === ChainId.BTC) {
+		checkSource = () => checkBtcSource({ tx, identity, refs, txHash });
+	} else if (fromChain === ChainId.SOL) {
 		checkSource = () => checkSolSource({ tx, identity, refs, txHash });
 	} else if (nonNullish(userAddress)) {
 		checkSource = () =>
@@ -487,7 +544,7 @@ const pollLifiActiveUserTransaction = async ({
  *
  * `userAddress` is the caller's EVM address, which signed every EVM-source row: rows are
  * principal-scoped and OISY derives one EVM address per principal. EVM-source rows are skipped while
- * it is unavailable; a Solana-source row needs no address. `confirmedNonceByChainId` is shared with
+ * it is unavailable; a Solana- or BTC-source row needs no address. `confirmedNonceByChainId` is shared with
  * the other EVM pollers of the same tick, so rows on one chain cost one nonce read whatever their
  * provider.
  */
