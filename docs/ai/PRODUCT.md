@@ -1191,6 +1191,18 @@ A **fill-or-kill** order is the exception to all of this: it can only execute by
 
 ---
 
+## Lend and borrow (Liquidium)
+
+### SOL through ckSOL (staging)
+
+On staging builds, Liquidium's SOL pool is offered through ckSOL. Its market shows as ckSOL, last in the Markets list, and SOL can be supplied, borrowed, repaid and withdrawn as ckSOL from and to the user's Internet Computer account, like the other ck assets. Native SOL is not offered yet: no picker lists it. Local builds have no ckSOL and offer no SOL; beta and production don't offer it yet.
+
+On every build, a SOL position shows with the SOL token and its amount, whichever rail funded it, including one made on Liquidium's own app. Outside staging it can't be acted on from OISY.
+
+Liquidium quotes SOL's provider fee per account, so picking SOL to supply creates the user's Liquidium profile first when there is none, then quotes. The other assets still create the profile when the supply is submitted. A fee quoted for a token picked before never replaces the fee of the one picked now.
+
+A borrow or withdrawal goes only to the user's own address on the chain it pays out on: BTC, Ethereum or the Internet Computer. Any other chain has no address, so the form can't be submitted rather than paying out to an address of another chain.
+
 ## Buy (OnRamper)
 
 Users can buy crypto with fiat through an embedded OnRamper widget. OnRamper requires the destination wallet addresses in the widget URL to be HMAC-signed so they cannot be tampered with in transit; OISY holds the signing secret in the backend canister (it never reaches the browser) and the frontend asks the backend to sign the URL before loading the widget.
