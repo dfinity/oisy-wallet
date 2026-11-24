@@ -1,9 +1,12 @@
 import type { TokenId } from '$declarations/backend/backend.did';
+import { LIQUIDIUM_SOL_ENABLED } from '$env/liquidium';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { CKSOL_IC_DATA } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS,
@@ -11,6 +14,7 @@ import {
 	LIQUIDIUM_HEALTH_CRITICAL_PERCENT,
 	LIQUIDIUM_INFLOW_SUBACCOUNT_PURPOSES,
 	LIQUIDIUM_NETWORK_ORDER,
+	LIQUIDIUM_PENDING_RAILS,
 	LIQUIDIUM_POOL_ORDER,
 	LIQUIDIUM_SUPPORTED_ASSETS,
 	type LiquidiumHealthLevel
@@ -63,6 +67,8 @@ export const liquidiumMarketToken = ({
 				return findTwinToken({ tokenToPair: USDC_TOKEN, tokens });
 			case 'USDT':
 				return findTwinToken({ tokenToPair: USDT_TOKEN, tokens });
+			case 'SOL':
+				return findTwinToken({ tokenToPair: SOLANA_TOKEN, tokens });
 			default:
 				return undefined;
 		}
@@ -70,6 +76,11 @@ export const liquidiumMarketToken = ({
 
 	if (chain === 'BTC' && asset === 'BTC') {
 		return BTC_MAINNET_TOKEN;
+	}
+
+	// A SOL position carries its pool's chain, `SOL`, whichever rail funded it.
+	if (chain === 'SOL' && asset === 'SOL') {
+		return SOLANA_TOKEN;
 	}
 
 	if (chain === 'ETH') {
@@ -88,7 +99,9 @@ export const liquidiumMarketToken = ({
 	return undefined;
 };
 
-// Display token for a rail the user can actually transact on, for the modal pickers.
+// Display token for a rail the user can actually transact on, for the modal pickers. A rail OISY
+// doesn't transact on gets none, even when its token resolves for display (native SOL, which a
+// position shows with but no wizard sends yet).
 export const liquidiumEnabledRailToken = ({
 	chain,
 	asset,
@@ -98,6 +111,10 @@ export const liquidiumEnabledRailToken = ({
 	asset: string;
 	enabledTokens: Token[];
 }): Token | undefined => {
+	if (!liquidiumSupportedRails(asset).includes(chain)) {
+		return undefined;
+	}
+
 	const token = liquidiumMarketToken({ chain, asset, tokens: enabledTokens });
 
 	return nonNullish(token) && enabledTokens.some(({ id }) => id === token.id) ? token : undefined;
@@ -307,11 +324,22 @@ export const mapLiquidiumMarket = (pool: Pool): LiquidiumMarket => ({
 // rail where the protocol offers one. A single lending pool is shared across rails (e.g.
 // ETH/USDC and ICP/ckUSDC settle in the same USDC pool), so this is a per-asset transfer
 // choice, not separate pools. Derived from the SDK's own identifier guard so it stays
-// correct if the protocol adds pairs; none for an asset outside LIQUIDIUM_SUPPORTED_ASSETS.
+// correct if the protocol adds pairs; none for an unsupported asset, and never a pending rail
+// (LIQUIDIUM_PENDING_RAILS).
 export const liquidiumSupportedRails = (asset: string): string[] =>
-	LIQUIDIUM_SUPPORTED_ASSETS.includes(asset)
-		? Object.values(Chain).filter((chain) => isAssetIdentifier({ chain, asset }))
+	isLiquidiumAssetSupported(asset)
+		? Object.values(Chain).filter(
+				(chain) =>
+					isAssetIdentifier({ chain, asset }) &&
+					!LIQUIDIUM_PENDING_RAILS.some((rail) => rail.asset === asset && rail.chain === chain)
+			)
 		: [];
+
+// SOL needs ckSOL in the build as well as its flag: ckSOL exists on staging, beta and production
+// only, and `CKSOL_ENABLED` can remove it. Read at call time, so specs can switch it.
+const isLiquidiumAssetSupported = (asset: string): boolean =>
+	LIQUIDIUM_SUPPORTED_ASSETS.includes(asset) ||
+	(asset === 'SOL' && LIQUIDIUM_SOL_ENABLED && nonNullish(CKSOL_IC_DATA));
 
 // Expands one pool into a market per supported transfer rail (`market.chain` is the rail,
 // not the pool's backing chain). Both rails of an asset carry identical pool economics

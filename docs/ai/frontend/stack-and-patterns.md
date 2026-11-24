@@ -30,12 +30,22 @@ Do not invent a second key next to one that already exists.
   It therefore survives a store reload, and is re-created only on a full reset
   — `resetAll()` after a failed certified update, or the page reload on
   sign-out.
+- The main-thread ICRC loader supplies the ID from `IC_BUILTIN_TOKENS`, matched
+  by ledger canister ID, when mapping built-in metadata. `mapIcrcToken` accepts
+  that ID without importing the catalog into worker-shared utilities.
+  This preserves picks made before the custom-token store loads. At the ICRC
+  auto-enable boundary, Swap resolves the current entry by ledger canister ID
+  to use its backend version and effective enabled state.
 - **Compare the object, never its description.** `TokenId.description` _is_ the
   ticker — it comes from `parseTokenId(symbol)`
   ([`$eth/utils/erc20.utils.ts`](../../../src/frontend/src/eth/utils/erc20.utils.ts),
   [`$icp/utils/icrc.utils.ts`](../../../src/frontend/src/icp/utils/icrc.utils.ts)).
   Two distinct contracts on the same network can share a ticker, so a ticker is
   not unique and is not a key.
+- Lists carrying loaded token metadata and backend versions must propagate updates even when IDs
+  and `enabled` flags stay the same. Use `derived` for these lists (`icrc.derived`,
+  `all-tokens.derived` and `all-network-tokens.derived`); `tokenListEqual` only compares membership,
+  order and enabled state.
 - No `TokenId` reachable? Key on the stable asset identifier — contract address
   / ledger canister ID / canister ID, e.g. `getTokenIdentifier` from
   [`$lib/utils/identifier.utils.ts`](../../../src/frontend/src/lib/utils/identifier.utils.ts)
@@ -396,6 +406,25 @@ the shared core rule, preserving its deprecated-package and `/dist/` import bans
   progress cues, not decorative motion. The pre-hydration loader in `app.html`
   follows the same rule, retaining its 30-second animation cap. Keep the owning
   controls' loading states, translated labels and accessibility semantics intact.
+- **Scrolling lists (`scroll-fade`):** a list that scrolls inside a modal or
+  panel (the token picker, send contacts, activity filters, swap offers) adds
+  `scroll-fade` (`global.scss`) to its scrolling element. An edge with more to
+  scroll fades over 16 px, an edge at its end stays sharp, and a list that
+  does not scroll shows nothing. The fade follows the scroll position
+  (`animation-timeline: scroll(self)`), so reduced motion leaves it as is;
+  the bottom-edge animation enables the mask so it clears when overflow disappears.
+  Firefox, without scroll-driven animations, shows the plain list. It also
+  sets `scroll-padding-block`, so keyboard focus scrolls a row clear of the
+  fade. Don't add it to dropdown popovers or the AI assistant chat.
+- **First load (`reveal`):** the signed-in app layout fades the hero in, then
+  the page 60 ms later, the first time they show after a page load, and never
+  again: route changes and a hero that comes back appear at once. The
+  `reveal` utility (`global.scss`) only changes opacity, over 200 ms on a
+  spring sampled into `linear()`; `--reveal-step` sets its place in the
+  stagger. Under reduced motion it is a 100 ms fade with no stagger, and a
+  section that takes keyboard focus shows at once. The landing page keeps its
+  own `.landing-enter`. Don't add `reveal` to rows, cards or anything that
+  mounts as data arrives: it would fade in again each time.
 - **Progress steps (`ProgressSteps`):** a step's old marker leaves at once and
   the new one comes in. A finished or failed badge springs in over 440 ms on a
   spring sampled into CSS `linear()`, with an overshooting `cubic-bezier`

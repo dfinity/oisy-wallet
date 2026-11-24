@@ -22,11 +22,13 @@ import {
 	type LiquidiumUnminedRepaysData
 } from '$lib/stores/liquidium-unmined-repays.store';
 import type { OptionBalance } from '$lib/types/balance';
+import { LiquidiumSolTransferRefusedError } from '$lib/types/errors';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import {
 	LIQUIDIUM_EXTERNAL_REF_KEYS,
-	type LiquidiumExternalRefKey
+	type LiquidiumExternalRefKey,
+	type LiquidiumSolBlockhash
 } from '$lib/types/liquidium-active-tx';
 import type { Token, TokenId } from '$lib/types/token';
 import { isActiveUserTransactionError } from '$lib/utils/active-user-transactions.utils';
@@ -276,7 +278,10 @@ export const liquidiumRepaySpendable = ({
 export type LiquidiumRepayBroadcast = (params: {
 	target: SupplyTarget;
 	amount: bigint;
-	beforeBroadcast: (params: { txid: string }) => Promise<void>;
+	beforeBroadcast: (params: {
+		txid: string;
+		solBlockhash?: LiquidiumSolBlockhash;
+	}) => Promise<void>;
 }) => Promise<string>;
 
 // Repays `amount` (base units) of `asset`'s debt: resolve profile → record an AUT → broadcast the
@@ -392,15 +397,32 @@ export const executeLiquidiumRepay = async ({
 	// Set before the write: one that committed but whose answer was lost leaves the txid on the row
 	// all the same.
 	let txidWriteAttempted = false;
+	// A native SOL transfer's blockhash and its valid slot, which the poller needs to tell one that
+	// will never land. Every later write replaces the refs wholesale, so they go along with each.
+	let solRefs: Partial<Record<LiquidiumExternalRefKey, string>> = {};
 
-	const recordTxid = async ({ txid: signedTxid }: { txid: string }) => {
+	const recordTxid = async ({
+		txid: signedTxid,
+		solBlockhash
+	}: {
+		txid: string;
+		solBlockhash?: LiquidiumSolBlockhash;
+	}) => {
 		txidWriteAttempted = true;
+
+		solRefs = nonNullish(solBlockhash)
+			? {
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.SOL_BLOCKHASH]: solBlockhash.blockhash,
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.SOL_BLOCKHASH_SLOT]: `${solBlockhash.slot}`
+				}
+			: {};
 
 		await updateActiveUserTransaction({
 			identity,
 			id,
 			externalRefs: toLiquidiumExternalRefs({
 				...refs,
+				...solRefs,
 				[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: signedTxid
 			})
 		});
@@ -424,7 +446,10 @@ export const executeLiquidiumRepay = async ({
 		// sent, as the wizard reports it. Once the broadcast began, only a refusal outright proves
 		// nothing went out: otherwise the row stays, and the repay keeps counting against the max
 		// until it settles, so a second full repay cannot follow it.
-		const sentNothing = !txidRecorded || isDefinitiveBtcBroadcastRefusal(err);
+		const sentNothing =
+			!txidRecorded ||
+			isDefinitiveBtcBroadcastRefusal(err) ||
+			err instanceof LiquidiumSolTransferRefusedError;
 
 		if (sentNothing && txidWriteAttempted) {
 			// The row may carry the txid, written or committed with its answer lost, and the poller's
@@ -463,7 +488,7 @@ export const executeLiquidiumRepay = async ({
 	// Written again when the transport already wrote it before the broadcast: a poller in another
 	// tab may have read the row without it and deleted it just after, its delete not being
 	// conditional on what it read. A row it deleted answers `NotFound` here and is recreated.
-	const sentRefs = { ...refs, [LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid };
+	const sentRefs = { ...refs, ...solRefs, [LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid };
 
 	try {
 		await updateActiveUserTransaction({

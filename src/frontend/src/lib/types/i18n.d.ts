@@ -1106,6 +1106,7 @@ interface I18nConvert {
 }
 
 interface I18nSwap {
+	alt: { clear_destination: string };
 	text: {
 		swap: string;
 		select_destination_token: string;
@@ -1159,6 +1160,25 @@ interface I18nSwap {
 		gasless: string;
 		swap_fees: string;
 		cross_chain_networks_info: string;
+		receive_shortcut_same_network: string;
+		receive_shortcut_other_network: string;
+		receive_shortcut_token_on_network: string;
+		receive_shortcut_convert: string;
+		receive_shortcut_convert_back: string;
+		receive_shortcut_bridge_back: string;
+		receive_shortcut_move: string;
+		receive_shortcut_any_token: string;
+		receive_shortcut_any_token_count: string;
+		receive_shortcut_any_token_count_one: string;
+		receive_shortcut_any_token_count_single: string;
+		receive_shortcut_more: string;
+		move_token_to: string;
+		move_no_networks_title: string;
+		move_no_networks_title_without_symbol: string;
+		move_no_networks_description: string;
+		move_networks_changed_title: string;
+		move_networks_changed_description: string;
+		as_token: string;
 		two_swaps_info: string;
 		two_swaps_first_button: string;
 		near_intents_estimated_time: string;
@@ -2452,6 +2472,7 @@ interface I18nLiquidium {
 		interest_accrued: string;
 		debt_after_repay: string;
 		repay_exceeds_debt: string;
+		repay_below_native_minimum: string;
 		repay_prices_unavailable: string;
 		repay_debt_unavailable: string;
 		repay_pending_covers_debt: string;

@@ -95,14 +95,17 @@
 			: undefined
 	);
 
-	// Borrowed asset is delivered to the user's own oisy address on the pool's chain:
-	// native BTC address for a BTC pool, ICRC account for an ICP-chain pool, else ETH.
+	// Borrowed asset is delivered to the user's own oisy address on the rail's chain: native BTC
+	// address, ICRC account for an ICP rail, ETH address. Any other chain has no receiver yet, so
+	// it can never fall through to an address of another chain.
 	let receiverAddress = $derived(
 		selectedMarket?.chain === 'BTC'
 			? $btcAddressMainnet
 			: selectedMarket?.chain === 'ICP'
 				? $icrcAccountIdentifierText
-				: $ethAddress
+				: selectedMarket?.chain === 'ETH'
+					? $ethAddress
+					: undefined
 	);
 
 	const goToStep = (stepName: WizardStepsLiquidiumBorrow) => {
