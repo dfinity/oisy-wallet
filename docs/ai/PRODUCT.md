@@ -578,6 +578,16 @@ When the AR is skipped with no larger OISY allowance, or the repeated CC fails f
 
 Every AR sends one Plausible event, `oisy_allowance_request`, with what triggered it (`load` or `insufficient_allowance`) in `event_trigger` and its answer (`granted`, `skipped` or `refused`) in `event_key`; during the AR cooldown no AR is sent, so there is no event. Every CC that fails because its allowance does not cover it, a failed repeat included, sends `charged_call` with the canister method in `event_key`, `result_status` `error` and `result_error_type` `insufficient_allowance`. Successful CCs send no event.
 
+### Own usage credits
+
+A user can also let the signer charge their own TCYCLES: an approval on the cycles ledger from their main account to the signer's. An approval reserves nothing, it only caps what the signer may charge from the TCYCLES balance. The app calls it the user's own usage credits. On local and staging builds, behind `OWN_CYCLES_ENABLED`, the [Tools](#tools) page has a **Usage credits** card for it, after Canister top-up:
+
+- It shows the approval left ("Your own credits") and the TCYCLES balance, since either can run low. Both are read with queries straight from the cycles ledger, so they show whether or not TCYCLES is enabled. A read that fails shows both as not available, with an error toast. The card reads both again whenever one of its steps closes.
+- **Add more** opens one step: the user enters an amount, up to their TCYCLES balance less the 0.0001 TCYCLES ledger fee the approval costs, and sees what the approval becomes. **Add** raises the approval by that amount, with no expiry, and closes the step with a confirmation. The approval states the amount it replaces, so the ledger refuses it if the approval left changed since the card read it, for example after a charge: the step then stays open with an error toast, and the card reads both values again.
+- **Get cycles** opens [Mint TCYCLES](#mint-tcycles).
+
+CCs do not use the approval yet, and nothing in the app sets it back to zero.
+
 ---
 
 ## User Preferences
@@ -669,6 +679,7 @@ A page (`/tools/`) for what a user does now and then rather than every day, reac
 
 - **Blockchain explorers**, the same card as on [Help](#help): a link to the user's own address on the blockchain explorer of each enabled network. Its clicks report `source_location: tools_page`.
 - **Canister top-up**, behind `CANISTER_TOP_UP_ENABLED` (`src/frontend/src/env/canister-top-up.env.ts`, on in every environment and kept as a kill switch). Its **Top up** button opens [Top up a canister](#top-up-a-canister) without a token, so the user picks what pays. The card leads with the canister: a plain "Top up" in a wallet would read as adding funds to the wallet.
+- **Usage credits**, behind `OWN_CYCLES_ENABLED` (`src/frontend/src/env/own-cycles.env.ts`, on for local and staging builds only). It shows the user's own usage credits and their TCYCLES balance, with **Add more** and **Get cycles**; see [Own usage credits](#own-usage-credits).
 - **Export data**: the CSV exports of tokens and transactions, Basic and Extended, as they were on Settings, with their text and Learn more link shown under the title rather than behind a help toggle, as every card on Tools shows its text. Settings keeps an Export data card that says export has moved and opens Tools.
 
 The page itself is not flagged.
@@ -1063,7 +1074,7 @@ The send flow's **Contacts** tab offers every contact with an XRP address, next 
 
 ## Mint TCYCLES
 
-The TCYCLES token page has a fourth hero button, **Mint**, after Receive, Send and Swap, in every environment; `CYCLES_MINT_ENABLED` (`src/frontend/src/env/cycles-mint.env.ts`) is kept as a kill switch that hides it. It turns ICP into TCYCLES through the NNS **Cycles Minting Canister** (CMC), at the network's rate, into the user's own TCYCLES balance. Only the mainnet cycles ledger's token (`um5iw-rqaaa-aaaaq-qaaba-cai`) has it. The button is always enabled: it does not follow the page's outflow state, which tracks the TCYCLES balance, so a user without any TCYCLES yet can still mint. With no ICP, or less than the 0.0001 ICP fee, the form offers a Max of 0 and cannot continue.
+The TCYCLES token page has a fourth hero button, **Mint**, after Receive, Send and Swap, in every environment; `CYCLES_MINT_ENABLED` (`src/frontend/src/env/cycles-mint.env.ts`) is kept as a kill switch that hides it. It turns ICP into TCYCLES through the NNS **Cycles Minting Canister** (CMC), at the network's rate, into the user's own TCYCLES balance. Only the mainnet cycles ledger's token (`um5iw-rqaaa-aaaaq-qaaba-cai`) has it. The Tools page's Usage credits card opens the same Mint from **Get cycles** (see [Own usage credits](#own-usage-credits)); with TCYCLES not enabled, the form there shows a TCYCLES balance of 0, since the wallet loads balances only for enabled tokens. The button is always enabled: it does not follow the page's outflow state, which tracks the TCYCLES balance, so a user without any TCYCLES yet can still mint. With no ICP, or less than the 0.0001 ICP fee, the form offers a Max of 0 and cannot continue.
 
 **Form.** The user enters ICP and sees the TCYCLES it mints as an estimate: ICP × the CMC's rate, minus the cycles ledger's 0.0001 TCYCLES deposit fee. It is an estimate because the CMC converts at its rate when the mint runs, not when the user looked. The rate ("1 ICP ≈ N TCYCLES") is read from the CMC, refreshed every minute and read again when Review opens, and the amount waits for it. The fees are the ICP network fee, on top of the amount, and the cycles ledger fee, out of what is received. The form cannot continue without a rate, with no amount, with an amount that with its fee exceeds the balance, or with an amount below the lower bound, which has two parts. The amount must be above 0.0003 ICP, since a refund returns the ICP minus 0.0003 ICP and so returns nothing at or below that, and it must mint more than twice the deposit fee at the current rate, so that a halving of the rate before the mint runs still leaves a positive credit. A notice says that minting cannot be undone.
 
