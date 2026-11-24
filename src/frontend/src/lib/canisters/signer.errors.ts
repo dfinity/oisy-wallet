@@ -6,7 +6,8 @@ import type {
 	SendBtcError as SignerCanisterSendBtcError
 } from '$declarations/signer/signer.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
-import { jsonReplacer } from '@dfinity/utils';
+import type { AllowanceRequestAnswer } from '$lib/types/api';
+import { isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 const mapPaymentErrorToMessage = (err: PaymentError): string => {
 	if ('UnsupportedPaymentType' in err) {
@@ -33,6 +34,60 @@ export class SignerCanisterPaymentError extends CanisterInternalError {
 		super(mapPaymentErrorToMessage(paymentError));
 	}
 }
+
+// A charged call (CC) that failed with an insufficient allowance, with the OISY allowance its error
+// stated and the answer of the allowance request (AR) sent right after it, so the form can tell the
+// user what to do next.
+export class SignerCanisterInsufficientAllowanceError extends SignerCanisterPaymentError {
+	readonly allowance: bigint;
+	readonly allowanceRequest: AllowanceRequestAnswer;
+
+	constructor({
+		paymentError,
+		allowance,
+		allowanceRequest
+	}: {
+		paymentError: PaymentError;
+		allowance: bigint;
+		allowanceRequest: AllowanceRequestAnswer;
+	}) {
+		super(paymentError);
+
+		this.allowance = allowance;
+		this.allowanceRequest = allowanceRequest;
+	}
+}
+
+const isPaymentErrorVariant = (err: unknown): err is { PaymentError: PaymentError } =>
+	typeof err === 'object' && nonNullish(err) && 'PaymentError' in err;
+
+// `getSchnorrPublicKey` and `signWithSchnorr` throw the canister's error variant as it is; the other
+// calls throw a `SignerCanisterPaymentError`.
+const paymentErrorOf = (err: unknown): PaymentError | undefined => {
+	if (err instanceof SignerCanisterPaymentError) {
+		return err.paymentError;
+	}
+
+	return isPaymentErrorVariant(err) ? err.PaymentError : undefined;
+};
+
+// The payment error and the OISY allowance of a CC that failed with an insufficient allowance, or
+// `undefined` for any other error.
+export const insufficientAllowanceOf = (
+	err: unknown
+): { paymentError: PaymentError; allowance: bigint } | undefined => {
+	const paymentError = paymentErrorOf(err);
+
+	if (isNullish(paymentError) || !('LedgerWithdrawFromError' in paymentError)) {
+		return undefined;
+	}
+
+	const { error } = paymentError.LedgerWithdrawFromError;
+
+	return 'InsufficientAllowance' in error
+		? { paymentError, allowance: error.InsufficientAllowance.allowance }
+		: undefined;
+};
 
 export const mapSignerCanisterBtcError = (err: SignerCanisterBtcError): CanisterInternalError => {
 	if ('InternalError' in err) {

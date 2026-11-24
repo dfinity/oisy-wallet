@@ -2,6 +2,7 @@ import type {
 	Network as BitcoinNetwork,
 	EcdsaKeyId,
 	EthSignTransactionRequest,
+	PaymentError,
 	SendBtcResponse,
 	SignBtcResponse
 } from '$declarations/signer/signer.did';
@@ -20,8 +21,14 @@ import {
 	signWithSchnorr
 } from '$lib/api/signer.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
+import {
+	SignerCanisterInsufficientAllowanceError,
+	SignerCanisterPaymentError
+} from '$lib/canisters/signer.errors';
 import * as appConstants from '$lib/constants/app.constants';
+import { requestAllowance } from '$lib/services/allowance-request.services';
 import type {
+	AllowanceRequestAnswer,
 	GenericSignWithEcdsaParams,
 	GetSchnorrPublicKeyParams,
 	SendBtcParams,
@@ -34,6 +41,10 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
+
+vi.mock('$lib/services/allowance-request.services', () => ({
+	requestAllowance: vi.fn()
+}));
 
 describe('signer.api', () => {
 	const signerCanisterMock = mock<SignerCanister>();
@@ -490,6 +501,71 @@ describe('signer.api', () => {
 			});
 
 			await expect(genericSignWithEcdsa(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('insufficient allowance', () => {
+		const ledger = Principal.fromText('um5iw-rqaaa-aaaaq-qaaba-cai');
+
+		const insufficientAllowance: PaymentError = {
+			LedgerWithdrawFromError: { error: { InsufficientAllowance: { allowance: 5n } }, ledger }
+		};
+
+		const refused: AllowanceRequestAnswer = { answer: 'refused' };
+
+		beforeEach(() => {
+			vi.mocked(requestAllowance).mockResolvedValue(refused);
+		});
+
+		it('should send an allowance request and throw its answer with the allowance left', async () => {
+			signerCanisterMock.personalSign.mockRejectedValue(
+				new SignerCanisterPaymentError(insufficientAllowance)
+			);
+
+			const error = await signMessage({ ...baseParams, message: 'test' }).catch((err) => err);
+
+			expect(error).toBeInstanceOf(SignerCanisterInsufficientAllowanceError);
+			expect(error).toMatchObject({
+				paymentError: insufficientAllowance,
+				allowance: 5n,
+				allowanceRequest: refused
+			});
+			expect(requestAllowance).toHaveBeenCalledExactlyOnceWith(mockIdentity);
+		});
+
+		it('should do the same for a Schnorr call that throws the canister error as it is', async () => {
+			signerCanisterMock.signWithSchnorr.mockRejectedValue({ PaymentError: insufficientAllowance });
+
+			const error = await signWithSchnorr({
+				...baseParams,
+				derivationPath: ['test'],
+				keyId: SOLANA_KEY_ID,
+				message: Uint8Array.from([4, 5, 6])
+			}).catch((err) => err);
+
+			expect(error).toBeInstanceOf(SignerCanisterInsufficientAllowanceError);
+			expect(error).toMatchObject({ allowance: 5n, allowanceRequest: refused });
+			expect(requestAllowance).toHaveBeenCalledOnce();
+		});
+
+		it('should pass any other payment error through without a request', async () => {
+			const insufficientFunds = new SignerCanisterPaymentError({
+				LedgerWithdrawFromError: { error: { InsufficientFunds: { balance: 1n } }, ledger }
+			});
+			signerCanisterMock.personalSign.mockRejectedValue(insufficientFunds);
+
+			await expect(signMessage({ ...baseParams, message: 'test' })).rejects.toBe(insufficientFunds);
+
+			expect(requestAllowance).not.toHaveBeenCalled();
+		});
+
+		it('should pass any other error through without a request', async () => {
+			const err = new Error('test');
+			signerCanisterMock.personalSign.mockRejectedValue(err);
+
+			await expect(signMessage({ ...baseParams, message: 'test' })).rejects.toBe(err);
+
+			expect(requestAllowance).not.toHaveBeenCalled();
 		});
 	});
 });
