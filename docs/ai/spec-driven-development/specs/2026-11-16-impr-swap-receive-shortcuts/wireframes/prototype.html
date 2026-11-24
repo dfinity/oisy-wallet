@@ -1,0 +1,1696 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Swap shortcuts · prototype</title>
+		<style>
+			@font-face {
+				font-family: CircularXX;
+				src: url(../../../../../../src/frontend/static/fonts/CircularXXWeb-Regular.woff2)
+					format('woff2');
+				font-weight: 400;
+			}
+			@font-face {
+				font-family: CircularXX;
+				src: url(../../../../../../src/frontend/static/fonts/CircularXXWeb-Bold.woff2)
+					format('woff2');
+				font-weight: 700;
+			}
+
+			/* OISY default theme (src/frontend/src/lib/styles/theme/default-theme.scss) */
+			:root {
+				--fg: #000;
+				--fg2: #212529;
+				--fg3: #6c757d;
+				--fg-dis: #0000004d;
+				--brand: #0066ff;
+				--brand-hover: #004abe;
+				--brand-10: #0066ff1a;
+				--brand-20: #0066ff33;
+				--brand-light: #d1e3ff;
+				--bg: #fff;
+				--bg2: #f8f9fa;
+				--bg3: #e9ecef;
+				--bg-dis: #0000000d;
+				--bd: #00000033;
+				--bd3: #0000001a;
+				--success: #16b364;
+				--success-10: #16b3641a;
+				--error: #ee3850;
+				--frame-w: 375px;
+				--pad: 12px;
+			}
+			body.desktop {
+				--frame-w: 560px;
+				--pad: 24px;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			html,
+			body {
+				margin: 0;
+			}
+			body {
+				font-family: CircularXX, system-ui, sans-serif;
+				background: #141414;
+				color: #f1f1f1;
+				-webkit-font-smoothing: antialiased;
+			}
+			button {
+				font: inherit;
+				color: inherit;
+				background: none;
+				border: 0;
+				padding: 0;
+				cursor: pointer;
+			}
+			img {
+				display: block;
+			}
+
+			/* Page chrome */
+			.page {
+				padding: 24px 24px 48px;
+			}
+			.top {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 12px 24px;
+				align-items: center;
+				margin-bottom: 24px;
+			}
+			.top h1 {
+				font-size: 18px;
+				margin: 0 16px 0 0;
+			}
+			.seg {
+				display: inline-flex;
+				flex-wrap: wrap;
+				gap: 4px;
+				background: #262626;
+				padding: 4px;
+				border-radius: 12px;
+			}
+			.seg button {
+				padding: 7px 12px;
+				border-radius: 9px;
+				font-size: 13px;
+				color: #c9c9c9;
+			}
+			.seg button[aria-pressed='true'] {
+				background: #f1f1f1;
+				color: #000;
+				font-weight: 700;
+			}
+			.seglabel {
+				font-size: 12px;
+				color: #9a9a9a;
+				margin-right: 6px;
+			}
+			.cols {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 40px;
+				align-items: flex-start;
+			}
+			.col h2 {
+				font-size: 15px;
+				margin: 0 0 4px;
+			}
+			.col .hint {
+				font-size: 13px;
+				color: #9a9a9a;
+				margin: 0 0 12px;
+				max-width: var(--frame-w);
+				line-height: 1.4;
+			}
+			.taps {
+				font-size: 13px;
+				color: #c9c9c9;
+				margin-top: 12px;
+				min-height: 18px;
+			}
+			.taps b {
+				color: #fff;
+			}
+			.foot {
+				margin-top: 32px;
+				font-size: 12px;
+				color: #8a8a8a;
+				max-width: 900px;
+				line-height: 1.5;
+			}
+
+			/* The modal */
+			.frame {
+				position: relative;
+				width: var(--frame-w);
+				height: 812px;
+				background: var(--bg);
+				color: var(--fg);
+				border-radius: 32px;
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
+			}
+			.mhead {
+				position: relative;
+				height: 64px;
+				flex: none;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-bottom: 1px solid var(--bd3);
+			}
+			.mhead .title {
+				font-size: 22px;
+				font-weight: 700;
+			}
+			.mhead .right {
+				position: absolute;
+				right: 16px;
+				display: flex;
+				gap: 12px;
+				align-items: center;
+			}
+			.mhead .left {
+				position: absolute;
+				left: 16px;
+			}
+			.pill {
+				background: var(--brand-light);
+				color: var(--fg);
+				font-size: 14px;
+				font-weight: 700;
+				padding: 5px 9px;
+				border-radius: 8px;
+				display: inline-flex;
+				gap: 4px;
+				align-items: center;
+			}
+			.iconbtn {
+				width: 32px;
+				height: 32px;
+				display: grid;
+				place-items: center;
+				border-radius: 8px;
+			}
+			.iconbtn:hover {
+				background: var(--bg-dis);
+			}
+			.mbody {
+				flex: 1;
+				overflow-y: auto;
+				padding: 20px var(--pad) 16px;
+			}
+			.mfoot {
+				flex: none;
+				border-top: 1px solid var(--bd3);
+				padding: 16px var(--pad);
+				display: flex;
+				gap: 12px;
+			}
+			.btn {
+				flex: 1;
+				height: 52px;
+				border-radius: 16px;
+				font-size: 17px;
+				font-weight: 700;
+			}
+			.btn.secondary {
+				background: var(--brand-light);
+				color: var(--brand);
+			}
+			.btn.primary {
+				background: var(--brand);
+				color: #fff;
+			}
+			.btn.primary:disabled {
+				background: var(--brand-light);
+				color: #0066ff80;
+				cursor: not-allowed;
+			}
+			.btn.full {
+				flex: 1 1 100%;
+			}
+
+			/* Token input cards (TokenInput.svelte) */
+			.card {
+				border: 1px solid var(--bd3);
+				background: var(--bg2);
+				border-radius: 12px;
+				padding: 20px;
+			}
+			.card.focused {
+				background: var(--brand-10);
+				border-color: var(--brand-20);
+			}
+			.cardhead {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				min-height: 24px;
+				margin-bottom: 12px;
+			}
+			.cardhead .t {
+				font-size: 15px;
+				font-weight: 700;
+			}
+			.onnet {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				font-size: 14px;
+				color: var(--fg3);
+			}
+			.field {
+				display: flex;
+				align-items: center;
+				height: 56px;
+				background: var(--bg);
+				border: 1px solid var(--bd3);
+				border-radius: 10px;
+			}
+			.card.focused .field {
+				border: 2px solid var(--brand);
+			}
+			.amount {
+				flex: 1;
+				min-width: 0;
+				padding-left: 14px;
+				font-size: 30px;
+				font-weight: 700;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			.amount.muted {
+				color: var(--fg-dis);
+				font-size: 18px;
+			}
+			.amount.selecttext {
+				font-size: 16px;
+				font-weight: 400;
+				text-align: left;
+				height: 100%;
+			}
+			.divider {
+				width: 1px;
+				height: 70%;
+				background: var(--bg-dis);
+			}
+			.tokbtn {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				height: 100%;
+				padding: 0 12px;
+				font-size: 16px;
+				font-weight: 700;
+				border-radius: 0 10px 10px 0;
+			}
+			.tokbtn:hover {
+				background: var(--bg-dis);
+			}
+			.plus {
+				width: 28px;
+				height: 28px;
+				border-radius: 50%;
+				background: var(--brand);
+				color: #fff;
+				display: grid;
+				place-items: center;
+			}
+			.plus.off {
+				background: var(--bg-dis);
+				color: var(--fg3);
+			}
+			.subrow {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-top: 10px;
+				font-size: 14px;
+				color: var(--fg3);
+				min-height: 22px;
+				gap: 8px;
+			}
+			.subrow .max {
+				color: var(--brand);
+				font-weight: 700;
+			}
+			.subrow .bal {
+				color: var(--fg);
+				font-weight: 700;
+				display: flex;
+				gap: 6px;
+				align-items: center;
+			}
+			.gain {
+				color: var(--success);
+				margin-left: 10px;
+			}
+			.switch {
+				position: relative;
+				height: 8px;
+				display: flex;
+				justify-content: center;
+				z-index: 2;
+			}
+			.switch button {
+				position: absolute;
+				top: -18px;
+				width: 44px;
+				height: 40px;
+				border-radius: 10px;
+				background: var(--brand);
+				color: #fff;
+				display: grid;
+				place-items: center;
+			}
+			.switch button:disabled {
+				background: #e3e7ec;
+				color: var(--fg3);
+				cursor: not-allowed;
+			}
+			.skel {
+				display: inline-block;
+				height: 26px;
+				width: 120px;
+				border-radius: 6px;
+				background: linear-gradient(90deg, var(--bg3), #f4f5f7, var(--bg3));
+				background-size: 200% 100%;
+				animation: sh 1s linear infinite;
+				vertical-align: middle;
+			}
+			.skel.small {
+				height: 14px;
+				width: 48px;
+			}
+			@keyframes sh {
+				to {
+					background-position: -200% 0;
+				}
+			}
+
+			/* Option rows (variant A) */
+			.opts {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+			.opt {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				width: 100%;
+				text-align: left;
+				background: var(--bg);
+				border: 1px solid var(--bd3);
+				border-radius: 12px;
+				padding: 12px 14px;
+				transition: border-color 0.15s;
+			}
+			.opt:hover {
+				border-color: var(--brand);
+			}
+			.opt .txt {
+				flex: 1;
+				min-width: 0;
+			}
+			.opt .ot {
+				font-size: 15px;
+				font-weight: 700;
+				line-height: 1.3;
+			}
+			.opt .os {
+				font-size: 13px;
+				color: var(--fg3);
+				margin-top: 2px;
+				line-height: 1.35;
+			}
+			.opt .chev {
+				color: var(--fg3);
+				flex: none;
+			}
+			.disc {
+				width: 36px;
+				height: 36px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				background: var(--bg3);
+				color: var(--fg2);
+				flex: none;
+			}
+			.keep {
+				display: block;
+				margin: 12px auto 0;
+				color: var(--brand);
+				font-weight: 700;
+				font-size: 14px;
+			}
+
+			/* Notices, Smart Swap cell */
+			.notice {
+				margin-top: 16px;
+				background: var(--bg2);
+				border-radius: 12px;
+				padding: 12px 14px;
+				font-size: 14px;
+				line-height: 1.4;
+			}
+			.rows {
+				margin-top: 16px;
+				border-top: 1px solid var(--bd3);
+				padding-top: 4px;
+			}
+			.row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 12px 0;
+				font-size: 15px;
+				color: var(--fg3);
+				gap: 8px;
+			}
+			.row .v {
+				color: var(--fg);
+				font-weight: 700;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.row .link {
+				color: var(--brand);
+				font-weight: 700;
+				margin-left: 10px;
+			}
+			.best {
+				background: var(--success-10);
+				color: var(--success);
+				font-size: 12px;
+				font-weight: 700;
+				padding: 4px 7px;
+				border-radius: 6px;
+				display: inline-flex;
+				gap: 4px;
+				align-items: center;
+			}
+
+			/* Logos */
+			.logo {
+				position: relative;
+				flex: none;
+			}
+			.logo > img,
+			.logo > .fallback {
+				width: 100%;
+				height: 100%;
+				border-radius: 50%;
+				object-fit: cover;
+			}
+			.logo .fallback {
+				display: grid;
+				place-items: center;
+				background: #1f6feb;
+				color: #fff;
+				font-weight: 700;
+			}
+			.logo .badge {
+				position: absolute;
+				right: -3px;
+				bottom: -3px;
+				border-radius: 50%;
+				background: #fff;
+				padding: 1.5px;
+			}
+			.logo .badge img {
+				width: 100%;
+				height: 100%;
+				border-radius: 50%;
+			}
+
+			/* Overlays: picker, network step, review */
+			.overlay {
+				position: absolute;
+				inset: 0;
+				background: var(--bg);
+				display: flex;
+				flex-direction: column;
+				z-index: 5;
+			}
+			.ohead {
+				position: relative;
+				height: 64px;
+				flex: none;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-bottom: 1px solid var(--bd3);
+				padding: 0 56px;
+			}
+			.ohead .title {
+				font-size: 20px;
+				font-weight: 700;
+				text-align: center;
+				line-height: 1.2;
+			}
+			.ohead .back {
+				position: absolute;
+				left: 12px;
+			}
+			.obody {
+				flex: 1;
+				overflow-y: auto;
+				padding: 16px var(--pad);
+			}
+			.search {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				height: 48px;
+				border: 1px solid var(--bd3);
+				border-radius: 12px;
+				padding: 0 14px;
+				color: var(--fg3);
+			}
+			.search input {
+				border: 0;
+				outline: 0;
+				flex: 1;
+				font: inherit;
+				font-size: 16px;
+				color: var(--fg);
+				background: transparent;
+			}
+			.chips {
+				display: flex;
+				gap: 8px;
+				margin: 16px 0 8px;
+				position: relative;
+			}
+			.chip {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				height: 36px;
+				padding: 0 12px;
+				border: 1px solid var(--bd3);
+				border-radius: 10px;
+				font-size: 14px;
+			}
+			.chip:hover {
+				border-color: var(--bd);
+			}
+			.menu {
+				position: absolute;
+				top: 42px;
+				left: 0;
+				z-index: 3;
+				background: var(--bg);
+				border: 1px solid var(--bd3);
+				border-radius: 12px;
+				box-shadow: 0 8px 24px #0000001f;
+				padding: 6px;
+				min-width: 220px;
+			}
+			.menu button {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				width: 100%;
+				padding: 9px 10px;
+				border-radius: 8px;
+				font-size: 14px;
+				text-align: left;
+			}
+			.menu button:hover,
+			.menu button[aria-pressed='true'] {
+				background: var(--bg2);
+			}
+			.list {
+				display: flex;
+				flex-direction: column;
+			}
+			.item {
+				display: flex;
+				align-items: center;
+				gap: 14px;
+				width: 100%;
+				text-align: left;
+				padding: 12px 4px;
+				border-bottom: 1px solid var(--bd3);
+			}
+			.item:last-child {
+				border-bottom: 0;
+			}
+			.item:hover {
+				background: var(--bg2);
+			}
+			.item .txt {
+				flex: 1;
+				min-width: 0;
+			}
+			.item .l1 {
+				font-size: 16px;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			.item .l1 b {
+				font-weight: 700;
+			}
+			.item .l1 span {
+				color: var(--fg3);
+			}
+			.item .l2 {
+				font-size: 14px;
+				color: var(--fg3);
+				margin-top: 2px;
+			}
+			.item .r {
+				text-align: right;
+				flex: none;
+			}
+			.item .r .a {
+				font-size: 15px;
+				font-weight: 700;
+			}
+			.item .r .u {
+				font-size: 14px;
+				color: var(--fg3);
+				margin-top: 2px;
+			}
+			.item.sel {
+				background: var(--brand-10);
+			}
+			.empty {
+				color: var(--fg3);
+				font-size: 14px;
+				padding: 24px 4px;
+				text-align: center;
+			}
+
+			/* Quick row (variant B, the user's mock) */
+			.qhead {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				font-size: 15px;
+				font-weight: 700;
+				margin: 18px 0 10px;
+			}
+			.tiles {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+				gap: 8px;
+			}
+			.tile {
+				background: var(--bg2);
+				border-radius: 14px;
+				padding: 12px 4px 10px;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 6px;
+			}
+			.tile:hover {
+				background: var(--bg3);
+			}
+			.tile .s {
+				font-size: 13px;
+				font-weight: 700;
+			}
+			.tile .n {
+				font-size: 11px;
+				color: var(--fg3);
+				margin-top: -4px;
+				max-width: 100%;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				padding: 0 4px;
+			}
+			.tile.more {
+				justify-content: center;
+				color: var(--fg3);
+				font-size: 13px;
+				font-weight: 700;
+			}
+
+			.sumline {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				padding: 14px;
+				border: 1px solid var(--bd3);
+				border-radius: 12px;
+				margin-bottom: 10px;
+			}
+			.sumline .k {
+				font-size: 13px;
+				color: var(--fg3);
+			}
+			.sumline .v {
+				font-size: 17px;
+				font-weight: 700;
+			}
+			.endnote {
+				margin-top: 18px;
+				font-size: 14px;
+				color: var(--fg3);
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="page">
+			<div class="top">
+				<h1>Swap shortcuts · prototype</h1>
+				<div>
+					<span class="seglabel">You pay with</span>
+					<div class="seg" id="cases"></div>
+				</div>
+				<div>
+					<span class="seglabel">Width</span>
+					<div class="seg" id="widths">
+						<button data-w="mobile" aria-pressed="true">375 · mobile</button>
+						<button data-w="desktop" aria-pressed="false">560 · desktop modal</button>
+					</div>
+				</div>
+			</div>
+			<div class="cols">
+				<div class="col">
+					<h2>A · Shortcuts in the empty You receive card</h2>
+					<p class="hint">
+						Once You pay has a token, You receive offers where it can go. The shortcuts go away once
+						a token is picked; tap the receive token to bring them back.
+					</p>
+					<div class="frame" id="frameA"></div>
+					<div class="taps" id="tapsA"></div>
+				</div>
+				<div class="col">
+					<h2>B · "Move across networks" row in the picker</h2>
+					<p class="hint">
+						The form stays as it is today. The receive picker opens on the pay token's network, with
+						the same token on other networks in a row above the list.
+					</p>
+					<div class="frame" id="frameB"></div>
+					<div class="taps" id="tapsB"></div>
+				</div>
+			</div>
+			<p class="foot">
+				Static prototype. Prices, balances, rates and fees are illustrative. Which networks a token
+				can reach follows the app on 2026-11-16: <code>SUPPORTED_CROSS_SWAP_NETWORKS</code> in
+				swap.constants.ts, the token groups in env/tokens/groups, OneSec only bringing tokens back
+				to their own network (<code>ONESEC_UNWRAP_ONLY</code>), and NEAR Intents taking Bitcoin to
+				and from EVM and Solana (the major tokens are assumed here). Review swap ends the prototype.
+			</p>
+		</div>
+
+		<script>
+			// ---------- Data ----------
+			const NETS = {
+				btc: {
+					name: 'Bitcoin',
+					logo: '../../../../../../src/frontend/src/lib/assets/networks/bitcoin-mainnet.svg'
+				},
+				eth: {
+					name: 'Ethereum',
+					logo: '../../../../../../src/frontend/src/lib/assets/networks/ethereum-mainnet.svg'
+				},
+				icp: {
+					name: 'Internet Computer',
+					logo: '../../../../../../src/frontend/src/lib/assets/networks/icp.svg'
+				},
+				arb: {
+					name: 'Arbitrum',
+					logo: '../../../../../../src/frontend/src/lib/assets/networks/arbitrum-mainnet.svg'
+				},
+				base: {
+					name: 'Base',
+					logo: '../../../../../../src/frontend/src/lib/assets/networks/base-mainnet.svg'
+				},
+				bsc: {
+					name: 'BNB Smart Chain',
+					logo: '../../../../../../src/frontend/src/lib/assets/networks/bsc-mainnet.svg'
+				},
+				pol: {
+					name: 'Polygon',
+					logo: '../../../../../../src/frontend/src/lib/assets/networks/polygon-mainnet.svg'
+				},
+				sol: {
+					name: 'Solana',
+					logo: '../../../../../../src/frontend/src/lib/assets/networks/solana-mainnet.svg'
+				}
+			};
+			// Bitcoin, Ethereum, Internet Computer, then A to Z (brand-and-copy.md, Chain listing)
+			const NET_ORDER = ['btc', 'eth', 'icp', 'arb', 'base', 'bsc', 'pol', 'sol'];
+			const EVM = ['eth', 'arb', 'base', 'bsc', 'pol'];
+
+			const T = (id, symbol, name, net, logo, price, group, extra = {}) => ({
+				id,
+				symbol,
+				name,
+				net,
+				logo,
+				price,
+				group,
+				...extra
+			});
+			const TOKENS = [
+				T(
+					'btc',
+					'BTC',
+					'Bitcoin',
+					'btc',
+					'../../../../../../src/frontend/src/btc/assets/bitcoin.svg',
+					91400,
+					'btc',
+					{ cf: 'ckbtc' }
+				),
+				T(
+					'ckbtc',
+					'ckBTC',
+					'ckBTC',
+					'icp',
+					'../../../../../../src/frontend/src/btc/assets/bitcoin.svg',
+					91400,
+					'btc',
+					{ cf: 'btc' }
+				),
+				T(
+					'eth-eth',
+					'ETH',
+					'Ethereum',
+					'eth',
+					'../../../../../../src/frontend/src/icp-eth/assets/eth.svg',
+					3080,
+					'eth',
+					{ cf: 'cketh' }
+				),
+				T(
+					'eth-arb',
+					'ETH',
+					'Ethereum',
+					'arb',
+					'../../../../../../src/frontend/src/icp-eth/assets/eth.svg',
+					3080,
+					'eth'
+				),
+				T(
+					'eth-base',
+					'ETH',
+					'Ethereum',
+					'base',
+					'../../../../../../src/frontend/src/icp-eth/assets/eth.svg',
+					3080,
+					'eth'
+				),
+				T(
+					'cketh',
+					'ckETH',
+					'ckETH',
+					'icp',
+					'../../../../../../src/frontend/src/icp-eth/assets/eth.svg',
+					3080,
+					'eth',
+					{ cf: 'eth-eth' }
+				),
+				T(
+					'usdc-eth',
+					'USDC',
+					'USD Coin',
+					'eth',
+					'../../../../../../src/frontend/src/eth/assets/usdc.svg',
+					1,
+					'usdc',
+					{ cf: 'ckusdc' }
+				),
+				T(
+					'usdc-arb',
+					'USDC',
+					'USD Coin',
+					'arb',
+					'../../../../../../src/frontend/src/eth/assets/usdc.svg',
+					1,
+					'usdc'
+				),
+				T(
+					'usdc-base',
+					'USDC',
+					'USD Coin',
+					'base',
+					'../../../../../../src/frontend/src/eth/assets/usdc.svg',
+					1,
+					'usdc'
+				),
+				T(
+					'usdc-bsc',
+					'USDC',
+					'USD Coin',
+					'bsc',
+					'../../../../../../src/frontend/src/eth/assets/usdc.svg',
+					1,
+					'usdc'
+				),
+				T(
+					'usdc-pol',
+					'USDC',
+					'USD Coin',
+					'pol',
+					'../../../../../../src/frontend/src/eth/assets/usdc.svg',
+					1,
+					'usdc'
+				),
+				T(
+					'usdc-sol',
+					'USDC',
+					'USD Coin',
+					'sol',
+					'../../../../../../src/frontend/src/eth/assets/usdc.svg',
+					1,
+					'usdc'
+				),
+				T(
+					'ckusdc',
+					'ckUSDC',
+					'ckUSDC',
+					'icp',
+					'../../../../../../src/frontend/src/eth/assets/usdc.svg',
+					1,
+					'usdc',
+					{ cf: 'usdc-eth', onesec: ['usdc-arb', 'usdc-base'] }
+				),
+				T(
+					'usdt-eth',
+					'USDT',
+					'Tether USD',
+					'eth',
+					'../../../../../../src/frontend/src/eth/assets/usdt.svg',
+					1,
+					'usdt'
+				),
+				T(
+					'usdt-arb',
+					'USDT',
+					'Tether USD',
+					'arb',
+					'../../../../../../src/frontend/src/eth/assets/usdt.svg',
+					1,
+					'usdt'
+				),
+				T(
+					'usdt-bsc',
+					'USDT',
+					'Tether USD',
+					'bsc',
+					'../../../../../../src/frontend/src/eth/assets/usdt.svg',
+					1,
+					'usdt'
+				),
+				T(
+					'usdt-pol',
+					'USDT',
+					'Tether USD',
+					'pol',
+					'../../../../../../src/frontend/src/eth/assets/usdt.svg',
+					1,
+					'usdt'
+				),
+				T(
+					'usdt-sol',
+					'USDT',
+					'Tether USD',
+					'sol',
+					'../../../../../../src/frontend/src/eth/assets/usdt.svg',
+					1,
+					'usdt'
+				),
+				T(
+					'weth-eth',
+					'WETH',
+					'Wrapped Ether',
+					'eth',
+					'../../../../../../src/frontend/src/eth/assets/weth.svg',
+					3080,
+					'weth'
+				),
+				T(
+					'weth-base',
+					'WETH',
+					'Wrapped Ether',
+					'base',
+					'../../../../../../src/frontend/src/eth/assets/weth.svg',
+					3080,
+					'weth'
+				),
+				T(
+					'cbbtc-eth',
+					'cbBTC',
+					'Coinbase Wrapped BTC',
+					'eth',
+					'../../../../../../src/frontend/src/eth/assets/cbbtc.webp',
+					91400,
+					'cbbtc'
+				),
+				T(
+					'cbbtc-arb',
+					'cbBTC',
+					'Coinbase Wrapped BTC',
+					'arb',
+					'../../../../../../src/frontend/src/eth/assets/cbbtc.webp',
+					91400,
+					'cbbtc'
+				),
+				T(
+					'cbbtc-base',
+					'cbBTC',
+					'Coinbase Wrapped BTC',
+					'base',
+					'../../../../../../src/frontend/src/eth/assets/cbbtc.webp',
+					91400,
+					'cbbtc'
+				),
+				T(
+					'cbbtc-sol',
+					'cbBTC',
+					'Coinbase Wrapped BTC',
+					'sol',
+					'../../../../../../src/frontend/src/eth/assets/cbbtc.webp',
+					91400,
+					'cbbtc'
+				),
+				T(
+					'eurc-eth',
+					'EURC',
+					'Euro Coin',
+					'eth',
+					'../../../../../../src/frontend/src/eth/assets/eurc.svg',
+					1.16,
+					'eurc'
+				),
+				T(
+					'eurc-base',
+					'EURC',
+					'Euro Coin',
+					'base',
+					'../../../../../../src/frontend/src/eth/assets/eurc.svg',
+					1.16,
+					'eurc'
+				),
+				T(
+					'icp',
+					'ICP',
+					'Internet Computer',
+					'icp',
+					'../../../../../../src/frontend/src/icp/assets/icp-light.svg',
+					4.2,
+					'icp'
+				),
+				T(
+					'icp-base',
+					'ICP',
+					'Internet Computer',
+					'base',
+					'../../../../../../src/frontend/src/icp/assets/icp-light.svg',
+					4.2,
+					'icp',
+					{ onesec: ['icp'] }
+				),
+				T(
+					'icp-arb',
+					'ICP',
+					'Internet Computer',
+					'arb',
+					'../../../../../../src/frontend/src/icp/assets/icp-light.svg',
+					4.2,
+					'icp',
+					{ onesec: ['icp'] }
+				),
+				T(
+					'sol',
+					'SOL',
+					'Solana',
+					'sol',
+					'../../../../../../src/frontend/src/sol/assets/sol.svg',
+					142,
+					'sol'
+				),
+				T(
+					'bnb',
+					'BNB',
+					'BNB',
+					'bsc',
+					'../../../../../../src/frontend/src/evm/bsc/assets/bnb.svg',
+					610,
+					'bnb'
+				),
+				T(
+					'pol',
+					'POL',
+					'Polygon',
+					'pol',
+					'../../../../../../src/frontend/src/evm/polygon/assets/pol.svg',
+					0.21,
+					'pol'
+				),
+				T(
+					'arb',
+					'ARB',
+					'Arbitrum',
+					'arb',
+					'../../../../../../src/frontend/src/eth/assets/arb.svg',
+					0.32,
+					'arb'
+				),
+				T('toshi', 'TOSHI', 'Toshi', 'base', null, 0.000312, 'toshi')
+			];
+			const TOK = Object.fromEntries(TOKENS.map((t) => [t.id, t]));
+			const GROUP_SYMBOL = { usdc: 'USDC', eth: 'ETH', btc: 'BTC', icp: 'ICP' };
+
+			const BAL = {
+				'usdc-base': 1240.5,
+				toshi: 1000000,
+				btc: 0.0215,
+				ckusdc: 820,
+				'eth-eth': 0.85,
+				'usdc-sol': 45.1,
+				icp: 120,
+				ckbtc: 0.004,
+				'eth-base': 0.12,
+				'cbbtc-base': 0.0031
+			};
+			const bal = (id) => BAL[id] ?? 0;
+
+			const CASES = [
+				{ key: 'usdc', label: 'USDC on Base', pay: 'usdc-base', amount: 250 },
+				{ key: 'toshi', label: 'TOSHI on Base', pay: 'toshi', amount: 250000 },
+				{ key: 'btc', label: 'BTC', pay: 'btc', amount: 0.01 },
+				{ key: 'ckusdc', label: 'ckUSDC', pay: 'ckusdc', amount: 200 },
+				{ key: 'eth', label: 'ETH on Ethereum', pay: 'eth-eth', amount: 0.5 },
+				{ key: 'none', label: 'No token yet', pay: null, amount: null }
+			];
+
+			// ---------- Routes (what the app can quote today) ----------
+			const canReach = (a, b) => {
+				if (!a || !b || a.id === b.id) return false;
+				const evmOrSol = (n) => EVM.includes(n) || n === 'sol';
+				if (evmOrSol(a.net) && evmOrSol(b.net)) return true; // Velora, LI.FI
+				if (a.net === 'icp' && b.net === 'icp') return true; // ICPSwap, KongSwap
+				if (a.cf === b.id || b.cf === a.id) return true; // Chain Fusion twins
+				if (a.onesec?.includes(b.id)) return true; // OneSec, back to the token's own network only
+				// NEAR Intents: Bitcoin to and from EVM and Solana (NEAR_INTENTS_BTC_SWAP_ENABLED is on)
+				const nearMajors = ['eth', 'usdc', 'usdt', 'sol', 'bnb', 'pol', 'cbbtc'];
+				if (a.net === 'btc' && evmOrSol(b.net) && nearMajors.includes(b.group)) return true;
+				if (b.net === 'btc' && evmOrSol(a.net) && nearMajors.includes(a.group)) return true;
+				return false;
+			};
+			const provider = (a, b) => {
+				if (a.cf === b.id || b.cf === a.id)
+					return {
+						name: 'Chain Fusion',
+						logo: '../../../../../../src/frontend/static/images/dapps/chain-fusion-logo.svg',
+						fee: 0.0005
+					};
+				if (a.net === 'btc' || b.net === 'btc')
+					return {
+						name: 'NEAR Intents',
+						logo: '../../../../../../src/frontend/static/images/dapps/near-intents-logo.svg',
+						fee: 0.004
+					};
+				if (a.onesec?.includes(b.id))
+					return {
+						name: 'OneSec',
+						logo: '../../../../../../src/frontend/static/images/dapps/onesec-logo.svg',
+						fee: 0.002
+					};
+				if (a.net === 'icp')
+					return {
+						name: 'ICPSwap',
+						logo: '../../../../../../src/frontend/static/images/dapps/icp-swap-logo.svg',
+						fee: 0.003
+					};
+				if (a.net === b.net)
+					return {
+						name: 'Velora',
+						logo: '../../../../../../src/frontend/static/images/dapps/velora-logo.svg',
+						fee: 0.0015
+					};
+				return {
+					name: 'LI.FI',
+					logo: '../../../../../../src/frontend/static/images/dapps/lifi-logo.svg',
+					fee: 0.003
+				};
+			};
+			const byNet = (a, b) => NET_ORDER.indexOf(a.net) - NET_ORDER.indexOf(b.net);
+			const byValue = (a, b) =>
+				bal(b.id) * b.price - bal(a.id) * a.price || a.symbol.localeCompare(b.symbol);
+			const reachable = (pay) => TOKENS.filter((t) => canReach(pay, t));
+			const sameNet = (pay) =>
+				reachable(pay)
+					.filter((t) => t.net === pay.net)
+					.sort(byValue);
+			const moveTargets = (pay) =>
+				reachable(pay)
+					.filter((t) => t.group === pay.group && t.net !== pay.net)
+					.sort(byNet);
+			const netsOf = (tokens) => NET_ORDER.filter((n) => tokens.some((t) => t.net === n));
+
+			// ---------- Formatting ----------
+			const fmtTok = (v) => {
+				if (v === 0) return '0.00';
+				if (v >= 1000)
+					return v.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+				if (v >= 1)
+					return v.toLocaleString('en-US', { maximumFractionDigits: 4, minimumFractionDigits: 2 });
+				return String(Number(v.toPrecision(4)));
+			};
+			const fmtUsd = (v) =>
+				v > 0 && v < 0.01
+					? '< $0.01'
+					: '$' + v.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+			const listOf = (names, max = 3) =>
+				names.length <= max
+					? names.join(', ').replace(/, ([^,]*)$/, ' and $1')
+					: `${names.slice(0, max).join(', ')} and ${names.length - max} more`;
+
+			// ---------- Icons ----------
+			const I = (d, s = 20, w = 2) =>
+				`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+			const ic = {
+				down: (s) => I('<path d="M6 9l6 6 6-6"/>', s),
+				right: (s) => I('<path d="M9 6l6 6-6 6"/>', s),
+				back: (s) => I('<path d="M19 12H5M11 18l-6-6 6-6"/>', s ?? 24),
+				close: (s) => I('<path d="M6 6l12 12M18 6L6 18"/>', s ?? 24),
+				gear: () =>
+					I(
+						'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+						16
+					),
+				swap: (s) => I('<path d="M8 4v16M4 8l4-4 4 4M16 20V4M12 16l4 4 4-4"/>', s ?? 18),
+				wallet: () =>
+					I('<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 14h2"/>', 16),
+				star: () =>
+					I(
+						'<path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/>',
+						13
+					),
+				search: (s) => I('<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>', s ?? 20),
+				plus: () => I('<path d="M12 5v14M5 12h14"/>', 16, 2.5),
+				move: (s) => I('<path d="M4 8h14l-3-3M20 16H6l3 3"/>', s ?? 18)
+			};
+
+			const logo = (t, size, withBadge = true) => {
+				const inner = t.logo
+					? `<img src="${t.logo}" alt="">`
+					: `<div class="fallback" style="font-size:${Math.round(size * 0.42)}px">${t.symbol[0]}</div>`;
+				const b = Math.round(size * 0.42);
+				const badge = withBadge
+					? `<span class="badge" style="width:${b}px;height:${b}px"><img src="${NETS[t.net].logo}" alt=""></span>`
+					: '';
+				return `<span class="logo" style="width:${size}px;height:${size}px">${inner}${badge}</span>`;
+			};
+			const netLogo = (net, size) =>
+				`<span class="logo" style="width:${size}px;height:${size}px"><img src="${NETS[net].logo}" alt=""></span>`;
+
+			// ---------- A frame ----------
+			class Frame {
+				constructor(variant, el, tapsEl) {
+					this.v = variant;
+					this.el = el;
+					this.tapsEl = tapsEl;
+					el.addEventListener('click', (e) => this.onClick(e));
+					el.addEventListener('input', (e) => {
+						if (e.target.matches('[data-search]')) {
+							this.s.q = e.target.value;
+							el.querySelector('.list').innerHTML = this.listHtml();
+						}
+					});
+				}
+
+				load(c) {
+					this.s = {
+						pay: c.pay ? TOK[c.pay] : null,
+						amount: c.amount,
+						recv: null,
+						overlay: null,
+						keep: null,
+						loading: false,
+						taps: 0,
+						last: null
+					};
+					this.render();
+				}
+
+				get recvAmount() {
+					const { pay, recv, amount } = this.s;
+					if (!pay || !recv) return null;
+					return (amount * pay.price * (1 - provider(pay, recv).fee)) / recv.price;
+				}
+
+				pick(token) {
+					this.s.recv = token;
+					this.s.overlay = null;
+					this.s.keep = null;
+					this.s.loading = true;
+					this.s.last = { taps: this.s.taps, what: `${token.symbol} on ${NETS[token.net].name}` };
+					this.render();
+					clearTimeout(this.timer);
+					this.timer = setTimeout(() => {
+						this.s.loading = false;
+						this.render();
+					}, 650);
+				}
+
+				openPicker(side, net) {
+					this.s.overlay = { type: 'picker', side, net, menu: false, more: false };
+					this.s.q = '';
+				}
+
+				onClick(e) {
+					const a = e.target.closest('[data-act]');
+					if (!a) {
+						if (this.s.overlay?.menu && !e.target.closest('.menu')) {
+							this.s.overlay.menu = false;
+							this.render();
+						}
+						return;
+					}
+					const act = a.dataset.act;
+					const arg = a.dataset.arg;
+					const s = this.s;
+					if (!['noop'].includes(act)) s.taps++;
+					switch (act) {
+						case 'pay':
+							this.openPicker('source', 'all');
+							break;
+						case 'recv':
+							if (this.v === 'A' && s.recv) {
+								s.keep = s.recv;
+								s.recv = null;
+								s.taps = 0;
+								s.last = null;
+							}
+							// B opens on the pay token's network, or on all networks when that one has nothing to
+							// receive (Bitcoin), as SwapTokensList's availableNetworks does.
+							else if (s.pay)
+								this.openPicker(
+									'destination',
+									this.v === 'B' && sameNet(s.pay).length ? s.pay.net : 'all'
+								);
+							break;
+						case 'keep':
+							s.recv = s.keep;
+							s.keep = null;
+							break;
+						case 'same':
+							this.openPicker('destination', s.pay.net);
+							break;
+						case 'any':
+							this.openPicker('destination', 'all');
+							break;
+						case 'move': {
+							const m = moveTargets(s.pay);
+							if (m.length === 1) return this.pick(m[0]);
+							s.overlay = { type: 'move' };
+							break;
+						}
+						case 'close':
+							s.overlay = null;
+							break;
+						case 'menu':
+							s.overlay.menu = !s.overlay.menu;
+							break;
+						case 'net':
+							s.overlay.net = arg;
+							s.overlay.menu = false;
+							break;
+						case 'more':
+							s.overlay.more = true;
+							break;
+						case 'token': {
+							const t = TOK[arg];
+							if (s.overlay?.side === 'source') {
+								const c = CASES.find((x) => x.pay === t.id);
+								s.pay = t;
+								s.amount = c?.amount ?? Number((100 / t.price).toPrecision(3));
+								s.recv = null;
+								s.keep = null;
+								s.overlay = null;
+								s.taps = 0;
+								s.last = null;
+								break;
+							}
+							return this.pick(t);
+						}
+						case 'switch': {
+							const amt = this.recvAmount;
+							[s.pay, s.recv] = [s.recv, s.pay];
+							s.amount = Number(amt.toPrecision(6));
+							break;
+						}
+						case 'review':
+							s.overlay = { type: 'review' };
+							break;
+						case 'noop':
+							return;
+					}
+					this.render();
+				}
+
+				// ----- pieces -----
+				header() {
+					return `<div class="mhead"><div class="title">Swap</div><div class="right"><span class="pill">1.5% ${ic.gear()}</span><button class="iconbtn" data-act="noop" aria-label="Close">${ic.close()}</button></div></div>`;
+				}
+
+				payCard() {
+					const { pay, amount } = this.s;
+					if (!pay) {
+						return `<div class="card"><div class="cardhead"><span class="t">You pay</span></div>
+					<div class="field"><button class="amount selecttext" data-act="pay">Select token</button><span class="divider"></span>
+					<button class="tokbtn" data-act="pay"><span class="plus">${ic.plus()}</span>${ic.down(18)}</button></div>
+					<div class="subrow"></div></div>`;
+					}
+					return `<div class="card focused"><div class="cardhead"><span class="t">You pay</span><span class="onnet">On ${NETS[pay.net].name} ${netLogo(pay.net, 22)}</span></div>
+				<div class="field"><div class="amount">${fmtTok(amount)}</div><span class="divider"></span>
+				<button class="tokbtn" data-act="pay">${logo(pay, 28, false)}${pay.symbol}${ic.down(18)}</button></div>
+				<div class="subrow"><span>${ic.swap(14)} ${fmtUsd(amount * pay.price)}</span><span class="max">Max: ${fmtTok(bal(pay.id))} ${pay.symbol}</span></div></div>`;
+				}
+
+				recvCard() {
+					const { pay, recv, loading, keep } = this.s;
+					const head = (r) =>
+						`<div class="cardhead"><span class="t">You receive</span>${r ? `<span class="onnet">On ${NETS[r.net].name} ${netLogo(r.net, 22)}</span>` : ''}</div>`;
+					if (recv) {
+						const amt = this.recvAmount;
+						const diff = ((amt * recv.price) / (this.s.amount * pay.price) - 1) * 100;
+						return `<div class="card">${head(recv)}
+					<div class="field"><div class="amount">${loading ? '<span class="skel"></span>' : fmtTok(amt)}</div><span class="divider"></span>
+					<button class="tokbtn" data-act="recv">${logo(recv, 28, false)}${recv.symbol}${ic.down(18)}</button></div>
+					<div class="subrow"><span>${loading ? '<span class="skel small"></span>' : `${ic.swap(14)} ${fmtUsd(amt * recv.price)}<span class="gain" style="color:${diff < 0 ? 'var(--error)' : 'var(--success)'}">${diff.toFixed(2)}%</span>`}</span>
+					<span class="bal">${ic.wallet()} ${fmtTok(bal(recv.id))} ${recv.symbol}</span></div></div>`;
+					}
+					if (this.v === 'A' && pay) {
+						const same = sameNet(pay);
+						const move = moveTargets(pay);
+						const any = reachable(pay);
+						const g = GROUP_SYMBOL[pay.group] ?? pay.symbol;
+						const net = NETS[pay.net].name;
+						const rows = [];
+						if (same.length)
+							rows.push(
+								`<button class="opt" data-act="same">${netLogo(pay.net, 36)}<span class="txt"><div class="ot">Another token on ${net}</div><div class="os">${listOf(same.map((t) => t.symbol))}</div></span><span class="chev">${ic.right(18)}</span></button>`
+							);
+						if (move.length) {
+							const sub =
+								move.length === 1
+									? `${NETS[move[0].net].name}${move[0].symbol !== g ? `, as ${move[0].symbol}` : ''}`
+									: listOf(
+											move.map((t) => NETS[t.net].name),
+											2
+										);
+							rows.push(
+								`<button class="opt" data-act="move">${logo(pay, 36, false)}<span class="txt"><div class="ot">${g} on another network</div><div class="os">${sub}</div></span><span class="chev">${ic.right(18)}</span></button>`
+							);
+						}
+						// Left out when the two shortcuts above already cover every destination.
+						const n = netsOf(any).length;
+						if (any.length > same.length + move.length)
+							rows.push(
+								`<button class="opt" data-act="any"><span class="disc">${ic.search(18)}</span><span class="txt"><div class="ot">Any token</div><div class="os">${any.length} token${any.length === 1 ? '' : 's'} on ${n} network${n === 1 ? '' : 's'}</div></span><span class="chev">${ic.right(18)}</span></button>`
+							);
+						return `<div class="card">${head(null)}<div class="opts">${rows.join('')}</div>${keep ? `<button class="keep" data-act="keep">Keep ${keep.symbol} on ${NETS[keep.net].name}</button>` : ''}</div>`;
+					}
+					return `<div class="card">${head(null)}
+				<div class="field"><div class="amount muted">—</div><span class="divider"></span>
+				<button class="tokbtn" data-act="${pay ? 'recv' : 'noop'}" ${pay ? '' : 'style="cursor:not-allowed"'}><span class="plus ${pay ? '' : 'off'}">${ic.plus()}</span>${pay ? ic.down(18) : ''}</button></div>
+				<div class="subrow"></div></div>`;
+				}
+
+				details() {
+					const { pay, recv, loading } = this.s;
+					if (!pay || !recv) return '';
+					const p = provider(pay, recv);
+					const notice =
+						pay.net !== recv.net
+							? `<div class="notice">You move tokens from <b>${NETS[pay.net].name}</b> to <b>${NETS[recv.net].name}</b> network</div>`
+							: '';
+					return `${notice}<div class="rows">
+				<div class="row"><span>OISY Smart Swap<span class="link">Select ›</span></span><span class="v">${loading ? '<span class="skel small"></span>' : `<span class="best">${ic.star()} Best Rate</span><span class="logo" style="width:22px;height:22px"><img src="${p.logo}" alt=""></span>${p.name}`}</span></div>
+				<div class="row"><span>Total estimated fee</span><span class="v">${loading ? '<span class="skel small"></span>' : fmtUsd(this.s.amount * pay.price * p.fee)} ${ic.down(16)}</span></div></div>`;
+				}
+
+				// ----- overlays -----
+				pickerTokens() {
+					const o = this.s.overlay;
+					const base =
+						o.side === 'source' ? TOKENS.filter((t) => bal(t.id) > 0) : reachable(this.s.pay);
+					const q = (this.s.q ?? '').trim().toLowerCase();
+					return base
+						.filter((t) => o.net === 'all' || t.net === o.net)
+						.filter(
+							(t) =>
+								!q ||
+								t.symbol.toLowerCase().includes(q) ||
+								t.name.toLowerCase().includes(q) ||
+								NETS[t.net].name.toLowerCase().includes(q)
+						)
+						.sort(byValue);
+				}
+
+				listHtml() {
+					const items = this.pickerTokens();
+					if (!items.length) return `<div class="empty">No tokens match.</div>`;
+					const sel = this.s.overlay.side === 'source' ? this.s.pay : this.s.recv;
+					return items
+						.map(
+							(t) =>
+								`<button class="item ${sel?.id === t.id ? 'sel' : ''}" data-act="token" data-arg="${t.id}">${logo(t, 44)}<span class="txt"><div class="l1"><b>${t.symbol}</b> <span>· ${t.name}</span></div><div class="l2">${NETS[t.net].name}</div></span><span class="r"><div class="a">${fmtTok(bal(t.id))}</div><div class="u">${fmtUsd(bal(t.id) * t.price)}</div></span></button>`
+						)
+						.join('');
+				}
+
+				pickerHtml() {
+					const o = this.s.overlay;
+					const recvSide = o.side === 'destination';
+					const pool = recvSide ? reachable(this.s.pay) : TOKENS.filter((t) => bal(t.id) > 0);
+					const nets = netsOf(pool);
+					const chipNet =
+						o.net === 'all' ? `All networks` : `${netLogo(o.net, 20)} ${NETS[o.net].name}`;
+					const menu = o.menu
+						? `<div class="menu"><button data-act="net" data-arg="all" aria-pressed="${o.net === 'all'}">All networks</button>${nets.map((n) => `<button data-act="net" data-arg="${n}" aria-pressed="${o.net === n}">${netLogo(n, 20)} ${NETS[n].name}</button>`).join('')}</div>`
+						: '';
+					let quick = '';
+					if (this.v === 'B' && recvSide) {
+						const m = moveTargets(this.s.pay);
+						if (m.length) {
+							const shown = o.more || m.length <= 5 ? m : m.slice(0, 4);
+							const tiles = shown
+								.map(
+									(t) =>
+										`<button class="tile" data-act="token" data-arg="${t.id}">${logo(t, 36)}<span class="s">${t.symbol}</span><span class="n">${NETS[t.net].name}</span></button>`
+								)
+								.join('');
+							const more =
+								shown.length < m.length
+									? `<button class="tile more" data-act="more">+${m.length - shown.length} more</button>`
+									: '';
+							quick = `<div class="qhead">${ic.move(20)} Move across networks</div><div class="tiles">${tiles}${more}</div>`;
+						}
+					}
+					return `<div class="overlay"><div class="ohead"><button class="iconbtn back" data-act="close" aria-label="Back">${ic.back()}</button><div class="title">Select token to ${recvSide ? 'receive' : 'pay'}</div></div>
+				<div class="obody"><label class="search">${ic.search()}<input data-search placeholder="Search token" value="${this.s.q ?? ''}"></label>
+				${quick}
+				<div class="chips"><button class="chip" data-act="menu">${chipNet} ${ic.down(16)}</button><button class="chip" data-act="noop" title="Not part of this prototype">All asset types ${ic.down(16)}</button>${menu}</div>
+				<div class="list">${this.listHtml()}</div></div>
+				<div class="mfoot"><button class="btn secondary full" data-act="close">Cancel</button></div></div>`;
+				}
+
+				moveHtml() {
+					const pay = this.s.pay;
+					const g = GROUP_SYMBOL[pay.group] ?? pay.symbol;
+					const rows = moveTargets(pay)
+						.map(
+							(t) =>
+								`<button class="item" data-act="token" data-arg="${t.id}">${logo(t, 44)}<span class="txt"><div class="l1"><b>${NETS[t.net].name}</b></div><div class="l2">${t.symbol === g ? t.symbol : `as ${t.symbol}`}</div></span><span class="r"><div class="a">${fmtTok(bal(t.id))} ${t.symbol}</div><div class="u">${fmtUsd(bal(t.id) * t.price)}</div></span></button>`
+						)
+						.join('');
+					return `<div class="overlay"><div class="ohead"><button class="iconbtn back" data-act="close" aria-label="Back">${ic.back()}</button><div class="title">Move ${g} to</div></div>
+				<div class="obody"><div class="list">${rows}</div></div>
+				<div class="mfoot"><button class="btn secondary full" data-act="close">Cancel</button></div></div>`;
+				}
+
+				reviewHtml() {
+					const { pay, recv, amount } = this.s;
+					return `<div class="overlay"><div class="ohead"><button class="iconbtn back" data-act="close" aria-label="Back">${ic.back()}</button><div class="title">Review swap</div></div>
+				<div class="obody">
+					<div class="sumline">${logo(pay, 36)}<div><div class="k">You pay, on ${NETS[pay.net].name}</div><div class="v">${fmtTok(amount)} ${pay.symbol}</div></div></div>
+					<div class="sumline">${logo(recv, 36)}<div><div class="k">You receive, on ${NETS[recv.net].name}</div><div class="v">${fmtTok(this.recvAmount)} ${recv.symbol}</div></div></div>
+					<p class="endnote">The prototype ends here. Review is unchanged by this idea.</p></div>
+				<div class="mfoot"><button class="btn secondary" data-act="close">Back</button><button class="btn primary" data-act="noop">Swap now</button></div></div>`;
+				}
+
+				render() {
+					const s = this.s;
+					// As in SwapForm: no switch to a token that cannot be paid with (zero balance).
+					const switchOff = !s.recv || s.loading || bal(s.recv.id) === 0;
+					const reviewOff = !s.recv || s.loading;
+					let overlay = '';
+					if (s.overlay?.type === 'picker') overlay = this.pickerHtml();
+					if (s.overlay?.type === 'move') overlay = this.moveHtml();
+					if (s.overlay?.type === 'review') overlay = this.reviewHtml();
+					this.el.innerHTML = `${this.header()}<div class="mbody">${this.payCard()}
+				<div class="switch"><button data-act="switch" ${switchOff ? 'disabled' : ''} aria-label="Switch tokens">${ic.swap()}</button></div>
+				${this.recvCard()}${this.details()}</div>
+				<div class="mfoot"><button class="btn secondary" data-act="noop">Cancel</button><button class="btn primary" data-act="review" ${reviewOff ? 'disabled' : ''}>Review swap</button></div>${overlay}`;
+					const focus = this.el.querySelector('[data-search]');
+					if (focus && s.q) {
+						focus.focus();
+						focus.setSelectionRange(s.q.length, s.q.length);
+					}
+					this.tapsEl.innerHTML = s.last
+						? `Filled You receive with <b>${s.last.what}</b> in <b>${s.last.taps} tap${s.last.taps === 1 ? '' : 's'}</b>.`
+						: s.pay
+							? `Taps so far: ${s.taps}`
+							: '';
+				}
+			}
+
+			// ---------- Page ----------
+			const A = new Frame('A', document.getElementById('frameA'), document.getElementById('tapsA'));
+			const B = new Frame('B', document.getElementById('frameB'), document.getElementById('tapsB'));
+			const casesEl = document.getElementById('cases');
+			const params = new URLSearchParams(location.search);
+			let current = params.get('case') ?? 'usdc';
+
+			const loadCase = (key) => {
+				current = key;
+				const c = CASES.find((x) => x.key === key);
+				A.load(c);
+				B.load(c);
+				casesEl.innerHTML = CASES.map(
+					(x) => `<button data-case="${x.key}" aria-pressed="${x.key === key}">${x.label}</button>`
+				).join('');
+			};
+			casesEl.addEventListener('click', (e) => {
+				const b = e.target.closest('[data-case]');
+				if (b) loadCase(b.dataset.case);
+			});
+			document.getElementById('widths').addEventListener('click', (e) => {
+				const b = e.target.closest('[data-w]');
+				if (!b) return;
+				document.body.classList.toggle('desktop', b.dataset.w === 'desktop');
+				document
+					.querySelectorAll('#widths button')
+					.forEach((x) => x.setAttribute('aria-pressed', x === b));
+			});
+			if (params.get('w') === 'desktop') document.querySelector('[data-w="desktop"]').click();
+			loadCase(current);
+			window.__proto = { A, B, loadCase };
+		</script>
+	</body>
+</html>

@@ -177,3 +177,24 @@ export class ChainFusionSolDepositRefusedError extends Error {
 		this.reason = reason;
 	}
 }
+
+/**
+ * A native SOL transfer to Liquidium that was never sent: it failed before its broadcast, or the node
+ * refused the broadcast. Its `cause` is the original failure. Any other failure of such a transfer
+ * may come after the SOL left.
+ */
+export class LiquidiumSolTransferRefusedError extends Error {
+	constructor(options?: ErrorOptions) {
+		super('The SOL transfer to Liquidium was not sent', options);
+	}
+}
+
+/**
+ * The blockhash of a native SOL transfer to Liquidium was no longer valid just before its broadcast,
+ * so nothing was sent. The blockhash is in the message for the logs only.
+ */
+export class LiquidiumSolBlockhashExpiredError extends Error {
+	constructor(blockhash: string) {
+		super(`The blockhash ${blockhash} of the SOL transfer is no longer valid`);
+	}
+}

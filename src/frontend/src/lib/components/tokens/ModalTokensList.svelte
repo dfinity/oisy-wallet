@@ -237,7 +237,7 @@
 	class="my-4 flex flex-col overflow-y-hidden sm:max-h-(--list-max-height) sm:min-h-(--list-min-height)"
 	bind:clientHeight={listHeight}
 >
-	<div class="gap-6 overflow-y-auto overscroll-contain">
+	<div class="scroll-fade gap-6 overflow-y-auto overscroll-contain">
 		{#if noTokensMatch}
 			{#if showNoMatch}
 				<div

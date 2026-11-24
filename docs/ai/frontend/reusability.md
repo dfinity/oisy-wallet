@@ -60,6 +60,10 @@ does not finish while the children are invisible (see `NftHideButton`).
 
 ### Common building blocks
 
+`TokenInput` and `TokenInputContent` accept an optional `trailingAction` snippet inside the field,
+after the token selector. Use an existing labelled button primitive for a separate field action,
+as Swap does for clearing the receive token.
+
 | Component                               | Where                             | Use it for                                                                                                                                                |
 | --------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `List`, `ListItem`, `ListItemButton`    | `$lib/components/common/`         | Vertical lists of items.                                                                                                                                  |
@@ -99,6 +103,7 @@ does not finish while the children are invisible (see `NftHideButton`).
 | `SwapProvider`                          | `$lib/components/swap/`           | Review's static provider label; its disclosure shows the offer's `SwapProviderDetails`.                                                                   |
 | `SwapProviderCell`                      | `$lib/components/swap/`           | The swap forms' Smart Swap cell: status, gain vs. lowest quote, opens the provider step.                                                                  |
 | `SwapProviderDetails`                   | `$lib/components/swap/`           | One offer's website and provider details, for `SwapProvider`'s disclosure and the provider step's card (`showWebsite={false}` there).                     |
+| `SwapReceiveShortcuts`                  | `$lib/components/swap/`           | The empty receive card's shortcuts (`getListedReceiveShortcuts`), led by `SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY` from `SwapModalWizardSteps`.                |
 | `BestRateBadge`                         | `$lib/components/ui/`             | Filled best-rate indicator: a star, with the "Best Rate" label from `md`.                                                                                 |
 | `SwapProviderAnimation`                 | `$lib/components/swap/`           | Right-aligned loop of the asked providers, then the `swapProviderPool`; reveals the real winner once; reduced motion built in.                            |
 | `SwapFeeRow`                            | `$lib/components/swap/`           | A swap form's fee row: slides in, shows a "Total fee" skeleton during a foreground comparison, cross-fades to the form's fees.                            |
@@ -146,6 +151,15 @@ Add new feature folders only if your concern doesn't fit any of the above.
 | `network.derived`, `networks.derived`                           | `$lib/derived/`                    | Active network + chain predicates.     |
 | `swap-amounts.store`, `swap-quote-activity.store`               | `$lib/stores/`                     | Accepted offers; pricing participants. |
 
+`swap.store` keeps `tokenListReturnFocus` across step remounts: Back restores the originating shortcut,
+picks focus the selected control, and a missing shortcut falls back to the receive area.
+It also keeps `receiveTokenPickerStep` and token-list filters so the receive selector reopens the
+chosen shortcut view after a pick or Back, including in Get Token. Shortcuts replace that view;
+a new pay token resets the remembered network step, and resetting the swap clears the memory.
+The network view only reopens for a destination in the pay token's group on another network.
+Its `tokenListReturnFocus` marks shortcut entries; reopening a selected token does not count as
+shortcut use.
+
 ### Constants worth knowing
 
 | File                                              | Where             | Notes                                                       |
@@ -174,6 +188,7 @@ Add new feature folders only if your concern doesn't fit any of the above.
 | `swap-tokens-filter.utils`                                                | `$lib/utils/`                     | The swap provider identifier space. `nativeSwapTokenIdentifier` is the one way to key a contract-less token (native ETH / SOL / BTC) — the category sets have no network dimension, so a bare symbol collides across chains. Never hand-roll it.                                                                                                                            |
 | `swap-slippage-storage.utils`                                             | `$lib/utils/`                     | The max slippage the user last chose, in the tab's `sessionStorage` (`loadSwapSlippage`, `saveSwapSlippage`, `forgetSwapSlippage`). Guarded storage access only: `saveSwapSlippage` writes any value, so save through `keepSwapSlippage`. Kept out of `swap.utils` so `auth.services` can clear it after a successful sign-in without loading the swap code.                |
 | `swap.utils` (`getInitialSwapSlippage`, `keepSwapSlippage`)               | `$lib/utils/`                     | The slippage the Swap and Get Token modals open and reset with: the saved one, else `SWAP_DEFAULT_SLIPPAGE_VALUE`. `keepSwapSlippage` is the one save path: it keeps only a value valid on every source network. `SwapSlippage` calls it when the editor closes, never on mount, so a half-typed value is never saved.                                                      |
+| `swap.utils` (`getReceiveSwapTokens`, `sortSwapListTokens`)               | `$lib/utils/`                     | What the receive list offers for a pay token on all networks and all asset types (the providers' reach, on the networks `getReceiveNetworkIds` allows, the pay token left out), and the order a swap token list shows tokens in. Anything that previews the receive list reads these, never a filter of its own.                                                            |
 | `nav.utils`, `before-navigate.utils`, `before-unload.utils`               | `$lib/utils/`                     | Navigation hooks.                                                                                                                                                                                                                                                                                                                                                           |
 | `transitions.utils` (`fade`, `fly`, `slide`, `scale`, `blur`, `backdrop`) | `$lib/utils/`                     | Svelte's transitions and their parameter types, with OISY's timings and reduced motion built in. Lint refuses `svelte/transition` elsewhere.                                                                                                                                                                                                                                |
 | `clipboard.utils`, `device.utils`, `events.utils`                         | `$lib/utils/`                     | Browser plumbing.                                                                                                                                                                                                                                                                                                                                                           |
@@ -256,7 +271,7 @@ in the PR description and ask the human owner before doing it.
 
 ## Landing artwork
 
-`Img` defaults to lazy loading; above-the-fold artwork can explicitly opt into `loading="eager"`. Supply intrinsic dimensions to reserve layout space. The landing uses static asset URLs and a deliberately slower, one-time 300ms entrance (12px upward movement, 4px blur, opacity), staggered by 100ms per section. It starts on mount without waiting for artwork; keyboard focus reveals controls immediately. Feature-card wrappers animate only translation to preserve descendant backdrop blur. Reduced motion uses `MOTION_REDUCED_FADE_DURATION` (100ms) without stagger; feature cards stay still. Reveal focused controls with visual overrides, preserving the animation timeline so it cannot replay on blur.
+`LandingWalletPreview` renders the signed-out wallet illustration as an inline SVG with intrinsic dimensions, app theme tokens, existing icons and sample balances. The landing page imports it only when the signed-out view renders and reserves its aspect ratio while the chunk loads. Keep its presentation independent of authenticated wallet state. The device outlines and screen clips use the same continuous corner curves, with the outer radius derived from the screen radius, bezel padding and border width. The device screens are visible as soon as the artwork mounts. When motion is enabled, the whole artwork rises together and the desktop balance card and top-right controls rise into place within it. The phone lifts into place and the token rows enter one by one. The portfolio counts up in whole dollars as the rows enter, using the final localized amount’s right edge to keep the digits aligned. It shows the exact balance as the rows settle. The network menu opens once the balance and rows have settled. The sign-in block keeps its one-time 300ms entrance (12px upward movement, 4px blur, opacity). Keyboard focus reveals controls immediately and preserves the animation timeline. Feature-card wrappers animate translation to preserve descendant backdrop blur. Under reduced motion, the sign-in block uses `MOTION_REDUCED_FADE_DURATION` (100ms), and the artwork and feature cards stay still.
 
 ## Overlay keyboard behavior
 

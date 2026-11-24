@@ -17,6 +17,8 @@ import {
 import * as liquidiumServices from '$lib/services/liquidium.services';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { liquidiumAssetTokenId } from '$lib/utils/liquidium.utils';
+import { readSolSourceTxOutcome } from '$sol/services/sol-source-tx.services';
+import { SolanaNetworks } from '$sol/types/network';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { nonNullish } from '@dfinity/utils';
@@ -42,6 +44,7 @@ vi.mock('$lib/services/active-user-transactions.services', () => ({
 }));
 vi.mock('$lib/services/liquidium.services', () => ({ getOrCreateLiquidiumProfile: vi.fn() }));
 vi.mock('$lib/services/analytics.services', () => ({ trackEvent: vi.fn() }));
+vi.mock('$sol/services/sol-source-tx.services', () => ({ readSolSourceTxOutcome: vi.fn() }));
 
 describe('liquidium-active-tx.services', () => {
 	const profileId = 'profile-1';
@@ -859,6 +862,189 @@ describe('liquidium-active-tx.services', () => {
 
 				expect(isNeverLanded).not.toHaveBeenCalled();
 			});
+		});
+	});
+
+	describe('native SOL rows whose transfer Liquidium does not list', () => {
+		const signature =
+			'5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW';
+		const solBlockhash = { blockhash: 'EkSnNWid2cvwEVnVx9aBqawnmiCNiDgp3gUdkDPTKN1N', slot: 42n };
+		const ethAddress = '0x1111111111111111111111111111111111111111' as EthAddress;
+		const readSolOutcome = vi.mocked(readSolSourceTxOutcome);
+		const createTx = vi.mocked(activeUserTransactionsServices.createActiveUserTransaction);
+
+		// The row as the supply service leaves it after a SOL transfer, which records its blockhash
+		// and its valid slot before the broadcast, as `sendLiquidiumSol` does.
+		const writeSupplyRow = async (chain: Chain = Chain.SOL): Promise<ActiveUserTransaction> => {
+			await executeLiquidiumSupply({
+				identity: mockIdentity,
+				ethAddress,
+				poolId: 'pool-sol',
+				chain,
+				asset: Asset.SOL,
+				amount: 30_000_000n,
+				inflowFee: 1_884_122n,
+				displayAmount: '0.03',
+				broadcast: async ({ beforeBroadcast }) => {
+					if (chain === Chain.SOL) {
+						await beforeBroadcast({ txid: signature, solBlockhash });
+					}
+
+					return signature;
+				}
+			});
+
+			const [[{ id, data, externalRefs }]] = createTx.mock.calls;
+
+			return {
+				id,
+				status: { Pending: null },
+				external_refs: externalRefs,
+				progress_step: [],
+				data,
+				updated_at_ns: ZERO,
+				error: [],
+				created_at_ns: ZERO
+			};
+		};
+
+		beforeEach(() => {
+			list.mockResolvedValue([]);
+			supply.mockResolvedValue({
+				target: { address: 'GXVewvv6HehcLFYCmwpqh5CrMjqN9zJ8rqzGq3HEt9Ax' },
+				submit: vi.fn()
+			});
+			vi.mocked(liquidiumServices.getOrCreateLiquidiumProfile).mockResolvedValue(profileId);
+			readSolOutcome.mockResolvedValue('pending');
+		});
+
+		it.each(['reverted', 'expired'] as const)(
+			'fails a supply whose transaction %s, read on the finalized chain from its valid slot',
+			async (outcome) => {
+				readSolOutcome.mockResolvedValue(outcome);
+
+				const tx = await writeSupplyRow();
+
+				await poll(tx);
+
+				expect(readSolOutcome).toHaveBeenCalledExactlyOnceWith({
+					rowId: tx.id,
+					signature,
+					blockhash: solBlockhash.blockhash,
+					minContextSlot: solBlockhash.slot,
+					network: SolanaNetworks.mainnet,
+					finalized: true
+				});
+				expect(apply).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						update: { status: { Failed: null }, error: en.liquidium.text.transaction_failed }
+					})
+				);
+			}
+		);
+
+		it.each(['pending', 'succeeded'] as const)(
+			'keeps a supply whose transaction is %s until Liquidium lists it',
+			async (outcome) => {
+				readSolOutcome.mockResolvedValue(outcome);
+
+				await poll(await writeSupplyRow());
+
+				expect(readSolOutcome).toHaveBeenCalledOnce();
+				expect(apply).not.toHaveBeenCalled();
+			}
+		);
+
+		it('follows the activity once Liquidium lists the transfer, without asking Solana', async () => {
+			const tx = await writeSupplyRow();
+
+			list.mockResolvedValue([
+				buildActivity({ txids: [signature], status: inflowStatus('completed') })
+			]);
+
+			await poll(tx);
+
+			expect(readSolOutcome).not.toHaveBeenCalled();
+			expect(apply).toHaveBeenCalledWith(
+				expect.objectContaining({ update: { status: { Succeeded: null } } })
+			);
+		});
+
+		it('leaves a row without the slot of its blockhash to Liquidium', async () => {
+			const tx = await writeSupplyRow();
+
+			await poll({
+				...tx,
+				external_refs: tx.external_refs.filter(
+					({ key }) => key !== LIQUIDIUM_EXTERNAL_REF_KEYS.SOL_BLOCKHASH_SLOT
+				)
+			});
+
+			expect(readSolOutcome).not.toHaveBeenCalled();
+			expect(apply).not.toHaveBeenCalled();
+		});
+
+		// The row as the repay service leaves it: its last write, after the broadcast, replaces the refs,
+		// and must keep the blockhash and its slot for this check.
+		it('fails a repay whose transaction expired, from the refs of its last write', async () => {
+			readSolOutcome.mockResolvedValue('expired');
+
+			await executeLiquidiumRepay({
+				identity: mockIdentity,
+				ethAddress,
+				poolId: 'pool-sol',
+				chain: Chain.SOL,
+				asset: Asset.SOL,
+				amount: 30_000_000n,
+				inflowFee: 1_884_122n,
+				displayAmount: '0.03',
+				broadcast: async ({ beforeBroadcast }) => {
+					await beforeBroadcast({ txid: signature, solBlockhash });
+
+					return signature;
+				}
+			});
+
+			const [[{ id, data }]] = createTx.mock.calls;
+			const updateTx = vi.mocked(activeUserTransactionsServices.updateActiveUserTransaction);
+			const lastRefs = updateTx.mock.calls
+				.map(([params]) => params.externalRefs)
+				.filter(nonNullish)
+				.at(-1);
+
+			const tx: ActiveUserTransaction = {
+				id,
+				status: { Pending: null },
+				external_refs: lastRefs ?? [],
+				progress_step: [],
+				data,
+				updated_at_ns: ZERO,
+				error: [],
+				created_at_ns: ZERO
+			};
+
+			await poll(tx);
+
+			expect(readSolOutcome).toHaveBeenCalledExactlyOnceWith({
+				rowId: id,
+				signature,
+				blockhash: solBlockhash.blockhash,
+				minContextSlot: solBlockhash.slot,
+				network: SolanaNetworks.mainnet,
+				finalized: true
+			});
+			expect(apply).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					update: { status: { Failed: null }, error: en.liquidium.text.transaction_failed }
+				})
+			);
+		});
+
+		it('does not ask Solana about a ckSOL supply', async () => {
+			await poll(await writeSupplyRow(Chain.ICP));
+
+			expect(readSolOutcome).not.toHaveBeenCalled();
+			expect(apply).not.toHaveBeenCalled();
 		});
 	});
 });
