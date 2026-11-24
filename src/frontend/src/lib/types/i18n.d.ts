@@ -187,6 +187,7 @@ interface I18nAuth {
 	};
 	landing: {
 		sections_label: string;
+		sections_button: string;
 		reframe_start: string;
 		reframe_end: string;
 		networks_label: string;

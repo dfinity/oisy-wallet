@@ -204,6 +204,7 @@
 		},
 		"landing": {
 			"sections_label": "",
+			"sections_button": "",
 			"reframe_start": "",
 			"reframe_end": "",
 			"networks_label": "",

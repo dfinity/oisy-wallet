@@ -18,6 +18,8 @@ describe('LandingSection', () => {
 
 		expect(region).toHaveAttribute('id', props.id);
 		expect(region).toHaveAttribute('tabindex', '-1');
+		// A jump target takes focus for the next Tab but draws no ring after a tap.
+		expect(region).toHaveClass('outline-none');
 		expect(getByRole('heading', { level: 2, name: props.title })).toBeInTheDocument();
 		expect(getByTestId(mockSnippetTestId)).toBeInTheDocument();
 	});

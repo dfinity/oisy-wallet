@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
+	import LandingSectionMenu from '$lib/components/auth/LandingSectionMenu.svelte';
 	import SignupsClosedBanner from '$lib/components/auth/SignupsClosedBanner.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import { MOTION_REDUCED_FADE_DURATION } from '$lib/constants/transition.constants';
@@ -14,6 +15,9 @@
 	class="mx-auto flex w-full max-w-screen-xl flex-1 flex-col items-center gap-8 px-5 md:gap-12 md:px-8"
 	{@attach landingBackgroundFade}
 >
+	<!-- First in the main landmark, so it is the first stop after the header's controls. -->
+	<LandingSectionMenu />
+
 	<div class="hero flex w-full max-w-screen-md flex-col items-center">
 		<SignupsClosedBanner />
 

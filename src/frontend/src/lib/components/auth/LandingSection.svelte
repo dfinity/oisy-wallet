@@ -16,9 +16,13 @@
 	let { id, eyebrow, title, description, points = [], flip = false, visual }: Props = $props();
 </script>
 
+<!--
+	A jump target, never a Tab stop: it takes focus so the next Tab and a screen reader continue here,
+	but draws no ring (Safari outlines a focused fragment target by default).
+-->
 <section
 	{id}
-	class="grid w-full scroll-mt-6 grid-cols-1 items-center gap-10 border-t border-tertiary py-16 md:grid-cols-12 md:gap-16 md:py-24"
+	class="grid w-full scroll-mt-6 grid-cols-1 items-center gap-10 border-t border-tertiary py-16 outline-none md:grid-cols-12 md:gap-16 md:py-24"
 	aria-labelledby={`${id}-title`}
 	tabindex="-1"
 >

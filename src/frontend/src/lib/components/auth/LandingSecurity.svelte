@@ -38,9 +38,10 @@
 	]);
 </script>
 
+<!-- A jump target, never a Tab stop: see LandingSection. -->
 <section
 	id="landing-security"
-	class="w-full scroll-mt-6 pb-16 md:pb-24"
+	class="w-full scroll-mt-6 pb-16 outline-none md:pb-24"
 	aria-labelledby="landing-security-title"
 	tabindex="-1"
 >

@@ -21,6 +21,7 @@
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
+	import { landingSectionLinks } from '$lib/utils/landing.utils';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 
 	interface Props {
@@ -30,12 +31,7 @@
 	let { showLandingNavigation = false }: Props = $props();
 
 	const landingNavigation = $derived(showLandingNavigation && $authNotSignedIn);
-	const landingLinks = $derived([
-		{ href: '#landing-hold', label: $i18n.navigation.text.tokens },
-		{ href: '#landing-security', label: $i18n.auth.landing.security_eyebrow },
-		{ href: '#landing-swap', label: $i18n.swap.text.swap },
-		{ href: '#landing-borrow', label: $i18n.auth.landing.borrow_eyebrow }
-	]);
+	const landingLinks = $derived(landingSectionLinks($i18n));
 
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340).
 	let networkSwitcherOpen = $state(false);
@@ -84,26 +80,6 @@
 	let viewTransitionName = $derived(menuOpen ? 'none' : 'header');
 </script>
 
-{#snippet sectionNavigation(styleClass: string)}
-	<nav
-		class="pointer-events-auto justify-center {styleClass}"
-		aria-label={$i18n.auth.landing.sections_label}
-	>
-		<div
-			class="flex max-w-full flex-wrap justify-center gap-0.5 rounded-[24px] border border-tertiary bg-primary/75 p-0.5 shadow-sm backdrop-blur-sm"
-		>
-			{#each landingLinks as { href, label } (href)}
-				<a
-					class="inline-flex min-h-10 min-w-10 items-center justify-center rounded-[21px] px-2.5 text-sm font-normal text-primary no-underline transition-[color,background-color,scale] duration-150 ease-out press hover:bg-brand-subtle-10 hover:text-brand-hover active:bg-brand-subtle-20 active:text-brand-hover sm:px-4"
-					{href}
-				>
-					{label}
-				</a>
-			{/each}
-		</div>
-	</nav>
-{/snippet}
-
 <svelte:window bind:scrollY />
 
 <header
@@ -128,11 +104,25 @@
 		<OisyWalletLogoLink />
 	</div>
 
-	<!-- The section links sit between the logo and the controls on wide screens; below `lg` they wrap
-	to a row of their own and come after the controls, so the tab order follows what is drawn. Only one
-	copy is displayed at a time. -->
+	<!-- Below `lg` the landing's floating LandingSectionMenu takes over these links. -->
 	{#if landingNavigation}
-		{@render sectionNavigation('hidden lg:flex')}
+		<nav
+			class="pointer-events-auto hidden justify-center lg:flex"
+			aria-label={$i18n.auth.landing.sections_label}
+		>
+			<div
+				class="flex max-w-full flex-wrap justify-center gap-0.5 rounded-[24px] border border-tertiary bg-primary/75 p-0.5 shadow-sm backdrop-blur-sm"
+			>
+				{#each landingLinks as { href, label } (href)}
+					<a
+						class="inline-flex min-h-10 min-w-10 items-center justify-center rounded-[21px] px-2.5 text-sm font-normal text-primary no-underline transition-[color,background-color,scale] duration-150 ease-out press hover:bg-brand-subtle-10 hover:text-brand-hover active:bg-brand-subtle-20 active:text-brand-hover sm:px-4"
+						{href}
+					>
+						{label}
+					</a>
+				{/each}
+			</div>
+		</nav>
 	{/if}
 
 	<div
@@ -170,10 +160,6 @@
 			</div>
 		{/if}
 	</div>
-
-	{#if landingNavigation}
-		{@render sectionNavigation('flex w-full lg:hidden')}
-	{/if}
 </header>
 
 {#if $modalAboutWhyOisy}

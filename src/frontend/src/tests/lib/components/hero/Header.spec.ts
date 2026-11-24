@@ -34,35 +34,22 @@ describe('Header', () => {
 	it('links to wallet features when the signed-out landing page is shown', () => {
 		mockAuthSignedIn(false);
 
-		const { getAllByRole } = render(Header, { showLandingNavigation: true });
-		const navs = getAllByRole('navigation', { name: sectionNavLabel });
+		const { getByRole } = render(Header, { showLandingNavigation: true });
+		const nav = getByRole('navigation', { name: sectionNavLabel });
 		const { auth, navigation, swap } = get(i18n);
 		const { borrow_eyebrow, security_eyebrow } = auth.landing;
 
-		// One copy per breakpoint; CSS displays only one, so assistive tech meets a single nav.
-		expect(navs).toHaveLength(2);
+		// Wide screens only: below lg the landing's floating section menu carries these links.
+		expect(nav).toHaveClass('hidden', 'lg:flex');
 
-		for (const nav of navs) {
-			for (const [name, href] of [
-				[navigation.text.tokens, '#landing-hold'],
-				[security_eyebrow, '#landing-security'],
-				[swap.text.swap, '#landing-swap'],
-				[borrow_eyebrow, '#landing-borrow']
-			]) {
-				expect(within(nav).getByRole('link', { name })).toHaveAttribute('href', href);
-			}
+		for (const [name, href] of [
+			[navigation.text.tokens, '#landing-hold'],
+			[security_eyebrow, '#landing-security'],
+			[swap.text.swap, '#landing-swap'],
+			[borrow_eyebrow, '#landing-borrow']
+		]) {
+			expect(within(nav).getByRole('link', { name })).toHaveAttribute('href', href);
 		}
-	});
-
-	it('draws the section links after the header controls below the lg breakpoint', () => {
-		mockAuthSignedIn(false);
-
-		const { getAllByRole } = render(Header, { showLandingNavigation: true });
-		const [wide, narrow] = getAllByRole('navigation', { name: sectionNavLabel });
-
-		expect(wide).toHaveClass('hidden', 'lg:flex');
-		expect(narrow).toHaveClass('lg:hidden');
-		expect(narrow?.previousElementSibling).not.toBe(wide);
 	});
 
 	it('marks itself scrolled once the page scrolls, and not at the top', async () => {
