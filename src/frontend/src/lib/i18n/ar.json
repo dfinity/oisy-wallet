@@ -89,7 +89,8 @@
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
-			"test_banner_beta": ""
+			"test_banner_beta": "",
+			"oisy_allowance_limited": ""
 		},
 		"alt": {
 			"logo": "شعار $name",

@@ -78,7 +78,7 @@ interface I18nCore {
 		got_it: string;
 		oisy_protects_you: string;
 	};
-	info: { test_banner: string; test_banner_beta: string };
+	info: { test_banner: string; test_banner_beta: string; oisy_allowance_limited: string };
 	alt: {
 		logo: string;
 		go_to_home: string;

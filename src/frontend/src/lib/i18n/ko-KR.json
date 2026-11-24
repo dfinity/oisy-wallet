@@ -89,7 +89,8 @@
 		},
 		"info": {
 			"test_banner": "테스트 목적으로만 사용하세요!",
-			"test_banner_beta": "이것은 베타 버전입니다. 버그가 발생할 수 있습니다. 실제 자산이 사용됩니다 - 주의하여 사용하세요."
+			"test_banner_beta": "이것은 베타 버전입니다. 버그가 발생할 수 있습니다. 실제 자산이 사용됩니다 - 주의하여 사용하세요.",
+			"oisy_allowance_limited": ""
 		},
 		"alt": {
 			"logo": "$name 로고",
