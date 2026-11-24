@@ -1445,6 +1445,7 @@
 			"gasless": "Gasless",
 			"swap_fees": "Swap Fees",
 			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network",
+			"lifi_btc_relay_recipient_warning": "$oisy_short can't confirm who receives this swap: LI.FI routes it through Relay, which records the recipient only after your BTC arrives.",
 			"receive_shortcut_same_network": "Another token on $network",
 			"receive_shortcut_other_network": "$symbol on another network",
 			"receive_shortcut_token_on_network": "$symbol on $network",

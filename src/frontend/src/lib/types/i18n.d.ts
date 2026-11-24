@@ -1160,6 +1160,7 @@ interface I18nSwap {
 		gasless: string;
 		swap_fees: string;
 		cross_chain_networks_info: string;
+		lifi_btc_relay_recipient_warning: string;
 		receive_shortcut_same_network: string;
 		receive_shortcut_other_network: string;
 		receive_shortcut_token_on_network: string;
