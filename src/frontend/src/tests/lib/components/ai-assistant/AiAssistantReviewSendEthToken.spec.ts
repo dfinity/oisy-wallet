@@ -14,7 +14,9 @@ import { ethAddressStore } from '$lib/stores/address.store';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import * as toasts from '$lib/stores/toasts.store';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { parseToken } from '$lib/utils/parse.utils';
+import { mockInsufficientAllowanceError } from '$tests/mocks/allowance.mock';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
@@ -162,6 +164,35 @@ describe('AiAssistantReviewSendEthToken', () => {
 		expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({ msg: { text: en.send.error.ethereum_transaction_unconfirmed } })
 		);
+	});
+
+	it('should say on the card that the allowance is used up, and disable Send, without a toast', async () => {
+		mockAuthStore();
+		mockCkEthMinterInfoStore();
+		mockEthAddressStore();
+		mockBalance();
+		mockEthFeeStore();
+
+		vi.spyOn(toasts, 'toastsErrorNoTrace').mockImplementation(() => Symbol('toast'));
+		sendSpy.mockRejectedValueOnce(mockInsufficientAllowanceError({ answer: 'refused' }));
+
+		const { getByTestId, getByText } = render(AiAssistantReviewSendEthToken, {
+			props,
+			context: mockContext()
+		});
+
+		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toBeEnabled();
+
+		await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+		await vi.waitFor(() =>
+			expect(
+				getByText(replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up))
+			).toBeInTheDocument()
+		);
+
+		expect(toasts.toastsErrorNoTrace).not.toHaveBeenCalled();
+		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toBeDisabled();
 	});
 
 	it('should keep offering the send after any other failure', async () => {

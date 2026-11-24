@@ -7,10 +7,14 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { solAddressMainnetStore } from '$lib/stores/address.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import * as toasts from '$lib/stores/toasts.store';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import * as solanaApi from '$sol/api/solana.api';
 import * as sendServices from '$sol/services/sol-send.services';
+import { mockInsufficientAllowanceError } from '$tests/mocks/allowance.mock';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
@@ -81,6 +85,31 @@ describe('AiAssistantReviewSendSolToken', () => {
 			identity: mockIdentity,
 			token: SOLANA_TOKEN
 		});
+	});
+
+	it('should say on the card that the allowance was renewed, without a toast', async () => {
+		mockAuthStore();
+		mockAddress();
+
+		const toastsErrorSpy = vi.spyOn(toasts, 'toastsError');
+		sendSpy.mockRejectedValueOnce(
+			mockInsufficientAllowanceError({ answer: 'granted', allowance: 2_917_000_000_000n })
+		);
+
+		const { getByTestId, getByText } = render(AiAssistantReviewSendSolToken, {
+			props,
+			context: mockContext()
+		});
+
+		await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+		await vi.waitFor(() =>
+			expect(
+				getByText(replaceOisyPlaceholders(en.core.info.oisy_allowance_renewed))
+			).toBeInTheDocument()
+		);
+
+		expect(toastsErrorSpy).not.toHaveBeenCalled();
 	});
 
 	it('should not call send if authIdentity is not defined', async () => {

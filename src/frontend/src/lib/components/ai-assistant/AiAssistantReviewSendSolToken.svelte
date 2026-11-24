@@ -7,6 +7,7 @@
 		SOLANA_LOCAL_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
+	import AllowanceOutcomeMessage from '$lib/components/core/AllowanceOutcomeMessage.svelte';
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
@@ -35,6 +36,11 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Address } from '$lib/types/address';
 	import type { TokenId } from '$lib/types/token';
+	import {
+		blocksRetry,
+		insufficientAllowanceOutcome,
+		type InsufficientAllowanceOutcome
+	} from '$lib/utils/allowance.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdSolana,
@@ -121,6 +127,9 @@
 
 	let loading = $state(false);
 
+	// What the card says after the send's charged call failed with an insufficient allowance.
+	let allowanceOutcome = $state<InsufficientAllowanceOutcome | undefined>();
+
 	let parsedAmount = $derived(
 		parseToken({
 			value: `${amount}`,
@@ -153,10 +162,16 @@
 	);
 
 	let invalid = $derived(
-		!sendEnabled || invalidDestination || notEmptyString(amountErrorMessage) || isNullish(amount)
+		!sendEnabled ||
+			(nonNullish(allowanceOutcome) && blocksRetry(allowanceOutcome)) ||
+			invalidDestination ||
+			notEmptyString(amountErrorMessage) ||
+			isNullish(amount)
 	);
 
 	const send = async () => {
+		allowanceOutcome = undefined;
+
 		const sharedTrackingEventMetadata = {
 			token: $sendTokenSymbol,
 			network: `${$sendTokenNetworkId.description}`
@@ -239,6 +254,13 @@
 				metadata: sendTrackingEventMetadata
 			});
 
+			// Nothing was signed, and the card says whether trying again can work.
+			allowanceOutcome = insufficientAllowanceOutcome(err);
+
+			if (nonNullish(allowanceOutcome)) {
+				return;
+			}
+
 			toastsError({
 				msg: { text: mapSolanaErrorMsg(err) ?? $i18n.send.error.unexpected },
 				err
@@ -260,6 +282,10 @@
 </div>
 
 {#if !sendCompleted}
+	{#if nonNullish(allowanceOutcome)}
+		<AllowanceOutcomeMessage outcome={allowanceOutcome} styleClass="mb-2" />
+	{/if}
+
 	{#if notEmptyString(amountErrorMessage) || invalidDestination}
 		<p class="mb-2 text-center text-sm text-error-primary" transition:slide={SLIDE_DURATION}>
 			{notEmptyString(amountErrorMessage)

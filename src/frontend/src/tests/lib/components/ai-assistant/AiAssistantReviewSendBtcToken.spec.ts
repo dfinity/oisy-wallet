@@ -23,7 +23,9 @@ import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { AddPendingTransactionOutcome } from '$lib/types/api';
 import type { Token } from '$lib/types/token';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { mockInsufficientAllowanceError } from '$tests/mocks/allowance.mock';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockBtcP2SHAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -143,6 +145,37 @@ describe('AiAssistantReviewSendBtcToken', () => {
 			err
 		});
 		expect(props.onSendCompleted).not.toHaveBeenCalled();
+	});
+
+	it('should say on the card that the transaction costs more, and disable Send, without a toast', async () => {
+		vi.spyOn(btcSendServices, 'sendBtc').mockRejectedValue(
+			mockInsufficientAllowanceError({ answer: 'skipped', allowance: 5_000_000_000n })
+		);
+		const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError').mockReturnValue(Symbol('toast'));
+		mockAuthStore();
+		mockBtcAddressStore();
+		mockBalance();
+		mockPrepareBtcSendApi();
+		mockValidateBtcSend();
+
+		const { getByTestId, getByText } = render(AiAssistantReviewSendBtcToken, {
+			props,
+			context: mockContext({ utxosFee: mockUtxosFee })
+		});
+
+		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toBeEnabled();
+
+		await fireEvent.click(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON));
+
+		await waitFor(() =>
+			expect(
+				getByText(replaceOisyPlaceholders(en.core.warning.oisy_allowance_exceeded))
+			).toBeInTheDocument()
+		);
+
+		expect(toastsErrorSpy).not.toHaveBeenCalled();
+		expect(props.onSendOutcomeUnknown).not.toHaveBeenCalled();
+		expect(getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON)).toBeDisabled();
 	});
 
 	it('should call sendBtc if all requirements are met', async () => {

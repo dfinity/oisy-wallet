@@ -21,6 +21,7 @@
 	} from '$btc/utils/btc-send.utils';
 	import { invalidSendAmount } from '$btc/utils/input.utils';
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
+	import AllowanceOutcomeMessage from '$lib/components/core/AllowanceOutcomeMessage.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
 		AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
@@ -42,6 +43,11 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Address } from '$lib/types/address';
+	import {
+		blocksRetry,
+		insufficientAllowanceOutcome,
+		type InsufficientAllowanceOutcome
+	} from '$lib/utils/allowance.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
@@ -81,6 +87,9 @@
 
 	let loading = $state(false);
 
+	// What the card says after the send's charged call failed with an insufficient allowance.
+	let allowanceOutcome = $state<InsufficientAllowanceOutcome | undefined>();
+
 	let parsedAmount = $derived(
 		parseToken({
 			value: `${amount}`,
@@ -115,6 +124,7 @@
 
 	let invalid = $derived(
 		!sendEnabled ||
+			(nonNullish(allowanceOutcome) && blocksRetry(allowanceOutcome)) ||
 			invalidDestination ||
 			notEmptyString(amountErrorMessage) ||
 			isNullish(amount) ||
@@ -124,6 +134,8 @@
 	);
 
 	const send = async () => {
+		allowanceOutcome = undefined;
+
 		const network = nonNullish($sendTokenNetworkId)
 			? mapNetworkIdToBitcoinNetwork($sendTokenNetworkId)
 			: undefined;
@@ -244,6 +256,13 @@
 				metadata: sendTrackingEventMetadata
 			});
 
+			// Nothing was signed, and the card says whether trying again can work.
+			allowanceOutcome = insufficientAllowanceOutcome(err);
+
+			if (nonNullish(allowanceOutcome)) {
+				return;
+			}
+
 			toastsError({
 				msg: {
 					text: mapBtcBroadcastErrorToMessage({ err, i18n: $i18n }) ?? $i18n.send.error.unexpected
@@ -274,6 +293,10 @@
 		<!-- TODO remove pendingTransactionsStatus as soon as parallel BTC transactions are also enabled for BTC convert -->
 		<BtcSendWarnings pendingTransactionsStatus={BtcPendingSentTransactionsStatus.NONE} {utxosFee} />
 	</div>
+
+	{#if nonNullish(allowanceOutcome)}
+		<AllowanceOutcomeMessage outcome={allowanceOutcome} styleClass="mb-2" />
+	{/if}
 
 	{#if notEmptyString(amountErrorMessage) || invalidDestination}
 		<p class="mb-2 text-center text-sm text-error-primary" transition:slide={SLIDE_DURATION}>

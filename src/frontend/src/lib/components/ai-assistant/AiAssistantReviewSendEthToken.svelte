@@ -21,6 +21,7 @@
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
+	import AllowanceOutcomeMessage from '$lib/components/core/AllowanceOutcomeMessage.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import {
@@ -46,6 +47,11 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Address } from '$lib/types/address';
 	import type { Token, TokenId } from '$lib/types/token';
+	import {
+		blocksRetry,
+		insufficientAllowanceOutcome,
+		type InsufficientAllowanceOutcome
+	} from '$lib/utils/allowance.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -111,6 +117,9 @@
 
 	let loading = $state(false);
 
+	// What the card says after the send's charged call failed with an insufficient allowance.
+	let allowanceOutcome = $state<InsufficientAllowanceOutcome | undefined>();
+
 	let parsedAmount = $derived(
 		parseToken({
 			value: `${amount}`,
@@ -160,6 +169,7 @@
 
 	let invalid = $derived(
 		!sendEnabled ||
+			(nonNullish(allowanceOutcome) && blocksRetry(allowanceOutcome)) ||
 			networkMismatch ||
 			invalidDestination ||
 			notEmptyString(insufficientFundsErrorMessage) ||
@@ -169,6 +179,8 @@
 	);
 
 	const send = async () => {
+		allowanceOutcome = undefined;
+
 		const sharedTrackingEventMetadata = {
 			token: $sendTokenSymbol,
 			network: `${$sendTokenNetworkId.description}`
@@ -274,6 +286,13 @@
 				metadata: sendTrackingEventMetadata
 			});
 
+			// Nothing was signed, and the card says whether trying again can work.
+			allowanceOutcome = insufficientAllowanceOutcome(err);
+
+			if (nonNullish(allowanceOutcome)) {
+				return;
+			}
+
 			toastEthereumTransactionError({
 				err,
 				fallbackMsg: $i18n.send.error.unexpected,
@@ -314,6 +333,10 @@
 			{$i18n.send.error.ethereum_transaction_unconfirmed}
 		</p>
 	{:else if !sendCompleted}
+		{#if nonNullish(allowanceOutcome)}
+			<AllowanceOutcomeMessage outcome={allowanceOutcome} styleClass="mb-2" />
+		{/if}
+
 		{#if notEmptyString(insufficientFundsErrorMessage) || invalidDestination}
 			<p class="mb-2 text-center text-sm text-error-primary" transition:slide={SLIDE_DURATION}>
 				{notEmptyString(insufficientFundsErrorMessage)
