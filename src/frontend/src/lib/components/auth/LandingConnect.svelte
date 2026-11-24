@@ -58,19 +58,7 @@
 		</dl>
 	</div>
 
-	<div
-		class="currency-preview min-w-0 md:col-span-7"
-		{@attach landingReveal(LANDING_REVEAL_STAGGER)}
-	>
+	<div class="min-w-0 md:col-span-7" {@attach landingReveal(LANDING_REVEAL_STAGGER)}>
 		<LandingCurrencyPreview />
 	</div>
 </section>
-
-<style lang="scss">
-	// Keep the focused control visible during the section's entrance.
-	.currency-preview:focus-within {
-		opacity: 1 !important;
-		transform: none !important;
-		filter: none !important;
-	}
-</style>

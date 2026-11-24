@@ -163,7 +163,7 @@
 		</div>
 	</div>
 
-	<div class="flex gap-3 border-t border-tertiary p-4 sm:px-6">
+	<div class="flex gap-3 border-t border-tertiary p-3 sm:px-6">
 		<ButtonCancel fullWidth onclick={noop} />
 		<Button fullWidth onclick={noop}>{$i18n.swap.text.review_button}</Button>
 	</div>

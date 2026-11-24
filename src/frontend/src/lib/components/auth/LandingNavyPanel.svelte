@@ -26,5 +26,10 @@
 		background:
 			radial-gradient(60% 80% at 50% 0%, rgb(91 201 252 / 25%), transparent 70%),
 			var(--landing-navy);
+
+		// The global focus ring (brand blue) is under 3:1 on navy; sky clears 7:1.
+		:global(:focus-visible) {
+			--color-background-brand-primary: var(--landing-sky);
+		}
 	}
 </style>

@@ -58,7 +58,7 @@
 
 		<article
 			class="grid grid-rows-[auto_1fr] overflow-hidden rounded-[28px] border border-tertiary bg-primary"
-			{@attach landingReveal(2 * LANDING_REVEAL_STAGGER)}
+			{@attach landingReveal(3 * LANDING_REVEAL_STAGGER)}
 		>
 			<div class="flex flex-col gap-2 px-6 pt-7 md:px-8 md:pt-8">
 				<h3 class="m-0 text-xl font-bold text-balance text-primary">

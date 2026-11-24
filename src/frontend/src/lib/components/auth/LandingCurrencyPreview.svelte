@@ -114,7 +114,7 @@
 		<output class="flex min-h-12 items-center gap-3" aria-atomic="true">
 			<LandingCurrencyFlag currency={displayedCurrency} size={36} />
 			<span
-				class="min-w-0 text-[clamp(1.25rem,7cqi,2.25rem)] font-bold tracking-tight [overflow-wrap:anywhere] text-primary"
+				class="min-w-0 text-[clamp(1.25rem,7cqi,2.25rem)] font-bold tracking-tight [overflow-wrap:anywhere] text-primary tabular-nums"
 				lang={language}
 			>
 				{format({ currency: displayedCurrency, language })}
@@ -148,7 +148,7 @@
 							value={currency}
 						/>
 						<span
-							class="peer-focus-visible:outline-brand-primary-alt flex min-h-10 cursor-pointer items-center gap-1.5 rounded-full px-2 text-xs font-semibold transition-[color,background-color,scale] duration-150 press peer-focus-visible:outline-2 peer-focus-visible:outline-offset-1 motion-reduce:transition-none"
+							class="flex min-h-10 cursor-pointer items-center gap-1.5 rounded-full px-2 text-xs font-semibold transition-[color,background-color,scale] duration-150 press peer-focus-visible:outline-2 peer-focus-visible:outline-offset-1 peer-focus-visible:outline-(--color-background-brand-primary) motion-reduce:transition-none"
 							class:bg-brand-subtle-20={currency === displayedCurrency}
 							class:text-primary={currency === displayedCurrency}
 							class:text-secondary={currency !== displayedCurrency}

@@ -25,7 +25,7 @@
 </script>
 
 <LandingPreviewFrame label={$i18n.auth.landing.borrow_preview}>
-	<div class="flex flex-col gap-5 p-5 sm:p-7">
+	<div class="flex flex-col gap-5 p-3 sm:p-7">
 		<div class="grid gap-2 sm:grid-cols-2">
 			{#each rows as { label, icon, amount, value } (label)}
 				<div class="flex flex-col gap-3 rounded-2xl bg-secondary p-4">
@@ -57,7 +57,7 @@
 		</div>
 
 		<span
-			class="flex h-12 items-center justify-center rounded-xl bg-brand-primary font-bold text-primary-inverted"
+			class="flex h-12 items-center justify-center rounded-2xl bg-brand-primary font-bold text-primary-inverted"
 		>
 			{$i18n.liquidium.text.action_borrow}
 		</span>

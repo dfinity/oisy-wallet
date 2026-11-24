@@ -8,18 +8,19 @@
 	import { landingBackgroundFade } from '$lib/utils/landing-reveal.utils';
 </script>
 
-<div
+<!-- Signed out, AuthGuard shows this page instead of SplitPane, so it carries the main landmark. -->
+<main
 	style:--landing-reduced-duration={`${MOTION_REDUCED_FADE_DURATION}ms`}
 	class="mx-auto flex w-full max-w-screen-xl flex-1 flex-col items-center gap-8 px-5 md:gap-12 md:px-8"
 	{@attach landingBackgroundFade}
 >
-	<div class="landing-enter flex w-full max-w-screen-md flex-col items-center">
+	<div class="hero flex w-full max-w-screen-md flex-col items-center">
 		<SignupsClosedBanner />
 
 		<HeroSignIn />
 	</div>
 
-	<div class="landing-enter artwork flex w-full justify-center">
+	<div style:--landing-step={3} class="landing-enter artwork flex w-full justify-center">
 		<div class="aspect-[1080/752] w-[90%]">
 			{#await import('$lib/components/auth/LandingWalletPreview.svelte') then { default: LandingWalletPreview }}
 				<LandingWalletPreview />
@@ -36,7 +37,7 @@
 			<!-- The hero and its sign-in buttons stay usable if the sections fail to load. -->
 		{/await}
 	</div>
-</div>
+</main>
 
 {#if $modalAuthHelp && nonNullish($modalAuthHelpData)}
 	<AuthHelpModal usesIdentityHelp={$modalAuthHelpData} />
@@ -44,9 +45,13 @@
 
 <style lang="scss">
 	/* Keyboard focus reveals the controls immediately. */
-	.landing-enter {
+	// The hero's title, description and sign-in buttons (HeroSignIn's `landing-step` blocks) enter
+	// 100 ms apart, then the artwork.
+	.landing-enter,
+	.hero :global(.landing-step) {
 		// A one-time landing entrance deliberately settles more slowly than in-app controls.
 		animation: landing-enter 300ms ease-out backwards;
+		animation-delay: calc(var(--landing-step, 0) * 100ms);
 
 		&:focus-within {
 			// Reveal focused controls without removing/restarting the animation timeline.
@@ -99,7 +104,8 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.landing-enter {
+		.landing-enter,
+		.hero :global(.landing-step) {
 			animation: landing-fade var(--landing-reduced-duration) ease-out backwards;
 		}
 		.artwork {

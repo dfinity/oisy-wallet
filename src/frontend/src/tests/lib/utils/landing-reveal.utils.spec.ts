@@ -106,6 +106,29 @@ describe('landing-reveal.utils', () => {
 		);
 	});
 
+	it('shows a block at once when something inside it takes focus', () => {
+		const node = document.createElement('div');
+
+		landingReveal()(node);
+		node.dispatchEvent(new FocusEvent('focusin'));
+
+		expect(node.style.opacity).toBe('');
+		expect(disconnect).toHaveBeenCalledOnce();
+	});
+
+	it('cancels a running entrance when something inside the block takes focus', () => {
+		const node = document.createElement('div');
+		const cancel = vi.fn();
+		vi.spyOn(node, 'animate').mockReturnValue({ cancel } as unknown as Animation);
+
+		landingReveal(200)(node);
+		trigger(entry({ isIntersecting: true, bottom: 500 }));
+		node.dispatchEvent(new FocusEvent('focusin'));
+
+		expect(cancel).toHaveBeenCalledOnce();
+		expect(node.style.opacity).toBe('');
+	});
+
 	it('leaves the block visible when IntersectionObserver is unavailable', () => {
 		vi.stubGlobal('IntersectionObserver', undefined);
 

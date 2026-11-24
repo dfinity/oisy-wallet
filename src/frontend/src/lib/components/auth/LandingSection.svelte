@@ -22,18 +22,28 @@
 	aria-labelledby={`${id}-title`}
 	tabindex="-1"
 >
-	<div class="flex flex-col gap-5 md:col-span-5" class:md:order-2={flip} {@attach landingReveal()}>
-		<p class="m-0 text-xs font-bold tracking-[0.2em] text-brand-primary uppercase">{eyebrow}</p>
-		<h2
-			id={`${id}-title`}
-			class="m-0 text-3xl leading-[1.1] font-bold tracking-tight text-balance text-primary md:text-[2.75rem]"
+	<div class="flex flex-col gap-5 md:col-span-5" class:md:order-2={flip}>
+		<div class="flex flex-col gap-5" {@attach landingReveal()}>
+			<p class="m-0 text-xs font-bold tracking-[0.2em] text-brand-primary uppercase">{eyebrow}</p>
+			<h2
+				id={`${id}-title`}
+				class="m-0 text-3xl leading-[1.1] font-bold tracking-tight text-balance text-primary md:text-[2.75rem]"
+			>
+				{title}
+			</h2>
+		</div>
+		<p
+			class="m-0 text-lg leading-relaxed text-pretty text-secondary"
+			{@attach landingReveal(LANDING_REVEAL_STAGGER)}
 		>
-			{title}
-		</h2>
-		<p class="m-0 text-lg leading-relaxed text-pretty text-secondary">{description}</p>
+			{description}
+		</p>
 
 		{#if points.length > 0}
-			<ul class="m-0 mt-1 flex list-none flex-col gap-3 p-0">
+			<ul
+				class="m-0 mt-1 flex list-none flex-col gap-3 p-0"
+				{@attach landingReveal(2 * LANDING_REVEAL_STAGGER)}
+			>
 				{#each points as point (point)}
 					<li class="flex gap-3 text-base leading-normal text-pretty text-secondary">
 						<span class="mt-0.5 shrink-0 text-brand-primary" aria-hidden="true">
@@ -46,7 +56,7 @@
 		{/if}
 	</div>
 
-	<div class="md:col-span-7" {@attach landingReveal(LANDING_REVEAL_STAGGER)}>
+	<div class="md:col-span-7" {@attach landingReveal(3 * LANDING_REVEAL_STAGGER)}>
 		{@render visual()}
 	</div>
 </section>

@@ -47,8 +47,8 @@
 					{numberFormat.format(index + 1)}
 				</span>
 				<div class="flex min-w-0 flex-col gap-1.5">
-					<h3 class="m-0 text-lg font-bold text-primary">{title}</h3>
-					<p class="m-0 text-base leading-relaxed text-balance text-secondary">{description}</p>
+					<h3 class="m-0 text-lg font-bold text-balance text-primary">{title}</h3>
+					<p class="m-0 text-base leading-relaxed text-pretty text-secondary">{description}</p>
 				</div>
 			</li>
 		{/each}

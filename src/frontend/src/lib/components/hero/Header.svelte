@@ -84,6 +84,26 @@
 	let viewTransitionName = $derived(menuOpen ? 'none' : 'header');
 </script>
 
+{#snippet sectionNavigation(styleClass: string)}
+	<nav
+		class="pointer-events-auto justify-center {styleClass}"
+		aria-label={$i18n.auth.landing.sections_label}
+	>
+		<div
+			class="flex max-w-full flex-wrap justify-center gap-0.5 rounded-[24px] border border-tertiary bg-primary/75 p-0.5 shadow-sm backdrop-blur-sm"
+		>
+			{#each landingLinks as { href, label } (href)}
+				<a
+					class="inline-flex min-h-10 min-w-10 items-center justify-center rounded-[21px] px-2.5 text-sm font-normal text-primary no-underline transition-[color,background-color,scale] duration-150 ease-out press hover:bg-brand-subtle-10 hover:text-brand-hover active:bg-brand-subtle-20 active:text-brand-hover sm:px-4"
+					{href}
+				>
+					{label}
+				</a>
+			{/each}
+		</div>
+	</nav>
+{/snippet}
+
 <svelte:window bind:scrollY />
 
 <header
@@ -108,24 +128,11 @@
 		<OisyWalletLogoLink />
 	</div>
 
+	<!-- The section links sit between the logo and the controls on wide screens; below `lg` they wrap
+	to a row of their own and come after the controls, so the tab order follows what is drawn. Only one
+	copy is displayed at a time. -->
 	{#if landingNavigation}
-		<nav
-			class="pointer-events-auto order-last flex w-full justify-center lg:order-none lg:w-auto"
-			aria-label={$i18n.auth.landing.sections_label}
-		>
-			<div
-				class="flex max-w-full flex-wrap justify-center gap-0.5 rounded-[24px] border border-tertiary bg-primary/75 p-0.5 shadow-sm backdrop-blur-sm"
-			>
-				{#each landingLinks as { href, label } (href)}
-					<a
-						class="inline-flex min-h-10 min-w-10 items-center justify-center rounded-[21px] px-2.5 text-sm font-normal text-primary no-underline transition-colors duration-150 ease-out hover:bg-brand-subtle-10 hover:text-brand-hover active:bg-brand-subtle-20 active:text-brand-hover sm:px-4"
-						{href}
-					>
-						{label}
-					</a>
-				{/each}
-			</div>
-		</nav>
+		{@render sectionNavigation('hidden lg:flex')}
 	{/if}
 
 	<div
@@ -163,6 +170,10 @@
 			</div>
 		{/if}
 	</div>
+
+	{#if landingNavigation}
+		{@render sectionNavigation('flex w-full lg:hidden')}
+	{/if}
 </header>
 
 {#if $modalAboutWhyOisy}

@@ -18,6 +18,8 @@ describe('LandingPage', () => {
 		const { landing, text } = auth;
 		const heading = getByRole('heading', { level: 1 });
 
+		// Signed out, this page replaces SplitPane, so it must carry the main landmark itself.
+		expect(within(getByRole('main')).getByRole('heading', { level: 1 })).toBe(heading);
 		expect(heading).toHaveTextContent(replaceOisyPlaceholders(text.title_part_1));
 		expect(heading).toHaveTextContent(text.title_part_2);
 

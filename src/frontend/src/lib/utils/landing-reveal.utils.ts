@@ -15,7 +15,9 @@ const prefersReducedMotion = (): boolean =>
  * Reveals a landing block once, the first time it scrolls into view.
  *
  * Blocks already above the viewport (a reload or back navigation that restores the scroll
- * position) appear without animation, so nothing stays hidden behind the reader.
+ * position) appear without animation, so nothing stays hidden behind the reader. Keyboard focus
+ * shows the block at once: the observer ignores the bottom 10% of the viewport, where a browser
+ * that scrolls only as far as needed can leave a focused link.
  */
 export const landingReveal =
 	(delay = 0): Attachment<HTMLElement> =>
@@ -25,6 +27,8 @@ export const landingReveal =
 		}
 
 		node.style.opacity = '0';
+
+		let animation: Animation | undefined;
 
 		const observer = new IntersectionObserver(
 			([entry]) => {
@@ -47,7 +51,7 @@ export const landingReveal =
 
 				const reduced = prefersReducedMotion();
 
-				node.animate(
+				animation = node.animate(
 					reduced
 						? [{ opacity: 0 }, { opacity: 1 }]
 						: [
@@ -65,10 +69,19 @@ export const landingReveal =
 			{ rootMargin: '0px 0px -10% 0px' }
 		);
 
+		const showOnFocus = () => {
+			observer.disconnect();
+			// Drops a delayed or running entrance, so the block shows at its final state.
+			animation?.cancel();
+			node.style.removeProperty('opacity');
+		};
+
+		node.addEventListener('focusin', showOnFocus, { once: true });
 		observer.observe(node);
 
 		return () => {
 			observer.disconnect();
+			node.removeEventListener('focusin', showOnFocus);
 			node.style.removeProperty('opacity');
 		};
 	};

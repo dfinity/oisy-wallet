@@ -10,10 +10,13 @@
 	let { label, interactive = false, children }: Props = $props();
 </script>
 
-<!-- Outer radius = inner radius (20px) + padding (12px / 20px), so the corners stay concentric. -->
-<div class="rounded-[32px] bg-brand-subtle-10 p-3 sm:rounded-[40px] sm:p-5">
+<!--
+	Outer radius = inner radius (28px) + padding (12px / 20px), so the corners stay concentric. The
+	inner 28px fits a 16px control sitting 12px from the screen's edge (the Swap and Borrow previews).
+-->
+<div class="rounded-[40px] bg-brand-subtle-10 p-3 sm:rounded-[48px] sm:p-5">
 	<div
-		class="overflow-hidden rounded-[20px] bg-primary shadow-sm outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+		class="overflow-hidden rounded-[28px] bg-primary shadow-sm outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
 		aria-label={label}
 		role={interactive ? 'group' : 'img'}
 	>

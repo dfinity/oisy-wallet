@@ -25,7 +25,7 @@
 
 <!-- Simplified flags drawn for a round chip a few pixels wide, not to heraldic precision. -->
 <svg
-	class="shrink-0 rounded-full outline-1 -outline-offset-1 outline-black/15"
+	class="shrink-0 rounded-full outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
 	aria-hidden="true"
 	height={size}
 	viewBox="0 0 32 32"

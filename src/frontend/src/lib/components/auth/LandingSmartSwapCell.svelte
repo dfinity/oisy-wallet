@@ -14,9 +14,9 @@
 	const PROVIDERS = [SwapProvider.NEAR_INTENTS, SwapProvider.LIFI, SwapProvider.ONE_SEC];
 	const SELECTED = SwapProvider.NEAR_INTENTS;
 
-	// One round: the cell compares for a while, settles on the best offer, then rests.
+	// One round each time the cell scrolls into view: it compares for a while, settles on the best
+	// offer, then rests. Kept under 5 seconds so nothing loops without a pause control (WCAG 2.2.2).
 	const COMPARE_MS = 2600;
-	const ROUND_MS = 7000;
 
 	let comparing = $state(false);
 	let confirmationId = $state(0);
@@ -33,21 +33,21 @@
 			setTimeout(() => {
 				comparing = false;
 				confirmationId++;
-			}, COMPARE_MS),
-			setTimeout(round, ROUND_MS)
+			}, COMPARE_MS)
 		);
 	};
 
 	// Plays only while the cell is on screen, and not at all with reduced motion.
 	const playWhenVisible = (node: HTMLElement) => {
-		if (prefersReducedMotion.current || typeof IntersectionObserver === 'undefined') {
+		if (typeof IntersectionObserver === 'undefined') {
 			return;
 		}
 
 		const observer = new IntersectionObserver(([entry]) => {
 			clearTimers();
 
-			if (entry?.isIntersecting) {
+			// Read on every entry, so a motion setting changed while the page is open applies.
+			if (entry?.isIntersecting && !prefersReducedMotion.current) {
 				round();
 				return;
 			}
@@ -77,12 +77,15 @@
 		>
 		<span class="grid pt-0.5 text-sm">
 			<span
-				class="smart-thinking col-start-1 row-start-1 text-tertiary"
-				class:invisible={!comparing}
+				class="col-start-1 row-start-1 text-tertiary transition-opacity duration-150 ease-out motion-reduce:transition-none"
+				class:opacity-0={!comparing}
+				class:smart-thinking={comparing}
 			>
 				{$i18n.swap.text.finding_best_rate}
 			</span>
-			<span class="col-start-1 row-start-1 text-tertiary" class:invisible={comparing}
+			<span
+				class="col-start-1 row-start-1 text-tertiary transition-opacity duration-150 ease-out motion-reduce:transition-none"
+				class:opacity-0={comparing}
 				>{gainBefore}+<strong class="font-bold text-primary">{gain}</strong>{gainAfter}</span
 			>
 		</span>
