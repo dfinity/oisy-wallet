@@ -108,9 +108,9 @@
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",
 			"standalone_mode": "Se han detectado problemas de conexión conocidos cuando tanto una aplicación como $oisy_short están instalados en la pantalla de inicio. Si tiene problemas para conectar $oisy_short o firmar transacciones, inicie la aplicación desde un navegador normal. Estamos trabajando en una solución que estará disponible pronto. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Leer más</a>",
 			"video_not_supported": "",
-			"oisy_allowance_used_up_title": "",
-			"oisy_allowance_used_up": "",
-			"oisy_allowance_exceeded": ""
+			"oisy_allowance_used_up_title": "Asignación gratuita de $oisy_name agotada",
+			"oisy_allowance_used_up": "Tu asignación gratuita de $oisy_name está agotada por ahora, así que algunas transacciones pueden fallar.",
+			"oisy_allowance_exceeded": "Esta transacción cuesta más de lo que cubre tu asignación gratuita de $oisy_name."
 		},
 		"error": {
 			"copy_failed": "",
