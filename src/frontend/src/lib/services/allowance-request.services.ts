@@ -2,6 +2,7 @@ import { allowSigning } from '$lib/api/backend.api';
 import { ALLOWANCE_REQUEST_COOLDOWN_MILLIS } from '$lib/constants/app.constants';
 import { trackRateLimited } from '$lib/services/analytics.services';
 import { allowanceIssueStore } from '$lib/stores/allowance-issue.store';
+import { allowanceToastStore } from '$lib/stores/allowance-toast.store';
 import type { AllowanceRequestAnswer } from '$lib/types/api';
 import type { NullishIdentity } from '$lib/types/identity';
 import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
@@ -48,9 +49,8 @@ const sendAllowanceRequest = async (identity: NullishIdentity): Promise<Allowanc
 };
 
 /**
- * Sends an allowance request (AR) after an insufficient allowance, or from the allowance banner's
- * Retry, and keeps the allowance issue state in line with its answer: a refused AR sets it, a granted
- * or skipped one clears it.
+ * Sends an allowance request (AR) and keeps the allowance issue state in line with its answer: a
+ * refused AR sets it, a granted or skipped one clears it.
  *
  * During the AR cooldown, no AR is sent and the answer is "refused". Callers that ask while an AR is
  * already in flight share its answer, so several calls failing at once send one AR.
@@ -79,4 +79,33 @@ export const requestAllowance = (identity: NullishIdentity): Promise<AllowanceRe
 	});
 
 	return pendingRequest;
+};
+
+/**
+ * After a charged call (CC) failed with an insufficient allowance, sends the AR and says whether to
+ * repeat the CC: after a granted AR, or a skipped one that states a larger OISY allowance than the
+ * failed CC did, because another tab or device got a new one in the meantime.
+ *
+ * Otherwise it asks for the toast that fits the answer: the allowance-issue toast for a refused AR,
+ * or the warning that the CC costs more than the OISY allowance covers for a skipped one.
+ */
+export const requestAllowanceAfterInsufficientAllowance = async ({
+	identity,
+	allowance
+}: {
+	identity: NullishIdentity;
+	allowance: bigint;
+}): Promise<{ repeat: boolean }> => {
+	const result = await requestAllowance(identity);
+
+	if (
+		result.answer === 'granted' ||
+		(result.answer === 'skipped' && result.allowance > allowance)
+	) {
+		return { repeat: true };
+	}
+
+	allowanceToastStore.set({ toast: result.answer === 'skipped' ? 'exceeded' : 'issue' });
+
+	return { repeat: false };
 };

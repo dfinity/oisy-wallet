@@ -89,8 +89,7 @@
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
-			"test_banner_beta": "Đây là phiên bản thử nghiệm. Bạn có thể gặp một số lỗi. Tài sản thật đang được sử dụng - vui lòng cẩn trọng.",
-			"oisy_allowance_limited": ""
+			"test_banner_beta": "Đây là phiên bản thử nghiệm. Bạn có thể gặp một số lỗi. Tài sản thật đang được sử dụng - vui lòng cẩn trọng."
 		},
 		"alt": {
 			"logo": "Logo $name",
@@ -108,7 +107,10 @@
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
 			"standalone_mode": "Có các sự cố kết nối đã biết khi cả ứng dụng và $oisy_short đều được cài đặt trên màn hình chính. Nếu gặp sự cố khi kết nối $oisy_short hoặc ký giao dịch, vui lòng khởi động ứng dụng từ trình duyệt thông thường. Chúng tôi đang khắc phục sự cố này và sẽ sớm được giải quyết. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Đọc thêm</a>",
-			"video_not_supported": ""
+			"video_not_supported": "",
+			"oisy_allowance_used_up_title": "",
+			"oisy_allowance_used_up": "",
+			"oisy_allowance_exceeded": ""
 		},
 		"error": {
 			"copy_failed": ""

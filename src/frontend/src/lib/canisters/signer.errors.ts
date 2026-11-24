@@ -6,7 +6,6 @@ import type {
 	SendBtcError as SignerCanisterSendBtcError
 } from '$declarations/signer/signer.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
-import type { AllowanceRequestAnswer } from '$lib/types/api';
 import { isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 const mapPaymentErrorToMessage = (err: PaymentError): string => {
@@ -35,29 +34,6 @@ export class SignerCanisterPaymentError extends CanisterInternalError {
 	}
 }
 
-// A charged call (CC) that failed with an insufficient allowance, with the OISY allowance its error
-// stated and the answer of the allowance request (AR) sent right after it, so the form can tell the
-// user what to do next.
-export class SignerCanisterInsufficientAllowanceError extends SignerCanisterPaymentError {
-	readonly allowance: bigint;
-	readonly allowanceRequest: AllowanceRequestAnswer;
-
-	constructor({
-		paymentError,
-		allowance,
-		allowanceRequest
-	}: {
-		paymentError: PaymentError;
-		allowance: bigint;
-		allowanceRequest: AllowanceRequestAnswer;
-	}) {
-		super(paymentError);
-
-		this.allowance = allowance;
-		this.allowanceRequest = allowanceRequest;
-	}
-}
-
 const isPaymentErrorVariant = (err: unknown): err is { PaymentError: PaymentError } =>
 	typeof err === 'object' && nonNullish(err) && 'PaymentError' in err;
 
@@ -71,11 +47,9 @@ const paymentErrorOf = (err: unknown): PaymentError | undefined => {
 	return isPaymentErrorVariant(err) ? err.PaymentError : undefined;
 };
 
-// The payment error and the OISY allowance of a CC that failed with an insufficient allowance, or
+// The OISY allowance stated by a charged call (CC) that failed with an insufficient allowance, or
 // `undefined` for any other error.
-export const insufficientAllowanceOf = (
-	err: unknown
-): { paymentError: PaymentError; allowance: bigint } | undefined => {
+export const insufficientAllowanceOf = (err: unknown): bigint | undefined => {
 	const paymentError = paymentErrorOf(err);
 
 	if (isNullish(paymentError) || !('LedgerWithdrawFromError' in paymentError)) {
@@ -84,9 +58,7 @@ export const insufficientAllowanceOf = (
 
 	const { error } = paymentError.LedgerWithdrawFromError;
 
-	return 'InsufficientAllowance' in error
-		? { paymentError, allowance: error.InsufficientAllowance.allowance }
-		: undefined;
+	return 'InsufficientAllowance' in error ? error.InsufficientAllowance.allowance : undefined;
 };
 
 export const mapSignerCanisterBtcError = (err: SignerCanisterBtcError): CanisterInternalError => {

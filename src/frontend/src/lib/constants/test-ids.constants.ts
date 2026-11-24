@@ -492,10 +492,6 @@ export const AI_ASSISTANT_SEND_TOKENS_OUTCOME_UNKNOWN_MESSAGE =
 export const AGREEMENTS_WARNING_BANNER = 'agreements-warning-banner';
 export const AGREEMENTS_WARNING_BANNER_CLOSE_BUTTON = 'agreements-warning-banner-close-button';
 
-// OISY allowance
-export const ALLOWANCE_ISSUE_BANNER = 'allowance-issue-banner';
-export const ALLOWANCE_ISSUE_BANNER_RETRY_BUTTON = 'allowance-issue-banner-retry-button';
-
 // UI components
 export const DATE_BADGE_ICON = 'date-badge-icon';
 

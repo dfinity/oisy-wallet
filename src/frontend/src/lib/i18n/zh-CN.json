@@ -89,8 +89,7 @@
 		},
 		"info": {
 			"test_banner": "仅用于测试目的！",
-			"test_banner_beta": "这是一个测试版发布。你可能会遇到一些错误。真实资产正在使用中——请谨慎操作。",
-			"oisy_allowance_limited": ""
+			"test_banner_beta": "这是一个测试版发布。你可能会遇到一些错误。真实资产正在使用中——请谨慎操作。"
 		},
 		"alt": {
 			"logo": "$name 标志",
@@ -108,7 +107,10 @@
 		"warning": {
 			"do_not_close": "在交易完成之前请勿关闭此标签页",
 			"standalone_mode": "将应用程序和 $oisy_short 同时安装到主屏幕时，存在已知的连接问题。如果在连接 $oisy_short 或签署交易时遇到问题，请从普通浏览器启动应用程序。我们正在修复此问题，将很快解决。 <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">了解更多</a>",
-			"video_not_supported": "你的浏览器不支持视频播放。"
+			"video_not_supported": "你的浏览器不支持视频播放。",
+			"oisy_allowance_used_up_title": "",
+			"oisy_allowance_used_up": "",
+			"oisy_allowance_exceeded": ""
 		},
 		"error": {
 			"copy_failed": ""

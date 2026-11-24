@@ -1,11 +1,16 @@
 import * as api from '$lib/api/backend.api';
 import { ALLOWANCE_REQUEST_COOLDOWN_MILLIS, ZERO } from '$lib/constants/app.constants';
-import { requestAllowance } from '$lib/services/allowance-request.services';
+import {
+	requestAllowance,
+	requestAllowanceAfterInsufficientAllowance
+} from '$lib/services/allowance-request.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
 import { allowanceIssueStore } from '$lib/stores/allowance-issue.store';
+import { allowanceToastStore } from '$lib/stores/allowance-toast.store';
 import type { AllowSigningOutcome } from '$lib/types/api';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn(),
@@ -141,6 +146,89 @@ describe('allowance-request.services', () => {
 			await requestAllowance(mockIdentity);
 
 			expect(spy).toHaveBeenCalledTimes(2);
+		});
+	});
+
+	describe('requestAllowanceAfterInsufficientAllowance', () => {
+		const allowance = 5_000_000_000n;
+
+		let toastSpy: MockInstance;
+
+		beforeEach(() => {
+			toastSpy = vi.spyOn(allowanceToastStore, 'set');
+		});
+
+		it('should repeat after a granted request, without a toast', async () => {
+			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(grantedOutcome);
+
+			await expect(
+				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
+			).resolves.toEqual({ repeat: true });
+
+			expect(toastSpy).not.toHaveBeenCalled();
+		});
+
+		it('should repeat after a skipped request with a larger allowance than the failed call stated', async () => {
+			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(skippedOutcome);
+
+			await expect(
+				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
+			).resolves.toEqual({ repeat: true });
+
+			expect(toastSpy).not.toHaveBeenCalled();
+		});
+
+		it('should ask for the warning that the call costs more than the allowance after a skipped request with no larger allowance', async () => {
+			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(skippedOutcome);
+
+			await expect(
+				requestAllowanceAfterInsufficientAllowance({
+					identity: mockIdentity,
+					allowance: 1_500_000_000_000n
+				})
+			).resolves.toEqual({ repeat: false });
+
+			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'exceeded' });
+			expect(get(allowanceIssueStore)).toBeUndefined();
+		});
+
+		it('should ask for the allowance-issue toast after a refused request', async () => {
+			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(rateLimitedOutcome);
+
+			await expect(
+				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
+			).resolves.toEqual({ repeat: false });
+
+			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'issue' });
+			expect(get(allowanceIssueStore)).toEqual({ refusedAt: Date.now() });
+		});
+
+		it('should ask for the allowance-issue toast again, without a request, for a call failing in the cooldown', async () => {
+			const spy = vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(rateLimitedOutcome);
+
+			await requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance });
+			await requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance });
+
+			expect(spy).toHaveBeenCalledOnce();
+			expect(toastSpy).toHaveBeenCalledTimes(2);
+			expect(toastSpy).toHaveBeenNthCalledWith(2, { toast: 'issue' });
+		});
+
+		it('should repeat, and clear the allowance issue, once a request after the cooldown is granted', async () => {
+			vi.spyOn(api, 'allowSigning')
+				.mockResolvedValueOnce(rateLimitedOutcome)
+				.mockResolvedValueOnce(grantedOutcome);
+
+			await requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance });
+
+			vi.advanceTimersByTime(ALLOWANCE_REQUEST_COOLDOWN_MILLIS);
+
+			await expect(
+				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
+			).resolves.toEqual({ repeat: true });
+
+			expect(toastSpy).toHaveBeenCalledOnce();
+			expect(get(allowanceIssueStore)).toBeUndefined();
 		});
 	});
 });

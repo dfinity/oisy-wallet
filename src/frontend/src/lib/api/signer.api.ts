@@ -8,12 +8,10 @@ import type {
 import type { EthAddress } from '$eth/types/address';
 import { CanisterApi } from '$lib/api/canister.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
-import {
-	insufficientAllowanceOf,
-	SignerCanisterInsufficientAllowanceError
-} from '$lib/canisters/signer.errors';
+import { insufficientAllowanceOf } from '$lib/canisters/signer.errors';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
-import { requestAllowance } from '$lib/services/allowance-request.services';
+import { requestAllowanceAfterInsufficientAllowance } from '$lib/services/allowance-request.services';
+import { allowanceToastStore } from '$lib/stores/allowance-toast.store';
 import type {
 	GenericSignWithEcdsaParams,
 	GetSchnorrPublicKeyParams,
@@ -21,7 +19,7 @@ import type {
 	SignWithSchnorrParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 
 const signerApi = new CanisterApi<SignerCanister>();
 
@@ -109,9 +107,11 @@ export const genericSignWithEcdsa = async ({
 }: CanisterApiFunctionParams<GenericSignWithEcdsaParams>): Promise<Uint8Array> =>
 	await callSigner({ identity, call: ({ genericSignWithEcdsa }) => genericSignWithEcdsa(rest) });
 
-// Every signer call is a charged call (CC), so this is the one place that catches an insufficient
-// allowance for all of them: it sends the allowance request (AR) before the flow sees the error,
-// and the error it throws then carries the AR's answer.
+// Every signer call is a charged call (CC), so this is the one place that handles an insufficient
+// allowance for all of them, and no flow needs to know about it: it sends the allowance request (AR)
+// before the flow sees the error and, when a new allowance came through, repeats the CC once. A CC
+// refused for its allowance ran nothing, so the repeat is like the first try. Any other answer, or a
+// repeat that fails, reaches the flow as the error it would have seen anyway.
 const callSigner = async <T>({
 	identity,
 	canisterId,
@@ -122,18 +122,28 @@ const callSigner = async <T>({
 	try {
 		return await call(signer);
 	} catch (err: unknown) {
-		const insufficientAllowance = insufficientAllowanceOf(err);
+		const allowance = insufficientAllowanceOf(err);
 
-		if (isNullish(insufficientAllowance)) {
+		if (isNullish(allowance)) {
 			throw err;
 		}
 
-		const allowanceRequest = await requestAllowance(identity);
+		const { repeat } = await requestAllowanceAfterInsufficientAllowance({ identity, allowance });
 
-		throw new SignerCanisterInsufficientAllowanceError({
-			...insufficientAllowance,
-			allowanceRequest
-		});
+		if (!repeat) {
+			throw err;
+		}
+
+		try {
+			return await call(signer);
+		} catch (repeatErr: unknown) {
+			// Refused again with a new allowance: the CC costs more than the OISY allowance covers.
+			if (nonNullish(insufficientAllowanceOf(repeatErr))) {
+				allowanceToastStore.set({ toast: 'exceeded' });
+			}
+
+			throw repeatErr;
+		}
 	}
 };
 
