@@ -110,6 +110,7 @@
 			"video_not_supported": "Your browser does not support video playback.",
 			"oisy_allowance_used_up_title": "Free usage credits are used up",
 			"oisy_allowance_used_up": "Your daily amount of free credits to sign transactions is used up, so signing some transactions may fail.",
+			"oisy_allowance_used_up_own_cycles": "Your daily amount of free credits to sign transactions is used up, so signing now uses your own credits.",
 			"oisy_allowance_exceeded": "This transaction costs more than your free $oisy_name allowance covers."
 		},
 		"error": {

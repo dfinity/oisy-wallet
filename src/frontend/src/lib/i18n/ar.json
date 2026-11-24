@@ -110,6 +110,7 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "",
 			"oisy_allowance_used_up": "",
+			"oisy_allowance_used_up_own_cycles": "",
 			"oisy_allowance_exceeded": ""
 		},
 		"error": {

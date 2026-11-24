@@ -98,6 +98,7 @@ interface I18nCore {
 		video_not_supported: string;
 		oisy_allowance_used_up_title: string;
 		oisy_allowance_used_up: string;
+		oisy_allowance_used_up_own_cycles: string;
 		oisy_allowance_exceeded: string;
 	};
 	error: { copy_failed: string; usage_credits_insufficient: string };

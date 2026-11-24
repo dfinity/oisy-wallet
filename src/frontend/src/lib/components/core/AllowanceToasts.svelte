@@ -15,7 +15,7 @@
 
 	// A toast still open stays where it is: shown again, it would move behind the newer toasts, out of
 	// the few on screen. Only one the user closed shows again.
-	const isOpen = (id: symbol | undefined): boolean =>
+	const isOpen = (id: symbol | undefined): id is symbol =>
 		nonNullish(id) && get(toastsStore).some(({ id: openId }) => openId === id);
 
 	const hide = (id: symbol | undefined) => {
@@ -25,8 +25,16 @@
 	};
 
 	// It looks unlike any other toast, so it stands out from the error the flow shows next to it.
-	const showIssueToast = () => {
+	// Its text says when the user's own credits paid instead; an open one gets the new text in place.
+	const showIssueToast = (ownCycles: boolean) => {
+		const text = replaceOisyPlaceholders(
+			ownCycles
+				? $i18n.core.warning.oisy_allowance_used_up_own_cycles
+				: $i18n.core.warning.oisy_allowance_used_up
+		);
+
 		if (isOpen(issueToastId)) {
+			toastsStore.update({ id: issueToastId, content: { text } });
 			return;
 		}
 
@@ -35,7 +43,7 @@
 			theme: 'inverted',
 			icon: IconFuelPump,
 			title: replaceOisyPlaceholders($i18n.core.warning.oisy_allowance_used_up_title),
-			text: replaceOisyPlaceholders($i18n.core.warning.oisy_allowance_used_up),
+			text,
 			link: { href: OISY_DOCS_URL, label: $i18n.core.text.learn_more }
 		});
 	};
@@ -61,7 +69,7 @@
 		// Only a failed charged call shows a toast, not a change of language.
 		untrack(() => {
 			if (request.toast === 'issue') {
-				showIssueToast();
+				showIssueToast(request.ownCycles === true);
 				return;
 			}
 

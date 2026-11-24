@@ -110,6 +110,7 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "Crediti di utilizzo gratuiti esauriti",
 			"oisy_allowance_used_up": "La tua quantità giornaliera di crediti gratuiti per firmare le transazioni è esaurita, quindi la firma di alcune transazioni potrebbe non riuscire.",
+			"oisy_allowance_used_up_own_cycles": "",
 			"oisy_allowance_exceeded": "Questa transazione costa più di quanto copra la tua quota gratuita di $oisy_name."
 		},
 		"error": {

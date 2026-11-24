@@ -110,6 +110,7 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "Gratis-Nutzungsguthaben aufgebraucht",
 			"oisy_allowance_used_up": "Dein tägliches Gratis-Guthaben zum Signieren von Transaktionen ist aufgebraucht, daher kann das Signieren einiger Transaktionen fehlschlagen.",
+			"oisy_allowance_used_up_own_cycles": "",
 			"oisy_allowance_exceeded": "Diese Transaktion kostet mehr, als dein Gratis-Kontingent von $oisy_name abdeckt."
 		},
 		"error": {
