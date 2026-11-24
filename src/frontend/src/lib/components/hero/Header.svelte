@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
-	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
 	import ActiveUserTransactionsButton from '$lib/components/active-user-transactions/ActiveUserTransactionsButton.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
@@ -155,7 +154,6 @@
 			<Menu bind:visible={menuOpen} />
 		{:else}
 			<div class="flex flex-wrap items-center justify-end gap-2 sm:gap-5">
-				<AboutWhyOisy trackEventSource={LANDING_PAGE_ROUTE} />
 				<DocumentationLink shortTextOnMobile trackEventSource={LANDING_PAGE_ROUTE} />
 				<ThemeSwitchButton />
 				<Menu bind:visible={menuOpen} />
