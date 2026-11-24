@@ -82,6 +82,21 @@ export const requestAllowance = (identity: NullishIdentity): Promise<AllowanceRe
 };
 
 /**
+ * Sends the AR at load. As for any AR, a granted or skipped answer clears the allowance issue. A
+ * refused one is silent: it sets no allowance issue and starts no AR cooldown, since the user may
+ * still have enough OISY allowance left.
+ *
+ * It never throws: a request that fails counts as refused.
+ */
+export const requestAllowanceAtLoad = async (identity: NullishIdentity): Promise<void> => {
+	const { answer } = await sendAllowanceRequest(identity);
+
+	if (answer !== 'refused') {
+		allowanceIssueStore.clear();
+	}
+};
+
+/**
  * After a charged call (CC) failed with an insufficient allowance, sends the AR and says whether to
  * repeat the CC: after a granted AR, or a skipped one that states a larger OISY allowance than the
  * failed CC did, because another tab or device got a new one in the meantime.

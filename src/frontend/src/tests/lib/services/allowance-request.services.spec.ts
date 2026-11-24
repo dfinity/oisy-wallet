@@ -2,7 +2,8 @@ import * as api from '$lib/api/backend.api';
 import { ALLOWANCE_REQUEST_COOLDOWN_MILLIS, ZERO } from '$lib/constants/app.constants';
 import {
 	requestAllowance,
-	requestAllowanceAfterInsufficientAllowance
+	requestAllowanceAfterInsufficientAllowance,
+	requestAllowanceAtLoad
 } from '$lib/services/allowance-request.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
 import { allowanceIssueStore } from '$lib/stores/allowance-issue.store';
@@ -229,6 +230,46 @@ describe('allowance-request.services', () => {
 
 			expect(toastSpy).toHaveBeenCalledOnce();
 			expect(get(allowanceIssueStore)).toBeUndefined();
+		});
+	});
+
+	describe('requestAllowanceAtLoad', () => {
+		it('should clear the allowance issue when granted', async () => {
+			allowanceIssueStore.setRefused();
+			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(grantedOutcome);
+
+			await requestAllowanceAtLoad(mockIdentity);
+
+			expect(get(allowanceIssueStore)).toBeUndefined();
+		});
+
+		it('should clear the allowance issue when skipped', async () => {
+			allowanceIssueStore.setRefused();
+			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(skippedOutcome);
+
+			await requestAllowanceAtLoad(mockIdentity);
+
+			expect(get(allowanceIssueStore)).toBeUndefined();
+		});
+
+		it('should set no allowance issue when refused', async () => {
+			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(rateLimitedOutcome);
+
+			await requestAllowanceAtLoad(mockIdentity);
+
+			expect(get(allowanceIssueStore)).toBeUndefined();
+			expect(trackRateLimited).toHaveBeenCalledExactlyOnceWith(rateLimitedOutcome.rateLimitInfo);
+		});
+
+		it('should leave an allowance issue and its cooldown as they are when refused', async () => {
+			allowanceIssueStore.setRefused();
+			const issue = get(allowanceIssueStore);
+			vi.advanceTimersByTime(1_000);
+			vi.spyOn(api, 'allowSigning').mockRejectedValueOnce(new Error('test'));
+
+			await expect(requestAllowanceAtLoad(mockIdentity)).resolves.toBeUndefined();
+
+			expect(get(allowanceIssueStore)).toBe(issue);
 		});
 	});
 });

@@ -3,7 +3,6 @@ import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
-import { allowSigning } from '$lib/api/backend.api';
 import {
 	networkBitcoinMainnetEnabled,
 	networkEthereumEnabled,
@@ -12,15 +11,14 @@ import {
 	networkXrpMainnetEnabled
 } from '$lib/derived/networks.derived';
 import { loadAddresses } from '$lib/services/addresses.services';
-import { trackRateLimited } from '$lib/services/analytics.services';
+import { requestAllowanceAtLoad } from '$lib/services/allowance-request.services';
 import { infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
-import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -38,21 +36,11 @@ import { get } from 'svelte/store';
  * @returns {Promise<void>} Resolves once the call has been answered or has failed.
  */
 export const initSignerAllowance = async (): Promise<void> => {
-	try {
-		const { identity } = get(authStore);
+	const { identity } = get(authStore);
 
-		const { rateLimitInfo } = await allowSigning({
-			identity,
-			iiDelegationChain: nonNullish(identity) ? extractIIDelegationChain(identity) : []
-		});
-
-		if (nonNullish(rateLimitInfo)) {
-			trackRateLimited(rateLimitInfo);
-		}
-	} catch (_err: unknown) {
-		// A failed request is no reason to stop: the backend tops the allowance up only once it runs low,
-		// so the user may still have enough left to sign.
-	}
+	// A refused request is no reason to stop: the backend tops the allowance up only once it runs low,
+	// so the user may still have enough left to sign.
+	await requestAllowanceAtLoad(identity);
 };
 
 /**
