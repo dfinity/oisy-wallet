@@ -127,7 +127,7 @@ Phase 3 comes first, with one spender: the signer charges the user's main accoun
 - An approval reserves nothing: it only caps what the signer may charge from the user's TCYCLES balance.
 - **Allowing.** In one approval, the user sets the spending limit from their TCYCLES balance and confirms it on a review step. A user without TCYCLES gets some first, for example through [Mint TCYCLES](../../PRODUCT.md#mint-tcycles). The approval costs one ledger fee.
 - **The approval is the switch.** Approving turns it on, and setting the approval to zero turns it off. There is no separate setting.
-- **Automatic use.** Every CC is charged to the OISY allowance first. When a CC returns Insufficient allowance and its AR is Refused, or no AR is sent during the AR cooldown, the shared signer module repeats it once, charged to the user's own cycles, if an approval is left. If the repeat succeeds, the flow never sees the failure. So OISY pays again as soon as its allowance covers a CC, without a reload, and phase 1's AR, at most one a minute, serves as the recheck. Before each such repeat, one CC fails at no charge. The approval is the consent, and its amount caps what can be charged.
+- **Automatic use.** Every CC is charged to the OISY allowance first. When a CC returns Insufficient allowance and its AR is Refused, the shared signer module repeats it once, charged to the user's own cycles, if an approval is left; so does a CC that costs more than the OISY allowance covers, with no warning. During the AR cooldown, CCs go straight to own cycles. If the repeat succeeds, the flow never sees the failure. After the cooldown, the next CC tries the OISY allowance first again, so OISY pays again as soon as its allowance covers a CC, without a reload, and phase 1's AR, at most one a minute, serves as the recheck. Before each such repeat, one CC fails at no charge. The approval is the consent, and its amount caps what can be charged.
 - **No prompt per transaction**: no warning and no checkbox.
 - The approval left and the TCYCLES balance are read with free queries on the cycles ledger.
 - **Own cycles running low.** A CC paid with the user's own cycles fails when the approval is used up (`InsufficientAllowance`) or the TCYCLES balance is (`InsufficientFunds`). Both show phase 1's usage-credits error text in the flow's error toast, in place of its usual text (see 4.4).
@@ -137,7 +137,7 @@ Phase 3 comes first, with one spender: the signer charges the user's main accoun
 - **An allowance card on the Tools page** shows the free signatures left (the OISY allowance left), the spending limit (the approval left, of the limit set last: "1.2 of 2 TCYCLES left") and the ICP Cycles balance, since either can run low, with **Set spending limit** and **Get ICP Cycles**. The ledger keeps only the approval left, so the limit set last comes from the cycles ledger's index. Allowances are also given in signatures, estimated at the backend's cost per signature; the spending limit's counts only what the balance can pay, with a warning while the balance covers less than the approval left. It stays out of the top row: users should rarely need it.
 - **Set spending limit** sets the approval to the amount the user enters, starting at the limit set last, up to their TCYCLES balance, 0 to revoke it, after a review step that shows the previous limit, the remaining and the new limit. **Get ICP Cycles** opens Mint TCYCLES. The card reads the cycles ledger itself, so it works whether or not TCYCLES is enabled.
 - **From the toast.** The allowance-issue toast links to the Tools card, next to its Learn more link, as the Activity info box links to Settings.
-- How the app shows that CCs are charged to the user's own cycles is still open (see pending decision 10).
+- **Showing it.** When own cycles pay the CC after a Refused AR, the allowance-issue toast keeps its title, and its text says signing now uses the user's own credits (see pending decision 10).
 
 ## 7. Phase 4: bound the total
 
@@ -215,7 +215,7 @@ Numbers stay fixed: a resolved decision keeps its number, and a new one gets the
 7. **Phase 4.** The cap size and period, the OISY allowance per Granted AR and the new-user pool.
 8. _Resolved:_ **Skipped while Allowance issue is set.** A Skipped AR clears Allowance issue too, since the OISY allowance is then at or above the OISY allowance threshold (see 1 and 4.5).
 9. _Resolved:_ **Where the outcome shows.** Not in the forms. After a Granted AR the CC repeats once; otherwise the allowance-issue toast and the warning toast say what happened, next to the form's usual error. The earlier design, an outcome box and a disabled main button in every form plus a banner, needed changes in every flow that makes CCs and made them all depend on this feature (#14740 and #14741, closed).
-10. _Partly resolved:_ **Phase 3 with toasts.** The allowance-issue toast links to the Tools card (see 6.2). Still open: how the app shows that CCs are charged to the user's own cycles, now that there is no banner.
+10. _Resolved:_ **Phase 3 with toasts.** The allowance-issue toast links to the Tools card (see 6.2). When own cycles pay the CC after a Refused AR, the toast keeps its title, and its text says signing now uses the user's own credits.
 
 ## 12. Non-goals
 
