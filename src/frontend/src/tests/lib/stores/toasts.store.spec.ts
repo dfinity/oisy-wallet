@@ -1,4 +1,4 @@
-import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
+import { OwnCyclesShortError, SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import { toastsError, toastsErrorNoTrace, toastsStore } from '$lib/stores/toasts.store';
 import { LiquidiumSolTransferRefusedError } from '$lib/types/errors';
 import en from '$tests/mocks/i18n.mock';
@@ -127,6 +127,33 @@ describe('toastsError', () => {
 
 		expect(get(toastsStore)[0].text).toBe(en.core.error.usage_credits_insufficient);
 	});
+
+	it('should show the same text when the user’s own cycles run short', () => {
+		const err = new OwnCyclesShortError({
+			LedgerWithdrawFromError: {
+				ledger: mockPrincipal,
+				error: { InsufficientFunds: { balance: 1n } }
+			}
+		});
+
+		toastsError({ msg: { text: 'Send failed.' }, err });
+
+		expect(get(toastsStore)[0].text).toBe(en.core.error.usage_credits_insufficient);
+	});
+
+	// OISY's own cycles account running short keeps today's text.
+	it('should keep the flow’s text when the OISY allowance’s funds run short', () => {
+		const err = new SignerCanisterPaymentError({
+			LedgerWithdrawFromError: {
+				ledger: mockPrincipal,
+				error: { InsufficientFunds: { balance: 1n } }
+			}
+		});
+
+		toastsError({ msg: { text: 'Send failed.' }, err });
+
+		expect(get(toastsStore)[0].text).toContain('Send failed.');
+	});
 });
 
 describe('toastsErrorNoTrace', () => {
@@ -151,5 +178,19 @@ describe('toastsErrorNoTrace', () => {
 		expect(get(toastsStore)[0]).toEqual(
 			expect.objectContaining({ text: en.core.error.usage_credits_insufficient, level: 'error' })
 		);
+	});
+
+	it('should show the same text when the user’s own cycles run short', () => {
+		toastsErrorNoTrace({
+			msg: { text: 'Supply failed.' },
+			err: new OwnCyclesShortError({
+				LedgerWithdrawFromError: {
+					ledger: mockPrincipal,
+					error: { InsufficientFunds: { balance: 1n } }
+				}
+			})
+		});
+
+		expect(get(toastsStore)[0].text).toBe(en.core.error.usage_credits_insufficient);
 	});
 });

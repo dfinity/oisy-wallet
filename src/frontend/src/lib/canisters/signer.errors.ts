@@ -80,6 +80,30 @@ export const insufficientAllowanceOf = (err: unknown): bigint | undefined => {
 	return undefined;
 };
 
+// A CC paid with the user's own cycles that their approval or their TCYCLES balance could not cover.
+export class OwnCyclesShortError extends SignerCanisterPaymentError {}
+
+// The error a CC paid with the user's own cycles reaches the flow with: an `OwnCyclesShortError`
+// when their approval or their TCYCLES balance could not cover it, any other error as it was.
+export const toOwnCyclesError = (err: unknown): unknown => {
+	const paymentError = paymentErrorOf(err);
+
+	if (isNullish(paymentError) || !('LedgerWithdrawFromError' in paymentError)) {
+		return err;
+	}
+
+	const { error } = paymentError.LedgerWithdrawFromError;
+
+	return 'InsufficientAllowance' in error || 'InsufficientFunds' in error
+		? new OwnCyclesShortError(paymentError)
+		: err;
+};
+
+// Whether a CC failed because the usage credits could not cover it: the OISY allowance, or the
+// user's own cycles.
+export const isUsageCreditsShort = (err: unknown): boolean =>
+	nonNullish(insufficientAllowanceOf(err)) || err instanceof OwnCyclesShortError;
+
 export const mapSignerCanisterBtcError = (err: SignerCanisterBtcError): CanisterInternalError => {
 	if ('InternalError' in err) {
 		return new CanisterInternalError(err.InternalError.msg);
