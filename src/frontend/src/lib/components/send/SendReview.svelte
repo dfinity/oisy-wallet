@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { isNullish, notEmptyString } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext, untrack, type Snippet } from 'svelte';
 	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
 	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
 	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
+	import AllowanceOutcomeMessage from '$lib/components/core/AllowanceOutcomeMessage.svelte';
 	import FirstTimeDestinationWarning from '$lib/components/send/FirstTimeDestinationWarning.svelte';
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import SendNftReview from '$lib/components/tokens/SendNftReview.svelte';
@@ -19,6 +20,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
+	import { blocksRetry } from '$lib/utils/allowance.utils';
 	import { isFirstTimeDestination } from '$lib/utils/known-destinations.utils';
 	import {
 		isNetworkIdBitcoin,
@@ -67,7 +69,7 @@
 		...rest
 	}: Props = $props();
 
-	const { sendToken, sendTokenExchangeRate, isIcBurning } =
+	const { sendToken, sendTokenExchangeRate, isIcBurning, sendAllowanceOutcome } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let networkId = $derived($sendToken.network.id);
@@ -108,7 +110,16 @@
 		untrack(resetFirstTimeDestinationConfirmation);
 	});
 
-	let sendDisabled = $derived(disabled || (firstTimeDestination && !firstTimeDestinationConfirmed));
+	let sendDisabled = $derived(
+		disabled ||
+			(firstTimeDestination && !firstTimeDestinationConfirmed) ||
+			(nonNullish($sendAllowanceOutcome) && blocksRetry($sendAllowanceOutcome))
+	);
+
+	const back = (onBack: () => void) => {
+		sendAllowanceOutcome.set(undefined);
+		onBack();
+	};
 </script>
 
 <ContentWithToolbar>
@@ -148,6 +159,12 @@
 		</div>
 	{/if}
 
+	{#if nonNullish($sendAllowanceOutcome)}
+		<div class="mt-4">
+			<AllowanceOutcomeMessage outcome={$sendAllowanceOutcome} styleClass="mb-0!" />
+		</div>
+	{/if}
+
 	{#snippet toolbar()}
 		{#if 'replaceToolbar' in rest}
 			{@render rest.replaceToolbar()}
@@ -155,7 +172,7 @@
 			{@const { onBack, onSend } = rest}
 
 			<ButtonGroup testId="toolbar">
-				<ButtonBack onclick={onBack} />
+				<ButtonBack onclick={() => back(onBack)} />
 				<Button disabled={sendDisabled} onclick={onSend} testId={REVIEW_FORM_SEND_BUTTON}>
 					{$isIcMintingAccount
 						? $i18n.mint.text.mint

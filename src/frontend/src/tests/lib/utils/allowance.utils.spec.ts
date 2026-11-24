@@ -1,5 +1,6 @@
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import {
+	blocksRetry,
 	insufficientAllowanceMessage,
 	insufficientAllowanceOutcome,
 	mapInsufficientAllowanceToSwapError
@@ -56,6 +57,17 @@ describe('allowance.utils', () => {
 
 		it('should be undefined for any other error', () => {
 			expect(insufficientAllowanceOutcome(new Error('test'))).toBeUndefined();
+		});
+	});
+
+	describe('blocksRetry', () => {
+		it('should let a renewed allowance be tried again', () => {
+			expect(blocksRetry('renewed')).toBeFalsy();
+		});
+
+		it('should block a retry when the request was refused or the transaction costs more', () => {
+			expect(blocksRetry('refused')).toBeTruthy();
+			expect(blocksRetry('exceeded')).toBeTruthy();
 		});
 	});
 

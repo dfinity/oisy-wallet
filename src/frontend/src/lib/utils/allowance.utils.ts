@@ -32,6 +32,10 @@ export const insufficientAllowanceOutcome = (
 	return allowanceRequest.allowance > allowance ? 'renewed' : 'exceeded';
 };
 
+// Whether the same transaction would fail the same way, so the form disables its main button.
+export const blocksRetry = (outcome: InsufficientAllowanceOutcome): boolean =>
+	outcome !== 'renewed';
+
 export const insufficientAllowanceMessage = ({
 	outcome,
 	i18n

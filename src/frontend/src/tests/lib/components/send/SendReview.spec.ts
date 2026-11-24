@@ -9,8 +9,11 @@ import {
 import { contactsStore } from '$lib/stores/contacts.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { Token } from '$lib/types/token';
+import type { InsufficientAllowanceOutcome } from '$lib/utils/allowance.utils';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { getMockContactsUi, mockContactEthAddressUi } from '$tests/mocks/contacts.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcAccount } from '$tests/mocks/identity.mock';
 import { mockXrpAddress, mockXrpAddress2 } from '$tests/mocks/xrp.mock';
@@ -33,6 +36,59 @@ describe('SendReview', () => {
 	beforeEach(() => {
 		contactsStore.reset();
 		isIcMintingAccount.set(false);
+	});
+
+	describe('after a charged call failed with an insufficient allowance', () => {
+		const contextWithOutcome = (outcome: InsufficientAllowanceOutcome) => {
+			const sendContext = initSendContext({ token: ETHEREUM_TOKEN });
+			sendContext.sendAllowanceOutcome.set(outcome);
+
+			return {
+				context: new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, sendContext]]),
+				sendContext
+			};
+		};
+
+		it('says to try again, and keeps Send enabled, when the allowance was renewed', async () => {
+			const { context } = contextWithOutcome('renewed');
+
+			const { getByTestId, getByText } = render(SendReview, { props, context });
+
+			await fireEvent.click(getByTestId('checkbox'));
+
+			expect(
+				getByText(replaceOisyPlaceholders(en.core.info.oisy_allowance_renewed))
+			).toBeInTheDocument();
+			expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).toBeEnabled();
+		});
+
+		it.each<{ outcome: InsufficientAllowanceOutcome; message: string }>([
+			{ outcome: 'refused', message: en.core.warning.oisy_allowance_used_up },
+			{ outcome: 'exceeded', message: en.core.warning.oisy_allowance_exceeded }
+		])(
+			'says why, and disables Send, when the outcome is $outcome',
+			async ({ outcome, message }) => {
+				const { context } = contextWithOutcome(outcome);
+
+				const { getByTestId, getByText } = render(SendReview, { props, context });
+
+				await fireEvent.click(getByTestId('checkbox'));
+
+				expect(getByText(replaceOisyPlaceholders(message))).toBeInTheDocument();
+				expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).toBeDisabled();
+			}
+		);
+
+		it('clears the outcome when the user goes back', async () => {
+			const { context, sendContext } = contextWithOutcome('refused');
+
+			const { getByText } = render(SendReview, { props, context });
+
+			await fireEvent.click(getByText(en.core.text.back));
+
+			expect(get(sendContext.sendAllowanceOutcome)).toBeUndefined();
+			expect(props.onBack).toHaveBeenCalled();
+		});
 	});
 
 	it('warns about a first-time destination and keeps the send button disabled', () => {

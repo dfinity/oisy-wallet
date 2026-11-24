@@ -6,6 +6,7 @@ import type { Address } from '$lib/types/address';
 import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import type { InsufficientAllowanceOutcome } from '$lib/utils/allowance.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { nonNullish, notEmptyString } from '@dfinity/utils';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
@@ -124,7 +125,8 @@ export const initSendContext = ({
 		isIcBurning,
 		sendEthCustomNonce,
 		sendEthFeePriority,
-		sendXrpDestinationTag
+		sendXrpDestinationTag,
+		sendAllowanceOutcome: writable<InsufficientAllowanceOutcome | undefined>(undefined)
 	};
 };
 
@@ -142,6 +144,8 @@ export interface SendContext {
 	sendEthCustomNonce: Writable<number | undefined>;
 	sendEthFeePriority: Writable<EthFeePriority>;
 	sendXrpDestinationTag: SendXrpDestinationTagStore;
+	// What the review says after the send's charged call failed with an insufficient allowance.
+	sendAllowanceOutcome: Writable<InsufficientAllowanceOutcome | undefined>;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');

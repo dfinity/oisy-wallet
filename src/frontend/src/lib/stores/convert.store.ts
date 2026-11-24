@@ -13,8 +13,9 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
+import type { InsufficientAllowanceOutcome } from '$lib/utils/allowance.utils';
 import type { Nullish } from '@dfinity/zod-schemas';
-import { derived, writable, type Readable } from 'svelte/store';
+import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export interface ConvertData {
 	sourceToken: Token;
@@ -85,7 +86,8 @@ export const initConvertContext = (convertData: ConvertData): ConvertContext => 
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate,
 		balanceForFee,
-		minterInfo
+		minterInfo,
+		convertAllowanceOutcome: writable<InsufficientAllowanceOutcome | undefined>(undefined)
 	};
 };
 
@@ -98,6 +100,8 @@ export interface ConvertContext {
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
 	minterInfo: Readable<Nullish<CkBtcMinterInfoData | CkEthMinterInfoData>>;
+	// What the review says after the conversion's charged call failed with an insufficient allowance.
+	convertAllowanceOutcome: Writable<InsufficientAllowanceOutcome | undefined>;
 }
 
 export const CONVERT_CONTEXT_KEY = Symbol('convert');
