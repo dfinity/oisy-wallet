@@ -110,8 +110,8 @@
 			"video_not_supported": "Votre navigateur ne prend pas en charge la lecture vidéo.",
 			"oisy_allowance_used_up_title": "Crédits d'utilisation gratuits épuisés",
 			"oisy_allowance_used_up": "Votre quantité quotidienne de crédits gratuits pour signer des transactions est épuisée, la signature de certaines transactions peut donc échouer.",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "Votre quantité quotidienne de crédits gratuits pour signer des transactions est épuisée, la signature utilise donc désormais vos propres crédits.",
+			"oisy_allowance_tools_link": "Gérez vos propres crédits dans <a href=\"$url\">Outils</a>.",
 			"oisy_allowance_exceeded": "Cette transaction coûte plus que ce que couvre votre quota gratuit $oisy_name."
 		},
 		"error": {
@@ -927,16 +927,16 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
+			"title": "Crédits d'utilisation",
+			"description": "Lorsque vos crédits d'utilisation gratuits sont épuisés, la signature est payée avec vos propres $token, jusqu'au montant que vous ajoutez ici.",
+			"own_credits": "Vos propres crédits",
+			"balance": "Solde $token",
+			"add_more": "Ajouter plus",
+			"get_cycles": "Obtenir des cycles",
+			"add_title": "Ajouter des crédits d'utilisation",
+			"add_description": "Vos $token restent dans votre solde. Le montant que vous ajoutez est le maximum que la signature peut y prélever.",
+			"own_credits_after": "Vos propres crédits ensuite",
+			"added": "$amount $token ajoutés à vos crédits d'utilisation.",
 			"free_signatures": "",
 			"signatures_one": "",
 			"signatures_other": "",
@@ -948,8 +948,8 @@
 			"balance_empty": ""
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "Impossible de charger vos crédits d'utilisation.",
+			"add": "Impossible d'ajouter des crédits d'utilisation. Veuillez réessayer."
 		}
 	},
 	"shortcuts": {

@@ -110,8 +110,8 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "Đã dùng hết tín dụng sử dụng miễn phí",
 			"oisy_allowance_used_up": "Lượng tín dụng miễn phí hằng ngày để ký giao dịch của bạn đã dùng hết, nên việc ký một số giao dịch có thể thất bại.",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "Lượng tín dụng miễn phí hằng ngày để ký giao dịch của bạn đã dùng hết, nên việc ký giờ sử dụng tín dụng của chính bạn.",
+			"oisy_allowance_tools_link": "Quản lý tín dụng của bạn trong <a href=\"$url\">Công cụ</a>.",
 			"oisy_allowance_exceeded": "Chi phí của giao dịch này vượt quá hạn mức miễn phí của $oisy_name."
 		},
 		"error": {
@@ -927,16 +927,16 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
+			"title": "Tín dụng sử dụng",
+			"description": "Khi tín dụng sử dụng miễn phí của bạn đã hết, việc ký sẽ được trả bằng $token của chính bạn, tối đa bằng số tiền bạn thêm ở đây.",
+			"own_credits": "Tín dụng của bạn",
+			"balance": "Số dư $token",
+			"add_more": "Thêm nữa",
+			"get_cycles": "Nhận cycles",
+			"add_title": "Thêm tín dụng sử dụng",
+			"add_description": "$token của bạn vẫn nằm trong số dư. Số tiền bạn thêm là mức tối đa mà việc ký có thể trừ từ đó.",
+			"own_credits_after": "Tín dụng của bạn sau khi thêm",
+			"added": "Đã thêm $amount $token vào tín dụng sử dụng của bạn.",
 			"free_signatures": "",
 			"signatures_one": "",
 			"signatures_other": "",
@@ -948,8 +948,8 @@
 			"balance_empty": ""
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "Không thể tải tín dụng sử dụng của bạn.",
+			"add": "Không thể thêm tín dụng sử dụng. Vui lòng thử lại."
 		}
 	},
 	"shortcuts": {

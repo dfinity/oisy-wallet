@@ -110,8 +110,8 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "Gratis-Nutzungsguthaben aufgebraucht",
 			"oisy_allowance_used_up": "Dein tägliches Gratis-Guthaben zum Signieren von Transaktionen ist aufgebraucht, daher kann das Signieren einiger Transaktionen fehlschlagen.",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "Dein tägliches Gratis-Guthaben zum Signieren von Transaktionen ist aufgebraucht, daher nutzt das Signieren jetzt dein eigenes Guthaben.",
+			"oisy_allowance_tools_link": "Verwalte dein eigenes Guthaben unter <a href=\"$url\">Werkzeuge</a>.",
 			"oisy_allowance_exceeded": "Diese Transaktion kostet mehr, als dein Gratis-Kontingent von $oisy_name abdeckt."
 		},
 		"error": {
@@ -927,16 +927,16 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
+			"title": "Nutzungsguthaben",
+			"description": "Wenn dein Gratis-Nutzungsguthaben aufgebraucht ist, wird das Signieren aus deinen eigenen $token bezahlt, bis zu dem Betrag, den du hier hinzufügst.",
+			"own_credits": "Dein eigenes Guthaben",
+			"balance": "$token-Guthaben",
+			"add_more": "Mehr hinzufügen",
+			"get_cycles": "Cycles holen",
+			"add_title": "Nutzungsguthaben hinzufügen",
+			"add_description": "Deine $token bleiben in deinem Guthaben. Der Betrag, den du hinzufügst, ist das Höchste, was das Signieren davon abbuchen kann.",
+			"own_credits_after": "Dein eigenes Guthaben danach",
+			"added": "$amount $token zu deinem Nutzungsguthaben hinzugefügt.",
 			"free_signatures": "",
 			"signatures_one": "",
 			"signatures_other": "",
@@ -948,8 +948,8 @@
 			"balance_empty": ""
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "Dein Nutzungsguthaben konnte nicht geladen werden.",
+			"add": "Nutzungsguthaben konnte nicht hinzugefügt werden. Bitte versuche es erneut."
 		}
 	},
 	"shortcuts": {

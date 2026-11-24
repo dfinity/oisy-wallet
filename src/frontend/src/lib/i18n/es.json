@@ -110,8 +110,8 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "Créditos de uso gratuitos agotados",
 			"oisy_allowance_used_up": "Tu cantidad diaria de créditos gratuitos para firmar transacciones se ha agotado, así que la firma de algunas transacciones puede fallar.",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "Tu cantidad diaria de créditos gratuitos para firmar transacciones se ha agotado, así que la firma ahora usa tus propios créditos.",
+			"oisy_allowance_tools_link": "Gestiona tus propios créditos en <a href=\"$url\">Herramientas</a>.",
 			"oisy_allowance_exceeded": "Esta transacción cuesta más de lo que cubre tu asignación gratuita de $oisy_name."
 		},
 		"error": {
@@ -927,16 +927,16 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
+			"title": "Créditos de uso",
+			"description": "Cuando tus créditos de uso gratuitos se agotan, la firma se paga con tus propios $token, hasta el importe que añadas aquí.",
+			"own_credits": "Tus propios créditos",
+			"balance": "Saldo de $token",
+			"add_more": "Añadir más",
+			"get_cycles": "Obtener cycles",
+			"add_title": "Añadir créditos de uso",
+			"add_description": "Tus $token se quedan en tu saldo. El importe que añades es lo máximo que la firma puede cobrar de ellos.",
+			"own_credits_after": "Tus propios créditos después",
+			"added": "Se añadieron $amount $token a tus créditos de uso.",
 			"free_signatures": "",
 			"signatures_one": "",
 			"signatures_other": "",
@@ -948,8 +948,8 @@
 			"balance_empty": ""
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "No se pudieron cargar tus créditos de uso.",
+			"add": "No se pudieron añadir créditos de uso. Inténtalo de nuevo."
 		}
 	},
 	"shortcuts": {

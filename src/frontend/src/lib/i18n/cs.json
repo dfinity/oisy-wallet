@@ -110,8 +110,8 @@
 			"video_not_supported": "Váš prohlížeč nepodporuje přehrávání videa.",
 			"oisy_allowance_used_up_title": "Bezplatné kredity za používání jsou vyčerpány",
 			"oisy_allowance_used_up": "Váš denní objem bezplatných kreditů na podepisování transakcí je vyčerpán, takže podepsání některých transakcí může selhat.",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "Váš denní objem bezplatných kreditů na podepisování transakcí je vyčerpán, takže podepisování nyní využívá vaše vlastní kredity.",
+			"oisy_allowance_tools_link": "Své vlastní kredity spravujte v sekci <a href=\"$url\">Nástroje</a>.",
 			"oisy_allowance_exceeded": "Tato transakce stojí víc, než pokryje váš bezplatný limit $oisy_name."
 		},
 		"error": {
@@ -927,16 +927,16 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
+			"title": "Kredity za používání",
+			"description": "Když vyčerpáte bezplatné kredity za používání, podepisování se platí z vašich vlastních $token, až do částky, kterou zde přidáte.",
+			"own_credits": "Vaše vlastní kredity",
+			"balance": "Zůstatek $token",
+			"add_more": "Přidat další",
+			"get_cycles": "Získat cycles",
+			"add_title": "Přidat kredity za používání",
+			"add_description": "Vaše $token zůstávají na vašem zůstatku. Částka, kterou přidáte, je nejvíc, co z nich podepisování může strhnout.",
+			"own_credits_after": "Vaše vlastní kredity poté",
+			"added": "Přidáno $amount $token k vašim kreditům za používání.",
 			"free_signatures": "",
 			"signatures_one": "",
 			"signatures_other": "",
@@ -948,8 +948,8 @@
 			"balance_empty": ""
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "Kredity za používání se nepodařilo načíst.",
+			"add": "Kredity za používání se nepodařilo přidat. Zkuste to znovu."
 		}
 	},
 	"shortcuts": {

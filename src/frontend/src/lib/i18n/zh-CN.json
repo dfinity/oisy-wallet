@@ -110,8 +110,8 @@
 			"video_not_supported": "你的浏览器不支持视频播放。",
 			"oisy_allowance_used_up_title": "免费使用额度已用完",
 			"oisy_allowance_used_up": "你每日用于签署交易的免费额度已用完，部分交易可能签署失败。",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "你每日用于签署交易的免费额度已用完，签名现在将使用你自己的额度。",
+			"oisy_allowance_tools_link": "在<a href=\"$url\">工具</a>中管理你自己的额度。",
 			"oisy_allowance_exceeded": "此交易的费用超出了你的 $oisy_name 免费额度。"
 		},
 		"error": {
@@ -927,16 +927,16 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
+			"title": "使用额度",
+			"description": "免费使用额度用完后，签名费用将从你自己的 $token 中支付，以你在此添加的金额为上限。",
+			"own_credits": "你自己的额度",
+			"balance": "$token 余额",
+			"add_more": "添加更多",
+			"get_cycles": "获取 cycles",
+			"add_title": "添加使用额度",
+			"add_description": "你的 $token 仍保留在余额中。你添加的金额是签名可从中扣除的上限。",
+			"own_credits_after": "添加后你自己的额度",
+			"added": "已向你的使用额度添加 $amount $token。",
 			"free_signatures": "",
 			"signatures_one": "",
 			"signatures_other": "",
@@ -948,8 +948,8 @@
 			"balance_empty": ""
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "无法加载你的使用额度。",
+			"add": "无法添加使用额度。请重试。"
 		}
 	},
 	"shortcuts": {

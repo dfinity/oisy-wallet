@@ -110,8 +110,8 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "Darmowe kredyty użytkowania wykorzystane",
 			"oisy_allowance_used_up": "Twoja dzienna pula darmowych kredytów na podpisywanie transakcji została wykorzystana, więc podpisanie niektórych transakcji może się nie powieść.",
-			"oisy_allowance_used_up_own_cycles": "",
-			"oisy_allowance_tools_link": "",
+			"oisy_allowance_used_up_own_cycles": "Twoja dzienna pula darmowych kredytów na podpisywanie transakcji została wykorzystana, więc podpisywanie korzysta teraz z Twoich własnych kredytów.",
+			"oisy_allowance_tools_link": "Zarządzaj własnymi kredytami w <a href=\"$url\">Narzędziach</a>.",
 			"oisy_allowance_exceeded": "Ta transakcja kosztuje więcej, niż pokrywa Twój darmowy limit $oisy_name."
 		},
 		"error": {
@@ -927,16 +927,16 @@
 	},
 	"usage_credits": {
 		"text": {
-			"title": "",
-			"description": "",
-			"own_credits": "",
-			"balance": "",
-			"add_more": "",
-			"get_cycles": "",
-			"add_title": "",
-			"add_description": "",
-			"own_credits_after": "",
-			"added": "",
+			"title": "Kredyty użytkowania",
+			"description": "Gdy Twoje darmowe kredyty użytkowania się wyczerpią, podpisywanie jest opłacane z Twoich własnych $token, do kwoty, którą tu dodasz.",
+			"own_credits": "Twoje własne kredyty",
+			"balance": "Saldo $token",
+			"add_more": "Dodaj więcej",
+			"get_cycles": "Zdobądź cycles",
+			"add_title": "Dodaj kredyty użytkowania",
+			"add_description": "Twoje $token zostają na Twoim saldzie. Kwota, którą dodasz, to najwięcej, ile podpisywanie może z nich pobrać.",
+			"own_credits_after": "Twoje własne kredyty potem",
+			"added": "Dodano $amount $token do Twoich kredytów użytkowania.",
 			"free_signatures": "",
 			"signatures_one": "",
 			"signatures_other": "",
@@ -948,8 +948,8 @@
 			"balance_empty": ""
 		},
 		"error": {
-			"load": "",
-			"add": ""
+			"load": "Nie udało się wczytać Twoich kredytów użytkowania.",
+			"add": "Nie udało się dodać kredytów użytkowania. Spróbuj ponownie."
 		}
 	},
 	"shortcuts": {
