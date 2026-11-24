@@ -8,7 +8,7 @@ The rest of the spec uses these terms with exactly this meaning.
 
 - **OISY allowance:** the amount of cycles from OISY's account that a user can still spend.
 - **OISY allowance threshold:** an amount of cycles. The backend sets a new OISY allowance only while the OISY allowance is below it.
-- **Charged call (CC):** a call that costs cycles, charged to the OISY allowance or, from phase 3, to the user's own cycles. Today that's every Chain Fusion Signer call, including the certified BTC balance. From phase 2, it also covers backend calls that cost cycles beyond their execution. Its status for this spec:
+- **Charged call (CC):** a call that costs cycles, charged to the OISY allowance or, from phase 3, to the user's own cycles. Today that's every Chain Fusion Signer call. From phase 2, it also covers backend calls that cost cycles beyond their execution. Its status for this spec:
   - **Insufficient allowance:** the CC fails because the OISY allowance is smaller than its charge.
 - **Allowance request (AR):** OISY's call to the backend that asks for a new OISY allowance. Its answers:
   - **Granted:** the backend sets a new OISY allowance.
@@ -67,29 +67,30 @@ The phases ship one by one, in this order. Each is useful on its own.
 
 ### 4.5 Allowance issue and its toast
 
-- When Allowance issue is set, and again with every CC that fails while it lasts, the **allowance-issue toast** shows: the free OISY allowance is used up for now, so some transactions may fail.
+- When Allowance issue is set, and again with every CC that returns Insufficient allowance while it lasts, the **allowance-issue toast** shows: the free OISY allowance is used up for now, so some transactions may fail.
 - It looks different from every other toast: warn level, the inverted theme, a title and its own icon.
-- The user can close it. It shows again with the next CC that fails while Allowance issue lasts.
+- The user can close it. It shows again with the next CC that returns Insufficient allowance while Allowance issue lasts.
 - It disappears when Allowance issue clears. Any Granted or Skipped AR clears it. A Skipped AR means the OISY allowance is at or above the OISY allowance threshold, for example after another tab or device got a Granted AR.
 - Toasts show above an open form, so the user sees it there too.
-- There is no **Retry** button: once the AR cooldown has passed, the next CC that fails sends an AR anyway.
+- There is no **Retry** button: once the AR cooldown has passed, the next CC that returns Insufficient allowance sends an AR anyway.
 - **No global blocking.** Allowance issue disables no feature, since no CC's price is known.
 
-### 4.6 CCs without a form
+### 4.6 The certified BTC balance
 
-A CC without a form, today the certified BTC balance in production, follows the same AR and repeat, and a Refused AR sets Allowance issue as for any CC. The certified BTC balance then falls back to the free unverified read from the Bitcoin canister, which the scheduler already makes, and the wallet shows that the balance is unverified. Whether this lands in phase 1 or phase 2 is still open (see [Pending decisions](#11-pending-decisions-facts-are-clear--we-just-need-to-decide)).
+This spec leaves out the certified BTC balance through the Chain Fusion Signer, today the one CC without a form. That route is turned off in every build before phase 1 ships, and the wallet then reads the balance only through the backend. Phase 2 makes that read a CC (see 5).
 
 ### 4.7 What does not change
 
 - **No form or flow changes.** None of them learns about the AR, the repeat or Allowance issue. When a CC still fails, each shows its usual error.
 - The one exception is a message in a shared helper: the BTC send through the backend (local and staging) tells the user to sign out and back in when the allowance runs out. That message goes, since the AR now runs on its own, and the send shows its usual error instead.
 - Every other CC result keeps today's handling, including `InsufficientFunds`, when OISY's own cycles account is short.
-- ICP and ICRC sends, receiving, addresses and every balance other than BTC work as before, with or without Allowance issue.
+- ICP and ICRC sends, receiving, addresses and every balance work as before, with or without Allowance issue.
 
 ## 5. Phase 2: the backend's costly calls become CCs
 
 - **One allowance.** A user-triggered backend call that costs cycles beyond its execution (for example a Bitcoin canister call, a vetKD key derivation or an HTTP outcall) becomes a CC, charged to the same OISY allowance.
 - When the OISY allowance can't cover such a CC, the backend returns Insufficient allowance. The frontend handles it like a signer CC: the AR, the repeat, Allowance issue and the toasts.
+- The certified BTC balance through the backend becomes a CC too, one without a form. When the read still fails with Insufficient allowance after the AR, the wallet falls back to the free unverified read from the Bitcoin canister, which the scheduler already makes, and shows that the balance is unverified.
 - How the backend charges a CC to the OISY allowance, and the exact list of calls, are still open (see [Open questions](#10-open-questions-facts-to-confirm)).
 
 ## 6. Phase 3: pay with your own cycles
@@ -139,7 +140,7 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 5. After a Granted AR, or a Skipped one with a larger OISY allowance, the CC is repeated once. When the repeat succeeds, the flow sees no failure.
 6. A repeated CC that returns Insufficient allowance again is handled like the Skipped case without a larger OISY allowance, with no second AR.
 7. Refused: the flow shows its usual error, Allowance issue is set, and the allowance-issue toast shows.
-8. While Allowance issue is set, every CC that fails shows the allowance-issue toast again. The user can close it, and it disappears when Allowance issue clears.
+8. While Allowance issue is set, every CC that returns Insufficient allowance shows the allowance-issue toast again. The user can close it, and it disappears when Allowance issue clears.
 9. The allowance-issue toast looks different from every other toast: warn level, the inverted theme, a title and its own icon.
 10. Skipped with no larger OISY allowance: the flow shows its usual error and a warning toast that stays until closed, without setting Allowance issue.
 11. Any Granted or Skipped AR clears Allowance issue.
@@ -155,14 +156,14 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 ## 10. Open questions (facts to confirm)
 
 1. **Phase 2 calls.** Which user-triggered backend calls cost cycles beyond their execution, and how much each?
-2. **BTC balance route.** Will the certified BTC balance through the backend, on local and staging today, reach production before phase 1 ships?
+2. _Answered:_ **BTC balance route.** Yes: the certified BTC balance through the Chain Fusion Signer is turned off in every build before phase 1 ships, and the wallet reads it only through the backend (see 4.6).
 3. **Phase 3, backend CCs.** How does a user pay the backend's CCs with their own cycles: a second approval, with the backend as spender, or another way? This depends on pending decision 3.
 
 ## 11. Pending decisions (facts are clear — we just need to decide)
 
 Numbers stay fixed: a resolved decision keeps its number, and a new one gets the next free number.
 
-1. **BTC balance fallback: phase 1 or phase 2?** In production, the certified BTC balance is a CC today, so it can return Insufficient allowance in phase 1. If the backend route reaches production first (open question 2), it becomes a phase 2 CC.
+1. _Resolved:_ **BTC balance fallback: phase 1 or phase 2?** Phase 2. The route through the Chain Fusion Signer is off before phase 1 ships, so phase 1 leaves it out. The read through the backend becomes a CC, with its fallback, in phase 2 (see 4.6 and 5).
 2. _Resolved:_ **Skipped after Insufficient allowance.** The OISY allowance stated before and after decides: larger, and the CC repeats; not larger, and the warning toast shows (see 4.4).
 3. **Phase 2 mechanics.** How does the backend charge a CC to the one OISY allowance? Lowering the approval costs a ledger fee per change, often more than the call itself. A counter kept by the backend avoids that fee.
 4. _Resolved:_ **ARs while Allowance issue is set.** None during the AR cooldown (see 1 and 4.3).
