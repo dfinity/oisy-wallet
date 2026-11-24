@@ -88,8 +88,9 @@ This spec leaves out the certified BTC balance through the Chain Fusion Signer, 
 
 ### 4.8 Analytics
 
-- Every AR after Insufficient allowance fires one Plausible event, `oisy_allowance_request`, with its answer (`granted`, `skipped` or `refused`; during the AR cooldown, when no AR is sent, `refused`) and the outcome for the CC: `repeated` when the repeat succeeds, `repeat_failed` when it fails, `not_repeated` otherwise.
-- That shows how often users run out of the OISY allowance and whether the repeat helps. The AR at load fires no such event.
+- **`oisy_allowance_request`**, one per AR, whatever triggered it: `event_trigger` is `load` or `insufficient_allowance`, and `event_key` is the AR's answer (`granted`, `skipped` or `refused`). During the AR cooldown no AR is sent, so there is no event either. An AR stopped by a rate limit also fires `rate_limited`, just before.
+- **`charged_call`**, one per CC that returns Insufficient allowance, a failed repeat included: `event_key` is the CC's method (for example `eth_sign_transaction`), with `result_status` `error` and `result_error_type` `insufficient_allowance`. Successful CCs fire no event. The name is not tied to the OISY allowance, since from phase 3 a CC can also run out of the user's own cycles.
+- Together they show how often CCs run out, which ones, and what the AR answered.
 
 ## 5. Phase 2: the backend's costly calls become CCs
 
@@ -130,7 +131,7 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
    1. Load: no sign-out on a Refused AR at load (#14737).
    2. The AR after Insufficient allowance, the repeat, the AR cooldown, Allowance issue and the toasts (#14739).
    3. Translations (#14754).
-   4. The Plausible event (see 4.8).
+   4. The Plausible events (see 4.8).
 2. **Phase 2:** the backend's costly calls become CCs, and the frontend handles their Insufficient allowance.
 3. **Phase 3:** the approval step, the Tools card, the payment-type switch, the way in from a failed CC (pending decision 10), and the backend accepting the user's cycles for its CCs.
 4. **Phase 4:** the cap, the smaller OISY allowance per Granted AR and the new-user pool.
@@ -152,7 +153,7 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 11. Any Granted or Skipped AR clears Allowance issue.
 12. No form or flow changes, and Allowance issue alone disables no feature.
 13. Every other CC result, `InsufficientFunds` included, keeps today's handling, ICP and ICRC sends are unaffected, and the BTC send through the backend no longer says to sign out and back in.
-14. Every AR after Insufficient allowance fires one `oisy_allowance_request` event with its answer and the CC's outcome.
+14. Every AR fires one `oisy_allowance_request` event with its trigger and answer, and every CC that returns Insufficient allowance fires one `charged_call` event with its method.
 
 ### Phase 3
 
