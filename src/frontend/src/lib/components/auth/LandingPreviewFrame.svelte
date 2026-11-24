@@ -3,10 +3,11 @@
 
 	interface Props {
 		label: string;
+		interactive?: boolean;
 		children: Snippet;
 	}
 
-	let { label, children }: Props = $props();
+	let { label, interactive = false, children }: Props = $props();
 </script>
 
 <!-- Outer radius = inner radius (20px) + padding (12px / 20px), so the corners stay concentric. -->
@@ -14,10 +15,15 @@
 	<div
 		class="overflow-hidden rounded-[20px] bg-primary shadow-sm outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
 		aria-label={label}
-		role="img"
+		role={interactive ? 'group' : 'img'}
 	>
-		<!-- inert: the previews reuse real app controls, which must not take focus or clicks here. -->
-		<div class="pointer-events-none select-none" aria-hidden="true" inert>
+		<!-- Decorative previews reuse real app controls without taking focus or clicks. -->
+		<div
+			class:pointer-events-none={!interactive}
+			class:select-none={!interactive}
+			aria-hidden={interactive ? undefined : true}
+			inert={!interactive}
+		>
 			{@render children()}
 		</div>
 	</div>

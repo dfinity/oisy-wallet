@@ -5,6 +5,7 @@
 	import LandingBorrowPreview from '$lib/components/auth/LandingBorrowPreview.svelte';
 	import LandingClose from '$lib/components/auth/LandingClose.svelte';
 	import LandingConnect from '$lib/components/auth/LandingConnect.svelte';
+	import LandingGetStarted from '$lib/components/auth/LandingGetStarted.svelte';
 	import LandingGive from '$lib/components/auth/LandingGive.svelte';
 	import LandingHoldPreview from '$lib/components/auth/LandingHoldPreview.svelte';
 	import LandingNetworks from '$lib/components/auth/LandingNetworks.svelte';
@@ -12,7 +13,6 @@
 	import LandingSecurity from '$lib/components/auth/LandingSecurity.svelte';
 	import LandingSwapPreview from '$lib/components/auth/LandingSwapPreview.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
 <LandingNetworks />
@@ -36,12 +36,18 @@
 <!-- Second, because it answers the hero's promise: is it safe, and how do I get in? -->
 <LandingSecurity />
 
+<LandingGetStarted />
+
 <LandingSection
 	id="landing-swap"
-	description={replaceOisyPlaceholders($i18n.auth.landing.swap_description)}
-	eyebrow={$i18n.auth.landing.swap_eyebrow}
+	description={$i18n.auth.landing.swap_description}
+	eyebrow={$i18n.swap.text.smart_swap}
 	flip
-	points={[$i18n.auth.landing.swap_point_fee, $i18n.auth.landing.swap_point_limit]}
+	points={[
+		$i18n.auth.landing.swap_point_fee,
+		$i18n.auth.landing.swap_point_value_warning,
+		$i18n.auth.landing.swap_point_slippage
+	]}
 	title={$i18n.auth.landing.swap_title}
 >
 	{#snippet visual()}

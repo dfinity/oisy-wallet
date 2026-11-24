@@ -1,19 +1,18 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
-	import IconChevronRight from '$lib/components/icons/lucide/IconChevronRight.svelte';
 	import SwapProviderAnimation from '$lib/components/swap/SwapProviderAnimation.svelte';
-	import { currentCurrency } from '$lib/derived/currency.derived';
-	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SwapProvider } from '$lib/types/swap';
-	import { formatCurrency } from '$lib/utils/format.utils';
 
-	// Sample offers for the illustration: the providers OISY asks for a Bitcoin to Ethereum swap.
+	interface Props {
+		gain: string;
+	}
+
+	let { gain }: Props = $props();
+
 	const PROVIDERS = [SwapProvider.NEAR_INTENTS, SwapProvider.LIFI, SwapProvider.ONE_SEC];
 	const SELECTED = SwapProvider.NEAR_INTENTS;
-	const GAIN_USD = 12.4;
 
 	// One round: the cell compares for a while, settles on the best offer, then rests.
 	const COMPARE_MS = 2600;
@@ -63,17 +62,7 @@
 
 	onDestroy(clearTimers);
 
-	let gainParts = $derived.by(() => {
-		const [before, after = ''] = $i18n.swap.text.smart_swap_gain.split('$amount');
-		const amount = formatCurrency({
-			value: GAIN_USD,
-			currency: $currentCurrency,
-			exchangeRate: $currencyExchangeStore,
-			language: $currentLanguage
-		});
-
-		return { before, amount, after };
-	});
+	const [gainBefore, gainAfter = ''] = $derived($i18n.swap.text.smart_swap_gain.split('$amount'));
 </script>
 
 <!-- Mirrors SwapProviderCell (its markup and styles), which needs a live swap context. -->
@@ -82,22 +71,20 @@
 	{@attach playWhenVisible}
 >
 	<span class="smart-beam" class:beaming={comparing} aria-hidden="true"><span></span></span>
-	<span class="flex flex-auto flex-col">
-		<span
-			class="text-base font-bold whitespace-nowrap text-primary"
-			class:smart-thinking={comparing}>{$i18n.swap.text.smart_swap}</span
+	<span class="flex min-w-0 flex-1 flex-col">
+		<span class="text-base font-bold text-primary" class:smart-thinking={comparing}
+			>{$i18n.swap.text.smart_swap}</span
 		>
-		<span class="flex w-0 min-w-full pt-0.5 text-sm whitespace-nowrap">
-			{#if comparing}
-				<span class="smart-thinking truncate text-tertiary"
-					>{$i18n.swap.text.finding_best_rate}</span
-				>
-			{:else if gainParts.amount}
-				<span class="truncate text-tertiary"
-					>{gainParts.before}<span class="font-semibold text-primary">{gainParts.amount}</span
-					>{gainParts.after}</span
-				>
-			{/if}
+		<span class="grid pt-0.5 text-sm">
+			<span
+				class="smart-thinking col-start-1 row-start-1 text-tertiary"
+				class:invisible={!comparing}
+			>
+				{$i18n.swap.text.finding_best_rate}
+			</span>
+			<span class="col-start-1 row-start-1 text-tertiary" class:invisible={comparing}
+				>{gainBefore}+<strong class="font-bold text-primary">{gain}</strong>{gainAfter}</span
+			>
 		</span>
 	</span>
 	<span class="flex min-w-24 flex-initial flex-col items-end">
@@ -108,9 +95,6 @@
 			providers={PROVIDERS}
 			selectedProvider={SELECTED}
 		/>
-	</span>
-	<span class="flex shrink-0 text-tertiary" aria-hidden="true">
-		<IconChevronRight size="20" />
 	</span>
 </div>
 

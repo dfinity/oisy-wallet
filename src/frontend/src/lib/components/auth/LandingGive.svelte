@@ -1,8 +1,7 @@
 <script lang="ts">
-	import payDark from '$lib/assets/landing-pay-dark.webp';
-	import payLight from '$lib/assets/landing-pay-light.webp';
 	import tipDark from '$lib/assets/landing-tip-dark.webp';
 	import tipLight from '$lib/assets/landing-tip-light.webp';
+	import LandingPayScannerPreview from '$lib/components/auth/LandingPayScannerPreview.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { LANDING_REVEAL_STAGGER, landingReveal } from '$lib/utils/landing-reveal.utils';
 
@@ -10,18 +9,12 @@
 		{
 			id: 'pay',
 			title: $i18n.auth.landing.pay_title,
-			description: $i18n.auth.landing.pay_description,
-			light: payLight,
-			dark: payDark,
-			alt: $i18n.auth.landing.pay_preview
+			description: $i18n.auth.landing.pay_description
 		},
 		{
 			id: 'tip',
 			title: $i18n.auth.landing.tip_title,
-			description: $i18n.auth.landing.tip_description,
-			light: tipLight,
-			dark: tipDark,
-			alt: $i18n.auth.landing.tip_preview
+			description: $i18n.auth.landing.tip_description
 		}
 	]);
 </script>
@@ -43,7 +36,7 @@
 	</div>
 
 	<div class="grid gap-5 md:grid-cols-2">
-		{#each cards as { id, title, description, light, dark, alt }, index (id)}
+		{#each cards as { id, title, description }, index (id)}
 			<article
 				class="grid grid-rows-[auto_1fr] overflow-hidden rounded-[28px] border border-tertiary bg-primary"
 				{@attach landingReveal(LANDING_REVEAL_STAGGER * (index + 1))}
@@ -62,30 +55,34 @@
 						<div
 							class="phone aspect-[780/1100] w-full overflow-hidden rounded-t-[34px] border-8 border-b-0"
 						>
-							<!-- One screen per theme; the inactive one is display:none, so screen readers announce only one. -->
-							<img
-								class="size-full object-cover object-top dark:hidden"
-								{alt}
-								decoding="async"
-								height="733"
-								loading="lazy"
-								src={light}
-								width="520"
-							/>
-							<img
-								class="hidden size-full object-cover object-top dark:block"
-								{alt}
-								decoding="async"
-								height="733"
-								loading="lazy"
-								src={dark}
-								width="520"
-							/>
+							{#if id === 'pay'}
+								<LandingPayScannerPreview />
+							{:else}
+								<!-- Only the active theme's screen is visible and announced. -->
+								<img
+									class="size-full object-cover object-top dark:hidden"
+									alt={$i18n.auth.landing.tip_preview}
+									decoding="async"
+									height="733"
+									loading="lazy"
+									src={tipLight}
+									width="520"
+								/>
+								<img
+									class="hidden size-full object-cover object-top dark:block"
+									alt={$i18n.auth.landing.tip_preview}
+									decoding="async"
+									height="733"
+									loading="lazy"
+									src={tipDark}
+									width="520"
+								/>
+							{/if}
 						</div>
 
 						{#if id === 'pay'}
 							<div
-								class="pay-chip absolute top-[12%] -left-[26%] flex w-[54%] -rotate-[9deg] items-center rounded-[18px] bg-surface px-[9%] py-[6.5%] text-primary"
+								class="pay-chip absolute -top-1 -left-[26%] z-1 flex w-1/2 -rotate-[9deg] items-center rounded-[18px] bg-surface px-[9%] py-[6.5%] text-primary sm:top-[5%] sm:w-[54%]"
 								aria-hidden="true"
 							>
 								<svg class="h-auto w-full" fill="none" viewBox="0 0 186 64">

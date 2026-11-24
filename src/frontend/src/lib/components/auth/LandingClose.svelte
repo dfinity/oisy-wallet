@@ -28,6 +28,28 @@
 </section>
 
 <style lang="scss">
+	// The login buttons' usual translucent hover fill blends into the navy panel.
+	section :global(button) {
+		@media (hover: hover) {
+			&:hover {
+				background-color: color-mix(
+					in srgb,
+					var(--color-background-primary) 94%,
+					var(--landing-sky)
+				);
+				border-color: color-mix(in srgb, var(--color-background-primary) 60%, var(--landing-sky));
+			}
+		}
+
+		&:active {
+			background-color: color-mix(in srgb, var(--color-background-primary) 90%, var(--landing-sky));
+		}
+
+		&:focus-visible {
+			--color-background-brand-primary: var(--landing-sky);
+		}
+	}
+
 	// The sign-in block's terms line is tertiary grey, made for the light page; on navy it would
 	// fall under 4.5:1, so it is lifted to translucent white here.
 	section :global(.text-tertiary) {

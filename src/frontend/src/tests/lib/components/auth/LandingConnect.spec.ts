@@ -1,10 +1,11 @@
 import { dAppDescriptions } from '$env/dapp-descriptions.env';
 import LandingConnect from '$lib/components/auth/LandingConnect.svelte';
 import { LANDING_NETWORKS } from '$lib/constants/landing.constants';
+import { currentCurrency } from '$lib/derived/currency.derived';
 import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
 import { i18n } from '$lib/stores/i18n.store';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render, within } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('LandingConnect', () => {
@@ -18,5 +19,62 @@ describe('LandingConnect', () => {
 		expect(valueOf(landing.connect_apps)).toBe(`${dAppDescriptions.length}`);
 		expect(valueOf(landing.connect_languages)).toBe(`${Object.values(Languages).length}`);
 		expect(valueOf(landing.connect_currencies)).toBe(`${Object.values(Currency).length}`);
+	});
+
+	it('previews hovered or focused currencies and keeps selection local', async () => {
+		const { getByRole } = render(LandingConnect);
+		const preview = within(getByRole('group', { name: get(i18n).auth.landing.connect_preview }));
+		const balance = preview.getByRole('status');
+		const walletCurrency = get(currentCurrency);
+
+		await fireEvent.click(preview.getByRole('radio', { name: 'USD' }));
+
+		const initialBalance = balance.textContent;
+		const euro = preview.getByRole('radio', { name: 'EUR' });
+		const euroLabel = euro.closest('label') as HTMLLabelElement;
+
+		await fireEvent.pointerEnter(euroLabel);
+
+		expect(balance).toHaveTextContent('€');
+		expect(euro).not.toBeChecked();
+
+		await fireEvent.pointerLeave(euroLabel);
+
+		expect(balance.textContent).toBe(initialBalance);
+
+		await fireEvent.focus(euro);
+
+		expect(balance).toHaveTextContent('€');
+		expect(euro).not.toBeChecked();
+
+		await fireEvent.blur(euro);
+
+		expect(balance.textContent).toBe(initialBalance);
+
+		await fireEvent.click(euro);
+
+		expect(euro).toBeChecked();
+		expect(balance).toHaveTextContent('€');
+		expect(get(currentCurrency)).toBe(walletCurrency);
+	});
+
+	it('uses the currency’s preview language and falls back to the page language', async () => {
+		const { getByRole } = render(LandingConnect);
+		const pageLanguage = get(i18n);
+		const preview = within(getByRole('group', { name: pageLanguage.auth.landing.connect_preview }));
+		const rouble = preview.getByRole('radio', { name: 'RUB' });
+		const balance = preview.getByRole('status');
+
+		await fireEvent.click(rouble);
+
+		await expect(preview.findByText('Ваш баланс')).resolves.toBeInTheDocument();
+		expect(preview.getByText('Русский')).toBeInTheDocument();
+		expect(balance).toHaveTextContent('4 762 626,40 ₽');
+		expect(rouble).toBeChecked();
+
+		await fireEvent.click(preview.getByRole('radio', { name: 'AED' }));
+
+		expect(preview.getByText(pageLanguage.hero.text.available_balance)).toBeInTheDocument();
+		expect(get(i18n).lang).toBe(pageLanguage.lang);
 	});
 });

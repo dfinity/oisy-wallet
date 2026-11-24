@@ -1,13 +1,11 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
-	import { prefersReducedMotion } from 'svelte/motion';
+	import { LANGUAGES } from '$env/i18n';
 	import LandingCurrencyFlag from '$lib/components/auth/LandingCurrencyFlag.svelte';
 	import LandingPreviewFrame from '$lib/components/auth/LandingPreviewFrame.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { Currency } from '$lib/enums/currency';
 	import { Languages } from '$lib/enums/languages';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { fly } from '$lib/utils/transitions.utils';
+	import { i18n, loadLanguage } from '$lib/stores/i18n.store';
 
 	// The Hold preview's sample total, shown through illustrative rates; not live prices.
 	const BALANCE_USD = 59_532.83;
@@ -31,70 +29,47 @@
 		[Currency.USD]: 1,
 		[Currency.VND]: 26_300
 	};
+	const PREVIEW_LANGUAGES: Partial<Record<Currency, Languages>> = {
+		[Currency.BRL]: Languages.PORTUGUESE,
+		[Currency.CAD]: Languages.ENGLISH,
+		[Currency.CHF]: Languages.FRENCH,
+		[Currency.CNY]: Languages.CHINESE_SIMPLIFIED,
+		[Currency.CZK]: Languages.CZECH,
+		[Currency.EUR]: Languages.GERMAN,
+		[Currency.GBP]: Languages.ENGLISH,
+		[Currency.INR]: Languages.HINDI,
+		[Currency.JPY]: Languages.JAPANESE,
+		[Currency.KRW]: Languages.KOREAN,
+		[Currency.NGN]: Languages.ENGLISH,
+		[Currency.PLN]: Languages.POLISH,
+		[Currency.RUB]: Languages.RUSSIAN,
+		[Currency.SGD]: Languages.ENGLISH,
+		[Currency.USD]: Languages.ENGLISH,
+		[Currency.VND]: Languages.VIETNAMESE
+	};
 
-	// One pass through these pairs, then the preview rests on the visitor's own currency.
-	const TOUR: { currency: Currency; language: Languages }[] = [
-		{ currency: Currency.USD, language: Languages.ENGLISH },
-		{ currency: Currency.EUR, language: Languages.GERMAN },
-		{ currency: Currency.CHF, language: Languages.FRENCH },
-		{ currency: Currency.JPY, language: Languages.JAPANESE },
-		{ currency: Currency.INR, language: Languages.HINDI },
-		{ currency: Currency.BRL, language: Languages.PORTUGUESE },
-		{ currency: Currency.KRW, language: Languages.KOREAN },
-		{ currency: Currency.PLN, language: Languages.POLISH },
-		{ currency: Currency.VND, language: Languages.VIETNAMESE }
-	];
-	const STEP_MS = 1800;
+	const getPreviewLabels = ({ lang, hero, core }: Awaited<ReturnType<typeof loadLanguage>>) => ({
+		lang,
+		balance: hero.text.available_balance,
+		currency: core.text.currency
+	});
 
 	const currencies = Object.values(Currency);
+	const groupName = $props.id();
+	const languageRequests: Partial<Record<Languages, Promise<ReturnType<typeof getPreviewLabels>>>> =
+		{};
 
-	let step = $state<number | undefined>();
-	let timer: ReturnType<typeof setInterval> | undefined;
+	let chosenCurrency = $state<Currency>();
+	let hoveredCurrency = $state<Currency>();
+	let focusedCurrency = $state<Currency>();
+	let loadedLabels = $state<ReturnType<typeof getPreviewLabels>>();
 
-	const stop = () => {
-		clearInterval(timer);
-		timer = undefined;
-	};
-
-	const tour = () => {
-		step = 0;
-		timer = setInterval(() => {
-			if (step === undefined || step >= TOUR.length - 1) {
-				stop();
-				step = undefined;
-				return;
-			}
-			step++;
-		}, STEP_MS);
-	};
-
-	const playOnceWhenVisible = (node: HTMLElement) => {
-		if (prefersReducedMotion.current || typeof IntersectionObserver === 'undefined') {
-			return;
-		}
-
-		const observer = new IntersectionObserver(([entry]) => {
-			if (!entry?.isIntersecting) {
-				return;
-			}
-			observer.disconnect();
-			tour();
-		});
-
-		observer.observe(node);
-
-		return () => observer.disconnect();
-	};
-
-	onDestroy(stop);
-
-	let current = $derived(
-		step === undefined
-			? (TOUR.find(({ currency }) => currency === $currentCurrency) ?? {
-					currency: $currentCurrency,
-					language: Languages.ENGLISH
-				})
-			: TOUR[step]
+	const selectedCurrency = $derived(chosenCurrency ?? $currentCurrency);
+	const displayedCurrency = $derived(hoveredCurrency ?? focusedCurrency ?? selectedCurrency);
+	const pageLabels = $derived(getPreviewLabels($i18n));
+	const language = $derived<Languages>(PREVIEW_LANGUAGES[displayedCurrency] ?? pageLabels.lang);
+	const labels = $derived(
+		loadedLabels !== undefined && loadedLabels.lang === language ? loadedLabels : pageLabels
 	);
 
 	const format = ({ currency, language }: { currency: Currency; language: Languages }): string =>
@@ -103,60 +78,87 @@
 			currency: currency.toUpperCase()
 		}).format(BALANCE_USD * SAMPLE_RATES[currency]);
 
-	const autonym = (language: Languages): string => {
-		const name = new Intl.DisplayNames([language], { type: 'language' }).of(language) ?? language;
-		return `${name.charAt(0).toLocaleUpperCase(language)}${name.slice(1)}`;
-	};
+	$effect(() => {
+		const next = language;
+		if (next === pageLabels.lang) {
+			return;
+		}
+
+		const request = (languageRequests[next] ??= loadLanguage(next).then(getPreviewLabels));
+
+		let current = true;
+		void request.then((nextLabels) => {
+			if (current) {
+				loadedLabels = nextLabels;
+			}
+		});
+
+		return () => {
+			current = false;
+		};
+	});
 </script>
 
-<LandingPreviewFrame label={$i18n.auth.landing.connect_preview}>
-	<div class="flex flex-col gap-6 p-5 sm:p-7" {@attach playOnceWhenVisible}>
+<LandingPreviewFrame interactive label={$i18n.auth.landing.connect_preview}>
+	<div class="@container flex min-w-0 flex-col gap-5 p-5 sm:p-7" lang={labels.lang}>
 		<div class="flex items-center justify-between gap-3">
-			<span class="text-sm text-tertiary">{$i18n.hero.text.available_balance}</span>
-			<span class="grid">
-				{#key current.language}
-					<span
-						class="rounded-full bg-secondary px-3 py-1 text-sm font-semibold text-primary [grid-area:1/1]"
-						lang={current.language}
-						in:fly={{ y: 8 }}
-						out:fly={{ y: -8 }}
-					>
-						{autonym(current.language)}
-					</span>
-				{/key}
+			<span class="text-sm text-tertiary">{labels.balance}</span>
+			<span
+				class="rounded-full bg-secondary px-3 py-1 text-sm font-semibold text-primary"
+				lang={language}
+			>
+				{LANGUAGES[language]}
 			</span>
 		</div>
 
-		<div class="grid min-h-12 items-center overflow-hidden">
-			{#key current.currency}
-				<span
-					class="flex items-center gap-3 [grid-area:1/1]"
-					in:fly={{ y: 16 }}
-					out:fly={{ y: -16 }}
-				>
-					<LandingCurrencyFlag currency={current.currency} size={36} />
-					<span
-						class="truncate text-3xl font-bold tracking-tight text-primary sm:text-4xl"
-						lang={current.language}
-					>
-						{format(current)}
-					</span>
-				</span>
-			{/key}
-		</div>
+		<output class="flex min-h-12 items-center gap-3" aria-atomic="true">
+			<LandingCurrencyFlag currency={displayedCurrency} size={36} />
+			<span
+				class="min-w-0 text-[clamp(1.25rem,7cqi,2.25rem)] font-bold tracking-tight [overflow-wrap:anywhere] text-primary"
+				lang={language}
+			>
+				{format({ currency: displayedCurrency, language })}
+			</span>
+		</output>
 
-		<ul class="m-0 grid list-none grid-cols-3 gap-2 p-0 sm:grid-cols-6">
-			{#each currencies as currency (currency)}
-				<li
-					class="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-xs font-semibold uppercase transition-colors duration-300"
-					class:bg-brand-subtle-20={currency === current.currency}
-					class:text-brand-primary={currency === current.currency}
-					class:text-tertiary={currency !== current.currency}
-				>
-					<LandingCurrencyFlag {currency} size={18} />
-					{currency}
-				</li>
-			{/each}
-		</ul>
+		<fieldset class="m-0 min-w-0 border-0 p-0">
+			<legend class="sr-only">{labels.currency}</legend>
+			<div class="grid grid-cols-3 gap-2 @min-[28rem]:grid-cols-6">
+				{#each currencies as currency (currency)}
+					<label
+						class="relative block min-w-0"
+						onpointerenter={({ pointerType }) => {
+							if (pointerType !== 'touch') {
+								hoveredCurrency = currency;
+							}
+						}}
+						onpointerleave={() => (hoveredCurrency = undefined)}
+					>
+						<input
+							name={groupName}
+							class="peer sr-only"
+							checked={selectedCurrency === currency}
+							onblur={() => (focusedCurrency = undefined)}
+							onchange={() => (chosenCurrency = currency)}
+							onfocus={() => {
+								focusedCurrency = currency;
+								hoveredCurrency = undefined;
+							}}
+							type="radio"
+							value={currency}
+						/>
+						<span
+							class="peer-focus-visible:outline-brand-primary-alt flex min-h-10 cursor-pointer items-center gap-1.5 rounded-full px-2 text-xs font-semibold transition-[color,background-color,scale] duration-150 press peer-focus-visible:outline-2 peer-focus-visible:outline-offset-1 motion-reduce:transition-none"
+							class:bg-brand-subtle-20={currency === displayedCurrency}
+							class:text-primary={currency === displayedCurrency}
+							class:text-secondary={currency !== displayedCurrency}
+						>
+							<LandingCurrencyFlag {currency} size={18} />
+							{currency.toUpperCase()}
+						</span>
+					</label>
+				{/each}
+			</div>
+		</fieldset>
 	</div>
 </LandingPreviewFrame>

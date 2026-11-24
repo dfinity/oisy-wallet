@@ -196,11 +196,11 @@ interface I18nAuth {
 		hold_point_collectibles: string;
 		hold_point_currency: string;
 		hold_preview: string;
-		swap_eyebrow: string;
 		swap_title: string;
 		swap_description: string;
 		swap_point_fee: string;
-		swap_point_limit: string;
+		swap_point_value_warning: string;
+		swap_point_slippage: string;
 		swap_preview: string;
 		give_eyebrow: string;
 		give_title: string;
@@ -230,6 +230,13 @@ interface I18nAuth {
 		security_privacy_description: string;
 		security_foundation: string;
 		security_source: string;
+		get_started_title: string;
+		get_started_sign_in_title: string;
+		get_started_sign_in_description: string;
+		get_started_fund_title: string;
+		get_started_fund_description: string;
+		get_started_use_title: string;
+		get_started_use_description: string;
 		connect_eyebrow: string;
 		connect_title: string;
 		connect_description: string;

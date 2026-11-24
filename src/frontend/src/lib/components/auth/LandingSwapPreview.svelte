@@ -1,19 +1,17 @@
 <script lang="ts">
+	import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
-	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import LandingPreviewFrame from '$lib/components/auth/LandingPreviewFrame.svelte';
 	import LandingSmartSwapCell from '$lib/components/auth/LandingSmartSwapCell.svelte';
+	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import IconSettings from '$lib/components/icons/lucide/IconSettings.svelte';
-	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import TokenInputBalance from '$lib/components/tokens/TokenInputBalance.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import Html from '$lib/components/ui/Html.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -22,19 +20,35 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	// Sample amounts and prices for the illustration only. The form is the app's SwapForm, built
-	// from the same pieces with static values, since the real one needs a live swap context.
+	// Example quotes in hundredths of a USDC for the same 0.05 BTC input.
+	const BEST_QUOTE = 479_520;
+	const LOWEST_QUOTE = 473_880;
 	const PAY = { token: BTC_MAINNET_TOKEN, amount: '0.05', exchangeRate: 96_154.86 };
 	const RECEIVE = {
-		token: ETHEREUM_TOKEN,
-		amount: '1.4789',
-		exchangeRate: 3_246.3,
-		balance: 1_350_000_000_000_000_000n
+		token: USDC_TOKEN,
+		amount: (BEST_QUOTE / 100).toFixed(2),
+		exchangeRate: 1,
+		balance: 1_350_000_000n
 	};
 	const MAX_BTC = '0.41998';
-	const VALUE_DIFFERENCE_PCT = -0.14;
+	const PAY_VALUE_USD = Number(PAY.amount) * PAY.exchangeRate;
+	const VALUE_DIFFERENCE_PCT = ((BEST_QUOTE / 100 - PAY_VALUE_USD) / PAY_VALUE_USD) * 100;
 	const NETWORK_FEE_BTC = '0.00001454';
 	const NETWORK_FEE_USD = 1.4;
+
+	const quoteFormat = $derived(
+		new Intl.NumberFormat($currentLanguage, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+	);
+	const gain = $derived(
+		`${quoteFormat.format((BEST_QUOTE - LOWEST_QUOTE) / 100)} ${USDC_TOKEN.symbol}`
+	);
+	const previewLabel = $derived(
+		replacePlaceholders($i18n.auth.landing.swap_preview, {
+			$sourceAmount: PAY.amount,
+			$receiveAmount: quoteFormat.format(BEST_QUOTE / 100),
+			$gain: gain
+		})
+	);
 
 	let networkFee = $derived(
 		formatCurrency({
@@ -48,7 +62,7 @@
 	const noop = () => {};
 </script>
 
-<LandingPreviewFrame label={$i18n.auth.landing.swap_preview}>
+<LandingPreviewFrame label={previewLabel}>
 	<!-- The modal header: title centred, slippage and close on the right. -->
 	<div class="relative flex items-center justify-end border-b border-tertiary px-4 pt-6 pb-4">
 		<span
@@ -96,7 +110,11 @@
 		</div>
 
 		<div class="relative">
-			<SwapSwitchTokensButton onTokensSwitch={noop} />
+			<div
+				class="absolute inset-0 z-1 m-auto grid size-9 place-items-center rounded-lg border border-secondary bg-tertiary text-primary shadow-sm"
+			>
+				<IconArrowUpDown size="14" />
+			</div>
 		</div>
 
 		<div class="mb-2">
@@ -126,18 +144,9 @@
 			</TokenInput>
 		</div>
 
-		<div class="mt-2 mb-4">
-			<MessageBox level="plain" styleClass="bg-secondary! font-normal!">
-				<Html
-					text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {
-						$sourceNetwork: PAY.token.network.name,
-						$destinationNetwork: RECEIVE.token.network.name
-					})}
-				/>
-			</MessageBox>
+		<div class="mt-2">
+			<LandingSmartSwapCell {gain} />
 		</div>
-
-		<LandingSmartSwapCell />
 
 		<div class="mt-3"><Hr /></div>
 

@@ -26,10 +26,10 @@
 </script>
 
 <section
-	class="grid w-full grid-cols-1 items-center gap-10 border-t border-tertiary py-16 md:grid-cols-2 md:gap-16 md:py-24"
+	class="grid w-full grid-cols-1 items-center gap-10 border-t border-tertiary py-16 md:grid-cols-12 md:gap-16 md:py-24"
 	aria-labelledby="landing-connect-title"
 >
-	<div class="flex flex-col gap-8">
+	<div class="flex min-w-0 flex-col gap-6 md:col-span-5">
 		<div class="flex flex-col gap-5" {@attach landingReveal()}>
 			<p class="m-0 text-xs font-bold tracking-[0.2em] text-brand-primary uppercase">
 				{$i18n.auth.landing.connect_eyebrow}
@@ -45,23 +45,32 @@
 			</p>
 		</div>
 
-		<dl class="m-0 grid grid-cols-2 gap-x-6 gap-y-5">
+		<dl class="m-0 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-tertiary pt-4">
 			{#each facts as { id, value, label }, index (id)}
 				<div
-					class="flex flex-col-reverse justify-end gap-1 border-t border-tertiary pt-4"
+					class="flex flex-row-reverse items-baseline justify-end gap-2"
 					{@attach landingReveal(LANDING_REVEAL_STAGGER * index)}
 				>
 					<dt class="text-sm leading-snug text-pretty text-secondary">{label}</dt>
-					<dd class="m-0 text-4xl font-bold tracking-tight text-primary">{value}</dd>
+					<dd class="m-0 text-xl font-bold text-primary tabular-nums">{value}</dd>
 				</div>
 			{/each}
 		</dl>
 	</div>
 
 	<div
-		class="mx-auto w-full max-w-lg md:max-w-none"
+		class="currency-preview min-w-0 md:col-span-7"
 		{@attach landingReveal(LANDING_REVEAL_STAGGER)}
 	>
 		<LandingCurrencyPreview />
 	</div>
 </section>
+
+<style lang="scss">
+	// Keep the focused control visible during the section's entrance.
+	.currency-preview:focus-within {
+		opacity: 1 !important;
+		transform: none !important;
+		filter: none !important;
+	}
+</style>

@@ -27,7 +27,9 @@
 	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import IconUser from '$lib/components/icons/IconUser.svelte';
+	import NavigationWalletIcon from '$lib/components/icons/IconWallet.svelte';
 	import IconAstronautHelmet from '$lib/components/icons/icon-astronaut/IconAstronautHelmet.svelte';
+	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlyBuy from '$lib/components/icons/iconly/IconlyBuy.svelte';
 	import IconlySend from '$lib/components/icons/iconly/IconlySend.svelte';
 	import IconBellDot from '$lib/components/icons/lucide/IconBellDot.svelte';
@@ -300,11 +302,11 @@
 
 	const headerIcons = [IconBellDot, IconScanLine, IconUser];
 	const phoneTabs = $derived([
-		{ label: $i18n.navigation.text.tokens, Icon: IconWallet },
-		{ label: $i18n.navigation.text.activity, Icon: IconClock },
-		{ label: $i18n.navigation.text.section_finance, Icon: IconLayers },
+		{ label: $i18n.navigation.text.tokens, Icon: NavigationWalletIcon },
+		{ label: $i18n.navigation.text.activity, Icon: IconActivity },
+		{ label: $i18n.navigation.text.section_finance, Icon: IconLayers, raised: true },
 		{ label: $i18n.navigation.text.notes, Icon: IconNotebook },
-		{ label: $i18n.core.text.more, Icon: IconEllipsis }
+		{ label: $i18n.navigation.text.section_more, Icon: IconEllipsis }
 	]);
 
 	const networkTriggerWidth = $derived($i18n.lang === Languages.ENGLISH ? 125 : 161);
@@ -617,12 +619,34 @@
 				{@render transaction(y + 11, row)}
 			{/each}
 
-			<rect class="panel" height="67" width="252" x="27" y="678" />
-			{#each phoneTabs as { label, Icon }, index (label)}
-				<g class:accent={index === 0} transform="translate({52 + index * 50} 689)">
-					<g class="phone-tab-icon" transform="translate(-8 0)"><Icon /></g>
-					<svg height="30" overflow="hidden" width="48" x="-24">
-						<text font-size="9" text-anchor="middle" x="24" y="28">{label}</text>
+			<!-- MobileNavigationMenu's bar contour scaled to the illustrated screen. -->
+			<svg
+				class="phone-tab-bar"
+				height="82"
+				preserveAspectRatio="none"
+				viewBox="0 0 300 126"
+				width="252"
+				x="27"
+				y="655"
+			>
+				<path
+					d="M0,36 L60,36 C92,36 119.2,35.6 132,26 A30,30 0 0 1 168,26 C180.8,35.6 208,36 240,36 L300,36 L300,126 L0,126 Z"
+				/>
+			</svg>
+			{#each phoneTabs as { label, Icon, raised }, index (label)}
+				<g
+					class="phone-tab"
+					class:phone-tab-selected={index === 0}
+					transform="translate({153 + (index - 2) * 50.4} 717)"
+				>
+					{#if raised}
+						<circle class="phone-tab-cradle" cy="-30" r="14.3" />
+					{/if}
+					<svg height="16" viewBox="0 0 24 24" width="16" x="-8" y={raised ? -38 : -24}>
+						<Icon />
+					</svg>
+					<svg height="14" overflow="hidden" width="48" x="-24" y="-11">
+						<text font-size="9" text-anchor="middle" x="24" y="11">{label}</text>
 					</svg>
 				</g>
 			{/each}
@@ -666,8 +690,7 @@
 	}
 
 	.panel,
-	.chip,
-	.divider {
+	.chip {
 		stroke: var(--color-border-primary);
 	}
 
@@ -699,9 +722,19 @@
 		fill: var(--color-background-primary-alt);
 	}
 
-	.phone-tab-icon :global(svg) {
-		width: 16px;
-		height: 16px;
+	.phone-tab-bar {
+		fill: var(--color-background-primary-inverted-alt);
+		stroke: var(--color-border-tertiary);
+	}
+
+	.phone-tab-cradle {
+		fill: var(--color-background-primary);
+		stroke: currentColor;
+	}
+
+	.phone-tab-selected {
+		color: var(--color-foreground-brand-primary-alt);
+		fill: currentColor;
 	}
 
 	:global([theme='dark']) .balance-action {
@@ -722,6 +755,11 @@
 
 	.network-menu > .panel {
 		stroke: var(--color-border-brand-subtle-20);
+	}
+
+	.network-menu > .divider {
+		stroke: var(--color-border-tertiary);
+		stroke-width: 0.75;
 	}
 
 	:global([theme='dark']) .network-menu > .panel {
