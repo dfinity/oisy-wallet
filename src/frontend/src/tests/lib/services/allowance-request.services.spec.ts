@@ -1,5 +1,6 @@
 import * as api from '$lib/api/backend.api';
 import { ALLOWANCE_REQUEST_COOLDOWN_MILLIS, ZERO } from '$lib/constants/app.constants';
+import { trackOisyAllowanceRequest } from '$lib/services/allowance-analytics.services';
 import {
 	requestAllowance,
 	requestAllowanceAfterInsufficientAllowance,
@@ -12,6 +13,10 @@ import type { AllowSigningOutcome } from '$lib/types/api';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
+
+vi.mock('$lib/services/allowance-analytics.services', () => ({
+	trackOisyAllowanceRequest: vi.fn()
+}));
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn(),
@@ -150,6 +155,61 @@ describe('allowance-request.services', () => {
 		});
 	});
 
+	describe('the allowance request event', () => {
+		it('should count a request after an insufficient allowance with its answer', async () => {
+			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(grantedOutcome);
+
+			await requestAllowance(mockIdentity);
+
+			expect(trackOisyAllowanceRequest).toHaveBeenCalledExactlyOnceWith({
+				trigger: 'insufficient_allowance',
+				answer: 'granted'
+			});
+		});
+
+		it('should count a refused request once, after the rate limit event', async () => {
+			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(rateLimitedOutcome);
+
+			await requestAllowance(mockIdentity);
+
+			expect(trackOisyAllowanceRequest).toHaveBeenCalledExactlyOnceWith({
+				trigger: 'insufficient_allowance',
+				answer: 'refused'
+			});
+			expect(vi.mocked(trackRateLimited).mock.invocationCallOrder[0]).toBeLessThan(
+				vi.mocked(trackOisyAllowanceRequest).mock.invocationCallOrder[0]
+			);
+		});
+
+		it('should count one request for callers that share it', async () => {
+			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(grantedOutcome);
+
+			await Promise.all([requestAllowance(mockIdentity), requestAllowance(mockIdentity)]);
+
+			expect(trackOisyAllowanceRequest).toHaveBeenCalledOnce();
+		});
+
+		it('should count nothing during the cooldown, when no request is sent', async () => {
+			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(rateLimitedOutcome);
+
+			await requestAllowance(mockIdentity);
+			await requestAllowance(mockIdentity);
+
+			expect(trackOisyAllowanceRequest).toHaveBeenCalledOnce();
+		});
+
+		it('should count a request at load with its trigger', async () => {
+			vi.spyOn(api, 'allowSigning').mockResolvedValueOnce(rateLimitedOutcome);
+
+			await requestAllowanceAtLoad(mockIdentity);
+
+			expect(trackOisyAllowanceRequest).toHaveBeenCalledExactlyOnceWith({
+				trigger: 'load',
+				answer: 'refused'
+			});
+		});
+	});
+
 	describe('requestAllowanceAfterInsufficientAllowance', () => {
 		const allowance = 5_000_000_000n;
 
@@ -164,7 +224,7 @@ describe('allowance-request.services', () => {
 
 			await expect(
 				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
-			).resolves.toEqual({ repeat: true, answer: 'granted' });
+			).resolves.toEqual({ repeat: true });
 
 			expect(toastSpy).not.toHaveBeenCalled();
 		});
@@ -174,7 +234,7 @@ describe('allowance-request.services', () => {
 
 			await expect(
 				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
-			).resolves.toEqual({ repeat: true, answer: 'skipped' });
+			).resolves.toEqual({ repeat: true });
 
 			expect(toastSpy).not.toHaveBeenCalled();
 		});
@@ -187,7 +247,7 @@ describe('allowance-request.services', () => {
 					identity: mockIdentity,
 					allowance: 1_500_000_000_000n
 				})
-			).resolves.toEqual({ repeat: false, answer: 'skipped' });
+			).resolves.toEqual({ repeat: false });
 
 			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'exceeded' });
 			expect(get(allowanceIssueStore)).toBeUndefined();
@@ -198,7 +258,7 @@ describe('allowance-request.services', () => {
 
 			await expect(
 				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
-			).resolves.toEqual({ repeat: false, answer: 'refused' });
+			).resolves.toEqual({ repeat: false });
 
 			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'issue' });
 			expect(get(allowanceIssueStore)).toEqual({ refusedAt: Date.now() });
@@ -226,7 +286,7 @@ describe('allowance-request.services', () => {
 
 			await expect(
 				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
-			).resolves.toEqual({ repeat: true, answer: 'granted' });
+			).resolves.toEqual({ repeat: true });
 
 			expect(toastSpy).toHaveBeenCalledOnce();
 			expect(get(allowanceIssueStore)).toBeUndefined();

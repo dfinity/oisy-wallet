@@ -576,7 +576,7 @@ When the AR is refused, the **allowance issue** state is set, and a toast titled
 
 When the AR is skipped with no larger OISY allowance, or the repeated CC fails for its allowance again, the CC costs more than the OISY allowance covers. A warning toast says so, and stays until the user closes it. The allowance issue state is not set, since cheaper CCs still work.
 
-Every AR after an insufficient allowance sends one Plausible event, `oisy_allowance_request`, with the AR's answer (`granted`, `skipped` or `refused`) in `event_key` and what happened to the CC (`repeated`, `repeat_failed` or `not_repeated`) in `event_value`. A CC that fails during the AR cooldown counts as `refused`.
+Every AR sends one Plausible event, `oisy_allowance_request`, with what triggered it (`load` or `insufficient_allowance`) in `event_trigger` and its answer (`granted`, `skipped` or `refused`) in `event_key`; during the AR cooldown no AR is sent, so there is no event. Every CC that fails because its allowance does not cover it, a failed repeat included, sends `charged_call` with the canister method in `event_key`, `result_status` `error` and `result_error_type` `insufficient_allowance`. Successful CCs send no event.
 
 ---
 

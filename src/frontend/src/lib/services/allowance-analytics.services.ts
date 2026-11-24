@@ -1,26 +1,44 @@
-import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+import {
+	PLAUSIBLE_EVENT_CHARGED_CALL_ERROR_TYPES,
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import type { AllowanceRequestAnswer } from '$lib/types/api';
 
-export type AllowanceRequestOutcome = 'repeated' | 'repeat_failed' | 'not_repeated';
+export type AllowanceRequestTrigger = 'load' | 'insufficient_allowance';
 
 /**
- * Counts each allowance request (AR) after a charged call ran out of the OISY allowance: its
- * answer, and whether the call was repeated and worked. It carries nothing about the user, the
- * call or the amounts.
+ * Counts every allowance request (AR): what triggered it, the app load or a charged call that ran
+ * out, and its answer. It carries nothing about the user or the amounts.
  */
 export const trackOisyAllowanceRequest = ({
-	answer,
-	outcome
+	trigger,
+	answer
 }: {
+	trigger: AllowanceRequestTrigger;
 	answer: AllowanceRequestAnswer['answer'];
-	outcome: AllowanceRequestOutcome;
 }) => {
 	trackEvent({
 		name: PLAUSIBLE_EVENTS.OISY_ALLOWANCE_REQUEST,
 		metadata: {
-			event_key: answer,
-			event_value: outcome
+			event_trigger: trigger,
+			event_key: answer
+		}
+	});
+};
+
+/**
+ * Counts a charged call (CC) that failed because its allowance did not cover it, by the canister
+ * method it called. Successful CCs are not counted: the flows' own events do that.
+ */
+export const trackChargedCallInsufficientAllowance = ({ method }: { method: string }) => {
+	trackEvent({
+		name: PLAUSIBLE_EVENTS.CHARGED_CALL,
+		metadata: {
+			event_key: method,
+			result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+			result_error_type: PLAUSIBLE_EVENT_CHARGED_CALL_ERROR_TYPES.INSUFFICIENT_ALLOWANCE
 		}
 	});
 };

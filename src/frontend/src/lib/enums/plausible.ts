@@ -16,9 +16,11 @@ export enum PLAUSIBLE_EVENTS {
 	PAY = 'pay',
 	SIGN_IN_CANCELLED_HELP = 'sign_in_cancelled_help',
 	RATE_LIMITED = 'rate_limited',
-	// An allowance request (AR) after a charged call ran out of the OISY allowance: its answer and
-	// whether the call was repeated.
+	// Every allowance request (AR) for a new OISY allowance: what triggered it and its answer.
 	OISY_ALLOWANCE_REQUEST = 'oisy_allowance_request',
+	// A charged call (CC), a call that costs cycles, that failed because its allowance did not cover
+	// it.
+	CHARGED_CALL = 'charged_call',
 	STAKE = 'stake',
 	UNSTAKE = 'unstake',
 	LOAD_TRANSACTIONS = 'load_transactions',
@@ -108,6 +110,10 @@ export enum PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES {
 // interpolates it verbatim, so a raw message cannot satisfy invariant 4 in
 // docs/ai/frontend/analytics.md. Help failures are categorised by error class instead; which call
 // failed is already in `event_modifier`.
+export enum PLAUSIBLE_EVENT_CHARGED_CALL_ERROR_TYPES {
+	INSUFFICIENT_ALLOWANCE = 'insufficient_allowance'
+}
+
 export enum PLAUSIBLE_EVENT_HELP_ERROR_TYPES {
 	// The factory has no pool for the pair, or the lookup itself failed - the factory answers an
 	// unknown pair with a text-free `CommonError`, so the two cannot be told apart.
