@@ -51,6 +51,13 @@ describe('modal.store', () => {
 		expect(get(modalStore)).toEqual({ id, type: 'canister-top-up' });
 	});
 
+	it('should open the usage-credits-add modal', () => {
+		const id = Symbol('modalId');
+		modalStore.openUsageCreditsAdd(id);
+
+		expect(get(modalStore)).toEqual({ id, type: 'usage-credits-add' });
+	});
+
 	it('should open harvest-stake modal with modalId', () => {
 		const id = Symbol('modalId');
 		modalStore.openHarvestStake(id);

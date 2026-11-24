@@ -143,6 +143,10 @@ export const modalCanisterTopUp: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'canister-top-up'
 );
+export const modalUsageCreditsAdd: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'usage-credits-add'
+);
 export const modalConvertBTCToCkBTC: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'convert-btc-ckbtc'

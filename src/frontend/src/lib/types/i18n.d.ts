@@ -664,6 +664,22 @@ interface I18nTools {
 	text: { title: string; top_up_canister: string };
 }
 
+interface I18nUsage_credits {
+	text: {
+		title: string;
+		description: string;
+		own_credits: string;
+		balance: string;
+		add_more: string;
+		get_cycles: string;
+		add_title: string;
+		add_description: string;
+		own_credits_after: string;
+		added: string;
+	};
+	error: { load: string; add: string };
+}
+
 interface I18nShortcuts {
 	privacy_mode: string;
 }
@@ -2890,6 +2906,7 @@ interface I18n {
 	help: I18nHelp;
 	settings: I18nSettings;
 	tools: I18nTools;
+	usage_credits: I18nUsage_credits;
 	shortcuts: I18nShortcuts;
 	networks: I18nNetworks;
 	receive: I18nReceive;

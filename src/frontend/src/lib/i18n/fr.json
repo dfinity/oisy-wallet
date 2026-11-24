@@ -923,6 +923,24 @@
 			"top_up_canister": "Recharger un canister avec des ICP ou des TCYCLES"
 		}
 	},
+	"usage_credits": {
+		"text": {
+			"title": "",
+			"description": "",
+			"own_credits": "",
+			"balance": "",
+			"add_more": "",
+			"get_cycles": "",
+			"add_title": "",
+			"add_description": "",
+			"own_credits_after": "",
+			"added": ""
+		},
+		"error": {
+			"load": "",
+			"add": ""
+		}
+	},
 	"shortcuts": {
 		"privacy_mode": "P"
 	},
