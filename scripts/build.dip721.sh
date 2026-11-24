@@ -19,7 +19,7 @@ print_help() {
 DIP721_BUILDENV="$DFX_NETWORK"
 export DIP721_BUILDENV
 
-# Psychedelic deleted its DIP721 repository, so its nft.did (develop branch) is kept here,
+# Psychedelic's DIP721 repository is no longer public, so its nft.did (develop branch) is kept here,
 # formatted by prettier. Original: https://archive.softwareheritage.org/swh:1:cnt:f5af872edbfacb12868f0ddc49129338d43e777b
 CANDID_SOURCE="scripts/dip721.did"
 

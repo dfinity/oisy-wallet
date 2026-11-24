@@ -19,7 +19,7 @@ print_help() {
 XTC_BUILDENV="$DFX_NETWORK"
 export XTC_BUILDENV
 
-# Psychedelic deleted its dank repository, so its candid/xtc.did (develop branch) is kept here,
+# Psychedelic's dank repository is no longer public, so its candid/xtc.did (develop branch) is kept here,
 # formatted by prettier. Original: https://archive.softwareheritage.org/swh:1:cnt:f5e9ebbf2afa802df8fb76a91483b0cf0792f371
 CANDID_SOURCE="scripts/xtc_ledger.did"
 
