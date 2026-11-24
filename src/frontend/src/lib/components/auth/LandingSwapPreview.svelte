@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { setContext } from 'svelte';
 	import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import LandingPreviewFrame from '$lib/components/auth/LandingPreviewFrame.svelte';
@@ -15,10 +16,13 @@
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { COLORED_NETWORK_LOGOS_CONTEXT_KEY } from '$lib/stores/colored-network-logos.store';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+
+	setContext(COLORED_NETWORK_LOGOS_CONTEXT_KEY, true);
 
 	// Example quotes in hundredths of a USDC for the same 0.05 BTC input.
 	const BEST_QUOTE = 479_520;

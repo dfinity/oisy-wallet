@@ -202,11 +202,11 @@ interface I18nAuth {
 		swap_point_value_warning: string;
 		swap_point_slippage: string;
 		swap_preview: string;
-		give_eyebrow: string;
 		give_title: string;
+		notes_description: string;
+		contacts_description: string;
 		pay_title: string;
 		pay_description: string;
-		pay_preview: string;
 		tip_title: string;
 		tip_description: string;
 		tip_preview: string;
@@ -226,6 +226,8 @@ interface I18nAuth {
 		security_sign_in_description: string;
 		security_keys_title: string;
 		security_keys_description: string;
+		security_first_send_title: string;
+		security_first_send_description: string;
 		security_privacy_title: string;
 		security_privacy_description: string;
 		security_foundation: string;

@@ -1,10 +1,12 @@
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import * as backendApi from '$lib/api/backend.api';
 import LandingPage from '$lib/components/auth/LandingPage.svelte';
 import { i18n } from '$lib/stores/i18n.store';
 import { themeStore } from '$lib/stores/theme.store';
 import { Theme } from '$lib/types/theme';
-import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-import { render } from '@testing-library/svelte';
+import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+import { render, within } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
@@ -12,7 +14,8 @@ describe('LandingPage', () => {
 	it('shows the hero promise and loads the feature sections below it', async () => {
 		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
 		const { getByRole, findByRole } = render(LandingPage);
-		const { landing, text } = get(i18n).auth;
+		const { address_book, auth, notes } = get(i18n);
+		const { landing, text } = auth;
 		const heading = getByRole('heading', { level: 1 });
 
 		expect(heading).toHaveTextContent(replaceOisyPlaceholders(text.title_part_1));
@@ -32,6 +35,34 @@ describe('LandingPage', () => {
 			await expect(
 				findByRole('heading', { level: 2, name: title }, { timeout: 5000 })
 			).resolves.toBeInTheDocument();
+		}
+
+		for (const title of [
+			notes.text.title,
+			address_book.text.title,
+			landing.tip_title,
+			landing.security_first_send_title
+		]) {
+			expect(getByRole('heading', { level: 3, name: title })).toBeInTheDocument();
+		}
+	});
+
+	it('uses the colored network logos in the swap preview', async () => {
+		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
+		const { findByRole } = render(LandingPage);
+		const { auth, tokens } = get(i18n);
+		const swapSection = await findByRole(
+			'region',
+			{ name: auth.landing.swap_title },
+			{ timeout: 5000 }
+		);
+
+		for (const network of [BTC_MAINNET_NETWORK, ETHEREUM_NETWORK]) {
+			const label = within(swapSection).getByText(
+				replacePlaceholders(tokens.text.on_network_label, { $network: network.name })
+			);
+
+			expect(label.parentElement?.querySelector('img')).toHaveAttribute('src', network.iconColored);
 		}
 	});
 
