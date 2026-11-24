@@ -5,7 +5,7 @@ print_help() {
   cat <<-EOF
 	Creates the DIP721 installation files:
 
-	- The Candid file is downloaded.
+	- The Candid file is copied from the repository.
 
 	The files are installed at the locations defined for 'dip721' in 'dfx.json'.
 	EOF
@@ -19,27 +19,16 @@ print_help() {
 DIP721_BUILDENV="$DFX_NETWORK"
 export DIP721_BUILDENV
 
-DIP721_REPO_URL="https://raw.githubusercontent.com/Psychedelic/DIP721/refs/heads/develop"
-# shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
-CANDID_URL="${DIP721_REPO_URL}/nft.did"
+# Psychedelic deleted its DIP721 repository, so its nft.did (develop branch) is kept here,
+# formatted by prettier. Original: https://archive.softwareheritage.org/swh:1:cnt:f5af872edbfacb12868f0ddc49129338d43e777b
+CANDID_SOURCE="scripts/dip721.did"
 
 CANDID_FILE="$(jq -r .canisters.dip721.candid dfx.json)"
 
-download() {
-  : 'Downloads a URL to a given file.'
-  # shellcheck disable=SC2016 # The $ in the comment is not meant to be expanded.
-  : '* With argument x, the filename is $X_FILE and the URL is $X_URL'
-  : '* If the file already exists, the user is prompted whether to overwrite, keeping the existing file by default.'
-  local asset asset_url asset_file
-  asset="$1"
-  asset_url="${asset^^}_URL"
-  asset_file="${asset^^}_FILE"
-  scripts/download-immutable.sh "${!asset_url}" "${!asset_file}"
-}
-
 ####
-# Downloads the candid file, if it does not exist already.
-download candid
+# Copies the candid file.
+mkdir -p "$(dirname "$CANDID_FILE")"
+cp "$CANDID_SOURCE" "$CANDID_FILE"
 
 ####
 # Success
