@@ -31,8 +31,10 @@ import {
 	initTokenActionValidationErrorsContext,
 	type TokenActionValidationErrorsContext
 } from '$lib/stores/token-action-validation-errors.store';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { stringifyJson } from '$lib/utils/json.utils';
 import { parseToken } from '$lib/utils/parse.utils';
+import { mockInsufficientAllowanceError } from '$tests/mocks/allowance.mock';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -365,6 +367,30 @@ describe('EthConvertTokenWizard', () => {
 		await vi.waitFor(() => expect(onBack).toHaveBeenCalledOnce());
 
 		expect(onClose).not.toHaveBeenCalled();
+	});
+
+	it('should go back to the review, which says the allowance is used up and disables Convert', async () => {
+		const onBack = vi.fn();
+		const onClose = vi.fn();
+
+		sendSpy.mockRejectedValueOnce(mockInsufficientAllowanceError({ answer: 'refused' }));
+
+		const { container, getByTestId, getByText } = render(EthConvertTokenWizard, {
+			props: { ...props, onBack, onClose },
+			context: mockContext(mockFees)
+		});
+
+		expect(getByTestId('convert-review-button-next')).toBeEnabled();
+
+		await clickConvertButton(container);
+
+		await vi.waitFor(() => expect(onBack).toHaveBeenCalledOnce());
+
+		expect(onClose).not.toHaveBeenCalled();
+		expect(
+			getByText(replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up))
+		).toBeInTheDocument();
+		expect(getByTestId('convert-review-button-next')).toBeDisabled();
 	});
 
 	it('should render convert form if currentStep is CONVERT', () => {

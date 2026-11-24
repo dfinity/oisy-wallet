@@ -49,6 +49,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { insufficientAllowanceOutcome } from '$lib/utils/allowance.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -63,7 +64,8 @@
 		sendToken,
 		sendBalance,
 		sendEthCustomNonce,
-		sendEthFeePriority
+		sendEthFeePriority,
+		sendAllowanceOutcome
 	} = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
@@ -281,6 +283,8 @@
 	};
 
 	const send = async () => {
+		sendAllowanceOutcome.set(undefined);
+
 		if (isNullishOrEmpty(destination)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.destination_address_invalid }
@@ -430,6 +434,16 @@
 				name: TRACK_COUNT_ETH_SEND_ERROR,
 				metadata: sendTrackingEventMetadata
 			});
+
+			// Nothing was signed, and the review says whether trying again can work.
+			const allowanceOutcome = insufficientAllowanceOutcome(err);
+
+			if (nonNullish(allowanceOutcome)) {
+				sendAllowanceOutcome.set(allowanceOutcome);
+
+				onBack();
+				return;
+			}
 
 			toastEthereumTransactionError({
 				err,

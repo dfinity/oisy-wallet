@@ -38,6 +38,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { insufficientAllowanceOutcome } from '$lib/utils/allowance.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBTCRegtest,
@@ -69,7 +70,8 @@
 
 	const { store: utxosFeeStore } = getContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY);
 
-	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
+	const { sourceToken, destinationToken, convertAllowanceOutcome } =
+		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
 	const progress = (step: ProgressStepsConvert) => (convertProgressStep = step);
 
@@ -98,6 +100,8 @@
 	});
 
 	const convert = async () => {
+		convertAllowanceOutcome.set(undefined);
+
 		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
 
 		if (isNullish($authIdentity)) {
@@ -164,16 +168,26 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
+			trackEvent({
+				name: TRACK_COUNT_CONVERT_BTC_TO_CKBTC_ERROR
+			});
+
+			// Nothing was signed, and the review says whether trying again can work.
+			const allowanceOutcome = insufficientAllowanceOutcome(err);
+
+			if (nonNullish(allowanceOutcome)) {
+				convertAllowanceOutcome.set(allowanceOutcome);
+
+				back();
+				return;
+			}
+
 			toastsError({
 				msg: {
 					text:
 						mapBtcBroadcastErrorToMessage({ err, i18n: $i18n }) ?? $i18n.convert.error.unexpected
 				},
 				...(isBtcSendLimitError(err) ? {} : { err })
-			});
-
-			trackEvent({
-				name: TRACK_COUNT_CONVERT_BTC_TO_CKBTC_ERROR
 			});
 
 			// As for a send: the conversion may have gone out, so the form is not offered again.
@@ -188,6 +202,11 @@
 
 	const close = () => onClose();
 	const back = () => onBack();
+
+	const backFromReview = () => {
+		convertAllowanceOutcome.set(undefined);
+		back();
+	};
 </script>
 
 <!-- No recipient, although the deposit address is the minter's P2WPKH one: priced for the largest
@@ -215,7 +234,7 @@
 		{:else if currentStep?.name === WizardStepsConvert.REVIEW}
 			<BtcConvertReview onConvert={convert} {receiveAmount} {sendAmount}>
 				{#snippet cancel()}
-					<ButtonBack onclick={back} />
+					<ButtonBack onclick={backFromReview} />
 				{/snippet}
 			</BtcConvertReview>
 		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}

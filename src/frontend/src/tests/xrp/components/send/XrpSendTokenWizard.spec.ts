@@ -11,6 +11,7 @@ import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseToken } from '$lib/utils/parse.utils';
+import { mockInsufficientAllowanceError } from '$tests/mocks/allowance.mock';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -33,7 +34,7 @@ import {
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import { get, readable } from 'svelte/store';
 
 // XRP is force-disabled under TEST, so `isNetworkIdXrp` in `send` would reject every attempt and
 // each "did not call" assertion below would pass for the wrong reason. Enable the catalog here.
@@ -498,6 +499,26 @@ describe('XrpSendTokenWizard', () => {
 			expect(onSendBack).toHaveBeenCalled();
 			expect(onSendForm).not.toHaveBeenCalled();
 			expect(onBack).not.toHaveBeenCalled();
+		});
+
+		it('steps back to the review, which says the allowance is used up, without a toast', async () => {
+			vi.spyOn(xrpSendServices, 'sendXrp').mockRejectedValue(
+				mockInsufficientAllowanceError({ answer: 'refused' })
+			);
+
+			const context = mockContext();
+
+			const { container } = await renderSettled(context);
+
+			await clickSend(container);
+
+			await waitFor(() => expect(onBack).toHaveBeenCalled());
+
+			expect(toasts.toastsError).not.toHaveBeenCalled();
+			expect(onSendForm).not.toHaveBeenCalled();
+			expect(get((context.get(SEND_CONTEXT_KEY) as SendContext).sendAllowanceOutcome)).toBe(
+				'refused'
+			);
 		});
 
 		// Nothing to correct, so the generic branch keeps the ordinary one step back.

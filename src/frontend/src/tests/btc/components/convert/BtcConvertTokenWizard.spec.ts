@@ -37,7 +37,9 @@ import {
 } from '$lib/stores/token-action-validation-errors.store';
 import type { AddPendingTransactionOutcome } from '$lib/types/api';
 import type { Token } from '$lib/types/token';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { mockInsufficientAllowanceError } from '$tests/mocks/allowance.mock';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -236,6 +238,34 @@ describe('BtcConvertTokenWizard', () => {
 			});
 			expect(onBack).toHaveBeenCalledOnce();
 			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		it('should go back to the review, which says the transaction costs more, without a toast', async () => {
+			vi.spyOn(btcSendServices, 'sendBtc').mockRejectedValue(
+				mockInsufficientAllowanceError({ answer: 'skipped', allowance: 5_000_000_000n })
+			);
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+			mockAuthStore();
+			mockBtcAddressStore();
+			mockAddressesStore();
+
+			const { container, getByText, getByTestId } = render(BtcConvertTokenWizard, {
+				props,
+				context: mockContext({ mockUtxosFeeStore: mockUtxosFeeStore(mockUtxosFee) })
+			});
+
+			expect(getByTestId('convert-review-button-next')).toBeEnabled();
+
+			await clickConvertButton(container);
+
+			await waitFor(() => expect(onBack).toHaveBeenCalledOnce());
+
+			expect(toastsErrorSpy).not.toHaveBeenCalled();
+			expect(onClose).not.toHaveBeenCalled();
+			expect(
+				getByText(replaceOisyPlaceholders(en.core.warning.oisy_allowance_exceeded))
+			).toBeInTheDocument();
+			expect(getByTestId('convert-review-button-next')).toBeDisabled();
 		});
 	});
 

@@ -19,10 +19,12 @@ import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import * as addressesStore from '$lib/derived/address.derived';
 import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
+import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { AddPendingTransactionOutcome } from '$lib/types/api';
 import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { mockInsufficientAllowanceError } from '$tests/mocks/allowance.mock';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -34,7 +36,7 @@ import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
 import { mockSendContextEntry } from '$tests/utils/send.context.test-utils';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import { get, readable } from 'svelte/store';
 
 describe('BtcSendTokenWizard', () => {
 	const sendAmount = 0.001;
@@ -238,6 +240,29 @@ describe('BtcSendTokenWizard', () => {
 			});
 			expect(onBack).toHaveBeenCalledOnce();
 			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		it('should go back to the review, which says the allowance is used up, without a toast', async () => {
+			vi.spyOn(btcSendServices, 'sendBtc').mockRejectedValue(
+				mockInsufficientAllowanceError({ answer: 'refused' })
+			);
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+			mockAuthStore();
+			mockAddressesStore();
+
+			const context = mockContext({ mockUtxosFeeStore: mockUtxosFeeStoreWithValue(mockUtxosFee) });
+
+			const { container } = render(BtcSendTokenWizard, { props, context });
+
+			await clickSendButton(container);
+
+			await waitFor(() => expect(onBack).toHaveBeenCalledOnce());
+
+			expect(toastsErrorSpy).not.toHaveBeenCalled();
+			expect(onClose).not.toHaveBeenCalled();
+			expect(get((context.get(SEND_CONTEXT_KEY) as SendContext).sendAllowanceOutcome)).toBe(
+				'refused'
+			);
 		});
 
 		it('should go back to the form with its own message for any other failure', async () => {

@@ -32,9 +32,10 @@ import * as toasts from '$lib/stores/toasts.store';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import type { WizardStep } from '$lib/types/wizard';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as inputUtils from '$lib/utils/input.utils';
 import EthSendTokenWizardTestHost from '$tests/eth/components/send/EthSendTokenWizardTestHost.svelte';
+import { mockInsufficientAllowanceError } from '$tests/mocks/allowance.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -67,7 +68,8 @@ describe('EthSendTokenWizard.spec', () => {
 		sendToken: writable(sendToken),
 		sendTokenId: writable(sendToken.id),
 		sendTokenDecimals: writable(sendTokenDecimals),
-		sendEthCustomNonce: writable(undefined)
+		sendEthCustomNonce: writable(undefined),
+		sendAllowanceOutcome: writable(undefined)
 	});
 
 	const mockContext = (params: {
@@ -840,6 +842,45 @@ describe('EthSendTokenWizard.spec', () => {
 
 			expect(onBack).toHaveBeenCalledOnce();
 			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		it('goes back to the review, which says the allowance is used up and disables Send', async () => {
+			const onBack = vi.fn();
+			const onClose = vi.fn();
+
+			vi.mocked(sendServices.send).mockRejectedValueOnce(
+				mockInsufficientAllowanceError({ answer: 'refused' })
+			);
+
+			const { getByTestId, getByText, queryByTestId } = renderHost({
+				currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+				sendProgressStep: ProgressStepsSend.INITIALIZATION,
+				nft: undefined,
+				destination,
+				sourceNetwork: ETHEREUM_NETWORK,
+				nativeEthereumToken: ETHEREUM_TOKEN,
+				sendToken: ETHEREUM_TOKEN,
+				sendTokenDecimals: ETHEREUM_TOKEN.decimals,
+				onBack,
+				onClose
+			});
+
+			const firstTimeDestinationCheckbox = queryByTestId('checkbox');
+			if (firstTimeDestinationCheckbox) {
+				await fireEvent.click(firstTimeDestinationCheckbox);
+			}
+
+			expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).toBeEnabled();
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+			expect(
+				getByText(replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up))
+			).toBeInTheDocument();
+			expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).toBeDisabled();
 		});
 	});
 

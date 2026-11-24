@@ -37,6 +37,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { insufficientAllowanceOutcome } from '$lib/utils/allowance.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBTCRegtest,
@@ -70,7 +71,7 @@
 		onTokensList
 	}: Props = $props();
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendAllowanceOutcome } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { store: utxosFeeStore } = getContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY);
 
@@ -92,6 +93,8 @@
 	const back = () => onSendBack();
 
 	const send = async () => {
+		sendAllowanceOutcome.set(undefined);
+
 		progress(ProgressStepsSendBtc.INITIALIZATION);
 
 		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
@@ -191,6 +194,16 @@
 				name: TRACK_COUNT_BTC_SEND_ERROR,
 				metadata: sendTrackingEventMetadata
 			});
+
+			// Nothing was signed, and the review says whether trying again can work.
+			const allowanceOutcome = insufficientAllowanceOutcome(err);
+
+			if (nonNullish(allowanceOutcome)) {
+				sendAllowanceOutcome.set(allowanceOutcome);
+
+				onBack();
+				return;
+			}
 
 			toastsError({
 				msg: {

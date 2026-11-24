@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import EthConvertForm from '$eth/components/convert/EthConvertForm.svelte';
@@ -42,6 +42,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { insufficientAllowanceOutcome } from '$lib/utils/allowance.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -69,7 +70,7 @@
 		children
 	}: Props = $props();
 
-	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
+	const { sourceToken, convertAllowanceOutcome } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
 	const { feeStore } = getContext<EthFeeContextType>(ETH_FEE_CONTEXT_KEY);
 
@@ -82,6 +83,8 @@
 	let sourceNetwork = $derived($selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK);
 
 	const convert = async () => {
+		convertAllowanceOutcome.set(undefined);
+
 		if (isNullishOrEmpty(destination)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.destination_address_invalid }
@@ -167,6 +170,16 @@
 				name: TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR
 			});
 
+			// Nothing was signed, and the review says whether trying again can work.
+			const allowanceOutcome = insufficientAllowanceOutcome(err);
+
+			if (nonNullish(allowanceOutcome)) {
+				convertAllowanceOutcome.set(allowanceOutcome);
+
+				back();
+				return;
+			}
+
 			toastEthereumTransactionError({
 				err,
 				fallbackMsg: $i18n.send.error.unexpected,
@@ -187,6 +200,11 @@
 
 	const close = () => onClose();
 	const back = () => onBack();
+
+	const backFromReview = () => {
+		convertAllowanceOutcome.set(undefined);
+		back();
+	};
 </script>
 
 <EthFeeContext
@@ -214,7 +232,7 @@
 		{:else if currentStep?.name === WizardStepsConvert.REVIEW}
 			<EthConvertReview onConvert={convert} {receiveAmount} {sendAmount}>
 				{#snippet cancel()}
-					<ButtonBack onclick={back} />
+					<ButtonBack onclick={backFromReview} />
 				{/snippet}
 			</EthConvertReview>
 		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}

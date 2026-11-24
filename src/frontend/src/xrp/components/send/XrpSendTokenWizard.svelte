@@ -20,6 +20,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { insufficientAllowanceOutcome } from '$lib/utils/allowance.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -77,7 +78,7 @@
 		onTokensList
 	}: Props = $props();
 
-	const { sendToken, sendTokenDecimals, sendXrpDestinationTag, sendBalance } =
+	const { sendToken, sendTokenDecimals, sendXrpDestinationTag, sendBalance, sendAllowanceOutcome } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let networkId = $derived($sendToken?.network.id);
@@ -120,6 +121,8 @@
 	const back = () => onSendBack();
 
 	const send = async () => {
+		sendAllowanceOutcome.set(undefined);
+
 		if (isNullish($authIdentity)) {
 			return;
 		}
@@ -358,6 +361,16 @@
 			if (err instanceof XrpDestinationTagRequiredError) {
 				correctOnForm($i18n.send.error.xrp_destination_tag_required);
 
+				return;
+			}
+
+			// Nothing was signed, and the review says whether trying again can work.
+			const allowanceOutcome = insufficientAllowanceOutcome(err);
+
+			if (nonNullish(allowanceOutcome)) {
+				sendAllowanceOutcome.set(allowanceOutcome);
+
+				onBack();
 				return;
 			}
 

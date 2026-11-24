@@ -31,6 +31,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { insufficientAllowanceOutcome } from '$lib/utils/allowance.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdSolana,
@@ -77,7 +78,8 @@
 		onTokensList
 	}: Props = $props();
 
-	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenDecimals, sendAllowanceOutcome } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let network = $derived($sendToken?.network);
 
@@ -136,6 +138,8 @@
 	const back = () => onSendBack();
 
 	const send = async () => {
+		sendAllowanceOutcome.set(undefined);
+
 		if (isNullish($authIdentity)) {
 			return;
 		}
@@ -217,6 +221,16 @@
 
 				setTimeout(() => close(), 750);
 
+				return;
+			}
+
+			// Nothing was signed, and the review says whether trying again can work.
+			const allowanceOutcome = insufficientAllowanceOutcome(err);
+
+			if (nonNullish(allowanceOutcome)) {
+				sendAllowanceOutcome.set(allowanceOutcome);
+
+				onBack();
 				return;
 			}
 
