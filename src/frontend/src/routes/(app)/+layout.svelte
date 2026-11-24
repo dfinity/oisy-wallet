@@ -127,7 +127,7 @@
 			class:min-h-[100dvh]={$authNotSignedIn}
 			class:overflow-x-hidden={$authNotSignedIn}
 		>
-			<Header />
+			<Header showLandingNavigation />
 
 			<AuthGuard>
 				<SplitPane>

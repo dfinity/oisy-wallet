@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
-	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
 	import ActiveUserTransactionsButton from '$lib/components/active-user-transactions/ActiveUserTransactionsButton.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
@@ -20,8 +19,23 @@
 		modalWalletConnect
 	} from '$lib/derived/modal.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
+
+	interface Props {
+		showLandingNavigation?: boolean;
+	}
+
+	let { showLandingNavigation = false }: Props = $props();
+
+	const landingNavigation = $derived(showLandingNavigation && $authNotSignedIn);
+	const landingLinks = $derived([
+		{ href: '#landing-hold-title', label: $i18n.auth.landing.hold_eyebrow },
+		{ href: '#landing-security-title', label: $i18n.auth.landing.security_eyebrow },
+		{ href: '#landing-swap-title', label: $i18n.swap.text.swap },
+		{ href: '#landing-borrow-title', label: $i18n.auth.landing.borrow_eyebrow }
+	]);
 
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340).
 	let networkSwitcherOpen = $state(false);
@@ -78,6 +92,7 @@
 	class:1.5xl:fixed={$authSignedIn}
 	class:1.5xl:inset-x-0={$authSignedIn}
 	class:flex-wrap={$authNotSignedIn}
+	class:landing-navigation={landingNavigation}
 	class:md:sticky={$authSignedIn}
 	class:md:top-0={$authSignedIn}
 	class:md:z-10={$authSignedIn && !popoverOpen}
@@ -92,6 +107,26 @@
 	<div class="pointer-events-auto">
 		<OisyWalletLogoLink />
 	</div>
+
+	{#if landingNavigation}
+		<nav
+			class="pointer-events-auto order-last flex w-full justify-center lg:order-none lg:w-auto"
+			aria-label={$i18n.auth.landing.sections_label}
+		>
+			<div
+				class="flex max-w-full flex-wrap justify-center gap-0.5 rounded-[24px] border border-tertiary bg-primary p-0.5 shadow-sm"
+			>
+				{#each landingLinks as { href, label } (href)}
+					<a
+						class="inline-flex min-h-10 min-w-10 items-center justify-center rounded-[21px] px-2.5 text-sm font-semibold text-primary no-underline transition-colors duration-150 ease-out hover:bg-brand-subtle-10 hover:text-brand-hover active:bg-brand-subtle-20 active:text-brand-hover sm:px-4"
+						{href}
+					>
+						{label}
+					</a>
+				{/each}
+			</div>
+		</nav>
+	{/if}
 
 	<div
 		class="pointer-events-auto flex items-center justify-end"
@@ -122,7 +157,6 @@
 			<Menu bind:visible={menuOpen} />
 		{:else}
 			<div class="flex flex-wrap items-center justify-end gap-2 sm:gap-5">
-				<AboutWhyOisy trackEventSource={LANDING_PAGE_ROUTE} />
 				<DocumentationLink shortTextOnMobile trackEventSource={LANDING_PAGE_ROUTE} />
 				<ThemeSwitchButton />
 				<Menu bind:visible={menuOpen} />
@@ -136,6 +170,13 @@
 {/if}
 
 <style lang="scss">
+	@media (min-width: 64rem) {
+		.landing-navigation {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+		}
+	}
+
 	// Between 768 px and 68rem (1088 px) even the compact controls sit over the content column,
 	// so scrolled rows would show through behind them: a band in the page colour covers them.
 	// From 68rem the controls clear the content and the header stays transparent, as from 1408 px.

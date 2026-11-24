@@ -203,6 +203,7 @@
 			"internet_identity": ""
 		},
 		"landing": {
+			"sections_label": "",
 			"reframe_start": "",
 			"reframe_end": "",
 			"networks_label": "",

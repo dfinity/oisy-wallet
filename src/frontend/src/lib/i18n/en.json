@@ -203,6 +203,7 @@
 			"internet_identity": "Internet Identity"
 		},
 		"landing": {
+			"sections_label": "Wallet features",
 			"reframe_start": "No app store. No seed phrase.",
 			"reframe_end": "Just oisy.com.",
 			"networks_label": "Networks $oisy_name supports",

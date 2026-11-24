@@ -275,6 +275,8 @@ in the PR description and ask the human owner before doing it.
 
 The sections below the artwork (`LandingSections`) load as their own lazy chunk, like the artwork. Each block enters once, the first time it scrolls into view, through the `landingReveal` attachment in `$lib/utils/landing-reveal.utils.ts`: the same 300ms, 12px and 4px blur as the sign-in block, with copy first and its visual `LANDING_REVEAL_STAGGER` (100ms) later. Blocks already scrolled past on reload or back navigation appear without animation. Under reduced motion they only fade, for `MOTION_REDUCED_FADE_DURATION`. The section visuals are small sample interfaces built from theme tokens and existing icons inside `LandingPreviewFrame`, which keeps the outer radius equal to the inner radius plus its padding. By default the frame exposes one labelled image to assistive technology and makes its sample controls inert. The currency preview opts in to an interactive frame with native currency controls and announces the formatted sample balance. The preview pairs currencies with supported languages and falls back to the page language for currencies without a match. It reads the preview labels through `loadLanguage`. Selecting a currency updates only the preview. The closing sign-in block passes `testIdSuffix` so its buttons do not share the hero's test ids.
 
+The signed-out header links to the landing section headings with native fragments. When the lazy sections mount, they resolve a landing fragment so an early click or a direct link reaches and focuses its heading.
+
 ## Overlay keyboard behavior
 
 `overlayFocus` in `$lib/utils/overlay.utils.ts` is the shared Svelte action for

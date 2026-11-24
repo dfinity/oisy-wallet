@@ -24,7 +24,8 @@
 		<p class="m-0 text-xs font-bold tracking-[0.2em] text-brand-primary uppercase">{eyebrow}</p>
 		<h2
 			id={`${id}-title`}
-			class="m-0 text-3xl leading-[1.1] font-bold tracking-tight text-balance text-primary md:text-[2.75rem]"
+			class="m-0 scroll-mt-6 text-3xl leading-[1.1] font-bold tracking-tight text-balance text-primary md:text-[2.75rem]"
+			tabindex="-1"
 		>
 			{title}
 		</h2>

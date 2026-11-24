@@ -2,6 +2,7 @@
 <svelte:options css="injected" />
 
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import LandingBorrowPreview from '$lib/components/auth/LandingBorrowPreview.svelte';
 	import LandingClose from '$lib/components/auth/LandingClose.svelte';
 	import LandingConnect from '$lib/components/auth/LandingConnect.svelte';
@@ -13,6 +14,19 @@
 	import LandingSecurity from '$lib/components/auth/LandingSecurity.svelte';
 	import LandingSwapPreview from '$lib/components/auth/LandingSwapPreview.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+
+	onMount(() => {
+		// A landing fragment can arrive before this lazy chunk has mounted.
+		const { hash } = window.location;
+
+		if (!hash.startsWith('#landing-')) {
+			return;
+		}
+
+		const target = document.getElementById(hash.slice(1));
+		target?.scrollIntoView();
+		target?.focus({ preventScroll: true });
+	});
 </script>
 
 <LandingNetworks />

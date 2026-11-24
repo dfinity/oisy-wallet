@@ -3,27 +3,50 @@ import {
 	NAVIGATION_MENU_BUTTON,
 	NETWORKS_SWITCHER_DROPDOWN
 } from '$lib/constants/test-ids.constants';
+import { i18n } from '$lib/stores/i18n.store';
 import { mockAuthSignedIn } from '$tests/mocks/auth.mock';
-import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('Header', () => {
 	const header = (container: HTMLElement): HTMLElement | null => container.querySelector('header');
+	const sectionNavLabel = get(i18n).auth.landing.sections_label;
 
 	it('sticks to the top from 768 px when signed in, and is fixed from 1408 px as before', () => {
 		mockAuthSignedIn();
 
-		const { container } = render(Header);
+		const { container, queryByRole } = render(Header, { showLandingNavigation: true });
 
 		expect(header(container)).toHaveClass('md:sticky', 'md:top-0', 'md:z-10', '1.5xl:fixed');
+		expect(queryByRole('navigation', { name: sectionNavLabel })).not.toBeInTheDocument();
 	});
 
 	it('scrolls away with the page when signed out', () => {
 		mockAuthSignedIn(false);
 
-		const { container } = render(Header);
+		const { container, queryByRole } = render(Header);
 
 		expect(header(container)).not.toHaveClass('md:sticky');
 		expect(header(container)).not.toHaveClass('1.5xl:fixed');
+		expect(queryByRole('navigation', { name: sectionNavLabel })).not.toBeInTheDocument();
+	});
+
+	it('links to wallet features when the signed-out landing page is shown', () => {
+		mockAuthSignedIn(false);
+
+		const { getByRole } = render(Header, { showLandingNavigation: true });
+		const nav = getByRole('navigation', { name: sectionNavLabel });
+		const { auth, swap } = get(i18n);
+		const { borrow_eyebrow, hold_eyebrow, security_eyebrow } = auth.landing;
+
+		for (const [name, href] of [
+			[hold_eyebrow, '#landing-hold-title'],
+			[security_eyebrow, '#landing-security-title'],
+			[swap.text.swap, '#landing-swap-title'],
+			[borrow_eyebrow, '#landing-borrow-title']
+		]) {
+			expect(within(nav).getByRole('link', { name })).toHaveAttribute('href', href);
+		}
 	});
 
 	it('marks itself scrolled once the page scrolls, and not at the top', async () => {

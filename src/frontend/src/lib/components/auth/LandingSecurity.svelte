@@ -47,7 +47,8 @@
 				</p>
 				<h2
 					id="landing-security-title"
-					class="m-0 text-3xl leading-[1.1] font-bold tracking-tight text-balance text-white md:text-[2.75rem]"
+					class="m-0 scroll-mt-6 text-3xl leading-[1.1] font-bold tracking-tight text-balance text-white md:text-[2.75rem]"
+					tabindex="-1"
 				>
 					{$i18n.auth.landing.security_title}
 				</h2>
