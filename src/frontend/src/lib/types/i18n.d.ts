@@ -78,7 +78,12 @@ interface I18nCore {
 		got_it: string;
 		oisy_protects_you: string;
 	};
-	info: { test_banner: string; test_banner_beta: string; oisy_allowance_limited: string };
+	info: {
+		test_banner: string;
+		test_banner_beta: string;
+		oisy_allowance_limited: string;
+		oisy_allowance_renewed: string;
+	};
 	alt: {
 		logo: string;
 		go_to_home: string;
@@ -92,7 +97,13 @@ interface I18nCore {
 		learn_more: string;
 		up_one_level: string;
 	};
-	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
+	warning: {
+		do_not_close: string;
+		standalone_mode: string;
+		video_not_supported: string;
+		oisy_allowance_used_up: string;
+		oisy_allowance_exceeded: string;
+	};
 	error: { copy_failed: string };
 }
 

@@ -24,6 +24,8 @@ export interface SwapError {
 	url?: { url: string; text: string };
 	errorType?: string;
 	swapSucceded?: boolean;
+	// The same swap would fail the same way, so the review disables Swap.
+	disablesSwap?: boolean;
 }
 
 export interface SwapData {

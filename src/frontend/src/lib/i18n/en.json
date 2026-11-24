@@ -90,7 +90,8 @@
 		"info": {
 			"test_banner": "For testing purposes only!",
 			"test_banner_beta": "This is a beta release. You may encounter bugs. Real assets are in play - please use with care.",
-			"oisy_allowance_limited": "Your free $oisy_name allowance is used up for now, so some transactions may fail."
+			"oisy_allowance_limited": "Your free $oisy_name allowance is used up for now, so some transactions may fail.",
+			"oisy_allowance_renewed": "Your free $oisy_name allowance ran out and has been renewed. Please try again."
 		},
 		"alt": {
 			"logo": "$name logo",
@@ -108,7 +109,9 @@
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done",
 			"standalone_mode": "There are known connection issues when both an app and $oisy_short are installed on a home&nbsp;screen. If you encounter issues connecting $oisy_short or signing transactions, please start the app from a regular browser. We are working on a fix and it will be resolved soon. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Read more</a>",
-			"video_not_supported": "Your browser does not support video playback."
+			"video_not_supported": "Your browser does not support video playback.",
+			"oisy_allowance_used_up": "Your free $oisy_name allowance is used up for now. Please try again later.",
+			"oisy_allowance_exceeded": "This transaction costs more than your free $oisy_name allowance covers."
 		},
 		"error": {
 			"copy_failed": "Couldn't copy. Your browser blocked access to the clipboard. Try again."

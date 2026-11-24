@@ -90,7 +90,8 @@
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
 			"test_banner_beta": "",
-			"oisy_allowance_limited": ""
+			"oisy_allowance_limited": "",
+			"oisy_allowance_renewed": ""
 		},
 		"alt": {
 			"logo": "شعار $name",
@@ -108,7 +109,9 @@
 		"warning": {
 			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",
 			"standalone_mode": "",
-			"video_not_supported": ""
+			"video_not_supported": "",
+			"oisy_allowance_used_up": "",
+			"oisy_allowance_exceeded": ""
 		},
 		"error": {
 			"copy_failed": ""
