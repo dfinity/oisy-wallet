@@ -64,7 +64,7 @@ The phases ship one by one, in this order. Each is useful on its own.
 - **Refused**, or no AR during the AR cooldown: the CC fails, and Allowance issue is set (see 4.5).
 - **Skipped** with no larger OISY allowance: the CC costs more than the OISY allowance, and the backend sets no new one at or above the OISY allowance threshold. The CC fails, and a warning toast says this transaction costs more than the free OISY allowance covers. It stays until the user closes it. Allowance issue is **not** set, since cheaper CCs still work. Today this happens with a large BTC send in production, which is charged for all its inputs in one CC.
 - A repeated CC that returns Insufficient allowance again is handled like the Skipped case without a larger OISY allowance, and no second AR is sent.
-- When the CC still fails, the flow shows its usual error, as today.
+- When the CC still fails, the flow shows its usual error, as today, but its error toast says "Your transaction couldn't be signed because you don't have enough usage credits left." in place of its usual text. This is the **usage-credits error text**.
 
 ### 4.5 Allowance issue and its toast
 
@@ -82,7 +82,7 @@ This spec leaves out the certified BTC balance through the Chain Fusion Signer, 
 
 ### 4.7 What does not change
 
-- **No form or flow changes.** None of them learns about the AR, the repeat or Allowance issue. When a CC still fails, each shows its usual error.
+- **No form or flow changes.** None of them learns about the AR, the repeat or Allowance issue. When a CC still fails, each shows its usual error, and the shared toast helper puts the usage-credits error text in its error toast (see 4.4).
 - The one exception is a message in a shared helper: the BTC send through the backend (local and staging) tells the user to sign out and back in when the allowance runs out. That message goes, since the AR now runs on its own, and the send shows its usual error instead.
 - Every other CC result keeps today's handling, including `InsufficientFunds`, when OISY's own cycles account is short.
 - ICP and ICRC sends, receiving, addresses and every balance work as before, with or without Allowance issue.
@@ -112,7 +112,7 @@ This spec leaves out the certified BTC balance through the Chain Fusion Signer, 
 - **Automatic use.** Every CC is charged to the OISY allowance first. When a CC returns Insufficient allowance and its AR is Refused, or no AR is sent during the AR cooldown, the shared signer module repeats it once, charged to the user's own cycles, if an approval is left. If the repeat succeeds, the flow never sees the failure. So OISY pays again as soon as its allowance covers a CC, without a reload, and phase 1's AR, at most one a minute, serves as the recheck. Before each such repeat, one CC fails at no charge. The approval is the consent, and its amount caps what can be charged.
 - **No prompt per transaction**: no warning and no checkbox.
 - The approval left and the TCYCLES balance are read with free queries on the cycles ledger.
-- **Own cycles running low.** A CC paid with the user's own cycles fails when the approval is used up (`InsufficientAllowance`) or the TCYCLES balance is (`InsufficientFunds`). Both get phase 1's usage-credits error text.
+- **Own cycles running low.** A CC paid with the user's own cycles fails when the approval is used up (`InsufficientAllowance`) or the TCYCLES balance is (`InsufficientFunds`). Both show phase 1's usage-credits error text in the flow's error toast, in place of its usual text (see 4.4).
 
 ### 6.2 Entry points and state
 
@@ -159,13 +159,14 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 12. No form or flow changes, and Allowance issue alone disables no feature.
 13. Every other CC result, `InsufficientFunds` included, keeps today's handling, ICP and ICRC sends are unaffected, and the BTC send through the backend no longer says to sign out and back in.
 14. Every AR fires one `oisy_allowance_request` event with its trigger and answer, and every CC that returns Insufficient allowance fires one `charged_call` event with its method.
+15. When a CC still fails for Insufficient allowance, the flow's error toast shows the usage-credits error text in place of its usual text, and the rest of the flow is unchanged.
 
 ### Phase 3
 
 1. A user can approve an amount of their TCYCLES for CCs from the Tools card, in one step.
 2. Every CC is charged to the OISY allowance first. A CC whose AR is Refused, or that falls in the AR cooldown, is repeated once on the user's own cycles if an approval is left, with no prompt per transaction.
 3. The Tools card shows the approval left and the TCYCLES balance, with **Add more** and **Get cycles**.
-4. A CC paid with the user's own cycles that fails for the approval or the TCYCLES balance shows the usage-credits error text.
+4. A CC paid with the user's own cycles that fails for the approval or the TCYCLES balance shows the usage-credits error text in the flow's error toast, in place of its usual text.
 5. The allowance-issue toast links to the Tools card.
 6. Without a reload, OISY pays CCs again as soon as the OISY allowance covers them, for example after the hourly limit resets or another device gets a Granted AR.
 
