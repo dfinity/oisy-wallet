@@ -86,6 +86,11 @@ This spec leaves out the certified BTC balance through the Chain Fusion Signer, 
 - Every other CC result keeps today's handling, including `InsufficientFunds`, when OISY's own cycles account is short.
 - ICP and ICRC sends, receiving, addresses and every balance work as before, with or without Allowance issue.
 
+### 4.8 Analytics
+
+- Every AR after Insufficient allowance fires one Plausible event, `oisy_allowance_request`, with its answer (`granted`, `skipped` or `refused`; during the AR cooldown, when no AR is sent, `refused`) and the outcome for the CC: `repeated` when the repeat succeeds, `repeat_failed` when it fails, `not_repeated` otherwise.
+- That shows how often users run out of the OISY allowance and whether the repeat helps. The AR at load fires no such event.
+
 ## 5. Phase 2: the backend's costly calls become CCs
 
 - **One allowance.** A user-triggered backend call that costs cycles beyond its execution (for example a Bitcoin canister call, a vetKD key derivation or an HTTP outcall) becomes a CC, charged to the same OISY allowance.
@@ -124,7 +129,8 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 1. **Phase 1**, in this order:
    1. Load: no sign-out on a Refused AR at load (#14737).
    2. The AR after Insufficient allowance, the repeat, the AR cooldown, Allowance issue and the toasts (#14739).
-   3. Translations.
+   3. Translations (#14754).
+   4. The Plausible event (see 4.8).
 2. **Phase 2:** the backend's costly calls become CCs, and the frontend handles their Insufficient allowance.
 3. **Phase 3:** the approval step, the Tools card, the payment-type switch, the way in from a failed CC (pending decision 10), and the backend accepting the user's cycles for its CCs.
 4. **Phase 4:** the cap, the smaller OISY allowance per Granted AR and the new-user pool.
@@ -146,6 +152,7 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 11. Any Granted or Skipped AR clears Allowance issue.
 12. No form or flow changes, and Allowance issue alone disables no feature.
 13. Every other CC result, `InsufficientFunds` included, keeps today's handling, ICP and ICRC sends are unaffected, and the BTC send through the backend no longer says to sign out and back in.
+14. Every AR after Insufficient allowance fires one `oisy_allowance_request` event with its answer and the CC's outcome.
 
 ### Phase 3
 
