@@ -14,9 +14,15 @@
 		onProviderSelected: (provider: OpenIdProvider) => void;
 		variant?: 'login' | 'lock';
 		rowBreakpoint?: 'sm' | 'md';
+		testIdSuffix?: string;
 	}
 
-	let { onProviderSelected, variant = 'login', rowBreakpoint = 'md' }: Props = $props();
+	let {
+		onProviderSelected,
+		variant = 'login',
+		rowBreakpoint = 'md',
+		testIdSuffix = ''
+	}: Props = $props();
 
 	// One-Click sign-in providers — see `@icp-sdk/auth` v6 `OpenIdProvider`.
 	// Internet Identity 2.0 performs the OIDC flow against these and returns
@@ -58,7 +64,7 @@
 		<button
 			class={`flex size-14 items-center justify-center rounded-xl transition-[color,background-color,border-color,scale] duration-150 ease-out press-icon focus-visible:outline-2 focus-visible:outline-offset-2 ${variantClasses}`}
 			aria-label={ariaLabel}
-			data-tid={testId}
+			data-tid={`${testId}${testIdSuffix}`}
 			onclick={() => onProviderSelected(provider)}
 			type="button"
 		>

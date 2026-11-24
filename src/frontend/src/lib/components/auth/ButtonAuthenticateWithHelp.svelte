@@ -20,13 +20,15 @@
 		helpAlignment?: 'inherit' | 'center';
 		needHelpLink?: boolean;
 		asPopup?: boolean;
+		testIdSuffix?: string;
 	}
 
 	let {
 		fullWidth = false,
 		helpAlignment = 'inherit',
 		needHelpLink = true,
-		asPopup = false
+		asPopup = false,
+		testIdSuffix = ''
 	}: Props = $props();
 
 	const modalId = Symbol();
@@ -60,6 +62,7 @@
 		{fullWidth}
 		justify={helpAlignment === 'center' ? 'center' : 'start'}
 		{onAuthenticate}
+		{testIdSuffix}
 	/>
 
 	<span

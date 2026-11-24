@@ -222,6 +222,21 @@ describe('ButtonAuthenticateWithHelp', () => {
 			});
 		});
 
+		it('should append the test id suffix to every sign-in button', () => {
+			const { container } = render(ButtonAuthenticateWithHelp, {
+				props: { testIdSuffix: '-closing' }
+			});
+
+			[LOGIN_BUTTON, ...openIdCases.map(({ testId }) => testId)].forEach((testId) => {
+				expect(
+					container.querySelector<HTMLButtonElement>(`button[data-tid="${testId}-closing"]`)
+				).toBeInTheDocument();
+				expect(
+					container.querySelector<HTMLButtonElement>(`button[data-tid="${testId}"]`)
+				).not.toBeInTheDocument();
+			});
+		});
+
 		it.each(openIdCases)(
 			'should call signIn with openIdProvider "$provider" when that button is clicked',
 			async ({ provider, testId }) => {

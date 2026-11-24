@@ -1,16 +1,17 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
-	import FeatureCards from '$lib/components/auth/FeatureCards.svelte';
 	import SignupsClosedBanner from '$lib/components/auth/SignupsClosedBanner.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import { MOTION_REDUCED_FADE_DURATION } from '$lib/constants/transition.constants';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
+	import { landingBackgroundFade } from '$lib/utils/landing-reveal.utils';
 </script>
 
 <div
 	style:--landing-reduced-duration={`${MOTION_REDUCED_FADE_DURATION}ms`}
 	class="mx-auto flex w-full max-w-screen-xl flex-1 flex-col items-center gap-8 px-5 md:gap-12 md:px-8"
+	{@attach landingBackgroundFade}
 >
 	<div class="landing-enter flex w-full max-w-screen-md flex-col items-center">
 		<SignupsClosedBanner />
@@ -28,8 +29,12 @@
 		</div>
 	</div>
 
-	<div class="landing-enter features w-full sm:-mt-48">
-		<FeatureCards />
+	<div class="flex w-full flex-col items-center">
+		{#await import('$lib/components/auth/LandingSections.svelte') then { default: LandingSections }}
+			<LandingSections />
+		{:catch}
+			<!-- The hero and its sign-in buttons stay usable if the sections fail to load. -->
+		{/await}
 	</div>
 </div>
 
@@ -54,12 +59,6 @@
 
 	.artwork {
 		animation-name: none;
-	}
-
-	.features {
-		// Opacity/filter on an ancestor prevent Chrome from blurring the cards' backdrop.
-		animation-name: landing-rise;
-		animation-delay: 200ms;
 	}
 
 	@media (prefers-reduced-motion: no-preference) {
@@ -103,8 +102,7 @@
 		.landing-enter {
 			animation: landing-fade var(--landing-reduced-duration) ease-out backwards;
 		}
-		.artwork,
-		.features {
+		.artwork {
 			animation: none;
 		}
 	}

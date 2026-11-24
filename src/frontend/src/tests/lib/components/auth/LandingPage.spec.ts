@@ -9,6 +9,32 @@ import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
 describe('LandingPage', () => {
+	it('shows the hero promise and loads the feature sections below it', async () => {
+		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
+		const { getByRole, findByRole } = render(LandingPage);
+		const { landing, text } = get(i18n).auth;
+		const heading = getByRole('heading', { level: 1 });
+
+		expect(heading).toHaveTextContent(replaceOisyPlaceholders(text.title_part_1));
+		expect(heading).toHaveTextContent(text.title_part_2);
+
+		for (const title of [
+			landing.hold_title,
+			landing.swap_title,
+			landing.give_title,
+			landing.borrow_title,
+			landing.security_title,
+			landing.connect_title,
+			landing.close_title
+		]) {
+			// The sections are a lazy chunk that pulls in token and swap-provider data; a cold load can
+			// take longer than findBy's default second.
+			await expect(
+				findByRole('heading', { level: 2, name: title }, { timeout: 5000 })
+			).resolves.toBeInTheDocument();
+		}
+	});
+
 	it('keeps the same accessible vector preview and intrinsic size across theme changes', async () => {
 		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
 		themeStore.select(Theme.LIGHT);
