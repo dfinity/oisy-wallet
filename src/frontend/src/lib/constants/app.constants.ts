@@ -108,7 +108,7 @@ export const LLM_CANISTER_ID = LOCAL
 
 // How long the delegation identity should remain valid?
 // 5 minutes, only to test what happens when the session expires.
-export const AUTH_MAX_TIME_TO_LIVE = BigInt(5 * 60 * 1_000 * 1_000 * 1_000);
+export const AUTH_MAX_TIME_TO_LIVE = BigInt(1 * 60 * 1_000 * 1_000 * 1_000);
 
 const DOMAIN_URL_HOSTNAME =
 	typeof window !== 'undefined'
