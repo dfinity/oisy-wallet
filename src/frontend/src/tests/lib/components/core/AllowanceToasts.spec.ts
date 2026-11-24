@@ -8,6 +8,7 @@ import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
+import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 describe('AllowanceToasts', () => {
@@ -33,6 +34,7 @@ describe('AllowanceToasts', () => {
 
 		allowanceIssueStore.clear();
 		allowanceToastStore.set(undefined);
+		toasts.toastsStore.reset();
 
 		toastsShowSpy = vi.spyOn(toasts, 'toastsShow');
 		hideSpy = vi.spyOn(toasts.toastsStore, 'hide');
@@ -56,20 +58,50 @@ describe('AllowanceToasts', () => {
 		expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith(issueToast);
 	});
 
-	it('should show the allowance-issue toast again in place of the last one', async () => {
+	it('should keep the open allowance-issue toast where it is', async () => {
 		render(AllowanceToasts);
 
 		allowanceIssueStore.setRefused();
 		allowanceToastStore.set({ toast: 'issue' });
 		await tick();
 
-		const firstToastId = toastsShowSpy.mock.results[0].value;
+		allowanceToastStore.set({ toast: 'issue' });
+		await tick();
+
+		expect(toastsShowSpy).toHaveBeenCalledOnce();
+		expect(hideSpy).not.toHaveBeenCalled();
+	});
+
+	it('should keep the open allowance-issue toast ahead of error toasts queued after it', async () => {
+		render(AllowanceToasts);
+
+		allowanceIssueStore.setRefused();
+		allowanceToastStore.set({ toast: 'issue' });
+		await tick();
+
+		const toastId = toastsShowSpy.mock.results[0].value;
+
+		[1, 2, 3].forEach((n) => toasts.toastsStore.show({ level: 'error', text: `Error ${n}` }));
 
 		allowanceToastStore.set({ toast: 'issue' });
 		await tick();
 
-		expect(toastsShowSpy).toHaveBeenCalledTimes(2);
-		expect(hideSpy).toHaveBeenCalledExactlyOnceWith(firstToastId);
+		expect(get(toasts.toastsStore)[0].id).toBe(toastId);
+	});
+
+	it('should show the allowance-issue toast again once the user closed it', async () => {
+		render(AllowanceToasts);
+
+		allowanceIssueStore.setRefused();
+		allowanceToastStore.set({ toast: 'issue' });
+		await tick();
+
+		toasts.toastsStore.hide(toastsShowSpy.mock.results[0].value);
+
+		allowanceToastStore.set({ toast: 'issue' });
+		await tick();
+
+		expect(toastsShowSpy).toHaveBeenNthCalledWith(2, issueToast);
 	});
 
 	it('should hide the allowance-issue toast once the allowance issue clears', async () => {
@@ -87,19 +119,31 @@ describe('AllowanceToasts', () => {
 		expect(hideSpy).toHaveBeenCalledExactlyOnceWith(toastId);
 	});
 
-	it('should show the warning that a call costs more than the allowance, in place of the last one', async () => {
+	it('should keep the open warning that a call costs more than the allowance where it is', async () => {
 		render(AllowanceToasts);
 
 		allowanceToastStore.set({ toast: 'exceeded' });
 		await tick();
 
-		const firstToastId = toastsShowSpy.mock.results[0].value;
+		allowanceToastStore.set({ toast: 'exceeded' });
+		await tick();
+
+		expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith(exceededToast);
+		expect(hideSpy).not.toHaveBeenCalled();
+	});
+
+	it('should show the warning that a call costs more than the allowance again once the user closed it', async () => {
+		render(AllowanceToasts);
+
+		allowanceToastStore.set({ toast: 'exceeded' });
+		await tick();
+
+		toasts.toastsStore.hide(toastsShowSpy.mock.results[0].value);
 
 		allowanceToastStore.set({ toast: 'exceeded' });
 		await tick();
 
 		expect(toastsShowSpy).toHaveBeenNthCalledWith(2, exceededToast);
-		expect(hideSpy).toHaveBeenCalledExactlyOnceWith(firstToastId);
 	});
 
 	it('should keep the warning when the allowance issue clears', async () => {
