@@ -31,10 +31,10 @@
 
 	const landingNavigation = $derived(showLandingNavigation && $authNotSignedIn);
 	const landingLinks = $derived([
-		{ href: '#landing-hold-title', label: $i18n.auth.landing.hold_eyebrow },
-		{ href: '#landing-security-title', label: $i18n.auth.landing.security_eyebrow },
-		{ href: '#landing-swap-title', label: $i18n.swap.text.swap },
-		{ href: '#landing-borrow-title', label: $i18n.auth.landing.borrow_eyebrow }
+		{ href: '#landing-hold', label: $i18n.auth.landing.hold_eyebrow },
+		{ href: '#landing-security', label: $i18n.auth.landing.security_eyebrow },
+		{ href: '#landing-swap', label: $i18n.swap.text.swap },
+		{ href: '#landing-borrow', label: $i18n.auth.landing.borrow_eyebrow }
 	]);
 
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340).
@@ -118,7 +118,7 @@
 			>
 				{#each landingLinks as { href, label } (href)}
 					<a
-						class="inline-flex min-h-10 min-w-10 items-center justify-center rounded-[21px] px-2.5 text-sm font-semibold text-primary no-underline transition-colors duration-150 ease-out hover:bg-brand-subtle-10 hover:text-brand-hover active:bg-brand-subtle-20 active:text-brand-hover sm:px-4"
+						class="inline-flex min-h-10 min-w-10 items-center justify-center rounded-[21px] px-2.5 text-sm font-normal text-primary no-underline transition-colors duration-150 ease-out hover:bg-brand-subtle-10 hover:text-brand-hover active:bg-brand-subtle-20 active:text-brand-hover sm:px-4"
 						{href}
 					>
 						{label}

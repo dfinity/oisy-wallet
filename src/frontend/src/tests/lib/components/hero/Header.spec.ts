@@ -40,10 +40,10 @@ describe('Header', () => {
 		const { borrow_eyebrow, hold_eyebrow, security_eyebrow } = auth.landing;
 
 		for (const [name, href] of [
-			[hold_eyebrow, '#landing-hold-title'],
-			[security_eyebrow, '#landing-security-title'],
-			[swap.text.swap, '#landing-swap-title'],
-			[borrow_eyebrow, '#landing-borrow-title']
+			[hold_eyebrow, '#landing-hold'],
+			[security_eyebrow, '#landing-security'],
+			[swap.text.swap, '#landing-swap'],
+			[borrow_eyebrow, '#landing-borrow']
 		]) {
 			expect(within(nav).getByRole('link', { name })).toHaveAttribute('href', href);
 		}

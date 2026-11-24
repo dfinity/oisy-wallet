@@ -17,15 +17,16 @@
 </script>
 
 <section
-	class="grid w-full grid-cols-1 items-center gap-10 border-t border-tertiary py-16 md:grid-cols-12 md:gap-16 md:py-24"
+	{id}
+	class="grid w-full scroll-mt-6 grid-cols-1 items-center gap-10 border-t border-tertiary py-16 md:grid-cols-12 md:gap-16 md:py-24"
 	aria-labelledby={`${id}-title`}
+	tabindex="-1"
 >
 	<div class="flex flex-col gap-5 md:col-span-5" class:md:order-2={flip} {@attach landingReveal()}>
 		<p class="m-0 text-xs font-bold tracking-[0.2em] text-brand-primary uppercase">{eyebrow}</p>
 		<h2
 			id={`${id}-title`}
-			class="m-0 scroll-mt-6 text-3xl leading-[1.1] font-bold tracking-tight text-balance text-primary md:text-[2.75rem]"
-			tabindex="-1"
+			class="m-0 text-3xl leading-[1.1] font-bold tracking-tight text-balance text-primary md:text-[2.75rem]"
 		>
 			{title}
 		</h2>

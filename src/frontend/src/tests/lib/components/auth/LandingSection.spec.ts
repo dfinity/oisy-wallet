@@ -14,7 +14,10 @@ describe('LandingSection', () => {
 	it('labels the section with its heading and renders the visual', () => {
 		const { getByRole, getByTestId } = render(LandingSection, { props });
 
-		expect(getByRole('region', { name: props.title })).toBeInTheDocument();
+		const region = getByRole('region', { name: props.title });
+
+		expect(region).toHaveAttribute('id', props.id);
+		expect(region).toHaveAttribute('tabindex', '-1');
 		expect(getByRole('heading', { level: 2, name: props.title })).toBeInTheDocument();
 		expect(getByTestId(mockSnippetTestId)).toBeInTheDocument();
 	});

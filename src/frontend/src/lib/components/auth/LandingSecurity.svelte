@@ -38,7 +38,12 @@
 	]);
 </script>
 
-<section class="w-full pb-16 md:pb-24" aria-labelledby="landing-security-title">
+<section
+	id="landing-security"
+	class="w-full scroll-mt-6 pb-16 md:pb-24"
+	aria-labelledby="landing-security-title"
+	tabindex="-1"
+>
 	<LandingNavyPanel styleClass="px-6 py-14 md:px-12 md:py-20">
 		<div class="flex flex-col gap-10 md:gap-12">
 			<div class="flex max-w-3xl flex-col gap-5" {@attach landingReveal()}>
@@ -47,8 +52,7 @@
 				</p>
 				<h2
 					id="landing-security-title"
-					class="m-0 scroll-mt-6 text-3xl leading-[1.1] font-bold tracking-tight text-balance text-white md:text-[2.75rem]"
-					tabindex="-1"
+					class="m-0 text-3xl leading-[1.1] font-bold tracking-tight text-balance text-white md:text-[2.75rem]"
 				>
 					{$i18n.auth.landing.security_title}
 				</h2>
