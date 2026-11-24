@@ -10,6 +10,9 @@ export const SIGNER_PAYMENT_TYPE: PaymentType = {
 	}
 };
 
+// Charged to the caller's own TCYCLES, through their approval to the signer.
+export const SIGNER_OWN_CYCLES_PAYMENT_TYPE: PaymentType = { CallerPaysIcrc2Cycles: null };
+
 // What the backend counts per signature when it sizes the OISY allowance: one signer fee and one
 // ledger fee (`SIGNER_FEE` + `LEDGER_FEE` in `src/backend/src/signer/service.rs`). Real charges vary
 // by call, so a number of signatures from it is an estimate.

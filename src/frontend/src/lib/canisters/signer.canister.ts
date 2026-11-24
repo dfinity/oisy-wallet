@@ -7,6 +7,7 @@ import type {
 	EthSignPrehashRequest,
 	EthSignTransactionRequest,
 	GetBalanceRequest,
+	PaymentType,
 	SendBtcResponse,
 	SignBtcResponse,
 	_SERVICE as SignerService
@@ -15,7 +16,11 @@ import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/si
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import type { EthAddress } from '$eth/types/address';
 import { getAgent } from '$lib/actors/agents.ic';
-import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
+import {
+	P2WPKH,
+	SIGNER_OWN_CYCLES_PAYMENT_TYPE,
+	SIGNER_PAYMENT_TYPE
+} from '$lib/canisters/signer.constants';
 import {
 	mapSignerCanisterBtcError,
 	mapSignerCanisterBtcSignPrehashError,
@@ -38,8 +43,20 @@ import {
 	toNullable,
 	uint8ArrayToHexString
 } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export class SignerCanister extends Canister<SignerService> {
+	private constructor(
+		id: Principal,
+		service: SignerService,
+		certifiedService: SignerService,
+		// How every call of this instance pays: from the OISY allowance, or from the caller's own
+		// cycles for the instance `payingWithOwnCycles` returns.
+		private readonly paymentType: PaymentType = SIGNER_PAYMENT_TYPE
+	) {
+		super(id, service, certifiedService);
+	}
+
 	static async create({
 		identity,
 		...options
@@ -58,13 +75,22 @@ export class SignerCanister extends Canister<SignerService> {
 		return new SignerCanister(canisterId, service, certifiedService);
 	}
 
+	// The same canister, with every call charged to the caller's own cycles.
+	payingWithOwnCycles = (): SignerCanister =>
+		new SignerCanister(
+			this.canisterId,
+			this.service,
+			this.certifiedService,
+			SIGNER_OWN_CYCLES_PAYMENT_TYPE
+		);
+
 	getBtcAddress = async ({ network }: { network: BitcoinNetwork }): Promise<BtcAddress> => {
 		const { btc_caller_address } = this.caller({
 			certified: true
 		});
 
 		const response = await btc_caller_address({ network, address_type: P2WPKH }, [
-			SIGNER_PAYMENT_TYPE
+			this.paymentType
 		]);
 
 		if ('Ok' in response) {
@@ -93,7 +119,7 @@ export class SignerCanister extends Canister<SignerService> {
 			address_type: P2WPKH,
 			min_confirmations: toNullable(minConfirmations)
 		};
-		const response = await btc_caller_balance(request, [SIGNER_PAYMENT_TYPE]);
+		const response = await btc_caller_balance(request, [this.paymentType]);
 
 		if ('Ok' in response) {
 			const {
@@ -113,7 +139,7 @@ export class SignerCanister extends Canister<SignerService> {
 		/* Note: `eth_address` gets the Ethereum address of a given principal, defaulting to the caller if not provided. */
 		/*       In OISY, we derive the ETH address from the caller. Therefore, we are not providing a principal as an argument. */
 		const request: EthAddressRequest = { principal: [] };
-		const response = await eth_address(request, [SIGNER_PAYMENT_TYPE]);
+		const response = await eth_address(request, [this.paymentType]);
 
 		if ('Ok' in response) {
 			const {
@@ -134,7 +160,7 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		const response = await eth_sign_transaction(transaction, [SIGNER_PAYMENT_TYPE]);
+		const response = await eth_sign_transaction(transaction, [this.paymentType]);
 
 		// If the response does not match the type signature, so has neither `Ok` nor `Err`,
 		// will typescript have thrown an error before this point?  Ditto for the other APIs.
@@ -156,7 +182,7 @@ export class SignerCanister extends Canister<SignerService> {
 		});
 
 		const request: EthPersonalSignRequest = { message };
-		const response = await eth_personal_sign(request, [SIGNER_PAYMENT_TYPE]);
+		const response = await eth_personal_sign(request, [this.paymentType]);
 
 		if ('Ok' in response) {
 			const {
@@ -174,7 +200,7 @@ export class SignerCanister extends Canister<SignerService> {
 		});
 
 		const request: EthSignPrehashRequest = { hash };
-		const response = await eth_sign_prehash(request, [SIGNER_PAYMENT_TYPE]);
+		const response = await eth_sign_prehash(request, [this.paymentType]);
 
 		if ('Ok' in response) {
 			const {
@@ -196,7 +222,7 @@ export class SignerCanister extends Canister<SignerService> {
 		// key. The response is a raw `r || s`; the caller recovers the recovery id from the known
 		// public key (see `encodeRecoverableSignature`).
 		const request: BtcSignPrehashRequest = { hash: uint8ArrayToHexString(hash) };
-		const response = await btc_sign_prehash(request, [SIGNER_PAYMENT_TYPE]);
+		const response = await btc_sign_prehash(request, [this.paymentType]);
 
 		if ('Ok' in response) {
 			const {
@@ -224,7 +250,7 @@ export class SignerCanister extends Canister<SignerService> {
 				fee_satoshis: feeSatoshis,
 				...rest
 			},
-			[SIGNER_PAYMENT_TYPE]
+			[this.paymentType]
 		);
 
 		if ('Ok' in response) {
@@ -251,7 +277,7 @@ export class SignerCanister extends Canister<SignerService> {
 				fee_satoshis: feeSatoshis,
 				...rest
 			},
-			[SIGNER_PAYMENT_TYPE]
+			[this.paymentType]
 		);
 
 		if ('Ok' in response) {
@@ -276,7 +302,7 @@ export class SignerCanister extends Canister<SignerService> {
 				canister_id: [],
 				derivation_path: mapDerivationPath(derivationPath)
 			},
-			[SIGNER_PAYMENT_TYPE]
+			[this.paymentType]
 		);
 
 		if ('Ok' in response) {
@@ -304,7 +330,7 @@ export class SignerCanister extends Canister<SignerService> {
 				derivation_path: mapDerivationPath(derivationPath),
 				message
 			},
-			[SIGNER_PAYMENT_TYPE]
+			[this.paymentType]
 		);
 
 		if ('Ok' in response) {
@@ -327,7 +353,7 @@ export class SignerCanister extends Canister<SignerService> {
 
 		// Note: the candid signature is `(opt PaymentType, SignWithEcdsaArgument)`, so the
 		// payment type is the first argument here (unlike the other signer methods).
-		const response = await generic_sign_with_ecdsa([SIGNER_PAYMENT_TYPE], {
+		const response = await generic_sign_with_ecdsa([this.paymentType], {
 			key_id: keyId,
 			derivation_path: mapDerivationPath(derivationPath),
 			message_hash: messageHash
