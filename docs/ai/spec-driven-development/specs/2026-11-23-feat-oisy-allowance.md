@@ -109,7 +109,7 @@ This spec leaves out the certified BTC balance through the Chain Fusion Signer, 
 - An approval reserves nothing: it only caps what the signer may charge from the user's TCYCLES balance.
 - **Allowing.** In one approval step, the user picks an amount from their TCYCLES balance and confirms. A user without TCYCLES gets some first, for example through [Mint TCYCLES](../../PRODUCT.md#mint-tcycles). The approval costs one ledger fee.
 - **The approval is the switch.** Approving turns it on, and setting the approval to zero turns it off. There is no separate setting.
-- **Automatic use.** While Allowance issue is set and an approval is left, CCs are charged to the user's own cycles instead of the OISY allowance. The approval is the consent, and its amount caps what can be charged.
+- **Automatic use.** Every CC is charged to the OISY allowance first. When a CC returns Insufficient allowance and its AR is Refused, or no AR is sent during the AR cooldown, the shared signer module repeats it once, charged to the user's own cycles, if an approval is left. If the repeat succeeds, the flow never sees the failure. So OISY pays again as soon as its allowance covers a CC, without a reload, and phase 1's AR, at most one a minute, serves as the recheck. Before each such repeat, one CC fails at no charge. The approval is the consent, and its amount caps what can be charged.
 - **No prompt per transaction**: no warning and no checkbox.
 - The approval left and the TCYCLES balance are read with free queries on the cycles ledger.
 - **Own cycles running low.** A CC paid with the user's own cycles fails when the approval is used up (`InsufficientAllowance`) or the TCYCLES balance is (`InsufficientFunds`). Both get phase 1's usage-credits error text.
@@ -163,10 +163,11 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 ### Phase 3
 
 1. A user can approve an amount of their TCYCLES for CCs from the Tools card, in one step.
-2. While Allowance issue is set and an approval is left, CCs are charged to the user's own cycles, with no prompt per transaction.
+2. Every CC is charged to the OISY allowance first. A CC whose AR is Refused, or that falls in the AR cooldown, is repeated once on the user's own cycles if an approval is left, with no prompt per transaction.
 3. The Tools card shows the approval left and the TCYCLES balance, with **Add more** and **Get cycles**.
 4. A CC paid with the user's own cycles that fails for the approval or the TCYCLES balance shows the usage-credits error text.
 5. The allowance-issue toast links to the Tools card.
+6. Without a reload, OISY pays CCs again as soon as the OISY allowance covers them, for example after the hourly limit resets or another device gets a Granted AR.
 
 ## 10. Open questions (facts to confirm)
 
