@@ -20,10 +20,14 @@ import {
 	signWithSchnorr
 } from '$lib/api/signer.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
-import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
+import { OwnCyclesShortError, SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import * as appConstants from '$lib/constants/app.constants';
 import { trackChargedCallInsufficientAllowance } from '$lib/services/allowance-analytics.services';
-import { requestAllowanceAfterInsufficientAllowance } from '$lib/services/allowance-request.services';
+import {
+	isAllowanceRequestInCooldown,
+	requestAllowanceAfterInsufficientAllowance
+} from '$lib/services/allowance-request.services';
+import { canPayWithOwnCycles } from '$lib/services/own-cycles.services';
 import { allowanceToastStore } from '$lib/stores/allowance-toast.store';
 import type {
 	GenericSignWithEcdsaParams,
@@ -41,7 +45,12 @@ import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock('$lib/services/allowance-request.services', () => ({
+	isAllowanceRequestInCooldown: vi.fn(),
 	requestAllowanceAfterInsufficientAllowance: vi.fn()
+}));
+
+vi.mock('$lib/services/own-cycles.services', () => ({
+	canPayWithOwnCycles: vi.fn()
 }));
 
 vi.mock('$lib/services/allowance-analytics.services', () => ({
@@ -523,7 +532,7 @@ describe('signer.api', () => {
 		});
 
 		it('should repeat the call once after a new allowance, and return its result', async () => {
-			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue({ repeat: true });
+			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue('repeat');
 			signerCanisterMock.personalSign
 				.mockRejectedValueOnce(insufficientAllowance())
 				.mockResolvedValueOnce('signed');
@@ -542,17 +551,28 @@ describe('signer.api', () => {
 		});
 
 		it('should throw the error as it was, without a repeat, when no new allowance came through', async () => {
-			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue({ repeat: false });
+			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue('refused');
 			const err = insufficientAllowance();
 			signerCanisterMock.personalSign.mockRejectedValue(err);
 
 			await expect(signMessage(signParams)).rejects.toBe(err);
 
 			expect(signerCanisterMock.personalSign).toHaveBeenCalledOnce();
+			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'issue' });
+		});
+
+		it('should say the call costs more than the allowance after a skipped request with no larger allowance', async () => {
+			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue('exceeded');
+			const err = insufficientAllowance();
+			signerCanisterMock.personalSign.mockRejectedValue(err);
+
+			await expect(signMessage(signParams)).rejects.toBe(err);
+
+			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'exceeded' });
 		});
 
 		it('should say the call costs more than the allowance when the repeat is refused for it again', async () => {
-			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue({ repeat: true });
+			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue('repeat');
 			const repeatErr = insufficientAllowance();
 			signerCanisterMock.personalSign
 				.mockRejectedValueOnce(insufficientAllowance())
@@ -566,7 +586,7 @@ describe('signer.api', () => {
 		});
 
 		it('should throw any other failure of the repeat without a toast', async () => {
-			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue({ repeat: true });
+			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue('repeat');
 			const repeatErr = new Error('test');
 			signerCanisterMock.personalSign
 				.mockRejectedValueOnce(insufficientAllowance())
@@ -578,7 +598,7 @@ describe('signer.api', () => {
 		});
 
 		it('should repeat a Schnorr call that throws the canister error as it is', async () => {
-			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue({ repeat: true });
+			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue('repeat');
 			const signature = Uint8Array.from([1, 2, 3]);
 			signerCanisterMock.signWithSchnorr
 				.mockRejectedValueOnce({ PaymentError: insufficientAllowance().paymentError })
@@ -618,6 +638,155 @@ describe('signer.api', () => {
 			await expect(signMessage(signParams)).rejects.toBe(err);
 
 			expect(requestAllowanceAfterInsufficientAllowance).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('own cycles', () => {
+		const ledger = Principal.fromText('um5iw-rqaaa-aaaaq-qaaba-cai');
+
+		const insufficientAllowance = () =>
+			new SignerCanisterPaymentError({
+				LedgerWithdrawFromError: { error: { InsufficientAllowance: { allowance: 5n } }, ledger }
+			});
+
+		const insufficientFunds = () =>
+			new SignerCanisterPaymentError({
+				LedgerWithdrawFromError: { error: { InsufficientFunds: { balance: 1n } }, ledger }
+			});
+
+		const signParams = { ...baseParams, message: 'test' };
+
+		const ownCyclesSignerMock = mock<SignerCanister>();
+
+		let toastSpy: MockInstance;
+
+		beforeEach(() => {
+			toastSpy = vi.spyOn(allowanceToastStore, 'set');
+
+			signerCanisterMock.payingWithOwnCycles.mockReturnValue(ownCyclesSignerMock);
+			vi.mocked(isAllowanceRequestInCooldown).mockReturnValue(false);
+			vi.mocked(canPayWithOwnCycles).mockResolvedValue(true);
+		});
+
+		it('should pay with own cycles after a refused request, and say so in the allowance-issue toast', async () => {
+			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue('refused');
+			signerCanisterMock.personalSign.mockRejectedValue(insufficientAllowance());
+			ownCyclesSignerMock.personalSign.mockResolvedValue('signed');
+
+			await expect(signMessage(signParams)).resolves.toBe('signed');
+
+			expect(signerCanisterMock.personalSign).toHaveBeenCalledOnce();
+			expect(ownCyclesSignerMock.personalSign).toHaveBeenCalledExactlyOnceWith({
+				message: 'test'
+			});
+			expect(canPayWithOwnCycles).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'issue', ownCycles: true });
+		});
+
+		it('should pay with own cycles, without a toast, for a call that costs more than the allowance covers', async () => {
+			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue('exceeded');
+			signerCanisterMock.personalSign.mockRejectedValue(insufficientAllowance());
+			ownCyclesSignerMock.personalSign.mockResolvedValue('signed');
+
+			await expect(signMessage(signParams)).resolves.toBe('signed');
+
+			expect(toastSpy).not.toHaveBeenCalled();
+		});
+
+		it('should pay with own cycles, without a toast, when the repeat with a new allowance is refused for it again', async () => {
+			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue('repeat');
+			signerCanisterMock.personalSign
+				.mockRejectedValueOnce(insufficientAllowance())
+				.mockRejectedValueOnce(insufficientAllowance());
+			ownCyclesSignerMock.personalSign.mockResolvedValue('signed');
+
+			await expect(signMessage(signParams)).resolves.toBe('signed');
+
+			expect(signerCanisterMock.personalSign).toHaveBeenCalledTimes(2);
+			expect(trackChargedCallInsufficientAllowance).toHaveBeenCalledTimes(2);
+			expect(toastSpy).not.toHaveBeenCalled();
+		});
+
+		it('should not pay with own cycles after a granted request', async () => {
+			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue('repeat');
+			signerCanisterMock.personalSign
+				.mockRejectedValueOnce(insufficientAllowance())
+				.mockResolvedValueOnce('signed');
+
+			await expect(signMessage(signParams)).resolves.toBe('signed');
+
+			expect(ownCyclesSignerMock.personalSign).not.toHaveBeenCalled();
+			expect(canPayWithOwnCycles).not.toHaveBeenCalled();
+		});
+
+		it('should fail as before when no approval is left', async () => {
+			vi.mocked(canPayWithOwnCycles).mockResolvedValue(false);
+			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue('refused');
+			const err = insufficientAllowance();
+			signerCanisterMock.personalSign.mockRejectedValue(err);
+
+			await expect(signMessage(signParams)).rejects.toBe(err);
+
+			expect(ownCyclesSignerMock.personalSign).not.toHaveBeenCalled();
+			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'issue' });
+		});
+
+		it('should fail with the usage-credits error when own cycles run short, and show the toast for the outcome', async () => {
+			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue('refused');
+			signerCanisterMock.personalSign.mockRejectedValue(insufficientAllowance());
+			ownCyclesSignerMock.personalSign.mockRejectedValue(insufficientFunds());
+
+			await expect(signMessage(signParams)).rejects.toBeInstanceOf(OwnCyclesShortError);
+
+			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'issue' });
+		});
+
+		it('should throw any other failure with own cycles as it was', async () => {
+			vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue('exceeded');
+			const ownErr = new Error('test');
+			signerCanisterMock.personalSign.mockRejectedValue(insufficientAllowance());
+			ownCyclesSignerMock.personalSign.mockRejectedValue(ownErr);
+
+			await expect(signMessage(signParams)).rejects.toBe(ownErr);
+
+			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'exceeded' });
+		});
+
+		describe('in the cooldown after a refused request', () => {
+			beforeEach(() => {
+				vi.mocked(isAllowanceRequestInCooldown).mockReturnValue(true);
+			});
+
+			it('should pay with own cycles straight away, without a request or a toast', async () => {
+				ownCyclesSignerMock.personalSign.mockResolvedValue('signed');
+
+				await expect(signMessage(signParams)).resolves.toBe('signed');
+
+				expect(signerCanisterMock.personalSign).not.toHaveBeenCalled();
+				expect(requestAllowanceAfterInsufficientAllowance).not.toHaveBeenCalled();
+				expect(toastSpy).not.toHaveBeenCalled();
+			});
+
+			it('should show the allowance-issue toast when own cycles run short', async () => {
+				ownCyclesSignerMock.personalSign.mockRejectedValue(insufficientAllowance());
+
+				await expect(signMessage(signParams)).rejects.toBeInstanceOf(OwnCyclesShortError);
+
+				expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'issue' });
+			});
+
+			it('should try the allowance first, and read the approval once, when none is left', async () => {
+				vi.mocked(canPayWithOwnCycles).mockResolvedValue(false);
+				vi.mocked(requestAllowanceAfterInsufficientAllowance).mockResolvedValue('refused');
+				const err = insufficientAllowance();
+				signerCanisterMock.personalSign.mockRejectedValue(err);
+
+				await expect(signMessage(signParams)).rejects.toBe(err);
+
+				expect(signerCanisterMock.personalSign).toHaveBeenCalledOnce();
+				expect(canPayWithOwnCycles).toHaveBeenCalledOnce();
+				expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'issue' });
+			});
 		});
 	});
 });
