@@ -15,6 +15,7 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { OISY_USAGE_CREDITS_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { TOOLS_USAGE_CREDITS_ANCHOR } from '$lib/constants/routes.constants';
 	import {
 		TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON,
 		TOOLS_USAGE_CREDITS_BALANCE,
@@ -178,7 +179,11 @@
 
 {#if nonNullish(token)}
 	<SettingsCard>
-		{#snippet title()}{$i18n.usage_credits.text.title}{/snippet}
+		<!-- The allowance-issue toast links here. The margin clears the header, which stays at the
+		     top on wider screens. -->
+		{#snippet title()}<span id={TOOLS_USAGE_CREDITS_ANCHOR} class="scroll-mt-28"
+				>{$i18n.usage_credits.text.title}</span
+			>{/snippet}
 
 		<!-- Shown, not behind a help toggle, as every card on Tools shows its text. Pulled up to the
 		     title it explains: the card's title gap is sized for rows. -->

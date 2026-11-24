@@ -23,6 +23,9 @@ export enum AppPath {
 	TermsOfUse = '/terms-of-use/'
 }
 
+// The Tools page's Usage credits card, which the allowance-issue toast links to.
+export const TOOLS_USAGE_CREDITS_ANCHOR = 'usage-credits';
+
 // SvelteKit uses the group defined in src/routes/(app)/ as part of the routeId. It also prefixes it with /.
 export const ROUTE_ID_GROUP_APP = '/(app)';
 

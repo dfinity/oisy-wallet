@@ -5,6 +5,7 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import ToolsUsageCredits from '$lib/components/tools/ToolsUsageCredits.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { OISY_USAGE_CREDITS_DOCS_URL } from '$lib/constants/oisy.constants';
+import { TOOLS_USAGE_CREDITS_ANCHOR } from '$lib/constants/routes.constants';
 import {
 	CONVERT_AMOUNT_EXCHANGE_VALUE,
 	TOKEN_INPUT_CURRENCY_TOKEN,
@@ -73,6 +74,15 @@ describe('ToolsUsageCredits', () => {
 		expect(getByRole('link', { name: en.settings.text.learn_more })).toHaveAttribute(
 			'href',
 			OISY_USAGE_CREDITS_DOCS_URL
+		);
+	});
+
+	// The allowance-issue toast links here.
+	it('carries the anchor the allowance-issue toast links to', () => {
+		const { container } = render(ToolsUsageCredits);
+
+		expect(container.querySelector(`#${TOOLS_USAGE_CREDITS_ANCHOR}`)).toHaveTextContent(
+			en.usage_credits.text.title
 		);
 	});
 
