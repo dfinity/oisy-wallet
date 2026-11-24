@@ -310,6 +310,13 @@ div.step {
 
 	--toast-warn-background: var(--color-background-warning-light);
 	--toast-warn-color: var(--color-foreground-warning-secondary);
+
+	// The inverted theme, so a toast that must stand out has a solid background. Without these the
+	// background is transparent and the page shows through it.
+	--toast-inverted-background: var(--color-background-primary-inverted);
+	--toast-inverted-background-contrast: var(--color-foreground-primary-inverted);
+	--toast-warn-inverted-background: var(--color-background-primary-inverted);
+	--toast-warn-inverted-color: var(--color-foreground-primary-inverted);
 }
 
 // Tooltip
