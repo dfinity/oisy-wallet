@@ -16,6 +16,7 @@ The rest of the spec uses these terms with exactly this meaning.
   - **Refused:** the backend returns an error and sets no new OISY allowance.
 - **Allowance issue:** a global state. It's set when the AR that follows an Insufficient allowance is Refused, and cleared when an AR is Granted or Skipped.
 - **AR cooldown:** while Allowance issue is set, the minute after each Refused AR. During it, OISY sends no AR.
+- **Usage credits:** the app's word, in its texts, for what a user can spend on CCs: the OISY allowance and, from phase 3, the user's own approval.
 
 ## 2. Goal
 
@@ -97,23 +98,27 @@ This spec leaves out the certified BTC balance through the Chain Fusion Signer, 
 - **One allowance.** A user-triggered backend call that costs cycles beyond its execution (for example a Bitcoin canister call, a vetKD key derivation or an HTTP outcall) becomes a CC, charged to the same OISY allowance.
 - When the OISY allowance can't cover such a CC, the backend returns Insufficient allowance. The frontend handles it like a signer CC: the AR, the repeat, Allowance issue and the toasts.
 - The certified BTC balance through the backend becomes a CC too, one without a form. When the read still fails with Insufficient allowance after the AR, the wallet falls back to the free unverified read from the Bitcoin canister, which the scheduler already makes, and shows that the balance is unverified.
+- **Own cycles for backend CCs.** A user who pays with their own cycles (phase 3) also lets the backend's CCs use them. How is open question 3.
 - How the backend charges a CC to the OISY allowance, and the exact list of calls, are still open (see [Open questions](#10-open-questions-facts-to-confirm)).
 
 ## 6. Phase 3: pay with your own cycles
 
 ### 6.1 How it works
 
-- The signer accepts "caller pays" (`CallerPaysIcrc2Cycles`): its charge comes from the caller's main cycles-ledger account, through an approval the caller gave the signer.
+- The signer accepts "caller pays" (`CallerPaysIcrc2Cycles`): its charge comes from the caller's main cycles-ledger account, through an approval the caller gave the signer. Phase 3 covers signer CCs only; the backend's CCs use the user's cycles from phase 2.
+- An approval reserves nothing: it only caps what the signer may charge from the user's TCYCLES balance.
 - **Allowing.** In one approval step, the user picks an amount from their TCYCLES balance and confirms. A user without TCYCLES gets some first, for example through [Mint TCYCLES](../../PRODUCT.md#mint-tcycles). The approval costs one ledger fee.
 - **The approval is the switch.** Approving turns it on, and setting the approval to zero turns it off. There is no separate setting.
 - **Automatic use.** While Allowance issue is set and an approval is left, CCs are charged to the user's own cycles instead of the OISY allowance. The approval is the consent, and its amount caps what can be charged.
 - **No prompt per transaction**: no warning and no checkbox.
 - The approval left and the TCYCLES balance are read with free queries on the cycles ledger.
+- **Own cycles running low.** A CC paid with the user's own cycles fails when the approval is used up (`InsufficientAllowance`) or the TCYCLES balance is (`InsufficientFunds`). Both get phase 1's usage-credits error text.
 
 ### 6.2 Entry points and state
 
-- **An allowance card on the Tools page** shows the approval left and the TCYCLES balance, with **Add more** and **Get cycles**.
-- How the user gets from a failed CC to the own-cycles setup, and how the app shows that CCs are charged to the user's own cycles, follow the toast approach of phase 1 and are still open (see pending decision 10).
+- **An allowance card on the Tools page** shows the approval left and the TCYCLES balance, since either can run low, with **Add more** and **Get cycles**. It stays out of the top row: users should rarely need it.
+- **From the toast.** The allowance-issue toast links to the Tools card, next to its Learn more link, as the Activity info box links to Settings.
+- How the app shows that CCs are charged to the user's own cycles is still open (see pending decision 10).
 
 ## 7. Phase 4: bound the total
 
@@ -132,8 +137,8 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
    2. The AR after Insufficient allowance, the repeat, the AR cooldown, Allowance issue and the toasts (#14739).
    3. Translations (#14754).
    4. The Plausible events (see 4.8).
-2. **Phase 2:** the backend's costly calls become CCs, and the frontend handles their Insufficient allowance.
-3. **Phase 3:** the approval step, the Tools card, the payment-type switch, the way in from a failed CC (pending decision 10), and the backend accepting the user's cycles for its CCs.
+2. **Phase 2:** the backend's costly calls become CCs, the frontend handles their Insufficient allowance, and the backend accepts the user's own cycles for them.
+3. **Phase 3:** the approval step, the Tools card, the payment-type switch and the toast's link to the Tools card, for signer CCs.
 4. **Phase 4:** the cap, the smaller OISY allowance per Granted AR and the new-user pool.
 
 ## 9. Acceptance criteria
@@ -160,12 +165,14 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 1. A user can approve an amount of their TCYCLES for CCs from the Tools card, in one step.
 2. While Allowance issue is set and an approval is left, CCs are charged to the user's own cycles, with no prompt per transaction.
 3. The Tools card shows the approval left and the TCYCLES balance, with **Add more** and **Get cycles**.
+4. A CC paid with the user's own cycles that fails for the approval or the TCYCLES balance shows the usage-credits error text.
+5. The allowance-issue toast links to the Tools card.
 
 ## 10. Open questions (facts to confirm)
 
 1. **Phase 2 calls.** Which user-triggered backend calls cost cycles beyond their execution, and how much each?
 2. _Answered:_ **BTC balance route.** Yes: the certified BTC balance through the Chain Fusion Signer is turned off in every build before phase 1 ships, and the wallet reads it only through the backend (see 4.6).
-3. **Phase 3, backend CCs.** How does a user pay the backend's CCs with their own cycles: a second approval, with the backend as spender, or another way? This depends on pending decision 3.
+3. **Backend CCs with own cycles (phase 2).** A second approval, with the backend as spender, from the same TCYCLES balance? Or one approval to the backend, which then pays the signer, so the backend briefly holds the user's cycles? This depends on pending decision 3.
 
 ## 11. Pending decisions (facts are clear — we just need to decide)
 
@@ -180,7 +187,7 @@ Numbers stay fixed: a resolved decision keeps its number, and a new one gets the
 7. **Phase 4.** The cap size and period, the OISY allowance per Granted AR and the new-user pool.
 8. _Resolved:_ **Skipped while Allowance issue is set.** A Skipped AR clears Allowance issue too, since the OISY allowance is then at or above the OISY allowance threshold (see 1 and 4.5).
 9. _Resolved:_ **Where the outcome shows.** Not in the forms. After a Granted AR the CC repeats once; otherwise the allowance-issue toast and the warning toast say what happened, next to the form's usual error. The earlier design, an outcome box and a disabled main button in every form plus a banner, needed changes in every flow that makes CCs and made them all depend on this feature (#14740 and #14741, closed).
-10. **Phase 3 with toasts.** How does a user get from the allowance-issue toast to the own-cycles setup (for example a link to the Tools card), and how does the app show that CCs are charged to the user's own cycles, now that there is no banner?
+10. _Partly resolved:_ **Phase 3 with toasts.** The allowance-issue toast links to the Tools card (see 6.2). Still open: how the app shows that CCs are charged to the user's own cycles, now that there is no banner.
 
 ## 12. Non-goals
 
