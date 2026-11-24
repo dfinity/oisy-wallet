@@ -10,6 +10,7 @@ import { CanisterApi } from '$lib/api/canister.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { insufficientAllowanceOf } from '$lib/canisters/signer.errors';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
+import { trackOisyAllowanceRequest } from '$lib/services/allowance-analytics.services';
 import { requestAllowanceAfterInsufficientAllowance } from '$lib/services/allowance-request.services';
 import { allowanceToastStore } from '$lib/stores/allowance-toast.store';
 import type {
@@ -128,15 +129,26 @@ const callSigner = async <T>({
 			throw err;
 		}
 
-		const { repeat } = await requestAllowanceAfterInsufficientAllowance({ identity, allowance });
+		const { repeat, answer } = await requestAllowanceAfterInsufficientAllowance({
+			identity,
+			allowance
+		});
 
 		if (!repeat) {
+			trackOisyAllowanceRequest({ answer, outcome: 'not_repeated' });
+
 			throw err;
 		}
 
 		try {
-			return await call(signer);
+			const result = await call(signer);
+
+			trackOisyAllowanceRequest({ answer, outcome: 'repeated' });
+
+			return result;
 		} catch (repeatErr: unknown) {
+			trackOisyAllowanceRequest({ answer, outcome: 'repeat_failed' });
+
 			// Refused again with a new allowance: the CC costs more than the OISY allowance covers.
 			if (nonNullish(insufficientAllowanceOf(repeatErr))) {
 				allowanceToastStore.set({ toast: 'exceeded' });

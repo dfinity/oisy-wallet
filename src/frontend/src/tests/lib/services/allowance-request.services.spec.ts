@@ -164,7 +164,7 @@ describe('allowance-request.services', () => {
 
 			await expect(
 				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
-			).resolves.toEqual({ repeat: true });
+			).resolves.toEqual({ repeat: true, answer: 'granted' });
 
 			expect(toastSpy).not.toHaveBeenCalled();
 		});
@@ -174,7 +174,7 @@ describe('allowance-request.services', () => {
 
 			await expect(
 				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
-			).resolves.toEqual({ repeat: true });
+			).resolves.toEqual({ repeat: true, answer: 'skipped' });
 
 			expect(toastSpy).not.toHaveBeenCalled();
 		});
@@ -187,7 +187,7 @@ describe('allowance-request.services', () => {
 					identity: mockIdentity,
 					allowance: 1_500_000_000_000n
 				})
-			).resolves.toEqual({ repeat: false });
+			).resolves.toEqual({ repeat: false, answer: 'skipped' });
 
 			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'exceeded' });
 			expect(get(allowanceIssueStore)).toBeUndefined();
@@ -198,7 +198,7 @@ describe('allowance-request.services', () => {
 
 			await expect(
 				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
-			).resolves.toEqual({ repeat: false });
+			).resolves.toEqual({ repeat: false, answer: 'refused' });
 
 			expect(toastSpy).toHaveBeenCalledExactlyOnceWith({ toast: 'issue' });
 			expect(get(allowanceIssueStore)).toEqual({ refusedAt: Date.now() });
@@ -226,7 +226,7 @@ describe('allowance-request.services', () => {
 
 			await expect(
 				requestAllowanceAfterInsufficientAllowance({ identity: mockIdentity, allowance })
-			).resolves.toEqual({ repeat: true });
+			).resolves.toEqual({ repeat: true, answer: 'granted' });
 
 			expect(toastSpy).toHaveBeenCalledOnce();
 			expect(get(allowanceIssueStore)).toBeUndefined();

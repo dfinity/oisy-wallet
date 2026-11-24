@@ -110,17 +110,17 @@ export const requestAllowanceAfterInsufficientAllowance = async ({
 }: {
 	identity: NullishIdentity;
 	allowance: bigint;
-}): Promise<{ repeat: boolean }> => {
+}): Promise<{ repeat: boolean; answer: AllowanceRequestAnswer['answer'] }> => {
 	const result = await requestAllowance(identity);
 
 	if (
 		result.answer === 'granted' ||
 		(result.answer === 'skipped' && result.allowance > allowance)
 	) {
-		return { repeat: true };
+		return { repeat: true, answer: result.answer };
 	}
 
 	allowanceToastStore.set({ toast: result.answer === 'skipped' ? 'exceeded' : 'issue' });
 
-	return { repeat: false };
+	return { repeat: false, answer: result.answer };
 };

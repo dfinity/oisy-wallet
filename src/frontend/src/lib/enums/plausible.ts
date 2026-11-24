@@ -16,6 +16,9 @@ export enum PLAUSIBLE_EVENTS {
 	PAY = 'pay',
 	SIGN_IN_CANCELLED_HELP = 'sign_in_cancelled_help',
 	RATE_LIMITED = 'rate_limited',
+	// An allowance request (AR) after a charged call ran out of the OISY allowance: its answer and
+	// whether the call was repeated.
+	OISY_ALLOWANCE_REQUEST = 'oisy_allowance_request',
 	STAKE = 'stake',
 	UNSTAKE = 'unstake',
 	LOAD_TRANSACTIONS = 'load_transactions',
