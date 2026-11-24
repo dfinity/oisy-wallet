@@ -98,8 +98,11 @@ export const toastsError = ({ msg: { text, ...rest }, err }: ToastsErrorParams):
 export const toastsErrorNoTrace = ({ msg, err }: ToastsErrorParams) => {
 	consoleError(`${msg.text}:`, err);
 
+	// The error stays out of the toast, but an insufficient allowance still gets its clear text.
 	return toastsError({
-		msg
+		msg: nonNullish(insufficientAllowanceOf(err))
+			? { ...msg, text: get(i18n).core.error.usage_credits_insufficient }
+			: msg
 	});
 };
 

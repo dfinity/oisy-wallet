@@ -47,9 +47,7 @@ const paymentErrorOf = (err: unknown): PaymentError | undefined => {
 	return isPaymentErrorVariant(err) ? err.PaymentError : undefined;
 };
 
-// The OISY allowance stated by a charged call (CC) that failed with an insufficient allowance, or
-// `undefined` for any other error.
-export const insufficientAllowanceOf = (err: unknown): bigint | undefined => {
+const statedAllowanceOf = (err: unknown): bigint | undefined => {
 	const paymentError = paymentErrorOf(err);
 
 	if (isNullish(paymentError) || !('LedgerWithdrawFromError' in paymentError)) {
@@ -59,6 +57,27 @@ export const insufficientAllowanceOf = (err: unknown): bigint | undefined => {
 	const { error } = paymentError.LedgerWithdrawFromError;
 
 	return 'InsufficientAllowance' in error ? error.InsufficientAllowance.allowance : undefined;
+};
+
+// The OISY allowance stated by a charged call (CC) that failed with an insufficient allowance, or
+// `undefined` for any other error. A flow may wrap the CC's error and keep it as the `cause`, as a
+// Liquidium SOL transfer that was never sent does, so the chain of causes is followed.
+export const insufficientAllowanceOf = (err: unknown): bigint | undefined => {
+	const seen = new Set<unknown>();
+	let current = err;
+
+	while (nonNullish(current) && !seen.has(current)) {
+		const allowance = statedAllowanceOf(current);
+
+		if (nonNullish(allowance)) {
+			return allowance;
+		}
+
+		seen.add(current);
+		current = current instanceof Error ? current.cause : undefined;
+	}
+
+	return undefined;
 };
 
 export const mapSignerCanisterBtcError = (err: SignerCanisterBtcError): CanisterInternalError => {
