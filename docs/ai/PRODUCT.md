@@ -570,7 +570,15 @@ Every app load, at sign-in or on a page reload, sends an **allowance request** (
 
 When the backend refuses the AR at load (it returns an error), the user stays signed in and the app loads as usual. A refused AR does not mean the next CC fails: the OISY allowance may still cover it, and a CC it cannot cover fails on its own. A refused AR used to sign the user out, unless the hourly or the per-minute limit stopped it. A just-created profile, which has no OISY allowance before this first AR, still waits for its answer before the wallet starts loading balances.
 
-When a CC fails because the OISY allowance is smaller than its charge (**insufficient allowance**), OISY sends an AR right away, before the flow sees the error. CCs that fail at the same time share one AR. An AR stopped by the hourly or the per-minute limit counts as refused. The flow then shows its usual error and never continues by itself; telling the user what the AR answered, in the form, comes later.
+When a CC fails because the OISY allowance is smaller than its charge (**insufficient allowance**), OISY sends an AR right away, before the flow sees the error. CCs that fail at the same time share one AR. An AR stopped by the hourly or the per-minute limit counts as refused. The flow then goes back to its form and never continues by itself.
+
+The swap review (BTC, ETH/EVM, SOL and XRP; ICP swaps make no CC) says what the AR answered, in its message box, instead of a toast or a generic error:
+
+- **Granted**, or skipped with a larger OISY allowance than the failed CC stated, because another tab or device got a new one in the meantime: an info box says the free allowance ran out and has been renewed, so try again. **Swap** stays enabled.
+- **Refused**, or no AR during the AR cooldown: a warning says the free allowance is used up for now, so try again later. **Swap** is disabled.
+- **Skipped** with no larger OISY allowance: the swap costs more than the OISY allowance, and the backend sets no new one at or above the OISY allowance threshold. A warning says so, and **Swap** is disabled. The allowance issue state is not set, since cheaper CCs still work.
+
+A disabled **Swap** stays disabled until the user leaves the review, even if the allowance issue clears in the meantime. The other forms still show their usual error.
 
 When that AR is refused, the **allowance issue** state is set: a banner at the top of the app says the free OISY allowance is used up for now, so some transactions may fail. The banner can't be closed. Its **Retry** sends a new AR, and is disabled for the minute after each refused AR (the **AR cooldown**), during which OISY sends no AR at all: a CC that fails then counts as refused straight away. The state, and the banner with it, clear as soon as an AR is granted, or is skipped because the OISY allowance is at or above the OISY allowance threshold again. The banner disables no feature, since no CC's price is known.
 
