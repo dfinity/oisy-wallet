@@ -179,6 +179,9 @@ export const MAX_UINT_64 = (1n << 64n) - 1n;
 export const COLLECTION_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 seconds in milliseconds
 export const NFT_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 seconds in milliseconds
 
+// OISY allowance
+export const ALLOWANCE_REQUEST_COOLDOWN_MILLIS = SECONDS_IN_MINUTE * 1_000;
+
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1_000; // 30 seconds in milliseconds
 export const WALLET_PAGINATION = 10n;
