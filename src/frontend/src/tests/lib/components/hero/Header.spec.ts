@@ -36,11 +36,11 @@ describe('Header', () => {
 
 		const { getByRole } = render(Header, { showLandingNavigation: true });
 		const nav = getByRole('navigation', { name: sectionNavLabel });
-		const { auth, swap } = get(i18n);
-		const { borrow_eyebrow, hold_eyebrow, security_eyebrow } = auth.landing;
+		const { auth, navigation, swap } = get(i18n);
+		const { borrow_eyebrow, security_eyebrow } = auth.landing;
 
 		for (const [name, href] of [
-			[hold_eyebrow, '#landing-hold'],
+			[navigation.text.tokens, '#landing-hold'],
 			[security_eyebrow, '#landing-security'],
 			[swap.text.swap, '#landing-swap'],
 			[borrow_eyebrow, '#landing-borrow']

@@ -31,7 +31,7 @@
 
 	const landingNavigation = $derived(showLandingNavigation && $authNotSignedIn);
 	const landingLinks = $derived([
-		{ href: '#landing-hold', label: $i18n.auth.landing.hold_eyebrow },
+		{ href: '#landing-hold', label: $i18n.navigation.text.tokens },
 		{ href: '#landing-security', label: $i18n.auth.landing.security_eyebrow },
 		{ href: '#landing-swap', label: $i18n.swap.text.swap },
 		{ href: '#landing-borrow', label: $i18n.auth.landing.borrow_eyebrow }
@@ -114,7 +114,7 @@
 			aria-label={$i18n.auth.landing.sections_label}
 		>
 			<div
-				class="flex max-w-full flex-wrap justify-center gap-0.5 rounded-[24px] border border-tertiary bg-primary p-0.5 shadow-sm"
+				class="flex max-w-full flex-wrap justify-center gap-0.5 rounded-[24px] border border-tertiary bg-primary/75 p-0.5 shadow-sm backdrop-blur-sm"
 			>
 				{#each landingLinks as { href, label } (href)}
 					<a
