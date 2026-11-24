@@ -15,7 +15,6 @@ import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as backendApi from '$lib/api/backend.api';
 import * as signerApi from '$lib/api/signer.api';
 import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
-import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import * as addressesStore from '$lib/derived/address.derived';
 import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -28,7 +27,6 @@ import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
 import { mockSendContextEntry } from '$tests/utils/send.context.test-utils';
@@ -215,26 +213,6 @@ describe('BtcSendTokenWizard', () => {
 
 			expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.send.error.btc_send_rate_limited.replace('$duration', '1 hour') }
-			});
-			expect(onBack).toHaveBeenCalledOnce();
-			expect(onClose).not.toHaveBeenCalled();
-		});
-
-		// Only on the backend path: a `btc_caller_send` can cost more than any renewed approval.
-		it('should go back to the form, saying to sign in again, after a spent signing approval', async () => {
-			btcSendViaBackend.enabled = true;
-
-			const err = new SignerCanisterPaymentError({
-				LedgerWithdrawFromError: {
-					ledger: mockPrincipal,
-					error: { InsufficientAllowance: { allowance: 10n } }
-				}
-			});
-
-			const toastsErrorSpy = await sendAndFail(err);
-
-			expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
-				msg: { text: en.send.error.btc_signing_allowance_spent }
 			});
 			expect(onBack).toHaveBeenCalledOnce();
 			expect(onClose).not.toHaveBeenCalled();

@@ -1156,7 +1156,6 @@
 			"ethereum_transaction_unconfirmed": "Chúng tôi không thể xác nhận giao dịch đã đến mạng hay chưa. Giao dịch vẫn có thể thành công, nên hãy đợi một hai phút và kiểm tra hoạt động của bạn trước khi gửi lại.",
 			"btc_transaction_unconfirmed": "",
 			"btc_send_rate_limited": "",
-			"btc_signing_allowance_spent": "",
 			"btc_transaction_never_landed": "",
 			"solana_transaction_expired": "Giao dịch của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể là do phí ưu tiên được cung cấp không đủ. Chúng tôi đã cập nhật lên số tiền được khuyến nghị mới nhất, vì vậy vui lòng thử lại.",
 			"solana_confirmation_failed": "Chúng tôi không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây rồi kiểm tra danh sách giao dịch của token để xem giao dịch của bạn có được tạo chính xác không.",
