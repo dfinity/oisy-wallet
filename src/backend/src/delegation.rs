@@ -54,7 +54,7 @@ thread_local! {
 /// production enforces the same II delegation check as staging and local.
 pub(crate) fn read_ii_verification_config() -> (Vec<Principal>, Vec<u8>, bool) {
     read_config(|config| {
-        let ii_ids = config.ii_canister_id.map(|id| vec![id]).unwrap_or_default();
+        let ii_ids = config.ii_canister_id.map_or_default(|id| vec![id]);
         let root_key = config
             .ic_root_key_raw
             .clone()

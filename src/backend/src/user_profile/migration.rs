@@ -194,8 +194,7 @@ mod tests {
         stored(key)
             .and_then(|profile| profile.settings)
             .and_then(|settings| settings.notifications)
-            .map(|notifications| notifications.dismissed_notifications)
-            .unwrap_or_default()
+            .map_or_default(|notifications| notifications.dismissed_notifications)
     }
 
     #[test]

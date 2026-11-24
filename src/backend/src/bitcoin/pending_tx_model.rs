@@ -63,8 +63,7 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
         let mut address_map = self
             .pending_transactions_map
             .get(&stored_principal)
-            .map(|c| c.0)
-            .unwrap_or_default();
+            .map_or_default(|c| c.0);
 
         if let Some(list) = address_map.get_mut(&address) {
             if list.len() >= self.max_pending_transactions {
@@ -279,7 +278,7 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
     pub fn pending_txids(&self, principal: Principal) -> HashSet<Vec<u8>> {
         self.pending_transactions_map
             .get(&StoredPrincipal(principal))
-            .map(|address_map| {
+            .map_or_default(|address_map| {
                 address_map
                     .0
                     .values()
@@ -287,7 +286,6 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
                     .map(|tx| tx.txid.clone())
                     .collect()
             })
-            .unwrap_or_default()
     }
 
     /// Returns the `max_len` largest of `utxos` by value, largest first, that no pending
@@ -305,7 +303,7 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
         let reserved_keys: HashSet<(Txid, u32)> = self
             .pending_transactions_map
             .get(&StoredPrincipal(principal))
-            .map(|address_map| {
+            .map_or_default(|address_map| {
                 address_map
                     .0
                     .values()
@@ -313,8 +311,7 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
                     .flat_map(|tx| tx.utxos.iter())
                     .map(|u| (u.outpoint.txid, u.outpoint.vout))
                     .collect()
-            })
-            .unwrap_or_default();
+            });
 
         let mut spendable: Vec<Utxo> = utxos
             .into_iter()
