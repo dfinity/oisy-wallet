@@ -9,10 +9,10 @@
 	let { currency, size = 24 }: Props = $props();
 
 	// Five-pointed star as polygon points, for the flags that carry one.
-	const star = (cx: number, cy: number, r: number, turn = 0): string =>
+	const star = ({ cx, cy, r }: { cx: number; cy: number; r: number }): string =>
 		Array.from({ length: 10 }, (_, i) => {
 			const radius = i % 2 === 0 ? r : r * 0.4;
-			const angle = -Math.PI / 2 + (i * Math.PI) / 5 + turn;
+			const angle = -Math.PI / 2 + (i * Math.PI) / 5;
 			return `${(cx + radius * Math.cos(angle)).toFixed(2)},${(cy + radius * Math.sin(angle)).toFixed(2)}`;
 		}).join(' ');
 
@@ -74,7 +74,7 @@
 		<circle cx="9" cy="8" fill="#fff" r="5" />
 		<circle cx="11" cy="8" fill="#ee2536" r="5" />
 		{#each [[13, 4.5], [16.5, 7], [15, 11], [11, 11], [9.8, 7]] as [x, y] (`${x}-${y}`)}
-			<polygon fill="#fff" points={star(x, y, 1.3)} />
+			<polygon fill="#fff" points={star({ cx: x, cy: y, r: 1.3 })} />
 		{/each}
 	{:else if currency === Currency.INR}
 		<rect fill="#fff" height="32" width="32" />
@@ -112,12 +112,12 @@
 		<polygon fill="#11457e" points="0,0 16,16 0,32" />
 	{:else if currency === Currency.VND}
 		<rect fill="#da251d" height="32" width="32" />
-		<polygon fill="#ff0" points={star(16, 16.5, 8)} />
+		<polygon fill="#ff0" points={star({ cx: 16, cy: 16.5, r: 8 })} />
 	{:else if currency === Currency.CNY}
 		<rect fill="#ee1c25" height="32" width="32" />
-		<polygon fill="#ff0" points={star(9, 10, 5)} />
+		<polygon fill="#ff0" points={star({ cx: 9, cy: 10, r: 5 })} />
 		{#each [[16, 5], [19, 8.5], [19, 13], [16, 16.5]] as [x, y] (`${x}-${y}`)}
-			<polygon fill="#ff0" points={star(x, y, 1.4)} />
+			<polygon fill="#ff0" points={star({ cx: x, cy: y, r: 1.4 })} />
 		{/each}
 	{:else if currency === Currency.NGN}
 		<rect fill="#fff" height="32" width="32" />
