@@ -1,5 +1,6 @@
 pub mod active_user_transactions;
 pub mod admin;
+pub mod api_doc;
 pub mod api_keys;
 pub mod bitcoin;
 pub mod contacts;
@@ -9,5 +10,6 @@ pub mod onramper;
 pub mod personal_note_shares;
 pub mod personal_notes;
 pub mod signer;
+pub mod tips;
 pub mod transactions;
 pub mod user_profile;

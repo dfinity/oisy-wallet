@@ -13,6 +13,7 @@ import { screensStore } from '$lib/stores/screens.store';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
@@ -29,6 +30,75 @@ describe('NftHideButton', () => {
 		vi.clearAllMocks();
 
 		screensStore.set('md');
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	it('keeps the button and both icons mounted when its hidden state changes', async () => {
+		const { getByTestId, rerender } = render(NftHideButton, {
+			props: { token: mockToken, source: 'gallery' }
+		});
+		const button = getByTestId(NFT_COLLECTION_ACTION_HIDE);
+		const icons = [...button.querySelectorAll('svg')];
+		const layers = button.querySelectorAll('.layer');
+
+		expect(layers).toHaveLength(2);
+		expect(layers[0]).toHaveAttribute('aria-hidden', 'false');
+
+		await rerender({
+			token: { ...mockToken, section: CustomTokenSection.HIDDEN },
+			source: 'gallery'
+		});
+
+		expect(getByTestId(NFT_COLLECTION_ACTION_UNHIDE)).toBe(button);
+		expect([...button.querySelectorAll('svg')]).toEqual(icons);
+		expect(layers[0]).toHaveAttribute('aria-hidden', 'true');
+		expect(layers[1]).toHaveAttribute('aria-hidden', 'false');
+	});
+
+	it.each([false, true])('defers the icon swap until loading ends (hidden: %s)', async (hidden) => {
+		vi.useFakeTimers();
+		const pending = Promise.withResolvers<undefined>();
+		vi.spyOn(nftsServices, 'updateNftSection').mockReturnValue(pending.promise);
+		const { getByTestId, rerender } = render(NftHideButton, {
+			props: {
+				token: { ...mockToken, section: hidden ? CustomTokenSection.HIDDEN : undefined },
+				source: 'gallery'
+			}
+		});
+		const button = getByTestId(hidden ? NFT_COLLECTION_ACTION_UNHIDE : NFT_COLLECTION_ACTION_HIDE);
+		const layers = [...button.querySelectorAll('.layer')];
+
+		await fireEvent.click(button);
+
+		expect(button).toBeDisabled();
+
+		await rerender({
+			token: { ...mockToken, section: hidden ? undefined : CustomTokenSection.HIDDEN },
+			source: 'gallery'
+		});
+		// The token store can update before the remaining NFT reload finishes.
+		await vi.advanceTimersByTimeAsync(350);
+
+		expect(button).toBeDisabled();
+		expect([...button.querySelectorAll('.layer')]).toEqual(layers);
+		expect(layers[0]).toHaveAttribute('aria-hidden', String(hidden));
+		expect(layers[1]).toHaveAttribute('aria-hidden', String(!hidden));
+
+		pending.resolve(undefined);
+		await runResolvedPromises();
+		await tick();
+
+		expect(button).toBeEnabled();
+
+		expect(getByTestId(hidden ? NFT_COLLECTION_ACTION_HIDE : NFT_COLLECTION_ACTION_UNHIDE)).toBe(
+			button
+		);
+		expect([...button.querySelectorAll('.layer')]).toEqual(layers);
+		expect(layers[0]).toHaveAttribute('aria-hidden', String(!hidden));
+		expect(layers[1]).toHaveAttribute('aria-hidden', String(hidden));
 	});
 
 	it('renders Unhide button when token.section is HIDDEN', () => {
@@ -61,6 +131,28 @@ describe('NftHideButton', () => {
 			const confirmBtn = getByTestId(`${CONFIRMATION_MODAL}-confirm`);
 
 			expect(confirmBtn).toBeInTheDocument();
+		});
+	});
+
+	it('shows the collection name as plain text in the confirmation', async () => {
+		const name =
+			'</b><h1>Title</h1><img src="https://example.com/a.png"><a href="https://example.com">link</a><b>';
+
+		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId('123') }]);
+
+		const { getByTestId } = render(NftHideButton, {
+			props: { token: { ...mockToken, name }, source: 'gallery' }
+		});
+
+		await fireEvent.click(getByTestId(NFT_COLLECTION_ACTION_HIDE));
+
+		await waitFor(() => {
+			const modal = getByTestId(CONFIRMATION_MODAL);
+
+			expect(modal.querySelector('b')?.textContent).toBe(name);
+			expect(modal.querySelector('h1')).toBeNull();
+			expect(modal.querySelector('img')).toBeNull();
+			expect(modal.querySelector('a')).toBeNull();
 		});
 	});
 

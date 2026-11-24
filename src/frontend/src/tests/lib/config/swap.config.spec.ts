@@ -29,12 +29,12 @@ describe('swap.config', () => {
 					title: en.send.text.select_token
 				},
 				{
-					name: WizardStepsSwap.FILTER_NETWORKS,
-					title: en.send.text.select_network_filter
+					name: WizardStepsSwap.SELECT_PROVIDER,
+					title: en.swap.text.smart_swap
 				},
 				{
-					name: WizardStepsSwap.SELECT_PROVIDER,
-					title: en.swap.text.select_swap_provider
+					name: WizardStepsSwap.MOVE_TOKEN,
+					title: en.swap.text.move_token_to
 				}
 			]);
 		});

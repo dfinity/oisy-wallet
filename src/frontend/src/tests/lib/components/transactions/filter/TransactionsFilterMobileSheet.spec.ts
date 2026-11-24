@@ -156,4 +156,13 @@ describe('TransactionsFilterMobileSheet', () => {
 			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN
 		});
 	});
+
+	it('renders the root categories as menu rows, like other sheets', () => {
+		const { getByText } = render(TransactionsFilterMobileSheet, { props: { visible: true } });
+
+		const row = getByText(get(i18n).transaction.filter.types_label).closest('button');
+
+		expect(row).toHaveClass('menu-row');
+		expect(row?.closest('.menu-surface')).not.toBeNull();
+	});
 });

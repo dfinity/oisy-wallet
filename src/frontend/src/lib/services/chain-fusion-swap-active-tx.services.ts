@@ -1,0 +1,1430 @@
+import type {
+	ActiveUserTransaction,
+	ActiveUserTransactionStatus,
+	ChainFusionData,
+	TokenId
+} from '$declarations/backend/backend.did';
+import type { DepositSolId } from '$declarations/cksol_minter/cksol_minter.did';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { BITCOIN_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
+import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
+import { infuraProviders } from '$eth/providers/infura.providers';
+import type { EthAddress } from '$eth/types/address';
+import { minterInfo } from '$icp-eth/api/cketh-minter.api';
+import { getUtxosQuery } from '$icp/api/bitcoin.api';
+import {
+	minterInfo as ckBtcMinterInfo,
+	getKnownUtxos,
+	updateBalance,
+	withdrawalStatuses
+} from '$icp/api/ckbtc-minter.api';
+import { retrieveEthStatus } from '$icp/api/cketh-minter.api';
+import {
+	minterInfo as ckSolMinterInfo,
+	depositSolStatus,
+	watchDepositAddress,
+	withdrawSolStatus
+} from '$icp/api/cksol-minter.api';
+import { getTransactions } from '$icp/api/icrc-index-ng.api';
+import { CkSolWatchDepositAddressError } from '$icp/canisters/cksol-minter.errors';
+import {
+	CHAIN_FUSION_CKBTC_MINT_LOOKUP_PAGE_SIZE,
+	CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS,
+	CHAIN_FUSION_WATCH_DEPOSIT_ADDRESS_INTERVAL_MILLIS
+} from '$lib/constants/app.constants';
+import {
+	applyActiveUserTransactionPollUpdate,
+	deleteActiveUserTransaction,
+	isBtcTransactionNeverLanded,
+	reloadActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
+import {
+	CHAIN_FUSION_EXTERNAL_REF_KEYS,
+	type ChainFusionExternalRefKey
+} from '$lib/types/chain-fusion-swap';
+import {
+	advanceStatus,
+	isTerminalActiveUserTransaction
+} from '$lib/utils/active-user-transactions.utils';
+import {
+	chainFusionBtcMintOutcomeError,
+	chainFusionBtcMintOutcomeToStatus,
+	chainFusionBtcWithdrawalStatusError,
+	chainFusionMintOutcomeError,
+	chainFusionMintOutcomeToStatus,
+	chainFusionSolDepositBelowMinimumError,
+	chainFusionSolMintStatusError,
+	chainFusionSolTransferError,
+	chainFusionSolWithdrawalStatusError,
+	chainFusionWithdrawalStatusError,
+	isChainFusionBtcMintDirection,
+	isChainFusionBtcWithdrawalDirection,
+	isChainFusionEthWithdrawalDirection,
+	isChainFusionMintDirection,
+	isChainFusionSolMintDirection,
+	isChainFusionSolWithdrawalDirection,
+	isSameUtxoTxid,
+	newerCkSolDepositId,
+	toChainFusionBtcMintOutcome,
+	toChainFusionBtcWithdrawalLearnedRefs,
+	toChainFusionBtcWithdrawalStatus,
+	toChainFusionDepositLogTopics,
+	toChainFusionExternalRefs,
+	toChainFusionExternalRefsMap,
+	toChainFusionSolMintLearnedRefs,
+	toChainFusionSolMintStatus,
+	toChainFusionSolWithdrawalLearnedRefs,
+	toChainFusionSolWithdrawalStatus,
+	toChainFusionWithdrawalLearnedRefs,
+	toChainFusionWithdrawalStatus,
+	toCkBtcMintDepositTxid,
+	toCkSolBlockhashSlot,
+	type ChainFusionBtcMintOutcome,
+	type ChainFusionMintOutcome
+} from '$lib/utils/chain-fusion-swap-active-tx.utils';
+import { consoleError } from '$lib/utils/console.utils';
+import {
+	readSolBalanceAfterTx,
+	readSolSourceTxOutcome
+} from '$sol/services/sol-source-tx.services';
+import { SolanaNetworks } from '$sol/types/network';
+import type { SolSourceTxOutcome } from '$sol/utils/sol-source-tx.utils';
+import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import {
+	MinterNoNewUtxosError,
+	type BitcoinDid,
+	type BitcoinNetwork,
+	type CkBtcMinterDid,
+	type RetrieveBtcStatusV2WithId
+} from '@icp-sdk/canisters/ckbtc';
+import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
+import type { Identity } from '@icp-sdk/core/agent';
+
+/**
+ * Counts how many consecutive polls have found no deposit log in the block a ck
+ * deposit mined in, once the minter has already scanned past it.
+ *
+ * Only the *absence*-based verdict is guarded. `deposited` rests on positive
+ * evidence — the helper-contract log is there — while `notDeposited` rests on
+ * evidence not being there, which is also what a transiently lagging Infura node
+ * produces. Writing `Failed` on that would be a permanent wrong verdict on a
+ * conversion that actually settled.
+ *
+ * Deliberately in-memory, as in `velora-active-tx.services`: a refresh resets the
+ * count, which at worst delays terminalization by one tick and never produces a
+ * wrong verdict.
+ */
+const missingDepositLogObservations = new Map<string, number>();
+
+// Test seam — module-level state would otherwise leak between cases.
+export const resetChainFusionMissingDepositLogObservations = (): void => {
+	missingDepositLogObservations.clear();
+};
+
+const MISSING_DEPOSIT_LOG_OBSERVATIONS_REQUIRED = 2;
+
+const recordMissingDepositLogObservation = (txId: string): number => {
+	const count = (missingDepositLogObservations.get(txId) ?? 0) + 1;
+	missingDepositLogObservations.set(txId, count);
+	return count;
+};
+
+/**
+ * Tracks when each pending ckBTC-deposit row last asked the minter to mint.
+ *
+ * `update_balance` is an update call while the poller ticks every few seconds, and
+ * the app-wide `CkBTCUpdateBalanceWorker` is very likely calling it for the same
+ * account anyway — so the throttle is the outer bound on how often a row nudges
+ * the minter, on top of the query gate that skips the call entirely while the
+ * deposit is still gathering confirmations. Precedent: `shouldNotifyForwarding`
+ * in `onesec-swap.services`.
+ *
+ * In-memory on purpose, like OneSec's: a refresh resets it, which at worst costs
+ * one extra idempotent update call.
+ */
+const lastUpdateBalanceMs = new Map<string, number>();
+
+export const resetChainFusionUpdateBalanceThrottle = (): void => {
+	lastUpdateBalanceMs.clear();
+};
+
+const shouldCallUpdateBalance = (txId: string): boolean => {
+	const now = Date.now();
+	const last = lastUpdateBalanceMs.get(txId);
+
+	if (nonNullish(last) && now - last < CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS) {
+		return false;
+	}
+
+	lastUpdateBalanceMs.set(txId, now);
+
+	return true;
+};
+
+/**
+ * Tracks when each pending SOL → ckSOL row last called `watch_deposit_address`, an update call,
+ * while the poller ticks every few seconds and the minter scans the address minutes apart at
+ * best. In-memory, like the `update_balance` throttle: a refresh resets it, which at worst costs
+ * one extra call that only reports what the minter already knows.
+ */
+const lastWatchDepositAddressMs = new Map<string, number>();
+
+export const resetChainFusionWatchDepositAddressThrottle = (): void => {
+	lastWatchDepositAddressMs.clear();
+};
+
+const shouldCallWatchDepositAddress = (txId: string): boolean => {
+	const now = Date.now();
+	const last = lastWatchDepositAddressMs.get(txId);
+
+	if (nonNullish(last) && now - last < CHAIN_FUSION_WATCH_DEPOSIT_ADDRESS_INTERVAL_MILLIS) {
+		return false;
+	}
+
+	lastWatchDepositAddressMs.set(txId, now);
+
+	return true;
+};
+
+/**
+ * One read per (minter, account) serves every row that shares it within a tick —
+ * the ckETH minter's scan position, the ckBTC minter's confirmation floor, the
+ * whole list of ckBTC withdrawal statuses, and the UTXO sets a ckBTC deposit is
+ * looked up in.
+ */
+interface ChainFusionPollCaches {
+	ckEthMinterInfo: Map<string, Promise<CkEthMinterDid.MinterInfo>>;
+	ckBtcMinterInfo: Map<string, Promise<CkBtcMinterDid.MinterInfo>>;
+	btcWithdrawalStatuses: Map<string, Promise<RetrieveBtcStatusV2WithId[]>>;
+	btcKnownUtxos: Map<string, Promise<CkBtcMinterDid.Utxo[]>>;
+	btcDepositUtxos: Map<string, Promise<{ utxos: BitcoinDid.utxo[]; tipHeight: number }>>;
+}
+
+const initChainFusionPollCaches = (): ChainFusionPollCaches => ({
+	ckEthMinterInfo: new Map(),
+	ckBtcMinterInfo: new Map(),
+	btcWithdrawalStatuses: new Map(),
+	btcKnownUtxos: new Map(),
+	btcDepositUtxos: new Map()
+});
+
+const memoize = <T>({
+	cache,
+	key,
+	load
+}: {
+	cache: Map<string, Promise<T>>;
+	key: string;
+	load: () => Promise<T>;
+}): Promise<T> => {
+	const cached = cache.get(key);
+
+	if (nonNullish(cached)) {
+		return cached;
+	}
+
+	const promise = load();
+	cache.set(key, promise);
+
+	return promise;
+};
+
+const applyUpdate = async ({
+	identity,
+	tx,
+	candidate,
+	error,
+	learned,
+	refs,
+	onlyWhileOpen = false
+}: {
+	identity: Identity;
+	tx: ActiveUserTransaction;
+	candidate: ActiveUserTransactionStatus | undefined;
+	error: string | undefined;
+	learned: Partial<Record<ChainFusionExternalRefKey, string>>;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+	// Refs sent without a status skip the backend's transition check, and replace the stored ones
+	// even on a row another tab settled meanwhile. With this set, refs that do not move the status
+	// go out with `Executing`, which the backend refuses on a settled row.
+	onlyWhileOpen?: boolean;
+}): Promise<void> => {
+	const next = nonNullish(candidate) ? advanceStatus({ current: tx.status, candidate }) : undefined;
+
+	// Persist newly-learned pointers even when the status itself doesn't advance.
+	// `external_refs` replaces the stored list wholesale, so the merge is required.
+	const hasNewRefs = (Object.keys(learned) as ChainFusionExternalRefKey[]).some(
+		(key) => refs[key] !== learned[key]
+	);
+	const externalRefs = hasNewRefs ? toChainFusionExternalRefs({ ...refs, ...learned }) : undefined;
+
+	const status: ActiveUserTransactionStatus | undefined =
+		next ?? (onlyWhileOpen && nonNullish(externalRefs) ? { Executing: null } : undefined);
+
+	const update = {
+		...(nonNullish(status) ? { status } : {}),
+		...(nonNullish(status) && 'Failed' in status && nonNullish(error) ? { error } : {}),
+		...(nonNullish(externalRefs) ? { externalRefs } : {})
+	};
+
+	if (Object.keys(update).length === 0) {
+		return;
+	}
+
+	await applyActiveUserTransactionPollUpdate({ identity, tx, update });
+};
+
+/**
+ * ckETH → ETH and ckERC20 → ERC20. The minter answers exactly, keyed on the ckETH
+ * ledger burn index snapshotted at creation, so the row resumes across refresh /
+ * logout with nothing held in memory.
+ */
+const pollChainFusionEthWithdrawal = async ({
+	tx,
+	identity,
+	refs
+}: {
+	tx: ActiveUserTransaction;
+	identity: Identity;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+}): Promise<void> => {
+	const minterCanisterId = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID];
+	const blockIndex = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKETH_BLOCK_INDEX];
+
+	// Not pollable without the minter or the burn index.
+	if (isNullish(minterCanisterId) || isNullish(blockIndex)) {
+		return;
+	}
+
+	const status = await retrieveEthStatus({
+		identity,
+		minterCanisterId,
+		blockIndex: BigInt(blockIndex)
+	});
+
+	await applyUpdate({
+		identity,
+		tx,
+		candidate: toChainFusionWithdrawalStatus(status),
+		error: chainFusionWithdrawalStatusError(status),
+		learned: toChainFusionWithdrawalLearnedRefs(status),
+		refs
+	});
+};
+
+/**
+ * ckBTC → BTC. Exact and query-only, keyed on the block index
+ * `retrieve_btc_with_approval` returned.
+ *
+ * The minter answers per account rather than per withdrawal, so one round-trip
+ * serves every ckBTC row of this user within a tick — the same sharing
+ * `pollOneSecActiveUserTransactions` does with its `getTransfers` call.
+ */
+const pollChainFusionBtcWithdrawal = async ({
+	tx,
+	identity,
+	refs,
+	caches
+}: {
+	tx: ActiveUserTransaction;
+	identity: Identity;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+	caches: ChainFusionPollCaches;
+}): Promise<void> => {
+	const minterCanisterId = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID];
+	const blockIndex = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.RETRIEVE_BTC_BLOCK_INDEX];
+
+	// Not pollable without the minter or the withdrawal index.
+	if (isNullish(minterCanisterId) || isNullish(blockIndex)) {
+		return;
+	}
+
+	const statuses = await memoize({
+		cache: caches.btcWithdrawalStatuses,
+		key: minterCanisterId,
+		load: () => withdrawalStatuses({ identity, minterCanisterId, certified: false })
+	});
+
+	const status = statuses.find(({ id }) => id === BigInt(blockIndex))?.status;
+
+	// The minter has not indexed the burn yet — or, for an old row, has pruned it.
+	// Either way there is nothing to advance on.
+	if (isNullish(status)) {
+		return;
+	}
+
+	await applyUpdate({
+		identity,
+		tx,
+		candidate: toChainFusionBtcWithdrawalStatus(status),
+		error: chainFusionBtcWithdrawalStatusError(status),
+		learned: toChainFusionBtcWithdrawalLearnedRefs(status),
+		refs
+	});
+};
+
+/**
+ * ckSOL → SOL. Exact, keyed on the ckSOL ledger burn index `withdraw_sol` returned. The
+ * minter serves the status as an update call only.
+ */
+const pollChainFusionSolWithdrawal = async ({
+	tx,
+	identity,
+	refs
+}: {
+	tx: ActiveUserTransaction;
+	identity: Identity;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+}): Promise<void> => {
+	const minterCanisterId = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID];
+	const blockIndex = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.WITHDRAW_SOL_BLOCK_INDEX];
+
+	// Not pollable without the minter or the burn index.
+	if (isNullish(minterCanisterId) || isNullish(blockIndex)) {
+		return;
+	}
+
+	const status = await withdrawSolStatus({
+		identity,
+		minterCanisterId,
+		blockIndex: BigInt(blockIndex)
+	});
+
+	await applyUpdate({
+		identity,
+		tx,
+		candidate: toChainFusionSolWithdrawalStatus(status),
+		error: chainFusionSolWithdrawalStatusError(status),
+		learned: toChainFusionSolWithdrawalLearnedRefs(status),
+		refs
+	});
+};
+
+/**
+ * The latest deposit of the account the minter names in its answer to `watch_deposit_address`:
+ * the deposit in flight when it detected one, otherwise the latest one it queued, which after a
+ * mint is the minted deposit. An error answer names one too, except `TemporarilyUnavailable`,
+ * which is rethrown for the next tick to retry.
+ */
+const watchCkSolLatestDepositId = async ({
+	identity,
+	minterCanisterId
+}: {
+	identity: Identity;
+	minterCanisterId: string;
+}): Promise<DepositSolId | undefined> => {
+	try {
+		const { status, latest_deposit_id } = await watchDepositAddress({ identity, minterCanisterId });
+
+		return 'Detected' in status ? status.Detected.deposit_id : fromNullable(latest_deposit_id);
+	} catch (err: unknown) {
+		if (!(err instanceof CkSolWatchDepositAddressError) || 'TemporarilyUnavailable' in err.error) {
+			throw err;
+		}
+
+		// A quarantined deposit of the account blocks every new one, so it is the deposit to
+		// follow; a full watchlist still names the latest deposit, minted or dropped.
+		return 'Quarantined' in err.error
+			? err.error.Quarantined.deposit_id
+			: fromNullable(err.error.TooManyWatchedAddresses.latest_deposit_id);
+	}
+};
+
+/**
+ * What the network says about the user's transfer of a ckSOL mint row, whose row is opened before
+ * the transfer is broadcast. `undefined` for a row without the transfer's blockhash. Read at
+ * finality: the row takes a deposit or fails on this verdict for good, and stops reading the
+ * transfer once it follows a deposit, while a confirmed block can still be rolled back.
+ */
+const readCkSolTransferOutcome = async ({
+	tx,
+	refs
+}: {
+	tx: ActiveUserTransaction;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+}): Promise<SolSourceTxOutcome | undefined> => {
+	const signature = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_SIGNATURE];
+	const blockhash = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH];
+
+	if (isNullish(signature) || isNullish(blockhash)) {
+		return;
+	}
+
+	// SOL → ckSOL is mainnet only.
+	return await readSolSourceTxOutcome({
+		rowId: tx.id,
+		signature,
+		blockhash,
+		minContextSlot: toCkSolBlockhashSlot(
+			refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH_SLOT]
+		),
+		network: SolanaNetworks.mainnet,
+		finalized: true
+	});
+};
+
+/**
+ * The backend's copy of a SOL → ckSOL row, read back with a certified call for a decision this tab's
+ * copy may be too stale for, or `undefined` once the backend no longer holds the row. The tab that
+ * opened such a row deleted it with nothing sent. It is deleted here too, as the Liquidium poller
+ * does, which removes this tab's copy: nothing can settle it, and while it is pending this tab offers
+ * no new conversion.
+ */
+const reloadCkSolMintRow = async ({
+	identity,
+	tx
+}: {
+	identity: Identity;
+	tx: ActiveUserTransaction;
+}): Promise<ActiveUserTransaction | undefined> => {
+	const current = await reloadActiveUserTransaction({ identity, id: tx.id });
+
+	if (isNullish(current)) {
+		lastWatchDepositAddressMs.delete(tx.id);
+
+		await deleteActiveUserTransaction({ identity, id: tx.id });
+	}
+
+	return current;
+};
+
+/**
+ * Whether the deposit address of a SOL → ckSOL row still holds the minter's minimum deposit amount
+ * after the mint of a deposit the row follows or moved past, or after a dropped one, or `undefined`
+ * while that cannot be read yet.
+ *
+ * The minter fixes a deposit's amount when a scan reads the balance, and reports neither that time
+ * nor the transfers the balance held. SOL sent to the address outside this conversion can reach the
+ * minimum before the transfer lands, and be queued and swept alone; after that mint, the minter
+ * sweeps again only once `watch_deposit_address` registers the address anew. A sweep takes the
+ * whole balance its scan queued, and the transfer alone meets the minimum, so what is left tells.
+ * It is read once the transfer is finalized, at finalized commitment, so that the balance counts it.
+ * A row without its transfer's blockhash cannot tell, as for the deposit it takes, and closes on the
+ * mint as before.
+ */
+const ckSolMintLeftMinimum = async ({
+	identity,
+	minterCanisterId,
+	refs
+}: {
+	identity: Identity;
+	minterCanisterId: string;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+}): Promise<boolean | undefined> => {
+	const address = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_DEPOSIT_ADDRESS];
+	const signature = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_SIGNATURE];
+
+	if (
+		isNullish(address) ||
+		isNullish(signature) ||
+		isNullish(refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH])
+	) {
+		return false;
+	}
+
+	// The minimum decides whether the row closes, so it is taken from a certified answer.
+	const [balance, { minimum_deposit_amount }] = await Promise.all([
+		readSolBalanceAfterTx({ address, signature, network: SolanaNetworks.mainnet }),
+		ckSolMinterInfo({ identity, minterCanisterId, certified: true })
+	]);
+
+	return isNullish(balance) ? undefined : balance >= minimum_deposit_amount;
+};
+
+/**
+ * Whether the backend's copy of a SOL → ckSOL row tracks the same deposits as this tab's: the
+ * deposit it follows or moved past, and its floor.
+ */
+const tracksSameCkSolDeposits = ({
+	current,
+	refs
+}: {
+	current: ActiveUserTransaction;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+}): boolean => {
+	const currentRefs = toChainFusionExternalRefsMap(current.external_refs);
+
+	return [
+		CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID,
+		CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_LATEST_DEPOSIT_ID
+	].every((key) => currentRefs[key] === refs[key]);
+};
+
+/**
+ * SOL → ckSOL. The minter reports the deposit through `watch_deposit_address`, an update call
+ * made about once a minute, and then answers exactly through `deposit_sol_status`, a query asked
+ * on every tick once the row knows the deposit id.
+ *
+ * Only a deposit above the floor is taken for this conversion: the latest deposit id of the
+ * account when the row was opened, the dropped deposit the row followed before, or a minted one it
+ * moved past. And only once the transfer is on chain, since no deposit can hold its SOL before. A
+ * `Watching` answer keeps the row in flight while the transfer can still land or has landed; the
+ * same call registers the address again once a window has ended, so a late transfer is still found.
+ * A transfer that can no longer land, or landed and failed, moved no SOL, and fails the row. A
+ * `Dropped` deposit leaves its SOL on the address, which the minter detects again under a new id,
+ * unless less than the minimum is left: a sweep that failed on chain still took its fee from the
+ * address, and a minimum can rise. Once the minter then names no newer deposit, no sweep will come,
+ * and the row fails, which lets the next conversion start and take the balance over the minimum.
+ * A mint that left the minimum deposit amount on the address did not sweep all of it either: the
+ * row raises its floor to that deposit, kept on the row so that a reload does not forget it, and
+ * looks for a newer one, which `watch_deposit_address` registers the address for. It closes on that
+ * mint only once the minter names no newer deposit and the address holds less than the minimum.
+ */
+const pollChainFusionSolMint = async ({
+	tx,
+	identity,
+	refs
+}: {
+	tx: ActiveUserTransaction;
+	identity: Identity;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+}): Promise<void> => {
+	const minterCanisterId = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID];
+
+	// Not pollable without the minter.
+	if (isNullish(minterCanisterId)) {
+		return;
+	}
+
+	const knownDepositIdRef = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID];
+	const knownDepositId = nonNullish(knownDepositIdRef) ? BigInt(knownDepositIdRef) : undefined;
+
+	const latestDepositIdRef = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_LATEST_DEPOSIT_ID];
+	const latestDepositId = nonNullish(latestDepositIdRef) ? BigInt(latestDepositIdRef) : undefined;
+
+	// A known deposit above the floor is the one the row follows; one at or below it is a mint that
+	// left the minimum on the address, which the row moved past.
+	const followedDepositId =
+		nonNullish(knownDepositId) && (isNullish(latestDepositId) || knownDepositId > latestDepositId)
+			? knownDepositId
+			: undefined;
+	const movedPastDepositId = isNullish(followedDepositId) ? knownDepositId : undefined;
+
+	// This tab's copy of the row can be stale: another tab may have settled it, moved it on to a newer
+	// deposit, or started the next conversion. So a write that settles the row, or changes the
+	// deposit it follows or its floor, goes out only while the backend's copy, read now with a
+	// certified call, is open and tracks the same deposit and floor as this tab's. The backend holds
+	// one open SOL → ckSOL row per account, so a deposit taken for a row still open then is no other
+	// conversion's. The read also puts the backend's copy in the store.
+	const backendTracksSameDeposits = async (): Promise<boolean> => {
+		const current = await reloadCkSolMintRow({ identity, tx });
+
+		if (nonNullish(current) && isTerminalActiveUserTransaction(current)) {
+			// Settled elsewhere: the row leaves the pending set, so its throttle entry has no reader left.
+			lastWatchDepositAddressMs.delete(tx.id);
+		}
+
+		return (
+			nonNullish(current) &&
+			!isTerminalActiveUserTransaction(current) &&
+			tracksSameCkSolDeposits({ current, refs })
+		);
+	};
+
+	/**
+	 * Applies the status of a deposit to the row, and says whether the row goes on to look for a newer
+	 * deposit in this poll, as after `Dropped`.
+	 */
+	const applyDepositStatus = async ({
+		depositId,
+		learned,
+		readBack = false,
+		leftMinimum: knownLeftMinimum
+	}: {
+		depositId: DepositSolId;
+		learned: Partial<Record<ChainFusionExternalRefKey, string>>;
+		// Set for the deposit this tab's copy names: a write that settles the row or moves past the
+		// deposit goes out only while the backend's copy tracks the same deposits.
+		readBack?: boolean;
+		// What the address held after the mint, when the caller read it already.
+		leftMinimum?: boolean;
+	}): Promise<boolean> => {
+		let status = await depositSolStatus({
+			identity,
+			minterCanisterId,
+			depositId,
+			certified: false
+		});
+
+		// `Minted` and `Quarantined` close the row for good and free the account, and `Dropped` moves
+		// the row on to a newer deposit for good, so they are taken only from a certified answer, not
+		// from a single replica's.
+		if ('Minted' in status || 'Quarantined' in status || 'Dropped' in status) {
+			status = await depositSolStatus({
+				identity,
+				minterCanisterId,
+				depositId,
+				certified: true
+			});
+		}
+
+		const leftMinimum =
+			'Minted' in status
+				? (knownLeftMinimum ?? (await ckSolMintLeftMinimum({ identity, minterCanisterId, refs })))
+				: false;
+
+		// The address cannot be read yet: the row stays in flight with what it learned.
+		if (isNullish(leftMinimum)) {
+			await applyUpdate({
+				identity,
+				tx,
+				candidate: { Executing: null },
+				error: undefined,
+				learned,
+				refs,
+				onlyWhileOpen: true
+			});
+
+			return false;
+		}
+
+		const candidate = toChainFusionSolMintStatus(status);
+		const settles = !leftMinimum && nonNullish(candidate) && !('Executing' in candidate);
+
+		if ((leftMinimum || settles) && readBack && !(await backendTracksSameDeposits())) {
+			return false;
+		}
+
+		// A mint that left the minimum did not sweep all of the address: the row raises its floor to
+		// that deposit, so that from the next poll on it looks for a newer one instead.
+		if (leftMinimum) {
+			await applyUpdate({
+				identity,
+				tx,
+				candidate: { Executing: null },
+				error: undefined,
+				learned: {
+					...learned,
+					[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_LATEST_DEPOSIT_ID]: `${depositId}`
+				},
+				refs,
+				onlyWhileOpen: true
+			});
+
+			return false;
+		}
+
+		// A terminal row leaves the pending set, so its throttle entry has no reader left.
+		if (settles) {
+			lastWatchDepositAddressMs.delete(tx.id);
+		}
+
+		// Two tabs can take a deposit at the same time: the one that records it must not overwrite the
+		// refs of the row the other settled meanwhile.
+		await applyUpdate({
+			identity,
+			tx,
+			candidate,
+			error: chainFusionSolMintStatusError(status),
+			learned: { ...learned, ...toChainFusionSolMintLearnedRefs(status) },
+			refs,
+			onlyWhileOpen: true
+		});
+
+		return 'Dropped' in status;
+	};
+
+	if (nonNullish(followedDepositId)) {
+		const goesOn = await applyDepositStatus({
+			depositId: followedDepositId,
+			learned: {},
+			readBack: true
+		});
+
+		if (!goesOn) {
+			return;
+		}
+	}
+
+	// Past that call, a deposit the row still follows is a dropped one.
+	const droppedDepositId = followedDepositId;
+
+	if (!shouldCallWatchDepositAddress(tx.id)) {
+		return;
+	}
+
+	// A row that followed a deposit before has its transfer finalized. Any other row takes a deposit
+	// only once its transfer is: until then, a newer deposit is another conversion's, settled while
+	// this one waited to be sent, and the row may still be under the check that deletes it unsent; a
+	// transfer only confirmed can still be rolled back, and the row reads it until it finalizes or
+	// can no longer land. A row without its transfer's blockhash cannot tell, and takes the deposit as
+	// before. Read before the minter is asked, so that a minter that does not answer never keeps a row
+	// open whose transfer can no longer land.
+	const outcome = isNullish(knownDepositId)
+		? await readCkSolTransferOutcome({ tx, refs })
+		: undefined;
+
+	const transferError = chainFusionSolTransferError(outcome);
+
+	// The row ends, which frees the account for the next conversion. This is also where a row ends
+	// that the tab which opened it deleted, its transfer never sent: so the backend's row decides,
+	// and only one still open there is failed.
+	if (nonNullish(transferError)) {
+		const current = await reloadCkSolMintRow({ identity, tx });
+
+		lastWatchDepositAddressMs.delete(tx.id);
+
+		if (isNullish(current) || isTerminalActiveUserTransaction(current)) {
+			return;
+		}
+
+		await applyUpdate({
+			identity,
+			tx,
+			candidate: { Failed: null },
+			error: transferError,
+			learned: {},
+			refs
+		});
+
+		return;
+	}
+
+	// Read before the minter is asked: a newer deposit that swept the address by then was queued
+	// before that call, which then names it. For a dropped deposit only on a row with its transfer's
+	// blockhash, as for the deposit it takes: without it, the row keeps waiting as before. And for a
+	// finalized transfer that no deposit took yet, which a minimum raised before the scan can keep
+	// the minter from ever queuing.
+	const leftMinimum =
+		nonNullish(movedPastDepositId) ||
+		(nonNullish(droppedDepositId) &&
+			nonNullish(refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.SOL_TX_BLOCKHASH])) ||
+		outcome === 'succeeded'
+			? await ckSolMintLeftMinimum({ identity, minterCanisterId, refs })
+			: undefined;
+
+	const depositId = newerCkSolDepositId({
+		depositId: await watchCkSolLatestDepositId({ identity, minterCanisterId }),
+		floor: followedDepositId ?? latestDepositId
+	});
+
+	if (isNullish(depositId) || (nonNullish(outcome) && outcome !== 'succeeded')) {
+		// Moved past a mint, the minter names no newer deposit, and less than the minimum is left: either
+		// nothing was left after all, or a raised minimum keeps the minter from sweeping it. No sweep
+		// will come, so the row closes on that mint.
+		if (nonNullish(movedPastDepositId) && leftMinimum === false) {
+			await applyDepositStatus({
+				depositId: movedPastDepositId,
+				learned: {},
+				readBack: true,
+				leftMinimum: false
+			});
+
+			return;
+		}
+
+		// Dropped, or finalized and never queued, the minter names no newer deposit, and less than the
+		// minimum is left: the minter will not sweep it. The row fails and frees the account for the
+		// next conversion, whose transfer takes the balance over the minimum, so that the rest is
+		// converted with it.
+		if ((nonNullish(droppedDepositId) || outcome === 'succeeded') && leftMinimum === false) {
+			if (!(await backendTracksSameDeposits())) {
+				return;
+			}
+
+			lastWatchDepositAddressMs.delete(tx.id);
+
+			await applyUpdate({
+				identity,
+				tx,
+				candidate: { Failed: null },
+				error: chainFusionSolDepositBelowMinimumError(),
+				learned: {},
+				refs
+			});
+
+			return;
+		}
+
+		// Watched, a deposit from before this one, or a transfer not on chain yet: the SOL is on the
+		// address or about to be.
+		await applyUpdate({
+			identity,
+			tx,
+			candidate: { Executing: null },
+			error: undefined,
+			learned: {},
+			refs
+		});
+
+		return;
+	}
+
+	// Read after the minter named the deposit.
+	if (!(await backendTracksSameDeposits())) {
+		return;
+	}
+
+	await applyDepositStatus({
+		depositId,
+		learned: { [CHAIN_FUSION_EXTERNAL_REF_KEYS.CKSOL_DEPOSIT_ID]: `${depositId}` }
+	});
+};
+
+// Chain Fusion swaps are mainnet-only, but the row states its own network rather
+// than assuming it: `data` is what the poller is allowed to trust.
+const toBitcoinNetwork = (token: TokenId): BitcoinNetwork | undefined =>
+	'BtcNativeMainnet' in token ? 'mainnet' : 'BtcNativeTestnet' in token ? 'testnet' : undefined;
+
+/**
+ * The complete UTXO set of an address: `get_utxos` paginates for addresses with
+ * many UTXOs, and a deposit sitting beyond the first page must not read as unseen
+ * — that verdict skips the update call, so it would strand the row whenever the
+ * app-wide worker is not also minting for this account. Walked in full rather
+ * than early-exiting on a match, because the memoised result is shared by every
+ * row watching the same address.
+ */
+const getAllAddressUtxos = async ({
+	identity,
+	bitcoinCanisterId,
+	network,
+	address
+}: {
+	identity: Identity;
+	bitcoinCanisterId: string;
+	network: BitcoinNetwork;
+	address: string;
+}): Promise<{ utxos: BitcoinDid.utxo[]; tipHeight: number }> => {
+	const utxos: BitcoinDid.utxo[] = [];
+	let tipHeight: number;
+	let page: Uint8Array | undefined;
+
+	do {
+		const {
+			utxos: pageUtxos,
+			tip_height,
+			next_page
+		} = await getUtxosQuery({ identity, bitcoinCanisterId, network, address, page });
+
+		utxos.push(...pageUtxos);
+		tipHeight = tip_height;
+		page = fromNullable(next_page);
+	} while (nonNullish(page));
+
+	return { utxos, tipHeight };
+};
+
+/**
+ * How many confirmations the deposit has, or `undefined` while the Bitcoin
+ * canister does not know the transaction yet — it indexes blocks, so a freshly
+ * broadcast deposit is absent from its UTXO set rather than listed at zero.
+ */
+const resolveBtcDepositConfirmations = async ({
+	identity,
+	bitcoinCanisterId,
+	network,
+	address,
+	txid,
+	caches
+}: {
+	identity: Identity;
+	bitcoinCanisterId: string;
+	network: BitcoinNetwork;
+	address: string;
+	txid: string;
+	caches: ChainFusionPollCaches;
+}): Promise<number | undefined> => {
+	const { utxos, tipHeight } = await memoize({
+		cache: caches.btcDepositUtxos,
+		key: `${bitcoinCanisterId}:${address}`,
+		load: () => getAllAddressUtxos({ identity, bitcoinCanisterId, network, address })
+	});
+
+	const utxo = utxos.find((utxo) => isSameUtxoTxid({ utxo, txid }));
+
+	return nonNullish(utxo) ? tipHeight - utxo.height + 1 : undefined;
+};
+
+// The ckBTC ledger index a minter's mints land in — the pairing already lives in the ck
+// token data; only ckBTC entries can match a ckBTC minter id.
+const toCkBtcIndexCanisterId = (minterCanisterId: string): string | undefined =>
+	[...ICRC_CK_TOKENS, ...PUBLIC_ICRC_TOKENS].find(
+		(token) => token.minterCanisterId === minterCanisterId
+	)?.indexCanisterId;
+
+/**
+ * Whether the ckBTC ledger records a mint crediting this deposit to the account.
+ *
+ * Read only to break the tie below, where a deposit is absent from both the minter's known
+ * UTXOs and its own deposit address. Walked backwards from the account's newest transaction
+ * and bounded by the row's creation time rather than a page count: the row is durable and
+ * resumes on login, so its mint can sit arbitrarily deep behind traffic that accrued while
+ * the user was away — but it can never predate the row that initiated the deposit.
+ */
+const hasCkBtcMintForDeposit = async ({
+	identity,
+	indexCanisterId,
+	txid,
+	createdAtNs
+}: {
+	identity: Identity;
+	indexCanisterId: string;
+	txid: string;
+	createdAtNs: bigint;
+}): Promise<boolean> => {
+	let start: bigint | undefined;
+	let hasOlderPages = true;
+
+	while (hasOlderPages) {
+		const { transactions, oldest_tx_id } = await getTransactions({
+			identity,
+			indexCanisterId,
+			owner: identity.getPrincipal(),
+			start,
+			maxResults: CHAIN_FUSION_CKBTC_MINT_LOOKUP_PAGE_SIZE,
+			certified: false
+		});
+
+		if (transactions.length === 0) {
+			return false;
+		}
+
+		const minted = transactions.some(({ transaction: { mint } }) => {
+			const memo = fromNullable(fromNullable(mint)?.memo ?? []);
+
+			return nonNullish(memo) && toCkBtcMintDepositTxid(memo) === txid;
+		});
+
+		if (minted) {
+			return true;
+		}
+
+		const oldestFetched = transactions.reduce((min, tx) => (tx.id < min.id ? tx : min));
+
+		// The mint cannot predate the row that initiated the deposit, so everything past this
+		// point is other traffic.
+		if (oldestFetched.transaction.timestamp < createdAtNs) {
+			return false;
+		}
+
+		// Stop when the account's history is exhausted — or, defensively, when a page fails to
+		// move the cursor: the walk synthesizes its own cursor, unlike the canister-issued
+		// `next_page` token `getAllAddressUtxos` follows.
+		const oldestTxId = fromNullable(oldest_tx_id);
+		hasOlderPages =
+			(isNullish(oldestTxId) || oldestFetched.id > oldestTxId) &&
+			(isNullish(start) || oldestFetched.id < start);
+
+		start = oldestFetched.id;
+	}
+
+	return false;
+};
+
+/**
+ * Resolves a ckBTC deposit's state, and — this is the one poller in the codebase
+ * that mutates — asks the minter to mint when the deposit is ready for it.
+ *
+ * The ckBTC minter credits nothing until someone calls `update_balance`, so a
+ * read-only poll would leave a deposit stranded at the deposit address for good.
+ * The call is gated twice over, because it is an update call the app-wide
+ * `CkBTCUpdateBalanceWorker` is very likely making for the same account anyway
+ * (`update_balance` is idempotent, so two callers are safe — just wasteful):
+ *
+ * 1. A query gate, the same one the worker's scheduler uses: the minter's known
+ *    UTXOs settle the row outright, and the Bitcoin canister's view of the deposit
+ *    address says whether the deposit has reached the minter's confirmation floor.
+ *    Below it, `update_balance` could only answer `NoNewUtxos`.
+ * 2. A per-row throttle as the outer bound.
+ *
+ * The verdict is the minter's own: whatever `update_balance` reports for this
+ * deposit. A row that is already in the minter's known-UTXO set has been consumed
+ * — by an earlier call of ours, by the worker, or by another session — and counts
+ * as minted; that is the one coarse step here, and it is bounded to "the minter
+ * took these exact coins off the deposit address", not to a scan position.
+ *
+ * The one verdict the minter has no part in is `neverLanded`: on mainnet, a
+ * deposit that neither the minter nor the Bitcoin canister has seen, and that
+ * Blockstream still does not know an hour after the row's last write
+ * (`isBtcTransactionNeverLanded`), fails without `update_balance` being called.
+ *
+ * Nothing is ever terminalized on an `update_balance` failure: the row stays
+ * pending so the next tick retries, exactly as OneSec leaves an unknown outcome
+ * pending rather than dropping the row out of the poll set.
+ */
+const resolveChainFusionBtcMintOutcome = async ({
+	identity,
+	txId,
+	createdAtNs,
+	updatedAtNs,
+	data,
+	refs,
+	caches
+}: {
+	identity: Identity;
+	txId: string;
+	createdAtNs: bigint;
+	updatedAtNs: bigint;
+	data: ChainFusionData;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+	caches: ChainFusionPollCaches;
+}): Promise<ChainFusionBtcMintOutcome | undefined> => {
+	const minterCanisterId = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID];
+	const txid = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_TXID];
+	const depositAddress = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_DEPOSIT_ADDRESS];
+
+	// Not pollable without the minter, the deposit or the address it went to.
+	if (isNullish(minterCanisterId) || isNullish(txid) || isNullish(depositAddress)) {
+		return;
+	}
+
+	const knownUtxos = await memoize({
+		cache: caches.btcKnownUtxos,
+		key: minterCanisterId,
+		load: () => getKnownUtxos({ identity, minterCanisterId })
+	});
+
+	if (knownUtxos.some((utxo) => isSameUtxoTxid({ utxo, txid }))) {
+		return 'minted';
+	}
+
+	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[minterCanisterId];
+	const network = toBitcoinNetwork(data.source_token);
+
+	// The Bitcoin canister is not deployed locally, so there the confirmation gate is
+	// simply skipped and the throttle carries the whole load — the same concession
+	// `CkBTCUpdateBalanceScheduler.hasPendingUtxos` makes.
+	if (nonNullish(bitcoinCanisterId) && nonNullish(network)) {
+		const confirmations = await resolveBtcDepositConfirmations({
+			identity,
+			bitcoinCanisterId,
+			network,
+			address: depositAddress,
+			txid,
+			caches
+		});
+
+		if (isNullish(confirmations)) {
+			// Absent from the deposit address, having already been absent from the minter's known
+			// UTXOs. That is the shape of a deposit the Bitcoin canister has not indexed yet — and
+			// equally of one the minter minted and has since *spent* to fund a withdrawal, which
+			// erases it from both. The ledger settles it: the minter's mint memo names the outpoint
+			// it credited and stays on the account for good.
+			const indexCanisterId = toCkBtcIndexCanisterId(minterCanisterId);
+
+			const minted =
+				nonNullish(indexCanisterId) &&
+				(await hasCkBtcMintForDeposit({
+					identity,
+					indexCanisterId,
+					txid,
+					createdAtNs
+				}));
+
+			if (minted) {
+				return 'minted';
+			}
+
+			// The Bitcoin canister only indexes blocks, so an unseen deposit may still be in a mempool,
+			// or may never have been broadcast: the row is written before the broadcast, whose outcome
+			// can be unclear. Only the network tells them apart.
+			const neverLanded =
+				network === 'mainnet' &&
+				(await isBtcTransactionNeverLanded({ id: txId, txid, updatedAtNs }));
+
+			return neverLanded ? 'neverLanded' : 'unseen';
+		}
+
+		const { min_confirmations } = await memoize({
+			cache: caches.ckBtcMinterInfo,
+			key: minterCanisterId,
+			load: () => ckBtcMinterInfo({ identity, minterCanisterId, certified: false })
+		});
+
+		if (confirmations < min_confirmations) {
+			return 'awaitingConfirmations';
+		}
+	}
+
+	if (!shouldCallUpdateBalance(txId)) {
+		return 'awaitingMint';
+	}
+
+	try {
+		const utxosStatuses = await updateBalance({ identity, minterCanisterId });
+
+		// A response that says nothing about this deposit — the minter had another of the
+		// user's UTXOs to process — is not a verdict.
+		return toChainFusionBtcMintOutcome({ utxosStatuses, txid }) ?? 'awaitingMint';
+	} catch (err: unknown) {
+		// `NoNewUtxos` is the expected answer whenever someone else got there first, so it
+		// is not worth logging; every other failure is transient as far as this row is
+		// concerned, and none of them may terminalize it.
+		if (!(err instanceof MinterNoNewUtxosError)) {
+			consoleError(err);
+		}
+
+		return 'awaitingMint';
+	}
+};
+
+/**
+ * BTC → ckBTC. See `resolveChainFusionBtcMintOutcome` — this is the mutating
+ * branch.
+ */
+const pollChainFusionBtcMint = async ({
+	tx,
+	identity,
+	data,
+	refs,
+	caches
+}: {
+	tx: ActiveUserTransaction;
+	identity: Identity;
+	data: ChainFusionData;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+	caches: ChainFusionPollCaches;
+}): Promise<void> => {
+	const outcome = await resolveChainFusionBtcMintOutcome({
+		identity,
+		txId: tx.id,
+		createdAtNs: tx.created_at_ns,
+		updatedAtNs: tx.updated_at_ns,
+		data,
+		refs,
+		caches
+	});
+
+	if (isNullish(outcome)) {
+		return;
+	}
+
+	// A terminal row leaves the pending set, so its throttle entry has no reader left.
+	if (outcome === 'minted' || outcome === 'rejected' || outcome === 'neverLanded') {
+		lastUpdateBalanceMs.delete(tx.id);
+	}
+
+	await applyUpdate({
+		identity,
+		tx,
+		candidate: chainFusionBtcMintOutcomeToStatus(outcome),
+		error: chainFusionBtcMintOutcomeError(outcome),
+		learned: {},
+		refs
+	});
+};
+
+// The ERC20 the deposit was made in, needed for the ckERC20 log topic. It is part
+// of the row's immutable `data`, so no ref carries it.
+const toErc20ContractAddress = (token: TokenId): EthAddress | undefined =>
+	'Erc20' in token ? token.Erc20[0] : undefined;
+
+/**
+ * Reads a ck deposit's state off the Ethereum side and the minter's scan
+ * progress, in the order that keeps the verdict honest.
+ *
+ * This is the durable form of the Convert flow's virtual transaction: while the
+ * minter has not scanned past the deposit's block the conversion is in flight,
+ * and once it has, the helper-contract log — the very log the virtual row is built
+ * from — says whether there was a deposit to mint.
+ *
+ * Returns the outcome plus anything worth persisting. The deposit's block number
+ * is read from the receipt once and then kept, which is what lets the settlement
+ * query be bounded to a single block instead of scanning to `latest`.
+ */
+const resolveChainFusionMintOutcome = async ({
+	identity,
+	data,
+	refs,
+	caches
+}: {
+	identity: Identity;
+	data: ChainFusionData;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+	caches: ChainFusionPollCaches;
+}): Promise<
+	| { outcome: ChainFusionMintOutcome; learned: Partial<Record<ChainFusionExternalRefKey, string>> }
+	| undefined
+> => {
+	const depositTxHash = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.DEPOSIT_TX_HASH];
+	const helperContractAddress = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.HELPER_CONTRACT_ADDRESS];
+	const minterCanisterId = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID];
+
+	// Not pollable without the deposit, the contract it went to, or the minter.
+	if (isNullish(depositTxHash) || isNullish(helperContractAddress) || isNullish(minterCanisterId)) {
+		return;
+	}
+
+	const learned: Partial<Record<ChainFusionExternalRefKey, string>> = {};
+
+	// Chain Fusion mints are Ethereum-mainnet only by construction: the quote
+	// rejects any other source network, and the ck helper contracts exist nowhere
+	// else — `infuraCkETHProviders` is not even built for the other EVM chains.
+	let depositBlockNumber = refs[CHAIN_FUSION_EXTERNAL_REF_KEYS.DEPOSIT_BLOCK_NUMBER];
+
+	if (isNullish(depositBlockNumber)) {
+		const receipt = await infuraProviders(ETHEREUM_NETWORK_ID).getTransactionReceipt(depositTxHash);
+
+		if (isNullish(receipt)) {
+			// Still in the mempool. Nothing has been observed yet, either way.
+			return { outcome: 'notMined', learned };
+		}
+
+		if (receipt.status === 0) {
+			// The deposit reverted, so no funds ever reached the helper contract.
+			return { outcome: 'reverted', learned };
+		}
+
+		depositBlockNumber = `${receipt.blockNumber}`;
+		learned[CHAIN_FUSION_EXTERNAL_REF_KEYS.DEPOSIT_BLOCK_NUMBER] = depositBlockNumber;
+	}
+
+	const info = await memoize({
+		cache: caches.ckEthMinterInfo,
+		key: minterCanisterId,
+		load: () => minterInfo({ identity, minterCanisterId, certified: false })
+	});
+
+	const lastObservedBlockNumber = fromNullable(info.last_observed_block_number);
+
+	// The minter has not reported a scan position yet; there is nothing to compare
+	// the deposit against, so leave the row where it is.
+	if (isNullish(lastObservedBlockNumber)) {
+		return { outcome: 'notObserved', learned };
+	}
+
+	// `<=`, not `<`: the Convert flow's virtual row survives while
+	// `getLogs(startBlock = last_observed_block_number)` — an *inclusive* bound —
+	// still returns the deposit's log, so the minter counts as past the block only
+	// once the deposit's block falls strictly behind its scan position.
+	if (lastObservedBlockNumber <= BigInt(depositBlockNumber)) {
+		return { outcome: 'notObserved', learned };
+	}
+
+	// The minter has consumed the deposit's block — the moment the Convert flow's
+	// virtual row is retired. Bounded to that single block, so an abandoned row
+	// picked up weeks later costs exactly the same query as a fresh one.
+	const logs = await infuraCkETHProviders(ETHEREUM_NETWORK_ID).getLogs({
+		contract: { address: helperContractAddress },
+		startBlock: Number(depositBlockNumber),
+		endBlock: Number(depositBlockNumber),
+		topics: toChainFusionDepositLogTopics({
+			principal: identity.getPrincipal(),
+			erc20ContractAddress: toErc20ContractAddress(data.source_token)
+		})
+	});
+
+	const deposited = logs.some(
+		({ transactionHash }) => transactionHash.toLowerCase() === depositTxHash.toLowerCase()
+	);
+
+	return { outcome: deposited ? 'deposited' : 'notDeposited', learned };
+};
+
+/**
+ * ETH → ckETH and ERC20 → ckERC20. The ckETH minter has no per-deposit status
+ * endpoint, so settlement is observed from the deposit side — see
+ * `resolveChainFusionMintOutcome`.
+ */
+const pollChainFusionMint = async ({
+	tx,
+	identity,
+	data,
+	refs,
+	caches
+}: {
+	tx: ActiveUserTransaction;
+	identity: Identity;
+	data: ChainFusionData;
+	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
+	caches: ChainFusionPollCaches;
+}): Promise<void> => {
+	const resolved = await resolveChainFusionMintOutcome({ identity, data, refs, caches });
+
+	if (isNullish(resolved)) {
+		return;
+	}
+
+	const { learned } = resolved;
+	let { outcome } = resolved;
+
+	if (outcome === 'notDeposited') {
+		if (recordMissingDepositLogObservation(tx.id) < MISSING_DEPOSIT_LOG_OBSERVATIONS_REQUIRED) {
+			outcome = 'notObserved';
+		}
+	} else {
+		missingDepositLogObservations.delete(tx.id);
+	}
+
+	await applyUpdate({
+		identity,
+		tx,
+		candidate: chainFusionMintOutcomeToStatus(outcome),
+		error: chainFusionMintOutcomeError(outcome),
+		learned,
+		refs
+	});
+};
+
+/**
+ * Advances the pending Chain Fusion rows, routed on the direction stored in the
+ * row's immutable `data` — which is why the direction is captured at creation
+ * rather than re-derived from the token pair on every tick.
+ *
+ * The withdrawal directions ask a minter and get an exact answer. The two
+ * Ethereum-family mints are observed from the deposit side, since the ckETH minter
+ * has no per-deposit status endpoint. The ckBTC mint is the odd one out: its
+ * poller has to make the minting happen, not merely watch it. The ckSOL mint asks
+ * the minter which deposit is this conversion's, then follows that deposit exactly.
+ */
+export const pollChainFusionActiveUserTransactions = async ({
+	identity,
+	transactions
+}: {
+	identity: Identity;
+	transactions: ActiveUserTransaction[];
+}): Promise<void> => {
+	if (transactions.length === 0) {
+		return;
+	}
+
+	const caches = initChainFusionPollCaches();
+
+	await Promise.all(
+		transactions.map(async (tx) => {
+			try {
+				if (!('ChainFusion' in tx.data)) {
+					return;
+				}
+
+				const { ChainFusion: data } = tx.data;
+
+				const refs = toChainFusionExternalRefsMap(tx.external_refs);
+
+				if (isChainFusionMintDirection(data.direction)) {
+					await pollChainFusionMint({ tx, identity, data, refs, caches });
+					return;
+				}
+
+				if (isChainFusionBtcMintDirection(data.direction)) {
+					await pollChainFusionBtcMint({ tx, identity, data, refs, caches });
+					return;
+				}
+
+				if (isChainFusionBtcWithdrawalDirection(data.direction)) {
+					await pollChainFusionBtcWithdrawal({ tx, identity, refs, caches });
+					return;
+				}
+
+				if (isChainFusionEthWithdrawalDirection(data.direction)) {
+					await pollChainFusionEthWithdrawal({ tx, identity, refs });
+					return;
+				}
+
+				if (isChainFusionSolWithdrawalDirection(data.direction)) {
+					await pollChainFusionSolWithdrawal({ tx, identity, refs });
+					return;
+				}
+
+				if (isChainFusionSolMintDirection(data.direction)) {
+					await pollChainFusionSolMint({ tx, identity, refs });
+				}
+			} catch (err: unknown) {
+				// A transient RPC or canister blip must leave the row pending so the next
+				// tick retries; one failing row never poisons the batch.
+				consoleError(err);
+			}
+		})
+	);
+};

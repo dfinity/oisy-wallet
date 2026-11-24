@@ -1,8 +1,14 @@
+import {
+	BTC_SEND_MAX_INPUTS,
+	CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+} from '$btc/constants/btc.constants';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
+import { BTC_SEND_VIA_BACKEND_ENABLED } from '$env/btc.env';
 import { outpointToKey } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { isNullish } from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 
 export interface UtxoSelectionResult {
@@ -14,6 +20,14 @@ export interface UtxoSelectionResult {
 }
 
 /**
+ * The most inputs a send may spend: with `BTC_SEND_VIA_BACKEND_ENABLED`, `BTC_SEND_MAX_INPUTS`, so
+ * the selection and Max never offer a send whose signing can outrun its approval. `undefined`
+ * otherwise.
+ */
+export const btcSendMaxInputs = (): number | undefined =>
+	BTC_SEND_VIA_BACKEND_ENABLED ? BTC_SEND_MAX_INPUTS : undefined;
+
+/**
  * Extracts outpoint keys (txid + vout) from an array of UTXOs.
  * Outpoints uniquely identify a UTXO; matching on txid alone over-filters
  * UTXOs that share a parent transaction.
@@ -22,18 +36,21 @@ export const extractUtxoOutpoints = (utxos: CkBtcMinterDid.Utxo[]): string[] =>
 	utxos.map(({ outpoint }) => outpointToKey(outpoint));
 
 /**
- * Estimates transaction virtual size (vbytes) based on number of inputs and outputs.
- * This is a simplified calculation for P2WPKH transactions.
+ * Estimates the virtual size (vbytes) of a send from the wallet's P2WPKH address: `numInputs`
+ * P2WPKH inputs, every output but the change (`outputVSizes`: the recipient's alone for a plain
+ * send, from `btcOutputVSize`, or each of a layout's outputs, from `btcScriptOutputVSize`) and a
+ * P2WPKH change output.
  *
  * All constants are in vbytes: witness data is discounted to 1/4 weight per BIP-141,
- * so the result must be multiplied by a sat/vbyte fee rate, not a sat/byte rate.
+ * so the result must be multiplied by a sat/vbyte fee rate, not a sat/byte rate. The output count
+ * is priced at 1 byte, which holds for up to 252 outputs.
  */
 export const estimateTransactionVSize = ({
 	numInputs,
-	numOutputs
+	outputVSizes
 }: {
 	numInputs: number;
-	numOutputs: number;
+	outputVSizes: number[];
 }): number => {
 	// version (4) + locktime (4) + input count (1) + output count (1) + SegWit marker+flag (0.5 → 1) = 11 vbytes
 	const BASE_VSIZE = 11;
@@ -43,10 +60,37 @@ export const estimateTransactionVSize = ({
 	// total: 41 + 26.5 = 67.5 → 68 vbytes
 	const INPUT_VSIZE = 68;
 
-	// P2WPKH output: value (8) + scriptPubKey length (1) + scriptPubKey (22) = 31 vbytes
-	const OUTPUT_VSIZE = 31;
+	// P2WPKH change output: value (8) + scriptPubKey length (1) + scriptPubKey (22) = 31 vbytes
+	const CHANGE_OUTPUT_VSIZE = 31;
 
-	return BASE_VSIZE + numInputs * INPUT_VSIZE + numOutputs * OUTPUT_VSIZE;
+	const outputsVSize = outputVSizes.reduce((sum, vsize) => sum + vsize, 0);
+
+	return BASE_VSIZE + numInputs * INPUT_VSIZE + outputsVSize + CHANGE_OUTPUT_VSIZE;
+};
+
+/**
+ * Fee in satoshis for a send with `numInputs` P2WPKH inputs, the outputs of `outputVSizes` and the
+ * change output every selection prices.
+ *
+ * Each output is sized from its script (`btcOutputVSize`, `btcScriptOutputVSize`): a P2TR or P2WSH
+ * output is 12 vbytes larger than a P2WPKH one, and pricing it as P2WPKH quotes less than the rate.
+ *
+ * Rounds up, so the transaction is never priced below the requested rate. Shared with the
+ * pre-broadcast validation, which must arrive at the same number for the same inputs and
+ * outputs.
+ */
+export const calculateFeeSatoshis = ({
+	numInputs,
+	outputVSizes,
+	feeRateMiliSatoshisPerVByte
+}: {
+	numInputs: number;
+	outputVSizes: number[];
+	feeRateMiliSatoshisPerVByte: bigint;
+}): bigint => {
+	const txVSize = estimateTransactionVSize({ numInputs, outputVSizes });
+
+	return (BigInt(txVSize) * feeRateMiliSatoshisPerVByte + 999n) / 1000n;
 };
 
 /**
@@ -61,15 +105,24 @@ export const estimateTransactionVSize = ({
  * The fee is recalculated after every pick because each additional input increases transaction
  * size.  Using fee(N+1) as the target when searching for the next UTXO ensures the selected
  * set will remain sufficient once the UTXO is added.
+ *
+ * With `maxInputs`, funds that need more inputs are insufficient. Since every pick but the last is
+ * the largest left, the selection then finds a set whenever any set of that many inputs covers the
+ * amount.
  */
 export const calculateUtxoSelection = ({
 	availableUtxos,
 	amountSatoshis,
-	feeRateMiliSatoshisPerVByte
+	outputVSizes,
+	feeRateMiliSatoshisPerVByte,
+	maxInputs
 }: {
 	availableUtxos: CkBtcMinterDid.Utxo[];
+	// What the outputs other than the change pay together.
 	amountSatoshis: bigint;
+	outputVSizes: number[];
 	feeRateMiliSatoshisPerVByte: bigint;
+	maxInputs?: number;
 }): UtxoSelectionResult => {
 	if (availableUtxos.length === 0) {
 		return {
@@ -81,16 +134,14 @@ export const calculateUtxoSelection = ({
 		};
 	}
 
-	const calcFee = (numInputs: number): bigint => {
-		const txVSize = estimateTransactionVSize({ numInputs, numOutputs: 2 });
-		return (BigInt(txVSize) * feeRateMiliSatoshisPerVByte + 999n) / 1000n;
-	};
+	const calcFee = (numInputs: number): bigint =>
+		calculateFeeSatoshis({ numInputs, outputVSizes, feeRateMiliSatoshisPerVByte });
 
 	const selectedUtxos: CkBtcMinterDid.Utxo[] = [];
 	let totalInputValue = ZERO;
 	const remaining = [...availableUtxos];
 
-	while (remaining.length > 0) {
+	while (remaining.length > 0 && (isNullish(maxInputs) || selectedUtxos.length < maxInputs)) {
 		// Fee for the transaction once we add one more input.
 		const fee = calcFee(selectedUtxos.length + 1);
 		const needed = amountSatoshis + fee - totalInputValue;
@@ -195,6 +246,69 @@ export const filterAvailableUtxos = ({
 		utxos: confirmedUtxos,
 		pendingUtxoOutpoints
 	});
+};
+
+/**
+ * The largest amount a send from `utxos` can actually carry: every available UTXO spent,
+ * minus the fee for a transaction with that many inputs.
+ *
+ * Derived from the set `prepareBtcSend` selects from — not from the wallet balance, which is
+ * read at `BTC_BALANCE_MIN_CONFIRMATIONS` and therefore also counts incoming UTXOs still
+ * under the confirmation floor a send requires. Offering those as "Max" quotes an amount the
+ * selection then refuses for want of funds.
+ *
+ * Spending everything needs every input, so the fee is priced for the full set rather than
+ * for whatever smaller set the greedy selection would pick at a lower amount.
+ *
+ * The fee is priced for the outputs of `outputVSizes`, as the selection prices them, so the amount
+ * offered is one the selection accepts. The amount is what those outputs pay together. Before the
+ * recipient of a plain send is known, its size is `BTC_LARGEST_OUTPUT_VSIZE`, and the amount is
+ * fundable whoever the recipient turns out to be.
+ *
+ * With `maxInputs`, a send spends at most that many, so the most it can carry comes from the
+ * largest of them, as the selection would pick them.
+ */
+export const calculateMaxSpendableAmount = ({
+	utxos,
+	pendingUtxoOutpoints,
+	outputVSizes,
+	feeRateMiliSatoshisPerVByte,
+	maxInputs
+}: {
+	utxos: CkBtcMinterDid.Utxo[];
+	pendingUtxoOutpoints: string[];
+	outputVSizes: number[];
+	feeRateMiliSatoshisPerVByte: bigint;
+	maxInputs?: number;
+}): bigint => {
+	const availableUtxos = filterAvailableUtxos({
+		utxos,
+		options: {
+			minConfirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS,
+			pendingUtxoOutpoints
+		}
+	});
+
+	if (availableUtxos.length === 0) {
+		return ZERO;
+	}
+
+	const spentUtxos =
+		isNullish(maxInputs) || availableUtxos.length <= maxInputs
+			? availableUtxos
+			: [...availableUtxos]
+					.sort(({ value: a }, { value: b }) => (a > b ? -1 : a < b ? 1 : 0))
+					.slice(0, maxInputs);
+
+	const totalValue = spentUtxos.reduce((sum, { value }) => sum + BigInt(value), ZERO);
+
+	const feeSatoshis = calculateFeeSatoshis({
+		numInputs: spentUtxos.length,
+		outputVSizes,
+		feeRateMiliSatoshisPerVByte
+	});
+
+	return totalValue > feeSatoshis ? totalValue - feeSatoshis : ZERO;
 };
 
 export const resetUtxosDataStores = (): void => {

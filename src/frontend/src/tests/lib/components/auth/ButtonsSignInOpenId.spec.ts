@@ -65,6 +65,38 @@ describe('ButtonsSignInOpenId', () => {
 		}
 	);
 
+	it.each([
+		{ variant: 'login' as const, pressed: 'active:bg-brand-subtle-30' },
+		{ variant: 'lock' as const, pressed: 'active:bg-brand-subtle-30' }
+	])(
+		'should shrink and darken every button while pressed in the $variant style',
+		({ variant, pressed }) => {
+			const { container } = render(ButtonsSignInOpenId, {
+				props: { onProviderSelected: vi.fn(), variant }
+			});
+
+			cases.forEach(({ testId }) =>
+				expect(container.querySelector(`button[data-tid="${testId}"]`)).toHaveClass(
+					'press-icon',
+					pressed
+				)
+			);
+		}
+	);
+
+	it('should fill and outline every button on hover in the login style', () => {
+		const { container } = render(ButtonsSignInOpenId, {
+			props: { onProviderSelected: vi.fn() }
+		});
+
+		cases.forEach(({ testId }) =>
+			expect(container.querySelector(`button[data-tid="${testId}"]`)).toHaveClass(
+				'hover:bg-brand-subtle-10',
+				'hover:border-brand-primary-alt'
+			)
+		);
+	});
+
 	it('should not invoke onProviderSelected for unrelated buttons', () => {
 		const onProviderSelected = vi.fn();
 

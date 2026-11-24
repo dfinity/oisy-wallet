@@ -31,5 +31,15 @@ export const CKETH_ABI = [
 	}
 ];
 
+// The ckETH helper contract `deposit(bytes32)` function prefix is 0xb214faa5. It is the `deposit` of
+// `CKETH_ABI` above, which converts the ETH it carries to ckETH for the principal it names.
+export const CKETH_DEPOSIT_HASH = '0xb214faa5';
+
+// The `depositEth(bytes32,bytes32)` function prefix of the ckETH minter's other helper contract, which
+// deposits to a principal and a subaccount. It converts the ETH it carries to ckETH for that account;
+// the same contract's `depositErc20` is `ERC20_DEPOSIT_ERC20_HASH`.
+// https://etherscan.io/address/0x18901044688D3756C35Ed2b36D93e6a5B8e00E68#code
+export const CK_DEPOSIT_ETH_HASH = '0x17c819c4';
+
 // As discussed with cross-chain team, we decided to hardcode gas estimation for ETH to ckETH for now.
 export const CKETH_FEE = 50_000n;

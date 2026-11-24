@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy } from 'svelte';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
-	import {
-		SESSION_REQUEST_ETH_SIGN_LEGACY,
-		SESSION_REQUEST_ETH_SIGN_V4
-	} from '$eth/constants/wallet-connect.constants';
 	import { signMessage } from '$eth/services/wallet-connect.services';
-	import { getSignParamsMessageTypedDataV4 } from '$eth/utils/wallet-connect.utils';
+	import {
+		getEthTypedDataPrimaryType,
+		getSignParamsMessageTypedDataV4,
+		isEthSignTypedDataMethod
+	} from '$eth/utils/wallet-connect.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
@@ -20,6 +20,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		listener: OptionWalletConnectListener;
@@ -30,15 +31,39 @@
 
 	let method = $derived(request.params.request.method);
 
-	let domainName = $derived.by(() => {
-		if (method === SESSION_REQUEST_ETH_SIGN_V4 || method === SESSION_REQUEST_ETH_SIGN_LEGACY) {
-			const {
-				domain: { name }
-			} = getSignParamsMessageTypedDataV4(request.params.request.params);
+	// The struct being hashed, which is what the request actually asks for, as the hash derives it
+	// rather than as the request declares it. Parsing can fail on a malformed payload, and a title is
+	// no reason to throw: such a request is titled by its method alone and left to the review, which
+	// is where an unparseable payload is flagged.
+	let primaryType = $derived.by(() => {
+		if (!isEthSignTypedDataMethod(method)) {
+			return;
+		}
 
-			return name;
+		try {
+			const primaryType = getEthTypedDataPrimaryType(
+				getSignParamsMessageTypedDataV4(request.params.request.params)
+			);
+
+			return notEmptyString(primaryType) ? primaryType : undefined;
+		} catch (_: unknown) {
+			return undefined;
 		}
 	});
+
+	// Typed data is a transaction the user authorizes rather than a message they write, so it is
+	// titled as one, named by the struct it hashes where it has one. A raw message
+	// stays a message. Either way the title says what OISY makes of the request, never what the
+	// request calls itself: the domain name it supplies is stated in the summary instead.
+	let modalTitle = $derived(
+		isEthSignTypedDataMethod(method)
+			? nonNullish(primaryType)
+				? replacePlaceholders($i18n.wallet_connect.text.sign_transaction_with_type, {
+						$type: primaryType
+					})
+				: $i18n.wallet_connect.text.sign_transaction
+			: $i18n.wallet_connect.text.sign_message
+	);
 
 	/**
 	 * Modal
@@ -68,6 +93,8 @@
 
 	let signProgressStep = $state<ProgressStepsSign>(ProgressStepsSign.INITIALIZATION);
 
+	let unreviewableTypedDataAcknowledged = $state(false);
+
 	/**
 	 * Reject a message
 	 */
@@ -86,6 +113,7 @@
 		const { success } = await signMessage({
 			request,
 			listener,
+			unreviewableTypedDataAcknowledged,
 			modalNext: modal.next,
 			progress: (step: ProgressStepsSign) => (signProgressStep = step)
 		});
@@ -99,7 +127,7 @@
 <WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
 	{#snippet title()}
 		<WalletConnectModalTitle>
-			{domainName ?? $i18n.wallet_connect.text.sign_message}
+			{modalTitle}
 		</WalletConnectModalTitle>
 	{/snippet}
 
@@ -107,7 +135,12 @@
 		{#if currentStep?.name === WizardStepsSign.SIGNING}
 			<InProgressWizard progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
-			<WalletConnectSignReview onApprove={approve} onReject={reject} {request} />
+			<WalletConnectSignReview
+				onApprove={approve}
+				onReject={reject}
+				{request}
+				bind:unreviewableTypedDataAcknowledged
+			/>
 		{/if}
 	{/key}
 </WizardModal>

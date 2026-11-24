@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { toCssUrl } from '$lib/utils/css.utils';
 
 	interface Props {
 		imageUrl?: string;
@@ -29,7 +30,8 @@
 </script>
 
 <div
-	style={`background-image: url(${imageUrl}); ${shadow === 'inset' ? 'box-shadow: inset 0px 0px 5px 1px #0000000D' : ''}`}
+	style:background-image={nonNullish(imageUrl) ? toCssUrl(imageUrl) : undefined}
+	style:box-shadow={shadow === 'inset' ? 'inset 0px 0px 5px 1px #0000000D' : undefined}
 	class={`flex bg-center bg-no-repeat ${styleClass}`}
 	class:animate-pulse={isNullish(imageUrl)}
 	class:bg-auto={size === 'auto'}

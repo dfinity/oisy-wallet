@@ -42,7 +42,7 @@
 </script>
 
 <div>
-	<div class="flex justify-between gap-[12px]">
+	<div class="flex justify-between gap-2">
 		<Button
 			colorStyle="tertiary"
 			onclick={handleLock}

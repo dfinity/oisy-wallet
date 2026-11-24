@@ -1,5 +1,6 @@
 import { BACKEND_EXCHANGE_ENABLED } from '$env/exchange.env';
 import { COINGECKO_FALLBACK_PROVIDER_ENABLED } from '$env/rest/coingecko.env';
+import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services';
 import type { Erc4626TokensExchangeData } from '$eth/types/erc4626';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
@@ -18,6 +19,7 @@ import {
 	exchangeRateSOLToUsd,
 	exchangeRateSPLToUsd,
 	exchangeRateUsdToCurrency,
+	exchangeRateXRPToUsd,
 	fetchExchangeRatesFromBackend,
 	fillIcrcPricesFromFallbackProviders
 } from '$lib/services/exchange.services';
@@ -34,11 +36,15 @@ import { consoleError } from '$lib/utils/console.utils';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import {
 	buildErc20PriceParams,
+	currencyExchangeRateFromBtc,
 	findMissingErc20ContractAddresses,
 	findMissingLedgerCanisterIds,
 	findMissingSplTokenAddresses,
+	isTcyclesLedgerCanisterId,
 	mergeExchangePrices,
-	type ProviderFallbackPrices
+	type ProviderFallbackPrices,
+	xdrBasketStatus,
+	xdrUsdPrice
 } from '$lib/utils/exchange.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -144,6 +150,7 @@ const syncExchangeFromBackend = async ({
 			currentIcpPrice: undefined,
 			currentIcrcPrices: {},
 			currentSolPrice: undefined,
+			currentXrpPrice: undefined,
 			currentSplPrices: {},
 			currentErc4626Prices: {},
 			currentBnbPrice: undefined,
@@ -176,6 +183,7 @@ const syncExchangeFromBackend = async ({
 		currentBtcPrice,
 		currentIcpPrice,
 		currentSolPrice,
+		currentXrpPrice,
 		currentBnbPrice,
 		currentPolPrice,
 		currentArbitrumEthPrice,
@@ -191,6 +199,7 @@ const syncExchangeFromBackend = async ({
 					currentBtcPrice: undefined,
 					currentIcpPrice: undefined,
 					currentSolPrice: undefined,
+					currentXrpPrice: undefined,
 					currentBnbPrice: undefined,
 					currentPolPrice: undefined,
 					currentArbitrumEthPrice: undefined,
@@ -217,6 +226,7 @@ const syncExchangeFromBackend = async ({
 		currentIcpPrice,
 		currentIcrcPrices,
 		currentSolPrice,
+		currentXrpPrice,
 		currentSplPrices,
 		currentErc4626Prices,
 		currentBnbPrice,
@@ -250,12 +260,12 @@ const syncExchangeFromProviders = async ({
 	);
 
 	const results = await Promise.allSettled([
-		exchangeRateUsdToCurrency(currentCurrency),
 		exchangeRateETHToUsd(),
-		exchangeRateBTCToUsd(),
+		exchangeRateBTCToUsd(currentCurrency),
 		exchangeRateICPToUsd(),
-		exchangeRateICRCToUsd(icrcLedgerCanisterIds),
+		exchangeRateICRCToUsd(icrcLedgerCanisterIds.filter((id) => !isTcyclesLedgerCanisterId(id))),
 		exchangeRateSOLToUsd(),
+		exchangeRateXRPToUsd(),
 		exchangeRateSPLToUsd(splTokenAddresses),
 		exchangeRateBNBToUsd(),
 		exchangeRatePOLToUsd()
@@ -268,29 +278,34 @@ const syncExchangeFromProviders = async ({
 	});
 
 	const [
-		currentExchangeRateResult,
 		currentEthPriceResult,
 		currentBtcPriceResult,
 		currentIcpPriceResult,
 		currentIcrcPricesResult,
 		currentSolPriceResult,
+		currentXrpPriceResult,
 		currentSplPricesResult,
 		currentBnbPriceResult,
 		currentPolPriceResult
 	] = results;
 
-	const currentExchangeRate =
-		currentExchangeRateResult.status === 'fulfilled' ? currentExchangeRateResult.value : undefined;
 	const currentEthPrice =
 		currentEthPriceResult.status === 'fulfilled' ? currentEthPriceResult.value : undefined;
 	const currentBtcPrice =
 		currentBtcPriceResult.status === 'fulfilled' ? currentBtcPriceResult.value : undefined;
+	// The display currency's rate comes from the same BTC request as BTC's own price.
+	const currentExchangeRate = currencyExchangeRateFromBtc({
+		btcPrice: currentBtcPrice?.bitcoin,
+		currency: currentCurrency
+	});
 	const currentIcpPrice =
 		currentIcpPriceResult.status === 'fulfilled' ? currentIcpPriceResult.value : undefined;
 	const currentIcrcPrices =
 		currentIcrcPricesResult.status === 'fulfilled' ? currentIcrcPricesResult.value : undefined;
 	const currentSolPrice =
 		currentSolPriceResult.status === 'fulfilled' ? currentSolPriceResult.value : undefined;
+	const currentXrpPrice =
+		currentXrpPriceResult.status === 'fulfilled' ? currentXrpPriceResult.value : undefined;
 	const currentSplPrices =
 		currentSplPricesResult.status === 'fulfilled' ? currentSplPricesResult.value : undefined;
 	const currentBnbPrice =
@@ -303,6 +318,16 @@ const syncExchangeFromProviders = async ({
 		erc4626TokensExchangeData
 	});
 
+	// TCYCLES costs no request of its own, so it is priced whether or not it is enabled: the swap
+	// flow lists disabled tokens too. Once the basket has expired, it has no price rather than a
+	// wrong one. Only a refresh that includes TCYCLES reports on the basket's countdown.
+	const xdrBasket = xdrBasketStatus(Date.now());
+	const tcyclesPrice =
+		xdrBasket?.phase !== 'expired' ? xdrUsdPrice(currentBtcPrice?.bitcoin) : undefined;
+	const currentXdrBasketStatus = icrcLedgerCanisterIds.some(isTcyclesLedgerCanisterId)
+		? xdrBasket
+		: undefined;
+
 	return {
 		currentExchangeRate: {
 			exchangeRateToUsd: currentExchangeRate?.rate ?? null,
@@ -313,14 +338,19 @@ const syncExchangeFromProviders = async ({
 		currentBtcPrice,
 		currentErc20Prices,
 		currentIcpPrice,
-		currentIcrcPrices: currentIcrcPrices ?? {},
+		currentIcrcPrices: {
+			...currentIcrcPrices,
+			...(nonNullish(tcyclesPrice) && { [TCYCLES_LEDGER_CANISTER_ID]: tcyclesPrice })
+		},
 		currentSolPrice,
+		currentXrpPrice,
 		currentSplPrices: currentSplPrices ?? {},
 		currentErc4626Prices,
 		currentBnbPrice,
 		currentPolPrice,
 		currentArbitrumEthPrice: currentEthPrice,
-		currentBaseEthPrice: currentEthPrice
+		currentBaseEthPrice: currentEthPrice,
+		...(nonNullish(currentXdrBasketStatus) && { currentXdrBasketStatus })
 	};
 };
 
@@ -341,7 +371,9 @@ const fetchProviderFallbackPrices = async ({
 		coingeckoResponse: backendData.currentErc20Prices
 	});
 	const missingIcrc = findMissingLedgerCanisterIds({
-		allLedgerCanisterIds: params.icrcLedgerCanisterIds,
+		allLedgerCanisterIds: params.icrcLedgerCanisterIds.filter(
+			(id) => !isTcyclesLedgerCanisterId(id)
+		),
 		coingeckoResponse: backendData.currentIcrcPrices
 	});
 	const missingSpl = findMissingSplTokenAddresses({
@@ -353,6 +385,7 @@ const fetchProviderFallbackPrices = async ({
 	const missingBtc = isNullish(backendData.currentBtcPrice);
 	const missingIcp = isNullish(backendData.currentIcpPrice);
 	const missingSol = isNullish(backendData.currentSolPrice);
+	const missingXrp = isNullish(backendData.currentXrpPrice);
 	const missingBnb = isNullish(backendData.currentBnbPrice);
 	const missingPol = isNullish(backendData.currentPolPrice);
 	const missingArbitrumEth = isNullish(backendData.currentArbitrumEthPrice);
@@ -372,6 +405,7 @@ const fetchProviderFallbackPrices = async ({
 	const fillBtc = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingBtc;
 	const fillIcp = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingIcp;
 	const fillSol = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingSol;
+	const fillXrp = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingXrp;
 	const fillBnb = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingBnb;
 	const fillPol = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingPol;
 
@@ -383,6 +417,7 @@ const fetchProviderFallbackPrices = async ({
 		!fillBtc &&
 		!fillIcp &&
 		!fillSol &&
+		!fillXrp &&
 		!fillBnb &&
 		!fillPol;
 
@@ -410,6 +445,7 @@ const fetchProviderFallbackPrices = async ({
 		btcPriceResult,
 		icpPriceResult,
 		solPriceResult,
+		xrpPriceResult,
 		bnbPriceResult,
 		polPriceResult
 	] = await Promise.all([
@@ -427,6 +463,7 @@ const fetchProviderFallbackPrices = async ({
 		fillBtc ? exchangeRateBTCToUsd().catch(logFallbackError) : Promise.resolve(undefined),
 		fillIcp ? exchangeRateICPToUsd().catch(logFallbackError) : Promise.resolve(undefined),
 		fillSol ? exchangeRateSOLToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		fillXrp ? exchangeRateXRPToUsd().catch(logFallbackError) : Promise.resolve(undefined),
 		fillBnb ? exchangeRateBNBToUsd().catch(logFallbackError) : Promise.resolve(undefined),
 		fillPol ? exchangeRatePOLToUsd().catch(logFallbackError) : Promise.resolve(undefined)
 	]);
@@ -456,6 +493,7 @@ const fetchProviderFallbackPrices = async ({
 		btcPrice: btcPriceResult,
 		icpPrice: icpPriceResult,
 		solPrice: solPriceResult,
+		xrpPrice: xrpPriceResult,
 		bnbPrice: bnbPriceResult,
 		polPrice: polPriceResult,
 		arbitrumEthPrice: missingArbitrumEth ? ethPrice : undefined,

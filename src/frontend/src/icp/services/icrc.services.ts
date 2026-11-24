@@ -2,7 +2,9 @@ import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ADDITIONAL_ICRC_TOKENS_INDEXED } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { ICRC_TOKENS, ICRC_TOKENS_METADATA } from '$env/tokens/tokens-icrc/tokens.icrc.env';
+import { RETIRED_ICRC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.retired.env';
 import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
+import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { SUPPORTED_ICP_TOKENS_INDEXED } from '$env/tokens/tokens.icp.env';
 import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
@@ -48,6 +50,7 @@ import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
+import { isTcyclesLedgerCanisterId } from '$lib/utils/exchange.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import {
 	fromNullable,
@@ -60,14 +63,6 @@ import {
 import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
-
-export const loadIcrcTokens = async ({
-	identity
-}: {
-	identity: NullishIdentity;
-}): Promise<void> => {
-	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity, useCache: true })]);
-};
 
 export const loadDefaultIcrcTokens = async () => {
 	await Promise.all(
@@ -189,6 +184,10 @@ const loadCustomIcrcTokensData = async ({
 
 		const ledgerCanisterIdText = ledger_id.toText();
 
+		if (RETIRED_ICRC_LEDGER_CANISTER_IDS.includes(ledgerCanisterIdText)) {
+			return;
+		}
+
 		// For performance reasons, if we can build the token metadata using the known custom tokens from the environments, we do so and save a call to the ledger to fetch the metadata.
 		const meta = buildIcrcCustomTokenMetadataPseudoResponse({
 			icrcCustomTokens: indexedIcrcCustomTokens,
@@ -198,6 +197,10 @@ const loadCustomIcrcTokensData = async ({
 		const serviceParams = { ledgerCanisterId: ledgerCanisterIdText, identity, certified };
 
 		const data: IcrcLoadData = {
+			// Keep a built-in pick's identity without importing the catalog into worker-shared utils.
+			id: IC_BUILTIN_TOKENS.find(
+				({ ledgerCanisterId }) => ledgerCanisterId === ledgerCanisterIdText
+			)?.id,
 			metadata: nonNullish(meta) ? meta : await metadata(serviceParams),
 			mintingAccount: await getMintingAccount(serviceParams),
 			ledgerCanisterId: ledgerCanisterIdText,
@@ -388,7 +391,9 @@ export const loadDisabledIcrcTokensExchanges = async ({
 		exchangeRateICRCToUsd(
 			disabledIcrcTokens.reduce<LedgerCanisterIdText[]>(
 				(acc, { ledgerCanisterId }) =>
-					!ICRC_CK_TOKENS_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)
+					// TCYCLES gets its XDR price from the exchange worker, never a market price.
+					!ICRC_CK_TOKENS_LEDGER_CANISTER_IDS.includes(ledgerCanisterId) &&
+					!isTcyclesLedgerCanisterId(ledgerCanisterId)
 						? [...acc, ledgerCanisterId]
 						: acc,
 				[]
@@ -465,4 +470,33 @@ export const isIcrcTokenSupportIcrc2 = async ({
 	});
 
 	return supportedStandards.some(({ name }) => name === IcTokenStandards.icrc2);
+};
+
+// A ledger's standards do not change while the app runs, so each ledger is asked once per session.
+const icrc3SupportByLedger = new Map<CanisterIdText, Promise<boolean>>();
+
+export const isIcrcTokenSupportIcrc3 = ({
+	identity,
+	ledgerCanisterId
+}: {
+	identity: NullishIdentity;
+	ledgerCanisterId: CanisterIdText;
+}): Promise<boolean> => {
+	const cached = icrc3SupportByLedger.get(ledgerCanisterId);
+
+	if (nonNullish(cached)) {
+		return cached;
+	}
+
+	const supported = icrc1SupportedStandards({ identity, ledgerCanisterId, certified: false })
+		.then((standards) => standards.some(({ name }) => name === IcTokenStandards.icrc3))
+		.catch((err: unknown) => {
+			// A failed call is not an answer: the next caller asks the ledger again.
+			icrc3SupportByLedger.delete(ledgerCanisterId);
+			throw err;
+		});
+
+	icrc3SupportByLedger.set(ledgerCanisterId, supported);
+
+	return supported;
 };

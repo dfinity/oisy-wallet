@@ -2,10 +2,62 @@ import {
 	compareNatural,
 	normalizeTextFilter,
 	someTextMatchesFilter,
-	textMatchesFilter
+	textMatchesFilter,
+	truncateUtf8Bytes
 } from '$lib/utils/string.utils';
 
 describe('string.utils', () => {
+	describe('truncateUtf8Bytes', () => {
+		const utf8Length = (text: string): number => new TextEncoder().encode(text).length;
+
+		it('should leave text that fits unchanged', () => {
+			expect(truncateUtf8Bytes({ text: 'hello', maxBytes: 5 })).toBe('hello');
+			expect(truncateUtf8Bytes({ text: '', maxBytes: 5 })).toBe('');
+		});
+
+		it('should cut ASCII at the byte limit', () => {
+			expect(truncateUtf8Bytes({ text: 'hello world', maxBytes: 5 })).toBe('hello');
+		});
+
+		it('should count bytes, not characters', () => {
+			// Each `é` takes two bytes.
+			const cut = truncateUtf8Bytes({ text: 'é'.repeat(10), maxBytes: 7 });
+
+			expect(cut).toBe('é'.repeat(3));
+			expect(utf8Length(cut)).toBe(6);
+		});
+
+		it('should never split a character that does not fit whole', () => {
+			// Three bytes left after `ab`, and the emoji takes four: it is dropped, not halved.
+			expect(truncateUtf8Bytes({ text: 'ab\u{1F600}', maxBytes: 5 })).toBe('ab');
+			expect(truncateUtf8Bytes({ text: 'ab\u{1F600}', maxBytes: 6 })).toBe('ab\u{1F600}');
+		});
+
+		it('should cut text many times the limit in one pass', () => {
+			expect(truncateUtf8Bytes({ text: 'x'.repeat(50_000), maxBytes: 256 })).toBe('x'.repeat(256));
+		});
+
+		it('should return nothing for a zero limit', () => {
+			expect(truncateUtf8Bytes({ text: 'hello', maxBytes: 0 })).toBe('');
+		});
+
+		it('should return nothing for a negative or NaN limit', () => {
+			expect(truncateUtf8Bytes({ text: 'hello', maxBytes: -3 })).toBe('');
+			expect(truncateUtf8Bytes({ text: 'hello', maxBytes: -Infinity })).toBe('');
+			expect(truncateUtf8Bytes({ text: 'hello', maxBytes: Number.NaN })).toBe('');
+		});
+
+		it('should keep the whole text for an unbounded limit', () => {
+			// `€` takes three bytes for one UTF-16 unit, the most UTF-8 needs per unit.
+			expect(truncateUtf8Bytes({ text: '€'.repeat(5), maxBytes: Infinity })).toBe('€'.repeat(5));
+			expect(truncateUtf8Bytes({ text: 'hé\u{1F600}', maxBytes: Infinity })).toBe('hé\u{1F600}');
+		});
+
+		it('should cut at the limit when it is below what the text could take', () => {
+			expect(truncateUtf8Bytes({ text: '€'.repeat(5), maxBytes: 14 })).toBe('€'.repeat(4));
+		});
+	});
+
 	describe('normalizeTextFilter', () => {
 		it('trims and lower-cases', () => {
 			expect(normalizeTextFilter('  Vendre  ')).toBe('vendre');

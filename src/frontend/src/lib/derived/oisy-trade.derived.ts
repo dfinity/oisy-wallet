@@ -10,11 +10,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { enabledIcTokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
-import type {
-	OisyTradeAsset,
-	OisyTradeOrderView,
-	OisyTradeWithdrawToken
-} from '$lib/types/oisy-trade';
+import type { OisyTradeAsset, OisyTradeOrderView } from '$lib/types/oisy-trade';
 import {
 	isOisyTradeOrderActive,
 	oisyTradeDepositableTokens as mapDepositableTokens,
@@ -22,8 +18,7 @@ import {
 	mapOisyTradeOrders,
 	oisyTradeSupportedTokenSymbols as mapSupportedTokenSymbols,
 	sumOisyTradeAssetsFreeUsd,
-	sumOisyTradeAssetsUsd,
-	toOisyTradeWithdrawTokens
+	sumOisyTradeAssetsUsd
 } from '$lib/utils/oisy-trade.utils';
 import { calculateTokenUsdBalance } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -56,11 +51,16 @@ const oisyTradeRawOrders: Readable<UserOrder[]> = derived(
 	({ orders }) => orders ?? []
 );
 
-// The caller's orders resolved to OISY tokens, newest first. Orders whose
-// base/quote ledger the wallet doesn't know are dropped.
+// The caller's orders resolved to OISY tokens, newest first. Wallet metadata is
+// preferred, but DEX supported-token metadata keeps disabled-token orders visible.
 export const oisyTradeOrders: Readable<OisyTradeOrderView[]> = derived(
-	[oisyTradeRawOrders, enabledIcTokens],
-	([$orders, $enabledIcTokens]) => mapOisyTradeOrders({ orders: $orders, tokens: $enabledIcTokens })
+	[oisyTradeRawOrders, oisyTradeSupportedTokens, enabledIcTokens],
+	([$orders, $supportedTokens, $enabledIcTokens]) =>
+		mapOisyTradeOrders({
+			orders: $orders,
+			tokens: $enabledIcTokens,
+			supportedTokens: $supportedTokens
+		})
 );
 
 // Working orders (Active tab): status Pending or Open.
@@ -146,14 +146,6 @@ export const oisyTradeDepositableUsdValue: Readable<number> = derived(
 			(acc, token) => acc + (calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0),
 			0
 		)
-);
-
-// DEX balances joined with the matching OISY token, so the Trading tab can offer
-// a Withdraw entry per holding with the token pre-resolved.
-export const oisyTradeWithdrawTokens: Readable<OisyTradeWithdrawToken[]> = derived(
-	[oisyTradeBalances, enabledIcTokens],
-	([$oisyTradeBalances, $enabledIcTokens]) =>
-		toOisyTradeWithdrawTokens({ balances: $oisyTradeBalances, icrcTokens: $enabledIcTokens })
 );
 
 // The supported trade tokens resolved to their matching app `IcToken` (by ledger

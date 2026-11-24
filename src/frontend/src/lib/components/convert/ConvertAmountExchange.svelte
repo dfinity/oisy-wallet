@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import {
 		CONVERT_AMOUNT_EXCHANGE_SKELETON,
@@ -11,6 +10,7 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { formatCurrency } from '$lib/utils/format.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		amount?: OptionAmount;

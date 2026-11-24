@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { getContext, type Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
@@ -17,6 +16,7 @@
 	} from '$lib/stores/token-action-validation-errors.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		sendAmount: OptionAmount;

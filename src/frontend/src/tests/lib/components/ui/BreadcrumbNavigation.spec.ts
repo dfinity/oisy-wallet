@@ -36,6 +36,7 @@ describe('BreadcrumbNavigation', () => {
 		links.forEach((link) => {
 			expect(link).toHaveClass('text-brand-primary');
 			expect(link).toHaveClass('no-underline');
+			expect(link).toHaveClass('hover:text-brand-hover', 'active:text-brand-hover');
 		});
 	});
 

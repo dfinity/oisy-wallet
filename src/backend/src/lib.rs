@@ -1,11 +1,8 @@
 #![warn(clippy::wildcard_imports)]
 
 use candid::Principal;
-use ic_cdk::{
-    export_candid, init,
-    management_canister::{HttpRequestResult, TransformArgs},
-    post_upgrade,
-};
+use ic_cdk::{export_candid, init, post_upgrade};
+use ic_cdk_management_canister::{HttpRequestResult, TransformArgs};
 use serde_bytes::ByteBuf;
 use shared::{
     http::{HttpRequest, HttpResponse},
@@ -18,10 +15,11 @@ use shared::{
         api_keys::ApiKeys,
         backend_config::{Arg, Config},
         bitcoin::{
-            BtcAddPendingTransactionRequest, BtcGetFeePercentilesRequest,
-            BtcGetPendingTransactionsRequest,
+            BtcAddPendingTransactionRequest, BtcBroadcastTransactionRequest, BtcGetBalanceRequest,
+            BtcGetFeePercentilesRequest, BtcGetPendingTransactionsRequest,
+            BtcGetSpendableUtxosRequest,
         },
-        contact::{CreateContactRequest, UpdateContactRequest},
+        contact::{CreateContactRequest, GetContactImagesRequest, UpdateContactRequest},
         custom_token::CustomToken,
         dapp::AddHiddenDappIdRequest,
         exchange::ExchangeRate,
@@ -34,15 +32,19 @@ use shared::{
         result_types::{
             ActiveUserTransactionResult, AddUserDismissedNotificationResult,
             AddUserHiddenDappIdResult, AllowSigningResult, BtcAddPendingTransactionResult,
-            BtcGetFeePercentilesResult, BtcGetPendingTransactionsResult,
-            ConsumePersonalNoteShareResult, CreateContactResult, CreatePersonalNoteShareResult,
-            CreateUserProfileResult, DeleteActiveUserTransactionResult, DeleteContactResult,
-            DeletePersonalNoteResult, GetActiveUserTransactionsResult, GetAgreementHistoryResult,
-            GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetPersonalNoteShareResult, GetPersonalNoteSharesCountResult,
-            GetPersonalNotesCountResult, GetPersonalNotesResult, GetUserProfileResult,
-            GetUserTransactionsResult, PersonalNotesVetkeyResult, SaveUserTransactionsResult,
-            SetPersonalNoteResult, SetUserShowTestnetsResult, SignOnramperWidgetUrlResult,
+            BtcBroadcastTransactionResult, BtcGetBalanceResult, BtcGetFeePercentilesResult,
+            BtcGetPendingTransactionsResult, BtcGetSpendableUtxosResult, CancelTipResult,
+            ClaimTipResult, ConsumePersonalNoteShareResult, CreateContactResult,
+            CreatePersonalNoteShareResult, CreateTipResult, CreateUserProfileResult,
+            DeleteActiveUserTransactionResult, DeleteContactResult, DeletePersonalNoteResult,
+            GetActiveUserTransactionsResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
+            GetContactImagesResult, GetContactResult, GetContactsPageResult, GetContactsResult,
+            GetMyTipsResult, GetPersonalNoteShareResult, GetPersonalNoteSharesCountResult,
+            GetPersonalNotesCountResult, GetPersonalNotesResult, GetTipDetailsResult, GetTipResult,
+            GetTipSecretResult, GetUserProfileResult, GetUserTransactionsResult,
+            MarkActiveUserTransactionsSeenResult, PersonalNotesVetkeyResult,
+            SaveUserTransactionsResult, SetPersonalNoteResult, SetTipSecretResult,
+            SetUserShowTestnetsResult, SignOnramperWidgetUrlResult, TipVetkeyResult,
             UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
             UpdateProviderAgreementsResult, UpdateTransactionFilterSettingsResult,
             UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
@@ -51,6 +53,7 @@ use shared::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest,
         },
+        tip::{CreateTipRequest, SetTipSecretRequest, TipClaimRequest},
         token_id::TokenId,
         transaction_settings::UpdateTransactionFilterSettingsRequest,
         user_profile::HasUserProfileResponse,
@@ -72,6 +75,7 @@ mod personal_notes;
 mod signer;
 mod state;
 mod status;
+mod tips;
 mod token;
 mod transactions;
 mod types;
@@ -114,6 +118,10 @@ pub fn post_upgrade(arg: Option<Arg>) {
         }
     }
 
+    // TODO: remove once every canister has been upgraded past the release that ships it; see
+    // `state::token_id_keys`. Runs before the timers that write to these stores are started.
+    state::token_id_keys::clear_stores_with_candid_token_id_keys();
+
     // Attach the personal-notes store eagerly so `stats()` (a query, which
     // cannot run the lazy init) reports the persisted count after an upgrade.
     // Fresh installs (`init`) stay lazy to avoid allocating its memory regions
@@ -126,6 +134,14 @@ pub fn post_upgrade(arg: Option<Arg>) {
     utils::housekeeping::start_periodic_housekeeping_timers();
 
     exchange::start_exchange_rate_timer();
+
+    // TODO: remove once every canister has been upgraded past the release that ships it; see
+    // `contacts::migration`.
+    contacts::start_inline_image_migration();
+
+    // TODO: remove once every canister has been upgraded past the release that ships it; see
+    // `user_profile::migration`.
+    user_profile::start_long_qualifier_cleanup();
 }
 
 export_candid!();

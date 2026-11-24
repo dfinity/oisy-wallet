@@ -1,15 +1,18 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { Asset, Chain } from '@liquidium/client';
+	import { SupplyAction, type Asset, type Chain } from '@liquidium/client';
 	import { setContext } from 'svelte';
 	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumRepayBtcWizard from '$lib/components/liquidium/repay/LiquidiumRepayBtcWizard.svelte';
 	import LiquidiumRepayEthWizard from '$lib/components/liquidium/repay/LiquidiumRepayEthWizard.svelte';
 	import LiquidiumRepayIcrcWizard from '$lib/components/liquidium/repay/LiquidiumRepayIcrcWizard.svelte';
+	import LiquidiumRepaySolWizard from '$lib/components/liquidium/repay/LiquidiumRepaySolWizard.svelte';
 	import LiquidiumRepayTokensList from '$lib/components/liquidium/repay/LiquidiumRepayTokensList.svelte';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumRepayWizardSteps } from '$lib/config/lend-borrow.config';
+	import { ZERO } from '$lib/constants/app.constants';
+	import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { liquidiumPortfolio } from '$lib/derived/liquidium.derived';
@@ -28,6 +31,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { consoleError } from '$lib/utils/console.utils';
+	import { liquidiumPendingRepayAmount } from '$lib/utils/liquidium-active-tx.utils';
 	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
@@ -58,39 +62,121 @@
 
 	// Provider inflow fee for this asset (repayment is an inflow), passed to the wizard.
 	let inflowFee = $state<bigint | undefined>();
+	// SOL only: the least gross transfer Liquidium credits, which the native SOL form enforces.
+	let minimumSendAmount = $state<bigint | undefined>();
 	// The estimate failed (e.g. stale oracle price): surface a retry message and block submit.
 	// Account-based repay has no SDK-sanctioned fee fallback (that exists only for instant loans),
 	// so it degrades gracefully like Supply rather than guessing a fee.
 	let inflowFeeUnavailable = $state(false);
-	// Full outstanding debt (base units) — the "Max (full debt)" cap.
+	// Full outstanding debt (base units) as the protocol sees it — excludes repays still settling.
 	let maxRepay = $state<bigint | undefined>();
+	// The debt request failed: the form stays blocked (it has no cap to check against) and says why.
+	let maxRepayUnavailable = $state(false);
+
+	// Repays already sent for this pool (any rail) that the protocol has not credited yet.
+	let pendingRepay = $derived(
+		nonNullish(selectedReserve)
+			? liquidiumPendingRepayAmount({
+					transactions: $activeUserTransactionsPending,
+					poolId: selectedReserve.poolId
+				})
+			: ZERO
+	);
+
+	// The "Max (full debt)" cap, net of pending repays: until they settle the protocol still reports
+	// the full debt, and a second full repay would arrive with no debt left to apply it to.
+	let netMaxRepay = $derived(
+		nonNullish(maxRepay) ? (maxRepay > pendingRepay ? maxRepay - pendingRepay : ZERO) : undefined
+	);
+
+	// The position as the portfolio reports it now: the copy picked from the list keeps the
+	// pre-settlement debt once a pending repay settles. The fee and max effects stay keyed on the pick,
+	// so a portfolio refresh does not refetch them.
+	const liveReserve = (picked: LiquidiumReserve): LiquidiumReserve =>
+		$liquidiumPortfolio?.reserves.find(({ poolId }) => poolId === picked.poolId) ?? picked;
 
 	$effect(() => {
 		const identity = $authIdentity;
 
-		if (nonNullish(identity) && nonNullish(selectedReserve)) {
-			const { asset, chain, poolId } = selectedReserve;
-
-			inflowFee = undefined;
-			inflowFeeUnavailable = false;
-			maxRepay = undefined;
-
-			// Reserve data widens asset/chain to open strings; narrow to the SDK's strict types here.
-			estimateLiquidiumInflowFee({
-				identity,
-				asset: asset as Asset,
-				chain: chain as Chain
-			})
-				.then((fee) => (inflowFee = fee))
-				.catch((err: unknown) => {
-					consoleError(err);
-					inflowFeeUnavailable = true;
-				});
-
-			getLiquidiumMaxRepayAmount({ identity, ethAddress: $ethAddress, poolId })
-				.then((amount) => (maxRepay = amount ?? undefined))
-				.catch(consoleError);
+		if (isNullish(identity) || isNullish(selectedReserve)) {
+			return;
 		}
+
+		const { asset, chain, poolId } = selectedReserve;
+
+		inflowFee = undefined;
+		minimumSendAmount = undefined;
+		inflowFeeUnavailable = false;
+
+		// A quote for a rail picked before must not overwrite the current one's.
+		let cancelled = false;
+
+		// Reserve data widens asset/chain to open strings; narrow to the SDK's strict types here.
+		estimateLiquidiumInflowFee({
+			identity,
+			ethAddress: $ethAddress,
+			asset: asset as Asset,
+			chain: chain as Chain,
+			poolId,
+			action: SupplyAction.repayment
+		})
+			.then(({ totalFee, minimumSendAmount: minimum }) => {
+				if (!cancelled) {
+					inflowFee = totalFee;
+					minimumSendAmount = minimum;
+				}
+			})
+			.catch((err: unknown) => {
+				consoleError(err);
+
+				if (!cancelled) {
+					inflowFeeUnavailable = true;
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	});
+
+	$effect(() => {
+		const identity = $authIdentity;
+		const address = $ethAddress;
+
+		// Refetched whenever the pending total changes: a repay that settles stops counting as
+		// pending, so the cap has to come from the protocol's debt after it, not the one quoted
+		// before. Until the fresh value lands the form stays blocked.
+		[pendingRepay];
+
+		maxRepay = undefined;
+		maxRepayUnavailable = false;
+
+		if (isNullish(identity) || isNullish(address) || isNullish(selectedReserve)) {
+			return;
+		}
+
+		// A slower earlier request must not overwrite the refetched cap.
+		let cancelled = false;
+
+		getLiquidiumMaxRepayAmount({ identity, ethAddress: address, poolId: selectedReserve.poolId })
+			.then((amount) => {
+				if (!cancelled) {
+					maxRepay = amount ?? undefined;
+					// `null` means no Liquidium profile, which a position with debt always has.
+					maxRepayUnavailable = isNullish(amount);
+				}
+			})
+			.catch((err: unknown) => {
+				consoleError(err);
+
+				if (!cancelled) {
+					maxRepayUnavailable = true;
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
 	});
 
 	let modal: WizardModal<WizardStepsLiquidiumRepay> | undefined = $state();
@@ -137,8 +223,10 @@
 		selectedReserve = reserve;
 		amount = undefined;
 		inflowFee = undefined;
+		minimumSendAmount = undefined;
 		inflowFeeUnavailable = false;
 		maxRepay = undefined;
+		maxRepayUnavailable = false;
 		repayProgressStep = ProgressStepsLiquidiumRepay.INITIALIZATION;
 		currentStep = undefined;
 		tokensListContext.resetFilters();
@@ -171,13 +259,15 @@
 					{currentStep}
 					{inflowFee}
 					{inflowFeeUnavailable}
-					{maxRepay}
+					maxRepay={netMaxRepay}
+					{maxRepayUnavailable}
 					onBack={modal.back}
 					onClose={close}
 					onNext={modal.next}
 					onSelectToken={enterTokensList}
+					{pendingRepay}
 					portfolio={$liquidiumPortfolio}
-					reserve={selectedReserve}
+					reserve={liveReserve(selectedReserve)}
 					bind:amount
 					bind:repayProgressStep
 				/>
@@ -186,28 +276,50 @@
 					{currentStep}
 					{inflowFee}
 					{inflowFeeUnavailable}
-					{maxRepay}
+					maxRepay={netMaxRepay}
+					{maxRepayUnavailable}
 					onBack={modal.back}
 					onClose={close}
 					onNext={modal.next}
 					onSelectToken={enterTokensList}
+					{pendingRepay}
 					portfolio={$liquidiumPortfolio}
-					reserve={selectedReserve}
+					reserve={liveReserve(selectedReserve)}
 					bind:amount
 					bind:repayProgressStep
 				/>
-			{:else}
+			{:else if selectedReserve.chain === 'SOL'}
+				<LiquidiumRepaySolWizard
+					{currentStep}
+					{inflowFee}
+					{inflowFeeUnavailable}
+					maxRepay={netMaxRepay}
+					{maxRepayUnavailable}
+					{minimumSendAmount}
+					onBack={modal.back}
+					onClose={close}
+					onNext={modal.next}
+					onSelectToken={enterTokensList}
+					{pendingRepay}
+					portfolio={$liquidiumPortfolio}
+					reserve={liveReserve(selectedReserve)}
+					bind:amount
+					bind:repayProgressStep
+				/>
+			{:else if selectedReserve.chain === 'ETH'}
 				<LiquidiumRepayEthWizard
 					{currentStep}
 					{inflowFee}
 					{inflowFeeUnavailable}
-					{maxRepay}
+					maxRepay={netMaxRepay}
+					{maxRepayUnavailable}
 					onBack={modal.back}
 					onClose={close}
 					onNext={modal.next}
 					onSelectToken={enterTokensList}
+					{pendingRepay}
 					portfolio={$liquidiumPortfolio}
-					reserve={selectedReserve}
+					reserve={liveReserve(selectedReserve)}
 					bind:amount
 					bind:repayProgressStep
 				/>

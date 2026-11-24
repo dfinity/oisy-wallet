@@ -213,7 +213,8 @@ const resolveQuoteFromPlan = async ({
 export const fetchOneSecEvmToIcpQuote = async ({
 	sourceToken,
 	destinationToken,
-	amount
+	amount,
+	onProviderParticipating
 }: EvmQuoteParams): Promise<SwapMappedResult | undefined> => {
 	const identity = get(authIdentity);
 	if (!ONESEC_SWAP_ENABLED || isNullish(identity) || !isNetworkIdICP(destinationToken.network.id)) {
@@ -226,6 +227,7 @@ export const fetchOneSecEvmToIcpQuote = async ({
 	}
 
 	try {
+		onProviderParticipating?.(SwapProvider.ONE_SEC);
 		const plan = await new EvmToIcpBridgeBuilder(sourceToken.network.name as EvmChain, entry.token)
 			.receiver(identity.getPrincipal())
 			.amountInUnits(amount)
@@ -241,7 +243,8 @@ export const fetchOneSecIcpToEvmQuote = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	userEthAddress
+	userEthAddress,
+	onProviderParticipating
 }: IcpBridgeQuoteParams): Promise<SwapMappedResult | undefined> => {
 	const identity = get(authIdentity);
 	if (
@@ -260,6 +263,7 @@ export const fetchOneSecIcpToEvmQuote = async ({
 
 	try {
 		const agent = await getAgent({ identity });
+		onProviderParticipating?.(SwapProvider.ONE_SEC);
 		const plan = await new IcpToEvmBridgeBuilder(
 			agent,
 			destinationToken.network.name as EvmChain,
@@ -288,7 +292,7 @@ const createAutAndDetachCloser = async ({
 }: {
 	identity: Identity;
 	swapId: string;
-	data: ActiveUserTransactionData;
+	data: ActiveUserTransactionData | undefined;
 	sourceToken: Token;
 	destinationToken: Token;
 	swapAmount: string | number;
@@ -304,19 +308,24 @@ const createAutAndDetachCloser = async ({
 		...extraRefs
 	};
 
-	// AUT persistence is best-effort: a failed `createActiveUserTransaction`
-	// must NOT abort the plan. The user has already committed funds (point of
-	// no return), so the closer is the only path that completes the bridge —
-	// it always runs, persisted row or not.
-	try {
-		await createActiveUserTransaction({
-			identity,
-			id: swapId,
-			data,
-			externalRefs: toOneSecExternalRefs(initialRefs)
-		});
-	} catch (err: unknown) {
-		consoleError(err);
+	// AUT persistence is best-effort: neither a failed
+	// `createActiveUserTransaction` nor an unmappable token may abort the plan.
+	// The user has already committed funds (point of no return), so the closer is
+	// the only path that completes the bridge — it always runs, persisted row or
+	// not. Nullish `data` is unreachable for the ERC-20 / ICRC pair OneSec
+	// supports, but the token mapper is shared, so it must degrade to an
+	// untracked bridge rather than a stranded one.
+	if (nonNullish(data)) {
+		try {
+			await createActiveUserTransaction({
+				identity,
+				id: swapId,
+				data,
+				externalRefs: toOneSecExternalRefs(initialRefs)
+			});
+		} catch (err: unknown) {
+			consoleError(err);
+		}
 	}
 
 	finishOneSecBridgingInSession({ identity, id: swapId, plan, initialRefs });

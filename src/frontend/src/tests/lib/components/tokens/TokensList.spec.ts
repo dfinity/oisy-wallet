@@ -102,6 +102,27 @@ describe('TokensList', () => {
 			});
 		});
 
+		it('should use the in-sentence form of Compute in the placeholder title', async () => {
+			tokenCategoryFilterStore.set({
+				key: 'token-category-filter',
+				value: { value: TokenCategoryTagValue.COMPUTE }
+			});
+
+			const { container } = render(TokensList);
+
+			await waitFor(() => {
+				const title = container.querySelector('p.font-bold');
+
+				expect(title).not.toBeNull();
+				expect(title?.textContent).toBe(
+					en.tokens.text.no_tokens_for_asset_type_zero_tokens.replace(
+						'$asset_type',
+						en.token_tag.category_in_sentence.compute
+					)
+				);
+			});
+		});
+
 		it('should use the proper label text when there are disabled tokens to enable', async () => {
 			const disabledStablecoin = mkToggleableToken({
 				category: TokenCategoryTagValue.STABLECOIN,

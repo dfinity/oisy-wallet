@@ -1,15 +1,21 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import { getContext, onMount, tick } from 'svelte';
+	import { get } from 'svelte/store';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import { TOKEN_INPUT_SELECT_TOKEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { allSwapUniverseTokens } from '$lib/derived/swap.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		MODAL_NETWORKS_LIST_CONTEXT_KEY,
+		type ModalNetworksListContext
+	} from '$lib/stores/modal-networks-list.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
@@ -21,56 +27,105 @@
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
+	import { canPayWithToken, getReceiveSwapTokens, sortSwapListTokens } from '$lib/utils/swap.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
-	import { sortTokens } from '$lib/utils/tokens.utils';
 
 	interface Props {
 		side?: SwapSelectTokenType;
 		onSelectToken: (token: Token) => void;
-		onSelectNetworkFilter: () => void;
 		onCloseTokensList: () => void;
+		onFiltersChange?: () => void;
 	}
 
-	let { side, onSelectToken, onSelectNetworkFilter, onCloseTokensList }: Props = $props();
+	let { side, onSelectToken, onCloseTokensList, onFiltersChange }: Props = $props();
 
-	const { sourceToken, destinationToken, receiveSupportedData } =
+	const { sourceToken, destinationToken, receiveSupportedData, tokenListReturnFocus } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	let root: HTMLDivElement;
+
+	onMount(() => {
+		// Keep desktop search autofocus; on mobile enter the list without opening the keyboard.
+		if (!root.contains(document.activeElement)) {
+			root.querySelector<HTMLElement>('button:not([disabled])')?.focus({ preventScroll: true });
+		}
+	});
+
+	const returnToForm = async (token?: Token) => {
+		const dialog = root.closest('[role="dialog"]');
+		const destinationSide = side === 'destination';
+		const returnFocus = get(tokenListReturnFocus);
+		tokenListReturnFocus.set(undefined);
+
+		if (nonNullish(token)) {
+			onSelectToken(token);
+		} else {
+			onCloseTokensList();
+		}
+
+		await tick();
+
+		if (dialog?.isConnected) {
+			const trigger =
+				!token && returnFocus
+					? dialog.querySelector<HTMLElement>(`[data-tid="${returnFocus}"]:not([disabled])`)
+					: undefined;
+
+			(
+				trigger ??
+				dialog.querySelector<HTMLElement>(
+					destinationSide
+						? '[data-swap-receive-area] button:not([disabled])'
+						: `[data-tid="${TOKEN_INPUT_SELECT_TOKEN_BUTTON}"]:not([disabled])`
+				)
+			)?.focus({ preventScroll: true });
+		}
+	};
 
 	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
-	// On the destination side use the per-source receive data (when available); on the source
-	// side fall back to the aggregated source-side data. Both come from the same provider state,
-	// just shaped differently.
-	let supportedData = $derived(
-		side === 'destination' ? $receiveSupportedData : $swapSupportedTokensStore?.aggregated
+	const { filteredNetworks } = getContext<ModalNetworksListContext>(
+		MODAL_NETWORKS_LIST_CONTEXT_KEY
 	);
 
-	let allSwapTokens: TokenToggleable<Token>[] = $derived(
-		filterSwapTokens({
-			tokens: $allSwapUniverseTokens,
-			supportedData
-		})
+	// This side's own pick stays in the list, checked, so reopening the list shows what is picked
+	// and a network with one token (Bitcoin) is never empty. The other side's pick is left out.
+	let selectedToken = $derived(side === 'destination' ? $destinationToken : $sourceToken);
+
+	let pairedToken = $derived(side === 'destination' ? $sourceToken : $destinationToken);
+
+	// To receive, what the pay token reaches, from the function the receive shortcuts read too. To
+	// pay, the aggregated source-side data, on the networks this side may use, so "All networks"
+	// never shows a token the swap cannot use.
+	let swapTokens: TokenToggleable<Token>[] = $derived(
+		side === 'destination' && nonNullish($sourceToken)
+			? getReceiveSwapTokens({
+					sourceToken: $sourceToken,
+					supportedData: $receiveSupportedData,
+					networks: $filteredNetworks,
+					tokens: $allSwapUniverseTokens,
+					networksAreConstrained: true
+				})
+			: filterSwapTokens({
+					tokens: $allSwapUniverseTokens,
+					supportedData:
+						side === 'destination' ? $receiveSupportedData : $swapSupportedTokensStore?.aggregated
+				}).filter(
+					({ id, network }) =>
+						id !== pairedToken?.id && $filteredNetworks.some(({ id }) => id === network.id)
+				)
 	);
 
-	let tokensUi: TokenToggleable<TokenUi>[] = $derived(
-		allSwapTokens
-			.filter(
-				(token: TokenToggleable<Token>) =>
-					token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
-			)
-			.map((token: TokenToggleable<Token>) =>
+	let tokens: TokenUi[] = $derived(
+		sortSwapListTokens({
+			tokens: swapTokens.map((token) =>
 				mapTokenUi({
 					token,
 					$balances: $balancesStore,
 					$stakeBalances,
 					$exchanges
 				})
-			)
-	);
-
-	let tokens: TokenUi[] = $derived(
-		sortTokens({
-			$tokens: tokensUi,
+			),
 			$tokensToPin,
 			$networksToPin: $networks
 		})
@@ -80,21 +135,37 @@
 		setTokens(tokens);
 	});
 
-	const onTokenButtonClick = (token: TokenUi) => {
-		onSelectToken(token);
-	};
+	// Listed, but not to be picked to pay with: a token that is not enabled, or has a balance of zero.
+	let unpayableTokenIds = $derived(
+		new Set(
+			side === 'source' ? tokens.filter((token) => !canPayWithToken(token)).map(({ id }) => id) : []
+		)
+	);
+
+	// Only networks with something to pick: with BTC on the other side, Bitcoin has nothing left. A
+	// network kept from an earlier visit that is not among them reads as all networks in the list.
+	let availableNetworks = $derived(
+		$filteredNetworks.filter(({ id }) => tokens.some(({ network }) => network.id === id))
+	);
 </script>
 
-<ModalTokensList {onSelectNetworkFilter} {onTokenButtonClick}>
-	{#snippet tokenListItem(token, onClick)}
-		<ModalTokensListItem {onClick} {token} />
-	{/snippet}
-	{#snippet noResults()}
-		<p class="text-primary">
-			{$i18n.tokens.manage.text.all_tokens_zero_balance}
-		</p>
-	{/snippet}
-	{#snippet toolbar()}
-		<ButtonCancel fullWidth={true} onclick={onCloseTokensList} />
-	{/snippet}
-</ModalTokensList>
+<div bind:this={root}>
+	<ModalTokensList
+		networks={availableNetworks}
+		{onFiltersChange}
+		onTokenButtonClick={(token) => returnToForm(token)}
+		showStakeBalance={false}
+	>
+		{#snippet tokenListItem(token, onClick)}
+			<ModalTokensListItem
+				disabled={unpayableTokenIds.has(token.id)}
+				{onClick}
+				selected={token.id === selectedToken?.id}
+				{token}
+			/>
+		{/snippet}
+		{#snippet toolbar()}
+			<ButtonBack fullWidth={true} onclick={() => returnToForm()} />
+		{/snippet}
+	</ModalTokensList>
+</div>

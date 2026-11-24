@@ -4,31 +4,31 @@
 	import FeatureCards from '$lib/components/auth/FeatureCards.svelte';
 	import SignupsClosedBanner from '$lib/components/auth/SignupsClosedBanner.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
+	import { MOTION_REDUCED_FADE_DURATION } from '$lib/constants/transition.constants';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { themeStore } from '$lib/stores/theme.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-
-	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
 </script>
 
 <div
+	style:--landing-reduced-duration={`${MOTION_REDUCED_FADE_DURATION}ms`}
 	class="mx-auto flex w-full max-w-screen-xl flex-1 flex-col items-center gap-8 px-5 md:gap-12 md:px-8"
 >
-	<div class="flex w-full max-w-screen-md flex-col items-center">
+	<div class="landing-enter flex w-full max-w-screen-md flex-col items-center">
 		<SignupsClosedBanner />
 
 		<HeroSignIn />
 	</div>
 
-	<div class="flex w-full justify-center">
-		{#await import(`$lib/assets/main-image-${$themeStore ?? 'light'}.webp`) then { default: src }}
-			<Img alt={ariaLabel} {src} styleClass="h-full w-[90%] object-cover" />
-		{/await}
+	<div class="landing-enter artwork flex w-full justify-center">
+		<div class="aspect-[1080/752] w-[90%]">
+			{#await import('$lib/components/auth/LandingWalletPreview.svelte') then { default: LandingWalletPreview }}
+				<LandingWalletPreview />
+			{:catch}
+				<!-- Keep the reserved space if the decorative artwork fails to load. -->
+			{/await}
+		</div>
 	</div>
 
-	<div class="w-full sm:-mt-48">
+	<div class="landing-enter features w-full sm:-mt-48">
 		<FeatureCards />
 	</div>
 </div>
@@ -36,3 +36,76 @@
 {#if $modalAuthHelp && nonNullish($modalAuthHelpData)}
 	<AuthHelpModal usesIdentityHelp={$modalAuthHelpData} />
 {/if}
+
+<style lang="scss">
+	/* Keyboard focus reveals the controls immediately. */
+	.landing-enter {
+		// A one-time landing entrance deliberately settles more slowly than in-app controls.
+		animation: landing-enter 300ms ease-out backwards;
+
+		&:focus-within {
+			// Reveal focused controls without removing/restarting the animation timeline.
+			// Important declarations take precedence over animated property values.
+			opacity: 1 !important;
+			transform: none !important;
+			filter: none !important;
+		}
+	}
+
+	.artwork {
+		animation-name: none;
+	}
+
+	.features {
+		// Opacity/filter on an ancestor prevent Chrome from blurring the cards' backdrop.
+		animation-name: landing-rise;
+		animation-delay: 200ms;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.artwork:has(:global(svg)) {
+			animation-name: landing-rise;
+		}
+	}
+
+	@keyframes landing-enter {
+		from {
+			opacity: 0;
+			transform: translateY(12px);
+			filter: blur(4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+			filter: blur(0);
+		}
+	}
+
+	@keyframes landing-rise {
+		from {
+			transform: translateY(12px);
+		}
+		to {
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes landing-fade {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.landing-enter {
+			animation: landing-fade var(--landing-reduced-duration) ease-out backwards;
+		}
+		.artwork,
+		.features {
+			animation: none;
+		}
+	}
+</style>

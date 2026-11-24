@@ -4,7 +4,6 @@
 	import { SvelteMap } from 'svelte/reactivity';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
-	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -141,12 +140,6 @@
 		}
 	});
 
-	let showNetworks = $state(false);
-
-	const onSelectNetwork = () => {
-		showNetworks = !showNetworks;
-	};
-
 	const modifiedTokens = new SvelteMap<TokenId, Token>();
 
 	let userHasEdited = $state(false);
@@ -184,59 +177,52 @@
 	{@render infoElement()}
 {/if}
 
-{#if showNetworks}
-	<ModalNetworksFilter onNetworkFilter={() => (showNetworks = false)} />
-{:else}
-	<ModalTokensList
-		networkSelectorViewOnly={nonNullish($selectedNetwork)}
-		onSelectNetworkFilter={onSelectNetwork}
-	>
-		{#snippet tokenListItem(token)}
-			<LogoButton dividers hover={false}>
-				{#snippet title()}
-					{nonNullish(token.oisySymbol) ? token.oisySymbol.oisySymbol : token.symbol}
-				{/snippet}
+<ModalTokensList networkSelectorViewOnly={nonNullish($selectedNetwork)}>
+	{#snippet tokenListItem(token)}
+		<LogoButton dividers hover={false}>
+			{#snippet title()}
+				{nonNullish(token.oisySymbol) ? token.oisySymbol.oisySymbol : token.symbol}
+			{/snippet}
 
-				{#snippet subtitle()}
-					{token.name}
-				{/snippet}
+			{#snippet subtitle()}
+				{token.name}
+			{/snippet}
 
-				{#snippet logo()}
-					<span class="mr-2">
-						<TokenLogo badge={{ type: 'network' }} color="white" data={token} />
-					</span>
-				{/snippet}
+			{#snippet logo()}
+				<span class="mr-2">
+					<TokenLogo badge={{ type: 'network' }} color="white" data={token} />
+				</span>
+			{/snippet}
 
-				{#snippet description()}
-					<span class="break-all">
-						{token.network.name}
-					</span>
-				{/snippet}
+			{#snippet description()}
+				<span class="break-all">
+					{token.network.name}
+				</span>
+			{/snippet}
 
-				{#snippet action()}
-					<EnableTokenToggle {onToggle} {token} />
-				{/snippet}
-			</LogoButton>
-		{/snippet}
-		{#snippet toolbar()}
-			<Button
-				colorStyle="secondary-light"
-				disabled={$pseudoNetworkICPTestnet ||
-					(isNftsPage && nonNullish($selectedNetwork) && !$selectedNetwork.supportsNft)}
-				onclick={onAddToken}
-				styleClass="whitespace-nowrap"
-			>
-				<IconPlus />
-				{isNftsPage ? $i18n.tokens.manage.text.import_nft : $i18n.tokens.manage.text.import_token}
-			</Button>
-			<Button
-				disabled={saveDisabled}
-				onclick={save}
-				styleClass="whitespace-nowrap"
-				testId={MANAGE_TOKENS_MODAL_SAVE}
-			>
-				{$i18n.core.text.save}
-			</Button>
-		{/snippet}
-	</ModalTokensList>
-{/if}
+			{#snippet action()}
+				<EnableTokenToggle {onToggle} {token} />
+			{/snippet}
+		</LogoButton>
+	{/snippet}
+	{#snippet toolbar()}
+		<Button
+			colorStyle="secondary-light"
+			disabled={$pseudoNetworkICPTestnet ||
+				(isNftsPage && nonNullish($selectedNetwork) && !$selectedNetwork.supportsNft)}
+			onclick={onAddToken}
+			styleClass="whitespace-nowrap"
+		>
+			<IconPlus />
+			{isNftsPage ? $i18n.tokens.manage.text.import_nft : $i18n.tokens.manage.text.import_token}
+		</Button>
+		<Button
+			disabled={saveDisabled}
+			onclick={save}
+			styleClass="whitespace-nowrap"
+			testId={MANAGE_TOKENS_MODAL_SAVE}
+		>
+			{$i18n.core.text.save}
+		</Button>
+	{/snippet}
+</ModalTokensList>

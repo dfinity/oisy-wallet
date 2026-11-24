@@ -1,8 +1,9 @@
 import { ICP_EXPLORER_URL } from '$env/explorers.env';
+import icpIconColored from '$icp/assets/icp-light.svg';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import icpIcon from '$lib/assets/networks/icp.svg';
 import { LOCAL } from '$lib/constants/app.constants';
-import type { OptionCanisterIdText } from '$lib/types/canister';
+import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { Network, NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { Principal } from '@icp-sdk/core/principal';
@@ -28,6 +29,12 @@ export const ICP_MINTING_ACCOUNT = getIcrcAccount(
 	)
 );
 
+// The NNS Cycles Minting Canister. Minting always targets the mainnet one: it
+// deposits into the mainnet cycles ledger, which TCYCLES is on every build. A local
+// replica has no CMC (`dfx.json` marks `cmc` remote there), so every CMC call from a
+// local build fails: its Mint form cannot load the rate and stops before any transfer.
+export const CMC_CANISTER_ID: CanisterIdText = 'rkp4c-7iaaa-aaaaa-aaaca-cai';
+
 /**
  * ICP
  */
@@ -40,6 +47,7 @@ export const ICP_NETWORK: Network = {
 	env: 'mainnet',
 	name: 'Internet Computer',
 	icon: icpIcon,
+	iconColored: icpIconColored,
 	explorerUrl: ICP_EXPLORER_URL,
 	supportsNft: true,
 	buy: { onramperId: 'icp' },

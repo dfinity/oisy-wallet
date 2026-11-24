@@ -1,14 +1,19 @@
 import type { Settings, UserProfile } from '$declarations/backend/backend.did';
 import * as dapps from '$env/dapp-descriptions.env';
 import * as rewards from '$env/reward-campaigns.env';
-import { FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
+import {
+	FEATURED_REWARD_CAROUSEL_SLIDE_ID,
+	SPRINKLES_SEASON_1_EPISODE_6_ID
+} from '$env/reward-campaigns.env';
 import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
 import { userProfileStore } from '$lib/stores/user-profile.store';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { mockDappsDescriptions } from '$tests/mocks/dapps.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
-import { toNullable } from '@dfinity/utils';
-import { render } from '@testing-library/svelte';
+import { nonNullish, toNullable } from '@dfinity/utils';
+import { fireEvent, render } from '@testing-library/svelte';
 
 describe('DappsCarousel', () => {
 	beforeEach(() => {
@@ -101,5 +106,28 @@ describe('DappsCarousel', () => {
 		const { getByTestId } = render(DappsCarousel);
 
 		expect(getByTestId(CAROUSEL_CONTAINER)).toBeInTheDocument();
+	});
+
+	it('should keep the featured reward card when a dApp card is closed', async () => {
+		vi.spyOn(rewards, 'FEATURED_REWARD_CAROUSEL_SLIDE_ID', 'get').mockReturnValue(
+			SPRINKLES_SEASON_1_EPISODE_6_ID as typeof FEATURED_REWARD_CAROUSEL_SLIDE_ID
+		);
+		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue(
+			mockDappsDescriptions.filter(({ carousel }) => nonNullish(carousel)).slice(0, 2)
+		);
+
+		const { getAllByRole, getByText } = render(DappsCarousel);
+
+		const closeButtons = getAllByRole('button', { name: en.core.text.close });
+
+		expect(closeButtons).toHaveLength(3);
+
+		// The first dApp card, right after the reward card.
+		await fireEvent.click(closeButtons[1]);
+
+		expect(getAllByRole('button', { name: en.core.text.close })).toHaveLength(2);
+		expect(
+			getByText(replaceOisyPlaceholders(en.rewards.text.carousel_slide_title))
+		).toBeInTheDocument();
 	});
 });

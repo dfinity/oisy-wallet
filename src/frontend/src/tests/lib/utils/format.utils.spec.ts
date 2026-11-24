@@ -7,6 +7,7 @@ import {
 	formatCurrency,
 	formatCurrencyAsNumber,
 	formatNanosecondsToDate,
+	formatNanosecondsToDateAndTime,
 	formatNanosecondsToShortRelativeTime,
 	formatNanosecondsToTimestamp,
 	formatSecondsToDate,
@@ -790,6 +791,57 @@ describe('format.utils', () => {
 			const result = formatNanosecondsToDate({ nanoseconds: invalid });
 
 			expect(result).toBe('Invalid Date');
+		});
+	});
+
+	describe('formatNanosecondsToDateAndTime', () => {
+		// Pinned rather than inherited, as `formatSecondsToDate` above does: without
+		// it these read as a different hour depending on where they run.
+		beforeEach(() => {
+			vi.stubEnv('TZ', 'UTC');
+		});
+
+		// 21 Sep 2026, 13:25:35. The seconds are here so their absence below means
+		// something.
+		const deadline = BigInt(Date.UTC(2026, 8, 21, 13, 25, 35)) * 1_000_000n;
+
+		it('splits the deadline so a sentence can join the halves in its own words', () => {
+			// One `toLocaleString` puts the locale's own separator between them, which
+			// is why this returns two strings: the copy says "Claim by $date at $time"
+			// and owns the word in the middle, in whatever language it is written in.
+			const { date, time } = formatNanosecondsToDateAndTime({ nanoseconds: deadline });
+
+			expect(date).toBe('Sep 21, 2026');
+			expect(time).toBe('13:25');
+		});
+
+		it('drops the seconds, which a deadline days away has no use for', () => {
+			// The claim screen printed a full `toLocaleString()` before this —
+			// "21/09/2026, 13:25:35" — down to the second, in whatever locale the
+			// browser happened to be in.
+			const { time } = formatNanosecondsToDateAndTime({ nanoseconds: deadline });
+
+			expect(time).not.toMatch(/:\d\d:/);
+		});
+
+		it('leaves the day and month order to the locale', () => {
+			// Not fixed to one order: there are fifteen languages here and only some
+			// of them put the month first. Going through `Intl` is the point.
+			const { date, time } = formatNanosecondsToDateAndTime({
+				nanoseconds: deadline,
+				language: Languages.GERMAN
+			});
+
+			expect(date).toBe('21. Sept. 2026');
+			expect(time).toBe('13:25');
+		});
+
+		it('keeps a 24-hour clock rather than following the locale to AM/PM', () => {
+			// The rest of the app reads `hour12: false`, and a deadline that says 1:25
+			// next to one that says 13:25 elsewhere is a reading someone has to redo.
+			const { time } = formatNanosecondsToDateAndTime({ nanoseconds: deadline });
+
+			expect(time).not.toMatch(/AM|PM/i);
 		});
 	});
 

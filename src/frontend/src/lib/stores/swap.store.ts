@@ -2,13 +2,18 @@ import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { swappableTokens } from '$lib/derived/swap.derived';
+import type { TokenCategoryTagValue } from '$lib/enums/token-tag';
+import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import { balancesStore } from '$lib/stores/balances.store';
 import {
 	swapSupportedTokensStore,
 	type SwapSupportedTokensData
 } from '$lib/stores/swap-supported-tokens.store';
 import type { Balance } from '$lib/types/balance';
-import type { Token } from '$lib/types/token';
+import type { Network } from '$lib/types/network';
+import type { OptionAmount } from '$lib/types/send';
+import type { SwapSelectTokenType } from '$lib/types/swap';
+import type { Token, TokenId } from '$lib/types/token';
 import { computeReceiveSupportedTokens } from '$lib/utils/swap-tokens-filter.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
@@ -23,7 +28,9 @@ export interface SwapError {
 
 export interface SwapData {
 	sourceToken?: Token;
-	destinationToken?: Token;
+	// `null` after explicitly clearing or invalidating the receive token, so the initial token does
+	// not come back.
+	destinationToken?: Token | null;
 }
 
 type IsTokensIcrc2Map = Record<string, boolean>;
@@ -34,6 +41,30 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>();
 	const isErc20PermitSupported = writable<IsTokensIcrc2Map | undefined>();
 	const failedSwapError = writable<SwapError | undefined>(undefined);
+	const lifiCarriedFee = writable<LifiCarriedFee | undefined>(undefined);
+	// Kept here rather than in the form, which every step change rebuilds: picking a provider or a
+	// destination would otherwise release "Max", and the amount would keep the max of a fee that
+	// no longer applies.
+	const amountSetToMax = writable(false);
+	// The LI.FI fee "Max" leaves room for while it holds a LI.FI amount, kept with it for the same
+	// reason.
+	const lifiMaxFee = writable<LifiMaxFee | undefined>(undefined);
+	// The two-swap hints shown since the swap modal opened. Kept here rather than in the hint, which
+	// comes and goes with the quotes and is rebuilt with the form, so that each one counts once.
+	const twoSwapsHintsShown: TwoSwapsHintShown[] = [];
+	// The network and asset type chosen through a shortcut or filters on each side's list, so it
+	// reopens on them and a pick never moves them; a side with none opens where the wizard starts it.
+	// Kept here because the list's own context is shared by every token picker.
+	const tokenListFilters = new Map<SwapSelectTokenType, SwapTokenListFilters>();
+	// The disabled tokens whose prices the wizard has loaded since the swap modal opened. Kept here
+	// rather than in the wizard, which Get Token rebuilds on every step, so that each one loads once.
+	const pricedTokenIds = new Set<TokenId>();
+	// Get Token rebuilds the wizard between steps, so the list's return target lives here.
+	const tokenListReturnFocus = writable<string | undefined>();
+	// The last receive view survives Get Token rebuilding the wizard on each step.
+	const receiveTokenPickerStep = writable<WizardStepsSwap.TOKENS_LIST | WizardStepsSwap.MOVE_TOKEN>(
+		WizardStepsSwap.TOKENS_LIST
+	);
 
 	const sourceToken = derived(
 		[data, swappableTokens],
@@ -42,7 +73,9 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const destinationToken = derived(
 		[data, swappableTokens],
 		([{ destinationToken }, $swappableTokens]) =>
-			destinationToken ?? $swappableTokens.destinationToken
+			destinationToken === null
+				? undefined
+				: (destinationToken ?? $swappableTokens.destinationToken)
 	);
 
 	const sourceTokenBalance = derived(
@@ -114,27 +147,53 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		isSourceTokenPermitSupported,
 		receiveSupportedData,
 		failedSwapError,
-		setSourceToken: (token: Token) =>
+		lifiCarriedFee,
+		amountSetToMax,
+		lifiMaxFee,
+		tokenListReturnFocus,
+		receiveTokenPickerStep,
+		// The amount is kept as it is for another source, not refilled with that token's max.
+		setSourceToken: (token: Token) => {
+			receiveTokenPickerStep.set(WizardStepsSwap.TOKENS_LIST);
+			amountSetToMax.set(false);
+			lifiMaxFee.set(undefined);
+
 			update((state) => ({
 				...state,
 				sourceToken: token
-			})),
+			}));
+		},
 		setDestinationToken: (token: Token | undefined) =>
 			update((state) => ({
 				...state,
-				destinationToken: token
+				destinationToken: token ?? null
 			})),
+		clearDestinationToken: () => {
+			// Keep the current pay amount when the quote and its fees are cleared.
+			amountSetToMax.set(false);
+			lifiMaxFee.set(undefined);
+
+			update((state) => ({ ...state, destinationToken: null }));
+		},
 		// TODO: Ideally, this function should be used with reactive statements, exported outside the store.
-		switchTokens: () =>
+		switchTokens: () => {
+			receiveTokenPickerStep.set(WizardStepsSwap.TOKENS_LIST);
+			amountSetToMax.set(false);
+			lifiMaxFee.set(undefined);
+
 			update((state) => {
 				const $swappableTokens = get(swappableTokens);
 
 				return {
 					...state,
-					sourceToken: state.destinationToken ?? $swappableTokens.destinationToken,
+					sourceToken:
+						state.destinationToken === null
+							? undefined
+							: (state.destinationToken ?? $swappableTokens.destinationToken),
 					destinationToken: state.sourceToken ?? $swappableTokens.sourceToken
 				};
-			}),
+			});
+		},
 		setIsTokensIcrc2: ({
 			ledgerCanisterId,
 			isIcrc2Supported
@@ -158,17 +217,98 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				[address]: isPermitSupported
 			})),
 
+		getTokenListFilters: (side: SwapSelectTokenType): SwapTokenListFilters | undefined =>
+			tokenListFilters.get(side),
+		setTokenListFilters: ({
+			side,
+			filters
+		}: {
+			side: SwapSelectTokenType;
+			filters: SwapTokenListFilters;
+		}) => {
+			tokenListFilters.set(side, filters);
+		},
+
+		markTokensPriced: <T extends Token>(tokens: T[]): T[] => {
+			const unpriced = tokens.filter(({ id }) => !pricedTokenIds.has(id));
+
+			unpriced.forEach(({ id }) => pricedTokenIds.add(id));
+
+			return unpriced;
+		},
+
+		markTwoSwapsHintShown: (hint: TwoSwapsHintShown): boolean => {
+			const shown = twoSwapsHintsShown.some(
+				({ sourceTokenId, destinationTokenId, intermediateTokenId, amount }) =>
+					sourceTokenId === hint.sourceTokenId &&
+					destinationTokenId === hint.destinationTokenId &&
+					intermediateTokenId === hint.intermediateTokenId &&
+					amount === hint.amount
+			);
+
+			if (!shown) {
+				twoSwapsHintsShown.push(hint);
+			}
+
+			return !shown;
+		},
+
 		reset: () => {
 			set({
 				sourceToken: undefined,
 				destinationToken: undefined
 			});
 			failedSwapError.set(undefined);
+			lifiCarriedFee.set(undefined);
+			amountSetToMax.set(false);
+			lifiMaxFee.set(undefined);
+			twoSwapsHintsShown.splice(0);
+			tokenListFilters.clear();
+			pricedTokenIds.clear();
+			tokenListReturnFocus.set(undefined);
+			receiveTokenPickerStep.set(WizardStepsSwap.TOKENS_LIST);
 		}
 	};
 };
 
+// A LI.FI fee ceiling that an execution found above the reviewed one, for the quote inputs it was
+// found for: on EVM its gas and L1 data fee, which the review prices at its own fee per gas, on
+// Solana the ceiling itself, in lamports. Kept here rather than in the wizard, which every step
+// change rebuilds: the review the failed execution returns to is another instance.
+export type LifiCarriedFee =
+	| {
+			key: string;
+			gas: bigint;
+			l1Fee: bigint;
+	  }
+	| {
+			key: string;
+			solCeiling: bigint;
+	  };
+
+// The highest LI.FI fee seen for the route to a destination while "Max" holds a LI.FI amount, and
+// that destination: the fee of a route to another says nothing about the new one's.
+export interface LifiMaxFee {
+	fee: bigint;
+	destinationTokenId: TokenId;
+}
+
+// A two-swap hint the swap form showed: for a pair, the token in between and the quoted amount.
+export interface TwoSwapsHintShown {
+	sourceTokenId: TokenId;
+	destinationTokenId: TokenId;
+	intermediateTokenId: TokenId;
+	amount: OptionAmount;
+}
+
+export interface SwapTokenListFilters {
+	network?: Network;
+	category?: TokenCategoryTagValue;
+}
+
 export interface SwapContext {
+	receiveTokenPickerStep: Writable<WizardStepsSwap.TOKENS_LIST | WizardStepsSwap.MOVE_TOKEN>;
+	tokenListReturnFocus: Writable<string | undefined>;
 	sourceToken: Readable<Token | undefined>;
 	destinationToken: Readable<Token | undefined>;
 	sourceTokenBalance: Readable<Balance | undefined>;
@@ -179,6 +319,12 @@ export interface SwapContext {
 	isSourceTokenPermitSupported: Readable<boolean | undefined>;
 	receiveSupportedData: Readable<SwapSupportedTokensData | undefined>;
 	failedSwapError: Writable<SwapError | undefined>;
+	lifiCarriedFee: Writable<LifiCarriedFee | undefined>;
+	// Whether "Max" holds the source amount, re-applied whenever the fee changes until the user
+	// types or the source changes.
+	amountSetToMax: Writable<boolean>;
+	// The LI.FI fee "Max" leaves room for while it holds a LI.FI amount.
+	lifiMaxFee: Writable<LifiMaxFee | undefined>;
 	setIsTokensIcrc2: (args: { ledgerCanisterId: string; isIcrc2Supported: boolean }) => void;
 	setIsTokenPermitSupported: ({
 		address,
@@ -189,7 +335,18 @@ export interface SwapContext {
 	}) => void;
 	setSourceToken: (token: Token) => void;
 	setDestinationToken: (token: Token | undefined) => void;
+	// Clears the receive token, including the one the swap opened with.
+	clearDestinationToken: () => void;
 	switchTokens: () => void;
+	// Records a two-swap hint as shown: `true` the first time since the swap modal opened.
+	markTwoSwapsHintShown: (hint: TwoSwapsHintShown) => boolean;
+	getTokenListFilters: (side: SwapSelectTokenType) => SwapTokenListFilters | undefined;
+	setTokenListFilters: (params: {
+		side: SwapSelectTokenType;
+		filters: SwapTokenListFilters;
+	}) => void;
+	// Records the tokens as priced and returns those not recorded before since the swap modal opened.
+	markTokensPriced: <T extends Token>(tokens: T[]) => T[];
 	reset: () => void;
 }
 

@@ -6,12 +6,14 @@ import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import AllTransactionsSkeletons from '$lib/components/transactions/AllTransactionsSkeletons.svelte';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
@@ -84,6 +86,7 @@ describe('AllTransactionsSkeletons', () => {
 			});
 
 			solTransactionsStore.append({ tokenId: SOLANA_TOKEN_ID, transactions: [] });
+			xrpTransactionsStore.append({ tokenId: XRP_TOKEN_ID, transactions: [] });
 
 			await tick();
 
@@ -110,6 +113,7 @@ describe('AllTransactionsSkeletons', () => {
 			});
 
 			solTransactionsStore.append({ tokenId: SOLANA_TOKEN_ID, transactions: [] });
+			xrpTransactionsStore.append({ tokenId: XRP_TOKEN_ID, transactions: [] });
 
 			await tick();
 

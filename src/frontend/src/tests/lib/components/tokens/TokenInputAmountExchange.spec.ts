@@ -6,6 +6,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import type { OptionAmount } from '$lib/types/send';
 import type { DisplayUnit } from '$lib/types/swap';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
@@ -46,6 +47,50 @@ describe('TokenInputAmountExchange', () => {
 		expect(valueElement).toHaveTextContent('$200.00');
 
 		await fireEvent.click(button);
+
+		expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
+	});
+
+	it('names the switch button and describes it with the shown value', () => {
+		const { getByRole } = render(TokenInputAmountExchange, defaultProps);
+		const button = getByRole('button', { name: en.tokens.alt.switch_amount_unit });
+
+		expect(button).toHaveAttribute('data-tid', TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON);
+		expect(button).toHaveAccessibleDescription(`100 ${mockValidIcToken.symbol}`);
+	});
+
+	it('switches between token and USD display on value click', async () => {
+		const { getByTestId } = render(TokenInputAmountExchange, defaultProps);
+		const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+
+		await fireEvent.click(valueElement);
+
+		expect(valueElement).toHaveTextContent('$200.00');
+
+		await fireEvent.click(valueElement);
+
+		expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
+	});
+
+	it('switches once on a double-click', async () => {
+		const { getByTestId } = render(TokenInputAmountExchange, defaultProps);
+		const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+
+		await fireEvent.click(valueElement, { detail: 1 });
+		await fireEvent.click(valueElement, { detail: 2 });
+		await fireEvent.dblClick(valueElement, { detail: 2 });
+
+		expect(valueElement).toHaveTextContent('$200.00');
+	});
+
+	it('does not switch on value click when disabled', async () => {
+		const { getByTestId } = render(TokenInputAmountExchange, {
+			...defaultProps,
+			disabled: true
+		});
+		const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+
+		await fireEvent.click(valueElement);
 
 		expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
 	});

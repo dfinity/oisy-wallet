@@ -1,4 +1,5 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { ZERO } from '$lib/constants/app.constants';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import { mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
@@ -27,6 +28,8 @@ describe('active-user-transactions.store', () => {
 
 		expect(get(activeUserTransactionsStore)).toEqual({
 			data: {},
+			seenUpToNs: ZERO,
+			loadedUpToNs: ZERO,
 			lastSeenUpdatedAtNs: {},
 			terminalSideEffectsApplied: {}
 		});
@@ -55,6 +58,19 @@ describe('active-user-transactions.store', () => {
 		expect(get(activeUserTransactionsStore)?.data).toEqual({});
 	});
 
+	it('holds only the principal it was initialised for', () => {
+		expect(activeUserTransactionsStore.holds(mockPrincipal)).toBeFalsy();
+
+		activeUserTransactionsStore.init(mockPrincipal);
+
+		expect(activeUserTransactionsStore.holds(mockPrincipal)).toBeTruthy();
+		expect(activeUserTransactionsStore.holds(mockPrincipal2)).toBeFalsy();
+
+		activeUserTransactionsStore.reset();
+
+		expect(activeUserTransactionsStore.holds(mockPrincipal)).toBeFalsy();
+	});
+
 	it('set replaces the data map', () => {
 		activeUserTransactionsStore.init(mockPrincipal);
 		activeUserTransactionsStore.set({
@@ -62,6 +78,255 @@ describe('active-user-transactions.store', () => {
 		});
 
 		expect(Object.keys(get(activeUserTransactionsStore)?.data ?? {}).sort()).toEqual(['a', 'b']);
+	});
+
+	// A load reads its snapshot asynchronously, so a create or update can commit while it is in
+	// flight. Replacing the rows wholesale erased that write, and a row gone from the store is one the
+	// poller never resolves.
+	describe('set against local writes made while its load was in flight', () => {
+		const ids = () => Object.keys(get(activeUserTransactionsStore)?.data ?? {}).sort();
+
+		it('keeps a row created after the load began that its snapshot lacks', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.set({ transactions: [pending({ id: 'a', updatedAtNs: 1n })] });
+
+			const since = activeUserTransactionsStore.beginLoad();
+			activeUserTransactionsStore.upsert({ transaction: pending({ id: 'new', updatedAtNs: 5n }) });
+			activeUserTransactionsStore.set({
+				transactions: [pending({ id: 'a', updatedAtNs: 1n })],
+				since
+			});
+
+			expect(ids()).toEqual(['a', 'new']);
+		});
+
+		// Absent from the snapshot and not written since the load began: deleted elsewhere, or pruned.
+		it('still drops a row its snapshot lacks when nothing wrote it since the load began', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.upsert({ transaction: pending({ id: 'gone', updatedAtNs: 1n }) });
+
+			const since = activeUserTransactionsStore.beginLoad();
+			activeUserTransactionsStore.set({ transactions: [], since });
+
+			expect(ids()).toEqual([]);
+		});
+
+		it('keeps the newer local copy of a row its snapshot also has', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.upsert({ transaction: pending({ id: 'a', updatedAtNs: 1n }) });
+
+			const since = activeUserTransactionsStore.beginLoad();
+			const settled = buildTx({ id: 'a', status: { Succeeded: null }, updated_at_ns: 2n });
+			activeUserTransactionsStore.upsert({ transaction: settled });
+			activeUserTransactionsStore.set({
+				transactions: [pending({ id: 'a', updatedAtNs: 1n })],
+				since
+			});
+
+			expect(get(activeUserTransactionsStore)?.data.a).toEqual(settled);
+		});
+
+		it('takes the snapshot copy when it is the newer one', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.upsert({ transaction: pending({ id: 'a', updatedAtNs: 1n }) });
+
+			const settled = buildTx({ id: 'a', status: { Succeeded: null }, updated_at_ns: 2n });
+			activeUserTransactionsStore.set({
+				transactions: [settled],
+				since: activeUserTransactionsStore.beginLoad()
+			});
+
+			expect(get(activeUserTransactionsStore)?.data.a).toEqual(settled);
+		});
+	});
+
+	// A row that arrives settled was reported on the device that settled it. Reporting it again
+	// replays the outcome of every row not yet dismissed whenever the user signs in on a new device.
+	describe('set claims the side effects of a row it first meets settled', () => {
+		const claimed = () => get(activeUserTransactionsStore)?.terminalSideEffectsApplied;
+
+		it('claims settled rows it has not held before, and no open ones', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.set({
+				transactions: [
+					buildTx({ id: 'sent', status: { Succeeded: null }, updated_at_ns: 1n }),
+					buildTx({ id: 'expired', status: { Failed: null }, updated_at_ns: 1n }),
+					pending({ id: 'open', updatedAtNs: 1n })
+				]
+			});
+
+			expect(claimed()).toEqual({ sent: true, expired: true });
+		});
+
+		it('leaves a row it held open, so the loader reports it settling', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.set({ transactions: [pending({ id: 'a', updatedAtNs: 1n })] });
+
+			activeUserTransactionsStore.set({
+				transactions: [buildTx({ id: 'a', status: { Succeeded: null }, updated_at_ns: 2n })]
+			});
+
+			expect(claimed()).toEqual({});
+		});
+
+		// Settled by this tab's own write, which the loader may not have reported yet.
+		it('leaves a settled row it already holds', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			const settled = buildTx({ id: 'a', status: { Succeeded: null }, updated_at_ns: 2n });
+			activeUserTransactionsStore.upsert({ transaction: settled });
+
+			activeUserTransactionsStore.set({ transactions: [settled] });
+
+			expect(claimed()).toEqual({});
+		});
+
+		// Its terminal write committed after the tab that sent it was gone, before anything reported
+		// the outcome.
+		describe('a row this browser sent the terminal status for', () => {
+			const mine = buildTx({ id: 'mine', status: { Succeeded: null }, updated_at_ns: 2n });
+
+			const loadMine = () => {
+				activeUserTransactionsStore.reset();
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.set({ transactions: [mine] });
+			};
+
+			it('is left to the loader', () => {
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+
+				loadMine();
+
+				expect(claimed()).toEqual({});
+			});
+
+			it('is left to the loader even when no store holds that principal', () => {
+				activeUserTransactionsStore.init(mockPrincipal2);
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+
+				loadMine();
+
+				expect(claimed()).toEqual({});
+			});
+
+			// Another tab that loaded before the marker was written saves its own copy of the state.
+			it('is left to the loader after another tab saves its older copy of the state', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.upsert({
+					transaction: pending({ id: 'other', updatedAtNs: 1n })
+				});
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+				activeUserTransactionsStore.markAllSeen();
+
+				loadMine();
+
+				expect(claimed()).toEqual({});
+			});
+
+			// Each marker has a storage key of its own, so these read it directly.
+			const sent = (id: string): string | null =>
+				localStorage.getItem(`aut:terminal-write:${mockPrincipal.toText()}:${id}`);
+
+			it('stops being recorded once its outcome was reported', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+				activeUserTransactionsStore.markTerminalSideEffectsApplied({ ids: ['mine'] });
+
+				expect(sent('mine')).toBeNull();
+			});
+
+			it('stops being recorded once the row was dismissed', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+				activeUserTransactionsStore.remove({ id: 'mine' });
+
+				expect(sent('mine')).toBeNull();
+			});
+
+			// Two tabs never write the same key for different rows, so one row's marker never takes
+			// another's with it.
+			it('leaves the other rows recorded when one stops being recorded', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+				activeUserTransactionsStore.markTerminalWriteSent({
+					principal: mockPrincipal,
+					id: 'other'
+				});
+				activeUserTransactionsStore.markTerminalSideEffectsApplied({ ids: ['other'] });
+
+				expect(sent('mine')).not.toBeNull();
+				expect(sent('other')).toBeNull();
+			});
+
+			// The OISY Trade foreground claims its row before it writes the terminal status.
+			it('is not recorded when its outcome is already recorded as reported', () => {
+				activeUserTransactionsStore.init(mockPrincipal);
+				activeUserTransactionsStore.markTerminalSideEffectsApplied({ ids: ['mine'] });
+				activeUserTransactionsStore.markTerminalWriteSent({ principal: mockPrincipal, id: 'mine' });
+
+				expect(sent('mine')).toBeNull();
+			});
+		});
+	});
+
+	// The backend's seen mark only moves forward, and a load or a mark answered out of order must not
+	// move the store's copy back either.
+	describe('the seen mark', () => {
+		const seenUpToNs = () => get(activeUserTransactionsStore)?.seenUpToNs;
+
+		it('set takes the mark a load returns', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.set({ transactions: [], seenUpToNs: 7n });
+
+			expect(seenUpToNs()).toBe(7n);
+		});
+
+		it('set keeps a later mark than the one a load returns', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.setSeenUpTo({ seenUpToNs: 9n });
+			activeUserTransactionsStore.set({ transactions: [], seenUpToNs: 7n });
+
+			expect(seenUpToNs()).toBe(9n);
+		});
+
+		it('setSeenUpTo moves the mark forward only', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.setSeenUpTo({ seenUpToNs: 9n });
+			activeUserTransactionsStore.setSeenUpTo({ seenUpToNs: 7n });
+
+			expect(seenUpToNs()).toBe(9n);
+		});
+
+		// Every row updated at or before a snapshot's latest update was in that snapshot, and only the
+		// snapshot last applied says what the list holds now.
+		it('set records the latest update of the snapshot it applies', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.set({
+				transactions: [pending({ id: 'a', updatedAtNs: 5n }), pending({ id: 'b', updatedAtNs: 7n })]
+			});
+
+			expect(get(activeUserTransactionsStore)?.loadedUpToNs).toBe(7n);
+
+			activeUserTransactionsStore.set({ transactions: [pending({ id: 'a', updatedAtNs: 5n })] });
+
+			expect(get(activeUserTransactionsStore)?.loadedUpToNs).toBe(5n);
+		});
+
+		// A local write says nothing about a row another device created in between.
+		it('upsert leaves the latest loaded update as it was', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.set({ transactions: [pending({ id: 'a', updatedAtNs: 5n })] });
+			activeUserTransactionsStore.upsert({ transaction: pending({ id: 'b', updatedAtNs: 9n }) });
+
+			expect(get(activeUserTransactionsStore)?.loadedUpToNs).toBe(5n);
+		});
+
+		it('starts again from zero for another principal', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.setSeenUpTo({ seenUpToNs: 9n });
+			activeUserTransactionsStore.init(mockPrincipal2);
+
+			expect(seenUpToNs()).toBe(ZERO);
+		});
 	});
 
 	it('upsert adds a new row and updates an existing one', () => {

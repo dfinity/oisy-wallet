@@ -7,9 +7,11 @@ import {
 	IC_CKUSDT_LEDGER_CANISTER_ID
 } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import { IC_CKSOL_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { Token } from '$lib/types/token';
 
@@ -27,10 +29,20 @@ export const LIQUIDIUM_ADVERTISED_TOKENS: Token[] = [
 	ICP_TOKEN
 ];
 
+// Pool assets OISY offers rails for. Other pools Liquidium lists stay out of the Markets list and
+// the pickers. SOL joins them behind `LIQUIDIUM_SOL_ENABLED` (see `isLiquidiumAssetSupported`).
+export const LIQUIDIUM_SUPPORTED_ASSETS: string[] = ['BTC', 'ETH', 'ICP', 'USDC', 'USDT'];
+
+// Rails of a supported asset that OISY can't transact on yet: native SOL, until OISY sends SOL to
+// Liquidium itself. Its pool is offered through ckSOL alone meanwhile.
+export const LIQUIDIUM_PENDING_RAILS: { asset: string; chain: string }[] = [
+	{ asset: 'SOL', chain: 'SOL' }
+];
+
 // Display order for the Markets list and the withdraw/repay pickers, applied as a stable sort on
 // top of the order Liquidium returns (see `orderLiquidiumRails`). Primary key: the lending pool,
 // by asset symbol. Assets not listed keep their received order, after the listed ones.
-export const LIQUIDIUM_POOL_ORDER: string[] = ['BTC', 'ETH', 'ICP', 'USDC', 'USDT'];
+export const LIQUIDIUM_POOL_ORDER: string[] = ['BTC', 'ETH', 'ICP', 'USDC', 'USDT', 'SOL'];
 
 // Transfer-network order, the final tiebreaker after "native rail first" — so extra networks
 // slot in predictably if the protocol adds them.
@@ -44,7 +56,16 @@ export const LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS: Record<string, OptionCanisterI
 	ETH: IC_CKETH_LEDGER_CANISTER_ID,
 	USDC: IC_CKUSDC_LEDGER_CANISTER_ID,
 	USDT: IC_CKUSDT_LEDGER_CANISTER_ID,
-	ICP: ICP_LEDGER_CANISTER_ID
+	ICP: ICP_LEDGER_CANISTER_ID,
+	SOL: IC_CKSOL_LEDGER_CANISTER_ID
+};
+
+// The first byte of the subaccount of a pool that Liquidium credits an inflow to a profile with:
+// what the inflow is for. Laid out by the Liquidium client, which OISY's own supply and repay go
+// through.
+export const LIQUIDIUM_INFLOW_SUBACCOUNT_PURPOSES = {
+	supply: 1,
+	repay: 2
 };
 
 // Display bands — Liquidium publishes no discrete cut-offs, so oisy picks its own
@@ -63,3 +84,21 @@ export const LIQUIDIUM_WITHDRAW_CAP_TOLERANCE = 1e-6;
 
 // Refresh cadence for markets + positions while the provider page is visible.
 export const LIQUIDIUM_POLL_INTERVAL_MILLIS = 30_000;
+
+// How long a repay's AUT may go without its txid and without a write before the poller deletes it,
+// counted in the poller's own ticks (see `OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS` for why not in
+// wall time). The repay records its row before the broadcast, renews it while the broadcast is
+// pending (`LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS`) and adds the txid right after it, so a row left
+// alone this long has nobody left to add one: its tab closed, or the write failed.
+//
+// Ten minutes: many renewals long, so a few lost ones do not end a broadcast's claim. Not much
+// longer, since until then a repay that was never sent keeps lowering the repay max.
+export const LIQUIDIUM_REPAY_TXID_GRACE_PERIOD_MILLIS = 10 * 60 * 1000;
+
+export const LIQUIDIUM_REPAY_TXID_GRACE_OBSERVATIONS = Math.ceil(
+	LIQUIDIUM_REPAY_TXID_GRACE_PERIOD_MILLIS / ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS
+);
+
+// How often a repay renews its row while its broadcast is pending, so the poller does not take it
+// for abandoned: nothing bounds how long a broadcast can take. Well inside the grace period above.
+export const LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS = 60_000;

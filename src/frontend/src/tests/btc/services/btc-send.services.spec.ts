@@ -2,24 +2,37 @@ import * as btcPendingSentTransactionsServices from '$btc/services/btc-pending-s
 import {
 	handleBtcValidationError,
 	sendBtc,
+	sendBtcScriptOutputs,
 	validateBtcSend,
-	type SendBtcParams
+	type SendBtcParams,
+	type SendBtcScriptOutputsParams
 } from '$btc/services/btc-send.services';
+import * as btcSignServices from '$btc/services/btc-sign.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
-import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
+import {
+	BtcBroadcastUnconfirmedError,
+	BtcSendValidationError,
+	BtcValidationError,
+	type UtxosFee
+} from '$btc/types/btc-send';
+import * as btcPsbtUtils from '$btc/utils/btc-psbt.utils';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import * as btcUtxosUtils from '$btc/utils/btc-utxos.utils';
 import * as btcUtils from '$icp/utils/btc.utils';
 import * as backendAPI from '$lib/api/backend.api';
 import * as signerAPI from '$lib/api/signer.api';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import * as walletUtils from '$lib/utils/wallet.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 import { toNullable } from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
+import type { Psbt } from 'bitcoinjs-lib';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -97,6 +110,10 @@ describe('btc-send.services', () => {
 			{
 				type: BtcSendValidationError.MinimumBalance,
 				text: get(i18n).send.assertion.minimum_btc_amount
+			},
+			{
+				type: BtcSendValidationError.PendingTransactionsNotAvailable,
+				text: get(i18n).send.assertion.pending_transactions_not_available
 			}
 		])('should toast the mapped message for $type', ({ type, text }) => {
 			handleBtcValidationError({ err: new BtcValidationError(type) });
@@ -106,11 +123,8 @@ describe('btc-send.services', () => {
 			});
 		});
 
-		it.each([
-			BtcSendValidationError.PendingTransactionsNotAvailable,
-			'unknown_error_type' as BtcSendValidationError
-		])('should toast the unexpected error with err for %s', (type) => {
-			const err = new BtcValidationError(type);
+		it('should toast the unexpected error with err for an unmapped type', () => {
+			const err = new BtcValidationError('unknown_error_type' as BtcSendValidationError);
 
 			handleBtcValidationError({ err });
 
@@ -122,6 +136,10 @@ describe('btc-send.services', () => {
 	});
 
 	describe('sendBtc', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
 		it('should call all required functions', async () => {
 			const addPendingBtcTransactionSpy = vi
 				.spyOn(backendAPI, 'addPendingBtcTransaction')
@@ -175,6 +193,41 @@ describe('btc-send.services', () => {
 			await expect(res).rejects.toThrow(error);
 		});
 
+		it('should hand the txid over on broadcast, before the pending-transaction bookkeeping', async () => {
+			const addPendingBtcTransactionSpy = vi
+				.spyOn(backendAPI, 'addPendingBtcTransaction')
+				.mockResolvedValue({ response: true });
+			vi.spyOn(signerAPI, 'sendBtc').mockResolvedValue({ txid });
+
+			const onBroadcast = vi.fn(() => {
+				expect(addPendingBtcTransactionSpy).not.toHaveBeenCalled();
+			});
+
+			await sendBtc({ ...defaultParams, onBroadcast });
+
+			expect(onBroadcast).toHaveBeenCalledExactlyOnceWith({ txid });
+			expect(addPendingBtcTransactionSpy).toHaveBeenCalledOnce();
+		});
+
+		// The bookkeeping protects this flow's own invariants — the spent UTXOs are
+		// recorded as pending — so a failing callback must not derail it.
+		it('should not let a throwing onBroadcast skip the bookkeeping', async () => {
+			const addPendingBtcTransactionSpy = vi
+				.spyOn(backendAPI, 'addPendingBtcTransaction')
+				.mockResolvedValue({ response: true });
+			vi.spyOn(signerAPI, 'sendBtc').mockResolvedValue({ txid });
+
+			const result = await sendBtc({
+				...defaultParams,
+				onBroadcast: () => {
+					throw error;
+				}
+			});
+
+			expect(result).toBe(txid);
+			expect(addPendingBtcTransactionSpy).toHaveBeenCalledOnce();
+		});
+
 		it('should throw if backend addPendingBtcTransaction throws', async () => {
 			vi.spyOn(backendAPI, 'addPendingBtcTransaction').mockImplementation(async () => {
 				await Promise.resolve();
@@ -184,6 +237,280 @@ describe('btc-send.services', () => {
 			const res = sendBtc(defaultParams);
 
 			await expect(res).rejects.toThrow(error);
+		});
+	});
+
+	describe('sendBtc through the backend', () => {
+		const signed = { txid: 'signed-txid', hex: '0001', bytes: Uint8Array.from([0, 1]) };
+		const psbt = {} as Psbt;
+
+		let buildBtcSendPsbtSpy: MockInstance;
+		let signAndFinalizeBtcPsbtSpy: MockInstance;
+		let broadcastBtcTransactionSpy: MockInstance;
+		let signerSendBtcSpy: MockInstance;
+		let addPendingBtcTransactionSpy: MockInstance;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			btcSendViaBackend.enabled = true;
+
+			buildBtcSendPsbtSpy = vi.spyOn(btcPsbtUtils, 'buildBtcSendPsbt').mockReturnValue(psbt);
+			signAndFinalizeBtcPsbtSpy = vi
+				.spyOn(btcSignServices, 'signAndFinalizeBtcPsbt')
+				.mockResolvedValue(signed);
+			broadcastBtcTransactionSpy = vi
+				.spyOn(backendAPI, 'broadcastBtcTransaction')
+				.mockResolvedValue({ txid: Uint8Array.from([1]) });
+			signerSendBtcSpy = vi.spyOn(signerAPI, 'sendBtc').mockResolvedValue({ txid });
+			addPendingBtcTransactionSpy = vi
+				.spyOn(backendAPI, 'addPendingBtcTransaction')
+				.mockResolvedValue({ response: true });
+		});
+
+		it('should build, sign and broadcast through the backend, and record nothing after', async () => {
+			const onProgress = vi.fn();
+
+			const result = await sendBtc({ ...defaultParams, onProgress });
+
+			expect(result).toBe(signed.txid);
+			expect(buildBtcSendPsbtSpy).toHaveBeenCalledExactlyOnceWith({
+				utxos: defaultParams.utxosFee.utxos,
+				outputs: [
+					{
+						destination: defaultParams.destination,
+						amount: convertNumberToSatoshis({ amount: defaultParams.amount })
+					}
+				],
+				changeAddress: defaultParams.source,
+				feeSatoshis: defaultParams.utxosFee.feeSatoshis,
+				network: defaultParams.network
+			});
+			expect(signAndFinalizeBtcPsbtSpy).toHaveBeenCalledExactlyOnceWith({
+				psbt,
+				identity: defaultParams.identity
+			});
+			expect(broadcastBtcTransactionSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: defaultParams.identity,
+				network: mapToSignerBitcoinNetwork({ network: defaultParams.network }),
+				transaction: signed.bytes,
+				iiDelegationChain: []
+			});
+			expect(onProgress).toHaveBeenCalledTimes(2);
+			expect(signerSendBtcSpy).not.toHaveBeenCalled();
+			expect(addPendingBtcTransactionSpy).not.toHaveBeenCalled();
+		});
+
+		it('should keep the Chain Fusion Signer with the flag off', async () => {
+			btcSendViaBackend.enabled = false;
+
+			const result = await sendBtc(defaultParams);
+
+			expect(result).toBe(txid);
+			expect(signerSendBtcSpy).toHaveBeenCalledOnce();
+			expect(addPendingBtcTransactionSpy).toHaveBeenCalledOnce();
+			expect(broadcastBtcTransactionSpy).not.toHaveBeenCalled();
+			expect(signAndFinalizeBtcPsbtSpy).not.toHaveBeenCalled();
+		});
+
+		it('should run beforeBroadcast with the txid, after signing and before the broadcast', async () => {
+			const beforeBroadcast = vi.fn(() => {
+				expect(signAndFinalizeBtcPsbtSpy).toHaveBeenCalledOnce();
+				expect(broadcastBtcTransactionSpy).not.toHaveBeenCalled();
+
+				return Promise.resolve();
+			});
+			const onBroadcast = vi.fn();
+
+			await sendBtc({ ...defaultParams, beforeBroadcast, onBroadcast });
+
+			expect(beforeBroadcast).toHaveBeenCalledExactlyOnceWith({ txid: signed.txid });
+			expect(onBroadcast).toHaveBeenCalledExactlyOnceWith({ txid: signed.txid });
+		});
+
+		it('should broadcast nothing when beforeBroadcast rejects', async () => {
+			const beforeBroadcast = vi.fn().mockRejectedValue(error);
+
+			await expect(sendBtc({ ...defaultParams, beforeBroadcast })).rejects.toThrow(error);
+
+			expect(broadcastBtcTransactionSpy).not.toHaveBeenCalled();
+		});
+
+		it('should reject with the backend typed answer, and not call onBroadcast', async () => {
+			const refusal = new BtcBroadcastTransactionCanisterError(
+				{ FeeTooLow: null },
+				'btc_broadcast_transaction: FeeTooLow'
+			);
+			broadcastBtcTransactionSpy.mockRejectedValue(refusal);
+			const onBroadcast = vi.fn();
+
+			await expect(sendBtc({ ...defaultParams, onBroadcast })).rejects.toBe(refusal);
+
+			expect(onBroadcast).not.toHaveBeenCalled();
+		});
+
+		it('should reject as unconfirmed when the broadcast fails with no typed answer', async () => {
+			broadcastBtcTransactionSpy.mockRejectedValue(error);
+
+			const res = sendBtc(defaultParams);
+
+			await expect(res).rejects.toBeInstanceOf(BtcBroadcastUnconfirmedError);
+			await expect(res).rejects.toHaveProperty('cause', error);
+		});
+
+		it('should resolve once broadcast though the progress callback throws after it', async () => {
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+			const waitAndTriggerWalletSpy = vi
+				.spyOn(walletUtils, 'waitAndTriggerWallet')
+				.mockResolvedValue(undefined);
+			const onProgress = vi
+				.fn()
+				.mockImplementationOnce(() => undefined)
+				.mockImplementationOnce(() => {
+					throw error;
+				});
+
+			const result = await sendBtc({ ...defaultParams, onProgress });
+
+			expect(result).toBe(signed.txid);
+			expect(broadcastBtcTransactionSpy).toHaveBeenCalledOnce();
+			expect(onProgress).toHaveBeenCalledTimes(2);
+			expect(waitAndTriggerWalletSpy).toHaveBeenCalledOnce();
+		});
+
+		it('should resolve once broadcast, whatever onBroadcast and the wallet refresh do', async () => {
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+			vi.spyOn(walletUtils, 'waitAndTriggerWallet').mockRejectedValue(error);
+
+			const result = await sendBtc({
+				...defaultParams,
+				onBroadcast: () => {
+					throw error;
+				}
+			});
+
+			expect(result).toBe(signed.txid);
+		});
+	});
+
+	describe('sendBtcScriptOutputs', () => {
+		const signed = { txid: 'signed-txid', hex: '0001', bytes: Uint8Array.from([0, 1]) };
+		const psbt = {} as Psbt;
+
+		const { destination: _destination, amount: _amount, ...commonParams } = defaultParams;
+
+		const params: SendBtcScriptOutputsParams = {
+			...commonParams,
+			layout: {
+				outputs: [
+					{ script: Uint8Array.from([0x00, 0x14, ...new Array(20).fill(1)]), value: 997_500n },
+					{ script: Uint8Array.from([0x6a, 0x01, 0x05]), value: ZERO },
+					{ script: Uint8Array.from([0x00, 0x14, ...new Array(20).fill(2)]), value: 2_500n }
+				],
+				changeIndex: 2,
+				sequence: 0xfffffffd
+			}
+		};
+
+		let buildBtcScriptOutputsPsbtSpy: MockInstance;
+		let buildBtcSendPsbtSpy: MockInstance;
+		let signAndFinalizeBtcPsbtSpy: MockInstance;
+		let broadcastBtcTransactionSpy: MockInstance;
+		let signerSendBtcSpy: MockInstance;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			btcSendViaBackend.enabled = true;
+
+			buildBtcScriptOutputsPsbtSpy = vi
+				.spyOn(btcPsbtUtils, 'buildBtcScriptOutputsPsbt')
+				.mockReturnValue(psbt);
+			buildBtcSendPsbtSpy = vi.spyOn(btcPsbtUtils, 'buildBtcSendPsbt');
+			signAndFinalizeBtcPsbtSpy = vi
+				.spyOn(btcSignServices, 'signAndFinalizeBtcPsbt')
+				.mockResolvedValue(signed);
+			broadcastBtcTransactionSpy = vi
+				.spyOn(backendAPI, 'broadcastBtcTransaction')
+				.mockResolvedValue({ txid: Uint8Array.from([1]) });
+			signerSendBtcSpy = vi.spyOn(signerAPI, 'sendBtc').mockResolvedValue({ txid });
+			vi.spyOn(walletUtils, 'waitAndTriggerWallet').mockResolvedValue(undefined);
+		});
+
+		it('should build the layout around the change, sign it and broadcast it through the backend', async () => {
+			const onProgress = vi.fn();
+
+			const result = await sendBtcScriptOutputs({ ...params, onProgress });
+
+			expect(result).toBe(signed.txid);
+			expect(buildBtcScriptOutputsPsbtSpy).toHaveBeenCalledExactlyOnceWith({
+				utxos: params.utxosFee.utxos,
+				outputs: params.layout.outputs,
+				changeIndex: params.layout.changeIndex,
+				changeAddress: params.source,
+				feeSatoshis: params.utxosFee.feeSatoshis,
+				network: params.network,
+				sequence: params.layout.sequence
+			});
+			expect(buildBtcSendPsbtSpy).not.toHaveBeenCalled();
+			expect(signAndFinalizeBtcPsbtSpy).toHaveBeenCalledExactlyOnceWith({
+				psbt,
+				identity: params.identity
+			});
+			expect(broadcastBtcTransactionSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: params.identity,
+				network: mapToSignerBitcoinNetwork({ network: params.network }),
+				transaction: signed.bytes,
+				iiDelegationChain: []
+			});
+			expect(onProgress).toHaveBeenCalledTimes(2);
+		});
+
+		it('should refuse with the flag off, before building or signing anything', async () => {
+			btcSendViaBackend.enabled = false;
+
+			await expect(sendBtcScriptOutputs(params)).rejects.toThrow(
+				'A BTC send with script outputs is broadcast through the backend only'
+			);
+
+			expect(buildBtcScriptOutputsPsbtSpy).not.toHaveBeenCalled();
+			expect(signAndFinalizeBtcPsbtSpy).not.toHaveBeenCalled();
+			expect(signerSendBtcSpy).not.toHaveBeenCalled();
+		});
+
+		it('should run beforeBroadcast with the txid, after signing and before the broadcast', async () => {
+			const beforeBroadcast = vi.fn(() => {
+				expect(signAndFinalizeBtcPsbtSpy).toHaveBeenCalledOnce();
+				expect(broadcastBtcTransactionSpy).not.toHaveBeenCalled();
+
+				return Promise.resolve();
+			});
+
+			await sendBtcScriptOutputs({ ...params, beforeBroadcast });
+
+			expect(beforeBroadcast).toHaveBeenCalledExactlyOnceWith({ txid: signed.txid });
+			expect(broadcastBtcTransactionSpy).toHaveBeenCalledOnce();
+		});
+
+		it('should broadcast nothing when beforeBroadcast rejects', async () => {
+			const beforeBroadcast = vi.fn().mockRejectedValue(error);
+
+			await expect(sendBtcScriptOutputs({ ...params, beforeBroadcast })).rejects.toThrow(error);
+
+			expect(broadcastBtcTransactionSpy).not.toHaveBeenCalled();
+		});
+
+		it("should reject with the backend's typed answer, or as unconfirmed without one", async () => {
+			const refusal = new BtcBroadcastTransactionCanisterError(
+				{ FeeTooLow: null },
+				'btc_broadcast_transaction: FeeTooLow'
+			);
+			broadcastBtcTransactionSpy.mockRejectedValueOnce(refusal).mockRejectedValueOnce(error);
+
+			await expect(sendBtcScriptOutputs(params)).rejects.toBe(refusal);
+			await expect(sendBtcScriptOutputs(params)).rejects.toBeInstanceOf(
+				BtcBroadcastUnconfirmedError
+			);
 		});
 	});
 
@@ -197,14 +524,20 @@ describe('btc-send.services', () => {
 			}
 		};
 
+		// 1 input + 2 outputs = 141 vB, at 4 sat/vByte = 564 satoshis.
 		const validUtxosFee: UtxosFee = {
-			feeSatoshis: 1000n, // 250 * 4 = 1000, within tolerance
+			feeSatoshis: 564n,
+			feeRateMiliSatoshisPerVByte: 4000n,
 			utxos: [validUtxo]
 		};
+
+		// A P2WPKH recipient: its output is the 31 vB `validUtxosFee` is priced for.
+		const p2wpkhDestination = 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq';
 
 		const defaultValidateParams = {
 			utxosFee: validUtxosFee,
 			source: 'bc1qt0nkp96r7p95xfacyp98pww2eu64yzuf78l4a2wy0sttt83hux4q6u2nl7',
+			destination: p2wpkhDestination,
 			amount: 0.0001,
 			network: 'mainnet' as const,
 			identity: mockIdentity
@@ -221,8 +554,6 @@ describe('btc-send.services', () => {
 			).mockResolvedValue({ success: true });
 			vi.spyOn(btcUtils, 'getPendingTransactionUtxoOutpoints').mockReturnValue([]);
 			vi.spyOn(btcUtxosUtils, 'extractUtxoOutpoints').mockReturnValue(['txid1:0', 'txid2:0']);
-			vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(250);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(4000n);
 		});
 
 		it('should pass validation for valid UTXOs and parameters', async () => {
@@ -380,10 +711,6 @@ describe('btc-send.services', () => {
 
 		describe('InvalidFeeCalculation validation', () => {
 			it('should throw InvalidFeeCalculation error when fee is too low', async () => {
-				// Mock estimated transaction size and fee rate to make expected fee higher than provided fee
-				vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(1000);
-				vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(10000n);
-
 				const params = {
 					...defaultValidateParams,
 					utxosFee: { ...validUtxosFee, feeSatoshis: 100n } // Very low fee
@@ -401,10 +728,6 @@ describe('btc-send.services', () => {
 			});
 
 			it('should throw InvalidFeeCalculation error when fee is too high', async () => {
-				// Mock estimated transaction size to make expected fee much lower than provided fee
-				vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(100);
-				vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1n);
-
 				const params = {
 					...defaultValidateParams,
 					utxosFee: { ...validUtxosFee, feeSatoshis: 50000n } // Very high fee
@@ -422,15 +745,100 @@ describe('btc-send.services', () => {
 			});
 		});
 
-		it('should throw InsufficientBalanceForFee error when UTXOs have insufficient funds', async () => {
-			// Use smaller fee and transaction size for consistent calculation
-			vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(250);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
+		describe('recipient', () => {
+			const p2trDestination = 'bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0';
 
+			// Above the 10% tolerance for a P2WPKH recipient (564 sats, so at most 620) but within it
+			// for a P2TR one (1 input + 43 + 31 = 153 vB at 4 sat/vB = 612 sats, so at most 673).
+			const feePricedForALargerOutput = { ...validUtxosFee, feeSatoshis: 650n };
+
+			it.each([
+				// The P2WPKH recipient above on testnet: the same witness program, which its output
+				// script alone would pay on mainnet.
+				'tb1qar0srrr7xfkvy5l643lydnw9re59gtzzy00gkn',
+				'not-an-address'
+			])(
+				'should refuse the recipient %s before anything else is checked or loaded',
+				async (destination) => {
+					await expect(
+						validateBtcSend({ ...defaultValidateParams, destination })
+					).rejects.toMatchObject({ type: BtcSendValidationError.InvalidDestination });
+
+					expect(
+						btcPendingSentTransactionsServices.loadBtcPendingSentTransactions
+					).not.toHaveBeenCalled();
+				}
+			);
+
+			it('should check the fee against the recipient output, sized from its script', async () => {
+				await expect(
+					validateBtcSend({
+						...defaultValidateParams,
+						destination: p2trDestination,
+						utxosFee: feePricedForALargerOutput
+					})
+				).resolves.not.toThrow();
+
+				await expect(
+					validateBtcSend({ ...defaultValidateParams, utxosFee: feePricedForALargerOutput })
+				).rejects.toMatchObject({ type: BtcSendValidationError.InvalidFeeCalculation });
+			});
+
+			it('should check the fee against the largest output when the recipient is not known', async () => {
+				await expect(
+					validateBtcSend({
+						...defaultValidateParams,
+						destination: undefined,
+						utxosFee: feePricedForALargerOutput
+					})
+				).resolves.not.toThrow();
+			});
+		});
+
+		describe('a layout of outputs', () => {
+			// A LI.FI LayerSwap layout: a P2TR deposit, an 18-byte memo and a P2WPKH fee output.
+			// 1 input + 43 + 29 + 31 + change (31) = 213 vB, at 4 sat/vB = 852 sats.
+			const outputVSizes = [43, 29, 31];
+			const feePricedForTheLayout = { ...validUtxosFee, feeSatoshis: 852n };
+
+			it('should check the fee against every output of the layout', async () => {
+				await expect(
+					validateBtcSend({
+						...defaultValidateParams,
+						destination: undefined,
+						outputVSizes,
+						utxosFee: feePricedForTheLayout
+					})
+				).resolves.not.toThrow();
+			});
+
+			it('should refuse the fee of a layout checked against one output', async () => {
+				await expect(
+					validateBtcSend({
+						...defaultValidateParams,
+						destination: undefined,
+						utxosFee: feePricedForTheLayout
+					})
+				).rejects.toMatchObject({ type: BtcSendValidationError.InvalidFeeCalculation });
+			});
+
+			it('should refuse the fee of one output checked against the layout', async () => {
+				await expect(
+					validateBtcSend({ ...defaultValidateParams, destination: undefined, outputVSizes })
+				).rejects.toMatchObject({ type: BtcSendValidationError.InvalidFeeCalculation });
+			});
+		});
+
+		it('should throw InsufficientBalanceForFee error when UTXOs have insufficient funds', async () => {
 			const params = {
 				...defaultValidateParams,
 				amount: 1, // 1 BTC = 100,000,000 satoshis, but UTXO only has 100,000
-				utxosFee: { ...validUtxosFee, feeSatoshis: 250n } // 250 * 1 = 250, within tolerance
+				// 141 vB at 1 sat/vByte = 141 satoshis, a valid fee for this selection
+				utxosFee: {
+					...validUtxosFee,
+					feeSatoshis: 141n,
+					feeRateMiliSatoshisPerVByte: 1000n
+				}
 			};
 
 			await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
@@ -445,17 +853,13 @@ describe('btc-send.services', () => {
 		});
 
 		it('should accept fee within tolerance range', async () => {
-			// Mock transaction size for predictable fee calculation
-			vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(250);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(4000n);
-
-			const expectedFee = BigInt(250) * 4n; // 1000 satoshis
-			const toleranceRange = expectedFee / 10n; // 100 satoshis
+			const expectedFee = 564n;
+			const toleranceRange = expectedFee / 10n; // 56 satoshis
 
 			// Test fee at upper tolerance boundary
 			const paramsUpperBound = {
 				...defaultValidateParams,
-				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange } // 1100
+				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange } // 620
 			};
 
 			await expect(validateBtcSend(paramsUpperBound)).resolves.not.toThrow();
@@ -463,7 +867,7 @@ describe('btc-send.services', () => {
 			// Test fee at lower tolerance boundary
 			const paramsLowerBound = {
 				...defaultValidateParams,
-				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee - toleranceRange } // 900
+				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee - toleranceRange } // 508
 			};
 
 			await expect(validateBtcSend(paramsLowerBound)).resolves.not.toThrow();
@@ -479,15 +883,13 @@ describe('btc-send.services', () => {
 				}
 			};
 
-			// Mock the transaction size estimation for 2 inputs
-			vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(370);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(3000n);
-
 			const params = {
 				...defaultValidateParams,
 				utxosFee: {
 					...validUtxosFee,
-					feeSatoshis: 1110n, // 370 * 3 = 1110, within tolerance
+					// 2 inputs + 2 outputs = 209 vB, at 3 sat/vByte = 627 satoshis
+					feeSatoshis: 627n,
+					feeRateMiliSatoshisPerVByte: 3000n,
 					utxos: [validUtxo, utxo2]
 				}
 			};
@@ -495,35 +897,48 @@ describe('btc-send.services', () => {
 			await expect(validateBtcSend(params)).resolves.not.toThrow();
 		});
 
-		it('should call getFeeRateFromPercentiles with correct parameters', async () => {
+		it('should not re-sample the fee rate', async () => {
 			const getFeeRateFromPercentilesSpy = vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles');
 
 			await validateBtcSend(defaultValidateParams);
 
-			expect(getFeeRateFromPercentilesSpy).toHaveBeenCalledWith({
-				network: defaultValidateParams.network,
-				identity: defaultValidateParams.identity
-			});
+			expect(getFeeRateFromPercentilesSpy).not.toHaveBeenCalled();
+		});
+
+		it('should accept a fee the mempool has since moved away from', async () => {
+			// The percentile median that priced this fee shifts within a minute of ordinary
+			// mempool movement, and near the 1 sat/vByte floor one slot of drift already
+			// exceeds the tolerance. The fee is judged against the rate it was quoted at, so
+			// the send survives the drift instead of failing on the confirmation step.
+			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
+
+			const params = {
+				...defaultValidateParams,
+				utxosFee: {
+					...validUtxosFee,
+					feeSatoshis: 181n,
+					feeRateMiliSatoshisPerVByte: 1284n
+				}
+			};
+
+			await expect(validateBtcSend(params)).resolves.not.toThrow();
 		});
 
 		it('should validate exact fee tolerance boundaries', async () => {
-			vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(250);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(4000n);
-
-			const expectedFee = 250n * 4n; // 1000 satoshis
-			const toleranceRange = expectedFee / 10n; // 100 satoshis
+			const expectedFee = 564n;
+			const toleranceRange = expectedFee / 10n; // 56 satoshis
 
 			// Test fee just outside tolerance (should fail)
 			const paramsOutsideUpper = {
 				...defaultValidateParams,
-				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange + 1n } // 1101
+				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange + 1n } // 621
 			};
 
 			await expect(validateBtcSend(paramsOutsideUpper)).rejects.toThrow(BtcValidationError);
 
 			const paramsOutsideLower = {
 				...defaultValidateParams,
-				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee - toleranceRange - 1n } // 899
+				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee - toleranceRange - 1n } // 507
 			};
 
 			await expect(validateBtcSend(paramsOutsideLower)).rejects.toThrow(BtcValidationError);
@@ -531,7 +946,7 @@ describe('btc-send.services', () => {
 			// Test fee exactly at tolerance boundary (should pass)
 			const paramsExactUpper = {
 				...defaultValidateParams,
-				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange } // 1100
+				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange } // 620
 			};
 
 			await expect(validateBtcSend(paramsExactUpper)).resolves.not.toThrow();

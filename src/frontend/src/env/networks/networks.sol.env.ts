@@ -9,6 +9,7 @@ import type { Network, NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
+import solMainnetIconColored from '$sol/assets/sol.svg';
 import type { SolanaNetwork } from '$sol/types/network';
 
 export const SOL_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
@@ -43,6 +44,7 @@ export const SOLANA_MAINNET_NETWORK: SolanaNetwork = {
 	name: 'Solana',
 	chainId: '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
 	icon: solMainnetIcon,
+	iconColored: solMainnetIconColored,
 	explorerUrl: SOL_MAINNET_EXPLORER_URL,
 	buy: { onramperId: 'solana' },
 	pay: { openCryptoPay: 'Solana' }

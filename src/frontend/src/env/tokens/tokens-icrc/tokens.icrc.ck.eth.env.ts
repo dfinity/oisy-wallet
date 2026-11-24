@@ -1,7 +1,7 @@
 import { CKETH_EXPLORER_URL, CKETH_SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
 import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
-import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
+import type { IcCkInterface } from '$icp/types/ic-token';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NonEmptyArray } from '$lib/types/utils';
@@ -89,7 +89,7 @@ export const CKETH_LEDGER_CANISTER_IDS: NonEmptyArray<CanisterIdText> = [
 	...CKETH_LEDGER_CANISTER_TESTNET_IDS
 ];
 
-export const ICRC_CK_ETH_TOKENS: IcInterface[] = [
+export const ICRC_CK_ETH_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKETH_LOCAL_DATA) ? [CKETH_LOCAL_DATA] : []),
 	...(nonNullish(CKETH_STAGING_DATA) ? [CKETH_STAGING_DATA] : [])
 ];

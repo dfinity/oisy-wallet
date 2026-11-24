@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import AiAssistantActionButton from '$lib/components/ai-assistant/AiAssistantActionButton.svelte';
 	import AiAssistantForm from '$lib/components/ai-assistant/AiAssistantForm.svelte';
 	import AiAssistantMessages from '$lib/components/ai-assistant/AiAssistantMessages.svelte';
@@ -24,6 +23,7 @@
 	import { generateAiAssistantResponseEventMetadata } from '$lib/utils/ai-assistant.utils';
 	import { consoleError } from '$lib/utils/console.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		loading?: boolean;
@@ -69,10 +69,12 @@
 
 	const sendMessage = async ({
 		messageText,
-		context
+		context,
+		typedByUser
 	}: {
 		messageText?: string;
 		context?: string;
+		typedByUser?: boolean;
 	}) => {
 		if (isNullish($authIdentity)) {
 			return;
@@ -81,7 +83,7 @@
 		if (notEmptyString(messageText)) {
 			aiAssistantStore.appendMessage({
 				role: 'user',
-				data: { text: messageText, context }
+				data: { text: messageText, context, ...(typedByUser === true && { typedByUser }) }
 			});
 		}
 
@@ -103,7 +105,8 @@
 				data:
 					(tool?.calls ?? []).length > 0 && (tool?.results ?? []).length > 0
 						? {
-								tool
+								tool,
+								...(notEmptyString(text) && { text })
 							}
 						: {
 								text: isNullishOrEmpty(text) ? $i18n.ai_assistant.errors.no_response : text,
@@ -144,7 +147,7 @@
 		const nextMessage = userInput;
 		userInput = '';
 
-		await sendMessage({ messageText: nextMessage });
+		await sendMessage({ messageText: nextMessage, typedByUser: true });
 	};
 </script>
 

@@ -6,6 +6,7 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
+	import NftThumbnail from '$lib/components/nfts/NftThumbnail.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import type { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
@@ -70,7 +71,7 @@
 </script>
 
 <button
-	class="flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300 hover:text-inherit"
+	class={`flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-[translate,scale,background-color] duration-150 ease-out hover:text-inherit ${!disabled && type !== 'default' ? 'press' : ''}`}
 	class:bg-primary={type === 'default'}
 	class:cursor-default={type === 'default'}
 	class:cursor-not-allowed={disabled}
@@ -96,13 +97,17 @@
 			type={type !== 'card-link' ? 'card-selectable' : 'card'}
 		>
 			<div class="h-full w-full">
-				<BgImg
-					imageUrl={getNftDisplayImageUrl(nft)}
-					shadow="inset"
-					size="cover"
-					styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
-					testId={`${testId}-image`}
-				/>
+				<NftThumbnail imageUrl={getNftDisplayImageUrl(nft)}>
+					{#snippet children({ imageUrl })}
+						<BgImg
+							{imageUrl}
+							shadow="inset"
+							size="cover"
+							styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
+							testId={`${testId}-image`}
+						/>
+					{/snippet}
+				</NftThumbnail>
 			</div>
 		</NftDisplayGuard>
 

@@ -1,22 +1,55 @@
 import { ZERO } from '$lib/constants/app.constants';
 
 // We want to show the latest balance.
-// Even if it's not totally confirmed (6 confirmations).
+// Even if it's not totally confirmed (CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS).
 // There is no difference between 0 and 1
 // because the bitcoin canister doesn't know about the mempool and unconfirmed transactions.
 export const BTC_BALANCE_MIN_CONFIRMATIONS = 1;
 
 // block_index (and hence confirmations value) is undefined - transaction status "pending"
-// 1 - 5 confirmations - transaction status "unconfirmed"
-// 6 and more confirmations - transaction status "confirmed"
+// 1 - 3 confirmations - transaction status "unconfirmed"
+// 4 and more confirmations - transaction status "confirmed"
 export const UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS = 1;
-export const CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS = 6;
+
+// Doubles as the floor a UTXO must clear before a send may select it. Chosen to match the depth
+// the ckBTC minter credited incoming deposits at when this was set; spending a UTXO we already
+// hold is the milder exposure of the two anyway — a reorg makes our own spend un-minable rather
+// than moving someone else's money.
+// Must stay in sync with MIN_CONFIRMATIONS_ACCEPTED_BTC_TX in src/backend/src/api/bitcoin.rs —
+// the backend re-checks the selected UTXOs at its own floor when the send registers as pending.
+export const CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS = 4;
+
+export const BTC_TXID_REGEX = /^[0-9a-f]{64}$/i;
 
 export const BTC_CONVERT_FEE = ZERO;
 
 export const DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE = 0.00001;
-export const BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION = 10;
 export const BTC_MINIMUM_AMOUNT = 700n;
+
+// Change below this goes to the miner rather than to a change output. The same as `DUST_THRESHOLD`
+// in the chain fusion signer's `build_p2wpkh_transaction`
+// (`src/signer/canister/src/sign/bitcoin/tx_utils.rs` in dfinity/chain-fusion-signer), so a send
+// built here has the layout CFS builds from the same inputs, outputs and fee.
+export const BTC_CHANGE_DUST_THRESHOLD_SATOSHIS = 1_000n;
+
+// The largest output a send can pay, P2WSH or P2TR, in vbytes: 8 (value) + 1 (script length) +
+// 34 (script). A fee priced with it covers any recipient, so it stands in until the recipient is
+// known.
+export const BTC_LARGEST_OUTPUT_VSIZE = 43;
+
+// The most inputs a send through the backend spends. Each input is one `btc_sign_prehash`, which
+// the signer charges at 37B plus the 1B ledger fee against the per-user approval the backend grants
+// at login. `allow_signing` tops that approval up only below 1.458T (`SUFFICIENT_CYCLES_THRESHOLD`
+// in `src/backend/src/signer/service.rs`), so a send of 38 inputs (1.444T) fits in what a login
+// leaves, and signing does not run out halfway, after spending cycles on a transaction it never
+// broadcasts. The backend's own limit, `MAX_BROADCAST_TX_INPUTS`, is 100.
+export const BTC_SEND_MAX_INPUTS = 38;
+
+// How many inputs of one transaction are signed at the same time. Each is a `btc_sign_prehash`
+// call, so one `sign_with_ecdsa` request. The subnet queues only 20 requests per key beyond the
+// pre-signatures it has ready, shared by every caller of the key, and refuses the rest. The chain
+// fusion signer's `btc_caller_send` signs one input at a time.
+export const BTC_SIGN_INPUTS_BATCH_SIZE = 10;
 
 // Fee tolerance percentage for Bitcoin transactions (±10%)
 // Percentage of tolerated increase in transaction fees compared to the confirmed fee.

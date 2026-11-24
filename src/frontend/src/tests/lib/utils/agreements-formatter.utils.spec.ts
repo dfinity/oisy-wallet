@@ -15,7 +15,7 @@ describe('agreements-formatter.utils', () => {
 		type UsedLanguages = Languages.ENGLISH | Languages.ITALIAN | Languages.GERMAN;
 
 		const cls =
-			'class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt"';
+			'class="inline-flex items-center gap-1 active:text-brand-hover hover:text-brand-hover text-brand-primary-alt"';
 
 		const licenseAgreementLink = ({ ariaLabel, text }: { ariaLabel: string; text: string }) =>
 			`<a target="_blank" ${cls} aria-label="${ariaLabel}" href="/license-agreement/">${text} <!----></a>`;

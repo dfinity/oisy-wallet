@@ -1,16 +1,19 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { getMinimumDepositAmount } from '@liquidium/client';
 	import { getContext, type Snippet } from 'svelte';
 	import LiquidiumProviderFee from '$lib/components/liquidium/supply/LiquidiumProviderFee.svelte';
 	import LiquidiumSupplyAgreement from '$lib/components/liquidium/supply/LiquidiumSupplyAgreement.svelte';
 	import StakeForm from '$lib/components/stake/StakeForm.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { LiquidiumMarket } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isDesktop } from '$lib/utils/device.utils';
+	import { formatToken } from '$lib/utils/format.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -24,6 +27,9 @@
 		// The provider-fee estimate failed (e.g. stale oracle price). Unlike repay, supply does not
 		// guess a fee — it surfaces a retry message and stays disabled until prices refresh.
 		inflowFeeUnavailable?: boolean;
+		// Least gross transfer (amount + provider fee) Liquidium credits, from a per-account quote
+		// (native SOL). Less would wait at the deposit address for a top-up.
+		minimumSendAmount?: bigint;
 		// Rail-specific balance check (gas/provider-fee coverage); owned by the wizard,
 		// which holds the per-chain fee context.
 		onCustomErrorValidate?: (userAmount: bigint) => Error | undefined;
@@ -41,6 +47,7 @@
 		totalFee,
 		inflowFee,
 		inflowFeeUnavailable = false,
+		minimumSendAmount,
 		onCustomErrorValidate,
 		feeDisplay,
 		onSelectToken,
@@ -53,6 +60,39 @@
 	let agreementChecked = $state(false);
 	let amountError = $state<Error | undefined>();
 
+	// The SDK only enforces the protocol deposit minimum on its wallet-executed path; this
+	// transfer rail bypasses it, so a below-minimum inflow must be rejected here. A quoted minimum is
+	// gross while the typed amount is net of the provider fee, so it is compared net.
+	let quotedMinimumSupply = $derived(
+		nonNullish(minimumSendAmount) && nonNullish(inflowFee) ? minimumSendAmount - inflowFee : ZERO
+	);
+
+	let minimumSupply = $derived.by(() => {
+		const protocolMinimum = getMinimumDepositAmount(market.asset);
+
+		return quotedMinimumSupply > protocolMinimum ? quotedMinimumSupply : protocolMinimum;
+	});
+
+	// At full precision: rounded, a quoted minimum (to the lamport) could read below what the check
+	// takes, and typing it would be rejected.
+	let minSupplyFormatted = $derived(
+		`${formatToken({
+			value: minimumSupply,
+			unitName: $sendTokenDecimals,
+			displayDecimals: $sendTokenDecimals
+		})} ${market.asset}`
+	);
+
+	let validateSupplyAmount = $derived.by(() => {
+		const minimum = minimumSupply;
+		const railValidate = onCustomErrorValidate;
+
+		return (userAmount: bigint): Error | undefined =>
+			userAmount < minimum
+				? new Error($i18n.liquidium.text.supply_below_minimum)
+				: railValidate?.(userAmount);
+	});
+
 	// Both fees must be resolved before the form can submit.
 	let feeMissing = $derived(isNullish(totalFee) || isNullish(inflowFee));
 
@@ -64,7 +104,7 @@
 			return;
 		}
 
-		const next = onCustomErrorValidate?.(
+		const next = validateSupplyAmount(
 			parseToken({ value: `${amount}`, unitName: $sendTokenDecimals })
 		);
 
@@ -80,7 +120,7 @@
 	isSelectable={nonNullish(onSelectToken)}
 	onClick={onSelectToken}
 	{onClose}
-	{onCustomErrorValidate}
+	onCustomErrorValidate={validateSupplyAmount}
 	{onNext}
 	providerFee={inflowFee}
 	{totalFee}
@@ -98,6 +138,13 @@
 				<span class="text-success-primary">{market.supplyApy.toFixed(2)}%</span>
 			{/snippet}
 		</ModalValue>
+
+		{#if minimumSupply > ZERO}
+			<ModalValue>
+				{#snippet label()}{$i18n.liquidium.text.minimum_supply}{/snippet}
+				{#snippet mainValue()}{minSupplyFormatted}{/snippet}
+			</ModalValue>
+		{/if}
 
 		<LiquidiumProviderFee {inflowFee} />
 

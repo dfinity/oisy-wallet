@@ -8,9 +8,12 @@ import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
 import { ADDITIONAL_ERC20_TOKENS, ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
 import { ETHEREUM_TOKEN, SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
+import { EthNonceReadError, EthSubmissionUnconfirmedError } from '$eth/types/send';
 import {
+	findEthersError,
 	getExplorerUrl,
 	isDefaultEthereumToken,
+	isEthersError,
 	isNotDefaultEthereumToken,
 	isNotSupportedEthTokenId,
 	isSupportedEthToken,
@@ -18,6 +21,7 @@ import {
 } from '$eth/utils/eth.utils';
 import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import type { Token } from '$lib/types/token';
+import { makeError } from 'ethers/utils';
 
 describe('eth.utils', () => {
 	describe('isDefaultEthereumToken', () => {
@@ -229,6 +233,55 @@ describe('eth.utils', () => {
 			const result3 = getExplorerUrl({ token: {} as unknown as Token });
 
 			expect(result3).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
+		});
+	});
+
+	describe('isEthersError', () => {
+		it('should recognise an error ethers raised', () => {
+			const err = makeError('could not coalesce error', 'UNKNOWN_ERROR', {
+				error: { code: -32000, message: 'already known' }
+			});
+
+			expect(isEthersError(err)).toBeTruthy();
+		});
+
+		it.each([
+			new Error('offline'),
+			{ code: 'UNKNOWN_ERROR', shortMessage: 'offline' },
+			'offline',
+			undefined
+		])('should not recognise anything else: %s', (err) => {
+			expect(isEthersError(err)).toBeFalsy();
+		});
+	});
+
+	describe('findEthersError', () => {
+		const ethersErr = makeError('could not coalesce error', 'UNKNOWN_ERROR', {
+			error: { code: -32603, message: 'Internal error' }
+		});
+
+		it('should return an ethers error as it is', () => {
+			expect(findEthersError(ethersErr)).toBe(ethersErr);
+		});
+
+		it.each([
+			{ kind: 'EthNonceReadError', err: new EthNonceReadError(ethersErr) },
+			{ kind: 'EthSubmissionUnconfirmedError', err: new EthSubmissionUnconfirmedError(ethersErr) },
+			{
+				kind: 'a caller wrapping it again',
+				err: new Error('sending failed', { cause: new EthSubmissionUnconfirmedError(ethersErr) })
+			}
+		])('should find the ethers error behind $kind', ({ err }) => {
+			expect(findEthersError(err)).toBe(ethersErr);
+		});
+
+		it.each([
+			new Error('offline'),
+			new EthSubmissionUnconfirmedError(new Error('offline')),
+			'offline',
+			undefined
+		])('should find nothing behind %s', (err) => {
+			expect(findEthersError(err)).toBeUndefined();
 		});
 	});
 });

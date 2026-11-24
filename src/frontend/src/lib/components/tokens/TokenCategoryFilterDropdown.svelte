@@ -1,94 +1,75 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconCheck from '$lib/components/icons/IconCheck.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import ModalFilterButton from '$lib/components/ui/ModalFilterButton.svelte';
-	import Popover from '$lib/components/ui/Popover.svelte';
-	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
+	import ListItemButton from '$lib/components/common/ListItemButton.svelte';
+	import FilterChip from '$lib/components/ui/FilterChip.svelte';
+	import { TOKEN_CATEGORY_FILTER } from '$lib/constants/test-ids.constants';
 	import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { tokenCategoryFilterStore } from '$lib/stores/settings.store';
 
 	interface Props {
 		selectedCategory?: TokenCategoryTagValue;
-		onSelect?: (value?: TokenCategoryTagValue) => void;
+		// The asset types to offer; every one when absent.
+		categories?: TokenCategoryTagValue[];
+		onSelect: (value?: TokenCategoryTagValue) => void;
 	}
 
-	let { selectedCategory, onSelect }: Props = $props();
+	let { selectedCategory, categories, onSelect }: Props = $props();
 
 	let visible = $state(false);
 
-	let button = $state<HTMLButtonElement | undefined>();
+	const allCategories = Object.values(TokenCategoryTagValue);
 
-	const categories = Object.values(TokenCategoryTagValue);
+	let offeredCategories = $derived(
+		nonNullish(categories)
+			? allCategories.filter((category) => categories.includes(category))
+			: allCategories
+	);
 
 	const getCategoryLabel = (value: TokenCategoryTagValue): string =>
 		$i18n.token_tag.category[value] ?? value;
 
-	let activeCategory = $derived(onSelect ? selectedCategory : $tokenCategoryFilter);
-
-	const currentLabel: string = $derived(
-		isNullish(activeCategory) ? $i18n.tokens.text.asset_type_all : getCategoryLabel(activeCategory)
-	);
-
 	const select = (value: TokenCategoryTagValue | undefined) => {
-		if (onSelect) {
-			onSelect(value);
-		} else {
-			tokenCategoryFilterStore.set({ key: 'token-category-filter', value: { value } });
-		}
+		onSelect(value);
+
 		visible = false;
 	};
 </script>
 
-<ModalFilterButton ariaLabel={currentLabel} onclick={() => (visible = !visible)} bind:button>
-	{currentLabel}
-</ModalFilterButton>
-
-<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
+<FilterChip
+	clearAriaLabel={$i18n.tokens.text.clear_asset_type_filter}
+	direction="rtl"
+	hasValue={nonNullish(selectedCategory)}
+	label={isNullish(selectedCategory)
+		? $i18n.tokens.text.asset_type_all_short
+		: getCategoryLabel(selectedCategory)}
+	onClear={() => onSelect(undefined)}
+	panelLabel={$i18n.tokens.text.filter_asset_types}
+	testId={TOKEN_CATEGORY_FILTER}
+	bind:visible
+>
 	<List condensed noPadding>
 		<ListItem>
-			<Button
-				alignLeft
-				colorStyle="tertiary-alt"
-				fullWidth
-				innerStyleClass="font-normal text-primary"
+			<ListItemButton
 				onclick={() => select(undefined)}
-				paddingSmall
-				styleClass="py-1 rounded-md pl-0.5 min-w-28"
-				transparent
+				selectable
+				selected={isNullish(selectedCategory)}
 			>
-				<span class="w-[20px] pt-0.75 text-brand-primary">
-					{#if isNullish(activeCategory)}
-						<IconCheck size="20" />
-					{/if}
-				</span>
 				{$i18n.tokens.text.asset_type_all}
-			</Button>
+			</ListItemButton>
 		</ListItem>
 
-		{#each categories as category (category)}
+		{#each offeredCategories as category (category)}
 			<ListItem>
-				<Button
-					alignLeft
-					colorStyle="tertiary-alt"
-					fullWidth
-					innerStyleClass="font-normal text-primary"
+				<ListItemButton
 					onclick={() => select(category)}
-					paddingSmall
-					styleClass="py-1 rounded-md pl-0.5 min-w-28"
-					transparent
+					selectable
+					selected={selectedCategory === category}
 				>
-					<span class="w-[20px] pt-0.75 text-brand-primary">
-						{#if activeCategory === category}
-							<IconCheck size="20" />
-						{/if}
-					</span>
 					{getCategoryLabel(category)}
-				</Button>
+				</ListItemButton>
 			</ListItem>
 		{/each}
 	</List>
-</Popover>
+</FilterChip>

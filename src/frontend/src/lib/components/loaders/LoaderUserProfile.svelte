@@ -6,7 +6,7 @@
 	import { infoSignOut } from '$lib/services/auth.services';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { userProfileStore } from '$lib/stores/user-profile.store';
+	import { userProfileCreated, userProfileStore } from '$lib/stores/user-profile.store';
 
 	interface Props {
 		children: Snippet;
@@ -22,6 +22,15 @@
 	const load = async ({ reload = false }: { reload?: boolean }) => {
 		if (isNullish($authIdentity)) {
 			userProfileStore.reset();
+			// `userProfileCreated` is a fact about *this* sign-in — it drives the
+			// first-time welcome — but nothing used to clear it, so after someone
+			// signed up and signed out, the next established user in the same tab
+			// inherited their welcome.
+			//
+			// Cleared here rather than at the top of every `load`: this function also
+			// runs on the `oisyRefreshUserProfile` event, and resetting there would
+			// take the flag away from the user who had just earned it.
+			userProfileCreated.set(false);
 			return;
 		}
 

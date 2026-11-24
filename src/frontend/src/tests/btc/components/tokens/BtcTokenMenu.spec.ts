@@ -97,4 +97,21 @@ describe('BtcTokenMenu', () => {
 			expect(a.href).toEqual(`${BTC_REGTEST_EXPLORER_URL}/address/${mockAddressRegtest}`);
 		});
 	});
+
+	it('opens a compact dropdown from a trigger with a touch-sized tap area', async () => {
+		mockPage.mockToken(BTC_MAINNET_TOKEN);
+
+		const { container } = render(BtcTokenMenu);
+		const button: HTMLButtonElement | null = container.querySelector(tokenMenuButtonSelector);
+
+		expect(button).toHaveClass('hit-area', 'hit-area-touch', 'press-icon');
+		expect(button).toHaveAttribute('aria-expanded', 'false');
+
+		button?.click();
+
+		await waitFor(() => {
+			expect(button).toHaveAttribute('aria-expanded', 'true');
+			expect(container.querySelector('.wrapper.dropdown .menu-surface')).not.toBeNull();
+		});
+	});
 });

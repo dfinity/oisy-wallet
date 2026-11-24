@@ -86,8 +86,12 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 	}
 
 	protected override stopTimer = () => {
-		this.postMessage({
-			msg: 'stopIcpWalletTimer'
+		this.postMessage<PostMessage<PostMessageDataRequestIcp>>({
+			msg: 'stopIcpWalletTimer',
+			data: {
+				ledgerCanisterId: this.ledgerCanisterId,
+				indexCanisterId: this.indexCanisterId
+			}
 		});
 	};
 

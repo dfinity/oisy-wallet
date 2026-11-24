@@ -1,5 +1,6 @@
 import { parseBoolEnvVar } from '$lib/utils/env.utils';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { resetBtcSendViaBackendBeforeEachTest } from '$tests/utils/btc-env.test-utils';
 import {
 	allowLoggingForDebugging,
 	disableConsoleLog,
@@ -55,7 +56,8 @@ vi.mock('$app/stores', () => ({
 }));
 
 vi.mock('$app/state', () => ({
-	page: {}
+	page: {},
+	navigating: { to: null }
 }));
 
 vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
@@ -67,11 +69,30 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	};
 });
 
+// Off unless a spec turns it on: see `$tests/utils/btc-env.test-utils`.
+vi.mock(import('$env/btc.env'), async (importOriginal) => {
+	const { btcSendViaBackend } = await import('$tests/utils/btc-env.test-utils');
+
+	return {
+		...(await importOriginal()),
+		get BTC_SEND_VIA_BACKEND_ENABLED() {
+			return btcSendViaBackend.enabled;
+		}
+	};
+});
+
 vi.mock('$lib/services/analytics-wrapper', () => ({
 	loadPlausibleTracker: vi.fn(() => ({
 		init: vi.fn(),
 		track: vi.fn()
 	}))
+}));
+
+// The real service sends HEAD requests and draws on a canvas, which specs must not reach. Specs rendering NFT media
+// get the original URL; the service's own spec unmocks it.
+vi.mock('$lib/services/nft-thumbnail.services', () => ({
+	loadNftThumbnail: vi.fn(() => Promise.resolve(undefined)),
+	resetNftThumbnails: vi.fn()
 }));
 
 vi.mock('ethers/providers', () => {
@@ -103,6 +124,8 @@ vi.mock('idb-keyval', () => ({
 }));
 
 failTestsThatLogToConsole();
+
+resetBtcSendViaBackendBeforeEachTest();
 
 const ALLOW_LOGGING_FOR_DEBUGGING = parseBoolEnvVar(
 	process.env.ALLOW_LOGGING_FOR_DEBUGGING ?? import.meta.env.VITE_ALLOW_LOGGING_FOR_DEBUGGING

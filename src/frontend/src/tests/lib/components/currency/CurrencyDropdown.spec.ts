@@ -8,6 +8,7 @@ import {
 import { currentCurrency } from '$lib/derived/currency.derived';
 import { Currency } from '$lib/enums/currency';
 import { currencyStore } from '$lib/stores/currency.store';
+import { i18n } from '$lib/stores/i18n.store';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
@@ -35,6 +36,15 @@ describe('CurrencyDropdown', () => {
 		await tick();
 
 		expect(getByText('€ - EUR')).toBeInTheDocument();
+	});
+
+	it('is named by the visible currency and described by what it does', () => {
+		const { getByRole } = render(CurrencyDropdown);
+
+		const trigger = getByRole('button', { name: '$ - USD' });
+
+		expect(trigger).not.toHaveAttribute('aria-label');
+		expect(trigger).toHaveAccessibleDescription(get(i18n).core.alt.switch_currency);
 	});
 
 	it('should render the list of currencies when the dropdown is opened', async () => {

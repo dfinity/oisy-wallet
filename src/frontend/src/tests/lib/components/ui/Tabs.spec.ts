@@ -23,6 +23,18 @@ describe('Tabs', () => {
 		children: mockSnippet
 	};
 
+	it.each(['default', 'menu'] as const)(
+		'shows pressed label feedback without scaling for %s tabs',
+		(tabVariant) => {
+			const { getAllByRole } = render(Tabs, { props: { ...props, tabVariant } });
+
+			for (const button of getAllByRole('button')) {
+				expect(button).toHaveClass('active:text-brand-hover', 'duration-150');
+				expect(button).not.toHaveClass('press');
+			}
+		}
+	);
+
 	it('renders component correctly', () => {
 		const { getByText, getByTestId } = render(Tabs, { props });
 

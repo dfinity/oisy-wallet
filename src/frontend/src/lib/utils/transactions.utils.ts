@@ -1,10 +1,15 @@
 import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
-import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
+import {
+	groupEthTransactionsByNetworkAndHash,
+	mapEthTransactionUi
+} from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
+import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
@@ -14,16 +19,20 @@ import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.st
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { getCkBtcPendingUtxoTransactions } from '$icp/utils/ckbtc-transactions.utils';
 import { getCkEthPendingTransactions } from '$icp/utils/cketh-transactions.utils';
+import { getCmcDepositAccountIdentifier } from '$icp/utils/cmc.utils';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import {
 	extendIcTransaction,
 	getAllIcTransactions,
 	getIcExtendedTransactions
 } from '$icp/utils/ic-transactions.utils';
+import { isTokenIcp } from '$icp/utils/icrc.utils';
 import { MICRO_TRANSACTION_USD_THRESHOLD, ZERO } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { Token } from '$lib/types/token';
+import type { NullishIdentity } from '$lib/types/identity';
+import type { NetworkId } from '$lib/types/network';
+import type { Token, TokenId } from '$lib/types/token';
 import type {
 	AllTransactionUiWithCmp,
 	AnyTransactionUi,
@@ -31,7 +40,6 @@ import type {
 	EthAllTransactionUiWithCmp
 } from '$lib/types/transaction-ui';
 import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
-import { last } from '$lib/utils/array.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	isNetworkIdBTCMainnet,
@@ -39,10 +47,13 @@ import {
 	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdSepolia,
-	isNetworkIdSolana
+	isNetworkIdSolana,
+	isNetworkIdXRPMainnet
 } from '$lib/utils/network.utils';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import { isTokenSpl } from '$sol/utils/spl.utils';
+import type { XrpCertifiedTransactionsData } from '$xrp/stores/xrp-transactions.store';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
@@ -55,36 +66,11 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 const findDuplicateEthNativeTransactions = (
 	ethTransactions: EthAllTransactionUiWithCmp[]
 ): Set<EthAllTransactionUiWithCmp> => {
-	// Group ETH transactions by (networkId, hash) to detect duplicates.
-	const groupsByNetworkAndHash = new Map<symbol, Map<string, EthAllTransactionUiWithCmp[]>>();
-
-	for (const tx of ethTransactions) {
-		const { hash } = tx.transaction;
-
-		if (nonNullish(hash)) {
-			const networkId = tx.token.network.id;
-
-			if (!groupsByNetworkAndHash.has(networkId)) {
-				groupsByNetworkAndHash.set(networkId, new Map());
-			}
-
-			const networkMap = groupsByNetworkAndHash.get(networkId);
-
-			if (isNullish(networkMap)) {
-				const newNetworkMap = new Map<string, EthAllTransactionUiWithCmp[]>();
-
-				newNetworkMap.set(hash, [tx]);
-
-				groupsByNetworkAndHash.set(networkId, newNetworkMap);
-			} else {
-				if (!networkMap.has(hash)) {
-					networkMap.set(hash, []);
-				}
-
-				networkMap.get(hash)?.push(tx);
-			}
-		}
-	}
+	const groupsByNetworkAndHash = groupEthTransactionsByNetworkAndHash({
+		items: ethTransactions,
+		networkId: ({ token: { network } }) => network.id,
+		hash: ({ transaction }) => transaction.hash
+	});
 
 	// For each group with duplicates, mark native fee entries for removal
 	// only when the group also contains at least one non-native (e.g. ERC-20) transfer.
@@ -134,6 +120,7 @@ export const mapAllTransactionsUi = ({
 	$ckBtcMinterInfoStore,
 	$ethAddress,
 	$solTransactions,
+	$xrpTransactions,
 	$btcStatuses,
 	$icTransactionsStore,
 	$ckBtcPendingUtxosStore,
@@ -146,6 +133,7 @@ export const mapAllTransactionsUi = ({
 	$ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
 	$ethAddress: OptionEthAddress;
 	$solTransactions: SolCertifiedTransactionsData;
+	$xrpTransactions?: XrpCertifiedTransactionsData;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
 	$icTransactionsStore: IcCertifiedTransactionsData;
 	$ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
@@ -260,15 +248,117 @@ export const mapAllTransactionsUi = ({
 			];
 		}
 
+		if (isNetworkIdXRPMainnet(networkId)) {
+			if (isNullish($xrpTransactions)) {
+				return acc;
+			}
+
+			return [
+				...acc,
+				...($xrpTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
+					transaction,
+					token,
+					component: 'xrp' as const
+				}))
+			];
+		}
+
 		return acc;
 	}, []);
 
 	// Remove native ETH/EVM transactions that duplicate an ERC token transfer on the same network and hash.
 	const duplicates = findDuplicateEthNativeTransactions(ethTransactions);
 
-	return duplicates.size > 0
-		? allTransactions.filter((tx) => !duplicates.has(tx as EthAllTransactionUiWithCmp))
-		: allTransactions;
+	const withoutEthDuplicates =
+		duplicates.size > 0
+			? allTransactions.filter((tx) => !duplicates.has(tx as EthAllTransactionUiWithCmp))
+			: allTransactions;
+
+	return dropDuplicateSolTransactions(withoutEthDuplicates);
+};
+
+/**
+ * One Solana record per signature lives in the store of every token the transaction touched, and
+ * the merged list keeps one row per token it moved.
+ *
+ * A swap is deliberately two rows, one per side, because each carries its own token's icon and
+ * balance change and a user scanning for a token wants to find it on the row that names it. What
+ * gets dropped is the rest: the tokens a transaction merely brushed, where a send that opened an
+ * account would otherwise appear again under SOL for the rent alone.
+ */
+const dropDuplicateSolTransactions = (
+	transactions: AllTransactionUiWithCmp[]
+): AllTransactionUiWithCmp[] => {
+	const groups = transactions.reduce<Map<string, AllTransactionUiWithCmp[]>>((acc, entry) => {
+		if (entry.component !== 'solana') {
+			return acc;
+		}
+
+		// Keyed by signature, which is what makes two rows the same transaction. The id is the
+		// signature for a record this redesign derived, but a record cached before it carries a
+		// per-instruction id, and grouping on that would leave its duplicates in place.
+		const key = String((entry.transaction as SolTransactionUi).signature ?? entry.transaction.id);
+		const group = acc.get(key);
+
+		if (nonNullish(group)) {
+			group.push(entry);
+		} else {
+			acc.set(key, [entry]);
+		}
+
+		return acc;
+	}, new Map());
+
+	const drop = new Set<AllTransactionUiWithCmp>();
+
+	groups.forEach((group) => {
+		if (group.length < 2) {
+			return;
+		}
+
+		const [{ transaction }] = group;
+		const { summary } = transaction as SolTransactionUi;
+
+		// The tokens the transaction is about: both sides of a swap, the single side of everything
+		// else. A token outside this set was only brushed, and its row would describe nothing.
+		const stated = [summary?.spent, summary?.received].filter(nonNullish);
+
+		// A transaction OISY could not reduce still moved what it moved, and it earns a row per
+		// token exactly as a swap does. Without this it kept one row, arbitrarily the first, which
+		// said "Interaction" over an amount belonging to whichever token happened to come first.
+		//
+		// The net of a token that only paid the fee is zero, so the fee alone never earns a row.
+		const subjects =
+			stated.length > 0
+				? stated
+				: ((transaction as SolTransactionUi).netChanges ?? []).filter(
+						({ delta }) => delta !== ZERO
+					);
+
+		// One row per subject, matched to the token that names it. A subject the merged list has no
+		// row for simply yields none.
+		const kept = subjects.reduce<AllTransactionUiWithCmp[]>((acc, { tokenAddress }) => {
+			const match = group.find(
+				(entry) =>
+					!acc.includes(entry) &&
+					(isNullish(tokenAddress)
+						? !isTokenSpl(entry.token)
+						: isTokenSpl(entry.token) && entry.token.address === tokenAddress)
+			);
+
+			return nonNullish(match) ? [...acc, match] : acc;
+		}, []);
+
+		const survivors = kept.length > 0 ? kept : [group[0]];
+
+		group.forEach((entry) => {
+			if (!survivors.includes(entry)) {
+				drop.add(entry);
+			}
+		});
+	});
+
+	return drop.size > 0 ? transactions.filter((entry) => !drop.has(entry)) : transactions;
 };
 
 // When using this filter function in combination with an infinite loader we need to make sure that the transactions are filtered while loading and not right before displaying them.
@@ -405,10 +495,27 @@ export const areTransactionsStoresLoaded = (
 		isTransactionsStoreInitialized(transactionsStore)
 	);
 
+/**
+ * Drops the transfers an approved spender pulled (ICRC-2 `transfer_from`). Such a transfer debits
+ * the account like a send, but the owner never picked the destination, the spender did. Swaps and
+ * dApp deposits work that way, so their pool or backend accounts must not be offered as previously
+ * used destinations in the send flow.
+ *
+ * Only IC transactions carry the information today: the index exposes the spender on the transfer
+ * itself. An EVM ERC-20 `transferFrom` has the same shape, but the outer transaction signer is not
+ * part of the indexed data we keep, so it cannot be told apart here yet.
+ */
+const excludeSpenderInitiated = (
+	transactions: AnyTransactionUiWithToken[]
+): AnyTransactionUiWithToken[] =>
+	transactions.filter(
+		(transaction) => !('transferSpender' in transaction && nonNullish(transaction.transferSpender))
+	);
+
 export const getKnownDestinations = (
 	transactions: AnyTransactionUiWithToken[]
 ): KnownDestinations =>
-	transactions.reduce<KnownDestinations>(
+	excludeSpenderInitiated(transactions).reduce<KnownDestinations>(
 		(acc, { timestamp, value, to, type, token }) =>
 			nonNullish(to) && type === 'send' && nonNullish(value) && value > ZERO
 				? {
@@ -438,11 +545,142 @@ export const getKnownDestinations = (
 	);
 
 /**
- * Finds the oldest transaction in a newest-first transaction store.
+ * The known destinations of the loaded Ethereum and EVM transactions on one network.
+ *
+ * Without the ckETH minter info, which tells the minter's own transfers apart, the history is not
+ * read, and every destination counts as unknown.
+ */
+export const getEthKnownDestinations = ({
+	transactions,
+	ckMinterInfo,
+	ethAddress,
+	tokens,
+	networkId
+}: {
+	transactions: EthCertifiedTransactionsData;
+	ckMinterInfo: OptionCertifiedMinterInfo;
+	ethAddress: OptionEthAddress;
+	tokens: Token[];
+	networkId: NetworkId;
+}): KnownDestinations => {
+	const ckMinterInfoAddresses = toCkMinterInfoAddresses(ckMinterInfo);
+
+	if (ckMinterInfoAddresses.length === 0) {
+		return {};
+	}
+
+	const tokenById = new Map(tokens.map((token) => [token.id, token]));
+
+	const mappedTransactions: AnyTransactionUiWithToken[] = [];
+	Object.getOwnPropertySymbols(transactions ?? {}).forEach((tokenId) => {
+		const token = tokenById.get(tokenId as TokenId);
+
+		if (nonNullish(token) && token.network.id === networkId) {
+			(transactions?.[tokenId as TokenId] ?? []).forEach(({ data: transaction }) => {
+				mappedTransactions.push({
+					...mapEthTransactionUi({
+						transaction,
+						ckMinterInfoAddresses,
+						ethAddress
+					}),
+					token
+				});
+			});
+		}
+	});
+
+	return getKnownDestinations(mappedTransactions);
+};
+
+/**
+ * The known destinations of the loaded IC transactions that count for a send of the given token.
+ *
+ * ICP and the ck and ICRC tokens keep separate histories: an ICP send does not make an address
+ * known for an ICRC send, nor the other way round.
+ */
+export const getIcKnownDestinations = ({
+	transactions,
+	tokens,
+	token: sendToken,
+	identity
+}: {
+	transactions: IcCertifiedTransactionsData;
+	tokens: Token[];
+	token: Token;
+	identity: NullishIdentity;
+}): KnownDestinations => {
+	const isIcpToken = isTokenIcp(sendToken);
+	const { [ICP_TOKEN_ID]: icpTransactions, ...icCkTransactionsStore } = transactions ?? {};
+	const icpTransactionsStore = { [ICP_TOKEN_ID]: icpTransactions ?? [] };
+
+	const tokenById = new Map(tokens.map((token) => [token.id, token]));
+
+	// A mint sends its ICP to the CMC's deposit account for the user. ICP sent
+	// there any other way carries no mint memo, is never minted, and cannot be
+	// recovered through OISY, so the account is never offered as, or counted as,
+	// a familiar destination.
+	const cyclesMintDepositAccountIdentifier = nonNullish(identity)
+		? getCmcDepositAccountIdentifier(identity.getPrincipal()).toLowerCase()
+		: undefined;
+
+	const mappedTransactions: AnyTransactionUiWithToken[] = [];
+
+	Object.getOwnPropertySymbols(isIcpToken ? icpTransactionsStore : icCkTransactionsStore).forEach(
+		(tokenId) => {
+			const token = tokenById.get(tokenId as TokenId);
+
+			if (nonNullish(token)) {
+				(transactions?.[tokenId as TokenId] ?? []).forEach(({ data }) => {
+					if (
+						nonNullish(cyclesMintDepositAccountIdentifier) &&
+						data.to?.toLowerCase() === cyclesMintDepositAccountIdentifier
+					) {
+						return;
+					}
+
+					// A canister top-up pays into the CMC's deposit account for that canister,
+					// which differs per canister, so it is told by its memo, as its label
+					// records. ICP sent there without the memo is never topped up.
+					if (data.typeLabel === 'transaction.label.top_up') {
+						return;
+					}
+
+					mappedTransactions.push({
+						...data,
+						token
+					});
+				});
+			}
+		}
+	);
+
+	return getKnownDestinations(mappedTransactions);
+};
+
+/**
+ * Finds the oldest of a list of transactions.
+ *
+ * A transaction store is assembled from several sources at once: a page the wallet worker
+ * delivers, the local cache, and the pages loaded on demand as the user scrolls. Nothing keeps
+ * the result sorted, so the last entry is not necessarily the oldest one. Callers page from
+ * whatever this returns, and a cursor that is not the oldest asks again for history the store
+ * already holds, which leaves everything behind it out of reach.
  *
  * @param transactions - The list of transactions to search through.
- * @returns The last transaction or undefined if no transactions are provided.
+ * @returns The oldest transaction, by the same ordering the lists render with, or undefined when
+ *   there is none.
  */
 export const findOldestTransaction = <T extends IcTransactionUi | SolTransactionUi>(
 	transactions: T[]
-): T | undefined => last(transactions);
+): T | undefined =>
+	// One pass rather than a sorted copy: this runs on every page of every chain, and the lists it
+	// walks are the whole loaded history. Taking the entry that would sort last, ties included,
+	// keeps it identical to sorting.
+	transactions.reduce<T | undefined>(
+		(oldest, transaction) =>
+			isNullish(oldest) ||
+			sortTransactions({ transactionA: transaction, transactionB: oldest }) >= 0
+				? transaction
+				: oldest,
+		undefined
+	);

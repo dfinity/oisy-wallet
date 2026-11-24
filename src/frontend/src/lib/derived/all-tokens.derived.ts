@@ -1,4 +1,5 @@
 import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
+import { LIFI_SWAP_ENABLED } from '$env/rest/lifi.env';
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
@@ -13,9 +14,7 @@ import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { CustomToken } from '$lib/types/custom-token';
 import type { RequiredToken, Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
-import { derivedMemo } from '$lib/utils/derived-memo.utils';
 import { isTokenFungible } from '$lib/utils/nft.utils';
-import { tokenListEqual } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
@@ -25,7 +24,7 @@ import { derived, type Readable } from 'svelte/store';
 // The entire list of ICRC tokens to display to the user:
 // This includes the default tokens (disabled or enabled), the custom tokens (disabled or enabled),
 // and the environment tokens that have never been used.
-export const allIcrcTokens: Readable<IcTokenToggleable[]> = derivedMemo(
+export const allIcrcTokens: Readable<IcTokenToggleable[]> = derived(
 	[icrcTokens],
 	([$icrcTokens]) => {
 		// The list of ICRC tokens (SNSes) is defined as environment variables.
@@ -44,8 +43,7 @@ export const allIcrcTokens: Readable<IcTokenToggleable[]> = derivedMemo(
 				({ ledgerCanisterId }) => !knownLedgerCanisterIds.has(ledgerCanisterId)
 			)
 		];
-	},
-	tokenListEqual
+	}
 );
 
 export const allSortedIcrcTokens: Readable<IcTokenToggleable[]> = derived(
@@ -61,7 +59,7 @@ export const allSwapCompatibleIcrcTokens: Readable<IcTokenToggleable[]> = derive
 		)
 );
 
-export const allTokens: Readable<CustomToken<Token>[]> = derivedMemo(
+export const allTokens: Readable<CustomToken<Token>[]> = derived(
 	[nativeTokens, ercFungibleTokens, allIcrcTokens, splTokens, nonFungibleTokens],
 	([$nativeTokens, $ercFungibleTokens, $allIcrcTokens, $splTokens, $nonFungibleTokens]) => [
 		...$nativeTokens.map((token) => ({ ...token, enabled: true })),
@@ -69,14 +67,11 @@ export const allTokens: Readable<CustomToken<Token>[]> = derivedMemo(
 		...$allIcrcTokens,
 		...$splTokens,
 		...$nonFungibleTokens
-	],
-	tokenListEqual
+	]
 );
 
-export const allFungibleTokens: Readable<Token[]> = derivedMemo(
-	[allTokens],
-	([$tokens]) => $tokens.filter(isTokenFungible),
-	tokenListEqual
+export const allFungibleTokens: Readable<Token[]> = derived([allTokens], ([$tokens]) =>
+	$tokens.filter(isTokenFungible)
 );
 
 export const allCrossChainSwapTokens: Readable<
@@ -86,7 +81,8 @@ export const allCrossChainSwapTokens: Readable<
 	([$ercFungibleTokens, $ethEvmNativeTokens, $splTokens, $enabledSolanaTokens]) => [
 		...$ethEvmNativeTokens.map((token) => ({ ...token, enabled: true })),
 		...$ercFungibleTokens,
-		...(NEAR_INTENTS_SWAP_ENABLED
+		// Solana's providers are NEAR Intents and LI.FI; either one keeps its tokens in the pickers.
+		...(NEAR_INTENTS_SWAP_ENABLED || LIFI_SWAP_ENABLED
 			? [...$enabledSolanaTokens.map((token) => ({ ...token, enabled: true })), ...$splTokens]
 			: [])
 	]

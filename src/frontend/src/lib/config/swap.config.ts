@@ -20,11 +20,12 @@ export const swapWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps<Wizard
 		title: i18n.send.text.select_token
 	},
 	{
-		name: WizardStepsSwap.FILTER_NETWORKS,
-		title: i18n.send.text.select_network_filter
-	},
-	{
 		name: WizardStepsSwap.SELECT_PROVIDER,
-		title: i18n.swap.text.select_swap_provider
+		title: i18n.swap.text.smart_swap
+	},
+	// Titled by the modal, which knows the symbol: "Move <symbol> to".
+	{
+		name: WizardStepsSwap.MOVE_TOKEN,
+		title: i18n.swap.text.move_token_to
 	}
 ];

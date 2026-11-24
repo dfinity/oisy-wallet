@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import EthTokenModal from '$eth/components/tokens/EthTokenModal.svelte';
 	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
+	import EthTransactionsScroll from '$eth/components/transactions/EthTransactionsScroll.svelte';
 	import EthTransactionsSkeletons from '$eth/components/transactions/EthTransactionsSkeletons.svelte';
 	import { sortedEthTransactions } from '$eth/derived/eth-transactions.derived';
 	import { nativeEthereumTokenId } from '$eth/derived/token.derived';
@@ -75,17 +76,19 @@
 <HiddenMicroTransactionsInfoBox />
 
 <EthTransactionsSkeletons>
-	{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
-		{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
-			<TransactionsDateGroup
-				{formattedDate}
-				testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-eth-${index}`}
-				{transactions}
-			/>
-		{/each}
-	{/if}
-
-	{#if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
+	{#if filteredTransactions.length > 0}
+		<EthTransactionsScroll {token}>
+			{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+					<TransactionsDateGroup
+						{formattedDate}
+						testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-eth-${index}`}
+						{transactions}
+					/>
+				{/each}
+			{/if}
+		</EthTransactionsScroll>
+	{:else if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
 		<TransactionsPlaceholder />
 	{/if}
 </EthTransactionsSkeletons>

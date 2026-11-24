@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardCard from '$lib/components/rewards/RewardCard.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
@@ -10,6 +9,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { getCampaignState, sortRewards } from '$lib/utils/rewards.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		title?: string;

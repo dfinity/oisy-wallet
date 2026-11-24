@@ -32,7 +32,7 @@
 				<IconCmp size="32" />
 			</div>
 
-			<p class="m-0 text-2xl leading-tight font-normal">
+			<p class="m-0 text-2xl leading-[1.4] font-normal text-pretty">
 				{label}
 			</p>
 		</div>

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
@@ -10,6 +9,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import type { OptionString } from '$lib/types/string';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		text?: Snippet;

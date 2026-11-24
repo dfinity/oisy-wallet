@@ -1,19 +1,20 @@
 use std::time::Duration;
 
-use candid::Principal;
+use candid::{decode_one, encode_one, Principal};
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::types::{
     personal_note::MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES,
     personal_note_share::{
         CreatePersonalNoteShareRequest, PersonalNoteShareContent, PersonalNoteShareError,
-        MAX_PERSONAL_NOTE_SHARE_EXPIRY_NS,
+        MAX_PERSONAL_NOTE_SHARES_PER_USER, MAX_PERSONAL_NOTE_SHARE_EXPIRY_NS,
     },
+    Stats,
 };
 
 use crate::utils::{
     mock::CALLER,
-    pocketic::{setup, PicBackend, PicCanisterTrait},
+    pocketic::{controller, setup, PicBackend, PicCanisterTrait},
 };
 
 // Mirrors `personal_notes.rs`: these tests deliberately share a small number
@@ -340,5 +341,111 @@ fn create_personal_note_share_rate_limits_repeated_callers() {
     assert!(
         matches!(limited, Err(PersonalNoteShareError::RateLimited(_))),
         "the create exceeding the limit should be rate limited; got {limited:?}"
+    );
+}
+
+// -------------------------------------------------------------------------------------------------
+// - Hourly prune
+// -------------------------------------------------------------------------------------------------
+
+fn stored_shares_count(pic_setup: &PicBackend) -> u64 {
+    pic_setup
+        .query::<Stats>(controller(), "stats", ())
+        .expect("a controller can read the stats")
+        .personal_note_shares_count
+}
+
+// The hourly housekeeping removes expired shares in timer batches. Removing 3,000 shares with the
+// largest content a create accepts takes more than one batch, so the count is seen between batches,
+// and a share that has not expired outlasts them all.
+#[test]
+fn the_hourly_prune_removes_expired_shares_in_batches() {
+    const USERS: u8 = 30;
+    const CREATES_PER_MINUTE: usize = 20;
+    const EXPIRED: u64 = USERS as u64 * MAX_PERSONAL_NOTE_SHARES_PER_USER as u64;
+
+    let pic_setup = setup();
+    let alice = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(alice);
+    let users = pic_setup.create_users(1..=USERS);
+    let now = now_ns(&pic_setup);
+
+    let live = token(1);
+    create_share(&pic_setup, alice, &live, now + 48 * ONE_HOUR_NS, false)
+        .expect("create should succeed");
+
+    // Every user fills the per-user cap with shares that expire together, well before the hourly
+    // run, at the create rate limit. Each minute's creates are submitted together, so they run in
+    // a few rounds rather than one round each.
+    let expires_at_ns = now + ONE_HOUR_NS / 4;
+    let content = ByteBuf::from(vec![0xAB; MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES]);
+    for round in 0..MAX_PERSONAL_NOTE_SHARES_PER_USER / CREATES_PER_MINUTE {
+        let mut submitted = Vec::new();
+        for (u, user) in users.iter().enumerate() {
+            for i in 0..CREATES_PER_MINUTE {
+                let request = CreatePersonalNoteShareRequest {
+                    token: format!("prune-{u}-{round}-{i}"),
+                    ct_content: content.clone(),
+                    expires_at_ns,
+                    single_use: false,
+                };
+                let call = pic_setup
+                    .pic
+                    .submit_call(
+                        pic_setup.canister_id(),
+                        user.principal,
+                        "create_personal_note_share",
+                        encode_one(request).unwrap(),
+                    )
+                    .expect("create_personal_note_share should be accepted");
+                submitted.push(call);
+            }
+        }
+        for call in submitted {
+            let reply = pic_setup
+                .pic
+                .await_call(call)
+                .expect("create_personal_note_share should reach the handler");
+            let result: Result<(), PersonalNoteShareError> = decode_one(&reply).unwrap();
+            result.expect("create should succeed");
+        }
+        pic_setup.pic.advance_time(Duration::from_secs(61));
+    }
+    assert_eq!(stored_shares_count(&pic_setup), EXPIRED + 1);
+
+    // Past the expiry and the next hourly run, then one batch per second.
+    pic_setup.pic.advance_time(Duration::from_hours(1));
+    let mut counts = vec![EXPIRED + 1];
+    for _ in 0..30 {
+        pic_setup.pic.tick();
+        let count = stored_shares_count(&pic_setup);
+        if counts.last() != Some(&count) {
+            counts.push(count);
+        }
+        if count == 1 {
+            break;
+        }
+        pic_setup.pic.advance_time(Duration::from_secs(1));
+    }
+
+    assert_eq!(counts.last(), Some(&1), "every expired share is removed");
+    assert!(
+        counts.iter().any(|&count| 1 < count && count <= EXPIRED),
+        "the expired shares are removed in more than one batch: {counts:?}"
+    );
+    assert!(
+        get_share(&pic_setup, Principal::anonymous(), &live).is_ok(),
+        "a share that has not expired stays"
+    );
+
+    let logs = pic_setup
+        .pic
+        .fetch_canister_logs(pic_setup.canister_id, controller())
+        .expect("a controller can read the canister logs");
+    let summary = format!("Pruned {EXPIRED} expired personal_note_shares entries");
+    assert!(
+        logs.iter()
+            .any(|record| String::from_utf8_lossy(&record.content).contains(&summary)),
+        "the prune logs its total once it is done"
     );
 }

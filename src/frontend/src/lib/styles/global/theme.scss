@@ -1,3 +1,4 @@
+@use '../mixins/interaction';
 @use '../theme/base-colors' as *;
 
 html {
@@ -60,11 +61,21 @@ a {
 	cursor: pointer;
 	word-break: break-word;
 }
-a:not(.unstyled):active,
-a:not(.unstyled):hover {
+// Hover only where the pointer can hover: on a touch screen a tap would leave the colour and
+// underline on until the next tap elsewhere. Pressed is not guarded, so a tap still shows.
+a:not(.unstyled):active {
 	color: var(--color-background-brand-primary);
 }
-a:hover,
+a:not(.unstyled) {
+	@include interaction.hover {
+		color: var(--color-background-brand-primary);
+	}
+}
+a {
+	@include interaction.hover {
+		text-decoration: underline;
+	}
+}
 a:focus {
 	text-decoration: underline;
 }

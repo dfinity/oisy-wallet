@@ -1,9 +1,14 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import type { BitcoinDid } from '@icp-sdk/canisters/ckbtc';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy } from 'svelte';
 	import BtcWalletConnectSignPsbtReview from '$btc/components/wallet-connect/BtcWalletConnectSignPsbtReview.svelte';
-	import { decodePsbt, signPsbt as signPsbtService } from '$btc/services/wallet-connect.services';
+	import {
+		decodePsbt,
+		loadPsbtWalletUtxos,
+		signPsbt as signPsbtService
+	} from '$btc/services/wallet-connect.services';
 	import type { OptionBtcAddress } from '$btc/types/address';
 	import type { WalletConnectBtcDecodedPsbt } from '$btc/types/wallet-connect';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
@@ -19,6 +24,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 
 	interface Props {
 		listener: OptionWalletConnectListener;
@@ -30,12 +36,47 @@
 
 	let application = $derived(request.verifyContext.verified.origin);
 
+	let walletUtxos = $state<BitcoinDid.utxo[] | undefined>();
+
+	$effect(() => {
+		// Reloaded whenever the request, the address or the identity changes: an address that
+		// arrives after the modal opened has a UTXO set of its own.
+		const params = { request, address, identity: $authIdentity };
+
+		walletUtxos = undefined;
+
+		// A slower previous load must not overwrite the set of the current address.
+		let cancelled = false;
+
+		loadPsbtWalletUtxos(params)
+			.then((utxos) => {
+				if (!cancelled) {
+					walletUtxos = utxos;
+				}
+			})
+			.catch((_: unknown) => {
+				// Without the UTXO set no input can be checked against it, so the review refuses every
+				// input whose previous transaction is not part of the request.
+				if (!cancelled) {
+					walletUtxos = [];
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	});
+
 	let decoded = $state<WalletConnectBtcDecodedPsbt | undefined>();
 	let decodeError = $state(false);
 
 	$effect(() => {
+		if (isNullish(walletUtxos)) {
+			return;
+		}
+
 		try {
-			decoded = decodePsbt({ request, address });
+			decoded = decodePsbt({ request, address, walletUtxos });
 			decodeError = false;
 		} catch (_: unknown) {
 			decoded = undefined;
@@ -110,6 +151,8 @@
 				{application}
 				{decodeError}
 				{decoded}
+				flaggedAsScam={!acceptedContext(request.verifyContext)}
+				loading={isNullish(walletUtxos)}
 				onApprove={approve}
 				onReject={reject}
 				source={address ?? ''}

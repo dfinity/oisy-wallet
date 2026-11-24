@@ -1,11 +1,13 @@
 use std::collections::BTreeMap;
 
 use candid::{CandidType, Deserialize};
+use serde::Deserializer;
 use serde_bytes::ByteBuf;
 
 use super::account::TokenAccountId;
 // Re-export image size limit used by validation so tests and external modules can reference it
 pub use crate::impls::MAX_IMAGE_SIZE_BYTES;
+use crate::validate::Validate;
 
 /// Maximum number of contacts per principal
 pub const MAX_CONTACTS_PER_USER: usize = 500;
@@ -13,10 +15,17 @@ pub const MAX_CONTACTS_PER_USER: usize = 500;
 /// Maximum number of images per principal (100)
 pub const MAX_IMAGES_PER_PRINCIPAL: usize = 100;
 
-/// Memory usage threshold (80%) above which new images cannot be added
-pub const MEMORY_USAGE_THRESHOLD: f64 = 0.8;
+/// Maximum number of contacts per `get_contact_images` call.
+///
+/// A reply in replicated execution, which a certified call gets, is capped at 2 MiB. 16 images of
+/// at most `MAX_IMAGE_SIZE_BYTES` stay well below that.
+pub const MAX_CONTACT_IMAGES_PER_CALL: usize = 16;
 
-pub type ImageId = u64;
+/// Encoded size up to which `get_contacts_page` fills a page (1.5 MiB).
+///
+/// The caps allow an address book far larger than the 2 MiB reply of a certified call; the margin
+/// covers the reply's own encoding around the contacts.
+pub const CONTACTS_PAGE_MAX_BYTES: usize = 1_536 * 1024;
 
 /// Represents the MIME type of image.
 #[derive(CandidType, Deserialize, serde::Serialize, Clone, Debug, Eq, PartialEq)]
@@ -57,7 +66,30 @@ pub struct Contact {
     pub name: String,
     pub addresses: Vec<ContactAddressData>,
     pub update_timestamp_ns: u64,
+    #[serde(default, deserialize_with = "deserialize_inline_image")]
     pub image: Option<ContactImage>,
+}
+
+/// Decodes [`Contact::image`], dropping an image that fails [`Validate`].
+///
+/// A principal's contacts are decoded as one [`StoredContacts`] value, and contacts written before
+/// images moved to their own stable map still hold their image inline. Dropping an inline image
+/// that fails validation keeps the rest of that value readable. Requests and the image map still
+/// decode [`ContactImage`] with its validation.
+fn deserialize_inline_image<'de, D>(deserializer: D) -> Result<Option<ContactImage>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    /// [`ContactImage`] through its `remote = "Self"` derive, which skips the validation that
+    /// `validate_on_deserialize!` adds.
+    #[derive(Deserialize)]
+    #[serde(transparent)]
+    struct UnvalidatedImage(#[serde(with = "ContactImage")] ContactImage);
+
+    let image = Option::<UnvalidatedImage>::deserialize(deserializer)?;
+    Ok(image
+        .map(|UnvalidatedImage(image)| image)
+        .filter(|image| image.validate().is_ok()))
 }
 
 #[derive(CandidType, Deserialize, serde::Serialize, Clone, Debug, Eq, PartialEq)]
@@ -97,37 +129,65 @@ pub struct UpdateContactRequest {
     pub image: Option<ContactImage>,
 }
 
+/// A page of the caller's contacts, as returned by `get_contacts_page`.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct ContactsPage {
+    /// Contacts in ID order, without their images; `get_contact_images` returns those.
+    pub contacts: Vec<Contact>,
+    /// What to pass as `after` for the next page; none once this page holds the last contact.
+    pub next: Option<u64>,
+}
+
+/// The caller's contacts whose images `get_contact_images` returns.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[serde(remote = "Self")]
+pub struct GetContactImagesRequest {
+    pub contact_ids: Vec<u64>,
+}
+
+/// A contact's image, as returned by `get_contact_images`.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct ContactImageEntry {
+    pub contact_id: u64,
+    pub image: ContactImage,
+}
+
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum ContactError {
     ContactNotFound,
     InvalidContactData,
     RandomnessError,
-    ImageTooLarge,
     TooManyContacts,
     TooManyContactsWithImages,
+    // The variants below have no producer, for three separate reasons.
+    //
+    // An oversized image is rejected while the request is being decoded, not by a handler:
+    // `validate_on_deserialize!(ContactImage)` in `impls.rs` gives `ContactImage` a `Deserialize`
+    // impl that runs `Validate` (non-recursive thanks to `#[serde(remote = "Self")]`), so candid
+    // decoding is what fails the call. `types::tests::contact_image` pins this by asserting the
+    // `Decode!` of an oversized image errors.
+    //
+    // An unsupported mime type fails decoding earlier still, as an unknown `ImageMimeType`
+    // variant, so it never reaches `Validate` at all.
+    //
+    // Canister-wide memory pressure is handled by monitoring and cycles ops rather than by
+    // individual write paths.
+    //
+    // All five are kept rather than removed because dropping a candid variant is a breaking
+    // interface change.
+    ImageTooLarge,
     CanisterMemoryNearCapacity,
     CanisterStatusError,
     InvalidImageFormat,
     ImageExceedsMaxSize,
 }
 
-// Helper struct for serialization
-#[derive(serde::Serialize)]
-pub struct ContactImageTemp<'a> {
-    pub mime_type: &'a ImageMimeType,
-    pub data: &'a serde_bytes::ByteBuf,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, serde::Serialize)]
-pub struct ImageStatistics {
-    pub total_contacts: usize,
-    pub contacts_with_images: usize,
-    pub total_image_size: usize,
-}
-
-/// Counts the number of contacts with images for a specific principal
+/// Counts contacts whose image is still held inline in the contact blob.
+///
+/// Images written since they were split into their own map are not counted here; the caller adds
+/// those. See `contacts::service::count_images`.
 #[must_use]
-pub fn count_contacts_with_images(stored_contacts: &StoredContacts) -> usize {
+pub fn count_contacts_with_inline_images(stored_contacts: &StoredContacts) -> usize {
     stored_contacts
         .contacts
         .values()
@@ -135,33 +195,107 @@ pub fn count_contacts_with_images(stored_contacts: &StoredContacts) -> usize {
         .count()
 }
 
-/// Calculates the total size of all images in the contact store
-#[must_use]
-pub fn calculate_total_image_size(stored_contacts: &StoredContacts) -> usize {
-    stored_contacts
-        .contacts
-        .values()
-        .filter_map(|contact| contact.image.as_ref())
-        .map(|image| image.data.len())
-        .sum()
-}
-
-/// Validates that adding a new image won't exceed the per-principal image limit
+/// Validates that adding a new image won't exceed the per-principal image limit.
+///
+/// Takes the count rather than the contact store because a principal's images live in two places
+/// while the inline-image format is still being phased out; assembling the count is the caller's
+/// job.
 ///
 /// # Errors
-/// Returns an error if the image limit is exceeded or other constraints are violated.
+/// Returns `TooManyContactsWithImages` if the principal is already at the cap.
 pub fn validate_principal_memory_limit(
-    stored_contacts: &StoredContacts,
+    current_image_count: usize,
     is_adding_new_image: bool,
 ) -> Result<(), ContactError> {
     if !is_adding_new_image {
         return Ok(());
     }
 
-    let current_image_count = count_contacts_with_images(stored_contacts);
     if current_image_count >= MAX_IMAGES_PER_PRINCIPAL {
         return Err(ContactError::TooManyContactsWithImages);
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::BTreeMap;
+
+    use pretty_assertions::assert_eq;
+    use serde_bytes::ByteBuf;
+
+    use super::{
+        count_contacts_with_inline_images, validate_principal_memory_limit, Contact, ContactError,
+        ContactImage, ImageMimeType, StoredContacts, MAX_IMAGES_PER_PRINCIPAL,
+    };
+
+    fn image() -> ContactImage {
+        ContactImage {
+            data: ByteBuf::from(vec![0x89, 0x50, 0x4E, 0x47]),
+            mime_type: ImageMimeType::Png,
+        }
+    }
+
+    fn contacts_with_images(count: usize) -> StoredContacts {
+        let mut contacts = BTreeMap::new();
+        for id in 0..count {
+            let id = id as u64;
+            contacts.insert(
+                id,
+                Contact {
+                    id,
+                    name: format!("contact {id}"),
+                    addresses: vec![],
+                    update_timestamp_ns: 0,
+                    image: Some(image()),
+                },
+            );
+        }
+        StoredContacts {
+            contacts,
+            update_timestamp_ns: 0,
+        }
+    }
+
+    #[test]
+    fn counts_only_contacts_that_carry_an_image() {
+        let mut stored_contacts = contacts_with_images(3);
+        stored_contacts.contacts.insert(
+            99,
+            Contact {
+                id: 99,
+                name: "no image".to_string(),
+                addresses: vec![],
+                update_timestamp_ns: 0,
+                image: None,
+            },
+        );
+
+        assert_eq!(count_contacts_with_inline_images(&stored_contacts), 3);
+    }
+
+    #[test]
+    fn allows_a_new_image_below_the_cap() {
+        assert_eq!(
+            validate_principal_memory_limit(MAX_IMAGES_PER_PRINCIPAL - 1, true),
+            Ok(())
+        );
+    }
+
+    #[test]
+    fn rejects_a_new_image_at_the_cap() {
+        assert_eq!(
+            validate_principal_memory_limit(MAX_IMAGES_PER_PRINCIPAL, true),
+            Err(ContactError::TooManyContactsWithImages)
+        );
+    }
+
+    #[test]
+    fn allows_writes_that_do_not_add_an_image_at_the_cap() {
+        assert_eq!(
+            validate_principal_memory_limit(MAX_IMAGES_PER_PRINCIPAL, false),
+            Ok(())
+        );
+    }
 }

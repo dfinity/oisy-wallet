@@ -10,8 +10,10 @@ export type NavigationItemId =
 	| 'earn'
 	| 'explore'
 	| 'notes'
+	| 'help'
 	| 'settings'
-	| 'rewards';
+	| 'rewards'
+	| 'tools';
 
 export type NavigationGroupId = 'portfolio' | 'finance' | 'more';
 

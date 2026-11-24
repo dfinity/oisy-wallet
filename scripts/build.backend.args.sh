@@ -25,7 +25,9 @@ mkdir -p "$(dirname "$CANISTER_ARG_PATH_BACKEND")"
 ln -s -f "$(basename "$CANISTER_ARG_PATH_BACKEND_FOR_NETWORK")" "$CANISTER_ARG_PATH_BACKEND"
 
 case "$DFX_NETWORK" in
-"staging")
+# The test_be_* backends run on mainnet next to staging's chain-fusion signer, so they take staging's
+# arguments; the local defaults below name a threshold key that mainnet doesn't have.
+"staging" | test_be_*)
   ECDSA_KEY_NAME="test_key_1"
   # For security reasons, mainnet root key will be hardcoded in the backend canister.
   ic_root_key_der="null"

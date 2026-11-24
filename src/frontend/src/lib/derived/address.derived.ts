@@ -7,10 +7,12 @@ import {
 	ethAddressStore,
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
-	solAddressMainnetStore
+	solAddressMainnetStore,
+	xrpAddressMainnetStore
 } from '$lib/stores/address.store';
 import { mapAddress } from '$lib/utils/address.utils';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
+import type { OptionXrpAddress, XrpAddress } from '$xrp/types/address';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -49,6 +51,11 @@ export const solAddressLocalnetNotLoaded: Readable<boolean> = derived(
 	([$solAddressLocalnetStore]) => isNullish($solAddressLocalnetStore)
 );
 
+export const xrpAddressMainnetNotLoaded: Readable<boolean> = derived(
+	[xrpAddressMainnetStore],
+	([$xrpAddressMainnetStore]) => isNullish($xrpAddressMainnetStore)
+);
+
 export const btcAddressMainnet: Readable<OptionBtcAddress> = derived(
 	[btcAddressMainnetStore],
 	([$btcAddressMainnetStore]) => mapAddress<BtcAddress>($btcAddressMainnetStore)
@@ -82,4 +89,9 @@ export const solAddressDevnet: Readable<OptionSolAddress> = derived(
 export const solAddressLocal: Readable<OptionSolAddress> = derived(
 	[solAddressLocalnetStore],
 	([$solAddressLocalnetStore]) => mapAddress<SolAddress>($solAddressLocalnetStore)
+);
+
+export const xrpAddressMainnet: Readable<OptionXrpAddress> = derived(
+	[xrpAddressMainnetStore],
+	([$xrpAddressMainnetStore]) => mapAddress<XrpAddress>($xrpAddressMainnetStore)
 );

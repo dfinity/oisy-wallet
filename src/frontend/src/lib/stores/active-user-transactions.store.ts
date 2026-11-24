@@ -1,5 +1,7 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
-import { get as storageGet, set as storageSet } from '$lib/utils/storage.utils';
+import { ZERO } from '$lib/constants/app.constants';
+import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
+import { del as storageDel, get as storageGet, set as storageSet } from '$lib/utils/storage.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
 import { writable, type Readable, type Writable } from 'svelte/store';
@@ -14,24 +16,68 @@ export interface ActiveUserTransactionsLocalState {
 export type ActiveUserTransactionsStoreData =
 	| ({
 			data: Record<string, ActiveUserTransaction>;
+			// From the backend, so it holds for every device: rows updated at or before it are seen.
+			seenUpToNs: bigint;
+			// The latest update in the snapshot last applied. Every row updated at or before it was in
+			// that snapshot, so this list has it, which neither a row written locally since nor an earlier
+			// snapshot establishes: a row another device created in between may be missing here, and an
+			// older snapshot landing late drops rows a newer one had.
+			loadedUpToNs: bigint;
 	  } & ActiveUserTransactionsLocalState)
 	| undefined;
 
 const STORAGE_PREFIX = 'aut:state:';
 
+// Rows this browser sent a terminal status for: such a write can commit after the tab that sent it
+// is gone, before anything reported its outcome, so a load leaves these rows to the loader. Kept
+// apart from the state above, which each tab saves whole from its own copy, and one key per
+// principal and row, so that no tab ever rewrites another tab's markers: a marker is only set or
+// removed, and read from storage when a load decides what to claim.
+const TERMINAL_WRITE_PREFIX = 'aut:terminal-write:';
+
+const terminalWritePrefix = (principal: Principal): string =>
+	`${TERMINAL_WRITE_PREFIX}${principal.toText()}:`;
+
 export interface ActiveUserTransactionsStore extends Readable<ActiveUserTransactionsStoreData> {
 	init: (principal: Principal) => void;
-	set: (params: { transactions: ActiveUserTransaction[] }) => void;
+	/** Whether the store holds this principal's rows, which an account switch can change mid-await. */
+	holds: (principal: Principal) => boolean;
+	/**
+	 * Marks the start of a load, to pass to `set` as `since` once its snapshot returns. A row written
+	 * locally after this mark survives a snapshot that lacks it: the snapshot was read before the
+	 * write committed, not after the row went away.
+	 */
+	beginLoad: () => number;
+	set: (params: {
+		transactions: ActiveUserTransaction[];
+		since?: number;
+		seenUpToNs?: bigint;
+	}) => void;
 	upsert: (params: { transaction: ActiveUserTransaction }) => void;
 	remove: (params: { id: string }) => void;
 	markAllSeen: () => void;
+	/** Records the backend's seen mark. It only moves forward, as it does in the backend. */
+	setSeenUpTo: (params: { seenUpToNs: bigint }) => void;
 	markTerminalSideEffectsApplied: (params: { ids: string[] }) => void;
+	/**
+	 * Records, before the write is sent, that this browser is sending a row its terminal status. For
+	 * the principal given, whichever one the store holds by then.
+	 */
+	markTerminalWriteSent: (params: { principal: Principal; id: string }) => void;
+	/** Drops that record when the canister refused the write, which therefore never committed. */
+	clearTerminalWriteSent: (params: { principal: Principal; id: string }) => void;
 	reset: () => void;
 }
 
 const initStore = (): ActiveUserTransactionsStore => {
 	const store: Writable<ActiveUserTransactionsStoreData> = writable(undefined);
 	let storageKey: string | undefined;
+	let terminalWriteKeyPrefix: string | undefined;
+
+	// A local write order, so a load can tell a row written after it began from one its snapshot no
+	// longer has. Per row, the sequence number of its last accepted local write.
+	let writeSequence = 0;
+	let lastLocalWrite: Record<string, number> = {};
 
 	const persist = (state: ActiveUserTransactionsLocalState) => {
 		if (isNullish(storageKey)) {
@@ -40,25 +86,40 @@ const initStore = (): ActiveUserTransactionsStore => {
 		storageSet({ key: storageKey, value: state });
 	};
 
+	const stateKey = (principal: Principal): string => `${STORAGE_PREFIX}${principal.toText()}`;
+
 	const init: ActiveUserTransactionsStore['init'] = (principal) => {
-		const key = `${STORAGE_PREFIX}${principal.toText()}`;
+		const key = stateKey(principal);
 
 		if (storageKey === key) {
 			return;
 		}
 
 		storageKey = key;
+		terminalWriteKeyPrefix = terminalWritePrefix(principal);
+		lastLocalWrite = {};
 
 		const persisted = storageGet<Partial<ActiveUserTransactionsLocalState>>({ key }) ?? {};
 
 		store.set({
 			data: {},
+			seenUpToNs: ZERO,
+			loadedUpToNs: ZERO,
 			lastSeenUpdatedAtNs: persisted.lastSeenUpdatedAtNs ?? {},
 			terminalSideEffectsApplied: persisted.terminalSideEffectsApplied ?? {}
 		});
 	};
 
-	const setAll: ActiveUserTransactionsStore['set'] = ({ transactions }) => {
+	const holds: ActiveUserTransactionsStore['holds'] = (principal) =>
+		storageKey === stateKey(principal);
+
+	const beginLoad: ActiveUserTransactionsStore['beginLoad'] = () => writeSequence;
+
+	// Merges rather than replaces. A load reads its snapshot asynchronously, and a create or update
+	// that commits while the read is in flight is already in the store by the time the snapshot lands
+	// — replacing wholesale erased it, and a row gone from the store is a row the poller never
+	// resolves.
+	const setAll: ActiveUserTransactionsStore['set'] = ({ transactions, since, seenUpToNs }) => {
 		store.update((current) => {
 			if (isNullish(current)) {
 				return current;
@@ -66,9 +127,27 @@ const initStore = (): ActiveUserTransactionsStore => {
 
 			const data: Record<string, ActiveUserTransaction> = {};
 
+			// The newer copy wins, by the rule `upsert` applies: a local row newer than the snapshot's
+			// is a write that landed after the snapshot was read.
 			for (const tx of transactions) {
-				data[tx.id] = tx;
+				const local = current.data[tx.id];
+
+				data[tx.id] = nonNullish(local) && local.updated_at_ns > tx.updated_at_ns ? local : tx;
 			}
+
+			// A row the snapshot lacks is gone — deleted elsewhere, or pruned — unless it was written
+			// locally after this load began, in which case the snapshot is simply older than it.
+			if (nonNullish(since)) {
+				for (const [id, local] of Object.entries(current.data)) {
+					if (!(id in data) && (lastLocalWrite[id] ?? 0) > since) {
+						data[id] = local;
+					}
+				}
+			}
+
+			lastLocalWrite = Object.fromEntries(
+				Object.entries(lastLocalWrite).filter(([id]) => id in data)
+			);
 
 			const lastSeenUpdatedAtNs: Record<string, string> = {};
 			const terminalSideEffectsApplied: Record<string, true> = {};
@@ -90,11 +169,45 @@ const initStore = (): ActiveUserTransactionsStore => {
 				}
 			}
 
-			if (prunedAny) {
+			// A row first met already settled was settled, and reported, by another device or an earlier
+			// session, so it is claimed without firing. Otherwise signing in on a new device replays the
+			// outcome of every row not yet dismissed. A row this tab already holds is left to the loader,
+			// and so is one this browser sent the terminal status for.
+			const sentHere = (id: string): boolean =>
+				nonNullish(terminalWriteKeyPrefix) &&
+				storageGet<boolean>({ key: `${terminalWriteKeyPrefix}${id}` }) === true;
+			let claimedAny = false;
+
+			for (const [id, tx] of Object.entries(data)) {
+				if (
+					!(id in current.data) &&
+					isTerminalActiveUserTransaction(tx) &&
+					!terminalSideEffectsApplied[id] &&
+					!sentHere(id)
+				) {
+					terminalSideEffectsApplied[id] = true;
+					claimedAny = true;
+				}
+			}
+
+			if (prunedAny || claimedAny) {
 				persist({ lastSeenUpdatedAtNs, terminalSideEffectsApplied });
 			}
 
-			return { ...current, data, lastSeenUpdatedAtNs, terminalSideEffectsApplied };
+			return {
+				...current,
+				data,
+				seenUpToNs:
+					nonNullish(seenUpToNs) && seenUpToNs > current.seenUpToNs
+						? seenUpToNs
+						: current.seenUpToNs,
+				loadedUpToNs: transactions.reduce(
+					(latest, { updated_at_ns }) => (updated_at_ns > latest ? updated_at_ns : latest),
+					ZERO
+				),
+				lastSeenUpdatedAtNs,
+				terminalSideEffectsApplied
+			};
 		});
 	};
 
@@ -110,6 +223,9 @@ const initStore = (): ActiveUserTransactionsStore => {
 				return current;
 			}
 
+			writeSequence += 1;
+			lastLocalWrite = { ...lastLocalWrite, [transaction.id]: writeSequence };
+
 			return {
 				...current,
 				data: { ...current.data, [transaction.id]: transaction }
@@ -124,11 +240,17 @@ const initStore = (): ActiveUserTransactionsStore => {
 			}
 
 			const { [id]: _removedTx, ...data } = current.data;
+			const { [id]: _removedWrite, ...remainingWrites } = lastLocalWrite;
+			lastLocalWrite = remainingWrites;
 			const { [id]: _removedSeen, ...lastSeenUpdatedAtNs } = current.lastSeenUpdatedAtNs;
 			const { [id]: _removedApplied, ...terminalSideEffectsApplied } =
 				current.terminalSideEffectsApplied;
 
 			persist({ lastSeenUpdatedAtNs, terminalSideEffectsApplied });
+
+			if (nonNullish(terminalWriteKeyPrefix)) {
+				storageDel({ key: `${terminalWriteKeyPrefix}${id}` });
+			}
 
 			return { ...current, data, lastSeenUpdatedAtNs, terminalSideEffectsApplied };
 		});
@@ -165,6 +287,16 @@ const initStore = (): ActiveUserTransactionsStore => {
 		});
 	};
 
+	const setSeenUpTo: ActiveUserTransactionsStore['setSeenUpTo'] = ({ seenUpToNs }) => {
+		store.update((current) => {
+			if (isNullish(current) || seenUpToNs <= current.seenUpToNs) {
+				return current;
+			}
+
+			return { ...current, seenUpToNs };
+		});
+	};
+
 	const markTerminalSideEffectsApplied: ActiveUserTransactionsStore['markTerminalSideEffectsApplied'] =
 		({ ids }) => {
 			store.update((current) => {
@@ -191,23 +323,58 @@ const initStore = (): ActiveUserTransactionsStore => {
 					terminalSideEffectsApplied
 				});
 
+				// Reported, or claimed by the flow that reports it, so the marker has done its job.
+				if (nonNullish(terminalWriteKeyPrefix)) {
+					for (const id of ids) {
+						storageDel({ key: `${terminalWriteKeyPrefix}${id}` });
+					}
+				}
+
 				return { ...current, terminalSideEffectsApplied };
 			});
 		};
 
+	const markTerminalWriteSent: ActiveUserTransactionsStore['markTerminalWriteSent'] = ({
+		principal,
+		id
+	}) => {
+		// The OISY Trade foreground claims its row before it writes it, and nothing would clear this.
+		const alreadyApplied =
+			storageGet<Partial<ActiveUserTransactionsLocalState>>({ key: stateKey(principal) })
+				?.terminalSideEffectsApplied?.[id] === true;
+
+		if (alreadyApplied) {
+			return;
+		}
+
+		storageSet({ key: `${terminalWritePrefix(principal)}${id}`, value: true });
+	};
+
+	const clearTerminalWriteSent: ActiveUserTransactionsStore['clearTerminalWriteSent'] = ({
+		principal,
+		id
+	}) => storageDel({ key: `${terminalWritePrefix(principal)}${id}` });
+
 	const reset: ActiveUserTransactionsStore['reset'] = () => {
 		storageKey = undefined;
+		terminalWriteKeyPrefix = undefined;
+		lastLocalWrite = {};
 		store.set(undefined);
 	};
 
 	return {
 		subscribe: store.subscribe,
 		init,
+		holds,
+		beginLoad,
 		set: setAll,
 		upsert,
 		remove,
 		markAllSeen,
+		setSeenUpTo,
 		markTerminalSideEffectsApplied,
+		markTerminalWriteSent,
+		clearTerminalWriteSent,
 		reset
 	};
 };

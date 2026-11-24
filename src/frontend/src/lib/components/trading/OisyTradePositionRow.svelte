@@ -56,8 +56,11 @@
 {#snippet body()}
 	<TokenLogo badge={{ type: 'network' }} color="white" {data} logoSize="lg" />
 
-	<span class="flex min-w-0 flex-1 flex-col text-left">
-		<span class="font-bold">{symbol}</span>
+	<!-- `TokenNameAndNetwork` sets no size of its own, so the name and network lines
+		 inherit `text-sm` from here while the symbol keeps `text-base` — mirroring the
+		 amount / fiat pairing on the right of the same row. -->
+	<span class="flex min-w-0 flex-1 flex-col text-left text-sm">
+		<span class="text-base font-bold">{symbol}</span>
 		<TokenNameAndNetwork {data} />
 	</span>
 
@@ -98,7 +101,7 @@
 
 {#if variant === 'holdings'}
 	<button
-		class="flex w-full items-center gap-4 rounded-lg px-2 py-3 text-left transition-colors hover:bg-brand-subtle-10"
+		class="flex w-full items-center gap-4 rounded-lg row-feedback px-2 py-3 text-left"
 		onclick={goToProvider}
 		type="button"
 	>

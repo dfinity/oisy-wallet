@@ -1,7 +1,14 @@
+import { BtcBroadcastUnconfirmedError } from '$btc/types/btc-send';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { alchemyProviders } from '$eth/providers/alchemy.providers';
+import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import type { EthAddress } from '$eth/types/address';
 import * as liquidiumApi from '$lib/api/liquidium.api';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
+import { LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS } from '$lib/constants/liquidium.constants';
 import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import * as analyticsServices from '$lib/services/analytics.services';
@@ -9,18 +16,38 @@ import {
 	computeLiquidiumRepayPreview,
 	executeLiquidiumRepay,
 	getLiquidiumMaxRepayAmount,
-	liquidiumDebtInterestUsd
+	holdLiquidiumRepayUntilMined,
+	liquidiumDebtInterestUsd,
+	liquidiumPendingCoversDebt,
+	liquidiumRepayCapError,
+	liquidiumRepaySpendable
 } from '$lib/services/liquidium-repay.services';
 import * as liquidiumServices from '$lib/services/liquidium.services';
+import { balancesStore } from '$lib/stores/balances.store';
+import { liquidiumUnminedRepaysStore } from '$lib/stores/liquidium-unmined-repays.store';
+import { LiquidiumSolTransferRefusedError } from '$lib/types/errors';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
-import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
+import {
+	LIQUIDIUM_EXTERNAL_REF_KEYS,
+	type LiquidiumSolBlockhash
+} from '$lib/types/liquidium-active-tx';
+import type { Token, TokenId } from '$lib/types/token';
+import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { nonNullish } from '@dfinity/utils';
 import type { SupplyFlow, SupplyTarget } from '@liquidium/client';
+import { get } from 'svelte/store';
 
+vi.mock('$eth/providers/alchemy.providers', () => ({ alchemyProviders: vi.fn() }));
+vi.mock('$eth/services/eth-balance.services', () => ({ reloadEthereumBalance: vi.fn() }));
 vi.mock('$lib/api/liquidium.api', () => ({ liquidiumClient: vi.fn() }));
 vi.mock('$lib/services/liquidium.services', () => ({ getOrCreateLiquidiumProfile: vi.fn() }));
 vi.mock('$lib/services/active-user-transactions.services', () => ({
-	createActiveUserTransaction: vi.fn()
+	createActiveUserTransaction: vi.fn(),
+	deleteActiveUserTransaction: vi.fn(),
+	deleteUnbroadcastActiveUserTransaction: vi.fn(),
+	updateActiveUserTransaction: vi.fn()
 }));
 vi.mock('$lib/services/analytics.services', () => ({ trackEvent: vi.fn() }));
 
@@ -82,6 +109,78 @@ describe('liquidium-repay.services', () => {
 		});
 	});
 
+	describe('liquidiumPendingCoversDebt', () => {
+		it('is false without pending repays', () => {
+			expect(
+				liquidiumPendingCoversDebt({ pendingRepay: ZERO, maxRepay: ZERO, reserve })
+			).toBeFalsy();
+		});
+
+		it('is true when the net cap is zero', () => {
+			expect(
+				liquidiumPendingCoversDebt({ pendingRepay: 1n, maxRepay: ZERO, reserve })
+			).toBeTruthy();
+		});
+
+		it('is true when pending repays reach the debt, even with a dust cap', () => {
+			expect(
+				liquidiumPendingCoversDebt({
+					pendingRepay: 100_000_000n,
+					maxRepay: 150n,
+					reserve: { ...reserve, debtInterest: 500_000n }
+				})
+			).toBeTruthy();
+		});
+
+		it('is false while pending repays fall short of the debt', () => {
+			expect(
+				liquidiumPendingCoversDebt({ pendingRepay: 99_999_999n, maxRepay: 1n, reserve })
+			).toBeFalsy();
+		});
+
+		it('is false while the cap is still loading and the debt is not covered', () => {
+			expect(
+				liquidiumPendingCoversDebt({ pendingRepay: 1n, maxRepay: undefined, reserve })
+			).toBeFalsy();
+		});
+	});
+
+	describe('liquidiumRepayCapError', () => {
+		const cap = { maxRepay: 100n, pendingRepay: ZERO, reserve, i18n: en };
+
+		it('is undefined within the cap', () => {
+			expect(liquidiumRepayCapError({ ...cap, amount: 50n })).toBeUndefined();
+		});
+
+		it('accepts exactly the cap', () => {
+			expect(liquidiumRepayCapError({ ...cap, amount: 100n })).toBeUndefined();
+		});
+
+		it('flags an amount over the cap', () => {
+			expect(liquidiumRepayCapError({ ...cap, amount: 101n })?.message).toBe(
+				en.liquidium.text.repay_exceeds_debt
+			);
+		});
+
+		it('flags a missing cap as unavailable', () => {
+			expect(liquidiumRepayCapError({ ...cap, amount: 1n, maxRepay: undefined })?.message).toBe(
+				en.liquidium.text.repay_debt_unavailable
+			);
+		});
+
+		it('flags a dust amount once pending repays cover the debt', () => {
+			// 1 BTC pending covers the 1 BTC debt; the buffer leaves a 150-sat cap the amount fits.
+			expect(
+				liquidiumRepayCapError({
+					...cap,
+					amount: 100n,
+					maxRepay: 150n,
+					pendingRepay: 100_000_000n
+				})?.message
+			).toBe(en.liquidium.text.repay_pending_covers_debt);
+		});
+	});
+
 	describe('getLiquidiumMaxRepayAmount', () => {
 		const getProfileId = vi.fn();
 		const getMaxRepayAmount = vi.fn();
@@ -94,9 +193,10 @@ describe('liquidium-repay.services', () => {
 			} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
 		});
 
-		it('returns the full debt amount from the SDK', async () => {
+		it("returns the SDK's buffered full-debt amount", async () => {
 			getProfileId.mockResolvedValue(profileId);
-			getMaxRepayAmount.mockResolvedValue({ amount: 100_010_000n, decimals: 8n });
+			// The SDK quotes `borrowed × 1.001`; `borrowed` already includes the accrued interest.
+			getMaxRepayAmount.mockResolvedValue({ amount: 100_100_000n, decimals: 8n });
 
 			const amount = await getLiquidiumMaxRepayAmount({
 				identity: mockIdentity,
@@ -104,8 +204,17 @@ describe('liquidium-repay.services', () => {
 				poolId
 			});
 
-			expect(amount).toBe(100_010_000n);
+			expect(amount).toBe(100_100_000n);
 			expect(getMaxRepayAmount).toHaveBeenCalledExactlyOnceWith(profileId, poolId);
+		});
+
+		it('returns zero when the SDK reports no debt', async () => {
+			getProfileId.mockResolvedValue(profileId);
+			getMaxRepayAmount.mockResolvedValue({ amount: ZERO, decimals: 8n });
+
+			await expect(
+				getLiquidiumMaxRepayAmount({ identity: mockIdentity, ethAddress, poolId })
+			).resolves.toBe(ZERO);
 		});
 
 		it('returns null with no identity or address', async () => {
@@ -133,6 +242,12 @@ describe('liquidium-repay.services', () => {
 		const broadcast = vi.fn();
 		const createActiveUserTransaction = vi.mocked(
 			activeUserTransactionsServices.createActiveUserTransaction
+		);
+		const updateActiveUserTransaction = vi.mocked(
+			activeUserTransactionsServices.updateActiveUserTransaction
+		);
+		const deleteActiveUserTransaction = vi.mocked(
+			activeUserTransactionsServices.deleteActiveUserTransaction
 		);
 
 		const nativeTarget: SupplyTarget = {
@@ -171,6 +286,10 @@ describe('liquidium-repay.services', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+			// Also drops `*Once` answers a case queued but did not use, so they cannot leak into the next.
+			createActiveUserTransaction.mockReset();
+			updateActiveUserTransaction.mockReset();
+			deleteActiveUserTransaction.mockReset();
 			vi.mocked(liquidiumServices.getOrCreateLiquidiumProfile).mockResolvedValue(profileId);
 			vi.mocked(liquidiumApi.liquidiumClient).mockReturnValue({
 				lending: { supply }
@@ -193,7 +312,8 @@ describe('liquidium-repay.services', () => {
 			// Gross transfer = net repayment (100_000_000) + provider inflow fee (50).
 			expect(broadcast).toHaveBeenCalledExactlyOnceWith({
 				target: nativeTarget,
-				amount: 100_000_050n
+				amount: 100_000_050n,
+				beforeBroadcast: expect.any(Function)
 			});
 			expect(submit).toHaveBeenCalledExactlyOnceWith({ txid: '0xhash' });
 
@@ -202,7 +322,7 @@ describe('liquidium-repay.services', () => {
 				metadata: { dApp: 'liquidium', action: 'repay', token: 'BTC', tokenAmount: '1' }
 			});
 
-			const [[{ data, externalRefs }]] = createActiveUserTransaction.mock.calls;
+			const [[{ data }]] = createActiveUserTransaction.mock.calls;
 
 			expect(data).toEqual(
 				expect.objectContaining({
@@ -213,33 +333,248 @@ describe('liquidium-repay.services', () => {
 					})
 				})
 			);
-			expect(externalRefs).toEqual(
-				expect.arrayContaining([
-					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
+			expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		it('records the AUT before broadcasting and adds the txid to it once sent', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockResolvedValue('0xhash');
+
+			await run();
+
+			const [[{ id, externalRefs }]] = createActiveUserTransaction.mock.calls;
+
+			expect(createActiveUserTransaction.mock.invocationCallOrder[0]).toBeLessThan(
+				broadcast.mock.invocationCallOrder[0]
+			);
+			expect(externalRefs).toEqual([
+				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
+				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'BTC' },
+				{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId }
+			]);
+
+			// The whole ref set, since the backend replaces it wholesale.
+			expect(updateActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				id,
+				externalRefs: [
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'BTC' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
 					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
-				])
+				]
+			});
+			// Before the SDK submit, so a tab closed during that call leaves the row its txid.
+			expect(updateActiveUserTransaction.mock.invocationCallOrder[0]).toBeLessThan(
+				submit.mock.invocationCallOrder[0]
 			);
 		});
 
-		it('resolves even if post-broadcast bookkeeping fails (funds already sent)', async () => {
+		it('does not broadcast when the AUT cannot be recorded', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			createActiveUserTransaction.mockRejectedValueOnce(new Error('TooManyActiveTransactions'));
+
+			await expect(run()).rejects.toThrow('TooManyActiveTransactions');
+
+			expect(broadcast).not.toHaveBeenCalled();
+			expect(submit).not.toHaveBeenCalled();
+			expect(analyticsServices.trackEvent).not.toHaveBeenCalled();
+		});
+
+		it('deletes the AUT when its create fails, in case only the answer was lost', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			createActiveUserTransaction.mockRejectedValueOnce(new Error('agent timeout'));
+
+			await expect(run()).rejects.toThrow('agent timeout');
+
+			const [[{ id }]] = createActiveUserTransaction.mock.calls;
+
+			expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				id
+			});
+		});
+
+		it('deletes the AUT and rethrows when the broadcast fails', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockRejectedValueOnce(new Error('insufficient funds'));
+
+			await expect(run()).rejects.toThrow('insufficient funds');
+
+			const [[{ id }]] = createActiveUserTransaction.mock.calls;
+
+			expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				id
+			});
+			expect(updateActiveUserTransaction).not.toHaveBeenCalled();
+			expect(submit).not.toHaveBeenCalled();
+			expect(analyticsServices.trackEvent).not.toHaveBeenCalled();
+		});
+
+		it('still rethrows the broadcast error when the AUT delete fails', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockRejectedValueOnce(new Error('insufficient funds'));
+			deleteActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
+
+			await expect(run()).rejects.toThrow('insufficient funds');
+		});
+
+		describe('while the broadcast is pending', () => {
+			beforeEach(() => {
+				vi.useFakeTimers();
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			const pendingBroadcast = () => {
+				let settle: { resolve: (txid: string) => void; reject: (err: Error) => void } = {
+					resolve: () => {},
+					reject: () => {}
+				};
+
+				broadcast.mockReturnValueOnce(
+					new Promise<string>((resolve, reject) => {
+						settle = { resolve, reject };
+					})
+				);
+
+				return () => settle;
+			};
+
+			it('renews the AUT, and stops once the transfer is sent', async () => {
+				supply.mockResolvedValue(buildFlow(nativeTarget));
+				const settle = pendingBroadcast();
+
+				const repaid = run();
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS * 2);
+
+				const [[{ id }]] = createActiveUserTransaction.mock.calls;
+
+				// A write with nothing in it, so it cannot clobber the row's refs or status.
+				expect(updateActiveUserTransaction).toHaveBeenCalledTimes(2);
+				expect(updateActiveUserTransaction).toHaveBeenNthCalledWith(1, {
+					identity: mockIdentity,
+					id
+				});
+
+				settle().resolve('0xhash');
+				await repaid;
+
+				// + the txid write.
+				expect(updateActiveUserTransaction).toHaveBeenCalledTimes(3);
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS * 2);
+
+				expect(updateActiveUserTransaction).toHaveBeenCalledTimes(3);
+			});
+
+			it('stops renewing the AUT once the broadcast fails', async () => {
+				supply.mockResolvedValue(buildFlow(nativeTarget));
+				const settle = pendingBroadcast();
+
+				const repaid = run();
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS);
+
+				settle().reject(new Error('insufficient funds'));
+
+				await expect(repaid).rejects.toThrow('insufficient funds');
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS * 2);
+
+				expect(updateActiveUserTransaction).toHaveBeenCalledOnce();
+				expect(deleteActiveUserTransaction).toHaveBeenCalledOnce();
+			});
+
+			it('keeps the repay going when a renewal fails', async () => {
+				supply.mockResolvedValue(buildFlow(nativeTarget));
+				updateActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
+				const settle = pendingBroadcast();
+
+				const repaid = run();
+
+				await vi.advanceTimersByTimeAsync(LIQUIDIUM_REPAY_LEASE_RENEWAL_MILLIS);
+
+				settle().resolve('0xhash');
+
+				await expect(repaid).resolves.toBeUndefined();
+			});
+		});
+
+		// A poller took the row for abandoned while the broadcast outlasted the grace period.
+		it('records the AUT again, with its txid, when it was deleted during the broadcast', async () => {
 			supply.mockResolvedValue(buildFlow(nativeTarget));
 			broadcast.mockResolvedValue('0xhash');
-			createActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
+			updateActiveUserTransaction.mockRejectedValueOnce({ NotFound: null });
+
+			await expect(run()).resolves.toBeUndefined();
+
+			expect(createActiveUserTransaction).toHaveBeenCalledTimes(2);
+
+			const [[first], [second]] = createActiveUserTransaction.mock.calls;
+
+			expect(second).toEqual({
+				...first,
+				externalRefs: [
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'BTC' },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID, value: profileId },
+					{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
+				]
+			});
+			expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		it('does not record the AUT again when the txid write fails for another reason', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockResolvedValue('0xhash');
+			updateActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
+
+			await expect(run()).resolves.toBeUndefined();
+
+			expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+		});
+
+		it('resolves when recording the AUT again fails (funds already sent)', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockResolvedValue('0xhash');
+			updateActiveUserTransaction.mockRejectedValueOnce({ NotFound: null });
+			createActiveUserTransaction
+				.mockResolvedValueOnce(mockActiveUserTransaction)
+				.mockRejectedValueOnce({ TooManyActiveTransactions: null });
+
+			await expect(run()).resolves.toBeUndefined();
+
+			expect(createActiveUserTransaction).toHaveBeenCalledTimes(2);
+			expect(submit).toHaveBeenCalledOnce();
+		});
+
+		it('resolves even if the txid write fails (funds already sent)', async () => {
+			supply.mockResolvedValue(buildFlow(nativeTarget));
+			broadcast.mockResolvedValue('0xhash');
+			updateActiveUserTransaction.mockRejectedValueOnce(new Error('backend unavailable'));
 
 			await expect(run()).resolves.toBeUndefined();
 
 			expect(broadcast).toHaveBeenCalledOnce();
+			expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
 		});
 
-		it('resolves and still registers the AUT when the SDK submit fails (txid is only an indexing hint)', async () => {
+		it('resolves and still adds the txid when the SDK submit fails (txid is only an indexing hint)', async () => {
 			supply.mockResolvedValue(buildFlow(nativeTarget));
 			broadcast.mockResolvedValue('0xhash');
 			submit.mockRejectedValueOnce(new Error('indexing hint rejected'));
 
 			await expect(run()).resolves.toBeUndefined();
 
-			expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+			expect(updateActiveUserTransaction).toHaveBeenCalledOnce();
 		});
 
 		it('reports progress and omits progressStep from the AUT when none is provided', async () => {
@@ -267,6 +602,672 @@ describe('liquidium-repay.services', () => {
 			const [[arg]] = createActiveUserTransaction.mock.calls;
 
 			expect(arg).not.toHaveProperty('progressStep');
+		});
+
+		describe('when the transport knows the txid before broadcasting', () => {
+			const sent = vi.fn();
+
+			// As the BTC wizard's `sendBtc` does through the backend: `beforeBroadcast` once signed,
+			// then the broadcast, which either goes out or fails with `failure`.
+			const broadcastThroughBackend = (failure?: unknown) =>
+				broadcast.mockImplementation(
+					async ({
+						beforeBroadcast
+					}: {
+						beforeBroadcast: (params: { txid: string }) => Promise<void>;
+					}) => {
+						await beforeBroadcast({ txid: '0xhash' });
+
+						sent();
+
+						if (nonNullish(failure)) {
+							throw failure;
+						}
+
+						return '0xhash';
+					}
+				);
+
+			const rowId = () => createActiveUserTransaction.mock.calls[0]?.[0].id;
+
+			beforeEach(() => {
+				sent.mockClear();
+				supply.mockResolvedValue(buildFlow(nativeTarget));
+			});
+
+			it('writes the txid to the row before the broadcast, and again after it', async () => {
+				updateActiveUserTransaction.mockImplementationOnce(() => {
+					expect(sent).not.toHaveBeenCalled();
+
+					return Promise.resolve();
+				});
+				broadcastThroughBackend();
+
+				await run();
+
+				const write = {
+					identity: mockIdentity,
+					id: rowId(),
+					externalRefs: expect.arrayContaining([
+						{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
+					])
+				};
+
+				expect(updateActiveUserTransaction).toHaveBeenCalledTimes(2);
+				expect(updateActiveUserTransaction).toHaveBeenNthCalledWith(1, write);
+				expect(updateActiveUserTransaction).toHaveBeenNthCalledWith(2, write);
+				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+				expect(submit).toHaveBeenCalledExactlyOnceWith({ txid: '0xhash' });
+			});
+
+			// A poller in another tab read the row before the txid write and deleted it just after:
+			// its delete is not conditional on what it read.
+			it('records the row again when a poller deleted it after the txid was written', async () => {
+				updateActiveUserTransaction
+					.mockResolvedValueOnce(undefined)
+					.mockRejectedValueOnce({ NotFound: null });
+				broadcastThroughBackend();
+
+				await expect(run()).resolves.toBeUndefined();
+
+				expect(createActiveUserTransaction).toHaveBeenCalledTimes(2);
+				expect(createActiveUserTransaction.mock.calls[1][0]).toEqual(
+					expect.objectContaining({
+						id: rowId(),
+						externalRefs: expect.arrayContaining([
+							{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }
+						])
+					})
+				);
+			});
+
+			// The write may have committed with only its answer lost, leaving the txid on the row,
+			// where the poller's cleanup of rows without one could not remove it.
+			it('broadcasts nothing and deletes the row, with retries, when the txid write fails', async () => {
+				updateActiveUserTransaction.mockRejectedValueOnce(new Error('agent timeout'));
+				broadcastThroughBackend();
+
+				await expect(run()).rejects.toThrow('agent timeout');
+
+				expect(sent).not.toHaveBeenCalled();
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity, id: rowId() });
+				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			// The row carries the txid by now, so the poller's cleanup of rows without one cannot
+			// remove it: the delete retries (`deleteUnbroadcastActiveUserTransaction`'s own spec
+			// covers a first attempt failing and the next succeeding).
+			it('deletes the row, with retries, when the broadcast is refused outright', async () => {
+				const refusal = new BtcBroadcastTransactionCanisterError(
+					{ UtxosAlreadyReserved: null },
+					'reserved'
+				);
+				broadcastThroughBackend(refusal);
+
+				await expect(run()).rejects.toBe(refusal);
+
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity, id: rowId() });
+				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			// The row nets this repay out of the repay max until it settles, so a second full repay
+			// cannot follow a first that went out.
+			it.each([
+				new BtcBroadcastTransactionCanisterError(
+					{ BroadcastOutcomeUnknown: { msg: 'trap' } },
+					'unknown'
+				),
+				new BtcBroadcastUnconfirmedError({ cause: new Error('timeout') })
+			])('keeps the row when the transfer may have gone out: %s', async (unclear) => {
+				broadcastThroughBackend(unclear);
+
+				await expect(run()).rejects.toBe(unclear);
+
+				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).not.toHaveBeenCalled();
+				expect(submit).not.toHaveBeenCalled();
+			});
+		});
+
+		describe('a native SOL transfer', () => {
+			const signature = 'sol-signature';
+			const solBlockhash: LiquidiumSolBlockhash = { blockhash: 'blockhash-1', slot: 42n };
+
+			// As `sendLiquidiumSol` does: `beforeBroadcast` with the blockhash and its valid slot, then
+			// the broadcast, which either goes out or fails with `failure`.
+			const broadcastSol = (failure?: unknown) =>
+				broadcast.mockImplementation(
+					async ({
+						beforeBroadcast
+					}: {
+						beforeBroadcast: (params: {
+							txid: string;
+							solBlockhash?: LiquidiumSolBlockhash;
+						}) => Promise<void>;
+					}) => {
+						await beforeBroadcast({ txid: signature, solBlockhash });
+
+						if (nonNullish(failure)) {
+							throw failure;
+						}
+
+						return signature;
+					}
+				);
+
+			const runSol = () =>
+				executeLiquidiumRepay({
+					identity: mockIdentity,
+					ethAddress,
+					poolId: 'pool-sol',
+					chain: 'SOL',
+					asset: 'SOL',
+					amount: 30_000_000n,
+					inflowFee: 1_884_122n,
+					displayAmount: '0.03',
+					progressStep: 'repaying',
+					broadcast
+				});
+
+			const rowId = () => createActiveUserTransaction.mock.calls[0]?.[0].id;
+
+			beforeEach(() => {
+				supply.mockResolvedValue(
+					buildFlow({
+						poolId: 'pool-sol',
+						asset: 'SOL',
+						chain: 'SOL',
+						action: 'repayment',
+						address: 'GXVewvv6HehcLFYCmwpqh5CrMjqN9zJ8rqzGq3HEt9Ax'
+					})
+				);
+			});
+
+			// Each write replaces the refs, so the poller would lose the blockhash if the one after the
+			// broadcast left it out.
+			it('records the blockhash and its valid slot with the txid, before the broadcast and after it', async () => {
+				broadcastSol();
+
+				await runSol();
+
+				const write = {
+					identity: mockIdentity,
+					id: rowId(),
+					externalRefs: expect.arrayContaining([
+						{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.CHAIN, value: 'SOL' },
+						{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: signature },
+						{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.SOL_BLOCKHASH, value: 'blockhash-1' },
+						{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.SOL_BLOCKHASH_SLOT, value: '42' }
+					])
+				};
+
+				expect(updateActiveUserTransaction).toHaveBeenCalledTimes(2);
+				expect(updateActiveUserTransaction).toHaveBeenNthCalledWith(1, write);
+				expect(updateActiveUserTransaction).toHaveBeenNthCalledWith(2, write);
+				expect(submit).toHaveBeenCalledExactlyOnceWith({ txid: signature });
+			});
+
+			it('deletes the row, with retries, when the transfer was never sent', async () => {
+				const refused = new LiquidiumSolTransferRefusedError({ cause: new Error('preflight') });
+				broadcastSol(refused);
+
+				await expect(runSol()).rejects.toBe(refused);
+
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity, id: rowId() });
+				expect(submit).not.toHaveBeenCalled();
+			});
+
+			it('keeps the row when the SOL may have left', async () => {
+				const unclear = new Error('confirmation timed out');
+				broadcastSol(unclear);
+
+				await expect(runSol()).rejects.toBe(unclear);
+
+				expect(deleteActiveUserTransaction).not.toHaveBeenCalled();
+				expect(
+					activeUserTransactionsServices.deleteUnbroadcastActiveUserTransaction
+				).not.toHaveBeenCalled();
+			});
+		});
+	});
+
+	describe('liquidiumRepaySpendable', () => {
+		const held = ({ amount, tokenId = USDC_TOKEN.id }: { amount: bigint; tokenId?: TokenId }) => ({
+			[`0x${amount.toString(16).padStart(64, '0')}`]: [{ tokenId, amount }]
+		});
+
+		// 23.757982 USDC with a 16.40 repay still unmined in it, and a 1.40 provider fee.
+		it('takes a held transfer out of the balance and the reserved fees out of the Max', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 23_757_982n,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: held({ amount: 16_400_000n }),
+					reserved: 1_400_000n
+				})
+			).toEqual({ spendable: 7_357_982n, maxSpendable: 5_957_982n });
+		});
+
+		it('adds up every held transfer of the token', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 100n,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: { ...held({ amount: 10n }), ...held({ amount: 20n }) },
+					reserved: 5n
+				})
+			).toEqual({ spendable: 70n, maxSpendable: 65n });
+		});
+
+		it('adds up the value and the gas a native repay holds of the token', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 100n,
+					tokenId: ETHEREUM_TOKEN.id,
+					unminedRepays: {
+						[`0x${'ab'.repeat(32)}`]: [
+							{ tokenId: ETHEREUM_TOKEN.id, amount: 10n },
+							{ tokenId: ETHEREUM_TOKEN.id, amount: 3n }
+						]
+					},
+					reserved: 5n
+				})
+			).toEqual({ spendable: 87n, maxSpendable: 82n });
+		});
+
+		it('takes only the gas a token repay holds of the native token', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 100n,
+					tokenId: ETHEREUM_TOKEN.id,
+					unminedRepays: {
+						[`0x${'ab'.repeat(32)}`]: [
+							{ tokenId: USDC_TOKEN.id, amount: 10n },
+							{ tokenId: ETHEREUM_TOKEN.id, amount: 3n }
+						]
+					}
+				})
+			).toEqual({ spendable: 97n });
+		});
+
+		it('ignores the transfers held for another token', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 100n,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: held({ amount: 10n, tokenId: ETHEREUM_TOKEN.id }),
+					reserved: 5n
+				})
+			).toEqual({ spendable: 100n });
+		});
+
+		it('leaves the balance and the Max to the form with nothing held', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 100n,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: {},
+					reserved: 5n
+				})
+			).toEqual({ spendable: 100n });
+		});
+
+		it('floors at zero when the held transfers exceed the balance', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 10n,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: held({ amount: 20n }),
+					reserved: 5n
+				})
+			).toEqual({ spendable: ZERO, maxSpendable: ZERO });
+		});
+
+		it('floors the Max at zero when the fees use up what is left', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 30n,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: held({ amount: 20n }),
+					reserved: 15n
+				})
+			).toEqual({ spendable: 10n, maxSpendable: ZERO });
+		});
+
+		it('has no Max until the fees are known', () => {
+			expect(
+				liquidiumRepaySpendable({
+					balance: 30n,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: held({ amount: 20n })
+				})
+			).toEqual({ spendable: 10n });
+		});
+
+		it.each([null, undefined])('passes a %s balance through', (balance) => {
+			expect(
+				liquidiumRepaySpendable({
+					balance,
+					tokenId: USDC_TOKEN.id,
+					unminedRepays: held({ amount: 20n }),
+					reserved: 5n
+				})
+			).toEqual({ spendable: balance });
+		});
+	});
+
+	describe('holdLiquidiumRepayUntilMined', () => {
+		const hash = `0x${'ab'.repeat(32)}`;
+		const amount = 23_757_982n;
+		const gasFee = 120_000_000_000_000n;
+
+		const params = {
+			hash,
+			token: USDC_TOKEN,
+			amount,
+			feeToken: ETHEREUM_TOKEN,
+			gasFee,
+			unmined: undefined
+		};
+
+		const holds = [
+			{ tokenId: USDC_TOKEN.id, amount },
+			{ tokenId: ETHEREUM_TOKEN.id, amount: gasFee }
+		];
+
+		const wait = vi.fn();
+
+		// What the reload stores lands in `balancesStore` later, as `batchSet` does on the next frame.
+		const storeBalance = ({ token: { id }, data = ZERO }: { token: Token; data?: bigint }) =>
+			balancesStore.set({ id, data: { data, certified: false } });
+
+		const macrotask = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+		beforeEach(() => {
+			liquidiumUnminedRepaysStore.reset();
+			balancesStore.reinitialize();
+
+			wait.mockReset();
+			vi.mocked(alchemyProviders, { partial: true }).mockReset().mockReturnValue({ wait });
+			vi.mocked(reloadEthereumBalance)
+				.mockReset()
+				.mockImplementation((reloadToken) => {
+					storeBalance({ token: reloadToken });
+
+					return Promise.resolve({ success: true });
+				});
+		});
+
+		it('holds the amount and the gas back as soon as it is called', () => {
+			wait.mockReturnValue(new Promise(() => {}));
+
+			holdLiquidiumRepayUntilMined(params);
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+		});
+
+		it('holds the amount and the gas of a native repay against the native token', () => {
+			wait.mockReturnValue(new Promise(() => {}));
+
+			holdLiquidiumRepayUntilMined({ ...params, token: ETHEREUM_TOKEN });
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({
+				[hash]: [
+					{ tokenId: ETHEREUM_TOKEN.id, amount },
+					{ tokenId: ETHEREUM_TOKEN.id, amount: gasFee }
+				]
+			});
+		});
+
+		it('waits on the token network for the transfer', async () => {
+			wait.mockResolvedValue('success');
+
+			await holdLiquidiumRepayUntilMined(params);
+
+			expect(alchemyProviders).toHaveBeenCalledWith(USDC_TOKEN.network.id);
+			expect(wait).toHaveBeenCalledWith(hash);
+		});
+
+		it('keeps both held until both balances have reloaded after the transfer is mined', async () => {
+			wait.mockResolvedValue('success');
+
+			const heldDuringReload: unknown[] = [];
+
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
+				heldDuringReload.push(get(liquidiumUnminedRepaysStore)[hash]);
+
+				storeBalance({ token: reloadToken });
+
+				return Promise.resolve({ success: true });
+			});
+
+			await holdLiquidiumRepayUntilMined(params);
+
+			expect(reloadEthereumBalance).toHaveBeenCalledTimes(2);
+			expect(reloadEthereumBalance).toHaveBeenCalledWith(USDC_TOKEN);
+			expect(reloadEthereumBalance).toHaveBeenCalledWith(ETHEREUM_TOKEN);
+			expect(heldDuringReload).toEqual([holds, holds]);
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('keeps both held until the reloaded balances are in the store', async () => {
+			wait.mockResolvedValue('success');
+			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: true });
+
+			const held = holdLiquidiumRepayUntilMined(params);
+
+			await vi.waitFor(() => expect(reloadEthereumBalance).toHaveBeenCalledTimes(2));
+			await macrotask();
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+
+			storeBalance({ token: USDC_TOKEN });
+			await macrotask();
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+
+			storeBalance({ token: ETHEREUM_TOKEN });
+			await held;
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('keeps both held while the reloaded balances are still the ones before the transfer', async () => {
+			storeBalance({ token: USDC_TOKEN, data: 100n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+
+			wait.mockResolvedValue('success');
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
+				storeBalance({ token: reloadToken, data: reloadToken.id === USDC_TOKEN.id ? 100n : 10n });
+
+				return Promise.resolve({ success: true });
+			});
+
+			const held = holdLiquidiumRepayUntilMined({ ...params, unmined: get(balancesStore) });
+
+			await vi.waitFor(() => expect(reloadEthereumBalance).toHaveBeenCalledTimes(2));
+			await macrotask();
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+
+			storeBalance({ token: USDC_TOKEN, data: 50n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 9n });
+			await held;
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('keeps both held when a poll commits the balances from before the transfer after the receipt', async () => {
+			storeBalance({ token: USDC_TOKEN, data: 100n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+
+			wait.mockImplementation(() => {
+				storeBalance({ token: USDC_TOKEN, data: 100n });
+				storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+
+				return Promise.resolve('success');
+			});
+			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: true });
+
+			const held = holdLiquidiumRepayUntilMined({ ...params, unmined: get(balancesStore) });
+
+			await vi.waitFor(() => expect(reloadEthereumBalance).toHaveBeenCalledTimes(2));
+			await macrotask();
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+
+			storeBalance({ token: USDC_TOKEN, data: 50n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 9n });
+			await held;
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('compares with the balances from before the send when the store already has the mined ones', async () => {
+			storeBalance({ token: USDC_TOKEN, data: 100n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+
+			const unmined = get(balancesStore);
+
+			// A poll committed the mined balances before the send returned.
+			storeBalance({ token: USDC_TOKEN, data: 50n });
+			storeBalance({ token: ETHEREUM_TOKEN, data: 9n });
+
+			wait.mockResolvedValue('success');
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
+				storeBalance({ token: reloadToken, data: reloadToken.id === USDC_TOKEN.id ? 50n : 9n });
+
+				return Promise.resolve({ success: true });
+			});
+
+			holdLiquidiumRepayUntilMined({ ...params, unmined });
+
+			await vi.waitFor(() => expect(get(liquidiumUnminedRepaysStore)).toEqual({}));
+		});
+
+		it('does not wait on the store for a reload that reports no success', async () => {
+			wait.mockResolvedValue('success');
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) =>
+				Promise.resolve({ success: reloadToken.id !== ETHEREUM_TOKEN.id })
+			);
+
+			const held = holdLiquidiumRepayUntilMined(params);
+
+			await vi.waitFor(() => expect(reloadEthereumBalance).toHaveBeenCalledTimes(2));
+			await macrotask();
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({ [hash]: holds });
+
+			storeBalance({ token: USDC_TOKEN });
+			await held;
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('releases both right away when no reload reports success', async () => {
+			wait.mockResolvedValue('success');
+			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: false });
+
+			await holdLiquidiumRepayUntilMined(params);
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it.each(['reverted', 'replaced'])(
+			'holds only the gas of a %s token repay until the native balance has changed',
+			async (status) => {
+				storeBalance({ token: USDC_TOKEN, data: 100n });
+				storeBalance({ token: ETHEREUM_TOKEN, data: 10n });
+
+				wait.mockResolvedValue(status);
+
+				const heldDuringReload: unknown[] = [];
+
+				vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
+					heldDuringReload.push(get(liquidiumUnminedRepaysStore)[hash]);
+
+					storeBalance({ token: reloadToken, data: 9n });
+
+					return Promise.resolve({ success: true });
+				});
+
+				await holdLiquidiumRepayUntilMined({ ...params, unmined: get(balancesStore) });
+
+				expect(reloadEthereumBalance).toHaveBeenCalledExactlyOnceWith(ETHEREUM_TOKEN);
+				expect(heldDuringReload).toEqual([[{ tokenId: ETHEREUM_TOKEN.id, amount: gasFee }]]);
+				expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+			}
+		);
+
+		it.each(['reverted', 'replaced'])('holds only the gas of a %s native repay', async (status) => {
+			wait.mockResolvedValue(status);
+
+			let heldDuringReload: unknown;
+
+			vi.mocked(reloadEthereumBalance).mockImplementation((reloadToken) => {
+				heldDuringReload = get(liquidiumUnminedRepaysStore)[hash];
+
+				storeBalance({ token: reloadToken });
+
+				return Promise.resolve({ success: true });
+			});
+
+			await holdLiquidiumRepayUntilMined({ ...params, token: ETHEREUM_TOKEN });
+
+			expect(reloadEthereumBalance).toHaveBeenCalledExactlyOnceWith(ETHEREUM_TOKEN);
+			expect(heldDuringReload).toEqual([{ tokenId: ETHEREUM_TOKEN.id, amount: gasFee }]);
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('reloads the native balance once for a native repay', async () => {
+			wait.mockResolvedValue('success');
+
+			await holdLiquidiumRepayUntilMined({ ...params, token: ETHEREUM_TOKEN });
+
+			expect(reloadEthereumBalance).toHaveBeenCalledExactlyOnceWith(ETHEREUM_TOKEN);
+		});
+
+		it('releases both and rejects when the wait fails', async () => {
+			wait.mockRejectedValue(new Error('timed out'));
+
+			await expect(holdLiquidiumRepayUntilMined(params)).rejects.toThrow('timed out');
+
+			expect(reloadEthereumBalance).not.toHaveBeenCalled();
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('releases both when a balance reload fails', async () => {
+			wait.mockResolvedValue('success');
+			vi.mocked(reloadEthereumBalance).mockRejectedValue(new Error('rpc down'));
+
+			await expect(holdLiquidiumRepayUntilMined(params)).rejects.toThrow('rpc down');
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({});
+		});
+
+		it('leaves the other held transfers in place', async () => {
+			const other = `0x${'cd'.repeat(32)}`;
+
+			liquidiumUnminedRepaysStore.add({
+				hash: other,
+				holds: [{ tokenId: USDC_TOKEN.id, amount: 1n }]
+			});
+
+			wait.mockResolvedValue('success');
+
+			await holdLiquidiumRepayUntilMined(params);
+
+			expect(get(liquidiumUnminedRepaysStore)).toEqual({
+				[other]: [{ tokenId: USDC_TOKEN.id, amount: 1n }]
+			});
 		});
 	});
 });

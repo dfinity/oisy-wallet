@@ -6,11 +6,13 @@ import type { Token } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import type { NonEmptyArray } from '$lib/types/utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
 
-export type AnyTransaction = BtcTransactionUi | Transaction | IcTransactionUi | SolTransactionUi;
+export type AnyTransaction =
+	BtcTransactionUi | Transaction | IcTransactionUi | SolTransactionUi | XrpTransactionUi;
 
 export type AnyTransactionUi =
-	BtcTransactionUi | EthTransactionUi | IcTransactionUi | SolTransactionUi;
+	BtcTransactionUi | EthTransactionUi | IcTransactionUi | SolTransactionUi | XrpTransactionUi;
 
 export type AnyTransactionUiWithToken = AnyTransactionUi & {
 	token: Token;
@@ -20,7 +22,8 @@ export type AnyTransactionUiWithCmp =
 	| { component: 'bitcoin'; transaction: BtcTransactionUi }
 	| { component: 'ethereum'; transaction: EthTransactionUi }
 	| { component: 'ic'; transaction: IcTransactionUi }
-	| { component: 'solana'; transaction: SolTransactionUi };
+	| { component: 'solana'; transaction: SolTransactionUi }
+	| { component: 'xrp'; transaction: XrpTransactionUi };
 
 export type AllTransactionUiWithCmp = AnyTransactionUiWithCmp & {
 	token: Token;

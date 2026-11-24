@@ -5,11 +5,13 @@
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
+	import { HELP_ENABLED } from '$env/help.env';
 	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
 	import { anyTradingProviderEnabled } from '$env/trading';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconPlant from '$lib/components/icons/IconPlant.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
+	import IconWrench from '$lib/components/icons/IconWrench.svelte';
 	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
@@ -17,12 +19,15 @@
 	import IconEllipsis from '$lib/components/icons/lucide/IconEllipsis.svelte';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconLayers from '$lib/components/icons/lucide/IconLayers.svelte';
+	import IconLifeBuoy from '$lib/components/icons/lucide/IconLifeBuoy.svelte';
 	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
 	import IconNotebook from '$lib/components/icons/lucide/IconNotebook.svelte';
 	import NavigationGroupSheet from '$lib/components/navigation/NavigationGroupSheet.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
+	import NavigationMoreMenu from '$lib/components/navigation/NavigationMoreMenu.svelte';
 	import Tag from '$lib/components/ui/Tag.svelte';
 	import {
+		DESKTOP_NAVIGATION_BOTTOM_ITEMS,
 		DESKTOP_NAVIGATION_SECTIONS,
 		MOBILE_NAVIGATION_BAR
 	} from '$lib/constants/navigation.constants';
@@ -39,7 +44,9 @@
 		NAVIGATION_ITEM_NOTES,
 		NAVIGATION_ITEM_REWARDS,
 		NAVIGATION_ITEM_SETTINGS,
+		NAVIGATION_ITEM_HELP,
 		NAVIGATION_ITEM_TOKENS,
+		NAVIGATION_ITEM_TOOLS,
 		NAVIGATION_ITEM_TRADE
 	} from '$lib/constants/test-ids.constants';
 	import { TokenTypes } from '$lib/enums/token-types';
@@ -62,6 +69,8 @@
 		isRouteNfts,
 		isRouteRewards,
 		isRouteSettings,
+		isRouteHelp,
+		isRouteTools,
 		isRouteTokens,
 		isRouteOisyTradeProvider,
 		isRouteTrading,
@@ -71,7 +80,7 @@
 
 	interface Props {
 		testIdPrefix?: string;
-		layout?: 'desktop' | 'mobile';
+		layout?: 'desktop' | 'mobile' | 'bottom';
 	}
 
 	let { testIdPrefix, layout = 'desktop' }: Props = $props();
@@ -199,7 +208,7 @@
 				href: url(AppPath.Activity),
 				selected: isRouteActivity(page)
 			},
-			// Trade and Borrow are NEW Finance destinations. Trade is gated by the
+			// Trade and Borrow are Finance destinations. Trade is gated by the
 			// trading providers like the Assets Trading tab; Borrow routes to the
 			// dedicated /borrow/ page.
 			...(anyTradingProviderEnabled
@@ -210,9 +219,7 @@
 							testId: prefixedTestId(NAVIGATION_ITEM_TRADE),
 							icon: IconLineChart,
 							href: url(AppPath.ProvidersOisyTrade),
-							selected: isRouteOisyTradeProvider(page),
-							tag: $i18n.core.text.new,
-							tagVariant: 'emphasis'
+							selected: isRouteOisyTradeProvider(page)
 						}
 					}
 				: {}),
@@ -222,9 +229,7 @@
 				testId: prefixedTestId(NAVIGATION_ITEM_BORROW),
 				icon: IconCoins,
 				href: url(AppPath.Borrow),
-				selected: isRouteBorrow(page),
-				tag: $i18n.core.text.new,
-				tagVariant: 'emphasis'
+				selected: isRouteBorrow(page)
 			},
 			// Todo: remove condition once the Earn feature is permanently enabled.
 			...(EARNING_ENABLED
@@ -263,6 +268,20 @@
 						}
 					}
 				: {}),
+			// Gated on HELP_ENABLED: with the flag off the entry is simply absent, which is all
+			// the gating the page needs - it has nothing worth hiding behind a route guard.
+			...(HELP_ENABLED
+				? {
+						help: {
+							label: $i18n.navigation.text.help,
+							ariaLabel: $i18n.navigation.alt.help_page,
+							testId: prefixedTestId(NAVIGATION_ITEM_HELP),
+							icon: IconLifeBuoy,
+							href: url(AppPath.Help),
+							selected: isRouteHelp(page)
+						}
+					}
+				: {}),
 			settings: {
 				label: $i18n.navigation.text.settings,
 				ariaLabel: $i18n.navigation.alt.settings,
@@ -278,6 +297,16 @@
 				icon: IconGift,
 				href: url(AppPath.Rewards),
 				selected: isRouteRewards(page)
+			},
+			// Not flagged: Export data lives on the page whatever the flags, while the Canister
+			// top-up section on it follows its own flag.
+			tools: {
+				label: $i18n.navigation.text.tools,
+				ariaLabel: $i18n.navigation.alt.tools,
+				testId: prefixedTestId(NAVIGATION_ITEM_TOOLS),
+				icon: IconWrench,
+				href: url(AppPath.Tools),
+				selected: isRouteTools(page)
 			}
 		})
 	);
@@ -315,7 +344,7 @@
 	{@const descriptor = descriptors[id]}
 	{#if nonNullish(descriptor)}
 		{@const Icon = descriptor.icon}
-		{@const cardClass = `relative flex flex-col items-center gap-2 rounded-2xl px-2 py-4 text-center no-underline ${descriptor.selected ? 'bg-brand-subtle-20 text-brand-primary-alt' : 'bg-secondary text-primary'}`}
+		{@const cardClass = `relative flex flex-col items-center gap-2 rounded-2xl px-2 py-4 text-center no-underline transition-[background-color,color,scale] duration-150 ease-out press ${descriptor.selected ? 'bg-brand-subtle-20 text-brand-primary-alt' : 'bg-secondary text-primary'}`}
 		{#snippet cardInner()}
 			<Icon />
 			<span class="text-sm font-semibold">{descriptor.label}</span>
@@ -335,11 +364,17 @@
 				{@render cardInner()}
 			</a>
 		{:else}
+			<!-- A card that opens a modal starts no navigation, so it closes its sheet itself, as
+			     instantly as a navigation would. -->
 			<button
 				class={cardClass}
 				aria-label={descriptor.ariaLabel}
 				data-tid={descriptor.testId}
-				onclick={descriptor.onclick}
+				onclick={() => {
+					closeSheetInstantly = true;
+					openSheet = null;
+					descriptor.onclick?.();
+				}}
 				type="button"
 			>
 				{@render cardInner()}
@@ -348,15 +383,32 @@
 	{/if}
 {/snippet}
 
-{#if layout === 'desktop'}
+{#if layout === 'bottom'}
+	<!-- The sidebar's pinned bottom block: Settings, then the More menu, stacked.
+	     Same condensed rows and 24px icons as the sections above, so the two read
+	     as one navigation rather than a second, smaller one. -->
+	<div
+		class="flex flex-col gap-0.5 [&_.nav-item]:items-center [&_.nav-item]:py-2 h-sm:pointer-fine:[&_.nav-item]:py-1.5 [&_.nav-item_svg]:h-6 [&_.nav-item_svg]:w-6"
+	>
+		{#each DESKTOP_NAVIGATION_BOTTOM_ITEMS as id (id)}
+			{@render navItem(id)}
+		{/each}
+
+		<NavigationMoreMenu />
+	</div>
+{:else if layout === 'desktop'}
 	{#each DESKTOP_NAVIGATION_SECTIONS as section, sectionIndex (section.id)}
 		{@const items = section.items.filter((id) => nonNullish(descriptors[id]))}
 		{#if items.length > 0}
 			<!-- Each group is its own box so the heading hugs its items (small gap);
 			     the separation between groups (mt-3) is clearly larger. -->
-			<div class="flex flex-col gap-0.5" class:mt-3={sectionIndex > 0}>
+			<div
+				class="flex flex-col gap-0.5"
+				class:h-sm:mt-2={sectionIndex > 0}
+				class:mt-3={sectionIndex > 0}
+			>
 				<p
-					class="mb-1 px-3 text-[0.625rem] font-bold tracking-widest text-tertiary uppercase"
+					class="mb-1 px-3 text-[0.625rem] font-bold tracking-widest text-tertiary uppercase h-sm:mb-0.5"
 					data-tid={prefixedTestId(SECTION_META[section.id].testId)}
 				>
 					{SECTION_META[section.id].label()}
@@ -384,7 +436,7 @@
 					     conditionally (text-primary is NOT a base class) so the active one wins
 					     regardless of Tailwind's utility source order. -->
 				<button
-					class="flex min-w-0 flex-1 flex-col items-center justify-end p-1.5 text-center text-sm"
+					class="group flex min-w-0 flex-1 flex-col items-center justify-end p-1.5 text-center text-sm"
 					class:text-brand-primary-alt={ownsCurrent}
 					class:text-primary={!ownsCurrent && !pressed}
 					class:text-tertiary={pressed}
@@ -401,7 +453,7 @@
 					     row (which the global `.mobile-nav` container padding lifts) so it clears the indicator.
 					     The label stays on the row (items-end). -->
 					<span
-						class="absolute bottom-[calc(1.75rem+env(safe-area-inset-bottom))] left-1/2 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border-[1.5px] border-current bg-primary transition-colors"
+						class="absolute bottom-[calc(1.75rem+env(safe-area-inset-bottom))] left-1/2 flex h-11 w-11 -translate-x-1/2 press-icon-in-group items-center justify-center rounded-full border-[1.5px] border-current bg-primary transition-[color,background-color,border-color,scale] duration-150 ease-out"
 					>
 						{#if nonNullish(GroupIcon)}
 							<GroupIcon />

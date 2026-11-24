@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import { MAX_PERSONAL_NOTE_LENGTH } from '$lib/constants/app.constants';
 	import { NOTES_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { personalNoteLength } from '$lib/utils/personal-note.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		value: string;
@@ -65,7 +65,7 @@
 		text inputs) so the active field is distinguishable from its resting state. -->
 	<textarea
 		bind:this={textarea}
-		class="min-h-32 w-full flex-1 resize-none overflow-y-auto rounded-lg border border-brand-subtle-20 bg-primary p-4 text-base font-normal text-primary outline-none transition-colors placeholder:text-tertiary focus:border-brand-primary md:flex-auto md:max-h-[calc(80dvh_-_28rem)]"
+		class="min-h-32 w-full flex-1 resize-none overflow-y-auto rounded-lg border border-brand-subtle-20 bg-primary p-4 text-base font-normal text-primary transition-colors outline-none placeholder:text-tertiary focus:border-brand-primary md:max-h-[calc(80dvh_-_28rem)] md:flex-auto"
 		aria-label={$i18n.notes.text.note_label}
 		data-tid={NOTES_INPUT}
 		{disabled}

@@ -18,6 +18,9 @@
 	import {
 		convertSatoshisToBtc,
 		isInvalidUtxosFee,
+		isUnclearBtcBroadcastOutcome,
+		isBtcSendLimitError,
+		mapBtcBroadcastErrorToMessage,
 		mapUtxosFeeErrorToMessage
 	} from '$btc/utils/btc-send.utils';
 	import LiquidiumRepayForm from '$lib/components/liquidium/repay/LiquidiumRepayForm.svelte';
@@ -30,7 +33,8 @@
 	import { WizardStepsLiquidiumRepay } from '$lib/enums/wizard-steps';
 	import {
 		computeLiquidiumRepayPreview,
-		executeLiquidiumRepay
+		executeLiquidiumRepay,
+		liquidiumRepayCapError
 	} from '$lib/services/liquidium-repay.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -48,6 +52,9 @@
 		amount: OptionAmount;
 		repayProgressStep: string;
 		maxRepay?: bigint;
+		maxRepayUnavailable?: boolean;
+		// Net amount of this pool's repays still settling.
+		pendingRepay?: bigint;
 		inflowFee?: bigint;
 		inflowFeeUnavailable?: boolean;
 		currentStep?: WizardStep;
@@ -63,6 +70,8 @@
 		amount = $bindable(),
 		repayProgressStep = $bindable(),
 		maxRepay,
+		maxRepayUnavailable,
+		pendingRepay = ZERO,
 		inflowFee,
 		inflowFeeUnavailable,
 		currentStep,
@@ -84,10 +93,12 @@
 	);
 
 	// Pairwise USD from the position itself (no asset-price dependency): the repaid share of the
-	// position's debt. Repaying improves the (aggregate) projected health factor.
+	// position's debt, including repays still settling. Repaying improves the (aggregate) projected
+	// health factor.
 	let repayUsd = $derived(
-		reserve.borrowed > ZERO && nonNullish(parsedAmount)
-			? (Number(parsedAmount) / Number(reserve.borrowed)) * reserve.borrowedUsd
+		reserve.borrowed > ZERO
+			? (Number((parsedAmount ?? ZERO) + pendingRepay) / Number(reserve.borrowed)) *
+					reserve.borrowedUsd
 			: 0
 	);
 
@@ -146,6 +157,21 @@
 			return;
 		}
 
+		// Review can outlive the cap (a repay that settles refetches it; a new pending one lowers
+		// it), so it is re-checked at the point of broadcast rather than trusted from the form.
+		const capError = liquidiumRepayCapError({
+			amount: parsedAmount,
+			maxRepay,
+			pendingRepay,
+			reserve,
+			i18n: $i18n
+		});
+
+		if (nonNullish(capError)) {
+			toastsError({ msg: { text: capError.message } });
+			return;
+		}
+
 		// A failed UTXO selection (error or empty set) cannot fund the broadcast — e.g.
 		// the balance is only in unconfirmed UTXOs — and the signer would reject it.
 		if (isInvalidUtxosFee(utxosFee)) {
@@ -196,14 +222,15 @@
 				inflowFee,
 				displayAmount: `${amount}`,
 				progress: (step) => (repayProgressStep = step),
-				broadcast: async ({ target, amount: transferAmount }) =>
+				broadcast: async ({ target, amount: transferAmount, beforeBroadcast }) =>
 					await sendBtc({
 						identity: $authIdentity,
 						network: btcNetwork,
 						utxosFee: preparedUtxosFee,
 						destination: target.address,
 						amount: convertSatoshisToBtc(transferAmount),
-						source
+						source,
+						beforeBroadcast
 					})
 			});
 
@@ -211,7 +238,21 @@
 
 			setTimeout(onClose, 750);
 		} catch (err: unknown) {
-			toastsError({ msg: { text: $i18n.liquidium.text.transaction_failed }, err });
+			toastsError({
+				msg: {
+					text:
+						mapBtcBroadcastErrorToMessage({ err, i18n: $i18n }) ??
+						$i18n.liquidium.text.transaction_failed
+				},
+				...(isBtcSendLimitError(err) ? {} : { err })
+			});
+
+			// The transfer may have gone out, and its row stays until it settles. The form would offer
+			// the full amount again, so the flow closes instead.
+			if (isUnclearBtcBroadcastOutcome(err)) {
+				onClose();
+				return;
+			}
 
 			onBack();
 		}
@@ -230,8 +271,11 @@
 			{amount}
 			{feeDisplay}
 			{inflowFee}
+			{maxRepay}
+			{maxRepayUnavailable}
 			{onBack}
 			onConfirm={repay}
+			{pendingRepay}
 			{preview}
 			{reserve}
 		/>
@@ -243,10 +287,12 @@
 			{inflowFee}
 			{inflowFeeUnavailable}
 			{maxRepay}
+			{maxRepayUnavailable}
 			{onClose}
 			onCustomErrorValidate={validateRepayAmount}
 			{onNext}
 			{onSelectToken}
+			{pendingRepay}
 			{preview}
 			{reserve}
 			totalFee={utxosFee?.feeSatoshis}

@@ -24,6 +24,5 @@ export const CRWDX_TOKEN: RequiredSpl2022Token = {
 	icon: crwdx,
 	address: 'Xs7xXqkcK7K8urEqGg52SECi79dRp2cEKKuYjUePYDw',
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
-	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
-	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
+	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
 };

@@ -1,4 +1,7 @@
-import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import {
+	ARBITRUM_MAINNET_NETWORK_ID,
+	SUPPORTED_ARBITRUM_NETWORK_IDS
+} from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import {
 	BASE_NETWORK_ID,
 	SUPPORTED_BASE_NETWORK_IDS
@@ -12,6 +15,7 @@ import {
 	SUPPORTED_EVM_NETWORK_IDS
 } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_POLYGON_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import * as btcNetworkEnv from '$env/networks/networks.btc.env';
 import {
 	BTC_MAINNET_NETWORK,
@@ -41,6 +45,7 @@ import {
 	SUPPORTED_SOLANA_NETWORKS,
 	SUPPORTED_SOLANA_NETWORK_IDS
 } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK, XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { CKBTC_LEDGER_CANISTER_TESTNET_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -65,17 +70,35 @@ import {
 	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdPolygon,
+	isNetworkIdRobinhood,
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
 	isNetworkIdSOLMainnet,
 	isNetworkIdSepolia,
 	isNetworkIdSolana,
+	isNetworkIdXRPMainnet,
+	isNetworkIdXrp,
 	isNetworkSolana,
+	isNetworkXrp,
 	isPseudoNetworkIdIcpTestnet,
 	mapCkBtcBitcoinNetworkToBackendBitcoinNetwork,
 	mapNetworkIdToBitcoinNetwork
 } from '$lib/utils/network.utils';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
+
+// XRP is force-disabled under TEST, so `SUPPORTED_XRP_NETWORK_IDS` is empty and the
+// list-based XRP guards would return false for every input — passing their negative
+// assertions vacuously. Enable it for this spec so both branches discriminate.
+vi.mock('$env/networks/networks.xrp.env', async () => {
+	const actual = await vi.importActual<Record<string, unknown>>('$env/networks/networks.xrp.env');
+
+	return {
+		...actual,
+		XRP_MAINNET_ENABLED: true,
+		SUPPORTED_XRP_NETWORKS: [actual.XRP_MAINNET_NETWORK],
+		SUPPORTED_XRP_NETWORK_IDS: [actual.XRP_MAINNET_NETWORK_ID]
+	};
+});
 
 describe('network utils', () => {
 	describe('isNetworkEthereum', () => {
@@ -123,6 +146,21 @@ describe('network utils', () => {
 
 		it('should return false for non-ICP network', () => {
 			expect(isNetworkSolana(ETHEREUM_NETWORK)).toBeFalsy();
+		});
+	});
+
+	describe('isNetworkXrp', () => {
+		it('should return true for the XRP network', () => {
+			expect(isNetworkXrp(XRP_MAINNET_NETWORK)).toBeTruthy();
+		});
+
+		it('should return false for a non-XRP network', () => {
+			expect(isNetworkXrp(ETHEREUM_NETWORK)).toBeFalsy();
+			expect(isNetworkXrp(SOLANA_MAINNET_NETWORK)).toBeFalsy();
+		});
+
+		it('should return false for an undefined network', () => {
+			expect(isNetworkXrp(undefined)).toBeFalsy();
 		});
 	});
 
@@ -236,6 +274,24 @@ describe('network utils', () => {
 
 			expect(isNetworkIdArbitrum(BASE_NETWORK_ID)).toBeFalsy();
 		});
+
+		it('should return false for the Robinhood Chain network ID', () => {
+			expect(isNetworkIdArbitrum(ROBINHOOD_MAINNET_NETWORK_ID)).toBeFalsy();
+		});
+	});
+
+	describe('isNetworkIdRobinhood', () => {
+		it('should return true for the Robinhood Chain network ID', () => {
+			expect(isNetworkIdRobinhood(ROBINHOOD_MAINNET_NETWORK_ID)).toBeTruthy();
+		});
+
+		it('should return false for non-Robinhood network IDs', () => {
+			expect(isNetworkIdRobinhood(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
+
+			expect(isNetworkIdRobinhood(ETHEREUM_NETWORK_ID)).toBeFalsy();
+
+			expect(isNetworkIdRobinhood(ARBITRUM_MAINNET_NETWORK_ID)).toBeFalsy();
+		});
 	});
 
 	describe('isNetworkIdBitcoin', () => {
@@ -333,6 +389,34 @@ describe('network utils', () => {
 		it('should return false for non-SOL mainnet ID', () => {
 			expect(isNetworkIdSOLMainnet(SOLANA_DEVNET_NETWORK_ID)).toBeFalsy();
 			expect(isNetworkIdSOLMainnet(SOLANA_LOCAL_NETWORK_ID)).toBeFalsy();
+		});
+	});
+
+	describe('isNetworkIdXrp', () => {
+		it('should return true for the XRP mainnet network ID', () => {
+			expect(isNetworkIdXrp(XRP_MAINNET_NETWORK_ID)).toBeTruthy();
+		});
+
+		it('should return false for non-XRP network IDs', () => {
+			expect(isNetworkIdXrp(ICP_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdXrp(ETHEREUM_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdXrp(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+		});
+
+		it('should return false for undefined network ID', () => {
+			expect(isNetworkIdXrp(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('isNetworkIdXRPMainnet', () => {
+		it('should return true for XRP mainnet ID', () => {
+			expect(isNetworkIdXRPMainnet(XRP_MAINNET_NETWORK_ID)).toBeTruthy();
+		});
+
+		it('should return false for non-XRP mainnet ID', () => {
+			expect(isNetworkIdXRPMainnet(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdXRPMainnet(ETHEREUM_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdXRPMainnet(undefined)).toBeFalsy();
 		});
 	});
 

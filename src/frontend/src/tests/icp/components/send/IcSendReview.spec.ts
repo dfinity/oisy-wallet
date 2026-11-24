@@ -1,7 +1,9 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcSendReview from '$icp/components/send/IcSendReview.svelte';
 import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
+import { CYCLES_SENT_TO_CANISTER_WARNING } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
 import { mockValidDip721Token } from '$tests/mocks/dip721-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidDip721Nft } from '$tests/mocks/nfts.mock';
@@ -76,5 +78,23 @@ describe('IcSendReview', () => {
 		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
 
 		expect(container).toHaveTextContent(`0 ${mockValidDip721Token.symbol}`);
+	});
+
+	it('should warn about TCYCLES sent to a canister', () => {
+		const { getByTestId } = render(IcSendReview, {
+			props: { ...props, destination: 'ywcsb-maaaa-aaaai-q6k7a-cai' },
+			context: new Map([[SEND_CONTEXT_KEY, initSendContext({ token: mockTcyclesToken })]])
+		});
+
+		expect(getByTestId(CYCLES_SENT_TO_CANISTER_WARNING)).toBeInTheDocument();
+	});
+
+	it('should not warn about another token sent to a canister', () => {
+		const { queryByTestId } = render(IcSendReview, {
+			props: { ...props, destination: 'ywcsb-maaaa-aaaai-q6k7a-cai' },
+			context: mockContext
+		});
+
+		expect(queryByTestId(CYCLES_SENT_TO_CANISTER_WARNING)).toBeNull();
 	});
 });

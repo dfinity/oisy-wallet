@@ -46,7 +46,7 @@ const providers: Record<NetworkId, InfuraErc4626Provider> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, InfuraErc4626Provider>>(
-	(acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraErc4626Provider(infura) }),
+	(acc, network) => ({ ...acc, [network.id]: new InfuraErc4626Provider(network) }),
 	{}
 );
 

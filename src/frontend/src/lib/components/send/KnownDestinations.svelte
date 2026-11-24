@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import KnownDestination from '$lib/components/send/KnownDestination.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,6 +11,7 @@
 	import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
 	import { getNetworkContact } from '$lib/utils/contacts.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		destination: string;
@@ -72,7 +72,7 @@
 <div in:fade>
 	{#if nonNullish(knownDestinations) && filteredKnownDestinations.length > 0}
 		<div class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]" in:fade>
-			<ul class="list-none overflow-y-auto overscroll-contain">
+			<ul class="scroll-fade list-none overflow-y-auto overscroll-contain">
 				{#each filteredKnownDestinations as { address, ...rest } (address)}
 					{@const networkContact = nonNullish(networkContacts)
 						? getNetworkContact({

@@ -1,0 +1,446 @@
+import type { ActiveUserTransactionRef } from '$declarations/backend/backend.did';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import type { Erc20Token } from '$eth/types/erc20';
+import en from '$lib/i18n/en.json';
+import {
+	NEAR_INTENTS_EXTERNAL_REF_KEYS,
+	type NearIntentsSwapDetails,
+	type NearIntentsSwapStatus
+} from '$lib/types/near-intents';
+import { SwapProvider } from '$lib/types/swap';
+import type { EvmSourceTxOutcome } from '$lib/utils/evm-source-tx.utils';
+import {
+	buildNearIntentsSwapTrackingMetadata,
+	isNearIntentsActiveUserTransaction,
+	isNearIntentsDepositExpired,
+	nearIntentsDepositExpiredError,
+	nearIntentsDepositOutcomeToUpdate,
+	nearIntentsStatusError,
+	toNearIntentsActiveUserTransactionStatus,
+	toNearIntentsData,
+	toNearIntentsDisplayRefs,
+	toNearIntentsExternalRefs,
+	toNearIntentsExternalRefsMap,
+	toNearIntentsLearnedRefs
+} from '$lib/utils/near-intents-active-tx.utils';
+import { verifyNearIntentsQuoteSignature } from '$lib/utils/near-intents-quote.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
+import type { SplToken } from '$sol/types/spl';
+import {
+	mockActiveUserTransaction,
+	mockNearIntentsActiveUserTransaction
+} from '$tests/mocks/active-user-transactions.mock';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockNearIntentsStatusPending } from '$tests/mocks/near-intents.mock';
+import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import { mockValidToken } from '$tests/mocks/tokens.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
+import { Principal } from '@icp-sdk/core/principal';
+
+vi.mock('$lib/utils/near-intents-quote.utils', () => ({
+	verifyNearIntentsQuoteSignature: vi.fn()
+}));
+
+const USDC_ETHEREUM = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+const USDC_SOLANA = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+const makeErc20Token = (address: string): Erc20Token => ({
+	...mockValidToken,
+	id: parseTokenId(`Erc20-${address}`),
+	standard: { code: 'erc20' },
+	address,
+	network: ETHEREUM_NETWORK
+});
+
+const makeSplToken = (address: string): SplToken => ({
+	...mockValidSplToken,
+	id: parseTokenId(`Spl-${address}`),
+	address
+});
+
+describe('near-intents-active-tx.utils', () => {
+	describe('isNearIntentsActiveUserTransaction', () => {
+		it('returns true for the NearIntents variant', () => {
+			expect(isNearIntentsActiveUserTransaction(mockNearIntentsActiveUserTransaction)).toBeTruthy();
+		});
+
+		it('returns false for a non-NearIntents variant', () => {
+			expect(isNearIntentsActiveUserTransaction(mockActiveUserTransaction)).toBeFalsy();
+		});
+	});
+
+	describe('toNearIntentsData', () => {
+		it('maps an ERC-20 source and an SPL destination', () => {
+			expect(
+				toNearIntentsData({
+					sourceToken: makeErc20Token(USDC_ETHEREUM),
+					destinationToken: makeSplToken(USDC_SOLANA),
+					amount: 1_000_000n
+				})
+			).toEqual({
+				NearIntents: {
+					source_token: { Erc20: [USDC_ETHEREUM, BigInt(ETHEREUM_NETWORK.chainId)] },
+					dest_token: { SplMainnet: USDC_SOLANA },
+					amount: 1_000_000n,
+					source_address: []
+				}
+			});
+		});
+
+		it('maps a native EVM source to EvmNative and a native SOL destination to SolNativeMainnet', () => {
+			expect(
+				toNearIntentsData({
+					sourceToken: ETHEREUM_TOKEN,
+					destinationToken: SOLANA_TOKEN,
+					amount: 5n
+				})
+			).toEqual({
+				NearIntents: {
+					source_token: { EvmNative: BigInt(ETHEREUM_NETWORK.chainId) },
+					dest_token: { SolNativeMainnet: null },
+					amount: 5n,
+					source_address: []
+				}
+			});
+		});
+
+		it('maps an ICP-side destination to its ICRC ledger', () => {
+			expect(
+				toNearIntentsData({
+					sourceToken: makeErc20Token(USDC_ETHEREUM),
+					destinationToken: mockValidIcToken,
+					amount: 1n
+				})
+			).toEqual({
+				NearIntents: {
+					source_token: { Erc20: [USDC_ETHEREUM, ETHEREUM_NETWORK.chainId] },
+					dest_token: { Icrc: Principal.fromText(mockValidIcToken.ledgerCanisterId) },
+					amount: 1n,
+					source_address: []
+				}
+			});
+		});
+
+		// A deposit from native XRP is an XRP payment, which the backend counts against its address.
+		it('records the source address of a swap from XRP', () => {
+			expect(
+				toNearIntentsData({
+					sourceToken: XRP_TOKEN,
+					destinationToken: ETHEREUM_TOKEN,
+					amount: 10_000_000n,
+					sourceAddress: mockXrpAddress
+				})
+			).toEqual({
+				NearIntents: {
+					source_token: { XrpNativeMainnet: null },
+					dest_token: { EvmNative: BigInt(ETHEREUM_NETWORK.chainId) },
+					amount: 10_000_000n,
+					source_address: [mockXrpAddress]
+				}
+			});
+		});
+
+		it('returns undefined when a token cannot be mapped to a backend TokenId', () => {
+			expect(
+				toNearIntentsData({
+					sourceToken: makeErc20Token(USDC_ETHEREUM),
+					destinationToken: BTC_REGTEST_TOKEN,
+					amount: 1n
+				})
+			).toBeUndefined();
+		});
+	});
+
+	describe('toNearIntentsExternalRefs', () => {
+		it('returns a sorted list of populated key/value pairs', () => {
+			const refs = toNearIntentsExternalRefs({
+				[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO]: 'memo',
+				[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS]: '0xdep'
+			});
+
+			expect(refs).toEqual([
+				{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: '0xdep' },
+				{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO, value: 'memo' }
+			]);
+		});
+
+		it('skips undefined or empty values', () => {
+			const refs = toNearIntentsExternalRefs({
+				[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS]: '0xdep',
+				[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO]: '',
+				[NEAR_INTENTS_EXTERNAL_REF_KEYS.ORIGIN_TX_HASH]: undefined
+			});
+
+			expect(refs).toEqual([
+				{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: '0xdep' }
+			]);
+		});
+	});
+
+	describe('toNearIntentsExternalRefsMap', () => {
+		it('turns the wire array into a key/value lookup map', () => {
+			const refs: ActiveUserTransactionRef[] = [
+				{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: '0xdep' },
+				{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.AMOUNT, value: '0.5' }
+			];
+
+			const map = toNearIntentsExternalRefsMap(refs);
+
+			expect(map[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS]).toBe('0xdep');
+			expect(map[NEAR_INTENTS_EXTERNAL_REF_KEYS.AMOUNT]).toBe('0.5');
+			expect(map[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO]).toBeUndefined();
+		});
+	});
+
+	describe('toNearIntentsDisplayRefs', () => {
+		it('snapshots source/destination symbols, network names and the raw amount', () => {
+			const sourceToken = { ...mockValidToken, symbol: 'USDC' };
+			const destinationToken = { ...SOLANA_TOKEN, symbol: 'SOL' };
+
+			expect(toNearIntentsDisplayRefs({ sourceToken, destinationToken, amount: '1.5' })).toEqual({
+				[NEAR_INTENTS_EXTERNAL_REF_KEYS.AMOUNT]: '1.5',
+				[NEAR_INTENTS_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL]: 'USDC',
+				[NEAR_INTENTS_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL]: sourceToken.network.name,
+				[NEAR_INTENTS_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]: 'SOL',
+				[NEAR_INTENTS_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL]: destinationToken.network.name
+			});
+		});
+	});
+
+	describe('toNearIntentsLearnedRefs', () => {
+		it('extracts origin and destination tx hashes when present', () => {
+			const swapDetails: NearIntentsSwapDetails = {
+				originChainTxHashes: [{ hash: '0xorigin', explorerUrl: 'https://e/0xorigin' }],
+				destinationChainTxHashes: [{ hash: '0xdest', explorerUrl: 'https://e/0xdest' }]
+			};
+
+			expect(toNearIntentsLearnedRefs(swapDetails)).toEqual({
+				[NEAR_INTENTS_EXTERNAL_REF_KEYS.ORIGIN_TX_HASH]: '0xorigin',
+				[NEAR_INTENTS_EXTERNAL_REF_KEYS.DESTINATION_TX_HASH]: '0xdest'
+			});
+		});
+
+		it('returns an empty object when no tx hashes are available', () => {
+			expect(toNearIntentsLearnedRefs({})).toEqual({});
+		});
+	});
+
+	describe('toNearIntentsActiveUserTransactionStatus', () => {
+		it('maps SUCCESS → Succeeded', () => {
+			expect(toNearIntentsActiveUserTransactionStatus('SUCCESS')).toEqual({ Succeeded: null });
+		});
+
+		it('maps REFUNDED and FAILED → Failed', () => {
+			expect(toNearIntentsActiveUserTransactionStatus('REFUNDED')).toEqual({ Failed: null });
+			expect(toNearIntentsActiveUserTransactionStatus('FAILED')).toEqual({ Failed: null });
+		});
+
+		it('maps every in-flight status → Executing (INCOMPLETE_DEPOSIT is NOT terminal)', () => {
+			const inFlight: NearIntentsSwapStatus[] = [
+				'PENDING_DEPOSIT',
+				'KNOWN_DEPOSIT_TX',
+				'INCOMPLETE_DEPOSIT',
+				'PROCESSING'
+			];
+
+			for (const status of inFlight) {
+				expect(toNearIntentsActiveUserTransactionStatus(status)).toEqual({ Executing: null });
+			}
+		});
+	});
+
+	describe('nearIntentsStatusError', () => {
+		it('returns the refunded message for REFUNDED', () => {
+			expect(nearIntentsStatusError('REFUNDED')).toBe(en.swap.error.swap_refunded);
+		});
+
+		it('returns the failed message for FAILED', () => {
+			expect(nearIntentsStatusError('FAILED')).toBe(en.swap.error.failed_unexpectedly);
+		});
+
+		it('returns undefined for non-terminal statuses', () => {
+			expect(nearIntentsStatusError('SUCCESS')).toBeUndefined();
+			expect(nearIntentsStatusError('PROCESSING')).toBeUndefined();
+		});
+	});
+
+	describe('isNearIntentsDepositExpired', () => {
+		const { quoteResponse } = mockNearIntentsStatusPending;
+		const { depositAddress, deadline } = quoteResponse.quote;
+
+		const afterDeadline = new Date(Date.parse(deadline) + 1);
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(true);
+			vi.useFakeTimers().setSystemTime(afterDeadline);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		// `KNOWN_DEPOSIT_TX` follows the hash OISY submits to `/deposit/submit`, so it does not
+		// establish that funds arrived either.
+		it.each<NearIntentsSwapStatus>(['PENDING_DEPOSIT', 'KNOWN_DEPOSIT_TX'])(
+			'is true at %s past the deadline of its verified quote',
+			async (status) => {
+				await expect(
+					isNearIntentsDepositExpired({ status, quoteResponse, depositAddress })
+				).resolves.toBeTruthy();
+
+				expect(verifyNearIntentsQuoteSignature).toHaveBeenCalledExactlyOnceWith(quoteResponse);
+			}
+		);
+
+		it('is false up to the deadline itself', async () => {
+			vi.setSystemTime(new Date(deadline));
+
+			await expect(
+				isNearIntentsDepositExpired({ status: 'PENDING_DEPOSIT', quoteResponse, depositAddress })
+			).resolves.toBeFalsy();
+		});
+
+		it.each<NearIntentsSwapStatus>([
+			'INCOMPLETE_DEPOSIT',
+			'PROCESSING',
+			'SUCCESS',
+			'REFUNDED',
+			'FAILED'
+		])('is false for %s, where a deposit has arrived or the swap ended', async (status) => {
+			await expect(
+				isNearIntentsDepositExpired({ status, quoteResponse, depositAddress })
+			).resolves.toBeFalsy();
+
+			expect(verifyNearIntentsQuoteSignature).not.toHaveBeenCalled();
+		});
+
+		it('is false for a quote of another deposit address', async () => {
+			await expect(
+				isNearIntentsDepositExpired({
+					status: 'PENDING_DEPOSIT',
+					quoteResponse,
+					depositAddress: '0xAnotherDepositAddress'
+				})
+			).resolves.toBeFalsy();
+
+			expect(verifyNearIntentsQuoteSignature).not.toHaveBeenCalled();
+		});
+
+		// A dry quote's signature covers its amounts only, so a dry quote carrying this row's address
+		// and a past deadline would still verify.
+		it('is false for a dry quote, whatever address and deadline it carries', async () => {
+			await expect(
+				isNearIntentsDepositExpired({
+					status: 'PENDING_DEPOSIT',
+					quoteResponse: {
+						...quoteResponse,
+						quoteRequest: { ...quoteResponse.quoteRequest, dry: true }
+					},
+					depositAddress
+				})
+			).resolves.toBeFalsy();
+
+			expect(verifyNearIntentsQuoteSignature).not.toHaveBeenCalled();
+		});
+
+		it('is false when the quote signature does not verify', async () => {
+			vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(false);
+
+			await expect(
+				isNearIntentsDepositExpired({ status: 'PENDING_DEPOSIT', quoteResponse, depositAddress })
+			).resolves.toBeFalsy();
+		});
+
+		it('is false when the deadline cannot be read', async () => {
+			await expect(
+				isNearIntentsDepositExpired({
+					status: 'PENDING_DEPOSIT',
+					quoteResponse: {
+						...quoteResponse,
+						quote: { ...quoteResponse.quote, deadline: 'not-a-date' }
+					},
+					depositAddress
+				})
+			).resolves.toBeFalsy();
+		});
+	});
+
+	describe('nearIntentsDepositExpiredError', () => {
+		it('returns the deposit expired message', () => {
+			expect(nearIntentsDepositExpiredError()).toBe(en.swap.error.near_intents_deposit_expired);
+		});
+	});
+
+	describe('nearIntentsDepositOutcomeToUpdate', () => {
+		it('fails the swap with the replaced-or-dropped message for a replaced deposit', () => {
+			expect(nearIntentsDepositOutcomeToUpdate('replaced')).toEqual({
+				status: { Failed: null },
+				error: en.swap.error.swap_replaced_or_dropped
+			});
+		});
+
+		it('fails the swap with the generic failure message for a reverted deposit', () => {
+			expect(nearIntentsDepositOutcomeToUpdate('reverted')).toEqual({
+				status: { Failed: null },
+				error: en.swap.error.failed_unexpectedly
+			});
+		});
+
+		it.each<EvmSourceTxOutcome>(['pending', 'succeeded', 'unknown'])(
+			'leaves the swap to 1Click for a %s deposit',
+			(outcome) => {
+				expect(nearIntentsDepositOutcomeToUpdate(outcome)).toBeUndefined();
+			}
+		);
+	});
+
+	describe('buildNearIntentsSwapTrackingMetadata', () => {
+		it('reads symbols, network names and amount off the row external_refs snapshot', () => {
+			expect(
+				buildNearIntentsSwapTrackingMetadata({
+					tx: { ...mockNearIntentsActiveUserTransaction, status: { Succeeded: null } }
+				})
+			).toEqual({
+				sourceToken: 'USDC',
+				destinationToken: 'USDC',
+				dApp: SwapProvider.NEAR_INTENTS,
+				tokenAmount: '1',
+				sourceNetwork: 'Ethereum',
+				destinationNetwork: 'Solana'
+			});
+		});
+
+		it('falls back to empty strings when the snapshot refs are missing', () => {
+			expect(
+				buildNearIntentsSwapTrackingMetadata({
+					tx: { ...mockNearIntentsActiveUserTransaction, external_refs: [] }
+				})
+			).toEqual({
+				sourceToken: '',
+				destinationToken: '',
+				dApp: SwapProvider.NEAR_INTENTS,
+				tokenAmount: '',
+				sourceNetwork: '',
+				destinationNetwork: ''
+			});
+		});
+
+		it('includes the error message verbatim when the row carries one', () => {
+			expect(
+				buildNearIntentsSwapTrackingMetadata({
+					tx: {
+						...mockNearIntentsActiveUserTransaction,
+						status: { Failed: null },
+						error: ['boom']
+					}
+				}).error
+			).toBe('boom');
+		});
+	});
+});

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import SendContact from '$lib/components/send/SendContact.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -9,6 +8,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		destination: string;
@@ -51,7 +51,7 @@
 <div in:fade>
 	{#if nonNullish(networkContacts) && Object.keys(filteredNetworkContacts).length > 0}
 		<div class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]" in:fade>
-			<ul class="list-none overflow-y-auto overscroll-contain">
+			<ul class="scroll-fade list-none overflow-y-auto overscroll-contain">
 				{#each Object.values(filteredNetworkContacts) as { contact, address }, index (index)}
 					<SendContact
 						{address}

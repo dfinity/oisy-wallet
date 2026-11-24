@@ -7,6 +7,8 @@ import {
 	PLAUSIBLE_EVENT_VALUES
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
+import { loadNftThumbnail } from '$lib/services/nft-thumbnail.services';
+import { getNftDisplayImageUrl } from '$lib/utils/nft.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -31,8 +33,8 @@ describe('NftCard', () => {
 		vi.clearAllMocks();
 	});
 
-	it('should render nft with metadata', () => {
-		const { container, getByText } = render(NftCard, {
+	it('should render nft with metadata', async () => {
+		const { container, getByText, findByTestId } = render(NftCard, {
 			props: {
 				nft: mockValidErc1155Nft,
 				testId,
@@ -41,9 +43,13 @@ describe('NftCard', () => {
 			}
 		});
 
-		const image: HTMLDivElement | null = container.querySelector(imageSelector);
+		const image = await findByTestId(`${testId}-image`);
 
 		expect(image).toBeInTheDocument();
+
+		assertNonNullish(mockValidErc1155Nft.imageUrl);
+
+		expect(image.style.backgroundImage).toContain(mockValidErc1155Nft.imageUrl);
 
 		const networkLogo: HTMLDivElement | null = container.querySelector(networkLogoSelector);
 
@@ -57,6 +63,27 @@ describe('NftCard', () => {
 
 		expect(getByText(mockValidErc1155Nft.name)).toBeInTheDocument();
 		expect(getByText(`#${mockValidErc1155Nft.id}`)).toBeInTheDocument();
+	});
+
+	it('should render the small copy of an SVG image', async () => {
+		const mockThumbnail = 'data:image/png;base64,dGh1bWJuYWls';
+
+		vi.mocked(loadNftThumbnail).mockResolvedValueOnce(mockThumbnail);
+
+		const { findByTestId } = render(NftCard, {
+			props: {
+				nft: mockValidErc721Nft,
+				testId
+			}
+		});
+
+		const image = await findByTestId(`${testId}-image`);
+
+		expect(image.style.backgroundImage).toContain(mockThumbnail);
+
+		expect(loadNftThumbnail).toHaveBeenCalledExactlyOnceWith(
+			getNftDisplayImageUrl(mockValidErc721Nft)
+		);
 	});
 
 	it('should render image placeholder if no image is defined', () => {
@@ -99,6 +126,8 @@ describe('NftCard', () => {
 		expect(cardElement.getAttribute('class')?.includes(' bg-primary')).toBeTruthy();
 		expect(cardElement.getAttribute('class')?.includes(' group')).toBeFalsy();
 		expect(cardElement.getAttribute('class')?.includes(' hover:bg-primary')).toBeFalsy();
+		// A default card is not interactive, so it does not press either.
+		expect(cardElement).not.toHaveClass('press');
 
 		await rerender({
 			nft: { ...mockValidErc721Nft, imageUrl: undefined },
@@ -109,6 +138,7 @@ describe('NftCard', () => {
 		expect(cardElement.getAttribute('class')?.includes(' bg-primary')).toBeFalsy();
 		expect(cardElement.getAttribute('class')?.includes(' group')).toBeTruthy();
 		expect(cardElement.getAttribute('class')?.includes(' hover:bg-primary')).toBeTruthy();
+		expect(cardElement).toHaveClass('press');
 
 		await rerender({
 			nft: { ...mockValidErc721Nft, imageUrl: undefined },
@@ -119,6 +149,19 @@ describe('NftCard', () => {
 		expect(cardElement.getAttribute('class')?.includes(' bg-primary')).toBeFalsy();
 		expect(cardElement.getAttribute('class')?.includes(' group')).toBeTruthy();
 		expect(cardElement.getAttribute('class')?.includes(' hover:bg-primary')).toBeTruthy();
+	});
+
+	it('should not press an interactive card while it is disabled', () => {
+		const { container } = render(NftCard, {
+			props: {
+				nft: { ...mockValidErc721Nft, imageUrl: undefined },
+				testId,
+				type: 'card-link',
+				disabled: true
+			}
+		});
+
+		expect(container.querySelector('button')).not.toHaveClass('press');
 	});
 
 	it('should track event with spam status on click when isSpam is true', () => {

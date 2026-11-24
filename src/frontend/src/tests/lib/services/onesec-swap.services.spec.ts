@@ -17,6 +17,7 @@ import { activeUserTransactionsStore } from '$lib/stores/active-user-transaction
 import { ONESEC_EXTERNAL_REF_KEYS } from '$lib/types/onesec-swap';
 import { SwapProvider } from '$lib/types/swap';
 import { consoleError } from '$lib/utils/console.utils';
+import * as oneSecUtils from '$lib/utils/onesec-swap.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import {
 	mockActiveUserTransaction,
@@ -207,6 +208,34 @@ describe('onesec-swap.services', () => {
 		mockStep.getLastTransferId.mockReturnValue(undefined);
 		mockExpectedFee.transferFee.mockReturnValue({ inUnits: 1000n });
 		mockExpectedFee.protocolFeeInPercent.mockReturnValue(0.1);
+	});
+
+	it('reports eligible pricing in both 1Sec directions, excluding missing prerequisites', async () => {
+		const onProviderParticipating = vi.fn();
+		await fetchOneSecEvmToIcpQuote({ ...baseEvmQuoteParams, onProviderParticipating });
+		await fetchOneSecIcpToEvmQuote({ ...baseIcpQuoteParams, onProviderParticipating });
+
+		expect(onProviderParticipating.mock.calls).toEqual([
+			[SwapProvider.ONE_SEC],
+			[SwapProvider.ONE_SEC]
+		]);
+
+		onProviderParticipating.mockClear();
+		await fetchOneSecEvmToIcpQuote({
+			...baseEvmQuoteParams,
+			destinationToken: makeIcToken('unsupported-ledger'),
+			onProviderParticipating
+		});
+		await fetchOneSecIcpToEvmQuote({
+			...baseIcpQuoteParams,
+			userEthAddress: undefined,
+			onProviderParticipating
+		});
+		currentIdentity = null;
+		await fetchOneSecEvmToIcpQuote({ ...baseEvmQuoteParams, onProviderParticipating });
+		await fetchOneSecIcpToEvmQuote({ ...baseIcpQuoteParams, onProviderParticipating });
+
+		expect(onProviderParticipating).not.toHaveBeenCalled();
 	});
 
 	describe('fetchOneSecEvmToIcpQuote', () => {
@@ -425,7 +454,7 @@ describe('onesec-swap.services', () => {
 
 				createSpy = vi
 					.spyOn(activeUserTransactionsServices, 'createActiveUserTransaction')
-					.mockResolvedValue();
+					.mockResolvedValue(mockActiveUserTransaction);
 				updateSpy = vi
 					.spyOn(activeUserTransactionsServices, 'updateActiveUserTransaction')
 					.mockResolvedValue();
@@ -452,6 +481,35 @@ describe('onesec-swap.services', () => {
 						])
 					})
 				);
+			});
+
+			it('still runs the in-session closer when the row payload cannot be built', async () => {
+				const dataSpy = vi.spyOn(oneSecUtils, 'toOneSecIcpToEvmData').mockReturnValue(undefined);
+
+				try {
+					mockPlan.nextStepToRun
+						.mockReturnValueOnce(mockStep)
+						.mockReturnValueOnce(mockStep)
+						.mockReturnValue(undefined);
+					mockStep.index.mockReturnValueOnce(0).mockReturnValueOnce(1);
+					mockStep.run
+						.mockResolvedValueOnce({ state: 'succeeded' })
+						.mockResolvedValueOnce({ state: 'succeeded' });
+					mockStep.getTransferId.mockReturnValueOnce(undefined).mockReturnValueOnce({ id: 42n });
+
+					await executeOneSecIcpToEvmBridge({ ...baseIcpToEvmParams, swapId });
+
+					expect(createSpy).not.toHaveBeenCalled();
+
+					await vi.waitFor(() => {
+						expect(updateSpy.mock.calls.at(-1)?.[0]).toMatchObject({
+							id: swapId,
+							status: { Succeeded: null }
+						});
+					});
+				} finally {
+					dataSpy.mockRestore();
+				}
 			});
 
 			it('does not create a row when a foreground step fails', async () => {
@@ -623,7 +681,7 @@ describe('onesec-swap.services', () => {
 
 				createSpy = vi
 					.spyOn(activeUserTransactionsServices, 'createActiveUserTransaction')
-					.mockResolvedValue();
+					.mockResolvedValue(mockActiveUserTransaction);
 				updateSpy = vi
 					.spyOn(activeUserTransactionsServices, 'updateActiveUserTransaction')
 					.mockResolvedValue();
@@ -881,7 +939,7 @@ describe('onesec-swap.services', () => {
 			vi.spyOn(
 				activeUserTransactionsServices,
 				'applyActiveUserTransactionPollUpdate'
-			).mockResolvedValue();
+			).mockResolvedValue(true);
 
 			await pollOneSecActiveUserTransactions({
 				identity: mockIdentity,
@@ -901,7 +959,7 @@ describe('onesec-swap.services', () => {
 			]);
 			const applySpy = vi
 				.spyOn(activeUserTransactionsServices, 'applyActiveUserTransactionPollUpdate')
-				.mockResolvedValue();
+				.mockResolvedValue(true);
 
 			await pollOneSecActiveUserTransactions({
 				identity: mockIdentity,
@@ -947,7 +1005,7 @@ describe('onesec-swap.services', () => {
 			});
 			const applySpy = vi
 				.spyOn(activeUserTransactionsServices, 'applyActiveUserTransactionPollUpdate')
-				.mockResolvedValue();
+				.mockResolvedValue(true);
 
 			await pollOneSecActiveUserTransactions({
 				identity: mockIdentity,
@@ -971,7 +1029,7 @@ describe('onesec-swap.services', () => {
 			});
 			const applySpy = vi
 				.spyOn(activeUserTransactionsServices, 'applyActiveUserTransactionPollUpdate')
-				.mockResolvedValue();
+				.mockResolvedValue(true);
 
 			await pollOneSecActiveUserTransactions({
 				identity: mockIdentity,
@@ -1058,7 +1116,7 @@ describe('onesec-swap.services', () => {
 					.mockResolvedValue();
 				const applySpy = vi
 					.spyOn(activeUserTransactionsServices, 'applyActiveUserTransactionPollUpdate')
-					.mockResolvedValue();
+					.mockResolvedValue(true);
 
 				await pollOneSecActiveUserTransactions({
 					identity: mockIdentity,
@@ -1169,7 +1227,7 @@ describe('onesec-swap.services', () => {
 				vi.spyOn(
 					activeUserTransactionsServices,
 					'applyActiveUserTransactionPollUpdate'
-				).mockResolvedValue();
+				).mockResolvedValue(true);
 
 				await pollOneSecActiveUserTransactions({
 					identity: mockIdentity,
@@ -1252,7 +1310,7 @@ describe('onesec-swap.services', () => {
 				vi.spyOn(
 					activeUserTransactionsServices,
 					'applyActiveUserTransactionPollUpdate'
-				).mockResolvedValue();
+				).mockResolvedValue(true);
 
 				await pollOneSecActiveUserTransactions({
 					identity: mockIdentity,

@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { slide } from 'svelte/transition';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { send as executeSend } from '$eth/services/send.services';
@@ -14,6 +13,7 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isEthAddress } from '$eth/utils/account.utils';
+	import { isSendOutcomeUnknown, toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -38,6 +38,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -48,6 +49,7 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		nativeEthereumToken: Token;
@@ -56,7 +58,9 @@
 		sourceNetwork: EthereumNetwork;
 		sendCompleted: boolean;
 		sendEnabled: boolean;
+		sendOutcomeUnknown?: boolean;
 		onSendCompleted: () => void;
+		onSendOutcomeUnknown: () => void;
 	}
 
 	let {
@@ -66,7 +70,9 @@
 		sourceNetwork,
 		sendCompleted,
 		sendEnabled,
-		onSendCompleted
+		sendOutcomeUnknown = false,
+		onSendCompleted,
+		onSendOutcomeUnknown
 	}: Props = $props();
 
 	const {
@@ -148,8 +154,13 @@
 
 	let invalidDestination = $derived(isNullishOrEmpty(destination) || !isEthAddress(destination));
 
+	// The review names the token's network, so a send prepared for any other network would be signed
+	// for a chain the user never saw.
+	let networkMismatch = $derived(sourceNetwork.id !== $sendTokenNetworkId);
+
 	let invalid = $derived(
 		!sendEnabled ||
+			networkMismatch ||
 			invalidDestination ||
 			notEmptyString(insufficientFundsErrorMessage) ||
 			isNullish(amount) ||
@@ -169,6 +180,10 @@
 		});
 
 		if (isNullish($authIdentity)) {
+			return;
+		}
+
+		if (networkMismatch) {
 			return;
 		}
 
@@ -259,10 +274,18 @@
 				metadata: sendTrackingEventMetadata
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
+			toastEthereumTransactionError({
+				err,
+				fallbackMsg: $i18n.send.error.unexpected,
+				token: $sendToken,
+				context: PLAUSIBLE_EVENT_CONTEXTS.AI_ASSISTANT
 			});
+
+			// A transaction that may have reached the network is not offered again: sent again, it
+			// would be signed with the next nonce, and both could execute.
+			if (isSendOutcomeUnknown(err)) {
+				onSendOutcomeUnknown();
+			}
 		}
 	};
 </script>
@@ -286,7 +309,11 @@
 		</EthFeeContext>
 	</div>
 
-	{#if !sendCompleted}
+	{#if sendOutcomeUnknown}
+		<p class="text-center text-sm text-warning-primary">
+			{$i18n.send.error.ethereum_transaction_unconfirmed}
+		</p>
+	{:else if !sendCompleted}
 		{#if notEmptyString(insufficientFundsErrorMessage) || invalidDestination}
 			<p class="mb-2 text-center text-sm text-error-primary" transition:slide={SLIDE_DURATION}>
 				{notEmptyString(insufficientFundsErrorMessage)

@@ -5,6 +5,7 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
+	import NftThumbnail from '$lib/components/nfts/NftThumbnail.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { MediaStatusEnum } from '$lib/enums/media-status';
 	import {
@@ -69,10 +70,11 @@
 </script>
 
 <button
-	class="group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300"
+	class={`group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-[translate,scale,background-color] duration-150 ease-out ${disabled ? '' : 'press'}`}
 	class:cursor-not-allowed={disabled}
 	class:hover:-translate-y-1={!disabled}
 	class:hover:bg-primary={!disabled}
+	{disabled}
 	onclick={onClick}
 >
 	<span class="relative block h-full w-full">
@@ -101,13 +103,17 @@
 
 					{#if index < 4 && nonNullish(nftDisplayImageUrl)}
 						<div class="relative aspect-square overflow-hidden rounded-lg bg-secondary-alt">
-							<BgImg
-								imageUrl={nftDisplayImageUrl}
-								shadow="inset"
-								size="cover"
-								styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
-								testId={`${testId}-image-${index}`}
-							/>
+							<NftThumbnail imageUrl={nftDisplayImageUrl}>
+								{#snippet children({ imageUrl })}
+									<BgImg
+										{imageUrl}
+										shadow="inset"
+										size="cover"
+										styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
+										testId={`${testId}-image-${index}`}
+									/>
+								{/snippet}
+							</NftThumbnail>
 						</div>
 					{/if}
 				{/each}

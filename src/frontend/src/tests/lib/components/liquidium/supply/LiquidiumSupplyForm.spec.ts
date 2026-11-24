@@ -1,4 +1,5 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import LiquidiumSupplyForm from '$lib/components/liquidium/supply/LiquidiumSupplyForm.svelte';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { LiquidiumMarket } from '$lib/types/liquidium';
@@ -84,6 +85,125 @@ describe('LiquidiumSupplyForm', () => {
 		});
 
 		expect(container).not.toHaveTextContent(en.liquidium.text.insufficient_funds_for_fee);
+	});
+
+	it('shows the minimum supply for the asset', () => {
+		const { container } = render(LiquidiumSupplyForm, {
+			props: baseProps,
+			context: mockContext()
+		});
+
+		expect(container).toHaveTextContent(en.liquidium.text.minimum_supply);
+		expect(container).toHaveTextContent('0.000051 BTC');
+	});
+
+	it('hides the minimum supply row for an asset without a protocol minimum', () => {
+		const { container } = render(LiquidiumSupplyForm, {
+			props: { ...baseProps, market: { ...market, asset: 'UNLISTED' } },
+			context: mockContext()
+		});
+
+		expect(container).not.toHaveTextContent(en.liquidium.text.minimum_supply);
+	});
+
+	it('rejects an amount below the protocol deposit minimum before the rail validator', () => {
+		const railValidate = vi.fn(() => new Error(en.liquidium.text.insufficient_funds_for_fee));
+
+		const { container } = render(LiquidiumSupplyForm, {
+			props: { ...baseProps, amount: 0.00005, onCustomErrorValidate: railValidate },
+			context: mockContext()
+		});
+
+		expect(container).toHaveTextContent(en.liquidium.text.supply_below_minimum);
+		expect(container).not.toHaveTextContent(en.liquidium.text.insufficient_funds_for_fee);
+	});
+
+	it('accepts an amount at the protocol deposit minimum', () => {
+		const { container } = render(LiquidiumSupplyForm, {
+			props: { ...baseProps, amount: 0.000051 },
+			context: mockContext()
+		});
+
+		expect(container).not.toHaveTextContent(en.liquidium.text.supply_below_minimum);
+	});
+
+	describe('with a quoted minimum (native SOL)', () => {
+		const solMarket: LiquidiumMarket = {
+			...market,
+			poolId: 'pool-sol',
+			asset: 'SOL',
+			chain: 'SOL'
+		};
+
+		const solContext = () =>
+			new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token: SOLANA_TOKEN })]]);
+
+		// A gross minimum of 0.02 SOL less a 0.002 SOL provider fee: 0.018 SOL to type.
+		const solProps = {
+			...baseProps,
+			market: solMarket,
+			inflowFee: 2_000_000n,
+			minimumSendAmount: 20_000_000n
+		};
+
+		it('shows the minimum net of the provider fee', () => {
+			const { container } = render(LiquidiumSupplyForm, {
+				props: solProps,
+				context: solContext()
+			});
+
+			expect(container).toHaveTextContent(en.liquidium.text.minimum_supply);
+			expect(container).toHaveTextContent('0.018 SOL');
+		});
+
+		it('rejects an amount whose transfer would be below the minimum', () => {
+			const { container } = render(LiquidiumSupplyForm, {
+				props: { ...solProps, amount: 0.017 },
+				context: solContext()
+			});
+
+			expect(container).toHaveTextContent(en.liquidium.text.supply_below_minimum);
+		});
+
+		it('accepts an amount whose transfer meets the minimum', () => {
+			const { container } = render(LiquidiumSupplyForm, {
+				props: { ...solProps, amount: 0.018 },
+				context: solContext()
+			});
+
+			expect(container).not.toHaveTextContent(en.liquidium.text.supply_below_minimum);
+		});
+
+		// Liquidium's quote today: a 1,884,122-lamport fee, so the minimum is not a round number.
+		it('shows a non-round minimum at full precision, which the check then accepts', () => {
+			const quote = { ...solProps, inflowFee: 1_884_122n };
+
+			const { container } = render(LiquidiumSupplyForm, {
+				props: { ...quote, amount: 0.018115878 },
+				context: solContext()
+			});
+
+			expect(container).toHaveTextContent('0.018115878 SOL');
+			expect(container).not.toHaveTextContent(en.liquidium.text.supply_below_minimum);
+		});
+
+		it('rejects an amount one lamport below a non-round minimum', () => {
+			const { container } = render(LiquidiumSupplyForm, {
+				props: { ...solProps, inflowFee: 1_884_122n, amount: 0.018115877 },
+				context: solContext()
+			});
+
+			expect(container).toHaveTextContent(en.liquidium.text.supply_below_minimum);
+		});
+
+		it('shows no minimum before the quote', () => {
+			const { container } = render(LiquidiumSupplyForm, {
+				props: { ...solProps, inflowFee: undefined, minimumSendAmount: undefined },
+				context: solContext()
+			});
+
+			expect(container).not.toHaveTextContent(en.liquidium.text.minimum_supply);
+		});
 	});
 
 	it('surfaces a retry message when the provider-fee estimate is unavailable', () => {

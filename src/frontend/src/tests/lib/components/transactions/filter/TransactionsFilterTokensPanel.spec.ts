@@ -71,6 +71,12 @@ describe('TransactionsFilterTokensPanel', () => {
 		expect(symbols).toEqual(['ALP', 'BTA', 'GMA']);
 	});
 
+	it('fades the edges of the scrolling list', () => {
+		const { getByRole } = render(TransactionsFilterTokensPanel);
+
+		expect(getByRole('list')).toHaveClass('scroll-fade');
+	});
+
 	it('sorts by symbol even when the alphabetical order of names disagrees', () => {
 		// Names are deliberately reverse-ordered vs. symbols so that a
 		// regression to name-based sorting would flip the rendered order.

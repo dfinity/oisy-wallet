@@ -32,7 +32,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
+	import { liquidiumMarketToken, liquidiumOpeningDebtFactor } from '$lib/utils/liquidium.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
@@ -79,7 +79,13 @@
 	// Single source of the aggregate preview; with no amount it reflects the current LTV / health.
 	let preview = $derived(
 		nonNullish($liquidiumPortfolio)
-			? computeLiquidiumBorrowPreview({ portfolio: $liquidiumPortfolio, newBorrowUsd })
+			? computeLiquidiumBorrowPreview({
+					portfolio: $liquidiumPortfolio,
+					newBorrowUsd,
+					openingDebtFactor: nonNullish(selectedMarket)
+						? liquidiumOpeningDebtFactor(selectedMarket)
+						: 1
+				})
 			: undefined
 	);
 
@@ -89,14 +95,17 @@
 			: undefined
 	);
 
-	// Borrowed asset is delivered to the user's own oisy address on the pool's chain:
-	// native BTC address for a BTC pool, ICRC account for an ICP-chain pool, else ETH.
+	// Borrowed asset is delivered to the user's own oisy address on the rail's chain: native BTC
+	// address, ICRC account for an ICP rail, ETH address. Any other chain has no receiver yet, so
+	// it can never fall through to an address of another chain.
 	let receiverAddress = $derived(
 		selectedMarket?.chain === 'BTC'
 			? $btcAddressMainnet
 			: selectedMarket?.chain === 'ICP'
 				? $icrcAccountIdentifierText
-				: $ethAddress
+				: selectedMarket?.chain === 'ETH'
+					? $ethAddress
+					: undefined
 	);
 
 	const goToStep = (stepName: WizardStepsLiquidiumBorrow) => {

@@ -1,8 +1,61 @@
 import { consoleError } from '$lib/utils/console.utils';
 import { isNullish } from '@dfinity/utils';
-import DOMPurify from 'dompurify';
+import DOMPurify, { type Config } from 'dompurify';
 
 let domPurify: typeof DOMPurify | undefined = undefined;
+
+/**
+ * Markup a text authored by a third party is allowed to produce.
+ *
+ * It covers what Markdown can render and nothing else. Notably, form controls are excluded so that
+ * such a text can never contribute a control to one of our flows, and `style` is excluded - both as
+ * a tag and as an attribute - so that it can never hide or repaint what we display next to it.
+ */
+const UNTRUSTED_CONFIG: Config = {
+	ALLOWED_TAGS: [
+		'a',
+		'b',
+		'blockquote',
+		'br',
+		'code',
+		'del',
+		'em',
+		'h1',
+		'h2',
+		'h3',
+		'h4',
+		'h5',
+		'h6',
+		'hr',
+		'i',
+		'li',
+		'ol',
+		'p',
+		'pre',
+		's',
+		'strong',
+		'sub',
+		'sup',
+		'table',
+		'tbody',
+		'td',
+		'th',
+		'thead',
+		'tr',
+		'ul'
+	],
+	ALLOWED_ATTR: ['align', 'colspan', 'href', 'lang', 'rowspan', 'title']
+};
+
+/**
+ * DOMPurify's defaults, without `style` elements.
+ *
+ * A `style` element applies to the whole page rather than to the text it comes with, so it could
+ * restyle any view open next to that text. None of our texts uses one.
+ */
+const DEFAULT_CONFIG: Config = {
+	FORBID_TAGS: ['style']
+};
 
 /**
  * A workaround to preserve target="_blank" attribute from sanitizer.
@@ -13,11 +66,16 @@ let domPurify: typeof DOMPurify | undefined = undefined;
 const restoreTargetAttributeHook = (node: Element) => {
 	if (node.getAttribute('data-target') === 'blank') {
 		// Use provided "rel" value if it contains "noopener" or "noreferrer" (https://web.dev/external-anchors-use-rel-noopener/)
-		// otherwise add "noopener".
+		// otherwise fall back to the pair we require on external links everywhere else.
+		// `sanitizeUntrusted` drops "rel" as an unlisted attribute, so a third-party link always
+		// lands on that fallback rather than on a value its author picked.
 		// split() to avoid invalid values (e.g. "noopenernoreferrer")
 		const originRel = node.getAttribute('rel') ?? '';
 		const parts = originRel.split(/\s+/);
-		const rel = parts.includes('noopener') || parts.includes('noreferrer') ? originRel : 'noopener';
+		const rel =
+			parts.includes('noopener') || parts.includes('noreferrer')
+				? originRel
+				: 'noopener noreferrer';
 
 		node.setAttribute('target', '_blank');
 		node.setAttribute('rel', rel);
@@ -37,10 +95,7 @@ const flagTargetAttributeHook = (node: Element) => {
 	return node;
 };
 
-/**
- * Sanitize a text with DOMPurify.
- */
-export const sanitize = (text: string): string => {
+const sanitizeWithConfig = ({ text, config }: { text: string; config: Config }): string => {
 	try {
 		// DOMPurify initialization
 		if (isNullish(domPurify)) {
@@ -51,13 +106,43 @@ export const sanitize = (text: string): string => {
 			domPurify.addHook('afterSanitizeAttributes', restoreTargetAttributeHook);
 		}
 
-		return domPurify.sanitize(text);
+		return domPurify.sanitize(text, config);
 	} catch (err: unknown) {
 		consoleError('Failed to sanitize HTML content', err);
 	}
 
 	return '';
 };
+
+/**
+ * Sanitize a text with DOMPurify's defaults, without `style` elements (see `DEFAULT_CONFIG`).
+ *
+ * For a text we do not author ourselves - e.g. anything derived from data a third party supplies -
+ * use `sanitizeUntrusted` instead.
+ */
+export const sanitize = (text: string): string =>
+	sanitizeWithConfig({ text, config: DEFAULT_CONFIG });
+
+/**
+ * Sanitize a text authored by a third party, keeping only the markup listed in `UNTRUSTED_CONFIG`.
+ */
+export const sanitizeUntrusted = (text: string): string =>
+	sanitizeWithConfig({ text, config: UNTRUSTED_CONFIG });
+
+/**
+ * Escape a value so that it reads as plain text once placed into HTML.
+ *
+ * Use it for a value we do not author - e.g. a token symbol or an NFT collection name - before it is
+ * substituted into a translated text that `Html` renders. Sanitizing alone is not enough there: even
+ * `sanitizeUntrusted` keeps headings, paragraphs and links, which such a value must never add.
+ */
+export const escapeHtml = (text: string): string =>
+	text
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
 
 let elementsCounters: Record<string, number> = {};
 

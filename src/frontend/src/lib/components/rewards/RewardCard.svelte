@@ -40,7 +40,11 @@
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 </script>
 
-<button class="flex flex-col" data-tid={testId} {onclick}>
+<button
+	class="flex flex-col transition-[scale] duration-150 ease-out press"
+	data-tid={testId}
+	{onclick}
+>
 	<div class="-mb-7">
 		<div class="relative max-h-66 overflow-hidden rounded-2xl">
 			<Img

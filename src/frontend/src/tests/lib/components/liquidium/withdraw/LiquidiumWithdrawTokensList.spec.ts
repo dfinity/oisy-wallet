@@ -1,5 +1,9 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
+import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import LiquidiumWithdrawTokensList from '$lib/components/liquidium/withdraw/LiquidiumWithdrawTokensList.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { MODAL_TOKENS_LIST } from '$lib/constants/test-ids.constants';
@@ -8,24 +12,16 @@ import {
 	initModalTokensListContext,
 	MODAL_TOKENS_LIST_CONTEXT_KEY
 } from '$lib/stores/modal-tokens-list.store';
+import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockNetworksSettings,
+	mockUserProfile,
+	mockUserSettings
+} from '$tests/mocks/user-profile.mock';
+import { toNullable } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
-
-// ck twins so the ICP (ck) rail resolves a display token in the picker; the native rails
-// resolve statically and need no token list.
-vi.mock('$lib/derived/tokens.derived', async (importOriginal) => {
-	const { readable } = await import('svelte/store');
-	const { mockValidIcCkToken } = await import('$tests/mocks/ic-tokens.mock');
-	const { parseTokenId } = await import('$lib/validation/token.validation');
-
-	return {
-		...(await importOriginal<Record<string, unknown>>()),
-		tokens: readable([
-			{ ...mockValidIcCkToken, id: parseTokenId('ckBTC'), symbol: 'ckBTC' },
-			{ ...mockValidIcCkToken, id: parseTokenId('ckUSDC'), symbol: 'ckUSDC' }
-		])
-	};
-});
 
 describe('LiquidiumWithdrawTokensList', () => {
 	const btcReserve: LiquidiumReserve = {
@@ -70,8 +66,26 @@ describe('LiquidiumWithdrawTokensList', () => {
 		[MODAL_TOKENS_LIST_CONTEXT_KEY, initModalTokensListContext({ tokens: [] })]
 	]);
 
+	// The picker offers only rails whose token the user has enabled, so the ERC-20 rail needs its
+	// runtime token (suggested → enabled by default) and the ICP rail its ck twin.
 	beforeEach(() => {
 		liquidiumStore.reset();
+		userProfileStore.reset();
+		erc20DefaultTokensStore.reset();
+		icrcCustomTokensStore.resetAll();
+
+		erc20DefaultTokensStore.set([USDC_TOKEN]);
+		icrcCustomTokensStore.setAll([
+			{
+				data: {
+					...mockValidIcCkToken,
+					symbol: 'ckBTC',
+					network: ICP_TOKEN.network,
+					enabled: true
+				} as IcrcCustomToken,
+				certified: false
+			}
+		]);
 	});
 
 	it('lists the supplied positions except the selected one', () => {
@@ -166,5 +180,41 @@ describe('LiquidiumWithdrawTokensList', () => {
 
 		expect(queryByText(BTC_MAINNET_TOKEN.symbol)).toBeNull();
 		expect(getByText('ckBTC')).toBeInTheDocument();
+	});
+
+	it('omits the delivery rails of the networks the user disabled, keeping their ck twins', () => {
+		userProfileStore.set({
+			certified: true,
+			profile: {
+				...mockUserProfile,
+				settings: toNullable({
+					...mockUserSettings,
+					networks: {
+						...mockNetworksSettings,
+						networks: [
+							[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
+							[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }]
+						]
+					}
+				})
+			}
+		});
+
+		liquidiumStore.set({
+			markets: [],
+			portfolio: portfolio([btcReserve, usdcReserve]),
+			assetPrices: {}
+		});
+
+		const { getByText, queryByText } = render(LiquidiumWithdrawTokensList, {
+			props: { onSelectReserve: () => {}, onClose: () => {} },
+			context
+		});
+
+		// Only the ck rail of the BTC position survives; the ERC-20 rail of the USDC position goes
+		// with the Ethereum network, and its ck twin is not enabled here.
+		expect(getByText('ckBTC')).toBeInTheDocument();
+		expect(queryByText(BTC_MAINNET_TOKEN.symbol)).toBeNull();
+		expect(queryByText(USDC_TOKEN.symbol)).toBeNull();
 	});
 });

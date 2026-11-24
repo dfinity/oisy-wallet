@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import Controls from '$lib/components/carousel/Controls.svelte';
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
 	import {
@@ -12,6 +11,7 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		autoplay?: number;
@@ -48,6 +48,10 @@
 	let slides = $state<Node[] | undefined>();
 	let currentSlide = $state(0);
 	let totalSlides = $derived(slides?.length ?? 0);
+	// One slide or none: the indicators and controls are hidden, so the bottom
+	// padding that holds them (`pb-10`) shrinks to the top one (`pb-3`). One class
+	// or the other, never both: with both, `pb-10` wins in the built CSS.
+	let singleSlide = $derived(nonNullish(slides) && slides.length <= 1);
 
 	/**
 	 * Autoplay timer
@@ -285,8 +289,7 @@
 <svelte:window onresize={onResize} />
 
 <div
-	class={`carousel-container ${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pt-3 pb-10 shadow-sm`}
-	class:pb-3={nonNullish(slides) && slides.length <= 1}
+	class={`carousel-container ${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pt-3 shadow-sm ${singleSlide ? 'pb-3' : 'pb-10'}`}
 	data-tid={CAROUSEL_CONTAINER}
 	out:slide={SLIDE_PARAMS}
 >

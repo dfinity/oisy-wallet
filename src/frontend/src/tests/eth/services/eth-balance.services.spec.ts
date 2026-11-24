@@ -12,6 +12,7 @@ import { infuraProviders } from '$eth/providers/infura.providers';
 import {
 	loadErc20Balances,
 	loadEthBalances,
+	readEthBalance,
 	reloadEthereumBalance
 } from '$eth/services/eth-balance.services';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -28,10 +29,14 @@ import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
 import { get } from 'svelte/store';
 
+// `JsonRpcProvider` and `Network` are needed even though this suite only exercises Infura
+// chains: the registry is built eagerly over every supported network, and the ones Infura does
+// not host take the fallback transport. Both share one implementation, as the shared setup mock
+// does — nothing here tells the two apart.
 vi.mock('ethers/providers', () => {
 	const provider = vi.fn();
 	provider.prototype.getBalance = vi.fn();
-	return { InfuraProvider: provider };
+	return { InfuraProvider: provider, JsonRpcProvider: provider, Network: vi.fn() };
 });
 
 vi.mock('ethers/contract', () => {
@@ -337,6 +342,38 @@ describe('eth-balance.services', () => {
 
 			expect(mockGetBalance).toHaveBeenCalledOnce();
 			expect(mockGetBalance).toHaveBeenNthCalledWith(1, mockEthAddress);
+		});
+
+		it('hands the native balance back before the store has it', async () => {
+			// A caller capping an amount right after the read cannot wait for the frame `batchSet`
+			// defers the store write to, so the value it needs has to come from the read itself.
+			const staleSample = { data: mockBalance + 1_000n, certified: false };
+
+			balancesStore.set({ id: ETHEREUM_TOKEN_ID, data: staleSample });
+
+			const balance = await readEthBalance({
+				networkId: ETHEREUM_NETWORK_ID,
+				tokenId: ETHEREUM_TOKEN_ID
+			});
+
+			expect(balance).toBe(mockBalance);
+
+			expect(get(balancesStore)?.[ETHEREUM_TOKEN_ID]).toEqual(staleSample);
+
+			await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+			expect(get(balancesStore)?.[ETHEREUM_TOKEN_ID]).toEqual({
+				certified: false,
+				data: mockBalance
+			});
+		});
+
+		it('hands back nothing when the read fails', async () => {
+			mockGetBalance.mockRejectedValueOnce(new Error('rpc down'));
+
+			await expect(
+				readEthBalance({ networkId: ETHEREUM_NETWORK_ID, tokenId: ETHEREUM_TOKEN_ID })
+			).resolves.toBeUndefined();
 		});
 
 		it('should load balance for a non-native Ethereum token', async () => {

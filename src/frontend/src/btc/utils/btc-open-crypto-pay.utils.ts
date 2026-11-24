@@ -82,7 +82,8 @@ export const validateBtcTransfer = ({
 		satoshisAmount: amount,
 		utxosFee: {
 			utxos: btcFee.utxos,
-			feeSatoshis: btcFee.feeSatoshis
+			feeSatoshis: btcFee.feeSatoshis,
+			feeRateMiliSatoshisPerVByte: btcFee.feeRateMiliSatoshisPerVByte
 		}
 	};
 };

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { isDesktop } from '$lib/utils/device.utils';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		value: string;

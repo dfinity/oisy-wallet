@@ -14,6 +14,7 @@
 		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { isSendOutcomeUnknown } from '$eth/utils/eth-error.utils';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -28,16 +29,21 @@
 	import { WizardStepsLiquidiumRepay } from '$lib/enums/wizard-steps';
 	import {
 		computeLiquidiumRepayPreview,
-		executeLiquidiumRepay
+		executeLiquidiumRepay,
+		holdLiquidiumRepayUntilMined,
+		liquidiumRepayCapError,
+		liquidiumRepaySpendable
 	} from '$lib/services/liquidium-repay.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { liquidiumUnminedRepaysStore } from '$lib/stores/liquidium-unmined-repays.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 	import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { consoleError } from '$lib/utils/console.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -47,6 +53,9 @@
 		amount: OptionAmount;
 		repayProgressStep: string;
 		maxRepay?: bigint;
+		maxRepayUnavailable?: boolean;
+		// Net amount of this pool's repays still settling.
+		pendingRepay?: bigint;
 		inflowFee?: bigint;
 		inflowFeeUnavailable?: boolean;
 		currentStep?: WizardStep;
@@ -62,6 +71,8 @@
 		amount = $bindable(),
 		repayProgressStep = $bindable(),
 		maxRepay,
+		maxRepayUnavailable,
+		pendingRepay = ZERO,
 		inflowFee,
 		inflowFeeUnavailable,
 		currentStep,
@@ -83,10 +94,12 @@
 	);
 
 	// Pairwise USD from the position itself (no asset-price dependency): the repaid share of the
-	// position's debt. Repaying improves the (aggregate) projected health factor.
+	// position's debt, including repays still settling. Repaying improves the (aggregate) projected
+	// health factor.
 	let repayUsd = $derived(
-		reserve.borrowed > ZERO && nonNullish(parsedAmount)
-			? (Number(parsedAmount) / Number(reserve.borrowed)) * reserve.borrowedUsd
+		reserve.borrowed > ZERO
+			? (Number((parsedAmount ?? ZERO) + pendingRepay) / Number(reserve.borrowed)) *
+					reserve.borrowedUsd
 			: 0
 	);
 
@@ -108,8 +121,15 @@
 		isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)
 	);
 
+	// For the gas check of a token repay: the native balance without the gas of repays not yet mined.
 	let nativeFeeBalance = $derived(
-		nonNullish(nativeEthereumToken) ? $balancesStore?.[nativeEthereumToken.id]?.data : undefined
+		nonNullish(nativeEthereumToken)
+			? liquidiumRepaySpendable({
+					balance: $balancesStore?.[nativeEthereumToken.id]?.data,
+					tokenId: nativeEthereumToken.id,
+					unminedRepays: $liquidiumUnminedRepaysStore
+				}).spendable
+			: undefined
 	);
 
 	$effect(() => {
@@ -137,8 +157,23 @@
 
 	const { maxGasFee } = ethFeeContext;
 
+	// A repay just broadcast is still in the balances until it is mined and they are reloaded: its
+	// value in the send token's, its gas in the native token's. Both "Max" and the balance check
+	// spend what is left without it. The reservation is the one the form makes from the send
+	// balance: the provider fee, and the gas for a native send.
+	let { spendable: spendableBalance, maxSpendable } = $derived(
+		liquidiumRepaySpendable({
+			balance: $sendBalance,
+			tokenId: $sendTokenId,
+			unminedRepays: $liquidiumUnminedRepaysStore,
+			reserved: nonNullish(inflowFee)
+				? inflowFee + (isNativeSend ? ($maxGasFee ?? ZERO) : ZERO)
+				: undefined
+		})
+	);
+
 	let validateRepayAmount = $derived.by(() => {
-		const balance = $sendBalance;
+		const balance = spendableBalance;
 		const inflow = inflowFee;
 		const gasFee = $maxGasFee;
 		const nativeBalance = nativeFeeBalance;
@@ -184,10 +219,33 @@
 			return;
 		}
 
+		// Review can outlive the cap (a repay that settles refetches it; a new pending one lowers
+		// it), so it is re-checked at the point of broadcast rather than trusted from the form.
+		const capError = liquidiumRepayCapError({
+			amount: parsedAmount,
+			maxRepay,
+			pendingRepay,
+			reserve,
+			i18n: $i18n
+		});
+
+		if (nonNullish(capError)) {
+			toastsError({ msg: { text: capError.message } });
+			return;
+		}
+
 		const { maxFeePerGas, maxPriorityFeePerGas, gas } = $feeStore;
 
 		if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
 			toastsError({ msg: { text: $i18n.send.assertion.max_gas_fee_per_gas_undefined } });
+			return;
+		}
+
+		const gasFee = $maxGasFee;
+		const feeToken = nativeEthereumToken;
+
+		if (isNullish(gasFee) || isNullish(feeToken)) {
+			toastsError({ msg: { text: $i18n.send.assertion.gas_fees_not_defined } });
 			return;
 		}
 
@@ -207,6 +265,8 @@
 				displayAmount: `${amount}`,
 				progress: (step) => (repayProgressStep = step),
 				broadcast: async ({ target, amount: transferAmount }) => {
+					const unmined = $balancesStore;
+
 					const { hash } = await send({
 						identity: $authIdentity,
 						from: $ethAddress,
@@ -219,6 +279,15 @@
 						gas
 					});
 
+					holdLiquidiumRepayUntilMined({
+						hash,
+						token: $sendToken,
+						amount: transferAmount,
+						feeToken,
+						gasFee,
+						unmined
+					}).catch(consoleError);
+
 					return hash;
 				}
 			});
@@ -227,6 +296,19 @@
 
 			setTimeout(onClose, 750);
 		} catch (err: unknown) {
+			// A repayment that may have reached the network is not offered again from the review: sent
+			// again, it would be signed with the next nonce, and both could execute.
+			if (isSendOutcomeUnknown(err)) {
+				toastsErrorNoTrace({
+					msg: { text: $i18n.send.error.ethereum_transaction_unconfirmed },
+					err
+				});
+
+				onClose();
+
+				return;
+			}
+
 			toastsError({ msg: { text: $i18n.liquidium.text.transaction_failed }, err });
 
 			onBack();
@@ -256,8 +338,11 @@
 				{amount}
 				{feeDisplay}
 				{inflowFee}
+				{maxRepay}
+				{maxRepayUnavailable}
 				{onBack}
 				onConfirm={repay}
+				{pendingRepay}
 				{preview}
 				{reserve}
 			/>
@@ -269,10 +354,13 @@
 				{inflowFee}
 				{inflowFeeUnavailable}
 				{maxRepay}
+				{maxRepayUnavailable}
+				{maxSpendable}
 				{onClose}
 				onCustomErrorValidate={validateRepayAmount}
 				{onNext}
 				{onSelectToken}
+				{pendingRepay}
 				{preview}
 				{reserve}
 				totalFee={$maxGasFee}

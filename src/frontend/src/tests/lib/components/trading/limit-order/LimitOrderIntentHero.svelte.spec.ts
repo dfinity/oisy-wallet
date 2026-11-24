@@ -1,12 +1,18 @@
+import type { IcToken } from '$icp/types/ic-token';
 import LimitOrderIntentHero from '$lib/components/trading/limit-order/LimitOrderIntentHero.svelte';
+import en from '$tests/mocks/i18n.mock';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
 describe('LimitOrderIntentHero', () => {
+	const baseToken: IcToken = { ...mockValidIcToken, symbol: 'ICP', decimals: 8 };
+	const quoteToken: IcToken = { ...mockValidIcToken, symbol: 'ckUSDC', decimals: 6 };
+
 	const baseProps = {
 		baseAmount: '10',
-		baseSymbol: 'ICP',
+		baseToken,
 		quoteAmount: '25',
-		quoteSymbol: 'ckUSDC'
+		quoteToken
 	};
 
 	it('renders a sell intent with both legs', () => {
@@ -23,16 +29,12 @@ describe('LimitOrderIntentHero', () => {
 		expect(container).toHaveTextContent('Buy');
 	});
 
-	it('shows fiat lines only when provided', () => {
-		const { container, rerender } = render(LimitOrderIntentHero, {
-			props: { side: 'sell', ...baseProps }
-		});
+	// The order's price is spelled out by the rows under the hero, so neither leg
+	// carries a fiat line — and no "exchange rate unavailable" fallback in its place.
+	it('renders no fiat line on either leg', () => {
+		const { container } = render(LimitOrderIntentHero, { props: { side: 'sell', ...baseProps } });
 
-		expect(container).not.toHaveTextContent('$19.00');
-
-		rerender({ side: 'sell', ...baseProps, baseFiat: '$19.00', quoteFiat: '$18.90' });
-
-		expect(container).toHaveTextContent('$19.00');
-		expect(container).toHaveTextContent('$18.90');
+		expect(container).not.toHaveTextContent('$');
+		expect(container).not.toHaveTextContent(en.tokens.text.exchange_is_not_available);
 	});
 });

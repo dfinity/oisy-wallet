@@ -15,6 +15,26 @@ describe('MaxBalanceButton', () => {
 	const amountTestId = 'max-balance-button-amount';
 	const amountSetToMaxTestId = 'max-balance-button-amount-set-to-max';
 
+	it('presses like an icon-size control and has a 40 px tap area', () => {
+		const { getByTestId } = render(MaxBalanceButton, { props: baseProps });
+
+		expect(getByTestId(MAX_BUTTON)).toHaveClass(
+			'hit-area',
+			'[--hit-area-y:calc(100%+1.125rem)]',
+			'press-icon',
+			'hover:text-brand-hover'
+		);
+	});
+
+	it('shows no hover when the fee uses up the balance, so Max would set 0', () => {
+		const { getByTestId } = render(MaxBalanceButton, {
+			props: { ...baseProps, fee: 200_000_000n }
+		});
+
+		expect(getByTestId(MAX_BUTTON)).toHaveTextContent('0 BTC');
+		expect(getByTestId(MAX_BUTTON)).not.toHaveClass('hover:text-brand-hover');
+	});
+
 	it('shows the affordable balance when no cap is set', () => {
 		const { getByTestId } = render(MaxBalanceButton, { props: baseProps });
 
@@ -75,6 +95,58 @@ describe('MaxBalanceButton', () => {
 		expect(getByTestId(amountSetToMaxTestId)).toHaveTextContent('false');
 	});
 
+	// Only a press calls it, never a re-application for a new fee.
+	it('calls onMax when pressed, not when re-applying max for a new fee', async () => {
+		vi.useFakeTimers();
+
+		try {
+			const onMax = vi.fn();
+
+			const { getByTestId, rerender } = render(MaxBalanceButtonTestHost, {
+				props: { ...baseProps, fee: 10_000_000n, onMax }
+			});
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+
+			expect(onMax).toHaveBeenCalledOnce();
+
+			await rerender({ ...baseProps, fee: 50_000_000n, onMax });
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('1.5');
+			expect(onMax).toHaveBeenCalledOnce();
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	// One pending re-application, restarted by each change: the fee settles before Max follows it.
+	it('restarts the delay on each fee change', async () => {
+		vi.useFakeTimers();
+
+		try {
+			const { getByTestId, rerender } = render(MaxBalanceButtonTestHost, {
+				props: { ...baseProps, fee: 10_000_000n }
+			});
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+			await vi.advanceTimersByTimeAsync(500);
+
+			await rerender({ ...baseProps, fee: 30_000_000n });
+			await vi.advanceTimersByTimeAsync(300);
+			await rerender({ ...baseProps, fee: 50_000_000n });
+			await vi.advanceTimersByTimeAsync(300);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('1.9');
+
+			await vi.advanceTimersByTimeAsync(200);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('1.5');
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
 	it('reapplies max after the fee changes when the amount is set to max', async () => {
 		vi.useFakeTimers();
 
@@ -104,6 +176,90 @@ describe('MaxBalanceButton', () => {
 			await vi.advanceTimersByTimeAsync(1);
 
 			expect(getByTestId(amountTestId)).toHaveTextContent('1.5');
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	// Regression: the cap arrives asynchronously — a BTC one only once the UTXOs load, which
+	// routinely takes longer than the debounce the click itself schedules. A "Max" chosen
+	// before it landed then stayed at the balance-based amount the cap exists to rule out.
+	it('reapplies max once a cap arrives when the amount is set to max', async () => {
+		vi.useFakeTimers();
+
+		try {
+			const { getByTestId, rerender } = render(MaxBalanceButtonTestHost, {
+				props: baseProps
+			});
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+
+			// Drain the debounce the click scheduled, so the cap below is the only thing that
+			// can reapply the max.
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('2');
+
+			await rerender({ ...baseProps, maxAmount: 100_000_000n });
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('1');
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	// Regression: the flag was read once when the reapplication was scheduled, so typing during
+	// the 500ms delay had the manual amount overwritten by the pending callback.
+	it('does not overwrite a manually typed amount when the user types during the delay', async () => {
+		vi.useFakeTimers();
+
+		try {
+			const { getByTestId, rerender } = render(MaxBalanceButtonTestHost, {
+				props: { ...baseProps, fee: 10_000_000n }
+			});
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('1.9');
+
+			// Schedules the debounced reapplication.
+			await rerender({ ...baseProps, fee: 50_000_000n });
+
+			await fireEvent.click(getByTestId('max-balance-button-simulate-input'));
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('0.002');
+			expect(getByTestId(amountSetToMaxTestId)).toHaveTextContent('false');
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	// A pending send reserving UTXOs shrinks the cap without moving the fee.
+	it('reapplies max when the cap shrinks and the fee is unchanged', async () => {
+		vi.useFakeTimers();
+
+		try {
+			const { getByTestId, rerender } = render(MaxBalanceButtonTestHost, {
+				props: { ...baseProps, maxAmount: 100_000_000n }
+			});
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('1');
+
+			await rerender({ ...baseProps, maxAmount: 50_000_000n });
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('0.5');
 		} finally {
 			vi.useRealTimers();
 		}

@@ -1,6 +1,8 @@
 mod active_user_transactions;
 mod agreements;
+mod api_doc;
 mod bitcoin;
+mod canister_status;
 mod config;
 mod contacts;
 mod custom_token;
@@ -12,6 +14,7 @@ mod settings;
 mod signer;
 mod stats;
 mod status;
+mod tips;
 mod transactions;
 mod user_profile;
 mod utils;

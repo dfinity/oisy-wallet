@@ -1,8 +1,8 @@
 export enum WizardStepsSend {
 	TOKENS_LIST = 'Tokens List',
 	NFTS_LIST = 'NFTs List',
+	SEND_OR_TOP_UP = 'Send Or Top Up',
 	DESTINATION = 'Destination',
-	FILTER_NETWORKS = 'Filter Networks',
 	SEND = 'Send',
 	REVIEW = 'Review',
 	SENDING = 'Sending',
@@ -27,8 +27,8 @@ export enum WizardStepsSwap {
 	REVIEW = 'Review',
 	SWAPPING = 'Swapping',
 	TOKENS_LIST = 'Tokens List',
-	FILTER_NETWORKS = 'Filter Networks',
-	SELECT_PROVIDER = 'Select swap provider'
+	SELECT_PROVIDER = 'Select swap provider',
+	MOVE_TOKEN = 'Move token'
 }
 
 export enum WizardStepsAuthHelp {
@@ -94,6 +94,14 @@ export enum WizardStepsTradingWithdraw {
 	TOKENS_LIST = 'Tokens List'
 }
 
+export enum WizardStepsTip {
+	INTRO = 'Intro',
+	TOKENS_LIST = 'Tokens List',
+	CREATE = 'Create',
+	SHARE = 'Share',
+	HISTORY = 'History'
+}
+
 export enum WizardStepsLiquidiumSupply {
 	SUPPLY = 'Supply',
 	REVIEW = 'Review',
@@ -130,7 +138,6 @@ export enum WizardStepsClaimStakingReward {
 export enum WizardStepsTradingDeposit {
 	DEPOSIT = 'Deposit',
 	TOKENS_LIST = 'Tokens List',
-	FILTER_NETWORKS = 'Filter Networks',
 	REVIEW = 'Review',
 	DEPOSITING = 'Depositing'
 }
@@ -151,6 +158,7 @@ export enum WizardStepsScanner {
 	PAYING = 'Paying',
 	PAYMENT_CONFIRMED = 'Payment Confirmed',
 	PAYMENT_FAILED = 'Payment Failed',
+	PAYMENT_NOT_CONFIRMED = 'Payment Not Confirmed',
 	WALLET_CONNECT_CONNECT = WizardStepsWalletConnect.CONNECT,
 	WALLET_CONNECT_REVIEW = WizardStepsWalletConnect.REVIEW
 }
@@ -161,4 +169,21 @@ export enum WizardStepsLimitOrder {
 	QUOTE_TOKEN = 'Quote token',
 	REVIEW = 'Review',
 	PLACING = 'Placing'
+}
+
+export enum WizardStepsCyclesMint {
+	MINT = 'Mint',
+	REVIEW = 'Review',
+	MINTING = 'Minting'
+}
+
+export enum WizardStepsCyclesTopUp {
+	// From Tools only: what the top-up is paid with.
+	TOKEN = 'Token',
+	CANISTER = 'Canister',
+	AMOUNT = 'Amount',
+	// Not 'Review': the send wizard hosts these steps next to its own Review step, and steps are
+	// found by name.
+	REVIEW = 'Top Up Review',
+	TOPPING_UP = 'ToppingUp'
 }

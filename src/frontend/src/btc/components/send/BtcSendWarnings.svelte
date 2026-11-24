@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
 	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import { BtcPrepareSendError, BtcSendValidationError, type UtxosFee } from '$btc/types/btc-send';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { fade } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		pendingTransactionsStatus: BtcPendingSentTransactionsStatus;

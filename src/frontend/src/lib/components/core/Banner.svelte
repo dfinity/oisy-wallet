@@ -18,7 +18,11 @@
 			<IconGixWarning size="48px" />
 			<h3 class="clamp-4">{$i18n.core.info.test_banner}</h3>
 		</span>
-		<button aria-label={$i18n.core.text.close} onclick={closeEnvBanner}><IconCloseThin /></button>
+		<button
+			class="hit-area relative press-icon"
+			aria-label={$i18n.core.text.close}
+			onclick={closeEnvBanner}><IconCloseThin /></button
+		>
 	</div>
 {:else if BETA && envBannerVisible}
 	<div
@@ -26,7 +30,11 @@
 	>
 		<WarningBanner>
 			<span class="w-full px-2">{$i18n.core.info.test_banner_beta}</span>
-			<button aria-label={$i18n.core.text.close} onclick={closeEnvBanner}>
+			<button
+				class="hit-area relative press-icon"
+				aria-label={$i18n.core.text.close}
+				onclick={closeEnvBanner}
+			>
 				<IconCloseThin />
 			</button>
 		</WarningBanner>

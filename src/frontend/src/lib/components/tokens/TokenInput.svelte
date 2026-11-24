@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import TokenInputContent from '$lib/components/tokens/TokenInputContent.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
+	import { slide } from '$lib/utils/transitions.utils';
 
 	interface Props {
 		token?: Token;
@@ -27,9 +27,11 @@
 		autofocus?: boolean;
 		onCustomValidate?: (userAmount: bigint) => TokenActionErrorType;
 		onCustomErrorValidate?: (userAmount: bigint) => Error | undefined;
+		revalidateKey?: unknown;
 		showTokenNetwork?: boolean;
 		onClick?: () => void;
 		title?: Snippet;
+		trailingAction?: Snippet;
 		amountInfo: Snippet;
 		balance: Snippet;
 	}
@@ -51,9 +53,11 @@
 		autofocus = false,
 		onCustomValidate = () => undefined,
 		onCustomErrorValidate = () => undefined,
+		revalidateKey = undefined,
 		showTokenNetwork = false,
 		onClick,
 		title,
+		trailingAction,
 		amountInfo,
 		balance
 	}: Props = $props();
@@ -66,7 +70,7 @@
 	class:bg-brand-subtle-10={focused}
 	class:bg-secondary={!focused}
 	class:border-brand-subtle-20={focused}
-	class:border-secondary={!focused}
+	class:border-tertiary={!focused}
 >
 	<TokenInputContent
 		{name}
@@ -83,9 +87,11 @@
 		{onCustomValidate}
 		{placeholder}
 		{readOnlyAmount}
+		{revalidateKey}
 		{showTokenNetwork}
 		{title}
 		{token}
+		{trailingAction}
 		bind:amount
 		bind:errorType
 		bind:error

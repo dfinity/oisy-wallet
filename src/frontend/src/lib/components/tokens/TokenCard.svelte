@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import Divider from '$lib/components/common/Divider.svelte';
 	import ExchangeRateChange from '$lib/components/exchange/ExchangeRateChange.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -21,13 +20,15 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isCardDataTogglableToken } from '$lib/utils/token-card.utils';
-	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		data: CardData;
 		testIdPrefix?: typeof TOKEN_CARD | typeof TOKEN_GROUP;
 		asNetwork?: boolean;
+		expanded?: boolean;
 		hover?: boolean;
+		showNetwork?: boolean;
 		onClick?: () => void;
 		onToggle?: (t: Token) => void;
 	}
@@ -36,7 +37,9 @@
 		data,
 		testIdPrefix = TOKEN_CARD,
 		asNetwork = false,
+		expanded,
 		hover = false,
+		showNetwork = true,
 		onClick,
 		onToggle
 	}: Props = $props();
@@ -64,7 +67,15 @@
 </script>
 
 <div class="flex w-full flex-col">
-	<LogoButton condensed={asNetwork} dividers={false} {hover} {onClick} rounded={false} {testId}>
+	<LogoButton
+		condensed={asNetwork}
+		dividers={false}
+		{expanded}
+		{hover}
+		{onClick}
+		rounded={false}
+		{testId}
+	>
 		{#snippet logo()}
 			<span class="flex" class:mr-2={!asNetwork}>
 				<TokenLogo
@@ -120,17 +131,13 @@
 		{#snippet description()}
 			<span class:text-sm={asNetwork}>
 				{#if data?.networks}
-					{@const networks = [...new Set(data.networks.map((n) => n.name))]}
-
 					<span class="text-primary">{data.name}</span>
-					{replacePlaceholders($i18n.tokens.text.on_network, { $network: '' })}
-					{#each networks as network, index (network)}
-						{#if index !== 0}
-							<Divider />
-						{/if}{network}
-					{/each}
 				{:else if !asNetwork}
-					<TokenNameAndNetwork {data} />
+					{#if showNetwork}
+						<TokenNameAndNetwork {data} />
+					{:else}
+						<span class="text-primary">{getTokenDisplayName(data)}</span>
+					{/if}
 				{/if}
 			</span>
 		{/snippet}

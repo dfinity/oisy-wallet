@@ -1,7 +1,14 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import type * as TokensErc20Env from '$env/tokens/tokens.erc20.env';
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import type { InfuraErc20Provider } from '$eth/providers/infura-erc20.providers';
+import * as infuraProvidersModule from '$eth/providers/infura-erc20.providers';
+import { loadCustomTokens, loadDefaultErc20Tokens } from '$eth/services/erc20.services';
+import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
+import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
+import { listCustomTokens } from '$lib/api/backend.api';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -23,6 +30,10 @@ vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
 }));
 
+// The hoisted mock injects the metadata-only token into the curated defaults before
+// `erc20.services` evaluates `ALL_DEFAULT_ERC20_TOKENS`, so the service under test can
+// be imported statically: re-importing it after `vi.resetModules()` re-transformed its
+// whole graph inside the test body and timed out under a parallel suite run.
 vi.mock('$env/tokens/tokens.erc20.env', async (importOriginal) => {
 	const actual = await importOriginal<typeof TokensErc20Env>();
 	const { ETHEREUM_NETWORK } = await import('$env/networks/networks.eth.env');
@@ -49,18 +60,17 @@ vi.mock('$env/tokens/tokens.erc20.env', async (importOriginal) => {
 });
 
 describe('erc20.services - metadataOnly', () => {
-	it('excludes metadata-only tokens from the visible default-tokens store', async () => {
-		vi.resetModules();
+	beforeEach(() => {
+		vi.clearAllMocks();
 
-		// Configure the fresh (post-reset) infura mock the re-imported service will use.
-		const infuraProviders = await import('$eth/providers/infura-erc20.providers');
-		vi.mocked(infuraProviders.infuraErc20Providers).mockReturnValue({
+		erc20DefaultTokensStore.reset();
+		erc20CustomTokensStore.resetAll();
+	});
+
+	it('excludes metadata-only tokens from the visible default-tokens store', async () => {
+		vi.mocked(infuraProvidersModule.infuraErc20Providers).mockReturnValue({
 			metadata: vi.fn().mockResolvedValue({ name: 'Weenus', symbol: 'WEENUS', decimals: 18 })
 		} as unknown as InfuraErc20Provider);
-
-		const { loadDefaultErc20Tokens } = await import('$eth/services/erc20.services');
-		const { erc20DefaultTokensStore } = await import('$eth/stores/erc20-default-tokens.store');
-		erc20DefaultTokensStore.reset();
 
 		await loadDefaultErc20Tokens();
 
@@ -72,16 +82,11 @@ describe('erc20.services - metadataOnly', () => {
 	});
 
 	it('still enriches a manually imported custom token at the metadata-only address', async () => {
-		vi.resetModules();
-
-		const infuraProviders = await import('$eth/providers/infura-erc20.providers');
 		const metadataMock = vi.fn().mockResolvedValue({ name: 'X', symbol: 'X', decimals: 18 });
-		vi.mocked(infuraProviders.infuraErc20Providers).mockReturnValue({
+		vi.mocked(infuraProvidersModule.infuraErc20Providers).mockReturnValue({
 			metadata: metadataMock
 		} as unknown as InfuraErc20Provider);
 
-		const { ETHEREUM_NETWORK } = await import('$env/networks/networks.eth.env');
-		const { listCustomTokens } = await import('$lib/api/backend.api');
 		const customToken: CustomToken = {
 			token: {
 				Erc20: {
@@ -97,12 +102,7 @@ describe('erc20.services - metadataOnly', () => {
 		};
 		vi.mocked(listCustomTokens).mockResolvedValue([customToken]);
 
-		const { mockAuthStore } = await import('$tests/mocks/auth.mock');
 		mockAuthStore();
-
-		const { loadCustomTokens } = await import('$eth/services/erc20.services');
-		const { erc20CustomTokensStore } = await import('$eth/stores/erc20-custom-tokens.store');
-		erc20CustomTokensStore.resetAll();
 
 		await loadCustomTokens({ identity: mockIdentity });
 
