@@ -72,7 +72,7 @@
 <div in:fade>
 	{#if nonNullish(knownDestinations) && filteredKnownDestinations.length > 0}
 		<div class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]" in:fade>
-			<ul class="list-none overflow-y-auto overscroll-contain">
+			<ul class="scroll-fade list-none overflow-y-auto overscroll-contain">
 				{#each filteredKnownDestinations as { address, ...rest } (address)}
 					{@const networkContact = nonNullish(networkContacts)
 						? getNetworkContact({

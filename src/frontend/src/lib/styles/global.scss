@@ -164,6 +164,101 @@ don't take it: they are the sign that work is happening.
 	}
 }
 
+/*
+`scroll-fade` - on a list that scrolls, an edge with more to scroll fades out over 16 px, so it
+is plain that the list goes on. An edge is sharp while the list sits at that end, and a list
+that does not scroll shows no fade. The fade follows the scroll position, not time
+(`animation-timeline: scroll(self)`), so reduced motion has nothing to stop. Browsers without
+scroll-driven animations (Firefox) show the plain list. Keyboard focus scrolls a row clear of
+the fade (`scroll-padding-block`), so a focused row is never half faded.
+*/
+$scroll-fade-size: 1rem;
+
+@property --scroll-fade-top {
+	syntax: '<length>';
+	inherits: false;
+	initial-value: 0px;
+}
+
+@property --scroll-fade-bottom {
+	syntax: '<length>';
+	inherits: false;
+	initial-value: 0px;
+}
+
+@property --scroll-fade-active {
+	syntax: '<number>';
+	inherits: false;
+	initial-value: 0;
+}
+
+@keyframes scroll-fade-top {
+	to {
+		--scroll-fade-top: #{$scroll-fade-size};
+	}
+}
+
+@keyframes scroll-fade-bottom {
+	from {
+		--scroll-fade-bottom: #{$scroll-fade-size};
+	}
+
+	// Its percentage range becomes inactive without overflow, clearing the mask even when
+	// the top animation retains its last filled value after a list shrinks.
+	from,
+	to {
+		--scroll-fade-active: 1;
+	}
+}
+
+@utility scroll-fade {
+	@supports (animation-timeline: scroll()) {
+		mask-image: linear-gradient(
+			to bottom,
+			transparent,
+			#000 calc(var(--scroll-fade-top) * var(--scroll-fade-active)),
+			#000 calc(100% - var(--scroll-fade-bottom) * var(--scroll-fade-active)),
+			transparent
+		);
+		scroll-padding-block: $scroll-fade-size;
+		animation:
+			scroll-fade-top auto linear both,
+			scroll-fade-bottom auto linear both;
+		animation-timeline: scroll(self);
+		animation-range:
+			0 $scroll-fade-size,
+			calc(100% - #{$scroll-fade-size}) 100%;
+	}
+}
+
+/*
+`reveal` - a section fades in as it first appears, `--reveal-step` x 60 ms after the first one,
+over 200 ms on a spring sampled into `linear()`. Only opacity changes, so nothing moves or
+reflows. Under reduced motion it is a 100 ms fade with no stagger. A section that takes keyboard
+focus shows at once, so focus never lands on something still invisible. The signed-in app
+layout applies it once per page load.
+*/
+@keyframes reveal {
+	from {
+		opacity: 0;
+	}
+}
+
+@utility reveal {
+	animation: reveal 200ms linear(0, 0.5729, 0.8966, 0.9789, 0.996, 1, 1) both;
+	animation-delay: calc(var(--reveal-step, 0) * 60ms);
+
+	@media (prefers-reduced-motion: reduce) {
+		animation-duration: 100ms;
+		animation-timing-function: ease-out;
+		animation-delay: 0s;
+	}
+
+	&:focus-within {
+		opacity: 1 !important;
+	}
+}
+
 @layer base {
 	/*
 	Pulsing loading placeholders hold still under reduced motion: the shape stays, the pulse

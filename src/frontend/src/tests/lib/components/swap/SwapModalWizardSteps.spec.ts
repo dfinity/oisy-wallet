@@ -2,8 +2,12 @@ import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-t
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { USDC_TOKEN as SOLANA_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
@@ -17,11 +21,15 @@ import {
 	MODAL_TOKENS_LIST,
 	NETWORK_FILTER,
 	SWAP_MODAL_SELECT_PROVIDER_STEP,
+	SWAP_RECEIVE_NETWORK_LIST,
+	SWAP_RECEIVE_SHORTCUT_SAME_NETWORK,
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_CATEGORY_FILTER,
 	TOKEN_INPUT_SELECT_TOKEN_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as addressDerived from '$lib/derived/address.derived';
+import * as crossChainNetworksDerived from '$lib/derived/cross-chain-networks.derived';
+import * as networksDerived from '$lib/derived/networks.derived';
 import * as swapDerived from '$lib/derived/swap.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { TokenCategoryTagValue } from '$lib/enums/token-tag';
@@ -41,6 +49,7 @@ import {
 	initSwapAmountsStore,
 	type SwapAmountsStoreData
 } from '$lib/stores/swap-amounts.store';
+import type { SwapSupportedTokensData } from '$lib/stores/swap-supported-tokens.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { WizardModal, WizardStep } from '$lib/types/wizard';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -357,7 +366,7 @@ describe('SwapModalWizardSteps', () => {
 		};
 
 		const cancelList = async (rendered: Rendered) => {
-			await fireEvent.click(rendered.getByText(en.core.text.cancel));
+			await fireEvent.click(rendered.getByText(en.core.text.back));
 			await showForm(rendered);
 		};
 
@@ -578,6 +587,86 @@ describe('SwapModalWizardSteps', () => {
 			expect(assetTypeChip()).toHaveTextContent(en.tokens.text.asset_type_all_short);
 		});
 
+		describe('opened by a receive shortcut', () => {
+			const payToken = { ...mockValidIcToken, enabled: true };
+
+			// The pay token reaches ICP, on Internet Computer.
+			const reachIcp: SwapSupportedTokensData = {
+				icp: { coverage: 'all', supportedTokenIds: new Set([ICP_TOKEN.ledgerCanisterId]) },
+				evm: { coverage: 'all', supportedTokenIds: new Set() },
+				sol: { coverage: 'all', supportedTokenIds: new Set() },
+				btc: { coverage: 'all', supportedTokenIds: new Set() },
+				xrp: { coverage: 'all', supportedTokenIds: new Set() }
+			};
+
+			let swapContext: ReturnType<typeof initSwapContext>;
+
+			beforeEach(() => {
+				swapContext = {
+					...initSwapContext({ sourceToken: payToken }),
+					receiveSupportedData: readable(reachIcp)
+				};
+
+				mockContext.set(SWAP_CONTEXT_KEY, {
+					...swapContext,
+					sourceTokenExchangeRate: readable(10),
+					destinationTokenExchangeRate: readable(2)
+				});
+			});
+
+			const openSameNetwork = async (rendered: Rendered) => {
+				await fireEvent.click(rendered.getByTestId(SWAP_RECEIVE_SHORTCUT_SAME_NETWORK));
+				await rendered.rerender({ currentStep: tokensListStep, steps, modal: mockModal });
+
+				await waitFor(() =>
+					expect(screen.queryByTestId(SWAP_SWITCH_TOKENS_BUTTON)).not.toBeInTheDocument()
+				);
+			};
+
+			it("opens the receive list on the pay token's network and all asset types", async () => {
+				const rendered = renderHost();
+
+				await openList({ rendered, side: 0 });
+
+				await pickFromChip({ chip: TOKEN_CATEGORY_FILTER, option: en.token_tag.category.crypto });
+
+				await cancelList(rendered);
+
+				await openSameNetwork(rendered);
+
+				expect(networkChip()).toHaveTextContent(ICP_NETWORK.name);
+				expect(assetTypeChip()).toHaveTextContent(en.tokens.text.asset_type_all_short);
+			});
+
+			it("remembers the shortcut's initial filters for the receive side", async () => {
+				const rendered = renderHost();
+
+				await openSameNetwork(rendered);
+
+				await cancelList(rendered);
+
+				expect(swapContext.getTokenListFilters('destination')).toEqual({
+					network: ICP_NETWORK,
+					category: undefined
+				});
+			});
+
+			it('keeps a filter the person changes there', async () => {
+				const rendered = renderHost();
+
+				await openSameNetwork(rendered);
+
+				await pickFromChip({ chip: TOKEN_CATEGORY_FILTER, option: en.token_tag.category.crypto });
+
+				await cancelList(rendered);
+
+				expect(swapContext.getTokenListFilters('destination')).toEqual({
+					network: ICP_NETWORK,
+					category: TokenCategoryTagValue.CRYPTO
+				});
+			});
+		});
+
 		it("keeps the receive list's own filters once they are changed", async () => {
 			const rendered = renderHost();
 
@@ -597,6 +686,80 @@ describe('SwapModalWizardSteps', () => {
 
 			expect(networkChip()).toHaveTextContent(en.networks.chain_fusion);
 			expect(assetTypeChip()).toHaveTextContent(en.tokens.text.asset_type_all_short);
+		});
+	});
+
+	describe('the network step', () => {
+		const steps = swapWizardSteps({ i18n: en });
+
+		const moveStep = { name: WizardStepsSwap.MOVE_TOKEN, title: 'title' };
+
+		const swapStepIndex = steps.findIndex(({ name }) => name === WizardStepsSwap.SWAP);
+
+		let swapContext: ReturnType<typeof initSwapContext>;
+
+		beforeEach(() => {
+			vi.mocked(mockModal.set).mockClear();
+
+			setupSwapAmountsStore();
+
+			mockContext.set(...mockModalTokensListContextEntry({ tokens: [] }));
+			mockContext.set(...mockModalNetworksListContextEntry({ networks: [BASE_NETWORK] }));
+
+			swapContext = {
+				...initSwapContext({ sourceToken: BASE_USDC_TOKEN }),
+				receiveSupportedData: readable({
+					icp: { coverage: 'all', supportedTokenIds: new Set() },
+					evm: { coverage: 'all', supportedTokenIds: new Set() },
+					sol: { coverage: 'all', supportedTokenIds: new Set([SOLANA_USDC_TOKEN.address]) },
+					btc: { coverage: 'all', supportedTokenIds: new Set() },
+					xrp: { coverage: 'all', supportedTokenIds: new Set() }
+				})
+			};
+
+			mockContext.set(SWAP_CONTEXT_KEY, swapContext);
+
+			vi.spyOn(swapDerived, 'allSwapUniverseTokens', 'get').mockReturnValue(
+				readable([BASE_USDC_TOKEN, SOLANA_USDC_TOKEN].map((token) => ({ ...token, enabled: true })))
+			);
+			vi.spyOn(crossChainNetworksDerived, 'crossChainSwapNetworksMainnets', 'get').mockReturnValue(
+				readable([BASE_NETWORK, SOLANA_MAINNET_NETWORK])
+			);
+			vi.spyOn(networksDerived, 'networks', 'get').mockReturnValue(
+				readable([BASE_NETWORK, SOLANA_MAINNET_NETWORK])
+			);
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it('sets the picked token and returns to the form', async () => {
+			const { getByTestId } = render(SwapModalWizardStepsTestHost, {
+				props: { currentStep: moveStep, steps, modal: mockModal },
+				context: mockContext
+			});
+
+			await fireEvent.click(
+				within(getByTestId(SWAP_RECEIVE_NETWORK_LIST)).getByRole('button', {
+					name: new RegExp(SOLANA_MAINNET_NETWORK.name)
+				})
+			);
+
+			expect(get(swapContext.destinationToken)?.id).toBe(SOLANA_USDC_TOKEN.id);
+			expect(mockModal.set).toHaveBeenCalledExactlyOnceWith(swapStepIndex);
+		});
+
+		it('returns to the form without a pick', async () => {
+			const { getByText } = render(SwapModalWizardStepsTestHost, {
+				props: { currentStep: moveStep, steps, modal: mockModal },
+				context: mockContext
+			});
+
+			await fireEvent.click(getByText(en.core.text.back));
+
+			expect(get(swapContext.destinationToken)).toBeUndefined();
+			expect(mockModal.set).toHaveBeenCalledExactlyOnceWith(swapStepIndex);
 		});
 	});
 

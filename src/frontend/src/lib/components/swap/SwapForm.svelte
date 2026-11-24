@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, type Snippet } from 'svelte';
+	import { getContext, tick, type Snippet } from 'svelte';
 	import { readable } from 'svelte/store';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
+	import SwapReceiveShortcuts from '$lib/components/swap/SwapReceiveShortcuts.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
 	import SwapTwoSwapsHint from '$lib/components/swap/SwapTwoSwapsHint.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
@@ -13,16 +15,24 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { SUPPORTED_CROSS_SWAP_NETWORKS } from '$lib/constants/swap.constants';
-	import { SWAP_DESTINATION_TOKEN_BALANCE } from '$lib/constants/test-ids.constants';
+	import {
+		SWAP_DESTINATION_TOKEN_BALANCE,
+		SWAP_CLEAR_DESTINATION_TOKEN
+	} from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
+	import {
+		SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY,
+		type SwapReceiveShortcutsContext
+	} from '$lib/stores/swap-receive-shortcuts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
@@ -102,8 +112,13 @@
 		sourceTokenBalance,
 		destinationTokenExchangeRate,
 		amountSetToMax,
-		switchTokens
+		switchTokens,
+		clearDestinationToken
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	const receiveShortcuts = getContext<SwapReceiveShortcutsContext | undefined>(
+		SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY
+	);
 
 	const { store: swapAmountsStore, activity } =
 		getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -220,6 +235,24 @@
 				: undefined;
 	});
 
+	let receiveArea = $state<HTMLDivElement | undefined>();
+
+	// The card in the receive area swaps for another in place, so focus would fall out of the modal:
+	// it goes to the first control of the new one.
+	const focusReceiveArea = async () => {
+		await tick();
+
+		receiveArea
+			?.querySelector<HTMLElement>('button:not([disabled])')
+			?.focus({ preventScroll: true });
+	};
+
+	const onClearDestination = () => {
+		clearDestinationToken();
+		swapAmountsStore.reset();
+		void focusReceiveArea();
+	};
+
 	const onTokensSwitch = () => {
 		const tempAmount = receiveAmount;
 		const newSourceDecimals = $destinationToken?.decimals;
@@ -238,6 +271,83 @@
 		switchTokens();
 	};
 </script>
+
+{#snippet receiveTokenInput()}
+	<TokenInput
+		amount={swapAmountsLoading ? 0 : receiveAmount}
+		disabled={true}
+		displayUnit={inputUnit}
+		exchangeRate={$destinationTokenExchangeRate}
+		loading={swapAmountsLoading}
+		onClick={() => onShowTokensList('destination')}
+		showTokenNetwork
+		token={$destinationToken}
+	>
+		{#snippet title()}{$i18n.tokens.text.destination_token_title}{/snippet}
+
+		{#snippet trailingAction()}
+			{#if nonNullish(receiveShortcuts) && nonNullish($sourceToken) && nonNullish($destinationToken)}
+				<div class="flex h-full shrink-0 items-center border-l border-tertiary">
+					<ButtonIcon
+						ariaLabel={$i18n.swap.alt.clear_destination}
+						onclick={onClearDestination}
+						testId={SWAP_CLEAR_DESTINATION_TOKEN}
+					>
+						{#snippet icon()}<span aria-hidden="true"><IconClose size="16" /></span>{/snippet}
+					</ButtonIcon>
+				</div>
+			{/if}
+		{/snippet}
+
+		{#snippet amountInfo()}
+			{#if nonNullish($destinationToken)}
+				{#if showSwapNotOfferedError}
+					<div class="text-error-primary" transition:slide={SLIDE_DURATION}
+						>{#if quoteError?.type === 'amount-too-low'}
+							{#if nonNullish(quoteErrorMinAmount) && nonNullish($sourceToken)}
+								{replacePlaceholders($i18n.swap.text.swap_amount_too_low_minimum, {
+									$amount: quoteErrorMinAmount,
+									$symbol: $sourceToken.symbol
+								})}
+							{:else}
+								{$i18n.swap.text.swap_amount_too_low}
+							{/if}
+						{:else}
+							{$i18n.swap.text.swap_is_not_offered}
+						{/if}</div
+					>
+				{:else}
+					<div class="flex gap-3 text-tertiary">
+						<TokenInputAmountExchange
+							amount={swapAmountsLoading ? 0 : receiveAmount}
+							exchangeRate={$destinationTokenExchangeRate}
+							token={$destinationToken}
+							bind:displayUnit={exchangeValueUnit}
+						/>
+
+						{#if swapAmountsLoading}
+							<span class="mt-0.5 w-10">
+								<SkeletonText />
+							</span>
+						{:else}
+							<SwapValueDifference {receiveAmount} {swapAmount} />
+						{/if}
+					</div>
+				{/if}
+			{/if}
+		{/snippet}
+
+		{#snippet balance()}
+			{#if nonNullish($destinationToken) && !destinationBalanceUnknown}
+				<TokenInputBalance
+					balance={$destinationTokenBalance}
+					testId={SWAP_DESTINATION_TOKEN_BALANCE}
+					token={$destinationToken}
+				/>
+			{/if}
+		{/snippet}
+	</TokenInput>
+{/snippet}
 
 <ContentWithToolbar>
 	<div>
@@ -292,69 +402,23 @@
 				</TokenInput>
 			</div>
 
-			<SwapSwitchTokensButton disabled={isSwitchTokensButtonDisabled()} {onTokensSwitch} />
+			<!-- A line at the receive card's top edge, which the button centres on: the shortcuts make
+			that card much taller than the pay card, and the middle of both would put it on them. -->
+			<div class="relative">
+				<SwapSwitchTokensButton disabled={isSwitchTokensButtonDisabled()} {onTokensSwitch} />
+			</div>
 
-			<div class="mb-2">
-				<TokenInput
-					amount={swapAmountsLoading ? 0 : receiveAmount}
-					disabled={true}
-					displayUnit={inputUnit}
-					exchangeRate={$destinationTokenExchangeRate}
-					loading={swapAmountsLoading}
-					onClick={() => onShowTokensList('destination')}
-					showTokenNetwork
-					token={$destinationToken}
-				>
-					{#snippet title()}{$i18n.tokens.text.destination_token_title}{/snippet}
-
-					{#snippet amountInfo()}
-						{#if nonNullish($destinationToken)}
-							{#if showSwapNotOfferedError}
-								<div class="text-error-primary" transition:slide={SLIDE_DURATION}
-									>{#if quoteError?.type === 'amount-too-low'}
-										{#if nonNullish(quoteErrorMinAmount) && nonNullish($sourceToken)}
-											{replacePlaceholders($i18n.swap.text.swap_amount_too_low_minimum, {
-												$amount: quoteErrorMinAmount,
-												$symbol: $sourceToken.symbol
-											})}
-										{:else}
-											{$i18n.swap.text.swap_amount_too_low}
-										{/if}
-									{:else}
-										{$i18n.swap.text.swap_is_not_offered}
-									{/if}</div
-								>
-							{:else}
-								<div class="flex gap-3 text-tertiary">
-									<TokenInputAmountExchange
-										amount={swapAmountsLoading ? 0 : receiveAmount}
-										exchangeRate={$destinationTokenExchangeRate}
-										token={$destinationToken}
-										bind:displayUnit={exchangeValueUnit}
-									/>
-
-									{#if swapAmountsLoading}
-										<span class="mt-0.5 w-10">
-											<SkeletonText />
-										</span>
-									{:else}
-										<SwapValueDifference {receiveAmount} {swapAmount} />
-									{/if}
-								</div>
-							{/if}
-						{/if}
-					{/snippet}
-
-					{#snippet balance()}
-						{#if nonNullish($destinationToken) && !destinationBalanceUnknown}
-							<TokenInputBalance
-								balance={$destinationTokenBalance}
-								testId={SWAP_DESTINATION_TOKEN_BALANCE}
-								token={$destinationToken}
-							/>
-						{/if}
-					{/snippet}
-				</TokenInput>
+			<div bind:this={receiveArea} class="mb-2" data-swap-receive-area>
+				{#if nonNullish(receiveShortcuts) && nonNullish($sourceToken) && isNullish($destinationToken)}
+					<SwapReceiveShortcuts
+						emptyField={receiveTokenInput}
+						navigation={receiveShortcuts}
+						onDestinationSet={focusReceiveArea}
+						sourceToken={$sourceToken}
+					/>
+				{:else}
+					{@render receiveTokenInput()}
+				{/if}
 			</div>
 		</div>
 

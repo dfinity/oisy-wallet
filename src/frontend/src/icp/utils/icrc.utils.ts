@@ -29,6 +29,7 @@ import { Principal } from '@icp-sdk/core/principal';
 
 export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> &
 	Partial<IcCkMetadata> & {
+		id?: IcToken['id'];
 		metadata: IcrcTokenMetadataResponse;
 		category: TokenCategory;
 		icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutId>;
@@ -75,6 +76,7 @@ const mapIcNetwork = (ledgerCanisterId: LedgerCanisterIdText) =>
 	isTokenIcTestnet({ ledgerCanisterId }) ? ICP_PSEUDO_TESTNET_NETWORK : ICP_NETWORK;
 
 export const mapIcrcToken = ({
+	id,
 	metadata,
 	icrcCustomTokens,
 	ledgerCanisterId,
@@ -112,7 +114,7 @@ export const mapIcrcToken = ({
 	const indexCanisterId = rest.indexCanisterId ?? customTokenSymbol?.indexCanisterId;
 
 	return {
-		id: parseTokenId(symbol),
+		id: id ?? parseTokenId(symbol),
 		network: mapIcNetwork(ledgerCanisterId),
 		standard: customTokenSymbol?.standard ?? { code: 'icrc' },
 		symbol,
