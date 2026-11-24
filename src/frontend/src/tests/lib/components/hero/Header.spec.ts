@@ -1,5 +1,6 @@
 import Header from '$lib/components/hero/Header.svelte';
 import {
+	ABOUT_WHY_OISY_BUTTON,
 	NAVIGATION_MENU_BUTTON,
 	NETWORKS_SWITCHER_DROPDOWN
 } from '$lib/constants/test-ids.constants';
@@ -29,6 +30,14 @@ describe('Header', () => {
 		expect(header(container)).not.toHaveClass('md:sticky');
 		expect(header(container)).not.toHaveClass('1.5xl:fixed');
 		expect(queryByRole('navigation', { name: sectionNavLabel })).not.toBeInTheDocument();
+	});
+
+	it('offers Why OISY next to the docs link when signed out', () => {
+		mockAuthSignedIn(false);
+
+		const { getByTestId } = render(Header, { showLandingNavigation: true });
+
+		expect(getByTestId(ABOUT_WHY_OISY_BUTTON)).toBeInTheDocument();
 	});
 
 	it('links to wallet features when the signed-out landing page is shown', () => {

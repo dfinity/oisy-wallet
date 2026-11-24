@@ -73,7 +73,7 @@
 				{#each links as { href, label }, index (href)}
 					<li in:fly|global={{ y: 8, delay: (links.length - 1 - index) * ITEM_STAGGER_MS }}>
 						<a
-							class="flex min-h-12 items-center justify-center rounded-full border border-tertiary bg-primary px-6 text-base font-semibold whitespace-nowrap text-primary no-underline shadow-md transition-[color,background-color,scale] duration-150 ease-out press hover:bg-brand-subtle-10 hover:text-brand-hover active:bg-brand-subtle-20 active:text-brand-hover"
+							class="flex min-h-12 items-center justify-center rounded-full border border-tertiary bg-primary px-6 py-2 text-center text-base font-semibold text-balance text-primary no-underline shadow-md transition-[color,background-color,scale] duration-150 ease-out press hover:bg-brand-subtle-10 hover:text-brand-hover active:bg-brand-subtle-20 active:text-brand-hover"
 							{href}
 							onclick={close}
 						>

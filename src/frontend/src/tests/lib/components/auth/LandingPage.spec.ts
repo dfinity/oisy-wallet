@@ -68,6 +68,24 @@ describe('LandingPage', () => {
 		}
 	});
 
+	it('moves focus to the section a fragment link names once the sections load', async () => {
+		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
+		const scrollIntoView = vi.fn();
+		Element.prototype.scrollIntoView = scrollIntoView;
+		window.location.hash = '#landing-swap';
+
+		const { findByRole } = render(LandingPage);
+		const section = await findByRole('region', { name: get(i18n).auth.landing.swap_title });
+
+		await vi.waitFor(() => expect(section).toHaveFocus());
+
+		expect(section).toHaveAttribute('id', 'landing-swap');
+		expect(scrollIntoView).toHaveBeenCalledOnce();
+
+		window.location.hash = '';
+		Reflect.deleteProperty(Element.prototype, 'scrollIntoView');
+	});
+
 	it('keeps the same accessible vector preview and intrinsic size across theme changes', async () => {
 		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
 		themeStore.select(Theme.LIGHT);
