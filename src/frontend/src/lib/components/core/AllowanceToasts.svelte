@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
 	import IconFuelPump from '$lib/components/icons/IconFuelPump.svelte';
+	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { allowanceIssueStore } from '$lib/stores/allowance-issue.store';
 	import { allowanceToastStore } from '$lib/stores/allowance-toast.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -27,7 +28,8 @@
 			theme: 'inverted',
 			icon: IconFuelPump,
 			title: replaceOisyPlaceholders($i18n.core.warning.oisy_allowance_used_up_title),
-			text: replaceOisyPlaceholders($i18n.core.warning.oisy_allowance_used_up)
+			text: replaceOisyPlaceholders($i18n.core.warning.oisy_allowance_used_up),
+			link: { href: OISY_DOCS_URL, label: $i18n.core.text.learn_more }
 		});
 	};
 

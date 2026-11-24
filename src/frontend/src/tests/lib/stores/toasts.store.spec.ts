@@ -1,5 +1,6 @@
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import { toastsError, toastsStore } from '$lib/stores/toasts.store';
+import en from '$tests/mocks/i18n.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
 
@@ -101,8 +102,9 @@ describe('toastsError', () => {
 		expect(get(toastsStore)[0].text).toBe('Send failed. / detail');
 	});
 
-	// The allowance toast says what happened, so the raw ledger text would only add noise.
-	it('should leave out the detail of an insufficient allowance', () => {
+	// The allowance toast next to it says why; the flow's generic text and the raw ledger text would
+	// only add noise.
+	it('should show one clear text for an insufficient allowance', () => {
 		const err = new SignerCanisterPaymentError({
 			LedgerWithdrawFromError: {
 				ledger: mockPrincipal,
@@ -112,6 +114,6 @@ describe('toastsError', () => {
 
 		toastsError({ msg: { text: 'Send failed.' }, err });
 
-		expect(get(toastsStore)[0].text).toBe('Send failed.');
+		expect(get(toastsStore)[0].text).toBe(en.core.error.usage_credits_insufficient);
 	});
 });

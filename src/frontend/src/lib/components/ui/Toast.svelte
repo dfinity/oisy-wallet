@@ -7,6 +7,7 @@
 	import IconError from '$lib/components/icons/IconError.svelte';
 	import IconGixInfo from '$lib/components/icons/IconGixInfo.svelte';
 	import IconGixWarning from '$lib/components/icons/IconGixWarning.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -31,7 +32,7 @@
 
 	const close = () => toastsStore.hide(msg.id);
 
-	let { text, level, spinner, title, overflow, position, icon, theme, renderAsHtml } =
+	let { text, level, spinner, title, overflow, position, icon, theme, renderAsHtml, link } =
 		$derived(msg);
 
 	let scroll = $derived(overflow === undefined || overflow === 'scroll');
@@ -102,6 +103,11 @@
 		{:else}
 			{text}
 		{/if}
+		{#if nonNullish(link)}
+			<ExternalLink ariaLabel={link.label} href={link.href} iconVisible={false} styleClass="ml-1"
+				>{link.label}</ExternalLink
+			>
+		{/if}
 	</p>
 
 	<button
@@ -156,6 +162,12 @@
 
 		&.inverted {
 			@include overlay.toast-inverted;
+
+			// The app's link blue does not read on the inverted background.
+			:global(a) {
+				color: inherit;
+				text-decoration: underline;
+			}
 
 			--toast-background: var(--toast-inverted-background);
 			--toast-color: var(--toast-inverted-background-contrast);

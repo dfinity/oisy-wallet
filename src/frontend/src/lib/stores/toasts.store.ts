@@ -1,9 +1,10 @@
 import { insufficientAllowanceOf } from '$lib/canisters/signer.errors';
+import { i18n } from '$lib/stores/i18n.store';
 import type { ToastLevel, ToastMsg, ToastMsgUI } from '$lib/types/toast';
 import { consoleError } from '$lib/utils/console.utils';
 import { errorDetailToString } from '$lib/utils/error.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
-import { writable, type Readable } from 'svelte/store';
+import { nonNullish } from '@dfinity/utils';
+import { get, writable, type Readable } from 'svelte/store';
 
 export interface ToastsStore extends Readable<ToastMsgUI[]> {
 	show: (msg: Partial<Pick<ToastMsgUI, 'id'>> & Omit<ToastMsgUI, 'id'>) => symbol;
@@ -77,12 +78,18 @@ export const toastsError = ({ msg: { text, ...rest }, err }: ToastsErrorParams):
 		consoleError(err);
 	}
 
-	// An insufficient OISY allowance gets a toast of its own that says what happened, so the raw
-	// ledger text is left out here.
-	const withDetail = nonNullish(err) && isNullish(insufficientAllowanceOf(err));
+	// An insufficient allowance gets one clear text instead of the flow's generic one and the raw
+	// ledger text; the allowance toast next to it says why.
+	if (nonNullish(err) && nonNullish(insufficientAllowanceOf(err))) {
+		return toastsStore.show({
+			...rest,
+			text: get(i18n).core.error.usage_credits_insufficient,
+			level: 'error'
+		});
+	}
 
 	return toastsStore.show({
-		text: `${text}${withDetail ? ` / ${errorDetailToString(err)}` : ''}`,
+		text: `${text}${nonNullish(err) ? ` / ${errorDetailToString(err)}` : ''}`,
 		...rest,
 		level: 'error'
 	});

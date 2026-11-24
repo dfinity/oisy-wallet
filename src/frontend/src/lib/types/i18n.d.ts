@@ -100,7 +100,7 @@ interface I18nCore {
 		oisy_allowance_used_up: string;
 		oisy_allowance_exceeded: string;
 	};
-	error: { copy_failed: string };
+	error: { copy_failed: string; usage_credits_insufficient: string };
 }
 
 interface I18nProgress {

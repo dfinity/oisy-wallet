@@ -113,7 +113,8 @@
 			"oisy_allowance_exceeded": ""
 		},
 		"error": {
-			"copy_failed": ""
+			"copy_failed": "",
+			"usage_credits_insufficient": ""
 		}
 	},
 	"progress": {

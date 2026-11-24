@@ -23,6 +23,21 @@ describe('Toasts', () => {
 		expect(getByTestId('toast-message').textContent).toContain('Hello toast');
 	});
 
+	it('renders a Learn more link after the text', () => {
+		toastsStore.show({
+			level: 'warn',
+			text: 'Hello toast',
+			link: { href: 'https://docs.oisy.com', label: 'Learn more' }
+		});
+
+		const { getByRole } = render(ToastsTest);
+
+		expect(getByRole('link', { name: 'Learn more' })).toHaveAttribute(
+			'href',
+			'https://docs.oisy.com'
+		);
+	});
+
 	it('stays reachable by keyboard while an overlay is open', () => {
 		toastsStore.show({ level: 'info', text: 'Hello toast' });
 

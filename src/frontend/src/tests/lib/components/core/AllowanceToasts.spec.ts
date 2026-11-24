@@ -1,5 +1,6 @@
 import AllowanceToasts from '$lib/components/core/AllowanceToasts.svelte';
 import IconFuelPump from '$lib/components/icons/IconFuelPump.svelte';
+import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 import { allowanceIssueStore } from '$lib/stores/allowance-issue.store';
 import { allowanceToastStore } from '$lib/stores/allowance-toast.store';
 import * as toasts from '$lib/stores/toasts.store';
@@ -15,7 +16,8 @@ describe('AllowanceToasts', () => {
 		theme: 'inverted',
 		icon: IconFuelPump,
 		title: replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up_title),
-		text: replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up)
+		text: replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up),
+		link: { href: OISY_DOCS_URL, label: en.core.text.learn_more }
 	};
 
 	const exceededToast = {
