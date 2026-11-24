@@ -20,12 +20,13 @@
 		{@attach landingReveal(LANDING_REVEAL_STAGGER)}
 		aria-label={replaceOisyPlaceholders($i18n.auth.landing.networks_label)}
 	>
-		{#each LANDING_NETWORKS as { id, name, icon } (id)}
+		{#each LANDING_NETWORKS as { id, name, icon, iconColored } (id)}
 			<li
 				class="flex items-center gap-2 rounded-full bg-primary py-1.5 pr-3.5 pl-1.5 text-sm font-semibold text-primary shadow-sm"
 			>
-				{#if icon}
-					<img class="size-6 rounded-full" alt="" src={icon} />
+				{#if iconColored ?? icon}
+					<!-- The brand-coloured marks read on both themes; the monochrome ones are dark-only. -->
+					<img class="size-6 rounded-full" alt="" src={iconColored ?? icon} />
 				{/if}
 				{name}
 			</li>

@@ -33,6 +33,9 @@
 	{/snippet}
 </LandingSection>
 
+<!-- Second, because it answers the hero's promise: is it safe, and how do I get in? -->
+<LandingSecurity />
+
 <LandingSection
 	id="landing-swap"
 	description={replaceOisyPlaceholders($i18n.auth.landing.swap_description)}
@@ -59,8 +62,6 @@
 		<LandingBorrowPreview />
 	{/snippet}
 </LandingSection>
-
-<LandingSecurity />
 
 <LandingConnect />
 

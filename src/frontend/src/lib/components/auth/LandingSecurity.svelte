@@ -68,7 +68,6 @@
 					ariaLabel={$i18n.auth.landing.security_source}
 					href={OISY_REPO_URL}
 					iconVisible={false}
-					inline
 					styleClass="source-link"
 				>
 					{$i18n.auth.landing.security_source}
