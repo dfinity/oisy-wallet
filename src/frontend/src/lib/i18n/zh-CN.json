@@ -108,13 +108,13 @@
 			"do_not_close": "在交易完成之前请勿关闭此标签页",
 			"standalone_mode": "将应用程序和 $oisy_short 同时安装到主屏幕时，存在已知的连接问题。如果在连接 $oisy_short 或签署交易时遇到问题，请从普通浏览器启动应用程序。我们正在修复此问题，将很快解决。 <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">了解更多</a>",
 			"video_not_supported": "你的浏览器不支持视频播放。",
-			"oisy_allowance_used_up_title": "$oisy_name 免费额度已用完",
-			"oisy_allowance_used_up": "你的 $oisy_name 免费额度暂时已用完，部分交易可能会失败。",
+			"oisy_allowance_used_up_title": "免费使用额度已用完",
+			"oisy_allowance_used_up": "你每日用于签署交易的免费额度已用完，部分交易可能签署失败。",
 			"oisy_allowance_exceeded": "此交易的费用超出了你的 $oisy_name 免费额度。"
 		},
 		"error": {
 			"copy_failed": "",
-			"usage_credits_insufficient": ""
+			"usage_credits_insufficient": "你的使用额度不足，无法签署此交易。"
 		}
 	},
 	"progress": {

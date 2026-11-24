@@ -108,13 +108,13 @@
 			"do_not_close": "Non chiudere questa scheda finché la transazione non è completata",
 			"standalone_mode": "Sono noti problemi di connessione quando sia un'app che $oisy_short sono installati nella schermata iniziale. Se riscontri problemi di connessione a $oisy_short o di firma delle transazioni, avvia l'app da un browser normale. Stiamo lavorando a una soluzione che sarà disponibile a breve. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Scopri di più</a>",
 			"video_not_supported": "",
-			"oisy_allowance_used_up_title": "Quota gratuita di $oisy_name esaurita",
-			"oisy_allowance_used_up": "La tua quota gratuita di $oisy_name è esaurita per ora, quindi alcune transazioni potrebbero non riuscire.",
+			"oisy_allowance_used_up_title": "Crediti di utilizzo gratuiti esauriti",
+			"oisy_allowance_used_up": "La tua quantità giornaliera di crediti gratuiti per firmare le transazioni è esaurita, quindi la firma di alcune transazioni potrebbe non riuscire.",
 			"oisy_allowance_exceeded": "Questa transazione costa più di quanto copra la tua quota gratuita di $oisy_name."
 		},
 		"error": {
 			"copy_failed": "",
-			"usage_credits_insufficient": ""
+			"usage_credits_insufficient": "Non è stato possibile firmare la tua transazione perché non ti restano abbastanza crediti di utilizzo."
 		}
 	},
 	"progress": {

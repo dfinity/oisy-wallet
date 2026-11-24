@@ -108,13 +108,13 @@
 			"do_not_close": "Не закрывайте эту вкладку, пока транзакция не завершится",
 			"standalone_mode": "При одновременной установке приложения и $oisy_short на главный экран возникают известные проблемы с подключением. Если у вас возникли проблемы с подключением $oisy_short или подписанием транзакций, запустите приложение из обычного браузера. Мы работаем над исправлением, которое скоро будет готово. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Подробнее</a>",
 			"video_not_supported": "Ваш браузер не поддерживает воспроизведение видео.",
-			"oisy_allowance_used_up_title": "Бесплатный лимит $oisy_name исчерпан",
-			"oisy_allowance_used_up": "Ваш бесплатный лимит $oisy_name пока исчерпан, поэтому некоторые транзакции могут не пройти.",
+			"oisy_allowance_used_up_title": "Бесплатные кредиты использования исчерпаны",
+			"oisy_allowance_used_up": "Ваш дневной объём бесплатных кредитов для подписи транзакций исчерпан, поэтому подписание некоторых транзакций может не пройти.",
 			"oisy_allowance_exceeded": "Эта транзакция стоит больше, чем покрывает ваш бесплатный лимит $oisy_name."
 		},
 		"error": {
 			"copy_failed": "",
-			"usage_credits_insufficient": ""
+			"usage_credits_insufficient": "Не удалось подписать вашу транзакцию: у вас недостаточно кредитов использования."
 		}
 	},
 	"progress": {
