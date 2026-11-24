@@ -48,44 +48,48 @@ The phases ship one by one, in this order. Each is useful on its own.
 ### 4.2 Load
 
 - Every app load sends an AR, as today.
-- A Refused AR at load causes **no sign-out**, sets no Allowance issue and shows no banner. The app carries on. The backend sets a new OISY allowance only below the OISY allowance threshold, so a Refused AR at load does not mean the next CC fails.
+- A Refused AR at load causes **no sign-out**, sets no Allowance issue and shows no toast. The app carries on. The backend sets a new OISY allowance only below the OISY allowance threshold, so a Refused AR at load does not mean the next CC fails.
 
 ### 4.3 AR after Insufficient allowance
 
-- When a CC returns Insufficient allowance, OISY sends an AR right away, in the shared signer module, before the flow sees the error. The failing step in the execution modal stays on screen a few seconds longer.
+- When a CC returns Insufficient allowance, OISY sends an AR right away, in the shared signer module, before the flow sees the error. The failing step stays on screen a few seconds longer.
 - CCs that return Insufficient allowance at the same time share one AR.
 - During the AR cooldown, OISY sends no AR, and the CC is handled as if its AR were Refused.
 - An AR stopped by the hourly or the per-minute limit is Refused. The frontend no longer turns it into Skipped.
-- The flow takes its **normal error path** back to its form and **never continues by itself**. The error tells the form the AR's answer.
 
-### 4.4 What the form shows
+### 4.4 The CC after the AR
 
-- **Granted:** an info box says the OISY allowance ran out and has been renewed, so try again. The form's buttons work as usual.
-- **Refused**, or no AR during the AR cooldown: a warning says there isn't enough OISY allowance right now, so try again later. The form's main button (for example **Swap**) is disabled, and Allowance issue is set.
-- **Skipped:** the form compares the OISY allowance stated in the Skipped answer with the one stated in the Insufficient allowance error.
-  - **Larger now:** another tab or device got a new OISY allowance in the meantime. The form shows what it shows for Granted.
-  - **Not larger:** the CC costs more than the OISY allowance, and the backend sets no new one at or above the OISY allowance threshold. A warning says this transaction costs more than the OISY allowance covers, and the form's main button is disabled. Allowance issue is **not** set, since cheaper CCs still work. Today this happens with a large BTC send in production, which is charged for all its inputs in one CC.
+- **Granted**, or **Skipped** with a larger OISY allowance than the Insufficient allowance stated, because another tab or device got a new one in the meantime: the shared signer module repeats the CC once, right away. A CC refused for Insufficient allowance ran nothing, so the repeat is like the first try. If it succeeds, the flow never sees the failure.
+- **Refused**, or no AR during the AR cooldown: the CC fails, and Allowance issue is set (see 4.5).
+- **Skipped** with no larger OISY allowance: the CC costs more than the OISY allowance, and the backend sets no new one at or above the OISY allowance threshold. The CC fails, and a warning toast says this transaction costs more than the free OISY allowance covers. It stays until the user closes it. Allowance issue is **not** set, since cheaper CCs still work. Today this happens with a large BTC send in production, which is charged for all its inputs in one CC.
+- A repeated CC that returns Insufficient allowance again is handled like the Skipped case without a larger OISY allowance, and no second AR is sent.
+- When the CC still fails, the flow shows its usual error, as today.
 
-### 4.5 Allowance issue and the banner
+### 4.5 Allowance issue and its toast
 
-- While Allowance issue is set, a global banner says the OISY allowance is limited and some transactions may fail. It can't be closed.
-- The banner has a **Retry** button that sends an AR. It's disabled during the AR cooldown.
-- Any Granted or Skipped AR clears Allowance issue: from **Retry**, from an AR after Insufficient allowance, or at app load. A Skipped AR means the OISY allowance is at or above the OISY allowance threshold, for example after another tab or device got a Granted AR.
-- **No global blocking.** Allowance issue disables no feature, since no CC's price is known. Only the form whose CC just failed disables its main button.
+- When Allowance issue is set, and again with every CC that fails while it lasts, the **allowance-issue toast** shows: the free OISY allowance is used up for now, so some transactions may fail.
+- It looks different from every other toast: warn level, the inverted theme, a title and its own icon.
+- The user can close it. It shows again with the next CC that fails while Allowance issue lasts.
+- It disappears when Allowance issue clears. Any Granted or Skipped AR clears it. A Skipped AR means the OISY allowance is at or above the OISY allowance threshold, for example after another tab or device got a Granted AR.
+- Toasts show above an open form, so the user sees it there too.
+- There is no **Retry** button: once the AR cooldown has passed, the next CC that fails sends an AR anyway.
+- **No global blocking.** Allowance issue disables no feature, since no CC's price is known.
 
 ### 4.6 CCs without a form
 
-A CC without a form, today the certified BTC balance in production, follows the same AR, and a Refused AR sets Allowance issue as for any CC. The certified BTC balance then falls back to the free unverified read from the Bitcoin canister, which the scheduler already makes, and the wallet shows that the balance is unverified. Whether this lands in phase 1 or phase 2 is still open (see [Pending decisions](#11-pending-decisions-facts-are-clear--we-just-need-to-decide)).
+A CC without a form, today the certified BTC balance in production, follows the same AR and repeat, and a Refused AR sets Allowance issue as for any CC. The certified BTC balance then falls back to the free unverified read from the Bitcoin canister, which the scheduler already makes, and the wallet shows that the balance is unverified. Whether this lands in phase 1 or phase 2 is still open (see [Pending decisions](#11-pending-decisions-facts-are-clear--we-just-need-to-decide)).
 
 ### 4.7 What does not change
 
+- **No form or flow changes.** None of them learns about the AR, the repeat or Allowance issue. When a CC still fails, each shows its usual error.
+- The one exception is a message in a shared helper: the BTC send through the backend (local and staging) tells the user to sign out and back in when the allowance runs out. That message goes, since the AR now runs on its own, and the send shows its usual error instead.
 - Every other CC result keeps today's handling, including `InsufficientFunds`, when OISY's own cycles account is short.
 - ICP and ICRC sends, receiving, addresses and every balance other than BTC work as before, with or without Allowance issue.
 
 ## 5. Phase 2: the backend's costly calls become CCs
 
 - **One allowance.** A user-triggered backend call that costs cycles beyond its execution (for example a Bitcoin canister call, a vetKD key derivation or an HTTP outcall) becomes a CC, charged to the same OISY allowance.
-- When the OISY allowance can't cover such a CC, the backend returns Insufficient allowance. The frontend handles it like a signer CC: the AR, the form, Allowance issue and the banner.
+- When the OISY allowance can't cover such a CC, the backend returns Insufficient allowance. The frontend handles it like a signer CC: the AR, the repeat, Allowance issue and the toasts.
 - How the backend charges a CC to the OISY allowance, and the exact list of calls, are still open (see [Open questions](#10-open-questions-facts-to-confirm)).
 
 ## 6. Phase 3: pay with your own cycles
@@ -99,19 +103,10 @@ A CC without a form, today the certified BTC balance in production, follows the 
 - **No prompt per transaction**: no warning and no checkbox.
 - The approval left and the TCYCLES balance are read with free queries on the cycles ledger.
 
-### 6.2 Entry points
+### 6.2 Entry points and state
 
-- **The form's warning after a Refused AR** offers **Use my own cycles**. It closes the form and opens the Tools page. Opening the setup on top of the form can come later.
-- **The banner** offers it too (see 6.3).
 - **An allowance card on the Tools page** shows the approval left and the TCYCLES balance, with **Add more** and **Get cycles**.
-
-Because the AR is automatic, **Use my own cycles** only appears after a Refused AR. A user never pays with their own cycles while a Granted AR is one click away.
-
-### 6.3 Banner
-
-- **a) No approval left:** the OISY allowance is limited, with **Retry** or **Use my own cycles**.
-- **b) Approval active:** CCs are charged to the user's own cycles from their approval of X TC, with **Check again**, which sends an AR.
-- When the approval runs out, the banner goes back to a).
+- How the user gets from a failed CC to the own-cycles setup, and how the app shows that CCs are charged to the user's own cycles, follow the toast approach of phase 1 and are still open (see pending decision 10).
 
 ## 7. Phase 4: bound the total
 
@@ -127,13 +122,10 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 
 1. **Phase 1**, in this order:
    1. Load: no sign-out on a Refused AR at load (#14737).
-   2. The AR after Insufficient allowance, the AR cooldown, Allowance issue and the banner.
-   3. The swap forms.
-   4. The send forms: Send, Convert and the AI assistant's send.
-   5. The other flows that make CCs: WalletConnect, NFT transfer, ERC-4626, OpenCryptoPay and Liquidium.
-   6. Translations.
+   2. The AR after Insufficient allowance, the repeat, the AR cooldown, Allowance issue and the toasts (#14739).
+   3. Translations.
 2. **Phase 2:** the backend's costly calls become CCs, and the frontend handles their Insufficient allowance.
-3. **Phase 3:** the approval step, the Tools card, the payment-type switch, banner states a) and b), and the backend accepting the user's cycles for its CCs.
+3. **Phase 3:** the approval step, the Tools card, the payment-type switch, the way in from a failed CC (pending decision 10), and the backend accepting the user's cycles for its CCs.
 4. **Phase 4:** the cap, the smaller OISY allowance per Granted AR and the new-user pool.
 
 ## 9. Acceptance criteria
@@ -144,22 +136,21 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 2. An AR stopped by the hourly or the per-minute limit counts as Refused.
 3. A CC that returns Insufficient allowance triggers one AR before its flow sees the error. CCs failing at the same time share one AR.
 4. During the AR cooldown, no AR is sent, and the CC is handled as if its AR were Refused.
-5. A failed flow returns to its form through its normal error path and never continues by itself.
-6. Granted, or Skipped with a larger OISY allowance than at the failure: the form shows the info box and its usual buttons.
-7. Refused: the form shows the warning, disables its main button and sets Allowance issue.
-8. Skipped with no larger OISY allowance: the form shows the warning that the transaction costs more than the OISY allowance covers and disables its main button, without setting Allowance issue.
-9. While Allowance issue is set, the banner shows, can't be closed and offers **Retry**, which is disabled during the AR cooldown.
-10. Any Granted or Skipped AR clears Allowance issue.
-11. Allowance issue alone disables no feature.
-12. Every flow that makes CCs reaches these outcomes instead of a generic or technical error. That covers send, swap, approve, permit, ERC-4626, NFT transfer, OpenCryptoPay, WalletConnect and Liquidium, on BTC, ETH/EVM, SOL and XRP. The BTC backend send's "sign out and back in" message is replaced too.
-13. Every other CC result, `InsufficientFunds` included, keeps today's handling, and ICP and ICRC sends are unaffected.
+5. After a Granted AR, or a Skipped one with a larger OISY allowance, the CC is repeated once. When the repeat succeeds, the flow sees no failure.
+6. A repeated CC that returns Insufficient allowance again is handled like the Skipped case without a larger OISY allowance, with no second AR.
+7. Refused: the flow shows its usual error, Allowance issue is set, and the allowance-issue toast shows.
+8. While Allowance issue is set, every CC that fails shows the allowance-issue toast again. The user can close it, and it disappears when Allowance issue clears.
+9. The allowance-issue toast looks different from every other toast: warn level, the inverted theme, a title and its own icon.
+10. Skipped with no larger OISY allowance: the flow shows its usual error and a warning toast that stays until closed, without setting Allowance issue.
+11. Any Granted or Skipped AR clears Allowance issue.
+12. No form or flow changes, and Allowance issue alone disables no feature.
+13. Every other CC result, `InsufficientFunds` included, keeps today's handling, ICP and ICRC sends are unaffected, and the BTC send through the backend no longer says to sign out and back in.
 
 ### Phase 3
 
-1. A user can approve an amount of their TCYCLES for CCs from the form's warning after a Refused AR, from the banner or from the Tools card, in one step.
+1. A user can approve an amount of their TCYCLES for CCs from the Tools card, in one step.
 2. While Allowance issue is set and an approval is left, CCs are charged to the user's own cycles, with no prompt per transaction.
-3. The banner shows a) without an approval left and b) with one.
-4. The Tools card shows the approval left and the TCYCLES balance, with **Add more** and **Get cycles**.
+3. The Tools card shows the approval left and the TCYCLES balance, with **Add more** and **Get cycles**.
 
 ## 10. Open questions (facts to confirm)
 
@@ -172,19 +163,21 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 Numbers stay fixed: a resolved decision keeps its number, and a new one gets the next free number.
 
 1. **BTC balance fallback: phase 1 or phase 2?** In production, the certified BTC balance is a CC today, so it can return Insufficient allowance in phase 1. If the backend route reaches production first (open question 2), it becomes a phase 2 CC.
-2. _Resolved:_ **Skipped after Insufficient allowance.** The form compares the OISY allowance stated before and after (see 4.4).
+2. _Resolved:_ **Skipped after Insufficient allowance.** The OISY allowance stated before and after decides: larger, and the CC repeats; not larger, and the warning toast shows (see 4.4).
 3. **Phase 2 mechanics.** How does the backend charge a CC to the one OISY allowance? Lowering the approval costs a ledger fee per change, often more than the call itself. A counter kept by the backend avoids that fee.
 4. _Resolved:_ **ARs while Allowance issue is set.** None during the AR cooldown (see 1 and 4.3).
-5. **The disabled main button.** After a Refused AR, does the form's main button enable again when Allowance issue is cleared, for example by a Granted AR after a CC without a form?
-6. **Phase 3 with an active approval.** After a Refused AR, the form would disable its main button although the next try would be charged to the user's own cycles. Should the button stay enabled then, with a note that the next try uses the user's own cycles?
+5. _Resolved:_ **The disabled main button.** No longer applies: no form disables anything (see 9).
+6. _Resolved:_ **Phase 3 with an active approval.** No longer applies, since no form disables its button (see 9). How phase 3 shows its state is decision 10.
 7. **Phase 4.** The cap size and period, the OISY allowance per Granted AR and the new-user pool.
 8. _Resolved:_ **Skipped while Allowance issue is set.** A Skipped AR clears Allowance issue too, since the OISY allowance is then at or above the OISY allowance threshold (see 1 and 4.5).
+9. _Resolved:_ **Where the outcome shows.** Not in the forms. After a Granted AR the CC repeats once; otherwise the allowance-issue toast and the warning toast say what happened, next to the form's usual error. The earlier design, an outcome box and a disabled main button in every form plus a banner, needed changes in every flow that makes CCs and made them all depend on this feature (#14740 and #14741, closed).
+10. **Phase 3 with toasts.** How does a user get from the allowance-issue toast to the own-cycles setup (for example a link to the Tools card), and how does the app show that CCs are charged to the user's own cycles, now that there is no banner?
 
 ## 12. Non-goals
 
-- A failed flow never continues by itself.
-- No warning in each form while Allowance issue is set. The banner is the only global sign.
-- The banner can't be closed.
+- No change to any form or flow: none of them learns about the AR, the repeat or Allowance issue.
+- No message box and no disabled button in the forms.
+- No banner and no **Retry** button.
 - No CC prices and no OISY allowance shown in phase 1.
 - No setup for own cycles on top of an open form in phase 3 (a later improvement).
 - No confirmation per transaction when paying with own cycles.
@@ -192,7 +185,7 @@ Numbers stay fixed: a resolved decision keeps its number, and a new one gets the
 ## 13. References
 
 - Backend: `src/backend/src/api/signer.rs`, `src/backend/src/signer/service.rs`, `src/backend/src/utils/rate_limiter.rs`.
-- Frontend: `src/frontend/src/lib/services/loader.services.ts`, `src/frontend/src/lib/canisters/backend.canister.ts`, `src/frontend/src/lib/api/signer.api.ts`, `src/frontend/src/lib/canisters/signer.canister.ts`, `src/frontend/src/lib/canisters/signer.constants.ts`, `src/frontend/src/lib/canisters/signer.errors.ts`, `src/frontend/src/btc/schedulers/btc-wallet.scheduler.ts`, `src/frontend/src/btc/utils/btc-send.utils.ts`, `src/frontend/src/eth/components/swap/SwapEthWizard.svelte`, `src/frontend/src/lib/components/swap/SwapReview.svelte`, `src/frontend/src/lib/components/tools/Tools.svelte`.
+- Frontend: `src/frontend/src/lib/services/loader.services.ts`, `src/frontend/src/lib/canisters/backend.canister.ts`, `src/frontend/src/lib/api/signer.api.ts`, `src/frontend/src/lib/canisters/signer.canister.ts`, `src/frontend/src/lib/canisters/signer.constants.ts`, `src/frontend/src/lib/canisters/signer.errors.ts`, `src/frontend/src/btc/schedulers/btc-wallet.scheduler.ts`, `src/frontend/src/btc/utils/btc-send.utils.ts`, `src/frontend/src/lib/stores/toasts.store.ts`, `src/frontend/src/lib/components/ui/Toast.svelte`, `src/frontend/src/lib/components/tools/Tools.svelte`.
 - Interfaces: `src/declarations/signer/signer.did` (`PaymentType`), `src/declarations/cycles_ledger/cycles_ledger.did` (`icrc2_allowance` is a query).
 - Related specs: `2026-09-23-feat-mint-tcycles-from-icp.md`, `2026-10-28-feat-canister-top-up-with-icp.md`, `2026-11-02-impr-btc-send-via-backend.md`.
 - Related open drafts, idle since June 2026: [#13144](https://github.com/dfinity/oisy-wallet/pull/13144) (`cfs_sign` event) and [#13145](https://github.com/dfinity/oisy-wallet/pull/13145) (friendlier signer payment errors).
