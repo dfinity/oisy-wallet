@@ -1,7 +1,8 @@
+import { insufficientAllowanceOf } from '$lib/canisters/signer.errors';
 import type { ToastLevel, ToastMsg, ToastMsgUI } from '$lib/types/toast';
 import { consoleError } from '$lib/utils/console.utils';
 import { errorDetailToString } from '$lib/utils/error.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export interface ToastsStore extends Readable<ToastMsgUI[]> {
@@ -76,8 +77,12 @@ export const toastsError = ({ msg: { text, ...rest }, err }: ToastsErrorParams):
 		consoleError(err);
 	}
 
+	// An insufficient OISY allowance gets a toast of its own that says what happened, so the raw
+	// ledger text is left out here.
+	const withDetail = nonNullish(err) && isNullish(insufficientAllowanceOf(err));
+
 	return toastsStore.show({
-		text: `${text}${nonNullish(err) ? ` / ${errorDetailToString(err)}` : ''}`,
+		text: `${text}${withDetail ? ` / ${errorDetailToString(err)}` : ''}`,
 		...rest,
 		level: 'error'
 	});
