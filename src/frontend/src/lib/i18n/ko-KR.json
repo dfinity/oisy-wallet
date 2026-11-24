@@ -111,6 +111,7 @@
 			"oisy_allowance_used_up_title": "무료 사용 크레딧 소진",
 			"oisy_allowance_used_up": "거래 서명에 쓰는 일일 무료 크레딧이 소진되어 일부 거래의 서명이 실패할 수 있습니다.",
 			"oisy_allowance_used_up_own_cycles": "",
+			"oisy_allowance_tools_link": "",
 			"oisy_allowance_exceeded": "이 거래의 비용이 $oisy_name 무료 한도를 초과합니다."
 		},
 		"error": {

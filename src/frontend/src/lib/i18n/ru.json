@@ -111,6 +111,7 @@
 			"oisy_allowance_used_up_title": "Бесплатные кредиты использования исчерпаны",
 			"oisy_allowance_used_up": "Ваш дневной объём бесплатных кредитов для подписи транзакций исчерпан, поэтому подписание некоторых транзакций может не пройти.",
 			"oisy_allowance_used_up_own_cycles": "",
+			"oisy_allowance_tools_link": "",
 			"oisy_allowance_exceeded": "Эта транзакция стоит больше, чем покрывает ваш бесплатный лимит $oisy_name."
 		},
 		"error": {

@@ -111,6 +111,7 @@
 			"oisy_allowance_used_up_title": "Darmowe kredyty użytkowania wykorzystane",
 			"oisy_allowance_used_up": "Twoja dzienna pula darmowych kredytów na podpisywanie transakcji została wykorzystana, więc podpisanie niektórych transakcji może się nie powieść.",
 			"oisy_allowance_used_up_own_cycles": "",
+			"oisy_allowance_tools_link": "",
 			"oisy_allowance_exceeded": "Ta transakcja kosztuje więcej, niż pokrywa Twój darmowy limit $oisy_name."
 		},
 		"error": {

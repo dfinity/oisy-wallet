@@ -1,3 +1,4 @@
+import * as ownCyclesEnv from '$env/own-cycles.env';
 import AllowanceToasts from '$lib/components/core/AllowanceToasts.svelte';
 import IconFuelPump from '$lib/components/icons/IconFuelPump.svelte';
 import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
@@ -38,6 +39,9 @@ describe('AllowanceToasts', () => {
 
 		toastsShowSpy = vi.spyOn(toasts, 'toastsShow');
 		hideSpy = vi.spyOn(toasts.toastsStore, 'hide');
+
+		// The flag follows the network the tests are built for, so the tests set it.
+		vi.spyOn(ownCyclesEnv, 'OWN_CYCLES_ENABLED', 'get').mockReturnValue(false);
 	});
 
 	it('should show no toast until a failed charged call asks for one', async () => {
@@ -191,5 +195,50 @@ describe('AllowanceToasts', () => {
 		await tick();
 
 		expect(hideSpy).not.toHaveBeenCalled();
+	});
+
+	describe('while paying with own cycles is on', () => {
+		const toolsLink = 'Manage your own credits in <a href="/tools/#usage-credits">Tools</a>.';
+
+		beforeEach(() => {
+			vi.spyOn(ownCyclesEnv, 'OWN_CYCLES_ENABLED', 'get').mockReturnValue(true);
+		});
+
+		it('should end the allowance-issue toast with a link to the Usage credits card', async () => {
+			render(AllowanceToasts);
+
+			allowanceIssueStore.setRefused();
+			allowanceToastStore.set({ toast: 'issue' });
+			await tick();
+
+			expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith({
+				...issueToast,
+				text: `${issueToast.text} ${toolsLink}`,
+				renderAsHtml: true
+			});
+		});
+
+		it('should link to the card when own credits pay too', async () => {
+			render(AllowanceToasts);
+
+			allowanceIssueStore.setRefused();
+			allowanceToastStore.set({ toast: 'issue', ownCycles: true });
+			await tick();
+
+			expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith({
+				...issueToast,
+				text: `${replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up_own_cycles)} ${toolsLink}`,
+				renderAsHtml: true
+			});
+		});
+
+		it('should not link from the warning that a call costs more than the allowance', async () => {
+			render(AllowanceToasts);
+
+			allowanceToastStore.set({ toast: 'exceeded' });
+			await tick();
+
+			expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith(exceededToast);
+		});
 	});
 });
