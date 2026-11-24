@@ -45,6 +45,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapProvider } from '$lib/types/swap';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { mapInsufficientAllowanceToSwapError } from '$lib/utils/allowance.utils';
 	import { asCkTwinOf } from '$lib/utils/chain-fusion-swap.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
@@ -365,6 +366,20 @@
 					),
 					variant: 'info'
 				});
+
+				onBack();
+				onStartTriggerAmount();
+				return;
+			}
+
+			// Nothing was signed, and the review says whether trying again can work.
+			const insufficientAllowanceError = mapInsufficientAllowanceToSwapError({
+				err,
+				i18n: $i18n
+			});
+
+			if (nonNullish(insufficientAllowanceError)) {
+				failedSwapError.set(insufficientAllowanceError);
 
 				onBack();
 				onStartTriggerAmount();

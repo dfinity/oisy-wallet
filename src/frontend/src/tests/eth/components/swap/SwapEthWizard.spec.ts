@@ -31,8 +31,10 @@ import * as toasts from '$lib/stores/toasts.store';
 import { LifiFeeChangedError, SwapBroadcastOutcomeUnknownError } from '$lib/types/errors';
 import { SwapProvider, VeloraSwapTypes, type SwapMappedResult } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { lifiCarriedFeeCeiling } from '$lib/utils/lifi-fee.utils';
 import SwapEthWizardStepsTest from '$tests/eth/components/swap/SwapEthWizardStepsTest.svelte';
+import { mockInsufficientAllowanceError } from '$tests/mocks/allowance.mock';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -625,6 +627,50 @@ describe('SwapEthWizard', () => {
 			expect(get(failedSwapError)).toEqual({
 				message: en.swap.error.failed_unexpectedly,
 				variant: 'error'
+			});
+		});
+
+		it('shows on the review that the allowance is used up, and disables Swap, when the AR is refused', async () => {
+			vi.spyOn(swapServices, 'fetchVeloraMarketSwap').mockRejectedValue(
+				mockInsufficientAllowanceError({ answer: 'refused' })
+			);
+
+			const { getByRole, getByText, onBack, queryByRole, failedSwapError } = renderExecution();
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(getByRole('checkbox'));
+			}
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(get(failedSwapError)).toEqual({
+				message: replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up),
+				variant: 'warning',
+				disablesSwap: true
+			});
+		});
+
+		it('says on the review to try again when the AR after an insufficient allowance is granted', async () => {
+			vi.spyOn(swapServices, 'fetchVeloraMarketSwap').mockRejectedValue(
+				mockInsufficientAllowanceError({ answer: 'granted', allowance: 2_917_000_000_000n })
+			);
+
+			const { getByRole, getByText, queryByRole, failedSwapError } = renderExecution();
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(getByRole('checkbox'));
+			}
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(get(failedSwapError)).toEqual({
+				message: replaceOisyPlaceholders(en.core.info.oisy_allowance_renewed),
+				variant: 'info'
 			});
 		});
 

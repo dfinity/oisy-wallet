@@ -16,6 +16,8 @@ import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+import { mockInsufficientAllowanceError } from '$tests/mocks/allowance.mock';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -380,6 +382,24 @@ describe('SwapXrpWizard', () => {
 				msg: { text: en.send.error.xrp_amount_exceeds_sendable },
 				err: error
 			});
+		});
+
+		it('says on the review, instead of a toast, that the allowance is used up, and disables Swap', async () => {
+			vi.mocked(fetchNearIntentsXrpSwap).mockRejectedValue(
+				mockInsufficientAllowanceError({ answer: 'refused' })
+			);
+
+			const { getByText, onBack } = await renderReviewSettled();
+
+			await clickSwap(getByText);
+
+			await waitFor(() => expect(onBack).toHaveBeenCalledOnce());
+
+			expect(toasts.toastsError).not.toHaveBeenCalled();
+			expect(
+				getByText(replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up))
+			).toBeInTheDocument();
+			expect(getByText(en.swap.text.swap_button).closest('button')).toBeDisabled();
 		});
 
 		it('goes back and reports any other failure', async () => {

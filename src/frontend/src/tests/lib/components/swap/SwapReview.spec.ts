@@ -457,6 +457,39 @@ describe('SwapReview', () => {
 			expect(getByText(errorMessage)).toBeInTheDocument();
 		});
 
+		it('should disable Swap when the failed swap error says the same swap would fail again', () => {
+			const { context } = createSwapContext({
+				failedSwapError: {
+					variant: 'warning',
+					message: 'The allowance is used up',
+					disablesSwap: true
+				}
+			});
+
+			const { getByText } = render(SwapReview, {
+				props: baseProps,
+				context
+			});
+
+			expect(getByText(en.swap.text.swap_button).closest('button')).toBeDisabled();
+		});
+
+		it('should keep Swap enabled for a failed swap error that does not disable it', () => {
+			const { context } = createSwapContext({
+				failedSwapError: {
+					variant: 'info',
+					message: 'Try again'
+				}
+			});
+
+			const { getByText } = render(SwapReview, {
+				props: baseProps,
+				context
+			});
+
+			expect(getByText(en.swap.text.swap_button).closest('button')).toBeEnabled();
+		});
+
 		it('should not show error message box when failedSwapError is undefined', () => {
 			const { context } = createSwapContext();
 

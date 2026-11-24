@@ -33,6 +33,7 @@ import * as toasts from '$lib/stores/toasts.store';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockInsufficientAllowanceError } from '$tests/mocks/allowance.mock';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -524,7 +525,7 @@ describe('SwapBtcWizard', () => {
 			const onBack = vi.fn();
 			const onStartTriggerAmount = vi.fn();
 
-			const { context } = createContext(nearIntentsOffer);
+			const { context, failedSwapError } = createContext(nearIntentsOffer);
 
 			const result = render(SwapBtcWizard, {
 				props: {
@@ -537,7 +538,7 @@ describe('SwapBtcWizard', () => {
 				context
 			});
 
-			return { ...result, onClose, onBack, onStartTriggerAmount };
+			return { ...result, onClose, onBack, onStartTriggerAmount, failedSwapError };
 		};
 
 		it('accepts the provider agreement before moving funds', async () => {
@@ -660,6 +661,26 @@ describe('SwapBtcWizard', () => {
 			expect(analytics.trackEvent).not.toHaveBeenCalledWith(
 				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
 			);
+		});
+
+		it('shows on the review, instead of a toast, that the transaction costs more than the allowance', async () => {
+			vi.mocked(fetchNearIntentsBtcSwap).mockRejectedValue(
+				mockInsufficientAllowanceError({ answer: 'skipped', allowance: 5_000_000_000n })
+			);
+
+			const { getByText, onBack, onClose, failedSwapError } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+			expect(toasts.toastsError).not.toHaveBeenCalled();
+			expect(get(failedSwapError)).toEqual({
+				message: replaceOisyPlaceholders(en.core.warning.oisy_allowance_exceeded),
+				variant: 'warning',
+				disablesSwap: true
+			});
 		});
 
 		it('goes back and reports the error when the deposit fails', async () => {

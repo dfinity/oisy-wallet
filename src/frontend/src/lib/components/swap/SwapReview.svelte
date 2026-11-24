@@ -134,7 +134,10 @@
 	});
 
 	let swapButtonDisabled = $derived(
-		isSwapAmountsLoading || swapDisabled || (isWarningConfirmationRequired && !isWarningConfirmed)
+		isSwapAmountsLoading ||
+			swapDisabled ||
+			(isWarningConfirmationRequired && !isWarningConfirmed) ||
+			$failedSwapError?.disablesSwap === true
 	);
 </script>
 

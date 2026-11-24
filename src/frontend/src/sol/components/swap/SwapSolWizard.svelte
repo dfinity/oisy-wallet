@@ -47,6 +47,7 @@
 	import { SwapProvider } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { mapInsufficientAllowanceToSwapError } from '$lib/utils/allowance.utils';
 	import { asCkTwinOf } from '$lib/utils/chain-fusion-swap.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
@@ -441,6 +442,11 @@
 				}
 			});
 
+			const insufficientAllowanceError = mapInsufficientAllowanceToSwapError({
+				err,
+				i18n: $i18n
+			});
+
 			if (err instanceof ChainFusionSolDepositRefusedError) {
 				// The minter stopped the conversion before any SOL moved, so the review says why.
 				failedSwapError.set({
@@ -476,6 +482,8 @@
 					),
 					variant: 'info'
 				});
+			} else if (nonNullish(insufficientAllowanceError)) {
+				failedSwapError.set(insufficientAllowanceError);
 			} else {
 				failedSwapError.set(undefined);
 

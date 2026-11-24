@@ -33,6 +33,7 @@
 	import { SwapProvider } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { mapInsufficientAllowanceToSwapError } from '$lib/utils/allowance.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { tryParseToken } from '$lib/utils/parse.utils';
@@ -87,8 +88,13 @@
 		onBack
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, sourceTokenBalance, sourceTokenExchangeRate } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		sourceToken,
+		destinationToken,
+		sourceTokenBalance,
+		sourceTokenExchangeRate,
+		failedSwapError
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -221,6 +227,8 @@
 		const { selectedProvider } = $swapAmountsStore;
 
 		try {
+			failedSwapError.set(undefined);
+
 			if (
 				selectedProvider?.provider === SwapProvider.NEAR_INTENTS &&
 				!$hasAcknowledgedNearIntentsSwap
@@ -316,6 +324,21 @@
 				toastsError({ msg: { text: $i18n.send.error.xrp_amount_exceeds_sendable }, err });
 
 				onBack();
+				onBack();
+				onStartTriggerAmount();
+
+				return;
+			}
+
+			// Nothing was signed, and the review says whether trying again can work.
+			const insufficientAllowanceError = mapInsufficientAllowanceToSwapError({
+				err,
+				i18n: $i18n
+			});
+
+			if (nonNullish(insufficientAllowanceError)) {
+				failedSwapError.set(insufficientAllowanceError);
+
 				onBack();
 				onStartTriggerAmount();
 

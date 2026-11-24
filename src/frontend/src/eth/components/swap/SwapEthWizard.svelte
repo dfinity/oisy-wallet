@@ -78,6 +78,7 @@
 	import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { mapInsufficientAllowanceToSwapError } from '$lib/utils/allowance.utils';
 	import { asCkTwinOf } from '$lib/utils/chain-fusion-swap.utils';
 	import { consoleError } from '$lib/utils/console.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
@@ -775,13 +776,15 @@
 					variant: 'info'
 				});
 			} else {
-				failedSwapError.set({
-					message:
-						nearIntentsQuoteRejectedMessage(err) ??
-						mapEthereumErrorMsg(err) ??
-						$i18n.swap.error.failed_unexpectedly,
-					variant: 'error'
-				});
+				failedSwapError.set(
+					mapInsufficientAllowanceToSwapError({ err, i18n: $i18n }) ?? {
+						message:
+							nearIntentsQuoteRejectedMessage(err) ??
+							mapEthereumErrorMsg(err) ??
+							$i18n.swap.error.failed_unexpectedly,
+						variant: 'error'
+					}
+				);
 			}
 
 			onBack();

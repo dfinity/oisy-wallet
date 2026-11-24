@@ -33,8 +33,10 @@ import {
 } from '$lib/types/errors';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import { SwapProvider, type ChainFusionSwapDetails, type SwapMappedResult } from '$lib/types/swap';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { estimatePriorityFee } from '$sol/api/solana.api';
 import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
+import { mockInsufficientAllowanceError } from '$tests/mocks/allowance.mock';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
@@ -583,6 +585,26 @@ describe('SwapSolWizard', () => {
 				expect(toasts.toastsError).not.toHaveBeenCalled();
 			}
 		);
+
+		it('should say on the review, instead of a toast, that the allowance is used up when the AR is refused', async () => {
+			mockFetchChainFusionSolSwap.mockRejectedValue(
+				mockInsufficientAllowanceError({ answer: 'refused' })
+			);
+
+			const { getByText, onBack, onClose, failedSwapError } = renderChainFusion();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(get(failedSwapError)).toStrictEqual({
+				message: replaceOisyPlaceholders(en.core.warning.oisy_allowance_used_up),
+				variant: 'warning',
+				disablesSwap: true
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+			expect(toasts.toastsError).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('provider agreement on swap', () => {
