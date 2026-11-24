@@ -89,7 +89,8 @@
 		},
 		"info": {
 			"test_banner": "仅用于测试目的！",
-			"test_banner_beta": "这是一个测试版发布。你可能会遇到一些错误。真实资产正在使用中——请谨慎操作。"
+			"test_banner_beta": "这是一个测试版发布。你可能会遇到一些错误。真实资产正在使用中——请谨慎操作。",
+			"oisy_allowance_limited": ""
 		},
 		"alt": {
 			"logo": "$name 标志",

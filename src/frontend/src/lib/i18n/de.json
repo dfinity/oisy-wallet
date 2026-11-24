@@ -89,7 +89,8 @@
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
-			"test_banner_beta": "Das ist eine Beta Version, die Fehler enthalten kann. Benutze sie mit Vorsicht, weil echte Token betroffen sein können."
+			"test_banner_beta": "Das ist eine Beta Version, die Fehler enthalten kann. Benutze sie mit Vorsicht, weil echte Token betroffen sein können.",
+			"oisy_allowance_limited": ""
 		},
 		"alt": {
 			"logo": "$name-Logo",

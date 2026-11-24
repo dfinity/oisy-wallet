@@ -89,7 +89,8 @@
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
-			"test_banner_beta": "Toto je beta verze. Může se vyskytnout chyba. V sázce jsou skutečné prostředky – používejte prosím s opatrností."
+			"test_banner_beta": "Toto je beta verze. Může se vyskytnout chyba. V sázce jsou skutečné prostředky – používejte prosím s opatrností.",
+			"oisy_allowance_limited": ""
 		},
 		"alt": {
 			"logo": "logo $name",

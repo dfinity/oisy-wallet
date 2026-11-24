@@ -89,7 +89,8 @@
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
-			"test_banner_beta": "Esta es una versión beta. Es posible que encuentres errores. Los activos reales están en juego, por favor, úsala con cuidado."
+			"test_banner_beta": "Esta es una versión beta. Es posible que encuentres errores. Los activos reales están en juego, por favor, úsala con cuidado.",
+			"oisy_allowance_limited": ""
 		},
 		"alt": {
 			"logo": "Logotipo",
