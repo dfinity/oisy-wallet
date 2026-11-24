@@ -1,8 +1,10 @@
 import { CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import * as ownCyclesEnv from '$env/own-cycles.env';
 import * as icrcIndexNgApi from '$icp/api/icrc-index-ng.api';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID, ZERO } from '$lib/constants/app.constants';
 import {
+	canPayWithOwnCycles,
 	loadFreeAllowance,
 	loadOwnCycles,
 	loadPreviousSpendingLimit,
@@ -379,6 +381,54 @@ describe('own-cycles.services', () => {
 			await expect(
 				setSpendingLimit({ identity: mockIdentity, approved: 1n, limit: 1_000_000_000_000n })
 			).rejects.toThrow(err);
+		});
+	});
+
+	describe('canPayWithOwnCycles', () => {
+		beforeEach(() => {
+			vi.spyOn(ownCyclesEnv, 'OWN_CYCLES_ENABLED', 'get').mockReturnValue(true);
+			vi.spyOn(icrcLedgerApi, 'allowance').mockResolvedValue({
+				allowance: 1n,
+				expires_at: []
+			});
+		});
+
+		it('is true with any approval left for the signer', async () => {
+			await expect(canPayWithOwnCycles({ identity: mockIdentity })).resolves.toBeTruthy();
+
+			expect(icrcLedgerApi.allowance).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				certified: false,
+				ledgerCanisterId: CYCLES_LEDGER_CANISTER_ID,
+				owner: { owner: mockPrincipal },
+				spender: signer
+			});
+		});
+
+		it('is false with no approval left', async () => {
+			vi.spyOn(icrcLedgerApi, 'allowance').mockResolvedValue({ allowance: ZERO, expires_at: [] });
+
+			await expect(canPayWithOwnCycles({ identity: mockIdentity })).resolves.toBeFalsy();
+		});
+
+		it('is false when the approval cannot be read', async () => {
+			vi.spyOn(icrcLedgerApi, 'allowance').mockRejectedValue(new Error('Ledger unreachable'));
+
+			await expect(canPayWithOwnCycles({ identity: mockIdentity })).resolves.toBeFalsy();
+		});
+
+		it('is false, without a read, while paying with own cycles is off', async () => {
+			vi.spyOn(ownCyclesEnv, 'OWN_CYCLES_ENABLED', 'get').mockReturnValue(false);
+
+			await expect(canPayWithOwnCycles({ identity: mockIdentity })).resolves.toBeFalsy();
+
+			expect(icrcLedgerApi.allowance).not.toHaveBeenCalled();
+		});
+
+		it('is false, without a read, while signed out', async () => {
+			await expect(canPayWithOwnCycles({ identity: undefined })).resolves.toBeFalsy();
+
+			expect(icrcLedgerApi.allowance).not.toHaveBeenCalled();
 		});
 	});
 });
