@@ -1389,6 +1389,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "Scambia",
 			"select_destination_token": "Seleziona token da ricevere",
@@ -1442,6 +1445,25 @@
 			"gasless": "",
 			"swap_fees": "",
 			"cross_chain_networks_info": "",
+			"receive_shortcut_same_network": "",
+			"receive_shortcut_other_network": "",
+			"receive_shortcut_token_on_network": "",
+			"receive_shortcut_convert": "",
+			"receive_shortcut_convert_back": "",
+			"receive_shortcut_bridge_back": "",
+			"receive_shortcut_move": "",
+			"receive_shortcut_any_token": "",
+			"receive_shortcut_any_token_count": "",
+			"receive_shortcut_any_token_count_one": "",
+			"receive_shortcut_any_token_count_single": "",
+			"receive_shortcut_more": "",
+			"move_token_to": "",
+			"move_no_networks_title": "",
+			"move_no_networks_title_without_symbol": "",
+			"move_no_networks_description": "",
+			"move_networks_changed_title": "",
+			"move_networks_changed_description": "",
+			"as_token": "",
 			"two_swaps_info": "$oisy_short offre solo scambi che può verificare completamente prima della tua approvazione, e non esiste uno scambio diretto di questo tipo da $sourceSymbol a $destinationSymbol. Però puoi scambiare prima $sourceSymbol con $intermediateSymbol e poi $intermediateSymbol con $destinationSymbol.",
 			"two_swaps_first_button": "Scambia prima con $intermediateSymbol",
 			"near_intents_estimated_time": "",
@@ -2715,9 +2737,7 @@
 		"text": {
 			"next_slide": "Slide successiva",
 			"prev_slide": "Slide precedente",
-			"indicator": "Vai alla slide $index",
-			"cksol_slide_title": "ckSOL è arrivato: SOL su Internet Computer",
-			"cksol_slide_cta": "Apri ckSOL"
+			"indicator": "Vai alla slide $index"
 		}
 	},
 	"agreements": {
@@ -2917,6 +2937,7 @@
 			"interest_accrued": "Interessi maturati",
 			"debt_after_repay": "Debito dopo il rimborso",
 			"repay_exceeds_debt": "L'importo supera il tuo debito residuo.",
+			"repay_below_native_minimum": "",
 			"repay_prices_unavailable": "I prezzi non sono temporaneamente disponibili. Il rimborso è disabilitato finché non vengono caricati.",
 			"repay_debt_unavailable": "Il tuo debito residuo non è temporaneamente disponibile. Il rimborso è disabilitato finché non viene caricato.",
 			"repay_pending_covers_debt": "Un rimborso per questa posizione è ancora in elaborazione. Potrai rimborsare di più una volta completato."

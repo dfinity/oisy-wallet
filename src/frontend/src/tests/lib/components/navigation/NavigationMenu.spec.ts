@@ -68,6 +68,17 @@ describe('NavigationMenu', () => {
 		expect(scroll.compareDocumentPosition(bottom) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 	});
 
+	it('shrinks the rows in short windows only for a mouse', () => {
+		// Touch screens keep 40px rows, the minimum tap target. Asserted on the
+		// classes because jsdom has no layout and no media queries.
+		const { scroll, bottom } = renderSidebar();
+
+		for (const list of [scroll.firstElementChild, bottom.firstElementChild]) {
+			expect(list).toHaveClass('h-sm:pointer-fine:[&_.nav-item]:py-1.5');
+			expect(list).not.toHaveClass('h-sm:[&_.nav-item]:py-1.5');
+		}
+	});
+
 	it('lets the scrolling area shrink, rather than push the pinned block out', () => {
 		// Without `min-h-0` a flex child will not shrink below its content, and the
 		// sections would push Settings and More off the bottom of the column

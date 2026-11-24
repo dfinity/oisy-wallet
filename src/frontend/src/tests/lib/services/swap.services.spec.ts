@@ -28,6 +28,8 @@ import {
 	hasSufficientIcrcAllowance,
 	loadCustomTokens as loadCustomIcrcTokens
 } from '$icp/services/icrc.services';
+import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { setCustomToken } from '$lib/api/backend.api';
@@ -4302,8 +4304,56 @@ describe('swap.services', () => {
 	});
 
 	describe('enableSwapDestinationToken with an ICRC destination', () => {
+		const selectedToken: IcTokenToggleable = {
+			...mockValidIcrcToken,
+			enabled: false
+		};
+
 		beforeEach(() => {
 			vi.clearAllMocks();
+		});
+
+		afterEach(() => {
+			icrcCustomTokensStore.resetAll();
+			icrcDefaultTokensStore.resetAll();
+		});
+
+		it.each([undefined, 1n])('uses the refreshed version instead of %s', async (version) => {
+			const destinationToken = { ...selectedToken, version };
+			const savedToken = { ...selectedToken, id: parseTokenId(selectedToken.symbol) };
+
+			if (version !== undefined) {
+				icrcCustomTokensStore.setAll([{ data: { ...savedToken, version }, certified: true }]);
+			}
+
+			icrcCustomTokensStore.setAll([{ data: { ...savedToken, version: 2n }, certified: true }]);
+
+			await enableSwapDestinationToken({ identity: mockIdentity, destinationToken });
+
+			expect(setCustomToken).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				token: expect.objectContaining({ enabled: true, version: [2n] })
+			});
+			expect(loadCustomIcrcTokens).toHaveBeenCalledOnce();
+		});
+
+		it('skips the write if the destination was enabled after selection', async () => {
+			icrcCustomTokensStore.setAll([
+				{ data: { ...selectedToken, enabled: true, version: 2n }, certified: true }
+			]);
+
+			await enableSwapDestinationToken({ identity: mockIdentity, destinationToken: selectedToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+		});
+
+		it('respects the effective enabled state of a default-enabled token', async () => {
+			icrcDefaultTokensStore.setAll([{ data: mockValidIcrcToken, certified: true }]);
+			icrcCustomTokensStore.setAll([{ data: { ...selectedToken, version: 2n }, certified: true }]);
+
+			await enableSwapDestinationToken({ identity: mockIdentity, destinationToken: selectedToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
 		});
 
 		// The regression this guards: a Chain Fusion mint (and a 1Sec bridge) lands on an

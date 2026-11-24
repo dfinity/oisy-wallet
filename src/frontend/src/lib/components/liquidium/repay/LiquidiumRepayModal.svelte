@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { Asset, Chain } from '@liquidium/client';
+	import { SupplyAction, type Asset, type Chain } from '@liquidium/client';
 	import { setContext } from 'svelte';
 	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumRepayBtcWizard from '$lib/components/liquidium/repay/LiquidiumRepayBtcWizard.svelte';
 	import LiquidiumRepayEthWizard from '$lib/components/liquidium/repay/LiquidiumRepayEthWizard.svelte';
 	import LiquidiumRepayIcrcWizard from '$lib/components/liquidium/repay/LiquidiumRepayIcrcWizard.svelte';
+	import LiquidiumRepaySolWizard from '$lib/components/liquidium/repay/LiquidiumRepaySolWizard.svelte';
 	import LiquidiumRepayTokensList from '$lib/components/liquidium/repay/LiquidiumRepayTokensList.svelte';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
@@ -61,6 +62,8 @@
 
 	// Provider inflow fee for this asset (repayment is an inflow), passed to the wizard.
 	let inflowFee = $state<bigint | undefined>();
+	// SOL only: the least gross transfer Liquidium credits, which the native SOL form enforces.
+	let minimumSendAmount = $state<bigint | undefined>();
 	// The estimate failed (e.g. stale oracle price): surface a retry message and block submit.
 	// Account-based repay has no SDK-sanctioned fee fallback (that exists only for instant loans),
 	// so it degrades gracefully like Supply rather than guessing a fee.
@@ -95,24 +98,45 @@
 	$effect(() => {
 		const identity = $authIdentity;
 
-		if (nonNullish(identity) && nonNullish(selectedReserve)) {
-			const { asset, chain } = selectedReserve;
-
-			inflowFee = undefined;
-			inflowFeeUnavailable = false;
-
-			// Reserve data widens asset/chain to open strings; narrow to the SDK's strict types here.
-			estimateLiquidiumInflowFee({
-				identity,
-				asset: asset as Asset,
-				chain: chain as Chain
-			})
-				.then((fee) => (inflowFee = fee))
-				.catch((err: unknown) => {
-					consoleError(err);
-					inflowFeeUnavailable = true;
-				});
+		if (isNullish(identity) || isNullish(selectedReserve)) {
+			return;
 		}
+
+		const { asset, chain, poolId } = selectedReserve;
+
+		inflowFee = undefined;
+		minimumSendAmount = undefined;
+		inflowFeeUnavailable = false;
+
+		// A quote for a rail picked before must not overwrite the current one's.
+		let cancelled = false;
+
+		// Reserve data widens asset/chain to open strings; narrow to the SDK's strict types here.
+		estimateLiquidiumInflowFee({
+			identity,
+			ethAddress: $ethAddress,
+			asset: asset as Asset,
+			chain: chain as Chain,
+			poolId,
+			action: SupplyAction.repayment
+		})
+			.then(({ totalFee, minimumSendAmount: minimum }) => {
+				if (!cancelled) {
+					inflowFee = totalFee;
+					minimumSendAmount = minimum;
+				}
+			})
+			.catch((err: unknown) => {
+				consoleError(err);
+
+				if (!cancelled) {
+					inflowFeeUnavailable = true;
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
 	});
 
 	$effect(() => {
@@ -199,6 +223,7 @@
 		selectedReserve = reserve;
 		amount = undefined;
 		inflowFee = undefined;
+		minimumSendAmount = undefined;
 		inflowFeeUnavailable = false;
 		maxRepay = undefined;
 		maxRepayUnavailable = false;
@@ -263,7 +288,25 @@
 					bind:amount
 					bind:repayProgressStep
 				/>
-			{:else}
+			{:else if selectedReserve.chain === 'SOL'}
+				<LiquidiumRepaySolWizard
+					{currentStep}
+					{inflowFee}
+					{inflowFeeUnavailable}
+					maxRepay={netMaxRepay}
+					{maxRepayUnavailable}
+					{minimumSendAmount}
+					onBack={modal.back}
+					onClose={close}
+					onNext={modal.next}
+					onSelectToken={enterTokensList}
+					{pendingRepay}
+					portfolio={$liquidiumPortfolio}
+					reserve={liveReserve(selectedReserve)}
+					bind:amount
+					bind:repayProgressStep
+				/>
+			{:else if selectedReserve.chain === 'ETH'}
 				<LiquidiumRepayEthWizard
 					{currentStep}
 					{inflowFee}

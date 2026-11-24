@@ -1389,6 +1389,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "スワップ",
 			"select_destination_token": "受け取るトークンを選択",
@@ -1442,6 +1445,25 @@
 			"gasless": "ガスレス",
 			"swap_fees": "スワップ手数料",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
+			"receive_shortcut_same_network": "",
+			"receive_shortcut_other_network": "",
+			"receive_shortcut_token_on_network": "",
+			"receive_shortcut_convert": "",
+			"receive_shortcut_convert_back": "",
+			"receive_shortcut_bridge_back": "",
+			"receive_shortcut_move": "",
+			"receive_shortcut_any_token": "",
+			"receive_shortcut_any_token_count": "",
+			"receive_shortcut_any_token_count_one": "",
+			"receive_shortcut_any_token_count_single": "",
+			"receive_shortcut_more": "",
+			"move_token_to": "",
+			"move_no_networks_title": "",
+			"move_no_networks_title_without_symbol": "",
+			"move_no_networks_description": "",
+			"move_networks_changed_title": "",
+			"move_networks_changed_description": "",
+			"as_token": "",
 			"two_swaps_info": "$oisy_short は、承認の前に完全に検証できるスワップのみを提供しています。$sourceSymbol から $destinationSymbol へのそのような直接のスワップはありません。ただし、まず $sourceSymbol を $intermediateSymbol にスワップし、その後 $intermediateSymbol を $destinationSymbol にスワップすることはできます。",
 			"two_swaps_first_button": "まず $intermediateSymbol にスワップ",
 			"near_intents_estimated_time": "",
@@ -2715,9 +2737,7 @@
 		"text": {
 			"next_slide": "次のスライド",
 			"prev_slide": "前のスライド",
-			"indicator": "スライド$indexにジャンプ",
-			"cksol_slide_title": "ckSOL登場: Internet Computer上のSOL",
-			"cksol_slide_cta": "ckSOLを開く"
+			"indicator": "スライド$indexにジャンプ"
 		}
 	},
 	"agreements": {
@@ -2917,6 +2937,7 @@
 			"interest_accrued": "発生した利息",
 			"debt_after_repay": "返済後の負債",
 			"repay_exceeds_debt": "金額が未払いの負債を超えています。",
+			"repay_below_native_minimum": "",
 			"repay_prices_unavailable": "価格は一時的に利用できません。読み込まれるまで返済は無効になっています。",
 			"repay_debt_unavailable": "未払いの負債は一時的に利用できません。読み込まれるまで返済は無効になっています。",
 			"repay_pending_covers_debt": "このポジションの返済はまだ処理中です。完了後に追加で返済できます。"

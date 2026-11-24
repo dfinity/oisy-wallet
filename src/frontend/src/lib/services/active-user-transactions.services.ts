@@ -1,3 +1,4 @@
+import { BTC_TXID_REGEX } from '$btc/constants/btc.constants';
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import {
 	createActiveUserTransaction as createActiveUserTransactionApi,
@@ -176,8 +177,6 @@ export const deleteUnbroadcastActiveUserTransaction = async ({
 		}
 	}
 };
-
-const BTC_TXID_REGEX = /^[0-9a-f]{64}$/i;
 
 /**
  * Each BTC row's last "is it known" check and its run of "not found" answers. In memory, like the
