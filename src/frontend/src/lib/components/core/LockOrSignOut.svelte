@@ -36,8 +36,9 @@
 
 	const handleLock = async () => {
 		onHidePopover?.();
-		await lockSession({ resetUrl: false });
+		// Stored first: a tab that finds the delegation gone must find the lock too, or it clears the cache.
 		authLocked.lock({ source: 'menu lock button' });
+		await lockSession({ resetUrl: false });
 	};
 </script>
 
