@@ -134,8 +134,8 @@ Phase 3 comes first, with one spender: the signer charges the user's main accoun
 
 ### 6.2 Entry points and state
 
-- **An allowance card on the Tools page** shows the free signatures left (the OISY allowance left), the spending limit (the approval left) and the ICP Cycles balance, since either can run low, with **Set spending limit** and **Get ICP Cycles**. Allowances are also given in signatures, estimated at the backend's cost per signature. It stays out of the top row: users should rarely need it.
-- **Set spending limit** sets the approval to the amount the user enters, up to their TCYCLES balance, 0 to revoke it, after a review step. **Get ICP Cycles** opens Mint TCYCLES. The card reads the cycles ledger itself, so it works whether or not TCYCLES is enabled.
+- **An allowance card on the Tools page** shows the free signatures left (the OISY allowance left), the spending limit (the approval left, of the limit set last: "1.2 of 2 TCYCLES left") and the ICP Cycles balance, since either can run low, with **Set spending limit** and **Get ICP Cycles**. The ledger keeps only the approval left, so the limit set last comes from the cycles ledger's index. Allowances are also given in signatures, estimated at the backend's cost per signature; the spending limit's counts only what the balance can pay, with a warning while the balance covers less than the approval left. It stays out of the top row: users should rarely need it.
+- **Set spending limit** sets the approval to the amount the user enters, starting at the limit set last, up to their TCYCLES balance, 0 to revoke it, after a review step that shows the previous limit, the remaining and the new limit. **Get ICP Cycles** opens Mint TCYCLES. The card reads the cycles ledger itself, so it works whether or not TCYCLES is enabled.
 - **From the toast.** The allowance-issue toast links to the Tools card, next to its Learn more link, as the Activity info box links to Settings.
 - How the app shows that CCs are charged to the user's own cycles is still open (see pending decision 10).
 
@@ -191,7 +191,7 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 
 1. A user can approve an amount of their TCYCLES for CCs from the Tools card, in one step.
 2. Every CC is charged to the OISY allowance first. A CC whose AR is Refused, or that falls in the AR cooldown, is repeated once on the user's own cycles if an approval is left, with no prompt per transaction.
-3. The Tools card shows the approval left and the TCYCLES balance, with **Set spending limit** and **Get ICP Cycles**.
+3. The Tools card shows the approval left, of the limit set last, and the TCYCLES balance, with **Set spending limit** and **Get ICP Cycles**.
 4. A CC paid with the user's own cycles that fails for the approval or the TCYCLES balance shows the usage-credits error text in the flow's error toast, in place of its usual text.
 5. The allowance-issue toast links to the Tools card.
 6. Without a reload, OISY pays CCs again as soon as the OISY allowance covers them, for example after the hourly limit resets or another device gets a Granted AR.
