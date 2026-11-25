@@ -9,3 +9,8 @@ export const SIGNER_PAYMENT_TYPE: PaymentType = {
 		subaccount: []
 	}
 };
+
+// What the backend counts per signature when it sizes the OISY allowance: one signer fee and one
+// ledger fee (`SIGNER_FEE` + `LEDGER_FEE` in `src/backend/src/signer/service.rs`). Real charges vary
+// by call, so a number of signatures from it is an estimate.
+export const SIGNER_CALL_ESTIMATED_CYCLES = 81_000_000_000n;

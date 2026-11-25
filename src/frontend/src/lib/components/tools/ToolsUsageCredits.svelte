@@ -4,6 +4,7 @@
 	import CyclesMintModal from '$icp/components/cycles-mint/CyclesMintModal.svelte';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
+	import { SIGNER_CALL_ESTIMATED_CYCLES } from '$lib/canisters/signer.constants';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
@@ -15,6 +16,7 @@
 	import {
 		TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON,
 		TOOLS_USAGE_CREDITS_BALANCE,
+		TOOLS_USAGE_CREDITS_FREE_SIGNATURES,
 		TOOLS_USAGE_CREDITS_GET_CYCLES_BUTTON,
 		TOOLS_USAGE_CREDITS_OWN_CREDITS
 	} from '$lib/constants/test-ids.constants';
@@ -23,7 +25,11 @@
 	import { modalCyclesMint, modalUsageCreditsAdd } from '$lib/derived/modal.derived';
 	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
-	import { loadOwnCycles, type OwnCycles } from '$lib/services/own-cycles.services';
+	import {
+		loadFreeAllowance,
+		loadOwnCycles,
+		type OwnCycles
+	} from '$lib/services/own-cycles.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -36,7 +42,20 @@
 	let exchangeRate = $derived(nonNullish(token) ? $exchanges?.[token.id]?.usd : undefined);
 
 	let ownCycles = $state<OwnCycles | undefined>();
+	// What is left of the free OISY allowance.
+	let free = $state<bigint | undefined>();
 	let loadFailed = $state(false);
+
+	// An estimate, from the cost the backend sizes the OISY allowance with.
+	const signatures = (cycles: bigint): bigint => cycles / SIGNER_CALL_ESTIMATED_CYCLES;
+
+	const signaturesText = (cycles: bigint): string => {
+		const count = signatures(cycles);
+
+		return count === 1n
+			? $i18n.usage_credits.text.signatures_one
+			: replacePlaceholders($i18n.usage_credits.text.signatures_other, { $count: `${count}` });
+	};
 
 	const load = async () => {
 		if (isNullish($authIdentity)) {
@@ -44,7 +63,10 @@
 		}
 
 		try {
-			ownCycles = await loadOwnCycles({ identity: $authIdentity });
+			[ownCycles, free] = await Promise.all([
+				loadOwnCycles({ identity: $authIdentity }),
+				loadFreeAllowance({ identity: $authIdentity })
+			]);
 			loadFailed = false;
 		} catch (err: unknown) {
 			loadFailed = true;
@@ -68,7 +90,7 @@
 	});
 </script>
 
-{#snippet amount(value: bigint | undefined, testId: string)}
+{#snippet amount(value: bigint | undefined, testId: string, estimate = false)}
 	{#if nonNullish(value) && nonNullish(token)}
 		<!-- The fiat value as the send shows it, from the amount in full. -->
 		<span class="flex gap-2 text-sm text-tertiary">
@@ -79,6 +101,9 @@
 				amount={formatToken({ value, unitName: token.decimals, displayDecimals: token.decimals })}
 				{exchangeRate}
 			/>
+			{#if estimate}
+				<span>· {signaturesText(value)}</span>
+			{/if}
 		</span>
 	{:else if loadFailed}
 		<span class="text-sm text-tertiary" data-tid={testId}>{$i18n.core.text.not_available}</span>
@@ -94,7 +119,7 @@
 		<!-- Shown, not behind a help toggle, as every card on Tools shows its text. Pulled up to the
 		     title it explains: the card's title gap is sized for rows. -->
 		<p class="-mt-4 mb-3 text-sm text-tertiary">
-			{replacePlaceholders($i18n.usage_credits.text.description, { $token: token.symbol })}
+			{$i18n.usage_credits.text.description}
 
 			<ExternalLink
 				ariaLabel={$i18n.settings.text.learn_more}
@@ -112,8 +137,27 @@
 		<SettingsCardItem>
 			{#snippet key()}
 				<span class="flex flex-col">
+					{$i18n.usage_credits.text.free_signatures}
+					{#if nonNullish(free)}
+						<output class="text-sm text-tertiary" data-tid={TOOLS_USAGE_CREDITS_FREE_SIGNATURES}
+							>≈ {signatures(free)}</output
+						>
+					{:else if loadFailed}
+						<span class="text-sm text-tertiary" data-tid={TOOLS_USAGE_CREDITS_FREE_SIGNATURES}
+							>{$i18n.core.text.not_available}</span
+						>
+					{:else}
+						<span class="mt-1 w-20"><SkeletonText /></span>
+					{/if}
+				</span>
+			{/snippet}
+		</SettingsCardItem>
+
+		<SettingsCardItem>
+			{#snippet key()}
+				<span class="flex flex-col">
 					{$i18n.usage_credits.text.own_credits}
-					{@render amount(ownCycles?.approved, TOOLS_USAGE_CREDITS_OWN_CREDITS)}
+					{@render amount(ownCycles?.approved, TOOLS_USAGE_CREDITS_OWN_CREDITS, true)}
 				</span>
 			{/snippet}
 
@@ -130,7 +174,7 @@
 		<SettingsCardItem>
 			{#snippet key()}
 				<span class="flex flex-col">
-					{replacePlaceholders($i18n.usage_credits.text.balance, { $token: token.symbol })}
+					{$i18n.usage_credits.text.balance}
 					{@render amount(ownCycles?.balance, TOOLS_USAGE_CREDITS_BALANCE)}
 				</span>
 			{/snippet}

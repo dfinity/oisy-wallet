@@ -934,7 +934,10 @@
 			"add_title": "",
 			"add_description": "",
 			"own_credits_after": "",
-			"added": ""
+			"added": "",
+			"free_signatures": "",
+			"signatures_one": "",
+			"signatures_other": ""
 		},
 		"error": {
 			"load": "",

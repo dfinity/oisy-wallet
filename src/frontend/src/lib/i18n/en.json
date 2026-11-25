@@ -926,15 +926,18 @@
 	"usage_credits": {
 		"text": {
 			"title": "Usage credits",
-			"description": "When your free daily usage credits are used up, signing is paid from your own $token, up to the amount you add here.",
-			"own_credits": "Your own credits",
-			"balance": "$token balance",
+			"description": "When your free daily usage credits are used up, signing is paid from your ICP Cycles, up to the spending limit you set here.",
+			"own_credits": "Spending limit",
+			"balance": "ICP Cycles balance",
 			"add_more": "Add more",
 			"get_cycles": "Get cycles",
 			"add_title": "Add usage credits",
 			"add_description": "Your $token stay in your balance. The amount you add is the most that signing can charge to them.",
-			"own_credits_after": "Your own credits after",
-			"added": "Added $amount $token to your usage credits."
+			"own_credits_after": "Spending limit after",
+			"added": "Added $amount $token to your spending limit.",
+			"free_signatures": "Free signatures left",
+			"signatures_one": "≈ 1 signature",
+			"signatures_other": "≈ $count signatures"
 		},
 		"error": {
 			"load": "Couldn't load your usage credits.",

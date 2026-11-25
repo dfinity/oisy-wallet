@@ -7,6 +7,7 @@ import {
 	CONVERT_AMOUNT_EXCHANGE_VALUE,
 	TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON,
 	TOOLS_USAGE_CREDITS_BALANCE,
+	TOOLS_USAGE_CREDITS_FREE_SIGNATURES,
 	TOOLS_USAGE_CREDITS_GET_CYCLES_BUTTON,
 	TOOLS_USAGE_CREDITS_MODAL,
 	TOOLS_USAGE_CREDITS_OWN_CREDITS
@@ -16,7 +17,6 @@ import * as cyclesMintAnalytics from '$lib/services/cycles-mint-analytics.servic
 import * as ownCyclesServices from '$lib/services/own-cycles.services';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockTcyclesToken, mockXdrPermyriadPerIcp } from '$tests/mocks/cycles-mint.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -46,6 +46,8 @@ describe('ToolsUsageCredits', () => {
 			readable([{ ...mockTcyclesToken, enabled: true }])
 		);
 		vi.spyOn(ownCyclesServices, 'loadOwnCycles').mockResolvedValue(ownCycles);
+		// 30 signatures at the backend's 0.081 TCYCLES each.
+		vi.spyOn(ownCyclesServices, 'loadFreeAllowance').mockResolvedValue(2_430_000_000_000n);
 		vi.spyOn(cmcApi, 'getIcpXdrConversionRate').mockResolvedValue(mockXdrPermyriadPerIcp);
 		vi.spyOn(cyclesMintAnalytics, 'trackCyclesMint').mockImplementation(() => undefined);
 		vi.spyOn(cyclesMintEnv, 'CYCLES_MINT_ENABLED', 'get').mockReturnValue(true);
@@ -55,23 +57,40 @@ describe('ToolsUsageCredits', () => {
 		const { container, getByRole, getByText } = render(ToolsUsageCredits);
 
 		expect(getByText(en.usage_credits.text.title)).toBeInTheDocument();
-		expect(container).toHaveTextContent(
-			replacePlaceholders(en.usage_credits.text.description, { $token: 'TCYCLES' })
-		);
+		expect(container).toHaveTextContent(en.usage_credits.text.description);
 		expect(getByRole('link', { name: en.settings.text.learn_more })).toHaveAttribute(
 			'href',
 			OISY_DOCS_URL
 		);
 	});
 
-	it('shows the approval left and the TCYCLES balance it reads', async () => {
-		const { getByTestId } = await renderLoaded();
+	it('shows the free signatures left, the spending limit and the ICP Cycles balance it reads', async () => {
+		const { container, getByTestId, getByText } = await renderLoaded();
 
+		expect(getByText(en.usage_credits.text.free_signatures)).toBeInTheDocument();
+		expect(getByTestId(TOOLS_USAGE_CREDITS_FREE_SIGNATURES)).toHaveTextContent('≈ 30');
+		expect(getByText(en.usage_credits.text.own_credits)).toBeInTheDocument();
 		expect(getByTestId(TOOLS_USAGE_CREDITS_OWN_CREDITS)).toHaveTextContent('1.5 TCYCLES');
+		expect(container).toHaveTextContent('≈ 18 signatures');
+		expect(getByText(en.usage_credits.text.balance)).toBeInTheDocument();
 		expect(getByTestId(TOOLS_USAGE_CREDITS_BALANCE)).toHaveTextContent('3.25 TCYCLES');
 		expect(ownCyclesServices.loadOwnCycles).toHaveBeenCalledExactlyOnceWith({
 			identity: mockIdentity
 		});
+		expect(ownCyclesServices.loadFreeAllowance).toHaveBeenCalledExactlyOnceWith({
+			identity: mockIdentity
+		});
+	});
+
+	it('says signature, not signatures, for one', async () => {
+		vi.spyOn(ownCyclesServices, 'loadOwnCycles').mockResolvedValue({
+			...ownCycles,
+			approved: 100_000_000_000n
+		});
+
+		const { container } = await renderLoaded();
+
+		expect(container).toHaveTextContent(en.usage_credits.text.signatures_one);
 	});
 
 	// The reads go to the cycles ledger itself, so the card does not need TCYCLES enabled; only
@@ -118,6 +137,9 @@ describe('ToolsUsageCredits', () => {
 			en.core.text.not_available
 		);
 		expect(getByTestId(TOOLS_USAGE_CREDITS_BALANCE)).toHaveTextContent(en.core.text.not_available);
+		expect(getByTestId(TOOLS_USAGE_CREDITS_FREE_SIGNATURES)).toHaveTextContent(
+			en.core.text.not_available
+		);
 		expect(getByTestId(TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON)).toBeDisabled();
 		expect(toastsErrorSpy).toHaveBeenCalledExactlyOnceWith({
 			msg: { text: en.usage_credits.error.load },
@@ -131,6 +153,7 @@ describe('ToolsUsageCredits', () => {
 		render(ToolsUsageCredits);
 
 		expect(ownCyclesServices.loadOwnCycles).not.toHaveBeenCalled();
+		expect(ownCyclesServices.loadFreeAllowance).not.toHaveBeenCalled();
 	});
 
 	describe('Add more', () => {

@@ -676,6 +676,9 @@ interface I18nUsage_credits {
 		add_description: string;
 		own_credits_after: string;
 		added: string;
+		free_signatures: string;
+		signatures_one: string;
+		signatures_other: string;
 	};
 	error: { load: string; add: string };
 }
