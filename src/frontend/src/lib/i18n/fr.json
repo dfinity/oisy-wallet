@@ -113,7 +113,7 @@
 			"oisy_allowance_used_up_own_cycles": "Votre quantité quotidienne de crédits gratuits pour signer des transactions est épuisée, la signature utilise donc désormais vos propres crédits.",
 			"oisy_allowance_used_up_short": "Vos crédits d'utilisation gratuits quotidiens sont épuisés, la signature peut donc échouer.",
 			"oisy_allowance_used_up_own_cycles_short": "Vos crédits d'utilisation gratuits quotidiens sont épuisés, la signature utilise donc <a href=\"$url\">vos propres crédits</a>.",
-			"oisy_allowance_tools_link": "Gérez vos propres crédits dans <a href=\"$url\">Outils</a>.",
+			"oisy_allowance_tools_link": "Gérez vos propres crédits dans&nbsp;<a href=\"$url\">Outils</a>.",
 			"oisy_allowance_exceeded": "Cette transaction coûte plus que ce que couvre votre quota gratuit $oisy_name."
 		},
 		"error": {

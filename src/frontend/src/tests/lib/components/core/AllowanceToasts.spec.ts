@@ -242,7 +242,8 @@ describe('AllowanceToasts', () => {
 	});
 
 	describe('while paying with own cycles is on', () => {
-		const toolsLink = 'Manage your own credits in <a href="/tools/#usage-credits">Tools</a>.';
+		// The non-breaking space keeps the link on the line of the word before it.
+		const toolsLink = 'Manage your own credits in&nbsp;<a href="/tools/#usage-credits">Tools</a>.';
 
 		beforeEach(() => {
 			vi.spyOn(ownCyclesEnv, 'OWN_CYCLES_ENABLED', 'get').mockReturnValue(true);

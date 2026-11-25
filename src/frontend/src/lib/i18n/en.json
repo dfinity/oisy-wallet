@@ -113,7 +113,7 @@
 			"oisy_allowance_used_up_own_cycles": "Your daily amount of free credits to sign transactions is used up, so signing now uses your own credits.",
 			"oisy_allowance_used_up_short": "Your free daily usage credits are used up, so signing may fail.",
 			"oisy_allowance_used_up_own_cycles_short": "Your free daily usage credits are used up, so signing uses <a href=\"$url\">your own credits</a>.",
-			"oisy_allowance_tools_link": "Manage your own credits in <a href=\"$url\">Tools</a>.",
+			"oisy_allowance_tools_link": "Manage your own credits in&nbsp;<a href=\"$url\">Tools</a>.",
 			"oisy_allowance_exceeded": "This transaction costs more than your free $oisy_name allowance covers."
 		},
 		"error": {

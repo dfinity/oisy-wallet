@@ -113,7 +113,7 @@
 			"oisy_allowance_used_up_own_cycles": "La tua quantità giornaliera di crediti gratuiti per firmare le transazioni è esaurita, quindi la firma ora usa i tuoi crediti.",
 			"oisy_allowance_used_up_short": "I tuoi crediti di utilizzo gratuiti giornalieri sono esauriti, quindi la firma potrebbe non riuscire.",
 			"oisy_allowance_used_up_own_cycles_short": "I tuoi crediti di utilizzo gratuiti giornalieri sono esauriti, quindi la firma usa <a href=\"$url\">i tuoi crediti</a>.",
-			"oisy_allowance_tools_link": "Gestisci i tuoi crediti in <a href=\"$url\">Strumenti</a>.",
+			"oisy_allowance_tools_link": "Gestisci i tuoi crediti in&nbsp;<a href=\"$url\">Strumenti</a>.",
 			"oisy_allowance_exceeded": "Questa transazione costa più di quanto copra la tua quota gratuita di $oisy_name."
 		},
 		"error": {
