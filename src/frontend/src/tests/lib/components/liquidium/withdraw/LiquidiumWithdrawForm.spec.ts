@@ -1,4 +1,5 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import LiquidiumWithdrawForm from '$lib/components/liquidium/withdraw/LiquidiumWithdrawForm.svelte';
 import { ZERO } from '$lib/constants/app.constants';
@@ -129,11 +130,64 @@ describe('LiquidiumWithdrawForm', () => {
 		expect(container).not.toHaveTextContent(en.liquidium.text.withdraw_exceeds_free_collateral);
 	});
 
+	// The input validates on a 300ms debounce.
+	const VALIDATION_DEBOUNCE_MS = 300;
+
+	// The SDK refuses a withdrawal below its per-asset minimum: 5000 sats for BTC.
+	describe('with the protocol minimum', () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('shows it at full precision', () => {
+			const { container } = render(LiquidiumWithdrawForm, { props: baseProps });
+
+			expect(container).toHaveTextContent(en.liquidium.text.minimum_withdraw);
+			expect(container).toHaveTextContent('0.00005 BTC');
+		});
+
+		it('blocks an amount below it', async () => {
+			const { container, getByRole } = render(LiquidiumWithdrawForm, {
+				props: { ...baseProps, amount: 0.00004999 }
+			});
+
+			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
+
+			expect(container).toHaveTextContent(en.liquidium.text.withdraw_below_minimum);
+			expect(reviewButton(getByRole)).toBeDisabled();
+		});
+
+		it('accepts the minimum itself', async () => {
+			const { container, getByRole } = render(LiquidiumWithdrawForm, {
+				props: { ...baseProps, amount: 0.00005 }
+			});
+
+			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
+
+			expect(container).not.toHaveTextContent(en.liquidium.text.withdraw_below_minimum);
+			expect(reviewButton(getByRole)).toBeEnabled();
+		});
+
+		it('shows no minimum for ICP, which has none', () => {
+			const { container } = render(LiquidiumWithdrawForm, {
+				props: {
+					...baseProps,
+					reserve: { ...reserve, poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' },
+					withdrawToken: ICP_TOKEN,
+					withdrawPrice: 5
+				}
+			});
+
+			expect(container).not.toHaveTextContent(en.liquidium.text.minimum_withdraw);
+		});
+	});
+
 	// Native SOL pays out through the ckSOL minter, which has a minimum withdrawal.
 	describe('with a rail minimum', () => {
-		// The input validates on a 300ms debounce.
-		const VALIDATION_DEBOUNCE_MS = 300;
-
 		const solProps = {
 			...baseProps,
 			reserve: {
@@ -160,12 +214,6 @@ describe('LiquidiumWithdrawForm', () => {
 			vi.useRealTimers();
 		});
 
-		it('shows no minimum without one', () => {
-			const { container } = render(LiquidiumWithdrawForm, { props: baseProps });
-
-			expect(container).not.toHaveTextContent(en.liquidium.text.minimum_withdraw);
-		});
-
 		it('shows it at full precision', () => {
 			const { container } = render(LiquidiumWithdrawForm, { props: solProps });
 
@@ -173,6 +221,7 @@ describe('LiquidiumWithdrawForm', () => {
 			expect(container).toHaveTextContent('0.002001 SOL');
 		});
 
+		// 0.002 SOL clears the protocol's 0.001 SOL but not the rail's 0.002001.
 		it('blocks an amount below it', async () => {
 			const { container, getByRole } = render(LiquidiumWithdrawForm, {
 				props: { ...solProps, amount: 0.002 }
@@ -193,6 +242,18 @@ describe('LiquidiumWithdrawForm', () => {
 
 			expect(container).not.toHaveTextContent(en.liquidium.text.withdraw_below_minimum);
 			expect(reviewButton(getByRole)).toBeEnabled();
+		});
+
+		it('keeps the protocol minimum when the rail asks for less', async () => {
+			const { container, getByRole } = render(LiquidiumWithdrawForm, {
+				props: { ...solProps, railMinimum: 500_000n, amount: 0.0009 }
+			});
+
+			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
+
+			expect(container).toHaveTextContent('0.001 SOL');
+			expect(container).toHaveTextContent(en.liquidium.text.withdraw_below_minimum);
+			expect(reviewButton(getByRole)).toBeDisabled();
 		});
 	});
 });
