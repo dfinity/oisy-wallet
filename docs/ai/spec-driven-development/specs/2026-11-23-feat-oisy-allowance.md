@@ -16,7 +16,8 @@ The rest of the spec uses these terms with exactly this meaning.
   - **Refused:** the backend returns an error and sets no new OISY allowance.
 - **Allowance issue:** a global state. It's set when the AR that follows an Insufficient allowance is Refused, and cleared when an AR is Granted or Skipped.
 - **AR cooldown:** while Allowance issue is set, the minute after each Refused AR. During it, OISY sends no AR.
-- **Usage credits:** the app's word, in its texts, for what a user can spend on CCs: the OISY allowance and, from phase 3, the user's own approval.
+- **Usage credits:** the app's word, in its texts, for what a user can spend on CCs: the OISY allowance and, from phase 3, the user's own approval, which phase 2 replaces with the own-cycles subaccount's balance.
+- **Own-cycles subaccount:** from phase 2, a subaccount of the user's own cycles-ledger account that holds the cycles their CCs may use (see 5.1).
 
 ## 2. Goal
 
@@ -98,14 +99,31 @@ This spec leaves out the certified BTC balance through the Chain Fusion Signer, 
 - **One allowance.** A user-triggered backend call that costs cycles beyond its execution (for example a Bitcoin canister call, a vetKD key derivation or an HTTP outcall) becomes a CC, charged to the same OISY allowance.
 - When the OISY allowance can't cover such a CC, the backend returns Insufficient allowance. The frontend handles it like a signer CC: the AR, the repeat, Allowance issue and the toasts.
 - The certified BTC balance through the backend becomes a CC too, one without a form. When the read still fails with Insufficient allowance after the AR, the wallet falls back to the free unverified read from the Bitcoin canister, which the scheduler already makes, and shows that the balance is unverified.
-- **Own cycles for backend CCs.** A user who pays with their own cycles (phase 3) also lets the backend's CCs use them. How is open question 3.
+- **Own cycles for backend CCs.** A user who pays with their own cycles (phase 3) also lets the backend's CCs use them, within one limit shared with the signer (see 5.1).
 - How the backend charges a CC to the OISY allowance, and the exact list of calls, are still open (see [Open questions](#10-open-questions-facts-to-confirm)).
+
+### 5.1 Own cycles in a subaccount
+
+Phase 3 comes first, with one spender: the signer charges the user's main account, through an approval (see 6.1). Phase 2 adds the backend as a second spender. An approval is per spender and reserves nothing, so a second approval from the main account would be a second limit: 1 TCYCLES to each lets them charge up to 2 together. So phase 2 moves own cycles into the own-cycles subaccount, whose balance is the one limit for both.
+
+- **The subaccount** is fixed: the same for every user, and known to the frontend and the backend. It belongs to the user like their main account: only they can move cycles out of it or change its approvals. OISY holds none of their cycles.
+- **Setting the limit** sets the subaccount's balance to the amount the user enters, moving the difference in from the main account, or back to it. It also approves the signer and the backend on the subaccount, each for the new limit: up to three ledger calls, with a fee each. Setting 0 moves everything back and leaves the approvals, since an empty subaccount pays nothing.
+- **One balance, one limit.** The signer and the backend charge the same balance, so what one takes, the other can't. An approval only goes down with its own spender's charges, so it never runs out before the balance.
+- **Charged first.** Each charge is taken from the subaccount before the call runs. When the balance can't cover it, the charge fails with `InsufficientFunds` and nothing runs. As in phase 3, the flow's error toast shows the usage-credits error text (see 6.1).
+- **The signer** charges the subaccount with "patron pays" (`PatronPaysIcrc2Cycles`), the subaccount as the patron, the way it charges the OISY allowance. Patron pays draws on an approval to the signer with a spender subaccount per user, the same spender account the OISY allowance approves, so that's the approval the user gives. The signer accepts any patron except its own account, so it needs no change.
+- **The backend** charges the subaccount the same way (`withdraw_from` on the cycles ledger), before each of its CCs, through an approval with a spender subaccount per user too. That adds one ledger call and one ledger fee to each backend CC paid with own cycles. Backend CCs offer the same two ways to pay as signer CCs, and the frontend repeats them with own cycles in the same cases (see 6.1).
+- **What changes from phase 3:**
+  - The approval step becomes setting the subaccount's balance, and the payment type for own cycles switches from "caller pays" to "patron pays" with the subaccount.
+  - A CC is repeated with own cycles while the subaccount has a balance left, instead of while an approval is left.
+  - The Tools card shows the subaccount's balance in place of the approval left. The TCYCLES balance no longer limits own cycles, since the limit's cycles are set aside.
+- **The assets page.** When TCYCLES is enabled, it shows the subaccount's balance next to the TCYCLES balance, not inside it, since send and Max use only the main account. The USD totals include it, the way they already include a token's staked balance. It's read on its own, with a query on the cycles ledger: at load, after setting the limit and after each CC that own cycles paid.
+- **Phase 3's approvals.** Own cycles are on only in local and staging builds. If they're turned on in production before phase 2, phase 2 also has to handle the approvals users gave in phase 3.
 
 ## 6. Phase 3: pay with your own cycles
 
 ### 6.1 How it works
 
-- The signer accepts "caller pays" (`CallerPaysIcrc2Cycles`): its charge comes from the caller's main cycles-ledger account, through an approval the caller gave the signer. Phase 3 covers signer CCs only; the backend's CCs use the user's cycles from phase 2.
+- The signer accepts "caller pays" (`CallerPaysIcrc2Cycles`): its charge comes from the caller's main cycles-ledger account, through an approval the caller gave the signer. Phase 3 covers signer CCs only; the backend's CCs use the user's cycles from phase 2, which also moves them into the own-cycles subaccount (see 5.1).
 - An approval reserves nothing: it only caps what the signer may charge from the user's TCYCLES balance.
 - **Allowing.** In one approval step, the user picks an amount from their TCYCLES balance and confirms. A user without TCYCLES gets some first, for example through [Mint TCYCLES](../../PRODUCT.md#mint-tcycles). The approval costs one ledger fee.
 - **The approval is the switch.** Approving turns it on, and setting the approval to zero turns it off. There is no separate setting.
@@ -137,7 +155,7 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
    2. The AR after Insufficient allowance, the repeat, the AR cooldown, Allowance issue and the toasts (#14739).
    3. Translations (#14754).
    4. The Plausible events (see 4.8).
-2. **Phase 2:** the backend's costly calls become CCs, the frontend handles their Insufficient allowance, and the backend accepts the user's own cycles for them.
+2. **Phase 2:** the backend's costly calls become CCs, the frontend handles their Insufficient allowance, and the backend accepts the user's own cycles for them, from the own-cycles subaccount, which the signer then charges too (see 5.1).
 3. **Phase 3**, which comes before phase 2: the approval step, the Tools card, the payment-type switch and the toast's link to the Tools card, for signer CCs.
 4. **Phase 4:** the cap, the smaller OISY allowance per Granted AR and the new-user pool.
 
@@ -161,6 +179,13 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 14. Every AR fires one `oisy_allowance_request` event with its trigger and answer, and every CC that returns Insufficient allowance fires one `charged_call` event with its method.
 15. When a CC still fails for Insufficient allowance, the flow's error toast shows the usage-credits error text in place of its usual text, and the rest of the flow is unchanged.
 
+### Phase 2: own cycles
+
+1. Setting the limit leaves the own-cycles subaccount's balance at the new limit, with the signer and the backend each approved on it for that limit.
+2. Signer and backend CCs paid with own cycles are charged to the subaccount before they run, and together never take more than its balance.
+3. A CC paid with own cycles that the subaccount can't cover runs nothing, and the flow's error toast shows the usage-credits error text.
+4. When TCYCLES is enabled, the assets page shows the subaccount's balance next to the TCYCLES balance, the USD totals include it, and send and Max use only the main account.
+
 ### Phase 3
 
 1. A user can approve an amount of their TCYCLES for CCs from the Tools card, in one step.
@@ -174,7 +199,7 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 
 1. **Phase 2 calls.** Which user-triggered backend calls cost cycles beyond their execution, and how much each?
 2. _Answered:_ **BTC balance route.** Yes: the certified BTC balance through the Chain Fusion Signer is turned off in every build before phase 1 ships, and the wallet reads it only through the backend (see 4.6).
-3. **Backend CCs with own cycles (phase 2).** A second approval, with the backend as spender, from the same TCYCLES balance? Or one approval to the backend, which then pays the signer, so the backend briefly holds the user's cycles? This depends on pending decision 3.
+3. _Answered:_ **Backend CCs with own cycles (phase 2).** Through the own-cycles subaccount, which the signer and the backend both charge, so its balance is one limit for both and the backend holds none of the user's cycles (see 5.1). A second approval from the main account would be a second limit. This no longer depends on pending decision 3, which only covers the OISY allowance.
 
 ## 11. Pending decisions (facts are clear — we just need to decide)
 
@@ -205,5 +230,6 @@ Numbers stay fixed: a resolved decision keeps its number, and a new one gets the
 - Backend: `src/backend/src/api/signer.rs`, `src/backend/src/signer/service.rs`, `src/backend/src/utils/rate_limiter.rs`.
 - Frontend: `src/frontend/src/lib/services/loader.services.ts`, `src/frontend/src/lib/canisters/backend.canister.ts`, `src/frontend/src/lib/api/signer.api.ts`, `src/frontend/src/lib/canisters/signer.canister.ts`, `src/frontend/src/lib/canisters/signer.constants.ts`, `src/frontend/src/lib/canisters/signer.errors.ts`, `src/frontend/src/btc/schedulers/btc-wallet.scheduler.ts`, `src/frontend/src/btc/utils/btc-send.utils.ts`, `src/frontend/src/lib/stores/toasts.store.ts`, `src/frontend/src/lib/components/ui/Toast.svelte`, `src/frontend/src/lib/components/tools/Tools.svelte`.
 - Interfaces: `src/declarations/signer/signer.did` (`PaymentType`), `src/declarations/cycles_ledger/cycles_ledger.did` (`icrc2_allowance` is a query).
+- Signer payments: `src/guard/src/guards/patron_pays_icrc2_cycles.rs` in dfinity/papi at `a102b459`, the version the Chain Fusion Signer uses. It refuses only the signer's own account as patron, and charges through `withdraw_from` with a spender subaccount from the caller's principal.
 - Related specs: `2026-09-23-feat-mint-tcycles-from-icp.md`, `2026-10-28-feat-canister-top-up-with-icp.md`, `2026-11-02-impr-btc-send-via-backend.md`.
 - Related open drafts, idle since June 2026: [#13144](https://github.com/dfinity/oisy-wallet/pull/13144) (`cfs_sign` event) and [#13145](https://github.com/dfinity/oisy-wallet/pull/13145) (friendlier signer payment errors).
