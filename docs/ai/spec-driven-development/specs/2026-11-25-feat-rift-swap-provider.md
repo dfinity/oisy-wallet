@@ -179,8 +179,11 @@ OpenAPI spec above.
 
 - Every request carries `x-api-key` when `RIFT_API_KEY` is set.
 - Responses are parsed, not cast. A response missing a required field is an error, not an offer.
-- Every request uses `format: "raw"`, so amounts are base-unit integers and assets are canonical
-  ids.
+- Every **quote** request sets `format: "raw"`, so amounts are base-unit integers and assets are
+  canonical ids. The order body is exactly `{ quote_id, to_address, refund_address }`: `POST /order`
+  rejects extra properties, so `format` is never added there. An order inherits its quote's format
+  (`OrderResponse.format`), so every order response, from `POST /order` and `GET /order/{id}`, must
+  read `format: "raw"` or it is unparseable.
 
 **Rate limiting.** Every Rift request (quotes, order creation and the poller's status reads) goes
 through one limiter in `rift.api.ts`:
@@ -367,9 +370,20 @@ broadcast refusal, as LI.FI's and the XRP sends' rows are.
 | `rift_deposit_tx`       | creation                           | the BTC txid or the EVM tx hash        |
 | `rift_deposit_nonce`    | creation (EVM)                     | the deposit's nonce                    |
 | `rift_deposit_chain_id` | creation (EVM)                     | the source chain id                    |
+| `rift_source_decimals`  | creation                           | the source token's decimals            |
+| `rift_dest_decimals`    | creation                           | the destination token's decimals       |
 | `rift_status`           | learned                            | the last Rift status seen              |
-| `rift_amount_out`       | learned (`delivered` / `refunded`) | `amount_out`, base units               |
+| `rift_amount_out`       | learned (`delivered` / `refunded`) | `amount_out`, formatted (below)        |
 | `rift_payout_tx`        | learned (`delivered` / `refunded`) | `payout_tx`                            |
+
+`rift_amount_out` is stored **formatted** in the token it was paid in, as `lifi_received_amount` is:
+with `rift_dest_decimals` for a delivery and `rift_source_decimals` for a refund. The decimals are
+saved at creation because a disabled custom token's metadata may be gone by the time the order
+settles. An amount that fails to parse or format is left out, and the row falls back to the
+estimate.
+
+With the shared display refs below, a row holds at most 16 refs, the backend's limit: a new ref
+needs another to go.
 
 The backend requires `rift_order_id` at creation, as it requires LI.FI's poll keys (`LIFI_REF_*`):
 a row without it could never be polled.
@@ -434,7 +448,8 @@ Status mapping (decided 2026-11-25):
   destination chain, so both sides are refreshed whatever the outcome.
 - `ActiveUserTransactionItem.svelte`: Rift joins the `isSwap` list and the `providerName` chain.
   - A `Succeeded` row shows `rift_amount_out` of the destination token in place of the estimate.
-  - A refunded row shows the refunded amount of the **source** token.
+  - A refunded row shows `rift_amount_out` of the **source** token.
+  - Both read the stored, formatted amount and need no token metadata.
   - Failure reasons are stored on the row, not displayed (precedent).
 
 ### i18n
@@ -496,8 +511,8 @@ flip, gated as in [Flag and env](#flag-and-env).
    refunded source amount; `frozen` and `expired` rows are `Failed` with their stored reason. An EVM
    deposit that reverted or was replaced turns its row `Failed` without waiting for the deposit
    deadline.
-10. A Rift row shows its amount, tokens and networks from its shared display refs, in any session,
-    even after its tokens are disabled.
+10. A Rift row shows its amount, tokens and networks from its shared display refs, and its delivered
+    or refunded amount from `rift_amount_out`, in any session, even after its tokens are disabled.
 11. At every terminal state, the BTC wallet, the swap's EVM token and that network's native token
     are refreshed.
 12. A session never starts two Rift requests (quotes, orders and status reads together) less than
