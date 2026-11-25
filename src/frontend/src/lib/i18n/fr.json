@@ -1390,7 +1390,8 @@
 	},
 	"swap": {
 		"alt": {
-			"clear_destination": ""
+			"clear_destination": "",
+			"reset_destination": ""
 		},
 		"text": {
 			"swap": "Échanger",

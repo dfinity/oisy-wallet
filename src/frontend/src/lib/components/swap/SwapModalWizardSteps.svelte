@@ -4,6 +4,8 @@
 	import { get } from 'svelte/store';
 	import { page } from '$app/state';
 	import SwapBtcContexts from '$btc/components/swap/SwapBtcContexts.svelte';
+	import SendQrCodeScan from '$lib/components/send/SendQrCodeScan.svelte';
+	import SwapDestinationStep from '$lib/components/swap/SwapDestinationStep.svelte';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapReceiveNetworkList from '$lib/components/swap/SwapReceiveNetworkList.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
@@ -38,6 +40,10 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import {
+		SWAP_DESTINATION_PICKER_CONTEXT_KEY,
+		type SwapDestinationPickerContext
+	} from '$lib/stores/swap-destination-picker.store';
+	import {
 		SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY,
 		type SwapReceiveShortcutsContext
 	} from '$lib/stores/swap-receive-shortcuts.store';
@@ -56,6 +62,7 @@
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { tryParseToken } from '$lib/utils/parse.utils';
+	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { getReceiveNetworkIds } from '$lib/utils/swap.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -95,7 +102,9 @@
 		setTokenListFilters,
 		markTokensPriced,
 		tokenListReturnFocus,
-		receiveTokenPickerStep
+		receiveTokenPickerStep,
+		customDestination,
+		customDestinationDraft
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const {
@@ -332,6 +341,18 @@
 		goToStep(WizardStepsSwap.SWAP);
 	};
 
+	// The address being entered starts from the one the swap pays out to now.
+	setContext<SwapDestinationPickerContext>(SWAP_DESTINATION_PICKER_CONTEXT_KEY, {
+		showDestinationPicker: () => {
+			customDestinationDraft.set(get(customDestination) ?? '');
+
+			goToStep(WizardStepsSwap.DESTINATION);
+		}
+	});
+
+	// An amount in a scanned code is left out: the swap amount is in the pay token.
+	let scannedAmount = $state<OptionAmount>();
+
 	const goToStep = (stepName: WizardStepsSwap | WizardStepsGetTokenType) => {
 		if (isNullish(modal)) {
 			return;
@@ -377,6 +398,20 @@
 
 					goToStep(WizardStepsSwap.SWAP);
 				}}
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.DESTINATION && nonNullish($destinationToken)}
+			<SwapDestinationStep
+				onBack={() => goToStep(WizardStepsSwap.SWAP)}
+				onQRCodeScan={() => goToStep(WizardStepsSwap.QR_CODE_SCAN)}
+				token={$destinationToken}
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.QR_CODE_SCAN}
+			<SendQrCodeScan
+				expectedToken={$destinationToken}
+				onDecodeQrCode={decodeQrCode}
+				onQRCodeBack={() => goToStep(WizardStepsSwap.DESTINATION)}
+				bind:destination={$customDestinationDraft}
+				bind:amount={scannedAmount}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapTokenWizard

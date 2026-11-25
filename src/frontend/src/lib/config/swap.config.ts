@@ -27,5 +27,13 @@ export const swapWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps<Wizard
 	{
 		name: WizardStepsSwap.MOVE_TOKEN,
 		title: i18n.swap.text.move_token_to
+	},
+	{
+		name: WizardStepsSwap.DESTINATION,
+		title: i18n.core.text.destination
+	},
+	{
+		name: WizardStepsSwap.QR_CODE_SCAN,
+		title: i18n.send.text.scan_qr
 	}
 ];

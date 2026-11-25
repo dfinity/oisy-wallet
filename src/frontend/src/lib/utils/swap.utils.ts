@@ -486,6 +486,15 @@ export const resolveSwapRecipientAddress = ({
 	return { type: 'not-required' };
 };
 
+// The receive networks where a NEAR Intents swap can pay out to an address the user picks. XRP is left
+// out: an exchange address there usually needs a destination tag, and whether 1Click can carry one on
+// a payout is not known yet.
+export const isSwapCustomDestinationNetworkId = (networkId: NetworkId | undefined): boolean =>
+	isNetworkIdEthereum(networkId) ||
+	isNetworkIdEvm(networkId) ||
+	isNetworkIdSolana(networkId) ||
+	isNetworkIdBTCMainnet(networkId);
+
 export const geSwapEthTokenAddress = (token: ErcFungibleToken) => {
 	if (isDefaultEthereumToken(token)) {
 		return SWAP_ETH_TOKEN_PLACEHOLDER;

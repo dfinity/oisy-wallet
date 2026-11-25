@@ -1107,7 +1107,7 @@ interface I18nConvert {
 }
 
 interface I18nSwap {
-	alt: { clear_destination: string };
+	alt: { clear_destination: string; reset_destination: string };
 	text: {
 		swap: string;
 		select_destination_token: string;
