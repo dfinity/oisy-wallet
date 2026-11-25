@@ -1,10 +1,12 @@
 import { CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { getTransactions } from '$icp/api/icrc-index-ng.api';
 import { allowance, approve, balance } from '$icp/api/icrc-ledger.api';
+import type { IndexCanisterIdText } from '$icp/types/canister';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { NullishIdentity } from '$lib/types/identity';
-import { assertNonNullish } from '@dfinity/utils';
-import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
+import { assertNonNullish, fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import type { IcrcAccount, IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 
 export interface OwnCycles {
@@ -21,7 +23,7 @@ const signerAccount = (): IcrcAccount => ({ owner: Principal.fromText(SIGNER_CAN
 /**
  * The approval left for the signer and the TCYCLES balance, read with queries unless `certified`:
  * they are only shown, and an approval built on them states the amount it replaces (see
- * `addOwnCycles`). They come from the cycles ledger itself, so they are there whether or not
+ * `setSpendingLimit`). They come from the cycles ledger itself, so they are there whether or not
  * the user has TCYCLES enabled.
  */
 export const loadOwnCycles = async ({
@@ -81,6 +83,76 @@ export const loadFreeAllowance = async ({
 	});
 
 	return free;
+};
+
+// How far back the read looks for the last approval: charges paid with own cycles land in the
+// same history, between approvals.
+const PREVIOUS_LIMIT_PAGES = 5;
+const PREVIOUS_LIMIT_PAGE_SIZE = 100n;
+
+const isDefaultSubaccount = (subaccount: [] | [Uint8Array]): boolean =>
+	(fromNullable(subaccount) ?? new Uint8Array()).every((byte) => byte === 0);
+
+const isOwnApproval = ({
+	approve: { from, spender },
+	owner
+}: {
+	approve: IcrcIndexDid.Approve;
+	owner: Principal;
+}): boolean =>
+	from.owner.toText() === owner.toText() &&
+	isDefaultSubaccount(from.subaccount) &&
+	spender.owner.toText() === SIGNER_CANISTER_ID &&
+	isDefaultSubaccount(spender.subaccount);
+
+/**
+ * The spending limit the user set last: their last approval to the signer, found in the cycles
+ * ledger's index, or `undefined` when none turns up in the history it looks through. The ledger
+ * keeps only what is left of an approval, and the index follows it a few seconds behind.
+ */
+export const loadPreviousSpendingLimit = async ({
+	identity,
+	indexCanisterId,
+	certified = false
+}: {
+	identity: NullishIdentity;
+	indexCanisterId: IndexCanisterIdText;
+	certified?: boolean;
+}): Promise<bigint | undefined> => {
+	assertNonNullish(identity);
+
+	const owner = identity.getPrincipal();
+	let start: bigint | undefined;
+
+	for (let page = 0; page < PREVIOUS_LIMIT_PAGES; page++) {
+		const { transactions, oldest_tx_id } = await getTransactions({
+			identity,
+			owner,
+			indexCanisterId,
+			start,
+			maxResults: PREVIOUS_LIMIT_PAGE_SIZE,
+			certified
+		});
+
+		// Newest first.
+		for (const { transaction } of transactions) {
+			const approval = fromNullable(transaction.approve);
+
+			if (nonNullish(approval) && isOwnApproval({ approve: approval, owner })) {
+				return approval.amount;
+			}
+		}
+
+		const oldest = transactions.at(-1)?.id;
+
+		if (isNullish(oldest) || oldest === fromNullable(oldest_tx_id)) {
+			return undefined;
+		}
+
+		start = oldest;
+	}
+
+	return undefined;
 };
 
 /**
