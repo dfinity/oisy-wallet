@@ -193,4 +193,21 @@ describe('toastsErrorNoTrace', () => {
 
 		expect(get(toastsStore)[0].text).toBe(en.core.error.usage_credits_insufficient);
 	});
+
+	// A Liquidium SOL transfer that was never sent keeps the CC's error as its cause.
+	it('should show the same text when own cycles that ran short are kept as the cause of another error', () => {
+		toastsErrorNoTrace({
+			msg: { text: 'Supply failed.' },
+			err: new LiquidiumSolTransferRefusedError({
+				cause: new OwnCyclesShortError({
+					LedgerWithdrawFromError: {
+						ledger: mockPrincipal,
+						error: { InsufficientFunds: { balance: 1n } }
+					}
+				})
+			})
+		});
+
+		expect(get(toastsStore)[0].text).toBe(en.core.error.usage_credits_insufficient);
+	});
 });

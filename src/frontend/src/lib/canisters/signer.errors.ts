@@ -59,26 +59,25 @@ const statedAllowanceOf = (err: unknown): bigint | undefined => {
 	return 'InsufficientAllowance' in error ? error.InsufficientAllowance.allowance : undefined;
 };
 
-// The OISY allowance stated by a charged call (CC) that failed with an insufficient allowance, or
-// `undefined` for any other error. A flow may wrap the CC's error and keep it as the `cause`, as a
-// Liquidium SOL transfer that was never sent does, so the chain of causes is followed.
-export const insufficientAllowanceOf = (err: unknown): bigint | undefined => {
-	const seen = new Set<unknown>();
+// The error and the ones it keeps as its `cause`, in order. A flow may wrap a charged call's (CC)
+// error and keep it as the cause, as a Liquidium SOL transfer that was never sent does. A chain that
+// loops ends at the first error seen again.
+const causeChainOf = (err: unknown): unknown[] => {
+	const chain: unknown[] = [];
 	let current = err;
 
-	while (nonNullish(current) && !seen.has(current)) {
-		const allowance = statedAllowanceOf(current);
-
-		if (nonNullish(allowance)) {
-			return allowance;
-		}
-
-		seen.add(current);
+	while (nonNullish(current) && !chain.includes(current)) {
+		chain.push(current);
 		current = current instanceof Error ? current.cause : undefined;
 	}
 
-	return undefined;
+	return chain;
 };
+
+// The OISY allowance stated by a CC that failed with an insufficient allowance, or `undefined` for
+// any other error, wherever it sits in the chain of causes.
+export const insufficientAllowanceOf = (err: unknown): bigint | undefined =>
+	causeChainOf(err).map(statedAllowanceOf).find(nonNullish);
 
 // A CC paid with the user's own cycles that their approval or their TCYCLES balance could not cover.
 export class OwnCyclesShortError extends SignerCanisterPaymentError {}
@@ -100,9 +99,10 @@ export const toOwnCyclesError = (err: unknown): unknown => {
 };
 
 // Whether a CC failed because the usage credits could not cover it: the OISY allowance, or the
-// user's own cycles.
+// user's own cycles. Both count wherever they sit in the chain of causes.
 export const isUsageCreditsShort = (err: unknown): boolean =>
-	nonNullish(insufficientAllowanceOf(err)) || err instanceof OwnCyclesShortError;
+	nonNullish(insufficientAllowanceOf(err)) ||
+	causeChainOf(err).some((cause) => cause instanceof OwnCyclesShortError);
 
 export const mapSignerCanisterBtcError = (err: SignerCanisterBtcError): CanisterInternalError => {
 	if ('InternalError' in err) {

@@ -107,6 +107,14 @@ describe('signer.errors', () => {
 			).toBeTruthy();
 		});
 
+		it('is true for own cycles that can’t cover the call, behind an error that wraps it', () => {
+			const err = new Error('outer', {
+				cause: toOwnCyclesError(withdrawFromError({ InsufficientFunds: { balance: 1n } }))
+			});
+
+			expect(isUsageCreditsShort(err)).toBeTruthy();
+		});
+
 		it('is false when OISY’s own account runs short', () => {
 			expect(
 				isUsageCreditsShort(withdrawFromError({ InsufficientFunds: { balance: 1n } }))
