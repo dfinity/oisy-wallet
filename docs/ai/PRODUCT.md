@@ -1155,6 +1155,16 @@ Changing the max slippage asks the providers for new offers, the same way changi
 
 NEAR Intents does: 1Click signs a minimum receive amount derived from the slippage into its quote, and the deposit settles against it. Its expected minimum, on the form and on Review, is that signed figure; only a quote without one shows the slippage applied to the quoted amount. The slippage goes to 1Click in whole basis points, rounded down, so a quote never allows more than the setting. Right before the deposit, next to the signature and expiry checks, OISY checks that the quote was requested with the max slippage Review showed; a quote for another one stops before anything is sent, with a message that no funds were sent.
 
+### NEAR Intents swaps to another address
+
+A swap through NEAR Intents can pay out to an address the user picks instead of their own, on the receive token's network, for receive tokens on an EVM network, Solana and Bitcoin. While NEAR Intents is the selected offer, the swap form shows a **Destination** row as Convert does: "Your OISY Wallet" and **Change >**. Change opens Send's destination step for the receive token (address field checked for that network, QR scan, recently used addresses and contacts). Next sets the address; Back leaves the destination as it was; the user's own address counts as "Your OISY Wallet". A scanned code fills the address only: an amount in it is ignored, and a code for another token is refused, as in Send.
+
+While an address is set, only NEAR Intents is asked for an offer, with that address as the recipient and the user's own address as the refund address, so no other provider can be selected. The row then stays even without an offer, with a control next to the address that goes back to "Your OISY Wallet" and asks every provider again. Changing the receive token or switching the two tokens also goes back to "Your OISY Wallet". Offers are requested again whenever the address changes, and offers kept from before are reused only for the address they were requested for.
+
+Review shows a **Destination** row with "Your OISY Wallet" or the network logo and the full address, taken from the quote 1Click signed rather than from the form. An address the wallet never sent to on that network shows the first-time warning of Send and Convert, and Swap waits for its checkbox. Swap stays disabled unless the signed quote pays out to the destination the user chose.
+
+What this deliberately does not do: no other address for XRP receive tokens (an exchange address there usually needs a destination tag, and whether 1Click can carry one on a payout is not known yet), no other address with any other provider, and no address in the swap's activity row.
+
 ### 1Sec restricted to the unwrapping direction
 
 1Sec (OneSec) bridges tokens between ICP and Ethereum, Base and Arbitrum. OISY offers only the way back out of a bridged position, never the way in: a user who already holds a bridged balance keeps a working exit, and nobody acquires a new one through OISY.
