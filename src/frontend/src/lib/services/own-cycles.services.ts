@@ -84,26 +84,26 @@ export const loadFreeAllowance = async ({
 };
 
 /**
- * Raises the signer's approval by `amount`, with no expiry. The approval states the amount it
- * replaces, so the ledger refuses it when the approval left has changed since it was read, for
- * example after a charge or from a wrong query answer: it never allows more than the user
- * added.
+ * Sets the signer's approval to `limit`, with no expiry: the user's new spending limit, 0 to
+ * revoke it. The approval states the one it replaces, so the ledger refuses it when the approval
+ * left has changed since it was read, for example after a charge or from a wrong query answer: it
+ * never allows more than the user set.
  */
-export const addOwnCycles = async ({
+export const setSpendingLimit = async ({
 	identity,
 	approved,
-	amount
+	limit
 }: {
 	identity: NullishIdentity;
 	// The approval left, as read.
 	approved: bigint;
-	amount: bigint;
+	limit: bigint;
 }): Promise<void> => {
 	await approve({
 		identity,
 		ledgerCanisterId: CYCLES_LEDGER_CANISTER_ID,
 		spender: signerAccount(),
-		amount: approved + amount,
+		amount: limit,
 		expectedAllowance: approved
 	});
 };

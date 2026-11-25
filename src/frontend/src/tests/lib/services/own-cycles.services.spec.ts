@@ -1,7 +1,11 @@
 import { CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID, ZERO } from '$lib/constants/app.constants';
-import { addOwnCycles, loadFreeAllowance, loadOwnCycles } from '$lib/services/own-cycles.services';
+import {
+	loadFreeAllowance,
+	loadOwnCycles,
+	setSpendingLimit
+} from '$lib/services/own-cycles.services';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { AccountIdentifier } from '@icp-sdk/canisters/ledger/icp';
 import { Principal } from '@icp-sdk/core/principal';
@@ -118,29 +122,37 @@ describe('own-cycles.services', () => {
 		});
 	});
 
-	describe('addOwnCycles', () => {
+	describe('setSpendingLimit', () => {
 		beforeEach(() => {
 			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
 		});
 
-		it('raises the approval by the amount, stating the approval it replaces, with no expiry', async () => {
-			await addOwnCycles({
+		it('sets the approval to the new limit, stating the one it replaces, with no expiry', async () => {
+			await setSpendingLimit({
 				identity: mockIdentity,
 				approved: 2_000_000_000_000n,
-				amount: 1_500_000_000_000n
+				limit: 1_500_000_000_000n
 			});
 
 			expect(icrcLedgerApi.approve).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				ledgerCanisterId: CYCLES_LEDGER_CANISTER_ID,
 				spender: signer,
-				amount: 3_500_000_000_000n,
+				amount: 1_500_000_000_000n,
 				expectedAllowance: 2_000_000_000_000n
 			});
 		});
 
+		it('revokes the limit with 0', async () => {
+			await setSpendingLimit({ identity: mockIdentity, approved: 2_000_000_000_000n, limit: ZERO });
+
+			expect(icrcLedgerApi.approve).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ amount: ZERO, expectedAllowance: 2_000_000_000_000n })
+			);
+		});
+
 		it('states a zero approval when none is left', async () => {
-			await addOwnCycles({ identity: mockIdentity, approved: ZERO, amount: 1_000_000_000_000n });
+			await setSpendingLimit({ identity: mockIdentity, approved: ZERO, limit: 1_000_000_000_000n });
 
 			expect(icrcLedgerApi.approve).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ amount: 1_000_000_000_000n, expectedAllowance: ZERO })
@@ -153,7 +165,7 @@ describe('own-cycles.services', () => {
 			vi.spyOn(icrcLedgerApi, 'approve').mockRejectedValue(err);
 
 			await expect(
-				addOwnCycles({ identity: mockIdentity, approved: 1n, amount: 1_000_000_000_000n })
+				setSpendingLimit({ identity: mockIdentity, approved: 1n, limit: 1_000_000_000_000n })
 			).rejects.toThrow(err);
 		});
 	});

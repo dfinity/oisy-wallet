@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { untrack } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { getTokenFee } from '$icp/utils/token.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
@@ -8,23 +9,27 @@
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Modal from '$lib/components/ui/Modal.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import {
-		TOOLS_USAGE_CREDITS_ADD_BUTTON,
-		TOOLS_USAGE_CREDITS_MODAL
+		TOOLS_USAGE_CREDITS_MODAL,
+		TOOLS_USAGE_CREDITS_REVIEW_BUTTON,
+		TOOLS_USAGE_CREDITS_SET_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { addOwnCycles, type OwnCycles } from '$lib/services/own-cycles.services';
+	import { WizardStepsUsageCredits } from '$lib/enums/wizard-steps';
+	import { setSpendingLimit, type OwnCycles } from '$lib/services/own-cycles.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -34,25 +39,29 @@
 	interface Props {
 		// The TCYCLES token, enabled or not: its symbol, decimals and ledger fee.
 		token: IcToken;
-		// The approval left and the TCYCLES balance, as the card read them.
+		// The approval left (the spending limit) and the TCYCLES balance, as the card read them.
 		ownCycles: OwnCycles;
 		// Called when the approval fails, so the card reads both again before the user retries:
-		// the approval states the amount it replaces, which may have changed.
+		// the approval states the one it replaces, which may have changed.
 		onError: () => void;
 	}
 
 	let { token, ownCycles, onError }: Props = $props();
 
-	let amount = $state<OptionAmount>();
+	const format = (value: bigint): string =>
+		formatToken({ value, unitName: token.decimals, displayDecimals: token.decimals });
+
+	// The amount is the new limit, not one added to it, so it starts at the current one. 0 revokes it.
+	let amount = $state<OptionAmount>(untrack(() => format(ownCycles.approved)));
 	let amountSetToMax = $state(false);
-	let adding = $state(false);
+	let setting = $state(false);
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	let exchangeRate = $derived($exchanges?.[token.id]?.usd);
 
-	// The approval costs one ledger fee, paid from the balance.
+	// Setting the limit costs one ledger fee, paid from the balance.
 	let fee = $derived(getTokenFee(token) ?? ZERO);
 
 	let parsedAmount = $derived(
@@ -61,9 +70,11 @@
 			: undefined
 	);
 
-	// The input's own check runs 300 ms after typing stops, so Add checks the balance itself.
+	// The input's own check runs 300 ms after typing stops, so Review checks the balance itself.
 	let invalid = $derived(
-		isNullish(parsedAmount) || parsedAmount === ZERO || parsedAmount + fee > ownCycles.balance
+		isNullish(parsedAmount) ||
+			parsedAmount === ownCycles.approved ||
+			parsedAmount + fee > ownCycles.balance
 	);
 
 	const validateAmount = (userAmount: bigint): Error | undefined =>
@@ -73,31 +84,33 @@
 				? new Error($i18n.fee.assertion.insufficient_funds_for_fee)
 				: undefined;
 
-	let ownCreditsAfter = $derived(ownCycles.approved + (invalid ? ZERO : (parsedAmount ?? ZERO)));
+	let currentStep = $state<WizardStep<WizardStepsUsageCredits> | undefined>();
+	let modal = $state<WizardModal<WizardStepsUsageCredits>>();
+
+	let steps = $derived<WizardSteps<WizardStepsUsageCredits>>([
+		{ name: WizardStepsUsageCredits.SET, title: $i18n.usage_credits.text.add_title },
+		{ name: WizardStepsUsageCredits.REVIEW, title: $i18n.convert.text.review }
+	]);
 
 	const close = () => modalStore.close();
 
-	const add = async () => {
+	const set = async () => {
 		if (isNullish(parsedAmount) || invalid) {
 			return;
 		}
 
-		adding = true;
+		setting = true;
 
 		try {
-			await addOwnCycles({
+			await setSpendingLimit({
 				identity: $authIdentity,
 				approved: ownCycles.approved,
-				amount: parsedAmount
+				limit: parsedAmount
 			});
 
 			toastsShow({
 				text: replacePlaceholders($i18n.usage_credits.text.added, {
-					$amount: formatToken({
-						value: parsedAmount,
-						unitName: token.decimals,
-						displayDecimals: token.decimals
-					}),
+					$amount: format(parsedAmount),
 					$token: token.symbol
 				}),
 				level: 'success',
@@ -110,86 +123,113 @@
 
 			onError();
 		} finally {
-			adding = false;
+			setting = false;
 		}
 	};
 </script>
 
-<Modal disablePointerEvents={adding} onClose={close} testId={TOOLS_USAGE_CREDITS_MODAL}>
-	{#snippet title()}{$i18n.usage_credits.text.add_title}{/snippet}
+<!-- With fiat values, as the send shows its amounts. -->
+{#snippet limitRow(value: bigint, title: string)}
+	<ConvertAmountDisplay amount={format(value)} {exchangeRate} symbol={token.symbol}>
+		{#snippet label()}{title}{/snippet}
+	</ConvertAmountDisplay>
+{/snippet}
 
-	<ContentWithToolbar>
-		<p class="mb-6 text-sm text-tertiary">
-			{replacePlaceholders($i18n.usage_credits.text.add_description, { $token: token.symbol })}
-		</p>
+{#snippet approvalFee()}
+	<FeeDisplay decimals={token.decimals} {exchangeRate} feeAmount={fee} symbol={token.symbol}>
+		{#snippet label()}{$i18n.fee.text.approval_fee}{/snippet}
+	</FeeDisplay>
+{/snippet}
 
-		<div class="mb-6">
-			<TokenInput
-				autofocus={isDesktop()}
-				disabled={adding}
-				displayUnit={inputUnit}
-				{exchangeRate}
-				isSelectable={false}
-				onCustomErrorValidate={validateAmount}
-				{token}
-				bind:amount
-				bind:amountSetToMax
-			>
-				{#snippet title()}{$i18n.core.text.amount}{/snippet}
+<WizardModal
+	bind:this={modal}
+	disablePointerEvents={setting}
+	onClose={close}
+	{steps}
+	testId={TOOLS_USAGE_CREDITS_MODAL}
+	bind:currentStep
+>
+	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-				{#snippet amountInfo()}
-					<div class="text-tertiary">
-						<TokenInputAmountExchange
-							{amount}
-							{exchangeRate}
-							{token}
-							bind:displayUnit={exchangeValueUnit}
-						/>
-					</div>
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsUsageCredits.REVIEW && nonNullish(parsedAmount)}
+			<ContentWithToolbar>
+				{@render limitRow(ownCycles.approved, $i18n.usage_credits.text.own_credits_after)}
+				{@render limitRow(parsedAmount, $i18n.usage_credits.text.new_limit)}
+				{@render approvalFee()}
+
+				{#snippet toolbar()}
+					<ButtonGroup>
+						<ButtonBack disabled={setting} onclick={() => modal?.back()} />
+
+						<Button
+							disabled={invalid || setting}
+							loading={setting}
+							onclick={set}
+							testId={TOOLS_USAGE_CREDITS_SET_BUTTON}
+						>
+							{$i18n.usage_credits.text.set}
+						</Button>
+					</ButtonGroup>
 				{/snippet}
+			</ContentWithToolbar>
+		{:else}
+			<ContentWithToolbar>
+				<p class="mb-6 text-sm text-tertiary">{$i18n.usage_credits.text.add_description}</p>
 
-				{#snippet balance()}
-					<MaxBalanceButton
-						balance={ownCycles.balance}
-						{fee}
+				<div class="mb-6">
+					<TokenInput
+						autofocus={isDesktop()}
+						displayUnit={inputUnit}
+						{exchangeRate}
+						isSelectable={false}
+						onCustomErrorValidate={validateAmount}
 						{token}
 						bind:amount
 						bind:amountSetToMax
-					/>
+					>
+						{#snippet title()}{$i18n.usage_credits.text.new_limit}{/snippet}
+
+						{#snippet amountInfo()}
+							<div class="text-tertiary">
+								<TokenInputAmountExchange
+									{amount}
+									{exchangeRate}
+									{token}
+									bind:displayUnit={exchangeValueUnit}
+								/>
+							</div>
+						{/snippet}
+
+						{#snippet balance()}
+							<MaxBalanceButton
+								balance={ownCycles.balance}
+								{fee}
+								{token}
+								bind:amount
+								bind:amountSetToMax
+							/>
+						{/snippet}
+					</TokenInput>
+				</div>
+
+				{@render limitRow(ownCycles.approved, $i18n.usage_credits.text.own_credits_after)}
+				{@render approvalFee()}
+
+				{#snippet toolbar()}
+					<ButtonGroup>
+						<ButtonCancel onclick={close} />
+
+						<Button
+							disabled={invalid}
+							onclick={() => modal?.next()}
+							testId={TOOLS_USAGE_CREDITS_REVIEW_BUTTON}
+						>
+							{$i18n.convert.text.review_button}
+						</Button>
+					</ButtonGroup>
 				{/snippet}
-			</TokenInput>
-		</div>
-
-		<!-- With fiat values, as the send shows its amounts. -->
-		<ConvertAmountDisplay
-			amount={formatToken({
-				value: ownCreditsAfter,
-				unitName: token.decimals,
-				displayDecimals: token.decimals
-			})}
-			{exchangeRate}
-			symbol={token.symbol}
-		>
-			{#snippet label()}{$i18n.usage_credits.text.own_credits_after}{/snippet}
-		</ConvertAmountDisplay>
-
-		<FeeDisplay decimals={token.decimals} {exchangeRate} feeAmount={fee} symbol={token.symbol}>
-			{#snippet label()}{$i18n.fee.text.approval_fee}{/snippet}
-		</FeeDisplay>
-
-		{#snippet toolbar()}
-			<ButtonGroup>
-				<ButtonCancel disabled={adding} onclick={close} />
-
-				<Button
-					disabled={invalid || adding}
-					loading={adding}
-					onclick={add}
-					testId={TOOLS_USAGE_CREDITS_ADD_BUTTON}
-				>
-					{$i18n.core.text.add}
-				</Button>
-			</ButtonGroup>
-		{/snippet}
-	</ContentWithToolbar>
-</Modal>
+			</ContentWithToolbar>
+		{/if}
+	{/key}
+</WizardModal>

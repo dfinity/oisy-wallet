@@ -679,6 +679,8 @@ interface I18nUsage_credits {
 		free_signatures: string;
 		signatures_one: string;
 		signatures_other: string;
+		new_limit: string;
+		set: string;
 	};
 	error: { load: string; add: string };
 }

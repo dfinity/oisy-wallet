@@ -178,7 +178,8 @@ export const TOOLS_USAGE_CREDITS_FREE_SIGNATURES = 'tools-usage-credits-free-sig
 export const TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON = 'tools-usage-credits-add-more-button';
 export const TOOLS_USAGE_CREDITS_GET_CYCLES_BUTTON = 'tools-usage-credits-get-cycles-button';
 export const TOOLS_USAGE_CREDITS_MODAL = 'tools-usage-credits-modal';
-export const TOOLS_USAGE_CREDITS_ADD_BUTTON = 'tools-usage-credits-add-button';
+export const TOOLS_USAGE_CREDITS_REVIEW_BUTTON = 'tools-usage-credits-review-button';
+export const TOOLS_USAGE_CREDITS_SET_BUTTON = 'tools-usage-credits-set-button';
 
 export const NAVIGATION_GROUP_PORTFOLIO = 'navigation-group-portfolio';
 export const NAVIGATION_GROUP_FINANCE = 'navigation-group-finance';

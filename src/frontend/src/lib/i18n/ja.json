@@ -937,7 +937,9 @@
 			"added": "",
 			"free_signatures": "",
 			"signatures_one": "",
-			"signatures_other": ""
+			"signatures_other": "",
+			"new_limit": "",
+			"set": ""
 		},
 		"error": {
 			"load": "",
