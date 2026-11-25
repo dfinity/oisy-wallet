@@ -1161,6 +1161,7 @@ interface I18nSwap {
 		gasless: string;
 		swap_fees: string;
 		cross_chain_networks_info: string;
+		lifi_btc_relay_recipient_warning: string;
 		receive_shortcut_same_network: string;
 		receive_shortcut_other_network: string;
 		receive_shortcut_token_on_network: string;
@@ -2443,6 +2444,8 @@ interface I18nLiquidium {
 		borrow_at_risk_warning: string;
 		borrow_exceeds_power: string;
 		borrow_below_minimum: string;
+		minimum_withdraw: string;
+		withdraw_below_minimum: string;
 		borrow_prices_unavailable: string;
 		borrow_high_risk_warning: string;
 		borrow_risk_confirm: string;
