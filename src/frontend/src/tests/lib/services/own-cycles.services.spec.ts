@@ -1,8 +1,9 @@
 import { CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
-import { SIGNER_CANISTER_ID, ZERO } from '$lib/constants/app.constants';
-import { addOwnCycles, loadOwnCycles } from '$lib/services/own-cycles.services';
+import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID, ZERO } from '$lib/constants/app.constants';
+import { addOwnCycles, loadFreeAllowance, loadOwnCycles } from '$lib/services/own-cycles.services';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { AccountIdentifier } from '@icp-sdk/canisters/ledger/icp';
 import { Principal } from '@icp-sdk/core/principal';
 
 describe('own-cycles.services', () => {
@@ -10,6 +11,42 @@ describe('own-cycles.services', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+	});
+
+	describe('loadFreeAllowance', () => {
+		beforeEach(() => {
+			vi.spyOn(icrcLedgerApi, 'allowance').mockResolvedValue({
+				allowance: 2_430_000_000_000n,
+				expires_at: []
+			});
+		});
+
+		it('returns what is left of the OISY allowance', async () => {
+			await expect(loadFreeAllowance({ identity: mockIdentity })).resolves.toBe(2_430_000_000_000n);
+		});
+
+		// As the backend keys it: its main account approves the signer, with the user's ICP account
+		// identifier as the spender's subaccount.
+		it('reads the backend’s approval to the signer for the user, with a query', async () => {
+			await loadFreeAllowance({ identity: mockIdentity });
+
+			expect(icrcLedgerApi.allowance).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				certified: false,
+				ledgerCanisterId: CYCLES_LEDGER_CANISTER_ID,
+				owner: { owner: BACKEND_CANISTER_PRINCIPAL },
+				spender: {
+					owner: Principal.fromText(SIGNER_CANISTER_ID),
+					subaccount: AccountIdentifier.fromPrincipal({ principal: mockPrincipal }).toUint8Array()
+				}
+			});
+		});
+
+		it('throws without an identity', async () => {
+			await expect(loadFreeAllowance({ identity: undefined })).rejects.toThrow();
+
+			expect(icrcLedgerApi.allowance).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('loadOwnCycles', () => {

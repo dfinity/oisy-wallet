@@ -1,6 +1,7 @@
 import { CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { allowance, approve, balance } from '$icp/api/icrc-ledger.api';
-import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
+import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
+import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { NullishIdentity } from '$lib/types/identity';
 import { assertNonNullish } from '@dfinity/utils';
 import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
@@ -49,6 +50,32 @@ export const loadOwnCycles = async ({
 	]);
 
 	return { approved, balance: ownBalance };
+};
+
+/**
+ * What is left of the free OISY allowance, read with a query, as it is only shown. The backend's
+ * main account approves the signer, with the user's ICP account identifier as the spender's
+ * subaccount (`principal2account` in the backend). A granted allowance request can still raise it.
+ */
+export const loadFreeAllowance = async ({
+	identity
+}: {
+	identity: NullishIdentity;
+}): Promise<bigint> => {
+	assertNonNullish(identity);
+
+	const { allowance: free } = await allowance({
+		identity,
+		certified: false,
+		ledgerCanisterId: CYCLES_LEDGER_CANISTER_ID,
+		owner: { owner: BACKEND_CANISTER_PRINCIPAL },
+		spender: {
+			owner: Principal.fromText(SIGNER_CANISTER_ID),
+			subaccount: getAccountIdentifier(identity.getPrincipal()).toUint8Array()
+		}
+	});
+
+	return free;
 };
 
 /**
