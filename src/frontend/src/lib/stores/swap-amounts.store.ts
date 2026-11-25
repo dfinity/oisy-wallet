@@ -11,6 +11,9 @@ export interface SwapAmountsStoreData {
 	// The slippage the offers were requested with. A provider can sign a minimum derived from it
 	// (NEAR Intents does), so an offer holds for this slippage only.
 	slippageForSwap?: number;
+	// The address the user picked that the offers were requested to pay out to, if any. A NEAR
+	// Intents quote pays the recipient it was issued for, so an offer holds for this address only.
+	customRecipientForSwap?: string;
 	selectedProvider?: SwapMappedResult;
 	manuallySelectedProviderKey?: SwapProvider;
 	// The reason the quote round produced no offers, when a provider named one.
@@ -22,6 +25,7 @@ export interface SwapAmountsStore extends Readable<Nullish<SwapAmountsStoreData>
 		swaps: SwapMappedResult[];
 		amountForSwap: OptionAmount;
 		slippageForSwap?: number;
+		customRecipientForSwap?: string;
 		selectedProvider?: SwapMappedResult;
 		quoteError?: SwapQuoteError;
 	}) => void;
@@ -53,7 +57,14 @@ export const initSwapAmountsStore = ({
 			set(null);
 		},
 
-		setSwaps: ({ swaps, amountForSwap, slippageForSwap, selectedProvider, quoteError }) => {
+		setSwaps: ({
+			swaps,
+			amountForSwap,
+			slippageForSwap,
+			customRecipientForSwap,
+			selectedProvider,
+			quoteError
+		}) => {
 			if (nonNullish(manualProviderKey)) {
 				// A pick belongs to the amount of the quote it was made on, which the store still
 				// holds: refreshes, a return from Review and Max applying its amount again keep it, a
@@ -70,6 +81,7 @@ export const initSwapAmountsStore = ({
 						swaps,
 						amountForSwap,
 						slippageForSwap,
+						customRecipientForSwap,
 						selectedProvider: manualMatch,
 						manuallySelectedProviderKey: manualProviderKey,
 						quoteError
@@ -85,6 +97,7 @@ export const initSwapAmountsStore = ({
 				swaps,
 				amountForSwap,
 				slippageForSwap,
+				customRecipientForSwap,
 				selectedProvider,
 				quoteError
 			});

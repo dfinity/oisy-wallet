@@ -466,6 +466,7 @@ export const fetchSwapAmounts = async ({
 	userSolAddress,
 	userBtcAddress,
 	userXrpAddress,
+	customRecipientAddress,
 	onProviderParticipating
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
@@ -474,6 +475,12 @@ export const fetchSwapAmounts = async ({
 	});
 
 	if (isNetworkIdICP(sourceToken.network.id)) {
+		// NEAR Intents, the only provider that pays out to an address the user picked, serves no
+		// Internet Computer token: every offer from here would pay the user's own address instead.
+		if (nonNullish(customRecipientAddress)) {
+			return [];
+		}
+
 		if (!isNetworkIdICP(destinationToken.network.id)) {
 			return await fetchSwapAmountsICPBridge({
 				sourceToken,
@@ -509,8 +516,15 @@ export const fetchSwapAmounts = async ({
 		return [];
 	}
 
+	// An address the user picked replaces their own as the recipient, and since only NEAR Intents
+	// pays out to one, NEAR Intents is the only provider asked: no other offer could pay that address.
 	const recipientAddress =
-		recipientResolution.type === 'resolved' ? recipientResolution.recipientAddress : undefined;
+		customRecipientAddress ??
+		(recipientResolution.type === 'resolved' ? recipientResolution.recipientAddress : undefined);
+
+	const fanOut: SwapQuoteFanOut = nonNullish(customRecipientAddress)
+		? { onlyProvider: SwapProvider.NEAR_INTENTS }
+		: {};
 
 	// Ahead of the EVM fall-through, which would otherwise cast a Bitcoin token to
 	// `Erc20Token` and hand it to providers that cannot quote it.
@@ -526,7 +540,8 @@ export const fetchSwapAmounts = async ({
 			userBtcAddress,
 			recipientAddress,
 			slippage,
-			...(onProviderParticipating && { onProviderParticipating })
+			...(onProviderParticipating && { onProviderParticipating }),
+			...fanOut
 		});
 	}
 
@@ -540,7 +555,8 @@ export const fetchSwapAmounts = async ({
 			userAddress: userXrpAddress,
 			recipientAddress,
 			slippage,
-			...(onProviderParticipating && { onProviderParticipating })
+			...(onProviderParticipating && { onProviderParticipating }),
+			...fanOut
 		});
 	}
 
@@ -561,7 +577,8 @@ export const fetchSwapAmounts = async ({
 			userAddress: sourceAddress,
 			recipientAddress,
 			slippage,
-			...(onProviderParticipating && { onProviderParticipating })
+			...(onProviderParticipating && { onProviderParticipating }),
+			...fanOut
 		});
 	}
 
@@ -572,7 +589,8 @@ export const fetchSwapAmounts = async ({
 		userAddress: userEthAddress,
 		recipientAddress,
 		slippage,
-		...(onProviderParticipating && { onProviderParticipating })
+		...(onProviderParticipating && { onProviderParticipating }),
+		...fanOut
 	});
 };
 
@@ -1607,6 +1625,19 @@ const collectSwapQuotes = <T>({
 	});
 };
 
+interface SwapQuoteFanOut {
+	// Asks this provider alone, when no other one could serve the request.
+	onlyProvider?: SwapProvider;
+}
+
+const askedSwapProviders = <T extends { key: SwapProvider; isEnabled: boolean }>({
+	providers,
+	onlyProvider
+}: SwapQuoteFanOut & { providers: T[] }): T[] =>
+	providers.filter(
+		({ key, isEnabled }) => isEnabled && (isNullish(onlyProvider) || key === onlyProvider)
+	);
+
 // Shared tail of the provider fan-outs: keep the fulfilled quotes, best first. When no
 // provider quoted at all but one refused the amount as below its minimum, rethrow that
 // refusal so the UI can name the reason instead of the generic "swap is not offered".
@@ -1686,13 +1717,14 @@ export const fetchSwapAmountsEVM = async ({
 	userAddress,
 	recipientAddress,
 	slippage,
-	onProviderParticipating
-}: EvmQuoteParams): Promise<SwapMappedResult[]> => {
+	onProviderParticipating,
+	onlyProvider
+}: EvmQuoteParams & SwapQuoteFanOut): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
 		return [];
 	}
 
-	const enabledProviders = evmSwapProviders.filter(({ isEnabled }) => isEnabled);
+	const enabledProviders = askedSwapProviders({ providers: evmSwapProviders, onlyProvider });
 
 	const settledResults = await collectSwapQuotes({
 		requests: enabledProviders.map(
@@ -1723,9 +1755,10 @@ export const fetchSwapAmountsBTC = async ({
 	userBtcAddress,
 	recipientAddress,
 	slippage,
-	onProviderParticipating
-}: BtcQuoteParams): Promise<SwapMappedResult[]> => {
-	const enabledProviders = btcSwapProviders.filter(({ isEnabled }) => isEnabled);
+	onProviderParticipating,
+	onlyProvider
+}: BtcQuoteParams & SwapQuoteFanOut): Promise<SwapMappedResult[]> => {
+	const enabledProviders = askedSwapProviders({ providers: btcSwapProviders, onlyProvider });
 
 	const settledResults = await collectSwapQuotes({
 		requests: enabledProviders.map(
@@ -1757,13 +1790,14 @@ export const fetchSwapAmountsSOL = async ({
 	userAddress,
 	recipientAddress,
 	slippage,
-	onProviderParticipating
-}: NearIntentsQuoteParams): Promise<SwapMappedResult[]> => {
+	onProviderParticipating,
+	onlyProvider
+}: NearIntentsQuoteParams & SwapQuoteFanOut): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
 		return [];
 	}
 
-	const enabledProviders = solSwapProviders.filter(({ isEnabled }) => isEnabled);
+	const enabledProviders = askedSwapProviders({ providers: solSwapProviders, onlyProvider });
 
 	const settledResults = await collectSwapQuotes({
 		requests: enabledProviders.map(
@@ -1792,13 +1826,14 @@ export const fetchSwapAmountsXRP = async ({
 	userAddress,
 	recipientAddress,
 	slippage,
-	onProviderParticipating
-}: NearIntentsQuoteParams): Promise<SwapMappedResult[]> => {
+	onProviderParticipating,
+	onlyProvider
+}: NearIntentsQuoteParams & SwapQuoteFanOut): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
 		return [];
 	}
 
-	const enabledProviders = xrpSwapProviders.filter(({ isEnabled }) => isEnabled);
+	const enabledProviders = askedSwapProviders({ providers: xrpSwapProviders, onlyProvider });
 
 	const settledResults = await collectSwapQuotes({
 		requests: enabledProviders.map(

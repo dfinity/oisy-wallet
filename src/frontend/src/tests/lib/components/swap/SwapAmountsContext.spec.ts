@@ -30,6 +30,7 @@ interface SwapAmountsContextProps {
 	sourceToken: IcToken | undefined;
 	destinationToken: IcToken | undefined;
 	slippageValue: OptionAmount;
+	customRecipientAddress?: string;
 	enableAmountUpdates?: boolean;
 	pauseAmountUpdates?: boolean;
 }
@@ -404,6 +405,75 @@ describe('SwapAmountsContext.svelte', () => {
 		expect(fetchMock).toHaveBeenLastCalledWith(expect.objectContaining({ slippage: '0.5' }));
 		expect(get(store)?.slippageForSwap).toBe(0.5);
 		expect(get(store)?.amountForSwap).toBe(10);
+	});
+
+	// A NEAR Intents quote pays the recipient it was issued for, so the offers of a remounted wizard
+	// are reused for the same address only.
+	it('calls fetchSwapAmounts when the offers were requested for another recipient', async () => {
+		const fetchMock = vi
+			.spyOn(swapService, 'fetchSwapAmounts')
+			.mockResolvedValue(mockSwapProviders);
+
+		store.setSwaps({
+			swaps: mockSwapProviders,
+			amountForSwap: 10,
+			slippageForSwap: 0.3,
+			selectedProvider: mockSwapProviders[0]
+		});
+
+		await renderWithContext({
+			amount: '10',
+			sourceToken,
+			destinationToken,
+			slippageValue: '0.3',
+			customRecipientAddress: mockXrpAddress
+		});
+
+		await waitForDebounce();
+
+		expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ customRecipientAddress: mockXrpAddress })
+		);
+		expect(get(store)?.customRecipientForSwap).toBe(mockXrpAddress);
+	});
+
+	it('calls fetchSwapAmounts again when only the recipient changes', async () => {
+		const fetchMock = vi
+			.spyOn(swapService, 'fetchSwapAmounts')
+			.mockResolvedValue(mockSwapProviders);
+
+		const { rerender } = await renderWithContext({
+			amount: '10',
+			sourceToken,
+			destinationToken,
+			slippageValue: '0.3',
+			customRecipientAddress: mockXrpAddress
+		});
+
+		await waitForDebounce();
+
+		expect(fetchMock).toHaveBeenCalledOnce();
+
+		await act(() =>
+			rerender({
+				amount: '10',
+				sourceToken,
+				destinationToken,
+				slippageValue: '0.3',
+				customRecipientAddress: undefined,
+				children: fakeSnippet,
+				isSwapAmountsLoading: false,
+				isSourceTokenIcrc2: true
+			})
+		);
+
+		await waitForDebounce();
+
+		expect(fetchMock).toHaveBeenCalledTimes(2);
+		expect(fetchMock).toHaveBeenLastCalledWith(
+			expect.objectContaining({ customRecipientAddress: undefined })
+		);
+		expect(get(store)?.customRecipientForSwap).toBeUndefined();
 	});
 
 	it('preserves manual provider selection across periodic refresh', async () => {

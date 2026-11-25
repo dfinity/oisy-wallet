@@ -112,6 +112,9 @@ export interface FetchSwapAmountsParams extends SwapQuoteObserver {
 	// The user's own XRP mainnet address: the refund address of a swap from XRP, and the
 	// payout address of a swap toward it.
 	userXrpAddress: OptionXrpAddress;
+	// An address the user picked to receive the swap instead of their own. Only NEAR Intents pays out
+	// to one, so it is the only provider asked while one is set.
+	customRecipientAddress?: string;
 }
 
 export type Slippage = string | number;

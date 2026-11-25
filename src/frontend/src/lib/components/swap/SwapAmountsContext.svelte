@@ -31,6 +31,8 @@
 		sourceToken?: Token;
 		destinationToken?: Token;
 		slippageValue: OptionAmount;
+		// An address the user picked to receive the swap instead of their own.
+		customRecipientAddress?: string;
 		children?: Snippet;
 		isSourceTokenIcrc2?: boolean;
 		isSwapAmountsLoading: boolean;
@@ -43,6 +45,7 @@
 		sourceToken,
 		destinationToken,
 		slippageValue,
+		customRecipientAddress,
 		children,
 		isSourceTokenIcrc2,
 		isSwapAmountsLoading = $bindable(false),
@@ -119,6 +122,8 @@
 		const slippage = slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE;
 		const parsedSlippage = Number(slippage);
 
+		const customRecipient = customRecipientAddress;
+
 		if (isNullish(isSourceTokenIcrc2) && isIcToken(sourceToken)) {
 			return;
 		}
@@ -173,6 +178,7 @@
 				userSolAddress: $solAddressMainnet,
 				userBtcAddress: $btcAddressMainnet,
 				userXrpAddress: $xrpAddressMainnet,
+				customRecipientAddress: customRecipient,
 				onProviderParticipating: (provider) => {
 					if (isCurrentRequest()) {
 						firstParticipantAt ??= Date.now();
@@ -193,6 +199,7 @@
 					swaps: [],
 					amountForSwap: parsedAmount,
 					slippageForSwap: parsedSlippage,
+					customRecipientForSwap: customRecipient,
 					selectedProvider: undefined
 				});
 				return;
@@ -202,6 +209,7 @@
 				swaps: swapAmounts,
 				amountForSwap: parsedAmount,
 				slippageForSwap: parsedSlippage,
+				customRecipientForSwap: customRecipient,
 				selectedProvider: swapAmounts[0]
 			});
 		} catch (err: unknown) {
@@ -218,6 +226,7 @@
 				swaps: [],
 				amountForSwap: parsedAmount,
 				slippageForSwap: parsedSlippage,
+				customRecipientForSwap: customRecipient,
 				selectedProvider: undefined,
 				...(err instanceof SwapAmountTooLowError && {
 					quoteError: { type: 'amount-too-low', minAmount: err.minAmount }
@@ -260,6 +269,7 @@
 			destinationTokenId,
 			isSourceTokenIcrc2,
 			slippageValue,
+			customRecipientAddress,
 			pauseAmountUpdates,
 			$authIdentity
 		];
@@ -282,12 +292,13 @@
 				return;
 			}
 			// A remounted wizard may reuse its accepted quote without replaying comparison, for the
-			// amount and the slippage it was requested with.
+			// amount, the slippage and the recipient it was requested with.
 			if (
 				fetchGeneration === 1 &&
 				nonNullish($store) &&
 				$store.amountForSwap === Number(amount) &&
-				$store.slippageForSwap === Number(slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE)
+				$store.slippageForSwap === Number(slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE) &&
+				$store.customRecipientForSwap === customRecipientAddress
 			) {
 				return;
 			}

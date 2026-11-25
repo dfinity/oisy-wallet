@@ -10,7 +10,7 @@ import {
 	type SwapSupportedTokensData
 } from '$lib/stores/swap-supported-tokens.store';
 import type { Balance } from '$lib/types/balance';
-import type { Network } from '$lib/types/network';
+import type { Network, NetworkId } from '$lib/types/network';
 import type { OptionAmount } from '$lib/types/send';
 import type { SwapSelectTokenType } from '$lib/types/swap';
 import type { Token, TokenId } from '$lib/types/token';
@@ -65,6 +65,14 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const receiveTokenPickerStep = writable<WizardStepsSwap.TOKENS_LIST | WizardStepsSwap.MOVE_TOKEN>(
 		WizardStepsSwap.TOKENS_LIST
 	);
+	// An address the user picked to receive the swap instead of their own, with the network it was
+	// picked for: it is valid there only.
+	const customDestinationData = writable<{ networkId: NetworkId; address: string } | undefined>();
+	// The address being entered in the destination picker, which the QR scanner, a step of its own,
+	// fills. Kept here because Get Token rebuilds the wizard between steps.
+	const customDestinationDraft = writable('');
+
+	const clearCustomDestination = () => customDestinationData.set(undefined);
 
 	const sourceToken = derived(
 		[data, swappableTokens],
@@ -76,6 +84,15 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			destinationToken === null
 				? undefined
 				: (destinationToken ?? $swappableTokens.destinationToken)
+	);
+
+	const customDestination = derived(
+		[customDestinationData, destinationToken],
+		([$customDestinationData, $destinationToken]) =>
+			nonNullish($customDestinationData) &&
+			$customDestinationData.networkId === $destinationToken?.network.id
+				? $customDestinationData.address
+				: undefined
 	);
 
 	const sourceTokenBalance = derived(
@@ -152,6 +169,15 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		lifiMaxFee,
 		tokenListReturnFocus,
 		receiveTokenPickerStep,
+		customDestination,
+		customDestinationDraft,
+		setCustomDestination: (address: string | undefined) => {
+			const networkId = get(destinationToken)?.network.id;
+
+			customDestinationData.set(
+				nonNullish(address) && nonNullish(networkId) ? { networkId, address } : undefined
+			);
+		},
 		// The amount is kept as it is for another source, not refilled with that token's max.
 		setSourceToken: (token: Token) => {
 			receiveTokenPickerStep.set(WizardStepsSwap.TOKENS_LIST);
@@ -163,15 +189,20 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				sourceToken: token
 			}));
 		},
-		setDestinationToken: (token: Token | undefined) =>
+		// A picked destination belongs to the receive token it was picked for.
+		setDestinationToken: (token: Token | undefined) => {
+			clearCustomDestination();
+
 			update((state) => ({
 				...state,
 				destinationToken: token ?? null
-			})),
+			}));
+		},
 		clearDestinationToken: () => {
 			// Keep the current pay amount when the quote and its fees are cleared.
 			amountSetToMax.set(false);
 			lifiMaxFee.set(undefined);
+			clearCustomDestination();
 
 			update((state) => ({ ...state, destinationToken: null }));
 		},
@@ -180,6 +211,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			receiveTokenPickerStep.set(WizardStepsSwap.TOKENS_LIST);
 			amountSetToMax.set(false);
 			lifiMaxFee.set(undefined);
+			clearCustomDestination();
 
 			update((state) => {
 				const $swappableTokens = get(swappableTokens);
@@ -267,6 +299,8 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			pricedTokenIds.clear();
 			tokenListReturnFocus.set(undefined);
 			receiveTokenPickerStep.set(WizardStepsSwap.TOKENS_LIST);
+			clearCustomDestination();
+			customDestinationDraft.set('');
 		}
 	};
 };
@@ -325,6 +359,13 @@ export interface SwapContext {
 	amountSetToMax: Writable<boolean>;
 	// The LI.FI fee "Max" leaves room for while it holds a LI.FI amount.
 	lifiMaxFee: Writable<LifiMaxFee | undefined>;
+	// An address the user picked to receive the swap instead of their own, on the receive token's
+	// network. Only NEAR Intents pays out to one.
+	customDestination: Readable<string | undefined>;
+	// The address being entered in the destination picker.
+	customDestinationDraft: Writable<string>;
+	// Picks a destination for the current receive token; `undefined` goes back to the user's own.
+	setCustomDestination: (address: string | undefined) => void;
 	setIsTokensIcrc2: (args: { ledgerCanisterId: string; isIcrc2Supported: boolean }) => void;
 	setIsTokenPermitSupported: ({
 		address,
