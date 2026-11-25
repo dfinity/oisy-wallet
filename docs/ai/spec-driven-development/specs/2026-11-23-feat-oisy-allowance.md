@@ -63,13 +63,13 @@ The phases ship one by one, in this order, except that phase 3 comes before phas
 
 - **Granted**, or **Skipped** with a larger OISY allowance than the Insufficient allowance stated, because another tab or device got a new one in the meantime: the shared signer module repeats the CC once, right away. A CC refused for Insufficient allowance ran nothing, so the repeat is like the first try. If it succeeds, the flow never sees the failure.
 - **Refused**, or no AR during the AR cooldown: the CC fails, and Allowance issue is set (see 4.5).
-- **Skipped** with no larger OISY allowance: the CC costs more than the OISY allowance, and the backend sets no new one at or above the OISY allowance threshold. The CC fails, and a warning toast says this transaction costs more than the free OISY allowance covers. It stays until the user closes it. Allowance issue is **not** set, since cheaper CCs still work. Today this happens with a large BTC send in production, which is charged for all its inputs in one CC.
+- **Skipped** with no larger OISY allowance: the CC costs more than the OISY allowance, and the backend sets no new one at or above the OISY allowance threshold. The CC fails, and a warning toast says this transaction needs more cycles to sign than OISY covers. It stays until the user closes it. Allowance issue is **not** set, since cheaper CCs still work. Today this happens with a large BTC send in production, which is charged for all its inputs in one CC.
 - A repeated CC that returns Insufficient allowance again is handled like the Skipped case without a larger OISY allowance, and no second AR is sent.
-- When the CC still fails, the flow shows its usual error, as today, but its error toast says "Your transaction couldn't be signed because you don't have enough usage credits left." in place of its usual text. This is the **usage-credits error text**.
+- When the CC still fails, the flow shows its usual error, as today, but its error toast says "Your transaction couldn't be signed right now." in place of its usual text. This is the **usage-credits error text**.
 
 ### 4.5 Allowance issue and its toast
 
-- When Allowance issue is set, and again with every CC that returns Insufficient allowance while it lasts, the **allowance-issue toast** shows: the free OISY allowance is used up for now, so some transactions may fail.
+- When Allowance issue is set, and again with every CC that returns Insufficient allowance while it lasts, the **allowance-issue toast** shows: OISY temporarily can't cover the cycles needed to sign transactions, so signing may fail, and OISY is working on a fix (see pending decision 12).
 - It looks different from every other toast: warn level, the inverted theme, a title and its own icon.
 - The user can close it. It shows again with the next CC that returns Insufficient allowance while Allowance issue lasts.
 - It disappears when Allowance issue clears. Any Granted or Skipped AR clears it. A Skipped AR means the OISY allowance is at or above the OISY allowance threshold, for example after another tab or device got a Granted AR.
@@ -137,7 +137,7 @@ Phase 3 comes first, with one spender: the signer charges the user's main accoun
 - **An allowance card on the Tools page** shows the free signatures left (the OISY allowance left), the spending limit (the approval left, of the limit set last: "1.2 of 2 TCYCLES left") and the ICP Cycles balance, since either can run low, with **Set spending limit** and **Get ICP Cycles**. The ledger keeps only the approval left, so the limit set last comes from the cycles ledger's index. Allowances are also given in signatures, estimated at the backend's cost per signature; the spending limit's counts only what the balance can pay, with a warning while the balance covers less than the approval left. It stays out of the top row: users should rarely need it.
 - **Set spending limit** sets the approval to the amount the user enters, starting at the limit set last, up to their TCYCLES balance, 0 to revoke it, after a review step that shows the previous limit, the remaining and the new limit. **Get ICP Cycles** opens Mint TCYCLES. The card reads the cycles ledger itself, so it works whether or not TCYCLES is enabled.
 - **From the toast.** The allowance-issue toast links to the Tools card, next to its Learn more link, as the Activity info box links to Settings.
-- **Showing it.** When own cycles pay the CC after a Refused AR, the allowance-issue toast keeps its title, and its text says signing now uses the user's spending limit (see pending decision 10).
+- **Showing it.** Until own cycles pay, the allowance-issue toast offers them for urgent transactions. When own cycles pay the CC after a Refused AR, the toast keeps its title, and its text says the user's own ICP Cycles cover signing for now (see pending decision 10).
 
 ## 7. Phase 4: bound the total
 
@@ -215,8 +215,9 @@ Numbers stay fixed: a resolved decision keeps its number, and a new one gets the
 7. **Phase 4.** The cap size and period, the OISY allowance per Granted AR and the new-user pool.
 8. _Resolved:_ **Skipped while Allowance issue is set.** A Skipped AR clears Allowance issue too, since the OISY allowance is then at or above the OISY allowance threshold (see 1 and 4.5).
 9. _Resolved:_ **Where the outcome shows.** Not in the forms. After a Granted AR the CC repeats once; otherwise the allowance-issue toast and the warning toast say what happened, next to the form's usual error. The earlier design, an outcome box and a disabled main button in every form plus a banner, needed changes in every flow that makes CCs and made them all depend on this feature (#14740 and #14741, closed).
-10. _Resolved:_ **Phase 3 with toasts.** The allowance-issue toast links to the Tools card (see 6.2). When own cycles pay the CC after a Refused AR, the toast keeps its title, and its text says signing now uses the user's spending limit.
-11. _Resolved:_ **The toast on phones.** Below 768 px, where the app has its phone layout, the allowance-issue toast has no title and a shorter text that still says the free usage credits are daily, so it stays a few lines tall. Its own-credits text links to the Tools card from "your spending limit". At every width the toast shows its whole text instead of scrolling after three lines.
+10. _Resolved:_ **Phase 3 with toasts.** The allowance-issue toast links to the Tools card (see 6.2). When own cycles pay the CC after a Refused AR, the toast keeps its title, and its text says the user's own ICP Cycles cover signing for now.
+11. _Resolved:_ **The toast on phones.** Below 768 px, where the app has its phone layout, the allowance-issue toast has no title and a shorter text that still says OISY temporarily can't cover signing, so it stays a few lines tall. Its own-credits text links to the Tools card from "your own ICP Cycles". At every width the toast shows its whole text instead of scrolling after three lines.
+12. _Resolved:_ **How the texts describe a limited OISY allowance.** As a temporary limit OISY is working on, not as free daily credits that are used up: OISY limits what it grants only in unusual situations, so the texts say OISY temporarily can't cover the cycles needed for signing, and, where own cycles are on, offer them for urgent transactions. They say "cover", not "pay".
 
 ## 12. Non-goals
 
