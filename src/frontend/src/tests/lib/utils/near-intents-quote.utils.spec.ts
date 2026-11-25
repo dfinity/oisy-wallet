@@ -136,6 +136,49 @@ const mockBscUsdcDestinationSignedQuoteResponse: NearIntentsQuoteResponse = {
 	correlationId: '07a1c8e8-b788-43e2-8c36-36289a1b93e4'
 };
 
+// A real dry `POST /v0/quote` response for a confidential swap, captured on 2026-11-25. It shows
+// that 1Click echoes `confidentiality` but leaves it out of what it signs. Trimmed like the
+// responses above: the echoed `appFees`, `depositMode` and `insured` are left out.
+const mockConfidentialDrySignedQuoteResponse: NearIntentsQuoteResponse = {
+	quote: {
+		amountIn: '100000000000000000',
+		amountInFormatted: '0.1',
+		amountInUsd: '168.463000000000',
+		minAmountIn: '100000000000000000',
+		amountOut: '168543560',
+		amountOutFormatted: '168.54356',
+		amountOutUsd: '168.463000000000',
+		minAmountOut: '166858124',
+		timeEstimate: 54,
+		refundFee: '35000000000000',
+		withdrawFee: '300000',
+		// A dry quote has no deposit address or deadline, and its signature covers only the amounts.
+		depositAddress: '',
+		depositMemo: null,
+		deadline: ''
+	},
+	quoteRequest: {
+		dry: true,
+		swapType: 'EXACT_INPUT',
+		slippageTolerance: 100,
+		originAsset: 'nep141:eth.omft.near',
+		depositType: 'ORIGIN_CHAIN',
+		destinationAsset: 'nep141:eth-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.omft.near',
+		amount: '100000000000000000',
+		refundTo: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+		refundType: 'ORIGIN_CHAIN',
+		recipient: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+		recipientType: 'DESTINATION_CHAIN',
+		deadline: '2026-12-31T00:00:00.000Z',
+		confidentiality: 'basic',
+		quoteWaitingTimeMs: 0
+	},
+	signature:
+		'ed25519:286MVhLwEa7cwbXYNFU5zE9LzBaXhwW9J6avx64qQxj87oXRKyXaJ3eTRM6hQRQQF3Fs9zJfx5xHo75qjTR1fLz3',
+	timestamp: '2026-11-25T19:17:34.764Z',
+	correlationId: '9ccfce15-75f1-4c51-9392-9e1ab5e899c7'
+};
+
 describe('near-intents-quote.utils', () => {
 	describe('nearIntentsQuoteHash', () => {
 		it('reproduces the digest the service signed', async () => {
@@ -158,6 +201,12 @@ describe('near-intents-quote.utils', () => {
 			}
 		])('accepts a genuine quote signed under an alias of $label', async ({ response }) => {
 			await expect(verifyNearIntentsQuoteSignature(response)).resolves.toBeTruthy();
+		});
+
+		it('accepts a genuine confidential quote, whose confidentiality is not signed', async () => {
+			await expect(
+				verifyNearIntentsQuoteSignature(mockConfidentialDrySignedQuoteResponse)
+			).resolves.toBeTruthy();
 		});
 
 		// Earlier, 1Click echoed the id it signed; the check must hold whichever alias comes back.
