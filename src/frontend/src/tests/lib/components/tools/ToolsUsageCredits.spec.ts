@@ -2,6 +2,7 @@ import * as cyclesMintEnv from '$env/cycles-mint.env';
 import * as cmcApi from '$icp/api/cmc.api';
 import * as icrcDerived from '$icp/derived/icrc.derived';
 import ToolsUsageCredits from '$lib/components/tools/ToolsUsageCredits.svelte';
+import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 import {
 	CONVERT_AMOUNT_EXCHANGE_VALUE,
 	TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON,
@@ -50,13 +51,17 @@ describe('ToolsUsageCredits', () => {
 		vi.spyOn(cyclesMintEnv, 'CYCLES_MINT_ENABLED', 'get').mockReturnValue(true);
 	});
 
-	it('shows its title and text', () => {
-		const { getByText } = render(ToolsUsageCredits);
+	it('shows its title and text, with a Learn more link to the docs', () => {
+		const { container, getByRole, getByText } = render(ToolsUsageCredits);
 
 		expect(getByText(en.usage_credits.text.title)).toBeInTheDocument();
-		expect(
-			getByText(replacePlaceholders(en.usage_credits.text.description, { $token: 'TCYCLES' }))
-		).toBeInTheDocument();
+		expect(container).toHaveTextContent(
+			replacePlaceholders(en.usage_credits.text.description, { $token: 'TCYCLES' })
+		);
+		expect(getByRole('link', { name: en.settings.text.learn_more })).toHaveAttribute(
+			'href',
+			OISY_DOCS_URL
+		);
 	});
 
 	it('shows the approval left and the TCYCLES balance it reads', async () => {

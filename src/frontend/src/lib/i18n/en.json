@@ -926,7 +926,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "Usage credits",
-			"description": "When your free usage credits are used up, signing is paid from your own $token, up to the amount you add here.",
+			"description": "When your free daily usage credits are used up, signing is paid from your own $token, up to the amount you add here.",
 			"own_credits": "Your own credits",
 			"balance": "$token balance",
 			"add_more": "Add more",

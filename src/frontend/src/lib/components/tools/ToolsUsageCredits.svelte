@@ -9,7 +9,9 @@
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import ToolsUsageCreditsModal from '$lib/components/tools/ToolsUsageCreditsModal.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON,
 		TOOLS_USAGE_CREDITS_BALANCE,
@@ -19,6 +21,8 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { modalCyclesMint, modalUsageCreditsAdd } from '$lib/derived/modal.derived';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { loadOwnCycles, type OwnCycles } from '$lib/services/own-cycles.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -91,6 +95,18 @@
 		     title it explains: the card's title gap is sized for rows. -->
 		<p class="-mt-4 mb-3 text-sm text-tertiary">
 			{replacePlaceholders($i18n.usage_credits.text.description, { $token: token.symbol })}
+
+			<ExternalLink
+				ariaLabel={$i18n.settings.text.learn_more}
+				href={OISY_DOCS_URL}
+				iconVisible={false}
+				trackEvent={buildLearnMoreEvent({
+					sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE,
+					sourceSublocation: 'usage_credits',
+					labelKey: 'settings.text.learn_more',
+					url: OISY_DOCS_URL
+				})}>{$i18n.settings.text.learn_more}</ExternalLink
+			>
 		</p>
 
 		<SettingsCardItem>
