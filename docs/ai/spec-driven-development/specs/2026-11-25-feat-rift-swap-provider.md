@@ -154,6 +154,9 @@ New `src/frontend/src/env/rest/rift.env.ts`:
   `LOCAL || STAGING`. It stays there through v1. The production flip is its own one-line PR,
   gated on **all** of: the no-slippage form redesign shipped, a production API key in place, and
   CORS confirmed from OISY's production origin.
+- The flag gates **new** quotes and orders only. Rift rows that already exist are polled, refreshed
+  and shown whatever its value, as LI.FI's are: turning it off while a deposit settles must not
+  strand the row or skip its balance refresh.
 - The BTC → EVM entry is enabled only while `BTC_SEND_VIA_BACKEND_ENABLED` is on too (as
   `LIFI_BTC_PROVIDER_ENABLED` is): only the backend path signs before broadcasting, which the row
   needs (see [Active User Transactions](#active-user-transactions)).
@@ -176,9 +179,19 @@ OpenAPI spec above.
 
 - Every request carries `x-api-key` when `RIFT_API_KEY` is set.
 - Responses are parsed, not cast. A response missing a required field is an error, not an offer.
-- A 429 records `Retry-After`, and no quote request is sent before it elapses.
 - Every request uses `format: "raw"`, so amounts are base-unit integers and assets are canonical
   ids.
+
+**Rate limiting.** Every Rift request (quotes, order creation and the poller's status reads) goes
+through one limiter in `rift.api.ts`:
+
+- Request **starts** are at least `RIFT_MIN_REQUEST_INTERVAL_MS` (1 s) apart, with or without a key
+  (keyed limits are not documented). Caching alone does not bound the rate: the form debounces input
+  changes by only 300 ms (`SwapAmountsContext.svelte`), and every change of inputs is a new request.
+- A 429 starts one shared cooldown until its `Retry-After` elapses. Nothing is sent to Rift before
+  then.
+- Order creation is served before any waiting quote or status read. A waiting quote request is
+  replaced by a newer one, so only the latest inputs are quoted.
 
 ### Asset identifiers
 
@@ -213,7 +226,8 @@ echoes are case-insensitive on the address part.
     can exhaust on its own. The mode does not affect execution: Rift re-quotes on `optimal` once the
     deposit arrives.
 - **Cadence:** on input change, then at most every `RIFT_QUOTE_REFRESH_INTERVAL_MS` (30 s, as LI.FI)
-  for unchanged inputs, cached per request. This keeps a keyless session well under 1 request/s.
+  for unchanged inputs, cached per request. The cache only avoids re-asking for unchanged inputs; the
+  [limiter](#api-client-no-sdk-no-new-dependency) is what keeps a session within 1 request/s.
 - **Quote checks, before an offer is shown.** The offer is dropped, silently, unless:
   - `format` is `raw`, and `from`, `to` and `amount_in` equal the request;
   - `estimated_amount_out` is a positive integer;
@@ -335,7 +349,8 @@ pub struct RiftData {
 }
 ```
 
-`validate_data` requires a valid amount, as for `Lifi`. The candid change is additive. Regenerate
+`validate_data` requires a valid amount, as for `Lifi`, and the `rift_order_id` ref at creation
+(see the refs below). The candid change is additive. Regenerate
 `backend.did` and the declarations per `docs/ai/backend/workflows/breaking-interface.md`. It is not
 breaking, but follow the regeneration steps.
 
@@ -356,20 +371,50 @@ broadcast refusal, as LI.FI's and the XRP sends' rows are.
 | `rift_amount_out`       | learned (`delivered` / `refunded`) | `amount_out`, base units               |
 | `rift_payout_tx`        | learned (`delivered` / `refunded`) | `payout_tx`                            |
 
+The backend requires `rift_order_id` at creation, as it requires LI.FI's poll keys (`LIFI_REF_*`):
+a row without it could never be polled.
+
+Every row also carries, from creation, the **display refs every swap provider shares** (`amount`,
+`usd_source_value`, `source_token_symbol`, `source_network_symbol`, `destination_token_symbol`,
+`destination_network_symbol`), built as `toLifiCreationRefs` builds them, symbols truncated to the
+backend's value limit. `ActiveUserTransactionItem.svelte` renders a row's amount, tokens and
+networks from these refs, so a row stays readable across sessions and after its tokens are
+disabled.
+
 **Poller** (`lib/services/rift-active-tx.services.ts`, utils in `lib/utils/rift-active-tx.utils.ts`).
-On each tick, every non-terminal Rift row is polled with one `GET /order/{rift_order_id}`, one after
-another. A 429 ends the round, and the round honours `Retry-After`. Status mapping (decided
-2026-11-25):
+The poller runs for every non-terminal Rift row, whatever `RIFT_SWAP_ENABLED` says.
+
+- Each row is read with one `GET /order/{rift_order_id}`, through the
+  [limiter](#api-client-no-sdk-no-new-dependency), one after another.
+- A tick (every 5 s, `ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS`) reads at most
+  `RIFT_MAX_ORDER_READS_PER_TICK` (3) rows, **least recently read first**. The other providers'
+  pollers run in the same tick, so one provider's round must stay short.
+- A 429 ends the round. The rows it did not reach are the least recently read, so the next round,
+  once `Retry-After` has elapsed, starts with them. No row is starved by one that keeps waiting for
+  its deposit.
+
+Status mapping (decided 2026-11-25):
 
 | Rift                                 | AUT                                                                                            |
 | ------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| `awaiting_deposit`                   | no change (`Pending`); EVM: a deposit nonce consumed by another tx → `Failed`                  |
+| `awaiting_deposit`                   | no change (`Pending`); EVM: a reverted or replaced deposit → `Failed` (below)                  |
 | `funded`, `executing`, `underfunded` | `Executing` (`underfunded` waits for Rift's refund)                                            |
 | `delivered`                          | `Succeeded`; `rift_amount_out`, `rift_payout_tx` recorded                                      |
 | `refunded`                           | `Failed`, `swap.error.swap_refunded`; refunded amount and `rift_payout_tx` recorded            |
 | `expired`                            | `Failed`, `swap.error.rift_deposit_expired`                                                    |
 | `frozen`                             | `Failed`, `swap.error.rift_order_frozen` (contact Rift support; the order id stays on the row) |
 | network error, 404, unparseable      | no change                                                                                      |
+
+- **An EVM deposit that never reaches Rift.** While the order is `awaiting_deposit`, an EVM row's
+  deposit is also read with `readEvmSourceTxOutcome` (from `rift_deposit_tx`, `rift_deposit_nonce`
+  and `rift_deposit_chain_id`), sharing the tick's `confirmedNonceByChainId`, as the NEAR Intents
+  poller does. A mined deposit that reverted consumed its nonce but sent Rift nothing, and a
+  replaced one never will. Mapped as `nearIntentsDepositOutcomeToUpdate` maps them:
+  - `reverted` → `Failed`, `swap.error.failed_unexpectedly`;
+  - `replaced` → `Failed`, `swap.error.swap_replaced_or_dropped`;
+  - any other verdict leaves the row to Rift's status.
+
+  The source chain's verdict names the cause, so it wins over Rift's `expired`.
 
 - **`frozen` is a final `Failed`.** An operator's later delivery or refund will not show on the row.
   The balance refresh still picks the funds up.
@@ -404,7 +449,8 @@ New keys in `en.json`, the other locales and `i18n.d.ts`:
 - `swap.error.rift_deposit_expired`
 - `swap.error.rift_order_frozen`
 
-A refund reuses `swap.error.swap_refunded`. Copy follows `docs/ai/frontend/brand-and-copy.md`.
+A refund reuses `swap.error.swap_refunded`; a reverted or replaced EVM deposit reuses
+`swap.error.failed_unexpectedly` and `swap.error.swap_replaced_or_dropped`. Copy follows `docs/ai/frontend/brand-and-copy.md`.
 
 ## Delivery plan
 
@@ -431,8 +477,9 @@ flip, gated as in [Flag and env](#flag-and-env).
 
 ## Acceptance criteria
 
-1. With `RIFT_SWAP_ENABLED` off, no request reaches `api.rift.trade` and the Swap modal behaves
-   exactly as before.
+1. With `RIFT_SWAP_ENABLED` off, no Rift quote or order is requested and the Swap modal behaves
+   exactly as before. Rift rows that already exist are still polled, refreshed at their terminal
+   state and shown.
 2. On staging, BTC → (ETH, cbBTC, USDC, … on Ethereum, Arbitrum, Base, Polygon, Robinhood Chain)
    shows a Rift offer when Rift has a route. EVM → BTC likewise. No Rift offer appears for Solana,
    BSC, ICP or XRP, or for any EVM ↔ EVM pair.
@@ -446,14 +493,19 @@ flip, gated as in [Flag and env](#flag-and-env).
 7. Every order is created with `refund_address` set to the user's own source-chain address.
 8. No deposit is broadcast without a Rift AUT row. A definitively refused broadcast leaves no row.
 9. Status mapping as in the table. A `delivered` row shows `amount_out`; a `refunded` row shows the
-   refunded source amount; `frozen` and `expired` rows are `Failed` with their stored reason.
-10. At every terminal state, the BTC wallet, the swap's EVM token and that network's native token
+   refunded source amount; `frozen` and `expired` rows are `Failed` with their stored reason. An EVM
+   deposit that reverted or was replaced turns its row `Failed` without waiting for the deposit
+   deadline.
+10. A Rift row shows its amount, tokens and networks from its shared display refs, in any session,
+    even after its tokens are disabled.
+11. At every terminal state, the BTC wallet, the swap's EVM token and that network's native token
     are refreshed.
-11. A keyless session never sends Rift more than one request per second from the quote loop, and a
-    429 stops requests until `Retry-After` elapses.
-12. Analytics events carry no Rift error text, addresses or order ids beyond what the existing swap
+12. A session never starts two Rift requests (quotes, orders and status reads together) less than
+    one second apart, and a 429 stops every Rift request until `Retry-After` elapses. After a 429,
+    the next poll round starts with the rows the cut round did not reach.
+13. Analytics events carry no Rift error text, addresses or order ids beyond what the existing swap
     events carry.
-13. No new npm dependency.
+14. No new npm dependency.
 
 ## Risks
 
@@ -465,8 +517,10 @@ flip, gated as in [Flag and env](#flag-and-env).
   address. The binding checks cover every echoed field, but not the address itself.
 - **Trust in Rift's TEE deployment**, with no third-party audit. An admin key can trigger refunds
   during an upgrade timelock.
-- **Rate limit.** Keyless is 1 request/s. A user with several open Rift rows plus quoting can hit
-  429s; the poller and quoting honour `Retry-After` and degrade to "no update" or "no offer".
+- **Rate limit.** Keyless is 1 request/s, and whether it is per IP or global is not documented. A
+  user with several open Rift rows plus quoting shares that budget through one limiter, so status
+  updates and offers slow down; a 429 still degrades to "no update" or "no offer" until
+  `Retry-After` elapses.
 - **No testnet.** Every test is a mainnet swap with small amounts on a staging deploy.
 - **`frozen` is final on the row** while Rift may still resolve it later.
 
