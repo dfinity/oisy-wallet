@@ -356,9 +356,11 @@ pub struct RiftData {
 ```
 
 `validate_data` requires a valid amount, as for `Lifi`, and the `rift_order_id` ref at creation
-(see the refs below). The candid change is additive. Regenerate
-`backend.did` and the declarations per `docs/ai/backend/workflows/breaking-interface.md`. It is not
-breaking, but follow the regeneration steps.
+(see the refs below). The variant is appended at the end of the enum, as `NearIntents`, `Velora`,
+`Lifi` and Chain Fusion's were. `breaking-interface.md` calls that typically non-breaking, but
+defers to CI's Candid compatibility check (`backend-tests / breaking-interface`). If that check
+flags the change, PR 1 is marked breaking as the doc describes. Regenerate `backend.did` and the
+declarations per that doc either way.
 
 **Row timing** (decided 2026-11-25). The row is created after the order is checked and the deposit
 is signed, before it is broadcast. No row means nothing is sent. It is deleted only on a definitive
@@ -399,8 +401,9 @@ was sent.
 `rift_amount_out` is stored **formatted** in the token it was paid in, as `lifi_received_amount` is:
 with `rift_dest_decimals` for a delivery and `rift_source_decimals` for a refund. The decimals are
 saved at creation because a disabled custom token's metadata may be gone by the time the order
-settles. An amount that fails to parse or format is left out, and the row falls back to the
-estimate.
+settles. An amount that fails to parse or format is left out. The row then shows the destination
+token's symbol with no received amount, as a LI.FI row does without its received pair; the quote's
+estimate is not stored on the row.
 
 With the shared display refs below, a row holds at most 16 refs, the backend's limit: a new ref
 needs another to go.
@@ -467,9 +470,11 @@ Status mapping (decided 2026-11-25):
   through `reloadEthereumBalance`. A refund lands on the source chain and a delivery on the
   destination chain, so both sides are refreshed whatever the outcome.
 - `ActiveUserTransactionItem.svelte`: Rift joins the `isSwap` list and the `providerName` chain.
-  - A `Succeeded` row shows `rift_amount_out` of the destination token in place of the estimate.
+  - A `Succeeded` row shows `rift_amount_out` of the destination token.
   - A refunded row shows `rift_amount_out` of the **source** token.
   - Both read the stored, formatted amount and need no token metadata.
+  - Until then, or without `rift_amount_out`, the row shows the source amount and the destination
+    token's symbol, as every swap row does.
   - Failure reasons are stored on the row, not displayed (precedent).
 
 ### i18n
