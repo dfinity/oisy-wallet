@@ -928,7 +928,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "Tín dụng sử dụng",
-			"description": "Khi tín dụng sử dụng miễn phí của bạn đã hết, việc ký sẽ được trả bằng $token của chính bạn, tối đa bằng số tiền bạn thêm ở đây.",
+			"description": "Khi tín dụng sử dụng miễn phí hằng ngày của bạn đã hết, việc ký sẽ được trả bằng $token của chính bạn, tối đa bằng số tiền bạn thêm ở đây.",
 			"own_credits": "Tín dụng của bạn",
 			"balance": "Số dư $token",
 			"add_more": "Thêm nữa",

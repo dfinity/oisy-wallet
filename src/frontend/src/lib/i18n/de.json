@@ -928,7 +928,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "Nutzungsguthaben",
-			"description": "Wenn dein Gratis-Nutzungsguthaben aufgebraucht ist, wird das Signieren aus deinen eigenen $token bezahlt, bis zu dem Betrag, den du hier hinzufügst.",
+			"description": "Wenn dein tägliches Gratis-Nutzungsguthaben aufgebraucht ist, wird das Signieren aus deinen eigenen $token bezahlt, bis zu dem Betrag, den du hier hinzufügst.",
 			"own_credits": "Dein eigenes Guthaben",
 			"balance": "$token-Guthaben",
 			"add_more": "Mehr hinzufügen",

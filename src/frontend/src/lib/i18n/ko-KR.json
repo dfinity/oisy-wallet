@@ -928,7 +928,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "사용 크레딧",
-			"description": "무료 사용 크레딧이 소진되면 여기서 추가한 금액까지 서명 비용이 내 $token에서 지불됩니다.",
+			"description": "일일 무료 사용 크레딧이 소진되면 여기서 추가한 금액까지 서명 비용이 내 $token에서 지불됩니다.",
 			"own_credits": "내 크레딧",
 			"balance": "$token 잔액",
 			"add_more": "더 추가",

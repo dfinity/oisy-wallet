@@ -928,7 +928,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "Kredyty użytkowania",
-			"description": "Gdy Twoje darmowe kredyty użytkowania się wyczerpią, podpisywanie jest opłacane z Twoich własnych $token, do kwoty, którą tu dodasz.",
+			"description": "Gdy Twoje dzienne darmowe kredyty użytkowania się wyczerpią, podpisywanie jest opłacane z Twoich własnych $token, do kwoty, którą tu dodasz.",
 			"own_credits": "Twoje własne kredyty",
 			"balance": "Saldo $token",
 			"add_more": "Dodaj więcej",

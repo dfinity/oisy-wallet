@@ -928,7 +928,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "使用额度",
-			"description": "免费使用额度用完后，签名费用将从你自己的 $token 中支付，以你在此添加的金额为上限。",
+			"description": "每日免费使用额度用完后，签名费用将从你自己的 $token 中支付，以你在此添加的金额为上限。",
 			"own_credits": "你自己的额度",
 			"balance": "$token 余额",
 			"add_more": "添加更多",

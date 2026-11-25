@@ -928,7 +928,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "Créditos de uso",
-			"description": "Cuando tus créditos de uso gratuitos se agotan, la firma se paga con tus propios $token, hasta el importe que añadas aquí.",
+			"description": "Cuando tus créditos de uso gratuitos diarios se agotan, la firma se paga con tus propios $token, hasta el importe que añadas aquí.",
 			"own_credits": "Tus propios créditos",
 			"balance": "Saldo de $token",
 			"add_more": "Añadir más",

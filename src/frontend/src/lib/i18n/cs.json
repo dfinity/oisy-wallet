@@ -928,7 +928,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "Kredity za používání",
-			"description": "Když vyčerpáte bezplatné kredity za používání, podepisování se platí z vašich vlastních $token, až do částky, kterou zde přidáte.",
+			"description": "Když vyčerpáte denní bezplatné kredity za používání, podepisování se platí z vašich vlastních $token, až do částky, kterou zde přidáte.",
 			"own_credits": "Vaše vlastní kredity",
 			"balance": "Zůstatek $token",
 			"add_more": "Přidat další",
