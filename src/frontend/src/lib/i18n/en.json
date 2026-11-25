@@ -939,7 +939,8 @@
 			"signatures_one": "~1 signature",
 			"signatures_other": "~$count signatures",
 			"new_limit": "New spending limit",
-			"set": "Set"
+			"set": "Set",
+			"limit_left": "$remaining of $limit $token left"
 		},
 		"error": {
 			"load": "Couldn't load your usage credits.",

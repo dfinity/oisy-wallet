@@ -12,6 +12,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { OISY_USAGE_CREDITS_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON,
@@ -28,6 +29,7 @@
 	import {
 		loadFreeAllowance,
 		loadOwnCycles,
+		loadPreviousSpendingLimit,
 		type OwnCycles
 	} from '$lib/services/own-cycles.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -41,10 +43,27 @@
 
 	let exchangeRate = $derived(nonNullish(token) ? $exchanges?.[token.id]?.usd : undefined);
 
+	// Its text, not the token: the card reads again when it changes, not with each new token list.
+	let indexCanisterId = $derived(token?.indexCanisterId);
+
 	let ownCycles = $state<OwnCycles | undefined>();
 	// What is left of the free OISY allowance.
 	let free = $state<bigint | undefined>();
 	let loadFailed = $state(false);
+
+	// The limit the user set last, as the index lists it.
+	let indexedLimit = $state<bigint | undefined>();
+
+	let previousLimit = $derived.by(() => {
+		if (isNullish(ownCycles)) {
+			return undefined;
+		}
+
+		// A limit below what is left of it can't be the one in force: then only what is left shows.
+		return nonNullish(indexedLimit) && indexedLimit >= ownCycles.approved
+			? indexedLimit
+			: undefined;
+	});
 
 	// An estimate, from the cost the backend sizes the OISY allowance with.
 	const signatures = (cycles: bigint): bigint => cycles / SIGNER_CALL_ESTIMATED_CYCLES;
@@ -64,15 +83,22 @@
 
 		// The query answers fast, and the certified answer follows and replaces it: a replica that has
 		// not caught up with an approval just made can't leave the card behind.
-		await queryAndUpdate<[OwnCycles, bigint]>({
+		await queryAndUpdate<[OwnCycles, bigint, bigint | undefined]>({
 			request: ({ identity, certified }) =>
 				Promise.all([
 					loadOwnCycles({ identity, certified }),
-					loadFreeAllowance({ identity, certified })
+					loadFreeAllowance({ identity, certified }),
+					// Without it the card shows what is left, as it does with no limit found.
+					nonNullish(indexCanisterId)
+						? loadPreviousSpendingLimit({ identity, indexCanisterId, certified }).catch(
+								() => undefined
+							)
+						: undefined
 				]),
-			onLoad: ({ response: [own, freeLeft] }) => {
+			onLoad: ({ response: [own, freeLeft, indexed] }) => {
 				ownCycles = own;
 				free = freeLeft;
+				indexedLimit = indexed;
 				loadFailed = false;
 			},
 			onUpdateError: ({ error: err }) => {
@@ -90,7 +116,7 @@
 	let addModalOpen = $derived($modalUsageCreditsAdd && $modalStore?.id === addModalId);
 	let mintModalOpen = $derived($modalCyclesMint && $modalStore?.id === mintModalId);
 
-	// Read when the card shows, and again each time one of its modals closes: adding credits
+	// Read when the card shows, and again each time one of its modals closes: setting the limit
 	// changes the approval, and minting the balance.
 	$effect(() => {
 		if (!addModalOpen && !mintModalOpen) {
@@ -99,19 +125,30 @@
 	});
 </script>
 
-{#snippet amount(value: bigint | undefined, testId: string, estimate = false)}
+{#snippet amount(
+	value: bigint | undefined,
+	testId: string,
+	{ limit, estimate }: { limit?: bigint; estimate?: bigint } = {}
+)}
 	{#if nonNullish(value) && nonNullish(token)}
-		<!-- The fiat value as the send shows it, from the amount in full. -->
+		{@const shown = formatToken({ value, unitName: token.decimals })}
+		<!-- The fiat value as the send shows it, from the amount in full: what is left, not the limit. -->
 		<span class="flex gap-2 text-sm text-tertiary">
 			<output data-tid={testId}
-				>{formatToken({ value, unitName: token.decimals })} {token.symbol}</output
+				>{nonNullish(limit) && limit > ZERO
+					? replacePlaceholders($i18n.usage_credits.text.limit_left, {
+							$remaining: shown,
+							$limit: formatToken({ value: limit, unitName: token.decimals }),
+							$token: token.symbol
+						})
+					: `${shown} ${token.symbol}`}</output
 			>
 			<ConvertAmountExchange
 				amount={formatToken({ value, unitName: token.decimals, displayDecimals: token.decimals })}
 				{exchangeRate}
 			/>
-			{#if estimate}
-				<span>· {signaturesText(value)}</span>
+			{#if nonNullish(estimate)}
+				<span>· {signaturesText(estimate)}</span>
 			{/if}
 		</span>
 	{:else if loadFailed}
@@ -166,7 +203,10 @@
 			{#snippet key()}
 				<span class="flex flex-col">
 					{$i18n.usage_credits.text.own_credits}
-					{@render amount(ownCycles?.approved, TOOLS_USAGE_CREDITS_OWN_CREDITS, true)}
+					{@render amount(ownCycles?.approved, TOOLS_USAGE_CREDITS_OWN_CREDITS, {
+						limit: previousLimit,
+						estimate: ownCycles?.approved
+					})}
 				</span>
 			{/snippet}
 

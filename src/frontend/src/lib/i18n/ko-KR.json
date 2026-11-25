@@ -939,7 +939,8 @@
 			"signatures_one": "",
 			"signatures_other": "",
 			"new_limit": "",
-			"set": ""
+			"set": "",
+			"limit_left": ""
 		},
 		"error": {
 			"load": "",
