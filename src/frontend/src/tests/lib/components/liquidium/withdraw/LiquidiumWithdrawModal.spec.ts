@@ -107,6 +107,7 @@ describe('LiquidiumWithdrawModal', () => {
 		});
 	});
 
+	// Only the protocol's 0.001 SOL minimum applies there.
 	it('reads no minter minimum for the ckSOL rail', async () => {
 		const { container } = render(LiquidiumWithdrawModal, {
 			props: { reserve: { ...reserve, chain: 'ICP' } }
@@ -116,7 +117,8 @@ describe('LiquidiumWithdrawModal', () => {
 		await runResolvedPromises();
 
 		expect(liquidiumSolServices.getLiquidiumSolNativeOutflowMinimum).not.toHaveBeenCalled();
-		expect(container).not.toHaveTextContent(en.liquidium.text.minimum_withdraw);
+		expect(container).toHaveTextContent('0.001 SOL');
+		expect(container).not.toHaveTextContent('0.002001 SOL');
 	});
 
 	it('withdraws native SOL to the mainnet SOL address', async () => {
