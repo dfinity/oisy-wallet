@@ -1,3 +1,4 @@
+import * as nearIntentsEnv from '$env/rest/near-intents.env';
 import {
 	fetchNearIntentsQuote,
 	fetchNearIntentsStatus,
@@ -11,8 +12,12 @@ import {
 	mockNearIntentsTokens
 } from '$tests/mocks/near-intents.mock';
 
+// The key is a getter so a test can `vi.spyOn(..., 'get')` it.
 vi.mock('$env/rest/near-intents.env', () => ({
-	NEAR_INTENTS_API_URL: 'https://1click.chaindefuser.com/v0'
+	NEAR_INTENTS_API_URL: 'https://1click.chaindefuser.com/v0',
+	get NEAR_INTENTS_API_KEY(): string | undefined {
+		return undefined;
+	}
 }));
 
 describe('near-intents.rest', () => {
@@ -20,6 +25,7 @@ describe('near-intents.rest', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.restoreAllMocks();
 	});
 
 	describe('fetchNearIntentsTokens', () => {
@@ -79,6 +85,47 @@ describe('near-intents.rest', () => {
 				body: JSON.stringify(quoteRequest)
 			});
 			expect(result).toEqual(mockNearIntentsQuoteResponse);
+		});
+
+		it('sends the partner key when one is configured', async () => {
+			vi.spyOn(nearIntentsEnv, 'NEAR_INTENTS_API_KEY', 'get').mockReturnValue('partner-jwt');
+
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: true,
+				json: () => Promise.resolve(mockNearIntentsQuoteResponse)
+			} as unknown as Response);
+
+			await fetchNearIntentsQuote(quoteRequest);
+
+			expect(fetch).toHaveBeenCalledWith(
+				'https://1click.chaindefuser.com/v0/quote',
+				expect.objectContaining({
+					headers: {
+						'Content-Type': 'application/json',
+						'X-API-Key': 'partner-jwt'
+					}
+				})
+			);
+		});
+
+		it('sends no partner key when the build sets it empty', async () => {
+			vi.spyOn(nearIntentsEnv, 'NEAR_INTENTS_API_KEY', 'get').mockReturnValue('');
+
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: true,
+				json: () => Promise.resolve(mockNearIntentsQuoteResponse)
+			} as unknown as Response);
+
+			await fetchNearIntentsQuote(quoteRequest);
+
+			expect(fetch).toHaveBeenCalledWith(
+				'https://1click.chaindefuser.com/v0/quote',
+				expect.objectContaining({
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				})
+			);
 		});
 
 		it('throws with API error message when response is not ok', async () => {

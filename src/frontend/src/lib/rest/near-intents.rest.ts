@@ -1,4 +1,4 @@
-import { NEAR_INTENTS_API_URL } from '$env/rest/near-intents.env';
+import { NEAR_INTENTS_API_KEY, NEAR_INTENTS_API_URL } from '$env/rest/near-intents.env';
 import { SwapAmountTooLowError } from '$lib/types/errors';
 import type {
 	NearIntentsDepositSubmitRequest,
@@ -7,12 +7,13 @@ import type {
 	NearIntentsStatusResponse,
 	NearIntentsToken
 } from '$lib/types/near-intents';
-import { nonNullish } from '@dfinity/utils';
+import { nonNullish, notEmptyString } from '@dfinity/utils';
 
+// https://docs.near-intents.org/integration/distribution-channels/1click-api/authentication
 const buildHeaders = (): HeadersInit => ({
-	'Content-Type': 'application/json'
-	// Apparently we do not need an API keys for Near Intents, we can do unauthorised calls
-	// Authorization: `Bearer ${NEAR_INTENTS_API_KEY}`
+	'Content-Type': 'application/json',
+	// A build without the key sets it to an empty string.
+	...(notEmptyString(NEAR_INTENTS_API_KEY) ? { 'X-API-Key': NEAR_INTENTS_API_KEY } : {})
 });
 
 // https://docs.near-intents.org/api-reference/oneclick/get-supported-tokens
