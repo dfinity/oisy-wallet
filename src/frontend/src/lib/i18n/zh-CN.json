@@ -110,10 +110,10 @@
 			"video_not_supported": "你的浏览器不支持视频播放。",
 			"oisy_allowance_used_up_title": "免费使用额度已用完",
 			"oisy_allowance_used_up": "你每日的免费使用额度已用完，部分交易可能签署失败。",
-			"oisy_allowance_used_up_own_cycles": "你每日的免费使用额度已用完，签名现在将使用你自己的额度。",
+			"oisy_allowance_used_up_own_cycles": "你每日的免费使用额度已用完，签名现在将使用你的支出上限。",
 			"oisy_allowance_used_up_short": "你每日的免费使用额度已用完，签名可能失败。",
-			"oisy_allowance_used_up_own_cycles_short": "你每日的免费使用额度已用完，签名将使用<a href=\"$url\">你自己的额度</a>。",
-			"oisy_allowance_tools_link": "在<a href=\"$url\">工具</a>中管理你自己的额度。",
+			"oisy_allowance_used_up_own_cycles_short": "你每日的免费使用额度已用完，签名将使用<a href=\"$url\">你的支出上限</a>。",
+			"oisy_allowance_tools_link": "在<a href=\"$url\">工具</a>中管理你的支出上限。",
 			"oisy_allowance_exceeded": "此交易的费用超出了你的 $oisy_name 免费额度。"
 		},
 		"error": {

@@ -110,10 +110,10 @@
 			"video_not_supported": "ブラウザがビデオ再生をサポートしていません。",
 			"oisy_allowance_used_up_title": "無料の利用クレジットを使い切りました",
 			"oisy_allowance_used_up": "1日分の無料の利用クレジットを使い切ったため、一部の取引の署名に失敗する可能性があります。",
-			"oisy_allowance_used_up_own_cycles": "1日分の無料の利用クレジットを使い切ったため、署名にはご自身のクレジットが使われます。",
+			"oisy_allowance_used_up_own_cycles": "1日分の無料の利用クレジットを使い切ったため、署名は支出上限の範囲で支払われます。",
 			"oisy_allowance_used_up_short": "1日分の無料の利用クレジットを使い切ったため、署名に失敗する可能性があります。",
-			"oisy_allowance_used_up_own_cycles_short": "1日分の無料の利用クレジットを使い切ったため、署名には<a href=\"$url\">ご自身のクレジット</a>が使われます。",
-			"oisy_allowance_tools_link": "ご自身のクレジットは<a href=\"$url\">ツール</a>で管理できます。",
+			"oisy_allowance_used_up_own_cycles_short": "1日分の無料の利用クレジットを使い切ったため、署名は<a href=\"$url\">支出上限</a>の範囲で支払われます。",
+			"oisy_allowance_tools_link": "支出上限は<a href=\"$url\">ツール</a>で管理できます。",
 			"oisy_allowance_exceeded": "この取引の費用は $oisy_name の無料枠を超えています。"
 		},
 		"error": {

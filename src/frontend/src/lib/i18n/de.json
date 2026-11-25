@@ -110,10 +110,10 @@
 			"video_not_supported": "",
 			"oisy_allowance_used_up_title": "Gratis-Nutzungsguthaben aufgebraucht",
 			"oisy_allowance_used_up": "Dein tägliches Gratis-Nutzungsguthaben ist aufgebraucht, daher kann das Signieren einiger Transaktionen fehlschlagen.",
-			"oisy_allowance_used_up_own_cycles": "Dein tägliches Gratis-Nutzungsguthaben ist aufgebraucht, daher nutzt das Signieren jetzt dein eigenes Guthaben.",
+			"oisy_allowance_used_up_own_cycles": "Dein tägliches Gratis-Nutzungsguthaben ist aufgebraucht, daher nutzt das Signieren jetzt dein Ausgabelimit.",
 			"oisy_allowance_used_up_short": "Dein tägliches Gratis-Nutzungsguthaben ist aufgebraucht, daher kann das Signieren fehlschlagen.",
-			"oisy_allowance_used_up_own_cycles_short": "Dein tägliches Gratis-Nutzungsguthaben ist aufgebraucht, daher nutzt das Signieren <a href=\"$url\">dein eigenes Guthaben</a>.",
-			"oisy_allowance_tools_link": "Verwalte dein eigenes Guthaben unter&nbsp;<a href=\"$url\">Werkzeuge</a>.",
+			"oisy_allowance_used_up_own_cycles_short": "Dein tägliches Gratis-Nutzungsguthaben ist aufgebraucht, daher nutzt das Signieren <a href=\"$url\">dein Ausgabelimit</a>.",
+			"oisy_allowance_tools_link": "Verwalte dein Ausgabelimit unter&nbsp;<a href=\"$url\">Werkzeuge</a>.",
 			"oisy_allowance_exceeded": "Diese Transaktion kostet mehr, als dein Gratis-Kontingent von $oisy_name abdeckt."
 		},
 		"error": {
