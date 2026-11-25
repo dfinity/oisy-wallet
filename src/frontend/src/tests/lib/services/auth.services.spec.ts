@@ -773,7 +773,8 @@ describe('auth.services', () => {
 			});
 		});
 
-		describe('when the user signed out in another tab', () => {
+		// Another tab signed out, or loaded with an expired session: this tab can't tell which.
+		describe('when the delegation is gone and no lock is stored', () => {
 			beforeEach(() => {
 				localStorage.setItem(AUTH_LOCK_KEY, 'false');
 			});
@@ -784,11 +785,10 @@ describe('auth.services', () => {
 				expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 			});
 
-			it('should clean the IDB storage for all principals', async () => {
+			it('should not clean the IDB storage for all principals', async () => {
 				await idleSignOut({ delegationExpired: false });
 
-				// 1 tokens + 4 txs + 1 Solana transaction details + 1 balance
-				expect(idbKeyval.clear).toHaveBeenCalledTimes(7);
+				expect(idbKeyval.clear).not.toHaveBeenCalled();
 			});
 
 			it('should not lock the wallet', async () => {
@@ -806,11 +806,7 @@ describe('auth.services', () => {
 			it('should not append a message to the reload URL', async () => {
 				await idleSignOut({ delegationExpired: false });
 
-				expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
-					{},
-					'',
-					new URL(`${rootLocation}?${PARAM_DELETE_IDB_CACHE}=true`)
-				);
+				expect(window.history.replaceState).not.toHaveBeenCalled();
 			});
 		});
 

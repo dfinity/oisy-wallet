@@ -205,9 +205,9 @@ export const idleSignOut = ({
 		});
 	}
 
-	// Gone without a lock: the user signed out in another tab, so this tab clears the cache as well.
+	// Gone without a lock: another tab signed out, which already cleared the cache, or loaded with an expired session, which keeps it.
 	if (!delegationExpired && locked !== 'expired') {
-		return logout({ clearIdbStorages: true });
+		return logout({ clearIdbStorages: false });
 	}
 
 	// The cache is kept, so the session ends on the lock page: it says so and offers to log out.
