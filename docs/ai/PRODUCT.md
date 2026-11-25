@@ -589,14 +589,14 @@ A user can also let the signer charge their own TCYCLES: an approval on the cycl
 
 On those builds, the user's own credits pay a CC only when the OISY allowance can't, and only while some approval is left (read with a query, since no CC's price is known):
 
-- After a refused AR, the CC is repeated once with own cycles, and the allowance-issue toast keeps its title but says the daily amount of free usage credits is used up, so signing now uses the user's own credits.
+- After a refused AR, the CC is repeated once with own cycles, and the allowance-issue toast keeps its title but says the daily amount of free usage credits is used up, so signing now uses the user's spending limit.
 - During the AR cooldown, CCs go straight to own cycles, with no AR and no toast.
 - A CC that costs more than the OISY allowance covers (a skipped AR, or a repeat refused again) is repeated once with own cycles, with no warning.
 - After the cooldown, the next CC tries the OISY allowance first again, so own cycles never pay while free credits would.
 
 When own cycles can't pay either, because no approval is left or the approval or the TCYCLES balance runs short, the CC fails as in phase 1, with the toast for its outcome; a CC that ran short on own cycles gets the usage-credits error text too. Nothing in the app sets the approval back to zero.
 
-On those builds, the allowance-issue toast, in both its texts, ends with "Manage your own credits in Tools." before its Learn more link. "Tools" opens the Tools page at the Usage credits card, the way the Activity info box links to Settings. On phones, the own-credits text is the shorter "Your free daily usage credits are used up, so signing uses your own credits.", where "your own credits" opens the card, with no extra sentence. The warning that a CC costs more than the OISY allowance covers has no such link.
+On those builds, the allowance-issue toast, in both its texts, ends with "Manage your spending limit in Tools." before its Learn more link. "Tools" opens the Tools page at the Usage credits card, the way the Activity info box links to Settings. On phones, the own-credits text is the shorter "Your free daily usage credits are used up, so signing uses your spending limit.", where "your spending limit" opens the card, with no extra sentence. The warning that a CC costs more than the OISY allowance covers has no such link.
 
 ---
 

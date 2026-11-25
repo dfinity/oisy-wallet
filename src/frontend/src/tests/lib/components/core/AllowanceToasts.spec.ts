@@ -243,7 +243,7 @@ describe('AllowanceToasts', () => {
 
 	describe('while paying with own cycles is on', () => {
 		// The non-breaking space keeps the link on the line of the word before it.
-		const toolsLink = 'Manage your own credits in&nbsp;<a href="/tools/#usage-credits">Tools</a>.';
+		const toolsLink = 'Manage your spending limit in&nbsp;<a href="/tools/#usage-credits">Tools</a>.';
 
 		beforeEach(() => {
 			vi.spyOn(ownCyclesEnv, 'OWN_CYCLES_ENABLED', 'get').mockReturnValue(true);
@@ -314,7 +314,7 @@ describe('AllowanceToasts', () => {
 
 				expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith({
 					...phoneIssueToast,
-					text: 'Your free daily usage credits are used up, so signing uses <a href="/tools/#usage-credits">your own credits</a>.',
+					text: 'Your free daily usage credits are used up, so signing uses <a href="/tools/#usage-credits">your spending limit</a>.',
 					renderAsHtml: true
 				});
 			});
