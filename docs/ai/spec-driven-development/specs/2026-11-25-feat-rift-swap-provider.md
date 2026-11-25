@@ -173,9 +173,10 @@ New `src/frontend/src/env/rest/rift.env.ts`:
 
 ### REST client (no SDK, no new dependency)
 
-`src/frontend/src/lib/rest/rift.rest.ts` (REST clients live in `lib/rest/`, as `lifi.rest.ts` and `near-intents.rest.ts` do; `lib/api/` wraps canister declarations) with typed `postRiftQuote`, `postRiftOrder` and
+`src/frontend/src/lib/rest/rift.rest.ts` with typed `postRiftQuote`, `postRiftOrder` and
 `getRiftOrder`, plus the types in `src/frontend/src/lib/types/rift.ts`. The shapes are those of the
-OpenAPI spec above.
+OpenAPI spec above. REST clients live in `lib/rest/`, as `lifi.rest.ts` and `near-intents.rest.ts`
+do; `lib/api/` wraps canister declarations.
 
 - Every request carries `x-api-key` when `RIFT_API_KEY` is set.
 - Responses are parsed, not cast. A response missing a required field is an error, not an offer.
