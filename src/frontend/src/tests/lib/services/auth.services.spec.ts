@@ -658,7 +658,7 @@ describe('auth.services', () => {
 			vi.clearAllMocks();
 		});
 
-		describe('when the session is not locked', () => {
+		describe('when the session is not locked and the delegation expired', () => {
 			beforeEach(() => {
 				localStorage.setItem(AUTH_LOCK_KEY, 'false');
 			});
@@ -668,7 +668,7 @@ describe('auth.services', () => {
 
 				expect(window.location.href).toEqual(activityLocation);
 
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: true });
 
 				expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 				expect(window.location.href).toEqual(activityLocation);
@@ -679,7 +679,7 @@ describe('auth.services', () => {
 
 				expect(sessionStorage.getItem('key')).toEqual('value');
 
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: true });
 
 				expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 				expect(sessionStorage.getItem('key')).toBeNull();
@@ -688,19 +688,19 @@ describe('auth.services', () => {
 			it('should remove the signer permissions and keep the other local storage entries', async () => {
 				mockLocalStorage();
 
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: true });
 
 				expectOnlySignerPermissionsRemoved();
 			});
 
 			it('should not clean the IDB storage for all principals', async () => {
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: true });
 
 				expect(idbKeyval.clear).not.toHaveBeenCalled();
 			});
 
 			it("should disconnect WalletConnect's session", async () => {
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: true });
 
 				expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
 
@@ -721,7 +721,7 @@ describe('auth.services', () => {
 					await Promise.resolve();
 				});
 
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: true });
 
 				expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
 
@@ -737,7 +737,7 @@ describe('auth.services', () => {
 
 				walletConnectPaired.set(true);
 
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: true });
 
 				expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
 
@@ -749,13 +749,13 @@ describe('auth.services', () => {
 			});
 
 			it('should lock the wallet because the session expired', async () => {
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: true });
 
 				expect(localStorage.getItem(AUTH_LOCK_KEY)).toEqual(JSON.stringify('expired'));
 			});
 
 			it('should track the lock event', async () => {
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: true });
 
 				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 					name: TRACK_LOCK_MODE_ACTIVATED,
@@ -767,30 +767,74 @@ describe('auth.services', () => {
 			});
 
 			it('should not append a message to the reload URL', async () => {
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: true });
 
 				expect(window.history.replaceState).not.toHaveBeenCalled();
 			});
 		});
 
-		describe('when the session already expired in another tab', () => {
+		describe('when the user signed out in another tab', () => {
 			beforeEach(() => {
-				localStorage.setItem(AUTH_LOCK_KEY, JSON.stringify('expired'));
+				localStorage.setItem(AUTH_LOCK_KEY, 'false');
 			});
 
-			it('should keep the wallet locked because the session expired', async () => {
-				await idleSignOut();
+			it('should call the signOut function of the authStore', async () => {
+				await idleSignOut({ delegationExpired: false });
 
 				expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
-				expect(localStorage.getItem(AUTH_LOCK_KEY)).toEqual(JSON.stringify('expired'));
+			});
+
+			it('should clean the IDB storage for all principals', async () => {
+				await idleSignOut({ delegationExpired: false });
+
+				// 1 tokens + 4 txs + 1 Solana transaction details + 1 balance
+				expect(idbKeyval.clear).toHaveBeenCalledTimes(7);
+			});
+
+			it('should not lock the wallet', async () => {
+				await idleSignOut({ delegationExpired: false });
+
+				expect(localStorage.getItem(AUTH_LOCK_KEY)).toEqual('false');
+			});
+
+			it('should not track a lock event', async () => {
+				await idleSignOut({ delegationExpired: false });
+
+				expect(trackEvent).not.toHaveBeenCalled();
 			});
 
 			it('should not append a message to the reload URL', async () => {
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: false });
 
-				expect(window.history.replaceState).not.toHaveBeenCalled();
+				expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
+					{},
+					'',
+					new URL(`${rootLocation}?${PARAM_DELETE_IDB_CACHE}=true`)
+				);
 			});
 		});
+
+		describe.each([true, false])(
+			'when the session already expired in another tab (delegation expired %s)',
+			(delegationExpired) => {
+				beforeEach(() => {
+					localStorage.setItem(AUTH_LOCK_KEY, JSON.stringify('expired'));
+				});
+
+				it('should keep the wallet locked because the session expired', async () => {
+					await idleSignOut({ delegationExpired });
+
+					expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+					expect(localStorage.getItem(AUTH_LOCK_KEY)).toEqual(JSON.stringify('expired'));
+				});
+
+				it('should not append a message to the reload URL', async () => {
+					await idleSignOut({ delegationExpired });
+
+					expect(window.history.replaceState).not.toHaveBeenCalled();
+				});
+			}
+		);
 
 		describe.each([
 			{ stored: 'before the lock reason', storedLock: 'true' },
@@ -803,7 +847,7 @@ describe('auth.services', () => {
 			});
 
 			it('should keep the lock as stored', async () => {
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: false });
 
 				expect(localStorage.getItem(AUTH_LOCK_KEY)).toEqual(storedLock);
 			});
@@ -813,7 +857,7 @@ describe('auth.services', () => {
 
 				expect(window.location.href).toEqual(activityLocation);
 
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: false });
 
 				expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 				expect(window.location.href).toEqual(activityLocation);
@@ -824,7 +868,7 @@ describe('auth.services', () => {
 
 				expect(sessionStorage.getItem('key')).toEqual('value');
 
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: false });
 
 				expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 				expect(sessionStorage.getItem('key')).toBeNull();
@@ -833,19 +877,19 @@ describe('auth.services', () => {
 			it('should remove the signer permissions and keep the other local storage entries', async () => {
 				mockLocalStorage();
 
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: false });
 
 				expectOnlySignerPermissionsRemoved();
 			});
 
 			it('should not clean the IDB storage for all principals', async () => {
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: false });
 
 				expect(idbKeyval.clear).not.toHaveBeenCalled();
 			});
 
 			it("should disconnect WalletConnect's session", async () => {
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: false });
 
 				expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
 
@@ -866,7 +910,7 @@ describe('auth.services', () => {
 					await Promise.resolve();
 				});
 
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: false });
 
 				expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
 
@@ -882,7 +926,7 @@ describe('auth.services', () => {
 
 				walletConnectPaired.set(true);
 
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: false });
 
 				expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
 
@@ -894,7 +938,7 @@ describe('auth.services', () => {
 			});
 
 			it('should track the sign out event', async () => {
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: false });
 
 				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 					name: TRACK_SIGN_OUT_WITH_WARNING,
@@ -908,7 +952,7 @@ describe('auth.services', () => {
 			});
 
 			it('should append a message to the reload URL', async () => {
-				await idleSignOut();
+				await idleSignOut({ delegationExpired: false });
 
 				expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
 					{},
