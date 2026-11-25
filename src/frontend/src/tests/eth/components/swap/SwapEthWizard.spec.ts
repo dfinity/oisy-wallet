@@ -38,6 +38,7 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockLifiQuote } from '$tests/mocks/lifi.mock';
+import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import {
 	mockNearIntentsProvider,
 	mockOneSecProvider,
@@ -719,7 +720,19 @@ describe('SwapEthWizard', () => {
 	describe('Near Intents swap with provider agreement', () => {
 		const mockEthAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
-		const nearIntentsSwapProviders: SwapMappedResult[] = [mockNearIntentsProvider];
+		// Paying out to the user's own address, as a quote OISY requests does when no other
+		// destination is picked: Review holds a quote for another recipient back.
+		const nearIntentsSwapProviders: SwapMappedResult[] = [
+			{
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: mockNearIntentsProvider.receiveAmount,
+				swapDetails: {
+					...mockNearIntentsQuoteResponse,
+					quoteRequest: { ...mockNearIntentsQuoteResponse.quoteRequest, recipient: mockEthAddress }
+				},
+				type: undefined
+			}
+		];
 
 		let feeState: Writable<FeeStoreData>;
 		let feeStore: EthFeeStore;

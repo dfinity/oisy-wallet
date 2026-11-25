@@ -6,6 +6,7 @@
 	import SwapLifiBtcRelayWarning from '$lib/components/swap/SwapLifiBtcRelayWarning.svelte';
 	import SwapNearIntentsTos from '$lib/components/swap/SwapNearIntentsTos.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
+	import SwapReviewDestination from '$lib/components/swap/SwapReviewDestination.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokensReview from '$lib/components/tokens/TokensReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -134,8 +135,13 @@
 		untrack(reset);
 	});
 
+	let isDestinationBlocked = $state(false);
+
 	let swapButtonDisabled = $derived(
-		isSwapAmountsLoading || swapDisabled || (isWarningConfirmationRequired && !isWarningConfirmed)
+		isSwapAmountsLoading ||
+			swapDisabled ||
+			isDestinationBlocked ||
+			(isWarningConfirmationRequired && !isWarningConfirmed)
 	);
 </script>
 
@@ -184,6 +190,7 @@
 	<div class="flex flex-col gap-3">
 		<SwapProvider {slippageValue} />
 		{@render swapFees()}
+		<SwapReviewDestination bind:swapBlocked={isDestinationBlocked} />
 	</div>
 
 	{#if isNearIntentsProvider && !$hasAcknowledgedNearIntentsSwap}
