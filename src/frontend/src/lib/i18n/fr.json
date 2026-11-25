@@ -931,17 +931,17 @@
 			"description": "Lorsque vos crédits d'utilisation gratuits quotidiens sont épuisés, la signature est payée avec vos ICP Cycles, jusqu'à la limite de dépense que vous fixez ici.",
 			"own_credits": "Limite de dépense",
 			"balance": "Solde ICP Cycles",
-			"add_more": "Ajouter plus",
-			"get_cycles": "Obtenir des cycles",
-			"add_title": "Ajouter des crédits d'utilisation",
-			"add_description": "Vos $token restent dans votre solde. Le montant que vous ajoutez est le maximum que la signature peut y prélever.",
-			"own_credits_after": "Limite de dépense après",
-			"added": "$amount $token ajoutés à votre limite de dépense.",
+			"add_more": "Définir la limite de dépense",
+			"get_cycles": "Obtenir des ICP Cycles",
+			"add_title": "Définissez votre limite de dépense",
+			"add_description": "La signature peut prélever jusqu'à ce montant sur vos ICP Cycles. Ils restent dans votre solde.",
+			"own_credits_after": "Limite de dépense actuelle",
+			"added": "Votre limite de dépense est fixée à $amount $token.",
 			"free_signatures": "Signatures gratuites restantes",
 			"signatures_one": "≈ 1 signature",
 			"signatures_other": "≈ $count signatures",
-			"new_limit": "",
-			"set": "",
+			"new_limit": "Nouvelle limite de dépense",
+			"set": "Définir",
 			"previous_limit": "",
 			"limit_left": "",
 			"balance_short": "",
@@ -949,7 +949,7 @@
 		},
 		"error": {
 			"load": "Impossible de charger vos crédits d'utilisation.",
-			"add": "Impossible d'ajouter des crédits d'utilisation. Veuillez réessayer."
+			"add": "Impossible de définir votre limite de dépense. Veuillez réessayer."
 		}
 	},
 	"shortcuts": {

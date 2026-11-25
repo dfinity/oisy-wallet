@@ -931,17 +931,17 @@
 			"description": "每日免费使用额度用完后，签名费用将从你的 ICP Cycles 中支付，以你在此设置的支出上限为限。",
 			"own_credits": "支出上限",
 			"balance": "ICP Cycles 余额",
-			"add_more": "添加更多",
-			"get_cycles": "获取 cycles",
-			"add_title": "添加使用额度",
-			"add_description": "你的 $token 仍保留在余额中。你添加的金额是签名可从中扣除的上限。",
-			"own_credits_after": "添加后的支出上限",
-			"added": "已向你的支出上限添加 $amount $token。",
+			"add_more": "设置支出上限",
+			"get_cycles": "获取 ICP Cycles",
+			"add_title": "设置你的支出上限",
+			"add_description": "签名最多可从你的 ICP Cycles 中扣除此金额。它们仍保留在你的余额中。",
+			"own_credits_after": "当前支出上限",
+			"added": "你的支出上限已设置为 $amount $token。",
 			"free_signatures": "剩余免费签名",
 			"signatures_one": "≈ 1 次签名",
 			"signatures_other": "≈ $count 次签名",
-			"new_limit": "",
-			"set": "",
+			"new_limit": "新支出上限",
+			"set": "设置",
 			"previous_limit": "",
 			"limit_left": "",
 			"balance_short": "",
@@ -949,7 +949,7 @@
 		},
 		"error": {
 			"load": "无法加载你的使用额度。",
-			"add": "无法添加使用额度。请重试。"
+			"add": "无法设置你的支出上限。请重试。"
 		}
 	},
 	"shortcuts": {

@@ -931,17 +931,17 @@
 			"description": "Když vyčerpáte denní bezplatné kredity za používání, podepisování se platí z vašich ICP Cycles, až do limitu výdajů, který zde nastavíte.",
 			"own_credits": "Limit výdajů",
 			"balance": "Zůstatek ICP Cycles",
-			"add_more": "Přidat další",
-			"get_cycles": "Získat cycles",
-			"add_title": "Přidat kredity za používání",
-			"add_description": "Vaše $token zůstávají na vašem zůstatku. Částka, kterou přidáte, je nejvíc, co z nich podepisování může strhnout.",
-			"own_credits_after": "Limit výdajů poté",
-			"added": "Přidáno $amount $token k vašemu limitu výdajů.",
+			"add_more": "Nastavit limit výdajů",
+			"get_cycles": "Získat ICP Cycles",
+			"add_title": "Nastavte limit výdajů",
+			"add_description": "Podepisování může z vašich ICP Cycles strhnout nejvýše tuto částku. Zůstávají na vašem zůstatku.",
+			"own_credits_after": "Aktuální limit výdajů",
+			"added": "Váš limit výdajů je nastaven na $amount $token.",
 			"free_signatures": "Zbývající bezplatné podpisy",
 			"signatures_one": "≈ 1 podpis",
 			"signatures_other": "≈ $count podpisů",
-			"new_limit": "",
-			"set": "",
+			"new_limit": "Nový limit výdajů",
+			"set": "Nastavit",
 			"previous_limit": "",
 			"limit_left": "",
 			"balance_short": "",
@@ -949,7 +949,7 @@
 		},
 		"error": {
 			"load": "Kredity za používání se nepodařilo načíst.",
-			"add": "Kredity za používání se nepodařilo přidat. Zkuste to znovu."
+			"add": "Limit výdajů se nepodařilo nastavit. Zkuste to prosím znovu."
 		}
 	},
 	"shortcuts": {

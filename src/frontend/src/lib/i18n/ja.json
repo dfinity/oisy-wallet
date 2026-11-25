@@ -931,17 +931,17 @@
 			"description": "1日分の無料の利用クレジットを使い切ると、ここで設定した支出上限まで、署名の費用はご自身のICP Cyclesから支払われます。",
 			"own_credits": "支出上限",
 			"balance": "ICP Cyclesの残高",
-			"add_more": "追加する",
-			"get_cycles": "cyclesを入手",
-			"add_title": "利用クレジットを追加",
-			"add_description": "$tokenは残高に残ります。追加した額は、署名がそこから引き落とせる上限です。",
-			"own_credits_after": "追加後の支出上限",
-			"added": "支出上限に$amount $tokenを追加しました。",
+			"add_more": "支出上限を設定",
+			"get_cycles": "ICP Cyclesを入手",
+			"add_title": "支出上限を設定",
+			"add_description": "署名では、ご自身のICP Cyclesからこの額まで引き落とされることがあります。ICP Cyclesは残高に残ります。",
+			"own_credits_after": "現在の支出上限",
+			"added": "支出上限を$amount $tokenに設定しました。",
 			"free_signatures": "残りの無料署名",
 			"signatures_one": "≈ 1回分の署名",
 			"signatures_other": "≈ $count回分の署名",
-			"new_limit": "",
-			"set": "",
+			"new_limit": "新しい支出上限",
+			"set": "設定",
 			"previous_limit": "",
 			"limit_left": "",
 			"balance_short": "",
@@ -949,7 +949,7 @@
 		},
 		"error": {
 			"load": "利用クレジットを読み込めませんでした。",
-			"add": "利用クレジットを追加できませんでした。もう一度お試しください。"
+			"add": "支出上限を設定できませんでした。もう一度お試しください。"
 		}
 	},
 	"shortcuts": {

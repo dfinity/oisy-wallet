@@ -931,17 +931,17 @@
 			"description": "Gdy Twoje dzienne darmowe kredyty użytkowania się wyczerpią, podpisywanie jest opłacane z Twoich ICP Cycles, do limitu wydatków, który tu ustawisz.",
 			"own_credits": "Limit wydatków",
 			"balance": "Saldo ICP Cycles",
-			"add_more": "Dodaj więcej",
-			"get_cycles": "Zdobądź cycles",
-			"add_title": "Dodaj kredyty użytkowania",
-			"add_description": "Twoje $token zostają na Twoim saldzie. Kwota, którą dodasz, to najwięcej, ile podpisywanie może z nich pobrać.",
-			"own_credits_after": "Limit wydatków po",
-			"added": "Dodano $amount $token do Twojego limitu wydatków.",
+			"add_more": "Ustaw limit wydatków",
+			"get_cycles": "Zdobądź ICP Cycles",
+			"add_title": "Ustaw limit wydatków",
+			"add_description": "Podpisywanie może pobrać z Twoich ICP Cycles najwyżej tę kwotę. Pozostają one na Twoim saldzie.",
+			"own_credits_after": "Obecny limit wydatków",
+			"added": "Twój limit wydatków wynosi teraz $amount $token.",
 			"free_signatures": "Pozostałe darmowe podpisy",
 			"signatures_one": "≈ 1 podpis",
 			"signatures_other": "≈ $count podpisów",
-			"new_limit": "",
-			"set": "",
+			"new_limit": "Nowy limit wydatków",
+			"set": "Ustaw",
 			"previous_limit": "",
 			"limit_left": "",
 			"balance_short": "",
@@ -949,7 +949,7 @@
 		},
 		"error": {
 			"load": "Nie udało się wczytać Twoich kredytów użytkowania.",
-			"add": "Nie udało się dodać kredytów użytkowania. Spróbuj ponownie."
+			"add": "Nie udało się ustawić limitu wydatków. Spróbuj ponownie."
 		}
 	},
 	"shortcuts": {
