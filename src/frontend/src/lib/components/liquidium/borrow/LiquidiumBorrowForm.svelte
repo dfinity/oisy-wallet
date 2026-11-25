@@ -39,6 +39,9 @@
 		preview: LiquidiumBorrowPreview;
 		amount: OptionAmount;
 		confirmChecked: boolean;
+		// The least the rail pays out, where it asks for more than the protocol: native SOL, through the
+		// ckSOL minter.
+		railMinimum?: bigint;
 		// Opens the token-selection step; when set, the token logo becomes a selector.
 		onSelectToken?: () => void;
 		onClose: () => void;
@@ -53,6 +56,7 @@
 		preview,
 		amount = $bindable(),
 		confirmChecked = $bindable(),
+		railMinimum,
 		onSelectToken,
 		onClose,
 		onNext
@@ -88,22 +92,31 @@
 
 	let hasAmount = $derived(nonNullish(parsedAmount) && parsedAmount > ZERO);
 
+	let minimumBorrow = $derived.by(() => {
+		const protocolMinimum = getMinimumBorrowAmount(market.asset);
+
+		return nonNullish(railMinimum) && railMinimum > protocolMinimum ? railMinimum : protocolMinimum;
+	});
+
 	let belowMinimum = $derived(
-		hasAmount && nonNullish(parsedAmount) && parsedAmount < getMinimumBorrowAmount(market.asset)
+		hasAmount && nonNullish(parsedAmount) && parsedAmount < minimumBorrow
 	);
 
+	// At full precision: rounded, a minimum such as native SOL's 0.002001 could read below what the
+	// check enforces.
 	let minBorrowFormatted = $derived(
 		nonNullish(borrowToken)
 			? `${formatToken({
-					value: getMinimumBorrowAmount(market.asset),
-					unitName: borrowToken.decimals
+					value: minimumBorrow,
+					unitName: borrowToken.decimals,
+					displayDecimals: borrowToken.decimals
 				})} ${market.asset}`
 			: ''
 	);
 
 	// Shown inside the input. Shares the service cap's tolerance so "Max" doesn't flag itself.
 	const validateBorrowAmount = (userAmount: bigint): Error | undefined => {
-		if (userAmount < getMinimumBorrowAmount(market.asset)) {
+		if (userAmount < minimumBorrow) {
 			return new Error($i18n.liquidium.text.borrow_below_minimum);
 		}
 
@@ -146,6 +159,7 @@
 			isSelectable={nonNullish(onSelectToken)}
 			onClick={onSelectToken}
 			onCustomErrorValidate={validateBorrowAmount}
+			revalidateKey={minimumBorrow}
 			showTokenNetwork
 			token={borrowToken}
 			bind:amount

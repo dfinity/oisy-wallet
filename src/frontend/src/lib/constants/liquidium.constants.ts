@@ -33,11 +33,10 @@ export const LIQUIDIUM_ADVERTISED_TOKENS: Token[] = [
 // the pickers. SOL joins them behind `LIQUIDIUM_SOL_ENABLED` (see `isLiquidiumAssetSupported`).
 export const LIQUIDIUM_SUPPORTED_ASSETS: string[] = ['BTC', 'ETH', 'ICP', 'USDC', 'USDT'];
 
-// Rails of a supported asset that OISY can't transact on yet: native SOL, until OISY sends SOL to
-// Liquidium itself. Its pool is offered through ckSOL alone meanwhile.
-export const LIQUIDIUM_PENDING_RAILS: { asset: string; chain: string }[] = [
-	{ asset: 'SOL', chain: 'SOL' }
-];
+// A native SOL borrow or withdraw leaves the pool as ckSOL and reaches Solana through the ckSOL
+// minter, paying the ckSOL ledger fee this many times on the way. Liquidium refuses one below the
+// minter's minimum withdrawal plus these fees.
+export const LIQUIDIUM_SOL_NATIVE_OUTFLOW_LEDGER_FEES = 2n;
 
 // Display order for the Markets list and the withdraw/repay pickers, applied as a stable sort on
 // top of the order Liquidium returns (see `orderLiquidiumRails`). Primary key: the lending pool,
