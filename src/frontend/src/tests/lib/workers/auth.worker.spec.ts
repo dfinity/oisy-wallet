@@ -136,7 +136,9 @@ describe('auth.worker', () => {
 				msg: 'delegationRemainingTime',
 				data: { authRemainingTime: expected }
 			});
-			expect(postMessageMock).not.toHaveBeenCalledWith({ msg: 'signOutIdleTimer' });
+			expect(postMessageMock).not.toHaveBeenCalledWith(
+				expect.objectContaining({ msg: 'signOutIdleTimer' })
+			);
 		});
 
 		it('should re-schedule the check at `AUTH_TIMER_INTERVAL`', async () => {
@@ -154,22 +156,28 @@ describe('auth.worker', () => {
 			expect(AuthClientProvider.getInstance().storage.get).toHaveBeenCalledOnce();
 		});
 
-		it('should emit `signOutIdleTimer` when no delegation is stored', async () => {
+		it('should emit `signOutIdleTimer` with the delegation not expired when no delegation is stored', async () => {
 			vi.mocked(AuthClientProvider.getInstance().storage.get).mockResolvedValue(null);
 
 			await onAuthMessage(createEvent('startIdleTimer'));
 			await vi.advanceTimersByTimeAsync(AUTH_TIMER_INTERVAL);
 
-			expect(postMessageMock).toHaveBeenCalledWith({ msg: 'signOutIdleTimer' });
+			expect(postMessageMock).toHaveBeenCalledWith({
+				msg: 'signOutIdleTimer',
+				data: { delegationExpired: false }
+			});
 		});
 
-		it('should emit `signOutIdleTimer` when the delegation is expired/invalid', async () => {
+		it('should emit `signOutIdleTimer` with the delegation expired when it is expired/invalid', async () => {
 			vi.mocked(isDelegationValid).mockReturnValue(false);
 
 			await onAuthMessage(createEvent('startIdleTimer'));
 			await vi.advanceTimersByTimeAsync(AUTH_TIMER_INTERVAL);
 
-			expect(postMessageMock).toHaveBeenCalledWith({ msg: 'signOutIdleTimer' });
+			expect(postMessageMock).toHaveBeenCalledWith({
+				msg: 'signOutIdleTimer',
+				data: { delegationExpired: true }
+			});
 			expect(postMessageMock).not.toHaveBeenCalledWith(
 				expect.objectContaining({ msg: 'delegationRemainingTime' })
 			);

@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "Du bist nicht angemeldet. Bitte melde Dich an, um fortzufahren.",
-			"session_expired": "Deine Sitzung ist abgelaufen, du wurdest abgemeldet.",
 			"reload_and_retry": "Etwas ist schiefgelaufen als du dich angemeldet hast. Bitte lade die Seite neu und versuche es erneut. Falls es weiterhin passiert, kontaktiere bitte Support."
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "Deine Wallet ist gesichert",
 			"title_part_2": "Du hast deine Wallet gesperrt. Entsperre sie um fortzufahren, oder logge dich aus.",
+			"title_part_2_session_expired": "Deine Sitzung ist abgelaufen und deine Wallet wurde zu deiner Sicherheit gesperrt. Mach dort weiter, wo du aufgehört hast, oder logge dich aus.",
 			"unlock": "Entsperren",
 			"logout": "Ausloggen",
 			"logout_clear_cash_message": "Ausloggen wird alle lokal gecachten Daten löschen",

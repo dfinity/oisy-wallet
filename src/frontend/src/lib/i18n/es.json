@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "No has iniciado sesión. Por favor, inicia sesión para continuar.",
-			"session_expired": "Has sido desconectado porque tu sesión ha expirado.",
 			"reload_and_retry": "Algo salió mal al iniciar sesión. Por favor, recarga la página e inténtalo de nuevo. Si este error persiste, por favor, contacta con el soporte."
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "Desbloquear para continuar",
 			"title_part_2": "Anteriormente bloqueaste tu billetera para mantenerla segura. Continúa donde lo dejaste o cierra sesión.",
+			"title_part_2_session_expired": "Tu sesión expiró y tu billetera se bloqueó para tu seguridad. Continúa donde lo dejaste o cierra sesión.",
 			"unlock": "Desbloquear",
 			"logout": "Cerrar sesión",
 			"logout_clear_cash_message": "Cerrar sesión borrará todos los datos en caché",

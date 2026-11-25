@@ -68,6 +68,37 @@ describe('LockPage', () => {
 		expect(getByText(get(i18n).lock.text.learn_more)).toBeInTheDocument();
 	});
 
+	describe('lock text', () => {
+		afterEach(() => {
+			authLocked.set({ key: 'authLocked', value: false });
+		});
+
+		it.each([true, 'lock' as const])(
+			'should say the wallet was locked when stored as %s',
+			(value) => {
+				authLocked.set({ key: 'authLocked', value });
+
+				const { getByText, queryByText } = render(LockPage);
+
+				expect(getByText(get(i18n).lock.text.title_part_1)).toBeInTheDocument();
+				expect(getByText(get(i18n).lock.text.title_part_2)).toBeInTheDocument();
+				expect(
+					queryByText(get(i18n).lock.text.title_part_2_session_expired)
+				).not.toBeInTheDocument();
+			}
+		);
+
+		it('should say the session expired when locked because of it', () => {
+			authLocked.set({ key: 'authLocked', value: 'expired' });
+
+			const { getByText, queryByText } = render(LockPage);
+
+			expect(getByText(get(i18n).lock.text.title_part_1)).toBeInTheDocument();
+			expect(getByText(get(i18n).lock.text.title_part_2_session_expired)).toBeInTheDocument();
+			expect(queryByText(get(i18n).lock.text.title_part_2)).not.toBeInTheDocument();
+		});
+	});
+
 	it('should call signIn with domain param when the Internet Identity button is clicked', async () => {
 		const signInMock = vi.spyOn(authServices, 'signIn').mockResolvedValue({ success: 'ok' });
 

@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",
-			"session_expired": "Bạn đã bị đăng xuất vì phiên của bạn đã hết hạn.",
 			"reload_and_retry": "Đã xảy ra lỗi trong quá trình đăng nhập. Vui lòng tải lại trang và thử lại. Nếu lỗi này vẫn tiếp diễn, vui lòng liên hệ bộ phận hỗ trợ."
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "Mở khóa để tiếp tục",
 			"title_part_2": "Trước đó, bạn đã khóa ví để giữ an toàn. Hãy tiếp tục từ chỗ bạn đã dừng hoặc đăng xuất.",
+			"title_part_2_session_expired": "Phiên của bạn đã hết hạn và ví đã được khóa để giữ an toàn cho bạn. Hãy tiếp tục từ chỗ bạn đã dừng hoặc đăng xuất.",
 			"unlock": "Mở khóa",
 			"logout": "Đăng xuất",
 			"logout_clear_cash_message": "Đăng xuất sẽ xóa tất cả dữ liệu được lưu trong bộ nhớ đệm",

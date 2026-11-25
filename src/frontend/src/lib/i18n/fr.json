@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "Vous n'êtes pas connecté. Veuillez vous connecter pour continuer.",
-			"session_expired": "Vous avez été déconnecté car votre session a expiré.",
 			"reload_and_retry": "Un problème est survenu lors de la connexion. Veuillez recharger la page et réessayer. Si cette erreur persiste, veuillez contacter le support."
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "Déverrouillez pour continuer",
 			"title_part_2": "Vous avez précédemment verrouillé votre portefeuille pour le protéger. Reprenez là où vous vous étiez arrêté ou déconnectez-vous.",
+			"title_part_2_session_expired": "Votre session a expiré et votre portefeuille a été verrouillé pour votre sécurité. Reprenez là où vous vous étiez arrêté ou déconnectez-vous.",
 			"unlock": "Ouvrir",
 			"logout": "Se déconnecter",
 			"logout_clear_cash_message": "La déconnexion effacera toutes les données mises en cache",
