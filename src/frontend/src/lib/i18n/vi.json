@@ -111,6 +111,8 @@
 			"oisy_allowance_used_up_title": "Đã dùng hết tín dụng sử dụng miễn phí",
 			"oisy_allowance_used_up": "Lượng tín dụng miễn phí hằng ngày để ký giao dịch của bạn đã dùng hết, nên việc ký một số giao dịch có thể thất bại.",
 			"oisy_allowance_used_up_own_cycles": "Lượng tín dụng miễn phí hằng ngày để ký giao dịch của bạn đã dùng hết, nên việc ký giờ sử dụng tín dụng của chính bạn.",
+			"oisy_allowance_used_up_short": "Tín dụng sử dụng miễn phí hằng ngày của bạn đã dùng hết, nên việc ký có thể thất bại.",
+			"oisy_allowance_used_up_own_cycles_short": "Tín dụng sử dụng miễn phí hằng ngày của bạn đã dùng hết, nên việc ký sử dụng <a href=\"$url\">tín dụng của chính bạn</a>.",
 			"oisy_allowance_tools_link": "Quản lý tín dụng của bạn trong <a href=\"$url\">Công cụ</a>.",
 			"oisy_allowance_exceeded": "Chi phí của giao dịch này vượt quá hạn mức miễn phí của $oisy_name."
 		},
