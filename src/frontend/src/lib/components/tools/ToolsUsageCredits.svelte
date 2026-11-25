@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
 	import { CYCLES_MINT_ENABLED } from '$env/cycles-mint.env';
 	import CyclesMintModal from '$icp/components/cycles-mint/CyclesMintModal.svelte';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
@@ -62,17 +62,26 @@
 			return;
 		}
 
-		try {
-			[ownCycles, free] = await Promise.all([
-				loadOwnCycles({ identity: $authIdentity }),
-				loadFreeAllowance({ identity: $authIdentity })
-			]);
-			loadFailed = false;
-		} catch (err: unknown) {
-			loadFailed = true;
+		// The query answers fast, and the certified answer follows and replaces it: a replica that has
+		// not caught up with an approval just made can't leave the card behind.
+		await queryAndUpdate<[OwnCycles, bigint]>({
+			request: ({ identity, certified }) =>
+				Promise.all([
+					loadOwnCycles({ identity, certified }),
+					loadFreeAllowance({ identity, certified })
+				]),
+			onLoad: ({ response: [own, freeLeft] }) => {
+				ownCycles = own;
+				free = freeLeft;
+				loadFailed = false;
+			},
+			onUpdateError: ({ error: err }) => {
+				loadFailed = true;
 
-			toastsError({ msg: { text: $i18n.usage_credits.error.load }, err });
-		}
+				toastsError({ msg: { text: $i18n.usage_credits.error.load }, err });
+			},
+			identity: $authIdentity
+		});
 	};
 
 	const addModalId = Symbol();

@@ -42,6 +42,14 @@ describe('own-cycles.services', () => {
 			});
 		});
 
+		it('reads it certified when asked', async () => {
+			await loadFreeAllowance({ identity: mockIdentity, certified: true });
+
+			expect(icrcLedgerApi.allowance).toHaveBeenCalledWith(
+				expect.objectContaining({ certified: true })
+			);
+		});
+
 		it('throws without an identity', async () => {
 			await expect(loadFreeAllowance({ identity: undefined })).rejects.toThrow();
 
@@ -81,6 +89,17 @@ describe('own-cycles.services', () => {
 				ledgerCanisterId: CYCLES_LEDGER_CANISTER_ID,
 				owner: mockPrincipal
 			});
+		});
+
+		it('reads both certified when asked', async () => {
+			await loadOwnCycles({ identity: mockIdentity, certified: true });
+
+			expect(icrcLedgerApi.allowance).toHaveBeenCalledWith(
+				expect.objectContaining({ certified: true })
+			);
+			expect(icrcLedgerApi.balance).toHaveBeenCalledWith(
+				expect.objectContaining({ certified: true })
+			);
 		});
 
 		it('throws without an identity', async () => {

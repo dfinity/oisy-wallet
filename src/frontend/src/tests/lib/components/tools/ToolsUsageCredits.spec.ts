@@ -74,12 +74,36 @@ describe('ToolsUsageCredits', () => {
 		expect(container).toHaveTextContent('≈ 18 signatures');
 		expect(getByText(en.usage_credits.text.balance)).toBeInTheDocument();
 		expect(getByTestId(TOOLS_USAGE_CREDITS_BALANCE)).toHaveTextContent('3.25 TCYCLES');
-		expect(ownCyclesServices.loadOwnCycles).toHaveBeenCalledExactlyOnceWith({
-			identity: mockIdentity
-		});
-		expect(ownCyclesServices.loadFreeAllowance).toHaveBeenCalledExactlyOnceWith({
-			identity: mockIdentity
-		});
+
+		// With a query first, then certified.
+		for (const certified of [false, true]) {
+			expect(ownCyclesServices.loadOwnCycles).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				certified
+			});
+			expect(ownCyclesServices.loadFreeAllowance).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				certified
+			});
+		}
+	});
+
+	// A replica that has not caught up with an approval just made answers the query with the one
+	// from before; the certified answer must win, even when the query answers last.
+	it('shows the certified values over a query that lags behind', async () => {
+		vi.spyOn(ownCyclesServices, 'loadOwnCycles').mockImplementation(({ certified }) =>
+			certified
+				? Promise.resolve(ownCycles)
+				: new Promise((resolve) =>
+						setTimeout(() => resolve({ ...ownCycles, approved: 500_000_000_000n }), 10)
+					)
+		);
+
+		const { getByTestId } = await renderLoaded();
+
+		await new Promise((resolve) => setTimeout(resolve, 20));
+
+		expect(getByTestId(TOOLS_USAGE_CREDITS_OWN_CREDITS)).toHaveTextContent('1.5 TCYCLES');
 	});
 
 	it('says signature, not signatures, for one', async () => {
@@ -181,12 +205,12 @@ describe('ToolsUsageCredits', () => {
 
 			await fireEvent.click(getByTestId(TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON));
 
-			expect(ownCyclesServices.loadOwnCycles).toHaveBeenCalledOnce();
+			expect(ownCyclesServices.loadOwnCycles).toHaveBeenCalledTimes(2);
 
 			modalStore.close();
 
 			await waitFor(() => {
-				expect(ownCyclesServices.loadOwnCycles).toHaveBeenCalledTimes(2);
+				expect(ownCyclesServices.loadOwnCycles).toHaveBeenCalledTimes(4);
 			});
 		});
 	});
@@ -209,7 +233,7 @@ describe('ToolsUsageCredits', () => {
 			modalStore.close();
 
 			await waitFor(() => {
-				expect(ownCyclesServices.loadOwnCycles).toHaveBeenCalledTimes(2);
+				expect(ownCyclesServices.loadOwnCycles).toHaveBeenCalledTimes(4);
 			});
 		});
 

@@ -19,15 +19,17 @@ export interface OwnCycles {
 const signerAccount = (): IcrcAccount => ({ owner: Principal.fromText(SIGNER_CANISTER_ID) });
 
 /**
- * The approval left for the signer and the TCYCLES balance, both read with queries: they are
- * only shown, and an approval built on them states the amount it replaces (see
+ * The approval left for the signer and the TCYCLES balance, read with queries unless `certified`:
+ * they are only shown, and an approval built on them states the amount it replaces (see
  * `addOwnCycles`). They come from the cycles ledger itself, so they are there whether or not
  * the user has TCYCLES enabled.
  */
 export const loadOwnCycles = async ({
-	identity
+	identity,
+	certified = false
 }: {
 	identity: NullishIdentity;
+	certified?: boolean;
 }): Promise<OwnCycles> => {
 	assertNonNullish(identity);
 
@@ -36,14 +38,14 @@ export const loadOwnCycles = async ({
 	const [{ allowance: approved }, ownBalance] = await Promise.all([
 		allowance({
 			identity,
-			certified: false,
+			certified,
 			ledgerCanisterId: CYCLES_LEDGER_CANISTER_ID,
 			owner: { owner },
 			spender: signerAccount()
 		}),
 		balance({
 			identity,
-			certified: false,
+			certified,
 			ledgerCanisterId: CYCLES_LEDGER_CANISTER_ID,
 			owner
 		})
@@ -53,20 +55,23 @@ export const loadOwnCycles = async ({
 };
 
 /**
- * What is left of the free OISY allowance, read with a query, as it is only shown. The backend's
- * main account approves the signer, with the user's ICP account identifier as the spender's
- * subaccount (`principal2account` in the backend). A granted allowance request can still raise it.
+ * What is left of the free OISY allowance, read with a query unless `certified`, as it is only
+ * shown. The backend's main account approves the signer, with the user's ICP account identifier as
+ * the spender's subaccount (`principal2account` in the backend). A granted allowance request can
+ * still raise it.
  */
 export const loadFreeAllowance = async ({
-	identity
+	identity,
+	certified = false
 }: {
 	identity: NullishIdentity;
+	certified?: boolean;
 }): Promise<bigint> => {
 	assertNonNullish(identity);
 
 	const { allowance: free } = await allowance({
 		identity,
-		certified: false,
+		certified,
 		ledgerCanisterId: CYCLES_LEDGER_CANISTER_ID,
 		owner: { owner: BACKEND_CANISTER_PRINCIPAL },
 		spender: {
