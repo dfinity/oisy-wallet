@@ -178,7 +178,11 @@ export const warnSignOut = (text: string): Promise<void> => {
 export const nullishSignOut = (): Promise<void> =>
 	warnSignOut(get(i18n).auth.warning.not_signed_in);
 
-export const idleSignOut = (): Promise<void> => {
+export const idleSignOut = ({
+	delegationExpired
+}: {
+	delegationExpired: boolean;
+}): Promise<void> => {
 	const locked = getStorage<AuthLockStoreData>({ key: AUTH_LOCK_KEY });
 
 	// Locked by hand in another tab.
@@ -199,6 +203,11 @@ export const idleSignOut = (): Promise<void> => {
 			},
 			clearIdbStorages: false
 		});
+	}
+
+	// Gone without a lock: the user signed out in another tab, so this tab clears the cache as well.
+	if (!delegationExpired && locked !== 'expired') {
+		return logout({ clearIdbStorages: true });
 	}
 
 	// The cache is kept, so the session ends on the lock page: it says so and offers to log out.

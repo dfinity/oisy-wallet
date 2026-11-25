@@ -14,6 +14,7 @@ import type {
 	PostMessageDataRequestSolSchema,
 	PostMessageDataRequestXrpSchema,
 	PostMessageDataResponseAuthSchema,
+	PostMessageDataResponseAuthSignOutSchema,
 	PostMessageDataResponseBTCAddressSchema,
 	PostMessageDataResponseErrorSchema,
 	PostMessageDataResponseExchangeErrorSchema,
@@ -65,6 +66,10 @@ export type PostMessageResponseStatus = z.infer<typeof PostMessageResponseStatus
 export type PostMessageResponse = z.infer<typeof PostMessageResponseSchema>;
 
 export type PostMessageDataResponseAuth = z.infer<typeof PostMessageDataResponseAuthSchema>;
+
+export type PostMessageDataResponseAuthSignOut = z.infer<
+	typeof PostMessageDataResponseAuthSignOutSchema
+>;
 
 export type PostMessageDataResponseExchange = z.infer<typeof PostMessageDataResponseExchangeSchema>;
 
