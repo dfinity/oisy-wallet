@@ -41,6 +41,8 @@
 
 	let clamp = $derived(overflow === 'clamp');
 
+	let visible = $derived(overflow === 'visible');
+
 	let timeoutId = $state<NodeJS.Timeout | undefined>();
 
 	const autoHide = () => {
@@ -93,6 +95,7 @@
 		class:clamp
 		class:scroll
 		class:truncate
+		class:visible
 		data-tid="toast-message"
 	>
 		{#if nonNullish(title)}
@@ -241,6 +244,11 @@
 				.title {
 					@include text.clamp(2);
 				}
+			}
+
+			// The whole text, with the line spacing of the default, scrolling one.
+			&.visible {
+				line-height: normal;
 			}
 		}
 

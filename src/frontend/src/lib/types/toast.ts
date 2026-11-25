@@ -13,7 +13,7 @@ export interface ToastMsgUI {
 	spinner?: boolean;
 	duration?: number;
 	position?: ToastPosition;
-	overflow?: 'scroll' | 'truncate' | 'clamp';
+	overflow?: 'scroll' | 'truncate' | 'clamp' | 'visible';
 	icon?: Component;
 	theme?: ToastTheme;
 	renderAsHtml?: boolean;
