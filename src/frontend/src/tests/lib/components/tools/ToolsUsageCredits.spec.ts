@@ -3,12 +3,14 @@ import * as cmcApi from '$icp/api/cmc.api';
 import * as icrcDerived from '$icp/derived/icrc.derived';
 import ToolsUsageCredits from '$lib/components/tools/ToolsUsageCredits.svelte';
 import {
+	CONVERT_AMOUNT_EXCHANGE_VALUE,
 	TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON,
 	TOOLS_USAGE_CREDITS_BALANCE,
 	TOOLS_USAGE_CREDITS_GET_CYCLES_BUTTON,
 	TOOLS_USAGE_CREDITS_MODAL,
 	TOOLS_USAGE_CREDITS_OWN_CREDITS
 } from '$lib/constants/test-ids.constants';
+import * as exchangeDerived from '$lib/derived/exchange.derived';
 import * as cyclesMintAnalytics from '$lib/services/cycles-mint-analytics.services';
 import * as ownCyclesServices from '$lib/services/own-cycles.services';
 import { modalStore } from '$lib/stores/modal.store';
@@ -69,6 +71,18 @@ describe('ToolsUsageCredits', () => {
 
 	// The reads go to the cycles ledger itself, so the card does not need TCYCLES enabled; only
 	// the token's details come from the list of tokens, enabled or not.
+	it('shows the fiat value next to both amounts', async () => {
+		vi.spyOn(exchangeDerived, 'exchanges', 'get').mockReturnValue(
+			readable({ [mockTcyclesToken.id]: { usd: 1.4 } })
+		);
+
+		const { getAllByTestId } = await renderLoaded();
+
+		expect(
+			getAllByTestId(CONVERT_AMOUNT_EXCHANGE_VALUE).map(({ textContent }) => textContent?.trim())
+		).toEqual(['~$2.10', '~$4.55']);
+	});
+
 	it('works with TCYCLES not enabled', async () => {
 		const disabled = { ...mockTcyclesToken, enabled: false };
 

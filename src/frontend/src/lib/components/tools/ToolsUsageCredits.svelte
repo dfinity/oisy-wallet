@@ -4,6 +4,7 @@
 	import CyclesMintModal from '$icp/components/cycles-mint/CyclesMintModal.svelte';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
+	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import ToolsUsageCreditsModal from '$lib/components/tools/ToolsUsageCreditsModal.svelte';
@@ -16,6 +17,7 @@
 		TOOLS_USAGE_CREDITS_OWN_CREDITS
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { modalCyclesMint, modalUsageCreditsAdd } from '$lib/derived/modal.derived';
 	import { loadOwnCycles, type OwnCycles } from '$lib/services/own-cycles.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -26,6 +28,8 @@
 
 	// Enabled or not: the card reads the cycles ledger itself, so it works with TCYCLES inactive.
 	let token = $derived($icrcTokens.find(isTokenCyclesLedger));
+
+	let exchangeRate = $derived(nonNullish(token) ? $exchanges?.[token.id]?.usd : undefined);
 
 	let ownCycles = $state<OwnCycles | undefined>();
 	let loadFailed = $state(false);
@@ -62,9 +66,16 @@
 
 {#snippet amount(value: bigint | undefined, testId: string)}
 	{#if nonNullish(value) && nonNullish(token)}
-		<output class="text-sm text-tertiary" data-tid={testId}
-			>{formatToken({ value, unitName: token.decimals })} {token.symbol}</output
-		>
+		<!-- The fiat value as the send shows it, from the amount in full. -->
+		<span class="flex gap-2 text-sm text-tertiary">
+			<output data-tid={testId}
+				>{formatToken({ value, unitName: token.decimals })} {token.symbol}</output
+			>
+			<ConvertAmountExchange
+				amount={formatToken({ value, unitName: token.decimals, displayDecimals: token.decimals })}
+				{exchangeRate}
+			/>
+		</span>
 	{:else if loadFailed}
 		<span class="text-sm text-tertiary" data-tid={testId}>{$i18n.core.text.not_available}</span>
 	{:else}

@@ -3,6 +3,8 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import { getTokenFee } from '$icp/utils/token.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+	import ConvertAmountDisplay from '$lib/components/convert/ConvertAmountDisplay.svelte';
+	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -10,7 +12,6 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
-	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		TOOLS_USAGE_CREDITS_ADD_BUTTON,
@@ -72,8 +73,7 @@
 				? new Error($i18n.fee.assertion.insufficient_funds_for_fee)
 				: undefined;
 
-	const format = (value: bigint): string =>
-		`${formatToken({ value, unitName: token.decimals, displayDecimals: token.decimals })} ${token.symbol}`;
+	let ownCreditsAfter = $derived(ownCycles.approved + (invalid ? ZERO : (parsedAmount ?? ZERO)));
 
 	const close = () => modalStore.close();
 
@@ -160,17 +160,22 @@
 			</TokenInput>
 		</div>
 
-		<ModalValue>
+		<!-- With fiat values, as the send shows its amounts. -->
+		<ConvertAmountDisplay
+			amount={formatToken({
+				value: ownCreditsAfter,
+				unitName: token.decimals,
+				displayDecimals: token.decimals
+			})}
+			{exchangeRate}
+			symbol={token.symbol}
+		>
 			{#snippet label()}{$i18n.usage_credits.text.own_credits_after}{/snippet}
-			{#snippet mainValue()}{format(
-					ownCycles.approved + (invalid ? ZERO : (parsedAmount ?? ZERO))
-				)}{/snippet}
-		</ModalValue>
+		</ConvertAmountDisplay>
 
-		<ModalValue>
+		<FeeDisplay decimals={token.decimals} {exchangeRate} feeAmount={fee} symbol={token.symbol}>
 			{#snippet label()}{$i18n.fee.text.approval_fee}{/snippet}
-			{#snippet mainValue()}{format(fee)}{/snippet}
-		</ModalValue>
+		</FeeDisplay>
 
 		{#snippet toolbar()}
 			<ButtonGroup>

@@ -1,9 +1,11 @@
 import ToolsUsageCreditsModal from '$lib/components/tools/ToolsUsageCreditsModal.svelte';
 import {
+	CONVERT_AMOUNT_EXCHANGE_VALUE,
 	TOKEN_INPUT_CURRENCY_TOKEN,
 	TOOLS_USAGE_CREDITS_ADD_BUTTON,
 	TOOLS_USAGE_CREDITS_MODAL
 } from '$lib/constants/test-ids.constants';
+import * as exchangeDerived from '$lib/derived/exchange.derived';
 import * as ownCyclesServices from '$lib/services/own-cycles.services';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
@@ -14,7 +16,7 @@ import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { get } from 'svelte/store';
+import { get, readable } from 'svelte/store';
 
 describe('ToolsUsageCreditsModal', () => {
 	// 1 TCYCLES left of the approval, 2 TCYCLES in the balance; the ledger fee is 0.0001 TCYCLES.
@@ -58,6 +60,18 @@ describe('ToolsUsageCreditsModal', () => {
 		const { getByTestId } = render(ToolsUsageCreditsModal, { props });
 
 		expect(getByTestId(TOOLS_USAGE_CREDITS_ADD_BUTTON)).toBeDisabled();
+	});
+
+	it('shows the fiat values of the approval after adding and of the fee', () => {
+		vi.spyOn(exchangeDerived, 'exchanges', 'get').mockReturnValue(
+			readable({ [mockTcyclesToken.id]: { usd: 1.4 } })
+		);
+
+		const { getAllByTestId } = render(ToolsUsageCreditsModal, { props });
+
+		expect(
+			getAllByTestId(CONVERT_AMOUNT_EXCHANGE_VALUE).map(({ textContent }) => textContent?.trim())
+		).toEqual(['~$1.40', '< $0.01']);
 	});
 
 	it('shows the approval after adding the amount, and the approval fee', async () => {
