@@ -172,7 +172,7 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
 6. A repeated CC that returns Insufficient allowance again is handled like the Skipped case without a larger OISY allowance, with no second AR.
 7. Refused: the flow shows its usual error, Allowance issue is set, and the allowance-issue toast shows.
 8. While Allowance issue is set, every CC that returns Insufficient allowance shows the allowance-issue toast again. The user can close it, and it disappears when Allowance issue clears.
-9. The allowance-issue toast looks different from every other toast: warn level, the inverted theme, a title and its own icon.
+9. The allowance-issue toast looks different from every other toast: warn level, the inverted theme, its own icon and, from 768 px wide, a title. It shows its whole text, which is shorter below 768 px (see pending decision 11).
 10. Skipped with no larger OISY allowance: the flow shows its usual error and a warning toast that stays until closed, without setting Allowance issue.
 11. Any Granted or Skipped AR clears Allowance issue.
 12. No form or flow changes, and Allowance issue alone disables no feature.
@@ -216,6 +216,7 @@ Numbers stay fixed: a resolved decision keeps its number, and a new one gets the
 8. _Resolved:_ **Skipped while Allowance issue is set.** A Skipped AR clears Allowance issue too, since the OISY allowance is then at or above the OISY allowance threshold (see 1 and 4.5).
 9. _Resolved:_ **Where the outcome shows.** Not in the forms. After a Granted AR the CC repeats once; otherwise the allowance-issue toast and the warning toast say what happened, next to the form's usual error. The earlier design, an outcome box and a disabled main button in every form plus a banner, needed changes in every flow that makes CCs and made them all depend on this feature (#14740 and #14741, closed).
 10. _Resolved:_ **Phase 3 with toasts.** The allowance-issue toast links to the Tools card (see 6.2). When own cycles pay the CC after a Refused AR, the toast keeps its title, and its text says signing now uses the user's own credits.
+11. _Resolved:_ **The toast on phones.** Below 768 px, where the app has its phone layout, the allowance-issue toast has no title and a shorter text that still says the free usage credits are daily, so it stays a few lines tall. Its own-credits text links to the Tools card from "your own credits". At every width the toast shows its whole text instead of scrolling after three lines.
 
 ## 12. Non-goals
 
