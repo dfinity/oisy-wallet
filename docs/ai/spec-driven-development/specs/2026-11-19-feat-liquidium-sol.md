@@ -143,6 +143,7 @@ The supply and repay modals quote the provider fee when a rail is picked (`estim
 - The Earn and Borrow cards' asset and network icons come from `LIQUIDIUM_ADVERTISED_TOKENS`. Add SOL.
 - Several strings list Liquidium's assets and need SOL (all locales): `borrow.text.header_description`, `borrow.cards.liquidium.description`, `dapps.descriptions.liquidium.one_liner`, `dapps.descriptions.liquidium.description` (which still says Solana support is "coming soon"), `liquidium.text.description`, `liquidium.info.fact_1_*`. The exact wording is product's call.
 - Neither the strings nor the card icons are behind `LIQUIDIUM_SOL_ENABLED`, while Liquidium itself is on in production. They therefore ship with the launch, not before, so production never advertises SOL while the pool is still hidden.
+- OISY doesn't author non-English translations unprompted (`docs/ai/frontend/i18n-and-a11y.md`), and `npm run i18n` keeps an existing translation. So PR 6 empties the other locales' values of the strings it changes: those locales show the new English text (an empty value falls back to it) until they are translated, rather than an outdated translation that leaves SOL out or calls Solana "coming soon".
 
 ---
 

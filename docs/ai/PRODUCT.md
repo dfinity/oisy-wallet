@@ -1221,6 +1221,8 @@ A native SOL borrow or withdrawal pays out through the ckSOL minter, which pays 
 
 On every build, a SOL position shows with the SOL token and its amount, whichever rail funded it, including one made on Liquidium's own app. Outside staging it can't be acted on from OISY.
 
+On every build, the Earn and Borrow cards show Solana and SOL among Liquidium's networks and assets, and the Borrow page, the Liquidium card, the provider page and Liquidium's Explore entry name SOL among its assets.
+
 Liquidium quotes SOL's provider fee per account, so picking SOL to supply creates the user's Liquidium profile first when there is none, then quotes. The other assets still create the profile when the supply is submitted. A fee quoted for a token picked before never replaces the fee of the one picked now.
 
 A borrow or withdrawal goes only to the user's own address on the chain it pays out on: BTC, Ethereum, Solana or the Internet Computer. Any other chain has no address, so the form can't be submitted rather than paying out to an address of another chain.

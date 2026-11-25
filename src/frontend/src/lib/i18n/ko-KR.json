@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "대출에 오신 것을 환영합니다!",
-			"header_description": "매도하지 않고도 유동성을 확보하세요. BTC, ICP 등을 담보로 스테이블코인을 대출받으세요.",
+			"header_description": "",
 			"borrowing_options": "대출 옵션",
 			"borrowing_potential": "대출 가능 한도",
 			"borrowing_power_hint": "자산을 담보로 제공할 경우 최적의 금리로 대출받을 수 있는 예상 금액입니다.",
@@ -2850,7 +2850,7 @@
 	},
 	"liquidium": {
 		"text": {
-			"description": "Bitcoin 공급. 스테이블코인 대출. 네이티브 유지.",
+			"description": "",
 			"health_factor": "건강 지수",
 			"health_no_debt": "",
 			"health_healthy": "",
@@ -2948,8 +2948,8 @@
 		"info": {
 			"title": "Liquidium이란?",
 			"description": "Liquidium은 여러 블록체인 네트워크에서 공급하거나 대출받을 수 있는 탈중앙화된 비수탁형 대출 프로토콜입니다. Internet Computer 위에 구축되어 중앙화된 브리지나 래핑된 토큰 없이 크로스체인 대출을 가능하게 합니다.",
-			"fact_1_title": "BTC로 수익 창출",
-			"fact_1_description": "Bitcoin을 대출해 주고 초과 담보 대출에서 수익을 얻으세요.",
+			"fact_1_title": "",
+			"fact_1_description": "",
 			"fact_2_title": "비수탁형",
 			"fact_2_description": "예치금은 온체인 스마트 컨트랙트로 보호되며 중앙화된 통제가 없습니다.",
 			"fact_3_title": "네이티브, 크로스체인",

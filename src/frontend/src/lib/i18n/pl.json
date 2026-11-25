@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "Witaj w sekcji Pożyczki!",
-			"header_description": "Uzyskaj płynność bez sprzedaży. Pożycz stablecoiny pod zastaw swoich BTC, ICP i innych aktywów.",
+			"header_description": "",
 			"borrowing_options": "Opcje pożyczki",
 			"borrowing_potential": "Potencjał pożyczkowy",
 			"borrowing_power_hint": "Szacunkowa kwota, jaką mógłbyś/mogłabyś pożyczyć, gdybyś przekazał(a) swoje aktywa jako zabezpieczenie, po najlepszej dostępnej stawce.",
@@ -2850,7 +2850,7 @@
 	},
 	"liquidium": {
 		"text": {
-			"description": "Dostarcz Bitcoin. Pożycz stablecoiny. Pozostań natywny.",
+			"description": "",
 			"health_factor": "Wskaźnik zdrowia",
 			"health_no_debt": "",
 			"health_healthy": "",
@@ -2948,8 +2948,8 @@
 		"info": {
 			"title": "Czym jest Liquidium",
 			"description": "Liquidium to zdecentralizowany, niepowierniczy protokół pożyczkowy, w którym możesz dostarczać aktywa lub pożyczać w wielu sieciach blockchain. Zbudowany na Internet Computer, umożliwia pożyczki cross-chain bez scentralizowanych mostów czy tokenów wrapped.",
-			"fact_1_title": "Zarabiaj na swoim BTC",
-			"fact_1_description": "Pożyczaj swojego Bitcoina, aby uzyskać zysk z nadzabezpieczonych pożyczek.",
+			"fact_1_title": "",
+			"fact_1_description": "",
 			"fact_2_title": "Niepowierniczy",
 			"fact_2_description": "Depozyty są zabezpieczone przez smart kontrakty onchain, bez scentralizowanej kontroli.",
 			"fact_3_title": "Natywny, Cross-Chain",

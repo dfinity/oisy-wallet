@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "欢迎来到借贷！",
-			"header_description": "无需卖出即可获得流动性。以您的 BTC、ICP 等资产作为抵押借入稳定币。",
+			"header_description": "",
 			"borrowing_options": "借贷选项",
 			"borrowing_potential": "可借额度",
 			"borrowing_power_hint": "如果您将资产作为抵押品提供，按最优利率估算的可借金额。",
@@ -2850,7 +2850,7 @@
 	},
 	"liquidium": {
 		"text": {
-			"description": "提供 Bitcoin。借入稳定币。保持原生。",
+			"description": "",
 			"health_factor": "健康系数",
 			"health_no_debt": "",
 			"health_healthy": "",
@@ -2948,8 +2948,8 @@
 		"info": {
 			"title": "什么是 Liquidium",
 			"description": "Liquidium 是一个去中心化、非托管的借贷协议，您可以在多个区块链网络中提供资产或借款。它构建在 Internet Computer 之上，无需中心化桥接或包装代币即可实现跨链借贷。",
-			"fact_1_title": "用您的 BTC 赚取收益",
-			"fact_1_description": "出借您的 Bitcoin，从超额抵押贷款中获得收益。",
+			"fact_1_title": "",
+			"fact_1_description": "",
 			"fact_2_title": "非托管",
 			"fact_2_description": "存款由链上智能合约保护，没有中心化控制。",
 			"fact_3_title": "原生、跨链",

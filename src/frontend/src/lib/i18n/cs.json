@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "Vítejte u půjček!",
-			"header_description": "Získej likviditu, aniž bys musel(a) prodávat. Půjč si stablecoiny oproti svým BTC, ICP a dalším aktivům.",
+			"header_description": "",
 			"borrowing_options": "Možnosti půjček",
 			"borrowing_potential": "Potenciál půjčky",
 			"borrowing_power_hint": "Odhad toho, kolik by sis mohl(a) půjčit, kdybys své assety poskytl(a) jako zajištění, za nejlepší dostupnou sazbu.",
@@ -2850,7 +2850,7 @@
 	},
 	"liquidium": {
 		"text": {
-			"description": "Poskytni Bitcoin. Půjč si stablecoiny. Zůstaň nativní.",
+			"description": "",
 			"health_factor": "Faktor zdraví",
 			"health_no_debt": "",
 			"health_healthy": "",
@@ -2948,8 +2948,8 @@
 		"info": {
 			"title": "Co je Liquidium",
 			"description": "Liquidium je decentralizovaný, non-custodial lending protokol, ve kterém můžeš poskytovat nebo si půjčovat napříč více blockchainovými sítěmi. Je postaven na Internet Computeru a umožňuje cross-chain lending bez centralizovaných bridge nebo wrapped tokenů.",
-			"fact_1_title": "Vydělávej na svém BTC",
-			"fact_1_description": "Půjčuj svůj Bitcoin a získávej výnos z nadměrně zajištěných půjček.",
+			"fact_1_title": "",
+			"fact_1_description": "",
 			"fact_2_title": "Non-Custodial",
 			"fact_2_description": "Vklady jsou zajištěny onchain smart kontrakty, bez centralizované kontroly.",
 			"fact_3_title": "Nativní, Cross-Chain",

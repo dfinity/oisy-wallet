@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "Bienvenue dans Emprunter !",
-			"header_description": "Accédez à des liquidités sans vendre. Empruntez des stablecoins contre vos BTC, ICP et plus encore.",
+			"header_description": "",
 			"borrowing_options": "Options d'emprunt",
 			"borrowing_potential": "Potentiel d'emprunt",
 			"borrowing_power_hint": "Une estimation du montant que vous pourriez emprunter si vous fournissiez vos actifs en garantie, au meilleur taux disponible.",
@@ -2850,7 +2850,7 @@
 	},
 	"liquidium": {
 		"text": {
-			"description": "Fournissez du Bitcoin. Empruntez des stablecoins. Restez natif.",
+			"description": "",
 			"health_factor": "Facteur de santé",
 			"health_no_debt": "",
 			"health_healthy": "",
@@ -2948,8 +2948,8 @@
 		"info": {
 			"title": "Qu'est-ce que Liquidium",
 			"description": "Liquidium est un protocole de prêt décentralisé et non custodial où vous pouvez fournir ou emprunter sur plusieurs réseaux blockchain. Construit sur Internet Computer, il permet des prêts cross-chain sans ponts centralisés ni tokens enveloppés.",
-			"fact_1_title": "Gagnez avec votre BTC",
-			"fact_1_description": "Prêtez votre Bitcoin pour obtenir un rendement sur des prêts surcollatéralisés.",
+			"fact_1_title": "",
+			"fact_1_description": "",
 			"fact_2_title": "Non custodial",
 			"fact_2_description": "Les dépôts sont sécurisés par des smart contracts onchain, sans contrôle centralisé.",
 			"fact_3_title": "Natif, Cross-Chain",

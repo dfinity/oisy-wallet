@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "Welcome to Borrow!",
-			"header_description": "Access liquidity without selling. Borrow stablecoins against your BTC, ICP, and more.",
+			"header_description": "Access liquidity without selling. Borrow stablecoins against your BTC, SOL, ICP, and more.",
 			"borrowing_options": "Borrowing options",
 			"borrowing_potential": "Borrowing potential",
 			"borrowing_power_hint": "An estimate of how much you could borrow if you supplied your assets as collateral, at the best available rate.",
@@ -17,7 +17,7 @@
 		"cards": {
 			"liquidium": {
 				"title": "Liquidium",
-				"description": "Borrow USDC, USDT or BTC against your supplied collateral.",
+				"description": "Borrow USDC, USDT, BTC or SOL against your supplied collateral.",
 				"action": "Borrow"
 			}
 		},
@@ -480,8 +480,8 @@
 			},
 			"liquidium": {
 				"name": "Liquidium",
-				"one_liner": "Borrow & lend native Bitcoin against USDT.",
-				"description": "Liquidium is a decentralized cross-chain lending protocol. Today it supports Bitcoin collateral and USDT on Ethereum, with Ethereum and Solana support coming soon. Unlike traditional DeFi protocols, Liquidium lets you use collateral on one chain to borrow on another—without centralized bridges or wrapping. Chain Fusion handles cross-chain operations securely behind the scenes."
+				"one_liner": "Borrow & lend native Bitcoin and Solana against USDT.",
+				"description": "Liquidium is a decentralized cross-chain lending protocol. It supports Bitcoin, Ethereum, Solana and the Internet Computer, as well as USDC and USDT on Ethereum. Unlike traditional DeFi protocols, Liquidium lets you use collateral on one chain to borrow on another—without centralized bridges or wrapping. Chain Fusion handles cross-chain operations securely behind the scenes."
 			},
 			"icpindex": {
 				"name": "ICP Index",
@@ -2850,7 +2850,7 @@
 	},
 	"liquidium": {
 		"text": {
-			"description": "Supply Bitcoin. Borrow Stablecoins. Stay Native.",
+			"description": "Supply Bitcoin and Solana. Borrow Stablecoins. Stay Native.",
 			"health_factor": "Health factor",
 			"health_no_debt": "No debt",
 			"health_healthy": "Healthy",
@@ -2948,8 +2948,8 @@
 		"info": {
 			"title": "What is Liquidium",
 			"description": "Liquidium is a decentralized, non-custodial lending protocol where you can supply or borrow across multiple blockchain networks. Built on the Internet Computer, it enables cross-chain lending without centralized bridges or wrapped tokens.",
-			"fact_1_title": "Earn on Your BTC",
-			"fact_1_description": "Lend your Bitcoin to earn yield from over-collateralized loans.",
+			"fact_1_title": "Earn on Your BTC and SOL",
+			"fact_1_description": "Lend your Bitcoin or Solana to earn yield from over-collateralized loans.",
 			"fact_2_title": "Non-Custodial",
 			"fact_2_description": "Deposits are secured by on-chain smart contracts, with no centralized control.",
 			"fact_3_title": "Native, Cross-Chain",

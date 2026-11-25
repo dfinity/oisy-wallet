@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "借りるへようこそ！",
-			"header_description": "売却せずに流動性を得られます。BTCやICPなどを担保にステーブルコインを借り入れましょう。",
+			"header_description": "",
 			"borrowing_options": "借入オプション",
 			"borrowing_potential": "借入可能額",
 			"borrowing_power_hint": "資産を担保として提供した場合に、最良の金利でどれくらい借り入れできるかの見積もりです。",
@@ -2850,7 +2850,7 @@
 	},
 	"liquidium": {
 		"text": {
-			"description": "Bitcoinを供給。ステーブルコインを借入。ネイティブのまま。",
+			"description": "",
 			"health_factor": "ヘルスファクター",
 			"health_no_debt": "",
 			"health_healthy": "",
@@ -2948,8 +2948,8 @@
 		"info": {
 			"title": "Liquidiumとは",
 			"description": "Liquidiumは分散型かつノンカストディアルなレンディングプロトコルで、複数のブロックチェーンネットワークをまたいで供給または借入ができます。Internet Computer上に構築されており、中央集権的なブリッジやラップドトークンなしでクロスチェーンレンディングを実現します。",
-			"fact_1_title": "BTCで収益を得る",
-			"fact_1_description": "Bitcoinを貸し出して、担保過剰型ローンから利回りを得られます。",
+			"fact_1_title": "",
+			"fact_1_description": "",
 			"fact_2_title": "ノンカストディアル",
 			"fact_2_description": "預け入れはオンチェーンのスマートコントラクトによって保護されており、中央集権的な管理はありません。",
 			"fact_3_title": "ネイティブ、クロスチェーン",
