@@ -4,7 +4,7 @@
 	import { get } from 'svelte/store';
 	import { OWN_CYCLES_ENABLED } from '$env/own-cycles.env';
 	import IconFuelPump from '$lib/components/icons/IconFuelPump.svelte';
-	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { OISY_USAGE_CREDITS_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { AppPath, TOOLS_USAGE_CREDITS_ANCHOR } from '$lib/constants/routes.constants';
 	import { allowanceIssueStore } from '$lib/stores/allowance-issue.store';
 	import { allowanceToastStore } from '$lib/stores/allowance-toast.store';
@@ -61,7 +61,7 @@
 			title: replaceOisyPlaceholders($i18n.core.warning.oisy_allowance_used_up_title),
 			text,
 			...(OWN_CYCLES_ENABLED && { renderAsHtml: true }),
-			link: { href: OISY_DOCS_URL, label: $i18n.core.text.learn_more }
+			link: { href: OISY_USAGE_CREDITS_DOCS_URL, label: $i18n.core.text.learn_more }
 		});
 	};
 
