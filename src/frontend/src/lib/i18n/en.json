@@ -936,8 +936,8 @@
 			"own_credits_after": "Current spending limit",
 			"added": "Your spending limit is set to $amount $token.",
 			"free_signatures": "Free signatures left",
-			"signatures_one": "≈ 1 signature",
-			"signatures_other": "≈ $count signatures",
+			"signatures_one": "~1 signature",
+			"signatures_other": "~$count signatures",
 			"new_limit": "New spending limit",
 			"set": "Set"
 		},

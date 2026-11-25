@@ -149,7 +149,7 @@
 					{$i18n.usage_credits.text.free_signatures}
 					{#if nonNullish(free)}
 						<output class="text-sm text-tertiary" data-tid={TOOLS_USAGE_CREDITS_FREE_SIGNATURES}
-							>≈ {signatures(free)}</output
+							>~{signatures(free)}</output
 						>
 					{:else if loadFailed}
 						<span class="text-sm text-tertiary" data-tid={TOOLS_USAGE_CREDITS_FREE_SIGNATURES}

@@ -68,10 +68,10 @@ describe('ToolsUsageCredits', () => {
 		const { container, getByTestId, getByText } = await renderLoaded();
 
 		expect(getByText(en.usage_credits.text.free_signatures)).toBeInTheDocument();
-		expect(getByTestId(TOOLS_USAGE_CREDITS_FREE_SIGNATURES)).toHaveTextContent('≈ 30');
+		expect(getByTestId(TOOLS_USAGE_CREDITS_FREE_SIGNATURES)).toHaveTextContent('~30');
 		expect(getByText(en.usage_credits.text.own_credits)).toBeInTheDocument();
 		expect(getByTestId(TOOLS_USAGE_CREDITS_OWN_CREDITS)).toHaveTextContent('1.5 TCYCLES');
-		expect(container).toHaveTextContent('≈ 18 signatures');
+		expect(container).toHaveTextContent('~18 signatures');
 		expect(getByText(en.usage_credits.text.balance)).toBeInTheDocument();
 		expect(getByTestId(TOOLS_USAGE_CREDITS_BALANCE)).toHaveTextContent('3.25 TCYCLES');
 
