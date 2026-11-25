@@ -27,7 +27,7 @@
 	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import IconUser from '$lib/components/icons/IconUser.svelte';
-	import NavigationWalletIcon from '$lib/components/icons/IconWallet.svelte';
+	import IconWalletNavigation from '$lib/components/icons/IconWallet.svelte';
 	import IconAstronautHelmet from '$lib/components/icons/icon-astronaut/IconAstronautHelmet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlyBuy from '$lib/components/icons/iconly/IconlyBuy.svelte';
@@ -302,7 +302,7 @@
 
 	const headerIcons = [IconBellDot, IconScanLine, IconUser];
 	const phoneTabs = $derived([
-		{ label: $i18n.navigation.text.tokens, Icon: NavigationWalletIcon },
+		{ label: $i18n.navigation.text.tokens, Icon: IconWalletNavigation },
 		{ label: $i18n.navigation.text.activity, Icon: IconActivity },
 		{ label: $i18n.navigation.text.section_finance, Icon: IconLayers, raised: true },
 		{ label: $i18n.navigation.text.notes, Icon: IconNotebook },

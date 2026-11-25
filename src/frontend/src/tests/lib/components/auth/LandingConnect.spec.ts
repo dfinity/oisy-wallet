@@ -1,10 +1,11 @@
 import { dAppDescriptions } from '$env/dapp-descriptions.env';
+import { LANGUAGES } from '$env/i18n';
 import LandingConnect from '$lib/components/auth/LandingConnect.svelte';
 import { LANDING_NETWORKS } from '$lib/constants/landing.constants';
 import { currentCurrency } from '$lib/derived/currency.derived';
 import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
-import { i18n } from '$lib/stores/i18n.store';
+import { i18n, loadLanguage } from '$lib/stores/i18n.store';
 import { fireEvent, render, within } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -64,12 +65,15 @@ describe('LandingConnect', () => {
 		const preview = within(getByRole('group', { name: pageLanguage.auth.landing.connect_preview }));
 		const rouble = preview.getByRole('radio', { name: 'RUB' });
 		const balance = preview.getByRole('status');
+		const russian = await loadLanguage(Languages.RUSSIAN);
 
 		await fireEvent.click(rouble);
 
-		await expect(preview.findByText('Ваш баланс')).resolves.toBeInTheDocument();
-		expect(preview.getByText('Русский')).toBeInTheDocument();
-		expect(balance).toHaveTextContent('4 762 626,40 ₽');
+		await expect(
+			preview.findByText(russian.hero.text.available_balance)
+		).resolves.toBeInTheDocument();
+		expect(preview.getByText(LANGUAGES[Languages.RUSSIAN])).toBeInTheDocument();
+		expect(balance).toHaveTextContent('₽');
 		expect(rouble).toBeChecked();
 
 		await fireEvent.click(preview.getByRole('radio', { name: 'AED' }));

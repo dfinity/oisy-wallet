@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { LANDING_NETWORKS } from '$lib/constants/landing.constants';
+	import { LANDING_NETWORKS, LANDING_REVEAL_STAGGER } from '$lib/constants/landing.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { LANDING_REVEAL_STAGGER, landingReveal } from '$lib/utils/landing-reveal.utils';
+	import { landingReveal } from '$lib/utils/landing-reveal.utils';
 </script>
 
 <!-- The wallet artwork above draws its phone past its own box, so this block clears it. -->
@@ -15,10 +15,12 @@
 		<span class="text-tertiary">{$i18n.auth.landing.reframe_end}</span>
 	</p>
 
+	<!-- `role="list"`: Safari drops the semantics of a list without bullets. -->
 	<ul
 		class="m-0 flex max-w-3xl list-none flex-wrap justify-center gap-2 p-0"
 		{@attach landingReveal(LANDING_REVEAL_STAGGER)}
 		aria-label={replaceOisyPlaceholders($i18n.auth.landing.networks_label)}
+		role="list"
 	>
 		{#each LANDING_NETWORKS as { id, name, icon, iconColored } (id)}
 			<li

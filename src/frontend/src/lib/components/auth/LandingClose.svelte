@@ -1,8 +1,9 @@
 <script lang="ts">
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 	import LandingNavyPanel from '$lib/components/auth/LandingNavyPanel.svelte';
+	import { LANDING_REVEAL_STAGGER } from '$lib/constants/landing.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { LANDING_REVEAL_STAGGER, landingReveal } from '$lib/utils/landing-reveal.utils';
+	import { landingReveal } from '$lib/utils/landing-reveal.utils';
 </script>
 
 <section class="w-full pb-16 md:pb-24" aria-labelledby="landing-close-title">
@@ -32,17 +33,13 @@
 </section>
 
 <style lang="scss">
+	@use '$lib/styles/mixins/interaction';
+
 	// The login buttons' usual translucent hover fill blends into the navy panel.
 	section :global(button) {
-		@media (hover: hover) {
-			&:hover {
-				background-color: color-mix(
-					in srgb,
-					var(--color-background-primary) 94%,
-					var(--landing-sky)
-				);
-				border-color: color-mix(in srgb, var(--color-background-primary) 60%, var(--landing-sky));
-			}
+		@include interaction.hover {
+			background-color: color-mix(in srgb, var(--color-background-primary) 94%, var(--landing-sky));
+			border-color: color-mix(in srgb, var(--color-background-primary) 60%, var(--landing-sky));
 		}
 
 		&:active {
@@ -53,6 +50,6 @@
 	// The sign-in block's terms line is tertiary grey, made for the light page; on navy it would
 	// fall under 4.5:1, so it is lifted to translucent white here.
 	section :global(.text-tertiary) {
-		color: rgb(255 255 255 / 64%);
+		color: color-mix(in srgb, var(--color-foreground-white) 64%, transparent);
 	}
 </style>

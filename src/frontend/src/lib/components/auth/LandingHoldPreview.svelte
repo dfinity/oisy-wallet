@@ -1,98 +1,17 @@
 <script lang="ts">
-	import bitcoin from '$btc/assets/bitcoin.svg?inline';
-	import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
-	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-	import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
-	import usdCoin from '$eth/assets/usdc.svg?inline';
-	import tetherGold from '$eth/assets/xaut.svg?inline';
-	import ethereum from '$icp-eth/assets/eth.svg?inline';
 	import LandingPreviewFrame from '$lib/components/auth/LandingPreviewFrame.svelte';
 	import TokenExchangeBalance from '$lib/components/tokens/TokenExchangeBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { LANDING_HOLD_TOKENS } from '$lib/constants/landing-preview.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { CardData } from '$lib/types/token-card';
 	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
-	import nvidia from '$sol/assets/nvdax.svg?inline';
-	import tesla from '$sol/assets/tslax.svg?inline';
-
-	// Sample holdings laid out like the home screen's TokenCard rows; nothing here reads wallet
-	// state. TokenCard itself waits for the exchange worker, which never starts signed out, so its
-	// fiat value and 24h change would stay skeletons here.
-	const tokens: (CardData & { usdPrice: number; usdPriceChangePercentage24h: number })[] = [
-		{
-			name: 'Bitcoin',
-			symbol: 'BTC',
-			decimals: 8,
-			icon: bitcoin,
-			network: BTC_MAINNET_NETWORK,
-			balance: 42_000_000n,
-			usdBalance: 40_385.04,
-			usdPrice: 96_154.86,
-			usdPriceChangePercentage24h: 1.84
-		},
-		{
-			name: 'Tesla xStock',
-			symbol: 'TSLAx',
-			decimals: 8,
-			icon: tesla,
-			network: SOLANA_MAINNET_NETWORK,
-			balance: 1_200_000_000n,
-			usdBalance: 5_412.0,
-			usdPrice: 451.0,
-			usdPriceChangePercentage24h: 3.12
-		},
-		{
-			name: 'Ethereum',
-			symbol: 'ETH',
-			decimals: 18,
-			icon: ethereum,
-			network: ETHEREUM_NETWORK,
-			balance: 1_350_000_000_000_000_000n,
-			usdBalance: 4_382.51,
-			usdPrice: 3_246.3,
-			usdPriceChangePercentage24h: -0.62
-		},
-		{
-			name: 'NVIDIA xStock',
-			symbol: 'NVDAx',
-			decimals: 8,
-			icon: nvidia,
-			network: SOLANA_MAINNET_NETWORK,
-			balance: 2_000_000_000n,
-			usdBalance: 3_640.8,
-			usdPrice: 182.04,
-			usdPriceChangePercentage24h: 0.94
-		},
-		{
-			name: 'Tether Gold',
-			symbol: 'XAUt',
-			decimals: 6,
-			icon: tetherGold,
-			network: ETHEREUM_NETWORK,
-			balance: 800_000n,
-			usdBalance: 3_312.48,
-			usdPrice: 4_140.6,
-			usdPriceChangePercentage24h: 0.21
-		},
-		{
-			name: 'USD Coin',
-			symbol: 'USDC',
-			decimals: 6,
-			icon: usdCoin,
-			network: ETHEREUM_NETWORK,
-			balance: 2_400_000_000n,
-			usdBalance: 2_400.0,
-			usdPrice: 1,
-			usdPriceChangePercentage24h: 0
-		}
-	];
 
 	const price = (value: number): string | undefined =>
 		formatCurrency({
@@ -124,7 +43,7 @@
 		</div>
 
 		<div class="flex flex-col gap-3">
-			{#each tokens as data (data.symbol)}
+			{#each LANDING_HOLD_TOKENS as data (data.symbol)}
 				{@const sign = changeSign(data.usdPriceChangePercentage24h)}
 				<div class="overflow-hidden rounded-xl">
 					<LogoButton hover={false} rounded={false}>

@@ -67,7 +67,6 @@
 </script>
 
 <LandingPreviewFrame label={previewLabel}>
-	<!-- The modal header: title centred, slippage and close on the right. -->
 	<div class="relative flex items-center justify-end border-b border-tertiary px-4 pt-6 pb-4">
 		<span
 			class="absolute left-1/2 -translate-x-1/2 text-[23px] leading-[30px] font-bold text-primary"

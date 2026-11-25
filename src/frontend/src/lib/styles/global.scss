@@ -362,4 +362,6 @@ layout applies it once per page load.
 /* Opt-in menu sizing overrides primitive utility defaults. */
 @layer utilities {
 	@include meta.load-css('global/menus');
+	/* After the utilities, so the comparing band's transparent text beats `text-primary`. */
+	@include meta.load-css('global/smart-swap');
 }

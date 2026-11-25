@@ -23,3 +23,24 @@ export const LANDING_NETWORKS: Network[] = [
 	SOLANA_MAINNET_NETWORK,
 	XRP_MAINNET_NETWORK
 ];
+
+// The landing's one-time entrance, shared by the hero (CSS) and the sections below it
+// (`landingReveal`), so the page settles as one piece.
+export const LANDING_REVEAL_DURATION = 300;
+export const LANDING_REVEAL_STAGGER = 100;
+
+// Hero blocks in entrance order, each one LANDING_REVEAL_STAGGER after the last. The title takes
+// the default step, 0.
+export const LANDING_HERO_STEP = {
+	description: 1,
+	signIn: 2,
+	artwork: 3
+} as const;
+
+// Fragment targets of the header's section row and the phone section menu.
+export const LANDING_SECTION_IDS = {
+	hold: 'landing-hold',
+	security: 'landing-security',
+	swap: 'landing-swap',
+	borrow: 'landing-borrow'
+} as const;

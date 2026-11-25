@@ -4,6 +4,7 @@ import {
 	NETWORKS_SWITCHER_DROPDOWN
 } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
+import { landingSectionLinks } from '$lib/utils/landing.utils';
 import { mockAuthSignedIn } from '$tests/mocks/auth.mock';
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -36,19 +37,12 @@ describe('Header', () => {
 
 		const { getByRole } = render(Header, { showLandingNavigation: true });
 		const nav = getByRole('navigation', { name: sectionNavLabel });
-		const { auth, navigation, swap } = get(i18n);
-		const { borrow_eyebrow, security_eyebrow } = auth.landing;
 
 		// Wide screens only: below lg the landing's floating section menu carries these links.
 		expect(nav).toHaveClass('hidden', 'lg:flex');
 
-		for (const [name, href] of [
-			[navigation.text.tokens, '#landing-hold'],
-			[security_eyebrow, '#landing-security'],
-			[swap.text.swap, '#landing-swap'],
-			[borrow_eyebrow, '#landing-borrow']
-		]) {
-			expect(within(nav).getByRole('link', { name })).toHaveAttribute('href', href);
+		for (const { label, href } of landingSectionLinks(get(i18n))) {
+			expect(within(nav).getByRole('link', { name: label })).toHaveAttribute('href', href);
 		}
 	});
 

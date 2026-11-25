@@ -13,6 +13,7 @@
 	import LandingSection from '$lib/components/auth/LandingSection.svelte';
 	import LandingSecurity from '$lib/components/auth/LandingSecurity.svelte';
 	import LandingSwapPreview from '$lib/components/auth/LandingSwapPreview.svelte';
+	import { LANDING_SECTION_IDS } from '$lib/constants/landing.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	onMount(() => {
@@ -32,7 +33,7 @@
 <LandingNetworks />
 
 <LandingSection
-	id="landing-hold"
+	id={LANDING_SECTION_IDS.hold}
 	description={$i18n.auth.landing.hold_description}
 	eyebrow={$i18n.auth.landing.hold_eyebrow}
 	points={[
@@ -53,7 +54,7 @@
 <LandingGetStarted />
 
 <LandingSection
-	id="landing-swap"
+	id={LANDING_SECTION_IDS.swap}
 	description={$i18n.auth.landing.swap_description}
 	eyebrow={$i18n.swap.text.smart_swap}
 	flip
@@ -72,7 +73,7 @@
 <LandingGive />
 
 <LandingSection
-	id="landing-borrow"
+	id={LANDING_SECTION_IDS.borrow}
 	description={$i18n.auth.landing.borrow_description}
 	eyebrow={$i18n.auth.landing.borrow_eyebrow}
 	points={[$i18n.auth.landing.borrow_point_fees, $i18n.auth.landing.borrow_point_repay]}

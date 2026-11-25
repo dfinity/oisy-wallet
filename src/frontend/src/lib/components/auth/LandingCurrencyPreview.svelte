@@ -2,13 +2,13 @@
 	import { LANGUAGES } from '$env/i18n';
 	import LandingCurrencyFlag from '$lib/components/auth/LandingCurrencyFlag.svelte';
 	import LandingPreviewFrame from '$lib/components/auth/LandingPreviewFrame.svelte';
+	import { LANDING_HOLD_BALANCE_USD } from '$lib/constants/landing-preview.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { Currency } from '$lib/enums/currency';
 	import { Languages } from '$lib/enums/languages';
 	import { i18n, loadLanguage } from '$lib/stores/i18n.store';
 
-	// The Hold preview's sample total, shown through illustrative rates; not live prices.
-	const BALANCE_USD = 59_532.83;
+	// Illustrative rates for the Hold preview's total; not live prices.
 	const SAMPLE_RATES: Record<Currency, number> = {
 		[Currency.AED]: 3.67,
 		[Currency.BRL]: 5.35,
@@ -48,21 +48,22 @@
 		[Currency.VND]: Languages.VIETNAMESE
 	};
 
-	const getPreviewLabels = ({ lang, hero, core }: Awaited<ReturnType<typeof loadLanguage>>) => ({
+	const getPreviewLabels = ({ lang, hero, core }: typeof $i18n) => ({
 		lang,
 		balance: hero.text.available_balance,
 		currency: core.text.currency
 	});
 
+	type PreviewLabels = ReturnType<typeof getPreviewLabels>;
+
 	const currencies = Object.values(Currency);
 	const groupName = $props.id();
-	const languageRequests: Partial<Record<Languages, Promise<ReturnType<typeof getPreviewLabels>>>> =
-		{};
+	const languageRequests: Partial<Record<Languages, Promise<PreviewLabels>>> = {};
 
 	let chosenCurrency = $state<Currency>();
 	let hoveredCurrency = $state<Currency>();
 	let focusedCurrency = $state<Currency>();
-	let loadedLabels = $state<ReturnType<typeof getPreviewLabels>>();
+	let loadedLabels = $state<PreviewLabels>();
 
 	const selectedCurrency = $derived(chosenCurrency ?? $currentCurrency);
 	const displayedCurrency = $derived(hoveredCurrency ?? focusedCurrency ?? selectedCurrency);
@@ -72,11 +73,17 @@
 		loadedLabels !== undefined && loadedLabels.lang === language ? loadedLabels : pageLabels
 	);
 
-	const format = ({ currency, language }: { currency: Currency; language: Languages }): string =>
+	const formatSampleBalance = ({
+		currency,
+		language
+	}: {
+		currency: Currency;
+		language: Languages;
+	}): string =>
 		new Intl.NumberFormat(language, {
 			style: 'currency',
 			currency: currency.toUpperCase()
-		}).format(BALANCE_USD * SAMPLE_RATES[currency]);
+		}).format(LANDING_HOLD_BALANCE_USD * SAMPLE_RATES[currency]);
 
 	$effect(() => {
 		const next = language;
@@ -117,7 +124,7 @@
 				class="min-w-0 text-[clamp(1.25rem,7cqi,2.25rem)] font-bold tracking-tight [overflow-wrap:anywhere] text-primary tabular-nums"
 				lang={language}
 			>
-				{format({ currency: displayedCurrency, language })}
+				{formatSampleBalance({ currency: displayedCurrency, language })}
 			</span>
 		</output>
 

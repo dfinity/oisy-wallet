@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
+	import { LANDING_HERO_STEP } from '$lib/constants/landing.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
@@ -13,14 +14,14 @@
 		</h1>
 
 		<p
-			style:--landing-step={1}
+			style:--landing-step={LANDING_HERO_STEP.description}
 			class="landing-step mx-auto mt-5 mb-0 max-w-[38ch] text-base leading-normal font-normal text-pretty text-primary md:text-lg"
 		>
 			{$i18n.auth.text.description}
 		</p>
 	</div>
 
-	<div style:--landing-step={2} class="landing-step w-full">
+	<div style:--landing-step={LANDING_HERO_STEP.signIn} class="landing-step w-full">
 		<ButtonAuthenticateWithHelp helpAlignment="center" needHelpLink={false} />
 	</div>
 </div>

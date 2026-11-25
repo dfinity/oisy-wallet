@@ -8,6 +8,7 @@ describe('LandingSection', () => {
 		eyebrow: 'Eyebrow',
 		title: 'A title',
 		description: 'A description',
+		points: ['First point', 'Second point'],
 		visual: mockSnippet
 	};
 
@@ -25,14 +26,15 @@ describe('LandingSection', () => {
 	});
 
 	it('renders the points as a list', () => {
-		const points = ['First point', 'Second point'];
-		const { getAllByRole } = render(LandingSection, { props: { ...props, points } });
+		const { getAllByRole } = render(LandingSection, { props });
 
-		expect(getAllByRole('listitem').map(({ textContent }) => textContent?.trim())).toEqual(points);
+		expect(getAllByRole('listitem').map(({ textContent }) => textContent?.trim())).toEqual(
+			props.points
+		);
 	});
 
 	it('renders no list without points', () => {
-		const { queryByRole } = render(LandingSection, { props });
+		const { queryByRole } = render(LandingSection, { props: { ...props, points: [] } });
 
 		expect(queryByRole('list')).not.toBeInTheDocument();
 	});

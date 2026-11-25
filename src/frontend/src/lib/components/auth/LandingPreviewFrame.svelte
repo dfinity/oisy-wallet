@@ -12,7 +12,7 @@
 
 <!--
 	Outer radius = inner radius (28px) + padding (12px / 20px), so the corners stay concentric. The
-	inner 28px fits a 16px control sitting 12px from the screen's edge (the Swap and Borrow previews).
+	inner 28px is itself a 16px corner radius sitting 12px in, the previews' mobile padding.
 -->
 <div class="rounded-[40px] bg-brand-subtle-10 p-3 sm:rounded-[48px] sm:p-5">
 	<div

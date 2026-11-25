@@ -1,11 +1,13 @@
 <script lang="ts">
 	import tipDark from '$lib/assets/landing-tip-dark.webp';
 	import tipLight from '$lib/assets/landing-tip-light.webp';
+	import LandingHeading from '$lib/components/auth/LandingHeading.svelte';
 	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
 	import IconNotebook from '$lib/components/icons/lucide/IconNotebook.svelte';
 	import IconUsersRound from '$lib/components/icons/lucide/IconUsersRound.svelte';
+	import { LANDING_REVEAL_STAGGER } from '$lib/constants/landing.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { LANDING_REVEAL_STAGGER, landingReveal } from '$lib/utils/landing-reveal.utils';
+	import { landingReveal } from '$lib/utils/landing-reveal.utils';
 
 	const features = $derived([
 		{
@@ -27,13 +29,12 @@
 	class="flex w-full flex-col gap-8 border-t border-tertiary py-16 md:gap-10 md:py-24"
 	aria-labelledby="landing-give-title"
 >
-	<h2
+	<LandingHeading
 		id="landing-give-title"
-		class="m-0 max-w-3xl text-3xl leading-[1.1] font-bold tracking-tight text-balance text-primary md:text-[2.75rem]"
-		{@attach landingReveal()}
-	>
-		{$i18n.auth.landing.give_title}
-	</h2>
+		reveal={landingReveal()}
+		styleClass="max-w-3xl"
+		title={$i18n.auth.landing.give_title}
+	/>
 
 	<div class="grid gap-5 md:grid-cols-2">
 		<div class="grid gap-5 md:auto-rows-fr">
@@ -110,9 +111,12 @@
 
 <style lang="scss">
 	.phone {
-		// The device bezel is the same near-black in both themes, like a real phone.
-		border-color: #0f172a;
-		box-shadow: 0 30px 60px -30px rgb(15 23 42 / 45%);
+		// The device bezel is the same near-black in both themes, like a real phone. The palette
+		// (base-colors.scss) has no such fixed near-black, so it is defined once here.
+		--phone-bezel: #0f172a;
+
+		border-color: var(--phone-bezel);
+		box-shadow: 0 30px 60px -30px color-mix(in srgb, var(--phone-bezel) 45%, transparent);
 	}
 
 	:global([theme='dark']) .phone {

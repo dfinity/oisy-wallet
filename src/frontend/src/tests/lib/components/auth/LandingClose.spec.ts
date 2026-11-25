@@ -6,6 +6,10 @@ import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('LandingClose', () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
 	it('shows the tagline', () => {
 		const { getByRole } = render(LandingClose);
 

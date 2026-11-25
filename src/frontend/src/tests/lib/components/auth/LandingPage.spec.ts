@@ -2,6 +2,7 @@ import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import * as backendApi from '$lib/api/backend.api';
 import LandingPage from '$lib/components/auth/LandingPage.svelte';
+import { LANDING_SECTION_IDS } from '$lib/constants/landing.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { themeStore } from '$lib/stores/theme.store';
 import { Theme } from '$lib/types/theme';
@@ -52,7 +53,7 @@ describe('LandingPage', () => {
 	it('uses the colored network logos in the swap preview', async () => {
 		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
 		const { findByRole } = render(LandingPage);
-		const { auth, tokens } = get(i18n);
+		const { auth, core } = get(i18n);
 		const swapSection = await findByRole(
 			'region',
 			{ name: auth.landing.swap_title },
@@ -60,11 +61,12 @@ describe('LandingPage', () => {
 		);
 
 		for (const network of [BTC_MAINNET_NETWORK, ETHEREUM_NETWORK]) {
-			const label = within(swapSection).getByText(
-				replacePlaceholders(tokens.text.on_network_label, { $network: network.name })
+			// By alt text: the preview is one labelled image, so its logos have no role of their own.
+			const logos = within(swapSection).getAllByAltText(
+				replacePlaceholders(core.alt.logo, { $name: network.name })
 			);
 
-			expect(label.parentElement?.querySelector('img')).toHaveAttribute('src', network.iconColored);
+			logos.forEach((logo) => expect(logo).toHaveAttribute('src', network.iconColored));
 		}
 	});
 
@@ -72,14 +74,14 @@ describe('LandingPage', () => {
 		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
 		const scrollIntoView = vi.fn();
 		Element.prototype.scrollIntoView = scrollIntoView;
-		window.location.hash = '#landing-swap';
+		window.location.hash = `#${LANDING_SECTION_IDS.swap}`;
 
 		const { findByRole } = render(LandingPage);
 		const section = await findByRole('region', { name: get(i18n).auth.landing.swap_title });
 
 		await vi.waitFor(() => expect(section).toHaveFocus());
 
-		expect(section).toHaveAttribute('id', 'landing-swap');
+		expect(section).toHaveAttribute('id', LANDING_SECTION_IDS.swap);
 		expect(scrollIntoView).toHaveBeenCalledOnce();
 
 		window.location.hash = '';

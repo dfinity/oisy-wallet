@@ -1,19 +1,21 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import LandingHeading from '$lib/components/auth/LandingHeading.svelte';
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
-	import { LANDING_REVEAL_STAGGER, landingReveal } from '$lib/utils/landing-reveal.utils';
+	import { LANDING_REVEAL_STAGGER } from '$lib/constants/landing.constants';
+	import { landingReveal } from '$lib/utils/landing-reveal.utils';
 
 	interface Props {
 		id: string;
 		eyebrow: string;
 		title: string;
 		description: string;
-		points?: string[];
+		points: string[];
 		flip?: boolean;
 		visual: Snippet;
 	}
 
-	let { id, eyebrow, title, description, points = [], flip = false, visual }: Props = $props();
+	let { id, eyebrow, title, description, points, flip = false, visual }: Props = $props();
 </script>
 
 <!--
@@ -28,14 +30,9 @@
 >
 	<div class="flex flex-col gap-5 md:col-span-5" class:md:order-2={flip}>
 		<div class="flex flex-col gap-5" {@attach landingReveal()}>
-			<p class="m-0 text-xs font-bold tracking-[0.2em] text-brand-primary uppercase">{eyebrow}</p>
-			<h2
-				id={`${id}-title`}
-				class="m-0 text-3xl leading-[1.1] font-bold tracking-tight text-balance text-primary md:text-[2.75rem]"
-			>
-				{title}
-			</h2>
+			<LandingHeading id={`${id}-title`} {eyebrow} {title} />
 		</div>
+		<!-- Outside the heading block, so it enters one stagger after it. -->
 		<p
 			class="m-0 text-lg leading-relaxed text-pretty text-secondary"
 			{@attach landingReveal(LANDING_REVEAL_STAGGER)}
@@ -44,9 +41,11 @@
 		</p>
 
 		{#if points.length > 0}
+			<!-- `role="list"`: Safari drops the semantics of a list without bullets. -->
 			<ul
 				class="m-0 mt-1 flex list-none flex-col gap-3 p-0"
 				{@attach landingReveal(2 * LANDING_REVEAL_STAGGER)}
+				role="list"
 			>
 				{#each points as point (point)}
 					<li class="flex gap-3 text-base leading-normal text-pretty text-secondary">

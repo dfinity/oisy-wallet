@@ -37,7 +37,7 @@
 		);
 	};
 
-	// Plays only while the cell is on screen, and not at all with reduced motion.
+	// A round played off screen would be missed, so each time the cell comes into view starts one.
 	const playWhenVisible = (node: HTMLElement) => {
 		if (typeof IntersectionObserver === 'undefined') {
 			return;
@@ -65,7 +65,8 @@
 	const [gainBefore, gainAfter = ''] = $derived($i18n.swap.text.smart_swap_gain.split('$amount'));
 </script>
 
-<!-- Mirrors SwapProviderCell (its markup and styles), which needs a live swap context. -->
+<!-- SwapProviderCell's look and comparing state (styles/global/smart-swap.scss), as one scripted
+	round: the real cell needs a live swap context. -->
 <div
 	class="relative flex w-full items-center gap-3 rounded-lg border border-tertiary bg-secondary px-4 py-3 text-left"
 	{@attach playWhenVisible}
@@ -100,95 +101,3 @@
 		/>
 	</span>
 </div>
-
-<style lang="scss">
-	// Copied from SwapProviderCell.svelte; keep the two in step.
-	.smart-thinking {
-		background: linear-gradient(
-				90deg,
-				var(--color-foreground-tertiary) 0 35%,
-				var(--color-foreground-primary) 50%,
-				var(--color-foreground-tertiary) 65% 100%
-			)
-			0 0 / 30rem 100%;
-		-webkit-background-clip: text;
-		background-clip: text;
-		color: transparent;
-
-		@media (prefers-reduced-motion: no-preference) {
-			animation: smart-thinking 2000ms linear infinite;
-		}
-
-		@media (prefers-reduced-motion: reduce) {
-			background: none;
-			color: var(--color-foreground-tertiary);
-		}
-	}
-
-	@keyframes smart-thinking {
-		from {
-			background-position: 0 0;
-		}
-		to {
-			background-position: 30rem 0;
-		}
-	}
-
-	.smart-beam {
-		position: absolute;
-		inset: -1.5px;
-		padding: 1.5px;
-		overflow: hidden;
-		border-radius: inherit;
-		pointer-events: none;
-		opacity: 0;
-		-webkit-mask:
-			linear-gradient(#000 0 0) content-box,
-			linear-gradient(#000 0 0);
-		-webkit-mask-composite: xor;
-		mask:
-			linear-gradient(#000 0 0) content-box,
-			linear-gradient(#000 0 0);
-		mask-composite: exclude;
-		transition: opacity 600ms cubic-bezier(0.23, 1, 0.32, 1);
-
-		span {
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			width: 200%;
-			aspect-ratio: 1;
-			translate: -50% -50%;
-			background: conic-gradient(
-				transparent 0 45%,
-				color-mix(in srgb, var(--color-foreground-brand-primary-alt) 30%, transparent) 72%,
-				var(--color-foreground-brand-primary) 92%,
-				transparent 100%
-			);
-			animation: smart-beam 3600ms linear infinite paused;
-		}
-
-		&.beaming {
-			opacity: 1;
-			transition-duration: 500ms;
-			transition-delay: 120ms;
-
-			span {
-				animation-play-state: running;
-			}
-		}
-
-		@media (prefers-reduced-motion: reduce) {
-			span {
-				animation: none;
-				background: var(--color-border-brand-subtle-20);
-			}
-		}
-	}
-
-	@keyframes smart-beam {
-		to {
-			rotate: 1turn;
-		}
-	}
-</style>

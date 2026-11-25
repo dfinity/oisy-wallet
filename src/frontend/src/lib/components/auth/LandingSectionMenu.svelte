@@ -69,7 +69,8 @@
 			aria-label={$i18n.auth.landing.sections_label}
 			out:fade
 		>
-			<ul class="m-0 flex list-none flex-col items-stretch gap-2 p-0">
+			<!-- `role="list"`: Safari drops the semantics of a list without bullets. -->
+			<ul class="m-0 flex list-none flex-col items-stretch gap-2 p-0" role="list">
 				{#each links as { href, label }, index (href)}
 					<li in:fly|global={{ y: 8, delay: (links.length - 1 - index) * ITEM_STAGGER_MS }}>
 						<a

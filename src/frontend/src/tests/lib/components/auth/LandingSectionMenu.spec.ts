@@ -1,18 +1,12 @@
 import LandingSectionMenu from '$lib/components/auth/LandingSectionMenu.svelte';
 import { i18n } from '$lib/stores/i18n.store';
+import { landingSectionLinks } from '$lib/utils/landing.utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('LandingSectionMenu', () => {
 	const { auth, navigation, swap } = get(i18n);
-	const { borrow_eyebrow, sections_button, sections_label, security_eyebrow } = auth.landing;
-
-	const links = [
-		[navigation.text.tokens, '#landing-hold'],
-		[security_eyebrow, '#landing-security'],
-		[swap.text.swap, '#landing-swap'],
-		[borrow_eyebrow, '#landing-borrow']
-	];
+	const { borrow_eyebrow, sections_button, sections_label } = auth.landing;
 
 	const renderMenu = () => {
 		const result = render(LandingSectionMenu);
@@ -39,8 +33,8 @@ describe('LandingSectionMenu', () => {
 		expect(button).toHaveAttribute('aria-expanded', 'true');
 		expect(nav).toHaveAttribute('id', 'landing-section-menu');
 
-		for (const [name, href] of links) {
-			expect(getByRole('link', { name })).toHaveAttribute('href', href);
+		for (const { label, href } of landingSectionLinks(get(i18n))) {
+			expect(getByRole('link', { name: label })).toHaveAttribute('href', href);
 		}
 	});
 

@@ -3,12 +3,11 @@
 
 	interface Props {
 		currency: Currency;
-		size?: number;
+		size: number;
 	}
 
-	let { currency, size = 24 }: Props = $props();
+	let { currency, size }: Props = $props();
 
-	// Five-pointed star as polygon points, for the flags that carry one.
 	const star = ({ cx, cy, r }: { cx: number; cy: number; r: number }): string =>
 		Array.from({ length: 10 }, (_, i) => {
 			const radius = i % 2 === 0 ? r : r * 0.4;

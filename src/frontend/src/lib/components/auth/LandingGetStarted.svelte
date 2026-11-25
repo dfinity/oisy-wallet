@@ -1,6 +1,8 @@
 <script lang="ts">
+	import LandingHeading from '$lib/components/auth/LandingHeading.svelte';
+	import { LANDING_REVEAL_STAGGER } from '$lib/constants/landing.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { LANDING_REVEAL_STAGGER, landingReveal } from '$lib/utils/landing-reveal.utils';
+	import { landingReveal } from '$lib/utils/landing-reveal.utils';
 
 	const numberFormat = $derived(new Intl.NumberFormat($i18n.lang));
 	const steps = $derived([
@@ -26,14 +28,13 @@
 	class="flex w-full flex-col gap-7 pb-16 md:gap-10 md:pb-24"
 	aria-labelledby="landing-get-started-title"
 >
-	<h2
+	<LandingHeading
 		id="landing-get-started-title"
-		class="m-0 text-3xl leading-[1.1] font-bold tracking-tight text-balance text-primary md:text-[2.75rem]"
-		{@attach landingReveal()}
-	>
-		{$i18n.auth.landing.get_started_title}
-	</h2>
+		reveal={landingReveal()}
+		title={$i18n.auth.landing.get_started_title}
+	/>
 
+	<!-- `role="list"`: Safari drops the semantics of a list without bullets. -->
 	<ol class="m-0 grid list-none gap-6 p-0 md:grid-cols-3 md:gap-8" role="list">
 		{#each steps as { id, title, description }, index (id)}
 			<li

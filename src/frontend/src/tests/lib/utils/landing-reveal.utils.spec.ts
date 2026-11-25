@@ -1,9 +1,16 @@
+import { LANDING_REVEAL_DURATION } from '$lib/constants/landing.constants';
 import { MOTION_REDUCED_FADE_DURATION } from '$lib/constants/transition.constants';
-import {
-	landingBackgroundFade,
-	landingBackgroundOpacity,
-	landingReveal
-} from '$lib/utils/landing-reveal.utils';
+import { landingReveal } from '$lib/utils/landing-reveal.utils';
+
+const motion = vi.hoisted(() => ({ reduced: false }));
+
+vi.mock('svelte/motion', () => ({
+	prefersReducedMotion: {
+		get current() {
+			return motion.reduced;
+		}
+	}
+}));
 
 describe('landing-reveal.utils', () => {
 	let callback: IntersectionObserverCallback | undefined;
@@ -24,6 +31,7 @@ describe('landing-reveal.utils', () => {
 
 	beforeEach(() => {
 		callback = undefined;
+		motion.reduced = false;
 		vi.clearAllMocks();
 
 		vi.stubGlobal(
@@ -74,7 +82,7 @@ describe('landing-reveal.utils', () => {
 		expect(disconnect).toHaveBeenCalledOnce();
 		expect(animate).toHaveBeenCalledOnce();
 		expect(animate.mock.calls[0]?.[1]).toMatchObject({
-			duration: 300,
+			duration: LANDING_REVEAL_DURATION,
 			delay: 100,
 			fill: 'backwards'
 		});
@@ -92,7 +100,7 @@ describe('landing-reveal.utils', () => {
 	});
 
 	it('only fades, without delay, when the reader prefers reduced motion', () => {
-		vi.mocked(window.matchMedia).mockReturnValueOnce({ matches: true } as MediaQueryList);
+		motion.reduced = true;
 
 		const node = document.createElement('div');
 		const animate = vi.spyOn(node, 'animate');
@@ -147,70 +155,5 @@ describe('landing-reveal.utils', () => {
 
 		expect(disconnect).toHaveBeenCalledOnce();
 		expect(node.style.opacity).toBe('');
-	});
-});
-
-describe('landingBackgroundOpacity', () => {
-	it('keeps the artwork at the top of the page', () => {
-		expect(landingBackgroundOpacity({ scrollY: 0, viewportHeight: 1000 })).toBe(1);
-		expect(landingBackgroundOpacity({ scrollY: 150, viewportHeight: 1000 })).toBe(1);
-	});
-
-	it('fades the artwork across the first screen', () => {
-		expect(landingBackgroundOpacity({ scrollY: 500, viewportHeight: 1000 })).toBeCloseTo(0.5);
-	});
-
-	it('hides the artwork once the first screen is scrolled past', () => {
-		expect(landingBackgroundOpacity({ scrollY: 850, viewportHeight: 1000 })).toBe(0);
-		expect(landingBackgroundOpacity({ scrollY: 4000, viewportHeight: 1000 })).toBe(0);
-	});
-
-	it('keeps the artwork when the viewport has no height', () => {
-		expect(landingBackgroundOpacity({ scrollY: 500, viewportHeight: 0 })).toBe(1);
-	});
-});
-
-describe('landingBackgroundFade', () => {
-	let layers: HTMLElement[];
-
-	beforeEach(() => {
-		layers = ['app-background-landing-light', 'app-background-landing-dark'].map((id) => {
-			const layer = document.createElement('img');
-			layer.id = id;
-			document.body.append(layer);
-			return layer;
-		});
-		vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
-			callback(0);
-			return 1;
-		});
-		vi.spyOn(window, 'innerHeight', 'get').mockReturnValue(1000);
-	});
-
-	afterEach(() => {
-		layers.forEach((layer) => layer.remove());
-		window.scrollY = 0;
-	});
-
-	it('sets the artwork opacity from the scroll position and restores it on cleanup', () => {
-		window.scrollY = 0;
-		const cleanup = landingBackgroundFade(document.createElement('div'));
-
-		layers.forEach((layer) => expect(layer.style.opacity).toBe('1'));
-
-		window.scrollY = 2000;
-		window.dispatchEvent(new Event('scroll'));
-
-		layers.forEach((layer) => expect(layer.style.opacity).toBe('0'));
-
-		cleanup?.();
-
-		layers.forEach((layer) => expect(layer.style.opacity).toBe(''));
-	});
-
-	it('does nothing without the artwork layers', () => {
-		layers.forEach((layer) => layer.remove());
-
-		expect(landingBackgroundFade(document.createElement('div'))).toBeUndefined();
 	});
 });

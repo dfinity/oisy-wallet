@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import LandingCurrencyPreview from '$lib/components/auth/LandingCurrencyPreview.svelte';
-	import { LANDING_NETWORKS } from '$lib/constants/landing.constants';
+	import LandingHeading from '$lib/components/auth/LandingHeading.svelte';
+	import { LANDING_NETWORKS, LANDING_REVEAL_STAGGER } from '$lib/constants/landing.constants';
 	import { Currency } from '$lib/enums/currency';
 	import { Languages } from '$lib/enums/languages';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { LANDING_REVEAL_STAGGER, landingReveal } from '$lib/utils/landing-reveal.utils';
+	import { landingReveal } from '$lib/utils/landing-reveal.utils';
 
 	// Counted from the data the wallet ships with, so the page never drifts from the product.
 	const facts = $derived([
@@ -31,18 +32,12 @@
 >
 	<div class="flex min-w-0 flex-col gap-6 md:col-span-5">
 		<div class="flex flex-col gap-5" {@attach landingReveal()}>
-			<p class="m-0 text-xs font-bold tracking-[0.2em] text-brand-primary uppercase">
-				{$i18n.auth.landing.connect_eyebrow}
-			</p>
-			<h2
+			<LandingHeading
 				id="landing-connect-title"
-				class="m-0 text-3xl leading-[1.1] font-bold tracking-tight text-balance text-primary md:text-[2.75rem]"
-			>
-				{$i18n.auth.landing.connect_title}
-			</h2>
-			<p class="m-0 text-lg leading-relaxed text-pretty text-secondary">
-				{replaceOisyPlaceholders($i18n.auth.landing.connect_description)}
-			</p>
+				description={replaceOisyPlaceholders($i18n.auth.landing.connect_description)}
+				eyebrow={$i18n.auth.landing.connect_eyebrow}
+				title={$i18n.auth.landing.connect_title}
+			/>
 		</div>
 
 		<dl class="m-0 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-tertiary pt-4">
