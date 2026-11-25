@@ -150,14 +150,10 @@ import {
 	verifyNearIntentsQuoteSignature
 } from '$lib/utils/near-intents-quote.utils';
 import {
-	isNetworkIdBTCMainnet,
 	isNetworkIdBitcoin,
-	isNetworkIdEthereum,
-	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdSOLDevnet,
 	isNetworkIdSolana,
-	isNetworkIdXRPMainnet,
 	isNetworkIdXrp
 } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
@@ -166,6 +162,7 @@ import {
 	geSwapEthTokenAddress,
 	getWithdrawableToken,
 	isKongSupportedIcToken,
+	resolveSwapRecipientAddress,
 	slippagePercentToBasisPoints
 } from '$lib/utils/swap.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
@@ -455,66 +452,6 @@ export const loadDisabledErc20AndSplTokensExchanges = async ({
 			[]
 		)
 	);
-};
-
-type SwapRecipientResolution =
-	// The destination network has no cross-chain payout address (e.g. ICP, where
-	// providers credit the user's principal); quotes proceed without a recipient.
-	| { type: 'not-required' }
-	// The user's destination-chain address is known and becomes the quote's recipient.
-	| { type: 'resolved'; recipientAddress: string }
-	// The destination needs a payout address the user does not have (yet). Such a pair
-	// must not be quoted at all: a cross-chain quote request falls back to the
-	// source-chain user address as recipient, which would pay out to a wrong-chain
-	// address.
-	| { type: 'missing' };
-
-/**
- * A cross-chain swap pays out on the destination chain, so the quote's recipient is the
- * user's address for the destination token's network, never the source-chain address.
- */
-const resolveSwapRecipientAddress = ({
-	destinationToken,
-	userEthAddress,
-	userSolAddress,
-	userBtcAddress,
-	userXrpAddress
-}: Pick<
-	FetchSwapAmountsParams,
-	'destinationToken' | 'userEthAddress' | 'userSolAddress' | 'userBtcAddress' | 'userXrpAddress'
->): SwapRecipientResolution => {
-	const {
-		network: { id: networkId }
-	} = destinationToken;
-
-	if (isNetworkIdSolana(networkId)) {
-		return nonNullish(userSolAddress)
-			? { type: 'resolved', recipientAddress: userSolAddress }
-			: { type: 'missing' };
-	}
-
-	// Mainnet only: the address at hand is the user's mainnet address, and cross-chain
-	// providers do not serve BTC testnets.
-	if (isNetworkIdBTCMainnet(networkId)) {
-		return nonNullish(userBtcAddress)
-			? { type: 'resolved', recipientAddress: userBtcAddress }
-			: { type: 'missing' };
-	}
-
-	// Mainnet only, for the same reason: XRP has no testnet in the wallet.
-	if (isNetworkIdXRPMainnet(networkId)) {
-		return nonNullish(userXrpAddress)
-			? { type: 'resolved', recipientAddress: userXrpAddress }
-			: { type: 'missing' };
-	}
-
-	if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
-		return nonNullish(userEthAddress)
-			? { type: 'resolved', recipientAddress: userEthAddress }
-			: { type: 'missing' };
-	}
-
-	return { type: 'not-required' };
 };
 
 export const fetchSwapAmounts = async ({
