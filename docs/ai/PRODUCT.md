@@ -1211,15 +1211,19 @@ A **fill-or-kill** order is the exception to all of this: it can only execute by
 
 ## Lend and borrow (Liquidium)
 
-### SOL through ckSOL (staging)
+### SOL (staging)
 
-On staging builds, Liquidium's SOL pool is offered through ckSOL. Its market shows as ckSOL, last in the Markets list, and SOL can be supplied, borrowed, repaid and withdrawn as ckSOL from and to the user's Internet Computer account, like the other ck assets. Native SOL is not offered yet: no picker lists it. Local builds have no ckSOL and offer no SOL; beta and production don't offer it yet.
+On staging builds, Liquidium's SOL pool is offered on both of its rails: native SOL from and to the user's Solana address, and ckSOL from and to their Internet Computer account, like the other ck assets. Its markets show as SOL and ckSOL, native first, last in the Markets list. A picker lists native SOL only with the Solana network enabled, and ckSOL only with ckSOL enabled. Local builds have no ckSOL and offer no SOL; beta and production don't offer it yet.
+
+A native SOL supply or repayment sends the amount plus Liquidium's fee from the user's Solana address, and the Solana network fee is paid on top; the balance must cover all three. Liquidium credits nothing below its quoted minimum transfer (0.02 SOL today), so the supply form shows that minimum net of the fee as "Minimum supply" (about 0.0181 SOL) and blocks less. A native repayment below it is blocked too, and the form says to repay with ckSOL. A transfer Solana refused, or one whose transaction expired before it was sent, goes back to the review with a translated message; one that may have left closes with the unknown-outcome message. A native SOL supply or repayment whose transaction failed, or expired on the finalized chain without landing, fails and stops counting against the repay maximum.
+
+A native SOL borrow or withdrawal pays out through the ckSOL minter, which pays out nothing below its minimum withdrawal plus two ckSOL ledger fees (0.002001 SOL today). Both forms show that minimum, as "Minimum borrow" and "Minimum withdrawal", and block less. The minter's withdrawal fee is not shown.
 
 On every build, a SOL position shows with the SOL token and its amount, whichever rail funded it, including one made on Liquidium's own app. Outside staging it can't be acted on from OISY.
 
 Liquidium quotes SOL's provider fee per account, so picking SOL to supply creates the user's Liquidium profile first when there is none, then quotes. The other assets still create the profile when the supply is submitted. A fee quoted for a token picked before never replaces the fee of the one picked now.
 
-A borrow or withdrawal goes only to the user's own address on the chain it pays out on: BTC, Ethereum or the Internet Computer. Any other chain has no address, so the form can't be submitted rather than paying out to an address of another chain.
+A borrow or withdrawal goes only to the user's own address on the chain it pays out on: BTC, Ethereum, Solana or the Internet Computer. Any other chain has no address, so the form can't be submitted rather than paying out to an address of another chain.
 
 ## Buy (OnRamper)
 

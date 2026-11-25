@@ -2908,6 +2908,8 @@
 			"borrow_at_risk_warning": "Cet emprunt réduit sensiblement votre facteur de santé.",
 			"borrow_exceeds_power": "Le montant dépasse votre capacité d'emprunt.",
 			"borrow_below_minimum": "Le montant est inférieur à l'emprunt minimum.",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "Les prix sont temporairement indisponibles. L'emprunt est désactivé jusqu'à leur chargement.",
 			"borrow_high_risk_warning": "Cet emprunt rapproche votre position de la liquidation.",
 			"borrow_risk_confirm": "Je comprends que cet emprunt augmente mon risque de liquidation.",

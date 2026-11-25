@@ -2908,6 +2908,8 @@
 			"borrow_at_risk_warning": "Khoản vay này làm giảm đáng kể hệ số sức khỏe của bạn.",
 			"borrow_exceeds_power": "Số tiền vượt quá hạn mức vay của bạn.",
 			"borrow_below_minimum": "Số tiền thấp hơn khoản vay tối thiểu.",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "Giá tạm thời không khả dụng. Việc vay bị vô hiệu hóa cho đến khi giá được tải.",
 			"borrow_high_risk_warning": "Khoản vay này đưa vị thế của bạn đến gần mức thanh lý.",
 			"borrow_risk_confirm": "Tôi hiểu rằng khoản vay này làm tăng rủi ro thanh lý của tôi.",

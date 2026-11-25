@@ -2443,6 +2443,8 @@ interface I18nLiquidium {
 		borrow_at_risk_warning: string;
 		borrow_exceeds_power: string;
 		borrow_below_minimum: string;
+		minimum_withdraw: string;
+		withdraw_below_minimum: string;
 		borrow_prices_unavailable: string;
 		borrow_high_risk_warning: string;
 		borrow_risk_confirm: string;

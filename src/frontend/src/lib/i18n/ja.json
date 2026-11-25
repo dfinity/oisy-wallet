@@ -2908,6 +2908,8 @@
 			"borrow_at_risk_warning": "この借入によりヘルスファクターが大きく下がります。",
 			"borrow_exceeds_power": "金額が借入可能額を超えています。",
 			"borrow_below_minimum": "金額が最低借入額を下回っています。",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "価格は一時的に利用できません。読み込まれるまで借入は無効になっています。",
 			"borrow_high_risk_warning": "この借入によりポジションが清算に近づきます。",
 			"borrow_risk_confirm": "この借入によって清算リスクが高まることを理解しています。",

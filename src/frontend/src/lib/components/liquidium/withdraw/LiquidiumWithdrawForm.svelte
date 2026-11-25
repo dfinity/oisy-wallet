@@ -31,6 +31,8 @@
 		preview: LiquidiumWithdrawPreview;
 		amount: OptionAmount;
 		confirmChecked: boolean;
+		// The least the rail pays out, where it has a minimum: native SOL, through the ckSOL minter.
+		railMinimum?: bigint;
 		// Opens the token-selection step; when set, the token logo becomes a selector.
 		onSelectToken?: () => void;
 		onClose: () => void;
@@ -45,6 +47,7 @@
 		preview,
 		amount = $bindable(),
 		confirmChecked = $bindable(),
+		railMinimum,
 		onSelectToken,
 		onClose,
 		onNext
@@ -92,12 +95,20 @@
 		hasAmount && nonNullish(parsedAmount) && parsedAmount > maxWithdrawBaseUnits
 	);
 
+	let belowMinimum = $derived(
+		hasAmount && nonNullish(parsedAmount) && nonNullish(railMinimum) && parsedAmount < railMinimum
+	);
+
 	// With debt the cap needs a price to size it; without debt it doesn't.
 	let pricesUnavailable = $derived(hasDebt && withdrawPrice <= 0);
 
 	// Prices unavailable → the cap can't be computed (it collapses to 0); the dedicated
 	// MessageBox explains why, so skip the misleading "exceeds free collateral" inline.
 	const validateWithdrawAmount = (userAmount: bigint): Error | undefined => {
+		if (nonNullish(railMinimum) && userAmount < railMinimum) {
+			return new Error($i18n.liquidium.text.withdraw_below_minimum);
+		}
+
 		if (pricesUnavailable || userAmount <= maxWithdrawBaseUnits) {
 			return undefined;
 		}
@@ -109,10 +120,27 @@
 		);
 	};
 
-	let needsConfirm = $derived(hasAmount && !exceedsCap && preview.healthLevel !== 'healthy');
+	let needsConfirm = $derived(
+		hasAmount && !exceedsCap && !belowMinimum && preview.healthLevel !== 'healthy'
+	);
 
 	let canReview = $derived(
-		hasAmount && !exceedsCap && !pricesUnavailable && (!needsConfirm || confirmChecked)
+		hasAmount &&
+			!exceedsCap &&
+			!belowMinimum &&
+			!pricesUnavailable &&
+			(!needsConfirm || confirmChecked)
+	);
+
+	// At full precision: rounded, native SOL's 0.002001 could read below what the check enforces.
+	let minWithdrawFormatted = $derived(
+		nonNullish(railMinimum)
+			? `${formatToken({
+					value: railMinimum,
+					unitName: reserve.depositedDecimals,
+					displayDecimals: reserve.depositedDecimals
+				})} ${reserve.asset}`
+			: ''
 	);
 
 	let suppliedFormatted = $derived(
@@ -137,6 +165,7 @@
 			isSelectable={nonNullish(onSelectToken)}
 			onClick={onSelectToken}
 			onCustomErrorValidate={validateWithdrawAmount}
+			revalidateKey={railMinimum}
 			showTokenNetwork
 			token={withdrawToken}
 			bind:amount
@@ -164,6 +193,13 @@
 			{/snippet}
 		</TokenInput>
 	</div>
+
+	{#if nonNullish(railMinimum)}
+		<ModalValue>
+			{#snippet label()}{$i18n.liquidium.text.minimum_withdraw}{/snippet}
+			{#snippet mainValue()}{minWithdrawFormatted}{/snippet}
+		</ModalValue>
+	{/if}
 
 	<ModalValue>
 		{#snippet label()}{$i18n.liquidium.text.supplied_label}{/snippet}

@@ -2908,6 +2908,8 @@
 			"borrow_at_risk_warning": "Tato půjčka citelně sníží tvůj faktor zdraví.",
 			"borrow_exceeds_power": "Částka přesahuje tvůj úvěrový rámec.",
 			"borrow_below_minimum": "Částka je nižší než minimální výše půjčky.",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "Ceny jsou dočasně nedostupné. Půjčování je deaktivováno, dokud se nenačtou.",
 			"borrow_high_risk_warning": "Tato půjčka přibližuje tvou pozici k likvidaci.",
 			"borrow_risk_confirm": "Rozumím, že tato půjčka zvyšuje mé riziko likvidace.",
