@@ -16,6 +16,7 @@
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
+	import SwapLifiBtcRelayWarning from '$lib/components/swap/SwapLifiBtcRelayWarning.svelte';
 	import SwapProviderCell from '$lib/components/swap/SwapProviderCell.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -227,6 +228,8 @@
 					<SwapBtcFees />
 				</SwapFeeRow>
 			</div>
+
+			<SwapLifiBtcRelayWarning />
 		{/if}
 	{/snippet}
 </SwapForm>

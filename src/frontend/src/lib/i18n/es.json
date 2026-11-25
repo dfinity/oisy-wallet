@@ -1445,6 +1445,7 @@
 			"gasless": "Sin gas",
 			"swap_fees": "Comisiones de Intercambio",
 			"cross_chain_networks_info": "Mover tokens de la red <b>$sourceNetwork</b> a la red <b>$destinationNetwork</b>",
+			"lifi_btc_relay_recipient_warning": "",
 			"receive_shortcut_same_network": "",
 			"receive_shortcut_other_network": "",
 			"receive_shortcut_token_on_network": "",
