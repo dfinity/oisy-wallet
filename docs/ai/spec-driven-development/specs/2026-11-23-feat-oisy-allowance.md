@@ -134,7 +134,7 @@ Phase 3 comes first, with one spender: the signer charges the user's main accoun
 
 ### 6.2 Entry points and state
 
-- **An allowance card on the Tools page** shows the approval left and the TCYCLES balance, since either can run low, with **Add more** and **Get cycles**. It stays out of the top row: users should rarely need it.
+- **An allowance card on the Tools page** shows the free signatures left (the OISY allowance left), the spending limit (the approval left) and the ICP Cycles balance, since either can run low, with **Add more** and **Get cycles**. Allowances are also given in signatures, estimated at the backend's cost per signature. It stays out of the top row: users should rarely need it.
 - **Add more** raises the approval by the amount the user enters, up to their TCYCLES balance. **Get cycles** opens Mint TCYCLES. The card reads the cycles ledger itself, so it works whether or not TCYCLES is enabled.
 - **From the toast.** The allowance-issue toast links to the Tools card, next to its Learn more link, as the Activity info box links to Settings.
 - How the app shows that CCs are charged to the user's own cycles is still open (see pending decision 10).
