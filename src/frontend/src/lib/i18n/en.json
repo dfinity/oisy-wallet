@@ -940,7 +940,9 @@
 			"signatures_other": "~$count signatures",
 			"new_limit": "New spending limit",
 			"set": "Set",
-			"limit_left": "$remaining of $limit $token left"
+			"limit_left": "$remaining of $limit $token left",
+			"balance_short": "Your balance covers only $amount $token of your remaining limit.",
+			"balance_empty": "Your balance is empty."
 		},
 		"error": {
 			"load": "Couldn't load your usage credits.",

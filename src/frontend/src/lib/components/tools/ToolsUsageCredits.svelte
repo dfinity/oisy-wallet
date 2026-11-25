@@ -11,12 +11,14 @@
 	import ToolsUsageCreditsModal from '$lib/components/tools/ToolsUsageCreditsModal.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { OISY_USAGE_CREDITS_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON,
 		TOOLS_USAGE_CREDITS_BALANCE,
+		TOOLS_USAGE_CREDITS_BALANCE_SHORT,
 		TOOLS_USAGE_CREDITS_FREE_SIGNATURES,
 		TOOLS_USAGE_CREDITS_GET_CYCLES_BUTTON,
 		TOOLS_USAGE_CREDITS_OWN_CREDITS
@@ -64,6 +66,15 @@
 			? indexedLimit
 			: undefined;
 	});
+
+	// What signing can charge: what is left of the limit, as far as the balance covers it.
+	let chargeable = $derived(
+		nonNullish(ownCycles)
+			? ownCycles.approved < ownCycles.balance
+				? ownCycles.approved
+				: ownCycles.balance
+			: undefined
+	);
 
 	// An estimate, from the cost the backend sizes the OISY allowance with.
 	const signatures = (cycles: bigint): bigint => cycles / SIGNER_CALL_ESTIMATED_CYCLES;
@@ -205,7 +216,7 @@
 					{$i18n.usage_credits.text.own_credits}
 					{@render amount(ownCycles?.approved, TOOLS_USAGE_CREDITS_OWN_CREDITS, {
 						limit: previousLimit,
-						estimate: ownCycles?.approved
+						estimate: chargeable
 					})}
 				</span>
 			{/snippet}
@@ -239,6 +250,23 @@
 				{/if}
 			{/snippet}
 		</SettingsCardItem>
+
+		<!-- The amounts above are both true, but signing can only charge what the balance holds: the
+		     estimate counts that, and this says why. No fiat value: the balance row above shows it. -->
+		{#if nonNullish(ownCycles) && ownCycles.approved > ownCycles.balance}
+			<MessageBox
+				level="warning"
+				styleClass="mt-4 mb-0!"
+				testId={TOOLS_USAGE_CREDITS_BALANCE_SHORT}
+			>
+				{ownCycles.balance === ZERO
+					? $i18n.usage_credits.text.balance_empty
+					: replacePlaceholders($i18n.usage_credits.text.balance_short, {
+							$amount: formatToken({ value: ownCycles.balance, unitName: token.decimals }),
+							$token: token.symbol
+						})}
+			</MessageBox>
+		{/if}
 	</SettingsCard>
 
 	{#if addModalOpen && nonNullish(ownCycles)}

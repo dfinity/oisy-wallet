@@ -9,6 +9,7 @@ import {
 	CONVERT_AMOUNT_EXCHANGE_VALUE,
 	TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON,
 	TOOLS_USAGE_CREDITS_BALANCE,
+	TOOLS_USAGE_CREDITS_BALANCE_SHORT,
 	TOOLS_USAGE_CREDITS_FREE_SIGNATURES,
 	TOOLS_USAGE_CREDITS_GET_CYCLES_BUTTON,
 	TOOLS_USAGE_CREDITS_MODAL,
@@ -19,6 +20,7 @@ import * as cyclesMintAnalytics from '$lib/services/cycles-mint-analytics.servic
 import * as ownCyclesServices from '$lib/services/own-cycles.services';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockTcyclesToken, mockXdrPermyriadPerIcp } from '$tests/mocks/cycles-mint.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -190,6 +192,44 @@ describe('ToolsUsageCredits', () => {
 
 			expect(getByTestId(TOOLS_USAGE_CREDITS_OWN_CREDITS)).toHaveTextContent('1.5 TCYCLES');
 			expect(ownCyclesServices.loadPreviousSpendingLimit).not.toHaveBeenCalled();
+		});
+
+		// 0.5 TCYCLES pays 6 signatures at 0.081 TCYCLES each, though 1.2 TCYCLES are left.
+		it('counts the signatures the balance can pay, and says why', async () => {
+			vi.spyOn(ownCyclesServices, 'loadOwnCycles').mockResolvedValue({
+				approved: 1_200_000_000_000n,
+				balance: 500_000_000_000n
+			});
+
+			const { container, getByTestId } = await renderLoaded();
+
+			expect(container).toHaveTextContent('~6 signatures');
+			expect(getByTestId(TOOLS_USAGE_CREDITS_BALANCE_SHORT)).toHaveTextContent(
+				replacePlaceholders(en.usage_credits.text.balance_short, {
+					$amount: '0.5',
+					$token: 'TCYCLES'
+				})
+			);
+		});
+
+		it('says the balance is empty', async () => {
+			vi.spyOn(ownCyclesServices, 'loadOwnCycles').mockResolvedValue({
+				approved: 1_200_000_000_000n,
+				balance: ZERO
+			});
+
+			const { container, getByTestId } = await renderLoaded();
+
+			expect(container).toHaveTextContent('~0 signatures');
+			expect(getByTestId(TOOLS_USAGE_CREDITS_BALANCE_SHORT)).toHaveTextContent(
+				en.usage_credits.text.balance_empty
+			);
+		});
+
+		it('shows no warning while the balance covers what is left', async () => {
+			const { queryByTestId } = await renderLoaded();
+
+			expect(queryByTestId(TOOLS_USAGE_CREDITS_BALANCE_SHORT)).not.toBeInTheDocument();
 		});
 	});
 

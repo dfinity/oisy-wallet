@@ -682,6 +682,8 @@ interface I18nUsage_credits {
 		new_limit: string;
 		set: string;
 		limit_left: string;
+		balance_short: string;
+		balance_empty: string;
 	};
 	error: { load: string; add: string };
 }

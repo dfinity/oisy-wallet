@@ -940,7 +940,9 @@
 			"signatures_other": "",
 			"new_limit": "",
 			"set": "",
-			"limit_left": ""
+			"limit_left": "",
+			"balance_short": "",
+			"balance_empty": ""
 		},
 		"error": {
 			"load": "",
