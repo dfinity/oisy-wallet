@@ -44,6 +44,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import solana from '$sol/assets/sol.svg?inline';
+	import xrp from '$xrp/assets/xrp.svg?inline';
 
 	const id = $props.id();
 	const desktopScreen = `${id}-desktop`;
@@ -130,6 +131,7 @@
 
 	// Illustrative balances keep the signed-out preview independent of wallet data.
 	const bitcoinBalance = 5249.84;
+	const xrpBalance = 565.6;
 	const tokenDuration = 170;
 	const currency = $derived(
 		new Intl.NumberFormat($i18n.lang, { style: 'currency', currency: 'USD' })
@@ -200,13 +202,13 @@
 			revealAt: 460
 		},
 		{
-			symbol: 'USDC',
-			name: 'USD Coin',
-			icon: usdCoin,
-			price: 1,
-			balance: '3,878.76',
-			value: 3878.76,
-			revealAt: 565
+			symbol: 'XRP',
+			name: 'XRP',
+			icon: xrp,
+			price: 2.02,
+			balance: '280',
+			value: xrpBalance,
+			revealAt: 520
 		},
 		{
 			symbol: 'SOL',
@@ -215,6 +217,15 @@
 			price: 120.05,
 			balance: '21.4960',
 			value: 2580.6,
+			revealAt: 570
+		},
+		{
+			symbol: 'USDC',
+			name: 'USD Coin',
+			icon: usdCoin,
+			price: 1,
+			balance: '3,878.76',
+			value: 3878.76,
 			revealAt: 620
 		}
 	];
@@ -277,15 +288,15 @@
 
 	const networks = [
 		{ name: 'Bitcoin', icon: bitcoinNetwork, value: bitcoinBalance },
-		{ name: 'Ethereum', icon: ethereumNetwork, value: 4988.57 },
 		{ name: 'Internet Computer', icon: icpNetwork, value: 11708.38 },
+		{ name: 'Ethereum', icon: ethereumNetwork, value: 4988.57 },
+		{ name: 'XRP Ledger', icon: xrpNetwork, value: xrpBalance },
+		{ name: 'Solana', icon: solanaNetwork, value: 2580.6 },
 		{ name: 'Arbitrum', icon: arbitrumNetwork, value: 1270.28 },
 		{ name: 'Base', icon: baseNetwork, value: 1283.56 },
 		{ name: 'BNB Smart Chain', icon: bnbNetwork, value: 387.39 },
 		{ name: 'Polygon', icon: polygonNetwork, value: 186.01 },
-		{ name: 'Robinhood Chain', icon: robinhoodNetwork, value: 185.64 },
-		{ name: 'Solana', icon: solanaNetwork, value: 2580.6 },
-		{ name: 'XRP Ledger', icon: xrpNetwork, value: 565.88 }
+		{ name: 'Robinhood Chain', icon: robinhoodNetwork, value: 185.64 }
 	];
 
 	const primaryActions = $derived([
@@ -514,7 +525,7 @@
 			</svg>
 		{/each}
 		{#each tokens as { symbol, name, icon, price, balance, value, revealAt }, index (symbol)}
-			<g transform="translate(369 {350 + index * 59})">
+			<g transform="translate(369 {350 + index * 53})">
 				<g style:--token-delay={`${revealAt}ms`} class="token-row">
 					<image height="37" href={icon} width="37" />
 					<text font-size="14" font-weight="700" x="46" y="16">{symbol}</text>

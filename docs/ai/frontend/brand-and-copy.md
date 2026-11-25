@@ -109,6 +109,9 @@ Arbitrum, Base, BNB Smart Chain, Polygon, Solana.
 **Short form:** _Bitcoin, Ethereum, Internet Computer, and more._
 **Internet Computer is never dropped.**
 
+The signed-out landing page leads with Bitcoin, Internet Computer (ICP), Ethereum,
+XRP, and Solana in its copy and artwork. Use XRP Ledger when naming the network.
+
 Use the official network names as defined in
 `src/frontend/src/env/networks/`. The L2 / sidechain in particular is
 **BNB Smart Chain** (not "BNB Chain"). Tickers (`BTC`, `ETH`, `ICP`,

@@ -6,6 +6,8 @@ import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
 describe('LandingWalletPreview', () => {
+	const finalBalance = '$28,971.75';
+
 	const mockPendingFonts = () => {
 		let resolveFonts: () => void = () => {};
 		const ready = new Promise<void>((resolve) => {
@@ -25,7 +27,7 @@ describe('LandingWalletPreview', () => {
 
 		expect(
 			container.querySelector('.portfolio-balance text[visibility="visible"]')
-		).toHaveTextContent('$28,406.15');
+		).toHaveTextContent(finalBalance);
 	});
 
 	describe('animated balance', () => {
@@ -56,7 +58,7 @@ describe('LandingWalletPreview', () => {
 			await tick();
 
 			expect(finalAmount).toHaveAttribute('visibility', 'visible');
-			expect(finalAmount).toHaveTextContent('$28,406.15');
+			expect(finalAmount).toHaveTextContent(finalBalance);
 
 			runFrame(1_140);
 			await tick();
@@ -70,12 +72,12 @@ describe('LandingWalletPreview', () => {
 			runFrame(1_300);
 			await tick();
 
-			expect(counter).toHaveTextContent('$12,263.00');
+			expect(counter).toHaveTextContent('$12,507.00');
 
 			runFrame(1_600);
 			await tick();
 
-			expect(counter).toHaveTextContent('$25,979.00');
+			expect(counter).toHaveTextContent('$26,496.00');
 			expect(counter).toHaveAttribute('x', '638');
 
 			runFrame(1_790);
@@ -83,7 +85,7 @@ describe('LandingWalletPreview', () => {
 
 			expect(counter).not.toBeInTheDocument();
 			expect(finalAmount).toHaveAttribute('visibility', 'visible');
-			expect(finalAmount).toHaveTextContent('$28,406.15');
+			expect(finalAmount).toHaveTextContent(finalBalance);
 
 			unmount();
 		});
@@ -97,7 +99,7 @@ describe('LandingWalletPreview', () => {
 			await tick();
 
 			expect(finalAmount).toHaveAttribute('visibility', 'visible');
-			expect(finalAmount).toHaveTextContent('$28,406.15');
+			expect(finalAmount).toHaveTextContent(finalBalance);
 			expect(window.requestAnimationFrame).not.toHaveBeenCalled();
 
 			await resolveFonts();

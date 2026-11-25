@@ -277,6 +277,8 @@ The sections below the artwork (`LandingSections`) load as their own lazy chunk,
 
 The signed-out header links to the top of each featured section with native fragments. When the lazy sections mount, they resolve a landing fragment so an early click or a direct link reaches and focuses the section.
 
+`LandingBorrowPreview` stacks two equal-height `LandingPreviewFrame` examples in the Borrow and Earn section. The stack rotates every five seconds while at least half is visible and the tab is active. Hover pauses rotation, and keyboard focus or a manual choice stops it until the visitor selects Play. Reduced motion disables automatic rotation and makes manual changes instant. Assistive technology receives the front example's image label, and the sample actions remain inert.
+
 ## Overlay keyboard behavior
 
 `overlayFocus` in `$lib/utils/overlay.utils.ts` is the shared Svelte action for

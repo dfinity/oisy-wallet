@@ -10,18 +10,18 @@ import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
 import type { Network } from '$lib/types/network';
 
-// Brand order: Bitcoin, Ethereum and the Internet Computer first, the rest alphabetical.
+// Keep the landing's lead assets first, then list the other networks alphabetically.
 export const LANDING_NETWORKS: Network[] = [
 	BTC_MAINNET_NETWORK,
-	ETHEREUM_NETWORK,
 	ICP_NETWORK,
+	ETHEREUM_NETWORK,
+	XRP_MAINNET_NETWORK,
+	SOLANA_MAINNET_NETWORK,
 	ARBITRUM_MAINNET_NETWORK,
 	BASE_NETWORK,
 	BSC_MAINNET_NETWORK,
 	POLYGON_MAINNET_NETWORK,
-	ROBINHOOD_MAINNET_NETWORK,
-	SOLANA_MAINNET_NETWORK,
-	XRP_MAINNET_NETWORK
+	ROBINHOOD_MAINNET_NETWORK
 ];
 
 // The landing's one-time entrance, shared by the hero (CSS) and the sections below it

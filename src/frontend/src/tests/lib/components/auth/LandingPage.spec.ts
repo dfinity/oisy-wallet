@@ -1,13 +1,14 @@
 import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import * as backendApi from '$lib/api/backend.api';
+import LandingBorrowPreview from '$lib/components/auth/LandingBorrowPreview.svelte';
 import LandingPage from '$lib/components/auth/LandingPage.svelte';
 import { LANDING_SECTION_IDS } from '$lib/constants/landing.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { themeStore } from '$lib/stores/theme.store';
 import { Theme } from '$lib/types/theme';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-import { render, within } from '@testing-library/svelte';
+import { fireEvent, render, within } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
@@ -86,6 +87,96 @@ describe('LandingPage', () => {
 
 		window.location.hash = '';
 		Reflect.deleteProperty(Element.prototype, 'scrollIntoView');
+	});
+
+	it('brings the selected Borrow or Earn preview to the front', async () => {
+		vi.spyOn(backendApi, 'newUserSignupsAllowed').mockResolvedValue(true);
+		const { findByRole, getByRole, queryByRole } = render(LandingPage);
+		const { auth, liquidium, earning } = get(i18n);
+		const controls = within(await findByRole('group', { name: auth.landing.borrow_eyebrow }));
+		const borrowButton = controls.getByRole('button', { name: liquidium.text.action_borrow });
+		const earnButton = controls.getByRole('button', { name: earning.text.title });
+
+		expect(borrowButton).toHaveAttribute('aria-pressed', 'true');
+		expect(getByRole('img', { name: auth.landing.borrow_preview })).toBeInTheDocument();
+		expect(
+			queryByRole('img', { name: auth.landing.earn_preview_with_harvest })
+		).not.toBeInTheDocument();
+
+		await fireEvent.click(earnButton);
+
+		expect(earnButton).toHaveAttribute('aria-pressed', 'true');
+		expect(borrowButton).toHaveAttribute('aria-pressed', 'false');
+		expect(getByRole('img', { name: auth.landing.earn_preview_with_harvest })).toBeInTheDocument();
+		expect(queryByRole('img', { name: auth.landing.borrow_preview })).not.toBeInTheDocument();
+	});
+
+	it('rotates only while the previews are visible and respects a manual choice', async () => {
+		let setIntersection = (_ratio: number) => {};
+		const disconnect = vi.fn();
+		vi.stubGlobal(
+			'IntersectionObserver',
+			class {
+				observe: (target: Element) => void;
+				disconnect = disconnect;
+
+				constructor(callback: (entries: IntersectionObserverEntry[]) => void) {
+					this.observe = (target) => {
+						setIntersection = (intersectionRatio) => {
+							const bounds = target.getBoundingClientRect();
+							callback([
+								{
+									target,
+									intersectionRatio,
+									isIntersecting: intersectionRatio > 0,
+									boundingClientRect: bounds,
+									intersectionRect: bounds,
+									rootBounds: bounds,
+									time: 0
+								}
+							]);
+						};
+					};
+				}
+			}
+		);
+		const hidden = vi.spyOn(document, 'hidden', 'get').mockReturnValue(false);
+		vi.useFakeTimers();
+		const { getByRole, unmount } = render(LandingBorrowPreview);
+		const { auth, liquidium, earning } = get(i18n);
+		const borrow = getByRole('button', { name: liquidium.text.action_borrow });
+		const earn = getByRole('button', { name: earning.text.title });
+
+		try {
+			await vi.advanceTimersByTimeAsync(5_000);
+
+			expect(borrow).toHaveAttribute('aria-pressed', 'true');
+
+			setIntersection(1);
+			await tick();
+			await vi.advanceTimersByTimeAsync(5_000);
+
+			expect(earn).toHaveAttribute('aria-pressed', 'true');
+
+			hidden.mockReturnValue(true);
+			await fireEvent(document, new Event('visibilitychange'));
+			await vi.advanceTimersByTimeAsync(5_000);
+
+			expect(earn).toHaveAttribute('aria-pressed', 'true');
+
+			hidden.mockReturnValue(false);
+			await fireEvent(document, new Event('visibilitychange'));
+			await fireEvent.click(borrow);
+			await vi.advanceTimersByTimeAsync(5_000);
+
+			expect(borrow).toHaveAttribute('aria-pressed', 'true');
+			expect(getByRole('button', { name: auth.landing.borrow_preview_play })).toBeInTheDocument();
+		} finally {
+			unmount();
+			vi.useRealTimers();
+			hidden.mockRestore();
+			vi.unstubAllGlobals();
+		}
 	});
 
 	it('keeps the same accessible vector preview and intrinsic size across theme changes', async () => {

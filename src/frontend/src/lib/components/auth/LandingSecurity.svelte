@@ -1,4 +1,6 @@
 <script lang="ts">
+	import internetComputerLogo from '$icp/assets/icp-light.svg?inline';
+	import trailOfBitsLogo from '$lib/assets/trail-of-bits-white.svg?inline';
 	import LandingHeading from '$lib/components/auth/LandingHeading.svelte';
 	import LandingNavyPanel from '$lib/components/auth/LandingNavyPanel.svelte';
 	import IconLock from '$lib/components/icons/IconLock.svelte';
@@ -11,6 +13,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { landingReveal } from '$lib/utils/landing-reveal.utils';
+
+	const AUDIT_REPORT_URL =
+		'https://github.com/trailofbits/publications/blob/master/reviews/2025-09-dfinity-oisy-securityreview.pdf';
 
 	const pillars = $derived([
 		{
@@ -73,17 +78,59 @@
 				{/each}
 			</ul>
 
-			<p class="m-0 text-sm leading-relaxed text-pretty text-white/60" {@attach landingReveal()}>
-				{$i18n.auth.landing.security_foundation}
-				<ExternalLink
-					ariaLabel={$i18n.auth.landing.security_source}
-					href={OISY_REPO_URL}
-					iconVisible={false}
-					styleClass="source-link"
+			<div class="flex flex-col gap-5" {@attach landingReveal()}>
+				<div
+					class="grid items-center gap-x-4 gap-y-1 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 sm:grid-cols-[auto_minmax(0,1fr)] sm:px-5 lg:grid-cols-[auto_minmax(0,1fr)_auto]"
 				>
-					{$i18n.auth.landing.security_source}
-				</ExternalLink>
-			</p>
+					<div class="flex items-center gap-3 sm:contents">
+						<img
+							class="h-auto w-16 shrink-0 sm:row-span-2 sm:w-20"
+							alt="Trail of Bits"
+							height="159"
+							src={trailOfBitsLogo}
+							width="265"
+						/>
+						<h3 class="m-0 text-base font-bold text-balance text-white">
+							{$i18n.auth.landing.security_audit_title}
+						</h3>
+					</div>
+					<p class="m-0 text-sm leading-relaxed text-pretty text-white/72 sm:col-start-2">
+						{$i18n.auth.landing.security_audit_description}
+					</p>
+					<ExternalLink
+						ariaLabel={$i18n.auth.landing.security_audit}
+						href={AUDIT_REPORT_URL}
+						iconAsLast
+						iconSize="16"
+						styleClass="source-link min-h-10 justify-self-start text-sm font-semibold sm:col-start-2 lg:col-start-3 lg:row-span-2 lg:row-start-1"
+					>
+						{$i18n.auth.landing.security_audit}
+					</ExternalLink>
+				</div>
+
+				<div class="flex flex-wrap items-center gap-x-3 text-sm leading-relaxed text-white/60">
+					<ExternalLink
+						ariaLabel={$i18n.auth.landing.security_foundation_link}
+						href="https://internetcomputer.org/"
+						iconVisible={false}
+						styleClass="source-link min-h-10 font-semibold"
+					>
+						<img class="size-5 shrink-0" alt="" src={internetComputerLogo} />
+						{$i18n.auth.landing.security_foundation_link}
+					</ExternalLink>
+					<p class="m-0 text-pretty">
+						{$i18n.auth.landing.security_foundation}
+						<ExternalLink
+							ariaLabel={$i18n.auth.landing.security_source}
+							href={OISY_REPO_URL}
+							iconVisible={false}
+							styleClass="source-link"
+						>
+							{$i18n.auth.landing.security_source}
+						</ExternalLink>
+					</p>
+				</div>
+			</div>
 		</div>
 	</LandingNavyPanel>
 </section>

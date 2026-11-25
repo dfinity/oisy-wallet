@@ -15,7 +15,13 @@ describe('LandingNetworks', () => {
 		const names = [...list.querySelectorAll('li')].map(({ textContent }) => textContent?.trim());
 
 		expect(names).toEqual(LANDING_NETWORKS.map(({ name }) => name));
-		expect(names.slice(0, 3)).toEqual(['Bitcoin', 'Ethereum', 'Internet Computer']);
+		expect(names.slice(0, 5)).toEqual([
+			'Bitcoin',
+			'Internet Computer',
+			'Ethereum',
+			'XRP Ledger',
+			'Solana'
+		]);
 	});
 
 	it('shows the reframe line', () => {

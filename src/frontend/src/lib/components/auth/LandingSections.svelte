@@ -76,7 +76,7 @@
 	id={LANDING_SECTION_IDS.borrow}
 	description={$i18n.auth.landing.borrow_description}
 	eyebrow={$i18n.auth.landing.borrow_eyebrow}
-	points={[$i18n.auth.landing.borrow_point_fees, $i18n.auth.landing.borrow_point_repay]}
+	points={[$i18n.auth.landing.borrow_point_fees, $i18n.auth.landing.borrow_point_earn]}
 	title={$i18n.auth.landing.borrow_title}
 >
 	{#snippet visual()}
