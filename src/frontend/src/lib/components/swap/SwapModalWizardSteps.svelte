@@ -5,8 +5,14 @@
 	import { page } from '$app/state';
 	import SwapBtcContexts from '$btc/components/swap/SwapBtcContexts.svelte';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
+	import SwapReceiveNetworkList from '$lib/components/swap/SwapReceiveNetworkList.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
+	import {
+		SWAP_RECEIVE_SHORTCUT_ANY_TOKEN,
+		SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK,
+		SWAP_RECEIVE_SHORTCUT_SAME_NETWORK
+	} from '$lib/constants/test-ids.constants';
 	import { allCrossChainSwapTokens } from '$lib/derived/all-tokens.derived';
 	import {
 		crossChainSwapNetworksMainnets,
@@ -31,6 +37,10 @@
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
+	import {
+		SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY,
+		type SwapReceiveShortcutsContext
+	} from '$lib/stores/swap-receive-shortcuts.store';
 	import {
 		SWAP_CONTEXT_KEY,
 		type SwapContext,
@@ -83,7 +93,9 @@
 		receiveSupportedData,
 		getTokenListFilters,
 		setTokenListFilters,
-		markTokensPriced
+		markTokensPriced,
+		tokenListReturnFocus,
+		receiveTokenPickerStep
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const {
@@ -189,27 +201,36 @@
 		};
 	};
 
-	// A side has its own filters once the person changes one on its list, even back to where it
-	// started; from then on it reopens on them. Until then nothing is kept, so the receive side goes on
-	// following the pay side.
-	const keepTokenListFilters = ({ side, changed }: { side: TokenSide; changed: boolean }) => {
-		if (!changed && isNullish(getTokenListFilters(side))) {
+	// A chosen shortcut remembers its starting filters; subsequent filter changes replace them.
+	const onTokenListFiltersChange = () => {
+		if (isNullish(selectTokenType)) {
 			return;
 		}
 
 		setTokenListFilters({
-			side,
+			side: selectTokenType,
 			filters: { network: get(filterNetwork), category: get(filterCategoryTag) }
 		});
 	};
 
-	const onTokenListFiltersChange = () => {
-		if (nonNullish(selectTokenType)) {
-			keepTokenListFilters({ side: selectTokenType, changed: true });
-		}
-	};
+	const enterTokenList = ({
+		side,
+		start,
+		returnFocus
+	}: {
+		side: TokenSide;
+		start?: SwapTokenListFilters;
+		returnFocus?: string;
+	}) => {
+		tokenListReturnFocus.set(returnFocus);
 
-	const enterTokenList = (side: TokenSide) => {
+		if (side === 'destination') {
+			receiveTokenPickerStep.set(WizardStepsSwap.TOKENS_LIST);
+			if (nonNullish(start)) {
+				setTokenListFilters({ side, filters: start });
+			}
+		}
+
 		swapAmountsStore.reset();
 
 		setFilterQuery('');
@@ -222,20 +243,49 @@
 
 		// A pick never moves a side's filters. Kept in the swap context, which outlives this component
 		// (Get Token rebuilds it on every step).
-		const { network, category } = getTokenListFilters(side) ?? getStartFilters(side);
+		const { network, category } = start ?? getTokenListFilters(side) ?? getStartFilters(side);
 
 		setFilterNetwork(network);
 
 		setFilterCategoryTag(category);
 	};
 
-	const showTokensList = (tokenSource: TokenSide) => enterTokenList(tokenSource);
+	const showMoveStep = ({ fromShortcut }: { fromShortcut: boolean }) => {
+		tokenListReturnFocus.set(fromShortcut ? SWAP_RECEIVE_SHORTCUT_OTHER_NETWORK : undefined);
+		receiveTokenPickerStep.set(WizardStepsSwap.MOVE_TOKEN);
+		swapAmountsStore.reset();
+		goToStep(WizardStepsSwap.MOVE_TOKEN);
+	};
+
+	const showTokensList = (side: TokenSide) => {
+		if (
+			side === 'destination' &&
+			nonNullish($destinationToken) &&
+			nonNullish($sourceToken?.groupData) &&
+			$destinationToken.groupData?.id === $sourceToken.groupData.id &&
+			$destinationToken.network.id !== $sourceToken.network.id &&
+			$receiveTokenPickerStep === WizardStepsSwap.MOVE_TOKEN
+		) {
+			showMoveStep({ fromShortcut: false });
+			return;
+		}
+		enterTokenList({ side });
+	};
+
+	// All asset types, so the list matches the shortcut's preview.
+	setContext<SwapReceiveShortcutsContext>(SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY, {
+		showReceiveList: (network) =>
+			enterTokenList({
+				side: 'destination',
+				start: { network, category: undefined },
+				returnFocus: nonNullish(network)
+					? SWAP_RECEIVE_SHORTCUT_SAME_NETWORK
+					: SWAP_RECEIVE_SHORTCUT_ANY_TOKEN
+			}),
+		showMoveStep: () => showMoveStep({ fromShortcut: true })
+	});
 
 	const closeTokenList = () => {
-		if (nonNullish(selectTokenType)) {
-			keepTokenListFilters({ side: selectTokenType, changed: false });
-		}
-
 		goToStep(WizardStepsSwap.SWAP);
 
 		resetAllowedNetworkIds();
@@ -318,6 +368,15 @@
 				onCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
 				onSelectProvider={selectProvider}
 				{slippageValue}
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.MOVE_TOKEN}
+			<SwapReceiveNetworkList
+				onClose={() => goToStep(WizardStepsSwap.SWAP)}
+				onSelectToken={(token) => {
+					setDestinationToken(token);
+
+					goToStep(WizardStepsSwap.SWAP);
+				}}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapTokenWizard

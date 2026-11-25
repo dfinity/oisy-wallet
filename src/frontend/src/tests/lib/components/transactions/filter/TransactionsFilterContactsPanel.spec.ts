@@ -53,6 +53,12 @@ describe('TransactionsFilterContactsPanel', () => {
 		expect(names).toEqual(['Alice', 'Bob']);
 	});
 
+	it('fades the edges of the scrolling list', () => {
+		const { getByRole } = render(TransactionsFilterContactsPanel);
+
+		expect(getByRole('list')).toHaveClass('scroll-fade');
+	});
+
 	it('reflects the store as the checked state', () => {
 		transactionsFilterStore.toggleContactId('1');
 

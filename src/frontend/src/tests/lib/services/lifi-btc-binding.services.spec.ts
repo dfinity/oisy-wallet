@@ -2,12 +2,15 @@ import type * as lifiEnv from '$env/rest/lifi.env';
 import {
 	bindLifiBtcPayout,
 	hasLifiBtcPayoutBinding,
+	isLifiBtcRelayOffer,
 	lifiBtcAdmittedBridges,
 	type LifiBtcPayoutBinding
 } from '$lib/services/lifi-btc-binding.services';
 import { LifiRouteUnsupportedError } from '$lib/types/errors';
+import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { decodeLifiBtcTransaction } from '$lib/utils/lifi-swap.utils';
-import { mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
+import { mockLifiBtcLayerswapQuote, mockLifiBtcRelayQuote } from '$tests/mocks/lifi-btc.mock';
+import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { ChainId, type QuoteRequestFromAmount } from '@lifi/sdk';
 
 // All three bridges allowed from Bitcoin, `near` denied.
@@ -101,6 +104,51 @@ describe('lifi-btc-binding.services', () => {
 			expect(lifiBtcAdmittedBridges({ bindings: { layerswap: binding, near: binding } })).toEqual([
 				'layerswap'
 			]);
+		});
+	});
+
+	describe('isLifiBtcRelayOffer', () => {
+		const relayOffer: SwapMappedResult = {
+			provider: SwapProvider.LIFI,
+			receiveAmount: 1_000_000n,
+			receiveOutMinimum: 990_000n,
+			swapDetails: mockLifiBtcRelayQuote,
+			request: { ...request, fromChain: ChainId.BTC }
+		};
+
+		it('should spot a LI.FI route from Bitcoin through Relay', () => {
+			expect(isLifiBtcRelayOffer(relayOffer)).toBeTruthy();
+		});
+
+		it('should not spot a route from Bitcoin through another bridge', () => {
+			expect(
+				isLifiBtcRelayOffer({ ...relayOffer, swapDetails: mockLifiBtcLayerswapQuote })
+			).toBeFalsy();
+		});
+
+		// The display name is LI.FI's to choose; only the tool key says which binding runs.
+		it('should not go by the display name', () => {
+			expect(
+				isLifiBtcRelayOffer({
+					...relayOffer,
+					swapDetails: {
+						...mockLifiBtcLayerswapQuote,
+						toolDetails: mockLifiBtcRelayQuote.toolDetails
+					}
+				})
+			).toBeFalsy();
+		});
+
+		// From an EVM source the payout recipient is decoded from the calldata, whatever the bridge.
+		it('should not spot a Relay route from another chain', () => {
+			expect(
+				isLifiBtcRelayOffer({ ...relayOffer, request: { ...request, fromChain: ChainId.ETH } })
+			).toBeFalsy();
+		});
+
+		it('should not spot another provider, or no offer', () => {
+			expect(isLifiBtcRelayOffer(mockSwapProviders[0])).toBeFalsy();
+			expect(isLifiBtcRelayOffer(undefined)).toBeFalsy();
 		});
 	});
 

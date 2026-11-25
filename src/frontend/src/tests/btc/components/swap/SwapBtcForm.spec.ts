@@ -10,6 +10,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	CONVERT_AMOUNT_DISPLAY_SKELETON,
+	SWAP_LIFI_BTC_RELAY_WARNING,
 	SWAP_PROVIDER_STATUS,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
@@ -19,12 +20,12 @@ import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.stor
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockBtcAddress, mockUtxo, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
-import { mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
+import { mockLifiBtcLayerswapQuote, mockLifiBtcRelayQuote } from '$tests/mocks/lifi-btc.mock';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
@@ -340,6 +341,53 @@ describe('SwapBtcForm', () => {
 			render(SwapBtcForm, { props, context: createContext() });
 
 			expect(maxSpy).toHaveBeenCalledWith({ source: mockBtcAddress, outputVSizes: undefined });
+		});
+	});
+
+	// Relay records the payout's recipient only once the deposit arrives, so OISY cannot check it.
+	describe('Relay recipient warning', () => {
+		const relayOffer: SwapMappedResult = { ...lifiOffer, swapDetails: mockLifiBtcRelayQuote };
+
+		const warning = replaceOisyPlaceholders(en.swap.text.lifi_btc_relay_recipient_warning);
+
+		it('warns with a LI.FI offer through Relay selected', () => {
+			const { getByTestId } = render(SwapBtcForm, {
+				props,
+				context: createContext({ offer: relayOffer })
+			});
+
+			expect(getByTestId(SWAP_LIFI_BTC_RELAY_WARNING)).toHaveTextContent(warning);
+		});
+
+		it.each([
+			{ label: 'a LI.FI offer through another bridge', offer: lifiOffer },
+			{ label: 'another provider', offer: chainFusionOffer }
+		])('does not warn with $label selected', ({ offer }) => {
+			const { queryByTestId } = render(SwapBtcForm, {
+				props,
+				context: createContext({ offer })
+			});
+
+			expect(queryByTestId(SWAP_LIFI_BTC_RELAY_WARNING)).not.toBeInTheDocument();
+		});
+
+		// A quote refresh can make Relay the best offer, or stop it being one.
+		it('follows the selected offer', async () => {
+			const context = createContext();
+			const { store } = context.get(SWAP_AMOUNTS_CONTEXT_KEY);
+			const { queryByTestId } = render(SwapBtcForm, { props, context });
+
+			expect(queryByTestId(SWAP_LIFI_BTC_RELAY_WARNING)).not.toBeInTheDocument();
+
+			store.setSelectedProvider(relayOffer);
+
+			await waitFor(() => expect(queryByTestId(SWAP_LIFI_BTC_RELAY_WARNING)).toBeInTheDocument());
+
+			store.setSelectedProvider(chainFusionOffer);
+
+			await waitFor(() =>
+				expect(queryByTestId(SWAP_LIFI_BTC_RELAY_WARNING)).not.toBeInTheDocument()
+			);
 		});
 	});
 

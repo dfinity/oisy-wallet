@@ -1,5 +1,6 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import LiquidiumWithdrawForm from '$lib/components/liquidium/withdraw/LiquidiumWithdrawForm.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import type { LiquidiumWithdrawPreview } from '$lib/services/liquidium-withdraw.services';
@@ -129,11 +130,11 @@ describe('LiquidiumWithdrawForm', () => {
 		expect(container).not.toHaveTextContent(en.liquidium.text.withdraw_exceeds_free_collateral);
 	});
 
+	// The input validates on a 300ms debounce.
+	const VALIDATION_DEBOUNCE_MS = 300;
+
 	// The SDK refuses a withdrawal below its per-asset minimum: 5000 sats for BTC.
 	describe('with the protocol minimum', () => {
-		// The input validates on a 300ms debounce.
-		const VALIDATION_DEBOUNCE_MS = 300;
-
 		beforeEach(() => {
 			vi.useFakeTimers();
 		});
@@ -182,6 +183,77 @@ describe('LiquidiumWithdrawForm', () => {
 			});
 
 			expect(container).not.toHaveTextContent(en.liquidium.text.minimum_withdraw);
+		});
+	});
+
+	// Native SOL pays out through the ckSOL minter, which has a minimum withdrawal.
+	describe('with a rail minimum', () => {
+		const solProps = {
+			...baseProps,
+			reserve: {
+				...reserve,
+				poolId: 'pool-sol',
+				asset: 'SOL',
+				chain: 'SOL',
+				deposited: 1_000_000_000n,
+				depositedDecimals: 9,
+				borrowedDecimals: 9,
+				suppliedUsd: 150
+			},
+			withdrawToken: SOLANA_TOKEN,
+			withdrawPrice: 150,
+			portfolio: portfolio({ totalSuppliedUsd: 150, netValueUsd: 150 }),
+			railMinimum: 2_001_000n
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('shows it at full precision', () => {
+			const { container } = render(LiquidiumWithdrawForm, { props: solProps });
+
+			expect(container).toHaveTextContent(en.liquidium.text.minimum_withdraw);
+			expect(container).toHaveTextContent('0.002001 SOL');
+		});
+
+		// 0.002 SOL clears the protocol's 0.001 SOL but not the rail's 0.002001.
+		it('blocks an amount below it', async () => {
+			const { container, getByRole } = render(LiquidiumWithdrawForm, {
+				props: { ...solProps, amount: 0.002 }
+			});
+
+			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
+
+			expect(container).toHaveTextContent(en.liquidium.text.withdraw_below_minimum);
+			expect(reviewButton(getByRole)).toBeDisabled();
+		});
+
+		it('accepts the minimum itself', async () => {
+			const { container, getByRole } = render(LiquidiumWithdrawForm, {
+				props: { ...solProps, amount: 0.002001 }
+			});
+
+			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
+
+			expect(container).not.toHaveTextContent(en.liquidium.text.withdraw_below_minimum);
+			expect(reviewButton(getByRole)).toBeEnabled();
+		});
+
+		it('keeps the protocol minimum when the rail asks for less', async () => {
+			const { container, getByRole } = render(LiquidiumWithdrawForm, {
+				props: { ...solProps, railMinimum: 500_000n, amount: 0.0009 }
+			});
+
+			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
+
+			expect(container).toHaveTextContent('0.001 SOL');
+			expect(container).toHaveTextContent(en.liquidium.text.withdraw_below_minimum);
+			expect(reviewButton(getByRole)).toBeDisabled();
 		});
 	});
 });

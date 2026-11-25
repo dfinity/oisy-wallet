@@ -355,6 +355,10 @@ Every call an EVM send hands to Alchemy after Infura failed it emits one structu
 
 The event carries no address, no transaction hash and no amount: each would tie it to one wallet, which invariant 3 in [`analytics.md`](frontend/analytics.md) forbids, and the question it answers — how often a provider fails a send, on which call and network — needs none of them.
 
+### Swap receive shortcut tracking
+
+The [shortcuts for what to receive](#choosing-what-to-receive) emit one `swap_receive_shortcut` event under `event_context: tokens`, with what was used in `event_modifier`: `same_network` or `any_token` when that shortcut is tapped, and `other_network` when a token is picked through "_Symbol_ on another network". That is on the tap itself when it reaches one network and sets the token directly, and otherwise on the pick in "Move _symbol_ to"; opening that step and leaving it sends nothing. The pay token goes in `token_*`, and for `other_network` the picked token in `token2_*`. The event carries no amount and no USD value: it answers whether the shortcuts are used, and which one.
+
 ---
 
 ## Tokens
@@ -447,6 +451,20 @@ Once the payment is approved or signed and on its way to the provider, an error 
 ---
 
 ## Swap
+
+### Choosing what to receive
+
+Once a pay token is picked, and until something is picked to receive, the empty **You receive** card offers shortcuts to where the money usually goes, in place of the blank field. Each is a view of the receive list for that pay token as it shows on all networks and all asset types: the tokens the providers supporting it reach, on the networks it reaches, without the pay token itself and without the testnet tokens that view leaves out. A shortcut can never offer a token the list would not.
+
+- **Another token on _network_**, the pay token's network. Its second line names up to three of the tokens there, in the list's order, then "and _N_ more". It opens the receive list on that network.
+- **_Symbol_ on another network**, the pay token's token group (USDC, ETH, BTC, ICP, or any other group OISY lists) on the other networks the pay token reaches. ckUSDC as the pay token reads "USDC on another network". Wrapped tokens such as WETH, cbBTC and WBTC are groups of their own: from ETH, WETH is another token, never "ETH on another network"; from WETH, "WETH on another network" offers WETH elsewhere. The second line names up to two networks in chain order (Bitcoin, Ethereum, Internet Computer, then A to Z). It opens **Move _symbol_ to**: one row per network, with the token's symbol (or "as ckBTC" when it differs) and the user's balance of it (none for a token the user has not enabled, whose balance OISY does not load, as in the list); a row sets the receive token and goes back to the form. When it reaches a single token there is no step and the row names that token: "ckBTC on Internet Computer" from BTC, "USDT on Ethereum" from ckUSDT, with the token's logo and a network badge, and one tap sets it. Its second line says what that does, by the provider behind the route: "Convert BTC to ckBTC" or "Convert ckUSDT back to USDT" through Chain Fusion (preferred when 1Sec also lists it), "Bridge ICP back to Internet Computer" through 1Sec, otherwise "Move USDC to Solana". It says no rate: fees apply. USDC on Base does not list Internet Computer, because 1Sec only takes a token back to its own network and Chain Fusion links ckUSDC to Ethereum only.
+- **Any token**, "_N_ tokens on _M_ networks". It opens the receive list on all networks. It is left out when the two above already cover every token: BTC with NEAR Intents off has nothing else.
+
+A shortcut with nothing behind it is left out, never shown disabled; Bitcoin and XRP have one token each, so neither offers "Another token on" its network. Until OISY has the providers' token lists, and when the pay token reaches nothing, the card is the empty field it always was. A list a shortcut opens starts on all asset types. The swap remembers that receive view and any filters changed in it: reopening after a pick or Back returns to the same-network list, the full token list, or the same-token network list that was chosen. A different shortcut replaces the remembered view. Changing or switching the pay token resets the same-token network view; closing the swap forgets it.
+
+Tapping a picked receive token opens the receive picker; returning with Back keeps the selection. A separate **×** button inside the receive field clears the receive token and its quote, keeping the pay token and amount, and brings the shortcuts back. Focus moves to the first shortcut, or to the empty receive selector while the providers are loading or offer nothing; after a one-tap shortcut, it moves to the receive token. The clear button is shown only with both tokens selected in the shortcuts flow. The same holds in Get Token's swap. There is no Keep link.
+
+The shortcuts do not change what can be received (no route, provider or token is added), ask for no quote before a receive token is picked, add nothing to the pay side, and remember nothing between openings of the swap modal. Review, Swapping and the receive list itself are unchanged. Their use is counted by `swap_receive_shortcut` (see [Swap receive shortcut tracking](#swap-receive-shortcut-tracking)).
 
 ### Velora
 
@@ -1193,17 +1211,21 @@ A **fill-or-kill** order is the exception to all of this: it can only execute by
 
 ## Lend and borrow (Liquidium)
 
-### SOL through ckSOL (staging)
+### SOL (staging)
 
-On staging builds, Liquidium's SOL pool is offered through ckSOL. Its market shows as ckSOL, last in the Markets list, and SOL can be supplied, borrowed, repaid and withdrawn as ckSOL from and to the user's Internet Computer account, like the other ck assets. Native SOL is not offered yet: no picker lists it. Local builds have no ckSOL and offer no SOL; beta and production don't offer it yet.
+On staging builds, Liquidium's SOL pool is offered on both of its rails: native SOL from and to the user's Solana address, and ckSOL from and to their Internet Computer account, like the other ck assets. Its markets show as SOL and ckSOL, native first, last in the Markets list. A picker lists native SOL only with the Solana network enabled, and ckSOL only with ckSOL enabled. Local builds have no ckSOL and offer no SOL; beta and production don't offer it yet.
+
+A native SOL supply or repayment sends the amount plus Liquidium's fee from the user's Solana address, and the Solana network fee is paid on top; the balance must cover all three. Liquidium credits nothing below its quoted minimum transfer (0.02 SOL today), so the supply form shows that minimum net of the fee as "Minimum supply" (about 0.0181 SOL) and blocks less. A native repayment below it is blocked too, and the form says to repay with ckSOL. A transfer Solana refused, or one whose transaction expired before it was sent, goes back to the review with a translated message; one that may have left closes with the unknown-outcome message. A native SOL supply or repayment whose transaction failed, or expired on the finalized chain without landing, fails and stops counting against the repay maximum.
+
+A native SOL borrow or withdrawal pays out through the ckSOL minter, which pays out nothing below its minimum withdrawal plus two ckSOL ledger fees (0.002001 SOL today). Both forms show that minimum, as "Minimum borrow" and "Minimum withdrawal", and block less. The minter's withdrawal fee is not shown.
 
 On every build, a SOL position shows with the SOL token and its amount, whichever rail funded it, including one made on Liquidium's own app. Outside staging it can't be acted on from OISY.
 
 Liquidium quotes SOL's provider fee per account, so picking SOL to supply creates the user's Liquidium profile first when there is none, then quotes. The other assets still create the profile when the supply is submitted. A fee quoted for a token picked before never replaces the fee of the one picked now.
 
-A borrow or withdrawal goes only to the user's own address on the chain it pays out on: BTC, Ethereum or the Internet Computer. Any other chain has no address, so the form can't be submitted rather than paying out to an address of another chain.
+A borrow or withdrawal goes only to the user's own address on the chain it pays out on: BTC, Ethereum, Solana or the Internet Computer. Any other chain has no address, so the form can't be submitted rather than paying out to an address of another chain.
 
-Liquidium refuses a withdrawal below its minimum for the asset, even of everything supplied: 5000 sats of BTC, 0.005 ETH, 1 USDC or USDT, and 0.001 SOL today. The withdraw form shows that minimum as "Minimum withdrawal" and blocks less, as the borrow form does with Liquidium's minimum borrow, so a supply smaller than the minimum can't be withdrawn from OISY. ICP has no minimum, and its form shows none.
+Liquidium refuses a withdrawal below its minimum for the asset, even of everything supplied: 5000 sats of BTC, 0.005 ETH, 1 USDC or USDT, and 0.001 SOL today. The withdraw form shows that minimum as "Minimum withdrawal" and blocks less, as the borrow form does with Liquidium's minimum borrow, so a supply smaller than the minimum can't be withdrawn from OISY. Where the rail asks for more, as native SOL's does, both forms show and enforce the rail's minimum instead. ICP has no minimum, and its form shows none.
 
 ## Buy (OnRamper)
 

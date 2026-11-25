@@ -1,4 +1,11 @@
+import {
+	IC_CKSOL_LEDGER_CANISTER_ID,
+	IC_CKSOL_MINTER_CANISTER_ID
+} from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { minterInfo } from '$icp/api/cksol-minter.api';
+import { transactionFee } from '$icp/api/icrc-ledger.api';
+import { LIQUIDIUM_SOL_NATIVE_OUTFLOW_LEDGER_FEES } from '$lib/constants/liquidium.constants';
 import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 import {
 	LiquidiumSolBlockhashExpiredError,
@@ -11,6 +18,24 @@ import { sendSol } from '$sol/services/sol-send.services';
 import type { SolAddress } from '$sol/types/address';
 import { SolanaNetworks } from '$sol/types/network';
 import { isSolSendRefusal } from '$sol/utils/sol-error.utils';
+import { AnonymousIdentity } from '@icp-sdk/core/agent';
+
+/**
+ * The least lamports a native SOL borrow or withdraw can pay out: the ckSOL minter's minimum
+ * withdrawal plus the ckSOL ledger fees on the way, which is what Liquidium refuses below.
+ *
+ * Read uncertified, since it only sizes a form: Liquidium reads the same values again at submit.
+ */
+export const getLiquidiumSolNativeOutflowMinimum = async (): Promise<bigint> => {
+	const identity = new AnonymousIdentity();
+
+	const [{ minimum_withdrawal_amount }, ledgerFee] = await Promise.all([
+		minterInfo({ identity, minterCanisterId: IC_CKSOL_MINTER_CANISTER_ID, certified: false }),
+		transactionFee({ identity, ledgerCanisterId: IC_CKSOL_LEDGER_CANISTER_ID, certified: false })
+	]);
+
+	return minimum_withdrawal_amount + ledgerFee * LIQUIDIUM_SOL_NATIVE_OUTFLOW_LEDGER_FEES;
+};
 
 /**
  * Sends `amount` lamports from the user's mainnet SOL address to a Liquidium target, and returns the

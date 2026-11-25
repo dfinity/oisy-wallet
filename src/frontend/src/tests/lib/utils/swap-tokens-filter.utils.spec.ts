@@ -22,6 +22,7 @@ import { buildNearIntentsSupportedDestinations } from '$lib/utils/near-intents-s
 import {
 	computeReceiveSupportedTokens,
 	filterSwapTokens,
+	getSwapProvidersListing,
 	nativeSwapTokenIdentifier,
 	networksWithSupport
 } from '$lib/utils/swap-tokens-filter.utils';
@@ -934,5 +935,41 @@ describe('a ck source does not reach its twin symbol on another EVM network', ()
 		});
 
 		expect(reachable).toStrictEqual([ETHEREUM_NETWORK.id]);
+	});
+});
+
+describe('getSwapProvidersListing', () => {
+	const ckBtc = { ...mockValidIcToken, ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai' };
+
+	const provider = ({
+		key,
+		destinations
+	}: {
+		key: SwapProvider;
+		destinations: ReturnType<SwapProviderSupport['getSupportedDestinations']>;
+	}): SwapProviderSupport => ({
+		key,
+		sourceCategory: 'btc',
+		supportedSourceTokens: undefined,
+		getSupportedDestinations: () => destinations
+	});
+
+	it('should name the providers that list the destination, not the wildcard ones', () => {
+		expect(
+			getSwapProvidersListing({
+				sourceToken: BTC_MAINNET_TOKEN,
+				destinationToken: ckBtc,
+				providers: [
+					provider({
+						key: SwapProvider.CHAIN_FUSION,
+						destinations: { icp: new Set([ckBtc.ledgerCanisterId]) }
+					}),
+					provider({ key: SwapProvider.NEAR_INTENTS, destinations: { icp: 'any' } }),
+					provider({ key: SwapProvider.ONE_SEC, destinations: {} }),
+					provider({ key: SwapProvider.KONG_SWAP, destinations: undefined }),
+					provider({ key: SwapProvider.ICP_SWAP, destinations: { icp: new Set(['other-ledger']) } })
+				]
+			})
+		).toEqual([SwapProvider.CHAIN_FUSION]);
 	});
 });

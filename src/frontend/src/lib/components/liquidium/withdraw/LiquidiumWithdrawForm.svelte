@@ -32,6 +32,8 @@
 		preview: LiquidiumWithdrawPreview;
 		amount: OptionAmount;
 		confirmChecked: boolean;
+		// The least the rail pays out, where it has a minimum: native SOL, through the ckSOL minter.
+		railMinimum?: bigint;
 		// Opens the token-selection step; when set, the token logo becomes a selector.
 		onSelectToken?: () => void;
 		onClose: () => void;
@@ -46,6 +48,7 @@
 		preview,
 		amount = $bindable(),
 		confirmChecked = $bindable(),
+		railMinimum,
 		onSelectToken,
 		onClose,
 		onNext
@@ -94,7 +97,11 @@
 	);
 
 	// The SDK refuses a smaller withdrawal when it prepares it, even of the whole supply.
-	let minimumWithdraw = $derived(getMinimumWithdrawAmount(reserve.asset));
+	let minimumWithdraw = $derived.by(() => {
+		const protocolMinimum = getMinimumWithdrawAmount(reserve.asset);
+
+		return nonNullish(railMinimum) && railMinimum > protocolMinimum ? railMinimum : protocolMinimum;
+	});
 
 	let belowMinimum = $derived(
 		hasAmount && nonNullish(parsedAmount) && parsedAmount < minimumWithdraw
@@ -133,7 +140,8 @@
 			(!needsConfirm || confirmChecked)
 	);
 
-	// At full precision: rounded, a minimum could read below what the check enforces.
+	// At full precision: rounded, a minimum such as native SOL's 0.002001 could read below what the
+	// check enforces.
 	let minWithdrawFormatted = $derived(
 		`${formatToken({
 			value: minimumWithdraw,
@@ -164,6 +172,7 @@
 			isSelectable={nonNullish(onSelectToken)}
 			onClick={onSelectToken}
 			onCustomErrorValidate={validateWithdrawAmount}
+			revalidateKey={minimumWithdraw}
 			showTokenNetwork
 			token={withdrawToken}
 			bind:amount

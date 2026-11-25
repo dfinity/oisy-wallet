@@ -31,6 +31,10 @@ describe('swap.config', () => {
 				{
 					name: WizardStepsSwap.SELECT_PROVIDER,
 					title: en.swap.text.smart_swap
+				},
+				{
+					name: WizardStepsSwap.MOVE_TOKEN,
+					title: en.swap.text.move_token_to
 				}
 			]);
 		});
