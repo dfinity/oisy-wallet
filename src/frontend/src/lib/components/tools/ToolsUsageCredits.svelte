@@ -39,7 +39,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	// Enabled or not: the card reads the cycles ledger itself, so it works with TCYCLES inactive.
 	let token = $derived($icrcTokens.find(isTokenCyclesLedger));
@@ -188,7 +188,7 @@
 		<!-- Shown, not behind a help toggle, as every card on Tools shows its text. Pulled up to the
 		     title it explains: the card's title gap is sized for rows. -->
 		<p class="-mt-4 mb-3 text-sm text-tertiary">
-			{$i18n.usage_credits.text.description}
+			{replaceOisyPlaceholders($i18n.usage_credits.text.description)}
 
 			<ExternalLink
 				ariaLabel={$i18n.settings.text.learn_more}

@@ -114,6 +114,7 @@
 			"oisy_allowance_used_up_short": "일일 무료 사용 크레딧이 소진되어 서명이 실패할 수 있습니다.",
 			"oisy_allowance_used_up_own_cycles_short": "일일 무료 사용 크레딧이 소진되어 서명에 <a href=\"$url\">지출 한도</a>가 사용됩니다.",
 			"oisy_allowance_tools_link": "<a href=\"$url\">도구</a>에서 지출 한도를 관리하세요.",
+			"oisy_allowance_tools_link_urgent": "",
 			"oisy_allowance_exceeded": "이 거래의 비용이 $oisy_name 무료 한도를 초과합니다."
 		},
 		"error": {

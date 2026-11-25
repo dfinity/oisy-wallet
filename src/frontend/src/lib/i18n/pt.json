@@ -114,6 +114,7 @@
 			"oisy_allowance_used_up_short": "Seus créditos de uso gratuitos diários se esgotaram, então a assinatura pode falhar.",
 			"oisy_allowance_used_up_own_cycles_short": "Seus créditos de uso gratuitos diários se esgotaram, então a assinatura usa <a href=\"$url\">seu limite de gastos</a>.",
 			"oisy_allowance_tools_link": "Gerencie seu limite de gastos em&nbsp;<a href=\"$url\">Ferramentas</a>.",
+			"oisy_allowance_tools_link_urgent": "",
 			"oisy_allowance_exceeded": "Esta transação custa mais do que sua cota gratuita do $oisy_name cobre."
 		},
 		"error": {

@@ -102,6 +102,7 @@ interface I18nCore {
 		oisy_allowance_used_up_short: string;
 		oisy_allowance_used_up_own_cycles_short: string;
 		oisy_allowance_tools_link: string;
+		oisy_allowance_tools_link_urgent: string;
 		oisy_allowance_exceeded: string;
 	};
 	error: { copy_failed: string; usage_credits_insufficient: string };
