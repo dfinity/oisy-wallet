@@ -171,9 +171,9 @@ New `src/frontend/src/env/rest/rift.env.ts`:
   `swapUniverseBitcoinTokens` in `swap.derived.ts`, and the BTC entries of
   `SUPPORTED_CROSS_SWAP_NETWORKS`.
 
-### API client (no SDK, no new dependency)
+### REST client (no SDK, no new dependency)
 
-`src/frontend/src/lib/api/rift.api.ts` with typed `postRiftQuote`, `postRiftOrder` and
+`src/frontend/src/lib/rest/rift.rest.ts` (REST clients live in `lib/rest/`, as `lifi.rest.ts` and `near-intents.rest.ts` do; `lib/api/` wraps canister declarations) with typed `postRiftQuote`, `postRiftOrder` and
 `getRiftOrder`, plus the types in `src/frontend/src/lib/types/rift.ts`. The shapes are those of the
 OpenAPI spec above.
 
@@ -186,7 +186,7 @@ OpenAPI spec above.
   read `format: "raw"` or it is unparseable.
 
 **Rate limiting.** Every Rift request (quotes, order creation and the poller's status reads) goes
-through one limiter in `rift.api.ts`:
+through one limiter in `rift.rest.ts`:
 
 - Request **starts** are at least `RIFT_MIN_REQUEST_INTERVAL_MS` (1 s) apart, with or without a key
   (keyed limits are not documented). Caching alone does not bound the rate: the form debounces input
@@ -230,7 +230,7 @@ echoes are case-insensitive on the address part.
     deposit arrives.
 - **Cadence:** on input change, then at most every `RIFT_QUOTE_REFRESH_INTERVAL_MS` (30 s, as LI.FI)
   for unchanged inputs, cached per request. The cache only avoids re-asking for unchanged inputs; the
-  [limiter](#api-client-no-sdk-no-new-dependency) is what keeps a session within 1 request/s.
+  [limiter](#rest-client-no-sdk-no-new-dependency) is what keeps a session within 1 request/s.
 - **Quote checks, before an offer is shown.** The offer is dropped, silently, unless:
   - `format` is `raw`, and `from`, `to` and `amount_in` equal the request;
   - `estimated_amount_out` is a positive integer;
@@ -422,7 +422,7 @@ disabled.
 The poller runs for every non-terminal Rift row, whatever `RIFT_SWAP_ENABLED` says.
 
 - Each row is read with one `GET /order/{rift_order_id}`, through the
-  [limiter](#api-client-no-sdk-no-new-dependency), one after another.
+  [limiter](#rest-client-no-sdk-no-new-dependency), one after another.
 - A tick (every 5 s, `ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS`) reads at most
   `RIFT_MAX_ORDER_READS_PER_TICK` (3) rows, **least recently read first**. The other providers'
   pollers run in the same tick, so one provider's round must stay short.
@@ -479,19 +479,18 @@ Status mapping (decided 2026-11-25):
 
 ### i18n
 
-New keys in `en.json`, the other locales and `i18n.d.ts`:
+New keys in `en.json`, the other locales and `i18n.d.ts`. The i18n types are generated
+(`npm run i18n`), so each key lands in the PR that first uses it, never later:
 
-- `swap.text.rift_estimate_warning`
-- `swap.text.rift_route_via`
-- `swap.error.rift_quote_expired`
-- `swap.error.rift_order_refused`
-- `swap.error.rift_order_unverified`
-- `swap.error.rift_deposit_expired`
-- `swap.error.rift_order_frozen`
-- `swap.error.rift_order_in_flight`
+- **PR 3** (presentation): `swap.text.rift_estimate_warning`, `swap.text.rift_route_via`.
+- **PR 4** (execution and tracking): `swap.error.rift_quote_expired`,
+  `swap.error.rift_order_refused`, `swap.error.rift_order_unverified`,
+  `swap.error.rift_deposit_expired`, `swap.error.rift_order_frozen`,
+  `swap.error.rift_order_in_flight`.
 
-A refund reuses `swap.error.swap_refunded`; a reverted or replaced EVM deposit reuses
-`swap.error.failed_unexpectedly` and `swap.error.swap_replaced_or_dropped`. Copy follows `docs/ai/frontend/brand-and-copy.md`.
+PR 6 adds no key. A refund reuses `swap.error.swap_refunded`; a reverted or replaced EVM deposit
+reuses `swap.error.failed_unexpectedly` and `swap.error.swap_replaced_or_dropped`. Copy follows
+`docs/ai/frontend/brand-and-copy.md`.
 
 ## Delivery plan
 
@@ -501,13 +500,14 @@ Each PR is atomic and updates `docs/ai/PRODUCT.md` when it changes behaviour.
    the one-row-per-order guard and tests; regenerate `backend.did`
    and the declarations.
 2. **Frontend foundation:** `SwapProvider.RIFT`, `rift.env.ts` (`RIFT_SWAP_ENABLED = false`),
-   `rift.api.ts` and `rift.ts` types, `rift.utils.ts` asset ids (native ids pinned from a live call),
+   `rift.rest.ts` and `rift.ts` types, `rift.utils.ts` asset ids (native ids pinned from a live call),
    the `swapService` stub, `swapProvidersDetails` entry and placeholder logo. No behaviour change.
 3. **BTC → EVM quoting and presentation:** the `btcSwapProviders` entry, quote checks, offer
-   mapping, cadence, `SwapDetailsRift`, `SwapRiftEstimateWarning` and the widened gates. The flag is
-   still `false`.
+   mapping, cadence, `SwapDetailsRift`, `SwapRiftEstimateWarning`, their two
+   [i18n keys](#i18n) and the widened gates. The flag is still `false`.
 4. **BTC → EVM execution and tracking:** pre-send checks, `fetchRiftBtcSwap`, `SwapBtcWizard`
-   dispatch, the poller and utils, loader and item branches, analytics and i18n. The flag becomes
+   dispatch, the poller and utils, loader and item branches, analytics and the error
+   [i18n keys](#i18n). The flag becomes
    `LOCAL || STAGING`; the BTC entry also requires `BTC_SEND_VIA_BACKEND_ENABLED`.
 5. **Refactor:** an optional `beforeBroadcast` on `send` (`eth/services/send.services.ts`), with no
    behaviour change.
