@@ -313,7 +313,8 @@ it when the selected provider is Rift (transfer-style, as for NEAR Intents).
 2. `sendBtc` to `deposit_address` for exactly `amount_in` (one transfer, at the fee the form
    reviewed).
    - In `beforeBroadcast`, create the AUT row with its refs (txid included). If the row cannot be
-     created, nothing is broadcast.
+     created, nothing is broadcast. That includes a second row for the same order
+     ([one row per order](#active-user-transactions)).
    - On `isDefinitiveBtcBroadcastRefusal`, delete the row (`deleteUnbroadcastActiveUserTransaction`).
    - On an unclear outcome, keep the row and still enable the destination token, as
      `fetchNearIntentsBtcSwap` does.
@@ -330,7 +331,9 @@ it when the selected provider is Rift (transfer-style, as for NEAR Intents).
    - `send` gains an optional `beforeBroadcast({ hash, nonce })`, as `swap()` has: after signing,
      hash the signed bytes and run the hook before broadcasting; if it rejects, nothing is
      broadcast. This lands as its own refactor PR with no behaviour change.
-   - Create the row there, with refs for the deposit hash, nonce and chain id.
+   - Create the row there, with refs for the deposit hash, nonce and chain id. A second row for the
+     same order is refused, and nothing is broadcast
+     ([one row per order](#active-user-transactions)).
    - On `isDefinitiveTransactionRefusal` (`eth/utils/eth-error.utils.ts`), delete the row.
 3. The BTC destination token is native BTC, which is always enabled; no token enabling is needed.
 4. Track `TRACK_COUNT_SWAP_SUBMITTED`. The modal closes.
@@ -360,6 +363,23 @@ breaking, but follow the regeneration steps.
 **Row timing** (decided 2026-11-25). The row is created after the order is checked and the deposit
 is signed, before it is broadcast. No row means nothing is sent. It is deleted only on a definitive
 broadcast refusal, as LI.FI's and the XRP sends' rows are.
+
+**One row per order.** `create` refuses a Rift row whose `rift_order_id` is already on one of the
+caller's rows, in any state, with `AlreadyInFlight`. This is the same kind of guard as the one
+that refuses a second XRP payment or SOL mint in flight.
+
+- Rift answers a repeated `POST /order` with the same order. Until it sees the first deposit, that
+  order still reads `awaiting_deposit` with no `deposit_tx`, so the binding checks pass again.
+- A retry after an unclear broadcast, or a second tab on the same quote, would then send a second
+  deposit to the same address.
+- Only this call sees the check and the write at once, so it is what holds the invariant. A
+  frontend check cannot be atomic with the create.
+
+On that refusal, nothing is broadcast. The existing row is kept and **never deleted**, and the swap
+stops with `swap.error.rift_order_in_flight`. After any attempt whose outcome is unclear, the
+reviewed quote is dropped, so a new swap starts from a fresh quote and therefore a new order. A row
+deleted after a definitive refusal no longer counts, so a retry on that order is allowed: nothing
+was sent.
 
 **External refs** (`RIFT_EXTERNAL_REF_KEYS`, `lib/types/rift.ts`; keys ≤ 32 chars, values ≤ 256):
 
@@ -463,6 +483,7 @@ New keys in `en.json`, the other locales and `i18n.d.ts`:
 - `swap.error.rift_order_unverified`
 - `swap.error.rift_deposit_expired`
 - `swap.error.rift_order_frozen`
+- `swap.error.rift_order_in_flight`
 
 A refund reuses `swap.error.swap_refunded`; a reverted or replaced EVM deposit reuses
 `swap.error.failed_unexpectedly` and `swap.error.swap_replaced_or_dropped`. Copy follows `docs/ai/frontend/brand-and-copy.md`.
@@ -471,7 +492,8 @@ A refund reuses `swap.error.swap_refunded`; a reverted or replaced EVM deposit r
 
 Each PR is atomic and updates `docs/ai/PRODUCT.md` when it changes behaviour.
 
-1. **Backend:** the `Rift` AUT variant (`RiftData`), validation and tests; regenerate `backend.did`
+1. **Backend:** the `Rift` AUT variant (`RiftData`), validation (amount, `rift_order_id` required),
+   the one-row-per-order guard and tests; regenerate `backend.did`
    and the declarations.
 2. **Frontend foundation:** `SwapProvider.RIFT`, `rift.env.ts` (`RIFT_SWAP_ENABLED = false`),
    `rift.api.ts` and `rift.ts` types, `rift.utils.ts` asset ids (native ids pinned from a live call),
@@ -507,6 +529,8 @@ flip, gated as in [Flag and env](#flag-and-env).
    its error, and no transaction is signed.
 7. Every order is created with `refund_address` set to the user's own source-chain address.
 8. No deposit is broadcast without a Rift AUT row. A definitively refused broadcast leaves no row.
+   A second attempt on an order that already has a row (a retry after an unclear broadcast, or a
+   second tab) broadcasts nothing and leaves the existing row as it is.
 9. Status mapping as in the table. A `delivered` row shows `amount_out`; a `refunded` row shows the
    refunded source amount; `frozen` and `expired` rows are `Failed` with their stored reason. An EVM
    deposit that reverted or was replaced turns its row `Failed` without waiting for the deposit
