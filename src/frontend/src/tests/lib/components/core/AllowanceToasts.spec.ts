@@ -245,12 +245,14 @@ describe('AllowanceToasts', () => {
 		// The non-breaking space keeps the link on the line of the word before it.
 		const toolsLink =
 			'Manage your spending limit in&nbsp;<a href="/tools/#usage-credits">Tools</a>.';
+		const urgentToolsLink =
+			'For urgent transactions, you can cover signing with your own ICP Cycles in&nbsp;<a href="/tools/#usage-credits">Tools</a>.';
 
 		beforeEach(() => {
 			vi.spyOn(ownCyclesEnv, 'OWN_CYCLES_ENABLED', 'get').mockReturnValue(true);
 		});
 
-		it('should end the allowance-issue toast with a link to the Usage credits card', async () => {
+		it('should end the allowance-issue toast by offering own cycles, with a link to the Usage credits card', async () => {
 			render(AllowanceToasts);
 
 			allowanceIssueStore.setRefused();
@@ -259,12 +261,12 @@ describe('AllowanceToasts', () => {
 
 			expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith({
 				...issueToast,
-				text: `${issueToast.text} ${toolsLink}`,
+				text: `${issueToast.text} ${urgentToolsLink}`,
 				renderAsHtml: true
 			});
 		});
 
-		it('should link to the card when own credits pay too', async () => {
+		it('should link to the spending limit on the card when own credits pay', async () => {
 			render(AllowanceToasts);
 
 			allowanceIssueStore.setRefused();
@@ -292,7 +294,7 @@ describe('AllowanceToasts', () => {
 				screensStore.set('md');
 			});
 
-			it('should end the short text with the link to the Usage credits card', async () => {
+			it('should end the short text by offering own cycles, with a link to the Usage credits card', async () => {
 				render(AllowanceToasts);
 
 				allowanceIssueStore.setRefused();
@@ -301,7 +303,7 @@ describe('AllowanceToasts', () => {
 
 				expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith({
 					...phoneIssueToast,
-					text: `${phoneIssueToast.text} ${toolsLink}`,
+					text: `${phoneIssueToast.text} ${urgentToolsLink}`,
 					renderAsHtml: true
 				});
 			});
@@ -315,7 +317,7 @@ describe('AllowanceToasts', () => {
 
 				expect(toastsShowSpy).toHaveBeenCalledExactlyOnceWith({
 					...phoneIssueToast,
-					text: 'Your free daily usage credits are used up, so signing uses <a href="/tools/#usage-credits">your spending limit</a>.',
+					text: 'OISY temporarily can\'t cover signing, so <a href="/tools/#usage-credits">your own ICP Cycles</a> cover it for now.',
 					renderAsHtml: true
 				});
 			});

@@ -114,6 +114,7 @@
 			"oisy_allowance_used_up_short": "Twoje dzienne darmowe kredyty użytkowania zostały wykorzystane, więc podpisywanie może się nie powieść.",
 			"oisy_allowance_used_up_own_cycles_short": "Twoje dzienne darmowe kredyty użytkowania zostały wykorzystane, więc podpisywanie korzysta z <a href=\"$url\">Twojego limitu wydatków</a>.",
 			"oisy_allowance_tools_link": "Zarządzaj limitem wydatków w&nbsp;<a href=\"$url\">Narzędziach</a>.",
+			"oisy_allowance_tools_link_urgent": "",
 			"oisy_allowance_exceeded": "Ta transakcja kosztuje więcej, niż pokrywa Twój darmowy limit $oisy_name."
 		},
 		"error": {

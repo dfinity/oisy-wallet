@@ -24,7 +24,7 @@ import * as cyclesMintAnalytics from '$lib/services/cycles-mint-analytics.servic
 import * as ownCyclesServices from '$lib/services/own-cycles.services';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockTcyclesToken, mockXdrPermyriadPerIcp } from '$tests/mocks/cycles-mint.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -70,7 +70,7 @@ describe('ToolsUsageCredits', () => {
 		const { container, getByRole, getByText } = render(ToolsUsageCredits);
 
 		expect(getByText(en.usage_credits.text.title)).toBeInTheDocument();
-		expect(container).toHaveTextContent(en.usage_credits.text.description);
+		expect(container).toHaveTextContent(replaceOisyPlaceholders(en.usage_credits.text.description));
 		expect(getByRole('link', { name: en.settings.text.learn_more })).toHaveAttribute(
 			'href',
 			OISY_USAGE_CREDITS_DOCS_URL

@@ -38,11 +38,18 @@
 	};
 
 	// While the user can pay with own cycles, the text ends with a link to the Tools page's Usage
-	// credits card, in the text as HTML, as the Activity info box links to Settings.
-	const withToolsLink = (text: string): string =>
-		OWN_CYCLES_ENABLED
-			? `${text} ${replacePlaceholders($i18n.core.warning.oisy_allowance_tools_link, { $url: TOOLS_URL })}`
-			: text;
+	// credits card, in the text as HTML, as the Activity info box links to Settings. It offers own
+	// cycles for urgent transactions, or, once they cover signing, points to the spending limit.
+	const withToolsLink = ({ text, ownCycles }: { text: string; ownCycles: boolean }): string => {
+		if (!OWN_CYCLES_ENABLED) {
+			return text;
+		}
+
+		const { oisy_allowance_tools_link: toolsLink, oisy_allowance_tools_link_urgent: urgentLink } =
+			$i18n.core.warning;
+
+		return `${text} ${replacePlaceholders(ownCycles ? toolsLink : urgentLink, { $url: TOOLS_URL })}`;
+	};
 
 	// On phones, the own-credits text links to the card from its own words, with no extra sentence.
 	const issueText = ({ ownCycles, phone }: { ownCycles: boolean; phone: boolean }): string => {
@@ -55,11 +62,14 @@
 
 		if (ownCycles) {
 			return phone
-				? replacePlaceholders(usedUpOwnCyclesShort, { $url: TOOLS_URL })
-				: withToolsLink(replaceOisyPlaceholders(usedUpOwnCycles));
+				? replacePlaceholders(replaceOisyPlaceholders(usedUpOwnCyclesShort), { $url: TOOLS_URL })
+				: withToolsLink({ text: replaceOisyPlaceholders(usedUpOwnCycles), ownCycles });
 		}
 
-		return withToolsLink(replaceOisyPlaceholders(phone ? usedUpShort : usedUp));
+		return withToolsLink({
+			text: replaceOisyPlaceholders(phone ? usedUpShort : usedUp),
+			ownCycles
+		});
 	};
 
 	// It looks unlike any other toast, so it stands out from the error the flow shows next to it.

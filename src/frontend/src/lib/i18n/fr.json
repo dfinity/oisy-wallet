@@ -114,6 +114,7 @@
 			"oisy_allowance_used_up_short": "Vos crédits d'utilisation gratuits quotidiens sont épuisés, la signature peut donc échouer.",
 			"oisy_allowance_used_up_own_cycles_short": "Vos crédits d'utilisation gratuits quotidiens sont épuisés, la signature utilise donc <a href=\"$url\">votre limite de dépense</a>.",
 			"oisy_allowance_tools_link": "Gérez votre limite de dépense dans&nbsp;<a href=\"$url\">Outils</a>.",
+			"oisy_allowance_tools_link_urgent": "",
 			"oisy_allowance_exceeded": "Cette transaction coûte plus que ce que couvre votre quota gratuit $oisy_name."
 		},
 		"error": {

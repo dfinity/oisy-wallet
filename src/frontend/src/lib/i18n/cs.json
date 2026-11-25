@@ -114,6 +114,7 @@
 			"oisy_allowance_used_up_short": "Vaše denní bezplatné kredity za používání jsou vyčerpány, takže podepisování může selhat.",
 			"oisy_allowance_used_up_own_cycles_short": "Vaše denní bezplatné kredity za používání jsou vyčerpány, takže podepisování využívá <a href=\"$url\">váš limit výdajů</a>.",
 			"oisy_allowance_tools_link": "Svůj limit výdajů spravujte v sekci&nbsp;<a href=\"$url\">Nástroje</a>.",
+			"oisy_allowance_tools_link_urgent": "",
 			"oisy_allowance_exceeded": "Tato transakce stojí víc, než pokryje váš bezplatný limit $oisy_name."
 		},
 		"error": {
