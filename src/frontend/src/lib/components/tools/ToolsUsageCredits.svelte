@@ -12,7 +12,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { OISY_USAGE_CREDITS_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON,
 		TOOLS_USAGE_CREDITS_BALANCE,
@@ -123,13 +123,13 @@
 
 			<ExternalLink
 				ariaLabel={$i18n.settings.text.learn_more}
-				href={OISY_DOCS_URL}
+				href={OISY_USAGE_CREDITS_DOCS_URL}
 				iconVisible={false}
 				trackEvent={buildLearnMoreEvent({
 					sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOOLS_PAGE,
 					sourceSublocation: 'usage_credits',
 					labelKey: 'settings.text.learn_more',
-					url: OISY_DOCS_URL
+					url: OISY_USAGE_CREDITS_DOCS_URL
 				})}>{$i18n.settings.text.learn_more}</ExternalLink
 			>
 		</p>

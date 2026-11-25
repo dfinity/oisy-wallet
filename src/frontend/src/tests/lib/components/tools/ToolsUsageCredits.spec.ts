@@ -2,7 +2,7 @@ import * as cyclesMintEnv from '$env/cycles-mint.env';
 import * as cmcApi from '$icp/api/cmc.api';
 import * as icrcDerived from '$icp/derived/icrc.derived';
 import ToolsUsageCredits from '$lib/components/tools/ToolsUsageCredits.svelte';
-import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
+import { OISY_USAGE_CREDITS_DOCS_URL } from '$lib/constants/oisy.constants';
 import {
 	CONVERT_AMOUNT_EXCHANGE_VALUE,
 	TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON,
@@ -60,7 +60,7 @@ describe('ToolsUsageCredits', () => {
 		expect(container).toHaveTextContent(en.usage_credits.text.description);
 		expect(getByRole('link', { name: en.settings.text.learn_more })).toHaveAttribute(
 			'href',
-			OISY_DOCS_URL
+			OISY_USAGE_CREDITS_DOCS_URL
 		);
 	});
 
