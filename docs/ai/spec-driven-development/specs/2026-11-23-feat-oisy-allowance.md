@@ -27,7 +27,7 @@ OISY pays the cycles for each user's CCs from the OISY allowance. This spec make
 3. **Phase 3:** let a user pay CCs with their own cycles while Allowance issue is set.
 4. **Phase 4:** bound the total OISY grants, and lower the OISY allowance each Granted AR sets.
 
-The phases ship one by one, in this order. Each is useful on its own.
+The phases ship one by one, in this order, except that phase 3 comes before phase 2. Each is useful on its own.
 
 ## 3. Motivation
 
@@ -138,7 +138,7 @@ This spec lands in its own PR, at the bottom of a GitHub stack. The phases follo
    3. Translations (#14754).
    4. The Plausible events (see 4.8).
 2. **Phase 2:** the backend's costly calls become CCs, the frontend handles their Insufficient allowance, and the backend accepts the user's own cycles for them.
-3. **Phase 3:** the approval step, the Tools card, the payment-type switch and the toast's link to the Tools card, for signer CCs.
+3. **Phase 3**, which comes before phase 2: the approval step, the Tools card, the payment-type switch and the toast's link to the Tools card, for signer CCs.
 4. **Phase 4:** the cap, the smaller OISY allowance per Granted AR and the new-user pool.
 
 ## 9. Acceptance criteria
