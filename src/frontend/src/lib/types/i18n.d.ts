@@ -681,6 +681,7 @@ interface I18nUsage_credits {
 		signatures_other: string;
 		new_limit: string;
 		set: string;
+		previous_limit: string;
 		limit_left: string;
 		balance_short: string;
 		balance_empty: string;

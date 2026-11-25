@@ -26,7 +26,10 @@ describe('ToolsUsageCreditsModal', () => {
 
 	const modalId = Symbol();
 
-	const props = { token: mockTcyclesToken, ownCycles, onError: vi.fn() };
+	const props = { token: mockTcyclesToken, ownCycles, onError: vi.fn(), onSet: vi.fn() };
+
+	// The limit set last, 1.5 TCYCLES, of which 1 TCYCLES is left.
+	const withPrevious = { ...props, previousLimit: 1_500_000_000_000n };
 
 	const amountInput = (container: HTMLElement): HTMLInputElement => {
 		const input: HTMLInputElement | null = container.querySelector(
@@ -41,8 +44,8 @@ describe('ToolsUsageCreditsModal', () => {
 	const enterAmount = async ({ container, value }: { container: HTMLElement; value: string }) =>
 		await fireEvent.input(amountInput(container), { target: { value } });
 
-	const review = async ({ value }: { value: string }) => {
-		const result = render(ToolsUsageCreditsModal, { props });
+	const review = async ({ value, previousLimit }: { value: string; previousLimit?: bigint }) => {
+		const result = render(ToolsUsageCreditsModal, { props: { ...props, previousLimit } });
 
 		await waitFor(() => {
 			expect(amountInput(result.container)).toBeInTheDocument();
@@ -67,7 +70,7 @@ describe('ToolsUsageCreditsModal', () => {
 		vi.spyOn(ownCyclesServices, 'setSpendingLimit').mockResolvedValue();
 	});
 
-	it('opens on the current spending limit, with Review disabled until it changes', async () => {
+	it('opens with an empty limit when none was set before, and Review disabled until one is entered', async () => {
 		const { container, getByTestId } = render(ToolsUsageCreditsModal, { props });
 
 		const modal = getByTestId(TOOLS_USAGE_CREDITS_MODAL);
@@ -76,7 +79,7 @@ describe('ToolsUsageCreditsModal', () => {
 		expect(modal).toHaveTextContent(en.usage_credits.text.add_description);
 
 		await waitFor(() => {
-			expect(amountInput(container).value).toBe('1');
+			expect(amountInput(container).value).toBe('');
 		});
 
 		expect(getByTestId(TOOLS_USAGE_CREDITS_REVIEW_BUTTON)).toBeDisabled();
@@ -86,16 +89,62 @@ describe('ToolsUsageCreditsModal', () => {
 		expect(getByTestId(TOOLS_USAGE_CREDITS_REVIEW_BUTTON)).toBeEnabled();
 	});
 
-	it('shows the fiat values of the current limit and of the fee', () => {
+	it('starts at the limit set last, ready to review', async () => {
+		const { container, getByTestId } = render(ToolsUsageCreditsModal, { props: withPrevious });
+
+		await waitFor(() => {
+			expect(amountInput(container).value).toBe('1.5');
+		});
+
+		expect(getByTestId(TOOLS_USAGE_CREDITS_REVIEW_BUTTON)).toBeEnabled();
+	});
+
+	it('opens with an empty limit after a revoke', async () => {
+		const { container } = render(ToolsUsageCreditsModal, {
+			props: { ...props, previousLimit: ZERO }
+		});
+
+		await waitFor(() => {
+			expect(amountInput(container).value).toBe('');
+		});
+	});
+
+	it('shows the limit set last and what is left of it', () => {
+		const { getByTestId } = render(ToolsUsageCreditsModal, { props: withPrevious });
+
+		const modal = getByTestId(TOOLS_USAGE_CREDITS_MODAL);
+
+		expect(modal).toHaveTextContent(`${en.usage_credits.text.previous_limit} 1.5 TCYCLES`);
+		expect(modal).toHaveTextContent(`${en.usage_credits.text.own_credits_after} 1 TCYCLES`);
+	});
+
+	it('shows only what is left when the limit set last is not known', () => {
+		const { getByTestId } = render(ToolsUsageCreditsModal, { props });
+
+		const modal = getByTestId(TOOLS_USAGE_CREDITS_MODAL);
+
+		expect(modal).not.toHaveTextContent(en.usage_credits.text.previous_limit);
+		expect(modal).toHaveTextContent(`${en.usage_credits.text.own_credits_after} 1 TCYCLES`);
+	});
+
+	it('shows the fiat values of the limit set last, of what is left and of the fee', () => {
 		vi.spyOn(exchangeDerived, 'exchanges', 'get').mockReturnValue(
 			readable({ [mockTcyclesToken.id]: { usd: 1.4 } })
 		);
 
-		const { getAllByTestId } = render(ToolsUsageCreditsModal, { props });
+		const { getAllByTestId } = render(ToolsUsageCreditsModal, { props: withPrevious });
 
 		expect(
 			getAllByTestId(CONVERT_AMOUNT_EXCHANGE_VALUE).map(({ textContent }) => textContent?.trim())
-		).toEqual(['~$1.40', '< $0.01']);
+		).toEqual(['~$2.10', '~$1.40', '< $0.01']);
+	});
+
+	it('keeps Review disabled for the limit already set', async () => {
+		const { container, getByTestId } = render(ToolsUsageCreditsModal, { props });
+
+		await enterAmount({ container, value: '1' });
+
+		expect(getByTestId(TOOLS_USAGE_CREDITS_REVIEW_BUTTON)).toBeDisabled();
 	});
 
 	it('lets through a limit that leaves the fee in the balance', async () => {
@@ -126,16 +175,38 @@ describe('ToolsUsageCreditsModal', () => {
 		await expect(findByText(en.send.assertion.insufficient_funds)).resolves.toBeInTheDocument();
 	});
 
-	it('reviews the current limit, the new one and the fee', async () => {
+	it('reviews the limit set last, what is left of it, the new one and the fee', async () => {
+		const { getByTestId } = await review({ value: '1.8', previousLimit: 1_500_000_000_000n });
+
+		const modal = getByTestId(TOOLS_USAGE_CREDITS_MODAL);
+
+		const rows = [
+			`${en.usage_credits.text.previous_limit} 1.5 TCYCLES`,
+			`${en.usage_credits.text.own_credits_after} 1 TCYCLES`,
+			`${en.usage_credits.text.new_limit} 1.8 TCYCLES`,
+			`${en.fee.text.approval_fee} 0.0001 TCYCLES`
+		];
+
+		expect(modal).toHaveTextContent(en.convert.text.review);
+
+		rows.forEach((row) => expect(modal).toHaveTextContent(row));
+
+		// Read top to bottom: what was set, what is left of it, what it becomes.
+		const text = (modal.textContent ?? '').replace(/\s+/g, ' ');
+		const positions = rows.map((row) => text.indexOf(row));
+
+		expect(positions).toEqual([...positions].sort((x, y) => x - y));
+		expect(ownCyclesServices.setSpendingLimit).not.toHaveBeenCalled();
+	});
+
+	it('reviews without the limit set last when it is not known', async () => {
 		const { getByTestId } = await review({ value: '1.5' });
 
 		const modal = getByTestId(TOOLS_USAGE_CREDITS_MODAL);
 
-		expect(modal).toHaveTextContent(en.convert.text.review);
+		expect(modal).not.toHaveTextContent(en.usage_credits.text.previous_limit);
 		expect(modal).toHaveTextContent(`${en.usage_credits.text.own_credits_after} 1 TCYCLES`);
 		expect(modal).toHaveTextContent(`${en.usage_credits.text.new_limit} 1.5 TCYCLES`);
-		expect(modal).toHaveTextContent(`${en.fee.text.approval_fee} 0.0001 TCYCLES`);
-		expect(ownCyclesServices.setSpendingLimit).not.toHaveBeenCalled();
 	});
 
 	it('goes back to the limit it reviewed', async () => {
@@ -148,7 +219,7 @@ describe('ToolsUsageCreditsModal', () => {
 		});
 	});
 
-	it('sets the new limit, then closes with a toast', async () => {
+	it('sets the new limit, tells the card, then closes with a toast', async () => {
 		const toastsShowSpy = vi.spyOn(toastsStore, 'toastsShow');
 
 		const { getByTestId } = await review({ value: '0.5' });
@@ -173,6 +244,7 @@ describe('ToolsUsageCreditsModal', () => {
 			level: 'success',
 			duration: 4000
 		});
+		expect(props.onSet).toHaveBeenCalledExactlyOnceWith(500_000_000_000n);
 		expect(props.onError).not.toHaveBeenCalled();
 	});
 
@@ -208,5 +280,6 @@ describe('ToolsUsageCreditsModal', () => {
 		});
 		expect(get(modalStore)?.id).toBe(modalId);
 		expect(getByTestId(TOOLS_USAGE_CREDITS_SET_BUTTON)).toBeEnabled();
+		expect(props.onSet).not.toHaveBeenCalled();
 	});
 });

@@ -7,13 +7,16 @@ import { ZERO } from '$lib/constants/app.constants';
 import { OISY_USAGE_CREDITS_DOCS_URL } from '$lib/constants/oisy.constants';
 import {
 	CONVERT_AMOUNT_EXCHANGE_VALUE,
+	TOKEN_INPUT_CURRENCY_TOKEN,
 	TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON,
 	TOOLS_USAGE_CREDITS_BALANCE,
 	TOOLS_USAGE_CREDITS_BALANCE_SHORT,
 	TOOLS_USAGE_CREDITS_FREE_SIGNATURES,
 	TOOLS_USAGE_CREDITS_GET_CYCLES_BUTTON,
 	TOOLS_USAGE_CREDITS_MODAL,
-	TOOLS_USAGE_CREDITS_OWN_CREDITS
+	TOOLS_USAGE_CREDITS_OWN_CREDITS,
+	TOOLS_USAGE_CREDITS_REVIEW_BUTTON,
+	TOOLS_USAGE_CREDITS_SET_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
 import * as cyclesMintAnalytics from '$lib/services/cycles-mint-analytics.services';
@@ -25,6 +28,7 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockTcyclesToken, mockXdrPermyriadPerIcp } from '$tests/mocks/cycles-mint.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get, readable, writable } from 'svelte/store';
@@ -230,6 +234,45 @@ describe('ToolsUsageCredits', () => {
 			const { queryByTestId } = await renderLoaded();
 
 			expect(queryByTestId(TOOLS_USAGE_CREDITS_BALANCE_SHORT)).not.toBeInTheDocument();
+		});
+
+		it('starts the step at the limit set last, and shows the limit just set until the index lists it', async () => {
+			vi.spyOn(ownCyclesServices, 'loadPreviousSpendingLimit').mockResolvedValue(previousLimit);
+			vi.spyOn(ownCyclesServices, 'setSpendingLimit').mockResolvedValue();
+
+			const { container, findByTestId, getByTestId } = await renderLoaded();
+
+			await waitFor(() => {
+				expect(getByTestId(TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON)).toBeEnabled();
+			});
+
+			await fireEvent.click(getByTestId(TOOLS_USAGE_CREDITS_ADD_MORE_BUTTON));
+
+			const input: HTMLInputElement | null = container.querySelector(
+				`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`
+			);
+
+			assertNonNullish(input);
+
+			await waitFor(() => {
+				expect(input.value).toBe('2');
+			});
+
+			// Once set, 3 TCYCLES are left, while the index still lists the limit before.
+			vi.spyOn(ownCyclesServices, 'loadOwnCycles').mockResolvedValue({
+				approved: 3_000_000_000_000n,
+				balance: 3_249_900_000_000n
+			});
+
+			await fireEvent.input(input, { target: { value: '3' } });
+			await fireEvent.click(getByTestId(TOOLS_USAGE_CREDITS_REVIEW_BUTTON));
+			await fireEvent.click(await findByTestId(TOOLS_USAGE_CREDITS_SET_BUTTON));
+
+			await waitFor(() => {
+				expect(getByTestId(TOOLS_USAGE_CREDITS_OWN_CREDITS)).toHaveTextContent(
+					'3 of 3 TCYCLES left'
+				);
+			});
 		});
 	});
 

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { untrack } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { getTokenFee } from '$icp/utils/token.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
@@ -39,20 +38,30 @@
 	interface Props {
 		// The TCYCLES token, enabled or not: its symbol, decimals and ledger fee.
 		token: IcToken;
-		// The approval left (the spending limit) and the TCYCLES balance, as the card read them.
+		// What is left of the spending limit (the approval) and the TCYCLES balance, as the card read
+		// them.
 		ownCycles: OwnCycles;
+		// The limit the user set last, when the card found it.
+		previousLimit?: bigint;
 		// Called when the approval fails, so the card reads both again before the user retries:
 		// the approval states the one it replaces, which may have changed.
 		onError: () => void;
+		// Called with the new limit once the ledger took it.
+		onSet: (limit: bigint) => void;
 	}
 
-	let { token, ownCycles, onError }: Props = $props();
+	let { token, ownCycles, previousLimit, onError, onSet }: Props = $props();
 
 	const format = (value: bigint): string =>
 		formatToken({ value, unitName: token.decimals, displayDecimals: token.decimals });
 
-	// The amount is the new limit, not one added to it, so it starts at the current one. 0 revokes it.
-	let amount = $state<OptionAmount>(untrack(() => format(ownCycles.approved)));
+	// The amount is the new limit, not one added to it. 0 revokes it. It starts at the limit set
+	// last, so filling it up again takes one click: seeded once, as the card doesn't read while the
+	// modal is open.
+	// svelte-ignore state_referenced_locally
+	let amount = $state<OptionAmount>(
+		nonNullish(previousLimit) && previousLimit > ZERO ? format(previousLimit) : undefined
+	);
 	let amountSetToMax = $state(false);
 	let setting = $state(false);
 
@@ -108,6 +117,8 @@
 				limit: parsedAmount
 			});
 
+			onSet(parsedAmount);
+
 			toastsShow({
 				text: replacePlaceholders($i18n.usage_credits.text.added, {
 					$amount: format(parsedAmount),
@@ -135,6 +146,13 @@
 	</ConvertAmountDisplay>
 {/snippet}
 
+{#snippet limitRows()}
+	{#if nonNullish(previousLimit)}
+		{@render limitRow(previousLimit, $i18n.usage_credits.text.previous_limit)}
+	{/if}
+	{@render limitRow(ownCycles.approved, $i18n.usage_credits.text.own_credits_after)}
+{/snippet}
+
 {#snippet approvalFee()}
 	<FeeDisplay decimals={token.decimals} {exchangeRate} feeAmount={fee} symbol={token.symbol}>
 		{#snippet label()}{$i18n.fee.text.approval_fee}{/snippet}
@@ -154,7 +172,7 @@
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsUsageCredits.REVIEW && nonNullish(parsedAmount)}
 			<ContentWithToolbar>
-				{@render limitRow(ownCycles.approved, $i18n.usage_credits.text.own_credits_after)}
+				{@render limitRows()}
 				{@render limitRow(parsedAmount, $i18n.usage_credits.text.new_limit)}
 				{@render approvalFee()}
 
@@ -213,7 +231,7 @@
 					</TokenInput>
 				</div>
 
-				{@render limitRow(ownCycles.approved, $i18n.usage_credits.text.own_credits_after)}
+				{@render limitRows()}
 				{@render approvalFee()}
 
 				{#snippet toolbar()}

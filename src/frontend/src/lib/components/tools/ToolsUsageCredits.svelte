@@ -55,10 +55,17 @@
 
 	// The limit the user set last, as the index lists it.
 	let indexedLimit = $state<bigint | undefined>();
+	// The index follows the ledger a few seconds behind: a limit just set from here counts while
+	// nothing has been charged from it.
+	let setLimit = $state<bigint | undefined>();
 
 	let previousLimit = $derived.by(() => {
 		if (isNullish(ownCycles)) {
 			return undefined;
+		}
+
+		if (nonNullish(setLimit) && setLimit === ownCycles.approved) {
+			return setLimit;
 		}
 
 		// A limit below what is left of it can't be the one in force: then only what is left shows.
@@ -270,7 +277,13 @@
 	</SettingsCard>
 
 	{#if addModalOpen && nonNullish(ownCycles)}
-		<ToolsUsageCreditsModal onError={load} {ownCycles} {token} />
+		<ToolsUsageCreditsModal
+			onError={load}
+			onSet={(limit) => (setLimit = limit)}
+			{ownCycles}
+			{previousLimit}
+			{token}
+		/>
 	{:else if mintModalOpen}
 		<CyclesMintModal destinationToken={token} />
 	{/if}
