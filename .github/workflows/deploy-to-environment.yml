@@ -95,6 +95,8 @@ on:
         required: false
       VITE_LIFI_INTEGRATOR_STAGING:
         required: false
+      VITE_NEAR_INTENTS_API_KEY_STAGING:
+        required: false
       DFX_DEPLOY_KEY_STAGING:
         required: true
       VITE_ETHERSCAN_API_KEY_BETA:
@@ -343,6 +345,7 @@ jobs:
               echo "VITE_XRP_RPC_URL_MAINNET=$(get VITE_XRP_RPC_URL_MAINNET "$VITE_XRP_RPC_URL_MAINNET_STAGING")"
               echo "VITE_LIFI_API_KEY=$(get VITE_LIFI_API_KEY "$VITE_LIFI_API_KEY_STAGING")"
               echo "VITE_LIFI_INTEGRATOR=$(get VITE_LIFI_INTEGRATOR "$VITE_LIFI_INTEGRATOR_STAGING")"
+              echo "VITE_NEAR_INTENTS_API_KEY=$(get VITE_NEAR_INTENTS_API_KEY "$VITE_NEAR_INTENTS_API_KEY_STAGING")"
             } >> $GITHUB_OUTPUT
 
             # Special handling for AUTH_ALTERNATIVE_ORIGINS:
@@ -410,6 +413,7 @@ jobs:
           VITE_XRP_RPC_URL_MAINNET_STAGING: ${{ secrets.VITE_XRP_RPC_URL_MAINNET_STAGING }}
           VITE_LIFI_API_KEY_STAGING: ${{ secrets.VITE_LIFI_API_KEY_STAGING }}
           VITE_LIFI_INTEGRATOR_STAGING: ${{ secrets.VITE_LIFI_INTEGRATOR_STAGING }}
+          VITE_NEAR_INTENTS_API_KEY_STAGING: ${{ secrets.VITE_NEAR_INTENTS_API_KEY_STAGING }}
           DFX_DEPLOY_KEY_STAGING: ${{ secrets.DFX_DEPLOY_KEY_STAGING }}
 
           VITE_ETHERSCAN_API_KEY_BETA: ${{ secrets.VITE_ETHERSCAN_API_KEY_BETA }}
@@ -491,6 +495,7 @@ jobs:
           VITE_XRP_RPC_URL_MAINNET: ${{ steps.set-outputs.outputs.VITE_XRP_RPC_URL_MAINNET }}
           VITE_LIFI_API_KEY: ${{ steps.set-outputs.outputs.VITE_LIFI_API_KEY }}
           VITE_LIFI_INTEGRATOR: ${{ steps.set-outputs.outputs.VITE_LIFI_INTEGRATOR }}
+          VITE_NEAR_INTENTS_API_KEY: ${{ steps.set-outputs.outputs.VITE_NEAR_INTENTS_API_KEY }}
 
       - name: Deploy Frontend to Environment
         run: |
@@ -522,6 +527,7 @@ jobs:
           VITE_XRP_RPC_URL_MAINNET: ${{ steps.set-outputs.outputs.VITE_XRP_RPC_URL_MAINNET }}
           VITE_LIFI_API_KEY: ${{ steps.set-outputs.outputs.VITE_LIFI_API_KEY }}
           VITE_LIFI_INTEGRATOR: ${{ steps.set-outputs.outputs.VITE_LIFI_INTEGRATOR }}
+          VITE_NEAR_INTENTS_API_KEY: ${{ steps.set-outputs.outputs.VITE_NEAR_INTENTS_API_KEY }}
           DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
 
       - name: Deploy Backend to Environment
