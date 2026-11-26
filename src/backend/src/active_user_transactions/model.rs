@@ -304,9 +304,13 @@ fn has_sol_mint_in_flight(map: &ActiveUserTransactionsMap, principal: Principal)
 /// `order_id`. A finished one counts too: a delivered or refunded order's deposit
 /// address must not be paid again either. A row the frontend deleted after a
 /// definitive broadcast refusal no longer counts, rightly, since nothing was sent.
-/// Nor does a finished row that `make_room` evicted at the cap: its order has
-/// settled, and the frontend never reuses a quote, and so an order, after an
-/// attempt.
+///
+/// Nor does a finished row the user dismissed, or `make_room` evicted at the cap.
+/// Both happen only once the first deposit has settled, so a tab that stalled
+/// before broadcasting could then pass this check. The frontend covers that gap
+/// by re-reading the order right before it broadcasts, and sends nothing unless
+/// the order still awaits its first deposit. Keeping used order ids here past
+/// their row would need state of its own, which the spec chose not to add.
 ///
 /// Per user, like every other check here: rows are principal-scoped, and an order
 /// is created for one user's addresses. Compared without case, since a UUID is hex.
@@ -4135,6 +4139,20 @@ mod tests {
         delete(&mut map, principal(), "rift-1".to_string()).expect("delete");
 
         create(&mut map, principal(), rift_req("rift-2", RIFT_ORDER_ID), 2).expect("retry");
+    }
+
+    #[test]
+    fn rift_order_freed_once_its_finished_row_is_dismissed() {
+        // By design (spec, "Re-check before broadcast"): the guard lives with the
+        // row. A finished row is dismissed only after the first deposit settled,
+        // and the frontend re-reads the order right before broadcasting, which is
+        // what stops a stalled tab from paying the order again.
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), rift_req("rift-1", RIFT_ORDER_ID), 1).expect("first");
+        set_status(&mut map, "rift-1", ActiveUserTransactionStatus::Succeeded);
+        delete(&mut map, principal(), "rift-1".to_string()).expect("dismiss");
+
+        create(&mut map, principal(), rift_req("rift-2", RIFT_ORDER_ID), 3).expect("recreate");
     }
 
     #[test]

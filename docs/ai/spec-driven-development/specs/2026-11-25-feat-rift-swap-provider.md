@@ -315,7 +315,9 @@ it when the selected provider is Rift (transfer-style, as for NEAR Intents).
    reviewed).
    - In `beforeBroadcast`, create the AUT row with its refs (txid included). If the row cannot be
      created, nothing is broadcast. That includes a second row for the same order
-     ([one row per order](#active-user-transactions)).
+     ([one row per order](#active-user-transactions)). Once the row exists, the hook re-reads the
+     order and broadcasts only if it still awaits its deposit
+     ([re-check before broadcast](#active-user-transactions)).
    - On `isDefinitiveBtcBroadcastRefusal`, delete the row (`deleteUnbroadcastActiveUserTransaction`).
    - On an unclear outcome, keep the row and still enable the destination token, as
      `fetchNearIntentsBtcSwap` does.
@@ -334,7 +336,8 @@ it when the selected provider is Rift (transfer-style, as for NEAR Intents).
      broadcast. This lands as its own refactor PR with no behaviour change.
    - Create the row there, with refs for the deposit hash, nonce and chain id. A second row for the
      same order is refused, and nothing is broadcast
-     ([one row per order](#active-user-transactions)).
+     ([one row per order](#active-user-transactions)). Then re-read the order and broadcast only if
+     it still awaits its deposit ([re-check before broadcast](#active-user-transactions)).
    - On `isDefinitiveTransactionRefusal` (`eth/utils/eth-error.utils.ts`), delete the row.
 3. The BTC destination token is native BTC, which is always enabled; no token enabling is needed.
 4. Track `TRACK_COUNT_SWAP_SUBMITTED`. The modal closes.
@@ -385,6 +388,26 @@ stops with `swap.error.rift_order_in_flight`. After any attempt whose outcome is
 reviewed quote is dropped, so a new swap starts from a fresh quote and therefore a new order. A row
 deleted after a definitive refusal no longer counts, so a retry on that order is allowed: nothing
 was sent.
+
+**Re-check before broadcast** (decided 2026-11-26). The guard holds only while the first row
+exists. A row also goes when the user dismisses it, or when `make_room` evicts it at the cap, and
+both only happen once it is terminal. A tab that stalled between its pre-send checks and its
+broadcast (a sleeping laptop, a suspended tab) could outlast that, and then pass the guard. So,
+once its row is created and right before broadcasting, the hook re-reads the order
+(`GET /order/{id}`, served with order-creation priority by the limiter):
+
+- It broadcasts only if the order still reads `awaiting_deposit` with no `deposit_tx`.
+- Otherwise it deletes its own row (nothing was sent), broadcasts nothing, and stops with
+  `swap.error.rift_order_in_flight`. If the order cannot be read, it does the same but stops with
+  `swap.error.rift_order_refused`.
+
+That closes the gap without new backend state. A row is only terminal once Rift or the source chain
+has settled the first deposit. If Rift saw it, the order no longer reads `awaiting_deposit` with no
+`deposit_tx`. If the source chain failed it (reverted or replaced), nothing reached Rift, so a deposit
+from the stalled tab is the order's first. Two tabs racing within seconds are still stopped by the
+guard, because the first row is not terminal yet. Backend tombstones for used order ids were
+considered and not taken: they would need new stable state, another interface change and a
+retention policy.
 
 **External refs** (`RIFT_EXTERNAL_REF_KEYS`, `lib/types/rift.ts`; keys ≤ 32 chars, values ≤ 256):
 
@@ -538,7 +561,9 @@ flip, gated as in [Flag and env](#flag-and-env).
 7. Every order is created with `refund_address` set to the user's own source-chain address.
 8. No deposit is broadcast without a Rift AUT row. A definitively refused broadcast leaves no row.
    A second attempt on an order that already has a row (a retry after an unclear broadcast, or a
-   second tab) broadcasts nothing and leaves the existing row as it is.
+   second tab) broadcasts nothing and leaves the existing row as it is. An attempt whose order no
+   longer reads `awaiting_deposit` with no `deposit_tx` right before broadcast, or cannot be read,
+   broadcasts nothing and leaves no row of its own.
 9. Status mapping as in the table. A `delivered` row shows `amount_out`; a `refunded` row shows the
    refunded source amount; `frozen` and `expired` rows are `Failed` with their stored reason. An EVM
    deposit that reverted or was replaced turns its row `Failed` without waiting for the deposit
@@ -604,7 +629,7 @@ flip, gated as in [Flag and env](#flag-and-env).
   wording; the intent is fixed above.
 - **Logo**: the official asset from Rift, replacing the placeholder.
 
-## Decisions (2026-11-25)
+## Decisions (2026-11-25, 2026-11-26)
 
 1. **Scope:** BTC ↔ EVM in v1, one PR per direction; EVM ↔ EVM later.
 2. **Midway stop:** design for Rift's documented model (`delivered` in the destination token,
@@ -624,6 +649,8 @@ flip, gated as in [Flag and env](#flag-and-env).
 9. **Terms gate:** none (LI.FI precedent).
 10. **Tokens:** any enabled ERC-20 on the five Rift networks, by contract address.
 11. **Production timing:** after the no-slippage form redesign (`LOCAL || STAGING` through v1).
+12. **Stalled tabs** (2026-11-26): the frontend re-reads the order right before broadcasting,
+    rather than the backend keeping tombstones of used order ids.
 
 ## References
 
