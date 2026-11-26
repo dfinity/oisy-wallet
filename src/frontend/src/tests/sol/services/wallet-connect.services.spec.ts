@@ -21,7 +21,8 @@ import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS,
 	SPL_TOKEN_MAX_AMOUNT,
-	STAKE_PROGRAM_ADDRESS
+	STAKE_PROGRAM_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
@@ -69,6 +70,7 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
+import { getCreateAccountWithSeedInstruction } from '@solana-program/system';
 import { getApproveCheckedInstruction, getApproveInstruction } from '@solana-program/token';
 import type { SignatureBytes } from '@solana/keys';
 import {
@@ -1925,6 +1927,73 @@ describe('wallet-connect.services', () => {
 				);
 
 				const result = await sign({ ...mockParams, simulated: true, simulationRan: true });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+				expect(mockListener.rejectRequest).toHaveBeenCalledOnce();
+			});
+		});
+
+		// The real mapper, on an account opened for the Token-2022 program at a size of the request's
+		// choosing and never initialised, with more writable accounts than a run reads so that none is
+		// made. Nothing in the message is unreadable, so only the creation's own reading refuses it.
+		describe('with an account opened for a token program and left uninitialised', () => {
+			it('should refuse to sign without a simulation', async () => {
+				const { mapSolTransactionMessage: mapper } = await vi.importActual<{
+					mapSolTransactionMessage: typeof mapSolTransactionMessage;
+				}>('$sol/utils/sol-transactions.utils');
+
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockImplementation(mapper);
+
+				// 10 MiB at its exact rent.
+				const creation = getCreateAccountWithSeedInstruction({
+					payer: createNoopSigner(address(mockSolAddress)),
+					newAccount: address(mockSolAddress2),
+					base: address(mockSolAddress),
+					seed: 'vault',
+					amount: 53_268_311_040n,
+					space: 10_485_760n,
+					programAddress: address(TOKEN_2022_PROGRAM_ADDRESS)
+				});
+
+				const unused = Array.from({ length: SOLANA_SIMULATION_MAX_ACCOUNTS }, (_, index) => ({
+					address: getAddressDecoder().decode(new Uint8Array(32).fill(index + 1)),
+					role: AccountRole.WRITABLE
+				}));
+
+				const transactionMessage = pipe(
+					createTransactionMessage({ version: 0 }),
+					(tx) => setTransactionMessageFeePayer(address(mockSolAddress), tx),
+					(tx) =>
+						setTransactionMessageLifetimeUsingBlockhash(
+							{
+								blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+								lastValidBlockHeight: 100n
+							},
+							tx
+						),
+					(tx) =>
+						appendTransactionMessageInstructions(
+							[{ ...creation, accounts: [...creation.accounts, ...unused] }],
+							tx
+						)
+				);
+
+				expect(selectSolSimulationAddresses(transactionMessage).length).toBeGreaterThan(
+					SOLANA_SIMULATION_MAX_ACCOUNTS
+				);
+
+				vi.spyOn(solTransactionsUtils, 'parseSolBase64TransactionMessage').mockResolvedValue(
+					transactionMessage
+				);
+
+				const result = await sign({ ...mockParams, simulated: false, simulationRan: false });
 
 				expect(result).toEqual({ success: false });
 
