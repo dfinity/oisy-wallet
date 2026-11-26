@@ -36,6 +36,8 @@
 //! there are the standard `icrc2_*`. Recorded because it is the obvious thing to
 //! assume, and it is not a reason to write a second client.
 
+use std::cell::Cell;
+
 use candid::{Nat, Principal};
 use ic_cdk::call::{Call, CallFailed, RejectCode};
 // Re-exported so callers keep importing the ledger shapes from the module that
@@ -47,6 +49,7 @@ pub use icrc_ledger_types::{
         transfer_from::{TransferFromArgs, TransferFromError},
     },
 };
+use shared::types::{signer::RateLimitError, tip::MAX_OPEN_TIP_LEDGER_CALLS};
 
 /// Why a payout did not happen.
 ///
@@ -122,6 +125,55 @@ fn classify(response: Result<Nat, TransferFromError>) -> Result<Nat, TransferFro
         }
         Err(TransferFromError::TooOld) => Err(TransferFromCallError::TooOld),
         Err(err) => Err(TransferFromCallError::Failed(format!("{err:?}"))),
+    }
+}
+
+thread_local! {
+    /// Places in use among the [`MAX_OPEN_TIP_LEDGER_CALLS`]. On the heap: an
+    /// upgrade starts again at zero, and a call left open across one passes its
+    /// deadline within [`LEDGER_CALL_TIMEOUT_SECONDS`] anyway.
+    static OPEN_LEDGER_CALLS: Cell<u32> = const { Cell::new(0) };
+}
+
+/// One of the [`MAX_OPEN_TIP_LEDGER_CALLS`] places for calls to a sender's
+/// ledger, held for as long as the value lives.
+///
+/// The deadline bounds how long one call holds its reply reservation; this
+/// bounds how many calls hold one at the same time, which no deadline can,
+/// because the requests that open them may keep coming. A create or a claim
+/// takes a place before its first ledger call and keeps it until its last one
+/// has answered, and it makes one call at a time. Dropping the value gives the
+/// place back, and ic-cdk drops it too when a trap cancels the task holding it,
+/// so a place is never lost.
+#[must_use = "the place is given back as soon as this value is dropped"]
+pub struct LedgerCallSlot(());
+
+impl LedgerCallSlot {
+    /// Takes a place for `caller`'s request.
+    ///
+    /// # Errors
+    /// A [`RateLimitError`] when every place is taken, naming the cap and one
+    /// call's deadline as the window: places come free as the calls holding
+    /// them answer or reach it.
+    pub fn acquire(caller: Principal) -> Result<Self, RateLimitError> {
+        OPEN_LEDGER_CALLS.with(|open| {
+            let taken = open.get();
+            if taken >= MAX_OPEN_TIP_LEDGER_CALLS {
+                return Err(RateLimitError {
+                    max_calls: MAX_OPEN_TIP_LEDGER_CALLS,
+                    window_ns: u64::from(LEDGER_CALL_TIMEOUT_SECONDS) * 1_000_000_000,
+                    caller,
+                });
+            }
+            open.set(taken + 1);
+            Ok(Self(()))
+        })
+    }
+}
+
+impl Drop for LedgerCallSlot {
+    fn drop(&mut self) {
+        OPEN_LEDGER_CALLS.with(|open| open.set(open.get().saturating_sub(1)));
     }
 }
 
@@ -350,5 +402,32 @@ mod tests {
                 required: 2,
             }
         )));
+    }
+
+    /// Every place up to the cap is given out, the next request is turned away
+    /// with the numbers the client shows, and a place handed back is there for
+    /// the request after.
+    #[test]
+    fn open_ledger_calls_stop_at_the_cap_until_a_place_is_given_back() {
+        let caller = Principal::from_slice(&[7]);
+        let mut held: Vec<LedgerCallSlot> = (0..MAX_OPEN_TIP_LEDGER_CALLS)
+            .map(|_| LedgerCallSlot::acquire(caller).expect("a place below the cap"))
+            .collect();
+
+        assert_eq!(
+            LedgerCallSlot::acquire(caller).err(),
+            Some(RateLimitError {
+                max_calls: MAX_OPEN_TIP_LEDGER_CALLS,
+                window_ns: 30_000_000_000,
+                caller,
+            })
+        );
+
+        held.pop();
+
+        assert!(
+            LedgerCallSlot::acquire(caller).is_ok(),
+            "a place handed back is free for the next request"
+        );
     }
 }
