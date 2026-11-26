@@ -285,21 +285,40 @@ export const loadNextErc20UserTransactions = async ({
 	// At the cap the canister trims the oldest entries on every save, so history older than what it
 	// already holds would be written and evicted in the same call.
 	if (verdictsAreResolved && !isEthBackendAtCapacity(tokenId)) {
-		try {
-			const { getBlockNumber } = infuraProviders(networkId);
-
-			const latestBlockNumber = await getBlockNumber();
-
-			await saveErc20FinalizedTransactions({
-				identity,
-				tokenId: transactionTokenId,
-				transactions: olderTransactions,
-				currentBlockNumber: latestBlockNumber
-			});
-		} catch (_: unknown) {
+		// See the native loader: not awaited, so a save the rate limit holds back never holds the
+		// next page.
+		saveOlderErc20Page({
+			identity,
+			transactionTokenId,
+			networkId,
+			transactions: olderTransactions
+		}).catch(() => {
 			// We silently ignore the saving errors since it is just useful for the next time, and not necessary for the user experience
-		}
+		});
 	}
 
 	return { hasMore: true };
+};
+
+const saveOlderErc20Page = async ({
+	identity,
+	transactionTokenId,
+	networkId,
+	transactions
+}: {
+	identity: NullishIdentity;
+	transactionTokenId: BackendTokenId;
+	networkId: NetworkId;
+	transactions: Transaction[];
+}): Promise<void> => {
+	const { getBlockNumber } = infuraProviders(networkId);
+
+	const latestBlockNumber = await getBlockNumber();
+
+	await saveErc20FinalizedTransactions({
+		identity,
+		tokenId: transactionTokenId,
+		transactions,
+		currentBlockNumber: latestBlockNumber
+	});
 };

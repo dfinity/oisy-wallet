@@ -25,7 +25,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { MAX_USER_TRANSACTIONS_PER_TOKEN } from '$lib/constants/user-transactions.constants';
 import type { Transaction } from '$lib/types/transaction';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { createMockBackendUserTransaction } from '$tests/mocks/user-transactions.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -395,6 +395,64 @@ describe('erc20-user-transactions.services', () => {
 					transactions: [expect.objectContaining({ id: '0xolder' })]
 				})
 			);
+		});
+
+		describe('when the canister refuses the save for its rate limit', () => {
+			beforeEach(() => {
+				vi.useFakeTimers();
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it('should resolve the page while the save waits for the limit window', async () => {
+				mockErc20Transactions.mockResolvedValue([makeTx({ hash: '0xolder', blockNumber: 20 })]);
+				mockSaveUserTransactions
+					.mockRejectedValueOnce({
+						RateLimited: { max_calls: 30, window_ns: 60_000_000_000n, caller: mockPrincipal }
+					})
+					.mockResolvedValue(undefined);
+
+				const { hasMore } = await loadNextErc20UserTransactions({
+					identity: mockIdentity,
+					address: mockEthAddress,
+					transactionTokenId: backendTokenId,
+					token: USDC_TOKEN,
+					tokenId: USDC_TOKEN.id,
+					networkId: ETHEREUM_NETWORK_ID,
+					oldestLoadedBlockNumber: 60
+				});
+
+				expect(hasMore).toBeTruthy();
+
+				await vi.waitFor(() => expect(mockSaveUserTransactions).toHaveBeenCalledOnce());
+
+				await vi.advanceTimersByTimeAsync(60_000);
+
+				expect(mockSaveUserTransactions).toHaveBeenCalledTimes(2);
+			});
+		});
+
+		it('should resolve the page when the save in the background fails', async () => {
+			mockErc20Transactions.mockResolvedValue([makeTx({ hash: '0xolder', blockNumber: 20 })]);
+			mockGetBlockNumber.mockRejectedValue(new Error('Chain tip unavailable'));
+
+			const { hasMore } = await loadNextErc20UserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: backendTokenId,
+				token: USDC_TOKEN,
+				tokenId: USDC_TOKEN.id,
+				networkId: ETHEREUM_NETWORK_ID,
+				oldestLoadedBlockNumber: 60
+			});
+
+			expect(hasMore).toBeTruthy();
+
+			await vi.waitFor(() => expect(mockGetBlockNumber).toHaveBeenCalledOnce());
+
+			expect(mockSaveUserTransactions).not.toHaveBeenCalled();
 		});
 
 		// At the cap the canister trims the oldest entries on every save, so persisting older history

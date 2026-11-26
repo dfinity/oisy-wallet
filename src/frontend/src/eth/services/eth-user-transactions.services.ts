@@ -382,21 +382,40 @@ const loadOlderFromEtherscan = async ({
 	ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
 
 	if (!skipSave) {
-		try {
-			const { getBlockNumber } = infuraProviders(networkId);
-
-			const latestBlockNumber = await getBlockNumber();
-
-			await saveEthFinalizedTransactions({
-				identity,
-				tokenId: transactionTokenId,
-				transactions: olderTransactions,
-				currentBlockNumber: latestBlockNumber
-			});
-		} catch (_: unknown) {
+		// Not awaited: the page is already on screen, and a save the canister's rate limit refuses
+		// waits out the limit's window before it is sent again, which would hold the next page.
+		saveOlderEtherscanPage({
+			identity,
+			transactionTokenId,
+			networkId,
+			transactions: olderTransactions
+		}).catch(() => {
 			// We silently ignore the saving errors since it is just useful for the next time, and not necessary for the user experience
-		}
+		});
 	}
 
 	return { hasMore: true };
+};
+
+const saveOlderEtherscanPage = async ({
+	identity,
+	transactionTokenId,
+	networkId,
+	transactions
+}: {
+	identity: NullishIdentity;
+	transactionTokenId: BackendTokenId;
+	networkId: NetworkId;
+	transactions: Transaction[];
+}): Promise<void> => {
+	const { getBlockNumber } = infuraProviders(networkId);
+
+	const latestBlockNumber = await getBlockNumber();
+
+	await saveEthFinalizedTransactions({
+		identity,
+		tokenId: transactionTokenId,
+		transactions,
+		currentBlockNumber: latestBlockNumber
+	});
 };
