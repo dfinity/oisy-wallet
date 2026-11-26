@@ -3,6 +3,7 @@ import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { AAUTOPILOT_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc4626/tokens.aautopilot_usdc.env';
 import { ARBITRUM_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { BNB_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
@@ -43,6 +44,18 @@ describe('rift.utils', () => {
 
 		it('names an ERC-20 by its lowercased contract address', () => {
 			expect(toRiftAssetId(erc20({}))).toBe('evm:1.0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48');
+		});
+
+		it('names an ERC-4626 vault share by its own contract address, not its asset', () => {
+			expect(toRiftAssetId(AAUTOPILOT_USDC_TOKEN)).toBe(
+				'evm:42161.0x407d3d942d0911a2fea7e22417f81e27c02d6c6f'
+			);
+		});
+
+		it('names no asset for an ERC-4626 vault share on a network Rift does not list', () => {
+			expect(
+				toRiftAssetId({ ...AAUTOPILOT_USDC_TOKEN, network: BSC_MAINNET_NETWORK })
+			).toBeUndefined();
 		});
 
 		it.each([

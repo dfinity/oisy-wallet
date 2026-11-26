@@ -222,7 +222,8 @@ through one limiter in `rift.rest.ts`:
 - An EVM native coin on a Rift network → `evm:<chainId>.<name>`, with the name from
   `RIFT_EVM_NATIVE_ASSETS`.
 - An ERC-20 on a Rift network → `evm:<chainId>.<contract address>`, lowercased. Any enabled ERC-20
-  qualifies (decided 2026-11-25); Rift answers 422 when it has no route, which is no offer.
+  qualifies (decided 2026-11-25). An ERC-4626 vault share counts as one, under its own contract
+  address, as it does for LI.FI. Rift answers 422 when it has no route, which is no offer.
 - Anything else → `undefined` (never asked about).
 
 The native-coin ids are pinned from live `format: "raw"` quotes (2026-11-26; see
