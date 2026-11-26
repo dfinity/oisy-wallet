@@ -40,7 +40,8 @@ const orderRequest: RiftOrderRequest = {
 	refund_address: mockRiftOrderResponse.refund_address
 };
 
-// A JSON answer whose body can be read any number of times, so one can answer several calls.
+// A JSON answer whose body can be read any number of times, so one can answer several calls: a real
+// `Response`'s own body can be read only once.
 const jsonResponse = ({
 	body,
 	status = 200,
@@ -49,14 +50,11 @@ const jsonResponse = ({
 	body: unknown;
 	status?: number;
 	headers?: Record<string, string>;
-}): Response =>
-	({
-		ok: status >= 200 && status < 300,
-		status,
-		statusText: '',
-		headers: new Headers(headers),
-		json: () => Promise.resolve(body)
-	}) as unknown as Response;
+}): Response => {
+	const response = new Response(JSON.stringify(body), { status, headers });
+	response.json = () => Promise.resolve(body);
+	return response;
+};
 
 // Answers a quote request with the quote, and anything else with the order.
 const answerByPath = (input: RequestInfo | URL): Promise<Response> =>
