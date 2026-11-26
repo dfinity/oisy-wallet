@@ -5,6 +5,7 @@ import { ATA_SIZE } from '$sol/constants/ata.constants';
 import {
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
@@ -52,6 +53,7 @@ import {
 	getCloseAccountInstruction,
 	getInitializeAccount3Instruction,
 	getInitializeAccountInstruction,
+	getInitializeMint2Instruction,
 	getSetAuthorityInstruction,
 	getTransferCheckedInstruction
 } from '@solana-program/token';
@@ -157,7 +159,8 @@ describe('sol-transactions.utils', () => {
 			expect(spyMapSolInstruction).toHaveBeenCalledExactlyOnceWith({
 				instruction: instruction1,
 				userAddress: undefined,
-				returnsToWallet: false
+				returnsToWallet: false,
+				initialised: false
 			});
 		});
 
@@ -173,7 +176,8 @@ describe('sol-transactions.utils', () => {
 					instruction,
 					userAddress: undefined,
 					rentExemptMinimum: 1_488_440n,
-					returnsToWallet: false
+					returnsToWallet: false,
+					initialised: false
 				})
 			);
 		});
@@ -192,17 +196,20 @@ describe('sol-transactions.utils', () => {
 			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(1, {
 				instruction: instruction1,
 				userAddress: undefined,
-				returnsToWallet: false
+				returnsToWallet: false,
+				initialised: false
 			});
 			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(2, {
 				instruction: instruction2,
 				userAddress: undefined,
-				returnsToWallet: false
+				returnsToWallet: false,
+				initialised: false
 			});
 			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(3, {
 				instruction: instruction3,
 				userAddress: undefined,
-				returnsToWallet: false
+				returnsToWallet: false,
+				initialised: false
 			});
 		});
 
@@ -719,6 +726,129 @@ describe('sol-transactions.utils', () => {
 						},
 						userAddress: user
 					}).ambiguous
+				).toBeTruthy();
+			});
+		});
+
+		// A dApp opens a token account for the user and initialises it in the same request. Left
+		// uninitialised, the account is anybody's to make theirs and close.
+		describe('an account the message opens for a token program', () => {
+			const user = mockSolAddress;
+			const account = mockSolAddress3;
+			const reserve = 1_488_440n;
+
+			beforeEach(() => {
+				// the surrounding suite stubs the instruction mapper; these cases exercise the real one
+				spyMapSolInstruction.mockRestore();
+			});
+
+			const opening = ({ programAddress = TOKEN_PROGRAM_ADDRESS } = {}) =>
+				getCreateAccountInstruction({
+					payer: createNoopSigner(address(user)),
+					newAccount: createNoopSigner(address(account)),
+					lamports: reserve,
+					space: ATA_SIZE,
+					programAddress: address(programAddress)
+				});
+
+			const initialisation = () =>
+				getInitializeAccount3Instruction({
+					account: address(account),
+					mint: address(JUP_TOKEN.address),
+					owner: address(user)
+				});
+
+			const map = (instructions: Instruction[]) =>
+				mapSolTransactionMessage({
+					transactionMessage: { ...mockSolParsedTransactionMessage, instructions },
+					userAddress: user,
+					rentExemptMinimum: reserve
+				});
+
+			it('should state the rent of one the message initialises', () => {
+				const mapped = map([opening(), initialisation()]);
+
+				expect(mapped.ambiguous).toBeUndefined();
+				expect(mapped.amount).toBe(reserve);
+				expect(mapped.payer).toBe(user);
+			});
+
+			it('should accept one initialised by an instruction a token batch carries', () => {
+				expect(map([opening(), getBatchInstruction([initialisation()])]).ambiguous).toBeUndefined();
+			});
+
+			it('should leave one initialised as a mint to the warning that initialisation carries', () => {
+				// 82 bytes, at the reserve scaled to that size.
+				const mapped = map([
+					getCreateAccountInstruction({
+						payer: createNoopSigner(address(user)),
+						newAccount: createNoopSigner(address(account)),
+						lamports: 1_066_800n,
+						space: 82n,
+						programAddress: address(TOKEN_PROGRAM_ADDRESS)
+					}),
+					getInitializeMint2Instruction({
+						mint: address(account),
+						decimals: 6,
+						mintAuthority: address(user)
+					})
+				]);
+
+				expect(mapped.ambiguous).toBeUndefined();
+				expect(mapped.unreviewed).toBeTruthy();
+			});
+
+			it.each([
+				{ program: 'Token', programAddress: TOKEN_PROGRAM_ADDRESS },
+				{ program: 'Token-2022', programAddress: TOKEN_2022_PROGRAM_ADDRESS }
+			])(
+				'should refuse one for the $program program the message leaves uninitialised',
+				({ programAddress }) => {
+					expect(map([opening({ programAddress })])).toStrictEqual({
+						amount: undefined,
+						ambiguous: true
+					});
+				}
+			);
+
+			// Sized as the request likes: 10 MiB at its exact rent, with nothing else in the message
+			// that OISY cannot read, so nothing else would hold it.
+			it('should refuse a large Token-2022 one opened at a seed and left uninitialised', () => {
+				expect(
+					map([
+						getCreateAccountWithSeedInstruction({
+							payer: createNoopSigner(address(user)),
+							newAccount: address(account),
+							base: address(user),
+							seed: 'vault',
+							amount: 53_268_311_040n,
+							space: 10_485_760n,
+							programAddress: address(TOKEN_2022_PROGRAM_ADDRESS)
+						})
+					])
+				).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should refuse one initialised by the other token program', () => {
+				expect(
+					map([opening({ programAddress: TOKEN_2022_PROGRAM_ADDRESS }), initialisation()]).ambiguous
+				).toBeTruthy();
+			});
+
+			// An address closed and opened again is a second account, which the first initialisation
+			// does not set up.
+			it('should refuse a second opening at the address that nothing initialises', () => {
+				expect(
+					map([
+						opening(),
+						initialisation(),
+						getCloseAccountInstruction({
+							account: address(account),
+							destination: address(user),
+							owner: createNoopSigner(address(user))
+						}),
+						opening()
+					]).ambiguous
 				).toBeTruthy();
 			});
 		});

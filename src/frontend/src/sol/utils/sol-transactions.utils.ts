@@ -6,6 +6,7 @@ import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-me
 import { calculateSolPrioritizationFee, resolveSolComputeUnitLimit } from '$sol/utils/fee.utils';
 import {
 	mapSolInstruction,
+	solTokenProgramOpeningsInitialised,
 	solUnbatchedInstructions,
 	solWrappedSolOpeningsReturnedToWallet
 } from '$sol/utils/sol-instructions.utils';
@@ -153,6 +154,9 @@ export const mapSolTransactionMessage = ({
 		instructions: unbatched,
 		userAddress
 	});
+	// So is whether the message initialises an account it opens for a token program, and an
+	// initialisation a batch carries sets the account up as one stated on its own does.
+	const initialised = solTokenProgramOpeningsInitialised({ instructions: unbatched });
 
 	const mapped = unbatched.reduce<MappedSolTransaction>(
 		(acc, instruction, index) => {
@@ -171,7 +175,8 @@ export const mapSolTransactionMessage = ({
 				instruction,
 				userAddress,
 				rentExemptMinimum,
-				returnsToWallet: returnedToWallet.has(index)
+				returnsToWallet: returnedToWallet.has(index),
+				initialised: initialised.has(index)
 			});
 
 			// The summary holds a single value per field, so any later instruction that
