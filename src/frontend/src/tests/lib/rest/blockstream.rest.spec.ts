@@ -1,4 +1,5 @@
 import { BLOCKSTREAM_API_URL } from '$env/rest/blockstream.env';
+import { BTC_TRANSACTION_STATUS_TIMEOUT_MILLIS } from '$lib/constants/app.constants';
 import { btcTransactionStatus } from '$lib/rest/blockstream.rest';
 
 describe('blockstream.rest', () => {
@@ -22,7 +23,22 @@ describe('blockstream.rest', () => {
 
 			await expect(btcTransactionStatus({ txid })).resolves.toEqual({ confirmed: false });
 
-			expect(fetchSpy).toHaveBeenCalledExactlyOnceWith(`${BLOCKSTREAM_API_URL}/tx/${txid}`);
+			expect(fetchSpy).toHaveBeenCalledExactlyOnceWith(`${BLOCKSTREAM_API_URL}/tx/${txid}`, {
+				signal: expect.any(AbortSignal)
+			});
+		});
+
+		it('should give the lookup a deadline', async () => {
+			const { signal } = new AbortController();
+			const timeoutSpy = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(signal);
+			const fetchSpy = mockFetch({ status: 404 });
+
+			await btcTransactionStatus({ txid });
+
+			expect(timeoutSpy).toHaveBeenCalledExactlyOnceWith(BTC_TRANSACTION_STATUS_TIMEOUT_MILLIS);
+			expect(fetchSpy).toHaveBeenCalledExactlyOnceWith(`${BLOCKSTREAM_API_URL}/tx/${txid}`, {
+				signal
+			});
 		});
 
 		it('should return undefined for a transaction the network does not know', async () => {

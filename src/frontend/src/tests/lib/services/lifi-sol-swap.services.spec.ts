@@ -19,6 +19,7 @@ import { toLifiExternalRefsMap } from '$lib/utils/lifi-active-tx.utils';
 import { sendSignedTransaction } from '$sol/services/sol-send.services';
 import { signTransaction } from '$sol/utils/sol-sign.utils';
 import { decodeTransactionMessage } from '$sol/utils/sol-transactions.utils';
+import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockLifiSolSolToUsdc, mockLifiSolUser } from '$tests/mocks/lifi-sol-transaction.mock';
 import { mockLifiQuote } from '$tests/mocks/lifi.mock';
@@ -164,7 +165,7 @@ describe('lifi-sol-swap.services', () => {
 			[mockLifiSolUser]: userSignature
 		} as SignatureDictionary);
 		vi.mocked(sendSignedTransaction).mockResolvedValue(undefined);
-		vi.mocked(createActiveUserTransaction).mockResolvedValue(undefined);
+		vi.mocked(createActiveUserTransaction).mockResolvedValue(mockActiveUserTransaction);
 		vi.mocked(deleteActiveUserTransaction).mockResolvedValue(undefined);
 	});
 

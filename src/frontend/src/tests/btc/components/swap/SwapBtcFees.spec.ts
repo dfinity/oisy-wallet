@@ -6,6 +6,7 @@ import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
@@ -34,6 +35,30 @@ describe('SwapBtcFees', () => {
 		swapDetails: mockNearIntentsQuoteResponse,
 		type: undefined
 	};
+
+	// Its own selection's fee differs from the loader's, which prices one output only.
+	const lifiOffer = ({
+		withSelection = true
+	}: { withSelection?: boolean } = {}): SwapMappedResult => ({
+		provider: SwapProvider.LIFI,
+		receiveAmount: 1_000_000n,
+		receiveOutMinimum: 990_000n,
+		swapDetails: mockLifiBtcLayerswapQuote,
+		request: {
+			fromChain: 20000000000001,
+			toChain: 1,
+			fromToken: 'bitcoin',
+			toToken: '0x0000000000000000000000000000000000000000',
+			fromAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+			fromAmount: '1000000'
+		},
+		...(withSelection && {
+			btcSelection: {
+				utxosFee: { ...mockUtxosFee, feeSatoshis: 2_130n },
+				outputVSizes: [43, 29, 31]
+			}
+		})
+	});
 
 	const createContext = ({
 		offer,
@@ -122,6 +147,26 @@ describe('SwapBtcFees', () => {
 
 		expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
 		expect(queryByText(en.swap.text.total_fee)).not.toBeInTheDocument();
+	});
+
+	// LI.FI's and the bridge's fees come out of the amount and are in the provider sheet; the network
+	// fee is its own selection's, priced for its deposit, memo and fee outputs, not the loader's.
+	it("renders the Bitcoin network fee of a LI.FI offer's own selection", () => {
+		const { getByText, queryByText } = render(SwapBtcFees, {
+			context: createContext({ offer: lifiOffer() })
+		});
+
+		expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
+		expect(getByText('0.0000213 BTC')).toBeInTheDocument();
+		expect(queryByText('0.00001 BTC')).not.toBeInTheDocument();
+	});
+
+	it('renders nothing for a LI.FI offer without its selection, rather than the loader fee', () => {
+		const { container } = render(SwapBtcFees, {
+			context: createContext({ offer: lifiOffer({ withSelection: false }) })
+		});
+
+		expect(container.textContent?.trim()).toBe('');
 	});
 
 	it('renders nothing for a NEAR Intents offer while the UTXO fee is unknown', () => {

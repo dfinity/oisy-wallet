@@ -1,7 +1,9 @@
 import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { MODAL_TOKENS_LIST, NETWORK_FILTER } from '$lib/constants/test-ids.constants';
@@ -16,6 +18,7 @@ import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { Network } from '$lib/types/network';
 import { SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
@@ -25,8 +28,8 @@ import {
 	mockModalTokensListContextEntry
 } from '$tests/utils/misc.context.test-utils';
 import { nonNullish } from '@dfinity/utils';
-import { render, screen, within } from '@testing-library/svelte';
-import { get, readable } from 'svelte/store';
+import { render, screen, waitFor, within } from '@testing-library/svelte';
+import { get, readable, writable } from 'svelte/store';
 
 describe('SwapTokensList', () => {
 	const props = {
@@ -202,6 +205,38 @@ describe('SwapTokensList', () => {
 			expect(networkChip()).toHaveTextContent(get(i18n).networks.chain_fusion);
 			expect(rowFor(icpToken.symbol)).toBeInTheDocument();
 			expect(rowFor(btcToken.symbol)).toBeUndefined();
+		});
+
+		it('keeps the wizard network scope when receive tokens load after opening', async () => {
+			const tokens = writable<TokenToggleable<Token>[]>([]);
+			vi.spyOn(swapDerived, 'allSwapUniverseTokens', 'get').mockReturnValue(tokens);
+			const reachable = { coverage: 'none' as const, supportedTokenIds: new Set<string>() };
+
+			render(SwapTokensList, {
+				props: destinationProps,
+				context: mockContext({
+					sourceToken: mockValidIcToken,
+					receiveSupportedData: {
+						icp: reachable,
+						evm: reachable,
+						sol: reachable,
+						btc: reachable,
+						xrp: reachable
+					},
+					// The empty constraint at open leaves all of the wizard's swap networks available.
+					networks: [ICP_NETWORK, SOLANA_MAINNET_NETWORK]
+				})
+			});
+
+			expect(rowFor(icpToken.symbol)).toBeUndefined();
+
+			tokens.set([icpToken, { ...SOLANA_TOKEN, enabled: true }, btcToken]);
+
+			await waitFor(() => {
+				expect(rowFor(icpToken.symbol)).toBeInTheDocument();
+				expect(rowFor(SOLANA_TOKEN.symbol)).toBeInTheDocument();
+				expect(rowFor(btcToken.symbol)).toBeUndefined();
+			});
 		});
 
 		it('offers only the networks with something to pick', async () => {

@@ -21,20 +21,29 @@ export type SolSourceTxOutcome = 'succeeded' | 'reverted' | 'pending' | 'expired
  * A transaction that landed just before its blockhash aged out did so before that slot, so a status
  * read from a node not that far yet can miss it. A missing status is only evidence once its read is
  * at or past the slot the blockhash was found invalid at; before that, the transaction is pending.
+ *
+ * With `finalized`, only a finalized status is a verdict: a confirmed block can still be rolled back,
+ * and a caller that acts for good on the outcome waits until it cannot.
  */
 export const toSolSourceTxOutcome = ({
 	status,
 	statusSlot,
-	blockhash
+	blockhash,
+	finalized = false
 }: {
 	status: SolanaSignatureStatus;
 	statusSlot: bigint;
 	blockhash?: { valid: boolean; slot: bigint };
+	finalized?: boolean;
 }): SolSourceTxOutcome => {
 	if (nonNullish(status)) {
 		const { confirmationStatus, err } = status;
 
-		if (confirmationStatus !== 'confirmed' && confirmationStatus !== 'finalized') {
+		const settled = finalized
+			? confirmationStatus === 'finalized'
+			: confirmationStatus === 'confirmed' || confirmationStatus === 'finalized';
+
+		if (!settled) {
 			return 'pending';
 		}
 

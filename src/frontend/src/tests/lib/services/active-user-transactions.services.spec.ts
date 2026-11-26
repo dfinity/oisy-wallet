@@ -233,6 +233,20 @@ describe('active-user-transactions.services', () => {
 			expect(get(activeUserTransactionsList)).toEqual([mockActiveUserTransaction]);
 		});
 
+		// With the backend's time on it, which the caller can measure against.
+		it('should return the row as the backend stored it', async () => {
+			vi.spyOn(backendApi, 'createActiveUserTransaction').mockResolvedValue(
+				mockActiveUserTransaction
+			);
+
+			await expect(
+				createActiveUserTransaction({
+					identity: mockIdentity,
+					...mockCreateActiveUserTransactionParams
+				})
+			).resolves.toBe(mockActiveUserTransaction);
+		});
+
 		// The account switched while the call was in flight: the row is not this account's.
 		it('should not upsert into the store of another account', async () => {
 			vi.spyOn(backendApi, 'createActiveUserTransaction').mockResolvedValue(

@@ -22,5 +22,10 @@ export const swapWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps<Wizard
 	{
 		name: WizardStepsSwap.SELECT_PROVIDER,
 		title: i18n.swap.text.smart_swap
+	},
+	// Titled by the modal, which knows the symbol: "Move <symbol> to".
+	{
+		name: WizardStepsSwap.MOVE_TOKEN,
+		title: i18n.swap.text.move_token_to
 	}
 ];

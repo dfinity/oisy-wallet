@@ -1,5 +1,6 @@
 import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import SwapIcpForm from '$icp/components/swap/SwapIcpForm.svelte';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
@@ -8,6 +9,7 @@ import {
 	CONVERT_AMOUNT_DISPLAY_SKELETON,
 	CONVERT_AMOUNT_EXCHANGE_SKELETON,
 	MAX_BUTTON,
+	SWAP_CLEAR_DESTINATION_TOKEN,
 	SWAP_FEE_ROW,
 	SWAP_PROVIDER_STATUS,
 	SWAP_SWITCH_TOKENS_BUTTON,
@@ -17,13 +19,18 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
+import { SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY } from '$lib/stores/swap-receive-shortcuts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import type { ChainFusionSwapDetails, SwapMappedResult } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import en from '$tests/mocks/i18n.mock';
-import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockValidIcCkToken,
+	mockValidIcToken,
+	mockValidIcrcToken
+} from '$tests/mocks/ic-tokens.mock';
 import { mockChainFusionProvider, mockOneSecProvider } from '$tests/mocks/swap.mocks';
 import { assertNonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -228,6 +235,49 @@ describe('SwapIcpForm', () => {
 		});
 
 		expect(container).toBeInTheDocument();
+	});
+
+	it.each([0, 500])('keeps a Chain Fusion Max amount when clearing after %i ms', async (delay) => {
+		const sourceToken = mockValidIcrcToken;
+		const context = new Map(mockContext);
+		context.set(SWAP_CONTEXT_KEY, {
+			...initSwapContext({ sourceToken, destinationToken: BTC_MAINNET_TOKEN }),
+			isSourceTokenIcrc2: readable(true)
+		});
+		context.set(SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY, {
+			showReceiveList: vi.fn(),
+			showMoveStep: vi.fn()
+		});
+
+		const provider = mockChainFusionProvider();
+		const store = initSwapAmountsStore();
+		store.setSwaps({ swaps: [provider], amountForSwap: 0.99, selectedProvider: provider });
+		context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store });
+		balancesStore.set({ id: sourceToken.id, data: { data: 100_000_000n, certified: true } });
+
+		vi.useFakeTimers();
+
+		try {
+			const { container, getByTestId } = render(SwapIcpForm, {
+				props: { ...props, swapAmount: undefined, sourceTokenFee: 1_000_000n },
+				context
+			});
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+			await vi.advanceTimersByTimeAsync(delay);
+			const payAmount = container.querySelector(amountSelector);
+
+			expect(payAmount).toHaveValue('0.99');
+
+			await fireEvent.click(getByTestId(SWAP_CLEAR_DESTINATION_TOKEN));
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(MAX_BUTTON)).toHaveTextContent('0.98');
+			expect(payAmount).toHaveValue('0.99');
+		} finally {
+			vi.useRealTimers();
+			balancesStore.reset(sourceToken.id);
+		}
 	});
 
 	it('should render exchange value displays', () => {

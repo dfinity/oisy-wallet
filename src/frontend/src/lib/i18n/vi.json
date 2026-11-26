@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",
-			"session_expired": "Bạn đã bị đăng xuất vì phiên của bạn đã hết hạn.",
 			"reload_and_retry": "Đã xảy ra lỗi trong quá trình đăng nhập. Vui lòng tải lại trang và thử lại. Nếu lỗi này vẫn tiếp diễn, vui lòng liên hệ bộ phận hỗ trợ."
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "Mở khóa để tiếp tục",
 			"title_part_2": "Trước đó, bạn đã khóa ví để giữ an toàn. Hãy tiếp tục từ chỗ bạn đã dừng hoặc đăng xuất.",
+			"title_part_2_session_expired": "Phiên của bạn đã hết hạn và ví đã được khóa để giữ an toàn cho bạn. Hãy tiếp tục từ chỗ bạn đã dừng hoặc đăng xuất.",
 			"unlock": "Mở khóa",
 			"logout": "Đăng xuất",
 			"logout_clear_cash_message": "Đăng xuất sẽ xóa tất cả dữ liệu được lưu trong bộ nhớ đệm",
@@ -756,6 +756,7 @@
 			"minter_ckbtc_btc": "Cần có một minter được cấu hình để chuyển đổi ckBTC sang BTC.",
 			"minter_cketh_eth": "Cần có một minter được cấu hình để chuyển đổi ckETH sang ETH.",
 			"minter_ckerc20_erc20": "Cần có một minter được cấu hình để chuyển đổi ckERC20 sang Erc20.",
+			"minter_cksol_sol": "Cần có một minter được cấu hình để chuyển đổi ckSOL sang SOL.",
 			"ledger_cketh_eth": "Cần có một sổ cái ckETH được cấu hình để chuyển đổi ckErc20 sang Erc20.",
 			"minter_btc": "Cần có một minter được cấu hình để truy xuất BTC.",
 			"minter_ckbtc_info": "Cần có một minter được cấu hình để tìm nạp thông tin ckBTC",
@@ -1096,6 +1097,7 @@
 			"minimum_ckbtc_amount": "Số lượng dưới mức tối thiểu $amount ckBTC cần thiết để chuyển đổi sang BTC.",
 			"minimum_cketh_amount": "Số lượng dưới mức rút tối thiểu là $amount $symbol.",
 			"minimum_amount": "Số lượng dưới mức rút tối thiểu là $amount $symbol.",
+			"minimum_deposit_amount": "Số lượng dưới mức nạp tối thiểu là $amount $symbol.",
 			"minimum_ledger_fees": "Số tiền dưới mức phí sổ cái $symbol.",
 			"minimum_cketh_balance": "Số dư $symbol dưới mức phí ước tính là $amount.",
 			"unknown_cketh": "Không thể truy xuất token ckETH.",
@@ -1387,6 +1389,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "Hoán đổi",
 			"select_destination_token": "Chọn token để nhận",
@@ -1440,6 +1445,26 @@
 			"gasless": "Không phí gas",
 			"swap_fees": "Phí giao dịch",
 			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>",
+			"lifi_btc_relay_recipient_warning": "",
+			"receive_shortcut_same_network": "",
+			"receive_shortcut_other_network": "",
+			"receive_shortcut_token_on_network": "",
+			"receive_shortcut_convert": "",
+			"receive_shortcut_convert_back": "",
+			"receive_shortcut_bridge_back": "",
+			"receive_shortcut_move": "",
+			"receive_shortcut_any_token": "",
+			"receive_shortcut_any_token_count": "",
+			"receive_shortcut_any_token_count_one": "",
+			"receive_shortcut_any_token_count_single": "",
+			"receive_shortcut_more": "",
+			"move_token_to": "",
+			"move_no_networks_title": "",
+			"move_no_networks_title_without_symbol": "",
+			"move_no_networks_description": "",
+			"move_networks_changed_title": "",
+			"move_networks_changed_description": "",
+			"as_token": "",
 			"two_swaps_info": "$oisy_short chỉ cung cấp các giao dịch hoán đổi mà nó có thể xác minh đầy đủ trước khi bạn chấp thuận, và không có giao dịch hoán đổi trực tiếp như vậy từ $sourceSymbol sang $destinationSymbol. Nhưng bạn có thể hoán đổi $sourceSymbol sang $intermediateSymbol trước, rồi từ $intermediateSymbol sang $destinationSymbol.",
 			"two_swaps_first_button": "Hoán đổi sang $intermediateSymbol trước",
 			"near_intents_estimated_time": "",
@@ -1490,7 +1515,13 @@
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
-			"lifi_route_unverified": ""
+			"lifi_route_unverified": "",
+			"cksol_deposit_in_progress": "Một giao dịch chuyển đổi từ SOL sang ckSOL đang được thực hiện. Bạn có thể bắt đầu giao dịch mới sau khi giao dịch này hoàn tất.",
+			"cksol_deposit_terms_changed": "Minter ckSOL đã thay đổi điều kiện kể từ báo giá này. Không có SOL nào được gửi. Vui lòng xem báo giá mới.",
+			"cksol_earlier_deposit_quarantined": "Minter ckSOL đã ngừng xử lý một khoản nạp trước đó của bạn và sẽ không nhận khoản nạp mới cho đến khi vấn đề được giải quyết. Không có SOL nào được gửi.",
+			"cksol_minter_unavailable": "Minter ckSOL hiện không thể nhận khoản nạp. Không có SOL nào được gửi. Vui lòng thử lại sau.",
+			"cksol_deposit_quarantined": "Minter ckSOL đã ngừng xử lý khoản nạp này. Minter giữ số SOL cho đến khi một bản nâng cấp minter giải quyết khoản nạp.",
+			"cksol_deposit_below_minimum": "Minter ckSOL không thể thu gom khoản nạp này và số SOL còn lại trên địa chỉ nạp của bạn thấp hơn mức nạp tối thiểu. Số SOL này sẽ được chuyển đổi cùng với lần chuyển đổi từ SOL sang ckSOL tiếp theo của bạn."
 		}
 	},
 	"buy": {
@@ -1827,6 +1858,8 @@
 			"convert_fee": "Phí chuyển đổi",
 			"convert_inter_network_fee": "Phí chuyển đổi liên mạng",
 			"convert_btc_network_fee": "Phí mạng Bitcoin",
+			"cksol_sweep_fee": "Phí Solana của minter",
+			"cksol_deposit_address_rent": "Phí thuê địa chỉ nạp",
 			"zero_fee": "Miễn phí",
 			"total_fee": "Tổng phí",
 			"ata_fee": "Phí ATA",
@@ -2303,6 +2336,7 @@
 			"signature_copied": "",
 			"id": "ID giao dịch",
 			"id_copied": "ID giao dịch đã được sao chép vào khay nhớ tạm.",
+			"twin_transaction": "Giao dịch $twinNetwork",
 			"timestamp": "Thời gian",
 			"type": "Loại",
 			"from": "Từ",
@@ -2415,6 +2449,8 @@
 			"reimbursement": "Hoàn tiền",
 			"twin_token_converted": "Đã chuyển đổi từ $twinToken",
 			"ck_token_converted": "Đã chuyển đổi từ $ckToken",
+			"converted_to_twin_token": "Đã chuyển đổi sang $twinToken",
+			"converted_to_ck_token": "Đã chuyển đổi sang $ckToken",
 			"sending_twin_token": "Đang gửi $twinToken",
 			"sending_twin_token_failed": "Gửi $twinToken thất bại",
 			"converting_twin_token": "Đang chuyển đổi $twinToken sang $ckToken",
@@ -2872,6 +2908,8 @@
 			"borrow_at_risk_warning": "Khoản vay này làm giảm đáng kể hệ số sức khỏe của bạn.",
 			"borrow_exceeds_power": "Số tiền vượt quá hạn mức vay của bạn.",
 			"borrow_below_minimum": "Số tiền thấp hơn khoản vay tối thiểu.",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "Giá tạm thời không khả dụng. Việc vay bị vô hiệu hóa cho đến khi giá được tải.",
 			"borrow_high_risk_warning": "Khoản vay này đưa vị thế của bạn đến gần mức thanh lý.",
 			"borrow_risk_confirm": "Tôi hiểu rằng khoản vay này làm tăng rủi ro thanh lý của tôi.",
@@ -2902,6 +2940,7 @@
 			"interest_accrued": "Lãi phát sinh",
 			"debt_after_repay": "Khoản nợ sau khi hoàn trả",
 			"repay_exceeds_debt": "Số tiền vượt quá khoản nợ chưa thanh toán của bạn.",
+			"repay_below_native_minimum": "",
 			"repay_prices_unavailable": "Giá tạm thời không khả dụng. Việc hoàn trả bị vô hiệu hóa cho đến khi giá được tải.",
 			"repay_debt_unavailable": "Khoản nợ chưa thanh toán của bạn tạm thời không khả dụng. Việc hoàn trả bị vô hiệu hóa cho đến khi khoản nợ được tải.",
 			"repay_pending_covers_debt": "Một khoản hoàn trả cho vị thế này vẫn đang được xử lý. Bạn có thể hoàn trả thêm khi khoản này hoàn tất."

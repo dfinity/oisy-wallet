@@ -7,6 +7,9 @@ export enum PLAUSIBLE_EVENTS {
 	// The swap form's hint to make a swap without an offer as two separate swaps, when it shows and
 	// when its button is used.
 	SWAP_TWO_SWAPS_HINT = 'swap_two_swaps_hint',
+	// A shortcut for what to receive on the swap form, or its link back to the receive token it
+	// replaced, when it is used.
+	SWAP_RECEIVE_SHORTCUT = 'swap_receive_shortcut',
 	MEDIA_CONSENT = 'media_consent',
 	OPEN_MODAL = 'open_modal',
 	LOAD_CUSTOM_TOKENS = 'load_custom_tokens',

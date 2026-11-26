@@ -1,5 +1,8 @@
 import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
-import { SWAP_SELECTED_PROVIDER_DETAILS } from '$lib/constants/test-ids.constants';
+import {
+	SWAP_MODAL_SELECT_PROVIDER_STEP,
+	SWAP_SELECTED_PROVIDER_DETAILS
+} from '$lib/constants/test-ids.constants';
 import * as ExchangeDerived from '$lib/derived/exchange.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { screensStore } from '$lib/stores/screens.store';
@@ -58,6 +61,14 @@ describe('SwapProviderListModal', () => {
 
 		expect(getByText(get(i18n).swap.text.smart_swap_offers)).toBeInTheDocument();
 		expect(getByText(get(i18n).swap.text.you_receive)).toBeInTheDocument();
+	});
+
+	it('fades the edges of the scrolling offer list', () => {
+		const { getByTestId } = render(SwapProviderListModal, {
+			context: mockContext
+		});
+
+		expect(getByTestId(SWAP_MODAL_SELECT_PROVIDER_STEP)).toHaveClass('scroll-fade');
 	});
 
 	it('shows the selected offer with its details above the offers', () => {

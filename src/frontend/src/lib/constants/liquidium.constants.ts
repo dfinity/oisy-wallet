@@ -7,6 +7,7 @@ import {
 	IC_CKUSDT_LEDGER_CANISTER_ID
 } from '$env/tokens/tokens-icrc/tokens.icrc.ck.erc20.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import { IC_CKSOL_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -28,10 +29,19 @@ export const LIQUIDIUM_ADVERTISED_TOKENS: Token[] = [
 	ICP_TOKEN
 ];
 
+// Pool assets OISY offers rails for. Other pools Liquidium lists stay out of the Markets list and
+// the pickers. SOL joins them behind `LIQUIDIUM_SOL_ENABLED` (see `isLiquidiumAssetSupported`).
+export const LIQUIDIUM_SUPPORTED_ASSETS: string[] = ['BTC', 'ETH', 'ICP', 'USDC', 'USDT'];
+
+// A native SOL borrow or withdraw leaves the pool as ckSOL and reaches Solana through the ckSOL
+// minter, paying the ckSOL ledger fee this many times on the way. Liquidium refuses one below the
+// minter's minimum withdrawal plus these fees.
+export const LIQUIDIUM_SOL_NATIVE_OUTFLOW_LEDGER_FEES = 2n;
+
 // Display order for the Markets list and the withdraw/repay pickers, applied as a stable sort on
 // top of the order Liquidium returns (see `orderLiquidiumRails`). Primary key: the lending pool,
 // by asset symbol. Assets not listed keep their received order, after the listed ones.
-export const LIQUIDIUM_POOL_ORDER: string[] = ['BTC', 'ETH', 'ICP', 'USDC', 'USDT'];
+export const LIQUIDIUM_POOL_ORDER: string[] = ['BTC', 'ETH', 'ICP', 'USDC', 'USDT', 'SOL'];
 
 // Transfer-network order, the final tiebreaker after "native rail first" — so extra networks
 // slot in predictably if the protocol adds them.
@@ -45,7 +55,8 @@ export const LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS: Record<string, OptionCanisterI
 	ETH: IC_CKETH_LEDGER_CANISTER_ID,
 	USDC: IC_CKUSDC_LEDGER_CANISTER_ID,
 	USDT: IC_CKUSDT_LEDGER_CANISTER_ID,
-	ICP: ICP_LEDGER_CANISTER_ID
+	ICP: ICP_LEDGER_CANISTER_ID,
+	SOL: IC_CKSOL_LEDGER_CANISTER_ID
 };
 
 // The first byte of the subaccount of a pool that Liquidium credits an inflow to a profile with:

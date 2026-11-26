@@ -4,6 +4,7 @@ import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/toke
 import { ICRC_TOKENS, ICRC_TOKENS_METADATA } from '$env/tokens/tokens-icrc/tokens.icrc.env';
 import { RETIRED_ICRC_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.retired.env';
 import { DIP20_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.dip20.env';
+import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { SUPPORTED_ICP_TOKENS_INDEXED } from '$env/tokens/tokens.icp.env';
 import { SNS_BUILTIN_TOKENS_INDEXED } from '$env/tokens/tokens.sns.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
@@ -196,6 +197,10 @@ const loadCustomIcrcTokensData = async ({
 		const serviceParams = { ledgerCanisterId: ledgerCanisterIdText, identity, certified };
 
 		const data: IcrcLoadData = {
+			// Keep a built-in pick's identity without importing the catalog into worker-shared utils.
+			id: IC_BUILTIN_TOKENS.find(
+				({ ledgerCanisterId }) => ledgerCanisterId === ledgerCanisterIdText
+			)?.id,
 			metadata: nonNullish(meta) ? meta : await metadata(serviceParams),
 			mintingAccount: await getMintingAccount(serviceParams),
 			ledgerCanisterId: ledgerCanisterIdText,
