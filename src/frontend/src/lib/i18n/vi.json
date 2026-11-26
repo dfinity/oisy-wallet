@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",
-			"session_expired": "Bạn đã bị đăng xuất vì phiên của bạn đã hết hạn.",
 			"reload_and_retry": "Đã xảy ra lỗi trong quá trình đăng nhập. Vui lòng tải lại trang và thử lại. Nếu lỗi này vẫn tiếp diễn, vui lòng liên hệ bộ phận hỗ trợ."
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "Mở khóa để tiếp tục",
 			"title_part_2": "Trước đó, bạn đã khóa ví để giữ an toàn. Hãy tiếp tục từ chỗ bạn đã dừng hoặc đăng xuất.",
+			"title_part_2_session_expired": "Phiên của bạn đã hết hạn và ví đã được khóa để giữ an toàn cho bạn. Hãy tiếp tục từ chỗ bạn đã dừng hoặc đăng xuất.",
 			"unlock": "Mở khóa",
 			"logout": "Đăng xuất",
 			"logout_clear_cash_message": "Đăng xuất sẽ xóa tất cả dữ liệu được lưu trong bộ nhớ đệm",
@@ -1445,6 +1445,7 @@
 			"gasless": "Không phí gas",
 			"swap_fees": "Phí giao dịch",
 			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>",
+			"lifi_btc_relay_recipient_warning": "",
 			"receive_shortcut_same_network": "",
 			"receive_shortcut_other_network": "",
 			"receive_shortcut_token_on_network": "",
@@ -2907,6 +2908,8 @@
 			"borrow_at_risk_warning": "Khoản vay này làm giảm đáng kể hệ số sức khỏe của bạn.",
 			"borrow_exceeds_power": "Số tiền vượt quá hạn mức vay của bạn.",
 			"borrow_below_minimum": "Số tiền thấp hơn khoản vay tối thiểu.",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "Giá tạm thời không khả dụng. Việc vay bị vô hiệu hóa cho đến khi giá được tải.",
 			"borrow_high_risk_warning": "Khoản vay này đưa vị thế của bạn đến gần mức thanh lý.",
 			"borrow_risk_confirm": "Tôi hiểu rằng khoản vay này làm tăng rủi ro thanh lý của tôi.",

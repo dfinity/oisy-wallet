@@ -1,7 +1,11 @@
 import { AppWorker } from '$lib/services/_worker.services';
 import { idleSignOut } from '$lib/services/auth.services';
 import { authRemainingTimeStore, type AuthStoreData } from '$lib/stores/auth.store';
-import type { PostMessage, PostMessageDataResponseAuth } from '$lib/types/post-message';
+import type {
+	PostMessage,
+	PostMessageDataResponseAuth,
+	PostMessageDataResponseAuthSignOut
+} from '$lib/types/post-message';
 import type { WorkerData } from '$lib/types/worker';
 import { isNullish } from '@dfinity/utils';
 
@@ -10,17 +14,27 @@ export class AuthWorker extends AppWorker {
 		super(worker);
 
 		this.setOnMessage(
-			async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataResponseAuth>>) => {
+			async ({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<PostMessageDataResponseAuth | PostMessageDataResponseAuthSignOut>
+			>) => {
 				const { msg, data } = dataMsg;
 
 				switch (msg) {
 					// TODO Investigate extra 'signOutIdleTimer' tick after lock
 					// syncAuthIdle stop the idle timer when the user is logOut or locked
 					case 'signOutIdleTimer':
-						await idleSignOut();
+						await idleSignOut({
+							// Without the cause, the cache is kept: the lock page still offers to log out.
+							delegationExpired:
+								(data as PostMessageDataResponseAuthSignOut | undefined)?.delegationExpired ?? true
+						});
 						return;
 					case 'delegationRemainingTime':
-						authRemainingTimeStore.set(data?.authRemainingTime);
+						authRemainingTimeStore.set(
+							(data as PostMessageDataResponseAuth | undefined)?.authRemainingTime
+						);
 				}
 			}
 		);

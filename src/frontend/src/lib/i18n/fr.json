@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "Vous n'êtes pas connecté. Veuillez vous connecter pour continuer.",
-			"session_expired": "Vous avez été déconnecté car votre session a expiré.",
 			"reload_and_retry": "Un problème est survenu lors de la connexion. Veuillez recharger la page et réessayer. Si cette erreur persiste, veuillez contacter le support."
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "Déverrouillez pour continuer",
 			"title_part_2": "Vous avez précédemment verrouillé votre portefeuille pour le protéger. Reprenez là où vous vous étiez arrêté ou déconnectez-vous.",
+			"title_part_2_session_expired": "Votre session a expiré et votre portefeuille a été verrouillé pour votre sécurité. Reprenez là où vous vous étiez arrêté ou déconnectez-vous.",
 			"unlock": "Ouvrir",
 			"logout": "Se déconnecter",
 			"logout_clear_cash_message": "La déconnexion effacera toutes les données mises en cache",
@@ -1445,6 +1445,7 @@
 			"gasless": "Sans gaz",
 			"swap_fees": "Frais d'échange",
 			"cross_chain_networks_info": "Vous déplacez des tokens du réseau <b>$sourceNetwork</b> vers le réseau <b>$destinationNetwork</b>",
+			"lifi_btc_relay_recipient_warning": "",
 			"receive_shortcut_same_network": "",
 			"receive_shortcut_other_network": "",
 			"receive_shortcut_token_on_network": "",
@@ -2907,6 +2908,8 @@
 			"borrow_at_risk_warning": "Cet emprunt réduit sensiblement votre facteur de santé.",
 			"borrow_exceeds_power": "Le montant dépasse votre capacité d'emprunt.",
 			"borrow_below_minimum": "Le montant est inférieur à l'emprunt minimum.",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "Les prix sont temporairement indisponibles. L'emprunt est désactivé jusqu'à leur chargement.",
 			"borrow_high_risk_warning": "Cet emprunt rapproche votre position de la liquidation.",
 			"borrow_risk_confirm": "Je comprends que cet emprunt augmente mon risque de liquidation.",

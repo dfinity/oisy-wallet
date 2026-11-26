@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "サインインしていません。続行するにはサインインしてください。",
-			"session_expired": "セッションの有効期限が切れました。ログアウトされました。",
 			"reload_and_retry": "サインイン中に問題が発生しました。ページを再読み込みしてから再度試してください。このエラーが続く場合は、サポートにお問い合わせください。"
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "ロックを解除して続行",
 			"title_part_2": "ウォレットは安全のためロックされています。中断したところから再開するか、ログアウトしてください。",
+			"title_part_2_session_expired": "セッションの有効期限が切れたため、安全のためウォレットをロックしました。中断したところから再開するか、ログアウトしてください。",
 			"unlock": "ロック解除",
 			"logout": "ログアウト",
 			"logout_clear_cash_message": "ログアウトすると、キャッシュされたデータがすべて消去されます。",
@@ -1445,6 +1445,7 @@
 			"gasless": "ガスレス",
 			"swap_fees": "スワップ手数料",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します。",
+			"lifi_btc_relay_recipient_warning": "",
 			"receive_shortcut_same_network": "",
 			"receive_shortcut_other_network": "",
 			"receive_shortcut_token_on_network": "",
@@ -2907,6 +2908,8 @@
 			"borrow_at_risk_warning": "この借入によりヘルスファクターが大きく下がります。",
 			"borrow_exceeds_power": "金額が借入可能額を超えています。",
 			"borrow_below_minimum": "金額が最低借入額を下回っています。",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "価格は一時的に利用できません。読み込まれるまで借入は無効になっています。",
 			"borrow_high_risk_warning": "この借入によりポジションが清算に近づきます。",
 			"borrow_risk_confirm": "この借入によって清算リスクが高まることを理解しています。",
