@@ -10,6 +10,7 @@ import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import {
 	CUSTOM_NAMES_BY_LEDGER_CANISTER_ID,
 	CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID,
+	isLocalOrInlineLogo,
 	isTokenDip20,
 	isTokenIc,
 	isTokenIcp,
@@ -237,6 +238,42 @@ describe('icrc.utils', () => {
 				id: token?.id
 			});
 			expect(token?.id.description).toBe(mockToken.symbol);
+		});
+
+		it.each([
+			'//host.example/icon.png',
+			'/\\host.example/icon.png',
+			' //host.example/icon.png',
+			'http://host.example/icon.png'
+		])(
+			'should use the static icon for a metadata logo that loads from another host: %s',
+			(logo) => {
+				const token = mapIcrcToken({
+					...mockParams,
+					metadata: [
+						...mockMetadata.slice(0, mockMetadata.length - 1),
+						[IcrcMetadataResponseEntries.LOGO, { Text: logo }]
+					],
+					icrcCustomTokens: {}
+				});
+
+				expect(token?.icon).toBe(`/icons/icrc/${mockToken.ledgerCanisterId}.png`);
+			}
+		);
+
+		it('should keep an inline image logo from metadata', () => {
+			const logo = 'data:image/png;base64,iVBORw0KGgo=';
+
+			const token = mapIcrcToken({
+				...mockParams,
+				metadata: [
+					...mockMetadata.slice(0, mockMetadata.length - 1),
+					[IcrcMetadataResponseEntries.LOGO, { Text: logo }]
+				],
+				icrcCustomTokens: {}
+			});
+
+			expect(token?.icon).toBe(logo);
 		});
 
 		it('should prioritize the icon from icrcCustomTokens instead of the icon from metadata', () => {
@@ -590,6 +627,33 @@ describe('icrc.utils', () => {
 
 				expect(token?.mintingAccount).toBeUndefined();
 			});
+		});
+	});
+
+	describe('isLocalOrInlineLogo', () => {
+		it.each([
+			'/icons/sns/ledger.png',
+			'/_app/immutable/assets/icon.svg',
+			'icon.png',
+			'data:image/png;base64,iVBORw0KGgo=',
+			'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=',
+			'DATA:IMAGE/PNG;base64,iVBORw0KGgo='
+		])('should accept a logo that loads from OISY or from the string: %s', (logo) => {
+			expect(isLocalOrInlineLogo(logo)).toBeTruthy();
+		});
+
+		it.each([
+			'https://host.example/icon.png',
+			'http://host.example/icon.png',
+			'//host.example/icon.png',
+			'/\\host.example/icon.png',
+			'\\\\host.example/icon.png',
+			' //host.example/icon.png',
+			'/\t/host.example/icon.png',
+			'ipfs://bafybeigdyrzt/icon.png',
+			'data:text/html;base64,PGgxPjwvaDE+'
+		])('should refuse a logo that loads from anywhere else: %s', (logo) => {
+			expect(isLocalOrInlineLogo(logo)).toBeFalsy();
 		});
 	});
 

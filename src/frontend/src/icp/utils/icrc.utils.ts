@@ -22,7 +22,6 @@ import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { mapTokenMetadata, type IcrcTokenMetadataResponse } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
@@ -75,6 +74,37 @@ export const CUSTOM_NAMES_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, st
 const mapIcNetwork = (ledgerCanisterId: LedgerCanisterIdText) =>
 	isTokenIcTestnet({ ledgerCanisterId }) ? ICP_PSEUDO_TESTNET_NETWORK : ICP_NETWORK;
 
+// Any origin works here: it only tells a relative logo, which resolves against it, from one that
+// names its own host.
+const LOGO_BASE_ORIGIN = 'https://oisy.invalid';
+
+const parseUrl = ({ url, base }: { url: string; base?: string }): URL | undefined => {
+	try {
+		return new URL(url, base);
+	} catch (_: unknown) {
+		return undefined;
+	}
+};
+
+/**
+ * Whether a token logo can be shown as it is: an `<img>` with it loads from OISY itself (a relative
+ * path, such as the shipped icons) or from the string (a `data:image` URL), and never from another
+ * host.
+ *
+ * The logo is parsed with the URL rules the browser applies to `src`, so spellings that only look
+ * relative (`//host/logo.png`, `/\host/logo.png`, a leading space or tab) resolve to their host
+ * here too.
+ */
+export const isLocalOrInlineLogo = (logo: string): boolean => {
+	const absolute = parseUrl({ url: logo });
+
+	if (nonNullish(absolute)) {
+		return absolute.protocol === 'data:' && absolute.pathname.toLowerCase().startsWith('image/');
+	}
+
+	return parseUrl({ url: logo, base: LOGO_BASE_ORIGIN })?.origin === LOGO_BASE_ORIGIN;
+};
+
 export const mapIcrcToken = ({
 	id,
 	metadata,
@@ -94,10 +124,10 @@ export const mapIcrcToken = ({
 
 	const dynamicIcon = icrcCustomTokens?.[ledgerCanisterId]?.icon ?? tokenIcon;
 
-	const { success: dynamicIconIsUrl } = UrlSchema.safeParse(dynamicIcon);
-
-	// We do not allow external URLs anyway, so it is safe to use the static icon, even if it does not exist
-	const icon = dynamicIconIsUrl ? staticIcon : dynamicIcon;
+	// A logo that would load from another host is never shown, so the static icon stands in for it,
+	// even if it does not exist.
+	const icon =
+		isNullish(dynamicIcon) || isLocalOrInlineLogo(dynamicIcon) ? dynamicIcon : staticIcon;
 
 	const customTokenSymbol = icrcCustomTokens?.[ledgerCanisterId];
 
