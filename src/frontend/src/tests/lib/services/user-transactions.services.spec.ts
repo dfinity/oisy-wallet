@@ -7,7 +7,7 @@ import {
 } from '$lib/services/user-transactions.services';
 import type { Transaction } from '$lib/types/transaction';
 import { consoleError } from '$lib/utils/console.utils';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import {
 	mockEthTransaction,
 	mockGetUserTransactionsResponse,
@@ -231,6 +231,78 @@ describe('user-transactions.services', () => {
 
 			// A save that fails without a trace is what let the over-sized batch go unnoticed.
 			expect(consoleError).toHaveBeenCalledOnce();
+		});
+
+		describe('when the canister refuses a batch for its rate limit', () => {
+			const rateLimited = {
+				RateLimited: { max_calls: 30, window_ns: 60_000_000_000n, caller: mockPrincipal }
+			};
+
+			beforeEach(() => {
+				vi.useFakeTimers();
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it('should send the batch again once the window has passed', async () => {
+				vi.spyOn(backendApi, 'saveUserTransactions')
+					.mockRejectedValueOnce(rateLimited)
+					.mockResolvedValue(undefined);
+
+				const result = save(makeTransactions(3));
+
+				await vi.advanceTimersByTimeAsync(59_999);
+
+				expect(backendApi.saveUserTransactions).toHaveBeenCalledOnce();
+
+				await vi.advanceTimersByTimeAsync(1);
+
+				await expect(result).resolves.toEqual({ success: true });
+				expect(backendApi.saveUserTransactions).toHaveBeenCalledTimes(2);
+				expect(consoleError).not.toHaveBeenCalled();
+			});
+
+			it('should keep sending it until it is accepted', async () => {
+				vi.spyOn(backendApi, 'saveUserTransactions')
+					.mockRejectedValueOnce(rateLimited)
+					.mockRejectedValueOnce(rateLimited)
+					.mockResolvedValue(undefined);
+
+				const result = save(makeTransactions(3));
+
+				await vi.advanceTimersByTimeAsync(120_000);
+
+				await expect(result).resolves.toEqual({ success: true });
+				expect(backendApi.saveUserTransactions).toHaveBeenCalledTimes(3);
+			});
+
+			it('should send the later batches only once the refused one is accepted', async () => {
+				vi.spyOn(backendApi, 'saveUserTransactions')
+					.mockRejectedValueOnce(rateLimited)
+					.mockResolvedValue(undefined);
+
+				const result = save(makeTransactions(MAX_SAVE_USER_TRANSACTIONS_BATCH + 1));
+
+				await vi.advanceTimersByTimeAsync(59_999);
+
+				expect(backendApi.saveUserTransactions).toHaveBeenCalledOnce();
+
+				await vi.advanceTimersByTimeAsync(1);
+
+				await expect(result).resolves.toEqual({ success: true });
+
+				const batchSizes = vi
+					.mocked(backendApi.saveUserTransactions)
+					.mock.calls.map(([{ transactions }]) => transactions.length);
+
+				expect(batchSizes).toEqual([
+					MAX_SAVE_USER_TRANSACTIONS_BATCH,
+					MAX_SAVE_USER_TRANSACTIONS_BATCH,
+					1
+				]);
+			});
 		});
 	});
 
