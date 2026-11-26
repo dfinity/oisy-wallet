@@ -11,20 +11,21 @@ use shared::types::{
     bitcoin::{
         BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
         BtcBroadcastTransactionError, BtcBroadcastTransactionRequest,
-        BtcBroadcastTransactionResponse, BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
+        BtcBroadcastTransactionResponse, BtcGetBalanceError, BtcGetBalanceRequest,
+        BtcGetBalanceResponse, BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
         BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
         BtcGetPendingTransactionsRequest, BtcGetSpendableUtxosError, BtcGetSpendableUtxosRequest,
         BtcGetSpendableUtxosResponse, PendingTransaction, StoredPendingTransaction,
     },
     result_types::{
-        BtcAddPendingTransactionResult, BtcBroadcastTransactionResult, BtcGetFeePercentilesResult,
-        BtcGetPendingTransactionsResult, BtcGetSpendableUtxosResult,
+        BtcAddPendingTransactionResult, BtcBroadcastTransactionResult, BtcGetBalanceResult,
+        BtcGetFeePercentilesResult, BtcGetPendingTransactionsResult, BtcGetSpendableUtxosResult,
     },
 };
 
 use crate::{
     bitcoin::{
-        api,
+        api::{self, GetAllUtxosError},
         broadcast_state_model::{
             begin_broadcast, finish_broadcast, reserve_without_broadcast,
             retain_reserved_broadcasts, with_btc_broadcast_states, BroadcastTarget,
@@ -38,7 +39,8 @@ use crate::{
         guards::{caller_is_not_anonymous, caller_is_registered_user},
         rate_limiter::{
             self, BTC_ADD_PENDING_TX_RATE_LIMITER, BTC_BROADCAST_TX_RATE_LIMITER,
-            BTC_GET_PENDING_TX_RATE_LIMITER, BTC_GET_SPENDABLE_UTXOS_RATE_LIMITER,
+            BTC_GET_BALANCE_RATE_LIMITER, BTC_GET_PENDING_TX_RATE_LIMITER,
+            BTC_GET_SPENDABLE_UTXOS_RATE_LIMITER,
         },
     },
 };
@@ -133,9 +135,15 @@ pub async fn btc_add_pending_transaction(
             params.network,
             source_address.clone(),
             Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+            principal,
         )
         .await
-        .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
+        .map_err(|err| match err {
+            GetAllUtxosError::RateLimited(e) => BtcAddPendingTransactionError::RateLimited(e),
+            GetAllUtxosError::InternalError(msg) => {
+                BtcAddPendingTransactionError::InternalError { msg }
+            }
+        })?;
 
         let current_keys: HashSet<(Txid, u32)> = current_utxos
             .iter()
@@ -222,7 +230,12 @@ pub async fn btc_get_pending_transactions(
 
         let (source_address, _) = get_utxos_and_prune(params.network, principal, now_ns)
             .await
-            .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
+            .map_err(|err| match err {
+                GetAllUtxosError::RateLimited(e) => BtcGetPendingTransactionsError::RateLimited(e),
+                GetAllUtxosError::InternalError(msg) => {
+                    BtcGetPendingTransactionsError::InternalError { msg }
+                }
+            })?;
 
         let pending_transactions = mutate_state(|state| {
             BtcUserPendingTransactionsModel::new(
@@ -314,9 +327,15 @@ pub async fn btc_broadcast_transaction(
             params.network,
             source_address.clone(),
             Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+            principal,
         )
         .await
-        .map_err(|msg| BtcBroadcastTransactionError::InternalError { msg })?;
+        .map_err(|err| match err {
+            GetAllUtxosError::RateLimited(e) => BtcBroadcastTransactionError::RateLimited(e),
+            GetAllUtxosError::InternalError(msg) => {
+                BtcBroadcastTransactionError::InternalError { msg }
+            }
+        })?;
 
         // Again after the awaits: a concurrent submission of the same bytes may have been sent
         // meanwhile, and its inputs may have left the fetched view.
@@ -418,7 +437,12 @@ pub async fn btc_get_spendable_utxos(
         let (source_address, current_utxos) =
             get_utxos_and_prune(params.network, principal, now_ns)
                 .await
-                .map_err(|msg| BtcGetSpendableUtxosError::InternalError { msg })?;
+                .map_err(|err| match err {
+                    GetAllUtxosError::RateLimited(e) => BtcGetSpendableUtxosError::RateLimited(e),
+                    GetAllUtxosError::InternalError(msg) => {
+                        BtcGetSpendableUtxosError::InternalError { msg }
+                    }
+                })?;
 
         mutate_state(|state| {
             let model = BtcUserPendingTransactionsModel::new(
@@ -445,23 +469,75 @@ pub async fn btc_get_spendable_utxos(
     inner(params).await.into()
 }
 
+/// Returns the balance of the caller's P2WPKH address, counting only the outputs with at least
+/// `min_confirmations` confirmations.
+///
+/// An update call, so the answer is certified. The backend pays for the Bitcoin canister call from
+/// its own cycles. It used to pay the chain fusion signer's `btc_caller_balance` instead, from its
+/// cycles ledger account and against the approval it grants each caller for signing, so every read
+/// used up part of what the caller could sign.
+///
+/// Requires a valid II delegation chain to verify the caller authenticated
+/// through Internet Identity. Controllers bypass this check.
+///
+/// # Errors
+/// Errors are enumerated by: `BtcGetBalanceError`.
+#[update(guard = "caller_is_registered_user")]
+pub async fn btc_get_balance(params: BtcGetBalanceRequest) -> BtcGetBalanceResult {
+    async fn inner(
+        params: BtcGetBalanceRequest,
+    ) -> Result<BtcGetBalanceResponse, BtcGetBalanceError> {
+        BTC_GET_BALANCE_RATE_LIMITER
+            .with(rate_limiter::RateLimiter::check_caller)
+            .map_err(BtcGetBalanceError::RateLimited)?;
+
+        let principal = msg_caller();
+
+        let (ii_canister_ids, root_key, guard_enabled) = delegation::read_ii_verification_config();
+        delegation::require_ii_delegation(
+            params.ii_delegation_chain.as_ref(),
+            is_controller(&principal),
+            principal,
+            &ii_canister_ids,
+            &root_key,
+            time(),
+            guard_enabled,
+        )
+        .map_err(|msg| BtcGetBalanceError::InvalidDelegationChain { msg })?;
+
+        let address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
+            .await
+            .map_err(|msg| BtcGetBalanceError::InternalError { msg })?;
+
+        let balance = api::get_balance(params.network, address, params.min_confirmations)
+            .await
+            .map_err(|msg| BtcGetBalanceError::BalanceUnavailable { msg })?;
+
+        Ok(BtcGetBalanceResponse { balance })
+    }
+    inner(params).await.into()
+}
+
 /// Fetches the caller's UTXOs with at least `MIN_CONFIRMATIONS_ACCEPTED_BTC_TX` confirmations, all
 /// pages, and prunes the caller's pending transactions against them, dropping the broadcast states
-/// of those it prunes.
+/// of those it prunes. Prunes nothing when the read stops short (see [`api::get_all_utxos`]).
 ///
 /// Returns the address the UTXOs belong to, and the UTXOs.
 async fn get_utxos_and_prune(
     network: BitcoinNetwork,
     principal: Principal,
     now_ns: u64,
-) -> Result<(String, Vec<Utxo>), String> {
-    let source_address = signer::btc_principal_to_p2wpkh_address(network, &principal).await?;
+) -> Result<(String, Vec<Utxo>), GetAllUtxosError> {
+    let source_address = signer::btc_principal_to_p2wpkh_address(network, &principal)
+        .await
+        .map_err(GetAllUtxosError::InternalError)?;
 
     let snapshot_started_ns = time();
     let current_utxos = api::get_all_utxos(
         network,
         source_address.clone(),
         Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+        principal,
     )
     .await?;
 

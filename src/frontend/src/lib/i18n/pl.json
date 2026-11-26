@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "Nie jesteś zalogowany. Zaloguj się, aby kontynuować.",
-			"session_expired": "Zostałeś wylogowany, ponieważ Twoja sesja wygasła.",
 			"reload_and_retry": ""
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "Odblokuj, aby kontynuować",
 			"title_part_2": "Wcześniej zablokowałeś swój portfel, aby go zabezpieczyć. Wznów od miejsca, w którym skończyłeś, lub wyloguj się.",
+			"title_part_2_session_expired": "Twoja sesja wygasła, a portfel został zablokowany dla Twojego bezpieczeństwa. Wznów od miejsca, w którym skończyłeś, lub wyloguj się.",
 			"unlock": "Odblokuj",
 			"logout": "Wyloguj",
 			"logout_clear_cash_message": "Wylogowanie usunie wszystkie dane z pamięci podręcznej",
@@ -756,6 +756,7 @@
 			"minter_ckbtc_btc": "Do konwersji ckBTC na BTC wymagany jest skonfigurowany minter.",
 			"minter_cketh_eth": "Do konwersji ckETH na ETH wymagany jest skonfigurowany minter.",
 			"minter_ckerc20_erc20": "Do konwersji ckERC20 na ERC20 wymagany jest skonfigurowany minter.",
+			"minter_cksol_sol": "Do konwersji ckSOL na SOL wymagany jest skonfigurowany minter.",
 			"ledger_cketh_eth": "Do konwersji ckERC20 na ERC20 wymagany jest skonfigurowany rejestr ckETH.",
 			"minter_btc": "Do odzyskania BTC wymagany jest skonfigurowany minter.",
 			"minter_ckbtc_info": "Do pobrania informacji o ckBTC wymagany jest skonfigurowany minter",
@@ -1096,6 +1097,7 @@
 			"minimum_ckbtc_amount": "Kwota jest niższa od minimum $amount ckBTC wymaganego do konwersji na BTC.",
 			"minimum_cketh_amount": "Kwota jest niższa od minimalnej kwoty wypłaty wynoszącej $amount $symbol.",
 			"minimum_amount": "Kwota jest niższa od minimalnej kwoty wypłaty wynoszącej $amount $symbol.",
+			"minimum_deposit_amount": "Kwota jest niższa od minimalnej kwoty wpłaty wynoszącej $amount $symbol.",
 			"minimum_ledger_fees": "Kwota jest niższa od opłat za rejestr $symbol.",
 			"minimum_cketh_balance": "Saldo $symbol jest niższe od szacowanej opłaty w wysokości $amount.",
 			"unknown_cketh": "Nie można pobrać tokena ckETH.",
@@ -1151,6 +1153,9 @@
 			"ethereum_transaction_not_sent": "Transakcja nie została wysłana: nie udało nam się połączyć z siecią, aby ją przygotować. Możesz bezpiecznie spróbować ponownie.",
 			"ethereum_transaction_unconfirmed": "Nie mogliśmy potwierdzić, czy transakcja dotarła do sieci. Może jeszcze przejść, więc odczekaj minutę lub dwie i przed ponownym wysłaniem sprawdź swoją aktywność.",
 			"btc_transaction_unconfirmed": "",
+			"btc_send_rate_limited": "",
+			"btc_signing_allowance_spent": "",
+			"btc_transaction_never_landed": "",
 			"solana_transaction_expired": "Twoja transakcja nie została przetworzona przez sieć Solana i wygasła, najprawdopodobniej dlatego, że podana opłata priorytetowa była niewystarczająca. Zaktualizowaliśmy ją do najnowszej zalecanej kwoty, więc spróbuj ponownie.",
 			"solana_confirmation_failed": "Nie otrzymaliśmy potwierdzenia dla właśnie utworzonej transakcji. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, czy Twoja transakcja została utworzona poprawnie.",
 			"solana_insufficient_funds": "Saldo Twojego tokena jest niewystarczające do zrealizowania tej transakcji. Twoje saldo mogło się zmienić od ostatniego wyświetlenia.",
@@ -1384,6 +1389,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "Wymiana",
 			"select_destination_token": "Wybierz token do otrzymania",
@@ -1437,6 +1445,26 @@
 			"gasless": "Bez gazu",
 			"swap_fees": "Opłaty za wymianę",
 			"cross_chain_networks_info": "Przenosisz tokeny z sieci <b>$sourceNetwork</b> do sieci <b>$destinationNetwork</b>",
+			"lifi_btc_relay_recipient_warning": "",
+			"receive_shortcut_same_network": "",
+			"receive_shortcut_other_network": "",
+			"receive_shortcut_token_on_network": "",
+			"receive_shortcut_convert": "",
+			"receive_shortcut_convert_back": "",
+			"receive_shortcut_bridge_back": "",
+			"receive_shortcut_move": "",
+			"receive_shortcut_any_token": "",
+			"receive_shortcut_any_token_count": "",
+			"receive_shortcut_any_token_count_one": "",
+			"receive_shortcut_any_token_count_single": "",
+			"receive_shortcut_more": "",
+			"move_token_to": "",
+			"move_no_networks_title": "",
+			"move_no_networks_title_without_symbol": "",
+			"move_no_networks_description": "",
+			"move_networks_changed_title": "",
+			"move_networks_changed_description": "",
+			"as_token": "",
 			"two_swaps_info": "$oisy_short oferuje tylko wymiany, które może w pełni zweryfikować przed Twoim zatwierdzeniem, a takiej bezpośredniej wymiany z $sourceSymbol na $destinationSymbol nie ma. Możesz jednak najpierw wymienić $sourceSymbol na $intermediateSymbol, a potem $intermediateSymbol na $destinationSymbol.",
 			"two_swaps_first_button": "Najpierw wymień na $intermediateSymbol",
 			"near_intents_estimated_time": "",
@@ -1487,7 +1515,13 @@
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
-			"lifi_route_unverified": ""
+			"lifi_route_unverified": "",
+			"cksol_deposit_in_progress": "Konwersja SOL na ckSOL jest już w toku. Nową możesz rozpocząć, gdy się zakończy.",
+			"cksol_deposit_terms_changed": "Minter ckSOL zmienił swoje warunki od czasu tej oferty. Nie wysłano żadnych SOL. Sprawdź nową ofertę.",
+			"cksol_earlier_deposit_quarantined": "Minter ckSOL wstrzymał przetwarzanie Twojej wcześniejszej wpłaty i nie przyjmie nowej, dopóki sprawa nie zostanie rozwiązana. Nie wysłano żadnych SOL.",
+			"cksol_minter_unavailable": "Minter ckSOL nie może teraz przyjąć wpłaty. Nie wysłano żadnych SOL. Spróbuj ponownie później.",
+			"cksol_deposit_quarantined": "Minter ckSOL wstrzymał przetwarzanie tej wpłaty. Przechowuje SOL, dopóki aktualizacja mintera nie rozwiąże problemu z wpłatą.",
+			"cksol_deposit_below_minimum": "Minter ckSOL nie mógł odebrać tej wpłaty, a SOL pozostałe na Twoim adresie wpłaty są poniżej minimalnej kwoty wpłaty. Zostaną przekonwertowane przy Twojej następnej konwersji SOL na ckSOL."
 		}
 	},
 	"buy": {
@@ -1522,7 +1556,8 @@
 			"data_is_incompleted": "",
 			"amount_does_not_match": "",
 			"recipient_address_is_not_valid": "",
-			"token_address_mismatch": ""
+			"token_address_mismatch": "",
+			"btc_reservation_rate_limited": ""
 		},
 		"alt": {
 			"pay": "",
@@ -1823,6 +1858,8 @@
 			"convert_fee": "Opłata za konwersję",
 			"convert_inter_network_fee": "Opłata między sieciami",
 			"convert_btc_network_fee": "Opłata sieciowa Bitcoin",
+			"cksol_sweep_fee": "Opłata mintera w sieci Solana",
+			"cksol_deposit_address_rent": "Czynsz za adres wpłaty",
 			"zero_fee": "Bezpłatnie",
 			"total_fee": "Całkowita opłata",
 			"ata_fee": "Opłata ATA",
@@ -1941,6 +1978,12 @@
 			"cketh_deposit_principal": "Odbiorca ckETH",
 			"cketh_deposit_refused": "To żądanie wywołuje kontrakt konwersji ckETH dla principala Internet Computer, który nie jest Twój, lub z danymi, których OISY nie potrafi odczytać. Dla Twojego bezpieczeństwa OISY go nie podpisze.",
 			"cketh_helper_unconfirmed": "OISY nie może jeszcze potwierdzić kontraktu konwersji ckETH, więc nie może sprawdzić tej wpłaty. Zatwierdzenie pozostanie wyłączone, dopóki nie będzie to możliwe.",
+			"ck_deposit": "To żądanie konwertuje $token na $ckToken dla Twojego principala Internet Computer, widocznego poniżej.",
+			"ck_deposit_other_account": "To żądanie konwertuje $token na $ckToken dla konta Internet Computer widocznego poniżej, które nie jest Twoim kontem OISY. OISY nie może sprawdzić, kto otrzyma tę wpłatę, więc zatwierdź je tylko wtedy, gdy ufasz tej aplikacji.",
+			"ck_deposit_liquidium": "To żądanie konwertuje $token na $ckToken dla Twojego konta Liquidium.",
+			"ck_deposit_liquidium_pool": "Pula $asset w Liquidium",
+			"ck_deposit_recipient": "Odbiorca $ckToken",
+			"ck_deposit_refused": "OISY nie potrafi odczytać tej konwersji do Internet Computer albo jej tokena nie można przekonwertować. Dla Twojego bezpieczeństwa OISY nie podpisze tego żądania.",
 			"swap_title": "",
 			"swap_pay": "",
 			"swap_pay_at_most": "",
@@ -2034,6 +2077,7 @@
 			"unknown_destination": "Nieznany adres docelowy.",
 			"cketh_deposit_refused": "To żądanie wywołuje kontrakt konwersji ckETH dla principala Internet Computer, który nie jest Twój, lub z danymi, których OISY nie potrafi odczytać. Dla Twojego bezpieczeństwa nie zostało podpisane.",
 			"cketh_helper_unconfirmed": "OISY nie mogła potwierdzić kontraktu konwersji ckETH, więc nie mogła sprawdzić tej wpłaty. Dla Twojego bezpieczeństwa nie została podpisana.",
+			"ck_deposit_refused": "Nie udało się odczytać tej konwersji do Internet Computer albo jej tokena nie można przekonwertować. Dla Twojego bezpieczeństwa żądanie nie zostało podpisane.",
 			"token_call_with_value": "To żądanie wysyła $amount do kontraktu tokena oprócz kwoty tokenów. Dla Twojego bezpieczeństwa nie zostało podpisane.",
 			"ambiguous_transaction": "Ta transakcja przenosi środki między kilkoma adresami i nie może zostać dokładnie wyświetlona do weryfikacji. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"close_pays_others": "Ta transakcja zamyka jedno z Twoich kont tokenów i wypłaca jego saldo na adres, który nie jest Twoim portfelem. Dla Twojego bezpieczeństwa nie została podpisana.",
@@ -2292,6 +2336,7 @@
 			"signature_copied": "",
 			"id": "Identyfikator transakcji",
 			"id_copied": "Identyfikator transakcji skopiowany do schowka.",
+			"twin_transaction": "Transakcja $twinNetwork",
 			"timestamp": "Znacznik czasu",
 			"type": "Typ",
 			"from": "Od",
@@ -2404,6 +2449,8 @@
 			"reimbursement": "Zwrot kosztów",
 			"twin_token_converted": "Przekonwertowano z $twinToken",
 			"ck_token_converted": "Przekonwertowano z $ckToken",
+			"converted_to_twin_token": "Przekonwertowano na $twinToken",
+			"converted_to_ck_token": "Przekonwertowano na $ckToken",
 			"sending_twin_token": "Wysyłanie $twinToken",
 			"sending_twin_token_failed": "Wysyłanie $twinToken nie powiodło się",
 			"converting_twin_token": "Konwersja $twinToken na $ckToken",
@@ -2861,6 +2908,8 @@
 			"borrow_at_risk_warning": "Ta pożyczka wyraźnie obniża twój wskaźnik zdrowia.",
 			"borrow_exceeds_power": "Kwota przekracza twoją zdolność pożyczkową.",
 			"borrow_below_minimum": "Kwota jest niższa niż minimalna pożyczka.",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "Ceny są tymczasowo niedostępne. Pożyczanie jest wyłączone do czasu ich wczytania.",
 			"borrow_high_risk_warning": "Ta pożyczka zbliża twoją pozycję do likwidacji.",
 			"borrow_risk_confirm": "Rozumiem, że ta pożyczka zwiększa moje ryzyko likwidacji.",
@@ -2891,6 +2940,7 @@
 			"interest_accrued": "Naliczone odsetki",
 			"debt_after_repay": "Dług po spłacie",
 			"repay_exceeds_debt": "Kwota przekracza twój zaległy dług.",
+			"repay_below_native_minimum": "",
 			"repay_prices_unavailable": "Ceny są tymczasowo niedostępne. Spłacanie jest wyłączone do czasu ich wczytania.",
 			"repay_debt_unavailable": "Twój zaległy dług jest tymczasowo niedostępny. Spłacanie jest wyłączone do czasu jego wczytania.",
 			"repay_pending_covers_debt": "Spłata tej pozycji jest nadal przetwarzana. Możesz spłacić więcej, gdy się zakończy."
@@ -3049,7 +3099,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "Asystent AI $oisy_short",
-			"welcome_message": "Cześć! 👋 Jestem estem Twoim osobistym konsjerżem AI. W czym mogę Ci pomóc?",
+			"welcome_message": "Cześć! 👋 Jestem Twoim osobistym konsjerżem AI. W czym mogę Ci pomóc?",
 			"action_button_contacts_title": "Pokaż kontakty",
 			"action_button_contacts_subtitle": "Wyświetl zapisane kontakty",
 			"action_button_contacts_prompt": "Pokaż mi moje kontakty.",

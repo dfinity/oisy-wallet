@@ -61,7 +61,8 @@ const onIdleSignOut = async () => {
 		return;
 	}
 
-	logout();
+	// A delegation that is gone rather than expired was removed by another tab.
+	logout({ delegationExpired: chain.delegation !== null });
 };
 
 /**
@@ -93,11 +94,11 @@ const checkDelegationChain = async (): Promise<{
 };
 
 // We do the logout on the client side because we reload the window to reload stores afterwards
-const logout = () => {
+const logout = ({ delegationExpired }: { delegationExpired: boolean }) => {
 	// Clear timer to avoid emitting sign-out multiple times
 	stopIdleTimer();
 
-	postMessage({ msg: 'signOutIdleTimer' });
+	postMessage({ msg: 'signOutIdleTimer', data: { delegationExpired } });
 };
 
 const emitExpirationTime = (delegation: DelegationChain) => {

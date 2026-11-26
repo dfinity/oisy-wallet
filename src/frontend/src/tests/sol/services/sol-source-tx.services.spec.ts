@@ -1,13 +1,16 @@
-import { getSignatureStatus, isBlockhashValid } from '$sol/api/solana.api';
+import { getSignatureStatus, getSolBalance, isBlockhashValid } from '$sol/api/solana.api';
 import {
+	readSolBalanceAfterTx,
 	readSolSourceTxOutcome,
 	resetSolSourceTxObservations
 } from '$sol/services/sol-source-tx.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolanaSignatureStatus } from '$sol/types/sol-rpc';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 
 vi.mock('$sol/api/solana.api', () => ({
 	getSignatureStatus: vi.fn(),
+	getSolBalance: vi.fn(),
 	isBlockhashValid: vi.fn()
 }));
 
@@ -207,6 +210,121 @@ describe('sol-source-tx.services', () => {
 
 				await expect(read()).resolves.toBe('succeeded');
 			});
+		});
+	});
+
+	describe('readSolSourceTxOutcome read at finality', () => {
+		const readFinalized = () =>
+			readSolSourceTxOutcome({
+				rowId: 'row-1',
+				signature,
+				blockhash,
+				minContextSlot: simulationSlot,
+				network: SolanaNetworks.mainnet,
+				finalized: true
+			});
+
+		it('should keep a confirmed transaction pending without reading its blockhash', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValue({ slot: 210n, status: confirmedStatus });
+
+			await expect(readFinalized()).resolves.toBe('pending');
+
+			expect(isBlockhashValid).not.toHaveBeenCalled();
+		});
+
+		it('should succeed a finalized transaction', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValue({
+				slot: 210n,
+				status: { ...confirmedStatus, confirmationStatus: 'finalized' }
+			});
+
+			await expect(readFinalized()).resolves.toBe('succeeded');
+		});
+
+		// A confirmed view past the blockhash can still be replaced by a fork that includes the
+		// transaction: only the finalized chain moving past it means no block can.
+		it('should read the blockhash on the finalized chain when there is no status', async () => {
+			await expect(readFinalized()).resolves.toBe('pending');
+
+			expect(isBlockhashValid).toHaveBeenCalledExactlyOnceWith({
+				blockhash,
+				network: SolanaNetworks.mainnet,
+				minContextSlot: simulationSlot,
+				commitment: 'finalized'
+			});
+		});
+
+		it('should expire a transaction whose confirmation was rolled back, once its blockhash has expired', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValueOnce({ slot: 210n, status: confirmedStatus });
+
+			await expect(readFinalized()).resolves.toBe('pending');
+
+			vi.mocked(getSignatureStatus).mockResolvedValue(noStatus);
+			vi.mocked(isBlockhashValid).mockResolvedValue({ slot: 200n, valid: false });
+
+			await expect(readFinalized()).resolves.toBe('pending');
+			await expect(readFinalized()).resolves.toBe('expired');
+		});
+	});
+
+	describe('readSolBalanceAfterTx', () => {
+		const readBalance = () =>
+			readSolBalanceAfterTx({
+				address: mockSolAddress,
+				signature,
+				network: SolanaNetworks.mainnet
+			});
+
+		const finalizedStatus: NonNullable<SolanaSignatureStatus> = {
+			...confirmedStatus,
+			confirmationStatus: 'finalized'
+		};
+
+		const processedStatus: NonNullable<SolanaSignatureStatus> = {
+			...confirmedStatus,
+			confirmationStatus: 'processed'
+		};
+
+		const failedStatus: NonNullable<SolanaSignatureStatus> = {
+			...finalizedStatus,
+			err: 'AccountInUse',
+			status: { Err: 'AccountInUse' }
+		};
+
+		it('should read the balance at finalized commitment, no earlier than the slot of the finalized transaction', async () => {
+			vi.mocked(getSignatureStatus).mockResolvedValue({ slot: 210n, status: finalizedStatus });
+			vi.mocked(getSolBalance).mockResolvedValue(20_000_000n);
+
+			await expect(readBalance()).resolves.toBe(20_000_000n);
+
+			expect(getSignatureStatus).toHaveBeenCalledExactlyOnceWith({
+				signature,
+				network: SolanaNetworks.mainnet
+			});
+			expect(getSolBalance).toHaveBeenCalledExactlyOnceWith({
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				minContextSlot: finalizedStatus.slot,
+				commitment: 'finalized'
+			});
+		});
+
+		it.each([
+			{ name: 'only processed', status: processedStatus },
+			{ name: 'only confirmed', status: confirmedStatus },
+			{ name: 'finalized with an error', status: failedStatus }
+		])('should read no balance for a transaction $name', async ({ status }) => {
+			vi.mocked(getSignatureStatus).mockResolvedValue({ slot: 210n, status });
+
+			await expect(readBalance()).resolves.toBeUndefined();
+
+			expect(getSolBalance).not.toHaveBeenCalled();
+		});
+
+		it('should read no balance while the status read finds no status for the transaction', async () => {
+			await expect(readBalance()).resolves.toBeUndefined();
+
+			expect(getSolBalance).not.toHaveBeenCalled();
 		});
 	});
 });

@@ -19,6 +19,7 @@
 		convertSatoshisToBtc,
 		isInvalidUtxosFee,
 		isUnclearBtcBroadcastOutcome,
+		isBtcSendLimitError,
 		mapBtcBroadcastErrorToMessage,
 		mapUtxosFeeErrorToMessage
 	} from '$btc/utils/btc-send.utils';
@@ -205,7 +206,7 @@
 						mapBtcBroadcastErrorToMessage({ err, i18n: $i18n }) ??
 						$i18n.liquidium.text.transaction_failed
 				},
-				err
+				...(isBtcSendLimitError(err) ? {} : { err })
 			});
 
 			// The transfer may have gone out, and its row stays until it settles. The form would offer

@@ -1,33 +1,60 @@
 import IconSend from '$lib/components/icons/IconSend.svelte';
 import NftLogo from '$lib/components/nfts/NftLogo.svelte';
+import { loadNftThumbnail } from '$lib/services/nft-thumbnail.services';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { getNftDisplayName } from '$lib/utils/nft.utils';
+import { getNftDisplayImageUrl, getNftDisplayName } from '$lib/utils/nft.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { render } from '@testing-library/svelte';
 
 describe('NftLogo', () => {
-	it('should render the main logo', () => {
-		const { getByTestId, getByAltText } = render(NftLogo, {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it('should render the main logo', async () => {
+		const { findByTestId, findByAltText } = render(NftLogo, {
 			props: {
 				nft: mockValidErc721Nft,
 				testId: 'nft-logo'
 			}
 		});
 
-		expect(getByTestId('nft-logo')).toBeInTheDocument();
+		await expect(findByTestId('nft-logo')).resolves.toBeInTheDocument();
 
 		const expected = replacePlaceholders(en.core.alt.logo, {
 			$name: getNftDisplayName(mockValidErc721Nft)
 		});
 
-		expect(getByAltText(expected)).toBeInTheDocument();
+		const logo = await findByAltText(expected);
+
+		expect(logo).toBeInTheDocument();
+
+		expect(logo).toHaveAttribute('src', getNftDisplayImageUrl(mockValidErc721Nft));
 	});
 
-	it('should use the collection fallback in the logo alt text when the NFT name is missing', () => {
+	it('should render the small copy of an SVG image', async () => {
+		const mockThumbnail = 'data:image/png;base64,dGh1bWJuYWls';
+
+		vi.mocked(loadNftThumbnail).mockResolvedValueOnce(mockThumbnail);
+
+		const { findByAltText } = render(NftLogo, {
+			props: {
+				nft: mockValidErc721Nft
+			}
+		});
+
+		const expected = replacePlaceholders(en.core.alt.logo, {
+			$name: getNftDisplayName(mockValidErc721Nft)
+		});
+
+		await expect(findByAltText(expected)).resolves.toHaveAttribute('src', mockThumbnail);
+	});
+
+	it('should use the collection fallback in the logo alt text when the NFT name is missing', async () => {
 		const nft = { ...mockValidErc721Nft, name: undefined };
 
-		const { getByAltText } = render(NftLogo, {
+		const { findByAltText } = render(NftLogo, {
 			props: {
 				nft
 			}
@@ -37,7 +64,7 @@ describe('NftLogo', () => {
 			$name: getNftDisplayName(nft)
 		});
 
-		expect(getByAltText(expected)).toBeInTheDocument();
+		await expect(findByAltText(expected)).resolves.toBeInTheDocument();
 	});
 
 	it('should not render the badge when it is not provided', () => {

@@ -27,7 +27,8 @@ export enum WizardStepsSwap {
 	REVIEW = 'Review',
 	SWAPPING = 'Swapping',
 	TOKENS_LIST = 'Tokens List',
-	SELECT_PROVIDER = 'Select swap provider'
+	SELECT_PROVIDER = 'Select swap provider',
+	MOVE_TOKEN = 'Move token'
 }
 
 export enum WizardStepsAuthHelp {

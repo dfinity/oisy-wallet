@@ -32,8 +32,20 @@ const config: UserConfig = {
 		target: 'es2020',
 		rollupOptions: {
 			output: {
-				manualChunks: (id) => {
+				// eslint-disable-next-line local-rules/prefer-object-params -- Rollup defines this callback signature.
+				manualChunks: (id, { getModuleInfo }) => {
 					const folder = dirname(id);
+					const preview = 'LandingWalletPreview.svelte';
+					const inlineSvg = id.endsWith('.svg?inline') ? getModuleInfo(id) : null;
+					const previewOnlySvg =
+						inlineSvg?.importers.length === 1 &&
+						basename(inlineSvg.importers[0]) === preview &&
+						inlineSvg.dynamicImporters.length === 0;
+
+					// Keep the signed-out artwork separate from the shared application bundle.
+					if (basename(id) === preview || previewOnlySvg) {
+						return 'landing-wallet-preview';
+					}
 
 					if (folder.includes('src/frontend/src/lib/i18n') && id.endsWith('.json')) {
 						return `i18n-${basename(id, '.json')}`;

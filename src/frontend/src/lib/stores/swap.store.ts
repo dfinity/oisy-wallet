@@ -3,6 +3,7 @@ import { isIcToken } from '$icp/validation/ic-token.validation';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { swappableTokens } from '$lib/derived/swap.derived';
 import type { TokenCategoryTagValue } from '$lib/enums/token-tag';
+import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import { balancesStore } from '$lib/stores/balances.store';
 import {
 	swapSupportedTokensStore,
@@ -27,7 +28,9 @@ export interface SwapError {
 
 export interface SwapData {
 	sourceToken?: Token;
-	destinationToken?: Token;
+	// `null` after explicitly clearing or invalidating the receive token, so the initial token does
+	// not come back.
+	destinationToken?: Token | null;
 }
 
 type IsTokensIcrc2Map = Record<string, boolean>;
@@ -49,10 +52,19 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	// The two-swap hints shown since the swap modal opened. Kept here rather than in the hint, which
 	// comes and goes with the quotes and is rebuilt with the form, so that each one counts once.
 	const twoSwapsHintsShown: TwoSwapsHintShown[] = [];
-	// The network and asset type the person set on each side's token list, so it reopens on them and a
-	// pick never moves them; a side with none opens where the wizard starts it. Kept here because the
-	// list's own context is shared by every token picker.
+	// The network and asset type chosen through a shortcut or filters on each side's list, so it
+	// reopens on them and a pick never moves them; a side with none opens where the wizard starts it.
+	// Kept here because the list's own context is shared by every token picker.
 	const tokenListFilters = new Map<SwapSelectTokenType, SwapTokenListFilters>();
+	// The disabled tokens whose prices the wizard has loaded since the swap modal opened. Kept here
+	// rather than in the wizard, which Get Token rebuilds on every step, so that each one loads once.
+	const pricedTokenIds = new Set<TokenId>();
+	// Get Token rebuilds the wizard between steps, so the list's return target lives here.
+	const tokenListReturnFocus = writable<string | undefined>();
+	// The last receive view survives Get Token rebuilding the wizard on each step.
+	const receiveTokenPickerStep = writable<WizardStepsSwap.TOKENS_LIST | WizardStepsSwap.MOVE_TOKEN>(
+		WizardStepsSwap.TOKENS_LIST
+	);
 
 	const sourceToken = derived(
 		[data, swappableTokens],
@@ -61,7 +73,9 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const destinationToken = derived(
 		[data, swappableTokens],
 		([{ destinationToken }, $swappableTokens]) =>
-			destinationToken ?? $swappableTokens.destinationToken
+			destinationToken === null
+				? undefined
+				: (destinationToken ?? $swappableTokens.destinationToken)
 	);
 
 	const sourceTokenBalance = derived(
@@ -136,8 +150,11 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		lifiCarriedFee,
 		amountSetToMax,
 		lifiMaxFee,
+		tokenListReturnFocus,
+		receiveTokenPickerStep,
 		// The amount is kept as it is for another source, not refilled with that token's max.
 		setSourceToken: (token: Token) => {
+			receiveTokenPickerStep.set(WizardStepsSwap.TOKENS_LIST);
 			amountSetToMax.set(false);
 			lifiMaxFee.set(undefined);
 
@@ -149,10 +166,18 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		setDestinationToken: (token: Token | undefined) =>
 			update((state) => ({
 				...state,
-				destinationToken: token
+				destinationToken: token ?? null
 			})),
+		clearDestinationToken: () => {
+			// Keep the current pay amount when the quote and its fees are cleared.
+			amountSetToMax.set(false);
+			lifiMaxFee.set(undefined);
+
+			update((state) => ({ ...state, destinationToken: null }));
+		},
 		// TODO: Ideally, this function should be used with reactive statements, exported outside the store.
 		switchTokens: () => {
+			receiveTokenPickerStep.set(WizardStepsSwap.TOKENS_LIST);
 			amountSetToMax.set(false);
 			lifiMaxFee.set(undefined);
 
@@ -161,7 +186,10 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 
 				return {
 					...state,
-					sourceToken: state.destinationToken ?? $swappableTokens.destinationToken,
+					sourceToken:
+						state.destinationToken === null
+							? undefined
+							: (state.destinationToken ?? $swappableTokens.destinationToken),
 					destinationToken: state.sourceToken ?? $swappableTokens.sourceToken
 				};
 			});
@@ -201,6 +229,14 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			tokenListFilters.set(side, filters);
 		},
 
+		markTokensPriced: <T extends Token>(tokens: T[]): T[] => {
+			const unpriced = tokens.filter(({ id }) => !pricedTokenIds.has(id));
+
+			unpriced.forEach(({ id }) => pricedTokenIds.add(id));
+
+			return unpriced;
+		},
+
 		markTwoSwapsHintShown: (hint: TwoSwapsHintShown): boolean => {
 			const shown = twoSwapsHintsShown.some(
 				({ sourceTokenId, destinationTokenId, intermediateTokenId, amount }) =>
@@ -228,6 +264,9 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			lifiMaxFee.set(undefined);
 			twoSwapsHintsShown.splice(0);
 			tokenListFilters.clear();
+			pricedTokenIds.clear();
+			tokenListReturnFocus.set(undefined);
+			receiveTokenPickerStep.set(WizardStepsSwap.TOKENS_LIST);
 		}
 	};
 };
@@ -268,6 +307,8 @@ export interface SwapTokenListFilters {
 }
 
 export interface SwapContext {
+	receiveTokenPickerStep: Writable<WizardStepsSwap.TOKENS_LIST | WizardStepsSwap.MOVE_TOKEN>;
+	tokenListReturnFocus: Writable<string | undefined>;
 	sourceToken: Readable<Token | undefined>;
 	destinationToken: Readable<Token | undefined>;
 	sourceTokenBalance: Readable<Balance | undefined>;
@@ -294,6 +335,8 @@ export interface SwapContext {
 	}) => void;
 	setSourceToken: (token: Token) => void;
 	setDestinationToken: (token: Token | undefined) => void;
+	// Clears the receive token, including the one the swap opened with.
+	clearDestinationToken: () => void;
 	switchTokens: () => void;
 	// Records a two-swap hint as shown: `true` the first time since the swap modal opened.
 	markTwoSwapsHintShown: (hint: TwoSwapsHintShown) => boolean;
@@ -302,6 +345,8 @@ export interface SwapContext {
 		side: SwapSelectTokenType;
 		filters: SwapTokenListFilters;
 	}) => void;
+	// Records the tokens as priced and returns those not recorded before since the swap modal opened.
+	markTokensPriced: <T extends Token>(tokens: T[]) => T[];
 	reset: () => void;
 }
 

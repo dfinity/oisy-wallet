@@ -900,8 +900,11 @@ fn test_housekeeping_evicts_stale_token_activity() {
     assert_eq!(stats_after.token_activity_count, 0);
 }
 
+/// A full `token_activity` fits one eviction batch, so this covers the timer path end to end, not
+/// the split: stopping at the budget and resuming are covered by the unit tests of
+/// `token::activity::evict_inactive_tokens`.
 #[test]
-fn test_housekeeping_evicts_a_full_token_activity_in_batches() {
+fn test_housekeeping_evicts_a_full_token_activity() {
     const FULL: u64 = 2_000;
     let pic_setup = setup();
     enable_exchange_rate_refresh(&pic_setup);
@@ -933,19 +936,6 @@ fn test_housekeeping_evicts_a_full_token_activity_in_batches() {
     assert_eq!(token_activity_count(), FULL);
 
     pic_setup.pic.advance_time(Duration::from_secs(60 * 60 + 1));
-    let mut count = token_activity_count();
-    for _ in 0..20 {
-        if count < FULL {
-            break;
-        }
-        pic_setup.pic.tick();
-        count = token_activity_count();
-    }
-    assert!(
-        0 < count && count < FULL,
-        "The first batch should stop at its budget and leave entries for the next, left {count}"
-    );
-
     for _ in 0..20 {
         pic_setup.pic.advance_time(Duration::from_secs(1));
         pic_setup.pic.tick();

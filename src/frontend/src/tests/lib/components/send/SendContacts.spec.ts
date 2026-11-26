@@ -64,6 +64,27 @@ describe('SendContacts', () => {
 		).toBeInTheDocument();
 	});
 
+	it('fades the edges of the scrolling list', () => {
+		const { getByRole } = render(SendContacts, {
+			props: {
+				...props,
+				destination: '',
+				networkContacts: {
+					[getNetworkContactKey({
+						contact: contact1,
+						address: mockContactBtcAddressUi.address
+					})]: {
+						address: mockContactBtcAddressUi.address,
+						contact: contact1
+					}
+				}
+			},
+			context: mockContext(BTC_MAINNET_TOKEN)
+		});
+
+		expect(getByRole('list')).toHaveClass('scroll-fade');
+	});
+
 	it('renders filtered by address content if data is provided', () => {
 		const { getByText } = render(SendContacts, {
 			props: {

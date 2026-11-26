@@ -28,6 +28,8 @@ import {
 	hasSufficientIcrcAllowance,
 	loadCustomTokens as loadCustomIcrcTokens
 } from '$icp/services/icrc.services';
+import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { setCustomToken } from '$lib/api/backend.api';
@@ -55,6 +57,7 @@ import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
+import * as exchangeServices from '$lib/services/exchange.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
 import * as nearIntentsServices from '$lib/services/near-intents.services';
 import * as oneSecSwapServices from '$lib/services/onesec-swap.services';
@@ -73,6 +76,7 @@ import {
 	fetchSwapAmountsXRP,
 	fetchVeloraDeltaSwap,
 	fetchVeloraMarketSwap,
+	loadDisabledErc20AndSplTokensExchanges,
 	loadKongSwapTokens,
 	performManualWithdraw,
 	withdrawICPSwapAfterFailedSwap,
@@ -109,6 +113,7 @@ import { geSwapEthTokenAddress, slippagePercentToBasisPoints } from '$lib/utils/
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
+import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
@@ -2415,7 +2420,9 @@ describe('swap.services', () => {
 			mockDeltaContractPostDeltaOrder.mockResolvedValue({ id: 'mock-auction-id' });
 			vi.mocked(geSwapEthTokenAddress).mockImplementation(({ address }) => address);
 
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 
 			vi.mocked(createPermit).mockResolvedValue({
 				nonce: '0',
@@ -2994,7 +3001,9 @@ describe('swap.services', () => {
 			mockSwapBuildTx.mockResolvedValue(mockTransaction());
 			vi.mocked(geSwapEthTokenAddress).mockImplementation(({ address }) => address);
 			vi.mocked(sendEvmSwap).mockResolvedValue({ hash: mockTxHash, nonce: mockTxNonce });
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should execute market swap successfully with non-default token', async () => {
@@ -3363,6 +3372,91 @@ describe('swap.services', () => {
 			await loadKongSwapTokens({ identity: mockIdentity, allIcrcTokens: [mockIcrcCustomToken] });
 
 			expect(get(kongSwapTokensStore)).toStrictEqual({});
+		});
+	});
+
+	describe('loadDisabledErc20AndSplTokensExchanges', () => {
+		const enabledErc20Token = { ...mockValidErc20Token, enabled: true };
+		const disabledErc20Token = {
+			...mockValidErc20Token,
+			id: parseTokenId('DisabledErc20TokenId'),
+			address: mockEthAddress2,
+			enabled: false
+		};
+		const disabledRobinhoodErc20Token = {
+			...mockValidErc20Token,
+			id: parseTokenId('DisabledRobinhoodErc20TokenId'),
+			network: ROBINHOOD_MAINNET_NETWORK,
+			enabled: false
+		};
+
+		const enabledSplToken = { ...mockValidSplToken, enabled: true };
+		const disabledSplToken = {
+			...mockValidSplToken,
+			id: parseTokenId('DisabledSplTokenId'),
+			address: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+			enabled: false
+		};
+
+		const tokens = [
+			enabledErc20Token,
+			disabledErc20Token,
+			disabledRobinhoodErc20Token,
+			enabledSplToken,
+			disabledSplToken
+		];
+
+		const ethereumExchange = { [mockEthAddress2.toLowerCase()]: { usd: 1, usd_market_cap: 1 } };
+		const robinhoodExchange = { [mockEthAddress.toLowerCase()]: { usd: 2, usd_market_cap: 2 } };
+		const splExchange = { [disabledSplToken.address]: { usd: 3, usd_market_cap: 3 } };
+
+		beforeEach(() => {
+			vi.resetAllMocks();
+
+			exchangeStore.reset();
+
+			vi.spyOn(exchangeServices, 'exchangeRateERC20ToUsd').mockImplementation(
+				({ coingeckoPlatformId }) =>
+					Promise.resolve(
+						coingeckoPlatformId === 'robinhood' ? robinhoodExchange : ethereumExchange
+					)
+			);
+			vi.spyOn(exchangeServices, 'exchangeRateSPLToUsd').mockResolvedValue(splExchange);
+		});
+
+		it('should price only the disabled tokens, per network', async () => {
+			await loadDisabledErc20AndSplTokensExchanges({ tokens });
+
+			expect(exchangeServices.exchangeRateERC20ToUsd).toHaveBeenCalledTimes(2);
+			expect(exchangeServices.exchangeRateERC20ToUsd).toHaveBeenCalledWith({
+				coingeckoPlatformId: 'ethereum',
+				contractAddresses: [{ address: mockEthAddress2, coingeckoId: 'ethereum' }]
+			});
+			expect(exchangeServices.exchangeRateERC20ToUsd).toHaveBeenCalledWith({
+				coingeckoPlatformId: 'robinhood',
+				contractAddresses: [{ address: mockValidErc20Token.address, coingeckoId: 'robinhood' }]
+			});
+			expect(exchangeServices.exchangeRateSPLToUsd).toHaveBeenCalledExactlyOnceWith([
+				disabledSplToken.address
+			]);
+		});
+
+		it('should add the prices to the exchange store', async () => {
+			await loadDisabledErc20AndSplTokensExchanges({ tokens });
+
+			expect(get(exchangeStore)).toStrictEqual({
+				...ethereumExchange,
+				...robinhoodExchange,
+				...splExchange
+			});
+		});
+
+		it('should keep the prices that loaded when another request fails', async () => {
+			vi.spyOn(exchangeServices, 'exchangeRateSPLToUsd').mockRejectedValue(new Error('down'));
+
+			await loadDisabledErc20AndSplTokensExchanges({ tokens });
+
+			expect(get(exchangeStore)).toStrictEqual({ ...ethereumExchange, ...robinhoodExchange });
 		});
 	});
 
@@ -4210,8 +4304,56 @@ describe('swap.services', () => {
 	});
 
 	describe('enableSwapDestinationToken with an ICRC destination', () => {
+		const selectedToken: IcTokenToggleable = {
+			...mockValidIcrcToken,
+			enabled: false
+		};
+
 		beforeEach(() => {
 			vi.clearAllMocks();
+		});
+
+		afterEach(() => {
+			icrcCustomTokensStore.resetAll();
+			icrcDefaultTokensStore.resetAll();
+		});
+
+		it.each([undefined, 1n])('uses the refreshed version instead of %s', async (version) => {
+			const destinationToken = { ...selectedToken, version };
+			const savedToken = { ...selectedToken, id: parseTokenId(selectedToken.symbol) };
+
+			if (version !== undefined) {
+				icrcCustomTokensStore.setAll([{ data: { ...savedToken, version }, certified: true }]);
+			}
+
+			icrcCustomTokensStore.setAll([{ data: { ...savedToken, version: 2n }, certified: true }]);
+
+			await enableSwapDestinationToken({ identity: mockIdentity, destinationToken });
+
+			expect(setCustomToken).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				token: expect.objectContaining({ enabled: true, version: [2n] })
+			});
+			expect(loadCustomIcrcTokens).toHaveBeenCalledOnce();
+		});
+
+		it('skips the write if the destination was enabled after selection', async () => {
+			icrcCustomTokensStore.setAll([
+				{ data: { ...selectedToken, enabled: true, version: 2n }, certified: true }
+			]);
+
+			await enableSwapDestinationToken({ identity: mockIdentity, destinationToken: selectedToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+		});
+
+		it('respects the effective enabled state of a default-enabled token', async () => {
+			icrcDefaultTokensStore.setAll([{ data: mockValidIcrcToken, certified: true }]);
+			icrcCustomTokensStore.setAll([{ data: { ...selectedToken, version: 2n }, certified: true }]);
+
+			await enableSwapDestinationToken({ identity: mockIdentity, destinationToken: selectedToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
 		});
 
 		// The regression this guards: a Chain Fusion mint (and a 1Sec bridge) lands on an
@@ -4275,7 +4417,9 @@ describe('swap.services', () => {
 
 			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123', nonce: 5 });
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not call setCustomToken when ERC20 destination token is toggleable and already enabled', async () => {
@@ -4385,7 +4529,9 @@ describe('swap.services', () => {
 
 			vi.mocked(sendSol).mockResolvedValue(mockSolSignature());
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not call setCustomToken when SPL destination token is toggleable and already enabled', async () => {
@@ -4463,7 +4609,9 @@ describe('swap.services', () => {
 
 			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123', nonce: 5 });
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not send funds when the quote signature does not verify', async () => {
@@ -4793,7 +4941,9 @@ describe('swap.services', () => {
 
 			vi.mocked(sendSol).mockResolvedValue(solTxSignature);
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not send funds when the quote was requested with another slippage', async () => {
@@ -4956,7 +5106,9 @@ describe('swap.services', () => {
 				return btcTxid;
 			});
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not send funds when the quote was requested with another slippage', async () => {
@@ -5160,7 +5312,7 @@ describe('swap.services', () => {
 					() => {
 						expect(broadcast).not.toHaveBeenCalled();
 
-						return Promise.resolve();
+						return Promise.resolve(mockActiveUserTransaction);
 					}
 				);
 				sendThroughBackend();
@@ -5284,7 +5436,9 @@ describe('swap.services', () => {
 				return Promise.resolve({ txHash: xrpTxHash, submitResult: undefined });
 			});
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue(
+				mockActiveUserTransaction
+			);
 		});
 
 		it('should not send funds when the quote was requested with another slippage', async () => {
