@@ -45,12 +45,13 @@ The three screens reuse what OISY already shows elsewhere:
 - The row exists for receive tokens on an EVM network, Solana and Bitcoin. Not for XRP: an exchange
   address on XRP usually needs a destination tag, and nothing tells yet whether 1Click can carry one
   (see [Open questions](#open-questions-facts-to-confirm)).
-- While another address is set, OISY asks NEAR Intents alone for an offer, with that address as the
-  recipient. No other provider is offered, so the swap can only go where the row says. If NEAR
-  Intents has no offer, the form says the swap is not offered, and the row stays so the user can see
-  why and change it.
-- Next to an address the user picked, a clear control goes back to "Your OISY Wallet". Every provider
-  is then asked again.
+- While another address is set, every provider is still asked and listed: NEAR Intents for that
+  address, every other provider for the user's own address. A row affects only what is below it,
+  never the provider above.
+- NEAR Intents stays selected while it has an offer, also at another amount. Selecting another
+  provider, or NEAR Intents having no offer, goes back to "Your OISY Wallet": only NEAR Intents pays
+  out to another address.
+- Next to an address the user picked, a clear control goes back to "Your OISY Wallet".
 - Changing the receive token, or switching the two tokens, goes back to "Your OISY Wallet". An
   address is only valid on the network it was picked for.
 
@@ -91,11 +92,12 @@ The three screens reuse what OISY already shows elsewhere:
 3. "Change >" opens Send's destination step for the receive token. Next with a valid address sets
    it; Back changes nothing; the user's own address counts as "Your OISY Wallet".
 4. The QR scan fills only the address field.
-5. With an address set, the quote request to 1Click carries it as `recipient`, the refund address is
-   still the user's own, and no other provider is asked.
+5. With an address set, the quote request to 1Click carries it as `recipient` and the refund address
+   is still the user's own. Every other provider is still asked, for the user's own address.
 6. Changing the address, clearing it, or changing the receive token requests new offers. A quote for
    another recipient never reaches Review.
-7. The clear control goes back to "Your OISY Wallet" and every provider is asked again.
+7. With an address set, NEAR Intents stays selected while it has an offer. Selecting another
+   provider, NEAR Intents having no offer, or the clear control goes back to "Your OISY Wallet".
 8. Review shows the address from the signed quote, in full, with the first-time warning gating Swap
    for an address never sent to on that network.
 9. Swap is disabled when the signed quote's recipient differs from the chosen destination.
