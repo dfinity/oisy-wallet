@@ -72,6 +72,15 @@ export type ActiveUserTransactionData =
 	  }
 	| {
 			/**
+			 * Rift swap. A single variant covers both v1 directions (BTC → EVM,
+			 * EVM → BTC); the order id, deposit address, deposit tx and settlement refs
+			 * ride in `external_refs`. The two chains are those of `source_token` /
+			 * `dest_token`.
+			 */
+			Rift: LifiData;
+	  }
+	| {
+			/**
 			 * OISY Trade order-book swap. Both legs are Internet Computer ledgers, and
 			 * the row is opened *before* the deposit — it is the record that tells a
 			 * later session which token to pull back out of the DEX's custody: the
@@ -139,9 +148,10 @@ export type ActiveUserTransactionError =
 	| { InvalidId: null }
 	| {
 			/**
-			 * A non-terminal record already tracks the same subject, and the flow only
-			 * allows one at a time. Distinct from `AlreadyExists`, which is about the
-			 * record's own id: this one is about what the record is *for*.
+			 * A record already tracks the same subject, and the flow only allows one: a
+			 * non-terminal one for most flows, any record at all for a Rift order.
+			 * Distinct from `AlreadyExists`, which is about the record's own id: this one
+			 * is about what the record is *for*.
 			 */
 			AlreadyInFlight: null;
 	  }

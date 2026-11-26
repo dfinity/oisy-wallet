@@ -369,7 +369,9 @@ broadcast refusal, as LI.FI's and the XRP sends' rows are.
 
 **One row per order.** `create` refuses a Rift row whose `rift_order_id` is already on one of the
 caller's rows, in any state, with `AlreadyInFlight`. This is the same kind of guard as the one
-that refuses a second XRP payment or SOL mint in flight.
+that refuses a second XRP payment or SOL mint in flight. Order ids are compared without case. The
+backend requires `rift_order_id` to be a UUID, the shape Rift's API gives it. An update can neither
+strip it nor change it, since either would loosen the guard.
 
 - Rift answers a repeated `POST /order` with the same order. Until it sees the first deposit, that
   order still reads `awaiting_deposit` with no `deposit_tx`, so the binding checks pass again.

@@ -66,6 +66,13 @@ pub const LIFI_REF_TX_HASH: &str = "lifi_tx_hash";
 pub const LIFI_REF_NONCE: &str = "lifi_nonce";
 pub const LIFI_REF_BLOCKHASH: &str = "lifi_blockhash";
 
+/// The Rift order a row tracks: the `id` from Rift's `POST /order`, a UUID. It is
+/// the row's only poll key — the poller reads `GET /order/{id}` — so a row without
+/// it could never reach a terminal status. It is also what keeps one row per
+/// order: Rift answers a repeated `POST /order` with the same order, whose deposit
+/// address takes a second deposit as readily as the first.
+pub const RIFT_REF_ORDER_ID: &str = "rift_order_id";
+
 /// Length bounds of an XRPL classic address. It is base58check over a 21-byte
 /// payload — the `0x00` version byte plus the 20-byte `AccountID` — with a
 /// 4-byte checksum appended, so 25 bytes are encoded and the result is 25 to 35
@@ -170,6 +177,11 @@ pub enum ActiveUserTransactionData {
     /// two calls. The ICP block index, learned once the transfer returns, rides
     /// in `external_refs`.
     CyclesTopUp(CyclesTopUpData),
+    /// Rift swap. A single variant covers both v1 directions (BTC → EVM,
+    /// EVM → BTC); the order id, deposit address, deposit tx and settlement refs
+    /// ride in `external_refs`. The two chains are those of `source_token` /
+    /// `dest_token`.
+    Rift(RiftData),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -396,6 +408,18 @@ pub struct CyclesTopUpData {
     pub transfer_created_at_ns: Timestamp,
 }
 
+/// Rift swap payload. Settlement is tracked off-chain, by Rift's order endpoint,
+/// so the order id and everything learned from it live in `external_refs`; only
+/// the values fixed at creation are captured here. As for LI.FI, no chain id is
+/// stored: the token ids already carry both chains.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct RiftData {
+    pub source_token: TokenId,
+    pub dest_token: TokenId,
+    /// Source-token amount in base units: the order's `amount_in`.
+    pub amount: Nat,
+}
+
 /// In-flight high-level user operation, persisted so the FE can resume polling
 /// across logout / tab close.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -456,9 +480,10 @@ pub enum ActiveUserTransactionError {
     InvalidId,
     InvalidData(String),
     IllegalStatusTransition,
-    /// A non-terminal record already tracks the same subject, and the flow only
-    /// allows one at a time. Distinct from `AlreadyExists`, which is about the
-    /// record's own id: this one is about what the record is *for*.
+    /// A record already tracks the same subject, and the flow only allows one: a
+    /// non-terminal one for most flows, any record at all for a Rift order.
+    /// Distinct from `AlreadyExists`, which is about the record's own id: this one
+    /// is about what the record is *for*.
     AlreadyInFlight,
 }
 
@@ -473,7 +498,7 @@ mod tests {
         ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, CyclesTopUpData,
         GetActiveUserTransactionsResponse, LifiData, LiquidiumAction, LiquidiumData,
         NearIntentsData, OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
-        UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode, XrpData,
+        RiftData, UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode, XrpData,
     };
     use crate::types::{
         custom_token::{ErcTokenId, SplTokenId},
@@ -782,6 +807,24 @@ mod tests {
                 source_token,
                 dest_token,
                 amount: Nat::from(1_000_000u64),
+            });
+            assert_eq!(roundtrip(&original), original);
+        }
+    }
+
+    #[test]
+    fn rift_variant_roundtrips() {
+        // Both v1 directions, with a native coin and an ERC-20 on the EVM side.
+        for (source_token, dest_token) in [
+            (TokenId::BtcNativeMainnet, TokenId::EvmNative(8453)),
+            (TokenId::BtcNativeMainnet, erc20(USDC_ETHEREUM, 1)),
+            (erc20(USDC_ETHEREUM, 1), TokenId::BtcNativeMainnet),
+            (TokenId::EvmNative(42161), TokenId::BtcNativeMainnet),
+        ] {
+            let original = ActiveUserTransactionData::Rift(RiftData {
+                source_token,
+                dest_token,
+                amount: Nat::from(100_000u64),
             });
             assert_eq!(roundtrip(&original), original);
         }
