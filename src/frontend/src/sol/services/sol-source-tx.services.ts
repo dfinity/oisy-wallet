@@ -1,7 +1,8 @@
-import { getSignatureStatus, isBlockhashValid } from '$sol/api/solana.api';
+import { getSignatureStatus, getSolBalance, isBlockhashValid } from '$sol/api/solana.api';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import { toSolSourceTxOutcome, type SolSourceTxOutcome } from '$sol/utils/sol-source-tx.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * Counts how many consecutive polls have observed a row's source transaction as expired. A single
@@ -42,29 +43,39 @@ const recordExpiryObservation = (rowId: string): number => {
  * invalid. Without it, the blockhash read is taken as it comes.
  *
  * `expired` is returned only once two consecutive polls of the same row have seen it; the first
- * reads as `pending`.
+ * reads as `pending`. With `finalized`, a status counts only once it is finalized (see
+ * `toSolSourceTxOutcome`), and the blockhash is read on the finalized chain too: a transfer is
+ * expired only once that chain has moved past its blockhash, which no later block can then include,
+ * not on a confirmed view that a competing fork can still replace.
  */
 export const readSolSourceTxOutcome = async ({
 	rowId,
 	signature,
 	blockhash,
 	minContextSlot,
-	network
+	network,
+	finalized = false
 }: {
 	rowId: string;
 	signature: string;
 	blockhash: string;
 	minContextSlot?: bigint;
 	network: SolanaNetworkType;
+	finalized?: boolean;
 }): Promise<SolSourceTxOutcome> => {
 	const { status, slot } = await getSignatureStatus({ signature, network });
 
-	let outcome = toSolSourceTxOutcome({ status, statusSlot: slot });
+	let outcome = toSolSourceTxOutcome({ status, statusSlot: slot, finalized });
 
 	// Only a missing status is ambiguous: the transaction may still land, or never will. The
 	// blockhash tells the two apart.
 	if (isNullish(status)) {
-		const blockhashRead = await isBlockhashValid({ blockhash, network, minContextSlot });
+		const blockhashRead = await isBlockhashValid({
+			blockhash,
+			network,
+			minContextSlot,
+			...(finalized && { commitment: 'finalized' as const })
+		});
 
 		if (!blockhashRead.valid) {
 			// The transaction may have landed just before its blockhash aged out, after the status was
@@ -75,7 +86,8 @@ export const readSolSourceTxOutcome = async ({
 			outcome = toSolSourceTxOutcome({
 				status: recheck.status,
 				statusSlot: recheck.slot,
-				blockhash: blockhashRead
+				blockhash: blockhashRead,
+				finalized
 			});
 		}
 	}
@@ -89,4 +101,34 @@ export const readSolSourceTxOutcome = async ({
 	expiryObservations.delete(rowId);
 
 	return outcome;
+};
+
+/**
+ * The lamports an address holds once a transaction is finalized, read at finalized commitment no
+ * earlier than its slot. Finalized blocks are on the one fork that stays, so the balance counts what
+ * that transaction moved, which a processed status or a confirmed read cannot promise. `undefined`
+ * until the status read finds the transaction finalized without an error. A node not that far yet
+ * refuses to answer, and the read throws.
+ */
+export const readSolBalanceAfterTx = async ({
+	address,
+	signature,
+	network
+}: {
+	address: SolAddress;
+	signature: string;
+	network: SolanaNetworkType;
+}): Promise<bigint | undefined> => {
+	const { status } = await getSignatureStatus({ signature, network });
+
+	if (isNullish(status) || status.confirmationStatus !== 'finalized' || nonNullish(status.err)) {
+		return;
+	}
+
+	return await getSolBalance({
+		address,
+		network,
+		minContextSlot: status.slot,
+		commitment: 'finalized'
+	});
 };

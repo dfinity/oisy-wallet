@@ -7,6 +7,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { authLockReason } from '$lib/derived/locked.derived';
 	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { signOut, signIn } from '$lib/services/auth.services';
@@ -73,7 +74,11 @@
 
 			<div class="my-6">
 				<h2 class="mb-2 text-2xl font-semibold">{$i18n.lock.text.title_part_1}</h2>
-				<span class="text-gray-600 mb-6">{$i18n.lock.text.title_part_2}</span>
+				<span class="text-gray-600 mb-6"
+					>{$authLockReason === 'expired'
+						? $i18n.lock.text.title_part_2_session_expired
+						: $i18n.lock.text.title_part_2}</span
+				>
 			</div>
 
 			<div class="w-full">

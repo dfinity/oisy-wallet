@@ -1,16 +1,18 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { Asset, Chain } from '@liquidium/client';
+	import { SupplyAction, type Asset, type Chain } from '@liquidium/client';
 	import { setContext } from 'svelte';
 	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumSupplyBtcWizard from '$lib/components/liquidium/supply/LiquidiumSupplyBtcWizard.svelte';
 	import LiquidiumSupplyEthWizard from '$lib/components/liquidium/supply/LiquidiumSupplyEthWizard.svelte';
 	import LiquidiumSupplyIcrcWizard from '$lib/components/liquidium/supply/LiquidiumSupplyIcrcWizard.svelte';
+	import LiquidiumSupplySolWizard from '$lib/components/liquidium/supply/LiquidiumSupplySolWizard.svelte';
 	import LiquidiumSupplyTokensList from '$lib/components/liquidium/supply/LiquidiumSupplyTokensList.svelte';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumSupplyWizardSteps } from '$lib/config/lend-borrow.config';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
@@ -54,26 +56,53 @@
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
 
 	let inflowFee = $state<bigint | undefined>();
+	// SOL only: the least gross transfer Liquidium credits, which the native SOL form enforces.
+	let minimumSendAmount = $state<bigint | undefined>();
 	// The estimate failed (e.g. stale oracle price): surface a retry message and block submit.
 	let inflowFeeUnavailable = $state(false);
 
 	$effect(() => {
 		const identity = $authIdentity;
 
-		if (nonNullish(identity) && nonNullish(selectedMarket)) {
-			const asset = selectedMarket.asset as Asset;
-			const chain = selectedMarket.chain as Chain;
-
-			inflowFee = undefined;
-			inflowFeeUnavailable = false;
-
-			estimateLiquidiumInflowFee({ identity, asset, chain })
-				.then((fee) => (inflowFee = fee))
-				.catch((err: unknown) => {
-					consoleError(err);
-					inflowFeeUnavailable = true;
-				});
+		if (isNullish(identity) || isNullish(selectedMarket)) {
+			return;
 		}
+
+		const { asset, chain, poolId } = selectedMarket;
+
+		inflowFee = undefined;
+		minimumSendAmount = undefined;
+		inflowFeeUnavailable = false;
+
+		// A SOL quote may first create the profile, so a quote for a rail picked before can answer
+		// after the current one's: it must not overwrite it.
+		let cancelled = false;
+
+		estimateLiquidiumInflowFee({
+			identity,
+			ethAddress: $ethAddress,
+			asset: asset as Asset,
+			chain: chain as Chain,
+			poolId,
+			action: SupplyAction.deposit
+		})
+			.then(({ totalFee, minimumSendAmount: minimum }) => {
+				if (!cancelled) {
+					inflowFee = totalFee;
+					minimumSendAmount = minimum;
+				}
+			})
+			.catch((err: unknown) => {
+				consoleError(err);
+
+				if (!cancelled) {
+					inflowFeeUnavailable = true;
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
 	});
 
 	let modal: WizardModal<WizardStepsLiquidiumSupply> | undefined = $state();
@@ -121,6 +150,7 @@
 		selectedMarket = market;
 		amount = undefined;
 		inflowFee = undefined;
+		minimumSendAmount = undefined;
 		inflowFeeUnavailable = false;
 		supplyProgressStep = ProgressStepsLiquidiumSupply.INITIALIZATION;
 		currentStep = undefined;
@@ -178,7 +208,21 @@
 				bind:amount
 				bind:supplyProgressStep
 			/>
-		{:else}
+		{:else if selectedMarket.chain === 'SOL'}
+			<LiquidiumSupplySolWizard
+				{currentStep}
+				{inflowFee}
+				{inflowFeeUnavailable}
+				market={selectedMarket}
+				{minimumSendAmount}
+				onBack={modal.back}
+				onClose={close}
+				onNext={modal.next}
+				onSelectToken={enterTokensList}
+				bind:amount
+				bind:supplyProgressStep
+			/>
+		{:else if selectedMarket.chain === 'ETH'}
 			<LiquidiumSupplyEthWizard
 				{currentStep}
 				{inflowFee}

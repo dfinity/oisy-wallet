@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "로그인되어 있지 않습니다. 계속하려면 로그인해 주세요.",
-			"session_expired": "세션이 만료되어 로그아웃되었습니다.",
 			"reload_and_retry": "로그인 중 문제가 발생했습니다. 페이지를 새로고침하고 다시 시도해 주세요. 문제가 지속되면 지원팀에 문의하세요."
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "계속하려면 잠금 해제하세요",
 			"title_part_2": "지갑을 안전하게 보호하기 위해 잠금 설정되었습니다. 이전에 하던 작업을 계속하거나 로그아웃하세요.",
+			"title_part_2_session_expired": "세션이 만료되어 안전을 위해 지갑이 잠겼습니다. 이전에 하던 작업을 계속하거나 로그아웃하세요.",
 			"unlock": "잠금 해제",
 			"logout": "로그아웃",
 			"logout_clear_cash_message": "로그아웃하면 모든 캐시 데이터가 삭제됩니다",
@@ -756,6 +756,7 @@
 			"minter_ckbtc_btc": "ckBTC를 BTC로 전환하려면 설정된 민터가 필요합니다.",
 			"minter_cketh_eth": "ckETH를 ETH로 전환하려면 설정된 민터가 필요합니다.",
 			"minter_ckerc20_erc20": "ckERC20을 ERC20으로 전환하려면 설정된 민터가 필요합니다.",
+			"minter_cksol_sol": "ckSOL을 SOL로 전환하려면 설정된 민터가 필요합니다.",
 			"ledger_cketh_eth": "ckERC20을 ERC20으로 전환하려면 설정된 ckETH 레저가 필요합니다.",
 			"minter_btc": "BTC를 가져오려면 설정된 민터가 필요합니다.",
 			"minter_ckbtc_info": "ckBTC 정보를 가져오려면 설정된 민터가 필요합니다",
@@ -1105,6 +1106,7 @@
 			"minimum_ckbtc_amount": "입력 금액이 BTC 전환에 필요한 최소 $amount ckBTC 미만입니다.",
 			"minimum_cketh_amount": "입력 금액이 최소 출금 금액인 $amount $symbol 미만입니다.",
 			"minimum_amount": "입력 금액이 최소 출금 금액인 $amount $symbol 미만입니다.",
+			"minimum_deposit_amount": "입력 금액이 최소 입금 금액인 $amount $symbol 미만입니다.",
 			"minimum_ledger_fees": "입력 금액이 레저 수수료 $symbol 미만입니다.",
 			"minimum_cketh_balance": "$symbol 잔액이 예상 수수료 $amount 미만입니다.",
 			"unknown_cketh": "ckETH 토큰을 가져올 수 없습니다.",
@@ -1396,6 +1398,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "스왑",
 			"select_destination_token": "받을 토큰 선택",
@@ -1449,6 +1454,26 @@
 			"gasless": "가스 없음",
 			"swap_fees": "스왑 수수료",
 			"cross_chain_networks_info": "<b>$sourceNetwork</b>에서 <b>$destinationNetwork</b> 네트워크로 토큰을 이동합니다",
+			"lifi_btc_relay_recipient_warning": "",
+			"receive_shortcut_same_network": "",
+			"receive_shortcut_other_network": "",
+			"receive_shortcut_token_on_network": "",
+			"receive_shortcut_convert": "",
+			"receive_shortcut_convert_back": "",
+			"receive_shortcut_bridge_back": "",
+			"receive_shortcut_move": "",
+			"receive_shortcut_any_token": "",
+			"receive_shortcut_any_token_count": "",
+			"receive_shortcut_any_token_count_one": "",
+			"receive_shortcut_any_token_count_single": "",
+			"receive_shortcut_more": "",
+			"move_token_to": "",
+			"move_no_networks_title": "",
+			"move_no_networks_title_without_symbol": "",
+			"move_no_networks_description": "",
+			"move_networks_changed_title": "",
+			"move_networks_changed_description": "",
+			"as_token": "",
 			"two_swaps_info": "$oisy_short는 승인 전에 완전히 검증할 수 있는 스왑만 제공하며, $sourceSymbol에서 $destinationSymbol(으)로 가는 그런 직접 스왑은 없습니다. 하지만 먼저 $sourceSymbol을(를) $intermediateSymbol(으)로 스왑한 다음, $intermediateSymbol을(를) $destinationSymbol(으)로 스왑할 수 있습니다.",
 			"two_swaps_first_button": "먼저 $intermediateSymbol(으)로 스왑",
 			"near_intents_estimated_time": "",
@@ -1499,7 +1524,13 @@
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
-			"lifi_route_unverified": ""
+			"lifi_route_unverified": "",
+			"cksol_deposit_in_progress": "SOL에서 ckSOL로의 전환이 이미 진행 중입니다. 완료된 후 새 전환을 시작할 수 있습니다.",
+			"cksol_deposit_terms_changed": "이 제안 이후 ckSOL 민터의 조건이 변경되었습니다. SOL은 전송되지 않았습니다. 새 제안을 확인해 주세요.",
+			"cksol_earlier_deposit_quarantined": "ckSOL 민터가 이전 입금의 처리를 중단했으며, 해결될 때까지 새 입금을 받지 않습니다. SOL은 전송되지 않았습니다.",
+			"cksol_minter_unavailable": "지금은 ckSOL 민터가 입금을 받을 수 없습니다. SOL은 전송되지 않았습니다. 나중에 다시 시도해 주세요.",
+			"cksol_deposit_quarantined": "ckSOL 민터가 이 입금의 처리를 중단했습니다. 민터 업그레이드로 입금이 해결될 때까지 민터가 SOL을 보관합니다.",
+			"cksol_deposit_below_minimum": "ckSOL 민터가 이 입금을 회수하지 못했으며, 입금 주소에 남은 SOL이 최소 입금 금액보다 적습니다. 다음 SOL에서 ckSOL로의 전환 시 함께 전환됩니다."
 		}
 	},
 	"buy": {
@@ -1836,6 +1867,8 @@
 			"convert_fee": "전환 수수료",
 			"convert_inter_network_fee": "네트워크 간 수수료",
 			"convert_btc_network_fee": "비트코인 네트워크 수수료",
+			"cksol_sweep_fee": "민터의 솔라나 수수료",
+			"cksol_deposit_address_rent": "입금 주소 렌트",
 			"zero_fee": "무료",
 			"total_fee": "총 수수료",
 			"ata_fee": "ATA 수수료",
@@ -2312,6 +2345,7 @@
 			"signature_copied": "",
 			"id": "트랜잭션 ID",
 			"id_copied": "트랜잭션 ID가 클립보드에 복사되었습니다.",
+			"twin_transaction": "$twinNetwork 트랜잭션",
 			"timestamp": "타임스탬프",
 			"type": "유형",
 			"from": "발신",
@@ -2424,6 +2458,8 @@
 			"reimbursement": "환불",
 			"twin_token_converted": "$twinToken에서 전환됨",
 			"ck_token_converted": "$ckToken에서 전환됨",
+			"converted_to_twin_token": "$twinToken로 전환됨",
+			"converted_to_ck_token": "$ckToken로 전환됨",
 			"sending_twin_token": "$twinToken 전송 중",
 			"sending_twin_token_failed": "$twinToken 전송 실패",
 			"converting_twin_token": "$twinToken을 $ckToken으로 전환 중",
@@ -2881,6 +2917,8 @@
 			"borrow_at_risk_warning": "이 대출로 건강 지수가 눈에 띄게 낮아집니다.",
 			"borrow_exceeds_power": "금액이 대출 가능 한도를 초과합니다.",
 			"borrow_below_minimum": "금액이 최소 대출 금액보다 적습니다.",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "가격 정보를 일시적으로 사용할 수 없습니다. 로드될 때까지 대출이 비활성화됩니다.",
 			"borrow_high_risk_warning": "이 대출로 포지션이 청산에 가까워집니다.",
 			"borrow_risk_confirm": "이 대출로 청산 위험이 높아진다는 것을 이해합니다.",
@@ -2911,6 +2949,7 @@
 			"interest_accrued": "발생 이자",
 			"debt_after_repay": "상환 후 부채",
 			"repay_exceeds_debt": "금액이 미상환 부채를 초과합니다.",
+			"repay_below_native_minimum": "",
 			"repay_prices_unavailable": "가격 정보를 일시적으로 사용할 수 없습니다. 로드될 때까지 상환이 비활성화됩니다.",
 			"repay_debt_unavailable": "미상환 부채 정보를 일시적으로 사용할 수 없습니다. 로드될 때까지 상환이 비활성화됩니다.",
 			"repay_pending_covers_debt": "이 포지션의 상환이 아직 처리 중입니다. 처리가 완료되면 추가로 상환할 수 있습니다."

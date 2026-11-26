@@ -83,6 +83,22 @@ describe('initBtcMaxSendAmount', () => {
 		);
 	});
 
+	// A LI.FI deposit, its memo and its fee: LayerSwap's layout, 103 vB against the 43 vB of one output.
+	it('should price Max for a layout of several outputs when given one', () => {
+		const outputVSizes = [43, 29, 31];
+
+		allUtxosStore.setAllUtxos({ allUtxos: [createMockUtxo({ value: 300_000 })] });
+		setPendingTransactions();
+		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
+
+		expect(get(initBtcMaxSendAmount({ source: mockAddress, outputVSizes }))).toBe(
+			300_000n - calculateFeeSatoshis({ numInputs: 1, outputVSizes, feeRateMiliSatoshisPerVByte })
+		);
+		expect(get(initBtcMaxSendAmount({ source: mockAddress, outputVSizes }))).toBeLessThan(
+			get(initBtcMaxSendAmount({ source: mockAddress })) ?? ZERO
+		);
+	});
+
 	// Regression: incoming funds under the send's confirmation floor counted towards the balance
 	// the "Max" button offered, so clicking it produced "Insufficient balance to cover the fees".
 	it('should ignore incoming UTXOs that are still under the confirmation floor', () => {

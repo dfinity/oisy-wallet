@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "आपने साइन इन नहीं किया है। कृपया जारी रखने के लिए साइन इन करें।",
-			"session_expired": "आपकी सत्र अवधि समाप्त होने के कारण आपको लॉग आउट कर दिया गया है।",
 			"reload_and_retry": ""
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "जारी रखने के लिए अनलॉक करें",
 			"title_part_2": "आपने पहले अपने वॉलेट को सुरक्षित रखने के लिए लॉक किया था। जहाँ से छोड़ा था वहीं से शुरू करें या लॉग आउट करें।",
+			"title_part_2_session_expired": "आपका सत्र समाप्त हो गया है और आपकी सुरक्षा के लिए आपका वॉलेट लॉक कर दिया गया है। जहाँ से छोड़ा था वहीं से शुरू करें या लॉग आउट करें।",
 			"unlock": "अनलॉक करें",
 			"logout": "लॉगआउट करें",
 			"logout_clear_cash_message": "लॉग आउट करने से सभी कैश्ड डेटा साफ़ हो जाएगा",
@@ -756,6 +756,7 @@
 			"minter_ckbtc_btc": "ckBTC को BTC में बदलने के लिए एक कॉन्फ़िगर किया गया मिन्टर आवश्यक है।",
 			"minter_cketh_eth": "ckETH को ETH में बदलने के लिए एक कॉन्फ़िगर किया गया मिन्टर आवश्यक है।",
 			"minter_ckerc20_erc20": "ckERC20 को ERC20 में बदलने के लिए एक कॉन्फ़िगर किया गया मिन्टर आवश्यक है।",
+			"minter_cksol_sol": "ckSOL को SOL में बदलने के लिए एक कॉन्फ़िगर किया गया मिन्टर आवश्यक है।",
 			"ledger_cketh_eth": "ckERC20 को ERC20 में बदलने के लिए एक कॉन्फ़िगर किया गया ckETH लेज़र आवश्यक है।",
 			"minter_btc": "BTC को पुनः प्राप्त करने के लिए एक कॉन्फ़िगर किया गया मिन्टर आवश्यक है।",
 			"minter_ckbtc_info": "ckBTC जानकारी लाने के लिए एक कॉन्फ़िगर किया गया मिन्टर आवश्यक है",
@@ -1105,6 +1106,7 @@
 			"minimum_ckbtc_amount": "राशि BTC में बदलने के लिए आवश्यक $amount ckBTC के न्यूनतम से कम है।",
 			"minimum_cketh_amount": "राशि $amount $symbol की न्यूनतम निकासी राशि से कम है।",
 			"minimum_amount": "राशि $amount $symbol की न्यूनतम निकासी राशि से कम है।",
+			"minimum_deposit_amount": "राशि $amount $symbol की न्यूनतम जमा राशि से कम है।",
 			"minimum_ledger_fees": "राशि लेज़र शुल्क $symbol से कम है।",
 			"minimum_cketh_balance": "$symbol बैलेंस अनुमानित शुल्क $amount से कम है।",
 			"unknown_cketh": "ckETH टोकन पुनः प्राप्त नहीं किया जा सकता है।",
@@ -1396,6 +1398,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "स्वैप करें",
 			"select_destination_token": "प्राप्त करने के लिए टोकन चुनें",
@@ -1449,6 +1454,26 @@
 			"gasless": "गैस रहित",
 			"swap_fees": "स्वैप शुल्क",
 			"cross_chain_networks_info": "आप टोकन <b>$sourceNetwork</b> से <b>$destinationNetwork</b> नेटवर्क पर ले जाते हैं",
+			"lifi_btc_relay_recipient_warning": "",
+			"receive_shortcut_same_network": "",
+			"receive_shortcut_other_network": "",
+			"receive_shortcut_token_on_network": "",
+			"receive_shortcut_convert": "",
+			"receive_shortcut_convert_back": "",
+			"receive_shortcut_bridge_back": "",
+			"receive_shortcut_move": "",
+			"receive_shortcut_any_token": "",
+			"receive_shortcut_any_token_count": "",
+			"receive_shortcut_any_token_count_one": "",
+			"receive_shortcut_any_token_count_single": "",
+			"receive_shortcut_more": "",
+			"move_token_to": "",
+			"move_no_networks_title": "",
+			"move_no_networks_title_without_symbol": "",
+			"move_no_networks_description": "",
+			"move_networks_changed_title": "",
+			"move_networks_changed_description": "",
+			"as_token": "",
 			"two_swaps_info": "$oisy_short केवल ऐसे स्वैप ऑफ़र करता है जिन्हें वह आपकी स्वीकृति से पहले पूरी तरह सत्यापित कर सके, और $sourceSymbol से $destinationSymbol तक ऐसा कोई सीधा स्वैप नहीं है। लेकिन आप पहले $sourceSymbol को $intermediateSymbol में और फिर $intermediateSymbol को $destinationSymbol में स्वैप कर सकते हैं।",
 			"two_swaps_first_button": "पहले $intermediateSymbol में स्वैप करें",
 			"near_intents_estimated_time": "",
@@ -1499,7 +1524,13 @@
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
-			"lifi_route_unverified": ""
+			"lifi_route_unverified": "",
+			"cksol_deposit_in_progress": "SOL से ckSOL में एक रूपांतरण पहले से प्रगति पर है। इसके पूरा होने के बाद आप नया रूपांतरण शुरू कर सकते हैं।",
+			"cksol_deposit_terms_changed": "इस ऑफ़र के बाद ckSOL मिन्टर ने अपनी शर्तें बदल दी हैं। कोई SOL नहीं भेजा गया। कृपया नया ऑफ़र देखें।",
+			"cksol_earlier_deposit_quarantined": "ckSOL मिन्टर ने आपकी एक पिछली जमा की प्रोसेसिंग रोक दी है और उसके हल होने तक कोई नई जमा नहीं लेगा। कोई SOL नहीं भेजा गया।",
+			"cksol_minter_unavailable": "ckSOL मिन्टर अभी कोई जमा नहीं ले सकता। कोई SOL नहीं भेजा गया। कृपया बाद में पुनः प्रयास करें।",
+			"cksol_deposit_quarantined": "ckSOL मिन्टर ने इस जमा की प्रोसेसिंग रोक दी है। जब तक मिन्टर का अपग्रेड इस जमा को हल नहीं करता, तब तक वह SOL को अपने पास रखता है।",
+			"cksol_deposit_below_minimum": "ckSOL मिन्टर इस जमा को एकत्र नहीं कर सका, और आपके जमा पते पर बचे SOL न्यूनतम जमा राशि से कम हैं। इन्हें SOL से ckSOL में आपके अगले रूपांतरण के साथ बदल दिया जाएगा।"
 		}
 	},
 	"buy": {
@@ -1836,6 +1867,8 @@
 			"convert_fee": "रूपांतरण शुल्क",
 			"convert_inter_network_fee": "अंतर-नेटवर्क शुल्क",
 			"convert_btc_network_fee": "बिटकॉइन नेटवर्क शुल्क",
+			"cksol_sweep_fee": "मिन्टर का सोलाना शुल्क",
+			"cksol_deposit_address_rent": "जमा पते का किराया",
 			"zero_fee": "मुफ़्त",
 			"total_fee": "कुल शुल्क",
 			"ata_fee": "ATA शुल्क",
@@ -2312,6 +2345,7 @@
 			"signature_copied": "",
 			"id": "लेनदेन आईडी",
 			"id_copied": "लेनदेन आईडी क्लिपबोर्ड पर कॉपी की गई।",
+			"twin_transaction": "$twinNetwork लेनदेन",
 			"timestamp": "टाइमस्टैम्प",
 			"type": "प्रकार",
 			"from": "से",
@@ -2424,6 +2458,8 @@
 			"reimbursement": "प्रतिपूर्ति",
 			"twin_token_converted": "$twinToken से परिवर्तित",
 			"ck_token_converted": "$ckToken से परिवर्तित",
+			"converted_to_twin_token": "$twinToken में परिवर्तित",
+			"converted_to_ck_token": "$ckToken में परिवर्तित",
 			"sending_twin_token": "$twinToken भेज रहा है",
 			"sending_twin_token_failed": "$twinToken भेजना विफल",
 			"converting_twin_token": "$twinToken को $ckToken में बदल रहा है",
@@ -2881,6 +2917,8 @@
 			"borrow_at_risk_warning": "यह उधार आपके स्वास्थ्य कारक को काफी कम कर देता है।",
 			"borrow_exceeds_power": "राशि आपकी उधार क्षमता से अधिक है।",
 			"borrow_below_minimum": "राशि न्यूनतम उधार से कम है।",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "कीमतें अस्थायी रूप से अनुपलब्ध हैं। लोड होने तक उधार लेना अक्षम है।",
 			"borrow_high_risk_warning": "यह उधार आपकी पोजीशन को लिक्विडेशन के करीब ले जाता है।",
 			"borrow_risk_confirm": "मैं समझता/समझती हूं कि यह उधार मेरे लिक्विडेशन जोखिम को बढ़ाता है।",
@@ -2911,6 +2949,7 @@
 			"interest_accrued": "अर्जित ब्याज",
 			"debt_after_repay": "चुकौती के बाद कर्ज",
 			"repay_exceeds_debt": "राशि आपके बकाया कर्ज से अधिक है।",
+			"repay_below_native_minimum": "",
 			"repay_prices_unavailable": "कीमतें अस्थायी रूप से अनुपलब्ध हैं। लोड होने तक चुकौती अक्षम है।",
 			"repay_debt_unavailable": "आपका बकाया कर्ज अस्थायी रूप से अनुपलब्ध है। लोड होने तक चुकौती अक्षम है।",
 			"repay_pending_covers_debt": "इस पोजीशन की एक चुकौती अभी प्रोसेस हो रही है। इसके पूरा होने के बाद आप और चुका सकते हैं।"

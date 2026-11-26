@@ -32,7 +32,7 @@
 	import type { WizardStep } from '$lib/types/wizard';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { getInitialSwapSlippage } from '$lib/utils/swap.utils';
+	import { getInitialSwapSlippage, getSwapMoveTokenTitle } from '$lib/utils/swap.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -45,7 +45,7 @@
 
 	let { token, currentApy, receiveAddress, availableBalance }: Props = $props();
 
-	const { reset: resetSwapStore } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { reset: resetSwapStore, sourceToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { resetFilters: resetTokensListFilters } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
@@ -76,7 +76,15 @@
 			currentStep?.name === WizardStepsGetToken.REVIEW ||
 			currentStep?.name === WizardStepsGetToken.SWAPPING ||
 			currentStep?.name === WizardStepsGetToken.SELECT_PROVIDER ||
-			currentStep?.name === WizardStepsGetToken.TOKENS_LIST
+			currentStep?.name === WizardStepsGetToken.TOKENS_LIST ||
+			currentStep?.name === WizardStepsGetToken.MOVE_TOKEN
+	);
+
+	// "Move <symbol> to" names the pay token's group, which its step config cannot know.
+	let titleString = $derived(
+		currentStep?.name === WizardStepsGetToken.MOVE_TOKEN
+			? getSwapMoveTokenTitle({ i18n: $i18n, sourceToken: $sourceToken })
+			: (currentStep?.title ?? '')
 	);
 
 	const reset = (fullReset = false) => {
@@ -128,7 +136,7 @@
 	{steps}
 	bind:currentStep
 >
-	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
+	{#snippet title()}{titleString}{/snippet}
 
 	{#snippet headerRight()}
 		{#if currentStep?.name === WizardStepsGetToken.SWAP}

@@ -158,3 +158,43 @@ export class LifiSolFeeChangedError extends Error {
  * answers are unsigned, so such a swap is never signed.
  */
 export class VeloraSwapRejectedError extends Error {}
+
+/**
+ * Why a SOL → ckSOL conversion stopped at the minter's `watch_deposit_address`, before any SOL was
+ * sent: `inFlight` when a deposit of the account is already in flight, `changed` when the deposit
+ * address, the minimum or the fee is not the one the offer was priced with, `quarantined` when an
+ * earlier deposit of the account is quarantined, and `unavailable` when the minter could not
+ * register the address.
+ */
+export type ChainFusionSolDepositRefusal = 'inFlight' | 'changed' | 'quarantined' | 'unavailable';
+
+export class ChainFusionSolDepositRefusedError extends Error {
+	readonly reason: ChainFusionSolDepositRefusal;
+
+	constructor(reason: ChainFusionSolDepositRefusal, options?: ErrorOptions) {
+		super(`The ckSOL minter does not take this deposit: ${reason}`, options);
+
+		this.reason = reason;
+	}
+}
+
+/**
+ * A native SOL transfer to Liquidium that was never sent: it failed before its broadcast, or the node
+ * refused the broadcast. Its `cause` is the original failure. Any other failure of such a transfer
+ * may come after the SOL left.
+ */
+export class LiquidiumSolTransferRefusedError extends Error {
+	constructor(options?: ErrorOptions) {
+		super('The SOL transfer to Liquidium was not sent', options);
+	}
+}
+
+/**
+ * The blockhash of a native SOL transfer to Liquidium was no longer valid just before its broadcast,
+ * so nothing was sent. The blockhash is in the message for the logs only.
+ */
+export class LiquidiumSolBlockhashExpiredError extends Error {
+	constructor(blockhash: string) {
+		super(`The blockhash ${blockhash} of the SOL transfer is no longer valid`);
+	}
+}

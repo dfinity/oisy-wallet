@@ -7,6 +7,7 @@ import {
 	RETIRED_ICRC_LEDGER_CANISTER_IDS,
 	RETIRED_ICRC_TOKENS
 } from '$env/tokens/tokens-icrc/tokens.icrc.retired.env';
+import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
 import {
 	hasSufficientIcrcAllowance,
@@ -229,6 +230,10 @@ describe('icrc.services', () => {
 			it('should load custom tokens without calling ledger metadata', async () => {
 				const dragginzLedgerCanisterId = 'zfcdd-tqaaa-aaaaq-aaaga-cai';
 				const dragginzIndexCanisterId = 'zlaol-iaaaa-aaaaq-aaaha-cai';
+				const builtin = IC_BUILTIN_TOKENS.find(
+					({ ledgerCanisterId }) => ledgerCanisterId === dragginzLedgerCanisterId
+				);
+				assert(nonNullish(builtin));
 
 				const mockCustomToken: CustomToken = {
 					token: {
@@ -263,7 +268,7 @@ describe('icrc.services', () => {
 						decimals: 8,
 						enabled: true,
 						fee: 100000n,
-						id: expect.any(Symbol),
+						id: builtin.id,
 						indexCanisterId: dragginzIndexCanisterId,
 						ledgerCanisterId: dragginzLedgerCanisterId,
 						mintingAccount: fromCandidAccount({ owner: mockPrincipal, subaccount: toNullable() }),

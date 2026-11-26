@@ -31,6 +31,7 @@
 		showTokenNetwork?: boolean;
 		onClick?: () => void;
 		title?: Snippet;
+		trailingAction?: Snippet;
 		amountInfo: Snippet;
 		balance: Snippet;
 	}
@@ -56,6 +57,7 @@
 		showTokenNetwork = false,
 		onClick,
 		title,
+		trailingAction,
 		amountInfo,
 		balance
 	}: Props = $props();
@@ -89,6 +91,7 @@
 		{showTokenNetwork}
 		{title}
 		{token}
+		{trailingAction}
 		bind:amount
 		bind:errorType
 		bind:error

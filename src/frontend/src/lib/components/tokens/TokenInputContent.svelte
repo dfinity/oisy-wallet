@@ -57,6 +57,7 @@
 		showTokenNetwork?: boolean;
 		onClick?: () => void;
 		title?: Snippet;
+		trailingAction?: Snippet;
 		amountInfo: Snippet;
 		balance: Snippet;
 	}
@@ -85,6 +86,7 @@
 		showTokenNetwork = false,
 		onClick,
 		title,
+		trailingAction,
 		amountInfo,
 		balance
 	}: Props = $props();
@@ -283,6 +285,7 @@
 			{/if}
 		</button>
 	{/if}
+	{@render trailingAction?.()}
 </TokenInputContainer>
 
 <div class="mt-2 flex min-h-6 items-center justify-between text-sm">

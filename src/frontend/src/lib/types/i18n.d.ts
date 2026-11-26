@@ -197,7 +197,7 @@ interface I18nAuth {
 	message: { session_locked: string };
 	info: { signups_closed: string };
 	banner: { signups_closed: string };
-	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
+	warning: { not_signed_in: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
 		error_while_signing_in: string;
@@ -232,6 +232,7 @@ interface I18nLock {
 	text: {
 		title_part_1: string;
 		title_part_2: string;
+		title_part_2_session_expired: string;
 		unlock: string;
 		logout: string;
 		logout_clear_cash_message: string;
@@ -496,6 +497,7 @@ interface I18nInit {
 		minter_ckbtc_btc: string;
 		minter_cketh_eth: string;
 		minter_ckerc20_erc20: string;
+		minter_cksol_sol: string;
 		ledger_cketh_eth: string;
 		minter_btc: string;
 		minter_ckbtc_info: string;
@@ -834,6 +836,7 @@ interface I18nSend {
 		minimum_ckbtc_amount: string;
 		minimum_cketh_amount: string;
 		minimum_amount: string;
+		minimum_deposit_amount: string;
 		minimum_ledger_fees: string;
 		minimum_cketh_balance: string;
 		unknown_cketh: string;
@@ -1113,6 +1116,7 @@ interface I18nConvert {
 }
 
 interface I18nSwap {
+	alt: { clear_destination: string };
 	text: {
 		swap: string;
 		select_destination_token: string;
@@ -1166,6 +1170,26 @@ interface I18nSwap {
 		gasless: string;
 		swap_fees: string;
 		cross_chain_networks_info: string;
+		lifi_btc_relay_recipient_warning: string;
+		receive_shortcut_same_network: string;
+		receive_shortcut_other_network: string;
+		receive_shortcut_token_on_network: string;
+		receive_shortcut_convert: string;
+		receive_shortcut_convert_back: string;
+		receive_shortcut_bridge_back: string;
+		receive_shortcut_move: string;
+		receive_shortcut_any_token: string;
+		receive_shortcut_any_token_count: string;
+		receive_shortcut_any_token_count_one: string;
+		receive_shortcut_any_token_count_single: string;
+		receive_shortcut_more: string;
+		move_token_to: string;
+		move_no_networks_title: string;
+		move_no_networks_title_without_symbol: string;
+		move_no_networks_description: string;
+		move_networks_changed_title: string;
+		move_networks_changed_description: string;
+		as_token: string;
 		two_swaps_info: string;
 		two_swaps_first_button: string;
 		near_intents_estimated_time: string;
@@ -1217,6 +1241,12 @@ interface I18nSwap {
 		lifi_status_unknown: string;
 		lifi_fee_changed: string;
 		lifi_route_unverified: string;
+		cksol_deposit_in_progress: string;
+		cksol_deposit_terms_changed: string;
+		cksol_earlier_deposit_quarantined: string;
+		cksol_minter_unavailable: string;
+		cksol_deposit_quarantined: string;
+		cksol_deposit_below_minimum: string;
 	};
 }
 
@@ -1520,6 +1550,8 @@ interface I18nFee {
 		convert_fee: string;
 		convert_inter_network_fee: string;
 		convert_btc_network_fee: string;
+		cksol_sweep_fee: string;
+		cksol_deposit_address_rent: string;
 		zero_fee: string;
 		total_fee: string;
 		ata_fee: string;
@@ -1979,6 +2011,7 @@ interface I18nTransaction {
 		signature_copied: string;
 		id: string;
 		id_copied: string;
+		twin_transaction: string;
 		timestamp: string;
 		type: string;
 		from: string;
@@ -2091,6 +2124,8 @@ interface I18nTransaction {
 		reimbursement: string;
 		twin_token_converted: string;
 		ck_token_converted: string;
+		converted_to_twin_token: string;
+		converted_to_ck_token: string;
 		sending_twin_token: string;
 		sending_twin_token_failed: string;
 		converting_twin_token: string;
@@ -2418,6 +2453,8 @@ interface I18nLiquidium {
 		borrow_at_risk_warning: string;
 		borrow_exceeds_power: string;
 		borrow_below_minimum: string;
+		minimum_withdraw: string;
+		withdraw_below_minimum: string;
 		borrow_prices_unavailable: string;
 		borrow_high_risk_warning: string;
 		borrow_risk_confirm: string;
@@ -2448,6 +2485,7 @@ interface I18nLiquidium {
 		interest_accrued: string;
 		debt_after_repay: string;
 		repay_exceeds_debt: string;
+		repay_below_native_minimum: string;
 		repay_prices_unavailable: string;
 		repay_debt_unavailable: string;
 		repay_pending_covers_debt: string;

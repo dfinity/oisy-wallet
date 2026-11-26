@@ -4,6 +4,7 @@ import {
 } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_MINTER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import {
@@ -62,6 +63,28 @@ describe('icrc.utils', () => {
 				[mockToken.ledgerCanisterId]: { ...mockToken, icon: 'https://icon.png' }
 			}
 		};
+
+		it('should preserve a supplied ID when ledger metadata is loaded', () => {
+			const [builtin] = IC_BUILTIN_TOKENS;
+			const token = mapIcrcToken({ ...mockParams, id: builtin.id });
+
+			expect(token?.id).toBe(builtin.id);
+			expect(token?.symbol).toBe(mockToken.symbol);
+		});
+
+		it('should give another ledger its own ID even when its symbol matches a built-in token', () => {
+			const [builtin] = IC_BUILTIN_TOKENS;
+			const token = mapIcrcToken({
+				...mockParams,
+				metadata: [
+					[IcrcMetadataResponseEntries.SYMBOL, { Text: builtin.symbol }],
+					...mockMetadata.slice(1)
+				]
+			});
+
+			expect(token?.id).not.toBe(builtin.id);
+			expect(token?.id.description).toBe(builtin.symbol);
+		});
 
 		it('should return undefined if metadata is empty', () => {
 			expect(mapIcrcToken({ ...mockParams, metadata: [] })).toBeUndefined();

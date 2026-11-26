@@ -1,3 +1,7 @@
+import {
+	SOLANA_DEVNET_NETWORK_ID,
+	SOLANA_MAINNET_NETWORK_ID
+} from '$env/networks/networks.sol.env';
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
@@ -11,6 +15,7 @@ import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.u
 import { mapSolNetBalanceChanges } from '$sol/utils/sol-net-changes.utils';
 import {
 	deriveSolTransactionSummary,
+	formatSolCkSolConversion,
 	formatSolInstructionSummary,
 	formatSolTransactionSummary,
 	solAppAccountCost,
@@ -1213,6 +1218,102 @@ describe('sol-transaction-summary.utils', () => {
 
 		it('should fall back to a word for a transaction it cannot reduce', () => {
 			expect(format({ kind: 'other' })).toBe(en.transaction.text.kind_other);
+		});
+	});
+
+	describe('formatSolCkSolConversion', () => {
+		const minterAddress = mockSolAddress;
+		const depositAddress = mockSolAddress2;
+
+		const payout: SolTransactionSummary = {
+			kind: 'receive',
+			received: { delta: 1_000_000n },
+			counterparty: minterAddress
+		};
+
+		const deposit: SolTransactionSummary = {
+			kind: 'send',
+			spent: { delta: -20_000_000n },
+			counterparty: depositAddress
+		};
+
+		const format = (summary: SolTransactionSummary) =>
+			formatSolCkSolConversion({
+				summary,
+				networkId: SOLANA_MAINNET_NETWORK_ID,
+				minterAddress,
+				depositAddress,
+				i18n: en
+			});
+
+		it('should name SOL from the minter a conversion from ckSOL', () => {
+			expect(format(payout)).toBe('Converted from ckSOL');
+		});
+
+		it('should name SOL sent to the deposit address a conversion to ckSOL', () => {
+			expect(format(deposit)).toBe('Converted to ckSOL');
+		});
+
+		it('should leave a token other than SOL to its own sentence', () => {
+			expect(
+				format({ ...payout, received: { delta: 1n, tokenAddress: mockSplAddress } })
+			).toBeUndefined();
+			expect(
+				format({ ...deposit, spent: { delta: -1n, tokenAddress: mockSplAddress } })
+			).toBeUndefined();
+		});
+
+		it('should leave SOL from or to any other address to its own sentence', () => {
+			expect(format({ ...payout, counterparty: mockSolAddress3 })).toBeUndefined();
+			expect(format({ ...deposit, counterparty: mockSolAddress3 })).toBeUndefined();
+		});
+
+		// Only a payout arrives from the minter and only a deposit leaves for the deposit address.
+		it('should not read a send to the minter or a receive from the deposit address', () => {
+			expect(format({ ...deposit, counterparty: minterAddress })).toBeUndefined();
+			expect(format({ ...payout, counterparty: depositAddress })).toBeUndefined();
+		});
+
+		it('should leave a transaction without a counterparty to its own sentence', () => {
+			expect(format({ kind: 'receive', received: { delta: 1n } })).toBeUndefined();
+		});
+
+		it('should leave a swap or a self-transfer to its own sentence', () => {
+			expect(format({ ...payout, kind: 'swap', spent: { delta: -1n } })).toBeUndefined();
+			expect(format({ ...deposit, kind: 'self' })).toBeUndefined();
+		});
+
+		it('should leave another cluster, or none, to its own sentence', () => {
+			for (const networkId of [SOLANA_DEVNET_NETWORK_ID, undefined]) {
+				for (const summary of [payout, deposit]) {
+					expect(
+						formatSolCkSolConversion({
+							summary,
+							networkId,
+							minterAddress,
+							depositAddress,
+							i18n: en
+						})
+					).toBeUndefined();
+				}
+			}
+		});
+
+		it('should say nothing while the addresses are not loaded', () => {
+			expect(
+				formatSolCkSolConversion({
+					summary: payout,
+					networkId: SOLANA_MAINNET_NETWORK_ID,
+					i18n: en
+				})
+			).toBeUndefined();
+			expect(
+				formatSolCkSolConversion({
+					summary: deposit,
+					networkId: SOLANA_MAINNET_NETWORK_ID,
+					i18n: en
+				})
+			).toBeUndefined();
 		});
 	});
 

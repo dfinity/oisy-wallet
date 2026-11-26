@@ -634,7 +634,7 @@
 			"fee": {
 				"__bigint__": "420"
 			},
-			"alternativeName": "Delulu DAO",
+			"alternativeName": "Waifu AI",
 			"url": "https://waifu.ic0.ai/"
 		}
 	},
@@ -652,6 +652,22 @@
 			},
 			"alternativeName": "DOXA",
 			"url": "https://www.doxadao.org"
+		}
+	},
+	{
+		"ledgerCanisterId": "cymd6-jqaaa-aaaaq-aafjq-cai",
+		"rootCanisterId": "cwoow-saaaa-aaaaq-aafiq-cai",
+		"indexCanisterId": "ckkuh-faaaa-aaaaq-aafkq-cai",
+		"governanceCanisterId": "c7nfk-eiaaa-aaaaq-aafja-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Menese Privacy",
+			"symbol": "MPV",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "Menese Privacy",
+			"url": "https://www.meneseprotocol.io"
 		}
 	}
 ]

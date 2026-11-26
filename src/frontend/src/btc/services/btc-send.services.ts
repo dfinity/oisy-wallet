@@ -11,7 +11,9 @@ import {
 import {
 	btcAddressToOutputScript,
 	btcOutputVSize,
-	buildBtcSendPsbt
+	buildBtcScriptOutputsPsbt,
+	buildBtcSendPsbt,
+	type BtcPsbtScriptOutput
 } from '$btc/utils/btc-psbt.utils';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateFeeSatoshis, extractUtxoOutpoints } from '$btc/utils/btc-utxos.utils';
@@ -33,6 +35,7 @@ import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import type { Identity } from '@icp-sdk/core/agent';
+import type { Psbt } from 'bitcoinjs-lib';
 import { get } from 'svelte/store';
 
 interface CommonBtcServiceParams {
@@ -58,6 +61,21 @@ export type SendBtcParams = CommonBtcServiceParams & {
 
 export type SignBtcParams = CommonBtcServiceParams & {
 	satoshisAmount: bigint;
+};
+
+// Outputs given as scripts, for a send whose layout is not one payment to an address: a LI.FI
+// deposit, its `OP_RETURN` memo and LI.FI's fee.
+export interface BtcScriptOutputsLayout {
+	// Kept byte for byte, in this order.
+	outputs: BtcPsbtScriptOutput[];
+	// Where the change goes, when there is change above the dust threshold.
+	changeIndex: number;
+	// Every input's sequence.
+	sequence: number;
+}
+
+export type SendBtcScriptOutputsParams = Omit<SendBtcParams, 'destination' | 'amount'> & {
+	layout: BtcScriptOutputsLayout;
 };
 
 // Validation errors whose handling is a uniform toast differing only by the
@@ -287,6 +305,36 @@ export const sendBtc = async (params: SendBtcParams): Promise<string> =>
 	BTC_SEND_VIA_BACKEND_ENABLED ? await sendBtcViaBackend(params) : await sendBtcViaSigner(params);
 
 /**
+ * Sends a transaction whose outputs are given as scripts, kept byte for byte around the user's change
+ * (`BtcScriptOutputsLayout`). Through the backend only: the Chain Fusion Signer pays addresses, and
+ * an `OP_RETURN` has none. Its steps, its failures and the reservation of its inputs are `sendBtc`'s
+ * on that path.
+ */
+export const sendBtcScriptOutputs = async ({
+	utxosFee,
+	network,
+	source,
+	layout: { outputs, changeIndex, sequence },
+	...rest
+}: SendBtcScriptOutputsParams): Promise<string> => {
+	if (!BTC_SEND_VIA_BACKEND_ENABLED) {
+		throw new Error('A BTC send with script outputs is broadcast through the backend only');
+	}
+
+	const psbt = buildBtcScriptOutputsPsbt({
+		utxos: utxosFee.utxos,
+		outputs,
+		changeIndex,
+		changeAddress: source,
+		feeSatoshis: utxosFee.feeSatoshis,
+		network,
+		sequence
+	});
+
+	return await signAndBroadcastBtcPsbt({ psbt, network, ...rest });
+};
+
+/**
  * Builds and signs the transaction in the frontend, then has the backend broadcast it.
  *
  * The backend reserves the inputs in the same call, so nothing is recorded afterwards. A failure
@@ -300,10 +348,7 @@ const sendBtcViaBackend = async ({
 	source,
 	destination,
 	amount,
-	identity,
-	onProgress,
-	beforeBroadcast,
-	onBroadcast
+	...rest
 }: SendBtcParams): Promise<string> => {
 	const psbt = buildBtcSendPsbt({
 		utxos: utxosFee.utxos,
@@ -313,6 +358,22 @@ const sendBtcViaBackend = async ({
 		network
 	});
 
+	return await signAndBroadcastBtcPsbt({ psbt, network, ...rest });
+};
+
+const signAndBroadcastBtcPsbt = async ({
+	psbt,
+	network,
+	identity,
+	onProgress,
+	beforeBroadcast,
+	onBroadcast
+}: Pick<
+	SendBtcParams,
+	'network' | 'identity' | 'onProgress' | 'beforeBroadcast' | 'onBroadcast'
+> & {
+	psbt: Psbt;
+}): Promise<string> => {
 	onProgress?.();
 
 	const { txid, bytes } = await signAndFinalizeBtcPsbt({ psbt, identity });

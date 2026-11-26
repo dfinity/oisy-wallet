@@ -19,7 +19,7 @@ export const isLiquidiumActiveUserTransaction = (tx: ActiveUserTransaction): boo
 	'Liquidium' in tx.data;
 
 // Net amount (base units) of `poolId` repays sent but not settled yet. Keyed by pool, not rail:
-// every rail of a position repays the same pool, and the AUT does not record the rail.
+// every rail of a position repays the same pool.
 export const liquidiumPendingRepayAmount = ({
 	transactions,
 	poolId

@@ -1,3 +1,4 @@
+import { BTC_TXID_REGEX } from '$btc/constants/btc.constants';
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import {
 	createActiveUserTransaction as createActiveUserTransactionApi,
@@ -84,13 +85,19 @@ const upsertForIdentity = ({
 	activeUserTransactionsStore.upsert({ transaction });
 };
 
+/**
+ * Creates the row and returns it as the backend stored it, stamped with the backend's time
+ * (`created_at_ns`).
+ */
 export const createActiveUserTransaction = async ({
 	identity,
 	...params
-}: { identity: Identity } & CreateActiveUserTransactionParams): Promise<void> => {
+}: { identity: Identity } & CreateActiveUserTransactionParams): Promise<ActiveUserTransaction> => {
 	const transaction = await createActiveUserTransactionApi({ identity, ...params });
 
 	upsertForIdentity({ identity, transaction });
+
+	return transaction;
 };
 
 export const updateActiveUserTransaction = async ({
@@ -171,8 +178,6 @@ export const deleteUnbroadcastActiveUserTransaction = async ({
 	}
 };
 
-const BTC_TXID_REGEX = /^[0-9a-f]{64}$/i;
-
 /**
  * Each BTC row's last "is it known" check and its run of "not found" answers. In memory, like the
  * pollers' other counters: a refresh restarts the run, which only delays a verdict.
@@ -182,6 +187,14 @@ const btcNeverLandedChecks = new Map<string, { checkedAtMs: number; notFoundAnsw
 // Test seam — module-level state would otherwise leak between cases.
 export const resetBtcNeverLandedChecks = (): void => {
 	btcNeverLandedChecks.clear();
+};
+
+/**
+ * Ends a row's run of "not found" answers, for a poller that saw its txid on the network by a lookup
+ * of its own: `isBtcTransactionNeverLanded` counts answers in a row, and that sighting is one too.
+ */
+export const noteBtcTransactionSeen = (id: string): void => {
+	btcNeverLandedChecks.delete(id);
 };
 
 /**

@@ -1,4 +1,4 @@
-import { isAuthLocked, isLocked } from '$lib/derived/locked.derived';
+import { authLockReason, isAuthLocked, isLocked } from '$lib/derived/locked.derived';
 import { authLocked } from '$lib/stores/locked.store';
 import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
 import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
@@ -19,6 +19,31 @@ describe('auth.derived', () => {
 			authLocked.toggleLock({});
 
 			expect(get(isLocked)).toBeFalsy();
+		});
+	});
+
+	describe('authLockReason', () => {
+		afterEach(() => {
+			authLocked.set({ key: 'authLocked', value: false });
+		});
+
+		it('should be undefined when unlocked', () => {
+			authLocked.set({ key: 'authLocked', value: false });
+
+			expect(get(authLockReason)).toBeUndefined();
+		});
+
+		it('should read a lock stored before the reason as a lock', () => {
+			authLocked.set({ key: 'authLocked', value: true });
+
+			expect(get(authLockReason)).toBe('lock');
+		});
+
+		it.each(['lock', 'expired'] as const)('should return the stored reason %s', (reason) => {
+			authLocked.set({ key: 'authLocked', value: reason });
+
+			expect(get(authLockReason)).toBe(reason);
+			expect(get(isLocked)).toBeTruthy();
 		});
 	});
 
@@ -63,6 +88,15 @@ describe('auth.derived', () => {
 			expect(get(isAuthLocked)).toBeFalsy();
 
 			authLocked.set({ key: 'authLocked', value: true });
+
+			expect(get(isAuthLocked)).toBeTruthy();
+		});
+
+		it('should be true when not signed in after the session expired', () => {
+			mockAuthStore(null);
+			mockAuthSignedIn(false);
+
+			authLocked.set({ key: 'authLocked', value: 'expired' });
 
 			expect(get(isAuthLocked)).toBeTruthy();
 		});
