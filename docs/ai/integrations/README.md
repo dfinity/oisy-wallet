@@ -11,7 +11,7 @@ provider gets its own file so the docs scale as more integrations are added.
 | [Etherscan](./etherscan.md) | ethers.js `EtherscanProvider` (REST)                                | EVM          | EVM transaction history (native, internal, ERC-20/721/1155 transfers)                                            |
 | [QuickNode](./quicknode.md) | `@solana/kit` WSS + HTTP JSON-RPC                                   | Solana       | Solana WS tx confirmation (mainnet) + SPL token metadata (`getAsset`)                                            |
 | [XRP Ledger](./xrpl.md)     | `fetch` HTTP JSON-RPC                                               | XRP Ledger   | Native XRP balance (`account_info`) and signed-transaction submission (`submit`); disabled in user-facing builds |
-| [OnRamper](./onramper.md)   | Backend HMAC signing                                                | —            | Buy-widget URL signing (backend runbook)                                                                         |
+| [OnRamper](./onramper.md)   | Backend HMAC signing + `fetch` REST                                 | —            | Buy-widget URL signing (backend runbook), lists of supported tokens for the ids of ERC-20 and SPL tokens         |
 
 ## Future work
 

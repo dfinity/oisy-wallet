@@ -106,7 +106,9 @@
 
 	// A deposit OISY refuses to sign, or holds until it can check it, is not a send either.
 	let ckEthDepositBlocked = $derived(
-		call.type === 'ckEthDepositRefused' || call.type === 'ckEthHelperUnconfirmed'
+		call.type === 'ckEthDepositRefused' ||
+			call.type === 'ckEthHelperUnconfirmed' ||
+			call.type === 'ckDepositRefused'
 	);
 
 	/**
@@ -145,9 +147,11 @@
 	let destination = $derived(firstTransaction.to ?? '');
 
 	// Compared however the address is cased, as the signing path compares it, so that casing cannot
-	// change where the review says the request goes.
+	// change where the review says the request goes. A deposit to the minter's helper that deposits to
+	// a subaccount is only classified as one at that helper, so it converts to the Internet Computer too.
 	let targetNetwork = $derived(
-		isDestinationContractAddress({ destination, contractAddress: ckEthHelperContractAddress })
+		isDestinationContractAddress({ destination, contractAddress: ckEthHelperContractAddress }) ||
+			call.type === 'ckDeposit'
 			? ICP_NETWORK
 			: $sendToken.network
 	);

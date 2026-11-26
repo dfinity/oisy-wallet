@@ -8,8 +8,10 @@ import {
 	infuraErc20Providers,
 	type InfuraErc20Provider
 } from '$eth/providers/infura-erc20.providers';
+import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
+import { loadCustomTokens as loadCustomIcrcTokens } from '$icp/services/icrc.services';
+import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
-import { saveCustomTokens } from '$lib/services/save-custom-tokens.services';
 import {
 	findSuggestedTokensWithBalance,
 	saveDeprecatedErc20TokensWithBalance,
@@ -19,16 +21,33 @@ import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { Token } from '$lib/types/token';
 import type { UserNetworks } from '$lib/types/user-networks';
+import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
 
-vi.mock('$lib/services/save-custom-tokens.services', () => ({
-	saveCustomTokens: vi.fn().mockResolvedValue(undefined)
+vi.mock('$lib/api/backend.api', () => ({
+	setManyCustomTokens: vi.fn().mockResolvedValue(undefined)
 }));
 
-vi.mock('$eth/providers/infura-erc20.providers', () => ({
+vi.mock(import('$eth/services/erc20.services'), async (importOriginal) => ({
+	...(await importOriginal()),
+	loadCustomTokens: vi.fn().mockResolvedValue(undefined)
+}));
+
+vi.mock(import('$icp/services/icrc.services'), async (importOriginal) => ({
+	...(await importOriginal()),
+	loadCustomTokens: vi.fn().mockResolvedValue(undefined)
+}));
+
+vi.mock(import('$sol/services/spl.services'), async (importOriginal) => ({
+	...(await importOriginal()),
+	loadCustomTokens: vi.fn().mockResolvedValue(undefined)
+}));
+
+vi.mock(import('$eth/providers/infura-erc20.providers'), async (importOriginal) => ({
+	...(await importOriginal()),
 	infuraErc20Providers: vi.fn()
 }));
 
@@ -92,36 +111,50 @@ describe('suggested-tokens.services', () => {
 		it('should save the tokens as enabled', async () => {
 			await saveSuggestedTokens({ identity: mockIdentity, tokens: [usdc, usdcSol] });
 
-			expect(saveCustomTokens).toHaveBeenCalledExactlyOnceWith({
+			expect(setManyCustomTokens).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				tokens: [
 					expect.objectContaining({
-						address: USDC_TOKEN.address,
-						chainId: USDC_TOKEN.network.chainId,
 						enabled: true,
-						networkKey: 'Erc20'
+						version: toNullable(),
+						token: {
+							Erc20: { token_address: USDC_TOKEN.address, chain_id: USDC_TOKEN.network.chainId }
+						}
 					}),
 					expect.objectContaining({
-						address: USDC_SOL_TOKEN.address,
 						enabled: true,
-						networkKey: 'SplMainnet'
+						version: toNullable(),
+						token: {
+							SplMainnet: expect.objectContaining({ token_address: USDC_SOL_TOKEN.address })
+						}
 					})
 				]
 			});
 		});
 
+		it('should reload only the custom tokens of the saved standards', async () => {
+			await saveSuggestedTokens({ identity: mockIdentity, tokens: [usdc, usdcSol] });
+
+			expect(loadCustomErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(loadCustomIcrcTokens).not.toHaveBeenCalled();
+		});
+
 		it('should not save without tokens', async () => {
 			await saveSuggestedTokens({ identity: mockIdentity, tokens: [] });
 
-			expect(saveCustomTokens).not.toHaveBeenCalled();
+			expect(setManyCustomTokens).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
 		});
 
-		it('should not throw when the save fails', async () => {
-			vi.mocked(saveCustomTokens).mockRejectedValueOnce(new Error('Version mismatch'));
+		it('should neither throw nor reload when the save fails', async () => {
+			vi.mocked(setManyCustomTokens).mockRejectedValueOnce(new Error('Version mismatch'));
 
 			await expect(
 				saveSuggestedTokens({ identity: mockIdentity, tokens: [usdc] })
 			).resolves.toBeUndefined();
+
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
 		});
 	});
 
@@ -171,14 +204,15 @@ describe('suggested-tokens.services', () => {
 				contract: ICP_TOKEN
 			});
 
-			expect(saveCustomTokens).toHaveBeenCalledExactlyOnceWith({
+			expect(setManyCustomTokens).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				tokens: [
 					expect.objectContaining({
-						address: ICP_TOKEN.address,
-						chainId: ICP_TOKEN.network.chainId,
 						enabled: true,
-						networkKey: 'Erc20'
+						version: toNullable(),
+						token: {
+							Erc20: { token_address: ICP_TOKEN.address, chain_id: ICP_TOKEN.network.chainId }
+						}
 					})
 				]
 			});
@@ -188,7 +222,7 @@ describe('suggested-tokens.services', () => {
 			await saveDeprecatedErc20TokensWithBalance({ ...params, tokens: [savedIcpToken] });
 
 			expect(providerMock.balance).not.toHaveBeenCalled();
-			expect(saveCustomTokens).not.toHaveBeenCalled();
+			expect(setManyCustomTokens).not.toHaveBeenCalled();
 		});
 
 		it('should skip a deprecated token without a balance', async () => {
@@ -196,7 +230,7 @@ describe('suggested-tokens.services', () => {
 
 			await saveDeprecatedErc20TokensWithBalance(params);
 
-			expect(saveCustomTokens).not.toHaveBeenCalled();
+			expect(setManyCustomTokens).not.toHaveBeenCalled();
 		});
 
 		it('should skip a deprecated token whose balance cannot be read', async () => {
@@ -204,7 +238,7 @@ describe('suggested-tokens.services', () => {
 
 			await expect(saveDeprecatedErc20TokensWithBalance(params)).resolves.toBeUndefined();
 
-			expect(saveCustomTokens).not.toHaveBeenCalled();
+			expect(setManyCustomTokens).not.toHaveBeenCalled();
 		});
 
 		it('should not check a deprecated token on a network the user has switched off', async () => {
@@ -214,7 +248,7 @@ describe('suggested-tokens.services', () => {
 			});
 
 			expect(providerMock.balance).not.toHaveBeenCalled();
-			expect(saveCustomTokens).not.toHaveBeenCalled();
+			expect(setManyCustomTokens).not.toHaveBeenCalled();
 		});
 
 		it.each([
@@ -226,7 +260,7 @@ describe('suggested-tokens.services', () => {
 			await saveDeprecatedErc20TokensWithBalance({ ...params, ...override });
 
 			expect(providerMock.balance).not.toHaveBeenCalled();
-			expect(saveCustomTokens).not.toHaveBeenCalled();
+			expect(setManyCustomTokens).not.toHaveBeenCalled();
 		});
 	});
 });

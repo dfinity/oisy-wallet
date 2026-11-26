@@ -108,7 +108,7 @@
 		bind:filter={searchValue}
 	/>
 
-	<ul class="m-0 flex max-h-80 list-none flex-col overflow-y-auto p-0">
+	<ul class="m-0 flex max-h-80 scroll-fade list-none flex-col overflow-y-auto p-0">
 		{#each visibleTokens as token (tokenRenderKey(token))}
 			{@const key = tokenRenderKey(token)}
 

@@ -29,6 +29,7 @@ import {
 	signature as solSignature,
 	type Address,
 	type Base64EncodedWireTransaction,
+	type Commitment,
 	type Lamports,
 	type ReadonlyUint8Array,
 	type Signature,
@@ -123,8 +124,8 @@ export const getSignatureStatus = async ({
 };
 
 /**
- * Whether a transaction with this recent blockhash can still land, as of the highest confirmed
- * slot, with that slot.
+ * Whether a transaction with this recent blockhash can still land, as of the highest slot at
+ * `commitment` (confirmed unless given), with that slot.
  *
  * A node answers `false` alike for a blockhash that has aged out and for one it has not seen yet,
  * which is what a node running behind answers about a recent one. `minContextSlot` is a slot where
@@ -134,11 +135,13 @@ export const getSignatureStatus = async ({
 export const isBlockhashValid = async ({
 	blockhash,
 	network,
-	minContextSlot
+	minContextSlot,
+	commitment = 'confirmed'
 }: {
 	blockhash: string;
 	network: SolanaNetworkType;
 	minContextSlot?: bigint;
+	commitment?: Commitment;
 }): Promise<{ slot: bigint; valid: boolean }> => {
 	const { isBlockhashValid } = solanaHttpRpc(network);
 
@@ -146,7 +149,7 @@ export const isBlockhashValid = async ({
 		context: { slot },
 		value
 	} = await isBlockhashValid(solBlockhash(blockhash), {
-		commitment: 'confirmed',
+		commitment,
 		...(nonNullish(minContextSlot) && { minContextSlot })
 	}).send();
 
@@ -264,6 +267,38 @@ export const loadTokenAccount = async ({
 export const getSolCreateAccountFee = async (network: SolanaNetworkType): Promise<Lamports> => {
 	const { getMinimumBalanceForRentExemption } = solanaHttpRpc(network);
 	return await getMinimumBalanceForRentExemption(ATA_SIZE).send();
+};
+
+/**
+ * The lamports an address holds, read at the RPC's default commitment unless `commitment` names
+ * another, and never cached: a caller reads it to see what has arrived since. With
+ * `minContextSlot`, a node not that far yet refuses to answer, and the read throws.
+ */
+export const getSolBalance = async ({
+	address,
+	network,
+	minContextSlot,
+	commitment
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+	minContextSlot?: bigint;
+	commitment?: Commitment;
+}): Promise<bigint> => {
+	const { getBalance } = solanaHttpRpc(network);
+
+	const config = {
+		...(nonNullish(commitment) && { commitment }),
+		...(nonNullish(minContextSlot) && { minContextSlot })
+	};
+
+	const { value } = await (
+		Object.keys(config).length > 0
+			? getBalance(solAddress(address), config)
+			: getBalance(solAddress(address))
+	).send();
+
+	return value;
 };
 
 /**

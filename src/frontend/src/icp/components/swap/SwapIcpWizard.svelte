@@ -20,7 +20,7 @@
 		TRACK_COUNT_SWAP_SUBMITTED,
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.constants';
-	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
+	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
@@ -45,7 +45,7 @@
 	import type { WizardStep } from '$lib/types/wizard';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
+	import { isNetworkIdBitcoin, isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
 
 	interface Props {
@@ -129,10 +129,14 @@
 	);
 
 	// The user's own address on the destination chain, which is where the minter pays the
-	// withdrawal out. Bitcoin and Ethereum are the only ck destinations.
-	let isBitcoinDestination = $derived(isNetworkIdBitcoin($destinationToken?.network.id));
-
-	let destinationAddress = $derived(isBitcoinDestination ? $btcAddressMainnet : $ethAddress);
+	// withdrawal out. Bitcoin, Solana and Ethereum are the ck destinations.
+	let destinationAddress = $derived(
+		isNetworkIdBitcoin($destinationToken?.network.id)
+			? $btcAddressMainnet
+			: isNetworkIdSOLMainnet($destinationToken?.network.id)
+				? $solAddressMainnet
+				: $ethAddress
+	);
 
 	// These close the modal once the funds have left the wallet and finish settling through
 	// the Active User Transactions store — every ck withdrawal included, whichever minter

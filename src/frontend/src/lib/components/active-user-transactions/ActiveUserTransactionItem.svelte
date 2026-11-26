@@ -15,13 +15,17 @@
 	import { swapProvidersDetails } from '$lib/constants/swap.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
 	import { LendBorrowProvider } from '$lib/types/lend-borrow';
 	import { LIFI_EXTERNAL_REF_KEYS } from '$lib/types/lifi';
 	import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 	import { ONESEC_EXTERNAL_REF_KEYS } from '$lib/types/onesec-swap';
 	import { SwapProvider } from '$lib/types/swap';
 	import { activeUserTransactionTimestampNs } from '$lib/utils/active-user-transactions.utils';
-	import { isChainFusionActiveUserTransaction } from '$lib/utils/chain-fusion-swap-active-tx.utils';
+	import {
+		isChainFusionActiveUserTransaction,
+		toChainFusionExternalRefsMap
+	} from '$lib/utils/chain-fusion-swap-active-tx.utils';
 	import { isCyclesMintActiveUserTransaction } from '$lib/utils/cycles-mint-active-tx.utils';
 	import { isCyclesTopUpActiveUserTransaction } from '$lib/utils/cycles-top-up-active-tx.utils';
 	import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
@@ -96,6 +100,22 @@
 
 		return nonNullish(symbol)
 			? [lifiRefs[LIFI_EXTERNAL_REF_KEYS.RECEIVED_AMOUNT], symbol]
+			: undefined;
+	});
+
+	// A ckSOL mint shows what the minter credited, once it has: the whole balance of the deposit
+	// address less the minter's fees, which can differ from the amount asked.
+	const chainFusionReceived = $derived.by(() => {
+		if (!isChainFusion) {
+			return;
+		}
+
+		const amount = toChainFusionExternalRefsMap(tx.external_refs)[
+			CHAIN_FUSION_EXTERNAL_REF_KEYS.RECEIVED_AMOUNT
+		];
+
+		return nonNullish(amount)
+			? [amount, refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]]
 			: undefined;
 	});
 
@@ -175,7 +195,8 @@
 							refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
 							refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
 							'→',
-							...(lifiReceived ?? [refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]])
+							...(lifiReceived ??
+								chainFusionReceived ?? [refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]])
 						]
 							.filter(nonNullish)
 							.join(' ')

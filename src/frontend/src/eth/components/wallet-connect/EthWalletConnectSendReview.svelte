@@ -1,6 +1,15 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import {
+		hexStringToUint8Array,
+		isNullish,
+		nonNullish,
+		uint8ArrayToHexString
+	} from '@dfinity/utils';
+	import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
+	import { Principal } from '@icp-sdk/core/principal';
+	import type { Pool } from '@liquidium/client';
 	import { getContext } from 'svelte';
+	import { LIQUIDIUM_ENABLED } from '$env/liquidium';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import EthFeePriority from '$eth/components/fee/EthFeePriority.svelte';
 	import EthWalletConnectCallMethods from '$eth/components/wallet-connect/EthWalletConnectCallMethods.svelte';
@@ -37,6 +46,8 @@
 	import WalletConnectScamWarning from '$lib/components/wallet-connect/WalletConnectScamWarning.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { loadLiquidiumInflowPool } from '$lib/services/liquidium.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -132,6 +143,114 @@
 	let ckEthDepositRefused = $derived(call.type === 'ckEthDepositRefused');
 
 	let ckEthHelperUnconfirmed = $derived(call.type === 'ckEthHelperUnconfirmed');
+
+	// A deposit to the minter's helper that deposits to a subaccount mints to whichever account it
+	// names, so the account is stated as the calldata names it and the notice says whether it is the
+	// user's own.
+	let ckDeposit = $derived(call.type === 'ckDeposit' ? call.deposit : undefined);
+
+	let ckDepositRefused = $derived(call.type === 'ckDepositRefused');
+
+	// Another account can still be the user's own account on Liquidium: a pool of it, in the
+	// subaccount that credits the user's Liquidium profile. Which pools and which profile those are is
+	// read from Liquidium, as OISY's own Liquidium supply reads them. Kept as text so that the read
+	// runs again only when the account changes, not whenever the request is classified anew.
+	let liquidiumInflowOwner = $derived(
+		LIQUIDIUM_ENABLED &&
+			nonNullish(ckDeposit) &&
+			!ckDeposit.ownAccount &&
+			nonNullish(ckDeposit.subaccount)
+			? ckDeposit.owner.toText()
+			: undefined
+	);
+
+	let liquidiumInflowSubaccount = $derived(
+		nonNullish(liquidiumInflowOwner) && nonNullish(ckDeposit?.subaccount)
+			? uint8ArrayToHexString(ckDeposit.subaccount)
+			: undefined
+	);
+
+	let liquidiumInflowCkTokenSymbol = $derived(
+		nonNullish(liquidiumInflowOwner) ? ckDeposit?.ckTokenSymbol : undefined
+	);
+
+	type LiquidiumPoolRead =
+		{ status: 'loading' } | { status: 'loaded'; pool: Pool | undefined } | { status: 'failed' };
+
+	let liquidiumPoolRead = $state<LiquidiumPoolRead | undefined>();
+
+	$effect(() => {
+		if (
+			isNullish(liquidiumInflowOwner) ||
+			isNullish(liquidiumInflowSubaccount) ||
+			isNullish(liquidiumInflowCkTokenSymbol) ||
+			isNullish($authIdentity) ||
+			isNullish($ethAddress)
+		) {
+			liquidiumPoolRead = undefined;
+			return;
+		}
+
+		// A read that a newer one replaced must not overwrite it when it answers late.
+		let current = true;
+
+		liquidiumPoolRead = { status: 'loading' };
+
+		loadLiquidiumInflowPool({
+			identity: $authIdentity,
+			ethAddress: $ethAddress,
+			owner: Principal.fromText(liquidiumInflowOwner),
+			subaccount: hexStringToUint8Array(liquidiumInflowSubaccount),
+			ckTokenSymbol: liquidiumInflowCkTokenSymbol
+		})
+			.then((pool) => {
+				if (current) {
+					liquidiumPoolRead = { status: 'loaded', pool };
+				}
+			})
+			.catch(() => {
+				// Liquidium not answering says nothing about whose account it is, so the deposit is
+				// reviewed as one to any other account.
+				if (current) {
+					liquidiumPoolRead = { status: 'failed' };
+				}
+			});
+
+		return () => {
+			current = false;
+		};
+	});
+
+	let liquidiumPoolLoading = $derived(liquidiumPoolRead?.status === 'loading');
+
+	let liquidiumPool = $derived(
+		liquidiumPoolRead?.status === 'loaded' ? liquidiumPoolRead.pool : undefined
+	);
+
+	let ckDepositToUser = $derived(
+		nonNullish(ckDeposit) && (ckDeposit.ownAccount || nonNullish(liquidiumPool))
+	);
+
+	let ckDepositNotice = $derived(
+		nonNullish(ckDeposit)
+			? replacePlaceholders(
+					ckDeposit.ownAccount
+						? $i18n.wallet_connect.text.ck_deposit
+						: nonNullish(liquidiumPool)
+							? $i18n.wallet_connect.text.ck_deposit_liquidium
+							: $i18n.wallet_connect.text.ck_deposit_other_account,
+					{ $token: ckDeposit.token.symbol, $ckToken: ckDeposit.ckTokenSymbol }
+				)
+			: undefined
+	);
+
+	// The account in its standard text form: the principal alone for a default account, the
+	// principal and the subaccount for any other. It is the one form wallets and explorers take.
+	let ckDepositAccount = $derived(
+		nonNullish(ckDeposit)
+			? encodeIcrcAccount({ owner: ckDeposit.owner, subaccount: ckDeposit.subaccount })
+			: undefined
+	);
 
 	let swap = $derived(call.type === 'uniswapSwap' ? call.swap : undefined);
 
@@ -253,13 +372,13 @@
 			: undefined
 	);
 
-	let token = $derived(erc20 ? (listedToken ?? unlistedToken) : $sendToken);
+	let token = $derived(erc20 ? (listedToken ?? unlistedToken) : (ckDeposit?.token ?? $sendToken));
 
 	let tokenExplorerUrl = $derived(
 		`${getExplorerUrl({ network: sourceNetworkProp })}/token/${destination}`
 	);
 
-	let amountDisplay = $derived(erc20 ? decodedErc20Data?.value : amount);
+	let amountDisplay = $derived(erc20 ? decodedErc20Data?.value : (ckDeposit?.amount ?? amount));
 
 	// A transfer moves tokens to the address encoded in the calldata, not to the
 	// contract the transaction is addressed to. Any other token call is addressed to the token
@@ -296,8 +415,11 @@
 	// A call OISY could not read is in the same position: the native value is all the review knows,
 	// and a zero there is not a summary of the request. Printing "0 ETH" as the amount of an
 	// unreviewed contract call is the misstatement this review exists to prevent, so the row is
-	// dropped rather than filled with a figure that describes nothing.
-	let noAmount = $derived((setApprovalForAll || unknownCall) && amount === ZERO);
+	// dropped rather than filled with a figure that describes nothing. A deposit held until OISY can
+	// check it is in the same position: a token deposit sends no native value at all.
+	let noAmount = $derived(
+		(setApprovalForAll || unknownCall || ckEthHelperUnconfirmed) && amount === ZERO
+	);
 
 	let balance = $derived(
 		nonNullish(unlistedToken)
@@ -357,6 +479,22 @@
 	{:else if nonNullish(ckEthDepositPrincipal)}
 		<MessageBox level="info" testId="wallet-connect-cketh-deposit">
 			{$i18n.wallet_connect.text.cketh_deposit}
+		</MessageBox>
+	{:else if ckDepositRefused}
+		<MessageBox level="error" testId="wallet-connect-ck-deposit-refused">
+			{$i18n.wallet_connect.text.ck_deposit_refused}
+		</MessageBox>
+	{:else if nonNullish(ckDeposit) && !liquidiumPoolLoading}
+		<!-- A deposit to another account is one OISY signs, so the notice warns rather than refuses. -->
+		<MessageBox
+			level={ckDepositToUser ? 'info' : 'warning'}
+			testId={ckDeposit.ownAccount
+				? 'wallet-connect-ck-deposit'
+				: nonNullish(liquidiumPool)
+					? 'wallet-connect-ck-deposit-liquidium'
+					: 'wallet-connect-ck-deposit-other-account'}
+		>
+			{ckDepositNotice}
 		</MessageBox>
 	{:else if unknownCall}
 		<WalletConnectAcknowledgement
@@ -448,6 +586,11 @@
 				<LoaderSpinner inline size="small" />
 				<span class="sr-only">{$i18n.init.info.hold_loading}</span>
 			</div>
+		{:else if activeTab === 'summary' && liquidiumPoolLoading}
+			<div class="mb-4" data-tid="wallet-connect-liquidium-pool-loading" role="status">
+				<LoaderSpinner inline size="small" />
+				<span class="sr-only">{$i18n.init.info.hold_loading}</span>
+			</div>
 		{:else if activeTab === 'summary' && nonNullish(swap)}
 			<EthWalletConnectUniswapSwap {application} network={sourceNetworkProp} {sourceNetwork} {swap}>
 				{@render fee()}
@@ -510,6 +653,37 @@
 					>
 						{ckEthDepositPrincipal.toText()}
 					</WalletConnectModalValue>
+				{:else if nonNullish(ckDeposit) && nonNullish(ckDepositAccount)}
+					<WalletConnectModalValue
+						label={replacePlaceholders($i18n.wallet_connect.text.ck_deposit_recipient, {
+							$ckToken: ckDeposit.ckTokenSymbol
+						})}
+						ref="ck-deposit-account"
+					>
+						<div class="flex flex-col gap-1">
+							<!-- In the text flow rather than a flex row: the account runs over more than one line,
+							     and a flex row would wrap the copy icon onto a line of its own. -->
+							<span>
+								{ckDepositAccount}
+
+								<AddressActions
+									copyAddress={ckDepositAccount}
+									copyAddressText={$i18n.wallet.text.address_copied}
+									inline
+								/>
+							</span>
+
+							<!-- Under the account, as the review names a known destination under its address: what is
+							     signed is the account, and the name is what OISY read from Liquidium. -->
+							{#if nonNullish(liquidiumPool)}
+								<span>
+									{replacePlaceholders($i18n.wallet_connect.text.ck_deposit_liquidium_pool, {
+										$asset: liquidiumPool.asset
+									})}
+								</span>
+							{/if}
+						</div>
+					</WalletConnectModalValue>
 				{/if}
 
 				{@render fee()}
@@ -533,7 +707,9 @@
 				unverifiableErc20 ||
 				unverifiableSetApprovalForAll ||
 				ckEthDepositRefused ||
-				ckEthHelperUnconfirmed}
+				ckEthHelperUnconfirmed ||
+				ckDepositRefused ||
+				liquidiumPoolLoading}
 			{onApprove}
 			{onReject}
 		/>

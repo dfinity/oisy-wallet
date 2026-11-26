@@ -3,6 +3,7 @@
 	import { getContext, type Snippet, untrack } from 'svelte';
 	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
+	import SwapLifiBtcRelayWarning from '$lib/components/swap/SwapLifiBtcRelayWarning.svelte';
 	import SwapNearIntentsTos from '$lib/components/swap/SwapNearIntentsTos.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
@@ -190,6 +191,8 @@
 			<SwapNearIntentsTos />
 		</div>
 	{/if}
+
+	<SwapLifiBtcRelayWarning />
 
 	{#if isSlippageWarning}
 		<div class="mt-4">

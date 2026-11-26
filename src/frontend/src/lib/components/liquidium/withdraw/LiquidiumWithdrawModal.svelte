@@ -10,12 +10,13 @@
 	import LiquidiumWithdrawTokensList from '$lib/components/liquidium/withdraw/LiquidiumWithdrawTokensList.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumWithdrawWizardSteps } from '$lib/config/lend-borrow.config';
-	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
+	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { liquidiumAssetPrices, liquidiumPortfolio } from '$lib/derived/liquidium.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsLiquidiumWithdraw } from '$lib/enums/progress-steps';
 	import { WizardStepsLiquidiumWithdraw } from '$lib/enums/wizard-steps';
+	import { getLiquidiumSolNativeOutflowMinimum } from '$lib/services/liquidium-sol.services';
 	import {
 		computeLiquidiumWithdrawPreview,
 		executeLiquidiumWithdraw
@@ -30,6 +31,7 @@
 	import type { LiquidiumReserve } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { consoleError } from '$lib/utils/console.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
@@ -91,15 +93,46 @@
 			: undefined
 	);
 
-	// Withdrawn asset is delivered to the user's own oisy address on the pool's chain:
-	// native BTC address for a BTC pool, ICRC account for an ICP-chain pool, else ETH.
+	// Withdrawn asset is delivered to the user's own oisy address on the rail's chain: native BTC
+	// address, ICRC account for an ICP rail, ETH address, mainnet SOL address. Any other chain has no
+	// receiver yet, so it can never fall through to an address of another chain.
 	let receiverAddress = $derived(
 		selectedReserve?.chain === 'BTC'
 			? $btcAddressMainnet
 			: selectedReserve?.chain === 'ICP'
 				? $icrcAccountIdentifierText
-				: $ethAddress
+				: selectedReserve?.chain === 'ETH'
+					? $ethAddress
+					: selectedReserve?.chain === 'SOL'
+						? $solAddressMainnet
+						: undefined
 	);
+
+	// Native SOL only: the least the ckSOL minter pays out. Until it loads, or if it fails, the form
+	// enforces none; Liquidium still refuses less at submit, before anything is signed.
+	let nativeOutflowMinimum = $state<bigint | undefined>();
+
+	$effect(() => {
+		nativeOutflowMinimum = undefined;
+
+		if (selectedReserve?.asset !== 'SOL' || selectedReserve.chain !== 'SOL') {
+			return;
+		}
+
+		let cancelled = false;
+
+		getLiquidiumSolNativeOutflowMinimum()
+			.then((minimum) => {
+				if (!cancelled) {
+					nativeOutflowMinimum = minimum;
+				}
+			})
+			.catch(consoleError);
+
+		return () => {
+			cancelled = true;
+		};
+	});
 
 	const goToStep = (stepName: WizardStepsLiquidiumWithdraw) => {
 		if (nonNullish(modal)) {
@@ -224,6 +257,7 @@
 				onSelectToken={enterTokensList}
 				portfolio={$liquidiumPortfolio}
 				{preview}
+				railMinimum={nativeOutflowMinimum}
 				reserve={selectedReserve}
 				{withdrawPrice}
 				{withdrawToken}

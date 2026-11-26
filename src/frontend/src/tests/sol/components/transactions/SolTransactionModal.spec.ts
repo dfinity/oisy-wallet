@@ -1,6 +1,8 @@
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { ckSolDepositAddressesStore, ckSolMinterAddressStore } from '$icp/stores/cksol.store';
 import { ZERO } from '$lib/constants/app.constants';
+import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -8,6 +10,7 @@ import SolTransactionModal from '$sol/components/transactions/SolTransactionModa
 import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 import { SolanaNetworks } from '$sol/types/network';
 import en from '$tests/mocks/i18n.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress2, mockSolAddress3, mockSplAddress } from '$tests/mocks/sol.mock';
 import { capitalizeFirstLetter } from '$tests/utils/string-utils';
@@ -394,6 +397,63 @@ describe('SolTransactionModal', () => {
 			await fireEvent.click(getByText(en.transaction.text.tab_balance_changes));
 
 			expect(getByText(`+2.5 ${named}`)).toBeInTheDocument();
+		});
+	});
+
+	describe('the Solana legs of a ckSOL conversion', () => {
+		const [base] = createMockSolTransactionsUi(1);
+
+		const minterAddress = mockSolAddress2;
+		const depositAddress = mockSolAddress3;
+
+		beforeEach(() => {
+			authStore.setForTesting(mockIdentity);
+
+			ckSolMinterAddressStore.set(minterAddress);
+			ckSolDepositAddressesStore.set({ [mockIdentity.getPrincipal().toText()]: depositAddress });
+		});
+
+		afterEach(() => {
+			ckSolMinterAddressStore.set(undefined);
+			ckSolDepositAddressesStore.set({});
+		});
+
+		it('should name SOL from the minter a conversion from ckSOL in the hero', () => {
+			const { getByText } = render(SolTransactionModal, {
+				props: {
+					transaction: {
+						...base,
+						type: 'receive',
+						summary: {
+							kind: 'receive' as const,
+							received: { delta: 1_000_000n },
+							counterparty: minterAddress
+						}
+					},
+					token: SOLANA_TOKEN
+				}
+			});
+
+			expect(getByText('Converted from ckSOL')).toBeInTheDocument();
+		});
+
+		it('should name SOL sent to the deposit address a conversion to ckSOL in the hero', () => {
+			const { getByText } = render(SolTransactionModal, {
+				props: {
+					transaction: {
+						...base,
+						type: 'send',
+						summary: {
+							kind: 'send' as const,
+							spent: { delta: -20_000_000n },
+							counterparty: depositAddress
+						}
+					},
+					token: SOLANA_TOKEN
+				}
+			});
+
+			expect(getByText('Converted to ckSOL')).toBeInTheDocument();
 		});
 	});
 });

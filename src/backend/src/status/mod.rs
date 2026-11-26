@@ -14,6 +14,7 @@ use shared::http::HttpResponse;
 
 pub mod cache;
 pub mod metrics;
+pub mod signups;
 
 /// Schema version for the JSON payload. Bump on breaking changes so monitors can pin.
 const STATUS_RESPONSE_VERSION: u32 = 1;

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+	import { ckSolConversionAddresses } from '$icp/derived/cksol.derived';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -43,6 +44,7 @@
 	import { solAccountExplorerUrl } from '$sol/utils/sol-explorer.utils';
 	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
 	import {
+		formatSolCkSolConversion,
 		formatSolTransactionSummary,
 		isSolSwapRoute,
 		solAtaFee
@@ -130,12 +132,18 @@
 	// old rendering.
 	let kindLabel = $derived(
 		nonNullish(summary)
-			? formatSolTransactionSummary({
+			? (formatSolCkSolConversion({
 					summary,
-					i18n: $i18n,
-					symbolOf,
-					amountOf: figureOf
-				})
+					networkId: token?.network.id,
+					...$ckSolConversionAddresses,
+					i18n: $i18n
+				}) ??
+					formatSolTransactionSummary({
+						summary,
+						i18n: $i18n,
+						symbolOf,
+						amountOf: figureOf
+					}))
 			: undefined
 	);
 
