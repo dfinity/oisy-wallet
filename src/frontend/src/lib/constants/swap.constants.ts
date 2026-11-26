@@ -147,6 +147,17 @@ export const LIFI_STATUS_TIMEOUT_MS = 10_000;
 // The deadline of the Relay status lookup the BTC payout binding makes before signing.
 export const RELAY_STATUS_TIMEOUT_MS = 10_000;
 
+// Rift allows a keyless client one request per second and documents no higher rate for a key, so
+// every request (quotes, orders and status reads alike) starts at least this long after the last.
+export const RIFT_MIN_REQUEST_INTERVAL_MS = 1_000;
+
+// How long Rift is left alone after a 429 that carries no usable `Retry-After`.
+export const RIFT_DEFAULT_RETRY_AFTER_MS = 5_000;
+
+// The deadline of a single Rift request, once the limiter has let it start. The active-transaction
+// tick awaits each provider's poller in turn, so a stalled request would stall every other row.
+export const RIFT_REQUEST_TIMEOUT_MS = 10_000;
+
 // LI.FI's recommended `/status` cadence: every 10 s for the first minute after the row is created,
 // every 30 s until 10 minutes, then every minute.
 export const LIFI_STATUS_POLL_CADENCE: { maxAgeMillis: number; intervalMillis: number }[] = [
@@ -240,6 +251,13 @@ export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersCon
 		website: 'https://li.fi',
 		name: 'LI.FI',
 		logo: '/images/dapps/lifi-logo.svg'
+	},
+	// Unconditional for the same reason as LI.FI.
+	[SwapProvider.RIFT]: {
+		website: 'https://rift.trade',
+		name: 'Rift',
+		// TODO: replace with Rift's official logo
+		logo: '/images/dapps/rift-logo.svg'
 	}
 };
 
