@@ -1915,6 +1915,7 @@
 			"events": "Události",
 			"message": "Zpráva",
 			"expiration": "Platnost",
+			"expiration_never": "",
 			"token": "Token",
 			"network": "Síť",
 			"networks": "Sítě",

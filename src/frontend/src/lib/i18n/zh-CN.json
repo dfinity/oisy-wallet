@@ -1915,6 +1915,7 @@
 			"events": "事件",
 			"message": "消息",
 			"expiration": "过期时间",
+			"expiration_never": "",
 			"token": "代币",
 			"network": "网络",
 			"networks": "网络",

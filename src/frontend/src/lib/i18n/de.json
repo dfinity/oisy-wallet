@@ -1915,6 +1915,7 @@
 			"events": "Ereignisse",
 			"message": "Nachricht",
 			"expiration": "Ablaufdatum",
+			"expiration_never": "",
 			"token": "Token",
 			"network": "Netzwerk",
 			"networks": "Netzwerke",

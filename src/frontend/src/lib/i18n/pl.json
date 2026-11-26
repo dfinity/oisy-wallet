@@ -1915,6 +1915,7 @@
 			"events": "Wydarzenia",
 			"message": "Wiadomość",
 			"expiration": "Wygaśnięcie",
+			"expiration_never": "",
 			"token": "Token",
 			"network": "Sieć",
 			"networks": "Sieci",

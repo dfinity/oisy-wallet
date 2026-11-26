@@ -1915,6 +1915,7 @@
 			"events": "Eventos",
 			"message": "Mensagem",
 			"expiration": "Expiração",
+			"expiration_never": "",
 			"token": "Token",
 			"network": "Rede",
 			"networks": "Redes",

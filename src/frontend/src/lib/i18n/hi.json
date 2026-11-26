@@ -1915,6 +1915,7 @@
 			"events": "घटनाएँ",
 			"message": "संदेश",
 			"expiration": "समाप्ति",
+			"expiration_never": "",
 			"token": "टोकन",
 			"network": "नेटवर्क",
 			"networks": "नेटवर्क",
