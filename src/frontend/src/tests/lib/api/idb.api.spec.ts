@@ -1,4 +1,4 @@
-import { deleteIdbAllOisyRelated } from '$lib/api/idb.api';
+import { deleteIdbAllOisyRelated, deleteIdbDatabase } from '$lib/api/idb.api';
 
 describe('idb.api', () => {
 	describe('deleteIdbAllOisyRelated', () => {
@@ -161,6 +161,54 @@ describe('idb.api', () => {
 			expect(mockDeleteDatabase).toHaveBeenCalledTimes(2);
 			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(1, 'oisy-btc-transactions');
 			expect(mockDeleteDatabase).toHaveBeenNthCalledWith(2, 'oisy-balances');
+		});
+	});
+
+	describe('deleteIdbDatabase', () => {
+		const mockDeleteDatabase = vi.fn();
+
+		const mockRequestFiring = ({ event, error }: { event: string; error?: Error }) => ({
+			error,
+			// eslint-disable-next-line local-rules/prefer-object-params
+			addEventListener: (type: string, callback: () => void) => {
+				if (type === event) {
+					callback();
+				}
+			}
+		});
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.stubGlobal('indexedDB', { deleteDatabase: mockDeleteDatabase });
+		});
+
+		afterEach(() => {
+			vi.unstubAllGlobals();
+		});
+
+		it('should resolve once the database is deleted', async () => {
+			mockDeleteDatabase.mockReturnValueOnce(mockRequestFiring({ event: 'success' }));
+
+			await expect(deleteIdbDatabase('some-database')).resolves.toBeUndefined();
+
+			expect(mockDeleteDatabase).toHaveBeenCalledExactlyOnceWith('some-database');
+		});
+
+		it('should reject with the error of a failed deletion', async () => {
+			const error = new Error('Deletion failed');
+
+			mockDeleteDatabase.mockReturnValueOnce(mockRequestFiring({ event: 'error', error }));
+
+			await expect(deleteIdbDatabase('some-database')).rejects.toThrow(error);
+		});
+
+		it('should reject when an open connection blocks the deletion', async () => {
+			mockDeleteDatabase.mockReturnValueOnce(mockRequestFiring({ event: 'blocked' }));
+
+			await expect(deleteIdbDatabase('some-database')).rejects.toThrow(
+				'IndexedDB database deletion blocked: some-database'
+			);
 		});
 	});
 });
