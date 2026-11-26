@@ -413,8 +413,9 @@ strip it nor change it, since either would loosen the guard.
   frontend check cannot be atomic with the create.
 
 On that refusal, nothing is broadcast. The existing row is kept and **never deleted**, and the swap
-stops with `swap.error.rift_order_in_flight`. After any attempt whose outcome is unclear, the
-reviewed quote is dropped, so a new swap starts from a fresh quote and therefore a new order. A row
+stops with `swap.error.rift_order_in_flight`. After any attempt, whether its deposit went
+out, failed or is unclear, the reviewed quote is dropped, so a new swap, even one with the same
+inputs, starts from a fresh quote and therefore a new order. A row
 deleted after a definitive refusal no longer counts, so a retry on that order is allowed: nothing
 was sent.
 

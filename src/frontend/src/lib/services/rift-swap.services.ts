@@ -276,8 +276,8 @@ const assertRiftOrderAwaitsDeposit = async ({ orderId }: { orderId: string }): P
  * deleted too; after an unclear one it stays for the poller, and the destination token is enabled as
  * after a sent deposit.
  *
- * Any failure drops the reviewed quote, so that a new swap starts from a fresh quote, and so a new
- * order.
+ * Whatever the outcome, the reviewed quote is dropped: a quote is ordered once, and a new swap, even
+ * one with the same inputs, starts from a fresh quote, and so a new order.
  */
 export const fetchRiftBtcSwap = async ({
 	identity,
@@ -362,10 +362,8 @@ export const fetchRiftBtcSwap = async ({
 
 			throw err;
 		}
-	} catch (err: unknown) {
+	} finally {
 		resetRiftQuoteCache();
-
-		throw err;
 	}
 
 	progress(ProgressStepsSwap.SWAP);

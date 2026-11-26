@@ -524,9 +524,7 @@ describe('rift-swap.services', () => {
 			});
 		});
 
-		// A retry then orders a fresh quote rather than the same order again.
-		it('drops the reviewed quote after a failure', async () => {
-			vi.mocked(postRiftQuote).mockResolvedValue(mockRiftQuote);
+		describe('the reviewed quote', () => {
 			const quoteParams: BtcQuoteParams = {
 				sourceToken: BTC_MAINNET_TOKEN,
 				destinationToken: USDC_ETHEREUM,
@@ -536,15 +534,33 @@ describe('rift-swap.services', () => {
 				slippage: 0.5
 			};
 
-			await fetchRiftBtcSwapQuote(quoteParams);
+			beforeEach(() => {
+				vi.mocked(postRiftQuote).mockResolvedValue(mockRiftQuote);
+			});
 
-			recheck({ status: 'funded' });
+			// A retry then orders a fresh quote rather than the same order again.
+			it('is dropped after a failure', async () => {
+				await fetchRiftBtcSwapQuote(quoteParams);
 
-			await expect(fetchRiftBtcSwap(params())).rejects.toThrow();
+				recheck({ status: 'funded' });
 
-			await fetchRiftBtcSwapQuote(quoteParams);
+				await expect(fetchRiftBtcSwap(params())).rejects.toThrow();
 
-			expect(postRiftQuote).toHaveBeenCalledTimes(2);
+				await fetchRiftBtcSwapQuote(quoteParams);
+
+				expect(postRiftQuote).toHaveBeenCalledTimes(2);
+			});
+
+			// Ordered again, it would return the same order, which the next swap could not pay.
+			it('is dropped after a deposit, so a swap with the same inputs gets a fresh one', async () => {
+				await fetchRiftBtcSwapQuote(quoteParams);
+
+				await fetchRiftBtcSwap(params());
+
+				await fetchRiftBtcSwapQuote(quoteParams);
+
+				expect(postRiftQuote).toHaveBeenCalledTimes(2);
+			});
 		});
 	});
 });
