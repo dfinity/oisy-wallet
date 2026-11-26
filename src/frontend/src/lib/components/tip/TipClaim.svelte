@@ -15,6 +15,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Spinner from '$lib/components/ui/Spinner.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { TIP_CLAIM_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
@@ -36,9 +37,10 @@
 
 	/**
 	 * This page has one job: show someone who has never heard of OISY what they
-	 * have been given, and get them signed in. The claim itself happens in the
-	 * wallet — see `TipClaimModal` — so `handing-off` is the last thing this page
-	 * does before the app takes over.
+	 * have been given, and get them signed in. Someone who arrives signed in gets
+	 * the same screen with a Claim button in place of sign-in. The claim itself
+	 * happens in the wallet — see `TipClaimModal` — so `handing-off` is the last
+	 * thing this page does before the app takes over.
 	 *
 	 * `unavailable` covers a link nobody can claim: unknown id, expired, already
 	 * claimed, or a fragment that did not survive the trip. They are deliberately
@@ -54,6 +56,15 @@
 	let symbol = $state<string | undefined>();
 	let decimals = $state<number | undefined>();
 	let logo = $state<string | undefined>();
+
+	let signedIn = $derived(nonNullish($authIdentity));
+
+	/**
+	 * Signing in from the preview is the go-ahead: the disclosure was on screen
+	 * when the visitor chose to. Someone who arrived signed in has not chosen
+	 * anything yet, so they claim with the button instead.
+	 */
+	let claimOnSignIn = $state(false);
 
 	// The claim code never leaves the fragment, so it is read here rather than
 	// from route params — and it survives sign-in because Internet Identity opens
@@ -72,8 +83,8 @@
 	 * Kept apart from `unavailable` for the same reason the authenticated flow
 	 * keeps them apart (see `isTipUnavailable`): "this tip is no longer available"
 	 * is a statement about someone's money, and a dropped connection is no
-	 * evidence for it. Retrying from here re-enters `load`, which picks the right
-	 * thing to redo — the preview while anonymous, the handover once signed in.
+	 * evidence for it. Retrying from here re-enters `load`, which reads the
+	 * preview again.
 	 */
 	const toUnreachable = () => {
 		preview = undefined;
@@ -161,14 +172,11 @@
 			return;
 		}
 
-		// Someone already signed in has nothing left to read here.
-		if (nonNullish($authIdentity)) {
-			await handOff();
-			return;
-		}
-
 		try {
 			preview = await loadTipPreview({ tipId });
+			// The root layout restores the session before this page mounts, so this
+			// tells someone who arrived signed in from someone who signs in here.
+			claimOnSignIn = isNullish($authIdentity);
 			pageState = 'preview';
 			void loadTokenMetadata(preview.ledger_canister_id);
 		} catch (err: unknown) {
@@ -199,7 +207,7 @@
 	// Signing in happens in a popup, so this component stays mounted and simply
 	// carries on as the identity appears — no round-trip through a URL.
 	$effect(() => {
-		if (nonNullish($authIdentity) && pageState === 'preview') {
+		if (claimOnSignIn && nonNullish($authIdentity) && pageState === 'preview') {
 			void handOff();
 		}
 	});
@@ -273,7 +281,9 @@
 			: $i18n.tip.text.claim_ready_title_plain}
 	</h1>
 
-	<p class="mb-2 text-center text-tertiary">{$i18n.tip.text.claim_ready_description}</p>
+	{#if !signedIn}
+		<p class="mb-2 text-center text-tertiary">{$i18n.tip.text.claim_ready_description}</p>
+	{/if}
 
 	{#if nonNullish(expiresAt)}
 		<p class="mb-2 text-center text-sm text-tertiary">
@@ -285,19 +295,26 @@
 	{/if}
 
 	<!--
-		Ahead of sign-in on purpose. The claim follows straight from signing in, so
-		this is the last moment the recipient can decide whether the sender learning
-		their identity is a price they want to pay — and the first moment they can
-		read it without having identified themselves to anyone.
+		Ahead of sign-in, or of the Claim button for someone already signed in, on
+		purpose. The claim follows straight from either, so this is the last moment
+		the recipient can decide whether the sender learning their identity is a
+		price they want to pay — and, signed out, the first moment they can read it
+		without having identified themselves to anyone.
 	-->
 	<p class="mb-6 text-center text-sm text-tertiary">{$i18n.tip.text.claimer_disclosure}</p>
 
-	<!--
-		The same sign-in block as the landing page, deliberately: this page is the
-		feature's cold-start funnel, so it must offer every provider the landing
-		page does — not a reduced one — and it carries the terms line with it.
-	-->
-	<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
+	{#if signedIn}
+		<Button fullWidth onclick={handOff} testId={TIP_CLAIM_BUTTON}>
+			{$i18n.tip.text.claim_title}
+		</Button>
+	{:else}
+		<!--
+			The same sign-in block as the landing page, deliberately: this page is the
+			feature's cold-start funnel, so it must offer every provider the landing
+			page does — not a reduced one — and it carries the terms line with it.
+		-->
+		<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
+	{/if}
 {:else if pageState === 'handing-off'}
 	<!--
 		One frame in practice: the wallet is a client-side navigation away, and the

@@ -1,17 +1,20 @@
 import { metadata } from '$icp/api/icrc-ledger.api';
 import TipClaim from '$lib/components/tip/TipClaim.svelte';
 import { ZERO } from '$lib/constants/app.constants';
-import { LOGIN_BUTTON } from '$lib/constants/test-ids.constants';
+import { LOGIN_BUTTON, TIP_CLAIM_BUTTON } from '$lib/constants/test-ids.constants';
+import * as authDerived from '$lib/derived/auth.derived';
 import * as tipServices from '$lib/services/tip.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import type { PendingTipClaim } from '$lib/types/tip';
 import * as consoleUtils from '$lib/utils/console.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
+import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import { render, waitFor, within } from '@testing-library/svelte';
-import { get } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 // Handing the tip to the wallet is now what this page does last, so the
 // navigation is part of its behaviour and has to be observable.
@@ -37,6 +40,16 @@ describe('TipClaim', () => {
 		const modal = get(modalStore);
 		return modal?.type === 'tip-claim' ? (modal.data as PendingTipClaim) : undefined;
 	};
+
+	const mockPreview = () =>
+		vi.spyOn(tipServices, 'loadTipPreview').mockResolvedValue({
+			amount: 500_000n,
+			ledger_canister_id: ledgerCanisterId,
+			expires_at_ns: 1_800_000_000_000_000_000n
+		});
+
+	const claimButton = (container: HTMLElement) =>
+		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_CLAIM_BUTTON}]`);
 
 	beforeEach(() => {
 		vi.restoreAllMocks();
@@ -153,11 +166,16 @@ describe('TipClaim', () => {
 			// `handing-off` renders a bare spinner with no way out, so a rejected
 			// navigation used to strand the recipient until they reloaded the page.
 			setFragment(`#c=${claimCode}`);
+			mockPreview();
 			mockAuthStore();
 			goto.mockRejectedValue(new Error('navigation blew up'));
 			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
 
-			const { getByText } = render(TipClaim, { props: { tipId } });
+			const { container, getByText } = render(TipClaim, { props: { tipId } });
+
+			await waitFor(() => expect(claimButton(container)).toBeInTheDocument());
+
+			claimButton(container)?.click();
 
 			await waitFor(() =>
 				expect(getByText(get(i18n).tip.text.unreachable_title)).toBeInTheDocument()
@@ -282,6 +300,27 @@ describe('TipClaim', () => {
 			);
 		});
 
+		it('hands the tip over once the visitor signs in from this screen', async () => {
+			// Signing in with the disclosure on screen is the go-ahead, so no second
+			// step follows it.
+			const identity = writable<Identity | null>(null);
+			vi.spyOn(authDerived, 'authIdentity', 'get').mockImplementation(() => identity);
+			setFragment(`#c=${claimCode}`);
+			mockPreview();
+
+			const { container } = render(TipClaim, { props: { tipId } });
+
+			await waitFor(() =>
+				expect(container.querySelector(`button[data-tid=${LOGIN_BUTTON}]`)).toBeInTheDocument()
+			);
+
+			identity.set(mockIdentity);
+
+			await waitFor(() => expect(pendingClaim()).toEqual({ tipId, claimCode }));
+
+			expect(claimButton(container)).not.toBeInTheDocument();
+		});
+
 		it('offers sign-in but never the message', async () => {
 			const detailsSpy = vi.spyOn(tipServices, 'loadTipDetails');
 
@@ -300,7 +339,35 @@ describe('TipClaim', () => {
 	describe('signed in', () => {
 		beforeEach(() => {
 			setFragment(`#c=${claimCode}`);
+			mockPreview();
 			mockAuthStore();
+		});
+
+		const renderAndClaim = async () => {
+			const result = render(TipClaim, { props: { tipId } });
+
+			await waitFor(() => expect(claimButton(result.container)).toBeInTheDocument());
+
+			claimButton(result.container)?.click();
+
+			return result;
+		};
+
+		it('shows the tip and the disclosure before handing anything over', async () => {
+			// Arriving signed in is not a choice to claim: the visitor reads who learns
+			// of it first, as someone signing in here does, and then decides.
+			const { container, getByText, queryByText } = render(TipClaim, { props: { tipId } });
+
+			await waitFor(() => expect(claimButton(container)).toBeInTheDocument());
+
+			expect(getByText(get(i18n).tip.text.claimer_disclosure)).toBeInTheDocument();
+			expect(getByText(get(i18n).tip.text.claim_title)).toBeInTheDocument();
+			// The sign-in prompt has nothing to say to someone already signed in.
+			expect(queryByText(get(i18n).tip.text.claim_ready_description)).not.toBeInTheDocument();
+			expect(container.querySelector(`button[data-tid=${LOGIN_BUTTON}]`)).not.toBeInTheDocument();
+
+			expect(goto).not.toHaveBeenCalled();
+			expect(pendingClaim()).toBeUndefined();
 		});
 
 		it('hands the tip to the wallet instead of claiming here', async () => {
@@ -309,7 +376,7 @@ describe('TipClaim', () => {
 			const detailsSpy = vi.spyOn(tipServices, 'loadTipDetails');
 			const claimSpy = vi.spyOn(tipServices, 'claimTip');
 
-			render(TipClaim, { props: { tipId } });
+			await renderAndClaim();
 
 			await waitFor(() => expect(pendingClaim()).toEqual({ tipId, claimCode }));
 			await waitFor(() => expect(goto).toHaveBeenCalledWith('/'));
@@ -328,7 +395,7 @@ describe('TipClaim', () => {
 				modalStore.close();
 			});
 
-			render(TipClaim, { props: { tipId } });
+			await renderAndClaim();
 
 			await waitFor(() => expect(pendingClaim()).toEqual({ tipId, claimCode }));
 		});
@@ -336,7 +403,7 @@ describe('TipClaim', () => {
 		it('keeps the claim code out of the URL the wallet lands on', async () => {
 			// The code travels in memory as the modal's data. Putting it in the URL
 			// would leave the whole authorisation in the wallet's history.
-			render(TipClaim, { props: { tipId } });
+			await renderAndClaim();
 
 			await waitFor(() => expect(goto).toHaveBeenCalled());
 
