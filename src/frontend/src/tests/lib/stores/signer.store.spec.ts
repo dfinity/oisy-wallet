@@ -1,9 +1,19 @@
 import { REPLICA_HOST } from '$lib/constants/app.constants';
 import { initSignerContext } from '$lib/stores/signer.store';
+import {
+	ICRC21_CALL_CONSENT_MESSAGE,
+	ICRC25_REQUEST_PERMISSIONS,
+	ICRC27_ACCOUNTS,
+	ICRC49_CALL_CANISTER,
+	type Prompts,
+	type RegisterPrompts
+} from '@dfinity/oisy-wallet-signer';
 import { Signer } from '@dfinity/oisy-wallet-signer/signer';
+import { assertNonNullish } from '@dfinity/utils';
 import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
+import { mock, type MockProxy } from 'vitest-mock-extended';
 
 describe('SignerContext', () => {
 	const identity = Ed25519KeyIdentity.generate();
@@ -26,6 +36,22 @@ describe('SignerContext', () => {
 
 		const messageListeners = (spy: MockInstance<typeof window.addEventListener>) =>
 			spy.mock.calls.filter(([type]) => type === 'message').map(([, listener]) => listener);
+
+		const promptOf = <T extends keyof Prompts>({
+			signer,
+			method
+		}: {
+			signer: MockProxy<Signer>;
+			method: T;
+		}): Prompts[T] => {
+			const registered = signer.register.mock.calls
+				.map(([options]) => options)
+				.find((options): options is RegisterPrompts<T> => options.method === method);
+
+			assertNonNullish(registered);
+
+			return registered.prompt;
+		};
 
 		afterEach(() => {
 			vi.restoreAllMocks();
@@ -65,7 +91,40 @@ describe('SignerContext', () => {
 			const { init, accountsPrompt, permissionsPrompt, consentMessagePrompt, callCanisterPrompt } =
 				initSignerContext();
 
+			const previousSigner = mock<Signer>();
+
+			vi.spyOn(Signer, 'init')
+				.mockReturnValueOnce(previousSigner)
+				.mockReturnValueOnce(mock<Signer>());
+
 			init({ owner: identity });
+
+			const origin = 'https://example.test';
+
+			promptOf({ signer: previousSigner, method: ICRC27_ACCOUNTS })({
+				origin,
+				approve: vi.fn(),
+				reject: vi.fn()
+			});
+			promptOf({ signer: previousSigner, method: ICRC25_REQUEST_PERMISSIONS })({
+				origin,
+				requestedScopes: [],
+				confirm: vi.fn()
+			});
+			promptOf({ signer: previousSigner, method: ICRC21_CALL_CONSENT_MESSAGE })({
+				origin,
+				status: 'loading'
+			});
+			promptOf({ signer: previousSigner, method: ICRC49_CALL_CANISTER })({
+				origin,
+				status: 'executing'
+			});
+
+			expect(get(accountsPrompt.payload)).not.toBeNull();
+			expect(get(permissionsPrompt.payload)).not.toBeNull();
+			expect(get(consentMessagePrompt.payload)).not.toBeNull();
+			expect(get(callCanisterPrompt.payload)).not.toBeNull();
+
 			init({ owner: otherIdentity });
 
 			expect(get(accountsPrompt.payload)).toBeNull();
