@@ -10,8 +10,6 @@ import {
 	CONVERT_AMOUNT_EXCHANGE_SKELETON,
 	MAX_BUTTON,
 	SWAP_CLEAR_DESTINATION_TOKEN,
-	SWAP_DESTINATION,
-	SWAP_DESTINATION_RESET,
 	SWAP_FEE_ROW,
 	SWAP_PROVIDER_STATUS,
 	SWAP_SWITCH_TOKENS_BUTTON,
@@ -20,7 +18,6 @@ import {
 import { balancesStore } from '$lib/stores/balances.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
-import { SWAP_DESTINATION_PICKER_CONTEXT_KEY } from '$lib/stores/swap-destination-picker.store';
 import { initSwapQuoteActivityStore } from '$lib/stores/swap-quote-activity.store';
 import { SWAP_RECEIVE_SHORTCUTS_CONTEXT_KEY } from '$lib/stores/swap-receive-shortcuts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
@@ -28,7 +25,6 @@ import type { ChainFusionSwapDetails, SwapMappedResult } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import {
 	mockValidIcCkToken,
@@ -113,30 +109,6 @@ describe('SwapIcpForm', () => {
 		expect(getByText(en.swap.text.smart_swap)).toBeInTheDocument();
 		expect(getByTestId(SWAP_PROVIDER_STATUS)).toHaveTextContent(en.swap.text.finding_best_rate);
 		expect(getByText(en.swap.text.review_button).closest('button')).toBeDisabled();
-	});
-
-	// NEAR Intents swaps no Internet Computer token, so an address picked before the pay token
-	// changed to one leaves no offer: the row stays to show why, and to clear it.
-	it('keeps the Destination row while an address is set', () => {
-		const swapContext = {
-			...initSwapContext({
-				sourceToken: mockValidIcToken as IcTokenToggleable,
-				destinationToken: BTC_MAINNET_TOKEN
-			}),
-			sourceTokenExchangeRate: readable(10),
-			destinationTokenExchangeRate: readable(2),
-			isSourceTokenIcrc2: readable(false)
-		};
-		swapContext.setCustomDestination(mockBtcAddress);
-
-		const context = new Map(mockContext);
-		context.set(SWAP_CONTEXT_KEY, swapContext);
-		context.set(SWAP_DESTINATION_PICKER_CONTEXT_KEY, { showDestinationPicker: vi.fn() });
-
-		const { getByTestId } = render(SwapIcpForm, { props, context });
-
-		expect(getByTestId(SWAP_DESTINATION)).toBeInTheDocument();
-		expect(getByTestId(SWAP_DESTINATION_RESET)).toBeInTheDocument();
 	});
 
 	it('hides the fees behind a Total fee skeleton while comparing, and brings them back after', async () => {

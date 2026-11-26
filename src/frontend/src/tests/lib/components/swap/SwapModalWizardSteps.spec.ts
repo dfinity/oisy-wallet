@@ -50,7 +50,8 @@ import {
 	type SwapAmountsStoreData
 } from '$lib/stores/swap-amounts.store';
 import type { SwapSupportedTokensData } from '$lib/stores/swap-supported-tokens.store';
-import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
+import { SWAP_CONTEXT_KEY, initSwapContext, type SwapContext } from '$lib/stores/swap.store';
+import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import type { WizardModal, WizardStep } from '$lib/types/wizard';
 import { parseTokenId } from '$lib/validation/token.validation';
 import SwapModalWizardStepsTestHost from '$tests/lib/components/swap/SwapModalWizardStepsTestHost.svelte';
@@ -59,6 +60,7 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { openFilterChip } from '$tests/utils/filter-chip.test-utils';
@@ -265,6 +267,53 @@ describe('SwapModalWizardSteps', () => {
 			});
 
 			expect(getByText(en.swap.text.initializing)).toBeInTheDocument();
+		});
+	});
+
+	describe('an address picked for NEAR Intents', () => {
+		const nearIntentsOffer: SwapMappedResult = {
+			provider: SwapProvider.NEAR_INTENTS,
+			receiveAmount: 900n,
+			receiveOutMinimum: 890n,
+			swapDetails: mockNearIntentsQuoteResponse
+		};
+
+		const setup = () => {
+			const store = setupSwapAmountsStore({
+				amountForSwap: 1,
+				swaps: [nearIntentsOffer, ...mockSwapProviders],
+				selectedProvider: nearIntentsOffer
+			});
+			setupIcTokenFeeStore();
+			setupModalTokensListContext();
+			setupModalNetworksListContext();
+
+			const swapContext = mockContext.get(SWAP_CONTEXT_KEY) as SwapContext;
+			swapContext.setCustomDestination(mockEthAddress2);
+
+			renderSwapModalWizardSteps({ name: WizardStepsSwap.SELECT_PROVIDER, title: 'title' });
+
+			return { store, swapContext };
+		};
+
+		it('is dropped once another provider is selected', async () => {
+			const { store, swapContext } = setup();
+
+			expect(get(swapContext.customDestination)).toBe(mockEthAddress2);
+
+			store.setManualProvider(mockSwapProviders[0]);
+			await tick();
+
+			expect(get(swapContext.customDestination)).toBeUndefined();
+		});
+
+		it('stays while NEAR Intents is selected', async () => {
+			const { store, swapContext } = setup();
+
+			store.setManualProvider(nearIntentsOffer);
+			await tick();
+
+			expect(get(swapContext.customDestination)).toBe(mockEthAddress2);
 		});
 	});
 

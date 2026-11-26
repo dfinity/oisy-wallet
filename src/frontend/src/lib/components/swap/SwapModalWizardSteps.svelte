@@ -55,7 +55,7 @@
 	import type { WizardStepsGetTokenType } from '$lib/types/get-token';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
+	import { SwapProvider, type SwapMappedResult, type SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import type { WizardModal, WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { consoleWarn } from '$lib/utils/console.utils';
@@ -104,7 +104,8 @@
 		tokenListReturnFocus,
 		receiveTokenPickerStep,
 		customDestination,
-		customDestinationDraft
+		customDestinationDraft,
+		setCustomDestination
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const {
@@ -347,6 +348,21 @@
 			customDestinationDraft.set(get(customDestination) ?? '');
 
 			goToStep(WizardStepsSwap.DESTINATION);
+		}
+	});
+
+	// Only NEAR Intents pays out to another address. Once another provider is selected, picked by the
+	// user or as the top offer because NEAR Intents has none, the swap pays the user's own address, so
+	// a picked address goes: the provider above decides what the row below it can hold.
+	$effect(() => {
+		const provider = $swapAmountsStore?.selectedProvider?.provider;
+
+		if (
+			nonNullish(provider) &&
+			provider !== SwapProvider.NEAR_INTENTS &&
+			nonNullish(get(customDestination))
+		) {
+			setCustomDestination(undefined);
 		}
 	});
 

@@ -23,7 +23,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SwapAmountTooLowError, SwapViaIntermediateTokenError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { SwapProvider } from '$lib/types/swap';
+	import { SwapProvider } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 
 	interface Props {
@@ -205,12 +205,18 @@
 				return;
 			}
 
+			// Offers for an address the user picked keep NEAR Intents, the only provider paying out to
+			// it, while it has one: the top offer of another provider pays the user's own address.
+			const nearIntentsOffer = nonNullish(customRecipient)
+				? swapAmounts.find(({ provider }) => provider === SwapProvider.NEAR_INTENTS)
+				: undefined;
+
 			store.setSwaps({
 				swaps: swapAmounts,
 				amountForSwap: parsedAmount,
 				slippageForSwap: parsedSlippage,
 				customRecipientForSwap: customRecipient,
-				selectedProvider: swapAmounts[0]
+				selectedProvider: nearIntentsOffer ?? swapAmounts[0]
 			});
 		} catch (err: unknown) {
 			if (!isCurrentRequest()) {

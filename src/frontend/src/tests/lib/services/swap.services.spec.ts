@@ -1959,8 +1959,9 @@ describe('swap.services', () => {
 			vi.clearAllMocks();
 		});
 
-		it('asks NEAR Intents alone, paying out to that address and refunding the user', async () => {
+		it('asks NEAR Intents to pay out to that address, and every other provider to pay the user', async () => {
 			mockEvmNearIntentsGetQuote.mockResolvedValueOnce(nearIntentsOffer);
+			mockVeloraGetQuote.mockResolvedValueOnce(undefined);
 
 			const result = await fetchSwapAmounts({
 				...params,
@@ -1974,7 +1975,9 @@ describe('swap.services', () => {
 					recipientAddress: mockEthAddress2
 				})
 			);
-			expect(mockVeloraGetQuote).not.toHaveBeenCalled();
+			expect(mockVeloraGetQuote).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ recipientAddress: mockEthAddress })
+			);
 		});
 
 		it('asks every provider, paying out to the user, without one', async () => {
@@ -1989,10 +1992,17 @@ describe('swap.services', () => {
 			expect(mockVeloraGetQuote).toHaveBeenCalledOnce();
 		});
 
-		it('offers nothing from an Internet Computer token, which NEAR Intents does not serve', async () => {
+		// NEAR Intents serves no Internet Computer token; the wizard drops the address once one of
+		// these offers is selected.
+		it('asks the Internet Computer providers as usual from an Internet Computer token', async () => {
 			const [icSource, icDest] = [mockValidIcToken as IcToken, mockValidIcrcToken as IcToken];
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValueOnce({
+				receive_amount: 950n,
+				slippage: 0.5
+			} as SwapAmountsReply);
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValueOnce({ receiveAmount: 975n });
 
-			const result = await fetchSwapAmounts({
+			await fetchSwapAmounts({
 				...params,
 				sourceToken: icSource,
 				destinationToken: icDest,
@@ -2001,9 +2011,8 @@ describe('swap.services', () => {
 				customRecipientAddress: mockEthAddress2
 			});
 
-			expect(result).toEqual([]);
-			expect(kongBackendApi.kongSwapAmounts).not.toHaveBeenCalled();
-			expect(mockIcpBridgeGetQuote).not.toHaveBeenCalled();
+			expect(kongBackendApi.kongSwapAmounts).toHaveBeenCalledOnce();
+			expect(icpSwapBackend.icpSwapAmounts).toHaveBeenCalledOnce();
 		});
 	});
 

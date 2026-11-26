@@ -17,6 +17,7 @@ import {
 	mockValidIcrcToken
 } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { act, render } from '@testing-library/svelte';
@@ -474,6 +475,46 @@ describe('SwapAmountsContext.svelte', () => {
 			expect.objectContaining({ customRecipientAddress: undefined })
 		);
 		expect(get(store)?.customRecipientForSwap).toBeUndefined();
+	});
+
+	describe('with an address the user picked', () => {
+		const nearIntentsOffer: SwapMappedResult = {
+			provider: SwapProvider.NEAR_INTENTS,
+			receiveAmount: 900n,
+			receiveOutMinimum: 890n,
+			swapDetails: mockNearIntentsQuoteResponse
+		};
+
+		const renderWithPickedAddress = () =>
+			renderWithContext({
+				amount: '10',
+				sourceToken,
+				destinationToken,
+				slippageValue: '0.3',
+				customRecipientAddress: mockXrpAddress
+			});
+
+		it('selects the offer of NEAR Intents, the only one paying out to it, over a better one', async () => {
+			vi.spyOn(swapService, 'fetchSwapAmounts').mockResolvedValue([
+				mockSwapProviders[0],
+				nearIntentsOffer
+			]);
+
+			await renderWithPickedAddress();
+			await waitForDebounce();
+
+			expect(get(store)?.swaps).toEqual([mockSwapProviders[0], nearIntentsOffer]);
+			expect(get(store)?.selectedProvider).toEqual(nearIntentsOffer);
+		});
+
+		it('selects the top offer when NEAR Intents has none', async () => {
+			vi.spyOn(swapService, 'fetchSwapAmounts').mockResolvedValue(mockSwapProviders);
+
+			await renderWithPickedAddress();
+			await waitForDebounce();
+
+			expect(get(store)?.selectedProvider).toEqual(mockSwapProviders[0]);
+		});
 	});
 
 	it('preserves manual provider selection across periodic refresh', async () => {
