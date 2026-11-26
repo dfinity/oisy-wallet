@@ -38,6 +38,7 @@ The three screens reuse what OISY already shows elsewhere:
 
 - A **Destination** row shows "Your OISY Wallet", or the network logo and the shortened address the
   user picked, followed by **Change >**.
+- The row sits between the provider and the fees: the fees stay last, as usual in OISY.
 - The row shows while NEAR Intents is the selected offer, and stays while another address is set.
   With any other provider selected and no address set, there is no row: those providers pay to the
   user's own address only.
@@ -68,6 +69,8 @@ The three screens reuse what OISY already shows elsewhere:
 - A **Destination** row shows "Your OISY Wallet", or the network logo and the **full** address, as
   Convert's review does: a shortened address cannot be told apart from a lookalike that shares its
   first and last characters.
+- The row sits above the fees, which stay last. The first-time warning sits below the fees, as
+  in Send and Convert.
 - The address shown is the one in the quote NEAR Intents signed, not the one in the form.
 - The first time the wallet sends to that address on that network, the first-time warning of Send
   and Convert appears, and **Swap** waits for its checkbox.
