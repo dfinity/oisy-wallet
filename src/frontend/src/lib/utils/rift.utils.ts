@@ -7,7 +7,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { RiftQuote, RiftQuoteRequest } from '$lib/types/rift';
 import type { Token } from '$lib/types/token';
 import { isNetworkEthereum, isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * Rift's canonical asset id for a token, as a `format: "raw"` quote writes it, or `undefined` for a
@@ -59,6 +59,9 @@ export const isRiftBtcSource = (token: Token): boolean =>
  * every field the offer rests on is checked against what OISY asked for: the raw format, the two
  * assets and the amount; a positive estimate; no integrator fee, which OISY never asks for; and an
  * expiry still ahead.
+ *
+ * Rift's route has exactly one delivery step, which carries the fee. A route with none or several is
+ * dropped, so a fee cannot hide in a step the check does not read.
  */
 export const isRiftQuoteForRequest = ({
 	quote: {
@@ -78,7 +81,9 @@ export const isRiftQuoteForRequest = ({
 	request: RiftQuoteRequest;
 	now: number;
 }): boolean => {
-	const delivery = route.find((step) => step.type === 'delivery');
+	const [delivery, ...otherDeliveries] = route.flatMap((step) =>
+		step.type === 'delivery' ? [step] : []
+	);
 
 	return (
 		format === 'raw' &&
@@ -87,7 +92,8 @@ export const isRiftQuoteForRequest = ({
 		BigInt(amount_in) === BigInt(request.amount_in) &&
 		BigInt(estimated_amount_out) > ZERO &&
 		(integrator_fee_bps ?? 0) === 0 &&
-		delivery?.type === 'delivery' &&
+		nonNullish(delivery) &&
+		otherDeliveries.length === 0 &&
 		BigInt(delivery.integrator_fee) === ZERO &&
 		Date.parse(expires_at) > now
 	);

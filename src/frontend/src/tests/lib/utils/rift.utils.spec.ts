@@ -133,7 +133,16 @@ describe('rift.utils', () => {
 			{ label: 'a zero estimate', quote: { estimated_amount_out: '0' } },
 			{ label: 'an integrator fee rate', quote: { integrator_fee_bps: 25 } },
 			{ label: 'an integrator fee on delivery', quote: { route: withDeliveryFee('1') } },
-			{ label: 'no delivery step', quote: { route: [venueToInk, venueToEthereum] } }
+			{ label: 'no delivery step', quote: { route: [venueToInk, venueToEthereum] } },
+			{
+				label: 'a second delivery step with an integrator fee',
+				// The live route ends with its delivery step.
+				quote: { route: [...mockRiftQuote.route, ...withDeliveryFee('1').slice(-1)] }
+			},
+			{
+				label: 'a second delivery step',
+				quote: { route: [...mockRiftQuote.route, ...mockRiftQuote.route.slice(-1)] }
+			}
 		])('drops a quote with $label', ({ quote }) => {
 			expect(
 				isRiftQuoteForRequest({

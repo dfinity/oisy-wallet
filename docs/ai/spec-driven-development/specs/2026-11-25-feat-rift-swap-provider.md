@@ -255,7 +255,8 @@ The native-coin ids are pinned from live `format: "raw"` quotes (2026-11-26; see
 - **Quote checks, before an offer is shown.** The offer is dropped, silently, unless:
   - `format` is `raw`, and `from`, `to` and `amount_in` equal the request;
   - `estimated_amount_out` is a positive integer;
-  - `integrator_fee_bps` is absent or 0, and the `delivery` step's `integrator_fee` is `0`;
+  - `integrator_fee_bps` is absent or 0, the route has exactly one `delivery` step, and that step's
+    `integrator_fee` is `0`;
   - `expires_at` is in the future.
 - **Offer shape.** A new `SwapMappedResult` member:
 
