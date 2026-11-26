@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "你尚未登录。请先登录以继续。",
-			"session_expired": "由于会话已过期，你已被登出。",
 			"reload_and_retry": "登录时发生错误。请刷新页面并重试。如果此错误持续存在，请联系支持团队。"
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "解锁以继续",
 			"title_part_2": "您之前已锁定钱包以确保其安全。请从上次中断的地方继续操作或退出。",
+			"title_part_2_session_expired": "您的会话已过期，为确保您的安全，钱包已被锁定。请从上次中断的地方继续操作或退出。",
 			"unlock": "开锁",
 			"logout": "退出登录",
 			"logout_clear_cash_message": "注销将清除所有缓存数据",
@@ -1445,6 +1445,7 @@
 			"gasless": "无需气费",
 			"swap_fees": "交易费",
 			"cross_chain_networks_info": "跨链网络信息",
+			"lifi_btc_relay_recipient_warning": "",
 			"receive_shortcut_same_network": "",
 			"receive_shortcut_other_network": "",
 			"receive_shortcut_token_on_network": "",
@@ -2907,6 +2908,8 @@
 			"borrow_at_risk_warning": "此笔借款会明显降低您的健康系数。",
 			"borrow_exceeds_power": "金额超过您的可借额度。",
 			"borrow_below_minimum": "金额低于最低借款额。",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "价格暂时不可用。加载完成前，借款功能已禁用。",
 			"borrow_high_risk_warning": "此笔借款会使您的仓位接近清算。",
 			"borrow_risk_confirm": "我理解此笔借款会增加我的清算风险。",

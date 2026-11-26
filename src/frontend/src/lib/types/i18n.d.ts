@@ -197,7 +197,7 @@ interface I18nAuth {
 	message: { session_locked: string };
 	info: { signups_closed: string };
 	banner: { signups_closed: string };
-	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
+	warning: { not_signed_in: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
 		error_while_signing_in: string;
@@ -232,6 +232,7 @@ interface I18nLock {
 	text: {
 		title_part_1: string;
 		title_part_2: string;
+		title_part_2_session_expired: string;
 		unlock: string;
 		logout: string;
 		logout_clear_cash_message: string;
@@ -1160,6 +1161,7 @@ interface I18nSwap {
 		gasless: string;
 		swap_fees: string;
 		cross_chain_networks_info: string;
+		lifi_btc_relay_recipient_warning: string;
 		receive_shortcut_same_network: string;
 		receive_shortcut_other_network: string;
 		receive_shortcut_token_on_network: string;
@@ -2442,6 +2444,8 @@ interface I18nLiquidium {
 		borrow_at_risk_warning: string;
 		borrow_exceeds_power: string;
 		borrow_below_minimum: string;
+		minimum_withdraw: string;
+		withdraw_below_minimum: string;
 		borrow_prices_unavailable: string;
 		borrow_high_risk_warning: string;
 		borrow_risk_confirm: string;

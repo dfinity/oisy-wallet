@@ -509,7 +509,11 @@ without a record of the payout, with what can be checked. `bindLifiRelayPayout`
   `/intents/status/v3` is not part of the `/requests/v2` retirement.
 - **Not checked: the recipient.** Relay exposes none before the deposit. A response tampered with in
   transit, or by LI.FI, can name a request of its own that pays someone else, and every check above
-  would pass. This is accepted.
+  would pass. This is accepted, and told to the user: while a LI.FI offer through Relay is selected
+  (`isLifiBtcRelayOffer`), the form and the review show a warning (`SwapLifiBtcRelayWarning`) that
+  OISY can't confirm who receives the swap, since Relay records the recipient only after the BTC
+  arrives. Decided on 2026-11-24 after a security review raised it: a plain warning, which does not
+  hold the swap back, not a confirmation to tick.
 
 ---
 
@@ -555,6 +559,8 @@ reaches production before PR 8.
    all of these hold:
    - the dependency spec's PR 10 (dfinity/oisy-wallet#14616) is live in production;
    - PR 4's backend release is live in production;
+   - the form and the review warn about Relay's unchecked recipient (see
+     [Bridge admission](#bridge-admission));
    - a funded swap through Relay on staging (Product's test) completes: the rebuilt transaction is
      credited (open question 2), the payout reaches the user's address, and the poller settles the
      row.
@@ -590,7 +596,9 @@ reaches production before PR 8.
   binding is tied to the deposit output being signed. The one exception is Relay's recipient, which
   is accepted unchecked (pending decision 1). A Relay quote is signed only when the deposit pays
   Relay's pinned depository, the quote takes that deposit for the memo's order and pays the reviewed
-  asset at least the displayed minimum, and Relay is waiting for that deposit.
+  asset at least the displayed minimum, and Relay is waiting for that deposit. While a Relay offer
+  is selected, the form and the review warn that OISY can't confirm who receives the swap, without
+  holding it back.
 - A quote whose PSBT has no change output is rebuilt with LI.FI's fee output intact.
 - The backend accepts a BTC-source LI.FI row, and still refuses a BTC destination and a testnet
   source.
@@ -665,6 +673,8 @@ reaches production before PR 8.
    - **Relay admitted on 2026-11-17 with a best-effort binding** that does not check the recipient
      (see [Bridge admission](#bridge-admission)). The user chose this over waiting for LI.FI. NEAR
      stays out (decision 4), and LayerSwap too, since it offers nothing to check.
+   - **Disclosed on 2026-11-24:** the form and the review warn while a Relay offer is selected. A
+     real fix still needs Relay to expose the recipient before the deposit, or Relay off from BTC.
 2. **Rebuild or sign as is.** Proposed: rebuild (above). Signing as is would be simpler but fails
    whenever LI.FI picks a UTXO the backend refuses.
    - **Taken as proposed:** the rebuild is built (PRs 3 and 5).

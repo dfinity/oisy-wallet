@@ -3,8 +3,12 @@ import { LIFI_ALLOWED_BRIDGES, LIFI_DENY_BRIDGES } from '$env/rest/lifi.env';
 import { bindLifiRelayPayout } from '$lib/services/lifi-btc-relay-binding.services';
 import { LifiRouteUnsupportedError } from '$lib/types/errors';
 import type { LifiBtcOutput } from '$lib/types/lifi';
+import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { isNullish } from '@dfinity/utils';
-import type { LiFiStep, QuoteRequestFromAmount } from '@lifi/sdk';
+import { ChainId, type LiFiStep, type QuoteRequestFromAmount } from '@lifi/sdk';
+
+// LI.FI's tool key for Relay (`/v1/tools`).
+const LIFI_RELAY_TOOL = 'relaydepository';
 
 export interface LifiBtcPayoutBindingParams {
 	// The re-quoted step whose transaction is signed.
@@ -39,8 +43,18 @@ export type LifiBtcPayoutBinding = (params: LifiBtcPayoutBindingParams) => Promi
  * NEAR Intents provider at a higher cost.
  */
 const LIFI_BTC_PAYOUT_BINDINGS: Partial<Record<string, LifiBtcPayoutBinding>> = {
-	relaydepository: bindLifiRelayPayout
+	[LIFI_RELAY_TOOL]: bindLifiRelayPayout
 };
+
+/**
+ * Whether the offer is a LI.FI route from Bitcoin through Relay, whose binding cannot check the
+ * recipient (`bindLifiRelayPayout`): the form and the review warn that OISY cannot confirm who is
+ * paid. Keyed on the tool, not on its display name, which is LI.FI's to choose.
+ */
+export const isLifiBtcRelayOffer = (offer: SwapMappedResult | undefined): boolean =>
+	offer?.provider === SwapProvider.LIFI &&
+	offer.request.fromChain === ChainId.BTC &&
+	offer.swapDetails.tool === LIFI_RELAY_TOOL;
 
 // The table's own entries only: a route's tool key comes from LI.FI's response.
 const payoutBindingOf = ({
