@@ -13,6 +13,7 @@
 	import SwapDetailsNearIntents from '$lib/components/swap/SwapDetailsNearIntents.svelte';
 	import SwapDetailsOisyTrade from '$lib/components/swap/SwapDetailsOisyTrade.svelte';
 	import SwapDetailsOneSec from '$lib/components/swap/SwapDetailsOneSec.svelte';
+	import SwapDetailsRift from '$lib/components/swap/SwapDetailsRift.svelte';
 	import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -67,4 +68,7 @@
 	<SwapDetailsOisyTrade {provider} />
 {:else if provider.provider === SwapProvider.LIFI && LIFI_SWAP_ENABLED}
 	<SwapDetailsLifi {provider} />
+{:else if provider.provider === SwapProvider.RIFT}
+	<!-- Not behind the flag: it gates new quotes, and an offer is only ever one of them. -->
+	<SwapDetailsRift {provider} />
 {/if}

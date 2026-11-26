@@ -17,6 +17,7 @@ import {
 	NEAR_INTENTS_XRP_SWAP_ENABLED
 } from '$env/rest/near-intents.env';
 import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
+import { RIFT_EVM_NATIVE_ASSETS, RIFT_SWAP_ENABLED } from '$env/rest/rift.env';
 import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import {
 	OISY_TRADE_LEARN_MORE_URL,
@@ -26,6 +27,7 @@ import { MOTION_EASE_OUT_CSS } from '$lib/constants/transition.constants';
 import type { NetworkId } from '$lib/types/network';
 import { SwapProvider, type ChainFusionPair, type SwapProvidersConfig } from '$lib/types/swap';
 import { toChainFusionPairs } from '$lib/utils/chain-fusion-swap.utils';
+import { nonNullish } from '@dfinity/utils';
 
 export const SWAP_SLIPPAGE_PRESET_VALUES = [0.5, 1.5, 3];
 export const [_, SWAP_DEFAULT_SLIPPAGE_VALUE] = SWAP_SLIPPAGE_PRESET_VALUES;
@@ -157,6 +159,10 @@ export const RIFT_DEFAULT_RETRY_AFTER_MS = 5_000;
 // The deadline of a single Rift request, once the limiter has let it start. The active-transaction
 // tick awaits each provider's poller in turn, so a stalled request would stall every other row.
 export const RIFT_REQUEST_TIMEOUT_MS = 10_000;
+
+// Rift is re-quoted at most this often for unchanged inputs, as LI.FI is, rather than on every
+// periodic tick: the whole session shares one request per second with the active-transaction poller.
+export const RIFT_QUOTE_REFRESH_INTERVAL_MS = 30_000;
 
 // LI.FI's recommended `/status` cadence: every 10 s for the first minute after the row is created,
 // every 30 s until 10 minutes, then every minute.
@@ -308,6 +314,12 @@ const NEAR_INTENTS_XRP_NETWORK_IDS: NetworkId[] = NEAR_INTENTS_XRP_SWAP_ENABLED
 	? [XRP_MAINNET_NETWORK_ID]
 	: [];
 
+// Rift bridges BTC mainnet to the EVM networks it is asked about. The other direction joins with its
+// own change.
+const RIFT_BTC_DESTINATION_NETWORK_IDS: NetworkId[] = RIFT_SWAP_ENABLED
+	? SUPPORTED_CROSS_SWAP_EVM_NETWORK_IDS.filter((id) => nonNullish(RIFT_EVM_NATIVE_ASSETS[id]))
+	: [];
+
 const ICP_PAIRED_EVM_NETWORK_IDS: NetworkId[] = [
 	...new Set<NetworkId>([
 		...(ONESEC_SWAP_ENABLED ? ONESEC_EVM_NETWORK_IDS : []),
@@ -331,9 +343,12 @@ export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
 	],
 	[BTC_MAINNET_NETWORK_ID]: [
 		...(CHAIN_FUSION_BTC_NETWORK_IDS.length > 0 ? [ICP_NETWORK_ID] : []),
-		...(NEAR_INTENTS_BTC_SWAP_ENABLED
-			? [...SUPPORTED_CROSS_SWAP_NETWORK_IDS, ...NEAR_INTENTS_XRP_NETWORK_IDS]
-			: [])
+		...new Set<NetworkId>([
+			...(NEAR_INTENTS_BTC_SWAP_ENABLED
+				? [...SUPPORTED_CROSS_SWAP_NETWORK_IDS, ...NEAR_INTENTS_XRP_NETWORK_IDS]
+				: []),
+			...RIFT_BTC_DESTINATION_NETWORK_IDS
+		])
 	],
 	[ETHEREUM_NETWORK_ID]: withIcpIfPaired(ETHEREUM_NETWORK_ID),
 	[ARBITRUM_MAINNET_NETWORK_ID]: withIcpIfPaired(ARBITRUM_MAINNET_NETWORK_ID),

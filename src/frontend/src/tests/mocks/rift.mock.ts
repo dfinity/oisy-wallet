@@ -1,3 +1,6 @@
+import { RiftQuoteSchema } from '$lib/schema/rift.schema';
+import type { RiftQuote, RiftQuoteRequest } from '$lib/types/rift';
+
 // A live `format: "raw"` quote for 0.002 BTC into USDC on Ethereum (2026-11-26), as Rift sends it,
 // fields OISY does not read included.
 export const mockRiftQuoteResponse = {
@@ -84,4 +87,17 @@ export const mockRiftOrderResponse = {
 	deposit_deadline: '2026-12-03T10:15:11.235343Z',
 	created_at: '2026-11-26T10:15:11.235343Z',
 	from_amount: '200000'
+};
+
+// The live quote as OISY reads it, typed: what an offer carries as its details.
+export const mockRiftQuote: RiftQuote = RiftQuoteSchema.parse(mockRiftQuoteResponse);
+
+// The request the live quote answers.
+export const mockRiftQuoteRequest: RiftQuoteRequest = {
+	from: 'bitcoin.btc',
+	to: 'evm:1.0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+	amount_in: '200000',
+	format: 'raw',
+	quote_mode: 'fast',
+	integrator_id: 'oisy'
 };

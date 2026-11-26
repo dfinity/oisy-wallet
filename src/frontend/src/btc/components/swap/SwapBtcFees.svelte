@@ -37,14 +37,18 @@
 
 	let totalFee = $derived(fees?.reduce((acc, { fee }) => acc + fee, ZERO));
 
-	// A NEAR Intents or LI.FI quote already prices the provider's fees into the receive amount
-	// (LI.FI's and the bridge's are listed in its provider sheet), so the only cost paid on top is
-	// the Bitcoin network fee of the deposit. LI.FI's is that of its own selection, priced for its
+	// A NEAR Intents, LI.FI or Rift quote already prices the provider's fees into the receive amount
+	// (LI.FI's and the bridge's, and Rift's delivery cost, are listed in its provider sheet), so the
+	// only cost paid on top is the Bitcoin network fee of the deposit. NEAR Intents and Rift take a
+	// plain transfer, which the loader prices; LI.FI's is that of its own selection, priced for its
 	// outputs.
 	let satoshisFee = $derived.by(() => {
 		const selectedProvider = $swapAmountsStore?.selectedProvider;
 
-		if (selectedProvider?.provider === SwapProvider.NEAR_INTENTS) {
+		if (
+			selectedProvider?.provider === SwapProvider.NEAR_INTENTS ||
+			selectedProvider?.provider === SwapProvider.RIFT
+		) {
 			return $utxosFeeStore?.utxosFee?.feeSatoshis;
 		}
 

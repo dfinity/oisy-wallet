@@ -1,3 +1,4 @@
+import type * as riftEnv from '$env/rest/rift.env';
 import {
 	RIFT_DEFAULT_RETRY_AFTER_MS,
 	RIFT_MIN_REQUEST_INTERVAL_MS
@@ -18,7 +19,8 @@ import { mockRiftOrderResponse, mockRiftQuoteResponse } from '$tests/mocks/rift.
 
 const env = vi.hoisted(() => ({ apiKey: undefined as string | undefined }));
 
-vi.mock('$env/rest/rift.env', () => ({
+vi.mock('$env/rest/rift.env', async (importOriginal) => ({
+	...(await importOriginal<typeof riftEnv>()),
 	RIFT_API_URL: 'https://api.rift.trade',
 	get RIFT_API_KEY() {
 		return env.apiKey;

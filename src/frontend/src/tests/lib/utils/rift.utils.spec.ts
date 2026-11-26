@@ -14,8 +14,16 @@ import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { Erc20Token } from '$eth/types/erc20';
-import { isSameRiftAssetId, toRiftAssetId } from '$lib/utils/rift.utils';
+import type { RiftQuote } from '$lib/types/rift';
+import {
+	isRiftBtcSource,
+	isRiftQuoteForRequest,
+	isSameRiftAssetId,
+	riftRouteVenues,
+	toRiftAssetId
+} from '$lib/utils/rift.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockRiftQuote, mockRiftQuoteRequest } from '$tests/mocks/rift.mock';
 
 const USDC_ETHEREUM = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 
@@ -78,6 +86,88 @@ describe('rift.utils', () => {
 			{ label: 'ICP', token: ICP_TOKEN }
 		])('names no asset for $label', ({ token }) => {
 			expect(toRiftAssetId(token)).toBeUndefined();
+		});
+	});
+
+	describe('isRiftBtcSource', () => {
+		it.each([
+			{ label: 'native BTC on mainnet', token: BTC_MAINNET_TOKEN, expected: true },
+			{ label: 'native BTC on testnet', token: BTC_TESTNET_TOKEN, expected: false },
+			{ label: 'ETH', token: ETHEREUM_TOKEN, expected: false }
+		])('is $expected for $label', ({ token, expected }) => {
+			expect(isRiftBtcSource(token)).toBe(expected);
+		});
+	});
+
+	describe('isRiftQuoteForRequest', () => {
+		// A minute before the live quote expires.
+		const now = Date.parse(mockRiftQuote.expires_at) - 60_000;
+
+		const [venueToInk, venueToEthereum] = mockRiftQuote.route;
+
+		const withDeliveryFee = (integratorFee: string): RiftQuote['route'] =>
+			mockRiftQuote.route.map((step) =>
+				step.type === 'delivery' ? { ...step, integrator_fee: integratorFee } : step
+			);
+
+		it('accepts the quote that answers the request', () => {
+			expect(
+				isRiftQuoteForRequest({ quote: mockRiftQuote, request: mockRiftQuoteRequest, now })
+			).toBeTruthy();
+		});
+
+		it('accepts an echo of the request in another case', () => {
+			expect(
+				isRiftQuoteForRequest({
+					quote: { ...mockRiftQuote, to: mockRiftQuote.to.toUpperCase() },
+					request: mockRiftQuoteRequest,
+					now
+				})
+			).toBeTruthy();
+		});
+
+		it.each([
+			{ label: 'another source asset', quote: { from: 'evm:1.eth' } },
+			{ label: 'another destination asset', quote: { to: 'evm:8453.eth' } },
+			{ label: 'another amount', quote: { amount_in: '200001' } },
+			{ label: 'a zero estimate', quote: { estimated_amount_out: '0' } },
+			{ label: 'an integrator fee rate', quote: { integrator_fee_bps: 25 } },
+			{ label: 'an integrator fee on delivery', quote: { route: withDeliveryFee('1') } },
+			{ label: 'no delivery step', quote: { route: [venueToInk, venueToEthereum] } }
+		])('drops a quote with $label', ({ quote }) => {
+			expect(
+				isRiftQuoteForRequest({
+					quote: { ...mockRiftQuote, ...quote },
+					request: mockRiftQuoteRequest,
+					now
+				})
+			).toBeFalsy();
+		});
+
+		it('accepts a zero integrator fee rate', () => {
+			expect(
+				isRiftQuoteForRequest({
+					quote: { ...mockRiftQuote, integrator_fee_bps: 0 },
+					request: mockRiftQuoteRequest,
+					now
+				})
+			).toBeTruthy();
+		});
+
+		it('drops a quote once it has expired', () => {
+			expect(
+				isRiftQuoteForRequest({
+					quote: mockRiftQuote,
+					request: mockRiftQuoteRequest,
+					now: Date.parse(mockRiftQuote.expires_at)
+				})
+			).toBeFalsy();
+		});
+	});
+
+	describe('riftRouteVenues', () => {
+		it('lists the venues in route order, without the delivery step', () => {
+			expect(riftRouteVenues(mockRiftQuote)).toEqual(['rift_otc', 'velora']);
 		});
 	});
 

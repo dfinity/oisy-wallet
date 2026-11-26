@@ -18,6 +18,7 @@ import {
 import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
 import type * as lifiEnv from '$env/rest/lifi.env';
 import type * as nearIntentsEnv from '$env/rest/near-intents.env';
+import type * as riftEnv from '$env/rest/rift.env';
 import {
 	crossChainSwapNetwoksEnvs,
 	crossChainSwapNetworks,
@@ -160,6 +161,43 @@ describe('cross-chain-swap derived stores', () => {
 			} finally {
 				vi.doUnmock('$env/chain-fusion-swap.env');
 				vi.doUnmock('$env/rest/near-intents.env');
+				vi.resetModules();
+			}
+		});
+
+		it('should include the enabled Bitcoin mainnet network when only Rift is on', async () => {
+			vi.resetModules();
+			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
+				...(await importOriginal<typeof nearIntentsEnv>()),
+				NEAR_INTENTS_BTC_SWAP_ENABLED: false
+			}));
+			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: false }));
+			vi.doMock('$env/rest/rift.env', async (importOriginal) => ({
+				...(await importOriginal<typeof riftEnv>()),
+				RIFT_SWAP_ENABLED: true
+			}));
+
+			try {
+				const [
+					{ crossChainSwapNetworks: networks },
+					{ setupTestnetsStore: setupTestnets },
+					{ setupUserNetworksStore: setupNetworks },
+					{ BTC_MAINNET_NETWORK: bitcoinMainnet }
+				] = await Promise.all([
+					import('$lib/derived/cross-chain-networks.derived'),
+					import('$tests/utils/testnets.test-utils'),
+					import('$tests/utils/user-networks.test-utils'),
+					import('$env/networks/networks.btc.env')
+				]);
+
+				setupTestnets('reset');
+				setupNetworks('allEnabled');
+
+				expect(get(networks)).toContain(bitcoinMainnet);
+			} finally {
+				vi.doUnmock('$env/chain-fusion-swap.env');
+				vi.doUnmock('$env/rest/near-intents.env');
+				vi.doUnmock('$env/rest/rift.env');
 				vi.resetModules();
 			}
 		});

@@ -8,6 +8,7 @@ import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
+import { mockRiftQuote } from '$tests/mocks/rift.mock';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
@@ -167,6 +168,24 @@ describe('SwapBtcFees', () => {
 		});
 
 		expect(container.textContent?.trim()).toBe('');
+	});
+
+	// A Rift deposit is a plain transfer, priced by the loader; Rift's delivery cost comes out of the
+	// estimate and is in the provider sheet.
+	it('renders the Bitcoin network fee for a Rift offer', () => {
+		const riftOffer: SwapMappedResult = {
+			provider: SwapProvider.RIFT,
+			receiveAmount: 121_475_958n,
+			swapDetails: mockRiftQuote
+		};
+
+		const { getByText, queryByText } = render(SwapBtcFees, {
+			context: createContext({ offer: riftOffer })
+		});
+
+		expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
+		expect(getByText('0.00001 BTC')).toBeInTheDocument();
+		expect(queryByText(en.swap.text.total_fee)).not.toBeInTheDocument();
 	});
 
 	it('renders nothing for a NEAR Intents offer while the UTXO fee is unknown', () => {
