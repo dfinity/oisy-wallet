@@ -378,6 +378,10 @@ A new user does not see any of these in the wallet; a user who wants one imports
 
 ICP on the same EVM chains is intentionally **not** metadata-only: some users may already hold a balance in it, and marking it metadata-only would remove it from the default curated token set (potentially hiding that balance unless they explicitly import it). ICP stays curated and suggested there.
 
+### Logos of Internet Computer tokens
+
+An ICRC ledger names its own logo. OISY shows it only when it loads from OISY itself or is carried inline (a `data:image` URL), so showing a token never contacts another host. Any other logo is not loaded: the token lists use OISY's shipped icon for that ledger instead, and the tip claim screens spell out the symbol.
+
 ### Asset types
 
 Every token belongs to one asset type, and the token list can be filtered by it: **All asset types**, then **Crypto**, **Stablecoins**, **Stocks**, **Commodities** and **Compute**, in that order. The types appear as pills above the token list, and as a dropdown in the modals' token lists (Send, Swap, Manage tokens and others). A token group is shown when any of its tokens matches, and the user can hide the filter altogether. Send and Swap opened from the assets page start their token lists on the asset type selected there, as they do on its network; opened from any other page, where the filter is not shown, they start on All asset types.
