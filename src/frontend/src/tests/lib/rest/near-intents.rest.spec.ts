@@ -90,10 +90,9 @@ describe('near-intents.rest', () => {
 		it('sends the partner key when one is configured', async () => {
 			vi.spyOn(nearIntentsEnv, 'NEAR_INTENTS_API_KEY', 'get').mockReturnValue('partner-jwt');
 
-			vi.mocked(fetch).mockResolvedValueOnce({
-				ok: true,
-				json: () => Promise.resolve(mockNearIntentsQuoteResponse)
-			} as unknown as Response);
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify(mockNearIntentsQuoteResponse))
+			);
 
 			await fetchNearIntentsQuote(quoteRequest);
 
@@ -111,10 +110,9 @@ describe('near-intents.rest', () => {
 		it('sends no partner key when the build sets it empty', async () => {
 			vi.spyOn(nearIntentsEnv, 'NEAR_INTENTS_API_KEY', 'get').mockReturnValue('');
 
-			vi.mocked(fetch).mockResolvedValueOnce({
-				ok: true,
-				json: () => Promise.resolve(mockNearIntentsQuoteResponse)
-			} as unknown as Response);
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify(mockNearIntentsQuoteResponse))
+			);
 
 			await fetchNearIntentsQuote(quoteRequest);
 
