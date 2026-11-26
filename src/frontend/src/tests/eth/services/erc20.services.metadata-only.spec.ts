@@ -1,7 +1,7 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import type * as TokensErc20Env from '$env/tokens/tokens.erc20.env';
-import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
+import { ERC20_DEPRECATED_TOKENS, ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import type { InfuraErc20Provider } from '$eth/providers/infura-erc20.providers';
 import * as infuraProvidersModule from '$eth/providers/infura-erc20.providers';
 import { loadCustomTokens, loadDefaultErc20Tokens } from '$eth/services/erc20.services';
@@ -118,5 +118,12 @@ describe('erc20.services - metadataOnly', () => {
 describe('ERC20_SUGGESTED_TOKENS invariant', () => {
 	it('never contains a metadata-only token', () => {
 		expect(ERC20_SUGGESTED_TOKENS.every(({ metadataOnly }) => !metadataOnly)).toBeTruthy();
+	});
+});
+
+// A deprecated token is saved for its holders, so it must stay curated to show up for them.
+describe('ERC20_DEPRECATED_TOKENS invariant', () => {
+	it('never contains a metadata-only token', () => {
+		expect(ERC20_DEPRECATED_TOKENS.every(({ metadataOnly }) => !metadataOnly)).toBeTruthy();
 	});
 });
