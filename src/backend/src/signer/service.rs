@@ -37,7 +37,7 @@ const LEDGER_FEE: u64 = 1_000_000_000u64;
 ///   Initial measurements indicate that a typical real fee will be about 80T.
 /// - PAPI is likely to offer an endpoint returning a pricelist in future, so we can periodically
 ///   check the price and adjust this value.
-const SIGNER_FEE: u64 = 80_000_000_000;
+const SIGNER_FEE: u64 = 43_000_000_000;
 /// A reasonable number of signing operations per user per login.
 ///
 /// Projected uses:
@@ -47,7 +47,7 @@ const SIGNER_FEE: u64 = 80_000_000_000;
 ///
 /// Margin of error: 3x (given  that the signer fee is subject to change in the next few days and
 /// weeks)
-const SIGNING_OPS_PER_LOGIN: u64 = 36;
+const SIGNING_OPS_PER_LOGIN: u64 = 1;
 const fn per_user_cycles_allowance() -> u64 {
     // Creating the allowance costs 1 ledger fee.
     // Every usage costs 1 ledger fee + 1 signer fee.
@@ -63,7 +63,7 @@ const fn per_user_cycles_allowance() -> u64 {
 ///   adds) the value.
 ///
 /// Set to roughly 18 signing operations worth of cycles.
-const SUFFICIENT_CYCLES_THRESHOLD: u64 = (LEDGER_FEE + SIGNER_FEE) * 18;
+const SUFFICIENT_CYCLES_THRESHOLD: u64 = 40_000_000_000;
 
 /// Retrieves the amount of cycles that the signer canister is allowed to spend
 /// on behalf of the current canister.

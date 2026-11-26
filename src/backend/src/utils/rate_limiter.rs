@@ -18,7 +18,7 @@ thread_local! {
 
     /// Rate-limits `allow_signing`: max 3 calls per caller per hour.
     pub(crate) static ALLOW_SIGNING_RATE_LIMITER: RateLimiter =
-        RateLimiter::new(3, 60 * 60 * 1_000_000_000);
+        RateLimiter::new(2, 60 * 60 * 1_000_000_000);
 
     /// Rate-limits `get_allowed_cycles`: max 10 calls per caller per minute.
     pub(crate) static GET_ALLOWED_CYCLES_RATE_LIMITER: RateLimiter =
