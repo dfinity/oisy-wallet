@@ -488,9 +488,10 @@ The poller runs for every non-terminal Rift row, whatever `RIFT_SWAP_ENABLED` sa
 - A 429 ends the round. The row that got it counts as read, so the next round starts with the rows
   this one did not reach, and no row keeps the others waiting, whether for its deposit or for Rift's
   rate limit.
-- While the limiter holds requests back after a 429 (`isRiftRateLimited`), a round reads nothing. A
-  read would wait out the rest of the `Retry-After`, and with it the tick every provider's poller
-  shares.
+- While the limiter holds requests back after a 429 (`isRiftRateLimited`), a round reads nothing.
+- The loader runs the Rift round beside its tick, behind a guard of its own, rather than awaiting it
+  inside the tick: a read that was already waiting for its turn when a 429 came in waits out the
+  `Retry-After`, which must not hold back the other providers' pollers.
 
 Status mapping (decided 2026-11-25):
 

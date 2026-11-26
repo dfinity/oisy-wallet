@@ -95,6 +95,8 @@
 
 	let timer: ReturnType<typeof setInterval> | undefined;
 	let inflight = false;
+	// Rift's round has a guard of its own: it runs beside the tick rather than inside it.
+	let riftInflight = false;
 
 	// Reads the latest `$authIdentity` at fire time rather than closing over a
 	// captured value, so a delegation refresh (new identity object, no nullish
@@ -168,11 +170,19 @@
 				});
 			}
 
-			// Polled whatever `RIFT_SWAP_ENABLED` says: a row can outlive the flag.
+			// Polled whatever `RIFT_SWAP_ENABLED` says: a row can outlive the flag. Not awaited: its
+			// reads wait their turn in Rift's rate limiter, a 429's `Retry-After` included, which must
+			// not hold back the other providers' pollers.
 			const rift = $activeUserTransactionsPending.filter(isRiftActiveUserTransaction);
 
-			if (rift.length > 0) {
-				await pollRiftActiveUserTransactions({ identity, transactions: rift });
+			if (rift.length > 0 && !riftInflight) {
+				riftInflight = true;
+
+				pollRiftActiveUserTransactions({ identity, transactions: rift })
+					.catch(consoleError)
+					.finally(() => {
+						riftInflight = false;
+					});
 			}
 
 			const chainFusion = $activeUserTransactionsPending.filter(isChainFusionActiveUserTransaction);

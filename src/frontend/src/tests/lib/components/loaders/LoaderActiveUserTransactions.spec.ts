@@ -448,6 +448,27 @@ describe('LoaderActiveUserTransactions', () => {
 			});
 		});
 
+		// Its reads wait for Rift's rate limiter, a 429's Retry-After included.
+		it("does not hold back the other providers' polling while a Rift round waits", async () => {
+			const riftSpy = vi
+				.spyOn(riftPoller, 'pollRiftActiveUserTransactions')
+				.mockReturnValue(new Promise(() => undefined));
+			const lifiSpy = vi.spyOn(lifiPoller, 'pollLifiActiveUserTransactions').mockResolvedValue();
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingRift('rift-a') });
+			activeUserTransactionsStore.upsert({ transaction: pendingLifi('lifi-a') });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(lifiSpy).toHaveBeenCalledTimes(2);
+			// One Rift round at a time.
+			expect(riftSpy).toHaveBeenCalledOnce();
+		});
+
 		it('polls Chain Fusion rows on each tick when present', async () => {
 			const oneSecSpy = vi
 				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
