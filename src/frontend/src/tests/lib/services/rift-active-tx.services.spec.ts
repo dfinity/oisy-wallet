@@ -4,7 +4,7 @@ import type * as ethBalanceServices from '$eth/services/eth-balance.services';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import { RIFT_MAX_ORDER_READS_PER_TICK } from '$lib/constants/swap.constants';
-import { getRiftOrder } from '$lib/rest/rift.rest';
+import { getRiftOrder, isRiftRateLimited } from '$lib/rest/rift.rest';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
 import {
 	pollRiftActiveUserTransactions,
@@ -21,7 +21,8 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockRiftOrder } from '$tests/mocks/rift.mock';
 
 vi.mock('$lib/rest/rift.rest', () => ({
-	getRiftOrder: vi.fn()
+	getRiftOrder: vi.fn(),
+	isRiftRateLimited: vi.fn()
 }));
 
 vi.mock('$lib/services/active-user-transactions.services', () => ({
@@ -61,6 +62,7 @@ describe('rift-active-tx.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		resetRiftPollState();
+		vi.mocked(isRiftRateLimited).mockReturnValue(false);
 	});
 
 	describe('pollRiftActiveUserTransactions', () => {
@@ -191,11 +193,46 @@ describe('rift-active-tx.services', () => {
 
 			await poll(rows);
 
+			expect(readOrderIds()[0]).toBe('33333333-d9cb-469f-a165-70867728950e');
+		});
+
+		// The row that got the 429 counts as read, so it does not keep the others waiting.
+		it('reaches every row in turn while each round ends on a 429', async () => {
+			vi.mocked(getRiftOrder).mockRejectedValue(
+				new RiftApiError({ status: 429, message: 'slow down' })
+			);
+			const rows = [row(1), row(2), row(3)];
+
+			for (const _ of rows) {
+				await poll(rows);
+			}
+
 			expect(readOrderIds()).toEqual([
+				'11111111-d9cb-469f-a165-70867728950e',
 				'22222222-d9cb-469f-a165-70867728950e',
-				'33333333-d9cb-469f-a165-70867728950e',
-				'11111111-d9cb-469f-a165-70867728950e'
+				'33333333-d9cb-469f-a165-70867728950e'
 			]);
+		});
+
+		// A read would wait out the rest of the Retry-After, and with it every provider's poller.
+		it('reads nothing while Rift holds requests back', async () => {
+			vi.mocked(isRiftRateLimited).mockReturnValue(true);
+
+			await poll([row(1), row(2)]);
+
+			expect(getRiftOrder).not.toHaveBeenCalled();
+		});
+
+		it('ends the round once Rift starts holding requests back', async () => {
+			vi.mocked(getRiftOrder).mockImplementation(() => {
+				vi.mocked(isRiftRateLimited).mockReturnValue(true);
+
+				return Promise.reject(new Error('offline'));
+			});
+
+			await poll([row(1), row(2)]);
+
+			expect(getRiftOrder).toHaveBeenCalledOnce();
 		});
 	});
 

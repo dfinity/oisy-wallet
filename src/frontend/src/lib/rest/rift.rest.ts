@@ -186,6 +186,13 @@ export const getRiftOrder = ({
 		schema: RiftOrderSchema
 	});
 
+/**
+ * Whether Rift is holding every request back after a 429. A request made now would wait out the rest
+ * of its `Retry-After`, so a caller that must not wait that long, such as the poller sharing the
+ * active-transaction tick with every provider, tries again later instead.
+ */
+export const isRiftRateLimited = (): boolean => Date.now() < cooldownUntil;
+
 // Test seam: the limiter's state is the module's, and would otherwise leak between cases.
 export const resetRiftRateLimiter = () => {
 	if (nonNullish(timer)) {

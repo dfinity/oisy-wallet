@@ -428,7 +428,8 @@ once its row is created and right before broadcasting, the hook re-reads the ord
 - It broadcasts only if the order still reads `awaiting_deposit` with no `deposit_tx`.
 - Otherwise it deletes its own row (nothing was sent), broadcasts nothing, and stops with
   `swap.error.rift_order_in_flight`. If the order cannot be read, it does the same but stops with
-  `swap.error.rift_order_refused`.
+  `swap.error.rift_order_refused`. If the order's `deposit_deadline` has passed since its checks
+  (signing takes time), it does the same but stops with `swap.error.rift_quote_expired`.
 
 That closes the gap without new backend state. A row is only terminal once Rift or the source chain
 has settled the first deposit. If Rift saw it, the order no longer reads `awaiting_deposit` with no
@@ -484,9 +485,12 @@ The poller runs for every non-terminal Rift row, whatever `RIFT_SWAP_ENABLED` sa
 - A tick (every 5 s, `ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS`) reads at most
   `RIFT_MAX_ORDER_READS_PER_TICK` (3) rows, **least recently read first**. The other providers'
   pollers run in the same tick, so one provider's round must stay short.
-- A 429 ends the round. The rows it did not reach are the least recently read, so the next round,
-  once `Retry-After` has elapsed, starts with them. No row is starved by one that keeps waiting for
-  its deposit.
+- A 429 ends the round. The row that got it counts as read, so the next round starts with the rows
+  this one did not reach, and no row keeps the others waiting, whether for its deposit or for Rift's
+  rate limit.
+- While the limiter holds requests back after a 429 (`isRiftRateLimited`), a round reads nothing. A
+  read would wait out the rest of the `Retry-After`, and with it the tick every provider's poller
+  shares.
 
 Status mapping (decided 2026-11-25):
 

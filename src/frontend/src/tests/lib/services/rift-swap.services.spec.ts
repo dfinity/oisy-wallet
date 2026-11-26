@@ -477,6 +477,17 @@ describe('rift-swap.services', () => {
 				});
 			});
 
+			it('deletes its row and stops when the order passed its deadline during signing', async () => {
+				recheck({ deposit_deadline: new Date(Date.now() - 1).toISOString() });
+
+				await expectRefused({ reason: 'quoteExpired' });
+
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: rowId()
+				});
+			});
+
 			it('deletes its row and stops when the order cannot be read again', async () => {
 				vi.mocked(getRiftOrder).mockRejectedValue(new RiftApiError({ status: 503, message: 'no' }));
 

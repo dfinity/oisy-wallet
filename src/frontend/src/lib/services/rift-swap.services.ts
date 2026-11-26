@@ -258,6 +258,11 @@ const assertRiftOrderAwaitsDeposit = async ({ orderId }: { orderId: string }): P
 	if (order.id.toLowerCase() !== orderId.toLowerCase() || !isRiftOrderAwaitingDeposit(order)) {
 		throw new RiftSwapRefusedError('orderInFlight');
 	}
+
+	// Signing and this read take time, and an order past its deadline takes no deposit.
+	if (Date.parse(order.deposit_deadline) <= Date.now()) {
+		throw new RiftSwapRefusedError('quoteExpired');
+	}
 };
 
 /**

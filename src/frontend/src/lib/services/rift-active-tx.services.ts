@@ -4,7 +4,7 @@ import {
 	reloadEthereumBalance
 } from '$eth/services/eth-balance.services';
 import { RIFT_MAX_ORDER_READS_PER_TICK } from '$lib/constants/swap.constants';
-import { getRiftOrder } from '$lib/rest/rift.rest';
+import { getRiftOrder, isRiftRateLimited } from '$lib/rest/rift.rest';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
 import { RiftApiError } from '$lib/types/errors';
 import { RIFT_EXTERNAL_REF_KEYS, type RiftExternalRefKey } from '$lib/types/rift';
@@ -82,9 +82,10 @@ const pollRiftActiveUserTransaction = async ({
  * limiter, whatever `RIFT_SWAP_ENABLED` says: a row can outlive the flag.
  *
  * A round reads at most `RIFT_MAX_ORDER_READS_PER_TICK` rows, least recently read first, since the
- * other providers' pollers share the tick. A 429 ends the round, and the rows it did not reach are
- * the least recently read, so the next round starts with them. Any other failure, a 404 or an
- * unreadable answer included, leaves the row as it is.
+ * other providers' pollers share the tick. A 429 ends the round, and the row that got it counts as
+ * read, so the next round starts with the rows this one did not reach. While Rift holds requests
+ * back after a 429, a round reads nothing. Any other failure, a 404 or an unreadable answer
+ * included, leaves the row as it is.
  */
 export const pollRiftActiveUserTransactions = async ({
 	identity,
@@ -98,17 +99,31 @@ export const pollRiftActiveUserTransactions = async ({
 		.slice(0, RIFT_MAX_ORDER_READS_PER_TICK);
 
 	for (const tx of round) {
+		// A read now would wait out the rest of a 429's `Retry-After`, and with it the tick every
+		// provider's poller shares: the rest of the round waits for a later tick instead.
+		if (isRiftRateLimited()) {
+			return;
+		}
+
+		let rateLimited = false;
+
 		try {
 			await pollRiftActiveUserTransaction({ tx, identity });
 		} catch (err: unknown) {
-			if (err instanceof RiftApiError && err.status === 429) {
-				return;
-			}
+			rateLimited = err instanceof RiftApiError && err.status === 429;
 
-			consoleError(err);
+			if (!rateLimited) {
+				consoleError(err);
+			}
 		}
 
+		// A row Rift answered with a 429 counts as read too, so that the next round starts with the
+		// rows this one did not reach, and no row keeps the others waiting.
 		lastReadAt.set(tx.id, Date.now());
+
+		if (rateLimited) {
+			return;
+		}
 	}
 };
 
