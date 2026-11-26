@@ -8,6 +8,7 @@
 	import { goto, preloadData } from '$app/navigation';
 	import type { PublicTip } from '$declarations/backend/backend.did';
 	import { metadata as ledgerMetadata } from '$icp/api/icrc-ledger.api';
+	import { isLocalOrInlineLogo } from '$icp/utils/icrc.utils';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 	import TipClaimHero from '$lib/components/tip/TipClaimHero.svelte';
@@ -91,7 +92,8 @@
 
 			if (nonNullish(meta)) {
 				({ symbol, decimals } = meta);
-				logo = meta.icon;
+				// Without a logo the hero spells out the symbol instead.
+				logo = nonNullish(meta.icon) && isLocalOrInlineLogo(meta.icon) ? meta.icon : undefined;
 			}
 		} catch (_: unknown) {
 			// Non-fatal, and it has to stay that way: this page is the cold-start

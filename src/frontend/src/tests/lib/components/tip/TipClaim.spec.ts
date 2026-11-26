@@ -1,3 +1,4 @@
+import { metadata } from '$icp/api/icrc-ledger.api';
 import TipClaim from '$lib/components/tip/TipClaim.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { LOGIN_BUTTON } from '$lib/constants/test-ids.constants';
@@ -7,8 +8,9 @@ import { modalStore } from '$lib/stores/modal.store';
 import type { PendingTipClaim } from '$lib/types/tip';
 import * as consoleUtils from '$lib/utils/console.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
-import { render, waitFor } from '@testing-library/svelte';
+import { render, waitFor, within } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 // Handing the tip to the wallet is now what this page does last, so the
@@ -233,6 +235,48 @@ describe('TipClaim', () => {
 			);
 
 			expect(container.querySelector(`button[data-tid=${LOGIN_BUTTON}]`)).toBeInTheDocument();
+		});
+
+		describe('the token logo', () => {
+			const renderWithLogo = (logo: string) => {
+				vi.mocked(metadata).mockResolvedValue([
+					[IcrcMetadataResponseEntries.SYMBOL, { Text: 'TOK' }],
+					[IcrcMetadataResponseEntries.NAME, { Text: 'Token' }],
+					[IcrcMetadataResponseEntries.DECIMALS, { Nat: 8n }],
+					[IcrcMetadataResponseEntries.FEE, { Nat: 10_000n }],
+					[IcrcMetadataResponseEntries.LOGO, { Text: logo }]
+				]);
+
+				return renderPreview();
+			};
+
+			afterEach(() => {
+				vi.mocked(metadata).mockReset();
+			});
+
+			it('shows a logo the ledger carries inline', async () => {
+				const logo = 'data:image/png;base64,iVBORw0KGgo=';
+
+				const { container, getByText } = renderWithLogo(logo);
+
+				await waitFor(() => expect(getByText(/0\.005 TOK Tip is Ready/)).toBeInTheDocument());
+
+				expect(container.querySelector(`img[src="${logo}"]`)).toBeInTheDocument();
+			});
+
+			it('spells out the symbol instead of loading a logo from another host', async () => {
+				const { container, getByText } = renderWithLogo('//host.example/logo.png');
+
+				await waitFor(() => expect(getByText(/0\.005 TOK Tip is Ready/)).toBeInTheDocument());
+
+				expect(container.querySelector('img[src*="host.example"]')).not.toBeInTheDocument();
+
+				const hero = container.querySelector(
+					`[aria-label="${get(i18n).tip.alt.claim_illustration}"]`
+				) as HTMLElement;
+
+				expect(within(hero).getByText('TOK')).toBeInTheDocument();
+			});
 		});
 
 		it('offers sign-in but never the message', async () => {
