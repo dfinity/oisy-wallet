@@ -222,6 +222,17 @@ export const ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES = 256;
 // LI.FI row is (`LIFI_ROW_DELETE_ATTEMPTS`).
 export const UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_ATTEMPTS = 3;
 export const UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_RETRY_DELAY_MILLIS = 1_000;
+// A BTC row whose transaction the network still does not know this long after the row's last write
+// (`updated_at_ns`) never reached it (`isBtcTransactionNeverLanded`). A broadcast reaches the
+// mempools in seconds.
+export const BTC_NEVER_LANDED_GRACE_MILLIS = 60 * SECONDS_IN_MINUTE * 1_000; // 1 hour
+// Each such row asks the network at most this often, and is failed after this many "not found"
+// answers in a row.
+export const BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS = 5 * SECONDS_IN_MINUTE * 1_000; // 5 minutes
+export const BTC_NEVER_LANDED_NOT_FOUND_ANSWERS_REQUIRED = 2;
+// The deadline of a BTC row's status lookup (`btcTransactionStatus`), body included. The pollers of
+// every provider run one after another, so a stalled lookup would hold them all.
+export const BTC_TRANSACTION_STATUS_TIMEOUT_MILLIS = 10_000;
 // Minimum delay between two `forward_evm_to_icp` re-notifications for the same
 // pending OneSec EVM→ICP row (notifying is an update call, polling is 5s).
 export const ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
@@ -230,6 +241,9 @@ export const ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_00
 // 5s — and it is the outer bound on top of the query gate that skips the call
 // entirely while the deposit is still gathering confirmations.
 export const CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
+// Minimum delay between two `watch_deposit_address` calls for the same pending SOL → ckSOL
+// row: an update call, while the minter scans the address minutes apart at best.
+export const CHAIN_FUSION_WATCH_DEPOSIT_ADDRESS_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
 
 // Page size for a pending ckBTC deposit's walk over the account's ledger history looking
 // for its own mint. The walk itself is bounded by the row's creation time, not by a page
@@ -283,6 +297,13 @@ export const NETWORK_BONUS_MULTIPLIER_DEFAULT = 1;
 
 // NFT max filesize limit (10MB)
 export const NFT_MAX_FILESIZE_LIMIT = 1024 * 1024 * 10;
+
+// Longest side, in pixels, of the PNG an SVG NFT is drawn into for cards and logos: sharp on a card at 3x pixel density
+export const NFT_THUMBNAIL_MAX_SIZE = 512;
+
+// Bounds both the media type check and the SVG load: a host that never answers must neither leave its card empty nor
+// hold up the other SVGs, which are drawn one at a time
+export const NFT_THUMBNAIL_TIMEOUT_MILLIS = 20_000;
 
 // ZERO ETH address
 export const ZERO_ETH_ADDRESS = '0x0000000000000000000000000000000000000000';

@@ -4,6 +4,7 @@
 	import noNftImage from '$lib/assets/nfts/no-nft-image.svg';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
+	import NftThumbnail from '$lib/components/nfts/NftThumbnail.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
@@ -43,15 +44,19 @@
 <div class="relative rounded-xl bg-primary/80">
 	<div style={`width: ${logoSizes[logoSize]}; height: ${logoSizes[logoSize]};`}>
 		<NftDisplayGuard {nft} type="nft-logo">
-			<Logo
-				alt={replacePlaceholders($i18n.core.alt.logo, { $name: nftDisplayName })}
-				circle={false}
-				{color}
-				{ring}
-				size={logoSize}
-				src={getNftDisplayImageUrl(nft) ?? noNftImage}
-				{testId}
-			/>
+			<NftThumbnail imageUrl={getNftDisplayImageUrl(nft)}>
+				{#snippet children({ imageUrl })}
+					<Logo
+						alt={replacePlaceholders($i18n.core.alt.logo, { $name: nftDisplayName })}
+						circle={false}
+						{color}
+						{ring}
+						size={logoSize}
+						src={imageUrl ?? noNftImage}
+						{testId}
+					/>
+				{/snippet}
+			</NftThumbnail>
 		</NftDisplayGuard>
 	</div>
 

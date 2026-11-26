@@ -181,6 +181,10 @@ export const PostMessageDataResponseAuthSchema = PostMessageDataResponseSchema.e
 	authRemainingTime: z.number()
 });
 
+export const PostMessageDataResponseAuthSignOutSchema = PostMessageDataResponseSchema.extend({
+	delegationExpired: z.boolean()
+});
+
 // TODO: generate zod schema for Coingecko
 export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSchema.extend({
 	currentExchangeRate: CurrencyExchangeDataSchema.optional(),

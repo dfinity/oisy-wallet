@@ -2451,5 +2451,23 @@ describe('tokens.utils', () => {
 
 			expect(tokenListEqual(left, right)).toBeFalsy();
 		});
+
+		it('should return false when only the version differs', () => {
+			const idA = Symbol('a');
+
+			const left = [{ id: idA, enabled: true }];
+			const right = [{ id: idA, enabled: true, version: 1n }];
+
+			expect(tokenListEqual(left, right)).toBeFalsy();
+		});
+
+		it('should return true when the version is the same', () => {
+			const idA = Symbol('a');
+
+			const left = [{ id: idA, enabled: true, version: 2n }];
+			const right = [{ id: idA, enabled: true, version: 2n }];
+
+			expect(tokenListEqual(left, right)).toBeTruthy();
+		});
 	});
 });

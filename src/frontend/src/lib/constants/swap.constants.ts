@@ -1,4 +1,5 @@
 import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
+import { CKSOL_ENABLED } from '$env/cksol.env';
 import { ARBITRUM_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BSC_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.bsc.env';
@@ -143,6 +144,9 @@ export const SWAP_BROADCAST_RETRY_DELAY_MILLIS = 1_000;
 // would stall every other provider's rows.
 export const LIFI_STATUS_TIMEOUT_MS = 10_000;
 
+// The deadline of the Relay status lookup the BTC payout binding makes before signing.
+export const RELAY_STATUS_TIMEOUT_MS = 10_000;
+
 // LI.FI's recommended `/status` cadence: every 10 s for the first minute after the row is created,
 // every 30 s until 10 minutes, then every minute.
 export const LIFI_STATUS_POLL_CADENCE: { maxAgeMillis: number; intervalMillis: number }[] = [
@@ -271,6 +275,10 @@ const CHAIN_FUSION_BTC_NETWORK_IDS: NetworkId[] = CHAIN_FUSION_SWAP_ENABLED
 	? [BTC_MAINNET_NETWORK_ID]
 	: [];
 
+// Solana and ckSOL reach each other through Chain Fusion, behind the ckSOL flag.
+const CHAIN_FUSION_SOL_NETWORK_IDS: NetworkId[] =
+	CHAIN_FUSION_SWAP_ENABLED && CKSOL_ENABLED ? [SOLANA_MAINNET_NETWORK_ID] : [];
+
 // NEAR Intents bridges BTC mainnet to and from every EVM and Solana chain in its map.
 const NEAR_INTENTS_BTC_NETWORK_IDS: NetworkId[] = NEAR_INTENTS_BTC_SWAP_ENABLED
 	? [BTC_MAINNET_NETWORK_ID]
@@ -300,7 +308,8 @@ export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
 	[ICP_NETWORK_ID]: [
 		ICP_NETWORK_ID,
 		...ICP_PAIRED_EVM_NETWORK_IDS,
-		...CHAIN_FUSION_BTC_NETWORK_IDS
+		...CHAIN_FUSION_BTC_NETWORK_IDS,
+		...CHAIN_FUSION_SOL_NETWORK_IDS
 	],
 	[BTC_MAINNET_NETWORK_ID]: [
 		...(CHAIN_FUSION_BTC_NETWORK_IDS.length > 0 ? [ICP_NETWORK_ID] : []),
@@ -315,6 +324,7 @@ export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
 	[BASE_NETWORK_ID]: withIcpIfPaired(BASE_NETWORK_ID),
 	[ROBINHOOD_MAINNET_NETWORK_ID]: withIcpIfPaired(ROBINHOOD_MAINNET_NETWORK_ID),
 	[SOLANA_MAINNET_NETWORK_ID]: [
+		...(CHAIN_FUSION_SOL_NETWORK_IDS.length > 0 ? [ICP_NETWORK_ID] : []),
 		...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
 		...NEAR_INTENTS_BTC_NETWORK_IDS,
 		...NEAR_INTENTS_XRP_NETWORK_IDS

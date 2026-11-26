@@ -1,3 +1,4 @@
+import { BTC_TXID_REGEX } from '$btc/constants/btc.constants';
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import {
 	createActiveUserTransaction as createActiveUserTransactionApi,
@@ -7,9 +8,14 @@ import {
 	updateActiveUserTransaction as updateActiveUserTransactionApi
 } from '$lib/api/backend.api';
 import {
+	BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS,
+	BTC_NEVER_LANDED_GRACE_MILLIS,
+	BTC_NEVER_LANDED_NOT_FOUND_ANSWERS_REQUIRED,
+	NANO_SECONDS_IN_MILLISECOND,
 	UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_ATTEMPTS,
 	UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_RETRY_DELAY_MILLIS
 } from '$lib/constants/app.constants';
+import { btcTransactionStatus } from '$lib/rest/blockstream.rest';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import type {
 	CreateActiveUserTransactionParams,
@@ -79,13 +85,19 @@ const upsertForIdentity = ({
 	activeUserTransactionsStore.upsert({ transaction });
 };
 
+/**
+ * Creates the row and returns it as the backend stored it, stamped with the backend's time
+ * (`created_at_ns`).
+ */
 export const createActiveUserTransaction = async ({
 	identity,
 	...params
-}: { identity: Identity } & CreateActiveUserTransactionParams): Promise<void> => {
+}: { identity: Identity } & CreateActiveUserTransactionParams): Promise<ActiveUserTransaction> => {
 	const transaction = await createActiveUserTransactionApi({ identity, ...params });
 
 	upsertForIdentity({ identity, transaction });
+
+	return transaction;
 };
 
 export const updateActiveUserTransaction = async ({
@@ -164,6 +176,85 @@ export const deleteUnbroadcastActiveUserTransaction = async ({
 			await waitForMilliseconds(UNBROADCAST_ACTIVE_USER_TRANSACTION_DELETE_RETRY_DELAY_MILLIS);
 		}
 	}
+};
+
+/**
+ * Each BTC row's last "is it known" check and its run of "not found" answers. In memory, like the
+ * pollers' other counters: a refresh restarts the run, which only delays a verdict.
+ */
+const btcNeverLandedChecks = new Map<string, { checkedAtMs: number; notFoundAnswers: number }>();
+
+// Test seam — module-level state would otherwise leak between cases.
+export const resetBtcNeverLandedChecks = (): void => {
+	btcNeverLandedChecks.clear();
+};
+
+/**
+ * Ends a row's run of "not found" answers, for a poller that saw its txid on the network by a lookup
+ * of its own: `isBtcTransactionNeverLanded` counts answers in a row, and that sighting is one too.
+ */
+export const noteBtcTransactionSeen = (id: string): void => {
+	btcNeverLandedChecks.delete(id);
+};
+
+/**
+ * Whether a mainnet BTC row's transaction never reached the network, so its poller can fail the row
+ * instead of waiting for it for good. A row can be written before its broadcast, which may then
+ * have sent nothing, though its outcome was unclear.
+ *
+ * Bitcoin cannot prove that nothing was broadcast. The evidence is the network not knowing the
+ * txid: neither in Blockstream's mempool nor in a block, `BTC_NEVER_LANDED_NOT_FOUND_ANSWERS_REQUIRED`
+ * times in a row, at most once per `BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS`, once the row has gone
+ * `BTC_NEVER_LANDED_GRACE_MILLIS` without a write. A transaction in a mempool is found, so its row
+ * keeps waiting however long it takes to confirm. A failed request counts for nothing either way.
+ *
+ * The grace runs from the row's last write, not its creation: a Liquidium repay renews its row while
+ * its broadcast is pending, and that call has no deadline. Once the renewals stop, the backend frees
+ * the reservation within the hour too.
+ */
+export const isBtcTransactionNeverLanded = async ({
+	id,
+	txid,
+	updatedAtNs
+}: {
+	id: string;
+	txid: string;
+	updatedAtNs: bigint;
+}): Promise<boolean> => {
+	const now = Date.now();
+
+	if (
+		!BTC_TXID_REGEX.test(txid) ||
+		now - Number(updatedAtNs / NANO_SECONDS_IN_MILLISECOND) < BTC_NEVER_LANDED_GRACE_MILLIS
+	) {
+		return false;
+	}
+
+	const previous = btcNeverLandedChecks.get(id);
+
+	if (nonNullish(previous) && now - previous.checkedAtMs < BTC_NEVER_LANDED_CHECK_INTERVAL_MILLIS) {
+		return false;
+	}
+
+	let notFoundAnswers = previous?.notFoundAnswers ?? 0;
+
+	try {
+		const status = await btcTransactionStatus({ txid });
+
+		notFoundAnswers = isNullish(status) ? notFoundAnswers + 1 : 0;
+	} catch (_: unknown) {
+		// Unknown either way: the run neither grows nor restarts, and the interval still applies.
+	}
+
+	if (notFoundAnswers >= BTC_NEVER_LANDED_NOT_FOUND_ANSWERS_REQUIRED) {
+		btcNeverLandedChecks.delete(id);
+
+		return true;
+	}
+
+	btcNeverLandedChecks.set(id, { checkedAtMs: now, notFoundAnswers });
+
+	return false;
 };
 
 /**

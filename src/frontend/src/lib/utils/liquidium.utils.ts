@@ -1,23 +1,28 @@
 import type { TokenId } from '$declarations/backend/backend.did';
+import { LIQUIDIUM_SOL_ENABLED } from '$env/liquidium';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { CKSOL_IC_DATA } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS,
 	LIQUIDIUM_HEALTH_AT_RISK_PERCENT,
 	LIQUIDIUM_HEALTH_CRITICAL_PERCENT,
+	LIQUIDIUM_INFLOW_SUBACCOUNT_PURPOSES,
 	LIQUIDIUM_NETWORK_ORDER,
 	LIQUIDIUM_POOL_ORDER,
+	LIQUIDIUM_SUPPORTED_ASSETS,
 	type LiquidiumHealthLevel
 } from '$lib/constants/liquidium.constants';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { Token } from '$lib/types/token';
 import { parseToken } from '$lib/utils/parse.utils';
 import { findTwinToken } from '$lib/utils/token.utils';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import {
 	Chain,
@@ -61,6 +66,8 @@ export const liquidiumMarketToken = ({
 				return findTwinToken({ tokenToPair: USDC_TOKEN, tokens });
 			case 'USDT':
 				return findTwinToken({ tokenToPair: USDT_TOKEN, tokens });
+			case 'SOL':
+				return findTwinToken({ tokenToPair: SOLANA_TOKEN, tokens });
 			default:
 				return undefined;
 		}
@@ -68,6 +75,11 @@ export const liquidiumMarketToken = ({
 
 	if (chain === 'BTC' && asset === 'BTC') {
 		return BTC_MAINNET_TOKEN;
+	}
+
+	// A SOL position carries its pool's chain, `SOL`, whichever rail funded it.
+	if (chain === 'SOL' && asset === 'SOL') {
+		return SOLANA_TOKEN;
 	}
 
 	if (chain === 'ETH') {
@@ -86,7 +98,8 @@ export const liquidiumMarketToken = ({
 	return undefined;
 };
 
-// Display token for a rail the user can actually transact on, for the modal pickers.
+// Display token for a rail the user can actually transact on, for the modal pickers. A rail OISY
+// doesn't transact on gets none, even when its token resolves for display.
 export const liquidiumEnabledRailToken = ({
 	chain,
 	asset,
@@ -96,6 +109,10 @@ export const liquidiumEnabledRailToken = ({
 	asset: string;
 	enabledTokens: Token[];
 }): Token | undefined => {
+	if (!liquidiumSupportedRails(asset).includes(chain)) {
+		return undefined;
+	}
+
 	const token = liquidiumMarketToken({ chain, asset, tokens: enabledTokens });
 
 	return nonNullish(token) && enabledTokens.some(({ id }) => id === token.id) ? token : undefined;
@@ -305,9 +322,17 @@ export const mapLiquidiumMarket = (pool: Pool): LiquidiumMarket => ({
 // rail where the protocol offers one. A single lending pool is shared across rails (e.g.
 // ETH/USDC and ICP/ckUSDC settle in the same USDC pool), so this is a per-asset transfer
 // choice, not separate pools. Derived from the SDK's own identifier guard so it stays
-// correct if the protocol adds pairs.
+// correct if the protocol adds pairs; none for an unsupported asset.
 export const liquidiumSupportedRails = (asset: string): string[] =>
-	Object.values(Chain).filter((chain) => isAssetIdentifier({ chain, asset }));
+	isLiquidiumAssetSupported(asset)
+		? Object.values(Chain).filter((chain) => isAssetIdentifier({ chain, asset }))
+		: [];
+
+// SOL needs ckSOL in the build as well as its flag: ckSOL exists on staging, beta and production
+// only, and `CKSOL_ENABLED` can remove it. Read at call time, so specs can switch it.
+const isLiquidiumAssetSupported = (asset: string): boolean =>
+	LIQUIDIUM_SUPPORTED_ASSETS.includes(asset) ||
+	(asset === 'SOL' && LIQUIDIUM_SOL_ENABLED && nonNullish(CKSOL_IC_DATA));
 
 // Expands one pool into a market per supported transfer rail (`market.chain` is the rail,
 // not the pool's backing chain). Both rails of an asset carry identical pool economics
@@ -474,3 +499,39 @@ export const liquidiumNetInterestUsd = (portfolio: LiquidiumPortfolio | null): n
 			acc + (suppliedUsd * supplyApy - borrowedUsd * borrowApy) / 100,
 		0
 	);
+
+// A subaccount is 32 bytes, and the profile's principal starts at its fourth.
+const LIQUIDIUM_INFLOW_SUBACCOUNT_LENGTH = 32;
+const LIQUIDIUM_INFLOW_PRINCIPAL_OFFSET = 3;
+
+/**
+ * Whether a subaccount of a Liquidium pool is the one that credits what reaches the pool to the
+ * given profile, as a supply or as a repayment.
+ *
+ * The Liquidium client lays it out as what the inflow is for in the first byte, the length of the
+ * profile's principal in the third, the principal from the fourth byte and zeros after it. Any
+ * other subaccount, including one that names the profile with bytes after it, is not.
+ */
+export const isLiquidiumInflowSubaccount = ({
+	subaccount,
+	profileId
+}: {
+	subaccount: Uint8Array;
+	profileId: Principal;
+}): boolean => {
+	const principal = profileId.toUint8Array();
+
+	if (principal.length > LIQUIDIUM_INFLOW_SUBACCOUNT_LENGTH - LIQUIDIUM_INFLOW_PRINCIPAL_OFFSET) {
+		return false;
+	}
+
+	return Object.values(LIQUIDIUM_INFLOW_SUBACCOUNT_PURPOSES).some((purpose) => {
+		const expected = new Uint8Array(LIQUIDIUM_INFLOW_SUBACCOUNT_LENGTH);
+
+		expected[0] = purpose;
+		expected[LIQUIDIUM_INFLOW_PRINCIPAL_OFFSET - 1] = principal.length;
+		expected.set(principal, LIQUIDIUM_INFLOW_PRINCIPAL_OFFSET);
+
+		return uint8ArrayToHexString(expected) === uint8ArrayToHexString(subaccount);
+	});
+};

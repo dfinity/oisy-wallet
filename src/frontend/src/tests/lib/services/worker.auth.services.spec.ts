@@ -2,7 +2,10 @@ import { AppWorker } from '$lib/services/_worker.services';
 import { idleSignOut } from '$lib/services/auth.services';
 import { AuthWorker } from '$lib/services/worker.auth.services';
 import { authRemainingTimeStore, type AuthStoreData } from '$lib/stores/auth.store';
-import type { PostMessageDataResponseAuth } from '$lib/types/post-message';
+import type {
+	PostMessageDataResponseAuth,
+	PostMessageDataResponseAuthSignOut
+} from '$lib/types/post-message';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
 
@@ -88,11 +91,22 @@ describe('worker.auth.services', () => {
 		});
 
 		describe('onmessage', () => {
-			it('should handle signOutIdleTimer message', () => {
+			it.each([true, false])(
+				'should handle signOutIdleTimer message with the delegation expired %s',
+				(delegationExpired) => {
+					const mockData: PostMessageDataResponseAuthSignOut = { delegationExpired };
+					const payload = { msg: 'signOutIdleTimer', data: mockData };
+					workerInstance.onmessage?.({ data: payload } as MessageEvent);
+
+					expect(idleSignOut).toHaveBeenCalledExactlyOnceWith({ delegationExpired });
+				}
+			);
+
+			it('should handle signOutIdleTimer message without data as an expired delegation', () => {
 				const payload = { msg: 'signOutIdleTimer' };
 				workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-				expect(idleSignOut).toHaveBeenCalledExactlyOnceWith();
+				expect(idleSignOut).toHaveBeenCalledExactlyOnceWith({ delegationExpired: true });
 			});
 
 			it('should handle delegationRemainingTime message', () => {

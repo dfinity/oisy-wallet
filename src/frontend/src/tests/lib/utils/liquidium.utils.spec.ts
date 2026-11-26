@@ -1,12 +1,16 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { IC_CKSOL_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { Token } from '$lib/types/token';
 import {
+	isLiquidiumInflowSubaccount,
+	liquidiumAssetTokenId,
 	liquidiumBorrowingPowerPotentialUsd,
 	liquidiumBorrowInterestUsd,
 	liquidiumEnabledRailToken,
@@ -36,6 +40,12 @@ import {
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import {
+	mockLiquidiumProfileId,
+	mockLiquidiumRepaySubaccount,
+	mockLiquidiumSupplySubaccount
+} from '$tests/mocks/liquidium-inflow.mock';
+import { Principal } from '@icp-sdk/core/principal';
+import {
 	HEALTH_FACTOR_DECIMALS,
 	HEALTH_FACTOR_SCALE,
 	type Pool,
@@ -43,6 +53,44 @@ import {
 	type UserPositionSummary,
 	type UserReserve
 } from '@liquidium/client';
+
+// SOL needs its flag and ckSOL in the build. Specs run as a local build, which has no ckSOL, so
+// the specs that need SOL switch ckSOL on.
+const solSupport = vi.hoisted(() => ({ flag: true, cksol: false }));
+
+vi.mock(import('$env/liquidium'), async (importOriginal) => ({
+	...(await importOriginal()),
+	get LIQUIDIUM_SOL_ENABLED() {
+		return solSupport.flag;
+	}
+}));
+
+vi.mock(import('$env/tokens/tokens-icrc/tokens.icrc.ck.sol.env'), async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...actual,
+		get CKSOL_IC_DATA() {
+			return solSupport.cksol
+				? {
+						ledgerCanisterId: actual.IC_CKSOL_LEDGER_CANISTER_ID,
+						minterCanisterId: actual.IC_CKSOL_MINTER_CANISTER_ID
+					}
+				: undefined;
+		}
+	};
+});
+
+const withSol = () => {
+	solSupport.cksol = true;
+};
+
+const ckSolToken = {
+	...mockValidIcCkToken,
+	id: parseTokenId('ckSOL'),
+	symbol: 'ckSOL',
+	network: ICP_TOKEN.network
+} as Token;
 
 // rateDecimals = 2 keeps the scaled rate fixtures readable (5n → 5%).
 const buildPool = (overrides: Partial<Pool> = {}): Pool => ({
@@ -95,6 +143,19 @@ const buildPosition = (overrides: Partial<Position> = {}): Position => ({
 const scaledHealth = (percent: bigint): bigint => (percent * HEALTH_FACTOR_SCALE) / 100n;
 
 describe('liquidium.utils', () => {
+	beforeEach(() => {
+		solSupport.flag = true;
+		solSupport.cksol = false;
+	});
+
+	describe('liquidiumAssetTokenId', () => {
+		it('keys a SOL row by the ckSOL ledger, whichever rail funded it', () => {
+			expect(liquidiumAssetTokenId('SOL')).toEqual({
+				Icrc: Principal.fromText(IC_CKSOL_LEDGER_CANISTER_ID)
+			});
+		});
+	});
+
 	describe('mapLiquidiumMarket', () => {
 		it('maps rates to percentages and reports availability', () => {
 			expect(mapLiquidiumMarket(buildPool())).toEqual({
@@ -153,6 +214,23 @@ describe('liquidium.utils', () => {
 		it('offers only the ICP rail for ICP', () => {
 			expect(liquidiumSupportedRails('ICP')).toEqual(['ICP']);
 		});
+
+		it('offers no rails for SOL without ckSOL in the build', () => {
+			expect(liquidiumSupportedRails('SOL')).toEqual([]);
+		});
+
+		it('offers the native + ICP (ck) rails for SOL', () => {
+			withSol();
+
+			expect(liquidiumSupportedRails('SOL')).toEqual(['SOL', 'ICP']);
+		});
+
+		it('offers no rails for SOL with its flag off', () => {
+			withSol();
+			solSupport.flag = false;
+
+			expect(liquidiumSupportedRails('SOL')).toEqual([]);
+		});
 	});
 
 	describe('mapLiquidiumMarketRails', () => {
@@ -175,6 +253,24 @@ describe('liquidium.utils', () => {
 
 			expect(markets).toHaveLength(1);
 			expect(markets[0].chain).toBe('ICP');
+		});
+
+		it('maps no markets for the SOL pool without ckSOL in the build', () => {
+			expect(
+				mapLiquidiumMarketRails(buildPool({ id: 'pool-sol', asset: 'SOL', chain: 'SOL' }))
+			).toEqual([]);
+		});
+
+		it('maps the SOL pool to a native SOL and a ckSOL market', () => {
+			withSol();
+
+			const markets = mapLiquidiumMarketRails(
+				buildPool({ id: 'pool-sol', asset: 'SOL', chain: 'SOL' })
+			);
+
+			expect(markets).toHaveLength(2);
+			expect(markets[0]).toMatchObject({ poolId: 'pool-sol', asset: 'SOL', chain: 'SOL' });
+			expect(markets[1]).toMatchObject({ poolId: 'pool-sol', asset: 'SOL', chain: 'ICP' });
 		});
 	});
 
@@ -233,6 +329,25 @@ describe('liquidium.utils', () => {
 
 			expect(rails).toHaveLength(1);
 			expect(rails[0].chain).toBe('ETH');
+		});
+
+		it('keeps a SOL position on its own chain only without ckSOL in the build', () => {
+			const rails = liquidiumReserveRails(
+				buildReserve({ poolId: 'pool-sol', asset: 'SOL', chain: 'SOL' })
+			);
+
+			expect(rails).toHaveLength(1);
+			expect(rails[0].chain).toBe('SOL');
+		});
+
+		it('offers a SOL position on its native and ckSOL rails', () => {
+			withSol();
+
+			const rails = liquidiumReserveRails(
+				buildReserve({ poolId: 'pool-sol', asset: 'SOL', chain: 'SOL' })
+			);
+
+			expect(rails.map(({ chain }) => chain)).toEqual(['SOL', 'ICP']);
 		});
 	});
 
@@ -1001,7 +1116,18 @@ describe('liquidium.utils', () => {
 
 		it('returns undefined for an unsupported (chain, asset) pair', () => {
 			expect(liquidiumMarketToken({ chain: 'BTC', asset: 'USDC', tokens: [] })).toBeUndefined();
-			expect(liquidiumMarketToken({ chain: 'SOL', asset: 'SOL', tokens: [] })).toBeUndefined();
+			expect(liquidiumMarketToken({ chain: 'SOL', asset: 'USDC', tokens: [] })).toBeUndefined();
+		});
+
+		it('resolves native SOL on the SOL chain, which a SOL position carries', () => {
+			expect(liquidiumMarketToken({ chain: 'SOL', asset: 'SOL', tokens: [] })).toBe(SOLANA_TOKEN);
+		});
+
+		it('resolves ckSOL on the ICP chain from its twin in the list', () => {
+			expect(liquidiumMarketToken({ chain: 'ICP', asset: 'SOL', tokens: [ckSolToken] })).toBe(
+				ckSolToken
+			);
+			expect(liquidiumMarketToken({ chain: 'ICP', asset: 'SOL', tokens: [] })).toBeUndefined();
 		});
 	});
 
@@ -1085,6 +1211,79 @@ describe('liquidium.utils', () => {
 					enabledTokens: [BTC_MAINNET_TOKEN]
 				})
 			).toBeUndefined();
+		});
+
+		it('resolves the ckSOL rail from the enabled twin when SOL is supported', () => {
+			withSol();
+
+			expect(
+				liquidiumEnabledRailToken({ chain: 'ICP', asset: 'SOL', enabledTokens: [ckSolToken] })
+			).toBe(ckSolToken);
+		});
+
+		it('rejects the ckSOL rail without ckSOL in the build', () => {
+			expect(
+				liquidiumEnabledRailToken({ chain: 'ICP', asset: 'SOL', enabledTokens: [ckSolToken] })
+			).toBeUndefined();
+		});
+
+		it('resolves the native SOL rail when SOL is supported and Solana enabled', () => {
+			withSol();
+
+			expect(
+				liquidiumEnabledRailToken({ chain: 'SOL', asset: 'SOL', enabledTokens: [SOLANA_TOKEN] })
+			).toBe(SOLANA_TOKEN);
+		});
+
+		it('rejects the native SOL rail with Solana disabled', () => {
+			withSol();
+
+			expect(
+				liquidiumEnabledRailToken({ chain: 'SOL', asset: 'SOL', enabledTokens: [ckSolToken] })
+			).toBeUndefined();
+		});
+	});
+
+	describe('isLiquidiumInflowSubaccount', () => {
+		const withByte = ({ index, value }: { index: number; value: number }): Uint8Array => {
+			const subaccount = Uint8Array.from(mockLiquidiumSupplySubaccount);
+
+			subaccount[index] = value;
+
+			return subaccount;
+		};
+
+		it.each([
+			{ purpose: 'a supply', subaccount: mockLiquidiumSupplySubaccount },
+			{ purpose: 'a repayment', subaccount: mockLiquidiumRepaySubaccount }
+		])('should recognise the subaccount of $purpose to the profile', ({ subaccount }) => {
+			expect(
+				isLiquidiumInflowSubaccount({ subaccount, profileId: mockLiquidiumProfileId })
+			).toBeTruthy();
+		});
+
+		it('should not recognise the subaccount of another profile', () => {
+			expect(
+				isLiquidiumInflowSubaccount({
+					subaccount: mockLiquidiumSupplySubaccount,
+					profileId: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai')
+				})
+			).toBeFalsy();
+		});
+
+		it.each([
+			{ kind: 'another purpose', subaccount: withByte({ index: 0, value: 3 }) },
+			{
+				kind: 'a byte between the purpose and the length',
+				subaccount: withByte({ index: 1, value: 1 })
+			},
+			{ kind: 'another length', subaccount: withByte({ index: 2, value: 16 }) },
+			{ kind: 'a byte after the principal', subaccount: withByte({ index: 31, value: 1 }) },
+			{ kind: 'the default subaccount', subaccount: new Uint8Array(32) }
+		])('should not recognise a subaccount with $kind', ({ subaccount }) => {
+			expect(
+				isLiquidiumInflowSubaccount({ subaccount, profileId: mockLiquidiumProfileId })
+			).toBeFalsy();
 		});
 	});
 });

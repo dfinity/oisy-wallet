@@ -12,7 +12,7 @@ import {
 import { aiAssistantChatMessages } from '$lib/derived/ai-assistant.derived';
 import { enabledMainnetTotalUsdBalance } from '$lib/derived/balances.derived';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
-import { networks } from '$lib/derived/networks.derived';
+import { enabledNetworksSymbols, networks } from '$lib/derived/networks.derived';
 import { enabledMainnetFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
 import { enabledTokens, enabledUniqueFungibleTokensSymbols } from '$lib/derived/tokens.derived';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -60,7 +60,7 @@ export const askLlm = async ({
 			messages,
 			tools: toNullable(
 				getAiAssistantToolsDescription({
-					enabledNetworksSymbols: get(enabledUniqueFungibleTokensSymbols),
+					enabledNetworksSymbols: get(enabledNetworksSymbols),
 					enabledTokensSymbols: get(enabledUniqueFungibleTokensSymbols)
 				})
 			)

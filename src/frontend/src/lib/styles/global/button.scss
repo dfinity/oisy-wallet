@@ -625,8 +625,12 @@ a.as-button {
 		@apply shadow-xs;
 	}
 
+	// A trigger with `hit-area-touch` (DropdownButton `hitArea`) keeps the 40 px of the icon
+	// buttons beside it and grows only its tap area.
 	@include interaction.coarse {
-		min-height: var(--touch-target-min-height);
+		&:not(.hit-area-touch) {
+			min-height: var(--touch-target-min-height);
+		}
 	}
 
 	@include interaction.hover {

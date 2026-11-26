@@ -3,14 +3,19 @@ import {
 	SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
 	SWAP_SLIPPAGE_WARNING_VALUE
 } from '$lib/constants/swap.constants';
+import { SWAP_LIFI_BTC_RELAY_WARNING } from '$lib/constants/test-ids.constants';
 import * as userProviderAgreementsDerived from '$lib/derived/user-provider-agreements.derived';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type SwapContext, type SwapError } from '$lib/stores/swap.store';
-import { SwapErrorCodes } from '$lib/types/swap';
+import { SwapErrorCodes, SwapProvider, type SwapMappedResult } from '$lib/types/swap';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockLifiBtcRelayQuote } from '$tests/mocks/lifi-btc.mock';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { mockNearIntentsProvider, mockSwapProviders } from '$tests/mocks/swap.mocks';
+import { ChainId } from '@lifi/sdk';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable, type Writable } from 'svelte/store';
 
@@ -700,6 +705,62 @@ describe('SwapReview', () => {
 			});
 
 			expect(container.textContent).not.toContain('Terms of Service');
+		});
+	});
+
+	// Relay records the payout's recipient only once the deposit arrives, so OISY cannot check it.
+	describe('Relay recipient warning', () => {
+		const relayOffer: SwapMappedResult = {
+			provider: SwapProvider.LIFI,
+			receiveAmount: 2n,
+			receiveOutMinimum: 1n,
+			swapDetails: mockLifiBtcRelayQuote,
+			request: {
+				fromChain: ChainId.BTC,
+				toChain: ChainId.ETH,
+				fromToken: 'bitcoin',
+				toToken: '0x0000000000000000000000000000000000000000',
+				fromAddress: mockBtcAddress,
+				fromAmount: '120000'
+			}
+		};
+
+		const createRelayContext = () => {
+			const { context } = createSwapContext();
+
+			const swapAmountsStore = initSwapAmountsStore();
+			swapAmountsStore.setSwaps({
+				swaps: [relayOffer],
+				amountForSwap: 1,
+				selectedProvider: relayOffer
+			});
+
+			context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
+
+			return context;
+		};
+
+		it('should warn without holding the swap back when a LI.FI offer through Relay is selected', () => {
+			const { getByTestId, getByText } = render(SwapReview, {
+				props: baseProps,
+				context: createRelayContext()
+			});
+
+			expect(getByTestId(SWAP_LIFI_BTC_RELAY_WARNING)).toHaveTextContent(
+				replaceOisyPlaceholders(en.swap.text.lifi_btc_relay_recipient_warning)
+			);
+			expect(getByText(en.swap.text.swap_button).closest('button')).toBeEnabled();
+		});
+
+		it('should not warn when another provider is selected', () => {
+			const { context } = createSwapContext();
+
+			const { queryByTestId } = render(SwapReview, {
+				props: baseProps,
+				context
+			});
+
+			expect(queryByTestId(SWAP_LIFI_BTC_RELAY_WARNING)).not.toBeInTheDocument();
 		});
 	});
 });

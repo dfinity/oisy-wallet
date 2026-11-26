@@ -19,6 +19,7 @@ import {
 	PostMessageDataRequestIcrcStrictSchema,
 	PostMessageDataRequestSchema,
 	PostMessageDataResponseAuthSchema,
+	PostMessageDataResponseAuthSignOutSchema,
 	PostMessageDataResponseBTCAddressSchema,
 	PostMessageDataResponseErrorSchema,
 	PostMessageDataResponseExchangeErrorSchema,
@@ -416,6 +417,24 @@ describe('post-message.schema', () => {
 			};
 
 			expect(() => PostMessageDataResponseAuthSchema.parse(invalidData)).toThrow();
+		});
+	});
+
+	describe('PostMessageDataResponseAuthSignOutSchema', () => {
+		it.each([true, false])('should validate with delegationExpired %s', (delegationExpired) => {
+			const validData = { delegationExpired };
+
+			expect(PostMessageDataResponseAuthSignOutSchema.parse(validData)).toEqual(validData);
+		});
+
+		it('should throw an error if delegationExpired is missing', () => {
+			expect(() => PostMessageDataResponseAuthSignOutSchema.parse({})).toThrow();
+		});
+
+		it('should throw an error if delegationExpired is not a boolean', () => {
+			expect(() =>
+				PostMessageDataResponseAuthSignOutSchema.parse({ delegationExpired: 'true' })
+			).toThrow();
 		});
 	});
 

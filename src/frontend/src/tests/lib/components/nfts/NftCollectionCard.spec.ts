@@ -1,5 +1,6 @@
 import * as navUtils from '$app/navigation';
 import NftCollectionCard from '$lib/components/nfts/NftCollectionCard.svelte';
+import { loadNftThumbnail } from '$lib/services/nft-thumbnail.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { nftsUrl } from '$lib/utils/nav.utils';
@@ -12,24 +13,18 @@ describe('NftCollectionCard', () => {
 	const gotoSpy = vi.spyOn(navUtils, 'goto');
 	const testId = 'nft-collection-card';
 
-	const getImageSelector = (index: number) => `div[data-tid="${testId}-image-${index}"]`;
 	const networkLogoSelector = `div[data-tid="${testId}-network-light-container"]`;
 
-	it('should render nft collection', () => {
-		const { container, getByText } = render(NftCollectionCard, {
+	it('should render nft collection', async () => {
+		const { container, getByText, findByTestId } = render(NftCollectionCard, {
 			props: {
 				collection: mockNftCollectionUi,
 				testId
 			}
 		});
 
-		const image1: HTMLDivElement | null = container.querySelector(getImageSelector(0));
-
-		expect(image1).toBeInTheDocument();
-
-		const image2: HTMLDivElement | null = container.querySelector(getImageSelector(1));
-
-		expect(image2).toBeInTheDocument();
+		await expect(findByTestId(`${testId}-image-0`)).resolves.toBeInTheDocument();
+		await expect(findByTestId(`${testId}-image-1`)).resolves.toBeInTheDocument();
 
 		const networkLogo: HTMLDivElement | null = container.querySelector(networkLogoSelector);
 
@@ -43,6 +38,23 @@ describe('NftCollectionCard', () => {
 				`${replacePlaceholders(get(i18n).nfts.text.collection_items_count, { $count: String(mockNftCollectionUi.nfts.length) })}`
 			)
 		).toBeInTheDocument();
+	});
+
+	it('should render the small copy of an SVG image', async () => {
+		const mockThumbnail = 'data:image/png;base64,dGh1bWJuYWls';
+
+		vi.mocked(loadNftThumbnail).mockResolvedValueOnce(mockThumbnail);
+
+		const { findByTestId } = render(NftCollectionCard, {
+			props: {
+				collection: mockNftCollectionUi,
+				testId
+			}
+		});
+
+		const image = await findByTestId(`${testId}-image-0`);
+
+		expect(image.style.backgroundImage).toContain(mockThumbnail);
 	});
 
 	it('should press to 0.98 unless disabled', async () => {

@@ -222,7 +222,6 @@
 		},
 		"warning": {
 			"not_signed_in": "你尚未登录。请先登录以继续。",
-			"session_expired": "由于会话已过期，你已被登出。",
 			"reload_and_retry": "登录时发生错误。请刷新页面并重试。如果此错误持续存在，请联系支持团队。"
 		},
 		"error": {
@@ -260,6 +259,7 @@
 		"text": {
 			"title_part_1": "解锁以继续",
 			"title_part_2": "您之前已锁定钱包以确保其安全。请从上次中断的地方继续操作或退出。",
+			"title_part_2_session_expired": "您的会话已过期，为确保您的安全，钱包已被锁定。请从上次中断的地方继续操作或退出。",
 			"unlock": "开锁",
 			"logout": "退出登录",
 			"logout_clear_cash_message": "注销将清除所有缓存数据",
@@ -756,6 +756,7 @@
 			"minter_ckbtc_btc": "需要配置铸币人才能将 ckBTC 转换为 BTC。",
 			"minter_cketh_eth": "需要配置铸币人才能将 ckETH 转换为 ETH。",
 			"minter_ckerc20_erc20": "需要配置铸币人才能将 ckERC20 转换为 ERC20。",
+			"minter_cksol_sol": "需要配置铸币人才能将 ckSOL 转换为 SOL。",
 			"ledger_cketh_eth": "需要配置 ckETH 账本才能将 ckERC20 转换为 ERC20。",
 			"minter_btc": "需要配置铸币人才能获取 BTC。",
 			"minter_ckbtc_info": "需要配置铸币人才能获取 ckBTC 信息",
@@ -1096,6 +1097,7 @@
 			"minimum_ckbtc_amount": "金额低于将 ckBTC 转换为 BTC 所需的最低 $amount ckBTC。",
 			"minimum_cketh_amount": "金额低于 $amount $symbol 的最低提取金额。",
 			"minimum_amount": "金额低于 $amount $symbol 的最低提取金额。",
+			"minimum_deposit_amount": "金额低于 $amount $symbol 的最低存入金额。",
 			"minimum_ledger_fees": "金额低于账本费用 $symbol。",
 			"minimum_cketh_balance": "$symbol 余额低于预计手续费 $amount。",
 			"unknown_cketh": "无法获取 ckETH 代币。",
@@ -1151,6 +1153,9 @@
 			"ethereum_transaction_not_sent": "交易未发送：我们无法连接网络来准备这笔交易。可以放心重试。",
 			"ethereum_transaction_unconfirmed": "我们无法确认交易是否已到达网络。它仍可能完成，因此请等待一两分钟，并在重新发送前先查看您的活动记录。",
 			"btc_transaction_unconfirmed": "",
+			"btc_send_rate_limited": "",
+			"btc_signing_allowance_spent": "",
+			"btc_transaction_never_landed": "",
 			"solana_transaction_expired": "您的交易未被Solana网络处理并已过期，很可能是因为提供的优先费用不足。我们已将其更新为最新推荐金额，请重试。",
 			"solana_confirmation_failed": "我们未收到您刚刚创建的交易的确认。请等待几秒钟，然后检查您的代币交易列表，确认您的交易是否已正确创建。",
 			"solana_insufficient_funds": "您的代币余额不足以完成此交易。您的余额自上次显示以来可能已发生变化。",
@@ -1384,6 +1389,9 @@
 		}
 	},
 	"swap": {
+		"alt": {
+			"clear_destination": ""
+		},
 		"text": {
 			"swap": "兑换",
 			"select_destination_token": "选择接收的代币",
@@ -1437,6 +1445,26 @@
 			"gasless": "无需气费",
 			"swap_fees": "交易费",
 			"cross_chain_networks_info": "跨链网络信息",
+			"lifi_btc_relay_recipient_warning": "",
+			"receive_shortcut_same_network": "",
+			"receive_shortcut_other_network": "",
+			"receive_shortcut_token_on_network": "",
+			"receive_shortcut_convert": "",
+			"receive_shortcut_convert_back": "",
+			"receive_shortcut_bridge_back": "",
+			"receive_shortcut_move": "",
+			"receive_shortcut_any_token": "",
+			"receive_shortcut_any_token_count": "",
+			"receive_shortcut_any_token_count_one": "",
+			"receive_shortcut_any_token_count_single": "",
+			"receive_shortcut_more": "",
+			"move_token_to": "",
+			"move_no_networks_title": "",
+			"move_no_networks_title_without_symbol": "",
+			"move_no_networks_description": "",
+			"move_networks_changed_title": "",
+			"move_networks_changed_description": "",
+			"as_token": "",
 			"two_swaps_info": "$oisy_short 只提供在你批准之前能够完全验证的兑换，而从 $sourceSymbol 到 $destinationSymbol 没有这样的直接兑换。不过，你可以先将 $sourceSymbol 兑换为 $intermediateSymbol，再将 $intermediateSymbol 兑换为 $destinationSymbol。",
 			"two_swaps_first_button": "先兑换为 $intermediateSymbol",
 			"near_intents_estimated_time": "",
@@ -1487,7 +1515,13 @@
 			"oisy_trade_recovery_failed": "",
 			"lifi_status_unknown": "",
 			"lifi_fee_changed": "",
-			"lifi_route_unverified": ""
+			"lifi_route_unverified": "",
+			"cksol_deposit_in_progress": "已有一笔从 SOL 到 ckSOL 的转换正在进行中。完成后即可开始新的转换。",
+			"cksol_deposit_terms_changed": "ckSOL 铸币人在此报价之后更改了条件。未发送任何 SOL。请查看新的报价。",
+			"cksol_earlier_deposit_quarantined": "ckSOL 铸币人已停止处理您之前的一笔存入，在此问题解决前不会接受新的存入。未发送任何 SOL。",
+			"cksol_minter_unavailable": "ckSOL 铸币人目前无法接受存入。未发送任何 SOL。请稍后重试。",
+			"cksol_deposit_quarantined": "ckSOL 铸币人已停止处理此笔存入。在铸币人升级解决此笔存入之前，SOL 由其保管。",
+			"cksol_deposit_below_minimum": "ckSOL 铸币人无法归集此笔存入，您的存入地址上剩余的 SOL 低于最低存入金额。这些 SOL 将在您下一次从 SOL 到 ckSOL 的转换中一并转换。"
 		}
 	},
 	"buy": {
@@ -1522,7 +1556,8 @@
 			"data_is_incompleted": "接收到的数据不完整，缺少部分必需信息。",
 			"amount_does_not_match": "接收到的数据中的金额与预期值不匹配。",
 			"recipient_address_is_not_valid": "接收到的数据中的收款地址不是有效的以太坊地址。",
-			"token_address_mismatch": "接收到的数据所指的代币与预期代币不一致。"
+			"token_address_mismatch": "接收到的数据所指的代币与预期代币不一致。",
+			"btc_reservation_rate_limited": ""
 		},
 		"alt": {
 			"pay": "包含支付说明信息的对话框",
@@ -1823,6 +1858,8 @@
 			"convert_fee": "转换手续费",
 			"convert_inter_network_fee": "跨网络手续费",
 			"convert_btc_network_fee": "比特币网络手续费",
+			"cksol_sweep_fee": "铸币人的 Solana 手续费",
+			"cksol_deposit_address_rent": "存入地址租金",
 			"zero_fee": "免费",
 			"total_fee": "总手续费",
 			"ata_fee": "ATA 手续费",
@@ -1941,6 +1978,12 @@
 			"cketh_deposit_principal": "ckETH 接收方",
 			"cketh_deposit_refused": "此请求会为不属于您的 Internet Computer 主标识，或使用 OISY 无法读取的数据，调用 ckETH 转换合约。为了您的安全，OISY 不会签署该请求。",
 			"cketh_helper_unconfirmed": "OISY 暂时无法确认 ckETH 转换合约，因此无法检查此存入请求。在能够检查之前，批准功能将保持禁用。",
+			"ck_deposit": "此请求会将 $token 转换为 $ckToken，并存入下方显示的您的 Internet Computer 主标识。",
+			"ck_deposit_other_account": "此请求会将 $token 转换为 $ckToken，并存入下方显示的 Internet Computer 账户，该账户不是您的 OISY 账户。OISY 无法验证谁会收到这笔存款，因此请仅在您信任此应用时批准。",
+			"ck_deposit_liquidium": "此请求会将 $token 转换为 $ckToken，并存入您的 Liquidium 账户。",
+			"ck_deposit_liquidium_pool": "Liquidium $asset 池",
+			"ck_deposit_recipient": "$ckToken 接收方",
+			"ck_deposit_refused": "OISY 无法读取此笔转换到 Internet Computer 的请求，或其代币无法转换。为了您的安全，OISY 不会签署该请求。",
 			"swap_title": "",
 			"swap_pay": "",
 			"swap_pay_at_most": "",
@@ -2034,6 +2077,7 @@
 			"unknown_destination": "未知的接收地址。",
 			"cketh_deposit_refused": "此请求会为不属于您的 Internet Computer 主标识，或使用 OISY 无法读取的数据，调用 ckETH 转换合约。为了您的安全，该请求未被签署。",
 			"cketh_helper_unconfirmed": "OISY 无法确认 ckETH 转换合约，因此无法检查此存入请求。为了您的安全，该请求未被签署。",
+			"ck_deposit_refused": "OISY 未能读取此笔转换到 Internet Computer 的请求，或其代币无法转换。为了您的安全，该请求未被签署。",
 			"token_call_with_value": "此请求除代币数量外，还会向代币合约发送 $amount。为了您的安全，该请求未被签署。",
 			"ambiguous_transaction": "此交易在多个地址之间转移资金，无法准确显示以供审核。为了您的安全，该交易未被签名。",
 			"close_pays_others": "此交易会关闭您的一个代币账户，并将其余额支付到不属于您钱包的地址。为了您的安全，该交易未被签署。",
@@ -2292,6 +2336,7 @@
 			"signature_copied": "",
 			"id": "交易 ID",
 			"id_copied": "交易 ID 已复制到剪贴板。",
+			"twin_transaction": "$twinNetwork 交易",
 			"timestamp": "时间戳",
 			"type": "类型",
 			"from": "来自",
@@ -2404,6 +2449,8 @@
 			"reimbursement": "报销",
 			"twin_token_converted": "从 $twinToken 转换",
 			"ck_token_converted": "从 $ckToken 转换",
+			"converted_to_twin_token": "转换为 $twinToken",
+			"converted_to_ck_token": "转换为 $ckToken",
 			"sending_twin_token": "正在发送 $twinToken",
 			"sending_twin_token_failed": "发送 $twinToken 失败",
 			"converting_twin_token": "正在将 $twinToken 转换为 $ckToken",
@@ -2861,6 +2908,8 @@
 			"borrow_at_risk_warning": "此笔借款会明显降低您的健康系数。",
 			"borrow_exceeds_power": "金额超过您的可借额度。",
 			"borrow_below_minimum": "金额低于最低借款额。",
+			"minimum_withdraw": "",
+			"withdraw_below_minimum": "",
 			"borrow_prices_unavailable": "价格暂时不可用。加载完成前，借款功能已禁用。",
 			"borrow_high_risk_warning": "此笔借款会使您的仓位接近清算。",
 			"borrow_risk_confirm": "我理解此笔借款会增加我的清算风险。",
@@ -2891,6 +2940,7 @@
 			"interest_accrued": "累计利息",
 			"debt_after_repay": "还款后债务",
 			"repay_exceeds_debt": "金额超过您的未偿债务。",
+			"repay_below_native_minimum": "",
 			"repay_prices_unavailable": "价格暂时不可用。加载完成前，还款功能已禁用。",
 			"repay_debt_unavailable": "您的未偿债务暂时不可用。加载完成前，还款功能已禁用。",
 			"repay_pending_covers_debt": "此仓位的一笔还款仍在处理中。完成后您可以继续还款。"

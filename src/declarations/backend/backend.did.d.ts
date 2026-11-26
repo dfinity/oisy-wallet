@@ -112,11 +112,11 @@ export type ActiveUserTransactionData =
 	  }
 	| {
 			/**
-			 * Chain Fusion ck conversion (BTC↔ckBTC, ETH↔ckETH, ERC20↔ckERC20). A
-			 * single variant covers all six directions, discriminated by the
-			 * `direction` field; the minter block indices, the BTC txid and deposit
-			 * address, and the Ethereum deposit tx hash and block number ride in
-			 * `external_refs`.
+			 * Chain Fusion ck conversion (BTC↔ckBTC, ETH↔ckETH, ERC20↔ckERC20,
+			 * SOL↔ckSOL). A single variant covers all eight directions, discriminated
+			 * by the `direction` field; the minter block indices, the BTC txid and
+			 * deposit address, and the Ethereum deposit tx hash and block number ride
+			 * in `external_refs`.
 			 */
 			ChainFusion: ChainFusionData;
 	  }
@@ -185,6 +185,7 @@ export type AddDappSettingsError =
 	| { UserNotFound: null };
 export type AddDismissedNotificationError =
 	| { TooManyNotifications: null }
+	| { QualifierTooLong: null }
 	| { VersionMismatch: null }
 	| { MaxDismissedNotifications: null }
 	| { UserNotFound: null };
@@ -668,6 +669,59 @@ export type BtcBroadcastTransactionResult =
 			 */
 			Err: BtcBroadcastTransactionError;
 	  };
+export type BtcGetBalanceError =
+	| {
+			/**
+			 * The Bitcoin canister did not answer, which a later call may get past.
+			 */
+			BalanceUnavailable: { msg: string };
+	  }
+	| {
+			/**
+			 * The provided II delegation chain is missing or failed verification.
+			 */
+			InvalidDelegationChain: { msg: string };
+	  }
+	| {
+			/**
+			 * The caller has exceeded the call rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The caller's address could not be derived.
+			 */
+			InternalError: { msg: string };
+	  };
+export interface BtcGetBalanceRequest {
+	ii_delegation_chain: [] | [IIDelegationChain];
+	network: Network;
+	/**
+	 * Counts only the outputs with at least this many confirmations. `None` counts every output
+	 * the Bitcoin canister knows, which is mined ones only.
+	 */
+	min_confirmations: [] | [number];
+}
+export interface BtcGetBalanceResponse {
+	/**
+	 * The balance of the caller's P2WPKH address, in satoshis.
+	 */
+	balance: bigint;
+}
+export type BtcGetBalanceResult =
+	| {
+			/**
+			 * The balance was retrieved successfully.
+			 */
+			Ok: BtcGetBalanceResponse;
+	  }
+	| {
+			/**
+			 * The balance was not retrieved due to an error.
+			 */
+			Err: BtcGetBalanceError;
+	  };
 export type BtcGetFeePercentilesError = {
 	InternalError: { msg: string };
 };
@@ -825,7 +879,7 @@ export type CanisterStatusType =
  * Chain Fusion ck conversion payload. Every settlement pointer is learned
  * mid-flow — a minter block index, a BTC txid, an Ethereum deposit tx hash — so
  * those live in `external_refs`; only the canonical immutable fields are
- * captured here, which is why all six directions share one variant.
+ * captured here, which is why all eight directions share one variant.
  *
  * `direction` is explicit rather than inferred from the token pair: the poller
  * selects its settlement oracle from it, and re-deriving "is this a mint or a
@@ -843,16 +897,18 @@ export interface ChainFusionData {
 }
 /**
  * Which ck conversion an active transaction tracks. Determines which minter the
- * frontend asks about settlement, and how: the three withdrawal directions have
- * an exact status keyed by the minter's burn block index, while the mint
- * directions are observed from the deposit side.
+ * frontend asks about settlement, and how: the four withdrawal directions have
+ * an exact status keyed by the minter's burn block index, while each mint
+ * direction is followed the way its minter reports deposits.
  */
 export type ChainFusionDirection =
 	| { BtcToCkBtc: null }
 	| { CkBtcToBtc: null }
 	| { EthToCkEth: null }
 	| { CkErc20ToErc20: null }
+	| { SolToCkSol: null }
 	| { Erc20ToCkErc20: null }
+	| { CkSolToSol: null }
 	| { CkEthToEth: null };
 export type ClaimTipResult = { Ok: TipClaim } | { Err: TipError };
 export interface Config {
@@ -2883,8 +2939,8 @@ export interface _SERVICE {
 	 * present.
 	 *
 	 * # Errors
-	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date, or
-	 * the batch is too large.
+	 * - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+	 * the batch is too large, or a qualifier is too long.
 	 */
 	add_user_dismissed_notification: ActorMethod<
 		[AddDismissedNotificationRequest],
@@ -2960,6 +3016,22 @@ export interface _SERVICE {
 		[BtcBroadcastTransactionRequest],
 		BtcBroadcastTransactionResult
 	>;
+	/**
+	 * Returns the balance of the caller's P2WPKH address, counting only the outputs with at least
+	 * `min_confirmations` confirmations.
+	 *
+	 * An update call, so the answer is certified. The backend pays for the Bitcoin canister call from
+	 * its own cycles. It used to pay the chain fusion signer's `btc_caller_balance` instead, from its
+	 * cycles ledger account and against the approval it grants each caller for signing, so every read
+	 * used up part of what the caller could sign.
+	 *
+	 * Requires a valid II delegation chain to verify the caller authenticated
+	 * through Internet Identity. Controllers bypass this check.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `BtcGetBalanceError`.
+	 */
+	btc_get_balance: ActorMethod<[BtcGetBalanceRequest], BtcGetBalanceResult>;
 	/**
 	 * Retrieves the current fee percentiles for Bitcoin transactions from the cache
 	 * for the specified network. Fee percentiles are measured in millisatoshi per byte

@@ -42,6 +42,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const AddDismissedNotificationError = IDL.Variant({
 		TooManyNotifications: IDL.Null,
+		QualifierTooLong: IDL.Null,
 		VersionMismatch: IDL.Null,
 		MaxDismissedNotifications: IDL.Null,
 		UserNotFound: IDL.Null
@@ -184,6 +185,22 @@ export const idlFactory = ({ IDL }) => {
 	const BtcBroadcastTransactionResult = IDL.Variant({
 		Ok: BtcBroadcastTransactionResponse,
 		Err: BtcBroadcastTransactionError
+	});
+	const BtcGetBalanceRequest = IDL.Record({
+		ii_delegation_chain: IDL.Opt(IIDelegationChain),
+		network: Network,
+		min_confirmations: IDL.Opt(IDL.Nat32)
+	});
+	const BtcGetBalanceResponse = IDL.Record({ balance: IDL.Nat64 });
+	const BtcGetBalanceError = IDL.Variant({
+		BalanceUnavailable: IDL.Record({ msg: IDL.Text }),
+		InvalidDelegationChain: IDL.Record({ msg: IDL.Text }),
+		RateLimited: RateLimitError,
+		InternalError: IDL.Record({ msg: IDL.Text })
+	});
+	const BtcGetBalanceResult = IDL.Variant({
+		Ok: BtcGetBalanceResponse,
+		Err: BtcGetBalanceError
 	});
 	const BtcGetFeePercentilesRequest = IDL.Record({ network: Network });
 	const BtcGetFeePercentilesResponse = IDL.Record({
@@ -369,7 +386,9 @@ export const idlFactory = ({ IDL }) => {
 		CkBtcToBtc: IDL.Null,
 		EthToCkEth: IDL.Null,
 		CkErc20ToErc20: IDL.Null,
+		SolToCkSol: IDL.Null,
 		Erc20ToCkErc20: IDL.Null,
+		CkSolToSol: IDL.Null,
 		CkEthToEth: IDL.Null
 	});
 	const ChainFusionData = IDL.Record({
@@ -1105,6 +1124,7 @@ export const idlFactory = ({ IDL }) => {
 			[BtcBroadcastTransactionResult],
 			[]
 		),
+		btc_get_balance: IDL.Func([BtcGetBalanceRequest], [BtcGetBalanceResult], []),
 		btc_get_current_fee_percentiles: IDL.Func(
 			[BtcGetFeePercentilesRequest],
 			[BtcGetFeePercentilesResult]

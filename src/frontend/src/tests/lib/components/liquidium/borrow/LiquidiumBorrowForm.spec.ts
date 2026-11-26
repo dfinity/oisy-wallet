@@ -1,4 +1,5 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import LiquidiumBorrowForm from '$lib/components/liquidium/borrow/LiquidiumBorrowForm.svelte';
 import type { LiquidiumBorrowPreview } from '$lib/services/liquidium-borrow.services';
 import type { LiquidiumMarket, LiquidiumPortfolio } from '$lib/types/liquidium';
@@ -143,6 +144,64 @@ describe('LiquidiumBorrowForm', () => {
 			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
 
 			expect(container).toHaveTextContent(en.liquidium.text.borrow_exceeds_power);
+		});
+	});
+
+	// Native SOL pays out through the ckSOL minter, whose minimum is above the protocol's 0.001 SOL.
+	describe('with a rail minimum', () => {
+		// The input validates on a 300ms debounce.
+		const VALIDATION_DEBOUNCE_MS = 300;
+
+		const solProps = {
+			...baseProps,
+			market: { ...market, poolId: 'pool-sol', asset: 'SOL', chain: 'SOL' },
+			borrowToken: SOLANA_TOKEN,
+			borrowPrice: 150,
+			railMinimum: 2_001_000n
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it("shows the rail's minimum at full precision when it is above the protocol's", () => {
+			const { container } = render(LiquidiumBorrowForm, { props: solProps });
+
+			expect(container).toHaveTextContent('0.002001 SOL');
+		});
+
+		it("keeps the protocol's minimum when the rail's is below it", () => {
+			const { container } = render(LiquidiumBorrowForm, {
+				props: { ...solProps, railMinimum: 500_000n }
+			});
+
+			expect(container).toHaveTextContent('0.001 SOL');
+		});
+
+		it('blocks an amount below it', async () => {
+			const { container, getByRole } = render(LiquidiumBorrowForm, {
+				props: { ...solProps, amount: 0.002 }
+			});
+
+			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
+
+			expect(container).toHaveTextContent(en.liquidium.text.borrow_below_minimum);
+			expect(reviewButton(getByRole)).toBeDisabled();
+		});
+
+		it('accepts the minimum itself', async () => {
+			const { container, getByRole } = render(LiquidiumBorrowForm, {
+				props: { ...solProps, amount: 0.002001 }
+			});
+
+			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
+
+			expect(container).not.toHaveTextContent(en.liquidium.text.borrow_below_minimum);
+			expect(reviewButton(getByRole)).toBeEnabled();
 		});
 	});
 });
