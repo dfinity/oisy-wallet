@@ -3,13 +3,15 @@ import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.en
 import { POLYGON_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { safeParse } from '$lib/validation/utils.validation';
 
-// Off until the first change that can execute a Rift swap, then `LOCAL || STAGING`. Production waits
-// for the no-slippage form redesign, a production API key and CORS confirmed from OISY's origin.
-export const RIFT_SWAP_ENABLED = false;
+// Feature flag: Rift quotes and orders new swaps. Production waits for the no-slippage form redesign,
+// a production API key and CORS confirmed from OISY's origin. Rows that exist are polled and shown
+// whatever it says.
+export const RIFT_SWAP_ENABLED = LOCAL || STAGING;
 
 export const RIFT_API_URL = safeParse({
 	schema: UrlSchema,

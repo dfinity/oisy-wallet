@@ -30,6 +30,10 @@
 	import { pollNearIntentsActiveUserTransactions } from '$lib/services/near-intents-active-tx.services';
 	import { pollOisyTradeActiveUserTransactions } from '$lib/services/oisy-trade-active-tx.services';
 	import { pollOneSecActiveUserTransactions } from '$lib/services/onesec-swap.services';
+	import {
+		pollRiftActiveUserTransactions,
+		reloadRiftEvmBalances
+	} from '$lib/services/rift-active-tx.services';
 	import { pollVeloraActiveUserTransactions } from '$lib/services/velora-active-tx.services';
 	import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -68,6 +72,10 @@
 		buildOneSecSwapTrackingMetadata,
 		isOneSecActiveUserTransaction
 	} from '$lib/utils/onesec-swap.utils';
+	import {
+		buildRiftSwapTrackingMetadata,
+		isRiftActiveUserTransaction
+	} from '$lib/utils/rift-active-tx.utils';
 	import {
 		buildVeloraSwapTrackingMetadata,
 		isVeloraActiveUserTransaction
@@ -158,6 +166,13 @@
 					userAddress: $ethAddress,
 					confirmedNonceByChainId
 				});
+			}
+
+			// Polled whatever `RIFT_SWAP_ENABLED` says: a row can outlive the flag.
+			const rift = $activeUserTransactionsPending.filter(isRiftActiveUserTransaction);
+
+			if (rift.length > 0) {
+				await pollRiftActiveUserTransactions({ identity, transactions: rift });
 			}
 
 			const chainFusion = $activeUserTransactionsPending.filter(isChainFusionActiveUserTransaction);
@@ -306,6 +321,23 @@
 				// balances have no wallet worker, so they are reloaded explicitly.
 				shouldRefresh = true;
 				reloadLifiEvmBalances({ tx, tokens: $enabledFungibleTokens });
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isRiftActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackEvent({
+					name: isSucceeded ? TRACK_COUNT_SWAP_SUCCESS : TRACK_COUNT_SWAP_ERROR,
+					metadata: buildRiftSwapTrackingMetadata({ tx })
+				});
+
+				// Whatever the outcome, on both chains: a delivery lands on the destination chain and a
+				// refund on the source chain. The wallet refresh covers Bitcoin; EVM balances have no
+				// wallet worker, so they are reloaded explicitly.
+				shouldRefresh = true;
+				reloadRiftEvmBalances({ tx, tokens: $enabledFungibleTokens });
 			} else if (
 				isTerminalActiveUserTransaction(tx) &&
 				!alreadyApplied &&

@@ -1,5 +1,5 @@
-import { RiftQuoteSchema } from '$lib/schema/rift.schema';
-import type { RiftQuote, RiftQuoteRequest } from '$lib/types/rift';
+import { RiftOrderSchema, RiftQuoteSchema } from '$lib/schema/rift.schema';
+import type { RiftOrder, RiftQuote, RiftQuoteRequest } from '$lib/types/rift';
 
 // A live `format: "raw"` quote for 0.002 BTC into USDC on Ethereum (2026-11-26), as Rift sends it,
 // fields OISY does not read included.
@@ -101,3 +101,11 @@ export const mockRiftQuoteRequest: RiftQuoteRequest = {
 	quote_mode: 'fast',
 	integrator_id: 'oisy'
 };
+
+// The order as OISY reads it, typed: created from `mockRiftQuote`, paying out to
+// `mockRiftOrderToAddress` and refunding to `mockRiftOrderRefundAddress`.
+export const mockRiftOrder: RiftOrder = RiftOrderSchema.parse(mockRiftOrderResponse);
+
+export const mockRiftOrderToAddress = mockRiftOrderResponse.to_address;
+
+export const mockRiftOrderRefundAddress = mockRiftOrderResponse.refund_address;

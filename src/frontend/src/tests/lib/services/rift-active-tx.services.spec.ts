@@ -1,0 +1,229 @@
+import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import type * as ethBalanceServices from '$eth/services/eth-balance.services';
+import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
+import type { Erc20Token } from '$eth/types/erc20';
+import { RIFT_MAX_ORDER_READS_PER_TICK } from '$lib/constants/swap.constants';
+import { getRiftOrder } from '$lib/rest/rift.rest';
+import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
+import {
+	pollRiftActiveUserTransactions,
+	reloadRiftEvmBalances,
+	resetRiftPollState
+} from '$lib/services/rift-active-tx.services';
+import { RiftApiError } from '$lib/types/errors';
+import { RIFT_EXTERNAL_REF_KEYS, type RiftOrder } from '$lib/types/rift';
+import { toRiftExternalRefsMap } from '$lib/utils/rift-active-tx.utils';
+import { mockRiftActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import en from '$tests/mocks/i18n.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockRiftOrder } from '$tests/mocks/rift.mock';
+
+vi.mock('$lib/rest/rift.rest', () => ({
+	getRiftOrder: vi.fn()
+}));
+
+vi.mock('$lib/services/active-user-transactions.services', () => ({
+	applyActiveUserTransactionPollUpdate: vi.fn()
+}));
+
+vi.mock('$eth/services/eth-balance.services', async (importOriginal) => ({
+	...(await importOriginal<typeof ethBalanceServices>()),
+	reloadEthereumBalance: vi.fn()
+}));
+
+const orderId = mockRiftOrder.id;
+
+const answer = (order: Partial<RiftOrder> = {}) =>
+	vi.mocked(getRiftOrder).mockResolvedValue({ ...mockRiftOrder, ...order });
+
+// A row of its own order, `n` distinguishing both.
+const row = (n: number): ActiveUserTransaction => {
+	const id = `${n}`.repeat(8);
+
+	return {
+		...mockRiftActiveUserTransaction,
+		id: `${id}-8888-4888-8888-888888888888`,
+		external_refs: mockRiftActiveUserTransaction.external_refs.map((ref) =>
+			ref.key === RIFT_EXTERNAL_REF_KEYS.ORDER_ID
+				? { ...ref, value: `${id}-d9cb-469f-a165-70867728950e` }
+				: ref
+		)
+	};
+};
+
+const readOrderIds = () => vi.mocked(getRiftOrder).mock.calls.map(([{ orderId }]) => orderId);
+
+const lastUpdate = () => vi.mocked(applyActiveUserTransactionPollUpdate).mock.lastCall?.[0].update;
+
+describe('rift-active-tx.services', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		resetRiftPollState();
+	});
+
+	describe('pollRiftActiveUserTransactions', () => {
+		const poll = (transactions = [mockRiftActiveUserTransaction]) =>
+			pollRiftActiveUserTransactions({ identity: mockIdentity, transactions });
+
+		it('reads the order the row pays', async () => {
+			answer({ status: 'awaiting_deposit' });
+
+			await poll();
+
+			expect(getRiftOrder).toHaveBeenCalledExactlyOnceWith({ orderId });
+		});
+
+		it('records an order still awaiting its deposit without moving the row', async () => {
+			answer({ status: 'awaiting_deposit' });
+
+			await poll();
+
+			const update = lastUpdate();
+
+			expect(update?.status).toBeUndefined();
+			expect(toRiftExternalRefsMap(update?.externalRefs ?? [])).toMatchObject({
+				rift_status: 'awaiting_deposit'
+			});
+		});
+
+		it('writes nothing new once the status is recorded', async () => {
+			answer({ status: 'awaiting_deposit' });
+
+			await poll([
+				{
+					...mockRiftActiveUserTransaction,
+					external_refs: [
+						...mockRiftActiveUserTransaction.external_refs,
+						{ key: RIFT_EXTERNAL_REF_KEYS.STATUS, value: 'awaiting_deposit' }
+					]
+				}
+			]);
+
+			expect(lastUpdate()).toEqual({});
+		});
+
+		it('moves a funded order to Executing', async () => {
+			answer({ status: 'funded' });
+
+			await poll();
+
+			expect(lastUpdate()?.status).toEqual({ Executing: null });
+		});
+
+		it('settles a delivered order with its amount and payout in the same write', async () => {
+			answer({ status: 'delivered', amount_out: '121475958', payout_tx: '0xpayout' });
+
+			await poll();
+
+			const update = lastUpdate();
+
+			expect(update?.status).toEqual({ Succeeded: null });
+			expect(update?.error).toBeUndefined();
+			expect(toRiftExternalRefsMap(update?.externalRefs ?? [])).toMatchObject({
+				rift_order_id: orderId,
+				rift_status: 'delivered',
+				rift_amount_out: '121.475958',
+				rift_payout_tx: '0xpayout'
+			});
+		});
+
+		it('fails a frozen order with its reason', async () => {
+			answer({ status: 'frozen' });
+
+			await poll();
+
+			expect(lastUpdate()).toMatchObject({
+				status: { Failed: null },
+				error: en.swap.error.rift_order_frozen
+			});
+		});
+
+		it('ignores an answer about another order', async () => {
+			answer({ id: '0f8fad5b-d9cb-469f-a165-000000000000', status: 'delivered' });
+
+			await poll();
+
+			expect(applyActiveUserTransactionPollUpdate).not.toHaveBeenCalled();
+		});
+
+		it('leaves a row whose read fails, and reads the next', async () => {
+			vi.mocked(getRiftOrder)
+				.mockRejectedValueOnce(new RiftApiError({ status: 404, message: 'not found' }))
+				.mockResolvedValueOnce({ ...mockRiftOrder, id: '22222222-d9cb-469f-a165-70867728950e' });
+
+			await poll([row(1), row(2)]);
+
+			expect(getRiftOrder).toHaveBeenCalledTimes(2);
+			expect(applyActiveUserTransactionPollUpdate).toHaveBeenCalledOnce();
+		});
+
+		it('reads at most a few rows per round, the least recently read first', async () => {
+			vi.mocked(getRiftOrder).mockRejectedValue(new Error('offline'));
+			const rows = [row(1), row(2), row(3), row(4)];
+
+			await poll(rows);
+
+			expect(readOrderIds()).toHaveLength(RIFT_MAX_ORDER_READS_PER_TICK);
+
+			vi.mocked(getRiftOrder).mockClear();
+
+			await poll(rows);
+
+			expect(readOrderIds()[0]).toBe('44444444-d9cb-469f-a165-70867728950e');
+		});
+
+		it('ends the round on a 429, and starts the next with the rows it did not reach', async () => {
+			vi.mocked(getRiftOrder)
+				.mockRejectedValueOnce(new Error('offline'))
+				.mockRejectedValueOnce(new RiftApiError({ status: 429, message: 'slow down' }));
+			const rows = [row(1), row(2), row(3)];
+
+			await poll(rows);
+
+			expect(readOrderIds()).toEqual([
+				'11111111-d9cb-469f-a165-70867728950e',
+				'22222222-d9cb-469f-a165-70867728950e'
+			]);
+
+			vi.mocked(getRiftOrder).mockClear().mockRejectedValue(new Error('offline'));
+
+			await poll(rows);
+
+			expect(readOrderIds()).toEqual([
+				'22222222-d9cb-469f-a165-70867728950e',
+				'33333333-d9cb-469f-a165-70867728950e',
+				'11111111-d9cb-469f-a165-70867728950e'
+			]);
+		});
+	});
+
+	describe('reloadRiftEvmBalances', () => {
+		const usdc: Erc20Token = {
+			...mockValidErc20Token,
+			address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+		};
+
+		beforeEach(() => {
+			vi.mocked(reloadEthereumBalance).mockResolvedValue({ success: true });
+		});
+
+		it("reloads the row's EVM token and its network's native token, each once", () => {
+			reloadRiftEvmBalances({
+				tx: mockRiftActiveUserTransaction,
+				tokens: [ETHEREUM_TOKEN, usdc, ETHEREUM_TOKEN]
+			});
+
+			expect(reloadEthereumBalance).toHaveBeenCalledTimes(2);
+			expect(reloadEthereumBalance).toHaveBeenCalledWith(ETHEREUM_TOKEN);
+			expect(reloadEthereumBalance).toHaveBeenCalledWith(usdc);
+		});
+
+		it('still reloads the native token once the EVM token is disabled', () => {
+			reloadRiftEvmBalances({ tx: mockRiftActiveUserTransaction, tokens: [ETHEREUM_TOKEN] });
+
+			expect(reloadEthereumBalance).toHaveBeenCalledExactlyOnceWith(ETHEREUM_TOKEN);
+		});
+	});
+});

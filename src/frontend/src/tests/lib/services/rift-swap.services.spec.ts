@@ -1,29 +1,64 @@
+import { sendBtc } from '$btc/services/btc-send.services';
+import { BtcBroadcastUnconfirmedError } from '$btc/types/btc-send';
 import { BNB_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { Erc20Token } from '$eth/types/erc20';
+import { BtcBroadcastTransactionCanisterError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { RIFT_QUOTE_REFRESH_INTERVAL_MS } from '$lib/constants/swap.constants';
-import { postRiftQuote } from '$lib/rest/rift.rest';
+import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { getRiftOrder, postRiftOrder, postRiftQuote } from '$lib/rest/rift.rest';
 import {
+	createActiveUserTransaction,
+	deleteUnbroadcastActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
+import {
+	fetchRiftBtcSwap,
 	fetchRiftBtcSwapQuote,
 	resetRiftQuoteCache,
 	riftBtcSupportedDestinations,
 	riftBtcSupportedTokens
 } from '$lib/services/rift-swap.services';
-import { RiftApiError } from '$lib/types/errors';
-import type { RiftQuote } from '$lib/types/rift';
-import { SwapProvider, type BtcQuoteParams } from '$lib/types/swap';
+import { enableSwapDestinationToken } from '$lib/services/swap.services';
+import { RiftApiError, RiftSwapRefusedError, type RiftSwapRefusal } from '$lib/types/errors';
+import type { RiftOrder, RiftQuote } from '$lib/types/rift';
+import { SwapProvider, type BtcQuoteParams, type SwapRiftBtcParams } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import { toRiftExternalRefsMap } from '$lib/utils/rift-active-tx.utils';
 import { resolveSwapTokenLookup } from '$lib/utils/swap-tokens-filter.utils';
-import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockRiftActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
+import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { mockRiftQuote, mockRiftQuoteRequest } from '$tests/mocks/rift.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import {
+	mockRiftOrder,
+	mockRiftOrderRefundAddress,
+	mockRiftOrderToAddress,
+	mockRiftQuote,
+	mockRiftQuoteRequest
+} from '$tests/mocks/rift.mock';
+import { btcSendViaBackend } from '$tests/utils/btc-env.test-utils';
 
 vi.mock('$lib/rest/rift.rest', () => ({
-	postRiftQuote: vi.fn()
+	postRiftQuote: vi.fn(),
+	postRiftOrder: vi.fn(),
+	getRiftOrder: vi.fn()
+}));
+
+vi.mock('$btc/services/btc-send.services', () => ({
+	sendBtc: vi.fn()
+}));
+
+vi.mock('$lib/services/active-user-transactions.services', () => ({
+	createActiveUserTransaction: vi.fn(),
+	deleteUnbroadcastActiveUserTransaction: vi.fn()
+}));
+
+vi.mock('$lib/services/swap.services', () => ({
+	enableSwapDestinationToken: vi.fn()
 }));
 
 const USDC_ETHEREUM: Erc20Token = {
@@ -217,6 +252,288 @@ describe('rift-swap.services', () => {
 				await expect(fetchRiftBtcSwapQuote(params())).resolves.toBeUndefined();
 				expect(postRiftQuote).toHaveBeenCalledOnce();
 			});
+		});
+	});
+
+	describe('fetchRiftBtcSwap', () => {
+		const TXID = 'cd'.repeat(32);
+
+		const params = (overrides: Partial<SwapRiftBtcParams> = {}): SwapRiftBtcParams => ({
+			identity: mockIdentity,
+			progress: vi.fn(),
+			sourceToken: BTC_MAINNET_TOKEN,
+			destinationToken: USDC_ETHEREUM,
+			swapAmount: 0.002,
+			userAddress: mockRiftOrderRefundAddress,
+			recipientAddress: mockRiftOrderToAddress,
+			network: 'mainnet',
+			offer: {
+				provider: SwapProvider.RIFT,
+				receiveAmount: 121_475_958n,
+				swapDetails: mockRiftQuote
+			},
+			utxosFee: mockUtxosFee,
+			...overrides
+		});
+
+		const order = (overrides: Partial<RiftOrder> = {}) =>
+			vi.mocked(postRiftOrder).mockResolvedValue({ ...mockRiftOrder, ...overrides });
+
+		const recheck = (overrides: Partial<RiftOrder> = {}) =>
+			vi.mocked(getRiftOrder).mockResolvedValue({ ...mockRiftOrder, ...overrides });
+
+		// Signs, runs the hook, then broadcasts: refused by `outcome` when given.
+		const broadcast = ({ outcome }: { outcome?: unknown } = {}) =>
+			vi.mocked(sendBtc).mockImplementation(async ({ beforeBroadcast }) => {
+				await beforeBroadcast?.({ txid: TXID });
+
+				if (outcome !== undefined) {
+					throw outcome;
+				}
+
+				return TXID;
+			});
+
+		const rowId = () => vi.mocked(createActiveUserTransaction).mock.lastCall?.[0].id;
+
+		const expectRefused = async ({
+			reason,
+			overrides
+		}: {
+			reason: RiftSwapRefusal;
+			overrides?: Partial<SwapRiftBtcParams>;
+		}) => {
+			const swap = fetchRiftBtcSwap(params(overrides));
+
+			await expect(swap).rejects.toBeInstanceOf(RiftSwapRefusedError);
+			await expect(swap).rejects.toMatchObject({ reason });
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			resetRiftQuoteCache();
+			btcSendViaBackend.enabled = true;
+
+			vi.useFakeTimers();
+			// Five minutes before the reviewed quote expires.
+			vi.setSystemTime(Date.parse(mockRiftQuote.expires_at) - 5 * 60_000);
+
+			order();
+			recheck();
+			broadcast();
+			vi.mocked(createActiveUserTransaction).mockResolvedValue(mockRiftActiveUserTransaction);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+			btcSendViaBackend.enabled = false;
+		});
+
+		it("orders the reviewed quote with the user's own addresses, and pays exactly the quoted amount", async () => {
+			await fetchRiftBtcSwap(params());
+
+			expect(postRiftOrder).toHaveBeenCalledExactlyOnceWith({
+				quote_id: mockRiftQuote.id,
+				to_address: mockRiftOrderToAddress,
+				refund_address: mockRiftOrderRefundAddress
+			});
+			expect(sendBtc).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					source: mockRiftOrderRefundAddress,
+					destination: mockRiftOrder.deposit_address,
+					amount: 0.002,
+					utxosFee: mockUtxosFee
+				})
+			);
+		});
+
+		it('creates the row before the broadcast, then reads the order once more, ahead of other requests', async () => {
+			await fetchRiftBtcSwap(params());
+
+			const [[{ data, externalRefs }]] = vi.mocked(createActiveUserTransaction).mock.calls;
+
+			expect(data).toEqual({
+				Rift: {
+					source_token: { BtcNativeMainnet: null },
+					dest_token: { Erc20: [USDC_ETHEREUM.address, 1n] },
+					amount: 200_000n
+				}
+			});
+			expect(toRiftExternalRefsMap(externalRefs)).toMatchObject({
+				rift_order_id: mockRiftOrder.id,
+				rift_deposit_address: mockRiftOrder.deposit_address,
+				rift_deposit_tx: TXID
+			});
+			expect(getRiftOrder).toHaveBeenCalledExactlyOnceWith({
+				orderId: mockRiftOrder.id,
+				urgent: true
+			});
+			expect(vi.mocked(createActiveUserTransaction).mock.invocationCallOrder[0]).toBeLessThan(
+				vi.mocked(getRiftOrder).mock.invocationCallOrder[0]
+			);
+		});
+
+		it('keeps the destination token visible and reports its progress', async () => {
+			const progress = vi.fn();
+
+			await fetchRiftBtcSwap(params({ progress }));
+
+			expect(enableSwapDestinationToken).toHaveBeenCalledExactlyOnceWith({
+				destinationToken: USDC_ETHEREUM,
+				identity: mockIdentity
+			});
+			expect(progress.mock.calls.map(([step]) => step)).toEqual([
+				ProgressStepsSwap.SIGN_TRANSFER,
+				ProgressStepsSwap.SWAP,
+				ProgressStepsSwap.UPDATE_UI
+			]);
+			expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		describe('before anything is signed', () => {
+			afterEach(() => {
+				expect(sendBtc).not.toHaveBeenCalled();
+				expect(createActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			it('stops on a quote that has expired, without ordering it', async () => {
+				vi.setSystemTime(Date.parse(mockRiftQuote.expires_at));
+
+				await expectRefused({ reason: 'quoteExpired' });
+
+				expect(postRiftOrder).not.toHaveBeenCalled();
+			});
+
+			it.each([
+				{ status: 410, reason: 'quoteExpired' as const },
+				{ status: 403, reason: 'orderRefused' as const },
+				{ status: 409, reason: 'orderRefused' as const },
+				{ status: 503, reason: 'orderRefused' as const }
+			])('stops when Rift answers the order with $status', async ({ status, reason }) => {
+				vi.mocked(postRiftOrder).mockRejectedValue(new RiftApiError({ status, message: 'no' }));
+
+				await expectRefused({ reason });
+			});
+
+			it.each([
+				{ label: 'another amount', overrides: { amount_in: '200001' } },
+				{ label: 'a deposit already seen', overrides: { deposit_tx: 'abc' } },
+				{
+					label: "the user's own address to deposit to",
+					overrides: { deposit_address: mockRiftOrderRefundAddress }
+				}
+			])('stops on an order with $label', async ({ overrides }) => {
+				order(overrides);
+
+				await expectRefused({ reason: 'orderUnverified' });
+			});
+
+			it('refuses an amount other than the quoted one, without ordering', async () => {
+				await expect(fetchRiftBtcSwap(params({ swapAmount: 0.003 }))).rejects.not.toBeInstanceOf(
+					RiftSwapRefusedError
+				);
+
+				expect(postRiftOrder).not.toHaveBeenCalled();
+			});
+
+			it('refuses to send without the backend path, which the row needs', async () => {
+				btcSendViaBackend.enabled = false;
+
+				await expect(fetchRiftBtcSwap(params())).rejects.toThrow();
+
+				expect(postRiftOrder).not.toHaveBeenCalled();
+			});
+		});
+
+		describe('right before the broadcast', () => {
+			it('stops when the order already has a row, and keeps that row', async () => {
+				vi.mocked(createActiveUserTransaction).mockRejectedValue({ AlreadyInFlight: null });
+
+				await expectRefused({ reason: 'orderInFlight' });
+
+				expect(getRiftOrder).not.toHaveBeenCalled();
+				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+			});
+
+			it('deletes a row it may have created when the backend gives no clear answer', async () => {
+				vi.mocked(createActiveUserTransaction).mockRejectedValue(new Error('timeout'));
+
+				await expect(fetchRiftBtcSwap(params())).rejects.toThrow('timeout');
+
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: rowId()
+				});
+			});
+
+			it('deletes its row and stops when the order has seen a deposit since', async () => {
+				recheck({ status: 'funded' });
+
+				await expectRefused({ reason: 'orderInFlight' });
+
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: rowId()
+				});
+			});
+
+			it('deletes its row and stops when the order cannot be read again', async () => {
+				vi.mocked(getRiftOrder).mockRejectedValue(new RiftApiError({ status: 503, message: 'no' }));
+
+				await expectRefused({ reason: 'orderRefused' });
+
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledOnce();
+			});
+		});
+
+		describe('after the broadcast', () => {
+			it('deletes the row when the backend refused the broadcast outright', async () => {
+				broadcast({
+					outcome: new BtcBroadcastTransactionCanisterError({ DuplicateInputs: null }, 'refused')
+				});
+
+				await expect(fetchRiftBtcSwap(params())).rejects.toThrow('refused');
+
+				expect(deleteUnbroadcastActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					id: rowId()
+				});
+				expect(enableSwapDestinationToken).not.toHaveBeenCalled();
+			});
+
+			it('keeps the row and enables the destination when the broadcast may have gone out', async () => {
+				broadcast({ outcome: new BtcBroadcastUnconfirmedError({ cause: new Error('lost') }) });
+
+				await expect(fetchRiftBtcSwap(params())).rejects.toBeInstanceOf(
+					BtcBroadcastUnconfirmedError
+				);
+
+				expect(deleteUnbroadcastActiveUserTransaction).not.toHaveBeenCalled();
+				expect(enableSwapDestinationToken).toHaveBeenCalledOnce();
+			});
+		});
+
+		// A retry then orders a fresh quote rather than the same order again.
+		it('drops the reviewed quote after a failure', async () => {
+			vi.mocked(postRiftQuote).mockResolvedValue(mockRiftQuote);
+			const quoteParams: BtcQuoteParams = {
+				sourceToken: BTC_MAINNET_TOKEN,
+				destinationToken: USDC_ETHEREUM,
+				amount: 200_000n,
+				userBtcAddress: mockBtcAddress,
+				recipientAddress: mockEthAddress,
+				slippage: 0.5
+			};
+
+			await fetchRiftBtcSwapQuote(quoteParams);
+
+			recheck({ status: 'funded' });
+
+			await expect(fetchRiftBtcSwap(params())).rejects.toThrow();
+
+			await fetchRiftBtcSwapQuote(quoteParams);
+
+			expect(postRiftQuote).toHaveBeenCalledTimes(2);
 		});
 	});
 });

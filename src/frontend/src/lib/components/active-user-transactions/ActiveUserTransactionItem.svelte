@@ -44,6 +44,7 @@
 		isOneSecActiveUserTransaction,
 		toOneSecExternalRefsMap
 	} from '$lib/utils/onesec-swap.utils';
+	import { isRiftActiveUserTransaction, riftPaidOut } from '$lib/utils/rift-active-tx.utils';
 	import { isVeloraActiveUserTransaction } from '$lib/utils/velora-active-tx.utils';
 	import {
 		isXrpActiveUserTransaction,
@@ -65,12 +66,13 @@
 	const isChainFusion = $derived(isChainFusionActiveUserTransaction(tx));
 	const isOisyTrade = $derived(isOisyTradeActiveUserTransaction(tx));
 	const isLifi = $derived(isLifiActiveUserTransaction(tx));
+	const isRift = $derived(isRiftActiveUserTransaction(tx));
 	// Every swap provider is rendered identically — they share the same
 	// display-ref key names in `external_refs`. Velora's Delta/Market distinction,
 	// Chain Fusion's conversion direction and OISY Trade's order side are internal
 	// routing and deliberately not surfaced.
 	const isSwap = $derived(
-		isOneSec || isNearIntents || isVelora || isChainFusion || isOisyTrade || isLifi
+		isOneSec || isNearIntents || isVelora || isChainFusion || isOisyTrade || isLifi || isRift
 	);
 	const isLiquidium = $derived(isLiquidiumActiveUserTransaction(tx));
 	// Not a swap and not a provider flow: a native XRP payment, whose row exists
@@ -119,6 +121,10 @@
 			: undefined;
 	});
 
+	// A settled Rift order shows what it paid out: the destination token once delivered, the source
+	// token, for less, once refunded.
+	const riftReceived = $derived(isRift ? riftPaidOut(tx) : undefined);
+
 	const isFailed = $derived('Failed' in tx.status);
 	const isSucceeded = $derived('Succeeded' in tx.status);
 
@@ -164,9 +170,12 @@
 									? // Unconditional like Chain Fusion's, so a row outliving a rollback of
 										// `LIFI_SWAP_ENABLED` keeps its provider name.
 										(swapProvidersDetails[SwapProvider.LIFI]?.name ?? '')
-									: isCyclesMint || isCyclesTopUp
-										? CMC_NAME
-										: undefined
+									: isRift
+										? // Unconditional too: a row outlives `RIFT_SWAP_ENABLED`.
+											(swapProvidersDetails[SwapProvider.RIFT]?.name ?? '')
+										: isCyclesMint || isCyclesTopUp
+											? CMC_NAME
+											: undefined
 	);
 
 	const titleText = $derived(
@@ -196,7 +205,8 @@
 							refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
 							'→',
 							...(lifiReceived ??
-								chainFusionReceived ?? [refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]])
+								chainFusionReceived ??
+								riftReceived ?? [refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]])
 						]
 							.filter(nonNullish)
 							.join(' ')

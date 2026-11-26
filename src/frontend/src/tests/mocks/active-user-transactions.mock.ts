@@ -26,6 +26,7 @@ import { LIFI_EXTERNAL_REF_KEYS } from '$lib/types/lifi';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
 import { OISY_TRADE_EXTERNAL_REF_KEYS } from '$lib/types/oisy-trade-swap';
+import { RIFT_EXTERNAL_REF_KEYS } from '$lib/types/rift';
 import { VELORA_EXTERNAL_REF_KEYS } from '$lib/types/velora-swap';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
@@ -122,6 +123,40 @@ export const mockLifiActiveUserTransaction: ActiveUserTransaction = {
 		{ key: LIFI_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Base' },
 		{ key: LIFI_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'USDC' },
 		{ key: LIFI_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Solana' }
+	],
+	created_at_ns: ZERO,
+	updated_at_ns: ZERO,
+	error: []
+};
+
+// BTC → USDC on Ethereum, paying `mockRiftOrder`. Candid merges Rift's data record with LI.FI's,
+// which has the same fields, so the generated type is `LifiData`.
+export const mockRiftData: LifiData = {
+	source_token: { BtcNativeMainnet: null },
+	dest_token: { Erc20: ['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 1n] },
+	amount: 200_000n
+};
+
+export const mockRiftActiveUserTransaction: ActiveUserTransaction = {
+	id: '88888888-8888-4888-8888-888888888888',
+	status: { Pending: null },
+	data: { Rift: mockRiftData },
+	progress_step: [],
+	external_refs: [
+		{ key: RIFT_EXTERNAL_REF_KEYS.ORDER_ID, value: '0f8fad5b-d9cb-469f-a165-70867728950e' },
+		{
+			key: RIFT_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS,
+			value: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq'
+		},
+		{ key: RIFT_EXTERNAL_REF_KEYS.DEPOSIT_TX, value: 'cd'.repeat(32) },
+		{ key: RIFT_EXTERNAL_REF_KEYS.SOURCE_DECIMALS, value: '8' },
+		{ key: RIFT_EXTERNAL_REF_KEYS.DEST_DECIMALS, value: '6' },
+		{ key: RIFT_EXTERNAL_REF_KEYS.AMOUNT, value: '0.002' },
+		{ key: RIFT_EXTERNAL_REF_KEYS.USD_SOURCE_VALUE, value: '122.5' },
+		{ key: RIFT_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL, value: 'BTC' },
+		{ key: RIFT_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Bitcoin' },
+		{ key: RIFT_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'USDC' },
+		{ key: RIFT_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Ethereum' }
 	],
 	created_at_ns: ZERO,
 	updated_at_ns: ZERO,

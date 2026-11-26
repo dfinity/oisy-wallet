@@ -3,6 +3,7 @@ import { NANO_SECONDS_IN_MILLISECOND, NANO_SECONDS_IN_SECOND } from '$lib/consta
 import en from '$lib/i18n/en.json';
 import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
 import { LIFI_EXTERNAL_REF_KEYS } from '$lib/types/lifi';
+import { RIFT_EXTERNAL_REF_KEYS } from '$lib/types/rift';
 import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 import {
 	mockChainFusionActiveUserTransaction,
@@ -12,6 +13,7 @@ import {
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
 	mockOisyTradeActiveUserTransaction,
+	mockRiftActiveUserTransaction,
 	mockVeloraActiveUserTransaction,
 	mockXrpActiveUserTransaction,
 	mockXrpData
@@ -79,6 +81,58 @@ describe('ActiveUserTransactionItem', () => {
 			});
 
 			expect(screen.getByText(`${en.swap.text.swap} 50 USDC → 49.875 USDC.e`)).toBeInTheDocument();
+		});
+	});
+
+	describe('Rift rows', () => {
+		const renderItem = (tx: typeof mockRiftActiveUserTransaction) =>
+			render(ActiveUserTransactionItem, {
+				props: { tx, isUnseen: false, dismissing: false, onDismiss: vi.fn() }
+			});
+
+		const settled = ({
+			status,
+			riftStatus,
+			amountOut
+		}: {
+			status: typeof mockRiftActiveUserTransaction.status;
+			riftStatus: string;
+			amountOut: string;
+		}) => ({
+			...mockRiftActiveUserTransaction,
+			status,
+			external_refs: [
+				...mockRiftActiveUserTransaction.external_refs,
+				{ key: RIFT_EXTERNAL_REF_KEYS.STATUS, value: riftStatus },
+				{ key: RIFT_EXTERNAL_REF_KEYS.AMOUNT_OUT, value: amountOut }
+			]
+		});
+
+		// The provider entry is unconditional, so a row keeps its name with `RIFT_SWAP_ENABLED` off.
+		it('renders as a swap with the provider and the cross-chain networks', () => {
+			const { container } = renderItem(mockRiftActiveUserTransaction);
+
+			expect(screen.getByText(`${en.swap.text.swap} 0.002 BTC → USDC`)).toBeInTheDocument();
+			expect(container).toHaveTextContent('Bitcoin → Ethereum');
+			expect(container).toHaveTextContent('Rift');
+		});
+
+		it('shows the amount delivered once the order is', () => {
+			renderItem(
+				settled({ status: { Succeeded: null }, riftStatus: 'delivered', amountOut: '121.475958' })
+			);
+
+			expect(
+				screen.getByText(`${en.swap.text.swap} 0.002 BTC → 121.475958 USDC`)
+			).toBeInTheDocument();
+		});
+
+		it('shows the BTC refunded once the order is', () => {
+			renderItem(
+				settled({ status: { Failed: null }, riftStatus: 'refunded', amountOut: '0.00195' })
+			);
+
+			expect(screen.getByText(`${en.swap.text.swap} 0.002 BTC → 0.00195 BTC`)).toBeInTheDocument();
 		});
 	});
 

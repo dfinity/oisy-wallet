@@ -137,6 +137,10 @@ describe('cross-chain-swap derived stores', () => {
 				...(await importOriginal<typeof nearIntentsEnv>()),
 				NEAR_INTENTS_BTC_SWAP_ENABLED: false
 			}));
+			vi.doMock('$env/rest/rift.env', async (importOriginal) => ({
+				...(await importOriginal<typeof riftEnv>()),
+				RIFT_SWAP_ENABLED: false
+			}));
 			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: false }));
 
 			try {
@@ -161,6 +165,7 @@ describe('cross-chain-swap derived stores', () => {
 			} finally {
 				vi.doUnmock('$env/chain-fusion-swap.env');
 				vi.doUnmock('$env/rest/near-intents.env');
+				vi.doUnmock('$env/rest/rift.env');
 				vi.resetModules();
 			}
 		});
@@ -208,6 +213,10 @@ describe('cross-chain-swap derived stores', () => {
 				...(await importOriginal<typeof nearIntentsEnv>()),
 				NEAR_INTENTS_BTC_SWAP_ENABLED: false
 			}));
+			vi.doMock('$env/rest/rift.env', async (importOriginal) => ({
+				...(await importOriginal<typeof riftEnv>()),
+				RIFT_SWAP_ENABLED: false
+			}));
 
 			try {
 				const [
@@ -233,6 +242,7 @@ describe('cross-chain-swap derived stores', () => {
 				expect(result).not.toContain(bitcoinTestnet);
 			} finally {
 				vi.doUnmock('$env/rest/near-intents.env');
+				vi.doUnmock('$env/rest/rift.env');
 				vi.resetModules();
 			}
 		});

@@ -578,6 +578,23 @@ export interface SwapLifiSolParams {
 	reviewedCeiling: bigint;
 }
 
+export interface SwapRiftBtcParams {
+	identity: Identity;
+	progress: (step: ProgressStep) => void;
+	sourceToken: Token;
+	destinationToken: Token;
+	swapAmount: Amount;
+	// The user's Bitcoin address: the source of the inputs, where the change goes, and the order's
+	// refund address.
+	userAddress: BtcAddress;
+	// The user's address on the destination chain, where Rift pays out.
+	recipientAddress: EthAddress;
+	network: BitcoinNetwork;
+	offer: Extract<SwapMappedResult, { provider: SwapProvider.RIFT }>;
+	// The selection and the fee the user reviewed, for the one plain transfer to the deposit address.
+	utxosFee: UtxosFee;
+}
+
 export interface SwapLifiBtcParams {
 	identity: Identity;
 	progress: (step: ProgressStep) => void;

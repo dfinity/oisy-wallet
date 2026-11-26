@@ -26,20 +26,24 @@ import * as analytics from '$lib/services/analytics.services';
 import { fetchChainFusionBtcSwap } from '$lib/services/chain-fusion-swap.services';
 import { fetchLifiBtcSwap } from '$lib/services/lifi-btc-swap.services';
 import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
+import { fetchRiftBtcSwap } from '$lib/services/rift-swap.services';
 import { fetchNearIntentsBtcSwap } from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type SwapError } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
+import { RiftSwapRefusedError } from '$lib/types/errors';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockLifiBtcLayerswapQuote } from '$tests/mocks/lifi-btc.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
+import { mockRiftQuote } from '$tests/mocks/rift.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get, readable, writable } from 'svelte/store';
@@ -70,6 +74,14 @@ vi.mock('$lib/services/lifi-btc-swap.services', () => ({
 	// The BTC provider registry imports these.
 	fetchLifiBtcSwapQuote: vi.fn(),
 	lifiBtcSupportedTokens: vi.fn()
+}));
+
+vi.mock('$lib/services/rift-swap.services', () => ({
+	fetchRiftBtcSwap: vi.fn(),
+	// The BTC provider registry imports these.
+	fetchRiftBtcSwapQuote: vi.fn(),
+	riftBtcSupportedTokens: vi.fn(),
+	riftBtcSupportedDestinations: vi.fn()
 }));
 
 vi.mock('$lib/services/provider-agreements.services', () => ({
@@ -869,6 +881,142 @@ describe('SwapBtcWizard', () => {
 			expect(toasts.toastsError).toHaveBeenCalledWith(
 				expect.objectContaining({ msg: { text: en.send.error.btc_transaction_unconfirmed } })
 			);
+		});
+	});
+
+	describe('Rift execution', () => {
+		const riftOffer: SwapMappedResult = {
+			provider: SwapProvider.RIFT,
+			receiveAmount: 121_475_958n,
+			swapDetails: mockRiftQuote
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+			vi.mocked(validateBtcSend).mockResolvedValue(undefined);
+			vi.mocked(fetchRiftBtcSwap).mockResolvedValue(undefined);
+			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		const renderExecution = () => {
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+
+			const { context } = createContext(riftOffer);
+
+			const result = render(SwapBtcWizard, {
+				props: {
+					...baseProps,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack
+				},
+				context
+			});
+
+			return { ...result, onClose, onBack };
+		};
+
+		const confirm = async (getByText: (text: string) => HTMLElement) => {
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+		};
+
+		it("sends through Rift, paying out to the user's EVM address", async () => {
+			const { getByText } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(fetchRiftBtcSwap).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					swapAmount: '0.01',
+					userAddress: mockBtcAddress,
+					recipientAddress: mockEthAddress,
+					network: 'mainnet',
+					offer: riftOffer
+				})
+			);
+			expect(fetchNearIntentsBtcSwap).not.toHaveBeenCalled();
+			expect(fetchLifiBtcSwap).not.toHaveBeenCalled();
+			expect(acceptProviderAgreement).not.toHaveBeenCalled();
+		});
+
+		it('closes after the deposit and tracks its submission', async () => {
+			const { getByText, onClose, onBack } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+			expect(analytics.trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: TRACK_COUNT_SWAP_SUBMITTED,
+					metadata: expect.objectContaining({ dApp: SwapProvider.RIFT })
+				})
+			);
+		});
+
+		it("refuses to send without the user's EVM address", async () => {
+			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(undefined));
+
+			const { getByText, onBack } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(fetchRiftBtcSwap).not.toHaveBeenCalled();
+			expect(toasts.toastsError).toHaveBeenCalledWith({
+				msg: { text: en.swap.error.unexpected_missing_data }
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+		});
+
+		// Nothing was sent, and the form comes back with a fresh quote.
+		it('says why Rift stopped the swap, and comes back to the form', async () => {
+			vi.mocked(fetchRiftBtcSwap).mockRejectedValue(new RiftSwapRefusedError('orderInFlight'));
+
+			const { getByText, onBack, onClose } = renderExecution();
+
+			await confirm(getByText);
+
+			expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.swap.error.rift_order_in_flight }
+			});
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		// Rift's answers can carry the user's addresses, and its refusals wrap them.
+		it("reports a refusal as an allow-listed category, never Rift's text", async () => {
+			vi.mocked(fetchRiftBtcSwap).mockRejectedValue(
+				new RiftSwapRefusedError('orderRefused', {
+					cause: new Error(`screening failed for ${mockEthAddress}`)
+				})
+			);
+
+			const { getByText } = renderExecution();
+
+			await confirm(getByText);
+
+			const errorEvent = vi
+				.mocked(analytics.trackEvent)
+				.mock.calls.find(([{ name }]) => name === TRACK_COUNT_SWAP_ERROR);
+
+			assertNonNullish(errorEvent);
+
+			const [{ metadata }] = errorEvent;
+
+			expect(metadata).toEqual(
+				expect.objectContaining({
+					dApp: SwapProvider.RIFT,
+					result_error_type: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.QUOTE_REJECTED
+				})
+			);
+			expect(metadata).not.toHaveProperty('error');
+			expect(JSON.stringify(metadata)).not.toContain(mockEthAddress);
 		});
 	});
 });

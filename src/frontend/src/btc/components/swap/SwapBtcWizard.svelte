@@ -23,10 +23,11 @@
 		TRACK_COUNT_SWAP_ERROR,
 		TRACK_COUNT_SWAP_SUBMITTED
 	} from '$lib/constants/analytics.constants';
-	import { btcAddressMainnet } from '$lib/derived/address.derived';
+	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { hasAcknowledgedNearIntentsSwap } from '$lib/derived/user-provider-agreements.derived';
+	import { PLAUSIBLE_EVENT_SWAP_ERROR_TYPES } from '$lib/enums/plausible';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -34,6 +35,7 @@
 	import { fetchLifiBtcSwap } from '$lib/services/lifi-btc-swap.services';
 	import { isSlippageExceeded } from '$lib/services/lifi-swap-execution.services';
 	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
+	import { fetchRiftBtcSwap } from '$lib/services/rift-swap.services';
 	import { enableSwapDestinationToken, fetchNearIntentsBtcSwap } from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -42,6 +44,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import { RiftSwapRefusedError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapProvider } from '$lib/types/swap';
 	import type { WizardStep } from '$lib/types/wizard';
@@ -52,6 +55,7 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toLifiSwapErrorType } from '$lib/utils/lifi-swap-error.utils';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
+	import { riftSwapRefusedMessage } from '$lib/utils/rift.utils';
 	import { nearIntentsQuoteRejectedMessage } from '$lib/utils/swap.utils';
 
 	interface Props {
@@ -129,6 +133,11 @@
 
 	let isNearIntentsProvider = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.NEAR_INTENTS
+	);
+
+	// A Rift deposit is a plain transfer, as a NEAR Intents one is.
+	let isRiftProvider = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.RIFT
 	);
 
 	const swap = async () => {
@@ -261,6 +270,32 @@
 					network,
 					utxosFee
 				});
+			} else if (selectedProvider?.provider === SwapProvider.RIFT) {
+				// Rift pays out to the user's EVM address, which the order binds.
+				if (isNullish($ethAddress)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+
+					onBack();
+
+					onStartTriggerAmount();
+
+					return;
+				}
+
+				await fetchRiftBtcSwap({
+					identity: $authIdentity,
+					progress: (step: ProgressStep) => (swapProgressStep = step),
+					sourceToken: $sourceToken,
+					destinationToken: $destinationToken,
+					swapAmount,
+					userAddress: sourceAddress,
+					recipientAddress: $ethAddress,
+					network,
+					offer: selectedProvider,
+					utxosFee
+				});
 			} else if (nonNullish(lifiOffer)) {
 				await fetchLifiBtcSwap({
 					identity: $authIdentity,
@@ -335,10 +370,12 @@
 				metadata: {
 					...swapTrackingMetadata,
 					// LI.FI's error text can carry the user's addresses: only an allow-listed category is
-					// reported, as from EVM and Solana.
+					// reported, as from EVM and Solana. So can Rift's, which its refusals wrap.
 					...(nonNullish(lifiOffer)
 						? { result_error_type: toLifiSwapErrorType(err) }
-						: { error: errorDetailToString(err) ?? '' })
+						: err instanceof RiftSwapRefusedError
+							? { result_error_type: PLAUSIBLE_EVENT_SWAP_ERROR_TYPES.QUOTE_REJECTED }
+							: { error: errorDetailToString(err) ?? '' })
 				}
 			});
 
@@ -365,6 +402,18 @@
 					),
 					variant: 'info'
 				});
+
+				onBack();
+				onStartTriggerAmount();
+				return;
+			}
+
+			// Rift stopped the swap before its deposit: nothing was sent, and the form comes back with a
+			// fresh quote.
+			const riftRefused = riftSwapRefusedMessage({ err, i18n: $i18n });
+
+			if (nonNullish(riftRefused)) {
+				toastsError({ msg: { text: riftRefused } });
 
 				onBack();
 				onStartTriggerAmount();
@@ -429,9 +478,9 @@
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 		<!-- Every provider settles as an active user transaction once the deposit is broadcast,
 		     so the stepper says the swap starts here and finishes in the background. NEAR
-		     Intents additionally signs a plain BTC transfer, hence the extra signing step. -->
+		     Intents and Rift additionally sign a plain BTC transfer, hence the extra signing step. -->
 		<SwapProgress
-			sendWithTransfer={isNearIntentsProvider}
+			sendWithTransfer={isNearIntentsProvider || isRiftProvider}
 			{swapProgressStep}
 			swapWithActiveTransaction
 		/>

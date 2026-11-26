@@ -1,13 +1,17 @@
+import { isBtcAddress } from '$btc/utils/btc-address.utils';
 import { isBitcoinToken } from '$btc/utils/token.utils';
 import { RIFT_BTC_ASSET_ID, RIFT_EVM_NATIVE_ASSETS } from '$env/rest/rift.env';
+import { isEthAddress } from '$eth/utils/account.utils';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { ZERO } from '$lib/constants/app.constants';
-import type { RiftQuote, RiftQuoteRequest } from '$lib/types/rift';
+import { RiftSwapRefusedError, type RiftSwapRefusal } from '$lib/types/errors';
+import type { RiftOrder, RiftQuote, RiftQuoteRequest } from '$lib/types/rift';
 import type { Token } from '$lib/types/token';
 import { isNetworkEthereum, isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { BtcNetwork } from '@icp-sdk/canisters/ckbtc';
 
 /**
  * Rift's canonical asset id for a token, as a `format: "raw"` quote writes it, or `undefined` for a
@@ -102,3 +106,102 @@ export const isRiftQuoteForRequest = ({
 // The venues of a quote's route, in the order the swap passes through them.
 export const riftRouteVenues = ({ route }: RiftQuote): string[] =>
 	route.flatMap((step) => (step.type === 'venue' ? [step.venue] : []));
+
+const isRiftBtcAssetId = (assetId: string): boolean =>
+	isSameRiftAssetId({ a: assetId, b: RIFT_BTC_ASSET_ID });
+
+// An address on the chain of `assetId`: a Bitcoin address is compared exactly, an EVM one, which is
+// hex, without case.
+const isSameRiftAddress = ({
+	assetId,
+	a,
+	b
+}: {
+	assetId: string;
+	a: string;
+	b: string;
+}): boolean => (isRiftBtcAssetId(assetId) ? a === b : a.toLowerCase() === b.toLowerCase());
+
+// A deposit address OISY can pay on the chain of `assetId`: a Bitcoin mainnet address, or an EVM one.
+const isRiftDepositAddress = ({
+	assetId,
+	address
+}: {
+	assetId: string;
+	address: string;
+}): boolean =>
+	isRiftBtcAssetId(assetId)
+		? isBtcAddress({ address, network: BtcNetwork.Mainnet })
+		: isEthAddress(address);
+
+// An order that has not seen any deposit yet: the only state in which one may be sent.
+export const isRiftOrderAwaitingDeposit = ({
+	status,
+	deposit_tx
+}: Pick<RiftOrder, 'status' | 'deposit_tx'>): boolean =>
+	status === 'awaiting_deposit' && isNullish(deposit_tx);
+
+/**
+ * Whether an order is the one the user reviewed, and may be paid at `now`. Rift's orders are
+ * unsigned, so every field it echoes is bound to the review: the reviewed quote, its assets and
+ * amount, and the user's own addresses, the payout on the destination chain and the refund on the
+ * source chain. The order must still await its first deposit, before its deadline, at an address on
+ * the source chain that is not one of the user's own.
+ *
+ * The deposit address itself is taken on Rift's word: nothing OISY can check vouches for it.
+ */
+export const isRiftOrderForReview = ({
+	order,
+	quote,
+	toAddress,
+	refundAddress,
+	now
+}: {
+	order: RiftOrder;
+	quote: Pick<RiftQuote, 'id' | 'from' | 'to' | 'amount_in'>;
+	toAddress: string;
+	refundAddress: string;
+	now: number;
+}): boolean => {
+	const { from, to, deposit_address: depositAddress } = order;
+
+	return (
+		order.quote_id.toLowerCase() === quote.id.toLowerCase() &&
+		isSameRiftAssetId({ a: from, b: quote.from }) &&
+		isSameRiftAssetId({ a: to, b: quote.to }) &&
+		BigInt(order.amount_in) === BigInt(quote.amount_in) &&
+		isSameRiftAddress({ assetId: quote.to, a: order.to_address, b: toAddress }) &&
+		nonNullish(order.refund_address) &&
+		isSameRiftAddress({ assetId: quote.from, a: order.refund_address, b: refundAddress }) &&
+		isRiftOrderAwaitingDeposit(order) &&
+		isRiftDepositAddress({ assetId: quote.from, address: depositAddress }) &&
+		!isSameRiftAddress({ assetId: quote.from, a: depositAddress, b: refundAddress }) &&
+		depositAddress.toLowerCase() !== toAddress.toLowerCase() &&
+		Date.parse(order.deposit_deadline) > now
+	);
+};
+
+/**
+ * What to tell the user of a Rift swap that stopped before its deposit, by why, or `undefined` for
+ * any other failure. Nothing was sent in either case.
+ */
+export const riftSwapRefusedMessage = ({
+	err,
+	i18n
+}: {
+	err: unknown;
+	i18n: I18n;
+}): string | undefined => {
+	if (!(err instanceof RiftSwapRefusedError)) {
+		return;
+	}
+
+	const messages: Record<RiftSwapRefusal, string> = {
+		quoteExpired: i18n.swap.error.rift_quote_expired,
+		orderRefused: i18n.swap.error.rift_order_refused,
+		orderUnverified: i18n.swap.error.rift_order_unverified,
+		orderInFlight: i18n.swap.error.rift_order_in_flight
+	};
+
+	return messages[err.reason];
+};

@@ -383,6 +383,10 @@ describe('swap.derived', () => {
 				...(await importOriginal<typeof nearIntentsEnv>()),
 				NEAR_INTENTS_BTC_SWAP_ENABLED: false
 			}));
+			vi.doMock('$env/rest/rift.env', async (importOriginal) => ({
+				...(await importOriginal<typeof riftEnv>()),
+				RIFT_SWAP_ENABLED: false
+			}));
 
 			try {
 				const [
@@ -406,6 +410,7 @@ describe('swap.derived', () => {
 			} finally {
 				vi.doUnmock('$env/chain-fusion-swap.env');
 				vi.doUnmock('$env/rest/near-intents.env');
+				vi.doUnmock('$env/rest/rift.env');
 				vi.resetModules();
 			}
 		});
@@ -453,6 +458,10 @@ describe('swap.derived', () => {
 				...(await importOriginal<typeof nearIntentsEnv>()),
 				NEAR_INTENTS_BTC_SWAP_ENABLED: false
 			}));
+			vi.doMock('$env/rest/rift.env', async (importOriginal) => ({
+				...(await importOriginal<typeof riftEnv>()),
+				RIFT_SWAP_ENABLED: false
+			}));
 
 			try {
 				const [
@@ -479,6 +488,7 @@ describe('swap.derived', () => {
 				expect(result.find(({ id }) => id === bitcoinTestnet.id)).toBeUndefined();
 			} finally {
 				vi.doUnmock('$env/rest/near-intents.env');
+				vi.doUnmock('$env/rest/rift.env');
 				vi.resetModules();
 			}
 		});

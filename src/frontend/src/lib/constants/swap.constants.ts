@@ -164,6 +164,10 @@ export const RIFT_REQUEST_TIMEOUT_MS = 10_000;
 // periodic tick: the whole session shares one request per second with the active-transaction poller.
 export const RIFT_QUOTE_REFRESH_INTERVAL_MS = 30_000;
 
+// Rift orders read per active-transaction tick, least recently read first. Every request starts at
+// least a second after the last, and the other providers' pollers run in the same tick.
+export const RIFT_MAX_ORDER_READS_PER_TICK = 3;
+
 // LI.FI's recommended `/status` cadence: every 10 s for the first minute after the row is created,
 // every 30 s until 10 minutes, then every minute.
 export const LIFI_STATUS_POLL_CADENCE: { maxAgeMillis: number; intervalMillis: number }[] = [

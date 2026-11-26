@@ -28,6 +28,7 @@ import * as liquidiumServices from '$lib/services/liquidium.services';
 import * as nearIntentsPoller from '$lib/services/near-intents-active-tx.services';
 import * as oisyTradePoller from '$lib/services/oisy-trade-active-tx.services';
 import * as oneSecPoller from '$lib/services/onesec-swap.services';
+import * as riftPoller from '$lib/services/rift-active-tx.services';
 import * as veloraPoller from '$lib/services/velora-active-tx.services';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import * as toasts from '$lib/stores/toasts.store';
@@ -44,6 +45,7 @@ import {
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
 	mockOisyTradeActiveUserTransaction,
+	mockRiftActiveUserTransaction,
 	mockVeloraActiveUserTransaction,
 	mockXrpActiveUserTransaction,
 	mockXrpSwapActiveUserTransaction
@@ -111,6 +113,14 @@ const lifiWithStatus =
 const pendingLifi = lifiWithStatus({ Pending: null });
 const succeededLifi = lifiWithStatus({ Succeeded: null });
 const failedLifi = lifiWithStatus({ Failed: null });
+
+const riftWithStatus =
+	(status: ActiveUserTransaction['status']) =>
+	(id: string): ActiveUserTransaction => ({ ...mockRiftActiveUserTransaction, id, status });
+
+const pendingRift = riftWithStatus({ Pending: null });
+const succeededRift = riftWithStatus({ Succeeded: null });
+const failedRift = riftWithStatus({ Failed: null });
 
 const pendingChainFusion = (id: string) =>
 	({
@@ -419,6 +429,23 @@ describe('LoaderActiveUserTransactions', () => {
 			expect(lifiSpy.mock.calls[1][0].confirmedNonceByChainId).not.toBe(
 				lifiSpy.mock.calls[0][0].confirmedNonceByChainId
 			);
+		});
+
+		it('polls Rift rows on each tick when present', async () => {
+			const riftSpy = vi.spyOn(riftPoller, 'pollRiftActiveUserTransactions').mockResolvedValue();
+			const rift = pendingRift('rift-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: rift });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(riftSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [rift]
+			});
 		});
 
 		it('polls Chain Fusion rows on each tick when present', async () => {
@@ -932,6 +959,45 @@ describe('LoaderActiveUserTransactions', () => {
 						metadata: expect.objectContaining({ dApp: SwapProvider.LIFI })
 					});
 					expect(appliedFlags()).toEqual({ 'lifi-a': true });
+				}
+			);
+		});
+
+		describe('a Rift row', () => {
+			let reloadSpy: ReturnType<typeof vi.spyOn>;
+
+			beforeEach(() => {
+				reloadSpy = vi.spyOn(riftPoller, 'reloadRiftEvmBalances').mockReturnValue(undefined);
+			});
+
+			// A delivery lands on the destination chain and a refund on the source chain.
+			it.each([
+				{ outcome: 'succeeds', settled: succeededRift, event: TRACK_COUNT_SWAP_SUCCESS },
+				{ outcome: 'fails', settled: failedRift, event: TRACK_COUNT_SWAP_ERROR }
+			])(
+				'reports once and refreshes the wallet and its EVM balances when it $outcome',
+				async ({ settled, event }) => {
+					activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+					activeUserTransactionsStore.upsert({ transaction: pendingRift('rift-a') });
+
+					render(LoaderActiveUserTransactions);
+					await tick();
+
+					expect(reloadSpy).not.toHaveBeenCalled();
+
+					activeUserTransactionsStore.upsert({ transaction: settled('rift-a') });
+					await tick();
+
+					expect(refreshSpy).toHaveBeenCalledOnce();
+					expect(reloadSpy).toHaveBeenCalledExactlyOnceWith({
+						tx: settled('rift-a'),
+						tokens: expect.any(Array)
+					});
+					expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+						name: event,
+						metadata: expect.objectContaining({ dApp: SwapProvider.RIFT })
+					});
+					expect(appliedFlags()).toEqual({ 'rift-a': true });
 				}
 			);
 		});

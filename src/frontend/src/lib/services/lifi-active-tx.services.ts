@@ -2,13 +2,12 @@ import type {
 	ActiveUserTransaction,
 	ActiveUserTransactionStatus
 } from '$declarations/backend/backend.did';
-import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
+import {
+	isReloadableEthereumBalanceToken,
+	reloadEthereumBalance
+} from '$eth/services/eth-balance.services';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
-import { isTokenErc20 } from '$eth/utils/erc20.utils';
-import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
-import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { LIFI_STATUS_UNRESOLVED_PERIOD_MILLIS } from '$lib/constants/swap.constants';
 import { btcTransactionStatus } from '$lib/rest/blockstream.rest';
 import { fetchLifiStatus } from '$lib/rest/lifi.rest';
@@ -578,14 +577,6 @@ export const pollLifiActiveUserTransactions = async ({
 	);
 };
 
-// What `reloadEthereumBalance` can load: native EVM coins, ERC-20s and ERC-4626 vaults. It hands
-// anything else to the ERC-20 loader, where an NFT collection fails and resets its balance.
-const isReloadableEvmToken = (token: Token): boolean =>
-	isSupportedEthTokenId(token.id) ||
-	isSupportedEvmNativeTokenId(token.id) ||
-	isTokenErc20(token) ||
-	isTokenErc4626(token);
-
 /**
  * Reloads the EVM balances a terminal LI.FI row may have moved: the source token and its network's
  * native token (gas, and where a refund may land) whatever the outcome, and the destination token
@@ -635,7 +626,7 @@ export const reloadLifiEvmBalances = ({
 	const evmTokens = new Map<Token['id'], Token>();
 
 	for (const token of [sourceToken, gasToken, destinationToken, ...payoutTokens]) {
-		if (nonNullish(token) && isReloadableEvmToken(token)) {
+		if (nonNullish(token) && isReloadableEthereumBalanceToken(token)) {
 			evmTokens.set(token.id, token);
 		}
 	}

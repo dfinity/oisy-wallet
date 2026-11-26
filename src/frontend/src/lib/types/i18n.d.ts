@@ -1220,6 +1220,12 @@ interface I18nSwap {
 		cannot_save_provider_agreement: string;
 		swap_refunded: string;
 		swap_replaced_or_dropped: string;
+		rift_quote_expired: string;
+		rift_order_refused: string;
+		rift_order_unverified: string;
+		rift_order_in_flight: string;
+		rift_deposit_expired: string;
+		rift_order_frozen: string;
 		swap_expired: string;
 		near_intents_quote_unverified: string;
 		near_intents_quote_expired: string;
