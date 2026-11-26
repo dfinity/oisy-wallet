@@ -189,6 +189,23 @@ allowance already consumed by the spender and charges another approval fee.
 for replenishing signing allowances; do not generalise this to retries of a
 one-shot approval, which should preserve their transaction identity.
 
+## Calls to a canister the caller names — short deadline, capped
+
+While a call waits for its reply, the system holds the cycles set aside for that
+reply. A canister the caller names (the token ledger of a tip, for example)
+answers when it likes, so:
+
+- Use `Call::bounded_wait` with a deadline of its own, well below the 300 s
+  default. The deadline bounds how long one call holds its reservation.
+- Cap how many such calls are open at once, and turn a request away before its
+  call leaves the canister when the cap is reached. How many calls are open
+  follows the request rate, so only a cap bounds what is held in total.
+
+Worked example: `LEDGER_CALL_TIMEOUT_SECONDS` and `LedgerCallSlot` in
+[`tips/icrc2.rs`](../../../src/backend/src/tips/icrc2.rs), with the cap
+`MAX_OPEN_TIP_LEDGER_CALLS` in
+[`shared::types::tip`](../../../src/shared/src/types/tip.rs).
+
 ## Threshold signatures — chain-fusion signer only
 
 - Direct calls to `sign_with_ecdsa` / `sign_with_schnorr` are forbidden
