@@ -25,11 +25,17 @@ import {
 	SESSION_REQUEST_PERSONAL_SIGN
 } from '$eth/constants/wallet-connect.constants';
 import type { OptionEthAddress } from '$eth/types/address';
-import { WALLET_CONNECT_METADATA } from '$lib/constants/wallet-connect.constants';
+import { deleteIdbDatabase } from '$lib/api/idb.api';
+import {
+	WALLET_CONNECT_IDB_NAME,
+	WALLET_CONNECT_METADATA,
+	WALLET_CONNECT_SESSIONS_OWNER_KEY
+} from '$lib/constants/wallet-connect.constants';
 import {
 	WalletConnectListener,
 	type WalletConnectApproveRequestMessage
 } from '$lib/types/wallet-connect';
+import { get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_MESSAGE,
@@ -52,12 +58,35 @@ const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
 let globalWalletKit: Awaited<ReturnType<typeof WalletKit.init>> | undefined;
 
+// The sessions WalletKit saves in the browser belong to the identity that approved them. When
+// another identity (or none) is signed in, they are dropped before WalletKit loads them, so a dApp
+// connected by one identity never reaches another one. If they cannot be dropped, this throws and
+// WalletKit is not started. Sessions saved before the owner was recorded have none and are dropped.
+const dropSessionsOfOtherIdentity = async (principal: Principal | undefined) => {
+	const owner = principal?.toText();
+
+	if (
+		nonNullish(owner) &&
+		getStorage<string>({ key: WALLET_CONNECT_SESSIONS_OWNER_KEY }) === owner
+	) {
+		return;
+	}
+
+	await deleteIdbDatabase(WALLET_CONNECT_IDB_NAME);
+
+	if (nonNullish(owner)) {
+		setStorage({ key: WALLET_CONNECT_SESSIONS_OWNER_KEY, value: owner });
+	}
+};
+
 // During the initialisation of the WalletConnect object,
 // there are sometimes issues with retained values from the requestors.
 // For example, if we initialise it once to try and reconnect and then re-initialise it when really connecting,
 // some DEXes will see it fail (for example, https://magiceden.io/).
-const getWalletKit = async () => {
+const getWalletKit = async ({ principal }: { principal: Principal | undefined }) => {
 	if (isNullish(globalWalletKit)) {
+		await dropSessionsOfOtherIdentity(principal);
+
 		globalWalletKit = await WalletKit.init({
 			core: new Core({
 				projectId: PROJECT_ID
@@ -138,7 +167,7 @@ export class WalletConnectClient extends WalletConnectListener {
 		// To address this, we clear the local storage of any WalletConnect keys to ensure the proper instantiation of a new Web3Wallet object.
 		clearLocalStorage();
 
-		const walletKit = await getWalletKit();
+		const walletKit = await getWalletKit({ principal: rest.btcPrincipal });
 
 		const client = new WalletConnectClient({
 			walletKit,
