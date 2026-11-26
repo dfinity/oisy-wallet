@@ -1,6 +1,7 @@
 import * as bscEnv from '$env/networks/networks-evm/networks.evm.bsc.env';
 import * as btcEnv from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import {
 	ARBITRUM_ETH_TOKEN,
 	ARBITRUM_SEPOLIA_ETH_TOKEN
@@ -51,12 +52,14 @@ import {
 	enabledNonFungibleTokensBySectionSpam,
 	enabledNonFungibleTokensWithoutSection,
 	enabledNonFungibleTokensWithoutSpam,
+	enabledTokens,
 	enabledUniqueFungibleTokensSymbols,
 	fungibleTokens,
 	tokens,
 	tokensToPin
 } from '$lib/derived/tokens.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
@@ -399,6 +402,35 @@ describe('tokens.derived', () => {
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken
 			]);
+		});
+	});
+
+	describe('enabledTokens', () => {
+		it('should carry the version an enabled suggested token gets when its entry loads', () => {
+			erc20DefaultTokensStore.add(USDC_TOKEN);
+
+			let latest: Token[] = [];
+			const unsubscribe = enabledTokens.subscribe((value) => {
+				latest = value;
+			});
+
+			try {
+				const before = latest.find(({ id }) => id === USDC_TOKEN.id);
+
+				expect(before).toMatchObject({ enabled: true });
+				expect(before && 'version' in before ? before.version : undefined).toBeUndefined();
+
+				erc20CustomTokensStore.setAll([
+					{ data: { ...USDC_TOKEN, enabled: true, version: 1n }, certified: true }
+				]);
+
+				expect(latest.find(({ id }) => id === USDC_TOKEN.id)).toMatchObject({
+					enabled: true,
+					version: 1n
+				});
+			} finally {
+				unsubscribe();
+			}
 		});
 	});
 

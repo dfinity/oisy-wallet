@@ -803,9 +803,13 @@ export const findPutativeToken = <T extends Token>({
 
 /**
  * Compares two token arrays by length, token identity (symbol id),
- * and — for toggleable tokens — the `enabled` flag.
+ * and — for toggleable tokens — the `enabled` flag and the `version` of the user's entry.
  * Fast O(n) check — catches the common case of identical token lists
  * produced from unchanged inputs.
+ *
+ * The version matters on its own: a token that gets an entry without changing `enabled` (e.g. a
+ * suggested token saved automatically) must reach consumers with it, or their next change to the
+ * token is refused.
  */
 // eslint-disable-next-line local-rules/prefer-object-params -- Being a comparison function, it's more ergonomic to take two separate arrays than an object param with two arrays.
 export const tokenListEqual = <T extends { id: symbol }>(a: T[], b: T[]): boolean => {
@@ -828,7 +832,10 @@ export const tokenListEqual = <T extends { id: symbol }>(a: T[], b: T[]): boolea
 		}
 
 		if (itemHasEnabled && otherHasEnabled) {
-			return (item as { enabled: unknown }).enabled === (other as { enabled: unknown }).enabled;
+			return (
+				(item as { enabled: unknown }).enabled === (other as { enabled: unknown }).enabled &&
+				(item as { version?: unknown }).version === (other as { version?: unknown }).version
+			);
 		}
 
 		return true;
