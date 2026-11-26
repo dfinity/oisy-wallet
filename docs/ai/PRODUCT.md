@@ -899,6 +899,8 @@ A WalletConnect pairing is started from the universal scanner by scanning (or pa
 
 OISY supports **several dApp connections at once**, each independently manageable. Connecting a new dApp leaves the already-connected ones in place, and the "Connected Apps" list shows every live session. Each row's close button disconnects only that dApp; a "Disconnect all" control tears every connection down in one tap. When a dApp ends its own session, only that entry is removed and the others keep working. Incoming sign/send requests route to the correct session by topic across all open connections. Previously connected sessions are restored after a page refresh.
 
+Saved connections belong to the identity that approved them. When a different identity signs in on the same browser, OISY drops the saved connections before any request from them can reach it; the dApps are not told. Connections an identity left saved, for example by closing the tab, are restored when that identity signs back in. Connections saved before OISY recorded their identity have none and are dropped once. If the saved connections cannot be dropped, for example because another tab still holds them open, WalletConnect does not start and the usual connection error is shown.
+
 Requests are still handled **one at a time**: while a request from one dApp is under review, a request arriving from another is rejected with a "request skipped" notice. Session proposals are likewise reviewed one at a time — the user adds connections sequentially (scan/paste → review → approve, then repeat).
 
 ---
