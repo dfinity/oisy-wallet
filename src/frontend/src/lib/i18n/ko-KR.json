@@ -108,18 +108,18 @@
 			"do_not_close": "거래가 완료될 때까지 이 탭을 닫지 마세요",
 			"standalone_mode": "앱과 $oisy_short 모두 홈 화면에 설치된 경우 알려진 연결 문제가 발생할 수 있습니다. $oisy_short 연결 또는 트랜잭션 서명에 문제가 발생하면 일반 브라우저에서 앱을 실행해 주세요. 현재 수정 작업 중이며 곧 해결될 예정입니다. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">자세히 알아보기</a>",
 			"video_not_supported": "브라우저가 동영상 재생을 지원하지 않습니다.",
-			"oisy_allowance_used_up_title": "무료 사용 크레딧 소진",
-			"oisy_allowance_used_up": "일일 무료 사용 크레딧이 소진되어 일부 거래의 서명이 실패할 수 있습니다.",
-			"oisy_allowance_used_up_own_cycles": "일일 무료 사용 크레딧이 소진되어 이제 서명에 지출 한도가 사용됩니다.",
-			"oisy_allowance_used_up_short": "일일 무료 사용 크레딧이 소진되어 서명이 실패할 수 있습니다.",
-			"oisy_allowance_used_up_own_cycles_short": "일일 무료 사용 크레딧이 소진되어 서명에 <a href=\"$url\">지출 한도</a>가 사용됩니다.",
+			"oisy_allowance_used_up_title": "서명 관련 일시적 문제",
+			"oisy_allowance_used_up": "$oisy_short에서 거래 서명에 필요한 사이클을 일시적으로 충당할 수 없어 서명이 실패할 수 있습니다. 현재 해결 작업 중입니다.",
+			"oisy_allowance_used_up_own_cycles": "$oisy_short에서 거래 서명에 필요한 사이클을 일시적으로 충당할 수 없어 당분간 내 ICP Cycles로 충당합니다. 현재 해결 작업 중입니다.",
+			"oisy_allowance_used_up_short": "$oisy_short에서 서명 비용을 일시적으로 충당할 수 없어 서명이 실패할 수 있습니다. 현재 해결 작업 중입니다.",
+			"oisy_allowance_used_up_own_cycles_short": "$oisy_short에서 서명 비용을 일시적으로 충당할 수 없어 당분간 <a href=\"$url\">내 ICP Cycles</a>로 충당합니다.",
 			"oisy_allowance_tools_link": "<a href=\"$url\">도구</a>에서 지출 한도를 관리하세요.",
-			"oisy_allowance_tools_link_urgent": "",
-			"oisy_allowance_exceeded": "이 거래의 비용이 $oisy_name 무료 한도를 초과합니다."
+			"oisy_allowance_tools_link_urgent": "급한 거래는 <a href=\"$url\">도구</a>에서 내 ICP Cycles로 서명 비용을 충당할 수 있습니다.",
+			"oisy_allowance_exceeded": "이 거래의 서명에는 $oisy_short에서 충당하는 것보다 많은 사이클이 필요합니다."
 		},
 		"error": {
 			"copy_failed": "",
-			"usage_credits_insufficient": "남은 사용 크레딧이 부족하여 거래에 서명할 수 없습니다."
+			"usage_credits_insufficient": "지금은 거래에 서명할 수 없습니다."
 		}
 	},
 	"progress": {
@@ -931,7 +931,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "사용 크레딧",
-			"description": "일일 무료 사용 크레딧이 소진되면 여기서 설정한 지출 한도까지 서명 비용이 내 ICP Cycles에서 지불됩니다.",
+			"description": "평소에는 $oisy_short에서 서명에 필요한 사이클을 충당합니다. 이것이 제한되면 여기서 설정한 지출 한도까지 내 ICP Cycles가 대신 사용됩니다.",
 			"own_credits": "지출 한도",
 			"balance": "ICP Cycles 잔액",
 			"add_more": "지출 한도 설정",

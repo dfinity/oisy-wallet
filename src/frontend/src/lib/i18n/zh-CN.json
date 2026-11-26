@@ -108,18 +108,18 @@
 			"do_not_close": "在交易完成之前请勿关闭此标签页",
 			"standalone_mode": "将应用程序和 $oisy_short 同时安装到主屏幕时，存在已知的连接问题。如果在连接 $oisy_short 或签署交易时遇到问题，请从普通浏览器启动应用程序。我们正在修复此问题，将很快解决。 <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">了解更多</a>",
 			"video_not_supported": "你的浏览器不支持视频播放。",
-			"oisy_allowance_used_up_title": "免费使用额度已用完",
-			"oisy_allowance_used_up": "你每日的免费使用额度已用完，部分交易可能签署失败。",
-			"oisy_allowance_used_up_own_cycles": "你每日的免费使用额度已用完，签名现在将使用你的支出上限。",
-			"oisy_allowance_used_up_short": "你每日的免费使用额度已用完，签名可能失败。",
-			"oisy_allowance_used_up_own_cycles_short": "你每日的免费使用额度已用完，签名将使用<a href=\"$url\">你的支出上限</a>。",
+			"oisy_allowance_used_up_title": "签名暂时出现问题",
+			"oisy_allowance_used_up": "$oisy_short 暂时无法承担签署交易所需的 Cycles，签名可能失败。我们正在努力解决。",
+			"oisy_allowance_used_up_own_cycles": "$oisy_short 暂时无法承担签署交易所需的 Cycles，目前由你自己的 ICP Cycles 承担。我们正在努力解决。",
+			"oisy_allowance_used_up_short": "$oisy_short 暂时无法承担签名所需的 Cycles，签名可能失败。我们正在努力解决。",
+			"oisy_allowance_used_up_own_cycles_short": "$oisy_short 暂时无法承担签名所需的 Cycles，目前由<a href=\"$url\">你自己的 ICP Cycles</a> 承担。",
 			"oisy_allowance_tools_link": "在<a href=\"$url\">工具</a>中管理你的支出上限。",
-			"oisy_allowance_tools_link_urgent": "",
-			"oisy_allowance_exceeded": "此交易的费用超出了你的 $oisy_name 免费额度。"
+			"oisy_allowance_tools_link_urgent": "对于紧急交易，你可以在<a href=\"$url\">工具</a>中改用你自己的 ICP Cycles 来签名。",
+			"oisy_allowance_exceeded": "此交易签名所需的 Cycles 超出了 $oisy_short 承担的额度。"
 		},
 		"error": {
 			"copy_failed": "",
-			"usage_credits_insufficient": "你的使用额度不足，无法签署此交易。"
+			"usage_credits_insufficient": "目前无法签署你的交易。"
 		}
 	},
 	"progress": {
@@ -931,7 +931,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "使用额度",
-			"description": "每日免费使用额度用完后，签名费用将从你的 ICP Cycles 中支付，以你在此设置的支出上限为限。",
+			"description": "$oisy_short 通常会承担签名所需的 Cycles。当此受到限制时，将改用你自己的 ICP Cycles，以你在此设置的支出上限为限。",
 			"own_credits": "支出上限",
 			"balance": "ICP Cycles 余额",
 			"add_more": "设置支出上限",

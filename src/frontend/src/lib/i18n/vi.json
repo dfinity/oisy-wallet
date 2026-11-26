@@ -108,18 +108,18 @@
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
 			"standalone_mode": "Có các sự cố kết nối đã biết khi cả ứng dụng và $oisy_short đều được cài đặt trên màn hình chính. Nếu gặp sự cố khi kết nối $oisy_short hoặc ký giao dịch, vui lòng khởi động ứng dụng từ trình duyệt thông thường. Chúng tôi đang khắc phục sự cố này và sẽ sớm được giải quyết. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Đọc thêm</a>",
 			"video_not_supported": "",
-			"oisy_allowance_used_up_title": "Đã dùng hết tín dụng sử dụng miễn phí",
-			"oisy_allowance_used_up": "Lượng tín dụng sử dụng miễn phí hằng ngày của bạn đã dùng hết, nên việc ký một số giao dịch có thể thất bại.",
-			"oisy_allowance_used_up_own_cycles": "Lượng tín dụng sử dụng miễn phí hằng ngày của bạn đã dùng hết, nên việc ký giờ sử dụng hạn mức chi tiêu của bạn.",
-			"oisy_allowance_used_up_short": "Tín dụng sử dụng miễn phí hằng ngày của bạn đã dùng hết, nên việc ký có thể thất bại.",
-			"oisy_allowance_used_up_own_cycles_short": "Tín dụng sử dụng miễn phí hằng ngày của bạn đã dùng hết, nên việc ký sử dụng <a href=\"$url\">hạn mức chi tiêu của bạn</a>.",
+			"oisy_allowance_used_up_title": "Sự cố tạm thời khi ký",
+			"oisy_allowance_used_up": "$oisy_short tạm thời không thể trang trải cycles cần thiết để ký giao dịch, nên việc ký có thể thất bại. Chúng tôi đang khắc phục.",
+			"oisy_allowance_used_up_own_cycles": "$oisy_short tạm thời không thể trang trải cycles cần thiết để ký giao dịch, nên hiện tại chúng được trang trải bằng ICP Cycles của chính bạn. Chúng tôi đang khắc phục.",
+			"oisy_allowance_used_up_short": "$oisy_short tạm thời không thể trang trải chi phí ký, nên việc ký có thể thất bại. Chúng tôi đang khắc phục.",
+			"oisy_allowance_used_up_own_cycles_short": "$oisy_short tạm thời không thể trang trải chi phí ký, nên hiện tại chi phí này được trang trải bằng <a href=\"$url\">ICP Cycles của chính bạn</a>.",
 			"oisy_allowance_tools_link": "Quản lý hạn mức chi tiêu của bạn trong&nbsp;<a href=\"$url\">Công cụ</a>.",
-			"oisy_allowance_tools_link_urgent": "",
-			"oisy_allowance_exceeded": "Chi phí của giao dịch này vượt quá hạn mức miễn phí của $oisy_name."
+			"oisy_allowance_tools_link_urgent": "Với giao dịch khẩn cấp, bạn có thể trang trải chi phí ký bằng ICP Cycles của chính bạn trong&nbsp;<a href=\"$url\">Công cụ</a>.",
+			"oisy_allowance_exceeded": "Giao dịch này cần nhiều cycles để ký hơn mức $oisy_short trang trải."
 		},
 		"error": {
 			"copy_failed": "",
-			"usage_credits_insufficient": "Không thể ký giao dịch của bạn vì bạn không còn đủ tín dụng sử dụng."
+			"usage_credits_insufficient": "Hiện không thể ký giao dịch của bạn."
 		}
 	},
 	"progress": {
@@ -931,7 +931,7 @@
 	"usage_credits": {
 		"text": {
 			"title": "Tín dụng sử dụng",
-			"description": "Khi tín dụng sử dụng miễn phí hằng ngày của bạn đã hết, việc ký sẽ được trả bằng ICP Cycles của bạn, tối đa bằng hạn mức chi tiêu bạn đặt ở đây.",
+			"description": "$oisy_short thường trang trải cycles cần thiết để ký. Khi việc này bị giới hạn, ICP Cycles của chính bạn sẽ được dùng thay, tối đa bằng hạn mức chi tiêu bạn đặt ở đây.",
 			"own_credits": "Hạn mức chi tiêu",
 			"balance": "Số dư ICP Cycles",
 			"add_more": "Đặt hạn mức chi tiêu",
