@@ -1,6 +1,7 @@
 import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { autoLoadIcrcToken, setCustomToken } from '$icp-eth/services/icrc-token.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { icrcUnavailableCustomTokensStore } from '$icp/stores/icrc-unavailable-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { ZERO } from '$lib/constants/app.constants';
@@ -343,5 +344,17 @@ describe('custom-token.services', () => {
 				});
 			}
 		);
+
+		it('should let a token deleted earlier back into the token lists', async () => {
+			backendCanisterMock.setCustomToken.mockResolvedValue(undefined);
+
+			icrcUnavailableCustomTokensStore.remove(mockIcrcCustomToken.ledgerCanisterId);
+
+			await setCustomToken({ token: mockIcrcCustomToken, identity: mockIdentity, enabled: true });
+
+			expect(
+				icrcUnavailableCustomTokensStore.isDeleted(mockIcrcCustomToken.ledgerCanisterId)
+			).toBeFalsy();
+		});
 	});
 });
