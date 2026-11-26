@@ -39,6 +39,9 @@ describe('SuggestedTokensSaver', () => {
 
 		vi.spyOn(tokensDerived, 'enabledTokens', 'get').mockImplementation(() => readable([usdc]));
 		vi.spyOn(modalDerived, 'modalManageTokens', 'get').mockImplementation(() => readable(false));
+		vi.spyOn(modalDerived, 'modalHideToken', 'get').mockImplementation(() => readable(false));
+		vi.spyOn(modalDerived, 'modalIcHideToken', 'get').mockImplementation(() => readable(false));
+		vi.spyOn(modalDerived, 'modalSolHideToken', 'get').mockImplementation(() => readable(false));
 	});
 
 	it('should save a suggested token once the user holds a balance in it', async () => {
@@ -92,30 +95,38 @@ describe('SuggestedTokensSaver', () => {
 		expect(saveSuggestedTokens).not.toHaveBeenCalled();
 	});
 
-	it('should hold the save while Manage tokens is open and send it after it closes', async () => {
-		const manageTokensOpen = writable(true);
+	it.each([
+		{ dialog: 'Manage tokens', store: 'modalManageTokens' as const },
+		{ dialog: 'the ERC-20 Hide dialog', store: 'modalHideToken' as const },
+		{ dialog: 'the ICRC Hide dialog', store: 'modalIcHideToken' as const },
+		{ dialog: 'the SPL Hide dialog', store: 'modalSolHideToken' as const }
+	])(
+		'should hold the save while $dialog is open and send it after it closes',
+		async ({ store }) => {
+			const dialogOpen = writable(true);
 
-		vi.spyOn(modalDerived, 'modalManageTokens', 'get').mockImplementation(() => manageTokensOpen);
+			vi.spyOn(modalDerived, store, 'get').mockImplementation(() => dialogOpen);
 
-		render(SuggestedTokensSaver);
+			render(SuggestedTokensSaver);
 
-		setBalance(100n);
+			setBalance(100n);
 
-		await tick();
+			await tick();
 
-		expect(saveSuggestedTokens).not.toHaveBeenCalled();
+			expect(saveSuggestedTokens).not.toHaveBeenCalled();
 
-		manageTokensOpen.set(false);
+			dialogOpen.set(false);
 
-		setBalance(200n);
+			setBalance(200n);
 
-		await waitFor(() => {
-			expect(saveSuggestedTokens).toHaveBeenCalledExactlyOnceWith({
-				identity: mockIdentity,
-				tokens: [usdc]
+			await waitFor(() => {
+				expect(saveSuggestedTokens).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					tokens: [usdc]
+				});
 			});
-		});
-	});
+		}
+	);
 
 	it('should not fail when the save rejects', async () => {
 		vi.mocked(saveSuggestedTokens).mockRejectedValueOnce(new Error('Save failed'));

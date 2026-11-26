@@ -3,7 +3,12 @@
 	import { untrack } from 'svelte';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalManageTokens } from '$lib/derived/modal.derived';
+	import {
+		modalHideToken,
+		modalIcHideToken,
+		modalManageTokens,
+		modalSolHideToken
+	} from '$lib/derived/modal.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import {
 		findSuggestedTokensWithBalance,
@@ -17,9 +22,9 @@
 	const sentTokenIds = new SvelteSet<TokenId>();
 
 	const save = () => {
-		// Manage tokens keeps a toggled token without the version a new entry would give it, so a save
-		// now would make the user's own Save fail. The next balance update after it closes tries again.
-		if ($modalManageTokens) {
+		// Token-management dialogs retain a token's version while editing or confirming a hide.
+		// A new entry would invalidate it. The next balance update after the dialog closes tries again.
+		if ($modalManageTokens || $modalHideToken || $modalIcHideToken || $modalSolHideToken) {
 			return;
 		}
 
