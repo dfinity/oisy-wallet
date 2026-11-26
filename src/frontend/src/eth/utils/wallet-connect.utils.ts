@@ -856,20 +856,24 @@ export const toTypedDataDomainChainId = (value: unknown): bigint | undefined => 
 const MAX_DATE_SECONDS = 8_640_000_000_000n;
 
 /**
- * A deadline as a number of seconds, when it is one a date can be built from.
+ * A deadline as the review states it: a number of seconds a date can be built from, or never.
  *
- * ERC-2612 permits routinely say "never expires" with a saturated `uint256`, and Permit2 with a
- * saturated `uint48`, and neither is a moment in time: past the last second a `Date` holds, the
+ * Permit2 says "never expires" with a saturated `uint48`, and its transfers and ERC-3009 with a
+ * saturated `uint256`, and neither is a moment in time: past the last second a `Date` holds, the
  * date renders as "Invalid Date", or as a year with seventy digits once it is past what a `Number`
- * holds exactly. Such a deadline is left out rather than rendered, since a nonsense date reads as
- * a real one.
+ * holds exactly. Such a deadline is never reached, so it is stated as such rather than rendered,
+ * since a nonsense date reads as a real one.
  */
-const toExpirationSeconds = (value: unknown): number | undefined => {
+const toExpiration = (
+	value: unknown
+): Pick<WalletConnectEthTypedDataAllowance, 'expiration' | 'neverExpires'> => {
 	const seconds = toDeclaredUint(value);
 
-	return nonNullish(seconds) && seconds >= ZERO && seconds <= MAX_DATE_SECONDS
-		? Number(seconds)
-		: undefined;
+	if (isNullish(seconds) || seconds < ZERO) {
+		return {};
+	}
+
+	return seconds > MAX_DATE_SECONDS ? { neverExpires: true } : { expiration: Number(seconds) };
 };
 
 const toDeclaredStruct = (value: unknown): Record<string, unknown> =>
@@ -886,7 +890,17 @@ const PERMIT2_DETAILS: Array<TypedDataField> = [
 
 // Permit2 names the token it is granting an allowance over, and the contract verifying the
 // signature is Permit2 itself rather than that token, so the domain must not be read here.
-const toPermit2Allowance = (details: unknown): WalletConnectEthTypedDataAllowance => {
+//
+// Permit2 stores an expiration of 0 as the time of the block that submits the permit, so the
+// allowance lasts for that transaction, which can come at any time until `sigDeadline`. That
+// deadline is then when the spender can last take the tokens.
+const toPermit2Allowance = ({
+	details,
+	sigDeadline
+}: {
+	details: unknown;
+	sigDeadline: unknown;
+}): WalletConnectEthTypedDataAllowance => {
 	const { token, amount, expiration } = toDeclaredStruct(details);
 
 	const declaredAmount = toDeclaredUint(amount);
@@ -895,7 +909,7 @@ const toPermit2Allowance = (details: unknown): WalletConnectEthTypedDataAllowanc
 		token: toDeclaredAddress(token),
 		amount: declaredAmount,
 		unlimited: declaredAmount === MAX_UINT_160,
-		expiration: toExpirationSeconds(expiration)
+		...toExpiration(toDeclaredUint(expiration) === ZERO ? sigDeadline : expiration)
 	};
 };
 
@@ -936,7 +950,7 @@ const toPermit2TransferAllowance = ({
 		token: toDeclaredAddress(token),
 		amount: declaredAmount,
 		unlimited: declaredAmount === MAX_UINT_256,
-		expiration: toExpirationSeconds(deadline)
+		...toExpiration(deadline)
 	};
 };
 
@@ -978,7 +992,7 @@ const toErc3009Approval = ({
 		{
 			token: toDeclaredAddress(verifyingContract),
 			amount: toDeclaredUint(value),
-			expiration: toExpirationSeconds(validBefore)
+			...toExpiration(validBefore)
 		}
 	]
 });
@@ -1003,9 +1017,9 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 			],
 			PermitDetails: PERMIT2_DETAILS
 		},
-		toApproval: ({ message: { spender, details } }) => ({
+		toApproval: ({ message: { spender, details, sigDeadline } }) => ({
 			spender: toDeclaredAddress(spender),
-			allowances: [toPermit2Allowance(details)]
+			allowances: [toPermit2Allowance({ details, sigDeadline })]
 		})
 	},
 	// Uniswap Permit2 `PermitBatch`: one signature setting an allowance over every token it lists,
@@ -1020,9 +1034,11 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 			],
 			PermitDetails: PERMIT2_DETAILS
 		},
-		toApproval: ({ message: { spender, details } }) => ({
+		toApproval: ({ message: { spender, details, sigDeadline } }) => ({
 			spender: toDeclaredAddress(spender),
-			allowances: (Array.isArray(details) ? details : []).map(toPermit2Allowance)
+			allowances: (Array.isArray(details) ? details : []).map((entry) =>
+				toPermit2Allowance({ details: entry, sigDeadline })
+			)
 		})
 	},
 	// Uniswap Permit2 `PermitTransferFrom`: one transfer, of up to the amount it names.
@@ -1080,7 +1096,10 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 		// ERC-2612 names no token, because the permit is verified by the token contract itself. The
 		// domain is what the digest is separated by, so `verifyingContract` is covered by the
 		// signature exactly as the members of the message are.
-		toApproval: ({ message: { spender, value, deadline }, domain: { verifyingContract } }) => {
+		//
+		// The deadline only limits when the permit can be submitted: the allowance it sets has no
+		// end, and that is what the review states.
+		toApproval: ({ message: { spender, value }, domain: { verifyingContract } }) => {
 			const declaredValue = toDeclaredUint(value);
 
 			return {
@@ -1090,7 +1109,7 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 						token: toDeclaredAddress(verifyingContract),
 						amount: declaredValue,
 						unlimited: declaredValue === MAX_UINT_256,
-						expiration: toExpirationSeconds(deadline)
+						neverExpires: true
 					}
 				]
 			};
@@ -1111,14 +1130,17 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 		// DAI carries no amount: `allowed` sets the allowance to the largest a `uint256` holds, and
 		// clearing it revokes. The bool is the allowance, so it is read as one rather than left as
 		// a word in the folded message.
-		toApproval: ({ message: { spender, expiry, allowed }, domain: { verifyingContract } }) => ({
+		//
+		// `expiry` only limits when the permit can be submitted, and 0 lets it be submitted at any
+		// time. Either way the allowance it sets has no end.
+		toApproval: ({ message: { spender, allowed }, domain: { verifyingContract } }) => ({
 			spender: toDeclaredAddress(spender),
 			allowances: [
 				{
 					token: toDeclaredAddress(verifyingContract),
 					amount: allowed === true ? undefined : ZERO,
 					unlimited: allowed === true,
-					expiration: toExpirationSeconds(expiry)
+					neverExpires: true
 				}
 			]
 		})
