@@ -23,9 +23,9 @@
 //!   payout, as `service::claim_tip` says at length. What turns a "maybe" back into an answer is
 //!   the payout's `created_at_time`: a retry by the same claimer inside the ledger's transaction
 //!   window is the same transaction, which the ledger either executes once or answers with the
-//!   block where it already did (see [`transfer_from`]). The deadline is [`PAYOUT_TIMEOUT_SECONDS`]
-//!   rather than the `bounded_wait` default of 300 s, which is far longer than a ledger's answer
-//!   stays worth having.
+//!   block where it already did (see [`transfer_from`]). Every call here waits
+//!   [`LEDGER_CALL_TIMEOUT_SECONDS`] rather than the `bounded_wait` default of 300 s, which is far
+//!   longer than a ledger's answer stays worth having.
 //! - That client is a struct bound to one canister and bundles cycles-only methods — `deposit`,
 //!   `withdraw`, `create_canister`. Tips points at whatever ledger the sender chose, and needs
 //!   three methods.
@@ -132,6 +132,7 @@ fn classify(response: Result<Nat, TransferFromError>) -> Result<Nat, TransferFro
 /// Returns the ledger's own message when the call fails or cannot be decoded.
 pub async fn fee(ledger: Principal) -> Result<Nat, String> {
     Call::bounded_wait(ledger, "icrc1_fee")
+        .change_timeout(LEDGER_CALL_TIMEOUT_SECONDS)
         .with_args(&())
         .await
         .map_err(|err| format!("icrc1_fee call failed: {err:?}"))?
@@ -145,6 +146,7 @@ pub async fn fee(ledger: Principal) -> Result<Nat, String> {
 /// Returns the ledger's own message when the call fails or cannot be decoded.
 pub async fn allowance(ledger: Principal, args: AllowanceArgs) -> Result<Allowance, String> {
     Call::bounded_wait(ledger, "icrc2_allowance")
+        .change_timeout(LEDGER_CALL_TIMEOUT_SECONDS)
         .with_args(&(args,))
         .await
         .map_err(|err| format!("icrc2_allowance call failed: {err:?}"))?
@@ -152,15 +154,17 @@ pub async fn allowance(ledger: Principal, args: AllowanceArgs) -> Result<Allowan
         .map_err(|err| format!("icrc2_allowance decode failed: {err:?}"))
 }
 
-/// How long a payout waits for the ledger before its outcome counts as unknown.
+/// How long a call to the sender's ledger waits for an answer: the two reads at
+/// creation and the payout alike. For the payout, this is when its outcome
+/// counts as unknown.
 ///
 /// A cross-subnet ledger call takes seconds, so thirty is roughly ten times what
 /// a healthy answer needs and the point past which the answer has stopped being
-/// worth waiting for. It also bounds what one open payout can hold: the cycles
+/// worth waiting for. It also bounds what one open call can hold: the cycles
 /// the system sets aside for a reply come back at the deadline whether or not
 /// the ledger answers, and the `bounded_wait` default of 300 s would hold ten
 /// times as many at once for an answer that went stale long before.
-const PAYOUT_TIMEOUT_SECONDS: u32 = 30;
+const LEDGER_CALL_TIMEOUT_SECONDS: u32 = 30;
 
 /// Moves tokens from the sender's account to the claimer's, drawing on the
 /// per-tip allowance. The ledger charges its fee to the allowance, not to the
@@ -179,7 +183,7 @@ const PAYOUT_TIMEOUT_SECONDS: u32 = 30;
 /// [`TransferFromCallError::InsufficientAllowance`] when the reservation no
 /// longer covers the payout; [`TransferFromCallError::InsufficientFunds`] when
 /// the sender's balance dropped below it; [`TransferFromCallError::Unresolved`]
-/// when [`PAYOUT_TIMEOUT_SECONDS`] passes with no answer, leaving the outcome
+/// when [`LEDGER_CALL_TIMEOUT_SECONDS`] passes with no answer, leaving the outcome
 /// unknown — see the module comment for why the claim state machine can take
 /// that answer; [`TransferFromCallError::TooOld`] when the stamp has aged out
 /// of the ledger's window; [`TransferFromCallError::Failed`] for any other
@@ -189,7 +193,7 @@ pub async fn transfer_from(
     args: TransferFromArgs,
 ) -> Result<Nat, TransferFromCallError> {
     let response = Call::bounded_wait(ledger, "icrc2_transfer_from")
-        .change_timeout(PAYOUT_TIMEOUT_SECONDS)
+        .change_timeout(LEDGER_CALL_TIMEOUT_SECONDS)
         .with_args(&(args,))
         .await
         .map_err(|err| {
