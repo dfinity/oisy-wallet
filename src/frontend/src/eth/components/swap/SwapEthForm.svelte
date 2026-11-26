@@ -6,6 +6,7 @@
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
+	import SwapDestination from '$lib/components/swap/SwapDestination.svelte';
 	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
@@ -264,6 +265,8 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<div class="mt-4 flex flex-col">
 				<SwapProviderCell {onShowProviderList} />
+
+				<SwapDestination />
 
 				<SwapFeeRow
 					show={nonNullish($swapAmountsStore?.selectedProvider) && nonNullish($feeTokenIdStore)}

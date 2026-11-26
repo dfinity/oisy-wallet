@@ -4,6 +4,7 @@
 	import { oisyTradeSwapEnabled } from '$env/oisy-trade-swap';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
+	import SwapDestination from '$lib/components/swap/SwapDestination.svelte';
 	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
@@ -348,6 +349,7 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<div class="mt-4 flex flex-col">
 				<SwapProviderCell {onShowProviderList} />
+				<SwapDestination />
 				<SwapFeeRow displayExchangeRate={false}>
 					<SwapFees />
 				</SwapFeeRow>

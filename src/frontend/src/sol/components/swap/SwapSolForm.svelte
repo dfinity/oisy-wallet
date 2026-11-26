@@ -7,6 +7,7 @@
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import { isTokenCkSolLedger } from '$icp/utils/ic-send.utils';
+	import SwapDestination from '$lib/components/swap/SwapDestination.svelte';
 	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProviderCell from '$lib/components/swap/SwapProviderCell.svelte';
@@ -287,6 +288,8 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<div class="mt-4 flex flex-col">
 				<SwapProviderCell {onShowProviderList} />
+
+				<SwapDestination />
 
 				<SwapFeeRow>
 					<SwapSolFees {isLifi} {lifiFee} />

@@ -189,8 +189,9 @@
 
 	<div class="flex flex-col gap-3">
 		<SwapProvider {slippageValue} />
-		{@render swapFees()}
-		<SwapReviewDestination bind:swapBlocked={isDestinationBlocked} />
+		<SwapReviewDestination bind:swapBlocked={isDestinationBlocked}>
+			{@render swapFees()}
+		</SwapReviewDestination>
 	</div>
 
 	{#if isNearIntentsProvider && !$hasAcknowledgedNearIntentsSwap}

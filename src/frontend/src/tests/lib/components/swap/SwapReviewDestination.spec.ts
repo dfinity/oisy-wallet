@@ -89,6 +89,26 @@ describe('SwapReviewDestination', () => {
 		expect(getByTestId('swap-blocked')).toHaveTextContent('false');
 	});
 
+	it('shows the address above the fees, and the first-time warning below them', () => {
+		const context = setup({
+			offer: nearIntentsOfferPaying(mockEthAddress2),
+			customDestination: mockEthAddress2
+		});
+
+		const { getByText, getByTestId } = render(SwapReviewDestinationTestHost, { context });
+
+		const address = getByText(mockEthAddress2);
+		const fees = getByTestId('swap-fees');
+		const warning = getByTestId(SEND_FIRST_TIME_DESTINATION_CONFIRM);
+
+		expect(address.compareDocumentPosition(fees) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+			Node.DOCUMENT_POSITION_FOLLOWING
+		);
+		expect(fees.compareDocumentPosition(warning) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+			Node.DOCUMENT_POSITION_FOLLOWING
+		);
+	});
+
 	it('does not warn about an address the wallet has sent to', () => {
 		mockKnownDestinations({ [mockEthAddress2]: { amounts: [], address: mockEthAddress2 } });
 
@@ -115,7 +135,7 @@ describe('SwapReviewDestination', () => {
 		expect(getByTestId('swap-blocked')).toHaveTextContent('true');
 	});
 
-	it('shows nothing for another provider', () => {
+	it('shows only the fees for another provider', () => {
 		const icpSwapOffer: SwapMappedResult = {
 			provider: SwapProvider.ICP_SWAP,
 			receiveAmount: 950_000n,
@@ -128,6 +148,7 @@ describe('SwapReviewDestination', () => {
 		const { queryByText, getByTestId } = render(SwapReviewDestinationTestHost, { context });
 
 		expect(queryByText(en.convert.text.default_destination)).not.toBeInTheDocument();
+		expect(getByTestId('swap-fees')).toBeInTheDocument();
 		expect(getByTestId('swap-blocked')).toHaveTextContent('false');
 	});
 });

@@ -5,7 +5,6 @@
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
-	import SwapDestination from '$lib/components/swap/SwapDestination.svelte';
 	import SwapReceiveShortcuts from '$lib/components/swap/SwapReceiveShortcuts.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
 	import SwapTwoSwapsHint from '$lib/components/swap/SwapTwoSwapsHint.svelte';
@@ -448,8 +447,6 @@
 		{/if}
 
 		{@render swapDetails?.()}
-
-		<SwapDestination />
 	</div>
 
 	{#snippet toolbar()}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, untrack } from 'svelte';
+	import { getContext, type Snippet, untrack } from 'svelte';
 	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
 	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
 	import DestinationValue from '$lib/components/address/DestinationValue.svelte';
@@ -31,9 +31,12 @@
 		// Whether the destination holds the swap back: a quote for another recipient than the one the
 		// user chose, or a first-time address whose warning is not ticked yet.
 		swapBlocked?: boolean;
+		// The fees, which stay last among the rows: they go between the address and its first-time
+		// warning, as in Send and Convert.
+		children?: Snippet;
 	}
 
-	let { swapBlocked = $bindable(false) }: Props = $props();
+	let { swapBlocked = $bindable(false), children }: Props = $props();
 
 	const { destinationToken, customDestination } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
@@ -121,14 +124,16 @@
 		isDestinationCustom={!paysOwnAddress}
 		token={$destinationToken}
 	/>
+{/if}
 
-	{#if firstTimeDestination}
-		<div class="mt-4">
-			<FirstTimeDestinationWarning
-				confirmed={firstTimeDestinationConfirmed}
-				onConfirm={() => (firstTimeDestinationConfirmed = !firstTimeDestinationConfirmed)}
-				styleClass="mb-0!"
-			/>
-		</div>
-	{/if}
+{@render children?.()}
+
+{#if firstTimeDestination}
+	<div class="mt-4">
+		<FirstTimeDestinationWarning
+			confirmed={firstTimeDestinationConfirmed}
+			onConfirm={() => (firstTimeDestinationConfirmed = !firstTimeDestinationConfirmed)}
+			styleClass="mb-0!"
+		/>
+	</div>
 {/if}

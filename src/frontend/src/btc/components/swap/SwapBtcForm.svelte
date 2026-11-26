@@ -14,6 +14,7 @@
 	import { convertSatoshisToBtc, isInvalidUtxosFee } from '$btc/utils/btc-send.utils';
 	import { invalidSendAmount } from '$btc/utils/input.utils';
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
+	import SwapDestination from '$lib/components/swap/SwapDestination.svelte';
 	import SwapFeeRow from '$lib/components/swap/SwapFeeRow.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapLifiBtcRelayWarning from '$lib/components/swap/SwapLifiBtcRelayWarning.svelte';
@@ -223,6 +224,8 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<div class="mt-4 flex flex-col">
 				<SwapProviderCell {onShowProviderList} />
+
+				<SwapDestination />
 
 				<SwapFeeRow show={nonNullish($swapAmountsStore?.selectedProvider)}>
 					<SwapBtcFees />

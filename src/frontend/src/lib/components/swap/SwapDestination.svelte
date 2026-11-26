@@ -49,7 +49,9 @@
 </script>
 
 {#if show && nonNullish(picker) && nonNullish($destinationToken)}
-	<div class="mt-4" data-tid={SWAP_DESTINATION} transition:slide>
+	<!-- The gap to the fees below is padding inside the row, so they slide along as it opens and
+	closes. -->
+	<div class="pb-2" data-tid={SWAP_DESTINATION} transition:slide>
 		<DestinationValue
 			destination={$customDestination}
 			isDestinationCustom={nonNullish($customDestination)}
