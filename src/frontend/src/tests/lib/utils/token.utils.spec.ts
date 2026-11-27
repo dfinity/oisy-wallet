@@ -38,6 +38,7 @@ import {
 	getMaxTransactionAmount,
 	getTokenDisplayName,
 	getTokenDisplaySymbol,
+	isTokenSuggested,
 	isUSD1Token,
 	mapDefaultTokenToToggleable,
 	mapTokenUi,
@@ -627,6 +628,36 @@ describe('token.utils', () => {
 
 				expect(result.enabled).toBeTruthy();
 			});
+		});
+	});
+
+	describe('isTokenSuggested', () => {
+		it.each([
+			{ description: 'ERC20 token USDC', token: USDC_TOKEN },
+			{ description: 'ERC20 token ICP on Base', token: ICP_BASE_TOKEN },
+			{ description: 'SPL token USDC on Solana', token: USDC_SOL_TOKEN }
+		])('should be true for the suggested $description', ({ token }) => {
+			expect(isTokenSuggested(token)).toBeTruthy();
+		});
+
+		it('should be true for a suggested ICRC token', () => {
+			const token = { ...mockValidIcToken, ledgerCanisterId: 'etik7-oiaaa-aaaar-qagia-cai' };
+
+			vi.spyOn(
+				tokensIcrcCkEnv,
+				'ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS',
+				'get'
+			).mockReturnValue([token.ledgerCanisterId]);
+
+			expect(isTokenSuggested(token)).toBeTruthy();
+		});
+
+		it.each([
+			{ description: 'ERC20 token LINK', token: LINK_TOKEN },
+			{ description: 'Ethereum token', token: ETHEREUM_TOKEN },
+			{ description: 'ICRC token that is not suggested', token: mockValidIcToken }
+		])('should be false for the $description', ({ token }) => {
+			expect(isTokenSuggested(token)).toBeFalsy();
 		});
 	});
 

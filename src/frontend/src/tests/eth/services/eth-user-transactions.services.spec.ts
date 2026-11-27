@@ -28,7 +28,7 @@ import type { GetUserTransactionsResponse } from '$lib/types/api';
 import type { Transaction } from '$lib/types/transaction';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { createMockBackendUserTransaction } from '$tests/mocks/user-transactions.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -506,6 +506,70 @@ describe('eth-user-transactions.services', () => {
 			expect(mockSaveUserTransactions).toHaveBeenCalledOnce();
 		});
 
+		describe('when the canister refuses the save for its rate limit', () => {
+			beforeEach(() => {
+				vi.useFakeTimers();
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it('resolves the page while the save waits for the limit window', async () => {
+				mockTransactionsProvider.mockResolvedValue([
+					makeTx({ hash: '0xold1', blockNumber: 80, timestamp: 800 })
+				]);
+				mockSaveUserTransactions
+					.mockRejectedValueOnce({
+						RateLimited: { max_calls: 30, window_ns: 60_000_000_000n, caller: mockPrincipal }
+					})
+					.mockResolvedValue(undefined);
+
+				const { hasMore } = await loadNextEthUserTransactions({
+					identity: mockIdentity,
+					address: mockEthAddress,
+					transactionTokenId: mockBackendTokenId,
+					tokenId: mockTokenId,
+					networkId: mockNetworkId,
+					cursor: undefined,
+					oldestLoadedBlockNumber: 100,
+					beAtCapacity: false
+				});
+
+				expect(hasMore).toBeTruthy();
+
+				await vi.waitFor(() => expect(mockSaveUserTransactions).toHaveBeenCalledOnce());
+
+				await vi.advanceTimersByTimeAsync(60_000);
+
+				expect(mockSaveUserTransactions).toHaveBeenCalledTimes(2);
+			});
+		});
+
+		it('resolves the page when the save in the background fails', async () => {
+			mockTransactionsProvider.mockResolvedValue([
+				makeTx({ hash: '0xold1', blockNumber: 80, timestamp: 800 })
+			]);
+			mockGetBlockNumber.mockRejectedValue(new Error('Chain tip unavailable'));
+
+			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: mockBackendTokenId,
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				cursor: undefined,
+				oldestLoadedBlockNumber: 100,
+				beAtCapacity: false
+			});
+
+			expect(hasMore).toBeTruthy();
+
+			await vi.waitFor(() => expect(mockGetBlockNumber).toHaveBeenCalledOnce());
+
+			expect(mockSaveUserTransactions).not.toHaveBeenCalled();
+		});
+
 		// Case 6: oldestLoadedBlockNumber is 0 — no older history possible
 		it('returns hasMore false when oldestLoadedBlockNumber is 0', async () => {
 			const { hasMore } = await loadNextEthUserTransactions({
@@ -898,6 +962,36 @@ describe('eth-user-transactions.services', () => {
 			});
 
 			expect(result).toEqual({ success: false });
+		});
+
+		describe('when the canister refuses the save for its rate limit', () => {
+			beforeEach(() => {
+				vi.useFakeTimers();
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it('sends it again once the window has passed', async () => {
+				mockSaveUserTransactions
+					.mockRejectedValueOnce({
+						RateLimited: { max_calls: 30, window_ns: 60_000_000_000n, caller: mockPrincipal }
+					})
+					.mockResolvedValue(undefined);
+
+				const result = saveEthFinalizedTransactions({
+					identity: mockIdentity,
+					tokenId: mockBackendTokenId,
+					transactions: [makeTx({ hash: '0xfinalized', blockNumber: 100 })],
+					currentBlockNumber: 200
+				});
+
+				await vi.advanceTimersByTimeAsync(60_000);
+
+				await expect(result).resolves.toEqual({ success: true });
+				expect(mockSaveUserTransactions).toHaveBeenCalledTimes(2);
+			});
 		});
 	});
 });

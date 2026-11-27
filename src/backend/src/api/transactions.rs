@@ -10,7 +10,10 @@ use shared::types::{
 use crate::{
     state::{mutate_state, read_state},
     transactions::model,
-    utils::guards::{caller_is_not_anonymous, caller_is_registered_user},
+    utils::{
+        guards::{caller_is_not_anonymous, caller_is_registered_user},
+        rate_limiter::{self, SAVE_USER_TRANSACTIONS_RATE_LIMITER},
+    },
 };
 
 /// Retrieves stored finalized transactions for the caller, with cursor-based pagination.
@@ -50,6 +53,12 @@ pub fn get_user_transactions(request: GetUserTransactionsRequest) -> GetUserTran
 /// Errors are enumerated by: `UserTransactionError`.
 #[update(guard = "caller_is_registered_user")]
 pub fn save_user_transactions(request: SaveUserTransactionsRequest) -> SaveUserTransactionsResult {
+    if let Err(e) =
+        SAVE_USER_TRANSACTIONS_RATE_LIMITER.with(rate_limiter::RateLimiter::check_caller)
+    {
+        return Err(UserTransactionError::RateLimited(e)).into();
+    }
+
     let SaveUserTransactionsRequest {
         token_id,
         transactions,
@@ -61,10 +70,15 @@ pub fn save_user_transactions(request: SaveUserTransactionsRequest) -> SaveUserT
         return Err(UserTransactionError::TooManyTransactions).into();
     }
 
-    // A transaction with an oversized field is not chain data, so the call is
-    // rejected outright rather than returned as an error, the same way
-    // `set_custom_token` handles input that is too large. Kept out of the doc
-    // comment because those are exported into `backend.did`.
+    // A token the wallet keeps no history for, or a transaction with an oversized
+    // field, is not chain data, so the call is rejected outright rather than
+    // returned as an error, the same way `set_custom_token` handles input that is
+    // too large. Kept out of the doc comment because those are exported into
+    // `backend.did`.
+    if let Err(err) = model::validate_token_id(&token_id) {
+        ic_cdk::trap(format!("Invalid token: {err}"));
+    }
+
     if let Err(err) = model::validate_transactions(&transactions) {
         ic_cdk::trap(format!("Invalid transaction: {err}"));
     }

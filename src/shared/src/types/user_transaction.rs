@@ -1,9 +1,12 @@
 use candid::{CandidType, Deserialize, Nat};
 
-use super::{custom_token::ChainId, token_id::TokenId};
+use super::{signer::RateLimitError, token_id::TokenId};
 
 /// Maximum number of transactions that can be stored per (user, token) pair.
 pub const MAX_USER_TRANSACTIONS_PER_TOKEN: usize = 10_000;
+
+/// Maximum number of tokens a user can store transactions for.
+pub const MAX_USER_TRANSACTION_TOKENS_PER_USER: usize = 500;
 
 /// Maximum number of transactions that can be saved in a single request.
 pub const MAX_SAVE_USER_TRANSACTIONS_BATCH: usize = 500;
@@ -26,6 +29,12 @@ pub const MAX_USER_TRANSACTION_ADDRESS_LEN: usize = 160;
 /// transfers use 138 bytes and even large contract calls stay well below this,
 /// so the cap only excludes payloads that are not transaction calldata.
 pub const MAX_USER_TRANSACTION_DATA_LEN: usize = 16 * 1024;
+
+/// Length, in bytes, the hex-encoded EVM input data is cut to when stored: `0x`, the
+/// 4-byte function selector and the first two 32-byte arguments. That is all the
+/// wallet reads from it to tell an approve, transfer or deposit and to name its
+/// spender, recipient or amount.
+pub const MAX_STORED_USER_TRANSACTION_DATA_LEN: usize = 2 + 2 * (4 + 2 * 32);
 
 /// Maximum length, in bytes, of an ICRC memo. The ledgers we read cap memos at
 /// 32 or 64 bytes.
@@ -72,15 +81,12 @@ pub enum NetworkTransactionData {
     Sol(SolTransactionData),
 }
 
-/// EVM / Ethereum-family transaction data.
+/// EVM / Ethereum-family transaction data: what the wallet shows for a transaction.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct EvmTransactionData {
-    pub chain_id: Option<ChainId>,
-    pub nonce: Option<u64>,
-    pub gas_limit: Option<Nat>,
     pub gas_price: Option<Nat>,
     pub gas_used: Option<Nat>,
-    /// Hex-encoded input data.
+    /// Hex-encoded input data, stored cut to `MAX_STORED_USER_TRANSACTION_DATA_LEN`.
     pub data: Option<String>,
     /// NFT token ID (ERC-721 / ERC-1155).
     pub nft_token_id: Option<Nat>,
@@ -173,4 +179,7 @@ pub enum UserTransactionError {
     InternalError {
         msg: String,
     },
+    /// The user already stores transactions for `MAX_USER_TRANSACTION_TOKENS_PER_USER` tokens.
+    TooManyTokens,
+    RateLimited(RateLimitError),
 }

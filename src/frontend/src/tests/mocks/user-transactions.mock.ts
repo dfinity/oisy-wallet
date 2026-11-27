@@ -53,9 +53,6 @@ export const createMockBackendUserTransaction = ({
 	value: 1000n,
 	network_data: {
 		Evm: {
-			chain_id: toNullable(1n),
-			nonce: toNullable(1n),
-			gas_limit: toNullable(21000n),
 			gas_price: toNullable(20_000_000_000n),
 			gas_used: toNullable(21000n),
 			data: toNullable(),
@@ -74,9 +71,6 @@ export const mockUserTransaction: UserTransaction = {
 		Evm: {
 			nft_token_id: toNullable(),
 			data: toNullable(),
-			chain_id: toNullable(1n),
-			nonce: toNullable(42n),
-			gas_limit: toNullable(),
 			gas_used: toNullable(),
 			gas_price: toNullable()
 		}
@@ -94,9 +88,6 @@ export const mockUserTransaction2: UserTransaction = {
 		Evm: {
 			nft_token_id: toNullable(),
 			data: toNullable('0xdata'),
-			chain_id: toNullable(1n),
-			nonce: toNullable(43n),
-			gas_limit: toNullable(21000n),
 			gas_used: toNullable(21000n),
 			gas_price: toNullable(20_000_000_000n)
 		}

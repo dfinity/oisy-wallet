@@ -21,6 +21,7 @@
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
+	import SuggestedTokensSaver from '$lib/components/tokens/SuggestedTokensSaver.svelte';
 	import TransactionsIdbSetter from '$lib/components/transactions/TransactionsIdbSetter.svelte';
 	import WalletConnectListener from '$lib/components/wallet-connect/WalletConnectListener.svelte';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
@@ -60,6 +61,8 @@
 		<TransactionsIdbSetter />
 
 		<BalancesIdbSetter />
+
+		<SuggestedTokensSaver />
 
 		<LoaderHarvest />
 

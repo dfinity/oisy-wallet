@@ -1326,9 +1326,6 @@ fn bench_user_transaction(id: u64) -> UserTransaction {
         to: Some(format!("0x{:040x}", id + 1)),
         value: Nat::from(1_000u64),
         network_data: NetworkTransactionData::Evm(EvmTransactionData {
-            chain_id: Some(1),
-            nonce: Some(1),
-            gas_limit: Some(Nat::from(21_000u64)),
             gas_price: Some(Nat::from(20_000_000_000u64)),
             gas_used: Some(Nat::from(21_000u64)),
             data: None,

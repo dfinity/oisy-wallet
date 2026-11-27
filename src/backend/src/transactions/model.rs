@@ -4,11 +4,13 @@ use candid::{Nat, Principal};
 use shared::types::{
     token_id::TokenId,
     user_transaction::{
-        GetUserTransactionsResponse, IcrcTransactionType, NetworkTransactionData, UserTransaction,
-        UserTransactionError, MAX_GET_USER_TRANSACTIONS_RESULTS, MAX_SAVE_USER_TRANSACTIONS_BATCH,
-        MAX_USER_TRANSACTIONS_PER_TOKEN, MAX_USER_TRANSACTION_ADDRESS_LEN,
-        MAX_USER_TRANSACTION_AMOUNT_BITS, MAX_USER_TRANSACTION_DATA_LEN,
-        MAX_USER_TRANSACTION_ID_LEN, MAX_USER_TRANSACTION_MEMO_LEN,
+        EvmTransactionData, GetUserTransactionsResponse, IcrcTransactionType,
+        NetworkTransactionData, UserTransaction, UserTransactionError,
+        MAX_GET_USER_TRANSACTIONS_RESULTS, MAX_SAVE_USER_TRANSACTIONS_BATCH,
+        MAX_STORED_USER_TRANSACTION_DATA_LEN, MAX_USER_TRANSACTIONS_PER_TOKEN,
+        MAX_USER_TRANSACTION_ADDRESS_LEN, MAX_USER_TRANSACTION_AMOUNT_BITS,
+        MAX_USER_TRANSACTION_DATA_LEN, MAX_USER_TRANSACTION_ID_LEN, MAX_USER_TRANSACTION_MEMO_LEN,
+        MAX_USER_TRANSACTION_TOKENS_PER_USER,
     },
 };
 
@@ -97,7 +99,6 @@ fn validate_transaction(tx: &UserTransaction) -> Result<(), String> {
     match &tx.network_data {
         NetworkTransactionData::Evm(d) => {
             for (field, amount) in [
-                ("gas_limit", d.gas_limit.as_ref()),
                 ("gas_price", d.gas_price.as_ref()),
                 ("gas_used", d.gas_used.as_ref()),
                 ("nft_token_id", d.nft_token_id.as_ref()),
@@ -165,8 +166,40 @@ fn require_amount(field: &str, amount: &Nat) -> Result<(), String> {
     Ok(())
 }
 
+/// Accept only the tokens the wallet keeps a history for: native EVM tokens, ERC-20,
+/// native SOL and SPL. Their addresses are checked when the request is decoded.
+///
+/// # Errors
+/// - If the token is of another kind.
+pub fn validate_token_id(token_id: &TokenId) -> Result<(), String> {
+    match token_id {
+        TokenId::EvmNative(_)
+        | TokenId::Erc20(..)
+        | TokenId::SolNativeMainnet
+        | TokenId::SolNativeDevnet
+        | TokenId::SplMainnet(_)
+        | TokenId::SplDevnet(_) => Ok(()),
+        TokenId::Erc721(..)
+        | TokenId::Erc1155(..)
+        | TokenId::Erc4626(..)
+        | TokenId::Icrc(_)
+        | TokenId::IcpNative
+        | TokenId::BtcNativeMainnet
+        | TokenId::BtcNativeTestnet
+        | TokenId::ExtV2(_)
+        | TokenId::Dip721(_)
+        | TokenId::IcPunks(_)
+        | TokenId::Icrc7(_)
+        | TokenId::XrpNativeMainnet => Err(format!("no history is stored for {token_id:?}")),
+    }
+}
+
 /// Save finalized transactions for a user and token.
 /// Transactions are deduplicated by hash and kept sorted by `block_index` ascending.
+///
+/// Only what the wallet shows is kept: EVM input data is cut to
+/// `MAX_STORED_USER_TRANSACTION_DATA_LEN`. A token the user has no history for yet
+/// counts against `MAX_USER_TRANSACTION_TOKENS_PER_USER`.
 pub fn save_transactions(
     map: &mut UserTransactionsMap,
     principal: Principal,
@@ -179,7 +212,10 @@ pub fn save_transactions(
 
     let key = make_key(principal, token_id);
 
-    let mut existing = map.get(&key).map(|c| c.0).unwrap_or_default();
+    let stored = map.get(&key);
+    let is_new_token = stored.is_none();
+
+    let mut existing = stored.map(|c| c.0).unwrap_or_default();
 
     let mut known_ids: HashSet<String> = existing.iter().map(|e| e.id.clone()).collect();
 
@@ -191,36 +227,66 @@ pub fn save_transactions(
         new_txs.push(tx.clone());
     }
 
-    if !new_txs.is_empty() {
-        new_txs.sort_unstable_by_key(|t| t.block_index);
-        existing = merge_sorted(existing, new_txs);
-
-        if existing.len() > MAX_USER_TRANSACTIONS_PER_TOKEN {
-            let mut trim_at = existing.len() - MAX_USER_TRANSACTIONS_PER_TOKEN;
-
-            // If the trim lands mid-block, advance to the next complete block boundary
-            // so we avoid storing a partial block at the oldest end.
-            if trim_at < existing.len() {
-                let boundary_block = existing[trim_at].block_index;
-                if trim_at > 0 && existing[trim_at - 1].block_index == boundary_block {
-                    if let Some(offset) = existing[trim_at..]
-                        .iter()
-                        .position(|t| t.block_index != boundary_block)
-                    {
-                        trim_at += offset;
-                    }
-                    // If every remaining tx shares the same block_index, keep the
-                    // original trim_at to avoid dropping everything.
-                }
-            }
-
-            existing = existing.split_off(trim_at);
-        }
+    // Nothing new: the stored history stays as it is, and a token without one gets no key.
+    if new_txs.is_empty() {
+        return Ok(());
     }
+
+    if is_new_token && count_tokens(map, principal) >= MAX_USER_TRANSACTION_TOKENS_PER_USER {
+        return Err(UserTransactionError::TooManyTokens);
+    }
+
+    new_txs.sort_unstable_by_key(|t| t.block_index);
+    existing = merge_sorted(existing, new_txs);
+
+    if existing.len() > MAX_USER_TRANSACTIONS_PER_TOKEN {
+        let mut trim_at = existing.len() - MAX_USER_TRANSACTIONS_PER_TOKEN;
+
+        // If the trim lands mid-block, advance to the next complete block boundary
+        // so we avoid storing a partial block at the oldest end.
+        if trim_at < existing.len() {
+            let boundary_block = existing[trim_at].block_index;
+            if trim_at > 0 && existing[trim_at - 1].block_index == boundary_block {
+                if let Some(offset) = existing[trim_at..]
+                    .iter()
+                    .position(|t| t.block_index != boundary_block)
+                {
+                    trim_at += offset;
+                }
+                // If every remaining tx shares the same block_index, keep the
+                // original trim_at to avoid dropping everything.
+            }
+        }
+
+        existing = existing.split_off(trim_at);
+    }
+
+    // Every transaction, not only the new ones: history stored before the cut keeps its
+    // full data until a save rewrites it.
+    existing.iter_mut().for_each(cut_stored_data);
 
     map.insert(key, Candid(existing));
 
     Ok(())
+}
+
+/// Cut the EVM input data to what the wallet reads from it.
+fn cut_stored_data(tx: &mut UserTransaction) {
+    if let NetworkTransactionData::Evm(EvmTransactionData {
+        data: Some(data), ..
+    }) = &mut tx.network_data
+    {
+        data.truncate(data.floor_char_boundary(MAX_STORED_USER_TRANSACTION_DATA_LEN));
+    }
+}
+
+/// The number of tokens the user stores transactions for. It walks keys only, so it
+/// decodes none of the stored history.
+fn count_tokens(map: &UserTransactionsMap, principal: Principal) -> usize {
+    // `EvmNative(0)` is the smallest token id, so the range starts at the user's first key.
+    map.keys_range(make_key(principal, &TokenId::EvmNative(0))..)
+        .take_while(|key| key.0 .0 == principal)
+        .count()
 }
 
 fn merge_sorted(a: Vec<UserTransaction>, b: Vec<UserTransaction>) -> Vec<UserTransaction> {
@@ -258,27 +324,32 @@ fn make_key(principal: Principal, token_id: &TokenId) -> UserTransactionKey {
 
 #[cfg(test)]
 mod tests {
-    use std::cell::RefCell;
+    use std::{borrow::Cow, cell::RefCell};
 
-    use candid::{Nat, Principal};
+    use candid::{CandidType, Nat, Principal};
     use ic_stable_structures::{
         memory_manager::{MemoryId, MemoryManager},
-        DefaultMemoryImpl,
+        DefaultMemoryImpl, Storable,
     };
     use pretty_assertions::assert_eq;
     use shared::types::{
+        custom_token::{ErcTokenId, SplTokenId},
         token_id::TokenId,
         user_transaction::{
             EvmTransactionData, IcrcTransactionData, IcrcTransactionType, NetworkTransactionData,
             SolTransactionData, UserTransaction, UserTransactionError,
             MAX_GET_USER_TRANSACTIONS_RESULTS, MAX_SAVE_USER_TRANSACTIONS_BATCH,
-            MAX_USER_TRANSACTIONS_PER_TOKEN, MAX_USER_TRANSACTION_ADDRESS_LEN,
-            MAX_USER_TRANSACTION_DATA_LEN, MAX_USER_TRANSACTION_ID_LEN,
-            MAX_USER_TRANSACTION_MEMO_LEN,
+            MAX_STORED_USER_TRANSACTION_DATA_LEN, MAX_USER_TRANSACTIONS_PER_TOKEN,
+            MAX_USER_TRANSACTION_ADDRESS_LEN, MAX_USER_TRANSACTION_DATA_LEN,
+            MAX_USER_TRANSACTION_ID_LEN, MAX_USER_TRANSACTION_MEMO_LEN,
+            MAX_USER_TRANSACTION_TOKENS_PER_USER,
         },
     };
 
-    use super::{get_transactions, make_key, save_transactions, validate_transactions};
+    use super::{
+        count_tokens, get_transactions, make_key, save_transactions, validate_token_id,
+        validate_transactions,
+    };
     use crate::types::{maps::UserTransactionsMap, storable::Candid};
 
     const PRINCIPAL_TEXT: &str = "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
@@ -301,9 +372,6 @@ mod tests {
             to: Some("0xdef".to_string()),
             value: Nat::from(1000u64),
             network_data: NetworkTransactionData::Evm(EvmTransactionData {
-                chain_id: Some(1),
-                nonce: Some(1),
-                gas_limit: Some(Nat::from(21000u64)),
                 gas_price: Some(Nat::from(20_000_000_000u64)),
                 gas_used: Some(Nat::from(21000u64)),
                 data: None,
@@ -382,9 +450,6 @@ mod tests {
     fn test_validate_rejects_oversized_evm_data() {
         let mut tx = make_tx("tx-1", 1, 1);
         tx.network_data = NetworkTransactionData::Evm(EvmTransactionData {
-            chain_id: Some(1),
-            nonce: Some(1),
-            gas_limit: None,
             gas_price: None,
             gas_used: None,
             data: Some("0".repeat(MAX_USER_TRANSACTION_DATA_LEN + 1)),
@@ -416,9 +481,6 @@ mod tests {
     fn test_validate_rejects_oversized_gas_price() {
         let mut tx = make_tx("tx-1", 1, 1);
         tx.network_data = NetworkTransactionData::Evm(EvmTransactionData {
-            chain_id: Some(1),
-            nonce: Some(1),
-            gas_limit: None,
             gas_price: Some(Nat::parse(&b"9".repeat(10_000)).unwrap()),
             gas_used: None,
             data: None,
@@ -1403,5 +1465,303 @@ mod tests {
         for window in block_indices.windows(2) {
             assert!(window[0] >= window[1], "blocks should be newest-first");
         }
+    }
+
+    fn evm_tx_with_data(id: &str, block_index: u64, data: &str) -> UserTransaction {
+        let mut tx = make_tx(id, block_index, block_index);
+        tx.network_data = NetworkTransactionData::Evm(EvmTransactionData {
+            gas_price: None,
+            gas_used: None,
+            data: Some(data.to_string()),
+            nft_token_id: None,
+        });
+        tx
+    }
+
+    fn stored_data(map: &UserTransactionsMap, principal: Principal, id: &str) -> Option<String> {
+        get_transactions(
+            map,
+            principal,
+            &eth_native_token(),
+            None,
+            MAX_GET_USER_TRANSACTIONS_RESULTS,
+        )
+        .transactions
+        .into_iter()
+        .find(|tx| tx.id == id)
+        .and_then(|tx| match tx.network_data {
+            NetworkTransactionData::Evm(d) => d.data,
+            _ => None,
+        })
+    }
+
+    /// An ERC-20 `transfer(address,uint256)` call: the selector and its two arguments.
+    fn transfer_data() -> String {
+        format!("0xa9059cbb{:0>64}{:0>64}", "11".repeat(20), "3e8")
+    }
+
+    #[test]
+    fn test_validate_token_id_accepts_history_tokens() {
+        for token_id in [
+            TokenId::EvmNative(1),
+            TokenId::Erc20(
+                ErcTokenId("0x1234567890123456789012345678901234567890".to_string()),
+                1,
+            ),
+            TokenId::SolNativeMainnet,
+            TokenId::SolNativeDevnet,
+            TokenId::SplMainnet(SplTokenId(
+                "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v".to_string(),
+            )),
+            TokenId::SplDevnet(SplTokenId(
+                "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU".to_string(),
+            )),
+        ] {
+            validate_token_id(&token_id)
+                .unwrap_or_else(|err| panic!("{token_id:?} should be accepted: {err}"));
+        }
+    }
+
+    #[test]
+    fn test_validate_token_id_rejects_other_tokens() {
+        for token_id in [
+            TokenId::Icrc(Principal::from_slice(&[0])),
+            TokenId::IcpNative,
+            TokenId::BtcNativeMainnet,
+            TokenId::Erc721(
+                ErcTokenId("0x1234567890123456789012345678901234567890".to_string()),
+                1,
+            ),
+            TokenId::XrpNativeMainnet,
+        ] {
+            assert!(
+                validate_token_id(&token_id).is_err(),
+                "{token_id:?} should be rejected"
+            );
+        }
+    }
+
+    #[test]
+    fn test_save_cuts_evm_data_to_what_the_list_reads() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        let transfer = transfer_data();
+        assert_eq!(transfer.len(), MAX_STORED_USER_TRANSACTION_DATA_LEN);
+        let long = format!(
+            "{transfer}{}",
+            "f".repeat(MAX_USER_TRANSACTION_DATA_LEN - transfer.len())
+        );
+
+        save_transactions(
+            &mut map,
+            principal,
+            &eth_native_token(),
+            &[
+                evm_tx_with_data("tx-1", 1, &long),
+                evm_tx_with_data("tx-2", 2, &transfer),
+                evm_tx_with_data("tx-3", 3, "0x"),
+            ],
+        )
+        .unwrap();
+
+        assert_eq!(stored_data(&map, principal, "tx-1"), Some(transfer.clone()));
+        assert_eq!(stored_data(&map, principal, "tx-2"), Some(transfer));
+        assert_eq!(stored_data(&map, principal, "tx-3"), Some("0x".to_string()));
+    }
+
+    #[test]
+    fn test_save_cuts_evm_data_on_a_character_boundary() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        // The two bytes of `é` straddle the cut.
+        let kept = "0".repeat(MAX_STORED_USER_TRANSACTION_DATA_LEN - 1);
+        let data = format!("{kept}é");
+
+        save_transactions(
+            &mut map,
+            principal,
+            &eth_native_token(),
+            &[evm_tx_with_data("tx-1", 1, &data)],
+        )
+        .unwrap();
+
+        assert_eq!(stored_data(&map, principal, "tx-1"), Some(kept));
+    }
+
+    #[test]
+    fn test_save_cuts_stored_history_it_rewrites() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        insert_transactions(
+            &mut map,
+            vec![evm_tx_with_data(
+                "tx-1",
+                1,
+                &"f".repeat(MAX_USER_TRANSACTION_DATA_LEN),
+            )],
+        );
+
+        save_transactions(
+            &mut map,
+            principal,
+            &eth_native_token(),
+            &[make_tx("tx-2", 2, 2)],
+        )
+        .unwrap();
+
+        assert_eq!(
+            stored_data(&map, principal, "tx-1"),
+            Some("f".repeat(MAX_STORED_USER_TRANSACTION_DATA_LEN))
+        );
+    }
+
+    #[test]
+    fn test_save_empty_batch_stores_no_key() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+
+        save_transactions(&mut map, principal, &eth_native_token(), &[]).unwrap();
+
+        assert!(map.is_empty());
+    }
+
+    #[test]
+    fn test_save_refuses_a_new_token_at_the_cap() {
+        let (mut map, _mm) = setup();
+        let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
+        let tx = make_tx("tx-1", 1, 1);
+
+        for chain_id in 0..u64::try_from(MAX_USER_TRANSACTION_TOKENS_PER_USER).unwrap() {
+            save_transactions(
+                &mut map,
+                principal,
+                &TokenId::EvmNative(chain_id),
+                std::slice::from_ref(&tx),
+            )
+            .unwrap();
+        }
+
+        let new_token = TokenId::EvmNative(u64::MAX);
+        let result = save_transactions(&mut map, principal, &new_token, std::slice::from_ref(&tx));
+        assert_eq!(result, Err(UserTransactionError::TooManyTokens));
+        assert!(map.get(&make_key(principal, &new_token)).is_none());
+
+        // A token the user already stores transactions for keeps taking them.
+        save_transactions(
+            &mut map,
+            principal,
+            &TokenId::EvmNative(0),
+            &[make_tx("tx-2", 2, 2)],
+        )
+        .expect("a stored token should take new transactions at the cap");
+
+        // The cap is per user.
+        save_transactions(
+            &mut map,
+            Principal::from_slice(&[1]),
+            &new_token,
+            std::slice::from_ref(&tx),
+        )
+        .expect("another user should not be affected by the cap");
+    }
+
+    #[test]
+    fn test_count_tokens_counts_only_the_users_keys() {
+        let (mut map, _mm) = setup();
+        let below = Principal::from_slice(&[1]);
+        let user = Principal::from_slice(&[2]);
+        let above = Principal::from_slice(&[3]);
+
+        // The smallest and the largest token id, plus kinds in between.
+        let tokens = [
+            TokenId::EvmNative(0),
+            TokenId::Erc20(
+                ErcTokenId("0x1234567890123456789012345678901234567890".to_string()),
+                1,
+            ),
+            TokenId::SolNativeDevnet,
+            TokenId::XrpNativeMainnet,
+        ];
+        for principal in [below, user, above] {
+            for token_id in &tokens {
+                map.insert(make_key(principal, token_id), Candid(vec![]));
+            }
+        }
+
+        assert_eq!(count_tokens(&map, user), tokens.len());
+    }
+
+    /// The EVM fields as they were stored before `chain_id`, `nonce` and `gas_limit` were
+    /// dropped.
+    #[derive(CandidType)]
+    struct EarlierEvmTransactionData {
+        chain_id: Option<u64>,
+        nonce: Option<u64>,
+        gas_limit: Option<Nat>,
+        gas_price: Option<Nat>,
+        gas_used: Option<Nat>,
+        data: Option<String>,
+        nft_token_id: Option<Nat>,
+    }
+
+    #[derive(CandidType)]
+    enum EarlierNetworkTransactionData {
+        Evm(EarlierEvmTransactionData),
+    }
+
+    #[derive(CandidType)]
+    struct EarlierUserTransaction {
+        id: String,
+        block_index: u64,
+        timestamp: u64,
+        from: String,
+        to: Option<String>,
+        value: Nat,
+        network_data: EarlierNetworkTransactionData,
+    }
+
+    #[test]
+    fn test_decodes_history_stored_with_the_dropped_evm_fields() {
+        let stored = candid::encode_one(vec![EarlierUserTransaction {
+            id: "tx-1".to_string(),
+            block_index: 1,
+            timestamp: 10,
+            from: "0xabc".to_string(),
+            to: Some("0xdef".to_string()),
+            value: Nat::from(1000u64),
+            network_data: EarlierNetworkTransactionData::Evm(EarlierEvmTransactionData {
+                chain_id: Some(1),
+                nonce: Some(7),
+                gas_limit: Some(Nat::from(21000u64)),
+                gas_price: Some(Nat::from(20_000_000_000u64)),
+                gas_used: Some(Nat::from(21000u64)),
+                data: Some(transfer_data()),
+                nft_token_id: None,
+            }),
+        }])
+        .unwrap();
+
+        let Candid(decoded) = Candid::<Vec<UserTransaction>>::from_bytes(Cow::Owned(stored));
+
+        assert_eq!(
+            decoded,
+            vec![UserTransaction {
+                id: "tx-1".to_string(),
+                block_index: 1,
+                timestamp: 10,
+                from: "0xabc".to_string(),
+                to: Some("0xdef".to_string()),
+                value: Nat::from(1000u64),
+                network_data: NetworkTransactionData::Evm(EvmTransactionData {
+                    gas_price: Some(Nat::from(20_000_000_000u64)),
+                    gas_used: Some(Nat::from(21000u64)),
+                    data: Some(transfer_data()),
+                    nft_token_id: None,
+                }),
+            }]
+        );
     }
 }
