@@ -47,6 +47,7 @@
 	import { toTipErrorType, trackTip } from '$lib/services/tip-analytics.services';
 	import { claimTip, loadTipDetails, tipRateLimit } from '$lib/services/tip.services';
 	import { autoLoadSingleToken } from '$lib/services/token.services';
+	import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -132,6 +133,9 @@
 	 * nor one already in their list, on or off. Read only once their list has loaded, so a token
 	 * they have is never called new.
 	 *
+	 * The rows the backend returned count too: a saved token whose details did not load is missing
+	 * from the loaded stores, but it is still in their list.
+	 *
 	 * Such a token is only added on the way to the wallet (`enableClaimedToken`), so they can still
 	 * leave it out.
 	 */
@@ -146,6 +150,9 @@
 			!LISTED_ICRC_LEDGER_CANISTER_IDS.has(ledgerCanisterId) &&
 			![...$allIcrcTokens, ...($icrcCustomTokensStore ?? []).map(({ data }) => data)].some(
 				(token) => token.ledgerCanisterId === ledgerCanisterId
+			) &&
+			!$backendCustomTokens.some(
+				({ token }) => 'Icrc' in token && token.Icrc.ledger_id.toText() === ledgerCanisterId
 			)
 		);
 	});

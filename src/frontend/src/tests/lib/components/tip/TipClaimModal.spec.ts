@@ -11,6 +11,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import * as tipServices from '$lib/services/tip.services';
 import * as tokenServices from '$lib/services/token.services';
+import { backendCustomTokens } from '$lib/stores/backend-custom-tokens.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
@@ -19,6 +20,7 @@ import * as consoleUtils from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as tipUtils from '$lib/utils/tip.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
@@ -124,6 +126,7 @@ describe('TipClaimModal', () => {
 		vi.mocked(loadCustomTokens).mockReset();
 		modalStore.close();
 		icrcCustomTokensStore.resetAll();
+		backendCustomTokens.set([]);
 		mockAuthStore();
 		// Describes one sign-in, so it must not leak between tests.
 		userProfileCreated.set(false);
@@ -278,6 +281,25 @@ describe('TipClaimModal', () => {
 				symbol: 'ckTEST',
 				name: 'ckTEST'
 			});
+
+			expect(warning(container)).not.toBeInTheDocument();
+			expect(dontAddButton(container)).not.toBeInTheDocument();
+		});
+
+		it('says nothing more about a saved token whose details did not load', async () => {
+			// Missing from the loaded stores, yet saved: the rows the backend returned still have it.
+			backendCustomTokens.set([
+				{ ...mockCustomTokens[0], token: { Icrc: { ledger_id: unlistedLedger, index_id: [] } } }
+			]);
+
+			const { container } = await renderWithToken({
+				ledger: unlistedLedger,
+				symbol: 'TOK',
+				name: 'Token'
+			});
+
+			// The symbol shows once the ledger's details are in, and with them any note.
+			await waitFor(() => expect(container).toHaveTextContent('TOK'));
 
 			expect(warning(container)).not.toBeInTheDocument();
 			expect(dontAddButton(container)).not.toBeInTheDocument();
